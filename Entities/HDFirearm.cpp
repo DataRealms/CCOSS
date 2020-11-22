@@ -36,6 +36,7 @@ void HDFirearm::Clear()
 
     m_pFlash = 0;
     m_FireSound.Reset();
+    m_FireEchoSound.Reset();
     m_ActiveSound.Reset();
     m_DeactivationSound.Reset();
     m_EmptySound.Reset();
@@ -112,6 +113,7 @@ int HDFirearm::Create(const HDFirearm &reference)
         m_pFlash->Attach(this, m_pFlash->GetParentOffset());
     }
     m_FireSound = reference.m_FireSound;
+    m_FireEchoSound = reference.m_FireEchoSound;
     m_ActiveSound = reference.m_ActiveSound;
     m_DeactivationSound = reference.m_DeactivationSound;
     m_EmptySound = reference.m_EmptySound;
@@ -175,12 +177,14 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader)
     }
     else if (propName == "FireSound")
         reader >> m_FireSound;
-    else if (propName == "ActiveSound") {
+    else if (propName == "FireEchoSound") {
+        reader >> m_FireEchoSound;
+        m_FireEchoSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::MODE_RESTART);
+    } else if (propName == "ActiveSound") {
         reader >> m_ActiveSound;
-        m_ActiveSound.SetAffectedByGlobalPitch(false); //Active sound (i.e. weapon spinup) modifies its pitch, so it has to account for global pitch on its own.
-    } else if (propName == "DeactivationSound")
+    } else if (propName == "DeactivationSound") {
         reader >> m_DeactivationSound;
-    else if (propName == "EmptySound")
+    } else if (propName == "EmptySound")
         reader >> m_EmptySound;
     else if (propName == "ReloadStartSound")
         reader >> m_ReloadStartSound;
@@ -256,6 +260,8 @@ int HDFirearm::Save(Writer &writer) const
     writer << m_pFlash;
     writer.NewProperty("FireSound");
     writer << m_FireSound;
+    writer.NewProperty("FireEchoSound");
+    writer << m_FireEchoSound;
     writer.NewProperty("ActiveSound");
     writer << m_ActiveSound;
     writer.NewProperty("DeactivationSound");
@@ -313,6 +319,7 @@ void HDFirearm::Destroy(bool notInherited)
     delete m_pMagazine;
     delete m_pFlash;
     m_FireSound.Stop();
+    m_FireEchoSound.Stop();
     m_ActiveSound.Stop();
     m_DeactivationSound.Stop();
 
@@ -987,8 +994,12 @@ void HDFirearm::Update()
 
         // Play firing sound
         // Only start playing if it's not a looping fire sound that is already playing, and if there's a mag
-        if (!(m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed()) && m_pMagazine)
-            m_FireSound.Play(m_Pos);
+        if (m_pMagazine) {
+            if (!(m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed())) {
+                m_FireSound.Play(m_Pos);
+            }
+            m_FireEchoSound.Play(m_Pos);
+        }
     }
     else {
         m_Recoiled = false;

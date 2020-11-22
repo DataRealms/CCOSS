@@ -574,6 +574,17 @@ int LuaMan::Create() {
 
         CONCRETELUABINDING(SoundContainer, Entity)
 			.def(constructor<>())
+            .enum_("SoundCycleMode")[
+                value("MODE_RANDOM", SoundContainer::SoundCycleMode::MODE_RANDOM),
+                value("MODE_FORWARDS", SoundContainer::SoundCycleMode::MODE_FORWARDS)
+            ]
+            .enum_("SoundOverlapMode")[
+                value("MODE_OVERLAP", SoundContainer::SoundOverlapMode::MODE_OVERLAP),
+                value("MODE_RESTART", SoundContainer::SoundOverlapMode::MODE_RESTART),
+                value("MODE_IGNORE_PLAY", SoundContainer::SoundOverlapMode::MODE_IGNORE_PLAY)
+            ]
+            .property("SoundCycleMode", &SoundContainer::GetSoundSelectionCycleMode, &SoundContainer::SetSoundSelectionCycleMode)
+            .property("SoundOverlapMode", &SoundContainer::GetSoundOverlapMode, &SoundContainer::SetSoundOverlapMode)
             .property("Immobile", &SoundContainer::IsImmobile, &SoundContainer::SetImmobile)
             .property("AttenuationStartDistance", &SoundContainer::GetAttenuationStartDistance, &SoundContainer::SetAttenuationStartDistance)
             .property("Loops", &SoundContainer::GetLoopSetting, &SoundContainer::SetLoopSetting)
@@ -590,6 +601,8 @@ int LuaMan::Create() {
             .def("Play", (bool (SoundContainer:: *)(const Vector &position, int player)) &SoundContainer::Play)
             .def("Stop", (bool (SoundContainer:: *)()) &SoundContainer::Stop)
             .def("Stop", (bool (SoundContainer:: *)(int player)) &SoundContainer::Stop)
+            .def("Restart", (bool (SoundContainer:: *)()) &SoundContainer::Restart)
+            .def("Restart", (bool (SoundContainer:: *)(int player)) &SoundContainer::Restart)
             .def("AddSound", (void (SoundContainer:: *)(std::string const &soundFilePath)) &SoundContainer::AddSound)
             .def("AddSound", (void (SoundContainer:: *)(std::string const &soundFilePath, const Vector &offset, float attenuationStartDistance, bool abortGameForInvalidSound)) &SoundContainer::AddSound)
             .def("AddSound", (void (SoundContainer:: *)(std::string const &soundFilePath, unsigned int soundSetIndex, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance, bool abortGameForInvalidSound)) &SoundContainer::AddSound)

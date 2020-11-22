@@ -5,9 +5,14 @@ namespace RTE {
 
 	ConcreteClassInfo(SoundContainer, Entity, 50);
 
-	const std::unordered_map<std::string, SoundContainer::SoundCycleMode> SoundContainer::c_CycleModeMap = {
+	const std::unordered_map<std::string, SoundContainer::SoundCycleMode> SoundContainer::c_SoundCycleModeMap = {
 		{"Random", SoundContainer::SoundCycleMode::MODE_RANDOM},
 		{"Forwards", SoundContainer::SoundCycleMode::MODE_FORWARDS}
+	};
+	const std::unordered_map<std::string, SoundContainer::SoundOverlapMode> SoundContainer::c_SoundOverlapModeMap = {
+		{"Overlap", SoundContainer::SoundOverlapMode::MODE_OVERLAP},
+		{"Restart", SoundContainer::SoundOverlapMode::MODE_RESTART},
+		{"Ignore Play", SoundContainer::SoundOverlapMode::MODE_IGNORE_PLAY}
 	};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -18,6 +23,7 @@ namespace RTE {
 		m_SoundSelectionCycleMode = MODE_RANDOM;
 
 		m_PlayingChannels.clear();
+		m_SoundOverlapMode = MODE_OVERLAP;
 
 		m_Immobile = false;
 		m_AttenuationStartDistance = c_DefaultAttenuationStartDistance;
@@ -48,6 +54,7 @@ namespace RTE {
 		m_SoundSelectionCycleMode = reference.m_SoundSelectionCycleMode;
 
 		m_PlayingChannels.clear();
+		m_SoundOverlapMode = reference.m_SoundOverlapMode;
 
 		m_Immobile = reference.m_Immobile;
 		m_AttenuationStartDistance = reference.m_AttenuationStartDistance;
@@ -70,10 +77,17 @@ namespace RTE {
 			return ReadSoundOrSoundSet(propName, reader);
 		} else if (propName == "CycleMode") {
 			std::string cycleModeString = reader.ReadPropValue();
-			if (c_CycleModeMap.find(cycleModeString) != c_CycleModeMap.end()) {
-				m_SoundSelectionCycleMode = c_CycleModeMap.find(cycleModeString)->second;
+			if (c_SoundCycleModeMap.find(cycleModeString) != c_SoundCycleModeMap.end()) {
+				m_SoundSelectionCycleMode = c_SoundCycleModeMap.find(cycleModeString)->second;
 			} else {
 				reader.ReportError("Cycle mode " + cycleModeString + " is invalid.");
+			}
+		} else if (propName == "OverlapMode") {
+			std::string overlapModeString = reader.ReadPropValue();
+			if (c_SoundOverlapModeMap.find(overlapModeString) != c_SoundOverlapModeMap.end()) {
+				m_SoundOverlapMode = c_SoundOverlapModeMap.find(overlapModeString)->second;
+			} else {
+				reader.ReportError("Cycle mode " + overlapModeString + " is invalid.");
 			}
 		} else if (propName == "Immobile") {
 			reader >> m_Immobile;
@@ -190,12 +204,19 @@ namespace RTE {
 		}
 
 		writer.NewProperty("CycleMode");
-		bool t = m_SoundSelectionCycleMode == SoundCycleMode::MODE_FORWARDS;
-		std::list<std::pair<const std::string, SoundContainer::SoundCycleMode>>::const_iterator cycleModeMapEntry = std::find_if(c_CycleModeMap.begin(), c_CycleModeMap.end(), [&soundSelectionCycleMode = m_SoundSelectionCycleMode](auto element) { return element.second == soundSelectionCycleMode; });
-		if (cycleModeMapEntry != c_CycleModeMap.end()) {
+		std::list<std::pair<const std::string, SoundCycleMode>>::const_iterator cycleModeMapEntry = std::find_if(c_SoundCycleModeMap.begin(), c_SoundCycleModeMap.end(), [&soundSelectionCycleMode = m_SoundSelectionCycleMode](auto element) { return element.second == soundSelectionCycleMode; });
+		if (cycleModeMapEntry != c_SoundCycleModeMap.end()) {
 			writer << cycleModeMapEntry->first;
 		} else {
 			writer << m_SoundSelectionCycleMode;
+		}
+
+		writer.NewProperty("OverlapMode");
+		std::list<std::pair<const std::string, SoundOverlapMode>>::const_iterator overlapModeMapEntry = std::find_if(c_SoundOverlapModeMap.begin(), c_SoundOverlapModeMap.end(), [&soundOverlapMode = m_SoundOverlapMode](auto element) { return element.second == soundOverlapMode; });
+		if (overlapModeMapEntry != c_SoundOverlapModeMap.end()) {
+			writer << overlapModeMapEntry->first;
+		} else {
+			writer << m_SoundOverlapMode;
 		}
 
 		writer.NewProperty("Immobile");
@@ -259,6 +280,23 @@ namespace RTE {
 			}
 		}
 		return NULL;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool SoundContainer::Play(int player) {
+		if (HasAnySounds()) {
+			if (IsBeingPlayed()) {
+				if (m_SoundOverlapMode == MODE_RESTART) {
+					Restart(player);
+				} else if (m_SoundOverlapMode == MODE_IGNORE_PLAY) {
+					return false;
+				}
+			}
+			return g_AudioMan.PlaySoundContainer(this, player);
+
+		}
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

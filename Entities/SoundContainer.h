@@ -20,7 +20,7 @@ namespace RTE {
 		ClassInfoGetters
 		
 		/// <summary>
-		/// How the SoundContainer should choose the next SoundSet to play when SelectNextSoundSet is called
+		/// How the SoundContainer should choose the next SoundSet to play when SelectNextSoundSet is called.
 		/// </summary>
 		enum SoundCycleMode {
 			MODE_RANDOM = 0,
@@ -28,7 +28,16 @@ namespace RTE {
 		};
 
 		/// <summary>
-		/// Self-contained struct defining an individual sound in a SoundSet
+		/// How the SoundContainer should behave when it tries to play again while already playing.
+		/// </summary>
+		enum SoundOverlapMode {
+			MODE_OVERLAP = 0,
+			MODE_RESTART = 1,
+			MODE_IGNORE_PLAY = 2
+		};
+
+		/// <summary>
+		/// Self-contained struct defining an individual sound in a SoundSet.
 		/// </summary>
 		struct SoundData {
 			ContentFile SoundFile;
@@ -156,30 +165,6 @@ namespace RTE {
 		bool HasAnySounds() const { return !m_SoundSets.empty(); }
 
 		/// <summary>
-		/// Gets the channels playing sounds from this SoundContainer.
-		/// </summary>
-		/// <returns>The channels currently being used.</returns>
-		std::unordered_set<unsigned short> *GetPlayingChannels() { return &m_PlayingChannels; }
-
-		/// <summary>
-		/// Indicates whether any sound in this SoundContainer is currently being played.
-		/// </summary>
-		/// <returns>Whether any sounds are playing.</returns>
-		bool IsBeingPlayed() const { return !m_PlayingChannels.empty(); }
-
-		/// <summary>
-		/// Adds a channel index to the SoundContainer's collection of playing channels.
-		/// </summary>
-		/// <param name="channel">The channel index to add.</param>
-		void AddPlayingChannel(unsigned short channel) { m_PlayingChannels.insert(channel); }
-
-		/// <summary>
-		/// Removes a channel index from the SoundContainer's collection of playing channels.
-		/// </summary>
-		/// <param name="channel">The channel index to remove.</param>
-		void RemovePlayingChannel(unsigned short channel) { m_PlayingChannels.erase(channel); }
-
-		/// <summary>
 		/// Gets the current sound selection cycle mode, which is used to determine what SoundSet to select next time SelectNextSoundSet is called.
 		/// </summary>
 		/// <returns>The current sound selection cycle mode.</returns>
@@ -209,6 +194,42 @@ namespace RTE {
 		/// <param name="sound">The FMOD::Sound to search for.</param>
 		/// <returns>A pointer to the corresponding SoundData or a null pointer.</returns>
 		const SoundData *GetSoundDataForSound(const FMOD::Sound *sound) const;
+
+		/// <summary>
+		/// Gets the channels playing sounds from this SoundContainer.
+		/// </summary>
+		/// <returns>The channels currently being used.</returns>
+		std::unordered_set<unsigned short> *GetPlayingChannels() { return &m_PlayingChannels; }
+
+		/// <summary>
+		/// Indicates whether any sound in this SoundContainer is currently being played.
+		/// </summary>
+		/// <returns>Whether any sounds are playing.</returns>
+		bool IsBeingPlayed() const { return !m_PlayingChannels.empty(); }
+
+		/// <summary>
+		/// Adds a channel index to the SoundContainer's collection of playing channels.
+		/// </summary>
+		/// <param name="channel">The channel index to add.</param>
+		void AddPlayingChannel(unsigned short channel) { m_PlayingChannels.insert(channel); }
+
+		/// <summary>
+		/// Removes a channel index from the SoundContainer's collection of playing channels.
+		/// </summary>
+		/// <param name="channel">The channel index to remove.</param>
+		void RemovePlayingChannel(unsigned short channel) { m_PlayingChannels.erase(channel); }
+
+		/// <summary>
+		/// Gets the SoundOverlapMode of this SoundContainer, which is used to determine how it should behave when it's told to play while already playing.
+		/// </summary>
+		/// <returns>The SoundOverlapMode of this SoundContainer.</returns>
+		SoundOverlapMode GetSoundOverlapMode() const { return m_SoundOverlapMode; }
+
+		/// <summary>
+		/// Sets the SoundOverlapMode of this SoundContainer, which is used to determine how it should behave when it's told to play while already playing. 
+		/// </summary>
+		/// <param name="newSoundOverlapMode">The new SoundOverlapMode this SoundContainer should use.</param>
+		void SetSoundOverlapMode(SoundOverlapMode newSoundOverlapMode) { m_SoundOverlapMode = newSoundOverlapMode; }
 #pragma endregion
 
 #pragma region Sound Property Getters and Setters
@@ -329,7 +350,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">The player to start playback of this SoundContainer's sounds for.</param>
 		/// <returns>Whether there were sounds to play and they were able to be played.</returns>
-		bool Play(int player) { return HasAnySounds() ? g_AudioMan.PlaySoundContainer(this, player) : false; }
+		bool Play(int player);
 
 		/// <summary>
 		/// Plays the next sound of this SoundContainer at the given position for all players.
@@ -360,6 +381,19 @@ namespace RTE {
 		bool Stop(int player) { return (HasAnySounds() && IsBeingPlayed()) ? g_AudioMan.StopSound(this, player) : false; }
 
 		/// <summary>
+		/// Restarts playback of this SoundContainer for all players.
+		/// </summary>
+		/// <returns>Whether this SoundContainer successfully restarted its playback.</returns>
+		bool Restart() { return Restart(-1); }
+
+		/// <summary>
+		/// Restarts playback of this SoundContainer for a specific player.
+		/// </summary>
+		/// <param name="player">Player to restart playback of this SoundContainer for.</param>
+		/// <returns>Whether this SoundContainer successfully restarted its playback.</returns>
+		bool Restart(int player) { return (HasAnySounds() && IsBeingPlayed()) ? g_AudioMan.StopSound(this, player) && g_AudioMan.PlaySoundContainer(this, player) : false; }
+
+		/// <summary>
 		/// Selects the next sounds of this SoundContainer to be played.
 		/// </summary>
 		bool SelectNextSoundSet();
@@ -383,17 +417,19 @@ namespace RTE {
 	protected:
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
-		static const std::unordered_map<std::string, SoundCycleMode> c_CycleModeMap; //!< A map of strings to CycleModes to support string parsing for the CycleMode enum. Populated in the implementing cpp file.
+		static const std::unordered_map<std::string, SoundCycleMode> c_SoundCycleModeMap; //!< A map of strings to SoundCycleModes to support string parsing for the SoundCycleMode enum. Populated in the implementing cpp file.
+		static const std::unordered_map<std::string, SoundOverlapMode> c_SoundOverlapModeMap; //!< A map of strings to SoundOverlapModes to support string parsing for the SoundOverlapMode enum. Populated in the implementing cpp file.
 
 		std::vector<std::vector<SoundData>> m_SoundSets; //The vector of SoundSets in this SoundContainer, wherein a SoundSet is a vector containing one or more SoundData structs.
 		size_t m_SelectedSoundSet; //!< The selected SoundSet for this SoundContainer, used to determine what sounds will play when Play is called.
-		SoundCycleMode m_SoundSelectionCycleMode; //!< The sound cycle mode for this sound container, used to determine what will play next, each time play is called.
+		SoundCycleMode m_SoundSelectionCycleMode; //!< The SoundCycleMode for this SoundContainer, used to determine what will play next, each time play is called.
 
-		std::unordered_set<unsigned short> m_PlayingChannels; //!< The channels this SoundContainer is currently using
+		std::unordered_set<unsigned short> m_PlayingChannels; //!< The channels this SoundContainer is currently using.
+		SoundOverlapMode m_SoundOverlapMode; //!< The SoundOverlapMode for this SoundContainer, used to determine how it should handle overlapping play calls.
 
 		bool m_Immobile; //!< Whether this SoundContainer's sounds should be treated as immobile, i.e. not affected by 3D sound effects. Mostly used for GUI sounds and the like.
 		float m_AttenuationStartDistance; //!< The distance away from the AudioSystem listener to start attenuating this sound. Attenuation follows FMOD 3D Inverse roll-off model.
-		int m_Loops; //!< Number of loops (repeats) the SoundContainer's sounds should play when played. 0 means it plays once, -1 means it plays until stopped .
+		int m_Loops; //!< Number of loops (repeats) the SoundContainer's sounds should play when played. 0 means it plays once, -1 means it plays until stopped.
 		bool m_SoundPropertiesUpToDate = false; //!< Whether this SoundContainer's sounds' modes and properties are up to date. Used primarily to handle discrepancies that can occur when loading from ini if the line ordering isn't ideal.
 		
 		int m_Priority; //!< The mixing priority of this SoundContainer's sounds. Higher values are more likely to be heard.

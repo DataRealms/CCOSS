@@ -83,6 +83,7 @@ namespace RTE {
 		m_FundsChangedSound.AddSound("Base.rte/Sounds/GUIs/FundsChanged4.flac", true);
 		m_FundsChangedSound.AddSound("Base.rte/Sounds/GUIs/FundsChanged5.flac", true);
 		m_FundsChangedSound.AddSound("Base.rte/Sounds/GUIs/FundsChanged6.flac", true);
+		m_FundsChangedSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::MODE_RESTART);
 
 		m_ActorSwitchSound.Create("Base.rte/Sounds/GUIs/ActorSwitch.flac", true, false);
 

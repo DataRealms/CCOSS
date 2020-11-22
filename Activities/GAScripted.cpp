@@ -107,9 +107,10 @@ int GAScripted::Create(const GAScripted &reference)
 
 int GAScripted::ReadProperty(std::string propName, Reader &reader)
 {
-    if (propName == "ScriptFile")
-        reader >> m_ScriptPath;
-    else if (propName == "LuaClassName")
+	if (propName == "ScriptFile") {
+		reader >> m_ScriptPath;
+		CorrectBackslashesInPaths(m_ScriptPath);
+	} else if (propName == "LuaClassName")
         reader >> m_LuaClassName;
 	else if (propName == "AddPieSlice")
 	{

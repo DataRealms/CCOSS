@@ -7,7 +7,7 @@ namespace RTE {
 
 	const std::string ContentFile::c_ClassName = "ContentFile";
 
-	std::unordered_map<std::string, BITMAP *> ContentFile::s_LoadedBitmaps[BitDepthCount];
+	std::array<std::unordered_map<std::string, BITMAP *>, ContentFile::BitDepths::BitDepthCount> ContentFile::s_LoadedBitmaps;
 	std::unordered_map<std::string, FMOD::Sound *> ContentFile::s_LoadedSamples;
 	std::unordered_map<size_t, std::string> ContentFile::s_PathHashes;
 
@@ -46,7 +46,7 @@ namespace RTE {
 
 	void ContentFile::FreeAllLoaded() {
 		for (int depth = BitDepths::Eight; depth < BitDepths::BitDepthCount; ++depth) {
-			for (const std::pair<std::string, BITMAP *> &bitmap : s_LoadedBitmaps[depth]) {
+			for (const std::pair<std::string, BITMAP *> &bitmap : s_LoadedBitmaps.at(depth)) {
 				destroy_bitmap(bitmap.second);
 			}
 		}
@@ -83,9 +83,11 @@ namespace RTE {
 
 	void ContentFile::SetDataPath(const std::string &newDataPath) {
 		m_DataPath = newDataPath;
-		m_DataPathExtension = std::filesystem::path(newDataPath).extension().string();
+		CorrectBackslashesInPaths(m_DataPath);
 
-		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n\n" + m_DataPath + "\n" + GetFormattedReaderPosition());
+		m_DataPathExtension = std::filesystem::path(m_DataPath).extension().string();
+
+		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n" + m_DataPath + "\n" + GetFormattedReaderPosition());
 
 		m_DataPathWithoutExtension = m_DataPath.substr(0, m_DataPath.length() - m_DataPathExtension.length());
 		s_PathHashes[GetHash()] = m_DataPath;
@@ -101,22 +103,36 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	BITMAP * ContentFile::GetAsBitmap(int conversionMode) {
+	BITMAP * ContentFile::GetAsBitmap(int conversionMode, const std::string &dataPathToSpecificFrame) {
 		if (m_DataPath.empty()) {
 			return nullptr;
 		}
 		BITMAP *returnBitmap = nullptr;
-		int bitDepth = (conversionMode == COLORCONV_8_TO_32) ? BitDepths::ThirtyTwo : BitDepths::Eight;
+		const int bitDepth = (conversionMode == COLORCONV_8_TO_32) ? BitDepths::ThirtyTwo : BitDepths::Eight;
+		std::string dataPathToLoad = dataPathToSpecificFrame.empty() ? m_DataPath : dataPathToSpecificFrame;
+		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
 		// Check if the file has already been read and loaded from the disk and, if so, use that data.
-		std::unordered_map<std::string, BITMAP *>::iterator foundBitmap = s_LoadedBitmaps[bitDepth].find(m_DataPath);
-		if (foundBitmap != s_LoadedBitmaps[bitDepth].end()) {
+		std::unordered_map<std::string, BITMAP *>::iterator foundBitmap = s_LoadedBitmaps.at(bitDepth).find(dataPathToLoad);
+		if (foundBitmap != s_LoadedBitmaps.at(bitDepth).end()) {
 			returnBitmap = (*foundBitmap).second;
 		} else {
-			returnBitmap = LoadAndReleaseBitmap(conversionMode); //NOTE: This takes ownership of the bitmap file
+			if (!std::filesystem::exists(dataPathToLoad)) {
+				const std::string dataPathWithoutExtension = dataPathToLoad.substr(0, dataPathToLoad.length() - m_DataPathExtension.length());
+				const std::string altFileExtension = (m_DataPathExtension == ".png") ? ".bmp" : ".png";
+
+				if (std::filesystem::exists(dataPathWithoutExtension + altFileExtension)) {
+					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
+					SetDataPath(m_DataPathWithoutExtension + altFileExtension);
+					dataPathToLoad = dataPathWithoutExtension + altFileExtension;
+				} else {
+					RTEAbort("Failed to find image file with following path and name:\n\n" + m_DataPath + " or " + altFileExtension + "\n" + m_FormattedReaderPosition);
+				}
+			}
+			returnBitmap = LoadAndReleaseBitmap(conversionMode, dataPathToLoad); // NOTE: This takes ownership of the bitmap file
 
 			// Insert the bitmap into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE
-			s_LoadedBitmaps[bitDepth].insert(std::pair<std::string, BITMAP *>(m_DataPath, returnBitmap));
+			s_LoadedBitmaps.at(bitDepth).insert(std::pair<std::string, BITMAP *>(dataPathToLoad, returnBitmap));
 		}
 		return returnBitmap;
 	}
@@ -129,56 +145,50 @@ namespace RTE {
 		}
 		// Create the array of as many BITMAP pointers as requested frames
 		BITMAP **returnBitmaps = new BITMAP *[frameCount];
+		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
 		// Don't try to append numbers if there's only one frame
 		if (frameCount == 1) {
+			// Check for 000 in the file name in case it is part of an animation but the FrameCount was set to 1. Do not warn about this because it's normal operation, but warn about incorrect extension.
+			if (!std::filesystem::exists(m_DataPath)) {
+				const std::string altFileExtension = (m_DataPathExtension == ".png") ? ".bmp" : ".png";
+
+				if (std::filesystem::exists(m_DataPathWithoutExtension + "000" + m_DataPathExtension)) {
+					SetDataPath(m_DataPathWithoutExtension + "000" + m_DataPathExtension);
+				} else if (std::filesystem::exists(m_DataPathWithoutExtension + "000" + altFileExtension)) {
+					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
+					SetDataPath(m_DataPathWithoutExtension + "000" + altFileExtension);
+				}
+			}
 			returnBitmaps[0] = GetAsBitmap(conversionMode);
 			return returnBitmaps;
 		}
 		char framePath[1024];
-		// For each frame in the animation, temporarily assign it to the datapath member var so that GetAsBitmap and then load it with GetBitmap
 		for (int frameNum = 0; frameNum < frameCount; frameNum++) {
 			std::snprintf(framePath, sizeof(framePath), "%s%03i%s", m_DataPathWithoutExtension.c_str(), frameNum, m_DataPathExtension.c_str());
-			m_DataPath = framePath;
-			returnBitmaps[frameNum] = GetAsBitmap(conversionMode);
+			returnBitmaps[frameNum] = GetAsBitmap(conversionMode, framePath);
 		}
-		m_DataPath = m_DataPathWithoutExtension + m_DataPathExtension;
 		return returnBitmaps;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	BITMAP * ContentFile::LoadAndReleaseBitmap(int conversionMode) {
+	BITMAP * ContentFile::LoadAndReleaseBitmap(int conversionMode, const std::string &dataPathToSpecificFrame) {
 		if (m_DataPath.empty()) {
 			return nullptr;
 		}
+		const std::string dataPathToLoad = dataPathToSpecificFrame.empty() ? m_DataPath : dataPathToSpecificFrame;
 		SetFormattedReaderPosition(GetFormattedReaderPosition());
-		const std::string altFileExtension = (m_DataPathExtension == ".png") ? ".bmp" : ".png";
 
-		if (!std::filesystem::exists(m_DataPath)) {
-			// Check for 000 in the file name in case it is part of an animation but the FrameCount was set to 1. Do not warn about this because it's normal operation.
-			if (std::filesystem::exists(m_DataPathWithoutExtension + "000" + m_DataPathExtension)) {
-				SetDataPath(m_DataPathWithoutExtension + "000" + m_DataPathExtension);
-			} else {
-				if (std::filesystem::exists(m_DataPathWithoutExtension + altFileExtension)) {
-					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
-					SetDataPath(m_DataPathWithoutExtension + altFileExtension);
-				} else if (std::filesystem::exists(m_DataPathWithoutExtension + "000" + altFileExtension)) {
-					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
-					SetDataPath(m_DataPathWithoutExtension + "000" + altFileExtension);
-				} else {
-					RTEAbort("Failed to find image file with following path and name:\n\n" + m_DataPath + " or " + altFileExtension + "\n" + m_FormattedReaderPosition);
-				}
-			}
-		}
 		BITMAP *returnBitmap = nullptr;
 
 		PALETTE currentPalette;
 		get_palette(currentPalette);
 
 		set_color_conversion((conversionMode == 0) ? COLORCONV_MOST : conversionMode);
-		returnBitmap = load_bitmap(m_DataPath.c_str(), currentPalette);
+		returnBitmap = load_bitmap(dataPathToLoad.c_str(), currentPalette);
 		RTEAssert(returnBitmap, "Failed to load image file with following path and name:\n\n" + m_DataPathAndReaderPosition + "\nThe file may be corrupt, incorrectly converted or saved with unsupported parameters.");
+
 		return returnBitmap;
 	}
 
@@ -208,19 +218,22 @@ namespace RTE {
 		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
 			return nullptr;
 		}
-		const std::string altFileExtension = (m_DataPathExtension == ".wav") ? ".ogg" : ".wav";
 
 		if (!std::filesystem::exists(m_DataPath)) {
-			if (std::filesystem::exists(m_DataPathWithoutExtension + altFileExtension)) {
-				g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
-				SetDataPath(m_DataPathWithoutExtension + altFileExtension);
-			} else {
-				if (abortGameForInvalidSound) {
-					RTEAbort("Failed to find audio file with following path and name:\n\n" + m_DataPath + " or " + altFileExtension + "\n" + m_FormattedReaderPosition);
-				} else {
-					g_ConsoleMan.PrintString("Failed to find audio file with following path and name:\n" + m_DataPath + " or " + altFileExtension + ". The file was not loaded!");
-					return nullptr;
+			bool foundAltExtension = false;
+			for (const std::string &altFileExtension : c_SupportedAudioFormats) {
+				if (std::filesystem::exists(m_DataPathWithoutExtension + altFileExtension)) {
+					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
+					SetDataPath(m_DataPathWithoutExtension + altFileExtension);
+					foundAltExtension = true;
+					break;
 				}
+			}
+			if (!foundAltExtension) {
+				std::string errorMessage = "Failed to find audio file with following path and name:\n\n" + m_DataPath + " or any alternative supported file type";
+				RTEAssert(!abortGameForInvalidSound, errorMessage + "\n" + m_FormattedReaderPosition);
+				g_ConsoleMan.PrintString(errorMessage + ". The file was not loaded!");
+				return nullptr;
 			}
 		}
 		if (std::filesystem::file_size(m_DataPath) == 0) {

@@ -68,6 +68,9 @@ ScenarioGUI::ScenarioGUI(Controller *pController) :
 	m_SceneNameLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("SceneNameLabel"));
 	m_SceneInfoLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("SceneInfoLabel"));
 	m_SceneInfoLabel->SetFont(m_ScenarioGUIController->GetSkin()->GetFont("smallfont.png"));
+	m_ScenePreviewBox = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("ScenePreviewBox"));
+	m_ScenePreviewBox->SetPositionRel(10, 33);
+	m_ScenePreviewBox->SetDrawType(GUICollectionBox::Image);
 
 	// Player team assignment box.
 	for (int playerIndex = Players::PlayerOne; playerIndex < PLAYERCOLUMNCOUNT; ++playerIndex) {
@@ -145,11 +148,11 @@ ScenarioGUI::ScenarioGUI(Controller *pController) :
 	m_ScenarioScreenBoxes[SCENEINFO]->SetPositionRel(m_ScenarioScreenBoxes[ROOTSCREEN]->GetWidth() - m_ScenarioScreenBoxes[SCENEINFO]->GetWidth() - 16, 16);
 	m_ScenarioScreenBoxes[PLAYERSETUP]->CenterInParent(true, true);
 
-	m_ScenePreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 8);
+	m_ScenePreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 32);
 	clear_to_color(m_ScenePreviewBitmap->GetBitmap(), g_MaskColor);
 
 	// Load and own the default preview bitmap.
-	m_DefaultPreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 8);
+	m_DefaultPreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 32);
 	ContentFile defaultPreviewContent("Base.rte/GUIs/DefaultPreview.png");
 	BITMAP *defaultPreview = defaultPreviewContent.LoadAndReleaseBitmap();
 	blit(defaultPreview, m_DefaultPreviewBitmap->GetBitmap(), 0, 0, 0, 0, m_DefaultPreviewBitmap->GetWidth(), m_DefaultPreviewBitmap->GetHeight());
@@ -298,9 +301,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 	m_ScenarioGUIController->Draw(&drawScreen);
 
 	// Draw scene preview after GUI.
-	if (m_ScenarioScreenBoxes[ACTIVITY]->GetVisible() && m_ScenarioScenes && m_SelectedScene && m_ScenarioScreenBoxes[SCENEINFO]->GetVisible()) {
-		draw_sprite(drawBitmap, m_ScenePreviewBitmap->GetBitmap(), m_ScenarioScreenBoxes[SCENEINFO]->GetXPos() + 10, m_ScenarioScreenBoxes[SCENEINFO]->GetYPos() + 33);
-	} else if (m_ScenarioScreenBoxes[PLAYERSETUP]->GetVisible()) {
+	if (m_ScenarioScreenBoxes[PLAYERSETUP]->GetVisible()) {
 		// Draw the Player-Team matrix lines and disabled overlay effects.
 		int lineY = 80;
 		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
@@ -631,6 +632,7 @@ void ScenarioGUI::ShowScenesBox() {
 			preview = m_DefaultPreviewBitmap->GetBitmap();
 		}
 		blit(preview, m_ScenePreviewBitmap->GetBitmap(), 0, 0, 0, 0, m_ScenePreviewBitmap->GetBitmap()->w, m_ScenePreviewBitmap->GetBitmap()->h);
+		m_ScenePreviewBox->SetDrawImage(new AllegroBitmap(m_ScenePreviewBitmap->GetBitmap()));
 	}
 
 	const int textHeight = m_SceneInfoLabel->ResizeHeightToFit();

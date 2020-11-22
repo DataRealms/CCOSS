@@ -240,6 +240,7 @@ namespace RTE {
 		GUIButton *m_SceneCloseButton;
 		GUILabel *m_SceneNameLabel;
 		GUILabel *m_SceneInfoLabel;
+		GUICollectionBox *m_ScenePreviewBox;
 
 		std::unique_ptr<AllegroBitmap> m_ScenePreviewBitmap = std::make_unique<AllegroBitmap>();
 		std::unique_ptr<AllegroBitmap> m_DefaultPreviewBitmap = std::make_unique<AllegroBitmap>();

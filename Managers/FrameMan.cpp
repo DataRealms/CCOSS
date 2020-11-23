@@ -972,23 +972,23 @@ namespace RTE {
 			case Players::PlayerTwo:
 				// If both splits, or just VSplit, then in upper right quadrant
 				if ((m_VSplit && !m_HSplit) || (m_VSplit && m_HSplit)) {
-					screenOffset.SetIntXY(GetResX() / 2, 0);
+					screenOffset.SetXY(GetResX() / 2, 0);
 				} else {
 					// If only HSplit, then lower left quadrant
-					screenOffset.SetIntXY(0, GetResY() / 2);
+					screenOffset.SetXY(0, GetResY() / 2);
 				}
 				break;
 			case Players::PlayerThree:
 				// Always lower left quadrant
-				screenOffset.SetIntXY(0, GetResY() / 2);
+				screenOffset.SetXY(0, GetResY() / 2);
 				break;
 			case Players::PlayerFour:
 				// Always lower right quadrant
-				screenOffset.SetIntXY(GetResX() / 2, GetResY() / 2);
+				screenOffset.SetXY(GetResX() / 2, GetResY() / 2);
 				break;
 			default:
 				// Always upper left corner
-				screenOffset.SetIntXY(0, 0);
+				screenOffset.SetXY(0, 0);
 				break;
 		}
 	}

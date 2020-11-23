@@ -62,13 +62,6 @@ namespace RTE {
 		Vector & SetX(const float newX) { m_X = newX; return *this; }
 
 		/// <summary>
-		/// Sets the X value of this Vector.
-		/// </summary>
-		/// <param name="newX">An int value that the X value will be set to.</param>
-		/// <returns>Vector reference to this after the operation.</returns>
-		Vector & SetIntX(const int newX) { m_X = static_cast<float>(newX); return *this; }
-
-		/// <summary>
 		/// Gets the Y value of this Vector.
 		/// </summary>
 		/// <returns>A float value that represents the Y value of this Vector.</returns>
@@ -82,27 +75,12 @@ namespace RTE {
 		Vector & SetY(const float newY) { m_Y = newY; return *this; }
 
 		/// <summary>
-		/// Sets the Y value of this Vector.
-		/// </summary>
-		/// <param name="newY">An int value that the Y value will be set to.</param>
-		/// <returns>Vector reference to this after the operation.</returns>
-		Vector & SetIntY(const int newY) { m_Y = static_cast<float>(newY); return *this; }
-
-		/// <summary>
 		/// Sets both the X and Y values of this Vector.
 		/// </summary>
 		/// <param name="newX">A float value that the X value will be set to.</param>
 		/// <param name="newY">A float value that the Y value will be set to.</param>
 		/// <returns>Vector reference to this after the operation.</returns>
 		Vector & SetXY(const float newX, const float newY) { m_X = newX; m_Y = newY; return *this; }
-
-		/// <summary>
-		/// Sets both the X and Y values of this Vector.
-		/// </summary>
-		/// <param name="newX">An int value that the X value will be set to.</param>
-		/// <param name="newY">An int value that the Y value will be set to.</param>
-		/// <returns>Vector reference to this after the operation.</returns>
-		Vector & SetIntXY(const int newX, const int newY) { m_X = static_cast<float>(newX); m_Y = static_cast<float>(newY); return *this; }
 
 		/// <summary>
 		/// Gets the absolute largest of the two elements. Will always be positive.

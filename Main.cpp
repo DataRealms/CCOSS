@@ -186,6 +186,9 @@ void ReinitMainMenu() {
 	g_pScenarioGUI->Destroy();
 	g_MetaMan.GetGUI()->Destroy();
 
+	g_ConsoleMan.Destroy();
+	g_ConsoleMan.Create();
+
 	InitMainMenu();
 	g_FrameMan.DestroyTempBackBuffers();
 	g_HadResolutionChange = true;

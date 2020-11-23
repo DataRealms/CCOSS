@@ -33,6 +33,7 @@ namespace RTE {
 		m_InputLogPosition = m_InputLog.begin();
 		m_LastInputString.clear();
 		m_LastLogMove = 0;
+		m_ConsoleTextBackup.clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,10 +66,15 @@ namespace RTE {
 		m_ParentBox->SetEnabled(false);
 		m_ParentBox->SetVisible(false);
 
-		m_ConsoleText->SetText("- RTE Lua Console -\nSee the Data Realms Wiki for commands: http://www.datarealms.com/wiki/\nPress F1 for a list of helpful shortcuts\n-------------------------------------");
+		if (!g_FrameMan.ResolutionChanged()) {
+			m_ConsoleText->SetText("- RTE Lua Console -\nSee the Data Realms Wiki for commands: http://www.datarealms.com/wiki/\nPress F1 for a list of helpful shortcuts\n-------------------------------------");
 
-		m_InputLogPosition = m_InputLog.begin();
-		m_LastLogMove = 0;
+			m_InputLogPosition = m_InputLog.begin();
+			m_LastLogMove = 0;
+		} else {
+			m_ConsoleText->SetText(m_ConsoleTextBackup);
+			m_ConsoleTextBackup.clear();
+		}
 
 		return 0;
 	}
@@ -76,13 +82,24 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ConsoleMan::Destroy() {
-		SaveAllText("LogConsole.txt");
+		if (g_FrameMan.ResolutionChanged()) {
+			m_ConsoleTextBackup = m_ConsoleText->GetText();
+		} else {
+			SaveAllText("LogConsole.txt");
+		}
 
 		delete m_GUIControlManager;
 		delete m_GUIInput;
 		delete m_GUIScreen;
 
-		Clear();
+		if (g_FrameMan.ResolutionChanged()) {
+			m_GUIScreen = nullptr;
+			m_GUIInput = nullptr;
+			m_GUIControlManager = nullptr;
+			m_ParentBox = nullptr;
+		} else {
+			Clear();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

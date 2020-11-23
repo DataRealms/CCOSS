@@ -176,6 +176,8 @@ namespace RTE {
 		std::string m_LastInputString; //!< Place to save the last worked on input string before deactivating the console.
 		short m_LastLogMove; //!< The last direction the log marker was moved. Needed so that changing directions won't need double tapping.
 
+		std::string m_ConsoleTextBackup; //!< A copy of the whole console text at the time of destruction. Used to restore console text when ConsoleMan is re-created after a resolution change.
+
 	private:
 
 		/// <summary>

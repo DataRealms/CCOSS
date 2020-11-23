@@ -1,4 +1,4 @@
-project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++17'])
+project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++17'], version:'0.1.0-Pre-3')
 
 source_inc_dirs = include_directories('Activities',
           'Entities',
@@ -21,13 +21,17 @@ deps = [
   ]
 
 compiler = meson.get_compiler('cpp')
-
+link_args=[]
+extra_args=[]
 
 if meson.get_compiler('cpp').get_id() == 'gcc'
-  extra_args = ['-pedantic','-fpermissive', '-Wno-write-strings', '-Wno-unknown-pragmas']
+  extra_args = ['-fpermissive', '-Wno-write-strings', '-Wno-unknown-pragmas']
+  release_args = ['-w']
   suffix = 'x86_64'
+  if compiler.version().version_compare('<9')
+    link_args += ['-lstdc++fs']
+  endif
 elif meson.get_compiler('cpp').get_id() == 'msvc'
-  extra_args = []
 endif
 
 pch = 'System/StandardIncludes.h'
@@ -43,11 +47,11 @@ subdir('external')
 
 debug = executable('CCCP_debug', 'Main.cpp',sources, link_with: [luabind_debug, raknet_debug, fmod],
             dependencies: [deps], include_directories:[source_inc_dirs, external_inc_dirs],
-            cpp_args:extra_args, cpp_pch:pch, name_suffix:suffix, override_options:['buildtype=debugoptimized', 'optimization=g'])
+            cpp_args:extra_args, link_args:link_args, cpp_pch:pch, name_suffix:suffix, override_options:['buildtype=debugoptimized', 'optimization=g'])
 
 release = executable('CCCP', 'Main.cpp', sources, link_with: [luabind, raknet, fmod],
             dependencies: [deps], include_directories:[source_inc_dirs, external_inc_dirs],
-            cpp_args:extra_args, cpp_pch:pch, name_suffix:suffix, build_by_default:false, override_options:['buildtype=release', 'optimization=3', 'debug=false'])
+            cpp_args:extra_args, link_args:link_args+release_args, cpp_pch:pch, name_suffix:suffix, build_by_default:false, override_options:['buildtype=release', 'optimization=3', 'debug=false'])
 
 #AppImage Targeting
 wget = find_program('wget')

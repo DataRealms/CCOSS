@@ -442,11 +442,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="rhs">A float reference as the right hand side operand.</param>
 		/// <returns>The resulting Vector.</returns>
-		Vector operator/(const float &rhs) const {
-			Vector returnVector(0, 0);
-			if (rhs != 0) { returnVector.SetXY(m_X / rhs, m_Y / rhs); }
-			return returnVector;
-		}
+		Vector operator/(const float &rhs) const { return (rhs != 0) ? Vector(m_X / rhs, m_Y / rhs) : Vector(0, 0); }
 
 		/// <summary>
 		/// Division operator overload for Vectors.
@@ -454,11 +450,7 @@ namespace RTE {
 		/// <param name="lhs">A Vector reference as the left hand side operand.</param>
 		/// <param name="rhs">A Vector reference as the right hand side operand.</param>
 		/// <returns>The resulting Vector.</returns>
-		friend Vector operator/(const Vector &lhs, const Vector &rhs) {
-			Vector returnVector(0, 0);
-			if (rhs.m_X != 0 && rhs.m_Y != 0) { returnVector.SetXY(lhs.m_X / rhs.m_X, lhs.m_Y / rhs.m_Y); }
-			return returnVector;
-		}
+		friend Vector operator/(const Vector &lhs, const Vector &rhs) { return (rhs.m_X != 0 && rhs.m_Y != 0) ? Vector(lhs.m_X / rhs.m_X, lhs.m_Y / rhs.m_Y) : Vector(0, 0); }
 
 		/// <summary>
 		/// Self-addition operator overload for Vectors.

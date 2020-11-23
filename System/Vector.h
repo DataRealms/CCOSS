@@ -32,8 +32,8 @@ namespace RTE {
 		/// <param name="inputX">Float defining the initial X value of this Vector.</param>
 		/// <param name="inputY">Float defining the initial Y value of this Vector.</param>
 		Vector(const float inputX, const float inputY) :
-		m_X(inputX),
-		m_Y(inputY) {};
+			m_X(inputX),
+			m_Y(inputY) {};
 
 		/// <summary>
 		/// Copy constructor method used to instantiate a Vector object identical to an already existing one.
@@ -370,7 +370,7 @@ namespace RTE {
 		/// <param name="lhs">A Vector reference as the left hand side operand.</param>
 		/// <param name="rhs">A Vector reference as the right hand side operand.</param>
 		/// <returns>A boolean indicating whether the two operands are unequal or not.</returns>
-		friend bool operator!=(const Vector &lhs, const Vector &rhs) { return !(lhs==rhs); }
+		friend bool operator!=(const Vector &lhs, const Vector &rhs) { return !(lhs == rhs); }
 
 		/// <summary>
 		/// A stream insertion operator for sending a Vector to an output stream.

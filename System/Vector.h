@@ -121,7 +121,7 @@ namespace RTE {
 		/// Flips the X element of this Vector.
 		/// </summary>
 		/// <param name="flipX">Whether or not to flip the X element or not.</param>
-		void FlipX(const bool flipX = true) { *this = GetYFlipped(flipX); }
+		void FlipX(const bool flipX = true) { *this = GetXFlipped(flipX); }
 
 		/// <summary>
 		/// Gets a Vector identical to this except that its Y component is flipped.

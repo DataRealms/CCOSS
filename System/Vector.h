@@ -507,7 +507,7 @@ namespace RTE {
 		const std::string & GetClassName() const override { return c_ClassName; }
 #pragma endregion
 
-	protected:
+	private:
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 	};

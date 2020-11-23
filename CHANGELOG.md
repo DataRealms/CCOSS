@@ -141,6 +141,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `FLAC` audio files can now be loaded through lua and ini.
 
+- Added new lua `Vector` functions: `GetRadRotated(angle)` and `GetDegRotated(angle)`. They return a rotated copy of the vector without modifying it.
+
 ### Changed
 
 - Codebase now uses the C++17 standard.

@@ -60,14 +60,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector & Vector::RadRotate(const float angle) {
+	Vector Vector::GetRadRotated(const float angle) {
+		Vector returnVector = *this;
 		const float adjustedAngle = -angle;
-		const float newX = m_X * std::cos(adjustedAngle) - m_Y * std::sin(adjustedAngle);
-		const float newY = m_X * std::sin(adjustedAngle) + m_Y * std::cos(adjustedAngle);
-		m_X = newX;
-		m_Y = newY;
+		returnVector.m_X = m_X * std::cos(adjustedAngle) - m_Y * std::sin(adjustedAngle);
+		returnVector.m_Y = m_X * std::sin(adjustedAngle) + m_Y * std::cos(adjustedAngle);
 
-		return *this;
+		return returnVector;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

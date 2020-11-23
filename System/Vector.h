@@ -58,13 +58,15 @@ namespace RTE {
 		/// Sets the X value of this Vector.
 		/// </summary>
 		/// <param name="newX">A float value that the X value will be set to.</param>
-		void SetX(const float newX) { m_X = newX; }
+		/// <returns>Vector reference to this after the operation.</returns>
+		Vector & SetX(const float newX) { m_X = newX; return *this; }
 
 		/// <summary>
 		/// Sets the X value of this Vector.
 		/// </summary>
 		/// <param name="newX">An int value that the X value will be set to.</param>
-		void SetIntX(const int newX) { m_X = static_cast<float>(newX); }
+		/// <returns>Vector reference to this after the operation.</returns>
+		Vector & SetIntX(const int newX) { m_X = static_cast<float>(newX); return *this; }
 
 		/// <summary>
 		/// Gets the Y value of this Vector.
@@ -76,27 +78,31 @@ namespace RTE {
 		/// Sets the Y value of this Vector.
 		/// </summary>
 		/// <param name="newY">A float value that the Y value will be set to.</param>
-		void SetY(const float newY) { m_Y = newY; }
+		/// <returns>Vector reference to this after the operation.</returns>
+		Vector & SetY(const float newY) { m_Y = newY; return *this; }
 
 		/// <summary>
 		/// Sets the Y value of this Vector.
 		/// </summary>
 		/// <param name="newY">An int value that the Y value will be set to.</param>
-		void SetIntY(const int newY) { m_Y = static_cast<float>(newY); }
+		/// <returns>Vector reference to this after the operation.</returns>
+		Vector & SetIntY(const int newY) { m_Y = static_cast<float>(newY); return *this; }
 
 		/// <summary>
 		/// Sets both the X and Y values of this Vector.
 		/// </summary>
 		/// <param name="newX">A float value that the X value will be set to.</param>
 		/// <param name="newY">A float value that the Y value will be set to.</param>
-		void SetXY(const float newX, const float newY) { m_X = newX; m_Y = newY; }
+		/// <returns>Vector reference to this after the operation.</returns>
+		Vector & SetXY(const float newX, const float newY) { m_X = newX; m_Y = newY; return *this; }
 
 		/// <summary>
 		/// Sets both the X and Y values of this Vector.
 		/// </summary>
 		/// <param name="newX">An int value that the X value will be set to.</param>
 		/// <param name="newY">An int value that the Y value will be set to.</param>
-		void SetIntXY(const int newX, const int newY) { m_X = static_cast<float>(newX); m_Y = static_cast<float>(newY); }
+		/// <returns>Vector reference to this after the operation.</returns>
+		Vector & SetIntXY(const int newX, const int newY) { m_X = static_cast<float>(newX); m_Y = static_cast<float>(newY); return *this; }
 
 		/// <summary>
 		/// Gets the absolute largest of the two elements. Will always be positive.
@@ -121,7 +127,8 @@ namespace RTE {
 		/// Flips the X element of this Vector.
 		/// </summary>
 		/// <param name="flipX">Whether or not to flip the X element or not.</param>
-		void FlipX(const bool flipX = true) { *this = GetXFlipped(flipX); }
+		/// <returns>Vector reference to this after the operation.</returns>
+		Vector & FlipX(const bool flipX = true) { *this = GetXFlipped(flipX); return *this; }
 
 		/// <summary>
 		/// Gets a Vector identical to this except that its Y component is flipped.
@@ -134,7 +141,8 @@ namespace RTE {
 		/// Flips the Y element of this Vector.
 		/// </summary>
 		/// <param name="flipY">Whether or not to flip the Y element or not.</param>
-		void FlipY(const bool flipY = true) { *this = GetYFlipped(flipY); }
+		/// <returns>Vector reference to this after the operation.</returns>
+		Vector & FlipY(const bool flipY = true) { *this = GetYFlipped(flipY); return *this; }
 
 		/// <summary>
 		/// Indicates whether the X component of this Vector is 0.
@@ -173,14 +181,14 @@ namespace RTE {
 		/// Sets the magnitude of this Vector. A negative magnitude will invert the Vector's direction.
 		/// </summary>
 		/// <param name="newMag">A float value that the magnitude will be set to.</param>
-		/// <returns>A reference to this after the change.</returns>
+		/// <returns>Vector reference to this after the operation.</returns>
 		Vector & SetMagnitude(const float newMag);
 
 		/// <summary>
 		/// Caps the magnitude of this Vector to a max value and keeps its angle intact.
 		/// </summary>
 		/// <param name="capMag">A float value that the magnitude will be capped by.</param>
-		/// <returns>A reference to this after the change.</returns>
+		/// <returns>Vector reference to this after the operation.</returns>
 		Vector & CapMagnitude(const float capMag);
 
 		/// <summary>
@@ -213,21 +221,21 @@ namespace RTE {
 		/// Rotate this Vector relatively by an angle in radians.
 		/// </summary>
 		/// <param name="angle">The angle in radians to rotate by. Positive angles rotate counter-clockwise, and negative angles clockwise.</param>
-		/// <returns>This vector, rotated.</returns>
+		/// <returns>Vector reference to this after the operation.</returns>
 		Vector & RadRotate(const float angle);
 
 		/// <summary>
 		/// Rotate this Vector relatively by an angle in degrees.
 		/// </summary>
 		/// <param name="angle">The angle in degrees to rotate by. Positive angles rotate counter-clockwise, and negative angles clockwise.</param>
-		/// <returns>This vector, rotated.</returns>
+		/// <returns>Vector reference to this after the operation.</returns>
 		Vector & DegRotate(const float angle) { return RadRotate(angle * c_PI / 180.0F); }
 
 		/// <summary>
 		/// Set this Vector to an absolute rotation based on the absolute rotation of another Vector.
 		/// </summary>
 		/// <param name="refVector">The reference Vector whose absolute angle from positive X (0 degrees) this Vector will be rotated to.</param>
-		/// <returns>This vector, rotated.</returns>
+		/// <returns>Vector reference to this after the operation.</returns>
 		Vector & AbsRotateTo(const Vector &refVector) { return RadRotate(refVector.GetAbsRadAngle() - GetAbsRadAngle()); }
 
 		/// <summary>
@@ -247,22 +255,26 @@ namespace RTE {
 		/// <summary>
 		/// Rounds the X and Y values of this Vector upwards. E.g. 0.49 -> 0.0 and 0.5 -> 1.0.
 		/// </summary>
-		void Round() { *this = GetRounded(); }
+		/// <returns>Vector reference to this after the operation.</returns>
+		Vector & Round() { *this = GetRounded(); return *this; }
 
 		/// <summary>
 		/// Sets the X and Y of this Vector to the nearest half value. E.g. 1.0 -> 1.5 and 0.9 -> 0.5.
 		/// </summary>
-		void ToHalf() { m_X = std::round(m_X * 2) / 2; m_Y = std::round(m_Y * 2) / 2; }
+		/// <returns>Vector reference to this after the operation.</returns>
+		Vector & ToHalf() { m_X = std::round(m_X * 2) / 2; m_Y = std::round(m_Y * 2) / 2; return *this; }
 
 		/// <summary>
 		/// Sets the X and Y of this Vector to the greatest integers that are not greater than their original values. E.g. -1.02 becomes -2.0.
 		/// </summary>
-		void Floor() { *this = GetFloored(); }
+		/// <returns>Vector reference to this after the operation.</returns>
+		Vector & Floor() { *this = GetFloored(); return *this; }
 
 		/// <summary>
 		/// Sets the X and Y of this Vector to the lowest integers that are not less than their original values. E.g. -1.02 becomes -1.0.
 		/// </summary>
-		void Ceiling() { *this = GetCeilinged(); }
+		/// <returns>Vector reference to this after the operation.</returns>
+		Vector & Ceiling() { *this = GetCeilinged(); return *this; }
 
 		/// <summary>
 		/// Returns a rounded copy of this Vector. Does not alter this Vector.

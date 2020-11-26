@@ -318,7 +318,7 @@ ClassInfoGetters
     /// Note that if the last allowance is removed, the HeldDevice will no longer have pickup limitations, rather than setting itself as unpickupable.
     /// </summary>
     /// <param name="actorPresetName">The PresetName of an object that should no longer be able to pick up this HeldDevice.</param>
-    void RemovePickupableByPresetName(const std::string &actorPresetName) { std::unordered_set<std::string>::iterator pickupableByPresetNameEntry = m_PickupableByPresetNames.find(actorPresetName); if (pickupableByPresetNameEntry != m_PickupableByPresetNames.end()) { m_PickupableByPresetNames.erase(pickupableByPresetNameEntry); } }
+    void RemovePickupableByPresetName(const std::string &actorPresetName);
 
     /// <summary>
     /// Gets the multiplier for how well this HeldDevice can be gripped by Arms.

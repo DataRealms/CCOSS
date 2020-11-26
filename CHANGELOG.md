@@ -142,7 +142,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - GUI sliders (like for music volume) can now be adjusted with the mouse scroll wheel.
 
-- Exposed PEmitter to lua. Bindings are identical to AEmitter's bindings, except that damage-related bindings don't exist for PEmitter.
+- Exposed `PEmitter` to lua. Bindings are identical to `AEmitter` bindings, except that damage-related bindings don't exist for `PEmitter`.
+
+- `FLAC` audio files can now be loaded through lua and ini.
 
 - Added Lua (R/W) properties for all hardcoded Attachables. You can now set them on the fly to be created objects of the relevant type. Note that trying to set things inappropriately (e.g. setting an HDFirearm as something's Leg) will probably crash the game; that's your problem to deal with.
 	You can read and write the following properties:
@@ -277,17 +279,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 	**Note:** Changing the game window resolution while an Activity is active requires ending the Activity. A dialog box will appear asking to confirm the change.
 
-- Moved from C-style random number generation to C++ standard. This includes usage of an mt19937 random number generator.  
-	For C++ coders the functions SelectRand, PosRand and RangeRand have been replaced by the function template RandomNum() and its overload RandomNum(T min, T max). The function NormalRand has been replaced by the function template RandomNormalNum(). For lua coders there is no change.
+- Moved from C-style random number generation to C++ standard. This includes usage of a `mt19937` random number generator.
 	
 - Resolution validation changed to support multiple screens. Incompatible/bad resolution settings will be overridden at startup with messages explaining the issue.  
 	**Note:** For multi-screen to work properly, the left-most screen MUST be set as primary. Screens having different resolutions does not actually matter but different heights will still be warned about and overridden due to the likeliness of GUI elementes being cropped on the shortest screen.  
 	Resolution validation can be disabled for multi-screen setups with `Settings.ini` property `DisableMultiScreenResolutionValidation`. Bad settings are likely to crash, use at own risk.  
 	For setups with more than 3 screens `DisableMultiScreenResolutionValidation` must be set true.
 
-- Damage to actors from impulses is now relative to their max health instead of being on a scale from 0 to 100.
+- Damage to `Actors` from impulses is now relative to their max health instead of being on a scale from 0 to 100.
 
-- Scenes with a PresetName containing the strings "Test", "Editor" and "Tutorial" are no longer excluded from the scenarios screen and from the metagame.
+- `Scenes` with a `PresetName` containing the strings "Test", "Editor" and "Tutorial" are no longer excluded from the scenarios screen and from the MetaGame.
 
 - Hands will now draw in transparent drawing mode, i.e. editing menu.
 

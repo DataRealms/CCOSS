@@ -1678,7 +1678,7 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar) {
         for (int i = 1; i < argc; i++) {
             // Print loading screen console to cout
 			if (std::strcmp(argv[i], "-cout") == 0) {
-				g_System.SetLogToCLI(true);
+				System::SetLogToCLI(true);
 			} else if (i + 1 < argc) {
 				// Launch game in server mode
                 if (std::strcmp(argv[i], "-server") == 0 && i + 1 < argc) {
@@ -1725,6 +1725,8 @@ int main(int argc, char *argv[]) {
 
     ///////////////////////////////////////////////////////////////////
     // Instantiate all the managers
+
+	System::Initialize();
 
     new ConsoleMan();
     new LuaMan();
@@ -1801,7 +1803,7 @@ int main(int argc, char *argv[]) {
 		g_ConsoleMan.SetEnabled(true);
 	} else {
 		// Delete an existing log if there are no warnings so there's less junk in the root folder.
-		if (std::filesystem::exists(g_System.GetWorkingDirectory() + "/LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
+		if (std::filesystem::exists(System::GetWorkingDirectory() + "LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
 	}
 
     if (!g_NetworkServer.IsServerModeEnabled()) {

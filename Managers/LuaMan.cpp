@@ -2519,7 +2519,7 @@ int LuaMan::FileOpen(std::string filename, std::string mode)
     string dotString = "..";
 	string rteString = ".rte";
 
-	string fullPath = g_System.GetWorkingDirectory()+ "/" + filename;
+	string fullPath = System::GetWorkingDirectory() + filename;
 
 	// Do not open paths with '..'
 	if (fullPath.find(dotString) != string::npos)

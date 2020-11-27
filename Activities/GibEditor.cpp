@@ -749,7 +749,7 @@ bool GibEditor::SaveObject(string saveAsName, bool forceOverwrite)
 	// Try to create NewData directory if file does not exist
 	if (!newDataFileExisted)
 	{
-		g_System.MakeDirectory(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/NewData");
+		System::MakeDirectory(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/NewData");
 	}
 
     if (g_PresetMan.AddEntityPreset(m_pEditedObject, m_ModuleSpaceID, forceOverwrite, objectFilePath))

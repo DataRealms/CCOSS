@@ -111,7 +111,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LoadingGUI::LoadingSplashProgressReport(std::string reportString, bool newItem) {
-		if (g_System.GetLogToCLI()) { g_System.PrintLoadingToCLI(reportString, newItem); }
+		if (System::GetLogToCLI()) { System::PrintLoadingToCLI(reportString, newItem); }
 
 		if (g_LoadingGUI.m_ControlManager) {
 			if (newItem) {
@@ -221,14 +221,14 @@ namespace RTE {
 						if (!slashPos) { break; }
 						// Terminate there so we are making the most senior folder
 						*(slashPos) = 0;
-						g_System.MakeDirectory(parentDirName);
+						System::MakeDirectory(parentDirName);
 					}
 
 					// Check if this entry is a directory or file
 					if (outputFileName[strlen(outputFileName) - 1] == '/' || outputFileName[strlen(outputFileName) - 1] == '\\') {
 						// Entry is a directory, so create it.
 						LoadingSplashProgressReport("Creating Dir: " + std::string(outputFileName), true);
-						g_System.MakeDirectory(outputFileName);
+						System::MakeDirectory(outputFileName);
 						// It's a file
 					} else {
 						// Validate so only certain file types are extracted:  .ini .txt .lua .cfg .bmp .png .jpg .jpeg .wav .ogg .mp3 .flac

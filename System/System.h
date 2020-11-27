@@ -12,25 +12,24 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a System object in system memory. 
-		/// Should never be called directly, since g_System is an extern linked global that should be used by everything trying to use System.
+		/// Store the current working directory and create any missing subdirectories.
 		/// </summary>
-		System() { m_LogToCLI = false; }
+		static void Initialize();
 #pragma endregion
 
 #pragma region Directories
 		/// <summary>
-		/// Returns current working directory.
+		/// Gets the current working directory.
 		/// </summary>
 		/// <returns>Absolute path to current working directory.</returns>
-		std::string GetWorkingDirectory();
+		static std::string & GetWorkingDirectory() { return s_WorkingDirectory; }
 
 		/// <summary>
 		/// Create a directory.
 		/// </summary>
 		/// <param name="path">Path to create.</param>
 		/// <returns>Returns 0 if successful.</returns>
-		int MakeDirectory(const std::string& path);
+		static int MakeDirectory(const std::string &pathToMake);
 #pragma endregion
 
 #pragma region Command-Line Interface
@@ -38,31 +37,30 @@ namespace RTE {
 		/// Tells whether printing loading progress report and console to command-line is enabled or not.
 		/// </summary>
 		/// <returns>Whether printing to command-line is enabled or not.</returns>
-		bool GetLogToCLI() const { return m_LogToCLI; }
+		static bool GetLogToCLI() { return s_LogToCLI; }
 
 		/// <summary>
 		/// Sets whether to print the loading progress report and console to command-line or not.
 		/// </summary>
 		/// <param name="enable">True to enable printing to command-line.</param>
-		void SetLogToCLI(bool enable) { m_LogToCLI = enable; }
+		static void SetLogToCLI(bool enable) { s_LogToCLI = enable; }
 
 		/// <summary>
 		/// Prints the loading progress report to command-line.
 		/// </summary>
-		void PrintLoadingToCLI(std::string reportString, bool newItem = false);
+		static void PrintLoadingToCLI(const std::string &reportString, bool newItem = false);
 
 		/// <summary>
 		/// Prints console output to command-line.
 		/// </summary>
 		/// <param name="inputString"></param>
-		void PrintToCLI(std::string inputString);
+		static void PrintToCLI(const std::string &stringToPrint);
 #pragma endregion
 
-	protected:
+	private:
 
-		bool m_LogToCLI; //!< Bool to tell whether to print the loading log and anything specified with PrintToCLI to command-line or not.
+		static bool s_LogToCLI; //!< Bool to tell whether to print the loading log and anything specified with PrintToCLI to command-line or not.
+		static std::string s_WorkingDirectory; //!< String containing the absolute path to current working directory.
 	};
-
-	extern System g_System;
 }
 #endif

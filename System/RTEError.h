@@ -1,6 +1,8 @@
 #ifndef _RTEERROR_
 #define _RTEERROR_
 
+#include "System.h"
+
 #include "allegro.h"
 #include "loadpng.h"
 

@@ -1,5 +1,4 @@
 #include "ConsoleMan.h"
-#include "System.h"
 
 #include "LuaMan.h"
 #include "UInputMan.h"

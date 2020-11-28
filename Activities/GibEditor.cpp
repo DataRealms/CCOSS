@@ -26,7 +26,6 @@
 #include "HeldDevice.h"
 #include "Scene.h"
 #include "DataModule.h"
-#include "System.h"
 
 #include "GUI/GUI.h"
 #include "GUI/GUIFont.h"

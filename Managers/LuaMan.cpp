@@ -1,5 +1,4 @@
 #include "LuaMan.h"
-#include "System.h"
 
 #include "ACDropShip.h"
 #include "ACrab.h"

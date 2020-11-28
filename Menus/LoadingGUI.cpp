@@ -1,5 +1,4 @@
 #include "LoadingGUI.h"
-#include "System.h"
 #include "Writer.h"
 #include "DataModule.h"
 #include "SceneLayer.h"

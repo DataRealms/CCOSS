@@ -23,7 +23,6 @@
 #include "ACRocket.h"
 #include "HeldDevice.h"
 #include "Scene.h"
-#include "System.h"
 #include "DataModule.h"
 
 #include "GUI/GUI.h"

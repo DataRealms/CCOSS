@@ -110,7 +110,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LoadingGUI::LoadingSplashProgressReport(std::string reportString, bool newItem) {
-		if (System::GetLogToCLI()) { System::PrintLoadingToCLI(reportString, newItem); }
+		if (System::IsLoggingToCLI()) { System::PrintLoadingToCLI(reportString, newItem); }
 
 		if (g_LoadingGUI.m_ControlManager) {
 			if (newItem) {

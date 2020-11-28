@@ -49,13 +49,12 @@ namespace RTE {
 		/// Tells whether printing loading progress report and console to command-line is enabled or not.
 		/// </summary>
 		/// <returns>Whether printing to command-line is enabled or not.</returns>
-		static bool GetLogToCLI() { return s_LogToCLI; }
+		static bool IsLoggingToCLI() { return s_LogToCLI; }
 
 		/// <summary>
-		/// Sets whether to print the loading progress report and console to command-line or not.
+		/// Enables printing the loading progress report and console to command-line. For Windows, also allocates a console instance and redirects cout to it.
 		/// </summary>
-		/// <param name="enable">True to enable printing to command-line.</param>
-		static void SetLogToCLI(bool enable) { s_LogToCLI = enable; }
+		static void EnableLoggingToCLI();
 
 		/// <summary>
 		/// Prints the loading progress report to command-line.

@@ -200,7 +200,7 @@ namespace RTE {
 
 	void ConsoleMan::PrintString(const std::string &stringToPrint) const {
 		m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + stringToPrint);
-		if (System::GetLogToCLI()) { System::PrintToCLI(stringToPrint); }
+		if (System::IsLoggingToCLI()) { System::PrintToCLI(stringToPrint); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

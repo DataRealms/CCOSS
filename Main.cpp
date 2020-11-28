@@ -1676,7 +1676,7 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar) {
         for (int i = 1; i < argc; i++) {
             // Print loading screen console to cout
 			if (std::strcmp(argv[i], "-cout") == 0) {
-				System::SetLogToCLI(true);
+				System::EnableLoggingToCLI();
 			} else if (i + 1 < argc) {
 				// Launch game in server mode
                 if (std::strcmp(argv[i], "-server") == 0 && i + 1 < argc) {

@@ -11,9 +11,6 @@
 // Windows.h defines these and they conflict with our methods so we need to undefine them manually.
 #undef GetClassName
 #undef PlaySound
-// minwindef.h defines these and they conflict with the std methods so we need to undefine them manually.
-#undef min
-#undef max
 
 #include "Singleton.h"
 

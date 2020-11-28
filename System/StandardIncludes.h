@@ -4,6 +4,45 @@
 // This restores features removed from the C++17 standard (auto_ptr and some other stuff). This is needed for LuaBind to work because it relies on it heavily.
 #define _HAS_AUTO_PTR_ETC 1
 
+// Disable a bunch of unneeded crap in WinAPI (on top of WIN32_LEAN_AND_MEAN)
+#ifdef _WIN32
+#define NOMINMAX
+#define NOGDI
+#define NOKERNEL
+#define NONLS
+#define NOMEMMGR
+#define NOGDICAPMASKS
+#define NOVIRTUALKEYCODES
+#define NOWINMESSAGES
+#define NOWINSTYLES
+#define NOMETAFILE
+#define NOSCROLL
+#define NOTEXTMETRIC
+#define NOCOMM
+#define NOKANJI
+#define NOHELP
+#define NOPROFILER
+#define NODEFERWINDOWPOS
+#define NOMCX
+#define NOMENUS
+#define NOICONS
+#define NOKEYSTATES
+#define NOSYSCOMMANDS
+#define NORASTEROPS
+#define NOSHOWWINDOW
+#define OEMRESOURCE
+#define NOATOM
+#define NODRAWTEXT
+#define NOCOLOR
+#define NOCTLMGR
+#define NOMSG
+#define NOOPENFILE
+#define NOSERVICE
+#define NOSOUND
+#define NOWH
+#define NOWINOFFSETS
+#endif
+
 // Inclusion of relevant C++ Standard Library headers.
 #include <cstdlib>
 #include <cstdarg>

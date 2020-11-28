@@ -25,6 +25,18 @@ namespace RTE {
 		static std::string & GetWorkingDirectory() { return s_WorkingDirectory; }
 
 		/// <summary>
+		/// Gets the screenshot directory name.
+		/// </summary>
+		/// <returns>Folder name of the screenshots directory.</returns>
+		static const std::string & GetScreenshotDirectory() { return s_ScreenshotDirectory; }
+
+		/// <summary>
+		/// Gets the mod directory name.
+		/// </summary>
+		/// <returns>Folder name of the mod directory.</returns>
+		static const std::string & GetModDirectory() { return s_ModDirectory; }
+
+		/// <summary>
 		/// Create a directory.
 		/// </summary>
 		/// <param name="path">Path to create.</param>
@@ -61,6 +73,8 @@ namespace RTE {
 
 		static bool s_LogToCLI; //!< Bool to tell whether to print the loading log and anything specified with PrintToCLI to command-line or not.
 		static std::string s_WorkingDirectory; //!< String containing the absolute path to current working directory.
+		static const std::string s_ScreenshotDirectory; //!< String containing the folder name of the screenshots directory.
+		static const std::string s_ModDirectory; //!< String containing the folder name of the mod directory.
 	};
 }
 #endif

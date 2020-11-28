@@ -12,6 +12,8 @@ namespace RTE {
 
 	bool System::s_LogToCLI = false;
 	std::string System::s_WorkingDirectory = ".";
+	const std::string System::s_ScreenshotDirectory = "_ScreenShots";
+	const std::string System::s_ModDirectory = "_Mods";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -23,6 +25,9 @@ namespace RTE {
 			s_WorkingDirectory.replace(s_WorkingDirectory.find("\\"), 1, "/");
 		}
 		if (s_WorkingDirectory.back() != '/') { s_WorkingDirectory.append("/"); }
+
+		if (!std::filesystem::exists(s_WorkingDirectory + s_ScreenshotDirectory)) { MakeDirectory(s_WorkingDirectory + s_ScreenshotDirectory); }
+		//if (!std::filesystem::exists(s_WorkingDirectory + s_ModDirectory)) { MakeDirectory(s_WorkingDirectory + s_ModDirectory); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

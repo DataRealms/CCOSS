@@ -1721,30 +1721,7 @@ int main(int argc, char *argv[]) {
     // Seed the random number generator
     SeedRNG();
 
-    ///////////////////////////////////////////////////////////////////
-    // Instantiate all the managers
-
 	System::Initialize();
-
-    new ConsoleMan();
-    new LuaMan();
-    new SettingsMan();
-    new TimerMan();
-	new PerformanceMan();
-    new PresetMan();
-    new FrameMan();
-	new PostProcessMan();
-	new PrimitiveMan();
-    new AudioMan();
-    new GUISound();
-    new UInputMan();
-    new ActivityMan();
-    new MovableMan();
-    new SceneMan();
-    new MetaMan();
-
-	new NetworkServer();
-	new NetworkClient();
 
     ///////////////////////////////////////////////////////////////////
     // Create the essential managers
@@ -1787,7 +1764,6 @@ int main(int argc, char *argv[]) {
 		g_AudioMan.SetMusicVolume(0);
 	}
 
-    new LoadingGUI();
 	g_LoadingGUI.InitLoadingScreen();
 	InitMainMenu();
 

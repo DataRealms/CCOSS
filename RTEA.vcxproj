@@ -101,7 +101,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;legacy_stdio_definitions.lib;zlibwapi.lib;libpng16_static.lib;liblz4.lib;fmod_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;lua51-debug-static.lib;luabind.x86.debug.lib;RakNet_LibStatic_Debug_Win32.lib;libboost_thread-vc141-mt-gd-x32-1_55.lib;libboost_date_time-vc141-mt-gd-x32-1_55.lib;libboost_system-vc141-mt-gd-x32-1_55.lib;libboost_chrono-vc141-mt-gd-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;ole32.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;zlibwapi.lib;libpng16_static.lib;liblz4.lib;fmod_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;lua51-debug-static.lib;luabind.x86.debug.lib;RakNet_LibStatic_Debug_Win32.lib;libboost_thread-vc141-mt-gd-x32-1_55.lib;libboost_date_time-vc141-mt-gd-x32-1_55.lib;libboost_system-vc141-mt-gd-x32-1_55.lib;libboost_chrono-vc141-mt-gd-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)Cortex Command.debug.exe</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -146,7 +146,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;legacy_stdio_definitions.lib;zlibwapi.lib;libpng16_static.lib;liblz4.lib;fmod_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;lua51-debug-static.lib;luabind.x86.debug.lib;RakNet_LibStatic_Debug_Win32.lib;libboost_thread-vc141-mt-gd-x32-1_55.lib;libboost_date_time-vc141-mt-gd-x32-1_55.lib;libboost_system-vc141-mt-gd-x32-1_55.lib;libboost_chrono-vc141-mt-gd-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;ole32.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;zlibwapi.lib;libpng16_static.lib;liblz4.lib;fmod_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;lua51-debug-static.lib;luabind.x86.debug.lib;RakNet_LibStatic_Debug_Win32.lib;libboost_thread-vc141-mt-gd-x32-1_55.lib;libboost_date_time-vc141-mt-gd-x32-1_55.lib;libboost_system-vc141-mt-gd-x32-1_55.lib;libboost_chrono-vc141-mt-gd-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)Cortex Command.debug.minimal.exe</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -198,7 +198,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;ole32.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;legacy_stdio_definitions.lib;zlibwapi.lib;libpng16_static.lib;liblz4.lib;fmod_vc.lib;alleg.lib;loadpng.lib;lua51.lib;luabind.x86.release.lib;RakNet_LibStatic_Release_Win32.lib;libboost_thread-vc141-mt-x32-1_55.lib;libboost_date_time-vc141-mt-x32-1_55.lib;libboost_system-vc141-mt-x32-1_55.lib;libboost_chrono-vc141-mt-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;ole32.lib;dinput8.lib;ddraw.lib;dxguid.lib;winmm.lib;dsound.lib;ws2_32.lib;zlibwapi.lib;libpng16_static.lib;liblz4.lib;fmod_vc.lib;alleg.lib;loadpng.lib;lua51.lib;luabind.x86.release.lib;RakNet_LibStatic_Release_Win32.lib;libboost_thread-vc141-mt-x32-1_55.lib;libboost_date_time-vc141-mt-x32-1_55.lib;libboost_system-vc141-mt-x32-1_55.lib;libboost_chrono-vc141-mt-x32-1_55.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)Cortex Command.exe</OutputFile>
       <AdditionalLibraryDirectories>external/lib/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>

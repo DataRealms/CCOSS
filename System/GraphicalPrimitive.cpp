@@ -1,4 +1,4 @@
-#include "Primitive.h"
+#include "GraphicalPrimitive.h"
 #include "Matrix.h"
 #include "FrameMan.h"
 #include "SceneMan.h"

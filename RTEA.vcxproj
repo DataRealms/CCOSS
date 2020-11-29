@@ -246,7 +246,7 @@
     <ClInclude Include="System\InputMapping.h" />
     <ClInclude Include="System\InputScheme.h" />
     <ClInclude Include="System\NetworkMessages.h" />
-    <ClInclude Include="System\Primitive.h" />
+    <ClInclude Include="System\GraphicalPrimitive.h" />
     <ClInclude Include="System\StandardIncludes.h" />
     <ClInclude Include="System\Box.h" />
     <ClInclude Include="System\Color.h" />
@@ -395,7 +395,7 @@
     <ClCompile Include="System\Entity.cpp" />
     <ClCompile Include="System\InputMapping.cpp" />
     <ClCompile Include="System\InputScheme.cpp" />
-    <ClCompile Include="System\Primitive.cpp" />
+    <ClCompile Include="System\GraphicalPrimitive.cpp" />
     <ClCompile Include="System\StandardIncludes.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Minimal Debug Open Source|Win32'">StandardIncludes.h</PrecompiledHeaderFile>

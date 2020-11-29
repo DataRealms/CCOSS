@@ -2,7 +2,7 @@
 #define _RTEPRIMITIVEMAN_
 
 #include "Singleton.h"
-#include "Primitive.h"
+#include "GraphicalPrimitive.h"
 
 #define g_PrimitiveMan PrimitiveMan::Instance()
 

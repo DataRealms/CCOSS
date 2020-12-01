@@ -350,22 +350,12 @@ namespace RTE {
 					soundMode |= FMOD_3D_HEADRELATIVE;
 					m_AttenuationStartDistance = c_SoundMaxAudibleDistance;
 				} else {
-					soundMode |= FMOD_3D_CUSTOMROLLOFF;
+					soundMode |= FMOD_3D_INVERSEROLLOFF;
 				}
 
 				result = (result == FMOD_OK) ? soundData.SoundObject->setMode(soundMode) : result;
 				result = (result == FMOD_OK) ? soundData.SoundObject->setLoopCount(m_Loops) : result;
-				if (m_Immobile) {
-					result = (result == FMOD_OK) ? soundData.SoundObject->set3DMinMaxDistance(std::max(0.0F, m_AttenuationStartDistance), c_SoundMaxAudibleDistance) : result;
-				} else {
-					//FMOD_VECTOR customRolloffPoints[10];
-					//CalculateCustomRolloffPoints(soundData, customRolloffPoints, 10);
-
-					//TODO Consider replacing this with normal min and max distance (but keep custom rolloff mode) so we can save some pointing issues. Might need to store min audible distance in audioman if fmod is strict about min and max distance sizes wrt each other.
-					soundData.CustomRolloffPoints[0] = FMOD_VECTOR{soundData.MinimumAudibleDistance, 0, 0};
-					soundData.CustomRolloffPoints[1] = FMOD_VECTOR{(soundData.AttenuationStartDistance < 0) ? m_AttenuationStartDistance : soundData.AttenuationStartDistance, 1, 0};
-					result = (result == FMOD_OK) ? soundData.SoundObject->set3DCustomRolloff(soundData.CustomRolloffPoints, 2) : result;
-				}
+				result = (result == FMOD_OK) ? soundData.SoundObject->set3DMinMaxDistance(soundData.MinimumAudibleDistance + std::max(0.0F, m_AttenuationStartDistance), c_SoundMaxAudibleDistance) : result;
 			}
 		}
 		m_SoundPropertiesUpToDate = result == FMOD_OK;

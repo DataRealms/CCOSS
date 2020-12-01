@@ -375,7 +375,7 @@ namespace RTE {
 		/// <param name="affectedByGlobalPitch">Whether the sound is affected by pitch.</param>
 		/// <param name="immobile">Whether the sound is immobile or not.</param>
 		/// <param name="fadeOutTime">The amount of time, in ms, to fade out over.</param>
-		void RegisterSoundEvent(int player, NetworkSoundState state, const std::unordered_set<int> *channels = NULL, const std::vector<size_t> *soundFileHashes = NULL, const Vector &position = Vector(), int loops = 0, float volume = 1.0F, float pitch = 1.0F, bool affectedByGlobalPitch = false, float attenuationStartDistance = 0, bool immobile = false, int fadeOutTime = 0);
+		void RegisterSoundEvent(int player, NetworkSoundState state, const std::unordered_set<int> *channels = nullptr, const std::vector<size_t> *soundFileHashes = nullptr, const Vector &position = Vector(), int loops = 0, float volume = 1.0F, float pitch = 1.0F, bool affectedByGlobalPitch = false, float attenuationStartDistance = 0, bool immobile = false, int fadeOutTime = 0);
 #pragma endregion
 
 #pragma region Class Info
@@ -401,9 +401,8 @@ namespace RTE {
 		FMOD::ChannelGroup *m_ImmobileSoundChannelGroup; //!< The FMOD ChannelGroup for immobile sounds.
 		
 		bool m_AudioEnabled; //!< Bool to tell whether audio is enabled or not.
-		int m_CurrentActivityHumanCount; //!< The stored number of humans in the current activity, used for audio splitscreen handling. Only updated when there's an activity running.
-
-		std::unordered_map<int, std::vector<FMOD_VECTOR>> m_SoundChannelRolloffs; //!< An unordered map of Sound Channel indices to a std::vector of FMOD_VECTORs representing each Sound Channel's custom attenuation rolloff. This is necessary to keep safe data in case the SoundContainer is destroyed while the sound is still playing.
+		std::vector<const Vector *> m_CurrentActivityHumanPlayerPositions; //!< The stored positions of each human player in the current activity. Only filled when there's an activity running.
+		std::unordered_map<int, float> m_SoundChannelMinimumAudibleDistances; //!<  An unordered map of sound channel indices to floats representing each Sound Channel's minimum audible distances. This is necessary to keep safe data in case the SoundContainer is destroyed while the sound is still playing, as happens often with TDExplosives.
 
 		float m_MusicVolume; //!< Global music volume.
 		float m_SoundsVolume; //!< Global sounds effects volume.
@@ -462,7 +461,13 @@ namespace RTE {
 		void Update3DEffectsForMobileSoundChannels();
 
 		/// <summary>
+		/// Sets or updates the position of the given sound channel so it handles scene wrapping correctly. Also handles minimum audible distance.
 		/// </summary>
+		/// <param name="soundChannel">The channel whose position should be set or updated.</param>
+		/// <param name="positionToUse">An optional position to set for this sound channel. Done this way to save setting and resetting data in FMOD.</param>
+		/// <returns>Whether the channel's position was succesfully set.</returns>
+		FMOD_RESULT UpdatePositionalEffectsForSoundChannel(FMOD::Channel *soundChannel, const FMOD_VECTOR *positionToUse = nullptr) const;
+#pragma endregion
 
 #pragma region FMOD Callbacks
 		/// <summary>
@@ -471,11 +476,8 @@ namespace RTE {
 		static FMOD_RESULT F_CALLBACK MusicChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *commandData1, void *commandData2);
 
 		/// <summary>
-		/// Updates 3D effects calculations on a given sound channel whose SoundContainer isn't immobile.
 		/// A static callback function for FMOD to invoke when a sound channel finished playing. See fmod docs - FMOD_CHANNELCONTROL_CALLBACK for details
 		/// </summary>
-		/// <returns>FMOD_OK if the 3D effects were successfully updated, otherwise an FMOD_ERROR.</returns>
-		FMOD_RESULT UpdateMobileSoundChannelCalculated3DEffects(FMOD::Channel *channel);
 		static FMOD_RESULT F_CALLBACK SoundChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *commandData1, void *commandData2);
 #pragma endregion
 

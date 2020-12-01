@@ -1,5 +1,4 @@
 #include "SoundContainer.h"
-#include "RTETools.h"
 
 namespace RTE {
 
@@ -118,13 +117,13 @@ namespace RTE {
 	int SoundContainer::ReadSoundOrSoundSet(const std::string &propName, Reader &reader) {
 		vector<SoundData> soundSet;
 		if (propName == "AddSound") {
-			soundSet.push_back(ReadSound(reader));
+			soundSet.push_back(ReadAndGetSound(reader));
 		} else if (propName == "AddSoundSet") {
 			reader.ReadPropValue();
 			while (reader.NextProperty()) {
 				std::string soundSetSubPropertyName = reader.ReadPropName();
 				if (soundSetSubPropertyName == "AddSound") {
-					soundSet.push_back(ReadSound(reader));
+					soundSet.push_back(ReadAndGetSound(reader));
 				} else {
 					reader.ReportError(soundSetSubPropertyName + " is not a valid property of SoundSets.");
 				}
@@ -137,7 +136,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	SoundContainer::SoundData SoundContainer::ReadSound(Reader &reader) {
+	SoundContainer::SoundData SoundContainer::ReadAndGetSound(Reader &reader) const {
 		std::string propValue = reader.ReadPropValue();
 		SoundData soundData;
 
@@ -279,7 +278,7 @@ namespace RTE {
 				}
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -372,29 +371,5 @@ namespace RTE {
 		m_SoundPropertiesUpToDate = result == FMOD_OK;
 
 		return result;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	//TODO this needs to be used or be deleted
-	void SoundContainer::CalculateCustomRolloffPoints(const SoundData &soundDataToCalculateFor, FMOD_VECTOR *rolloffPoints, int numRolloffPoints) {
-		float attenuationStartDistance = (soundDataToCalculateFor.AttenuationStartDistance < 0) ? m_AttenuationStartDistance : soundDataToCalculateFor.AttenuationStartDistance;
-		float currentDistance = attenuationStartDistance;
-		float currentVolumeLevel = 1;
-
-		int i = 0;
-		if (soundDataToCalculateFor.MinimumAudibleDistance > 0) {
-			i = 2;
-			currentDistance += soundDataToCalculateFor.MinimumAudibleDistance;
-			rolloffPoints[0] = FMOD_VECTOR{0, 0, 0};
-			rolloffPoints[1] = FMOD_VECTOR{soundDataToCalculateFor.MinimumAudibleDistance - 0.1F, 0, 0};
-		}
-
-		for (i = ((soundDataToCalculateFor.MinimumAudibleDistance > 0) ? 2 : 0); i < numRolloffPoints - 1; i++) {
-			rolloffPoints[i] = FMOD_VECTOR{currentDistance, currentVolumeLevel, 0};
-			currentDistance += attenuationStartDistance;
-			currentVolumeLevel = (currentDistance < c_SoundMaxAudibleDistance) ? currentVolumeLevel * 0.5F : 0;
-		}
-		rolloffPoints[numRolloffPoints - 1] = FMOD_VECTOR{currentDistance, 0, 0};
 	}
 }

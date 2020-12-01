@@ -24,14 +24,18 @@ namespace RTE {
 
 	public:
 
-		// TODO: Add comments to all these.
+		/// <summary>
+		/// Hardcoded playback priorities for sounds. Note that sounds don't have to use these specifically; their priority can be anywhere between high and low.
+		/// </summary>
 		enum PlaybackPriority {
 			PRIORITY_HIGH = 0,
 			PRIORITY_NORMAL = 128,
-			PRIORITY_LOW = 256,
-			PRIORITY_COUNT
+			PRIORITY_LOW = 256
 		};
 
+		/// <summary>
+		/// Music event states for sending music data from the server to clients during multiplayer games.
+		/// </summary>
 		enum NetworkMusicState {
 			MUSIC_PLAY = 0,
 			MUSIC_STOP,
@@ -39,6 +43,9 @@ namespace RTE {
 			MUSIC_SET_PITCH
 		};
 
+		/// <summary>
+		/// The data struct used to send music data from the server to clients during multiplayer games.
+		/// </summary>
 		struct NetworkMusicData {
 			unsigned char State;
 			char Path[256];
@@ -47,6 +54,9 @@ namespace RTE {
 			float Pitch;
 		};
 
+		/// <summary>
+		/// Sound event states for sending sound data from the server to clients during multiplayer games.
+		/// </summary>
 		enum NetworkSoundState {
 			SOUND_PLAY = 0,
 			SOUND_STOP,
@@ -57,18 +67,21 @@ namespace RTE {
 			SOUND_FADE_OUT
 		};
 
+		/// <summary>
+		/// The data struct used to send sound data from the server to clients during multiplayer games.
+		/// </summary>
 		struct NetworkSoundData {
 			unsigned char State;
-			unsigned short Channels[c_MaxPlayingSoundsPerContainer];
+			int Channels[c_MaxPlayingSoundsPerContainer];
 			size_t SoundFileHashes[c_MaxPlayingSoundsPerContainer];
 			float Position[2];
-			short Loops;
+			int Loops;
 			float Volume;
 			float Pitch;
 			bool AffectedByGlobalPitch;
 			float AttenuationStartDistance;
 			bool Immobile;
-			short FadeOutTime;
+			int FadeOutTime;
 		};
 
 #pragma region Creation
@@ -362,7 +375,7 @@ namespace RTE {
 		/// <param name="affectedByGlobalPitch">Whether the sound is affected by pitch.</param>
 		/// <param name="immobile">Whether the sound is immobile or not.</param>
 		/// <param name="fadeOutTime">The amount of time, in ms, to fade out over.</param>
-		void RegisterSoundEvent(int player, NetworkSoundState state, const std::unordered_set<unsigned short> *channels = NULL, const std::vector<size_t> *soundFileHashes = NULL, const Vector &position = Vector(), short loops = 0, float volume = 1.0F, float pitch = 1.0F, bool affectedByGlobalPitch = false, float attenuationStartDistance = 0, bool immobile = false, short fadeOutTime = 0);
+		void RegisterSoundEvent(int player, NetworkSoundState state, const std::unordered_set<int> *channels = NULL, const std::vector<size_t> *soundFileHashes = NULL, const Vector &position = Vector(), int loops = 0, float volume = 1.0F, float pitch = 1.0F, bool affectedByGlobalPitch = false, float attenuationStartDistance = 0, bool immobile = false, int fadeOutTime = 0);
 #pragma endregion
 
 #pragma region Class Info
@@ -392,8 +405,8 @@ namespace RTE {
 
 		std::unordered_map<int, std::vector<FMOD_VECTOR>> m_SoundChannelRolloffs; //!< An unordered map of Sound Channel indices to a std::vector of FMOD_VECTORs representing each Sound Channel's custom attenuation rolloff. This is necessary to keep safe data in case the SoundContainer is destroyed while the sound is still playing.
 
-		float m_SoundsVolume; //!< Global sounds effects volume.
 		float m_MusicVolume; //!< Global music volume.
+		float m_SoundsVolume; //!< Global sounds effects volume.
 		float m_GlobalPitch; //!< Global pitch multiplier.
 
 		std::string m_MusicPath; //!< The path to the last played music stream.
@@ -423,7 +436,7 @@ namespace RTE {
 		/// <param name="soundContainer">A pointer to a SoundContainer object. Ownership IS NOT transferred!</param>
 		/// <param name="position">The position at which to play the SoundContainer's sounds.</param>
 		/// <returns>Whether the position was successfully set.</returns>
-		bool ChangePlayingSoundContainerPosition(SoundContainer *soundContainer, const Vector &position);
+		bool ChangeSoundContainerPlayingChannelsPosition(SoundContainer *soundContainer);
 
 		/// <summary>
 		/// Changes the volume of a SoundContainer's playing sounds.
@@ -431,7 +444,7 @@ namespace RTE {
 		/// <param name="soundContainer">A pointer to a SoundContainer object. Ownership IS NOT transferred!</param>
 		/// <param name="volume">The new volume to play sounds at, between 0 and 1.</param>
 		/// <returns>Whether the volume was successfully updated.</returns>
-		bool ChangePlayingSoundContainerVolume(SoundContainer *soundContainer, float newVolume);
+		bool ChangeSoundContainerPlayingChannelsVolume(SoundContainer *soundContainer);
 
 		/// <summary>
 		/// Changes the frequency/pitch of a SoundContainer's playing sounds.
@@ -439,35 +452,34 @@ namespace RTE {
 		/// <param name="soundContainer">A pointer to a SoundContainer object. Ownership IS NOT transferred!</param>
 		/// <param name="pitch">New pitch to play sounds at, limited to 8 octaves up or down (i.e. 0.125 - 8).</param>
 		/// <returns>Whether the pitch was successfully updated.</returns>
-		bool ChangePlayingSoundContainerPitch(SoundContainer *soundContainer, float newPitch);
+		bool ChangeSoundContainerPlayingChannelsPitch(SoundContainer *soundContainer);
 #pragma endregion
 
+#pragma region 3D Effect Handling
 		/// <summary>
-		/// A static callback function for FMOD to invoke when the music channel finishes playing. See fmod docs - FMOD_SYSTEM_CALLBACK for details
+		/// Updates 3D effects calculations for all sound channels whose SoundContainers isn't immobile.
+		/// </summary>
+		void Update3DEffectsForMobileSoundChannels();
+
+		/// <summary>
+		/// </summary>
+
+#pragma region FMOD Callbacks
+		/// <summary>
+		/// A static callback function for FMOD to invoke when the music channel finishes playing. See fmod docs - FMOD_CHANNELCONTROL_CALLBACK for details
 		/// </summary>
 		static FMOD_RESULT F_CALLBACK MusicChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *commandData1, void *commandData2);
 
 		/// <summary>
-		/// A static callback function for FMOD to invoke when a sound channel finished playing. See fmod docs - FMOD_SYSTEM_CALLBACK for details
-		/// </summary>
-		static FMOD_RESULT F_CALLBACK SoundChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *commandData1, void *commandData2);
-
-		/// <summary>
-		/// A static callback function for Digital Signal Processing that does extra work with Panning and Attenuation to make them better for CC.
-		/// </summary>
-		static FMOD_RESULT F_CALLBACK AudioMan::PanAndAttenuationDSPCallback(FMOD_DSP_STATE *dspState, float *inBuffer, float *outBuffer, unsigned int length, int inChannels, int *outChannels);
-
-		/// <summary>
-		/// Updates 3D effects calculations for all sound channels whose SoundContainers isn't immobile.
-		/// </summary>
-		void UpdateCalculated3DEffectsForMobileSoundChannels();
-
-		/// <summary>
 		/// Updates 3D effects calculations on a given sound channel whose SoundContainer isn't immobile.
+		/// A static callback function for FMOD to invoke when a sound channel finished playing. See fmod docs - FMOD_CHANNELCONTROL_CALLBACK for details
 		/// </summary>
 		/// <returns>FMOD_OK if the 3D effects were successfully updated, otherwise an FMOD_ERROR.</returns>
 		FMOD_RESULT UpdateMobileSoundChannelCalculated3DEffects(FMOD::Channel *channel);
+		static FMOD_RESULT F_CALLBACK SoundChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *commandData1, void *commandData2);
+#pragma endregion
 
+#pragma region Utility Methods
 		/// <summary>
 		/// Gets the corresponding FMOD_VECTOR for a given RTE Vector.
 		/// </summary>
@@ -481,6 +493,7 @@ namespace RTE {
 		/// <param name="fmodVector">The FMOD_VECTOR to get as an RTE Vector.</param>
 		/// <returns>The RTE Vector that corresponds to the given FMOD_VECTOR.</returns>
 		Vector GetAsVector(FMOD_VECTOR fmodVector) const;
+#pragma endregion
 
 		/// <summary>
 		/// Clears all the member variables of this AudioMan, effectively resetting the members of this abstraction level only.

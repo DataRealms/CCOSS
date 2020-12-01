@@ -16,12 +16,11 @@ namespace RTE {
 		m_AudioEnabled = false;
 
 		m_SoundChannelRolloffs.clear();
-
-		m_MusicPath.clear();
-		m_SoundsVolume = 1.0;
 		m_MusicVolume = 1.0;
+		m_SoundsVolume = 1.0;
 		m_GlobalPitch = 1.0;
 
+		m_MusicPath.clear();
 		m_MusicPlayList.clear();
 		m_SilenceTimer.Reset();
 		m_SilenceTimer.SetRealTimeLimitS(-1);
@@ -120,7 +119,7 @@ namespace RTE {
 			status = status == FMOD_OK ? m_AudioSystem->update() : status;
 
 			if (!IsMusicPlaying() && m_SilenceTimer.IsPastRealTimeLimit()) { PlayNextStream(); }
-			if (status != FMOD_OK) { g_ConsoleMan.PrintString("ERROR: Could not update audioman due to FMOD error: " + std::string(FMOD_ErrorString(status))); }
+			if (status != FMOD_OK) { g_ConsoleMan.PrintString("ERROR: Could not update AudioMan due to FMOD error: " + std::string(FMOD_ErrorString(status))); }
 		}
 	}
 
@@ -130,36 +129,13 @@ namespace RTE {
 		if (!m_AudioEnabled) {
 			return;
 		}
-		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_GLOBAL_PITCH, NULL, NULL, Vector(), 0, 0.0F, pitch); }
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_GLOBAL_PITCH, nullptr, nullptr, Vector(), 0, 0.0F, pitch); }
 
-		// Limit pitch change to 8 octaves up or down
 		m_GlobalPitch = std::clamp(pitch, 0.125F, 8.0F); 
 		if (includeMusic) { m_MusicChannelGroup->setPitch(m_GlobalPitch); }
 
 		FMOD::ChannelGroup *channelGroupToUse = includeImmobileSounds ? m_SoundChannelGroup : m_MobileSoundChannelGroup;
 		channelGroupToUse->setPitch(m_GlobalPitch);
-
-		int numChannels;
-		FMOD_RESULT result = channelGroupToUse->getNumChannels(&numChannels);
-		if (result != FMOD_OK) {
-			g_ConsoleMan.PrintString("ERROR: Could not set global pitch: " + std::string(FMOD_ErrorString(result)));
-			return;
-		}
-
-		FMOD::Channel *soundChannel;
-		bool isPlaying;
-		for (int i = 0; i < numChannels; i++) {
-			result = channelGroupToUse->getChannel(i, &soundChannel);
-			result = (result == FMOD_OK) ? soundChannel->isPlaying(&isPlaying) : result;
-
-			if (result == FMOD_OK && isPlaying) {
-				void *userData;
-				result == FMOD_OK ? soundChannel->getUserData(&userData) : result;
-				const SoundContainer *channelSoundContainer = static_cast<SoundContainer *>(userData);
-
-				if (channelSoundContainer->IsAffectedByGlobalPitch()) { soundChannel->setPitch(pitch); }
-			}
-		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -257,7 +233,7 @@ namespace RTE {
 			FMOD::Channel *musicChannel;
 			result = musicStream->set3DMinMaxDistance(c_SoundMaxAudibleDistance, c_SoundMaxAudibleDistance);
 			result = (result == FMOD_OK) ? m_AudioSystem->playSound(musicStream, m_MusicChannelGroup, true, &musicChannel) : result;
-			result = (result == FMOD_OK) ? musicChannel->set3DAttributes(&GetAsFMODVector(Vector()), NULL) : result;
+			result = (result == FMOD_OK) ? musicChannel->set3DAttributes(&GetAsFMODVector(Vector()), nullptr) : result;
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not play music file: " + std::string(filePath) + ": " + std::string(FMOD_ErrorString(result)));
 				return;
@@ -305,7 +281,7 @@ namespace RTE {
 					bool isPlaying;
 					FMOD_RESULT result = m_MusicChannelGroup->isPlaying(&isPlaying);
 					if (result == FMOD_OK && isPlaying) {
-						if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_SILENCE, NULL, seconds); }
+						if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_SILENCE, nullptr, seconds); }
 						result = m_MusicChannelGroup->stop();
 					}
 					if (result != FMOD_OK) { g_ConsoleMan.PrintString("ERROR: Could not play silence as specified in music queue, when trying to play next stream: " + std::string(FMOD_ErrorString(result))); }
@@ -374,8 +350,8 @@ namespace RTE {
 		bool anySoundsPlaying = soundContainer->IsBeingPlayed();
 
 		if (anySoundsPlaying) {
-			const std::unordered_set<unsigned short> *channels = soundContainer->GetPlayingChannels();
-			for (std::unordered_set<unsigned short>::const_iterator channelIterator = channels->begin(); channelIterator != channels->end();) {
+			const std::unordered_set<int> *channels = soundContainer->GetPlayingChannels();
+			for (std::unordered_set<int>::const_iterator channelIterator = channels->begin(); channelIterator != channels->end();) {
 				result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
 				++channelIterator; // NOTE - stopping the sound will remove the channel, screwing things up if we don't move to the next iterator preemptively
 				result = (result == FMOD_OK) ? soundChannel->stop() : result;
@@ -402,9 +378,9 @@ namespace RTE {
 		unsigned long long parentClock;
 		float currentVolume;
 
-		const std::unordered_set<unsigned short> *channels = soundContainer->GetPlayingChannels();
-		for (std::unordered_set<unsigned short>::const_iterator channelIterator = channels->begin(); channelIterator != channels->end(); ++channelIterator) {
-			result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
+		const std::unordered_set<int> channels = *soundContainer->GetPlayingChannels();
+		for (int channel : channels) {
+			result = m_AudioSystem->getChannel(channel, &soundChannel);
 			result = (result == FMOD_OK) ? soundChannel->getDSPClock(nullptr, &parentClock) : result;
 			result = (result == FMOD_OK) ? soundChannel->getVolume(&currentVolume) : result;
 			result = (result == FMOD_OK) ? soundChannel->addFadePoint(parentClock, currentVolume) : result;
@@ -423,9 +399,7 @@ namespace RTE {
 		list.clear();
 		g_SoundEventsListMutex[player].lock();
 
-		for (std::list<NetworkMusicData>::iterator eItr = m_MusicEvents[player].begin(); eItr != m_MusicEvents[player].end(); ++eItr) {
-			list.push_back((*eItr));
-		}
+		for (const NetworkMusicData &musicEvent : m_MusicEvents[player]) { list.push_back(musicEvent); }
 		m_MusicEvents[player].clear();
 		g_SoundEventsListMutex[player].unlock();
 	}
@@ -434,9 +408,7 @@ namespace RTE {
 
 	void AudioMan::RegisterMusicEvent(int player, NetworkMusicState state, const char *filepath, int loops, float position, float pitch) {
 		if (player == -1) {
-			for (int i = 0; i < c_MaxClients; i++) {
-				RegisterMusicEvent(i, state, filepath, loops, position, pitch);
-			}
+			for (int i = 0; i < c_MaxClients; i++) { RegisterMusicEvent(i, state, filepath, loops, position, pitch); }
 		} else {
 			NetworkMusicData musicData;
 			musicData.State = state;
@@ -463,20 +435,16 @@ namespace RTE {
 		list.clear();
 		g_SoundEventsListMutex[player].lock();
 
-		for (std::list<NetworkSoundData>::iterator eItr = m_SoundEvents[player].begin(); eItr != m_SoundEvents[player].end(); ++eItr) {
-			list.push_back((*eItr));
-		}
+		for (const NetworkSoundData &soundEvent : m_SoundEvents[player]) { list.push_back(soundEvent); }
 		m_SoundEvents[player].clear();
 		g_SoundEventsListMutex[player].unlock();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AudioMan::RegisterSoundEvent(int player, NetworkSoundState state, const std::unordered_set<unsigned short> *channels, const std::vector<size_t> *soundFileHashes, const Vector &position, short loops, float volume, float pitch, bool affectedByGlobalPitch, float attenuationStartDistance, bool immobile, short fadeOutTime) {
+	void AudioMan::RegisterSoundEvent(int player, NetworkSoundState state, const std::unordered_set<int> *channels, const std::vector<size_t> *soundFileHashes, const Vector &position, int loops, float volume, float pitch, bool affectedByGlobalPitch, float attenuationStartDistance, bool immobile, int fadeOutTime) {
 		if (player == -1) {
-			for (int i = 0; i < c_MaxClients; i++) {
-				RegisterSoundEvent(i, state, channels, soundFileHashes, position, loops, volume, pitch, affectedByGlobalPitch, fadeOutTime);
-			}
+			for (int i = 0; i < c_MaxClients; i++) { RegisterSoundEvent(i, state, channels, soundFileHashes, position, loops, volume, pitch, affectedByGlobalPitch, attenuationStartDistance, immobile, fadeOutTime); }
 		} else {
 			if (player >= 0 && player < c_MaxClients) {
 				NetworkSoundData soundData;
@@ -570,18 +538,18 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool AudioMan::ChangePlayingSoundContainerPosition(SoundContainer *soundContainer, const Vector &position) {
+	bool AudioMan::ChangeSoundContainerPlayingChannelsPosition(SoundContainer *soundContainer) {
 		if (!m_AudioEnabled || !soundContainer) {
 			return false;
 		}
-		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_POSITION, soundContainer->GetPlayingChannels(), &soundContainer->GetSelectedSoundHashes(), position); }
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_POSITION, soundContainer->GetPlayingChannels(), &soundContainer->GetSelectedSoundHashes(), soundContainer->GetPosition()); }
 
 		FMOD_RESULT result = FMOD_OK;
 		FMOD::Channel *soundChannel;
 		FMOD::Sound *sound;
 
-		const std::unordered_set<unsigned short> *playingChannels = soundContainer->GetPlayingChannels();
-		for (unsigned short channelIndex : *playingChannels) {
+		const std::unordered_set<int> *playingChannels = soundContainer->GetPlayingChannels();
+		for (int channelIndex : *playingChannels) {
 			result = m_AudioSystem->getChannel(channelIndex, &soundChannel);
 			result = (result == FMOD_OK) ? soundChannel->getCurrentSound(&sound) : result;
 			const SoundContainer::SoundData *soundData = soundContainer->GetSoundDataForSound(sound);
@@ -600,90 +568,60 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool AudioMan::ChangePlayingSoundContainerVolume(SoundContainer *soundContainer, float newVolume) {
+	bool AudioMan::ChangeSoundContainerPlayingChannelsVolume(SoundContainer *soundContainer) {
 		if (!m_AudioEnabled || !soundContainer || !soundContainer->IsBeingPlayed()) {
 			return false;
 		}
-		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_VOLUME, soundContainer->GetPlayingChannels(), &soundContainer->GetSelectedSoundHashes(), Vector(), 0, newVolume); }
-
-		FMOD_RESULT result = FMOD_OK;
-		FMOD::Channel *soundChannel;
-		float soundChannelCurrentVolume;
-
-		const std::unordered_set<unsigned short> *playingChannels = soundContainer->GetPlayingChannels();
-		for (unsigned short channelIndex : *playingChannels) {
-			result = m_AudioSystem->getChannel(channelIndex, &soundChannel);
-			result = result == FMOD_OK ? soundChannel->getVolume(&soundChannelCurrentVolume) : result;
-			float soundContainerVolume = soundContainer->GetVolume() == 0 ? 1.0F : soundContainer->GetVolume();
-			result = result == FMOD_OK ? soundChannel->setVolume(newVolume * (soundChannelCurrentVolume / soundContainerVolume)) : result;
-			if (result != FMOD_OK) { g_ConsoleMan.PrintString("ERROR: Could not update sound volume for the sound being played on channel " + std::to_string(channelIndex) + " for SoundContainer " + soundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result))); }
-		}
-		return result == FMOD_OK;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool AudioMan::ChangePlayingSoundContainerPitch(SoundContainer *soundContainer, float newPitch) {
-		if (!m_AudioEnabled || !soundContainer || !soundContainer->IsBeingPlayed()) {
-			return false;
-		}
-		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_PITCH, soundContainer->GetPlayingChannels(), &soundContainer->GetSelectedSoundHashes(), Vector(), 0, 0.0F, newPitch); }
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_VOLUME, soundContainer->GetPlayingChannels(), &soundContainer->GetSelectedSoundHashes(), Vector(), 0, soundContainer->GetVolume()); }
 
 		FMOD_RESULT result = FMOD_OK;
 		FMOD::Channel *soundChannel;
 
-		const std::unordered_set<unsigned short> *playingChannels = soundContainer->GetPlayingChannels();
-		for (unsigned short channelIndex : *playingChannels) {
+		const std::unordered_set<int> *playingChannels = soundContainer->GetPlayingChannels();
+		for (int channelIndex : *playingChannels) {
 			result = m_AudioSystem->getChannel(channelIndex, &soundChannel);
-			result = result == FMOD_OK ? soundChannel->setPitch(newPitch) : result;
-			if (result != FMOD_OK) { g_ConsoleMan.PrintString("ERROR: Could not update sound pitch for the sound being played on channel " + std::to_string(channelIndex) + " for SoundContainer " + soundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result))); }
-		}
-		return result == FMOD_OK;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	FMOD_RESULT F_CALLBACK AudioMan::MusicChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *unusedCommandData1, void *unusedCommandData2) {
-		if (channelControlType == FMOD_CHANNELCONTROL_CHANNEL && callbackType == FMOD_CHANNELCONTROL_CALLBACK_END) {
-			g_AudioMan.PlayNextStream();
-		}
-		return FMOD_OK;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	FMOD_RESULT F_CALLBACK AudioMan::SoundChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *unusedCommandData1, void *unusedCommandData2) {
-		if (channelControlType == FMOD_CHANNELCONTROL_CHANNEL && callbackType == FMOD_CHANNELCONTROL_CALLBACK_END) {
-			FMOD::Channel *channel = reinterpret_cast<FMOD::Channel *>(channelControl);
-			int channelIndex;
-			FMOD_RESULT result = channel->getIndex(&channelIndex);
-
-			// Remove this playing sound index from the SoundContainer if it has any playing sounds, i.e. it hasn't been reset before this callback happened.
-			void *userData;
-			result = (result == FMOD_OK) ? channel->getUserData(&userData) : result;
-			SoundContainer *channelSoundContainer = static_cast<SoundContainer *>(userData);
-			if (channelSoundContainer->IsBeingPlayed()) { channelSoundContainer->RemovePlayingChannel(channelIndex); }
-			result = (result == FMOD_OK) ? channel->setUserData(NULL) : result;
-
-			// Remove the stored rolloff for this channel
-			if (AudioMan::Instance().m_SoundChannelRolloffs.find(channelIndex) != AudioMan::Instance().m_SoundChannelRolloffs.end()) { AudioMan::Instance().m_SoundChannelRolloffs.erase(channelIndex); }
-
+			result = result == FMOD_OK ? soundChannel->setVolume(soundContainer->GetVolume()) : result;
 			if (result != FMOD_OK) {
-				g_ConsoleMan.PrintString("ERROR: An error occurred when Ending a sound in SoundContainer " + channelSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
-				return result;
+				g_ConsoleMan.PrintString("ERROR: Could not update sound volume for the sound being played on channel " + std::to_string(channelIndex) + " for SoundContainer " + soundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
 			}
 		}
-		return FMOD_OK;
+		return result == FMOD_OK;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	//TODO remove or use this
-	FMOD_RESULT F_CALLBACK AudioMan::PanAndAttenuationDSPCallback(FMOD_DSP_STATE *dspState, float *inBuffer, float *outBuffer, unsigned int length, int inChannels, int *outChannels) {
-		return FMOD_OK;
+	bool AudioMan::ChangeSoundContainerPlayingChannelsPitch(SoundContainer *soundContainer) {
+		if (!m_AudioEnabled || !soundContainer || !soundContainer->IsBeingPlayed()) {
+			return false;
+		}
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_PITCH, soundContainer->GetPlayingChannels(), &soundContainer->GetSelectedSoundHashes(), Vector(), 0, 0.0F, soundContainer->GetPitch()); }
+
+		FMOD_RESULT result = FMOD_OK;
+		FMOD::Channel *soundChannel;
+
+		const std::unordered_set<int> *playingChannels = soundContainer->GetPlayingChannels();
+		for (int channelIndex : *playingChannels) {
+			result = m_AudioSystem->getChannel(channelIndex, &soundChannel);
+			result = result == FMOD_OK ? soundChannel->setPitch(soundContainer->GetPitch()) : result;
+			if (result != FMOD_OK) {
+				g_ConsoleMan.PrintString("ERROR: Could not update sound pitch for the sound being played on channel " + std::to_string(channelIndex) + " for SoundContainer " + soundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
+			}
+		}
+		return result == FMOD_OK;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+			if (result != FMOD_OK) {
+			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 	void AudioMan::UpdateCalculated3DEffectsForMobileSoundChannels() {
 		int numberOfPlayingChannels;
@@ -710,7 +648,12 @@ namespace RTE {
 		FMOD_RESULT result = channel->get3DAttributes(&channelPosition, NULL);
 		if (result != FMOD_OK) {
 			return result;
+	FMOD_RESULT F_CALLBACK AudioMan::MusicChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *unusedCommandData1, void *unusedCommandData2) {
+		if (channelControlType == FMOD_CHANNELCONTROL_CHANNEL && callbackType == FMOD_CHANNELCONTROL_CALLBACK_END) {
+			g_AudioMan.PlayNextStream();
 		}
+		return FMOD_OK;
+	}
 
 		const Activity *currentActivity = g_ActivityMan.GetActivity();
 		float shortestDistance = g_SceneMan.GetSceneDim().GetMagnitude();
@@ -734,6 +677,19 @@ namespace RTE {
 				channel->set3DLevel(g_SettingsMan.SoundPanningEffectStrength());
 			}
 		}
+	FMOD_RESULT F_CALLBACK AudioMan::SoundChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *unusedCommandData1, void *unusedCommandData2) {
+		if (channelControlType == FMOD_CHANNELCONTROL_CHANNEL && callbackType == FMOD_CHANNELCONTROL_CALLBACK_END) {
+			FMOD::Channel *channel = reinterpret_cast<FMOD::Channel *>(channelControl);
+			int channelIndex;
+			FMOD_RESULT result = channel->getIndex(&channelIndex);
+
+			// Remove this playing sound index from the SoundContainer if it has any playing sounds, i.e. it hasn't been reset before this callback happened.
+			void *userData;
+			result = (result == FMOD_OK) ? channel->getUserData(&userData) : result;
+			if (result == FMOD_OK) {
+				SoundContainer *channelSoundContainer = static_cast<SoundContainer *>(userData);
+				if (channelSoundContainer->IsBeingPlayed()) { channelSoundContainer->RemovePlayingChannel(channelIndex); }
+				result = (result == FMOD_OK) ? channel->setUserData(nullptr) : result;
 
 		FMOD_VECTOR *rolloffPoints; // NOTE: Rolloff points are - 1. Minimum audible distance, 2. Attenuation start distance
 		result = (result == FMOD_OK) ? channel->get3DCustomRolloff(&rolloffPoints, NULL) : result;
@@ -744,8 +700,13 @@ namespace RTE {
 				attenuatedVolume = 0;
 			} else if (shortestDistance < rolloffPoints[0].x + rolloffPoints[1].x) {
 				attenuatedVolume = 1;
+				if (result != FMOD_OK) {
+					g_ConsoleMan.PrintString("ERROR: An error occurred when Ending a sound in SoundContainer " + channelSoundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
+					return result;
+				}
 			} else {
 				attenuatedVolume = rolloffPoints[1].x / (shortestDistance - rolloffPoints[0].x);
+				g_ConsoleMan.PrintString("ERROR: An error occurred when Ending a sound: " + std::string(FMOD_ErrorString(result)));
 			}
 
 			void *userData;
@@ -754,6 +715,7 @@ namespace RTE {
 		}
 
 		return result;
+		return FMOD_OK;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

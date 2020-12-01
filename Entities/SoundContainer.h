@@ -97,7 +97,7 @@ namespace RTE {
 
 #pragma region INI Handling
 		/// <summary>
-		/// Handles reading a SoundSet from INI. If the Reader is trying to read a line adding a sound, it'll call ReadSound and add the resulting sound to a new SoundSet.
+		/// Handles reading a SoundSet from INI. If the Reader is trying to read a line adding a sound, it'll call ReadAndGetSound and add the resulting sound to a new SoundSet.
 		/// </summary>
 		/// <param name="propName">The name of the property to be read.</param>
 		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
@@ -109,7 +109,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
 		/// <returns>SoundData for the newly read sound.</returns>
-		SoundData ReadSound(Reader &reader);
+		SoundData ReadAndGetSound(Reader &reader) const;
 #pragma endregion
 
 #pragma region Sound Addition
@@ -199,7 +199,7 @@ namespace RTE {
 		/// Gets the channels playing sounds from this SoundContainer.
 		/// </summary>
 		/// <returns>The channels currently being used.</returns>
-		std::unordered_set<unsigned short> *GetPlayingChannels() { return &m_PlayingChannels; }
+		std::unordered_set<int> *GetPlayingChannels() { return &m_PlayingChannels; }
 
 		/// <summary>
 		/// Indicates whether any sound in this SoundContainer is currently being played.
@@ -211,13 +211,13 @@ namespace RTE {
 		/// Adds a channel index to the SoundContainer's collection of playing channels.
 		/// </summary>
 		/// <param name="channel">The channel index to add.</param>
-		void AddPlayingChannel(unsigned short channel) { m_PlayingChannels.insert(channel); }
+		void AddPlayingChannel(int channel) { m_PlayingChannels.insert(channel); }
 
 		/// <summary>
 		/// Removes a channel index from the SoundContainer's collection of playing channels.
 		/// </summary>
 		/// <param name="channel">The channel index to remove.</param>
-		void RemovePlayingChannel(unsigned short channel) { m_PlayingChannels.erase(channel); }
+		void RemovePlayingChannel(int channel) { m_PlayingChannels.erase(channel); }
 
 		/// <summary>
 		/// Gets the SoundOverlapMode of this SoundContainer, which is used to determine how it should behave when it's told to play while already playing.
@@ -311,7 +311,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="position">The new position to play the SoundContainer's sounds.</param>
 		/// <returns>Whether this SoundContainer's attenuation setting was successful.</returns>
-		void SetPosition(const Vector &newPosition) { if (IsBeingPlayed() && !m_Immobile) { g_AudioMan.ChangePlayingSoundContainerPosition(this, newPosition); } m_Pos = m_Immobile ? Vector() : newPosition; }
+		void SetPosition(const Vector &newPosition) { if (!m_Immobile && newPosition != m_Pos) { m_Pos = newPosition; if (IsBeingPlayed()) { g_AudioMan.ChangeSoundContainerPlayingChannelsPosition(this); } } }
 
 		/// <summary>
 		/// Gets the volume the sounds in this SoundContainer are played at. Note that this does not factor volume changes due to the SoundContainer's position.
@@ -323,7 +323,7 @@ namespace RTE {
 		/// Sets the volume sounds in this SoundContainer should be played at. Note that this does not factor volume changes due to the SoundContainer's position. Does not affect currently playing sounds.
 		/// </summary>
 		/// <param name="newVolume">The new volume sounds in this SoundContainer should be played at. Limited between 0 and 10.</param>
-		void SetVolume(float newVolume) { newVolume = std::clamp(newVolume, 0.0F, 10.0F); if (IsBeingPlayed()) { g_AudioMan.ChangePlayingSoundContainerVolume(this, newVolume); } m_Volume = newVolume; }
+		void SetVolume(float newVolume) { m_Volume = std::clamp(newVolume, 0.0F, 10.0F); if (IsBeingPlayed()) { g_AudioMan.ChangeSoundContainerPlayingChannelsVolume(this); } }
 
 		/// <summary>
 		/// Gets the pitch the sounds in this SoundContainer are played at. Note that this does not factor in global pitch.
@@ -335,7 +335,7 @@ namespace RTE {
 		/// Sets the pitch sounds in this SoundContainer should be played at and updates any playing instances accordingly.
 		/// </summary>
 		/// <param name="newPitch">The new pitch sounds in this SoundContainer should be played at. Limited between 0.125 and 8 (8 octaves up or down).</param>
-		void SetPitch(float newPitch) { newPitch = std::clamp(newPitch, 0.125F, 8.0F); if (IsBeingPlayed()) { g_AudioMan.ChangePlayingSoundContainerPitch(this, newPitch); } m_Pitch = newPitch; }
+		void SetPitch(float newPitch) { m_Pitch = std::clamp(newPitch, 0.125F, 8.0F); if (IsBeingPlayed()) { g_AudioMan.ChangeSoundContainerPlayingChannelsPitch(this); } }
 #pragma endregion
 
 #pragma region Playback Controls
@@ -424,7 +424,7 @@ namespace RTE {
 		size_t m_SelectedSoundSet; //!< The selected SoundSet for this SoundContainer, used to determine what sounds will play when Play is called.
 		SoundCycleMode m_SoundSelectionCycleMode; //!< The SoundCycleMode for this SoundContainer, used to determine what will play next, each time play is called.
 
-		std::unordered_set<unsigned short> m_PlayingChannels; //!< The channels this SoundContainer is currently using.
+		std::unordered_set<int> m_PlayingChannels; //!< The channels this SoundContainer is currently using.
 		SoundOverlapMode m_SoundOverlapMode; //!< The SoundOverlapMode for this SoundContainer, used to determine how it should handle overlapping play calls.
 
 		bool m_Immobile; //!< Whether this SoundContainer's sounds should be treated as immobile, i.e. not affected by 3D sound effects. Mostly used for GUI sounds and the like.
@@ -438,14 +438,6 @@ namespace RTE {
 		Vector m_Pos; //!< The current position of this SoundContainer's sounds.
 		float m_Pitch; //!< The current natural pitch of this SoundContainer's sounds.
 		float m_Volume; //!< The current natural volume of this SoundContainer's sounds.
-
-		/// <summary>
-		/// TODO This is currently not used in favor of a simpler 2-point method but is kept in case it should be changed back. Examine this and remove or use it in future.
-		/// </summary>
-		/// <param name="soundDataToCalculateFor"></param>
-		/// <param name="rolloffPoints"></param>
-		/// <param name="numRolloffPoints"></param>
-		void CalculateCustomRolloffPoints(const SoundData &soundDataToCalculateFor, FMOD_VECTOR *rolloffPoints, int numRolloffPoints);
 
 		/// <summary>
 		/// Clears all the member variables of this SoundContainer, effectively resetting the members of this abstraction level only.

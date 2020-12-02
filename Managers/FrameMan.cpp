@@ -14,7 +14,9 @@
 #include "GUI/AllegroBitmap.h"
 #include "GUI/AllegroScreen.h"
 
-#ifdef __unix__
+#ifdef _WIN32
+#include "winalleg.h"
+#elif __unix__
 #include <X11/Xlib.h>
 #endif
 

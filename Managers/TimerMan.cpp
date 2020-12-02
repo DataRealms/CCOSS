@@ -1,7 +1,11 @@
 #include "TimerMan.h"
-#ifdef __unix__
+
+#ifdef _WIN32
+#include <Windows.h>
+#elif __unix__
 #include <time.h>
 #endif
+
 namespace RTE {
 
 	const std::string TimerMan::c_ClassName = "TimerMan";

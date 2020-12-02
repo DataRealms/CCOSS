@@ -206,14 +206,6 @@ namespace RTE {
 		Reader & operator>>(std::string &var) { var.assign(ReadLine()); return *this; }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Reader.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Reader.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
 
 		/// <summary>
@@ -228,8 +220,6 @@ namespace RTE {
 			unsigned int CurrentLine; //!< The line number the stream is on.
 			unsigned short PreviousIndent; //!< Count of tabs encountered on the last line DiscardEmptySpace() discarded.
 		};
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 
 		std::ifstream *m_Stream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
 		std::list<StreamInfo> m_StreamStack; //!< Stack of stream and filepath pairs, each one representing a file opened to read from within another.

@@ -148,17 +148,8 @@ namespace RTE {
 		Writer & operator<<(const std::string &var) { *m_Stream << var; return *this; }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Writer.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Writer.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
 
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		std::ofstream *m_Stream; //!< Stream used for writing to files.
 		std::string m_FolderPath; //!< Only the path to the folder that we are writing a file in, excluding the filename

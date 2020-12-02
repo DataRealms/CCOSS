@@ -840,20 +840,25 @@ namespace RTE {
 		}
 
 		if (g_InActivity) {	
-			bool BuyMenuIsOpen = 0;
-			GameActivity* temp = dynamic_cast<GameActivity*>(g_ActivityMan.GetActivity());
 
-			// Make ESC key open BuyMenuGUIs if any are open rather than pausing the game.
-			for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
-				if (temp->GetBuyGUI(player)->IsVisible()) {
-					BuyMenuIsOpen = true;
-					break;
+			if (AnyStartPress(false)) {
+
+				bool buyMenuIsOpen = 0;
+				GameActivity* currentGameActivity = dynamic_cast<GameActivity*>(g_ActivityMan.GetActivity());
+
+				// Make ESC key open BuyMenuGUIs if any are open rather than pausing the game.
+				for (short player = Players::PlayerOne; player < currentGameActivity->GetPlayerCount(); player++) {
+					if (currentGameActivity->GetBuyGUI(player)->IsVisible()) {
+						buyMenuIsOpen = true;
+						break;
+					}
 				}
-			}
 
-			if (!BuyMenuIsOpen && AnyStartPress(false)) {
-				g_ActivityMan.PauseActivity();
-				return;
+				if (!buyMenuIsOpen) {
+					g_ActivityMan.PauseActivity();
+					return;
+				}
+
 			}
 			// Ctrl+R or Back button for controllers to reset activity.
 			if (!g_ResetActivity) { g_ResetActivity = FlagCtrlState() && KeyPressed(KEY_R) || AnyBackPress(); }

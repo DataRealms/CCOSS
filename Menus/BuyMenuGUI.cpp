@@ -1426,8 +1426,8 @@ void BuyMenuGUI::Update()
     if (m_pController->IsMouseControlled() && m_MenuEnabled == ENABLED && m_pController->IsState(PRESS_PRIMARY) && m_CursorPos.m_X > m_pParentBox->GetWidth())
         TryPurchase();
 
-    // Right click, or pie menu press close the menu
-    if (m_pController->IsState(PRESS_SECONDARY) || m_pController->IsState(PIE_MENU_ACTIVE))
+    // ESC, Right click, or pie menu press close the menu
+    if (m_pController->IsState(PRESS_SECONDARY) || m_pController->IsState(PIE_MENU_ACTIVE) || g_UInputMan.AnyStartPress(false))
         SetEnabled(false);
 
     //////////////////////////////////////////

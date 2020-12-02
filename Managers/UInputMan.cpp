@@ -7,6 +7,8 @@
 #include "PerformanceMan.h"
 #include "GUIInput.h"
 #include "Icon.h"
+#include "GameActivity.h"
+#include "BuyMenuGUI.h"
 
 extern volatile bool g_Quit;
 extern bool g_ResetActivity;
@@ -837,8 +839,19 @@ namespace RTE {
 			return;
 		}
 
-		if (g_InActivity) {
-			if (AnyStartPress(false)) {
+		if (g_InActivity) {	
+			bool BuyMenuIsOpen = 0;
+			GameActivity* temp = dynamic_cast<GameActivity*>(g_ActivityMan.GetActivity());
+
+			// Make ESC key open BuyMenuGUIs if any are open rather than pausing the game.
+			for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
+				if (temp->GetBuyGUI(player)->IsVisible()) {
+					BuyMenuIsOpen = true;
+					break;
+				}
+			}
+
+			if (!BuyMenuIsOpen && AnyStartPress(false)) {
 				g_ActivityMan.PauseActivity();
 				return;
 			}

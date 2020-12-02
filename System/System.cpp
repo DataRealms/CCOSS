@@ -2,8 +2,6 @@
 
 #ifdef _WIN32
 #include <Windows.h>
-#include <direct.h>
-#define getcwd _getcwd
 #else
 #include <unistd.h>
 #include <sys/stat.h>
@@ -15,16 +13,12 @@ namespace RTE {
 	std::string System::s_WorkingDirectory = ".";
 	const std::string System::s_ScreenshotDirectory = "_ScreenShots";
 	const std::string System::s_ModDirectory = "_Mods";
+	const std::string System::s_ModulePackageExtension = ".rte";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void System::Initialize() {
-		char currentWorkingDir[1024];
-		getcwd(currentWorkingDir, sizeof(currentWorkingDir));
-		s_WorkingDirectory = std::string(currentWorkingDir);
-		while (std::find(s_WorkingDirectory.begin(), s_WorkingDirectory.end(), '\\') != s_WorkingDirectory.end()) {
-			s_WorkingDirectory.replace(s_WorkingDirectory.find("\\"), 1, "/");
-		}
+		s_WorkingDirectory = std::filesystem::current_path().generic_string();
 		if (s_WorkingDirectory.back() != '/') { s_WorkingDirectory.append("/"); }
 
 		if (!std::filesystem::exists(s_WorkingDirectory + s_ScreenshotDirectory)) { MakeDirectory(s_WorkingDirectory + s_ScreenshotDirectory); }
@@ -33,12 +27,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int System::MakeDirectory(const std::string &pathToMake) {
-#ifdef _WIN32
-		return _mkdir(pathToMake.c_str());	
-#elif __unix__
-		return mkdir(pathToMake.c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-#endif
+	bool System::MakeDirectory(const std::string &pathToMake) {
+		bool createResult = std::filesystem::create_directory(pathToMake);
+		if (createResult) {
+			std::filesystem::permissions(pathToMake, std::filesystem::perms::owner_all | std::filesystem::perms::group_read | std::filesystem::perms::group_exec | std::filesystem::perms::others_read | std::filesystem::perms::others_exec, std::filesystem::perm_options::add);
+		}
+		return createResult;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

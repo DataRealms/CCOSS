@@ -22,7 +22,7 @@ namespace RTE {
 		/// Gets the current working directory.
 		/// </summary>
 		/// <returns>Absolute path to current working directory.</returns>
-		static std::string & GetWorkingDirectory() { return s_WorkingDirectory; }
+		static const std::string & GetWorkingDirectory() { return s_WorkingDirectory; }
 
 		/// <summary>
 		/// Gets the screenshot directory name.
@@ -37,11 +37,17 @@ namespace RTE {
 		static const std::string & GetModDirectory() { return s_ModDirectory; }
 
 		/// <summary>
+		/// Gets the extension that determines a directory/file is a RTE module. 
+		/// </summary>
+		/// <returns>String containing the RTE module extension.</returns>
+		static const std::string & GetModulePackageExtension() { return s_ModulePackageExtension; }
+
+		/// <summary>
 		/// Create a directory.
 		/// </summary>
 		/// <param name="path">Path to create.</param>
 		/// <returns>Returns 0 if successful.</returns>
-		static int MakeDirectory(const std::string &pathToMake);
+		static bool MakeDirectory(const std::string &pathToMake);
 #pragma endregion
 
 #pragma region Command-Line Interface
@@ -74,6 +80,7 @@ namespace RTE {
 		static std::string s_WorkingDirectory; //!< String containing the absolute path to current working directory.
 		static const std::string s_ScreenshotDirectory; //!< String containing the folder name of the screenshots directory.
 		static const std::string s_ModDirectory; //!< String containing the folder name of the mod directory.
+		static const std::string s_ModulePackageExtension; //!< The extension that determines a directory/file is a RTE module.
 	};
 }
 #endif

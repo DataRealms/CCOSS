@@ -259,7 +259,7 @@ int PresetMan::GetModuleID(string moduleName)
     int dotPos = moduleName.find_last_of('.');
     // Wasnt, so try adding it
     if (dotPos == string::npos)
-        moduleName = moduleName + g_WritePackageExtension;
+        moduleName = moduleName + System::GetModulePackageExtension();
     // There was ".rte", so try to shave it off the name
     else
         moduleName = moduleName.substr(0, dotPos);
@@ -282,7 +282,7 @@ int PresetMan::GetModuleID(string moduleName)
     dotPos = moduleName.find_last_of('.');
     // Wasnt, so try adding it
     if (dotPos == string::npos)
-        moduleName = moduleName + g_WritePackageExtension;
+        moduleName = moduleName + System::GetModulePackageExtension();
     // There was ".rte", so try to shave it off the name
     else
         moduleName = moduleName.substr(0, dotPos);

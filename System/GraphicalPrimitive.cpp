@@ -58,7 +58,7 @@ namespace RTE {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			if (m_Thickness > 1) {
-				for (short i = 0; i < m_Thickness; i++) {
+				for (int i = 0; i < m_Thickness; i++) {
 					arc(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
 				}
 			} else {
@@ -71,7 +71,7 @@ namespace RTE {
 			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
 
 			if (m_Thickness > 1) {
-				for (short i = 0; i < m_Thickness; i++){
+				for (int i = 0; i < m_Thickness; i++){
 					arc(drawScreen, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
 					arc(drawScreen, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
 				}

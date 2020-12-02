@@ -434,7 +434,8 @@ namespace RTE {
 		g_PerformanceMan.Update();
 
 		// Remove all scheduled primitives, those will be re-added by updates from other entities.
-		g_PrimitiveMan.ClearPrimitivesList();
+		// This needs to happen here, otherwise if there are multiple sim updates in during a single frame duplicates will be added to the primitive queue.
+		g_PrimitiveMan.ClearPrimitivesQueue();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

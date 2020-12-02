@@ -8,14 +8,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PrimitiveMan::DrawBitmapPrimitive(short player, Vector centerPos, Entity *entity, float rotAngle, unsigned short frame, bool hFlipped, bool vFlipped) {
+	void PrimitiveMan::DrawBitmapPrimitive(int player, const Vector &centerPos, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped) {
 		const MOSprite *moSprite = dynamic_cast<MOSprite *>(entity);
 		if (moSprite) {
 			BITMAP *bitmap = moSprite->GetSpriteFrame(frame);
 
 			if (bitmap) {
 				if (!hFlipped && !vFlipped) {
-					m_Primitives.push_back(new BitmapPrimitive(player, centerPos, bitmap, rotAngle));
+					m_Primitives.push(std::make_unique<BitmapPrimitive>(player, centerPos, bitmap, rotAngle));
 				} else {
 					BITMAP *flipBitmap = create_bitmap_ex(8, bitmap->w, bitmap->h);
 					clear_to_color(flipBitmap, 0);
@@ -27,7 +27,7 @@ namespace RTE {
 					} else if (hFlipped && vFlipped) {
 						draw_sprite_vh_flip(flipBitmap, bitmap, 0, 0);
 					}
-					m_Primitives.push_back(new BitmapPrimitive(player, centerPos, flipBitmap, rotAngle));
+					m_Primitives.push(std::make_unique<BitmapPrimitive>(player, centerPos, flipBitmap, rotAngle));
 				}
 			}
 		}
@@ -35,18 +35,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PrimitiveMan::ClearPrimitivesList() {
-		for (const GraphicalPrimitive *primitive : m_Primitives) {
-			delete primitive;
-		}
-		m_Primitives.clear();
+	void PrimitiveMan::ClearPrimitivesQueue() {
+		std::queue<std::unique_ptr<GraphicalPrimitive>> emptyQueue;
+		std::swap(m_Primitives, emptyQueue);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PrimitiveMan::DrawPrimitives(short player, BITMAP *targetBitmap, const Vector &targetPos) const {
-		for (GraphicalPrimitive *primitive : m_Primitives) {
-			if (player == primitive->m_Player || primitive->m_Player == -1) { primitive->Draw(targetBitmap, targetPos); }
+	void PrimitiveMan::DrawPrimitives(int player, BITMAP *targetBitmap, const Vector &targetPos) {
+		while (!m_Primitives.empty()) {
+			if (m_Primitives.front()->m_Player == player || m_Primitives.front()->m_Player == -1) { m_Primitives.front()->Draw(targetBitmap, targetPos); }
+			m_Primitives.pop();
 		}
 	}
 }

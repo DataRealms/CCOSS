@@ -314,7 +314,8 @@ namespace RTE {
 				if (std::abs(currentRotAngleOffset - m_PrevRotAngleOffset) > 0.01745F) { // Update for 1 degree differences
 					Matrix atomRotationForSubgroup(rootParentAsMOSR->FacingAngle(GetRotAngle()) - rootParentAsMOSR->FacingAngle(rootParentAsMOSR->GetRotAngle()));
 					Vector atomOffsetForSubgroup = g_SceneMan.ShortestDistance(rootParentAsMOSR->GetPos(), m_Pos, g_SceneMan.SceneWrapsX());
-					atomOffsetForSubgroup.FlipX(rootParentAsMOSR->IsHFlipped());
+					atomOffsetForSubgroup.FlipX(rootParentAsMOSR->IsHFlipped()); //TODO consolidate this into the line above once this returns the vector
+					atomOffsetForSubgroup /= Matrix(rootParentAsMOSR->GetRotAngle() * rootParentAsMOSR->GetFlipFactor());
 					rootParentAsMOSR->GetAtomGroup()->UpdateSubAtoms(GetAtomSubgroupID(), atomOffsetForSubgroup, atomRotationForSubgroup);
 				}
 			}

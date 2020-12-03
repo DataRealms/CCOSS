@@ -842,11 +842,9 @@ namespace RTE {
 		if (g_InActivity) {	
 
 			if (AnyStartPress(false)) {
-
-				bool buyMenuIsOpen = 0;
+				bool buyMenuIsOpen = false;
 				GameActivity* currentGameActivity = dynamic_cast<GameActivity*>(g_ActivityMan.GetActivity());
 
-				// Make ESC key open BuyMenuGUIs if any are open rather than pausing the game.
 				for (short player = Players::PlayerOne; player < currentGameActivity->GetPlayerCount(); player++) {
 					if (currentGameActivity->GetBuyGUI(player)->IsVisible()) {
 						buyMenuIsOpen = true;

@@ -99,12 +99,8 @@ namespace RTE {
 		/// Replaces backslashes with forward slashes in file paths to eliminate issues with cross-platform compatibility or invalid escape sequences.
 		/// </summary>
 		/// <param name="pathToCorrect">Reference to the file path string to correct slashes in.</param>
-		void CorrectBackslashesInPaths(std::string &pathToCorrect) const {
-			// TODO: Add a warning log entry if backslashes are found in a data path. Perhaps overwrite them in the ini file itself.
-			while (std::find(pathToCorrect.begin(), pathToCorrect.end(), '\\') != pathToCorrect.end()) {
-				pathToCorrect.replace(pathToCorrect.find("\\"), 1, "/");
-			}
-		}
+		// TODO: Add a warning log entry if backslashes are found in a data path. Perhaps overwrite them in the ini file itself.
+		std::string CorrectBackslashesInPath(const std::string &pathToCorrect) const { return std::filesystem::path(pathToCorrect).generic_string(); }
 #pragma endregion
 
 #pragma region Logging

@@ -62,8 +62,7 @@ int GlobalScript::Create(const GlobalScript &reference)
 int GlobalScript::ReadProperty(const std::string &propName, Reader &reader)
 {
 	if (propName == "ScriptPath") {
-		reader >> m_ScriptPath;
-		CorrectBackslashesInPaths(m_ScriptPath);
+		m_ScriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
 	} else if (propName == "LuaClassName")
         reader >> m_LuaClassName;
 	else if (propName == "LateUpdate")

@@ -332,8 +332,7 @@ int MovableObject::ReadProperty(const std::string &propName, Reader &reader)
 		PieMenuGUI::AddAvailableSlice(newSlice);
 	}
 	else if (propName == "ScriptPath") {
-		std::string scriptPath = reader.ReadPropValue();
-		CorrectBackslashesInPaths(scriptPath);
+		std::string scriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
 		if (LoadScript(scriptPath) == -2) { reader.ReportError("Duplicate script path " + scriptPath); }
 	} else if (propName == "ScreenEffect") {
         reader >> m_ScreenEffectFile;

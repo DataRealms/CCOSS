@@ -192,8 +192,7 @@ int PieMenuGUI::Slice::ReadProperty(const std::string &propName, Reader &reader)
     else if (propName == "Direction")
         reader >> m_Direction;
 	else if (propName == "ScriptPath") {
-		reader >> m_ScriptPath;
-		CorrectBackslashesInPaths(m_ScriptPath);
+		m_ScriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
 	} else if (propName == "FunctionName")
         reader >> m_FunctionName;
     else

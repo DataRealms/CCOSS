@@ -118,7 +118,7 @@ void Activity::Clear() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Activity::ReadProperty(std::string propName, Reader &reader) {
+	int Activity::ReadProperty(const std::string &propName, Reader &reader) {
 		if (propName == "Description") {
 			reader >> m_Description;
 		} else if (propName == "SceneName") {

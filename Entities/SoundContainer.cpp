@@ -56,7 +56,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SoundContainer::ReadProperty(std::string propName, Reader &reader) {
+	int SoundContainer::ReadProperty(const std::string &propName, Reader &reader) {
 		if (propName == "AddSound" || propName == "AddSoundSet") {
 			return ReadSoundOrSoundSet(propName, reader);
 		} else if (propName == "CycleMode") {

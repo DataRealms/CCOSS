@@ -83,7 +83,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Atom::ReadProperty(std::string propName, Reader &reader) {
+	int Atom::ReadProperty(const std::string &propName, Reader &reader) {
 		if (propName == "Offset") {
 			reader >> m_Offset;
 		} else if (propName == "OriginalOffset") {

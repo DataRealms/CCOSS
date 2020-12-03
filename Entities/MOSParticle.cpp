@@ -36,7 +36,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int MOSParticle::ReadProperty(std::string propName, Reader &reader) {
+	int MOSParticle::ReadProperty(const std::string &propName, Reader &reader) {
 		if (propName == "Atom") {
 			if (!m_Atom) { m_Atom = new Atom; }
 			reader >> *m_Atom;

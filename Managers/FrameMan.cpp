@@ -341,7 +341,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::ReadProperty(std::string propName, Reader &reader) {
+	int FrameMan::ReadProperty(const std::string &propName, Reader &reader) {
 		if (propName == "ResolutionX") {
 			reader >> m_ResX;
 			m_NewResX = m_ResX;

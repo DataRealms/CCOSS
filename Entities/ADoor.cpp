@@ -83,7 +83,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ADoor::ReadProperty(std::string propName, Reader &reader) {
+	int ADoor::ReadProperty(const std::string &propName, Reader &reader) {
 		if (propName == "Door") {
 			delete m_Door;
 			m_Door = new Attachable;

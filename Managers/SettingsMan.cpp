@@ -98,7 +98,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SettingsMan::ReadProperty(std::string propName, Reader &reader) {
+	int SettingsMan::ReadProperty(const std::string &propName, Reader &reader) {
 		if (propName == "PaletteFile") {
 			g_FrameMan.ReadProperty(propName, reader);
 		} else if (propName == "ResolutionX") {

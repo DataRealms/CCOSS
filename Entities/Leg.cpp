@@ -104,7 +104,7 @@ int Leg::Create(const Leg &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int Leg::ReadProperty(std::string propName, Reader &reader)
+int Leg::ReadProperty(const std::string &propName, Reader &reader)
 {
     if (propName == "Foot")
     {

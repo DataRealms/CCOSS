@@ -46,7 +46,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Entity::ReadProperty(std::string propName, Reader &reader) {
+	int Entity::ReadProperty(const std::string &propName, Reader &reader) {
 		if (propName == "CopyOf") {
 			std::string refName = reader.ReadPropValue();
 			std::string className = GetClassName();

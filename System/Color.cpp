@@ -27,7 +27,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Color::ReadProperty(std::string propName, Reader &reader) {
+	int Color::ReadProperty(const std::string &propName, Reader &reader) {
 		if (propName == "R") {
 			reader >> m_R;
 		} else if (propName == "G") {

@@ -34,7 +34,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int InputScheme::ReadProperty(std::string propName, Reader &reader) {
+	int InputScheme::ReadProperty(const std::string &propName, Reader &reader) {
 		if (propName == "Device") {
 			SetDevice(static_cast<InputDevice>(std::stoi(reader.ReadPropValue())));
 		} else if (propName == "Preset") {

@@ -25,7 +25,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ADSensor::ReadProperty(std::string propName, Reader &reader) {
+	int ADSensor::ReadProperty(const std::string &propName, Reader &reader) {
 		if (propName == "StartOffset") {
 			reader >> m_StartOffset;
 		} else if (propName == "SensorRay") {

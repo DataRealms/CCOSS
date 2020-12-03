@@ -77,7 +77,7 @@ int Turret::Create(const Turret &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int Turret::ReadProperty(std::string propName, Reader &reader)
+int Turret::ReadProperty(const std::string &propName, Reader &reader)
 {
     if (propName == "MountedMO")
     {

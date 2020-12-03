@@ -48,7 +48,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ThrownDevice::ReadProperty(std::string propName, Reader &reader) {
+	int ThrownDevice::ReadProperty(const std::string &propName, Reader &reader) {
 		if (propName == "ActivationSound") {
 			reader >> m_ActivationSound;
 		} else if (propName == "StartThrowOffset") {

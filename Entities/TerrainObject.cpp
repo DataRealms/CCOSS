@@ -158,7 +158,7 @@ int TerrainObject::Create(const TerrainObject &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int TerrainObject::ReadProperty(std::string propName, Reader &reader)
+int TerrainObject::ReadProperty(const std::string &propName, Reader &reader)
 {
     if (propName == "FGColorFile")
     {

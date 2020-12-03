@@ -105,7 +105,7 @@ int GAScripted::Create(const GAScripted &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int GAScripted::ReadProperty(std::string propName, Reader &reader)
+int GAScripted::ReadProperty(const std::string &propName, Reader &reader)
 {
 	if (propName == "ScriptFile") {
 		reader >> m_ScriptPath;

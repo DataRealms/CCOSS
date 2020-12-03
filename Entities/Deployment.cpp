@@ -130,7 +130,7 @@ int Deployment::Create(const Deployment &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int Deployment::ReadProperty(std::string propName, Reader &reader)
+int Deployment::ReadProperty(const std::string &propName, Reader &reader)
 {
     if (propName == "LoadoutName")
         reader >> m_LoadoutName;

@@ -170,7 +170,7 @@ int MOSprite::Create(const MOSprite &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int MOSprite::ReadProperty(std::string propName, Reader &reader)
+int MOSprite::ReadProperty(const std::string &propName, Reader &reader)
 {
     if (propName == "SpriteFile")
         reader >> m_SpriteFile;

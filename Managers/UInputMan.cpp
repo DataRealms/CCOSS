@@ -120,7 +120,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int UInputMan::ReadProperty(std::string propName, Reader &reader) {
+	int UInputMan::ReadProperty(const std::string &propName, Reader &reader) {
 		if (propName == "MouseSensitivity") {
 			reader >> m_MouseSensitivity;
 		} else if (propName == "Player1Scheme" || propName == "Player2Scheme" || propName == "Player3Scheme" || propName == "Player4Scheme") {

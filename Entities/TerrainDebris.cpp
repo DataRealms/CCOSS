@@ -53,7 +53,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int TerrainDebris::ReadProperty(std::string propName, Reader &reader) {
+	int TerrainDebris::ReadProperty(const std::string &propName, Reader &reader) {
 		if (propName == "DebrisFile") {
 			reader >> m_DebrisFile;
 		} else if (propName == "DebrisPieceCount") {

@@ -78,7 +78,7 @@ int SceneObject::SOPlacer::Create(const SOPlacer &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int SceneObject::SOPlacer::ReadProperty(std::string propName, Reader &reader)
+int SceneObject::SOPlacer::ReadProperty(const std::string &propName, Reader &reader)
 {
     if (propName == "PlacedObject")
     {
@@ -258,7 +258,7 @@ int SceneObject::Create(const SceneObject &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the Reader's position is untouched.
 
-int SceneObject::ReadProperty(std::string propName, Reader &reader)
+int SceneObject::ReadProperty(const std::string &propName, Reader &reader)
 {
     if (propName == "Position")
         reader >> m_Pos;

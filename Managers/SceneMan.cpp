@@ -326,7 +326,7 @@ int SceneMan::LoadScene(std::string sceneName, bool placeObjects, bool placeUnit
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int SceneMan::ReadProperty(std::string propName, Reader &reader)
+int SceneMan::ReadProperty(const std::string &propName, Reader &reader)
 {
     if (propName == "AddScene")
         g_PresetMan.GetEntityPreset(reader);

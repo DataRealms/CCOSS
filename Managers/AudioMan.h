@@ -433,7 +433,6 @@ namespace RTE {
 		/// Sets/updates the position of a SoundContainer's playing sounds.
 		/// </summary>
 		/// <param name="soundContainer">A pointer to a SoundContainer object. Ownership IS NOT transferred!</param>
-		/// <param name="position">The position at which to play the SoundContainer's sounds.</param>
 		/// <returns>Whether the position was successfully set.</returns>
 		bool ChangeSoundContainerPlayingChannelsPosition(SoundContainer *soundContainer);
 
@@ -441,15 +440,14 @@ namespace RTE {
 		/// Changes the volume of a SoundContainer's playing sounds.
 		/// </summary>
 		/// <param name="soundContainer">A pointer to a SoundContainer object. Ownership IS NOT transferred!</param>
-		/// <param name="volume">The new volume to play sounds at, between 0 and 1.</param>
+		/// <param name="newVolume">The new volume to play sounds at, between 0 and 1.</param>
 		/// <returns>Whether the volume was successfully updated.</returns>
-		bool ChangeSoundContainerPlayingChannelsVolume(SoundContainer *soundContainer);
+		bool ChangeSoundContainerPlayingChannelsVolume(SoundContainer *soundContainer, float newVolume);
 
 		/// <summary>
 		/// Changes the frequency/pitch of a SoundContainer's playing sounds.
 		/// </summary>
 		/// <param name="soundContainer">A pointer to a SoundContainer object. Ownership IS NOT transferred!</param>
-		/// <param name="pitch">New pitch to play sounds at, limited to 8 octaves up or down (i.e. 0.125 - 8).</param>
 		/// <returns>Whether the pitch was successfully updated.</returns>
 		bool ChangeSoundContainerPlayingChannelsPitch(SoundContainer *soundContainer);
 #pragma endregion

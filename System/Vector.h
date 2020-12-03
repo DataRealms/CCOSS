@@ -17,37 +17,31 @@ namespace RTE {
 
 		SerializableOverrideMethods
 
-		float m_X = 0.0F; //!< X value of this vector.
-		float m_Y = 0.0F; //!< Y value of this vector.
+		float m_X; //!< X value of this vector.
+		float m_Y; //!< Y value of this vector.
 
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a Vector object with values (0, 0).
 		/// </summary>
-		Vector() {};
+		Vector() = default;
 
 		/// <summary>
 		/// Constructor method used to instantiate a Vector object from X and Y values.
 		/// </summary>
 		/// <param name="inputX">Float defining the initial X value of this Vector.</param>
 		/// <param name="inputY">Float defining the initial Y value of this Vector.</param>
-		Vector(const float inputX, const float inputY) :
-			m_X(inputX),
-			m_Y(inputY) {};
-
-		/// <summary>
-		/// Copy constructor method used to instantiate a Vector object identical to an already existing one.
-		/// </summary>
-		/// <param name="reference">A Vector object which is passed in by reference.</param>
-		Vector(const Vector &reference) = default;
+		Vector(const float inputX, const float inputY) : m_X(inputX), m_Y(inputY) {};
 #pragma endregion
 
-#pragma region Getters and Setters
+#pragma region Destruction
 		/// <summary>
 		/// Sets both the X and Y of this Vector to zero.
 		/// </summary>
-		void Reset() { m_X = 0.0F; m_Y = 0.0F; }
+		void Reset() override { m_X = 0.0F; m_Y = 0.0F; }
+#pragma endregion
 
+#pragma region Getters and Setters
 		/// <summary>
 		/// Gets the X value of this Vector.
 		/// </summary>

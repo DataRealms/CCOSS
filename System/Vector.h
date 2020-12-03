@@ -17,8 +17,8 @@ namespace RTE {
 
 		SerializableOverrideMethods
 
-		float m_X; //!< X value of this vector.
-		float m_Y; //!< Y value of this vector.
+		float m_X = 0.0F; //!< X value of this vector.
+		float m_Y = 0.0F; //!< Y value of this vector.
 
 #pragma region Creation
 		/// <summary>

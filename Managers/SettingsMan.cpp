@@ -82,7 +82,7 @@ namespace RTE {
 		RTEAssert(settingsWriter.WriterOK(), "After failing to open the Base.rte/Settings.ini, could not then even create a new one to save settings to!\nAre you trying to run the game from a read-only disk?\nYou need to install the game to a writable area before running it!");
 
 		WriteDefaultSettings(settingsWriter);
-		settingsWriter.Destroy();
+		settingsWriter.EndWrite();
 
 		Reader settingsReader("Base.rte/Settings.ini");
 		return Serializable::Create(settingsReader, true, doCreate);
@@ -90,10 +90,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsMan::UpdateSettingsFile() {
+	void SettingsMan::UpdateSettingsFile() const {
 		Writer settingsWriter("Base.rte/Settings.ini");
 		g_SettingsMan.Save(settingsWriter);
-		settingsWriter.Destroy();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

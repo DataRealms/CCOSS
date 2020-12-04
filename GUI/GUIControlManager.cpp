@@ -488,7 +488,7 @@ bool GUIControlManager::Save(const std::string Filename)
 
     bool Result = Save(&W);
     
-    W.Destroy();
+    W.EndWrite();
 
     return Result;
 }

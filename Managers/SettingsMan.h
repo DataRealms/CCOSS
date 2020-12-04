@@ -66,7 +66,7 @@ namespace RTE {
 		/// <summary>
 		/// Overwrites the settings file to save changes made from within the game.
 		/// </summary>
-		void UpdateSettingsFile();
+		void UpdateSettingsFile() const;
 #pragma endregion
 
 #pragma region Engine Settings

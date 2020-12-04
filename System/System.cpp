@@ -119,4 +119,20 @@ namespace RTE {
 		std::cout << "\r" << stringToPrint << std::endl;
 #endif
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int System::ASCIIFileContainsString(const std::string &filePath, const std::string &findString) {
+		std::ifstream inputStream(filePath, std::ios::binary);
+		if (!inputStream.is_open()) {
+			return -1;
+		} else {
+			size_t fileSize = static_cast<size_t>(std::filesystem::file_size(filePath));
+			std::vector<unsigned char> rawData(fileSize);
+			inputStream.read(reinterpret_cast<char *>(&rawData.at(0)), fileSize);
+			inputStream.close();
+
+			return (std::search(rawData.begin(), rawData.end(), findString.begin(), findString.end()) != rawData.end()) ? 0 : 1;
+		}
+	}
 }

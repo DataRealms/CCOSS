@@ -695,7 +695,7 @@ void MainMenuGUI::Update()
 
 				if (m_PioneerPromoBox.IsWithinBox(mouse))
 				{
-					OpenBrowserToURL("http://store.steampowered.com/app/300260/");
+					System::OpenBrowserToURL("http://store.steampowered.com/app/300260/");
 				}
 			}
 		}

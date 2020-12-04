@@ -74,6 +74,22 @@ namespace RTE {
 		static void PrintToCLI(const std::string &stringToPrint);
 #pragma endregion
 
+#pragma region Misc
+		/// <summary>
+		/// Fires up the default browser for the current OS on a specific URL.
+		/// </summary>
+		/// <param name="goToURL">A string with the URL to send the browser to.</param>
+		static void OpenBrowserToURL(const std::string &goToURL) { std::system(std::string("start ").append(goToURL).c_str()); }
+
+		/// <summary>
+		/// Searches through an ASCII file on disk for a specific string and tells whether it was found or not.
+		/// </summary>
+		/// <param name="">The path to the ASCII file to search.</param>
+		/// <param name="">The exact string to look for. Case sensitive!</param>
+		/// <returns>0 if the string was found in the file or 1 if not. -1 if the file was inaccessible.</returns>
+		static int ASCIIFileContainsString(const std::string &filePath, const std::string &findString);
+#pragma endregion
+
 	private:
 
 		static bool s_LogToCLI; //!< Bool to tell whether to print the loading log and anything specified with PrintToCLI to command-line or not.

@@ -203,21 +203,5 @@ namespace RTE {
 	/// <returns>A float with the represented angle as full rotations being 256.</returns>
 	float GetAllegroAngle(float angleDegrees);
 #pragma endregion
-
-#pragma region Misc
-	/// <summary>
-	/// Fires up the default browser for the current OS on a specific URL.
-	/// </summary>
-	/// <param name="goToURL">A string with the URL to send the browser to.</param>
-	void OpenBrowserToURL(std::string goToURL);
-
-	/// <summary>
-	/// Searches through an ASCII file on disk for a specific string and tells whether it was found or not.
-	/// </summary>
-	/// <param name="">The path to the ASCII file to search.</param>
-	/// <param name="">The exact string to look for. Case sensitive!</param>
-	/// <returns>Whether the file was found AND that string was found in that file.</returns>
-	bool ASCIIFileContainsString(std::string filePath, std::string findString);
-#pragma endregion
 }
 #endif

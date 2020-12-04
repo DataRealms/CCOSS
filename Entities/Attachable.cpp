@@ -201,22 +201,24 @@ namespace RTE {
 		jointStiffnessValueToUse = jointStiffnessValueToUse > 0 ? jointStiffnessValueToUse : m_JointStiffness;
 		jointStrengthValueToUse = jointStrengthValueToUse > 0 ? jointStrengthValueToUse : m_JointStrength;
 		gibImpulseLimitValueToUse = gibImpulseLimitValueToUse > 0 ? gibImpulseLimitValueToUse : m_GibImpulseLimit;
+		if (gibImpulseLimitValueToUse > 0) { gibImpulseLimitValueToUse = std::max(gibImpulseLimitValueToUse, jointStrengthValueToUse); }
 
 		Vector totalImpulseForce;
 		for (const std::pair<Vector, Vector> &impulseForce : m_ImpulseForces) {
 			totalImpulseForce += impulseForce.first;
 		}
+		totalImpulseForce *= jointStiffnessValueToUse;
 
 		if (gibImpulseLimitValueToUse > 0 && totalImpulseForce.GetMagnitude() > gibImpulseLimitValueToUse) {
-			jointImpulses += (totalImpulseForce.SetMagnitude(gibImpulseLimitValueToUse)) * jointStiffnessValueToUse;
+			jointImpulses += totalImpulseForce.SetMagnitude(gibImpulseLimitValueToUse);
 			GibThis();
 			return false;
 		} else if (jointStrengthValueToUse > 0 && totalImpulseForce.GetMagnitude() > jointStrengthValueToUse) {
-			jointImpulses += (totalImpulseForce.SetMagnitude(jointStrengthValueToUse)) * jointStiffnessValueToUse;
+			jointImpulses += totalImpulseForce.SetMagnitude(jointStrengthValueToUse);
 			m_Parent->RemoveAttachable(this, true, true);
 			return false;
 		} else {
-			jointImpulses += totalImpulseForce * jointStiffnessValueToUse;
+			jointImpulses += totalImpulseForce;
 		}
 
 		// Rough explanation of what this is doing:

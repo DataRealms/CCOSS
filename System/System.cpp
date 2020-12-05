@@ -76,8 +76,9 @@ namespace RTE {
 		std::string greenTick = "";
 		std::string yellowDot = "";
 		// Also replace tab with 4 spaces because tab is super wide in the Windows console
-		while (unicodedOutput.find("\t") != std::string::npos) {
-			unicodedOutput.replace(unicodedOutput.find("\t"), 1, "    ");
+		size_t tabPos = 0;
+		while ((tabPos = unicodedOutput.find("\t")) != std::string::npos) {
+			unicodedOutput.replace(tabPos, 1, "    ");
 		}	
 #endif
 		// Convert all ✓ characters to unicode, it's the 42th from last character in CC's custom font

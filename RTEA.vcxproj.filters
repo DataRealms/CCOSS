@@ -566,9 +566,6 @@
     <ClCompile Include="GUI\AllegroScreen.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
-    <ClCompile Include="GUI\GUI.cpp">
-      <Filter>GUI</Filter>
-    </ClCompile>
     <ClCompile Include="GUI\GUIBanner.cpp">
       <Filter>GUI</Filter>
     </ClCompile>

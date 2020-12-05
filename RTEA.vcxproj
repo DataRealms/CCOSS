@@ -434,7 +434,6 @@
     <ClCompile Include="GUI\AllegroBitmap.cpp" />
     <ClCompile Include="GUI\AllegroInput.cpp" />
     <ClCompile Include="GUI\AllegroScreen.cpp" />
-    <ClCompile Include="GUI\GUI.cpp" />
     <ClCompile Include="GUI\GUIBanner.cpp" />
     <ClCompile Include="GUI\GUIButton.cpp" />
     <ClCompile Include="GUI\GUICheckbox.cpp" />

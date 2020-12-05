@@ -1,9 +1,7 @@
-#ifndef _LOADINGUI_
+#ifndef _LOADINGGUI_
 #define _LOADINGGUI_
 
 #include "Singleton.h"
-
-struct BITMAP;
 
 #define g_LoadingGUI LoadingGUI::Instance()
 

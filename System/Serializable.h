@@ -33,7 +33,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a Serializable object in system memory. Create() should be called before using the object.
 		/// </summary>
-		Serializable() {}
+		Serializable() = default;
 
 		/// <summary>
 		/// Makes the Serializable object ready for use, usually after all necessary properties have been set with Create(Reader).
@@ -69,6 +69,11 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Destruction
+		/// <summary>
+		/// Destructor method used to clean up a Serializable object before deletion from system memory.
+		/// </summary>
+		virtual ~Serializable() = default;
+
 		/// <summary>
 		/// Resets the entire Serializable, including its inherited members, to their default settings or values.
 		/// </summary>

@@ -1815,7 +1815,6 @@ int main(int argc, char *argv[]) {
 	g_PerformanceMan.Destroy();
     g_FrameMan.Destroy();
     g_TimerMan.Destroy();
-    g_SettingsMan.Destroy();
     g_LuaMan.Destroy();
     ContentFile::FreeAllLoaded();
     g_ConsoleMan.Destroy();

@@ -27,12 +27,6 @@ namespace RTE {
 		/// <summary>
 		/// Makes the SettingsMan object ready for use.
 		/// </summary>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create() override { return Serializable::Create(); }
-
-		/// <summary>
-		/// Makes the SettingsMan object ready for use.
-		/// </summary>
 		/// <param name="reader">A Reader that the SettingsMan will create itself from.</param>
 		/// <param name="checkType">Whether there is a class name in the stream to check against to make sure the correct type is being read from the stream.</param>
 		/// <param name="doCreate">Whether to do any additional initialization of the object after reading in all the properties from the Reader.</param>
@@ -41,16 +35,6 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Destruction
-		/// <summary>
-		/// Destructor method used to clean up a SettingsMan object before deletion from system memory.
-		/// </summary>
-		~SettingsMan() { Destroy(); }
-
-		/// <summary>
-		/// Destroys and resets (through Clear()) the SettingsMan object.
-		/// </summary>
-		void Destroy() { Clear(); }
-
 		/// <summary>
 		/// Resets the entire SettingsMan, including its inherited members, to their default settings or values.
 		/// </summary>
@@ -186,7 +170,7 @@ namespace RTE {
 		/// Sets the player name that will be used in network multiplayer matches.
 		/// </summary>
 		/// <param name="newName">String with the new player name to use.</param>
-		void SetPlayerNetworkName(std::string newName) { m_PlayerNetworkName = newName.empty() ? "Dummy" : newName; }
+		void SetPlayerNetworkName(const std::string &newName) { m_PlayerNetworkName = newName.empty() ? "Dummy" : newName; }
 
 		/// <summary>
 		/// Gets the LAN server address to connect to.
@@ -198,7 +182,7 @@ namespace RTE {
 		/// Sets the LAN server address to connect to.
 		/// </summary>
 		/// <param name="newName">New LAN server address to connect to.</param>
-		void SetNetworkServerAddress(std::string newAddress) { m_NetworkServerAddress = newAddress.empty() ? "127.0.0.1:8000" : newAddress; }
+		void SetNetworkServerAddress(const std::string &newAddress) { m_NetworkServerAddress = newAddress.empty() ? "127.0.0.1:8000" : newAddress; }
 
 		/// <summary>
 		/// Gets the NAT punch-through server address.
@@ -210,7 +194,7 @@ namespace RTE {
 		/// Sets the NAT punch-through server address.
 		/// </summary>
 		/// <param name="newValue">New NAT punch-through server address to connect to.</param>
-		void SetNATServiceAddress(std::string newAddress) { m_NATServiceAddress = newAddress.empty() ? "127.0.0.1:61111" : newAddress; }
+		void SetNATServiceAddress(const std::string &newAddress) { m_NATServiceAddress = newAddress.empty() ? "127.0.0.1:61111" : newAddress; }
 
 		/// <summary>
 		/// Gets the server name used when connecting via NAT punch-through service.
@@ -222,7 +206,7 @@ namespace RTE {
 		/// Sets the server name to use when connecting via NAT punch-through service.
 		/// </summary>
 		/// <param name="newValue">New NAT punch-through server name.</param>
-		void SetNATServerName(std::string newName) { m_NATServerName = newName.empty() ? "DefaultServerName" : newName; }
+		void SetNATServerName(const std::string &newName) { m_NATServerName = newName.empty() ? "DefaultServerName" : newName; }
 
 		/// <summary>
 		/// Gets the server password to use when connecting via NAT punch-through service.
@@ -234,7 +218,7 @@ namespace RTE {
 		/// Sets the server password to use when connecting via NAT punch-through service.
 		/// </summary>
 		/// <param name="newValue">New password to use when connecting via NAT punch-through service.</param>
-		void SetNATServerPassword(std::string newValue) { m_NATServerPassword = newValue.empty() ? "DefaultServerPassword" : newValue; }
+		void SetNATServerPassword(const std::string &newValue) { m_NATServerPassword = newValue.empty() ? "DefaultServerPassword" : newValue; }
 
 		/// <summary>
 		/// Gets whether server is using higher compression methods.
@@ -300,19 +284,19 @@ namespace RTE {
 		/// Gets whether a NAT service is used for punch-through.
 		/// </summary>
 		/// <returns>Whether a NAT service is used for punch-through or not.</returns>
-		bool GetUseNATService() { return m_UseNATService; }
+		bool GetUseNATService() const { return m_UseNATService; }
 
 		/// <summary>
 		/// Gets whether server puts threads to sleep if it didn't receive anything for 10 seconds to reduce CPU load.
 		/// </summary>
 		/// <returns>Whether threads will be put to sleep when server isn't receiving any data or not.</returns>
-		bool GetServerSleepWhenIdle() { return m_ServerSleepWhenIdle; }
+		bool GetServerSleepWhenIdle() const { return m_ServerSleepWhenIdle; }
 
 		/// <summary>
 		/// Gets whether the server will try to put the thread to sleep to reduce CPU load if the sim frame took less time to complete than it should at 30 fps.
 		/// </summary>
 		/// <returns>Whether threads will be put to sleep if server completed frame faster than it normally should or not.</returns>
-		bool GetServerSimSleepWhenIdle() { return m_ServerSimSleepWhenIdle; }
+		bool GetServerSimSleepWhenIdle() const { return m_ServerSimSleepWhenIdle; }
 #pragma endregion
 
 #pragma region Editor Settings
@@ -424,7 +408,7 @@ namespace RTE {
 		/// Gets whether the reader progress report is being displayed during module loading or not.
 		/// </summary>
 		/// <returns>Whether the reader progress report is being displayed during module loading or not.</returns>
-		bool DisableLoadingScreen() { return m_DisableLoadingScreen; }
+		bool DisableLoadingScreen() const { return m_DisableLoadingScreen; }
 
 		/// <summary>
 		/// Gets how accurately the reader progress report tells what line it's reading during module loading.
@@ -532,8 +516,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		SettingsMan(const SettingsMan &reference) {}
-		SettingsMan & operator=(const SettingsMan &rhs) {}
+		SettingsMan(const SettingsMan &reference) = delete;
+		SettingsMan & operator=(const SettingsMan &rhs) = delete;
 	};
 }
 #endif

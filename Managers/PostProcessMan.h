@@ -190,17 +190,7 @@ namespace RTE {
 		void SetNetworkPostEffectsList(short whichScreen, std::list<PostEffect> &inputList);
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Manager.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		std::list<PostEffect> m_PostScreenEffects; //!< List of effects to apply at the end of each frame. This list gets cleared out and re-filled each frame.
 		std::list<PostEffect> m_PostSceneEffects; //!< All post-processing effects registered for this draw frame in the scene.

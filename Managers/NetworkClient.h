@@ -111,17 +111,7 @@ namespace RTE {
 		RakNet::SystemAddress ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, unsigned short port);
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		static constexpr unsigned short c_PlayerNameCharLimit = 15; //!< Maximum length of the player name.
 		std::string m_PlayerName; //!< The player name the will be used by the client in network games.

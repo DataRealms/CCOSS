@@ -25,8 +25,6 @@ extern bool g_InActivity;
 
 namespace RTE {
 
-	const std::string NetworkServer::c_ClassName = "NetworkServer";
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::BackgroundSendThreadFunction(NetworkServer *server, short player) {

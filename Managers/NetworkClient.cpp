@@ -13,8 +13,6 @@
 
 namespace RTE {
 
-	const std::string NetworkClient::c_ClassName = "NetworkClient";
-
 	// Data structure for constructing the draw boxes we'll need to use for drawing SceneLayers.
 	struct SLDrawBox {
 		int sourceX;

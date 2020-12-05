@@ -218,17 +218,7 @@ namespace RTE {
 		long long GetTimeToSleep() const { return (m_DeltaTime - m_SimAccumulator) / 2; };
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		long long m_StartTime; //!< The point in real time when the simulation (re)started.
 		long long m_TicksPerSecond; //!< The frequency of ticks each second, ie the resolution of the timer.	

@@ -137,17 +137,8 @@ namespace RTE {
 		void SetCurrentPing(unsigned short ping) { m_CurrentPing = ping; }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Entity.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
 
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 		static constexpr unsigned short c_MSPFAverageSampleSize = 10; //!< How many samples to use to calculate average MSPF value.
 		static constexpr unsigned short c_MaxSamples = 120; //!< How many performance samples to store, directly affects graph size.
 		static constexpr unsigned short c_Average = 10; //!< How many samples to use to calculate average value displayed on screen.

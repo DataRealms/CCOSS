@@ -404,17 +404,7 @@ namespace RTE {
 		void RegisterSoundEvent(int player, NetworkSoundState state, const std::unordered_set<unsigned short> *channels = NULL, const std::vector<size_t> *soundFileHashes = NULL, const Vector &position = Vector(), short loops = 0, float pitch = 1, bool affectedByGlobalPitch = false, float attenuationStartDistance = 0, bool immobile = false, short fadeOutTime = 0);
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 
 		const FMOD_VECTOR c_FMODForward = FMOD_VECTOR{0, 0, 1}; //!< An FMOD_VECTOR defining the Forwards direction. Necessary for 3D Sounds.
 		const FMOD_VECTOR c_FMODUp = FMOD_VECTOR{0, 1, 0}; //!< An FMOD_VECTOR defining the Up direction. Necessary for 3D Sounds.

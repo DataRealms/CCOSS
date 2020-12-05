@@ -117,8 +117,6 @@ namespace luabind
 namespace RTE
 {
 
-const string LuaMan::m_ClassName = "LuaMan";
-
 // Can't have global enums in the master state so we use this dummy struct as a class and register the enums under it.
 struct enum_wrapper {
 	// Nested structs for each enum because we can't register enum_wrapper multiple times under a different name.

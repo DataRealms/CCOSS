@@ -158,14 +158,6 @@ namespace RTE {
 		void RegisterTerrainChange(SceneMan::TerrainChange terrainChange);
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
 
 		/// <summary>
@@ -180,8 +172,6 @@ namespace RTE {
 			std::thread *SendThread; //!<
 			std::string PlayerName; //!<
 		};
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		bool m_IsInServerMode = false; //!<
 

@@ -366,17 +366,8 @@ namespace RTE {
 		void DrawBitmapPrimitive(int player, const Vector &centerPos, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped);
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Manager.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
 
-		static const std::string c_ClassName; //! A string with the friendly-formatted type name of this object.
 		std::queue<std::unique_ptr<GraphicalPrimitive>> m_Primitives; //!< List of graphical primitives scheduled to draw this frame, cleared every frame during FrameMan::Draw().
 
 	private:

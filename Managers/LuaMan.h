@@ -93,16 +93,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-	const std::string & GetClassName() const { return m_ClassName; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetLastError
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the last error message from executing scripts.
@@ -340,9 +330,6 @@ public:
 // Protected member variable and method declarations
 
 protected:
-
-    // Member variables
-    static const std::string m_ClassName;
 
     // The master parent script state
     lua_State *m_pMasterState;

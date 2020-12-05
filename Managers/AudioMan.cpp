@@ -20,6 +20,14 @@ namespace RTE {
 		m_MusicVolume = 1.0;
 		m_GlobalPitch = 1.0;
 
+		m_SoundPanningEffectStrength = 0.6F;
+
+		//////////////////////////////////////////////////
+		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
+		m_ListenerZOffset = 0;
+		m_MinimumDistanceForPanning = 50.0F;
+		//////////////////////////////////////////////////
+
 		m_MusicPlayList.clear();
 		m_SilenceTimer.Reset();
 		m_SilenceTimer.SetRealTimeLimitS(-1);
@@ -93,18 +101,18 @@ namespace RTE {
 				int audioSystemPlayerNumber = 0;
 				for (int player = Players::PlayerOne; player < currentActivity->GetPlayerCount() && audioSystemPlayerNumber < m_CurrentActivityHumanCount; player++) {
 					if (currentActivity->PlayerHuman(player)) {
-						status = m_AudioSystem->set3DListenerAttributes(audioSystemPlayerNumber, &GetAsFMODVector(g_SceneMan.GetScrollTarget(currentActivity->ScreenOfPlayer(player)), g_SettingsMan.c_ListenerZOffset()), NULL, &c_FMODForward, &c_FMODUp);
+						status = m_AudioSystem->set3DListenerAttributes(audioSystemPlayerNumber, &GetAsFMODVector(g_SceneMan.GetScrollTarget(currentActivity->ScreenOfPlayer(player)), m_ListenerZOffset), NULL, &c_FMODForward, &c_FMODUp);
 						audioSystemPlayerNumber++; 
 					}
 				}
 
-				if (g_SettingsMan.SoundPanningEffectStrength() < 1) { UpdateCalculated3DEffectsForMobileSoundChannels(); }
+				if (m_SoundPanningEffectStrength < 1) { UpdateCalculated3DEffectsForMobileSoundChannels(); }
 			} else {
 				if (m_CurrentActivityHumanCount != 1) {
 					m_CurrentActivityHumanCount = 1;
 					status = m_AudioSystem->set3DNumListeners(1);
 				}
-				status = m_AudioSystem->set3DListenerAttributes(0, &GetAsFMODVector(g_SceneMan.GetScrollTarget(), g_SettingsMan.c_ListenerZOffset()), NULL, &c_FMODForward, &c_FMODUp);
+				status = m_AudioSystem->set3DListenerAttributes(0, &GetAsFMODVector(g_SceneMan.GetScrollTarget(), m_ListenerZOffset), NULL, &c_FMODForward, &c_FMODUp);
 			}
 
 			status = m_AudioSystem->update();
@@ -451,7 +459,7 @@ namespace RTE {
 				result = (result == FMOD_OK) ? channel->setUserData(soundContainer) : result;
 				result = (result == FMOD_OK) ? channel->setCallback(SoundChannelEndedCallback) : result;
 				result = (result == FMOD_OK) ? channel->set3DAttributes(&GetAsFMODVector(sceneWrapHandlingPositions[copyToHandleSceneWrapping] + soundData.Offset), NULL) : result;
-				result = (result == FMOD_OK) ? channel->set3DLevel(g_SettingsMan.SoundPanningEffectStrength()) : result;
+				result = (result == FMOD_OK) ? channel->set3DLevel(m_SoundPanningEffectStrength) : result;
 				result = (result == FMOD_OK) ? channel->setPriority(priority) : result;
 				result = (result == FMOD_OK) ? channel->setPitch(pitch) : result;
 
@@ -712,12 +720,12 @@ namespace RTE {
 		float channel3dLevel;
 		result = (result == FMOD_OK) ? channel->get3DLevel(&channel3dLevel) : result;
 		if (result == FMOD_OK && m_CurrentActivityHumanCount == 1) {
-			if (shortestDistance < g_SettingsMan.c_MinimumDistanceForPanning()) {
+			if (shortestDistance < m_MinimumDistanceForPanning) {
 				channel->set3DLevel(0);
-			} else if (shortestDistance < g_SettingsMan.c_MinimumDistanceForPanning() * 2) {
-				channel->set3DLevel(LERP(0, 1, 0, g_SettingsMan.SoundPanningEffectStrength(), channel3dLevel));
+			} else if (shortestDistance < m_MinimumDistanceForPanning * 2) {
+				channel->set3DLevel(LERP(0, 1, 0, m_SoundPanningEffectStrength, channel3dLevel));
 			} else {
-				channel->set3DLevel(g_SettingsMan.SoundPanningEffectStrength());
+				channel->set3DLevel(m_SoundPanningEffectStrength);
 			}
 		}
 

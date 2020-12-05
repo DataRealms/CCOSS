@@ -60,10 +60,8 @@ struct AlarmEvent
 // Parent(s):       Singleton, Serializable.
 // Class history:   12/25/2001 MovableMan created.
 
-class MovableMan:
-    public Singleton<MovableMan>,
-    public Serializable
-{
+class MovableMan : public Singleton<MovableMan>, public Serializable {
+	friend class SettingsMan;
     friend class LuaMan;
 
 

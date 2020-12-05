@@ -15,6 +15,7 @@ namespace RTE {
 	/// Singleton manager responsible for all performance stats counting and drawing.
 	/// </summary>
 	class PerformanceMan : public Singleton<PerformanceMan> {
+		friend class SettingsMan;
 
 	public:
 

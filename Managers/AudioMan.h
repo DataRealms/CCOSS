@@ -20,6 +20,7 @@ namespace RTE {
 	/// The singleton manager of the WAV sound effects and OGG music playback.
 	/// </summary>
 	class AudioMan : public Singleton<AudioMan> {
+		friend class SettingsMan;
 
 	public:
 
@@ -424,6 +425,14 @@ namespace RTE {
 		double m_SoundsVolume; //!< Global sounds effects volume.
 		double m_MusicVolume; //!< Global music volume.
 		double m_GlobalPitch; //!< Global pitch multiplier.
+
+		float m_SoundPanningEffectStrength; //!< The strength of the sound panning effect, 0 (no panning) - 1 (full panning).
+
+		//////////////////////////////////////////////////
+		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
+		float m_ListenerZOffset;
+		float m_MinimumDistanceForPanning;
+		//////////////////////////////////////////////////
 
 		std::string m_MusicPath; //!< The path to the last played music stream.
 		std::list<std::string> m_MusicPlayList; //!< Playlist of paths to music to play after the current non looping one is done.

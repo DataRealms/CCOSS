@@ -36,10 +36,7 @@ class DataModule;
 // Class history:   12/25/2001 PresetMan created.
 // Class history:   05/30/2008 Changed name to PresetMan.
 
-class PresetMan:
-    public Singleton<PresetMan>//,
-//    public Serializable
-{
+class PresetMan : public Singleton<PresetMan> {
 	friend class LuaMan;
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -481,15 +478,6 @@ public:
 	Actor * GetLoadout(std::string loadoutName, int moduleNumber, bool spawnDropShip);
 
 
-#pragma region Class Info
-	/// <summary>
-	/// Gets the class name of this object.
-	/// </summary>
-	/// <returns>A string with the friendly-formatted type name of this object.</returns>
-	const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -517,8 +505,6 @@ protected:
 // Private member variable and method declarations
 
 private:
-
-	static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

@@ -59,7 +59,7 @@ namespace RTE {
 		/// Returns the recommended MOID count. If this amount is exceeded then some units may be removed at the start of the activity.
 		/// </summary>
 		/// <returns>Recommended MOID count.</returns>
-		unsigned int RecommendedMOIDCount() const { return m_RecommendedMOIDCount; }
+		int RecommendedMOIDCount() const { return m_RecommendedMOIDCount; }
 
 		/// <summary>
 		/// Gets whether we're using additional Draws during MO's PreTravel and PostTravel to update MO layer this frame with more precision, or just data from the last frame with less precision.
@@ -71,22 +71,7 @@ namespace RTE {
 		/// Sets whether to use additional Draws during MO's PreTravel and PostTravel to update MO layer this frame with more precision, or just data from the last frame with less precision.
 		/// </summary>
 		/// <param name="newValue">True for precise collisions.</param>
-		void SetPreciseCollisions(bool newValue) { m_PreciseCollisions = newValue; }
-#pragma endregion
-
-
-#pragma region Audio Settings
-		/// <summary>
-		/// The strength of the sound panning effect.
-		/// </summary>
-		/// <returns>0 - 1, where 0 is no panning and 1 is fully panned.</returns>
-		float SoundPanningEffectStrength() const { return m_SoundPanningEffectStrength; }
-
-		//////////////////////////////////////////////////
-		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
-		float c_ListenerZOffset() const { return m_ListenerZOffset; }
-		float c_MinimumDistanceForPanning() const { return m_MinimumDistanceForPanning; }
-		//////////////////////////////////////////////////
+		void SetPreciseCollisions(bool newValue) { m_PreciseCollisions = true /*newValue*/; }
 #pragma endregion
 
 #pragma region Gameplay Settings
@@ -148,7 +133,7 @@ namespace RTE {
 		/// Gets the number of crabs needed to be released at once to trigger the crab bomb effect.
 		/// </summary>
 		/// <returns>The number of crabs needed to be released at once to trigger the crab bomb effect.</returns>
-		unsigned short CrabBombThreshold() const { return m_CrabBombThreshold; }
+		int CrabBombThreshold() const { return m_CrabBombThreshold; }
 #pragma endregion
 
 #pragma region Default Activity Settings
@@ -336,7 +321,7 @@ namespace RTE {
 		/// Gets how accurately the reader progress report tells what line it's reading during module loading.
 		/// </summary>
 		/// <returns>How accurately the reader progress report tells what line it's reading during module loading.</returns>
-		unsigned short LoadingScreenReportPrecision() const { return m_LoadingScreenReportPrecision; }
+		int LoadingScreenReportPrecision() const { return m_LoadingScreenReportPrecision; }
 
 		/// <summary>
 		/// Gets the multiplier value for the transition durations between different menus.
@@ -355,22 +340,13 @@ namespace RTE {
 
 		bool m_SettingsNeedOverwrite; //!< Whether the settings file was generated with minimal defaults and needs to be overwritten to be fully populated.
 
-
-		float m_SoundPanningEffectStrength; //!< The strength of the sound panning effect, 0 (no panning) - 1 (full panning).
-
-		//////////////////////////////////////////////////
-		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
-		float m_ListenerZOffset;
-		float m_MinimumDistanceForPanning;
-		//////////////////////////////////////////////////
-
 		bool m_ShowForeignItems; //!< Do not show foreign items in buy menu.
 		bool m_FlashOnBrainDamage; //!< Whether red flashes on brain damage are on or off.
 		bool m_BlipOnRevealUnseen; //!< Blip if unseen is revealed.	
 		bool m_EndlessMode; //!< Endless MetaGame mode.
 		bool m_EnableHats; //!< Whether randomized hat attachables will be attached to all AHuman actors.
 		bool m_EnableCrabBombs; //!< Whether all actors (except Brains and Doors) should be annihilated if a number exceeding the crab bomb threshold is released at once.
-		unsigned short m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.
+		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.
 
 		std::string m_PlayerNetworkName; //!< Player name used in network multiplayer matches.
 		std::string m_NetworkServerAddress; //!< LAN server address to connect to.
@@ -381,7 +357,7 @@ namespace RTE {
 		bool m_AllowSavingToBase; //!< Whether editors will allow to select Base.rte as a module to save in.
 		bool m_ShowMetaScenes; //!< Show MetaScenes in editors and activities.
 
-		unsigned int m_RecommendedMOIDCount; //!< Recommended max MOID's before removing actors from scenes.
+		int m_RecommendedMOIDCount; //!< Recommended max MOID's before removing actors from scenes.
 		bool m_PreciseCollisions; //!<Whether to use additional Draws during MO's PreTravel and PostTravel to update MO layer this frame with more precision, or just uses data from the last frame with less precision.
 
 		bool m_LaunchIntoActivity; //!< Whether to skip the intro and main menu and launch directly into the set default activity instead.
@@ -389,7 +365,7 @@ namespace RTE {
 		bool m_SkipIntro; //!< Whether to play the intro of the game or skip directly to the main menu.
 		bool m_ToolTips; //!< Whether ToolTips are enabled or not.
 		bool m_DisableLoadingScreen; //!< Whether to display the reader progress report during module loading or not. Greatly increases loading speeds when disabled.
-		unsigned short m_LoadingScreenReportPrecision; //!< How accurately the reader progress report tells what line it's reading during module loading. Lower values equal more precision at the cost of loading speed.
+		int m_LoadingScreenReportPrecision; //!< How accurately the reader progress report tells what line it's reading during module loading. Lower values equal more precision at the cost of loading speed.
 		float m_MenuTransitionDurationMultiplier; //!< Multiplier value for the transition durations between different menus. Lower values equal faster transitions.
 		bool m_PrintDebugInfo; //!< Print some debug info in console.
 

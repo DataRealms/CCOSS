@@ -110,16 +110,6 @@ int MovableMan::ReadProperty(const std::string &propName, Reader &reader)
         g_PresetMan.GetEntityPreset(reader);
     else if (propName == "SplashRatio")
         reader >> m_SplashRatio;
-    else if (propName == "MaxUnheldItems")
-        reader >> m_MaxDroppedItems;
-    else if (propName == "SloMoThreshold")
-        reader >> m_SloMoThreshold;
-    else if (propName == "SloMoDurationMS")
-        reader >> m_SloMoDuration;
-    else if (propName == "EnableParticleSettling")
-        reader >> m_SettlingEnabled;
-    else if (propName == "EnableMOSubtraction")
-        reader >> m_MOSubtractionEnabled;
     else
         return Serializable::ReadProperty(propName, reader);
 

@@ -116,21 +116,6 @@ void SceneMan::Clear()
 	m_pOrphanSearchBitmap = create_bitmap_ex(8, MAXORPHANRADIUS , MAXORPHANRADIUS);
 }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the SceneMan object ready for use.
-
-int SceneMan::Create()
-{
-    if (Serializable::Create() < 0)
-        return -1;
-
-    return 0;
-}
-*/
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -290,7 +275,7 @@ int SceneMan::LoadScene()
             SetSceneToLoad(g_ActivityMan.GetActivity()->GetSceneName());
 
         // If that failed, then resort to the default scene name
-        if (SetSceneToLoad(g_SceneMan.GetDefaultSceneName()) < 0)
+        if (SetSceneToLoad(m_DefaultSceneName) < 0)
         {
             g_ConsoleMan.PrintString("ERROR: Couldn't start because no Scene has been specified to load!");
             return -1;

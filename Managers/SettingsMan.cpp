@@ -18,14 +18,6 @@ namespace RTE {
 	void SettingsMan::Clear() {
 		m_SettingsNeedOverwrite = false;
 
-
-		m_SoundPanningEffectStrength = 0.6F;
-		//////////////////////////////////////////////////
-		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
-		m_ListenerZOffset = 0;
-		m_MinimumDistanceForPanning = 50.0F;
-		//////////////////////////////////////////////////
-
 		m_FlashOnBrainDamage = true;
 		m_BlipOnRevealUnseen = true;
 		m_EndlessMode = false;
@@ -111,14 +103,14 @@ namespace RTE {
 		} else if (propName == "MusicVolume") {
 			g_AudioMan.SetMusicVolume(std::stod(reader.ReadPropValue()) / 100.0);
 		} else if (propName == "SoundPanningEffectStrength") {
-			reader >> m_SoundPanningEffectStrength;
+			reader >> g_AudioMan.m_SoundPanningEffectStrength;
 
 		//////////////////////////////////////////////////
 		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
 		} else if (propName == "ListenerZOffset") {
-			reader >> m_ListenerZOffset;
+			reader >> g_AudioMan.m_ListenerZOffset;
 		} else if (propName == "MinimumDistanceForPanning") {
-			reader >> m_MinimumDistanceForPanning;
+			reader >> g_AudioMan.m_MinimumDistanceForPanning;
 		//////////////////////////////////////////////////
 
 		} else if (propName == "ShowForeignItems") {
@@ -128,11 +120,11 @@ namespace RTE {
 		} else if (propName == "BlipOnRevealUnseen") {
 			reader >> m_BlipOnRevealUnseen;
 		} else if (propName == "MaxUnheldItems") {
-			g_MovableMan.ReadProperty(propName, reader);
+			reader >> g_MovableMan.m_MaxDroppedItems;
 		} else if (propName == "SloMoThreshold") {
-			g_MovableMan.ReadProperty(propName, reader);
+			reader >> g_MovableMan.m_SloMoThreshold;
 		} else if (propName == "SloMoDurationMS") {
-			g_MovableMan.ReadProperty(propName, reader);
+			reader >> g_MovableMan.m_SloMoDuration;
 		} else if (propName == "EndlessMode") {
 			reader >> m_EndlessMode;
 		} else if (propName == "EnableHats") {
@@ -144,11 +136,11 @@ namespace RTE {
 		} else if (propName == "LaunchIntoActivity") {
 			reader >> m_LaunchIntoActivity;
 		} else if (propName == "DefaultActivityType") {
-			g_ActivityMan.SetDefaultActivityType(reader.ReadPropValue());
+			reader >> g_ActivityMan.m_DefaultActivityType;
 		} else if (propName == "DefaultActivityName") {
-			g_ActivityMan.SetDefaultActivityName(reader.ReadPropValue());
+			reader >> g_ActivityMan.m_DefaultActivityName;
 		} else if (propName == "DefaultSceneName") {
-			g_SceneMan.SetDefaultSceneName(reader.ReadPropValue());
+			reader >> g_SceneMan.m_DefaultSceneName;
 		} else if (propName == "RecommendedMOIDCount") {
 			reader >> m_RecommendedMOIDCount;
 
@@ -159,9 +151,9 @@ namespace RTE {
 		*/
 
 		} else if (propName == "EnableParticleSettling") {
-			g_MovableMan.ReadProperty(propName, reader);
+			reader >> g_MovableMan.m_SettlingEnabled;
 		} else if (propName == "EnableMOSubtraction") {
-			g_MovableMan.ReadProperty(propName, reader);
+			reader >> g_MovableMan.m_MOSubtractionEnabled;
 		} else if (propName == "DeltaTime") {
 			g_TimerMan.SetDeltaTimeSecs(std::stof(reader.ReadPropValue()));
 		} else if (propName == "RealToSimCap") {
@@ -181,7 +173,7 @@ namespace RTE {
 		} else if (propName == "ConsoleScreenRatio") {
 			g_ConsoleMan.SetConsoleScreenSize(std::stof(reader.ReadPropValue()));
 		} else if (propName == "AdvancedPerformanceStats") {
-			g_PerformanceMan.ShowAdvancedPerformanceStats(std::stoi(reader.ReadPropValue()));
+			reader >> g_PerformanceMan.m_AdvancedPerfStats;
 		} else if (propName == "MenuTransitionDuration") {
 			SetMenuTransitionDurationMultiplier(std::stof(reader.ReadPropValue()));
 		} else if (propName == "PrintDebugInfo") {
@@ -231,7 +223,7 @@ namespace RTE {
 		} else if (propName == "MouseSensitivity") {
 			reader >> g_UInputMan.m_MouseSensitivity;
 		} else if (propName == "Player1Scheme" || propName == "Player2Scheme" || propName == "Player3Scheme" || propName == "Player4Scheme") {
-			for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
+			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 				std::string playerNum = std::to_string(player + 1);
 				if (propName == "Player" + playerNum + "Scheme") {
 					reader >> g_UInputMan.m_ControlScheme[player];
@@ -278,17 +270,18 @@ namespace RTE {
 		writer.NewLineString("// Audio Settings", false);
 		writer.NewLine(false);
 		writer.NewProperty("SoundVolume");
-		writer << g_AudioMan.GetSoundsVolume() * 100;
+		writer << g_AudioMan.m_SoundsVolume * 100;
 		writer.NewProperty("MusicVolume");
-		writer << g_AudioMan.GetMusicVolume() * 100;
+		writer << g_AudioMan.m_MusicVolume * 100;
 		writer.NewProperty("SoundPanningEffectStrength");
-		writer << m_SoundPanningEffectStrength;
+		writer << g_AudioMan.m_SoundPanningEffectStrength;
+
 		//////////////////////////////////////////////////
 		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
 		writer.NewProperty("ListenerZOffset");
-		writer << m_ListenerZOffset;
+		writer << g_AudioMan.m_ListenerZOffset;
 		writer.NewProperty("MinimumDistanceForPanning");
-		writer << m_MinimumDistanceForPanning;
+		writer << g_AudioMan.m_MinimumDistanceForPanning;
 		//////////////////////////////////////////////////
 
 		writer.NewLine(false, 2);
@@ -323,11 +316,11 @@ namespace RTE {
 		writer.NewProperty("LaunchIntoActivity");
 		writer << m_LaunchIntoActivity;
 		writer.NewProperty("DefaultActivityType");
-		writer << g_ActivityMan.GetDefaultActivityType();
+		writer << g_ActivityMan.m_DefaultActivityType;
 		writer.NewProperty("DefaultActivityName");
-		writer << g_ActivityMan.GetDefaultActivityName();
+		writer << g_ActivityMan.m_DefaultActivityName;
 		writer.NewProperty("DefaultSceneName");
-		writer << g_SceneMan.GetDefaultSceneName();
+		writer << g_SceneMan.m_DefaultSceneName;
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);
@@ -373,9 +366,9 @@ namespace RTE {
 		writer.NewProperty("LoadingScreenReportPrecision");
 		writer << m_LoadingScreenReportPrecision;
 		writer.NewProperty("ConsoleScreenRatio");
-		writer << g_ConsoleMan.GetConsoleScreenSize();
+		writer << g_ConsoleMan.m_ConsoleScreenRatio;
 		writer.NewProperty("AdvancedPerformanceStats");
-		writer << g_PerformanceMan.AdvancedPerformanceStatsEnabled();
+		writer << g_PerformanceMan.m_AdvancedPerfStats;
 		writer.NewProperty("MenuTransitionDuration");
 		writer << m_MenuTransitionDurationMultiplier;
 		writer.NewProperty("PrintDebugInfo");
@@ -476,7 +469,7 @@ namespace RTE {
 		writer.NewLineString("// Input Devices:  0 = Keyboard Only, 1 = Mouse + Keyboard, 2 = Joystick One, 3 = Joystick Two, , 4 = Joystick Three, 5 = Joystick Four");
 		writer.NewLineString("// Scheme Presets: 0 = No Preset, 1 = WASD, 2 = Cursor Keys, 3 = XBox 360 Controller");
 
-		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
+		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 			std::string playerNum = std::to_string(player + 1);
 			writer.NewLine(false, 2);
 			writer.NewDivider(false);
@@ -485,6 +478,8 @@ namespace RTE {
 			writer.NewProperty("Player" + playerNum + "Scheme");
 			writer << g_UInputMan.m_ControlScheme[player];
 		}
+
+		writer.ObjectEnd();
 
 		return 0;
 	}

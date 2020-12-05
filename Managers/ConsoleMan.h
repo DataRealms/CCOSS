@@ -18,6 +18,7 @@ namespace RTE {
 	/// The singleton manager of the lua console.
 	/// </summary>
 	class ConsoleMan : public Singleton<ConsoleMan> {
+		friend class SettingsMan;
 
 	public:
 

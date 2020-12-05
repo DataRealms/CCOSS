@@ -103,11 +103,8 @@ struct IntRect
 // Parent(s):       Singleton, Serializable.
 // Class history:   12/25/2001 SceneMan created.
 
-class SceneMan:
-    public Singleton<SceneMan>,
-    public Serializable
-{
-
+class SceneMan : public Singleton<SceneMan>, public Serializable {
+	friend class SettingsMan;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations

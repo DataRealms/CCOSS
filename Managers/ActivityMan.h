@@ -12,6 +12,7 @@ namespace RTE {
 	/// The singleton manager of the Activities and rules of Cortex Command.
 	/// </summary>
 	class ActivityMan : public Singleton<ActivityMan> {
+		friend class SettingsMan;
 
 	public:
 

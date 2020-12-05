@@ -219,84 +219,6 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newValue">New password to use when connecting via NAT punch-through service.</param>
 		void SetNATServerPassword(const std::string &newValue) { m_NATServerPassword = newValue.empty() ? "DefaultServerPassword" : newValue; }
-
-		/// <summary>
-		/// Gets whether server is using higher compression methods.
-		/// </summary>
-		/// <returns>Whether server is using higher compression methods or not.</returns>
-		bool GetServerUseHighCompression() const { return m_ServerUseHighCompression; }
-
-		/// <summary>
-		/// Gets whether server is using faster compression methods.
-		/// </summary>
-		/// <returns>Whether server is using faster compression methods or not.</returns>
-		bool GetServerUseFastCompression() const { return m_ServerUseFastCompression; }
-
-		/// <summary>
-		/// Gets the compression level used by the server when in high compressing mode.
-		/// </summary>
-		/// <returns>The compression level currently used by the server.</returns>
-		int GetServerHighCompressionLevel() const { return m_ServerHighCompressionLevel; }
-
-		/// <summary>
-		/// Gets the server acceleration factor, higher values consume more bandwidth but less CPU.
-		/// </summary>
-		/// <returns>The acceleration factor currently used by the server.</returns>
-		int GetServerFastAccelerationFactor() const { return m_ServerFastAccelerationFactor; }
-
-		/// <summary>
-		/// Gets whether server is using interlacing to reduce bandwidth usage.
-		/// </summary>
-		/// <returns>Whether server uses interlacing or not.</returns>
-		bool GetServerUseInterlacing() const { return m_ServerUseInterlacing; }
-
-		/// <summary>
-		/// Gets the server frame transmission rate.
-		/// </summary>
-		/// <returns>The server frame transmission rate.</returns>
-		unsigned short GetServerEncodingFps() const { return m_ServerEncodingFps; }
-
-		/// <summary>
-		/// Gets the input send rate between the client and the server.
-		/// </summary>
-		/// <returns>The input send rate.</returns>
-		unsigned short GetClientInputFps() const { return m_ClientInputFps; }
-
-		/// <summary>
-		/// Gets whether the server transmits frames as blocks instead of lines.
-		/// </summary>
-		/// <returns>Whether the server transmits frames as blocks instead of lines or not.</returns>
-		bool GetServerTransmitAsBoxes() const { return m_ServerTransmitAsBoxes; }
-
-		/// <summary>
-		/// Gets the width of the transmitted block when transmitting frames as blocks.
-		/// </summary>
-		/// <returns>The width of the transmitted block.</returns>
-		unsigned short GetServerBoxWidth() const { return m_ServerBoxWidth; }
-
-		/// <summary>
-		/// Gets the height of the transmitted block when transmitting frames as blocks.
-		/// </summary>
-		/// <returns>The height of the transmitted block.</returns>
-		unsigned short GetServerBoxHeight() const { return m_ServerBoxHeight; }
-
-		/// <summary>
-		/// Gets whether a NAT service is used for punch-through.
-		/// </summary>
-		/// <returns>Whether a NAT service is used for punch-through or not.</returns>
-		bool GetUseNATService() const { return m_UseNATService; }
-
-		/// <summary>
-		/// Gets whether server puts threads to sleep if it didn't receive anything for 10 seconds to reduce CPU load.
-		/// </summary>
-		/// <returns>Whether threads will be put to sleep when server isn't receiving any data or not.</returns>
-		bool GetServerSleepWhenIdle() const { return m_ServerSleepWhenIdle; }
-
-		/// <summary>
-		/// Gets whether the server will try to put the thread to sleep to reduce CPU load if the sim frame took less time to complete than it should at 30 fps.
-		/// </summary>
-		/// <returns>Whether threads will be put to sleep if server completed frame faster than it normally should or not.</returns>
-		bool GetServerSimSleepWhenIdle() const { return m_ServerSimSleepWhenIdle; }
 #pragma endregion
 
 #pragma region Editor Settings
@@ -452,33 +374,9 @@ namespace RTE {
 
 		std::string m_PlayerNetworkName; //!< Player name used in network multiplayer matches.
 		std::string m_NetworkServerAddress; //!< LAN server address to connect to.
-		bool m_UseNATService; //!< Whether a NAT service is used for punch-through.
 		std::string m_NATServiceAddress; //!< NAT punch-through server address.
 		std::string m_NATServerName; //!< Server name to use when connecting via NAT punch-through service.
 		std::string m_NATServerPassword; //!< Server password to use when connecting via NAT punch-through service.
-		unsigned short m_ClientInputFps; //!< The rate (in FPS) the client input is sent to the server.
-		bool m_ServerUseHighCompression; //!< Whether to use higher compression methods (default).
-		bool m_ServerUseFastCompression; //!< Whether to use faster compression methods and conserve CPU.
-		int m_ServerHighCompressionLevel; //!< Compression level. 10 is optimal, 12 is highest.
-		bool m_ServerUseInterlacing; //!< Use interlacing to heavily reduce bandwidth usage at the cost of visual degradation (unusable at 30 fps, but may be suitable at 60 fps).
-		unsigned short m_ServerEncodingFps; //!< Frame transmission rate. Higher value equals more CPU and bandwidth consumption.
-		bool m_ServerSleepWhenIdle; //!< If true puts thread to sleep if it didn't receive anything for 10 seconds to avoid melting the CPU at 100% even if there are no connections.
-		bool m_ServerSimSleepWhenIdle; //!< If true the server will try to put the thread to sleep to reduce CPU load if the sim frame took less time to complete than it should at 30 fps.
-
-		/// <summary>
-		/// Acceleration factor, higher values consume more bandwidth but less CPU.
-		/// The larger the acceleration value, the faster the algorithm, but also lesser the compression. It's a trade-off. It can be fine tuned, with each successive value providing roughly +~3% to speed. 
-		/// An acceleration value of "1" is the same as regular LZ4_compress_default(). Values <= 0 will be replaced by ACCELERATION_DEFAULT(currently == 1, see lz4 documentation).
-		/// </summary>
-		int m_ServerFastAccelerationFactor;
-
-		/// <summary>
-		/// Transmit frames as blocks instead of lines. Provides better compression at the cost of higher CPU usage.
-		/// Though the compression is quite high it is recommended that Width * Height are less than MTU size or about 1500 bytes or packets may be fragmented by network hardware or dropped completely.
-		/// </summary>
-		bool m_ServerTransmitAsBoxes;
-		unsigned short m_ServerBoxWidth; //!< Width of the transmitted CPU block. Different values may improve bandwidth usage.
-		unsigned short m_ServerBoxHeight; //!< Height of the transmitted CPU block. Different values may improve bandwidth usage.
 
 		bool m_AllowSavingToBase; //!< Whether editors will allow to select Base.rte as a module to save in.
 		bool m_ShowMetaScenes; //!< Show MetaScenes in editors and activities.

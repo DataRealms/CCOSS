@@ -68,7 +68,6 @@ namespace RTE {
 		// Record the first client that connects to us so we can pass it to the ping function
 		m_ClientID = RakNet::UNASSIGNED_SYSTEM_ADDRESS;
 		m_Client = RakNet::RakPeerInterface::GetInstance();
-		m_ClientInputFps = g_SettingsMan.GetClientInputFps();
 
 		return 0;
 	}

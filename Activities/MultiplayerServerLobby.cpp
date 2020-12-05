@@ -912,8 +912,6 @@ namespace RTE {
 
 	bool MultiplayerServerLobby::StartGame()
 	{
-		g_NetworkServer.SetInterlacingMode(g_SettingsMan.GetServerUseInterlacing());
-
 		// Get the currently selected Activity
 		const Activity *pActivityPreset = m_pActivitySelect->GetSelectedItem() ? dynamic_cast<const Activity *>(m_pActivitySelect->GetSelectedItem()->m_pEntity) : 0;
 

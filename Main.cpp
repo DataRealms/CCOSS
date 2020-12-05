@@ -1639,7 +1639,7 @@ bool RunGameLoop() {
 				g_NetworkServer.Update();
 				serverUpdated = true;
 			}
-			if (g_SettingsMan.GetServerSimSleepWhenIdle()) {
+			if (g_NetworkServer.GetServerSimSleepWhenIdle()) {
 				long long ticksToSleep = g_TimerMan.GetTimeToSleep();
 				if (ticksToSleep > 0) {
 					double secsToSleep = static_cast<double>(ticksToSleep) / static_cast<double>(g_TimerMan.GetTicksPerSecond());

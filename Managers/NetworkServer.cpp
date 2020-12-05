@@ -55,6 +55,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::Clear() {
+		m_SleepWhenIdle = false;
+		m_SimSleepWhenIdle = false;
+
 		for (short i = 0; i < c_MaxClients; i++) {
 			m_BackBuffer8[i] = 0;
 			m_BackBufferGUI8[i] = 0;
@@ -138,6 +141,7 @@ namespace RTE {
 		m_TransmitAsBoxes = true;
 		m_BoxWidth = 32;
 		m_BoxHeight = 44;
+		m_UseNATService = false;
 		m_NatServerConnected = false;
 		m_LastPackedReceived.Reset();
 	}
@@ -158,16 +162,6 @@ namespace RTE {
 			m_LZ4CompressionState[i] = malloc(LZ4_sizeofStateHC());
 			m_LZ4FastCompressionState[i] = malloc(LZ4_sizeofState());
 		}
-
-		m_UseHighCompression = g_SettingsMan.GetServerUseHighCompression();
-		m_UseFastCompression = g_SettingsMan.GetServerUseFastCompression();
-		m_HighCompressionLevel = g_SettingsMan.GetServerHighCompressionLevel();
-		m_FastAccelerationFactor = g_SettingsMan.GetServerFastAccelerationFactor();
-		m_UseInterlacing = g_SettingsMan.GetServerUseInterlacing();
-		m_EncodingFps = g_SettingsMan.GetServerEncodingFps();
-		m_TransmitAsBoxes = g_SettingsMan.GetServerTransmitAsBoxes();
-		m_BoxWidth = g_SettingsMan.GetServerBoxWidth();
-		m_BoxHeight = g_SettingsMan.GetServerBoxHeight();
 
 		return 0;
 	}
@@ -226,7 +220,7 @@ namespace RTE {
 			g_ConsoleMan.PrintString("SERVER: STARTED!");
 		}
 
-		if (g_SettingsMan.GetUseNATService()) {
+		if (m_UseNATService) {
 			g_ConsoleMan.PrintString("SERVER: Connecting to NAT service");
 
 			std::string serverName;
@@ -1725,7 +1719,7 @@ namespace RTE {
 			}
 		}
 
-		if (g_SettingsMan.GetServerSleepWhenIdle() && m_LastPackedReceived.IsPastRealMS(10000)) {
+		if (m_SleepWhenIdle && m_LastPackedReceived.IsPastRealMS(10000)) {
 			short playersConnected = 0;
 			for (short player = 0; player < c_MaxClients; player++)
 				if (IsPlayerConnected(player)) {

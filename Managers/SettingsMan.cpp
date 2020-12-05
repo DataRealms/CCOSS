@@ -2,9 +2,12 @@
 #include "ConsoleMan.h"
 #include "MovableMan.h"
 #include "FrameMan.h"
+#include "PostProcessMan.h"
 #include "AudioMan.h"
 #include "PerformanceMan.h"
 #include "UInputMan.h"
+#include "NetworkClient.h"
+#include "NetworkServer.h"
 
 namespace RTE {
 
@@ -32,22 +35,9 @@ namespace RTE {
 
 		m_NetworkServerAddress = "127.0.0.1:8000";
 		m_PlayerNetworkName = "Dummy";
-		m_UseNATService = false;
 		m_NATServiceAddress = "127.0.0.1:61111";
 		m_NATServerName = "DefaultServerName";
 		m_NATServerPassword = "DefaultServerPassword";
-		m_ClientInputFps = 30;
-		m_ServerTransmitAsBoxes = true;
-		m_ServerBoxWidth = 32;
-		m_ServerBoxHeight = 44;
-		m_ServerUseHighCompression = true;
-		m_ServerUseFastCompression = false;
-		m_ServerHighCompressionLevel = 10;
-		m_ServerFastAccelerationFactor = 1;
-		m_ServerUseInterlacing = false;
-		m_ServerEncodingFps = 30;
-		m_ServerSleepWhenIdle = false;
-		m_ServerSimSleepWhenIdle = false;
 
 		m_AllowSavingToBase = false;
 		m_ShowForeignItems = true;
@@ -201,7 +191,7 @@ namespace RTE {
 		} else if (propName == "NetworkServerName") {
 			reader >> m_NetworkServerAddress;
 		} else if (propName == "UseNATService") {
-			reader >> m_UseNATService;
+			reader >> g_NetworkServer.m_UseNATService;
 		} else if (propName == "NATServiceAddress") {
 			reader >> m_NATServiceAddress;
 		} else if (propName == "NATServerName") {
@@ -209,29 +199,29 @@ namespace RTE {
 		} else if (propName == "NATServerPassword") {
 			reader >> m_NATServerPassword;
 		} else if (propName == "ClientInputFps") {
-			reader >> m_ClientInputFps;
+			reader >> g_NetworkClient.m_ClientInputFps;
 		} else if (propName == "ServerTransmitAsBoxes") {
-			reader >> m_ServerTransmitAsBoxes;
+			reader >> g_NetworkServer.m_TransmitAsBoxes;
 		} else if (propName == "ServerBoxWidth") {
-			reader >> m_ServerBoxWidth;
+			reader >> g_NetworkServer.m_BoxWidth;
 		} else if (propName == "ServerBoxHeight") {
-			reader >> m_ServerBoxHeight;
+			reader >> g_NetworkServer.m_BoxHeight;
 		} else if (propName == "ServerUseHighCompression") {
-			reader >> m_ServerUseHighCompression;
+			reader >> g_NetworkServer.m_UseHighCompression;
 		} else if (propName == "ServerUseFastCompression") {
-			reader >> m_ServerUseFastCompression;
+			reader >> g_NetworkServer.m_UseFastCompression;
 		} else if (propName == "ServerHighCompressionLevel") {
-			reader >> m_ServerHighCompressionLevel;
+			reader >> g_NetworkServer.m_HighCompressionLevel;
 		} else if (propName == "ServerFastAccelerationFactor") {
-			reader >> m_ServerFastAccelerationFactor;
+			reader >> g_NetworkServer.m_FastAccelerationFactor;
 		} else if (propName == "ServerUseInterlacing") {
-			reader >> m_ServerUseInterlacing;
+			reader >> g_NetworkServer.m_UseInterlacing;
 		} else if (propName == "ServerEncodingFps") {
-			reader >> m_ServerEncodingFps;
+			reader >> g_NetworkServer.m_EncodingFps;
 		} else if (propName == "ServerSleepWhenIdle") {
-			reader >> m_ServerSleepWhenIdle;
+			reader >> g_NetworkServer.m_SleepWhenIdle;
 		} else if (propName == "ServerSimSleepWhenIdle") {
-			reader >> m_ServerSimSleepWhenIdle;
+			reader >> g_NetworkServer.m_SimSleepWhenIdle;
 		} else if (propName == "VisibleAssemblyGroup") {
 			m_VisibleAssemblyGroupsList.push_back(reader.ReadPropValue());
 		} else if (propName == "DisableMod") {
@@ -400,7 +390,7 @@ namespace RTE {
 		writer.NewProperty("NetworkServerName");
 		writer << m_NetworkServerAddress;
 		writer.NewProperty("UseNATService");
-		writer << m_UseNATService;
+		writer << g_NetworkServer.m_UseNATService;
 		writer.NewProperty("NATServiceAddress");
 		writer << m_NATServiceAddress;
 		writer.NewProperty("NATServerName");
@@ -413,29 +403,29 @@ namespace RTE {
 		writer.NewLineString("// Advanced Network Settings", false);
 		writer.NewLine(false);
 		writer.NewProperty("ClientInputFps");
-		writer << m_ClientInputFps;
+		writer << g_NetworkClient.m_ClientInputFps;
 		writer.NewProperty("ServerTransmitAsBoxes");
-		writer << m_ServerTransmitAsBoxes;
+		writer << g_NetworkServer.m_TransmitAsBoxes;
 		writer.NewProperty("ServerBoxWidth");
-		writer << m_ServerBoxWidth;
+		writer << g_NetworkServer.m_BoxWidth;
 		writer.NewProperty("ServerBoxHeight");
-		writer << m_ServerBoxHeight;
+		writer << g_NetworkServer.m_BoxHeight;
 		writer.NewProperty("ServerUseHighCompression");
-		writer << m_ServerUseHighCompression;
+		writer << g_NetworkServer.m_UseHighCompression;
 		writer.NewProperty("ServerUseFastCompression");
-		writer << m_ServerUseFastCompression;
+		writer << g_NetworkServer.m_UseFastCompression;
 		writer.NewProperty("ServerHighCompressionLevel");
-		writer << m_ServerHighCompressionLevel;
+		writer << g_NetworkServer.m_HighCompressionLevel;
 		writer.NewProperty("ServerFastAccelerationFactor");
-		writer << m_ServerFastAccelerationFactor;
+		writer << g_NetworkServer.m_FastAccelerationFactor;
 		writer.NewProperty("ServerUseInterlacing");
-		writer << m_ServerUseInterlacing;
+		writer << g_NetworkServer.m_UseInterlacing;
 		writer.NewProperty("ServerEncodingFps");
-		writer << m_ServerEncodingFps;
+		writer << g_NetworkServer.m_EncodingFps;
 		writer.NewProperty("ServerSleepWhenIdle");
-		writer << m_ServerSleepWhenIdle;
+		writer << g_NetworkServer.m_SleepWhenIdle;
 		writer.NewProperty("ServerSimSleepWhenIdle");
-		writer << m_ServerSimSleepWhenIdle;
+		writer << g_NetworkServer.m_SimSleepWhenIdle;
 
 		if (!m_VisibleAssemblyGroupsList.empty()) {
 			writer.NewLine(false, 2);

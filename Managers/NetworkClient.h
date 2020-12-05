@@ -27,6 +27,7 @@ namespace RTE {
 	/// The centralized singleton manager of the network multiplayer client.
 	/// </summary>
 	class NetworkClient : public Singleton<NetworkClient> {
+		friend class SettingsMan;
 
 	public:
 

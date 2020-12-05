@@ -4,21 +4,14 @@ VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RTEA", "RTEA.vcxproj", "{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{02433C09-01D9-4910-BB03-FF648DB02229}"
-EndProject
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug Open Source|Win32 = Debug Open Source|Win32
-		Final Open Source|Win32 = Final Open Source|Win32
-		Minimal Debug Open Source|Win32 = Minimal Debug Open Source|Win32
-	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Open Source|Win32.ActiveCfg = Debug Open Source|Win32
-		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Open Source|Win32.Build.0 = Debug Open Source|Win32
-		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Final Open Source|Win32.ActiveCfg = Final Open Source|Win32
-		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Final Open Source|Win32.Build.0 = Final Open Source|Win32
-		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Minimal Debug Open Source|Win32.ActiveCfg = Minimal Debug Open Source|Win32
-		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Minimal Debug Open Source|Win32.Build.0 = Minimal Debug Open Source|Win32
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Open Source|Win32.ActiveCfg = Debug Full|Win32
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Open Source|Win32.Build.0 = Debug Full|Win32
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Final Open Source|Win32.ActiveCfg = Final|Win32
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Final Open Source|Win32.Build.0 = Final|Win32
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Minimal Debug Open Source|Win32.ActiveCfg = Final|Win32
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Minimal Debug Open Source|Win32.Build.0 = Final|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

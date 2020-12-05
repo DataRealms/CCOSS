@@ -269,7 +269,7 @@ namespace RTE {
 		CreateBackBuffers();
 
 		ContentFile scenePreviewGradientFile("Base.rte/GUIs/PreviewSkyGradient.png");
-		m_ScenePreviewDumpGradient = scenePreviewGradientFile.LoadAndReleaseBitmap(COLORCONV_8_TO_32);
+		m_ScenePreviewDumpGradient = scenePreviewGradientFile.GetAsBitmap(COLORCONV_8_TO_32, false);
 
 		return 0;
 	}

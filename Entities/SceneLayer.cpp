@@ -224,7 +224,7 @@ int SceneLayer::LoadData()
     blit(pCopyFrom, m_pMainBitmap, 0, 0, 0, 0, pCopyFrom->w, pCopyFrom->h);
 */
     // Re-load directly from disk each time; don't do any caching of these bitmaps
-    m_pMainBitmap = m_BitmapFile.LoadAndReleaseBitmap();
+    m_pMainBitmap = m_BitmapFile.GetAsBitmap(COLORCONV_NONE, false);
 
     m_MainBitmapOwned = true;
 

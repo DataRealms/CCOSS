@@ -635,8 +635,28 @@ void MainMenuGUI::Update()
         return;
 
     // If esc pressed, show quit dialog if applicable
-    if (g_UInputMan.KeyPressed(KEY_ESC))
-        QuitLogic();
+	if (g_UInputMan.KeyPressed(KEY_ESC)) {
+		if (m_MenuScreen == OPTIONSSCREEN || m_MenuScreen == MODMANAGERSCREEN || m_MenuScreen == EDITORSCREEN || m_MenuScreen == CREDITSSCREEN) {
+			HideAllScreens();
+			m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
+			m_MenuScreen = MAINSCREEN;
+			m_ScreenChange = true;
+			g_GUISound.BackButtonPressSound()->Play();
+
+			if (m_MenuScreen == OPTIONSSCREEN) {
+				g_SettingsMan.SetFlashOnBrainDamage(m_aOptionsCheckbox[FLASHONBRAINDAMAGE]->GetCheck());
+				g_SettingsMan.SetBlipOnRevealUnseen(m_aOptionsCheckbox[BLIPONREVEALUNSEEN]->GetCheck());
+				g_SettingsMan.SetShowForeignItems(m_aOptionsCheckbox[SHOWFOREIGNITEMS]->GetCheck());
+				g_SettingsMan.SetShowToolTips(m_aOptionsCheckbox[SHOWTOOLTIPS]->GetCheck());
+				g_SettingsMan.SetPreciseCollisions(m_aOptionsCheckbox[PRECISECOLLISIONS]->GetCheck());
+				g_SettingsMan.UpdateSettingsFile();
+			} else if (m_MenuScreen == MODMANAGERSCREEN) {
+				g_SettingsMan.UpdateSettingsFile();
+			}
+		} else {
+			QuitLogic();
+		}
+	}
 
     ////////////////////////////////////////////////////////////////////////
     // Animate the menu into and out of view if enabled or disabled

@@ -1394,7 +1394,7 @@ bool SceneMan::LoadUnseenLayer(std::string bitmapPath, int team)
 {
     ContentFile bitmapFile(bitmapPath.c_str());
     SceneLayer *pUnseenLayer = new SceneLayer();
-    if (pUnseenLayer->Create(bitmapFile.LoadAndReleaseBitmap(), true, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0)) < 0)
+    if (pUnseenLayer->Create(bitmapFile.GetAsBitmap(COLORCONV_NONE, false), true, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0)) < 0)
     {
         g_ConsoleMan.PrintString("ERROR: Loading background layer " + pUnseenLayer->GetPresetName() + "\'s data failed!");
         return false;

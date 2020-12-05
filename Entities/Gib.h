@@ -15,6 +15,7 @@ namespace RTE {
 
 	public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
 #pragma region Creation
@@ -95,17 +96,7 @@ namespace RTE {
 		bool InheritsVelocity() const { return m_InheritsVel; }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Entity.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const override { return m_sClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string m_sClassName; //!< A string with the friendly-formatted type name of this object.
 
 		const MovableObject *m_GibParticle; //!< The pointer to the preset instance that copies of will be created as this Gib. Not Owned.
 		Vector m_Offset; //!< Offset spawn position from owner/parent's position.
@@ -117,6 +108,8 @@ namespace RTE {
 		bool m_InheritsVel; //!< Whether this Gib should inherit the velocity of the exploding parent or not.
 
 	private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		/// <summary>
 		/// Clears all the member variables of this Gib, effectively resetting the members of this abstraction level only.

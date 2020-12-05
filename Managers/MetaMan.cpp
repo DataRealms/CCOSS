@@ -31,7 +31,7 @@ extern bool g_ResumeActivity;
 
 namespace RTE {
 
-const string MetaMan::m_ClassName = "MetaMan";
+const string MetaMan::c_ClassName = "MetaMan";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

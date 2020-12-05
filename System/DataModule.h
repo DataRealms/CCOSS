@@ -28,6 +28,7 @@ namespace RTE {
 
 	public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
 #pragma region Creation
@@ -243,17 +244,7 @@ namespace RTE {
 		void ReloadAllScripts();
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Entity.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const override { return c_ClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		bool m_ScanFolderContents; //!< Indicates whether module loader should scan for any .ini's inside module folder instead of loading files defined in IncludeFile only.
 		bool m_IgnoreMissingItems; //!< Indicates whether module loader should ignore missing items in this module.
@@ -291,6 +282,8 @@ namespace RTE {
 		std::map<std::string, std::list<std::pair<std::string, Entity *>>> m_TypeMap;
 
 	private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 #pragma region Entity Mapping
 		/// <summary>

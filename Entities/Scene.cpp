@@ -36,7 +36,7 @@
 namespace RTE {
 
 ConcreteClassInfo(Scene, Entity, 0)
-const string Scene::Area::m_sClassName = "Area";
+const string Scene::Area::c_ClassName = "Area";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -20,6 +20,7 @@ namespace RTE {
 
 	public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
 		Vector SLOffset[c_MaxScreenCount][c_MaxLayersStoredForNetwork]; //!< SceneLayer offsets for each screen in online multiplayer.
@@ -541,17 +542,7 @@ namespace RTE {
 		int SaveWorldToPreviewBMP(const char *nameBase) { return SaveBitmap(ScenePreviewDump, nameBase); }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Entity.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const override { return c_ClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string c_ClassName; //!< The friendly-formatted type name of this object.
 
 		static constexpr unsigned short m_BPP = 32; //!< Color depth (bits per pixel).
 
@@ -634,6 +625,8 @@ namespace RTE {
 		std::mutex m_NetworkBitmapLock[c_MaxScreenCount]; //!< Mutex lock for thread safe updating of the network backbuffer bitmaps.
 
 	private:
+
+		static const std::string c_ClassName; //!< The friendly-formatted type name of this object.
 
 		/// <summary>
 		/// Enumeration with different settings for the SaveBitmap() method.

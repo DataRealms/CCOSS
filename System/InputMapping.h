@@ -12,6 +12,7 @@ namespace RTE {
 
 	public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
 #pragma region Creation
@@ -32,7 +33,7 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up an InputMapping object before deletion from system memory.
 		/// </summary>
-		~InputMapping() { Destroy(); }
+		~InputMapping() override { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the InputMapping object.
@@ -133,17 +134,7 @@ namespace RTE {
 		int GetAxis() const { return m_AxisMap; }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const override { return c_ClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		std::string m_PresetDescription; //!< The friendly description that is associated with the scheme preset element, if any is set.
 
@@ -158,6 +149,8 @@ namespace RTE {
 		int m_DirectionMap; //!< The joystick direction mapping.
 		
 	private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		/// <summary>
 		/// Clears all the member variables of this InputMapping, effectively resetting the members of this abstraction level only.

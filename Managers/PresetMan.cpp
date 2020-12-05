@@ -28,7 +28,7 @@
 
 namespace RTE {
 
-const string PresetMan::m_ClassName = "PresetMan";
+const string PresetMan::c_ClassName = "PresetMan";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -4,8 +4,6 @@
 
 namespace RTE {
 
-	const std::string PrimitiveMan::c_ClassName = "PrimitiveMan";
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PrimitiveMan::DrawBitmapPrimitive(int player, const Vector &centerPos, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped) {

@@ -15,6 +15,7 @@ namespace RTE {
 
 	public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
 		float m_X; //!< X value of this vector.
@@ -535,19 +536,9 @@ namespace RTE {
 		float & operator[](const int &rhs) { return (rhs == 0) ? m_X : m_Y; }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Vector.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Vector.</returns>
-		const std::string & GetClassName() const override { return c_ClassName; }
-#pragma endregion
-
-	protected:
+	private:
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
-
-	private:
 
 		/// <summary>
 		/// Clears all the member variables of this Vector, effectively resetting the members of this abstraction level only.

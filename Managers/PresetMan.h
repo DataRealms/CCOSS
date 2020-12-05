@@ -101,16 +101,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this entity.
-
-    const std::string & GetClassName() const { return m_ClassName; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          LoadDataModule
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Reads an entire data module and adds it to this. NOTE that official
@@ -491,13 +481,19 @@ public:
 	Actor * GetLoadout(std::string loadoutName, int moduleNumber, bool spawnDropShip);
 
 
+#pragma region Class Info
+	/// <summary>
+	/// Gets the class name of this object.
+	/// </summary>
+	/// <returns>A string with the friendly-formatted type name of this object.</returns>
+	const std::string & GetClassName() const { return c_ClassName; }
+#pragma endregion
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
 protected:
-
-    // Member variables
-    static const std::string m_ClassName;
 
     // Owned and loaded DataModule:s
     std::vector<DataModule *> m_pDataModules;
@@ -521,6 +517,8 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+	static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

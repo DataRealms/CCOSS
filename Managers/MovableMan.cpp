@@ -27,7 +27,7 @@
 
 namespace RTE {
 
-const string MovableMan::m_ClassName = "MovableMan";
+const string MovableMan::c_ClassName = "MovableMan";
 
 
 // Comparison functor for sorting movable objects by their X position using STL's sort

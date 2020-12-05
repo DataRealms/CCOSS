@@ -72,7 +72,7 @@ using namespace RTE;
 #define BRAINOVERLAP 2
 
 
-const string MetagameGUI::m_ClassName = "MetagameGUI";
+const string MetagameGUI::c_ClassName = "MetagameGUI";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

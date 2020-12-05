@@ -13,6 +13,7 @@ namespace RTE {
 
 	public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
 #pragma region Creation
@@ -109,17 +110,7 @@ namespace RTE {
 		//void SetupDefaults();
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const override { return c_ClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		InputDevice m_ActiveDevice; //!< The currently active device for this scheme.
 		InputPreset m_SchemePreset; //!< The preset this scheme was last set to, if any.
@@ -130,6 +121,8 @@ namespace RTE {
 		InputMapping m_InputMapping[INPUT_COUNT]; //!< The device input element mappings.
 
 	private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		/// <summary>
 		/// Clears all the member variables of this InputScheme, effectively resetting the members of this abstraction level only.

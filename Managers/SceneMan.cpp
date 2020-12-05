@@ -39,7 +39,7 @@ namespace RTE
 #define CLEANAIRINTERVAL 200000
 #define COMPACTINGHEIGHT 25
 
-const std::string SceneMan::m_ClassName = "SceneMan";
+const std::string SceneMan::c_ClassName = "SceneMan";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

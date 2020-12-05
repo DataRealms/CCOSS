@@ -15,6 +15,7 @@ namespace RTE {
 
 	public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
 		unsigned char m_R; //!< Red value of this color.
@@ -137,19 +138,12 @@ namespace RTE {
 		unsigned char RecalculateIndex() { return m_Index = makecol8(m_R, m_G, m_B); }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Color.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Color.</returns>
-		const std::string & GetClassName() const override { return c_ClassName; }
-#pragma endregion
-
 	protected:
 
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 
 	private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 
 		/// <summary>
 		/// Clears all the member variables of this Color, effectively resetting the members of this abstraction level only.

@@ -72,6 +72,7 @@ namespace RTE {
 
 	public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
 #pragma region Creation
@@ -450,17 +451,8 @@ namespace RTE {
 		Atom & operator=(const Atom &rhs) { if (this != &rhs) { Destroy(); Create(rhs); } return *this; }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const override { return c_ClassName; }
-#pragma endregion
-
 	protected:
 
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 		static constexpr int c_NormalCheckCount = 16; //!< Array size for offsets to form circle in s_NormalChecks.
 
 		static std::vector<void *> s_AllocatedPool; //!< Pool of pre-allocated Atoms.	
@@ -522,6 +514,8 @@ namespace RTE {
 		bool m_SubStepped;
 
 	private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 
 		/// <summary>
 		/// Clears all the member variables of this Atom, effectively resetting the members of this abstraction level only.

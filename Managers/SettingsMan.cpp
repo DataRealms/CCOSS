@@ -239,9 +239,15 @@ namespace RTE {
 		} else if (propName == "EnableScript") {
 			EnableScript(reader.ReadPropValue());
 		} else if (propName == "MouseSensitivity") {
-			g_UInputMan.ReadProperty(propName, reader);
+			reader >> g_UInputMan.m_MouseSensitivity;
 		} else if (propName == "Player1Scheme" || propName == "Player2Scheme" || propName == "Player3Scheme" || propName == "Player4Scheme") {
-			g_UInputMan.ReadProperty(propName, reader);
+			for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
+				std::string playerNum = std::to_string(player + 1);
+				if (propName == "Player" + playerNum + "Scheme") {
+					reader >> g_UInputMan.m_ControlScheme[player];
+					break;
+				}
+			}
 		} else {
 			return Serializable::ReadProperty(propName, reader);
 		}
@@ -469,7 +475,26 @@ namespace RTE {
 			}
 		}
 
-		writer << g_UInputMan;
+		writer.NewLine(false, 2);
+		writer.NewDivider(false);
+		writer.NewLineString("// Input Mapping", false);
+		writer.NewLine(false);
+		writer.NewProperty("MouseSensitivity");
+		writer << g_UInputMan.m_MouseSensitivity;
+
+		writer.NewLine(false);
+		writer.NewLineString("// Input Devices:  0 = Keyboard Only, 1 = Mouse + Keyboard, 2 = Joystick One, 3 = Joystick Two, , 4 = Joystick Three, 5 = Joystick Four");
+		writer.NewLineString("// Scheme Presets: 0 = No Preset, 1 = WASD, 2 = Cursor Keys, 3 = XBox 360 Controller");
+
+		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
+			std::string playerNum = std::to_string(player + 1);
+			writer.NewLine(false, 2);
+			writer.NewDivider(false);
+			writer.NewLineString("// Player " + playerNum, false);
+			writer.NewLine(false);
+			writer.NewProperty("Player" + playerNum + "Scheme");
+			writer << g_UInputMan.m_ControlScheme[player];
+		}
 
 		return 0;
 	}

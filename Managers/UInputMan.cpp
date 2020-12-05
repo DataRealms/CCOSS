@@ -15,7 +15,6 @@ extern bool g_LaunchIntoEditor;
 
 namespace RTE {
 
-	const std::string UInputMan::c_ClassName = "UInputMan";
 	GUIInput* UInputMan::s_InputClass = nullptr;
 
 	char *UInputMan::s_PrevKeyStates = new char[KEY_MAX];
@@ -106,61 +105,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		if (Serializable::Create() < 0) {
-			return -1;
-		}
 	int UInputMan::Initialize() {
 		if (install_keyboard() != 0) { RTEAbort("Failed to initialize keyboard!"); }
 		if (install_joystick(JOY_TYPE_AUTODETECT) != 0) { RTEAbort("Failed to initialize joysticks!"); }
 
 		poll_joystick();
 
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int UInputMan::ReadProperty(const std::string &propName, Reader &reader) {
-		if (propName == "MouseSensitivity") {
-			reader >> m_MouseSensitivity;
-		} else if (propName == "Player1Scheme" || propName == "Player2Scheme" || propName == "Player3Scheme" || propName == "Player4Scheme") {
-			for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
-				std::string playerNum = std::to_string(player + 1);
-				if (propName == "Player" + playerNum + "Scheme") {
-					reader >> m_ControlScheme[player];
-					break;
-				}
-			}
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int UInputMan::Save(Writer &writer) const {
-		writer.NewLine(false, 2);
-		writer.NewDivider(false);
-		writer.NewLineString("// Input Mapping", false);
-		writer.NewLine(false);
-
-		writer.NewProperty("MouseSensitivity");
-		writer << m_MouseSensitivity;
-
-		writer.NewLine(false);
-		writer.NewLineString("// Input Devices:  0 = Keyboard Only, 1 = Mouse + Keyboard, 2 = Joystick One, 3 = Joystick Two, , 4 = Joystick Three, 5 = Joystick Four");
-		writer.NewLineString("// Scheme Presets: 0 = No Preset, 1 = WASD, 2 = Cursor Keys, 3 = XBox 360 Controller");
-
-		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
-			std::string playerNum = std::to_string(player + 1);
-			writer.NewLine(false, 2);
-			writer.NewDivider(false);
-			writer.NewLineString("// Player " + playerNum, false);
-			writer.NewLine(false);
-			writer.NewProperty("Player" + playerNum + "Scheme");
-			writer << m_ControlScheme[player];
-		}
 		return 0;
 	}
 

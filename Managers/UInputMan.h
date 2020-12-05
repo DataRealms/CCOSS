@@ -15,12 +15,10 @@ namespace RTE {
 	/// <summary>
 	/// The singleton manager responsible for handling user input.
 	/// </summary>
-	class UInputMan : public Singleton<UInputMan>, public Serializable {
+	class UInputMan : public Singleton<UInputMan> {
+		friend class SettingsMan;
 
 	public:
-
-		SerializableClassNameGetter
-		SerializableOverrideMethods
 
 		/// <summary>
 		/// Enumeration for the different states an input element or button can be in.
@@ -64,11 +62,6 @@ namespace RTE {
 		/// Destroys and resets (through Clear()) the UInputMan object.
 		/// </summary>
 		void Destroy() { Clear(); }
-
-		/// <summary>
-		/// Resets the entire UInputMan, including its inherited members, to their default settings or values.
-		/// </summary>
-		void Reset() override { Clear(); }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -786,8 +779,6 @@ namespace RTE {
 		bool m_TrapMousePosPerPlayer[Players::MaxPlayerCount]; //!< Whether to trap the mouse position to the middle of the screen for each player during network multiplayer.
 
 	private:
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 #pragma region Input State Handling
 		/// <summary>

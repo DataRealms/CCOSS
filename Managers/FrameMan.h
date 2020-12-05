@@ -16,12 +16,10 @@ namespace RTE {
 	/// <summary>
 	/// The singleton manager over the composition and display of frames.
 	/// </summary>
-	class FrameMan : public Singleton<FrameMan>, public Serializable {
+	class FrameMan : public Singleton<FrameMan> {
+		friend class SettingsMan;
 
 	public:
-
-		SerializableClassNameGetter
-		SerializableOverrideMethods
 
 		Vector SLOffset[c_MaxScreenCount][c_MaxLayersStoredForNetwork]; //!< SceneLayer offsets for each screen in online multiplayer.
 
@@ -54,11 +52,6 @@ namespace RTE {
 		/// This will be called by ReinitMainMenu() and MUST NOT BE CALLED ANYWHERE ELSE!
 		/// </summary>
 		void DestroyTempBackBuffers();
-
-		/// <summary>
-		/// Resets the entire FrameMan, including its inherited members, to their default settings or values.
-		/// </summary>
-		void Reset() override { Clear(); }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -547,6 +540,9 @@ namespace RTE {
 		static constexpr unsigned short m_BPP = 32; //!< Color depth (bits per pixel).
 
 		int m_GfxDriver; //!< The graphics driver that will be used for rendering.
+		bool m_ForceVirtualFullScreenGfxDriver; //!< Whether to use the borderless window driver. Overrides any other windowed drivers. The driver that will be used is GFX_DIRECTX_WIN_BORDERLESS.
+		bool m_ForceOverlayedWindowGfxDriver; //!< Whether to use the non-overlapped windowed driver. The driver that will be used is GFX_DIRECTX_OVL.
+		bool m_ForceNonOverlayedWindowGfxDriver; //!< Whether to use the non-overlay driver. Overrides overlayed driver setting. The driver that will be used is GFX_DIRECTX_WIN.
 
 		bool m_DisableMultiScreenResolutionValidation; //!< Whether to disable resolution validation when running multi-screen mode or not. Allows setting whatever crazy resolution that may or may not crash.
 
@@ -626,12 +622,10 @@ namespace RTE {
 
 	private:
 
-		static const std::string c_ClassName; //!< The friendly-formatted type name of this object.
-
 		/// <summary>
 		/// Enumeration with different settings for the SaveBitmap() method.
 		/// </summary>
-		enum SaveBitmapMode { SingleBitmap = 0, ScreenDump, WorldDump, ScenePreviewDump};
+		enum SaveBitmapMode { SingleBitmap = 0, ScreenDump, WorldDump, ScenePreviewDump };
 
 		/// <summary>
 		/// BITMAPs to temporarily store the backbuffers when recreating them. These are needed to have a pointer to their original allocated memory after overwriting them so it can be deleted.

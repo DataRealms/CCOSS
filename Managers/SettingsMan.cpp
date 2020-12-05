@@ -4,7 +4,6 @@
 #include "FrameMan.h"
 #include "AudioMan.h"
 #include "PerformanceMan.h"
-#include "PostProcessMan.h"
 #include "UInputMan.h"
 
 namespace RTE {
@@ -16,9 +15,6 @@ namespace RTE {
 	void SettingsMan::Clear() {
 		m_SettingsNeedOverwrite = false;
 
-		m_ForceVirtualFullScreenGfxDriver = false;
-		m_ForceOverlayedWindowGfxDriver = false;
-		m_ForceNonOverlayedWindowGfxDriver = false;
 
 		m_SoundPanningEffectStrength = 0.6F;
 		//////////////////////////////////////////////////
@@ -99,25 +95,27 @@ namespace RTE {
 
 	int SettingsMan::ReadProperty(const std::string &propName, Reader &reader) {
 		if (propName == "PaletteFile") {
-			g_FrameMan.ReadProperty(propName, reader);
+			reader >> g_FrameMan.m_PaletteFile;
 		} else if (propName == "ResolutionX") {
-			g_FrameMan.ReadProperty(propName, reader);
+			reader >> g_FrameMan.m_ResX;
+			g_FrameMan.m_NewResX = g_FrameMan.m_ResX;
 		} else if (propName == "ResolutionY") {
-			g_FrameMan.ReadProperty(propName, reader);
+			reader >> g_FrameMan.m_ResY;
+			g_FrameMan.m_NewResY = g_FrameMan.m_ResY;
 		} else if (propName == "ResolutionMultiplier") {
-			g_FrameMan.ReadProperty(propName, reader);
+			reader >> g_FrameMan.m_ResMultiplier;
 		} else if (propName == "DisableMultiScreenResolutionValidation") {
-			g_FrameMan.ReadProperty(propName, reader);
+			reader >> g_FrameMan.m_DisableMultiScreenResolutionValidation;
 		} else if (propName == "HSplitScreen") {
-			g_FrameMan.ReadProperty(propName, reader);
+			reader >> g_FrameMan.m_HSplitOverride;
 		} else if (propName == "VSplitScreen") {
-			g_FrameMan.ReadProperty(propName, reader);
+			reader >> g_FrameMan.m_VSplitOverride;
 		} else if (propName == "ForceVirtualFullScreenGfxDriver") {
-			reader >> m_ForceVirtualFullScreenGfxDriver;
+			reader >> g_FrameMan.m_ForceVirtualFullScreenGfxDriver;
 		} else if (propName == "ForceOverlayedWindowGfxDriver") {
-			reader >> m_ForceOverlayedWindowGfxDriver;
+			reader >> g_FrameMan.m_ForceOverlayedWindowGfxDriver;
 		} else if (propName == "ForceNonOverlayedWindowGfxDriver") {
-			reader >> m_ForceNonOverlayedWindowGfxDriver;
+			reader >> g_FrameMan.m_ForceNonOverlayedWindowGfxDriver;
 		} else if (propName == "SoundVolume") {
 			g_AudioMan.SetSoundsVolume(std::stod(reader.ReadPropValue()) / 100.0);
 		} else if (propName == "MusicVolume") {
@@ -259,25 +257,25 @@ namespace RTE {
 		writer.NewLineString("// Display Settings", false);
 		writer.NewLine(false);
 		writer.NewProperty("PaletteFile");
-		writer << g_FrameMan.GetPaletteFile();
+		writer << g_FrameMan.m_PaletteFile;
 		writer.NewProperty("ResolutionX");
-		writer << g_FrameMan.GetNewResX();
+		writer << g_FrameMan.m_NewResX;
 		writer.NewProperty("ResolutionY");
-		writer << g_FrameMan.GetNewResY();
+		writer << g_FrameMan.m_NewResY;
 		writer.NewProperty("ResolutionMultiplier");
-		writer << g_FrameMan.ResolutionMultiplier();
+		writer << g_FrameMan.m_ResMultiplier;
 		writer.NewProperty("DisableMultiScreenResolutionValidation");
-		writer << g_FrameMan.IsMultiScreenResolutionValidationDisabled();
+		writer << g_FrameMan.m_DisableMultiScreenResolutionValidation;
 		writer.NewProperty("HSplitScreen");
-		writer << g_FrameMan.GetHSplit();
+		writer << g_FrameMan.m_HSplitOverride;
 		writer.NewProperty("VSplitScreen");
-		writer << g_FrameMan.GetVSplit();
+		writer << g_FrameMan.m_VSplitOverride;
 		writer.NewProperty("ForceVirtualFullScreenGfxDriver");
-		writer << m_ForceVirtualFullScreenGfxDriver;
+		writer << g_FrameMan.m_ForceVirtualFullScreenGfxDriver;
 		writer.NewProperty("ForceOverlayedWindowGfxDriver");
-		writer << m_ForceOverlayedWindowGfxDriver;
+		writer << g_FrameMan.m_ForceOverlayedWindowGfxDriver;
 		writer.NewProperty("ForceNonOverlayedWindowGfxDriver");
-		writer << m_ForceNonOverlayedWindowGfxDriver;
+		writer << g_FrameMan.m_ForceNonOverlayedWindowGfxDriver;
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

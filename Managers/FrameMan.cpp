@@ -24,8 +24,6 @@ extern bool g_InActivity;
 
 namespace RTE {
 
-	const std::string FrameMan::c_ClassName = "FrameMan";
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::DisplaySwitchOut(void) { g_UInputMan.DisableMouseMoving(true); }
@@ -38,6 +36,9 @@ namespace RTE {
 
 	void FrameMan::Clear() {
 		m_GfxDriver = GFX_AUTODETECT_WINDOWED;
+		m_ForceVirtualFullScreenGfxDriver = false;
+		m_ForceOverlayedWindowGfxDriver = false;
+		m_ForceNonOverlayedWindowGfxDriver = false;
 		m_DisableMultiScreenResolutionValidation = false;
 #ifdef _WIN32
 		m_NumScreens = GetSystemMetrics(SM_CMONITORS);
@@ -117,13 +118,13 @@ namespace RTE {
 
 	void FrameMan::SetGraphicsDriver() {
 #ifdef _WIN32
-		if (g_SettingsMan.ForceOverlayedWindowGfxDriver()) {
+		if (m_ForceOverlayedWindowGfxDriver) {
 			m_GfxDriver = GFX_DIRECTX_OVL;
 			g_ConsoleMan.PrintString("SYSTEM: Using overlay DirectX windowed driver!");
-		} else if (g_SettingsMan.ForceNonOverlayedWindowGfxDriver()) {
+		} else if (m_ForceNonOverlayedWindowGfxDriver) {
 			m_GfxDriver = GFX_DIRECTX_WIN;
 			g_ConsoleMan.PrintString("SYSTEM: Using non-overlay DirectX windowed driver!");
-		} else if (g_SettingsMan.ForceVirtualFullScreenGfxDriver()) {
+		} else if (m_ForceVirtualFullScreenGfxDriver) {
 			m_GfxDriver = GFX_DIRECTX_WIN_BORDERLESS;
 			g_ConsoleMan.PrintString("SYSTEM: Using DirectX fullscreen-windowed driver!");
 		} else {
@@ -337,54 +338,6 @@ namespace RTE {
 		if (m_HSplit || m_VSplit) { m_TempPlayerScreen = m_PlayerScreen; }
 
 		CreateBackBuffers();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int FrameMan::ReadProperty(const std::string &propName, Reader &reader) {
-		if (propName == "ResolutionX") {
-			reader >> m_ResX;
-			m_NewResX = m_ResX;
-		} else if (propName == "ResolutionY") {
-			reader >> m_ResY;
-			m_NewResY = m_ResY;
-		} else if (propName == "ResolutionMultiplier") {
-			reader >> m_ResMultiplier;
-		} else if (propName == "DisableMultiScreenResolutionValidation") {
-			reader >> m_DisableMultiScreenResolutionValidation;
-		} else if (propName == "HSplitScreen") {
-			reader >> m_HSplitOverride;
-		} else if (propName == "VSplitScreen") {
-			reader >> m_VSplitOverride;
-		} else if (propName == "PaletteFile") {
-			reader >> m_PaletteFile;
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int FrameMan::Save(Writer &writer) const {
-		Serializable::Save(writer);
-
-		writer.NewProperty("ResolutionX");
-		writer << m_ResX;
-		writer.NewProperty("ResolutionY");
-		writer << m_ResY;
-		writer.NewProperty("ResolutionMultiplier");
-		writer << m_ResMultiplier;
-		writer.NewProperty("DisableMultiScreenResolutionValidation");
-		writer << m_DisableMultiScreenResolutionValidation;
-		writer.NewProperty("HSplitScreen");
-		writer << m_HSplitOverride;
-		writer.NewProperty("VSplitScreen");
-		writer << m_VSplitOverride;
-		writer.NewProperty("PaletteFile");
-		writer << m_PaletteFile;
-
-		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

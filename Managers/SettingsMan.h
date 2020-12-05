@@ -90,25 +90,6 @@ namespace RTE {
 		void SetPreciseCollisions(bool newValue) { m_PreciseCollisions = newValue; }
 #pragma endregion
 
-#pragma region Display Settings
-		/// <summary>
-		/// Whether we're told to use windowed driver with borderless style driver via settings. Overrides any other windowed drivers. The driver that will be used is GFX_DIRECTX_WIN_BORDERLESS.
-		/// </summary>
-		/// <returns>True if forced to use software driver.</returns>
-		bool ForceVirtualFullScreenGfxDriver() const { return m_ForceVirtualFullScreenGfxDriver; }
-
-		/// <summary>
-		/// Whether we're told to use non overlapped windowed driver. The driver that will be used is GFX_DIRECTX_OVL.
-		/// </summary>
-		/// <returns>True if forced to use software driver.</returns>
-		bool ForceOverlayedWindowGfxDriver() const { return m_ForceOverlayedWindowGfxDriver; }
-
-		/// <summary>
-		/// Whether we're told to use non-overlay driver. Overrides overlayed driver setting. The driver that will be used is GFX_DIRECTX_WIN.
-		/// </summary>
-		/// <returns>True if forced to use software driver.</returns>
-		bool ForceNonOverlayedWindowGfxDriver() const { return m_ForceNonOverlayedWindowGfxDriver; }
-#pragma endregion
 
 #pragma region Audio Settings
 		/// <summary>
@@ -468,9 +449,6 @@ namespace RTE {
 
 		bool m_SettingsNeedOverwrite; //!< Whether the settings file was generated with minimal defaults and needs to be overwritten to be fully populated.
 
-		bool m_ForceVirtualFullScreenGfxDriver; //!< Whether we should try using fullscreen mode.
-		bool m_ForceOverlayedWindowGfxDriver; //!< Whether we should try using overlayed window driver.
-		bool m_ForceNonOverlayedWindowGfxDriver; //!< Whether we should try using non-overlayed window driver.
 
 		float m_SoundPanningEffectStrength; //!< The strength of the sound panning effect, 0 (no panning) - 1 (full panning).
 

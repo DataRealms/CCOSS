@@ -35,7 +35,7 @@ namespace RTE {
 		/// Makes the FrameMan object ready for use, which is to be used with SettingsMan first.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create() override;
+		int Initialize();
 #pragma endregion
 
 #pragma region Destruction

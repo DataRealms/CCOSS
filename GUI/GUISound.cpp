@@ -36,7 +36,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int GUISound::Create() {
+	int GUISound::Initialize() {
 		// Interface sounds should not be pitched to reinforce the appearance of time decoupling between simulation and UI.
 
 		m_SplashSound.Create("Base.rte/Sounds/GUIs/MetaStart.flac", 0, false, 0, true);

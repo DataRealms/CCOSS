@@ -46,13 +46,13 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a NetworkServer object in system memory. This will call Create() so it shouldn't be called after.
 		/// </summary>
-		NetworkServer() { Clear(); Create(); }
+		NetworkServer() { Clear(); Initialize(); }
 
 		/// <summary>
 		/// Makes the NetworkServer object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create();
+		int Initialize();
 #pragma endregion
 
 #pragma region Destruction

@@ -224,7 +224,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::Create() {
+	int FrameMan::Initialize() {
 		SetGraphicsDriver();
 		ValidateResolution(m_ResX, m_ResY, m_ResMultiplier);
 		set_color_depth(m_BPP);

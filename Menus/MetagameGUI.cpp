@@ -3036,7 +3036,7 @@ void MetagameGUI::CompletedActivity()
 
             // Clear out the Lua state completely so it's not running some BS in the background
             g_LuaMan.Destroy();
-            g_LuaMan.Create();
+            g_LuaMan.Initialize();
             g_PresetMan.ReloadAllScripts();
 
             // Play some nice ambient music

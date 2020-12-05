@@ -24,7 +24,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int PostProcessMan::Create() {
+	int PostProcessMan::Initialize() {
 		// TODO: Make more robust and load more glows!
 		ContentFile glowFile("Base.rte/Effects/Glows/YellowTiny.png");
 		m_YellowGlow = glowFile.GetAsBitmap();

@@ -77,7 +77,7 @@ void MovableMan::Clear()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes the MovableMan object ready for use.
 
-int MovableMan::Create()
+int MovableMan::Initialize()
 {
 // TODO: Increase this number, or maybe only for certain classes?
     Entity::ClassInfo::FillAllPools();

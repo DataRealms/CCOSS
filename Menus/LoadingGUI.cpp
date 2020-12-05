@@ -141,7 +141,7 @@ namespace RTE {
 
 	bool LoadingGUI::LoadDataModules() {
 		g_PresetMan.Destroy();
-		g_PresetMan.Create();
+		g_PresetMan.Initialize();
 		ExtractZippedModules();
 		g_PresetMan.LoadAllDataModules();
 

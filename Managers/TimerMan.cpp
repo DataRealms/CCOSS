@@ -33,7 +33,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int TimerMan::Create() {
+	int TimerMan::Initialize() {
 		// Get the frequency of ticks/s for this machine
 #ifdef _WIN32
 		LARGE_INTEGER tempLInt;

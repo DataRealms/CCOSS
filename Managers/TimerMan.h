@@ -20,13 +20,13 @@ namespace RTE {
 		/// Constructor method used to instantiate a TimerMan object in system memory. This constructor calls Create() so it shouldn't be called again.
 		/// </summary>
 		// TODO: Figure out why removing Create() here kills fps and if it's already here then why are we calling Create() again during main().
-		TimerMan() { Clear(); Create(); }
+		TimerMan() { Clear(); Initialize(); }
 
 		/// <summary>
 		/// Makes the TimerMan object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create();
+		int Initialize();
 #pragma endregion
 
 #pragma region Destruction

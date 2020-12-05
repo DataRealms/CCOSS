@@ -106,10 +106,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int UInputMan::Create() {
 		if (Serializable::Create() < 0) {
 			return -1;
 		}
+	int UInputMan::Initialize() {
 		if (install_keyboard() != 0) { RTEAbort("Failed to initialize keyboard!"); }
 		if (install_joystick(JOY_TYPE_AUTODETECT) != 0) { RTEAbort("Failed to initialize joysticks!"); }
 

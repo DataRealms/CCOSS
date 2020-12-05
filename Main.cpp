@@ -185,7 +185,7 @@ void ReinitMainMenu() {
 	g_MetaMan.GetGUI()->Destroy();
 
 	g_ConsoleMan.Destroy();
-	g_ConsoleMan.Create();
+	g_ConsoleMan.Initialize();
 
 	InitMainMenu();
 	g_FrameMan.DestroyTempBackBuffers();
@@ -1726,31 +1726,31 @@ int main(int argc, char *argv[]) {
     ///////////////////////////////////////////////////////////////////
     // Create the essential managers
 
-    g_LuaMan.Create();
+    g_LuaMan.Initialize();
 	
-	Reader settingsReader("Base.rte/Settings.ini", false, 0, true);
-    g_SettingsMan.Create(settingsReader);
+	Reader settingsReader("Base.rte/Settings.ini", false, nullptr, true);
+    g_SettingsMan.Initialize(settingsReader);
 
-	g_NetworkServer.Create();
-	g_NetworkClient.Create();
+	g_NetworkServer.Initialize();
+	g_NetworkClient.Initialize();
 
     int exitVar = 0;
     if (!HandleMainArgs(argc, argv, exitVar)) {
 		return exitVar;
 	}
-    g_TimerMan.Create();
-	g_PerformanceMan.Create();
-    g_PresetMan.Create();
-    g_FrameMan.Create();
-    g_PostProcessMan.Create();
-    if (g_AudioMan.Create() >= 0) {
-        g_GUISound.Create();
+    g_TimerMan.Initialize();
+	g_PerformanceMan.Initialize();
+    g_PresetMan.Initialize();
+    g_FrameMan.Initialize();
+    g_PostProcessMan.Initialize();
+    if (g_AudioMan.Initialize() >= 0) {
+        g_GUISound.Initialize();
     }
-    g_UInputMan.Create();
-    g_ConsoleMan.Create();
-    g_ActivityMan.Create();
-    g_MovableMan.Create();
-    g_MetaMan.Create();
+    g_UInputMan.Initialize();
+    g_ConsoleMan.Initialize();
+    g_ActivityMan.Initialize();
+    g_MovableMan.Initialize();
+    g_MetaMan.Initialize();
 
     ///////////////////////////////////////////////////////////////////
     // Main game driver

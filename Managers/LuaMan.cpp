@@ -428,7 +428,7 @@ void LuaMan::Clear()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int LuaMan::Create() {
+int LuaMan::Initialize() {
     m_pMasterState = luaL_newstate();
     // Attach the master state to LuaBind
     luabind::open(m_pMasterState);

@@ -144,7 +144,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int NetworkServer::Create() {
+	int NetworkServer::Initialize() {
 		m_IsInServerMode = false;
 		m_ServerPort = "";
 		m_Server = RakNet::RakPeerInterface::GetInstance();

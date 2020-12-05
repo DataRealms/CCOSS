@@ -37,7 +37,7 @@ namespace RTE {
 		/// <param name="checkType">Whether there is a class name in the stream to check against to make sure the correct type is being read from the stream.</param>
 		/// <param name="doCreate">Whether to do any additional initialization of the object after reading in all the properties from the Reader.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(Reader &reader, bool checkType = true, bool doCreate = true) override;
+		int Initialize(Reader &reader, bool checkType = true, bool doCreate = true);
 #pragma endregion
 
 #pragma region Destruction

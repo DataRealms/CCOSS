@@ -64,7 +64,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int NetworkClient::Create() {
+	int NetworkClient::Initialize() {
 		// Record the first client that connects to us so we can pass it to the ping function
 		m_ClientID = RakNet::UNASSIGNED_SYSTEM_ADDRESS;
 		m_Client = RakNet::RakPeerInterface::GetInstance();

@@ -72,7 +72,7 @@ void MetaMan::Clear()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes the MetaMan object ready for use.
 
-int MetaMan::Create()
+int MetaMan::Initialize()
 {
 //    if (Serializable::Create() < 0)
 //        return -1;

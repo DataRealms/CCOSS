@@ -68,7 +68,7 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-	int Create();
+	int Initialize();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

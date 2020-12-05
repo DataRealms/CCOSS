@@ -72,7 +72,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SettingsMan::Create(Reader &reader, bool checkType, bool doCreate) {
+	int SettingsMan::Initialize(Reader &reader, bool checkType, bool doCreate) {
 		if (reader.IsOK()) {
 			return Serializable::Create(reader, checkType);
 		}

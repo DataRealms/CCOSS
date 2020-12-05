@@ -339,7 +339,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="rhs">A Vector reference.</param>
 		/// <returns>A reference to the changed Vector.</returns>
-		Vector & operator=(const Vector &rhs) = default;
+		Vector & operator=(const Vector &rhs);
 
 		/// <summary>
 		/// An assignment operator for setting this Vector equal to the average of an std::deque of Vectors.

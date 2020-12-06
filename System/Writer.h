@@ -19,20 +19,19 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a Writer object in system memory and make it ready for writing to the passed in file path.
 		/// </summary>
-		/// <param name="filename">Path to the file to open for writing.</param>
+		/// <param name="filename">Path to the file to open for writing. If the directory doesn't exist the stream will fail to open.</param>
 		/// <param name="append">Whether to append to the file if it exists, or to overwrite it.</param>
-		Writer(const char *filename, bool append = false) { Clear(); Create(filename, append); }
+		/// <param name="createDir">Whether to create the directory path to the file name before attempting to open the stream, in case it doesn't exist.</param>
+		Writer(const char *filename, bool append = false, bool createDir = false) { Clear(); Create(filename, append, createDir); }
 
 		/// <summary>
 		/// Makes the Writer object ready for use.
 		/// </summary>
-		/// <param name="filename">
-		/// The filename of the file to open and write to.
-		/// If the file path doesn't exist, the first directory name is used in an attempt to open a package and then read a file from within that.
-		/// </param>
+		/// <param name="filename">Path to the file to open for writing. If the directory doesn't exist the stream will fail to open.</param>
 		/// <param name="append">Whether to append to the file if it exists, or to overwrite it.</param>
+		/// <param name="createDir">Whether to create the directory path to the file name before attempting to open the stream, in case it doesn't exist.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(const char *filename, bool append = false);
+		int Create(const char *filename, bool append = false, bool createDir = false);
 #pragma endregion
 
 #pragma region Getters
@@ -112,7 +111,7 @@ namespace RTE {
 		/// Shows whether the writer is ready to start accepting data streamed to it.
 		/// </summary>
 		/// <returns>Whether the writer is ready to start accepting data streamed to it or not.</returns>
-		bool WriterOK() const { return m_Stream && !m_Stream->fail() && m_Stream->is_open(); }
+		bool WriterOK() const { return m_Stream.get() && !m_Stream->fail() && m_Stream->is_open(); }
 
 		/// <summary>
 		/// Flushes and closes the output stream of this Writer. This happens automatically at destruction but needs to be called manually if a written file must be read from in the same scope.

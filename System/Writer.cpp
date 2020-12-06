@@ -1,4 +1,5 @@
 #include "Writer.h"
+#include "System.h"
 
 namespace RTE {
 
@@ -14,13 +15,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Writer::Create(const char *filename, bool append) {
-		m_Stream = std::make_unique<std::ofstream>(filename, append ? (std::ios::out | std::ios::app | std::ios::ate) : (std::ios::out | std::ios::trunc));
-
-		if (!m_Stream->good()) {
-			return -1;
-		}
-
+	int Writer::Create(const char *filename, bool append, bool createDir) {
 		m_FilePath = filename;
 
 		// Extract filename and folder path
@@ -28,6 +23,13 @@ namespace RTE {
 		m_FileName = m_FilePath.substr(slashPos + 1);
 		m_FolderPath = m_FilePath.substr(0, slashPos + 1);
 
+		if (createDir) { System::MakeDirectory(System::GetWorkingDirectory() + m_FolderPath); }
+
+		m_Stream = std::make_unique<std::ofstream>(filename, append ? (std::ios::out | std::ios::app | std::ios::ate) : (std::ios::out | std::ios::trunc));
+
+		if (!m_Stream->good()) {
+			return -1;
+		}
 		return 0;
 	}
 

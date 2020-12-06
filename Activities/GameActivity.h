@@ -235,26 +235,6 @@ public:
 
     BuyMenuGUI * GetBuyGUI(unsigned int which = 0) const { return m_pBuyGUI[which]; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsBuyGUIOpen
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks if the in-game GUI Object is open for a specific player.
-// Arguments:       Which player to check the GUI for. -1 will return true if true for any
-//                  player
-// Return value:    Whether or not the BuyMenuGUI is visible for input player(s)
-
-    bool IsBuyGUIOpen(unsigned int which = 0);
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsBuyGUIVisible
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks if the in-game GUI Object is visible for a specific player.
-// Arguments:       Which player to check the GUI for. -1 will return true if true for any 
-//                  player
-// Return value:    Whether or not the BuyMenuGUI is visible for input player(s)
-
-    bool IsBuyGUIVisible(unsigned int which = 0);
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetEditorGUI

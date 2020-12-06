@@ -167,16 +167,11 @@ namespace RTE {
 	int DataModule::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		writer.NewProperty("ModuleName");
-		writer << m_FriendlyName;
-		writer.NewProperty("Author");
-		writer << m_Author;
-		writer.NewProperty("Description");
-		writer << m_Description;
-		writer.NewProperty("Version");
-		writer << m_Version;
-		writer.NewProperty("IconFile");
-		writer << m_IconFile;
+		writer.NewPropertyWithValue("ModuleName", m_FriendlyName);
+		writer.NewPropertyWithValue("Author", m_Author);
+		writer.NewPropertyWithValue("Description", m_Description);
+		writer.NewPropertyWithValue("Version", m_Version);
+		writer.NewPropertyWithValue("IconFile", m_IconFile);
 
 		// TODO: Write out all the different entity instances, each having their own relative location within the data module stored
 		// Will need the writer to be able to open different files and append to them as needed, probably done in NewEntity()

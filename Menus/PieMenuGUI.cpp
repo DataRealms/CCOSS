@@ -208,22 +208,16 @@ int PieMenuGUI::Slice::ReadProperty(const std::string &propName, Reader &reader)
 // Description:     Saves the complete state of this Slice with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int PieMenuGUI::Slice::Save(Writer &writer) const
-{
-    Serializable::Save(writer);
+int PieMenuGUI::Slice::Save(Writer &writer) const {
+	Serializable::Save(writer);
 
-    writer.NewProperty("Description");
-    writer << m_Description;
-    writer.NewProperty("Icon");
-    writer << m_Icon;
-    writer.NewProperty("Direction");
-    writer << m_Direction;
-    writer.NewProperty("ScriptPath");
-    writer << m_ScriptPath;
-    writer.NewProperty("FunctionName");
-    writer << m_FunctionName;
+	writer.NewPropertyWithValue("Description", m_Description);
+	writer.NewPropertyWithValue("Icon", m_Icon);
+	writer.NewPropertyWithValue("Direction", m_Direction);
+	writer.NewPropertyWithValue("ScriptPath", m_ScriptPath);
+	writer.NewPropertyWithValue("FunctionName", m_FunctionName);
 
-    return 0;
+	return 0;
 }
 
 

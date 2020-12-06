@@ -64,12 +64,9 @@ namespace RTE {
 	int Box::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		writer.NewProperty("Corner");
-		writer << m_Corner;
-		writer.NewProperty("Width");
-		writer << m_Width;
-		writer.NewProperty("Height");
-		writer << m_Height;
+		writer.NewPropertyWithValue("Corner", m_Corner);
+		writer.NewPropertyWithValue("Width", m_Width);
+		writer.NewPropertyWithValue("Height", m_Height);
 
 		return 0;
 	}

@@ -89,10 +89,10 @@ namespace RTE {
 		void NewDivider(bool toIndent = true, int dividerLength = 72) const { NewLine(toIndent); *m_Stream << std::string(dividerLength, '/'); }
 
 		/// <summary>
-		/// Used to specify the name of a new property to be written.
+		/// Creates a new line and writes the name of the property in preparation to writing it's value.
 		/// </summary>
 		/// <param name="propName">The name of the property to be written.</param>
-		void NewProperty(const std::string &propName) const { NewLine(); *m_Stream << propName; *m_Stream << " = "; }
+		void NewProperty(const std::string &propName) const { NewLine(); *m_Stream << propName + " = "; }
 
 		/// <summary>
 		/// Creates a new line and writes the name of the specified property, followed by its set value.

@@ -376,19 +376,16 @@ int SceneMan::ReadProperty(const std::string &propName, Reader &reader)
 // Description:     Saves the complete state of this SceneMan with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int SceneMan::Save(Writer &writer) const
-{
-    g_ConsoleMan.PrintString("ERROR: Tried to save SceneMan, screen does not make sense");
+int SceneMan::Save(Writer &writer) const {
+	g_ConsoleMan.PrintString("ERROR: Tried to save SceneMan, screen does not make sense");
 
-    Serializable::Save(writer);
+	Serializable::Save(writer);
 
-    for (int i = 0; i < m_MaterialCount; ++i)
-    {
-        writer.NewProperty("AddMaterial");
-        writer << *(m_apMatPalette[i]);
-    }
+	for (int i = 0; i < m_MaterialCount; ++i) {
+		writer.NewPropertyWithValue("AddMaterial", *(m_apMatPalette[i]));
+	}
 
-    return 0;
+	return 0;
 }
 
 

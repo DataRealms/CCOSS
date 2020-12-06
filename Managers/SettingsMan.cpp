@@ -244,181 +244,118 @@ namespace RTE {
 		writer.NewDivider(false);
 		writer.NewLineString("// Display Settings", false);
 		writer.NewLine(false);
-		writer.NewProperty("PaletteFile");
-		writer << g_FrameMan.m_PaletteFile;
-		writer.NewProperty("ResolutionX");
-		writer << g_FrameMan.m_NewResX;
-		writer.NewProperty("ResolutionY");
-		writer << g_FrameMan.m_NewResY;
-		writer.NewProperty("ResolutionMultiplier");
-		writer << g_FrameMan.m_ResMultiplier;
-		writer.NewProperty("DisableMultiScreenResolutionValidation");
-		writer << g_FrameMan.m_DisableMultiScreenResolutionValidation;
-		writer.NewProperty("HSplitScreen");
-		writer << g_FrameMan.m_HSplitOverride;
-		writer.NewProperty("VSplitScreen");
-		writer << g_FrameMan.m_VSplitOverride;
-		writer.NewProperty("ForceVirtualFullScreenGfxDriver");
-		writer << g_FrameMan.m_ForceVirtualFullScreenGfxDriver;
-		writer.NewProperty("ForceOverlayedWindowGfxDriver");
-		writer << g_FrameMan.m_ForceOverlayedWindowGfxDriver;
-		writer.NewProperty("ForceNonOverlayedWindowGfxDriver");
-		writer << g_FrameMan.m_ForceNonOverlayedWindowGfxDriver;
+		writer.NewPropertyWithValue("PaletteFile", g_FrameMan.m_PaletteFile);
+		writer.NewPropertyWithValue("ResolutionX", g_FrameMan.m_NewResX);
+		writer.NewPropertyWithValue("ResolutionY", g_FrameMan.m_NewResY);
+		writer.NewPropertyWithValue("ResolutionMultiplier", g_FrameMan.m_ResMultiplier);
+		writer.NewPropertyWithValue("DisableMultiScreenResolutionValidation", g_FrameMan.m_DisableMultiScreenResolutionValidation);
+		writer.NewPropertyWithValue("HSplitScreen", g_FrameMan.m_HSplitOverride);
+		writer.NewPropertyWithValue("VSplitScreen", g_FrameMan.m_VSplitOverride);
+		writer.NewPropertyWithValue("ForceVirtualFullScreenGfxDriver", g_FrameMan.m_ForceVirtualFullScreenGfxDriver);
+		writer.NewPropertyWithValue("ForceOverlayedWindowGfxDriver", g_FrameMan.m_ForceOverlayedWindowGfxDriver);
+		writer.NewPropertyWithValue("ForceNonOverlayedWindowGfxDriver", g_FrameMan.m_ForceNonOverlayedWindowGfxDriver);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);
 		writer.NewLineString("// Audio Settings", false);
 		writer.NewLine(false);
-		writer.NewProperty("SoundVolume");
-		writer << g_AudioMan.m_SoundsVolume * 100;
-		writer.NewProperty("MusicVolume");
-		writer << g_AudioMan.m_MusicVolume * 100;
-		writer.NewProperty("SoundPanningEffectStrength");
-		writer << g_AudioMan.m_SoundPanningEffectStrength;
+		writer.NewPropertyWithValue("SoundVolume", g_AudioMan.m_SoundsVolume * 100);
+		writer.NewPropertyWithValue("MusicVolume", g_AudioMan.m_MusicVolume * 100);
+		writer.NewPropertyWithValue("SoundPanningEffectStrength", g_AudioMan.m_SoundPanningEffectStrength);
 
 		//////////////////////////////////////////////////
 		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
-		writer.NewProperty("ListenerZOffset");
-		writer << g_AudioMan.m_ListenerZOffset;
-		writer.NewProperty("MinimumDistanceForPanning");
-		writer << g_AudioMan.m_MinimumDistanceForPanning;
+		writer.NewPropertyWithValue("ListenerZOffset", g_AudioMan.m_ListenerZOffset);
+		writer.NewPropertyWithValue("MinimumDistanceForPanning", g_AudioMan.m_MinimumDistanceForPanning);
 		//////////////////////////////////////////////////
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);
 		writer.NewLineString("// Gameplay Settings", false);
 		writer.NewLine(false);
-		writer.NewProperty("ShowForeignItems");
-		writer << m_ShowForeignItems;
-		writer.NewProperty("FlashOnBrainDamage");
-		writer << m_FlashOnBrainDamage;
-		writer.NewProperty("BlipOnRevealUnseen");
-		writer << m_BlipOnRevealUnseen;
-		writer.NewProperty("MaxUnheldItems");
-		writer << g_MovableMan.GetMaxDroppedItems();
-		writer.NewProperty("SloMoThreshold");
-		writer << g_MovableMan.GetSloMoThreshold();
-		writer.NewProperty("SloMoDurationMS");
-		writer << g_MovableMan.GetSloMoDuration();
-		writer.NewProperty("EndlessMode");
-		writer << m_EndlessMode;
-		writer.NewProperty("EnableHats");
-		writer << m_EnableHats;
-		writer.NewProperty("EnableCrabBombs");
-		writer << m_EnableCrabBombs;
-		writer.NewProperty("CrabBombThreshold");
-		writer << m_CrabBombThreshold;
+		writer.NewPropertyWithValue("ShowForeignItems", m_ShowForeignItems);
+		writer.NewPropertyWithValue("FlashOnBrainDamage", m_FlashOnBrainDamage);
+		writer.NewPropertyWithValue("BlipOnRevealUnseen", m_BlipOnRevealUnseen);
+		writer.NewPropertyWithValue("MaxUnheldItems", g_MovableMan.m_MaxDroppedItems);
+		writer.NewPropertyWithValue("SloMoThreshold", g_MovableMan.m_SloMoThreshold);
+		writer.NewPropertyWithValue("SloMoDurationMS", g_MovableMan.m_SloMoDuration);
+		writer.NewPropertyWithValue("EndlessMode", m_EndlessMode);
+		writer.NewPropertyWithValue("EnableHats", m_EnableHats);
+		writer.NewPropertyWithValue("EnableCrabBombs", m_EnableCrabBombs);
+		writer.NewPropertyWithValue("CrabBombThreshold", m_CrabBombThreshold);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);
 		writer.NewLineString("// Default Activity Settings", false);
 		writer.NewLine(false);
-		writer.NewProperty("LaunchIntoActivity");
-		writer << m_LaunchIntoActivity;
-		writer.NewProperty("DefaultActivityType");
-		writer << g_ActivityMan.m_DefaultActivityType;
-		writer.NewProperty("DefaultActivityName");
-		writer << g_ActivityMan.m_DefaultActivityName;
-		writer.NewProperty("DefaultSceneName");
-		writer << g_SceneMan.m_DefaultSceneName;
+		writer.NewPropertyWithValue("LaunchIntoActivity", m_LaunchIntoActivity);
+		writer.NewPropertyWithValue("DefaultActivityType", g_ActivityMan.m_DefaultActivityType);
+		writer.NewPropertyWithValue("DefaultActivityName", g_ActivityMan.m_DefaultActivityName);
+		writer.NewPropertyWithValue("DefaultSceneName", g_SceneMan.m_DefaultSceneName);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);
 		writer.NewLineString("// Engine Settings", false);
 		writer.NewLine(false);
-		writer.NewProperty("RecommendedMOIDCount");
-		writer << m_RecommendedMOIDCount;
+		writer.NewPropertyWithValue("RecommendedMOIDCount", m_RecommendedMOIDCount);
 
 		/*
 		// Temporarily removed from settings file due to being buggy when disabled by user.
-		writer.NewProperty("PreciseCollisions");
-		writer << m_PreciseCollisions;
+		writer.NewPropertyWithValue("PreciseCollisions", m_PreciseCollisions);
 		*/
 
-		writer.NewProperty("EnableParticleSettling");
-		writer << g_MovableMan.IsParticleSettlingEnabled();
-		writer.NewProperty("EnableMOSubtraction");
-		writer << g_MovableMan.IsMOSubtractionEnabled();
-		writer.NewProperty("DeltaTime");
-		writer << g_TimerMan.GetDeltaTimeSecs();
-		writer.NewProperty("RealToSimCap");
-		writer << g_TimerMan.GetRealToSimCap();
+		writer.NewPropertyWithValue("EnableParticleSettling", g_MovableMan.m_SettlingEnabled);
+		writer.NewPropertyWithValue("EnableMOSubtraction", g_MovableMan.m_MOSubtractionEnabled);
+		writer.NewPropertyWithValue("DeltaTime", g_TimerMan.GetDeltaTimeSecs());
+		writer.NewPropertyWithValue("RealToSimCap", g_TimerMan.GetRealToSimCap());
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);
 		writer.NewLineString("// Editor Settings", false);
 		writer.NewLine(false);
-		writer.NewProperty("AllowSavingToBase");
-		writer << m_AllowSavingToBase;
-		writer.NewProperty("ShowMetaScenes");
-		writer << m_ShowMetaScenes;
+		writer.NewPropertyWithValue("AllowSavingToBase", m_AllowSavingToBase);
+		writer.NewPropertyWithValue("ShowMetaScenes", m_ShowMetaScenes);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);
 		writer.NewLineString("// Misc Settings", false);
 		writer.NewLine(false);
-		writer.NewProperty("SkipIntro");
-		writer << m_SkipIntro;
-		writer.NewProperty("ToolTips");
-		writer << m_ToolTips;
-		writer.NewProperty("DisableLoadingScreen");
-		writer << m_DisableLoadingScreen;
-		writer.NewProperty("LoadingScreenReportPrecision");
-		writer << m_LoadingScreenReportPrecision;
-		writer.NewProperty("ConsoleScreenRatio");
-		writer << g_ConsoleMan.m_ConsoleScreenRatio;
-		writer.NewProperty("AdvancedPerformanceStats");
-		writer << g_PerformanceMan.m_AdvancedPerfStats;
-		writer.NewProperty("MenuTransitionDuration");
-		writer << m_MenuTransitionDurationMultiplier;
-		writer.NewProperty("PrintDebugInfo");
-		writer << m_PrintDebugInfo;
+		writer.NewPropertyWithValue("SkipIntro", m_SkipIntro);
+		writer.NewPropertyWithValue("ToolTips", m_ToolTips);
+		writer.NewPropertyWithValue("DisableLoadingScreen", m_DisableLoadingScreen);
+		writer.NewPropertyWithValue("LoadingScreenReportPrecision", m_LoadingScreenReportPrecision);
+		writer.NewPropertyWithValue("ConsoleScreenRatio", g_ConsoleMan.m_ConsoleScreenRatio);
+		writer.NewPropertyWithValue("AdvancedPerformanceStats", g_PerformanceMan.m_AdvancedPerfStats);
+		writer.NewPropertyWithValue("MenuTransitionDuration", m_MenuTransitionDurationMultiplier);
+		writer.NewPropertyWithValue("PrintDebugInfo", m_PrintDebugInfo);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);
 		writer.NewLineString("// Network Settings", false);
 		writer.NewLine(false);
-		writer.NewProperty("PlayerNetworkName");
-		writer << m_PlayerNetworkName;
-		writer.NewProperty("NetworkServerName");
-		writer << m_NetworkServerAddress;
-		writer.NewProperty("UseNATService");
-		writer << g_NetworkServer.m_UseNATService;
-		writer.NewProperty("NATServiceAddress");
-		writer << m_NATServiceAddress;
-		writer.NewProperty("NATServerName");
-		writer << m_NATServerName;
-		writer.NewProperty("NATServerPassword");
-		writer << m_NATServerPassword;
+		writer.NewPropertyWithValue("PlayerNetworkName", m_PlayerNetworkName);
+		writer.NewPropertyWithValue("NetworkServerName", m_NetworkServerAddress);
+		writer.NewPropertyWithValue("UseNATService", g_NetworkServer.m_UseNATService);
+		writer.NewPropertyWithValue("NATServiceAddress", m_NATServiceAddress);
+		writer.NewPropertyWithValue("NATServerName", m_NATServerName);
+		writer.NewPropertyWithValue("NATServerPassword", m_NATServerPassword);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);
 		writer.NewLineString("// Advanced Network Settings", false);
 		writer.NewLine(false);
-		writer.NewProperty("ClientInputFps");
-		writer << g_NetworkClient.m_ClientInputFps;
-		writer.NewProperty("ServerTransmitAsBoxes");
-		writer << g_NetworkServer.m_TransmitAsBoxes;
-		writer.NewProperty("ServerBoxWidth");
-		writer << g_NetworkServer.m_BoxWidth;
-		writer.NewProperty("ServerBoxHeight");
-		writer << g_NetworkServer.m_BoxHeight;
-		writer.NewProperty("ServerUseHighCompression");
-		writer << g_NetworkServer.m_UseHighCompression;
-		writer.NewProperty("ServerUseFastCompression");
-		writer << g_NetworkServer.m_UseFastCompression;
-		writer.NewProperty("ServerHighCompressionLevel");
-		writer << g_NetworkServer.m_HighCompressionLevel;
-		writer.NewProperty("ServerFastAccelerationFactor");
-		writer << g_NetworkServer.m_FastAccelerationFactor;
-		writer.NewProperty("ServerUseInterlacing");
-		writer << g_NetworkServer.m_UseInterlacing;
-		writer.NewProperty("ServerEncodingFps");
-		writer << g_NetworkServer.m_EncodingFps;
-		writer.NewProperty("ServerSleepWhenIdle");
-		writer << g_NetworkServer.m_SleepWhenIdle;
-		writer.NewProperty("ServerSimSleepWhenIdle");
-		writer << g_NetworkServer.m_SimSleepWhenIdle;
+		writer.NewPropertyWithValue("ClientInputFps", g_NetworkClient.m_ClientInputFps);
+		writer.NewPropertyWithValue("ServerTransmitAsBoxes", g_NetworkServer.m_TransmitAsBoxes);
+		writer.NewPropertyWithValue("ServerBoxWidth", g_NetworkServer.m_BoxWidth);
+		writer.NewPropertyWithValue("ServerBoxHeight", g_NetworkServer.m_BoxHeight);
+		writer.NewPropertyWithValue("ServerUseHighCompression", g_NetworkServer.m_UseHighCompression);
+		writer.NewPropertyWithValue("ServerUseFastCompression", g_NetworkServer.m_UseFastCompression);
+		writer.NewPropertyWithValue("ServerHighCompressionLevel", g_NetworkServer.m_HighCompressionLevel);
+		writer.NewPropertyWithValue("ServerFastAccelerationFactor", g_NetworkServer.m_FastAccelerationFactor);
+		writer.NewPropertyWithValue("ServerUseInterlacing", g_NetworkServer.m_UseInterlacing);
+		writer.NewPropertyWithValue("ServerEncodingFps", g_NetworkServer.m_EncodingFps);
+		writer.NewPropertyWithValue("ServerSleepWhenIdle", g_NetworkServer.m_SleepWhenIdle);
+		writer.NewPropertyWithValue("ServerSimSleepWhenIdle", g_NetworkServer.m_SimSleepWhenIdle);
 
 		if (!m_VisibleAssemblyGroupsList.empty()) {
 			writer.NewLine(false, 2);
@@ -426,8 +363,7 @@ namespace RTE {
 			writer.NewLineString("// Enabled Bunker Assembly Groups", false);
 			writer.NewLine(false);
 			for (const std::string &visibleAssembly : m_VisibleAssemblyGroupsList) {
-				writer.NewProperty("VisibleAssemblyGroup");
-				writer << visibleAssembly;
+				writer.NewPropertyWithValue("VisibleAssemblyGroup", visibleAssembly);
 			}
 		}
 
@@ -437,10 +373,7 @@ namespace RTE {
 			writer.NewLineString("// Disabled Mods", false);
 			writer.NewLine(false);
 			for (const std::pair<std::string, bool> &disabledMod : m_DisabledMods) {
-				if (disabledMod.second) {
-					writer.NewProperty("DisableMod");
-					writer << disabledMod.first;
-				}
+				if (disabledMod.second) { writer.NewPropertyWithValue("DisableMod", disabledMod.first); }
 			}
 		}
 
@@ -449,12 +382,8 @@ namespace RTE {
 			writer.NewDivider(false);
 			writer.NewLineString("// Enabled Global Scripts", false);
 			writer.NewLine(false);
-
 			for (const std::pair<std::string, bool> &enabledScript : m_EnabledScripts) {
-				if (enabledScript.second) {
-					writer.NewProperty("EnableScript");
-					writer << enabledScript.first;
-				}
+				if (enabledScript.second) { writer.NewPropertyWithValue("EnableScript", enabledScript.first); }
 			}
 		}
 
@@ -462,8 +391,7 @@ namespace RTE {
 		writer.NewDivider(false);
 		writer.NewLineString("// Input Mapping", false);
 		writer.NewLine(false);
-		writer.NewProperty("MouseSensitivity");
-		writer << g_UInputMan.m_MouseSensitivity;
+		writer.NewPropertyWithValue("MouseSensitivity", g_UInputMan.m_MouseSensitivity);
 
 		writer.NewLine(false);
 		writer.NewLineString("// Input Devices:  0 = Keyboard Only, 1 = Mouse + Keyboard, 2 = Joystick One, 3 = Joystick Two, , 4 = Joystick Three, 5 = Joystick Four");
@@ -475,8 +403,7 @@ namespace RTE {
 			writer.NewDivider(false);
 			writer.NewLineString("// Player " + playerNum, false);
 			writer.NewLine(false);
-			writer.NewProperty("Player" + playerNum + "Scheme");
-			writer << g_UInputMan.m_ControlScheme[player];
+			writer.NewPropertyWithValue("Player" + playerNum + "Scheme", g_UInputMan.m_ControlScheme[player]);
 		}
 
 		writer.ObjectEnd();
@@ -492,21 +419,13 @@ namespace RTE {
 		}
 		writer.ObjectStart(GetClassName());
 
-		writer.NewProperty("PaletteFile");
-		ContentFile paletteFile("Base.rte/palette.bmp");
-		writer << paletteFile;
-		writer.NewProperty("ResolutionX");
-		writer << 960;
-		writer.NewProperty("ResolutionY");
-		writer << 540;
-		writer.NewProperty("ResolutionMultiplier");
-		writer << 1;
-		writer.NewProperty("DisableMultiScreenResolutionValidation");
-		writer << 0;
-		writer.NewProperty("SoundVolume");
-		writer << 40;
-		writer.NewProperty("MusicVolume");
-		writer << 60;
+		writer.NewPropertyWithValue("PaletteFile", ContentFile("Base.rte/palette.bmp"));
+		writer.NewPropertyWithValue("ResolutionX", 960);
+		writer.NewPropertyWithValue("ResolutionY", 540);
+		writer.NewPropertyWithValue("ResolutionMultiplier", true);
+		writer.NewPropertyWithValue("DisableMultiScreenResolutionValidation", false);
+		writer.NewPropertyWithValue("SoundVolume", 40);
+		writer.NewPropertyWithValue("MusicVolume", 60);
 
 		writer.ObjectEnd();
 

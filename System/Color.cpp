@@ -45,12 +45,9 @@ namespace RTE {
 	int Color::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		writer.NewProperty("R");
-		writer << m_R;
-		writer.NewProperty("G");
-		writer << m_G;
-		writer.NewProperty("B");
-		writer << m_B;
+		writer.NewPropertyWithValue("R", m_R);
+		writer.NewPropertyWithValue("G", m_G);
+		writer.NewPropertyWithValue("B", m_B);
 
 		return 0;
 	}

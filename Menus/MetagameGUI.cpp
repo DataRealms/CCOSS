@@ -814,29 +814,17 @@ int MetagameGUI::ReadProperty(const std::string &propName, Reader &reader)
 // Description:     Saves the complete state of this MetagameGUI to an output stream for
 //                  later recreation with Create(Reader &reader);
 
-int MetagameGUI::Save(Writer &writer) const
-{
-    Serializable::Save(writer);
+int MetagameGUI::Save(Writer &writer) const {
+	Serializable::Save(writer);
 
-    Vector tempPos;
+	writer.NewPropertyWithValue("P1BoxPos", Vector(m_apPlayerBox[Players::PlayerOne]->GetXPos(), m_apPlayerBox[Players::PlayerOne]->GetYPos()));
+	writer.NewPropertyWithValue("P2BoxPos", Vector(m_apPlayerBox[Players::PlayerTwo]->GetXPos(), m_apPlayerBox[Players::PlayerTwo]->GetYPos()));
+	writer.NewPropertyWithValue("P3BoxPos", Vector(m_apPlayerBox[Players::PlayerThree]->GetXPos(), m_apPlayerBox[Players::PlayerThree]->GetYPos()));
+	writer.NewPropertyWithValue("P4BoxPos", Vector(m_apPlayerBox[Players::PlayerFour]->GetXPos(), m_apPlayerBox[Players::PlayerFour]->GetYPos()));
 
-    writer.NewProperty("P1BoxPos");
-    tempPos.SetXY(m_apPlayerBox[Players::PlayerOne]->GetXPos(), m_apPlayerBox[Players::PlayerOne]->GetYPos());
-    writer << tempPos;
-    writer.NewProperty("P2BoxPos");
-    tempPos.SetXY(m_apPlayerBox[Players::PlayerTwo]->GetXPos(), m_apPlayerBox[Players::PlayerTwo]->GetYPos());
-    writer << tempPos;
-    writer.NewProperty("P3BoxPos");
-    tempPos.SetXY(m_apPlayerBox[Players::PlayerThree]->GetXPos(), m_apPlayerBox[Players::PlayerThree]->GetYPos());
-    writer << tempPos;
-    writer.NewProperty("P4BoxPos");
-    tempPos.SetXY(m_apPlayerBox[Players::PlayerFour]->GetXPos(), m_apPlayerBox[Players::PlayerFour]->GetYPos());
-    writer << tempPos;
-    writer.NewProperty("PhaseBoxPos");
-    tempPos.SetXY(m_pPhaseBox->GetXPos(), m_pPhaseBox->GetYPos());
-    writer << tempPos;
+	writer.NewPropertyWithValue("PhaseBoxPos", Vector(m_pPhaseBox->GetXPos(), m_pPhaseBox->GetYPos()));
 
-    return 0;
+	return 0;
 }
 
 
@@ -1330,16 +1318,13 @@ bool MetagameGUI::SaveGame(string saveName, string savePath, bool resaveSceneDat
     // Now write out the index file of all MetaSaves so the new save is found on next runtime
     Writer indexWriter((string(METASAVEPATH) + string("Index.ini")).c_str());
     indexWriter.ObjectStart("DataModule");
-    indexWriter.NewProperty("ModuleName");
-    indexWriter << "Metagame Saves";
+    indexWriter.NewPropertyWithValue("ModuleName", "Metagame Saves");
     // Get the current list of all MetaSave Preset:s, including the new one we just saved
     list<Entity *> saveList;
     g_PresetMan.GetAllOfType(saveList, "MetaSave");
     // Go through the list and add their names to the combo box
-    for (list<Entity *>::iterator itr = saveList.begin(); itr != saveList.end(); ++itr)
-    {
-        indexWriter.NewProperty("AddMetaSave");
-        indexWriter << (*itr);
+	for (const Entity *saveListEntry : saveList) {
+        indexWriter.NewPropertyWithValue("AddMetaSave", saveListEntry);
     }
     indexWriter.ObjectEnd();
 

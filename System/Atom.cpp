@@ -109,16 +109,11 @@ namespace RTE {
 	int Atom::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		writer.NewProperty("Offset");
-		writer << m_Offset;
-		writer.NewProperty("OriginalOffset");
-		writer << m_OriginalOffset;
-		writer.NewProperty("Material");
-		writer << m_Material;
-		writer.NewProperty("TrailColor");
-		writer << m_TrailColor;
-		writer.NewProperty("TrailLength");
-		writer << m_TrailLength;
+		writer.NewPropertyWithValue("Offset", m_Offset);
+		writer.NewPropertyWithValue("OriginalOffset", m_OriginalOffset);
+		writer.NewPropertyWithValue("Material", m_Material);
+		writer.NewPropertyWithValue("TrailColor", m_TrailColor);
+		writer.NewPropertyWithValue("TrailLength", m_TrailLength);
 
 		return 0;
 	}

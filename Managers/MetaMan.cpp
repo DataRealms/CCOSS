@@ -334,79 +334,61 @@ int MetaMan::ReadProperty(const std::string &propName, Reader &reader)
 // Description:     Saves the complete state of this MetaMan to an output stream for
 //                  later recreation with Create(Reader &reader);
 
-int MetaMan::Save(Writer &writer) const
-{
-    Serializable::Save(writer);
+int MetaMan::Save(Writer &writer) const {
+	Serializable::Save(writer);
 
-    writer.NewProperty("GameState");
-    writer << m_GameState;
-    writer.NewProperty("GameName");
-    writer << m_GameName;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-	writer.NewProperty("Team1AISkill");
-	writer << m_TeamAISkill[Activity::TeamOne];
-	writer.NewProperty("Team2AISkill");
-	writer << m_TeamAISkill[Activity::TeamTwo];
-	writer.NewProperty("Team3AISkill");
-	writer << m_TeamAISkill[Activity::TeamThree];
-	writer.NewProperty("Team4AISkill");
-	writer << m_TeamAISkill[Activity::TeamFour];
-    for (vector<MetaPlayer>::const_iterator tItr = m_Players.begin(); tItr != m_Players.end(); ++tItr)
-    {
-        writer.NewProperty("AddPlayer");
-        writer << (*tItr);
-    }
-    writer.NewProperty("TeamCount");
-    writer << m_TeamCount;
-    if (m_TeamCount >= 1)
-    {
-        writer.NewProperty("Team1Icon");
-        m_TeamIcons[Activity::TeamOne].SavePresetCopy(writer);
-    }
-    if (m_TeamCount >= 2)
-    {
-        writer.NewProperty("Team2Icon");
-        m_TeamIcons[Activity::TeamTwo].SavePresetCopy(writer);
-    }
-    if (m_TeamCount >= 3)
-    {
-        writer.NewProperty("Team3Icon");
-        m_TeamIcons[Activity::TeamThree].SavePresetCopy(writer);
-    }
-    if (m_TeamCount >= 4)
-    {
-        writer.NewProperty("Team4Icon");
-        m_TeamIcons[Activity::TeamFour].SavePresetCopy(writer);
-    }
-    writer.NewProperty("CurrentRound");
-    writer << m_CurrentRound;
-    for (vector<Scene *>::const_iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
-    {
-        // Save the scene data to a good unique prefix for the Scene's layers' bitmap files as they are saved
-// This should be handled separately from any .ini writing
-//        (*sItr)->SaveData(writer.GetFolderPath() + m_GameName + " - " + (*sItr)->GetPresetName());
-        writer.NewProperty("AddScene");
-        writer << (*sItr);
-    }
-    writer.NewProperty("RevealedScenes");
-    writer << m_RevealedScenes;
-    writer.NewProperty("RevealRate");
-    writer << m_RevealRate;
-    writer.NewProperty("RevealExtra");
-    writer << m_RevealExtra;
-    for (vector<GAScripted *>::const_iterator aItr = m_RoundOffensives.begin(); aItr != m_RoundOffensives.end(); ++aItr)
-    {
-        writer.NewProperty("AddOffensive");
-        writer << (*aItr);
-    }
-    writer.NewProperty("CurrentOffensive");
-    writer << m_CurrentOffensive;
+	writer.NewPropertyWithValue("GameState", m_GameState);
+	writer.NewPropertyWithValue("GameName", m_GameName);
+	writer.NewPropertyWithValue("Difficulty", m_Difficulty);
+	writer.NewPropertyWithValue("Team1AISkill", m_TeamAISkill[Activity::TeamOne]);
+	writer.NewPropertyWithValue("Team2AISkill", m_TeamAISkill[Activity::TeamTwo]);
+	writer.NewPropertyWithValue("Team3AISkill", m_TeamAISkill[Activity::TeamThree]);
+	writer.NewPropertyWithValue("Team4AISkill", m_TeamAISkill[Activity::TeamFour]);
 
-    writer.NewProperty("MetaGUI");
-    writer << m_pMetaGUI;
+	for (const MetaPlayer &metaPlayer : m_Players) {
+		writer.NewPropertyWithValue("AddPlayer", metaPlayer);
+	}
 
-    return 0;
+	writer.NewPropertyWithValue("TeamCount", m_TeamCount);
+
+	if (m_TeamCount >= 1) {
+		writer.NewProperty("Team1Icon");
+		m_TeamIcons[Activity::TeamOne].SavePresetCopy(writer);
+	}
+	if (m_TeamCount >= 2) {
+		writer.NewProperty("Team2Icon");
+		m_TeamIcons[Activity::TeamTwo].SavePresetCopy(writer);
+	}
+	if (m_TeamCount >= 3) {
+		writer.NewProperty("Team3Icon");
+		m_TeamIcons[Activity::TeamThree].SavePresetCopy(writer);
+	}
+	if (m_TeamCount >= 4) {
+		writer.NewProperty("Team4Icon");
+		m_TeamIcons[Activity::TeamFour].SavePresetCopy(writer);
+	}
+
+	writer.NewPropertyWithValue("CurrentRound", m_CurrentRound);
+
+	for (const Scene *metaScene : m_Scenes) {
+		// Save the scene data to a good unique prefix for the Scene's layers' bitmap files as they are saved
+		// This should be handled separately from any .ini writing
+		//(*sItr)->SaveData(writer.GetFolderPath() + m_GameName + " - " + (*sItr)->GetPresetName());
+		writer.NewPropertyWithValue("AddScene", metaScene);
+	}
+
+	writer.NewPropertyWithValue("RevealedScenes", m_RevealedScenes);
+	writer.NewPropertyWithValue("RevealRate", m_RevealRate);
+	writer.NewPropertyWithValue("RevealExtra", m_RevealExtra);
+
+	for (const GAScripted *metaOffensive : m_RoundOffensives) {
+		writer.NewPropertyWithValue("AddOffensive", metaOffensive);
+	}
+
+	writer.NewPropertyWithValue("CurrentOffensive", m_CurrentOffensive);
+	writer.NewPropertyWithValue("MetaGUI", m_pMetaGUI);
+
+	return 0;
 }
 
 

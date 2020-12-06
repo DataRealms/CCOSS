@@ -68,10 +68,8 @@ namespace RTE {
 	int ContentFile::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		if (!m_DataPath.empty()) {
-			writer.NewProperty("FilePath");
-			writer << m_DataPath;
-		}
+		if (!m_DataPath.empty()) { writer.NewPropertyWithValue("FilePath", m_DataPath); }
+
 		return 0;
 	}
 

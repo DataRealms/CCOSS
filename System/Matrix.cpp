@@ -75,8 +75,7 @@ namespace RTE {
 	int Matrix::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		writer.NewProperty("AngleDegrees");
-		writer << GetDegAngle();
+		writer.NewPropertyWithValue("AngleDegrees", GetDegAngle());
 
 		return 0;
 	}

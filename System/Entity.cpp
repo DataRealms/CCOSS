@@ -113,23 +113,17 @@ namespace RTE {
 
 		// Is an original preset definition
 		if (m_IsOriginalPreset) {
-			writer.NewProperty("PresetName");
-			writer << m_PresetName;
-			// Only write out a copy reference if there is one
+			writer.NewPropertyWithValue("PresetName", m_PresetName);
+		// Only write out a copy reference if there is one	
 		} else if (!m_PresetName.empty() && m_PresetName != "None") {
-			writer.NewProperty("CopyOf");
-			writer << GetModuleAndPresetName();
+			writer.NewPropertyWithValue("CopyOf", GetModuleAndPresetName());
 		}
-		if (!m_PresetDescription.empty()) {
-			writer.NewProperty("Description");
-			writer << m_PresetDescription;
-		}
+		if (!m_PresetDescription.empty()) { writer.NewPropertyWithValue("Description", m_PresetDescription); }
+
 		// TODO: Make proper save system that knows not to save redundant data!
 		/*
-		for (list<string>::const_iterator itr = m_Groups.begin(); itr != m_Groups.end(); ++itr)
-		{
-			writer.NewProperty("AddToGroup");
-			writer << *itr;
+		for (list<string>::const_iterator itr = m_Groups.begin(); itr != m_Groups.end(); ++itr) {
+			writer.NewPropertyWithValue("AddToGroup", *itr);
 		}
 		*/
 		return 0;
@@ -144,8 +138,7 @@ namespace RTE {
 			return -1;
 		}
 		writer.ObjectStart(GetClassName());
-		writer.NewProperty("CopyOf");
-		writer << GetModuleAndPresetName();
+		writer.NewPropertyWithValue("CopyOf", GetModuleAndPresetName());
 		writer.ObjectEnd();
 
 		return 0;

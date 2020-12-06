@@ -130,16 +130,13 @@ int GAScripted::ReadProperty(const std::string &propName, Reader &reader)
 // Description:     Saves the complete state of this GAScripted with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int GAScripted::Save(Writer &writer) const
-{
-    GameActivity::Save(writer);
+int GAScripted::Save(Writer &writer) const {
+	GameActivity::Save(writer);
 
-    writer.NewProperty("ScriptFile");
-    writer << m_ScriptPath;
-    writer.NewProperty("LuaClassName");
-    writer << m_LuaClassName;
+	writer.NewPropertyWithValue("ScriptFile", m_ScriptPath);
+	writer.NewPropertyWithValue("LuaClassName", m_LuaClassName);
 
-    return 0;
+	return 0;
 }
 
 

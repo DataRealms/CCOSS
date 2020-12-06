@@ -130,21 +130,17 @@ int GABaseDefense::ReadProperty(const std::string &propName, Reader &reader)
 // Description:     Saves the complete state of this GABaseDefense with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int GABaseDefense::Save(Writer &writer) const
-{
-    GameActivity::Save(writer);
+int GABaseDefense::Save(Writer &writer) const {
+	GameActivity::Save(writer);
 
-    writer.NewProperty("SpawnIntervalEasiest");
-    writer << m_SpawnIntervalEasiest;
-    writer.NewProperty("SpawnIntervalHardest");
-    writer << m_SpawnIntervalHardest;
-    for (vector<Actor *>::const_iterator itr = m_AttackerSpawns.begin(); itr != m_AttackerSpawns.end(); ++itr)
-    {
-        writer.NewProperty("AddAttackerSpawn");
-        writer << (*itr);
-    }
+	writer.NewPropertyWithValue("SpawnIntervalEasiest", m_SpawnIntervalEasiest);
+	writer.NewPropertyWithValue("SpawnIntervalHardest", m_SpawnIntervalHardest);
 
-    return 0;
+	for (const Actor *spawnsEntry : m_AttackerSpawns) {
+		writer.NewPropertyWithValue("AddAttackerSpawn", spawnsEntry);
+	}
+
+	return 0;
 }
 
 

@@ -131,18 +131,9 @@ int GibEditor::ReadProperty(const std::string &propName, Reader &reader)
 // Description:     Saves the complete state of this GibEditor with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int GibEditor::Save(Writer &writer) const
-{
-    EditorActivity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int GibEditor::Save(Writer &writer) const {
+	EditorActivity::Save(writer);
+	return 0;
 }
 
 

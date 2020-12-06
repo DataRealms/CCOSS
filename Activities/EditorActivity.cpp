@@ -158,18 +158,9 @@ int EditorActivity::ReadProperty(const std::string &propName, Reader &reader)
 // Description:     Saves the complete state of this EditorActivity with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int EditorActivity::Save(Writer &writer) const
-{
-    Activity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int EditorActivity::Save(Writer &writer) const {
+	Activity::Save(writer);
+	return 0;
 }
 
 

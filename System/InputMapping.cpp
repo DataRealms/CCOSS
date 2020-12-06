@@ -62,26 +62,17 @@ namespace RTE {
 	int InputMapping::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		writer.NewProperty("KeyMap");
-		writer << m_KeyMap;
+		writer.NewPropertyWithValue("KeyMap", m_KeyMap);
 
-		if (m_MouseButtonMap >= 0) {
-			writer.NewProperty("MouseButtonMap");
-			writer << m_MouseButtonMap;
-		}
-		if (m_JoyButtonMap >= 0) {
-			writer.NewProperty("JoyButtonMap");
-			writer << m_JoyButtonMap;
-		}
+		if (m_MouseButtonMap >= 0) { writer.NewPropertyWithValue("MouseButtonMap", m_MouseButtonMap); }
+		if (m_JoyButtonMap >= 0) { writer.NewPropertyWithValue("JoyButtonMap", m_JoyButtonMap); }
 
 		if (m_DirectionMapped) {
-			writer.NewProperty("StickMap");
-			writer << m_StickMap;
-			writer.NewProperty("AxisMap");
-			writer << m_AxisMap;
-			writer.NewProperty("DirectionMap");
-			writer << m_DirectionMap;
+			writer.NewPropertyWithValue("StickMap", m_StickMap);
+			writer.NewPropertyWithValue("AxisMap", m_AxisMap);
+			writer.NewPropertyWithValue("DirectionMap", m_DirectionMap);
 		}
+
 		return 0;
 	}
 }

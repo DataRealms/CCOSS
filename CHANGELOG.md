@@ -256,6 +256,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The "woosh" sound played when switching actors from a distance will now take scene wrapping into account. Additionally, attempting to switch to previous or next actor with only one actor will play the more correct "error" sound.
 
+- Pressing escape at the options, mod manager, game editors and credits screens no longer quits the game.
+
+- Pressing escape when a buy menu is open now closes it instead of returning to the main menu.
+
 ### Removed
 
 - Removed the ability to remove scripts from objects with Lua. This is no longer needed cause of code efficiency increases.

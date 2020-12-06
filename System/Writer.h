@@ -95,6 +95,13 @@ namespace RTE {
 		void NewProperty(const std::string &propName) const { NewLine(); *m_Stream << propName; *m_Stream << " = "; }
 
 		/// <summary>
+		/// Creates a new line and writes the name of the specified property, followed by its set value.
+		/// </summary>
+		/// <param name="propName">The name of the property to be written.</param>
+		/// <param name="propValue">The value of the property.</param>
+		template <typename Type> void NewPropertyWithValue(const std::string &propName, const Type &propValue) { NewLine(); *m_Stream << propName + " = "; *this << propValue; }
+
+		/// <summary>
 		/// Marks that there is a null reference to an object here.
 		/// </summary>
 		void NoObject() const { *m_Stream << "None"; }

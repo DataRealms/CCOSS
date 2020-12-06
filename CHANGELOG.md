@@ -234,6 +234,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `Scenes` with a `PresetName` containing the strings "Test", "Editor" and "Tutorial" are no longer excluded from the scenarios screen and from the MetaGame.
 
+- Pressing escape when a buy menu is open now closes it instead of returning to the main menu.
+
 ### Fixed
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.

@@ -1076,7 +1076,7 @@ void PieMenuGUI::Update()
             Vector separator;
             for (vector<Slice *>::iterator sItr = m_AllSlices.begin(); sItr != m_AllSlices.end(); ++sItr)
             {
-                separator.SetIntXY(m_InnerRadius + m_Thickness + 2, 0);
+                separator.SetXY(m_InnerRadius + m_Thickness + 2, 0);
                 separator.RadRotate((*sItr)->m_AreaStart);
                 // Draw four so that the result will be at least 2px thick, no matter what angle
                 line(m_pBGBitmap, centerX, centerY, centerX + separator.GetCeilingIntX(), centerY + separator.GetCeilingIntY(), g_MaskColor);
@@ -1088,7 +1088,7 @@ void PieMenuGUI::Update()
             // Indicate the highlighted segment, only if it is also enabled?
             if (m_pHoveredSlice && m_pHoveredSlice->m_Enabled)
             {
-                separator.SetIntXY(m_InnerRadius + (m_Thickness / 2), 0);
+                separator.SetXY(m_InnerRadius + (m_Thickness / 2), 0);
                 separator.RadRotate(m_pHoveredSlice->m_MidAngle);
     //            floodfill(m_pBGBitmap, centerX + separator.GetFloorIntX(), centerY + separator.GetFloorIntY(), 122);
                 floodfill(m_pBGBitmap, centerX + separator.GetFloorIntX(), centerY + separator.GetFloorIntY(), m_pHoveredSlice->m_Enabled ? g_BlackColor : g_RedColor);
@@ -1343,7 +1343,7 @@ void PieMenuGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
                 // If we have the disabled etc frames, then use em if applicable
                 pIcon = (*sItr)->m_Icon.GetBitmaps8()[(!((*sItr)->m_Enabled) && (*sItr)->m_Icon.GetFrameCount() > PIS_DISABLED) ? PIS_DISABLED : (((*sItr) == m_pHoveredSlice && (*sItr)->m_Icon.GetFrameCount() > PIS_SELECTED) ? PIS_SELECTED : PIS_NORMAL)];
                 // Position and draw the icon bitmap
-                iconPos.SetIntXY(m_InnerRadius + (m_Thickness / 2), 0);
+                iconPos.SetXY(m_InnerRadius + (m_Thickness / 2), 0);
                 iconPos.RadRotate((*sItr)->m_MidAngle);
                 iconPos += Vector(1, 1);
                 draw_sprite(pTargetBitmap, pIcon, drawPos.m_X + iconPos.m_X - (pIcon->w / 2), drawPos.m_Y + iconPos.m_Y - (pIcon->h / 2)); 

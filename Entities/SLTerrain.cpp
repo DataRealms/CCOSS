@@ -1120,7 +1120,7 @@ void SLTerrain::ApplyMovableObject(MovableObject *pMObject)
             pTempBitmap = m_spTempBitmap16;
 
         // The position of the upper left corner of the temporary bitmap in the scene
-        Vector bitmapScroll = pMOSprite->GetPos().GetFloored() - (pTempBitmap->w / 2);
+        Vector bitmapScroll = pMOSprite->GetPos().GetFloored() - Vector(pTempBitmap->w / 2, pTempBitmap->w / 2);
 
 		Box notUsed;
 		

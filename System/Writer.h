@@ -22,7 +22,7 @@ namespace RTE {
 		/// <param name="filename">Path to the file to open for writing. If the directory doesn't exist the stream will fail to open.</param>
 		/// <param name="append">Whether to append to the file if it exists, or to overwrite it.</param>
 		/// <param name="createDir">Whether to create the directory path to the file name before attempting to open the stream, in case it doesn't exist.</param>
-		Writer(const char *filename, bool append = false, bool createDir = false) { Clear(); Create(filename, append, createDir); }
+		Writer(const std::string &fileName, bool append = false, bool createDir = false) { Clear(); Create(fileName, append, createDir); }
 
 		/// <summary>
 		/// Makes the Writer object ready for use.
@@ -31,7 +31,7 @@ namespace RTE {
 		/// <param name="append">Whether to append to the file if it exists, or to overwrite it.</param>
 		/// <param name="createDir">Whether to create the directory path to the file name before attempting to open the stream, in case it doesn't exist.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(const char *filename, bool append = false, bool createDir = false);
+		int Create(const std::string &fileName, bool append = false, bool createDir = false);
 #pragma endregion
 
 #pragma region Getters

@@ -307,7 +307,7 @@ public:
 //                  to the existing layout.
 // Returns:         True if sucessful.
 
-    bool Load(Reader *R, bool keepOld = false);
+    bool Load(Reader *reader, bool keepOld = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

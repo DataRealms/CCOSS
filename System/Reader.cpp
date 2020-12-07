@@ -80,34 +80,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Reader::ReadLine(char *locString, int size) {
-		DiscardEmptySpace();
-
-		char temp;
-		char peek = m_Stream->peek();
-		int i = 0;
-
-		for (i = 0; i < size - 1 && peek != '\n' && peek != '\r' && peek != '\t'; ++i) {
-			temp = m_Stream->get();
-			// Check for line comment "//"
-			if (peek == '/' && m_Stream->peek() == '/') {
-				m_Stream->putback(temp);
-				break;
-			}
-			if (m_Stream->eof()) {
-				EndIncludeFile();
-				break;
-			}
-			if (!m_Stream->good()) { ReportError("Stream failed for some reason"); }
-
-			locString[i] = temp;
-			peek = m_Stream->peek();
-		}
-		locString[i] = '\0';
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	std::string Reader::ReadLine() {
 		DiscardEmptySpace();
 

@@ -119,13 +119,6 @@ namespace RTE {
 		/// <summary>
 		/// Reads the rest of the line from the context object Reader's stream current location.
 		/// </summary>
-		/// <param name="locString">The c-string that will be filled out with the line.</param>
-		/// <param name="size">An int specifying the max size of the c-string.</param>
-		void ReadLine(char *locString, int size);
-
-		/// <summary>
-		/// Reads the rest of the line from the context object Reader's stream current location.
-		/// </summary>
 		/// <returns>The std::string that will hold the line's contents.</returns>
 		std::string ReadLine();
 

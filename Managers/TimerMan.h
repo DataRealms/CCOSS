@@ -85,6 +85,12 @@ namespace RTE {
 		int SimUpdatesSinceDrawn() const { return m_SimUpdatesSinceDrawn; }
 
 		/// <summary>
+		/// Gets the simulation speed over real time.
+		/// </summary>
+		/// <returns>The value of the simulation speed over real time.</returns>
+		float GetSimSpeed() const { return m_SimSpeed; }
+
+		/// <summary>
 		/// Gets a time scale factor which will be used to speed up or slow down the progress of the simulation time in relation to the real world time.
 		/// </summary>
 		/// <returns>A factor between the real world time, and the simulation time.</returns>
@@ -235,6 +241,7 @@ namespace RTE {
 		int m_SimUpdatesSinceDrawn; //!< How many sim updates have been done since the last drawn one.
 		bool m_DrawnSimUpdate; //!< Tells whether the current simulation update will be drawn in a frame.
 
+		float m_SimSpeed; //!< The simulation speed over real time.
 		float m_TimeScale; //!< The relationship between the real world actual time and the simulation time. A value of 2.0 means simulation runs twice as fast as normal, as perceived by a player.
 
 		bool m_AveragingEnabled; //!< Whether calculated delta time averaging is enabled.

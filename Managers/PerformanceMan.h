@@ -106,6 +106,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="showGraphs">Whether to show the performance graphs or not.</param>
 		void ShowAdvancedPerformanceStats(bool showGraphs = true) { m_AdvancedPerfStats = showGraphs; }
+
+		/// <summary>
+		/// Gets the average of the MSPF reading buffer, calculated each frame.
+		/// </summary>
+		/// <returns>The average value of the MSPF reading buffer.</returns>
+		size_t GetMSPFAverage() const { return m_MSPFAverage; }
 #pragma endregion
 
 #pragma region Performance Counter Handling
@@ -155,7 +161,6 @@ namespace RTE {
 		bool m_AdvancedPerfStats; //!< Whether to show performance graphs on screen or not.
 
 		Timer *m_FrameTimer; //!< Timer for measuring milliseconds per frame for performance stats readings.
-		float m_SimSpeed; //!< The simulation speed over real time.
 		unsigned short m_Sample; //!< Sample counter.
 
 		std::deque<unsigned int> m_MSPFs; //!< History log of readings, for averaging the results.

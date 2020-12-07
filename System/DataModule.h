@@ -289,6 +289,15 @@ namespace RTE {
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
+#pragma region INI Handling
+		/// <summary>
+		/// If ScanFolderContents is enabled in this DataModule's Index.ini, looks for any ini files in the top-level directory of the module and reads all of them in alphabetical order.
+		/// </summary>
+		/// <param name="progressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this DataModule's creation.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int FindAndRead(const ProgressCallback &progressCallback = nullptr);
+#pragma endregion
+
 #pragma region Entity Mapping
 		/// <summary>
 		/// Checks if the type map has an instance added of a specific name and exact type.

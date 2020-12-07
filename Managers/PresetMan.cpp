@@ -386,7 +386,7 @@ const Entity * PresetMan::GetEntityPreset(Reader &reader)
 		{
 			// Abort loading if we can't create entity and it's not in Scenes.rte
 			if (!g_PresetMan.GetDataModule(whichModule)->GetIgnoreMissingItems())
-				RTEAbort("Reading of a preset instance \"" + pNewInstance->GetPresetName() + "\" of class " + pNewInstance->GetClassName() + " failed in file " + reader.GetCurrentFilePath() + ", shortly before line #" + reader.GetCurrentFileLineString());
+				RTEAbort("Reading of a preset instance \"" + pNewInstance->GetPresetName() + "\" of class " + pNewInstance->GetClassName() + " failed in file " + reader.GetCurrentFilePath() + ", shortly before line #" + reader.GetCurrentFileLine());
 		}
 		else if (pNewInstance)
 		{
@@ -445,7 +445,7 @@ Entity * PresetMan::ReadReflectedPreset(Reader &reader)
         if (pNewInstance && pNewInstance->Create(reader, false) < 0)
 		{
 			if (!g_PresetMan.GetDataModule(whichModule)->GetIgnoreMissingItems())
-	            RTEAbort("Reading of a preset instance \"" + pNewInstance->GetPresetName() + "\" of class " + pNewInstance->GetClassName() + " failed in file " + reader.GetCurrentFilePath() + ", shortly before line #" + reader.GetCurrentFileLineString());
+	            RTEAbort("Reading of a preset instance \"" + pNewInstance->GetPresetName() + "\" of class " + pNewInstance->GetClassName() + " failed in file " + reader.GetCurrentFilePath() + ", shortly before line #" + reader.GetCurrentFileLine());
 		}
 		else
 		{

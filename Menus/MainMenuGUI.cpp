@@ -531,7 +531,7 @@ int MainMenuGUI::Create(Controller *pController)
     // Read all the credits from the file and set the credits label
 	m_CreditsLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("CreditsLabel"));
     Reader creditsReader("Credits.txt");
-    string creditsText = creditsReader.ReadTo('#', true);
+    std::string creditsText = creditsReader.WholeFileAsString();
 
 // TODO: Get Unicode going!
     // Hack here to change the special characters over 128 in the ansi ascii table to match our font files

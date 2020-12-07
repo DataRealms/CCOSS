@@ -374,7 +374,7 @@ bool BuyMenuGUI::LoadAllLoadoutsFromFile()
     Reader loadoutFile(loadoutPath, false, 0, true);
 
     // Read any and all loadout presets from file
-    while (loadoutFile.IsOK() && loadoutFile.NextProperty())
+    while (loadoutFile.ReaderOK() && loadoutFile.NextProperty())
     {
         Loadout newLoad;
         loadoutFile >> newLoad;

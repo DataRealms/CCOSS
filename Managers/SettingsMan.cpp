@@ -51,7 +51,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SettingsMan::Initialize(Reader &reader, bool checkType, bool doCreate) {
-		if (reader.IsOK()) {
+		if (reader.ReaderOK()) {
 			return Serializable::Create(reader, checkType);
 		}
 

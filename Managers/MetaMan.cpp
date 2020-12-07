@@ -235,7 +235,7 @@ int MetaMan::Load(const MetaSave *pSave)
 
     // Create the reader to read the metagame state from
     Reader reader(pSave->GetSavePath().c_str(), false, 0, false);
-    if (!reader.IsOK())
+    if (!reader.ReaderOK())
         return -1;
 
     // Clear off players, scenes, and offensive activiies before filling up on new ones read from disk

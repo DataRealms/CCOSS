@@ -58,7 +58,7 @@ namespace RTE {
 					reader.ReportError("The PresetName to be copied was not found in data modules.");
 				}
 				// If we couldn't find the preset to copy from, read it as an original but report the problem in the console
-				g_ConsoleMan.PrintString("ERROR: Couldn't find the preset '" + refName + "' accessed in " + reader.GetCurrentFilePath() + " at line " + reader.GetCurrentFileLineString());
+				g_ConsoleMan.PrintString("ERROR: Couldn't find the preset '" + refName + "' accessed in " + reader.GetCurrentFilePath() + " at line " + reader.GetCurrentFileLine());
 				// Preset name might have "[ModuleName]/" preceding it, detect it here and select proper module!
 				int slashPos = refName.find_first_of('/');
 				m_PresetName = (slashPos != std::string::npos) ? refName.substr(slashPos + 1) : refName;

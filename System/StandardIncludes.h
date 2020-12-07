@@ -54,6 +54,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <stack>
 #include <list>
 #include <set>
 #include <map>

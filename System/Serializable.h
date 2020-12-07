@@ -55,7 +55,7 @@ namespace RTE {
 			}
 			// This is the engine for processing all properties of this Serializable upon read creation.
 			while (reader.NextProperty()) {
-				m_FormattedReaderPosition = ("in file " + reader.GetCurrentFilePath() + " on line " + std::to_string(reader.GetCurrentFileLine()));
+				m_FormattedReaderPosition = ("in file " + reader.GetCurrentFilePath() + " on line " + reader.GetCurrentFileLine());
 				std::string propName = reader.ReadPropName();
 				// We need to check if !propName.empty() because ReadPropName may return "" when it reads an IncludeFile without any properties in case they are all commented out or it's the last line in file.
 				// Also ReadModuleProperty may return "" when it skips IncludeFile till the end of file.

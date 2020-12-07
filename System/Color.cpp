@@ -8,8 +8,8 @@ namespace RTE {
 
 	int Color::Create() {
 		// Read all the properties
-		if (Serializable::Create() < 0) { 
-			return -1; 
+		if (Serializable::Create() < 0) {
+			return -1;
 		}
 		RecalculateIndex();
 		return 0;

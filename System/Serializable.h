@@ -21,7 +21,7 @@ namespace RTE {
 		#define SerializableOverrideMethods \
 			int ReadProperty(const std::string &propName, Reader &reader) override; \
 			int Save(Writer &writer) const override;
-		
+
 		/// <summary>
 		/// Convenience macro to cut down on duplicate GetClassName methods in non-poolable classes that extend Serializable.
 		/// </summary>

@@ -116,7 +116,7 @@ namespace RTE {
 	int Controller::GetTeam() const { return m_ControlledActor ? m_ControlledActor->GetTeam() : m_Team; }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	void Controller::SetTeam(short team) {
 		if (m_ControlledActor) { m_ControlledActor->SetTeam(team); }
 		m_Team = team;
@@ -324,7 +324,7 @@ namespace RTE {
 		}
 
 		// Translate analog aim input into sharp aim control state
-		if (m_AnalogAim.GetMagnitude() > 0.1 && !m_ControlStates[PIE_MENU_ACTIVE]) { m_ControlStates[AIM_SHARP] = true; }	
+		if (m_AnalogAim.GetMagnitude() > 0.1 && !m_ControlStates[PIE_MENU_ACTIVE]) { m_ControlStates[AIM_SHARP] = true; }
 
 		// Disable sharp aim while moving - this also helps with keyboard vs mouse fighting when moving and aiming in opposite directions
 		if (m_ControlStates[PRESS_RIGHT] || m_ControlStates[PRESS_LEFT] || m_ControlStates[BODY_JUMPSTART] || (m_ControlStates[PIE_MENU_ACTIVE] && !m_ControlStates[SECONDARY_ACTION])) {

@@ -735,7 +735,7 @@ namespace RTE {
 				g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
 				///////////////////////////////////////////////////////////////////////////////////////////////////
-				// Atom-MO collision detection and response. 
+				// Atom-MO collision detection and response.
 
 				// Detect hits with non-ignored MO's, if enabled.
 				m_MOIDHit = g_SceneMan.GetMOIDPixel(intPos[X], intPos[Y]);
@@ -769,7 +769,7 @@ namespace RTE {
 					RTEAssert(m_LastHit.Body[HITEE], "Hitee MO is 0 in Atom::Travel!");
 					RTEAssert(m_MOIDHit == m_LastHit.Body[HITEE]->GetID(), "g_MovableMan.GetMOFromID messed up in Atom::MOHitResponse!");
 
-					// Don't do this normal approximation based on object centers, it causes particles to 'slide into' sprite objects when they should be resting on them. 
+					// Don't do this normal approximation based on object centers, it causes particles to 'slide into' sprite objects when they should be resting on them.
 					// Orthogonal normals only, as the pixel boundaries themselves! See further down for the setting of this.
 					//m_LastHit.BitmapNormal = m_LastHit.Body[HITOR]->GetPos() - m_LastHit.Body[HITEE]->GetPos();
 					//m_LastHit.BitmapNormal.Normalize();
@@ -832,7 +832,7 @@ namespace RTE {
 				}
 
 				///////////////////////////////////////////////////////////////////////////////////////////////////
-				// Atom-Terrain collision detection and response. 
+				// Atom-Terrain collision detection and response.
 
 				// If there was no MO collision detected, then check for terrain hits.
 				else if ((hitMaterialID = g_SceneMan.GetTerrMatter(intPos[X], intPos[Y])) && !m_OwnerMO->m_IgnoreTerrain) {

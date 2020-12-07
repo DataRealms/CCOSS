@@ -172,7 +172,7 @@ namespace RTE {
 			arc(drawScreen, drawEnd.GetFloorIntX() - m_CornerRadius, drawStart.GetFloorIntY() - m_CornerRadius, itofix(-64), itofix(0), m_CornerRadius, m_Color);
 
 			//Draw the top, bottom, left and right planes respectively
-			hline(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawStart.GetFloorIntY(), drawEnd.GetFloorIntX() - m_CornerRadius, m_Color);	
+			hline(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawStart.GetFloorIntY(), drawEnd.GetFloorIntX() - m_CornerRadius, m_Color);
 			hline(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawEnd.GetFloorIntY(), drawEnd.GetFloorIntX() - m_CornerRadius, m_Color);
 			vline(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY() - m_CornerRadius, drawEnd.GetFloorIntY() + m_CornerRadius, m_Color);
 			vline(drawScreen, drawEnd.GetFloorIntX(), drawStart.GetFloorIntY() - m_CornerRadius, drawEnd.GetFloorIntY() + m_CornerRadius, m_Color);
@@ -212,7 +212,7 @@ namespace RTE {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			Vector drawEnd = m_EndPos - targetPos;
-			
+
 			// Draw the top left, bottom left, top right and bottom right corners respectively
 			circlefill(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawEnd.GetFloorIntY() + m_CornerRadius, m_CornerRadius, m_Color);
 			circlefill(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawStart.GetFloorIntY() - m_CornerRadius, m_CornerRadius, m_Color);

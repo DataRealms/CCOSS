@@ -320,9 +320,9 @@ namespace RTE {
 		short m_Team; //!< The last team this controlled. This is necessary so we still have some control after controlled's death.
 
 		/// <summary>
-		/// These are hacks to make the switch to brain shortcut work without immediately switching away by 
+		/// These are hacks to make the switch to brain shortcut work without immediately switching away by
 		/// detecting the release of the previous and next buttons after pressing them both down to get to the brain.
-		/// </summary>		
+		/// </summary>
 		bool m_NextIgnore;
 		bool m_PrevIgnore;
 
@@ -333,8 +333,8 @@ namespace RTE {
 		bool m_WeaponDropIgnore;
 		bool m_WeaponReloadIgnore;
 
-		Timer m_ReleaseTimer; //!< Timer for measuring release delays.  
-		Timer m_JoyAccelTimer; //!< Timer for measuring analog joystick-controlled cursor acceleration.   
+		Timer m_ReleaseTimer; //!< Timer for measuring release delays.
+		Timer m_JoyAccelTimer; //!< Timer for measuring analog joystick-controlled cursor acceleration.
 		Timer m_KeyAccelTimer; //!< Timer for measuring keyboard-controlled cursor acceleration.
 
 		Vector m_MouseMovement; //!< Relative mouse movement, if this player uses the mouse.

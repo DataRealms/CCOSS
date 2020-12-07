@@ -86,7 +86,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int DataModule::Create(const DataModule &reference) {
-		RTEAbort("Can't clone Data Modules!"); 
+		RTEAbort("Can't clone Data Modules!");
 		return 0;
 	}
 
@@ -278,7 +278,7 @@ namespace RTE {
 		if (withType == "All" || withType.empty()) {
 			for (std::list<std::string>::const_iterator gItr = m_GroupRegister.begin(); gItr != m_GroupRegister.end(); ++gItr) {
 				groupList.push_back(*gItr);
-				// TODO: it seems weird that foundAny isn't set to true here, given that the list gets filled. 
+				// TODO: it seems weird that foundAny isn't set to true here, given that the list gets filled.
 				// But I suppose no actual finding is done. Investigate this and see where it's called, maybe this should be changed
 			}
 		} else {
@@ -288,7 +288,7 @@ namespace RTE {
 				// Go through all the entities of that type, adding the groups they belong to
 				for (std::list<std::pair<std::string, Entity *>>::iterator instItr = classItr->second.begin(); instItr != classItr->second.end(); ++instItr) {
 					groupListPtr = instItr->second->GetGroupList();
-					
+
 					for (std::list<std::string>::const_iterator gItr = groupListPtr->begin(); gItr != groupListPtr->end(); ++gItr) {
 						groupList.push_back(*gItr); // Get the grouped entities, without transferring ownership
 						foundAny = true;
@@ -314,7 +314,7 @@ namespace RTE {
 
 		// Find either the Entity typelist that contains all entities in this DataModule, or the specific class' typelist (which will get all derived classes too)
 		std::map<std::string, std::list<std::pair<std::string, Entity *>>>::iterator classItr = m_TypeMap.find((type.empty() || type == "All") ? "Entity" : type);
-		
+
 		if (classItr != m_TypeMap.end()) {
 			RTEAssert(!classItr->second.empty(), "DataModule has class entry without instances in its map!?");
 			for (std::list<std::pair<std::string, Entity *>>::iterator instItr = classItr->second.begin(); instItr != classItr->second.end(); ++instItr) {
@@ -374,7 +374,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	// TODO: This method is almost identical to GetEntityPreset, except it doesn't return a const Entity *. 
+	// TODO: This method is almost identical to GetEntityPreset, except it doesn't return a const Entity *.
 	// Investigate if the latter needs to return const (based on what's using it) and if not, get rid of this and replace its uses. At the very least, consider renaming this
 	// See https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/87
 	Entity * DataModule::GetEntityIfExactType(const std::string &exactType, const std::string &presetName) {

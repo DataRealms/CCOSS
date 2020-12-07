@@ -26,7 +26,7 @@ namespace RTE {
 
 		char message[512];
 
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD 	
+#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
 		// Show message box with explanation
 		std::snprintf(message, sizeof(message), "Runtime Error in file %s, line %i, because:\n\n%s\n\nThe last frame has been dumped to 'abortscreen.bmp'", file, line, description);
 		allegro_message(message);
@@ -51,7 +51,7 @@ namespace RTE {
 		if (!expression) {
 			// TODO: Make this display a box in the game asking whether to ignore or abort. For now, always abort.
 			RTEAbortFunc(description, __FILE__, __LINE__);
-			
+
 			// True so that the debugbreak code is run and the debugger goes there.
 			return true;
 		}

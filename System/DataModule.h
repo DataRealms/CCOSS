@@ -47,7 +47,7 @@ namespace RTE {
 
 		/// <summary>
 		/// Makes the DataModule object ready for use. This needs to be called after PresetMan is created.
-		/// This looks for an "index.ini" within the specified .rte directory and loads all the defined objects in that index file. 
+		/// This looks for an "index.ini" within the specified .rte directory and loads all the defined objects in that index file.
 		/// </summary>
 		/// <param name="moduleName">A string defining the name of this DataModule, e.g. "MyModule.rte".</param>
 		/// <param name="progressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this DataModule's creation.</param>
@@ -249,8 +249,8 @@ namespace RTE {
 		bool m_ScanFolderContents; //!< Indicates whether module loader should scan for any .ini's inside module folder instead of loading files defined in IncludeFile only.
 		bool m_IgnoreMissingItems; //!< Indicates whether module loader should ignore missing items in this module.
 
-		std::string m_FileName; //!< File/folder name of the data module, eg "MyMod.rte".   
-		std::string m_FriendlyName; //!< Friendly name of the data module, eg "My Weapons Mod". 
+		std::string m_FileName; //!< File/folder name of the data module, eg "MyMod.rte".
+		std::string m_FriendlyName; //!< Friendly name of the data module, eg "My Weapons Mod".
 		std::string m_Author; //!< Name of the author of this module.
 		std::string m_Description; //!< Brief description of what this module is and contains.
 		std::string m_ScriptPath; //!< Path to script to execute when this module is loaded.

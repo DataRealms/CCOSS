@@ -114,7 +114,7 @@ namespace RTE {
 		// Is an original preset definition
 		if (m_IsOriginalPreset) {
 			writer.NewPropertyWithValue("PresetName", m_PresetName);
-		// Only write out a copy reference if there is one	
+		// Only write out a copy reference if there is one
 		} else if (!m_PresetName.empty() && m_PresetName != "None") {
 			writer.NewPropertyWithValue("CopyOf", GetModuleAndPresetName());
 		}

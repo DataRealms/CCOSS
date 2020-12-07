@@ -138,9 +138,6 @@ namespace RTE {
 		unsigned char RecalculateIndex() { return m_Index = makecol8(m_R, m_G, m_B); }
 #pragma endregion
 
-	protected:
-
-
 	private:
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.

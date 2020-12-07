@@ -138,16 +138,16 @@ namespace RTE {
 
 		std::string m_PresetDescription; //!< The friendly description that is associated with the scheme preset element, if any is set.
 
-		int m_KeyMap; //!< The keyboard key mapping.	
-		int m_MouseButtonMap; //!< The mouse button mapping.	
-			
+		int m_KeyMap; //!< The keyboard key mapping.
+		int m_MouseButtonMap; //!< The mouse button mapping.
+
 		bool m_DirectionMapped; //!< Whether joystick direction mapping is enabled.
 
 		int m_JoyButtonMap; //!< The joystick button mapping.
 		int m_StickMap; //!< The joystick stick mapping, if any.
 		int m_AxisMap; //!< The joystick axis mapping.
 		int m_DirectionMap; //!< The joystick direction mapping.
-		
+
 	private:
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.

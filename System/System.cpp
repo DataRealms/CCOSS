@@ -66,7 +66,7 @@ namespace RTE {
 		size_t startPos = 0;
 		// Just make sure to really overwrite all old output, " - done! ✓" is shorter than "reading line 700"
 		std::string unicodedOutput = reportString + "            ";
-		
+
 #ifdef __unix__
 		// Colorize output with ANSI escape code
 		std::string greenTick = "\033[1;32m✓\033[0;0m";
@@ -79,7 +79,7 @@ namespace RTE {
 		size_t tabPos = 0;
 		while ((tabPos = unicodedOutput.find("\t")) != std::string::npos) {
 			unicodedOutput.replace(tabPos, 1, "    ");
-		}	
+		}
 #endif
 		// Convert all ✓ characters to unicode, it's the 42th from last character in CC's custom font
 		while ((startPos = unicodedOutput.find(-42, startPos)) != std::string::npos) {

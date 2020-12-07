@@ -16,7 +16,7 @@ namespace RTE {
 
 		Vector m_StartPos; //!< Start position of the primitive.
 		Vector m_EndPos; //!< End position of the primitive.
-		unsigned char m_Color; //!< Color to draw this primitive with.		
+		unsigned char m_Color; //!< Color to draw this primitive with.
 		int m_Player; //!< Player screen to draw this primitive on.
 
 		/// <summary>

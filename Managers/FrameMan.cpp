@@ -1225,7 +1225,7 @@ namespace RTE {
 			blit(m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][i], m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i], 0, 0, 0, 0, m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i]->w, m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i]->h);
 			m_NetworkBitmapLock[i].unlock();
 
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+#ifndef RELEASE_BUILD
 			// Draw all player's screen into one
 			if (g_UInputMan.KeyHeld(KEY_5)) {
 				stretch_blit(m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h, dx, dy, dw, dh);
@@ -1233,7 +1233,7 @@ namespace RTE {
 #endif
 		}
 
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+#ifndef RELEASE_BUILD
 		if (g_UInputMan.KeyHeld(KEY_1)) {
 			stretch_blit(m_NetworkBackBufferFinal8[0][0], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][0]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][0]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 		}

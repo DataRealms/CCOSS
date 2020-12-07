@@ -24,7 +24,7 @@ namespace RTE {
 
 		std::string abortMessage;
 
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+#ifndef RELEASE_BUILD
 		// Show message box with explanation
 		abortMessage = "Runtime Error in file " + file + ", line " + std::to_string(line) + ", because:\n\n" + description + "\n\nThe last frame has been dumped to 'AbortScreen.bmp'";
 #else

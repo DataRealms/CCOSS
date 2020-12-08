@@ -32,16 +32,6 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up an InputScheme object before deletion from system memory.
-		/// </summary>
-		~InputScheme() { Destroy(); }
-
-		/// <summary>
-		/// Destroys and resets (through Clear()) the InputScheme object.
-		/// </summary>
-		void Destroy() { Clear(); }
-
-		/// <summary>
 		/// Resets the entire InputScheme, including its inherited members, to their default settings or values.
 		/// </summary>
 		void Reset() override { Clear(); }
@@ -76,7 +66,7 @@ namespace RTE {
 		/// Gets the InputMappings for this.
 		/// </summary>
 		/// <returns>The input mappings array, which is INPUT_COUNT large.</returns>
-		InputMapping * GetInputMappings() { return m_InputMapping; }
+		InputMapping * GetInputMappings() { return m_InputMappings.data(); }
 
 		/// <summary>
 		/// Get the deadzone value for this control scheme.
@@ -94,7 +84,7 @@ namespace RTE {
 		/// Get the DeadZoneType for this control scheme.
 		/// </summary>
 		/// <returns>The DeadZoneType this scheme is set to use. See DeadZoneType enumeration.</returns>
-		DeadZoneType GetJoystickDeadzoneType() { return m_JoystickDeadzoneType; }
+		DeadZoneType GetJoystickDeadzoneType() const { return m_JoystickDeadzoneType; }
 
 		/// <summary>
 		/// Set the DeadZoneType for this control scheme.
@@ -118,7 +108,7 @@ namespace RTE {
 		DeadZoneType m_JoystickDeadzoneType; //!< Which deadzone type is used.
 		float m_JoystickDeadzone; //!< How much of the input to treat as a deadzone input, i.e. one not registered by the game.
 
-		InputMapping m_InputMapping[INPUT_COUNT]; //!< The device input element mappings.
+		std::array<InputMapping, InputElements::INPUT_COUNT> m_InputMappings; //!< The input element mappings of this InputScheme.
 
 	private:
 

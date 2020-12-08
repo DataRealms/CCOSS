@@ -31,16 +31,6 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up an InputMapping object before deletion from system memory.
-		/// </summary>
-		~InputMapping() override { Destroy(); }
-
-		/// <summary>
-		/// Destroys and resets (through Clear()) the InputMapping object.
-		/// </summary>
-		void Destroy() { Clear(); }
-
-		/// <summary>
 		/// Resets the entire InputMapping, including its inherited members, to their default settings or values.
 		/// </summary>
 		void Reset() override { Clear(); }
@@ -57,7 +47,7 @@ namespace RTE {
 		/// Sets the description of the input scheme preset that this element is part of, if any preset has been set for this element's scheme.
 		/// </summary>
 		/// <param name="presetDesc">The description associated with this element by the scheme preset, if any has been set. This string should be empty otherwise.</param>
-		void SetPresetDescription(std::string presetDesc) { m_PresetDescription = presetDesc; }
+		void SetPresetDescription(const std::string &presetDesc) { m_PresetDescription = presetDesc; }
 #pragma endregion
 
 #pragma region Keyboard Getters and Setters

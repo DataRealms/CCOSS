@@ -697,8 +697,8 @@ void GibEditorGUI::Update()
     if (m_pCurrentGib && m_DrawCurrentGib)
     {
 		Vector gibPos = g_SceneMan.SnapPosition(m_CursorPos - m_CursorOffset, m_GridSnapping);
-		gibPos.SetIntX(gibPos.m_X);
-		gibPos.SetIntY(gibPos.m_Y);
+		gibPos.SetX(static_cast<int>(gibPos.m_X));
+		gibPos.SetY(static_cast<int>(gibPos.m_Y));
 
         m_pCurrentGib->SetPos(gibPos);
         m_pCurrentGib->Update();

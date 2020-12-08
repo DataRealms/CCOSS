@@ -810,7 +810,7 @@ namespace RTE {
 		int mickeyX;
 		int mickeyY;
 		get_mouse_mickeys(&mickeyX, &mickeyY);
-		m_RawMouseMovement.SetIntXY(mickeyX, mickeyY);
+		m_RawMouseMovement.SetXY(mickeyX, mickeyY);
 
 		// TODO: Add sensitivity slider to settings menu
 		m_RawMouseMovement *= m_MouseSensitivity;

@@ -141,6 +141,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `FLAC` audio files can now be loaded through lua and ini.
 
+- Added new lua `Vector` functions: `GetRadRotated(angle)` and `GetDegRotated(angle)`. They return a rotated copy of the vector without modifying it.
+
 ### Changed
 
 - Codebase now uses the C++17 standard.
@@ -257,6 +259,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed issue where OnPieMenu function wasn't working for `AHuman` equipped items, and made it work for `BGArm` equipped items as well as `FGArm` ones.
 
 - The "woosh" sound played when switching actors from a distance will now take scene wrapping into account. Additionally, attempting to switch to previous or next actor with only one actor will play the more correct "error" sound.
+
+- Pressing escape at the options, mod manager, game editors and credits screens no longer quits the game.
 
 ### Removed
 

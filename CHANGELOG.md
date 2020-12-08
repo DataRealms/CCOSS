@@ -143,6 +143,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added new lua `Vector` functions: `GetRadRotated(angle)` and `GetDegRotated(angle)`. They return a rotated copy of the vector without modifying it.
 
+- `Color` object's RGB values can now be set with index number.  
+	```
+	Color/TrailColor = Color
+		Index = 0-255 // Corresponds with index in palette.bmp
+	```
+
 ### Changed
 
 - Codebase now uses the C++17 standard.

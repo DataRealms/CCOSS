@@ -28,7 +28,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Color::ReadProperty(const std::string &propName, Reader &reader) {
-		if (propName == "R") {
+		if (propName == "Index") {
+			SetRGBWithIndex(static_cast<unsigned char>(std::clamp(std::stoi(reader.ReadPropValue()), 0, 255)));
+		} else if (propName == "R") {
 			reader >> m_R;
 		} else if (propName == "G") {
 			reader >> m_G;

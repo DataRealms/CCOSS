@@ -839,11 +839,9 @@ namespace RTE {
 		}
 
 		if (g_InActivity) {
-			if (AnyStartPress(false)) {
-				if (!dynamic_cast<GameActivity*>(g_ActivityMan.GetActivity())->IsBuyGUIVisible(-1)) {
-					g_ActivityMan.PauseActivity();
-					return;
-				}
+			if (AnyStartPress(false) && !dynamic_cast<GameActivity*>(g_ActivityMan.GetActivity())->IsBuyGUIVisible(-1)) {
+				g_ActivityMan.PauseActivity();
+				return;
 			}
 			// Ctrl+R or Back button for controllers to reset activity.
 			if (!g_ResetActivity) { g_ResetActivity = FlagCtrlState() && KeyPressed(KEY_R) || AnyBackPress(); }

@@ -4,11 +4,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	extern void ShowMessageBox(const std::string &message) { allegro_message(message.c_str()); }
+	void ShowMessageBox(const std::string &message) { allegro_message(message.c_str()); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	extern bool RTEAbortFunc(const std::string &description, const std::string &file, int line) {
+	bool RTEAbortFunc(const std::string &description, const std::string &file, int line) {
 		// Save out the screen bitmap, after making a copy of it, faster sometimes
 		if (screen) {
 			BITMAP *abortScreenBuffer = create_bitmap(screen->w, screen->h);
@@ -31,7 +31,7 @@ namespace RTE {
 		// Shortened and less confusing one. users have no use of knowing which source file and where.
 		abortMessage = description + "\n\nThe last frame has been dumped to 'AbortScreen.bmp'";
 #endif
-		allegro_message(abortMessage.c_str());
+		ShowMessageBox(abortMessage);
 
 		// True so that the debugbreak code is run and the debugger goes there.
 		return true;
@@ -39,7 +39,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool RTEAssertFunc(bool expression, const std::string &description, const std::string &file, int line, bool &alwaysIgnore) {
+	bool RTEAssertFunc(bool expression, const char *description, const char *file, int line, bool &alwaysIgnore) {
 		if (!expression) {
 			// TODO: Make this display a box in the game asking whether to ignore or abort. For now, always abort.
 			RTEAbortFunc(description, __FILE__, __LINE__);

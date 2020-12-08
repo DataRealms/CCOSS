@@ -838,8 +838,7 @@ namespace RTE {
 			return;
 		}
 
-		if (g_InActivity) {	
-
+		if (g_InActivity) {
 			if (AnyStartPress(false)) {
 				if (!dynamic_cast<GameActivity*>(g_ActivityMan.GetActivity())->IsBuyGUIVisible(-1)) {
 					g_ActivityMan.PauseActivity();

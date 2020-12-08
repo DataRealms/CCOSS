@@ -372,11 +372,8 @@ void GameActivity::SetCPUTeam(int team)
 */
 }
 
-/// <summary>
-/// Checks if the in-game GUI Object is open for a specific player in the GameActivity
-/// </summary>
-/// <param name="which">Which player to check the GUI for. -1 will check all players</param>
-/// <returns>Whether or not the BuyMenuGUI is visible for input player(s)</returns>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool GameActivity::IsBuyGUIOpen(int which) {
     if (which == -1) {
         for (short player = Players::PlayerOne; player < this->GetPlayerCount(); player++) {
@@ -389,11 +386,8 @@ bool GameActivity::IsBuyGUIOpen(int which) {
     return this->GetBuyGUI(which)->IsEnabled();
 }
 
-/// <summary>
-/// Checks if the in-game GUI Object is visible for a specific player.
-/// </summary>
-/// <param name="which">Which player to check the GUI for. -1 will check all players</param>
-/// <returns>Whether or not the BuyMenuGUI is visible for input player(s)</returns>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool GameActivity::IsBuyGUIVisible(int which) {
     if (which == -1) {
         for (short player = Players::PlayerOne; player < this->GetPlayerCount(); player++) {

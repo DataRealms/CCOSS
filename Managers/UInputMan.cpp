@@ -8,7 +8,6 @@
 #include "GUIInput.h"
 #include "Icon.h"
 #include "GameActivity.h"
-#include "BuyMenuGUI.h"
 
 extern volatile bool g_Quit;
 extern bool g_ResetActivity;

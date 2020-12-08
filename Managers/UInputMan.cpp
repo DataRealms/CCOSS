@@ -842,21 +842,12 @@ namespace RTE {
 		if (g_InActivity) {	
 
 			if (AnyStartPress(false)) {
-				bool buyMenuIsOpen = false;
 				GameActivity* currentGameActivity = dynamic_cast<GameActivity*>(g_ActivityMan.GetActivity());
 
-				for (short player = Players::PlayerOne; player < currentGameActivity->GetPlayerCount(); player++) {
-					if (currentGameActivity->GetBuyGUI(player)->IsVisible()) {
-						buyMenuIsOpen = true;
-						break;
-					}
-				}
-
-				if (!buyMenuIsOpen) {
+				if (!currentGameActivity->IsBuyGUIVisible(-1)) {
 					g_ActivityMan.PauseActivity();
 					return;
 				}
-
 			}
 			// Ctrl+R or Back button for controllers to reset activity.
 			if (!g_ResetActivity) { g_ResetActivity = FlagCtrlState() && KeyPressed(KEY_R) || AnyBackPress(); }

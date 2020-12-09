@@ -549,6 +549,8 @@ namespace RTE {
 
 		BITMAP *m_Bitmap; //!< Bitmap to draw.
 		float m_RotAngle; //!< Angle to rotate bitmap in radians.
+		bool m_HFlipped; //!< Whether the Bitmap to draw should be horizontally flipped.
+		bool m_VFlipped; //!< Whether the Bitmap to draw should be vertically flipped.
 
 		/// <summary>
 		/// Constructor method for BitmapPrimitive object.
@@ -557,8 +559,10 @@ namespace RTE {
 		/// <param name="pos">Position of this primitive's center.</param>
 		/// <param name="bitmap">Bitmap to draw.</param>
 		/// <param name="rotAngle">Angle to rotate bitmap in radians.</param>
-		BitmapPrimitive(int player, const Vector &centerPos, BITMAP * bitmap, float rotAngle) :
-			m_Bitmap(bitmap), m_RotAngle(rotAngle) {
+		/// <param name="hFlipped">Whether the bitmap to draw should be horizontally flipped.</param>
+		/// <param name="vFlipped">Whether the bitmap to draw should be vertically flipped.</param>
+		BitmapPrimitive(int player, const Vector &centerPos, BITMAP *bitmap, float rotAngle, bool hFlipped, bool vFlipped) :
+			m_Bitmap(bitmap), m_RotAngle(rotAngle), m_HFlipped(hFlipped), m_VFlipped(vFlipped) {
 
 			m_StartPos = centerPos;
 			m_Player = player;

@@ -10,24 +10,7 @@ namespace RTE {
 		const MOSprite *moSprite = dynamic_cast<MOSprite *>(entity);
 		if (moSprite) {
 			BITMAP *bitmap = moSprite->GetSpriteFrame(frame);
-
-			if (bitmap) {
-				if (!hFlipped && !vFlipped) {
-					m_Primitives.push(std::make_unique<BitmapPrimitive>(player, centerPos, bitmap, rotAngle));
-				} else {
-					BITMAP *flipBitmap = create_bitmap_ex(8, bitmap->w, bitmap->h);
-					clear_to_color(flipBitmap, 0);
-
-					if (hFlipped && !vFlipped) {
-						draw_sprite_h_flip(flipBitmap, bitmap, 0, 0);
-					} else if (!hFlipped && vFlipped) {
-						draw_sprite_v_flip(flipBitmap, bitmap, 0, 0);
-					} else if (hFlipped && vFlipped) {
-						draw_sprite_vh_flip(flipBitmap, bitmap, 0, 0);
-					}
-					m_Primitives.push(std::make_unique<BitmapPrimitive>(player, centerPos, flipBitmap, rotAngle));
-				}
-			}
+			if (bitmap) { m_Primitives.push(std::make_unique<BitmapPrimitive>(player, centerPos, bitmap, rotAngle, hFlipped, vFlipped)); }
 		}
 	}
 

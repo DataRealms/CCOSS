@@ -10,23 +10,15 @@ namespace RTE {
 		const MOSprite *moSprite = dynamic_cast<MOSprite *>(entity);
 		if (moSprite) {
 			BITMAP *bitmap = moSprite->GetSpriteFrame(frame);
-			if (bitmap) { m_Primitives.push(std::make_unique<BitmapPrimitive>(player, centerPos, bitmap, rotAngle, hFlipped, vFlipped)); }
+			if (bitmap) { m_ScheduledPrimitives.push_back(std::make_unique<BitmapPrimitive>(player, centerPos, bitmap, rotAngle, hFlipped, vFlipped)); }
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PrimitiveMan::ClearPrimitivesQueue() {
-		std::queue<std::unique_ptr<GraphicalPrimitive>> emptyQueue;
-		std::swap(m_Primitives, emptyQueue);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void PrimitiveMan::DrawPrimitives(int player, BITMAP *targetBitmap, const Vector &targetPos) {
-		while (!m_Primitives.empty()) {
-			if (m_Primitives.front()->m_Player == player || m_Primitives.front()->m_Player == -1) { m_Primitives.front()->Draw(targetBitmap, targetPos); }
-			m_Primitives.pop();
+	void PrimitiveMan::DrawPrimitives(int player, BITMAP *targetBitmap, const Vector &targetPos) const {
+		for (const std::unique_ptr<GraphicalPrimitive> &primitive : m_ScheduledPrimitives) {
+			if (primitive->m_Player == player || primitive->m_Player == -1) { primitive->Draw(targetBitmap, targetPos); }
 		}
 	}
 }

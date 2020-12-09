@@ -410,7 +410,7 @@ namespace RTE {
 		draw_sprite(bitmapToDraw, m_Bitmap, 0, 0);
 
 		if (m_HFlipped || m_VFlipped) {
-			BITMAP *flipBitmap = create_bitmap_ex(8, m_Bitmap->w, m_Bitmap->h);
+			BITMAP *flipBitmap = create_bitmap_ex(8, bitmapToDraw->w, bitmapToDraw->h);
 			clear_to_color(flipBitmap, 0);
 
 			if (m_HFlipped && !m_VFlipped) {
@@ -421,7 +421,7 @@ namespace RTE {
 				draw_sprite_vh_flip(flipBitmap, bitmapToDraw, 0, 0);
 			}
 
-			draw_sprite(flipBitmap, bitmapToDraw, 0, 0);
+			blit(flipBitmap, bitmapToDraw, 0, 0, 0, 0, bitmapToDraw->w, bitmapToDraw->h);
 			destroy_bitmap(flipBitmap);
 		}
 
@@ -429,7 +429,7 @@ namespace RTE {
 
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
-			pivot_scaled_sprite(drawScreen, m_Bitmap, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), m_Bitmap->w / 2, m_Bitmap->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+			pivot_scaled_sprite(drawScreen, bitmapToDraw, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
 		} else {
 			Vector drawStartLeft;
 			Vector drawStartRight;
@@ -437,8 +437,8 @@ namespace RTE {
 			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
 
 			// Take into account the h-flipped pivot point
-			pivot_scaled_sprite(drawScreen, m_Bitmap, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), m_Bitmap->w / 2, m_Bitmap->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
-			pivot_scaled_sprite(drawScreen, m_Bitmap, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), m_Bitmap->w / 2, m_Bitmap->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+			pivot_scaled_sprite(drawScreen, bitmapToDraw, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
+			pivot_scaled_sprite(drawScreen, bitmapToDraw, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), bitmapToDraw->w / 2, bitmapToDraw->h / 2, ftofix(rotation.GetAllegroAngle()), ftofix(1.0));
 		}
 
 		destroy_bitmap(bitmapToDraw);

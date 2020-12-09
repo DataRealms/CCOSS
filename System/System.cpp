@@ -14,6 +14,7 @@ namespace RTE {
 	const std::string System::s_ScreenshotDirectory = "_ScreenShots";
 	const std::string System::s_ModDirectory = "_Mods";
 	const std::string System::s_ModulePackageExtension = ".rte";
+	const std::string System::s_ZippedModulePackageExtension = ".rte.zip";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

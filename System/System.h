@@ -43,6 +43,12 @@ namespace RTE {
 		static const std::string & GetModulePackageExtension() { return s_ModulePackageExtension; }
 
 		/// <summary>
+		/// Gets the extension that determines a file is a zipped RTE module.
+		/// </summary>
+		/// <returns>String containing the zipped RTE module extension.</returns>
+		static const std::string & GetZippedModulePackageExtension() { return s_ZippedModulePackageExtension; }
+
+		/// <summary>
 		/// Create a directory.
 		/// </summary>
 		/// <param name="path">Path to create.</param>
@@ -97,6 +103,7 @@ namespace RTE {
 		static const std::string s_ScreenshotDirectory; //!< String containing the folder name of the screenshots directory.
 		static const std::string s_ModDirectory; //!< String containing the folder name of the mod directory.
 		static const std::string s_ModulePackageExtension; //!< The extension that determines a directory/file is a RTE module.
+		static const std::string s_ZippedModulePackageExtension; //!< The extension that determines a file is a zipped RTE module.
 	};
 }
 #endif

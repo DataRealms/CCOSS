@@ -197,6 +197,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `Actor` Lua (R) property `InventoryMass`. This provides access to the mass of the `Actor's` inventory separate from the `Actor's` actual mass.
 
+- Added new lua `Vector` functions: `GetRadRotated(angle)` and `GetDegRotated(angle)`. They return a rotated copy of the vector without modifying it.
+
 ### Changed
 
 - Codebase now uses the C++17 standard.
@@ -331,6 +333,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `Attachables` now use their `GibImpulseLimit` as well as their `JointStrength` when determining whether they should be detached by strong forces. To maintain backwards compatibility, if the `GibImpulseLimit` is less than the `JointStrength`, the `JointStrength` will be used instead for this purpose.
 
 - The `FacingAngle` function has been moved from `Actor` to `MOSprite` so it can be used more widely.
+
+- Pressing escape at the options, mod manager, game editors and credits screens no longer quits the game.
 
 ### Fixed
 

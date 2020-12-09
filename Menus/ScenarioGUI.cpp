@@ -317,7 +317,7 @@ int ScenarioGUI::Create(Controller *pController)
 
 	// Load default preview bitmap
 	ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview.png");
-	m_pDefaultPreviewBitmap = defaultPreview.LoadAndReleaseBitmap();
+	m_pDefaultPreviewBitmap = defaultPreview.GetAsBitmap(COLORCONV_NONE, false);
 
 	clear_to_color(m_pScenePreviewBitmap, g_MaskColor);
 

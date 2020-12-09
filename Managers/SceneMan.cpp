@@ -1409,7 +1409,7 @@ bool SceneMan::LoadUnseenLayer(std::string bitmapPath, int team)
 {
     ContentFile bitmapFile(bitmapPath.c_str());
     SceneLayer *pUnseenLayer = new SceneLayer();
-    if (pUnseenLayer->Create(bitmapFile.LoadAndReleaseBitmap(), true, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0)) < 0)
+    if (pUnseenLayer->Create(bitmapFile.GetAsBitmap(COLORCONV_NONE, false), true, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0)) < 0)
     {
         g_ConsoleMan.PrintString("ERROR: Loading background layer " + pUnseenLayer->GetPresetName() + "\'s data failed!");
         return false;
@@ -1849,7 +1849,7 @@ bool SceneMan::CastMaterialRay(const Vector &start, const Vector &ray, unsigned 
                 foundPixel = true;
                 result.SetXY(intPos[X], intPos[Y]);
                 // Save last ray pos
-                m_LastRayHitPos.SetIntXY(intPos[X], intPos[Y]);
+                m_LastRayHitPos.SetXY(intPos[X], intPos[Y]);
                 break;
             }
 
@@ -1981,7 +1981,7 @@ bool SceneMan::CastNotMaterialRay(const Vector &start, const Vector &ray, unsign
                 foundPixel = true;
                 result.SetXY(intPos[X], intPos[Y]);
                 // Save last ray pos
-                m_LastRayHitPos.SetIntXY(intPos[X], intPos[Y]);
+                m_LastRayHitPos.SetXY(intPos[X], intPos[Y]);
                 break;
             }
 
@@ -2309,7 +2309,7 @@ bool SceneMan::CastStrengthRay(const Vector &start, const Vector &ray, float str
                     foundPixel = true;
                     result.SetXY(intPos[X], intPos[Y]);
                     // Save last ray pos
-                    m_LastRayHitPos.SetIntXY(intPos[X], intPos[Y]);
+                    m_LastRayHitPos.SetXY(intPos[X], intPos[Y]);
                     break;
                 }
             }
@@ -2429,7 +2429,7 @@ bool SceneMan::CastWeaknessRay(const Vector &start, const Vector &ray, float str
                 foundPixel = true;
                 result.SetXY(intPos[X], intPos[Y]);
                 // Save last ray pos
-                m_LastRayHitPos.SetIntXY(intPos[X], intPos[Y]);
+                m_LastRayHitPos.SetXY(intPos[X], intPos[Y]);
                 break;
             }
 
@@ -2555,7 +2555,7 @@ MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID
                     else
                     {
                         // Save last ray pos
-                        m_LastRayHitPos.SetIntXY(intPos[X], intPos[Y]);
+                        m_LastRayHitPos.SetXY(intPos[X], intPos[Y]);
                         return hitMOID;
                     }
                 }
@@ -2563,7 +2563,7 @@ MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID
                 else
                 {
                     // Save last ray pos
-                    m_LastRayHitPos.SetIntXY(intPos[X], intPos[Y]);
+                    m_LastRayHitPos.SetXY(intPos[X], intPos[Y]);
                     return hitMOID;
                 }
             }
@@ -2575,7 +2575,7 @@ MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID
                 if (hitTerrain != g_MaterialAir && hitTerrain != ignoreMaterial)
                 {
                     // Save last ray pos
-                    m_LastRayHitPos.SetIntXY(intPos[X], intPos[Y]);
+                    m_LastRayHitPos.SetXY(intPos[X], intPos[Y]);
                     return g_NoMOID;
                 }
             }
@@ -2686,7 +2686,7 @@ bool SceneMan::CastFindMORay(const Vector &start, const Vector &ray, MOID target
                 // Found target MOID, so save result and report success
                 resultPos.SetXY(intPos[X], intPos[Y]);
                 // Save last ray pos
-                m_LastRayHitPos.SetIntXY(intPos[X], intPos[Y]);
+                m_LastRayHitPos.SetXY(intPos[X], intPos[Y]);
                 return true;
             }
 
@@ -2697,7 +2697,7 @@ bool SceneMan::CastFindMORay(const Vector &start, const Vector &ray, MOID target
                 if (hitTerrain != g_MaterialAir && hitTerrain != ignoreMaterial)
                 {
                     // Save last ray pos
-                    m_LastRayHitPos.SetIntXY(intPos[X], intPos[Y]);
+                    m_LastRayHitPos.SetXY(intPos[X], intPos[Y]);
                     return false;
                 }
             }
@@ -2831,7 +2831,7 @@ float SceneMan::CastObstacleRay(const Vector &start, const Vector &ray, Vector &
                 hitObstacle = true;
                 obstaclePos.SetXY(intPos[X], intPos[Y]);
                 // Save last ray pos
-                m_LastRayHitPos.SetIntXY(intPos[X], intPos[Y]);
+                m_LastRayHitPos.SetXY(intPos[X], intPos[Y]);
                 break;
             }
             else

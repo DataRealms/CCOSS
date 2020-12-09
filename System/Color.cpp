@@ -1,4 +1,5 @@
 #include "Color.h"
+#include "allegro/color.h"
 
 namespace RTE {
 
@@ -7,8 +8,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Color::Create() {
-		// Read all the properties
-		if (Serializable::Create() < 0) {
+		if (Serializable::Create()) {
 			return -1;
 		}
 		RecalculateIndex();
@@ -17,10 +17,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Color::Create(unsigned char inputR, unsigned char inputG, unsigned char inputB) {
-		m_R = inputR;
-		m_G = inputG;
-		m_B = inputB;
+	int Color::Create(int inputR, int inputG, int inputB) {
+		SetR(inputR);
+		SetG(inputG);
+		SetB(inputB);
 		RecalculateIndex();
 		return 0;
 	}
@@ -29,13 +29,13 @@ namespace RTE {
 
 	int Color::ReadProperty(const std::string &propName, Reader &reader) {
 		if (propName == "Index") {
-			SetRGBWithIndex(static_cast<unsigned char>(std::clamp(std::stoi(reader.ReadPropValue()), 0, 255)));
+			SetRGBWithIndex(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "R") {
-			reader >> m_R;
+			SetR(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "G") {
-			reader >> m_G;
+			SetG(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "B") {
-			reader >> m_B;
+			SetB(std::stoi(reader.ReadPropValue()));
 		} else {
 			return Serializable::ReadProperty(propName, reader);
 		}
@@ -56,16 +56,21 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Color::SetRGBWithIndex(unsigned char index) {
+	void Color::SetRGBWithIndex(int index) {
+		m_Index = std::clamp(index, 0, 255);
 
-		m_Index = index;
-
-		RGB color;
-		get_color(static_cast<int>(m_Index), &color);
+		RGB rgbColor;
+		get_color(m_Index, &rgbColor);
 
 		// Multiply by 4 because the Allegro RGB struct elements are in range 0-63, and proper RGB needs 0-255.
-		m_R = color.r * 4;
-		m_G = color.g * 4;
-		m_B = color.b * 4;
+		m_R = rgbColor.r * 4;
+		m_G = rgbColor.g * 4;
+		m_B = rgbColor.b * 4;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int Color::RecalculateIndex() {
+		return m_Index = makecol8(m_R, m_G, m_B);
 	}
 }

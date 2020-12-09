@@ -36,7 +36,7 @@ namespace RTE {
 		m_CrabToHumanSpawnRatio = 0;
 
 		// Report that we're starting to read a new DataModule
-		if (progressCallback) { progressCallback(m_FileName + static_cast<char>(-43) + " loading:", true); }
+		if (progressCallback) { progressCallback(m_FileName + " " + static_cast<char>(-43) + " loading:", true); }
 
 		Reader reader;
 		std::string indexPath(m_FileName + "/Index.ini");
@@ -75,7 +75,7 @@ namespace RTE {
 		m_CrabToHumanSpawnRatio = 0;
 
 		// Report that we're starting to read a new DataModule
-		if (progressCallback) { progressCallback(m_FileName + static_cast<char>(-43) + " reading properties:", true); }
+		if (progressCallback) { progressCallback(m_FileName + " " + static_cast<char>(-43) + " reading properties:", true); }
 		Reader reader;
 		std::string indexPath(m_FileName + "/Index.ini");
 

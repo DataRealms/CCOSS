@@ -1089,8 +1089,12 @@ friend class Atom;
 // Return value:    None.
 
 	void AddImpulseForce(const Vector &impulse, const Vector &offset = Vector()) {
+
+#ifndef RELEASE_BUILD
 		RTEAssert(impulse.GetLargest() < 500000, "HUEG IMPULSE FORCE");
 		RTEAssert(offset.GetLargest() < 5000, "HUEG IMPULSE FORCE OFFSET");
+#endif
+
 		m_ImpulseForces.push_back(std::make_pair(impulse, offset));
 	}
 
@@ -1107,7 +1111,11 @@ friend class Atom;
 // Return value:    None.
 
 	void AddAbsImpulseForce(const Vector &impulse, const Vector &absPos) {
+
+#ifndef RELEASE_BUILD
 		RTEAssert(impulse.GetLargest() < 500000, "HUEG IMPULSE FORCE");
+#endif
+
 		m_ImpulseForces.push_back(std::make_pair(impulse, g_SceneMan.ShortestDistance(m_Pos, absPos) * c_MPP));
 	}
 

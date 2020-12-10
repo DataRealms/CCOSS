@@ -391,7 +391,7 @@ namespace RTE {
 					lineAddr += maxWidth;
 				}
 
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+#ifndef RELEASE_BUILD
 				if (g_UInputMan.KeyHeld(KEY_0)) { rect(bmp, bpx, bpy, bpx + maxWidth - 1, bpy + maxHeight - 1, g_BlackColor); }
 #endif
 			}
@@ -984,7 +984,7 @@ namespace RTE {
 		// Input is sent at whatever settings are set in inputs per second
 		float inputSend = m_ClientInputFps;
 
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+#if !defined DEBUG_RELEASE_BUILD && !defined RELEASE_BUILD
 		// Reduce input rate for debugging because it may overflow the input queue
 		inputSend = 10;
 #endif

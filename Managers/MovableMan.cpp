@@ -1664,7 +1664,7 @@ void MovableMan::Update()
 
     {
         // Travel Actors
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS1);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsTravel);
         {
             for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
             {
@@ -1686,7 +1686,7 @@ void MovableMan::Update()
                 (*aIt)->NewFrame();
             }
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS1);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsTravel);
 
         // Travel items
         {
@@ -1704,7 +1704,7 @@ void MovableMan::Update()
         }
 
         // Travel particles
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS1);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesTravel);
         {
             for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
             {
@@ -1718,7 +1718,7 @@ void MovableMan::Update()
                 (*parIt)->NewFrame();
             }
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS1);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesTravel);
 
         g_SceneMan.UnlockScene();
     }
@@ -1730,7 +1730,7 @@ void MovableMan::Update()
         g_SceneMan.LockScene();
 
         // Actors
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS2);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
         {
             for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
             {
@@ -1739,7 +1739,7 @@ void MovableMan::Update()
                 (*aIt)->ApplyImpulses();
             }
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS2);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsUpdate);
 
         // Items
         {
@@ -1758,7 +1758,7 @@ void MovableMan::Update()
         }
 
         // Particles
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS2);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
         {
             for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
             {
@@ -1774,7 +1774,7 @@ void MovableMan::Update()
                 }
             }
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS2);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
     }
 
     ///////////////////////////////////////////////////

@@ -15,7 +15,7 @@ namespace RTE {
 		m_ShowPerfStats = false;
 		m_AdvancedPerfStats = true;
 		m_CurrentPing = 0;
-		m_FrameTimer = 0;
+		m_FrameTimer = nullptr;
 		m_MSPFs.clear();
 		m_MSPFAverage = 0;
 	}
@@ -23,48 +23,40 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int PerformanceMan::Initialize() {
-		m_FrameTimer = new Timer();
+		m_FrameTimer = std::make_unique<Timer>();
 		m_Sample = 0;
 
-		for (unsigned short counter = 0; counter < PERF_COUNT; ++counter) {
-			std::fill_n(m_PerfData[counter], c_MaxSamples, 0);
-			std::fill_n(m_PerfPercentages[counter], c_MaxSamples, 0);
-			m_PerfMeasureStart[counter] = 0;
-			m_PerfMeasureStop[counter] = 0;
+		for (int counter = 0; counter < PerformanceCounters::PerfCounterCount; ++counter) {
+			m_PerfData.at(counter).fill(0);
+			m_PerfPercentages.at(counter).fill(0);
 		}
+		m_PerfMeasureStart.fill(0);
+		m_PerfMeasureStop.fill(0);
 
 		// Set up performance counter's names
-		m_PerfCounterNames[PERF_SIM_TOTAL] = "Total";
-		m_PerfCounterNames[PERF_ACTORS_PASS1] = "Act Travel";
-		m_PerfCounterNames[PERF_PARTICLES_PASS1] = "Prt Travel";
-		m_PerfCounterNames[PERF_ACTORS_PASS2] = "Act Update";
-		m_PerfCounterNames[PERF_PARTICLES_PASS2] = "Prt Update";
-		m_PerfCounterNames[PERF_ACTORS_AI] = "Act AI";
-		m_PerfCounterNames[PERF_ACTIVITY] = "Activity";
+		m_PerfCounterNames.at(PerformanceCounters::SimTotal) = "Total";
+		m_PerfCounterNames.at(PerformanceCounters::ActorsTravel) = "Act Travel";
+		m_PerfCounterNames.at(PerformanceCounters::ParticlesTravel) = "Prt Travel";
+		m_PerfCounterNames.at(PerformanceCounters::ActorsUpdate) = "Act Update";
+		m_PerfCounterNames.at(PerformanceCounters::ParticlesUpdate) = "Prt Update";
+		m_PerfCounterNames.at(PerformanceCounters::ActorsAIUpdate) = "Act AI";
+		m_PerfCounterNames.at(PerformanceCounters::ActivityUpdate) = "Activity";
 
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PerformanceMan::Destroy() {
-		delete m_FrameTimer;
-		Clear();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void PerformanceMan::Update() {
-		// TODO: Figure out how doing this here and then in Draw() evens out the fps values and see if we can get same results without this.
-		// Time and store the milliseconds per frame reading to the buffer, and trim the buffer as needed
-		m_MSPFs.push_back(m_FrameTimer->GetElapsedRealTimeMS());
+		// Time and store the milliseconds per frame reading of the sim update to the buffer, and trim the buffer as needed
+		m_MSPFs.push_back(static_cast<int>(m_FrameTimer->GetElapsedRealTimeMS()));
 		while (m_MSPFs.size() > c_MSPFAverageSampleSize) {
 			m_MSPFs.pop_front();
 		}
 
 		// Calculate the average milliseconds per frame over the last sampleSize frames
 		m_MSPFAverage = 0;
-		for (const unsigned int &mspf : m_MSPFs) {
+		for (const int &mspf : m_MSPFs) {
 			m_MSPFAverage += mspf;
 		}
 		m_MSPFAverage /= m_MSPFs.size();
@@ -72,17 +64,21 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PerformanceMan::ResetFrameTimer() { m_FrameTimer->Reset(); }
+	void PerformanceMan::ResetFrameTimer() const {
+		m_FrameTimer->Reset();
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PerformanceMan::StartPerformanceMeasurement(PerformanceCounters counter) { m_PerfMeasureStart[counter] = g_TimerMan.GetAbsoluteTime(); }
+	void PerformanceMan::StartPerformanceMeasurement(PerformanceCounters counter) {
+		m_PerfMeasureStart.at(counter) = g_TimerMan.GetAbsoluteTime();
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PerformanceMan::StopPerformanceMeasurement(PerformanceCounters counter) {
-		m_PerfMeasureStop[counter] = g_TimerMan.GetAbsoluteTime();
-		AddPerformanceSample(counter, m_PerfMeasureStop[counter] - m_PerfMeasureStart[counter]);
+		m_PerfMeasureStop.at(counter) = g_TimerMan.GetAbsoluteTime();
+		AddPerformanceSample(counter, m_PerfMeasureStop.at(counter) - m_PerfMeasureStart.at(counter));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -91,28 +87,28 @@ namespace RTE {
 		m_Sample++;
 		if (m_Sample >= c_MaxSamples) { m_Sample = 0; }
 
-		for (unsigned short counter = 0; counter < PERF_COUNT; ++counter) {
-			m_PerfData[counter][m_Sample] = 0;
-			m_PerfPercentages[counter][m_Sample] = 0;
+		for (int counter = 0; counter < PerformanceCounters::PerfCounterCount; ++counter) {
+			m_PerfData.at(counter).at(m_Sample) = 0;
+			m_PerfPercentages.at(counter).at(m_Sample) = 0;
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PerformanceMan::CalculateSamplePercentages() {
-		for (unsigned short counter = 0; counter < PERF_COUNT; ++counter) {
-			unsigned short samplePercentage = static_cast<unsigned short>(static_cast<float>(m_PerfData[counter][m_Sample]) / static_cast<float>(m_PerfData[counter][PERF_SIM_TOTAL]) * 100);
-			m_PerfPercentages[counter][m_Sample] = samplePercentage;
+		for (int counter = 0; counter < PerformanceCounters::PerfCounterCount; ++counter) {
+			int samplePercentage = static_cast<int>(static_cast<float>(m_PerfData.at(counter).at(m_Sample)) / static_cast<float>(m_PerfData.at(counter).at(PerformanceCounters::SimTotal)) * 100);
+			m_PerfPercentages.at(counter).at(m_Sample) = samplePercentage;
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	unsigned long long PerformanceMan::GetPerformanceCounterAverage(PerformanceCounters counter) const {
-		unsigned long long totalPerformanceMeasurement = 0;
-		unsigned short sample = m_Sample;
-		for (unsigned short i = 0; i < c_Average; ++i) {
-			totalPerformanceMeasurement += m_PerfData[counter][sample];
+	uint64_t PerformanceMan::GetPerformanceCounterAverage(PerformanceCounters counter) const {
+		uint64_t totalPerformanceMeasurement = 0;
+		int sample = m_Sample;
+		for (int i = 0; i < c_Average; ++i) {
+			totalPerformanceMeasurement += m_PerfData.at(counter).at(sample);
 			if (sample == 0) { sample = c_MaxSamples; }
 			sample--;
 		}
@@ -121,21 +117,21 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PerformanceMan::Draw(AllegroBitmap bitmapToDrawTo) {
+	void PerformanceMan::Draw(AllegroBitmap &bitmapToDrawTo) {
 		if (m_ShowPerfStats) {
-			// Time and store the milliseconds per frame reading to the buffer, and trim the buffer as needed
-			m_MSPFs.push_back(m_FrameTimer->GetElapsedRealTimeMS());
+			// Time and store the milliseconds per frame reading of the drawing frame to the buffer, and trim the buffer as needed
+			m_MSPFs.push_back(static_cast<int>(m_FrameTimer->GetElapsedRealTimeMS()));
 			m_FrameTimer->Reset();
 			while (m_MSPFs.size() > c_MSPFAverageSampleSize) {
 				m_MSPFs.pop_front();
 			}
 			// Calculate the average milliseconds per frame over the last sampleSize frames
-			for(const unsigned int &mspf : m_MSPFs){
+			for(const int &mspf : m_MSPFs){
 				m_MSPFAverage += mspf;
 			}
 			m_MSPFAverage /= m_MSPFs.size();
 
-			char str[512];
+			char str[128];
 
 			// Calculate the fps from the average
 			float fps = 1.0F / (static_cast<float>(m_MSPFAverage) / 1000.0F);
@@ -156,7 +152,7 @@ namespace RTE {
 			std::snprintf(str, sizeof(str), "DeltaTime: %.2f ms ([5]-, [6]+)", deltaTime);
 			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 40, str, GUIFont::Left);
 
-			std::snprintf(str, sizeof(str), "Particles: %i", g_MovableMan.GetParticleCount());
+			std::snprintf(str, sizeof(str), "Particles: %li", g_MovableMan.GetParticleCount());
 			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, c_StatsHeight + 50, str, GUIFont::Left);
 
 			std::snprintf(str, sizeof(str), "Objects: %i", g_MovableMan.GetKnownObjectsCount());
@@ -184,18 +180,18 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PerformanceMan::DrawPeformanceGraphs(AllegroBitmap bitmapToDrawTo) {
+	void PerformanceMan::DrawPeformanceGraphs(AllegroBitmap &bitmapToDrawTo) {
 		CalculateSamplePercentages();
 
-		char str[512];
+		char str[128];
 
-		for (unsigned short pc = 0; pc < PERF_COUNT; ++pc) {
-			unsigned short blockStart = c_GraphsStartOffsetY + pc * c_GraphBlockHeight;
+		for (int pc = 0; pc < PerformanceCounters::PerfCounterCount; ++pc) {
+			int blockStart = c_GraphsStartOffsetY + pc * c_GraphBlockHeight;
 
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, blockStart, m_PerfCounterNames[pc], GUIFont::Left);
+			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX, blockStart, m_PerfCounterNames.at(pc), GUIFont::Left);
 
-			// Print percentage from PerformanceCounters::PERF_SIM_TOTAL
-			unsigned short perc = static_cast<unsigned short>((static_cast<float>(GetPerformanceCounterAverage(static_cast<PerformanceCounters>(pc))) / static_cast<float>(GetPerformanceCounterAverage(PERF_SIM_TOTAL)) * 100));
+			// Print percentage from PerformanceCounters::SimTotal
+			int perc = static_cast<int>((static_cast<float>(GetPerformanceCounterAverage(static_cast<PerformanceCounters>(pc))) / static_cast<float>(GetPerformanceCounterAverage(PerformanceCounters::SimTotal)) * 100));
 			std::snprintf(str, sizeof(str), "%%: %u", perc);
 			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX + 60, blockStart, str, GUIFont::Left);
 
@@ -203,39 +199,36 @@ namespace RTE {
 			std::snprintf(str, sizeof(str), "T: %lli", GetPerformanceCounterAverage(static_cast<PerformanceCounters>(pc)) / 1000);
 			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX + 96, blockStart, str, GUIFont::Left);
 
-			unsigned short graphStart = blockStart + c_GraphsOffsetX;
+			int graphStart = blockStart + c_GraphsOffsetX;
 
 			// Draw graph backgrounds
 			bitmapToDrawTo.DrawRectangle(c_StatsOffsetX, graphStart, c_MaxSamples, c_GraphHeight, 240, true);
 			bitmapToDrawTo.DrawLine(c_StatsOffsetX, graphStart + c_GraphHeight / 2, c_StatsOffsetX - 1 + c_MaxSamples, graphStart + c_GraphHeight / 2, 96);
 
 			// Draw sample dots
-			unsigned short peak = 0;
-			unsigned short sample = m_Sample;
-			for (unsigned short i = 0; i < c_MaxSamples; i++) {
+			int peak = 0;
+			int sample = m_Sample;
+			for (int i = 0; i < c_MaxSamples; ++i) {
 				// Show microseconds in graphs, assume that 33333 microseconds (one frame of 30 fps) is the highest value on the graph
-				unsigned short value = Limit(static_cast<unsigned short>(static_cast<float>(m_PerfData[pc][sample]) / (1000000 / 30) * 100), 100, 0);
-				unsigned short dotHeight = static_cast<unsigned short>(static_cast<float>(c_GraphHeight) / 100.0 * static_cast<float>(value));
+				int value = std::clamp(static_cast<int>(static_cast<float>(m_PerfData.at(pc).at(sample)) / (1000000.0F / 30.0F) * 100.0F), 0, 100);
+				int dotHeight = static_cast<int>(static_cast<float>(c_GraphHeight) / 100.0F * static_cast<float>(value));
 
 				bitmapToDrawTo.SetPixel(c_StatsOffsetX - 1 + c_MaxSamples - i, graphStart + c_GraphHeight - dotHeight, 13);
-				peak = Limit(peak, m_PerfData[pc][sample], 0);
+				peak = std::clamp(peak, 0, static_cast<int>(m_PerfData.at(pc).at(sample)));
 
 				if (sample == 0) { sample = c_MaxSamples; }
 				sample--;
 			}
 
 			// Print peak values
-			std::snprintf(str, sizeof(str), "Peak: %i", peak / 1000);
-			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX + 130, blockStart, str, GUIFont::Left);
+			g_FrameMan.GetLargeFont()->DrawAligned(&bitmapToDrawTo, c_StatsOffsetX + 130, blockStart, "Peak: " + std::to_string(peak / 1000), GUIFont::Left);
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PerformanceMan::DrawCurrentPing() {
+	void PerformanceMan::DrawCurrentPing() const {
 		AllegroBitmap allegroBitmap(g_FrameMan.GetBackBuffer8());
-		char buf[32];
-		std::snprintf(buf, sizeof(buf), "PING: %u", m_CurrentPing);
-		g_FrameMan.GetLargeFont()->DrawAligned(&allegroBitmap, g_FrameMan.GetBackBuffer8()->w - 25, g_FrameMan.GetBackBuffer8()->h - 14, buf, GUIFont::Right);
+		g_FrameMan.GetLargeFont()->DrawAligned(&allegroBitmap, g_FrameMan.GetBackBuffer8()->w - 25, g_FrameMan.GetBackBuffer8()->h - 14, "PING: " + std::to_string(m_CurrentPing), GUIFont::Right);
 	}
 }

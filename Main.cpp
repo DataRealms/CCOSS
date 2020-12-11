@@ -1581,7 +1581,7 @@ bool RunGameLoop() {
 			// Advance the simulation time by the fixed amount
 			g_TimerMan.UpdateSim();
 
-			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_SIM_TOTAL);
+			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::SimTotal);
 
 			g_UInputMan.Update();
 
@@ -1593,15 +1593,15 @@ bool RunGameLoop() {
 			g_FrameMan.Update();
 			g_AudioMan.Update();
 			g_LuaMan.Update();
-			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTIVITY);
+			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActivityUpdate);
 			g_ActivityMan.Update();
-			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTIVITY);
+			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActivityUpdate);
 			g_MovableMan.Update();
 
 			g_ActivityMan.LateUpdateGlobalScripts();
 
 			g_ConsoleMan.Update();
-			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_SIM_TOTAL);
+			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::SimTotal);
 
 			if (!g_InActivity) {
 				g_TimerMan.PauseSim(true);

@@ -1,8 +1,7 @@
 ﻿#include "System.h"
+#include "unzip.h"
 
-#ifdef _WIN32
-#include <Windows.h>
-#else
+#ifndef _WIN32
 #include <unistd.h>
 #include <sys/stat.h>
 #endif
@@ -15,6 +14,7 @@ namespace RTE {
 	const std::string System::s_ModDirectory = "_Mods";
 	const std::string System::s_ModulePackageExtension = ".rte";
 	const std::string System::s_ZippedModulePackageExtension = ".rte.zip";
+	const std::unordered_set<std::string> System::s_SupportedExtensions = { ".ini", ".txt", ".lua", ".cfg", ".bmp", ".png", ".jpg", ".jpeg", ".wav", ".ogg", ".mp3", ".flac" };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -120,6 +120,137 @@ namespace RTE {
 		// All the fancy formatting doesn't work with the Windows console so just print the string as it is
 		std::cout << "\r" << stringToPrint << std::endl;
 #endif
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::string System::ExtractZippedDataModule(const std::string &zippedModulePath) {
+		std::string zippedModuleName = std::filesystem::path(zippedModulePath).filename().generic_string();
+
+		// Try to open the zipped and unzip it into place as an exposed data module
+		unzFile zippedModule = unzOpen(zippedModuleName.c_str());
+		std::stringstream extractionProgressReport;
+		bool abortExtract = false;
+
+		if (zippedModule) {
+			unz_global_info zippedModuleInfo;
+			if (unzGetGlobalInfo(zippedModule, &zippedModuleInfo) != UNZ_OK) {
+				extractionProgressReport << "\tSkipped: " + zippedModuleName + " - Could not read global file info!\n";
+				abortExtract = true;
+			}
+			// Buffer to hold data read from the zip file
+			std::array<char, s_FileBufferSize> fileBuffer;
+
+			// Go through and extract every file inside this zip, overwriting every colliding file that already exists in the install directory
+			for (int i = 0; i < zippedModuleInfo.number_entry && !abortExtract; ++i) {
+				unz_file_info currentFileInfo;
+				std::array<char, s_MaxFileName> outputFileInfoData;
+				if (unzGetCurrentFileInfo(zippedModule, &currentFileInfo, outputFileInfoData.data(), s_MaxFileName, nullptr, 0, nullptr, 0) != UNZ_OK) {
+					extractionProgressReport << "\tSkipped: " + std::string(outputFileInfoData.data()) + " - Could not read file info!\n";
+					continue;
+				}
+				std::string outputFileName = outputFileInfoData.data();
+#ifdef _WIN32
+				// TODO: Windows 10 adds support for paths over 260 characters so investigate how to get Windows version and whether the setting is enabled at runtime.
+				// Windows doesn't support paths over 260 characters long.
+				if ((s_WorkingDirectory + outputFileName).length() >= MAX_PATH) {
+					extractionProgressReport << "\tSkipped file: " + outputFileName + " - Full path to file exceeds 260 characters!\n";
+					continue;
+				}
+#endif
+				// Check if the directory we are trying to extract into exists, and if not, create it
+				std::string outputFileDirectory = outputFileName.substr(0, outputFileName.find_last_of("/\\") + 1);
+				if (!std::filesystem::exists(outputFileDirectory)) {
+					if (!MakeDirectory(s_WorkingDirectory + outputFileDirectory)) {
+						extractionProgressReport << "\tFailed to create directory: " + outputFileName + " - Extraction aborted!\n";
+						abortExtract = true;
+						continue;
+					} else {
+						extractionProgressReport << "\tCreated directory: " + outputFileName + "\n";
+					}
+				}
+				// If the output file is a directly, go the next entry listed in the zip file
+				if (std::filesystem::is_directory(outputFileName)) {
+					unzCloseCurrentFile(zippedModule);
+					if ((i + 1) < zippedModuleInfo.number_entry && unzGoToNextFile(zippedModule) != UNZ_OK) {
+						extractionProgressReport << "\tCould not read next file inside zip - Extraction aborted!\n";
+						abortExtract = true;
+					}
+					continue;
+				}
+
+				// Validate so only certain file types are extracted
+				std::string fileExtension = std::filesystem::path(outputFileName).extension().generic_string();
+				std::transform(fileExtension.begin(), fileExtension.end(), fileExtension.begin(), tolower);
+
+				if (s_SupportedExtensions.find(fileExtension) == s_SupportedExtensions.end()) {
+					extractionProgressReport << "\tSkipped file: " + outputFileName + " - Bad extension!\n";
+					unzCloseCurrentFile(zippedModule);
+
+					// Go the next entry listed in the zip file
+					if ((i + 1) < zippedModuleInfo.number_entry && unzGoToNextFile(zippedModule) != UNZ_OK) {
+						extractionProgressReport << "\tCould not read next file inside zip - Extraction aborted!\n";
+						abortExtract = true;
+					}
+					continue;
+				}
+
+				if (unzOpenCurrentFile(zippedModule) != UNZ_OK) {
+					extractionProgressReport << "\tSkipped file: " + zippedModuleName + " - Could not open file!\n";
+				} else {
+					// Open a file to write out the data.
+					FILE *outputFile = fopen(outputFileName.c_str(), "wb");
+					if (outputFile == nullptr) { extractionProgressReport << "\tSkipped file: " + outputFileName + " - Could not open/create destination file!\n"; }
+
+					// Write the entire file out, reading in buffer size chunks and spitting them out to the output stream
+					bool abortWrite = false;
+					int bytesRead = 0;
+					int totalBytesRead = 0;
+					do {
+						bytesRead = unzReadCurrentFile(zippedModule, fileBuffer.data(), s_FileBufferSize);
+						totalBytesRead += bytesRead;
+
+						if (bytesRead < 0) {
+							extractionProgressReport << "\tSkipped file: " + outputFileName + " - File is empty or corrupt!\n";
+							abortWrite = true;
+						// Sanity check how damn big this file we're writing is becoming. could prevent zip bomb exploits: http://en.wikipedia.org/wiki/Zip_bomb
+						} else if (totalBytesRead >= s_MaxUnzippedFileSize) {
+							extractionProgressReport << "\tSkipped file: " + outputFileName + " - File is too large, extract it manually!\n";
+							abortWrite = true;
+						}
+						if (abortWrite) {
+							break;
+						}
+						fwrite(fileBuffer.data(), bytesRead, 1, outputFile);
+					// Keep going while bytes are still being read (0 means end of file)
+					} while (bytesRead > 0 && outputFile);
+
+					fclose(outputFile);
+					unzCloseCurrentFile(zippedModule);
+
+					extractionProgressReport << "\tExtracted file: " + outputFileName + "\n";
+				}
+				// Go the next entry listed in the zip file.
+				if ((i + 1) < zippedModuleInfo.number_entry && unzGoToNextFile(zippedModule) != UNZ_OK) {
+					extractionProgressReport << "\tCould not read next file inside zip - Extraction aborted!\n";
+					abortExtract = true;
+				}
+			}
+			unzClose(zippedModule);
+			extractionProgressReport << "Successfully extracted Data Module from: " + zippedModuleName + " - Deleting zip file!\n";
+			std::remove((s_WorkingDirectory + zippedModuleName).c_str());
+		} else {
+			bool makeDirResult = false;
+			if (!std::filesystem::exists(s_WorkingDirectory + "_FailedExtract")) { makeDirResult = MakeDirectory(s_WorkingDirectory + "_FailedExtract"); }
+			if (makeDirResult) {
+				extractionProgressReport << "Failed to extract Data module from: " + zippedModuleName + " - Moving zip file to failed extract directory!\n";
+				std::filesystem::rename(s_WorkingDirectory + zippedModuleName, s_WorkingDirectory + "_FailedExtract/" + zippedModuleName);
+			} else {
+				extractionProgressReport << "Failed to extract Data module from: " + zippedModuleName + " - Failed to create directory to move zip file into, deleting zip file!\n";
+				std::remove((s_WorkingDirectory + zippedModuleName).c_str());
+			}
+		}
+		return extractionProgressReport.str();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

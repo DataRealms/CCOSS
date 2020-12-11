@@ -1740,7 +1740,6 @@ int main(int argc, char *argv[]) {
 	}
     g_TimerMan.Initialize();
 	g_PerformanceMan.Initialize();
-    g_PresetMan.Initialize();
     g_FrameMan.Initialize();
     g_PostProcessMan.Initialize();
     if (g_AudioMan.Initialize() >= 0) {

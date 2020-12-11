@@ -506,6 +506,11 @@ protected:
 
 private:
 
+	/// <summary>
+	/// Iterates through the working directory to find any files matching the zipped module package extension (.rte.zip) and proceeds to extract them.
+	/// </summary>
+	void FindAndExtractZippedModules() const;
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
 //////////////////////////////////////////////////////////////////////////////////////////

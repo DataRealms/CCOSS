@@ -80,6 +80,15 @@ namespace RTE {
 		static void PrintToCLI(const std::string &stringToPrint);
 #pragma endregion
 
+#pragma region Archived DataModule Handling
+		/// <summary>
+		/// Extracts all files from a zipped DataModule, overwriting any corresponding files already existing.
+		/// </summary>
+		/// <param name="zippedModulePath">Path to the module to extract.</param>
+		/// <returns>A string containing the progress report of the extraction.</returns>
+		static std::string ExtractZippedDataModule(const std::string &zippedModulePath);
+#pragma endregion
+
 #pragma region Misc
 		/// <summary>
 		/// Fires up the default browser for the current OS on a specific URL.
@@ -104,6 +113,11 @@ namespace RTE {
 		static const std::string s_ModDirectory; //!< String containing the folder name of the mod directory.
 		static const std::string s_ModulePackageExtension; //!< The extension that determines a directory/file is a RTE module.
 		static const std::string s_ZippedModulePackageExtension; //!< The extension that determines a file is a zipped RTE module.
+
+		static const std::unordered_set<std::string> s_SupportedExtensions; //!< Container for all the supported file extensions that are allowed to be extracted from zipped module files.
+		static constexpr int s_MaxFileName = 512; //!< Maximum length of output file directory + name string.
+		static constexpr int s_FileBufferSize = 8192; //!< Buffer to hold data read from the zip file.
+		static constexpr int s_MaxUnzippedFileSize = 104857600; //!< Maximum size of single file being extracted from zip archive (100MiB).
 	};
 }
 #endif

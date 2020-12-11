@@ -153,6 +153,11 @@ bool PresetMan::LoadDataModule(string moduleName, bool official, ProgressCallbac
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool PresetMan::LoadAllDataModules() {
+	// Destroy and possible loaded modules
+	g_PresetMan.Destroy();
+
+	FindAndExtractZippedModules();
+
 	// Load all the official modules first!
 	std::array<std::string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
 	for (const std::string &officialModule : officialModules) {
@@ -1052,6 +1057,16 @@ Actor * PresetMan::GetLoadout(std::string loadoutName, int moduleNumber, bool sp
 	return 0;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void PresetMan::FindAndExtractZippedModules() const {
+	for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory())) {
+		std::string zippedModulePath = std::filesystem::path(directoryEntry).generic_string();
+		if (zippedModulePath.find(System::GetZippedModulePackageExtension()) == zippedModulePath.length() - System::GetZippedModulePackageExtension().length()) {
+			LoadingGUI::LoadingSplashProgressReport("Extracting Data Module from: " + directoryEntry.path().filename().generic_string(), true);
+			LoadingGUI::LoadingSplashProgressReport(System::ExtractZippedDataModule(zippedModulePath), true);
+		}
+	}
+}
 
 } // namespace RTE

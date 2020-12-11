@@ -51,31 +51,9 @@ namespace RTE {
 		/// <param name="reportString">The string to print in the report and log.</param>
 		/// <param name="newItem">Whether to start a new line in the log writer and to scroll the bitmap.</param>
 		static void LoadingSplashProgressReport(const std::string &reportString, bool newItem = false);
-
-		/// <summary>
-		/// Finding and loading all DataModules.
-		/// </summary>
-		bool LoadDataModules();
-
-		/// <summary>
-		/// Unzip all *.rte.zip files found in the install directory, overwriting all files already existing.
-		/// This will cause extracted and available data modules to be updated to whatever is within their corresponding zip files.
-		/// The point of this is that it facilitates downloaded mods being loaded without having to be manually unzipped first by the user.
-		/// </summary>
-		// TODO: Break this down between PresetMan and System.
-		void ExtractZippedModules() const;
 #pragma endregion
 
 	protected:
-
-		static constexpr int s_MaxFileName = 512; //!< Maximum length of output file directory + name string.
-		static constexpr int s_FileBufferSize = 8192; //!< Buffer to hold data read from the zip file.
-		static constexpr int s_MaxUnzippedFileSize = 104857600; //!< Maximum size of single file being extracted from zip archive (100MiB).
-
-		/// <summary>
-		/// Container for all the supported file extensions that are allowed to be extracted from zipped module files.
-		/// </summary>
-		const std::unordered_set<std::string> s_SupportedExtensions = { ".ini", ".txt", ".lua", ".cfg", ".bmp", ".png", ".jpg", ".jpeg", ".wav", ".ogg", ".mp3", ".flac" };
 
 		/// <summary>
 		/// Custom deleters for std::unique_ptr members. Must be defined to avoid including the class headers and just rely on forward declaration.

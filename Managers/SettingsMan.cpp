@@ -46,6 +46,7 @@ namespace RTE {
 		m_LoadingScreenReportPrecision = 100;
 		m_MenuTransitionDurationMultiplier = 1.0F;
 		m_PrintDebugInfo = false;
+		m_MeasureModuleLoadTime = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -178,6 +179,8 @@ namespace RTE {
 			SetMenuTransitionDurationMultiplier(std::stof(reader.ReadPropValue()));
 		} else if (propName == "PrintDebugInfo") {
 			reader >> m_PrintDebugInfo;
+		} else if (propName == "MeasureModuleLoadTime") {
+			reader >> m_MeasureModuleLoadTime;
 		} else if (propName == "PlayerNetworkName") {
 			reader >> m_PlayerNetworkName;
 		} else if (propName == "NetworkServerName") {
@@ -328,6 +331,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("AdvancedPerformanceStats", g_PerformanceMan.m_AdvancedPerfStats);
 		writer.NewPropertyWithValue("MenuTransitionDuration", m_MenuTransitionDurationMultiplier);
 		writer.NewPropertyWithValue("PrintDebugInfo", m_PrintDebugInfo);
+		writer.NewPropertyWithValue("MeasureModuleLoadTime", m_MeasureModuleLoadTime);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

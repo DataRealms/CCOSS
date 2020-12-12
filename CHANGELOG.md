@@ -148,6 +148,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Color/TrailColor = Color
 		Index = 0-255 // Corresponds with index in palette.bmp
 	```
+	
+- New `Settings.ini` property `MeasureModuleLoadTime = 0/1` to measure the duration of module loading (archived module extraction included). For benchmarking purpuses.
 
 ### Changed
 

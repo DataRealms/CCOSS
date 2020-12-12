@@ -153,6 +153,8 @@ bool PresetMan::LoadDataModule(string moduleName, bool official, ProgressCallbac
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool PresetMan::LoadAllDataModules() {
+	std::chrono::steady_clock::time_point moduleLoadTimerStart = std::chrono::high_resolution_clock::now();
+
 	// Destroy and possible loaded modules
 	g_PresetMan.Destroy();
 
@@ -189,6 +191,10 @@ bool PresetMan::LoadAllDataModules() {
 	if (!g_PresetMan.LoadDataModule("Scenes.rte", false, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
 	if (!g_PresetMan.LoadDataModule("Metagames.rte", false, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
 
+	if (g_SettingsMan.MeasureModuleLoadTime()) {
+		std::chrono::milliseconds moduleLoadElapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - moduleLoadTimerStart);
+		g_ConsoleMan.PrintString("Module load duration is: " + std::to_string(moduleLoadElapsedTime.count()) + "ms");
+	}
 	return true;
 }
 

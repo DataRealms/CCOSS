@@ -334,6 +334,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newSpeed">New multiplier value for the transition durations between different menus. Lower values equal faster transitions.</param>
 		void SetMenuTransitionDurationMultiplier(float newSpeed) { m_MenuTransitionDurationMultiplier = std::max(0.0F, newSpeed); }
+
+		/// <summary>
+		/// Gets whether the duration of module loading (extraction included) should be measured or not. For benchmarking purposes.
+		/// </summary>
+		/// <returns>Whether duration should be measured or not.</returns>
+		bool MeasureModuleLoadTime() const { return m_MeasureModuleLoadTime; }
 #pragma endregion
 
 	protected:
@@ -342,7 +348,7 @@ namespace RTE {
 
 		bool m_ShowForeignItems; //!< Do not show foreign items in buy menu.
 		bool m_FlashOnBrainDamage; //!< Whether red flashes on brain damage are on or off.
-		bool m_BlipOnRevealUnseen; //!< Blip if unseen is revealed.	
+		bool m_BlipOnRevealUnseen; //!< Blip if unseen is revealed.
 		bool m_EndlessMode; //!< Endless MetaGame mode.
 		bool m_EnableHats; //!< Whether randomized hat attachables will be attached to all AHuman actors.
 		bool m_EnableCrabBombs; //!< Whether all actors (except Brains and Doors) should be annihilated if a number exceeding the crab bomb threshold is released at once.
@@ -368,6 +374,7 @@ namespace RTE {
 		int m_LoadingScreenReportPrecision; //!< How accurately the reader progress report tells what line it's reading during module loading. Lower values equal more precision at the cost of loading speed.
 		float m_MenuTransitionDurationMultiplier; //!< Multiplier value for the transition durations between different menus. Lower values equal faster transitions.
 		bool m_PrintDebugInfo; //!< Print some debug info in console.
+		bool m_MeasureModuleLoadTime; //!< Whether to measure the duration of data module loading (extraction included). For benchmarking purposes.
 
 		std::list<std::string> m_VisibleAssemblyGroupsList; //!< List of assemblies groups always shown in editors.
 		std::map<std::string, bool> m_DisabledMods; //!< List of the module names we disabled.

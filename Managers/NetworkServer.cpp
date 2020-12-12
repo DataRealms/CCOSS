@@ -205,6 +205,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void NetworkServer::SetServerPort(const std::string &newPort) {
+		bool useDefault = false;
+		for (const char &stringChar : newPort) {
+			if (!std::isdigit(stringChar)) {
+				g_ConsoleMan.PrintString("ERROR: Invalid port passed into \"-server\" argument, using default (8000) instead!");
+				useDefault = true;
+				break;
+			}
+		}
+		m_ServerPort = useDefault ? "8000" : newPort;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void NetworkServer::Start() {
 		RakNet::SocketDescriptor socketDescriptors[1];
 		socketDescriptors[0].port = atoi(m_ServerPort.c_str());

@@ -104,7 +104,7 @@ namespace RTE {
 		/// Sets the port this server will be using.
 		/// </summary>
 		/// <param name="newPort">The new port to set.</param>
-		void SetServerPort(std::string newPort) { m_ServerPort = newPort; }
+		void SetServerPort(const std::string &newPort);
 
 		/// <summary>
 		/// Sets whether interlacing is used to reduce bandwidth usage or not.

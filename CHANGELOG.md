@@ -8,6 +8,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- New `Settings.ini` property `MeasureModuleLoadTime = 0/1` to measure the duration of module loading (archived module extraction included). For benchmarking purpuses.
+
+- `Color` object's RGB values can now be set with index number.  
+	```
+	Color/TrailColor = Color
+		Index = 0-255 // Corresponds with index in palette.bmp
+	```
+
+### Changed
+
+### Fixed
+
+### Removed
+
+***
+
+## [Unreleased]
+
+### Added
+
 - Implemented Lua Just-In-Time compilation (MoonJIT 2.2.0).
 
 - Implemented PNG file loading and saving. PNGs still need to be indexed just like BMPs! Transparency (alpha) not supported (yet).
@@ -142,14 +162,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `FLAC` audio files can now be loaded through lua and ini.
 
 - Added new lua `Vector` functions: `GetRadRotated(angle)` and `GetDegRotated(angle)`. They return a rotated copy of the vector without modifying it.
-
-- `Color` object's RGB values can now be set with index number.  
-	```
-	Color/TrailColor = Color
-		Index = 0-255 // Corresponds with index in palette.bmp
-	```
-	
-- New `Settings.ini` property `MeasureModuleLoadTime = 0/1` to measure the duration of module loading (archived module extraction included). For benchmarking purpuses.
 
 ### Changed
 

@@ -1676,16 +1676,16 @@ void HandleMainArgs(int argCount, char **argValue) {
 	bool launchModeSet = false;
 	bool singleModuleSet = false;
 
-    for (int i = 0; i < argCount;) {
+	for (int i = 0; i < argCount;) {
 		std::string currentArg = argValue[i];
 		bool lastArg = i + 1 == argCount;
 
-        // Print loading screen console to cout
+		// Print loading screen console to cout
 		if (currentArg == "-cout") { System::EnableLoggingToCLI(); }
 
 		// Load a single module right after the official modules
 		if (!lastArg && !singleModuleSet && currentArg == "-module") {
-			std::string moduleToLoad = argValue[i++];
+			std::string moduleToLoad = argValue[++i];
 			if (moduleToLoad.find(System::GetModulePackageExtension()) == moduleToLoad.length() - System::GetModulePackageExtension().length()) {
 				g_PresetMan.SetSingleModuleToLoad(moduleToLoad);
 				singleModuleSet = true;
@@ -1695,17 +1695,17 @@ void HandleMainArgs(int argCount, char **argValue) {
 			// Launch game in server mode
 			if (currentArg == "-server") {
 				g_NetworkServer.EnableServerMode();
-				g_NetworkServer.SetServerPort(!lastArg ? argValue[i++] : "8000");
+				g_NetworkServer.SetServerPort(!lastArg ? argValue[++i] : "8000");
 				launchModeSet = true;
 			// Launch game directly into editor activity
 			} else if (!lastArg && currentArg == "-editor") {
-				g_EditorToLaunch = argValue[i++];
+				g_EditorToLaunch = argValue[++i];
 				g_LaunchIntoEditor = true;
 				launchModeSet = true;
 			}
 		}
-		i++;
-    }
+		++i;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -90,7 +90,7 @@ namespace RTE {
 		m_TempBackBuffer32 = nullptr;
 		m_TempPlayerScreen = nullptr;
 
-		for (short screenCount = 0; screenCount < c_MaxScreenCount; ++screenCount) {
+		for (int screenCount = 0; screenCount < c_MaxScreenCount; ++screenCount) {
 			m_ScreenText[screenCount].clear();
 			m_TextDuration[screenCount] = -1;
 			m_TextDurationTimer[screenCount].Reset();
@@ -100,7 +100,7 @@ namespace RTE {
 			m_FlashedLastFrame[screenCount] = false;
 			m_FlashTimer[screenCount].Reset();
 
-			for (short bufferFrame = 0; bufferFrame < 2; bufferFrame++) {
+			for (int bufferFrame = 0; bufferFrame < 2; bufferFrame++) {
 				m_NetworkBackBufferIntermediate8[bufferFrame][screenCount] = nullptr;
 				m_NetworkBackBufferFinal8[bufferFrame][screenCount] = nullptr;
 				m_NetworkBackBufferIntermediateGUI8[bufferFrame][screenCount] = nullptr;
@@ -137,7 +137,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::ValidateResolution(unsigned short &resX, unsigned short &resY, unsigned short &resMultiplier) {
+	void FrameMan::ValidateResolution(int &resX, int &resY, int &resMultiplier) {
 		if (resX * resMultiplier > m_ScreenResX || resY * resMultiplier > m_ScreenResY) {
 			allegro_message("Resolution too high to fit display, overriding to fit!");
 			resX = m_NewResX = m_ScreenResX / resMultiplier;
@@ -173,7 +173,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::ValidateMultiScreenResolution(unsigned short &resX, unsigned short &resY, unsigned short &resMultiplier) {
+	void FrameMan::ValidateMultiScreenResolution(int &resX, int &resY, int &resMultiplier) {
 #ifdef _WIN32
 		POINT pointOnScreen;
 		HMONITOR screenHandle;
@@ -197,7 +197,7 @@ namespace RTE {
 		screenHandle = MonitorFromPoint(pointOnScreen, MONITOR_DEFAULTTONULL);
 		screenInfo = { sizeof(MONITORINFO) };
 		GetMonitorInfo(screenHandle, &screenInfo);
-		unsigned short centerScreenResY = screenInfo.rcMonitor.bottom;
+		int centerScreenResY = screenInfo.rcMonitor.bottom;
 
 		if (centerScreenResY != m_PrimaryScreenResY) {
 			allegro_message("Center screen height is not identical to primary screen, overriding to fit primary screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
@@ -211,7 +211,7 @@ namespace RTE {
 			screenHandle = MonitorFromPoint(pointOnScreen, MONITOR_DEFAULTTONULL);
 			screenInfo = { sizeof(MONITORINFO) };
 			GetMonitorInfo(screenHandle, &screenInfo);
-			unsigned short rightScreenResY = screenInfo.rcMonitor.bottom;
+			int rightScreenResY = screenInfo.rcMonitor.bottom;
 
 			if (rightScreenResY != m_PrimaryScreenResY) {
 				allegro_message("Right screen height is not identical to primary screen, overriding to extend to center screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
@@ -286,8 +286,8 @@ namespace RTE {
 		ClearBackBuffer32();
 
 		// Create all the network 8bpp back buffers
-		for (short i = 0; i < c_MaxScreenCount; i++) {
-			for (short f = 0; f < 2; f++) {
+		for (int i = 0; i < c_MaxScreenCount; i++) {
+			for (int f = 0; f < 2; f++) {
 				m_NetworkBackBufferIntermediate8[f][i] = create_bitmap_ex(8, m_ResX, m_ResY);
 				clear_to_color(m_NetworkBackBufferIntermediate8[f][i], m_BlackColor);
 
@@ -327,8 +327,8 @@ namespace RTE {
 		m_TempBackBuffer8 = m_BackBuffer8;
 		m_TempBackBuffer32 = m_BackBuffer32;
 
-		for (short i = 0; i < c_MaxScreenCount; i++) {
-			for (short f = 0; f < 2; f++) {
+		for (int i = 0; i < c_MaxScreenCount; i++) {
+			for (int f = 0; f < 2; f++) {
 				m_TempNetworkBackBufferIntermediate8[f][i] = m_NetworkBackBufferIntermediate8[f][i];
 				m_TempNetworkBackBufferIntermediateGUI8[f][i] = m_NetworkBackBufferIntermediateGUI8[f][i];
 				m_TempNetworkBackBufferFinal8[f][i] = m_NetworkBackBufferFinal8[f][i];
@@ -350,8 +350,8 @@ namespace RTE {
 		destroy_bitmap(m_WorldDumpBuffer);
 		destroy_bitmap(m_ScenePreviewDumpGradient);
 
-		for (short i = 0; i < c_MaxScreenCount; i++) {
-			for (short f = 0; f < 2; f++) {
+		for (int i = 0; i < c_MaxScreenCount; i++) {
+			for (int f = 0; f < 2; f++) {
 				destroy_bitmap(m_NetworkBackBufferIntermediate8[f][i]);
 				destroy_bitmap(m_NetworkBackBufferIntermediateGUI8[f][i]);
 				destroy_bitmap(m_NetworkBackBufferFinal8[f][i]);
@@ -373,8 +373,8 @@ namespace RTE {
 		destroy_bitmap(m_TempBackBuffer32);
 		destroy_bitmap(m_TempPlayerScreen);
 
-		for (short i = 0; i < c_MaxScreenCount; i++) {
-			for (short f = 0; f < 2; f++) {
+		for (int i = 0; i < c_MaxScreenCount; i++) {
+			for (int f = 0; f < 2; f++) {
 				destroy_bitmap(m_TempNetworkBackBufferIntermediate8[f][i]);
 				destroy_bitmap(m_TempNetworkBackBufferIntermediateGUI8[f][i]);
 				destroy_bitmap(m_TempNetworkBackBufferFinal8[f][i]);
@@ -395,7 +395,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool FrameMan::IsValidResolution(unsigned short width, unsigned short height) const {
+	bool FrameMan::IsValidResolution(int width, int height) const {
 		if ((width >= 640 && height >= 480) && (width <= m_ScreenResX || height <= m_ScreenResY)) {
 			// Disallow 1366x768 because it's not supported by Allegro.
 			if (width == 1366 && height == 768) {
@@ -409,7 +409,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::SwitchResolutionMultiplier(unsigned char multiplier) {
+	int FrameMan::SwitchResolutionMultiplier(int multiplier) {
 		if (multiplier <= 0 || multiplier > 4 || multiplier == m_ResMultiplier) {
 			return -1;
 		}
@@ -422,8 +422,8 @@ namespace RTE {
 #endif
 
 		// Need to save these first for recovery attempts to work (screen might be 0)
-		unsigned short resX = m_ResX;
-		unsigned short resY = m_ResY;
+		int resX = m_ResX;
+		int resY = m_ResY;
 
 		// Set the GFX_TEXT driver to hack around Allegro's window resizing limitations (specifically reducing window size) when switching from 2X mode to 1X mode.
 		// This will force a state where there is no actual game window between multiplier switches and the next set_gfx_mode call will recreate it correctly.
@@ -456,9 +456,9 @@ namespace RTE {
 		if ((upscaled && IsUpscaledFullscreen()) || (!upscaled && IsFullscreen())) {
 			return;
 		}
-		unsigned short resX = m_ScreenResX;
-		unsigned short resY = m_ScreenResY;
-		unsigned short resMultiplier = 1;
+		int resX = m_ScreenResX;
+		int resY = m_ScreenResY;
+		int resMultiplier = 1;
 
 		if (upscaled) {
 			if (!IsFullscreen() && m_ResMultiplier == 1 && m_ResX == m_ScreenResX / 2 && m_ResY == m_ScreenResY / 2) {
@@ -474,7 +474,7 @@ namespace RTE {
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::SwitchResolution(unsigned short newResX, unsigned short newResY, unsigned short newMultiplier, bool endActivity) {
+	int FrameMan::SwitchResolution(int newResX, int newResY, int newMultiplier, bool endActivity) {
 		if (!IsValidResolution(newResX, newResY) || newResX <= 0 || newResX > m_ScreenResX || newResY <= 0 || newResY > m_ScreenResY) {
 			return -1;
 		}
@@ -489,9 +489,9 @@ namespace RTE {
 		}
 		
 		// Need to save these first for recovery attempts to work (screen might be 0)
-		unsigned short resX = m_ResX;
-		unsigned short resY = m_ResY;
-		unsigned short resMultiplier = m_ResMultiplier;
+		int resX = m_ResX;
+		int resY = m_ResY;
+		int resMultiplier = m_ResMultiplier;
 
 		ValidateResolution(newResX, newResY, newMultiplier);
 
@@ -550,7 +550,7 @@ namespace RTE {
 			m_PlayerScreenWidth = m_BackBuffer8->w;
 			m_PlayerScreenHeight = m_BackBuffer8->h;
 		}
-		for (short i = 0; i < c_MaxScreenCount; ++i) {
+		for (int i = 0; i < c_MaxScreenCount; ++i) {
 			m_FlashScreenColor[i] = -1;
 			m_FlashedLastFrame[i] = false;
 		}
@@ -558,11 +558,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	unsigned short FrameMan::GetPlayerFrameBufferWidth(short whichPlayer) const {
+	int FrameMan::GetPlayerFrameBufferWidth(int whichPlayer) const {
 		if (IsInMultiplayerMode()) {
 			if (whichPlayer < 0 || whichPlayer >= c_MaxScreenCount) {
-				unsigned short width = GetResX();
-				for (unsigned short i = 0; i < c_MaxScreenCount; i++) {
+				int width = GetResX();
+				for (int i = 0; i < c_MaxScreenCount; i++) {
 					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w < width)) {
 						width = m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w;
 					}
@@ -579,11 +579,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	unsigned short FrameMan::GetPlayerFrameBufferHeight(short whichPlayer) const {
+	int FrameMan::GetPlayerFrameBufferHeight(int whichPlayer) const {
 		if (IsInMultiplayerMode()) {
 			if (whichPlayer < 0 || whichPlayer >= c_MaxScreenCount) {
-				unsigned short height = GetResY();
-				for (unsigned short i = 0; i < c_MaxScreenCount; i++) {
+				int height = GetResY();
+				for (int i = 0; i < c_MaxScreenCount; i++) {
 					if (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i] && (m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h < height)) { 
 						height = m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h;
 					}
@@ -600,19 +600,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	unsigned short FrameMan::CalculateTextHeight(const std::string &text, unsigned short maxWidth, bool isSmall) {
+	int FrameMan::CalculateTextHeight(const std::string &text, int maxWidth, bool isSmall) {
 		return isSmall ? GetSmallFont()->CalculateHeight(text, maxWidth) : GetLargeFont()->CalculateHeight(text, maxWidth);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	unsigned short FrameMan::CalculateTextWidth(const std::string &text, bool isSmall) {
+	int FrameMan::CalculateTextWidth(const std::string &text, bool isSmall) {
 		return isSmall ? GetSmallFont()->CalculateWidth(text) : GetLargeFont()->CalculateWidth(text);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::SetScreenText(const std::string &message, short whichScreen, unsigned short blinkInterval, short displayDuration, bool centered) {
+	void FrameMan::SetScreenText(const std::string &message, int whichScreen, int blinkInterval, int displayDuration, bool centered) {
 		// See if we can overwrite the previous message
 		if (whichScreen >= 0 && whichScreen < c_MaxScreenCount && m_TextDurationTimer[whichScreen].IsPastRealMS(m_TextDuration[whichScreen])) {
 			m_ScreenText[whichScreen] = message;
@@ -625,7 +625,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::ClearScreenText(short whichScreen) {
+	void FrameMan::ClearScreenText(int whichScreen) {
 		if (whichScreen >= 0 && whichScreen < c_MaxScreenCount) {
 			m_ScreenText[whichScreen].clear();
 			m_TextDuration[whichScreen] = -1;
@@ -664,8 +664,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::CreateNewNetworkPlayerBackBuffer(short player, unsigned short width, unsigned short height) {
-		for (unsigned short f = 0; f < 2; f++) {
+	void FrameMan::CreateNewNetworkPlayerBackBuffer(int player, int width, int height) {
+		for (int f = 0; f < 2; f++) {
 			destroy_bitmap(m_NetworkBackBufferIntermediate8[f][player]);
 			m_NetworkBackBufferIntermediate8[f][player] = create_bitmap_ex(8, width, height);
 
@@ -709,8 +709,8 @@ namespace RTE {
 			return -1;
 		}
 
-		unsigned short fileNumber = 0;
-		unsigned short maxFileTrys = 1000;
+		int fileNumber = 0;
+		int maxFileTrys = 1000;
 		char fullFileName[256];
 
 		while (fileNumber < maxFileTrys) {
@@ -805,7 +805,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::SharedDrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, unsigned char color, unsigned char altColor, unsigned short skip, unsigned short skipStart, bool shortestWrap, bool drawDot, BITMAP *dot) const {
+	int FrameMan::SharedDrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, int color, int altColor, int skip, int skipStart, bool shortestWrap, bool drawDot, BITMAP *dot) const {
 		RTEAssert(bitmap, "Trying to draw line to null Bitmap");
 		if (drawDot) { RTEAssert(dot, "Trying to draw line of dots without specifying a dot Bitmap"); }
 
@@ -820,8 +820,8 @@ namespace RTE {
 		int increment[2];
 		bool drawAlt = false;
 
-		unsigned short dotHeight = drawDot ? dot->h : 0;
-		unsigned short dotWidth = drawDot ? dot->w : 0;
+		int dotHeight = drawDot ? dot->h : 0;
+		int dotWidth = drawDot ? dot->w : 0;
 
 		//acquire_bitmap(bitmap);
 
@@ -923,7 +923,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::UpdateScreenOffsetForSplitScreen(short playerScreen, Vector &screenOffset) const {
+	void FrameMan::UpdateScreenOffsetForSplitScreen(int playerScreen, Vector &screenOffset) const {
 		switch (playerScreen) {
 			case Players::PlayerTwo:
 				// If both splits, or just VSplit, then in upper right quadrant
@@ -981,7 +981,7 @@ namespace RTE {
 
 			// Save scene layer's offsets for each screen, server will pick them to build the frame state and send to client
 			if (IsInMultiplayerMode()) {
-				unsigned short layerCount = 0;
+				int layerCount = 0;
 
 				for (const SceneLayer *sceneLayer : g_SceneMan.GetScene()->GetBackLayers()) {
 					SLOffset[playerScreen][layerCount] = sceneLayer->GetOffset();
@@ -1086,15 +1086,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::DrawScreenText(short playerScreen, AllegroBitmap playerGUIBitmap) {
+	void FrameMan::DrawScreenText(int playerScreen, AllegroBitmap playerGUIBitmap) {
 		int textPosY = 0;
 		// Only draw screen text to actual human players
 		if (playerScreen < g_ActivityMan.GetActivity()->GetHumanCount()) {
 			textPosY += 12;
 
 			if (!m_ScreenText[playerScreen].empty()) {
-				unsigned short bufferOrScreenWidth = IsInMultiplayerMode() ? GetPlayerFrameBufferWidth(playerScreen) : GetPlayerScreenWidth();
-				unsigned short bufferOrScreenHeight = IsInMultiplayerMode() ? GetPlayerFrameBufferHeight(playerScreen) : GetPlayerScreenHeight();
+				int bufferOrScreenWidth = IsInMultiplayerMode() ? GetPlayerFrameBufferWidth(playerScreen) : GetPlayerScreenWidth();
+				int bufferOrScreenHeight = IsInMultiplayerMode() ? GetPlayerFrameBufferHeight(playerScreen) : GetPlayerScreenHeight();
 
 				if (m_TextCentered[playerScreen]) { textPosY = (bufferOrScreenHeight / 2) - 52; }
 
@@ -1132,7 +1132,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::DrawScreenFlash(short playerScreen, BITMAP *playerGUIBitmap) {
+	void FrameMan::DrawScreenFlash(int playerScreen, BITMAP *playerGUIBitmap) {
 		if (m_FlashScreenColor[playerScreen] != -1) {
 			// If set to flash for a period of time, first be solid and then start flashing slower
 			double timeTillLimit = m_FlashTimer[playerScreen].LeftTillRealTimeLimitMS();
@@ -1176,7 +1176,7 @@ namespace RTE {
 			BITMAP *effectBitmap = 0;
 			int effectPosX = 0;
 			int effectPosY = 0;
-			unsigned char effectStrength = 0;
+			int effectStrength = 0;
 			Vector targetPos(0, 0);
 
 			// Draw objects
@@ -1210,13 +1210,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::PrepareFrameForNetwork() {
-		unsigned short dx = 0;
-		unsigned short dy = 0;
-		unsigned short dw = m_BackBuffer8->w / 2;
-		unsigned short dh = m_BackBuffer8->h / 2;
+		int dx = 0;
+		int dy = 0;
+		int dw = m_BackBuffer8->w / 2;
+		int dh = m_BackBuffer8->h / 2;
 
 		// Blit all four internal player screens onto the backbuffer
-		for (unsigned short i = 0; i < c_MaxScreenCount; i++) {
+		for (int i = 0; i < c_MaxScreenCount; i++) {
 			dx = (i == 1 || i == 3) ? dw : dx;
 			dy = (i == 2 || i == 3) ? dh : dy;
 

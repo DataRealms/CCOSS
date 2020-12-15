@@ -290,7 +290,7 @@ void Activity::Clear() {
 			g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
 			g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(player));
 
-			m_PlayerController[player].Destroy();
+			m_PlayerController[player].Reset();
 			m_PlayerController[player].Create(Controller::CIM_PLAYER, player);
 			m_PlayerController[player].SetTeam(m_Team[player]);
 

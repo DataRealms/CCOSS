@@ -202,7 +202,7 @@ int BaseEditor::Start()
         g_SceneMan.SetScreenTeam(ScreenOfPlayer(editingPlayer), m_Team[editingPlayer]);
         g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(editingPlayer));
 
-        m_PlayerController[editingPlayer].Destroy();
+        m_PlayerController[editingPlayer].Reset();
         m_PlayerController[editingPlayer].Create(Controller::CIM_PLAYER, editingPlayer);
         m_PlayerController[editingPlayer].SetTeam(m_Team[editingPlayer]);
 

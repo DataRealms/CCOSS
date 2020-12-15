@@ -220,9 +220,6 @@ int EditorActivity::Start()
     // Force the split screen config to just be one big screen for editing
     g_FrameMan.ResetSplitScreens(false, false);
 
-    // Only need one controller
-    m_PlayerController[0].Create();
-
     ///////////////////////////
     // GUI manager setup
 

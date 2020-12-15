@@ -180,7 +180,7 @@ void InitMainMenu() {
 /// </summary>
 void ReinitMainMenu() {
 	g_pMainMenuGUI->Destroy();
-	g_pMainMenuController->Destroy();
+	g_pMainMenuController->Reset();
 	g_pScenarioGUI->Destroy();
 	g_MetaMan.GetGUI()->Destroy();
 

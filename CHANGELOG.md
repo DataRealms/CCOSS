@@ -8,6 +8,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Executable can be compiled as 64bit.
+
+### Changed
+
+### Fixed
+
+### Removed
+
+***
+
+## [Unreleased]
+
+### Added
+
 - Implemented Lua Just-In-Time compilation (MoonJIT 2.2.0).
 
 - Implemented PNG file loading and saving. PNGs still need to be indexed just like BMPs! Transparency (alpha) not supported (yet).

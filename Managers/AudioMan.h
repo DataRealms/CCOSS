@@ -49,7 +49,7 @@ namespace RTE {
 		struct NetworkMusicData {
 			unsigned char State;
 			char Path[256];
-			int Loops;
+			int LoopsOrSilence;
 			float Position;
 			float Pitch;
 		};
@@ -58,12 +58,12 @@ namespace RTE {
 		/// Sound event states for sending sound data from the server to clients during multiplayer games.
 		/// </summary>
 		enum NetworkSoundState {
-			SOUND_PLAY = 0,
+			SOUND_SET_GLOBAL_PITCH = 0,
+			SOUND_PLAY,
 			SOUND_STOP,
 			SOUND_SET_POSITION,
 			SOUND_SET_VOLUME,
 			SOUND_SET_PITCH,
-			SOUND_SET_GLOBAL_PITCH,
 			SOUND_FADE_OUT
 		};
 
@@ -72,15 +72,16 @@ namespace RTE {
 		/// </summary>
 		struct NetworkSoundData {
 			unsigned char State;
-			int Channels[c_MaxPlayingSoundsPerContainer];
-			size_t SoundFileHashes[c_MaxPlayingSoundsPerContainer];
-			float Position[2];
+			std::size_t SoundFileHash;
+			int Channel;
+			bool Immobile;
+			float AttenuationStartDistance;
 			int Loops;
+			int Priority;
+			bool AffectedByGlobalPitch;
+			float Position[2];
 			float Volume;
 			float Pitch;
-			bool AffectedByGlobalPitch;
-			float AttenuationStartDistance;
-			bool Immobile;
 			int FadeOutTime;
 		};
 
@@ -348,34 +349,26 @@ namespace RTE {
 		/// <param name="player">Player(s) for which the event happened.</param>
 		/// <param name="state">NetworkMusicState for the event.</param>
 		/// <param name="filepath">Music file path to transmit to client.</param>
-		/// <param name="loops">Loops counter.</param>
+		/// <param name="loops">LoopsOrSilence counter or, if state is silence, the length of the silence.</param>
 		/// <param name="position">Music playback position.</param>
 		/// <param name="pitch">Pitch value.</param>
-		void RegisterMusicEvent(int player, NetworkMusicState state, const char *filepath, int loops = 0, float position = 0, float pitch = 1);
+		void RegisterMusicEvent(int player, NetworkMusicState state, const char *filepath, int loopsOrSilence = 0, float position = 0, float pitch = 1);
 
 		/// <summary>
 		/// Fills the list with sound events happened for the specified network player.
 		/// </summary>
 		/// <param name="player">Player to get events for.</param>
 		/// <param name="list">List with events for this player.</param>
-		void GetSoundEvents(int player, std::list<NetworkSoundData> & list);
+		void GetSoundEvents(int player, std::list<NetworkSoundData> &list);
 
 		/// <summary>
-		/// Adds the sound event to internal list of sound events for the specified player.
+		/// Adds the sound event to the internal list of sound events for the specified player.
 		/// </summary>
 		/// <param name="player">Player(s) for which the event happened.</param>
-		/// <param name="state">NetworkSoundState for the event .</param>
-		/// <param name="channels">Pointer to an unordered_set of channels this sound event applies to on the server.</param>
-		/// <param name="soundFileHashes">Pointer to a vector of hashes describing sound file locations to transmit to client.</param>
-		/// <param name="position">Sound position.</param>
-		/// <param name="loops">Loops counter.</param>
-		/// <param name="volume">Volume value.</param>
-		/// <param name="pitch">Pitch value.</param>
-		/// <param name="attenuationStartDistance">The distance at which the sound will start attenuating away.</param>
-		/// <param name="affectedByGlobalPitch">Whether the sound is affected by pitch.</param>
-		/// <param name="immobile">Whether the sound is immobile or not.</param>
-		/// <param name="fadeOutTime">The amount of time, in ms, to fade out over.</param>
-		void RegisterSoundEvent(int player, NetworkSoundState state, const std::unordered_set<int> *channels = nullptr, const std::vector<size_t> *soundFileHashes = nullptr, const Vector &position = Vector(), int loops = 0, float volume = 1.0F, float pitch = 1.0F, bool affectedByGlobalPitch = false, float attenuationStartDistance = 0, bool immobile = false, int fadeOutTime = 0);
+		/// <param name="state">NetworkSoundState for the event.</param>
+		/// <param name="soundContainer">A pointer to the SoundContainer this event is happening to, or a null pointer for global events.</param>
+		/// <param name="fadeOutTime">THe amount of time, in MS, to fade out over. This data isn't contained in SoundContainer, so it needs to be passed in separately.</param>
+		void RegisterSoundEvent(int player, NetworkSoundState state, const SoundContainer *soundContainer, int fadeOutTime = 0);
 #pragma endregion
 
 #pragma region Class Info

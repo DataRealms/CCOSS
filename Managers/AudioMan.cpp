@@ -136,7 +136,7 @@ namespace RTE {
 		if (!m_AudioEnabled) {
 			return;
 		}
-		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_GLOBAL_PITCH, nullptr, nullptr, Vector(), 0, 0.0F, pitch); }
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_GLOBAL_PITCH, nullptr); }
 
 		m_GlobalPitch = std::clamp(pitch, 0.125F, 8.0F); 
 		if (includeMusic) { m_MusicChannelGroup->setPitch(m_GlobalPitch); }
@@ -350,7 +350,7 @@ namespace RTE {
 		if (!m_AudioEnabled || !soundContainer) {
 			return false;
 		}
-		if (m_IsInMultiplayerMode) { RegisterSoundEvent(player, SOUND_STOP, soundContainer->GetPlayingChannels()); }
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(player, SOUND_STOP, soundContainer); }
 
 		FMOD_RESULT result;
 		FMOD::Channel *soundChannel;
@@ -374,7 +374,7 @@ namespace RTE {
 		if (!m_AudioEnabled || !soundContainer || !soundContainer->IsBeingPlayed()) {
 			return;
 		}
-		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_FADE_OUT, soundContainer->GetPlayingChannels(), &soundContainer->GetSelectedSoundHashes(), Vector(), 0, 0, 0, false, 0, false, fadeOutTime); }
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_FADE_OUT, soundContainer, fadeOutTime); }
 
 		int sampleRate;
 		m_AudioSystem->getSoftwareFormat(&sampleRate, nullptr, nullptr);
@@ -413,13 +413,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AudioMan::RegisterMusicEvent(int player, NetworkMusicState state, const char *filepath, int loops, float position, float pitch) {
+	void AudioMan::RegisterMusicEvent(int player, NetworkMusicState state, const char *filepath, int loopsOrSilence, float position, float pitch) {
 		if (player == -1) {
-			for (int i = 0; i < c_MaxClients; i++) { RegisterMusicEvent(i, state, filepath, loops, position, pitch); }
+			for (int i = 0; i < c_MaxClients; i++) { RegisterMusicEvent(i, state, filepath, loopsOrSilence, position, pitch); }
 		} else {
 			NetworkMusicData musicData;
 			musicData.State = state;
-			musicData.Loops = loops;
+			musicData.LoopsOrSilence = loopsOrSilence;
 			musicData.Pitch = pitch;
 			musicData.Position = position;
 			if (filepath) {
@@ -440,43 +440,65 @@ namespace RTE {
 			return;
 		}
 		list.clear();
-		g_SoundEventsListMutex[player].lock();
 
-		for (const NetworkSoundData &soundEvent : m_SoundEvents[player]) { list.push_back(soundEvent); }
-		m_SoundEvents[player].clear();
+		g_SoundEventsListMutex[player].lock();
+		const NetworkSoundData *lastSetGlobalPitchEvent = nullptr;
+		for (const NetworkSoundData &soundEvent : m_SoundEvents[player]) {
+			if (soundEvent.State == SOUND_SET_GLOBAL_PITCH) {
+				lastSetGlobalPitchEvent = &soundEvent;
+			} else {
+				list.push_back(soundEvent);
+			}
+		}
+		if (lastSetGlobalPitchEvent) { list.push_back(*lastSetGlobalPitchEvent); }
 		g_SoundEventsListMutex[player].unlock();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AudioMan::RegisterSoundEvent(int player, NetworkSoundState state, const std::unordered_set<int> *channels, const std::vector<size_t> *soundFileHashes, const Vector &position, int loops, float volume, float pitch, bool affectedByGlobalPitch, float attenuationStartDistance, bool immobile, int fadeOutTime) {
+	void AudioMan::RegisterSoundEvent(int player, NetworkSoundState state, const SoundContainer *soundContainer, int fadeoutTime) {
 		if (player == -1) {
-			for (int i = 0; i < c_MaxClients; i++) { RegisterSoundEvent(i, state, channels, soundFileHashes, position, loops, volume, pitch, affectedByGlobalPitch, attenuationStartDistance, immobile, fadeOutTime); }
+			for (int i = 0; i < c_MaxClients; i++) { RegisterSoundEvent(i, state, soundContainer, fadeoutTime); }
 		} else {
-			if (player >= 0 && player < c_MaxClients) {
+			FMOD_RESULT result = FMOD_OK;
+			std::vector<NetworkSoundData> soundDataVector;
+
+			if (state == SOUND_SET_GLOBAL_PITCH) {
 				NetworkSoundData soundData;
 				soundData.State = state;
+				soundData.Pitch = m_GlobalPitch;
+				soundDataVector.push_back(soundData);
+			} else {
+				for (int playingChannel : *soundContainer->GetPlayingChannels()) {
+					FMOD::Channel *soundChannel;
+					result = m_AudioSystem->getChannel(playingChannel, &soundChannel);
+					FMOD::Sound *sound;
+					result = (result == FMOD_OK) ? soundChannel->getCurrentSound(&sound) : result;
 
-				std::fill_n(soundData.Channels, c_MaxPlayingSoundsPerContainer, c_MaxVirtualChannels + 1);
-				if (channels) { std::copy(channels->begin(), channels->end(), soundData.Channels); }
-
-				std::fill_n(soundData.SoundFileHashes, c_MaxPlayingSoundsPerContainer, 0);
-				if (soundFileHashes) { std::copy(soundFileHashes->begin(), soundFileHashes->end(), soundData.SoundFileHashes); }
-
-				soundData.Position[0] = position.m_X;
-				soundData.Position[1] = position.m_Y;
-				soundData.Loops = loops;
-				soundData.Volume = volume;
-				soundData.Pitch = pitch;
-				soundData.AffectedByGlobalPitch = affectedByGlobalPitch;
-				soundData.AttenuationStartDistance = attenuationStartDistance;
-				soundData.Immobile = immobile;
-				soundData.FadeOutTime = fadeOutTime;
-
-				g_SoundEventsListMutex[player].lock();
-				m_SoundEvents[player].push_back(soundData);
-				g_SoundEventsListMutex[player].unlock();
+					if (result != FMOD_OK) {
+						continue;
+					}
+					NetworkSoundData soundData;
+					soundData.State = state;
+					soundData.SoundFileHash = soundContainer->GetSoundDataForSound(sound)->SoundFile.GetHash();
+					soundData.Channel = playingChannel;
+					soundData.Immobile = soundContainer->IsImmobile();
+					soundData.AttenuationStartDistance = soundContainer->GetAttenuationStartDistance();
+					soundData.Loops = soundContainer->GetLoopSetting();
+					soundData.Priority = soundContainer->GetPriority();
+					soundData.AffectedByGlobalPitch = soundContainer->IsAffectedByGlobalPitch();
+					soundData.Position[0] = soundContainer->GetPosition().m_X;
+					soundData.Position[1] = soundContainer->GetPosition().m_Y;
+					soundData.Volume = soundContainer->GetVolume();
+					soundData.Pitch = soundContainer->GetPitch();
+					soundData.FadeOutTime = fadeoutTime;
+					soundDataVector.push_back(soundData);
+				}
 			}
+
+			g_SoundEventsListMutex[player].lock();
+			m_SoundEvents[player].insert(m_SoundEvents[player].end(), soundDataVector.begin(), soundDataVector.end());
+			g_SoundEventsListMutex[player].unlock();
 		}
 	}
 
@@ -534,9 +556,7 @@ namespace RTE {
 			soundContainer->AddPlayingChannel(channelIndex);
 		}
 
-		if (m_IsInMultiplayerMode) {
-			RegisterSoundEvent(player, SOUND_PLAY, soundContainer->GetPlayingChannels(), &soundContainer->GetSelectedSoundHashes(), soundContainer->GetPosition(), soundContainer->GetLoopSetting(), soundContainer->GetVolume(), soundContainer->GetPitch(), soundContainer->IsAffectedByGlobalPitch(), soundContainer->GetAttenuationStartDistance(), soundContainer->IsImmobile());
-		}
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(player, SOUND_PLAY, soundContainer); }
 		return true;
 	}
 
@@ -546,7 +566,7 @@ namespace RTE {
 		if (!m_AudioEnabled || !soundContainer) {
 			return false;
 		}
-		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_POSITION, soundContainer->GetPlayingChannels(), &soundContainer->GetSelectedSoundHashes(), soundContainer->GetPosition()); }
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_POSITION, soundContainer); }
 
 		FMOD_RESULT result = FMOD_OK;
 		FMOD::Channel *soundChannel;
@@ -573,7 +593,7 @@ namespace RTE {
 		if (!m_AudioEnabled || !soundContainer || !soundContainer->IsBeingPlayed()) {
 			return false;
 		}
-		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_VOLUME, soundContainer->GetPlayingChannels(), &soundContainer->GetSelectedSoundHashes(), Vector(), 0, soundContainer->GetVolume()); }
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_VOLUME, soundContainer); }
 
 		FMOD_RESULT result = FMOD_OK;
 		FMOD::Channel *soundChannel;
@@ -605,7 +625,7 @@ namespace RTE {
 		if (!m_AudioEnabled || !soundContainer || !soundContainer->IsBeingPlayed()) {
 			return false;
 		}
-		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_PITCH, soundContainer->GetPlayingChannels(), &soundContainer->GetSelectedSoundHashes(), Vector(), 0, 0.0F, soundContainer->GetPitch()); }
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_PITCH, soundContainer); }
 
 		FMOD_RESULT result = FMOD_OK;
 		FMOD::Channel *soundChannel;

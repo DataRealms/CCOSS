@@ -6,18 +6,30 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RTEA", "RTEA.vcxproj", "{A5
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug Full|x64 = Debug Full|x64
 		Debug Full|x86 = Debug Full|x86
+		Debug Minimal|x64 = Debug Minimal|x64
 		Debug Minimal|x86 = Debug Minimal|x86
+		Debug Release|x64 = Debug Release|x64
 		Debug Release|x86 = Debug Release|x86
+		Final|x64 = Final|x64
 		Final|x86 = Final|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Full|x64.ActiveCfg = Debug Full|x64
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Full|x64.Build.0 = Debug Full|x64
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Full|x86.ActiveCfg = Debug Full|Win32
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Full|x86.Build.0 = Debug Full|Win32
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Minimal|x64.ActiveCfg = Debug Minimal|x64
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Minimal|x64.Build.0 = Debug Minimal|x64
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Minimal|x86.ActiveCfg = Debug Minimal|Win32
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Minimal|x86.Build.0 = Debug Minimal|Win32
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Release|x64.ActiveCfg = Debug Release|x64
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Release|x64.Build.0 = Debug Release|x64
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Release|x86.ActiveCfg = Debug Release|Win32
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Release|x86.Build.0 = Debug Release|Win32
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Final|x64.ActiveCfg = Final|x64
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Final|x64.Build.0 = Final|x64
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Final|x86.ActiveCfg = Final|Win32
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Final|x86.Build.0 = Final|Win32
 	EndGlobalSection

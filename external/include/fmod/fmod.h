@@ -27,6 +27,7 @@ FMOD_RESULT F_API FMOD_Memory_GetStats             (int *currentalloced, int *ma
 FMOD_RESULT F_API FMOD_Debug_Initialize            (FMOD_DEBUG_FLAGS flags, FMOD_DEBUG_MODE mode, FMOD_DEBUG_CALLBACK callback, const char *filename);
 FMOD_RESULT F_API FMOD_File_SetDiskBusy            (int busy);
 FMOD_RESULT F_API FMOD_File_GetDiskBusy            (int *busy);
+FMOD_RESULT F_API FMOD_Thread_SetAttributes        (FMOD_THREAD_TYPE type, FMOD_THREAD_AFFINITY affinity, FMOD_THREAD_PRIORITY priority, FMOD_THREAD_STACK_SIZE stacksize);
 
 /*
     FMOD System factory functions.  Use this to create an FMOD System Instance.  below you will see FMOD_System_Init/Close to get started.
@@ -101,6 +102,7 @@ FMOD_RESULT F_API FMOD_System_GetVersion                (FMOD_SYSTEM *system, un
 FMOD_RESULT F_API FMOD_System_GetOutputHandle           (FMOD_SYSTEM *system, void **handle);
 FMOD_RESULT F_API FMOD_System_GetChannelsPlaying        (FMOD_SYSTEM *system, int *channels, int *realchannels);
 FMOD_RESULT F_API FMOD_System_GetCPUUsage               (FMOD_SYSTEM *system, float *dsp, float *stream, float *geometry, float *update, float *total);
+FMOD_RESULT F_API FMOD_System_GetCPUUsageEx             (FMOD_SYSTEM *system, float *convolutionThread1, float *convolutionThread2);
 FMOD_RESULT F_API FMOD_System_GetFileUsage              (FMOD_SYSTEM *system, long long *sampleBytesRead, long long *streamBytesRead, long long *otherBytesRead);
 
 /* Sound/DSP/Channel/FX creation and retrieval. */
@@ -114,6 +116,7 @@ FMOD_RESULT F_API FMOD_System_CreateReverb3D            (FMOD_SYSTEM *system, FM
 FMOD_RESULT F_API FMOD_System_PlaySound                 (FMOD_SYSTEM *system, FMOD_SOUND *sound, FMOD_CHANNELGROUP *channelgroup, FMOD_BOOL paused, FMOD_CHANNEL **channel);
 FMOD_RESULT F_API FMOD_System_PlayDSP                   (FMOD_SYSTEM *system, FMOD_DSP *dsp, FMOD_CHANNELGROUP *channelgroup, FMOD_BOOL paused, FMOD_CHANNEL **channel);
 FMOD_RESULT F_API FMOD_System_GetChannel                (FMOD_SYSTEM *system, int channelid, FMOD_CHANNEL **channel);
+FMOD_RESULT F_API FMOD_System_GetDSPInfoByType          (FMOD_SYSTEM *system, FMOD_DSP_TYPE type, const FMOD_DSP_DESCRIPTION **description);
 FMOD_RESULT F_API FMOD_System_GetMasterChannelGroup     (FMOD_SYSTEM *system, FMOD_CHANNELGROUP **channelgroup);
 FMOD_RESULT F_API FMOD_System_GetMasterSoundGroup       (FMOD_SYSTEM *system, FMOD_SOUNDGROUP **soundgroup);
 

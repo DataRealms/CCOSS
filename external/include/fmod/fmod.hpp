@@ -38,6 +38,7 @@ namespace FMOD
     inline FMOD_RESULT Debug_Initialize     (FMOD_DEBUG_FLAGS flags, FMOD_DEBUG_MODE mode = FMOD_DEBUG_MODE_TTY, FMOD_DEBUG_CALLBACK callback = 0, const char *filename = 0) { return FMOD_Debug_Initialize(flags, mode, callback, filename); }
     inline FMOD_RESULT File_SetDiskBusy     (int busy) { return FMOD_File_SetDiskBusy(busy); }
     inline FMOD_RESULT File_GetDiskBusy     (int *busy) { return FMOD_File_GetDiskBusy(busy); }
+    inline FMOD_RESULT Thread_SetAttributes (FMOD_THREAD_TYPE type, FMOD_THREAD_AFFINITY affinity = FMOD_THREAD_AFFINITY_GROUP_DEFAULT, FMOD_THREAD_PRIORITY priority = FMOD_THREAD_PRIORITY_DEFAULT, FMOD_THREAD_STACK_SIZE stacksize = FMOD_THREAD_STACK_SIZE_DEFAULT) { return FMOD_Thread_SetAttributes(type, affinity, priority, stacksize); }
 
     /*
         FMOD System factory functions.
@@ -123,6 +124,7 @@ namespace FMOD
         FMOD_RESULT F_API getOutputHandle         (void **handle);
         FMOD_RESULT F_API getChannelsPlaying      (int *channels, int *realchannels = 0);
         FMOD_RESULT F_API getCPUUsage             (float *dsp, float *stream, float *geometry, float *update, float *total);
+        FMOD_RESULT F_API getCPUUsageEx           (float *convolutionThread1, float *convolutionThread2);
         FMOD_RESULT F_API getFileUsage            (long long *sampleBytesRead, long long *streamBytesRead, long long *otherBytesRead);
 
         // Sound/DSP/Channel/FX creation and retrieval.
@@ -137,6 +139,7 @@ namespace FMOD
         FMOD_RESULT F_API playSound               (Sound *sound, ChannelGroup *channelgroup, bool paused, Channel **channel);
         FMOD_RESULT F_API playDSP                 (DSP *dsp, ChannelGroup *channelgroup, bool paused, Channel **channel);
         FMOD_RESULT F_API getChannel              (int channelid, Channel **channel);
+        FMOD_RESULT F_API getDSPInfoByType        (FMOD_DSP_TYPE type, const FMOD_DSP_DESCRIPTION **description);
         FMOD_RESULT F_API getMasterChannelGroup   (ChannelGroup **channelgroup);
         FMOD_RESULT F_API getMasterSoundGroup     (SoundGroup **soundgroup);
 

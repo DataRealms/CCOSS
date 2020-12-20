@@ -572,7 +572,7 @@ namespace RTE {
 		msg->SoundEventsCount = 0;
 
 		for (const AudioMan::NetworkSoundData &soundEvent : events) {
-			if (sizeof(MsgSoundEvents) + soundDataTotalSize + sizeof(AudioMan::NetworkSoundData) <= c_MaxPixelLineBufferSize) {
+			if (sizeof(MsgSoundEvents) + (msg->SoundEventsCount * sizeof(AudioMan::NetworkSoundData)) <= c_MaxPixelLineBufferSize) {
 				soundDataPointer->State = soundEvent.State;
 				soundDataPointer->SoundFileHash = soundEvent.SoundFileHash;
 				soundDataPointer->Channel = soundEvent.Channel;

@@ -601,12 +601,12 @@ namespace RTE {
 					SoundContainer *soundContainerToHandle = (serverSoundEntryForChannel == m_ServerSounds.end()) ? nullptr : m_ServerSounds.at(serverSoundChannelIndex);
 
 					auto alreadyHandledSoundStates = alreadyHandledSoundContainers.equal_range(soundContainerToHandle);
-					bool alreadyHandled = soundDataPointer->State != AudioMan::SOUND_PLAY && std::any_of(alreadyHandledSoundStates.first, alreadyHandledSoundStates.second, [&soundDataPointer](AudioMan::NetworkSoundState alreadyHandledSoundState) { return alreadyHandledSoundState == soundDataPointer->State; });
+					bool alreadyHandled = soundDataPointer->State != AudioMan::SOUND_PLAY && std::any_of(alreadyHandledSoundStates.first, alreadyHandledSoundStates.second, [&soundDataPointer](const std::pair<SoundContainer *, unsigned char> &alreadyHandledSoundStateEntry) { return static_cast<const AudioMan::NetworkSoundState>(alreadyHandledSoundStateEntry.second) == soundDataPointer->State; });
 					if (!alreadyHandled) {
 						switch (soundDataPointer->State) {
 							case AudioMan::SOUND_PLAY:
 								if (soundContainerToHandle == nullptr) {
-									soundContainerToHandle = new SoundContainer();
+									soundContainerToHandle = new SoundContainer;
 								} else {
 									soundContainerToHandle->Stop();
 									soundContainerToHandle->Reset();

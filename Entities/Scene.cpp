@@ -1309,7 +1309,7 @@ int Scene::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "PreviewBitmapFile")
 	{
         reader >> m_PreviewBitmapFile;
-		m_pPreviewBitmap = m_PreviewBitmapFile.LoadAndReleaseBitmap();
+		m_pPreviewBitmap = m_PreviewBitmapFile.GetAsBitmap(COLORCONV_NONE, false);
 	}
     else if (propName == "Terrain")
     {

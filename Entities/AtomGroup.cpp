@@ -1008,7 +1008,10 @@ namespace RTE {
 							if (hitMOID != g_NoMOID) {
 								hitData.Body[HITOR] = m_OwnerMOSR;
 								hitData.Body[HITEE] = g_MovableMan.GetMOFromID(hitMOID);
+
+#ifndef RELEASE_BUILD
 								RTEAssert(hitData.Body[HITEE], "Hitee MO is 0 in AtomGroup::PushTravel!");
+#endif
 
 								hitData.Body[HITEE]->CollideAtPoint(hitData);
 

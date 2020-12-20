@@ -339,21 +339,21 @@ bool PlayIntroTitle() {
     // Load the Intro slides
     BITMAP **apIntroSlides = new BITMAP *[SLIDECOUNT];
     ContentFile introSlideFile("Base.rte/GUIs/Title/Intro/IntroSlideA.png");
-    apIntroSlides[SLIDEPAST] = introSlideFile.LoadAndReleaseBitmap();
+    apIntroSlides[SLIDEPAST] = introSlideFile.GetAsBitmap(COLORCONV_NONE, false);
     introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideB.png");
-    apIntroSlides[SLIDENOW] = introSlideFile.LoadAndReleaseBitmap();
+    apIntroSlides[SLIDENOW] = introSlideFile.GetAsBitmap(COLORCONV_NONE, false);
     introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideC.png");
-    apIntroSlides[SLIDEVR] = introSlideFile.LoadAndReleaseBitmap();
+    apIntroSlides[SLIDEVR] = introSlideFile.GetAsBitmap(COLORCONV_NONE, false);
     introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideD.png");
-    apIntroSlides[SLIDETRAVEL] = introSlideFile.LoadAndReleaseBitmap();
+    apIntroSlides[SLIDETRAVEL] = introSlideFile.GetAsBitmap(COLORCONV_NONE, false);
     introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideE.png");
-    apIntroSlides[SLIDEALIENS] = introSlideFile.LoadAndReleaseBitmap();
+    apIntroSlides[SLIDEALIENS] = introSlideFile.GetAsBitmap(COLORCONV_NONE, false);
     introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideF.png");
-    apIntroSlides[SLIDETRADE] = introSlideFile.LoadAndReleaseBitmap();
+    apIntroSlides[SLIDETRADE] = introSlideFile.GetAsBitmap(COLORCONV_NONE, false);
     introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideG.png");
-    apIntroSlides[SLIDEPEACE] = introSlideFile.LoadAndReleaseBitmap();
+    apIntroSlides[SLIDEPEACE] = introSlideFile.GetAsBitmap(COLORCONV_NONE, false);
     introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideH.png");
-    apIntroSlides[SLIDEFRONTIER] = introSlideFile.LoadAndReleaseBitmap();
+    apIntroSlides[SLIDEFRONTIER] = introSlideFile.GetAsBitmap(COLORCONV_NONE, false);
 
     ContentFile alphaFile;
     BITMAP *pAlpha = 0;

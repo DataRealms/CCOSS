@@ -800,7 +800,7 @@ void HDFirearm::Update()
                         (m_Supported ? 1.0F : m_NoSupportFactor) * RandomNormalNum();
                 tempNozzle = m_MuzzleOff.GetYFlipped(m_HFlipped);
                 tempNozzle.DegRotate(degAimAngle + shake);
-                roundVel.SetIntXY(pRound->GetFireVel(), 0);
+                roundVel.SetXY(pRound->GetFireVel(), 0);
                 roundVel.DegRotate(degAimAngle + shake);
 
                 Vector particlePos;
@@ -864,7 +864,7 @@ void HDFirearm::Update()
                     pShell->SetPos(m_Pos + tempEject);
 
                     // ##@#@@$ TEMP
-                    shellVel.SetIntXY(pRound->GetShellVel(), 0);
+                    shellVel.SetXY(pRound->GetShellVel(), 0);
                     shellVel.DegRotate(degAimAngle + 150 * (m_HFlipped ? -1 : 1) + shellSpread);
                     pShell->SetVel(m_Vel + shellVel);
                     pShell->SetRotAngle(m_Rotation.GetRadAngle());

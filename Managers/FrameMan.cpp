@@ -266,7 +266,7 @@ namespace RTE {
 		CreateBackBuffers();
 
 		ContentFile scenePreviewGradientFile("Base.rte/GUIs/PreviewSkyGradient.png");
-		m_ScenePreviewDumpGradient = scenePreviewGradientFile.LoadAndReleaseBitmap(COLORCONV_8_TO_32);
+		m_ScenePreviewDumpGradient = scenePreviewGradientFile.GetAsBitmap(COLORCONV_8_TO_32, false);
 
 		return 0;
 	}
@@ -972,23 +972,23 @@ namespace RTE {
 			case Players::PlayerTwo:
 				// If both splits, or just VSplit, then in upper right quadrant
 				if ((m_VSplit && !m_HSplit) || (m_VSplit && m_HSplit)) {
-					screenOffset.SetIntXY(GetResX() / 2, 0);
+					screenOffset.SetXY(GetResX() / 2, 0);
 				} else {
 					// If only HSplit, then lower left quadrant
-					screenOffset.SetIntXY(0, GetResY() / 2);
+					screenOffset.SetXY(0, GetResY() / 2);
 				}
 				break;
 			case Players::PlayerThree:
 				// Always lower left quadrant
-				screenOffset.SetIntXY(0, GetResY() / 2);
+				screenOffset.SetXY(0, GetResY() / 2);
 				break;
 			case Players::PlayerFour:
 				// Always lower right quadrant
-				screenOffset.SetIntXY(GetResX() / 2, GetResY() / 2);
+				screenOffset.SetXY(GetResX() / 2, GetResY() / 2);
 				break;
 			default:
 				// Always upper left corner
-				screenOffset.SetIntXY(0, 0);
+				screenOffset.SetXY(0, 0);
 				break;
 		}
 	}
@@ -1269,7 +1269,7 @@ namespace RTE {
 			blit(m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][i], m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i], 0, 0, 0, 0, m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i]->w, m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][i]->h);
 			m_NetworkBitmapLock[i].unlock();
 
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+#ifndef RELEASE_BUILD
 			// Draw all player's screen into one
 			if (g_UInputMan.KeyHeld(KEY_5)) {
 				stretch_blit(m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h, dx, dy, dw, dh);
@@ -1277,7 +1277,7 @@ namespace RTE {
 #endif
 		}
 
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+#ifndef RELEASE_BUILD
 		if (g_UInputMan.KeyHeld(KEY_1)) {
 			stretch_blit(m_NetworkBackBufferFinal8[0][0], m_BackBuffer8, 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][0]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][0]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 		}

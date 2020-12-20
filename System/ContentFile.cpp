@@ -103,7 +103,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	BITMAP * ContentFile::GetAsBitmap(int conversionMode, const std::string &dataPathToSpecificFrame) {
+	BITMAP * ContentFile::GetAsBitmap(int conversionMode, bool storeBitmap, const std::string &dataPathToSpecificFrame) {
 		if (m_DataPath.empty()) {
 			return nullptr;
 		}
@@ -132,7 +132,7 @@ namespace RTE {
 			returnBitmap = LoadAndReleaseBitmap(conversionMode, dataPathToLoad); // NOTE: This takes ownership of the bitmap file
 
 			// Insert the bitmap into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE
-			s_LoadedBitmaps.at(bitDepth).insert(std::pair<std::string, BITMAP *>(dataPathToLoad, returnBitmap));
+			if (storeBitmap) { s_LoadedBitmaps.at(bitDepth).insert({ dataPathToLoad, returnBitmap }); }
 		}
 		return returnBitmap;
 	}
@@ -166,7 +166,7 @@ namespace RTE {
 		char framePath[1024];
 		for (int frameNum = 0; frameNum < frameCount; frameNum++) {
 			std::snprintf(framePath, sizeof(framePath), "%s%03i%s", m_DataPathWithoutExtension.c_str(), frameNum, m_DataPathExtension.c_str());
-			returnBitmaps[frameNum] = GetAsBitmap(conversionMode, framePath);
+			returnBitmaps[frameNum] = GetAsBitmap(conversionMode, true, framePath);
 		}
 		return returnBitmaps;
 	}
@@ -207,7 +207,7 @@ namespace RTE {
 			returnSample = LoadAndReleaseSound(abortGameForInvalidSound, asyncLoading); //NOTE: This takes ownership of the sample file
 
 			// Insert the Sound object into the map, PASSING OVER OWNERSHIP OF THE LOADED FILE
-			s_LoadedSamples.insert(std::pair<std::string, FMOD::Sound *>(m_DataPath, returnSample));
+			s_LoadedSamples.insert({ m_DataPath, returnSample });
 		}
 		return returnSample;
 	}

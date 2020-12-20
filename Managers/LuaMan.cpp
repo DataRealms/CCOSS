@@ -574,16 +574,12 @@ int LuaMan::Create() {
 
         CONCRETELUABINDING(SoundContainer, Entity)
 			.def(constructor<>())
-            .enum_("SoundCycleMode")[
-                value("MODE_RANDOM", SoundContainer::SoundCycleMode::MODE_RANDOM),
-                value("MODE_FORWARDS", SoundContainer::SoundCycleMode::MODE_FORWARDS)
-            ]
             .enum_("SoundOverlapMode")[
-                value("MODE_OVERLAP", SoundContainer::SoundOverlapMode::MODE_OVERLAP),
-                value("MODE_RESTART", SoundContainer::SoundOverlapMode::MODE_RESTART),
-                value("MODE_IGNORE_PLAY", SoundContainer::SoundOverlapMode::MODE_IGNORE_PLAY)
+                value("OVERLAP", SoundContainer::SoundOverlapMode::OVERLAP),
+                value("RESTART", SoundContainer::SoundOverlapMode::RESTART),
+                value("IGNORE_PLAY", SoundContainer::SoundOverlapMode::IGNORE_PLAY)
             ]
-            .property("SoundCycleMode", &SoundContainer::GetSoundSelectionCycleMode, &SoundContainer::SetSoundSelectionCycleMode)
+            .property("TopLevelSoundSet", &SoundContainer::GetTopLevelSoundSet)
             .property("SoundOverlapMode", &SoundContainer::GetSoundOverlapMode, &SoundContainer::SetSoundOverlapMode)
             .property("Immobile", &SoundContainer::IsImmobile, &SoundContainer::SetImmobile)
             .property("AttenuationStartDistance", &SoundContainer::GetAttenuationStartDistance, &SoundContainer::SetAttenuationStartDistance)
@@ -602,11 +598,22 @@ int LuaMan::Create() {
             .def("Stop", (bool (SoundContainer:: *)()) &SoundContainer::Stop)
             .def("Stop", (bool (SoundContainer:: *)(int player)) &SoundContainer::Stop)
             .def("Restart", (bool (SoundContainer:: *)()) &SoundContainer::Restart)
-            .def("Restart", (bool (SoundContainer:: *)(int player)) &SoundContainer::Restart)
-            .def("AddSound", (void (SoundContainer:: *)(std::string const &soundFilePath)) &SoundContainer::AddSound)
-            .def("AddSound", (void (SoundContainer:: *)(std::string const &soundFilePath, const Vector &offset, float attenuationStartDistance, bool abortGameForInvalidSound)) &SoundContainer::AddSound)
-            .def("AddSound", (void (SoundContainer:: *)(std::string const &soundFilePath, unsigned int soundSetIndex, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance, bool abortGameForInvalidSound)) &SoundContainer::AddSound)
-            .def("SelectNextSoundSet", &SoundContainer::SelectNextSoundSet),
+            .def("Restart", (bool (SoundContainer:: *)(int player)) &SoundContainer::Restart),
+
+        class_<SoundSet, Serializable>("SoundSet")
+            .def(constructor<>())
+            .enum_("SoundSelectionCycleMode")[
+                value("RANDOM", SoundSet::SoundSelectionCycleMode::RANDOM),
+                value("FORWARDS", SoundSet::SoundSelectionCycleMode::FORWARDS),
+                value("ALL", SoundSet::SoundSelectionCycleMode::ALL)
+            ]
+            .property("SoundSelectionCycleMode", &SoundSet::GetSoundSelectionCycleMode, &SoundSet::SetSoundSelectionCycleMode)
+            .def_readonly("SubSoundSets", &SoundSet::GetSubSoundSets, return_stl_iterator)
+            .def("HasAnySounds", &SoundSet::HasAnySounds)
+            .def("SelectNextSounds", &SoundSet::SelectNextSounds)
+            .def("AddSound", (void (SoundSet:: *)(std::string const &soundFilePath)) &SoundSet::AddSound)
+            .def("AddSound", (void (SoundSet:: *)(std::string const &soundFilePath, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance)) &SoundSet::AddSound)
+            .def("AddSubSoundSet", &SoundSet::AddSubSoundSet),
 
         ABSTRACTLUABINDING(SceneObject, Entity)
             .property("Pos", &SceneObject::GetPos, &SceneObject::SetPos)

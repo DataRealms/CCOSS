@@ -611,7 +611,7 @@ namespace RTE {
 									soundContainerToHandle->Stop();
 									soundContainerToHandle->Reset();
 								}
-								soundContainerToHandle->AddSound(ContentFile::GetPathFromHash(soundDataPointer->SoundFileHash), false);
+								soundContainerToHandle->GetTopLevelSoundSet().AddSound(ContentFile::GetPathFromHash(soundDataPointer->SoundFileHash), false);
 								soundContainerToHandle->SetImmobile(soundDataPointer->Immobile);
 								soundContainerToHandle->SetAttenuationStartDistance(soundDataPointer->AttenuationStartDistance);
 								soundContainerToHandle->SetLoopSetting(soundDataPointer->Loops);

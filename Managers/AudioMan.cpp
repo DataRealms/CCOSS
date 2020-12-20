@@ -335,7 +335,7 @@ namespace RTE {
 	SoundContainer *AudioMan::PlaySound(const std::string &filePath, const Vector &position, int player) {
 		SoundContainer *newSoundContainer = new SoundContainer();
 		newSoundContainer->SetPosition(position);
-		newSoundContainer->AddSound(filePath);
+		newSoundContainer->GetTopLevelSoundSet().AddSound(filePath);
 		if (newSoundContainer->HasAnySounds()) {
 			PlaySoundContainer(newSoundContainer, player);
 		} else {
@@ -517,22 +517,24 @@ namespace RTE {
 				return false;
 			}
 		}
-		if (!soundContainer->SelectNextSoundSet()) {
+		if (!soundContainer->GetTopLevelSoundSet().SelectNextSounds()) {
 			g_ConsoleMan.PrintString("Unable to select new sounds to play for SoundContainer " + soundContainer->GetPresetName());
 			return false;
 		}
 		FMOD::ChannelGroup *channelGroupToPlayIn = soundContainer->IsImmobile() ? m_ImmobileSoundChannelGroup : m_MobileSoundChannelGroup;
 		FMOD::Channel *channel;
 		int channelIndex;
-		for (SoundContainer::SoundData soundData : soundContainer->GetFlattenedSelectedSoundSet()) {
-			result = (result == FMOD_OK) ? m_AudioSystem->playSound(soundData.SoundObject, channelGroupToPlayIn, true, &channel) : result;
+		std::vector<SoundSet::SoundData *> selectedSoundData;
+		soundContainer->GetTopLevelSoundSet().GetFlattenedSoundData(selectedSoundData, true);
+		for (const SoundSet::SoundData *soundData : selectedSoundData) {
+			result = (result == FMOD_OK) ? m_AudioSystem->playSound(soundData->SoundObject, channelGroupToPlayIn, true, &channel) : result;
 			result = (result == FMOD_OK) ? channel->getIndex(&channelIndex) : result;
 
 			result = (result == FMOD_OK) ? channel->setUserData(soundContainer) : result;
 			result = (result == FMOD_OK) ? channel->setCallback(SoundChannelEndedCallback) : result;
 			if (!soundContainer->IsImmobile()) {
-				m_SoundChannelMinimumAudibleDistances.insert({channelIndex, soundData.MinimumAudibleDistance});
-				UpdatePositionalEffectsForSoundChannel(channel, &GetAsFMODVector(soundContainer->GetPosition() + soundData.Offset));
+				m_SoundChannelMinimumAudibleDistances.insert({channelIndex, soundData->MinimumAudibleDistance});
+				UpdatePositionalEffectsForSoundChannel(channel, &GetAsFMODVector(soundContainer->GetPosition() + soundData->Offset));
 				result = (result == FMOD_OK) ? channel->set3DLevel(g_SettingsMan.SoundPanningEffectStrength()) : result;
 			} else {
 				result = (result == FMOD_OK) ? channel->set3DLevel(0.0F) : result;
@@ -576,7 +578,7 @@ namespace RTE {
 		for (int channelIndex : *playingChannels) {
 			result = m_AudioSystem->getChannel(channelIndex, &soundChannel);
 			result = (result == FMOD_OK) ? soundChannel->getCurrentSound(&sound) : result;
-			const SoundContainer::SoundData *soundData = soundContainer->GetSoundDataForSound(sound);
+			const SoundSet::SoundData *soundData = soundContainer->GetSoundDataForSound(sound);
 
 			FMOD_VECTOR soundPosition = GetAsFMODVector(soundContainer->GetPosition() + ((soundData == nullptr) ? Vector() : soundData->Offset));
 			result = (result == FMOD_OK) ? UpdatePositionalEffectsForSoundChannel(soundChannel, &soundPosition) : result;

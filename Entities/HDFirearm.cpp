@@ -178,17 +178,17 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader)
         }
     } else if (propName == "PreFireSound") {
         reader >> m_PreFireSound;
-        m_DeactivationSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::MODE_IGNORE_PLAY);
+        m_DeactivationSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::IGNORE_PLAY);
     } else if (propName == "FireSound")
         reader >> m_FireSound;
     else if (propName == "FireEchoSound") {
         reader >> m_FireEchoSound;
-        m_FireEchoSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::MODE_RESTART);
+        m_FireEchoSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::RESTART);
     } else if (propName == "ActiveSound") {
         reader >> m_ActiveSound;
     } else if (propName == "DeactivationSound") {
         reader >> m_DeactivationSound;
-        m_DeactivationSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::MODE_IGNORE_PLAY);
+        m_DeactivationSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::IGNORE_PLAY);
     } else if (propName == "EmptySound")
         reader >> m_EmptySound;
     else if (propName == "ReloadStartSound")

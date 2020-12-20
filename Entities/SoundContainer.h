@@ -1,8 +1,8 @@
-#ifndef _RTESOUND_
-#define _RTESOUND_
+#ifndef _RTESOUNDCONTAINER_
+#define _RTESOUNDCONTAINER_
 
 #include "Entity.h"
-#include "ContentFile.h"
+#include "SoundSet.h"
 #include "AudioMan.h"
 
 namespace RTE {
@@ -18,34 +18,14 @@ namespace RTE {
 		EntityAllocation(SoundContainer)
 		SerializableOverrideMethods
 		ClassInfoGetters
-		
-		/// <summary>
-		/// How the SoundContainer should choose the next SoundSet to play when SelectNextSoundSet is called.
-		/// </summary>
-		enum SoundCycleMode {
-			MODE_RANDOM = 0,
-			MODE_FORWARDS = 1
-		};
 
 		/// <summary>
 		/// How the SoundContainer should behave when it tries to play again while already playing.
 		/// </summary>
-		enum SoundOverlapMode {
-			MODE_OVERLAP = 0,
-			MODE_RESTART = 1,
-			MODE_IGNORE_PLAY = 2
-		};
-
-		/// <summary>
-		/// Self-contained struct defining an individual sound in a SoundSet.
-		/// </summary>
-		struct SoundData {
-			ContentFile SoundFile;
-			FMOD::Sound *SoundObject;
-			Vector Offset = Vector();
-			float MinimumAudibleDistance = 0;
-			float AttenuationStartDistance = -1;
-			FMOD_VECTOR CustomRolloffPoints[2];
+		enum class SoundOverlapMode {
+			OVERLAP = 0,
+			RESTART = 1,
+			IGNORE_PLAY = 2
 		};
 
 #pragma region Creation
@@ -74,7 +54,7 @@ namespace RTE {
 		/// <param name="immobile">Whether this SoundContainer's sounds will be treated as immobile, i.e. they won't be affected by 3D sound manipulation.</param>
 		/// <param name="affectedByGlobalPitch">Whether this SoundContainer's sounds' frequency will be affected by the global pitch.</param>
 		/// <returns>An error return value signaing success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(const std::string &soundFilePath, bool immobile = false, bool affectedByGlobalPitch = true) { AddSound(soundFilePath, true); SetImmobile(immobile); SetAffectedByGlobalPitch(affectedByGlobalPitch); return 0; }
+		int Create(const std::string &soundFilePath, bool immobile = false, bool affectedByGlobalPitch = true) { m_TopLevelSoundSet.AddSound(soundFilePath, true); SetImmobile(immobile); SetAffectedByGlobalPitch(affectedByGlobalPitch); return 0; }
 #pragma endregion
 
 #pragma region Destruction
@@ -95,111 +75,37 @@ namespace RTE {
 		void Reset() override { Clear(); Entity::Reset(); }
 #pragma endregion
 
-#pragma region INI Handling
-		/// <summary>
-		/// Handles reading a SoundSet from INI. If the Reader is trying to read a line adding a sound, it'll call ReadAndGetSound and add the resulting sound to a new SoundSet.
-		/// </summary>
-		/// <param name="propName">The name of the property to be read.</param>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>An error return value signaling whether the property was successfully read or not. 0 means it was succesful, any nonzero value means it failed.</returns>
-		int ReadSoundOrSoundSet(const std::string &propName, Reader &reader);
-
-		/// <summary>
-		/// Handles reading a SoundData from INI, loading it in as a ContentFile and into FMOD, and reading any of its subproperties. Does not add the created SoundData to a SoundContainer.
-		/// </summary>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>SoundData for the newly read sound.</returns>
-		SoundData ReadAndGetSound(Reader &reader) const;
-#pragma endregion
-
-#pragma region Sound Addition
-		/// <summary>
-		/// Adds a new sound to this SoundContainer, spitting out a lua error if it fails.
-		/// The Sound will have default configuration and be added to a new SoundSet.
-		/// </summary>
-		/// <param name="soundFilePath">A path to the new sound to add. This will be handled through PresetMan.</param>
-		void AddSound(const std::string &soundFilePath) { return AddSound(soundFilePath, false); }
-
-		/// <summary>
-		/// Adds a new sound to this SoundContainer, either spitting out a lua error or aborting if it fails.
-		/// The sound will have default configuration and be added to a new SoundSet.
-		/// </summary>
-		/// <param name="soundFilePath">A path to the new sound to add. This will be handled through PresetMan.</param>
-		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error.</param>
-		void AddSound(const std::string &soundFilePath, bool abortGameForInvalidSound) { return AddSound(soundFilePath, Vector(), -1, abortGameForInvalidSound); }
-
-		/// <summary>
-		/// Adds a new sound to this SoundContainer, either spitting out a lua error or aborting if it fails.
-		/// The sound will be configured based on parameters, and be added to a new SoundSet.
-		/// </summary>
-		/// <param name="soundFilePath">A path to the new sound to add. This will be handled through PresetMan.</param>
-		/// <param name="offset">The offset position to play this sound at, where (0, 0) is no offset.</param>
-		/// <param name="attenuationStartDistance">The attenuation start distance for this sound, -1 means it uses the parent SoundContainer's attenuation start distance.</param>
-		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error.</param>
-		void AddSound(const std::string &soundFilePath, const Vector &offset, float attenuationStartDistance, bool abortGameForInvalidSound) { return AddSound(soundFilePath, m_SoundSets.size(), offset, 0, attenuationStartDistance, abortGameForInvalidSound); }
-
-		/// <summary>
-		/// Adds a new sound to this SoundContainer, either spitting out a lua error or aborting if it fails.
-		/// The sound will be configured based on parameters, and be added to the SoundSet at the given index, or a new one if there is none at that index.
-		/// </summary>
-		/// <param name="soundFilePath">A path to the new sound to add. This will be handled through PresetMan.</param>
-		/// <param name="soundSetIndex">The SoundSet index to add this new Sound to. If it's not an existing index, a new SoundSet will be added with this Sound.</param>
-		/// <param name="offset">The offset position to play this sound at, where (0, 0) is no offset.</param>
-		/// <param name="minimumAudibleDistance">The minimum distance at which this sound will be audible. 0 means there is none, which is normally the case.</param>
-		/// <param name="attenuationStartDistance">The attenuation start distance for this sound, -1 sets it to default.</param>
-		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error.</param>
-		void AddSound(const std::string &soundFilePath, unsigned int soundSetIndex, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance, bool abortGameForInvalidSound);
-#pragma endregion
-
 #pragma region Sound Management Getters and Setters
 		/// <summary>
-		/// Gets the current list of sounds in the SoundContainer.
+		/// Shows whether this SoundContainer's top level SoundSet has any SoundData or SoundSets.
 		/// </summary>
-		/// <returns>A reference to the list.</returns>
-		const std::vector<std::vector<SoundData>> *GetSounds() const { return &m_SoundSets; }
+		/// <returns>Whether this SoundContainer has any sounds.</returns>
+		bool HasAnySounds() const { return m_TopLevelSoundSet.HasAnySounds(); }
 
 		/// <summary>
-		/// Shows whether this SoundContainer has been initialized at all yet and loaded with any samples.
+		/// Gets a reference to the top level SoundSet of this SoundContainer, to which all SoundData and sub SoundSets belong.
 		/// </summary>
-		/// <returns>Whether this sound has any samples.</returns>
-		bool HasAnySounds() const { return !m_SoundSets.empty(); }
-
-		/// <summary>
-		/// Gets the current sound selection cycle mode, which is used to determine what SoundSet to select next time SelectNextSoundSet is called.
-		/// </summary>
-		/// <returns>The current sound selection cycle mode.</returns>
-		SoundCycleMode GetSoundSelectionCycleMode() const { return m_SoundSelectionCycleMode; }
-
-		/// <summary>
-		/// Sets the current sound selection cycle mode, which is used to determine what SoundSet to select next time SelectNextSoundSet is called.
-		/// </summary>
-		/// <param name="soundSelectionCycleMode">The sound selection cycle mode to use.</param>
-		void SetSoundSelectionCycleMode(SoundCycleMode soundSelectionCycleMode) { m_SoundSelectionCycleMode = soundSelectionCycleMode; }
-
-		/// <summary>
-		/// Gets the selected SoundSet for this SoundContainer. The selected SoundSet is changed with SelectNextSoundSet.
-		/// </summary>
-		/// <returns>The selected SoundSet.</returns>
-		std::vector<SoundData> GetSelectedSoundSet() const { return m_SoundSets[m_SelectedSoundSet]; }
+		/// <returns>A reference to the top level SoundSet of this SoundContainer.</returns>
+		SoundSet & GetTopLevelSoundSet() { return m_TopLevelSoundSet; }
 
 		/// <summary>
 		/// Gets a vector of hashes of the sounds selected to be played next in this SoundContainer.
 		/// </summary>
 		/// <returns>The currently playing sounds hashes.</returns>
-		std::vector<size_t> GetSelectedSoundHashes() const;
+		std::vector<std::size_t> GetSelectedSoundHashes() const;
 
 		/// <summary>
 		/// Gets the SoundData object that corresponds to the given FMOD::Sound. If the sound can't be found, it returns a null pointer.
 		/// </summary>
 		/// <param name="sound">The FMOD::Sound to search for.</param>
 		/// <returns>A pointer to the corresponding SoundData or a null pointer.</returns>
-		const SoundData *GetSoundDataForSound(const FMOD::Sound *sound) const;
+		const SoundSet::SoundData * GetSoundDataForSound(const FMOD::Sound *sound) const;
 
 		/// <summary>
 		/// Gets the channels playing sounds from this SoundContainer.
 		/// </summary>
 		/// <returns>The channels currently being used.</returns>
-		std::unordered_set<int> *GetPlayingChannels() { return &m_PlayingChannels; }
+		std::unordered_set<int> const * GetPlayingChannels() const { return &m_PlayingChannels; }
 
 		/// <summary>
 		/// Indicates whether any sound in this SoundContainer is currently being played.
@@ -394,11 +300,6 @@ namespace RTE {
 		bool Restart(int player) { return (HasAnySounds() && IsBeingPlayed()) ? g_AudioMan.StopSound(this, player) && g_AudioMan.PlaySoundContainer(this, player) : false; }
 
 		/// <summary>
-		/// Selects the next sounds of this SoundContainer to be played.
-		/// </summary>
-		bool SelectNextSoundSet();
-
-		/// <summary>
 		/// Fades out playback of the SoundContainer to 0 volume.
 		/// </summary>
 		/// <param name="fadeOutTime">How long the fadeout should take.</param>
@@ -414,15 +315,12 @@ namespace RTE {
 		FMOD_RESULT UpdateSoundProperties();
 #pragma endregion
 
-	protected:
+	private:
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
-		static const std::unordered_map<std::string, SoundCycleMode> c_SoundCycleModeMap; //!< A map of strings to SoundCycleModes to support string parsing for the SoundCycleMode enum. Populated in the implementing cpp file.
 		static const std::unordered_map<std::string, SoundOverlapMode> c_SoundOverlapModeMap; //!< A map of strings to SoundOverlapModes to support string parsing for the SoundOverlapMode enum. Populated in the implementing cpp file.
 
-		std::vector<std::vector<SoundData>> m_SoundSets; //The vector of SoundSets in this SoundContainer, wherein a SoundSet is a vector containing one or more SoundData structs.
-		size_t m_SelectedSoundSet; //!< The selected SoundSet for this SoundContainer, used to determine what sounds will play when Play is called.
-		SoundCycleMode m_SoundSelectionCycleMode; //!< The SoundCycleMode for this SoundContainer, used to determine what will play next, each time play is called.
+		SoundSet m_TopLevelSoundSet; //The top level SoundSet that handles all SoundData and sub SoundSets in this SoundContainer.
 
 		std::unordered_set<int> m_PlayingChannels; //!< The channels this SoundContainer is currently using.
 		SoundOverlapMode m_SoundOverlapMode; //!< The SoundOverlapMode for this SoundContainer, used to determine how it should handle overlapping play calls.

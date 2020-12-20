@@ -217,7 +217,7 @@ namespace RTE {
 		void SetMusicPosition(float position);
 #pragma endregion
 
-#pragma region Sound Getters and Setters
+#pragma region Overall Sound Getters and Setters
 		/// <summary>
 		/// Gets the volume of all sounds. Does not get volume of music.
 		/// </summary>
@@ -427,7 +427,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="soundContainer">A pointer to a SoundContainer object. Ownership IS NOT transferred!</param>
 		/// <returns>Whether the position was successfully set.</returns>
-		bool ChangeSoundContainerPlayingChannelsPosition(SoundContainer *soundContainer);
+		bool ChangeSoundContainerPlayingChannelsPosition(const SoundContainer *soundContainer);
 
 		/// <summary>
 		/// Changes the volume of a SoundContainer's playing sounds.
@@ -435,14 +435,14 @@ namespace RTE {
 		/// <param name="soundContainer">A pointer to a SoundContainer object. Ownership IS NOT transferred!</param>
 		/// <param name="newVolume">The new volume to play sounds at, between 0 and 1.</param>
 		/// <returns>Whether the volume was successfully updated.</returns>
-		bool ChangeSoundContainerPlayingChannelsVolume(SoundContainer *soundContainer, float newVolume);
+		bool ChangeSoundContainerPlayingChannelsVolume(const SoundContainer *soundContainer, float newVolume);
 
 		/// <summary>
 		/// Changes the frequency/pitch of a SoundContainer's playing sounds.
 		/// </summary>
 		/// <param name="soundContainer">A pointer to a SoundContainer object. Ownership IS NOT transferred!</param>
 		/// <returns>Whether the pitch was successfully updated.</returns>
-		bool ChangeSoundContainerPlayingChannelsPitch(SoundContainer *soundContainer);
+		bool ChangeSoundContainerPlayingChannelsPitch(const SoundContainer *soundContainer);
 #pragma endregion
 
 #pragma region 3D Effect Handling

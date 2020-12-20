@@ -524,7 +524,7 @@ namespace RTE {
 		FMOD::ChannelGroup *channelGroupToPlayIn = soundContainer->IsImmobile() ? m_ImmobileSoundChannelGroup : m_MobileSoundChannelGroup;
 		FMOD::Channel *channel;
 		int channelIndex;
-		for (SoundContainer::SoundData soundData : soundContainer->GetSelectedSoundSet()) {
+		for (SoundContainer::SoundData soundData : soundContainer->GetFlattenedSelectedSoundSet()) {
 			result = (result == FMOD_OK) ? m_AudioSystem->playSound(soundData.SoundObject, channelGroupToPlayIn, true, &channel) : result;
 			result = (result == FMOD_OK) ? channel->getIndex(&channelIndex) : result;
 
@@ -562,7 +562,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool AudioMan::ChangeSoundContainerPlayingChannelsPosition(SoundContainer *soundContainer) {
+	bool AudioMan::ChangeSoundContainerPlayingChannelsPosition(const SoundContainer *soundContainer) {
 		if (!m_AudioEnabled || !soundContainer) {
 			return false;
 		}
@@ -589,7 +589,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool AudioMan::ChangeSoundContainerPlayingChannelsVolume(SoundContainer *soundContainer, float newVolume) {
+	bool AudioMan::ChangeSoundContainerPlayingChannelsVolume(const SoundContainer *soundContainer, float newVolume) {
 		if (!m_AudioEnabled || !soundContainer || !soundContainer->IsBeingPlayed()) {
 			return false;
 		}
@@ -621,7 +621,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool AudioMan::ChangeSoundContainerPlayingChannelsPitch(SoundContainer *soundContainer) {
+	bool AudioMan::ChangeSoundContainerPlayingChannelsPitch(const SoundContainer *soundContainer) {
 		if (!m_AudioEnabled || !soundContainer || !soundContainer->IsBeingPlayed()) {
 			return false;
 		}

@@ -3,6 +3,7 @@
 
 #include "Vector.h"
 #include "ContentFile.h"
+#include "LuaMan.h"
 
 namespace RTE {
 
@@ -10,6 +11,7 @@ namespace RTE {
 	/// A set of sounds, and their selection data.
 	/// </summary>
 	class SoundSet : public Serializable {
+		friend class LuaMan;
 
 	public:
 

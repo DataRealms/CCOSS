@@ -243,7 +243,7 @@ namespace RTE {
 		/// </summary>
 		auto selectSoundForwards = [&selectedVectorSize, &unselectedVectorSize, this]() {
 			m_CurrentSelection.second++;
-			if (m_CurrentSelection.second > selectedVectorSize) {
+			if (m_CurrentSelection.second > selectedVectorSize - 1) {
 				m_CurrentSelection = {!m_CurrentSelection.first, 0};
 				std::swap(selectedVectorSize, unselectedVectorSize);
 				if (selectedVectorSize == 0) {

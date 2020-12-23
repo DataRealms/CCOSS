@@ -581,7 +581,6 @@ int LuaMan::Create() {
                 value("RESTART", SoundContainer::SoundOverlapMode::RESTART),
                 value("IGNORE_PLAY", SoundContainer::SoundOverlapMode::IGNORE_PLAY)
             ]
-            .property("TopLevelSoundSet", &SoundContainer::GetTopLevelSoundSet)
             .property("SoundOverlapMode", &SoundContainer::GetSoundOverlapMode, &SoundContainer::SetSoundOverlapMode)
             .property("Immobile", &SoundContainer::IsImmobile, &SoundContainer::SetImmobile)
             .property("AttenuationStartDistance", &SoundContainer::GetAttenuationStartDistance, &SoundContainer::SetAttenuationStartDistance)
@@ -592,6 +591,7 @@ int LuaMan::Create() {
             .property("Volume", &SoundContainer::GetVolume, &SoundContainer::SetVolume)
             .property("Pitch", &SoundContainer::GetPitch, &SoundContainer::SetPitch)
             .def("HasAnySounds", &SoundContainer::HasAnySounds)
+            .def("GetTopLevelSoundSet", &SoundContainer::GetTopLevelSoundSet)
 			.def("IsBeingPlayed", &SoundContainer::IsBeingPlayed)
             .def("Play", (bool (SoundContainer:: *)()) &SoundContainer::Play)
             .def("Play", (bool (SoundContainer:: *)(const int player)) &SoundContainer::Play)
@@ -602,7 +602,7 @@ int LuaMan::Create() {
             .def("Restart", (bool (SoundContainer:: *)()) &SoundContainer::Restart)
             .def("Restart", (bool (SoundContainer:: *)(int player)) &SoundContainer::Restart),
 
-        class_<SoundSet, Serializable>("SoundSet")
+        class_<SoundSet>("SoundSet")
             .def(constructor<>())
             .enum_("SoundSelectionCycleMode")[
                 value("RANDOM", SoundSet::SoundSelectionCycleMode::RANDOM),
@@ -610,7 +610,7 @@ int LuaMan::Create() {
                 value("ALL", SoundSet::SoundSelectionCycleMode::ALL)
             ]
             .property("SoundSelectionCycleMode", &SoundSet::GetSoundSelectionCycleMode, &SoundSet::SetSoundSelectionCycleMode)
-            .def_readonly("SubSoundSets", &SoundSet::GetSubSoundSets, return_stl_iterator)
+            .def_readonly("SubSoundSets", &SoundSet::m_SubSoundSets, return_stl_iterator)
             .def("HasAnySounds", &SoundSet::HasAnySounds)
             .def("SelectNextSounds", &SoundSet::SelectNextSounds)
             .def("AddSound", (void (SoundSet:: *)(std::string const &soundFilePath)) &SoundSet::AddSound)

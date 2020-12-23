@@ -220,13 +220,12 @@ namespace RTE {
 		}
 		int selectedVectorSize = m_CurrentSelection.first == false ? m_SoundData.size() : m_SubSoundSets.size();
 		int unselectedVectorSize = m_CurrentSelection.first == true ? m_SoundData.size() : m_SubSoundSets.size();
-		int soundDataAndSetSize = selectedVectorSize + unselectedVectorSize;
 
 		/// <summary>
 		/// Internal lambda function to pick a random sound that's not the previously played sound. Done to avoid scoping issues inside the switch below.
 		/// </summary>
 		auto selectSoundRandom = [&selectedVectorSize, &unselectedVectorSize, this]() {
-			if (selectedVectorSize == 1 || RandomNum(0, 1) == 1) {
+			if (unselectedVectorSize > 0 && (selectedVectorSize == 1 || RandomNum(0, 1) == 1)) {
 				std::swap(selectedVectorSize, unselectedVectorSize);
 				m_CurrentSelection = {!m_CurrentSelection.first, RandomNum(0, selectedVectorSize - 1)};
 			} else {
@@ -253,7 +252,7 @@ namespace RTE {
 			}
 		};
 
-		switch (soundDataAndSetSize) {
+		switch (selectedVectorSize + unselectedVectorSize) {
 			case 0:
 				return false;
 			case 1:

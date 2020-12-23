@@ -1,20 +1,23 @@
 #include "SoundSet.h"
+#include "AudioMan.h"
+#include "RTETools.h"
+#include "RTEError.h"
 
 namespace RTE {
 
 	const std::string SoundSet::m_sClassName = "SoundSet";
 
-	const std::unordered_map<std::string, SoundContainer::SoundCycleMode> SoundContainer::c_SoundCycleModeMap = {
-		{"Random", SoundSet::SoundCycleMode::RANDOM},
-		{"Forwards", SoundSet::SoundCycleMode::FORWARDS},
-		{"All", SoundSet::SoundCycleMode::ALL}
+	const std::unordered_map<std::string, SoundSet::SoundSelectionCycleMode> SoundSet::c_SoundSelectionCycleModeMap = {
+		{"Random", SoundSelectionCycleMode::RANDOM},
+		{"Forwards", SoundSelectionCycleMode::FORWARDS},
+		{"All", SoundSelectionCycleMode::ALL}
 	};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SoundSet::Clear() {
 		m_SoundSelectionCycleMode = SoundSelectionCycleMode::RANDOM;
-		m_CurrentSelection.clear();
+		m_CurrentSelection = {false, 0};
 
 		m_SoundData.clear();
 		m_SubSoundSets.clear();
@@ -28,7 +31,7 @@ namespace RTE {
 		for (SoundData referenceSoundData : reference.m_SoundData) {
 			m_SoundData.push_back(referenceSoundData);
 		}
-		for (const SoundSet &referenceSoundSet : reference.m_SoundSets) {
+		for (const SoundSet &referenceSoundSet : reference.m_SubSoundSets) {
 			SoundSet soundSet;
 			soundSet.Create(referenceSoundSet);
 			m_SubSoundSets.push_back(soundSet);
@@ -43,7 +46,7 @@ namespace RTE {
 		if (propName == "SoundSelectionCycleMode" || propName == "CycleMode") {
 			m_SoundSelectionCycleMode = ReadSoundSelectionCycleMode(reader);
 		} else if (propName == "AddSound") {
-			AddSoundData(ReadAndGetSound(reader));
+			AddSoundData(ReadAndGetSoundData(reader));
 		} else if (propName == "AddSoundSet" || propName == "AddSubSoundSet") {
 			SoundSet subSoundSet;
 			reader >> subSoundSet;
@@ -56,14 +59,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	static SoundData ReadAndGetSound(Reader &reader) {
-		SoundData soundData;
+	SoundSet::SoundData SoundSet::ReadAndGetSoundData(Reader &reader) {
+		SoundSet::SoundData soundData;
 
 		/// <summary>
 		/// Internal lambda function to load an audio file by path in as a ContentFile, which in turn loads it into FMOD, then returns SoundData for it in the outParam outSoundData.
 		/// </summary>
 		/// <param name="soundPath">The path to the sound file.</param>
-		auto readSoundDirectlyFromPath = [&soundData, &reader](const std::string &soundPath) {
+		auto readSoundFromPath = [&soundData, &reader](const std::string &soundPath) {
 			ContentFile soundFile(soundPath.c_str());
 			soundFile.SetFormattedReaderPosition("in file " + reader.GetCurrentFilePath() + " on line " + std::to_string(reader.GetCurrentFileLine()));
 			FMOD::Sound *soundObject = soundFile.GetAsSound();
@@ -75,14 +78,14 @@ namespace RTE {
 
 		std::string propValue = reader.ReadPropValue();
 		if (propValue != "Sound" && propValue != "ContentFile") {
-			readSoundDirectlyFromPath(propValue);
+			readSoundFromPath(propValue);
 			return soundData;
 		}
 
 		while (reader.NextProperty()) {
 			std::string soundSubPropertyName = reader.ReadPropName();
 			if (soundSubPropertyName == "FilePath" || soundSubPropertyName == "Path") {
-				readSound(reader.ReadPropValue());
+				readSoundFromPath(reader.ReadPropValue());
 			} else if (soundSubPropertyName == "Offset") {
 				reader >> soundData.Offset;
 			} else if (soundSubPropertyName == "MinimumAudibleDistance") {
@@ -97,15 +100,16 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	static SoundSelectionCycleMode SoundSet::ReadSoundSelectionCycleMode(const Reader &reader) {
-		std::string cycleModeString = reader.ReadPropValue();
-		SoundSelectionCycleMode soundSelectionCycleMode = SoundSelectionCycleMode::RANDOM;
-		if (c_SoundCycleModeMap.find(cycleModeString) != c_SoundCycleModeMap.end()) {
-			soundSelectionCycleMode = c_SoundCycleModeMap.find(cycleModeString)->second;
-		} else {
-			reader.ReportError("Cycle mode " + cycleModeString + " is invalid.");
+	SoundSet::SoundSelectionCycleMode SoundSet::ReadSoundSelectionCycleMode(Reader &reader) {
+		std::string soundSelectionCycleModeString = reader.ReadPropValue();
+
+		std::unordered_map<std::string, SoundSelectionCycleMode>::const_iterator soundSelectionCycleMode = c_SoundSelectionCycleModeMap.find(soundSelectionCycleModeString);
+		if (soundSelectionCycleMode != c_SoundSelectionCycleModeMap.end()) {
+			return soundSelectionCycleMode->second;
 		}
-		return soundSelectionCycleMode;
+
+		reader.ReportError("Sound selection cycle mode " + soundSelectionCycleModeString + " is invalid.");
+		return SoundSelectionCycleMode::RANDOM;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -114,7 +118,7 @@ namespace RTE {
 		Serializable::Save(writer);
 
 		writer.NewProperty("SoundSelectionCycleMode");
-		SaveSoundSelectionCycleMode(m_SoundSelectionCycleMode);
+		SaveSoundSelectionCycleMode(writer, m_SoundSelectionCycleMode);
 
 		for (const SoundData &soundData : m_SoundData) {
 			writer.NewProperty("AddSound");
@@ -144,9 +148,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	static void SoundSet::SaveSoundSelectionCycleMode(Writer &writer, SoundSelectionCycleMode soundSelectionCycleMode) {
-		std::list<std::pair<const std::string, SoundCycleMode>>::const_iterator cycleModeMapEntry = std::find_if(c_SoundCycleModeMap.begin(), c_SoundCycleModeMap.end(), [&soundSelectionCycleMode = soundSelectionCycleMode](auto element) { return element.second == soundSelectionCycleMode; });
-		if (cycleModeMapEntry != c_SoundCycleModeMap.end()) {
+	void SoundSet::SaveSoundSelectionCycleMode(Writer &writer, SoundSelectionCycleMode soundSelectionCycleMode) {
+		std::list<std::pair<const std::string, SoundSelectionCycleMode>>::const_iterator cycleModeMapEntry = std::find_if(c_SoundSelectionCycleModeMap.begin(), c_SoundSelectionCycleModeMap.end(), [&soundSelectionCycleMode = soundSelectionCycleMode](auto element) { return element.second == soundSelectionCycleMode; });
+		if (cycleModeMapEntry != c_SoundSelectionCycleModeMap.end()) {
 			writer << cycleModeMapEntry->first;
 		} else {
 			RTEAbort("Tried to write invalid SoundSelectionCycleMode when saving SoundContainer/SoundSet.");
@@ -168,8 +172,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool SoundSet::HasAnySounds(bool includeSubSoundSets) const {
-		bool hasAnySounds = !m_SoundSets.empty();
-		if (!hasAySounds && includeSubSoundSets) {
+		bool hasAnySounds = !m_SoundData.empty();
+		if (!hasAnySounds && includeSubSoundSets) {
 			for (const SoundSet &subSoundSet : m_SubSoundSets) {
 				hasAnySounds = subSoundSet.HasAnySounds();
 				if (hasAnySounds) { break; }
@@ -180,55 +184,96 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SoundSet::GetFlattenedSoundData(std::vector<SoundData *> &flattenedSoundData, bool onlyGetSelectedSoundData) const {
+	void SoundSet::GetFlattenedSoundData(std::vector<SoundData *> &flattenedSoundData, bool onlyGetSelectedSoundData) {
 		if (!onlyGetSelectedSoundData || m_SoundSelectionCycleMode == SoundSelectionCycleMode::ALL) {
 			for (SoundData &soundData : m_SoundData) { flattenedSoundData.push_back(&soundData); }
-			for (const SoundSet &subSoundSet : m_SubSoundSets) { subSoundSet.GetFlattenedSoundData(flattenedSoundData, onlyGetSelectedSoundData); }
+			for (SoundSet &subSoundSet : m_SubSoundSets) { subSoundSet.GetFlattenedSoundData(flattenedSoundData, onlyGetSelectedSoundData); }
 		} else {
 			if (m_CurrentSelection.first == false) {
 				flattenedSoundData.push_back(&m_SoundData[m_CurrentSelection.second]);
 			} else {
-				m_CurrentSelection.second.GetFlattenedSoundData(flattenedSoundData, onlyGetSelectedSoundData);
+				m_SubSoundSets[m_CurrentSelection.second].GetFlattenedSoundData(flattenedSoundData, onlyGetSelectedSoundData);
 			}
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool SoundSet::SelectNextSoundSet() const {
-		int soundSetCount = m_SoundSets.size();
-		switch (soundSetCount) {
+	void SoundSet::GetFlattenedSoundData(std::vector<const SoundData *> &flattenedSoundData, bool onlyGetSelectedSoundData) const {
+		if (!onlyGetSelectedSoundData || m_SoundSelectionCycleMode == SoundSelectionCycleMode::ALL) {
+			for (const SoundData &soundData : m_SoundData) { flattenedSoundData.push_back(&soundData); }
+			for (const SoundSet &subSoundSet : m_SubSoundSets) { subSoundSet.GetFlattenedSoundData(flattenedSoundData, onlyGetSelectedSoundData); }
+		} else {
+			if (m_CurrentSelection.first == false) {
+				flattenedSoundData.push_back(&m_SoundData[m_CurrentSelection.second]);
+			} else {
+				m_SubSoundSets[m_CurrentSelection.second].GetFlattenedSoundData(flattenedSoundData, onlyGetSelectedSoundData);
+			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool SoundSet::SelectNextSounds() {
+		if (m_SoundSelectionCycleMode == SoundSelectionCycleMode::ALL) {
+			return true;
+		}
+		int selectedVectorSize = m_CurrentSelection.first == false ? m_SoundData.size() : m_SubSoundSets.size();
+		int unselectedVectorSize = m_CurrentSelection.first == true ? m_SoundData.size() : m_SubSoundSets.size();
+		int soundDataAndSetSize = selectedVectorSize + unselectedVectorSize;
+
+		/// <summary>
+		/// Internal lambda function to pick a random sound that's not the previously played sound. Done to avoid scoping issues inside the switch below.
+		/// </summary>
+		auto selectSoundRandom = [&selectedVectorSize, &unselectedVectorSize, this]() {
+			if (selectedVectorSize == 1 || RandomNum(0, 1) == 1) {
+				std::swap(selectedVectorSize, unselectedVectorSize);
+				m_CurrentSelection = {!m_CurrentSelection.first, RandomNum(0, selectedVectorSize - 1)};
+			} else {
+				size_t soundToSelect = RandomNum(0, selectedVectorSize - 1);
+				while (soundToSelect == m_CurrentSelection.second) {
+					soundToSelect = RandomNum(0, selectedVectorSize - 1);
+				}
+				m_CurrentSelection.second = soundToSelect;
+			}
+		};
+
+		/// <summary>
+		/// Internal lambda function to pick the next sound in the forwards direction.
+		/// </summary>
+		auto selectSoundForwards = [&selectedVectorSize, &unselectedVectorSize, this]() {
+			m_CurrentSelection.second++;
+			if (m_CurrentSelection.second > selectedVectorSize) {
+				m_CurrentSelection = {!m_CurrentSelection.first, 0};
+				std::swap(selectedVectorSize, unselectedVectorSize);
+				if (selectedVectorSize == 0) {
+					m_CurrentSelection.first = !m_CurrentSelection.first;
+					std::swap(selectedVectorSize, unselectedVectorSize);
+				}
+			}
+		};
+
+		switch (soundDataAndSetSize) {
 			case 0:
 				return false;
 			case 1:
 				return true;
 			case 2:
-				m_SelectedSoundSet = (m_SelectedSoundSet + 1) % 2;
+				selectSoundForwards();
 				break;
 			default:
-				/// <summary>
-				/// Internal lambda function to pick a random sound that's not the previously played sound. Done to avoid scoping issues inside the switch below.
-				/// </summary>
-				auto selectRandomSound = [&soundSetCount, this]() {
-					size_t soundToSelect = RandomNum(0, soundSetCount - 1);
-					while (soundToSelect == m_SelectedSoundSet) {
-						soundToSelect = RandomNum(0, soundSetCount - 1);
-					}
-					m_SelectedSoundSet = soundToSelect;
-				};
-
 				switch (m_SoundSelectionCycleMode) {
-					case RANDOM:
-						selectRandomSound();
+					case SoundSelectionCycleMode::RANDOM:
+						selectSoundRandom();
 						break;
-					case FORWARDS:
-						m_SelectedSoundSet = (m_SelectedSoundSet + 1) % soundSetCount;
+					case SoundSelectionCycleMode::FORWARDS:
+						selectSoundForwards();
 						break;
 					default:
-						RTEAbort("Invalid sound cycle mode " + m_SoundSelectionCycleMode);
+						RTEAbort("Invalid sound selection sound cycle mode.");
 						break;
 				}
-				RTEAssert(m_SelectedSoundSet >= 0 && m_SelectedSoundSet < soundSetCount, "Failed to select next sound, either none was selected or the selected sound was invalid.");
+				RTEAssert(m_CurrentSelection.second >= 0 && m_CurrentSelection.second < selectedVectorSize, "Failed to select next sound, either none was selected or the selected sound was invalid.");
 		}
 		return true;
 	}

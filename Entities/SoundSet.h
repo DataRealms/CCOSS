@@ -18,7 +18,7 @@ namespace RTE {
 		/// <summary>
 		/// How the SoundSet should choose the next sound or SoundSet to play when SelectNextSound is called.
 		/// </summary>
-		enum class SoundSelectionCycleMode {
+		enum SoundSelectionCycleMode {
 			RANDOM = 0,
 			FORWARDS,
 			ALL
@@ -68,14 +68,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
 		/// <returns>SoundData for the newly read sound.</returns>
-		static SoundData ReadAndGetSound(Reader &reader);
+		static SoundData ReadAndGetSoundData(Reader &reader);
 
 		/// <summary>
 		/// Handles turning a SoundCelectionCycleMode from its user-friendly name in INI to its enum value, using the static SoundSelectionCycleMap.
 		/// </summary>
 		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
 		/// <returns>The appropriate SoundSelectionCycleMode for the given INI value.</returns>
-		static SoundSelectionCycleMode ReadSoundSelectionCycleMode(const Reader &reader);
+		static SoundSelectionCycleMode ReadSoundSelectionCycleMode(Reader &reader);
 
 		/// <summary>
 		/// Handles writing the given SoundSelectionCycleMode out to the given Writer, using the static SoundSelectionCycleMap.
@@ -148,14 +148,21 @@ namespace RTE {
 		/// Sets the SoundSelectionCycleMode for this SoundSet, which is used to determine what SoundSet to select next time SelectNextSounds is called.
 		/// </summary>
 		/// <param name="newSoundSelectionCycleMOde">The new SoundSelectionCycleMode for this SoundSet.</param>
-		void SetSoundSelectionCycleMode(SoundSelectionCycleMode newSoundSelectionCycleMOde) { m_SoundSelectionCycleMode = newSoundSelectionCycleMOde; }
+		void SetSoundSelectionCycleMode(SoundSelectionCycleMode newSoundSelectionCycleMode) { m_SoundSelectionCycleMode = newSoundSelectionCycleMode; }
 
 		/// <summary>
 		/// Filles the passed in vector with the flattened SoundData in the SoundSet, optionally only getting currently selected SoundData.
 		/// </summary>
 		/// <param name="flattenedSoundData">A reference vector of SoundData references to be filled with this SoundSet's flattened SoundData.</param>
 		/// <param name="onlyGetSelectedSoundData">Whether to only get SoundData that is currently selected, or to get all SoundData in this SoundSet.</param>
-		void GetFlattenedSoundData(std::vector<SoundData *> &flattenedSoundData, bool onlyGetSelectedSoundData) const;
+		void GetFlattenedSoundData(std::vector<SoundData *> &flattenedSoundData, bool onlyGetSelectedSoundData);
+
+		/// <summary>
+		/// Filles the passed in vector with the flattened SoundData in the SoundSet, optionally only getting currently selected SoundData.
+		/// </summary>
+		/// <param name="flattenedSoundData">A reference vector of SoundData references to be filled with this SoundSet's flattened SoundData.</param>
+		/// <param name="onlyGetSelectedSoundData">Whether to only get SoundData that is currently selected, or to get all SoundData in this SoundSet.</param>
+		void GetFlattenedSoundData(std::vector<const SoundData *> &flattenedSoundData, bool onlyGetSelectedSoundData) const;
 
 		/// <summary>
 		/// Gets the vector of SubSoundSets for this SoundSet.

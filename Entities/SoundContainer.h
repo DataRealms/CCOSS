@@ -22,7 +22,7 @@ namespace RTE {
 		/// <summary>
 		/// How the SoundContainer should behave when it tries to play again while already playing.
 		/// </summary>
-		enum class SoundOverlapMode {
+		enum SoundOverlapMode {
 			OVERLAP = 0,
 			RESTART = 1,
 			IGNORE_PLAY = 2

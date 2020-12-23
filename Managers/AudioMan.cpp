@@ -524,7 +524,7 @@ namespace RTE {
 		FMOD::ChannelGroup *channelGroupToPlayIn = soundContainer->IsImmobile() ? m_ImmobileSoundChannelGroup : m_MobileSoundChannelGroup;
 		FMOD::Channel *channel;
 		int channelIndex;
-		std::vector<SoundSet::SoundData *> selectedSoundData;
+		std::vector<const SoundSet::SoundData *> selectedSoundData;
 		soundContainer->GetTopLevelSoundSet().GetFlattenedSoundData(selectedSoundData, true);
 		for (const SoundSet::SoundData *soundData : selectedSoundData) {
 			result = (result == FMOD_OK) ? m_AudioSystem->playSound(soundData->SoundObject, channelGroupToPlayIn, true, &channel) : result;

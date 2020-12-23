@@ -59,7 +59,7 @@ namespace RTE {
 
 	int SoundContainer::ReadProperty(std::string propName, Reader &reader) {
 		if (propName == "AddSound") {
-			m_TopLevelSoundSet.AddSoundData(SoundSet::ReadAndGetSound(reader));
+			m_TopLevelSoundSet.AddSoundData(SoundSet::ReadAndGetSoundData(reader));
 		} else if (propName == "AddSoundSet") {
 			SoundSet subSoundSet;
 			reader >> subSoundSet;
@@ -141,7 +141,7 @@ namespace RTE {
 
 	std::vector<std::size_t> SoundContainer::GetSelectedSoundHashes() const {
 		std::vector<size_t> soundHashes;
-		std::vector<SoundSet::SoundData *> flattenedSoundData;
+		std::vector<const SoundSet::SoundData *> flattenedSoundData;
 		m_TopLevelSoundSet.GetFlattenedSoundData(flattenedSoundData, false);
 		for (const SoundSet::SoundData *selectedSoundData : flattenedSoundData) {
 			soundHashes.push_back(selectedSoundData->SoundFile.GetHash());
@@ -152,7 +152,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	const SoundSet::SoundData * SoundContainer::GetSoundDataForSound(const FMOD::Sound *sound) const {
-		std::vector<SoundSet::SoundData *> flattenedSoundData;
+		std::vector<const SoundSet::SoundData *> flattenedSoundData;
 		m_TopLevelSoundSet.GetFlattenedSoundData(flattenedSoundData, false);
 		for (const SoundSet::SoundData *soundData : flattenedSoundData) {
 			if (sound == soundData->SoundObject) {

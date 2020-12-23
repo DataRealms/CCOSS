@@ -14,8 +14,6 @@
 
 namespace RTE {
 
-	class SoundContainer;
-
 	/// <summary>
 	/// The singleton manager of the WAV sound effects and OGG music playback.
 	/// </summary>

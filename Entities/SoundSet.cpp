@@ -101,17 +101,21 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	SoundSet::SoundSelectionCycleMode SoundSet::ReadSoundSelectionCycleMode(Reader &reader) {
+		SoundSelectionCycleMode soundSelectionCycleModeToReturn;
 		std::string soundSelectionCycleModeString = reader.ReadPropValue();
 
 		std::unordered_map<std::string, SoundSelectionCycleMode>::const_iterator soundSelectionCycleMode = c_SoundSelectionCycleModeMap.find(soundSelectionCycleModeString);
 		if (soundSelectionCycleMode != c_SoundSelectionCycleModeMap.end()) {
-			return soundSelectionCycleMode->second;
-		} else if (std::stoi(soundSelectionCycleModeString)) {
-			return static_cast<SoundSelectionCycleMode>(std::stoi(soundSelectionCycleModeString));
+			soundSelectionCycleModeToReturn = soundSelectionCycleMode->second;
+		} else {
+			try {
+				soundSelectionCycleModeToReturn = static_cast<SoundSelectionCycleMode>(std::stoi(soundSelectionCycleModeString));
+			} catch (const std::exception &) {
+				reader.ReportError("Sound selection cycle mode " + soundSelectionCycleModeString + " is invalid.");
+			}
 		}
-
-		reader.ReportError("Sound selection cycle mode " + soundSelectionCycleModeString + " is invalid.");
-		return SoundSelectionCycleMode::RANDOM;
+		
+		return soundSelectionCycleModeToReturn;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

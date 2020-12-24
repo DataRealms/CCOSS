@@ -70,10 +70,12 @@ namespace RTE {
 			std::string soundOverlapModeString = reader.ReadPropValue();
 			if (c_SoundOverlapModeMap.find(soundOverlapModeString) != c_SoundOverlapModeMap.end()) {
 				m_SoundOverlapMode = c_SoundOverlapModeMap.find(soundOverlapModeString)->second;
-			} else if (std::stoi(soundOverlapModeString)) {
-				m_SoundOverlapMode = static_cast<SoundOverlapMode>(std::stoi(soundOverlapModeString));
 			} else {
-				reader.ReportError("Cycle mode " + soundOverlapModeString + " is invalid.");
+				try {
+					m_SoundOverlapMode = static_cast<SoundOverlapMode>(std::stoi(soundOverlapModeString));
+				} catch (const std::exception &) {
+					reader.ReportError("Cycle mode " + soundOverlapModeString + " is invalid.");
+				}
 			}
 		} else if (propName == "Immobile") {
 			reader >> m_Immobile;

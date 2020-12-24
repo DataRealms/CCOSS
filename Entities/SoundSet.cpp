@@ -224,6 +224,11 @@ namespace RTE {
 
 	bool SoundSet::SelectNextSounds() {
 		if (m_SoundSelectionCycleMode == SoundSelectionCycleMode::ALL) {
+			for (SoundSet &subSoundSet : m_SubSoundSets) {
+				if (!subSoundSet.SelectNextSounds()) {
+					return false;
+				}
+			}
 			return true;
 		}
 		int selectedVectorSize = m_CurrentSelection.first == false ? m_SoundData.size() : m_SubSoundSets.size();
@@ -265,7 +270,6 @@ namespace RTE {
 				return false;
 			case 1:
 				if (selectedVectorSize == 0) { m_CurrentSelection.first = !m_CurrentSelection.first; }
-				return true;
 			case 2:
 				selectSoundForwards();
 				break;
@@ -282,6 +286,9 @@ namespace RTE {
 						break;
 				}
 				RTEAssert(m_CurrentSelection.second >= 0 && m_CurrentSelection.second < selectedVectorSize, "Failed to select next sound, either none was selected or the selected sound was invalid.");
+		}
+		if (m_CurrentSelection.first == true) {
+			return m_SubSoundSets[m_CurrentSelection.second].SelectNextSounds();
 		}
 		return true;
 	}

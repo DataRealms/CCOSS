@@ -175,9 +175,9 @@ namespace RTE {
 
 #pragma region Miscellaneous
 		/// <summary>
-		/// Selects the next sounds of this SoundContainer to be played.
+		/// Selects the next sounds of this SoundSet to be played, also selecting them for sub SoundSets as appropriate.
 		/// </summary>
-		/// <returns>Whether a new sound set was successfully selected.</returns>
+		/// <returns>False if this SoundSet or any of its sub SoundSets failed to select sounds, or true if everything worked.</returns>
 		bool SelectNextSounds();
 #pragma endregion
 

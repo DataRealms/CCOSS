@@ -15,7 +15,7 @@
 namespace RTE {
 
 	/// <summary>
-	/// The singleton manager of the WAV sound effects and OGG music playback.
+	/// The singleton manager of sound effect and music playback.
 	/// </summary>
 	class AudioMan : public Singleton<AudioMan> {
 		friend class SoundContainer;
@@ -161,7 +161,7 @@ namespace RTE {
 		/// <param name="pitch">New global pitch, limited to 8 octaves up or down (i.e. 0.125 - 8). Defaults to 1.</param>
 		/// <param name="includeImmobileSounds">Whether to include immobile sounds (normally used for GUI and so on) in global pitch modification. Defaults to false.</param>
 		/// <param name="includeMusic">Whether to include the music in global pitch modification. Defaults to false.</param>
-		void SetGlobalPitch(float pitch = 1.0, bool includeImmobileSounds = false, bool includeMusic = false);
+		void SetGlobalPitch(float pitch = 1.0F, bool includeImmobileSounds = false, bool includeMusic = false);
 #pragma endregion
 
 #pragma region Music Getters and Setters
@@ -181,7 +181,7 @@ namespace RTE {
 		/// Sets the music to a specific volume. Does not affect sounds.
 		/// </summary>
 		/// <param name="volume">The desired volume scalar. 0.0-1.0.</param>
-		void SetMusicVolume(float volume = 1.0) { m_MusicVolume = std::clamp(volume, 0.0F, 1.0F); if (m_AudioEnabled) { m_MusicChannelGroup->setVolume(m_MusicVolume); } }
+		void SetMusicVolume(float volume = 1.0F) { m_MusicVolume = std::clamp(volume, 0.0F, 1.0F); if (m_AudioEnabled) { m_MusicChannelGroup->setVolume(m_MusicVolume); } }
 
 		/// <summary>
 		/// Sets the music to a specific volume, but it will only last until a new song is played. Useful for fading etc.
@@ -243,7 +243,7 @@ namespace RTE {
 		/// <param name="filePath">The path to the music file to play.</param>
 		/// <param name="loops">The number of times to loop the song. 0 means play once. -1 means play infinitely until stopped.</param>
 		/// <param name="volumeOverrideIfNotMuted">The volume override for music for this song only, if volume is not muted. < 0 means no override.</param>
-		void PlayMusic(const char *filePath, int loops = -1, float volumeOverrideIfNotMuted = -1.0);
+		void PlayMusic(const char *filePath, int loops = -1, float volumeOverrideIfNotMuted = -1.0F);
 
 		/// <summary>
 		/// Plays the next music stream in the queue, if any is queued.
@@ -350,7 +350,7 @@ namespace RTE {
 		/// <param name="loops">LoopsOrSilence counter or, if state is silence, the length of the silence.</param>
 		/// <param name="position">Music playback position.</param>
 		/// <param name="pitch">Pitch value.</param>
-		void RegisterMusicEvent(int player, NetworkMusicState state, const char *filepath, int loopsOrSilence = 0, float position = 0, float pitch = 1);
+		void RegisterMusicEvent(int player, NetworkMusicState state, const char *filepath, int loopsOrSilence = 0, float position = 0, float pitch = 1.0F);
 
 		/// <summary>
 		/// Fills the list with sound events happened for the specified network player.

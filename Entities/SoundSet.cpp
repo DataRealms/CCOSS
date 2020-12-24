@@ -182,7 +182,9 @@ namespace RTE {
 		if (!hasAnySounds && includeSubSoundSets) {
 			for (const SoundSet &subSoundSet : m_SubSoundSets) {
 				hasAnySounds = subSoundSet.HasAnySounds();
-				if (hasAnySounds) { break; }
+				if (hasAnySounds) {
+					break;
+				}
 			}
 		}
 		return hasAnySounds;

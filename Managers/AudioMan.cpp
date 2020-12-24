@@ -17,9 +17,9 @@ namespace RTE {
 		m_CurrentActivityHumanPlayerPositions.clear();
 		m_SoundChannelMinimumAudibleDistances.clear();
 
-		m_MusicVolume = 1.0;
-		m_SoundsVolume = 1.0;
-		m_GlobalPitch = 1.0;
+		m_MusicVolume = 1.0F;
+		m_SoundsVolume = 1.0F;
+		m_GlobalPitch = 1.0F;
 
 		m_MusicPath.clear();
 		m_MusicPlayList.clear();

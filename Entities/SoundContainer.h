@@ -53,7 +53,7 @@ namespace RTE {
 		/// <param name="soundFilePath">The path to a sound to add to the first SoundSet of this SoundContainer.</param>
 		/// <param name="immobile">Whether this SoundContainer's sounds will be treated as immobile, i.e. they won't be affected by 3D sound manipulation.</param>
 		/// <param name="affectedByGlobalPitch">Whether this SoundContainer's sounds' frequency will be affected by the global pitch.</param>
-		/// <returns>An error return value signaing success or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(const std::string &soundFilePath, bool immobile = false, bool affectedByGlobalPitch = true) { m_TopLevelSoundSet.AddSound(soundFilePath, true); SetImmobile(immobile); SetAffectedByGlobalPitch(affectedByGlobalPitch); return 0; }
 #pragma endregion
 
@@ -210,7 +210,7 @@ namespace RTE {
 		/// Gets the position at which this SoundContainer's sound will be played. Note that its individual sounds can be offset from this.
 		/// </summary>
 		/// <returns>The position of this SoundContainer.</returns>
-		const Vector &GetPosition() const { return m_Pos; }
+		const Vector & GetPosition() const { return m_Pos; }
 
 		/// <summary>
 		/// Sets the position of the SoundContainer's sounds while they're playing.

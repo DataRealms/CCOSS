@@ -33,8 +33,8 @@ namespace RTE {
 			ContentFile SoundFile;
 			FMOD::Sound *SoundObject;
 			Vector Offset = Vector();
-			float MinimumAudibleDistance = 0;
-			float AttenuationStartDistance = -1;
+			float MinimumAudibleDistance = 0.0F;
+			float AttenuationStartDistance = -1.0F;
 		};
 
 #pragma region Creation
@@ -66,7 +66,7 @@ namespace RTE {
 #pragma region INI Handling
 		/// <summary>
 		/// Handles reading a SoundData from INI, loading it in as a ContentFile and into FMOD, and reading any of its subproperties.
-		/// /////////Does not add the created SoundData to a this SoundSet.
+		/// Does not add the created SoundData to a this SoundSet.
 		/// </summary>
 		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
 		/// <returns>SoundData for the newly read sound.</returns>
@@ -153,14 +153,14 @@ namespace RTE {
 		void SetSoundSelectionCycleMode(SoundSelectionCycleMode newSoundSelectionCycleMode) { m_SoundSelectionCycleMode = newSoundSelectionCycleMode; }
 
 		/// <summary>
-		/// Filles the passed in vector with the flattened SoundData in the SoundSet, optionally only getting currently selected SoundData.
+		/// Fills the passed in vector with the flattened SoundData in the SoundSet, optionally only getting currently selected SoundData.
 		/// </summary>
 		/// <param name="flattenedSoundData">A reference vector of SoundData references to be filled with this SoundSet's flattened SoundData.</param>
 		/// <param name="onlyGetSelectedSoundData">Whether to only get SoundData that is currently selected, or to get all SoundData in this SoundSet.</param>
 		void GetFlattenedSoundData(std::vector<SoundData *> &flattenedSoundData, bool onlyGetSelectedSoundData);
 
 		/// <summary>
-		/// Filles the passed in vector with the flattened SoundData in the SoundSet, optionally only getting currently selected SoundData.
+		/// Fills the passed in vector with the flattened SoundData in the SoundSet, optionally only getting currently selected SoundData.
 		/// </summary>
 		/// <param name="flattenedSoundData">A reference vector of SoundData references to be filled with this SoundSet's flattened SoundData.</param>
 		/// <param name="onlyGetSelectedSoundData">Whether to only get SoundData that is currently selected, or to get all SoundData in this SoundSet.</param>

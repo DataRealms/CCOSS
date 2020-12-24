@@ -452,6 +452,8 @@ namespace RTE {
 		}
 		if (lastSetGlobalPitchEvent) { list.push_back(*lastSetGlobalPitchEvent); }
 		g_SoundEventsListMutex[player].unlock();
+
+		m_SoundEvents[player].clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

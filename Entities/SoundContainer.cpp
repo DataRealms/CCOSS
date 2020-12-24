@@ -66,12 +66,14 @@ namespace RTE {
 			m_TopLevelSoundSet.AddSoundSet(soundSetToAdd);
 		} else if (propName == "SoundSelectionCycleMode" || propName == "CycleMode") {
 			m_TopLevelSoundSet.SetSoundSelectionCycleMode(SoundSet::ReadSoundSelectionCycleMode(reader));
-		} else if (propName == "OverlapMode") {
-			std::string overlapModeString = reader.ReadPropValue();
-			if (c_SoundOverlapModeMap.find(overlapModeString) != c_SoundOverlapModeMap.end()) {
-				m_SoundOverlapMode = c_SoundOverlapModeMap.find(overlapModeString)->second;
+		} else if (propName == "SoundOverlapMode") {
+			std::string soundOverlapModeString = reader.ReadPropValue();
+			if (c_SoundOverlapModeMap.find(soundOverlapModeString) != c_SoundOverlapModeMap.end()) {
+				m_SoundOverlapMode = c_SoundOverlapModeMap.find(soundOverlapModeString)->second;
+			} else if (std::stoi(soundOverlapModeString)) {
+				m_SoundOverlapMode = static_cast<SoundOverlapMode>(std::stoi(soundOverlapModeString));
 			} else {
-				reader.ReportError("Cycle mode " + overlapModeString + " is invalid.");
+				reader.ReportError("Cycle mode " + soundOverlapModeString + " is invalid.");
 			}
 		} else if (propName == "Immobile") {
 			reader >> m_Immobile;
@@ -107,7 +109,7 @@ namespace RTE {
 		writer.NewProperty("SoundSelectionCycleMode");
 		SoundSet::SaveSoundSelectionCycleMode(writer, m_TopLevelSoundSet.GetSoundSelectionCycleMode());
 
-		writer.NewProperty("OverlapMode");
+		writer.NewProperty("SoundOverlapMode");
 		std::list<std::pair<const std::string, SoundOverlapMode>>::const_iterator overlapModeMapEntry = std::find_if(c_SoundOverlapModeMap.begin(), c_SoundOverlapModeMap.end(), [&soundOverlapMode = m_SoundOverlapMode](auto element) { return element.second == soundOverlapMode; });
 		if (overlapModeMapEntry != c_SoundOverlapModeMap.end()) {
 			writer << overlapModeMapEntry->first;

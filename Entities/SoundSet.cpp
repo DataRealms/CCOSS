@@ -106,6 +106,8 @@ namespace RTE {
 		std::unordered_map<std::string, SoundSelectionCycleMode>::const_iterator soundSelectionCycleMode = c_SoundSelectionCycleModeMap.find(soundSelectionCycleModeString);
 		if (soundSelectionCycleMode != c_SoundSelectionCycleModeMap.end()) {
 			return soundSelectionCycleMode->second;
+		} else if (std::stoi(soundSelectionCycleModeString)) {
+			return static_cast<SoundSelectionCycleMode>(std::stoi(soundSelectionCycleModeString));
 		}
 
 		reader.ReportError("Sound selection cycle mode " + soundSelectionCycleModeString + " is invalid.");

@@ -264,6 +264,7 @@ namespace RTE {
 			case 0:
 				return false;
 			case 1:
+				if (selectedVectorSize == 0) { m_CurrentSelection.first = !m_CurrentSelection.first; }
 				return true;
 			case 2:
 				selectSoundForwards();

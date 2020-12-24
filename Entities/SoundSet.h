@@ -150,7 +150,7 @@ namespace RTE {
 		/// Sets the SoundSelectionCycleMode for this SoundSet, which is used to determine what SoundSet to select next time SelectNextSounds is called.
 		/// </summary>
 		/// <param name="newSoundSelectionCycleMOde">The new SoundSelectionCycleMode for this SoundSet.</param>
-		void SetSoundSelectionCycleMode(SoundSelectionCycleMode newSoundSelectionCycleMode) { m_SoundSelectionCycleMode = newSoundSelectionCycleMode; }
+		void SetSoundSelectionCycleMode(SoundSelectionCycleMode newSoundSelectionCycleMode) { m_SoundSelectionCycleMode = newSoundSelectionCycleMode; if (m_SoundSelectionCycleMode == SoundSelectionCycleMode::FORWARDS) { m_CurrentSelection.second = -1; } }
 
 		/// <summary>
 		/// Fills the passed in vector with the flattened SoundData in the SoundSet, optionally only getting currently selected SoundData.
@@ -195,7 +195,7 @@ namespace RTE {
 		static const std::unordered_map<std::string, SoundSet::SoundSelectionCycleMode> c_SoundSelectionCycleModeMap; //!< A map of strings to SoundSelectionCycleModes to support string parsing for the SoundCycleMode enum. Populated in the implementing cpp file.
 
 		SoundSelectionCycleMode m_SoundSelectionCycleMode; //!< The SoundSelectionCycleMode for this SoundSet.
-		std::pair<bool, std::size_t> m_CurrentSelection; //!< Whether the currently selection is in the SoundData (false) or SoundSet (true) vector, and its index in the appropriate vector.
+		std::pair<bool, int> m_CurrentSelection; //!< Whether the currently selection is in the SoundData (false) or SoundSet (true) vector, and its index in the appropriate vector.
 
 		std::vector<SoundData> m_SoundData; //!< The SoundData available for selection in this SoundSet.
 		std::vector<SoundSet> m_SubSoundSets; //!< The sub SoundSets available for selection in this SoundSet.

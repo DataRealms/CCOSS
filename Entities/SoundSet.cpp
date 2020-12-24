@@ -44,7 +44,7 @@ namespace RTE {
 
 	int SoundSet::ReadProperty(std::string propName, Reader &reader) {
 		if (propName == "SoundSelectionCycleMode") {
-			m_SoundSelectionCycleMode = ReadSoundSelectionCycleMode(reader);
+			SetSoundSelectionCycleMode(ReadSoundSelectionCycleMode(reader));
 		} else if (propName == "AddSound") {
 			AddSoundData(ReadAndGetSoundData(reader));
 		} else if (propName == "AddSoundSet") {
@@ -233,6 +233,10 @@ namespace RTE {
 		}
 		int selectedVectorSize = m_CurrentSelection.first == false ? m_SoundData.size() : m_SubSoundSets.size();
 		int unselectedVectorSize = m_CurrentSelection.first == true ? m_SoundData.size() : m_SubSoundSets.size();
+		if (selectedVectorSize == 0 && unselectedVectorSize > 0) {
+			m_CurrentSelection.first = !m_CurrentSelection.first;
+			std::swap(selectedVectorSize, unselectedVectorSize);
+		}
 
 		/// <summary>
 		/// Internal lambda function to pick a random sound that's not the previously played sound. Done to avoid scoping issues inside the switch below.
@@ -256,9 +260,8 @@ namespace RTE {
 		auto selectSoundForwards = [&selectedVectorSize, &unselectedVectorSize, this]() {
 			m_CurrentSelection.second++;
 			if (m_CurrentSelection.second > selectedVectorSize - 1) {
-				m_CurrentSelection = {!m_CurrentSelection.first, 0};
-				std::swap(selectedVectorSize, unselectedVectorSize);
-				if (selectedVectorSize == 0) {
+				m_CurrentSelection.second = 0;
+				if (unselectedVectorSize > 0) {
 					m_CurrentSelection.first = !m_CurrentSelection.first;
 					std::swap(selectedVectorSize, unselectedVectorSize);
 				}
@@ -269,7 +272,7 @@ namespace RTE {
 			case 0:
 				return false;
 			case 1:
-				if (selectedVectorSize == 0) { m_CurrentSelection.first = !m_CurrentSelection.first; }
+				break;
 			case 2:
 				selectSoundForwards();
 				break;

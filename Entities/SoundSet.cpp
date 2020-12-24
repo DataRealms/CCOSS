@@ -48,9 +48,9 @@ namespace RTE {
 		} else if (propName == "AddSound") {
 			AddSoundData(ReadAndGetSoundData(reader));
 		} else if (propName == "AddSoundSet") {
-			SoundSet subSoundSet;
-			reader >> subSoundSet;
-			AddSubSoundSet(subSoundSet);
+			SoundSet soundSetToAdd;
+			reader >> soundSetToAdd;
+			AddSoundSet(soundSetToAdd);
 		} else {
 			return Serializable::ReadProperty(propName, reader);
 		}

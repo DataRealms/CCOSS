@@ -130,7 +130,7 @@ namespace RTE {
 		/// Adds a copy of the passed in SoundSet as a sub SoundSet of this SoundSet. Ownership IS transferred!
 		/// </summary>
 		/// <param name="soundSetToAdd">A reference to the SoundSet to be copied in as a sub SoundSet of this SoundSet. Ownership IS transferred!</param>
-		void AddSubSoundSet(const SoundSet &soundSetToAdd) { m_SubSoundSets.push_back(soundSetToAdd); }
+		void AddSoundSet(const SoundSet &soundSetToAdd) { m_SubSoundSets.push_back(soundSetToAdd); }
 #pragma endregion
 
 #pragma region Getters and Setters

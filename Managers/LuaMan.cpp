@@ -615,7 +615,7 @@ int LuaMan::Create() {
             .def("SelectNextSounds", &SoundSet::SelectNextSounds)
             .def("AddSound", (void (SoundSet:: *)(std::string const &soundFilePath)) &SoundSet::AddSound)
             .def("AddSound", (void (SoundSet:: *)(std::string const &soundFilePath, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance)) &SoundSet::AddSound)
-            .def("AddSubSoundSet", &SoundSet::AddSubSoundSet),
+            .def("AddSoundSet", &SoundSet::AddSoundSet),
 
         ABSTRACTLUABINDING(SceneObject, Entity)
             .property("Pos", &SceneObject::GetPos, &SceneObject::SetPos)

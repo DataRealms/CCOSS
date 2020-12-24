@@ -61,9 +61,9 @@ namespace RTE {
 		if (propName == "AddSound") {
 			m_TopLevelSoundSet.AddSoundData(SoundSet::ReadAndGetSoundData(reader));
 		} else if (propName == "AddSoundSet") {
-			SoundSet subSoundSet;
-			reader >> subSoundSet;
-			m_TopLevelSoundSet.AddSubSoundSet(subSoundSet);
+			SoundSet soundSetToAdd;
+			reader >> soundSetToAdd;
+			m_TopLevelSoundSet.AddSoundSet(soundSetToAdd);
 		} else if (propName == "SoundSelectionCycleMode" || propName == "CycleMode") {
 			m_TopLevelSoundSet.SetSoundSelectionCycleMode(SoundSet::ReadSoundSelectionCycleMode(reader));
 		} else if (propName == "OverlapMode") {

@@ -1208,19 +1208,42 @@ void BuyMenuGUI::Update()
 
         // Get handle to the currently selected item, if any
         GUIListPanel::Item *pItem = m_pShopList->GetItem(m_ListItemIndex);
+        
+        // Consider replacing with "hovertext"
+        string description = "";
+
+        if (pItem && pItem->m_pEntity) {
+            description = pItem->m_pEntity->GetDescription();
+            const Entity* currentItem = pItem->m_pEntity;
+            if (dynamic_cast<const ACraft*>(currentItem)) {
+                int craftMaxPassengers = dynamic_cast<const ACraft*>(currentItem)->GetMaxPassengers();
+                int craftMaxMass = (int)dynamic_cast<const ACraft*>(currentItem)->GetMaxMass() - (int)dynamic_cast<const ACraft*>(currentItem)->GetMass();
+                description += "\nMax Mass: " + std::to_string(craftMaxMass) + "\nMax Passengers: " + std::to_string(craftMaxPassengers);
+
+            }
+            else if (dynamic_cast<const Actor*>(currentItem)) {
+                int itemMass = (int)dynamic_cast<const Actor*>(currentItem)->GetMass();
+                int passengerSlotsTaken = dynamic_cast<const Actor*>(currentItem)->GetPassengerSlots();
+                description += "\nMass: " + std::to_string(itemMass);
+                if (passengerSlotsTaken > 1) {
+                    description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
+                }
+            }
+            else if (dynamic_cast<const MovableObject*>(currentItem)) {
+                int itemMass = (int)dynamic_cast<const MovableObject*>(currentItem)->GetMass();
+                description += "\nMass: " + std::to_string(itemMass);
+            }
+
+        }else if (pItem && pItem->m_ExtraIndex >= 0) {
+            const DataModule* pModule = g_PresetMan.GetDataModule(pItem->m_ExtraIndex);
+            if (pModule && !pModule->GetDescription().empty()) {
+                description = pModule->GetDescription();
+            }
+        }
+
 
         // Show popup info box next to selected item, but only if it has a description
-        string description = "";
-        // Get it from the regular Entitiy preset
-        if (pItem && pItem->m_pEntity && !pItem->m_pEntity->GetDescription().empty())
-            description = pItem->m_pEntity->GetDescription();
-        // Show popup info box next to selected module item, but only if it has a description
-        else if (pItem && pItem->m_ExtraIndex >= 0)
-        {
-            const DataModule *pModule = g_PresetMan.GetDataModule(pItem->m_ExtraIndex);
-            if (pModule && !pModule->GetDescription().empty())
-                description = pModule->GetDescription();
-        }
+        
 
         // Now show the description, if we have any
         if (!description.empty())
@@ -1352,11 +1375,34 @@ void BuyMenuGUI::Update()
             }
         }
 
+
         // Get handle to the currently selected item, if any
-        GUIListPanel::Item *pItem = m_pCartList->GetItem(m_ListItemIndex);
+        GUIListPanel::Item* pItem = m_pCartList->GetItem(m_ListItemIndex);
+
+        // Consider replacing with "hovertext"
+        string description = "";
+
+        if (pItem && pItem->m_pEntity) {
+            description = pItem->m_pEntity->GetDescription();
+            const Entity* currentItem = pItem->m_pEntity;
+
+            if (dynamic_cast<const Actor*>(currentItem)) {
+                int itemMass = ceil(dynamic_cast<const Actor*>(currentItem)->GetMass());
+                int passengerSlotsTaken = dynamic_cast<const Actor*>(currentItem)->GetPassengerSlots();
+                description += "\nMass: " + std::to_string(itemMass);
+                if (passengerSlotsTaken > 1) {
+                    description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
+                }
+            }
+            else if (dynamic_cast<const MovableObject*>(currentItem)) {
+                int itemMass = ceil(dynamic_cast<const MovableObject*>(currentItem)->GetMass());
+                description += "\nMass: " + std::to_string(itemMass);
+            }
+
+        }
 
         // Show popup info box next to selected item, but only if it has a description
-        if (pItem && pItem->m_pEntity && !pItem->m_pEntity->GetDescription().empty())
+        if (!description.empty())
         {
             // Show the popup box with the hovered item's description
             m_pPopupBox->SetVisible(true);
@@ -1366,7 +1412,7 @@ void BuyMenuGUI::Update()
             if (m_pPopupBox->GetYPos() + m_pPopupBox->GetHeight() > m_pParentBox->GetHeight())
                 m_pPopupBox->SetPositionAbs(m_pPopupBox->GetXPos(), m_pParentBox->GetHeight() - m_pPopupBox->GetHeight());
             m_pPopupText->SetHAlignment(GUIFont::Right);
-            m_pPopupText->SetText(pItem->m_pEntity->GetDescription());
+            m_pPopupText->SetText(description);
             // Resize the box height to fit the text
             int newHeight = m_pPopupText->ResizeHeightToFit();
             m_pPopupBox->Resize(m_pPopupBox->GetWidth(), newHeight + 10);

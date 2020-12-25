@@ -95,7 +95,7 @@ namespace RTE {
 
 		/// <summary>
 		/// Sets the DataPath combined with the file and line it's being created from. This is used in cases we can't get the file and line from Serializable::Create(&reader).
-		/// For example when creating a ContentFile for the sound during the readSound lambda in SoundContainer::ReadSound.
+		/// For example when creating a ContentFile for the sound during the readSound lambda in SoundContainer::ReadAndGetSound.
 		/// </summary>
 		/// <param name="newPosition">The file and line that are currently being read.</param>
 		void SetFormattedReaderPosition(const std::string &newPosition);
@@ -139,8 +139,7 @@ namespace RTE {
 		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error. Default true.</param>
 		/// <param name="asyncLoading">Whether to enable FMOD asynchronous loading or not. Should be disabled for loading audio files with Lua AddSound.
 		/// <returns>Pointer to the FSOUND_SAMPLE loaded from disk.</returns>
-		FMOD::Sound * GetAsSample(bool abortGameForInvalidSound = true, bool asyncLoading = true);
-
+		FMOD::Sound * GetAsSound(bool abortGameForInvalidSound = true, bool asyncLoading = true);
 #pragma endregion
 
 #pragma region Class Info
@@ -191,7 +190,7 @@ namespace RTE {
 		/// <param name="abortGameForInvalidSound">Whether to abort the game if the sound couldn't be added, or just show a console error. Default true.</param>
 		/// <param name="asyncLoading">Whether to enable FMOD asynchronous loading or not. Should be disabled for loading audio files with Lua AddSound.
 		/// <returns>Pointer to the FSOUND_SAMPLE loaded from disk.</returns>
-		FMOD::Sound * LoadAndReleaseSample(bool abortGameForInvalidSound = true, bool asyncLoading = true);
+		FMOD::Sound * LoadAndReleaseSound(bool abortGameForInvalidSound = true, bool asyncLoading = true);
 #pragma endregion
 
 		/// <summary>

@@ -450,6 +450,9 @@
     <ClInclude Include="Entities\SoundContainer.h">
       <Filter>Entities</Filter>
     </ClInclude>
+	<ClInclude Include="Entities\SoundSet.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
     <ClInclude Include="System\Primitive.h">
       <Filter>System</Filter>
     </ClInclude>
@@ -889,6 +892,9 @@
       <Filter>Managers</Filter>
     </ClCompile>
     <ClCompile Include="Entities\SoundContainer.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+	<ClCompile Include="Entities\SoundSet.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="System\Primitive.cpp">

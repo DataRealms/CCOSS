@@ -47,11 +47,10 @@
 #include "BunkerAssemblyScheme.h"
 
 extern bool g_ResetActivity;
-extern bool g_InActivity;
 
 namespace RTE {
 
-CONCRETECLASSINFO(AssemblyEditor, EditorActivity, 0)
+ConcreteClassInfo(AssemblyEditor, EditorActivity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -118,7 +117,6 @@ int AssemblyEditor::ReadProperty(std::string propName, Reader &reader)
         reader >> m_DeliveryDelay;
     else
 */
-        // See if the base class(es) can find a match instead
         return EditorActivity::ReadProperty(propName, reader);
 
     return 0;
@@ -246,7 +244,7 @@ int AssemblyEditor::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void AssemblyEditor::Pause(bool pause)
+void AssemblyEditor::SetPaused(bool pause)
 {
     // Override the pause
     m_Paused = false;
@@ -264,7 +262,7 @@ void AssemblyEditor::End()
 
     
 
-    m_ActivityState = OVER;
+    m_ActivityState = ActivityState::Over;
 }
 
 
@@ -482,7 +480,6 @@ void AssemblyEditor::Update()
                 if (g_SceneMan.GetScene()->GetPresetName() == "Editor Scene")
                 {
                     g_ActivityMan.PauseActivity();
-                    g_InActivity = false;
                 }
                 // Just do normal cancel of the dialog and go back to editing
                 else

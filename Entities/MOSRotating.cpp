@@ -12,8 +12,8 @@
 // Inclusions of header files
 
 #include "MOSRotating.h"
+#include "SettingsMan.h"
 #include "AtomGroup.h"
-#include "RTEManagers.h"
 #include "SLTerrain.h"
 #include "MOPixel.h"
 #include "MOSParticle.h"
@@ -24,9 +24,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(MOSRotating, MOSprite, 100)
-
-const string MOSRotating::Gib::m_sClassName = "Gib";
+ConcreteClassInfo(MOSRotating, MOSprite, 500)
 
 BITMAP * MOSRotating::m_spTempBitmap16 = 0;
 BITMAP * MOSRotating::m_spTempBitmap32 = 0;
@@ -41,135 +39,6 @@ BITMAP * MOSRotating::m_spTempBitmapS64 = 0;
 BITMAP * MOSRotating::m_spTempBitmapS128 = 0;
 BITMAP * MOSRotating::m_spTempBitmapS256 = 0;
 BITMAP * MOSRotating::m_spTempBitmapS512 = 0;
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this Gib, effectively
-//                  resetting the members of this abstraction level only.
-
-void MOSRotating::Gib::Clear()
-{
-    m_pGibParticle = 0;
-    m_Offset.Reset();
-    m_Count = 1;
-    m_Spread = c_PI;
-    m_MinVelocity = 0;
-    m_MaxVelocity = 0;
-    m_LifeVariation = 0.1;
-    m_InheritsVel = true;
-}
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the Gib object ready for use.
-
-int MOSRotating::Gib::Create()
-{
-    if (Serializable::Create() < 0)
-        return -1;
-
-    return 0;
-}
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a Gib to be identical to another, by deep copy.
-
-int MOSRotating::Gib::Create(const Gib &reference)
-{
-    m_pGibParticle = reference.m_pGibParticle;
-    m_Offset = reference.m_Offset;
-    m_Count = reference.m_Count;
-    m_Spread = reference.m_Spread;
-    m_MinVelocity = reference.m_MinVelocity;
-    m_MaxVelocity = reference.m_MaxVelocity;
-    m_LifeVariation = reference.m_LifeVariation;
-    m_InheritsVel = reference.m_InheritsVel;
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the reader's position is untouched.
-
-int MOSRotating::Gib::ReadProperty(std::string propName, Reader &reader)
-{
-    if (propName == "GibParticle")
-    {
-        m_pGibParticle = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
-        RTEAssert(m_pGibParticle, "Stream suggests allocating an unallocatable type in Gib::Create!");
-    }
-    else if (propName == "Offset")
-        reader >> m_Offset;
-    else if (propName == "Count")
-        reader >> m_Count;
-    else if (propName == "Spread")
-        reader >> m_Spread;
-    else if (propName == "MinVelocity")
-        reader >> m_MinVelocity;
-    else if (propName == "MaxVelocity")
-        reader >> m_MaxVelocity;
-    else if (propName == "LifeVariation")
-        reader >> m_LifeVariation;
-    else if (propName == "InheritsVel")
-        reader >> m_InheritsVel;
-    else
-        // See if the base class(es) can find a match instead
-        return Serializable::ReadProperty(propName, reader);
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this Gib with a Writer for
-//                  later recreation with Create(Reader &reader);
-
-int MOSRotating::Gib::Save(Writer &writer) const
-{
-    Serializable::Save(writer);
-
-    writer.NewProperty("GibParticle");
-
-	// All of this is needed to make a preset look like not original and save as CopyOf instead of separate preset.
-	Entity * e = m_pGibParticle->Clone();
-	e->ResetOriginalPresetFlag();
-	writer << e;
-	delete e;
-	e = 0;
-
-    writer.NewProperty("Offset");
-    writer << m_Offset;
-/* Make propert gib
-    writer.NewProperty("Count");
-    writer << m_Count;
-    writer.NewProperty("Spread");
-    writer << m_Spread;
-    writer.NewProperty("MinVelocity");
-    writer << m_MinVelocity;
-    writer.NewProperty("MaxVelocity");
-    writer << m_MaxVelocity;
-    writer.NewProperty("LifeVariation");
-    writer << m_LifeVariation;
-    writer.NewProperty("InheritsVel");
-    writer << m_InheritsVel;
-*/
-
-    return 0;
-}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -388,7 +257,7 @@ int MOSRotating::Create(const MOSRotating &reference)
     }
 
 	// Gib copies
-    for (list<MOSRotating::Gib>::const_iterator gItr = reference.m_Gibs.begin(); gItr != reference.m_Gibs.end(); ++gItr)
+    for (list<Gib>::const_iterator gItr = reference.m_Gibs.begin(); gItr != reference.m_Gibs.end(); ++gItr)
     {
         m_Gibs.push_back(*gItr);
     }
@@ -481,7 +350,6 @@ int MOSRotating::ReadProperty(std::string propName, Reader &reader)
     } else if (propName == "AddCustomValue") {
         ReadCustomValueProperty(reader);
     } else
-        // See if the base class(es) can find a match instead
         return MOSprite::ReadProperty(propName, reader);
 
     return 0;
@@ -744,39 +612,39 @@ void MOSRotating::AddRecoil()
 
 bool MOSRotating::CollideAtPoint(HitData &hd)
 {
-    hd.resImpulse[HITOR].Reset();
-    hd.resImpulse[HITEE].Reset();
+    hd.ResImpulse[HITOR].Reset();
+    hd.ResImpulse[HITEE].Reset();
 
-//    if (m_AlreadyHitBy.find(hd.pBody[HITOR]->GetID()) == m_AlreadyHitBy.end())
+//    if (m_AlreadyHitBy.find(hd.Body[HITOR]->GetID()) == m_AlreadyHitBy.end())
 //    {
-//        m_AlreadyHitBy.insert(hd.pBody[HITOR]->GetID());
+//        m_AlreadyHitBy.insert(hd.Body[HITOR]->GetID());
 
-    hd.hitRadius[HITEE] = (hd.hitPoint - m_Pos) * g_FrameMan.GetMPP();
+    hd.HitRadius[HITEE] = (hd.HitPoint - m_Pos) * c_MPP;
 /*
     // Cancel if both hitor and hitee's hitpoint radii are pointing int he same direction, meaning the objects are really tangled
-    if (!hd.hitRadius[HITOR].IsZero() && hd.hitRadius[HITOR].Dot(hd.hitRadius[HITEE]) >= 0)
+    if (!hd.HitRadius[HITOR].IsZero() && hd.HitRadius[HITOR].Dot(hd.HitRadius[HITEE]) >= 0)
         return false;
 */
-    hd.mass[HITEE] = m_Mass;
-    hd.momInertia[HITEE] = m_pAtomGroup->GetMomentOfInertia();
-    hd.hitVel[HITEE] = m_Vel + hd.hitRadius[HITEE].GetPerpendicular() * m_AngularVel;
-    hd.velDiff = hd.hitVel[HITOR] - hd.hitVel[HITEE];
+    hd.TotalMass[HITEE] = m_Mass;
+    hd.MomInertia[HITEE] = m_pAtomGroup->GetMomentOfInertia();
+    hd.HitVel[HITEE] = m_Vel + hd.HitRadius[HITEE].GetPerpendicular() * m_AngularVel;
+    hd.VelDiff = hd.HitVel[HITOR] - hd.HitVel[HITEE];
 
     // Only do collision response for this if it appears the collision is happening in the 'right' direction, meaning away from the hitee collision normal
     // The wrong way happens when things are sunk into each other, and thus getting 'hooked' on each other
-    if (hd.velDiff.Dot(hd.bitmapNormal) < 0)
+    if (hd.VelDiff.Dot(hd.BitmapNormal) < 0)
     {
-        Vector hitAcc = -hd.velDiff * (1 + (hd.pBody[HITOR]->GetMaterial()->restitution * GetMaterial()->restitution));
+        Vector hitAcc = -hd.VelDiff * (1 + (hd.Body[HITOR]->GetMaterial()->GetRestitution() * GetMaterial()->GetRestitution()));
 
-        float hittorLever = hd.hitRadius[HITOR].GetPerpendicular().Dot(hd.bitmapNormal);
-        float hitteeLever = hd.hitRadius[HITEE].GetPerpendicular().Dot(hd.bitmapNormal);
+        float hittorLever = hd.HitRadius[HITOR].GetPerpendicular().Dot(hd.BitmapNormal);
+        float hitteeLever = hd.HitRadius[HITEE].GetPerpendicular().Dot(hd.BitmapNormal);
         hittorLever *= hittorLever;
         hitteeLever *= hitteeLever;
-        float impulse = hitAcc.Dot(hd.bitmapNormal) / (((1 / hd.mass[HITOR]) + (1 / hd.mass[HITEE])) +
-                        (hittorLever / hd.momInertia[HITOR]) + (hitteeLever / hd.momInertia[HITEE]));
+        float impulse = hitAcc.Dot(hd.BitmapNormal) / (((1 / hd.TotalMass[HITOR]) + (1 / hd.TotalMass[HITEE])) +
+                        (hittorLever / hd.MomInertia[HITOR]) + (hitteeLever / hd.MomInertia[HITEE]));
     // TODO: Should the impfactor not be swapped? -EE vs -OR?")
-        hd.resImpulse[HITOR] = hd.bitmapNormal * impulse * hd.impFactor[HITOR];
-        hd.resImpulse[HITEE] = hd.bitmapNormal * -impulse * hd.impFactor[HITEE];
+        hd.ResImpulse[HITOR] = hd.BitmapNormal * impulse * hd.ImpulseFactor[HITOR];
+        hd.ResImpulse[HITEE] = hd.BitmapNormal * -impulse * hd.ImpulseFactor[HITEE];
 
         // If a particle, which does not penetrate, but bounces, do any additional
         // effects of that bounce.
@@ -787,24 +655,24 @@ bool MOSRotating::CollideAtPoint(HitData &hd)
         }
 
         // If the hittee is pinned, see if the collision's impulse is enough to dislodge it.
-        float hiteePin = hd.pBody[HITEE]->GetPinStrength();
+        float hiteePin = hd.Body[HITEE]->GetPinStrength();
         // See if it's pinned, and compare it to the impulse force from the collision
-        if (m_PinStrength > 0 && hd.resImpulse[HITEE].GetMagnitude() > m_PinStrength)
+        if (m_PinStrength > 0 && hd.ResImpulse[HITEE].GetMagnitude() > m_PinStrength)
         {
             // Unpin and set the threshold to 0
-            hd.pBody[HITEE]->SetPinStrength(0);
+            hd.Body[HITEE]->SetPinStrength(0);
         }
         // If not knocked loose, then move the impulse of the hitee to the hitor
         else if (hiteePin)
         {
 // No good, causes crazy bounces
-//            hd.resImpulse[HITOR] -= hd.resImpulse[HITEE];
-            hd.resImpulse[HITEE].Reset();
+//            hd.ResImpulse[HITOR] -= hd.ResImpulse[HITEE];
+            hd.ResImpulse[HITEE].Reset();
         }
 
-        AddImpulseForce(hd.resImpulse[HITEE], hd.hitRadius[HITEE]);
-//        m_Vel += hd.resImpulse[HITEE] / hd.mass[HITEE];
-//        m_AngularVel += hd.hitRadius[HITEE].GetPerpendicular().Dot(hd.resImpulse[HITEE]) / hd.momInertia[HITEE];
+        AddImpulseForce(hd.ResImpulse[HITEE], hd.HitRadius[HITEE]);
+//        m_Vel += hd.ResImpulse[HITEE] / hd.mass[HITEE];
+//        m_AngularVel += hd.HitRadius[HITEE].GetPerpendicular().Dot(hd.ResImpulse[HITEE]) / hd.MomInertia[HITEE];
     }
     else
         return false;
@@ -839,7 +707,7 @@ bool MOSRotating::OnSink(HitData &hd)
 /*
     Vector oldPos(m_Pos);
     m_Pos = pos;
-    Draw(g_SceneMan.GetTerrainColorBitmap(), Vector(), g_DrawKey);
+    Draw(g_SceneMan.GetTerrainColorBitmap(), Vector(), g_DrawMask);
     Draw(g_SceneMan.GetTerrainMaterialBitmap(), Vector(), g_DrawAir);
     m_Pos = oldPos;
 */
@@ -858,16 +726,16 @@ bool MOSRotating::OnSink(HitData &hd)
 bool MOSRotating::ParticlePenetration(HitData &hd)
 {
     // Only particles can penetrate.
-    if (!(dynamic_cast<MOPixel *>(hd.pBody[HITOR]) || dynamic_cast<MOSParticle *>(hd.pBody[HITOR])))
+    if (!(dynamic_cast<MOPixel *>(hd.Body[HITOR]) || dynamic_cast<MOSParticle *>(hd.Body[HITOR])))
         return false;
 
-    float impulseForce = hd.resImpulse[HITEE].GetMagnitude();
+    float impulseForce = hd.ResImpulse[HITEE].GetMagnitude();
     Material const * myMat = GetMaterial();
-    float myStrength = myMat->strength / hd.pBody[HITOR]->GetSharpness();
+    float myStrength = myMat->GetIntegrity() / hd.Body[HITOR]->GetSharpness();
 
 
     // See if there is enough energy in the collision for the particle to penetrate
-    if (impulseForce * hd.pBody[HITOR]->GetSharpness() > myMat->strength)
+    if (impulseForce * hd.Body[HITOR]->GetSharpness() > myMat->GetIntegrity())
     {
         // Ok penetration happened, now figure out if and where the exit point
         // would be by tracing a rasterized line through the sprite.
@@ -884,19 +752,19 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
         bounds[Y] = m_aSprite[m_Frame]->h;
 
         // Figure out the entry position in the un-rotated sprite's coordinates.
-        Vector entryPos = (g_SceneMan.ShortestDistance(m_Pos, hd.hitPoint) / m_Rotation).GetXFlipped(m_HFlipped) - m_SpriteOffset;
-        intPos[X] = floorf(entryPos.m_X);
-        intPos[Y] = floorf(entryPos.m_Y);
+        Vector entryPos = (g_SceneMan.ShortestDistance(m_Pos, hd.HitPoint) / m_Rotation).GetXFlipped(m_HFlipped) - m_SpriteOffset;
+        intPos[X] = std::floor(entryPos.m_X);
+        intPos[Y] = std::floor(entryPos.m_Y);
 
         // Get the un-rotated direction and max possible
         // travel length of the particle.
         Vector dir(max(bounds[X], bounds[Y]), 0);
-        dir.AbsRotateTo(hd.hitVel[HITOR] / m_Rotation);
+        dir.AbsRotateTo(hd.HitVel[HITOR] / m_Rotation);
         dir = dir.GetXFlipped(m_HFlipped);
 
         // Bresenham's line drawing algorithm preparation
-        delta[X] = floorf(entryPos.m_X + dir.m_X) - intPos[X];
-        delta[Y] = floorf(entryPos.m_Y + dir.m_Y) - intPos[Y];
+        delta[X] = std::floor(entryPos.m_X + dir.m_X) - intPos[X];
+        delta[Y] = std::floor(entryPos.m_Y + dir.m_Y) - intPos[Y];
         domSteps = 0;
         subSteps = 0;
 
@@ -982,7 +850,7 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
             // Add entry wound AEmitter to actor where the particle penetrated.
             AEmitter *pEntryWound = dynamic_cast<AEmitter *>(m_pEntryWound->Clone());
             pEntryWound->SetEmitAngle(dir.GetXFlipped(m_HFlipped).GetAbsRadAngle() + c_PI);
-			pEntryWound->SetDamageMultiplier(hd.pBody[HITOR]->WoundDamageMultiplier());
+			pEntryWound->SetDamageMultiplier(hd.Body[HITOR]->WoundDamageMultiplier());
             // Adjust position so that it looks like the hole is actually *on* the Hitee.
             entryPos[dom] += increment[dom] * (pEntryWound->GetSpriteFrame()->w / 2);
 			AddWound(pEntryWound, entryPos + m_SpriteOffset);
@@ -1001,30 +869,30 @@ bool MOSRotating::ParticlePenetration(HitData &hd)
                 // Adjust position so that it looks like the hole is actually *on* the Hitee.
                 exitPos[dom] -= increment[dom] * (pExitWound->GetSpriteFrame()->w / 2);
                 pExitWound->SetEmitAngle(dir.GetXFlipped(m_HFlipped).GetAbsRadAngle());
-				pExitWound->SetDamageMultiplier(hd.pBody[HITOR]->WoundDamageMultiplier());
+				pExitWound->SetDamageMultiplier(hd.Body[HITOR]->WoundDamageMultiplier());
 				AddWound(pExitWound, exitPos + m_SpriteOffset);
                 pExitWound = 0;
             }
 
             // Set the exiting particle's position to where the exit wound is,
             // in world coordinates.
-            hd.pBody[HITOR]->SetPos(((exitPos + m_SpriteOffset) / m_Rotation) + m_Pos);
+            hd.Body[HITOR]->SetPos(((exitPos + m_SpriteOffset) / m_Rotation) + m_Pos);
 
             // Finally apply the forces imposed on both this MOSRotating
             // and the hitting particle due to the penetrating and exiting hit.
             // These don't need to be manipulated if there was no exit, since this
             // absorbed all the energy, and the hittee gets deleted from the scene.
-            hd.resImpulse[HITEE] -= hd.resImpulse[HITEE] * (impulseForce / hd.resImpulse[HITEE].GetMagnitude());
-            hd.resImpulse[HITOR] = -(hd.resImpulse[HITEE]);
+            hd.ResImpulse[HITEE] -= hd.ResImpulse[HITEE] * (impulseForce / hd.ResImpulse[HITEE].GetMagnitude());
+            hd.ResImpulse[HITOR] = -(hd.ResImpulse[HITEE]);
         }
         // Particle got lodged inside this MOSRotating, so stop it and delete it from scene.
         else
         {
             // Set the exiting particle's position to where it looks lodged
-//            hd.pBody[HITOR]->SetPos(m_Pos - m_SpriteOffset + entryPos);
-//            hd.pBody[HITOR]->SetVel(Vector());
-            hd.pBody[HITOR]->SetToDelete(true);
-            hd.terminate[HITOR] = true;
+//            hd.Body[HITOR]->SetPos(m_Pos - m_SpriteOffset + entryPos);
+//            hd.Body[HITOR]->SetVel(Vector());
+            hd.Body[HITOR]->SetToDelete(true);
+            hd.Terminate[HITOR] = true;
         }
 
         // Report that penetration occured.
@@ -1052,7 +920,7 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
     MovableObject *pGib = 0;
     float velMin, velRange, spread, angularVel;
     Vector gibROffset, gibVel;
-    for (list<MOSRotating::Gib>::iterator gItr = m_Gibs.begin(); gItr != m_Gibs.end(); ++gItr)
+    for (list<Gib>::iterator gItr = m_Gibs.begin(); gItr != m_Gibs.end(); ++gItr)
     {
 		// Throwing out gibs
         for (int i = 0; i < (*gItr).GetCount(); ++i)
@@ -1080,12 +948,12 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
             gibROffset = RotateOffset((*gItr).GetOffset());
             // Put variation on the lifetime, if it's not set to be endless
             if (pGib->GetLifetime() != 0)
-                pGib->SetLifetime(pGib->GetLifetime() * (1.0 + ((*gItr).GetLifeVariation() * NormalRand())));
+                pGib->SetLifetime(pGib->GetLifetime() * (1.0F + ((*gItr).GetLifeVariation() * RandomNormalNum())));
             // Set up its position and velocity according to the parameters of this AEmitter.
             pGib->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
             pGib->SetRotAngle(m_Rotation.GetRadAngle() + pGib->GetRotMatrix().GetRadAngle());
             // Rotational angle
-            pGib->SetAngularVel((pGib->GetAngularVel() * 0.35) + (pGib->GetAngularVel() * 0.65 / pGib->GetMass()) * PosRand());
+            pGib->SetAngularVel((pGib->GetAngularVel() * 0.35F) + (pGib->GetAngularVel() * 0.65F / pGib->GetMass()) * RandomNum());
             // Make it rotate away in the appropriate direction depending on which side of the object it is on
             // If the object is far to the relft or right of the center, make it always rotate outwards to some degree
             if (gibROffset.m_X > m_aSprite[0]->w / 3)
@@ -1098,18 +966,18 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
             // Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
             else
             {
-                pGib->SetAngularVel((pGib->GetAngularVel() * 0.5 + pGib->GetAngularVel() * PosRand()) * (NormalRand() > 0 ? 1 : -1));
+                pGib->SetAngularVel((pGib->GetAngularVel() * 0.5F + pGib->GetAngularVel() * RandomNum()) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
             }
 
 // TODO: Optimize making the random angles!")
             {
 				// Pretty much always zero
                 gibVel = gibROffset;
-                if (gibVel.IsZero())
-                    gibVel.SetXY(velMin + velRange * PosRand(), 0);
-                else
-                    gibVel.SetMagnitude(velMin + velRange * PosRand());
-                gibVel.RadRotate(impactImpulse.GetAbsRadAngle() + spread * NormalRand());
+				if (gibVel.IsZero())
+					gibVel.SetXY(velMin + RandomNum(0.0F, velRange), 0);
+				else
+					gibVel.SetMagnitude(velMin + RandomNum(0.0F, velRange));
+				gibVel.RadRotate(impactImpulse.GetAbsRadAngle() + spread * RandomNormalNum());
 // Don't! the offset was already rotated!
 //                gibVel = RotateOffset(gibVel);
                 // Distribute any impact implse out over all the gibs
@@ -1117,7 +985,7 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
             }
 
             // Only add the velocity of the parent if it's suppposed to
-            if ((*gItr).InheritsVel())
+            if ((*gItr).InheritsVelocity())
                 pGib->SetVel(m_Vel + gibVel);
             else
                 pGib->SetVel(gibVel);
@@ -1149,7 +1017,7 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
         velRange = 10.0f;
 
         // Rotational angle velocity
-        pAttachable->SetAngularVel((pAttachable->GetAngularVel() * 0.35) + (pAttachable->GetAngularVel() * 0.65 / pAttachable->GetMass()) * PosRand());
+        pAttachable->SetAngularVel((pAttachable->GetAngularVel() * 0.35F) + (pAttachable->GetAngularVel() * 0.65F / pAttachable->GetMass()) * RandomNum());
         // Make it rotate away in the appropriate direction depending on which side of the object it is on
         // If the object is far to the relft or right of the center, make it always rotate outwards to some degree
         if (pAttachable->GetParentOffset().m_X > m_aSprite[0]->w / 3)
@@ -1162,15 +1030,15 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
         // Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
         else
         {
-            pAttachable->SetAngularVel((pAttachable->GetAngularVel() * 0.5 + pAttachable->GetAngularVel() * PosRand()) * (NormalRand() > 0 ? 1 : -1));
+            pAttachable->SetAngularVel((pAttachable->GetAngularVel() * 0.5F + pAttachable->GetAngularVel() * RandomNum()) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
         }
 
 // TODO: Optimize making the random angles!")
         gibVel = pAttachable->GetParentOffset();
         if (gibVel.IsZero())
-            gibVel.SetXY(velMin + velRange * PosRand(), 0);
+            gibVel.SetXY(velMin + RandomNum(0.0F, velRange), 0);
         else
-            gibVel.SetMagnitude(velMin + velRange * PosRand());
+            gibVel.SetMagnitude(velMin + RandomNum(0.0F, velRange));
         gibVel.RadRotate(impactImpulse.GetAbsRadAngle());
         pAttachable->SetVel(m_Vel + gibVel);
 
@@ -1216,7 +1084,7 @@ void MOSRotating::GibThis(Vector impactImpulse, float internalBlast, MovableObje
 
 bool MOSRotating::MoveOutOfTerrain(unsigned char strongerThan)
 {
-    return m_pAtomGroup->ResolveTerrainIntersection(m_Pos, m_Rotation, strongerThan);
+    return m_pAtomGroup->ResolveTerrainIntersection(m_Pos, strongerThan);
 }
 
 
@@ -1462,7 +1330,7 @@ bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
         // Just make the outline of this disappear from the terrain
         {
 // TODO: These don't work at all because they're drawing shapes of color 0 to an intermediate field of 0!
-            Draw(g_SceneMan.GetTerrain()->GetFGColorBitmap(), Vector(), g_DrawKey, true);
+            Draw(g_SceneMan.GetTerrain()->GetFGColorBitmap(), Vector(), g_DrawMask, true);
             Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), Vector(), g_DrawAir, true);
         }
 */
@@ -1501,8 +1369,8 @@ bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
                 {
                     tally -= 1.0;
                     (*itr)->SetPos((*itr)->GetPos() - m_Vel.GetNormalized() * depth);
-                    (*itr)->SetVel(Vector(velMag * splashDir * PosRand(), -velMag * PosRand()));
-                    m_DeepHardness += (*itr)->GetMaterial()->strength * (*itr)->GetMaterial()->pixelDensity;
+					(*itr)->SetVel(Vector(velMag * RandomNum(0.0F, splashDir), -RandomNum(0.0F, velMag)));
+                    m_DeepHardness += (*itr)->GetMaterial()->GetIntegrity() * (*itr)->GetMaterial()->GetPixelDensity();
                     g_MovableMan.AddParticle(*itr);
                     *itr = 0;
                 }
@@ -1629,7 +1497,7 @@ void MOSRotating::PostTravel()
 void MOSRotating::Update()
 {
 
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+#ifndef RELEASE_BUILD
 	RTEAssert(m_MOID == g_NoMOID || (m_MOID >= 0 && m_MOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
 #endif
 
@@ -1843,19 +1711,15 @@ bool MOSRotating::RemoveAttachable(long attachableUniqueId)
 /// </summary>
 /// <param name="pAttachable">The attachable to remove</param>
 /// <returns>False if the attachable is invalid, otherwise true</returns>
-bool MOSRotating::RemoveAttachable(Attachable *pAttachable)
-{
-	if (pAttachable)
-	{
-		if (m_Attachables.size() > 0)
-		{
+bool MOSRotating::RemoveAttachable(Attachable *pAttachable) {
+	if (pAttachable) {
+		if (m_Attachables.size() > 0) {
 			m_Attachables.remove(pAttachable);
 		}
-		if (m_AllAttachables.size() > 0)
-		{
+		if (m_AllAttachables.size() > 0) {
 			m_AllAttachables.remove(pAttachable);
 		}
-		pAttachable->Detach();
+		pAttachable->ToDeleteWithParent() ? pAttachable->SetToDelete() : pAttachable->Detach();
 		return true;
 	}
 	return false;
@@ -1941,10 +1805,10 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 // TODO: Fix that MaterialAir and KeyColor don't work at all because they're drawing 0 to a field of 0's
         // Draw the requested material sihouette on the material bitmap
         if (mode == g_DrawMaterial)
-            draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, m_SettleMaterialDisabled ? GetMaterial()->id : GetMaterial()->GetSettleMaterialID(), -1);
+            draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial(), -1);
         else if (mode == g_DrawAir)
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_MaterialAir, -1);
-        else if (mode == g_DrawKey)
+        else if (mode == g_DrawMask)
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, keyColor, -1);
         else if (mode == g_DrawWhite)
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_WhiteColor, -1);

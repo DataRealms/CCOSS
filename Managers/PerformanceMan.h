@@ -42,14 +42,14 @@ namespace RTE {
 		/// Makes the PerformanceMan object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create();
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up a PerformanceMan object before deletion from system memory.
 		/// </summary>
-		virtual ~PerformanceMan() { Destroy(); }
+		~PerformanceMan() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the PerformanceMan object.
@@ -142,7 +142,7 @@ namespace RTE {
 		/// Gets the class name of this Entity.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const { return c_ClassName; }
 #pragma endregion
 
 	protected:
@@ -167,7 +167,7 @@ namespace RTE {
 		unsigned short m_Sample; //!< Sample counter.
 
 		std::deque<unsigned int> m_MSPFs; //!< History log of readings, for averaging the results.
-		unsigned short m_MSPFAverage; //!< The average of the MSPF reading buffer above, calculated each frame.
+		size_t m_MSPFAverage; //!< The average of the MSPF reading buffer above, calculated each frame.
 		unsigned short m_CurrentPing; //!< Current ping value to display on screen.
 
 		std::string m_PerfCounterNames[PERF_COUNT]; //!< Performance counter names displayed on screen.
@@ -196,7 +196,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="counter">Counter to get average value from.</param>
 		/// <returns>An average value for specified counter.</returns>
-		unsigned long long GetPerformanceCounterAverage(PerformanceCounters counter);
+		unsigned long long GetPerformanceCounterAverage(PerformanceCounters counter) const;
 #pragma endregion
 
 		/// <summary>
@@ -210,8 +210,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		PerformanceMan(const PerformanceMan &reference) {}
-		PerformanceMan & operator=(const PerformanceMan &rhs) {}
+		PerformanceMan(const PerformanceMan &reference) = delete;
+		PerformanceMan & operator=(const PerformanceMan &rhs) = delete;
 	};
 }
 #endif

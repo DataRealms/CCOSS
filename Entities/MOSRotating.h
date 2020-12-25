@@ -15,7 +15,9 @@
 // Inclusions of header files
 
 #include "MOSprite.h"
+#include "Gib.h"
 #include "PostProcessMan.h"
+#include "SoundContainer.h"
 
 namespace RTE
 {
@@ -24,7 +26,6 @@ class AtomGroup;
 struct HitData;
 class AEmitter;
 class Attachable;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Class:           MOSRotating
@@ -48,237 +49,11 @@ friend class AtomGroup;
 friend class SLTerrain;
 friend class LuaMan;
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Nested class:    Gib
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Something to bundle the properties of Gib piece together.
-    // Parent(s):       Serializable.
-    // Class history:   10/24/2006 Gib created.
-
-    class Gib:
-        public Serializable
-    {
-
-    friend class GibEditor;
-    friend class TDExplosive;
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Public member variable, method and friend function declarations
-
-    public:
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Constructor:     Gib
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Constructor method used to instantiate a Gib object in system
-    //                  memory. Create() should be called before using the object.
-    // Arguments:       None.
-
-        Gib() { Clear(); }
-
-/*
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Create
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Makes the Gib object ready for use.
-    // Arguments:       None.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Create();
-*/
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Create
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Creates a Gib to be identical to another, by deep copy.
-    // Arguments:       A reference to the Gib to deep copy.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Create(const Gib &reference);
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  ReadProperty
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Reads a property value from a Reader stream. If the name isn't
-    //                  recognized by this class, then ReadProperty of the parent class
-    //                  is called. If the property isn't recognized by any of the base classes,
-    //                  false is returned, and the Reader's position is untouched.
-    // Arguments:       The name of the property to be read.
-    //                  A Reader lined up to the value of the property to be read.
-    // Return value:    An error return value signaling whether the property was successfully
-    //                  read or not. 0 means it was read successfully, and any nonzero indicates
-    //                  that a property of that name could not be found in this or base classes.
-
-        virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Reset
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Resets the entire Serializable, including its inherited members, to their
-    //                  default settings or values.
-    // Arguments:       None.
-    // Return value:    None.
-
-        virtual void Reset() { Clear(); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Save
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Saves the complete state of this Gib to an output stream for
-    //                  later recreation with Create(Reader &reader);
-    // Arguments:       A Writer that the Gib will save itself with.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Save(Writer &writer) const;
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetClassName
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the class name of this Entity.
-    // Arguments:       None.
-    // Return value:    A string with the friendly-formatted type name of this object.
-
-        virtual const std::string & GetClassName() const { return m_sClassName; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetParticlePreset
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the reference particle to be used as a gib. Owenership is NOT transferred!
-    // Arguments:       None.
-    // Return value:    A pointer to the particle to be emitted. Not transferred!
-
-        virtual const MovableObject * GetParticlePreset() { return m_pGibParticle; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetOffset
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the spawn offset from the parent's position.
-    // Arguments:       None.
-    // Return value:    The offset in pixels from the parent's position where this gets spawned.
-
-        virtual Vector GetOffset() const { return m_Offset; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetCount
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the number of emissions to make of this emission type in a burst.
-    // Arguments:       None.
-    // Return value:    The number of emissions there should be of this type in an emission.
-
-        virtual int GetCount() const { return m_Count; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetSpread
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the angle spread of velocity of the emitted MO's to each side of
-    //                  the m_EmitAngle angle. in radians. PI/2 would mean that MO's fly out to
-    //                  one side only, with the m_Rotation defining the middle of that half circle.
-    // Arguments:       None.
-    // Return value:    The emission spread in radians.
-
-        virtual float GetSpread() const { return m_Spread; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetMinVelocity
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the specified minimum velocity an emitted MO can have when emitted.
-    // Arguments:       None.
-    // Return value:    The min emission velocity in m/s.
-
-        virtual float GetMinVelocity() const { return MIN(m_MinVelocity, m_MaxVelocity); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetMaxVelocity
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the specified maximum velocity an emitted MO can have when emitted.
-    // Arguments:       None.
-    // Return value:    The max emission velocity in m/s.
-
-        virtual float GetMaxVelocity() const { return MAX(m_MinVelocity, m_MaxVelocity); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetLifeVariation
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the specified variation in lifetime of the gibbed object.
-    // Arguments:       None.
-    // Return value:    The life variation rationally expressed.. 0.1 = up to 10% varitaion.
-
-        virtual float GetLifeVariation() const { return m_LifeVariation; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  InheritsVel
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Shows whether this's gibs should inherit the velocity of the gibbing
-    //                  parent.
-    // Arguments:       None.
-    // Return value:    Whetehr this inherits velocity or not.
-
-        virtual bool InheritsVel() const { return m_InheritsVel; }
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Protected member variable and method declarations
-
-    protected:
-
-        // Member variables
-        static const std::string m_sClassName;
-        // The pointer to the preset instance, that copies of which will be emitted. Not Owned
-        const MovableObject *m_pGibParticle;
-        // Offset spawn position from owner/parent's position
-        Vector m_Offset;
-        // The number of emissions of this type should be emitted
-        int m_Count;
-        // The angle spread of velocity of the emitted MO's to each
-        // side of the m_EmitAngle angle. in radians.
-        // PI/2 would mean that MO's fly out to one side only, with the
-        // m_Rotation defining the middle of that half circle.
-        float m_Spread;
-        // The minimum velocity an emitted MO can have when emitted
-        float m_MinVelocity;
-        // The maximum velocity an emitted MO can have when emitted
-        float m_MaxVelocity;
-        // The per-gib variation in life time, in percentage of the existing life time of the gib
-        float m_LifeVariation;
-        // Whether this gib should inherit the velocity of the exploding parent or not
-        bool m_InheritsVel;
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Private member variable and method declarations
-
-    private:
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Method:          Clear
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Clears all the member variables of this Gib, effectively
-    //                  resetting the members of this abstraction level only.
-    // Arguments:       None.
-    // Return value:    None.
-
-        void Clear();
-
-    };
-
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(MOSRotating)
+EntityAllocation(MOSRotating)
+SerializableOverrideMethods
+ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -298,7 +73,7 @@ ENTITYALLOCATION(MOSRotating)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~MOSRotating() { Destroy(true); }
+	~MOSRotating() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -309,7 +84,7 @@ ENTITYALLOCATION(MOSRotating)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -326,12 +101,7 @@ ENTITYALLOCATION(MOSRotating)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(ContentFile spriteFile,
-                       const int frameCount = 1,
-                       const float mass = 1,
-                       const Vector &position = Vector(0, 0),
-                       const Vector &velocity = Vector(0, 0),
-                       const unsigned long lifetime = 0);
+	int Create(ContentFile spriteFile, const int frameCount = 1, const float mass = 1, const Vector &position = Vector(0, 0), const Vector &velocity = Vector(0, 0), const unsigned long lifetime = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -342,23 +112,7 @@ ENTITYALLOCATION(MOSRotating)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const MOSRotating &reference);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
+	int Create(const MOSRotating &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -369,19 +123,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); MOSprite::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this MOSRotating to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the MOSRotating will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+    void Reset() override { Clear(); MOSprite::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -392,27 +134,7 @@ ENTITYALLOCATION(MOSRotating)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -423,7 +145,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       None.
 // Return value:    A float describing the mass value in Kilograms (kg).
 
-    virtual float GetMass() const;
+    float GetMass() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -443,19 +165,8 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       None.
 // Return value:    The the Material of this MOSRotating.
 
-    virtual Material const * GetMaterial() const;
+	Material const * GetMaterial() const override;
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HitsMOs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets whether this MovableObject is set to collide with other
-//                  MovableObject:s during travel.
-// Arguments:       None.
-// Return value:    Whether to hit other MO's during travel, or not.
-
-    virtual bool HitsMOs() const;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetDrawPriority
@@ -467,7 +178,7 @@ ENTITYALLOCATION(MOSRotating)
 // Return value:    The the priority  of this MovableObject. Higher number, the higher
 //                  priority.
 
-    virtual int GetDrawPriority() const;
+	int GetDrawPriority() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -488,20 +199,7 @@ ENTITYALLOCATION(MOSRotating)
 // Return value:    A const reference to the current recoil offset.
 
     const Vector & GetRecoilOffset() const { return m_RecoilOffset; }
-/*
-// TODO: Improve this one! Really crappy fit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetBoundingBox
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the oriented bounding box which is guaranteed to contain this,
-//                  taking rotation etc into account. It's not guaranteed to be fit
-//                  perfectly though. TODO: MAKE FIT BETTER
-// Arguments:       None.
-// Return value:    A Box which is guaranteed to contain this. Does nto take wrapping into
-//                  account, and parts of this box may be out of bounds!
 
-    virtual Box GetBoundingBox() const { return Box(m_Pos + Vector(-m_MaxRadius, -m_MaxRadius), m_MaxDiameter, m_MaxDiameter); }
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetGibList
@@ -511,37 +209,6 @@ ENTITYALLOCATION(MOSRotating)
 // Return value:    A pointer to the list of gibs. Ownership is NOT transferred!
 
     std::list<Gib> * GetGibList() { return &m_Gibs; }
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetAtom
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Replaces the current Atom of this MOSRotating with a new one.
-// Arguments:       A reference to the new Atom.
-// Return value:    None.
-
-    void SetAtom(Atom *newAtom);
-*/
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetToHitMOs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets this MovableObject to collide with other MovableObjects during
-//                  travel.
-// Arguments:       Whether to hit other MO's during travel, or not.
-// Return value:    None.
-
-    virtual void SetToHitMOs(bool hitMOs = true);
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsGold
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this MO is made of Gold or not.
-// Arguments:       None.
-// Return value:    Whether this MovableObject is of Gold or not.
-
-    virtual bool IsGold() const { return m_MOType == TypeGeneric && GetMaterial()->id == c_GoldMaterialID; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -616,7 +283,7 @@ ENTITYALLOCATION(MOSRotating)
 // Return value:    Whether the collision has been deemed valid. If false, then disregard
 //                  any impulses in the Hitdata.
 
-    virtual bool CollideAtPoint(HitData &hitData);
+    bool CollideAtPoint(HitData &hitData) override;
 
 
     /// <summary>
@@ -625,7 +292,7 @@ ENTITYALLOCATION(MOSRotating)
     /// </summary>
     /// <param name="hd">The HitData describing the collision in detail.</param>
     /// <return>Whether the MovableObject should immediately halt any travel going on after this bounce.</return>
-    virtual bool OnBounce(HitData &hd);
+	bool OnBounce(HitData &hd) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -638,7 +305,7 @@ ENTITYALLOCATION(MOSRotating)
 // Return value:    Wheter the MovableObject should immediately halt any travel going on
 //                  after this sinkage.
 
-    virtual bool OnSink(HitData &hd);
+	bool OnSink(HitData &hd) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -681,7 +348,7 @@ ENTITYALLOCATION(MOSRotating)
 // Return value:    Whether any intersection was successfully resolved. Will return true
 //                  even if there wasn't any intersections to begin with.
 
-    virtual bool MoveOutOfTerrain(unsigned char strongerThan = g_MaterialAir);
+	bool MoveOutOfTerrain(unsigned char strongerThan = g_MaterialAir) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -693,7 +360,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ApplyForces();
+	void ApplyForces() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -705,7 +372,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ApplyImpulses();
+	void ApplyImpulses() override;
 
 
 	void AddAttachable(Attachable *pAttachable);
@@ -732,7 +399,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ResetAllTimers();
+    void ResetAllTimers() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -744,7 +411,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void RestDetection();
+    void RestDetection() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -755,7 +422,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       The point in absolute scene coordinates.
 // Return value:    Whether this' graphical rep overlaps the scene point.
 
-    virtual bool IsOnScenePoint(Vector &scenePoint) const;
+	bool IsOnScenePoint(Vector &scenePoint) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -765,7 +432,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void EraseFromTerrain();
+	void EraseFromTerrain();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -779,7 +446,7 @@ ENTITYALLOCATION(MOSRotating)
 //                  erased terrain.
 // Return value:    Whether deep penetration was detected and erasure was done.
 
-    virtual bool DeepCheck(bool makeMOPs = true, int skipMOP = 2, int maxMOP = 100);
+	bool DeepCheck(bool makeMOPs = true, int skipMOP = 2, int maxMOP = 100);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -790,7 +457,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void PreTravel();
+	void PreTravel() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -800,7 +467,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Travel();
+	void Travel() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -811,7 +478,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void PostTravel();
+	void PostTravel() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -821,7 +488,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -832,7 +499,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       The MovableObject to check this for overlap against.
 // Return value:    Whether it was drawn or not.
 
-    virtual bool DrawMOIDIfOverlapping(MovableObject *pOverlapMO);
+	bool DrawMOIDIfOverlapping(MovableObject *pOverlapMO) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -847,50 +514,47 @@ ENTITYALLOCATION(MOSRotating)
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetGibWoundLimit
+// Method:  GetGibWoundLimit
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Return wound limit for this object.
 // Arguments:       None.
 // Return value:    Wound limit of the object.
 
-	virtual int GetGibWoundLimit() const { return m_GibWoundLimit; } 
+	int GetGibWoundLimit() const { return m_GibWoundLimit; } 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetGibImpulseLimit
+// Method:  SetGibImpulseLimit
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Set new impulse limit.
 // Arguments:       New impulse limit.
 // Return value:    None.
 
-	virtual void SetGibImpulseLimit(int newLimit) { m_GibImpulseLimit = newLimit; }
+	void SetGibImpulseLimit(int newLimit) { m_GibImpulseLimit = newLimit; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetGibImpulseLimit
+// Method:  GetGibImpulseLimit
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Return impulse limit for this object.
 // Arguments:       None.
 // Return value:    Impulse limit of the object.
 
-	virtual int GetGibImpulseLimit() const { return m_GibImpulseLimit; } 
+	int GetGibImpulseLimit() const { return m_GibImpulseLimit; } 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetGibWoundLimit
+// Method:  SetGibWoundLimit
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Set new wound limit, current wounds are not affected.
 // Arguments:       New wound limit.
 // Return value:    None.
 
-	virtual void SetGibWoundLimit(int newLimit) { m_GibWoundLimit = newLimit; }
+	void SetGibWoundLimit(int newLimit) { m_GibWoundLimit = newLimit; }
 
 
 	/// <summary>
@@ -898,7 +562,7 @@ ENTITYALLOCATION(MOSRotating)
 	/// </summary>
 	/// <param name="pWound">The wound AEmitter to add</param>
 	/// <param name="parentOffsetToSet">The vector to set as the wound AEmitter's parent offset</param>
-	virtual void AddWound(AEmitter *pWound, const Vector& parentOffsetToSet, bool checkGibWoundLimit = true);
+	void AddWound(AEmitter *pWound, const Vector& parentOffsetToSet, bool checkGibWoundLimit = true);
 
 
 	/// <summary>
@@ -910,59 +574,59 @@ ENTITYALLOCATION(MOSRotating)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetWoundCount
+// Method:  GetWoundCount
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the amount of wound attached to this.
 // Arguments:       Key to retrieve value.
 // Return value:    Wound amount.
 
-	virtual int GetWoundCount() const { return m_Wounds.size(); }; 
+	int GetWoundCount() const { return m_Wounds.size(); }; 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetStringValue
+// Method:  GetStringValue
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the string value associated with the specified key or "" if it does not exist.
 // Arguments:       Key to retrieve value.
 // Return value:    String value.
 
-	virtual std::string GetStringValue(std::string key);
+	std::string GetStringValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetNumberValue
+// Method:  GetNumberValue
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the number value associated with the specified key or 0 if it does not exist.
 // Arguments:       Key to retrieve value.
 // Return value:    Number (double) value.
 
-	virtual double GetNumberValue(std::string key);
+	double GetNumberValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetObjectValue
+// Method:  GetObjectValue
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the object value associated with the specified key or 0 if it does not exist.
 // Arguments:       None.
 // Return value:    Object (Entity *) value.
 
-	virtual Entity * GetObjectValue(std::string key);
+	Entity * GetObjectValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetStringValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the string value associated with the specified key.
-// Arguments:       String key and value to set.
-// Return value:    None.
-
-	virtual void SetStringValue(std::string key, std::string value);
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetNumberValue
+// Method:  SetStringValue
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the string value associated with the specified key.
 // Arguments:       String key and value to set.
 // Return value:    None.
 
-	virtual void SetNumberValue(std::string key, double value);
+	void SetStringValue(std::string key, std::string value);
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:  SetNumberValue
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets the string value associated with the specified key.
+// Arguments:       String key and value to set.
+// Return value:    None.
+
+	void SetNumberValue(std::string key, double value);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetObjectValue
@@ -971,7 +635,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       String key and value to set.
 // Return value:    None.
 
-	virtual void SetObjectValue(std::string key, Entity * value);
+	void SetObjectValue(std::string key, Entity * value);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RemoveStringValue
@@ -980,7 +644,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       String key to remove.
 // Return value:    None.
 
-	virtual void RemoveStringValue(std::string key);
+	void RemoveStringValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RemoveNumberValue
@@ -989,7 +653,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       String key to remove.
 // Return value:    None.
 
-	virtual void RemoveNumberValue(std::string key);
+	void RemoveNumberValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RemoveObjectValue
@@ -998,7 +662,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       String key to remove.
 // Return value:    None.
 
-	virtual void RemoveObjectValue(std::string key);
+	void RemoveObjectValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  StringValueExists
@@ -1007,7 +671,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       String key to check.
 // Return value:    True if value exists.
 
-	virtual bool StringValueExists(std::string key);
+	bool StringValueExists(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  NumberValueExists
@@ -1016,7 +680,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       String key to check.
 // Return value:    True if value exists.
 
-	virtual bool NumberValueExists(std::string key);
+	bool NumberValueExists(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ObjectValueExists
@@ -1025,7 +689,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       String key to check.
 // Return value:    True if value exists.
 
-	virtual bool ObjectValueExists(std::string key);
+	bool ObjectValueExists(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetMOIDs
@@ -1034,7 +698,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       Vector to store MOIDs
 // Return value:    None.
 
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetDamageMultiplier
@@ -1043,7 +707,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       New multiplier value.
 // Return value:    None.
 
-	virtual void SetDamageMultiplier(float newValue) { m_DamageMultiplier = newValue; }
+	void SetDamageMultiplier(float newValue) { m_DamageMultiplier = newValue; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetDamageMultiplier
@@ -1052,7 +716,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       None.
 // Return value:    Current multiplier value.
 
-	virtual float GetDamageMultiplier() const { return m_DamageMultiplier; }
+	float GetDamageMultiplier() const { return m_DamageMultiplier; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsDamageMultiplierRedefined
@@ -1062,7 +726,7 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       None.
 // Return value:    Current multiplier value.
 
-	virtual bool IsDamageMultiplierRedefined() const { return m_DamageMultiplierRedefined; }
+	bool IsDamageMultiplierRedefined() const { return m_DamageMultiplierRedefined; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1072,17 +736,17 @@ ENTITYALLOCATION(MOSRotating)
 // Arguments:       None.
 // Return value:    The amount of impulse force exerted on this during the last frame.
 
-	virtual Vector GetTravelImpulse() const { return m_TravelImpulse; }
+	Vector GetTravelImpulse() const { return m_TravelImpulse; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTravelImpulse
+// Method:          SetTravelImpulse
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the amount of impulse force exerted on this during the last frame.
 // Arguments:       New impulse value
 // Return value:    None.
 
-	virtual void SetTravelImpulse(Vector impulse) { m_TravelImpulse = impulse; }
+	void SetTravelImpulse(Vector impulse) { m_TravelImpulse = impulse; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1121,9 +785,7 @@ protected:
 //                  the same as the last one in the index (presumably its parent),
 // Return value:    None.
 
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID = g_NoMOID,
-                                 bool makeNewMOID = true);
+    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
     // Member variables
     static Entity::ClassInfo m_sClass;
@@ -1227,8 +889,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    MOSRotating(const MOSRotating &reference);
-    MOSRotating& operator=(const MOSRotating &rhs);
+	MOSRotating(const MOSRotating &reference) = delete;
+	MOSRotating& operator=(const MOSRotating &rhs) = delete;
 
 };
 

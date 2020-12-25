@@ -3,20 +3,18 @@
 #include "Writer.h"
 #include "DataModule.h"
 #include "SceneLayer.h"
-#include "RTEManagers.h"
+#include "SettingsMan.h"
+#include "PresetMan.h"
+#include "FrameMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/GUICollectionBox.h"
-#include "GUI/GUIProgressBar.h"
 #include "GUI/GUIListBox.h"
-#include "GUI/GUILabel.h"
 #include "GUI/AllegroScreen.h"
 #include "GUI/AllegroBitmap.h"
 #include "GUI/AllegroInput.h"
 
 #include "unzip.h"
-
-extern volatile bool g_Quit;
 
 namespace RTE {
 
@@ -44,20 +42,26 @@ namespace RTE {
 
 		// Loading splash screen
 		g_FrameMan.ClearBackBuffer32();
-		SceneLayer *pLoadingSplash = new SceneLayer();
-		pLoadingSplash->Create(ContentFile("Base.rte/GUIs/Title/LoadingSplash.bmp"), false, Vector(), true, false, Vector(1.0, 0));
+		SceneLayer *loadingSplash = new SceneLayer();
+		loadingSplash->Create(ContentFile("Base.rte/GUIs/Title/LoadingSplash.png"), false, Vector(), true, false, Vector(1.0, 0));
 
 		// Hardcoded offset to make room for the loading box only if DisableLoadingScreen is false.
 		int loadingSplashOffset = g_SettingsMan.DisableLoadingScreen() ? 14 : 120;
-		pLoadingSplash->SetOffset(Vector(((pLoadingSplash->GetBitmap()->w - g_FrameMan.GetResX()) / 2) + loadingSplashOffset, 0));
+		loadingSplash->SetOffset(Vector(((loadingSplash->GetBitmap()->w - g_FrameMan.GetResX()) / 2) + loadingSplashOffset, 0));
 
 		// Draw onto wrapped strip centered vertically on the screen
-		Box splashBox(Vector(0, (g_FrameMan.GetResY() - pLoadingSplash->GetBitmap()->h) / 2), g_FrameMan.GetResX(), pLoadingSplash->GetBitmap()->h);
-		pLoadingSplash->Draw(g_FrameMan.GetBackBuffer32(), splashBox);
-		delete pLoadingSplash;
-		pLoadingSplash = 0;
+		Box splashBox(Vector(0, (g_FrameMan.GetResY() - loadingSplash->GetBitmap()->h) / 2), g_FrameMan.GetResX(), loadingSplash->GetBitmap()->h);
+		loadingSplash->Draw(g_FrameMan.GetBackBuffer32(), splashBox);
+		delete loadingSplash;
+		loadingSplash = 0;
 
 		g_FrameMan.FlipFrameBuffers();
+
+		if (g_SettingsMan.SettingsNeedOverwrite()) {
+			// Overwrite Settings.ini after all the managers are created to fully populate the file. Up until this moment Settings.ini is populated only with minimal required properties to run.
+			// When the overwrite happens there is a short delay which causes the screen to remain black, so this is done here after the flip to mask that black screen.
+			g_SettingsMan.UpdateSettingsFile();
+		}
 
 		// Set up the loading GUI
 		if (!m_ControlManager) {
@@ -75,27 +79,27 @@ namespace RTE {
 
 		// Place and clear the sectionProgress box
 		dynamic_cast<GUICollectionBox *>(m_ControlManager->GetControl("root"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
-		GUIListBox *pBox = dynamic_cast<GUIListBox *>(m_ControlManager->GetControl("ProgressBox"));
+		GUIListBox *listBox = dynamic_cast<GUIListBox *>(m_ControlManager->GetControl("ProgressBox"));
 		// Make the box a bit bigger if there's room in higher, HD resolutions
 		if (g_FrameMan.GetResX() >= 960) {
 			// Make the loading progress box fill the right third of the screen
-			pBox->Resize((g_FrameMan.GetResX() / 3) - 12, pBox->GetHeight());
-			pBox->SetPositionRel(g_FrameMan.GetResX() - pBox->GetWidth() - 12, (g_FrameMan.GetResY() / 2) - (pBox->GetHeight() / 2));
+			listBox->Resize((g_FrameMan.GetResX() / 3) - 12, listBox->GetHeight());
+			listBox->SetPositionRel(g_FrameMan.GetResX() - listBox->GetWidth() - 12, (g_FrameMan.GetResY() / 2) - (listBox->GetHeight() / 2));
 		} else {
 			// Legacy positioning and sizing when running low resolutions
-			pBox->SetPositionRel(g_FrameMan.GetResX() - pBox->GetWidth() - 12, (g_FrameMan.GetResY() / 2) - (pBox->GetHeight() / 2));
+			listBox->SetPositionRel(g_FrameMan.GetResX() - listBox->GetWidth() - 12, (g_FrameMan.GetResY() / 2) - (listBox->GetHeight() / 2));
 		}
-		pBox->ClearList();
+		listBox->ClearList();
 
 		// New mechanism to speed up loading times as it turned out that a massive amount of time is spent to update GUI control.
 		if (!g_SettingsMan.DisableLoadingScreen() && !m_LoadingGUIBitmap) {
-			pBox->SetVisible(false);
-			m_LoadingGUIBitmap = create_bitmap_ex(8, pBox->GetWidth(), pBox->GetHeight());
+			listBox->SetVisible(false);
+			m_LoadingGUIBitmap = create_bitmap_ex(8, listBox->GetWidth(), listBox->GetHeight());
 			clear_to_color(m_LoadingGUIBitmap, 54);
-			rect(m_LoadingGUIBitmap, 0, 0, pBox->GetWidth() - 1, pBox->GetHeight() - 1, 33);
-			rect(m_LoadingGUIBitmap, 1, 1, pBox->GetWidth() - 2, pBox->GetHeight() - 2, 33);
-			m_PosX = pBox->GetXPos();
-			m_PosY = pBox->GetYPos();
+			rect(m_LoadingGUIBitmap, 0, 0, listBox->GetWidth() - 1, listBox->GetHeight() - 1, 33);
+			rect(m_LoadingGUIBitmap, 1, 1, listBox->GetWidth() - 2, listBox->GetHeight() - 2, 33);
+			m_PosX = listBox->GetXPos();
+			m_PosY = listBox->GetYPos();
 		}
 		// Create the loading log writer
 		if (!m_LoadingLogWriter) { m_LoadingLogWriter = new Writer("LogLoading.txt"); }
@@ -110,7 +114,6 @@ namespace RTE {
 		if (g_System.GetLogToCLI()) { g_System.PrintLoadingToCLI(reportString, newItem); }
 
 		if (g_LoadingGUI.m_ControlManager) {
-			g_UInputMan.Update();
 			if (newItem) {
 				// Write out the last line to the log file before starting a new one
 				if (g_LoadingGUI.m_LoadingLogWriter->WriterOK()) { *g_LoadingGUI.m_LoadingLogWriter << reportString << "\n"; }
@@ -132,21 +135,15 @@ namespace RTE {
 
 				g_FrameMan.FlipFrameBuffers();
 			}
-			// Quit if we're commanded to during loading
-			if (g_Quit) { exit(0); }
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LoadingGUI::LoadDataModules() {
-		// Clear out the PresetMan and all its DataModules
 		g_PresetMan.Destroy();
 		g_PresetMan.Create();
-
-		// Unpack any ".rte.zip" files
-		ExtractArchivedModules();
-		// Load all unpacked modules
+		ExtractZippedModules();
 		g_PresetMan.LoadAllDataModules();
 
 		return true;
@@ -154,7 +151,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingGUI::ExtractArchivedModules() {
+	void LoadingGUI::ExtractZippedModules() {
 		al_ffblk zippedModuleInfo;
 		unzFile zipFile;
 		for (int result = al_findfirst("*.rte.zip", &zippedModuleInfo, FA_ALL); result == 0; result = al_findnext(&zippedModuleInfo)) {
@@ -177,7 +174,7 @@ namespace RTE {
 
 				// Loop to extract all files
 				bool abortExtract = false;
-				for (uLong i = 0; i < zipFileInfo.number_entry && !abortExtract; ++i) {
+				for (unsigned long i = 0; i < zipFileInfo.number_entry && !abortExtract; ++i) {
 					// Get info about current file.
 					unz_file_info fileInfo;
 					char outputFileName[s_MaxFileName];
@@ -189,32 +186,41 @@ namespace RTE {
 					char outputDirName[s_MaxFileName];
 					char parentDirName[s_MaxFileName];
 					// Copy the file path to a separate directory path
+#ifdef _WIN32
 					strcpy_s(outputDirName, sizeof(outputDirName), outputFileName);
+#else
+					strcpy(outputDirName, outputFileName);
+#endif
 					// Find the last slash in the directory path, so we can cut off everything after that (ie the actual filename), and only have the directory path left
-					char *pSlashPos = strrchr(outputDirName, '/');
+					char *slashPos = strrchr(outputDirName, '/');
 					// Try to find the other kind of slash if we found none
-					if (!pSlashPos) { pSlashPos = strrchr(outputDirName, '\\'); }
+					if (!slashPos) { slashPos = strrchr(outputDirName, '\\'); }
 					// Now that we have the slash position, terminate the directory path string right after there
-					if (pSlashPos) { *(++pSlashPos) = 0; }
+					if (slashPos) { *(++slashPos) = 0; }
 
 					// If that file's directory doesn't exist yet, then create it, and all its parent directories above if need be
-					for (int nested = 0; !std::experimental::filesystem::exists(outputDirName) && pSlashPos; ++nested) {
+					for (int nested = 0; !std::filesystem::exists(outputDirName) && slashPos; ++nested) {
 						// Keep making new working copies of the path that we can dice up
+#ifdef _WIN32
 						strcpy_s(parentDirName, sizeof(parentDirName), outputDirName[0] == '.' ? &(outputDirName[2]) : outputDirName);
+#else
+						strcpy(parentDirName, outputDirName[0] == '.' ? &(outputDirName[2]) : outputDirName);
+#endif
+
 						// Start off at the beginning
-						pSlashPos = parentDirName;
-						for (int j = 0; j <= nested && pSlashPos; ++j) {
+						slashPos = parentDirName;
+						for (int j = 0; j <= nested && slashPos; ++j) {
 							// Find the first slash so we can isolate the folders in the hierarchy, in descending seniority
-							pSlashPos = strchr(pSlashPos, '/');
+							slashPos = strchr(slashPos, '/');
 							// If we can't find any more slashes, then quit
-							if (!pSlashPos) { break; }
+							if (!slashPos) { break; }
 							// If we did find a slash, go to one past it slash and try to find the next one
-							pSlashPos++;
+							slashPos++;
 						}
 						// No more nested folders to make
-						if (!pSlashPos) { break; }
+						if (!slashPos) { break; }
 						// Terminate there so we are making the most senior folder
-						*(pSlashPos) = 0;
+						*(slashPos) = 0;
 						g_System.MakeDirectory(parentDirName);
 					}
 
@@ -225,15 +231,15 @@ namespace RTE {
 						g_System.MakeDirectory(outputFileName);
 						// It's a file
 					} else {
-						// Validate so only certain file types are extracted:  .ini .txt .lua .cfg .bmp .png .jpg .jpeg .wav .ogg .mp3
+						// Validate so only certain file types are extracted:  .ini .txt .lua .cfg .bmp .png .jpg .jpeg .wav .ogg .mp3 .flac
 						// Get the file extension
-						std::string fileExtension = std::experimental::filesystem::path(outputFileName).extension().string();
+						std::string fileExtension = std::filesystem::path(outputFileName).extension().string();
 						std::transform(fileExtension.begin(), fileExtension.end(), fileExtension.begin(), ::tolower);
 						const char *ext = fileExtension.c_str();
-						// Validate only certain file types to be included! .ini .txt .lua .cfg .bmp .png .jpg .jpeg .wav .ogg .mp3
+						// Validate only certain file types to be included! .ini .txt .lua .cfg .bmp .png .jpg .jpeg .wav .ogg .mp3 .flac
 						if (!(std::strcmp(ext, ".ini") == 0 || std::strcmp(ext, ".txt") == 0 || std::strcmp(ext, ".lua") == 0 || std::strcmp(ext, ".cfg") == 0 ||
 							std::strcmp(ext, ".bmp") == 0 || std::strcmp(ext, ".png") == 0 || std::strcmp(ext, ".jpg") == 0 || std::strcmp(ext, ".jpeg") == 0 ||
-							std::strcmp(ext, ".wav") == 0 || std::strcmp(ext, ".ogg") == 0 || std::strcmp(ext, ".mp3") == 0)) {
+							std::strcmp(ext, ".wav") == 0 || std::strcmp(ext, ".ogg") == 0 || std::strcmp(ext, ".mp3") == 0 || std::strcmp(ext, ".flac") == 0)) {
 							LoadingSplashProgressReport("Skipping: " + std::string(outputFileName) + " - bad extension!", true);
 
 							// Keep going through!!
@@ -252,14 +258,12 @@ namespace RTE {
 						}
 						// Entry is a file, so extract it.
 						LoadingSplashProgressReport("Extracting: " + std::string(outputFileName), true);
-						if (unzOpenCurrentFile(zipFile) != UNZ_OK) {
-							LoadingSplashProgressReport("Could not open file within " + std::string(zippedModuleInfo.name), true);
-						}
+						if (unzOpenCurrentFile(zipFile) != UNZ_OK) { LoadingSplashProgressReport("Could not open file within " + std::string(zippedModuleInfo.name), true);	}
+
 						// Open a file to write out the data.
 						FILE *outputFile = fopen(outputFileName, "wb");
-						if (outputFile == NULL) {
-							LoadingSplashProgressReport("Could not open/create destination file while unzipping " + std::string(zippedModuleInfo.name), true);
-						}
+						if (outputFile == NULL) { LoadingSplashProgressReport("Could not open/create destination file while unzipping " + std::string(zippedModuleInfo.name), true); }
+
 						// Write the entire file out, reading in buffer size chunks and spitting them out to the output stream
 						int bytesRead = 0;
 						int64_t totalBytesRead = 0;
@@ -290,7 +294,6 @@ namespace RTE {
 						// Close the read file within the zip archive
 						unzCloseCurrentFile(zipFile);
 					}
-
 					// Go the next entry listed in the zip file.
 					if ((i + 1) < zipFileInfo.number_entry) {
 						if (unzGoToNextFile(zipFile) != UNZ_OK) {

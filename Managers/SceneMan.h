@@ -14,20 +14,14 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-// *** TEMP
-//#include "resource.h"
-
-#include "RTETools.h"
-#include "Singleton.h"
-#define g_SceneMan SceneMan::Instance()
 #include "Serializable.h"
-
-#include "FrameMan.h"
-#include "ActivityMan.h"
-//#include "MovableMan.h"
-#include "Vector.h"
+#include "Timer.h"
 #include "Box.h"
-//#include "SceneLayer.h"
+#include "Singleton.h"
+
+#include "ActivityMan.h"
+
+#define g_SceneMan SceneMan::Instance()
 
 namespace RTE
 {
@@ -35,7 +29,6 @@ namespace RTE
 class Scene;
 class SceneLayer;
 class SLTerrain;
-class Terrain;
 class SceneObject;
 class TerrainObject;
 class MovableObject;
@@ -121,6 +114,8 @@ class SceneMan:
 
 public:
 
+	SerializableOverrideMethods
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     SceneMan
@@ -139,19 +134,8 @@ public:
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~SceneMan() { Destroy(); }
+	~SceneMan() { Destroy(); }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the SceneMan object ready for use.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
@@ -162,7 +146,7 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(std::string readerFile);
+	int Create(std::string readerFile);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -188,7 +172,7 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScene
+// Method:  LoadScene
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Actually loads a new Scene into memory. has to be done before using
 //                  this object.
@@ -198,11 +182,11 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int LoadScene(Scene *pNewScene, bool placeObjects = true, bool placeUnits = true);
+	int LoadScene(Scene *pNewScene, bool placeObjects = true, bool placeUnits = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetSceneToLoad
+// Method:  SetSceneToLoad
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Stores a Scene reference to be loaded later into the SceneMan.
 // Arguments:       The instance reference of the Scene, ownership IS NOT (!!) transferred!
@@ -210,11 +194,11 @@ public:
 //                  in its definition.
 // Return value:    None.
 
-    virtual void SetSceneToLoad(const Scene *pLoadScene, bool placeObjects = true, bool placeUnits = true) { m_pSceneToLoad = pLoadScene; m_PlaceObjects = placeObjects; m_PlaceUnits = placeUnits; }
+	void SetSceneToLoad(const Scene *pLoadScene, bool placeObjects = true, bool placeUnits = true) { m_pSceneToLoad = pLoadScene; m_PlaceObjects = placeObjects; m_PlaceUnits = placeUnits; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetSceneToLoad
+// Method:  SetSceneToLoad
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets a scene to load later, by preset name.
 // Arguments:       The name of the Scene preset instance to load.
@@ -223,32 +207,32 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int SetSceneToLoad(std::string sceneName, bool placeObjects = true, bool placeUnits = true);
+	int SetSceneToLoad(std::string sceneName, bool placeObjects = true, bool placeUnits = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetSceneToLoad
+// Method:  GetSceneToLoad
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the stored Scene reference to be loaded later into the SceneMan.
 // Arguments:       None.
 // Return value:    The instance reference of the Scene, ownership IS NOT (!!) transferred!
 
-    virtual const Scene * GetSceneToLoad() { return m_pSceneToLoad; }
+	const Scene * GetSceneToLoad() { return m_pSceneToLoad; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScene
+// Method:  LoadScene
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Actually loads the Scene set to be loaded in SetSceneToLoad.
 // Arguments:       None.
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int LoadScene();
+	int LoadScene();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScene
+// Method:  LoadScene
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Loads a Scene right now, by preset name.
 // Arguments:       The name of the Scene preset instance to load.
@@ -258,11 +242,11 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int LoadScene(std::string sceneName, bool placeObjects = true, bool placeUnits = true);
+	int LoadScene(std::string sceneName, bool placeObjects = true, bool placeUnits = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadScene
+// Method:  LoadScene
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Loads a Scene right now, by preset name.
 // Arguments:       The name of the Scene preset instance to load.
@@ -271,46 +255,18 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-	virtual int LoadScene(std::string sceneName, bool placeObjects = true) { return LoadScene(sceneName, placeObjects, true); }
+	int LoadScene(std::string sceneName, bool placeObjects = true) { return LoadScene(sceneName, placeObjects, true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire SceneMan, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this SceneMan to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the SceneMan will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+	void Reset() override { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -324,13 +280,13 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
+// Method:  GetClassName
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the class name of this Entity.
 // Arguments:       None.
 // Return value:    A string with the friendly-formatted type name of this object.
 
-    virtual const std::string & GetClassName() const { return m_ClassName; }
+	const std::string & GetClassName() const override { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -401,7 +357,7 @@ public:
 // Description:     Gets a specific material from the material palette. Ownership is NOT
 //                  transferred!
 // Arguments:       The unsigned char index specifying screen material to get (0-255).
-// Return value:    A reference to the requested material. OINT!
+// Return value:    A reference to the requested material. OWNERSHIP IS NOT TRANSFERRED!
 
     Material const * GetMaterialFromID(unsigned char screen) { return screen >= 0 && screen < c_PaletteEntriesNumber && m_apMatPalette[screen] ?  m_apMatPalette[screen] : m_apMatPalette[g_MaterialAir]; }
 
@@ -733,7 +689,7 @@ public:
 // Arguments:       Which screen to get the target for.
 // Return value:    Current target vector in *scene coordinates*.
 
-    Vector GetScrollTarget(int screen = 0) const { return m_ScrollTarget[screen]; }
+    const Vector & GetScrollTarget(int screen = 0) const { return m_ScrollTarget[screen]; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1301,7 +1257,7 @@ public:
 //                  for optimization reasons. 0 = every pixel is checked.
 // Return value:    The MOID of the hit non-ignored MO, or g_NoMOID if terrain or no MO was hit.
 
-    MOID CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID = g_NoMOID, int ignoreTeam = Activity::NOTEAM, unsigned char ignoreMaterial = 0, bool ignoreAllTerrain = false, int skip = 0);
+    MOID CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID = g_NoMOID, int ignoreTeam = Activity::NoTeam, unsigned char ignoreMaterial = 0, bool ignoreAllTerrain = false, int skip = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1345,7 +1301,7 @@ public:
 //                  encountered. If no pixel of the right material was found, < 0 is returned.
 //                  If an obstacle on the starting position was encountered, 0 is returned.
 
-    float CastObstacleRay(const Vector &start, const Vector &ray, Vector &obstaclePos, Vector &freePos, MOID ignoreMOID = g_NoMOID, int ignoreTeam = Activity::NOTEAM, unsigned char ignoreMaterial = 0, int skip = 0);
+    float CastObstacleRay(const Vector &start, const Vector &ray, Vector &obstaclePos, Vector &freePos, MOID ignoreMOID = g_NoMOID, int ignoreTeam = Activity::NoTeam, unsigned char ignoreMaterial = 0, int skip = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1714,6 +1670,10 @@ public:
 		bool back;
 	};
 
+    /// <summary>
+    /// Sets the current scene pointer to null
+    /// </summary>
+    void SceneMan::ClearCurrentScene();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -1800,12 +1760,6 @@ protected:
 	BITMAP * m_pOrphanSearchBitmap;
 
 
-// TODO TEMP REMOVE
-    // Debug deque with integers showing how many sim
-//    std::deque<bool> m_DrawnUpdates;
-//    std::deque<int> m_SUSDs;
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations
 
@@ -1821,10 +1775,10 @@ private:
 
     void Clear();
 
-
+    
     // Disallow the use of some implicit methods.
-    SceneMan(const SceneMan &reference);
-    SceneMan & operator=(const SceneMan &rhs);
+	SceneMan(const SceneMan &reference) = delete;
+	SceneMan & operator=(const SceneMan &rhs) = delete;
 
 };
 

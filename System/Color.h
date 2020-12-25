@@ -15,6 +15,8 @@ namespace RTE {
 
 	public:
 
+		SerializableOverrideMethods
+
 		unsigned char m_R; //!< Red value of this color.
 		unsigned char m_G; //!< Green value of this color.
 		unsigned char m_B; //!< Blue value of this color.
@@ -50,7 +52,7 @@ namespace RTE {
 		/// Makes the Color object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create() override;
 
 		/// <summary>
 		/// Makes the Color object ready for use.
@@ -59,35 +61,14 @@ namespace RTE {
 		/// <param name="G">Initial Green value of this color.</param>
 		/// <param name="B">Initial Blue value of this color.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(unsigned char inputR, unsigned char inputG, unsigned char inputB);
+		int Create(unsigned char inputR, unsigned char inputG, unsigned char inputB);
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Sets RGB of this Color to zero.
 		/// </summary>
-		void Reset() { Clear(); }
-#pragma endregion
-
-#pragma region INI Handling
-		/// <summary>
-		/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called.
-		/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
-		/// </summary>
-		/// <param name="propName">The name of the property to be read.</param>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>
-		/// An error return value signaling whether the property was successfully read or not.
-		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
-		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader);
-
-		/// <summary>
-		/// Saves the complete state of this Color to an output stream for later recreation with Create(Reader &reader).
-		/// </summary>
-		/// <param name="writer">A Writer that the Color will save itself with.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const;
+		void Reset() override { Clear(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -161,12 +142,12 @@ namespace RTE {
 		/// Gets the class name of this Color.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this Color.</returns>
-		virtual const std::string & GetClassName() const { return m_ClassName; }
+		const std::string & GetClassName() const override { return c_ClassName; }
 #pragma endregion
 
 	protected:
 
-		static const std::string m_ClassName; //!< A string with the friendly-formatted type name of this.
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 
 	private:
 

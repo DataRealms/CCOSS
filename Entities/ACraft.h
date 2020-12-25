@@ -45,6 +45,9 @@ class ACraft:
 
 public:
 
+	SerializableOverrideMethods
+	ClassInfoGetters
+
 
 enum HatchState
 {
@@ -80,6 +83,8 @@ enum
 
     public:
 
+		SerializableOverrideMethods
+
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Constructor:     Exit
@@ -99,7 +104,7 @@ enum
     // Return value:    An error return value signaling sucess or any particular failure.
     //                  Anything below 0 is an error signal.
 
-        virtual int Create();
+		int Create() override;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -110,23 +115,7 @@ enum
     // Return value:    An error return value signaling sucess or any particular failure.
     //                  Anything below 0 is an error signal.
 
-        virtual int Create(const Exit &reference);
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  ReadProperty
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Reads a property value from a Reader stream. If the name isn't
-    //                  recognized by this class, then ReadProperty of the parent class
-    //                  is called. If the property isn't recognized by any of the base classes,
-    //                  false is returned, and the Reader's position is untouched.
-    // Arguments:       The name of the property to be read.
-    //                  A Reader lined up to the value of the property to be read.
-    // Return value:    An error return value signaling whether the property was successfully
-    //                  read or not. 0 means it was read successfully, and any nonzero indicates
-    //                  that a property of that name could not be found in this or base classes.
-
-        virtual int ReadProperty(std::string propName, Reader &reader);
+		int Create(const Exit &reference);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -137,19 +126,7 @@ enum
     // Arguments:       None.
     // Return value:    None.
 
-        virtual void Reset() { Clear(); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Save
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Saves the complete state of this Exit to an output stream for
-    //                  later recreation with Create(Reader &reader);
-    // Arguments:       A Writer that the Exit will save itself with.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Save(Writer &writer) const;
+        void Reset() override { Clear(); }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -159,27 +136,27 @@ enum
     // Arguments:       None.
     // Return value:    A string with the friendly-formatted type name of this object.
 
-        virtual const std::string & GetClassName() const { return m_sClassName; }
+		const std::string & GetClassName() const override { return m_sClassName; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetOffset
+    // Method:  GetOffset
     //////////////////////////////////////////////////////////////////////////////////////////
     // Description:     Gets the position offset of this exit from the position of its ACraft.
     // Arguments:       None.
     // Return value:    The coordinates relative to the m_Pos of this' ACraft.
 
-        virtual Vector GetOffset() const { return m_Offset; }
+		Vector GetOffset() const { return m_Offset; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetVelocity
+    // Method:  GetVelocity
     //////////////////////////////////////////////////////////////////////////////////////////
     // Description:     Gets the velocity of anything that exits through this.
     // Arguments:       None.
     // Return value:    The velocity vector for anything exiting through this.
 
-        virtual Vector GetVelocity() const { return m_Velocity * (1.0 + m_VelSpread * NormalRand()); }
+        Vector GetVelocity() const { return m_Velocity * (1.0F + m_VelSpread * RandomNormalNum()); }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -191,21 +168,21 @@ enum
     // Arguments:       None.
     // Return value:    Half the total width of the opening.
 
-        virtual float GetRadius() const { return m_Radius; }
+		float GetRadius() const { return m_Radius; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetRange
+    // Method:  GetRange
     //////////////////////////////////////////////////////////////////////////////////////////
     // Description:     Gets the distance this exit can suck in objects from.
     // Arguments:       None.
     // Return value:    The sucking range of this.
 
-        virtual float GetRange() const { return m_Range; }
+		float GetRange() const { return m_Range; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  CheckIfClear
+    // Method:  CheckIfClear
     //////////////////////////////////////////////////////////////////////////////////////////
     // Description:     Calculates whether this exit is currently clear enough of terrain to
     //                  safely put things through without them ending up in the terrain.
@@ -214,32 +191,32 @@ enum
     //                  How large (radius) the item is that is supposed to fit.
     // Return value:    If this has been determined clear to put anything through.
 
-        virtual bool CheckIfClear(const Vector &pos, Matrix &rot, float size = 20);
+		bool CheckIfClear(const Vector &pos, Matrix &rot, float size = 20);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  IsClear
+    // Method:  IsClear
     //////////////////////////////////////////////////////////////////////////////////////////
     // Description:     Tells if this is clear of the terrain to put things through. Faster than
     //                  CheckIfClear().
     // Arguments:       None.
     // Return value:    If this has been determined clear to put anything through.
 
-        virtual bool IsClear() const { return m_Clear; }
+		bool IsClear() const { return m_Clear; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  SuckInMOs
+    // Method:  SuckInMOs
     //////////////////////////////////////////////////////////////////////////////////////////
     // Description:     Uses cast MO rays to see if anyhting is able to be drawn into this
     //                  exit. If so, it will alter the positiona nd velocity of the objet so
     //                  it flies into the exit until it is sufficiently inside and then it'll
     //                  return the MO here, OWNERHIP NOT TRANSFERRED! It is still in MovableMan!
-    // Arguments:       A pointer to the ACraft owner of this Exit. OINT.
+    // Arguments:       A pointer to the ACraft owner of this Exit. OWNERSHIP IS NOT TRANSFERRED!
     // Return value:    If an MO has been fully drawn into the exit, it will be returned here,
     //                  OWNERSHIP NOT TRANSFERRED!
 
-        virtual MOSRotating * SuckInMOs(ACraft *pExitOwner);
+		MOSRotating * SuckInMOs(ACraft *pExitOwner);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -284,7 +261,7 @@ enum
 
 
 // Concrete allocation and cloning definitions
-//ENTITYALLOCATION(ACraft)
+//EntityAllocation(ACraft)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -304,7 +281,7 @@ enum
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~ACraft() { Destroy(true); }
+	~ACraft() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -317,7 +294,7 @@ enum
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -328,23 +305,7 @@ enum
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const ACraft &reference);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
+	int Create(const ACraft &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -355,19 +316,7 @@ enum
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Actor::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this ACraft to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the ACraft will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+    void Reset() override { Clear(); Actor::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -378,27 +327,7 @@ enum
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -412,14 +341,14 @@ enum
 //                  How much to multiply the value if this happens to be a foreign Tech.
 // Return value:    The current value of this Actor and all his carried assets.
 
-    virtual float GetTotalValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const;
+	float GetTotalValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTotalValueOld
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     DOES THE SAME THING AS GetTotalValue, USED ONLY TO PRESERVE LUA COMPATIBILITY
 
-	virtual float GetTotalValueOld(int nativeModule = 0, float foreignMult = 1.0) const { return GetTotalValue(nativeModule, foreignMult, 1.0); }
+	float GetTotalValueOld(int nativeModule = 0, float foreignMult = 1.0) const override { return GetTotalValue(nativeModule, foreignMult, 1.0); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -431,7 +360,7 @@ enum
 // Arguments:       The Preset name of the object to look for.
 // Return value:    Whetehr the object was found carried by this.
 
-    virtual bool HasObject(std::string objectName) const;
+	bool HasObject(std::string objectName) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -443,7 +372,7 @@ enum
 // Arguments:       The name of the group to look for.
 // Return value:    Whetehr the object in the group was found carried by this.
 
-    virtual bool HasObjectInGroup(std::string groupName) const;
+	bool HasObjectInGroup(std::string groupName) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -463,7 +392,7 @@ enum
 // Arguments:       The assigned team number.
 // Return value:    None.
 
-    virtual void SetTeam(int team);
+	void SetTeam(int team) override;
 
 
 
@@ -474,7 +403,7 @@ enum
 // Arguments:       The pie menu to add slices to. Ownership is NOT transferred!
 // Return value:    Whether any slices were added.
 
-    virtual bool AddPieMenuSlices(PieMenuGUI *pPieMenu);
+   bool AddPieMenuSlices(PieMenuGUI *pPieMenu) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -486,7 +415,7 @@ enum
 // Return value:    Whetehr any slice was handled. False if no matching slice handler was
 //                  found, or there was no slice currently activated by the pie menu.
 
-    virtual bool HandlePieCommand(int pieSliceIndex);
+    bool HandlePieCommand(int pieSliceIndex) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -507,7 +436,7 @@ enum
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void OpenHatch();
+	void OpenHatch();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -517,7 +446,7 @@ enum
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void CloseHatch();
+	void CloseHatch();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -527,7 +456,7 @@ enum
 // Arguments:       An pointer to the new item to add. Ownership IS TRANSFERRED!
 // Return value:    None..
 
-    virtual void AddInventoryItem(MovableObject *pItemToAdd);
+	void AddInventoryItem(MovableObject *pItemToAdd) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -540,7 +469,7 @@ enum
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void DropAllInventory();
+	void DropAllInventory() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -561,7 +490,7 @@ enum
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ResetEmissionTimers() {;};
+	virtual void ResetEmissionTimers() {}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -574,7 +503,7 @@ enum
 // Return value:    Wheter the MovableObject should immediately halt any travel going on
 //                  after this hit.
 
-    virtual bool OnMOHit(MovableObject *pOtherMO);
+	bool OnMOHit(MovableObject *pOtherMO) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -584,7 +513,7 @@ enum
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -599,10 +528,7 @@ enum
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const = 0;
+	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -616,7 +542,7 @@ enum
 //                  get drawn etc.
 // Return value:    None.
 
-    virtual void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false);
+    void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -628,7 +554,7 @@ enum
 // Return value:    An integer with the recomended number of actors that fit in the craft.
 //                  Default is -1 (unknown).
 
-    virtual int GetMaxPassengers() const { return m_MaxPassengers; }
+	virtual int GetMaxPassengers() const { return m_MaxPassengers; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -650,7 +576,7 @@ enum
 // Arguments:       None.
 // Return value:    Returns total number of wounds of this actor.
 
-	virtual int GetTotalWoundCount() const { return Actor::GetTotalWoundCount(); }
+	int GetTotalWoundCount() const override { return Actor::GetTotalWoundCount(); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetTotalWoundLimit
@@ -659,28 +585,28 @@ enum
 // Arguments:       None.
 // Return value:    Returns total wound limit of this actor.
 
-	virtual int GetTotalWoundLimit() const { return Actor::GetTotalWoundLimit(); }; 
+	int GetTotalWoundLimit() const override { return Actor::GetTotalWoundLimit(); }; 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetDeliveryDelayMultiplier
+// Method:  GetDeliveryDelayMultiplier
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:		Returns delivery delay multiplier. 
 // Arguments:       None.
 // Return value:    Delivery delay multiplier. 
 
-	virtual float GetDeliveryDelayMultiplier() const { return m_DeliveryDelayMultiplier; }
+	float GetDeliveryDelayMultiplier() const { return m_DeliveryDelayMultiplier; }
 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetDeliveryDelayMultiplier
+// Method:  SetDeliveryDelayMultiplier
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:		Sets delivery delay multiplier. 
 // Arguments:       Delivery delay multiplier. 
 // Return value:    None.
 
-	virtual void SetDeliveryDelayMultiplier(float newValue) { m_DeliveryDelayMultiplier = newValue; }
+	void SetDeliveryDelayMultiplier(float newValue) { m_DeliveryDelayMultiplier = newValue; }
 
 
 
@@ -702,9 +628,7 @@ protected:
 //                  the same as the last one in the index (presumably its parent),
 // Return value:    None.
 
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID = g_NoMOID,
-                                 bool makeNewMOID = true) { Actor::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID); }
+    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override { Actor::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID); }
 
     void SetAttachableVelocitiesForGibbing(Attachable* pAttachable, Vector impactImpulse, float internalBlast);
 
@@ -715,7 +639,7 @@ protected:
 // Arguments:       Vector to store MOIDs
 // Return value:    None.
 
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const { Actor::GetMOIDs(MOIDs); } 
+	void GetMOIDs(std::vector<MOID> &MOIDs) const override { Actor::GetMOIDs(MOIDs); } 
 
     // Member variables
     static Entity::ClassInfo m_sClass;
@@ -802,8 +726,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    ACraft(const ACraft &reference);
-    ACraft & operator=(const ACraft &rhs);
+	ACraft(const ACraft &reference) = delete;
+	ACraft & operator=(const ACraft &rhs) = delete;
 
 };
 

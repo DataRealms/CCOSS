@@ -70,7 +70,7 @@ public:
 // Description:     Clears all the data
 // Arguments:       None.
 
-    void Clear(void);
+    void Clear();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ public:
 // Description:     Frees the allocated data.
 // Arguments:       None.
 
-    void Destroy(void);
+    void Destroy();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -134,7 +134,7 @@ public:
 // Description:     Creates a bitmap from a filename.
 // Arguments:       Filename.
 
-    GUIBitmap *CreateBitmap(const std::string Filename);
+    GUIBitmap * CreateBitmap(const std::string Filename);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

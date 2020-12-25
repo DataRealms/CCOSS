@@ -48,7 +48,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(HeldDevice)
+EntityAllocation(HeldDevice)
+SerializableOverrideMethods
+ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -68,7 +70,7 @@ ENTITYALLOCATION(HeldDevice)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~HeldDevice() { Destroy(true); }
+	~HeldDevice() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +81,7 @@ ENTITYALLOCATION(HeldDevice)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -94,22 +96,6 @@ ENTITYALLOCATION(HeldDevice)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire HeldDevice, including its inherited members, to their
@@ -117,19 +103,7 @@ ENTITYALLOCATION(HeldDevice)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Attachable::Reset(); m_MOType = MovableObject::TypeHeldDevice; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this HeldDevice to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the HeldDevice will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+    void Reset() override { Clear(); Attachable::Reset(); m_MOType = MovableObject::TypeHeldDevice; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -140,27 +114,7 @@ ENTITYALLOCATION(HeldDevice)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -170,7 +124,7 @@ ENTITYALLOCATION(HeldDevice)
 // Arguments:       None.
 // Return value:    A Vector with the absolute position of this' HUD stack top point.
 
-    virtual Vector GetAboveHUDPos() const { return m_Pos + Vector(0, -32); }
+	Vector GetAboveHUDPos() const override { return m_Pos + Vector(0, -32); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -413,13 +367,13 @@ ENTITYALLOCATION(HeldDevice)
 	
 	
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AddPieMenuSlices
+// Method:  AddPieMenuSlices
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Adds all slices this needs on a pie menu.
 // Arguments:       The pie menu to add slices to. Ownership is NOT transferred!
 // Return value:    Whether any slices were added.
 
-    virtual bool AddPieMenuSlices(PieMenuGUI *pPieMenu);
+   bool AddPieMenuSlices(PieMenuGUI *pPieMenu);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -433,7 +387,7 @@ ENTITYALLOCATION(HeldDevice)
 // Return value:    Whether the collision has been deemed valid. If false, then disregard
 //                  any impulses in the Hitdata.
 
-    virtual bool CollideAtPoint(HitData &hitData);
+    bool CollideAtPoint(HitData &hitData) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -466,7 +420,7 @@ ENTITYALLOCATION(HeldDevice)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reload() { ; }
+    virtual void Reload() {}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -530,18 +484,8 @@ ENTITYALLOCATION(HeldDevice)
 // Return value:    Wheter the MovableObject should immediately halt any travel going on
 //                  after this hit.
 
-    virtual bool OnMOHit(MovableObject *pOtherMO);
+	bool OnMOHit(MovableObject *pOtherMO) override;
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Travel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Travels this, using its physical representation.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void Travel();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -550,7 +494,7 @@ ENTITYALLOCATION(HeldDevice)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -565,10 +509,7 @@ ENTITYALLOCATION(HeldDevice)
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -582,12 +523,12 @@ ENTITYALLOCATION(HeldDevice)
 //                  get drawn etc.
 // Return value:    None.
 
-    virtual void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false);
+    void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false) override;
 
 	/// <summary>
 	/// Resest all the timers used by this. Can be emitters, etc. This is to prevent backed up emissions to come out all at once while this has been held dormant in an inventory.
 	/// </summary>
-	virtual void ResetAllTimers() { Attachable::ResetAllTimers(); m_ActivationTmr.Reset(); }
+	void ResetAllTimers() override { Attachable::ResetAllTimers(); m_ActivationTimer.Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -602,7 +543,7 @@ protected:
     // Is this HeldDevice that are currently activated?
     bool m_Activated;
     // Timer for timing how long a feature has been activated.
-    Timer m_ActivationTmr;
+    Timer m_ActivationTimer;
     // Can be weilded well with one hand or not
     bool m_OneHanded;
 	// Can be weilded with bg hand or not
@@ -649,8 +590,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    HeldDevice(const HeldDevice &reference);
-    HeldDevice & operator=(const HeldDevice &rhs);
+	HeldDevice(const HeldDevice &reference) = delete;
+	HeldDevice & operator=(const HeldDevice &rhs) = delete;
 
 };
 

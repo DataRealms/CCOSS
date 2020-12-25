@@ -28,13 +28,13 @@ namespace RTE {
 
 	int PostProcessMan::Create() {
 		// TODO: Make more robust and load more glows!
-		ContentFile glowFile("Base.rte/Effects/Glows/YellowTiny.bmp");
+		ContentFile glowFile("Base.rte/Effects/Glows/YellowTiny.png");
 		m_YellowGlow = glowFile.GetAsBitmap();
 		m_YellowGlowHash = glowFile.GetHash();
-		glowFile.SetDataPath("Base.rte/Effects/Glows/RedTiny.bmp");
+		glowFile.SetDataPath("Base.rte/Effects/Glows/RedTiny.png");
 		m_RedGlow = glowFile.GetAsBitmap();
 		m_RedGlowHash = glowFile.GetHash();
-		glowFile.SetDataPath("Base.rte/Effects/Glows/BlueTiny.bmp");
+		glowFile.SetDataPath("Base.rte/Effects/Glows/BlueTiny.png");
 		m_BlueGlow = glowFile.GetAsBitmap();
 		m_BlueGlowHash = glowFile.GetHash();
 
@@ -162,7 +162,7 @@ namespace RTE {
 
 		// Check for intersections. If any are found, cut down the intersecting IntRect to the bounds of the IntRect we're testing against, then make and store a Box out of it
 		for (IntRect &wrappedTestRect : wrappedTestRects) {
-			for (IntRect &wrappedGlowRect : wrappedGlowRects) {
+			for (const IntRect &wrappedGlowRect : wrappedGlowRects) {
 				if (wrappedTestRect.Intersects(wrappedGlowRect)) {
 					IntRect cutRect(wrappedGlowRect);
 					cutRect.IntersectionCut(wrappedTestRect);
@@ -205,7 +205,7 @@ namespace RTE {
 		Vector postEffectPosRelativeToBox;
 
 		for (PostEffect &scenePostEffect : m_PostSceneEffects) {
-			if (team != Activity::NOTEAM) { unseen = g_SceneMan.IsUnseen(scenePostEffect.m_Pos.m_X, scenePostEffect.m_Pos.m_Y, team); }
+			if (team != Activity::NoTeam) { unseen = g_SceneMan.IsUnseen(scenePostEffect.m_Pos.m_X, scenePostEffect.m_Pos.m_Y, team); }
 
 			if (WithinBox(scenePostEffect.m_Pos, boxPos, boxWidth, boxHeight) && !unseen) {
 				found = true;
@@ -224,7 +224,7 @@ namespace RTE {
 		Vector postEffectPosRelativeToBox;
 
 		for (PostEffect &scenePostEffect : m_PostSceneEffects) {
-			if (team != Activity::NOTEAM) { unseen = g_SceneMan.IsUnseen(scenePostEffect.m_Pos.m_X, scenePostEffect.m_Pos.m_Y, team); }
+			if (team != Activity::NoTeam) { unseen = g_SceneMan.IsUnseen(scenePostEffect.m_Pos.m_X, scenePostEffect.m_Pos.m_Y, team); }
 				
 			if (WithinBox(scenePostEffect.m_Pos, left, top, right, bottom) && !unseen) {
 				found = true;
@@ -332,7 +332,7 @@ namespace RTE {
 					testpixel = _getpixel(g_FrameMan.GetBackBuffer8(), x, y);
 
 					// YELLOW
-					if ((testpixel == g_YellowGlowColor && PosRand() < 0.9) || testpixel == 98 || (testpixel == 120 && PosRand() < 0.7)) {
+					if ((testpixel == g_YellowGlowColor && RandomNum() < 0.9F) || testpixel == 98 || (testpixel == 120 && RandomNum() < 0.7F)) {
 						draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_YellowGlow, x - 2, y - 2);
 					}
 					// TODO: Enable and add more colors once we actually have something that needs these.

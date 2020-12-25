@@ -12,15 +12,9 @@
 // Inclusions of header files
 
 #include "ACraft.h"
-#include "Atom.h"
 #include "AtomGroup.h"
-#include "Attachable.h"
-#include "HeldDevice.h"
-#include "Arm.h"
 #include "Leg.h"
 #include "Controller.h"
-#include "RTETools.h"
-#include "MOPixel.h"
 #include "Matrix.h"
 #include "AEmitter.h"
 #include "HDFirearm.h"
@@ -30,12 +24,11 @@
 #include "Scene.h"
 
 #include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
 namespace RTE {
 
-ABSTRACTCLASSINFO(ACraft, Actor)
+AbstractClassInfo(ACraft, Actor)
 const string ACraft::Exit::m_sClassName = "Exit";
 
 #define EXITLINESPACING 7
@@ -114,7 +107,6 @@ int ACraft::Exit::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "Range")
         reader >> m_Range;
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -224,18 +216,18 @@ MOSRotating * ACraft::Exit::SuckInMOs(ACraft *pExitOwner)
         rayVec = pExitOwner->RotateOffset(m_Velocity);
         rayVec.SetMagnitude(m_Range);
 
-        MOID itemMOID = g_SceneMan.CastMORay(exitCorner, rayVec, pExitOwner->GetRootID(), Activity::NOTEAM, g_MaterialGrass, true, 4);
+        MOID itemMOID = g_SceneMan.CastMORay(exitCorner, rayVec, pExitOwner->GetRootID(), Activity::NoTeam, g_MaterialGrass, true, 4);
         // Try the other side if we didn't find anything
         if (itemMOID == g_NoMOID)
         {
             exitCorner -= exitRadius * 2;
-            itemMOID = g_SceneMan.CastMORay(exitCorner, rayVec, pExitOwner->GetRootID(), Activity::NOTEAM, g_MaterialGrass, true, 4);
+            itemMOID = g_SceneMan.CastMORay(exitCorner, rayVec, pExitOwner->GetRootID(), Activity::NoTeam, g_MaterialGrass, true, 4);
         }
         // Try center beam if we STILL didn't find anything
         if (itemMOID == g_NoMOID)
         {
             exitCorner += exitRadius;
-            itemMOID = g_SceneMan.CastMORay(exitCorner, rayVec, pExitOwner->GetRootID(), Activity::NOTEAM, g_MaterialGrass, true, 4);
+            itemMOID = g_SceneMan.CastMORay(exitCorner, rayVec, pExitOwner->GetRootID(), Activity::NoTeam, g_MaterialGrass, true, 4);
         }
 
         // See if we caught anything
@@ -373,7 +365,6 @@ int ACraft::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "MaxPassengers")
         reader >> m_MaxPassengers;
     else
-        // See if the base class(es) can find a match instead
         return Actor::ReadProperty(propName, reader);
 
     return 0;
@@ -741,7 +732,7 @@ void ACraft::DropAllInventory()
             else
             {
                 (*exitee)->SetVel(m_Vel + exitVel * antiGravBoost);
-                (*exitee)->SetAngularVel(5 * NormalRand());
+                (*exitee)->SetAngularVel(5.0F * RandomNormalNum());
                 // Avoid it having immediate collisions with this
                 (*exitee)->SetWhichMOToNotHit(this, 0.5f);
                 // Avoid this immediate collisions with it
@@ -933,7 +924,7 @@ void ACraft::Update()
         m_ToDelete = true;
     }
 
-	if (g_ActivityMan.GetActivity()->GetCraftsOrbitAtTheEdge())
+	if (g_ActivityMan.GetActivity()->GetCraftOrbitAtTheEdge())
 	{
 		if (g_SceneMan.GetScene() && !g_SceneMan.GetScene()->WrapsX())
 		{
@@ -992,7 +983,7 @@ void ACraft::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 
     // Only draw if the team viewing this is on the same team OR has seen the space where this is located
     int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-    if (viewingTeam != m_Team && viewingTeam != Activity::NOTEAM)
+    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam)
     {
         if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
             return;
@@ -1054,27 +1045,27 @@ void ACraft::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         {
             char str[64];
             int iconOff = m_apAIIcons[0]->w + 2;
-            int iconColor = m_Team == Activity::TEAM_1 ? AIICON_RED : AIICON_GREEN;
+            int iconColor = m_Team == Activity::TeamOne ? AIICON_RED : AIICON_GREEN;
             Vector iconPos = GetCPUPos() - targetPos;
             
             if (m_AIMode == AIMODE_RETURN)
             {
-                sprintf_s(str, sizeof(str), "%s", "Return");
+                std::snprintf(str, sizeof(str), "%s", "Return");
                 pSmallFont->DrawAligned(&pBitmapInt, iconPos.m_X, iconPos.m_Y - 18, str, GUIFont::Centre);
             }
             else if (m_AIMode == AIMODE_DELIVER)
             {
-                sprintf_s(str, sizeof(str), "%s", "Deliver");
+                std::snprintf(str, sizeof(str), "%s", "Deliver");
                 pSmallFont->DrawAligned(&pBitmapInt, iconPos.m_X - 9, iconPos.m_Y - 5, str, GUIFont::Right);
             }
             else if (m_AIMode == AIMODE_SCUTTLE)
             {
-                sprintf_s(str, sizeof(str), "%s", "Scuttle");
+                std::snprintf(str, sizeof(str), "%s", "Scuttle");
                 pSmallFont->DrawAligned(&pBitmapInt, iconPos.m_X + 9, iconPos.m_Y - 5, str, GUIFont::Left);
             }
             else if (m_AIMode == AIMODE_STAY)
             {
-                sprintf_s(str, sizeof(str), "%s", "Stay");
+                std::snprintf(str, sizeof(str), "%s", "Stay");
                 pSmallFont->DrawAligned(&pBitmapInt, iconPos.m_X, iconPos.m_Y + 8, str, GUIFont::Centre);
             }
 
@@ -1112,7 +1103,7 @@ void ACraft::SetAttachableVelocitiesForGibbing(Attachable * pAttachable, Vector 
     newVel.SetMagnitude(internalBlast);
     newVel += m_Vel + impactImpulse;
     pAttachable->SetVel(newVel);
-    pAttachable->SetAngularVel(NormalRand());
+    pAttachable->SetAngularVel(RandomNormalNum());
 }
 
 } // namespace RTE

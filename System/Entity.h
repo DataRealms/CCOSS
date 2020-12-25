@@ -10,41 +10,41 @@ namespace RTE {
 	typedef std::function<void(void*)> MemoryDeallocate; //!< Convenient name definition for the memory deallocation callback function.
 
 #pragma region Global Macro Definitions
-	#define ABSTRACTCLASSINFO(TYPE, PARENT)	\
+	#define AbstractClassInfo(TYPE, PARENT)	\
 		Entity::ClassInfo TYPE::m_sClass(#TYPE, &PARENT::m_sClass);
 
-	#define CONCRETECLASSINFO(TYPE, PARENT, BLOCKCOUNT) \
+	#define ConcreteClassInfo(TYPE, PARENT, BLOCKCOUNT) \
 		Entity::ClassInfo TYPE::m_sClass(#TYPE, &PARENT::m_sClass, TYPE::Allocate, TYPE::Deallocate, TYPE::NewInstance, BLOCKCOUNT);
 
-	#define CONCRETESUBCLASSINFO(TYPE, SUPER, PARENT, BLOCKCOUNT) \
+	#define ConcreteSubClassInfo(TYPE, SUPER, PARENT, BLOCKCOUNT) \
 		Entity::ClassInfo SUPER::TYPE::m_sClass(#TYPE, &PARENT::m_sClass, SUPER::TYPE::Allocate, SUPER::TYPE::Deallocate, SUPER::TYPE::NewInstance, BLOCKCOUNT);
 
 	/// <summary>
 	/// Convenience macro to cut down on duplicate ClassInfo methods in classes that extend Entity.
 	/// </summary>
-	#define CLASSINFOGETTERS \
-		const Entity::ClassInfo & GetClass() const { return m_sClass; } \
-		const std::string & GetClassName() const { return m_sClass.GetName(); }
+	#define ClassInfoGetters \
+		const Entity::ClassInfo & GetClass() const override { return m_sClass; } \
+		const std::string & GetClassName() const override { return m_sClass.GetName(); }
 
 	/// <summary>
 	/// Static method used in conjunction with ClassInfo to allocate an Entity. 
 	/// This function is passed into the constructor of this Entity's static ClassInfo's constructor, so that it can instantiate MovableObjects.
 	/// </summary>
 	/// <returns>A pointer to the newly dynamically allocated Entity. Ownership is transferred as well.</returns>
-	#define ENTITYALLOCATION(TYPE)																		\
+	#define EntityAllocation(TYPE)																		\
 		static void * operator new (size_t size) { return TYPE::m_sClass.GetPoolMemory(); }				\
-		static void operator delete (void *pInstance) { TYPE::m_sClass.ReturnPoolMemory(pInstance); }	\
+		static void operator delete (void *instance) { TYPE::m_sClass.ReturnPoolMemory(instance); }		\
 		static void * operator new (size_t size, void *p) throw() { return p; }							\
 		static void operator delete (void *, void *) throw() {  }										\
 		static void * Allocate() { return malloc(sizeof(TYPE)); }										\
-		static void Deallocate(void *pInstance) { free(pInstance); }									\
+		static void Deallocate(void *instance) { free(instance); }										\
 		static Entity * NewInstance() { return new TYPE; }												\
-		virtual Entity * Clone(Entity *pCloneTo = 0) const {											\
-			TYPE *pEnt = pCloneTo ? dynamic_cast<TYPE *>(pCloneTo) : new TYPE();						\
-			RTEAssert(pEnt, "Tried to clone to an incompatible instance!");								\
-			if (pCloneTo) { pEnt->Destroy(); }															\
-			pEnt->Create(*this);																		\
-			return pEnt;																				\
+		Entity * Clone(Entity *cloneTo = 0) const override {											\
+			TYPE *ent = cloneTo ? dynamic_cast<TYPE *>(cloneTo) : new TYPE();							\
+			RTEAssert(ent, "Tried to clone to an incompatible instance!");								\
+			if (cloneTo) { ent->Destroy(); }															\
+			ent->Create(*this);																			\
+			return ent;																					\
 		}
 #pragma endregion
 
@@ -55,7 +55,7 @@ namespace RTE {
 		g_DrawColor = 0,
 		g_DrawMaterial,
 		g_DrawAir,
-		g_DrawKey,
+		g_DrawMask,
 		g_DrawWhite,
 		g_DrawMOID,
 		g_DrawNoMOID,
@@ -75,6 +75,8 @@ namespace RTE {
 
 	public:
 
+		SerializableOverrideMethods
+
 #pragma region ClassInfo
 		/// <summary>
 		/// The class that describes each subclass of Entity. There should be one ClassInfo static instance for every Entity child.
@@ -89,12 +91,12 @@ namespace RTE {
 			/// Constructor method used to instantiate a ClassInfo Entity.
 			/// </summary>
 			/// <param name="name">A friendly-formatted name of the Entity that is going to be represented by this ClassInfo.</param>
-			/// <param name="pParentInfo">Pointer to the parent class' info. 0 if this describes a root class.</param>
-			/// <param name="fpAllocFunc">Function pointer to the raw allocation function of the derived's size. If the represented Entity subclass isn't concrete, pass in 0.</param>
-			/// <param name="fpDeallocFunc">Function pointer to the raw deallocation function of memory. If the represented Entity subclass isn't concrete, pass in 0.</param>
-			/// <param name="fpNewFunc">Function pointer to the new instance factory. If the represented Entity subclass isn't concrete, pass in 0.</param>
+			/// <param name="parentInfo">Pointer to the parent class' info. 0 if this describes a root class.</param>
+			/// <param name="allocFunc">Function pointer to the raw allocation function of the derived's size. If the represented Entity subclass isn't concrete, pass in 0.</param>
+			/// <param name="deallocFunc">Function pointer to the raw deallocation function of memory. If the represented Entity subclass isn't concrete, pass in 0.</param>
+			/// <param name="newFunc">Function pointer to the new instance factory. If the represented Entity subclass isn't concrete, pass in 0.</param>
 			/// <param name="allocBlockCount">The number of new instances to fill the pre-allocated pool with when it runs out.</param>
-			ClassInfo(const std::string &name, ClassInfo *pParentInfo = 0, MemoryAllocate fpAllocFunc = 0, MemoryDeallocate fpDeallocFunc = 0, Entity * (*fpNewFunc)() = 0, int allocBlockCount = 10);
+			ClassInfo(const std::string &name, ClassInfo *parentInfo = 0, MemoryAllocate allocFunc = 0, MemoryDeallocate deallocFunc = 0, Entity * (*newFunc)() = 0, int allocBlockCount = 10);
 #pragma endregion
 
 #pragma region Getters
@@ -121,7 +123,7 @@ namespace RTE {
 			/// Gets the ClassInfo which describes the parent of this.
 			/// </summary>
 			/// <returns>A pointer to the parent ClassInfo. 0 if this is a root class.</returns>
-			const ClassInfo * GetParent() const { return m_pParentInfo; }
+			const ClassInfo * GetParent() const { return m_ParentInfo; }
 #pragma endregion
 
 #pragma region Memory Management
@@ -129,14 +131,14 @@ namespace RTE {
 			/// Grabs from the pre-allocated pool, an available chunk of memory the exact size of the Entity this ClassInfo represents. OWNERSHIP IS TRANSFERRED!
 			/// </summary>
 			/// <returns>A pointer to the pre-allocated pool memory. OWNERSHIP IS TRANSFERRED!</returns>
-			virtual void * GetPoolMemory();
+			void * GetPoolMemory();
 
 			/// <summary>
 			/// Returns a raw chunk of memory back to the pre-allocated available pool.
 			/// </summary>
-			/// <param name="pReturnedMemory">The raw chunk of memory that is being returned. Needs to be the same size as the type this ClassInfo describes. OWNERSHIP IS TRANSFERRED!</param>
+			/// <param name="returnedMemory">The raw chunk of memory that is being returned. Needs to be the same size as the type this ClassInfo describes. OWNERSHIP IS TRANSFERRED!</param>
 			/// <returns>The count of outstanding memory chunks after this was returned.</returns>
-			virtual int ReturnPoolMemory(void *pReturnedMemory);
+			int ReturnPoolMemory(void *returnedMemory);
 
 			/// <summary>
 			/// Writes a bunch of useful debug info about the memory pools to a file.
@@ -162,26 +164,26 @@ namespace RTE {
 			/// Returns whether the represented Entity subclass is concrete or not, that is if it can create new instances through NewInstance().
 			/// </summary>
 			/// <returns>Whether the represented Entity subclass is concrete or not.</returns>
-			bool IsConcrete() const { return m_fpAllocate != 0 ? true : false; }
+			bool IsConcrete() const { return (m_Allocate != 0) ? true : false; }
 
 			/// <summary>
 			/// Dynamically allocates an instance of the Entity subclass that this ClassInfo represents. If the Entity isn't concrete, 0 will be returned.
 			/// </summary>
 			/// <returns>A pointer to the dynamically allocated Entity. Ownership is transferred. If the represented Entity subclass isn't concrete, 0 will be returned.</returns>
-			virtual Entity * NewInstance() const { return IsConcrete() ? m_fpNewInstance() : 0; }
+			virtual Entity * NewInstance() const { return IsConcrete() ? m_NewInstance() : 0; }
 #pragma endregion
 
 		protected:
 
-			static ClassInfo *m_sClassHead; //!< Head of unordered linked list of ClassInfos in existence.
+			static ClassInfo *s_ClassHead; //!< Head of unordered linked list of ClassInfos in existence.
 
 			const std::string m_Name; //!< A string with the friendly - formatted name of this ClassInfo.
-			const ClassInfo *m_pParentInfo; //!< A pointer to the parent ClassInfo.
+			const ClassInfo *m_ParentInfo; //!< A pointer to the parent ClassInfo.
 
-			MemoryAllocate m_fpAllocate; //!< Raw memory allocation for the size of the type this ClassInfo describes.
-			MemoryDeallocate m_fpDeallocate; //!< Raw memory deallocation for the size of the type this ClassInfo describes.
+			MemoryAllocate m_Allocate; //!< Raw memory allocation for the size of the type this ClassInfo describes.
+			MemoryDeallocate m_Deallocate; //!< Raw memory deallocation for the size of the type this ClassInfo describes.
 			// TODO: figure out why this doesn't want to work when defined as std::function.
-			Entity *(*m_fpNewInstance)(); //!< Returns an actual new instance of the type that this describes.
+			Entity *(*m_NewInstance)(); //!< Returns an actual new instance of the type that this describes.
 
 			ClassInfo *m_NextClass; //!< Next ClassInfo after this one on aforementioned unordered linked list.
 
@@ -191,8 +193,8 @@ namespace RTE {
 
 
 			// Forbidding copying
-			ClassInfo(const ClassInfo &reference) {}
-			ClassInfo & operator=(const ClassInfo &rhs) {}
+			ClassInfo(const ClassInfo &reference) = delete;
+			ClassInfo & operator=(const ClassInfo &rhs) = delete;
 		};
 #pragma endregion
 
@@ -206,7 +208,7 @@ namespace RTE {
 		/// Makes the Entity ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create() override;
 
 		/// <summary>
 		/// Creates an Entity to be identical to another, by deep copy.
@@ -222,14 +224,14 @@ namespace RTE {
 		/// <param name="checkType">Whether there is a class name in the stream to check against to make sure the correct type is being read from the stream.</param>
 		/// <param name="doCreate">Whether to do any additional initialization of the object after reading in all the properties from the Reader. This is done by calling Create().</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(Reader &reader, bool checkType = true, bool doCreate = true) { return Serializable::Create(reader, checkType, doCreate); }
+		int Create(Reader &reader, bool checkType = true, bool doCreate = true) override { return Serializable::Create(reader, checkType, doCreate); }
 
 		/// <summary>
 		/// Uses a passed-in instance, or creates a new one, and makes it identical to this.
 		/// </summary>
-		/// <param name="pCloneTo">A pointer to an instance to make identical to this. If 0 is passed in, a new instance is made inside here, and ownership of it IS returned!</param>
+		/// <param name="cloneTo">A pointer to an instance to make identical to this. If 0 is passed in, a new instance is made inside here, and ownership of it IS returned!</param>
 		/// <returns>An Entity pointer to the newly cloned-to instance. Ownership IS transferred!</returns>
-		virtual Entity * Clone(Entity *pCloneTo = 0) const { RTEAbort("Attempt to clone an abstract or unclonable type!"); return 0; }
+		virtual Entity * Clone(Entity *cloneTo = 0) const { RTEAbort("Attempt to clone an abstract or unclonable type!"); return 0; }
 #pragma endregion
 
 #pragma region Destruction
@@ -247,36 +249,17 @@ namespace RTE {
 		/// <summary>
 		/// Resets the entire Entity, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
+		void Reset() override { Clear(); }
 #pragma endregion
 
 #pragma region INI Handling
-		/// <summary>
-		/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called.
-		/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
-		/// </summary>
-		/// <param name="propName">The name of the property to be read.</param>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>
-		/// An error return value signaling whether the property was successfully read or not.
-		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
-		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader);
-
-		/// <summary>
-		/// Saves the complete state of this Entity to an output stream for later recreation with Create(istream &stream).
-		/// </summary>
-		/// <param name="writer">A Writer that the Entity will save itself to.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const = 0;
-
 		/// <summary> 
 		/// Only saves out a Preset reference of this to the stream.
 		/// Is only applicable to objects that are not original presets and haven't been altered since they were copied from their original.
 		/// </summary>
 		/// <param name="writer">A Writer that the Entity will save itself to.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int SavePresetCopy(Writer &writer) const;
+		int SavePresetCopy(Writer &writer) const;
 #pragma endregion
 
 #pragma region Getters and Setters

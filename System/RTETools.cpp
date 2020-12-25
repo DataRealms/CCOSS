@@ -3,25 +3,41 @@
 
 namespace RTE {
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SeedRand() { srand(time(0)); }
+	std::mt19937 g_RNG;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	double PosRand() { return (rand() / (RAND_MAX / 1000 + 1)) / 1000.0; }
+	float GetMPP() { return c_MPP; }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	double NormalRand() { return (static_cast<double>(rand()) / (RAND_MAX / 2)) - 1.0; }
+	float GetPPM() { return c_PPM; }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	double RangeRand(float min, float max) { return min + ((max - min) * PosRand()); }
+	float GetLPP() { return c_LPP; }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SelectRand(int min, int max) { return min + static_cast<int>((max - min) * PosRand() + 0.5); }
+	float GetPPL() { return c_PPL; }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SeedRNG() {
+		// Pre-Seed generation
+		std::array<int, 624> seedData;
+		std::random_device randomDevice;
+		std::generate_n(seedData.data(), seedData.size(), std::ref(randomDevice));
+
+		std::seed_seq sequence(std::begin(seedData), std::end(seedData));
+		g_RNG.seed(sequence);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SeedRNG(unsigned int seed) {
+		g_RNG.seed(seed);
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -39,11 +55,11 @@ namespace RTE {
 	float EaseIn(float start, float end, float progressScalar) {
 		if (progressScalar <= 0) {
 			return start;
-		} else if (progressScalar >= 1.0) {
+		} else if (progressScalar >= 1.0F) {
 			return end;
 		}
 		float t = 1 - progressScalar;
-		return (end - start) * (sinf(-t * c_HalfPI) + 1) + start;
+		return (end - start) * (std::sin(-t * c_HalfPI) + 1) + start;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,16 +67,16 @@ namespace RTE {
 	float EaseOut(float start, float end, float progressScalar) {
 		if (progressScalar <= 0) {
 			return start;
-		} else if (progressScalar >= 1.0) {
+		} else if (progressScalar >= 1.0F) {
 			return end;
 		}
-		return (end - start) * -sinf(-progressScalar * c_HalfPI) + start;
+		return (end - start) * -std::sin(-progressScalar * c_HalfPI) + start;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float EaseInOut(float start, float end, float progressScalar) {
-		return start * (2 * powf(progressScalar, 3) - 3 * powf(progressScalar, 2) + 1) + end * (3 * powf(progressScalar, 2) - 2 * powf(progressScalar, 3));
+		return start * (2 * std::pow(progressScalar, 3) - 3 * std::pow(progressScalar, 2) + 1) + end * (3 * std::pow(progressScalar, 2) - 2 * std::pow(progressScalar, 3));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -116,6 +132,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	float GetAllegroAngle(float angleDegrees) { return (angleDegrees / 360) * 256; }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void OpenBrowserToURL(std::string goToURL) {
 		system(std::string("start ").append(goToURL).c_str());
 	}
@@ -124,8 +144,8 @@ namespace RTE {
 
 	bool ASCIIFileContainsString(std::string filePath, std::string findString) {
 		// Open the script file so we can check it out
-		std::ifstream *pFile = new std::ifstream(filePath.c_str());
-		if (!pFile->good()) {
+		std::ifstream *file = new std::ifstream(filePath.c_str());
+		if (!file->good()) {
 			return false;
 		}
 		char rawLine[1024];
@@ -135,22 +155,19 @@ namespace RTE {
 		std::string::size_type commentPos = std::string::npos;
 		bool blockCommented = false;
 
-		while (!pFile->eof()) {
+		while (!file->eof()) {
 			// Go through the script file, line by line
-			pFile->getline(rawLine, 1024);
+			file->getline(rawLine, 1024);
 			line = rawLine;
 			pos = endPos = 0;
-			commentPos = std::string::npos;
 
 			// Check for block comments
-			if (!blockCommented && (commentPos = line.find("/*", 0)) != std::string::npos) { blockCommented = true; }
+			if ((commentPos = line.find("/*", 0) != std::string::npos) && !blockCommented) { blockCommented = true; }
 
 			// Find the end of the block comment
-			if (blockCommented) {
-				if ((commentPos = line.find("*/", commentPos == std::string::npos ? 0 : commentPos)) != std::string::npos) {
-					blockCommented = false;
-					pos = commentPos;
-				}
+			if (((commentPos = line.find("*/", commentPos == std::string::npos ? 0 : commentPos)) != std::string::npos) && blockCommented) {
+				blockCommented = false;
+				pos = commentPos;
 			}
 			// Process the line as usual
 			if (!blockCommented) {
@@ -161,16 +178,16 @@ namespace RTE {
 					pos = line.find(findString.c_str(), pos);
 					if (pos != std::string::npos && pos < commentPos) {
 						// Found it!
-						delete pFile;
-						pFile = 0;
+						delete file;
+						file = 0;
 						return true;
 					}
 				} while (pos != std::string::npos && pos < commentPos);
 			}
 		}
 		// Didn't find the search string
-		delete pFile;
-		pFile = 0;
+		delete file;
+		file = 0;
 		return false;
 	}
 }

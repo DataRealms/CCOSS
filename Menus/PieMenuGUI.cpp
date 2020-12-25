@@ -33,7 +33,7 @@
 
 using namespace RTE;
 
-const string PieMenuGUI::Slice::m_sClassName = "Slice";
+const string PieMenuGUI::Slice::c_ClassName = "Slice";
 BITMAP *PieMenuGUI::s_pCursor;
 //BITMAP *PieMenuGUI::s_pCursorGlow;
 
@@ -191,12 +191,12 @@ int PieMenuGUI::Slice::ReadProperty(std::string propName, Reader &reader)
         reader >> m_Icon;
     else if (propName == "Direction")
         reader >> m_Direction;
-    else if (propName == "ScriptPath")
-        reader >> m_ScriptPath;
-    else if (propName == "FunctionName")
+	else if (propName == "ScriptPath") {
+		reader >> m_ScriptPath;
+		CorrectBackslashesInPaths(m_ScriptPath);
+	} else if (propName == "FunctionName")
         reader >> m_FunctionName;
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -294,9 +294,9 @@ int PieMenuGUI::Create(Controller *pController, Actor *pFocusActor)
     // Load the static pie icons and cursor if havne't been done yet
     if (!s_pCursor)
     {
-        ContentFile cursorFile("Base.rte/GUIs/Skins/PieCursor.bmp");
+        ContentFile cursorFile("Base.rte/GUIs/Skins/PieCursor.png");
         s_pCursor = cursorFile.GetAsBitmap();
-//        cursorFile.SetDataPath("Base.rte/Effects/Glows/YellowSmall.bmp");
+//        cursorFile.SetDataPath("Base.rte/Effects/Glows/YellowSmall.png");
 //        s_pCursorGlow = cursorFile.GetAsBitmap();
     }
 
@@ -1083,7 +1083,7 @@ void PieMenuGUI::Update()
             Vector separator;
             for (vector<Slice *>::iterator sItr = m_AllSlices.begin(); sItr != m_AllSlices.end(); ++sItr)
             {
-                separator.SetIntXY(m_InnerRadius + m_Thickness + 2, 0);
+                separator.SetXY(m_InnerRadius + m_Thickness + 2, 0);
                 separator.RadRotate((*sItr)->m_AreaStart);
                 // Draw four so that the result will be at least 2px thick, no matter what angle
                 line(m_pBGBitmap, centerX, centerY, centerX + separator.GetCeilingIntX(), centerY + separator.GetCeilingIntY(), g_MaskColor);
@@ -1095,7 +1095,7 @@ void PieMenuGUI::Update()
             // Indicate the highlighted segment, only if it is also enabled?
             if (m_pHoveredSlice && m_pHoveredSlice->m_Enabled)
             {
-                separator.SetIntXY(m_InnerRadius + (m_Thickness / 2), 0);
+                separator.SetXY(m_InnerRadius + (m_Thickness / 2), 0);
                 separator.RadRotate(m_pHoveredSlice->m_MidAngle);
     //            floodfill(m_pBGBitmap, centerX + separator.GetFloorIntX(), centerY + separator.GetFloorIntY(), 122);
                 floodfill(m_pBGBitmap, centerX + separator.GetFloorIntX(), centerY + separator.GetFloorIntY(), m_pHoveredSlice->m_Enabled ? g_BlackColor : g_RedColor);
@@ -1277,7 +1277,7 @@ void PieMenuGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
 			//Calculate estimated jetpack impulse
 			AEmitter *pJetpack = pCrab->GetJetpack();
 			if (pJetpack && pJetpack->IsAttached())
-				jetImpulseFactor = pJetpack->EstimateImpulse(false) * g_FrameMan.GetPPM() / g_TimerMan.GetDeltaTimeSecs();
+				jetImpulseFactor = pJetpack->EstimateImpulse(false) * c_PPM / g_TimerMan.GetDeltaTimeSecs();
 		}*/
 
 		x += width / 2 + gap * 2;
@@ -1350,7 +1350,7 @@ void PieMenuGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
                 // If we have the disabled etc frames, then use em if applicable
                 pIcon = (*sItr)->m_Icon.GetBitmaps8()[(!((*sItr)->m_Enabled) && (*sItr)->m_Icon.GetFrameCount() > PIS_DISABLED) ? PIS_DISABLED : (((*sItr) == m_pHoveredSlice && (*sItr)->m_Icon.GetFrameCount() > PIS_SELECTED) ? PIS_SELECTED : PIS_NORMAL)];
                 // Position and draw the icon bitmap
-                iconPos.SetIntXY(m_InnerRadius + (m_Thickness / 2), 0);
+                iconPos.SetXY(m_InnerRadius + (m_Thickness / 2), 0);
                 iconPos.RadRotate((*sItr)->m_MidAngle);
                 iconPos += Vector(1, 1);
                 draw_sprite(pTargetBitmap, pIcon, drawPos.m_X + iconPos.m_X - (pIcon->w / 2), drawPos.m_Y + iconPos.m_Y - (pIcon->h / 2)); 

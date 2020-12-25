@@ -10,39 +10,105 @@ namespace RTE {
 
 	class Vector;
 
+	extern std::mt19937 g_RNG; //!< The random number generator used for all random functions.
+
+#pragma region Physics Constants Getters
+	/// <summary>
+	/// Gets the ratio between the physics engine's meters and on-screen pixels.
+	/// </summary>
+	/// <returns>A float describing the current MPP ratio.</returns>
+	float GetMPP();
+
+	/// <summary>
+	/// Gets the ratio between on-screen pixels and the physics engine's meters.
+	/// </summary>
+	/// <returns>A float describing the current PPM ratio.</returns>
+	float GetPPM();
+
+	/// <summary>
+	/// Gets the ratio between the physics engine's Liters and on-screen pixels.
+	/// </summary>
+	/// <returns>A float describing the current LPP ratio.</returns>
+	float GetLPP();
+
+	/// <summary>
+	/// Gets the ratio between the on-screen pixels and the physics engine's Liters.
+	/// </summary>
+	/// <returns>A float describing the current PPL ratio.</returns>
+	float GetPPL();
+#pragma endregion
+
 #pragma region Random Numbers
 	/// <summary>
-	/// Seeds the rand with the current runtime time.
+	/// Seed the mt19937 random number generator. mt19937 is the standard mersenne_twister_engine.
 	/// </summary>
-	void SeedRand();
+	void SeedRNG();
 
 	/// <summary>
-	/// A good rand function that return a float between 0.0 and 0.999.
+	/// Seed the mt19937 random number generator. mt19937 is the standard mersenne_twister_engine.
 	/// </summary>
-	/// <returns>Random number.</returns>
-	double PosRand();
+	/// <param name="seed">Seed for the random number generator.</param>
+	void SeedRNG(unsigned int seed);
 
 	/// <summary>
-	/// A good rand function that returns a floating point value between -1.0 and 1.0, both inclusive.
+	/// Function template which returns a uniformly distributed random number in the range [-1, 1].
 	/// </summary>
-	/// <returns>Random number.</returns>
-	double NormalRand();
+	/// <returns>Uniformly distributed random number in the range [-1, 1].</returns>
+	template <typename floatType = float>
+	typename std::enable_if<std::is_floating_point<floatType>::value, floatType>::type RandomNormalNum() {
+		return std::uniform_real_distribution<floatType>(floatType(-1.0), std::nextafter(floatType(1.0), std::numeric_limits<floatType>::max()))(g_RNG);
+	}
 
 	/// <summary>
-	/// A good rand function that returns a floating point value between two given thresholds, the min being inclusive, but the max not.
+	/// Function template specialization for int types which returns a uniformly distributed random number in the range [-1, 1].
 	/// </summary>
-	/// <param name="min">Minimum value this can return.</param>
-	/// <param name="max">Maximum value this can return.</param>
-	/// <returns>Random number between limits.</returns>
-	double RangeRand(float min, float max);
+	/// <returns>Uniformly distributed random number in the range [-1, 1].</returns>
+	template <typename intType>
+	typename std::enable_if<std::is_integral<intType>::value, intType>::type RandomNormalNum() {
+		return std::uniform_int_distribution<intType>(intType(-1), intType(1))(g_RNG);
+	}
 
 	/// <summary>
-	/// A rand function that returns an int between min and max, both inclusive.
+	/// Function template which returns a uniformly distributed random number in the range [0, 1].
 	/// </summary>
-	/// <param name="min">Minimum value this can return.</param>
-	/// <param name="max">Maximum value this can return.</param>
-	/// <returns>Random number between limits.</returns>
-	int SelectRand(int min, int max);
+	/// <returns>Uniformly distributed random number in the range [0, 1].</returns>
+	template <typename floatType = float>
+	typename std::enable_if<std::is_floating_point<floatType>::value, floatType>::type RandomNum() {
+		return std::uniform_real_distribution<floatType>(floatType(0.0), std::nextafter(floatType(1.0), std::numeric_limits<floatType>::max()))(g_RNG);
+	}
+
+	/// <summary>
+	/// Function template specialization for int types which returns a uniformly distributed random number in the range [0, 1].
+	/// </summary>
+	/// <returns>Uniformly distributed random number in the range [0, 1].</returns>
+	template <typename intType>
+	typename std::enable_if<std::is_integral<intType>::value, intType>::type RandomNum() {
+		return std::uniform_int_distribution<intType>(intType(0), intType(1))(g_RNG);
+	}
+
+	/// <summary>
+	/// Function template which returns a uniformly distributed random number in the range [min, max].
+	/// </summary>
+	/// <param name="min">Lower boundary of the range to pick a number from.</param>
+	/// <param name="max">Upper boundary of the range to pick a number from.</param>
+	/// <returns>Uniformly distributed random number in the range [min, max].</returns>
+	template <typename floatType = float>
+	typename std::enable_if<std::is_floating_point<floatType>::value, floatType>::type RandomNum(floatType min, floatType max) {
+		if (max < min) { std::swap(min, max); }
+		return (std::uniform_real_distribution<floatType>(floatType(0.0), std::nextafter(max - min, std::numeric_limits<floatType>::max()))(g_RNG) + min);
+	}
+
+	/// <summary>
+	/// Function template specialization for int types which returns a uniformly distributed random number in the range [min, max].
+	/// </summary>
+	/// <param name="min">Lower boundary of the range to pick a number from.</param>
+	/// <param name="max">Upper boundary of the range to pick a number from.</param>
+	/// <returns>Uniformly distributed random number in the range [min, max].</returns>
+	template <typename intType>
+	typename std::enable_if<std::is_integral<intType>::value, intType>::type RandomNum(intType min, intType max) {
+		if (max < min) { std::swap(min, max); }
+		return (std::uniform_int_distribution<intType>(intType(0), max - min)(g_RNG) + min);
+	}
 #pragma endregion
 
 #pragma region Interpolation
@@ -127,6 +193,15 @@ namespace RTE {
 	/// <param name="bottom">Position of box bottom plane (Y end).</param>
 	/// <returns>True if point is inside box bounds.</returns>
 	bool WithinBox(Vector &point, float left, float top, float right, float bottom);
+#pragma endregion
+
+#pragma region Conversion
+	/// <summary>
+	/// Returns a corrected angle value that can be used with Allegro fixed point math routines where 256 equals 360 degrees.
+	/// </summary>
+	/// <param name="angleDegrees">The angle value to correct. In degrees.</param>
+	/// <returns>A float with the represented angle as full rotations being 256.</returns>
+	float GetAllegroAngle(float angleDegrees);
 #pragma endregion
 
 #pragma region Misc

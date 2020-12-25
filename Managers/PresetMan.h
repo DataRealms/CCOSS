@@ -14,25 +14,15 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "RTETools.h"
-#include "Singleton.h"
-#define g_PresetMan PresetMan::Instance()
-
-//#include "Serializable.h"
 #include "Entity.h"
-#include "Actor.h"
-//#include "FrameMan.h"
-//#include "SceneMan.h"
-//#include "Vector.h"
-//#include "MOPixel.h"
-//#include "AHuman.h"
-//#include "MovableEntity.h"
-//#include "LimbPath.h"
-//#include "AtomGroup.h"
+#include "Singleton.h"
+
+#define g_PresetMan PresetMan::Instance()
 
 namespace RTE
 {
 
+class Actor;
 class DataModule;
 
 
@@ -75,7 +65,7 @@ public:
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~PresetMan() { Destroy(); }
+    ~PresetMan() { Destroy(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -86,30 +76,18 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+    int Create();
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this PresetMan to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the PresetMan will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire PresetMan, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+    void Reset() { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -123,13 +101,13 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
+// Method:  GetClassName
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the class name of this Entity.
 // Arguments:       None.
 // Return value:    A string with the friendly-formatted type name of this entity.
 
-    virtual const std::string & GetClassName() const { return m_ClassName; }
+    const std::string & GetClassName() const { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -468,7 +446,7 @@ public:
 // Method:          GetGroups
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Fills out a list with all groups registered in a specific module.
-// Arguments:       The list that all found groups will be ADDED to. OINT.
+// Arguments:       The list that all found groups will be ADDED to. OWNERSHIP IS NOT TRANSFERRED!
 //                  Which module to get the groups for. -1 means get ALL groups ever reg'd.
 //                  Pass a type name here and only groups with entitys of that type will be
 //                  be included. "All" means don't consider what types are in the groups.
@@ -482,7 +460,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Fills out a list with all groups registered in all official modules,
 //                  PLUS a specific non-official module as well.
-// Arguments:       The list that all found groups will be ADDED to. OINT.
+// Arguments:       The list that all found groups will be ADDED to. OWNERSHIP IS NOT TRANSFERRED!
 //                  Which module to get the groups for, in addition to all groups in
 //                  official modules loaded earlier than the one specified here. -1 means
 //                  get ALL groups ever reg'd.
@@ -555,9 +533,9 @@ private:
     void Clear();
 
 
-    // Disallow the use of some implicit methods.
-    PresetMan(const PresetMan &reference);
-    PresetMan & operator=(const PresetMan &rhs);
+	// Disallow the use of some implicit methods.
+	PresetMan(const PresetMan &reference) = delete;
+	PresetMan & operator=(const PresetMan &rhs) = delete;
 
 };
 

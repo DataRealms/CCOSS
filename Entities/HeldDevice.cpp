@@ -12,19 +12,16 @@
 // Inclusions of header files
 
 #include "HeldDevice.h"
-#include "Atom.h"
-#include "RTEManagers.h"
-#include "RTETools.h"
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "Actor.h"
-#include "ACraft.h"
+#include "MovableMan.h"
 #include "AtomGroup.h"
+
+#include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
+
 
 namespace RTE {
 
-CONCRETECLASSINFO(HeldDevice, Attachable, 0)
+ConcreteClassInfo(HeldDevice, Attachable, 50)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -38,7 +35,7 @@ void HeldDevice::Clear()
     m_HeldDeviceType = WEAPON;
     m_IsExplosiveWeapon = false;
     m_Activated = false;
-    m_ActivationTmr.Reset();
+    m_ActivationTimer.Reset();
     m_OneHanded = false;
 	m_DualWieldable = false;
     m_StanceOffset.Reset();
@@ -121,7 +118,7 @@ int HeldDevice::Create(const HeldDevice &reference)
     m_HeldDeviceType = reference.m_HeldDeviceType;
 
     m_Activated = reference.m_Activated;
-    m_ActivationTmr = reference.m_ActivationTmr;
+    m_ActivationTimer = reference.m_ActivationTimer;
 
     m_OneHanded = reference.m_OneHanded;
 	m_DualWieldable = reference.m_DualWieldable;
@@ -175,7 +172,6 @@ int HeldDevice::ReadProperty(std::string propName, Reader &reader)
 		PieMenuGUI::AddAvailableSlice(newSlice);
     }
     else
-        // See if the base class(es) can find a match instead
         return Attachable::ReadProperty(propName, reader);
 
     return 0;
@@ -305,13 +301,6 @@ bool HeldDevice::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 bool HeldDevice::CollideAtPoint(HitData &hd)
 {
     return Attachable::CollideAtPoint(hd);
-/* Obsolete
-    if (hd.pBody[HITOR] && g_MovableMan.IsOfActor(hd.pBody[HITOR]->GetID())) {
-        MovableObject *pMO = g_MovableMan.GetMOFromID(hd.pBody[HITOR]->GetRootID());
-        if (pMO && pMO->IsActor())
-            dynamic_cast<Actor *>(pMO)->SetItemInReach(this);
-    }
-*/
 }
 
 
@@ -324,7 +313,7 @@ void HeldDevice::Activate()
 {
     if (!m_Activated)
     {
-        m_ActivationTmr.Reset();
+        m_ActivationTimer.Reset();
         // Register alarming event!
         if (m_Loudness > 0)
             g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, m_Loudness));
@@ -354,22 +343,6 @@ void HeldDevice::Deactivate()
 
 bool HeldDevice::OnMOHit(MovableObject *pOtherMO)
 {
-/* The ACraft now actively suck things in with cast rays instead
-    // See if we hit any craft with open doors to get sucked into
-    ACraft *pCraft = dynamic_cast<ACraft *>(pOtherMO);
-
-    if (!IsSetToDelete() && pCraft && (pCraft->GetHatchState() == ACraft::OPEN || pCraft->GetHatchState() == ACraft::OPENING))
-    {
-        // Detach from whomever holds this
-        Detach();
-        // Add (copy) to the ship's inventory
-        pCraft->AddInventoryItem(dynamic_cast<MovableObject *>(this->Clone()));
-        // Delete the original from scene - this is safer than 'removing' or handing over ownership halfway through MovableMan's update
-        this->SetToDelete();
-        // Terminate; we got sucked into the craft; so communicate this out
-        return true;
-    }
-*/
     // Don't terminate, continue on
     return false;
 }
@@ -412,7 +385,7 @@ void HeldDevice::Update()
         if (m_SpriteAnimMode == LOOPWHENMOVING && m_Activated)
         {
             float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % m_SpriteAnimDuration;
-            m_Frame = floorf((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);
+            m_Frame = std::floor((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);
         }
     }
 
@@ -488,7 +461,7 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
     {
         // Only draw if the team viewing this has seen the space where this is located
         int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-        if (viewingTeam != Activity::NOTEAM)
+        if (viewingTeam != Activity::NoTeam)
         {
             if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
                 return;
@@ -543,7 +516,7 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
                 m_BlinkTimer.Reset();
 
             pSymbolFont->DrawAligned(&pBitmapInt, drawPos.m_X - 1, drawPos.m_Y - 20, str, GUIFont::Centre);
-            sprintf_s(str, sizeof(str), "%s", m_PresetName.c_str());
+            std::snprintf(str, sizeof(str), "%s", m_PresetName.c_str());
             pTextFont->DrawAligned(&pBitmapInt, drawPos.m_X + 0, drawPos.m_Y - 29, str, GUIFont::Centre);
         }
     }

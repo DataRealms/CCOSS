@@ -13,14 +13,14 @@
 
 #include "BunkerAssemblyScheme.h"
 #include "PresetMan.h"
-#include "ContentFile.h"
+#include "FrameMan.h"
+
 #include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
 namespace RTE {
 
-CONCRETECLASSINFO(BunkerAssemblyScheme, SceneObject, 0)
+ConcreteClassInfo(BunkerAssemblyScheme, SceneObject, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -240,7 +240,6 @@ int BunkerAssemblyScheme::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "AssemblyGroup")
 		reader >> m_AssemblyGroup;
     else
-        // See if the base class(es) can find a match instead
         return SceneObject::ReadProperty(propName, reader);
 
     return 0;

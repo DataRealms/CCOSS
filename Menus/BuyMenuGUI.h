@@ -88,14 +88,14 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire BuyMenuGUI, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+    void Reset() { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -109,18 +109,18 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  LoadAllLoadoutsFromFile
+// Method:  LoadAllLoadoutsFromFile
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Loads or re-loads all the loadout presets from the appropriate files
 //                  on disk. This will first clear out all current loadout presets!
 // Arguments:       None.
 // Return value:    Success or not.
 
-    virtual bool LoadAllLoadoutsFromFile();
+    bool LoadAllLoadoutsFromFile();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  SaveAllLoadoutsToFile
+// Method:  SaveAllLoadoutsToFile
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Saves all the loadouts to appropriate file on disk. Does NOT save
 //                  any named presets which will be loaded from the standard preset
@@ -128,7 +128,7 @@ public:
 // Arguments:       None.
 // Return value:    Success or not.
 
-    virtual bool SaveAllLoadoutsToFile();
+    bool SaveAllLoadoutsToFile();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -269,13 +269,13 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  SaveCurrentLoadout
+// Method:  SaveCurrentLoadout
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Saves the current loadout into a Set.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void SaveCurrentLoadout();
+    void SaveCurrentLoadout();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -336,17 +336,17 @@ public:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  Draw
+// Method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws the menu
 // Arguments:       The bitmap to draw on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *drawBitmap) const;
+    void Draw(BITMAP *drawBitmap) const;
 
 
 
@@ -599,36 +599,25 @@ public:
 
 protected:
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  FocusChange
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes sure all things that to happen when focus is moved from one area
-//                  or control to the next within the menu, will happen.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void FocusChange();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  CategoryChange
+// Method:  CategoryChange
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes sure all things that to happen when category is changed, happens.
 // Arguments:       Wheter to change focus to the category tabs or not.
 // Return value:    None.
 
-    virtual void CategoryChange(bool focusOnCategoryTabs = true);
+    void CategoryChange(bool focusOnCategoryTabs = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  DeployLoadout
+// Method:  DeployLoadout
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Loads the loadout set into the cart, replacing whatever's there now.
 // Arguments:       The index of the loadout to load.
 // Return value:    Whether it was loaded successfully or not.
 
-    virtual bool DeployLoadout(int index);
+    bool DeployLoadout(int index);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -689,7 +678,7 @@ protected:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  TryPurchase
+// Method:  TryPurchase
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Attempts to make a purchase with everything already set up.
 // Arguments:       None.
@@ -869,8 +858,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    BuyMenuGUI(const BuyMenuGUI &reference);
-    BuyMenuGUI & operator=(const BuyMenuGUI &rhs);
+	BuyMenuGUI(const BuyMenuGUI &reference) = delete;
+	BuyMenuGUI & operator=(const BuyMenuGUI &rhs) = delete;
 
 };
 

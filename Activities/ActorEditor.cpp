@@ -49,7 +49,7 @@ extern bool g_ResetActivity;
 
 namespace RTE {
 
-CONCRETECLASSINFO(ActorEditor, EditorActivity, 0)
+ConcreteClassInfo(ActorEditor, EditorActivity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -118,7 +118,6 @@ int ActorEditor::ReadProperty(std::string propName, Reader &reader)
         reader >> m_DeliveryDelay;
     else
 */
-        // See if the base class(es) can find a match instead
         return EditorActivity::ReadProperty(propName, reader);
 
     return 0;
@@ -199,7 +198,7 @@ int ActorEditor::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void ActorEditor::Pause(bool pause)
+void ActorEditor::SetPaused(bool pause)
 {
     // Override the pause
     m_Paused = false;
@@ -217,7 +216,7 @@ void ActorEditor::End()
 
     
 
-    m_ActivityState = OVER;
+    m_ActivityState = ActivityState::Over;
 }
 
 
@@ -271,7 +270,7 @@ void ActorEditor::Update()
 
     // Set the screen occlusion situation
     if (!m_pPicker->IsVisible())
-        g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(PLAYER_1));
+        g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(Players::PlayerOne));
 
     // Picking something to load into the editor
     if (m_EditorMode == EditorActivity::LOADDIALOG)
@@ -378,7 +377,7 @@ bool ActorEditor::LoadActor(const Entity *pActorToLoad)
     if (m_pEditedActor)
     {
         // Set up the editor for the new actor
-        m_pEditedActor->SetControllerMode(Controller::CIM_PLAYER, UInputMan::PLAYER_ONE);
+        m_pEditedActor->SetControllerMode(Controller::CIM_PLAYER, Players::PlayerOne);
         // Set up the pie menu with the actor's own slices
         m_pPieMenu->ResetSlices();
         // Add the reload data slice

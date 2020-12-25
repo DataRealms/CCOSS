@@ -12,13 +12,12 @@
 // Inclusions of header files
 
 #include "MOSprite.h"
-#include "RTEManagers.h"
-#include "RTETools.h"
+#include "PresetMan.h"
 #include "AEmitter.h"
 
 namespace RTE {
 
-ABSTRACTCLASSINFO(MOSprite, MovableObject)
+AbstractClassInfo(MOSprite, MovableObject)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -214,7 +213,6 @@ int MOSprite::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "ExitWound")
         m_pExitWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader));
     else
-        // See if the base class(es) can find a match instead
         return MovableObject::ReadProperty(propName, reader);
 
     return 0;
@@ -466,6 +464,16 @@ void MOSprite::Update() {
 		// If animation mode is set to something other than ALWAYSLOOP but only has 2 frames, override it because it's pointless
 		if ((m_SpriteAnimMode == ALWAYSRANDOM || m_SpriteAnimMode == ALWAYSPINGPONG) && m_FrameCount == 2) {
 			m_SpriteAnimMode = ALWAYSLOOP;
+		} else if (m_SpriteAnimMode == OVERLIFETIME) {
+			// If animation mode is set to over lifetime but lifetime is unlimited, override to always loop otherwise it will never animate.
+			if (m_Lifetime == 0) {
+				m_SpriteAnimMode = ALWAYSLOOP;
+			} else {
+				double lifeTimeFrame = static_cast<double>(m_FrameCount) * (m_AgeTimer.GetElapsedSimTimeMS() / static_cast<double>(m_Lifetime));
+				m_Frame = static_cast<int>(std::floor(lifeTimeFrame));
+				if (m_Frame >= m_FrameCount) { m_Frame = m_FrameCount - 1; }
+				return;
+			}
 		}
 	} else {
 		m_SpriteAnimMode = NOANIM;
@@ -483,7 +491,7 @@ void MOSprite::Update() {
 			    break;
 		    case ALWAYSRANDOM:
 			    while (m_Frame == prevFrame) {
-				    m_Frame = floorf(static_cast<float>(m_FrameCount) * PosRand());
+					m_Frame = RandomNum<int>(0, m_FrameCount - 1);
 			    }
                 m_SpriteAnimTimer.Reset();
 			    break;
@@ -575,7 +583,7 @@ void MOSprite::Draw(BITMAP *pTargetBitmap,
         }
         else if (mode == g_DrawAir)
             draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), g_MaterialAir, -1);
-        else if (mode == g_DrawKey)
+        else if (mode == g_DrawMask)
             draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), g_MaskColor, -1);
         else if (mode == g_DrawWhite)
             draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), g_WhiteColor, -1);

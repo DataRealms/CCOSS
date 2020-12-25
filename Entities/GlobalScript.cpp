@@ -18,7 +18,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(GlobalScript, Entity, 0);
+ConcreteClassInfo(GlobalScript, Entity, 10);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -61,9 +61,10 @@ int GlobalScript::Create(const GlobalScript &reference)
 
 int GlobalScript::ReadProperty(std::string propName, Reader &reader)
 {
-    if (propName == "ScriptPath")
-        reader >> m_ScriptPath;
-    else if (propName == "LuaClassName")
+	if (propName == "ScriptPath") {
+		reader >> m_ScriptPath;
+		CorrectBackslashesInPaths(m_ScriptPath);
+	} else if (propName == "LuaClassName")
         reader >> m_LuaClassName;
 	else if (propName == "LateUpdate")
 		reader >> m_LateUpdate;

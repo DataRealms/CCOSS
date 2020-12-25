@@ -1,7 +1,6 @@
 #ifndef _RTEPOSTPROCESSMAN_
 #define _RTEPOSTPROCESSMAN_
 
-#include "Serializable.h"
 #include "Singleton.h"
 #include "Box.h"
 #include "SceneMan.h"
@@ -40,7 +39,7 @@ namespace RTE {
 	/// <summary>
 	/// Singleton manager responsible for all 32bpp post-process effect drawing.
 	/// </summary>
-	class PostProcessMan : public Singleton<PostProcessMan>, public Serializable {
+	class PostProcessMan : public Singleton<PostProcessMan> {
 
 	public:
 
@@ -108,9 +107,9 @@ namespace RTE {
 		/// </summary>
 		/// <param name="effectPos">The absolute scene coordinates of the center of the effect.</param>
 		/// <param name="effect">A 32bpp BITMAP screen should be drawn centered on the above scene location in the final frame buffer. Ownership is NOT transferred!</param>
-		/// <param name="hash"></param>
+		/// <param name="hash">Hash value of the effect for transmitting over the network.</param>
 		/// <param name="strength">The intensity level this effect should have when blended in post. 0 - 255.</param>
-		/// <param name="angle"></param>
+		/// <param name="angle">The angle this effect should be rotated at.</param>
 		void RegisterPostEffect(const Vector &effectPos, BITMAP *effect, size_t hash, unsigned char strength = 255, float angle = 0);
 
 		/// <summary>
@@ -180,7 +179,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichScreen">Which player screen to get list for.</param>
 		/// <param name="outputList"></param>
-		void GetNetworkPostEffectsList(short whichScreen, std::list<PostEffect> & outputList);
+		void GetNetworkPostEffectsList(short whichScreen, std::list<PostEffect> &outputList);
 
 		// TODO: Figure out.
 		/// <summary>
@@ -188,7 +187,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichScreen">Which player screen to set list for.</param>
 		/// <param name="inputList"></param>
-		void SetNetworkPostEffectsList(short whichScreen, std::list<PostEffect> & inputList);
+		void SetNetworkPostEffectsList(short whichScreen, std::list<PostEffect> &inputList);
 #pragma endregion
 
 #pragma region Class Info
@@ -196,7 +195,7 @@ namespace RTE {
 		/// Gets the class name of this Manager.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const { return c_ClassName; }
 #pragma endregion
 
 	protected:
@@ -283,8 +282,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		PostProcessMan(const PostProcessMan &reference) {}
-		PostProcessMan & operator=(const PostProcessMan &rhs) {}
+		PostProcessMan(const PostProcessMan &reference) = delete;
+		PostProcessMan & operator=(const PostProcessMan &rhs) = delete;
 	};
 }
 #endif

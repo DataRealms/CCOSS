@@ -42,8 +42,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(ACDropShip)
-
+EntityAllocation(ACDropShip)
+SerializableOverrideMethods
+ClassInfoGetters
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     ACDropShip
@@ -62,7 +63,7 @@ ENTITYALLOCATION(ACDropShip)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~ACDropShip() { Destroy(true); }
+	~ACDropShip() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +74,7 @@ ENTITYALLOCATION(ACDropShip)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -88,22 +89,6 @@ ENTITYALLOCATION(ACDropShip)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire ACDropShip, including its inherited members, to their
@@ -111,20 +96,7 @@ ENTITYALLOCATION(ACDropShip)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); ACraft::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this ACDropShip to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the ACDropShip will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
+    void Reset() override { Clear(); ACraft::Reset(); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Destroy
@@ -134,27 +106,7 @@ ENTITYALLOCATION(ACDropShip)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -165,7 +117,7 @@ ENTITYALLOCATION(ACDropShip)
 // Arguments:       None.
 // Return value:    A float describing the mass value in Kilograms (kg).
 
-    virtual float GetMass() const;
+    float GetMass() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -178,7 +130,7 @@ ENTITYALLOCATION(ACDropShip)
 //                  here means less calculation.
 // Return value:    The rough altitude over the terrain, in pixels.
 
-    virtual float GetAltitude(int max = 0, int accuracy = 0);
+	float GetAltitude(int max = 0, int accuracy = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -188,7 +140,7 @@ ENTITYALLOCATION(ACDropShip)
 // Arguments:       How far ahead of travel direction to check for obstacles.
 // Return value:    Which MOID was detected as obstacle. g_NoMOID means nothing was detected.
 
-    virtual MOID DetectObstacle(float distance);
+	MOID DetectObstacle(float distance);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -199,34 +151,8 @@ ENTITYALLOCATION(ACDropShip)
 //                  assigned for this frame.
 // Return value:    None.
 
-    virtual void SetID(const MOID newID);
+    void SetID(const MOID newID) override;
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OnBounce
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits and then
-//                  bounces off of something. This is called by the owned Atom/AtomGroup
-//                  of this MovableObject during travel.
-// Arguments:       The position where the bounce-hit occurred.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this bounce.
-
-    virtual bool OnBounce(const Vector &pos);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OnSink
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits and then
-//                  sink into something. This is called by the owned Atom/AtomGroup
-//                  of this MovableObject during travel.
-// Arguments:       The position where the sink-hit occurred.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this sinkage.
-
-    virtual bool OnSink(const Vector &pos);
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AutoStabilizing
@@ -236,7 +162,7 @@ ENTITYALLOCATION(ACDropShip)
 // Arguments:       None.
 // Return value:    Wheter this will try to auto stabilize.
 
-    virtual bool AutoStabilizing() { return true; }
+	bool AutoStabilizing() override { return true; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -249,7 +175,7 @@ ENTITYALLOCATION(ACDropShip)
 //                  A pointer to an MO which the gibs shuold not be colliding with!
 // Return value:    None.
 
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
+	void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -260,7 +186,7 @@ ENTITYALLOCATION(ACDropShip)
 // Arguments:       The point in absolute scene coordinates.
 // Return value:    Whether this' graphical rep overlaps the scene point.
 
-    virtual bool IsOnScenePoint(Vector &scenePoint) const;
+    bool IsOnScenePoint(Vector &scenePoint) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -271,7 +197,7 @@ ENTITYALLOCATION(ACDropShip)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateAI();
+	void UpdateAI() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -281,7 +207,7 @@ ENTITYALLOCATION(ACDropShip)
 // Arguments:       Nosssssssne.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -296,10 +222,7 @@ ENTITYALLOCATION(ACDropShip)
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -311,7 +234,7 @@ ENTITYALLOCATION(ACDropShip)
 // Return value:    An integer with the recomended number of actors that fit in the craft.
 //                  Default is four.
 
-    virtual int GetMaxPassengers() const { return m_MaxPassengers > -1 ? m_MaxPassengers : 4; }
+	int GetMaxPassengers() const override { return m_MaxPassengers > -1 ? m_MaxPassengers : 4; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -382,7 +305,7 @@ ENTITYALLOCATION(ACDropShip)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ResetEmissionTimers();
+    void ResetEmissionTimers() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -392,7 +315,7 @@ ENTITYALLOCATION(ACDropShip)
 // Arguments:       None.
 // Return value:    Returns total number of wounds of this actor.
 
-	virtual int GetTotalWoundCount() const; 
+	int GetTotalWoundCount() const override; 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetTotalWoundLimit
@@ -401,7 +324,7 @@ ENTITYALLOCATION(ACDropShip)
 // Arguments:       None.
 // Return value:    Returns total wound limit of this actor.
 
-	virtual int GetTotalWoundLimit() const; 
+	int GetTotalWoundLimit() const override; 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -411,7 +334,7 @@ ENTITYALLOCATION(ACDropShip)
 // Arguments:       Amount of wounds to remove.
 // Return value:    Damage taken from removed wounds.
 
-	virtual int RemoveAnyRandomWounds(int amount);
+	int RemoveAnyRandomWounds(int amount) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -421,7 +344,7 @@ ENTITYALLOCATION(ACDropShip)
 // Arguments:       Vector to store MOIDs
 // Return value:    None.
 
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -431,7 +354,7 @@ ENTITYALLOCATION(ACDropShip)
 // Arguments:       None.
 // Return value:    Max engine angle in degrees.
 
-	virtual float GetMaxEngineAngle() const { return m_MaxEngineAngle; }
+	float GetMaxEngineAngle() const { return m_MaxEngineAngle; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -441,7 +364,7 @@ ENTITYALLOCATION(ACDropShip)
 // Arguments:       Max engine angle in degrees.
 // Return value:    None.
 
-	virtual void SetMaxEngineAngle(float newAngle) { m_MaxEngineAngle = newAngle; }
+	void SetMaxEngineAngle(float newAngle) { m_MaxEngineAngle = newAngle; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -465,7 +388,7 @@ ENTITYALLOCATION(ACDropShip)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetMaxEngineAngle
+// Virtual method:  GetLateralControl
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets lateral control value -1.0 to 1.0 control of sideways movement. 0 means try to stand still in X.
 // Arguments:       None.
@@ -491,9 +414,7 @@ protected:
 //                  the same as the last one in the index (presumably its parent),
 // Return value:    None.
 
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID = g_NoMOID,
-                                 bool makeNewMOID = true);
+    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 
     // Member variables
@@ -544,8 +465,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    ACDropShip(const ACDropShip &reference);
-    ACDropShip & operator=(const ACDropShip &rhs);
+	ACDropShip(const ACDropShip &reference) = delete;
+	ACDropShip & operator=(const ACDropShip &rhs) = delete;
 
 };
 

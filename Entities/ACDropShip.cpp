@@ -12,26 +12,14 @@
 // Inclusions of header files
 
 #include "ACDropShip.h"
-#include "Atom.h"
 #include "AtomGroup.h"
-#include "Attachable.h"
-#include "HeldDevice.h"
-#include "Arm.h"
-#include "Leg.h"
 #include "Controller.h"
-#include "RTETools.h"
-#include "MOPixel.h"
 #include "Matrix.h"
 #include "AEmitter.h"
-#include "HDFirearm.h"
-
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "GUI/AllegroBitmap.h"
 
 namespace RTE {
 
-CONCRETECLASSINFO(ACDropShip, ACraft, 0)
+ConcreteClassInfo(ACDropShip, ACraft, 10)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -195,7 +183,6 @@ int ACDropShip::ReadProperty(std::string propName, Reader &reader)
 	else if (propName == "LateralControlSpeed")
 		reader >> m_LateralControlSpeed;
 	else
-        // See if the base class(es) can find a match instead
         return ACraft::ReadProperty(propName, reader);
 
     return 0;
@@ -358,11 +345,11 @@ MOID ACDropShip::DetectObstacle(float distance)
     MOID detected = g_NoMOID;
 
     // Check center too?
-    if ((detected = g_SceneMan.CastMORay(m_Pos, checkRay, m_RootMOID, Activity::NOTEAM, 0, true, 30)) != g_NoMOID)
+    if ((detected = g_SceneMan.CastMORay(m_Pos, checkRay, m_RootMOID, Activity::NoTeam, 0, true, 30)) != g_NoMOID)
         return detected;
-    if ((detected = g_SceneMan.CastMORay(rPos, checkRay, m_RootMOID, Activity::NOTEAM, 0, true, 30)) != g_NoMOID)
+    if ((detected = g_SceneMan.CastMORay(rPos, checkRay, m_RootMOID, Activity::NoTeam, 0, true, 30)) != g_NoMOID)
         return detected;
-    if ((detected = g_SceneMan.CastMORay(lPos, checkRay, m_RootMOID, Activity::NOTEAM, 0, true, 30)) != g_NoMOID)
+    if ((detected = g_SceneMan.CastMORay(lPos, checkRay, m_RootMOID, Activity::NoTeam, 0, true, 30)) != g_NoMOID)
         return detected;
 
     return false;
@@ -546,7 +533,7 @@ void ACDropShip::UpdateAI()
             if (!IsInventoryEmpty() && m_AIMode != AIMODE_STAY)
             {
                 // Randomly choose a direction to be going when unloading
-                m_LateralMoveState = PosRand() > 0.5 ? LAT_LEFT : LAT_RIGHT;
+                m_LateralMoveState = RandomNum() > 0.5F ? LAT_LEFT : LAT_RIGHT;
                 DropAllInventory();
                 m_DeliveryState = UNLOAD;
                 // Start ascending since we're probably doing downward at max already
@@ -1047,7 +1034,7 @@ int ACDropShip::RemoveAnyRandomWounds(int amount)
 		if (bodyParts.size() == 0)
 			break;
 
-		int partIndex = RangeRand(0, bodyParts.size() - 1);
+		int partIndex = RandomNum<int>(0, bodyParts.size() - 1);
 		MOSRotating * part = bodyParts[partIndex];
 		damage += part->RemoveWounds(1);
 	}
@@ -1183,11 +1170,11 @@ void ACDropShip::Draw(BITMAP *pTargetBitmap,
     {
 #ifdef DEBUG_BUILD
         acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X),
-                              floorf(m_Pos.m_Y),
+        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
+                              std::floor(m_Pos.m_Y),
                               64);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X),
-                              floorf(m_Pos.m_Y),
+        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
+                              std::floor(m_Pos.m_Y),
                               64);
         release_bitmap(pTargetBitmap);
 

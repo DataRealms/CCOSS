@@ -106,22 +106,22 @@ void ScenarioGUI::Clear()
     m_pSceneCloseButton = 0;
     m_pSceneNameLabel = 0;
     m_pSceneInfoLabel = 0;
-    for (int player = Activity::PLAYER_1; player < PLAYERCOLUMNCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
     {
-        for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
+        for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team)
         {
 //            m_aaControls = team == TEAM_DISABLED;
             m_aapPlayerBoxes[player][team] = 0;
         }
     }
 
-    for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
+    for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team)
     {
         m_apTeamBoxes[team] = 0;
         m_apTeamNameLabels[team] = 0;
     }
 
-	for (int team = Activity::TEAM_1; team < RTE::Activity::MAXTEAMCOUNT; ++team)
+	for (int team = Activity::TeamOne; team < RTE::Activity::MaxTeamCount; ++team)
 	{
         m_apTeamTechSelect[team] = 0;
 		m_apTeamAISkillSlider[team] = 0;
@@ -130,7 +130,7 @@ void ScenarioGUI::Clear()
 
     m_pStartErrorLabel = 0;
     m_pCPULockLabel = 0;
-    m_LockedCPUTeam = Activity::NOTEAM;
+    m_LockedCPUTeam = Activity::NoTeam;
 
     m_pGoldLabel = 0;
     m_pGoldSlider = 0;
@@ -154,7 +154,7 @@ void ScenarioGUI::Clear()
     m_StartPlayers = 1;
     m_StartTeams = 2;
     m_StartFunds = 1600;
-    m_StartDifficulty = GameActivity::MEDIUMDIFFICULTY;
+    m_StartDifficulty = Activity::MediumDifficulty;
     m_BackToMain = false;
     m_Quit = false;
 }
@@ -205,50 +205,50 @@ int ScenarioGUI::Create(Controller *pController)
     m_pDifficultyLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("DifficultyLabel"));
     m_pDifficultySlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("DifficultySlider"));
     m_pActivitySelect->SetDropHeight(64);
-//    m_pActivitySelect->GetListPanel()->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
-    m_pActivityLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
+//    m_pActivitySelect->GetListPanel()->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
+    m_pActivityLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
 
     // Scene Info Box
     m_pSceneCloseButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("SceneCloseButton"));
     m_pSceneNameLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneNameLabel"));
     m_pSceneInfoLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneInfoLabel"));
-    m_pSceneInfoLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
+    m_pSceneInfoLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
 
     // Player team assignment box
     char str[128];
-    for (int player = Activity::PLAYER_1; player < PLAYERCOLUMNCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
     {
-        for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
+        for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team)
         {
             // +1 because the controls are indexed starting at 1, not 0
-            sprintf_s(str, sizeof(str), "P%dT%dBox", player + 1, team + 1);
+            std::snprintf(str, sizeof(str), "P%dT%dBox", player + 1, team + 1);
             m_aapPlayerBoxes[player][team] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl(str));
         }
     }
     m_apTeamBoxes[TEAM_DISABLED] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("TDIcon"));
-    m_apTeamBoxes[Activity::TEAM_1] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("T1Icon"));
-    m_apTeamBoxes[Activity::TEAM_2] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("T2Icon"));
-    m_apTeamBoxes[Activity::TEAM_3] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("T3Icon"));
-    m_apTeamBoxes[Activity::TEAM_4] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("T4Icon"));
+    m_apTeamBoxes[Activity::TeamOne] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("T1Icon"));
+    m_apTeamBoxes[Activity::TeamTwo] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("T2Icon"));
+    m_apTeamBoxes[Activity::TeamThree] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("T3Icon"));
+    m_apTeamBoxes[Activity::TeamFour] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("T4Icon"));
     m_apTeamNameLabels[TEAM_DISABLED] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("TDLabel"));
-    m_apTeamNameLabels[Activity::TEAM_1] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T1Label"));
-    m_apTeamNameLabels[Activity::TEAM_2] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T2Label"));
-    m_apTeamNameLabels[Activity::TEAM_3] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T3Label"));
-    m_apTeamNameLabels[Activity::TEAM_4] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T4Label"));
-    m_apTeamTechSelect[Activity::TEAM_1] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("T1TechCombo"));
-    m_apTeamTechSelect[Activity::TEAM_2] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("T2TechCombo"));
-    m_apTeamTechSelect[Activity::TEAM_3] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("T3TechCombo"));
-    m_apTeamTechSelect[Activity::TEAM_4] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("T4TechCombo"));
-	m_apTeamAISkillSlider[Activity::TEAM_1] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("T1AISkillSlider"));
-	m_apTeamAISkillSlider[Activity::TEAM_2] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("T2AISkillSlider"));
-	m_apTeamAISkillSlider[Activity::TEAM_3] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("T3AISkillSlider"));
-	m_apTeamAISkillSlider[Activity::TEAM_4] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("T4AISkillSlider"));
-	m_apTeamAISkillLabel[Activity::TEAM_1] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T1AISkillLabel"));
-	m_apTeamAISkillLabel[Activity::TEAM_2] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T2AISkillLabel"));
-	m_apTeamAISkillLabel[Activity::TEAM_3] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T3AISkillLabel"));
-	m_apTeamAISkillLabel[Activity::TEAM_4] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T4AISkillLabel"));
+    m_apTeamNameLabels[Activity::TeamOne] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T1Label"));
+    m_apTeamNameLabels[Activity::TeamTwo] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T2Label"));
+    m_apTeamNameLabels[Activity::TeamThree] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T3Label"));
+    m_apTeamNameLabels[Activity::TeamFour] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T4Label"));
+    m_apTeamTechSelect[Activity::TeamOne] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("T1TechCombo"));
+    m_apTeamTechSelect[Activity::TeamTwo] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("T2TechCombo"));
+    m_apTeamTechSelect[Activity::TeamThree] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("T3TechCombo"));
+    m_apTeamTechSelect[Activity::TeamFour] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("T4TechCombo"));
+	m_apTeamAISkillSlider[Activity::TeamOne] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("T1AISkillSlider"));
+	m_apTeamAISkillSlider[Activity::TeamTwo] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("T2AISkillSlider"));
+	m_apTeamAISkillSlider[Activity::TeamThree] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("T3AISkillSlider"));
+	m_apTeamAISkillSlider[Activity::TeamFour] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("T4AISkillSlider"));
+	m_apTeamAISkillLabel[Activity::TeamOne] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T1AISkillLabel"));
+	m_apTeamAISkillLabel[Activity::TeamTwo] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T2AISkillLabel"));
+	m_apTeamAISkillLabel[Activity::TeamThree] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T3AISkillLabel"));
+	m_apTeamAISkillLabel[Activity::TeamFour] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("T4AISkillLabel"));
 
-	for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; team++)
+	for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; team++)
 	{
 		// Hide tech combobxes by default
 	    m_apTeamTechSelect[team]->SetEnabled(false);
@@ -260,7 +260,7 @@ int ScenarioGUI::Create(Controller *pController)
 		// Hide AIs skill combobxes by default
 	    m_apTeamAISkillSlider[team]->SetEnabled(false);
 		m_apTeamAISkillSlider[team]->SetVisible(false);
-		m_apTeamAISkillSlider[team]->SetValue(Activity::DEFAULTSKILL);
+		m_apTeamAISkillSlider[team]->SetValue(Activity::DefaultSkill);
 
 	    m_apTeamAISkillLabel[team]->SetEnabled(false);
 		m_apTeamAISkillLabel[team]->SetVisible(false);
@@ -283,18 +283,18 @@ int ScenarioGUI::Create(Controller *pController)
 			if ((techPos = techName.find(techString)) != string::npos)
 			{
 				techName.replace(techPos, techString.length(), "");
-				m_apTeamTechSelect[Activity::TEAM_1]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-				m_apTeamTechSelect[Activity::TEAM_2]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-				m_apTeamTechSelect[Activity::TEAM_3]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-				m_apTeamTechSelect[Activity::TEAM_4]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+				m_apTeamTechSelect[Activity::TeamOne]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+				m_apTeamTechSelect[Activity::TeamTwo]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+				m_apTeamTechSelect[Activity::TeamThree]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+				m_apTeamTechSelect[Activity::TeamFour]->GetListPanel()->AddItem(techName, "", 0, 0, i);
 			}
 		}
     }
     // Make the lists be scrolled to the top when they are initially dropped
-    m_apTeamTechSelect[Activity::TEAM_1]->GetListPanel()->ScrollToTop();
-    m_apTeamTechSelect[Activity::TEAM_2]->GetListPanel()->ScrollToTop();
-    m_apTeamTechSelect[Activity::TEAM_3]->GetListPanel()->ScrollToTop();
-    m_apTeamTechSelect[Activity::TEAM_4]->GetListPanel()->ScrollToTop();
+    m_apTeamTechSelect[Activity::TeamOne]->GetListPanel()->ScrollToTop();
+    m_apTeamTechSelect[Activity::TeamTwo]->GetListPanel()->ScrollToTop();
+    m_apTeamTechSelect[Activity::TeamThree]->GetListPanel()->ScrollToTop();
+    m_apTeamTechSelect[Activity::TeamFour]->GetListPanel()->ScrollToTop();
 
     m_pGoldLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("GoldLabel"));
     m_pGoldSlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("GoldSlider"));
@@ -316,8 +316,8 @@ int ScenarioGUI::Create(Controller *pController)
 	m_pScenePreviewBitmap = create_bitmap_ex(8, Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT);
 
 	// Load default preview bitmap
-	ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview.bmp");
-	m_pDefaultPreviewBitmap = defaultPreview.LoadAndReleaseBitmap();
+	ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview.png");
+	m_pDefaultPreviewBitmap = defaultPreview.GetAsBitmap(COLORCONV_NONE, false);
 
 	clear_to_color(m_pScenePreviewBitmap, g_MaskColor);
 
@@ -467,7 +467,7 @@ void ScenarioGUI::Update()
             m_ScreenChange = false;
         }
 
-        if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::RUNNING || g_ActivityMan.GetActivity()->GetActivityState() == Activity::EDITING))
+        if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing))
 		{
 			if (!m_aScenarioButton[RESUME]->GetVisible())
 				m_aScenarioButton[RESUME]->SetVisible(true);
@@ -628,7 +628,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
     // Transparency effect on the scene dots and lines
     drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
     // Screen blend the dots and lines, with some flicekring in its intensity
-    int blendAmount = 120 + 55 * NormalRand();
+	int blendAmount = 120 + RandomNum(-55, 55);
     set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
     // Draw sites etc only when selecting them
@@ -647,11 +647,11 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
 				color = c_GUIColorYellow;
 
             screenLocation = m_PlanetCenter + (*sItr)->GetLocation() + (*sItr)->GetLocationOffset();
-            blendAmount = 85 + 25 * NormalRand();
+			blendAmount = 85 + RandomNum(-25, 25);
             set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
             circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 4, color);
             circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 2, color);
-            blendAmount = 200 + 55 * NormalRand();
+			blendAmount = 200 + RandomNum(-55, 55);
             set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
             circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 1, color);
         }
@@ -696,7 +696,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
     {
         const Activity *pActivity = m_pActivitySelect->GetSelectedItem() ? dynamic_cast<const Activity *>(m_pActivitySelect->GetSelectedItem()->m_pEntity) : 0;
         int lineY = 80;
-        for (int team = 0; team < Activity::MAXTEAMCOUNT; ++team)
+        for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
         {
             // Disabled shaded boxes
             if (pActivity && (!pActivity->TeamActive(team) || m_LockedCPUTeam == team))
@@ -717,7 +717,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
         }
 
 		// Manually draw UI elements on top of colored rectangle
-		for (int team = Activity::MAXTEAMCOUNT - 1; team >= Activity::TEAM_1; team--)
+		for (int team = Activity::MaxTeamCount - 1; team >= Activity::TeamOne; team--)
 		{
 			if (m_apTeamTechSelect[team]->GetVisible())
 			{
@@ -739,7 +739,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
 	// Show who controls the cursor
 	int device = g_UInputMan.GetLastDeviceWhichControlledGUICursor();
 
-	if (device >= UInputMan::DEVICE_GAMEPAD_1)
+	if (device >= DEVICE_GAMEPAD_1)
 	{
 		int mouseX, mouseY;
 		m_pGUIInput->GetMousePosition(&mouseX, &mouseY);
@@ -750,17 +750,17 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
 	}
 
 	// Show which joysticks are detected by the game
-	for (int joy = 0; joy < UInputMan::MAX_PLAYERS; joy++)
+	for (int joystick = Players::PlayerOne; joystick < Players::MaxPlayerCount; joystick++)
 	{
-		if (g_UInputMan.JoystickActive(joy))
+		if (g_UInputMan.JoystickActive(joystick))
 		{
-			int matchedDevice = UInputMan::DEVICE_GAMEPAD_1 + joy;
+			int matchedDevice = DEVICE_GAMEPAD_1 + joystick;
 
 			if (matchedDevice != device)
 			{
 				const Icon * pIcon = g_UInputMan.GetDeviceIcon(matchedDevice);
 				if (pIcon)
-					draw_sprite(drawBitmap, pIcon->GetBitmaps8()[0], g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * joy, g_FrameMan.GetResY() - 25);
+					draw_sprite(drawBitmap, pIcon->GetBitmaps8()[0], g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * joystick, g_FrameMan.GetResY() - 25);
 			}
 		}
 	}
@@ -776,6 +776,7 @@ void ScenarioGUI::Draw(BITMAP *drawBitmap) const
 
 void ScenarioGUI::UpdateInput()
 {
+	// TODO: if activity is running, allow esc to resume activity instead of quitting.
     // If esc pressed, show quit dialog if applicable
     if (g_UInputMan.KeyPressed(KEY_ESC))
     {
@@ -1065,15 +1066,15 @@ void ScenarioGUI::UpdateActivityBox()
             m_pActivityLabel->SetText(pSelected->GetDescription() + "\n\nNO sites appear to be compatible with this selected activity! Please try another.");
         m_pDifficultyLabel->SetVisible(true);
         m_pDifficultySlider->SetVisible(true);
-        if (m_pDifficultySlider->GetValue() < GameActivity::CAKEDIFFICULTY)
+        if (m_pDifficultySlider->GetValue() < Activity::CakeDifficulty)
             m_pDifficultyLabel->SetText("Difficulty: Cake");
-        else if (m_pDifficultySlider->GetValue() < GameActivity::EASYDIFFICULTY)
+        else if (m_pDifficultySlider->GetValue() < Activity::EasyDifficulty)
             m_pDifficultyLabel->SetText("Difficulty: Easy");
-        else if (m_pDifficultySlider->GetValue() < GameActivity::MEDIUMDIFFICULTY)
+        else if (m_pDifficultySlider->GetValue() < Activity::MediumDifficulty)
             m_pDifficultyLabel->SetText("Difficulty: Medium");
-        else if (m_pDifficultySlider->GetValue() < GameActivity::HARDDIFFICULTY)
+        else if (m_pDifficultySlider->GetValue() < Activity::HardDifficulty)
             m_pDifficultyLabel->SetText("Difficulty: Hard");
-        else if (m_pDifficultySlider->GetValue() < GameActivity::NUTSDIFFICULTY)
+        else if (m_pDifficultySlider->GetValue() < Activity::NutsDifficulty)
             m_pDifficultyLabel->SetText("Difficulty: Nuts");
         else
             m_pDifficultyLabel->SetText("Difficulty: Nuts!");
@@ -1087,27 +1088,27 @@ void ScenarioGUI::UpdateActivityBox()
 		if (pSelectedGA)
 		{
 			// Set gold slider value if activity sepcifies default gold amounts for difficulties
-			if (m_pDifficultySlider->GetValue() < GameActivity::CAKEDIFFICULTY)
+			if (m_pDifficultySlider->GetValue() < Activity::CakeDifficulty)
 			{
 				if (pSelectedGA->GetDefaultGoldCake() > -1)
 					m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldCake());
 			}
-			else if (m_pDifficultySlider->GetValue() < GameActivity::EASYDIFFICULTY)
+			else if (m_pDifficultySlider->GetValue() < Activity::EasyDifficulty)
 			{
 				if (pSelectedGA->GetDefaultGoldEasy() > -1)
 					m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldEasy());
 			}
-			else if (m_pDifficultySlider->GetValue() < GameActivity::MEDIUMDIFFICULTY)
+			else if (m_pDifficultySlider->GetValue() < Activity::MediumDifficulty)
 			{
 				if (pSelectedGA->GetDefaultGoldMedium() > -1)
 					m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldMedium());
 			}
-			else if (m_pDifficultySlider->GetValue() < GameActivity::HARDDIFFICULTY)
+			else if (m_pDifficultySlider->GetValue() < Activity::HardDifficulty)
 			{
 				if (pSelectedGA->GetDefaultGoldHard() > -1)
 					m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldHard());
 			}
-			else if (m_pDifficultySlider->GetValue() < GameActivity::NUTSDIFFICULTY)
+			else if (m_pDifficultySlider->GetValue() < Activity::NutsDifficulty)
 			{
 				if (pSelectedGA->GetDefaultGoldNuts() > -1)
 					m_pGoldSlider->SetValue(pSelectedGA->GetDefaultGoldNuts());
@@ -1240,14 +1241,14 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
             // The pre-set team that should absolutely be CPU played
             m_LockedCPUTeam = pGameActivity->GetCPUTeam();
             // Align the locked CPU team text label with the appropriate row
-            if (m_LockedCPUTeam != Activity::NOTEAM)
+            if (m_LockedCPUTeam != Activity::NoTeam)
                 m_pCPULockLabel->SetPositionAbs(m_pCPULockLabel->GetXPos(), m_apTeamNameLabels[m_LockedCPUTeam]->GetYPos());
         }
 
         // Set up the matrix of player control boxes
-        for (int player = Activity::PLAYER_1; player < PLAYERCOLUMNCOUNT; ++player)
+        for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
         {
-            for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
+            for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team)
             {
                 if (newActivity)
                 {
@@ -1267,7 +1268,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
                     }
 
                     // The CPU gets placed on its locked team
-                    if (m_LockedCPUTeam != Activity::NOTEAM && player == PLAYER_CPU)
+                    if (m_LockedCPUTeam != Activity::NoTeam && player == PLAYER_CPU)
                     {
                         if (team == m_LockedCPUTeam)
                         {
@@ -1291,7 +1292,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
                     // That isn't on a team row locked to the CPU
                     && m_LockedCPUTeam != team
                     // And not the CPU player if he is locked to a CPU team
-                    && (m_LockedCPUTeam == Activity::NOTEAM || player != PLAYER_CPU))
+                    && (m_LockedCPUTeam == Activity::NoTeam || player != PLAYER_CPU))
                     // And a cell not already selected
                     //&& m_aapPlayerBoxes[player][team]->GetDrawType() != GUICollectionBox::Image)
                     // And players aren't maxed out for this Activity, or we are removing a player from team assignment
@@ -1302,7 +1303,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
                     {
                         // Need to clear all other rows of this column
 // TODO:  -- unless the CPU column?
-                        for (int t2 = Activity::TEAM_1; t2 < TEAMROWCOUNT; ++t2)
+                        for (int t2 = Activity::TeamOne; t2 < TEAMROWCOUNT; ++t2)
                         {
                             // This clicked cell should get the icon of this column
                             if (t2 == team)
@@ -1342,7 +1343,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
                         // If CPU changed to an actual team assignment, clear all human players off his new team
                         if (player == PLAYER_CPU && team != TEAM_DISABLED)
                         {
-                            for (int p2 = Activity::PLAYER_1; p2 < Activity::MAXPLAYERCOUNT; ++p2)
+                            for (int p2 = Players::PlayerOne; p2 < Players::MaxPlayerCount; ++p2)
                             {
                                 // Deselect the player's team assignment if he's on the same team as the CPU
                                 if (m_aapPlayerBoxes[p2][team]->GetDrawType() == GUICollectionBox::Image)
@@ -1360,7 +1361,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
                         // If Player clicked CPU disabled button, clear CPU row
                         if (player == PLAYER_CPU && team == TEAM_DISABLED)
                         {
-							for (int t2 = Activity::TEAM_1; t2 <= Activity::TEAM_4; ++t2)
+							for (int t2 = Activity::TeamOne; t2 <= Activity::TeamFour; ++t2)
 							{
 								if (m_aapPlayerBoxes[PLAYER_CPU][t2]->GetDrawType() == GUICollectionBox::Image)
 								{
@@ -1388,7 +1389,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
 
 						//Check if we need to clear or set CPU disabled team icon
 						bool noCPUs = true;
-						for (int t2 = Activity::TEAM_1; t2 <= Activity::TEAM_4; ++t2)
+						for (int t2 = Activity::TeamOne; t2 <= Activity::TeamFour; ++t2)
 						{
 							if (m_aapPlayerBoxes[PLAYER_CPU][t2]->GetDrawType() == GUICollectionBox::Image)
 								noCPUs = false;
@@ -1422,7 +1423,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
         }
 
         // Team info columns
-        for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
+        for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team)
         {
             // Update the team names and such
             if (newActivity)
@@ -1450,7 +1451,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
                     if (!pIcon)
                     {
                         char str[128];
-                        sprintf_s(str, sizeof(str), "Team %d Default", team + 1);
+                        std::snprintf(str, sizeof(str), "Team %d Default", team + 1);
                         pIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", str));
                     }
                     m_apTeamNameLabels[team]->SetText(pActivity->GetTeamName(team) + ":");
@@ -1471,7 +1472,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
             if (pActivity->TeamActive(team))
             {
                 teamHasPlayers = false;
-                for (int player = Activity::PLAYER_1; player < PLAYERCOLUMNCOUNT; ++player)
+                for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
                 {
                     // CPU is sometimes disabled, but still counts as a team
                     if (team != TEAM_DISABLED && m_aapPlayerBoxes[player][team]->GetDrawType() == GUICollectionBox::Image)
@@ -1495,7 +1496,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
             }
 			else
 			{
-				if (team >= Activity::TEAM_1 && team < Activity::MAXTEAMCOUNT)
+				if (team >= Activity::TeamOne && team < Activity::MaxTeamCount)
 				{
 					m_apTeamTechSelect[team]->SetEnabled(false);
 					m_apTeamTechSelect[team]->SetVisible(false);
@@ -1513,7 +1514,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
             m_aScenarioButton[STARTGAME]->SetVisible(false);
             m_pStartErrorLabel->SetVisible(true);
             char str[256];
-            sprintf_s(str, sizeof(str), "Too many players assigned! Max for this activity is %d", pGameActivity->GetMaxPlayerSupport());
+            std::snprintf(str, sizeof(str), "Too many players assigned! Max for this activity is %d", pGameActivity->GetMaxPlayerSupport());
             m_pStartErrorLabel->SetText(str);
         }
         // If we are under the required number of teams with players assigned, disable the start button and show why
@@ -1522,7 +1523,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
             m_aScenarioButton[STARTGAME]->SetVisible(false);
             m_pStartErrorLabel->SetVisible(true);
             char str[256];
-            sprintf_s(str, sizeof(str), "Assign players to at\nleast %d of the teams!", pGameActivity->GetMinTeamsRequired());
+            std::snprintf(str, sizeof(str), "Assign players to at\nleast %d of the teams!", pGameActivity->GetMinTeamsRequired());
             m_pStartErrorLabel->SetText(str);
         }
 		// Assign at least one human player
@@ -1545,14 +1546,14 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
 		int startGold = m_pGoldSlider->GetValue();
 		startGold = startGold - startGold % 500;
 		if (m_pGoldSlider->GetValue() == m_pGoldSlider->GetMaximum())
-			sprintf_s(str, sizeof(str), "Starting Gold: %c Infinite", -58);
+			std::snprintf(str, sizeof(str), "Starting Gold: %c Infinite", -58);
 		else
-			sprintf_s(str, sizeof(str), "Starting Gold: %c %d oz", -58, startGold);
+			std::snprintf(str, sizeof(str), "Starting Gold: %c %d oz", -58, startGold);
 		m_pGoldLabel->SetText(str);
 
 
 		// Set skill labels
-		for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; team++)
+		for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; team++)
 		{
 			m_apTeamAISkillLabel[team]->SetText(Activity::GetAISkillString(m_apTeamAISkillSlider[team]->GetValue()));
 		}
@@ -1563,7 +1564,7 @@ void ScenarioGUI::UpdatePlayersBox(bool newActivity)
     {
         m_aScenarioButton[STARTGAME]->SetVisible(false);
         m_pStartErrorLabel->SetVisible(true);
-        m_pCPULockLabel->SetVisible(m_LockedCPUTeam != Activity::NOTEAM);
+        m_pCPULockLabel->SetVisible(m_LockedCPUTeam != Activity::NoTeam);
     }
 }
 
@@ -1577,9 +1578,9 @@ int ScenarioGUI::PlayerCount()
 {
     int count = 0;
     // Go through all the on-team non-CPU cells and see how many players are already assigned.
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
-        for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+        for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
         {
             if (m_aapPlayerBoxes[player][team]->GetDrawType() == GUICollectionBox::Image)
                 ++count;
@@ -1632,9 +1633,9 @@ bool ScenarioGUI::StartGame()
 
     // Set up the player and team assignments
     pActivity->ClearPlayers(false);
-    for (int player = Activity::PLAYER_1; player < PLAYERCOLUMNCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < PLAYERCOLUMNCOUNT; ++player)
     {
-        for (int team = Activity::TEAM_1; team < TEAMROWCOUNT; ++team)
+        for (int team = Activity::TeamOne; team < TEAMROWCOUNT; ++team)
         {
             if (team != TEAM_DISABLED && m_aapPlayerBoxes[player][team]->GetDrawType() == GUICollectionBox::Image)
             {
@@ -1650,7 +1651,7 @@ bool ScenarioGUI::StartGame()
         }
     }
 
-	for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+	for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
     {
 		// Set up techs
 		GUIListPanel::Item *pTechItem = m_apTeamTechSelect[team]->GetSelectedItem();
@@ -1659,7 +1660,7 @@ bool ScenarioGUI::StartGame()
 			// If the "random" selection, choose one from the list of loaded techs
 			if (m_apTeamTechSelect[team]->GetSelectedIndex() == 1)//pTechItem->m_ExtraIndex < 0)
 			{
-				int selection = SelectRand(1, m_apTeamTechSelect[team]->GetListPanel()->GetItemList()->size() - 1);
+				int selection = RandomNum<int>(1, m_apTeamTechSelect[team]->GetListPanel()->GetItemList()->size() - 1);
 				m_apTeamTechSelect[team]->SetSelectedIndex(selection);
 				pTechItem = m_apTeamTechSelect[team]->GetSelectedItem();
 
@@ -1679,7 +1680,7 @@ bool ScenarioGUI::StartGame()
 		if (m_apTeamAISkillSlider[team]->IsEnabled())
 			pGameActivity->SetTeamAISkill(team, m_apTeamAISkillSlider[team]->GetValue());
 		else
-			pGameActivity->SetTeamAISkill(team, Activity::DEFAULTSKILL);
+			pGameActivity->SetTeamAISkill(team, Activity::DefaultSkill);
 	}
 
 	//Force close all previously opened files
@@ -1719,12 +1720,8 @@ void ScenarioGUI::GetAllScenesAndActivities()
     {
         pScene = dynamic_cast<Scene *>(*pItr);
         // Only add non-editor and non-special scenes, or ones that don't have locations defined, or have Test in their names, or are metascenes
-		if (pScene && !pScene->GetLocation().IsZero() && 
-			pScene->GetPresetName().find("Editor") == string::npos && 
-			pScene->GetPresetName().find("Test") == string::npos && 
-			!pScene->IsMetagameInternal() && 
-			(pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
-            filteredScenes.push_back(pScene);
+		if (pScene && !pScene->GetLocation().IsZero() && !pScene->IsMetagameInternal() && (pScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes()))
+			filteredScenes.push_back(pScene);
     }
 
 	//Clear offsets
@@ -1894,7 +1891,7 @@ void ScenarioGUI::UpdateSiteNameLabel(bool visible, string text, const Vector &l
 
 void ScenarioGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Vector &end, int color) const
 {
-    int blendAmount = 210 + 15 * NormalRand();
+	int blendAmount = 210 + RandomNum(-15, 15);
     set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
     line(drawBitmap, start.m_X, start.m_Y, end.m_X, end.m_Y, color);
 /* Looks like ass
@@ -1910,7 +1907,7 @@ void ScenarioGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Ve
         line(drawBitmap, start.m_X - 1, start.m_Y, end.m_X - 1, end.m_Y, color);
     }
 */
-    blendAmount = 45 + 25 * NormalRand();
+	blendAmount = 45 + RandomNum(-25, 25);
     set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
     line(drawBitmap, start.m_X + 1, start.m_Y, end.m_X + 1, end.m_Y, color);
     line(drawBitmap, start.m_X - 1, start.m_Y, end.m_X - 1, end.m_Y, color);
@@ -1947,7 +1944,7 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     int totalSegments = 0;
     int drawnFirstSegments = 0;
     int lastSegmentsToDraw = 0;
-    int circleRadius = squareSite ? floorf(6 * circleSize) : floorf(8 * circleSize);
+    int circleRadius = squareSite ? std::floor(6 * circleSize) : std::floor(8 * circleSize);
     int chamferSize = CHAMFERSIZE;
     Vector chamferPoint1;
     Vector chamferPoint2;
@@ -2023,7 +2020,7 @@ bool ScenarioGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     // Draw a circle around the site target
     if (!(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments))
     {
-        int blendAmount = 225 + 20 * NormalRand();
+		int blendAmount = 225 + RandomNum(-20, 20);
         set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
         // If specified, draw a squareSite instead (with chamfered corners)

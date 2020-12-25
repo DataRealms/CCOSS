@@ -19,7 +19,7 @@
 
 namespace RTE {
 
-	CONCRETECLASSINFO(PEmitter, MOSParticle, 50)
+	ConcreteClassInfo(PEmitter, MOSParticle, 100)
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 		// Method:          Clear
@@ -157,7 +157,7 @@ namespace RTE {
 			reader >> burstSize;
 			// Go through all emissions and set the rate so that it emulates the way it used to work, for mod backwards compatibility
 			for (list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
-				(*eItr).m_BurstSize = ceilf((float)burstSize / (float)m_EmissionList.size());
+				(*eItr).m_BurstSize = std::ceil((float)burstSize / (float)m_EmissionList.size());
 		}
 		else if (propName == "BurstScale")
 			reader >> m_BurstScale;
@@ -177,7 +177,6 @@ namespace RTE {
 			reader >> m_LoudnessOnEmit;
 		else
 		{
-			// See if the base class(es) can find a match instead
 			return MOSParticle::ReadProperty(propName, reader);
 		}
 
@@ -473,13 +472,13 @@ namespace RTE {
 						else
 							pParticle->SetPos(m_Pos + RotateOffset(m_EmissionOffset));
 						// TODO: Optimize making the random angles!")
-						emitVel.SetXY(velMin + velRange * PosRand(), 0);
-						emitVel.RadRotate(m_EmitAngle.GetRadAngle() + spread * NormalRand());
+						emitVel.SetXY(velMin + RandomNum(0.0F, velRange), 0);
+						emitVel.RadRotate(m_EmitAngle.GetRadAngle() + spread * RandomNormalNum());
 						emitVel = RotateOffset(emitVel);
 						pParticle->SetVel(parentVel + emitVel);
 
 						if (pParticle->GetLifetime() != 0)
-							pParticle->SetLifetime(pParticle->GetLifetime() * (1.0 + ((*eItr).GetLifeVariation() * NormalRand())));
+							pParticle->SetLifetime(pParticle->GetLifetime() * (1.0F + ((*eItr).GetLifeVariation() * RandomNormalNum())));
 						pParticle->SetTeam(m_Team);
 						pParticle->SetIgnoresTeamHits(true);
 

@@ -123,6 +123,7 @@ void GUIManager::Update(void)
     int MouseX = 0, MouseY = 0;
     int DeltaX, DeltaY;    
     int MouseButtons[3], MouseStates[3];
+	int MouseWheelChange = 0;
     int Released = GUIPanel::MOUSE_NONE;
     int Pushed = GUIPanel::MOUSE_NONE;
     int Buttons = GUIPanel::MOUSE_NONE;
@@ -148,7 +149,7 @@ void GUIManager::Update(void)
     {
         m_Input->GetMousePosition(&MouseX, &MouseY);
         m_Input->GetMouseButtons(MouseButtons, MouseStates);
-        Modifier = m_Input->GetModifier();
+		MouseWheelChange = m_Input->GetMouseWheelChange();
 
         // Calculate mouse movement
         DeltaX = MouseX - m_OldMouseX;
@@ -269,6 +270,12 @@ void GUIManager::Update(void)
             if (m_MouseOverPanel)
                 m_MouseOverPanel->OnMouseLeave(MouseX, MouseY, Buttons, Mod);
         }
+
+		if (MouseWheelChange) {
+			if (CurPanel) {
+				CurPanel->OnMouseWheelChange(MouseX, MouseY, Mod, MouseWheelChange);
+			}
+		}
 
         m_MouseOverPanel = CurPanel;
     }

@@ -36,63 +36,60 @@ class AEmitter;
 // Parent(s):       Actor.
 // Class history:   10/24/2007 ACrab created.
 
-class ACrab:
-    public Actor
-{
+class ACrab :
+	public Actor {
 
 
-enum MovementState
-{
-    STAND = 0,
-    WALK,
-    JUMP,
-    DISLODGE,
-    MOVEMENTSTATECOUNT
-};
+	enum MovementState {
+		STAND = 0,
+		WALK,
+		JUMP,
+		DISLODGE,
+		MOVEMENTSTATECOUNT
+	};
 
-enum
-{
-    LEFTSIDE = 0,
-    RIGHTSIDE,
-    SIDECOUNT
-};
+	enum {
+		LEFTSIDE = 0,
+		RIGHTSIDE,
+		SIDECOUNT
+	};
 
-enum
-{
-    FGROUND = 0,
-    BGROUND,
-    LAYERCOUNT
-};
+	enum {
+		FGROUND = 0,
+		BGROUND,
+		LAYERCOUNT
+	};
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Public member variable, method and friend function declarations
 
 public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(ACrab)
+	EntityAllocation(ACrab)
+		SerializableOverrideMethods
+		ClassInfoGetters
+
+		//////////////////////////////////////////////////////////////////////////////////////////
+		// Constructor:     ACrab
+		//////////////////////////////////////////////////////////////////////////////////////////
+		// Description:     Constructor method used to instantiate a ACrab object in system
+		//                  memory. Create() should be called before using the object.
+		// Arguments:       None.
+
+		ACrab() { Clear(); }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     ACrab
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Constructor method used to instantiate a ACrab object in system
-//                  memory. Create() should be called before using the object.
-// Arguments:       None.
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Destructor:      ~ACrab
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Description:     Destructor method used to clean up a ACrab object before deletion
+	//                  from system memory.
+	// Arguments:       None.
 
-    ACrab() { Clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Destructor:      ~ACrab
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destructor method used to clean up a ACrab object before deletion
-//                  from system memory.
-// Arguments:       None.
-
-    virtual ~ACrab() { Destroy(true); }
+	~ACrab() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -103,61 +100,18 @@ ENTITYALLOCATION(ACrab)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the ACrab object ready for use.
-// Arguments:       A pointer to a BITMAP that this ACrab will own and destroy.
-//                  A pointer to a Controller that this ACrab will own and destroy.
-//                  A float specifying the object's mass in Kilograms (kg).
-//                  A Vector specifying the initial position.
-//                  A Vector specifying the initial velocity.
-//                  A AtomGroup that will make up the collision 'cage' of this mass object.
-//                  The amount of time in ms this MovableObject will exist. 0 means unlim.
-//                  An initial Status.
-//                  An int with the initial health value of this ACrab.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create(BITMAP *pSprite,
-                       Controller *pController,
-                       const float mass,
-                       const Vector &position = Vector(0, 0),
-                       const Vector &velocity = Vector(0, 0),
-                       AtomGroup *hitBody = new AtomGroup(),
-                       const unsigned long lifetime = 0,
-                       Status status = ACTIVE,
-                       const int health = 100);
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a ACrab to be identical to another, by deep copy.
-// Arguments:       A reference to the ACrab to deep copy.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create(const ACrab &reference);
+	int Create() override;
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
+ //////////////////////////////////////////////////////////////////////////////////////////
+ // Virtual method:  Create
+ //////////////////////////////////////////////////////////////////////////////////////////
+ // Description:     Creates a ACrab to be identical to another, by deep copy.
+ // Arguments:       A reference to the ACrab to deep copy.
+ // Return value:    An error return value signaling sucess or any particular failure.
+ //                  Anything below 0 is an error signal.
 
-    virtual int ReadProperty(std::string propName, Reader &reader);
+	int Create(const ACrab &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -168,19 +122,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Actor::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this ACrab to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the ACrab will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+	void Reset() override { Clear(); Actor::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -191,27 +133,7 @@ ENTITYALLOCATION(ACrab)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+	void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -222,7 +144,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       None.
 // Return value:    A float describing the mass value in Kilograms (kg).
 
-    virtual float GetMass() const;
+	float GetMass() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -232,7 +154,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       None.
 // Return value:    The current amount of carried gold, in Oz.
 
-    virtual float GetGoldCarried() const { return m_GoldCarried + m_GoldInInventoryChunk; }
+	float GetGoldCarried() const override { return m_GoldCarried + m_GoldInInventoryChunk; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetEyePos
@@ -242,7 +164,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       None.
 // Return value:    A Vector with the absolute position of this' eye or view point.
 
-    virtual Vector GetEyePos() const;
+	Vector GetEyePos() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -252,7 +174,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       None.
 // Return value:    A pointer to the Leg Attachable. Ownership is NOT transferred!
 
-    Attachable * GetLFGLeg() const { return (Attachable *)m_pLFGLeg; }
+	Attachable * GetLFGLeg() const { return (Attachable *)m_pLFGLeg; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -262,7 +184,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       None.
 // Return value:    A pointer to the Leg Attachable. Ownership is NOT transferred!
 
-    Attachable * GetLBGLeg() const { return (Attachable *)m_pLBGLeg; }
+	Attachable * GetLBGLeg() const { return (Attachable *)m_pLBGLeg; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -272,7 +194,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       None.
 // Return value:    A pointer to the Leg Attachable. Ownership is NOT transferred!
 
-    Attachable * GetRFGLeg() const { return (Attachable *)m_pRFGLeg; }
+	Attachable * GetRFGLeg() const { return (Attachable *)m_pRFGLeg; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -282,7 +204,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       None.
 // Return value:    A pointer to the Leg Attachable. Ownership is NOT transferred!
 
-    Attachable * GetRBGLeg() const { return (Attachable *)m_pRBGLeg; }
+	Attachable * GetRBGLeg() const { return (Attachable *)m_pRBGLeg; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -292,7 +214,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       None.
 // Return value:    A pointer to jetpack emitter. Ownership is NOT transferred!
 
-    AEmitter * GetJetpack() const { return (AEmitter *)m_pJetpack; }
+	AEmitter * GetJetpack() const { return (AEmitter *)m_pJetpack; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -302,7 +224,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       None.
 // Return value:    The amount of time this' jetpack can fire when it's at max.
 
-    float GetJetTimeTotal() const { return m_JetTimeTotal; }
+	float GetJetTimeTotal() const { return m_JetTimeTotal; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetJetTimeTotal
@@ -311,7 +233,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       The amount of time this' jetpack can fire when it's at max.
 // Return value:    None.
 
-    void SetJetTimeTotal(float newValue) { m_JetTimeTotal = newValue; }
+	void SetJetTimeTotal(float newValue) { m_JetTimeTotal = newValue; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetJetTimeLeft
@@ -320,7 +242,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       None.
 // Return value:    The amount of time this' jetpack can still fire before running out.
 
-    float GetJetTimeLeft() const { return m_JetTimeLeft; }
+	float GetJetTimeLeft() const { return m_JetTimeLeft; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -331,7 +253,7 @@ ENTITYALLOCATION(ACrab)
 //                  assigned for this frame.
 // Return value:    None.
 
-    virtual void SetID(const MOID newID);
+	void SetID(const MOID newID) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -345,34 +267,8 @@ ENTITYALLOCATION(ACrab)
 // Return value:    Whether the collision has been deemed valid. If false, then disregard
 //                  any impulses in the Hitdata.
 
-    virtual bool CollideAtPoint(HitData &hitData);
+	bool CollideAtPoint(HitData &hitData) override;
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OnBounce
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits and then
-//                  bounces off of something. This is called by the owned Atom/AtomGroup
-//                  of this MovableObject during travel.
-// Arguments:       The position where the bounce-hit occurred.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this bounce.
-
-    virtual bool OnBounce(const Vector &pos);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OnSink
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits and then
-//                  sink into something. This is called by the owned Atom/AtomGroup
-//                  of this MovableObject during travel.
-// Arguments:       The position where the sink-hit occurred.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this sinkage.
-
-    virtual bool OnSink(const Vector &pos);
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  AddPieMenuSlices
@@ -381,7 +277,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       The pie menu to add slices to. Ownership is NOT transferred!
 // Return value:    Whether any slices were added.
 
-    virtual bool AddPieMenuSlices(PieMenuGUI *pPieMenu);
+	bool AddPieMenuSlices(PieMenuGUI *pPieMenu) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -393,89 +289,89 @@ ENTITYALLOCATION(ACrab)
 // Return value:    Whetehr any slice was handled. False if no matching slice handler was
 //                  found, or there was no slice currently activated by the pie menu.
 
-    virtual bool HandlePieCommand(int pieSliceIndex);
+	bool HandlePieCommand(int pieSliceIndex) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  GetEquippedItem
+// Method:  GetEquippedItem
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns any equipped turret.
 // Arguments:       None.
 // Return value:    A pointer to an attachable.
 
-    virtual Attachable * GetTurret() const;
+	Attachable * GetTurret() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  GetEquippedItem
+// Method:  GetEquippedItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns whatever is equipped in the turret, if anything. OINT.
+// Description:     Returns whatever is equipped in the turret, if anything. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       None.
 // Return value:    The currently equipped item, if any.
 
-    virtual MovableObject * GetEquippedItem() const;
+	MovableObject * GetEquippedItem() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  FirearmIsReady
+// Method:  FirearmIsReady
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the currently held HDFirearm's is ready for use, and has
 //                  ammo etc.
 // Arguments:       None.
 // Return value:    Whether a currently HDFirearm (if any) is ready for use.
 
-    virtual bool FirearmIsReady() const;
+	bool FirearmIsReady() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  FirearmIsEmpty
+// Method:  FirearmIsEmpty
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the currently held HDFirearm's is out of ammo.
 // Arguments:       None.
 // Return value:    Whether a currently HDFirearm (if any) is out of ammo.
 
-    virtual bool FirearmIsEmpty() const;
+	bool FirearmIsEmpty() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  FirearmNeedsReload
+// Method:  FirearmNeedsReload
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the currently held HDFirearm's is almost out of ammo.
 // Arguments:       None.
 // Return value:    Whether a currently HDFirearm (if any) has less than half of ammo left.
 
-    virtual bool FirearmNeedsReload() const;
+	bool FirearmNeedsReload() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  FirearmIsSemiAuto
+// Method:  FirearmIsSemiAuto
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the currently held HDFirearm's is semi or full auto.
 // Arguments:       None.
 // Return value:    Whether a currently HDFirearm (if any) is a semi auto device.
 
-    virtual bool FirearmIsSemiAuto() const;
+	bool FirearmIsSemiAuto() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  FirearmActivationDelay
+// Method:  FirearmActivationDelay
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the currently held device's delay between pulling the trigger
 //                  and activating.
 // Arguments:       None.
 // Return value:    Delay in ms or zero if not a HDFirearm.
 
-    virtual int FirearmActivationDelay() const;
+int FirearmActivationDelay() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  ReloadFirearm
+// Method:  ReloadFirearm
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Reloads the currently held firearm, if any.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ReloadFirearm();
+	void ReloadFirearm();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -486,7 +382,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       A Vector witht he aboslute coordinates of a point to check.
 // Return value:    Whether the point is within close range of this.
 
-    virtual bool IsWithinRange(Vector &point) const;
+	bool IsWithinRange(Vector &point) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -498,11 +394,11 @@ ENTITYALLOCATION(ACrab)
 //                  The range, in pixels, beyond the actors sharp aim that the ray will have.
 // Return value:    Whether any unseen pixels were revealed by this look.
 
-    virtual bool Look(float FOVSpread, float range);
+	bool Look(float FOVSpread, float range) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LookForMOs
+// Method:  LookForMOs
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Casts an MO detecting ray in the direction of where the head is looking
 //                  at the time. Factors including head rotation, sharp aim mode, and
@@ -513,7 +409,7 @@ ENTITYALLOCATION(ACrab)
 //                  Whether to ignore all terrain or not (true means 'x-ray vision').
 // Return value:    A pointer to the MO seen while looking.
 
-    virtual MovableObject * LookForMOs(float FOVSpread = 45, unsigned char ignoreMaterial = 0, bool ignoreAllTerrain = false);
+	MovableObject * LookForMOs(float FOVSpread = 45, unsigned char ignoreMaterial = 0, bool ignoreAllTerrain = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -526,7 +422,7 @@ ENTITYALLOCATION(ACrab)
 //                  A pointer to an MO which the gibs shuold not be colliding with!
 // Return value:    None.
 
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
+	void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -537,7 +433,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       The point in absolute scene coordinates.
 // Return value:    Whether this' graphical rep overlaps the scene point.
 
-    virtual bool IsOnScenePoint(Vector &scenePoint) const;
+	bool IsOnScenePoint(Vector &scenePoint) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -547,7 +443,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual bool UpdateMovePath();
+	bool UpdateMovePath() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -558,7 +454,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateAI();
+	void UpdateAI() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -568,7 +464,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -578,7 +474,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       None.
 // Return value:    Returns total number of wounds of this actor.
 
-	virtual int GetTotalWoundCount() const; 
+	int GetTotalWoundCount() const override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetTotalWoundLimit
@@ -587,7 +483,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       None.
 // Return value:    Returns total wound limit of this actor.
 
-	virtual int GetTotalWoundLimit() const; 
+	int GetTotalWoundLimit() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -602,10 +498,7 @@ ENTITYALLOCATION(ACrab)
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -619,7 +512,7 @@ ENTITYALLOCATION(ACrab)
 //                  get drawn etc.
 // Return value:    None.
 
-    virtual void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false);
+	void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -629,7 +522,7 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       Amount of wounds to remove.
 // Return value:    Damage taken from removed wounds.
 
-	virtual int RemoveAnyRandomWounds(int amount);
+	int RemoveAnyRandomWounds(int amount) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -639,49 +532,49 @@ ENTITYALLOCATION(ACrab)
 // Arguments:       Vector to store MOIDs
 // Return value:    None.
 
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetLimbPathSpeed
+// Method:  GetLimbPathSpeed
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Get walking limb path speed for the specified preset.
 // Arguments:       Speed preset to set 0 = LimbPath::SLOW, 1 = Limbpath::NORMAL, 2 = LimbPath::FAST
 // Return value:    Limb path speed for the specified preset in m/s.
 
-	virtual float GetLimbPathSpeed(int speedPreset) const;
+	float GetLimbPathSpeed(int speedPreset) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetLimbPathSpeed
+// Method:  SetLimbPathSpeed
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Set walking limb path speed for the specified preset.
 // Arguments:       Speed preset to set 0 = LimbPath::SLOW, 1 = Limbpath::NORMAL, 2 = LimbPath::FAST. New speed value in m/s.
 // Return value:    None.
 
-	virtual void SetLimbPathSpeed(int speedPreset, float speed);
+	void SetLimbPathSpeed(int speedPreset, float speed);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetLimbPathPushForce
+// Method:  GetLimbPathPushForce
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the default force that a limb traveling walking LimbPath can push against
 //                  stuff in the scene with. 
 // Arguments:       None.
 // Return value:    The default set force maximum, in kg * m/s^2.
 
-	virtual float GetLimbPathPushForce() const;
+	float GetLimbPathPushForce() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetLimbPathPushForce
+// Method:  SetLimbPathPushForce
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the default force that a limb traveling walking LimbPath can push against
 //                  stuff in the scene with. 
 // Arguments:       The default set force maximum, in kg * m/s^2.
 // Return value:    None
 
-	virtual void SetLimbPathPushForce(float force);
+	void SetLimbPathPushForce(float force);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -701,128 +594,122 @@ protected:
 //                  the same as the last one in the index (presumably its parent),
 // Return value:    None.
 
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                  MOID rootMOID = g_NoMOID,
-                                  bool makeNewMOID = true);
+	void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 
-    // Member variables
-    static Entity::ClassInfo m_sClass;
+	// Member variables
+	static Entity::ClassInfo m_sClass;
 
-    // Turret which can be mounted with a weapon
-    Turret *m_pTurret;
-    // Left Foreground leg.
-    Leg *m_pLFGLeg;
-    // Left Background leg.
-    Leg *m_pLBGLeg;
-    // Right Foreground leg.
-    Leg *m_pRFGLeg;
-    // Right Background leg.
-    Leg *m_pRBGLeg;
-    // Limb AtomGroups.
-    AtomGroup *m_pLFGFootGroup;
-    AtomGroup *m_pLBGFootGroup;
-    AtomGroup *m_pRFGFootGroup;
-    AtomGroup *m_pRBGFootGroup;
-    // The sound of the actor taking a step (think robot servo)
-    SoundContainer m_StrideSound;
-    // Jetpack booster.
-    AEmitter *m_pJetpack;
-    // The max total time, in ms, that the jetpack can be used without pause
-    float m_JetTimeTotal;
-    // How much time left the jetpack can go, in ms
-    float m_JetTimeLeft;
-    // Blink timer
-    Timer m_IconBlinkTimer;
-    // Current movement state.
-    MovementState m_MoveState;
-    // Limb paths for different movement states.
-    // First which side, then which background/foreground, then the movement state
-    LimbPath m_Paths[SIDECOUNT][LAYERCOUNT][MOVEMENTSTATECOUNT];
-    // Whether was aiming during the last frame too.
-    bool m_Aiming;
-    // Controls the start of leg synch.
-    bool m_StrideStart[SIDECOUNT];
-    // Times the strides to make sure they get restarted if they end up too long
-    Timer m_StrideTimer[SIDECOUNT];
-    // How much gold is carried in an MovableObject in inventory, separate from the actor gold tally.
-    int m_GoldInInventoryChunk;
-    // The maximum angle MountedMO can be aimed up, positive values only, in radians
-    float m_AimRangeUpperLimit;
-    // The maximum angle MountedMO can be aimed down, positive values only, in radians
-    float m_AimRangeLowerLimit;
+	// Turret which can be mounted with a weapon
+	Turret *m_pTurret;
+	// Left Foreground leg.
+	Leg *m_pLFGLeg;
+	// Left Background leg.
+	Leg *m_pLBGLeg;
+	// Right Foreground leg.
+	Leg *m_pRFGLeg;
+	// Right Background leg.
+	Leg *m_pRBGLeg;
+	// Limb AtomGroups.
+	AtomGroup *m_pLFGFootGroup;
+	AtomGroup *m_pLBGFootGroup;
+	AtomGroup *m_pRFGFootGroup;
+	AtomGroup *m_pRBGFootGroup;
+	// The sound of the actor taking a step (think robot servo)
+	SoundContainer m_StrideSound;
+	// Jetpack booster.
+	AEmitter *m_pJetpack;
+	// The max total time, in ms, that the jetpack can be used without pause
+	float m_JetTimeTotal;
+	// How much time left the jetpack can go, in ms
+	float m_JetTimeLeft;
+	// Blink timer
+	Timer m_IconBlinkTimer;
+	// Current movement state.
+	MovementState m_MoveState;
+	// Limb paths for different movement states.
+	// First which side, then which background/foreground, then the movement state
+	LimbPath m_Paths[SIDECOUNT][LAYERCOUNT][MOVEMENTSTATECOUNT];
+	// Whether was aiming during the last frame too.
+	bool m_Aiming;
+	// Controls the start of leg synch.
+	bool m_StrideStart[SIDECOUNT];
+	// Times the strides to make sure they get restarted if they end up too long
+	Timer m_StrideTimer[SIDECOUNT];
+	// How much gold is carried in an MovableObject in inventory, separate from the actor gold tally.
+	int m_GoldInInventoryChunk;
+	// The maximum angle MountedMO can be aimed up, positive values only, in radians
+	float m_AimRangeUpperLimit;
+	// The maximum angle MountedMO can be aimed down, positive values only, in radians
+	float m_AimRangeLowerLimit;
 
-    ////////////////
-    // AI States
+	////////////////
+	// AI States
 
-    enum DeviceHandlingState
-    {
-        STILL = 0,
-        POINTING,
-        SCANNING,
-        AIMING,
-        FIRING,
-        THROWING,
-        DIGGING
-    };
+	enum DeviceHandlingState {
+		STILL = 0,
+		POINTING,
+		SCANNING,
+		AIMING,
+		FIRING,
+		THROWING,
+		DIGGING
+	};
 
-    enum SweepState
-    {
-        NOSWEEP = 0,
-        SWEEPINGUP,
-        SWEEPUPPAUSE,
-        SWEEPINGDOWN,
-        SWEEPDOWNPAUSE
-    };
+	enum SweepState {
+		NOSWEEP = 0,
+		SWEEPINGUP,
+		SWEEPUPPAUSE,
+		SWEEPINGDOWN,
+		SWEEPDOWNPAUSE
+	};
 
-    enum DigState
-    {
-        NOTDIGGING = 0,
-        PREDIG,
-        STARTDIG,
-        TUNNELING,
-        FINISHINGDIG,
-        PAUSEDIGGER
-    };
+	enum DigState {
+		NOTDIGGING = 0,
+		PREDIG,
+		STARTDIG,
+		TUNNELING,
+		FINISHINGDIG,
+		PAUSEDIGGER
+	};
 
-    enum JumpState
-    {
-        NOTJUMPING = 0,
-        FORWARDJUMP,
-        PREUPJUMP,
-        UPJUMP,
-        APEXJUMP,
-        LANDJUMP
-    };
+	enum JumpState {
+		NOTJUMPING = 0,
+		FORWARDJUMP,
+		PREUPJUMP,
+		UPJUMP,
+		APEXJUMP,
+		LANDJUMP
+	};
 
-    // What the AI is doing with its held devices
-    DeviceHandlingState m_DeviceState;
-    // What we are doing with a device sweeping
-    SweepState m_SweepState;
-    // The current digging state
-    DigState m_DigState;
-    // The current jumping state
-    JumpState m_JumpState;
-    // Jumping target, overshoot this and the jump is completed
-    Vector m_JumpTarget;
-    // Jumping left or right
-    bool m_JumpingRight;
-    // The position of the end of the current tunnel being dug. When it is reached, digging can stop.
-    Vector m_DigTunnelEndPos;
-    // The center angle (in rads) for the sweeping motion done duing scannign and digging
-    float m_SweepCenterAimAngle;
-    // The range to each direction of the center that the sweeping motion will be done in
-    float m_SweepRange;
-    // The absolute coordinates of the last detected gold deposits
-    Vector m_DigTarget;
-    // Timer for how long to be shooting at a seen enemy target
-    Timer m_FireTimer;
-    // Timer for how long to be shooting at a seen enemy target
-    Timer m_SweepTimer;
-    // Timer for how long to be patrolling in a direction
-    Timer m_PatrolTimer;
-    // Timer for how long to be firing the jetpack in a direction
-    Timer m_JumpTimer;
+	// What the AI is doing with its held devices
+	DeviceHandlingState m_DeviceState;
+	// What we are doing with a device sweeping
+	SweepState m_SweepState;
+	// The current digging state
+	DigState m_DigState;
+	// The current jumping state
+	JumpState m_JumpState;
+	// Jumping target, overshoot this and the jump is completed
+	Vector m_JumpTarget;
+	// Jumping left or right
+	bool m_JumpingRight;
+	// The position of the end of the current tunnel being dug. When it is reached, digging can stop.
+	Vector m_DigTunnelEndPos;
+	// The center angle (in rads) for the sweeping motion done duing scannign and digging
+	float m_SweepCenterAimAngle;
+	// The range to each direction of the center that the sweeping motion will be done in
+	float m_SweepRange;
+	// The absolute coordinates of the last detected gold deposits
+	Vector m_DigTarget;
+	// Timer for how long to be shooting at a seen enemy target
+	Timer m_FireTimer;
+	// Timer for how long to be shooting at a seen enemy target
+	Timer m_SweepTimer;
+	// Timer for how long to be patrolling in a direction
+	Timer m_PatrolTimer;
+	// Timer for how long to be firing the jetpack in a direction
+	Timer m_JumpTimer;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -838,11 +725,11 @@ private:
 // Arguments:       None.
 // Return value:    None.
 
-    void Clear();
+	void Clear();
 
-    // Disallow the use of some implicit methods.
-    ACrab(const ACrab &reference);
-    ACrab & operator=(const ACrab &rhs);
+	// Disallow the use of some implicit methods.
+	ACrab(const ACrab &reference) = delete;
+	ACrab & operator=(const ACrab &rhs) = delete;
 
 };
 

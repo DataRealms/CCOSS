@@ -35,7 +35,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(Scene, Entity, 0)
+ConcreteClassInfo(Scene, Entity, 0)
 const string Scene::Area::m_sClassName = "Area";
 
 
@@ -101,7 +101,6 @@ int Scene::Area::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "Name")
         reader >> m_Name;
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -403,7 +402,7 @@ Vector Scene::Area::GetRandomPoint() const
         return Vector();
 
     // Randomly choose a box, and a point within it
-    return m_BoxList[floor(RangeRand(0, m_BoxList.size()))].GetRandomPoint();
+	return m_BoxList[RandomNum<int>(0, m_BoxList.size() - 1)].GetRandomPoint();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -418,9 +417,9 @@ void Scene::Clear()
     m_LocationOffset.Reset();
     m_MetagamePlayable = false; // Let scenes be non-metagame playable by default, they need AI building plans anyway
     m_Revealed = false;
-    m_OwnedByTeam = Activity::NOTEAM;
+    m_OwnedByTeam = Activity::NoTeam;
     m_RoundIncome = 1000;
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         m_ResidentBrains[player] = 0;
         m_BuildBudget[player] = 0;
@@ -437,7 +436,7 @@ void Scene::Clear()
         m_PlacedObjects[set].clear();
     m_BackLayerList.clear();
 	m_Deployments.clear();
-    for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+    for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
     {
         m_UnseenPixelSize[team].Reset();
         m_apUnseenLayer[team] = 0;
@@ -504,7 +503,7 @@ int Scene::Create(const Scene &reference)
     m_Revealed = reference.m_Revealed;
     m_OwnedByTeam = reference.m_OwnedByTeam;
     m_RoundIncome = reference.m_RoundIncome;
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (reference.m_ResidentBrains[player])
             m_ResidentBrains[player] = dynamic_cast<SceneObject *>(reference.m_ResidentBrains[player]->Clone());
@@ -524,7 +523,7 @@ int Scene::Create(const Scene &reference)
     for (list<SceneLayer *>::const_iterator lItr = reference.m_BackLayerList.begin(); lItr != reference.m_BackLayerList.end(); ++lItr)
         m_BackLayerList.push_back(dynamic_cast<SceneLayer *>((*lItr)->Clone()));
 
-    for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+    for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
     {
         // If the Unseen layers are loaded, then copy them. If not, then copy the procedural param that is responsible for creating them
         if (reference.m_apUnseenLayer[team])
@@ -582,7 +581,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
     ///////////////////////////////////
     // Load Unseen layers before applying objects to the scene,
     // so we can reveal around stuff that is getting placed for the appropriate team
-    for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+    for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
     {
         // Specified to dynamically create the unseen layer?
         if (!m_UnseenPixelSize[team].IsZero())
@@ -616,16 +615,16 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
     // But don't if we are only loading the scene bitmap layer data
     if (placeObjects)
     {
-		Actor * pBrains[Activity::MAXTEAMCOUNT];
-		for (int i=0; i < Activity::MAXTEAMCOUNT; i++)
+		Actor * pBrains[Activity::MaxTeamCount];
+		for (int i = Activity::TeamOne; i < Activity::MaxTeamCount; i++)
 			pBrains[i] = 0;
 
 		// Indicates whether we need to process static brain deployments or mobile
 		// whichever comes first is selected and used everywhere
-		string activeBrainDeployment[Activity::MAXTEAMCOUNT];
+		string activeBrainDeployment[Activity::MaxTeamCount];
 
 		// Lists of found brain deployment locations used to place brain
-		std::vector<Vector> brainLocations[Activity::MAXTEAMCOUNT];
+		std::vector<Vector> brainLocations[Activity::MaxTeamCount];
 
         
 		//for (list<SceneObject *>::iterator oItr = m_PlacedObjects[AIPLAN].begin(); oItr != m_PlacedObjects[AIPLAN].end(); ++oItr) // I'm using this to dump AI plans with ctrl+w
@@ -675,7 +674,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 					if (placeUnits)
 					{
 						int team = pDep->GetTeam();
-						if (team < 0 || team >= Activity::MAXTEAMCOUNT)
+						if (team < Activity::TeamOne || team >= Activity::MaxTeamCount)
 							team = 0;
 
 						// Select first brain deployemnt type as the only deployment type for this team
@@ -823,18 +822,18 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 					if (pTO)
                     {
                         // First clear out the box of unseen layer for whichever team placed this
-                        if (pTO->GetFGColorBitmap() && pTO->GetPlacedByPlayer() != Activity::NOPLAYER && g_ActivityMan.GetActivity())
+                        if (pTO->GetFGColorBitmap() && pTO->GetPlacedByPlayer() != Players::NoPlayer && g_ActivityMan.GetActivity())
                         {
                             // Learn which team placed this thing so we can reveal for them only
                             int ownerTeam = pTO->GetTeam();
-                            if (ownerTeam != Activity::NOTEAM && m_apUnseenLayer[ownerTeam] && m_apUnseenLayer[ownerTeam]->GetBitmap())
+                            if (ownerTeam != Activity::NoTeam && m_apUnseenLayer[ownerTeam] && m_apUnseenLayer[ownerTeam]->GetBitmap())
                             {
                                 // Translate to the scaled unseen layer's coordinates
                                 Vector scale = m_apUnseenLayer[ownerTeam]->GetScaleInverse();
-                                int scaledX = floorf((pTO->GetPos().m_X - (float)(pTO->GetFGColorBitmap()->w / 2)) * scale.m_X);
-                                int scaledY = floorf((pTO->GetPos().m_Y - (float)(pTO->GetFGColorBitmap()->h / 2)) * scale.m_Y);
-                                int scaledW = ceilf(pTO->GetFGColorBitmap()->w * scale.m_X);
-                                int scaledH = ceilf(pTO->GetFGColorBitmap()->h * scale.m_Y);
+                                int scaledX = std::floor((pTO->GetPos().m_X - (float)(pTO->GetFGColorBitmap()->w / 2)) * scale.m_X);
+                                int scaledY = std::floor((pTO->GetPos().m_Y - (float)(pTO->GetFGColorBitmap()->h / 2)) * scale.m_Y);
+                                int scaledW = std::ceil(pTO->GetFGColorBitmap()->w * scale.m_X);
+                                int scaledH = std::ceil(pTO->GetFGColorBitmap()->h * scale.m_Y);
                                 // Fill the box with key color for the owner ownerTeam, revealing the area that this thing is on
                                 rectfill(m_apUnseenLayer[ownerTeam]->GetBitmap(), scaledX, scaledY, scaledX + scaledW, scaledY + scaledH, g_MaskColor);
                                 // Expand the box a little so the whole placed object is going to be hidden
@@ -843,7 +842,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
                                 scaledW += 2;
                                 scaledH += 2;
                                 // Fill the box with BLACK for all the other teams so they can't see the new developments here!
-                                for (int t = Activity::TEAM_1; t < Activity::MAXTEAMCOUNT; ++t)
+                                for (int t = Activity::TeamOne; t < Activity::MaxTeamCount; ++t)
                                 {
                                     if (t != ownerTeam && m_apUnseenLayer[t] && m_apUnseenLayer[t]->GetBitmap())
                                         rectfill(m_apUnseenLayer[t]->GetBitmap(), scaledX, scaledY, scaledX + scaledW, scaledY + scaledH, g_BlackColor);
@@ -863,16 +862,16 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
             }
         }
 		// Finally select random brain location from the list of found brain deployments
-		for (int t = 0; t < Activity::MAXTEAMCOUNT; t++)
+		for (int t = Activity::TeamOne; t < Activity::MaxTeamCount; t++)
 		{
 			if (pBrains[t])
 			{
 				int team = pBrains[t]->GetTeam();
-				if (team < 0 || team >= Activity::MAXTEAMCOUNT)
+				if (team < Activity::TeamOne || team >= Activity::MaxTeamCount)
 					team = 0;
 				if (brainLocations[team].size() > 0)
 				{
-					int selection = SelectRand(0, brainLocations[team].size() - 1);
+					int selection = RandomNum<int>(0, brainLocations[team].size() - 1);
 					pBrains[t]->SetPos(brainLocations[team].at(selection));
 				}
 			}
@@ -1025,11 +1024,11 @@ int Scene::SaveData(string pathBase)
 
     // Save unseen layers' data
     char str[64];
-    for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+    for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
     {
         if (m_apUnseenLayer[team])
         {
-            sprintf_s(str, sizeof(str), "T%d", team);
+            std::snprintf(str, sizeof(str), "T%d", team);
             // Save unseen layer data to disk
             if (m_apUnseenLayer[team]->SaveData(pathBase + " US" + str + ".bmp") < 0)
             {
@@ -1237,7 +1236,7 @@ int Scene::ClearData()
     }
 
     // Clear unseen layers' data
-    for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+    for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
     {
         if (m_apUnseenLayer[team])
         {
@@ -1280,29 +1279,29 @@ int Scene::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "RoundIncome")
         reader >> m_RoundIncome;
     else if (propName == "P1ResidentBrain")
-        m_ResidentBrains[Activity::PLAYER_1] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
+        m_ResidentBrains[Players::PlayerOne] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
     else if (propName == "P2ResidentBrain")
-        m_ResidentBrains[Activity::PLAYER_2] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
+        m_ResidentBrains[Players::PlayerTwo] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
     else if (propName == "P3ResidentBrain")
-        m_ResidentBrains[Activity::PLAYER_3] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
+        m_ResidentBrains[Players::PlayerThree] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
     else if (propName == "P4ResidentBrain")
-        m_ResidentBrains[Activity::PLAYER_4] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
+        m_ResidentBrains[Players::PlayerFour] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
     else if (propName == "P1BuildBudget")
-        reader >> m_BuildBudget[Activity::PLAYER_1];
+        reader >> m_BuildBudget[Players::PlayerOne];
     else if (propName == "P2BuildBudget")
-        reader >> m_BuildBudget[Activity::PLAYER_2];
+        reader >> m_BuildBudget[Players::PlayerTwo];
     else if (propName == "P3BuildBudget")
-        reader >> m_BuildBudget[Activity::PLAYER_3];
+        reader >> m_BuildBudget[Players::PlayerThree];
     else if (propName == "P4BuildBudget")
-        reader >> m_BuildBudget[Activity::PLAYER_4];
+        reader >> m_BuildBudget[Players::PlayerFour];
     else if (propName == "P1BuildBudgetRatio")
-        reader >> m_BuildBudgetRatio[Activity::PLAYER_1];
+        reader >> m_BuildBudgetRatio[Players::PlayerOne];
     else if (propName == "P2BuildBudgetRatio")
-        reader >> m_BuildBudgetRatio[Activity::PLAYER_2];
+        reader >> m_BuildBudgetRatio[Players::PlayerTwo];
     else if (propName == "P3BuildBudgetRatio")
-        reader >> m_BuildBudgetRatio[Activity::PLAYER_3];
+        reader >> m_BuildBudgetRatio[Players::PlayerThree];
     else if (propName == "P4BuildBudgetRatio")
-        reader >> m_BuildBudgetRatio[Activity::PLAYER_4];
+        reader >> m_BuildBudgetRatio[Players::PlayerFour];
     else if (propName == "AutoDesigned")
         reader >> m_AutoDesigned;
     else if (propName == "TotalInvestment")
@@ -1310,7 +1309,7 @@ int Scene::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "PreviewBitmapFile")
 	{
         reader >> m_PreviewBitmapFile;
-		m_pPreviewBitmap = m_PreviewBitmapFile.LoadAndReleaseBitmap();
+		m_pPreviewBitmap = m_PreviewBitmapFile.GetAsBitmap(COLORCONV_NONE, false);
 	}
     else if (propName == "Terrain")
     {
@@ -1346,51 +1345,51 @@ int Scene::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "AllUnseenPixelSizeTeam1")
     {
         // Read the desired pixel dimensions of the dynamically generated unseen map
-        reader >> m_UnseenPixelSize[Activity::TEAM_1];
+        reader >> m_UnseenPixelSize[Activity::TeamOne];
     }
     else if (propName == "AllUnseenPixelSizeTeam2")
     {
         // Read the desired pixel dimensions of the dynamically generated unseen map
-        reader >> m_UnseenPixelSize[Activity::TEAM_2];
+        reader >> m_UnseenPixelSize[Activity::TeamTwo];
     }
     else if (propName == "AllUnseenPixelSizeTeam3")
     {
         // Read the desired pixel dimensions of the dynamically generated unseen map
-        reader >> m_UnseenPixelSize[Activity::TEAM_3];
+        reader >> m_UnseenPixelSize[Activity::TeamThree];
     }
     else if (propName == "AllUnseenPixelSizeTeam4")
     {
         // Read the desired pixel dimensions of the dynamically generated unseen map
-        reader >> m_UnseenPixelSize[Activity::TEAM_4];
+        reader >> m_UnseenPixelSize[Activity::TeamFour];
     }
     else if (propName == "UnseenLayerTeam1")
     {
-        delete m_apUnseenLayer[Activity::TEAM_1];
-        m_apUnseenLayer[Activity::TEAM_1] = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader));
+        delete m_apUnseenLayer[Activity::TeamOne];
+        m_apUnseenLayer[Activity::TeamOne] = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader));
     }
     else if (propName == "UnseenLayerTeam2")
     {
-        delete m_apUnseenLayer[Activity::TEAM_2];
-        m_apUnseenLayer[Activity::TEAM_2] = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader));
+        delete m_apUnseenLayer[Activity::TeamTwo];
+        m_apUnseenLayer[Activity::TeamTwo] = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader));
     }
     else if (propName == "UnseenLayerTeam3")
     {
-        delete m_apUnseenLayer[Activity::TEAM_3];
-        m_apUnseenLayer[Activity::TEAM_3] = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader));
+        delete m_apUnseenLayer[Activity::TeamThree];
+        m_apUnseenLayer[Activity::TeamThree] = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader));
     }
     else if (propName == "UnseenLayerTeam4")
     {
-        delete m_apUnseenLayer[Activity::TEAM_4];
-        m_apUnseenLayer[Activity::TEAM_4] = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader));
+        delete m_apUnseenLayer[Activity::TeamFour];
+        m_apUnseenLayer[Activity::TeamFour] = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader));
     }
     else if (propName == "ScanScheduledTeam1")
-        reader >> m_ScanScheduled[Activity::TEAM_1];
+        reader >> m_ScanScheduled[Activity::TeamOne];
     else if (propName == "ScanScheduledTeam2")
-        reader >> m_ScanScheduled[Activity::TEAM_2];
+        reader >> m_ScanScheduled[Activity::TeamTwo];
     else if (propName == "ScanScheduledTeam3")
-        reader >> m_ScanScheduled[Activity::TEAM_3];
+        reader >> m_ScanScheduled[Activity::TeamThree];
     else if (propName == "ScanScheduledTeam4")
-        reader >> m_ScanScheduled[Activity::TEAM_4];
+        reader >> m_ScanScheduled[Activity::TeamFour];
     else if (propName == "AddArea")
     {
         Area area;
@@ -1401,7 +1400,6 @@ int Scene::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "GlobalAcceleration")
         reader >> m_GlobalAcc;
     else
-        // See if the base class(es) can find a match instead
         return Entity::ReadProperty(propName, reader);
 
     return 0;
@@ -1442,11 +1440,11 @@ int Scene::Save(Writer &writer) const
     writer << m_RoundIncome;
     // Write out the brains and the minimal info needed to place them in the scene
     char str[64];
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (m_ResidentBrains[player])
         {
-            sprintf_s(str, sizeof(str), "P%dResidentBrain", player + 1);
+            std::snprintf(str, sizeof(str), "P%dResidentBrain", player + 1);
             writer.NewProperty(str);
             writer.ObjectStart(m_ResidentBrains[player]->GetClassName());
             writer.NewProperty("CopyOf");
@@ -1492,21 +1490,21 @@ int Scene::Save(Writer &writer) const
         }
     }
     writer.NewProperty("P1BuildBudget");
-    writer << m_BuildBudget[Activity::PLAYER_1];
+    writer << m_BuildBudget[Players::PlayerOne];
     writer.NewProperty("P2BuildBudget");
-    writer << m_BuildBudget[Activity::PLAYER_2];
+    writer << m_BuildBudget[Players::PlayerTwo];
     writer.NewProperty("P3BuildBudget");
-    writer << m_BuildBudget[Activity::PLAYER_3];
+    writer << m_BuildBudget[Players::PlayerThree];
     writer.NewProperty("P4BuildBudget");
-    writer << m_BuildBudget[Activity::PLAYER_4];
+    writer << m_BuildBudget[Players::PlayerFour];
     writer.NewProperty("P1BuildBudgetRatio");
-    writer << m_BuildBudgetRatio[Activity::PLAYER_1];
+    writer << m_BuildBudgetRatio[Players::PlayerOne];
     writer.NewProperty("P2BuildBudgetRatio");
-    writer << m_BuildBudgetRatio[Activity::PLAYER_2];
+    writer << m_BuildBudgetRatio[Players::PlayerTwo];
     writer.NewProperty("P3BuildBudgetRatio");
-    writer << m_BuildBudgetRatio[Activity::PLAYER_3];
+    writer << m_BuildBudgetRatio[Players::PlayerThree];
     writer.NewProperty("P4BuildBudgetRatio");
-    writer << m_BuildBudgetRatio[Activity::PLAYER_4];
+    writer << m_BuildBudgetRatio[Players::PlayerFour];
     writer.NewProperty("AutoDesigned");
     writer << m_AutoDesigned;
     writer.NewProperty("TotalInvestment");
@@ -1534,7 +1532,7 @@ int Scene::Save(Writer &writer) const
             writer.NewProperty("Position");
             writer << (*oItr)->GetPos();
 
-            if ((*oItr)->GetPlacedByPlayer() != Activity::NOPLAYER)
+            if ((*oItr)->GetPlacedByPlayer() != Players::NoPlayer)
             {
                 writer.NewProperty("PlacedByPlayer");
                 writer << (*oItr)->GetPlacedByPlayer();
@@ -1633,65 +1631,65 @@ int Scene::Save(Writer &writer) const
         writer.NewProperty("AddBackgroundLayer");
         (*slItr)->SavePresetCopy(writer);
     }
-    if (!m_UnseenPixelSize[Activity::TEAM_1].IsZero())
+    if (!m_UnseenPixelSize[Activity::TeamOne].IsZero())
     {
         writer.NewProperty("AllUnseenPixelSizeTeam1");
-        writer << m_UnseenPixelSize[Activity::TEAM_1];
+        writer << m_UnseenPixelSize[Activity::TeamOne];
     }
-    if (!m_UnseenPixelSize[Activity::TEAM_2].IsZero())
+    if (!m_UnseenPixelSize[Activity::TeamTwo].IsZero())
     {
         writer.NewProperty("AllUnseenPixelSizeTeam2");
-        writer << m_UnseenPixelSize[Activity::TEAM_2];
+        writer << m_UnseenPixelSize[Activity::TeamTwo];
     }
-    if (!m_UnseenPixelSize[Activity::TEAM_3].IsZero())
+    if (!m_UnseenPixelSize[Activity::TeamThree].IsZero())
     {
         writer.NewProperty("AllUnseenPixelSizeTeam3");
-        writer << m_UnseenPixelSize[Activity::TEAM_3];
+        writer << m_UnseenPixelSize[Activity::TeamThree];
     }
-    if (!m_UnseenPixelSize[Activity::TEAM_4].IsZero())
+    if (!m_UnseenPixelSize[Activity::TeamFour].IsZero())
     {
         writer.NewProperty("AllUnseenPixelSizeTeam4");
-        writer << m_UnseenPixelSize[Activity::TEAM_4];
+        writer << m_UnseenPixelSize[Activity::TeamFour];
     }
-    if (m_apUnseenLayer[Activity::TEAM_1])
+    if (m_apUnseenLayer[Activity::TeamOne])
     {
         writer.NewProperty("UnseenLayerTeam1");
-        writer << m_apUnseenLayer[Activity::TEAM_1];
+        writer << m_apUnseenLayer[Activity::TeamOne];
     }
-    if (m_apUnseenLayer[Activity::TEAM_2])
+    if (m_apUnseenLayer[Activity::TeamTwo])
     {
         writer.NewProperty("UnseenLayerTeam2");
-        writer << m_apUnseenLayer[Activity::TEAM_2];
+        writer << m_apUnseenLayer[Activity::TeamTwo];
     }
-    if (m_apUnseenLayer[Activity::TEAM_3])
+    if (m_apUnseenLayer[Activity::TeamThree])
     {
         writer.NewProperty("UnseenLayerTeam3");
-        writer << m_apUnseenLayer[Activity::TEAM_3];
+        writer << m_apUnseenLayer[Activity::TeamThree];
     }
-    if (m_apUnseenLayer[Activity::TEAM_4])
+    if (m_apUnseenLayer[Activity::TeamFour])
     {
         writer.NewProperty("UnseenLayerTeam4");
-        writer << m_apUnseenLayer[Activity::TEAM_4];
+        writer << m_apUnseenLayer[Activity::TeamFour];
     }
-    if (m_ScanScheduled[Activity::TEAM_1])
+    if (m_ScanScheduled[Activity::TeamOne])
     {
         writer.NewProperty("ScanScheduledTeam1");
-        writer << m_ScanScheduled[Activity::TEAM_1];
+        writer << m_ScanScheduled[Activity::TeamOne];
     }
-    if (m_ScanScheduled[Activity::TEAM_2])
+    if (m_ScanScheduled[Activity::TeamTwo])
     {
         writer.NewProperty("ScanScheduledTeam2");
-        writer << m_ScanScheduled[Activity::TEAM_2];
+        writer << m_ScanScheduled[Activity::TeamTwo];
     }
-    if (m_ScanScheduled[Activity::TEAM_3])
+    if (m_ScanScheduled[Activity::TeamThree])
     {
         writer.NewProperty("ScanScheduledTeam3");
-        writer << m_ScanScheduled[Activity::TEAM_3];
+        writer << m_ScanScheduled[Activity::TeamThree];
     }
-    if (m_ScanScheduled[Activity::TEAM_4])
+    if (m_ScanScheduled[Activity::TeamFour])
     {
         writer.NewProperty("ScanScheduledTeam4");
-        writer << m_ScanScheduled[Activity::TEAM_4];
+        writer << m_ScanScheduled[Activity::TeamFour];
     }
 	for (list<Area>::const_iterator aItr = m_AreaList.begin(); aItr != m_AreaList.end(); ++aItr)
 	{
@@ -1719,7 +1717,7 @@ void Scene::Destroy(bool notInherited)
     delete m_pTerrain;
     delete m_pPathFinder;
 
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
         delete m_ResidentBrains[player];
 
     for (int set = PLACEONLOAD; set < PLACEDSETSCOUNT; ++set)
@@ -1743,10 +1741,10 @@ void Scene::Destroy(bool notInherited)
 		*slItr = 0;
 	}
 
-    delete m_apUnseenLayer[Activity::TEAM_1];
-    delete m_apUnseenLayer[Activity::TEAM_2];
-    delete m_apUnseenLayer[Activity::TEAM_3];
-    delete m_apUnseenLayer[Activity::TEAM_4];
+    delete m_apUnseenLayer[Activity::TeamOne];
+    delete m_apUnseenLayer[Activity::TeamTwo];
+    delete m_apUnseenLayer[Activity::TeamThree];
+    delete m_apUnseenLayer[Activity::TeamFour];
 
 	//if (m_PreviewBitmapOwned)
 	destroy_bitmap(m_pPreviewBitmap);
@@ -1783,7 +1781,7 @@ bool Scene::MigrateToModule(int whichModule)
 
 void Scene::FillUnseenLayer(Vector pixelSize, int team, bool createNow)
 {
-    if (team == Activity::NOTEAM || !(pixelSize.m_X >= 1.0 && pixelSize.m_Y >= 1.0))
+    if (team == Activity::NoTeam || !(pixelSize.m_X >= 1.0 && pixelSize.m_Y >= 1.0))
         return;
 
     m_UnseenPixelSize[team] = pixelSize;
@@ -1811,7 +1809,7 @@ void Scene::FillUnseenLayer(Vector pixelSize, int team, bool createNow)
 
 void Scene::SetUnseenLayer(SceneLayer *pNewLayer, int team)
 {
-    if (team == Activity::NOTEAM || !pNewLayer)
+    if (team == Activity::NoTeam || !pNewLayer)
         return;
 
     // Replace any old unseen layer with the new one that is generated
@@ -1829,7 +1827,7 @@ void Scene::SetUnseenLayer(SceneLayer *pNewLayer, int team)
 
 void Scene::ClearSeenPixels(int team)
 {
-    if (team != Activity::NOTEAM)
+    if (team != Activity::NoTeam)
     {
         // Clear all the pixels off the map, set them to key color
         if (m_apUnseenLayer[team])
@@ -1871,7 +1869,7 @@ void Scene::ClearSeenPixels(int team)
 
 bool Scene::CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom, int team)
 {
-    if (team == Activity::NOTEAM || !m_apUnseenLayer[team])
+    if (team == Activity::NoTeam || !m_apUnseenLayer[team])
         return false;
 
     // Do any necessary wrapping
@@ -2038,7 +2036,7 @@ int Scene::PlaceResidentBrains(Activity &newActivity)
 {
     int found = 0;
 
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (PlaceResidentBrain(player, newActivity))
             ++found;
@@ -2059,7 +2057,7 @@ int Scene::RetrieveResidentBrains(Activity &oldActivity)
 {
     int found = 0;
 
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
 //        RTEAssert(oldActivity.GetPlayerBrain(player) && oldActivity.GetPlayerBrain(player)->GetTeam() == oldActivity.GetTeamOfPlayer(player), "Resident Brain is of the wrong team BEFORE being retrieved!!");
 
@@ -2243,7 +2241,7 @@ void Scene::UpdatePlacedObjects(int whichSet)
 {
     if (whichSet == PLACEONLOAD)
     {
-        for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+        for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
             if (m_ResidentBrains[player])
                 m_ResidentBrains[player]->Update();
     }
@@ -2279,7 +2277,7 @@ int Scene::ClearPlacedObjectSet(int whichSet)
 // Method:          GetResidentBrain
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the resident brain Actor of a specific player from this scene,
-//                  if there is any. OINT!
+//                  if there is any. OWNERSHIP IS NOT TRANSFERRED!
 
 SceneObject * Scene::GetResidentBrain(int player) const
 {
@@ -2314,7 +2312,7 @@ void Scene::SetResidentBrain(int player, SceneObject *pNewBrain)
 int Scene::GetResidentBrainCount() const
 {
     int count = 0;
-    for (int p = Activity::PLAYER_1; p < Activity::MAXPLAYERCOUNT; ++p)
+    for (int p = Players::PlayerOne; p < Players::MaxPlayerCount; ++p)
     {
         if (m_ResidentBrains[p])
             count++;
@@ -2456,7 +2454,7 @@ float Scene::CalcBuildBudgetUse(int player, int *pAffordCount, int *pAffordAIPla
     if (pAffordCount)
         *pAffordCount = 0;
 
-    if (player < Activity::PLAYER_1 || player >= Activity::MAXPLAYERCOUNT)
+    if (player < Players::PlayerOne || player >= Players::MaxPlayerCount)
         return 0;
 
     // Take metaplayer tech modifiers into account when calculating costs of this Deployment spawn
@@ -2586,7 +2584,7 @@ float Scene::ApplyAIPlan(int player, int *pObjectsApplied)
     if (pObjectsApplied)
         *pObjectsApplied = 0;
 
-    if (player < Activity::PLAYER_1 || player >= Activity::MAXPLAYERCOUNT)
+    if (player < Players::PlayerOne || player >= Players::MaxPlayerCount)
         return 0;
 
     // Take metaplayer tech modifiers into account when calculating costs of this Deployment spawn
@@ -2656,14 +2654,14 @@ float Scene::ApplyBuildBudget(int player, int *pObjectsBuilt)
     if (pObjectsBuilt)
         *pObjectsBuilt = 0;
 
-    if (player < Activity::PLAYER_1 || player >= Activity::MAXPLAYERCOUNT)
+    if (player < Players::PlayerOne || player >= Players::MaxPlayerCount)
         return 0;
 
     // Take metaplayer tech modifiers into account when calculating costs of this Deployment spawn
     int nativeModule = 0;
     float foreignCostMult = 1.0;
 	float nativeCostMult = 1.0;
-    int team = Activity::NOTEAM;
+    int team = Activity::NoTeam;
     MetaPlayer *pMetaPlayer = g_MetaMan.GetMetaPlayerOfInGamePlayer(player);
     if (g_MetaMan.GameInProgress() && pMetaPlayer)
     {
@@ -3103,7 +3101,7 @@ void Scene::Update()
 	if (g_SettingsMan.BlipOnRevealUnseen())
 	{
 		// Highlight the pixels that have been revealed on the unseen maps
-		for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+		for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
 		{
 			if (m_apUnseenLayer[team])
 			{

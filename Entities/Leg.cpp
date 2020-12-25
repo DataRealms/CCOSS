@@ -12,14 +12,11 @@
 // Inclusions of header files
 
 #include "Leg.h"
-#include "RTEManagers.h"
-#include "RTETools.h"
-#include "HeldDevice.h"
-#include "ContentFile.h"
+#include "PresetMan.h"
 
 namespace RTE {
 
-CONCRETECLASSINFO(Leg, Attachable, 0)
+ConcreteClassInfo(Leg, Attachable, 50)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -145,7 +142,6 @@ int Leg::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "MoveSpeed")
         reader >> m_MoveSpeed;
     else
-        // See if the base class(es) can find a match instead
         return Attachable::ReadProperty(propName, reader);
 
     return 0;
@@ -252,7 +248,7 @@ void Leg::BendLeg()
     else if (m_CurrentNormalizedExtension > 1.0)
         m_CurrentNormalizedExtension = 1.0;
 
-    m_Frame = floorf(m_CurrentNormalizedExtension * m_FrameCount);
+    m_Frame = std::floor(m_CurrentNormalizedExtension * m_FrameCount);
 
     // Clamp
     if (m_Frame >= m_FrameCount)

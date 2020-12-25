@@ -41,8 +41,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(HDFirearm)
-
+EntityAllocation(HDFirearm)
+SerializableOverrideMethods
+ClassInfoGetters
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     HDFirearm
@@ -61,7 +62,7 @@ ENTITYALLOCATION(HDFirearm)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~HDFirearm() { Destroy(true); }
+	~HDFirearm() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -72,7 +73,7 @@ ENTITYALLOCATION(HDFirearm)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -87,22 +88,6 @@ ENTITYALLOCATION(HDFirearm)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire HDFirearm, including its inherited members, to their
@@ -110,19 +95,7 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); HeldDevice::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this HDFirearm to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the HDFirearm will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+    void Reset() override { Clear(); HeldDevice::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -133,27 +106,7 @@ ENTITYALLOCATION(HDFirearm)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -164,50 +117,50 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       None.
 // Return value:    A float describing the mass value in Kilograms (kg).
 
-    virtual float GetMass() const;
+    float GetMass() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetRateOfFire
+// Method:  GetRateOfFire
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the rate of fire of this. This applies even if semi-auto. it
 //                  limits how quickly a new round can be fired after the last.
 // Arguments:       None.
 // Return value:    The rate of fire, in rounds per min.
 
-    virtual int GetRateOfFire() const { return m_RateOfFire; }
+	int GetRateOfFire() const { return m_RateOfFire; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetRateOfFire
+// Method:  SetRateOfFire
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the rate of fire of this. This applies even if semi-auto. it
 //                  limits how quickly a new round can be fired after the last.
 // Arguments:       The new rate of fire, in rounds per min.
 // Return value:    None.
 
-    virtual void SetRateOfFire(int newRate) { m_RateOfFire = newRate; }
+	void SetRateOfFire(int newRate) { m_RateOfFire = newRate; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMagazine
+// Method:  GetMagazine
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the currently attached Magazine, if any.
 // Arguments:       None.
 // Return value:    The Magazine, if any is attached.
 
-    virtual Magazine * GetMagazine() const { return m_pMagazine; }
+	Magazine * GetMagazine() const { return m_pMagazine; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetNextMagazineName
+// Method:  SetNextMagazineName
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the Preset name of the next Magazine that will be loaded into
 //                  this gun. This changes all future mags that will be reloaded.
 // Arguments:       The preset name of the new Magazine to load into this from now on.
 // Return value:    Whether the specified magazine was found and successfully prepared.
 
-    virtual bool SetNextMagazineName(std::string magName);
+	bool SetNextMagazineName(std::string magName);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -433,7 +386,7 @@ ENTITYALLOCATION(HDFirearm)
 // Return value:    A vector describing the absolute world coordinates for the magazine
 //                  attachment point of this
 
-    virtual Vector GetMagazinePos() const;
+	Vector GetMagazinePos() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -445,7 +398,7 @@ ENTITYALLOCATION(HDFirearm)
 // Return value:    A vector describing the absolute world coordinates for the muzzle point
 //                  of this
 
-    virtual Vector GetMuzzlePos() const;
+	Vector GetMuzzlePos() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -457,7 +410,7 @@ ENTITYALLOCATION(HDFirearm)
 // Return value:    A unrotated vector describing the relative for the muzzle point of
 //                  this from this' position.
 
-    virtual Vector GetMuzzleOffset() const { return m_MuzzleOff; }
+	Vector GetMuzzleOffset() const override { return m_MuzzleOff; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -468,19 +421,8 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       Bew ofsset value.
 // Return value:    None.
 
-	virtual void SetMuzzleOffset(Vector newOffset) { m_MuzzleOff = newOffset; }
+	void SetMuzzleOffset(Vector newOffset) override { m_MuzzleOff = newOffset; }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetParentOffset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the current position offset of this HDFirearm relative to the
-//                  parent Actor's position, if attached.
-// Arguments:       None.
-// Return value:    A const reference to the current parent offset.
-
-    const Vector & GetParentOffset() const { return m_ParentOffset; }
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetID
@@ -490,7 +432,7 @@ ENTITYALLOCATION(HDFirearm)
 //                  assigned for this frame.
 // Return value:    None.
 
-    virtual void SetID(const MOID newID);
+    void SetID(const MOID newID) override;
     
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -500,7 +442,7 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       Pointer to the MOSprite to attach to. Ownership is NOT transferred!
 // Return value:    None.
 
-    virtual void Attach(MOSRotating *pParent) { HeldDevice::Attach(pParent); m_Reloading = false; m_ReloadTmr.Reset(); }
+	void Attach(MOSRotating *pParent) override { HeldDevice::Attach(pParent); m_Reloading = false; m_ReloadTmr.Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -510,7 +452,7 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Detach() { HeldDevice::Detach(); m_Activated = m_Reloading = false; m_ReloadTmr.Reset(); }
+	void Detach() override { HeldDevice::Detach(); m_Activated = m_Reloading = false; m_ReloadTmr.Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -522,7 +464,7 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ResetAllTimers() { HeldDevice::ResetAllTimers(); m_LastFireTmr.Reset(); m_ReloadTmr.Reset(); }
+    void ResetAllTimers() override { HeldDevice::ResetAllTimers(); m_LastFireTmr.Reset(); m_ReloadTmr.Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -534,7 +476,7 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void RestDetection();
+    void RestDetection() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -545,7 +487,7 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Activate();
+	void Activate() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -556,7 +498,7 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Deactivate();
+	void Deactivate() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -577,7 +519,7 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reload();
+	void Reload() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -587,7 +529,7 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       None.
 // Return value:    Whetehr being reloaded.
 
-    virtual bool IsReloading() const override { return m_Reloading; }
+	bool IsReloading() const override { return m_Reloading; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -597,7 +539,7 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       None.
 // Return value:    Whether just done reloading this frame.
 
-    virtual bool DoneReloading() const override { return m_DoneReloading; }
+	bool DoneReloading() const override { return m_DoneReloading; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -607,7 +549,7 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       None.
 // Return value:    Whetehr in need of reloading (ie not full).
 
-    virtual bool NeedsReloading() const override;
+	bool NeedsReloading() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -618,27 +560,27 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       None.
 // Return value:    Whetehr magazine is full or not.
 
-    virtual bool IsFull();
+	bool IsFull() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsFullAuto
+// Method:  IsFullAuto
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Tells whether the device is fully automatic or not.
 // Arguments:       None.
 // Return value:    Whether the player can hold down fire and this will fire repeatedly.
 
-    virtual bool IsFullAuto() const { return m_FullAuto; }
+	bool IsFullAuto() const { return m_FullAuto; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetFullAuto
+// Method:  SetFullAuto
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets whether the device is fully automatic or not.
 // Arguments:       New value.
 // Return value:    None.
 
-    virtual void SetFullAuto(bool newValue)  { m_FullAuto = newValue; }
+	void SetFullAuto(bool newValue) { m_FullAuto = newValue; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -648,7 +590,7 @@ ENTITYALLOCATION(HDFirearm)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -663,10 +605,7 @@ ENTITYALLOCATION(HDFirearm)
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -679,7 +618,7 @@ ENTITYALLOCATION(HDFirearm)
 //                  get drawn etc.
 // Return value:    None.
 
-    virtual void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false);
+    void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -779,9 +718,7 @@ protected:
 //                  the same as the last one in the index (presumably its parent),
 // Return value:    None.
 
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID = g_NoMOID,
-                                 bool makeNewMOID = true);
+    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -791,7 +728,7 @@ protected:
 // Arguments:       Vector to store MOIDs
 // Return value:    None.
 
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
 
     // Member variables.
     static Entity::ClassInfo m_sClass;
@@ -804,8 +741,10 @@ protected:
     // Muzzle Flash Attachable. Owned
     Attachable *m_pFlash;
 
+    SoundContainer m_PreFireSound; //!< The sound this HDFirearm should play before it starts firing. Distinct from activation sound in that it will play exactly once per trigger pull and not pitch up.
     // The audio of this FireArm being fired.
     SoundContainer m_FireSound;
+    SoundContainer m_FireEchoSound; //!< The audio that is played as the echo for the gun. Each shot will restart this sound, so it doesn't ever overlap.
     // The audio that is played immediately upon activation, but perhaps before actual first firing, if there's a pre-delay
     SoundContainer m_ActiveSound;
     // The audio that is played immediately upon cease of activation
@@ -910,8 +849,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    HDFirearm(const HDFirearm &reference);
-    HDFirearm & operator=(const HDFirearm &rhs);
+	HDFirearm(const HDFirearm &reference) = delete;
+	HDFirearm & operator=(const HDFirearm &rhs) = delete;
 
 };
 

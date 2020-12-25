@@ -50,7 +50,7 @@ extern bool g_ResetActivity;
 
 namespace RTE {
 
-CONCRETECLASSINFO(GibEditor, EditorActivity, 0)
+ConcreteClassInfo(GibEditor, EditorActivity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +120,6 @@ int GibEditor::ReadProperty(std::string propName, Reader &reader)
         reader >> m_DeliveryDelay;
     else
 */
-        // See if the base class(es) can find a match instead
         return EditorActivity::ReadProperty(propName, reader);
 
     return 0;
@@ -222,7 +221,7 @@ int GibEditor::Start()
         m_pSaveDialogBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("SaveDialogBox"));
 
         // Set the background image of the parent collection box
-//        ContentFile backgroundFile("Base.rte/GUIs/BuyMenuBackground.bmp");
+//        ContentFile backgroundFile("Base.rte/GUIs/BuyMenuBackground.png");
 //        m_pSaveDialogBox->SetDrawImage(new AllegroBitmap(backgroundFile.GetAsBitmap()));
 //        m_pSaveDialogBox->SetDrawBackground(true);
 //        m_pSaveDialogBox->SetDrawType(GUICollectionBox::Image);
@@ -269,7 +268,7 @@ int GibEditor::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void GibEditor::Pause(bool pause)
+void GibEditor::SetPaused(bool pause)
 {
     // Override the pause
     m_Paused = false;
@@ -287,7 +286,7 @@ void GibEditor::End()
 
     
 
-    m_ActivityState = OVER;
+    m_ActivityState = ActivityState::Over;
 }
 
 
@@ -528,11 +527,11 @@ void GibEditor::Update()
                     m_pEditedObject->Update();
 
                     // Make proxy copies of the loaded objects' gib reference instances and place them in the list to be edited
-                    list<MOSRotating::Gib> *pLoadedGibList = m_pEditedObject->GetGibList();
+                    list<Gib> *pLoadedGibList = m_pEditedObject->GetGibList();
                     list<MovableObject *> *pEditedGibList = m_pEditorGUI->GetPlacedGibs();
                     MovableObject *pGibCopy = 0;
 
-                    for (list<MOSRotating::Gib>::iterator gItr = pLoadedGibList->begin(); gItr != pLoadedGibList->end(); ++gItr)
+                    for (list<Gib>::iterator gItr = pLoadedGibList->begin(); gItr != pLoadedGibList->end(); ++gItr)
                     {
                         pGibCopy = dynamic_cast<MovableObject *>((*gItr).GetParticlePreset()->Clone());
                         if (pGibCopy)
@@ -824,24 +823,24 @@ void GibEditor::StuffEditedGibs(MOSRotating *pEditedObject)
         return;
 
     // Replace the gibs of the object with the proxies that have been edited in the gui
-    list<MOSRotating::Gib> *pObjectGibList = pEditedObject->GetGibList();
+    list<Gib> *pObjectGibList = pEditedObject->GetGibList();
     pObjectGibList->clear();
 
     // Take each proxy object and stuff it into a Gib instance which then gets stuffed into the object to be saved
     list<MovableObject *> *pProxyGibList = m_pEditorGUI->GetPlacedGibs();
     for (list<MovableObject *>::iterator gItr = pProxyGibList->begin(); gItr != pProxyGibList->end(); ++gItr)
     {
-        MOSRotating::Gib newGib;
-        // Only set the refernce instance directly from the isntanceman. OINT
-        newGib.m_pGibParticle = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset((*gItr)->GetClassName(), (*gItr)->GetPresetName(), m_ModuleSpaceID));
-        if (newGib.m_pGibParticle)
+        Gib newGib;
+        // Only set the refernce instance directly from the isntanceman. OWNERSHIP IS NOT TRANSFERRED!
+        newGib.m_GibParticle = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset((*gItr)->GetClassName(), (*gItr)->GetPresetName(), m_ModuleSpaceID));
+        if (newGib.m_GibParticle)
         {
             newGib.m_Count = 1;
             newGib.m_Offset = (*gItr)->GetPos() - pEditedObject->GetPos();
 // TODO: do proper velocity calculations here!
 // ... actually leave these as 0 and let them be calculated in GibThis
 //            newGib.m_MinVelocity = (100.0f + 50.0f * NormalRand()) / (*gItr)->GetMass();
-//            newGib.m_MaxVelocity = newGib.m_MinVelocity + ((100.0f * PosRand()) / (*gItr)->GetMass());
+//            newGib.m_MaxVelocity = newGib.m_MinVelocity + ((100.0f * RandomNum()) / (*gItr)->GetMass());
             pObjectGibList->push_back(newGib);
         }
     }

@@ -2,7 +2,7 @@
 
 namespace RTE {
 
-	const std::string Color::m_ClassName = "Color";
+	const std::string Color::c_ClassName = "Color";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -35,7 +35,6 @@ namespace RTE {
 		} else if (propName == "B") {
 			reader >> m_B;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;
@@ -59,11 +58,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Color::SetRGBWithIndex(unsigned char index) {
+
 		m_Index = index;
 
 		RGB color;
 		get_color(static_cast<int>(m_Index), &color);
 
+		// Multiply by 4 because the Allegro RGB struct elements are in range 0-63, and proper RGB needs 0-255.
 		m_R = color.r * 4;
 		m_G = color.g * 4;
 		m_B = color.b * 4;

@@ -16,7 +16,6 @@
 
 #include "Entity.h"
 #include "Vector.h"
-#include "FrameMan.h"
 #include "ActivityMan.h"
 #include "Atom.h"
 
@@ -53,8 +52,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(LimbPath)
-
+EntityAllocation(LimbPath)
+SerializableOverrideMethods
+ClassInfoGetters
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     LimbPath
@@ -73,7 +73,7 @@ ENTITYALLOCATION(LimbPath)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~LimbPath() { Destroy(true); }
+	~LimbPath() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ ENTITYALLOCATION(LimbPath)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +101,7 @@ ENTITYALLOCATION(LimbPath)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const Vector &startPoint,
+	int Create(const Vector &startPoint,
                        const unsigned int segCount = 1,
                        const Vector *aSegArray = new Vector,
                        const float travelSpeed = 1.0);
@@ -119,22 +119,6 @@ ENTITYALLOCATION(LimbPath)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire LimbPath, including its inherited members, to their
@@ -142,19 +126,7 @@ ENTITYALLOCATION(LimbPath)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Entity::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this LimbPath to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the Controller will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+    void Reset() override { Clear(); Entity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -165,27 +137,7 @@ ENTITYALLOCATION(LimbPath)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -331,7 +283,7 @@ ENTITYALLOCATION(LimbPath)
 // Arguments:       None.
 // Return value:    The total time (ms) this should take to travel along, if unobstructed.
 
-    float GetTotalPathTime() const { return ((m_TotalLength * g_FrameMan.GetMPP()) / m_TravelSpeed[m_WhichSpeed]) * 1000; }
+    float GetTotalPathTime() const { return ((m_TotalLength * c_MPP) / m_TravelSpeed[m_WhichSpeed]) * 1000; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -342,7 +294,7 @@ ENTITYALLOCATION(LimbPath)
 // Arguments:       None.
 // Return value:    The total time (ms) this should take to travel along, if unobstructed.
 
-    float GetRegularPathTime() const { return ((m_RegularLength * g_FrameMan.GetMPP()) / m_TravelSpeed[m_WhichSpeed]) * 1000; }
+    float GetRegularPathTime() const { return ((m_RegularLength * c_MPP) / m_TravelSpeed[m_WhichSpeed]) * 1000; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -610,7 +562,7 @@ ENTITYALLOCATION(LimbPath)
 // Return value:    Whether a starting segment that yielded a starting pos free of terrain
 //                  was found or not.
 
-    bool RestartFree(Vector &limbPos, MOID MOIDToIgnore = g_NoMOID, int ignoreTeam = Activity::NOTEAM);
+    bool RestartFree(Vector &limbPos, MOID MOIDToIgnore = g_NoMOID, int ignoreTeam = Activity::NoTeam);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -637,7 +589,7 @@ ENTITYALLOCATION(LimbPath)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
+// Method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws this LimbPath's current graphical debug representation to a
 //                  BITMAP of choice.
@@ -646,9 +598,7 @@ ENTITYALLOCATION(LimbPath)
 //                  The color to draw the path's pixels as.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      unsigned char color = 34) const;
+	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), unsigned char color = 34) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

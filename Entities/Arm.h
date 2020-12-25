@@ -41,8 +41,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(Arm)
-
+EntityAllocation(Arm)
+SerializableOverrideMethods
+ClassInfoGetters
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     Arm
@@ -61,19 +62,8 @@ ENTITYALLOCATION(Arm)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~Arm() { Destroy(true); }
+	~Arm() override { Destroy(true); }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the Arm object ready for use.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
@@ -87,22 +77,6 @@ ENTITYALLOCATION(Arm)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire Arm, including its inherited members, to their
@@ -110,19 +84,7 @@ ENTITYALLOCATION(Arm)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Attachable::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this Arm to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the Arm will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+    void Reset() override { Clear(); Attachable::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -133,27 +95,7 @@ ENTITYALLOCATION(Arm)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +106,7 @@ ENTITYALLOCATION(Arm)
 // Arguments:       None.
 // Return value:    A float describing the mass value in Kilograms (kg).
 
-    virtual float GetMass() const;
+    float GetMass() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -174,7 +116,7 @@ ENTITYALLOCATION(Arm)
 // Arguments:       None.
 // Return value:    Vector with the current absolute scene hand position.
 
-    Vector GetHandPos() const { return m_Pos + m_HandOffset; }
+    Vector GetHandPos() const { return m_JointPos + m_HandOffset; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -252,7 +194,7 @@ ENTITYALLOCATION(Arm)
 //                  assigned for this frame.
 // Return value:    None.
 
-    virtual void SetID(const MOID newID);
+    void SetID(const MOID newID) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -275,16 +217,16 @@ ENTITYALLOCATION(Arm)
 // Arguments:       Vector with the new absolute scene hand position.
 // Return value:    None.
 
-    void SetHandPos(const Vector &newHandPos) { m_HandOffset = newHandPos - m_Pos; }
+    void SetHandPos(const Vector &newHandPos) { m_HandOffset = newHandPos - m_JointPos; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetIdleOffset
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the offset from the position of this Arm to which its hand will
+// Description:     Gets the offset from the joint position of this Arm to which its hand will
 //                  go when not holding a device and not able to reach a certain target.
 // Arguments:       None.
-// Return value:    Vector with the new idle offset relative to the position of this Arm.
+// Return value:    Vector with the new idle offset relative to the joint position of this Arm.
 
 	Vector GetIdleOffset() const { return m_IdleOffset; }
 
@@ -292,9 +234,9 @@ ENTITYALLOCATION(Arm)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetIdleOffset
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the offset from the position of this Arm to which its hand will
+// Description:     Sets the offset from the joint position of this Arm to which its hand will
 //                  go when not holding a device and not able to reach a certain target.
-// Arguments:       Vector with the new idle offset relative to the position of this Arm.
+// Arguments:       Vector with the new idle offset relative to the joint position of this Arm.
 // Return value:    None.
 
     void SetIdleOffset(const Vector &newIdleOffset) { m_IdleOffset = newIdleOffset; }
@@ -424,7 +366,7 @@ ENTITYALLOCATION(Arm)
 //                  A pointer to an MO which the gibs shuold not be colliding with!
 // Return value:    None.
 
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
+    void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -434,7 +376,7 @@ ENTITYALLOCATION(Arm)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -449,14 +391,11 @@ ENTITYALLOCATION(Arm)
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  DrawHand
+// Method:  DrawHand
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws this Arm's hand's graphical representation to a BITMAP of
 //                  choice.
@@ -465,9 +404,7 @@ ENTITYALLOCATION(Arm)
 //                  In which mode to draw in. See the DrawMode enumeration for the modes.
 // Return value:    None.
 
-    virtual void DrawHand(BITMAP *pTargetBitmap,
-                          const Vector &targetPos = Vector(),
-                          DrawMode mode = g_DrawColor) const;
+	void DrawHand(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -477,7 +414,7 @@ ENTITYALLOCATION(Arm)
 // Arguments:       Vector to store MOIDs
 // Return value:    None.
 
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -508,9 +445,7 @@ protected:
 //                  the same as the last one in the index (presumably its parent),
 // Return value:    None.
 
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID = g_NoMOID,
-                                 bool makeNewMOID = true);
+    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 
     // Member variables
@@ -525,22 +460,21 @@ protected:
     ContentFile m_HandFile;
     // The small bitmap holding the hand bitmap.
     BITMAP *m_pHand;
-    // The maximum reaching length of this arm, in pixels, from the m_Pos.
+	// The maximum reaching length of this Arm. Max distance between the joint position and the hand offset. Length of a straight arm sprite in pixels.
     float m_MaxLength;
-    // Current offset position the.hand relative to the m_Pos.
+    // Current offset position of the hand relative to m_JointPos.
     Vector m_HandOffset;
-    // The target offset that this Arm's hand is reaching after.
+    // The target position that this Arm's hand is reaching after.
     // If (0, 0), the Arm is currently not reaching after anything.
     Vector m_TargetPoint;
-    // The target offset from m_Pos that this Arm's hand is reaching after when
-    // not reaching for or doing anything else.
+    // The target offset relative to m_JointPos that this Arm's hand is moving to while not reaching for or doing anything else.
     Vector m_IdleOffset;
     // How fast the arm moves to a reach target,
     // on a scale from 0.0 (frozen) to 1.0 (instantly there).
     float m_MoveSpeed;
     // Wether this Arm will go to idle position if it didn't reach or not.
     bool m_WillIdle;
-    // Wether this Arm reaached the reach target last Update.
+    // Whether this Arm reached the reach target last Update.
     bool m_DidReach;
 
 
@@ -562,8 +496,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    Arm(const Arm &reference);
-    Arm & operator=(const Arm &rhs);
+	Arm(const Arm &reference) = delete;
+	Arm & operator=(const Arm &rhs) = delete;
 
 };
 

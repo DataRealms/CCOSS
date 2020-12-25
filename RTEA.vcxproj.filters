@@ -27,9 +27,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="cpp.hint" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="System\Box.h">
       <Filter>System</Filter>
     </ClInclude>
@@ -97,9 +94,6 @@
       <Filter>Managers</Filter>
     </ClInclude>
     <ClInclude Include="Managers\PresetMan.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="Managers\RTEManagers.h">
       <Filter>Managers</Filter>
     </ClInclude>
     <ClInclude Include="Managers\SceneMan.h">
@@ -237,13 +231,7 @@
     <ClInclude Include="Entities\AHuman.h">
       <Filter>Entities</Filter>
     </ClInclude>
-    <ClInclude Include="Entities\AllEntities.h">
-      <Filter>Entities</Filter>
-    </ClInclude>
     <ClInclude Include="Entities\Arm.h">
-      <Filter>Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="Entities\Atom.h">
       <Filter>Entities</Filter>
     </ClInclude>
     <ClInclude Include="Entities\AtomGroup.h">
@@ -414,12 +402,6 @@
     <ClInclude Include="Managers\NetworkServer.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="Managers\Network.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="Managers\NetworkMessages.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
     <ClInclude Include="Activities\MultiplayerGame.h">
       <Filter>Activities</Filter>
     </ClInclude>
@@ -468,8 +450,38 @@
     <ClInclude Include="Entities\SoundContainer.h">
       <Filter>Entities</Filter>
     </ClInclude>
+	<ClInclude Include="Entities\SoundSet.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
     <ClInclude Include="System\Primitive.h">
       <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Atom.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\ADSensor.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\Gib.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\Round.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="System\NetworkMessages.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\InputScheme.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\InputMapping.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\MetaSave.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\Activity.h">
+      <Filter>Entities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -672,9 +684,6 @@
       <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="Entities\Arm.cpp">
-      <Filter>Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="Entities\Atom.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="Entities\AtomGroup.cpp">
@@ -885,8 +894,35 @@
     <ClCompile Include="Entities\SoundContainer.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
+	<ClCompile Include="Entities\SoundSet.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
     <ClCompile Include="System\Primitive.cpp">
       <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Atom.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\ADSensor.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\Gib.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\Round.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="System\InputScheme.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\InputMapping.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\MetaSave.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\Activity.cpp">
+      <Filter>Entities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -898,5 +934,8 @@
     <ResourceCompile Include="Resources\RTEA.rc">
       <Filter>Resources</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

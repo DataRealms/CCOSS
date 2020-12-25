@@ -1,7 +1,6 @@
 #ifndef _RTEFRAMEMAN_
 #define _RTEFRAMEMAN_
 
-#include "RTETools.h"
 #include "ContentFile.h"
 #include "Timer.h"
 #include "Box.h"
@@ -21,6 +20,8 @@ namespace RTE {
 
 	public:
 
+		SerializableOverrideMethods
+
 		Vector SLOffset[c_MaxScreenCount][c_MaxLayersStoredForNetwork]; //!< SceneLayer offsets for each screen in online multiplayer.
 
 #pragma region Creation
@@ -33,14 +34,14 @@ namespace RTE {
 		/// Makes the FrameMan object ready for use, which is to be used with SettingsMan first.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create() override;
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up a FrameMan object before deletion from system memory.
 		/// </summary>
-		virtual ~FrameMan() { Destroy(); }
+		~FrameMan() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the FrameMan object.
@@ -48,30 +49,15 @@ namespace RTE {
 		void Destroy();
 
 		/// <summary>
+		/// Destroys the temporary backbuffers to free the memory that was allocated to the current backbuffers before they were overwritten and allocated new memory addresses.
+		/// This will be called by ReinitMainMenu() and MUST NOT BE CALLED ANYWHERE ELSE!
+		/// </summary>
+		void DestroyTempBackBuffers();
+
+		/// <summary>
 		/// Resets the entire FrameMan, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
-#pragma endregion
-
-#pragma region INI Handling
-		/// <summary>
-		/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called.
-		/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
-		/// </summary>
-		/// <param name="propName">The name of the property to be read.</param>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>
-		/// An error return value signaling whether the property was successfully read or not.
-		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
-		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader);
-
-		/// <summary>
-		/// Saves the complete state of this FrameMan to an output stream for later recreation with Create(Reader &reader).
-		/// </summary>
-		/// <param name="writer">A Writer that the FrameMan will save itself with.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const;
+		void Reset() override { Clear(); }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -86,7 +72,7 @@ namespace RTE {
 		void Draw();
 #pragma endregion
 
-#pragma region Getters and Setters
+#pragma region Getters
 		/// <summary>
 		/// Gets the 8bpp backbuffer bitmap.
 		/// </summary>
@@ -98,36 +84,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns>A pointer to the BITMAP 32bpp backbuffer. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetBackBuffer32() const { return m_BackBuffer32; }
-
-		/// <summary>
-		/// Gets the ratio between the physics engine's meters and on-screen pixels.
-		/// </summary>
-		/// <returns>A float describing the current MPP ratio.</returns>
-		float GetMPP() const { return m_MPP; }
-
-		/// <summary>
-		/// Gets the ratio between on-screen pixels and the physics engine's meters.
-		/// </summary>
-		/// <returns>A float describing the current PPM ratio.</returns>
-		float GetPPM() const { return m_PPM; }
-
-		/// <summary>
-		/// Sets the ratio between on-screen pixels and the physics engine's meters.
-		/// </summary>
-		/// <param name="newPPM">A float specifying the new PPM ratio.</param>
-		void SetPPM(const float newPPM) { m_PPM = newPPM; }
-
-		/// <summary>
-		/// Gets the ratio between the physics engine's Liters and on-screen pixels.
-		/// </summary>
-		/// <returns>A float describing the current LPP ratio.</returns>
-		float GetLPP() const { return m_LPP; }
-
-		/// <summary>
-		/// Gets the ratio between the on-screen pixels and the physics engine's Liters.
-		/// </summary>
-		/// <returns>A float describing the current PPL ratio.</returns>
-		float GetPPL() const { return m_PPL; }
 #pragma endregion
 
 #pragma region Resolution Handling
@@ -188,11 +144,58 @@ namespace RTE {
 		unsigned short ResolutionMultiplier() const { return m_ResMultiplier; }
 
 		/// <summary>
+		/// Gets whether resolution validation in multi-screen mode is disabled or not.
+		/// </summary>
+		/// <returns>Whether resolution validation in multi-screen mode is disabled or not.</returns>
+		bool IsMultiScreenResolutionValidationDisabled() const { return m_DisableMultiScreenResolutionValidation; }
+
+		/// <summary>
 		/// Sets and switches to a new windowed mode resolution multiplier.
 		/// </summary>
 		/// <param name="multiplier">The multiplier to switch to.</param>
-		/// <returns>Error code, anything other than 0 is error.</returns>
+		/// <returns>Error code, anything other than 0 is an error.</returns>
 		int SwitchResolutionMultiplier(unsigned char multiplier = 1);
+
+		/// <summary>
+		/// Gets whether the game window is in fullscreen (borderless window) mode or not.
+		/// </summary>
+		/// <returns>True if the game window resolution matches the desktop resolution.</returns>
+		bool IsFullscreen() const { return m_ResX == m_ScreenResX && m_ResY == m_ScreenResY; }
+
+		/// <summary>
+		/// Gets whether the game window is in upscaled fullscreen (borderless window) mode or not.
+		/// </summary>
+		/// <returns>True if the game window is exactly half of the desktop resolution and the multiplier is set to 2.</returns>
+		bool IsUpscaledFullscreen() const { return m_ResMultiplier == 2 && m_ResX == m_ScreenResX / 2 && m_ResY == m_ScreenResY / 2; }
+		
+		/// <summary>
+		/// Switches the game window into fullscreen or upscaled fullscreen mode.
+		/// </summary>
+		/// <param name="upscaled">Whether to switch to upscaled mode or not.</param>
+		/// <param name="endActivity">Whether the current Activity should be ended before performing the switch.</param>
+		void SwitchToFullscreen(bool upscaled, bool endActivity = false);
+
+		/// <summary>
+		/// Gets whether the game window resolution was changed.
+		/// </summary>
+		/// <returns>Whether the game window resolution was changed.</returns>
+		bool ResolutionChanged() const { return m_ResChanged; }
+
+		/// <summary>
+		/// Sets whether the game window resolution was changed. Used to reset the flag after the change is complete. This is called from ReinitMainMenu() and should not be called anywhere else.
+		/// </summary>
+		/// <param name="resolutionChanged">Whether the resolution changed or not.</param>
+		void SetResolutionChanged(bool resolutionChanged) { m_ResChanged = resolutionChanged; }
+
+		/// <summary>
+		/// Switches the game window resolution to the specified dimensions.
+		/// </summary>
+		/// <param name="newResX">New width to set window to.</param>
+		/// <param name="newResY">New height to set window to.</param>
+		/// <param name="newMultiplier">New resolution multiplier to set window to.</param>
+		/// <param name="endActivity">Whether the current Activity should be ended before performing the switch.</param>
+		/// <returns>Error code, anything other than 0 is an error.</returns>
+		int SwitchResolution(unsigned short newResX, unsigned short newResY, unsigned short newMultiplier = 1, bool endActivity = false);
 #pragma endregion
 
 #pragma region Split-Screen Handling
@@ -318,17 +321,17 @@ namespace RTE {
 		/// <summary>
 		/// Flips the frame buffers, showing the backbuffer on the current display.
 		/// </summary>
-		void FlipFrameBuffers();
+		void FlipFrameBuffers() const;
 
 		/// <summary>
 		/// Clears the 8bpp backbuffer with black.
 		/// </summary>
-		void ClearBackBuffer8() { clear_to_color(m_BackBuffer8, m_BlackColor); }
+		void ClearBackBuffer8() const { clear_to_color(m_BackBuffer8, m_BlackColor); }
 
 		/// <summary>
 		/// Clears the 32bpp backbuffer with black.
 		/// </summary>
-		void ClearBackBuffer32() { clear_to_color(m_BackBuffer32, 0); }
+		void ClearBackBuffer32() const { clear_to_color(m_BackBuffer32, 0); }
 
 		/// <summary>
 		/// Sets a specific recalculated transparency table which is used for any subsequent transparency drawing.
@@ -347,7 +350,7 @@ namespace RTE {
 		/// <summary>
 		/// Draws a line that can be dotted or with other effects.
 		/// </summary>
-		/// <param name="pBitmap">The Bitmap to draw to. Ownership is NOT transferred.</param>
+		/// <param name="bitmap">The Bitmap to draw to. Ownership is NOT transferred.</param>
 		/// <param name="start">The absolute Start point.</param>
 		/// <param name="end">The absolute end point.</param>
 		/// <param name="color">The color value of the line.</param>
@@ -356,8 +359,8 @@ namespace RTE {
 		/// <param name="skipStart">The start of the skipping phase. If skip is 10 and this is 5, the first dot will be drawn after 5 pixels.</param>
 		/// <param name="shortestWrap">Whether the line should take the shortest possible route across scene wraps.</param>
 		/// <returns>The end state of the skipping phase. Eg if 4 is returned here the last dot was placed 4 pixels ago.</returns>
-		int DrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, unsigned char color, unsigned char altColor = 0, unsigned short skip = 0, unsigned short skipStart = 0, bool shortestWrap = false) {
-			return SharedDrawLine(bitmap, start, end, color, altColor, skip, skipStart, shortestWrap, false, 0);
+		int DrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, unsigned char color, unsigned char altColor = 0, unsigned short skip = 0, unsigned short skipStart = 0, bool shortestWrap = false) const {
+			return SharedDrawLine(bitmap, start, end, color, altColor, skip, skipStart, shortestWrap, false, nullptr);
 		}
 
 		/// <summary>
@@ -371,7 +374,7 @@ namespace RTE {
 		/// <param name="skipStart">The start of the skipping phase. If skip is 10 and this is 5, the first dot will be drawn after 5 pixels.</param>
 		/// <param name="shortestWrap">Whether the line should take the shortest possible route across scene wraps.</param>
 		/// <returns>The end state of the skipping phase. Eg if 4 is returned here the last dot was placed 4 pixels ago.</returns>
-		int DrawDotLine(BITMAP *bitmap, const Vector &start, const Vector &end, BITMAP *dot, unsigned short skip = 0, unsigned short skipStart = 0, bool shortestWrap = false) {
+		int DrawDotLine(BITMAP *bitmap, const Vector &start, const Vector &end, BITMAP *dot, unsigned short skip = 0, unsigned short skipStart = 0, bool shortestWrap = false) const {
 			return SharedDrawLine(bitmap, start, end, 0, 0, skip, skipStart, shortestWrap, true, dot);
 		}
 #pragma endregion
@@ -529,6 +532,13 @@ namespace RTE {
 		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
 		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
 		int SaveWorldToBMP(const char *nameBase) { return SaveBitmap(WorldDump, nameBase); }
+
+		/// <summary>
+		/// Dumps a miniature screenshot of the whole scene to be used as a preview.
+		/// </summary>
+		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
+		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
+		int SaveWorldToPreviewBMP(const char *nameBase) { return SaveBitmap(ScenePreviewDump, nameBase); }
 #pragma endregion
 
 #pragma region Class Info
@@ -536,7 +546,7 @@ namespace RTE {
 		/// Gets the class name of this Entity.
 		/// </summary>
 		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		const std::string & GetClassName() const override { return c_ClassName; }
 #pragma endregion
 
 	protected:
@@ -547,18 +557,26 @@ namespace RTE {
 
 		int m_GfxDriver; //!< The graphics driver that will be used for rendering.
 
-		unsigned short m_ScreenResX; //!< Width of the physical screen (desktop resolution). 
-		unsigned short m_ScreenResY; //!< Height of the physical screen (desktop resolution).
+		bool m_DisableMultiScreenResolutionValidation; //!< Whether to disable resolution validation when running multi-screen mode or not. Allows setting whatever crazy resolution that may or may not crash.
+
+		unsigned short m_NumScreens; //!< Number of physical screens.
+		unsigned short m_ScreenResX; //!< Width of the primary or all physical screens combined if more than one available (desktop resolution). 
+		unsigned short m_ScreenResY; //!< Height of the primary or tallest screen if more than one available (desktop resolution).
+		unsigned short m_PrimaryScreenResX; //!< Width of the primary physical screen only.
+		unsigned short m_PrimaryScreenResY; //!< Height of the primary physical screen only.
 
 		unsigned short m_ResX; //!< Game window width.
 		unsigned short m_ResY; //!< Game window height.
 		unsigned short m_NewResX; //!< New game window width that will take effect next time the FrameMan is started.
 		unsigned short m_NewResY; //!< New game window height that will take effect next time the FrameMan is started.
 
-		unsigned char m_ResMultiplier; //!< The number of times the game window and image should be multiplied and stretched across for better visibility.
-		unsigned char m_NewResMultiplier; //!< This is the new multiple that will take effect next time the FrameMan is started.
+		unsigned short m_ResMultiplier; //!< The number of times the game window and image should be multiplied and stretched across for better visibility.
+		unsigned short m_NewResMultiplier; //!< This is the new multiple that will take effect next time the FrameMan is started.
 
-		bool m_Fullscreen; //!< Whether in fullscreen mode (borderless window) or not.
+		bool m_ResChanged; //!< Whether the resolution was changed through the settings fullscreen/upscaled fullscreen buttons.
+
+		bool m_Fullscreen; //!< Whether in fullscreen (borderless window) mode or not. True when resolution matches desktop.
+		bool m_UpscaledFullscreen; //!< Whether in upscaled fullscreen (borderless window) mode or not. True when multiplier equals 2 and resolution matches half of desktop. 
 
 		bool m_HSplit; //!< Whether the screen is split horizontally across the screen, ie as two splitscreens one above the other.
 		bool m_VSplit; //!< Whether the screen is split vertically across the screen, ie as two splitscreens side by side.
@@ -566,6 +584,7 @@ namespace RTE {
 		bool m_VSplitOverride; //!< Whether the screen is set to split vertically in settings.
 	
 		ContentFile m_PaletteFile; //!< File of the screen palette.
+		PALETTE m_Palette; //!< Array of RGB entries read from the palette file.
 
 		unsigned char m_BlackColor; //!< Palette index for the black color.
 		unsigned char m_AlmostBlackColor; //!< Palette index for the closest to black color.
@@ -578,11 +597,6 @@ namespace RTE {
 		unsigned short m_PlayerScreenWidth; //!< Width of the screen of each player. Will be smaller than resolution only if the screen is split.
 		unsigned short m_PlayerScreenHeight; //!< Height of the screen of each player. Will be smaller than resolution only if the screen is split.
 	
-		float m_PPM; //!< Pixels Per Meter constant.
-		float m_MPP; //!< Meters Per Pixel constant.
-		float m_PPL; //!< Pixels per Liter constant.
-		float m_LPP; //!< Liters Per Pixel constant.
-
 		AllegroScreen *m_GUIScreen; //!< GUI screen object kept and owned just for the fonts.
 		GUIFont *m_SmallFont; //!< Pointer to the standard small font for quick access.
 		GUIFont *m_LargeFont; //!< Pointer to the standard large font for quick access.
@@ -602,6 +616,7 @@ namespace RTE {
 		BITMAP *m_BackBuffer32; //!< 32bpp backbuffer, only used for post-processing.
 		BITMAP *m_ScreenDumpBuffer; //!< Temporary buffer for making quick screencaps.
 		BITMAP *m_WorldDumpBuffer; //!< Temporary buffer for making whole scene screencaps.
+		BITMAP *m_ScenePreviewDumpGradient; //!< BITMAP for the scene preview sky gradient (easier to load from a pre-made file because it's dithered).
 
 		BITMAP *m_NetworkBackBufferIntermediate8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw.
 		BITMAP *m_NetworkBackBufferIntermediateGUI8[2][c_MaxScreenCount]; //!< Per-player allocated frame buffer to draw upon during FrameMan draw. Used to draw UI only.
@@ -623,7 +638,30 @@ namespace RTE {
 		/// <summary>
 		/// Enumeration with different settings for the SaveBitmap() method.
 		/// </summary>
-		enum SaveBitmapMode { SingleBitmap = 0, ScreenDump, WorldDump};
+		enum SaveBitmapMode { SingleBitmap = 0, ScreenDump, WorldDump, ScenePreviewDump};
+
+		/// <summary>
+		/// BITMAPs to temporarily store the backbuffers when recreating them. These are needed to have a pointer to their original allocated memory after overwriting them so it can be deleted.
+		/// Overwriting the backbuffers without storing the original pointers and deleting them after the resolution change will result in a memory leak.
+		/// </summary>
+		BITMAP *m_TempBackBuffer8;
+		BITMAP *m_TempBackBuffer32;
+		BITMAP *m_TempPlayerScreen;
+		BITMAP *m_TempNetworkBackBufferIntermediate8[2][c_MaxScreenCount];
+		BITMAP *m_TempNetworkBackBufferIntermediateGUI8[2][c_MaxScreenCount];
+		BITMAP *m_TempNetworkBackBufferFinal8[2][c_MaxScreenCount];
+		BITMAP *m_TempNetworkBackBufferFinalGUI8[2][c_MaxScreenCount];
+
+		/// <summary>
+		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched away from the game window. 
+		/// It will temporarily disable positioning of the mouse so that when focus is switched back to the game window, the game window won't fly away because the user clicked the title bar of the window.
+		/// </summary>
+		static void DisplaySwitchOut();
+
+		/// <summary>
+		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched back to the game window.
+		/// </summary>
+		static void DisplaySwitchIn();
 
 #pragma region Create Breakdown
 		/// <summary>
@@ -634,9 +672,18 @@ namespace RTE {
 		/// <summary>
 		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during Create().
 		/// </summary>
-		/// <param name="resX">Game window width (m_ResX or m_NewResX).</param>
-		/// <param name="resY">Game window height (m_ResY or m_NewResY).</param>
-		void ValidateResolution(unsigned short &resX, unsigned short &resY);
+		/// <param name="resX">Game window width to check.</param>
+		/// <param name="resY">Game window height to check.</param>
+		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
+		void ValidateResolution(unsigned short &resX, unsigned short &resY, unsigned short &resMultiplier);
+
+		/// <summary>
+		/// Checks whether the passed in multi-screen resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during ValidateResolution().
+		/// </summary>
+		/// <param name="resX">Game window width to check.</param>
+		/// <param name="resY">Game window height to check.</param>
+		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
+		void ValidateMultiScreenResolution(unsigned short &resX, unsigned short &resY, unsigned short &resMultiplier);
 
 		/// <summary>
 		/// Creates all the frame buffer bitmaps to be used by FrameMan. This is called during Create().
@@ -645,26 +692,34 @@ namespace RTE {
 		int CreateBackBuffers();
 #pragma endregion
 
+#pragma region Resolution Handling
+		/// <summary>
+		/// Stores the current backbuffers in the temporary backbuffers and calls CreateBackbuffers() to overwrite the current ones with new resolution settings.
+		/// The storing is done so we can later free the original allocated memory otherwise we will lose the pointer to it and have a memory leak.
+		/// </summary>
+		void RecreateBackBuffers();
+#pragma endregion
+
 #pragma region Draw Breakdown
 		/// <summary>
 		/// Updates the drawing position of each player screen on the backbuffer when split screen is active. This is called during Draw().
 		/// </summary>
 		/// <param name="playerScreen">The player screen to update offset for.</param>
 		/// <param name="screenOffset">Vector representing the screen offset.</param>
-		void UpdateScreenOffsetForSplitScreen(short playerScreen, Vector &screenOffset);
+		void UpdateScreenOffsetForSplitScreen(short playerScreen, Vector &screenOffset) const;
 
 		/// <summary>
 		/// Draws all the text messages to the specified player screen. This is called during Draw().
 		/// </summary>
-		/// <param name="playerScreenToFlash">The player screen the text will be shown on.</param>
-		/// <param name="guiBitmap">The bitmap the text will be drawn on.</param>
+		/// <param name="playerScreen">The player screen the text will be shown on.</param>
+		/// <param name="playerGUIBitmap">The bitmap the text will be drawn on.</param>
 		void DrawScreenText(short playerScreen, AllegroBitmap playerGUIBitmap);
 
 		/// <summary>
 		/// Draws the screen flash effect to the specified player screen with parameters set by FlashScreen(). This is called during Draw().
 		/// </summary>
-		/// <param name="playerScreenToFlash">The player screen the flash effect will be shown to.</param>
-		/// <param name="guiBitmap">The bitmap the flash effect will be drawn on.</param>
+		/// <param name="playerScreen">The player screen the flash effect will be shown to.</param>
+		/// <param name="playerGUIBitmap">The bitmap the flash effect will be drawn on.</param>
 		void DrawScreenFlash(short playerScreen, BITMAP *playerGUIBitmap);
 
 		/// <summary>
@@ -675,26 +730,42 @@ namespace RTE {
 
 #pragma region Screen Capture
 		/// <summary>
-		/// Draws the current frame of the whole scene to a temporary buffer that is later saved as a screenshot. This is called from SaveBitmap().
+		/// Draws the current frame of the whole scene to a temporary buffer that is later saved as a screenshot.
 		/// </summary>
-		void DrawWorldDump();
+		/// <param name="drawForScenePreview">If true will skip drawing objects, post-effects and sky gradient in the WorldDump. To be used for dumping scene preview images.</param>
+		void DrawWorldDump(bool drawForScenePreview = false) const;
 
 		/// <summary>
-		/// Shared method for saving screenshots or individual bitmaps. Will be called from SaveBitmapToBMP(), SaveScreenToBMP() or SaveWorldToBMP().
+		/// Shared method for saving screenshots or individual bitmaps.
 		/// </summary>
 		/// <param name="modeToSave">What is being saved. See SaveBitmapMode enumeration for a list of modes.</param>
 		/// <param name="nameBase">
-		/// The filename of the file to save to, WITHOUT EXTENSION.
+		/// The name of the file that is being saved, WITHOUT EXTENSION.
 		/// Eg, If "Test" is passed in, this function will save to Test000.bmp, if that file does not already exist. If it does exist, it will attempt 001, and so on.
 		/// </param>
-		/// <param name="bitmapToSave">The individual bitmap that will be dumped. 0 if not in SingleBitmap mode.</param>
-		int SaveBitmap(SaveBitmapMode modeToSave, const char *nameBase, BITMAP *bitmapToSave = 0);
+		/// <param name="bitmapToSave">The individual bitmap that will be dumped. 0 or nullptr if not in SingleBitmap mode.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int SaveBitmap(SaveBitmapMode modeToSave, const char *nameBase, BITMAP *bitmapToSave = nullptr);
+
+		/// <summary>
+		/// Saves a BITMAP as an 8bpp bitmap file that is indexed with the specified palette.
+		/// </summary>
+		/// <param name="fileName">The full name of the file that is being saved. Path and everything included.</param>
+		/// <param name="bitmapToSave">The BITMAP that is being saved into a file.</param>
+		/// <param name="paletteToIndexWith">What PALETTE to use for indexing the file.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <remarks>
+		/// This method is a workaround to Allegro being unable to set a color conversion mode when saving files.
+		/// It works by first saving the 32bpp bitmap as is, then loading it back under the REDUCE_TO_256 color conversion mode, blitting it to a fresh bitmap and saving it again with the passed in palette.
+		/// The re-blitted bitmap is properly 8bpp and will be indexed correctly. The old saved file is deleted in the process before the new one is saved.
+		/// </remarks>
+		int SaveIndexedBitmap(char *fileName, BITMAP *bitmapToSave, PALETTE paletteToIndexWith) const;
 #pragma endregion
 
 		/// <summary>
 		/// Shared method for drawing lines to avoid duplicate code. Will by called by either DrawLine() or DrawDotLine().
 		/// </summary>
-		/// <param name="pBitmap">The Bitmap to draw to. Ownership is NOT transferred.</param>
+		/// <param name="bitmap">The Bitmap to draw to. Ownership is NOT transferred.</param>
 		/// <param name="start">The absolute Start point.</param>
 		/// <param name="end">The absolute end point.</param>
 		/// <param name="color">The color value of the line.</param>
@@ -705,7 +776,7 @@ namespace RTE {
 		/// <param name="drawDot">Whether to draw a regular line or a dot line. True for dot line.</param>
 		/// <param name="dot">The bitmap to be used for dots (will be centered).</param>
 		/// <returns>The end state of the skipping phase. Eg if 4 is returned here the last dot was placed 4 pixels ago.</returns>
-		int SharedDrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, unsigned char color, unsigned char altColor = 0, unsigned short skip = 0, unsigned short skipStart = 0, bool shortestWrap = false, bool drawDot = false, BITMAP *dot = 0);
+		int SharedDrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, unsigned char color, unsigned char altColor = 0, unsigned short skip = 0, unsigned short skipStart = 0, bool shortestWrap = false, bool drawDot = false, BITMAP *dot = nullptr) const;
 
 		/// <summary>
 		/// Gets the requested font from the GUI engine's current skin. Ownership is NOT transferred!
@@ -720,8 +791,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		FrameMan(const FrameMan &reference) {}
-		FrameMan & operator=(const FrameMan &rhs) {}
+		FrameMan(const FrameMan &reference) = delete;
+		FrameMan & operator=(const FrameMan &rhs) = delete;
 	};
 }
 #endif

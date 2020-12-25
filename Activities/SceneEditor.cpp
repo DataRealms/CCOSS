@@ -44,11 +44,10 @@
 #include "GABaseDefense.h"
 
 extern bool g_ResetActivity;
-extern bool g_InActivity;
 
 namespace RTE {
 
-CONCRETECLASSINFO(SceneEditor, EditorActivity, 0)
+ConcreteClassInfo(SceneEditor, EditorActivity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -118,7 +117,6 @@ int SceneEditor::ReadProperty(std::string propName, Reader &reader)
         reader >> m_DeliveryDelay;
     else
 */
-        // See if the base class(es) can find a match instead
         return EditorActivity::ReadProperty(propName, reader);
 
     return 0;
@@ -228,7 +226,7 @@ int SceneEditor::Start()
         m_pSaveDialogBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("SaveDialogBox"));
 
         // Set the background image of the parent collection box
-//        ContentFile backgroundFile("Base.rte/GUIs/BuyMenuBackground.bmp");
+//        ContentFile backgroundFile("Base.rte/GUIs/BuyMenuBackground.png");
 //        m_pSaveDialogBox->SetDrawImage(new AllegroBitmap(backgroundFile.GetAsBitmap()));
 //        m_pSaveDialogBox->SetDrawBackground(true);
 //        m_pSaveDialogBox->SetDrawType(GUICollectionBox::Image);
@@ -270,7 +268,7 @@ int SceneEditor::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void SceneEditor::Pause(bool pause)
+void SceneEditor::SetPaused(bool pause)
 {
     // Override the pause
     m_Paused = false;
@@ -288,7 +286,7 @@ void SceneEditor::End()
 
     
 
-    m_ActivityState = OVER;
+    m_ActivityState = ActivityState::Over;
 }
 
 
@@ -383,24 +381,20 @@ void SceneEditor::Update()
 			Activity * pActivity = dynamic_cast<Activity *>(pActivityPreset->Clone());
 			GameActivity *pTestGame = dynamic_cast<GameActivity *>(pActivity);
             RTEAssert(pTestGame, "Couldn't find the \"Skirmish Defense\" GAScripted Activity! Has it been defined?");
-            pTestGame->SetPlayerCount(1);
-            pTestGame->SetTeamCount(2);
             pTestGame->SetTeamOfPlayer(0, 0);
             pTestGame->SetCPUTeam(1);
 			pTestGame->SetStartingGold(10000);
 			pTestGame->SetFogOfWarEnabled(false);
-            pTestGame->SetDifficulty(GameActivity::MEDIUMDIFFICULTY);
+            pTestGame->SetDifficulty(DifficultySetting::MediumDifficulty);
             g_ActivityMan.SetStartActivity(pTestGame);
             g_ResetActivity = true;
 
 
             /*GABaseDefense *pTestGame = dynamic_cast<GABaseDefense *>(g_PresetMan.GetEntityPreset("GABaseDefense", "Test Activity")->Clone());
             RTEAssert(pTestGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
-            pTestGame->SetPlayerCount(1);
-            pTestGame->SetTeamCount(2);
             pTestGame->SetTeamOfPlayer(0, 0);
             pTestGame->SetCPUTeam(1);
-            pTestGame->SetDifficulty(GameActivity::MAXDIFFICULTY);
+            pTestGame->SetDifficulty(GameActivity::MaxDifficulty);
             pTestGame->Create();
             g_ActivityMan.SetStartActivity(pTestGame);
             g_ResetActivity = true;*/
@@ -466,7 +460,7 @@ void SceneEditor::Update()
                     }
 
 					// Make random planet coord's for this scene
-					float angle = RangeRand(0, 2 * c_PI);
+					float angle = RandomNum(0.0F, c_TwoPI);
                     Vector pos = Vector((int)(150 * cos(angle)), (int)(150 * sin(angle)));
 					pNewScene->SetLocation(pos);
 
@@ -627,7 +621,6 @@ void SceneEditor::Update()
                 if (g_SceneMan.GetScene()->GetPresetName() == "Editor Scene")
                 {
                     g_ActivityMan.PauseActivity();
-                    g_InActivity = false;
                 }
                 // Just do normal cancel of the dialog and go back to editing
                 else

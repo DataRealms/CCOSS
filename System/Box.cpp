@@ -2,7 +2,7 @@
 
 namespace RTE {
 
-	const std::string Box::m_ClassName = "Box";
+	const std::string Box::c_ClassName = "Box";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -54,7 +54,6 @@ namespace RTE {
 		} else if (propName == "Height") {
 			reader >> m_Height;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;

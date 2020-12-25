@@ -87,14 +87,14 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire ScenarioGUI, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+	void Reset() { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -197,17 +197,17 @@ public:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  Draw
+// Method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws the menu
 // Arguments:       The bitmap to draw on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *drawBitmap) const;
+	void Draw(BITMAP *drawBitmap) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -410,13 +410,13 @@ protected:
     // These add on the player and team max counts
     enum PlayerColumns
     {
-        PLAYER_CPU = Activity::MAXPLAYERCOUNT,
+        PLAYER_CPU = Players::MaxPlayerCount,
         PLAYERCOLUMNCOUNT
     };
 
     enum TeamRows
     {
-        TEAM_DISABLED = Activity::MAXTEAMCOUNT,
+        TEAM_DISABLED = Activity::MaxTeamCount,
         TEAMROWCOUNT
     };
 
@@ -485,11 +485,11 @@ protected:
     int m_LockedCPUTeam;
 
     //Tech selection combos
-	GUIComboBox *m_apTeamTechSelect[Activity::MAXTEAMCOUNT];
+	GUIComboBox *m_apTeamTechSelect[Activity::MaxTeamCount];
 	
 	// AI skill selection
-	GUISlider *m_apTeamAISkillSlider[Activity::MAXTEAMCOUNT];
-	GUILabel *m_apTeamAISkillLabel[Activity::MAXTEAMCOUNT];
+	GUISlider *m_apTeamAISkillSlider[Activity::MaxTeamCount];
+	GUILabel *m_apTeamAISkillLabel[Activity::MaxTeamCount];
 
     GUILabel *m_pGoldLabel;
     GUISlider *m_pGoldSlider;
@@ -556,8 +556,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    ScenarioGUI(const ScenarioGUI &reference);
-    ScenarioGUI & operator=(const ScenarioGUI &rhs);
+	ScenarioGUI(const ScenarioGUI &reference) = delete;
+	ScenarioGUI & operator=(const ScenarioGUI &rhs) = delete;
 
 };
 

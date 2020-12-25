@@ -47,7 +47,7 @@ extern bool g_ResetActivity;
 
 namespace RTE {
 
-CONCRETECLASSINFO(AreaEditor, EditorActivity, 0)
+ConcreteClassInfo(AreaEditor, EditorActivity, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -114,7 +114,6 @@ int AreaEditor::ReadProperty(std::string propName, Reader &reader)
         reader >> m_DeliveryDelay;
     else
 */
-        // See if the base class(es) can find a match instead
         return EditorActivity::ReadProperty(propName, reader);
 
     return 0;
@@ -215,7 +214,7 @@ int AreaEditor::Start()
         m_pSaveDialogBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("SaveDialogBox"));
 
         // Set the background image of the parent collection box
-//        ContentFile backgroundFile("Base.rte/GUIs/BuyMenuBackground.bmp");
+//        ContentFile backgroundFile("Base.rte/GUIs/BuyMenuBackground.png");
 //        m_pSaveDialogBox->SetDrawImage(new AllegroBitmap(backgroundFile.GetAsBitmap()));
 //        m_pSaveDialogBox->SetDrawBackground(true);
 //        m_pSaveDialogBox->SetDrawType(GUICollectionBox::Image);
@@ -257,7 +256,7 @@ int AreaEditor::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void AreaEditor::Pause(bool pause)
+void AreaEditor::SetPaused(bool pause)
 {
     // Override the pause
     m_Paused = false;
@@ -275,7 +274,7 @@ void AreaEditor::End()
 
     
 
-    m_ActivityState = OVER;
+    m_ActivityState = ActivityState::Over;
 }
 
 
@@ -382,13 +381,11 @@ void AreaEditor::Update()
 			Activity * pActivity = dynamic_cast<Activity *>(pActivityPreset->Clone());
 			GameActivity *pTestGame = dynamic_cast<GameActivity *>(pActivity);
             RTEAssert(pTestGame, "Couldn't find the \"Skirmish Defense\" GAScripted Activity! Has it been defined?");
-            pTestGame->SetPlayerCount(1);
-            pTestGame->SetTeamCount(2);
             pTestGame->SetTeamOfPlayer(0, 0);
             pTestGame->SetCPUTeam(1);
 			pTestGame->SetStartingGold(10000);
 			pTestGame->SetFogOfWarEnabled(false);
-            pTestGame->SetDifficulty(GameActivity::MEDIUMDIFFICULTY);
+            pTestGame->SetDifficulty(DifficultySetting::MediumDifficulty);
             g_ActivityMan.SetStartActivity(pTestGame);
             g_ResetActivity = true;
         }

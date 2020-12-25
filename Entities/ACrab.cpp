@@ -12,31 +12,24 @@
 // Inclusions of header files
 
 #include "ACrab.h"
-#include "Atom.h"
 #include "AtomGroup.h"
 #include "Attachable.h"
-#include "HeldDevice.h"
 #include "ThrownDevice.h"
 #include "Turret.h"
 #include "Leg.h"
 #include "Controller.h"
-#include "RTETools.h"
-#include "MOPixel.h"
 #include "Matrix.h"
 #include "AEmitter.h"
 #include "HDFirearm.h"
-#include "SLTerrain.h"
-#include "PresetMan.h"
 #include "PieMenuGUI.h"
 #include "Scene.h"
 
 #include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
 namespace RTE {
 
-CONCRETECLASSINFO(ACrab, Actor, 0)
+ConcreteClassInfo(ACrab, Actor, 20)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -347,7 +340,6 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "AimRangeLowerLimit")
         reader >> m_AimRangeLowerLimit;
     else
-        // See if the base class(es) can find a match instead
         return Actor::ReadProperty(propName, reader);
 
     return 0;
@@ -579,24 +571,24 @@ bool ACrab::CollideAtPoint(HitData &hd)
     return Actor::CollideAtPoint(hd);
 
 /*
-    hd.resImpulse[HITOR].Reset();
-    hd.resImpulse[HITEE].Reset();
-    hd.hitRadius[HITEE] = (hd.hitPoint - m_Pos) * g_FrameMan.GetMPP();
+    hd.ResImpulse[HITOR].Reset();
+    hd.ResImpulse[HITEE].Reset();
+    hd.HitRadius[HITEE] = (hd.HitPoint - m_Pos) * c_MPP;
     hd.mass[HITEE] = m_Mass;
-    hd.momInertia[HITEE] = m_pAtomGroup->GetMomentOfInertia();
-    hd.hitVel[HITEE] = m_Vel + hd.hitRadius[HITEE].GetPerpendicular() * m_AngularVel;
-    hd.velDiff = hd.hitVel[HITOR] - hd.hitVel[HITEE];
-    Vector hitAcc = -hd.velDiff * (1 + hd.pBody[HITOR]->GetMaterial().restitution * GetMaterial().restitution);
+    hd.MomInertia[HITEE] = m_pAtomGroup->GetMomentOfInertia();
+    hd.HitVel[HITEE] = m_Vel + hd.HitRadius[HITEE].GetPerpendicular() * m_AngularVel;
+    hd.VelDiff = hd.HitVel[HITOR] - hd.HitVel[HITEE];
+    Vector hitAcc = -hd.VelDiff * (1 + hd.Body[HITOR]->GetMaterial().restitution * GetMaterial().restitution);
 
-    float hittorLever = hd.hitRadius[HITOR].GetPerpendicular().Dot(hd.bitmapNormal);
-    float hitteeLever = hd.hitRadius[HITEE].GetPerpendicular().Dot(hd.bitmapNormal);
+    float hittorLever = hd.HitRadius[HITOR].GetPerpendicular().Dot(hd.BitmapNormal);
+    float hitteeLever = hd.HitRadius[HITEE].GetPerpendicular().Dot(hd.BitmapNormal);
     hittorLever *= hittorLever;
     hitteeLever *= hitteeLever;
-    float impulse = hitAcc.Dot(hd.bitmapNormal) / (((1 / hd.mass[HITOR]) + (1 / hd.mass[HITEE])) +
-                    (hittorLever / hd.momInertia[HITOR]) + (hitteeLever / hd.momInertia[HITEE]));
+    float impulse = hitAcc.Dot(hd.BitmapNormal) / (((1 / hd.mass[HITOR]) + (1 / hd.mass[HITEE])) +
+                    (hittorLever / hd.MomInertia[HITOR]) + (hitteeLever / hd.MomInertia[HITEE]));
 
-    hd.resImpulse[HITOR] = hd.bitmapNormal * impulse * hd.impFactor[HITOR];
-    hd.resImpulse[HITEE] = hd.bitmapNormal * -impulse * hd.impFactor[HITEE];
+    hd.ResImpulse[HITOR] = hd.BitmapNormal * impulse * hd.ImpulseFactor[HITOR];
+    hd.ResImpulse[HITEE] = hd.BitmapNormal * -impulse * hd.ImpulseFactor[HITEE];
 
     ////////////////////////////////////////////////////////////////////////////////
     // If a particle, which does not penetrate, but bounces, do any additional
@@ -606,9 +598,9 @@ bool ACrab::CollideAtPoint(HitData &hd)
         ;
     }
 
-    m_Vel += hd.resImpulse[HITEE] / hd.mass[HITEE];
-    m_AngularVel += hd.hitRadius[HITEE].GetPerpendicular().Dot(hd.resImpulse[HITEE]) /
-                    hd.momInertia[HITEE];
+    m_Vel += hd.ResImpulse[HITEE] / hd.mass[HITEE];
+    m_AngularVel += hd.HitRadius[HITEE].GetPerpendicular().Dot(hd.ResImpulse[HITEE]) /
+                    hd.MomInertia[HITEE];
 */
 }
 
@@ -737,7 +729,7 @@ Attachable * ACrab::GetTurret() const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  GetEquippedItem
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns whatever is equipped in the turret, if anything. OINT.
+// Description:     Returns whatever is equipped in the turret, if anything. OWNERSHIP IS NOT TRANSFERRED!
 
 MovableObject * ACrab::GetEquippedItem() const
 {
@@ -925,7 +917,7 @@ bool ACrab::Look(float FOVSpread, float range)
     aimMatrix.SetXFlipped(m_HFlipped);
     lookVector *= aimMatrix;
     // Add the spread
-    lookVector.DegRotate(FOVSpread * NormalRand());
+    lookVector.DegRotate(FOVSpread * RandomNormalNum());
 
     // TODO: generate an alarm event if we spot an enemy actor?
 
@@ -968,7 +960,7 @@ MovableObject * ACrab::LookForMOs(float FOVSpread, unsigned char ignoreMaterial,
     aimMatrix.SetXFlipped(m_HFlipped);
     lookVector *= aimMatrix;
     // Add the spread
-    lookVector.DegRotate(FOVSpread * NormalRand());
+    lookVector.DegRotate(FOVSpread * RandomNormalNum());
 
     MOID seenMOID = g_SceneMan.CastMORay(aimPos, lookVector, m_MOID, IgnoresWhichTeam(), ignoreMaterial, ignoreAllTerrain, 5);
     pSeenMO = g_MovableMan.GetMOFromID(seenMOID);
@@ -991,8 +983,8 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     if (m_pTurret && m_pTurret->IsAttached())
     {
         RemoveAttachable(m_pTurret);
-        m_pTurret->SetVel(m_Vel + m_pTurret->GetParentOffset() * PosRand());
-        m_pTurret->SetAngularVel(NormalRand());
+        m_pTurret->SetVel(m_Vel + m_pTurret->GetParentOffset() * RandomNum());
+        m_pTurret->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pTurret);
         m_pTurret = 0;
     }
@@ -1007,32 +999,32 @@ void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
     if (m_pLFGLeg && m_pLFGLeg->IsAttached())
     {
         RemoveAttachable(m_pLFGLeg);
-        m_pLFGLeg->SetVel(m_Vel + m_pLFGLeg->GetParentOffset() * PosRand());
-        m_pLFGLeg->SetAngularVel(NormalRand());
+        m_pLFGLeg->SetVel(m_Vel + m_pLFGLeg->GetParentOffset() * RandomNum());
+        m_pLFGLeg->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pLFGLeg);
         m_pLFGLeg = 0;
     }
     if (m_pLBGLeg && m_pLBGLeg->IsAttached())
     {
         RemoveAttachable(m_pLBGLeg);
-        m_pLBGLeg->SetVel(m_Vel + m_pLBGLeg->GetParentOffset() * PosRand());
-        m_pLBGLeg->SetAngularVel(NormalRand());
+        m_pLBGLeg->SetVel(m_Vel + m_pLBGLeg->GetParentOffset() * RandomNum());
+        m_pLBGLeg->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pLBGLeg);
         m_pLBGLeg = 0;
     }
     if (m_pRFGLeg && m_pRFGLeg->IsAttached())
     {
         RemoveAttachable(m_pRFGLeg);
-        m_pRFGLeg->SetVel(m_Vel + m_pRFGLeg->GetParentOffset() * PosRand());
-        m_pRFGLeg->SetAngularVel(NormalRand());
+        m_pRFGLeg->SetVel(m_Vel + m_pRFGLeg->GetParentOffset() * RandomNum());
+        m_pRFGLeg->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pRFGLeg);
         m_pRFGLeg = 0;
     }
     if (m_pRBGLeg && m_pRBGLeg->IsAttached())
     {
         RemoveAttachable(m_pRBGLeg);
-        m_pRBGLeg->SetVel(m_Vel + m_pRBGLeg->GetParentOffset() * PosRand());
-        m_pRBGLeg->SetAngularVel(NormalRand());
+        m_pRBGLeg->SetVel(m_Vel + m_pRBGLeg->GetParentOffset() * RandomNum());
+        m_pRBGLeg->SetAngularVel(RandomNormalNum());
         g_MovableMan.AddParticle(m_pRBGLeg);
         m_pRBGLeg = 0;
     }
@@ -3033,7 +3025,7 @@ int ACrab::RemoveAnyRandomWounds(int amount)
 		if (bodyParts.size() == 0)
 			break;
 
-		int partIndex = RangeRand(0, bodyParts.size() - 1);
+		int partIndex = RandomNum<int>(0, bodyParts.size() - 1);
 		MOSRotating * part = bodyParts[partIndex];
 		damage += part->RemoveWounds(1);
 	}
@@ -3128,11 +3120,11 @@ void ACrab::Draw(BITMAP *pTargetBitmap,
     if (mode == g_DrawColor && !onlyPhysical)
     {
         acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X),
-                              floorf(m_Pos.m_Y),
+        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
+                              std::floor(m_Pos.m_Y),
                               64);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X),
-                              floorf(m_Pos.m_Y),
+        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
+                              std::floor(m_Pos.m_Y),
                               64);
         release_bitmap(pTargetBitmap);
 
@@ -3163,7 +3155,7 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
     // Only draw if the team viewing this is on the same team OR has seen the space where this is located
     int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-    if (viewingTeam != m_Team && viewingTeam != Activity::NOTEAM)
+    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam)
     {
         if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
             return;
@@ -3253,7 +3245,7 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             char gaugeColor = jetTimeRatio > 0.6 ? 149 : (jetTimeRatio > 0.3 ? 77 : 13);
             rectfill(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack + 6, drawPos.m_X + (16 * jetTimeRatio), drawPos.m_Y + m_HUDStack + 7, gaugeColor);
 //                    rect(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack - 2, drawPos.m_X + 24, drawPos.m_Y + m_HUDStack - 4, 238);
-//                    sprintf_s(str, sizeof(str), "%.0f Kg", mass);
+//                    std::snprintf(str, sizeof(str), "%.0f Kg", mass);
 //                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
 
             m_HUDStack += -10;
@@ -3269,11 +3261,11 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 str[0] = -56; str[1] = 0;
                 pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 10, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
                 if (pHeldFirearm->IsReloading())
-                    sprintf_s(str, sizeof(str), "%s", "Reloading...");
+                    std::snprintf(str, sizeof(str), "%s", "Reloading...");
                 else if (pHeldFirearm->GetRoundInMagCount() >= 0)
-                    sprintf_s(str, sizeof(str), "%i", pHeldFirearm->GetRoundInMagCount());
+                    std::snprintf(str, sizeof(str), "%i", pHeldFirearm->GetRoundInMagCount());
                 else
-                    sprintf_s(str, sizeof(str), "%s", "INF");
+                    std::snprintf(str, sizeof(str), "%s", "INF");
                 pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
 
                 m_HUDStack += -10;
@@ -3281,7 +3273,7 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
         }
         else
         {
-            sprintf_s(str, sizeof(str), "NO TURRET!");
+            std::snprintf(str, sizeof(str), "NO TURRET!");
             pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
             m_HUDStack += -9;
         }
@@ -3289,7 +3281,7 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
 		// Print aim angle and rot angle stoff
 		/*{
-			sprintf_s(str, sizeof(str), "Aim %.2f Rot %.2f Lim %.2f", m_AimAngle, GetRotAngle(), m_AimRange + GetRotAngle());
+			std::snprintf(str, sizeof(str), "Aim %.2f Rot %.2f Lim %.2f", m_AimAngle, GetRotAngle(), m_AimRange + GetRotAngle());
 			pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
 
 			m_HUDStack += -10;
@@ -3300,27 +3292,27 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
         if (m_Controller.IsState(AI_MODE_SET))
         {
             int iconOff = m_apAIIcons[0]->w + 2;
-            int iconColor = m_Team == Activity::TEAM_1 ? AIICON_RED : AIICON_GREEN;
+            int iconColor = m_Team == Activity::TeamOne ? AIICON_RED : AIICON_GREEN;
             Vector iconPos = GetCPUPos() - targetPos;
             
             if (m_AIMode == AIMODE_SENTRY)
             {
-                sprintf_s(str, sizeof(str), "%s", "Sentry");
+                std::snprintf(str, sizeof(str), "%s", "Sentry");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X, iconPos.m_Y - 18, str, GUIFont::Centre);
             }
             else if (m_AIMode == AIMODE_PATROL)
             {
-                sprintf_s(str, sizeof(str), "%s", "Patrol");
+                std::snprintf(str, sizeof(str), "%s", "Patrol");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X - 9, iconPos.m_Y - 5, str, GUIFont::Right);
             }
             else if (m_AIMode == AIMODE_BRAINHUNT)
             {
-                sprintf_s(str, sizeof(str), "%s", "Brainhunt");
+                std::snprintf(str, sizeof(str), "%s", "Brainhunt");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X + 9, iconPos.m_Y - 5, str, GUIFont::Left);
             }
             else if (m_AIMode == AIMODE_GOLDDIG)
             {
-                sprintf_s(str, sizeof(str), "%s", "Gold Dig");
+                std::snprintf(str, sizeof(str), "%s", "Gold Dig");
                 pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X, iconPos.m_Y + 8, str, GUIFont::Centre);
             }
 

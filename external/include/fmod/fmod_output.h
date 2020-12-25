@@ -67,7 +67,7 @@ typedef struct FMOD_OUTPUT_DESCRIPTION
     unsigned int                            apiversion;
     const char                             *name;
     unsigned int                            version;
-    FMOD_OUTPUT_METHOD                      polling; /* This will become "method" on the next major version */
+    FMOD_OUTPUT_METHOD                      method;
     FMOD_OUTPUT_GETNUMDRIVERS_CALLBACK      getnumdrivers;
     FMOD_OUTPUT_GETDRIVERINFO_CALLBACK      getdriverinfo;
     FMOD_OUTPUT_INIT_CALLBACK               init;

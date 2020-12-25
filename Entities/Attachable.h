@@ -41,9 +41,10 @@ public:
 
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(Attachable)
-ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
-
+EntityAllocation(Attachable)
+AddScriptFunctionNames(MOSRotating, "OnAttach", "OnDetach")
+SerializableOverrideMethods
+ClassInfoGetters
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     Attachable
@@ -62,7 +63,7 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~Attachable() { Destroy(true); }
+	~Attachable() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +74,7 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -88,22 +89,6 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire Attachable, including its inherited members, to their
@@ -111,19 +96,7 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); MOSRotating::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this Attachable to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the Attachable will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+    void Reset() override { Clear(); MOSRotating::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -134,69 +107,32 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
+	/// <summary>
+	/// Gets the MO which is the parent of this Attachable.
+	/// </summary>
+	/// <returns>A pointer to the parent of this Attachable.</returns>
+	MovableObject * GetParent() override { return m_pParent; }
 
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
+	/// <summary>
+	/// Gets the MO which is the parent of this Attachable. 
+	/// </summary>
+	/// <returns>A pointer to the parent of this Attachable.</returns>
+	const MovableObject * GetParent() const override { return m_pParent; }
 
+	/// <summary>
+	/// Gets the MO which is the ultimate root parent of this Attachable and its parent.
+	/// </summary>
+	/// <returns>A pointer to the highest root parent of this Attachable.</returns>
+	MovableObject * GetRootParent() override { return m_pParent ? m_pParent->GetRootParent() : this; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetRootParent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the MO which is the ultimate root parent of this Attachable and
-//                  its parent.
-// Arguments:       None.
-// Return value:    A pointer to the highest root parent of this Attachable.
-
-    virtual MovableObject * GetRootParent() { return m_pParent ? m_pParent->GetRootParent() : this; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetRootParent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the MO which is the ultimate root parent of this Attachable and
-//                  its parent.
-// Arguments:       None.
-// Return value:    A pointer to the highest root parent of this Attachable.
-
-    virtual const MovableObject * GetRootParent() const { return m_pParent ? m_pParent->GetRootParent() : this; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetParent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the MO which is the parent of this Attachable.
-// Arguments:       None.
-// Return value:    A pointer to the highest root parent of this Attachable.
-
-	virtual MovableObject * GetParent() { return m_pParent; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetParent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the MO which is the parent of this Attachable. 
-// Arguments:       None.
-// Return value:    A pointer to the highest root parent of this Attachable.
-
-	virtual const MovableObject * GetParent() const { return m_pParent; }
+	/// <summary>
+	/// Gets the MO which is the ultimate root parent of this Attachable and its parent.
+	/// </summary>
+	/// <returns>A pointer to the highest root parent of this Attachable.</returns>
+	const MovableObject * GetRootParent() const override { return m_pParent ? m_pParent->GetRootParent() : this; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -208,7 +144,7 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
 // Return value:    A const reference Vector describing the offset from the parent's pos
 //                  to the joint point.
 
-    virtual const Vector & GetParentOffset() const { return m_ParentOffset; }
+	const Vector & GetParentOffset() const { return m_ParentOffset; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -220,7 +156,7 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
 // Return value:    A const reference Vector describing the offset of the joint relative
 //                  to the this Attachable's origin/center of mass position.
 
-    virtual const Vector & GetJointOffset() const { return m_JointOffset; }
+	const Vector & GetJointOffset() const { return m_JointOffset; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -232,7 +168,7 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
 //                  to the this Attachable's origin/center of mass position.
 // Return value:    None.
 
-	virtual void SetJointOffset(Vector offset) { m_JointOffset = offset; }
+	void SetJointOffset(Vector offset) { m_JointOffset = offset; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -413,7 +349,7 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
 // Arguments:       None.
 // Return value:    Whether it's to be drawn after parent or not.
 
-    virtual bool IsDrawnAfterParent() const { return m_DrawAfterParent; }
+	bool IsDrawnAfterParent() const override { return m_DrawAfterParent; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -427,7 +363,7 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
 // Return value:    Whether the collision has been deemed valid. If false, then disregard
 //                  any impulses in the Hitdata.
 
-    virtual bool CollideAtPoint(HitData &hitData);
+    bool CollideAtPoint(HitData &hitData) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -443,7 +379,7 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
 //                  somehting but a MOPixel or MOSParticle is being passed in as hitor,
 //                  false will trivially be returned here.
 
-    virtual bool ParticlePenetration(HitData &hd);
+	bool ParticlePenetration(HitData &hd) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -456,7 +392,7 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
 //                  A pointer to an MO which the gibs shuold not be colliding with!
 // Return value:    None.
 
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
+    void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -477,7 +413,7 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
 //                  The offset from the parent's Pos to the joint position.
 // Return value:    None.
 
-    virtual void Attach(MOSRotating *pParent, const Vector &parOffset) { Attach(pParent); m_ParentOffset = parOffset; }
+	void Attach(MOSRotating *pParent, const Vector &parOffset) { Attach(pParent); m_ParentOffset = parOffset; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -529,19 +465,8 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
 // Return value:    A float with the damage points accumulated since the last time
 //                  this method was called.
 
-    virtual float CollectDamage();
+	float CollectDamage();
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  PostTravel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does stuff that needs to be done after Update(). Always call after
-//                  calling Update.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void PostTravel();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -550,7 +475,7 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -565,10 +490,7 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -578,72 +500,78 @@ ADD_SCRIPT_FUNCTION_NAMES(MOSRotating, "OnAttach", "OnDetach")
 // Arguments:       Amount of wounds to remove.
 // Return value:    Amount of damage, caused by these wounds.
 
-	virtual int RemoveWounds(int amount); 
+	int RemoveWounds(int amount) override; 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AddDamage
+// Method:  AddDamage
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Adds specified number of damage points to this attachable.
 // Arguments:       Amount of damage to add.
 // Return value:    None.
 
-	virtual void AddDamage(float amount) { m_DamageCount += amount;  };
+	void AddDamage(float amount) { m_DamageCount += amount;  };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  InheritsRotAngle
+// Method:  InheritsRotAngle
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     If true (default old behavior) the parent MOSRotating resets attachables or emitters RotAngle every frame. False to avoid that.
 // Arguments:       None.
 // Return value:    Whether parent MOSRotating should change this RotAngle to match it's own during MOSRotating::Update
 
-	virtual bool InheritsRotAngle() const { return m_InheritsRotAngle; }
+	bool InheritsRotAngle() const { return m_InheritsRotAngle; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetInheritsRotAngle
+// Method:  SetInheritsRotAngle
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets Whether parent MOSRotating should change this RotAngle to match it's own during MOSRotating::Update.
 // Arguments:       Whether to inherit RotAngle or not.
 // Return value:    None.
 
-	virtual void SetInheritsRotAngle(bool inherit) { m_InheritsRotAngle = inherit; }
+	void SetInheritsRotAngle(bool inherit) { m_InheritsRotAngle = inherit; }
 
 
 	/// <summary>
 	/// Whether this attachable is capable of having terrain collisions enabled/disabled when attached to a parent.
 	/// </summary>
 	/// <return>If true, can have terrain collisions enabled/disabled when attached.</return>
-	virtual bool CanCollideWithTerrainWhenAttached() const { return m_CanCollideWithTerrainWhenAttached; }
+	bool CanCollideWithTerrainWhenAttached() const { return m_CanCollideWithTerrainWhenAttached; }
 
 
 	/// <summary>
 	/// Sets whether this attachable is capable of having terrain collisions enabled/disabled when attached to a parent.
 	/// </summary>
 	/// <param name="canCollide">Whether this attachable can have terrain collisions enabled/disabled when attached.</param>
-	virtual void SetCanCollideWithTerrainWhenAttached(bool canCollide) { m_CanCollideWithTerrainWhenAttached = canCollide; }
+	void SetCanCollideWithTerrainWhenAttached(bool canCollide) { m_CanCollideWithTerrainWhenAttached = canCollide; }
 
 
 	/// <summary>
 	/// Whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.
 	/// </summary>
 	/// <return>If true, terrain collisions while attached are enabled and atoms are present in parent AtomGroup.</return>
-	virtual bool IsCollidingWithTerrainWhileAttached() const { return m_IsCollidingWithTerrainWhileAttached; }
+	bool IsCollidingWithTerrainWhileAttached() const { return m_IsCollidingWithTerrainWhileAttached; }
 
 
 	/// <summary>
 	/// Sets whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.
 	/// </summary>
 	/// <param name="collide">Whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.</param>
-	virtual void SetIsCollidingWithTerrainWhileAttached(bool isColliding) { m_IsCollidingWithTerrainWhileAttached = isColliding; }
+	void SetIsCollidingWithTerrainWhileAttached(bool isColliding) { m_IsCollidingWithTerrainWhileAttached = isColliding; }
 
 
 	/// <summary>
 	/// Turns on/off this Attachable's terrain collisions while it is attached by adding/removing its atoms to/from its parent AtomGroup.
 	/// </summary>
-	virtual void EnableTerrainCollisions(bool enable);
+	void EnableTerrainCollisions(bool enable);
 
+
+	/// <summary>
+	/// Gets whether this attachable is marked be deleted along with it's parent when it's being deleted or not.
+	/// </summary>
+	/// <returns>Whether this attachable is marked to be deleted along with it's parent or not.</returns>
+	bool ToDeleteWithParent() const { return m_DeleteWithParent; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -701,6 +629,8 @@ protected:
 	// Whether this attachable currently has terrain collisions enabled while it's attached to a parent.
 	bool m_IsCollidingWithTerrainWhileAttached;
 
+	bool m_DeleteWithParent; //!< Whether this attachable is marked to be deleted along with it's parent when it's being deleted or not.
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations
@@ -720,8 +650,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    Attachable(const Attachable &reference);
-    Attachable& operator=(const Attachable &rhs);
+	Attachable(const Attachable &reference) = delete;
+	Attachable & operator=(const Attachable &rhs) = delete;
 
 };
 

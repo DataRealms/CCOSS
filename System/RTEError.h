@@ -2,10 +2,21 @@
 #define _RTEERROR_
 
 #include "allegro.h"
+#include "loadpng.h"
+
+#ifdef _WIN32
+#define DebuggerBreak __debugbreak();
+#else
+#define DebuggerBreak ;
+#endif
+
+#ifndef RELEASE_BUILD
+#define AbortAction DebuggerBreak
+#else
+#define AbortAction std::exit(EXIT_FAILURE);
+#endif
 
 namespace RTE {
-
-	static BITMAP *g_pScreendumpBuffer = 0; //!< Buffer for saving abort screendumps.
 
 	/// <summary>
 	/// Pops up a message box dialog in the OS. For debug purposes mostly.
@@ -22,10 +33,8 @@ namespace RTE {
 	extern bool RTEAbortFunc(const char *description, const char *file, int line);
 	extern bool RTEAbortFunc(const std::string description, const char *file, int line);
 
-	#define RTEAbort(description) {								\
-		if (RTEAbortFunc(description, __FILE__, __LINE__)) {	\
-			__debugbreak();										\
-		}														\
+	#define RTEAbort(description) {											\
+		if (RTEAbortFunc(description, __FILE__, __LINE__)) { AbortAction }	\
 	}
 
 	/// <summary>
@@ -41,13 +50,11 @@ namespace RTE {
 	extern bool RTEAssertFunc(bool expression, const char *description, const char *file, int line, bool &alwaysIgnore);
 	extern bool RTEAssertFunc(bool expression, const std::string description, const char *file, int line, bool &alwaysIgnore);
 
-	#define RTEAssert(expression, description) {												\
-		static bool alwaysIgnore = false;														\
-		if (!alwaysIgnore) {																	\
-			if (RTEAssertFunc(expression, description, __FILE__, __LINE__, alwaysIgnore)) {		\
-				__debugbreak();																	\
-			}																					\
-		}																						\
+	#define RTEAssert(expression, description) {															\
+		static bool alwaysIgnore = false;																	\
+		if (!alwaysIgnore) {																				\
+			if (RTEAssertFunc(expression, description, __FILE__, __LINE__, alwaysIgnore)) { AbortAction }	\
+		}																									\
 	}
 }
 #endif

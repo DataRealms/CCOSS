@@ -13,26 +13,19 @@
 
 
 #include "ACRocket.h"
-#include "Atom.h"
 #include "AtomGroup.h"
 #include "Attachable.h"
-#include "HeldDevice.h"
-#include "Arm.h"
 #include "Leg.h"
 #include "Controller.h"
-#include "RTETools.h"
-#include "MOPixel.h"
 #include "Matrix.h"
 #include "AEmitter.h"
-#include "HDFirearm.h"
 
 #include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
 namespace RTE {
 
-CONCRETECLASSINFO(ACRocket, ACraft, 0)
+ConcreteClassInfo(ACRocket, ACraft, 10)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -243,7 +236,6 @@ int ACRocket::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "ScuttleIfFlippedTime")
         reader >> m_ScuttleIfFlippedTime;
     else
-        // See if the base class(es) can find a match instead
         return ACraft::ReadProperty(propName, reader);
 
     return 0;
@@ -380,7 +372,7 @@ void ACRocket::SetID(const MOID newID)
         m_pMThruster->SetID(newID);
 }
 
-
+/*
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          OnBounce
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -405,7 +397,7 @@ bool ACRocket::OnSink(const Vector &pos)
 {
     return false;
 }
-
+*/
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GibThis
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1031,11 +1023,11 @@ void ACRocket::Update()
     ////////////////////////////////////////
     // Hatch Operation
 
-    int lastFrame = m_FrameCount - 1;
+    unsigned int lastFrame = m_FrameCount - 1;
 
     if (m_HatchState == OPENING) {
         if (m_HatchTimer.GetElapsedSimTimeMS() <= m_HatchDelay && m_HatchDelay)
-            m_Frame = floorf((float)lastFrame * ((float)m_HatchTimer.GetElapsedSimTimeMS() / (float)m_HatchDelay));
+            m_Frame = static_cast<unsigned int>(static_cast<double>(lastFrame) * (m_HatchTimer.GetElapsedSimTimeMS() / static_cast<double>(m_HatchDelay)));
         else
         {
             m_Frame = lastFrame;
@@ -1045,8 +1037,7 @@ void ACRocket::Update()
     }
     else if (m_HatchState == CLOSING) {
         if (m_HatchTimer.GetElapsedSimTimeMS() <= m_HatchDelay && m_HatchDelay)
-
-            m_Frame = lastFrame - floorf((float)lastFrame * ((float)m_HatchTimer.GetElapsedSimTimeMS() / (float)m_HatchDelay));
+            m_Frame = lastFrame - static_cast<unsigned int>(static_cast<double>(lastFrame) * (m_HatchTimer.GetElapsedSimTimeMS() / static_cast<double>(m_HatchDelay)));
         else
         {
             m_Frame = 0;
@@ -1143,7 +1134,7 @@ int ACRocket::RemoveAnyRandomWounds(int amount)
 		if (bodyParts.size() == 0)
 			break;
 
-		int partIndex = RangeRand(0, bodyParts.size() - 1);
+		int partIndex = RandomNum<int>(0, bodyParts.size() - 1);
 		MOSRotating * part = bodyParts[partIndex];
 		damage += part->RemoveWounds(1);
 	}
@@ -1251,11 +1242,11 @@ void ACRocket::Draw(BITMAP *pTargetBitmap,
     if (mode == g_DrawColor) {
 #ifdef DEBUG_BUILD
         acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X),
-                              floorf(m_Pos.m_Y),
+        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
+                              std::floor(m_Pos.m_Y),
                               64);
-        putpixel(pTargetBitmap, floorf(m_Pos.m_X),
-                              floorf(m_Pos.m_Y),
+        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
+                              std::floor(m_Pos.m_Y),
                               64);
         release_bitmap(pTargetBitmap);
 

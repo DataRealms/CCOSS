@@ -182,17 +182,10 @@ bool PresetMan::LoadDataModule(string moduleName, bool official, ProgressCallbac
 
 bool PresetMan::LoadAllDataModules() {
 	// Load all the official modules first!
-	if (!LoadDataModule("Base.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-
-	if (!LoadDataModule("Coalition.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Imperatus.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Techion.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Dummy.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Ronin.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Browncoats.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Uzira.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("MuIlaak.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Missions.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	std::array<std::string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
+	for (const std::string &officialModule : officialModules) {
+		if (!LoadDataModule(officialModule, true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	}
 
 	// If a single module is specified, skip loading all other unofficial modules and load specified module only.
 	if (m_SingleModuleToLoad != "Base.rte" && m_SingleModuleToLoad != "") {
@@ -622,7 +615,7 @@ Entity * PresetMan::GetRandomOfGroup(string group, string type, int whichModule)
 
     // Pick one and return it
     int current = 0;
-    int selection = SelectRand(0, entityList.size() - 1);
+    int selection = RandomNum<int>(0, entityList.size() - 1);
     for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
     {
         if (current == selection)
@@ -710,7 +703,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 
     // Pick one and return it
     int current = 0;
-    int selection = SelectRand(0, entityList.size() - 1);
+    int selection = RandomNum<int>(0, entityList.size() - 1);
 
 	int totalWeight = 0;
 	for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
@@ -722,7 +715,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 		if (totalWeight == 0)
 			return 0;
 
-		selection = SelectRand(0, totalWeight - 1);
+		selection = RandomNum(0, totalWeight - 1);
 
 		for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
 		{
@@ -829,7 +822,7 @@ Entity * PresetMan::GetRandomOfGroupInModuleSpace(string group, string type, int
 
     // Pick one and return it
     int current = 0;
-    int selection = SelectRand(0, entityList.size() - 1);
+    int selection = RandomNum<int>(0, entityList.size() - 1);
     for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
     {
         if (current == selection)

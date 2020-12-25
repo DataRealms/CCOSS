@@ -1,7 +1,11 @@
 ﻿#include "System.h"
+#ifdef _WIN32 
 #include <direct.h>
-
 #define getcwd _getcwd
+#else
+#include <unistd.h>
+#include <sys/stat.h>
+#endif
 
 namespace RTE {
 
@@ -19,7 +23,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int System::MakeDirectory(const std::string& path) { return _mkdir(path.c_str()); }
+	int System::MakeDirectory(const std::string& path) {
+#ifdef _WIN32
+		return _mkdir(path.c_str());
+#elif __unix__
+		return mkdir(path.c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+#endif
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -59,7 +69,7 @@ namespace RTE {
 		inputString = std::regex_replace(inputString, regexError, "\033[1;31m$&\033[0;0m");
 
 		// Color .rte-paths green
-		std::regex regexPath("\\w*\\.rte\\/(\\w| |\\.|\\/)*(\\/|\\.bmp|\\.wav|\\.lua|\\.ini)");
+		std::regex regexPath("\\w*\\.rte\\/(\\w| |\\.|\\/)*(\\/|\\.bmp|\\.png|\\.wav|\\.ogg|\\.flac||\\.lua|\\.ini)");
 		inputString = std::regex_replace(inputString, regexPath, "\033[1;32m$&\033[0;0m");
 
 		// Color names in quotes yellow

@@ -8,11 +8,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PrimitiveMan::DrawBitmapPrimitive(short player, Vector start, Entity *entity, float rotAngle, unsigned short frame) {
+	void PrimitiveMan::DrawBitmapPrimitive(short player, Vector centerPos, Entity *entity, float rotAngle, unsigned short frame, bool hFlipped, bool vFlipped) {
 		const MOSprite *moSprite = dynamic_cast<MOSprite *>(entity);
 		if (moSprite) {
-			BITMAP *pBitmap = moSprite->GetSpriteFrame(frame);
-			if (pBitmap) { m_Primitives.push_back(new BitmapPrimitive(player, start, pBitmap, rotAngle)); }
+			BITMAP *bitmap = moSprite->GetSpriteFrame(frame);
+			if (bitmap) { m_Primitives.push_back(new BitmapPrimitive(player, centerPos, bitmap, rotAngle, hFlipped, vFlipped)); }
 		}
 	}
 
@@ -27,9 +27,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PrimitiveMan::DrawPrimitives(short player, BITMAP *pTargetBitmap, const Vector &targetPos) {
+	void PrimitiveMan::DrawPrimitives(short player, BITMAP *targetBitmap, const Vector &targetPos) const {
 		for (GraphicalPrimitive *primitive : m_Primitives) {
-			if (player == primitive->m_Player || primitive->m_Player == -1) { primitive->Draw(pTargetBitmap, targetPos); }
+			if (player == primitive->m_Player || primitive->m_Player == -1) { primitive->Draw(targetBitmap, targetPos); }
 		}
 	}
 }

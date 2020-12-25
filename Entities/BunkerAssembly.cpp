@@ -23,7 +23,7 @@
 
 namespace RTE {
 
-CONCRETECLASSINFO(BunkerAssembly, SceneObject, 0)
+ConcreteClassInfo(BunkerAssembly, SceneObject, 0)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -260,11 +260,10 @@ int BunkerAssembly::ReadProperty(std::string propName, Reader &reader)
 		} else {
 			// Do not allow to define assemblies prior to corresponding assembly scheme
 			char s[256];
-			sprintf_s(s, sizeof(s), "Required BunkerAssemblyScheme '%s%' not found when trying to load BunkerAssembly '%s'! BunkerAssemblySchemes MUST be defined before dependent BunkerAssmeblies.", parentScheme.c_str(), m_PresetName.c_str());
+			std::snprintf(s, sizeof(s), "Required BunkerAssemblyScheme '%s%' not found when trying to load BunkerAssembly '%s'! BunkerAssemblySchemes MUST be defined before dependent BunkerAssmeblies.", parentScheme.c_str(), m_PresetName.c_str());
 			RTEAbort(s);
 		}
 	} else
-        // See if the base class(es) can find a match instead
         return SceneObject::ReadProperty(propName, reader);
 
     return 0;
@@ -424,7 +423,7 @@ std::vector<Deployment *> BunkerAssembly::GetDeployments()
 		if (candidatesList.size() == 0 )
 			break;
 
-		int selection = SelectRand(0, candidatesList.size() - 1);
+		int selection = RandomNum<int>(0, candidatesList.size() - 1);
 		deploymentsList.push_back(candidatesList.at(selection));
 		candidatesList.erase(candidatesList.begin() + selection);
 	}

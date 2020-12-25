@@ -12,15 +12,13 @@
 // Inclusions of header files
 
 #include "Arm.h"
-#include "RTETools.h"
 #include "HDFirearm.h"
 #include "ThrownDevice.h"
-#include "ContentFile.h"
 #include "PresetMan.h"
 
 namespace RTE {
 
-CONCRETECLASSINFO(Arm, Attachable, 0)
+ConcreteClassInfo(Arm, Attachable, 50)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -31,7 +29,6 @@ CONCRETECLASSINFO(Arm, Attachable, 0)
 
 void Arm::Clear()
 {
-//    m_HandOffset.Reset();
     m_pHeldMO = 0;
     m_HandFile.Reset();
     m_pHand = 0;
@@ -125,7 +122,6 @@ int Arm::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "MoveSpeed")
         reader >> m_MoveSpeed;
     else
-        // See if the base class(es) can find a match instead
         return Attachable::ReadProperty(propName, reader);
 
     return 0;
@@ -235,8 +231,8 @@ void Arm::SetHeldMO(MovableObject *newHeldMO)
         HeldDevice *pHeldDev = dynamic_cast<HeldDevice *>(m_pHeldMO);
         pHeldDev->Detach();
 // TODO: Refine throwing force to dropped device here?")
-        pHeldDev->SetVel(Vector(10 * PosRand(), -15 * PosRand()));
-        pHeldDev->SetAngularVel(-10 * PosRand());
+		pHeldDev->SetVel(Vector(RandomNum(0.0F, 10.0F), -RandomNum(0.0F, 15.0F)));
+		pHeldDev->SetAngularVel(-RandomNum(0.0F, 10.0F));
         g_MovableMan.AddItem(pHeldDev);
         m_pHeldMO = pHeldDev = 0;
     }
@@ -338,7 +334,7 @@ MovableObject * Arm::SwapHeldMO(MovableObject *newMO)
 
 void Arm::Reach(const Vector &scenePoint)
 {
-    m_TargetPoint = scenePoint.GetFloored();
+    m_TargetPoint = scenePoint;
     m_WillIdle = true;
 /*
     if (m_HFlipped) {
@@ -430,7 +426,7 @@ void Arm::Update()
     if (!m_pParent) {
         // When arm is detached, let go of whatever it is holding 
         if (m_pHeldMO) {
-            m_pHeldMO->SetVel(m_Vel + Vector(-10 * PosRand(), -15 * PosRand()));
+			m_pHeldMO->SetVel(m_Vel + Vector(-RandomNum(0.0F, 10.0F), -RandomNum(0.0F, 15.0F)));
             m_pHeldMO->SetAngularVel(-7);
             if (m_pHeldMO->IsDevice())
                 dynamic_cast<Attachable *>(m_pHeldMO)->Detach();
@@ -453,11 +449,11 @@ void Arm::Update()
             pHeldDev->SetHFlipped(m_HFlipped);
 
             Vector handTarget(pHeldDev->GetStanceOffset());
-            handTarget *= m_Rotation/* + m_pParent->GetRotMatrix()*/;
-//            handTarget.RadRotate(m_pParent->GetRotMatrix());
+			handTarget *= m_Rotation/* + m_pParent->GetRotMatrix()*/;
+			//            handTarget.RadRotate(m_pParent->GetRotMatrix());
 
             // Predict where the new muzzle position will be if we don't try to clear the muzzle of terrain
-            Vector newMuzzlePos = (m_JointPos.GetFloored() + handTarget) - RotateOffset(pHeldDev->GetJointOffset()) + RotateOffset(pHeldDev->GetMuzzleOffset());
+            Vector newMuzzlePos = (m_JointPos + handTarget) - RotateOffset(pHeldDev->GetJointOffset()) + RotateOffset(pHeldDev->GetMuzzleOffset());
             // Adjust the hand offset back if necessary so that the weapon's muzzle doesn't poke into terrain
             Vector midToMuzzle(pHeldDev->GetRadius(), 0);
             midToMuzzle = RotateOffset(midToMuzzle);
@@ -470,7 +466,7 @@ void Arm::Update()
             g_SceneMan.CastStrengthRay(midOfDevice, midToMuzzle, 5, freeMuzzlePos, 0, false);
             Vector muzzleAdjustment = g_SceneMan.ShortestDistance(newMuzzlePos, freeMuzzlePos);
             // Only apply if it's large enough
-            if (muzzleAdjustment.GetMagnitude() > 2.0f)
+            if (muzzleAdjustment.GetMagnitude() > 2.0F)
                 handTarget += muzzleAdjustment;
 
             // Interpolate the hand offset to the hand target
@@ -480,8 +476,7 @@ void Arm::Update()
             // Make sure the weapon cannot be extended beyond the reach of the arm.
             ConstrainHand();
 
-            float handAngle = m_HandOffset.GetAbsRadAngle();
-            pHeldDev->SetJointPos(m_JointPos.GetFloored() + m_HandOffset);
+            pHeldDev->SetJointPos(m_JointPos + m_HandOffset);
             pHeldDev->SetRotAngle(m_Rotation.GetRadAngle());
             pHeldDev->Update();
             if (pHeldDev->IsRecoiled())
@@ -489,13 +484,13 @@ void Arm::Update()
             else
                 m_Recoiled = false;
 
-            m_Rotation = (m_HFlipped ? c_PI : 0) + handAngle;
+            m_Rotation = (m_HFlipped ? c_PI : 0) + m_HandOffset.GetAbsRadAngle();
 
             // Redo the positioning of the arm now since the rotation has changed and RotateOffset will return different results
             if (!m_JointPos.IsZero())
-                m_Pos = m_JointPos.GetFloored() - RotateOffset(m_JointOffset);
+                m_Pos = m_JointPos - RotateOffset(m_JointOffset);
             else
-                m_Pos = m_pParent->GetPos().GetFloored() - RotateOffset(m_JointOffset);
+                m_Pos = m_pParent->GetPos() - RotateOffset(m_JointOffset);
 
             // Apply forces and detach if necessary
             // OBSERVE the memeber pointer is what gets set to 0!$@#$@
@@ -520,19 +515,18 @@ void Arm::Update()
                 Vector handTarget = g_SceneMan.ShortestDistance(m_JointPos, m_TargetPoint);
 
                 // Check if handTarget is within arm's length.
-    // TEMP the +3 is a hack! improve
                 if (handTarget.GetMagnitude() <= m_MaxLength || !m_WillIdle/* && handTarget.GetFloored() != m_HandOffset.GetFloored()*/)
                 {
                     Vector moveVec(handTarget - m_HandOffset);
                     m_HandOffset += moveVec * m_MoveSpeed;
                     m_DidReach = m_WillIdle;
                 }
-                else /*if (m_IdleOffset.GetXFlipped(m_HFlipped).GetFloored() != m_HandOffset.GetFloored())*/
-                {
-                    Vector moveVec(m_IdleOffset.GetXFlipped(m_HFlipped) - m_HandOffset);
-                    m_HandOffset += moveVec * m_MoveSpeed;
-                    m_DidReach = false;
-                }
+				else /*if (m_IdleOffset.GetXFlipped(m_HFlipped).GetFloored() != m_HandOffset.GetFloored())*/
+				{
+					Vector moveVec(m_IdleOffset.GetXFlipped(m_HFlipped) - m_HandOffset);
+					m_HandOffset += moveVec * m_MoveSpeed;
+					m_DidReach = false;
+				}
             }
             // Cap hand distance to what the Arm allows
             ConstrainHand();
@@ -540,39 +534,38 @@ void Arm::Update()
 
             // Redo the positioning of the arm now since the rotation has changed and RotateOffset will return different results
             if (!m_JointPos.IsZero())
-                m_Pos = m_JointPos.GetFloored() - RotateOffset(m_JointOffset);
+                m_Pos = m_JointPos - RotateOffset(m_JointOffset);
             else
-                m_Pos = m_pParent->GetPos().GetFloored() - RotateOffset(m_JointOffset);
+                m_Pos = m_pParent->GetPos() - RotateOffset(m_JointOffset);
 
             // If holding something other than a FireArm, then update it
             if (m_pHeldMO)
             {
                 Attachable *pHeldDev = dynamic_cast<Attachable *>(m_pHeldMO);
                 if (pHeldDev)
-                    pHeldDev->SetJointPos(m_JointPos.GetFloored() + m_HandOffset);
+                    pHeldDev->SetJointPos(m_JointPos + m_HandOffset);
                 else
-                    m_pHeldMO->SetPos(m_JointPos.GetFloored() + m_HandOffset);
+                    m_pHeldMO->SetPos(m_JointPos + m_HandOffset);
                 m_pHeldMO->SetHFlipped(m_HFlipped);
                 m_pHeldMO->SetRotAngle(m_Rotation.GetRadAngle());
                 m_pHeldMO->Update();
-                // If it blew up or whatever, releaes it from hand and put into scene so it'll be cleaned up properly
+                // If it blew up or whatever, release it from hand and put into scene so it'll be cleaned up properly
                 if (m_pHeldMO->IsSetToDelete())
                     g_MovableMan.AddItem(ReleaseHeldMO());
             }
         }
 
-// TODO: improve!")
         // Set correct frame for arm bend.
-        float halfMax = m_MaxLength / 2;
-        float balle = m_HandOffset.GetMagnitude() - halfMax;
-        float temp = (m_HandOffset.GetMagnitude() - halfMax) / halfMax;
-        temp *= m_FrameCount;
-        int newFrame = floorf(temp);
-        newFrame -= newFrame >= m_FrameCount ? 1 : 0;
-        m_Frame = newFrame;
-
-//        m_aSprite->SetAngle(m_Rotation);
-//        m_aSprite->SetScale(m_Scale);
+		float halfMax = m_MaxLength / 2.0F;
+		int newFrame = static_cast<int>(((m_HandOffset.GetMagnitude()- halfMax) / halfMax) * static_cast<float>(m_FrameCount));
+		if (newFrame < 0) {
+			newFrame = 0;
+		}
+		RTEAssert(newFrame <= m_FrameCount, "Arm frame is out of bounds for "+ GetClassName()+": "+ GetPresetName() + ".");
+		if (newFrame == m_FrameCount) {
+			--newFrame;
+		}
+		m_Frame = newFrame;
     }
 }
 
@@ -651,16 +644,17 @@ void Arm::DrawHand(BITMAP *pTargetBitmap,
                    DrawMode mode) const
 {
 
-    Vector handPos(m_JointPos.GetFloored() +
+    Vector handPos(m_JointPos +
                    m_HandOffset +
                    (m_Recoiled ? m_RecoilOffset : Vector()) -
                    targetPos);
     handPos.m_X -= (m_pHand->w / 2) + 1;
     handPos.m_Y -= (m_pHand->h / 2) + 1;
+
     if (!m_HFlipped)
-        draw_sprite(pTargetBitmap, m_pHand, handPos.m_X, handPos.m_Y);
+        draw_sprite(pTargetBitmap, m_pHand, handPos.GetFloorIntX(), handPos.GetFloorIntY());
     else
-        draw_sprite_h_flip(pTargetBitmap, m_pHand, handPos.m_X, handPos.m_Y);
+        draw_sprite_h_flip(pTargetBitmap, m_pHand, handPos.GetFloorIntX(), handPos.GetFloorIntY());
 }
 
 } // namespace RTE

@@ -1,11 +1,10 @@
 #include "Vector.h"
 
-#pragma intrinsic (sin, cos)
 #pragma float_control(precise, on)
 
 namespace RTE {
 
-	const std::string Vector::m_ClassName = "Vector";
+	const std::string Vector::c_ClassName = "Vector";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -15,7 +14,6 @@ namespace RTE {
 		} else if (propName == "Y") {
 			reader >> m_Y;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;
@@ -36,16 +34,18 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector & Vector::SetMagnitude(float newMag) {
-		Vector temp(*this);
-		SetXY(newMag, 0);
-		AbsRotateTo(temp);
+	Vector & Vector::SetMagnitude(const float newMag) {
+		if (IsZero()) {
+			SetXY(newMag, 0.0F);
+		} else {
+			*this *= (newMag / GetMagnitude());
+		}
 		return *this;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector & Vector::CapMagnitude(float capMag) {
+	Vector & Vector::CapMagnitude(const float capMag) {
 		if (capMag == 0) { Reset(); }
 		if (GetMagnitude() > capMag) { SetMagnitude(capMag); }
 		return *this;
@@ -54,108 +54,41 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float Vector::GetAbsRadAngle() const {
-		if (m_X == 0) {
-			return m_Y > 0 ? -c_HalfPI : (m_Y < 0 ? c_HalfPI : 0);
-		}
-		if (m_Y == 0) {
-			return m_X > 0 ? 0 : (m_X < 0 ? c_PI : 0);
-		}
-		// TODO: Confirm that this is correct!")
-		float rawAngle = -atan(m_Y / m_X);
-		if (m_X < 0) { rawAngle += c_PI; }
-
-		return rawAngle;
+		const float radAngle = -std::atan2(m_Y, m_X);
+		return (radAngle < -c_HalfPI) ? (radAngle + c_TwoPI) : radAngle;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float Vector::GetAbsDegAngle() const {
-		if (m_X == 0) {
-			return m_Y > 0 ? -90 : (m_Y < 0 ? 90 : 0);
-		}
-		if (m_Y == 0) {
-			return m_X > 0 ? 0 : (m_X < 0 ? 180 : 0);
-		}
-		float rawAngle = -(atan(m_Y / m_X) / c_PI) * 180;
-		if (m_X < 0) { rawAngle += 180; }
+	Vector Vector::GetRadRotated(const float angle) {
+		Vector returnVector = *this;
+		const float adjustedAngle = -angle;
+		returnVector.m_X = m_X * std::cos(adjustedAngle) - m_Y * std::sin(adjustedAngle);
+		returnVector.m_Y = m_X * std::sin(adjustedAngle) + m_Y * std::cos(adjustedAngle);
 
-		return rawAngle;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	Vector & Vector::RadRotate(float angle) {
-		angle = -angle;
-		float tempX = m_X * cos(angle) - m_Y * sin(angle);
-		float tempY = m_X * sin(angle) + m_Y * cos(angle);
-		m_X = tempX;
-		m_Y = tempY;
-
-		return *this;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	Vector & Vector::DegRotate(float angle) {
-		angle = -angle;
-
-		// Convert to radians.
-		angle /= 180;
-		angle *= c_PI;
-
-		float tempX = m_X * cos(angle) - m_Y * sin(angle);
-		float tempY = m_X * sin(angle) + m_Y * cos(angle);
-		m_X = tempX;
-		m_Y = tempY;
-
-		return *this;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	Vector & Vector::AbsRotateTo(const Vector &refVector) {
-		float rawAngle;
-		if (refVector.m_X == 0) {
-			rawAngle = refVector.m_Y > 0 ? -c_HalfPI : (refVector.m_Y < 0 ? c_HalfPI : 0);
-		} else if (refVector.m_Y == 0) {
-			rawAngle = refVector.m_X > 0 ? 0 : (refVector.m_X < 0 ? c_PI : 0);
-		} else {
-			rawAngle = -atan(refVector.m_Y / refVector.m_X);
-			if (refVector.m_X < 0) { rawAngle += c_PI; }
-		}
-		rawAngle = -rawAngle;
-
-		m_X = GetMagnitude();
-		m_Y = 0.0;
-
-		float tempX = m_X * cos(rawAngle) - m_Y * sin(rawAngle);
-		float tempY = m_X * sin(rawAngle) + m_Y * cos(rawAngle);
-		m_X = tempX;
-		m_Y = tempY;
-
-		return *this;
+		return returnVector;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Vector & Vector::operator=(const Vector &rhs) {
-		if (*this == rhs) {
-			return *this;
+		if (*this != rhs) {
+			m_X = rhs.m_X;
+			m_Y = rhs.m_Y;
 		}
-		m_X = rhs.m_X;
-		m_Y = rhs.m_Y;
 		return *this;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Vector & Vector::operator=(const std::deque<Vector> &rhs) {
-		Clear();
-		if (rhs.empty()) { return *this; }
-		for (std::deque<Vector>::const_iterator itr = rhs.begin(); itr != rhs.end(); ++itr) {
-			*this += *itr;
+		Reset();
+		if (!rhs.empty()) {
+			for (const Vector &vector : rhs) {
+				*this += vector;
+			}
+			*this /= static_cast<float>(rhs.size());
 		}
-		*this /= rhs.size();
 		return *this;
 	}
 }

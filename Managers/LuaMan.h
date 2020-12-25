@@ -1,14 +1,6 @@
 #ifndef _RTELUAMAN_
 #define _RTELUAMAN_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            LuaMan.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Header file for the LuaMan class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -47,20 +39,6 @@ class LuaMan:
 
 public:
 
-/*
-enum ServerResult
-{
-    SUCCESS = 0,
-    FAILEDCONNECTION,
-    INVALIDXML,
-    MAXCOUNT,
-    INVALIDKEY,
-    INVALIDPRODUCT,
-    EXPIREDKEY,
-    INVALIDMACHINE,
-    UNKNOWNERROR
-};
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     LuaMan
@@ -79,7 +57,7 @@ enum ServerResult
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~LuaMan() { Destroy(); }
+    ~LuaMan() { Destroy(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -90,46 +68,18 @@ enum ServerResult
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
+	int Create();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this LuaMan to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the LuaMan will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire LuaMan, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+	void Reset() { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -143,13 +93,13 @@ enum ServerResult
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
+// Method:  GetClassName
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the class name of this Entity.
 // Arguments:       None.
 // Return value:    A string with the friendly-formatted type name of this object.
 
-    virtual const std::string & GetClassName() const { return m_ClassName; }
+	const std::string & GetClassName() const { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -180,7 +130,7 @@ enum ServerResult
 // Arguments:       None.
 // Return value:    Whether errors exist.
 
-    bool ErrorExists() const { return m_LastError.empty(); }
+    bool ErrorExists() const { return !m_LastError.empty(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -239,30 +189,21 @@ enum ServerResult
     /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
     int RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, std::vector<std::string> variablesToSafetyCheck = std::vector<std::string>(), std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RunScriptString
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Takes a string containing a script snippet and runs it on the master
-//                  state.
-// Arguments:       The string with the script snippet.
-//                  Whether to report any errors to the console immediately.
-// Return value:    Returns less than zero if any errors encountered when running this script.
-//                  To get the actual error string, call GetLastError.
-
+    /// <summary>
+    /// Takes a string containing a script snippet and runs it on the master state.
+    /// </summary>
+    /// <param name="scriptString">The string with the script snippet.</param>
+    /// <param name="consoleErrors">Whether to report any errors to the console immediately.</param>
+    /// <returns>Returns less than zero if any errors encountered when running this script. To get the actual error string, call GetLastError.</returns>
     int RunScriptString(const std::string &scriptString, bool consoleErrors = true);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RunScriptFile
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Opens and loads a file containing a script and runs it on the master
-//                  state.
-// Arguments:       The path to the file to load and run.
-//                  Whether to report any errors to the console immediately.
-// Return value:    Returns less than zero if any errors encountered when running this script.
-//                  To get the actual error string, call GetLastError.
-
-    int RunScriptFile(std::string filePath, bool consoleErrors = true);
+    /// <summary>
+    /// Opens and loads a file containing a script and runs it on the master state.
+    /// </summary>
+    /// <param name="filePath">The path to the file to load and run.</param>
+    /// <param name="consoleErrors">Whether to report any errors to the console immediately.</param>
+    /// <returns>Returns less than zero if any errors encountered when running this script. To get the actual error string, call GetLastError.</returns>
+    int RunScriptFile(const std::string &filePath, bool consoleErrors = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -436,8 +377,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    LuaMan(const LuaMan &reference);
-    LuaMan & operator=(const LuaMan &rhs);
+	LuaMan(const LuaMan &reference) = delete;
+	LuaMan & operator=(const LuaMan &rhs) = delete;
 
 	//Internal list of opened files used by File* functions 
 	FILE * m_Files[MAX_OPEN_FILES];

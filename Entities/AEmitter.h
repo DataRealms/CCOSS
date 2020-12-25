@@ -41,8 +41,9 @@ public:
 	friend class LuaMan;
 
 // Concrete allocation and cloning definitions
-ENTITYALLOCATION(AEmitter)
-
+EntityAllocation(AEmitter)
+SerializableOverrideMethods
+ClassInfoGetters
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     AEmitter
@@ -61,7 +62,7 @@ ENTITYALLOCATION(AEmitter)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~AEmitter() { Destroy(true); }
+	~AEmitter() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -72,7 +73,7 @@ ENTITYALLOCATION(AEmitter)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -87,22 +88,6 @@ ENTITYALLOCATION(AEmitter)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire AEmitter, including its inherited members, to their
@@ -110,19 +95,7 @@ ENTITYALLOCATION(AEmitter)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); MOSRotating::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this AEmitter to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the AEmitter will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+    void Reset() override { Clear(); MOSRotating::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -133,27 +106,7 @@ ENTITYALLOCATION(AEmitter)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -494,7 +447,7 @@ ENTITYALLOCATION(AEmitter)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ResetAllTimers() { Attachable::ResetAllTimers(); m_BurstTimer.Reset(); m_LastEmitTmr.Reset(); }
+    void ResetAllTimers() override { Attachable::ResetAllTimers(); m_BurstTimer.Reset(); m_LastEmitTmr.Reset(); }
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -507,7 +460,7 @@ ENTITYALLOCATION(AEmitter)
 //                  A pointer to an MO which the gibs shuold not be colliding with!
 // Return value:    None.
 
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
+    void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -517,67 +470,67 @@ ENTITYALLOCATION(AEmitter)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetBurstDamage
+// Method:  GetBurstDamage
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns burst damage of this emitter.
 // Arguments:       None.
 // Return value:    Burst damage of emitter.
 
-	virtual float GetBurstDamage() const { return m_BurstDamage * m_EmitterDamageMultiplier; }
+	float GetBurstDamage() const { return m_BurstDamage * m_EmitterDamageMultiplier; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetBurstDamage
+// Method:  SetBurstDamage
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets burst damage of this emitter.
 // Arguments:       Burst damage of emitter.
 // Return value:    None.
 
-	virtual void SetBurstDamage(float newValue) { m_BurstDamage = newValue; }
+	void SetBurstDamage(float newValue) { m_BurstDamage = newValue; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetEmitDamage
+// Method:  GetEmitDamage
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns emit damage of this emitter.
 // Arguments:       None.
 // Return value:    Emit damage of emitter.
 
-	virtual float GetEmitDamage() const { return m_EmitDamage * m_EmitterDamageMultiplier; }
+	float GetEmitDamage() const { return m_EmitDamage * m_EmitterDamageMultiplier; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetEmitDamage
+// Method:  SetEmitDamage
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets emit damage of this emitter.
 // Arguments:       Emit damage of emitter.
 // Return value:    None.
 
-	virtual void SetEmitDamage(float newValue) { m_EmitDamage = newValue; }
+	void SetEmitDamage(float newValue) { m_EmitDamage = newValue; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetEmitterDamageMultiplier
+// Method:  GetEmitterDamageMultiplier
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns damage multiplier of this emitter.
 // Arguments:       None.
 // Return value:    Damage multiplier of emitter.
 
-	virtual float GetEmitterDamageMultiplier() const { return m_EmitterDamageMultiplier; }
+	float GetEmitterDamageMultiplier() const { return m_EmitterDamageMultiplier; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetEmitterDamageMultiplier
+// Method:  SetEmitterDamageMultiplier
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets damage multiplier of this emitter.
 // Arguments:       New damage multiplier of emitter
 // Return value:    None.
 
-	virtual void SetEmitterDamageMultiplier(float newValue) { m_EmitterDamageMultiplier = newValue; }
+	void SetEmitterDamageMultiplier(float newValue) { m_EmitterDamageMultiplier = newValue; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -592,37 +545,34 @@ ENTITYALLOCATION(AEmitter)
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsDamaging
+// Method:  IsDamaging
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether this emitter deals damage.
 // Arguments:       None.
 // Return value:    Returns true if this emitter deals damage.
 
-	virtual bool IsDamaging() { return (m_EmitDamage > 0 || m_BurstDamage > 0) && m_EmitterDamageMultiplier > 0; }
+	bool IsDamaging() { return (m_EmitDamage > 0 || m_BurstDamage > 0) && m_EmitterDamageMultiplier > 0; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetEmitCountLimit
+// Method:  GetEmitCountLimit
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the number of emissions left before emitter is disabled.
 // Arguments:       None.
 // Return value:    Returns the number of emissions left before emitter is disabled.
 
-	virtual long GetEmitCountLimit() const { return m_EmitCountLimit; }
+	long GetEmitCountLimit() const { return m_EmitCountLimit; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetEmitCountLimit
+// Method:  SetEmitCountLimit
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the number of emissions left before emitter is disabled.
 // Arguments:       New number of emissions left
 // Return value:    None.
 
-	virtual void SetEmitCountLimit(long newValue) { m_EmitCountLimit = newValue; }
+	void SetEmitCountLimit(long newValue) { m_EmitCountLimit = newValue; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -710,8 +660,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    AEmitter(const AEmitter &reference);
-    AEmitter & operator=(const AEmitter &rhs);
+	AEmitter(const AEmitter &reference) = delete;
+	AEmitter & operator=(const AEmitter &rhs) = delete;
 
 };
 

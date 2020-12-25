@@ -12,16 +12,16 @@
 // Inclusions of header files
 
 #include "Attachable.h"
-#include "Atom.h"
 #include "AtomGroup.h"
-#include "RTEManagers.h"
-#include "RTETools.h"
+#include "PresetMan.h"
+#include "MovableMan.h"
 #include "AEmitter.h"
 #include "Actor.h"
+#include "ConsoleMan.h"
 
 namespace RTE {
 
-CONCRETECLASSINFO(Attachable, MOSRotating, 0)
+ConcreteClassInfo(Attachable, MOSRotating, 100)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -47,6 +47,7 @@ void Attachable::Clear()
 	m_InheritsRotAngle = true;
 	m_CanCollideWithTerrainWhenAttached = false;
 	m_IsCollidingWithTerrainWhileAttached = false;
+	m_DeleteWithParent = false;
 }
 
 
@@ -87,6 +88,7 @@ int Attachable::Create(const Attachable &reference)
     m_OnlyLinForces = reference.m_OnlyLinForces;
 	m_InheritsRotAngle = reference.m_InheritsRotAngle;
 	m_CanCollideWithTerrainWhenAttached = reference.m_CanCollideWithTerrainWhenAttached;
+	m_DeleteWithParent = reference.m_DeleteWithParent;
 
     return 0;
 }
@@ -118,8 +120,9 @@ int Attachable::ReadProperty(std::string propName, Reader &reader)
         reader >> m_DrawAfterParent;
     else if (propName == "CollidesWithTerrainWhenAttached")
         reader >> m_CanCollideWithTerrainWhenAttached;
+	else if (propName == "DeleteWithParent")
+		reader >> m_DeleteWithParent;
     else
-        // See if the base class(es) can find a match instead
         return MOSRotating::ReadProperty(propName, reader);
 
     return 0;
@@ -152,6 +155,8 @@ int Attachable::Save(Writer &writer) const
     writer << m_DrawAfterParent;
     writer.NewProperty("CollidesWithTerrainWhenAttached");
     writer << m_CanCollideWithTerrainWhenAttached;
+	writer.NewProperty("DeleteWithParent");
+	writer << m_DeleteWithParent;
 
     return 0;
 }
@@ -183,8 +188,8 @@ bool Attachable::CollideAtPoint(HitData &hd)
     return MOSRotating::CollideAtPoint(hd);
 /*
     // See if the impact created a force enough to detach from parent.
-    if (m_pParent && hd.resImpulse[HITEE].GetMagnitude() > m_JointStrength) {
-        m_pParent->AddAbsImpulseForce(Vector(hd.resImpulse[HITEE]).SetMagnitude(m_JointStrength), m_JointPos);
+    if (m_pParent && hd.ResImpulse[HITEE].GetMagnitude() > m_JointStrength) {
+        m_pParent->AddAbsImpulseForce(Vector(hd.ResImpulse[HITEE]).SetMagnitude(m_JointStrength), m_JointPos);
         
         Detach();
     }
@@ -208,22 +213,22 @@ bool Attachable::ParticlePenetration(HitData &hd)
     bool penetrated = MOSRotating::ParticlePenetration(hd);
 
 	// Add damage points if MO is set to damage actors
-	if (hd.pBody[HITOR]->DamageOnCollision() != 0)
-		AddDamage(hd.pBody[HITOR]->DamageOnCollision());
+	if (hd.Body[HITOR]->DamageOnCollision() != 0)
+		AddDamage(hd.Body[HITOR]->DamageOnCollision());
 
     // If penetrated, propogate an alarm up to the root parent, if it's an actor
     if (penetrated && m_pParent)
     {
 		// Add damage points if MO is set to damage actors on penetration
-		if (hd.pBody[HITOR]->DamageOnPenetration() != 0)
-			AddDamage(hd.pBody[HITOR]->DamageOnPenetration());
+		if (hd.Body[HITOR]->DamageOnPenetration() != 0)
+			AddDamage(hd.Body[HITOR]->DamageOnPenetration());
 
         Actor *pParentActor = dynamic_cast<Actor *>(GetRootParent());
         if (pParentActor)
         {
             // Move the alarm point out a bit from the body so the reaction is better
-//            Vector extruded(g_SceneMan.ShortestDistance(pParentActor->GetPos(), hd.hitPoint));
-            Vector extruded(hd.hitVel[HITOR]);
+//            Vector extruded(g_SceneMan.ShortestDistance(pParentActor->GetPos(), hd.HitPoint));
+            Vector extruded(hd.HitVel[HITOR]);
             extruded.SetMagnitude(pParentActor->GetHeight());
             extruded = m_Pos - extruded;
             g_SceneMan.WrapPosition(extruded);
@@ -241,17 +246,13 @@ bool Attachable::ParticlePenetration(HitData &hd)
 // Description:     Gibs this, effectively destroying it and creating multiple gibs or
 //                  pieces in its place.
 
-void Attachable::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
-{
-    if (m_pParent)
-    {
-        (MOSRotating *)m_pParent->RemoveAttachable(this);
+void Attachable::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO) {
+    if(m_pParent){
+      m_pParent->RemoveAttachable(this);
     }
-    else
-    {
-        Detach();
+    else{
+      Detach();
     }
-
     MOSRotating::GibThis(impactImpulse, internalBlast, pIgnoreMO);
 }
 
@@ -299,7 +300,7 @@ void Attachable::Detach()
 	// Since it's no longer atteched it should belong to itself
 	m_RootMOID = m_MOID;
 
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+#ifndef RELEASE_BUILD
 	RTEAssert(m_RootMOID == g_NoMOID || (m_RootMOID >= 0 && m_RootMOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
 	RTEAssert(m_MOID == g_NoMOID || (m_MOID >= 0 && m_MOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
 #endif
@@ -515,9 +516,9 @@ void Attachable::Update()
         // Attached, so get all metrics from parent and apply
 //        m_HFlipped = m_pParent->IsHFlipped();  not flexible enough
         if (!m_JointPos.IsZero())
-            m_Pos = m_JointPos.GetFloored() - RotateOffset(m_JointOffset);
+            m_Pos = m_JointPos - RotateOffset(m_JointOffset);
         else
-            m_Pos = m_pParent->GetPos().GetFloored() - RotateOffset(m_JointOffset);
+            m_Pos = m_pParent->GetPos() - RotateOffset(m_JointOffset);
 //        m_Rotation = m_pParent->GetRotMatrix();
         m_Vel = m_pParent->GetVel();
 //        m_AngularVel =  m_pParent->GetAngularVel();
@@ -554,7 +555,7 @@ void Attachable::Update()
     MOSRotating::Update();
 
     // If we're attached to something, MoveableMan doesn't own us, and therefore isn't calling our ScriptUpdate (and our parent isn't calling it either), so we should here
-    if (m_pParent != NULL && GetRootParent()->HasEverBeenAddedToMovableMan()) { UpdateScripts(); }
+    if (IsAttached() && GetRootParent()->HasEverBeenAddedToMovableMan()) { UpdateScripts(); }
 }
 
 
@@ -606,10 +607,10 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
             m_pTempBitmapA->SetColorKey(g_MaskColor);
 
             if (mode == g_DrawMaterial)
-                DrawMaterial(m_aSprite, m_pTempBitmapA, GetSettleMaterialID());
+                DrawMaterial(m_aSprite, m_pTempBitmapA, GetSettleMaterial());
             else if (mode == g_DrawAir)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, g_MaterialAir);
-            else if (mode == g_DrawKey)
+            else if (mode == g_DrawMask)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, g_MaskColor);
             else if (mode == g_DrawMOID)
                 DrawMaterial(m_aSprite, m_pTempBitmapA, m_MOID);
@@ -646,10 +647,10 @@ void Attachable::Draw(BITMAP *pTargetBitmap,
         m_aSprite->SetPos(spritePos.m_X, spritePos.m_Y);
 
         if (mode == g_DrawMaterial)
-            DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, GetSettleMaterialID());
+            DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, GetSettleMaterial());
         else if (mode == g_DrawAir)
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, g_MaterialAir);
-        else if (mode == g_DrawKey)
+        else if (mode == g_DrawMask)
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, g_MaskColor);
         else if (mode == g_DrawMOID)
             DrawMaterialRotoZoomed(m_aSprite, pTargetBitmap, m_MOID);

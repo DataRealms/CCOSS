@@ -18,10 +18,11 @@
 #include "SettingsMan.h"
 #include "LuaMan.h"
 #include "Atom.h"
+#include "Actor.h"
 
 namespace RTE {
 
-ABSTRACTCLASSINFO(MovableObject, SceneObject)
+AbstractClassInfo(MovableObject, SceneObject)
 
 unsigned long int MovableObject::m_UniqueIDCounter = 1;
 
@@ -73,7 +74,8 @@ void MovableObject::Clear()
     m_ToSettle = false;
     m_ToDelete = false;
     m_HUDVisible = true;
-    m_LoadedScripts.clear();
+    m_AllLoadedScripts.clear();
+    m_FunctionsAndScripts.clear();
     m_ScriptPresetName.clear();
     m_ScriptObjectName.clear();
     m_ScreenEffectFile.Reset();
@@ -206,10 +208,12 @@ int MovableObject::Create(const MovableObject &reference)
     m_MissionCritical = reference.m_MissionCritical;
     m_CanBeSquished = reference.m_CanBeSquished;
     m_HUDVisible = reference.m_HUDVisible;
-    for (const std::pair<std::string, bool> &scriptEntry : reference.m_LoadedScripts) {
-        m_LoadedScripts.push_back({scriptEntry.first, scriptEntry.second});
+    
+    for (const std::pair<std::string, bool> &referenceScriptEntry : reference.m_AllLoadedScripts) {
+        m_AllLoadedScripts.push_back({referenceScriptEntry.first, referenceScriptEntry.second});
     }
-    m_ScriptPresetName = reference.m_ScriptPresetName;
+    ReloadScripts(false);
+
     if (reference.m_pScreenEffect)
     {
         m_ScreenEffectFile = reference.m_ScreenEffectFile;
@@ -222,7 +226,7 @@ int MovableObject::Create(const MovableObject &reference)
 	m_RandomizeEffectRotAngleEveryFrame = reference.m_RandomizeEffectRotAngleEveryFrame;
 
 	if (m_RandomizeEffectRotAngle)
-		m_EffectRotAngle = c_PI * 2 * NormalRand();
+		m_EffectRotAngle = c_PI * RandomNum(-2.0F, 2.0F);
 
 	m_ScreenEffectHash = reference.m_ScreenEffectHash;
     m_EffectStartTime = reference.m_EffectStartTime;
@@ -327,13 +331,11 @@ int MovableObject::ReadProperty(std::string propName, Reader &reader)
 		reader >> newSlice;
 		PieMenuGUI::AddAvailableSlice(newSlice);
 	}
-	else if (propName == "ScriptPath")
-    {
-        std::string scriptPath = reader.ReadPropValue();
-        if (LoadScript(scriptPath) == -2) { reader.ReportError("Duplicate script path " + scriptPath); }
-    }
-    else if (propName == "ScreenEffect")
-    {
+	else if (propName == "ScriptPath") {
+		std::string scriptPath = reader.ReadPropValue();
+		CorrectBackslashesInPaths(scriptPath);
+		if (LoadScript(scriptPath) == -2) { reader.ReportError("Duplicate script path " + scriptPath); }
+	} else if (propName == "ScreenEffect") {
         reader >> m_ScreenEffectFile;
         m_pScreenEffect = m_ScreenEffectFile.GetAsBitmap();
 		m_ScreenEffectHash = m_ScreenEffectFile.GetHash();
@@ -354,13 +356,13 @@ int MovableObject::ReadProperty(std::string propName, Reader &reader)
     {
         float strength;
         reader >> strength;
-        m_EffectStartStrength = floorf((float)255 * strength);
+        m_EffectStartStrength = std::floor((float)255 * strength);
     }
     else if (propName == "EffectStopStrength")
     {
         float strength;
         reader >> strength;
-        m_EffectStopStrength = floorf((float)255 * strength);
+        m_EffectStopStrength = std::floor((float)255 * strength);
     }
     else if (propName == "EffectAlwaysShows")
         reader >> m_EffectAlwaysShows;
@@ -373,7 +375,6 @@ int MovableObject::ReadProperty(std::string propName, Reader &reader)
 	else if (propName == "IgnoreTerrain")
 		reader >> m_IgnoreTerrain;
 	else
-        // See if the base class(es) can find a match instead
         return SceneObject::ReadProperty(propName, reader);
 
     return 0;
@@ -475,10 +476,10 @@ int MovableObject::InitializeObjectScripts() {
         return -2;
     }
 
-    if (RunScriptedFunctionInAppropriateScripts("Create", true, true) < 0) {
-        m_ScriptObjectName = "ERROR";
-        return -3;
-    }
+	if (!(*m_FunctionsAndScripts.find("Create")).second.empty() && RunScriptedFunctionInAppropriateScripts("Create", true, true) < 0) {
+		m_ScriptObjectName = "ERROR";
+		return -3;
+	}
     return 0;
 }
 
@@ -491,7 +492,7 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
     } else if (HasScript(scriptPath)) {
         return -2;
     }
-    m_LoadedScripts.push_back({scriptPath, loadAsEnabledScript});
+    m_AllLoadedScripts.push_back({scriptPath, loadAsEnabledScript});
 
     // Clear the temporary variable names that will hold the functions read in from the file
     for (const std::string &functionName : GetSupportedScriptFunctionNames()) {
@@ -522,8 +523,12 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
     }
 
     // Assign the different functions read in from the script to their permanent locations in the preset's table
-    for (std::string functionName : GetSupportedScriptFunctionNames()) {
+    for (const std::string &functionName : GetSupportedScriptFunctionNames()) {
+        if (m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end()) {
+            m_FunctionsAndScripts.insert({functionName, std::vector<std::pair<std::string, bool> *>()});
+        }
         if (g_LuaMan.GlobalIsDefined(functionName)) {
+            m_FunctionsAndScripts.find(functionName)->second.push_back(&m_AllLoadedScripts.back());
             int error = g_LuaMan.RunScriptString(
                 m_ScriptPresetName + "." + functionName + " = " + m_ScriptPresetName + "." + functionName + " or {}; " +
                 m_ScriptPresetName + "." + functionName + "[\"" + scriptPath + "\"] = " + functionName + ";"
@@ -539,20 +544,25 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::ReloadScripts() {
-    if (m_LoadedScripts.empty()) {
+int MovableObject::ReloadScripts(bool alsoReloadPresetScripts) {
+    if (m_AllLoadedScripts.empty()) {
         return 0;
     }
 
     /// <summary>
     /// Internal lambda function to clear a given object's script configurations, and then load them all again in order to reset them.
     /// </summary>
-    auto clearScriptConfigurationAndLoadPreexistingScripts = [](MovableObject *object) {
-        std::vector<std::pair<std::string, bool>> loadedScriptsCopy = object->m_LoadedScripts;
-        object->m_LoadedScripts.clear();
-        object->m_ScriptPresetName.clear();
+    auto clearScriptConfigurationAndLoadPreexistingScripts = [](MovableObject *object, bool shouldClearScriptPresetName) {
+        std::vector<std::pair<std::string, bool>> loadedScriptsCopy = object->m_AllLoadedScripts;
+        object->m_AllLoadedScripts.clear();
+        object->m_FunctionsAndScripts.clear();
+        if (shouldClearScriptPresetName) {
+            object->m_ScriptPresetName.clear();
+        } else {
+            object->m_ScriptObjectName.clear();
+        }
 
-        int status = 0;
+        int status = 0; 
         for (const std::pair<std::string, bool> &scriptEntry : loadedScriptsCopy) {
             status = object->LoadScript(scriptEntry.first, scriptEntry.second);
             if (status < 0) {
@@ -562,14 +572,12 @@ int MovableObject::ReloadScripts() {
         return status;
     };
 
-    int status = clearScriptConfigurationAndLoadPreexistingScripts(this);
-    if (status >= 0) {
-        return status;
-    }
     //TODO consider getting rid of this const_cast. It would require either code duplication or creating some none const methods (specifically of PresetMan::GetEntityPreset, which may be unsafe. Could be this gross exceptional handling is the best way to go.
     MovableObject *pPreset = const_cast<MovableObject *>(dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(GetClassName(), GetPresetName(), GetModuleID())));
-    if (pPreset && pPreset != this) {
-        status = clearScriptConfigurationAndLoadPreexistingScripts(pPreset);
+
+    int status = clearScriptConfigurationAndLoadPreexistingScripts(this, pPreset == this);
+    if (alsoReloadPresetScripts && status <= 0 && pPreset && pPreset != this) {
+        status = clearScriptConfigurationAndLoadPreexistingScripts(pPreset, true);
     }
 
     return status;
@@ -604,32 +612,13 @@ bool MovableObject::AddScript(const std::string &scriptPath) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool MovableObject::RemoveScript(const std::string &scriptPath) {
-    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty()) {
-        return false;
-    }
-
-    std::vector<std::pair<std::string, bool>>::const_iterator scriptEntryIterator = FindScript(scriptPath);
-    if (scriptEntryIterator != m_LoadedScripts.end()) {
-        m_LoadedScripts.erase(scriptEntryIterator);
-        if (ObjectScriptsInitialized() && RunScriptedFunction(scriptPath, "OnScriptRemoveOrDisable", {}, {"true"}) < 0) {
-            g_ConsoleMan.PrintString("NOTE: The script has been removed despite this error.");
-            return false;
-        }
-        return true;
-    }
-    return false;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 bool MovableObject::EnableScript(const std::string &scriptPath) {
-    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty()) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
         return false;
     }
 
     std::vector<std::pair<std::string, bool>>::iterator scriptEntryIterator = FindScript(scriptPath);
-    if (scriptEntryIterator != m_LoadedScripts.end() && scriptEntryIterator->second == false) {
+    if (scriptEntryIterator != m_AllLoadedScripts.end() && scriptEntryIterator->second == false) {
         if (ObjectScriptsInitialized() && RunScriptedFunction(scriptPath, "OnScriptEnable") < 0) {
             return false;
         }
@@ -642,13 +631,13 @@ bool MovableObject::EnableScript(const std::string &scriptPath) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool MovableObject::DisableScript(const std::string &scriptPath) {
-    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty()) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
         return false;
     }
 
     std::vector<std::pair<std::string, bool>>::iterator scriptEntryIterator = FindScript(scriptPath);
-    if (scriptEntryIterator != m_LoadedScripts.end() && scriptEntryIterator->second == true) {
-        if (ObjectScriptsInitialized() && RunScriptedFunction(scriptPath, "OnScriptRemoveOrDisable", {}, {"false"}) < 0) {
+    if (scriptEntryIterator != m_AllLoadedScripts.end() && scriptEntryIterator->second == true) {
+        if (ObjectScriptsInitialized() && RunScriptedFunction(scriptPath, "OnScriptDisable") < 0) {
             return false;
         }
         scriptEntryIterator->second = false;
@@ -660,7 +649,7 @@ bool MovableObject::DisableScript(const std::string &scriptPath) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
-    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized()) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized()) {
         return -1;
     }
 
@@ -671,7 +660,7 @@ int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std:
     functionEntityArguments.clear();
     functionLiteralArguments.clear();
     
-    if (status < 0 && m_LoadedScripts.size() > 1) {
+    if (status < 0 && m_AllLoadedScripts.size() > 1) {
         g_ConsoleMan.PrintString("ERROR: An error occured while trying to run the " + functionName + " function for script at path " + scriptPath);
         return -2;
     }
@@ -682,14 +671,14 @@ int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std:
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
-    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized()) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized() || m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end()) {
         return -1;
     }
 
     int status = 0;
-    for (const std::pair<std::string, bool> &scriptEntry : m_LoadedScripts) {
-        if (runOnDisabledScripts || scriptEntry.second == true) {
-            status = RunScriptedFunction(scriptEntry.first, functionName, functionEntityArguments, functionLiteralArguments);
+    for (const std::pair<std::string, bool> *scriptEntry : m_FunctionsAndScripts.at(functionName)) {
+        if (runOnDisabledScripts || scriptEntry->second == true) {
+            status = RunScriptedFunction(scriptEntry->first, functionName, functionEntityArguments, functionLiteralArguments);
             if (status < 0 && stopOnError) {
                 return status;
             }
@@ -787,10 +776,10 @@ bool MovableObject::IsAtRest()
 
 bool MovableObject::OnMOHit(HitData &hd)
 {
-    if (hd.pRootBody[HITOR] != hd.pRootBody[HITEE] && (hd.pBody[HITOR] == this || hd.pBody[HITEE] == this)) {
-        RunScriptedFunctionInAppropriateScripts("OnCollideWithMO", false, false, {hd.pBody[hd.pBody[HITOR] == this ? HITEE : HITOR], hd.pRootBody[hd.pBody[HITOR] == this ? HITEE : HITOR]});
+    if (hd.RootBody[HITOR] != hd.RootBody[HITEE] && (hd.Body[HITOR] == this || hd.Body[HITEE] == this)) {
+        RunScriptedFunctionInAppropriateScripts("OnCollideWithMO", false, false, {hd.Body[hd.Body[HITOR] == this ? HITEE : HITOR], hd.RootBody[hd.Body[HITOR] == this ? HITEE : HITOR]});
     }
-    return hd.terminate[hd.pRootBody[HITOR] == this ? HITOR : HITEE] = OnMOHit(hd.pRootBody[hd.pRootBody[HITOR] == this ? HITEE : HITOR]);
+    return hd.Terminate[hd.RootBody[HITOR] == this ? HITOR : HITEE] = OnMOHit(hd.RootBody[hd.RootBody[HITOR] == this ? HITEE : HITOR]);
 }
 
 void MovableObject::SetHitWhatTerrMaterial(unsigned char matID) {
@@ -967,7 +956,7 @@ void MovableObject::Update()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int MovableObject::UpdateScripts() {
-    if (m_LoadedScripts.empty() || m_ScriptPresetName.empty()) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty()) {
         return -1;
     }
 
@@ -981,7 +970,7 @@ int MovableObject::UpdateScripts() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int MovableObject::OnPieMenu(Actor *pieMenuActor) {
-    if (!pieMenuActor || m_LoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized()) {
+    if (!pieMenuActor || m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized()) {
         return -1;
     }
 
@@ -993,7 +982,7 @@ int MovableObject::OnPieMenu(Actor *pieMenuActor) {
 void MovableObject::Update()
 {
 	if (m_RandomizeEffectRotAngleEveryFrame)
-		m_EffectRotAngle = c_PI * 2 * NormalRand();
+		m_EffectRotAngle = c_PI * 2.0F * RandomNormalNum();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1001,9 +990,7 @@ void MovableObject::Update()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates this' and its childrens MOID status. Supposed to be done every frame.
 
-void MovableObject::UpdateMOID(vector<MovableObject *> &MOIDIndex,
-                               int rootMOID,
-                               bool makeNewMOID)
+void MovableObject::UpdateMOID(vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID)
 {
     // Register the own MOID
     RegMOID(MOIDIndex, rootMOID, makeNewMOID);

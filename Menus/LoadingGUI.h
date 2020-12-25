@@ -48,13 +48,13 @@ namespace RTE {
 		/// This will cause extracted and available data modules to be updated to whatever is within their corresponding zip files.
 		/// The point of this is that it facilitates downloaded mods being loaded without having to be manually unzipped first by the user.
 		/// </summary>
-		void ExtractArchivedModules();
+		void ExtractZippedModules();
 
 	protected:
 
-		static const unsigned int s_MaxFileName = 256; //!< Maximum length of output file directory + name string.
-		static const unsigned int s_FileBufferSize = 8192; //!< Buffer to hold data read from the zip file.
-		static const unsigned int s_MaxUnzippedFileSize = 104857600; //!< Maximum size of single file being extracted from zip archive (100MiB).
+		static constexpr unsigned int s_MaxFileName = 256; //!< Maximum length of output file directory + name string.
+		static constexpr unsigned int s_FileBufferSize = 8192; //!< Buffer to hold data read from the zip file.
+		static constexpr unsigned int s_MaxUnzippedFileSize = 104857600; //!< Maximum size of single file being extracted from zip archive (100MiB).
 
 		GUIControlManager *m_ControlManager; //!< Manager of the whole LoadingGUI.
 		AllegroInput *m_GUIInput; //!< Input interface of this.
@@ -62,8 +62,8 @@ namespace RTE {
 		Writer *m_LoadingLogWriter; //!< The Writer that generates the loading log.
 		BITMAP *m_LoadingGUIBitmap; //!< BITMAP that the progress report will be drawn into.
 
-		int m_PosX; //!< Position of the progress report box on X axis.
-		int m_PosY; //!< Position of the progress report box on Y axis.
+		short m_PosX; //!< Position of the progress report box on X axis.
+		short m_PosY; //!< Position of the progress report box on Y axis.
 
 	private:
 
@@ -73,8 +73,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		LoadingGUI(const LoadingGUI &reference) {}
-		LoadingGUI &operator=(const LoadingGUI &rhs) {}
+		LoadingGUI(const LoadingGUI &reference) = delete;
+		LoadingGUI &operator=(const LoadingGUI &rhs) = delete;
 	};
 }
 #endif

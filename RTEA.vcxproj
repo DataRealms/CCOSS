@@ -517,6 +517,7 @@
     <ClInclude Include="Entities\MetaSave.h" />
     <ClInclude Include="Entities\PEmitter.h" />
     <ClInclude Include="Entities\Round.h" />
+    <ClInclude Include="Entities\SoundSet.h" />
     <ClInclude Include="GUI\Interface.h" />
     <ClInclude Include="GUI\GUISound.h" />
     <ClInclude Include="Managers\NetworkClient.h" />
@@ -670,6 +671,7 @@
     <ClCompile Include="Entities\MetaSave.cpp" />
     <ClCompile Include="Entities\PEmitter.cpp" />
     <ClCompile Include="Entities\Round.cpp" />
+    <ClCompile Include="Entities\SoundSet.cpp" />
     <ClCompile Include="GUI\GUISound.cpp" />
     <ClCompile Include="Managers\NetworkClient.cpp" />
     <ClCompile Include="Managers\NetworkServer.cpp" />

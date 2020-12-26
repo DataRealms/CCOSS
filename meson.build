@@ -23,8 +23,9 @@ deps = [
 compiler = meson.get_compiler('cpp')
 link_args=[]
 extra_args=[]
+suffix=''
 
-if meson.get_compiler('cpp').get_id() == 'gcc'
+if meson.get_compiler('cpp').get_id() in ['gcc', 'clang']
   extra_args = ['-fpermissive', '-Wno-write-strings', '-Wno-unknown-pragmas']
   release_args = ['-w']
   suffix = 'x86_64'

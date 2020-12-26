@@ -145,7 +145,7 @@ namespace RTE {
 		Vector m_TargetPos[c_FramesToRemember]; //!<
 		std::list<PostEffect> m_PostEffects[c_FramesToRemember]; //!< List of post-effects received from server.
 
-		std::unordered_map<unsigned short, SoundContainer *> m_ServerSounds; //!< Unordered map of SoundContainers received from server. OWNED!!!
+		std::unordered_map<int, SoundContainer *> m_ServerSounds; //!< Unordered map of SoundContainers received from server. OWNED!!!
 
 		unsigned char m_SceneID; //!< 
 		int m_CurrentSceneLayerReceived; //!<

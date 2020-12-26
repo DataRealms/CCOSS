@@ -295,8 +295,12 @@ namespace RTE {
 
 			m_LastHit.Body[HITOR] = m_OwnerMO;
 			m_LastHit.Body[HITEE] = g_MovableMan.GetMOFromID(m_MOIDHit);
+
+#ifndef RELEASE_BUILD
 			RTEAssert(m_LastHit.Body[HITEE], "Hitee MO is 0 in Atom::MOHitResponse!");
 			RTEAssert(m_MOIDHit == m_LastHit.Body[HITEE]->GetID(), "g_MovableMan.GetMOFromID messed up in Atom::MOHitResponse!");
+#endif
+
 			// Get the roots for both bodies
 			if (m_LastHit.Body[HITOR]) { m_LastHit.RootBody[HITOR] = m_LastHit.Body[HITOR]->GetRootParent(); }
 			if (m_LastHit.Body[HITEE]) { m_LastHit.RootBody[HITEE] = m_LastHit.Body[HITEE]->GetRootParent(); }
@@ -766,8 +770,11 @@ namespace RTE {
 
 					m_LastHit.Body[HITOR] = m_OwnerMO;
 					m_LastHit.Body[HITEE] = MO;
+
+#ifndef RELEASE_BUILD
 					RTEAssert(m_LastHit.Body[HITEE], "Hitee MO is 0 in Atom::Travel!");
 					RTEAssert(m_MOIDHit == m_LastHit.Body[HITEE]->GetID(), "g_MovableMan.GetMOFromID messed up in Atom::MOHitResponse!");
+#endif
 
 					// Don't do this normal approximation based on object centers, it causes particles to 'slide into' sprite objects when they should be resting on them.
 					// Orthogonal normals only, as the pixel boundaries themselves! See further down for the setting of this.

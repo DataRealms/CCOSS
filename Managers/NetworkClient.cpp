@@ -584,57 +584,65 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkClient::ReceiveSoundEventsMsg(RakNet::Packet *packet) {
-		MsgSoundEvents * msg = (MsgSoundEvents *)packet->data;
-		const AudioMan::NetworkSoundData *sndDataPtr = (AudioMan::NetworkSoundData *)((char *)msg + sizeof(MsgSoundEvents));
+		MsgSoundEvents *msg = (MsgSoundEvents *)packet->data;
+		const AudioMan::NetworkSoundData *soundDataPointer = (AudioMan::NetworkSoundData *)((char *)msg + sizeof(MsgSoundEvents));
+		std::unordered_multimap<SoundContainer *, unsigned char> alreadyHandledSoundContainers;
 
 		for (int msgIndex = 0; msgIndex < msg->SoundEventsCount; msgIndex++) {
-			if (sndDataPtr->State == AudioMan::SOUND_SET_GLOBAL_PITCH) {
-				g_AudioMan.SetGlobalPitch(sndDataPtr->Pitch);
+			if (soundDataPointer->State == AudioMan::SOUND_SET_GLOBAL_PITCH) {
+				g_AudioMan.SetGlobalPitch(soundDataPointer->Pitch);
 			} else {
-				// The set of SoundContainers that have already been handled for this event, used to hopefully avoid repeating actions when iterating over provided sound channel indices
-				std::unordered_set<SoundContainer *> alreadyHandledSoundContainers;
+				int serverSoundChannelIndex = soundDataPointer->Channel;
+				std::unordered_map<int, SoundContainer *>::iterator serverSoundEntryForChannel = m_ServerSounds.find(serverSoundChannelIndex);
+				if (soundDataPointer->State == AudioMan::SOUND_PLAY || serverSoundEntryForChannel != m_ServerSounds.end()) {
+					SoundContainer *soundContainerToHandle = (serverSoundEntryForChannel == m_ServerSounds.end()) ? nullptr : m_ServerSounds.at(serverSoundChannelIndex);
 
-				for (unsigned short serverSoundChannelIndex : sndDataPtr->Channels) {
-					if (serverSoundChannelIndex < c_MaxVirtualChannels && (sndDataPtr->State == AudioMan::SOUND_PLAY || m_ServerSounds.find(serverSoundChannelIndex) != m_ServerSounds.end())) {
-						SoundContainer *soundContainerToHandle = (m_ServerSounds.find(serverSoundChannelIndex) == m_ServerSounds.end()) ? NULL : m_ServerSounds.at(serverSoundChannelIndex);
-						if (alreadyHandledSoundContainers.find(soundContainerToHandle) == alreadyHandledSoundContainers.end()) {
-							switch (sndDataPtr->State) {
-								case AudioMan::SOUND_PLAY:
-									if (soundContainerToHandle == NULL) {
-										soundContainerToHandle = new SoundContainer();
-									} else {
-										soundContainerToHandle->Stop();
-										soundContainerToHandle->Reset();
-									}
-									soundContainerToHandle->Create(sndDataPtr->Loops, sndDataPtr->AffectedByGlobalPitch, sndDataPtr->AttenuationStartDistance, sndDataPtr->Immobile);
-									for (size_t soundFileHash : sndDataPtr->SoundFileHashes) {
-										if (soundFileHash != 0) { soundContainerToHandle->AddSound(ContentFile::GetPathFromHash(soundFileHash)); }
-									}
-									g_AudioMan.PlaySound(soundContainerToHandle, Vector(sndDataPtr->Position[0], sndDataPtr->Position[1]), -1, -1, sndDataPtr->Pitch);
-									break;
-								case AudioMan::SOUND_STOP:
+					auto alreadyHandledSoundStates = alreadyHandledSoundContainers.equal_range(soundContainerToHandle);
+					bool alreadyHandled = soundDataPointer->State != AudioMan::SOUND_PLAY && std::any_of(alreadyHandledSoundStates.first, alreadyHandledSoundStates.second, [&soundDataPointer](const std::pair<SoundContainer *, unsigned char> &alreadyHandledSoundStateEntry) { return static_cast<const AudioMan::NetworkSoundState>(alreadyHandledSoundStateEntry.second) == soundDataPointer->State; });
+					if (!alreadyHandled) {
+						switch (soundDataPointer->State) {
+							case AudioMan::SOUND_PLAY:
+								if (soundContainerToHandle == nullptr) {
+									soundContainerToHandle = new SoundContainer;
+								} else {
 									soundContainerToHandle->Stop();
-									break;
-								case AudioMan::SOUND_SET_POSITION:
-									soundContainerToHandle->SetPosition(Vector(sndDataPtr->Position[0], sndDataPtr->Position[1]));
-									break;
-								case AudioMan::SOUND_SET_PITCH:
-									g_AudioMan.SetSoundPitch(soundContainerToHandle, sndDataPtr->Pitch);
-									break;
-								case AudioMan::SOUND_FADE_OUT:
-									g_AudioMan.FadeOutSound(soundContainerToHandle, sndDataPtr->FadeOutTime);
-									break;
-								default:
-									RTEAbort("Multiplayer client tried to receive unhandled Sound Event, of state " + sndDataPtr->State);
-							}
-							alreadyHandledSoundContainers.insert(soundContainerToHandle);
+									soundContainerToHandle->Reset();
+								}
+								soundContainerToHandle->GetTopLevelSoundSet().AddSound(ContentFile::GetPathFromHash(soundDataPointer->SoundFileHash), false);
+								soundContainerToHandle->SetImmobile(soundDataPointer->Immobile);
+								soundContainerToHandle->SetAttenuationStartDistance(soundDataPointer->AttenuationStartDistance);
+								soundContainerToHandle->SetLoopSetting(soundDataPointer->Loops);
+								soundContainerToHandle->SetPriority(soundDataPointer->Priority);
+								soundContainerToHandle->SetAffectedByGlobalPitch(soundDataPointer->AffectedByGlobalPitch);
+								soundContainerToHandle->SetPosition(Vector(soundDataPointer->Position[0], soundDataPointer->Position[1]));
+								soundContainerToHandle->SetVolume(soundDataPointer->Volume);
+								soundContainerToHandle->SetPitch(soundDataPointer->Pitch);
+								soundContainerToHandle->Play();
+								break;
+							case AudioMan::SOUND_STOP:
+								soundContainerToHandle->Stop();
+								break;
+							case AudioMan::SOUND_SET_POSITION:
+								soundContainerToHandle->SetPosition(Vector(soundDataPointer->Position[0], soundDataPointer->Position[1]));
+								break;
+							case AudioMan::SOUND_SET_VOLUME:
+								soundContainerToHandle->SetVolume(soundDataPointer->Volume);
+								break;
+							case AudioMan::SOUND_SET_PITCH:
+								soundContainerToHandle->SetPitch(soundDataPointer->Pitch);
+								break;
+							case AudioMan::SOUND_FADE_OUT:
+								g_AudioMan.FadeOutSound(soundContainerToHandle, soundDataPointer->FadeOutTime);
+								break;
+							default:
+								RTEAbort("Multiplayer client tried to receive unhandled Sound Event, of state " + soundDataPointer->State);
 						}
-						// We always have to add the newly made sound container to the map of server sounds, regardless of whether we were able to delete existing sounds above
-						if (sndDataPtr->State == AudioMan::SOUND_PLAY) { m_ServerSounds.insert({ serverSoundChannelIndex, soundContainerToHandle }); }
+						alreadyHandledSoundContainers.insert({soundContainerToHandle, soundDataPointer->State});
 					}
+					if (soundDataPointer->State == AudioMan::SOUND_PLAY) { m_ServerSounds.insert({ serverSoundChannelIndex, soundContainerToHandle }); }
 				}
 			}
-			sndDataPtr++;
+			soundDataPointer++;
 		}
 	}
 
@@ -642,39 +650,36 @@ namespace RTE {
 
 	void NetworkClient::ReceiveMusicEventsMsg(RakNet::Packet *packet) {
 		MsgMusicEvents *msg = (MsgMusicEvents *)packet->data;
-		const AudioMan::NetworkMusicData *musDataPtr = (AudioMan::NetworkMusicData *)((char *)msg + sizeof(MsgMusicEvents));
+		const AudioMan::NetworkMusicData *musicDataPointer = (AudioMan::NetworkMusicData *)((char *)msg + sizeof(MsgMusicEvents));
 
 		for (int i = 0; i < msg->MusicEventsCount; i++) {
-			switch (musDataPtr->State) {
+			switch (musicDataPointer->State) {
 				case AudioMan::MUSIC_PLAY:
 					char path[256];
 
 					memset(path, 0, 256);
-					strncpy(path, musDataPtr->Path, 255);
+					strncpy(path, musicDataPointer->Path, 255);
 
 					char buf[128];
-					std::snprintf(buf, sizeof(buf), "MUSIC %s %d", path, musDataPtr->Loops);
-					g_ConsoleMan.PrintString(buf);
+					std::snprintf(buf, sizeof(buf), "MUSIC %s %d", path, musicDataPointer->LoopsOrSilence);
 
-					g_AudioMan.PlayMusic(path, musDataPtr->Loops);
-					if (musDataPtr->Position > 0) { g_AudioMan.SetMusicPosition(musDataPtr->Position); }
+					g_AudioMan.PlayMusic(path, musicDataPointer->LoopsOrSilence);
+					if (musicDataPointer->Position > 0) { g_AudioMan.SetMusicPosition(musicDataPointer->Position); }
 					break;
 				case AudioMan::MUSIC_STOP:
-					g_ConsoleMan.PrintString("MUSIC STOP");
 					g_AudioMan.StopMusic();
 					break;
 				case AudioMan::MUSIC_SET_PITCH:
-					//g_AudioMan.SetMusicPitch(sndDataPtr->Pitch);
+					g_AudioMan.SetMusicPitch(musicDataPointer->Pitch);
 					break;
 				case AudioMan::MUSIC_SILENCE:
-					g_ConsoleMan.PrintString("MUSIC SILENCE");
-					//g_AudioMan.QueueSilence(sndDataPtr->Loops);
+					g_AudioMan.QueueSilence(musicDataPointer->LoopsOrSilence);
 					g_AudioMan.StopMusic();
 					break;
 				default:
-					RTEAbort("Multiplayer client tried to receive unhandled Music Event, of state " + musDataPtr->State);
+					RTEAbort("Multiplayer client tried to receive unhandled Music Event, of state " + musicDataPointer->State);
 			}
-			musDataPtr++;
+			musicDataPointer++;
 		}
 	}
 

@@ -63,4 +63,4 @@ linuxdeploy = custom_target('linuxdeploy', build_by_default:false, output:'linux
 chmod = find_program('chmod')
 outname = 'cccp-x86_64.AppImage'
 
-custom_target('appimage', depends:[release, linuxdeploy], output:outname , command:[find_program('env'), 'OUTPUT='+outname, linuxdeploy.full_path(), '--appdir=@PRIVATE_DIR@', '-e', release, '-l', fmod, '-l', fmod.full_path()+'.11', '-d', desktop_file, '-i', icon_file, '-oappimage'])
+custom_target('appimage', depends:[release, linuxdeploy], output:outname , command:[find_program('env'), 'OUTPUT='+outname, linuxdeploy.full_path(), '--appdir=@PRIVATE_DIR@', '-e', release, '-l', fmod_so[0], '-d', desktop_file, '-i', icon_file, '-oappimage'])

@@ -8,6 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Removed
+
+***
+
+## [0.1.0 pre-release 3.0][0.1.0-pre3.0] - 2020/12/25
+
+### Added
+
 - Implemented Lua Just-In-Time compilation (MoonJIT 2.2.0).
 
 - Implemented PNG file loading and saving. PNGs still need to be indexed just like BMPs! Transparency (alpha) not supported (yet).
@@ -629,3 +641,5 @@ Note: For a log of changes made prior to the commencement of the open source com
 [unreleased]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/compare/master...cortex-command-community:development
 [0.1.0-pre1]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/releases/tag/v0.1.0-pre1
 [0.1.0-pre2]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/releases/tag/v0.1.0-pre2
+[0.1.0-pre3.0]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/releases/tag/v0.1.0-pre3.0
+

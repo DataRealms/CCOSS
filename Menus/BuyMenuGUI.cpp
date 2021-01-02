@@ -1242,7 +1242,6 @@ void BuyMenuGUI::Update()
             }
         }
 
-
         // Show popup info box next to selected item, but only if it has a description
         // Now show the description, if we have any
         if (!description.empty())

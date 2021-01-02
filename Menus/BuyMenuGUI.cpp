@@ -1208,32 +1208,33 @@ void BuyMenuGUI::Update()
 
         // Get handle to the currently selected item, if any
         GUIListPanel::Item *pItem = m_pShopList->GetItem(m_ListItemIndex);
-        
-        // Consider replacing with "hovertext"
         string description = "";
 
         if (pItem && pItem->m_pEntity) {
             description = pItem->m_pEntity->GetDescription();
             const Entity* currentItem = pItem->m_pEntity;
-            if (dynamic_cast<const ACraft*>(currentItem)) {
-                int craftMaxPassengers = dynamic_cast<const ACraft*>(currentItem)->GetMaxPassengers();
-                int craftMaxMass = (int)dynamic_cast<const ACraft*>(currentItem)->GetMaxMass() - (int)dynamic_cast<const ACraft*>(currentItem)->GetMass();
+            const ACraft* pItemAsCraft = dynamic_cast<const ACraft*>(currentItem);
+            if (pItemAsCraft) {
+                int craftMaxPassengers = pItemAsCraft->GetMaxPassengers();
+                int craftMaxMass = (int)pItemAsCraft->GetMaxMass() - (int)pItemAsCraft->GetMass();
                 description += "\nMax Mass: " + std::to_string(craftMaxMass) + "\nMax Passengers: " + std::to_string(craftMaxPassengers);
-
-            }
-            else if (dynamic_cast<const Actor*>(currentItem)) {
-                int itemMass = (int)dynamic_cast<const Actor*>(currentItem)->GetMass();
-                int passengerSlotsTaken = dynamic_cast<const Actor*>(currentItem)->GetPassengerSlots();
-                description += "\nMass: " + std::to_string(itemMass);
-                if (passengerSlotsTaken > 1) {
-                    description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
+            } else {
+                const Actor* pItemAsActor = dynamic_cast<const Actor*>(currentItem);
+                if (pItemAsActor) {
+                    int itemMass = (int)pItemAsActor->GetMass();
+                    int passengerSlotsTaken = pItemAsActor->GetPassengerSlots();
+                    description += "\nMass: " + std::to_string(itemMass);
+                    if (passengerSlotsTaken > 1) {
+                        description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
+                    }
+                }else {
+                    const MovableObject* pItemAsMO = dynamic_cast<const MovableObject*>(currentItem);
+                    if (pItemAsMO) {
+                        int itemMass = (int)pItemAsMO->GetMass();
+                        description += "\nMass: " + std::to_string(itemMass);
+                    }
                 }
             }
-            else if (dynamic_cast<const MovableObject*>(currentItem)) {
-                int itemMass = (int)dynamic_cast<const MovableObject*>(currentItem)->GetMass();
-                description += "\nMass: " + std::to_string(itemMass);
-            }
-
         }else if (pItem && pItem->m_ExtraIndex >= 0) {
             const DataModule* pModule = g_PresetMan.GetDataModule(pItem->m_ExtraIndex);
             if (pModule && !pModule->GetDescription().empty()) {
@@ -1375,30 +1376,29 @@ void BuyMenuGUI::Update()
             }
         }
 
-
         // Get handle to the currently selected item, if any
         GUIListPanel::Item* pItem = m_pCartList->GetItem(m_ListItemIndex);
-
-        // Consider replacing with "hovertext"
         string description = "";
 
         if (pItem && pItem->m_pEntity) {
             description = pItem->m_pEntity->GetDescription();
             const Entity* currentItem = pItem->m_pEntity;
-
-            if (dynamic_cast<const Actor*>(currentItem)) {
-                int itemMass = ceil(dynamic_cast<const Actor*>(currentItem)->GetMass());
-                int passengerSlotsTaken = dynamic_cast<const Actor*>(currentItem)->GetPassengerSlots();
+            const Actor* pItemAsActor = dynamic_cast<const Actor*>(currentItem);
+            if (pItemAsActor) {
+                int itemMass = (int)pItemAsActor->GetMass();
+                int passengerSlotsTaken = pItemAsActor->GetPassengerSlots();
                 description += "\nMass: " + std::to_string(itemMass);
                 if (passengerSlotsTaken > 1) {
                     description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
                 }
             }
-            else if (dynamic_cast<const MovableObject*>(currentItem)) {
-                int itemMass = ceil(dynamic_cast<const MovableObject*>(currentItem)->GetMass());
-                description += "\nMass: " + std::to_string(itemMass);
+            else {
+                const MovableObject* pItemAsMO = dynamic_cast<const MovableObject*>(currentItem);
+                if (pItemAsMO) {
+                    int itemMass = (int)pItemAsMO->GetMass();
+                    description += "\nMass: " + std::to_string(itemMass);
+                }
             }
-
         }
 
         // Show popup info box next to selected item, but only if it has a description

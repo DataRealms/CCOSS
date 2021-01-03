@@ -8,6 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+### Changed
+
+### Fixed
+
+### Removed
+
+***
+
+## [0.1.0 pre-release 3.0][0.1.0-pre3.0] - 2020/12/25
+
+### Added
+
 - Implemented Lua Just-In-Time compilation (MoonJIT 2.2.0).
 
 - Implemented PNG file loading and saving. PNGs still need to be indexed just like BMPs! Transparency (alpha) not supported (yet).
@@ -143,6 +155,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added new lua `Vector` functions: `GetRadRotated(angle)` and `GetDegRotated(angle)`. They return a rotated copy of the vector without modifying it.
 
+- Added `Enum` binding for `SoundSet.SoundSelectionCycleMode`: `RANDOM = 0, FORWARDS = 1, ALL = 2`.
+
+- Added `Enum` binding for `SoundContainer.SoundOverlapMode`: `OVERLAP = 0, RESTART = 1, IGNORE_PLAY = 2`.
+
+- New `SoundContainer` function `Restart`, which allows you to restart a playing `SoundContainer`. Also another `Play` function, that lets you just specify the player to play the sound for.
+
+- New `HDFirearm` INI property `PreFireSound`, which allows you to specify a sound that will play exactly once before the weapon fires.  
+	Note that this was designed primarily for things like flamethrowers, semi-auto weapons may wonky with it, and full-auto weapons may fire multiple shots in the first burst, if you don't also set an `ActivationDelay`.	
+
+- `SoundSets` have been made a bit more fully featured, they can now have sub `SoundSets` and their own `SoundSelectionCycleMode` and they now have a Lua binding so you can create them in Lua with `local mySoundSet = SoundSet()`.  
+	They have the following INI and Lua properties:  	
+	
+	`SoundSelectionCycleMode` (INI and Lua R/W) - Determines how sounds in this `SoundSet` will be selected each time it is played (or when `SelectNextSounds` is called).  
+	Note that sub `SoundSets` can have different `SoundSelectionCycleModes`. `SoundSets` with sub `SoundSets` and sounds whose `SoundSelectionCycleMode` is `FORWARDS` will first go through their sounds, then each sub `SoundSet`.  
+	
+	`soundSet.SubSoundSets` (Lua R) - An iterator over the sub `SoundSets` of this `SoundSet`, allowing you to manipulate them as you would any `SoundSet`.  
+	`soundSet:HasAnySounds(includeSubSoundSets)` (Lua) - Whether or not this `SoundSet` has any sounds, optionally including its sub `SoundSets`.  
+	`soundSet:SelectNextSounds()` (Lua) - Selects the next sounds for this `SoundSet`. Note that playing a `SoundContainer` will always also do this, so this is only really useful to allow you to skip sounds when `SoundSelectionCycleMode` is set to `FORWARDS`.  
+	`soundSet:AddSound("Path/to/sound")` (Lua) - Adds the sound at the given path with no offset, 0 minimum audible distance, and default attenuation start distance.  
+	`soundSet:AddSound("Path/to/sound", offset, minimumAudibleDistance, attenuationStartDistance)` (Lua) - Adds the sound at the given path with the given parameters.  
+	`soundSet:AddSoundSet(soundSetToAdd)` (Lua) - Adds the given `SoundSet` as a sub `SoundSet` of this `SoundSet`.  
+	
+	Additionally, `AddSound` and `AddSoundSet` INI properties work for `SoundSets`. They are exactly the same as they are for `SoundContainers`.
+
+- You can get the top level `SoundSet` of a `SoundContainer` with `soundContainer:GetTopLevelSoundSet` and manipulate it as described above. This allows you full interaction with all levels of `SoundSets` in a `SoundContainer`.
+
 ### Changed
 
 - Codebase now uses the C++17 standard.
@@ -236,6 +274,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `Scenes` with a `PresetName` containing the strings "Test", "Editor" and "Tutorial" are no longer excluded from the scenarios screen and from the MetaGame.
 
+- `SoundContainer` is now a concrete Lua entity. This means it can now be created with `CreateSoundContainer("PresetName", "DataModule.rte")` and has all the standard functionality like cloning, etc.  
+	To support these changes, a bunch of Lua functionality has been added and modified:  
+
+	`soundContainer.Immobile` - Whether or not the `SoundContainer` is immobile. Immobile sounds are generally used for GUI elements and will never be automatically panned, pitched or attenuated.  
+	`soundContainer.AttenuationStartDistance` - Formerly INI only, this property is now gettable and settable through Lua. See previous changelog entries for details on it.  
+	`soundContainer.Pos` - Rather than updating the `SoundContainer's` position through `AudioMan`, you should now use the `Pos` property.  
+	`soundContainer.Volume` - In addition to attenuation based volume changes, it is now possible to set a `SoundContainer's` overall volume. This works together with volume changes caused by attenuation.  
+	`soundContainer.Pitch` - Rather than updating the `SoundContainer's` pitch through `AudioMan`, you should now use the `Pitch` property. Also note that this now works properly with the game's global pitch so no complicated handling is necessary.
+	
+- `AddSound` and `SelectNextSoundSet` Lua bindings have been moved from `SoundContainer` to `SoundSet`. The latter has been renamed and the former have been trimmed down slightly since some complexity is no longer needed. Their speciifcs are mentioned in the `Added` section.
+
 ### Fixed
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.
@@ -260,6 +309,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Pressing escape at the options, mod manager, game editors and credits screens no longer quits the game.
 
+- `HDFirearm` INI property `DeactivationSound` now works properly instead of constantly playing.
+
+- Gold mining sound has been set to restart its playback everytime it's played, making it way less annoying. It's still pretty wonky, but it's better.
+
+- Sound panning should now work properly around scene seams. Additionally, sounds should be less stuttery (e.g. distant jetpacks) and generally sound better.
+
 ### Removed
 
 - Removed the ability to remove scripts from objects with Lua. This is no longer needed cause of code efficiency increases.
@@ -275,6 +330,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Removed `Activity` properties `TeamCount` and `PlayerCount`. These are handled internally and do nothing when set in ini.
 
 - Removed `Activity` property `FundsOfTeam#`, use `Team#Funds` instead.
+
+- Some functionality has been moved from `AudioMan` to `SoundContainer`. As such, the following `AudioMan` Lua bindings are no longer available:  
+	`SetSoundPosition(soundContainer)`, `SetSoundPitch(soundContainer`, `PlaySound(filePath, position, player, loops, priority, pitchOrAffectedByGlobalPitch`, `attenuationStartDistance, immobile)`  
+	
+	The lengthy `PlaySound` function should be replaced by making a `SoundContainer` in your `Create` function and setting properties appropriately.  
+	This can be done by creating one defined INI with `soundContainer = CreateSoundContainer(...)`, or by making an empty one with `soundContainer = SoundContainer()`.
 
 ***
 
@@ -580,3 +641,5 @@ Note: For a log of changes made prior to the commencement of the open source com
 [unreleased]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/compare/master...cortex-command-community:development
 [0.1.0-pre1]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/releases/tag/v0.1.0-pre1
 [0.1.0-pre2]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/releases/tag/v0.1.0-pre2
+[0.1.0-pre3.0]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/releases/tag/v0.1.0-pre3.0
+

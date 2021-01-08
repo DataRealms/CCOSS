@@ -112,7 +112,7 @@ namespace RTE {
 		SoundSet::SaveSoundSelectionCycleMode(writer, m_TopLevelSoundSet.GetSoundSelectionCycleMode());
 
 		writer.NewProperty("SoundOverlapMode");
-		std::list<std::pair<const std::string, SoundOverlapMode>>::const_iterator overlapModeMapEntry = std::find_if(c_SoundOverlapModeMap.begin(), c_SoundOverlapModeMap.end(), [&soundOverlapMode = m_SoundOverlapMode](auto element) { return element.second == soundOverlapMode; });
+		auto overlapModeMapEntry = std::find_if(c_SoundOverlapModeMap.begin(), c_SoundOverlapModeMap.end(), [&soundOverlapMode = m_SoundOverlapMode](auto element) { return element.second == soundOverlapMode; });
 		if (overlapModeMapEntry != c_SoundOverlapModeMap.end()) {
 			writer << overlapModeMapEntry->first;
 		} else {

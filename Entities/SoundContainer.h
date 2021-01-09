@@ -229,7 +229,7 @@ namespace RTE {
 		/// Sets the volume sounds in this SoundContainer should be played at. Note that this does not factor volume changes due to the SoundContainer's position. Does not affect currently playing sounds.
 		/// </summary>
 		/// <param name="newVolume">The new volume sounds in this SoundContainer should be played at. Limited between 0 and 10.</param>
-		void SetVolume(float newVolume) { newVolume = std::clamp(newVolume, 0.0F, 10.0F); if (IsBeingPlayed()) { g_AudioMan.ChangeSoundContainerPlayingChannelsVolume(this, newVolume); m_Volume = newVolume; } }
+		void SetVolume(float newVolume) { newVolume = std::clamp(newVolume, 0.0F, 10.0F); if (IsBeingPlayed()) { g_AudioMan.ChangeSoundContainerPlayingChannelsVolume(this, newVolume); } m_Volume = newVolume; }
 
 		/// <summary>
 		/// Gets the pitch the sounds in this SoundContainer are played at. Note that this does not factor in global pitch.

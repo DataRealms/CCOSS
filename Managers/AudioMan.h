@@ -268,7 +268,7 @@ namespace RTE {
 		/// Queues up a period of silence in the music stream playlist.
 		/// </summary>
 		/// <param name="seconds">The number of secs to wait before going to the next stream.</param>
-		void QueueSilence(int seconds) { if (m_AudioEnabled && seconds > 0) { m_MusicPlayList.push_back("@" + seconds); } }
+		void QueueSilence(int seconds) { if (m_AudioEnabled && seconds > 0) { m_MusicPlayList.push_back("@" + std::to_string(seconds)); } }
 
 		/// <summary>
 		/// Clears the music queue.

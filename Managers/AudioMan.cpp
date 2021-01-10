@@ -533,16 +533,16 @@ namespace RTE {
 
 			result = (result == FMOD_OK) ? channel->setUserData(soundContainer) : result;
 			result = (result == FMOD_OK) ? channel->setCallback(SoundChannelEndedCallback) : result;
+			result = (result == FMOD_OK) ? channel->setPriority(soundContainer->GetPriority()) : result;
+			result = (result == FMOD_OK) ? channel->setPitch(soundContainer->GetPitch()) : result;
 			if (soundContainer->IsImmobile()) {
 				result = (result == FMOD_OK) ? channel->set3DLevel(0.0F) : result;
+				result = (result == FMOD_OK) ? channel->setVolume(soundContainer->GetVolume()) : result;
 			} else {
 				m_SoundChannelMinimumAudibleDistances.insert({channelIndex, soundData->MinimumAudibleDistance});
 				result = (result == FMOD_OK) ? channel->set3DLevel(g_SettingsMan.SoundPanningEffectStrength()) : result;
 				UpdatePositionalEffectsForSoundChannel(channel, &GetAsFMODVector(soundContainer->GetPosition() + soundData->Offset));
 			}
-			result = (result == FMOD_OK) ? channel->setPriority(soundContainer->GetPriority()) : result;
-			result = (result == FMOD_OK) ? channel->setVolume(soundContainer->GetVolume()) : result;
-			result = (result == FMOD_OK) ? channel->setPitch(soundContainer->GetPitch()) : result;
 
 
 			if (result != FMOD_OK) {
@@ -719,6 +719,7 @@ namespace RTE {
 					channelPosition = wrappedChannelPosition;
 				}
 				if (distanceToChannelPosition > longestDistance) { longestDistance = distanceToChannelPosition; }
+				if (!sceneWraps) { break; }
 			}
 		}
 
@@ -730,7 +731,7 @@ namespace RTE {
 		result = result == FMOD_OK ? soundChannel->get3DMinMaxDistance(&attenuationStartDistance, &soundMaxDistance) : result;
 		
 		float attenuatedVolume = (shortestDistance <= attenuationStartDistance) ? 1.0F : attenuationStartDistance / shortestDistance;
-		if (shortestDistance > soundMaxDistance) {
+		if (shortestDistance >= soundMaxDistance) {
 			attenuatedVolume = 0.0F;
 		} else if (m_SoundChannelMinimumAudibleDistances.empty() || m_SoundChannelMinimumAudibleDistances.find(soundChannelIndex) == m_SoundChannelMinimumAudibleDistances.end()) {
 			g_ConsoleMan.PrintString("ERROR: An error occurred when checking to see if the sound at channel " + std::to_string(soundChannelIndex) + " was less than its minimum audible distance away from the farthest listener.");

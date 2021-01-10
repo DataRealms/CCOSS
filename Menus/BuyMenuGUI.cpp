@@ -1216,12 +1216,12 @@ void BuyMenuGUI::Update()
             const ACraft* pItemAsCraft = dynamic_cast<const ACraft*>(currentItem);
             if (pItemAsCraft) {
                 int craftMaxPassengers = pItemAsCraft->GetMaxPassengers();
-                int craftMaxMass = (int)pItemAsCraft->GetMaxMass() - (int)pItemAsCraft->GetMass();
+                int craftMaxMass = static_cast<int>(pItemAsCraft->GetMaxMass()) - static_cast<int>(pItemAsCraft->GetMass());
                 description += "\nMax Mass: " + std::to_string(craftMaxMass) + "\nMax Passengers: " + std::to_string(craftMaxPassengers);
             } else {
                 const Actor* pItemAsActor = dynamic_cast<const Actor*>(currentItem);
                 if (pItemAsActor) {
-                    int itemMass = (int)pItemAsActor->GetMass();
+                    int itemMass = static_cast<int>(pItemAsActor->GetMass());
                     int passengerSlotsTaken = pItemAsActor->GetPassengerSlots();
                     description += "\nMass: " + std::to_string(itemMass);
                     if (passengerSlotsTaken > 1) {
@@ -1230,7 +1230,7 @@ void BuyMenuGUI::Update()
                 }else {
                     const MovableObject* pItemAsMO = dynamic_cast<const MovableObject*>(currentItem);
                     if (pItemAsMO) {
-                        int itemMass = (int)pItemAsMO->GetMass();
+                        int itemMass = static_cast<int>(pItemAsMO->GetMass());
                         description += "\nMass: " + std::to_string(itemMass);
                     }
                 }
@@ -1382,7 +1382,7 @@ void BuyMenuGUI::Update()
             const Entity* currentItem = pItem->m_pEntity;
             const Actor* pItemAsActor = dynamic_cast<const Actor*>(currentItem);
             if (pItemAsActor) {
-                int itemMass = (int)pItemAsActor->GetMass();
+                int itemMass = static_cast<int>(pItemAsActor->GetMass());
                 int passengerSlotsTaken = pItemAsActor->GetPassengerSlots();
                 description += "\nMass: " + std::to_string(itemMass);
                 if (passengerSlotsTaken > 1) {
@@ -1392,7 +1392,7 @@ void BuyMenuGUI::Update()
             else {
                 const MovableObject* pItemAsMO = dynamic_cast<const MovableObject*>(currentItem);
                 if (pItemAsMO) {
-                    int itemMass = (int)pItemAsMO->GetMass();
+                    int itemMass = static_cast<int>(pItemAsMO->GetMass());
                     description += "\nMass: " + std::to_string(itemMass);
                 }
             }

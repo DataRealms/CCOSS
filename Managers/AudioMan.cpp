@@ -533,12 +533,12 @@ namespace RTE {
 
 			result = (result == FMOD_OK) ? channel->setUserData(soundContainer) : result;
 			result = (result == FMOD_OK) ? channel->setCallback(SoundChannelEndedCallback) : result;
-			if (!soundContainer->IsImmobile()) {
-				m_SoundChannelMinimumAudibleDistances.insert({channelIndex, soundData->MinimumAudibleDistance});
-				UpdatePositionalEffectsForSoundChannel(channel, &GetAsFMODVector(soundContainer->GetPosition() + soundData->Offset));
-				result = (result == FMOD_OK) ? channel->set3DLevel(g_SettingsMan.SoundPanningEffectStrength()) : result;
-			} else {
+			if (soundContainer->IsImmobile()) {
 				result = (result == FMOD_OK) ? channel->set3DLevel(0.0F) : result;
+			} else {
+				m_SoundChannelMinimumAudibleDistances.insert({channelIndex, soundData->MinimumAudibleDistance});
+				result = (result == FMOD_OK) ? channel->set3DLevel(g_SettingsMan.SoundPanningEffectStrength()) : result;
+				UpdatePositionalEffectsForSoundChannel(channel, &GetAsFMODVector(soundContainer->GetPosition() + soundData->Offset));
 			}
 			result = (result == FMOD_OK) ? channel->setPriority(soundContainer->GetPriority()) : result;
 			result = (result == FMOD_OK) ? channel->setVolume(soundContainer->GetVolume()) : result;
@@ -725,11 +725,11 @@ namespace RTE {
 		int soundChannelIndex;
 		result = result == FMOD_OK ? soundChannel->getIndex(&soundChannelIndex) : result;
 
-		float attenuationStartDistance;
+		float attenuationStartDistance = c_DefaultAttenuationStartDistance;
 		float soundMaxDistance;
 		result = result == FMOD_OK ? soundChannel->get3DMinMaxDistance(&attenuationStartDistance, &soundMaxDistance) : result;
 		
-		float attenuatedVolume = shortestDistance <= attenuationStartDistance ? 1.0F : attenuationStartDistance / shortestDistance;
+		float attenuatedVolume = (shortestDistance <= attenuationStartDistance) ? 1.0F : attenuationStartDistance / shortestDistance;
 		if (shortestDistance > soundMaxDistance) {
 			attenuatedVolume = 0.0F;
 		} else if (m_SoundChannelMinimumAudibleDistances.empty() || m_SoundChannelMinimumAudibleDistances.find(soundChannelIndex) == m_SoundChannelMinimumAudibleDistances.end()) {
@@ -742,8 +742,8 @@ namespace RTE {
 		result = result == FMOD_OK ? soundChannel->getUserData(&userData) : result;
 		float panLevel;
 		result = result == FMOD_OK ? soundChannel->get3DLevel(&panLevel) : result;
-		if (result == FMOD_OK && panLevel < 1.0F) {
-			SoundContainer *channelSoundContainer = static_cast<SoundContainer *>(userData);
+		if (result == FMOD_OK && (panLevel < 1.0F || attenuatedVolume == 0.0F)) {
+			const SoundContainer *channelSoundContainer = static_cast<SoundContainer *>(userData);
 			result = soundChannel->setVolume(attenuatedVolume * channelSoundContainer->GetVolume());
 		}
 

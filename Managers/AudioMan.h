@@ -452,7 +452,7 @@ namespace RTE {
 		void Update3DEffectsForMobileSoundChannels();
 
 		/// <summary>
-		/// Sets or updates the position of the given sound channel so it handles scene wrapping correctly. Also handles minimum audible distance.
+		/// Sets or updates the position of the given sound channel so it handles scene wrapping correctly. Also handles volume attenuation and minimum audible distance.
 		/// </summary>
 		/// <param name="soundChannel">The channel whose position should be set or updated.</param>
 		/// <param name="positionToUse">An optional position to set for this sound channel. Done this way to save setting and resetting data in FMOD.</param>

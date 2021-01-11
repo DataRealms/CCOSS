@@ -276,7 +276,15 @@ namespace RTE {
 		void ClearMusicQueue() { m_MusicPlayList.clear(); }
 #pragma endregion
 
-#pragma region Sound Playback and Handling
+#pragma region Mobile Sound Playback and Handling
+		/// <summary>
+		/// Pauses all sound playback.
+		/// <param name="pause">Whether to pause sounds or resume them.</param>
+		/// </summary>
+		void PauseAllMobileSounds(bool pause = true) { if (m_AudioEnabled) { m_MobileSoundChannelGroup->setPaused(pause); } }
+#pragma endregion
+
+#pragma region Lua Sound File Playing
 		/// <summary>
 		/// Starts playing a certain sound file.
 		/// </summary>
@@ -299,28 +307,6 @@ namespace RTE {
 		/// <param name="player">Which player to play the SoundContainer's sounds for, -1 means all players.</param>
 		/// <returns>The new SoundContainer being played. OWNERSHIP IS TRANSFERRED!</returns>
 		SoundContainer *PlaySound(const std::string &filePath, const Vector &position, int player);
-
-		/// <summary>
-		/// Stops playing all sounds in a given SoundContainer.
-		/// </summary>
-		/// <param name="soundContainer">Pointer to the SoundContainer to stop playing. Ownership is NOT transferred!</param>
-		/// <returns>True if sounds were playing and were stopped, false otherwise.</returns>
-		bool StopSound(SoundContainer *soundContainer) { return StopSound(soundContainer, -1); }
-
-		/// <summary>
-		/// Stops playing all sounds in a given SoundContainer for a certain player.
-		/// </summary>
-		/// <param name="player">Which player to stop the SoundContainer  for.</param>
-		/// <param name="soundContainer">Pointer to the SoundContainer to stop playing. Ownership is NOT transferred!</param>
-		/// <returns></returns>
-		bool StopSound(SoundContainer *soundContainer, int player);
-
-		/// <summary>
-		/// Fades out playback of all sounds in a specific SoundContainer.
-		/// </summary>
-		/// <param name="soundContainer">Pointer to the Sound to fade out playing. Ownership is NOT transferred!</param>
-		/// <param name="fadeOutTime">The amount of time, in ms, to fade out over.</param>
-		void FadeOutSound(SoundContainer *soundContainer, int fadeOutTime = 1000);
 #pragma endregion
 
 #pragma region Network Audio Handling
@@ -443,6 +429,21 @@ namespace RTE {
 		/// <param name="soundContainer">A pointer to a SoundContainer object. Ownership IS NOT transferred!</param>
 		/// <returns>Whether the pitch was successfully updated.</returns>
 		bool ChangeSoundContainerPlayingChannelsPitch(const SoundContainer *soundContainer);
+
+		/// <summary>
+		/// Stops playing a SoundContainer's playing sounds for a certain player.
+		/// </summary>
+		/// <param name="soundContainer">A pointer to a SoundContainer object6. Ownership is NOT transferred!</param>
+		/// <param name="player">Which player to stop playing the SoundContainer for.</param>
+		/// <returns></returns>
+		bool StopSoundContainerPlayingChannels(SoundContainer *soundContainer, int player);
+
+		/// <summary>
+		/// Fades out playback a SoundContainer.
+		/// </summary>
+		/// <param name="soundContainer">A pointer to a SoundContainer object. Ownership is NOT transferred!</param>
+		/// <param name="fadeOutTime">The amount of time, in ms, to fade out over.</param>
+		void FadeOutSoundContainerPlayingChannels(SoundContainer *soundContainer, int fadeOutTime);
 #pragma endregion
 
 #pragma region 3D Effect Handling

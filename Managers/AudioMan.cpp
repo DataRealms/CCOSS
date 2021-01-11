@@ -345,59 +345,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool AudioMan::StopSound(SoundContainer *soundContainer, int player) {
-		if (!m_AudioEnabled || !soundContainer) {
-			return false;
-		}
-		if (m_IsInMultiplayerMode) { RegisterSoundEvent(player, SOUND_STOP, soundContainer); }
-
-		FMOD_RESULT result;
-		FMOD::Channel *soundChannel;
-		bool anySoundsPlaying = soundContainer->IsBeingPlayed();
-
-		if (anySoundsPlaying) {
-			const std::unordered_set<int> *channels = soundContainer->GetPlayingChannels();
-			for (std::unordered_set<int>::const_iterator channelIterator = channels->begin(); channelIterator != channels->end();) {
-				result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
-				++channelIterator; // NOTE - stopping the sound will remove the channel, screwing things up if we don't move to the next iterator preemptively
-				result = (result == FMOD_OK) ? soundChannel->stop() : result;
-				if (result != FMOD_OK) { g_ConsoleMan.PrintString("Error: Failed to stop playing channel in SoundContainer " + soundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result))); }
-			}
-		}
-		return anySoundsPlaying;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void AudioMan::FadeOutSound(SoundContainer *soundContainer, int fadeOutTime) {
-		if (!m_AudioEnabled || !soundContainer || !soundContainer->IsBeingPlayed()) {
-			return;
-		}
-		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_FADE_OUT, soundContainer, fadeOutTime); }
-
-		int sampleRate;
-		m_AudioSystem->getSoftwareFormat(&sampleRate, nullptr, nullptr);
-		int fadeOutTimeAsSamples = fadeOutTime * sampleRate / 1000;
-
-		FMOD_RESULT result;
-		FMOD::Channel *soundChannel;
-		unsigned long long parentClock;
-		float currentVolume;
-
-		const std::unordered_set<int> channels = *soundContainer->GetPlayingChannels();
-		for (int channel : channels) {
-			result = m_AudioSystem->getChannel(channel, &soundChannel);
-			result = (result == FMOD_OK) ? soundChannel->getDSPClock(nullptr, &parentClock) : result;
-			result = (result == FMOD_OK) ? soundChannel->getVolume(&currentVolume) : result;
-			result = (result == FMOD_OK) ? soundChannel->addFadePoint(parentClock, currentVolume) : result;
-			result = (result == FMOD_OK) ? soundChannel->addFadePoint(parentClock + fadeOutTimeAsSamples, 0) : result;
-
-			if (result != FMOD_OK) { g_ConsoleMan.PrintString("ERROR: Could not fade out sounds in SoundContainer " + soundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result))); }
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void AudioMan::GetMusicEvents(int player, std::list<NetworkMusicData> &list) {
 		if (player < 0 || player >= c_MaxClients) {
 			return;
@@ -642,6 +589,56 @@ namespace RTE {
 			}
 		}
 		return result == FMOD_OK;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool AudioMan::StopSoundContainerPlayingChannels(SoundContainer *soundContainer, int player) {
+		if (!m_AudioEnabled || !soundContainer || !soundContainer->IsBeingPlayed()) {
+			return false;
+		}
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(player, SOUND_STOP, soundContainer); }
+
+		FMOD_RESULT result;
+		FMOD::Channel *soundChannel;
+		
+		const std::unordered_set<int> *channels = soundContainer->GetPlayingChannels();
+		for (std::unordered_set<int>::const_iterator channelIterator = channels->begin(); channelIterator != channels->end();) {
+			result = m_AudioSystem->getChannel((*channelIterator), &soundChannel);
+			++channelIterator; // NOTE - stopping the sound will remove the channel, screwing things up if we don't move to the next iterator preemptively
+			result = (result == FMOD_OK) ? soundChannel->stop() : result;
+			if (result != FMOD_OK) { g_ConsoleMan.PrintString("Error: Failed to stop playing channel in SoundContainer " + soundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result))); }
+		}
+		return result == FMOD_OK;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void AudioMan::FadeOutSoundContainerPlayingChannels(SoundContainer *soundContainer, int fadeOutTime) {
+		if (!m_AudioEnabled || !soundContainer || !soundContainer->IsBeingPlayed()) {
+			return;
+		}
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_FADE_OUT, soundContainer, fadeOutTime); }
+
+		int sampleRate;
+		m_AudioSystem->getSoftwareFormat(&sampleRate, nullptr, nullptr);
+		int fadeOutTimeAsSamples = fadeOutTime * sampleRate / 1000;
+
+		FMOD_RESULT result;
+		FMOD::Channel *soundChannel;
+		unsigned long long parentClock;
+		float currentVolume;
+
+		const std::unordered_set<int> channels = *soundContainer->GetPlayingChannels();
+		for (int channel : channels) {
+			result = m_AudioSystem->getChannel(channel, &soundChannel);
+			result = (result == FMOD_OK) ? soundChannel->getDSPClock(nullptr, &parentClock) : result;
+			result = (result == FMOD_OK) ? soundChannel->getVolume(&currentVolume) : result;
+			result = (result == FMOD_OK) ? soundChannel->addFadePoint(parentClock, currentVolume) : result;
+			result = (result == FMOD_OK) ? soundChannel->addFadePoint(parentClock + fadeOutTimeAsSamples, 0) : result;
+
+			if (result != FMOD_OK) { g_ConsoleMan.PrintString("ERROR: Could not fade out sounds in SoundContainer " + soundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result))); }
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

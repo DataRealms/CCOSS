@@ -284,7 +284,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Player to stop playback of this SoundContainer for.</param>
 		/// <returns>Whether this SoundContainer successfully stopped playing.</returns>
-		bool Stop(int player) { return (HasAnySounds() && IsBeingPlayed()) ? g_AudioMan.StopSound(this, player) : false; }
+		bool Stop(int player) { return (HasAnySounds() && IsBeingPlayed()) ? g_AudioMan.StopSoundContainerPlayingChannels(this, player) : false; }
 
 		/// <summary>
 		/// Restarts playback of this SoundContainer for all players.
@@ -297,13 +297,13 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Player to restart playback of this SoundContainer for.</param>
 		/// <returns>Whether this SoundContainer successfully restarted its playback.</returns>
-		bool Restart(int player) { return (HasAnySounds() && IsBeingPlayed()) ? g_AudioMan.StopSound(this, player) && g_AudioMan.PlaySoundContainer(this, player) : false; }
+		bool Restart(int player) { return (HasAnySounds() && IsBeingPlayed()) ? g_AudioMan.StopSoundContainerPlayingChannels(this, player) && g_AudioMan.PlaySoundContainer(this, player) : false; }
 
 		/// <summary>
 		/// Fades out playback of the SoundContainer to 0 volume.
 		/// </summary>
 		/// <param name="fadeOutTime">How long the fadeout should take.</param>
-		void FadeOut(int fadeOutTime = 1000) { if (IsBeingPlayed()) { return g_AudioMan.FadeOutSound(this, fadeOutTime); } }
+		void FadeOut(int fadeOutTime = 1000) { if (IsBeingPlayed()) { return g_AudioMan.FadeOutSoundContainerPlayingChannels(this, fadeOutTime); } }
 #pragma endregion
 
 #pragma region Miscellaneous

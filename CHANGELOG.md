@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
-- Pressing Esc key while the BuyMenu is closes all BuyMenus instead of pausing the game.
+- Pressing escape when a buy menu is open now closes it instead of pausing the game.
 
 ### Fixed
 

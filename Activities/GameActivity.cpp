@@ -374,21 +374,7 @@ void GameActivity::SetCPUTeam(int team)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool GameActivity::IsBuyGUIOpen(int which) {
-    if (which == -1) {
-        for (short player = Players::PlayerOne; player < this->GetPlayerCount(); player++) {
-            if (this->GetBuyGUI(player)->IsEnabled()) {
-                return true;
-            }
-        }
-        return false;
-    }
-    return this->GetBuyGUI(which)->IsEnabled();
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-bool GameActivity::IsBuyGUIVisible(int which) {
+bool GameActivity::IsBuyGUIVisible(int which) const {
     if (which == -1) {
         for (short player = Players::PlayerOne; player < this->GetPlayerCount(); player++) {
             if (this->GetBuyGUI(player)->IsVisible()) {

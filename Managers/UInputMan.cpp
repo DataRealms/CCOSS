@@ -7,6 +7,7 @@
 #include "PerformanceMan.h"
 #include "GUIInput.h"
 #include "Icon.h"
+#include "GameActivity.h"
 
 extern volatile bool g_Quit;
 extern bool g_ResetActivity;
@@ -838,7 +839,7 @@ namespace RTE {
 		}
 
 		if (g_InActivity) {
-			if (AnyStartPress(false)) {
+			if (AnyStartPress(false) && !dynamic_cast<GameActivity*>(g_ActivityMan.GetActivity())->IsBuyGUIVisible(-1)) {
 				g_ActivityMan.PauseActivity();
 				return;
 			}

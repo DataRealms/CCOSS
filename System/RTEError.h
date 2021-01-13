@@ -10,7 +10,7 @@
 #define DebuggerBreak ;
 #endif
 
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+#ifndef RELEASE_BUILD
 #define AbortAction DebuggerBreak
 #else
 #define AbortAction std::exit(EXIT_FAILURE);

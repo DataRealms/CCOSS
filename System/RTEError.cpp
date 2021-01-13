@@ -26,7 +26,7 @@ namespace RTE {
 
 		char message[512];
 
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD 	
+#ifndef RELEASE_BUILD
 		// Show message box with explanation
 		std::snprintf(message, sizeof(message), "Runtime Error in file %s, line %i, because:\n\n%s\n\nThe last frame has been dumped to 'abortscreen.bmp'", file, line, description);
 		allegro_message(message);

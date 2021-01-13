@@ -741,8 +741,10 @@ protected:
     // Muzzle Flash Attachable. Owned
     Attachable *m_pFlash;
 
+    SoundContainer m_PreFireSound; //!< The sound this HDFirearm should play before it starts firing. Distinct from activation sound in that it will play exactly once per trigger pull and not pitch up.
     // The audio of this FireArm being fired.
     SoundContainer m_FireSound;
+    SoundContainer m_FireEchoSound; //!< The audio that is played as the echo for the gun. Each shot will restart this sound, so it doesn't ever overlap.
     // The audio that is played immediately upon activation, but perhaps before actual first firing, if there's a pre-delay
     SoundContainer m_ActiveSound;
     // The audio that is played immediately upon cease of activation

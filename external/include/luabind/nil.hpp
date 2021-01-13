@@ -23,6 +23,8 @@
 #ifndef LUABIND_NIL_HPP
 #define LUABIND_NIL_HPP
 
+#include <luabind/config.hpp>
+
 namespace luabind
 {
    namespace detail
@@ -31,7 +33,7 @@ namespace luabind
    }
 
    // defined in class.cpp
-   extern detail::nil_type nil;
+   extern LUABIND_API detail::nil_type nil;
 }
 
 #endif

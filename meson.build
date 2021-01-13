@@ -23,12 +23,16 @@ deps = [
 compiler = meson.get_compiler('cpp')
 link_args=[]
 extra_args=[]
+preprocessor_flags = []
+preprocessor_flags_debug = []
 suffix=''
 
 if meson.get_compiler('cpp').get_id() in ['gcc', 'clang']
   extra_args = ['-fpermissive', '-Wno-write-strings', '-Wno-unknown-pragmas']
   release_args = ['-w']
   suffix = 'x86_64'
+  preprocessor_flags = ['-DRELEASE_BUILD']
+  preprocessor_flags_debug = ['-DDEBUG_RELEASE_BUILD']
   if compiler.version().version_compare('<9')
     link_args += ['-lstdc++fs']
   endif

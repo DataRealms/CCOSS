@@ -34,8 +34,12 @@ typedef FMOD_RESULT (F_CALLBACK *FMOD_CODEC_GETLENGTH_CALLBACK)    (FMOD_CODEC_S
 typedef FMOD_RESULT (F_CALLBACK *FMOD_CODEC_SETPOSITION_CALLBACK)  (FMOD_CODEC_STATE *codec_state, int subsound, unsigned int position, FMOD_TIMEUNIT postype);
 typedef FMOD_RESULT (F_CALLBACK *FMOD_CODEC_GETPOSITION_CALLBACK)  (FMOD_CODEC_STATE *codec_state, unsigned int *position, FMOD_TIMEUNIT postype);
 typedef FMOD_RESULT (F_CALLBACK *FMOD_CODEC_SOUNDCREATE_CALLBACK)  (FMOD_CODEC_STATE *codec_state, int subsound, FMOD_SOUND *sound);
-typedef FMOD_RESULT (F_CALLBACK *FMOD_CODEC_METADATA_CALLBACK)     (FMOD_CODEC_STATE *codec_state, FMOD_TAGTYPE tagtype, char *name, void *data, unsigned int datalen, FMOD_TAGDATATYPE datatype, int unique);
 typedef FMOD_RESULT (F_CALLBACK *FMOD_CODEC_GETWAVEFORMAT_CALLBACK)(FMOD_CODEC_STATE *codec_state, int index, FMOD_CODEC_WAVEFORMAT *waveformat);
+
+/*
+    Codec functions
+*/
+typedef FMOD_RESULT (F_CALLBACK *FMOD_CODEC_METADATA_FUNC)         (FMOD_CODEC_STATE *codec_state, FMOD_TAGTYPE tagtype, char *name, void *data, unsigned int datalen, FMOD_TAGDATATYPE datatype, int unique);
 
 /*
     Codec structures
@@ -83,7 +87,7 @@ struct FMOD_CODEC_STATE
     unsigned int                 filesize;
     FMOD_FILE_READ_CALLBACK      fileread;
     FMOD_FILE_SEEK_CALLBACK      fileseek;
-    FMOD_CODEC_METADATA_CALLBACK metadata;
+    FMOD_CODEC_METADATA_FUNC     metadata;
 
     int                          waveformatversion;
 };

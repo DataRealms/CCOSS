@@ -1208,7 +1208,7 @@ void BuyMenuGUI::Update()
 
         // Get handle to the currently selected item, if any
         GUIListPanel::Item *pItem = m_pShopList->GetItem(m_ListItemIndex);
-        string description = "";
+        std::string description = "";
 
         if (pItem && pItem->m_pEntity) {
             description = pItem->m_pEntity->GetDescription();
@@ -1219,19 +1219,23 @@ void BuyMenuGUI::Update()
                 int craftMaxMass = static_cast<int>(pItemAsCraft->GetMaxMass()) - static_cast<int>(pItemAsCraft->GetMass());
                 description += "\nMax Mass: " + std::to_string(craftMaxMass) + "\nMax Passengers: " + std::to_string(craftMaxPassengers);
             } else {
+                std::stringstream floatStream;
                 const Actor* pItemAsActor = dynamic_cast<const Actor*>(currentItem);
                 if (pItemAsActor) {
-                    int itemMass = static_cast<int>(pItemAsActor->GetMass());
+                    floatStream << std::fixed << std::setprecision(1) << pItemAsActor->GetMass();
+                    // If the item's mass is an integer, remove trailing zero and decimal point.
+                    description += "\nMass: " + ((floatStream.str().back() == '0') ? floatStream.str().substr(0, floatStream.str().length() - 2) : floatStream.str());
+                    
                     int passengerSlotsTaken = pItemAsActor->GetPassengerSlots();
-                    description += "\nMass: " + std::to_string(itemMass);
                     if (passengerSlotsTaken > 1) {
                         description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
                     }
                 }else {
                     const MovableObject* pItemAsMO = dynamic_cast<const MovableObject*>(currentItem);
                     if (pItemAsMO) {
-                        int itemMass = static_cast<int>(pItemAsMO->GetMass());
-                        description += "\nMass: " + std::to_string(itemMass);
+                        floatStream << std::fixed << std::setprecision(1) << pItemAsMO->GetMass();
+                        // If the item's mass is an integer, remove trailing zero and decimal point.
+                        description += "\nMass: " + ((floatStream.str().back() == '0') ? floatStream.str().substr(0, floatStream.str().length() - 2) : floatStream.str());
                     }
                 }
             }
@@ -1375,16 +1379,19 @@ void BuyMenuGUI::Update()
 
         // Get handle to the currently selected item, if any
         GUIListPanel::Item* pItem = m_pCartList->GetItem(m_ListItemIndex);
-        string description = "";
+        std::string description = "";
 
         if (pItem && pItem->m_pEntity) {
             description = pItem->m_pEntity->GetDescription();
             const Entity* currentItem = pItem->m_pEntity;
+            std::stringstream floatStream;
             const Actor* pItemAsActor = dynamic_cast<const Actor*>(currentItem);
             if (pItemAsActor) {
-                int itemMass = static_cast<int>(pItemAsActor->GetMass());
+                floatStream << std::fixed << std::setprecision(1) << pItemAsActor->GetMass();
+                // If the item's mass is an integer, remove trailing zero and decimal point.
+                description += "\nMass: " + ((floatStream.str().back() == '0') ? floatStream.str().substr(0, floatStream.str().length() - 2) : floatStream.str());
+
                 int passengerSlotsTaken = pItemAsActor->GetPassengerSlots();
-                description += "\nMass: " + std::to_string(itemMass);
                 if (passengerSlotsTaken > 1) {
                     description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
                 }
@@ -1392,8 +1399,9 @@ void BuyMenuGUI::Update()
             else {
                 const MovableObject* pItemAsMO = dynamic_cast<const MovableObject*>(currentItem);
                 if (pItemAsMO) {
-                    int itemMass = static_cast<int>(pItemAsMO->GetMass());
-                    description += "\nMass: " + std::to_string(itemMass);
+                    floatStream << std::fixed << std::setprecision(1) << pItemAsMO->GetMass();
+                    // If the item's mass is an integer, remove trailing zero and decimal point.
+                    description += "\nMass: " + ((floatStream.str().back() == '0') ? floatStream.str().substr(0, floatStream.str().length() - 2) : floatStream.str());
                 }
             }
         }

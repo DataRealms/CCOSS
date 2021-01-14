@@ -545,6 +545,7 @@ namespace detail
 
 #undef LUABIND_OPERATOR_ADL_WKND
 #endif
+
 } // namespace detail
 
 namespace adl

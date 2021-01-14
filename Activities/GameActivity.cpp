@@ -372,6 +372,21 @@ void GameActivity::SetCPUTeam(int team)
 */
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool GameActivity::IsBuyGUIVisible(int which) const {
+    if (which == -1) {
+        for (short player = Players::PlayerOne; player < this->GetPlayerCount(); player++) {
+            if (this->GetBuyGUI(player)->IsVisible()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    return this->GetBuyGUI(which)->IsVisible();
+
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SwitchToActor
 //////////////////////////////////////////////////////////////////////////////////////////

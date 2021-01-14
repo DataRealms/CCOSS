@@ -8,7 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Executable can be compiled as 64bit.
+
 ### Changed
+
+- Pressing escape when a buy menu is open now closes it instead of pausing the game.
 
 - BuyMenu tooltips now display item info as well as a description. This includes the maximum carriable mass and passengers for Craft, mass and passenger slots required for Actors, and mass for other Moveable Objects.
 

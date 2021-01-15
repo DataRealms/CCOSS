@@ -300,7 +300,7 @@ void Attachable::Detach()
 	// Since it's no longer atteched it should belong to itself
 	m_RootMOID = m_MOID;
 
-#if defined DEBUG_BUILD || defined MIN_DEBUG_BUILD
+#ifndef RELEASE_BUILD
 	RTEAssert(m_RootMOID == g_NoMOID || (m_RootMOID >= 0 && m_RootMOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
 	RTEAssert(m_MOID == g_NoMOID || (m_MOID >= 0 && m_MOID < g_MovableMan.GetMOIDCount()), "MOID out of bounds!");
 #endif

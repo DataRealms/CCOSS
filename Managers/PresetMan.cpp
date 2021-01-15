@@ -163,7 +163,7 @@ bool PresetMan::LoadDataModule(string moduleName, bool official, ProgressCallbac
 
         // Add the name to ID mapping - note that official modules can't be loaded after any non-official ones!
         // Adding the lowercase name version so we can more easily find with case-agnostic search
-		m_DataModuleIDs.insert(pair<string, int>(lowercaseName, m_pDataModules.size() - 1));
+		m_DataModuleIDs.insert(pair<string, size_t>(lowercaseName, m_pDataModules.size() - 1));
     }
 
     // Now actually create it
@@ -251,7 +251,7 @@ int PresetMan::GetModuleID(string moduleName)
     std::transform(moduleName.begin(), moduleName.end(), moduleName.begin(), ::tolower);
 
     // First pass
-    map<string, int>::iterator itr = m_DataModuleIDs.find(moduleName);
+    map<string, size_t>::iterator itr = m_DataModuleIDs.find(moduleName);
     if (itr != m_DataModuleIDs.end())
         return (*itr).second;
 

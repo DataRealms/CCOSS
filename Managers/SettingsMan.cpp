@@ -20,11 +20,11 @@ namespace RTE {
 		m_ForceOverlayedWindowGfxDriver = false;
 		m_ForceNonOverlayedWindowGfxDriver = false;
 
-		m_SoundPanningEffectStrength = 0.6F;
+		m_SoundPanningEffectStrength = 0.5F;
 		//////////////////////////////////////////////////
 		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
-		m_ListenerZOffset = 0;
-		m_MinimumDistanceForPanning = 50.0F;
+		m_ListenerZOffset = 400;
+		m_MinimumDistanceForPanning = 30.0F;
 		//////////////////////////////////////////////////
 
 		m_FlashOnBrainDamage = true;

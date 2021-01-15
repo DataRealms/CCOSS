@@ -87,7 +87,7 @@ namespace RTE {
 
 		m_DataPathExtension = std::filesystem::path(m_DataPath).extension().string();
 
-		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n\n" + m_DataPath + "\n" + GetFormattedReaderPosition());
+		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n" + m_DataPath + "\n" + GetFormattedReaderPosition());
 
 		m_DataPathWithoutExtension = m_DataPath.substr(0, m_DataPath.length() - m_DataPathExtension.length());
 		s_PathHashes[GetHash()] = m_DataPath;
@@ -103,7 +103,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	BITMAP * ContentFile::GetAsBitmap(int conversionMode, const std::string &dataPathToSpecificFrame) {
+	BITMAP * ContentFile::GetAsBitmap(int conversionMode, bool storeBitmap, const std::string &dataPathToSpecificFrame) {
 		if (m_DataPath.empty()) {
 			return nullptr;
 		}
@@ -132,7 +132,7 @@ namespace RTE {
 			returnBitmap = LoadAndReleaseBitmap(conversionMode, dataPathToLoad); // NOTE: This takes ownership of the bitmap file
 
 			// Insert the bitmap into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE
-			s_LoadedBitmaps.at(bitDepth).insert(std::pair<std::string, BITMAP *>(dataPathToLoad, returnBitmap));
+			if (storeBitmap) { s_LoadedBitmaps.at(bitDepth).insert({ dataPathToLoad, returnBitmap }); }
 		}
 		return returnBitmap;
 	}
@@ -166,7 +166,7 @@ namespace RTE {
 		char framePath[1024];
 		for (int frameNum = 0; frameNum < frameCount; frameNum++) {
 			std::snprintf(framePath, sizeof(framePath), "%s%03i%s", m_DataPathWithoutExtension.c_str(), frameNum, m_DataPathExtension.c_str());
-			returnBitmaps[frameNum] = GetAsBitmap(conversionMode, framePath);
+			returnBitmaps[frameNum] = GetAsBitmap(conversionMode, true, framePath);
 		}
 		return returnBitmaps;
 	}
@@ -194,28 +194,27 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	FMOD::Sound * ContentFile::GetAsSample(bool abortGameForInvalidSound, bool asyncLoading) {
+	FMOD::Sound * ContentFile::GetAsSound(bool abortGameForInvalidSound, bool asyncLoading) {
 		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
 			return nullptr;
 		}
 		FMOD::Sound *returnSample = nullptr;
 
-		// Check if the file has already been read and loaded from the disk and, if so, use that data.
 		std::unordered_map<std::string, FMOD::Sound *>::iterator foundSound = s_LoadedSamples.find(m_DataPath);
 		if (foundSound != s_LoadedSamples.end()) {
 			returnSample = (*foundSound).second;
 		} else {
-			returnSample = LoadAndReleaseSample(abortGameForInvalidSound, asyncLoading); //NOTE: This takes ownership of the sample file
+			returnSample = LoadAndReleaseSound(abortGameForInvalidSound, asyncLoading); //NOTE: This takes ownership of the sample file
 
 			// Insert the Sound object into the map, PASSING OVER OWNERSHIP OF THE LOADED FILE
-			s_LoadedSamples.insert(std::pair<std::string, FMOD::Sound *>(m_DataPath, returnSample));
+			s_LoadedSamples.insert({ m_DataPath, returnSample });
 		}
 		return returnSample;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	FMOD::Sound * ContentFile::LoadAndReleaseSample(bool abortGameForInvalidSound, bool asyncLoading) {
+	FMOD::Sound * ContentFile::LoadAndReleaseSound(bool abortGameForInvalidSound, bool asyncLoading) {
 		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
 			return nullptr;
 		}
@@ -237,13 +236,19 @@ namespace RTE {
 				return nullptr;
 			}
 		}
+		if (std::filesystem::file_size(m_DataPath) == 0) {
+			const std::string errorMessage = "Failed to create sound because because the file was empty. The path and name were: ";
+			RTEAssert(!abortGameForInvalidSound, errorMessage + "\n\n" + m_DataPathAndReaderPosition);
+			g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
+			return nullptr;
+		}
 		FMOD::Sound *returnSample = nullptr;
 
 		FMOD_MODE fmodFlags = FMOD_CREATESAMPLE | FMOD_3D | (asyncLoading ? FMOD_NONBLOCKING : FMOD_DEFAULT);
 		FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(m_DataPath.c_str(), fmodFlags, nullptr, &returnSample);
 
 		if (result != FMOD_OK) {
-			const std::string errorMessage = "Failed to create sound because of FMOD error: " + std::string(FMOD_ErrorString(result)) + "\nThe path and name were: ";
+			const std::string errorMessage = "Failed to create sound because of FMOD error: " + std::string(FMOD_ErrorString(result)) + " The path and name were: ";
 			RTEAssert(!abortGameForInvalidSound, errorMessage + "\n\n" + m_DataPathAndReaderPosition);
 			g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
 			return returnSample;

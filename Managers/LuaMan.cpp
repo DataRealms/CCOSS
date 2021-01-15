@@ -186,6 +186,7 @@ struct enum_wrapper {
     TYPE * Random##TYPE(std::string group) { return Random##TYPE(group, "All"); }
 
 // These are expanded by the preprocessor to all the different cloning function definitions.
+LUAENTITYCREATE(SoundContainer)
 LUAENTITYCREATE(Attachable)
 LUAENTITYCREATE(AEmitter)
 LUAENTITYCREATE(Turret)
@@ -229,6 +230,7 @@ LUAENTITYCREATE(PEmitter)
 
 // These are expanded by the preprocessor to all the different cloning function definitions.
 LUAENTITYCLONE(Entity)
+LUAENTITYCLONE(SoundContainer)
 LUAENTITYCLONE(SceneObject)
 LUAENTITYCLONE(MovableObject)
 LUAENTITYCLONE(Attachable)
@@ -287,9 +289,10 @@ void DeleteEntity(Entity *pEntity)
     bool Is##TYPE(Entity *pEntity) { return dynamic_cast<TYPE *>(pEntity) ? true : false; }
 
 // These are expanded by the preprocessor to all the different casting function definitions named: To[Type]()
+LUAENTITYCAST(Entity)
+LUAENTITYCAST(SoundContainer)
 LUAENTITYCAST(SceneObject)
 LUAENTITYCAST(MovableObject)
-LUAENTITYCAST(Entity)
 LUAENTITYCAST(Attachable)
 LUAENTITYCAST(Arm)
 LUAENTITYCAST(Leg)
@@ -510,6 +513,8 @@ int LuaMan::Create() {
             .def("Reset", &Vector::Reset)
             .def("RadRotate", &Vector::RadRotate)
             .def("DegRotate", &Vector::DegRotate)
+			.def("GetRadRotated", &Vector::GetRadRotated)
+			.def("GetDegRotated", &Vector::GetDegRotated)
             .def("AbsRotateTo", &Vector::AbsRotateTo)
             .def_readwrite("X", &Vector::m_X)
             .def_readwrite("Y", &Vector::m_Y)
@@ -569,23 +574,48 @@ int LuaMan::Create() {
             .def("AddToGroup", &Entity::AddToGroup)
             .def("IsInGroup", (bool (Entity::*)(const string &))&Entity::IsInGroup),
 
-		class_<SoundContainer>("SoundContainer")
+        CONCRETELUABINDING(SoundContainer, Entity)
 			.def(constructor<>())
+            .enum_("SoundOverlapMode")[
+                value("OVERLAP", SoundContainer::SoundOverlapMode::OVERLAP),
+                value("RESTART", SoundContainer::SoundOverlapMode::RESTART),
+                value("IGNORE_PLAY", SoundContainer::SoundOverlapMode::IGNORE_PLAY)
+            ]
+            .property("SoundOverlapMode", &SoundContainer::GetSoundOverlapMode, &SoundContainer::SetSoundOverlapMode)
+            .property("Immobile", &SoundContainer::IsImmobile, &SoundContainer::SetImmobile)
+            .property("AttenuationStartDistance", &SoundContainer::GetAttenuationStartDistance, &SoundContainer::SetAttenuationStartDistance)
+            .property("Loops", &SoundContainer::GetLoopSetting, &SoundContainer::SetLoopSetting)
+            .property("Priority", &SoundContainer::GetPriority, &SoundContainer::SetPriority)
+            .property("AffectedByGlobalPitch", &SoundContainer::IsAffectedByGlobalPitch, &SoundContainer::SetAffectedByGlobalPitch)
+            .property("Pos", &SoundContainer::GetPosition, &SoundContainer::SetPosition)
+            .property("Volume", &SoundContainer::GetVolume, &SoundContainer::SetVolume)
+            .property("Pitch", &SoundContainer::GetPitch, &SoundContainer::SetPitch)
             .def("HasAnySounds", &SoundContainer::HasAnySounds)
+            .def("GetTopLevelSoundSet", &SoundContainer::GetTopLevelSoundSet)
 			.def("IsBeingPlayed", &SoundContainer::IsBeingPlayed)
             .def("Play", (bool (SoundContainer:: *)()) &SoundContainer::Play)
+            .def("Play", (bool (SoundContainer:: *)(const int player)) &SoundContainer::Play)
             .def("Play", (bool (SoundContainer:: *)(const Vector &position)) &SoundContainer::Play)
             .def("Play", (bool (SoundContainer:: *)(const Vector &position, int player)) &SoundContainer::Play)
             .def("Stop", (bool (SoundContainer:: *)()) &SoundContainer::Stop)
             .def("Stop", (bool (SoundContainer:: *)(int player)) &SoundContainer::Stop)
-            .def("AddSound", (void (SoundContainer:: *)(std::string const &soundFilePath)) &SoundContainer::AddSound)
-            .def("AddSound", (void (SoundContainer:: *)(std::string const &soundFilePath, const Vector &offset, float attenuationStartDistance, bool abortGameForInvalidSound)) &SoundContainer::AddSound)
-            .def("AddSound", (void (SoundContainer:: *)(std::string const &soundFilePath, unsigned int soundSetIndex, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance, bool abortGameForInvalidSound)) &SoundContainer::AddSound)
-			.def("SetPosition", &SoundContainer::SetPosition)
-            .def("SelectNextSoundSet", &SoundContainer::SelectNextSoundSet)
-			.property("Loops", &SoundContainer::GetLoopSetting, &SoundContainer::SetLoopSetting)
-            .property("Priority", &SoundContainer::GetPriority, &SoundContainer::SetPriority)
-            .property("AffectedByGlobalPitch", &SoundContainer::IsAffectedByGlobalPitch, &SoundContainer::SetAffectedByGlobalPitch),
+            .def("Restart", (bool (SoundContainer:: *)()) &SoundContainer::Restart)
+            .def("Restart", (bool (SoundContainer:: *)(int player)) &SoundContainer::Restart),
+
+        class_<SoundSet>("SoundSet")
+            .def(constructor<>())
+            .enum_("SoundSelectionCycleMode")[
+                value("RANDOM", SoundSet::SoundSelectionCycleMode::RANDOM),
+                value("FORWARDS", SoundSet::SoundSelectionCycleMode::FORWARDS),
+                value("ALL", SoundSet::SoundSelectionCycleMode::ALL)
+            ]
+            .property("SoundSelectionCycleMode", &SoundSet::GetSoundSelectionCycleMode, &SoundSet::SetSoundSelectionCycleMode)
+            .def_readonly("SubSoundSets", &SoundSet::m_SubSoundSets, return_stl_iterator)
+            .def("HasAnySounds", &SoundSet::HasAnySounds)
+            .def("SelectNextSounds", &SoundSet::SelectNextSounds)
+            .def("AddSound", (void (SoundSet:: *)(std::string const &soundFilePath)) &SoundSet::AddSound)
+            .def("AddSound", (void (SoundSet:: *)(std::string const &soundFilePath, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance)) &SoundSet::AddSound)
+            .def("AddSoundSet", &SoundSet::AddSoundSet),
 
         ABSTRACTLUABINDING(SceneObject, Entity)
             .property("Pos", &SceneObject::GetPos, &SceneObject::SetPos)
@@ -1515,8 +1545,6 @@ int LuaMan::Create() {
             .def("SetMusicPosition", &AudioMan::SetMusicPosition)
             .def("SetMusicPitch", &AudioMan::SetMusicPitch)
             .property("SoundsVolume", &AudioMan::GetSoundsVolume, &AudioMan::SetSoundsVolume)
-            .def("SetSoundPosition", &AudioMan::SetSoundPosition)
-            .def("SetSoundPitch", &AudioMan::SetSoundPitch)
             .def("StopAll", &AudioMan::StopMusic)
             .def("PlayMusic", &AudioMan::PlayMusic)
             .def("PlayNextStream", &AudioMan::PlayNextStream)
@@ -1524,10 +1552,9 @@ int LuaMan::Create() {
             .def("QueueMusicStream", &AudioMan::QueueMusicStream)
             .def("QueueSilence", &AudioMan::QueueSilence)
             .def("ClearMusicQueue", &AudioMan::ClearMusicQueue)
-            .def("PlaySound", (SoundContainer *(AudioMan:: *)(const char *filePath)) &AudioMan::PlaySound)
-            .def("PlaySound", (SoundContainer *(AudioMan:: *)(const char *filePath, const Vector &position)) &AudioMan::PlaySound)
-            .def("PlaySound", (SoundContainer *(AudioMan:: *)(const char *filePath, const Vector &position, int player)) &AudioMan::PlaySound)
-            .def("PlaySound", (SoundContainer *(AudioMan:: *)(const char *filePath, const Vector &position, int player, int loops, int priority, double pitchOrAffectedByGlobalPitch, float attenuationStartDistance, bool immobile)) &AudioMan::PlaySound)
+            .def("PlaySound", (SoundContainer *(AudioMan:: *)(const std::string &filePath)) &AudioMan::PlaySound, adopt(result))
+            .def("PlaySound", (SoundContainer *(AudioMan:: *)(const std::string &filePath, const Vector &position)) &AudioMan::PlaySound, adopt(result))
+            .def("PlaySound", (SoundContainer *(AudioMan:: *)(const std::string &filePath, const Vector &position, int player)) &AudioMan::PlaySound, adopt(result))
             .def("StopSound", (bool (AudioMan:: *)(SoundContainer *soundContainer)) &AudioMan::StopSound)
             .def("StopSound", (bool (AudioMan:: *)(SoundContainer *soundContainer, int player)) &AudioMan::StopSound)
             .def("FadeOutSound", &AudioMan::FadeOutSound),

@@ -154,7 +154,7 @@ ScenarioGUI::ScenarioGUI(Controller *pController) :
 	// Load and own the default preview bitmap.
 	m_DefaultPreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 32);
 	ContentFile defaultPreviewContent("Base.rte/GUIs/DefaultPreview.png");
-	BITMAP *defaultPreview = defaultPreviewContent.LoadAndReleaseBitmap();
+	BITMAP *defaultPreview = defaultPreviewContent.GetAsBitmap(COLORCONV_NONE, false);
 	blit(defaultPreview, m_DefaultPreviewBitmap->GetBitmap(), 0, 0, 0, 0, m_DefaultPreviewBitmap->GetWidth(), m_DefaultPreviewBitmap->GetHeight());
 	destroy_bitmap(defaultPreview);
 

@@ -77,6 +77,7 @@ namespace RTE {
 
 		m_LastMusicPath = "";
 		m_LastMusicPos = 0;
+		g_AudioMan.PauseAllMobileSounds(false);
 
 		return error;
 	}

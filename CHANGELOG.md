@@ -12,7 +12,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
+- Fixed various audio bugs that were in Pre3, and fixed clicking noise on sounds that played far away. The game should sound way better now!
+
+- Mobile sounds (i.e. generally things that aren't GUI related) will now pause and resume when you pause and resume your activity.
+
 ### Removed
+
+- Some functionality has been moved from `AudioMan` to `SoundContainer`. As such, the following `AudioMan` Lua bindings are no longer available:
+	`AudioMan:FadeOutSound(fadeOutTime);` has been replaced with `soundContainer:FadeOut(fadeOutTime);`
+	`AudioMan:StopSound(soundContainer);` and `AudioMan:StopSound(soundContainer, player);` have been replaced with `soundContainer:Stop();` and `soundContainer:Stop(player);`
 
 ***
 

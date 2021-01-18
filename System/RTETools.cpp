@@ -190,4 +190,18 @@ namespace RTE {
 		file = 0;
 		return false;
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::string RoundFloatToPrecision(float input, int precision) {
+		std::stringstream floatStream;
+		floatStream << std::fixed << std::setprecision(precision) << input;
+		std::string outputString = floatStream.str();
+		// Remove trailing zeroes and decimal point.
+		outputString.erase(outputString.find_last_not_of('0') + 1);
+		if (outputString.back() == '.') {
+			outputString.pop_back();
+		}
+		return outputString;
+	}
 }

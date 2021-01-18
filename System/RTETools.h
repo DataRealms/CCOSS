@@ -218,6 +218,13 @@ namespace RTE {
 	/// <param name="">The exact string to look for. Case sensitive!</param>
 	/// <returns>Whether the file was found AND that string was found in that file.</returns>
 	bool ASCIIFileContainsString(std::string filePath, std::string findString);
+
+	/// <summary>
+	/// Rounds a float to a set fixed point precision (digits afrer decimal point), removing trailing zeroes and decimal points.
+	/// </summary>
+	/// <param name="inputFloat">The input float to round.</param>
+	/// <returns>A string of the float, displayed to chosen precision.</returns>
+	std::string RoundFloatToPrecision(float input, int precision);
 #pragma endregion
 }
 #endif

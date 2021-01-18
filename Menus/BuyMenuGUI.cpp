@@ -1230,7 +1230,7 @@ void BuyMenuGUI::Update()
                     if (passengerSlotsTaken > 1) {
                         description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
                     }
-                }else {
+                } else {
                     const MovableObject* pItemAsMO = dynamic_cast<const MovableObject*>(currentItem);
                     if (pItemAsMO) {
                         floatStream << std::fixed << std::setprecision(1) << pItemAsMO->GetMass();
@@ -1239,17 +1239,15 @@ void BuyMenuGUI::Update()
                     }
                 }
             }
-        }else if (pItem && pItem->m_ExtraIndex >= 0) {
+        } else if (pItem && pItem->m_ExtraIndex >= 0) {
             const DataModule* pModule = g_PresetMan.GetDataModule(pItem->m_ExtraIndex);
             if (pModule && !pModule->GetDescription().empty()) {
                 description = pModule->GetDescription();
             }
         }
 
-        // Show popup info box next to selected item, but only if it has a description
-        // Now show the description, if we have any
-        if (!description.empty())
-        {
+        // Show popup info box next to selected item if it has a description or tooltip.
+        if (!description.empty()) {
             // Show the popup box with the hovered item's description
             m_pPopupBox->SetVisible(true);
             // Need to add an offset to make it look better and not have the cursor obscure text
@@ -1265,25 +1263,23 @@ void BuyMenuGUI::Update()
         }
 
         // User selected to add an item to cart list!
-        if (m_pController->IsState(PRESS_FACEBUTTON))
-        {
+        if (m_pController->IsState(PRESS_FACEBUTTON)) {
             // User pressed on a module group item; toggle its expansion!
-            if (pItem && pItem->m_ExtraIndex >= 0)
-            {
+            if (pItem && pItem->m_ExtraIndex >= 0) {
                 // Make appropriate sound
-                if (!m_aExpandedModules[pItem->m_ExtraIndex])
+                if (!m_aExpandedModules[pItem->m_ExtraIndex]) {
                     g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
-                // Different, maybe?
-                else
+                    // Different, maybe?
+                } else {
                     g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
-                // Toggle the expansion of the module group item's items below
-                m_aExpandedModules[pItem->m_ExtraIndex] = !m_aExpandedModules[pItem->m_ExtraIndex];
-                // Re-populate the item list with the new module expansion configuation
-                CategoryChange(false);
+                    // Toggle the expansion of the module group item's items below
+                    m_aExpandedModules[pItem->m_ExtraIndex] = !m_aExpandedModules[pItem->m_ExtraIndex];
+                    // Re-populate the item list with the new module expansion configuation
+                    CategoryChange(false);
+                }
             }
             // User pressed on a loadout set, so load it into the menu
-            else if (pItem && m_MenuCategory == SETS)
-            {
+            else if (pItem && m_MenuCategory == SETS) {
                 // Beep if there's an error
                 if (!DeployLoadout(m_ListItemIndex))
                     g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
@@ -1325,17 +1321,14 @@ void BuyMenuGUI::Update()
     /////////////////////////////////////////
     // CART/ORDER LIST focus
 
-    else if (m_MenuFocus == ORDER)
-    {
+    else if (m_MenuFocus == ORDER) {
         // Changed to the list, so select the top one in the item list
-        if (m_FocusChange)
-        {
+        if (m_FocusChange) {
             m_pCartList->SetFocus();
-            if (!m_pCartList->GetItemList()->empty() && m_pCartList->GetSelectedIndex() < 0)
+            if (!m_pCartList->GetItemList()->empty() && m_pCartList->GetSelectedIndex() < 0) {
                 m_pCartList->SetSelectedIndex(m_ListItemIndex = 0);
-            // Synch our index with the one already selected in the list
-            else
-            {
+                // Synch our index with the one already selected in the list
+            } else {
                 m_ListItemIndex = m_pCartList->GetSelectedIndex();
                 m_pCartList->ScrollToSelected();
             }
@@ -1344,34 +1337,25 @@ void BuyMenuGUI::Update()
         }
 
         int listSize = m_pCartList->GetItemList()->size();
-        if (pressDown)
-        {
+        if (pressDown) {
             m_ListItemIndex++;
-            if (m_ListItemIndex >= listSize)
-            {
+            if (m_ListItemIndex >= listSize) {
                 m_ListItemIndex = listSize - 1;
                 // If at the end of the list and the player presses down, then switch focus to the BUY button
                 m_FocusChange = 1;
                 m_MenuFocus = OK;
-            }
-            // Only do list change logic if we actually did change
-            else
-            {
+            } else {
+                // Only do list change logic if we actually did change
                 m_pCartList->SetSelectedIndex(m_ListItemIndex);
                 g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
             }
-        }
-        else if (pressUp)
-        {
+        } else if (pressUp) {
             m_ListItemIndex--;
-            if (m_ListItemIndex < 0)
-            {
+            if (m_ListItemIndex < 0) {
                 m_ListItemIndex = 0;
                 g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
-            }
-            // Only do list change logic if we actually did change
-            else
-            {
+            } else {
+                // Only do list change logic if we actually did change
                 m_pCartList->SetSelectedIndex(m_ListItemIndex);
                 g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
             }
@@ -1395,8 +1379,7 @@ void BuyMenuGUI::Update()
                 if (passengerSlotsTaken > 1) {
                     description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
                 }
-            }
-            else {
+            } else {
                 const MovableObject* pItemAsMO = dynamic_cast<const MovableObject*>(currentItem);
                 if (pItemAsMO) {
                     floatStream << std::fixed << std::setprecision(1) << pItemAsMO->GetMass();
@@ -1406,9 +1389,7 @@ void BuyMenuGUI::Update()
             }
         }
 
-        // Show popup info box next to selected item, but only if it has a description
-        if (!description.empty())
-        {
+        if (!description.empty()) {
             // Show the popup box with the hovered item's description
             m_pPopupBox->SetVisible(true);
             // Need to add an offset to make it look better and not have the cursor obscure text

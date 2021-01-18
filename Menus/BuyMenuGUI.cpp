@@ -1212,15 +1212,15 @@ void BuyMenuGUI::Update()
 
         if (pItem && pItem->m_pEntity) {
             description = pItem->m_pEntity->GetDescription();
-            const Entity* currentItem = pItem->m_pEntity;
-            const ACraft* itemAsCraft = dynamic_cast<const ACraft*>(currentItem);
+            const Entity *currentItem = pItem->m_pEntity;
+            const ACraft *itemAsCraft = dynamic_cast<const ACraft*>(currentItem);
             if (itemAsCraft) {
                 int craftMaxPassengers = itemAsCraft->GetMaxPassengers();
                 int craftMaxMass = static_cast<int>(itemAsCraft->GetMaxMass()) - static_cast<int>(itemAsCraft->GetMass());
                 description += "\nMax Mass: " + std::to_string(craftMaxMass) + "\nMax Passengers: " + std::to_string(craftMaxPassengers);
             } else {
                 std::stringstream floatStream;
-                const Actor* itemAsActor = dynamic_cast<const Actor*>(currentItem);
+                const Actor *itemAsActor = dynamic_cast<const Actor*>(currentItem);
                 if (itemAsActor) {
                     floatStream << std::fixed << std::setprecision(1) << itemAsActor->GetMass();
                     // If the item's mass is an integer, remove trailing zero and decimal point.
@@ -1231,7 +1231,7 @@ void BuyMenuGUI::Update()
                         description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
                     }
                 } else {
-                    const MovableObject* itemAsMO = dynamic_cast<const MovableObject*>(currentItem);
+                    const MovableObject *itemAsMO = dynamic_cast<const MovableObject*>(currentItem);
                     if (itemAsMO) {
                         floatStream << std::fixed << std::setprecision(1) << itemAsMO->GetMass();
                         // If the item's mass is an integer, remove trailing zero and decimal point.
@@ -1240,7 +1240,7 @@ void BuyMenuGUI::Update()
                 }
             }
         } else if (pItem && pItem->m_ExtraIndex >= 0) {
-            const DataModule* pModule = g_PresetMan.GetDataModule(pItem->m_ExtraIndex);
+            const DataModule *pModule = g_PresetMan.GetDataModule(pItem->m_ExtraIndex);
             if (pModule && !pModule->GetDescription().empty()) {
                 description = pModule->GetDescription();
             }
@@ -1362,14 +1362,14 @@ void BuyMenuGUI::Update()
         }
 
         // Get handle to the currently selected item, if any
-        GUIListPanel::Item* pItem = m_pCartList->GetItem(m_ListItemIndex);
+        GUIListPanel::Item *pItem = m_pCartList->GetItem(m_ListItemIndex);
         std::string description = "";
 
         if (pItem && pItem->m_pEntity) {
             description = pItem->m_pEntity->GetDescription();
-            const Entity* currentItem = pItem->m_pEntity;
+            const Entity *currentItem = pItem->m_pEntity;
             std::stringstream floatStream;
-            const Actor* itemAsActor = dynamic_cast<const Actor*>(currentItem);
+            const Actor *itemAsActor = dynamic_cast<const Actor*>(currentItem);
             if (itemAsActor) {
                 floatStream << std::fixed << std::setprecision(1) << itemAsActor->GetMass();
                 // If the item's mass is an integer, remove trailing zero and decimal point.
@@ -1380,7 +1380,7 @@ void BuyMenuGUI::Update()
                     description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
                 }
             } else {
-                const MovableObject* itemAsMO = dynamic_cast<const MovableObject*>(currentItem);
+                const MovableObject *itemAsMO = dynamic_cast<const MovableObject*>(currentItem);
                 if (itemAsMO) {
                     floatStream << std::fixed << std::setprecision(1) << itemAsMO->GetMass();
                     // If the item's mass is an integer, remove trailing zero and decimal point.

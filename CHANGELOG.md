@@ -130,8 +130,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	```
 	
 - New INI and Lua (R/W) properties for Attachables:
-	`TransfersDamageToParent = 0/1`. If enabled, the Attachable will act like hardcoded ones and transfer damage to its parent. For Attachables attached to other Attachables, the parent Attachable (and any of its parents, etc.) must have this enabled for it to work.
-	`ParentBreakWound = AEmitter...`. Use this to optionally define different BreakWounds for the Attachable and its parent. Matches BreakWound by default for ease of use.
+	`TransfersDamageToParent = 0/1`. If enabled, the Attachable will act like hardcoded ones and transfer damage to its parent. For `Attachables` attached to other `Attachables`, the parent `Attachable` (and any of its parents, etc.) must have this enabled for it to affect the root parent.
+	`ParentBreakWound = AEmitter...`. Use this to define a BreakWound that will be applied to the `Attachable's` parent when the `Attachable` is removed.
 	`BreakWound` is also now R/W accessible to Lua.
 
 - Added log for non-fatal loading errors. This log will show image files that have been loaded with incorrect extensions (has no side effects but should be addressed) and audio files that failed loading entirely and will not be audible.  

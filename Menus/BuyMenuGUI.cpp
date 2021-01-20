@@ -1213,13 +1213,13 @@ void BuyMenuGUI::Update()
         if (pItem && pItem->m_pEntity) {
             description = pItem->m_pEntity->GetDescription();
             const Entity *currentItem = pItem->m_pEntity;
-            const ACraft *itemAsCraft = dynamic_cast<const ACraft*>(currentItem);
+            const ACraft *itemAsCraft = dynamic_cast<const ACraft *>(currentItem);
             if (itemAsCraft) {
                 int craftMaxPassengers = itemAsCraft->GetMaxPassengers();
                 int craftMaxMass = static_cast<int>(itemAsCraft->GetMaxMass()) - static_cast<int>(itemAsCraft->GetMass());
                 description += "\nMax Mass: " + std::to_string(craftMaxMass) + "\nMax Passengers: " + std::to_string(craftMaxPassengers);
             } else {
-                const Actor *itemAsActor = dynamic_cast<const Actor*>(currentItem);
+                const Actor *itemAsActor = dynamic_cast<const Actor *>(currentItem);
                 if (itemAsActor) {
                     description += "\nMass: " + RoundFloatToPrecision(itemAsActor->GetMass(), 1);
                     int passengerSlotsTaken = itemAsActor->GetPassengerSlots();

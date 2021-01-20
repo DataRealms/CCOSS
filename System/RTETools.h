@@ -220,7 +220,7 @@ namespace RTE {
 	bool ASCIIFileContainsString(std::string filePath, std::string findString);
 
 	/// <summary>
-	/// Rounds a float to a set fixed point precision (digits afrer decimal point), removing trailing zeroes and decimal points.
+	/// Rounds a float to a set fixed point precision (digits afrer decimal point).
 	/// </summary>
 	/// <param name="inputFloat">The input float to round.</param>
 	/// <returns>A string of the float, displayed to chosen precision.</returns>

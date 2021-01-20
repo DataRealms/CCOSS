@@ -1227,7 +1227,7 @@ void BuyMenuGUI::Update()
                         description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
                     }
                 } else {
-                    const MovableObject *itemAsMO = dynamic_cast<const MovableObject*>(currentItem);
+                    const MovableObject *itemAsMO = dynamic_cast<const MovableObject *>(currentItem);
                     if (itemAsMO) {
                         description += "\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass(), 1);
                     }
@@ -1362,9 +1362,8 @@ void BuyMenuGUI::Update()
         if (pItem && pItem->m_pEntity) {
             description = pItem->m_pEntity->GetDescription();
             const Entity *currentItem = pItem->m_pEntity;
-            const Actor *itemAsActor = dynamic_cast<const Actor*>(currentItem);
+            const Actor *itemAsActor = dynamic_cast<const Actor *>(currentItem);
             if (itemAsActor) {
-                // If the item's mass is an integer, remove trailing zero and decimal point.
                 description += "\nMass: " + RoundFloatToPrecision(itemAsActor->GetMass(), 1);;
 
                 int passengerSlotsTaken = itemAsActor->GetPassengerSlots();
@@ -1372,7 +1371,7 @@ void BuyMenuGUI::Update()
                     description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
                 }
             } else {
-                const MovableObject *itemAsMO = dynamic_cast<const MovableObject*>(currentItem);
+                const MovableObject *itemAsMO = dynamic_cast<const MovableObject *>(currentItem);
                 if (itemAsMO) {
                     description += "\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass(), 1);
                 }

@@ -1215,13 +1215,12 @@ void BuyMenuGUI::Update()
             if (description.empty()) {
                 description = "-No Information Found-";
             }
-            //description = (pItem->m_pEntity->GetDescription() != "") ? pItem->m_pEntity->GetDescription() : "-No Information Found-";
             const Entity *currentItem = pItem->m_pEntity;
             const ACraft *itemAsCraft = dynamic_cast<const ACraft *>(currentItem);
             if (itemAsCraft) {
                 int craftMaxPassengers = itemAsCraft->GetMaxPassengers();
-                int craftMaxMass = static_cast<int>(itemAsCraft->GetMaxMass()) - static_cast<int>(itemAsCraft->GetMass());
-                description += "\n\nMax Mass: " + std::to_string(craftMaxMass) + " kg" + "\nMax Passengers: " + std::to_string(craftMaxPassengers);
+                float craftMaxMass = itemAsCraft->GetMaxMass() - itemAsCraft->GetMass();
+                description += "\n\nMax Mass: " + RoundFloatToPrecision(craftMaxMass, 1) + " kg" + "\nMax Passengers: " + std::to_string(craftMaxPassengers);
             } else {
                 const Actor *itemAsActor = dynamic_cast<const Actor *>(currentItem);
                 if (itemAsActor) {
@@ -1364,7 +1363,6 @@ void BuyMenuGUI::Update()
         std::string description = "";
 
         if (pItem && pItem->m_pEntity) {
-            //description = (pItem->m_pEntity->GetDescription() != "") ? pItem->m_pEntity->GetDescription() : "-No Information Found-";
             description = pItem->m_pEntity->GetDescription();
             if (description.empty()) {
                 description = "-No Information Found-";

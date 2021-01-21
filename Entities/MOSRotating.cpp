@@ -464,6 +464,7 @@ void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet
             GibThis(blast);
             return;
         } else {
+            woundToAdd->SetCollidesWithTerrainWhileAttached(false);
             woundToAdd->SetParentOffset(parentOffsetToSet);
             woundToAdd->SetParent(this);
             m_AttachableAndWoundMass += woundToAdd->GetMass();
@@ -502,8 +503,10 @@ float MOSRotating::RemoveWounds(int numberOfWoundsToRemove, bool includePositive
             return 0.0F;
         }
         float woundDamage = m_Wounds.front()->GetBurstDamage();
-        m_AttachableAndWoundMass -= m_Wounds.front()->GetMass();
+        AEmitter *wound = m_Wounds.front();
+        m_AttachableAndWoundMass -= wound->GetMass();
         m_Wounds.pop_front();
+        delete wound;
         return woundDamage;
     };
 
@@ -1428,12 +1431,31 @@ void MOSRotating::Update() {
         m_Rotation += radsToGo * m_OrientToVel * velInfluence;
     }
 
-    for (AEmitter *wound : m_Wounds) {
-        RTEAssert(wound, "Broken wound AEmitter");
+    AEmitter *wound = nullptr;
+    for (std::list<AEmitter *>::iterator woundIterator = m_Wounds.begin(); woundIterator != m_Wounds.end(); ) {
+        wound = *woundIterator;
+        RTEAssert(wound && wound->IsAttachedTo(this), "Broken wound AEmitter");
+        ++woundIterator;
         wound->Update();
+
+        if (wound->IsSetToDelete() || (wound->GetLifetime() > 0 && wound->GetAge() > wound->GetLifetime())) {
+            m_Wounds.remove(wound);
+            m_AttachableAndWoundMass -= wound->GetMass();
+            delete wound;
+        } else {
+            Vector totalImpulseForce;
+            for (const std::pair<Vector, Vector> &impulseForce : wound->GetImpulses()) {
+                totalImpulseForce += impulseForce.first;
+            }
+            totalImpulseForce *= wound->GetJointStiffness();
+
+            if (!totalImpulseForce.IsZero()) { AddImpulseForce(totalImpulseForce, wound->GetApplyTransferredForcesAtOffset() ? wound->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
+
+            wound->ClearImpulseForces();
+        }
     }
 
-    Attachable *attachable = 0;
+    Attachable *attachable = nullptr;
     for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
         attachable = *attachableIterator;
         RTEAssert(attachable, "Broken Attachable!");

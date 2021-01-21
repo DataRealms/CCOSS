@@ -548,7 +548,7 @@ void AEmitter::Update()
         m_LastEmitTmr.Reset();
 
         // Apply recoil/push effects. Joint stiffness will take effect when these are transferred to the parent.
-        m_ImpulseForces.push_back({pushImpulses, Vector()});
+        if (!pushImpulses.IsZero()) { AddImpulseForce(pushImpulses); }
 
         // Count the the damage caused by the emissions, and only if we're not bursting
         if (!m_BurstTriggered)

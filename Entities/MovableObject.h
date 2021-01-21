@@ -1095,7 +1095,7 @@ friend class Atom;
 		RTEAssert(offset.GetLargest() < 5000, "HUEG IMPULSE FORCE OFFSET");
 #endif
 
-		m_ImpulseForces.push_back(std::make_pair(impulse, offset));
+        m_ImpulseForces.push_back({impulse, offset});
 	}
 
 
@@ -1427,6 +1427,11 @@ friend class Atom;
 
 	void SetForceOffset(int n, Vector v) { if (n > 0 && n < m_Forces.size()) m_Forces[n].second = v; }
 
+    /// <summary>
+    /// Gets the pairs of impulse forces and their offsets that have to be applied.
+    /// </summary>
+    /// <returns>A constant reference to the deque of impulses for this MovableObject.</returns>
+    const std::deque <std::pair<Vector, Vector>> &GetImpulses() { return m_ImpulseForces; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetImpulsesCount()

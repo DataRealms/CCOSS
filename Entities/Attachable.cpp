@@ -390,6 +390,8 @@ namespace RTE {
 		if (newParent) {
 			m_Parent = newParent;
 			m_Team = newParent->GetTeam();
+			m_JointPos = m_Parent->GetPos() + m_Parent->RotateOffset(GetParentOffset());
+			m_Pos = m_JointPos - RotateOffset(m_JointOffset);
 			if (m_CollidesWithTerrainWhileAttached) { AddOrRemoveAtomsFromRootParentAtomGroup(true); }
 		} else {
 			m_RootMOID = m_MOID;

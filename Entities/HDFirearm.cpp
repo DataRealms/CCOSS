@@ -35,7 +35,9 @@ void HDFirearm::Clear()
     m_pMagazine = 0;
 
     m_pFlash = 0;
+    m_PreFireSound.Reset();
     m_FireSound.Reset();
+    m_FireEchoSound.Reset();
     m_ActiveSound.Reset();
     m_DeactivationSound.Reset();
     m_EmptySound.Reset();
@@ -106,7 +108,9 @@ int HDFirearm::Create(const HDFirearm &reference) {
     HeldDevice::Create(reference);
 
     m_pMagazineReference = reference.m_pMagazineReference;
+    m_PreFireSound = reference.m_PreFireSound;
     m_FireSound = reference.m_FireSound;
+    m_FireEchoSound = reference.m_FireEchoSound;
     m_ActiveSound = reference.m_ActiveSound;
     m_DeactivationSound = reference.m_DeactivationSound;
     m_EmptySound = reference.m_EmptySound;
@@ -163,13 +167,19 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader) {
             m_pFlash->SetDeleteWhenRemovedFromParent(true);
             m_pFlash->SetCollidesWithTerrainWhileAttached(false);
         }
-    } else if (propName == "FireSound") {
+    } else if (propName == "PreFireSound") {
+        reader >> m_PreFireSound;
+        m_DeactivationSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::IGNORE_PLAY);
+    } else if (propName == "FireSound")
         reader >> m_FireSound;
+    else if (propName == "FireEchoSound") {
+        reader >> m_FireEchoSound;
+        m_FireEchoSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::RESTART);
     } else if (propName == "ActiveSound") {
         reader >> m_ActiveSound;
-        m_ActiveSound.SetAffectedByGlobalPitch(false); //Active sound (i.e. weapon spinup) modifies its pitch, so it has to account for global pitch on its own.
     } else if (propName == "DeactivationSound") {
         reader >> m_DeactivationSound;
+        m_DeactivationSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::IGNORE_PLAY);
     } else if (propName == "EmptySound") {
         reader >> m_EmptySound;
     } else if (propName == "ReloadStartSound") {
@@ -235,8 +245,12 @@ int HDFirearm::Save(Writer &writer) const
     writer << m_pMagazine;
     writer.NewProperty("Flash");
     writer << m_pFlash;
+    writer.NewProperty("PreFireSound");
+    writer << m_PreFireSound;
     writer.NewProperty("FireSound");
     writer << m_FireSound;
+    writer.NewProperty("FireEchoSound");
+    writer << m_FireEchoSound;
     writer.NewProperty("ActiveSound");
     writer << m_ActiveSound;
     writer.NewProperty("DeactivationSound");
@@ -291,9 +305,14 @@ int HDFirearm::Save(Writer &writer) const
 
 void HDFirearm::Destroy(bool notInherited)
 {
+    m_PreFireSound.Stop();
     m_FireSound.Stop();
+    m_FireEchoSound.Stop();
     m_ActiveSound.Stop();
     m_DeactivationSound.Stop();
+    m_EmptySound.Stop();
+    m_ReloadStartSound.Stop();
+    m_ReloadEndSound.Stop();
 
     if (!notInherited)
         HeldDevice::Destroy();
@@ -540,13 +559,14 @@ void HDFirearm::RestDetection()
 // Description:     Activates one of this HDFirearm's features. Analogous to 'pulling
 //                  the trigger'.
 
-void HDFirearm::Activate()
-{
+void HDFirearm::Activate() {
+    bool wasActivated = m_Activated;
     HeldDevice::Activate();
 
-    // Play the pre-fire sound
-    if (!IsReloading() && !m_ActiveSound.IsBeingPlayed())
-        m_ActiveSound.Play(this->m_Pos);
+    if (!IsReloading()) {
+        if (!m_ActiveSound.IsBeingPlayed()) { m_ActiveSound.Play(this->m_Pos); }
+        if (!wasActivated && !m_PreFireSound.IsBeingPlayed()) { m_PreFireSound.Play(this->m_Pos); }
+    }
 }
 
 
@@ -556,18 +576,14 @@ void HDFirearm::Activate()
 // Description:     Deactivates one of this HDFirearm's features. Analogous to 'releasing
 //                  the trigger'.
 
-void HDFirearm::Deactivate()
-{
+void HDFirearm::Deactivate() {
+    bool wasActivated = m_Activated;
     HeldDevice::Deactivate();
     m_FiredOnce = false;
 
-    // Stop any looping fire sounds
-    if (m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed())
-        m_FireSound.Stop();
-
-    // Play the post-fire sound
-    if (!m_DeactivationSound.IsBeingPlayed())
-        m_DeactivationSound.Play(m_Pos);
+    m_PreFireSound.Stop();
+    if (m_FireSound.GetLoopSetting() == -1) { m_FireSound.Stop(); }
+    if (wasActivated && m_pMagazine && !m_pMagazine->IsEmpty() && !m_DeactivationSound.IsBeingPlayed()) { m_DeactivationSound.Play(m_Pos); }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -672,6 +688,8 @@ void HDFirearm::Update()
 {
     HeldDevice::Update();
 
+    if (m_PreFireSound.IsBeingPlayed()) { m_PreFireSound.SetPosition(m_Pos); }
+    if (m_FireSound.IsBeingPlayed()) { m_FireSound.SetPosition(m_Pos); }
     if (m_ActiveSound.IsBeingPlayed()) { m_ActiveSound.SetPosition(m_Pos); }
     if (m_DeactivationSound.IsBeingPlayed()) { m_DeactivationSound.SetPosition(m_Pos); }
 
@@ -689,8 +707,7 @@ void HDFirearm::Update()
 
     if (m_pMagazine && !m_pMagazine->IsEmpty())
     {
-        if (m_Activated)
-        {
+        if (m_Activated && !m_PreFireSound.IsBeingPlayed()) {
 
             // Get the parent root of this AEmitter
 // TODO: Potentially get this once outside instead, like in attach/detach")
@@ -889,6 +906,7 @@ void HDFirearm::Update()
     {
         // Play empty pin click sound.
         m_EmptySound.Play(m_Pos);
+        m_DeactivationSound.Play(m_Pos);
         // Indicate that we have clicked once during the current activation. 
         m_AlreadyClicked = true;
 
@@ -908,6 +926,8 @@ void HDFirearm::Update()
             m_ActivationTimer.Reset();
             m_ActivationTimer.Reset();
             m_LastFireTmr.Reset();
+
+            if (m_Activated) { m_PreFireSound.Play(); }
         }
 
         m_Reloading = false;
@@ -920,6 +940,7 @@ void HDFirearm::Update()
         // Reset the click indicator.
         m_AlreadyClicked = false;
 
+        m_PreFireSound.Stop();
         // Stop any looping activation sounds
         if (m_FireSound.GetLoopSetting() == -1)// && m_FireSound.IsBeingPlayed())
             m_FireSound.Stop();
@@ -961,8 +982,12 @@ void HDFirearm::Update()
 
         // Play firing sound
         // Only start playing if it's not a looping fire sound that is already playing, and if there's a mag
-        if (!(m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed()) && m_pMagazine)
-            m_FireSound.Play(m_Pos);
+        if (m_pMagazine) {
+            if (!(m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed())) {
+                m_FireSound.Play(m_Pos);
+            }
+            m_FireEchoSound.Play(m_Pos);
+        }
     }
     else {
         m_Recoiled = false;
@@ -983,13 +1008,13 @@ void HDFirearm::Update()
                 if (m_Activated && !m_Reloading && m_ActivationTimer.GetElapsedSimTimeMS() < m_ActivationDelay)
                 {
                     animDuration = (int)LERP(0, m_ActivationDelay, (float)(m_SpriteAnimDuration * 10), (float)m_SpriteAnimDuration, m_ActivationTimer.GetElapsedSimTimeMS());
-                    g_AudioMan.SetSoundPitch(&m_ActiveSound, LERP(0, m_ActivationDelay, 0, 1.0, m_ActivationTimer.GetElapsedSimTimeMS()) * g_AudioMan.GetGlobalPitch());
+                    m_ActiveSound.SetPitch(LERP(0, m_ActivationDelay, 0, 1.0, m_ActivationTimer.GetElapsedSimTimeMS()));
                 }
                 // Spin down
                 if ((!m_Activated || m_Reloading) && m_LastFireTmr.GetElapsedSimTimeMS() < m_DeactivationDelay)
                 {
                     animDuration = (int)LERP(0, m_DeactivationDelay, (float)m_SpriteAnimDuration, (float)(m_SpriteAnimDuration * 10), m_LastFireTmr.GetElapsedSimTimeMS());
-                    g_AudioMan.SetSoundPitch(&m_ActiveSound, LERP(0, m_DeactivationDelay, 1.0, 0, m_LastFireTmr.GetElapsedSimTimeMS()) * g_AudioMan.GetGlobalPitch());
+                    m_ActiveSound.SetPitch(LERP(0, m_DeactivationDelay, 1.0, 0, m_LastFireTmr.GetElapsedSimTimeMS()));
                 }
 
                 if (animDuration > 0 && !(m_Reloading && m_LastFireTmr.GetElapsedSimTimeMS() >= m_DeactivationDelay))

@@ -10,7 +10,7 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Game Version
-	static constexpr char *c_GameVersion = "Pre-Release 3";
+	static constexpr char *c_GameVersion = "Pre-Release 3.0";
 #pragma endregion
 
 #pragma region Filesystem Constants
@@ -82,7 +82,7 @@ namespace RTE {
 	static constexpr unsigned short c_MinimumDistanceForPanning = 50; //!< The minimum distance before which sound panning should not occur. Not relevant for immobile sounds or in splitscreen.
 	*/
 	static constexpr unsigned short c_DefaultAttenuationStartDistance = 100; //!< The default start distance for attenuating sounds. Individual sounds can have different values for this.
-	static constexpr unsigned int c_SoundMaxAudibleDistance = 100000; //!< The maximum distance at which any sound can possibly be heard, after which point it will have 0 volume. Arbitrary default suggested by FMOD.
+	static constexpr unsigned int c_SoundMaxAudibleDistance = 10000; //!< The maximum distance at which any sound can possibly be heard, after which point it will have 0 volume. Arbitrary default suggested by FMOD.
 #pragma endregion
 
 #pragma region Network Constants

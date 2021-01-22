@@ -1,4 +1,5 @@
-sources += files('ACDropShip.cpp',
+sources += files(
+'ACDropShip.cpp',
 'ACRocket.cpp',
 'ACrab.cpp',
 'ACraft.cpp',
@@ -39,8 +40,10 @@ sources += files('ACDropShip.cpp',
 'SceneLayer.cpp',
 'SceneObject.cpp',
 'SoundContainer.cpp',
+'SoundSet.cpp',
 'TDExplosive.cpp',
 'TerrainDebris.cpp',
 'TerrainObject.cpp',
 'ThrownDevice.cpp',
-'Turret.cpp')
+'Turret.cpp'
+)

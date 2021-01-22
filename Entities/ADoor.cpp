@@ -380,7 +380,7 @@ namespace RTE {
 			m_SpriteAnimDuration = LERP(0, m_MaxHealth, 10, m_InitialSpriteAnimDuration, m_Health);
 
 			if (!m_DoorMoveSound.IsBeingPlayed()) { m_DoorMoveSound.Play(m_Pos); }
-			g_AudioMan.SetSoundPitch(&m_DoorMoveSound, LERP(10, m_InitialSpriteAnimDuration, 2, 1, m_SpriteAnimDuration) * g_AudioMan.GetGlobalPitch());
+			m_DoorMoveSound.SetPitch(LERP(10, m_InitialSpriteAnimDuration, 2, 1, m_SpriteAnimDuration));
 
 			m_Health -= 0.4F;
 		}

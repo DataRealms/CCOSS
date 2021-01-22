@@ -716,7 +716,9 @@ namespace RTE {
 					channelPosition = wrappedChannelPosition;
 				}
 				if (distanceToChannelPosition > longestDistance) { longestDistance = distanceToChannelPosition; }
-				if (!sceneWraps) { break; }
+				if (!sceneWraps) {
+					break;
+				}
 			}
 		}
 

@@ -601,7 +601,7 @@ int LuaMan::Create() {
             .def("Stop", (bool (SoundContainer:: *)(int player)) &SoundContainer::Stop)
             .def("Restart", (bool (SoundContainer:: *)()) &SoundContainer::Restart)
             .def("Restart", (bool (SoundContainer:: *)(int player)) &SoundContainer::Restart)
-            .def("FadeOut", (bool (SoundContainer:: *)(int fadeOutTime)) &SoundContainer::FadeOut),
+            .def("FadeOut", &SoundContainer::FadeOut),
 
         class_<SoundSet>("SoundSet")
             .def(constructor<>())

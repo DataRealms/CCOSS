@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
+- Enabled DPI Awareness to fix issues with resolution settings when Windows scaling is enabled.
+
 ### Removed
 
 ***

@@ -23,11 +23,16 @@ deps = [
 compiler = meson.get_compiler('cpp')
 link_args=[]
 extra_args=[]
+preprocessor_flags = []
+preprocessor_flags_debug = []
+suffix=''
 
-if meson.get_compiler('cpp').get_id() == 'gcc'
+if meson.get_compiler('cpp').get_id() in ['gcc', 'clang']
   extra_args = ['-fpermissive', '-Wno-write-strings', '-Wno-unknown-pragmas']
   release_args = ['-w']
   suffix = 'x86_64'
+  preprocessor_flags = ['-DRELEASE_BUILD']
+  preprocessor_flags_debug = ['-DDEBUG_RELEASE_BUILD']
   if compiler.version().version_compare('<9')
     link_args += ['-lstdc++fs']
   endif
@@ -62,4 +67,4 @@ linuxdeploy = custom_target('linuxdeploy', build_by_default:false, output:'linux
 chmod = find_program('chmod')
 outname = 'cccp-x86_64.AppImage'
 
-custom_target('appimage', depends:[release, linuxdeploy], output:outname , command:[find_program('env'), 'OUTPUT='+outname, linuxdeploy.full_path(), '--appdir=@PRIVATE_DIR@', '-e', release, '-l', fmod, '-l', fmod.full_path()+'.11', '-d', desktop_file, '-i', icon_file, '-oappimage'])
+custom_target('appimage', depends:[release, linuxdeploy], output:outname , command:[find_program('env'), 'OUTPUT='+outname, linuxdeploy.full_path(), '--appdir=@PRIVATE_DIR@', '-e', release, '-l', fmod_so[0], '-d', desktop_file, '-i', icon_file, '-oappimage'])

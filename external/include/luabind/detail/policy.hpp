@@ -37,6 +37,7 @@
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/or.hpp>
 #include <boost/type_traits/add_reference.hpp>
+#include <boost/type_traits/remove_reference.hpp>
 #include <boost/type_traits/is_pointer.hpp>
 #include <boost/type_traits/is_base_and_derived.hpp>
 #include <boost/bind/arg.hpp>
@@ -596,12 +597,25 @@ namespace luabind { namespace detail
 			int flags = object_rep::owner;
 			if (crep->has_holder())
 			{
-				new(held) T(ref);
-				object_ptr = held;
 				if (LUABIND_TYPE_INFO_EQUAL(LUABIND_TYPEID(T), crep->const_holder_type()))
 				{
+					new(held) T(ref);
+					object_ptr = held;
 					flags |= object_rep::constant;
 					destructor = crep->const_holder_destructor();
+				}
+				else if (LUABIND_TYPE_INFO_EQUAL(LUABIND_TYPEID(T), crep->holder_type()))
+				{
+					new(held) T(ref);
+					object_ptr = held;
+				}
+				else
+				{
+					assert(LUABIND_TYPE_INFO_EQUAL(LUABIND_TYPEID(T), crep->type()));
+					std::auto_ptr<T> obj(new T(ref));
+					crep->construct_holder()(held, obj.get());
+					object_ptr = held;
+					obj.release();
 				}
 			}
 			else
@@ -994,6 +1008,18 @@ namespace luabind { namespace detail
 		}
 
 		template<class T>
+		T apply(lua_State* L, by_const_reference<T>, int index)
+		{
+			return static_cast<T>(static_cast<int>(lua_tonumber(L, index)));
+		}
+
+		template<class T>
+		static int match(lua_State* L, by_const_reference<T>, int index)
+		{
+			if (lua_isnumber(L, index)) return 0; else return -1;
+		}
+
+		template<class T>
 		void converter_postcall(lua_State*, T, int) {}
 	};
 /*
@@ -1124,7 +1150,7 @@ namespace luabind { namespace detail
 //							is_lua_functor<T>
 //						  , functor_converter<Direction>
 //						  , eval_if<
-								boost::is_enum<T>
+								boost::is_enum<typename boost::remove_reference<T>::type>
 							  , enum_converter<Direction>
 							  , eval_if<
 									is_nonconst_pointer<T>
@@ -1279,7 +1305,8 @@ namespace luabind { namespace detail
 
 namespace luabind { namespace
 {
-#if defined(__BORLANDC__) || (BOOST_VERSION == 103400 && defined(__GNUC__))
+#if defined(__GNUC__) && \
+  (__GNUC__ * 100 + __GNUC_MINOR__ <= 400 || BOOST_VERSION <= 103401)
   static inline boost::arg<0> return_value()
   {
 	  return boost::arg<0>();

@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Executable can be compiled as 64bit.
+
 - New `Settings.ini` property `MeasureModuleLoadTime = 0/1` to measure the duration of module loading (archived module extraction included). For benchmarking purpuses.
 
 - `Color` object's RGB values can now be set with index number.  
@@ -18,13 +20,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Pressing escape when a buy menu is open now closes it instead of pausing the game.
+
 ### Fixed
+
+- Enabled DPI Awareness to fix issues with resolution settings when Windows scaling is enabled.
 
 ### Removed
 
 ***
 
-## [Unreleased]
+## [0.1.0 pre-release 3.0][0.1.0-pre3.0] - 2020/12/25
 
 ### Added
 
@@ -649,3 +655,5 @@ Note: For a log of changes made prior to the commencement of the open source com
 [unreleased]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/compare/master...cortex-command-community:development
 [0.1.0-pre1]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/releases/tag/v0.1.0-pre1
 [0.1.0-pre2]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/releases/tag/v0.1.0-pre2
+[0.1.0-pre3.0]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/releases/tag/v0.1.0-pre3.0
+

@@ -55,7 +55,7 @@ distribution.
 
 #if defined( _DEBUG )
 #	if defined( _MSC_VER )
-#		define MPASSERT( x )		if ( !(x)) { _asm { int 3 } }
+#		define MPASSERT( x )		if ( !(x)) { __debugbreak(); }
 #	else
 #		include <assert.h>
 #		define MPASSERT assert

@@ -133,7 +133,9 @@ namespace RTE {
 		Writer & operator<<(const int &var) { *m_Stream << var; return *this; }
 		Writer & operator<<(const unsigned int &var) { *m_Stream << var; return *this; }
 		Writer & operator<<(const long &var) { *m_Stream << var; return *this; }
+		Writer & operator<<(const long long &var) { *m_Stream << var; return *this; }
 		Writer & operator<<(const unsigned long &var) { *m_Stream << var; return *this; }
+		Writer & operator<<(const unsigned long long &var) { *m_Stream << var; return *this; }
 		Writer & operator<<(const float &var) { *m_Stream << var; return *this; }
 		Writer & operator<<(const double &var) { *m_Stream << var; return *this; }
 		Writer & operator<<(const char *var) { *m_Stream << var; return *this; }

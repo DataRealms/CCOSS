@@ -14,6 +14,8 @@
 
 namespace RTE {
 
+	class SoundContainer;
+
 	/// <summary>
 	/// The singleton manager of sound effect and music playback.
 	/// </summary>

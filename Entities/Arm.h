@@ -314,7 +314,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Whether this Arm is holding anyhting.
 
-    bool IsReaching() { return !m_TargetPoint.IsZero(); }
+    bool IsReaching() { return !m_TargetPosition.IsZero(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -358,14 +358,9 @@ ClassInfoGetters
 
     bool HoldsSomething() { return m_pHeldMO != 0; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this MovableObject. Supposed to be done every frame.
-// Arguments:       None.
-// Return value:    None.
-
+    /// <summary>
+    /// Updates this Arm. Supposed to be done every frame.
+    /// </summary>
 	void Update() override;
 
 
@@ -383,18 +378,13 @@ ClassInfoGetters
 
     void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  DrawHand
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this Arm's hand's graphical representation to a BITMAP of
-//                  choice.
-// Arguments:       A pointer to a BITMAP to draw on.
-//                  The absolute position of the target bitmap's upper left corner in the Scene.
-//                  In which mode to draw in. See the DrawMode enumeration for the modes.
-// Return value:    None.
-
-	void DrawHand(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor) const;
+    /// <summary>
+    /// Draws this Arm's hand's graphical representation to a BITMAP of choice.
+    /// </summary>
+    /// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
+    /// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
+    /// <param name="mode">Which mode to draw in. See the DrawMode enumeration for available modes.</param>
+	void DrawHand(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -432,7 +422,7 @@ protected:
     Vector m_HandOffset;
     // The target position that this Arm's hand is reaching after.
     // If (0, 0), the Arm is currently not reaching after anything.
-    Vector m_TargetPoint;
+    Vector m_TargetPosition;
     // The target offset relative to m_JointPos that this Arm's hand is moving to while not reaching for or doing anything else.
     Vector m_IdleOffset;
     // How fast the arm moves to a reach target,
@@ -449,6 +439,19 @@ protected:
 
 private:
 
+
+#pragma region Update Breakdown
+    /// <summary>
+    /// Updates the current hand offset for this Arm. Should only be called from Update.
+    /// If the Arm is attached, the current hand offset is based on the target offset and move speed, and whether the Arm should idle or not, otherwise it puts it in a reasonable position.
+    /// </summary>
+    void UpdateCurrentHandOffset();
+
+    /// <summary>
+    /// Updates the frame for this Arm. Should only be called from Update.
+    /// </summary>
+    void UpdateArmFrame();
+#pragma endregion
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

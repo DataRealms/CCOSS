@@ -248,6 +248,7 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         AddAttachable(m_pFGArm);
         if (!m_pFGArm->GetDamageMultiplierSetInINI()) { m_pFGArm->SetDamageMultiplier(1.0F); }
         m_pFGArm->SetDrawnAfterParent(true);
+        m_pFGArm->SetDrawnNormallyByParent(false);
     } else if (propName == "BGArm") {
         RemoveAttachable(m_pBGArm);
         m_pBGArm = new Arm;
@@ -4309,6 +4310,10 @@ void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos
 
 void AHuman::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     Actor::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
+
+    // Note: For some reason the ordering of the attachables list can get messed up. The most important thing here is that the FGArm is on top of everything else.
+    if (m_pFGArm) { m_pFGArm->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
+
     //TODO simplify this complex if check when arm is cleaned up like turret so all it can hold are HeldDevices and children
     // Draw background Arm's hand after the HeldDevice of FGArm is drawn if the FGArm is holding a weapon.
     DrawMode realMode = (mode == g_DrawColor && m_FlashWhiteMS) ? g_DrawWhite : mode;

@@ -2314,8 +2314,7 @@ void BuyMenuGUI::TryPurchase()
 		if (pCraft)
 		{
 			// Enforce max mass
-			if (pCraft->GetMaxMass() > 0 && GetTotalOrderMass() > pCraft->GetMaxMass() && m_EnforceMaxMassConstraint)
-			{
+			if (m_EnforceMaxMassConstraint && pCraft->GetMaxMass() > 0 && GetTotalOrderMass() > pCraft->GetMaxMass()) {
 				g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
 				// Set the notification blinker
 				m_BlinkMode = MAXMASS;
@@ -2367,10 +2366,9 @@ void BuyMenuGUI::UpdateTotalMassLabel(const ACraft * pCraft, GUILabel * pLabel)
 #else
 			strcpy(buf, "NO CARGO SPACE");
 #endif
-	}
-	else
-		std::snprintf(buf, sizeof(buf), "%d", (int)GetTotalOrderMass());
-
+    } else {
+        std::snprintf(buf, sizeof(buf), "%d", (int)GetTotalOrderMass());
+    }
 	pLabel->SetText(buf);
 }
 

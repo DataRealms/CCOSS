@@ -7,6 +7,9 @@
 //                  data@datarealms.com
 //                  http://www.datarealms.com
 
+// Suppress compiler warning about unrecognized escape sequence on line 183
+#pragma warning( disable : 4129 )
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files

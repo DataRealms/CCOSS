@@ -155,41 +155,45 @@ bool PresetMan::LoadDataModule(string moduleName, bool official, ProgressCallbac
 bool PresetMan::LoadAllDataModules() {
 	std::chrono::steady_clock::time_point moduleLoadTimerStart = std::chrono::high_resolution_clock::now();
 
-	// Destroy and possible loaded modules
-	g_PresetMan.Destroy();
+	// Destroy any possible loaded modules
+	Destroy();
 
 	FindAndExtractZippedModules();
 
 	// Load all the official modules first!
 	std::array<std::string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
 	for (const std::string &officialModule : officialModules) {
-		if (!LoadDataModule(officialModule, true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+		if (!LoadDataModule(officialModule, true, &LoadingGUI::LoadingSplashProgressReport)) {
+			return false;
+		}
 	}
 
 	// If a single module is specified, skip loading all other unofficial modules and load specified module only.
-	if (m_SingleModuleToLoad != "Base.rte" && m_SingleModuleToLoad != "") {
-		if (!LoadDataModule(m_SingleModuleToLoad, false, &LoadingGUI::LoadingSplashProgressReport)) { return false; } else { return true; }
+	if (!m_SingleModuleToLoad.empty() && std::find(officialModules.begin(), officialModules.end(), m_SingleModuleToLoad) == officialModules.end()) {
+		if (!LoadDataModule(m_SingleModuleToLoad, false, &LoadingGUI::LoadingSplashProgressReport)) {
+			g_ConsoleMan.PrintString("ERROR: Failed to load DataModule \"" + m_SingleModuleToLoad + "\"! Only official modules were loaded!");
+			return false;
+		}
 	} else {
-		al_ffblk moduleInfo;
-		int moduleID = 0;
-
-		for (int result = al_findfirst("*.rte", &moduleInfo, FA_DIREC | FA_RDONLY); result == 0; result = al_findnext(&moduleInfo)) {
-			if (!g_SettingsMan.IsModDisabled(moduleInfo.name)) {
-				moduleID = GetModuleID(moduleInfo.name);
-				// Make sure we don't load properties of already loaded official modules
-				if (strlen(moduleInfo.name) > 0 && (moduleID < 0 || moduleID >= GetOfficialModuleCount()) && string(moduleInfo.name) != "Metagames.rte" && string(moduleInfo.name) != "Scenes.rte") {
+		for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory())) {
+			std::string directoryEntryPath = directoryEntry.path().generic_string();
+			if (std::filesystem::is_directory(directoryEntryPath) && std::regex_match(directoryEntryPath, std::regex(".*\.rte"))) {
+				std::string moduleName = directoryEntryPath.substr(directoryEntryPath.find_last_of('/') + 1, std::string::npos);
+				if (!g_SettingsMan.IsModDisabled(moduleName) && (std::find(officialModules.begin(), officialModules.end(), moduleName) == officialModules.end() && moduleName != "Metagames.rte" && moduleName != "Scenes.rte")) {
+					int moduleID = GetModuleID(moduleName);
 					// NOTE: LoadDataModule can return false (especially since it may try to load already loaded modules, which is okay) and shouldn't cause stop, so we can ignore its return value here.
-                    LoadDataModule(string(moduleInfo.name), false, &LoadingGUI::LoadingSplashProgressReport);
+					if (moduleID < 0 || moduleID >= GetOfficialModuleCount()) { LoadDataModule(moduleName, false, &LoadingGUI::LoadingSplashProgressReport); }
 				}
 			}
 		}
-		// Close the file search to avoid memory leaks
-		al_findclose(&moduleInfo);
+		// Load scenes and MetaGames AFTER all other techs etc are loaded; might be referring to stuff in user mods.
+		if (!LoadDataModule("Scenes.rte", false, &LoadingGUI::LoadingSplashProgressReport)) {
+			return false;
+		}
+		if (!LoadDataModule("Metagames.rte", false, &LoadingGUI::LoadingSplashProgressReport)) {
+			return false;
+		}
 	}
-
-	// Load scenes and MetaGames AFTER all other techs etc are loaded; might be referring to stuff in user mods
-	if (!g_PresetMan.LoadDataModule("Scenes.rte", false, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!g_PresetMan.LoadDataModule("Metagames.rte", false, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
 
 	if (g_SettingsMan.MeasureModuleLoadTime()) {
 		std::chrono::milliseconds moduleLoadElapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - moduleLoadTimerStart);

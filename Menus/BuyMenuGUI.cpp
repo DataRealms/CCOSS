@@ -2307,12 +2307,9 @@ void BuyMenuGUI::TryPurchase()
         m_BlinkMode = NOFUNDS;
         m_BlinkTimer.Reset();
 		return;
-	}
-	else
-	{
+	} else {
 		const ACraft * pCraft = dynamic_cast<const ACraft *>(m_pSelectedCraft);
-		if (pCraft)
-		{
+		if (pCraft) {
 			// Enforce max mass
 			if (m_EnforceMaxMassConstraint && pCraft->GetMaxMass() > 0 && GetTotalOrderMass() > pCraft->GetMaxMass()) {
 				g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
@@ -2335,9 +2332,7 @@ void BuyMenuGUI::TryPurchase()
 	}
 
 	// Only allow purchase if there is a delivery craft and enough funds
-	if (m_pSelectedCraft && std::floor(GetTotalOrderCost()) <= std::floor(g_ActivityMan.GetActivity()->GetTeamFunds(m_pController->GetTeam())))
-	{
-		//            m_pBuyButton->OnKeyPress(0, 0);
+	if (m_pSelectedCraft && std::floor(GetTotalOrderCost()) <= std::floor(g_ActivityMan.GetActivity()->GetTeamFunds(m_pController->GetTeam()))) {
 		m_PurchaseMade = true;
 		g_GUISound.PurchaseMadeSound()->Play(m_pController->GetPlayer());
 	}

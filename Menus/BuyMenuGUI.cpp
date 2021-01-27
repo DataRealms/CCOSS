@@ -2351,25 +2351,23 @@ void BuyMenuGUI::TryPurchase()
 
 void BuyMenuGUI::UpdateTotalMassLabel(const ACraft * pCraft, GUILabel * pLabel)
 {
-	if (!pLabel)
-		return;
-
-	char buf[64];
-
-	if (pCraft && pCraft->GetMaxMass() != 0)
-	{
-		if (pCraft->GetMaxMass() > 0)
-			std::snprintf(buf, sizeof(buf), "%d / %d", (int)GetTotalOrderMass() - (int)GetCraftMass(), (int)pCraft->GetMaxMass() - (int)GetCraftMass());
-		else
-#ifdef _WIN32
-			strcpy_s(buf, sizeof(buf), "NO CARGO SPACE");
-#else
-			strcpy(buf, "NO CARGO SPACE");
-#endif
-    } else {
-        std::snprintf(buf, sizeof(buf), "%d", (int)GetTotalOrderMass());
+    if (!pLabel) {
+        return;
     }
-	pLabel->SetText(buf);
+
+    std::string display;
+
+    if (pCraft && pCraft->GetMaxMass() != 0) {
+        if (pCraft->GetMaxMass() > 0) {
+            display = RoundFloatToPrecision(GetTotalOrderMass() - GetCraftMass(), 1) + " / " + RoundFloatToPrecision(pCraft->GetMaxMass() - GetCraftMass(), 1);
+        } else {
+            display = "NO CARGO SPACE";
+        }
+    } else {
+        display = RoundFloatToPrecision(GetTotalOrderMass(), 1);
+    }
+
+	pLabel->SetText(display);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

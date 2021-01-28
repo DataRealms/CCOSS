@@ -943,7 +943,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    The max recommend total mass for this Actor
 
-	float GetMaxMass() const { return m_MaxMass; }
+	float GetMaxMass() const { return m_MaxInventoryMass; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1394,9 +1394,9 @@ protected:
     Vector m_ViewPoint;
     // The inventory of carried MovableObjects of this Actor. They are also Owned by this.
     std::deque<MovableObject *> m_Inventory;
-    // The max recommended weight of this Actor, including himself and all his inventory
-    // If this is 0 or less, there's no recommended limit
-    float m_MaxMass;
+    // The max combined weight of items in this Actor's inventory.
+    // If this is -1 there's no limit.
+    float m_MaxInventoryMass;
     // The device that can/will be picked up
     HeldDevice *m_pItemInReach;
     // Whether the pie menu associated with this needs updating

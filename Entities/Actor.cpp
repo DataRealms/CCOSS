@@ -104,7 +104,7 @@ void Actor::Clear()
     m_HolsterOffset.Reset();
     m_ViewPoint.Reset();
     m_Inventory.clear();
-    m_MaxMass = 0;
+    m_MaxInventoryMass = 0;
     m_pItemInReach = 0;
     m_PieNeedsUpdate = false;
     m_HUDStack = 0;
@@ -250,7 +250,7 @@ int Actor::Create(const Actor &reference)
          ++itr)
         m_Inventory.push_back(dynamic_cast<MovableObject *>((*itr)->Clone()));
 
-    m_MaxMass = reference.m_MaxMass;
+    m_MaxInventoryMass = reference.m_MaxInventoryMass;
 
     for (list<PieMenuGUI::Slice>::const_iterator itr = reference.m_PieSlices.begin(); itr != reference.m_PieSlices.end(); ++itr)
         m_PieSlices.push_back(*itr);
@@ -383,8 +383,8 @@ int Actor::ReadProperty(std::string propName, Reader &reader)
         RTEAssert(pInvMO, "Reader has been fed bad Inventory MovableObject in Actor::Create");
         m_Inventory.push_back(pInvMO);
     }
-    else if (propName == "MaxMass")
-        reader >> m_MaxMass;
+    else if (propName == "MaxMass" || propName == "MaxInventoryMass")
+        reader >> m_MaxInventoryMass;
     else if (propName == "AddPieSlice")
     {
         PieMenuGUI::Slice newSlice;
@@ -461,8 +461,8 @@ int Actor::Save(Writer &writer) const
         writer.NewProperty("AddInventory");
         writer << **itr;
     }
-    writer.NewProperty("MaxMass");
-    writer << m_MaxMass;
+    writer.NewProperty("MaxInventoryMass");
+    writer << m_MaxInventoryMass;
     for (list<PieMenuGUI::Slice>::const_iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
     {
         writer.NewProperty("AddPieSlice");

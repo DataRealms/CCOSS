@@ -2371,26 +2371,21 @@ void BuyMenuGUI::UpdateTotalMassLabel(const ACraft * pCraft, GUILabel * pLabel)
 // Description:     Updates the text of the specified label to reflect the total passenger count of
 //                  all the items in teh order box.
 
-void BuyMenuGUI::UpdateTotalPassengersLabel(const ACraft * pCraft, GUILabel * pLabel)
-{
-	if (!pLabel)
-		return;
+void BuyMenuGUI::UpdateTotalPassengersLabel(const ACraft * pCraft, GUILabel * pLabel) {
+    if (!pLabel) {
+        return;
+    }
 
-	char buf[64];
+    std::string display;
 
-	if (pCraft && pCraft->GetMaxPassengers() != 0)
-	{
-		if (pCraft->GetMaxPassengers() > 0)
-			std::snprintf(buf, sizeof(buf), "%d / %d", GetTotalOrderPassengers(), pCraft->GetMaxPassengers());
-		else 
-			std::snprintf(buf, sizeof(buf), "%d", GetTotalOrderPassengers());
-	}
-	else
-#ifdef _WIN32
-		strcpy_s(buf, sizeof(buf), "NO ROOM");
-#else
-		strcpy(buf, "NO ROOM");
-#endif
+    if (pCraft && pCraft->GetMaxPassengers() != 0) {
+        display = std::to_string(pCraft->GetMaxPassengers());
+        if (pCraft->GetMaxInventoryMass() > 0) {
+            display += " / " + std::to_string(pCraft->GetMaxInventoryMass());
+        }
+    } else {
+        display = "NO PASSENGER SPACE";
+    }
 
-	pLabel->SetText(buf);
+    pLabel->SetText(display);
 }

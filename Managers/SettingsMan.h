@@ -60,18 +60,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Recommended MOID count.</returns>
 		int RecommendedMOIDCount() const { return m_RecommendedMOIDCount; }
-
-		/// <summary>
-		/// Gets whether we're using additional Draws during MO's PreTravel and PostTravel to update MO layer this frame with more precision, or just data from the last frame with less precision.
-		/// </summary>
-		/// <returns>Whether precise collisions are enabled.</returns>
-		bool PreciseCollisions() const { return m_PreciseCollisions; }
-
-		/// <summary>
-		/// Sets whether to use additional Draws during MO's PreTravel and PostTravel to update MO layer this frame with more precision, or just data from the last frame with less precision.
-		/// </summary>
-		/// <param name="newValue">True for precise collisions.</param>
-		void SetPreciseCollisions(bool newValue) { m_PreciseCollisions = true /*newValue*/; }
 #pragma endregion
 
 #pragma region Gameplay Settings
@@ -364,7 +352,6 @@ namespace RTE {
 		bool m_ShowMetaScenes; //!< Show MetaScenes in editors and activities.
 
 		int m_RecommendedMOIDCount; //!< Recommended max MOID's before removing actors from scenes.
-		bool m_PreciseCollisions; //!<Whether to use additional Draws during MO's PreTravel and PostTravel to update MO layer this frame with more precision, or just uses data from the last frame with less precision.
 
 		bool m_LaunchIntoActivity; //!< Whether to skip the intro and main menu and launch directly into the set default activity instead.
 

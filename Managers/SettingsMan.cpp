@@ -36,7 +36,6 @@ namespace RTE {
 		m_ShowMetaScenes = false;
 
 		m_RecommendedMOIDCount = 240;
-		m_PreciseCollisions = true;
 
 		m_LaunchIntoActivity = false;
 
@@ -144,13 +143,6 @@ namespace RTE {
 			reader >> g_SceneMan.m_DefaultSceneName;
 		} else if (propName == "RecommendedMOIDCount") {
 			reader >> m_RecommendedMOIDCount;
-
-		/*
-		// Temporarily removed from settings file due to being buggy when disabled by user.
-		} else if (propName == "PreciseCollisions") {
-			reader >> m_PreciseCollisions;
-		*/
-
 		} else if (propName == "EnableParticleSettling") {
 			reader >> g_MovableMan.m_SettlingEnabled;
 		} else if (propName == "EnableMOSubtraction") {
@@ -301,12 +293,6 @@ namespace RTE {
 		writer.NewLineString("// Engine Settings", false);
 		writer.NewLine(false);
 		writer.NewPropertyWithValue("RecommendedMOIDCount", m_RecommendedMOIDCount);
-
-		/*
-		// Temporarily removed from settings file due to being buggy when disabled by user.
-		writer.NewPropertyWithValue("PreciseCollisions", m_PreciseCollisions);
-		*/
-
 		writer.NewPropertyWithValue("EnableParticleSettling", g_MovableMan.m_SettlingEnabled);
 		writer.NewPropertyWithValue("EnableMOSubtraction", g_MovableMan.m_MOSubtractionEnabled);
 		writer.NewPropertyWithValue("DeltaTime", g_TimerMan.GetDeltaTimeSecs());

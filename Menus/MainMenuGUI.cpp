@@ -352,8 +352,6 @@ int MainMenuGUI::Create(Controller *pController)
 	m_aOptionsCheckbox[SHOWFOREIGNITEMS]->SetCheck(g_SettingsMan.ShowForeignItems());
     m_aOptionsCheckbox[SHOWTOOLTIPS] = dynamic_cast<GUICheckbox *>(m_pGUIController->GetControl("ShowToolTipsCheckbox"));
 	m_aOptionsCheckbox[SHOWTOOLTIPS]->SetCheck(g_SettingsMan.ToolTips());
-	m_aOptionsCheckbox[PRECISECOLLISIONS] = dynamic_cast<GUICheckbox *>(m_pGUIController->GetControl("PreciseCollisionsCheckbox"));
-	m_aOptionsCheckbox[PRECISECOLLISIONS]->SetCheck(g_SettingsMan.PreciseCollisions());
 
     m_pResolutionCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("ComboResolution"));
     UpdateResolutionCombo();
@@ -648,7 +646,6 @@ void MainMenuGUI::Update()
 				g_SettingsMan.SetBlipOnRevealUnseen(m_aOptionsCheckbox[BLIPONREVEALUNSEEN]->GetCheck());
 				g_SettingsMan.SetShowForeignItems(m_aOptionsCheckbox[SHOWFOREIGNITEMS]->GetCheck());
 				g_SettingsMan.SetShowToolTips(m_aOptionsCheckbox[SHOWTOOLTIPS]->GetCheck());
-				g_SettingsMan.SetPreciseCollisions(m_aOptionsCheckbox[PRECISECOLLISIONS]->GetCheck());
 				g_SettingsMan.UpdateSettingsFile();
 			} else if (m_MenuScreen == MODMANAGERSCREEN) {
 				g_SettingsMan.UpdateSettingsFile();
@@ -1163,7 +1160,6 @@ void MainMenuGUI::Update()
 					g_SettingsMan.SetBlipOnRevealUnseen(m_aOptionsCheckbox[BLIPONREVEALUNSEEN]->GetCheck());
 					g_SettingsMan.SetShowForeignItems(m_aOptionsCheckbox[SHOWFOREIGNITEMS]->GetCheck());
 					g_SettingsMan.SetShowToolTips(m_aOptionsCheckbox[SHOWTOOLTIPS]->GetCheck());
-					g_SettingsMan.SetPreciseCollisions(m_aOptionsCheckbox[PRECISECOLLISIONS]->GetCheck());
 
 					g_SettingsMan.UpdateSettingsFile();
 				}

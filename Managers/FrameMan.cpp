@@ -1215,9 +1215,10 @@ namespace RTE {
 					BITMAP *targetBitmap = g_PostProcessMan.GetTempEffectBitmap(effectBitmap);
 					clear_to_color(targetBitmap, 0);
 
-					 fixed fAngle = fixmul(postEffect.m_Angle, radtofix_r);
+					Matrix newAngle;
+					newAngle.SetRadAngle(postEffect.m_Angle);
 
-					rotate_sprite(targetBitmap, effectBitmap, 0, 0, fAngle);
+					rotate_sprite(targetBitmap, effectBitmap, 0, 0, ftofix(newAngle.GetAllegroAngle()));
 					draw_trans_sprite(m_WorldDumpBuffer, targetBitmap, effectPosX, effectPosY);
 				}
 			}

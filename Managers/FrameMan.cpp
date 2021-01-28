@@ -137,6 +137,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void FrameMan::SetDisplaySwitchMode() const {
+		set_display_switch_mode(SWITCH_BACKGROUND);
+		set_display_switch_callback(SWITCH_OUT, DisplaySwitchOut);
+		set_display_switch_callback(SWITCH_IN, DisplaySwitchIn);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void FrameMan::ValidateResolution(int &resX, int &resY, int &resMultiplier) {
 		if (resX * resMultiplier > m_ScreenResX || resY * resMultiplier > m_ScreenResY) {
 			allegro_message("Resolution too high to fit display, overriding to fit!");
@@ -243,14 +251,11 @@ namespace RTE {
 			m_ResY = m_NewResY = 540;
 			m_ResMultiplier = m_NewResMultiplier = 1;
 		}
-			
+
 		// Clear the screen buffer so it doesn't flash pink
 		clear_to_color(screen, 0);
 
-		// Set the switching mode; what happens when the app window is switched to and from
-		set_display_switch_mode(SWITCH_BACKGROUND);
-		set_display_switch_callback(SWITCH_OUT, DisplaySwitchOut);
-		set_display_switch_callback(SWITCH_IN, DisplaySwitchIn);
+		SetDisplaySwitchMode();
 
 		// Sets the allowed color conversions when loading bitmaps from files
 		set_color_conversion(COLORCONV_MOST);
@@ -418,7 +423,7 @@ namespace RTE {
 			return -1;
 		}
 #ifdef __unix__
-		m_GfxDriver= (m_ResX * multiplier == m_ScreenResX && m_ResY * multiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
+		m_GfxDriver = (m_ResX * multiplier == m_ScreenResX && m_ResY * multiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
 #endif
 
 		// Need to save these first for recovery attempts to work (screen might be 0)
@@ -441,6 +446,9 @@ namespace RTE {
 			return 1;
 		}
 		set_palette(m_Palette);
+
+		SetDisplaySwitchMode();
+
 		m_ResMultiplier = multiplier;
 
 		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
@@ -513,9 +521,11 @@ namespace RTE {
 		m_ResX = m_NewResX = newResX;
 		m_ResY = m_NewResY = newResY;
 		m_ResMultiplier = m_NewResMultiplier = newMultiplier;
-		
+
 		RecreateBackBuffers();
 		set_palette(m_Palette);
+
+		SetDisplaySwitchMode();
 
 		g_ConsoleMan.PrintString("SYSTEM: Switched to different resolution.");
 		g_SettingsMan.UpdateSettingsFile();

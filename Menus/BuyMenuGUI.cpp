@@ -2356,10 +2356,10 @@ void BuyMenuGUI::UpdateTotalMassLabel(const ACraft * pCraft, GUILabel * pLabel)
         if (pCraft->GetMaxMass() > 0) {
             display = RoundFloatToPrecision(GetTotalOrderMass() - GetCraftMass(), 1) + " / " + RoundFloatToPrecision(pCraft->GetMaxMass() - GetCraftMass(), 1);
         } else {
-            display = "NO CARGO SPACE";
+            display = RoundFloatToPrecision(GetTotalOrderMass(), 1);
         }
     } else {
-        display = RoundFloatToPrecision(GetTotalOrderMass(), 1);
+        display = "NO CARGO SPACE";
     }
 
 	pLabel->SetText(display);

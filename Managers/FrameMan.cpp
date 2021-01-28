@@ -724,9 +724,8 @@ namespace RTE {
 		char fullFileName[256];
 
 		while (fileNumber < maxFileTrys) {
-			// Check for the file namebase001.bmp; if it exists, try 002, etc.
-			char *fileExtension = { (modeToSave == SaveBitmapMode::SingleBitmap || modeToSave == SaveBitmapMode::ScenePreviewDump) ? ".bmp" : ".png" };
-			std::snprintf(fullFileName, sizeof(fullFileName), "%s/%s%03i%s", System::GetScreenshotDirectory().c_str(), nameBase, fileNumber++, fileExtension);
+			// Check for the file namebase001.png; if it exists, try 002, etc.
+			std::snprintf(fullFileName, sizeof(fullFileName), "%s/%s%03i%s", System::GetScreenshotDirectory().c_str(), nameBase, fileNumber++, ".png");
 			if (!std::filesystem::exists(fullFileName)) {
 				break;
 			}
@@ -736,7 +735,7 @@ namespace RTE {
 
 		switch (modeToSave) {
 			case SingleBitmap:
-				if (bitmapToSave && save_bmp(fullFileName, bitmapToSave, m_Palette) == 0) {
+				if (bitmapToSave && save_png(fullFileName, bitmapToSave, m_Palette) == 0) {
 					g_ConsoleMan.PrintString("SYSTEM: Bitmap was dumped to: " + std::string(fullFileName));
 					return 0;
 				}
@@ -752,7 +751,7 @@ namespace RTE {
 					if (save_png(fullFileName, m_ScreenDumpBuffer, nullptr) == 0) {
 						g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + std::string(fullFileName));
 						return 0;
-					}		
+					}
 				}
 				break;
 			case ScenePreviewDump:
@@ -793,7 +792,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int FrameMan::SaveIndexedBitmap(char *fileName, BITMAP *bitmapToSave, PALETTE paletteToIndexWith) const {
-		save_bmp(fileName, bitmapToSave, paletteToIndexWith);
+		save_png(fileName, bitmapToSave, paletteToIndexWith);
 
 		int lastColorConversionMode = get_color_conversion();
 		set_color_conversion(COLORCONV_REDUCE_TO_256);
@@ -804,7 +803,7 @@ namespace RTE {
 		BITMAP *tempConvertingBitmap = create_bitmap_ex(8, bitmapToSave->w, bitmapToSave->h);
 		blit(tempLoadBitmap, tempConvertingBitmap, 0, 0, 0, 0, tempConvertingBitmap->w, tempConvertingBitmap->h);
 
-		int saveResult = save_bmp(fileName, tempConvertingBitmap, m_Palette);
+		int saveResult = save_png(fileName, tempConvertingBitmap, m_Palette);
 
 		set_color_conversion(lastColorConversionMode);
 		destroy_bitmap(tempLoadBitmap);

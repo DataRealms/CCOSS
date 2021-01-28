@@ -731,13 +731,13 @@ namespace RTE {
 			}
 		}
 
-		int worldDumpBufferBitDepth;
+		bool saveSuccess = false;
 
 		switch (modeToSave) {
 			case SingleBitmap:
 				if (bitmapToSave && save_png(fullFileName, bitmapToSave, m_Palette) == 0) {
 					g_ConsoleMan.PrintString("SYSTEM: Bitmap was dumped to: " + std::string(fullFileName));
-					return 0;
+					saveSuccess = true;
 				}
 				break;
 			case ScreenDump:
@@ -750,16 +750,15 @@ namespace RTE {
 					// nullptr for the PALETTE parameter here because we're saving a 24bpp file and it's irrelevant.
 					if (save_png(fullFileName, m_ScreenDumpBuffer, nullptr) == 0) {
 						g_ConsoleMan.PrintString("SYSTEM: Screen was dumped to: " + std::string(fullFileName));
-						return 0;
+						saveSuccess = true;
 					}
 				}
 				break;
 			case ScenePreviewDump:
 			case WorldDump:
-				worldDumpBufferBitDepth = (modeToSave == SaveBitmapMode::ScenePreviewDump) ? 32 : 24;
-				if (!m_WorldDumpBuffer || bitmap_color_depth(m_WorldDumpBuffer) != worldDumpBufferBitDepth || (m_WorldDumpBuffer->w != g_SceneMan.GetSceneWidth() || m_WorldDumpBuffer->h != g_SceneMan.GetSceneHeight())) {
+				if (!m_WorldDumpBuffer || (m_WorldDumpBuffer->w != g_SceneMan.GetSceneWidth() || m_WorldDumpBuffer->h != g_SceneMan.GetSceneHeight())) {
 					if (m_WorldDumpBuffer) { destroy_bitmap(m_WorldDumpBuffer); }
-					m_WorldDumpBuffer = create_bitmap_ex(worldDumpBufferBitDepth, g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight());
+					m_WorldDumpBuffer = create_bitmap_ex(32, g_SceneMan.GetSceneWidth(), g_SceneMan.GetSceneHeight());
 				}
 				if (modeToSave == ScenePreviewDump) {
 					DrawWorldDump(true);
@@ -770,23 +769,32 @@ namespace RTE {
 
 					if (SaveIndexedBitmap(fullFileName, scenePreviewDumpBuffer, m_Palette) == 0) {
 						g_ConsoleMan.PrintString("SYSTEM: Scene Preview was dumped to: " + std::string(fullFileName));
-						destroy_bitmap(scenePreviewDumpBuffer);
-						return 0;
+						saveSuccess = true;
 					}
+					destroy_bitmap(scenePreviewDumpBuffer);
 				} else {
 					DrawWorldDump();
-					if (save_png(fullFileName, m_WorldDumpBuffer, nullptr) == 0) {
+
+					BITMAP *depthConvertBitmap = create_bitmap_ex(24, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h);
+					blit(m_WorldDumpBuffer, depthConvertBitmap, 0, 0, 0, 0, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h);
+
+					if (save_png(fullFileName, depthConvertBitmap, nullptr) == 0) {
 						g_ConsoleMan.PrintString("SYSTEM: World was dumped to: " + std::string(fullFileName));
-						return 0;
+						saveSuccess = true;
 					}
+					destroy_bitmap(depthConvertBitmap);
 				}
 				break;
 			default:
 				g_ConsoleMan.PrintString("ERROR: Wrong bitmap save mode passed in, no bitmap was saved!");
 				return -1;
 		}
-		g_ConsoleMan.PrintString("ERROR: Unable to save bitmap to: " + std::string(fullFileName));
-		return -1;
+		if (!saveSuccess) {
+			g_ConsoleMan.PrintString("ERROR: Unable to save bitmap to: " + std::string(fullFileName));
+			return -1;
+		} else {
+			return 0;
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1166,9 +1174,9 @@ namespace RTE {
 
 		// Draw sky gradient if we're not dumping a scene preview
 		if (!drawForScenePreview) {
-			clear_to_color(m_WorldDumpBuffer, makecol24(132, 192, 252)); // Light blue color
+			clear_to_color(m_WorldDumpBuffer, makecol32(132, 192, 252)); // Light blue color
 			for (int i = 0; i < m_WorldDumpBuffer->h; i++) {
-				int lineColor = makecol24(64 + ((static_cast<float>(i) / worldBitmapHeight) * (128 - 64)), 64 + ((static_cast<float>(i) / worldBitmapHeight) * (192 - 64)), 96 + ((static_cast<float>(i) / worldBitmapHeight) * (255 - 96)));
+				int lineColor = makecol32(64 + ((static_cast<float>(i) / worldBitmapHeight) * (128 - 64)), 64 + ((static_cast<float>(i) / worldBitmapHeight) * (192 - 64)), 96 + ((static_cast<float>(i) / worldBitmapHeight) * (255 - 96)));
 				hline(m_WorldDumpBuffer, 0, i, worldBitmapWidth - 1, lineColor);
 			}
 		} else {
@@ -1182,7 +1190,7 @@ namespace RTE {
 		// If we're not dumping a scene preview, draw objects and post-effects.
 		if (!drawForScenePreview) {
 			std::list<PostEffect> postEffectsList;
-			BITMAP *effectBitmap = 0;
+			BITMAP *effectBitmap = nullptr;
 			int effectPosX = 0;
 			int effectPosY = 0;
 			int effectStrength = 0;

@@ -1210,9 +1210,9 @@ void BuyMenuGUI::Update()
         std::string description = "";
 
         if (pItem && pItem->m_pEntity) {
-            description = pItem->m_pEntity->GetDescription();
+            description = pItem->m_pEntity->GetDescription() + "\n";
             if (description.empty()) {
-                description = "-No Information Found-";
+                description = "-No Information Found-\n";
             }
             const Entity *currentItem = pItem->m_pEntity;
             const ACraft *itemAsCraft = dynamic_cast<const ACraft *>(currentItem);
@@ -1220,15 +1220,15 @@ void BuyMenuGUI::Update()
                 int craftMaxPassengers = itemAsCraft->GetMaxPassengers();
                 float craftMaxMass = itemAsCraft->GetMaxInventoryMass();
                 if (craftMaxMass == 0) {
-                    description += "\n\nNO CARGO SPACE!";
+                    description += "\nNO CARGO SPACE!";
                 } else if (craftMaxMass > 0) {
-                    description += "\n\nMax Mass: " + RoundFloatToPrecision(craftMaxMass, 1) + " kg";
+                    description += "\nMax Mass: " + RoundFloatToPrecision(craftMaxMass, 1) + " kg";
                 }
                 description += "\nMax Passengers: " + std::to_string(craftMaxPassengers);
             } else {
                 const Actor *itemAsActor = dynamic_cast<const Actor *>(currentItem);
                 if (itemAsActor) {
-                    description += "\n\nMass: " + RoundFloatToPrecision(itemAsActor->GetMass(), 1) + " kg";
+                    description += "\nMass: " + RoundFloatToPrecision(itemAsActor->GetMass(), 1) + " kg";
                     int passengerSlotsTaken = itemAsActor->GetPassengerSlots();
                     if (passengerSlotsTaken > 1) {
                         description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
@@ -1236,7 +1236,7 @@ void BuyMenuGUI::Update()
                 } else {
                     const MovableObject *itemAsMO = dynamic_cast<const MovableObject *>(currentItem);
                     if (itemAsMO) {
-                        description += "\n\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass(), 1) + " kg";
+                        description += "\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass(), 1) + " kg";
                     }
                 }
             }

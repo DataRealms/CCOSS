@@ -2311,7 +2311,7 @@ void BuyMenuGUI::TryPurchase()
 		const ACraft * pCraft = dynamic_cast<const ACraft *>(m_pSelectedCraft);
 		if (pCraft) {
 			// Enforce max mass
-			if (m_EnforceMaxMassConstraint && pCraft->GetMaxMass() > 0 && GetTotalOrderMass() > pCraft->GetMaxMass()) {
+			if (m_EnforceMaxMassConstraint && pCraft->GetMaxMass() >= 0 && GetTotalOrderMass() > pCraft->GetMaxMass()) {
 				g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
 				// Set the notification blinker
 				m_BlinkMode = MAXMASS;

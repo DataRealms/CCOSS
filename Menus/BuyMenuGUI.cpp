@@ -754,10 +754,9 @@ float BuyMenuGUI::GetTotalOrderCost()
 float BuyMenuGUI::GetTotalOrderMass()
 {
 	float totalMass = 0;
-	for (vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
-		totalMass += dynamic_cast<const MOSprite *>((*itr)->m_pEntity)->GetMass();
-
-	totalMass += GetCraftMass();
+    for (vector<GUIListPanel::Item*>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr) {
+        totalMass += dynamic_cast<const MOSprite*>((*itr)->m_pEntity)->GetMass();
+    }
 
 	return totalMass;
 }
@@ -1219,8 +1218,13 @@ void BuyMenuGUI::Update()
             const ACraft *itemAsCraft = dynamic_cast<const ACraft *>(currentItem);
             if (itemAsCraft) {
                 int craftMaxPassengers = itemAsCraft->GetMaxPassengers();
-                float craftMaxMass = itemAsCraft->GetMaxMass() - itemAsCraft->GetMass();
-                description += "\n\nMax Mass: " + RoundFloatToPrecision(craftMaxMass, 1) + " kg" + "\nMax Passengers: " + std::to_string(craftMaxPassengers);
+                float craftMaxMass = itemAsCraft->GetMaxInventoryMass();
+                if (craftMaxMass == 0) {
+                    description += "\n\nNO CARGO SPACE!";
+                } else if (craftMaxMass > 0) {
+                    description += "\n\nMax Mass: " + RoundFloatToPrecision(craftMaxMass, 1) + " kg";
+                }
+                description += "\nMax Passengers: " + std::to_string(craftMaxPassengers);
             } else {
                 const Actor *itemAsActor = dynamic_cast<const Actor *>(currentItem);
                 if (itemAsActor) {
@@ -2311,7 +2315,7 @@ void BuyMenuGUI::TryPurchase()
 		const ACraft * pCraft = dynamic_cast<const ACraft *>(m_pSelectedCraft);
 		if (pCraft) {
 			// Enforce max mass
-			if (m_EnforceMaxMassConstraint && pCraft->GetMaxMass() >= 0 && GetTotalOrderMass() > pCraft->GetMaxMass()) {
+			if (m_EnforceMaxMassConstraint && pCraft->GetMaxInventoryMass() >= 0 && GetTotalOrderMass() > pCraft->GetMaxInventoryMass()) {
 				g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
 				// Set the notification blinker
 				m_BlinkMode = MAXMASS;
@@ -2344,19 +2348,17 @@ void BuyMenuGUI::TryPurchase()
 // Description:     Updates the text of the specified label to reflect the total mass of
 //                  all the items in teh order box.
 
-void BuyMenuGUI::UpdateTotalMassLabel(const ACraft * pCraft, GUILabel * pLabel)
-{
+void BuyMenuGUI::UpdateTotalMassLabel(const ACraft * pCraft, GUILabel * pLabel) {
     if (!pLabel) {
         return;
     }
 
     std::string display;
 
-    if (pCraft && pCraft->GetMaxMass() != 0) {
-        if (pCraft->GetMaxMass() > 0) {
-            display = RoundFloatToPrecision(GetTotalOrderMass() - GetCraftMass(), 1) + " / " + RoundFloatToPrecision(pCraft->GetMaxMass() - GetCraftMass(), 1);
-        } else {
-            display = RoundFloatToPrecision(GetTotalOrderMass(), 1);
+    if (pCraft && pCraft->GetMaxInventoryMass() != 0) {
+        display = RoundFloatToPrecision(GetTotalOrderMass(), 1);
+        if (pCraft->GetMaxInventoryMass() > 0) {
+            display += " / " + RoundFloatToPrecision(pCraft->GetMaxInventoryMass(), 1);
         }
     } else {
         display = "NO CARGO SPACE";

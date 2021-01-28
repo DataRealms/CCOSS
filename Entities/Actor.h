@@ -934,16 +934,12 @@ ClassInfoGetters
 
 	const std::deque<MovableObject *> * GetInventory() { return &m_Inventory; }
 
+	/// <summary>
+	/// Returns the maximum total mass this Actor can carry in it's inventory.
+	/// </summary>
+	/// <returns> The maximum carriable mass of this Actor.</returns>
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetMaxMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tells how much total mass (in kg) this Actor is recommended to weigh
-//                  at most INCLUDING his own weight AND all his inventory!
-// Arguments:       None.
-// Return value:    The max recommend total mass for this Actor
-
-	float GetMaxMass() const { return m_MaxInventoryMass; }
+	float GetMaxInventoryMass() const { return m_MaxInventoryMass; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

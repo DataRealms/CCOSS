@@ -520,30 +520,15 @@ bool GUIControlManager::Save(Writer *W)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Load
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Loads the layout from a file.
-
-bool GUIControlManager::Load(const string Filename, bool keepOld)
-{
-    Reader R;
-
-    if (R.Create((char *)Filename.c_str()) != 0)
-        return false;
-    
-    bool Result = Load(&R, keepOld);
-
-    return Result;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Load
-//////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Loads the layout from a Reader class.
 // Arguments:       Reader class
 // Returns:         True if sucessful.
 
-bool GUIControlManager::Load(Reader *reader, bool keepOld) {
-	assert(reader);
+bool GUIControlManager::Load(const std::string &Filename, bool keepOld) {
+	Reader reader;
+	if (reader.Create(Filename.c_str()) != 0) {
+		return false;
+	}
 
 	// Clear the current layout, IF directed to
 	if (!keepOld) { Clear(); }
@@ -553,8 +538,8 @@ bool GUIControlManager::Load(Reader *reader, bool keepOld) {
 
 	GUIProperties *CurProp = nullptr;
 
-	while (!reader->GetStream()->eof()) {
-		std::string line = reader->ReadLine();
+	while (!reader.GetStream()->eof()) {
+		std::string line = reader.ReadLine();
 
 		if (line.empty()) {
 			continue;
@@ -569,13 +554,13 @@ bool GUIControlManager::Load(Reader *reader, bool keepOld) {
 		}
 
 		// Is the line a valid property?
-		size_t Position = line.find('=');
+		size_t Position = line.find_first_of('=');
 		if (Position != std::string::npos) {
 			// Break the line into variable & value, but only add a property if it belongs to a section
 			if (CurProp) {
 				// Grab the variable & value strings and trim them
-				std::string Name = reader->TrimString(line.substr(0, Position));
-				std::string Value = reader->TrimString(line.substr(Position + 1, std::string::npos));
+				std::string Name = reader.TrimString(line.substr(0, Position));
+				std::string Value = reader.TrimString(line.substr(Position + 1, std::string::npos));
 
 				// Add it to the current property
 				CurProp->AddVariable(Name, Value);

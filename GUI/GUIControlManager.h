@@ -295,19 +295,7 @@ public:
 //                  to the existing layout.
 // Returns:         True if sucessful.
 
-    bool Load(const std::string Filename, bool keepOld = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Load
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Loads the layout from a Reader class.
-// Arguments:       Reader object
-//                  Whether to NOT clear out the manager, but just add the controls loaded
-//                  to the existing layout.
-// Returns:         True if sucessful.
-
-    bool Load(Reader *reader, bool keepOld = false);
+    bool Load(const std::string &Filename, bool keepOld = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -789,7 +789,10 @@ namespace RTE {
 		}
 
 		if (g_InActivity) {
-			if (AnyStartPress(false) && !dynamic_cast<GameActivity*>(g_ActivityMan.GetActivity())->IsBuyGUIVisible(-1)) {
+			const GameActivity *gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
+			bool anyVisibleBuyGUI = (gameActivity) ? gameActivity->IsBuyGUIVisible(-1) : false;
+
+			if (AnyStartPress(false) && !anyVisibleBuyGUI) {
 				g_ActivityMan.PauseActivity();
 				return;
 			}

@@ -822,7 +822,7 @@ void HDFirearm::Update()
 
                     // Set the fired particle to not hit this HeldDevice's parent, if applicable
                     if (m_FireIgnoresThis)
-                        pParticle->SetWhichMOToNotHit(pRootParent, 1.0f);
+                        pParticle->SetWhichMOToNotHit(this, 1.0f);
 
                     // Set the team so alarm events that happen if these gib won't freak out the guy firing
                     pParticle->SetTeam(m_Team);

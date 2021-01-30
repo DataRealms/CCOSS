@@ -100,8 +100,8 @@ namespace RTE {
 
 				if (m_CurrentActivityHumanPlayerPositions.empty() || (m_CurrentActivityHumanPlayerPositions.at(0) == nullptr || m_CurrentActivityHumanPlayerPositions.at(0)->GetFloorIntX() > g_SceneMan.GetSceneWidth() || m_CurrentActivityHumanPlayerPositions.at(0)->GetX() < 0.0F)) {
 					m_CurrentActivityHumanPlayerPositions.clear();
-					for (short player = Players::PlayerOne; player < currentActivity->GetPlayerCount() && m_CurrentActivityHumanPlayerPositions.size() < currentActivityHumanCount; player++) {
-						if (currentActivity->PlayerHuman(player)) {
+					for (short player = Players::PlayerOne; player < Players::MaxPlayerCount && m_CurrentActivityHumanPlayerPositions.size() < currentActivityHumanCount; player++) {
+						if (currentActivity->PlayerActive(player) && currentActivity->PlayerHuman(player)) {
 							const Vector &humanPlayerPosition = g_SceneMan.GetScrollTarget(currentActivity->ScreenOfPlayer(player));
 							m_CurrentActivityHumanPlayerPositions.push_back(&humanPlayerPosition);
 						}

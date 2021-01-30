@@ -172,6 +172,7 @@ int AEmitter::ReadProperty(std::string propName, Reader &reader) {
             AddAttachable(m_pFlash);
             m_pFlash->SetDrawnNormallyByParent(false);
             m_pFlash->SetInheritsRotAngle(false);
+            m_pFlash->SetInheritsHFlipped(0);
             m_pFlash->SetDeleteWhenRemovedFromParent(true);
             m_pFlash->SetCollidesWithTerrainWhileAttached(false);
         }

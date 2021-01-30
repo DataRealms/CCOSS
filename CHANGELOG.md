@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Mobile sounds (i.e. generally things that aren't GUI related) will now pause and resume when you pause and resume your activity.
 
+- The `DeactivationSound` of `HDFirearms` now respects its `SoundOverlapMode` instead of never allowing overlap. If you don't want it overlapping, set it up accordingly.
+
 ### Removed
 
 ***

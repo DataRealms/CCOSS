@@ -56,6 +56,11 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
+		/// Prints the selected graphics driver message to the console. Has to be done after all managers initialization because ConsoleMan does not exist during FrameMan initialization.
+		/// </summary>
+		void PrintSelectedGfxDriverMessage() const;
+
+		/// <summary>
 		/// Updates the state of this FrameMan. Supposed to be done every frame.
 		/// </summary>
 		void Update();
@@ -543,6 +548,8 @@ namespace RTE {
 		bool m_ForceVirtualFullScreenGfxDriver; //!< Whether to use the borderless window driver. Overrides any other windowed drivers. The driver that will be used is GFX_DIRECTX_WIN_BORDERLESS.
 		bool m_ForceOverlayedWindowGfxDriver; //!< Whether to use the non-overlapped windowed driver. The driver that will be used is GFX_DIRECTX_OVL.
 		bool m_ForceNonOverlayedWindowGfxDriver; //!< Whether to use the non-overlay driver. Overrides overlayed driver setting. The driver that will be used is GFX_DIRECTX_WIN.
+
+		std::string m_GfxDriverMessage; //!< String containing the currently selected graphics driver message. Used for printing it to the console after all managers finished initializing.
 
 		bool m_DisableMultiScreenResolutionValidation; //!< Whether to disable resolution validation when running multi-screen mode or not. Allows setting whatever crazy resolution that may or may not crash.
 

@@ -39,6 +39,7 @@ namespace RTE {
 		m_ForceVirtualFullScreenGfxDriver = false;
 		m_ForceOverlayedWindowGfxDriver = false;
 		m_ForceNonOverlayedWindowGfxDriver = false;
+		m_GfxDriverMessage.clear();
 		m_DisableMultiScreenResolutionValidation = false;
 #ifdef _WIN32
 		m_NumScreens = GetSystemMetrics(SM_CMONITORS);
@@ -120,19 +121,25 @@ namespace RTE {
 #ifdef _WIN32
 		if (m_ForceOverlayedWindowGfxDriver) {
 			m_GfxDriver = GFX_DIRECTX_OVL;
-			g_ConsoleMan.PrintString("SYSTEM: Using overlay DirectX windowed driver!");
+			m_GfxDriverMessage = "SYSTEM: Using overlay DirectX windowed driver!";
 		} else if (m_ForceNonOverlayedWindowGfxDriver) {
 			m_GfxDriver = GFX_DIRECTX_WIN;
-			g_ConsoleMan.PrintString("SYSTEM: Using non-overlay DirectX windowed driver!");
+			m_GfxDriverMessage = "SYSTEM: Using non-overlay DirectX windowed driver!";
 		} else if (m_ForceVirtualFullScreenGfxDriver) {
 			m_GfxDriver = GFX_DIRECTX_WIN_BORDERLESS;
-			g_ConsoleMan.PrintString("SYSTEM: Using DirectX fullscreen-windowed driver!");
+			m_GfxDriverMessage = "SYSTEM: Using DirectX fullscreen-windowed driver!";
 		} else {
 			m_GfxDriver = GFX_AUTODETECT_WINDOWED;
 		}
 #else
-		m_GfxDriver= (m_ResX * m_ResMultiplier == m_ScreenResX && m_ResY * m_ResMultiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
+		m_GfxDriver = (m_ResX * m_ResMultiplier == m_ScreenResX && m_ResY * m_ResMultiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
 #endif
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void FrameMan::PrintSelectedGfxDriverMessage() const {
+		if (!m_GfxDriverMessage.empty()) { g_ConsoleMan.PrintString(m_GfxDriverMessage); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -488,7 +495,7 @@ namespace RTE {
 		}
 
 #ifdef __unix__
-		m_GfxDriver= (newResX * newMultiplier == m_ScreenResX && newResY * newMultiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
+		m_GfxDriver = (newResX * newMultiplier == m_ScreenResX && newResY * newMultiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
 #endif
 
 		// Must end any running activity otherwise have to deal with recreating all the GUI elements in GameActivity because it crashes when opening the BuyMenu. Easier to just end it.

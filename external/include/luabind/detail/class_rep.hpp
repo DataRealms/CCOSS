@@ -180,6 +180,7 @@ namespace luabind { namespace detail
 		void get_table(lua_State* L) const { m_table.push(L); }
 		void get_default_table(lua_State* L) const { m_default_table.push(L); }
 
+		void(*construct_holder() const)(void*, void*) { return m_construct_holder; }
 		void(*destructor() const)(void*) { return m_destructor; }
 		void(*const_holder_destructor() const)(void*) { return m_const_holder_destructor; }
 		typedef const void*(*t_const_extractor)(void*);

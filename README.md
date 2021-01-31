@@ -19,14 +19,14 @@ You may also want to check out the list of recommended Visual Studio plugins [he
 
 3. Copy the following libraries from `Cortex-Command-Community-Project-Source\external\lib\` into the **Data Repository**:
 * `lua51.dll`
+* `lua51-64.dll`
 * `fmod.dll`
-* `liblz4.dll`
-* `zlibwapi.dll`
+* `fmodL.dll`
 
 4. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into the **Data Repository**.
 
 Now you're ready to build and launch the game.  
-Simply open `RTEA.sln` with Visual Studio, choose your configuration, and run the project.
+Simply open `RTEA.sln` with Visual Studio, choose your target platform (x86 or x64) and configuration, and run the project.
 
 * Use `Debug Full` for debugging with all visual elements enabled (builds fast, runs very slow).
 * Use `Debug Minimal` for debugging with all visual elements disabled (builds fast, runs slightly faster).

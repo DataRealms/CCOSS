@@ -504,7 +504,7 @@ protected:
 
     // Names of all DataModule:s mapped to indices into the m_pDataModules vector.
     // The names are all lowercase name so we can more easily find them in case-agnostic fashion
-    std::map<std::string, int> m_DataModuleIDs;
+    std::map<std::string, size_t> m_DataModuleIDs;
 
     // How many modules are 'official' and shipped with the game, and guaranteed to not have name conflicts among them
     // All official modules are in the beginning of the m_TypeMap, so this count shows how many into that vector they represent

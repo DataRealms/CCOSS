@@ -192,7 +192,7 @@ namespace RTE {
 		/// Sets the current playback priority. Higher priority (lower value) will make this more likely to make it into mixing on playback. Does not affect currently playing sounds.
 		/// </summary>
 		/// <param name="priority">The new priority. See AudioMan::PRIORITY_* enumeration.</param>
-		void SetPriority(int priority) { m_Priority = std::clamp(priority, 0, 255); }
+		void SetPriority(int priority) { m_Priority = std::clamp(priority, 0, 256); }
 
 		/// <summary>
 		/// Gets whether the sounds in this SoundContainer are affected by global pitch changes or not.
@@ -229,7 +229,7 @@ namespace RTE {
 		/// Sets the volume sounds in this SoundContainer should be played at. Note that this does not factor volume changes due to the SoundContainer's position. Does not affect currently playing sounds.
 		/// </summary>
 		/// <param name="newVolume">The new volume sounds in this SoundContainer should be played at. Limited between 0 and 10.</param>
-		void SetVolume(float newVolume) { newVolume = std::clamp(newVolume, 0.0F, 10.0F); if (IsBeingPlayed()) { g_AudioMan.ChangeSoundContainerPlayingChannelsVolume(this, newVolume); m_Volume = newVolume; } }
+		void SetVolume(float newVolume) { newVolume = std::clamp(newVolume, 0.0F, 10.0F); if (IsBeingPlayed()) { g_AudioMan.ChangeSoundContainerPlayingChannelsVolume(this, newVolume); } m_Volume = newVolume; }
 
 		/// <summary>
 		/// Gets the pitch the sounds in this SoundContainer are played at. Note that this does not factor in global pitch.
@@ -284,7 +284,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Player to stop playback of this SoundContainer for.</param>
 		/// <returns>Whether this SoundContainer successfully stopped playing.</returns>
-		bool Stop(int player) { return (HasAnySounds() && IsBeingPlayed()) ? g_AudioMan.StopSound(this, player) : false; }
+		bool Stop(int player) { return (HasAnySounds() && IsBeingPlayed()) ? g_AudioMan.StopSoundContainerPlayingChannels(this, player) : false; }
 
 		/// <summary>
 		/// Restarts playback of this SoundContainer for all players.
@@ -297,13 +297,13 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Player to restart playback of this SoundContainer for.</param>
 		/// <returns>Whether this SoundContainer successfully restarted its playback.</returns>
-		bool Restart(int player) { return (HasAnySounds() && IsBeingPlayed()) ? g_AudioMan.StopSound(this, player) && g_AudioMan.PlaySoundContainer(this, player) : false; }
+		bool Restart(int player) { return (HasAnySounds() && IsBeingPlayed()) ? g_AudioMan.StopSoundContainerPlayingChannels(this, player) && g_AudioMan.PlaySoundContainer(this, player) : false; }
 
 		/// <summary>
 		/// Fades out playback of the SoundContainer to 0 volume.
 		/// </summary>
 		/// <param name="fadeOutTime">How long the fadeout should take.</param>
-		void FadeOut(int fadeOutTime = 1000) { if (IsBeingPlayed()) { return g_AudioMan.FadeOutSound(this, fadeOutTime); } }
+		void FadeOut(int fadeOutTime = 1000) { if (IsBeingPlayed()) { return g_AudioMan.FadeOutSoundContainerPlayingChannels(this, fadeOutTime); } }
 #pragma endregion
 
 #pragma region Miscellaneous

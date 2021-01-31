@@ -150,7 +150,7 @@ namespace RTE {
 		Activity *m_StartActivity; //!< The starting condition of the next Activity to be (re)started. OWNED BY THIS!
 			
 		std::string m_LastMusicPath; //!< Path to the last music stream being played.
-		double m_LastMusicPos; //!< What the last position of the in-game music track was before pause, in seconds.
+		float m_LastMusicPos; //!< What the last position of the in-game music track was before pause, in seconds.
 
 	private:
 

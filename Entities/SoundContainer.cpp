@@ -196,7 +196,7 @@ namespace RTE {
 			if (m_Immobile) {
 				soundMode |= FMOD_3D_HEADRELATIVE;
 				m_AttenuationStartDistance = c_SoundMaxAudibleDistance;
-			} else if (g_SettingsMan.SoundPanningEffectStrength() == 1.0F) {
+			} else if (g_AudioMan.GetSoundPanningEffectStrength() == 1.0F) {
 				soundMode |= FMOD_3D_INVERSEROLLOFF;
 			} else {
 				soundMode |= FMOD_3D_CUSTOMROLLOFF;

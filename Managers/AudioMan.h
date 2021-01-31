@@ -165,6 +165,12 @@ namespace RTE {
 		/// <param name="includeImmobileSounds">Whether to include immobile sounds (normally used for GUI and so on) in global pitch modification. Defaults to false.</param>
 		/// <param name="includeMusic">Whether to include the music in global pitch modification. Defaults to false.</param>
 		void SetGlobalPitch(float pitch = 1.0F, bool includeImmobileSounds = false, bool includeMusic = false);
+
+		/// <summary>
+		/// The strength of the sound panning effect.
+		/// </summary>
+		/// <returns>0 - 1, where 0 is no panning and 1 is fully panned.</returns>
+		float GetSoundPanningEffectStrength() const { return m_SoundPanningEffectStrength; }
 #pragma endregion
 
 #pragma region Music Getters and Setters

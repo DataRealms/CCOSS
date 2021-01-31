@@ -1593,12 +1593,12 @@ bool RunGameLoop() {
 				serverUpdated = true;
 			}
 			g_FrameMan.Update();
-			g_AudioMan.Update();
 			g_LuaMan.Update();
 			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTIVITY);
 			g_ActivityMan.Update();
 			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTIVITY);
 			g_MovableMan.Update();
+            g_AudioMan.Update();
 
 			g_ActivityMan.LateUpdateGlobalScripts();
 

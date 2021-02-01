@@ -466,6 +466,7 @@ void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet
         } else {
             woundToAdd->SetCollidesWithTerrainWhileAttached(false);
             woundToAdd->SetParentOffset(parentOffsetToSet);
+            woundToAdd->SetInheritsHFlipped(false);
             woundToAdd->SetParent(this);
             m_AttachableAndWoundMass += woundToAdd->GetMass();
             m_Wounds.push_back(woundToAdd);

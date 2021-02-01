@@ -1218,7 +1218,9 @@ void BuyMenuGUI::Update()
                 } else if (craftMaxMass > 0) {
                     description += "\nMax Mass: " + RoundFloatToPrecision(craftMaxMass, 1) + " kg";
                 }
-                description += "\nMax Passengers: " + std::to_string(craftMaxPassengers);
+                if (craftMaxPassengers >= 0 && craftMaxMass != 0) {
+                    description += (craftMaxPassengers == 0) ? "\nNO PASSENGER SPACE!" : "\nMax Passengers: " + std::to_string(craftMaxPassengers);
+                }
             } else {
                 const Actor *itemAsActor = dynamic_cast<const Actor *>(currentItem);
                 if (itemAsActor) {

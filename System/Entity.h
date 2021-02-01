@@ -231,7 +231,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="cloneTo">A pointer to an instance to make identical to this. If 0 is passed in, a new instance is made inside here, and ownership of it IS returned!</param>
 		/// <returns>An Entity pointer to the newly cloned-to instance. Ownership IS transferred!</returns>
-		virtual Entity * Clone(Entity *cloneTo = 0) const { RTEAbort("Attempt to clone an abstract or unclonable type!"); return 0; }
+		virtual Entity * Clone(Entity *cloneTo = nullptr) const { RTEAbort("Attempt to clone an abstract or unclonable type!"); return nullptr; }
 #pragma endregion
 
 #pragma region Destruction

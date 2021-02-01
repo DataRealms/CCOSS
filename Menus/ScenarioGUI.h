@@ -27,13 +27,13 @@ namespace RTE {
 	public:
 
 		/// <summary>
-		/// 
+		/// Enumeration for the results of the Scenario GUI input and event update.
 		/// </summary>
 		enum ScenarioUpdateResult {
-			NOEVENT = 0,
-			BACKTOMAIN,
-			ACTIVITYRESUMED,
-			ACTIVITYRESTARTED
+			NoEvent,
+			BackToMain,
+			ActivityResumed,
+			ActivityRestarted
 		};
 
 #pragma region Creation
@@ -59,6 +59,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates the user input processing.
 		/// </summary>
+		/// <returns>The result of the user input and event update. See ScenarioUpdateResult enumeration.</returns>
 		ScenarioUpdateResult UpdateInput();
 
 		/// <summary>
@@ -98,7 +99,7 @@ namespace RTE {
 		};
 
 		/// <summary>
-		/// These add on the player and team max counts.
+		/// These add on the player max counts.
 		/// </summary>
 		enum PlayerColumns {
 			PlayerCPU = Players::MaxPlayerCount,
@@ -106,7 +107,7 @@ namespace RTE {
 		};
 
 		/// <summary>
-		/// 
+		/// These add on the team max counts.
 		/// </summary>
 		enum TeamRows {
 			DisabledTeam = Activity::Teams::MaxTeamCount,
@@ -125,13 +126,12 @@ namespace RTE {
 		Timer m_BlinkTimer; //!< Notification blink timer.
 
 		GUICollectionBox *m_DraggedBox; //!< Currently dragged GUI box.
-		Vector m_PrevMousePos; //!< Previous pos of mouse to calculate dragging.
+		Vector m_PrevMousePos; //!< Previous position of the mouse to calculate dragging.
 
 		Vector m_PlanetCenter; //!< The absolute screen position of the planet center.
-		float m_PlanetRadius = 240.0F; //!< The screen radius of the planet.
+		float m_PlanetRadius; //!< The screen radius of the planet.
 
-		//std::list<Scene *> *m_ScenarioScenes; //!< Pointer to the current set of Scenes being displayed. Not owned, and neither are the scenes.
-		std::vector<Scene *> *m_ScenarioScenes;
+		std::vector<Scene *> *m_ScenarioScenes; //!< Pointer to the current set of Scenes being displayed. Not owned, and neither are the scenes.
 
 		Scene *m_HoveredScene; //!< The scene preset currently hovered. Not owned.
 		Scene *m_SelectedScene; //!< The scene preset currently selected. Not owned.
@@ -145,7 +145,6 @@ namespace RTE {
 		GUILabel *m_DifficultyLabel;
 		GUISlider *m_DifficultySlider;
 
-		//std::map<Activity *, std::list<Scene *>> m_ScenarioActivities; //!< The map of Activities and the Scenes compatible with each, neither of which are owned here.
 		std::map<Activity *, std::vector<Scene *>> m_ScenarioActivities; //!< The map of Activities and the Scenes compatible with each, neither of which are owned here.
 		const Activity *m_SelectedActivity; //!< The currently selected activity. Not owned.
 
@@ -175,14 +174,14 @@ namespace RTE {
 
 		int m_LockedCPUTeam = Activity::Teams::NoTeam; //!< Which team the CPU is locked to, if any.
 
-#pragma region
+#pragma region CollectionBox Handling
 		/// <summary>
 		/// Shows the Scene info box.
 		/// </summary>
 		void ShowScenesBox();
 
 		/// <summary>
-		/// Shows the player config box.
+		/// Shows the player configuration box.
 		/// </summary>
 		void ShowPlayersBox();
 
@@ -198,7 +197,7 @@ namespace RTE {
 		void KeepBoxInScreenBounds(GUICollectionBox *screenBox) const;
 #pragma endregion
 
-#pragma region
+#pragma region Scenes and Activities Handling
 		/// <summary>
 		/// Gathers all the available Scenes and Activity presets there are.
 		/// </summary>
@@ -209,15 +208,6 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newSelectedScene">The new selected scene or nullptr to deselect the current selection.</param>
 		void SetSelectedScene(Scene *newSelectedScene);
-#pragma endregion
-
-#pragma region
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="hoveredPlayer"></param>
-		/// <param name="hoveredTeam"></param>
-		void ClickInPlayerSetup(int hoveredPlayer, int hoveredTeam);
 
 		/// <summary>
 		/// Sets up and starts the currently selected Activity and settings.
@@ -252,9 +242,16 @@ namespace RTE {
 		void UpdateActivityBox();
 
 		/// <summary>
-		/// Updates the contents of the player config box.
+		/// Updates the contents of the player configuration box.
 		/// </summary>
 		void UpdatePlayersBox();
+
+		/// <summary>
+		/// Handles player and team selection boxes in the player configuration box.
+		/// </summary>
+		/// <param name="clickedPlayer">The player box that was clicked.</param>
+		/// <param name="clickedTeam">The team box that was clicked.</param>
+		void ClickInPlayerSetup(int clickedPlayer, int clickedTeam);
 
 		/// <summary>
 		/// Displays the site's name label if the mouse is over a site point. Otherwise the label is hidden.

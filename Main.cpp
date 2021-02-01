@@ -670,14 +670,13 @@ bool PlayIntroTitle() {
 		}
 
         // Scenario setup menu update and drawing
-		ScenarioGUI::ScenarioUpdateResult scenarioGUIResult = ScenarioGUI::NOEVENT;
-        if (g_IntroState == SCENARIOMENU)
-        {
-            g_pScenarioGUI->SetPlanetInfo(planetPos, planetRadius);
-			scenarioGUIResult = g_pScenarioGUI->UpdateInput();
+		ScenarioGUI::ScenarioUpdateResult scenarioUpdateResult = ScenarioGUI::NoEvent;
+		if (g_IntroState == SCENARIOMENU) {
+			g_pScenarioGUI->SetPlanetInfo(planetPos, planetRadius);
+			scenarioUpdateResult = g_pScenarioGUI->UpdateInput();
 			g_pScenarioGUI->Update();
-            g_pScenarioGUI->Draw(g_FrameMan.GetBackBuffer32());
-        }
+			g_pScenarioGUI->Draw(g_FrameMan.GetBackBuffer32());
+		}
 
         // Metagame menu update and drawing
         if (g_IntroState == CAMPAIGNPLAY)
@@ -1317,17 +1316,22 @@ bool PlayIntroTitle() {
                 sectionSwitch = false;
             }
 
-			if (scenarioGUIResult == ScenarioGUI::ScenarioUpdateResult::BACKTOMAIN) {
-				g_IntroState = PLANETTOMAIN;
-				sectionSwitch = true;
-			} else if (scenarioGUIResult == ScenarioGUI::ScenarioUpdateResult::ACTIVITYRESUMED) {
-				g_ResumeActivity = true;
-			} else if (scenarioGUIResult == ScenarioGUI::ScenarioUpdateResult::ACTIVITYRESTARTED) {
-				// Make sure the scene is going to be reset with the new parameters
-				g_ResetActivity = true;
-
-				g_IntroState = FADEOUT;
-				sectionSwitch = true;
+			switch (scenarioUpdateResult) {
+				case ScenarioGUI::ScenarioUpdateResult::BackToMain:
+					g_IntroState = PLANETTOMAIN;
+					sectionSwitch = true;
+					break;
+				case ScenarioGUI::ScenarioUpdateResult::ActivityResumed:
+					g_ResumeActivity = true;
+					break;
+				case ScenarioGUI::ScenarioUpdateResult::ActivityRestarted:
+					// Make sure the scene is going to be reset with the new parameters
+					g_ResetActivity = true;
+					g_IntroState = FADEOUT;
+					sectionSwitch = true;
+					break;
+				default:
+					break;
 			}
 
 			// In server mode once we exited to main or scenario menu we need to start Lobby activity 

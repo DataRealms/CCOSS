@@ -193,9 +193,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::string RoundFloatToPrecision(float input, int precision) {
-		std::stringstream floatStream;
-		floatStream << std::fixed << std::setprecision(precision) << input;
-		return floatStream.str();		
+	std::string RoundFloatToPrecision(float input, int precision, int roundingMode) {
+		RTEAssert(roundingMode >= 0 && roundingMode <= 2, "Error in RoundFloatToPrecision: INVALID ROUNDING MODE");
+		if (roundingMode == 0) {
+			std::stringstream floatStream;
+			floatStream << std::fixed << std::setprecision(precision) << input;
+			return floatStream.str();
+		} else if (roundingMode == 1) {
+			//RTEAssert(input <= (std::numeric_limits<float>::max() / static_cast<float>(pow(10, precision))), "VALUE WILL EXCEED NUMERIC LIMITS WITH PRECISION " + std::to_string(precision));
+			float roundingBuffer = floor(input * static_cast<float>(pow(10, precision))) / static_cast<float>(pow(10, precision));
+			return RoundFloatToPrecision(roundingBuffer, precision);
+		} else if (roundingMode == 2) {
+			float roundingBuffer = ceil(input * static_cast<float>(pow(10, precision))) / static_cast<float>(pow(10, precision));
+			return RoundFloatToPrecision(roundingBuffer, precision);
+		}
 	}
 }

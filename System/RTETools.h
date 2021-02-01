@@ -220,11 +220,15 @@ namespace RTE {
 	bool ASCIIFileContainsString(std::string filePath, std::string findString);
 
 	/// <summary>
-	/// Rounds a float to a set fixed point precision (digits afrer decimal point).
+	/// Rounds a float to a set fixed point precision (digits afrer decimal point) with option to to always ceil or always floor the rounding.
 	/// </summary>
 	/// <param name="inputFloat">The input float to round.</param>
-	/// <returns>A string of the float, displayed to chosen precision.</returns>
-	std::string RoundFloatToPrecision(float input, int precision);
+	/// <param name="roundingMode">(0, 1, 2) What method of rounding to use for the result. 
+	/// <para>0 default is floor 0 &lt; r &lt;= 0.5, ceil 0.5 &lt; r &lt; 1.</para>
+	/// <para>1 Always floor remainder.</para>
+	/// 2 Always ceil remainder.</param>
+	/// <returns>A string of the float, rounded and displayed to chosen precision.</returns>
+	std::string RoundFloatToPrecision(float input, int precision, int roundingMode = 0);
 #pragma endregion
 }
 #endif

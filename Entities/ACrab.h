@@ -527,9 +527,13 @@ protected:
 	Leg *m_pRBGLeg;
 	// Limb AtomGroups.
 	AtomGroup *m_pLFGFootGroup;
+	AtomGroup *m_BackupLFGFootGroup;
 	AtomGroup *m_pLBGFootGroup;
+	AtomGroup *m_BackupLBGFootGroup;
 	AtomGroup *m_pRFGFootGroup;
+	AtomGroup *m_BackupRFGFootGroup;
 	AtomGroup *m_pRBGFootGroup;
+	AtomGroup *m_BackupRBGFootGroup;
 	// The sound of the actor taking a step (think robot servo)
 	SoundContainer m_StrideSound;
 	// Jetpack booster.

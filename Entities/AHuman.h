@@ -900,7 +900,9 @@ protected:
     AtomGroup *m_pFGHandGroup;
     AtomGroup *m_pBGHandGroup;
     AtomGroup *m_pFGFootGroup;
+    AtomGroup *m_BackupFGFootGroup;
     AtomGroup *m_pBGFootGroup;
+    AtomGroup *m_BackupBGFootGroup;
     // The sound of the actor taking a step (think robot servo)
     SoundContainer m_StrideSound;
     // Jetpack booster.

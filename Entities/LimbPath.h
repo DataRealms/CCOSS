@@ -171,6 +171,12 @@ ClassInfoGetters
 
 //    const Vector const * GetSegArray() const { return m_aSegments; }
 
+    /// <summary>
+    /// Gets whether or not foot collisions should be disabled, i.e. the limbpath's progress is greater than the FootCollisionsDisabledSegment value.
+    /// </summary>
+    /// <returns>Whether or not foot collisions should be disabled for this limbpath at its current progress.</returns>
+    bool FootCollisionsShouldBeDisabled() const { return m_FootCollisionsDisabledSegment >= 0 && m_FootCollisionsDisabledSegment <= static_cast<int>(std::floorf(GetRegularProgress() * static_cast<float>(GetSegCount()))); }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetSegProgress
@@ -343,7 +349,7 @@ ClassInfoGetters
 // Return value:    A float indicating the total progress made on the entire path, from
 //                  0.0 to 1.0. If the path has ended, 0.0 is returned.
 
-    float GetTotalProgress();
+    float GetTotalProgress()  const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -357,7 +363,7 @@ ClassInfoGetters
 // Return value:    A float indicating the total progress made on the regular path, from
 //                  0.0 to 1.0. If the path has ended, 0.0 is returned.
 
-    float GetRegularProgress();
+    float GetRegularProgress() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -573,7 +579,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Whether this has been Create:ed yet.
 
-    bool IsInitialized() { return !m_Start.IsZero() || !m_Segments.empty(); }
+    bool IsInitialized() const { return !m_Start.IsZero() || !m_Segments.empty(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -585,7 +591,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    bool IsStaticPoint() { return m_Segments.empty(); }
+    bool IsStaticPoint() const { return m_Segments.empty(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -621,6 +627,8 @@ protected:
 
     // The iterator to the segment of the path that the limb ended up on the end of
 	std::deque<Vector>::iterator m_CurrentSegment;
+
+    int m_FootCollisionsDisabledSegment; //!< The segment after which foot collisions will be disabled for this limbpath, if it's for legs.
 
     // Normalized measure of how far the limb has progressed toward the
     // current segment's target. 0.0 means its farther away than the

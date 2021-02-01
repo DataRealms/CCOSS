@@ -357,12 +357,13 @@ void Arm::Update() {
 
     UpdateCurrentHandOffset();
 
-    if (m_pHeldMO) {
+    HeldDevice *heldDevice = m_pHeldMO ? dynamic_cast<HeldDevice *>(m_pHeldMO) : nullptr;
+    if (heldDevice) {
         // In order to keep the HeldDevice in the right place, we need to convert its offset (the hand offset) to work as the ParentOffset for the HeldDevice.
         // The HeldDevice will then use this to set its JointPos when it's updated. Unfortunately UnRotateOffset doesn't work for this, since it's Vector/Matrix division, which isn't commutative.
         Vector handOffsetAsParentOffset = RotateOffset(m_JointOffset) + m_HandOffset;
         handOffsetAsParentOffset.RadRotate(-m_Rotation.GetRadAngle()).FlipX(m_HFlipped);
-        dynamic_cast<HeldDevice *>(m_pHeldMO)->SetParentOffset(handOffsetAsParentOffset);
+        heldDevice->SetParentOffset(handOffsetAsParentOffset);
     }
 
     Attachable::Update();

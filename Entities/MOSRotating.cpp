@@ -464,6 +464,7 @@ void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet
             GibThis(blast);
             return;
         } else {
+            if (!woundToAdd->GetDamageMultiplierSetInINI() && woundToAdd->GetDamageMultiplier() == 0.0F) { woundToAdd->SetDamageMultiplier(1.0F); }
             woundToAdd->SetCollidesWithTerrainWhileAttached(false);
             woundToAdd->SetParentOffset(parentOffsetToSet);
             woundToAdd->SetParent(this);

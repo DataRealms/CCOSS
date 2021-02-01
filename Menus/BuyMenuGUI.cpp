@@ -745,14 +745,10 @@ float BuyMenuGUI::GetTotalOrderCost()
     return totalCost;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTotalOrderMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return teh total mass of everything listed in the order box.
 
-float BuyMenuGUI::GetTotalOrderMass()
-{
+float BuyMenuGUI::GetTotalOrderMass() const {
 	float totalMass = 0;
     for (vector<GUIListPanel::Item*>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr) {
         totalMass += dynamic_cast<const MOSprite*>((*itr)->m_pEntity)->GetMass();
@@ -766,8 +762,7 @@ float BuyMenuGUI::GetTotalOrderMass()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Return mass of craft used in the order box.
 
-float BuyMenuGUI::GetCraftMass()
-{
+float BuyMenuGUI::GetCraftMass() {
 	float totalMass = 0;
 
 	// Add the delivery craft's mass
@@ -785,8 +780,7 @@ float BuyMenuGUI::GetCraftMass()
 // Arguments:       None.
 // Return value:    The total number of passengers.
 
-int BuyMenuGUI::GetTotalOrderPassengers()
-{
+int BuyMenuGUI::GetTotalOrderPassengers() const {
 	int passengers = 0;
 	for (vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
 	{
@@ -2275,11 +2269,61 @@ void BuyMenuGUI::AddPresetsToItemList()
 // Description:     Updated the text of the total cost label to reflect the total cost of
 //                  all the items in the order box.
 
-void BuyMenuGUI::UpdateTotalCostLabel(int whichTeam)
-{
-    char newText[512];
-    std::snprintf(newText, sizeof(newText), "Cost: %.0f/%.0f", GetTotalOrderCost(), g_ActivityMan.GetActivity()->GetTeamFunds(whichTeam));
-    m_pCostLabel->SetText(newText);
+void BuyMenuGUI::UpdateTotalCostLabel(int whichTeam) {
+    std::string display;
+    display += "Cost: " + RoundFloatToPrecision(GetTotalOrderCost(), 0, 2) + "/" + RoundFloatToPrecision(g_ActivityMan.GetActivity()->GetTeamFunds(whichTeam), 0);
+    m_pCostLabel->SetText(display);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          UpdateTotalMassLabel
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Updates the text of the specified label to reflect the total mass of
+//                  all the items in teh order box.
+
+void BuyMenuGUI::UpdateTotalMassLabel(const ACraft* pCraft, GUILabel* pLabel) const {
+    if (!pLabel) {
+        return;
+    }
+
+    std::string display;
+
+    if (pCraft && pCraft->GetMaxInventoryMass() != 0) {
+        display = RoundFloatToPrecision(GetTotalOrderMass(), 1);
+        if (pCraft->GetMaxInventoryMass() > 0) {
+            display += " / " + RoundFloatToPrecision(pCraft->GetMaxInventoryMass(), 1);
+        }
+    } else {
+        display = "NO CARGO SPACE";
+    }
+
+    pLabel->SetText(display);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          UpdateTotalPassengersLabel
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Updates the text of the specified label to reflect the total passenger count of
+//                  all the items in teh order box.
+
+void BuyMenuGUI::UpdateTotalPassengersLabel(const ACraft* pCraft, GUILabel* pLabel) const {
+    if (!pLabel) {
+        return;
+    }
+
+    std::string display;
+
+    if (pCraft && pCraft->GetMaxPassengers() != 0) {
+        display = std::to_string(GetTotalOrderPassengers());
+        if (pCraft->GetMaxInventoryMass() > 0) {
+            display += " / " + std::to_string(pCraft->GetMaxPassengers());
+        }
+    } else {
+        display = "NO PASSENGER SPACE";
+    }
+
+    pLabel->SetText(display);
 }
 
 
@@ -2342,52 +2386,3 @@ void BuyMenuGUI::TryPurchase()
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateTotalMassLabel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the text of the specified label to reflect the total mass of
-//                  all the items in teh order box.
-
-void BuyMenuGUI::UpdateTotalMassLabel(const ACraft * pCraft, GUILabel * pLabel) {
-    if (!pLabel) {
-        return;
-    }
-
-    std::string display;
-
-    if (pCraft && pCraft->GetMaxInventoryMass() != 0) {
-        display = RoundFloatToPrecision(GetTotalOrderMass(), 1);
-        if (pCraft->GetMaxInventoryMass() > 0) {
-            display += " / " + RoundFloatToPrecision(pCraft->GetMaxInventoryMass(), 1);
-        }
-    } else {
-        display = "NO CARGO SPACE";
-    }
-
-	pLabel->SetText(display);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateTotalPassengersLabel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the text of the specified label to reflect the total passenger count of
-//                  all the items in teh order box.
-
-void BuyMenuGUI::UpdateTotalPassengersLabel(const ACraft * pCraft, GUILabel * pLabel) {
-    if (!pLabel) {
-        return;
-    }
-
-    std::string display;
-
-    if (pCraft && pCraft->GetMaxPassengers() != 0) {
-        display = std::to_string(pCraft->GetMaxPassengers());
-        if (pCraft->GetMaxInventoryMass() > 0) {
-            display += " / " + std::to_string(pCraft->GetMaxInventoryMass());
-        }
-    } else {
-        display = "NO PASSENGER SPACE";
-    }
-
-    pLabel->SetText(display);
-}

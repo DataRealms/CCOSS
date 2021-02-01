@@ -12,11 +12,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Some functionality has been moved from `AudioMan` to `SoundContainer` for consistency. As such, the following `AudioMan` Lua bindings have been replaced:
+	`AudioMan:FadeOutSound(fadeOutTime);` has been replaced with `soundContainer:FadeOut(fadeOutTime);`
+	`AudioMan:StopSound(soundContainer);` and `AudioMan:StopSound(soundContainer, player);` have been replaced with `soundContainer:Stop();` and `soundContainer:Stop(player);`
+	
 - Pressing escape when a buy menu is open now closes it instead of pausing the game.
 
 - BuyMenu tooltips now display item info as well as a description. This includes the maximum carriable mass and passengers for Craft, mass and passenger slots required for Actors, and mass for other Moveable Objects.
 
 ### Fixed
+
+- Fixed various audio bugs that were in Pre3, and fixed clicking noise on sounds that played far away. The game should sound way better now!
+
+- Mobile sounds (i.e. generally things that aren't GUI related) will now pause and resume when you pause and resume your activity.
+
+- The `DeactivationSound` of `HDFirearms` now respects its `SoundOverlapMode` instead of never allowing overlap. If you don't want it overlapping, set it up accordingly.
 
 - Enabled DPI Awareness to fix issues with resolution settings when Windows scaling is enabled.
 

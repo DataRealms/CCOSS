@@ -600,7 +600,8 @@ int LuaMan::Create() {
             .def("Stop", (bool (SoundContainer:: *)()) &SoundContainer::Stop)
             .def("Stop", (bool (SoundContainer:: *)(int player)) &SoundContainer::Stop)
             .def("Restart", (bool (SoundContainer:: *)()) &SoundContainer::Restart)
-            .def("Restart", (bool (SoundContainer:: *)(int player)) &SoundContainer::Restart),
+            .def("Restart", (bool (SoundContainer:: *)(int player)) &SoundContainer::Restart)
+            .def("FadeOut", &SoundContainer::FadeOut),
 
         class_<SoundSet>("SoundSet")
             .def(constructor<>())
@@ -1555,10 +1556,7 @@ int LuaMan::Create() {
             .def("ClearMusicQueue", &AudioMan::ClearMusicQueue)
             .def("PlaySound", (SoundContainer *(AudioMan:: *)(const std::string &filePath)) &AudioMan::PlaySound, adopt(result))
             .def("PlaySound", (SoundContainer *(AudioMan:: *)(const std::string &filePath, const Vector &position)) &AudioMan::PlaySound, adopt(result))
-            .def("PlaySound", (SoundContainer *(AudioMan:: *)(const std::string &filePath, const Vector &position, int player)) &AudioMan::PlaySound, adopt(result))
-            .def("StopSound", (bool (AudioMan:: *)(SoundContainer *soundContainer)) &AudioMan::StopSound)
-            .def("StopSound", (bool (AudioMan:: *)(SoundContainer *soundContainer, int player)) &AudioMan::StopSound)
-            .def("FadeOutSound", &AudioMan::FadeOutSound),
+            .def("PlaySound", (SoundContainer *(AudioMan:: *)(const std::string &filePath, const Vector &position, int player)) &AudioMan::PlaySound, adopt(result)),
 
         class_<UInputMan>("UInputManager")
 			.def("GetInputDevice", &UInputMan::GetInputDevice)

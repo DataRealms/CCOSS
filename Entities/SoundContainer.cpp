@@ -1,4 +1,5 @@
 #include "SoundContainer.h"
+#include "SettingsMan.h"
 
 namespace RTE {
 
@@ -195,13 +196,16 @@ namespace RTE {
 			if (m_Immobile) {
 				soundMode |= FMOD_3D_HEADRELATIVE;
 				m_AttenuationStartDistance = c_SoundMaxAudibleDistance;
-			} else {
+			} else if (g_SettingsMan.SoundPanningEffectStrength() == 1.0F) {
 				soundMode |= FMOD_3D_INVERSEROLLOFF;
+			} else {
+				soundMode |= FMOD_3D_CUSTOMROLLOFF;
 			}
 
 			result = (result == FMOD_OK) ? soundData->SoundObject->setMode(soundMode) : result;
 			result = (result == FMOD_OK) ? soundData->SoundObject->setLoopCount(m_Loops) : result;
-			result = (result == FMOD_OK) ? soundData->SoundObject->set3DMinMaxDistance(soundData->MinimumAudibleDistance + std::max(0.0F, m_AttenuationStartDistance), c_SoundMaxAudibleDistance) : result;
+			m_AttenuationStartDistance = std::clamp(m_AttenuationStartDistance, 0.0F, static_cast<float>(c_SoundMaxAudibleDistance) - soundData->MinimumAudibleDistance);
+			result = (result == FMOD_OK) ? soundData->SoundObject->set3DMinMaxDistance(soundData->MinimumAudibleDistance + m_AttenuationStartDistance, c_SoundMaxAudibleDistance) : result;
 		}
 		m_SoundPropertiesUpToDate = result == FMOD_OK;
 

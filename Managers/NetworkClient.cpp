@@ -635,7 +635,7 @@ namespace RTE {
 								soundContainerToHandle->SetPitch(soundDataPointer->Pitch);
 								break;
 							case AudioMan::SOUND_FADE_OUT:
-								g_AudioMan.FadeOutSound(soundContainerToHandle, soundDataPointer->FadeOutTime);
+								soundContainerToHandle->FadeOut(soundDataPointer->FadeOutTime);
 								break;
 							default:
 								RTEAbort("Multiplayer client tried to receive unhandled Sound Event, of state " + soundDataPointer->State);

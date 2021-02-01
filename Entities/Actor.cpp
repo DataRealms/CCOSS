@@ -135,6 +135,8 @@ void Actor::Clear()
     m_StuckTimer.Reset();
     m_FallTimer.Reset();
     m_DigStrength = 1;
+
+    m_DamageMultiplier = 1.0F;
 }
 
 

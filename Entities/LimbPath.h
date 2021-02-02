@@ -175,7 +175,7 @@ ClassInfoGetters
     /// Gets whether or not foot collisions should be disabled, i.e. the limbpath's progress is greater than the FootCollisionsDisabledSegment value.
     /// </summary>
     /// <returns>Whether or not foot collisions should be disabled for this limbpath at its current progress.</returns>
-    bool FootCollisionsShouldBeDisabled() const { return m_FootCollisionsDisabledSegment >= 0 && (GetSegCount() - static_cast<int>(std::floorf(GetRegularProgress() * static_cast<float>(GetSegCount())))) <= m_FootCollisionsDisabledSegment; }
+    bool FootCollisionsShouldBeDisabled() const { return m_FootCollisionsDisabledSegment >= 0 && GetSegCount() - GetCurrentSegmentNumber() <= m_FootCollisionsDisabledSegment; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -364,6 +364,12 @@ ClassInfoGetters
 //                  0.0 to 1.0. If the path has ended, 0.0 is returned.
 
     float GetRegularProgress() const;
+
+    /// <summary>
+    /// Gets the current segment as a number, rather than an iterator.
+    /// </summary>
+    /// <returns>The current segment as a number.</returns>
+    int GetCurrentSegmentNumber() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

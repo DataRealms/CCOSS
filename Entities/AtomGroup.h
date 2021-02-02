@@ -202,6 +202,11 @@ namespace RTE {
 		bool RemoveAtoms(long removeID);
 
 		/// <summary>
+		/// Removes all atoms in this AtomGroup, leaving it empty of Atoms.
+		/// </summary>
+		void RemoveAllAtoms() { m_Atoms.clear(); m_SubGroups.clear(); m_MomentOfInertia = 0.0F; m_StoredOwnerMass = 0.0F; }
+
+		/// <summary>
 		/// Gets whether the AtomGroup contains a subgroup with the given subgroupID.
 		/// </summary>
 		/// <param name="subgroupID">The subgroupID to check for.</param>

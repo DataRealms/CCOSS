@@ -123,9 +123,6 @@ int AHuman::Create()
         }
     }
 
-    m_BackupFGFootGroup = new AtomGroup;
-    m_BackupBGFootGroup = new AtomGroup;
-
     // If empty-handed, equip first thing in inventory
     if (m_pFGArm && m_pFGArm->IsAttached() && !m_pFGArm->GetHeldMO())
     {
@@ -188,10 +185,12 @@ int AHuman::Create(const AHuman &reference) {
     m_pFGFootGroup->SetOwner(this);
     m_BackupFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupFGFootGroup->Clone());
     m_BackupFGFootGroup->SetOwner(this);
+    m_BackupFGFootGroup->SetLimbPos(reference.m_BackupFGFootGroup->GetLimbPos());
     m_pBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pBGFootGroup->Clone());
     m_pBGFootGroup->SetOwner(this);
     m_BackupBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupBGFootGroup->Clone());
     m_BackupBGFootGroup->SetOwner(this);
+    m_BackupBGFootGroup->SetLimbPos(reference.m_BackupBGFootGroup->GetLimbPos());
 
     m_StrideSound = reference.m_StrideSound;
 
@@ -292,11 +291,17 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         m_pFGFootGroup = new AtomGroup();
         reader >> m_pFGFootGroup;
         m_pFGFootGroup->SetOwner(this);
+        m_BackupFGFootGroup = new AtomGroup(*m_pFGFootGroup);
+        m_BackupFGFootGroup->RemoveAllAtoms();
+        m_BackupFGFootGroup->SetLimbPos(m_pFGFootGroup->GetLimbPos());
     } else if (propName == "BGFootGroup") {
         delete m_pBGFootGroup;
         m_pBGFootGroup = new AtomGroup();
         reader >> m_pBGFootGroup;
         m_pBGFootGroup->SetOwner(this);
+        m_BackupBGFootGroup = new AtomGroup(*m_pBGFootGroup);
+        m_BackupBGFootGroup->RemoveAllAtoms();
+        m_BackupBGFootGroup->SetLimbPos(m_pBGFootGroup->GetLimbPos());
     } else if (propName == "StrideSound") {
         reader >> m_StrideSound;
     } else if (propName == "StandLimbPath") {
@@ -3618,8 +3623,14 @@ void AHuman::Update()
     if (m_Status == STABLE && m_MoveState != NOMOVE)
     {
         // This exists to support disabling foot collisions if the limbpath has that flag set.
-        if ((m_pFGFootGroup->GetAtomCount() == 0 && m_BackupFGFootGroup->GetAtomCount() > 0) != m_Paths[FGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) { std::swap(m_pFGFootGroup, m_BackupFGFootGroup); }
-        if ((m_pBGFootGroup->GetAtomCount() == 0 && m_BackupBGFootGroup->GetAtomCount() > 0) != m_Paths[BGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) { std::swap(m_pBGFootGroup, m_BackupBGFootGroup); }
+        if ((m_pFGFootGroup->GetAtomCount() == 0 && m_BackupFGFootGroup->GetAtomCount() > 0) != m_Paths[FGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupFGFootGroup->SetLimbPos(m_pFGFootGroup->GetLimbPos());
+            std::swap(m_pFGFootGroup, m_BackupFGFootGroup);
+        }
+        if ((m_pBGFootGroup->GetAtomCount() == 0 && m_BackupBGFootGroup->GetAtomCount() > 0) != m_Paths[BGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupBGFootGroup->SetLimbPos(m_pBGFootGroup->GetLimbPos());
+            std::swap(m_pBGFootGroup, m_BackupBGFootGroup);
+        }
 
         // WALKING, OR WE ARE JETPACKING AND STUCK
         if (m_MoveState == WALK || (m_MoveState == JUMP && m_Vel.GetLargest() < 1.0))

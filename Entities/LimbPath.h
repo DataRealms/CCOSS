@@ -175,7 +175,7 @@ ClassInfoGetters
     /// Gets whether or not foot collisions should be disabled, i.e. the limbpath's progress is greater than the FootCollisionsDisabledSegment value.
     /// </summary>
     /// <returns>Whether or not foot collisions should be disabled for this limbpath at its current progress.</returns>
-    bool FootCollisionsShouldBeDisabled() const { return m_FootCollisionsDisabledSegment >= 0 && m_FootCollisionsDisabledSegment <= static_cast<int>(std::floorf(GetRegularProgress() * static_cast<float>(GetSegCount()))); }
+    bool FootCollisionsShouldBeDisabled() const { return m_FootCollisionsDisabledSegment >= 0 && (GetSegCount() - static_cast<int>(std::floorf(GetRegularProgress() * static_cast<float>(GetSegCount())))) <= m_FootCollisionsDisabledSegment; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -293,7 +293,6 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         m_pFGFootGroup->SetOwner(this);
         m_BackupFGFootGroup = new AtomGroup(*m_pFGFootGroup);
         m_BackupFGFootGroup->RemoveAllAtoms();
-        m_BackupFGFootGroup->SetLimbPos(m_pFGFootGroup->GetLimbPos());
     } else if (propName == "BGFootGroup") {
         delete m_pBGFootGroup;
         m_pBGFootGroup = new AtomGroup();
@@ -301,7 +300,6 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         m_pBGFootGroup->SetOwner(this);
         m_BackupBGFootGroup = new AtomGroup(*m_pBGFootGroup);
         m_BackupBGFootGroup->RemoveAllAtoms();
-        m_BackupBGFootGroup->SetLimbPos(m_pBGFootGroup->GetLimbPos());
     } else if (propName == "StrideSound") {
         reader >> m_StrideSound;
     } else if (propName == "StandLimbPath") {

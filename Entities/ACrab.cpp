@@ -114,11 +114,6 @@ int ACrab::Create()
         }
     }
 
-    m_BackupLFGFootGroup = new AtomGroup;
-    m_BackupLBGFootGroup = new AtomGroup;
-    m_BackupRFGFootGroup = new AtomGroup;
-    m_BackupRBGFootGroup = new AtomGroup;
-
     // Initalize the jump time left
     m_JetTimeLeft = m_JetTimeTotal;
 
@@ -205,18 +200,22 @@ int ACrab::Create(const ACrab &reference) {
     m_pLFGFootGroup->SetOwner(this);
     m_BackupLFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupLFGFootGroup->Clone());
     m_BackupLFGFootGroup->SetOwner(this);
+    m_BackupLFGFootGroup->SetLimbPos(reference.m_BackupLFGFootGroup->GetLimbPos());
     m_pLBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pLBGFootGroup->Clone());
     m_pLBGFootGroup->SetOwner(this);
     m_BackupLBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupLBGFootGroup->Clone());
     m_BackupLBGFootGroup->SetOwner(this);
+    m_BackupLBGFootGroup->SetLimbPos(reference.m_BackupLBGFootGroup->GetLimbPos());
     m_pRFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pRFGFootGroup->Clone());
     m_pRFGFootGroup->SetOwner(this);
     m_BackupRFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupRFGFootGroup->Clone());
     m_BackupRFGFootGroup->SetOwner(this);
+    m_BackupRFGFootGroup->SetLimbPos(reference.m_BackupRFGFootGroup->GetLimbPos());
     m_pRBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pRBGFootGroup->Clone());
     m_pRBGFootGroup->SetOwner(this);
     m_BackupRBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupRBGFootGroup->Clone());
     m_BackupRBGFootGroup->SetOwner(this);
+    m_BackupRBGFootGroup->SetLimbPos(reference.m_BackupRBGFootGroup->GetLimbPos());
 
     m_StrideSound = reference.m_StrideSound;
 
@@ -309,6 +308,9 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         m_pLBGFootGroup->Create(*m_pLFGFootGroup);
         m_pLFGFootGroup->SetOwner(this);
         m_pLBGFootGroup->SetOwner(this);
+        m_BackupLFGFootGroup = new AtomGroup(*m_pLFGFootGroup);
+        m_BackupLFGFootGroup->RemoveAllAtoms();
+        m_BackupLBGFootGroup = new AtomGroup(*m_BackupLFGFootGroup);
     } else if (propName == "RFootGroup" || propName == "RightFootGroup") {
         delete m_pRFGFootGroup;
         delete m_pRBGFootGroup;
@@ -318,6 +320,9 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         m_pRBGFootGroup->Create(*m_pRFGFootGroup);
         m_pRFGFootGroup->SetOwner(this);
         m_pRBGFootGroup->SetOwner(this);
+        m_BackupRFGFootGroup = new AtomGroup(*m_pRFGFootGroup);
+        m_BackupRFGFootGroup->RemoveAllAtoms();
+        m_BackupRBGFootGroup = new AtomGroup(*m_BackupRFGFootGroup);
     } else if (propName == "StrideSound") {
         reader >> m_StrideSound;
     } else if (propName == "LStandLimbPath" || propName == "LeftStandLimbPath") {
@@ -2451,10 +2456,22 @@ void ACrab::Update()
     if (m_Status == STABLE)
     {
         // This exists to support disabling foot collisions if the limbpath has that flag set.
-        if ((m_pLFGFootGroup->GetAtomCount() == 0 && m_BackupLFGFootGroup->GetAtomCount() > 0) != m_Paths[LEFTSIDE][FGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) { std::swap(m_pLFGFootGroup, m_BackupLFGFootGroup); }
-        if ((m_pLBGFootGroup->GetAtomCount() == 0 && m_BackupLBGFootGroup->GetAtomCount() > 0) != m_Paths[LEFTSIDE][BGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) { std::swap(m_pLBGFootGroup, m_BackupLBGFootGroup); }
-        if ((m_pRFGFootGroup->GetAtomCount() == 0 && m_BackupRFGFootGroup->GetAtomCount() > 0) != m_Paths[RIGHTSIDE][FGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) { std::swap(m_pRFGFootGroup, m_BackupRFGFootGroup); }
-        if ((m_pRBGFootGroup->GetAtomCount() == 0 && m_BackupRBGFootGroup->GetAtomCount() > 0) != m_Paths[RIGHTSIDE][BGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) { std::swap(m_pRBGFootGroup, m_BackupRBGFootGroup); }
+        if ((m_pLFGFootGroup->GetAtomCount() == 0 && m_BackupLFGFootGroup->GetAtomCount() > 0) != m_Paths[LEFTSIDE][FGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupLFGFootGroup->SetLimbPos(m_pLFGFootGroup->GetLimbPos());
+            std::swap(m_pLFGFootGroup, m_BackupLFGFootGroup);
+        }
+        if ((m_pLBGFootGroup->GetAtomCount() == 0 && m_BackupLBGFootGroup->GetAtomCount() > 0) != m_Paths[LEFTSIDE][BGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupLBGFootGroup->SetLimbPos(m_pLBGFootGroup->GetLimbPos());
+            std::swap(m_pLBGFootGroup, m_BackupLBGFootGroup);
+        }
+        if ((m_pRFGFootGroup->GetAtomCount() == 0 && m_BackupRFGFootGroup->GetAtomCount() > 0) != m_Paths[RIGHTSIDE][FGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupRFGFootGroup->SetLimbPos(m_pRFGFootGroup->GetLimbPos());
+            std::swap(m_pRFGFootGroup, m_BackupRFGFootGroup);
+        }
+        if ((m_pRBGFootGroup->GetAtomCount() == 0 && m_BackupRBGFootGroup->GetAtomCount() > 0) != m_Paths[RIGHTSIDE][BGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupRBGFootGroup->SetLimbPos(m_pRBGFootGroup->GetLimbPos());
+            std::swap(m_pRBGFootGroup, m_BackupRBGFootGroup);
+        }
 
         // WALKING
         if (m_MoveState == WALK)

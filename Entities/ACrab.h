@@ -46,13 +46,13 @@ class ACrab :
 		MOVEMENTSTATECOUNT
 	};
 
-	enum {
+	enum Side {
 		LEFTSIDE = 0,
 		RIGHTSIDE,
 		SIDECOUNT
 	};
 
-	enum {
+	enum Layer {
 		FGROUND = 0,
 		BGROUND,
 		LAYERCOUNT
@@ -461,6 +461,16 @@ int FirearmActivationDelay() const;
 // Return value:    None.
 
 	void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false) override;
+
+
+	/// <summary>
+	/// Gets the LimbPath corresponding to the passed in Side, Layer and MovementState values.
+	/// </summary>
+	/// <param name="side">Whether to get the left or right side.</param>
+	/// <param name="layer">Whether to get foreground or background LimbPath.</param>
+	/// <param name="movementState">Which movement state to get the LimbPath for.</param>
+	/// <returns>The LimbPath corresponding to the passed in Layer and MovementState values.</returns>
+	LimbPath *GetLimbPath(Side side, Layer layer, MovementState movementState) { return &m_Paths[side][layer][movementState]; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

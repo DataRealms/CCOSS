@@ -803,10 +803,10 @@ ClassInfoGetters
     /// <summary>
     /// Gets the LimbPath corresponding to the passed in Layer and MovementState values.
     /// </summary>
-    /// <param name="foregroundBackground">Whether to get foreground or background LimbPath.</param>
+    /// <param name="layer">Whether to get foreground or background LimbPath.</param>
     /// <param name="movementState">Which movement state to get the LimbPath for.</param>
     /// <returns>The LimbPath corresponding to the passed in Layer and MovementState values.</returns>
-    LimbPath * GetLimbPath(Layer foregroundBackground, MovementState movementState) { return &m_Paths[foregroundBackground][movementState]; }
+    LimbPath * GetLimbPath(Layer layer, MovementState movementState) { return &m_Paths[layer][movementState]; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

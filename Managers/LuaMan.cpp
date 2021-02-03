@@ -1260,6 +1260,7 @@ int LuaMan::Create() {
             .def("Look", &ACrab::Look)
             .def("LookForMOs", &ACrab::LookForMOs)
             .def("IsOnScenePoint", &ACrab::IsOnScenePoint)
+            .def("GetLimbPath", &ACrab::GetLimbPath)
 			.property("LimbPathPushForce", &ACrab::GetLimbPathPushForce, &ACrab::SetLimbPathPushForce)
 			.def("GetLimbPathSpeed", &ACrab::GetLimbPathSpeed)
 			.def("SetLimbPathSpeed", &ACrab::SetLimbPathSpeed),

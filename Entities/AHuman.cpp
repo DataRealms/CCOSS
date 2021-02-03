@@ -4215,13 +4215,26 @@ void AHuman::Update()
             }
         }
         // Upright body posture
-        else
-        {
-            // Break the spring if close to target angle.
-            if (fabs(rot) > 0.1)
-                m_AngularVel -= rot * 0.5;//fabs(rot);
-            else if (fabs(m_AngularVel) > 0.3)
-                m_AngularVel *= 0.5;
+		else
+		{
+			// Hunch slightly if crouching but still
+			if (m_MoveState == CROUCH)
+			{
+				float rotTarget = m_HFlipped ? c_QuarterPI : -c_QuarterPI;
+				float rotDiff = rot - rotTarget;
+				if (fabs(rotDiff) > 0.1)
+					m_AngularVel -= rotDiff * 0.5;
+				else if (fabs(m_AngularVel) > 0.3)
+					m_AngularVel *= 0.5;
+			}
+			else
+			{
+				if (fabs(rot) > 0.1)
+					m_AngularVel -= rot * 0.5;
+				// Break the spring if close to target angle.
+				else if (fabs(m_AngularVel) > 0.3)
+					m_AngularVel *= 0.5;
+			}
         }
     }
     // Keel over

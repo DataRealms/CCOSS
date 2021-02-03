@@ -648,6 +648,11 @@ int LuaMan::Create() {
             .def("AddSound", (void (SoundSet:: *)(std::string const &soundFilePath, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance)) &SoundSet::AddSound)
             .def("AddSoundSet", &SoundSet::AddSoundSet),
 
+        class_<LimbPath>("LimbPath")
+            .property("StartOffset", &LimbPath::GetStartOffset, &LimbPath::SetStartOffset)
+            .property("SegmentCount", &LimbPath::GetSegCount)
+            .def("GetSegment", &LimbPath::GetSegment),
+
         ABSTRACTLUABINDING(SceneObject, Entity)
             .property("Pos", &SceneObject::GetPos, &SceneObject::SetPos)
             .property("HFlipped", &SceneObject::IsHFlipped, &SceneObject::SetHFlipped)
@@ -1178,6 +1183,7 @@ int LuaMan::Create() {
             .def("LookForGold", &AHuman::LookForGold)
             .def("LookForMOs", &AHuman::LookForMOs)
             .def("IsOnScenePoint", &AHuman::IsOnScenePoint)
+            .def("GetLimbPath", &AHuman::GetLimbPath)
 			.property("LimbPathPushForce", &AHuman::GetLimbPathPushForce, &AHuman::SetLimbPathPushForce)
 			.def("GetLimbPathSpeed", &AHuman::GetLimbPathSpeed)
 			.def("SetLimbPathSpeed", &AHuman::SetLimbPathSpeed),

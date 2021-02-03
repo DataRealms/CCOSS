@@ -312,6 +312,8 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         reader >> m_Paths[FGROUND][WALK];
     } else if (propName == "CrouchLimbPath") {
         reader >> m_Paths[FGROUND][CROUCH];
+    } else if (propName == "CrouchLimbPathBG") {
+        reader >> m_Paths[BGROUND][CROUCH];
     } else if (propName == "CrawlLimbPath") {
         reader >> m_Paths[FGROUND][CRAWL];
     } else if (propName == "ArmCrawlLimbPath") {

@@ -65,13 +65,18 @@ release = executable('CCCP', 'Main.cpp', sources, link_with: [luabind, raknet, f
             cpp_args:[extra_args, preprocessor_flags], link_args:link_args+release_args, cpp_pch:pch,
             name_suffix:suffix, build_by_default:true, override_options:['buildtype=release', 'optimization=3', 'debug=false'])
 
-#AppImage Targeting
-wget = find_program('wget')
+if target_machine.system() in['linux']
+  #AppImage
+  wget = find_program('wget')
 
-linuxdeploy_url = 'https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage'
+  linuxdeploy_url = 'https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage'
 
-linuxdeploy = custom_target('linuxdeploy', build_by_default:false, output:'linuxdeploy-x86_64.AppImage', command:[find_program('env'), wget, '-O', '@OUTPUT@', linuxdeploy_url, '&&', find_program('chmod'), '+x', '@OUTPUT@'])
-chmod = find_program('chmod')
-outname = 'cccp-x86_64.AppImage'
+  linuxdeploy = custom_target('linuxdeploy', build_by_default:false, output:'linuxdeploy-x86_64.AppImage',
+		command:[find_program('env'), wget, '-O', '@OUTPUT@', linuxdeploy_url,
+		find_program('chmod'), '+x', '@OUTPUT@'])
+  outname = 'cccp-x86_64.AppImage'
 
-custom_target('appimage', depends:[release, linuxdeploy], output:outname , command:[find_program('env'), 'OUTPUT='+outname, linuxdeploy.full_path(), '--appdir=@PRIVATE_DIR@', '-e', release, '-l', fmod_so[0], '-d', desktop_file, '-i', icon_file, '-oappimage'])
+  custom_target('appimage', depends:[release, linuxdeploy], output:outname,
+		command:[find_program('env'), 'OUTPUT='+outname, linuxdeploy.full_path(),
+		'--appdir=@PRIVATE_DIR@', '-e', release, '-l', fmod_so[0], '-d', desktop_file, '-i', icon_file, '-oappimage'])
+endif

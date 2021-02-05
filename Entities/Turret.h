@@ -88,6 +88,15 @@ namespace RTE {
 		/// Updates this MovableObject. Supposed to be done every frame.
 		/// </summary>
 		void Update() override;
+
+		/// <summary>
+		/// Draws this Turret's current graphical representation to a BITMAP of choice.
+		/// </summary>
+		/// <param name="pTargetBitmap">A pointer to a BITMAP to draw on.</param>
+		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
+		/// <param name="mode">In which mode to draw in. See the DrawMode enumeration for the modes.</param>
+		/// <param name="onlyPhysical">Whether to not draw any extra 'ghost' items of this MovableObject, indicator arrows or hovering HUD text and so on.</param>
+		void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 #pragma endregion
 
 	protected:

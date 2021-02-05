@@ -83,4 +83,12 @@ namespace RTE {
 		if (m_MountedDevice) { m_MountedDevice->SetRotAngle(m_Rotation.GetRadAngle() + m_MountedDeviceRotOffset); }
 		Attachable::Update();
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Turret::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
+		Attachable::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
+		//TODO replace this with a relative draw order property or something that lets you organize attachable drawing so it doesn't need special hardcoding crap. Use this for ahuman limbs and arm held mo if possible.
+		if (m_MountedDevice && m_MountedDevice->IsDrawnAfterParent()) { m_MountedDevice->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
+	}
 }

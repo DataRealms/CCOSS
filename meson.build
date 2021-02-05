@@ -65,7 +65,7 @@ release = executable('CCCP', 'Main.cpp', sources, link_with: [luabind, raknet, f
             cpp_args:[extra_args, preprocessor_flags], link_args:link_args+release_args, cpp_pch:pch,
             name_suffix:suffix, build_by_default:true, override_options:['buildtype=release', 'optimization=3', 'debug=false'])
 
-if target_machine.system() in['linux']
+if target_machine.system() in ['linux']
   #AppImage
   wget = find_program('wget')
 

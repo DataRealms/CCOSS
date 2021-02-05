@@ -22,6 +22,7 @@ deps = [
   ]
 
 compiler = meson.get_compiler('cpp')
+build_rpath = []
 link_args=[]
 extra_args=[]
 preprocessor_flags = []
@@ -29,12 +30,12 @@ preprocessor_flags_debug = []
 suffix=''
 
 if compiler.get_argument_syntax()== 'gcc' # this will allow for clang to be used
+  build_rpath += '$ORIGIN'
   extra_args = ['-fpermissive', '-Wno-unknown-pragmas'] # Warnings are there for a reason
   release_args = ['-w']
   suffix = 'x86_64'
   preprocessor_flags = ['-DRELEASE_BUILD']
   preprocessor_flags_debug = ['-DDEBUG_RELEASE_BUILD']
-  link_args += ['-Wl,-rpath=$ORIGIN,--enable-new-dtags']
   if compiler.get_id() =='gcc' and compiler.version().version_compare('<9')
     link_args += ['-lstdc++fs']
   endif

@@ -1,4 +1,4 @@
-project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++17'], version:'0.1.0-Pre-3')
+project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++17'], version:'0.1.0-Pre-3.1', meson_version:'>=0.49')
 
 source_inc_dirs = include_directories('Activities',
           'Entities',

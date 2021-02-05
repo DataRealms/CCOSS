@@ -1,11 +1,12 @@
 project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++17'], version:'0.1.0-Pre-3.1', meson_version:'>=0.49')
 
-source_inc_dirs = include_directories('Activities',
-          'Entities',
-          'GUI',
-          'Managers',
-          'Menus',
-          'System')
+source_inc_dirs = include_directories(
+  'Activities',
+  'Entities',
+  'GUI',
+  'Managers',
+  'Menus',
+  'System')
 
 deps = [
   dependency('allegro'),
@@ -52,11 +53,13 @@ subdir('external')
 
 debug = executable('CCCP_debug', 'Main.cpp',sources, link_with: [luabind_debug, raknet_debug, fmod],
             dependencies: [deps], include_directories:[source_inc_dirs, external_inc_dirs],
-            cpp_args:extra_args, link_args:link_args, cpp_pch:pch, name_suffix:suffix, override_options:['buildtype=debugoptimized', 'optimization=g'])
+            cpp_args:[extra_args, preprocessor_flags_debug], link_args:link_args, cpp_pch:pch,
+            name_suffix:suffix, build_by_default:false, override_options:['buildtype=debugoptimized', 'optimization=g'])
 
 release = executable('CCCP', 'Main.cpp', sources, link_with: [luabind, raknet, fmod],
             dependencies: [deps], include_directories:[source_inc_dirs, external_inc_dirs],
-            cpp_args:extra_args, link_args:link_args+release_args, cpp_pch:pch, name_suffix:suffix, build_by_default:false, override_options:['buildtype=release', 'optimization=3', 'debug=false'])
+            cpp_args:[extra_args, preprocessor_flags], link_args:link_args+release_args, cpp_pch:pch,
+            name_suffix:suffix, build_by_default:true, override_options:['buildtype=release', 'optimization=3', 'debug=false'])
 
 #AppImage Targeting
 wget = find_program('wget')

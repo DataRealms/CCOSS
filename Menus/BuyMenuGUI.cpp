@@ -1224,7 +1224,7 @@ void BuyMenuGUI::Update()
             } else {
                 const Actor *itemAsActor = dynamic_cast<const Actor *>(currentItem);
                 if (itemAsActor) {
-                    description += "\nMass: " + RoundFloatToPrecision(itemAsActor->GetMass(), 1) + " kg";
+                    description += "\nMass: " + RoundFloatToPrecision(itemAsActor->GetMass(), 1, 2) + " kg";
                     int passengerSlotsTaken = itemAsActor->GetPassengerSlots();
                     if (passengerSlotsTaken > 1) {
                         description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
@@ -1232,7 +1232,7 @@ void BuyMenuGUI::Update()
                 } else {
                     const MovableObject *itemAsMO = dynamic_cast<const MovableObject *>(currentItem);
                     if (itemAsMO) {
-                        description += "\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass(), 1) + " kg";
+                        description += "\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass(), 1, 2) + " kg";
                     }
                 }
             }
@@ -1370,7 +1370,7 @@ void BuyMenuGUI::Update()
             const Entity *currentItem = pItem->m_pEntity;
             const Actor *itemAsActor = dynamic_cast<const Actor *>(currentItem);
             if (itemAsActor) {
-                description += "\n\nMass: " + RoundFloatToPrecision(itemAsActor->GetMass(), 1) + " kg";
+                description += "\n\nMass: " + RoundFloatToPrecision(itemAsActor->GetMass(), 1, 2) + " kg";
 
                 int passengerSlotsTaken = itemAsActor->GetPassengerSlots();
                 if (passengerSlotsTaken > 1) {
@@ -1379,7 +1379,7 @@ void BuyMenuGUI::Update()
             } else {
                 const MovableObject *itemAsMO = dynamic_cast<const MovableObject *>(currentItem);
                 if (itemAsMO) {
-                    description += "\n\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass(), 1) + " kg";
+                    description += "\n\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass(), 1, 2) + " kg";
                 }
             }
         }
@@ -2292,7 +2292,7 @@ void BuyMenuGUI::UpdateTotalMassLabel(const ACraft* pCraft, GUILabel* pLabel) co
     std::string display;
 
     if (pCraft && pCraft->GetMaxInventoryMass() != 0) {
-        display = RoundFloatToPrecision(GetTotalOrderMass(), 1);
+        display = RoundFloatToPrecision(GetTotalOrderMass(), 1, 2);
         if (pCraft->GetMaxInventoryMass() > 0) {
             display += " / " + RoundFloatToPrecision(pCraft->GetMaxInventoryMass(), 1);
         }
@@ -2322,7 +2322,7 @@ void BuyMenuGUI::UpdateTotalPassengersLabel(const ACraft* pCraft, GUILabel* pLab
             display += " / " + std::to_string(pCraft->GetMaxPassengers());
         }
     } else {
-        display = "NO PASSENGER SPACE";
+        display = "NO SPACE";
     }
 
     pLabel->SetText(display);

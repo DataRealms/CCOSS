@@ -153,7 +153,7 @@ ClassInfoGetters
     /// </summary>
     /// <param name="oldAttachableOrWoundMass">The mass the Attachable or wound had before its mass was modified.</param>
     /// <param name="newAttachableOrWoundMass">The up-to-date mass of the Attachable or wound after its mass was modified.</param>
-    void UpdateAttachableAndWoundMass(float oldAttachableOrWoundMass, float newAttachableOrWoundMass) { m_AttachableAndWoundMass += newAttachableOrWoundMass - oldAttachableOrWoundMass; }
+    virtual void UpdateAttachableAndWoundMass(float oldAttachableOrWoundMass, float newAttachableOrWoundMass) { m_AttachableAndWoundMass += newAttachableOrWoundMass - oldAttachableOrWoundMass; }
 
     /// <summary>
     /// Gets the MOIDs of this MOSRotating and all its Attachables and Wounds, putting them into the MOIDs vector.

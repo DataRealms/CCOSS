@@ -336,8 +336,19 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Attachable::SetMass(const float newMass) {
+		float currentMass = GetMass();
+		if (newMass != currentMass) {
+			float previousMassForUpdatingParent = m_Parent ? currentMass : 0.0F;
+			MovableObject::SetMass(newMass);
+			if (m_Parent) { m_Parent->UpdateAttachableAndWoundMass(previousMassForUpdatingParent, GetMass()); }
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Attachable::UpdateAttachableAndWoundMass(float oldAttachableOrWoundMass, float newAttachableOrWoundMass) {
 		float previousMassForUpdatingParent = m_Parent ? GetMass() : 0.0F;
-		MovableObject::SetMass(newMass);
+		MOSRotating::UpdateAttachableAndWoundMass(oldAttachableOrWoundMass, newAttachableOrWoundMass);
 		if (m_Parent) { m_Parent->UpdateAttachableAndWoundMass(previousMassForUpdatingParent, GetMass()); }
 	}
 

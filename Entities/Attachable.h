@@ -387,6 +387,13 @@ namespace RTE {
 		void SetMass(const float newMass) final;
 
 		/// <summary>
+		/// Updates the total mass of Attachables and wounds for this Attachable, intended to be used when Attachables' masses get modified. Simply subtracts the old mass and adds the new one.
+		/// </summary>
+		/// <param name="oldAttachableOrWoundMass">The mass the Attachable or wound had before its mass was modified.</param>
+		/// <param name="newAttachableOrWoundMass">The up-to-date mass of the Attachable or wound after its mass was modified.</param>
+		void UpdateAttachableAndWoundMass(float oldAttachableOrWoundMass, float newAttachableOrWoundMass) final;
+
+		/// <summary>
 		/// Adds the passed in Attachable the list of Attachables and sets its parent to this Attachable.
 		/// </summary>
 		/// <param name="attachable">The Attachable to add.</param>

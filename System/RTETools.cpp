@@ -198,15 +198,18 @@ namespace RTE {
 			std::stringstream floatStream;
 			floatStream << std::fixed << std::setprecision(precision) << input;
 			return floatStream.str();
-		} else if (roundingMode == 1) {
-			//RTEAssert(input < (std::numeric_limits<float>::max() / static_cast<float>(pow(10, precision))), "VALUE WILL EXCEED NUMERIC LIMITS WITH PRECISION " + std::to_string(precision));
-			float roundingBuffer = floor(input * static_cast<float>(pow(10, precision))) / static_cast<float>(pow(10, precision));
-			return RoundFloatToPrecision(roundingBuffer, precision);
-		} else if (roundingMode == 2) {
-			float roundingBuffer = ceil(input * static_cast<float>(pow(10, precision))) / static_cast<float>(pow(10, precision));
-			return RoundFloatToPrecision(roundingBuffer, precision);
 		} else {
-			RTEAssert(false, "Error in RoundFloatToPrecision: INVALID ROUNDING MODE");
+			RTEAssert(static_cast<float>(pow(10, precision)) < std::numeric_limits<float>::max(), "PRECISION SET GREATER THAN EXPONENT MAX");
+			RTEAssert(input < (std::numeric_limits<float>::max() / static_cast<float>(pow(10, precision))), "VALUE WILL EXCEED NUMERIC LIMITS WITH PRECISION " + std::to_string(precision));
+			if (roundingMode == 1) {
+				float roundingBuffer = floor(input * static_cast<float>(pow(10, precision))) / static_cast<float>(pow(10, precision));
+				return RoundFloatToPrecision(roundingBuffer, precision);
+			} else if (roundingMode == 2) {
+				float roundingBuffer = ceil(input * static_cast<float>(pow(10, precision))) / static_cast<float>(pow(10, precision));
+				return RoundFloatToPrecision(roundingBuffer, precision);
+			} else {
+				RTEAssert(false, "Error in RoundFloatToPrecision: INVALID ROUNDING MODE");
+			}
 		}
 	}
 }

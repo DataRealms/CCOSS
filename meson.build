@@ -28,16 +28,20 @@ preprocessor_flags = []
 preprocessor_flags_debug = []
 suffix=''
 
-if meson.get_compiler('cpp').get_id() in ['gcc', 'clang']
-  extra_args = ['-fpermissive', '-Wno-write-strings', '-Wno-unknown-pragmas']
+if compiler.get_argument_syntax()== 'gcc' # this will allow for clang to be used
+  extra_args = ['-fpermissive', '-Wno-unknown-pragmas'] # Warnings are there for a reason
   release_args = ['-w']
   suffix = 'x86_64'
   preprocessor_flags = ['-DRELEASE_BUILD']
   preprocessor_flags_debug = ['-DDEBUG_RELEASE_BUILD']
-  if compiler.version().version_compare('<9')
+  link_args += ['-Wl,-rpath=$ORIGIN,--enable-new-dtags']
+  if compiler.get_id() =='gcc' and compiler.version().version_compare('<9')
     link_args += ['-lstdc++fs']
   endif
-elif meson.get_compiler('cpp').get_id() == 'msvc'
+elif compiler.get_argument_syntax()== 'msvc'
+#TODO: add MSVC related arguments and stuff in here
+else
+  error('Using unknown compiler, please use gcc or msvc compatible compilers')
 endif
 
 pch = 'System/StandardIncludes.h'

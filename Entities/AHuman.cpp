@@ -64,6 +64,7 @@ void AHuman::Clear()
         m_Paths[BGROUND][i].Reset();
         m_Paths[FGROUND][i].Terminate();
         m_Paths[BGROUND][i].Terminate();
+        m_RotAngleTargets[i] = 0.0F;
     }
     m_Aiming = false;
     m_ArmClimbing[FGROUND] = false;
@@ -201,6 +202,7 @@ int AHuman::Create(const AHuman &reference) {
     for (int i = 0; i < MOVEMENTSTATECOUNT; ++i) {
         m_Paths[FGROUND][i].Create(reference.m_Paths[FGROUND][i]);
         m_Paths[BGROUND][i].Create(reference.m_Paths[BGROUND][i]);
+        m_RotAngleTargets[i] = reference.m_RotAngleTargets[i];
     }
 
     m_GoldInInventoryChunk = reference.m_GoldInInventoryChunk;
@@ -322,6 +324,14 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         reader >> m_Paths[FGROUND][JUMP];
     } else if (propName == "DislodgeLimbPath") {
         reader >> m_Paths[FGROUND][DISLODGE];
+    } else if (propName == "StandRotAngleTarget") {
+        reader >> m_RotAngleTargets[STAND];
+    } else if (propName == "WalkRotAngleTarget") {
+        reader >> m_RotAngleTargets[WALK];
+    } else if (propName == "CrouchRotAngleTarget") {
+        reader >> m_RotAngleTargets[CROUCH];
+    } else if (propName == "JumpRotAngleTarget") {
+        reader >> m_RotAngleTargets[JUMP];
     } else {
         return Actor::ReadProperty(propName, reader);
     }
@@ -4217,24 +4227,12 @@ void AHuman::Update()
         // Upright body posture
 		else
 		{
-			// Hunch slightly if crouching but still
-			if (m_MoveState == CROUCH)
-			{
-				float rotTarget = m_HFlipped ? c_QuarterPI : -c_QuarterPI;
-				float rotDiff = rot - rotTarget;
-				if (fabs(rotDiff) > 0.1)
-					m_AngularVel -= rotDiff * 0.5;
-				else if (fabs(m_AngularVel) > 0.3)
-					m_AngularVel *= 0.5;
-			}
-			else
-			{
-				if (fabs(rot) > 0.1)
-					m_AngularVel -= rot * 0.5;
-				// Break the spring if close to target angle.
-				else if (fabs(m_AngularVel) > 0.3)
-					m_AngularVel *= 0.5;
-			}
+            float rotDiff = rot - (GetRotAngleTarget(m_MoveState) * GetFlipFactor());
+            if (fabs(rotDiff) > 0.1F) {
+                m_AngularVel -= rotDiff * 0.5F;
+            } else if (fabs(m_AngularVel) > 0.3F) {
+                m_AngularVel *= 0.5F;
+            }
         }
     }
     // Keel over

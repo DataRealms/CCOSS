@@ -1186,7 +1186,9 @@ int LuaMan::Create() {
             .def("GetLimbPath", &AHuman::GetLimbPath)
 			.property("LimbPathPushForce", &AHuman::GetLimbPathPushForce, &AHuman::SetLimbPathPushForce)
 			.def("GetLimbPathSpeed", &AHuman::GetLimbPathSpeed)
-			.def("SetLimbPathSpeed", &AHuman::SetLimbPathSpeed),
+			.def("SetLimbPathSpeed", &AHuman::SetLimbPathSpeed)
+			.def("GetRotAngleTarget", &AHuman::GetRotAngleTarget)
+			.def("SetRotAngleTarget", &AHuman::SetRotAngleTarget),
         
 		CONCRETELUABINDING(ACrab, Actor)
 			// These are all private/protected so they can't be bound, need to consider making them public.

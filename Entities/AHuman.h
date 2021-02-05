@@ -850,6 +850,20 @@ ClassInfoGetters
 
 	void SetLimbPathPushForce(float force);
 
+    /// <summary>
+    /// Gets the target rot angle for the given MovementState.
+    /// </summary>
+    /// <param name="movementState">The MovementState to get the rot angle target for.</param>
+    /// <returns>The target rot angle for the given MovementState.</returns>
+    float GetRotAngleTarget(MovementState movementState) { return m_RotAngleTargets.at(movementState); }
+
+    /// <summary>
+    /// Sets the target rot angle for the given MovementState.
+    /// </summary>
+    /// <param name="movementState">The MovementState to get the rot angle target for.</param>
+    /// <param name="newRotAngleTarget">The new rot angle target to use.</param>
+    void SetRotAngleTarget(MovementState movementState, float newRotAngleTarget) { m_RotAngleTargets.at(movementState) = newRotAngleTarget; }
+
 	/// <summary>
 	/// Gets the duration it takes this AHuman to fully charge a throw.
 	/// </summary>
@@ -935,6 +949,7 @@ protected:
     // Limb paths for different movement states.
     // [0] is for the foreground limbs, and [1] is for BG.
     LimbPath m_Paths[2][MOVEMENTSTATECOUNT];
+    std::array<float, MOVEMENTSTATECOUNT> m_RotAngleTargets; //!< An array of rot angle targets for different movement states.
     // Whether was aiming during the last frame too.
     bool m_Aiming;
     // Whether the BG Arm is helping with locomotion or not.

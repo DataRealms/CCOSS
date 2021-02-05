@@ -22,7 +22,7 @@ deps = [
   ]
 
 compiler = meson.get_compiler('cpp')
-build_rpath = []
+build_rpath = ''
 link_args=[]
 extra_args=[]
 preprocessor_flags = []
@@ -36,6 +36,7 @@ if compiler.get_argument_syntax()== 'gcc' # this will allow for clang to be used
   suffix = 'x86_64'
   preprocessor_flags = ['-DRELEASE_BUILD']
   preprocessor_flags_debug = ['-DDEBUG_RELEASE_BUILD']
+  link_args += ['-Wl,--enable-new-dtags']
   if compiler.get_id() =='gcc' and compiler.version().version_compare('<9')
     link_args += ['-lstdc++fs']
   endif
@@ -56,14 +57,14 @@ subdir('System')
 subdir('Resources')
 subdir('external')
 
-debug = executable('CCCP_debug', 'Main.cpp',sources, link_with: [luabind_debug, raknet_debug, fmod],
+debug = executable('CCCP_debug', 'Main.cpp',sources, link_with: [luabind_debug, raknet_debug], objects:[fmod_so],
             dependencies: [deps], include_directories:[source_inc_dirs, external_inc_dirs],
-            cpp_args:[extra_args, preprocessor_flags_debug], link_args:link_args, cpp_pch:pch,
+            cpp_args:[extra_args, preprocessor_flags_debug], link_args:link_args, build_rpath:build_rpath, cpp_pch:pch,
             name_suffix:suffix, build_by_default:false, override_options:['buildtype=debugoptimized', 'optimization=g'])
 
-release = executable('CCCP', 'Main.cpp', sources, link_with: [luabind, raknet, fmod],
+release = executable('CCCP', 'Main.cpp', sources, link_with: [luabind, raknet], objects:[fmod_so],
             dependencies: [deps], include_directories:[source_inc_dirs, external_inc_dirs],
-            cpp_args:[extra_args, preprocessor_flags], link_args:link_args+release_args, cpp_pch:pch,
+            cpp_args:[extra_args, preprocessor_flags], link_args:link_args+release_args, build_rpath:build_rpath, cpp_pch:pch,
             name_suffix:suffix, build_by_default:true, override_options:['buildtype=release', 'optimization=3', 'debug=false'])
 
 if target_machine.system() in ['linux']

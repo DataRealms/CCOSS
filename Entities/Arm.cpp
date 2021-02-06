@@ -358,6 +358,11 @@ void Arm::Update() {
     UpdateCurrentHandOffset();
 
     HeldDevice *heldDevice = m_pHeldMO ? dynamic_cast<HeldDevice *>(m_pHeldMO) : nullptr;
+    const ThrownDevice *thrownDevice = heldDevice ? dynamic_cast<ThrownDevice *>(heldDevice) : nullptr;
+
+    // HeldDevices need to use the aim angle for their positioning and rotating, while ThrownDevices need to aim and position themselves based on the hand offset, so this done here for TDs and below for HDs.
+    if (thrownDevice) { m_Rotation = m_HandOffset.GetAbsRadAngle() + (m_HFlipped ? c_PI : 0); }
+
     if (heldDevice) {
         // In order to keep the HeldDevice in the right place, we need to convert its offset (the hand offset) to work as the ParentOffset for the HeldDevice.
         // The HeldDevice will then use this to set its JointPos when it's updated. Unfortunately UnRotateOffset doesn't work for this, since it's Vector/Matrix division, which isn't commutative.
@@ -368,10 +373,9 @@ void Arm::Update() {
 
     Attachable::Update();
 
-    if (IsAttached()) {
-        if (dynamic_cast<HeldDevice *>(m_pHeldMO)) { m_Recoiled = dynamic_cast<HeldDevice *>(m_pHeldMO)->IsRecoiled(); }
+    m_Recoiled = heldDevice && heldDevice->IsRecoiled();
 
-        // Need to manually specify the rotation here so the arm moves with its hand. Need to specify the position because the rotation has changed and RotateOffset will return different results.
+    if (!thrownDevice) {
         m_Rotation = m_HandOffset.GetAbsRadAngle() + (m_HFlipped ? c_PI : 0);
         m_Pos = m_JointPos - RotateOffset(m_JointOffset);
     }
@@ -397,9 +401,14 @@ void Arm::UpdateCurrentHandOffset() {
             g_SceneMan.CastStrengthRay(midOfDevice, midToMuzzle, 5, terrainOrMuzzlePosition, 0, false);
             targetOffset += g_SceneMan.ShortestDistance(newMuzzlePos, terrainOrMuzzlePosition, g_SceneMan.SceneWrapsX());
         } else {
-            targetOffset = m_TargetPosition.IsZero() ? m_IdleOffset.GetXFlipped(m_HFlipped) : g_SceneMan.ShortestDistance(m_JointPos, m_TargetPosition, g_SceneMan.SceneWrapsX());
-            if (m_WillIdle && !m_TargetPosition.IsZero() && targetOffset.GetMagnitude() > m_MaxLength) { targetOffset = m_IdleOffset.GetXFlipped(m_HFlipped); }
+            if (m_TargetPosition.IsZero()) {
+                targetOffset = m_IdleOffset.GetXFlipped(m_HFlipped);
+            } else {
+                targetOffset = g_SceneMan.ShortestDistance(m_JointPos, m_TargetPosition, g_SceneMan.SceneWrapsX());
+                if (m_WillIdle && targetOffset.GetMagnitude() > m_MaxLength) { targetOffset = m_IdleOffset.GetXFlipped(m_HFlipped); }
+            }
         }
+
         Vector distanceFromTargetOffsetToHandOffset(targetOffset - m_HandOffset);
         m_HandOffset += distanceFromTargetOffsetToHandOffset * m_MoveSpeed;
         m_HandOffset.ClampMagnitude(m_MaxLength, m_MaxLength / 2 + 0.1F);

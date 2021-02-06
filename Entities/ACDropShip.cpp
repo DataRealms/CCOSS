@@ -127,40 +127,40 @@ int ACDropShip::ReadProperty(std::string propName, Reader &reader) {
         m_pRThruster = new AEmitter;
         reader >> m_pRThruster;
         AddAttachable(m_pRThruster);
-        if (!m_pRThruster->GetDamageMultiplierSetInINI()) { m_pRThruster->SetDamageMultiplier(1.0F); }
+        if (m_pRThruster->HasNoSetDamageMultiplier()) { m_pRThruster->SetDamageMultiplier(1.0F); }
         m_pRThruster->SetInheritsRotAngle(false);
     } else if (propName == "LThruster") {
         RemoveAttachable(m_pLThruster);
         m_pLThruster = new AEmitter;
         reader >> m_pLThruster;
         AddAttachable(m_pLThruster);
-        if (!m_pLThruster->GetDamageMultiplierSetInINI()) { m_pLThruster->SetDamageMultiplier(1.0F); }
+        if (m_pLThruster->HasNoSetDamageMultiplier()) { m_pLThruster->SetDamageMultiplier(1.0F); }
         m_pLThruster->SetInheritsRotAngle(false);
     } else if (propName == "URThruster") {
         RemoveAttachable(m_pURThruster);
         m_pURThruster = new AEmitter;
         reader >> m_pURThruster;
         AddAttachable(m_pURThruster);
-        if (!m_pURThruster->GetDamageMultiplierSetInINI()) { m_pURThruster->SetDamageMultiplier(1.0F); }
+        if (m_pURThruster->HasNoSetDamageMultiplier()) { m_pURThruster->SetDamageMultiplier(1.0F); }
     } else if (propName == "ULThruster") {
         RemoveAttachable(m_pULThruster);
         m_pULThruster = new AEmitter;
         reader >> m_pULThruster;
         AddAttachable(m_pULThruster);
-        if (!m_pULThruster->GetDamageMultiplierSetInINI()) { m_pULThruster->SetDamageMultiplier(1.0F); }
+        if (m_pULThruster->HasNoSetDamageMultiplier()) { m_pULThruster->SetDamageMultiplier(1.0F); }
     } else if (propName == "RHatchDoor") {
         RemoveAttachable(m_pRHatch);
         m_pRHatch = new Attachable;
         reader >> m_pRHatch;
         AddAttachable(m_pRHatch);
-        if (!m_pRHatch->GetDamageMultiplierSetInINI()) { m_pRHatch->SetDamageMultiplier(1.0F); }
+        if (m_pRHatch->HasNoSetDamageMultiplier()) { m_pRHatch->SetDamageMultiplier(1.0F); }
         m_pRHatch->SetInheritsRotAngle(false);
     } else if (propName == "LHatchDoor") {
         RemoveAttachable(m_pLHatch);
         m_pLHatch = new Attachable;
         reader >> m_pLHatch;
         AddAttachable(m_pLHatch);
-        if (!m_pLHatch->GetDamageMultiplierSetInINI()) { m_pLHatch->SetDamageMultiplier(1.0F); }
+        if (m_pLHatch->HasNoSetDamageMultiplier()) { m_pLHatch->SetDamageMultiplier(1.0F); }
         m_pLHatch->SetInheritsRotAngle(false);
     } else if (propName == "HatchDoorSwingRange") {
         reader >> m_HatchSwingRange;

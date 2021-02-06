@@ -261,13 +261,13 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         m_pTurret = new Turret;
         reader >> m_pTurret;
         AddAttachable(m_pTurret);
-        if (!m_pTurret->GetDamageMultiplierSetInINI()) { m_pTurret->SetDamageMultiplier(5.0F); }
+        if (m_pTurret->HasNoSetDamageMultiplier()) { m_pTurret->SetDamageMultiplier(5.0F); }
     } else if (propName == "Jetpack") {
         RemoveAttachable(m_pJetpack);
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
         AddAttachable(m_pJetpack);
-        if (!m_pJetpack->GetDamageMultiplierSetInINI()) { m_pJetpack->SetDamageMultiplier(0.0F); }
+        if (m_pJetpack->HasNoSetDamageMultiplier()) { m_pJetpack->SetDamageMultiplier(0.0F); }
         m_pJetpack->SetApplyTransferredForcesAtOffset(false);
         m_pJetpack->SetDeleteWhenRemovedFromParent(true);
     } else if (propName == "JumpTime") {
@@ -278,27 +278,27 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         m_pLFGLeg = new Leg;
         reader >> m_pLFGLeg;
         AddAttachable(m_pLFGLeg);
-        if (!m_pLFGLeg->GetDamageMultiplierSetInINI()) { m_pLFGLeg->SetDamageMultiplier(1.0F); }
+        if (m_pLFGLeg->HasNoSetDamageMultiplier()) { m_pLFGLeg->SetDamageMultiplier(1.0F); }
         m_pLFGLeg->SetInheritsHFlipped(-1);
     } else if (propName == "LBGLeg" || propName == "LeftFGLeg") {
         RemoveAttachable(m_pLBGLeg);
         m_pLBGLeg = new Leg;
         reader >> m_pLBGLeg;
         AddAttachable(m_pLBGLeg);
-        if (!m_pLBGLeg->GetDamageMultiplierSetInINI()) { m_pLBGLeg->SetDamageMultiplier(1.0F); }
+        if (m_pLBGLeg->HasNoSetDamageMultiplier()) { m_pLBGLeg->SetDamageMultiplier(1.0F); }
         m_pLBGLeg->SetInheritsHFlipped(-1);
     } else if (propName == "RFGLeg" || propName == "LeftFGLeg") {
         RemoveAttachable(m_pRFGLeg);
         m_pRFGLeg = new Leg;
         reader >> m_pRFGLeg;
         AddAttachable(m_pRFGLeg);
-        if (!m_pRFGLeg->GetDamageMultiplierSetInINI()) { m_pRFGLeg->SetDamageMultiplier(1.0F); }
+        if (m_pRFGLeg->HasNoSetDamageMultiplier()) { m_pRFGLeg->SetDamageMultiplier(1.0F); }
     } else if (propName == "RBGLeg" || propName == "LeftFGLeg") {
         RemoveAttachable(m_pRBGLeg);
         m_pRBGLeg = new Leg;
         reader >> m_pRBGLeg;
         AddAttachable(m_pRBGLeg);
-        if (!m_pRBGLeg->GetDamageMultiplierSetInINI()) { m_pRBGLeg->SetDamageMultiplier(1.0F); }
+        if (m_pRBGLeg->HasNoSetDamageMultiplier()) { m_pRBGLeg->SetDamageMultiplier(1.0F); }
     } else if (propName == "LFootGroup" || propName == "LeftFootGroup") {
         delete m_pLFGFootGroup;
         delete m_pLBGFootGroup;

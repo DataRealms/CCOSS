@@ -238,14 +238,14 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         m_pHead = new Attachable;
         reader >> m_pHead;
         AddAttachable(m_pHead);
-        if (!m_pHead->GetDamageMultiplierSetInINI()) { m_pHead->SetDamageMultiplier(5.0F); }
+        if (m_pHead->HasNoSetDamageMultiplier()) { m_pHead->SetDamageMultiplier(5.0F); }
         m_pHead->SetInheritsRotAngle(false);
     } else if (propName == "Jetpack") {
         RemoveAttachable(m_pJetpack);
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
         AddAttachable(m_pJetpack);
-        if (!m_pJetpack->GetDamageMultiplierSetInINI()) { m_pJetpack->SetDamageMultiplier(0.0F); }
+        if (m_pJetpack->HasNoSetDamageMultiplier()) { m_pJetpack->SetDamageMultiplier(0.0F); }
         m_pJetpack->SetApplyTransferredForcesAtOffset(false);
     } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
@@ -256,7 +256,7 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         m_pFGArm = new Arm;
         reader >> m_pFGArm;
         AddAttachable(m_pFGArm);
-        if (!m_pFGArm->GetDamageMultiplierSetInINI()) { m_pFGArm->SetDamageMultiplier(1.0F); }
+        if (m_pFGArm->HasNoSetDamageMultiplier()) { m_pFGArm->SetDamageMultiplier(1.0F); }
         m_pFGArm->SetDrawnAfterParent(true);
         m_pFGArm->SetDrawnNormallyByParent(false);
     } else if (propName == "BGArm") {
@@ -264,20 +264,20 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         m_pBGArm = new Arm;
         reader >> m_pBGArm;
         AddAttachable(m_pBGArm);
-        if (!m_pBGArm->GetDamageMultiplierSetInINI()) { m_pBGArm->SetDamageMultiplier(1.0F); }
+        if (m_pBGArm->HasNoSetDamageMultiplier()) { m_pBGArm->SetDamageMultiplier(1.0F); }
         m_pBGArm->SetDrawnAfterParent(false);
     } else if (propName == "FGLeg") {
         RemoveAttachable(m_pFGLeg);
         m_pFGLeg = new Leg;
         reader >> m_pFGLeg;
         AddAttachable(m_pFGLeg);
-        if (!m_pFGLeg->GetDamageMultiplierSetInINI()) { m_pFGLeg->SetDamageMultiplier(1.0F); }
+        if (m_pFGLeg->HasNoSetDamageMultiplier()) { m_pFGLeg->SetDamageMultiplier(1.0F); }
     } else if (propName == "BGLeg") {
         RemoveAttachable(m_pBGLeg);
         m_pBGLeg = new Leg;
         reader >> m_pBGLeg;
         AddAttachable(m_pBGLeg);
-        if (!m_pBGLeg->GetDamageMultiplierSetInINI()) { m_pBGLeg->SetDamageMultiplier(1.0F); }
+        if (m_pBGLeg->HasNoSetDamageMultiplier()) { m_pBGLeg->SetDamageMultiplier(1.0F); }
         m_pBGLeg->SetDrawnAfterParent(false);
     } else if (propName == "HandGroup") {
         delete m_pFGHandGroup;

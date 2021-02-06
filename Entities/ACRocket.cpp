@@ -164,14 +164,14 @@ int ACRocket::ReadProperty(std::string propName, Reader &reader) {
         m_pRLeg = new Leg;
         reader >> m_pRLeg;
         AddAttachable(m_pRLeg);
-        if (!m_pRLeg->GetDamageMultiplierSetInINI()) { m_pRLeg->SetDamageMultiplier(1.0F); }
+        if (m_pRLeg->HasNoSetDamageMultiplier()) { m_pRLeg->SetDamageMultiplier(1.0F); }
     } else if (propName == "LLeg") {
         RemoveAttachable(m_pLLeg);
         m_pLLeg = new Leg;
         reader >> m_pLLeg;
         AddAttachable(m_pLLeg);
         m_pLLeg->SetInheritsHFlipped(-1);
-        if (!m_pLLeg->GetDamageMultiplierSetInINI()) { m_pLLeg->SetDamageMultiplier(1.0F); }
+        if (m_pLLeg->HasNoSetDamageMultiplier()) { m_pLLeg->SetDamageMultiplier(1.0F); }
     } else if (propName == "RFootGroup") {
         delete m_pRFootGroup;
         m_pRFootGroup = new AtomGroup();
@@ -187,35 +187,35 @@ int ACRocket::ReadProperty(std::string propName, Reader &reader) {
         m_pMThruster = new AEmitter;
         reader >> m_pMThruster;
         AddAttachable(m_pMThruster);
-        if (!m_pMThruster->GetDamageMultiplierSetInINI()) { m_pMThruster->SetDamageMultiplier(1.0F); }
+        if (m_pMThruster->HasNoSetDamageMultiplier()) { m_pMThruster->SetDamageMultiplier(1.0F); }
         m_pMThruster->SetInheritedRotAngleOffset(-c_HalfPI);
     } else if (propName == "RThruster") {
         RemoveAttachable(m_pRThruster);
         m_pRThruster = new AEmitter;
         reader >> m_pRThruster;
         AddAttachable(m_pRThruster);
-        if (!m_pRThruster->GetDamageMultiplierSetInINI()) { m_pRThruster->SetDamageMultiplier(1.0F); }
+        if (m_pRThruster->HasNoSetDamageMultiplier()) { m_pRThruster->SetDamageMultiplier(1.0F); }
         m_pRThruster->SetInheritedRotAngleOffset(c_EighthPI);
     } else if (propName == "LThruster") {
         RemoveAttachable(m_pLThruster);
         m_pLThruster = new AEmitter;
         reader >> m_pLThruster;
         AddAttachable(m_pLThruster);
-        if (!m_pLThruster->GetDamageMultiplierSetInINI()) { m_pLThruster->SetDamageMultiplier(1.0F); }
+        if (m_pLThruster->HasNoSetDamageMultiplier()) { m_pLThruster->SetDamageMultiplier(1.0F); }
         m_pLThruster->SetInheritedRotAngleOffset(c_PI - c_EighthPI);
     } else if (propName == "URThruster") {
         RemoveAttachable(m_pURThruster);
         m_pURThruster = new AEmitter;
         reader >> m_pURThruster;
         AddAttachable(m_pURThruster);
-        if (!m_pURThruster->GetDamageMultiplierSetInINI()) { m_pURThruster->SetDamageMultiplier(1.0F); }
+        if (m_pURThruster->HasNoSetDamageMultiplier()) { m_pURThruster->SetDamageMultiplier(1.0F); }
         m_pURThruster->SetInheritedRotAngleOffset(c_HalfPI - c_EighthPI);
     } else if (propName == "ULThruster") {
         RemoveAttachable(m_pULThruster);
         m_pULThruster = new AEmitter;
         reader >> m_pULThruster;
         AddAttachable(m_pULThruster);
-        if (!m_pULThruster->GetDamageMultiplierSetInINI()) { m_pULThruster->SetDamageMultiplier(1.0F); }
+        if (m_pULThruster->HasNoSetDamageMultiplier()) { m_pULThruster->SetDamageMultiplier(1.0F); }
         m_pULThruster->SetInheritedRotAngleOffset(c_HalfPI + c_EighthPI);
     } else if (propName == "RaisedGearLimbPath") {
         reader >> m_Paths[RIGHT][RAISED];

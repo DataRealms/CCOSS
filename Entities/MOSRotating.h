@@ -780,7 +780,7 @@ ClassInfoGetters
 // Arguments:       New multiplier value.
 // Return value:    None.
 
-	void SetDamageMultiplier(float newValue) { m_DamageMultiplier = newValue; }
+    void SetDamageMultiplier(float newValue) { m_DamageMultiplier = newValue; m_NoSetDamageMultiplier = false; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetDamageMultiplier
@@ -792,10 +792,10 @@ ClassInfoGetters
 	float GetDamageMultiplier() const { return m_DamageMultiplier; }
 
     /// <summary>
-    /// Gets whether the damage multiplier was set in this MOSRotating's INI definition. Used to determine whether to set the damage multiplier for hardcoded Attachables when reading them in from INI.
+    /// Gets whether the damage multiplier for this MOSRotating has been directly set, or is at its default value.
     /// </summary>
-    /// <returns>Whether the damage multiplier was set in this MOSRotating's INI definition.</returns>
-    bool GetDamageMultiplierSetInINI() const { return m_DamageMultiplierSetInINI; }
+    /// <returns>Whether the damage multiplier for this MOSRotating has been set.</returns>
+    bool HasNoSetDamageMultiplier() const { return m_NoSetDamageMultiplier; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -912,9 +912,8 @@ protected:
 	// Map to store any object pointers
 	std::map<std::string, Entity *> m_ObjectValueMap;
 
-	// Damage multiplier for this attachable
-	float m_DamageMultiplier;
-    bool m_DamageMultiplierSetInINI; //!< Whether or not the damage multiplier was set in INI for this MOSRotating.
+	float m_DamageMultiplier; //!< Damage multiplier for this MOSRotating.
+    bool m_NoSetDamageMultiplier; //!< Whether or not the damage multiplier for this MOSRotating was set.
 
     // Intermediary drawing bitmap used to flip rotating bitmaps. Owned!
     BITMAP *m_pFlipBitmap;

@@ -1217,6 +1217,7 @@ void BuyMenuGUI::Update()
                     description += (craftMaxPassengers == 0) ? "\nNO PASSENGER SPACE!" : "\nMax Passengers: " + std::to_string(craftMaxPassengers);
                 }
             } else {
+				// Items in the BuyMenu always have any remainder rounded up in their masses.
                 const Actor *itemAsActor = dynamic_cast<const Actor *>(currentItem);
                 if (itemAsActor) {
                     description += "\nMass: " + RoundFloatToPrecision(itemAsActor->GetMass(), 1, 2) + " kg";
@@ -1358,14 +1359,11 @@ void BuyMenuGUI::Update()
         std::string description = "";
 
         if (pItem && pItem->m_pEntity) {
-            description = pItem->m_pEntity->GetDescription();
-            if (description.empty()) {
-                description = "-No Information Found-";
-            }
+			description = ((pItem->m_pEntity->GetDescription().empty()) ? "-No Information Found-" : pItem->m_pEntity->GetDescription()) + "\n";
             const Entity *currentItem = pItem->m_pEntity;
             const Actor *itemAsActor = dynamic_cast<const Actor *>(currentItem);
             if (itemAsActor) {
-                description += "\n\nMass: " + RoundFloatToPrecision(itemAsActor->GetMass(), 1, 2) + " kg";
+                description += "\nMass: " + RoundFloatToPrecision(itemAsActor->GetMass(), 1, 2) + " kg";
 
                 int passengerSlotsTaken = itemAsActor->GetPassengerSlots();
                 if (passengerSlotsTaken > 1) {
@@ -1374,7 +1372,7 @@ void BuyMenuGUI::Update()
             } else {
                 const MovableObject *itemAsMO = dynamic_cast<const MovableObject *>(currentItem);
                 if (itemAsMO) {
-                    description += "\n\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass(), 1, 2) + " kg";
+                    description += "\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass(), 1, 2) + " kg";
                 }
             }
         }
@@ -2260,74 +2258,58 @@ void BuyMenuGUI::AddPresetsToItemList()
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateTotalCostLabel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updated the text of the total cost label to reflect the total cost of
-//                  all the items in the order box.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BuyMenuGUI::UpdateTotalCostLabel(int whichTeam) {
-    std::string display;
-    display += "Cost: " + RoundFloatToPrecision(GetTotalOrderCost(), 0, 2) + "/" + RoundFloatToPrecision(g_ActivityMan.GetActivity()->GetTeamFunds(whichTeam), 0);
-    m_pCostLabel->SetText(display);
+	// Total order cost is always rounded up from any remainder.
+	std::string display = "Cost: " + RoundFloatToPrecision(GetTotalOrderCost(), 0, 2) + "/" + RoundFloatToPrecision(g_ActivityMan.GetActivity()->GetTeamFunds(whichTeam), 0);
+	m_pCostLabel->SetText(display);
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateTotalMassLabel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the text of the specified label to reflect the total mass of
-//                  all the items in teh order box.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BuyMenuGUI::UpdateTotalMassLabel(const ACraft* pCraft, GUILabel* pLabel) const {
-    if (!pLabel) {
-        return;
-    }
+	if (!pLabel) {
+		return;
+	}
 
-    std::string display;
+	std::string display;
+	if (pCraft && pCraft->GetMaxInventoryMass() != 0) {
+		display = RoundFloatToPrecision(GetTotalOrderMass(), 1, 2);
+		if (pCraft->GetMaxInventoryMass() > 0) {
+			display += " / " + RoundFloatToPrecision(pCraft->GetMaxInventoryMass(), 1);
+		}
+	} else {
+		display = "NO CARGO SPACE";
+	}
 
-    if (pCraft && pCraft->GetMaxInventoryMass() != 0) {
-        display = RoundFloatToPrecision(GetTotalOrderMass(), 1, 2);
-        if (pCraft->GetMaxInventoryMass() > 0) {
-            display += " / " + RoundFloatToPrecision(pCraft->GetMaxInventoryMass(), 1);
-        }
-    } else {
-        display = "NO CARGO SPACE";
-    }
-
-    pLabel->SetText(display);
+	pLabel->SetText(display);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateTotalPassengersLabel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the text of the specified label to reflect the total passenger count of
-//                  all the items in teh order box.
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BuyMenuGUI::UpdateTotalPassengersLabel(const ACraft* pCraft, GUILabel* pLabel) const {
-    if (!pLabel) {
-        return;
-    }
+	if (!pLabel) {
+		return;
+	}
 
-    std::string display;
+	std::string display;
+	if (pCraft && pCraft->GetMaxPassengers() != 0) {
+		display = std::to_string(GetTotalOrderPassengers());
+		if (pCraft->GetMaxPassengers() > 0) {
+			display += " / " + std::to_string(pCraft->GetMaxPassengers());
+		}
+	} else {
+		display = "NO SPACE";
+	}
 
-    if (pCraft && pCraft->GetMaxPassengers() != 0) {
-        display = std::to_string(GetTotalOrderPassengers());
-        if (pCraft->GetMaxPassengers() > 0) {
-            display += " / " + std::to_string(pCraft->GetMaxPassengers());
-        }
-    } else {
-        display = "NO SPACE";
-    }
-
-    pLabel->SetText(display);
+	pLabel->SetText(display);
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  TryPurchase
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Attempts to make a purchase with everything set up.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BuyMenuGUI::TryPurchase()
 {

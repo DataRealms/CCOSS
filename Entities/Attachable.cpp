@@ -170,6 +170,28 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void Attachable::SetParentOffset(const Vector &newParentOffset) {
+		bool offsetsAreDifferent = (m_ParentOffset - newParentOffset).GetMagnitude() > 0.1F;
+		m_ParentOffset = newParentOffset;
+		if (offsetsAreDifferent) {
+			UpdatePositionAndJointPositionBasedOnOffsets();
+			if (m_Parent) { m_Parent->HandlePotentialRadiusAffectingAttachable(this); }
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Attachable::SetJointOffset(const Vector &newJointOffset) {
+		bool offsetsAreDifferent = (m_JointOffset - newJointOffset).GetMagnitude() > 0.1F;
+		m_JointOffset = newJointOffset;
+		if (offsetsAreDifferent) {
+			UpdatePositionAndJointPositionBasedOnOffsets();
+			if (m_Parent) { m_Parent->HandlePotentialRadiusAffectingAttachable(this); }
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool Attachable::TransferJointForces(Vector &jointForces) {
 		if (!m_Parent) {
 			return false;
@@ -296,11 +318,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Attachable::Update() {
-		if (!m_Parent) {
-			m_JointPos = m_Pos + RotateOffset(m_JointOffset);
-		} else {
-			m_JointPos = m_Parent->GetPos() + m_Parent->RotateOffset(GetParentOffset());
-			m_Pos = m_JointPos - RotateOffset(m_JointOffset);
+		if (m_Parent) {
+			UpdatePositionAndJointPositionBasedOnOffsets();
+			if ((m_ParentOffset - m_PrevParentOffset).GetMagnitude() > 0.1F || (m_JointOffset - m_PrevJointOffset).GetMagnitude() > 0.1F) { m_Parent->HandlePotentialRadiusAffectingAttachable(this); }
 			m_Vel = m_Parent->GetVel();
 			m_Team = m_Parent->GetTeam();
 			if (InheritsHFlipped() != 0) { m_HFlipped = m_InheritsHFlipped == 1 ? m_Parent->IsHFlipped() : !m_Parent->IsHFlipped(); }
@@ -321,9 +341,6 @@ namespace RTE {
 				}
 			}
 			m_DeepCheck = false;
-
-			m_PrevPos = m_Pos;
-			m_PrevVel = m_Vel;
 			m_PrevRotAngleOffset = currentRotAngleOffset;
 		}
 
@@ -331,6 +348,11 @@ namespace RTE {
 
 		// If we're attached to something, MovableMan doesn't own us, and therefore isn't calling our UpdateScripts method (and neither is our parent), so we should here.
 		if (m_Parent != nullptr && GetRootParent()->HasEverBeenAddedToMovableMan()) { UpdateScripts(); }
+
+		m_PrevPos = m_Pos;
+		m_PrevVel = m_Vel;
+		m_PrevParentOffset = m_ParentOffset;
+		m_PrevJointOffset = m_JointOffset;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -422,6 +444,16 @@ namespace RTE {
 
 		if (parentToUseForScriptCall && parentToUseForScriptCall->GetRootParent()->HasEverBeenAddedToMovableMan()) {
 			RunScriptedFunctionInAppropriateScripts(newParent ? "OnAttach" : "OnDetach", false, false, {parentToUseForScriptCall});
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Attachable::UpdatePositionAndJointPositionBasedOnOffsets() {
+		if (m_Parent) {
+			m_JointPos = m_Parent->GetPos() + m_Parent->RotateOffset(GetParentOffset()); m_Pos = m_JointPos - RotateOffset(m_JointOffset);
+		} else {
+			m_JointPos = m_Pos + RotateOffset(m_JointOffset);
 		}
 	}
 

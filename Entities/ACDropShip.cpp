@@ -379,6 +379,7 @@ void ACDropShip::UpdateAI()
 
         // Check for something in the way of our descent, and hover to the side to avoid it
         MOID detected = g_NoMOID;
+        //TODO since GetRadius includes attachables, this could probably be lessened. Maybe could just use GetDiameter directly.
         if ((detected = DetectObstacle(GetRadius() * 4)) != g_NoMOID)
         {
             // Only check other craft in the way
@@ -444,6 +445,7 @@ void ACDropShip::UpdateAI()
 
         // Check for something in the way of our ascent, and hover to the side to avoid it
         MOID detected = g_NoMOID;
+        //TODO since GetRadius includes attachables, this could probably be lessened. Maybe could just use GetDiameter directly.
         if ((detected = DetectObstacle(GetRadius() * 4)) != g_NoMOID)
         {
             // Only check other craft in the way

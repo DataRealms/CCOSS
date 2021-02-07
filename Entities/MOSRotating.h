@@ -137,6 +137,36 @@ ClassInfoGetters
     void Destroy(bool notInherited = false) override;
 
     /// <summary>
+    /// Gets the radius of this MOSRotating, not including any Attachables.
+    /// </summary>
+    /// <returns></returns>
+    float GetIndividualRadius() const { return m_SpriteRadius; }
+
+    /// <summary>
+    /// Gets the radius of this MOSRotating, including any Attachables.
+    /// </summary>
+    /// <returns>The radius of this MOSRotating, including any Attachables.</returns>
+    float GetRadius() const override { return std::max(m_SpriteRadius, m_FarthestAttachableDistanceAndRadius); }
+
+    /// <summary>
+    /// Gets the diameter of this MOSRotating, not including any Attachables.
+    /// </summary>
+    /// <returns></returns>
+    float GetIndividualDiameter() const { return m_SpriteDiameter; }
+
+    /// <summary>
+    /// Gets the diameter of this MOSRotating, including any Attachables.
+    /// </summary>
+    /// <returns>The diameter of this MOSRotating, including any Attachables.</returns>
+    float GetDiameter() const override { return GetRadius() * 2.0F; }
+
+    /// <summary>
+    /// Checks if this Attachable should affect radius and, handles it if it should.
+    /// </summary>
+    /// <param name="attachable">The Attachable to check.</param>
+    void HandlePotentialRadiusAffectingAttachable(const Attachable *attachable);
+
+    /// <summary>
     /// Gets the mass value of this MOSRotating, not including any Attachables or wounds.
     /// </summary>
     /// <returns>The mass of this MOSRotating.</returns>
@@ -891,6 +921,8 @@ protected:
     std::list<Attachable *> m_Attachables;
     std::unordered_set<unsigned long> m_ReferenceHardcodedAttachableUniqueIDs; //!< An unordered set is filled with the Unique IDs of all of the reference object's hardcoded Attachables when using the copy Create.
     std::unordered_map<unsigned long, std::function<void (MOSRotating*, Attachable*)>> m_HardcodedAttachableUniqueIDsAndSetters; //!< An unordered map of Unique IDs to setter lambda functions, used to call the appropriate hardcoded Attachable setter when a hardcoded Attachable is removed.
+    const Attachable *m_RadiusAffectingAttachable; //!< A pointer to the Attachable that is currently affecting the radius. Used for some efficiency benefits.
+    float m_FarthestAttachableDistanceAndRadius; //!< The distance + radius of the radius affecting Attachable.
     float m_AttachableAndWoundMass; //!< The mass of all Attachables and wounds on this MOSRotating. Used in combination with its actual mass and any other affecting factors to get its total mass.
     // The list of Gib:s this will create when gibbed
     std::list<Gib> m_Gibs;

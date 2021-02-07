@@ -814,6 +814,8 @@ int LuaMan::Create() {
 
         CONCRETELUABINDING(MOSRotating, MOSprite)
             /*.property("Material", &MOSRotating::GetMaterial)*/
+            .property("IndividualRadius", &MOSRotating::GetIndividualRadius)
+            .property("IndividualDiameter", &MOSRotating::GetIndividualDiameter)
             .property("IndividualMass", &MOSRotating::GetIndividualMass)
             .property("RecoilForce", &MOSRotating::GetRecoilForce)
             .property("RecoilOffset", &MOSRotating::GetRecoilOffset)

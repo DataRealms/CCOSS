@@ -1361,7 +1361,7 @@ namespace RTE {
 		}
 
 		// If the exit vector is too large, then avoid the jarring jump and report that we didn't make it out
-		if (totalExitVector.GetMagnitude() > m_OwnerMOSR->GetRadius()) {
+		if (totalExitVector.GetMagnitude() > m_OwnerMOSR->GetIndividualRadius()) {
 			return false;
 		}
 
@@ -1489,7 +1489,7 @@ namespace RTE {
 		}
 
 		// Now actually apply the exit vectors to both, but only if the jump isn't too jarring
-		if (thisExit.GetMagnitude() < m_OwnerMOSR->GetRadius()) { position += thisExit; }
+		if (thisExit.GetMagnitude() < m_OwnerMOSR->GetIndividualRadius()) { position += thisExit; }
 		if (!intersectedExit.IsZero() && intersectedExit.GetMagnitude() < intersectedMO->GetRadius()) { intersectedMO->SetPos(intersectedMO->GetPos() + intersectedExit); }
 
 		if (m_OwnerMOSR->CanBeSquished() && RatioInTerrain() > 0.75F) /* && totalExitVector.GetMagnitude() > m_OwnerMOSR->GetDiameter()) */ {

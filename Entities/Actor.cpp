@@ -892,7 +892,7 @@ void Actor::DropAllInventory()
 			velRange = 10.0F;
 
 			// Randomize the offset from center to be within the original object
-			gibROffset.SetXY(m_MaxRadius * 0.35F * RandomNormalNum(), m_MaxRadius * 0.35F * RandomNormalNum());
+			gibROffset.SetXY(m_SpriteRadius * 0.35F * RandomNormalNum(), m_SpriteRadius * 0.35F * RandomNormalNum());
 			// Set up its position and velocity according to the parameters of this AEmitter.
 			pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
 			pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
@@ -994,7 +994,7 @@ void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToI
         velRange = 10.0F;
 
         // Randomize the offset from center to be within the original object
-        gibROffset.SetXY(m_MaxRadius * 0.35F * RandomNormalNum(), m_MaxRadius * 0.35F * RandomNormalNum());
+        gibROffset.SetXY(m_SpriteRadius * 0.35F * RandomNormalNum(), m_SpriteRadius * 0.35F * RandomNormalNum());
         // Set up its position and velocity according to the parameters of this AEmitter.
         pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
         pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());

@@ -64,6 +64,8 @@ void MOSRotating::Clear()
     m_Attachables.clear();
     m_ReferenceHardcodedAttachableUniqueIDs.clear();
     m_HardcodedAttachableUniqueIDsAndSetters.clear();
+    m_RadiusAffectingAttachable = nullptr;
+    m_FarthestAttachableDistanceAndRadius = 0.0F;
     m_AttachableAndWoundMass = 0.0F;
     m_Gibs.clear();
     m_GibImpulseLimit = 0;
@@ -111,8 +113,8 @@ int MOSRotating::Create()
 
 // Now done in MOSprite::Create, based on the sprite
     // Calc radius based on the atomgroup
-//    m_MaxRadius = m_pAtomGroup->CalculateMaxRadius() + 4;
-//    m_MaxDiameter = m_MaxRadius * 2;
+//    m_SpriteRadius = m_pAtomGroup->CalculateMaxRadius() + 4;
+//    m_MaxDiameter = m_SpriteRadius * 2;
 
 /* Allocated in lazy fashion as needed when drawing flipped
     if (!m_pFlipBitmap && m_aSprite[0])
@@ -152,27 +154,27 @@ int MOSRotating::Create()
         m_spTempBitmapS512 = create_bitmap_ex(c_MOIDLayerBitDepth, 512, 512);
 
     // Choose an appropriate size for this' diameter
-    if (m_MaxDiameter >= 256)
+    if (m_SpriteDiameter >= 256)
 	{
         m_pTempBitmap = m_spTempBitmap512;
         m_pTempBitmapS = m_spTempBitmapS512;
 	}
-    else if (m_MaxDiameter  >= 128)
+    else if (m_SpriteDiameter >= 128)
 	{
         m_pTempBitmap = m_spTempBitmap256;
         m_pTempBitmapS = m_spTempBitmapS256;
 	}
-    else if (m_MaxDiameter  >= 64)
+    else if (m_SpriteDiameter >= 64)
 	{
         m_pTempBitmap = m_spTempBitmap128;
         m_pTempBitmapS = m_spTempBitmapS128;
 	}
-    else if (m_MaxDiameter >= 32)
+    else if (m_SpriteDiameter >= 32)
 	{
         m_pTempBitmap = m_spTempBitmap64;
         m_pTempBitmapS = m_spTempBitmapS64;
 	}
-    else if (m_MaxDiameter >= 16)
+    else if (m_SpriteDiameter >= 16)
 	{
         m_pTempBitmap = m_spTempBitmap32;
         m_pTempBitmapS = m_spTempBitmapS32;
@@ -1166,16 +1168,17 @@ void MOSRotating::RestDetection()
     if (fabs(m_Rotation.GetRadAngle() - m_PrevRotation.GetRadAngle()) >= 0.01)
         m_RestTimer.Reset();
 
-    // If we seem to be about to settle, make sure we're not flying in the air still
+    // If we seem to be about to settle, make sure we're not flying in the air still.
+    // Note that this uses sprite radius to avoid possibly settling when it shouldn't (e.g. if there's a lopsided attachable enlarging the radius, using GetRadius might make it settle in the air).
     if (m_ToSettle || IsAtRest())
     {
-        if (g_SceneMan.OverAltitude(m_Pos, m_MaxRadius + 4, 3))
+        if (g_SceneMan.OverAltitude(m_Pos, m_SpriteRadius + 4, 3))
         {
             m_RestTimer.Reset();
             m_ToSettle = false;
         }
 // TODO: REMOVE
-//        bool KUK = g_SceneMan.OverAltitude(m_Pos, m_MaxRadius + 4, 3);
+//        bool KUK = g_SceneMan.OverAltitude(m_Pos, m_SpriteRadius + 4, 3);
     }
 
     m_PrevRotation = m_Rotation;
@@ -1189,7 +1192,8 @@ bool MOSRotating::IsOnScenePoint(Vector &scenePoint) const {
         return false;
     }
 
-    if (WithinBox(scenePoint, m_Pos.m_X - m_MaxRadius, m_Pos.m_Y - m_MaxRadius, m_Pos.m_X + m_MaxRadius, m_Pos.m_Y + m_MaxRadius)) {
+    //TODO this should really use GetRadius() instead of sprite radius, then check attachable's sprites directly here. It'd save some computation but I didn't wanna deal with it.
+    if (WithinBox(scenePoint, m_Pos.m_X - m_SpriteRadius, m_Pos.m_Y - m_SpriteRadius, m_Pos.m_X + m_SpriteRadius, m_Pos.m_Y + m_SpriteRadius)) {
         Vector spritePoint = scenePoint - m_Pos;
         spritePoint = UnRotateOffset(spritePoint);
         int pixel = getpixel(m_aSprite[m_Frame], static_cast<int>(spritePoint.m_X - m_SpriteOffset.m_X), static_cast<int>(spritePoint.m_Y - m_SpriteOffset.m_Y));
@@ -1489,7 +1493,7 @@ bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO)
 {
     if (pOverlapMO != this && m_GetsHitByMOs)
     {
-        float combinedRadii = m_MaxRadius + pOverlapMO->GetRadius();
+        float combinedRadii = GetRadius() + pOverlapMO->GetRadius();
         Vector otherPos = pOverlapMO->GetPos();
 
         // Quick check
@@ -1497,8 +1501,7 @@ bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO)
             return false;
 
         // Check if the offset is within the combined radii of the two object, and therefore might be overlapping
-        Vector offset = otherPos - m_Pos;
-        if (offset.GetMagnitude() < combinedRadii)
+        if (g_SceneMan.ShortestDistance(m_Pos, otherPos, g_SceneMan.SceneWrapsX()).GetMagnitude() < combinedRadii)
         {
             // They may be overlapping, so draw the MOID rep of this to the MOID layer
             Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);
@@ -1536,7 +1539,8 @@ void MOSRotating::AddAttachable(Attachable *attachable, const Vector& parentOffs
         attachable->SetParentOffset(parentOffsetToSet);
         attachable->SetParent(this);
         m_AttachableAndWoundMass += attachable->GetMass();
-		m_Attachables.push_back(attachable);
+        HandlePotentialRadiusAffectingAttachable(attachable);
+        m_Attachables.push_back(attachable);
 	}
 }
 
@@ -1589,6 +1593,13 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
     }
     if (attachable->GetDeleteWhenRemovedFromParent()) { attachable->SetToDelete(); }
     if (addToMovableMan || attachable->IsSetToDelete()) { g_MovableMan.AddMO(attachable); }
+
+    if (attachable == m_RadiusAffectingAttachable) {
+        m_RadiusAffectingAttachable = nullptr;
+        m_FarthestAttachableDistanceAndRadius = 0;
+        std::for_each(m_Attachables.begin(), m_Attachables.end(), [this](const Attachable *attachableToCheck) { HandlePotentialRadiusAffectingAttachable(attachableToCheck); });
+    }
+
     return true;
 }
 
@@ -1703,13 +1714,13 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
         // See if need to double draw this across the scene seam if we're being drawn onto a scenewide bitmap
         if (targetPos.IsZero() && m_WrapDoubleDraw)
         {
-            if (spritePos.m_X < m_MaxDiameter)
+            if (spritePos.m_X < m_SpriteDiameter)
             {
                 aDrawPos[passes] = spritePos;
                 aDrawPos[passes].m_X += pTargetBitmap->w;
                 passes++;
             }
-            else if (spritePos.m_X > pTargetBitmap->w - m_MaxDiameter)
+            else if (spritePos.m_X > pTargetBitmap->w - m_SpriteDiameter)
             {
                 aDrawPos[passes] = spritePos;
                 aDrawPos[passes].m_X -= pTargetBitmap->w;
@@ -1800,7 +1811,7 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 
                 // Register potential MOID drawing
                 if (mode == g_DrawMOID)
-                    g_SceneMan.RegisterMOIDDrawing(aDrawPos[i].GetFloored(), m_MaxRadius + 2);
+                    g_SceneMan.RegisterMOIDDrawing(aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
             }
         }
     }
@@ -1848,7 +1859,7 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 
                 // Register potential MOID drawing
                 if (mode == g_DrawMOID)
-                    g_SceneMan.RegisterMOIDDrawing(aDrawPos[i].GetFloored(), m_MaxRadius + 2);
+                    g_SceneMan.RegisterMOIDDrawing(aDrawPos[i].GetFloored(), m_SpriteRadius + 2);
             }
         }
     }
@@ -1872,6 +1883,18 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
         //m_pDeepGroup->Draw(pTargetBitmap, targetPos, false, 13);
     }
 #endif
+}
+
+void MOSRotating::HandlePotentialRadiusAffectingAttachable(const Attachable *attachable) {
+    float distanceAndRadiusFromParent = g_SceneMan.ShortestDistance(m_Pos, attachable->m_Pos, g_SceneMan.SceneWrapsX()).GetMagnitude() + attachable->GetRadius();
+    if (attachable == m_RadiusAffectingAttachable && distanceAndRadiusFromParent < m_FarthestAttachableDistanceAndRadius && m_Attachables.size() > 1) {
+        m_FarthestAttachableDistanceAndRadius = 0;
+        m_RadiusAffectingAttachable = nullptr;
+        std::for_each(m_Attachables.begin(), m_Attachables.end(), [this](const Attachable *attachableToCheck) { HandlePotentialRadiusAffectingAttachable(attachableToCheck); });
+    } else if (distanceAndRadiusFromParent > m_FarthestAttachableDistanceAndRadius) {
+        m_FarthestAttachableDistanceAndRadius = distanceAndRadiusFromParent;
+        m_RadiusAffectingAttachable = attachable;
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

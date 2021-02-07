@@ -147,7 +147,7 @@ public:
 // Arguments:       None.
 // Return value:    The radius from its center to the edge of its graphical representation.
 
-	float GetRadius() const override { return m_MaxRadius; }
+	float GetRadius() const override { return m_SpriteRadius; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -157,7 +157,7 @@ public:
 // Arguments:       None.
 // Return value:    The largest diameter across its graphical representation.
 
-	float GetDiameter() const override { return m_MaxDiameter; }
+    float GetDiameter() const override { return m_SpriteDiameter; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -167,7 +167,7 @@ public:
 // Arguments:       None.
 // Return value:    A Vector with the absolute position of this' HUD stack top point.
 
-	Vector GetAboveHUDPos() const override { return m_Pos + Vector(0, -m_MaxRadius); }
+	Vector GetAboveHUDPos() const override { return m_Pos + Vector(0, -GetRadius()); }
 
 // TODO: Improve this one! Really crappy fit
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -180,7 +180,7 @@ public:
 // Return value:    A Box which is guaranteed to contain this. Does nto take wrapping into
 //                  account, and parts of this box may be out of bounds!
 
-	Box GetBoundingBox() const { return Box(m_Pos + Vector(-m_MaxRadius, -m_MaxRadius), m_MaxDiameter, m_MaxDiameter); }
+	Box GetBoundingBox() const { return Box(m_Pos + Vector(-GetRadius(), -GetRadius()), GetDiameter(), GetDiameter()); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -404,7 +404,7 @@ public:
 // Arguments:       None.
 // Return value:    Whether this is either moving or rotating too fast.
 
-	bool IsTooFast() const override { return m_Vel.GetLargest() > 500.0f || fabs(m_AngularVel) > (2000.0f / (m_MaxRadius + 1.0f)); }
+	bool IsTooFast() const override { return m_Vel.GetLargest() > 500.0f || fabs(m_AngularVel) > (2000.0f / (GetRadius() + 1.0f)); }
     //bool IsTooFast() const override { return m_Vel.GetLargest() > 500 || fabs(m_AngularVel) > 100.0f; }
 
 
@@ -585,8 +585,8 @@ protected:
     // Whether flipped horizontally or not.
     bool m_HFlipped;
     // The precalculated maximum possible radius and diameter of this, in pixels
-    float m_MaxRadius;
-    float m_MaxDiameter;
+    float m_SpriteRadius;
+    float m_SpriteDiameter;
     // A counter to count the oscillations in rotation, in order to detect settling.
     int m_AngOscillations;
     // Whether to disable the settle material ID when this gets drawn as material

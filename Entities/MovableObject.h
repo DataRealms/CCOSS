@@ -327,7 +327,7 @@ friend class Atom;
 // Arguments:       None.
 // Return value:    The largest diameter across its graphical representation.
 
-    virtual float GetDiameter() const { return 2.0f; }
+    virtual float GetDiameter() const { return 2.0F; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -106,7 +106,7 @@ namespace RTE {
 		/// Sets the stored offset between this Attachable's parent's Pos and the joint position. This should be maintained by the parent.
 		/// </summary>
 		/// <param name="newParentOffset">A const reference to the new parent offset.</param>
-		void SetParentOffset(const Vector &newParentOffset) { m_ParentOffset = newParentOffset; }
+		void SetParentOffset(const Vector &newParentOffset);
 
 		/// <summary>
 		/// Gets whether this Attachable is to be drawn after (in front of) or before (behind) its parent.
@@ -221,8 +221,8 @@ namespace RTE {
 		/// <summary>
 		/// Sets the offset of the joint (the point around which this Attachable and its parent hinge) from this Attachable's center of mass/origin.
 		/// </summary>
-		/// <param name="offset">A Vector describing the offset of the joint relative to the this Attachable's origin/center of mass position.</param>
-		void SetJointOffset(const Vector &offset) { m_JointOffset = offset; }
+		/// <param name="newJointOffset">A Vector describing the offset of the joint relative to the this Attachable's origin/center of mass position.</param>
+		void SetJointOffset(const Vector &newJointOffset);
 #pragma endregion
 
 #pragma region Force Transferral
@@ -498,6 +498,8 @@ namespace RTE {
 		long m_AtomSubgroupID; //!< The Atom IDs this' atoms will have when attached and added to a parent's AtomGroup.
 		bool m_CollidesWithTerrainWhileAttached; //!< Whether this attachable currently has terrain collisions enabled while it's attached to a parent.
 
+		Vector m_PrevParentOffset; //!< The previous frame's parent offset.
+		Vector m_PrevJointOffset; //!< The previous frame's joint offset.
 		float m_PrevRotAngleOffset; //!< The previous frame's difference between this Attachable's RotAngle and it's root parent's RotAngle.
 
 		/// <summary>
@@ -507,6 +509,11 @@ namespace RTE {
 		virtual void SetParent(MOSRotating *newParent);
 
 	private:
+
+		/// <summary>
+		/// Updates the position of this Attachable based on its parent offset and joint offset. Used during update and when something sets these offsets through setters.
+		/// </summary>
+		void UpdatePositionAndJointPositionBasedOnOffsets();
 
 		/// <summary>
 		/// Turns on/off this Attachable's terrain collisions while it is attached by adding/removing its Atoms to/from its root parent's AtomGroup.

@@ -47,7 +47,7 @@
     <IntDir>_Bin\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>..\Cortex-Command-Community-Project-Data\</OutDir>
     <GenerateManifest>true</GenerateManifest>
-    <EmbedManifest>false</EmbedManifest>
+    <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -148,6 +148,7 @@
     </Link>
     <Manifest>
       <OutputManifestFile>$(IntDir)$(TargetName).manifest</OutputManifestFile>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
     </Manifest>
     <Xdcmake>
       <OutputFile>$(IntDir)$(TargetName).xml</OutputFile>
@@ -192,6 +193,7 @@
     </Link>
     <Manifest>
       <OutputManifestFile>$(IntDir)$(TargetName).manifest</OutputManifestFile>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
     </Manifest>
     <Xdcmake>
       <OutputFile>$(IntDir)$(TargetName).xml</OutputFile>
@@ -237,6 +239,7 @@
     </Link>
     <Manifest>
       <OutputManifestFile>$(IntDir)$(TargetName).manifest</OutputManifestFile>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
     </Manifest>
     <Xdcmake>
       <OutputFile>$(IntDir)$(TargetName).xml</OutputFile>
@@ -281,6 +284,7 @@
     </Link>
     <Manifest>
       <OutputManifestFile>$(IntDir)$(TargetName).manifest</OutputManifestFile>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
     </Manifest>
     <Xdcmake>
       <OutputFile>$(IntDir)$(TargetName).xml</OutputFile>
@@ -337,6 +341,7 @@
     </Link>
     <Manifest>
       <OutputManifestFile>$(IntDir)$(TargetName).manifest</OutputManifestFile>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
     </Manifest>
     <Xdcmake>
       <OutputFile>$(IntDir)$(TargetName).xml</OutputFile>
@@ -393,6 +398,7 @@
     </Link>
     <Manifest>
       <OutputManifestFile>$(IntDir)$(TargetName).manifest</OutputManifestFile>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
     </Manifest>
     <Xdcmake>
       <OutputFile>$(IntDir)$(TargetName).xml</OutputFile>
@@ -447,6 +453,7 @@
     </Link>
     <Manifest>
       <OutputManifestFile>$(IntDir)$(TargetName).manifest</OutputManifestFile>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
     </Manifest>
     <Xdcmake>
       <OutputFile>$(IntDir)$(TargetName).xml</OutputFile>
@@ -501,6 +508,7 @@
     </Link>
     <Manifest>
       <OutputManifestFile>$(IntDir)$(TargetName).manifest</OutputManifestFile>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
     </Manifest>
     <Xdcmake>
       <OutputFile>$(IntDir)$(TargetName).xml</OutputFile>

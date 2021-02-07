@@ -112,6 +112,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Lifetime and ToDelete now work on wounds, giving modders more control over them.
 
+- Some functionality has been moved from `AudioMan` to `SoundContainer` for consistency. As such, the following `AudioMan` Lua bindings have been replaced:
+	`AudioMan:FadeOutSound(fadeOutTime);` has been replaced with `soundContainer:FadeOut(fadeOutTime);`
+	`AudioMan:StopSound(soundContainer);` and `AudioMan:StopSound(soundContainer, player);` have been replaced with `soundContainer:Stop();` and `soundContainer:Stop(player);`
+	
 - Pressing escape when a buy menu is open now closes it instead of pausing the game.
 
 ### Fixed
@@ -123,6 +127,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Getting the `Mass` of a `MOSRotating` has now been made more efficient. Additionally, `Attachables` of `Attachables` will now be included in Mass, so some things have gotten a lot heavier (e.g. Dummy Dreadnought).
 
 - The moment of inertia of `AtomGroups` now updates when the mass or Atoms change, meaning losing `Attachables` or changing mass will properly affect how rotational forces apply to MOSRotatings.
+
+- Fixed various audio bugs that were in Pre3, and fixed clicking noise on sounds that played far away. The game should sound way better now!
+
+- Mobile sounds (i.e. generally things that aren't GUI related) will now pause and resume when you pause and resume your activity.
+
+- The `DeactivationSound` of `HDFirearms` now respects its `SoundOverlapMode` instead of never allowing overlap. If you don't want it overlapping, set it up accordingly.
+
+- Enabled DPI Awareness to fix issues with resolution settings when Windows scaling is enabled.
 
 ### Removed
 

@@ -583,7 +583,7 @@ void HDFirearm::Deactivate() {
 
     m_PreFireSound.Stop();
     if (m_FireSound.GetLoopSetting() == -1) { m_FireSound.Stop(); }
-    if (wasActivated && m_pMagazine && !m_pMagazine->IsEmpty() && !m_DeactivationSound.IsBeingPlayed()) { m_DeactivationSound.Play(m_Pos); }
+    if (wasActivated && m_pMagazine && !m_pMagazine->IsEmpty()) { m_DeactivationSound.Play(m_Pos); }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

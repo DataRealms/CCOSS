@@ -1202,10 +1202,7 @@ void BuyMenuGUI::Update()
         std::string description = "";
 
         if (pItem && pItem->m_pEntity) {
-            description = pItem->m_pEntity->GetDescription() + "\n";
-            if (description.empty()) {
-                description = "-No Information Found-\n";
-            }
+			description = ((pItem->m_pEntity->GetDescription().empty()) ? "-No Information Found-": pItem->m_pEntity->GetDescription()) + "\n";
             const Entity *currentItem = pItem->m_pEntity;
             const ACraft *itemAsCraft = dynamic_cast<const ACraft *>(currentItem);
             if (itemAsCraft) {

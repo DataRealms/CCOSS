@@ -750,17 +750,15 @@ float BuyMenuGUI::GetTotalOrderCost()
 
 float BuyMenuGUI::GetTotalOrderMass() const {
 	float totalMass = 0;
-    for (vector<GUIListPanel::Item*>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr) {
-        totalMass += dynamic_cast<const MOSprite*>((*itr)->m_pEntity)->GetMass();
-    }
+	for (vector<GUIListPanel::Item*>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr) {
+		totalMass += dynamic_cast<const MOSprite*>((*itr)->m_pEntity)->GetMass();
+	}
 
 	return totalMass;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetCraftMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return mass of craft used in the order box.
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 float BuyMenuGUI::GetCraftMass() {
 	float totalMass = 0;

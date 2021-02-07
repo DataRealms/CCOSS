@@ -2162,7 +2162,7 @@ int LuaMan::Create() {
 		def("GetMPP", &GetMPP),
 		def("GetPPL", &GetPPL),
 		def("GetLPP", &GetLPP),
-        def("RoundFloatToPrecision", &RoundFloatToPrecision),
+		def("RoundFloatToPrecision", &RoundFloatToPrecision),
 
 		class_<enum_wrapper::input_device>("InputDevice")
 			.enum_("InputDevice")[

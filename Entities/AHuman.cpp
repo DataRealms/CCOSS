@@ -239,6 +239,7 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         reader >> m_pHead;
         AddAttachable(m_pHead);
         if (m_pHead->HasNoSetDamageMultiplier()) { m_pHead->SetDamageMultiplier(5.0F); }
+        if (m_pHead->IsDrawnAfterParent()) { m_pHead->SetDrawnNormallyByParent(false); }
         m_pHead->SetInheritsRotAngle(false);
     } else if (propName == "Jetpack") {
         RemoveAttachable(m_pJetpack);
@@ -4348,6 +4349,7 @@ void AHuman::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode,
 
     DrawMode realMode = (mode == g_DrawColor && m_FlashWhiteMS) ? g_DrawWhite : mode;
     // Note: For some reason the ordering of the attachables list can get messed up. The most important thing here is that the FGArm is on top of everything else.
+    if (m_pHead && m_pHead->IsDrawnAfterParent()) { m_pHead->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical); }
     if (m_pFGArm) { m_pFGArm->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical); }
 
     //TODO simplify this complex if check when arm is cleaned up like turret so all it can hold are HeldDevices and children

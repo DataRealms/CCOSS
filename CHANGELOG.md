@@ -66,6 +66,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `Actor` Lua (R) property `InventoryMass`. This provides access to the mass of the `Actor's` inventory separate from the `Actor's` actual mass.
 
+- Added `LimbPath` INI property `EndSegCount`, which allows you to specify a segment after which the owning `Actor's` foot will not collide with terrain. This lets you add extra visual-only frames to your `LimbPaths`.
+
+- Added `AHuman` INI property `CrouchLimbPathBG` to allow you to specify a different `LimbPath` for the background leg while crouching.
+
+- Added `AHuman` INI properties `StandRotAngleTarget`, `WalkRotAngleTarget`, `CrouchRotAngleTarget` and `JumpRotAngleTarget` that let you define the rot angle the body should aim towards when in the corresponding `MovementState`.
+
+- Added `AHuman` Lua methods `GetRotAngleTarget(movementState)` and `SetRotAngleTarget(movementState, newRotAngleTarget)` that allow you to get and set rot angle targets for `MovementStates`. Note that only the `MovementStates` mentioned above will actually work.
+
+- `LimbPaths` are now Lua accessible for `ACrabs` and `AHumans`. You can use `GetLimbPath(Layer, MovementState)` for `AHumans` and `GetLimbPath(Side, Layer, MovementState)` for `ACrabs`.
+	`LimbPaths` have the following properties:
+	`limbPath.StartOffset` (R/W) - the start offset for the `LimbPath`. Also defines its position if it has no actual path.
+	`limbPath.SegmentCount` (R) - the number of segments in the `LimbPath`.
+	`limbPath:GetSegment(segmentIndex)` - Gets the segment Vector for the given segment index. You can use this to modify `LimbPaths`.
+
 ### Changed
 
 - Hands will now draw in transparent drawing mode, i.e. editing menu.
@@ -75,7 +89,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Everything draws better when flashing white, including craft which used to be terrible at it.
 
 - Reworked Attachable managment
-	`DamageMultiplier` on `Attachables` now works as expected, all `Attachables` can now transfer damage to their root parent. This will travel up chains of `Attachables`, as long as every `Attachable` in the chain has a non-zero DamageMultiplier (yes, negative numbers are supported if you wanna have healing instead of damage or weirdness with chaining negative multipliers).
+	`DamageMultiplier` on `Attachables` now works as expected, all `Attachables` can now transfer damage to their root parent. This will travel up chains of `Attachables`, as long as every `Attachable` in the chain has a non-zero DamageMultiplier (yes, negative numbers are supported if you wanna have healing instead of damage or weirdness with chaining negative multipliers). Note that the default `DamageMultiplier` for `Attachables` is 0, so you have to set it if you want it. Also note that wounds will default this value to 1 instead of 0.
 	`Attachable` terrain collision has been reworked so that it can be changed simply by setting `CollidesWithTerrainWhileAttached = true/false` in INI or Lua. Also, `Attachables` attached to other `Attachables` will now collide with terrain properly.
 	`BreakWounds` on `Attachables` now gets added to both the `Attachable` and the parent when the `Attachable` is broken off. If `ParentBreakWound` is defined, the parent will use this instead of the regular `BreakWound`.
 	
@@ -127,6 +141,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Getting the `Mass` of a `MOSRotating` has now been made more efficient. Additionally, `Attachables` of `Attachables` will now be included in Mass, so some things have gotten a lot heavier (e.g. Dummy Dreadnought).
 
 - The moment of inertia of `AtomGroups` now updates when the mass or Atoms change, meaning losing `Attachables` or changing mass will properly affect how rotational forces apply to MOSRotatings.
+
+- `WoundDamageMultipliers` on projectiles will now properly stack with wounds' `DamageMultiplier`. Prior to this, if you set the `DamageMultiplier` of a wound on some object, it'd be overwritten by the hitting projectile's `WoundDamageMultiplier`. Now they multiply together properly.
+
+- `Radius` and `Diameter` now account for `Attachables` on objects that can have them. If you want just the `Radius` or `Diameter` of the object, use `IndividualRadius` and `IndividualDiameter` (only available for `MOSRotating` and subclasses). This means that `Radius` and `Diameter` will now give you a good estimation of an object's total size.
 
 - Fixed various audio bugs that were in Pre3, and fixed clicking noise on sounds that played far away. The game should sound way better now!
 

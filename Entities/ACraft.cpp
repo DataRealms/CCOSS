@@ -22,6 +22,7 @@
 #include "PieMenuGUI.h"
 #include "SceneMan.h"
 #include "Scene.h"
+#include "SettingsMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
@@ -244,6 +245,9 @@ MOSRotating * ACraft::Exit::SuckInMOs(ACraft *pExitOwner)
     // Nothing was sucked in far enough to be returned as done
     return 0;
 }
+
+// Initialise static flag to check for active crab bombs.
+bool ACraft::m_sCrabBombInEffect = false;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -802,6 +806,31 @@ bool ACraft::OnMOHit(MovableObject *pOtherMO)
 */
     // Don't terminate, continue travel
     return false;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACraft::GibThis(Vector impactImpulse, float internalBlast, MovableObject* pIgnoreMO) {
+
+	if (g_SettingsMan.EnableCrabBombs() && !m_sCrabBombInEffect) {
+		m_sCrabBombInEffect = true;
+		unsigned short crabCount = 0;
+		for (const MovableObject* inventoryEntry : m_Inventory) {
+			if (inventoryEntry->GetPresetName() == "Crab") { crabCount++; }
+		}
+		// If we have enough crabs gib all actors on scene except brains and doors
+		if (crabCount >= g_SettingsMan.CrabBombThreshold()) {
+			for (int moid = 1; moid < g_MovableMan.GetMOIDCount() - 1; moid++) {
+				Actor* actor = dynamic_cast<Actor*>(g_MovableMan.GetMOFromID(moid));
+				if (actor && actor != this && actor->GetClassName() != "ADoor" && !actor->IsInGroup("Brains")) { actor->GibThis(); }
+			}
+		}
+		m_sCrabBombInEffect = false;
+	}
+
+	Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);
+
 }
 
 

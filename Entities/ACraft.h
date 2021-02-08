@@ -609,6 +609,15 @@ enum
 	void SetDeliveryDelayMultiplier(float newValue) { m_DeliveryDelayMultiplier = newValue; }
 
 
+	/// <summary>
+	/// Gibs this, effectively destroying it and creating multiple gibs or pieces in its place. Virtual override checks for crab bombs, calls Actor::GibThis.
+	/// </summary>
+	/// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen. </param>
+	/// <param name="internalBlast">The internal blast impulse which will push the gibs away from the center. </param>
+	/// <param name="pIgnoreMO">A pointer to an MO which the gibs shuold not be colliding with! </param>
+
+	void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject* pIgnoreMO = nullptr) override;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -678,6 +687,8 @@ protected:
     SoundContainer m_CrashSound;
     // The recomended, not absolute, maximum number of actors that fit in the inventory
     int m_MaxPassengers;
+	// Flag to determine if a craft is triggering the Crab Bomb effect.
+	static bool m_sCrabBombInEffect;
 
     ////////
     // AI states

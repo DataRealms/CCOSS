@@ -465,7 +465,7 @@ void ACRocket::GibThis(Vector impactImpulse, float internalBlast, MovableObject 
         m_pULThruster = nullptr;
     }
 
-    Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);
+    ACraft::GibThis(impactImpulse, internalBlast, pIgnoreMO);
 }
 
 

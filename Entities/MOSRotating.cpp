@@ -1472,7 +1472,7 @@ void MOSRotating::Update() {
         attachable->Update();
 
         if (attachable->IsAttachedTo(this) && attachable->IsSetToDelete()) {
-            RemoveAttachable(attachable, true, false);
+            RemoveAttachable(attachable, true, true);
         } else if (!attachable->IsSetToDelete()) {
             TransferForcesFromAttachable(attachable);
         }

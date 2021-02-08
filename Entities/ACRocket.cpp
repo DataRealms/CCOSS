@@ -414,7 +414,7 @@ void ACRocket::GibThis(Vector impactImpulse, float internalBlast, MovableObject 
         SetAttachableVelocitiesForGibbing(m_pRLeg, impactImpulse, internalBlast);
         m_pRLeg->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pRLeg);
-        m_pRLeg = 0;
+        m_pRLeg = nullptr;
     }
     if (m_pLLeg && m_pLLeg->IsAttached())
     {
@@ -422,7 +422,7 @@ void ACRocket::GibThis(Vector impactImpulse, float internalBlast, MovableObject 
         SetAttachableVelocitiesForGibbing(m_pLLeg, impactImpulse, internalBlast);
         m_pLLeg->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pLLeg);
-        m_pLLeg = 0;
+        m_pLLeg = nullptr;
     }
     if (m_pMThruster && m_pMThruster->IsAttached())
     {
@@ -430,7 +430,7 @@ void ACRocket::GibThis(Vector impactImpulse, float internalBlast, MovableObject 
         SetAttachableVelocitiesForGibbing(m_pMThruster, impactImpulse, internalBlast);
         m_pMThruster->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pMThruster);
-        m_pMThruster = 0;
+        m_pMThruster = nullptr;
     }
     if (m_pRThruster && m_pRThruster->IsAttached())
     {
@@ -438,7 +438,7 @@ void ACRocket::GibThis(Vector impactImpulse, float internalBlast, MovableObject 
         SetAttachableVelocitiesForGibbing(m_pRThruster, impactImpulse, internalBlast);
         m_pRThruster->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pRThruster);
-        m_pRThruster = 0;
+        m_pRThruster = nullptr;
     }
     if (m_pLThruster && m_pLThruster->IsAttached())
     {
@@ -446,7 +446,7 @@ void ACRocket::GibThis(Vector impactImpulse, float internalBlast, MovableObject 
         SetAttachableVelocitiesForGibbing(m_pLThruster, impactImpulse, internalBlast);
         m_pLThruster->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pLThruster);
-        m_pLThruster = 0;
+        m_pLThruster = nullptr;
     }
     if (m_pURThruster && m_pURThruster->IsAttached())
     {
@@ -454,7 +454,7 @@ void ACRocket::GibThis(Vector impactImpulse, float internalBlast, MovableObject 
         SetAttachableVelocitiesForGibbing(m_pURThruster, impactImpulse, internalBlast);
         m_pURThruster->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pURThruster);
-        m_pURThruster = 0;
+        m_pURThruster = nullptr;
     }
     if (m_pULThruster && m_pULThruster->IsAttached())
     {
@@ -462,7 +462,7 @@ void ACRocket::GibThis(Vector impactImpulse, float internalBlast, MovableObject 
         SetAttachableVelocitiesForGibbing(m_pULThruster, impactImpulse, internalBlast);
         m_pULThruster->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pULThruster);
-        m_pULThruster = 0;
+        m_pULThruster = nullptr;
     }
 
     Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);

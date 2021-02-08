@@ -417,7 +417,7 @@ void ACDropShip::GibThis(Vector impactImpulse, float internalBlast, MovableObjec
         SetAttachableVelocitiesForGibbing(m_pRThruster, impactImpulse, internalBlast);
         m_pRThruster->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pRThruster);
-        m_pRThruster = 0;
+        m_pRThruster = nullptr;
     }
     if (m_pLThruster && m_pLThruster->IsAttached())
     {
@@ -425,7 +425,7 @@ void ACDropShip::GibThis(Vector impactImpulse, float internalBlast, MovableObjec
         SetAttachableVelocitiesForGibbing(m_pLThruster, impactImpulse, internalBlast);
         m_pLThruster->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pLThruster);
-        m_pLThruster = 0;
+        m_pLThruster = nullptr;
     }
     if (m_pRHatch && m_pRHatch->IsAttached())
     {
@@ -433,7 +433,7 @@ void ACDropShip::GibThis(Vector impactImpulse, float internalBlast, MovableObjec
         SetAttachableVelocitiesForGibbing(m_pRHatch, impactImpulse, internalBlast);
         m_pRHatch->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pRHatch);
-        m_pRHatch = 0;
+        m_pRHatch = nullptr;
     }
     if (m_pLHatch && m_pLHatch->IsAttached())
     {
@@ -441,7 +441,7 @@ void ACDropShip::GibThis(Vector impactImpulse, float internalBlast, MovableObjec
         SetAttachableVelocitiesForGibbing(m_pLHatch, impactImpulse, internalBlast);
         m_pLHatch->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pLHatch);
-        m_pLHatch = 0;
+        m_pLHatch = nullptr;
     }
     if (m_pURThruster && m_pURThruster->IsAttached())
     {
@@ -449,7 +449,7 @@ void ACDropShip::GibThis(Vector impactImpulse, float internalBlast, MovableObjec
         SetAttachableVelocitiesForGibbing(m_pURThruster, impactImpulse, internalBlast);
         m_pURThruster->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pURThruster);
-        m_pURThruster = 0;
+        m_pURThruster = nullptr;
     }
     if (m_pULThruster && m_pULThruster->IsAttached())
     {
@@ -457,10 +457,10 @@ void ACDropShip::GibThis(Vector impactImpulse, float internalBlast, MovableObjec
         SetAttachableVelocitiesForGibbing(m_pULThruster, impactImpulse, internalBlast);
         m_pULThruster->SetToGetHitByMOs(false);
         g_MovableMan.AddParticle(m_pULThruster);
-        m_pULThruster = 0;
+        m_pULThruster = nullptr;
     }
 
-    Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);
+    ACraft::GibThis(impactImpulse, internalBlast, pIgnoreMO);
 }
 
 

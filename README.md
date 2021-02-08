@@ -11,7 +11,7 @@ First you need to download the necessary files:
 
 1. Install the necessary tools.  
 You'll probably want [Visual Studio Community Edition](https://visualstudio.microsoft.com/downloads/) (build supports both 2017 and 2019 versions).  
-You also need to have [Visual C++ Redistributable for Visual Studio 2017 (x86)](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) installed in order to run the compiled builds.  
+You also need to have both x86 and x64 versions of the [Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) installed in order to run the compiled builds.  
 You may also want to check out the list of recommended Visual Studio plugins [here](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Information,-Recommended-Plugins-and-Useful-Links).
 
 2. Clone this Source Repository and the [Data Repository](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data) in neighboring folders.  
@@ -36,7 +36,7 @@ Simply open `RTEA.sln` with Visual Studio, choose your target platform (x86 or x
 The first build will take a while, but future ones should be quicker.
 
 # Linux Build Instructions
-The Linux build uses the meson build system, and builds against system libraries
+The Linux build uses the meson build system, and builds against system libraries.
 
 ## Dependencies:
 
@@ -57,7 +57,7 @@ The Linux build uses the meson build system, and builds against system libraries
 
 1. Install Dependencies (see below for some distro-specific instructions).
 
-2. Clone this Source Repository and the [Data Respository](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data)
+2. Clone this Source Repository and the [Data Respository](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data).
 
 3. Open a terminal in the Source Repository.
 
@@ -70,7 +70,7 @@ For `meson` versions `>=0.54` (check `meson --version`) :
 6. `meson compile` for debug build, or `meson compile CCCP` for a release build.
 If the build fails because of memory shortage you may need to reduce the number of build threads (meson will use all available threads by default) using the `-j<number of threads>` option, if this doesn't help, increase your swap size to at least 6Gb.
 
-For `meson` versions `<0.54`
+For `meson` versions `<0.54` :
 
 6. `ninja` for debug builds, or `ninja CCCP.x86_64` for release builds. Using the `-j<number of threads>` option will also work here.
 
@@ -78,11 +78,11 @@ For `meson` versions `<0.54`
 
 1. Copy (or link, might be preferable for testing builds) `builddir/CCCP_debug.x86_64` or `builddir/CCCP.x86_64` (depending on if you made a release build) into the **Data Repository**.
 
-2. Copy all `libfmod` files from `external/lib/linux/x86_64` into the **Data Repository**
+2. Copy all `libfmod` files from `external/lib/linux/x86_64` into the **Data Repository**.
 
-2. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into **Data Repository**.
+3. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into **Data Repository**.
 
-3. Run `./CCCP.x86_64` or `./CCCP_debug.x86_64` in the **Data Repository**.
+4. Run `./CCCP.x86_64` or `./CCCP_debug.x86_64` in the **Data Repository**.
 
 ## Troubleshooting:
 Until borderless windows are implemented, you might seem get stuck in fullscreen mode.
@@ -91,12 +91,15 @@ Try Alt-Return, or if that doesn't work kill CC with ctrl-alt-end.
 On X11 media keys and such don't work in fullscreen, this is a known issue (this does not happen on Wayland).
 
 ## Installing Dependencies
-**Arch Linux:**
+
+**Arch Linux:**  
 `# pacman -S allegro4 flac luajit minizip lz4 libpng libx11 meson xorg-fonts-misc`
 
-**Ubuntu:**
-`# apt-get install liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev`
+**Ubuntu:**  
+`# apt-get install liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev`  
 `# pip install meson`
+
+***
 
 # More Information
 

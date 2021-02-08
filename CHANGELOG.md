@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Executable can be compiled as 64bit.
 
+- Added the helper function `RoundFloatToPrecision( )` to RTETools and exposed to Lua. Utility function to round and format floating point numbers for display in strings. 
+
 ### Changed
 
 - Some functionality has been moved from `AudioMan` to `SoundContainer` for consistency. As such, the following `AudioMan` Lua bindings have been replaced:
@@ -19,6 +21,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Pressing escape when a buy menu is open now closes it instead of pausing the game.
 
 - BuyMenu tooltips now display item info as well as a description. This includes the maximum carriable mass and passengers for Craft, mass and passenger slots required for Actors, and mass for other Moveable Objects.
+
+- `MaxMass` property for Actors now no longer includes that actors mass in the calculation, and has been renamed to `MaxInventoryMass` for clarity. In mods, this is most important for ACraft, which will now need their total mass subtracted from the value. 
 
 ### Fixed
 

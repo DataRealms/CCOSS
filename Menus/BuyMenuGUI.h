@@ -328,6 +328,15 @@ public:
 
 	int GetTotalOrderPassengers();
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          EnableEquipmentSelection
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Enable or disable the buy menu equipment selection mode.
+// Arguments:       Enabled flag.
+// Return value:    None.
+
+    void BuyMenuGUI::EnableEquipmentSelection(bool enabled);
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
@@ -709,11 +718,11 @@ protected:
     {
         CRAFT = 0,
         BODIES,
+        SETS,
         TOOLS,
         GUNS,
         BOMBS,
         SHIELDS,
-        SETS,
         CATEGORYCOUNT
     };
 
@@ -769,6 +778,25 @@ protected:
     Timer m_RepeatStartTimer;
     // Measures the interval between input repeats
     Timer m_RepeatTimer;
+
+    // If the player has selected an actor and is now selecting equipment
+    bool m_SelectingEquipment;
+    // Last tab visited while equipment selection was enabled
+    MenuCategory m_LastVisitedEquipmentTab;
+    // Last tab visited while equipment selection was disabled
+    MenuCategory m_LastVisitedMainTab;
+    // Last scroll position while equipment selection was enabled
+    int m_LastEquipmentScrollPosition;
+    // Last scroll position while equipment selection was disabled
+    int m_LastMainScrollPosition;
+    // First tab when equipment selection is disabled
+    MenuCategory m_FirstMainTab;
+    // Last tab when equipment selection is disabled
+    MenuCategory m_LastMainTab;
+    // First tab when equipment selection is enabled
+    MenuCategory m_FirstEquipmentTab;
+    // Last tab when equipment selection is enabled
+    MenuCategory m_LastEquipmentTab;
 
     // Collection box of the buy GUIs
     GUICollectionBox *m_pParentBox;

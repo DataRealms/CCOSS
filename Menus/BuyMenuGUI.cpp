@@ -113,6 +113,12 @@ void BuyMenuGUI::Clear()
 	m_AllowedItems.clear();
 	m_AlwaysAllowedItems.clear();
 	m_OwnedItems.clear();
+
+    m_SelectingEquipment = false;
+    m_LastVisitedEquipmentTab = GUNS;
+    m_LastVisitedMainTab = BODIES;
+    m_LastEquipmentScrollPosition = -1;
+    m_LastMainScrollPosition = -1;
 }
 
 
@@ -198,6 +204,14 @@ int BuyMenuGUI::Create(Controller *pController)
     m_pCategoryTabs[SHIELDS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("ShieldsTab"));
     m_pCategoryTabs[SETS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("SetsTab"));
 
+    m_pCategoryTabs[CRAFT]->SetVisible(true);
+    m_pCategoryTabs[BODIES]->SetVisible(true);
+    m_pCategoryTabs[TOOLS]->SetVisible(false);
+    m_pCategoryTabs[GUNS]->SetVisible(false);
+    m_pCategoryTabs[BOMBS]->SetVisible(false);
+    m_pCategoryTabs[SHIELDS]->SetVisible(false);
+    m_pCategoryTabs[SETS]->SetVisible(true);
+
     m_pShopList = dynamic_cast<GUIListBox *>(m_pGUIController->GetControl("CatalogLB"));
     m_pCartList = dynamic_cast<GUIListBox *>(m_pGUIController->GetControl("OrderLB"));
     m_pCraftLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("CraftLabel"));
@@ -270,6 +284,15 @@ int BuyMenuGUI::Create(Controller *pController)
 
     // Set initial focus, category list, and label settings
     m_MenuFocus = OK;
+    m_SelectingEquipment = false;
+    m_LastVisitedEquipmentTab = GUNS;
+    m_LastVisitedMainTab = BODIES;
+    m_LastEquipmentScrollPosition = -1;
+    m_LastMainScrollPosition = -1;
+    m_FirstMainTab = CRAFT;
+    m_LastMainTab = SETS;
+    m_FirstEquipmentTab = TOOLS;
+    m_LastEquipmentTab = SHIELDS;
     m_FocusChange = true;
     m_MenuCategory = SETS;
     CategoryChange();
@@ -563,6 +586,12 @@ void BuyMenuGUI::SetEnabled(bool enable)
     }
     else if (!enable && m_MenuEnabled != DISABLED && m_MenuEnabled != DISABLING)
     {
+        // Disable equipment selection mode if it's enabled
+        if (m_SelectingEquipment)
+        {
+            EnableEquipmentSelection(false);
+        }
+
         m_MenuEnabled = DISABLING;
         // Trap the mouse cursor again
         g_UInputMan.TrapMousePos(true, m_pController->GetPlayer());
@@ -802,6 +831,58 @@ int BuyMenuGUI::GetTotalOrderPassengers()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// Method:          EnableEquipmentSelection
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Enable or disable the buy menu equipment selection mode.
+
+void BuyMenuGUI::EnableEquipmentSelection(bool enabled)
+{
+    g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
+    if (enabled == true)
+    {
+        // Save the last tab and scroll position
+        MenuCategory auxCategory = static_cast<MenuCategory>(m_MenuCategory);
+        m_LastMainScrollPosition = m_pShopList->GetScrollVerticalValue();
+
+        m_SelectingEquipment = true;
+        m_pCategoryTabs[CRAFT]->SetVisible(false);
+        m_pCategoryTabs[BODIES]->SetVisible(false);
+        m_pCategoryTabs[TOOLS]->SetVisible(true);
+        m_pCategoryTabs[GUNS]->SetVisible(true);
+        m_pCategoryTabs[BOMBS]->SetVisible(true);
+        m_pCategoryTabs[SHIELDS]->SetVisible(true);
+        m_pCategoryTabs[SETS]->SetVisible(false);
+
+        m_MenuCategory = m_LastVisitedEquipmentTab;
+        m_LastVisitedMainTab = auxCategory;
+        CategoryChange();
+        m_pShopList->ScrollTo(m_LastEquipmentScrollPosition);
+    }
+    else
+    {
+        // Save the last tab and scroll position
+        MenuCategory auxCategory = static_cast<MenuCategory>(m_MenuCategory);
+        m_LastEquipmentScrollPosition = m_pShopList->GetScrollVerticalValue();
+
+        m_SelectingEquipment = false;
+        m_pCategoryTabs[CRAFT]->SetVisible(true);
+        m_pCategoryTabs[BODIES]->SetVisible(true);
+        m_pCategoryTabs[TOOLS]->SetVisible(false);
+        m_pCategoryTabs[GUNS]->SetVisible(false);
+        m_pCategoryTabs[BOMBS]->SetVisible(false);
+        m_pCategoryTabs[SHIELDS]->SetVisible(false);
+        m_pCategoryTabs[SETS]->SetVisible(true);
+
+        m_MenuCategory = m_LastVisitedMainTab;
+        m_LastVisitedEquipmentTab = auxCategory;
+        CategoryChange();
+        m_pShopList->ScrollTo(m_LastMainScrollPosition);
+    }
+    m_MenuFocus = ITEMS;
+    m_FocusChange = 1;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates the state of this Menu each frame
@@ -951,8 +1032,13 @@ void BuyMenuGUI::Update()
 
     bool pressLeft = m_pController->IsState(PRESS_LEFT);
     bool pressRight = m_pController->IsState(PRESS_RIGHT);
-    bool pressUp = m_pController->IsState(PRESS_UP) || m_pController->IsState(SCROLL_UP);
-    bool pressDown = m_pController->IsState(PRESS_DOWN) || m_pController->IsState(SCROLL_DOWN);
+    bool pressUp = m_pController->IsState(PRESS_UP);
+    bool pressDown = m_pController->IsState(PRESS_DOWN);
+    bool pressScrollUp = m_pController->IsState(SCROLL_UP);
+    bool pressScrollDown = m_pController->IsState(SCROLL_DOWN);
+
+    bool pressNextActor = m_pController->IsState(ACTOR_NEXT);
+    bool pressPrevActor = m_pController->IsState(ACTOR_PREV);
 
     // If no direciton is held down, then cancel the repeating
     if (!(m_pController->IsState(MOVE_RIGHT) || m_pController->IsState(MOVE_LEFT) || m_pController->IsState(MOVE_UP) || m_pController->IsState(MOVE_DOWN)))
@@ -1041,14 +1127,74 @@ void BuyMenuGUI::Update()
     // Play focus change sound, if applicable
     if (m_FocusChange && m_MenuEnabled != ENABLING)
         g_GUISound.FocusChangeSound()->Play(m_pController->GetPlayer());
-/* Blah, should control whatever is currently focused
-    // Mouse wheel only controls the categories, so switch to it and make the category go up or down
-    if (m_pController->IsState(SCROLL_UP) || m_pController->IsState(SCROLL_DOWN))
+    /* Blah, should control whatever is currently focused
+        // Mouse wheel only controls the categories, so switch to it and make the category go up or down
+        if (m_pController->IsState(SCROLL_UP) || m_pController->IsState(SCROLL_DOWN))
+        {
+            m_FocusChange = CATEGORIES - m_MenuFocus;
+            m_MenuFocus = CATEGORIES;
+        }
+    */
+
+    /////////////////////////////////////////
+    // Change Category directly
+
+    if (pressNextActor)
     {
-        m_FocusChange = CATEGORIES - m_MenuFocus;
-        m_MenuFocus = CATEGORIES;
+        m_MenuCategory++;
+        if (m_SelectingEquipment && m_MenuCategory > m_LastEquipmentTab)
+        {
+            m_MenuCategory = m_LastEquipmentTab;
+            g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+        }
+        else if (!m_SelectingEquipment && m_MenuCategory > m_LastMainTab)
+        {
+            m_MenuCategory = m_LastMainTab;
+            g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+        }
+        else
+        {
+            CategoryChange();
+            g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
+
+            m_MenuFocus = ITEMS;
+            m_FocusChange = 1;
+        }
     }
-*/
+    else if (pressPrevActor)
+    {
+        m_MenuCategory--;
+        if (m_SelectingEquipment && m_MenuCategory < m_FirstEquipmentTab)
+        {
+            m_MenuCategory = m_FirstEquipmentTab;
+            g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+        }
+        else if (!m_SelectingEquipment && m_MenuCategory < m_FirstMainTab)
+        {
+            m_MenuCategory = m_FirstMainTab;
+            g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+        }
+        else
+        {
+            CategoryChange();
+            g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
+
+            m_MenuFocus = ITEMS;
+            m_FocusChange = 1;
+        }
+    }
+
+    /////////////////////////////////////////
+    // Scroll buy menu
+
+    if (pressScrollUp)
+    {
+        m_pShopList->ScrollUp();
+    }
+    else if (pressScrollDown)
+    {
+        m_pShopList->ScrollDown();
+    }
 
     /////////////////////////////////////////
     // SETS BUTTONS focus
@@ -1119,13 +1265,19 @@ void BuyMenuGUI::Update()
         if (pressDown)
         {
             m_MenuCategory++;
-            if (m_MenuCategory >= CATEGORYCOUNT)
+            if (m_SelectingEquipment && m_MenuCategory > m_LastEquipmentTab)
             {
-                m_MenuCategory = CATEGORYCOUNT - 1;
+                m_MenuCategory = m_LastEquipmentTab;
                 // Go to the preset buttons if hit down on the last one
                 m_MenuFocus = SETBUTTONS;
                 m_FocusChange = -1;
 //                g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+            }
+            else if (!m_SelectingEquipment && m_MenuCategory > m_LastMainTab)
+            {
+                m_MenuCategory = m_LastMainTab;
+                m_MenuFocus = SETBUTTONS;
+                m_FocusChange = -1;
             }
 /*
             // Loop Around
@@ -1141,9 +1293,14 @@ void BuyMenuGUI::Update()
         else if (pressUp)
         {
             m_MenuCategory--;
-            if (m_MenuCategory < 0)
+            if (m_SelectingEquipment && m_MenuCategory < m_FirstEquipmentTab)
             {
-                m_MenuCategory = 0;
+                m_MenuCategory = m_FirstEquipmentTab;
+                g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+            }
+            else if (!m_SelectingEquipment && m_MenuCategory < m_FirstMainTab)
+            {
+                m_MenuCategory = m_FirstMainTab;
                 g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
             }
 /*
@@ -1286,6 +1443,11 @@ void BuyMenuGUI::Update()
                     // Gotto make a copy of the bitmap to pass it to the next list
                     GUIBitmap *pItemBitmap = new AllegroBitmap(dynamic_cast<AllegroBitmap *>(pItem->m_pBitmap)->GetBitmap());
                     m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
+                    // If I just selected an AHuman, enable equipment selection mode
+                    if (m_MenuCategory == BODIES && pItem->m_pEntity->GetClassName() == "AHuman")
+                    {
+                        EnableEquipmentSelection(true);
+                    }
                 }
                 g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
             }
@@ -1375,6 +1537,24 @@ void BuyMenuGUI::Update()
         // Fire button removes items from the order list
         if (m_pController->IsState(PRESS_FACEBUTTON))
         {
+            // I'm deleting a AHuman, delete any items after item
+            if (pItem && pItem->m_pEntity && pItem->m_pEntity->GetClassName() == "AHuman")
+            {
+                int lastItemToDelete = m_pCartList->GetItemList()->size() - 1;
+                for (int i = m_ListItemIndex + 1; i != m_pCartList->GetItemList()->size(); i++)
+                {
+                    GUIListPanel::Item* auxItem = m_pCartList->GetItem(i);
+                    if (auxItem->m_pEntity->GetClassName() == "AHuman")
+                    {
+                        lastItemToDelete = i - 1;
+                        break;
+                    }
+                }
+                for (int i = lastItemToDelete; i > m_ListItemIndex; i--)
+                {
+                    m_pCartList->DeleteItem(i);
+                }
+            }
             m_pCartList->DeleteItem(m_ListItemIndex);
             // If we're not at the bottom, then select the item in the same place as the one just deleted
             if (m_pCartList->GetItemList()->size() > m_ListItemIndex)
@@ -1423,12 +1603,24 @@ void BuyMenuGUI::Update()
     }
 
     // If mouse clicked outside the buy menu, the user is considered havin g tried to buy
-    if (m_pController->IsMouseControlled() && m_MenuEnabled == ENABLED && m_pController->IsState(PRESS_PRIMARY) && m_CursorPos.m_X > m_pParentBox->GetWidth())
+    // Pressing the reload button also confirms the purchase
+    if (m_MenuEnabled == ENABLED && ((m_pController->IsMouseControlled() && m_pController->IsState(PRESS_PRIMARY) && m_CursorPos.m_X > m_pParentBox->GetWidth()) || m_pController->IsState(WEAPON_RELOAD)))
         TryPurchase();
 
     // ESC, Right click, or pie menu press close the menu
-    if (m_pController->IsState(PRESS_SECONDARY) || m_pController->IsState(PIE_MENU_ACTIVE) || g_UInputMan.AnyStartPress(false))
-        SetEnabled(false);
+    if (m_pController->IsState(PRESS_SECONDARY) || g_UInputMan.AnyStartPress(false))
+    {
+        // If equipment selection mode is enabled, return to the main buy menu
+        // Otherwise, close the buy menu
+        if (m_SelectingEquipment)
+        {
+            EnableEquipmentSelection(false);
+        }
+        else
+        {
+            SetEnabled(false);
+        }
+    }
 
     //////////////////////////////////////////
 	// Update the ControlManager
@@ -1598,6 +1790,12 @@ void BuyMenuGUI::Update()
 							{
 								m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
 							}
+                            
+                            // If I just selected an AHuman, enable equipment selection mode
+                            if (m_MenuCategory == BODIES && pItem->m_pEntity->GetClassName() == "AHuman")
+                            {
+                                EnableEquipmentSelection(true);
+                            }
                         }
                         g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
                     }
@@ -1662,6 +1860,24 @@ void BuyMenuGUI::Update()
                         m_ListItemIndex = m_pCartList->GetSelectedIndex();
                         m_pCartList->ScrollToSelected();
 
+                        // I'm deleting a AHuman, delete any items after item
+                        if (pItem && pItem->m_pEntity && pItem->m_pEntity->GetClassName() == "AHuman")
+                        {
+                            int lastItemToDelete = m_pCartList->GetItemList()->size() - 1;
+                            for (int i = m_ListItemIndex + 1; i != m_pCartList->GetItemList()->size(); i++)
+                            {
+                                GUIListPanel::Item* auxItem = m_pCartList->GetItem(i);
+                                if (auxItem->m_pEntity->GetClassName() == "AHuman")
+                                {
+                                    lastItemToDelete = i - 1;
+                                    break;
+                                }
+                            }
+                            for (int i = lastItemToDelete; i > m_ListItemIndex; i--)
+                            {
+                                m_pCartList->DeleteItem(i);
+                            }
+                        }
                         m_pCartList->DeleteItem(m_ListItemIndex);
                         // If we're not at the bottom, then select the item in the same place as the one just deleted
                         if (m_pCartList->GetItemList()->size() > m_ListItemIndex)
@@ -2283,6 +2499,12 @@ void BuyMenuGUI::TryPurchase()
 	}
 	else
 	{
+        // Disable equipment selection mode if it's enabled
+        if (m_SelectingEquipment)
+        {
+            EnableEquipmentSelection(false);
+        }
+
 		const ACraft * pCraft = dynamic_cast<const ACraft *>(m_pSelectedCraft);
 		if (pCraft)
 		{

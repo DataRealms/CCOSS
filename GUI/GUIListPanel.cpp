@@ -17,6 +17,7 @@
 using namespace RTE;
 
 #define RIGHTTEXTWIDTH 36
+#define SCROLLAMOUNT 20
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUIListPanel
@@ -784,6 +785,85 @@ void GUIListPanel::ScrollToItem(Item *pItem)
             m_VertScroll->SetValue(stackHeight);
         if (stackHeight + itemHeight > m_VertScroll->GetValue() + m_VertScroll->GetPageSize())
             m_VertScroll->SetValue(stackHeight + itemHeight - m_VertScroll->GetPageSize());
+    }
+    BuildBitmap(false, true);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          ScrollDown
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Scroll the list up
+
+void GUIListPanel::ScrollUp()
+{
+    if (m_VertScroll->_GetVisible())
+    {
+        if (!m_Items.empty())
+        {
+            RTE::GUIListPanel::Item* pItem = m_Items.back();
+            int stackHeight = GetStackHeight(pItem);
+            int itemHeight = GetItemHeight(pItem);
+            int maxScrollDistance = m_VertScroll->GetValue();
+            int scrollDistance = MIN(SCROLLAMOUNT, maxScrollDistance);
+            if (scrollDistance > 0) {
+                m_VertScroll->SetValue(m_VertScroll->GetValue() - scrollDistance);
+            }
+        }
+    }
+    BuildBitmap(false, true);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          ScrollDown
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Scroll the list down
+
+void GUIListPanel::ScrollDown()
+{
+    if (m_VertScroll->_GetVisible())
+    {
+        if (!m_Items.empty())
+        {
+            RTE::GUIListPanel::Item* pItem = m_Items.back();
+            int stackHeight = GetStackHeight(pItem);
+            int itemHeight = GetItemHeight(pItem);
+            int maxScrollDistance = (stackHeight + itemHeight) - (m_VertScroll->GetValue() + m_VertScroll->GetPageSize());
+            int scrollDistance = MIN(SCROLLAMOUNT, maxScrollDistance);
+            if (scrollDistance > 0) {
+                m_VertScroll->SetValue(m_VertScroll->GetValue() + scrollDistance);
+            }
+        }
+    }
+    BuildBitmap(false, true);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          ScrollDown
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Scroll the list down
+
+void GUIListPanel::ScrollTo(int position)
+{
+    if (m_VertScroll->_GetVisible())
+    {
+        if (!m_Items.empty() && position >= 0)
+        {
+            RTE::GUIListPanel::Item* pItem = m_Items.back();
+            int stackHeight = GetStackHeight(pItem);
+            int itemHeight = GetItemHeight(pItem);
+
+            if (position + m_VertScroll->GetPageSize() > stackHeight + itemHeight)
+            {
+                m_VertScroll->SetValue(MAX(0, stackHeight + itemHeight - m_VertScroll->GetPageSize()));
+            }
+            else 
+            {
+                m_VertScroll->SetValue(position);
+            }
+        }
     }
     BuildBitmap(false, true);
 }

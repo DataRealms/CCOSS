@@ -204,6 +204,7 @@ namespace RTE {
 			extraRotation -= (m_ExtendedOffset.GetAbsRadAngle() - m_ContractedOffset.GetAbsRadAngle()) * extraRotationRatio;
 
 			m_Rotation.SetRadAngle(m_Rotation.GetRadAngle() + extraRotation * static_cast<float>(GetFlipFactor()));
+			m_AngularVel = 0.0F;
 		}
 	}
 

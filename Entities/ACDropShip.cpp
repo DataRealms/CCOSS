@@ -665,10 +665,12 @@ void ACDropShip::Update()
 
     if (m_pRThruster && m_pRThruster->IsAttached()) {
         m_pRThruster->SetRotAngle(engineRot.GetRadAngle());
+        m_pRThruster->SetAngularVel(0.0F);
     }
 
     if (m_pLThruster && m_pLThruster->IsAttached()) {
         m_pLThruster->SetRotAngle(engineRot.GetRadAngle());
+        m_pLThruster->SetAngularVel(0.0F);
     }
 
     // Auto balancing with the up thrusters

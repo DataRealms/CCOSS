@@ -353,7 +353,11 @@ void Arm::ReachToward(const Vector &scenePoint)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Arm::Update() {
-    if (!IsAttached()) { RemoveAttachable(dynamic_cast<Attachable *>(m_pHeldMO), true, false); }
+    if (!IsAttached()) {
+        RemoveAttachable(dynamic_cast<Attachable *>(m_pHeldMO), true, false);
+    } else {
+        m_AngularVel = 0.0F;
+    }
 
     UpdateCurrentHandOffset();
 
@@ -361,7 +365,7 @@ void Arm::Update() {
     const ThrownDevice *thrownDevice = heldDevice ? dynamic_cast<ThrownDevice *>(heldDevice) : nullptr;
 
     // HeldDevices need to use the aim angle for their positioning and rotating, while ThrownDevices need to aim and position themselves based on the hand offset, so this done here for TDs and below for HDs.
-    if (thrownDevice) { m_Rotation = m_HandOffset.GetAbsRadAngle() + (m_HFlipped ? c_PI : 0); }
+    if (thrownDevice || !heldDevice) { m_Rotation = m_HandOffset.GetAbsRadAngle() + (m_HFlipped ? c_PI : 0); }
 
     if (heldDevice) {
         // In order to keep the HeldDevice in the right place, we need to convert its offset (the hand offset) to work as the ParentOffset for the HeldDevice.
@@ -375,7 +379,7 @@ void Arm::Update() {
 
     m_Recoiled = heldDevice && heldDevice->IsRecoiled();
 
-    if (!thrownDevice) {
+    if (heldDevice && !thrownDevice) {
         m_Rotation = m_HandOffset.GetAbsRadAngle() + (m_HFlipped ? c_PI : 0);
         m_Pos = m_JointPos - RotateOffset(m_JointOffset);
     }

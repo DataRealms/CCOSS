@@ -612,10 +612,9 @@ enum
 	/// <summary>
 	/// Gibs this, effectively destroying it and creating multiple gibs or pieces in its place. Virtual override checks for crab bombs, calls Actor::GibThis.
 	/// </summary>
-	/// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen. </param>
-	/// <param name="internalBlast">The internal blast impulse which will push the gibs away from the center. </param>
-	/// <param name="pIgnoreMO">A pointer to an MO which the gibs shuold not be colliding with! </param>
-
+	/// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen.</param>
+	/// <param name="internalBlast">The internal blast impulse which will push the gibs away from the center.</param>
+	/// <param name="pIgnoreMO">A pointer to an MO which the gibs shuold not be colliding with!</param>
 	void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject* pIgnoreMO = nullptr) override;
 
 

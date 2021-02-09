@@ -811,26 +811,22 @@ bool ACraft::OnMOHit(MovableObject *pOtherMO)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ACraft::GibThis(Vector impactImpulse, float internalBlast, MovableObject* pIgnoreMO) {
-
+void ACraft::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO) {
 	if (g_SettingsMan.EnableCrabBombs() && !m_sCrabBombInEffect) {
 		m_sCrabBombInEffect = true;
-		unsigned short crabCount = 0;
-		for (const MovableObject* inventoryEntry : m_Inventory) {
+		int crabCount = 0;
+		for (const MovableObject *inventoryEntry : m_Inventory) {
 			if (inventoryEntry->GetPresetName() == "Crab") { crabCount++; }
 		}
-		// If we have enough crabs gib all actors on scene except brains and doors
 		if (crabCount >= g_SettingsMan.CrabBombThreshold()) {
 			for (int moid = 1; moid < g_MovableMan.GetMOIDCount() - 1; moid++) {
-				Actor* actor = dynamic_cast<Actor*>(g_MovableMan.GetMOFromID(moid));
+				Actor *actor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(moid));
 				if (actor && actor != this && actor->GetClassName() != "ADoor" && !actor->IsInGroup("Brains")) { actor->GibThis(); }
 			}
 		}
 		m_sCrabBombInEffect = false;
 	}
-
 	Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);
-
 }
 
 

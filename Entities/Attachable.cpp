@@ -317,6 +317,16 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool Attachable::HandlePotentialRadiusAffectingAttachable(const Attachable *attachable) {
+		if (MOSRotating::HandlePotentialRadiusAffectingAttachable(attachable)) {
+			if (IsAttached()) { m_Parent->HandlePotentialRadiusAffectingAttachable(this); }
+			return true;
+		}
+		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void Attachable::Update() {
 		if (m_Parent) {
 			UpdatePositionAndJointPositionBasedOnOffsets();

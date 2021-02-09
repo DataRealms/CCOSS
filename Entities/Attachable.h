@@ -371,7 +371,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen.</param>
 		/// <param name="movableObjectToIgnore">A pointer to an MO which the Gibs and Attachables should not be colliding with.</param>
-		virtual void GibThis(const Vector &impactImpulse = Vector(), MovableObject *movableObjectToIgnore = nullptr);
+		void GibThis(const Vector &impactImpulse = Vector(), MovableObject *movableObjectToIgnore = nullptr) override;
+
+		/// <summary>
+		/// Checks if the given Attachable should affect radius, and handles it if it should.
+		/// </summary>
+		/// <param name="attachable">The Attachable to check.</param>
+		/// <returns>Whether the radius affecting Attachable changed as a result of this call.</returns>
+		bool HandlePotentialRadiusAffectingAttachable(const Attachable *attachable) override;
 
 		/// <summary>
 		/// Updates this Attachable. Supposed to be done every frame.

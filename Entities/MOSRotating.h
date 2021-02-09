@@ -161,10 +161,11 @@ ClassInfoGetters
     float GetDiameter() const override { return GetRadius() * 2.0F; }
 
     /// <summary>
-    /// Checks if this Attachable should affect radius and, handles it if it should.
+    /// Checks if the given Attachable should affect radius, and handles it if it should.
     /// </summary>
     /// <param name="attachable">The Attachable to check.</param>
-    void HandlePotentialRadiusAffectingAttachable(const Attachable *attachable);
+    /// <returns>Whether the radius affecting Attachable changed as a result of this call.</returns>
+    virtual bool HandlePotentialRadiusAffectingAttachable(const Attachable *attachable);
 
     /// <summary>
     /// Gets the mass value of this MOSRotating, not including any Attachables or wounds.

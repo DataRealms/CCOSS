@@ -19,6 +19,7 @@
 #include "MOSParticle.h"
 #include "AEmitter.h"
 #include "Attachable.h"
+#include "HDFirearm.h"
 
 #include "RTEError.h"
 
@@ -1598,6 +1599,11 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
         m_RadiusAffectingAttachable = nullptr;
         m_FarthestAttachableDistanceAndRadius = 0;
         std::for_each(m_Attachables.begin(), m_Attachables.end(), [this](const Attachable *attachableToCheck) { HandlePotentialRadiusAffectingAttachable(attachableToCheck); });
+
+        Attachable *thisAsAttachable = dynamic_cast<Attachable *>(this);
+        if (thisAsAttachable && m_Attachables.empty() && thisAsAttachable->IsAttached()) {
+            thisAsAttachable->m_Parent->HandlePotentialRadiusAffectingAttachable(thisAsAttachable);
+        }
     }
 
     return true;
@@ -1885,16 +1891,25 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 #endif
 }
 
-void MOSRotating::HandlePotentialRadiusAffectingAttachable(const Attachable *attachable) {
+bool MOSRotating::HandlePotentialRadiusAffectingAttachable(const Attachable *attachable) {
+    const HDFirearm *thisAsFirearm = dynamic_cast<HDFirearm *>(this);
+    const AEmitter *thisAsEmitter = dynamic_cast<AEmitter *>(this);
+    if ((thisAsFirearm && attachable == thisAsFirearm->GetFlash()) || (thisAsEmitter && attachable == thisAsEmitter->GetFlash())) {
+        return false;
+    }
     float distanceAndRadiusFromParent = g_SceneMan.ShortestDistance(m_Pos, attachable->m_Pos, g_SceneMan.SceneWrapsX()).GetMagnitude() + attachable->GetRadius();
-    if (attachable == m_RadiusAffectingAttachable && distanceAndRadiusFromParent < m_FarthestAttachableDistanceAndRadius && m_Attachables.size() > 1) {
-        m_FarthestAttachableDistanceAndRadius = 0;
-        m_RadiusAffectingAttachable = nullptr;
-        std::for_each(m_Attachables.begin(), m_Attachables.end(), [this](const Attachable *attachableToCheck) { HandlePotentialRadiusAffectingAttachable(attachableToCheck); });
+    if (attachable == m_RadiusAffectingAttachable && distanceAndRadiusFromParent < m_FarthestAttachableDistanceAndRadius) {
+        m_FarthestAttachableDistanceAndRadius = distanceAndRadiusFromParent;
+        if (m_Attachables.size() > 1) {
+            std::for_each(m_Attachables.begin(), m_Attachables.end(), [this](const Attachable *attachableToCheck) { HandlePotentialRadiusAffectingAttachable(attachableToCheck); });
+        }
+        return true;
     } else if (distanceAndRadiusFromParent > m_FarthestAttachableDistanceAndRadius) {
         m_FarthestAttachableDistanceAndRadius = distanceAndRadiusFromParent;
         m_RadiusAffectingAttachable = attachable;
+        return true;
     }
+    return false;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

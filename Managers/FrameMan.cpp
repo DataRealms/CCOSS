@@ -37,8 +37,6 @@ namespace RTE {
 	void FrameMan::Clear() {
 		m_GfxDriver = GFX_AUTODETECT_WINDOWED;
 		m_ForceVirtualFullScreenGfxDriver = false;
-		m_ForceOverlayedWindowGfxDriver = false;
-		m_ForceNonOverlayedWindowGfxDriver = false;
 		m_GfxDriverMessage.clear();
 		m_DisableMultiScreenResolutionValidation = false;
 #ifdef _WIN32
@@ -119,13 +117,7 @@ namespace RTE {
 
 	void FrameMan::SetGraphicsDriver() {
 #ifdef _WIN32
-		if (m_ForceOverlayedWindowGfxDriver) {
-			m_GfxDriver = GFX_DIRECTX_OVL;
-			m_GfxDriverMessage = "SYSTEM: Using overlay DirectX windowed driver!";
-		} else if (m_ForceNonOverlayedWindowGfxDriver) {
-			m_GfxDriver = GFX_DIRECTX_WIN;
-			m_GfxDriverMessage = "SYSTEM: Using non-overlay DirectX windowed driver!";
-		} else if (m_ForceVirtualFullScreenGfxDriver) {
+		if (m_ForceVirtualFullScreenGfxDriver) {
 			m_GfxDriver = GFX_DIRECTX_WIN_BORDERLESS;
 			m_GfxDriverMessage = "SYSTEM: Using DirectX fullscreen-windowed driver!";
 		} else {

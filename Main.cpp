@@ -1770,7 +1770,7 @@ int main(int argc, char **argv) {
 	g_LoadingGUI.InitLoadingScreen();
 	InitMainMenu();
 
-	g_FrameMan.PrintSelectedGfxDriverMessage();
+	g_FrameMan.PrintForcedGfxDriverMessage();
 
 	if (g_ConsoleMan.LoadWarningsExist()) {
 		g_ConsoleMan.PrintString("WARNING: References to files that could not be located or failed to load detected during module loading!\nSee \"LogLoadingWarning.txt\" for a list of bad references.");

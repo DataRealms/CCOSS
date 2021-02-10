@@ -54,7 +54,7 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Updates the state of this PerformanceMan. Supposed to be done sim update.
+		/// Updates the state of this PerformanceMan. Supposed to be done every sim update.
 		/// </summary>
 		void Update();
 

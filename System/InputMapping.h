@@ -46,8 +46,8 @@ namespace RTE {
 		/// <summary>
 		/// Sets the description of the input scheme preset that this element is part of, if any preset has been set for this element's scheme.
 		/// </summary>
-		/// <param name="presetDesc">The description associated with this element by the scheme preset, if any has been set. This string should be empty otherwise.</param>
-		void SetPresetDescription(const std::string &presetDesc) { m_PresetDescription = presetDesc; }
+		/// <param name="presetDescription">The description associated with this element by the scheme preset, if any has been set. This string should be empty otherwise.</param>
+		void SetPresetDescription(const std::string &presetDescription) { m_PresetDescription = presetDescription; }
 #pragma endregion
 
 #pragma region Keyboard Getters and Setters

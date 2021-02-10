@@ -138,7 +138,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::PrintSelectedGfxDriverMessage() const {
+	void FrameMan::PrintForcedGfxDriverMessage() const {
 		if (!m_GfxDriverMessage.empty()) { g_ConsoleMan.PrintString(m_GfxDriverMessage); }
 	}
 
@@ -401,7 +401,7 @@ namespace RTE {
 		g_PerformanceMan.Update();
 
 		// Remove all scheduled primitives, those will be re-added by updates from other entities.
-		// This needs to happen here, otherwise if there are multiple sim updates in during a single frame duplicates will be added to the primitive queue.
+		// This needs to happen here, otherwise if there are multiple sim updates during a single frame duplicates will be added to the primitive queue.
 		g_PrimitiveMan.ClearPrimitivesQueue();
 	}
 
@@ -1222,9 +1222,7 @@ namespace RTE {
 					BITMAP *targetBitmap = g_PostProcessMan.GetTempEffectBitmap(effectBitmap);
 					clear_to_color(targetBitmap, 0);
 
-					Matrix newAngle;
-					newAngle.SetRadAngle(postEffect.m_Angle);
-
+					Matrix newAngle(postEffect.m_Angle);
 					rotate_sprite(targetBitmap, effectBitmap, 0, 0, ftofix(newAngle.GetAllegroAngle()));
 					draw_trans_sprite(m_WorldDumpBuffer, targetBitmap, effectPosX, effectPosY);
 				}

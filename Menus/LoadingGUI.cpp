@@ -71,7 +71,6 @@ namespace RTE {
 
 		g_PresetMan.LoadAllDataModules();
 
-		// Once we're done loading all the modules free any resources used by this because we won't be needing it anymore
 		Destroy();
 	}
 

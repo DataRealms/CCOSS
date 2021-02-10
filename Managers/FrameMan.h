@@ -58,7 +58,7 @@ namespace RTE {
 		/// <summary>
 		/// Prints the selected graphics driver message to the console. Has to be done after all managers initialization because ConsoleMan does not exist during FrameMan initialization.
 		/// </summary>
-		void PrintSelectedGfxDriverMessage() const;
+		void PrintForcedGfxDriverMessage() const;
 
 		/// <summary>
 		/// Updates the state of this FrameMan. Supposed to be done every frame.
@@ -632,7 +632,7 @@ namespace RTE {
 		/// <summary>
 		/// Enumeration with different settings for the SaveBitmap() method.
 		/// </summary>
-		enum SaveBitmapMode { SingleBitmap = 0, ScreenDump, WorldDump, ScenePreviewDump };
+		enum SaveBitmapMode { SingleBitmap, ScreenDump, WorldDump, ScenePreviewDump };
 
 		/// <summary>
 		/// BITMAPs to temporarily store the backbuffers when recreating them. These are needed to have a pointer to their original allocated memory after overwriting them so it can be deleted.

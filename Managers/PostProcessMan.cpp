@@ -370,9 +370,7 @@ namespace RTE {
 					BITMAP *targetBitmap = GetTempEffectBitmap(effectBitmap);
 					clear_to_color(targetBitmap, 0);
 
-					Matrix newAngle;
-					newAngle.SetRadAngle(postEffect.m_Angle);
-
+					Matrix newAngle(postEffect.m_Angle);
 					rotate_sprite(targetBitmap, effectBitmap, 0, 0, ftofix(newAngle.GetAllegroAngle()));
 					draw_trans_sprite(g_FrameMan.GetBackBuffer32(), targetBitmap, effectPosX, effectPosY);
 				}

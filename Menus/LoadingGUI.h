@@ -31,7 +31,7 @@ namespace RTE {
 		void InitLoadingScreen();
 
 		/// <summary>
-		/// Creates the GUI listbox that the progress report will be drawn to, if not disabled through the settings file to speed up loading times.
+		/// Creates the GUI ListBox that the progress report will be drawn to, if not disabled through the settings file to speed up loading times.
 		/// As it turned out, a massive amount of time is spent updating the GUI control and flipping the frame buffers.
 		/// </summary>
 		void CreateProgressReportListbox();

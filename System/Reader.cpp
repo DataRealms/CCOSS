@@ -153,7 +153,7 @@ namespace RTE {
 		if (!DiscardEmptySpace() || m_EndOfStreams) {
 			return false;
 		}
-		// If there are fewer tabs on the last line eaten this time, that means there are no more properties to read on this object
+		// If there are fewer tabs on the last line eaten this time, that means there are no more properties to read on this object.
 		if (m_ObjectEndings < -m_IndentDifference) {
 			m_ObjectEndings++;
 			return false;
@@ -266,7 +266,7 @@ namespace RTE {
 		// Report that we're including a file
 		if (m_ReportProgress) { m_ReportProgress(m_ReportTabs + m_FileName + " on line " + std::to_string(m_CurrentLine) + " includes:", false); }
 
-		// Get the file path from the current stream before of pushing it into the StreamStack, otherwise we can't open a new stream after releasing it because we can't read
+		// Get the file path from the current stream before pushing it into the StreamStack, otherwise we can't open a new stream after releasing it because we can't read.
 		std::string includeFilePath = std::filesystem::path(ReadPropValue()).generic_string();
 
 		// Push the current stream onto the StreamStack for future retrieval when the new include file has run out of data.
@@ -294,7 +294,6 @@ namespace RTE {
 		// This is set to 0, because locally in the included file, all properties start at that count
 		m_PreviousIndent = 0;
 
-		// Extract just the filename
 		m_FileName = m_FilePath.substr(m_FilePath.find_first_of("/\\") + 1);
 
 		// Report that we're starting a new file
@@ -312,7 +311,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool Reader::EndIncludeFile() {
-		// Do final report on the file we're closing
 		if (m_ReportProgress) { m_ReportProgress(m_ReportTabs + m_FileName + " - done! " + static_cast<char>(-42), false); }
 
 		if (m_StreamStack.empty()) {
@@ -321,16 +319,15 @@ namespace RTE {
 		}
 
 		// Replace the current included stream with the parent one
-		m_Stream.reset(m_StreamStack.top().Stream); // Destructs the current m_Stream and takes back ownership and management of the raw StreamInfo std::ifstream pointer.
+		m_Stream.reset(m_StreamStack.top().Stream);
 		m_FilePath = m_StreamStack.top().FilePath;
 		m_CurrentLine = m_StreamStack.top().CurrentLine;
 
-		// Observe it's being added, not just replaced. This is to keep proper track when exiting out of a file
+		// Observe it's being added, not just replaced. This is to keep proper track when exiting out of a file.
 		m_PreviousIndent += m_StreamStack.top().PreviousIndent;
 
 		m_StreamStack.pop();
 
-		// Extract just the filename
 		m_FileName = m_FilePath.substr(m_FilePath.find_first_of("/\\") + 1);
 
 		// Report that we're going back a file

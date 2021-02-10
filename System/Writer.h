@@ -98,7 +98,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="propName">The name of the property to be written.</param>
 		/// <param name="propValue">The value of the property.</param>
-		template <typename Type> void NewPropertyWithValue(const std::string &propName, const Type &propValue) { NewLine(); *m_Stream << propName + " = "; *this << propValue; }
+		template <typename Type> void NewPropertyWithValue(const std::string &propName, const Type &propValue) { NewProperty(propName); *this << propValue; }
 
 		/// <summary>
 		/// Marks that there is a null reference to an object here.

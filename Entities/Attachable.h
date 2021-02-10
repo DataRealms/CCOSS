@@ -106,7 +106,7 @@ namespace RTE {
 		/// Sets the stored offset between this Attachable's parent's Pos and the joint position. This should be maintained by the parent.
 		/// </summary>
 		/// <param name="newParentOffset">A const reference to the new parent offset.</param>
-		void SetParentOffset(const Vector &newParentOffset);
+		void SetParentOffset(const Vector &newParentOffset) { m_ParentOffset = newParentOffset; }
 
 		/// <summary>
 		/// Gets whether this Attachable is to be drawn after (in front of) or before (behind) its parent.
@@ -222,7 +222,7 @@ namespace RTE {
 		/// Sets the offset of the joint (the point around which this Attachable and its parent hinge) from this Attachable's center of mass/origin.
 		/// </summary>
 		/// <param name="newJointOffset">A Vector describing the offset of the joint relative to the this Attachable's origin/center of mass position.</param>
-		void SetJointOffset(const Vector &newJointOffset);
+		void SetJointOffset(const Vector &newJointOffset) { m_JointOffset = newJointOffset; }
 #pragma endregion
 
 #pragma region Force Transferral

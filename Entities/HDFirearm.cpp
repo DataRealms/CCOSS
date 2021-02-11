@@ -55,6 +55,7 @@ void HDFirearm::Clear()
     m_SharpShakeRange = 0;
     m_NoSupportFactor = 0;
     m_ParticleSpreadRange = 0;
+	m_ShellEjectAngle = 150;
     m_ShellSpreadRange = 0;
     m_ShellAngVelRange = 0;
     m_AIFireVel = -1;
@@ -128,6 +129,7 @@ int HDFirearm::Create(const HDFirearm &reference) {
     m_SharpShakeRange = reference.m_SharpShakeRange;
     m_NoSupportFactor = reference.m_NoSupportFactor;
     m_ParticleSpreadRange = reference.m_ParticleSpreadRange;
+	m_ShellEjectAngle = reference.m_ShellEjectAngle;
     m_ShellSpreadRange = reference.m_ShellSpreadRange;
     m_ShellAngVelRange = reference.m_ShellAngVelRange;
     m_MuzzleOff = reference.m_MuzzleOff;
@@ -213,6 +215,8 @@ int HDFirearm::ReadProperty(std::string propName, Reader &reader) {
     } else if (propName == "ParticleSpreadRange") {
         reader >> m_ParticleSpreadRange;
         m_ParticleSpreadRange /= 2;
+	} else if (propName == "ShellEjectAngle") {
+		reader >> m_ShellEjectAngle;
     } else if (propName == "ShellSpreadRange") {
         reader >> m_ShellSpreadRange;
         m_ShellSpreadRange /= 2;
@@ -285,6 +289,8 @@ int HDFirearm::Save(Writer &writer) const
     writer << m_NoSupportFactor;
     writer.NewProperty("ParticleSpreadRange");
     writer << m_ParticleSpreadRange * 2;
+	writer.NewProperty("ShellEjectAngle");
+	writer << m_ShellEjectAngle;
     writer.NewProperty("ShellSpreadRange");
     writer << m_ShellSpreadRange * 2;
     writer.NewProperty("ShellAngVelRange");
@@ -850,16 +856,18 @@ void HDFirearm::Update()
 
                     // ##@#@@$ TEMP
                     shellVel.SetXY(pRound->GetShellVel(), 0);
-                    shellVel.DegRotate(degAimAngle + 150 * (m_HFlipped ? -1 : 1) + shellSpread);
+                    shellVel.DegRotate(degAimAngle + m_ShellEjectAngle * (m_HFlipped ? -1 : 1) + shellSpread);
                     pShell->SetVel(m_Vel + shellVel);
                     pShell->SetRotAngle(m_Rotation.GetRadAngle());
                     pShell->SetAngularVel(pShell->GetAngularVel() + (m_ShellAngVelRange * RandomNormalNum()));
 					pShell->SetHFlipped(m_HFlipped);
-//                  // Set the ejected shell to not hit this HeldDevice's parent, if applicable
-//                  if (m_FireIgnoresThis)
-//                      pParticle->SetWhichMOToNotHit(pRootParent, 1.0f);
+					// Set the ejected shell to not hit this HeldDevice's parent, if applicable
+					if (m_FireIgnoresThis)
+						pShell->SetWhichMOToNotHit(this, 1.0f);
                     // Set the team so alarm events that happen if these gib won't freak out the guy firing
                     pShell->SetTeam(m_Team);
+					// Set this to ignore team hits in case it's lethal
+					pShell->SetIgnoresTeamHits(true);
                     g_MovableMan.AddParticle(pShell);
                     pShell = 0;
                 }

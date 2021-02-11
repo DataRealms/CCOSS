@@ -94,6 +94,8 @@ namespace RTE {
 			reader >> g_FrameMan.m_VSplitOverride;
 		} else if (propName == "ForceVirtualFullScreenGfxDriver") {
 			reader >> g_FrameMan.m_ForceVirtualFullScreenGfxDriver;
+		} else if (propName == "ForceDedicatedFullScreenGfxDriver") {
+			reader >> g_FrameMan.m_ForceDedicatedFullScreenGfxDriver;
 		} else if (propName == "SoundVolume") {
 			g_AudioMan.SetSoundsVolume(std::stod(reader.ReadPropValue()) / 100.0);
 		} else if (propName == "MusicVolume") {
@@ -243,6 +245,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("HSplitScreen", g_FrameMan.m_HSplitOverride);
 		writer.NewPropertyWithValue("VSplitScreen", g_FrameMan.m_VSplitOverride);
 		writer.NewPropertyWithValue("ForceVirtualFullScreenGfxDriver", g_FrameMan.m_ForceVirtualFullScreenGfxDriver);
+		writer.NewPropertyWithValue("ForceDedicatedFullScreenGfxDriver", g_FrameMan.m_ForceDedicatedFullScreenGfxDriver);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

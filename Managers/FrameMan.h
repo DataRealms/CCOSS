@@ -546,6 +546,7 @@ namespace RTE {
 
 		int m_GfxDriver; //!< The graphics driver that will be used for rendering.
 		bool m_ForceVirtualFullScreenGfxDriver; //!< Whether to use the borderless window driver. Overrides any other windowed drivers. The driver that will be used is GFX_DIRECTX_WIN_BORDERLESS.
+		bool m_ForceDedicatedFullScreenGfxDriver; //!< Whether to use the dedicated fullscreen driver. Overrides any other driver. The driver that will be used is GFX_DIRECTX_ACCEL.
 
 		std::string m_GfxDriverMessage; //!< String containing the currently selected graphics driver message. Used for printing it to the console after all managers finished initializing.
 

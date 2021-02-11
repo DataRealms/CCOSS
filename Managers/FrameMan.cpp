@@ -120,6 +120,9 @@ namespace RTE {
 		if (m_ForceVirtualFullScreenGfxDriver) {
 			m_GfxDriver = GFX_DIRECTX_WIN_BORDERLESS;
 			m_GfxDriverMessage = "SYSTEM: Using DirectX fullscreen-windowed driver!";
+		} else if (m_ForceDedicatedFullScreenGfxDriver) {
+			m_GfxDriver = GFX_DIRECTX_ACCEL;
+			m_GfxDriverMessage = "SYSTEM: Using DirectX dedicated fullscreen driver!";
 		} else {
 			m_GfxDriver = GFX_AUTODETECT_WINDOWED;
 		}
@@ -149,11 +152,11 @@ namespace RTE {
 			allegro_message("Resolution too high to fit display, overriding to fit!");
 			resX = m_NewResX = m_ScreenResX / resMultiplier;
 			resY = m_NewResY = m_ScreenResY / resMultiplier;
-		} else if (resX * resMultiplier == 1366 && resY * resMultiplier == 768) {
-			allegro_message("Unfortunately, 1366x768 resolution is not supported by Cortex Command's graphics API. 1360x768 will be used instead!");
+		} else if (!m_ForceDedicatedFullScreenGfxDriver && resX * resMultiplier == 1366 && resY * resMultiplier == 768) {
+			allegro_message("Unfortunately, 1366x768 resolution is not supported in windowed or borderless mode. 1360x768 will be used instead!\nTo enable the use of this resolution, please force the dedicated fullscreen driver through \"Settings.ini\".");
 			resX = m_NewResX = 1360 / resMultiplier;
 			resY = m_NewResY = 768 / resMultiplier;
-		} else if ((resX * resMultiplier) % 4 > 0) {
+		} else if (!m_ForceDedicatedFullScreenGfxDriver && (resX * resMultiplier) % 4 > 0) {
 			allegro_message("Resolution width that is not divisible by 4 is not supported!\nOverriding to closest valid width!");
 			resX = m_NewResX = std::floor(resX / 4) * 4;
 		}
@@ -401,8 +404,8 @@ namespace RTE {
 
 	bool FrameMan::IsValidResolution(int width, int height) const {
 		if ((width >= 640 && height >= 480) && (width <= m_ScreenResX || height <= m_ScreenResY)) {
-			// Disallow 1366x768 because it's not supported by Allegro.
-			if (width == 1366 && height == 768) {
+			// Disallow 1366x768 outside of dedicated fullscreen because it's not supported.
+			if (!m_ForceDedicatedFullScreenGfxDriver && width == 1366 && height == 768) {
 				return false;
 			}
 			return true;
@@ -418,7 +421,7 @@ namespace RTE {
 			return -1;
 		}
 		if (m_ResX > m_ScreenResX / multiplier || m_ResY > m_ScreenResY / multiplier) {
-			allegro_message("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!");
+			allegro_message("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nTHIS IS NOT USED TO TOGGLE FULLSCREEN!");
 			return -1;
 		}
 #ifdef __unix__

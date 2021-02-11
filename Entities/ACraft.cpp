@@ -753,7 +753,7 @@ void ACraft::DropAllInventory()
             m_HasDelivered = true;
 
             // Kill craft if it is lying down.
-            if (fabs(m_Rotation.GetRadAngle()) > c_QuarterPI && m_Status != DYING)
+            if (fabs(m_Rotation.GetRadAngle()) > c_HalfPI && m_Status != DYING)
             {
                 m_Status = DYING;
                 m_DeathTmr.Reset();

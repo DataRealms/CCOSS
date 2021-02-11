@@ -36,7 +36,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Gib::ReadProperty(const std::string &propName, Reader &reader) {
+	int Gib::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "GibParticle") {
 			m_GibParticle = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
 			RTEAssert(m_GibParticle, "Stream suggests allocating an unallocable type in Gib::Create!");

@@ -58,7 +58,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SoundContainer::ReadProperty(const std::string &propName, Reader &reader) {
+	int SoundContainer::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "AddSound") {
 			m_TopLevelSoundSet.AddSoundData(SoundSet::ReadAndGetSoundData(reader));
 		} else if (propName == "AddSoundSet") {

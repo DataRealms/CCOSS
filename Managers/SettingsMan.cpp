@@ -75,7 +75,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SettingsMan::ReadProperty(const std::string &propName, Reader &reader) {
+	int SettingsMan::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "PaletteFile") {
 			reader >> g_FrameMan.m_PaletteFile;
 		} else if (propName == "ResolutionX") {
@@ -97,9 +97,9 @@ namespace RTE {
 		} else if (propName == "ForceDedicatedFullScreenGfxDriver") {
 			reader >> g_FrameMan.m_ForceDedicatedFullScreenGfxDriver;
 		} else if (propName == "SoundVolume") {
-			g_AudioMan.SetSoundsVolume(std::stod(reader.ReadPropValue()) / 100.0);
+			g_AudioMan.SetSoundsVolume(std::stof(reader.ReadPropValue()) / 100.0F);
 		} else if (propName == "MusicVolume") {
-			g_AudioMan.SetMusicVolume(std::stod(reader.ReadPropValue()) / 100.0);
+			g_AudioMan.SetMusicVolume(std::stof(reader.ReadPropValue()) / 100.0F);
 		} else if (propName == "SoundPanningEffectStrength") {
 			reader >> g_AudioMan.m_SoundPanningEffectStrength;
 

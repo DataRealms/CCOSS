@@ -298,7 +298,7 @@ int MOSRotating::Create(const MOSRotating &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int MOSRotating::ReadProperty(const std::string &propName, Reader &reader)
+int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "AtomGroup")
     {

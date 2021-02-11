@@ -89,7 +89,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int DataModule::ReadProperty(const std::string &propName, Reader &reader) {
+	int DataModule::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "ModuleName") {
 			reader >> m_FriendlyName;
 		} else if (propName == "Author") {

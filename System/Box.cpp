@@ -46,7 +46,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Box::ReadProperty(const std::string &propName, Reader &reader) {
+	int Box::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Corner") {
 			reader >> m_Corner;
 		} else if (propName == "Width") {

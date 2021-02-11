@@ -265,7 +265,7 @@ int MetaMan::Load(const MetaSave *pSave)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the Reader's position is untouched.
 
-int MetaMan::ReadProperty(const std::string &propName, Reader &reader)
+int MetaMan::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "GameState")
         reader >> m_GameState;

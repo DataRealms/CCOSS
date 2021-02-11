@@ -8,7 +8,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Vector::ReadProperty(const std::string &propName, Reader &reader) {
+	int Vector::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "X") {
 			reader >> m_X;
 		} else if (propName == "Y") {

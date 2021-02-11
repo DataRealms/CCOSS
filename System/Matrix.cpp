@@ -59,7 +59,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Matrix::ReadProperty(const std::string &propName, Reader &reader) {
+	int Matrix::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "AngleDegrees") {
 			SetDegAngle(std::stof(reader.ReadPropValue()));
 		} else if (propName == "AngleRadians") {

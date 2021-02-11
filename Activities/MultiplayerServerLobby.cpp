@@ -154,7 +154,7 @@ namespace RTE {
 	//                  is called. If the property isn't recognized by any of the base classes,
 	//                  false is returned, and the reader's position is untouched.
 
-	int MultiplayerServerLobby::ReadProperty(const std::string &propName, Reader &reader)
+	int MultiplayerServerLobby::ReadProperty(const std::string_view &propName, Reader &reader)
 	{
 		return Activity::ReadProperty(propName, reader);
 	}

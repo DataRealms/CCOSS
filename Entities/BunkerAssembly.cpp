@@ -179,7 +179,7 @@ int BunkerAssembly::Create(const BunkerAssembly &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int BunkerAssembly::ReadProperty(const std::string &propName, Reader &reader)
+int BunkerAssembly::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     // Ignore TerrainObject's specific properties, but don't let parent class process them
 	if (propName == "FGColorFile")

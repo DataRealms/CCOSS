@@ -19,7 +19,7 @@ namespace RTE {
 		/// Convenience macro to cut down on duplicate ReadProperty and Save methods in classes that extend Serializable.
 		/// </summary>
 		#define SerializableOverrideMethods \
-			int ReadProperty(const std::string &propName, Reader &reader) override; \
+			int ReadProperty(const std::string_view &propName, Reader &reader) override; \
 			int Save(Writer &writer) const override;
 
 		/// <summary>
@@ -92,7 +92,7 @@ namespace RTE {
 		/// An error return value signaling whether the property was successfully read or not.
 		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
 		/// </returns>
-		virtual int ReadProperty(const std::string &propName, Reader &reader) {
+		virtual int ReadProperty(const std::string_view &propName, Reader &reader) {
 			// Discard the value of the property which failed to read
 			reader.ReadPropValue();
 			reader.ReportError("Could not match property");

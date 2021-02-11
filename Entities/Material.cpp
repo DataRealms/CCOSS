@@ -55,7 +55,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Material::ReadProperty(const std::string &propName, Reader &reader) {
+	int Material::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Index") {
 			// TODO: Check for index collisions here
 			reader >> m_Index;	

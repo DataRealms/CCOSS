@@ -323,7 +323,7 @@ int Actor::Create(const Actor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int Actor::ReadProperty(const std::string &propName, Reader &reader)
+int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "BodyHitSound")
         reader >> m_BodyHitSound;

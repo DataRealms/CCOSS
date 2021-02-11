@@ -59,7 +59,7 @@ int GlobalScript::Create(const GlobalScript &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the Reader's position is untouched.
 
-int GlobalScript::ReadProperty(const std::string &propName, Reader &reader)
+int GlobalScript::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 	if (propName == "ScriptPath") {
 		m_ScriptPath = CorrectBackslashesInPath(reader.ReadPropValue());

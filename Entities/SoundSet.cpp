@@ -42,7 +42,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SoundSet::ReadProperty(const std::string &propName, Reader &reader) {
+	int SoundSet::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "SoundSelectionCycleMode") {
 			SetSoundSelectionCycleMode(ReadSoundSelectionCycleMode(reader));
 		} else if (propName == "AddSound") {

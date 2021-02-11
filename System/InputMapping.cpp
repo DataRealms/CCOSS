@@ -33,7 +33,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int InputMapping::ReadProperty(const std::string &propName, Reader &reader) {
+	int InputMapping::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "KeyMap") {
 			int key;
 			reader >> key;

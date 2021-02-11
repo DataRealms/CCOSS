@@ -89,7 +89,7 @@ int SLTerrain::TerrainFrosting::Create(const TerrainFrosting &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int SLTerrain::TerrainFrosting::ReadProperty(const std::string &propName, Reader &reader)
+int SLTerrain::TerrainFrosting::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "TargetMaterial")
         reader >> m_TargetMaterial;
@@ -575,7 +575,7 @@ int SLTerrain::ClearData()
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int SLTerrain::ReadProperty(const std::string &propName, Reader &reader)
+int SLTerrain::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "BackgroundTexture")
         reader >> m_BGTextureFile;

@@ -1265,7 +1265,7 @@ void PieMenuGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
 
 				// Draw weight indicator
 				float itemMass = pItem->GetMass();
-				str[0] = itemMass > 25 ? -29 : (itemMass > 15 ? -30 : -31);
+				str[0] = itemMass > 30 ? -28 : (itemMass > 20 ? -29 : (itemMass > 10 ? -30 : -31));
 				str[1] = 0;
 				pSymbolFont->DrawAligned(&allegroBitmap, x, y - height - 6, str, GUIFont::Centre);
 			}
@@ -1314,7 +1314,7 @@ void PieMenuGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
 
 			// Draw weight indicator
 			float itemMass = pInventory->at(i)->GetMass();
-			str[0] = itemMass > 25 ? -29 : (itemMass > 15 ? -30 : -31);
+			str[0] = itemMass > 30 ? -28 : (itemMass > 20 ? -29 : (itemMass > 10 ? -30 : -31));
 			str[1] = 0;
 			pSymbolFont->DrawAligned(&allegroBitmap, x + pIcon->w / 2, y - height - 6, str, GUIFont::Centre);
 		}

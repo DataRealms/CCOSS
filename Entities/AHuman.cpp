@@ -4511,11 +4511,11 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 				if (acceleration > 0.47F) {
 					str[0] = -31;
 				} else {
-					str[0] = acceleration > 0.35F ? -30 : -29;
+					str[0] = acceleration > 0.41F ? -30 : (acceleration > 0.35F ? -29 : -28);
 				}
                 // Do the blinky blink
-                if ((str[0] == -29 || str[0] == -30) && m_IconBlinkTimer.AlternateSim(250))
-                    str[0] = -28;
+                if ((str[0] == -28 || str[0] == -29) && m_IconBlinkTimer.AlternateSim(250))
+                    str[0] = -27;
             }
             // null-terminate
             str[1] = 0;

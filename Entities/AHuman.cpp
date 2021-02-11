@@ -3430,7 +3430,7 @@ void AHuman::Update()
 
 // TODO: make the delay data driven by both the actor and the device!
     // 
-    if (m_Controller.IsState(AIM_SHARP) && (m_MoveState == STAND || m_MoveState == CROUCH || m_MoveState == NOMOVE) && m_Vel.GetMagnitude() < 5.0)
+    if (m_Controller.IsState(AIM_SHARP) && (m_MoveState == STAND || m_MoveState == CROUCH || m_MoveState == NOMOVE || m_MoveState == WALK) && m_Vel.GetMagnitude() < 5.0)
     {
 /*
         float halfDelay = m_SharpAimDelay / 2;
@@ -3449,12 +3449,14 @@ void AHuman::Update()
         // If aim sharp is being done digitally, then translate to full analog aim mag
         if (aimMag < 0.1)
             aimMag = 1.0;
+		if (m_MoveState == WALK)
+			aimMag *= 0.3;
 
         if (m_SharpAimTimer.IsPastSimMS(m_SharpAimDelay))
         {
             // Only go slower outward
-            if (m_SharpAimProgress < aimMag)
-                m_SharpAimProgress += (aimMag - m_SharpAimProgress) * 0.035;
+			if (m_SharpAimProgress < aimMag)
+				m_SharpAimProgress += (aimMag - m_SharpAimProgress) * 0.035;
             else
                 m_SharpAimProgress = aimMag;
         }
@@ -4107,6 +4109,8 @@ void AHuman::Update()
     if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
     {
         float maxLength = m_pFGArm->GetHeldDevice()->GetSharpLength();
+		if (m_MoveState == WALK)
+			maxLength *= 0.7;
 
         // Use a non-terrain check ray to cap the magnitude, so we can't see into objects etc
         if (m_SharpAimProgress > 0)

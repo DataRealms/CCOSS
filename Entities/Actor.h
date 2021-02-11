@@ -803,6 +803,26 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// Method:  SetCanRevealUnseen
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets whether this actor can reveal unseen areas by looking.
+// Arguments:       Whether this actor can reveal unseen areas.
+// Return value:    None.
+
+void SetCanRevealUnseen(bool newCanRevealUnseen) { m_CanRevealUnseen = newCanRevealUnseen; }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:  GetCanRevealUnseen
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets whether this actor is able to reveal unseen areas by looking.
+// Arguments:       None.
+// Return value:    Whether this actor can reveal unseen areas.
+
+bool GetCanRevealUnseen() const { return m_CanRevealUnseen; }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // Method:  AlarmPoint
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes this alarmed about a certian point on in the scene, overriding
@@ -1339,6 +1359,8 @@ protected:
     float m_SightDistance;
     // How perceptive this is of alarming events going on around him, 0.0 - 1.0
     float m_Perceptiveness;
+	// Whether or not this actor can reveal unseen areas by looking
+	bool m_CanRevealUnseen;
     // About How tall is the Actor, in pixels?
     float m_CharHeight;
     // Speed at which the m_AimAngle will change, in radians/s.

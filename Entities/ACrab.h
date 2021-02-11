@@ -236,6 +236,7 @@ public:
 
 	float GetJetTimeTotal() const { return m_JetTimeTotal; }
 
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetJetTimeTotal
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -245,6 +246,7 @@ public:
 
 	void SetJetTimeTotal(float newValue) { m_JetTimeTotal = newValue; }
 
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetJetTimeLeft
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -253,6 +255,26 @@ public:
 // Return value:    The amount of time this' jetpack can still fire before running out.
 
 	float GetJetTimeLeft() const { return m_JetTimeLeft; }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetJetAngleRange
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
+// Arguments:       None.
+// Return value:    The ratio at which this jetpack follows the aim angle of the user.
+
+	float GetJetAngleRange() const { return m_JetAngleRange; }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          SetJetAngleRange
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
+// Arguments:       The ratio at which this jetpack follows the aim angle of the user.
+// Return value:    None.
+
+	void SetJetAngleRange(float newValue) { m_JetAngleRange = newValue; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -552,6 +574,8 @@ protected:
 	float m_JetTimeTotal;
 	// How much time left the jetpack can go, in ms
 	float m_JetTimeLeft;
+	// Ratio at which the jetpack angle follows aim angle
+	float m_JetAngleRange;
 	// Blink timer
 	Timer m_IconBlinkTimer;
 	// Current movement state.

@@ -379,6 +379,26 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetJetAngleRange
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
+// Arguments:       None.
+// Return value:    The ratio at which this jetpack follows the aim angle of the user.
+
+	float GetJetAngleRange() const { return m_JetAngleRange; }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          SetJetAngleRange
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
+// Arguments:       The ratio at which this jetpack follows the aim angle of the user.
+// Return value:    None.
+
+	void SetJetAngleRange(float newValue) { m_JetAngleRange = newValue; }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  CollideAtPoint
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Calculates the collision response when another MO's Atom collides with
@@ -911,6 +931,8 @@ protected:
     static Entity::ClassInfo m_sClass;
     // Articulated head.
     Attachable *m_pHead;
+	// Ratio at which the head's rotation follows the aim angle
+	float m_LookToAimRatio;
     // Foreground arm.
     Arm *m_pFGArm;
     // Background arm.
@@ -934,6 +956,8 @@ protected:
     float m_JetTimeTotal;
     // How much time left the jetpack can go, in ms
     float m_JetTimeLeft;
+	// Ratio at which the jetpack angle follows aim angle
+	float m_JetAngleRange;
     // Blink timer
     Timer m_IconBlinkTimer;
     // Current upper body state.

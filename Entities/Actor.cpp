@@ -100,6 +100,7 @@ void Actor::Clear()
     m_LastAlarmPos.Reset();
     m_SightDistance = 450;
     m_Perceptiveness = 0.5;
+	m_CanRevealUnseen = true;
     m_CharHeight = 0;
     m_HolsterOffset.Reset();
     m_ViewPoint.Reset();
@@ -244,6 +245,7 @@ int Actor::Create(const Actor &reference)
     m_SeenTargetPos = reference.m_SeenTargetPos;
     m_SightDistance = reference.m_SightDistance;
     m_Perceptiveness = reference.m_Perceptiveness;
+	m_CanRevealUnseen = reference.m_CanRevealUnseen;
     m_CharHeight = reference.m_CharHeight;
     m_HolsterOffset = reference.m_HolsterOffset;
 
@@ -375,6 +377,8 @@ int Actor::ReadProperty(std::string propName, Reader &reader)
         reader >> m_SightDistance;
     else if (propName == "Perceptiveness")
         reader >> m_Perceptiveness;
+	else if (propName == "CanRevealUnseen")
+		reader >> m_CanRevealUnseen;
     else if (propName == "CharHeight")
         reader >> m_CharHeight;
     else if (propName == "HolsterOffset")
@@ -454,6 +458,8 @@ int Actor::Save(Writer &writer) const
     writer << m_SightDistance;
     writer.NewProperty("Perceptiveness");
     writer << m_Perceptiveness;
+	writer.NewProperty("CanRevealUnseen");
+	writer << m_CanRevealUnseen;
     writer.NewProperty("CharHeight");
     writer << m_CharHeight;
     writer.NewProperty("HolsterOffset");
@@ -670,7 +676,7 @@ Controller::InputMode Actor::SwapControllerModes(Controller::InputMode newMode, 
 
 bool Actor::Look(float FOVSpread, float range)
 {
-    if (!g_SceneMan.AnythingUnseen(m_Team))
+    if (!g_SceneMan.AnythingUnseen(m_Team) || m_CanRevealUnseen == false)
         return false;
 
     // Use the 'eyes' on the 'head', if applicable

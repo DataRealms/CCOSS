@@ -57,6 +57,7 @@ void ACrab::Clear()
     m_pJetpack = 0;
     m_JetTimeTotal = 0.0;
     m_JetTimeLeft = 0.0;
+	m_JetAngleRange = 0.25;
     m_MoveState = STAND;
     for (int side = 0; side < SIDECOUNT; ++side)
     {
@@ -195,6 +196,7 @@ int ACrab::Create(const ACrab &reference) {
 
     m_JetTimeTotal = reference.m_JetTimeTotal;
     m_JetTimeLeft = reference.m_JetTimeLeft;
+	m_JetAngleRange = reference.m_JetAngleRange;
 
     m_pLFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pLFGFootGroup->Clone());
     m_pLFGFootGroup->SetOwner(this);
@@ -273,6 +275,8 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
     } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         m_JetTimeTotal *= 1000;
+	} else if (propName == "JumpAngleRange") {
+		reader >> m_JetAngleRange;
     } else if (propName == "LFGLeg" || propName == "LeftFGLeg") {
         RemoveAttachable(m_pLFGLeg);
         m_pLFGLeg = new Leg;
@@ -366,6 +370,8 @@ int ACrab::Save(Writer &writer) const
     writer.NewProperty("JumpTime");
     // Convert to seconds
     writer << m_JetTimeTotal / 1000;
+	writer.NewProperty("JumpAngleRange");
+	writer << m_JetAngleRange;
     writer.NewProperty("LFGLeg");
     writer << m_pLFGLeg;
     writer.NewProperty("LBGLeg");
@@ -2233,8 +2239,8 @@ void ACrab::Update()
         // Or just use the aim angle if we're getting digital input
         else
         {
-            float jetAngle = m_AimAngle >= 0 ? (m_AimAngle * 0.25) : 0;
-            jetAngle = c_PI + c_QuarterPI + c_EighthPI + jetAngle;
+			float jetAngle = m_AimAngle >= 0 ? (m_AimAngle * m_JetAngleRange) : 0;
+			jetAngle = c_PI + c_HalfPI - (c_HalfPI * m_JetAngleRange) + jetAngle;
             // Don't need to use FacingAngle on this becuase it's already applied to the AimAngle since last update.
             m_pJetpack->SetEmitAngle(jetAngle);
         }

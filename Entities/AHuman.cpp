@@ -43,6 +43,7 @@ ConcreteClassInfo(AHuman, Actor, 20)
 void AHuman::Clear()
 {
     m_pHead = 0;
+	m_LookToAimRatio = 0.7;
     m_pJetpack = 0;
     m_pFGArm = 0;
     m_pBGArm = 0;
@@ -72,6 +73,7 @@ void AHuman::Clear()
     m_StrideStart = false;
     m_JetTimeTotal = 0.0;
     m_JetTimeLeft = 0.0;
+	m_JetAngleRange = 0.25;
     m_GoldInInventoryChunk = 0;
     m_ThrowTmr.Reset();
     m_ThrowPrepTime = 1000;
@@ -174,9 +176,12 @@ int AHuman::Create(const AHuman &reference) {
     }
     Actor::Create(reference);
 
+	m_LookToAimRatio = reference.m_LookToAimRatio;
+
 	m_ThrowPrepTime = reference.m_ThrowPrepTime;
     m_JetTimeTotal = reference.m_JetTimeTotal;
     m_JetTimeLeft = reference.m_JetTimeLeft;
+	m_JetAngleRange = reference.m_JetAngleRange;
 
     m_pFGHandGroup = dynamic_cast<AtomGroup *>(reference.m_pFGHandGroup->Clone());
     m_pFGHandGroup->SetOwner(this);
@@ -241,6 +246,8 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         if (m_pHead->HasNoSetDamageMultiplier()) { m_pHead->SetDamageMultiplier(5.0F); }
         if (m_pHead->IsDrawnAfterParent()) { m_pHead->SetDrawnNormallyByParent(false); }
         m_pHead->SetInheritsRotAngle(false);
+	} else if (propName == "LookToAimRatio") {
+		reader >> m_LookToAimRatio;
     } else if (propName == "Jetpack") {
         RemoveAttachable(m_pJetpack);
         m_pJetpack = new AEmitter;
@@ -252,6 +259,8 @@ int AHuman::ReadProperty(std::string propName, Reader &reader) {
         reader >> m_JetTimeTotal;
         // Convert to ms
         m_JetTimeTotal *= 1000;
+	} else if (propName == "JumpAngleRange") {
+		reader >> m_JetAngleRange;
     } else if (propName == "FGArm") {
         RemoveAttachable(m_pFGArm);
         m_pFGArm = new Arm;
@@ -355,11 +364,15 @@ int AHuman::Save(Writer &writer) const
 	writer << m_ThrowPrepTime;
     writer.NewProperty("Head");
     writer << m_pHead;
+    writer.NewProperty("LookToAimRatio");
+    writer << m_LookToAimRatio;
     writer.NewProperty("Jetpack");
     writer << m_pJetpack;
     writer.NewProperty("JumpTime");
     // Convert to seconds
     writer << m_JetTimeTotal / 1000;
+	writer.NewProperty("JumpAngleRange");
+	writer << m_JetAngleRange;
     writer.NewProperty("FGArm");
     writer << m_pFGArm;
     writer.NewProperty("BGArm");
@@ -1624,7 +1637,7 @@ bool AHuman::IsWithinRange(Vector &point) const
 
 bool AHuman::Look(float FOVSpread, float range)
 {
-    if (!g_SceneMan.AnythingUnseen(m_Team))
+    if (!g_SceneMan.AnythingUnseen(m_Team) || m_CanRevealUnseen == false)
         return false;
 
     // Set the length of the look vector
@@ -3176,9 +3189,9 @@ void AHuman::Update()
         // Or just use the aim angle if we're getting digital input
         else
         {
-            float jetAngle = m_AimAngle >= 0 ? (m_AimAngle * 0.25) : 0;
-            jetAngle = c_PI + c_QuarterPI + c_EighthPI + jetAngle;
-            // Don't need to use FacingAngle on this becuase it's already applied to the AimAngle since last update.
+            float jetAngle = m_AimAngle >= 0 ? (m_AimAngle * m_JetAngleRange) : 0;
+			jetAngle = c_PI + c_HalfPI - (c_HalfPI * m_JetAngleRange) + jetAngle;
+            // Don't need to use FacingAngle on this because it's already applied to the AimAngle since last update.
             m_pJetpack->SetEmitAngle(jetAngle);
         }
     }
@@ -3995,7 +4008,7 @@ void AHuman::Update()
         float toRotate = 0;
         // Only rotate the head to match the aim angle if body is stable and upright
         if (m_Status == STABLE && std::fabs(m_Rotation.GetRadAngle()) < (c_HalfPI + c_QuarterPI)) {
-            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((m_HFlipped ? -m_AimAngle : m_AimAngle) * 0.7F + m_Rotation.GetRadAngle() * 0.2F);
+            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((m_HFlipped ? -m_AimAngle : m_AimAngle) * m_LookToAimRatio + m_Rotation.GetRadAngle() * (0.9 - m_LookToAimRatio));
             toRotate *= 0.15F;
         }
         // If dying upright, make head slump forward or back depending on body lean

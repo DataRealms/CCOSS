@@ -149,22 +149,22 @@ namespace RTE {
 
 	void FrameMan::ValidateResolution(int &resX, int &resY, int &resMultiplier) {
 		if (resX * resMultiplier > m_ScreenResX || resY * resMultiplier > m_ScreenResY) {
-			allegro_message("Resolution too high to fit display, overriding to fit!");
+			ShowMessageBox("Resolution too high to fit display, overriding to fit!");
 			resX = m_NewResX = m_ScreenResX / resMultiplier;
 			resY = m_NewResY = m_ScreenResY / resMultiplier;
 		} else if (!m_ForceDedicatedFullScreenGfxDriver && resX * resMultiplier == 1366 && resY * resMultiplier == 768) {
-			allegro_message("Unfortunately, 1366x768 resolution is not supported in windowed or borderless mode. 1360x768 will be used instead!\nTo enable the use of this resolution, please force the dedicated fullscreen driver through \"Settings.ini\".");
+			ShowMessageBox("Unfortunately, 1366x768 resolution is not supported in windowed or borderless mode. 1360x768 will be used instead!\nTo enable the use of this resolution, please force the dedicated fullscreen driver through \"Settings.ini\".");
 			resX = m_NewResX = 1360 / resMultiplier;
 			resY = m_NewResY = 768 / resMultiplier;
 		} else if (!m_ForceDedicatedFullScreenGfxDriver && (resX * resMultiplier) % 4 > 0) {
-			allegro_message("Resolution width that is not divisible by 4 is not supported!\nOverriding to closest valid width!");
-			resX = m_NewResX = std::floor(resX / 4) * 4;
+			ShowMessageBox("Resolution width that is not divisible by 4 is not supported!\nOverriding to closest valid width!");
+			resX = m_NewResX = static_cast<int>(std::floor(resX / 4) * 4);
 		}
 
 		if (m_NumScreens == 1) {
 			float currentAspectRatio = static_cast<float>(resX) / static_cast<float>(resY);
 			if (currentAspectRatio < 1 || currentAspectRatio > 4) {
-				allegro_message("Abnormal aspect ratio detected! Reverting to defaults!");
+				ShowMessageBox("Abnormal aspect ratio detected! Reverting to defaults!");
 				resX = m_NewResX = 960;
 				resY = m_NewResY = 540;
 				resMultiplier = m_ResMultiplier = m_NewResMultiplier = 1;
@@ -172,7 +172,7 @@ namespace RTE {
 		} else if (!m_DisableMultiScreenResolutionValidation && m_NumScreens > 1 && m_NumScreens < 4) {
 			if (resX * resMultiplier > m_PrimaryScreenResX || resY * resMultiplier > m_PrimaryScreenResY) { ValidateMultiScreenResolution(resX, resY, resMultiplier); }
 		} else if (!m_DisableMultiScreenResolutionValidation && m_NumScreens > 3) {
-			allegro_message("Number of screens is too damn high! Overriding to defaults!\n\nPlease disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
+			ShowMessageBox("Number of screens is too damn high! Overriding to defaults!\n\nPlease disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
 			resX = m_NewResX = 960;
 			resY = m_NewResY = 540;
 			resMultiplier = m_ResMultiplier = m_NewResMultiplier = 1;
@@ -197,7 +197,7 @@ namespace RTE {
 				"Please configure your left-most screen to be primary to utilize all screens, as the game window will extend right but will not extend left, leaving any screen left of the primary unused.\n\n"
 				"You can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!\n\nResolution settings will be overridden to fit primary screen only!"
 			};
-			allegro_message(leftNotPrimaryMessage);
+			ShowMessageBox(leftNotPrimaryMessage);
 			resX = m_NewResX = m_PrimaryScreenResX / resMultiplier;
 			resY = m_NewResY = m_PrimaryScreenResY / resMultiplier;
 			return;
@@ -210,7 +210,7 @@ namespace RTE {
 		int centerScreenResY = screenInfo.rcMonitor.bottom;
 
 		if (centerScreenResY != m_PrimaryScreenResY) {
-			allegro_message("Center screen height is not identical to primary screen, overriding to fit primary screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
+			ShowMessageBox("Center screen height is not identical to primary screen, overriding to fit primary screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
 			resX = m_NewResX = m_PrimaryScreenResX / resMultiplier;
 			resY = m_NewResY = m_PrimaryScreenResY / resMultiplier;
 			return;
@@ -224,7 +224,7 @@ namespace RTE {
 			int rightScreenResY = screenInfo.rcMonitor.bottom;
 
 			if (rightScreenResY != m_PrimaryScreenResY) {
-				allegro_message("Right screen height is not identical to primary screen, overriding to extend to center screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
+				ShowMessageBox("Right screen height is not identical to primary screen, overriding to extend to center screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
 				resX = m_NewResX = (m_ScreenResX - (screenInfo.rcMonitor.right - screenInfo.rcMonitor.left)) / resMultiplier;
 				resY = m_NewResY = m_PrimaryScreenResY / resMultiplier;
 				return;
@@ -242,10 +242,10 @@ namespace RTE {
 
 		if (set_gfx_mode(m_GfxDriver, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, 0, 0) != 0) {
 			// If a bad resolution somehow slipped past the validation, revert to defaults.
-			allegro_message("Unable to set specified graphics mode because: %s!\n\nNow trying to default back to VGA...", allegro_error);
+			ShowMessageBox("Unable to set specified graphics mode because: " + std::string(allegro_error) + "!\n\nNow trying to default back to VGA...");
 			if (set_gfx_mode(GFX_AUTODETECT_WINDOWED, 960, 540, 0, 0) != 0) {
 				set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
-				allegro_message("Unable to set any graphics mode because %s!", allegro_error);
+				ShowMessageBox("Unable to set any graphics mode because " + std::string(allegro_error) + "!");
 				return 1;
 			}
 			// Successfully reverted to defaults. so set that as the current resolution
@@ -421,7 +421,7 @@ namespace RTE {
 			return -1;
 		}
 		if (m_ResX > m_ScreenResX / multiplier || m_ResY > m_ScreenResY / multiplier) {
-			allegro_message("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nTHIS IS NOT USED TO TOGGLE FULLSCREEN!");
+			ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nTHIS IS NOT USED TO TOGGLE FULLSCREEN!");
 			return -1;
 		}
 #ifdef __unix__
@@ -440,7 +440,7 @@ namespace RTE {
 			// Oops, failed to set windowed mode, so go back to previous multiplier
 			if (set_gfx_mode(m_GfxDriver, resX * m_ResMultiplier, resY * m_ResMultiplier, 0, 0) != 0) {
 				set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
-				allegro_message("Unable to set back to previous windowed mode multiplier because: %s!", allegro_error);
+				ShowMessageBox("Unable to set back to previous windowed mode multiplier because: " + std::string(allegro_error) + "!");
 				return 1;
 			}
 			g_ConsoleMan.PrintString("ERROR: Failed to switch to new windowed mode multiplier, reverted back to previous setting!");
@@ -513,7 +513,7 @@ namespace RTE {
 
 		if (set_gfx_mode(m_GfxDriver, newResX * newMultiplier, newResY * newMultiplier, 0, 0) != 0) {
 			if (set_gfx_mode(m_GfxDriver, resX * resMultiplier, resY * resMultiplier, 0, 0) != 0) {
-				allegro_message("Unable to set back to previous resolution because: %s!", allegro_error);
+				ShowMessageBox("Unable to set back to previous resolution because: " + std::string(allegro_error) + "!");
 				return 1;
 			}
 			g_ConsoleMan.PrintString("ERROR: Failed to switch to new resolution, reverted back to previous setting!");

@@ -22,6 +22,8 @@ namespace RTE {
 		m_GibWithParentChance = 0.0F;
 		m_ParentGibBlastStrengthMultiplier = 1;
 
+		m_IsWound = false;
+
 		m_JointStrength = 10.0F;
 		m_JointStiffness = 1.0F;
 		m_JointOffset.Reset();
@@ -64,6 +66,8 @@ namespace RTE {
 
 		m_GibWithParentChance = reference.m_GibWithParentChance;
 		m_ParentGibBlastStrengthMultiplier = reference.m_ParentGibBlastStrengthMultiplier;
+
+		m_IsWound = reference.m_IsWound;
 
 		m_JointStrength = reference.m_JointStrength;
 		m_JointStiffness = reference.m_JointStiffness;
@@ -420,6 +424,7 @@ namespace RTE {
 			m_RootMOID = m_MOID;
 			m_RestTimer.Reset();
 			m_Team = -1;
+			m_IsWound = false;
 			if (m_pMOToNotHit && m_Parent && m_Parent->GetWhichMOToNotHit() == m_pMOToNotHit) { m_pMOToNotHit = nullptr; }
 
 			if (m_CollidesWithTerrainWhileAttached) { AddOrRemoveAtomsFromRootParentAtomGroup(false); }

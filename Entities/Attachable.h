@@ -185,6 +185,20 @@ namespace RTE {
 		void SetParentGibBlastStrengthMultiplier(float parentGibBlastStrengthMultiplier) { m_ParentGibBlastStrengthMultiplier = parentGibBlastStrengthMultiplier; }
 #pragma endregion
 
+#pragma region Temporary Handling for Wounds, to be Replaced by a Wound Object in Future
+		/// <summary>
+		/// Gets whether or not this Attachable is a wound, as determined by its parent MOSR.
+		/// </summary>
+		/// <returns>Whether or not this Attachable is a wound.</returns>
+		bool IsWound() const { return m_IsWound; }
+
+		/// <summary>
+		/// Sets whether or not this Attachable is a wound, to be done by its parent MOSR.
+		/// </summary>
+		/// <param name="isWound">Whether or not this Attachable should be a wound.</param>
+		void SetIsWound(bool isWound) { m_IsWound = isWound; }
+#pragma endregion
+
 #pragma region Joint Getters and Setters
 		/// <summary>
 		/// Gets the amount of impulse force the joint of this Attachable can handle before breaking.
@@ -489,6 +503,9 @@ namespace RTE {
 		float m_GibWithParentChance; //!< The percentage chance that this Attachable will gib when its parent does. 0 means never, 1 means always.
 		float m_ParentGibBlastStrengthMultiplier; //!< The multiplier this Attachable will apply to its parent's gib blast strength when the parent gibs.
 		
+		//TODO This is a stopgap for a dedicated Wound class, that would be helpful to simplify things like this and default damage multiplier handling.
+		bool m_IsWound; //!< Whether or not this Attachable has been added as a wound. Only set and applied for Attachables with parents.
+
 		float m_JointStrength; //!< The amount of impulse force needed on this to detach it from the host Actor, in kg * m/s. A value of 0 means the join is infinitely strong and will never break naturally.
 		float m_JointStiffness; //!< The normalized joint stiffness scalar. 1.0 means impulse forces on this attachable will be transferred to the parent with 100% strength, 0 means they will not transfer at all.
 		Vector m_JointOffset; //!< The offset to the joint (the point around which this Attachable and its parent hinge) from its center of mass/origin.

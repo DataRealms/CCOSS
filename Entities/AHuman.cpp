@@ -552,7 +552,7 @@ void AHuman::SetFGArm(Arm *newArm) {
 
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newArm->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
             Arm *castedAttachable = dynamic_cast<Arm *>(attachable);
-            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetJetpack");
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetFGArm");
             dynamic_cast<AHuman *>(parent)->SetFGArm(castedAttachable);
         }});
     }

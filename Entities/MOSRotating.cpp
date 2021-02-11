@@ -471,6 +471,7 @@ void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet
             woundToAdd->SetParentOffset(parentOffsetToSet);
             woundToAdd->SetInheritsHFlipped(false);
             woundToAdd->SetParent(this);
+            woundToAdd->SetIsWound(true);
             if (woundToAdd->HasNoSetDamageMultiplier()) { woundToAdd->SetDamageMultiplier(1.0F); }
             m_AttachableAndWoundMass += woundToAdd->GetMass();
             m_Wounds.push_back(woundToAdd);
@@ -1892,6 +1893,9 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
 }
 
 bool MOSRotating::HandlePotentialRadiusAffectingAttachable(const Attachable *attachable) {
+    if (!attachable->IsAttachedTo(this) && !attachable->IsWound()) {
+        return false;
+    }
     const HDFirearm *thisAsFirearm = dynamic_cast<HDFirearm *>(this);
     const AEmitter *thisAsEmitter = dynamic_cast<AEmitter *>(this);
     if ((thisAsFirearm && attachable == thisAsFirearm->GetFlash()) || (thisAsEmitter && attachable == thisAsEmitter->GetFlash())) {

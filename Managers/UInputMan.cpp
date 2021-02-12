@@ -790,9 +790,7 @@ namespace RTE {
 
 		if (g_InActivity) {
 			const GameActivity *gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
-			bool anyVisibleBuyGUI = (gameActivity) ? gameActivity->IsBuyGUIVisible(-1) : false;
-
-			if (AnyStartPress(false) && !anyVisibleBuyGUI) {
+			if (AnyStartPress(false) && (!gameActivity || !gameActivity->IsBuyGUIVisible(-1))) {
 				g_ActivityMan.PauseActivity();
 				return;
 			}
@@ -806,10 +804,10 @@ namespace RTE {
 		if (FlagCtrlState() && !FlagAltState()) {
 			// Ctrl+S to save continuous ScreenDumps
 			if (KeyHeld(KEY_S)) {
-				g_FrameMan.SaveScreenToBMP("ScreenDump");
+				g_FrameMan.SaveScreenToPNG("ScreenDump");
 			// Ctrl+W to save a WorldDump
 			} else if (KeyPressed(KEY_W)) {
-				g_FrameMan.SaveWorldToBMP("WorldDump");
+				g_FrameMan.SaveWorldToPNG("WorldDump");
 			// Ctrl+M to cycle draw modes
 			} else if (KeyPressed(KEY_M)) {
 				g_SceneMan.SetLayerDrawMode((g_SceneMan.GetLayerDrawMode() + 1) % 3);
@@ -826,12 +824,12 @@ namespace RTE {
 				g_FrameMan.SwitchResolutionMultiplier((g_FrameMan.ResolutionMultiplier() >= 2) ? 1 : 2);
 			// Alt+W to save ScenePreviewDump (miniature WorldDump)
 			} else if (KeyPressed(KEY_W)) {
-				g_FrameMan.SaveWorldToPreviewBMP("ScenePreviewDump");
+				g_FrameMan.SaveWorldPreviewToPNG("ScenePreviewDump");
 			}
 		} else {
 			// PrntScren to save a single ScreenDump
 			if (KeyPressed(KEY_PRTSCR)) {
-				g_FrameMan.SaveScreenToBMP("ScreenDump");
+				g_FrameMan.SaveScreenToPNG("ScreenDump");
 			} else if (KeyPressed(KEY_F1)) {
 				g_ConsoleMan.ShowShortcuts();
 			} else if (KeyPressed(KEY_F2)) {

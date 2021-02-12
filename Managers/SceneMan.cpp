@@ -542,8 +542,8 @@ bool SceneMan::MOIDClearCheck()
         {
             if ((badMOID = _getpixel(pMOIDMap, x, y)) != g_NoMOID)
             {
-                g_FrameMan.SaveBitmapToBMP(pMOIDMap, "MOIDCheck");
-                g_FrameMan.SaveBitmapToBMP(m_pMOColorLayer->GetBitmap(), "MOIDCheck");
+                g_FrameMan.SaveBitmapToPNG(pMOIDMap, "MOIDCheck");
+                g_FrameMan.SaveBitmapToPNG(m_pMOColorLayer->GetBitmap(), "MOIDCheck");
                 RTEAbort("Bad MOID of MO detected: " + g_MovableMan.GetMOFromID(badMOID)->GetPresetName());
                 return false;
             }

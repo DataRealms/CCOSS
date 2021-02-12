@@ -64,7 +64,7 @@ namespace RTE {
 
 #pragma region Gameplay Settings
 		/// <summary>
-		/// Returns true if endless metagame mode is enabled.
+		/// Returns true if endless MetaGame mode is enabled.
 		/// </summary>
 		/// <returns>Whether endless mode is enabled via settings.</returns>
 		bool EndlessMode() const { return m_EndlessMode; }

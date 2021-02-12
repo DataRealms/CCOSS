@@ -1470,8 +1470,8 @@ int LuaMan::Initialize() {
             .def("ClearScreenText", &FrameMan::ClearScreenText)
             .def("FadeInPalette", &FrameMan::FadeInPalette)
             .def("FadeOutPalette", &FrameMan::FadeOutPalette)
-            .def("SaveScreenToBMP", &FrameMan::SaveScreenToBMP)
-            .def("SaveBitmapToBMP", &FrameMan::SaveBitmapToBMP)
+            .def("SaveScreenToPNG", &FrameMan::SaveScreenToPNG)
+            .def("SaveBitmapToPNG", &FrameMan::SaveBitmapToPNG)
             .def("FlashScreen", &FrameMan::FlashScreen)
 			.def("CalculateTextHeight", &FrameMan::CalculateTextHeight)
 			.def("CalculateTextWidth", &FrameMan::CalculateTextWidth),

@@ -765,11 +765,11 @@ namespace RTE {
 				if (modeToSave == ScenePreviewDump) {
 					DrawWorldDump(true);
 
-					BITMAP *scenePreviewDumpBuffer = create_bitmap(140, 55);
+					BITMAP *scenePreviewDumpBuffer = create_bitmap_ex(32, 140, 55);
 					blit(m_ScenePreviewDumpGradient, scenePreviewDumpBuffer, 0, 0, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
 					masked_stretch_blit(m_WorldDumpBuffer, scenePreviewDumpBuffer, 0, 0, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
 
-					if (SaveIndexedBitmap(fullFileName, scenePreviewDumpBuffer, m_Palette) == 0) {
+					if (SaveIndexedPNG(fullFileName, scenePreviewDumpBuffer) == 0) {
 						g_ConsoleMan.PrintString("SYSTEM: Scene Preview was dumped to: " + std::string(fullFileName));
 						saveSuccess = true;
 					}
@@ -801,8 +801,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::SaveIndexedBitmap(char *fileName, BITMAP *bitmapToSave, PALETTE paletteToIndexWith) const {
-		save_png(fileName, bitmapToSave, paletteToIndexWith);
+	int FrameMan::SaveIndexedPNG(const char *fileName, BITMAP *bitmapToSave) const {
+		// nullptr for the PALETTE parameter here because the bitmap is 32bpp and whatever we index it with will end up wrong anyway.
+		save_png(fileName, bitmapToSave, nullptr);
 
 		int lastColorConversionMode = get_color_conversion();
 		set_color_conversion(COLORCONV_REDUCE_TO_256);

@@ -112,7 +112,7 @@ namespace RTE {
 		if (System::IsLoggingToCLI()) { System::PrintLoadingToCLI(reportString, newItem); }
 
 		if (newItem) {
-			// Write out the last line to the log file before starting a new one and scroll the bitmap upwards
+			// Write out the last line to the log file before starting a new one and scroll the bitmap upwards.
 			if (g_LoadingGUI.m_LoadingLogWriter) { *g_LoadingGUI.m_LoadingLogWriter << reportString << "\n"; }
 			if (g_LoadingGUI.m_ProgressListboxBitmap) { blit(g_LoadingGUI.m_ProgressListboxBitmap, g_LoadingGUI.m_ProgressListboxBitmap, 2, 12, 2, 2, g_LoadingGUI.m_ProgressListboxBitmap->w - 3, g_LoadingGUI.m_ProgressListboxBitmap->h - 12); }
 		}
@@ -120,15 +120,15 @@ namespace RTE {
 		if (g_LoadingGUI.m_ProgressListboxBitmap) {
 			AllegroBitmap drawBitmap(g_LoadingGUI.m_ProgressListboxBitmap);
 
-			// Clear current line
+			// Clear current line.
 			rectfill(g_LoadingGUI.m_ProgressListboxBitmap, 2, g_LoadingGUI.m_ProgressListboxBitmap->h - 12, g_LoadingGUI.m_ProgressListboxBitmap->w - 3, g_LoadingGUI.m_ProgressListboxBitmap->h - 3, 54);
 			// Print new line
 			g_FrameMan.GetSmallFont()->DrawAligned(&drawBitmap, 5, g_LoadingGUI.m_ProgressListboxBitmap->h - 12, reportString.c_str(), GUIFont::Left);
-			// DrawAligned - MaxWidth is useless here, so we're just drawing lines manually
+			// DrawAligned - MaxWidth is useless here, so we're just drawing lines manually.
 			vline(g_LoadingGUI.m_ProgressListboxBitmap, g_LoadingGUI.m_ProgressListboxBitmap->w - 2, g_LoadingGUI.m_ProgressListboxBitmap->h - 12, g_LoadingGUI.m_ProgressListboxBitmap->h - 2, 33);
 			vline(g_LoadingGUI.m_ProgressListboxBitmap, g_LoadingGUI.m_ProgressListboxBitmap->w - 1, g_LoadingGUI.m_ProgressListboxBitmap->h - 12, g_LoadingGUI.m_ProgressListboxBitmap->h - 2, 33);
 
-			// Draw onto current frame buffer
+			// Draw onto current frame buffer.
 			blit(g_LoadingGUI.m_ProgressListboxBitmap, g_FrameMan.GetBackBuffer32(), 0, 0, g_LoadingGUI.m_PosX, g_LoadingGUI.m_PosY, g_LoadingGUI.m_ProgressListboxBitmap->w, g_LoadingGUI.m_ProgressListboxBitmap->h);
 
 			g_FrameMan.FlipFrameBuffers();

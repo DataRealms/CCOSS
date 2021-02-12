@@ -511,33 +511,33 @@ namespace RTE {
 
 #pragma region Screen Capture
 		/// <summary>
-		/// Dumps a bitmap to a 8bpp BMP file.
+		/// Dumps a bitmap to a 8bpp PNG file.
 		/// </summary>
 		/// <param name="bitmap">The individual bitmap that will be dumped.</param>
 		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
 		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
-		int SaveBitmapToBMP(BITMAP *bitmap, const char *nameBase) { return SaveBitmap(SingleBitmap, nameBase, bitmap); }
+		int SaveBitmapToPNG(BITMAP *bitmap, const char *nameBase) { return SaveBitmap(SingleBitmap, nameBase, bitmap); }
 
 		/// <summary>
-		/// Dumps a bitmap of the screen backbuffer to a 8bpp BMP file.
+		/// Dumps a bitmap of the screen backbuffer to a 8bpp PNG file.
 		/// </summary>
 		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
 		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
-		int SaveScreenToBMP(const char *nameBase) { return SaveBitmap(ScreenDump, nameBase); }
+		int SaveScreenToPNG(const char *nameBase) { return SaveBitmap(ScreenDump, nameBase); }
 
 		/// <summary>
-		/// Dumps a bitmap of everything on the scene to the BMP file.
+		/// Dumps a bitmap of everything on the scene to a PNG file.
 		/// </summary>
 		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
 		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
-		int SaveWorldToBMP(const char *nameBase) { return SaveBitmap(WorldDump, nameBase); }
+		int SaveWorldToPNG(const char *nameBase) { return SaveBitmap(WorldDump, nameBase); }
 
 		/// <summary>
-		/// Dumps a miniature screenshot of the whole scene to be used as a preview.
+		/// Dumps a miniature screenshot of the whole scene to be used as a preview to a PNG file.
 		/// </summary>
 		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
 		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
-		int SaveWorldToPreviewBMP(const char *nameBase) { return SaveBitmap(ScenePreviewDump, nameBase); }
+		int SaveWorldPreviewToPNG(const char *nameBase) { return SaveBitmap(ScenePreviewDump, nameBase); }
 #pragma endregion
 
 	protected:
@@ -750,14 +750,13 @@ namespace RTE {
 		/// </summary>
 		/// <param name="fileName">The full name of the file that is being saved. Path and everything included.</param>
 		/// <param name="bitmapToSave">The BITMAP that is being saved into a file.</param>
-		/// <param name="paletteToIndexWith">What PALETTE to use for indexing the file.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		/// <remarks>
 		/// This method is a workaround to Allegro being unable to set a color conversion mode when saving files.
 		/// It works by first saving the 32bpp bitmap as is, then loading it back under the REDUCE_TO_256 color conversion mode, blitting it to a fresh bitmap and saving it again with the passed in palette.
 		/// The re-blitted bitmap is properly 8bpp and will be indexed correctly. The old saved file is deleted in the process before the new one is saved.
 		/// </remarks>
-		int SaveIndexedBitmap(char *fileName, BITMAP *bitmapToSave, PALETTE paletteToIndexWith) const;
+		int SaveIndexedPNG(const char *fileName, BITMAP *bitmapToSave) const;
 #pragma endregion
 
 		/// <summary>

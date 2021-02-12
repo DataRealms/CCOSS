@@ -127,7 +127,6 @@ namespace RTE {
 	std::string System::ExtractZippedDataModule(const std::string &zippedModulePath) {
 		std::string zippedModuleName = std::filesystem::path(zippedModulePath).filename().generic_string();
 
-		// Try to open the zipped and unzip it into place as an exposed data module
 		unzFile zippedModule = unzOpen(zippedModuleName.c_str());
 		std::stringstream extractionProgressReport;
 		bool abortExtract = false;
@@ -138,10 +137,9 @@ namespace RTE {
 				extractionProgressReport << "\tSkipped: " + zippedModuleName + " - Could not read global file info!\n";
 				abortExtract = true;
 			}
-			// Buffer to hold data read from the zip file
 			std::array<char, s_FileBufferSize> fileBuffer;
 
-			// Go through and extract every file inside this zip, overwriting every colliding file that already exists in the install directory
+			// Go through and extract every file inside this zip, overwriting every colliding file that already exists in the install directory.
 			for (int i = 0; i < zippedModuleInfo.number_entry && !abortExtract; ++i) {
 				unz_file_info currentFileInfo;
 				std::array<char, s_MaxFileName> outputFileInfoData;
@@ -158,7 +156,7 @@ namespace RTE {
 					continue;
 				}
 #endif
-				// Check if the directory we are trying to extract into exists, and if not, create it
+				// Check if the directory we are trying to extract into exists, and if not, create it.
 				std::string outputFileDirectory = outputFileName.substr(0, outputFileName.find_last_of("/\\") + 1);
 				if (!std::filesystem::exists(outputFileDirectory)) {
 					if (!MakeDirectory(s_WorkingDirectory + outputFileDirectory)) {
@@ -169,7 +167,7 @@ namespace RTE {
 						extractionProgressReport << "\tCreated directory: " + outputFileName + "\n";
 					}
 				}
-				// If the output file is a directly, go the next entry listed in the zip file
+				// If the output file is a directly, go the next entry listed in the zip file.
 				if (std::filesystem::is_directory(outputFileName)) {
 					unzCloseCurrentFile(zippedModule);
 					if ((i + 1) < zippedModuleInfo.number_entry && unzGoToNextFile(zippedModule) != UNZ_OK) {
@@ -179,7 +177,7 @@ namespace RTE {
 					continue;
 				}
 
-				// Validate so only certain file types are extracted
+				// Validate so only certain file types are extracted.
 				std::string fileExtension = std::filesystem::path(outputFileName).extension().generic_string();
 				std::transform(fileExtension.begin(), fileExtension.end(), fileExtension.begin(), tolower);
 
@@ -187,7 +185,6 @@ namespace RTE {
 					extractionProgressReport << "\tSkipped file: " + outputFileName + " - Bad extension!\n";
 					unzCloseCurrentFile(zippedModule);
 
-					// Go the next entry listed in the zip file
 					if ((i + 1) < zippedModuleInfo.number_entry && unzGoToNextFile(zippedModule) != UNZ_OK) {
 						extractionProgressReport << "\tCould not read next file inside zip - Extraction aborted!\n";
 						abortExtract = true;
@@ -198,11 +195,10 @@ namespace RTE {
 				if (unzOpenCurrentFile(zippedModule) != UNZ_OK) {
 					extractionProgressReport << "\tSkipped file: " + zippedModuleName + " - Could not open file!\n";
 				} else {
-					// Open a file to write out the data.
 					FILE *outputFile = fopen(outputFileName.c_str(), "wb");
 					if (outputFile == nullptr) { extractionProgressReport << "\tSkipped file: " + outputFileName + " - Could not open/create destination file!\n"; }
 
-					// Write the entire file out, reading in buffer size chunks and spitting them out to the output stream
+					// Write the entire file out, reading in buffer size chunks and spitting them out to the output stream.
 					bool abortWrite = false;
 					int bytesRead = 0;
 					int totalBytesRead = 0;
@@ -222,7 +218,7 @@ namespace RTE {
 							break;
 						}
 						fwrite(fileBuffer.data(), bytesRead, 1, outputFile);
-					// Keep going while bytes are still being read (0 means end of file)
+					// Keep going while bytes are still being read (0 means end of file).
 					} while (bytesRead > 0 && outputFile);
 
 					fclose(outputFile);
@@ -230,7 +226,7 @@ namespace RTE {
 
 					extractionProgressReport << "\tExtracted file: " + outputFileName + "\n";
 				}
-				// Go the next entry listed in the zip file.
+
 				if ((i + 1) < zippedModuleInfo.number_entry && unzGoToNextFile(zippedModule) != UNZ_OK) {
 					extractionProgressReport << "\tCould not read next file inside zip - Extraction aborted!\n";
 					abortExtract = true;

@@ -37,7 +37,7 @@ namespace RTE {
 		static const std::string & GetModDirectory() { return s_ModDirectory; }
 
 		/// <summary>
-		/// Gets the extension that determines a directory/file is a RTE module.
+		/// Gets the extension that determines a directory/file is an RTE module.
 		/// </summary>
 		/// <returns>String containing the RTE module extension.</returns>
 		static const std::string & GetModulePackageExtension() { return s_ModulePackageExtension; }

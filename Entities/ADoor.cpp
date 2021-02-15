@@ -45,6 +45,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ADoor::Create(const ADoor &reference) {
+		if (reference.m_Door) {
+			m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_Door->GetUniqueID());
+			SetDoor(dynamic_cast<Attachable *>(reference.m_Door->Clone()));
+		}
+
 		Actor::Create(reference);
 
 		m_InitialSpriteAnimDuration = reference.m_SpriteAnimDuration;
@@ -53,11 +58,6 @@ namespace RTE {
 			m_Sensors.push_back(sensor);
 		}
 		m_SensorInterval = reference.m_SensorInterval;
-
-		if (reference.m_Door) {
-			m_Door = dynamic_cast<Attachable *>(reference.m_Door->Clone());
-			AddAttachable(m_Door, m_ClosedOffset, true);
-		}
 
 		// Set the initial door state to the opposite of default so it'll move to default when spawned and draw the door material layer.
 		m_DoorState = reference.m_ClosedByDefault ? OPEN : CLOSED;
@@ -83,11 +83,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ADoor::ReadProperty(std::string propName, Reader &reader) {
+	int ADoor::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Door") {
-			delete m_Door;
+			RemoveAttachable(m_Door);
 			m_Door = new Attachable;
 			reader >> m_Door;
+			AddAttachable(m_Door);
+			m_Door->SetInheritsRotAngle(false);
 			m_DoorMaterialID = m_Door->GetMaterial()->GetIndex();
 		} else if (propName == "OpenOffset") {
 			reader >> m_OpenOffset;
@@ -191,7 +193,6 @@ namespace RTE {
 		m_DoorMoveSound.Stop();
 		m_DoorDirectionChangeSound.Stop();
 		m_DoorMoveEndSound.Stop();
-		delete m_Door;
 		if (!notInherited) { Actor::Destroy(); }
 
 		for (ADSensor &sensor : m_Sensors) {
@@ -202,30 +203,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float ADoor::GetMass() const {
-		float totalMass = Actor::GetMass();
-		if (m_Door) { totalMass += m_Door->GetMass(); }
-		return totalMass;
-	}
+	void ADoor::SetDoor(Attachable *newDoor) {
+		if (newDoor == nullptr) {
+			if (m_Door && m_Door->IsAttached()) { RemoveAttachable(m_Door); }
+			m_Door = nullptr;
+		} else {
+			if (m_Door && m_Door->IsAttached()) { RemoveAttachable(m_Door); }
+			m_Door = newDoor;
+			AddAttachable(newDoor);
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ADoor::GetMOIDs(std::vector<MOID> &MOIDs) const {
-		if (m_Door) { m_Door->GetMOIDs(MOIDs); }
-		Actor::GetMOIDs(MOIDs);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ADoor::SetID(const MOID newID) {
-		Actor::SetID(newID);
-		if (m_Door) { m_Door->SetID(newID); }
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool ADoor::IsOnScenePoint(Vector &scenePoint) const {
-		return ((m_Door && m_Door->IsOnScenePoint(scenePoint)) || Actor::IsOnScenePoint(scenePoint));
+			m_HardcodedAttachableUniqueIDsAndSetters.insert({newDoor->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+				dynamic_cast<ADoor *>(parent)->SetDoor(attachable);
+			}});
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -285,45 +275,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ADoor::RemoveAnyRandomWounds(int amount) {
-		float damage = 0;
-		for (int i = 0; i < amount; i++) {
-			std::vector<MOSRotating *> woundedBodyParts;
-			if (GetWoundCount() > 0) { woundedBodyParts.push_back(this); }
-			if (m_Door && m_Door->GetWoundCount()) { woundedBodyParts.push_back(m_Door); }
-
-			if (woundedBodyParts.size() == 0) {
-				return damage;
-			}
-
-			int partIndex = RandomNum<int>(0, woundedBodyParts.size() - 1);
-			MOSRotating *part = woundedBodyParts[partIndex];
-			damage += part->RemoveWounds(1);
-		}
-		return damage;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ADoor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *ignoreMO) {
+	void ADoor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
 		if (m_Door && m_Door->IsAttached()) {
 			EraseDoorMaterial();
 			m_Door->DeepCheck(true);
 			m_Door->SetPinStrength(0);
-			m_Door->SetVel(m_Vel + m_Door->GetParentOffset() * RandomNum());
-			m_Door->SetAngularVel(RandomNormalNum());
-			g_MovableMan.AddParticle(m_Door);
-			RemoveAttachable(m_Door);
-			m_Door = 0;
 		}
-		Actor::GibThis(impactImpulse, internalBlast, ignoreMO);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ADoor::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID) {
-		if (m_Door) { m_Door->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID); }
-		Actor::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
+		Actor::GibThis(impactImpulse, movableObjectToIgnore);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -397,16 +355,16 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::Update() {
-		Actor::Update();
 
 		if (m_Door && m_Door->IsAttached()) {
 			if (m_DoorState != STOPPED && m_SensorTimer.IsPastSimMS(m_SensorInterval)) { UpdateSensors(); }
-			UpdateDoorAttachable();
+			UpdateDoorAttachableActions();
 		}
 
-		if (m_Door && !ApplyAttachableForces(m_Door)) {
+		Actor::Update();
+
+		if (!m_Door) {
 			EraseDoorMaterial();
-			m_Door = 0;
 			// Start the spinning out of control animation for the motor, start it slow
 			m_SpriteAnimDuration *= 4;			
 		}
@@ -426,7 +384,7 @@ namespace RTE {
 
 			m_Health -= 0.4F;
 		}
-		if (m_Status == DEAD) { GibThis(Vector(), 50); }
+		if (m_Status == DEAD) { GibThis(); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -460,13 +418,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ADoor::UpdateDoorAttachable() {
+	void ADoor::UpdateDoorAttachableActions() {
 		Vector startOffset;
 		Vector endOffset;
 		float startAngle;
 		float endAngle;
-
-		m_Door->SetHFlipped(m_HFlipped);
 
 		if (m_DoorState == OPEN || m_DoorState == OPENING) {
 			startOffset = m_ClosedOffset;
@@ -481,16 +437,16 @@ namespace RTE {
 		}
 
 		if (m_DoorState == OPEN || m_DoorState == CLOSED) {
-			m_Door->SetJointPos(m_Pos + endOffset.GetXFlipped(m_HFlipped) * m_Rotation);
-			m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * GetFlipFactor()));
+			m_Door->SetParentOffset(endOffset);
+			m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * static_cast<float>(GetFlipFactor())));
 		} else if (m_DoorState == OPENING || m_DoorState == CLOSING) {
 			if (!m_DoorMoveSound.IsBeingPlayed()) { m_DoorMoveSound.Play(m_Pos); }
 
 			if (m_DoorMoveTimer.IsPastSimMS(m_DoorMoveTime)) {
 				m_ResetToDefaultStateTimer.Reset();
 
-				m_Door->SetJointPos(m_Pos + endOffset.GetXFlipped(m_HFlipped) * m_Rotation);
-				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * GetFlipFactor()));
+				m_Door->SetParentOffset(endOffset);
+				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * static_cast<float>(GetFlipFactor())));
 
 				m_DoorMoveSound.Stop();
 				m_DoorMoveEndSound.Play(m_Pos);
@@ -507,32 +463,12 @@ namespace RTE {
 				// TODO: Make this work across rotation 0. Probably the best solution would be to setup an angle LERP that properly handles the 2PI border and +- angles.
 				float updatedAngle = LERP(0, m_DoorMoveTime, startAngle, endAngle, m_DoorMoveTimer.GetElapsedSimTimeMS());
 
-				m_Door->SetJointPos(m_Pos + updatedOffset.GetXFlipped(m_HFlipped) * m_Rotation);
+				m_Door->SetParentOffset(updatedOffset);
 				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (updatedAngle * GetFlipFactor()));
 
 				// Clear away any terrain debris when the door is moving but only after a short delay so it doesn't take a chunk out of the ground
 				if (m_DoorMoveTimer.IsPastSimMS(50)) { m_Door->DeepCheck(true); }
 			}
-		}
-		m_Door->Update();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ADoor::Draw(BITMAP *targetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
-		// Override color drawing with flash, if requested.
-		DrawMode realMode = (mode == g_DrawColor && m_FlashWhiteMS) ? g_DrawWhite : mode;
-
-		if (m_Door && m_Door->IsAttached()) {
-			if (!m_Door->IsDrawnAfterParent()) {
-				m_Door->Draw(targetBitmap, targetPos, realMode, onlyPhysical);
-				Actor::Draw(targetBitmap, targetPos, mode, onlyPhysical);
-			} else {
-				Actor::Draw(targetBitmap, targetPos, mode, onlyPhysical);
-				m_Door->Draw(targetBitmap, targetPos, realMode, onlyPhysical);
-			}
-		} else {
-			Actor::Draw(targetBitmap, targetPos, mode, onlyPhysical);
 		}
 	}
 

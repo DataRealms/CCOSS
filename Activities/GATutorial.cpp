@@ -166,7 +166,7 @@ int GATutorial::Create(const GATutorial &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int GATutorial::ReadProperty(std::string propName, Reader &reader)
+int GATutorial::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "SpawnIntervalEasiest")
@@ -194,21 +194,9 @@ int GATutorial::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this GATutorial with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int GATutorial::Save(Writer &writer) const
-{
-    GameActivity::Save(writer);
-/*
-    writer.NewProperty("SpawnIntervalEasiest");
-    writer << m_SpawnIntervalEasiest;
-    writer.NewProperty("SpawnIntervalHardest");
-    writer << m_SpawnIntervalHardest;
-    for (vector<Actor *>::const_iterator itr = m_AttackerSpawns.begin(); itr != m_AttackerSpawns.end(); ++itr)
-    {
-        writer.NewProperty("AddAttackerSpawn");
-        writer << (*itr);
-    }
-*/
-    return 0;
+int GATutorial::Save(Writer &writer) const {
+	GameActivity::Save(writer);
+	return 0;
 }
 
 

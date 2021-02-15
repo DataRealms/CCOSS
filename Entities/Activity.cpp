@@ -118,7 +118,7 @@ void Activity::Clear() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Activity::ReadProperty(std::string propName, Reader &reader) {
+	int Activity::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Description") {
 			reader >> m_Description;
 		} else if (propName == "SceneName") {
@@ -290,7 +290,7 @@ void Activity::Clear() {
 			g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
 			g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(player));
 
-			m_PlayerController[player].Destroy();
+			m_PlayerController[player].Reset();
 			m_PlayerController[player].Create(Controller::CIM_PLAYER, player);
 			m_PlayerController[player].SetTeam(m_Team[player]);
 

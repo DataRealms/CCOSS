@@ -20,6 +20,7 @@ namespace RTE {
 	/// The singleton manager of sound effect and music playback.
 	/// </summary>
 	class AudioMan : public Singleton<AudioMan> {
+		friend class SettingsMan;
 		friend class SoundContainer;
 
 	public:
@@ -96,7 +97,7 @@ namespace RTE {
 		/// Makes the AudioMan object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create();
+		int Initialize();
 #pragma endregion
 
 #pragma region Destruction
@@ -164,6 +165,12 @@ namespace RTE {
 		/// <param name="includeImmobileSounds">Whether to include immobile sounds (normally used for GUI and so on) in global pitch modification. Defaults to false.</param>
 		/// <param name="includeMusic">Whether to include the music in global pitch modification. Defaults to false.</param>
 		void SetGlobalPitch(float pitch = 1.0F, bool includeImmobileSounds = false, bool includeMusic = false);
+
+		/// <summary>
+		/// The strength of the sound panning effect.
+		/// </summary>
+		/// <returns>0 - 1, where 0 is no panning and 1 is fully panned.</returns>
+		float GetSoundPanningEffectStrength() const { return m_SoundPanningEffectStrength; }
 #pragma endregion
 
 #pragma region Music Getters and Setters
@@ -268,7 +275,7 @@ namespace RTE {
 		/// Queues up a period of silence in the music stream playlist.
 		/// </summary>
 		/// <param name="seconds">The number of secs to wait before going to the next stream.</param>
-		void QueueSilence(int seconds) { if (m_AudioEnabled && seconds > 0) { m_MusicPlayList.push_back("@" + seconds); } }
+		void QueueSilence(int seconds) { if (m_AudioEnabled && seconds > 0) { m_MusicPlayList.push_back("@" + std::to_string(seconds)); } }
 
 		/// <summary>
 		/// Clears the music queue.
@@ -276,7 +283,15 @@ namespace RTE {
 		void ClearMusicQueue() { m_MusicPlayList.clear(); }
 #pragma endregion
 
-#pragma region Sound Playback and Handling
+#pragma region Mobile Sound Playback and Handling
+		/// <summary>
+		/// Pauses all sound playback.
+		/// <param name="pause">Whether to pause sounds or resume them.</param>
+		/// </summary>
+		void PauseAllMobileSounds(bool pause = true) { if (m_AudioEnabled) { m_MobileSoundChannelGroup->setPaused(pause); } }
+#pragma endregion
+
+#pragma region Lua Sound File Playing
 		/// <summary>
 		/// Starts playing a certain sound file.
 		/// </summary>
@@ -299,28 +314,6 @@ namespace RTE {
 		/// <param name="player">Which player to play the SoundContainer's sounds for, -1 means all players.</param>
 		/// <returns>The new SoundContainer being played. OWNERSHIP IS TRANSFERRED!</returns>
 		SoundContainer *PlaySound(const std::string &filePath, const Vector &position, int player);
-
-		/// <summary>
-		/// Stops playing all sounds in a given SoundContainer.
-		/// </summary>
-		/// <param name="soundContainer">Pointer to the SoundContainer to stop playing. Ownership is NOT transferred!</param>
-		/// <returns>True if sounds were playing and were stopped, false otherwise.</returns>
-		bool StopSound(SoundContainer *soundContainer) { return StopSound(soundContainer, -1); }
-
-		/// <summary>
-		/// Stops playing all sounds in a given SoundContainer for a certain player.
-		/// </summary>
-		/// <param name="player">Which player to stop the SoundContainer  for.</param>
-		/// <param name="soundContainer">Pointer to the SoundContainer to stop playing. Ownership is NOT transferred!</param>
-		/// <returns></returns>
-		bool StopSound(SoundContainer *soundContainer, int player);
-
-		/// <summary>
-		/// Fades out playback of all sounds in a specific SoundContainer.
-		/// </summary>
-		/// <param name="soundContainer">Pointer to the Sound to fade out playing. Ownership is NOT transferred!</param>
-		/// <param name="fadeOutTime">The amount of time, in ms, to fade out over.</param>
-		void FadeOutSound(SoundContainer *soundContainer, int fadeOutTime = 1000);
 #pragma endregion
 
 #pragma region Network Audio Handling
@@ -371,17 +364,7 @@ namespace RTE {
 		void RegisterSoundEvent(int player, NetworkSoundState state, const SoundContainer *soundContainer, int fadeOutTime = 0);
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 
 		const FMOD_VECTOR c_FMODForward = FMOD_VECTOR{0, 0, 1}; //!< An FMOD_VECTOR defining the Forwards direction. Necessary for 3D Sounds.
 		const FMOD_VECTOR c_FMODUp = FMOD_VECTOR{0, 1, 0}; //!< An FMOD_VECTOR defining the Up direction. Necessary for 3D Sounds.
@@ -400,6 +383,14 @@ namespace RTE {
 		float m_MusicVolume; //!< Global music volume.
 		float m_SoundsVolume; //!< Global sounds effects volume.
 		float m_GlobalPitch; //!< Global pitch multiplier.
+
+		float m_SoundPanningEffectStrength; //!< The strength of the sound panning effect, 0 (no panning) - 1 (full panning).
+
+		//////////////////////////////////////////////////
+		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
+		float m_ListenerZOffset;
+		float m_MinimumDistanceForPanning;
+		//////////////////////////////////////////////////
 
 		std::string m_MusicPath; //!< The path to the last played music stream.
 		std::list<std::string> m_MusicPlayList; //!< Playlist of paths to music to play after the current non looping one is done.
@@ -443,6 +434,21 @@ namespace RTE {
 		/// <param name="soundContainer">A pointer to a SoundContainer object. Ownership IS NOT transferred!</param>
 		/// <returns>Whether the pitch was successfully updated.</returns>
 		bool ChangeSoundContainerPlayingChannelsPitch(const SoundContainer *soundContainer);
+
+		/// <summary>
+		/// Stops playing a SoundContainer's playing sounds for a certain player.
+		/// </summary>
+		/// <param name="soundContainer">A pointer to a SoundContainer object6. Ownership is NOT transferred!</param>
+		/// <param name="player">Which player to stop playing the SoundContainer for.</param>
+		/// <returns></returns>
+		bool StopSoundContainerPlayingChannels(SoundContainer *soundContainer, int player);
+
+		/// <summary>
+		/// Fades out playback a SoundContainer.
+		/// </summary>
+		/// <param name="soundContainer">A pointer to a SoundContainer object. Ownership is NOT transferred!</param>
+		/// <param name="fadeOutTime">The amount of time, in ms, to fade out over.</param>
+		void FadeOutSoundContainerPlayingChannels(SoundContainer *soundContainer, int fadeOutTime);
 #pragma endregion
 
 #pragma region 3D Effect Handling
@@ -452,7 +458,7 @@ namespace RTE {
 		void Update3DEffectsForMobileSoundChannels();
 
 		/// <summary>
-		/// Sets or updates the position of the given sound channel so it handles scene wrapping correctly. Also handles minimum audible distance.
+		/// Sets or updates the position of the given sound channel so it handles scene wrapping correctly. Also handles volume attenuation and minimum audible distance.
 		/// </summary>
 		/// <param name="soundChannel">The channel whose position should be set or updated.</param>
 		/// <param name="positionToUse">An optional position to set for this sound channel. Done this way to save setting and resetting data in FMOD.</param>

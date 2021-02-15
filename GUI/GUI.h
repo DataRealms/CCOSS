@@ -15,7 +15,7 @@ struct GUIRect { long left; long top; long right; long bottom; };
 /// <param name="top">Position of top left corner on Y axis.</param>
 /// <param name="right">Position of bottom right corner on X axis.</param>
 /// <param name="bottom">Position of bottom right corner on Y axis.</param>
-void SetRect(GUIRect *pRect, int left, int top, int right, int bottom);
+inline void SetRect(GUIRect *rect, int left, int top, int right, int bottom) { rect->left = left; rect->top = top; rect->right = right; rect->bottom = bottom; }
 #pragma endregion
 
 #include "RTETools.h"

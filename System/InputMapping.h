@@ -12,6 +12,7 @@ namespace RTE {
 
 	public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
 #pragma region Creation
@@ -30,16 +31,6 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up an InputMapping object before deletion from system memory.
-		/// </summary>
-		~InputMapping() { Destroy(); }
-
-		/// <summary>
-		/// Destroys and resets (through Clear()) the InputMapping object.
-		/// </summary>
-		void Destroy() { Clear(); }
-
-		/// <summary>
 		/// Resets the entire InputMapping, including its inherited members, to their default settings or values.
 		/// </summary>
 		void Reset() override { Clear(); }
@@ -55,8 +46,8 @@ namespace RTE {
 		/// <summary>
 		/// Sets the description of the input scheme preset that this element is part of, if any preset has been set for this element's scheme.
 		/// </summary>
-		/// <param name="presetDesc">The description associated with this element by the scheme preset, if any has been set. This string should be empty otherwise.</param>
-		void SetPresetDescription(std::string presetDesc) { m_PresetDescription = presetDesc; }
+		/// <param name="presetDescription">The description associated with this element by the scheme preset, if any has been set. This string should be empty otherwise.</param>
+		void SetPresetDescription(const std::string &presetDescription) { m_PresetDescription = presetDescription; }
 #pragma endregion
 
 #pragma region Keyboard Getters and Setters
@@ -133,31 +124,23 @@ namespace RTE {
 		int GetAxis() const { return m_AxisMap; }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const override { return c_ClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		std::string m_PresetDescription; //!< The friendly description that is associated with the scheme preset element, if any is set.
 
-		int m_KeyMap; //!< The keyboard key mapping.	
-		int m_MouseButtonMap; //!< The mouse button mapping.	
-			
+		int m_KeyMap; //!< The keyboard key mapping.
+		int m_MouseButtonMap; //!< The mouse button mapping.
+
 		bool m_DirectionMapped; //!< Whether joystick direction mapping is enabled.
 
 		int m_JoyButtonMap; //!< The joystick button mapping.
 		int m_StickMap; //!< The joystick stick mapping, if any.
 		int m_AxisMap; //!< The joystick axis mapping.
 		int m_DirectionMap; //!< The joystick direction mapping.
-		
+
 	private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		/// <summary>
 		/// Clears all the member variables of this InputMapping, effectively resetting the members of this abstraction level only.

@@ -27,7 +27,7 @@ namespace RTE {
 		const std::string & GetClassName() const override { return m_sClass.GetName(); }
 
 	/// <summary>
-	/// Static method used in conjunction with ClassInfo to allocate an Entity. 
+	/// Static method used in conjunction with ClassInfo to allocate an Entity.
 	/// This function is passed into the constructor of this Entity's static ClassInfo's constructor, so that it can instantiate MovableObjects.
 	/// </summary>
 	/// <returns>A pointer to the newly dynamically allocated Entity. Ownership is transferred as well.</returns>
@@ -113,7 +113,7 @@ namespace RTE {
 			static std::list<std::string> GetClassNames();
 
 			/// <summary>
-			/// Gets the ClassInfo of a particular RTE class corresponding to a friendly-formatted string name. 
+			/// Gets the ClassInfo of a particular RTE class corresponding to a friendly-formatted string name.
 			/// </summary>
 			/// <param name="name">The friendly name of the desired ClassInfo.</param>
 			/// <returns>A pointer to the requested ClassInfo, or 0 if none that matched the name was found. Ownership is NOT transferred!</returns>
@@ -253,7 +253,7 @@ namespace RTE {
 #pragma endregion
 
 #pragma region INI Handling
-		/// <summary> 
+		/// <summary>
 		/// Only saves out a Preset reference of this to the stream.
 		/// Is only applicable to objects that are not original presets and haven't been altered since they were copied from their original.
 		/// </summary>
@@ -410,12 +410,12 @@ namespace RTE {
 		std::string m_PresetName; //!< The name of the Preset data this was cloned from, if any.
 		std::string m_PresetDescription; //!< The description of the preset in user friendly plain text that will show up in menus etc.
 
-		bool m_IsOriginalPreset; //!< Whether this is to be added to the PresetMan as an original preset instance.  
+		bool m_IsOriginalPreset; //!< Whether this is to be added to the PresetMan as an original preset instance.
 		int m_DefinedInModule; //!< The DataModule ID that this was successfully added to at some point. -1 if not added to anything yet.
 
 		//TODO Consider replacing this with an unordered_set. See https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/88
-		std::list<std::string> m_Groups; //!< List of all tags associated with this. The groups are used to categorize and organize Entities.  
-		std::string m_LastGroupSearch; //!< Last group search string, for more efficient response on multiple tries for the same group name.  
+		std::list<std::string> m_Groups; //!< List of all tags associated with this. The groups are used to categorize and organize Entities.
+		std::string m_LastGroupSearch; //!< Last group search string, for more efficient response on multiple tries for the same group name.
 		bool m_LastGroupResult; //!< Last group search result, for more efficient response on multiple tries for the same group name.
 
 		int m_RandomWeight; //!< Random weight used when picking item using PresetMan::GetRandomBuyableOfGroupFromTech. From 0 to 100. 0 means item won't be ever picked.

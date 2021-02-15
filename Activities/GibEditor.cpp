@@ -26,7 +26,6 @@
 #include "HeldDevice.h"
 #include "Scene.h"
 #include "DataModule.h"
-#include "System.h"
 
 #include "GUI/GUI.h"
 #include "GUI/GUIFont.h"
@@ -109,7 +108,7 @@ int GibEditor::Create(const GibEditor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int GibEditor::ReadProperty(std::string propName, Reader &reader)
+int GibEditor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "CPUTeam")
@@ -132,18 +131,9 @@ int GibEditor::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this GibEditor with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int GibEditor::Save(Writer &writer) const
-{
-    EditorActivity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int GibEditor::Save(Writer &writer) const {
+	EditorActivity::Save(writer);
+	return 0;
 }
 
 
@@ -749,7 +739,7 @@ bool GibEditor::SaveObject(string saveAsName, bool forceOverwrite)
 	// Try to create NewData directory if file does not exist
 	if (!newDataFileExisted)
 	{
-		g_System.MakeDirectory(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/NewData");
+		System::MakeDirectory(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/NewData");
 	}
 
     if (g_PresetMan.AddEntityPreset(m_pEditedObject, m_ModuleSpaceID, forceOverwrite, objectFilePath))

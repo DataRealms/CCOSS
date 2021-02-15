@@ -154,7 +154,7 @@ namespace RTE {
 	//                  is called. If the property isn't recognized by any of the base classes,
 	//                  false is returned, and the reader's position is untouched.
 
-	int MultiplayerServerLobby::ReadProperty(std::string propName, Reader &reader)
+	int MultiplayerServerLobby::ReadProperty(const std::string_view &propName, Reader &reader)
 	{
 		return Activity::ReadProperty(propName, reader);
 	}
@@ -912,8 +912,6 @@ namespace RTE {
 
 	bool MultiplayerServerLobby::StartGame()
 	{
-		g_NetworkServer.SetInterlacingMode(g_SettingsMan.GetServerUseInterlacing());
-
 		// Get the currently selected Activity
 		const Activity *pActivityPreset = m_pActivitySelect->GetSelectedItem() ? dynamic_cast<const Activity *>(m_pActivitySelect->GetSelectedItem()->m_pEntity) : 0;
 

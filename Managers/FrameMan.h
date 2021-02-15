@@ -16,11 +16,10 @@ namespace RTE {
 	/// <summary>
 	/// The singleton manager over the composition and display of frames.
 	/// </summary>
-	class FrameMan : public Singleton<FrameMan>, public Serializable {
+	class FrameMan : public Singleton<FrameMan> {
+		friend class SettingsMan;
 
 	public:
-
-		SerializableOverrideMethods
 
 		Vector SLOffset[c_MaxScreenCount][c_MaxLayersStoredForNetwork]; //!< SceneLayer offsets for each screen in online multiplayer.
 
@@ -34,7 +33,7 @@ namespace RTE {
 		/// Makes the FrameMan object ready for use, which is to be used with SettingsMan first.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create() override;
+		int Initialize();
 #pragma endregion
 
 #pragma region Destruction
@@ -53,14 +52,14 @@ namespace RTE {
 		/// This will be called by ReinitMainMenu() and MUST NOT BE CALLED ANYWHERE ELSE!
 		/// </summary>
 		void DestroyTempBackBuffers();
-
-		/// <summary>
-		/// Resets the entire FrameMan, including its inherited members, to their default settings or values.
-		/// </summary>
-		void Reset() override { Clear(); }
 #pragma endregion
 
 #pragma region Concrete Methods
+		/// <summary>
+		/// Prints the selected graphics driver message to the console. Has to be done after all managers initialization because ConsoleMan does not exist during FrameMan initialization.
+		/// </summary>
+		void PrintForcedGfxDriverMessage() const;
+
 		/// <summary>
 		/// Updates the state of this FrameMan. Supposed to be done every frame.
 		/// </summary>
@@ -91,37 +90,37 @@ namespace RTE {
 		/// Gets the horizontal resolution of the screen.
 		/// </summary>
 		/// <returns>An int describing the horizontal resolution of the screen in pixels.</returns>
-		unsigned short GetResX() const { return m_ResX; }
+		int GetResX() const { return m_ResX; }
 
 		/// <summary>
 		/// Gets the vertical resolution of the screen.
 		/// </summary>
 		/// <returns>An int describing the vertical resolution of the screen in pixels.</returns>
-		unsigned short GetResY() const { return m_ResY; }
+		int GetResY() const { return m_ResY; }
 
 		/// <summary>
 		/// Gets the horizontal resolution of the screen that will be used next time this FrameMan is Created.
 		/// </summary>
 		/// <returns>An int describing the horizontal resolution of the new screen in pixels.</returns>
-		unsigned short GetNewResX() const { return m_NewResX; }
+		int GetNewResX() const { return m_NewResX; }
 
 		/// <summary>
 		/// Sets the horizontal resolution of the screen that will be used next time this FrameMan is Created.
 		/// </summary>
 		/// <param name="newResX">An int describing the horizontal resolution of the new screen in pixels.</param>
-		void SetNewResX(unsigned short newResX) { m_NewResX = newResX; }
+		void SetNewResX(int newResX) { m_NewResX = newResX; }
 
 		/// <summary>
 		/// Gets the vertical resolution of the screen that will be used next time this FrameMan is Created.
 		/// </summary>
 		/// <returns>An int describing the vertical resolution of the new screen in pixels.</returns>
-		unsigned short GetNewResY() const { return m_NewResY; }
+		int GetNewResY() const { return m_NewResY; }
 
 		/// <summary>
 		/// Sets the vertical resolution of the screen that will be used next time this FrameMan is Created.
 		/// </summary>
 		/// <param name="newResY">An int describing the vertical resolution of the new screen in pixels.</param>
-		void SetNewResY(unsigned short newResY) { m_NewResY = newResY; }
+		void SetNewResY(int newResY) { m_NewResY = newResY; }
 
 		/// <summary>
 		/// Indicates whether a new resolution has been set for the next time this FrameMan is created.
@@ -135,13 +134,13 @@ namespace RTE {
 		/// <param name="width">Resolution width.</param>
 		/// <param name="height">Resolution height.</param>
 		/// <returns>True if resolution is supported.</returns>
-		bool IsValidResolution(unsigned short width, unsigned short height) const;
+		bool IsValidResolution(int width, int height) const;
 
 		/// <summary>
 		/// Tells how many times the screen resolution is being multiplied and the backbuffer stretched across for better readability.
 		/// </summary>
 		/// <returns>What multiple the screen resolution is run in (1 normal).</returns>
-		unsigned short ResolutionMultiplier() const { return m_ResMultiplier; }
+		int ResolutionMultiplier() const { return m_ResMultiplier; }
 
 		/// <summary>
 		/// Gets whether resolution validation in multi-screen mode is disabled or not.
@@ -154,7 +153,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="multiplier">The multiplier to switch to.</param>
 		/// <returns>Error code, anything other than 0 is an error.</returns>
-		int SwitchResolutionMultiplier(unsigned char multiplier = 1);
+		int SwitchResolutionMultiplier(int multiplier = 1);
 
 		/// <summary>
 		/// Gets whether the game window is in fullscreen (borderless window) mode or not.
@@ -195,7 +194,7 @@ namespace RTE {
 		/// <param name="newMultiplier">New resolution multiplier to set window to.</param>
 		/// <param name="endActivity">Whether the current Activity should be ended before performing the switch.</param>
 		/// <returns>Error code, anything other than 0 is an error.</returns>
-		int SwitchResolution(unsigned short newResX, unsigned short newResY, unsigned short newMultiplier = 1, bool endActivity = false);
+		int SwitchResolution(int newResX, int newResY, int newMultiplier = 1, bool endActivity = false);
 #pragma endregion
 
 #pragma region Split-Screen Handling
@@ -234,33 +233,33 @@ namespace RTE {
 		/// Gets the number of currently active screens, counting all splits.
 		/// </summary>
 		/// <returns>The number of currently active screens.</returns>
-		unsigned short GetScreenCount() const { return m_HSplit || m_VSplit ? (m_HSplit && m_VSplit ? 4 : 2) : 1; }
+		int GetScreenCount() const { return m_HSplit || m_VSplit ? (m_HSplit && m_VSplit ? 4 : 2) : 1; }
 
 		/// <summary>
 		/// Gets the width of the individual player screens. This will only be less than the backbuffer resolution if there are split screens.
 		/// </summary>
 		/// <returns>The width of the player screens.</returns>
-		unsigned short GetPlayerScreenWidth() const { return GetPlayerFrameBufferWidth(-1); }
+		int GetPlayerScreenWidth() const { return GetPlayerFrameBufferWidth(-1); }
 
 		/// <summary>
 		/// Gets the height of the individual player screens. This will only be less than the backbuffer resolution if there are split screens.
 		/// </summary>
 		/// <returns>The height of the player screens.</returns>
-		unsigned short GetPlayerScreenHeight() const { return GetPlayerFrameBufferHeight(-1); }
+		int GetPlayerScreenHeight() const { return GetPlayerFrameBufferHeight(-1); }
 
 		/// <summary>
 		/// Gets the width of the specified player screen. This will only be less than the backbuffer resolution if there are split screens.
 		/// </summary>
 		/// <param name="whichPlayer">Player to get screen width for, only used by multiplayer parts.</param>
 		/// <returns>The width of the specified player screen.</returns>
-		unsigned short GetPlayerFrameBufferWidth(short whichPlayer) const;
+		int GetPlayerFrameBufferWidth(int whichPlayer) const;
 
 		/// <summary>
 		/// Gets the height of the specified player screen. This will only be less than the backbuffer resolution if there are split screens.
 		/// </summary>
 		/// <param name="whichPlayer">Player to get screen width for, only used by multiplayer parts.</param>
 		/// <returns>The height of the specified player screen.</returns>
-		unsigned short GetPlayerFrameBufferHeight(short whichPlayer) const;
+		int GetPlayerFrameBufferHeight(int whichPlayer) const;
 #pragma endregion
 
 #pragma region Text Handling
@@ -282,7 +281,7 @@ namespace RTE {
 		/// <param name="text">Text string.</param>
 		/// <param name="isSmall">Whether to use small or large font.</param>
 		/// <returns>Width of the text string.</returns>
-		unsigned short CalculateTextWidth(const std::string &text, bool isSmall);
+		int CalculateTextWidth(const std::string &text, bool isSmall);
 
 		/// <summary>
 		/// Calculates the height of a text string using the given font size.
@@ -291,14 +290,14 @@ namespace RTE {
 		/// <param name="maxWidth">Maximum width of the text string.</param>
 		/// <param name="isSmall">Whether to use small or large font.</param>
 		/// <returns>Height of the text string.</returns>
-		unsigned short CalculateTextHeight(const std::string &text, unsigned short maxWidth, bool isSmall);
+		int CalculateTextHeight(const std::string &text, int maxWidth, bool isSmall);
 
 		/// <summary>
 		/// Gets the message to be displayed on top of each player's screen.
 		/// </summary>
 		/// <param name="whichScreen">Which player screen to get message from.</param>
 		/// <returns>Current message shown to player.</returns>
-		std::string GetScreenText(short whichScreen = 0) const { return (whichScreen >= 0 && whichScreen < c_MaxScreenCount) ? m_ScreenText[whichScreen] : ""; }
+		std::string GetScreenText(int whichScreen = 0) const { return (whichScreen >= 0 && whichScreen < c_MaxScreenCount) ? m_ScreenText[whichScreen] : ""; }
 
 		/// <summary>
 		/// Sets the message to be displayed on top of each player's screen
@@ -308,13 +307,13 @@ namespace RTE {
 		/// <param name="blinkInterval">The interval with which the screen will be blinking, in ms. 0 means no blinking.</param>
 		/// <param name="displayDuration">The duration, in MS to force this message to display. No other message can be displayed before this expires. ClearScreenText overrides it though.</param>
 		/// <param name="centered">Vertically centered on the screen.</param>
-		void SetScreenText(const std::string &message, short whichScreen = 0, unsigned short blinkInterval = 0, short displayDuration = -1, bool centered = false);
+		void SetScreenText(const std::string &message, int whichScreen = 0, int blinkInterval = 0, int displayDuration = -1, bool centered = false);
 
 		/// <summary>
 		/// Clears the message to be displayed on top of each player's screen.
 		/// </summary>
 		/// <param name="whichScreen">Which screen message to clear.</param>
-		void ClearScreenText(short whichScreen = 0);
+		void ClearScreenText(int whichScreen = 0);
 #pragma endregion
 
 #pragma region Drawing
@@ -345,7 +344,7 @@ namespace RTE {
 		/// <param name="screen">Which screen to flash.</param>
 		/// <param name="color">What color to flash it. -1 means no color or flash.</param>
 		/// <param name="periodMS">How long a period to fill the frame with color. If 0, a single-frame flash will happen.</param>
-		void FlashScreen(short screen, int color, float periodMS = 0) { m_FlashScreenColor[screen] = color; m_FlashTimer[screen].SetRealTimeLimitMS(periodMS); m_FlashTimer[screen].Reset(); }
+		void FlashScreen(int screen, int color, float periodMS = 0) { m_FlashScreenColor[screen] = color; m_FlashTimer[screen].SetRealTimeLimitMS(periodMS); m_FlashTimer[screen].Reset(); }
 
 		/// <summary>
 		/// Draws a line that can be dotted or with other effects.
@@ -359,7 +358,7 @@ namespace RTE {
 		/// <param name="skipStart">The start of the skipping phase. If skip is 10 and this is 5, the first dot will be drawn after 5 pixels.</param>
 		/// <param name="shortestWrap">Whether the line should take the shortest possible route across scene wraps.</param>
 		/// <returns>The end state of the skipping phase. Eg if 4 is returned here the last dot was placed 4 pixels ago.</returns>
-		int DrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, unsigned char color, unsigned char altColor = 0, unsigned short skip = 0, unsigned short skipStart = 0, bool shortestWrap = false) const {
+		int DrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, int color, int altColor = 0, int skip = 0, int skipStart = 0, bool shortestWrap = false) const {
 			return SharedDrawLine(bitmap, start, end, color, altColor, skip, skipStart, shortestWrap, false, nullptr);
 		}
 
@@ -374,7 +373,7 @@ namespace RTE {
 		/// <param name="skipStart">The start of the skipping phase. If skip is 10 and this is 5, the first dot will be drawn after 5 pixels.</param>
 		/// <param name="shortestWrap">Whether the line should take the shortest possible route across scene wraps.</param>
 		/// <returns>The end state of the skipping phase. Eg if 4 is returned here the last dot was placed 4 pixels ago.</returns>
-		int DrawDotLine(BITMAP *bitmap, const Vector &start, const Vector &end, BITMAP *dot, unsigned short skip = 0, unsigned short skipStart = 0, bool shortestWrap = false) const {
+		int DrawDotLine(BITMAP *bitmap, const Vector &start, const Vector &end, BITMAP *dot, int skip = 0, int skipStart = 0, bool shortestWrap = false) const {
 			return SharedDrawLine(bitmap, start, end, 0, 0, skip, skipStart, shortestWrap, true, dot);
 		}
 #pragma endregion
@@ -397,56 +396,56 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Which player screen to get backbuffer bitmap for.</param>
 		/// <returns>A pointer to the 8bpp backbuffer BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetNetworkBackBuffer8Ready(short player) const { return m_NetworkBackBufferFinal8[m_NetworkFrameReady][player]; }
+		BITMAP * GetNetworkBackBuffer8Ready(int player) const { return m_NetworkBackBufferFinal8[m_NetworkFrameReady][player]; }
 
 		/// <summary>
 		/// Gets the ready 8bpp backbuffer GUI bitmap used to draw network transmitted image on top of everything.
 		/// </summary>
 		/// <param name="player">Which player screen to get GUI backbuffer bitmap for.</param>
 		/// <returns>A pointer to the 8bpp GUI backbuffer BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetNetworkBackBufferGUI8Ready(short player) const { return m_NetworkBackBufferFinalGUI8[m_NetworkFrameReady][player]; }
+		BITMAP * GetNetworkBackBufferGUI8Ready(int player) const { return m_NetworkBackBufferFinalGUI8[m_NetworkFrameReady][player]; }
 
 		/// <summary>
 		/// Gets the current 8bpp backbuffer bitmap used to draw network transmitted image on top of everything.
 		/// </summary>
 		/// <param name="player">Which player screen to get backbuffer bitmap for.</param>
 		/// <returns>A pointer to the 8bpp backbuffer BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetNetworkBackBuffer8Current(short player) const { return m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][player]; }
+		BITMAP * GetNetworkBackBuffer8Current(int player) const { return m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][player]; }
 
 		/// <summary>
 		/// Gets the current 8bpp backbuffer GUI bitmap used to draw network transmitted image on top of everything.
 		/// </summary>
 		/// <param name="player">Which player screen to get backbuffer bitmap for.</param>
 		/// <returns>A pointer to the 8bpp GUI backbuffer BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetNetworkBackBufferGUI8Current(short player) const { return m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][player]; }
+		BITMAP * GetNetworkBackBufferGUI8Current(int player) const { return m_NetworkBackBufferFinalGUI8[m_NetworkFrameCurrent][player]; }
 
 		/// <summary>
 		/// Gets the ready 8bpp intermediate backbuffer bitmap used to copy network transmitted image to before sending. 
 		/// </summary>
 		/// <param name="player">Which player screen to get intermediate bitmap for.</param>
 		/// <returns>A pointer to the 8bpp intermediate BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetNetworkBackBufferIntermediate8Ready(short player) const { return m_NetworkBackBufferIntermediate8[m_NetworkFrameReady][player]; }
+		BITMAP * GetNetworkBackBufferIntermediate8Ready(int player) const { return m_NetworkBackBufferIntermediate8[m_NetworkFrameReady][player]; }
 
 		/// <summary>
 		/// Gets the ready 8bpp intermediate backbuffer GUI bitmap used to copy network transmitted image to before sending.
 		/// </summary>
 		/// <param name="player">Which player screen to get intermediate GUI bitmap for.</param>
 		/// <returns>A pointer to the 8bpp intermediate GUI BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetNetworkBackBufferIntermediate8Current(short player) const { return m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][player]; }
+		BITMAP * GetNetworkBackBufferIntermediate8Current(int player) const { return m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][player]; }
 
 		/// <summary>
 		/// Gets the current 8bpp intermediate backbuffer bitmap used to copy network transmitted image to before sending. 
 		/// </summary>
 		/// <param name="player">Which player screen to get intermediate bitmap for.</param>
 		/// <returns>A pointer to the 8bpp intermediate BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetNetworkBackBufferIntermediateGUI8Ready(short player) const { return m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameReady][player]; }
+		BITMAP * GetNetworkBackBufferIntermediateGUI8Ready(int player) const { return m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameReady][player]; }
 
 		/// <summary>
 		/// Gets the current 8bpp intermediate backbuffer GUI bitmap used to copy network transmitted image to before sending.
 		/// </summary>
 		/// <param name="player">Which player screen to get intermediate GUI bitmap for.</param>
 		/// <returns>A pointer to the 8bpp intermediate GUI BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetNetworkBackBufferIntermediateGUI8Current(short player) const { return m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][player]; }
+		BITMAP * GetNetworkBackBufferIntermediateGUI8Current(int player) const { return m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][player]; }
 
 		// TODO: Figure out.
 		/// <summary>
@@ -454,7 +453,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="screen"></param>
 		/// <returns></returns>
-		Vector GetTargetPos(short screen) const { return m_TargetPos[m_NetworkFrameReady][screen]; }
+		Vector GetTargetPos(int screen) const { return m_TargetPos[m_NetworkFrameReady][screen]; }
 
 		/// <summary>
 		/// Gets whether we are drawing the contents of the network backbuffers on top of m_BackBuffer8 every frame.
@@ -480,7 +479,7 @@ namespace RTE {
 		/// <param name="player">Player to create new backbuffer for.</param>
 		/// <param name="width">Width of new backbuffer.</param>
 		/// <param name="height">Height of new backbuffer</param>
-		void CreateNewNetworkPlayerBackBuffer(short player, unsigned short width, unsigned short height);
+		void CreateNewNetworkPlayerBackBuffer(int player, int width, int height);
 #pragma endregion
 
 #pragma region Palette Routines
@@ -501,77 +500,71 @@ namespace RTE {
 		/// Fades the palette in from black at a specified speed.
 		/// </summary>
 		/// <param name="fadeSpeed">Speed specified from (slowest) 1 - 64 (fastest).</param>
-		void FadeInPalette(unsigned char fadeSpeed = 1) { PALETTE pal; get_palette(pal); fade_in(pal, Limit(fadeSpeed, 64, 1)); }
+		void FadeInPalette(int fadeSpeed = 1) { PALETTE pal; get_palette(pal); fade_in(pal, Limit(fadeSpeed, 64, 1)); }
 
 		/// <summary>
 		/// Fades the palette out to black at a specified speed.
 		/// </summary>
 		/// <param name="fadeSpeed">Speed specified from (slowest) 1 - 64 (fastest).</param>
-		void FadeOutPalette(unsigned char fadeSpeed = 1) { fade_out(Limit(fadeSpeed, 64, 1)); }
+		void FadeOutPalette(int fadeSpeed = 1) { fade_out(Limit(fadeSpeed, 64, 1)); }
 #pragma endregion
 
 #pragma region Screen Capture
 		/// <summary>
-		/// Dumps a bitmap to a 8bpp BMP file.
+		/// Dumps a bitmap to a 8bpp PNG file.
 		/// </summary>
 		/// <param name="bitmap">The individual bitmap that will be dumped.</param>
 		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
 		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
-		int SaveBitmapToBMP(BITMAP *bitmap, const char *nameBase) { return SaveBitmap(SingleBitmap, nameBase, bitmap); }
+		int SaveBitmapToPNG(BITMAP *bitmap, const char *nameBase) { return SaveBitmap(SingleBitmap, nameBase, bitmap); }
 
 		/// <summary>
-		/// Dumps a bitmap of the screen backbuffer to a 8bpp BMP file.
+		/// Dumps a bitmap of the screen backbuffer to a 8bpp PNG file.
 		/// </summary>
 		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
 		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
-		int SaveScreenToBMP(const char *nameBase) { return SaveBitmap(ScreenDump, nameBase); }
+		int SaveScreenToPNG(const char *nameBase) { return SaveBitmap(ScreenDump, nameBase); }
 
 		/// <summary>
-		/// Dumps a bitmap of everything on the scene to the BMP file.
+		/// Dumps a bitmap of everything on the scene to a PNG file.
 		/// </summary>
 		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
 		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
-		int SaveWorldToBMP(const char *nameBase) { return SaveBitmap(WorldDump, nameBase); }
+		int SaveWorldToPNG(const char *nameBase) { return SaveBitmap(WorldDump, nameBase); }
 
 		/// <summary>
-		/// Dumps a miniature screenshot of the whole scene to be used as a preview.
+		/// Dumps a miniature screenshot of the whole scene to be used as a preview to a PNG file.
 		/// </summary>
 		/// <param name="nameBase">The filename of the file to save to, WITHOUT EXTENSION.</param>
 		/// <returns>0 for success, anything below 0 is a sign of failure.</returns>
-		int SaveWorldToPreviewBMP(const char *nameBase) { return SaveBitmap(ScenePreviewDump, nameBase); }
-#pragma endregion
-
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Entity.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const override { return c_ClassName; }
+		int SaveWorldPreviewToPNG(const char *nameBase) { return SaveBitmap(ScenePreviewDump, nameBase); }
 #pragma endregion
 
 	protected:
 
-		static const std::string c_ClassName; //!< The friendly-formatted type name of this object.
-
-		static constexpr unsigned short m_BPP = 32; //!< Color depth (bits per pixel).
+		static constexpr int m_BPP = 32; //!< Color depth (bits per pixel).
 
 		int m_GfxDriver; //!< The graphics driver that will be used for rendering.
+		bool m_ForceVirtualFullScreenGfxDriver; //!< Whether to use the borderless window driver. Overrides any other windowed drivers. The driver that will be used is GFX_DIRECTX_WIN_BORDERLESS.
+		bool m_ForceDedicatedFullScreenGfxDriver; //!< Whether to use the dedicated fullscreen driver. Overrides any other driver. The driver that will be used is GFX_DIRECTX_ACCEL.
+
+		std::string m_GfxDriverMessage; //!< String containing the currently selected graphics driver message. Used for printing it to the console after all managers finished initializing.
 
 		bool m_DisableMultiScreenResolutionValidation; //!< Whether to disable resolution validation when running multi-screen mode or not. Allows setting whatever crazy resolution that may or may not crash.
 
-		unsigned short m_NumScreens; //!< Number of physical screens.
-		unsigned short m_ScreenResX; //!< Width of the primary or all physical screens combined if more than one available (desktop resolution). 
-		unsigned short m_ScreenResY; //!< Height of the primary or tallest screen if more than one available (desktop resolution).
-		unsigned short m_PrimaryScreenResX; //!< Width of the primary physical screen only.
-		unsigned short m_PrimaryScreenResY; //!< Height of the primary physical screen only.
+		int m_NumScreens; //!< Number of physical screens.
+		int m_ScreenResX; //!< Width of the primary or all physical screens combined if more than one available (desktop resolution). 
+		int m_ScreenResY; //!< Height of the primary or tallest screen if more than one available (desktop resolution).
+		int m_PrimaryScreenResX; //!< Width of the primary physical screen only.
+		int m_PrimaryScreenResY; //!< Height of the primary physical screen only.
 
-		unsigned short m_ResX; //!< Game window width.
-		unsigned short m_ResY; //!< Game window height.
-		unsigned short m_NewResX; //!< New game window width that will take effect next time the FrameMan is started.
-		unsigned short m_NewResY; //!< New game window height that will take effect next time the FrameMan is started.
+		int m_ResX; //!< Game window width.
+		int m_ResY; //!< Game window height.
+		int m_NewResX; //!< New game window width that will take effect next time the FrameMan is started.
+		int m_NewResY; //!< New game window height that will take effect next time the FrameMan is started.
 
-		unsigned short m_ResMultiplier; //!< The number of times the game window and image should be multiplied and stretched across for better visibility.
-		unsigned short m_NewResMultiplier; //!< This is the new multiple that will take effect next time the FrameMan is started.
+		int m_ResMultiplier; //!< The number of times the game window and image should be multiplied and stretched across for better visibility.
+		int m_NewResMultiplier; //!< This is the new multiple that will take effect next time the FrameMan is started.
 
 		bool m_ResChanged; //!< Whether the resolution was changed through the settings fullscreen/upscaled fullscreen buttons.
 
@@ -582,21 +575,21 @@ namespace RTE {
 		bool m_VSplit; //!< Whether the screen is split vertically across the screen, ie as two splitscreens side by side.
 		bool m_HSplitOverride; //!< Whether the screen is set to split horizontally in settings.
 		bool m_VSplitOverride; //!< Whether the screen is set to split vertically in settings.
-	
+
 		ContentFile m_PaletteFile; //!< File of the screen palette.
 		PALETTE m_Palette; //!< Array of RGB entries read from the palette file.
 
-		unsigned char m_BlackColor; //!< Palette index for the black color.
-		unsigned char m_AlmostBlackColor; //!< Palette index for the closest to black color.
+		int m_BlackColor; //!< Palette index for the black color.
+		int m_AlmostBlackColor; //!< Palette index for the closest to black color.
 
 		COLOR_MAP m_LessTransTable; //!< Color table for low transparency.
 		COLOR_MAP m_HalfTransTable; //!< Color table for medium transparency.
 		COLOR_MAP m_MoreTransTable; //!< Color table for high transparency.
-		
+
 		BITMAP *m_PlayerScreen; //!< Intermediary split screen bitmap.
-		unsigned short m_PlayerScreenWidth; //!< Width of the screen of each player. Will be smaller than resolution only if the screen is split.
-		unsigned short m_PlayerScreenHeight; //!< Height of the screen of each player. Will be smaller than resolution only if the screen is split.
-	
+		int m_PlayerScreenWidth; //!< Width of the screen of each player. Will be smaller than resolution only if the screen is split.
+		int m_PlayerScreenHeight; //!< Height of the screen of each player. Will be smaller than resolution only if the screen is split.
+
 		AllegroScreen *m_GUIScreen; //!< GUI screen object kept and owned just for the fonts.
 		GUIFont *m_SmallFont; //!< Pointer to the standard small font for quick access.
 		GUIFont *m_LargeFont; //!< Pointer to the standard large font for quick access.
@@ -628,8 +621,8 @@ namespace RTE {
 		bool m_StoreNetworkBackBuffer; //!< If true, dumps the contents of the m_BackBuffer8 to the network backbuffers every frame.
 		bool m_DrawNetworkBackBuffer; //!< If true, draws the contents of the network backbuffers on top of m_BackBuffer8 every frame in FrameMan.Draw.
 
-		unsigned short m_NetworkFrameCurrent; //!< Which frame index is being rendered, 0 or 1.
-		unsigned short m_NetworkFrameReady; //!< Which frame is rendered and ready for transmission, 0 or 1.
+		int m_NetworkFrameCurrent; //!< Which frame index is being rendered, 0 or 1.
+		int m_NetworkFrameReady; //!< Which frame is rendered and ready for transmission, 0 or 1.
 
 		std::mutex m_NetworkBitmapLock[c_MaxScreenCount]; //!< Mutex lock for thread safe updating of the network backbuffer bitmaps.
 
@@ -638,7 +631,7 @@ namespace RTE {
 		/// <summary>
 		/// Enumeration with different settings for the SaveBitmap() method.
 		/// </summary>
-		enum SaveBitmapMode { SingleBitmap = 0, ScreenDump, WorldDump, ScenePreviewDump};
+		enum SaveBitmapMode { SingleBitmap, ScreenDump, WorldDump, ScenePreviewDump };
 
 		/// <summary>
 		/// BITMAPs to temporarily store the backbuffers when recreating them. These are needed to have a pointer to their original allocated memory after overwriting them so it can be deleted.
@@ -670,12 +663,17 @@ namespace RTE {
 		void SetGraphicsDriver();
 
 		/// <summary>
+		/// Sets the window switching mode and callbacks. These set the behavior of the game window when it loses/gains focus.
+		/// </summary>
+		void SetDisplaySwitchMode() const;
+
+		/// <summary>
 		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during Create().
 		/// </summary>
 		/// <param name="resX">Game window width to check.</param>
 		/// <param name="resY">Game window height to check.</param>
 		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
-		void ValidateResolution(unsigned short &resX, unsigned short &resY, unsigned short &resMultiplier);
+		void ValidateResolution(int &resX, int &resY, int &resMultiplier);
 
 		/// <summary>
 		/// Checks whether the passed in multi-screen resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior. This is called during ValidateResolution().
@@ -683,7 +681,7 @@ namespace RTE {
 		/// <param name="resX">Game window width to check.</param>
 		/// <param name="resY">Game window height to check.</param>
 		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
-		void ValidateMultiScreenResolution(unsigned short &resX, unsigned short &resY, unsigned short &resMultiplier);
+		void ValidateMultiScreenResolution(int &resX, int &resY, int &resMultiplier);
 
 		/// <summary>
 		/// Creates all the frame buffer bitmaps to be used by FrameMan. This is called during Create().
@@ -706,21 +704,21 @@ namespace RTE {
 		/// </summary>
 		/// <param name="playerScreen">The player screen to update offset for.</param>
 		/// <param name="screenOffset">Vector representing the screen offset.</param>
-		void UpdateScreenOffsetForSplitScreen(short playerScreen, Vector &screenOffset) const;
+		void UpdateScreenOffsetForSplitScreen(int playerScreen, Vector &screenOffset) const;
 
 		/// <summary>
 		/// Draws all the text messages to the specified player screen. This is called during Draw().
 		/// </summary>
 		/// <param name="playerScreen">The player screen the text will be shown on.</param>
 		/// <param name="playerGUIBitmap">The bitmap the text will be drawn on.</param>
-		void DrawScreenText(short playerScreen, AllegroBitmap playerGUIBitmap);
+		void DrawScreenText(int playerScreen, AllegroBitmap playerGUIBitmap);
 
 		/// <summary>
 		/// Draws the screen flash effect to the specified player screen with parameters set by FlashScreen(). This is called during Draw().
 		/// </summary>
 		/// <param name="playerScreen">The player screen the flash effect will be shown to.</param>
 		/// <param name="playerGUIBitmap">The bitmap the flash effect will be drawn on.</param>
-		void DrawScreenFlash(short playerScreen, BITMAP *playerGUIBitmap);
+		void DrawScreenFlash(int playerScreen, BITMAP *playerGUIBitmap);
 
 		/// <summary>
 		/// Renders current frame and marks it ready for network transmission. This is called during Draw().
@@ -752,14 +750,13 @@ namespace RTE {
 		/// </summary>
 		/// <param name="fileName">The full name of the file that is being saved. Path and everything included.</param>
 		/// <param name="bitmapToSave">The BITMAP that is being saved into a file.</param>
-		/// <param name="paletteToIndexWith">What PALETTE to use for indexing the file.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		/// <remarks>
 		/// This method is a workaround to Allegro being unable to set a color conversion mode when saving files.
 		/// It works by first saving the 32bpp bitmap as is, then loading it back under the REDUCE_TO_256 color conversion mode, blitting it to a fresh bitmap and saving it again with the passed in palette.
 		/// The re-blitted bitmap is properly 8bpp and will be indexed correctly. The old saved file is deleted in the process before the new one is saved.
 		/// </remarks>
-		int SaveIndexedBitmap(char *fileName, BITMAP *bitmapToSave, PALETTE paletteToIndexWith) const;
+		int SaveIndexedPNG(const char *fileName, BITMAP *bitmapToSave) const;
 #pragma endregion
 
 		/// <summary>
@@ -776,7 +773,7 @@ namespace RTE {
 		/// <param name="drawDot">Whether to draw a regular line or a dot line. True for dot line.</param>
 		/// <param name="dot">The bitmap to be used for dots (will be centered).</param>
 		/// <returns>The end state of the skipping phase. Eg if 4 is returned here the last dot was placed 4 pixels ago.</returns>
-		int SharedDrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, unsigned char color, unsigned char altColor = 0, unsigned short skip = 0, unsigned short skipStart = 0, bool shortestWrap = false, bool drawDot = false, BITMAP *dot = nullptr) const;
+		int SharedDrawLine(BITMAP *bitmap, const Vector &start, const Vector &end, int color, int altColor = 0, int skip = 0, int skipStart = 0, bool shortestWrap = false, bool drawDot = false, BITMAP *dot = nullptr) const;
 
 		/// <summary>
 		/// Gets the requested font from the GUI engine's current skin. Ownership is NOT transferred!

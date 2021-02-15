@@ -25,8 +25,6 @@ extern bool g_InActivity;
 
 namespace RTE {
 
-	const std::string NetworkServer::c_ClassName = "NetworkServer";
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::BackgroundSendThreadFunction(NetworkServer *server, short player) {
@@ -57,6 +55,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::Clear() {
+		m_SleepWhenIdle = false;
+		m_SimSleepWhenIdle = false;
+
 		for (short i = 0; i < c_MaxClients; i++) {
 			m_BackBuffer8[i] = 0;
 			m_BackBufferGUI8[i] = 0;
@@ -140,13 +141,14 @@ namespace RTE {
 		m_TransmitAsBoxes = true;
 		m_BoxWidth = 32;
 		m_BoxHeight = 44;
+		m_UseNATService = false;
 		m_NatServerConnected = false;
 		m_LastPackedReceived.Reset();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int NetworkServer::Create() {
+	int NetworkServer::Initialize() {
 		m_IsInServerMode = false;
 		m_ServerPort = "";
 		m_Server = RakNet::RakPeerInterface::GetInstance();
@@ -160,16 +162,6 @@ namespace RTE {
 			m_LZ4CompressionState[i] = malloc(LZ4_sizeofStateHC());
 			m_LZ4FastCompressionState[i] = malloc(LZ4_sizeofState());
 		}
-
-		m_UseHighCompression = g_SettingsMan.GetServerUseHighCompression();
-		m_UseFastCompression = g_SettingsMan.GetServerUseFastCompression();
-		m_HighCompressionLevel = g_SettingsMan.GetServerHighCompressionLevel();
-		m_FastAccelerationFactor = g_SettingsMan.GetServerFastAccelerationFactor();
-		m_UseInterlacing = g_SettingsMan.GetServerUseInterlacing();
-		m_EncodingFps = g_SettingsMan.GetServerEncodingFps();
-		m_TransmitAsBoxes = g_SettingsMan.GetServerTransmitAsBoxes();
-		m_BoxWidth = g_SettingsMan.GetServerBoxWidth();
-		m_BoxHeight = g_SettingsMan.GetServerBoxHeight();
 
 		return 0;
 	}
@@ -213,6 +205,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void NetworkServer::SetServerPort(const std::string &newPort) {
+		bool useDefault = false;
+		for (const char &stringChar : newPort) {
+			if (!std::isdigit(stringChar)) {
+				g_ConsoleMan.PrintString("ERROR: Invalid port passed into \"-server\" argument, using default (8000) instead!");
+				useDefault = true;
+				break;
+			}
+		}
+		m_ServerPort = useDefault ? "8000" : newPort;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void NetworkServer::Start() {
 		RakNet::SocketDescriptor socketDescriptors[1];
 		socketDescriptors[0].port = atoi(m_ServerPort.c_str());
@@ -228,7 +234,7 @@ namespace RTE {
 			g_ConsoleMan.PrintString("SERVER: STARTED!");
 		}
 
-		if (g_SettingsMan.GetUseNATService()) {
+		if (m_UseNATService) {
 			g_ConsoleMan.PrintString("SERVER: Connecting to NAT service");
 
 			std::string serverName;
@@ -1716,7 +1722,7 @@ namespace RTE {
 			}
 		}
 
-		if (g_SettingsMan.GetServerSleepWhenIdle() && m_LastPackedReceived.IsPastRealMS(10000)) {
+		if (m_SleepWhenIdle && m_LastPackedReceived.IsPastRealMS(10000)) {
 			short playersConnected = 0;
 			for (short player = 0; player < c_MaxClients; player++)
 				if (IsPlayerConnected(player)) {

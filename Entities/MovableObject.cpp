@@ -263,7 +263,7 @@ int MovableObject::Create(const MovableObject &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int MovableObject::ReadProperty(std::string propName, Reader &reader)
+int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 	if (propName == "Mass")
 	{
@@ -332,8 +332,7 @@ int MovableObject::ReadProperty(std::string propName, Reader &reader)
 		PieMenuGUI::AddAvailableSlice(newSlice);
 	}
 	else if (propName == "ScriptPath") {
-		std::string scriptPath = reader.ReadPropValue();
-		CorrectBackslashesInPaths(scriptPath);
+		std::string scriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
 		if (LoadScript(scriptPath) == -2) { reader.ReportError("Duplicate script path " + scriptPath); }
 	} else if (propName == "ScreenEffect") {
         reader >> m_ScreenEffectFile;
@@ -867,14 +866,8 @@ void MovableObject::ApplyImpulses()
 
 void MovableObject::PreTravel()
 {
-    if (m_GetsHitByMOs)
-    {
-		if (g_SettingsMan.PreciseCollisions())
-		{
-			// Temporarily remove the representation of this from the scene MO layers
-			Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawNoMOID, true);
-		}
-    }
+	// Temporarily remove the representation of this from the scene MO layers
+	if (m_GetsHitByMOs) { Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawNoMOID, true); }
 
     // Save previous position and velocities before moving
     m_PrevPos = m_Pos;
@@ -909,16 +902,12 @@ void MovableObject::PostTravel()
     if (m_IgnoresAGHitsWhenSlowerThan > 0)
         m_IgnoresAtomGroupHits = m_Vel.GetLargest() < m_IgnoresAGHitsWhenSlowerThan;
 
-    if (m_GetsHitByMOs)
-    {
-		if (g_SettingsMan.PreciseCollisions())
-		{
-			// Replace updated MOID representation to scene after Update
-			Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);
-		}
-        m_AlreadyHitBy.clear();
-    }
-    m_IsUpdated = true;
+	if (m_GetsHitByMOs) {
+		// Replace updated MOID representation to scene after Update
+		Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);
+		m_AlreadyHitBy.clear();
+	}
+	m_IsUpdated = true;
 
     // Check for age expiration
     if (m_Lifetime && m_AgeTimer.GetElapsedSimTimeMS() > m_Lifetime)
@@ -1023,27 +1012,17 @@ void MovableObject::GetMOIDs(std::vector<MOID> &MOIDs) const
 //                  itself and its children for this frame.
 //                  BITMAP of choice.
 
-void MovableObject::RegMOID(vector<MovableObject *> &MOIDIndex,
-                            MOID rootMOID,
-                            bool makeNewMOID)
-{
-    // Make a new MOID for itself
-    if (makeNewMOID)
-    {
-		// Skip g_NoMOID item
-		if (MOIDIndex.size() == g_NoMOID)
-			MOIDIndex.push_back(0);
+void MovableObject::RegMOID(vector<MovableObject *> &MOIDIndex, MOID rootMOID, bool makeNewMOID) {
+    if (!makeNewMOID && GetParent()) {
+        m_MOID = GetParent()->GetID();
+    } else {
+        if (MOIDIndex.size() == g_NoMOID) { MOIDIndex.push_back(0); }
 
 		m_MOID = MOIDIndex.size();
 		MOIDIndex.push_back(this);
     }
-    // Use the parent's MOID instead (the two are considered the same MO)
-    else
-        m_MOID = MOIDIndex.size() - 1;
 
-    // Assign the root MOID
     m_RootMOID = (rootMOID == g_NoMOID ? m_MOID : rootMOID);
-
 }
 
 } // namespace RTE

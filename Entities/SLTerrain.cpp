@@ -25,7 +25,7 @@ namespace RTE {
 
 ConcreteClassInfo(SLTerrain, SceneLayer, 0)
 
-const string SLTerrain::TerrainFrosting::m_sClassName = "TerrainFrosting";
+const string SLTerrain::TerrainFrosting::c_ClassName = "TerrainFrosting";
 BITMAP * SLTerrain::m_spTempBitmap16 = 0;
 BITMAP * SLTerrain::m_spTempBitmap32 = 0;
 BITMAP * SLTerrain::m_spTempBitmap64 = 0;
@@ -89,7 +89,7 @@ int SLTerrain::TerrainFrosting::Create(const TerrainFrosting &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int SLTerrain::TerrainFrosting::ReadProperty(std::string propName, Reader &reader)
+int SLTerrain::TerrainFrosting::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "TargetMaterial")
         reader >> m_TargetMaterial;
@@ -575,7 +575,7 @@ int SLTerrain::ClearData()
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int SLTerrain::ReadProperty(std::string propName, Reader &reader)
+int SLTerrain::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "BackgroundTexture")
         reader >> m_BGTextureFile;
@@ -1103,8 +1103,7 @@ void SLTerrain::ApplyMovableObject(MovableObject *pMObject)
         // Temporary bitmap holder, doesn't own
         BITMAP *pSprite = pMOSprite->GetSpriteFrame();
 
-// TODO: Make the diameter more accurate.. now we have to double it because it's not taking into account anything attached to the MO
-        float diameter = pMOSprite->GetDiameter() * 2;
+        float diameter = pMOSprite->GetDiameter();
         // Choose an appropriate size
         if (diameter >= 256)
             pTempBitmap = m_spTempBitmap512;

@@ -327,7 +327,7 @@ friend class Atom;
 // Arguments:       None.
 // Return value:    The largest diameter across its graphical representation.
 
-    virtual float GetDiameter() const { return 2.0f; }
+    virtual float GetDiameter() const { return 2.0F; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -778,15 +778,10 @@ friend class Atom;
     void SetAge(double newAge = 0) { m_AgeTimer.SetElapsedSimTimeMS(newAge); }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-// Arguments:       An int specifying the MOID that this MovableObject is
-//                  assigned for this frame.
-// Return value:    None.
-
-    virtual void SetID(const MOID newID) { m_MOID = newID; }
+    /// <summary>
+    /// Sets the MOID of this MovableObject to be g_NoMOID (255) for this frame.
+    /// </summary>
+    virtual void SetAsNoID() { m_MOID = g_NoMOID; }
 
     /// <summary>
     /// Sets this object as having been added to MovableMan. Should only really be done in MovableMan::AddObject.
@@ -827,17 +822,18 @@ friend class Atom;
     void SetToGetHitByMOs(bool getHitByMOs = true) { m_GetsHitByMOs = getHitByMOs; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetWhichMOToNotHit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets this MO to not hit a specific other MO and all its children even
-//                  though MO hitting is enabled on this MovableObject
-// Arguments:       A pointer to the MO to not be hitting. 0 means don't ignore anyhting.
-//                  Ownership is not transferred!
-//                  For how long, in S, to ignore the above. Negative number means forever.
-// Return value:    None.
+    /// <summary>
+    /// Gets the MO this MO is set not to hit even when MO hitting is enabled on this MO.
+    /// </summary>
+    /// <returns>The MO this MO is set not to hit.</returns>
+    const MovableObject * GetWhichMOToNotHit() const { return m_pMOToNotHit; }
 
-    void SetWhichMOToNotHit(MovableObject *moToNotHit = 0, float forHowLong = -1) { m_pMOToNotHit = moToNotHit; m_MOIgnoreTimer.Reset(); m_MOIgnoreTimer.SetSimTimeLimitS(forHowLong); }
+    /// <summary>
+    /// Sets this MO to not hit a specific other MO and all its children even when MO hitting is enabled on this MO.
+    /// </summary>
+    /// <param name="moToNotHit">A pointer to the MO to not be hitting. Null pointer means don't ignore anyhting. Ownership is NOT transferred!</param>
+    /// <param name="forHowLong">How long, in seconds, to ignore the specified MO. A negative number means forever.</param>
+    virtual void SetWhichMOToNotHit(MovableObject *moToNotHit = nullptr, float forHowLong = -1) { m_pMOToNotHit = moToNotHit; m_MOIgnoreTimer.Reset(); m_MOIgnoreTimer.SetSimTimeLimitS(forHowLong); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1099,7 +1095,7 @@ friend class Atom;
 		RTEAssert(offset.GetLargest() < 5000, "HUEG IMPULSE FORCE OFFSET");
 #endif
 
-		m_ImpulseForces.push_back(std::make_pair(impulse, offset));
+        m_ImpulseForces.push_back({impulse, offset});
 	}
 
 
@@ -1431,6 +1427,11 @@ friend class Atom;
 
 	void SetForceOffset(int n, Vector v) { if (n > 0 && n < m_Forces.size()) m_Forces[n].second = v; }
 
+    /// <summary>
+    /// Gets the pairs of impulse forces and their offsets that have to be applied.
+    /// </summary>
+    /// <returns>A constant reference to the deque of impulses for this MovableObject.</returns>
+    const std::deque <std::pair<Vector, Vector>> &GetImpulses() { return m_ImpulseForces; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetImpulsesCount()

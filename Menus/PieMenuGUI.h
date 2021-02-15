@@ -116,6 +116,7 @@ public:
 
     public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
     enum SliceDirection
@@ -207,16 +208,6 @@ public:
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
-    // Method:  GetClassName
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the class name of this Entity.
-    // Arguments:       None.
-    // Return value:    A string with the friendly-formatted type name of this object.
-
-		const std::string & GetClassName() const override { return c_ClassName; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
     // Method:          GetScriptPath
     //////////////////////////////////////////////////////////////////////////////////////////
     // Description:     Gets the file path of the scripted file this should run when activated
@@ -245,8 +236,6 @@ public:
 		SliceDirection GetDirection() const { return (SliceDirection)m_Direction; }
 
 
-        // Member variables
-        static const std::string c_ClassName;
         // Description of what this slice option does
         std::string m_Description;
         // The Slice type, also serves as icon index
@@ -278,6 +267,7 @@ public:
 
     private:
 
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Method:          Clear

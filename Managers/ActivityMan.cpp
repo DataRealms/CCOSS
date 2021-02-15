@@ -14,17 +14,15 @@ extern bool g_InActivity;
 
 namespace RTE {
 
-	const string ActivityMan::c_ClassName = "ActivityMan";
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ActivityMan::Clear() {
 		m_DefaultActivityType = "GATutorial";
 		m_DefaultActivityName = "Tutorial Mission";
-		m_Activity = 0;
-		m_StartActivity = 0;
+		m_Activity = nullptr;
+		m_StartActivity = nullptr;
 		m_LastMusicPath = "";
-		m_LastMusicPos = 0;
+		m_LastMusicPos = 0.0F;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -77,6 +75,7 @@ namespace RTE {
 
 		m_LastMusicPath = "";
 		m_LastMusicPos = 0;
+		g_AudioMan.PauseAllMobileSounds(false);
 
 		return error;
 	}
@@ -121,6 +120,7 @@ namespace RTE {
 
 			m_Activity->SetPaused(pause);
 			g_InActivity = !pause;
+			g_AudioMan.PauseAllMobileSounds(pause);
 			g_ConsoleMan.PrintString("SYSTEM: Activity \"" + m_Activity->GetPresetName() + "\" was " + (pause ? "paused" : "resumed"));
 		} else {
 			g_ConsoleMan.PrintString("ERROR: No Activity to pause!");

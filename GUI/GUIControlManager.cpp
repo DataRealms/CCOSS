@@ -488,7 +488,7 @@ bool GUIControlManager::Save(const std::string Filename)
 
     bool Result = Save(&W);
     
-    W.Destroy();
+    W.EndWrite();
 
     return Result;
 }
@@ -520,111 +520,63 @@ bool GUIControlManager::Save(Writer *W)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Load
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Loads the layout from a file.
-
-bool GUIControlManager::Load(const string Filename, bool keepOld)
-{
-    Reader R;
-
-    if (R.Create((char *)Filename.c_str()) != 0)
-        return false;
-    
-    bool Result = Load(&R, keepOld);
-
-    R.Destroy();
-
-    return Result;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Load
-//////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Loads the layout from a Reader class.
 // Arguments:       Reader class
 // Returns:         True if sucessful.
 
-bool GUIControlManager::Load(Reader *R, bool keepOld)
-{
-    assert(R);
+bool GUIControlManager::Load(const std::string &Filename, bool keepOld) {
+	Reader reader;
+	if (reader.Create(Filename.c_str()) != 0) {
+		return false;
+	}
 
-    // Clear the current layout, IF directed to
-    if (!keepOld)
-        Clear();
+	// Clear the current layout, IF directed to
+	if (!keepOld) { Clear(); }
 
-    vector<GUIProperties *> ControlList;
-    ControlList.clear();
+	std::vector<GUIProperties *> ControlList;
+	ControlList.clear();
 
-    GUIProperties *CurProp = 0;
+	GUIProperties *CurProp = nullptr;
 
-    while(!R->GetStream()->eof()) {
-        char line[2048];
-        R->ReadLine(line, 2048);
+	while (!reader.GetStream()->eof()) {
+		std::string line = reader.ReadLine();
 
-        // Ignore blank lines
-        if (strlen(line) == 0)
-            continue;
+		if (line.empty()) {
+			continue;
+		}
 
-        // Is the line a section?
-        if (line[0] == '[' && line[strlen(line)-1] == ']') {
-            line[strlen(line)-1] = '\0';
-            GUIUtil::SafeOverlappingStrCpy(line, GUIUtil::TrimString(line+1));
+		// Is the line a section?
+		if (line.front() == '[' && line.back() == ']') {
+			GUIProperties *p = new GUIProperties(line.substr(1, line.size() - 2));
+			CurProp = p;
+			ControlList.push_back(p);
+			continue;
+		}
 
-            GUIProperties *p = new GUIProperties(line);
+		// Is the line a valid property?
+		size_t Position = line.find_first_of('=');
+		if (Position != std::string::npos) {
+			// Break the line into variable & value, but only add a property if it belongs to a section
+			if (CurProp) {
+				// Grab the variable & value strings and trim them
+				std::string Name = reader.TrimString(line.substr(0, Position));
+				std::string Value = reader.TrimString(line.substr(Position + 1, std::string::npos));
 
-            CurProp = p;
+				// Add it to the current property
+				CurProp->AddVariable(Name, Value);
+			}
+			continue;
+		}
+	}
 
-            ControlList.push_back(p);
-
-            continue;
-        }
-
-        // Is the line a valid property?
-        char *ptr = strchr(line, '=');
-        if (ptr != 0) {
-            // Break the line into variable & value
-            int Position = (int)(ptr - line + 1);
-
-            // Only add a property if it belongs to a section
-            if (CurProp) {
-                char Name[256];
-                char Value[2048];
-
-                // Grab the variable & value strings
-                strncpy(Name, line, Position-1);
-                Name[Position-1] = '\0';
-                strncpy(Value, line+Position, strlen(line)-Position);
-                Value[strlen(line)-Position] = '\0';
-
-                // Trim the strings
-                GUIUtil::SafeOverlappingStrCpy(Name, GUIUtil::TrimString(Name));
-                GUIUtil::SafeOverlappingStrCpy(Value, GUIUtil::TrimString(Value));
-
-                // Add it to the current property
-                CurProp->AddVariable(Name, Value);
-            }
-            continue;
-        }
-
-        // Some stray line
-        // Ignore it
-    }
-
-
-    /*
-     * Go through each control item and create it
-     */
-    vector<GUIProperties *>::iterator it;
+    // Go through each control item and create it
+    std::vector<GUIProperties *>::iterator it;
     for(it = ControlList.begin(); it != ControlList.end(); it++) {
         GUIProperties *Prop = *it;
-
         AddControl(Prop);
-
         // Free the property class
         delete Prop;
     }
 
-
-    // Done
     return true;
 }

@@ -103,7 +103,7 @@ int AreaEditor::Create(const AreaEditor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int AreaEditor::ReadProperty(std::string propName, Reader &reader)
+int AreaEditor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "CPUTeam")
@@ -126,18 +126,9 @@ int AreaEditor::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this AreaEditor with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int AreaEditor::Save(Writer &writer) const
-{
-    EditorActivity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int AreaEditor::Save(Writer &writer) const {
+	EditorActivity::Save(writer);
+	return 0;
 }
 
 

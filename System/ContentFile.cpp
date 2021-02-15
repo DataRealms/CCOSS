@@ -54,7 +54,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ContentFile::ReadProperty(std::string propName, Reader &reader) {
+	int ContentFile::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "FilePath" || propName == "Path") {
 			SetDataPath(reader.ReadPropValue());
 		} else {
@@ -68,10 +68,8 @@ namespace RTE {
 	int ContentFile::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		if (!m_DataPath.empty()) {
-			writer.NewProperty("FilePath");
-			writer << m_DataPath;
-		}
+		if (!m_DataPath.empty()) { writer.NewPropertyWithValue("FilePath", m_DataPath); }
+
 		return 0;
 	}
 
@@ -82,9 +80,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ContentFile::SetDataPath(const std::string &newDataPath) {
-		m_DataPath = newDataPath;
-		CorrectBackslashesInPaths(m_DataPath);
-
+		m_DataPath = CorrectBackslashesInPath(newDataPath);
 		m_DataPathExtension = std::filesystem::path(m_DataPath).extension().string();
 
 		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n" + m_DataPath + "\n" + GetFormattedReaderPosition());
@@ -248,7 +244,7 @@ namespace RTE {
 		FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(m_DataPath.c_str(), fmodFlags, nullptr, &returnSample);
 
 		if (result != FMOD_OK) {
-			const std::string errorMessage = "Failed to create sound because of FMOD error: " + std::string(FMOD_ErrorString(result)) + " The path and name were: ";
+			const std::string errorMessage = "Failed to create sound because of FMOD error:\n" + std::string(FMOD_ErrorString(result)) + "\nThe path and name were: ";
 			RTEAssert(!abortGameForInvalidSound, errorMessage + "\n\n" + m_DataPathAndReaderPosition);
 			g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
 			return returnSample;

@@ -135,6 +135,8 @@ void Actor::Clear()
     m_StuckTimer.Reset();
     m_FallTimer.Reset();
     m_DigStrength = 1;
+
+    m_DamageMultiplier = 1.0F;
 }
 
 
@@ -323,7 +325,7 @@ int Actor::Create(const Actor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int Actor::ReadProperty(std::string propName, Reader &reader)
+int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "BodyHitSound")
         reader >> m_BodyHitSound;
@@ -506,21 +508,15 @@ int Actor::LoadScript(std::string const &scriptPath, bool loadAsEnabledScript) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this Actor, including the mass of its
-//                  currently attached body parts and inventory.
-
-float Actor::GetMass() const
-{
-    float totalMass = MOSRotating::GetMass();
-    for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
-        totalMass += (*itr)->GetMass();
-    totalMass += m_GoldCarried * g_SceneMan.GetKgPerOz();
-    return totalMass;
+float Actor::GetInventoryMass() const {
+    float inventoryMass = 0.0F;
+    for (const MovableObject *inventoryItem : m_Inventory) {
+        inventoryMass += inventoryItem->GetMass();
+    }
+    return inventoryMass;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -743,19 +739,6 @@ void Actor::RestDetection()
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FacingAngle
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adjusts an absolute aiming angle based on whether this Actor is facing
-//                  left or right.
-
-float Actor::FacingAngle(float angle) const
-{
-    return (m_HFlipped ? c_PI : 0) + (angle * (m_HFlipped ? -1 : 1));
-//    return (angle * m_HFlipped ? -1 : 1);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  AddPieMenuSlices
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Adds all slices this needs on a pie menu.
@@ -909,7 +892,7 @@ void Actor::DropAllInventory()
 			velRange = 10.0F;
 
 			// Randomize the offset from center to be within the original object
-			gibROffset.SetXY(m_MaxRadius * 0.35F * RandomNormalNum(), m_MaxRadius * 0.35F * RandomNormalNum());
+			gibROffset.SetXY(m_SpriteRadius * 0.35F * RandomNormalNum(), m_SpriteRadius * 0.35F * RandomNormalNum());
 			// Set up its position and velocity according to the parameters of this AEmitter.
 			pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
 			pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
@@ -973,28 +956,14 @@ void Actor::DropAllInventory()
 // Description:     Gibs this, effectively destroying it and creating multiple gibs or
 //                  pieces in its place.
 
-void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
+void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToIgnore)
 {
     // Play death sound
 // TODO: Don't attenuate since death is pretty important.. maybe only make this happen for teh brains
     m_DeathSound.Play(m_Pos);
 
     // Gib all the regular gibs
-    MOSRotating::GibThis(impactImpulse, internalBlast, pIgnoreMO);
-
-	if (g_SettingsMan.EnableCrabBombs()) {
-		unsigned short crabCount = 0;
-		for (const MovableObject *inventoryEntry : m_Inventory) {
-			if (inventoryEntry->GetPresetName() == "Crab") { crabCount++; }
-		}
-		// If we have enough crabs gib all actors on scene except brains and doors
-		if (crabCount >= g_SettingsMan.CrabBombThreshold()) {
-			for (int moid = 1; moid < g_MovableMan.GetMOIDCount() - 1; moid++) {
-				Actor *actor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(moid));
-				if (actor && actor != this && actor->GetClassName() != "ADoor" && !actor->IsInGroup("Brains")) { actor->GibThis(); }
-			}
-		}
-	}
+    MOSRotating::GibThis(impactImpulse, movableObjectToIgnore);
 
     // Throw out all the inventory with the appropriate force and directions
     MovableObject *pObject = 0;
@@ -1007,11 +976,11 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
         pObject = *gItr;
 
         // Generate the velocities procedurally
-        velMin = internalBlast / pObject->GetMass();
+        velMin = m_GibBlastStrength / pObject->GetMass();
         velRange = 10.0F;
 
         // Randomize the offset from center to be within the original object
-        gibROffset.SetXY(m_MaxRadius * 0.35F * RandomNormalNum(), m_MaxRadius * 0.35F * RandomNormalNum());
+        gibROffset.SetXY(m_SpriteRadius * 0.35F * RandomNormalNum(), m_SpriteRadius * 0.35F * RandomNormalNum());
         // Set up its position and velocity according to the parameters of this AEmitter.
         pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
         pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
@@ -1048,8 +1017,8 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
         pObject->ResetAllTimers();
 
         // Set the gib to not hit a specific MO
-        if (pIgnoreMO)
-            pObject->SetWhichMOToNotHit(pIgnoreMO);
+        if (movableObjectToIgnore)
+            pObject->SetWhichMOToNotHit(movableObjectToIgnore);
 
         // Detect whether we're dealing with a passenger and add it as Actor instead
         if (pPassenger = dynamic_cast<Actor *>(pObject))
@@ -1290,9 +1259,9 @@ bool Actor::UpdateAIScripted() {
 
     int status = !g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false) ? ReloadScripts() : 0;
     status = (status >= 0 && !ObjectScriptsInitialized()) ? InitializeObjectScripts() : status;
-    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_AI);
+    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
     status = (status >= 0) ? RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true) : status;
-    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_AI);
+    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
 
     return status >= 0;
 }
@@ -1362,35 +1331,6 @@ void Actor::UpdateAI()
             }
         }
     }
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAnyRandomWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds from the actor and all standard attachables.
-
-int Actor::RemoveAnyRandomWounds(int amount)
-{
-	float damage = 0;
-
-	for (int i = 0; i < amount; i++)
-	{
-		// Fill the list of damaged bodyparts
-		std::vector<MOSRotating *> bodyParts;
-		if (GetWoundCount() > 0)
-			bodyParts.push_back(this);
-
-		// Stop removing wounds if there are not any left
-		if (bodyParts.size() == 0)
-			break;
-
-		int partIndex = RandomNum<int>(0, bodyParts.size() - 1);
-		MOSRotating * part = bodyParts[partIndex];
-		damage += part->RemoveWounds(1);
-	}
-
-	return damage;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1493,10 +1433,14 @@ void Actor::Update()
     }
 
     /////////////////////////////////////
-    // Detract damage caused by wounds from health
-
-    for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
-        m_Health -= (*itr)->CollectDamage() * m_DamageMultiplier; //Actors must apply DamageMultiplier effects to their main MO by themselves
+    // Take damage/heal from wounds and wounds on Attachables
+    for (AEmitter *wound : m_Wounds) {
+        m_Health -= wound->CollectDamage() * m_DamageMultiplier;
+    }
+    for (Attachable *attachable : m_Attachables) {
+        m_Health -= attachable->CollectDamage();
+    }
+    m_Health = std::min(m_Health, m_MaxHealth);
 
     /////////////////////////////////////////////
     // Take damage from large hits during travel

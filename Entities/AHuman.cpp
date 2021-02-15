@@ -4074,8 +4074,8 @@ void AHuman::Update()
                     m_pFGArm->GetHeldDevice()->SetSupported(true);
                     m_pBGArm->SetRecoil(m_pFGArm->GetHeldDevice()->GetRecoilForce(), m_pFGArm->GetHeldDevice()->GetRecoilOffset(), m_pFGArm->GetHeldDevice()->IsRecoiled());
                 } else {
-                    // BGArm did not reach to support the device.
-                    m_pFGArm->GetHeldDevice()->SetSupported(false);
+					// BGArm did not reach to support the device. Count device as supported anyway, if crouching
+					m_pFGArm->GetHeldDevice()->SetSupported(m_MoveState == CROUCH || m_ProneState == PRONE);
                     m_pBGArm->SetRecoil(Vector(), Vector(), false);
                 }
             } else {

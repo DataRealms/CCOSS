@@ -164,6 +164,14 @@ namespace RTE {
 		Vector & CapMagnitude(const float capMag);
 
 		/// <summary>
+		/// Clamps the magnitude of this Vector between the upper and lower limits, and keeps its angle intact.
+		/// </summary>
+		/// <param name="upperMagnitudeLimit">A float value that defines the upper limit for the magnitude.</param>
+		/// <param name="lowerMagnitudeLimit">A float value that defines the lower limit for the magnitude.</param>
+		/// <returns>A reference to this after the change.</returns>
+		Vector & ClampMagnitude(float upperMagnitudeLimit, float lowerMagnitudeLimit);
+
+		/// <summary>
 		/// Returns a Vector that has the same direction as this but with a magnitude of 1.0.
 		/// </summary>
 		/// <returns>A normalized copy of this vector.</returns>

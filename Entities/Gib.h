@@ -49,7 +49,7 @@ namespace RTE {
 		/// Gets the reference particle to be used as a Gib. Ownership is NOT transferred!
 		/// </summary>
 		/// <returns>A pointer to the particle to be used as a Gib.</returns>
-		const MovableObject * GetParticlePreset() { return m_GibParticle; }
+		const MovableObject * GetParticlePreset() const { return m_GibParticle; }
 
 		/// <summary>
 		/// Gets the spawn offset of this Gib from the parent's position.

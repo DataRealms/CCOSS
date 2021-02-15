@@ -94,7 +94,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    void Reset() override { Clear(); Attachable::Reset(); }
+    void Reset() override { Clear(); Attachable::Reset(); m_CollidesWithTerrainWhileAttached = false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

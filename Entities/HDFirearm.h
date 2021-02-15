@@ -110,17 +110,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this HDFirearm, including the mass of Magazine
-//                  may have inserted.
-// Arguments:       None.
-// Return value:    A float describing the mass value in Kilograms (kg).
-
-    float GetMass() const override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetRateOfFire
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the rate of fire of this. This applies even if semi-auto. it
@@ -142,14 +131,29 @@ ClassInfoGetters
 	void SetRateOfFire(int newRate) { m_RateOfFire = newRate; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetMagazine
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the currently attached Magazine, if any.
-// Arguments:       None.
-// Return value:    The Magazine, if any is attached.
+    /// <summary>
+    /// Gets the Magazine of this HDFirearm.
+    /// </summary>
+    /// <returns>A pointer to Magazine of this HDFirearm. Ownership is NOT transferred!</returns>
+    Magazine * GetMagazine() const { return m_pMagazine; }
 
-	Magazine * GetMagazine() const { return m_pMagazine; }
+    /// <summary>
+    /// Sets the Magazine for this HDFirearm. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newMagazine">The new Magazine to use.</param>
+    void SetMagazine(Magazine *newMagazine);
+
+    /// <summary>
+    /// Gets the flash of this HDFirearm.
+    /// </summary>
+    /// <returns>A pointer to flash of this HDFirearm. Ownership is NOT transferred!</returns>
+    Attachable * GetFlash() const { return m_pFlash; }
+
+    /// <summary>
+    /// Sets the flash for this HDFirearm. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newTurret">The new flash to use.</param>
+    void SetFlash(Attachable *newFlash);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -425,37 +429,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-// Arguments:       An moid specifying the MOID that this MovableObject is
-//                  assigned for this frame.
-// Return value:    None.
-
-    void SetID(const MOID newID) override;
-    
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Attach
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Attaches this Attachable to a host MOSprite
-// Arguments:       Pointer to the MOSprite to attach to. Ownership is NOT transferred!
-// Return value:    None.
-
-	void Attach(MOSRotating *pParent) override { HeldDevice::Attach(pParent); m_Reloading = false; m_ReloadTmr.Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Detach
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Detaches this Attachable from its host MOSprite
-// Arguments:       None.
-// Return value:    None.
-
-	void Detach() override { HeldDevice::Detach(); m_Activated = m_Reloading = false; m_ReloadTmr.Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ResetAllTimers
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resest all the timers used by this. Can be emitters, etc. This is to
@@ -681,54 +654,16 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:  SetRecoilTransmission
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the calar of how much of the fire recoil force is transmitted to 
-//					who/whatever is holding this weapon
-// Arguments:       New transmission value.
-// Return value:    None.
-
-	void SetRecoilTransmission(float recoilTransmission) { m_RecoilTransmission = recoilTransmission; }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetRecoilTransmission
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the calar of how much of the fire recoil force is transmitted to 
-//					who/whatever is holding this weapon
-// Arguments:       None.
-// Return value:    Transmission value.
-
-	float GetRecoilTransmission() const { return m_RecoilTransmission; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
 protected:
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-// Arguments:       The MOID index to register itself and its children in.
-//                  The MOID of the root MO of this MO, ie the highest parent of this MO.
-//                  0 means that this MO is the root, ie it is owned by MovableMan.
-//                  Whether this MO should make a new MOID to use for itself, or to use
-//                  the same as the last one in the index (presumably its parent),
-// Return value:    None.
-
-    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
+    /// <summary>
+    /// Sets this Attachable's parent MOSRotating, and also sets its Team based on its parent and, if the Attachable is set to collide, adds/removes Atoms to its new/old parent.
+    /// Additionally, sets this HDFirearm as not firing or reloading, and resets its reload timer.
+    /// </summary>
+    /// <param name="newParent">A pointer to the MOSRotating to set as the new parent. Ownership is NOT transferred!</param>
+    void SetParent(MOSRotating *newParent) override { HeldDevice::SetParent(newParent); Deactivate(); m_Reloading = false; m_ReloadTmr.Reset(); }
 
     // Member variables.
     static Entity::ClassInfo m_sClass;
@@ -773,8 +708,6 @@ protected:
     // Whether particles fired from this HDFirearm will ignore hits with itself,
     // and the root parent of this HDFirearm, regardless if they are set to hit MOs.
     bool m_FireIgnoresThis;
-    // Scalar of how much of the fire recoil force is transmitted to who/whatever is holding this weapon
-    float m_RecoilTransmission;
 
     // Timer for timing how long ago the last round was fired.
     Timer m_LastFireTmr;

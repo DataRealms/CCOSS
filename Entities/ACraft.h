@@ -517,21 +517,6 @@ enum
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Pure v. method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this ACraft's current graphical representation to a
-//                  BITMAP of choice.
-// Arguments:       A pointer to a BITMAP to draw on.
-//                  The absolute position of the target bitmap's upper left corner in the Scene.
-//                  In which mode to draw in. See the DrawMode enumeration for the modes.
-//                  Whether to not draw any extra 'ghost' items of this MovableObject,
-//                  indicator arrows or hovering HUD text and so on.
-// Return value:    None.
-
-	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  DrawHUD
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws this Actor's current graphical HUD overlay representation to a
@@ -570,25 +555,6 @@ enum
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound count of this actor and all vital attachables.
-// Arguments:       None.
-// Return value:    Returns total number of wounds of this actor.
-
-	int GetTotalWoundCount() const override { return Actor::GetTotalWoundCount(); }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound limit of this actor and all vital attachables.
-// Arguments:       None.
-// Return value:    Returns total wound limit of this actor.
-
-	int GetTotalWoundLimit() const override { return Actor::GetTotalWoundLimit(); }; 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetDeliveryDelayMultiplier
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:		Returns delivery delay multiplier. 
@@ -614,32 +580,6 @@ enum
 // Protected member variable and method declarations
 
 protected:
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-// Arguments:       The MOID index to register itself and its children in.
-//                  The MOID of the root MO of this MO, ie the highest parent of this MO.
-//                  0 means that this MO is the root, ie it is owned by MovableMan.
-//                  Whether this MO should make a new MOID to use for itself, or to use
-//                  the same as the last one in the index (presumably its parent),
-// Return value:    None.
-
-    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override { Actor::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID); }
-
-    void SetAttachableVelocitiesForGibbing(Attachable* pAttachable, Vector impactImpulse, float internalBlast);
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-	void GetMOIDs(std::vector<MOID> &MOIDs) const override { Actor::GetMOIDs(MOIDs); } 
 
     // Member variables
     static Entity::ClassInfo m_sClass;

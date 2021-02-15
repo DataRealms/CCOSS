@@ -107,12 +107,4 @@ namespace RTE {
 	bool WithinBox(Vector &point, Vector &boxPos, float width, float height) {
 		return point.m_X >= boxPos.m_X && point.m_X < (boxPos.m_X + width) && point.m_Y >= boxPos.m_Y && point.m_Y < (boxPos.m_Y + height);
 	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	float DegreesToRadians(float angleInDegrees) { return angleInDegrees / 180.0F * c_PI; }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	float RadiansToDegrees(float angleInRadians) { return angleInRadians / c_PI * 180.0F; }
 }

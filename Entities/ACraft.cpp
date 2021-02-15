@@ -32,6 +32,8 @@ namespace RTE {
 AbstractClassInfo(ACraft, Actor)
 const string ACraft::Exit::m_sClassName = "Exit";
 
+bool ACraft::s_CrabBombInEffect = false;
+
 #define EXITLINESPACING 7
 #define EXITSUCKDELAYMS 1500
 
@@ -245,9 +247,6 @@ MOSRotating * ACraft::Exit::SuckInMOs(ACraft *pExitOwner)
     // Nothing was sucked in far enough to be returned as done
     return 0;
 }
-
-// Initialise static flag to check for active crab bombs.
-bool ACraft::m_sCrabBombInEffect = false;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -812,8 +811,8 @@ bool ACraft::OnMOHit(MovableObject *pOtherMO)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACraft::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO) {
-	if (g_SettingsMan.EnableCrabBombs() && !m_sCrabBombInEffect) {
-		m_sCrabBombInEffect = true;
+	if (g_SettingsMan.EnableCrabBombs() && !s_CrabBombInEffect) {
+		s_CrabBombInEffect = true;
 		int crabCount = 0;
 		for (const MovableObject *inventoryEntry : m_Inventory) {
 			if (inventoryEntry->GetPresetName() == "Crab") { crabCount++; }
@@ -824,7 +823,7 @@ void ACraft::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
 				if (actor && actor != this && actor->GetClassName() != "ADoor" && !actor->IsInGroup("Brains")) { actor->GibThis(); }
 			}
 		}
-		m_sCrabBombInEffect = false;
+		s_CrabBombInEffect = false;
 	}
 	Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);
 }

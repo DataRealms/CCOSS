@@ -686,8 +686,8 @@ protected:
     SoundContainer m_CrashSound;
     // The recomended, not absolute, maximum number of actors that fit in the inventory
     int m_MaxPassengers;
-	// Flag to determine if a craft is triggering the Crab Bomb effect.
-	static bool m_sCrabBombInEffect;
+
+	static bool s_CrabBombInEffect; //!< Flag to determine if a craft is triggering the Crab Bomb effect.
 
     ////////
     // AI states

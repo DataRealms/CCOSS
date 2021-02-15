@@ -17,7 +17,7 @@
 #include "PresetMan.h"
 #include "AHuman.h"
 #include "MOPixel.h"
-#include "Attachable.h"
+#include "HeldDevice.h"
 #include "SLTerrain.h"
 #include "Controller.h"
 #include "AtomGroup.h"
@@ -771,21 +771,21 @@ Actor * MovableMan::GetUnassignedBrain(int team) const
 //                  best way to add it is. E.g. if it's an Actor, it will be added as such.
 //                  Ownership IS transferred!
 
-bool MovableMan::AddMO(MovableObject *pMOToAdd)
-{
-    if (!pMOToAdd)
+bool MovableMan::AddMO(MovableObject *pMOToAdd) {
+    if (!pMOToAdd) {
         return false;
+    }
 
     pMOToAdd->SetAsAddedToMovableMan();
 
     // Find out what kind it is and apply accordingly
-    if (Actor *pActor = dynamic_cast<Actor *>(pMOToAdd))
-    {
+    if (Actor *pActor = dynamic_cast<Actor *>(pMOToAdd)) {
         AddActor(pActor);
         return true;
-    }
-    else
-    {
+    } else if (HeldDevice *pHeldDevice = dynamic_cast<HeldDevice *>(pMOToAdd)) {
+        AddItem(pHeldDevice);
+        return true;
+    } else {
         AddParticle(pMOToAdd);
         return true;
     }
@@ -2106,7 +2106,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
             currentMOID = m_MOIDIndex.size();
         }
         else
-            m_Actors[i]->SetID(g_NoMOID);
+            m_Actors[i]->SetAsNoID();
     }
     for (i = 0; i < iCount; ++i)
     {
@@ -2117,7 +2117,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
             currentMOID = m_MOIDIndex.size();
         }
         else
-            m_Items[i]->SetID(g_NoMOID);
+            m_Items[i]->SetAsNoID();
     }
     for (i = 0; i < parCount; ++i)
     {
@@ -2128,7 +2128,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
             currentMOID = m_MOIDIndex.size();
         }
         else
-            m_Particles[i]->SetID(g_NoMOID);
+            m_Particles[i]->SetAsNoID();
     }
 }
 

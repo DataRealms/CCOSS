@@ -202,6 +202,20 @@ namespace RTE {
 	/// <param name="angleDegrees">The angle value to correct. In degrees.</param>
 	/// <returns>A float with the represented angle as full rotations being 256.</returns>
 	inline float GetAllegroAngle(float angleDegrees) { return (angleDegrees / 360) * 256; }
+
+	/// <summary>
+	/// Returns the given angle converted from degrees to radians.
+	/// </summary>
+	/// <param name="angleInDegrees">The angle in degrees to be converted.</param>
+	/// <returns>The converted angle in radians.</returns>
+	float DegreesToRadians(float angleInDegrees);
+
+	/// <summary>
+	/// Returns the given angle converted from radians to degrees.
+	/// </summary>
+	/// <param name="angleInRadians">The angle in radians to be converted.</param>
+	/// <returns>The converted angle in degrees.</returns>
+	float RadiansToDegrees(float angleInRadians);
 #pragma endregion
 }
 #endif

@@ -55,25 +55,11 @@ void AEmitter::Clear()
     m_EmitDamage = 0;
     m_LastEmitTmr.Reset();
     m_pFlash = 0;
-    m_FlashScale = 1.0f;
-    m_AvgBurstImpulse = -1.0f;
-    m_AvgImpulse = -1.0f;
+    m_FlashScale = 1.0F;
+    m_AvgBurstImpulse = -1.0F;
+    m_AvgImpulse = -1.0F;
     m_FlashOnlyOnBurst = true;
-    m_LoudnessOnEmit = 1.0f;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the Emission object ready for use.
-
-int AEmitter::Create()
-{
-    if (Attachable::Create() < 0)
-        return -1;
-
-    return 0;
+    m_LoudnessOnEmit = 1.0F;
 }
 
 
@@ -82,12 +68,16 @@ int AEmitter::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a AEmitter to be identical to another, by deep copy.
 
-int AEmitter::Create(const AEmitter &reference)
-{
+int AEmitter::Create(const AEmitter &reference) {
+    if (reference.m_pFlash) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFlash->GetUniqueID());
+        SetFlash(dynamic_cast<Attachable *>(reference.m_pFlash->Clone()));
+    }
     Attachable::Create(reference);
 
-    for (list<Emission *>::const_iterator itr = reference.m_EmissionList.begin(); itr != reference.m_EmissionList.end(); ++itr)
-        m_EmissionList.push_back(dynamic_cast<Emission *>((*itr)->Clone()));
+    for (const Emission *referenceEmission : reference.m_EmissionList) {
+        m_EmissionList.push_back(dynamic_cast<Emission *>(referenceEmission->Clone()));
+    }
 
     m_EmissionSound = reference.m_EmissionSound;
     m_BurstSound = reference.m_BurstSound;
@@ -107,12 +97,6 @@ int AEmitter::Create(const AEmitter &reference)
     m_EmitAngle = reference.m_EmitAngle;
     m_EmissionOffset = reference.m_EmissionOffset;
     m_EmitDamage = reference.m_EmitDamage;
-    if (reference.m_pFlash)
-    {
-        m_pFlash = dynamic_cast<Attachable *>(reference.m_pFlash->Clone());
-        if (m_pFlash)
-            m_pFlash->Attach(this);
-    }
     m_FlashScale = reference.m_FlashScale;
     m_FlashOnlyOnBurst = reference.m_FlashOnlyOnBurst;
     m_LoudnessOnEmit = reference.m_LoudnessOnEmit;
@@ -129,84 +113,76 @@ int AEmitter::Create(const AEmitter &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int AEmitter::ReadProperty(const std::string_view &propName, Reader &reader)
-{
-    if (propName == "AddEmission")
-    {
+int AEmitter::ReadProperty(const std::string_view &propName, Reader &reader) {
+    if (propName == "AddEmission") {
         Emission * emission = new Emission();
         reader >> *emission;
         m_EmissionList.push_back(emission);
-    }
-    else if (propName == "EmissionSound")
+    } else if (propName == "EmissionSound") {
         reader >> m_EmissionSound;
-    else if (propName == "BurstSound")
+    } else if (propName == "BurstSound") {
         reader >> m_BurstSound;
-    else if (propName == "EndSound")
+    } else if (propName == "EndSound") {
         reader >> m_EndSound;
-    else if (propName == "EmissionEnabled")
+    } else if (propName == "EmissionEnabled") {
         reader >> m_EmitEnabled;
-    else if (propName == "EmissionCount")
+    } else if (propName == "EmissionCount") {
         reader >> m_EmitCount;
-    else if (propName == "EmissionCountLimit")
+    } else if (propName == "EmissionCountLimit") {
         reader >> m_EmitCountLimit;
-    else if (propName == "ParticlesPerMinute")
-    {
+    } else if (propName == "ParticlesPerMinute") {
         float ppm;
         reader >> ppm;
-        // Go through all emissions and set the rate so that it emulates the way it used to work, for mod backwards compatibility
-        for (list<Emission *>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
-            (*eItr)->m_PPM = ppm / m_EmissionList.size();
-    }
-    else if (propName == "MinThrottleRange")
+        // Go through all emissions and set the rate so that it emulates the way it used to work, for mod backwards compatibility.
+        for (Emission *emission : m_EmissionList) { emission->m_PPM = ppm / static_cast<float>(m_EmissionList.size()); }
+    } else if (propName == "MinThrottleRange") {
         reader >> m_MinThrottleRange;
-    else if (propName == "MaxThrottleRange")
+    } else if (propName == "MaxThrottleRange") {
         reader >> m_MaxThrottleRange;
-    else if (propName == "Throttle")
+    } else if (propName == "Throttle") {
         reader >> m_Throttle;
-    else if (propName == "EmissionsIgnoreThis")
+    } else if (propName == "EmissionsIgnoreThis") {
         reader >> m_EmissionsIgnoreThis;
-    else if (propName == "BurstSize")
-    {
+    } else if (propName == "BurstSize") {
         int burstSize;
         reader >> burstSize;
-        // Go through all emissions and set the rate so that it emulates the way it used to work, for mod backwards compatibility
-        for (list<Emission *>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
-            (*eItr)->m_BurstSize = std::ceil((float)burstSize / (float)m_EmissionList.size());
-    }
-    else if (propName == "BurstScale")
+        // Go through all emissions and set the rate so that it emulates the way it used to work, for mod backwards compatibility.
+        for (Emission *emission : m_EmissionList) { emission->m_BurstSize = std::ceil(static_cast<float>(burstSize) / static_cast<float>(m_EmissionList.size())); }
+    } else if (propName == "BurstScale") {
         reader >> m_BurstScale;
-    else if (propName == "BurstDamage")
+    } else if (propName == "BurstDamage") {
         reader >> m_BurstDamage;
-	else if (propName == "EmitterDamageMultiplier")
+    } else if (propName == "EmitterDamageMultiplier") {
 		reader >> m_EmitterDamageMultiplier;
-	else if (propName == "BurstSpacing")
+    } else if (propName == "BurstSpacing") {
         reader >> m_BurstSpacing;
-    else if (propName == "BurstTriggered")
+    } else if (propName == "BurstTriggered") {
         reader >> m_BurstTriggered;
-    else if (propName == "EmissionAngle")
+    } else if (propName == "EmissionAngle") {
         reader >> m_EmitAngle;
-    else if (propName == "EmissionOffset")
+    } else if (propName == "EmissionOffset") {
         reader >> m_EmissionOffset;
-    else if (propName == "EmissionDamage")
+    } else if (propName == "EmissionDamage") {
         reader >> m_EmitDamage;
-    else if (propName == "Flash")
-    {
-        const Entity *pObj = g_PresetMan.GetEntityPreset(reader);
-        if (pObj)
-        {
-            m_pFlash = dynamic_cast<Attachable *>(pObj->Clone());
-            if (m_pFlash)
-                m_pFlash->Attach(this);
+    } else if (propName == "Flash") {
+        RemoveAttachable(m_pFlash);
+        const Entity *flashEntity = g_PresetMan.GetEntityPreset(reader);
+        if (flashEntity) {
+            m_pFlash = dynamic_cast<Attachable *>(flashEntity->Clone());
+            AddAttachable(m_pFlash);
+            m_pFlash->SetDrawnNormallyByParent(false);
+            m_pFlash->SetInheritsRotAngle(false);
+            m_pFlash->SetInheritsHFlipped(0);
+            m_pFlash->SetDeleteWhenRemovedFromParent(true);
+            m_pFlash->SetCollidesWithTerrainWhileAttached(false);
         }
-    }
-    else if (propName == "FlashScale")
+    } else if (propName == "FlashScale") {
         reader >> m_FlashScale;
-    else if (propName == "FlashOnlyOnBurst")
+    } else if (propName == "FlashOnlyOnBurst") {
         reader >> m_FlashOnlyOnBurst;
-    else if (propName == "LoudnessOnEmit")
+    } else if (propName == "LoudnessOnEmit") {
         reader >> m_LoudnessOnEmit;
-    else
-    {
+    } else {
         return Attachable::ReadProperty(propName, reader);
     }
 
@@ -298,8 +274,6 @@ void AEmitter::Destroy(bool notInherited)
 
     m_EmissionSound.Stop();
 //    m_BurstSound.Stop();
-
-    delete m_pFlash;
 
     if (!notInherited)
         Attachable::Destroy();
@@ -393,21 +367,24 @@ float AEmitter::EstimateImpulse(bool burst)
     return m_AvgImpulse * throttleFactor;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
+void AEmitter::SetFlash(Attachable *newFlash) {
+    if (newFlash == nullptr) {
+        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
+        m_pFlash = nullptr;
+    } else {
+        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
+        m_pFlash = newFlash;
+        AddAttachable(newFlash);
 
-void AEmitter::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
-{
-    
-
-    Attachable::GibThis(impactImpulse, internalBlast, pIgnoreMO);
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newFlash->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            dynamic_cast<AEmitter *>(parent)->SetFlash(attachable);
+        }});
+    }
 }
-*/
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -423,6 +400,15 @@ void AEmitter::Update()
         m_SpriteAnimMode = m_EmitEnabled ? ALWAYSLOOP : NOANIM;
         if (!m_EmitEnabled)
             m_Frame = 0;
+    }
+
+    // Update and show flash if there is one
+    if (m_pFlash && (!m_FlashOnlyOnBurst || m_BurstTriggered)) {
+        m_pFlash->SetParentOffset(m_EmissionOffset);
+        // Don't set the flipping for the flash because that is wasting resources when drawing, just handle the flipping of the rotation here.
+        m_pFlash->SetRotAngle(m_HFlipped ? c_PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle());
+        m_pFlash->SetScale(m_FlashScale);
+        m_pFlash->SetNextFrame();
     }
 
     Attachable::Update();
@@ -562,26 +548,8 @@ void AEmitter::Update()
         }
         m_LastEmitTmr.Reset();
 
-        // Apply recoil/push effects, scaled by the joint stiffness
-        if (m_pParent && !m_OnlyLinForces)
-            m_pParent->AddAbsImpulseForce(pushImpulses * m_JointStiffness, m_Pos + m_JointOffset);
-        else
-            m_ImpulseForces.push_back(make_pair<Vector, Vector>(pushImpulses * m_JointStiffness, Vector()));
-
-        // Update and show flash if there is one
-        if (m_pFlash && (!m_FlashOnlyOnBurst || m_BurstTriggered)) {
-            if (!m_EmissionOffset.IsZero())
-                m_pFlash->SetJointPos(m_Pos + RotateOffset(m_EmissionOffset)/* + (m_MuzzleOff.GetXFlipped(m_HFlipped) * m_Rotation)*/);
-            else
-                m_pFlash->SetJointPos(m_Pos/* + (m_MuzzleOff.GetXFlipped(m_HFlipped) * m_Rotation)*/);
-            // Don't set the flipping for the flash because that is wasting resources when drawing,
-            // just handle the flipping of the rotation here.
-            m_pFlash->SetRotAngle(m_HFlipped ? c_PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle());
-//            m_pFlash->SetFrame(std::floor((m_pFlash->GetFrameCount()/* - 1*/) * RandomNum() - 0.001));
-            m_pFlash->SetScale(m_FlashScale);
-            m_pFlash->SetNextFrame();
-            m_pFlash->Update();
-        }
+        // Apply recoil/push effects. Joint stiffness will take effect when these are transferred to the parent.
+        if (!pushImpulses.IsZero()) { AddImpulseForce(pushImpulses); }
 
         // Count the the damage caused by the emissions, and only if we're not bursting
         if (!m_BurstTriggered)
@@ -603,14 +571,6 @@ void AEmitter::Update()
     // Do stuff to stop emission
 	else
 	{
-		// Fix for when emitter is not emitting the flash is drawn on the wrong position
-		if (m_pFlash) {
-			if (!m_EmissionOffset.IsZero())
-				m_pFlash->SetJointPos(m_Pos + RotateOffset(m_EmissionOffset)/* + (m_MuzzleOff.GetXFlipped(m_HFlipped) * m_Rotation)*/);
-			else
-				m_pFlash->SetJointPos(m_Pos/* + (m_MuzzleOff.GetXFlipped(m_HFlipped) * m_Rotation)*/);
-		}
-
 		if (m_WasEmitting)
 		{
 			m_EmissionSound.Stop();

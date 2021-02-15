@@ -38,6 +38,9 @@ void Magazine::Clear()
     m_AIAimMaxDistance = -1;
     m_AIAimPenetration = 0;
     m_AIBlastRadius = -1;
+
+    // NOTE: This special override of a parent class member variable avoids needing an extra variable to avoid overwriting INI values.
+    m_CollidesWithTerrainWhileAttached = false;
 }
 
 

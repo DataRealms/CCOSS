@@ -952,21 +952,6 @@ void ACraft::Update()
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this ACraft's current graphical representation to a
-//                  BITMAP of choice.
-
-void ACraft::Draw(BITMAP *pTargetBitmap,
-                   const Vector &targetPos,
-                   DrawMode mode,
-                   bool onlyPhysical) const
-{
-    Actor::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  DrawHUD
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws this Actor's current graphical HUD overlay representation to a
@@ -1089,21 +1074,6 @@ void ACraft::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         }
 */
     }
-}
-
-/// <summary>
-/// Helper method to remove code duplication in ACDropship and ACRocket gibbing
-/// </summary>
-/// <param name="pAttachable">The attachable to set velocities for</param>
-/// <param name="impactImpulse">The impactImpulse passed in from GibThis</param>
-/// <param name="internalBlast">The internalBlast passed in from GibThis</param>
-void ACraft::SetAttachableVelocitiesForGibbing(Attachable * pAttachable, Vector impactImpulse, float internalBlast)
-{
-    Vector newVel(pAttachable->GetPos() - m_Pos);
-    newVel.SetMagnitude(internalBlast);
-    newVel += m_Vel + impactImpulse;
-    pAttachable->SetVel(newVel);
-    pAttachable->SetAngularVel(RandomNormalNum());
 }
 
 } // namespace RTE

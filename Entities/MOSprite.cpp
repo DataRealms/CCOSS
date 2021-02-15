@@ -38,8 +38,8 @@ void MOSprite::Clear()
     m_SpriteAnimTimer.Reset();
     m_SpriteAnimIsReversingFrames = false;
     m_HFlipped = false;
-    m_MaxRadius = 1;
-    m_MaxDiameter = 2;
+    m_SpriteRadius = 1.0F;
+    m_SpriteDiameter = 2.0F;
     m_Rotation.Reset();
     m_PrevRotation.Reset();
     m_AngularVel = 0;
@@ -76,8 +76,8 @@ int MOSprite::Create()
         // Calc maximum dimensions from the Pos, based on the sprite
         float maxX = MAX(fabs(m_SpriteOffset.m_X), fabs(m_aSprite[0]->w + m_SpriteOffset.m_X));
         float maxY = MAX(fabs(m_SpriteOffset.m_Y), fabs(m_aSprite[0]->h + m_SpriteOffset.m_Y));
-        m_MaxRadius = sqrt((float)(maxX * maxX) + (maxY * maxY));
-        m_MaxDiameter = m_MaxRadius * 2;
+        m_SpriteRadius = sqrt((float)(maxX * maxX) + (maxY * maxY));
+        m_SpriteDiameter = m_SpriteRadius * 2.0F;
     }
     else
         return -1;
@@ -111,8 +111,8 @@ int MOSprite::Create(ContentFile spriteFile,
     // Calc maximum dimensions from the Pos, based on the sprite
     float maxX = MAX(fabs(m_SpriteOffset.m_X), fabs(m_aSprite[0]->w + m_SpriteOffset.m_X));
     float maxY = MAX(fabs(m_SpriteOffset.m_Y), fabs(m_aSprite[0]->h + m_SpriteOffset.m_Y));
-    m_MaxRadius = sqrt((float)(maxX * maxX) + (maxY * maxY));
-    m_MaxDiameter = m_MaxRadius * 2;
+    m_SpriteRadius = sqrt((float)(maxX * maxX) + (maxY * maxY));
+    m_SpriteDiameter = m_SpriteRadius * 2.0F;
 
     return 0;
 }
@@ -147,8 +147,8 @@ int MOSprite::Create(const MOSprite &reference)
     m_SpriteAnimMode = reference.m_SpriteAnimMode;
     m_SpriteAnimDuration = reference.m_SpriteAnimDuration;
     m_HFlipped = reference.m_HFlipped;
-    m_MaxRadius = reference.m_MaxRadius;
-    m_MaxDiameter = reference.m_MaxDiameter;
+    m_SpriteRadius = reference.m_SpriteRadius;
+    m_SpriteDiameter = reference.m_SpriteDiameter;
 
     m_Rotation = reference.m_Rotation;
     m_AngularVel = reference.m_AngularVel;
@@ -407,7 +407,7 @@ bool MOSprite::IsOnScenePoint(Vector &scenePoint) const
         }
     }
 */
-    if (WithinBox(scenePoint, m_Pos.m_X - m_MaxRadius, m_Pos.m_Y - m_MaxRadius, m_Pos.m_X + m_MaxRadius, m_Pos.m_Y + m_MaxRadius))
+    if (WithinBox(scenePoint, m_Pos.m_X - m_SpriteRadius, m_Pos.m_Y - m_SpriteRadius, m_Pos.m_X + m_SpriteRadius, m_Pos.m_Y + m_SpriteRadius))
     {
         // Get scene point in object's relative space
         Vector spritePoint = scenePoint - m_Pos;

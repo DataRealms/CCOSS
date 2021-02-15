@@ -1103,8 +1103,7 @@ void SLTerrain::ApplyMovableObject(MovableObject *pMObject)
         // Temporary bitmap holder, doesn't own
         BITMAP *pSprite = pMOSprite->GetSpriteFrame();
 
-// TODO: Make the diameter more accurate.. now we have to double it because it's not taking into account anything attached to the MO
-        float diameter = pMOSprite->GetDiameter() * 2;
+        float diameter = pMOSprite->GetDiameter();
         // Choose an appropriate size
         if (diameter >= 256)
             pTempBitmap = m_spTempBitmap512;

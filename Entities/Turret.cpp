@@ -92,4 +92,3 @@ namespace RTE {
 		if (m_MountedDevice && m_MountedDevice->IsDrawnAfterParent()) { m_MountedDevice->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
 	}
 }
-}

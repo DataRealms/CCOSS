@@ -107,15 +107,8 @@ int MOSRotating::Create()
     else if (m_pDeepGroup)
         m_pDeepGroup->SetOwner(this);
 
-    // Set up the sprite center Vector.
-    m_SpriteCenter.SetXY(m_aSprite[m_Frame]->w / 2,
-                         m_aSprite[m_Frame]->h / 2);
+    m_SpriteCenter.SetXY(m_aSprite[m_Frame]->w / 2, m_aSprite[m_Frame]->h / 2);
     m_SpriteCenter += m_SpriteOffset;
-
-// Now done in MOSprite::Create, based on the sprite
-    // Calc radius based on the atomgroup
-//    m_SpriteRadius = m_pAtomGroup->CalculateMaxRadius() + 4;
-//    m_MaxDiameter = m_SpriteRadius * 2;
 
 /* Allocated in lazy fashion as needed when drawing flipped
     if (!m_pFlipBitmap && m_aSprite[0])
@@ -1179,8 +1172,6 @@ void MOSRotating::RestDetection()
             m_RestTimer.Reset();
             m_ToSettle = false;
         }
-// TODO: REMOVE
-//        bool KUK = g_SceneMan.OverAltitude(m_Pos, m_SpriteRadius + 4, 3);
     }
 
     m_PrevRotation = m_Rotation;

@@ -21,20 +21,20 @@ namespace RTE {
 		MovableObject *Body[2]; //!< Pointers to the two hitting bodies. If hitee is 0, that means collision with terrain. The HitData struct doesn't own these.
 		MovableObject *RootBody[2]; //!< Pointers to root parents of the two hitting bodies. If hitee is 0, that means collision with terrain. The HitData struct doesn't own these.
 
-		Vector BitmapNormal; //!< The approximated normal vector of the bitmap that the hitee is presenting to the hittor at the collision point. The inverse of this is the one representing the hittor bitmap.	
+		Vector BitmapNormal; //!< The approximated normal vector of the bitmap that the hitee is presenting to the hittor at the collision point. The inverse of this is the one representing the hittor bitmap.
 
 		const Material *HitMaterial[2]; //!< The material of the respective bodies at the hit point.
 
-		float TotalMass[2]; //!< Total mass of each body.	
+		float TotalMass[2]; //!< Total mass of each body.
 		float MomInertia[2]; //!< Moment of inertia. If 0, assume to be a point mass.
-		float SquaredMIHandle[2]; //!< The torque handle used to calculate the moment of inertia's effects, pre-squared. 
+		float SquaredMIHandle[2]; //!< The torque handle used to calculate the moment of inertia's effects, pre-squared.
 
-		Vector HitPoint; //!< The hit point of the collision in absolute scene units.	
+		Vector HitPoint; //!< The hit point of the collision in absolute scene units.
 		Vector HitRadius[2]; //!< The vector IN METERS between the CoM and the HitPoint.
-		Vector HitVel[2]; //!< The collision velocity of the respective bodies at the HitPoint, including rotations.	
+		Vector HitVel[2]; //!< The collision velocity of the respective bodies at the HitPoint, including rotations.
 		Vector VelDiff; //!< The difference in velocity between the two bodies HitPoint velocities.
 
-		Vector PreImpulse[2]; //!< The impulse force of each body at the hit point just prior to collision. 
+		Vector PreImpulse[2]; //!< The impulse force of each body at the hit point just prior to collision.
 		Vector ResImpulse[2]; //!< The resulting impulse as response to the collision.
 
 		float HitDenominator; //!< The impulse equation's denominator for this collision.
@@ -72,6 +72,7 @@ namespace RTE {
 
 	public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
 #pragma region Creation
@@ -246,7 +247,7 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Sets up the normal of this atom, based on its position on a sprite's bitmap. 
+		/// Sets up the normal of this atom, based on its position on a sprite's bitmap.
 		/// It will check pixels around it and see if they are inside the object or not, and infer a collision normal based on that. THIS ONLY WORKS IF THE ATOM IS ON THE SURFACE OF THE SPRITE!
 		/// </summary>
 		/// <param name="sprite">The bitmap to check against. Ownership IS NOT transferred!</param>
@@ -300,7 +301,7 @@ namespace RTE {
 		void SetIgnoreMOIDsByGroup(std::list<MOID> const * ignoreMOIDsByGroup) { m_IgnoreMOIDsByGroup = ignoreMOIDsByGroup; };
 
 		/// <summary>
-		/// Clear the list of MOIDs that this Atom is set to ignore collisions with during its next travel sequence. 
+		/// Clear the list of MOIDs that this Atom is set to ignore collisions with during its next travel sequence.
 		/// This should be done each frame so that fresh MOIDs can be re-added. (MOIDs are only valid during a frame).
 		/// </summary>
 		void ClearMOIDIgnoreList() { m_IgnoreMOIDs.clear(); }
@@ -450,20 +451,11 @@ namespace RTE {
 		Atom & operator=(const Atom &rhs) { if (this != &rhs) { Destroy(); Create(rhs); } return *this; }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const override { return c_ClassName; }
-#pragma endregion
-
 	protected:
 
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 		static constexpr int c_NormalCheckCount = 16; //!< Array size for offsets to form circle in s_NormalChecks.
 
-		static std::vector<void *> s_AllocatedPool; //!< Pool of pre-allocated Atoms.	
+		static std::vector<void *> s_AllocatedPool; //!< Pool of pre-allocated Atoms.
 		static int s_PoolAllocBlockCount; //!< The number of instances to fill up the pool of Atoms with each time it runs dry.
 		static int s_InstancesInUse; //!< The number of allocated instances passed out from the pool.
 		static const int s_NormalChecks[c_NormalCheckCount][2]; //!< This forms a circle around the Atom's offset center, to check for key color pixels in order to determine the normal at the Atom's position.
@@ -473,27 +465,27 @@ namespace RTE {
 		Vector m_Normal; //!< The current normalized surface normal Vector of this Atom.
 		Material const * m_Material; //!< The material this Atom is made of.
 		int m_SubgroupID; //!< Identifying ID for adding and removing atoms from AtomGroups.
-		
+
 		bool m_StepWasTaken; //!< Whether the last call to StepForward actually resulted in a step or not.
 		float m_StepRatio; //!< The normalized ratio of how many steps are actually taken to how many calls to TakeStep are made.
 		Vector m_SegTraj; //!< The segment trajectory currently set by SetupSeg.
 		float m_SegProgress; //!< The segment progress while taking steps.
 
-		bool m_ChangedDir; //!< This is only true if there was a change in direction of trajectory during the last travel move of this Atom.		
+		bool m_ChangedDir; //!< This is only true if there was a change in direction of trajectory during the last travel move of this Atom.
 		int m_PrevError; //!< This is the stored error (fraction) at the end of the last travel move. To be used when the direction wasn't changed during a hit, and will make sure the continued trajectory is straight.
 		bool m_ResultWrapped; //!< This is only true when the resulting position reflects a wrap around the scene.
 
-		bool m_MOHitsDisabled; //!< Temporary disabling of MO collisions for this. 
+		bool m_MOHitsDisabled; //!< Temporary disabling of MO collisions for this.
 		bool m_TerrainHitsDisabled; //!< Temporary disabling of terrain collisions for this. Will be re-enabled once out of terrain again.
 
-		MovableObject *m_OwnerMO; //!< The owner of this Atom. The owner is obviously not owned by this Atom.	
+		MovableObject *m_OwnerMO; //!< The owner of this Atom. The owner is obviously not owned by this Atom.
 		MOID m_IgnoreMOID; //!< Special ignored MOID.
 		std::list<MOID> m_IgnoreMOIDs; //!< ignore hits with MOs of these IDs.
 		std::list<MOID> const * m_IgnoreMOIDsByGroup; //!< Also ignore hits with MOs of these IDs. This one may be set externally by atom group.
 
 		HitData m_LastHit; //!< Data containing information on the last collision experienced by this Atom.
-		MOID m_MOIDHit; //!< The MO, if any, this Atom hit on the last step.	
-		unsigned char m_TerrainMatHit; //!< The terrain material, if any, this Atom hit on the last step.	
+		MOID m_MOIDHit; //!< The MO, if any, this Atom hit on the last step.
+		unsigned char m_TerrainMatHit; //!< The terrain material, if any, this Atom hit on the last step.
 
 		int m_NumPenetrations; //!< Counts consecutive penetrations in a row. Resets to 0 as soon as penetration streak ends.
 
@@ -515,13 +507,15 @@ namespace RTE {
 		int m_Delta2[2];
 		int m_Increment[2];
 		int m_Error;
-		int m_Dom; 
+		int m_Dom;
 		int m_Sub;
 		int m_DomSteps;
 		int m_SubSteps;
 		bool m_SubStepped;
 
 	private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 
 		/// <summary>
 		/// Clears all the member variables of this Atom, effectively resetting the members of this abstraction level only.

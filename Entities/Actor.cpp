@@ -325,7 +325,7 @@ int Actor::Create(const Actor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int Actor::ReadProperty(std::string propName, Reader &reader)
+int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "BodyHitSound")
         reader >> m_BodyHitSound;
@@ -1273,9 +1273,9 @@ bool Actor::UpdateAIScripted() {
 
     int status = !g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false) ? ReloadScripts() : 0;
     status = (status >= 0 && !ObjectScriptsInitialized()) ? InitializeObjectScripts() : status;
-    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_AI);
+    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
     status = (status >= 0) ? RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true) : status;
-    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_AI);
+    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
 
     return status >= 0;
 }

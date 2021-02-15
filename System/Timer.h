@@ -285,17 +285,8 @@ namespace RTE {
 		bool AlternateSim(int period) const { return (period == 0) ? true : (static_cast<int>(GetElapsedSimTimeMS()) % (period * 2)) > period; }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Timer.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Serializable.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
 
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 
 		double m_TicksPerMS; //!< Ticks per MS.
 

@@ -8,7 +8,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Vector::ReadProperty(std::string propName, Reader &reader) {
+	int Vector::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "X") {
 			reader >> m_X;
 		} else if (propName == "Y") {
@@ -24,10 +24,8 @@ namespace RTE {
 	int Vector::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		writer.NewProperty("X");
-		writer << m_X;
-		writer.NewProperty("Y");
-		writer << m_Y;
+		writer.NewPropertyWithValue("X", m_X);
+		writer.NewPropertyWithValue("Y", m_Y);
 
 		return 0;
 	}

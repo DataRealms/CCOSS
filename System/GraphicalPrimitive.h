@@ -16,8 +16,13 @@ namespace RTE {
 
 		Vector m_StartPos; //!< Start position of the primitive.
 		Vector m_EndPos; //!< End position of the primitive.
-		unsigned short m_Color; //!< Color to draw this primitive with.		
-		short m_Player; //!< Player screen to draw this primitive on.
+		unsigned char m_Color; //!< Color to draw this primitive with.
+		int m_Player; //!< Player screen to draw this primitive on.
+
+		/// <summary>
+		/// Destructor method used to clean up a GraphicalPrimitive object before deletion from system memory.
+		/// </summary>
+		virtual ~GraphicalPrimitive() = default;
 
 		/// <summary>
 		/// Translates coordinates from scene to this bitmap offset producing two coordinates.
@@ -34,14 +39,14 @@ namespace RTE {
 		/// I really don't know how to make it simpler, because it has so many special cases and simply wrapping all out-of-the scene coordinates don't work because this way nothing will be ever draw across the seam.
 		/// You're welcome to rewrite this nightmare if you can, I wasted a whole week on this (I can admit that I'm just too dumb for this) )))
 		/// </remarks>
-		void TranslateCoordinates(Vector targetPos, Vector scenePos, Vector & drawLeftPos, Vector & drawRightPos) const;
+		void TranslateCoordinates(Vector targetPos, const Vector &scenePos, Vector &drawLeftPos, Vector &drawRightPos) const;
 
 		/// <summary>
 		/// Draws this primitive on provided bitmap.
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		virtual void Draw(BITMAP *drawScreen, Vector targetPos) = 0;
+		virtual void Draw(BITMAP *drawScreen, const Vector &targetPos) = 0;
 	};
 #pragma endregion
 
@@ -60,7 +65,7 @@ namespace RTE {
 		/// <param name="startPos">Start position of the primitive.</param>
 		/// <param name="end">End position of the primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		LinePrimitive(short player, Vector startPos, Vector endPos, unsigned char color) {
+		LinePrimitive(int player, const Vector &startPos, const Vector &endPos, unsigned char color) {
 			m_StartPos = startPos;
 			m_EndPos = endPos;
 			m_Color = color;
@@ -72,7 +77,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, Vector targetPos) override;
+		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 	};
 #pragma endregion
 
@@ -86,8 +91,8 @@ namespace RTE {
 
 		float m_StartAngle; //!< The angle from which the arc begins.
 		float m_EndAngle; //!< The angle at which the arc ends.
-		short m_Radius; //!< Radius of the arc primitive.
-		short m_Thickness; //!< Thickness of the arc primitive in pixels.
+		int m_Radius; //!< Radius of the arc primitive.
+		int m_Thickness; //!< Thickness of the arc primitive in pixels.
 
 		/// <summary>
 		/// Constructor method for ArcPrimitive object.
@@ -98,13 +103,11 @@ namespace RTE {
 		/// <param name="endAngle">The angle at which the arc drawing ends.</param>
 		/// <param name="radius">Radius of the arc primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		ArcPrimitive(short player, Vector centerPos, float startAngle, float endAngle, short radius, short thickness, unsigned char color) {
+		ArcPrimitive(int player, const Vector &centerPos, float startAngle, float endAngle, int radius, int thickness, unsigned char color) :
+			m_StartAngle(startAngle), m_EndAngle(endAngle), m_Radius(radius), m_Thickness(thickness) {
+
 			m_StartPos = centerPos;
 			m_Color = color;
-			m_StartAngle = startAngle;
-			m_EndAngle = endAngle;
-			m_Radius = radius;
-			m_Thickness = thickness;
 			m_Player = player;
 		}
 
@@ -113,7 +116,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, Vector targetPos) override;
+		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 	};
 #pragma endregion
 
@@ -137,10 +140,10 @@ namespace RTE {
 		/// <param name="guideB">The second guide point that controls the curve of the spline. The spline won't necessarily pass through this point, but it will affect it's shape.</param>
 		/// <param name="endPos">End position of the primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		SplinePrimitive(short player, Vector startPos, Vector guideA, Vector guideB, Vector endPos, unsigned char color) {
+		SplinePrimitive(int player, const Vector &startPos, const Vector &guideA, const Vector &guideB, const Vector &endPos, unsigned char color) :
+			m_GuidePointAPos(guideA), m_GuidePointBPos(guideB) {
+
 			m_StartPos = startPos;
-			m_GuidePointAPos = guideA;
-			m_GuidePointBPos = guideB;
 			m_EndPos = endPos;
 			m_Color = color;
 			m_Player = player;
@@ -151,7 +154,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, Vector targetPos) override;
+		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 	};
 #pragma endregion
 
@@ -170,7 +173,7 @@ namespace RTE {
 		/// <param name="topLeftPos">Start position of the primitive. Top left corner.</param>
 		/// <param name="bottomRightPos">End position of the primitive. Bottom right corner.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		BoxPrimitive(short player, Vector topLeftPos, Vector bottomRightPos, unsigned char color) {
+		BoxPrimitive(int player, const Vector &topLeftPos, const Vector &bottomRightPos, unsigned char color) {
 			m_StartPos = topLeftPos;
 			m_EndPos = bottomRightPos;
 			m_Color = color;
@@ -182,7 +185,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, Vector targetPos) override;
+		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 	};
 #pragma endregion
 
@@ -201,7 +204,7 @@ namespace RTE {
 		/// <param name="topLeftPos">Start position of the primitive. Top left corner.</param>
 		/// <param name="bottomRightPos">End position of the primitive. Bottom right corner.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		BoxFillPrimitive(short player, Vector topLeftPos, Vector bottomRightPos, unsigned char color) {
+		BoxFillPrimitive(int player, const Vector &topLeftPos, const Vector &bottomRightPos, unsigned char color) {
 			m_StartPos = topLeftPos;
 			m_EndPos = bottomRightPos;
 			m_Color = color;
@@ -213,7 +216,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, Vector targetPos) override;
+		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 	};
 #pragma endregion
 
@@ -225,7 +228,7 @@ namespace RTE {
 
 	public:
 
-		short m_CornerRadius; //!< The radius of the corners of the box.
+		int m_CornerRadius; //!< The radius of the corners of the box.
 
 		/// <summary>
 		/// Constructor method for RoundedBoxPrimitive object.
@@ -235,10 +238,11 @@ namespace RTE {
 		/// <param name="bottomRightPos">End position of the primitive. Bottom right corner.</param>
 		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		RoundedBoxPrimitive(short player, Vector topLeftPos, Vector bottomRightPos, short cornerRadius, unsigned char color) {
+		RoundedBoxPrimitive(int player, const Vector &topLeftPos, const Vector &bottomRightPos, int cornerRadius, unsigned char color) :
+			m_CornerRadius(cornerRadius) {
+
 			m_StartPos = topLeftPos;
 			m_EndPos = bottomRightPos;
-			m_CornerRadius = cornerRadius;
 			m_Color = color;
 			m_Player = player;
 		}
@@ -248,7 +252,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, Vector targetPos) override;
+		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 	};
 #pragma endregion
 
@@ -260,7 +264,7 @@ namespace RTE {
 
 	public:
 
-		short m_CornerRadius; //!< The radius of the corners of the box.
+		int m_CornerRadius; //!< The radius of the corners of the box.
 
 		/// <summary>
 		/// Constructor method for RoundedBoxFillPrimitive object.
@@ -270,10 +274,11 @@ namespace RTE {
 		/// <param name="bottomRightPos">End position of the primitive. Bottom right corner.</param>
 		/// <param name="cornerRadius">The radius of the corners of the box. Smaller radius equals sharper corners.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		RoundedBoxFillPrimitive(short player, Vector topLeftPos, Vector bottomRightPos, short cornerRadius, unsigned char color) {
+		RoundedBoxFillPrimitive(int player, const Vector &topLeftPos, const Vector &bottomRightPos, int cornerRadius, unsigned char color) :
+			m_CornerRadius(cornerRadius) {
+
 			m_StartPos = topLeftPos;
 			m_EndPos = bottomRightPos;
-			m_CornerRadius = cornerRadius;
 			m_Color = color;
 			m_Player = player;
 		}
@@ -283,7 +288,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, Vector targetPos) override;
+		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 	};
 #pragma endregion
 
@@ -295,7 +300,7 @@ namespace RTE {
 
 	public:
 
-		short m_Radius; //!< Radius of the circle primitive.
+		int m_Radius; //!< Radius of the circle primitive.
 
 		/// <summary>
 		/// Constructor method for CirclePrimitive object.
@@ -304,10 +309,11 @@ namespace RTE {
 		/// <param name="centerPos">Position of this primitive's center.</param>
 		/// <param name="radius">Radius of the circle primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		CirclePrimitive(short player, Vector centerPos, short radius, unsigned char color) {
+		CirclePrimitive(int player, const Vector &centerPos, int radius, unsigned char color) :
+			m_Radius(radius) {
+
 			m_StartPos = centerPos;
 			m_Color = color;
-			m_Radius = radius;
 			m_Player = player;
 		}
 
@@ -316,7 +322,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, Vector targetPos) override;
+		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 	};
 #pragma endregion
 
@@ -328,7 +334,7 @@ namespace RTE {
 
 	public:
 
-		short m_Radius; //!< Radius of the circle primitive.
+		int m_Radius; //!< Radius of the circle primitive.
 
 		/// <summary>
 		/// Constructor method for CircleFillPrimitive object.
@@ -337,10 +343,11 @@ namespace RTE {
 		/// <param name="centerPos">Position of this primitive's center.</param>
 		/// <param name="radius">Radius of the circle primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		CircleFillPrimitive(short player, Vector centerPos, short radius, unsigned char color) {
+		CircleFillPrimitive(int player, const Vector &centerPos, int radius, unsigned char color) :
+			m_Radius(radius) {
+
 			m_StartPos = centerPos;
 			m_Color = color;
-			m_Radius = radius;
 			m_Player = player;
 		}
 
@@ -349,7 +356,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, Vector targetPos) override;
+		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 	};
 #pragma endregion
 
@@ -361,8 +368,8 @@ namespace RTE {
 
 	public:
 
-		short m_HorizRadius; //!< The horizontal radius of the ellipse primitive.
-		short m_VertRadius; //!< The vertical radius of the ellipse primitive.
+		int m_HorizRadius; //!< The horizontal radius of the ellipse primitive.
+		int m_VertRadius; //!< The vertical radius of the ellipse primitive.
 
 		/// <summary>
 		/// Constructor method for EllipsePrimitive object.
@@ -372,11 +379,11 @@ namespace RTE {
 		/// <param name="horizRadius">Horizontal radius of the ellipse primitive.</param>
 		/// <param name="vertRadius">Vertical radius of the ellipse primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		EllipsePrimitive(short player, Vector centerPos, short horizRadius, short vertRadius, unsigned char color) {
+		EllipsePrimitive(int player, const Vector &centerPos, int horizRadius, int vertRadius, unsigned char color) :
+			m_HorizRadius(horizRadius), m_VertRadius(vertRadius) {
+
 			m_StartPos = centerPos;
 			m_Color = color;
-			m_HorizRadius = horizRadius;
-			m_VertRadius = vertRadius;
 			m_Player = player;
 		}
 
@@ -385,7 +392,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, Vector targetPos) override;
+		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 	};
 #pragma endregion
 
@@ -397,8 +404,8 @@ namespace RTE {
 
 	public:
 
-		short m_HorizRadius; //!< The horizontal radius of the ellipse primitive.
-		short m_VertRadius; //!< The vertical radius of the ellipse primitive.
+		int m_HorizRadius; //!< The horizontal radius of the ellipse primitive.
+		int m_VertRadius; //!< The vertical radius of the ellipse primitive.
 
 		/// <summary>
 		/// Constructor method for EllipseFillPrimitive object.
@@ -407,11 +414,11 @@ namespace RTE {
 		/// <param name="centerPos">Position of this primitive's center.</param>
 		/// <param name="radius">Radius of the circle primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		EllipseFillPrimitive(short player, Vector centerPos, short horizRadius, short vertRadius, unsigned char color) {
+		EllipseFillPrimitive(int player, const Vector &centerPos, int horizRadius, int vertRadius, unsigned char color) :
+			m_HorizRadius(horizRadius), m_VertRadius(vertRadius) {
+
 			m_StartPos = centerPos;
 			m_Color = color;
-			m_HorizRadius = horizRadius;
-			m_VertRadius = vertRadius;
 			m_Player = player;
 		}
 
@@ -420,7 +427,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, Vector targetPos) override;
+		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 	};
 #pragma endregion
 
@@ -444,10 +451,9 @@ namespace RTE {
 		/// <param name="pointB">Position of the second point of the triangle</param>
 		/// <param name="pointC">Position of the third point of the triangle</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		TrianglePrimitive(short player, Vector pointA, Vector pointB, Vector pointC, unsigned char color) {
-			m_PointAPos = pointA;
-			m_PointBPos = pointB;
-			m_PointCPos = pointC;
+		TrianglePrimitive(int player, const Vector &pointA, const Vector &pointB, const Vector &pointC, unsigned char color) :
+			m_PointAPos(pointA), m_PointBPos(pointB), m_PointCPos(pointC) {
+
 			m_Color = color;
 			m_Player = player;
 		}
@@ -457,7 +463,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, Vector targetPos) override;
+		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 	};
 #pragma endregion
 
@@ -481,10 +487,9 @@ namespace RTE {
 		/// <param name="pointB">Position of the second point of the triangle</param>
 		/// <param name="pointC">Position of the third point of the triangle</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		TriangleFillPrimitive(short player, Vector pointA, Vector pointB, Vector pointC, unsigned char color) {
-			m_PointAPos = pointA;
-			m_PointBPos = pointB;
-			m_PointCPos = pointC;
+		TriangleFillPrimitive(int player, const Vector &pointA, const Vector &pointB, const Vector &pointC, unsigned char color) :
+			m_PointAPos(pointA), m_PointBPos(pointB), m_PointCPos(pointC) {
+
 			m_Color = color;
 			m_Player = player;
 		}
@@ -494,7 +499,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, Vector targetPos) override;
+		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 	};
 #pragma endregion
 
@@ -506,9 +511,9 @@ namespace RTE {
 
 	public:
 
-		bool m_IsSmall; //!< Use small or large font. True for small font.
-		short m_Alignment; //!< Alignment of text.
 		std::string m_Text; //!< String containing text to draw.
+		bool m_IsSmall; //!< Use small or large font. True for small font.
+		int m_Alignment; //!< Alignment of text.
 
 		/// <summary>
 		/// Constructor method for TextPrimitive object.
@@ -518,11 +523,10 @@ namespace RTE {
 		/// <param name="text">String containing text to draw.</param>
 		/// <param name="isSmall">Use small or large font. True for small font.</param>
 		/// <param name="alignment">Alignment of text.</param>
-		TextPrimitive(short player, Vector pos, std::string text, bool isSmall, short alignment) {
+		TextPrimitive(int player, const Vector &pos, const std::string &text, bool isSmall, int alignment) :
+			m_Text(text), m_IsSmall(isSmall), m_Alignment(alignment) {
+
 			m_StartPos = pos;
-			m_Text = text;
-			m_IsSmall = isSmall;
-			m_Alignment = alignment;
 			m_Player = player;
 		}
 
@@ -531,7 +535,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, Vector targetPos) override;
+		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 	};
 #pragma endregion
 
@@ -543,8 +547,8 @@ namespace RTE {
 
 	public:
 
-		float m_RotAngle; //!< Angle to rotate bitmap in radians.
 		BITMAP *m_Bitmap; //!< Bitmap to draw.
+		float m_RotAngle; //!< Angle to rotate bitmap in radians.
 		bool m_HFlipped; //!< Whether the Bitmap to draw should be horizontally flipped.
 		bool m_VFlipped; //!< Whether the Bitmap to draw should be vertically flipped.
 
@@ -557,12 +561,10 @@ namespace RTE {
 		/// <param name="rotAngle">Angle to rotate bitmap in radians.</param>
 		/// <param name="hFlipped">Whether the bitmap to draw should be horizontally flipped.</param>
 		/// <param name="vFlipped">Whether the bitmap to draw should be vertically flipped.</param>
-		BitmapPrimitive(short player, Vector centerPos, BITMAP * bitmap, float rotAngle, bool hFlipped, bool vFlipped) {
+		BitmapPrimitive(int player, const Vector &centerPos, BITMAP *bitmap, float rotAngle, bool hFlipped, bool vFlipped) :
+			m_Bitmap(bitmap), m_RotAngle(rotAngle), m_HFlipped(hFlipped), m_VFlipped(vFlipped) {
+
 			m_StartPos = centerPos;
-			m_Bitmap = bitmap;
-			m_RotAngle = rotAngle;
-			m_HFlipped = hFlipped;
-			m_VFlipped = vFlipped;
 			m_Player = player;
 		}
 
@@ -571,7 +573,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="drawScreen">Bitmap to draw on.</param>
 		/// <param name="targetPos">Position of graphical primitive.</param>
-		void Draw(BITMAP *drawScreen, Vector targetPos) override;
+		void Draw(BITMAP *drawScreen, const Vector &targetPos) override;
 	};
 #pragma endregion
 }

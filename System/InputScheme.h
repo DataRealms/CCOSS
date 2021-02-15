@@ -13,6 +13,7 @@ namespace RTE {
 
 	public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
 #pragma region Creation
@@ -30,16 +31,6 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Destruction
-		/// <summary>
-		/// Destructor method used to clean up an InputScheme object before deletion from system memory.
-		/// </summary>
-		~InputScheme() { Destroy(); }
-
-		/// <summary>
-		/// Destroys and resets (through Clear()) the InputScheme object.
-		/// </summary>
-		void Destroy() { Clear(); }
-
 		/// <summary>
 		/// Resets the entire InputScheme, including its inherited members, to their default settings or values.
 		/// </summary>
@@ -75,7 +66,7 @@ namespace RTE {
 		/// Gets the InputMappings for this.
 		/// </summary>
 		/// <returns>The input mappings array, which is INPUT_COUNT large.</returns>
-		InputMapping * GetInputMappings() { return m_InputMapping; }
+		InputMapping * GetInputMappings() { return m_InputMappings.data(); }
 
 		/// <summary>
 		/// Get the deadzone value for this control scheme.
@@ -93,7 +84,7 @@ namespace RTE {
 		/// Get the DeadZoneType for this control scheme.
 		/// </summary>
 		/// <returns>The DeadZoneType this scheme is set to use. See DeadZoneType enumeration.</returns>
-		DeadZoneType GetJoystickDeadzoneType() { return m_JoystickDeadzoneType; }
+		DeadZoneType GetJoystickDeadzoneType() const { return m_JoystickDeadzoneType; }
 
 		/// <summary>
 		/// Set the DeadZoneType for this control scheme.
@@ -109,17 +100,7 @@ namespace RTE {
 		//void SetupDefaults();
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const override { return c_ClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		InputDevice m_ActiveDevice; //!< The currently active device for this scheme.
 		InputPreset m_SchemePreset; //!< The preset this scheme was last set to, if any.
@@ -127,9 +108,11 @@ namespace RTE {
 		DeadZoneType m_JoystickDeadzoneType; //!< Which deadzone type is used.
 		float m_JoystickDeadzone; //!< How much of the input to treat as a deadzone input, i.e. one not registered by the game.
 
-		InputMapping m_InputMapping[INPUT_COUNT]; //!< The device input element mappings.
+		std::array<InputMapping, InputElements::INPUT_COUNT> m_InputMappings; //!< The input element mappings of this InputScheme.
 
 	private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		/// <summary>
 		/// Clears all the member variables of this InputScheme, effectively resetting the members of this abstraction level only.

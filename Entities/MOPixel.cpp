@@ -63,7 +63,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int MOPixel::ReadProperty(std::string propName, Reader &reader) {
+	int MOPixel::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Atom") {
 			if (!m_Atom) { m_Atom = new Atom; }
 			reader >> m_Atom;

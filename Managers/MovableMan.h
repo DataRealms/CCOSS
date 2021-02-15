@@ -60,10 +60,8 @@ struct AlarmEvent
 // Parent(s):       Singleton, Serializable.
 // Class history:   12/25/2001 MovableMan created.
 
-class MovableMan:
-    public Singleton<MovableMan>,
-    public Serializable
-{
+class MovableMan : public Singleton<MovableMan>, public Serializable {
+	friend class SettingsMan;
     friend class LuaMan;
 
 
@@ -72,6 +70,7 @@ class MovableMan:
 
 public:
 
+	SerializableClassNameGetter
 	SerializableOverrideMethods
 
 
@@ -103,7 +102,7 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-	int Create() override;
+	int Initialize();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -125,16 +124,6 @@ public:
 // Return value:    None.
 
     void Destroy();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-	const std::string & GetClassName() const override { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -919,9 +908,6 @@ public:
 
 protected:
 
-    // Member variables
-    static const std::string m_ClassName;
-
     // All actors in the scene
     std::deque<Actor *> m_Actors;
     // List of items that are pickup-able by actors
@@ -983,6 +969,8 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+	static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

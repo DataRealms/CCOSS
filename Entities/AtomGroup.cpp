@@ -103,7 +103,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int AtomGroup::ReadProperty(std::string propName, Reader &reader) {
+	int AtomGroup::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Material") {
 			Material mat;
 			mat.Reset();

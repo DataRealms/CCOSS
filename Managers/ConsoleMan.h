@@ -18,6 +18,7 @@ namespace RTE {
 	/// The singleton manager of the lua console.
 	/// </summary>
 	class ConsoleMan : public Singleton<ConsoleMan> {
+		friend class SettingsMan;
 
 	public:
 
@@ -31,7 +32,7 @@ namespace RTE {
 		/// Makes the ConsoleMan object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create();
+		int Initialize();
 #pragma endregion
 
 #pragma region Destruction
@@ -141,17 +142,7 @@ namespace RTE {
 		void Draw(BITMAP *targetBitmap) const;
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		/// <summary>
 		/// Enumeration for console states when enabling/disabling the console. NOTE: This can't be lower down because m_ConsoleState relies on this definition.

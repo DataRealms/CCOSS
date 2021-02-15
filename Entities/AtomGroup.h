@@ -3,9 +3,6 @@
 
 #include "Atom.h"
 
-// Defined in Winbase.h and conflicts with our method so we need to undefine it manually.
-#undef AddAtom
-
 namespace RTE {
 
 	class MOSRotating;

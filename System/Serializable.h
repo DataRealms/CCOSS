@@ -19,15 +19,21 @@ namespace RTE {
 		/// Convenience macro to cut down on duplicate ReadProperty and Save methods in classes that extend Serializable.
 		/// </summary>
 		#define SerializableOverrideMethods \
-			int ReadProperty(std::string propName, Reader &reader) override; \
+			int ReadProperty(const std::string_view &propName, Reader &reader) override; \
 			int Save(Writer &writer) const override;
+
+		/// <summary>
+		/// Convenience macro to cut down on duplicate GetClassName methods in non-poolable classes that extend Serializable.
+		/// </summary>
+		#define SerializableClassNameGetter \
+			const std::string & GetClassName() const override { return c_ClassName; }
 #pragma endregion
 
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a Serializable object in system memory. Create() should be called before using the object.
 		/// </summary>
-		Serializable() {}
+		Serializable() = default;
 
 		/// <summary>
 		/// Makes the Serializable object ready for use, usually after all necessary properties have been set with Create(Reader).
@@ -49,7 +55,7 @@ namespace RTE {
 			}
 			// This is the engine for processing all properties of this Serializable upon read creation.
 			while (reader.NextProperty()) {
-				m_FormattedReaderPosition = ("in file " + reader.GetCurrentFilePath() + " on line " + std::to_string(reader.GetCurrentFileLine()));
+				m_FormattedReaderPosition = ("in file " + reader.GetCurrentFilePath() + " on line " + reader.GetCurrentFileLine());
 				std::string propName = reader.ReadPropName();
 				// We need to check if !propName.empty() because ReadPropName may return "" when it reads an IncludeFile without any properties in case they are all commented out or it's the last line in file.
 				// Also ReadModuleProperty may return "" when it skips IncludeFile till the end of file.
@@ -63,6 +69,11 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Destruction
+		/// <summary>
+		/// Destructor method used to clean up a Serializable object before deletion from system memory.
+		/// </summary>
+		virtual ~Serializable() = default;
+
 		/// <summary>
 		/// Resets the entire Serializable, including its inherited members, to their default settings or values.
 		/// </summary>
@@ -81,7 +92,7 @@ namespace RTE {
 		/// An error return value signaling whether the property was successfully read or not.
 		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
 		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader) {
+		virtual int ReadProperty(const std::string_view &propName, Reader &reader) {
 			// Discard the value of the property which failed to read
 			reader.ReadPropValue();
 			reader.ReportError("Could not match property");
@@ -99,12 +110,8 @@ namespace RTE {
 		/// Replaces backslashes with forward slashes in file paths to eliminate issues with cross-platform compatibility or invalid escape sequences.
 		/// </summary>
 		/// <param name="pathToCorrect">Reference to the file path string to correct slashes in.</param>
-		void CorrectBackslashesInPaths(std::string &pathToCorrect) const {
-			// TODO: Add a warning log entry if backslashes are found in a data path. Perhaps overwrite them in the ini file itself.
-			while (std::find(pathToCorrect.begin(), pathToCorrect.end(), '\\') != pathToCorrect.end()) {
-				pathToCorrect.replace(pathToCorrect.find("\\"), 1, "/");
-			}
-		}
+		// TODO: Add a warning log entry if backslashes are found in a data path. Perhaps overwrite them in the ini file itself.
+		std::string CorrectBackslashesInPath(const std::string &pathToCorrect) const { return std::filesystem::path(pathToCorrect).generic_string(); }
 #pragma endregion
 
 #pragma region Logging

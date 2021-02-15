@@ -1,5 +1,4 @@
 #include "ConsoleMan.h"
-#include "System.h"
 
 #include "LuaMan.h"
 #include "UInputMan.h"
@@ -14,8 +13,6 @@
 #include "GUI/GUILabel.h"
 
 namespace RTE {
-
-	const std::string ConsoleMan::c_ClassName = "ConsoleMan";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -38,7 +35,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ConsoleMan::Create() {
+	int ConsoleMan::Initialize() {
 		if (!m_GUIScreen) { m_GUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer32()); }
 		if (!m_GUIInput) { m_GUIInput = new AllegroInput(-1); }
 		if (!m_GUIControlManager) { m_GUIControlManager = new GUIControlManager(); }
@@ -201,7 +198,7 @@ namespace RTE {
 
 	void ConsoleMan::PrintString(const std::string &stringToPrint) const {
 		m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + stringToPrint);
-		if (g_System.GetLogToCLI()) { g_System.PrintToCLI(stringToPrint); }
+		if (System::IsLoggingToCLI()) { System::PrintToCLI(stringToPrint); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

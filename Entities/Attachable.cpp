@@ -92,7 +92,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Attachable::ReadProperty(std::string propName, Reader &reader) {
+	int Attachable::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "ParentOffset") {
 			reader >> m_ParentOffset;
 		} else if (propName == "DrawAfterParent") {

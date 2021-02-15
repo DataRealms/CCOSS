@@ -29,7 +29,7 @@
 namespace RTE {
 
 AbstractClassInfo(ACraft, Actor)
-const string ACraft::Exit::m_sClassName = "Exit";
+const string ACraft::Exit::c_ClassName = "Exit";
 
 #define EXITLINESPACING 7
 #define EXITSUCKDELAYMS 1500
@@ -94,7 +94,7 @@ int ACraft::Exit::Create()
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int ACraft::Exit::ReadProperty(std::string propName, Reader &reader)
+int ACraft::Exit::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "Offset")
         reader >> m_Offset;
@@ -342,7 +342,7 @@ int ACraft::Create(const ACraft &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int ACraft::ReadProperty(std::string propName, Reader &reader)
+int ACraft::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "HatchDelay")
         reader >> m_HatchDelay;

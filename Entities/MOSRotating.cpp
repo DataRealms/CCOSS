@@ -282,7 +282,7 @@ int MOSRotating::Create(const MOSRotating &reference) {
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int MOSRotating::ReadProperty(std::string propName, Reader &reader)
+int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "AtomGroup")
     {
@@ -1321,14 +1321,11 @@ bool MOSRotating::DeepCheck(bool makeMOPs, int skipMOP, int maxMOPs)
 // Arguments:       None.
 // Return value:    None.
 
-void MOSRotating::PreTravel()
-{
-    MOSprite::PreTravel();
+void MOSRotating::PreTravel() {
+	MOSprite::PreTravel();
 
-    // If this is going slow enough, check for and redraw the MOID representations of
-    // any other MOSRotating:s that may be overlapping this
-	if (m_GetsHitByMOs && m_HitsMOs && m_Vel.m_X < 2.0 && m_Vel.m_Y < 2.0 && g_SettingsMan.PreciseCollisions())
-        g_MovableMan.RedrawOverlappingMOIDs(this);
+	// If this is going slow enough, check for and redraw the MOID representations of any other MOSRotatings that may be overlapping this
+	if (m_GetsHitByMOs && m_HitsMOs && m_Vel.GetX() < 2.0F && m_Vel.GetY() < 2.0F) { g_MovableMan.RedrawOverlappingMOIDs(this); }
 }
 
 
@@ -1349,17 +1346,6 @@ void MOSRotating::Travel()
 
     // Reset the travel impulse for this frame
     m_TravelImpulse.Reset();
-
-
-	// Set the atom to ignore this MO and all of it's children if PreciseCollisions are off
-	// When PreciseCollisions are on PreTravel takes care of it by removing this MO's silhouette from MO layer
-	if (!g_SettingsMan.PreciseCollisions())
-	{
-		std::vector<MOID> MOIDs;
-		GetMOIDs(MOIDs);
-		for (vector<MOID>::const_iterator aItr = MOIDs.begin(); aItr != MOIDs.end(); ++aItr)
-			m_pAtomGroup->AddMOIDToIgnore(*aItr);
-	}
 
     // Set the atom to ignore a certain MO, if set and applicable.
     if (m_HitsMOs && m_pMOToNotHit && g_MovableMan.ValidMO(m_pMOToNotHit) && !m_MOIgnoreTimer.IsPastSimTimeLimit()) {

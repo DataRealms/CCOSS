@@ -20,6 +20,7 @@ namespace RTE {
 	/// The singleton manager of sound effect and music playback.
 	/// </summary>
 	class AudioMan : public Singleton<AudioMan> {
+		friend class SettingsMan;
 		friend class SoundContainer;
 
 	public:
@@ -96,7 +97,7 @@ namespace RTE {
 		/// Makes the AudioMan object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create();
+		int Initialize();
 #pragma endregion
 
 #pragma region Destruction
@@ -164,6 +165,12 @@ namespace RTE {
 		/// <param name="includeImmobileSounds">Whether to include immobile sounds (normally used for GUI and so on) in global pitch modification. Defaults to false.</param>
 		/// <param name="includeMusic">Whether to include the music in global pitch modification. Defaults to false.</param>
 		void SetGlobalPitch(float pitch = 1.0F, bool includeImmobileSounds = false, bool includeMusic = false);
+
+		/// <summary>
+		/// The strength of the sound panning effect.
+		/// </summary>
+		/// <returns>0 - 1, where 0 is no panning and 1 is fully panned.</returns>
+		float GetSoundPanningEffectStrength() const { return m_SoundPanningEffectStrength; }
 #pragma endregion
 
 #pragma region Music Getters and Setters
@@ -357,17 +364,7 @@ namespace RTE {
 		void RegisterSoundEvent(int player, NetworkSoundState state, const SoundContainer *soundContainer, int fadeOutTime = 0);
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 
 		const FMOD_VECTOR c_FMODForward = FMOD_VECTOR{0, 0, 1}; //!< An FMOD_VECTOR defining the Forwards direction. Necessary for 3D Sounds.
 		const FMOD_VECTOR c_FMODUp = FMOD_VECTOR{0, 1, 0}; //!< An FMOD_VECTOR defining the Up direction. Necessary for 3D Sounds.
@@ -386,6 +383,14 @@ namespace RTE {
 		float m_MusicVolume; //!< Global music volume.
 		float m_SoundsVolume; //!< Global sounds effects volume.
 		float m_GlobalPitch; //!< Global pitch multiplier.
+
+		float m_SoundPanningEffectStrength; //!< The strength of the sound panning effect, 0 (no panning) - 1 (full panning).
+
+		//////////////////////////////////////////////////
+		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
+		float m_ListenerZOffset;
+		float m_MinimumDistanceForPanning;
+		//////////////////////////////////////////////////
 
 		std::string m_MusicPath; //!< The path to the last played music stream.
 		std::list<std::string> m_MusicPlayList; //!< Playlist of paths to music to play after the current non looping one is done.

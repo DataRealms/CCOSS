@@ -14,7 +14,7 @@ namespace RTE {
 	/// </summary>
 	struct PathNode {
 
-		Vector Pos; //!< Absolute position of the center of this node in the scene.    
+		Vector Pos; //!< Absolute position of the center of this node in the scene.
 		bool IsChanged; //!< Whether this has been updated since last call to Reset the pather.
 
 		/// <summary>

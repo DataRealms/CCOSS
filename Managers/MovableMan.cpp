@@ -27,7 +27,7 @@
 
 namespace RTE {
 
-const string MovableMan::m_ClassName = "MovableMan";
+const string MovableMan::c_ClassName = "MovableMan";
 
 
 // Comparison functor for sorting movable objects by their X position using STL's sort
@@ -77,7 +77,7 @@ void MovableMan::Clear()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes the MovableMan object ready for use.
 
-int MovableMan::Create()
+int MovableMan::Initialize()
 {
 // TODO: Increase this number, or maybe only for certain classes?
     Entity::ClassInfo::FillAllPools();
@@ -98,7 +98,7 @@ int MovableMan::Create()
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int MovableMan::ReadProperty(std::string propName, Reader &reader)
+int MovableMan::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "AddEffect")
         g_PresetMan.GetEntityPreset(reader);
@@ -110,16 +110,6 @@ int MovableMan::ReadProperty(std::string propName, Reader &reader)
         g_PresetMan.GetEntityPreset(reader);
     else if (propName == "SplashRatio")
         reader >> m_SplashRatio;
-    else if (propName == "MaxUnheldItems")
-        reader >> m_MaxDroppedItems;
-    else if (propName == "SloMoThreshold")
-        reader >> m_SloMoThreshold;
-    else if (propName == "SloMoDurationMS")
-        reader >> m_SloMoDuration;
-    else if (propName == "EnableParticleSettling")
-        reader >> m_SettlingEnabled;
-    else if (propName == "EnableMOSubtraction")
-        reader >> m_MOSubtractionEnabled;
     else
         return Serializable::ReadProperty(propName, reader);
 
@@ -1674,7 +1664,7 @@ void MovableMan::Update()
 
     {
         // Travel Actors
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS1);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsTravel);
         {
             for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
             {
@@ -1696,7 +1686,7 @@ void MovableMan::Update()
                 (*aIt)->NewFrame();
             }
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS1);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsTravel);
 
         // Travel items
         {
@@ -1714,7 +1704,7 @@ void MovableMan::Update()
         }
 
         // Travel particles
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS1);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesTravel);
         {
             for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
             {
@@ -1728,7 +1718,7 @@ void MovableMan::Update()
                 (*parIt)->NewFrame();
             }
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS1);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesTravel);
 
         g_SceneMan.UnlockScene();
     }
@@ -1740,7 +1730,7 @@ void MovableMan::Update()
         g_SceneMan.LockScene();
 
         // Actors
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS2);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
         {
             for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
             {
@@ -1749,7 +1739,7 @@ void MovableMan::Update()
                 (*aIt)->ApplyImpulses();
             }
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS2);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsUpdate);
 
         // Items
         {
@@ -1768,7 +1758,7 @@ void MovableMan::Update()
         }
 
         // Particles
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS2);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
         {
             for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
             {
@@ -1784,7 +1774,7 @@ void MovableMan::Update()
                 }
             }
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS2);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
     }
 
     ///////////////////////////////////////////////////

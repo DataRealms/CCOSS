@@ -450,11 +450,8 @@
     <ClInclude Include="Entities\SoundContainer.h">
       <Filter>Entities</Filter>
     </ClInclude>
-	<ClInclude Include="Entities\SoundSet.h">
+    <ClInclude Include="Entities\SoundSet.h">
       <Filter>Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="System\Primitive.h">
-      <Filter>System</Filter>
     </ClInclude>
     <ClInclude Include="System\Atom.h">
       <Filter>System</Filter>
@@ -482,6 +479,9 @@
     </ClInclude>
     <ClInclude Include="Entities\Activity.h">
       <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="System\GraphicalPrimitive.h">
+      <Filter>System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -567,9 +567,6 @@
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\AllegroScreen.cpp">
-      <Filter>GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\GUI.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\GUIBanner.cpp">
@@ -894,11 +891,8 @@
     <ClCompile Include="Entities\SoundContainer.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
-	<ClCompile Include="Entities\SoundSet.cpp">
+	  <ClCompile Include="Entities\SoundSet.cpp">
       <Filter>Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="System\Primitive.cpp">
-      <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="System\Atom.cpp">
       <Filter>System</Filter>
@@ -923,6 +917,9 @@
     </ClCompile>
     <ClCompile Include="Entities\Activity.cpp">
       <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="System\GraphicalPrimitive.cpp">
+      <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

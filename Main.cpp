@@ -18,8 +18,6 @@
 /// Cortex Command Community Project - https://github.com/cortex-command-community
 /// </summary>
 
-#include "System.h"
-
 #include "MetaMan.h"
 #include "SettingsMan.h"
 #include "ConsoleMan.h"
@@ -118,7 +116,7 @@ enum SLIDES {
 volatile bool g_Quit = false;
 bool g_ResetRTE = false; //!< Signals to reset the entire RTE next iteration.
 bool g_LaunchIntoEditor = false; //!< Flag for launching directly into editor activity.
-const char *g_EditorToLaunch = ""; //!< String with editor activity name to launch.
+std::string g_EditorToLaunch = ""; //!< String with editor activity name to launch.
 bool g_InActivity = false;
 bool g_ResetActivity = false;
 bool g_ResumeActivity = false;
@@ -182,12 +180,12 @@ void InitMainMenu() {
 /// </summary>
 void ReinitMainMenu() {
 	g_pMainMenuGUI->Destroy();
-	g_pMainMenuController->Destroy();
+	g_pMainMenuController->Reset();
 	g_pScenarioGUI->Destroy();
 	g_MetaMan.GetGUI()->Destroy();
 
 	g_ConsoleMan.Destroy();
-	g_ConsoleMan.Create();
+	g_ConsoleMan.Initialize();
 
 	InitMainMenu();
 	g_FrameMan.DestroyTempBackBuffers();
@@ -293,20 +291,25 @@ void EnterMultiplayerLobby() {
 /// <summary>
 /// Launch editor activity specified in command-line argument.
 /// </summary>
-void EnterEditorActivity(const char *editorToEnter) {
-	if (std::strcmp(editorToEnter, "ActorEditor") == 0) { 
-		g_pMainMenuGUI->StartActorEditor(); 
-	} else if (std::strcmp(editorToEnter, "GibEditor") == 0) {
+/// <returns>Whether a valid editor name was passed in and set to be launched.</returns>
+bool EnterEditorActivity(const std::string &editorToEnter) {
+	if (editorToEnter == "ActorEditor") {
+		g_pMainMenuGUI->StartActorEditor();
+	} else if (editorToEnter == "GibEditor") {
 		g_pMainMenuGUI->StartGibEditor();
-	} else if (std::strcmp(editorToEnter, "SceneEditor") == 0) {
+	} else if (editorToEnter == "SceneEditor") {
 		g_pMainMenuGUI->StartSceneEditor();
-	} else if (std::strcmp(editorToEnter, "AreaEditor") == 0) {
+	} else if (editorToEnter == "AreaEditor") {
 		g_pMainMenuGUI->StartAreaEditor();
-	} else if (std::strcmp(editorToEnter, "AssemblyEditor") == 0) {
+	} else if (editorToEnter == "AssemblyEditor") {
 		g_pMainMenuGUI->StartAssemblyEditor();
 	} else {
+		g_ConsoleMan.PrintString("ERROR: Invalid editor name passed into \"-editor\" argument!");
+		g_ConsoleMan.SetEnabled(true);
 		g_LaunchIntoEditor = false;
+		return false;
 	}
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1583,7 +1586,7 @@ bool RunGameLoop() {
 			// Advance the simulation time by the fixed amount
 			g_TimerMan.UpdateSim();
 
-			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_SIM_TOTAL);
+			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::SimTotal);
 
 			g_UInputMan.Update();
 
@@ -1594,16 +1597,16 @@ bool RunGameLoop() {
 			}
 			g_FrameMan.Update();
 			g_LuaMan.Update();
-			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTIVITY);
+			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActivityUpdate);
 			g_ActivityMan.Update();
-			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTIVITY);
+			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActivityUpdate);
 			g_MovableMan.Update();
             g_AudioMan.Update();
 
 			g_ActivityMan.LateUpdateGlobalScripts();
 
 			g_ConsoleMan.Update();
-			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_SIM_TOTAL);
+			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::SimTotal);
 
 			if (!g_InActivity) {
 				g_TimerMan.PauseSim(true);
@@ -1641,7 +1644,7 @@ bool RunGameLoop() {
 				g_NetworkServer.Update();
 				serverUpdated = true;
 			}
-			if (g_SettingsMan.GetServerSimSleepWhenIdle()) {
+			if (g_NetworkServer.GetServerSimSleepWhenIdle()) {
 				long long ticksToSleep = g_TimerMan.GetTimeToSleep();
 				if (ticksToSleep > 0) {
 					double secsToSleep = static_cast<double>(ticksToSleep) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
@@ -1661,45 +1664,48 @@ bool RunGameLoop() {
 /// <summary>
 /// Command-line argument handling.
 /// </summary>
-/// <param name="argc">Argument name.</param>
-/// <param name="argv">Argument value.</param>
-/// <param name="appExitVar">The appExitVar is what the program should exit with if this returns false.</param>
-/// <returns>False if app should quit right after this.</returns>
-bool HandleMainArgs(int argc, char *argv[], int &appExitVar) {
-
-    // If no additional arguments passed, just continue (first argument is the program path)
-    if (argc == 1) {
-		return true;
+/// <param name="argCount">Argument count.</param>
+/// <param name="argValue">Argument values.</param>
+void HandleMainArgs(int argCount, char **argValue) {
+	// Discard the first argument because it's always the executable path/name
+	argCount--;
+	argValue++;
+	if (argCount == 0) {
+		return;
 	}
-    // Default program return var if fail
-    appExitVar = 2;
+	bool launchModeSet = false;
+	bool singleModuleSet = false;
 
-    if (argc >= 2) {
-        for (int i = 1; i < argc; i++) {
-            // Print loading screen console to cout
-			if (std::strcmp(argv[i], "-cout") == 0) {
-				g_System.SetLogToCLI(true);
-			} else if (i + 1 < argc) {
-				// Launch game in server mode
-                if (std::strcmp(argv[i], "-server") == 0 && i + 1 < argc) {
-                    std::string port = argv[++i];
-                    g_NetworkServer.EnableServerMode();
-                    g_NetworkServer.SetServerPort(port);
-				// Load a single module right after the official modules
-                } else if (std::strcmp(argv[i], "-module") == 0 && i + 1 < argc) {
-					g_PresetMan.SetSingleModuleToLoad(argv[++i]);
-				// Launch game directly into editor activity
-				} else if (std::strcmp(argv[i], "-editor") == 0 && i + 1 < argc) {
-					const char *editorName = argv[++i];
-					if (std::strcmp(editorName, "") == 1) {
-						g_EditorToLaunch = editorName;
-						g_LaunchIntoEditor = true;
-					}
-				}
-            }
-        }
-    }
-    return true;
+	for (int i = 0; i < argCount;) {
+		std::string currentArg = argValue[i];
+		bool lastArg = i + 1 == argCount;
+
+		// Print loading screen console to cout
+		if (currentArg == "-cout") { System::EnableLoggingToCLI(); }
+
+		// Load a single module right after the official modules
+		if (!lastArg && !singleModuleSet && currentArg == "-module") {
+			std::string moduleToLoad = argValue[++i];
+			if (moduleToLoad.find(System::GetModulePackageExtension()) == moduleToLoad.length() - System::GetModulePackageExtension().length()) {
+				g_PresetMan.SetSingleModuleToLoad(moduleToLoad);
+				singleModuleSet = true;
+			}
+		}
+		if (!launchModeSet) {
+			// Launch game in server mode
+			if (currentArg == "-server") {
+				g_NetworkServer.EnableServerMode();
+				g_NetworkServer.SetServerPort(!lastArg ? argValue[++i] : "8000");
+				launchModeSet = true;
+			// Launch game directly into editor activity
+			} else if (!lastArg && currentArg == "-editor") {
+				g_EditorToLaunch = argValue[++i];
+				g_LaunchIntoEditor = true;
+				launchModeSet = true;
+			}
+		}
+		++i;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1707,7 +1713,7 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar) {
 /// <summary>
 /// Implementation of the main function.
 /// </summary>
-int main(int argc, char *argv[]) {
+int main(int argc, char **argv) {
 
 	///////////////////////////////////////////////////////////////////
     // Initialize Allegro
@@ -1723,57 +1729,31 @@ int main(int argc, char *argv[]) {
     // Seed the random number generator
     SeedRNG();
 
-    ///////////////////////////////////////////////////////////////////
-    // Instantiate all the managers
-
-    new ConsoleMan();
-    new LuaMan();
-    new SettingsMan();
-    new TimerMan();
-	new PerformanceMan();
-    new PresetMan();
-    new FrameMan();
-	new PostProcessMan();
-	new PrimitiveMan();
-    new AudioMan();
-    new GUISound();
-    new UInputMan();
-    new ActivityMan();
-    new MovableMan();
-    new SceneMan();
-    new MetaMan();
-
-	new NetworkServer();
-	new NetworkClient();
+	System::Initialize();
 
     ///////////////////////////////////////////////////////////////////
     // Create the essential managers
 
-    g_LuaMan.Create();
-	
-	Reader settingsReader("Base.rte/Settings.ini", false, 0, true);
-    g_SettingsMan.Create(settingsReader);
+	Reader settingsReader("Base.rte/Settings.ini", false, nullptr, true);
+    g_SettingsMan.Initialize(settingsReader);
 
-	g_NetworkServer.Create();
-	g_NetworkClient.Create();
-
-    int exitVar = 0;
-    if (!HandleMainArgs(argc, argv, exitVar)) {
-		return exitVar;
-	}
-    g_TimerMan.Create();
-	g_PerformanceMan.Create();
-    g_PresetMan.Create();
-    g_FrameMan.Create();
-    g_PostProcessMan.Create();
-    if (g_AudioMan.Create() >= 0) {
-        g_GUISound.Create();
+	g_LuaMan.Initialize();
+	g_NetworkServer.Initialize();
+	g_NetworkClient.Initialize();
+    g_TimerMan.Initialize();
+	g_PerformanceMan.Initialize();
+    g_FrameMan.Initialize();
+    g_PostProcessMan.Initialize();
+    if (g_AudioMan.Initialize() >= 0) {
+        g_GUISound.Initialize();
     }
-    g_UInputMan.Create();
-    g_ConsoleMan.Create();
-    g_ActivityMan.Create();
-    g_MovableMan.Create();
-    g_MetaMan.Create();
+    g_UInputMan.Initialize();
+    g_ConsoleMan.Initialize();
+    g_ActivityMan.Initialize();
+    g_MovableMan.Initialize();
+    g_MetaMan.Initialize();
+
+	HandleMainArgs(argc, argv);
 
     ///////////////////////////////////////////////////////////////////
     // Main game driver
@@ -1787,12 +1767,10 @@ int main(int argc, char *argv[]) {
 		g_AudioMan.SetMusicVolume(0);
 	}
 
-    new LoadingGUI();
 	g_LoadingGUI.InitLoadingScreen();
 	InitMainMenu();
 
-	std::string screenshotSaveDir = g_System.GetWorkingDirectory() + "/" + c_ScreenshotDirectory;
-	if (!std::filesystem::exists(screenshotSaveDir)) { g_System.MakeDirectory(screenshotSaveDir); }
+	g_FrameMan.PrintForcedGfxDriverMessage();
 
 	if (g_ConsoleMan.LoadWarningsExist()) {
 		g_ConsoleMan.PrintString("WARNING: References to files that could not be located or failed to load detected during module loading!\nSee \"LogLoadingWarning.txt\" for a list of bad references.");
@@ -1801,7 +1779,7 @@ int main(int argc, char *argv[]) {
 		g_ConsoleMan.SetEnabled(true);
 	} else {
 		// Delete an existing log if there are no warnings so there's less junk in the root folder.
-		if (std::filesystem::exists(g_System.GetWorkingDirectory() + "/LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
+		if (std::filesystem::exists(System::GetWorkingDirectory() + "LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
 	}
 
     if (!g_NetworkServer.IsServerModeEnabled()) {
@@ -1810,7 +1788,10 @@ int main(int argc, char *argv[]) {
 			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetDevice(InputDevice::DEVICE_MOUSE_KEYB);
 			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetPreset(InputPreset::PRESET_WASDKEYS);
 			// Start the specified editor activity.
-			EnterEditorActivity(g_EditorToLaunch);
+			if (!EnterEditorActivity(g_EditorToLaunch)) {
+				g_IntroState = g_SettingsMan.SkipIntro() ? MENUAPPEAR : START;
+				PlayIntroTitle();
+			}
 		} else if (!g_SettingsMan.LaunchIntoActivity()) {
 			g_IntroState = g_SettingsMan.SkipIntro() ? MENUAPPEAR : START;
 			PlayIntroTitle();
@@ -1839,10 +1820,8 @@ int main(int argc, char *argv[]) {
     g_AudioMan.Destroy();
     g_PresetMan.Destroy();
     g_UInputMan.Destroy();
-	g_PerformanceMan.Destroy();
     g_FrameMan.Destroy();
     g_TimerMan.Destroy();
-    g_SettingsMan.Destroy();
     g_LuaMan.Destroy();
     ContentFile::FreeAllLoaded();
     g_ConsoleMan.Destroy();

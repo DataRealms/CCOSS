@@ -76,7 +76,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Leg::ReadProperty(std::string propName, Reader &reader) {
+	int Leg::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Foot") {
 			RemoveAttachable(m_Foot);
 			const Entity *footEntity = g_PresetMan.GetEntityPreset(reader);

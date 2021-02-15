@@ -15,6 +15,7 @@ namespace RTE {
 
 	public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
 		float m_X = 0.0F; //!< X value of this vector.
@@ -495,14 +496,6 @@ namespace RTE {
 		/// <param name="rhs">An int index indicating which element is requested (X = 0, Y = 1).</param>
 		/// <returns>The requested element.</returns>
 		float & operator[](const int &rhs) { return (rhs == 0) ? m_X : m_Y; }
-#pragma endregion
-
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Vector.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Vector.</returns>
-		const std::string & GetClassName() const override { return c_ClassName; }
 #pragma endregion
 
 	private:

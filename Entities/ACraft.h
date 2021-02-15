@@ -83,6 +83,7 @@ enum
 
     public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
 
@@ -127,16 +128,6 @@ enum
     // Return value:    None.
 
         void Reset() override { Clear(); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetClassName
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the class name of this Entity.
-    // Arguments:       None.
-    // Return value:    A string with the friendly-formatted type name of this object.
-
-		const std::string & GetClassName() const override { return m_sClassName; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -224,8 +215,6 @@ enum
 
     protected:
 
-        // Member variables
-        static const std::string m_sClassName;
         // The offset of this exit relative the position of its ACraft
         Vector m_Offset;
         // The exiting velocity of anyhting exiting through this
@@ -246,6 +235,8 @@ enum
     // Private member variable and method declarations
 
     private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Method:          Clear

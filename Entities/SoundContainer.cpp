@@ -58,7 +58,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SoundContainer::ReadProperty(std::string propName, Reader &reader) {
+	int SoundContainer::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "AddSound") {
 			m_TopLevelSoundSet.AddSoundData(SoundSet::ReadAndGetSoundData(reader));
 		} else if (propName == "AddSoundSet") {
@@ -196,7 +196,7 @@ namespace RTE {
 			if (m_Immobile) {
 				soundMode |= FMOD_3D_HEADRELATIVE;
 				m_AttenuationStartDistance = c_SoundMaxAudibleDistance;
-			} else if (g_SettingsMan.SoundPanningEffectStrength() == 1.0F) {
+			} else if (g_AudioMan.GetSoundPanningEffectStrength() == 1.0F) {
 				soundMode |= FMOD_3D_INVERSEROLLOFF;
 			} else {
 				soundMode |= FMOD_3D_CUSTOMROLLOFF;

@@ -12,6 +12,7 @@ namespace RTE {
 	/// The singleton manager of the Activities and rules of Cortex Command.
 	/// </summary>
 	class ActivityMan : public Singleton<ActivityMan> {
+		friend class SettingsMan;
 
 	public:
 
@@ -25,7 +26,7 @@ namespace RTE {
 		/// Makes the ActivityMan object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create() { return 0; }
+		int Initialize() { return 0; }
 #pragma endregion
 
 #pragma region Destruction
@@ -140,18 +141,8 @@ namespace RTE {
 		void Update() { if (m_Activity) { m_Activity->Update(); } }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
 
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
-		
 		std::string m_DefaultActivityType; //!< The type name of the default Activity to be loaded if nothing else is available.
 		std::string m_DefaultActivityName; //!< The preset name of the default Activity to be loaded if nothing else is available.
 		

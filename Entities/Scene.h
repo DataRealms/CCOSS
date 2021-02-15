@@ -81,6 +81,7 @@ public:
 
     public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -126,16 +127,6 @@ public:
     // Return value:    None.
 
         void Reset() override { Clear(); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetClassName
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the class name of this Entity.
-    // Arguments:       None.
-    // Return value:    A string with the friendly-formatted type name of this object.
-
-		const std::string & GetClassName() const override { return m_sClassName; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -261,8 +252,6 @@ public:
 
     protected:
 
-        // Member variables
-        static const std::string m_sClassName;
         // The list of Box:es defining the Area in the owner Scene
         std::vector<Box> m_BoxList;
         // The name tag of this Area
@@ -273,6 +262,8 @@ public:
     // Private member variable and method declarations
 
     private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Method:          Clear

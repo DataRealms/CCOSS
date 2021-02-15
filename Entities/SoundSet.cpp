@@ -42,7 +42,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SoundSet::ReadProperty(std::string propName, Reader &reader) {
+	int SoundSet::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "SoundSelectionCycleMode") {
 			SetSoundSelectionCycleMode(ReadSoundSelectionCycleMode(reader));
 		} else if (propName == "AddSound") {
@@ -68,7 +68,7 @@ namespace RTE {
 		/// <param name="soundPath">The path to the sound file.</param>
 		auto readSoundFromPath = [&soundData, &reader](const std::string &soundPath) {
 			ContentFile soundFile(soundPath.c_str());
-			soundFile.SetFormattedReaderPosition("in file " + reader.GetCurrentFilePath() + " on line " + std::to_string(reader.GetCurrentFileLine()));
+			soundFile.SetFormattedReaderPosition("in file " + reader.GetCurrentFilePath() + " on line " + reader.GetCurrentFileLine());
 			FMOD::Sound *soundObject = soundFile.GetAsSound();
 			if (g_AudioMan.IsAudioEnabled() && !soundObject) { reader.ReportError(std::string("Failed to load the sound from the file")); }
 

@@ -8,8 +8,6 @@
 
 namespace RTE {
 
-	const std::string AudioMan::c_ClassName = "AudioMan";
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void AudioMan::Clear() {
@@ -20,6 +18,14 @@ namespace RTE {
 		m_MusicVolume = 1.0F;
 		m_SoundsVolume = 1.0F;
 		m_GlobalPitch = 1.0F;
+
+		m_SoundPanningEffectStrength = 0.5F;
+
+		//////////////////////////////////////////////////
+		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
+		m_ListenerZOffset = 400;
+		m_MinimumDistanceForPanning = 30.0F;
+		//////////////////////////////////////////////////
 
 		m_MusicPath.clear();
 		m_MusicPlayList.clear();
@@ -35,7 +41,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int AudioMan::Create() {
+	int AudioMan::Initialize() {
 		FMOD_RESULT audioSystemSetupResult = FMOD::System_Create(&m_AudioSystem);
 		
 		FMOD_ADVANCEDSETTINGS audioSystemAdvancedSettings;
@@ -110,7 +116,7 @@ namespace RTE {
 
 				int listenerNumber = 0;
 				for (const Vector *humanPlayerPosition : m_CurrentActivityHumanPlayerPositions) {
-					status = status == FMOD_OK ? m_AudioSystem->set3DListenerAttributes(listenerNumber, &GetAsFMODVector(*humanPlayerPosition, g_SettingsMan.c_ListenerZOffset()), nullptr, &c_FMODForward, &c_FMODUp) : status;
+					status = status == FMOD_OK ? m_AudioSystem->set3DListenerAttributes(listenerNumber, &GetAsFMODVector(*humanPlayerPosition, m_ListenerZOffset), nullptr, &c_FMODForward, &c_FMODUp) : status;
 					listenerNumber++;
 				}
 
@@ -120,7 +126,7 @@ namespace RTE {
 					m_CurrentActivityHumanPlayerPositions.clear();
 					status = status == FMOD_OK ? m_AudioSystem->set3DNumListeners(1) : status;
 				}
-				status = status == FMOD_OK ? m_AudioSystem->set3DListenerAttributes(0, &GetAsFMODVector(g_SceneMan.GetScrollTarget(), g_SettingsMan.c_ListenerZOffset()), nullptr, &c_FMODForward, &c_FMODUp) : status;
+				status = status == FMOD_OK ? m_AudioSystem->set3DListenerAttributes(0, &GetAsFMODVector(g_SceneMan.GetScrollTarget(), m_ListenerZOffset), nullptr, &c_FMODForward, &c_FMODUp) : status;
 			}
 
 			status = status == FMOD_OK ? m_AudioSystem->update() : status;
@@ -486,11 +492,10 @@ namespace RTE {
 				result = (result == FMOD_OK) ? channel->set3DLevel(0.0F) : result;
 				result = (result == FMOD_OK) ? channel->setVolume(soundContainer->GetVolume()) : result;
 			} else {
-				m_SoundChannelMinimumAudibleDistances.insert({channelIndex, soundData->MinimumAudibleDistance});
-				result = (result == FMOD_OK) ? channel->set3DLevel(g_SettingsMan.SoundPanningEffectStrength()) : result;
+				m_SoundChannelMinimumAudibleDistances.insert({ channelIndex, soundData->MinimumAudibleDistance });
+				result = (result == FMOD_OK) ? channel->set3DLevel(m_SoundPanningEffectStrength) : result;
 				UpdatePositionalEffectsForSoundChannel(channel, &GetAsFMODVector(soundContainer->GetPosition() + soundData->Offset));
 			}
-
 
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not play sounds from SoundContainer " + soundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
@@ -663,12 +668,12 @@ namespace RTE {
 			result = (result == FMOD_OK) ? soundChannel->get3DLevel(&channel3dLevel) : result;
 			if (result == FMOD_OK && m_CurrentActivityHumanPlayerPositions.size() == 1) {
 				float distanceToPlayer = (*m_CurrentActivityHumanPlayerPositions.at(0) - GetAsVector(channelPosition)).GetMagnitude();
-				if (distanceToPlayer < g_SettingsMan.c_MinimumDistanceForPanning()) {
+				if (distanceToPlayer < m_MinimumDistanceForPanning) {
 					soundChannel->set3DLevel(0);
-				} else if (distanceToPlayer < g_SettingsMan.c_MinimumDistanceForPanning() * 2) {
-					soundChannel->set3DLevel(LERP(0, 1, 0, g_SettingsMan.SoundPanningEffectStrength(), channel3dLevel));
+				} else if (distanceToPlayer < m_MinimumDistanceForPanning * 2) {
+					soundChannel->set3DLevel(LERP(0, 1, 0, m_SoundPanningEffectStrength, channel3dLevel));
 				} else {
-					soundChannel->set3DLevel(g_SettingsMan.SoundPanningEffectStrength());
+					soundChannel->set3DLevel(m_SoundPanningEffectStrength);
 				}
 			}
 

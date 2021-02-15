@@ -374,7 +374,7 @@ bool BuyMenuGUI::LoadAllLoadoutsFromFile()
     Reader loadoutFile(loadoutPath, false, 0, true);
 
     // Read any and all loadout presets from file
-    while (loadoutFile.IsOK() && loadoutFile.NextProperty())
+    while (loadoutFile.ReaderOK() && loadoutFile.NextProperty())
     {
         Loadout newLoad;
         loadoutFile >> newLoad;
@@ -478,16 +478,11 @@ bool BuyMenuGUI::SaveAllLoadoutsToFile()
     // Open the file
     Writer loadoutFile(loadoutPath, false);
 
-    // Write out all the loadouts that are custom, user made. The preset ones will later be read from the presetman instead
-    for (vector<Loadout>::iterator itr = m_Loadouts.begin(); itr != m_Loadouts.end(); ++itr)
-    {
-        // Don't write out and preset references.. tehy'll be read first from presetman on load anyway
-        if ((*itr).GetPresetName() == "None")
-        {
-            loadoutFile.NewProperty("AddLoadout");
-            loadoutFile << (*itr);
-        }
-    }
+	// Write out all the loadouts that are user made.
+	for (const Loadout &loadoutEntry : m_Loadouts) {
+		// Don't write out preset references, they'll be read first from PresetMan on load anyway
+		if (loadoutEntry.GetPresetName() == "None") { loadoutFile.NewPropertyWithValue("AddLoadout", loadoutEntry); }
+	}
 
     return true;
 }

@@ -147,16 +147,17 @@ ClassInfoGetters
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 	int LoadScript(std::string const &scriptPath, bool loadAsEnabledScript = false) override;
 
+    /// <summary>
+    /// Gets the mass of this Actor's inventory. Does not include any equipped item (for actor subtypes that have that).
+    /// </summary>
+    /// <returns>The mass of this Actor's inventory.</returns>
+    float GetInventoryMass() const;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this Actor, including the mass of its
-//                  currently attached body parts and inventory.
-// Arguments:       None.
-// Return value:    A float describing the mass value in Kilograms (kg).
-
-    float GetMass() const override;
+    /// <summary>
+    /// Gets the mass of this Actor, including the mass of its Attachables, wounds and inventory.
+    /// </summary>
+    /// <returns>The mass of this Actor, its inventory and all its Attachables and wounds in Kilograms (kg).</returns>
+    float GetMass() const override { return MOSRotating::GetMass() + GetInventoryMass() + (m_GoldCarried * g_SceneMan.GetKgPerOz()); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -225,15 +226,6 @@ ClassInfoGetters
 // Return value:    None.
 
     void SetMaxHealth(int newValue) { m_MaxHealth = newValue; }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAnyRandomWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds from the actor and all standard attachables.
-// Arguments:       Amount of wounds to remove.
-// Return value:    Damage taken from removed wounds.
-
-	virtual int RemoveAnyRandomWounds(int amount);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetAimDistance
@@ -594,18 +586,6 @@ ClassInfoGetters
 // Return value:    A const bool with the answer.
 
     bool IsDead() const { return m_Status == DEAD; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FacingAngle
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adjusts an absolute aiming angle based on wether this Actor is facing
-//                  left or right.
-// Arguments:       The input angle in radians.
-// Return value:    The output angle in radians, which will be unaltered if this Actor is
-//                  facing right.
-
-    float FacingAngle(float angle) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -990,17 +970,13 @@ ClassInfoGetters
     void DrawWaypoints(bool drawWaypoints = true) { m_DrawWaypoints = drawWaypoints; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-// Arguments:       The impulse (kg * m/s) of the impact causing the gibbing to happen.
-//                  The internal blast impulse which will push the gibs away from the center.
-//                  A pointer to an MO which the gibs shuold not be colliding with!
-// Return value:    None.
-
-    void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = nullptr) override;
+    /// <summary>
+    /// Destroys this MOSRotating and creates its specified Gibs in its place with appropriate velocities.
+    /// Any Attachables are removed and also given appropriate velocities.
+    /// </summary>
+    /// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen.</param>
+    /// <param name="movableObjectToIgnore">A pointer to an MO which the Gibs and Attachables should not be colliding with.</param>
+    void GibThis(const Vector &impactImpulse = Vector(), MovableObject *movableObjectToIgnore = nullptr) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1143,25 +1119,6 @@ ClassInfoGetters
 // Return value:    Returns deployment id of this actor.
 
 	unsigned int GetDeploymentID() const { return m_DeploymentID; }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound count of this actor and all vital attachables.
-// Arguments:       None.
-// Return value:    Returns total number of wounds of this actor.
-
-	virtual int GetTotalWoundCount() const { return this->GetWoundCount(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound limit of this actor and all vital attachables.
-// Arguments:       None.
-// Return value:    Returns total wound limit of this actor.
-
-	virtual int GetTotalWoundLimit() const { return this->m_GibWoundLimit; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

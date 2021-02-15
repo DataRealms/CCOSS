@@ -46,9 +46,13 @@ void ACrab::Clear()
     m_pRFGLeg = 0;
     m_pRBGLeg = 0;
     m_pLFGFootGroup = 0;
+    m_BackupLFGFootGroup = nullptr;
     m_pLBGFootGroup = 0;
+    m_BackupLBGFootGroup = nullptr;
     m_pRFGFootGroup = 0;
+    m_BackupRFGFootGroup = nullptr;
     m_pRBGFootGroup = 0;
+    m_BackupRBGFootGroup = nullptr;
     m_StrideSound.Reset();
     m_pJetpack = 0;
     m_JetTimeTotal = 0.0;
@@ -161,67 +165,64 @@ int ACrab::Create(BITMAP *pSprite,
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a ACrab to be identical to another, by deep copy.
 
-int ACrab::Create(const ACrab &reference)
-{
+int ACrab::Create(const ACrab &reference) {
+    //Note - hardcoded attachable copying is organized based on desired draw order here.
+    if (reference.m_pLBGLeg) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLBGLeg->GetUniqueID());
+        SetLeftBGLeg(dynamic_cast<Leg *>(reference.m_pLBGLeg->Clone()));
+    }
+    if (reference.m_pRBGLeg) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRBGLeg->GetUniqueID());
+        SetRightBGLeg(dynamic_cast<Leg *>(reference.m_pRBGLeg->Clone()));
+    }
+    if (reference.m_pJetpack) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pJetpack->GetUniqueID());
+        SetJetpack(dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone()));
+    }
+    if (reference.m_pTurret) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pTurret->GetUniqueID());
+        SetTurret(dynamic_cast<Turret *>(reference.m_pTurret->Clone()));
+    }
+    if (reference.m_pLFGLeg) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLFGLeg->GetUniqueID());
+        SetLeftFGLeg(dynamic_cast<Leg *>(reference.m_pLFGLeg->Clone()));
+    }
+    if (reference.m_pRFGLeg) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRFGLeg->GetUniqueID());
+        SetRightFGLeg(dynamic_cast<Leg *>(reference.m_pRFGLeg->Clone()));
+    }
     Actor::Create(reference);
-
-    if (reference.m_pTurret)
-    {
-        m_pTurret = dynamic_cast<Turret *>(reference.m_pTurret->Clone());
-		m_pTurret->SetCanCollideWithTerrainWhenAttached(true);
-        AddAttachable(m_pTurret, true);
-    }
-
-    if (reference.m_pJetpack)
-    {
-        m_pJetpack = dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone());
-        AddAttachable(m_pJetpack, true);
-    }
 
     m_JetTimeTotal = reference.m_JetTimeTotal;
     m_JetTimeLeft = reference.m_JetTimeLeft;
 
-    if (reference.m_pLFGLeg)
-    {
-        m_pLFGLeg = dynamic_cast<Leg *>(reference.m_pLFGLeg->Clone());
-        AddAttachable(m_pLFGLeg, true);
-    }
-
-    if (reference.m_pLBGLeg)
-    {
-        m_pLBGLeg = dynamic_cast<Leg *>(reference.m_pLBGLeg->Clone());
-        AddAttachable(m_pLBGLeg, true);
-    }
-
-    if (reference.m_pRFGLeg)
-    {
-        m_pRFGLeg = dynamic_cast<Leg *>(reference.m_pRFGLeg->Clone());
-        AddAttachable(m_pRFGLeg, true);
-    }
-
-    if (reference.m_pRBGLeg)
-    {
-        m_pRBGLeg = dynamic_cast<Leg *>(reference.m_pRBGLeg->Clone());
-        AddAttachable(m_pRBGLeg, true);
-    }
-
     m_pLFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pLFGFootGroup->Clone());
     m_pLFGFootGroup->SetOwner(this);
+    m_BackupLFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupLFGFootGroup->Clone());
+    m_BackupLFGFootGroup->SetOwner(this);
+    m_BackupLFGFootGroup->SetLimbPos(reference.m_BackupLFGFootGroup->GetLimbPos());
     m_pLBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pLBGFootGroup->Clone());
     m_pLBGFootGroup->SetOwner(this);
+    m_BackupLBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupLBGFootGroup->Clone());
+    m_BackupLBGFootGroup->SetOwner(this);
+    m_BackupLBGFootGroup->SetLimbPos(reference.m_BackupLBGFootGroup->GetLimbPos());
     m_pRFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pRFGFootGroup->Clone());
     m_pRFGFootGroup->SetOwner(this);
+    m_BackupRFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupRFGFootGroup->Clone());
+    m_BackupRFGFootGroup->SetOwner(this);
+    m_BackupRFGFootGroup->SetLimbPos(reference.m_BackupRFGFootGroup->GetLimbPos());
     m_pRBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pRBGFootGroup->Clone());
     m_pRBGFootGroup->SetOwner(this);
+    m_BackupRBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupRBGFootGroup->Clone());
+    m_BackupRBGFootGroup->SetOwner(this);
+    m_BackupRBGFootGroup->SetLimbPos(reference.m_BackupRBGFootGroup->GetLimbPos());
 
     m_StrideSound = reference.m_StrideSound;
 
     m_MoveState = reference.m_MoveState;
 
-    for (int side = 0; side < SIDECOUNT; ++side)
-    {
-        for (int i = 0; i < MOVEMENTSTATECOUNT; ++i)
-        {
+    for (int side = 0; side < SIDECOUNT; ++side) {
+        for (int i = 0; i < MOVEMENTSTATECOUNT; ++i) {
             m_Paths[side][FGROUND][i].Create(reference.m_Paths[side][FGROUND][i]);
             m_Paths[side][BGROUND][i].Create(reference.m_Paths[side][BGROUND][i]);
         }
@@ -253,54 +254,52 @@ int ACrab::Create(const ACrab &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int ACrab::ReadProperty(std::string propName, Reader &reader)
+int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "Turret")
-    {
-        delete m_pTurret;
+    if (propName == "Turret") {
+        RemoveAttachable(m_pTurret);
         m_pTurret = new Turret;
         reader >> m_pTurret;
-		if (!m_pTurret->IsDamageMultiplierRedefined())
-			m_pTurret->SetDamageMultiplier(5);
-    }
-    else if (propName == "Jetpack")
-    {
-        delete m_pJetpack;
+        AddAttachable(m_pTurret);
+        if (m_pTurret->HasNoSetDamageMultiplier()) { m_pTurret->SetDamageMultiplier(5.0F); }
+    } else if (propName == "Jetpack") {
+        RemoveAttachable(m_pJetpack);
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
-    }
-    else if (propName == "JumpTime")
-    {
+        AddAttachable(m_pJetpack);
+        if (m_pJetpack->HasNoSetDamageMultiplier()) { m_pJetpack->SetDamageMultiplier(0.0F); }
+        m_pJetpack->SetApplyTransferredForcesAtOffset(false);
+        m_pJetpack->SetDeleteWhenRemovedFromParent(true);
+    } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
-        // Convert to ms
         m_JetTimeTotal *= 1000;
-    }
-    else if (propName == "LFGLeg")
-    {
-        delete m_pLFGLeg;
+    } else if (propName == "LFGLeg" || propName == "LeftFGLeg") {
+        RemoveAttachable(m_pLFGLeg);
         m_pLFGLeg = new Leg;
         reader >> m_pLFGLeg;
-    }
-    else if (propName == "LBGLeg")
-    {
-        delete m_pLBGLeg;
+        AddAttachable(m_pLFGLeg);
+        if (m_pLFGLeg->HasNoSetDamageMultiplier()) { m_pLFGLeg->SetDamageMultiplier(1.0F); }
+        m_pLFGLeg->SetInheritsHFlipped(-1);
+    } else if (propName == "LBGLeg" || propName == "LeftFGLeg") {
+        RemoveAttachable(m_pLBGLeg);
         m_pLBGLeg = new Leg;
         reader >> m_pLBGLeg;
-    }
-    else if (propName == "RFGLeg")
-    {
-        delete m_pRFGLeg;
+        AddAttachable(m_pLBGLeg);
+        if (m_pLBGLeg->HasNoSetDamageMultiplier()) { m_pLBGLeg->SetDamageMultiplier(1.0F); }
+        m_pLBGLeg->SetInheritsHFlipped(-1);
+    } else if (propName == "RFGLeg" || propName == "LeftFGLeg") {
+        RemoveAttachable(m_pRFGLeg);
         m_pRFGLeg = new Leg;
         reader >> m_pRFGLeg;
-    }
-    else if (propName == "RBGLeg")
-    {
-        delete m_pRBGLeg;
+        AddAttachable(m_pRFGLeg);
+        if (m_pRFGLeg->HasNoSetDamageMultiplier()) { m_pRFGLeg->SetDamageMultiplier(1.0F); }
+    } else if (propName == "RBGLeg" || propName == "LeftFGLeg") {
+        RemoveAttachable(m_pRBGLeg);
         m_pRBGLeg = new Leg;
         reader >> m_pRBGLeg;
-    }
-    else if (propName == "LFootGroup")
-    {
+        AddAttachable(m_pRBGLeg);
+        if (m_pRBGLeg->HasNoSetDamageMultiplier()) { m_pRBGLeg->SetDamageMultiplier(1.0F); }
+    } else if (propName == "LFootGroup" || propName == "LeftFootGroup") {
         delete m_pLFGFootGroup;
         delete m_pLBGFootGroup;
         m_pLFGFootGroup = new AtomGroup();
@@ -309,9 +308,10 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         m_pLBGFootGroup->Create(*m_pLFGFootGroup);
         m_pLFGFootGroup->SetOwner(this);
         m_pLBGFootGroup->SetOwner(this);
-    }
-    else if (propName == "RFootGroup")
-    {
+        m_BackupLFGFootGroup = new AtomGroup(*m_pLFGFootGroup);
+        m_BackupLFGFootGroup->RemoveAllAtoms();
+        m_BackupLBGFootGroup = new AtomGroup(*m_BackupLFGFootGroup);
+    } else if (propName == "RFootGroup" || propName == "RightFootGroup") {
         delete m_pRFGFootGroup;
         delete m_pRBGFootGroup;
         m_pRFGFootGroup = new AtomGroup();
@@ -320,27 +320,30 @@ int ACrab::ReadProperty(std::string propName, Reader &reader)
         m_pRBGFootGroup->Create(*m_pRFGFootGroup);
         m_pRFGFootGroup->SetOwner(this);
         m_pRBGFootGroup->SetOwner(this);
-    }
-    else if (propName == "StrideSound")
+        m_BackupRFGFootGroup = new AtomGroup(*m_pRFGFootGroup);
+        m_BackupRFGFootGroup->RemoveAllAtoms();
+        m_BackupRBGFootGroup = new AtomGroup(*m_BackupRFGFootGroup);
+    } else if (propName == "StrideSound") {
         reader >> m_StrideSound;
-    else if (propName == "LStandLimbPath")
+    } else if (propName == "LStandLimbPath" || propName == "LeftStandLimbPath") {
         reader >> m_Paths[LEFTSIDE][FGROUND][STAND];
-    else if (propName == "LWalkLimbPath")
+    } else if (propName == "LWalkLimbPath" || propName == "LeftWalkLimbPath") {
         reader >> m_Paths[LEFTSIDE][FGROUND][WALK];
-    else if (propName == "LDislodgeLimbPath")
+    } else if (propName == "LDislodgeLimbPath" || propName == "LeftDislodgeLimbPath") {
         reader >> m_Paths[LEFTSIDE][FGROUND][DISLODGE];
-    else if (propName == "RStandLimbPath")
+    } else if (propName == "RStandLimbPath" || propName == "RightStandLimbPath") {
         reader >> m_Paths[RIGHTSIDE][FGROUND][STAND];
-    else if (propName == "RWalkLimbPath")
+    } else if (propName == "RWalkLimbPath" || propName == "RightWalkLimbPath") {
         reader >> m_Paths[RIGHTSIDE][FGROUND][WALK];
-    else if (propName == "RDislodgeLimbPath")
+    } else if (propName == "RDislodgeLimbPath" || propName == "RightDislodgeLimbPath") {
         reader >> m_Paths[RIGHTSIDE][FGROUND][DISLODGE];
-    else if (propName == "AimRangeUpperLimit")
+    } else if (propName == "AimRangeUpperLimit") {
         reader >> m_AimRangeUpperLimit;
-    else if (propName == "AimRangeLowerLimit")
+    } else if (propName == "AimRangeLowerLimit") {
         reader >> m_AimRangeLowerLimit;
-    else
+    } else {
         return Actor::ReadProperty(propName, reader);
+    }
 
     return 0;
 }
@@ -452,12 +455,6 @@ int ACrab::Save(ostream &stream) const
 
 void ACrab::Destroy(bool notInherited)
 {
-    delete m_pTurret;
-    delete m_pLFGLeg;
-    delete m_pLBGLeg;
-    delete m_pRFGLeg;
-    delete m_pRBGLeg;
-    delete m_pJetpack;
     delete m_pLFGFootGroup;
     delete m_pLBGFootGroup;
     delete m_pRFGFootGroup;
@@ -469,29 +466,6 @@ void ACrab::Destroy(bool notInherited)
     if (!notInherited)
         Actor::Destroy();
     Clear();
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this ACrab, including the mass of its
-//                  currently attached body parts and inventory.
-
-float ACrab::GetMass() const
-{
-    float totalMass = Actor::GetMass();
-    if (m_pTurret)
-        totalMass += m_pTurret->GetMass();
-    if (m_pLFGLeg)
-        totalMass += m_pLFGLeg->GetMass();
-    if (m_pLBGLeg)
-        totalMass += m_pLBGLeg->GetMass();
-    if (m_pRFGLeg)
-        totalMass += m_pRFGLeg->GetMass();
-    if (m_pRBGLeg)
-        totalMass += m_pRBGLeg->GetMass();
-    return totalMass;
 }
 
 /*
@@ -531,32 +505,127 @@ Vector ACrab::GetCPUPos() const
 
 Vector ACrab::GetEyePos() const
 {
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->GetMountedMO())
-        return m_pTurret->GetMountedMO()->GetPos();
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
+        return m_pTurret->GetMountedDevice()->GetPos();
 
     return m_Pos;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
+void ACrab::SetTurret(Turret *newTurret) {
+    if (newTurret == nullptr) {
+        if (m_pTurret && m_pTurret->IsAttached()) { RemoveAttachable(m_pTurret); }
+        m_pTurret = nullptr;
+    } else {
+        if (m_pTurret && m_pTurret->IsAttached()) { RemoveAttachable(m_pTurret); }
+        m_pTurret = newTurret;
+        AddAttachable(newTurret);
 
-void ACrab::SetID(const MOID newID)
-{
-    MovableObject::SetID(newID);
-    if (m_pTurret)
-        m_pTurret->SetID(newID);
-    if (m_pLFGLeg)
-        m_pLFGLeg->SetID(newID);
-    if (m_pLBGLeg)
-        m_pLBGLeg->SetID(newID);
-    if (m_pRFGLeg)
-        m_pRFGLeg->SetID(newID);
-    if (m_pRBGLeg)
-        m_pRBGLeg->SetID(newID);
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newTurret->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Turret *castedAttachable = dynamic_cast<Turret *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetTurret");
+            dynamic_cast<ACrab *>(parent)->SetTurret(castedAttachable);
+        }});
+    }
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACrab::SetJetpack(AEmitter *newJetpack) {
+    if (newJetpack == nullptr) {
+        if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
+        m_pJetpack = nullptr;
+    } else {
+        if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
+        m_pJetpack = newJetpack;
+        AddAttachable(newJetpack);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newJetpack->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            AEmitter *castedAttachable = dynamic_cast<AEmitter *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetJetpack");
+            dynamic_cast<ACrab *>(parent)->SetJetpack(castedAttachable);
+        }});
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACrab::SetLeftFGLeg(Leg *newLeg) {
+    if (newLeg == nullptr) {
+        if (m_pLFGLeg && m_pLFGLeg->IsAttached()) { RemoveAttachable(m_pLFGLeg); }
+        m_pLFGLeg = nullptr;
+    } else {
+        if (m_pLFGLeg && m_pLFGLeg->IsAttached()) { RemoveAttachable(m_pLFGLeg); }
+        m_pLFGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetLeftFGLeg");
+            dynamic_cast<ACrab *>(parent)->SetLeftFGLeg(castedAttachable);
+        }});
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACrab::SetLeftBGLeg(Leg *newLeg) {
+    if (newLeg == nullptr) {
+        if (m_pLBGLeg && m_pLBGLeg->IsAttached()) { RemoveAttachable(m_pLBGLeg); }
+        m_pLBGLeg = nullptr;
+    } else {
+        if (m_pLBGLeg && m_pLBGLeg->IsAttached()) { RemoveAttachable(m_pLBGLeg); }
+        m_pLBGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetLeftBGLeg");
+            dynamic_cast<ACrab *>(parent)->SetLeftBGLeg(castedAttachable);
+        }});
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACrab::SetRightFGLeg(Leg *newLeg) {
+    if (newLeg == nullptr) {
+        if (m_pRFGLeg && m_pRFGLeg->IsAttached()) { RemoveAttachable(m_pRFGLeg); }
+        m_pRFGLeg = nullptr;
+    } else {
+        if (m_pRFGLeg && m_pRFGLeg->IsAttached()) { RemoveAttachable(m_pRFGLeg); }
+        m_pRFGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetRightFGLeg");
+            dynamic_cast<ACrab *>(parent)->SetRightFGLeg(castedAttachable);
+        }});
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACrab::SetRightBGLeg(Leg *newLeg) {
+    if (newLeg == nullptr) {
+        if (m_pRBGLeg && m_pRBGLeg->IsAttached()) { RemoveAttachable(m_pRBGLeg); }
+        m_pRBGLeg = nullptr;
+    } else {
+        if (m_pRBGLeg && m_pRBGLeg->IsAttached()) { RemoveAttachable(m_pRBGLeg); }
+        m_pRBGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetRightBGLeg");
+            dynamic_cast<ACrab *>(parent)->SetRightBGLeg(castedAttachable);
+        }});
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -664,7 +733,7 @@ bool ACrab::AddPieMenuSlices(PieMenuGUI *pPieMenu)
     Actor::AddPieMenuSlices(pPieMenu);
 
     // Add any custom slices from a currently held device
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
         m_pTurret->GetMountedDevice()->AddPieMenuSlices(pPieMenu);
 
     return true;
@@ -711,31 +780,15 @@ bool ACrab::HandlePieCommand(int pieSliceIndex)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  GetTurret
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns any attached turret.
-
-Attachable * ACrab::GetTurret() const
-{
-    if (m_pTurret && m_pTurret->IsAttached())
-    {
-        return dynamic_cast<Attachable *>(m_pTurret);
-    }
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  GetEquippedItem
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns whatever is equipped in the turret, if anything. OWNERSHIP IS NOT TRANSFERRED!
 
 MovableObject * ACrab::GetEquippedItem() const
 {
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsSomethingMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        return m_pTurret->GetMountedMO();
+        return m_pTurret->GetMountedDevice();
     }
 
     return 0;
@@ -750,9 +803,9 @@ MovableObject * ACrab::GetEquippedItem() const
 
 bool ACrab::FirearmIsReady() const
 {
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsSomethingMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedDevice());
         if (pWeapon && pWeapon->GetRoundInMagCount() != 0)
             return true;
     }
@@ -768,9 +821,9 @@ bool ACrab::FirearmIsReady() const
 
 bool ACrab::FirearmIsEmpty() const
 {
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedDevice());
         if (pWeapon && pWeapon->GetRoundInMagCount() == 0)
             return true;
     }
@@ -786,9 +839,9 @@ bool ACrab::FirearmIsEmpty() const
 
 bool ACrab::FirearmNeedsReload() const
 {
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedDevice());
         if (pWeapon && pWeapon->NeedsReloading())
             return true;
     }
@@ -804,9 +857,9 @@ bool ACrab::FirearmNeedsReload() const
 
 bool ACrab::FirearmIsSemiAuto() const
 {
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedDevice());
         return pWeapon && !pWeapon->IsFullAuto();
     }
     return false;
@@ -822,9 +875,9 @@ bool ACrab::FirearmIsSemiAuto() const
 
 void ACrab::ReloadFirearm()
 {
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedDevice());
         if (pWeapon)
             pWeapon->Reload();
     }
@@ -840,9 +893,9 @@ void ACrab::ReloadFirearm()
 int ACrab::FirearmActivationDelay() const
 {
     // Check if the currently held device is already the desired type
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedMO());
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pTurret->GetMountedDevice());
         if (pWeapon)
             return pWeapon->GetActivationDelay();
     }
@@ -873,7 +926,7 @@ bool ACrab::IsWithinRange(Vector &point) const
     float range = m_AimDistance;
 
     // Add the sharp range of the equipped weapon
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
         range += m_pTurret->GetMountedDevice()->GetSharpLength() * m_SharpAimProgress;
     }
@@ -899,7 +952,7 @@ bool ACrab::Look(float FOVSpread, float range)
     Vector aimPos = GetCPUPos();
 
     // If aiming down the barrel, look through that
-    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
         aimPos = m_pTurret->GetMountedDevice()->GetPos();
         aimDistance += m_pTurret->GetMountedDevice()->GetSharpLength();
@@ -941,7 +994,7 @@ MovableObject * ACrab::LookForMOs(float FOVSpread, unsigned char ignoreMaterial,
     float aimDistance = m_AimDistance + g_FrameMan.GetPlayerScreenWidth() * 0.51;   // Set the length of the look vector
 
     // If aiming down the barrel, look through that
-    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
         aimPos = m_pTurret->GetMountedDevice()->GetPos();
         aimDistance += m_pTurret->GetMountedDevice()->GetSharpLength();
@@ -968,86 +1021,6 @@ MovableObject * ACrab::LookForMOs(float FOVSpread, unsigned char ignoreMaterial,
         return pSeenMO->GetRootParent();
 
     return pSeenMO;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-
-void ACrab::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
-{
-    // Detach all limbs and let loose
-    if (m_pTurret && m_pTurret->IsAttached())
-    {
-        RemoveAttachable(m_pTurret);
-        m_pTurret->SetVel(m_Vel + m_pTurret->GetParentOffset() * RandomNum());
-        m_pTurret->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pTurret);
-        m_pTurret = 0;
-    }
-    if (m_pJetpack && m_pJetpack->IsAttached())
-    {
-        // Jetpacks are really nothing, so just delete them safely
-        RemoveAttachable(m_pJetpack);
-        m_pJetpack->SetToDelete(true);
-        g_MovableMan.AddParticle(m_pJetpack);
-        m_pJetpack = 0;
-    }
-    if (m_pLFGLeg && m_pLFGLeg->IsAttached())
-    {
-        RemoveAttachable(m_pLFGLeg);
-        m_pLFGLeg->SetVel(m_Vel + m_pLFGLeg->GetParentOffset() * RandomNum());
-        m_pLFGLeg->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pLFGLeg);
-        m_pLFGLeg = 0;
-    }
-    if (m_pLBGLeg && m_pLBGLeg->IsAttached())
-    {
-        RemoveAttachable(m_pLBGLeg);
-        m_pLBGLeg->SetVel(m_Vel + m_pLBGLeg->GetParentOffset() * RandomNum());
-        m_pLBGLeg->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pLBGLeg);
-        m_pLBGLeg = 0;
-    }
-    if (m_pRFGLeg && m_pRFGLeg->IsAttached())
-    {
-        RemoveAttachable(m_pRFGLeg);
-        m_pRFGLeg->SetVel(m_Vel + m_pRFGLeg->GetParentOffset() * RandomNum());
-        m_pRFGLeg->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pRFGLeg);
-        m_pRFGLeg = 0;
-    }
-    if (m_pRBGLeg && m_pRBGLeg->IsAttached())
-    {
-        RemoveAttachable(m_pRBGLeg);
-        m_pRBGLeg->SetVel(m_Vel + m_pRBGLeg->GetParentOffset() * RandomNum());
-        m_pRBGLeg->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pRBGLeg);
-        m_pRBGLeg = 0;
-    }
-
-    Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsOnScenePoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this' current graphical representation overlaps
-//                  a point in absolute scene coordinates.
-
-bool ACrab::IsOnScenePoint(Vector &scenePoint) const
-{
-    return ((m_pTurret && m_pTurret->IsOnScenePoint(scenePoint)) ||
-            (m_pLFGLeg && m_pLFGLeg->IsOnScenePoint(scenePoint)) ||
-            (m_pRFGLeg && m_pRFGLeg->IsOnScenePoint(scenePoint)) ||
-            Actor::IsOnScenePoint(scenePoint) ||
-            (m_pJetpack && m_pJetpack->IsOnScenePoint(scenePoint)) ||
-            (m_pLBGLeg && m_pLBGLeg->IsOnScenePoint(scenePoint)) ||
-            (m_pRBGLeg && m_pRBGLeg->IsOnScenePoint(scenePoint)));
 }
 
 
@@ -2455,17 +2428,14 @@ void ACrab::Update()
     ////////////////////////////////////
     // Fire/Activate held devices
 
-    if (m_pTurret && m_pTurret->IsAttached())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
         // Activate held device, if a device is held.
-        if (m_pTurret->IsHeldDeviceMounted())
-        {
-            m_pTurret->GetMountedDevice()->SetSharpAim(m_SharpAimProgress);
-            if (m_Controller.IsState(WEAPON_FIRE))
-                m_pTurret->GetMountedDevice()->Activate();
-            else
-                m_pTurret->GetMountedDevice()->Deactivate();
-        }
+        m_pTurret->GetMountedDevice()->SetSharpAim(m_SharpAimProgress);
+        if (m_Controller.IsState(WEAPON_FIRE))
+            m_pTurret->GetMountedDevice()->Activate();
+        else
+            m_pTurret->GetMountedDevice()->Deactivate();
     }
 
     // Controller disabled
@@ -2485,6 +2455,24 @@ void ACrab::Update()
 
     if (m_Status == STABLE)
     {
+        // This exists to support disabling foot collisions if the limbpath has that flag set.
+        if ((m_pLFGFootGroup->GetAtomCount() == 0 && m_BackupLFGFootGroup->GetAtomCount() > 0) != m_Paths[LEFTSIDE][FGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupLFGFootGroup->SetLimbPos(m_pLFGFootGroup->GetLimbPos());
+            std::swap(m_pLFGFootGroup, m_BackupLFGFootGroup);
+        }
+        if ((m_pLBGFootGroup->GetAtomCount() == 0 && m_BackupLBGFootGroup->GetAtomCount() > 0) != m_Paths[LEFTSIDE][BGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupLBGFootGroup->SetLimbPos(m_pLBGFootGroup->GetLimbPos());
+            std::swap(m_pLBGFootGroup, m_BackupLBGFootGroup);
+        }
+        if ((m_pRFGFootGroup->GetAtomCount() == 0 && m_BackupRFGFootGroup->GetAtomCount() > 0) != m_Paths[RIGHTSIDE][FGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupRFGFootGroup->SetLimbPos(m_pRFGFootGroup->GetLimbPos());
+            std::swap(m_pRFGFootGroup, m_BackupRFGFootGroup);
+        }
+        if ((m_pRBGFootGroup->GetAtomCount() == 0 && m_BackupRBGFootGroup->GetAtomCount() > 0) != m_Paths[RIGHTSIDE][BGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupRBGFootGroup->SetLimbPos(m_pRBGFootGroup->GetLimbPos());
+            std::swap(m_pRBGFootGroup, m_BackupRBGFootGroup);
+        }
+
         // WALKING
         if (m_MoveState == WALK)
         {
@@ -2703,12 +2691,37 @@ void ACrab::Update()
         }
     }
 
+    /////////////////////////////////
+    // Manage Attachable:s
+    if (m_pTurret && m_pTurret->IsAttached()) {
+        m_pTurret->SetMountedDeviceRotOffset((m_AimAngle * static_cast<float>(GetFlipFactor())) - m_Rotation.GetRadAngle());
+    }
+
+    if (m_pLFGLeg && m_pLFGLeg->IsAttached()) {
+        m_pLFGLeg->EnableIdle(m_Status != UNSTABLE);
+        m_pLFGLeg->SetTargetPosition(m_pLFGFootGroup->GetLimbPos(m_HFlipped));
+    }
+
+    if (m_pLBGLeg && m_pLBGLeg->IsAttached()) {
+        m_pLBGLeg->EnableIdle(m_Status != UNSTABLE);
+        m_pLBGLeg->SetTargetPosition(m_pLBGFootGroup->GetLimbPos(m_HFlipped));
+    }
+
+    if (m_pRFGLeg && m_pRFGLeg->IsAttached()) {
+        m_pRFGLeg->EnableIdle(m_Status != UNSTABLE);
+        m_pRFGLeg->SetTargetPosition(m_pRFGFootGroup->GetLimbPos(m_HFlipped));
+    }
+
+    if (m_pRBGLeg && m_pRBGLeg->IsAttached()) {
+        m_pRBGLeg->EnableIdle(m_Status != UNSTABLE);
+        m_pRBGLeg->SetTargetPosition(m_pRBGFootGroup->GetLimbPos(m_HFlipped));
+    }
+
+
     /////////////////////////////////////////////////
     // Update MovableObject, adds on the forces etc
     // NOTE: this also updates the controller, so any setstates of it will be wiped!
-
     Actor::Update();
-
 
     ////////////////////////////////////
     // Update viewpoint
@@ -2720,7 +2733,7 @@ void ACrab::Update()
     // Reset this each frame
     m_SharpAimMaxedOut = false;
 
-    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
     {
         float maxLength = m_pTurret->GetMountedDevice()->GetSharpLength();
 
@@ -2757,97 +2770,6 @@ void ACrab::Update()
     if (m_Vel.GetMagnitude() > 10.0)
         m_ViewPoint += m_Vel * 6;
 
-
-    /////////////////////////////////
-    // Update Attachable:s
-
-    if (m_pTurret && m_pTurret->IsAttached())
-    {
-        m_pTurret->SetHFlipped(m_HFlipped);
-        m_pTurret->SetJointPos(m_Pos + m_pTurret->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pTurret->SetRotAngle(m_Rotation.GetRadAngle());
-        m_pTurret->SetMountedRotOffset((m_HFlipped ? -m_AimAngle : m_AimAngle) - m_Rotation.GetRadAngle());
-        m_pTurret->Update();
-        // Update the Atoms' offsets in the parent group
-//        Matrix atomRot(FacingAngle(m_pTurret->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
-//        m_pAtomGroup->UpdateSubAtoms(m_pTurret->GetAtomSubgroupID(), m_pTurret->GetParentOffset() - (m_pTurret->GetJointOffset() * atomRot), atomRot);
-
-        m_Health -= m_pTurret->CollectDamage();// * 5;
-    }
-
-    if (m_pJetpack && m_pJetpack->IsAttached())
-    {
-        m_pJetpack->SetHFlipped(m_HFlipped);
-        m_pJetpack->SetJointPos(m_Pos + m_pJetpack->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pJetpack->SetRotAngle(m_Rotation.GetRadAngle());
-        m_pJetpack->SetOnlyLinearForces(true);
-        m_pJetpack->Update();
-//        m_Health -= m_pJetpack->CollectDamage() * 10;
-    }
-
-    if (m_pLFGLeg && m_pLFGLeg->IsAttached())
-    {
-        // Left legs always flipped the other way
-        m_pLFGLeg->SetHFlipped(!m_HFlipped);
-        // Don't flip the parent offset though, that's probably done in the ini
-        m_pLFGLeg->SetJointPos(m_Pos + m_pLFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pLFGLeg->EnableIdle(m_Status != UNSTABLE);
-        m_pLFGLeg->ReachToward(m_pLFGFootGroup->GetLimbPos(m_HFlipped));
-        m_pLFGLeg->Update();
-        m_Health -= m_pLFGLeg->CollectDamage();
-    }
-
-    if (m_pLBGLeg && m_pLBGLeg->IsAttached())
-    {
-        // Left legs always flipped the other way
-        m_pLBGLeg->SetHFlipped(!m_HFlipped);
-        // Don't flip the parent offset though, that's probably done in the ini
-        m_pLBGLeg->SetJointPos(m_Pos + m_pLBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pLBGLeg->EnableIdle(m_Status != UNSTABLE);
-        m_pLBGLeg->ReachToward(m_pLBGFootGroup->GetLimbPos(m_HFlipped));
-        m_pLBGLeg->Update();
-        m_Health -= m_pLBGLeg->CollectDamage();
-    }
-
-    if (m_pRFGLeg && m_pRFGLeg->IsAttached())
-    {
-        m_pRFGLeg->SetHFlipped(m_HFlipped);
-        m_pRFGLeg->SetJointPos(m_Pos + m_pRFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pRFGLeg->EnableIdle(m_Status != UNSTABLE);
-        m_pRFGLeg->ReachToward(m_pRFGFootGroup->GetLimbPos(m_HFlipped));
-        m_pRFGLeg->Update();
-        m_Health -= m_pRFGLeg->CollectDamage();
-    }
-
-    if (m_pRBGLeg && m_pRBGLeg->IsAttached())
-    {
-        m_pRBGLeg->SetHFlipped(m_HFlipped);
-        m_pRBGLeg->SetJointPos(m_Pos + m_pRBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pRBGLeg->EnableIdle(m_Status != UNSTABLE);
-        m_pRBGLeg->ReachToward(m_pRBGFootGroup->GetLimbPos(m_HFlipped));
-        m_pRBGLeg->Update();
-        m_Health -= m_pRBGLeg->CollectDamage();
-    }
-
-    /////////////////////////////
-    // Apply forces transferred from the attachables and
-    // add detachment wounds to this if applicable
-
-    if (!ApplyAttachableForces(m_pTurret))
-        m_pTurret = 0;
-    if (!ApplyAttachableForces(m_pJetpack))
-        m_pJetpack = 0;
-    if (!ApplyAttachableForces(m_pLFGLeg))
-        m_pLFGLeg = 0;
-    if (!ApplyAttachableForces(m_pLBGLeg))
-        m_pLBGLeg = 0;
-    if (!ApplyAttachableForces(m_pRFGLeg))
-        m_pRFGLeg = 0;
-    if (!ApplyAttachableForces(m_pRBGLeg))
-        m_pRBGLeg = 0;
 /* Done by pie menu now, see HandlePieCommand()
     ////////////////////////////////////////
     // AI mode setting
@@ -2940,202 +2862,20 @@ void ACrab::Update()
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-
-void ACrab::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
-                         MOID rootMOID,
-                         bool makeNewMOID)
-{
-    if (m_pLBGLeg)
-        m_pLBGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pRBGLeg)
-        m_pRBGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pJetpack)
-        m_pJetpack->UpdateMOID(MOIDIndex, m_RootMOID, false);
-    if (m_pLFGLeg)
-        m_pLFGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pRFGLeg)
-        m_pRFGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pTurret)
-        m_pTurret->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-
-    Actor::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-void ACrab::GetMOIDs(std::vector<MOID> &MOIDs) const
-{
-	if (m_pLBGLeg)
-		m_pLBGLeg->GetMOIDs(MOIDs);
-	if (m_pRBGLeg)
-		m_pRBGLeg->GetMOIDs(MOIDs);
-	if (m_pJetpack)
-		m_pJetpack->GetMOIDs(MOIDs);
-	if (m_pLFGLeg)
-		m_pLFGLeg->GetMOIDs(MOIDs);
-	if (m_pRFGLeg)
-		m_pRFGLeg->GetMOIDs(MOIDs);
-	if (m_pTurret)
-		m_pTurret->GetMOIDs(MOIDs);
-
-	Actor::GetMOIDs(MOIDs);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAnyRandomWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds from the actor and all standard attachables.
-
-int ACrab::RemoveAnyRandomWounds(int amount)
-{
-	float damage = 0;
-
-	for (int i = 0; i < amount; i++)
-	{
-		// Fill the list of damaged bodyparts
-		std::vector<MOSRotating *> bodyParts;
-		if (GetWoundCount() > 0)
-			bodyParts.push_back(this);
-
-		if (m_pLBGLeg && m_pLBGLeg->GetWoundCount())
-			bodyParts.push_back(m_pLBGLeg);
-		if (m_pRBGLeg && m_pRBGLeg->GetWoundCount())
-			bodyParts.push_back(m_pRBGLeg);
-		if (m_pJetpack && m_pJetpack->GetWoundCount())
-			bodyParts.push_back(m_pJetpack);
-		if (m_pLFGLeg && m_pLFGLeg->GetWoundCount())
-			bodyParts.push_back(m_pLFGLeg);
-		if (m_pRFGLeg && m_pRFGLeg->GetWoundCount())
-			bodyParts.push_back(m_pRFGLeg);
-		if (m_pTurret && m_pTurret->GetWoundCount())
-			bodyParts.push_back(m_pTurret);
-
-		// Stop removing wounds if there are not any left
-		if (bodyParts.size() == 0)
-			break;
-
-		int partIndex = RandomNum<int>(0, bodyParts.size() - 1);
-		MOSRotating * part = bodyParts[partIndex];
-		damage += part->RemoveWounds(1);
-	}
-
-	return damage;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound count of this actor and all vital attachables.
-
-int ACrab::GetTotalWoundCount() const
-{
-	int count = Actor::GetWoundCount();
-
-    if (m_pLBGLeg)
-        count += m_pLBGLeg->GetWoundCount();
-    if (m_pRBGLeg)
-        count += m_pRBGLeg->GetWoundCount();
-    if (m_pJetpack)
-        count += m_pJetpack->GetWoundCount();
-    if (m_pLFGLeg)
-        count += m_pLFGLeg->GetWoundCount();
-    if (m_pRFGLeg)
-        count += m_pRFGLeg->GetWoundCount();
-    if (m_pTurret)
-        count += m_pTurret->GetWoundCount();
-
-	return count;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound limit of this actor and all vital attachables.
-
-int ACrab::GetTotalWoundLimit() const
-{ 
-	int count = Actor::GetGibWoundLimit();
-
-    if (m_pLBGLeg)
-        count += m_pLBGLeg->GetGibWoundLimit();
-    if (m_pRBGLeg)
-        count += m_pRBGLeg->GetGibWoundLimit();
-    if (m_pJetpack)
-        count += m_pJetpack->GetGibWoundLimit();
-    if (m_pLFGLeg)
-        count += m_pLFGLeg->GetGibWoundLimit();
-    if (m_pRFGLeg)
-        count += m_pRFGLeg->GetGibWoundLimit();
-    if (m_pTurret)
-        count += m_pTurret->GetGibWoundLimit();
-
-	return count;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this ACrab's current graphical representation to a
-//                  BITMAP of choice.
-
-void ACrab::Draw(BITMAP *pTargetBitmap,
-                  const Vector &targetPos,
-                  DrawMode mode,
-                  bool onlyPhysical) const
-{
-    // Override color drawing with flash, if requested.
-    DrawMode realMode = (mode == g_DrawColor && m_FlashWhiteMS) ? g_DrawWhite : mode;
-
-    if (m_pLBGLeg)
-        m_pLBGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pRBGLeg)
-        m_pRBGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pJetpack)
-        m_pJetpack->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pTurret && !m_pTurret->IsDrawnAfterParent())
-        m_pTurret->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-
-    Actor::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (m_pTurret && m_pTurret->IsDrawnAfterParent())
-        m_pTurret->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pRFGLeg)
-        m_pRFGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pLFGLeg)
-        m_pLFGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #ifdef DEBUG_BUILD
-//    if (mode == g_DrawDebug)
-    if (mode == g_DrawColor && !onlyPhysical)
-    {
-        acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
-                              std::floor(m_Pos.m_Y),
-                              64);
-        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
-                              std::floor(m_Pos.m_Y),
-                              64);
-        release_bitmap(pTargetBitmap);
+void ACrab::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
+    Actor::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
+    if (mode == g_DrawColor && !onlyPhysical) {
         m_pLFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pLBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pRFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pRBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
     }
-#endif
 }
+#endif
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -3189,7 +2929,7 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     // Player AI drawing
 
     // Device aiming reticule
-    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->IsHeldDeviceMounted())
+    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
         m_pTurret->GetMountedDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen, m_Controller.IsPlayerControlled());
 
     //////////////////////////////////////

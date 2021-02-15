@@ -39,7 +39,7 @@ namespace RTE
 #define CLEANAIRINTERVAL 200000
 #define COMPACTINGHEIGHT 25
 
-const std::string SceneMan::m_ClassName = "SceneMan";
+const std::string SceneMan::c_ClassName = "SceneMan";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -115,21 +115,6 @@ void SceneMan::Clear()
 		destroy_bitmap(m_pOrphanSearchBitmap);
 	m_pOrphanSearchBitmap = create_bitmap_ex(8, MAXORPHANRADIUS , MAXORPHANRADIUS);
 }
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the SceneMan object ready for use.
-
-int SceneMan::Create()
-{
-    if (Serializable::Create() < 0)
-        return -1;
-
-    return 0;
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
@@ -290,7 +275,7 @@ int SceneMan::LoadScene()
             SetSceneToLoad(g_ActivityMan.GetActivity()->GetSceneName());
 
         // If that failed, then resort to the default scene name
-        if (SetSceneToLoad(g_SceneMan.GetDefaultSceneName()) < 0)
+        if (SetSceneToLoad(m_DefaultSceneName) < 0)
         {
             g_ConsoleMan.PrintString("ERROR: Couldn't start because no Scene has been specified to load!");
             return -1;
@@ -326,7 +311,7 @@ int SceneMan::LoadScene(std::string sceneName, bool placeObjects, bool placeUnit
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int SceneMan::ReadProperty(std::string propName, Reader &reader)
+int SceneMan::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "AddScene")
         g_PresetMan.GetEntityPreset(reader);
@@ -391,19 +376,16 @@ int SceneMan::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this SceneMan with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int SceneMan::Save(Writer &writer) const
-{
-    g_ConsoleMan.PrintString("ERROR: Tried to save SceneMan, screen does not make sense");
+int SceneMan::Save(Writer &writer) const {
+	g_ConsoleMan.PrintString("ERROR: Tried to save SceneMan, screen does not make sense");
 
-    Serializable::Save(writer);
+	Serializable::Save(writer);
 
-    for (int i = 0; i < m_MaterialCount; ++i)
-    {
-        writer.NewProperty("AddMaterial");
-        writer << *(m_apMatPalette[i]);
-    }
+	for (int i = 0; i < m_MaterialCount; ++i) {
+		writer.NewPropertyWithValue("AddMaterial", *(m_apMatPalette[i]));
+	}
 
-    return 0;
+	return 0;
 }
 
 
@@ -560,8 +542,8 @@ bool SceneMan::MOIDClearCheck()
         {
             if ((badMOID = _getpixel(pMOIDMap, x, y)) != g_NoMOID)
             {
-                g_FrameMan.SaveBitmapToBMP(pMOIDMap, "MOIDCheck");
-                g_FrameMan.SaveBitmapToBMP(m_pMOColorLayer->GetBitmap(), "MOIDCheck");
+                g_FrameMan.SaveBitmapToPNG(pMOIDMap, "MOIDCheck");
+                g_FrameMan.SaveBitmapToPNG(m_pMOColorLayer->GetBitmap(), "MOIDCheck");
                 RTEAbort("Bad MOID of MO detected: " + g_MovableMan.GetMOFromID(badMOID)->GetPresetName());
                 return false;
             }

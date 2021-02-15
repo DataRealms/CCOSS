@@ -13,10 +13,6 @@ namespace RTE {
 	static constexpr char *c_GameVersion = "Pre-Release 3.0";
 #pragma endregion
 
-#pragma region Filesystem Constants
-	static constexpr char *c_ScreenshotDirectory = { "_Screenshots" };
-#pragma endregion
-
 #pragma region Physics Constants
 	static constexpr float c_PPM = 20.0F; //!< Pixels per Meter constant.
 	static constexpr float c_MPP = 1.0F / c_PPM; //!< Meters per Pixel constant.
@@ -57,8 +53,8 @@ namespace RTE {
 	#define c_GUIColorDarkBlue makecol(12, 20, 39)
 	#define c_GUIColorGray makecol(232, 232, 248)
 
-	#define c_PlayerSlotColorDefault makecol(161, 109, 20) 
-	#define c_PlayerSlotColorHovered makecol(203, 130, 56) 
+	#define c_PlayerSlotColorDefault makecol(161, 109, 20)
+	#define c_PlayerSlotColorHovered makecol(203, 130, 56)
 	#define c_PlayerSlotColorDisabled makecol(104, 67, 15)
 #pragma endregion
 
@@ -191,7 +187,7 @@ namespace RTE {
 	enum JoyDirections { JOYDIR_ONE = 0, JOYDIR_TWO };
 
 	/// <summary>
-	/// Enumeration for joystick dead zone types. 
+	/// Enumeration for joystick dead zone types.
 	/// Square deadzone cuts-off any input from every axis separately. For example if x-axis has less than 20% input and y-axis has more, x-axis input is ignored.
 	/// Circle uses a round zone to capture stick position on both axis then cut-off if this position is inside the round dead zone.
 	/// </summary>

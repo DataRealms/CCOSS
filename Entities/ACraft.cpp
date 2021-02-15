@@ -30,7 +30,7 @@
 namespace RTE {
 
 AbstractClassInfo(ACraft, Actor)
-const string ACraft::Exit::m_sClassName = "Exit";
+const string ACraft::Exit::c_ClassName = "Exit";
 
 bool ACraft::s_CrabBombInEffect = false;
 
@@ -96,7 +96,7 @@ int ACraft::Exit::Create()
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int ACraft::Exit::ReadProperty(std::string propName, Reader &reader)
+int ACraft::Exit::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "Offset")
         reader >> m_Offset;
@@ -344,7 +344,7 @@ int ACraft::Create(const ACraft &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int ACraft::ReadProperty(std::string propName, Reader &reader)
+int ACraft::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "HatchDelay")
         reader >> m_HatchDelay;
@@ -810,7 +810,7 @@ bool ACraft::OnMOHit(MovableObject *pOtherMO)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ACraft::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO) {
+void ACraft::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
 	if (g_SettingsMan.EnableCrabBombs() && !s_CrabBombInEffect) {
 		s_CrabBombInEffect = true;
 		int crabCount = 0;
@@ -825,7 +825,7 @@ void ACraft::GibThis(Vector impactImpulse, float internalBlast, MovableObject *p
 		}
 		s_CrabBombInEffect = false;
 	}
-	Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);
+	Actor::GibThis(impactImpulse, movableObjectToIgnore);
 }
 
 
@@ -975,21 +975,6 @@ void ACraft::Update()
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this ACraft's current graphical representation to a
-//                  BITMAP of choice.
-
-void ACraft::Draw(BITMAP *pTargetBitmap,
-                   const Vector &targetPos,
-                   DrawMode mode,
-                   bool onlyPhysical) const
-{
-    Actor::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  DrawHUD
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws this Actor's current graphical HUD overlay representation to a
@@ -1112,21 +1097,6 @@ void ACraft::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         }
 */
     }
-}
-
-/// <summary>
-/// Helper method to remove code duplication in ACDropship and ACRocket gibbing
-/// </summary>
-/// <param name="pAttachable">The attachable to set velocities for</param>
-/// <param name="impactImpulse">The impactImpulse passed in from GibThis</param>
-/// <param name="internalBlast">The internalBlast passed in from GibThis</param>
-void ACraft::SetAttachableVelocitiesForGibbing(Attachable * pAttachable, Vector impactImpulse, float internalBlast)
-{
-    Vector newVel(pAttachable->GetPos() - m_Pos);
-    newVel.SetMagnitude(internalBlast);
-    newVel += m_Vel + impactImpulse;
-    pAttachable->SetVel(newVel);
-    pAttachable->SetAngularVel(RandomNormalNum());
 }
 
 } // namespace RTE

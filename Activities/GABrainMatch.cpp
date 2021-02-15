@@ -91,7 +91,7 @@ int GABrainMatch::Create(const GABrainMatch &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int GABrainMatch::ReadProperty(std::string propName, Reader &reader)
+int GABrainMatch::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "CPUTeam")
@@ -114,18 +114,9 @@ int GABrainMatch::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this GABrainMatch with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int GABrainMatch::Save(Writer &writer) const
-{
-    GameActivity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int GABrainMatch::Save(Writer &writer) const {
+	GameActivity::Save(writer);
+	return 0;
 }
 
 

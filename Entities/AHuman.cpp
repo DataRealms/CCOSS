@@ -51,7 +51,9 @@ void AHuman::Clear()
     m_pFGHandGroup = 0;
     m_pBGHandGroup = 0;
     m_pFGFootGroup = 0;
+    m_BackupFGFootGroup = nullptr;
     m_pBGFootGroup = 0;
+    m_BackupBGFootGroup = nullptr;
     m_StrideSound.Reset();
     m_ArmsState = WEAPON_READY;
     m_MoveState = STAND;
@@ -62,6 +64,7 @@ void AHuman::Clear()
         m_Paths[BGROUND][i].Reset();
         m_Paths[FGROUND][i].Terminate();
         m_Paths[BGROUND][i].Terminate();
+        m_RotAngleTargets[i] = 0.0F;
     }
     m_Aiming = false;
     m_ArmClimbing[FGROUND] = false;
@@ -104,6 +107,12 @@ int AHuman::Create()
     if (Actor::Create() < 0)
         return -1;
 
+    // Cheat to make sure the FG Arm is always at the end of the Attachables list so it draws last.
+    if (m_pFGArm) {
+        m_Attachables.erase(std::find(m_Attachables.begin(), m_Attachables.end(), m_pFGArm));
+        m_Attachables.push_back(m_pFGArm);
+    }
+
     // Make the limb paths for the background limbs
     for (int i = 0; i < MOVEMENTSTATECOUNT; ++i)
     {
@@ -137,45 +146,37 @@ int AHuman::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a AHuman to be identical to another, by deep copy.
 
-int AHuman::Create(const AHuman &reference)
-{
+int AHuman::Create(const AHuman &reference) {
+    //Note - hardcoded attachable copying is organized based on desired draw order here.
+    if (reference.m_pBGArm) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pBGArm->GetUniqueID());
+        SetBGArm(dynamic_cast<Arm *>(reference.m_pBGArm->Clone()));
+    }
+    if (reference.m_pBGLeg) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pBGLeg->GetUniqueID());
+        SetBGLeg(dynamic_cast<Leg *>(reference.m_pBGLeg->Clone()));
+    }
+    if (reference.m_pJetpack) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pJetpack->GetUniqueID());
+        SetJetpack(dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone()));
+    }
+    if (reference.m_pHead) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pHead->GetUniqueID());
+        SetHead(dynamic_cast<Attachable *>(reference.m_pHead->Clone()));
+    }
+    if (reference.m_pFGLeg) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFGLeg->GetUniqueID());
+        SetFGLeg(dynamic_cast<Leg *>(reference.m_pFGLeg->Clone()));
+    }
+    if (reference.m_pFGArm) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFGArm->GetUniqueID());
+        SetFGArm(dynamic_cast<Arm *>(reference.m_pFGArm->Clone()));
+    }
     Actor::Create(reference);
 
 	m_ThrowPrepTime = reference.m_ThrowPrepTime;
-
-    if (reference.m_pHead) {
-        m_pHead = dynamic_cast<Attachable *>(reference.m_pHead->Clone());
-		m_pHead->SetCanCollideWithTerrainWhenAttached(true);
-        AddAttachable(m_pHead, true);
-    }
-
-    if (reference.m_pJetpack) {
-        m_pJetpack = dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone());
-        AddAttachable(m_pJetpack, true);
-    }
-
     m_JetTimeTotal = reference.m_JetTimeTotal;
     m_JetTimeLeft = reference.m_JetTimeLeft;
-
-    if (reference.m_pFGArm) {
-        m_pFGArm = dynamic_cast<Arm *>(reference.m_pFGArm->Clone());
-        AddAttachable(m_pFGArm, true);
-    }
-
-    if (reference.m_pBGArm) {
-        m_pBGArm = dynamic_cast<Arm *>(reference.m_pBGArm->Clone());
-        AddAttachable(m_pBGArm, true);
-    }
-
-    if (reference.m_pFGLeg) {
-        m_pFGLeg = dynamic_cast<Leg *>(reference.m_pFGLeg->Clone());
-        AddAttachable(m_pFGLeg, true);
-    }
-
-    if (reference.m_pBGLeg) {
-        m_pBGLeg = dynamic_cast<Leg *>(reference.m_pBGLeg->Clone());
-        AddAttachable(m_pBGLeg, true);
-    }
 
     m_pFGHandGroup = dynamic_cast<AtomGroup *>(reference.m_pFGHandGroup->Clone());
     m_pFGHandGroup->SetOwner(this);
@@ -183,8 +184,14 @@ int AHuman::Create(const AHuman &reference)
     m_pBGHandGroup->SetOwner(this);
     m_pFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pFGFootGroup->Clone());
     m_pFGFootGroup->SetOwner(this);
+    m_BackupFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupFGFootGroup->Clone());
+    m_BackupFGFootGroup->SetOwner(this);
+    m_BackupFGFootGroup->SetLimbPos(reference.m_BackupFGFootGroup->GetLimbPos());
     m_pBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pBGFootGroup->Clone());
     m_pBGFootGroup->SetOwner(this);
+    m_BackupBGFootGroup = dynamic_cast<AtomGroup *>(reference.m_BackupBGFootGroup->Clone());
+    m_BackupBGFootGroup->SetOwner(this);
+    m_BackupBGFootGroup->SetLimbPos(reference.m_BackupBGFootGroup->GetLimbPos());
 
     m_StrideSound = reference.m_StrideSound;
 
@@ -192,10 +199,10 @@ int AHuman::Create(const AHuman &reference)
     m_MoveState = reference.m_MoveState;
     m_ProneState = reference.m_ProneState;
 
-    for (int i = 0; i < MOVEMENTSTATECOUNT; ++i)
-    {
+    for (int i = 0; i < MOVEMENTSTATECOUNT; ++i) {
         m_Paths[FGROUND][i].Create(reference.m_Paths[FGROUND][i]);
         m_Paths[BGROUND][i].Create(reference.m_Paths[BGROUND][i]);
+        m_RotAngleTargets[i] = reference.m_RotAngleTargets[i];
     }
 
     m_GoldInInventoryChunk = reference.m_GoldInInventoryChunk;
@@ -223,56 +230,57 @@ int AHuman::Create(const AHuman &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int AHuman::ReadProperty(std::string propName, Reader &reader)
-{
-	if (propName == "ThrowPrepTime")
-		reader >> m_ThrowPrepTime;
-	else if (propName == "Head")
-    {
-        delete m_pHead;
+int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
+    if (propName == "ThrowPrepTime") {
+        reader >> m_ThrowPrepTime;
+    } else if (propName == "Head") {
+        RemoveAttachable(m_pHead);
         m_pHead = new Attachable;
         reader >> m_pHead;
-		if (!m_pHead->IsDamageMultiplierRedefined())
-			m_pHead->SetDamageMultiplier(5);
-    }
-    else if (propName == "Jetpack")
-    {
-        delete m_pJetpack;
+        AddAttachable(m_pHead);
+        if (m_pHead->HasNoSetDamageMultiplier()) { m_pHead->SetDamageMultiplier(5.0F); }
+        if (m_pHead->IsDrawnAfterParent()) { m_pHead->SetDrawnNormallyByParent(false); }
+        m_pHead->SetInheritsRotAngle(false);
+    } else if (propName == "Jetpack") {
+        RemoveAttachable(m_pJetpack);
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
-    }
-    else if (propName == "JumpTime")
-    {
+        AddAttachable(m_pJetpack);
+        if (m_pJetpack->HasNoSetDamageMultiplier()) { m_pJetpack->SetDamageMultiplier(0.0F); }
+        m_pJetpack->SetApplyTransferredForcesAtOffset(false);
+    } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         // Convert to ms
         m_JetTimeTotal *= 1000;
-    }
-    else if (propName == "FGArm")
-    {
-        delete m_pFGArm;
+    } else if (propName == "FGArm") {
+        RemoveAttachable(m_pFGArm);
         m_pFGArm = new Arm;
         reader >> m_pFGArm;
-    }
-    else if (propName == "BGArm")
-    {
-        delete m_pBGArm;
+        AddAttachable(m_pFGArm);
+        if (m_pFGArm->HasNoSetDamageMultiplier()) { m_pFGArm->SetDamageMultiplier(1.0F); }
+        m_pFGArm->SetDrawnAfterParent(true);
+        m_pFGArm->SetDrawnNormallyByParent(false);
+    } else if (propName == "BGArm") {
+        RemoveAttachable(m_pBGArm);
         m_pBGArm = new Arm;
         reader >> m_pBGArm;
-    }
-    else if (propName == "FGLeg")
-    {
-        delete m_pFGLeg;
+        AddAttachable(m_pBGArm);
+        if (m_pBGArm->HasNoSetDamageMultiplier()) { m_pBGArm->SetDamageMultiplier(1.0F); }
+        m_pBGArm->SetDrawnAfterParent(false);
+    } else if (propName == "FGLeg") {
+        RemoveAttachable(m_pFGLeg);
         m_pFGLeg = new Leg;
         reader >> m_pFGLeg;
-    }
-    else if (propName == "BGLeg")
-    {
-        delete m_pBGLeg;
+        AddAttachable(m_pFGLeg);
+        if (m_pFGLeg->HasNoSetDamageMultiplier()) { m_pFGLeg->SetDamageMultiplier(1.0F); }
+    } else if (propName == "BGLeg") {
+        RemoveAttachable(m_pBGLeg);
         m_pBGLeg = new Leg;
         reader >> m_pBGLeg;
-    }
-    else if (propName == "HandGroup")
-    {
+        AddAttachable(m_pBGLeg);
+        if (m_pBGLeg->HasNoSetDamageMultiplier()) { m_pBGLeg->SetDamageMultiplier(1.0F); }
+        m_pBGLeg->SetDrawnAfterParent(false);
+    } else if (propName == "HandGroup") {
         delete m_pFGHandGroup;
         delete m_pBGHandGroup;
         m_pFGHandGroup = new AtomGroup();
@@ -281,43 +289,53 @@ int AHuman::ReadProperty(std::string propName, Reader &reader)
         m_pBGHandGroup->Create(*m_pFGHandGroup);
         m_pFGHandGroup->SetOwner(this);
         m_pBGHandGroup->SetOwner(this);
-    }
-    else if (propName == "FGFootGroup")
-    {
+    } else if (propName == "FGFootGroup") {
         delete m_pFGFootGroup;
         m_pFGFootGroup = new AtomGroup();
         reader >> m_pFGFootGroup;
         m_pFGFootGroup->SetOwner(this);
-    }
-    else if (propName == "BGFootGroup")
-    {
+        m_BackupFGFootGroup = new AtomGroup(*m_pFGFootGroup);
+        m_BackupFGFootGroup->RemoveAllAtoms();
+    } else if (propName == "BGFootGroup") {
         delete m_pBGFootGroup;
         m_pBGFootGroup = new AtomGroup();
         reader >> m_pBGFootGroup;
         m_pBGFootGroup->SetOwner(this);
-    }
-    else if (propName == "StrideSound")
+        m_BackupBGFootGroup = new AtomGroup(*m_pBGFootGroup);
+        m_BackupBGFootGroup->RemoveAllAtoms();
+    } else if (propName == "StrideSound") {
         reader >> m_StrideSound;
-    else if (propName == "StandLimbPath")
+    } else if (propName == "StandLimbPath") {
         reader >> m_Paths[FGROUND][STAND];
-    else if (propName == "StandLimbPathBG")
+    } else if (propName == "StandLimbPathBG") {
         reader >> m_Paths[BGROUND][STAND];
-    else if (propName == "WalkLimbPath")
+    } else if (propName == "WalkLimbPath") {
         reader >> m_Paths[FGROUND][WALK];
-    else if (propName == "CrouchLimbPath")
+    } else if (propName == "CrouchLimbPath") {
         reader >> m_Paths[FGROUND][CROUCH];
-    else if (propName == "CrawlLimbPath")
+    } else if (propName == "CrouchLimbPathBG") {
+        reader >> m_Paths[BGROUND][CROUCH];
+    } else if (propName == "CrawlLimbPath") {
         reader >> m_Paths[FGROUND][CRAWL];
-    else if (propName == "ArmCrawlLimbPath")
+    } else if (propName == "ArmCrawlLimbPath") {
         reader >> m_Paths[FGROUND][ARMCRAWL];
-    else if (propName == "ClimbLimbPath")
+    } else if (propName == "ClimbLimbPath") {
         reader >> m_Paths[FGROUND][CLIMB];
-    else if (propName == "JumpLimbPath")
+    } else if (propName == "JumpLimbPath") {
         reader >> m_Paths[FGROUND][JUMP];
-    else if (propName == "DislodgeLimbPath")
+    } else if (propName == "DislodgeLimbPath") {
         reader >> m_Paths[FGROUND][DISLODGE];
-    else
+    } else if (propName == "StandRotAngleTarget") {
+        reader >> m_RotAngleTargets[STAND];
+    } else if (propName == "WalkRotAngleTarget") {
+        reader >> m_RotAngleTargets[WALK];
+    } else if (propName == "CrouchRotAngleTarget") {
+        reader >> m_RotAngleTargets[CROUCH];
+    } else if (propName == "JumpRotAngleTarget") {
+        reader >> m_RotAngleTargets[JUMP];
+    } else {
         return Actor::ReadProperty(propName, reader);
+    }
 
     return 0;
 }
@@ -387,47 +405,14 @@ int AHuman::Save(Writer &writer) const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Destroys and resets (through Clear()) the AHuman object.
 
-void AHuman::Destroy(bool notInherited)
-{
-    delete m_pBGLeg;
-    delete m_pFGLeg;
-    delete m_pBGArm;
-    delete m_pFGArm;
-    delete m_pJetpack;
-    delete m_pHead;
+void AHuman::Destroy(bool notInherited) {
+    delete m_pFGHandGroup;
     delete m_pBGHandGroup;
     delete m_pFGFootGroup;
     delete m_pBGFootGroup;
-//    for (deque<LimbPath *>::iterator itr = m_WalkPaths.begin();
-//         itr != m_WalkPaths.end(); ++itr)
-//        delete *itr;
 
-    if (!notInherited)
-        Actor::Destroy();
+    if (!notInherited) { Actor::Destroy(); }
     Clear();
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this AHuman, including the mass of its
-//                  currently attached body parts and inventory.
-
-float AHuman::GetMass() const
-{
-    float totalMass = Actor::GetMass();
-    if (m_pHead)
-        totalMass += m_pHead->GetMass();
-    if (m_pFGArm)
-        totalMass += m_pFGArm->GetMass();
-    if (m_pBGArm)
-        totalMass += m_pBGArm->GetMass();
-    if (m_pFGLeg)
-        totalMass += m_pFGLeg->GetMass();
-    if (m_pBGLeg)
-        totalMass += m_pBGLeg->GetMass();
-    return totalMass;
 }
 
 
@@ -518,40 +503,125 @@ Vector AHuman::GetEyePos() const
     return m_Pos;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHeadBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the sprite representing the head of this.
+void AHuman::SetHead(Attachable *newHead) {
+    if (newHead == nullptr) {
+        if (m_pHead && m_pHead->IsAttached()) { RemoveAttachable(m_pHead); }
+        m_pHead = nullptr;
+    } else {
+        if (m_pHead && m_pHead->IsAttached()) { RemoveAttachable(m_pHead); }
+        m_pHead = newHead;
+        AddAttachable(newHead);
 
-BITMAP * AHuman::GetHeadBitmap() const
-{
-    if (m_pHead && m_pHead->IsAttached())
-        return m_pHead->GetSpriteFrame(0);
-
-    return 0;
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newHead->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            dynamic_cast<AHuman *>(parent)->SetHead(attachable);
+        }});
+    }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
+void AHuman::SetJetpack(AEmitter *newJetpack) {
+    if (newJetpack == nullptr) {
+        if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
+        m_pJetpack = nullptr;
+    } else {
+        if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
+        m_pJetpack = newJetpack;
+        AddAttachable(newJetpack);
 
-void AHuman::SetID(const MOID newID)
-{
-    MovableObject::SetID(newID);
-    if (m_pHead)
-        m_pHead->SetID(newID);
-    if (m_pFGArm)
-        m_pFGArm->SetID(newID);
-    if (m_pBGArm)
-        m_pBGArm->SetID(newID);
-    if (m_pFGLeg)
-        m_pFGLeg->SetID(newID);
-    if (m_pBGLeg)
-        m_pBGLeg->SetID(newID);
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newJetpack->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            AEmitter *castedAttachable = dynamic_cast<AEmitter *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetJetpack");
+            dynamic_cast<AHuman *>(parent)->SetJetpack(castedAttachable);
+        }});
+    }
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AHuman::SetFGArm(Arm *newArm) {
+    if (newArm == nullptr) {
+        if (m_pFGArm && m_pFGArm->IsAttached()) { RemoveAttachable(m_pFGArm); }
+        m_pFGArm = nullptr;
+    } else {
+        if (m_pFGArm && m_pFGArm->IsAttached()) { RemoveAttachable(m_pFGArm); }
+        m_pFGArm = newArm;
+        AddAttachable(newArm);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newArm->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Arm *castedAttachable = dynamic_cast<Arm *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetFGArm");
+            dynamic_cast<AHuman *>(parent)->SetFGArm(castedAttachable);
+        }});
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AHuman::SetBGArm(Arm *newArm) {
+    if (newArm == nullptr) {
+        if (m_pBGArm && m_pBGArm->IsAttached()) { RemoveAttachable(m_pBGArm); }
+        m_pBGArm = nullptr;
+    } else {
+        if (m_pBGArm && m_pBGArm->IsAttached()) { RemoveAttachable(m_pBGArm); }
+        m_pBGArm = newArm;
+        AddAttachable(newArm);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newArm->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Arm *castedAttachable = dynamic_cast<Arm *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetBGArm");
+            dynamic_cast<AHuman *>(parent)->SetBGArm(castedAttachable);
+        }});
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AHuman::SetFGLeg(Leg *newLeg) {
+    if (newLeg == nullptr) {
+        if (m_pFGLeg && m_pFGLeg->IsAttached()) { RemoveAttachable(m_pFGLeg); }
+        m_pFGLeg = nullptr;
+    } else {
+        if (m_pFGLeg && m_pFGLeg->IsAttached()) { RemoveAttachable(m_pFGLeg); }
+        m_pFGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetFGLeg");
+            dynamic_cast<AHuman *>(parent)->SetFGLeg(castedAttachable);
+        }});
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AHuman::SetBGLeg(Leg *newLeg) {
+    if (newLeg == nullptr) {
+        if (m_pBGLeg && m_pBGLeg->IsAttached()) { RemoveAttachable(m_pBGLeg); }
+        m_pBGLeg = nullptr;
+    } else {
+        if (m_pBGLeg && m_pBGLeg->IsAttached()) { RemoveAttachable(m_pBGLeg); }
+        m_pBGLeg = newLeg;
+        AddAttachable(newLeg);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetBGLeg");
+            dynamic_cast<AHuman *>(parent)->SetBGLeg(castedAttachable);
+        }});
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+BITMAP *AHuman::GetHeadBitmap() const {
+    return (m_pHead && m_pHead->IsAttached()) ? m_pHead->GetSpriteFrame(0) : nullptr;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1644,86 +1714,6 @@ MovableObject * AHuman::LookForMOs(float FOVSpread, unsigned char ignoreMaterial
         return pSeenMO->GetRootParent();
 
     return pSeenMO;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-
-void AHuman::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
-{
-    // Detach all limbs and let loose
-    if (m_pHead && m_pHead->IsAttached())
-    {
-        RemoveAttachable(m_pHead);
-        m_pHead->SetVel(m_Vel + m_pHead->GetParentOffset() * RandomNum());
-        m_pHead->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pHead);
-        m_pHead = 0;
-    }
-    if (m_pJetpack && m_pJetpack->IsAttached())
-    {
-        // Jetpacks are really nothing, so just delete them safely
-        RemoveAttachable(m_pJetpack);
-        m_pJetpack->SetToDelete(true);
-        g_MovableMan.AddParticle(m_pJetpack);
-        m_pJetpack = 0;
-    }
-    if (m_pFGArm && m_pFGArm->IsAttached())
-    {
-        RemoveAttachable(m_pFGArm);
-        m_pFGArm->SetVel(m_Vel + m_pFGArm->GetParentOffset() * RandomNum());
-        m_pFGArm->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pFGArm);
-        m_pFGArm = 0;
-    }
-    if (m_pBGArm && m_pBGArm->IsAttached())
-    {
-        RemoveAttachable(m_pBGArm);
-        m_pBGArm->SetVel(m_Vel + m_pBGArm->GetParentOffset() * RandomNum());
-        m_pBGArm->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pBGArm);
-        m_pBGArm = 0;
-    }
-    if (m_pFGLeg && m_pFGLeg->IsAttached())
-    {
-        RemoveAttachable(m_pFGLeg);
-        m_pFGLeg->SetVel(m_Vel + m_pFGLeg->GetParentOffset() * RandomNum());
-        m_pFGLeg->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pFGLeg);
-        m_pFGLeg = 0;
-    }
-    if (m_pBGLeg && m_pBGLeg->IsAttached())
-    {
-        RemoveAttachable(m_pBGLeg);
-        m_pBGLeg->SetVel(m_Vel + m_pBGLeg->GetParentOffset() * RandomNum());
-        m_pBGLeg->SetAngularVel(RandomNormalNum());
-        g_MovableMan.AddParticle(m_pBGLeg);
-        m_pBGLeg = 0;
-    }
-
-    Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsOnScenePoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this' current graphical representation overlaps
-//                  a point in absolute scene coordinates.
-
-bool AHuman::IsOnScenePoint(Vector &scenePoint) const
-{
-    return ((m_pFGArm && m_pFGArm->IsOnScenePoint(scenePoint)) ||
-            (m_pFGLeg && m_pFGLeg->IsOnScenePoint(scenePoint)) ||
-            (m_pHead && m_pHead->IsOnScenePoint(scenePoint)) ||
-            Actor::IsOnScenePoint(scenePoint) ||
-            (m_pJetpack && m_pJetpack->IsOnScenePoint(scenePoint)) ||
-            (m_pBGArm && m_pBGArm->IsOnScenePoint(scenePoint)) ||
-            (m_pBGLeg && m_pBGLeg->IsOnScenePoint(scenePoint)));
 }
 
 
@@ -3103,7 +3093,7 @@ void AHuman::Update()
                 Attachable *pNewHat = dynamic_cast<Attachable *>(preset->Clone());
                 if (pNewHat)
                 {
-			        m_pHead->DetachOrDestroyAll(true);
+			        m_pHead->RemoveOrDestroyAllAttachables(true);
 			        m_pHead->AddAttachable(pNewHat, pNewHat->GetParentOffset());
                 }
 			}
@@ -3608,8 +3598,7 @@ void AHuman::Update()
     }
 
     // Item currently set to be within reach has expired or is now out of range
-    if (m_pItemInReach && (!g_MovableMan.IsDevice(m_pItemInReach) || (m_pItemInReach->GetPos() - m_Pos).GetMagnitude() > reach))
-    {
+    if (m_pItemInReach && (m_pItemInReach->IsUnPickupable() || (m_pItemInReach->HasPickupLimitations() && !m_pItemInReach->IsPickupableBy(this)) || !g_MovableMan.IsDevice(m_pItemInReach) || (m_pItemInReach->GetPos() - m_Pos).GetMagnitude() > reach)) {
         m_pItemInReach = 0;
         m_PieNeedsUpdate = true;
     }
@@ -3644,6 +3633,16 @@ void AHuman::Update()
 
     if (m_Status == STABLE && m_MoveState != NOMOVE)
     {
+        // This exists to support disabling foot collisions if the limbpath has that flag set.
+        if ((m_pFGFootGroup->GetAtomCount() == 0 && m_BackupFGFootGroup->GetAtomCount() > 0) != m_Paths[FGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupFGFootGroup->SetLimbPos(m_pFGFootGroup->GetLimbPos());
+            std::swap(m_pFGFootGroup, m_BackupFGFootGroup);
+        }
+        if ((m_pBGFootGroup->GetAtomCount() == 0 && m_BackupBGFootGroup->GetAtomCount() > 0) != m_Paths[BGROUND][m_MoveState].FootCollisionsShouldBeDisabled()) {
+            m_BackupBGFootGroup->SetLimbPos(m_pBGFootGroup->GetLimbPos());
+            std::swap(m_pBGFootGroup, m_BackupBGFootGroup);
+        }
+
         // WALKING, OR WE ARE JETPACKING AND STUCK
         if (m_MoveState == WALK || (m_MoveState == JUMP && m_Vel.GetLargest() < 1.0))
         {
@@ -3990,10 +3989,96 @@ void AHuman::Update()
         }
     }
 
+    /////////////////////////////////
+    // Manage Attachable:s
+    if (m_pHead && m_pHead->IsAttached()) {
+        float toRotate = 0;
+        // Only rotate the head to match the aim angle if body is stable and upright
+        if (m_Status == STABLE && std::fabs(m_Rotation.GetRadAngle()) < (c_HalfPI + c_QuarterPI)) {
+            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((m_HFlipped ? -m_AimAngle : m_AimAngle) * 0.7F + m_Rotation.GetRadAngle() * 0.2F);
+            toRotate *= 0.15F;
+        }
+        // If dying upright, make head slump forward or back depending on body lean
+// TODO: Doesn't work too well, but probably could
+//        else if ((m_Status == DEAD || m_Status == DYING) && fabs(m_Rotation.GetRadAngle()) < c_QuarterPI)
+//        {
+//            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(m_Rotation.GetRadAngle() + ((m_HFlipped && m_Rotation.GetRadAngle() > 0) || (!m_HFlipped && m_Rotation.GetRadAngle() > 0) ? c_PI : -c_PI) * 0.6);
+//            toRotate *= 0.10;
+//        }
+        // Make head just keep rotating loosely with the body if unstable or upside down
+        else {
+            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(m_Rotation.GetRadAngle());
+            toRotate *= 0.10F;
+        }
+        // Now actually rotate by the amount calculated above
+        m_pHead->SetRotAngle(m_pHead->GetRotAngle() + toRotate);
+    }
+
+    if (m_pFGLeg && m_pFGLeg->IsAttached()) {
+        m_pFGLeg->EnableIdle(m_ProneState == NOTPRONE && m_Status != UNSTABLE);
+        m_pFGLeg->SetTargetPosition(m_pFGFootGroup->GetLimbPos(m_HFlipped));
+    }
+
+    if (m_pBGLeg && m_pBGLeg->IsAttached()) {
+        m_pBGLeg->EnableIdle(m_ProneState == NOTPRONE && m_Status != UNSTABLE);
+        m_pBGLeg->SetTargetPosition(m_pBGFootGroup->GetLimbPos(m_HFlipped));
+    }
+
+    if (m_pFGArm && m_pFGArm->IsAttached()) {
+        m_pFGArm->SetRotAngle(m_AimAngle * static_cast<float>(GetFlipFactor()));
+
+        if (m_Status == STABLE) {
+            if (m_ArmClimbing[FGROUND]) {
+                // Can't climb with anything in the arm?
+                //UnequipBGArm();
+                m_pFGArm->ReachToward(m_pFGHandGroup->GetLimbPos(m_HFlipped));
+            } else if (!m_pFGArm->IsReaching()) {
+                // This will likely make the arm idle since the target will be out of range
+                m_pFGArm->Reach(m_pFGHandGroup->GetLimbPos(m_HFlipped));
+            }
+        } else {
+            // Unstable, so just drop the arm limply
+            m_pFGArm->ReachToward(m_pFGHandGroup->GetLimbPos(m_HFlipped));
+        }
+    }
+
+    if (m_pBGArm && m_pBGArm->IsAttached()) {
+        if (m_Status == STABLE) {
+            if (m_ArmClimbing[BGROUND]) {
+                // Can't climb with the shield
+                UnequipBGArm();
+                m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
+            } else if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice() && !m_pBGArm->HoldsHeldDevice()) {
+                // Re-equip shield in BG arm after climbing
+                EquipShieldInBGArm();
+                m_pBGArm->Reach(m_pFGArm->GetHeldDevice()->GetSupportPos());
+                //            m_pBGArm->ReachToward(m_Pos + m_WalkPaths.front()->GetCurrentPos());
+
+                // BGArm does reach to support the device held by FGArm.
+                if (m_pBGArm->DidReach()) {
+                    m_pFGArm->GetHeldDevice()->SetSupported(true);
+                    m_pBGArm->SetRecoil(m_pFGArm->GetHeldDevice()->GetRecoilForce(), m_pFGArm->GetHeldDevice()->GetRecoilOffset(), m_pFGArm->GetHeldDevice()->IsRecoiled());
+                } else {
+                    // BGArm did not reach to support the device.
+                    m_pFGArm->GetHeldDevice()->SetSupported(false);
+                    m_pBGArm->SetRecoil(Vector(), Vector(), false);
+                }
+            } else {
+                // Re-equip shield in BG arm after climbing
+                EquipShieldInBGArm();
+                // This will likely make the arm idle since the target will be out of range
+                m_pBGArm->Reach(m_pFGHandGroup->GetLimbPos(m_HFlipped));
+                m_pBGArm->SetRotAngle(m_HFlipped ? (-m_AimAngle + -m_Rotation.GetRadAngle()) : (m_AimAngle + m_Rotation.GetRadAngle()));
+            }
+        } else {
+            // Unstable, so just drop the arm limply
+            m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
+        }
+    }
+
     /////////////////////////////////////////////////
     // Update MovableObject, adds on the forces etc
     // NOTE: this also updates the controller, so any setstates of it will be wiped!
-
     Actor::Update();
 
     ////////////////////////////////////
@@ -4043,176 +4128,6 @@ void AHuman::Update()
     if (m_Vel.GetMagnitude() > 10.0)
         m_ViewPoint += m_Vel * 6;
 
-    /////////////////////////////////
-    // Update Attachable:s
-
-    if (m_pHead && m_pHead->IsAttached())
-    {
-        m_pHead->SetHFlipped(m_HFlipped);
-        m_pHead->SetJointPos(m_Pos + m_pHead->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        float toRotate = 0;
-        // Only rotate the head to match the aim angle if body is stable and upright
-        if (m_Status == STABLE && fabs(m_Rotation.GetRadAngle()) < (c_HalfPI + c_QuarterPI))
-        {
-            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((m_HFlipped ? -m_AimAngle : m_AimAngle) * 0.7 + m_Rotation.GetRadAngle() * 0.2);
-            toRotate *= 0.15;
-        }
-        // If dying upright, make head slump forward or back depending on body lean
-// TODO: Doesn't work too well, but probably could
-//        else if ((m_Status == DEAD || m_Status == DYING) && fabs(m_Rotation.GetRadAngle()) < c_QuarterPI)
-//        {
-//            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(m_Rotation.GetRadAngle() + ((m_HFlipped && m_Rotation.GetRadAngle() > 0) || (!m_HFlipped && m_Rotation.GetRadAngle() > 0) ? c_PI : -c_PI) * 0.6);
-//            toRotate *= 0.10;
-//        }
-        // Make head just keep rotating loosely with the body if unstable or upside down
-        else
-        {
-            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(m_Rotation.GetRadAngle());
-            toRotate *= 0.10;
-        }
-        // Now actually rotate by the amount calculated above
-        m_pHead->SetRotAngle(m_pHead->GetRotMatrix().GetRadAngle() + toRotate);
-
-        m_pHead->Update();
-        // Update the Atoms' offsets in the parent group
-        Matrix headAtomRot(FacingAngle(m_pHead->GetRotMatrix().GetRadAngle()) - FacingAngle(m_Rotation.GetRadAngle()));
-        m_pAtomGroup->UpdateSubAtoms(m_pHead->GetAtomSubgroupID(), m_pHead->GetParentOffset() - (m_pHead->GetJointOffset() * headAtomRot), headAtomRot);
-
-        m_Health -= m_pHead->CollectDamage();// * 5; // This is done in CollectDamage via m_DamageMultiplier now.
-    }
-
-    if (m_pJetpack && m_pJetpack->IsAttached())
-    {
-        m_pJetpack->SetHFlipped(m_HFlipped);
-        m_pJetpack->SetJointPos(m_Pos + m_pJetpack->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pJetpack->SetRotAngle(m_Rotation.GetRadAngle());
-        m_pJetpack->SetOnlyLinearForces(true);
-        m_pJetpack->Update();
-//        m_Health -= m_pJetpack->CollectDamage() * 10;
-    }
-
-    if (m_pFGLeg && m_pFGLeg->IsAttached())
-    {
-        m_pFGLeg->SetHFlipped(m_HFlipped);
-        m_pFGLeg->SetJointPos(m_Pos + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pFGLeg->EnableIdle(m_ProneState == NOTPRONE && m_Status != UNSTABLE);
-//        if (!m_ArmClimbing[FGROUND])
-            m_pFGLeg->ReachToward(m_pFGFootGroup->GetLimbPos(m_HFlipped));
-        m_pFGLeg->Update();
-        m_Health -= m_pFGLeg->CollectDamage();
-    }
-
-    if (m_pBGLeg && m_pBGLeg->IsAttached())
-    {
-        m_pBGLeg->SetHFlipped(m_HFlipped);
-        m_pBGLeg->SetJointPos(m_Pos + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        // Only have the leg go to idle position if the limb target is over the joint and if we're firing the jetpack... looks retarded otherwise
-        m_pBGLeg->EnableIdle(m_ProneState == NOTPRONE && m_Status != UNSTABLE);
-//        if (!m_ArmClimbing[BGROUND])
-            m_pBGLeg->ReachToward(m_pBGFootGroup->GetLimbPos(m_HFlipped));
-        m_pBGLeg->Update();
-        m_Health -= m_pBGLeg->CollectDamage();
-    }
-
-    if (m_pFGArm && m_pFGArm->IsAttached())
-    {
-        m_pFGArm->SetHFlipped(m_HFlipped);
-        m_pFGArm->SetJointPos(m_Pos + m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pFGArm->SetRotAngle(m_HFlipped ? (-m_AimAngle/* + -m_Rotation*/) : (m_AimAngle/* + m_Rotation*/));
-//        m_pFGArm->SetRotTarget(m_HFlipped ? (-m_AimAngle/* + -m_Rotation*/) : (m_AimAngle/* + m_Rotation*/));
-
-        if (m_Status == STABLE)
-        {
-            if (m_ArmClimbing[FGROUND])
-            {
-                // Can't climb with anything in the arm?
-    //            UnequipBGArm();
-                m_pFGArm->ReachToward(m_pFGHandGroup->GetLimbPos(m_HFlipped));
-            }
-            // This will likely make the arm idle since the target will be out of range
-            else if (!m_pFGArm->IsReaching())
-                m_pFGArm->Reach(m_pFGHandGroup->GetLimbPos(m_HFlipped));
-        }
-        // Unstable, so just drop the arm limply
-        else
-            m_pFGArm->ReachToward(m_pFGHandGroup->GetLimbPos(m_HFlipped));
-
-        m_pFGArm->Update();
-        m_Health -= m_pFGArm->CollectDamage();
-    }
-
-    if (m_pBGArm && m_pBGArm->IsAttached())
-    {
-        m_pBGArm->SetHFlipped(m_HFlipped);
-        m_pBGArm->SetJointPos(m_Pos + m_pBGArm->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        if (m_Status == STABLE)
-        {
-            if (m_ArmClimbing[BGROUND])
-            {
-                // Can't climb with the shield
-                UnequipBGArm();
-                m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
-                m_pBGArm->Update();
-            }
-            else if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice() && !m_pBGArm->HoldsHeldDevice())
-            {
-                // Re-equip shield in BG arm after climbing
-                EquipShieldInBGArm();
-                m_pBGArm->Reach(m_pFGArm->GetHeldDevice()->GetSupportPos());
-    //            m_pBGArm->ReachToward(m_Pos + m_WalkPaths.front()->GetCurrentPos());
-                m_pBGArm->Update();
-
-                // BGArm does reach to support the device held by FGArm.
-                if (m_pBGArm->DidReach())
-                {
-                    m_pFGArm->GetHeldDevice()->SetSupported(true);
-                    m_pBGArm->SetRecoil(m_pFGArm->GetHeldDevice()->GetRecoilForce(),
-                                        m_pFGArm->GetHeldDevice()->GetRecoilOffset(),
-                                        m_pFGArm->GetHeldDevice()->IsRecoiled());
-                }
-                // BGArm did not reach to support the device.
-                else
-                {
-                    m_pFGArm->GetHeldDevice()->SetSupported(false);
-                    m_pBGArm->SetRecoil(Vector(), Vector(), false);
-                }
-            }
-            else
-            {
-                // Re-equip shield in BG arm after climbing
-                EquipShieldInBGArm();
-                // This will likely make the arm idle since the target will be out of range
-                m_pBGArm->Reach(m_pFGHandGroup->GetLimbPos(m_HFlipped));
-                m_pBGArm->SetRotAngle(m_HFlipped ? (-m_AimAngle + -m_Rotation.GetRadAngle()) : (m_AimAngle + m_Rotation.GetRadAngle()));
-                m_pBGArm->Update();
-            }
-        }
-        // Unstable, so just drop the arm limply
-        else
-        {
-            m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
-            m_pBGArm->Update();
-        }
-
-        m_Health -= m_pBGArm->CollectDamage();
-    }
-
-    /////////////////////////////
-    // Apply forces transferred from the attachables and
-    // add detachment wounds to this if applicable
-
-    if (!ApplyAttachableForces(m_pHead))
-        m_pHead = 0;
-    if (!ApplyAttachableForces(m_pJetpack))
-        m_pJetpack = 0;
-    if (!ApplyAttachableForces(m_pFGArm, true))
-        m_pFGArm = 0;
-    if (!ApplyAttachableForces(m_pBGArm, true))
-        m_pBGArm = 0;
-    if (!ApplyAttachableForces(m_pFGLeg, true))
-        m_pFGLeg = 0;
-    if (!ApplyAttachableForces(m_pBGLeg, true))
-        m_pBGLeg = 0;
 /* Done by pie menu now, see HandlePieCommand()
     ////////////////////////////////////////
     // AI mode setting
@@ -4311,13 +4226,14 @@ void AHuman::Update()
             }
         }
         // Upright body posture
-        else
-        {
-            // Break the spring if close to target angle.
-            if (fabs(rot) > 0.1)
-                m_AngularVel -= rot * 0.5;//fabs(rot);
-            else if (fabs(m_AngularVel) > 0.3)
-                m_AngularVel *= 0.5;
+		else
+		{
+            float rotDiff = rot - (GetRotAngleTarget(m_MoveState) * GetFlipFactor());
+            if (fabs(rotDiff) > 0.1F) {
+                m_AngularVel -= rotDiff * 0.5F;
+            } else if (fabs(m_AngularVel) > 0.3F) {
+                m_AngularVel *= 0.5F;
+            }
         }
     }
     // Keel over
@@ -4422,210 +4338,34 @@ void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos
     release_bitmap(pTargetBitmap);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAnyRandomWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds from the actor and all standard attachables.
-
-int AHuman::RemoveAnyRandomWounds(int amount)
-{
-	float damage = 0;
-
-	for (int i = 0; i < amount; i++)
-	{
-		// Fill the list of damaged bodyparts
-		std::vector<MOSRotating *> bodyParts;
-		if (GetWoundCount() > 0)
-			bodyParts.push_back(this);
-
-		if (m_pBGLeg && m_pBGLeg->GetWoundCount())
-			bodyParts.push_back(m_pBGLeg);
-		if (m_pBGArm && m_pBGArm->GetWoundCount())
-			bodyParts.push_back(m_pBGArm);
-		if (m_pJetpack && m_pJetpack->GetWoundCount())
-			bodyParts.push_back(m_pJetpack);
-		if (m_pHead && m_pHead->GetWoundCount())
-			bodyParts.push_back(m_pHead);
-		if (m_pFGLeg && m_pFGLeg->GetWoundCount())
-			bodyParts.push_back(m_pFGLeg);
-		if (m_pFGArm && m_pFGArm->GetWoundCount())
-			bodyParts.push_back(m_pFGArm);
-
-		// Stop removing wounds if there are not any left
-		if (bodyParts.size() == 0)
-			break;
-
-		int partIndex = RandomNum<int>(0, bodyParts.size() - 1);
-		MOSRotating * part = bodyParts[partIndex];
-		damage += part->RemoveWounds(1);
-	}
-
-	return damage;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound count of this actor and all vital attachables.
-
-int AHuman::GetTotalWoundCount() const
-{
-	int count = Actor::GetTotalWoundCount();
-
-    if (m_pBGLeg)
-        count += m_pBGLeg->GetWoundCount();
-    if (m_pBGArm)
-        count += m_pBGArm->GetWoundCount();
-    if (m_pJetpack)
-        count += m_pJetpack->GetWoundCount();
-    if (m_pHead)
-        count += m_pHead->GetWoundCount();
-    if (m_pFGLeg)
-        count += m_pFGLeg->GetWoundCount();
-    if (m_pFGArm)
-        count += m_pFGArm->GetWoundCount();
-
-	return count;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound limit of this actor and all vital attachables.
-
-int AHuman::GetTotalWoundLimit() const
-{ 
-	int count = Actor::GetGibWoundLimit();
-
-    if (m_pBGLeg)
-        count += m_pBGLeg->GetGibWoundLimit();
-    if (m_pBGArm)
-        count += m_pBGArm->GetGibWoundLimit();
-    if (m_pJetpack)
-        count += m_pJetpack->GetGibWoundLimit();
-    if (m_pHead)
-        count += m_pHead->GetGibWoundLimit();
-    if (m_pFGLeg)
-        count += m_pFGLeg->GetGibWoundLimit();
-    if (m_pFGArm)
-        count += m_pFGArm->GetGibWoundLimit();
-
-	return count;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame
-
-void AHuman::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
-                              MOID rootMOID,
-                              bool makeNewMOID)
-{
-    if (m_pBGLeg)
-        m_pBGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pBGArm)
-        m_pBGArm->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pJetpack)
-        m_pJetpack->UpdateMOID(MOIDIndex, m_RootMOID, false);
-    if (m_pHead)
-        m_pHead->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pFGLeg)
-        m_pFGLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pFGArm)
-        m_pFGArm->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-
-    Actor::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-void AHuman::GetMOIDs(std::vector<MOID> &MOIDs) const
-{
-	if (m_pBGLeg)
-		m_pBGLeg->GetMOIDs(MOIDs);
-	if (m_pBGArm)
-		m_pBGArm->GetMOIDs(MOIDs);
-	if (m_pJetpack)
-		m_pJetpack->GetMOIDs(MOIDs);
-	if (m_pHead)
-		m_pHead->GetMOIDs(MOIDs);
-	if (m_pFGLeg)
-		m_pFGLeg->GetMOIDs(MOIDs);
-	if (m_pFGArm)
-		m_pFGArm->GetMOIDs(MOIDs);
-
-	Actor::GetMOIDs(MOIDs);
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws this AHuman's current graphical representation to a
 //                  BITMAP of choice.
 
-void AHuman::Draw(BITMAP *pTargetBitmap,
-                  const Vector &targetPos,
-                  DrawMode mode,
-                  bool onlyPhysical) const
-{
-    // Override color drawing with flash, if requested.
-    DrawMode realMode = (mode == g_DrawColor && m_FlashWhiteMS) ? g_DrawWhite : mode;
-
-    if (m_pBGLeg)
-        m_pBGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pBGArm)
-        m_pBGArm->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pJetpack)
-        m_pJetpack->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pHead && !m_pHead->IsDrawnAfterParent())
-        m_pHead->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-
+void AHuman::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     Actor::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-    if (m_pHead && m_pHead->IsDrawnAfterParent())
-        m_pHead->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pFGLeg)
-        m_pFGLeg->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-    if (m_pFGArm)
-    {
-        m_pFGArm->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical);
-        // Draw background Arm's hand after the HeldDevice of FGArm is drawn.
-        if (!onlyPhysical && mode == g_DrawColor && (m_pBGArm && m_pBGArm->DidReach() && m_pFGArm->HoldsHeldDevice() && !m_pFGArm->HoldsThrownDevice() && !m_pFGArm->GetHeldDevice()->IsReloading() && !m_pFGArm->GetHeldDevice()->IsShield()))
-            m_pBGArm->DrawHand(pTargetBitmap, targetPos, realMode);
+    DrawMode realMode = (mode == g_DrawColor && m_FlashWhiteMS) ? g_DrawWhite : mode;
+    // Note: For some reason the ordering of the attachables list can get messed up. The most important thing here is that the FGArm is on top of everything else.
+    if (m_pHead && m_pHead->IsDrawnAfterParent()) { m_pHead->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical); }
+    if (m_pFGArm) { m_pFGArm->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical); }
+
+    //TODO simplify this complex if check when arm is cleaned up like turret so all it can hold are HeldDevices and children
+    // Draw background Arm's hand after the HeldDevice of FGArm is drawn if the FGArm is holding a weapon.
+    if (m_pFGArm && m_pBGArm && !onlyPhysical && mode == g_DrawColor && m_pBGArm->DidReach() && m_pFGArm->HoldsHeldDevice() && !m_pFGArm->HoldsThrownDevice() && !m_pFGArm->GetHeldDevice()->IsReloading() && !m_pFGArm->GetHeldDevice()->IsShield()) {
+        m_pBGArm->DrawHand(pTargetBitmap, targetPos, realMode);
     }
     
 #ifdef DEBUG_BUILD
-    if (mode == g_DrawDebug)
-    {
-        // Limbpath debug drawing
+    if (mode == g_DrawDebug) {
         m_Paths[m_HFlipped][WALK].Draw(pTargetBitmap, targetPos, 122);
         m_Paths[m_HFlipped][CRAWL].Draw(pTargetBitmap, targetPos, 122);
         m_Paths[m_HFlipped][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);
         m_Paths[m_HFlipped][CLIMB].Draw(pTargetBitmap, targetPos, 165);
     }
-
-    if (mode == g_DrawColor && !onlyPhysical)
-    {
-        acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
-                              std::floor(m_Pos.m_Y),
-                              64);
-        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
-                              std::floor(m_Pos.m_Y),
-                              64);
-        release_bitmap(pTargetBitmap);
-
-//        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
+    if (mode == g_DrawColor && !onlyPhysical) {
         m_pFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pFGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);

@@ -223,7 +223,7 @@ int GameActivity::Create(const GameActivity &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int GameActivity::ReadProperty(std::string propName, Reader &reader)
+int GameActivity::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "CPUTeam")
     {
@@ -269,16 +269,13 @@ int GameActivity::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this GameActivity with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int GameActivity::Save(Writer &writer) const
-{
-    Activity::Save(writer);
+int GameActivity::Save(Writer &writer) const {
+	Activity::Save(writer);
 
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
+	writer.NewPropertyWithValue("CPUTeam", m_CPUTeam);
+	writer.NewPropertyWithValue("DeliveryDelay", m_DeliveryDelay);
 
-    return 0;
+	return 0;
 }
 
 

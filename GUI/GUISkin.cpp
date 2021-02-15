@@ -66,85 +66,57 @@ void GUISkin::Clear(void)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Loads a skin for a directory
 
-bool GUISkin::Load(const std::string Directory, const std::string Filename)
-{
-    RTE::Reader    SkinFile;
+bool GUISkin::Load(const std::string &directory, const std::string &fileName) {
+	// Destroy any previous instances
+	Destroy();
 
-    // Destroy any previous instances
-    Destroy();
+	m_Directory = directory;
 
-    m_Directory = Directory;
+	RTE::Reader skinFile;
+	if (skinFile.Create((m_Directory + "/" + fileName).c_str()) == -1) {
+		return false;
+	}
 
-    // Load the skin file
-    if (SkinFile.Create((Directory + "/" + Filename).c_str()) == -1) {
-        return false;
-    }
+	// Go through the skin file adding the sections and properties
+	GUIProperties *CurProp = nullptr;
 
-    // Go through the skin file adding the sections and properties
-    GUIProperties *CurProp = 0;
-    
-    while(!SkinFile.GetStream()->eof()) {
-        char line[512];
-        SkinFile.ReadLine(line, 512);
+	while (!skinFile.GetStream()->eof()) {
+		std::string line = skinFile.ReadLine();
 
-        // Ignore blank lines
-        if (strlen(line) == 0)
-            continue;
+		if (line.empty()) {
+			continue;
+		}
 
-        // Is the line a section?
-        if (line[0] == '[' && line[strlen(line)-1] == ']') {
-            line[strlen(line)-1] = '\0';
-            GUIUtil::SafeOverlappingStrCpy(line, GUIUtil::TrimString(line+1));
+		// Is the line a section?
+		if (line.front() == '[' && line.back() == ']') {
+			GUIProperties *p = new GUIProperties(line.substr(1, line.size() - 2));
+			CurProp = p;
+			m_PropList.push_back(p);
+			continue;
+		}
 
-            GUIProperties *p = new GUIProperties(line);
+		// Is the line a valid property?
+		size_t Position = line.find('=');
+		if (Position != std::string::npos) {
+			// Break the line into variable & value, but only add a property if it belongs to a section
+			if (CurProp) {
+				// Grab the variable & value strings and trim them
+				std::string Name = skinFile.TrimString(line.substr(0, Position));
+				std::string Value = skinFile.TrimString(line.substr(Position + 1, std::string::npos));
 
-            CurProp = p;
+				// Add it to the current property
+				CurProp->AddVariable(Name, Value);
+			}
+			continue;
+		}
+	}
 
-            m_PropList.push_back(p);
+	// Load the mouse pointers
+	m_MousePointers[0] = LoadMousePointer("Mouse_Pointer");
+	m_MousePointers[1] = LoadMousePointer("Mouse_Text");
+	m_MousePointers[2] = LoadMousePointer("Mouse_HSize");
 
-            continue;
-        }
-
-        // Is the line a valid property?
-        char *ptr = strchr(line, '=');
-        if (ptr != 0) {
-            // Break the line into variable & value
-            int Position = (int)(ptr - line + 1);
-
-            // Only add a property if it belongs to a section
-            if (CurProp) {
-                char Name[256];
-                char Value[256];
-
-                // Grab the variable & value strings
-                strncpy(Name, line, Position-1);
-                Name[Position-1] = '\0';
-                strncpy(Value, line+Position, strlen(line)-Position);
-                Value[strlen(line)-Position] = '\0';
-
-                // Trim the strings
-                GUIUtil::SafeOverlappingStrCpy(Name, GUIUtil::TrimString(Name));
-                GUIUtil::SafeOverlappingStrCpy(Value, GUIUtil::TrimString(Value));
-
-                // Add it to the current property
-                CurProp->AddVariable(Name, Value);
-            }
-            continue;
-        }
-
-        // Some stray line
-        // Ignore it
-
-    }
-
-    SkinFile.Destroy();
-
-    // Load the mouse pointers
-    m_MousePointers[0] = LoadMousePointer("Mouse_Pointer");
-    m_MousePointers[1] = LoadMousePointer("Mouse_Text");
-    m_MousePointers[2] = LoadMousePointer("Mouse_HSize");
-    
-    return true;
+	return true;
 }
 
 

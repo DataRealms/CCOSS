@@ -1,5 +1,4 @@
 #include "LuaMan.h"
-#include "System.h"
 
 #include "ACDropShip.h"
 #include "ACrab.h"
@@ -53,6 +52,7 @@
 // LuaBind
 #include "luabind/luabind.hpp"
 #include "luabind/operator.hpp"
+#include "luabind/copy_policy.hpp"
 #include "luabind/adopt_policy.hpp"
 #include "luabind/out_value_policy.hpp"
 #include "luabind/iterator_policy.hpp"
@@ -117,8 +117,6 @@ namespace luabind
 
 namespace RTE
 {
-
-const string LuaMan::m_ClassName = "LuaMan";
 
 // Can't have global enums in the master state so we use this dummy struct as a class and register the enums under it.
 struct enum_wrapper {
@@ -188,6 +186,8 @@ struct enum_wrapper {
 // These are expanded by the preprocessor to all the different cloning function definitions.
 LUAENTITYCREATE(SoundContainer)
 LUAENTITYCREATE(Attachable)
+LUAENTITYCREATE(Arm)
+LUAENTITYCREATE(Leg)
 LUAENTITYCREATE(AEmitter)
 LUAENTITYCREATE(Turret)
 LUAENTITYCREATE(Actor)
@@ -234,6 +234,9 @@ LUAENTITYCLONE(SoundContainer)
 LUAENTITYCLONE(SceneObject)
 LUAENTITYCLONE(MovableObject)
 LUAENTITYCLONE(Attachable)
+LUAENTITYCLONE(Arm)
+LUAENTITYCLONE(Leg)
+LUAENTITYCLONE(Emission)
 LUAENTITYCLONE(AEmitter)
 LUAENTITYCLONE(Turret)
 LUAENTITYCLONE(Actor)
@@ -384,6 +387,30 @@ double NormalRand() { return RandomNormalNum<double>(); }
 double PosRand() { return RandomNum<double>(); }
 
 /*
+These methods are needed to specially handling removing attachables with Lua in order to avoid memory leaks. They have silly names cause luabind otherwise makes it difficult to pass values to them properly.
+Eventually RemoveAttachable should return the removed attachable, making this whole thing no longer unsafe and these methods unnecessary (there's a TODO in MOSRotating.h for it).
+*/
+bool RemoveAttachableLuaSafe4(MOSRotating *luaSelfObject, Attachable *attachable, bool addToMovableMan, bool addBreakWounds) {
+    if (!addToMovableMan && !attachable->IsSetToDelete()) {
+        attachable->SetToDelete();
+    }
+    return luaSelfObject->RemoveAttachable(attachable, addToMovableMan, addBreakWounds);
+}
+bool RemoveAttachableLuaSafe3(MOSRotating *luaSelfObject, Attachable *attachable) {
+    return RemoveAttachableLuaSafe4(luaSelfObject, attachable, false, false);
+}
+bool RemoveAttachableLuaSafe2(MOSRotating *luaSelfObject, long attachableUniqueID, bool addToMovableMan, bool addBreakWounds) {
+    MovableObject *attachableAsMovableObject = g_MovableMan.FindObjectByUniqueID(attachableUniqueID);
+    if (attachableAsMovableObject) {
+        return RemoveAttachableLuaSafe4(luaSelfObject, dynamic_cast<Attachable *>(attachableAsMovableObject), addToMovableMan, addBreakWounds);
+    }
+    return false;
+}
+bool RemoveAttachableLuaSafe1(MOSRotating *luaSelfObject, long attachableUniqueID) {
+    return RemoveAttachableLuaSafe2(luaSelfObject, attachableUniqueID, false, false);
+}
+
+/*
 //////////////////////////////////////////////////////////////////////////////////////////
 // Wrapper for the GAScripted so we can derive new classes from it purely in lua:
 //
@@ -434,7 +461,7 @@ void LuaMan::Clear()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int LuaMan::Create() {
+int LuaMan::Initialize() {
     m_pMasterState = luaL_newstate();
     // Attach the master state to LuaBind
     luabind::open(m_pMasterState);
@@ -498,6 +525,7 @@ int LuaMan::Create() {
             .property("AbsRadAngle", &Vector::GetAbsRadAngle)
             .property("AbsDegAngle", &Vector::GetAbsDegAngle)
             .def("CapMagnitude", &Vector::CapMagnitude)
+            .def("ClampMagnitude", &Vector::ClampMagnitude)
             .def("FlipX", &Vector::FlipX)
             .def("FlipY", &Vector::FlipY)
             .def("IsZero", &Vector::IsZero)
@@ -618,6 +646,11 @@ int LuaMan::Create() {
             .def("AddSound", (void (SoundSet:: *)(std::string const &soundFilePath, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance)) &SoundSet::AddSound)
             .def("AddSoundSet", &SoundSet::AddSoundSet),
 
+        class_<LimbPath>("LimbPath")
+            .property("StartOffset", &LimbPath::GetStartOffset, &LimbPath::SetStartOffset)
+            .property("SegmentCount", &LimbPath::GetSegCount)
+            .def("GetSegment", &LimbPath::GetSegment),
+
         ABSTRACTLUABINDING(SceneObject, Entity)
             .property("Pos", &SceneObject::GetPos, &SceneObject::SetPos)
             .property("HFlipped", &SceneObject::IsHFlipped, &SceneObject::SetHFlipped)
@@ -670,6 +703,7 @@ int LuaMan::Create() {
             .property("IgnoresTeamHits", &MovableObject::IgnoresTeamHits, &MovableObject::SetIgnoresTeamHits)
             .property("IgnoresWhichTeam", &MovableObject::IgnoresWhichTeam)
 			.property("IgnoreTerrain", &MovableObject::IgnoreTerrain, &MovableObject::SetIgnoreTerrain)
+            .def("GetWhichMOToNotHit", &MovableObject::GetWhichMOToNotHit)
 			.def("SetWhichMOToNotHit", &MovableObject::SetWhichMOToNotHit)
             .property("ToSettle", &MovableObject::ToSettle, &MovableObject::SetToSettle)
             .property("ToDelete", &MovableObject::ToDelete, &MovableObject::SetToDelete)
@@ -766,6 +800,7 @@ int LuaMan::Create() {
             .def("IsOnScenePoint", &MOSprite::IsOnScenePoint)
             .def("RotateOffset", &MOSprite::RotateOffset)
             .def("UnRotateOffset", &MOSprite::UnRotateOffset)
+            .def("FacingAngle", &MOSprite::FacingAngle)
             .def("GetSpriteWidth", &MOSprite::GetSpriteWidth)
             .def("GetSpriteHeight", &MOSprite::GetSpriteHeight)
 			.def("SetEntryWound", &MOSprite::SetEntryWound)
@@ -777,13 +812,16 @@ int LuaMan::Create() {
 
         CONCRETELUABINDING(MOSRotating, MOSprite)
             /*.property("Material", &MOSRotating::GetMaterial)*/
+            .property("IndividualRadius", &MOSRotating::GetIndividualRadius)
+            .property("IndividualDiameter", &MOSRotating::GetIndividualDiameter)
+            .property("IndividualMass", &MOSRotating::GetIndividualMass)
             .property("RecoilForce", &MOSRotating::GetRecoilForce)
             .property("RecoilOffset", &MOSRotating::GetRecoilOffset)
 			.property("TravelImpulse", &MOSRotating::GetTravelImpulse, &MOSRotating::SetTravelImpulse)
-			.property("GibWoundLimit", &MOSRotating::GetGibWoundLimit, &MOSRotating::SetGibWoundLimit)
+			.property("GibWoundLimit", (int (MOSRotating:: *)() const) &MOSRotating::GetGibWoundLimit, &MOSRotating::SetGibWoundLimit)
 			.property("GibImpulseLimit", &MOSRotating::GetGibImpulseLimit, &MOSRotating::SetGibImpulseLimit)
 			.property("DamageMultiplier", &MOSRotating::GetDamageMultiplier, &MOSRotating::SetDamageMultiplier)
-			.property("WoundCount", &MOSRotating::GetWoundCount)
+			.property("WoundCount", (int (MOSRotating:: *)() const) &MOSRotating::GetWoundCount)
             .def("AddRecoil", &MOSRotating::AddRecoil)
             .def("SetRecoil", &MOSRotating::SetRecoil)
             .def("IsRecoiled", &MOSRotating::IsRecoiled)
@@ -793,10 +831,13 @@ int LuaMan::Create() {
             // Free function bound as member function to emulate default variables
             .def("GibThis", &GibThis)
             .def("MoveOutOfTerrain", &MOSRotating::MoveOutOfTerrain)
-            .def("ApplyForces", &MOSRotating::ApplyForces)
-            .def("ApplyImpulses", &MOSRotating::ApplyImpulses)
+			.def("GetGibWoundLimit", (int (MOSRotating:: *)() const) &MOSRotating::GetGibWoundLimit)
+            .def("GetGibWoundLimit", (int (MOSRotating:: *)(bool positiveDamage, bool negativeDamage, bool noDamage) const) &MOSRotating::GetGibWoundLimit)
+			.def("GetWoundCount", (int (MOSRotating:: *)() const) &MOSRotating::GetWoundCount)
+			.def("GetWoundCount", (int (MOSRotating:: *)(bool positiveDamage, bool negativeDamage, bool noDamage) const) &MOSRotating::GetWoundCount)
 			.def("AddWound", &MOSRotating::AddWound, adopt(_2))
-			.def("RemoveWounds", &MOSRotating::RemoveWounds)
+			.def("RemoveWounds", (float (MOSRotating:: *)(int numberOfWoundsToRemove)) &MOSRotating::RemoveWounds)
+            .def("RemoveWounds", (float (MOSRotating:: *)(int numberOfWoundsToRemove, bool positiveDamage, bool negativeDamage, bool noDamage)) &MOSRotating::RemoveWounds)
             .def("IsOnScenePoint", &MOSRotating::IsOnScenePoint)
             .def("EraseFromTerrain", &MOSRotating::EraseFromTerrain)
             .def("GetStringValue", &MOSRotating::GetStringValue)
@@ -813,32 +854,39 @@ int LuaMan::Create() {
             .def("ObjectValueExists", &MOSRotating::ObjectValueExists)
             .def("AddAttachable", (void (MOSRotating::*)(Attachable *attachableToAdd))&MOSRotating::AddAttachable, adopt(_2))
             .def("AddAttachable", (void (MOSRotating::*)(Attachable *attachableToAdd, const Vector &parentOffset))&MOSRotating::AddAttachable, adopt(_2))
+            .def("RemoveAttachable", &RemoveAttachableLuaSafe1)
+            .def("RemoveAttachable", &RemoveAttachableLuaSafe2)
+            .def("RemoveAttachable", &RemoveAttachableLuaSafe3)
+            .def("RemoveAttachable", &RemoveAttachableLuaSafe4)
+            /*
+            .def("RemoveAttachable", (bool (MOSRotating:: *)(long uniqueIDOfAttachableToRemove)) &MOSRotating::RemoveAttachable)
+            .def("RemoveAttachable", (bool (MOSRotating:: *)(long uniqueIDOfAttachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable)
             .def("RemoveAttachable", (bool (MOSRotating::*)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable)
-            .def("RemoveAttachable", (bool (MOSRotating::*)(long uniqueIDOfAttachableToRemove))&MOSRotating::RemoveAttachable)
+            .def("RemoveAttachable", (bool (MOSRotating:: *)(Attachable *attachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable)
+            */
 			.def("AddEmitter", (void (MOSRotating::*)(Attachable *attachableToAdd))&MOSRotating::AddAttachable, adopt(_2))
 			.def("AddEmitter", (void (MOSRotating::*)(Attachable *attachableToAdd, const Vector &parentOffset))&MOSRotating::AddAttachable, adopt(_2))
 			.def("RemoveEmitter", (bool (MOSRotating::*)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable)
 			.def("RemoveEmitter", (bool (MOSRotating::*)(long uniqueIDOfAttachableToRemove))&MOSRotating::RemoveAttachable)
-			.def_readonly("Attachables", &MOSRotating::m_AllAttachables, return_stl_iterator)
+			.def_readonly("Attachables", &MOSRotating::m_Attachables, return_stl_iterator)
 			.def_readonly("Wounds", &MOSRotating::m_Wounds, return_stl_iterator),
 
         CONCRETELUABINDING(Attachable, MOSRotating)
-			.property("ParentOffset", &Attachable::GetParentOffset, &Attachable::SetParentOffset)
-            .property("JointOffset", &Attachable::GetJointOffset, &Attachable::SetJointOffset)
-            .property("JointStiffness", &Attachable::GetJointStiffness, &Attachable::SetJointStiffness)
-            .property("JointStrength", &Attachable::GetJointStrength, &Attachable::SetJointStrength)
-            .property("RotTarget", &Attachable::GetRotTarget, &Attachable::SetRotTarget)
-            .property("AtomSubgroupID", &Attachable::GetAtomSubgroupID, &Attachable::SetAtomSubgroupID)
-            .property("OnlyLinearForces", &Attachable::GetOnlyLinearForces, &Attachable::SetOnlyLinearForces)
             .def("IsAttached", &Attachable::IsAttached)
             .def("IsAttachedTo", &Attachable::IsAttachedTo)
+			.property("ParentOffset", &Attachable::GetParentOffset, &Attachable::SetParentOffset)
             .def("IsDrawnAfterParent", &Attachable::IsDrawnAfterParent)
-            .def("TransferJointForces", &Attachable::TransferJointForces)
-            .def("TransferJointImpulses", &Attachable::TransferJointImpulses)
-            .def("CollectDamage", &Attachable::CollectDamage)
+            .property("JointStrength", &Attachable::GetJointStrength, &Attachable::SetJointStrength)
+            .property("JointStiffness", &Attachable::GetJointStiffness, &Attachable::SetJointStiffness)
+            .property("JointOffset", &Attachable::GetJointOffset, &Attachable::SetJointOffset)
+            .property("ApplyTransferredForcesAtOffset", &Attachable::GetApplyTransferredForcesAtOffset, &Attachable::SetApplyTransferredForcesAtOffset)
+            .property("BreakWound", &Attachable::GetBreakWound, &Attachable::SetBreakWound, detail::null_type(), adopt(_2))
+            .property("ParentBreakWound", &Attachable::GetParentBreakWound, &Attachable::SetParentBreakWound, detail::null_type(), adopt(_2))
+            .property("InheritsHFlipped", &Attachable::InheritsHFlipped, &Attachable::SetInheritsHFlipped)
 			.property("InheritsRotAngle", &Attachable::InheritsRotAngle, &Attachable::SetInheritsRotAngle)
-			.property("IsCollidingWithTerrainWhileAttached", &Attachable::IsCollidingWithTerrainWhileAttached)
-			.def("EnableTerrainCollisions", &Attachable::EnableTerrainCollisions),
+            .property("InheritedRotAngleOffset", &Attachable::GetInheritedRotAngleOffset, &Attachable::SetInheritedRotAngleOffset)
+            .property("AtomSubgroupID", &Attachable::GetAtomSubgroupID)
+			.property("CollidesWithTerrainWhileAttached", &Attachable::GetCollidesWithTerrainWhileAttached, &Attachable::SetCollidesWithTerrainWhileAttached),
 
 		ABSTRACTLUABINDING(Emission, Entity)
 			.property("ParticlesPerMinute", &Emission::GetRate, &Emission::SetRate)
@@ -863,6 +911,7 @@ int LuaMan::Create() {
 			.property("EmitterDamageMultiplier", &AEmitter::GetEmitterDamageMultiplier, &AEmitter::SetEmitterDamageMultiplier)
 			.property("EmitCountLimit", &AEmitter::GetEmitCountLimit, &AEmitter::SetEmitCountLimit)
 			.property("EmitDamage", &AEmitter::GetEmitDamage, &AEmitter::SetEmitDamage)
+            .property("Flash", &AEmitter::GetFlash, &AEmitter::SetFlash, detail::null_type(), adopt(_2))
 			.property("FlashScale", &AEmitter::GetFlashScale, &AEmitter::SetFlashScale)
 			.def("GetEmitVector", &AEmitter::GetEmitVector)
             .def("GetRecoilVector", &AEmitter::GetRecoilVector)
@@ -956,6 +1005,7 @@ int LuaMan::Create() {
             .property("Status", &Actor::GetStatus, &Actor::SetStatus)
             .property("Health", &Actor::GetHealth, &Actor::SetHealth)
             .property("MaxHealth", &Actor::GetMaxHealth, &Actor::SetMaxHealth)
+            .property("InventoryMass", &Actor::GetInventoryMass)
             .property("GoldCarried", &Actor::GetGoldCarried, &Actor::SetGoldCarried)
             .property("AimRange", &Actor::GetAimRange, &Actor::SetAimRange)
             .def("GetAimAngle", &Actor::GetAimAngle)
@@ -970,7 +1020,6 @@ int LuaMan::Create() {
             .def("AddHealth", &Actor::AddHealth)
             .def("IsStatus", &Actor::IsStatus)
             .def("IsDead", &Actor::IsDead)
-            .def("FacingAngle", &Actor::FacingAngle)
             .property("AIMode", &Actor::GetAIMode, &Actor::SetAIMode)
             .property("DeploymentID", &Actor::GetDeploymentID)
             .property("PassengerSlots", &Actor::GetPassengerSlots, &Actor::SetPassengerSlots)
@@ -1006,9 +1055,6 @@ int LuaMan::Create() {
             .def("GetAlarmPoint", &Actor::GetAlarmPoint)
             .property("AimDistance", &Actor::GetAimDistance, &Actor::SetAimDistance)
 			.property("SightDistance", &Actor::GetSightDistance, &Actor::SetSightDistance)
-			.property("TotalWoundCount", &Actor::GetTotalWoundCount)
-			.property("TotalWoundLimit", &Actor::GetTotalWoundLimit)
-            .def("RemoveAnyRandomWounds", &Actor::RemoveAnyRandomWounds)
             .property("DeathSound", &Actor::GetDeathSound, &Actor::SetDeathSound),
 
 		CONCRETELUABINDING(ADoor, Actor)
@@ -1019,19 +1065,21 @@ int LuaMan::Create() {
 				value("CLOSING", ADoor::DoorState::CLOSING),
 				value("STOPPED", ADoor::DoorState::STOPPED)
 			]
-            .property("Door", &ADoor::GetDoor)
+            .property("Door", &ADoor::GetDoor, &ADoor::SetDoor, detail::null_type(), adopt(_2))
 			.def("GetDoorState", &ADoor::GetDoorState)
 			.def("OpenDoor", &ADoor::OpenDoor)
 			.def("CloseDoor", &ADoor::CloseDoor)
 			.def("StopDoor", &ADoor::StopDoor)
 			.def("SetClosedByDefault", &ADoor::SetClosedByDefault),
 
-		ABSTRACTLUABINDING(Arm, Attachable)
+		CONCRETELUABINDING(Arm, Attachable)
+            .property("HeldDevice", &Arm::GetHeldMO)
 			.property("IdleOffset", &Arm::GetIdleOffset, &Arm::SetIdleOffset)
+            .property("GripStrength", &Arm::GetGripStrength, &Arm::SetGripStrength)
 			.property("HandPos", &Arm::GetHandPos, &Arm::SetHandPos),
 
-        ABSTRACTLUABINDING(Leg, Attachable)
-            .property("Foot", &Leg::GetFoot),
+        CONCRETELUABINDING(Leg, Attachable)
+            .property("Foot", &Leg::GetFoot, &Leg::SetFoot, detail::null_type(), adopt(_2)),
 
 		CONCRETELUABINDING(AHuman, Actor)
 			// These are all private/protected so they can't be bound, need to consider making them public.
@@ -1101,14 +1149,14 @@ int LuaMan::Create() {
 				value("LANDJUMP", 5 /*AHuman::JumpState::LANDJUMP*/)
 			]
             .def(constructor<>())
-            .property("Head", &AHuman::GetHead)
-            .property("FGArm", &AHuman::GetFGArm)
-            .property("BGArm", &AHuman::GetBGArm)
-            .property("FGLeg", &AHuman::GetFGLeg)
-			.property("FGFoot", &AHuman::GetFGFoot)
-            .property("BGLeg", &AHuman::GetBGLeg)
-			.property("BGFoot", &AHuman::GetBGFoot)
-            .property("Jetpack", &AHuman::GetJetpack)
+            .property("Head", &AHuman::GetHead, &AHuman::SetHead, detail::null_type(), adopt(_2))
+            .property("Jetpack", &AHuman::GetJetpack, &AHuman::SetJetpack, detail::null_type(), adopt(_2))
+            .property("FGArm", &AHuman::GetFGArm, &AHuman::SetFGArm, detail::null_type(), adopt(_2))
+            .property("BGArm", &AHuman::GetBGArm, &AHuman::SetBGArm, detail::null_type(), adopt(_2))
+            .property("FGLeg", &AHuman::GetFGLeg, &AHuman::SetFGLeg, detail::null_type(), adopt(_2))
+            .property("BGLeg", &AHuman::GetBGLeg, &AHuman::SetBGLeg, detail::null_type(), adopt(_2))
+			.property("FGFoot", &AHuman::GetFGFoot, &AHuman::SetFGFoot, detail::null_type(), adopt(_2))
+			.property("BGFoot", &AHuman::GetBGFoot, &AHuman::SetBGFoot, detail::null_type(), adopt(_2))
             .property("JetTimeTotal", &AHuman::GetJetTimeTotal, &AHuman::SetJetTimeTotal)
             .property("JetTimeLeft", &AHuman::GetJetTimeLeft, &AHuman::SetJetTimeLeft)
 			.property("ThrowPrepTime", &AHuman::GetThrowPrepTime, &AHuman::SetThrowPrepTime)
@@ -1135,9 +1183,12 @@ int LuaMan::Create() {
             .def("LookForGold", &AHuman::LookForGold)
             .def("LookForMOs", &AHuman::LookForMOs)
             .def("IsOnScenePoint", &AHuman::IsOnScenePoint)
+            .def("GetLimbPath", &AHuman::GetLimbPath)
 			.property("LimbPathPushForce", &AHuman::GetLimbPathPushForce, &AHuman::SetLimbPathPushForce)
 			.def("GetLimbPathSpeed", &AHuman::GetLimbPathSpeed)
-			.def("SetLimbPathSpeed", &AHuman::SetLimbPathSpeed),
+			.def("SetLimbPathSpeed", &AHuman::SetLimbPathSpeed)
+			.def("GetRotAngleTarget", &AHuman::GetRotAngleTarget)
+			.def("SetRotAngleTarget", &AHuman::SetRotAngleTarget),
         
 		CONCRETELUABINDING(ACrab, Actor)
 			// These are all private/protected so they can't be bound, need to consider making them public.
@@ -1192,12 +1243,12 @@ int LuaMan::Create() {
 				value("LANDJUMP", 5 /*ACrab::JumpState::LANDJUMP*/)
 			]
             .def(constructor<>())
-            .property("Turret", &ACrab::GetTurret)
-            .property("LFGLeg", &ACrab::GetLFGLeg)
-            .property("LBGLeg", &ACrab::GetLBGLeg)
-            .property("RFGLeg", &ACrab::GetRFGLeg)
-            .property("RBGLeg", &ACrab::GetRBGLeg)
-            .property("Jetpack", &ACrab::GetJetpack)
+            .property("Turret", &ACrab::GetTurret, &ACrab::SetTurret, detail::null_type(), adopt(_2))
+            .property("Jetpack", &ACrab::GetJetpack, &ACrab::SetJetpack, detail::null_type(), adopt(_2))
+            .property("LeftFGLeg", &ACrab::GetLeftFGLeg, &ACrab::SetLeftFGLeg, detail::null_type(), adopt(_2))
+            .property("LeftBGLeg", &ACrab::GetLeftBGLeg, &ACrab::SetLeftBGLeg, detail::null_type(), adopt(_2))
+            .property("RightFGLeg", &ACrab::GetRightFGLeg, &ACrab::SetRightFGLeg, detail::null_type(), adopt(_2))
+            .property("RightBGLeg", &ACrab::GetRightBGLeg, &ACrab::SetRightBGLeg, detail::null_type(), adopt(_2))
             .property("JetTimeTotal", &ACrab::GetJetTimeTotal, &ACrab::SetJetTimeTotal)
             .property("JetTimeLeft", &ACrab::GetJetTimeLeft)
             .property("EquippedItem", &ACrab::GetEquippedItem)
@@ -1211,11 +1262,13 @@ int LuaMan::Create() {
             .def("Look", &ACrab::Look)
             .def("LookForMOs", &ACrab::LookForMOs)
             .def("IsOnScenePoint", &ACrab::IsOnScenePoint)
+            .def("GetLimbPath", &ACrab::GetLimbPath)
 			.property("LimbPathPushForce", &ACrab::GetLimbPathPushForce, &ACrab::SetLimbPathPushForce)
 			.def("GetLimbPathSpeed", &ACrab::GetLimbPathSpeed)
 			.def("SetLimbPathSpeed", &ACrab::SetLimbPathSpeed),
 
-        ABSTRACTLUABINDING(Turret, Attachable),
+        CONCRETELUABINDING(Turret, Attachable)
+			.property("MountedDevice", &Turret::GetMountedDevice, &Turret::SetMountedDevice, detail::null_type(), adopt(_2)),
 
 		ABSTRACTLUABINDING(ACraft, Actor)
 			.enum_("HatchState")[
@@ -1251,12 +1304,12 @@ int LuaMan::Create() {
             .property("DeliveryDelayMultiplier", &ACraft::GetDeliveryDelayMultiplier),
 
         CONCRETELUABINDING(ACDropShip, ACraft)
-            .property("RightEngine", &ACDropShip::GetRThruster)
-            .property("LeftEngine", &ACDropShip::GetLThruster)
-            .property("RightThruster", &ACDropShip::GetURThruster)
-            .property("LeftThruster", &ACDropShip::GetULThruster)
-			.property("LeftHatch", &ACDropShip::GetLHatch)
-			.property("RightHatch", &ACDropShip::GetRHatch)
+            .property("RightEngine", &ACDropShip::GetRightThruster, &ACDropShip::SetRightThruster, detail::null_type(), adopt(_2))
+            .property("LeftEngine", &ACDropShip::GetLeftThruster, &ACDropShip::SetLeftThruster, detail::null_type(), adopt(_2))
+            .property("RightThruster", &ACDropShip::GetURightThruster, &ACDropShip::SetURightThruster, detail::null_type(), adopt(_2))
+            .property("LeftThruster", &ACDropShip::GetULeftThruster, &ACDropShip::SetULeftThruster, detail::null_type(), adopt(_2))
+			.property("RightHatch", &ACDropShip::GetRightHatch, &ACDropShip::SetRightHatch, detail::null_type(), adopt(_2))
+			.property("LeftHatch", &ACDropShip::GetLeftHatch, &ACDropShip::SetLeftHatch, detail::null_type(), adopt(_2))
 			.property("MaxEngineAngle", &ACDropShip::GetMaxEngineAngle, &ACDropShip::SetMaxEngineAngle)
 			.property("LateralControlSpeed", &ACDropShip::GetLateralControlSpeed, &ACDropShip::SetLateralControlSpeed)
 			.property("LateralControl", &ACDropShip::GetLateralControl)
@@ -1272,11 +1325,13 @@ int LuaMan::Create() {
 				value("RAISING", 3 /*ACRocket::LandingGearState::RAISING*/),
 				value("GearStateCount", 4 /*ACRocket::LandingGearState::GearStateCount*/)
 			]
-			.property("MainEngine", &ACRocket::GetMThruster)
-			.property("LeftEngine", &ACRocket::GetLThruster)
-			.property("RightEngine", &ACRocket::GetRThruster)
-			.property("LeftThruster", &ACRocket::GetULThruster)
-			.property("RightThruster", &ACRocket::GetURThruster)
+            .property("RightLeg", &ACRocket::GetRightLeg, &ACRocket::SetRightLeg, detail::null_type(), adopt(_2))
+            .property("LeftLeg", &ACRocket::GetLeftLeg, &ACRocket::SetLeftLeg, detail::null_type(), adopt(_2))
+			.property("MainEngine", &ACRocket::GetMainThruster, &ACRocket::SetMainThruster, detail::null_type(), adopt(_2))
+			.property("LeftEngine", &ACRocket::GetLeftThruster, &ACRocket::SetLeftThruster, detail::null_type(), adopt(_2))
+			.property("RightEngine", &ACRocket::GetRightThruster, &ACRocket::SetRightThruster, detail::null_type(), adopt(_2))
+			.property("LeftThruster", &ACRocket::GetULeftThruster, &ACRocket::SetULeftThruster, detail::null_type(), adopt(_2))
+			.property("RightThruster", &ACRocket::GetURightThruster, &ACRocket::SetURightThruster, detail::null_type(), adopt(_2))
 			.property("GearState", &ACRocket::GetGearState),
 
         CONCRETELUABINDING(HeldDevice, Attachable)
@@ -1304,6 +1359,12 @@ int LuaMan::Create() {
             .def("IsFull", &HeldDevice::IsFull)
 			.property("SharpLength", &HeldDevice::GetSharpLength, &HeldDevice::SetSharpLength)
 			.property("SupportOffset", &HeldDevice::GetSupportOffset, &HeldDevice::SetSupportOffset)
+            .property("HasPickupLimitations", &HeldDevice::HasPickupLimitations)
+            .property("UnPickupable", &HeldDevice::IsUnPickupable, &HeldDevice::SetUnPickupable)
+            .def("IsPickupableBy", &HeldDevice::IsPickupableBy)
+            .def("AddPickupableByPresetName", &HeldDevice::AddPickupableByPresetName)
+            .def("RemovePickupableByPresetName", &HeldDevice::RemovePickupableByPresetName)
+            .property("GripStrengthMultiplier", &HeldDevice::GetGripStrengthMultiplier, &HeldDevice::SetGripStrengthMultiplier)
 			.def("SetSupported", &HeldDevice::SetSupported),
 
         CONCRETELUABINDING(Magazine, Attachable)
@@ -1330,7 +1391,8 @@ int LuaMan::Create() {
             .property("RateOfFire", &HDFirearm::GetRateOfFire, &HDFirearm::SetRateOfFire)
 			.property("FullAuto", &HDFirearm::IsFullAuto, &HDFirearm::SetFullAuto)
             .property("RoundInMagCount", &HDFirearm::GetRoundInMagCount)
-            .property("Magazine", &HDFirearm::GetMagazine)
+            .property("Magazine", &HDFirearm::GetMagazine, &HDFirearm::SetMagazine, detail::null_type(), adopt(_2))
+            .property("Flash", &HDFirearm::GetFlash, &HDFirearm::SetFlash, detail::null_type(), adopt(_2))
             .property("ActivationDelay", &HDFirearm::GetActivationDelay, &HDFirearm::SetActivationDelay)
             .property("DeactivationDelay", &HDFirearm::GetDeactivationDelay, &HDFirearm::SetDeactivationDelay)
             .property("ReloadTime", &HDFirearm::GetReloadTime, &HDFirearm::SetReloadTime)
@@ -1349,7 +1411,7 @@ int LuaMan::Create() {
             .def("CompareTrajectories", &HDFirearm::CompareTrajectories)
             .def("SetNextMagazineName", &HDFirearm::SetNextMagazineName)
 			.property("IsAnimatedManually", &HDFirearm::IsAnimatedManually, &HDFirearm::SetAnimatedManually)
-			.property("RecoilTransmission", &HDFirearm::GetRecoilTransmission, &HDFirearm::SetRecoilTransmission),
+			.property("RecoilTransmission", &HDFirearm::GetJointStiffness, &HDFirearm::SetJointStiffness),
 
         CONCRETELUABINDING(ThrownDevice, HeldDevice)
             .property("MinThrowVel", &ThrownDevice::GetMinThrowVel, &ThrownDevice::SetMinThrowVel)
@@ -1473,8 +1535,8 @@ int LuaMan::Create() {
             .def("ClearScreenText", &FrameMan::ClearScreenText)
             .def("FadeInPalette", &FrameMan::FadeInPalette)
             .def("FadeOutPalette", &FrameMan::FadeOutPalette)
-            .def("SaveScreenToBMP", &FrameMan::SaveScreenToBMP)
-            .def("SaveBitmapToBMP", &FrameMan::SaveBitmapToBMP)
+            .def("SaveScreenToPNG", &FrameMan::SaveScreenToPNG)
+            .def("SaveBitmapToPNG", &FrameMan::SaveBitmapToPNG)
             .def("FlashScreen", &FrameMan::FlashScreen)
 			.def("CalculateTextHeight", &FrameMan::CalculateTextHeight)
 			.def("CalculateTextWidth", &FrameMan::CalculateTextWidth),
@@ -1483,40 +1545,40 @@ int LuaMan::Create() {
 			.def("RegisterPostEffect", &PostProcessMan::RegisterPostEffect),
 
 		class_<PrimitiveMan>("PrimitiveManager")
-			.def("DrawLinePrimitive", (void (PrimitiveMan::*)(Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawLinePrimitive)
-			.def("DrawLinePrimitive", (void (PrimitiveMan::*)(short player, Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawLinePrimitive)
-			.def("DrawArcPrimitive", (void (PrimitiveMan::*)(Vector pos, float startAngle, float endAngle, short radius, unsigned char color))&PrimitiveMan::DrawArcPrimitive)
-			.def("DrawArcPrimitive", (void (PrimitiveMan::*)(Vector pos, float startAngle, float endAngle, short radius, unsigned char color, short thickness))&PrimitiveMan::DrawArcPrimitive)
-			.def("DrawArcPrimitive", (void (PrimitiveMan::*)(short player, Vector pos, float startAngle, float endAngle, short radius, unsigned char color))&PrimitiveMan::DrawArcPrimitive)
-			.def("DrawArcPrimitive", (void (PrimitiveMan::*)(short player, Vector pos, float startAngle, float endAngle, short radius, unsigned char color, short thickness))&PrimitiveMan::DrawArcPrimitive)
-			.def("DrawSplinePrimitive", (void (PrimitiveMan::*)(Vector start, Vector guideA, Vector guideB, Vector end, unsigned char color))&PrimitiveMan::DrawSplinePrimitive)
-			.def("DrawSplinePrimitive", (void (PrimitiveMan::*)(short player, Vector start, Vector guideA, Vector guideB, Vector end, unsigned char color))&PrimitiveMan::DrawSplinePrimitive)
-			.def("DrawBoxPrimitive", (void (PrimitiveMan::*)(Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawBoxPrimitive)
-			.def("DrawBoxPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawBoxPrimitive)
-			.def("DrawBoxFillPrimitive", (void (PrimitiveMan::*)(Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawBoxFillPrimitive)
-			.def("DrawBoxFillPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawBoxFillPrimitive)
-			.def("DrawRoundedBoxPrimitive", (void (PrimitiveMan::*)(Vector start, Vector end, float cornerRadius, unsigned char color))&PrimitiveMan::DrawRoundedBoxPrimitive)
-			.def("DrawRoundedBoxPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Vector end, float cornerRadius, unsigned char color))&PrimitiveMan::DrawRoundedBoxPrimitive)
-			.def("DrawRoundedBoxFillPrimitive", (void (PrimitiveMan::*)(Vector start, Vector end, float cornerRadius, unsigned char color))&PrimitiveMan::DrawRoundedBoxFillPrimitive)
-			.def("DrawRoundedBoxFillPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Vector end, float cornerRadius, unsigned char color))&PrimitiveMan::DrawRoundedBoxFillPrimitive)
-			.def("DrawCirclePrimitive", (void (PrimitiveMan::*)(Vector pos, short radius, unsigned char color))&PrimitiveMan::DrawCirclePrimitive)
-			.def("DrawCirclePrimitive", (void (PrimitiveMan::*)(short player, Vector pos, short radius, unsigned char color))&PrimitiveMan::DrawCirclePrimitive)
-			.def("DrawCircleFillPrimitive", (void (PrimitiveMan::*)(Vector pos, short radius, unsigned char color))&PrimitiveMan::DrawCircleFillPrimitive)
-			.def("DrawCircleFillPrimitive", (void (PrimitiveMan::*)(short player, Vector pos, short radius, unsigned char color))&PrimitiveMan::DrawCircleFillPrimitive)
-			.def("DrawEllipsePrimitive", (void (PrimitiveMan::*)(Vector pos, short horizRadius, short vertRadius, unsigned char color))&PrimitiveMan::DrawEllipsePrimitive)
-			.def("DrawEllipsePrimitive", (void (PrimitiveMan::*)(short player, Vector pos, short horizRadius, short vertRadius, unsigned char color))&PrimitiveMan::DrawEllipsePrimitive)
-			.def("DrawEllipseFillPrimitive", (void (PrimitiveMan::*)(Vector pos, short horizRadius, short vertRadius, unsigned char color))&PrimitiveMan::DrawEllipseFillPrimitive)
-			.def("DrawEllipseFillPrimitive", (void (PrimitiveMan::*)(short player, Vector pos, short horizRadius, short vertRadius, unsigned char color))&PrimitiveMan::DrawEllipseFillPrimitive)
-			.def("DrawTrianglePrimitive", (void (PrimitiveMan::*)(Vector pointA, Vector pointB, Vector pointC, unsigned char color))&PrimitiveMan::DrawTrianglePrimitive)
-			.def("DrawTrianglePrimitive", (void (PrimitiveMan::*)(short player, Vector pointA, Vector pointB, Vector pointC, unsigned char color))&PrimitiveMan::DrawTrianglePrimitive)
-			.def("DrawTriangleFillPrimitive", (void (PrimitiveMan::*)(Vector pointA, Vector pointB, Vector pointC, unsigned char color))&PrimitiveMan::DrawTriangleFillPrimitive)
-			.def("DrawTriangleFillPrimitive", (void (PrimitiveMan::*)(short player, Vector pointA, Vector pointB, Vector pointC, unsigned char color))&PrimitiveMan::DrawTriangleFillPrimitive)
-			.def("DrawTextPrimitive", (void (PrimitiveMan::*)(Vector start, std::string text, bool isSmall, short alignment))&PrimitiveMan::DrawTextPrimitive)
-			.def("DrawTextPrimitive", (void (PrimitiveMan::*)(short player, Vector start, std::string text, bool isSmall, short alignment))&PrimitiveMan::DrawTextPrimitive)
-			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(Vector start, Entity *entity, float rotAngle, unsigned short frame))&PrimitiveMan::DrawBitmapPrimitive)
-			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(Vector start, Entity *entity, float rotAngle, unsigned short frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive)
-			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Entity *entity, float rotAngle, unsigned short frame))&PrimitiveMan::DrawBitmapPrimitive)
-			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Entity *entity, float rotAngle, unsigned short frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive),
+			.def("DrawLinePrimitive", (void (PrimitiveMan::*)(const Vector &start, const Vector &end, unsigned char color))&PrimitiveMan::DrawLinePrimitive)
+			.def("DrawLinePrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const Vector &end, unsigned char color))&PrimitiveMan::DrawLinePrimitive)
+			.def("DrawArcPrimitive", (void (PrimitiveMan::*)(const Vector &pos, float startAngle, float endAngle, int radius, unsigned char color))&PrimitiveMan::DrawArcPrimitive)
+			.def("DrawArcPrimitive", (void (PrimitiveMan::*)(const Vector &pos, float startAngle, float endAngle, int radius, unsigned char color, int thickness))&PrimitiveMan::DrawArcPrimitive)
+			.def("DrawArcPrimitive", (void (PrimitiveMan::*)(int player, const Vector &pos, float startAngle, float endAngle, int radius, unsigned char color))&PrimitiveMan::DrawArcPrimitive)
+			.def("DrawArcPrimitive", (void (PrimitiveMan::*)(int player, const Vector &pos, float startAngle, float endAngle, int radius, unsigned char color, int thickness))&PrimitiveMan::DrawArcPrimitive)
+			.def("DrawSplinePrimitive", (void (PrimitiveMan::*)(const Vector &start, const Vector &guideA, const Vector &guideB, const Vector &end, unsigned char color))&PrimitiveMan::DrawSplinePrimitive)
+			.def("DrawSplinePrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const Vector &guideA, const Vector &guideB, const Vector &end, unsigned char color))&PrimitiveMan::DrawSplinePrimitive)
+			.def("DrawBoxPrimitive", (void (PrimitiveMan::*)(const Vector &start, const Vector &end, unsigned char color))&PrimitiveMan::DrawBoxPrimitive)
+			.def("DrawBoxPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const Vector &end, unsigned char color))&PrimitiveMan::DrawBoxPrimitive)
+			.def("DrawBoxFillPrimitive", (void (PrimitiveMan::*)(const Vector &start, const Vector &end, unsigned char color))&PrimitiveMan::DrawBoxFillPrimitive)
+			.def("DrawBoxFillPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const Vector &end, unsigned char color))&PrimitiveMan::DrawBoxFillPrimitive)
+			.def("DrawRoundedBoxPrimitive", (void (PrimitiveMan::*)(const Vector &start, const Vector &end, int cornerRadius, unsigned char color))&PrimitiveMan::DrawRoundedBoxPrimitive)
+			.def("DrawRoundedBoxPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const Vector &end, int cornerRadius, unsigned char color))&PrimitiveMan::DrawRoundedBoxPrimitive)
+			.def("DrawRoundedBoxFillPrimitive", (void (PrimitiveMan::*)(const Vector &start, const Vector &end, int cornerRadius, unsigned char color))&PrimitiveMan::DrawRoundedBoxFillPrimitive)
+			.def("DrawRoundedBoxFillPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const Vector &end, int cornerRadius, unsigned char color))&PrimitiveMan::DrawRoundedBoxFillPrimitive)
+			.def("DrawCirclePrimitive", (void (PrimitiveMan::*)(const Vector & pos, int radius, unsigned char color))&PrimitiveMan::DrawCirclePrimitive)
+			.def("DrawCirclePrimitive", (void (PrimitiveMan::*)(int player, const Vector &pos, int radius, unsigned char color))&PrimitiveMan::DrawCirclePrimitive)
+			.def("DrawCircleFillPrimitive", (void (PrimitiveMan::*)(const Vector &pos, int radius, unsigned char color))&PrimitiveMan::DrawCircleFillPrimitive)
+			.def("DrawCircleFillPrimitive", (void (PrimitiveMan::*)(int player, const Vector &pos, int radius, unsigned char color))&PrimitiveMan::DrawCircleFillPrimitive)
+			.def("DrawEllipsePrimitive", (void (PrimitiveMan::*)(const Vector &pos, int horizRadius, int vertRadius, unsigned char color))&PrimitiveMan::DrawEllipsePrimitive)
+			.def("DrawEllipsePrimitive", (void (PrimitiveMan::*)(int player, const Vector &pos, int horizRadius, int vertRadius, unsigned char color))&PrimitiveMan::DrawEllipsePrimitive)
+			.def("DrawEllipseFillPrimitive", (void (PrimitiveMan::*)(const Vector &pos, int horizRadius, int vertRadius, unsigned char color))&PrimitiveMan::DrawEllipseFillPrimitive)
+			.def("DrawEllipseFillPrimitive", (void (PrimitiveMan::*)(int player, const Vector &pos, int horizRadius, int vertRadius, unsigned char color))&PrimitiveMan::DrawEllipseFillPrimitive)
+			.def("DrawTrianglePrimitive", (void (PrimitiveMan::*)(const Vector &pointA, const Vector &pointB, const Vector &pointC, unsigned char color))&PrimitiveMan::DrawTrianglePrimitive)
+			.def("DrawTrianglePrimitive", (void (PrimitiveMan::*)(int player, const Vector &pointA, const Vector &pointB, const Vector &pointC, unsigned char color))&PrimitiveMan::DrawTrianglePrimitive)
+			.def("DrawTriangleFillPrimitive", (void (PrimitiveMan::*)(const Vector &pointA, const Vector &pointB, const Vector &pointC, unsigned char color))&PrimitiveMan::DrawTriangleFillPrimitive)
+			.def("DrawTriangleFillPrimitive", (void (PrimitiveMan::*)(int player, const Vector &pointA, const Vector &pointB, const Vector &pointC, unsigned char color))&PrimitiveMan::DrawTriangleFillPrimitive)
+			.def("DrawTextPrimitive", (void (PrimitiveMan::*)(const Vector &start, const std::string &text, bool isSmall, int alignment))&PrimitiveMan::DrawTextPrimitive)
+			.def("DrawTextPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const std::string &text, bool isSmall, int alignment))&PrimitiveMan::DrawTextPrimitive)
+			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(const Vector &start, Entity *entity, float rotAngle, int frame))&PrimitiveMan::DrawBitmapPrimitive)
+			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(const Vector &start, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive)
+			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, Entity *entity, float rotAngle, int frame))&PrimitiveMan::DrawBitmapPrimitive)
+			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive),
 
         class_<PresetMan>("PresetManager")
             .def("LoadDataModule", (bool (PresetMan::*)(string))&PresetMan::LoadDataModule)
@@ -1566,11 +1628,11 @@ int LuaMan::Create() {
             .def("KeyReleased", &UInputMan::KeyReleased)
             .def("KeyHeld", &UInputMan::KeyHeld)
             .def("WhichKeyHeld", &UInputMan::WhichKeyHeld)
-            .def("MouseButtonPressed", (bool (UInputMan::*)(int,short) const)&UInputMan::MouseButtonPressed) 
+            .def("MouseButtonPressed", (bool (UInputMan::*)(int, int) const)&UInputMan::MouseButtonPressed) 
 			.def("MouseButtonPressed", (bool (UInputMan::*)(int) const)&UInputMan::MouseButtonPressed)
-			.def("MouseButtonReleased", (bool (UInputMan::*)(int, short) const)&UInputMan::MouseButtonReleased)
+			.def("MouseButtonReleased", (bool (UInputMan::*)(int, int) const)&UInputMan::MouseButtonReleased)
 			.def("MouseButtonReleased", (bool (UInputMan::*)(int) const)&UInputMan::MouseButtonReleased)
-			.def("MouseButtonHeld", (bool (UInputMan::*)(int, short) const)&UInputMan::MouseButtonHeld)
+			.def("MouseButtonHeld", (bool (UInputMan::*)(int, int) const)&UInputMan::MouseButtonHeld)
 			.def("MouseButtonHeld", (bool (UInputMan::*)(int) const)&UInputMan::MouseButtonHeld)
 			.def("MouseWheelMoved", &UInputMan::MouseWheelMoved)
             .def("JoyButtonPressed", &UInputMan::JoyButtonPressed)
@@ -2544,7 +2606,7 @@ int LuaMan::FileOpen(std::string filename, std::string mode)
     string dotString = "..";
 	string rteString = ".rte";
 
-	string fullPath = g_System.GetWorkingDirectory()+ "/" + filename;
+	string fullPath = System::GetWorkingDirectory() + filename;
 
 	// Do not open paths with '..'
 	if (fullPath.find(dotString) != string::npos)

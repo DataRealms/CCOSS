@@ -4,10 +4,14 @@
 #include "Singleton.h"
 #include "SoundContainer.h"
 
-#include "RakPeerInterface.h"
 #include "NetworkMessages.h"
 
+// TODO: Figure out how to deal with anything that is defined by these and include them in implementation only to remove Windows.h macro pollution from our headers.
+#include "RakPeerInterface.h"
 #include "NatPunchthroughClient.h"
+
+// RakNet includes Windows.h so we need to undefine macros that conflict with our method names.
+#undef GetClassName
 
 #define g_NetworkClient NetworkClient::Instance()
 
@@ -23,6 +27,7 @@ namespace RTE {
 	/// The centralized singleton manager of the network multiplayer client.
 	/// </summary>
 	class NetworkClient : public Singleton<NetworkClient> {
+		friend class SettingsMan;
 
 	public:
 
@@ -30,13 +35,13 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a NetworkClient object in system memory. Create() should be called before using the object.
 		/// </summary>
-		NetworkClient() { Clear(); Create(); }
+		NetworkClient() { Clear(); Initialize(); }
 
 		/// <summary>
 		/// Makes the NetworkClient object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create();
+		int Initialize();
 #pragma endregion
 
 #pragma region Destruction
@@ -107,17 +112,7 @@ namespace RTE {
 		RakNet::SystemAddress ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, unsigned short port);
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		static constexpr unsigned short c_PlayerNameCharLimit = 15; //!< Maximum length of the player name.
 		std::string m_PlayerName; //!< The player name the will be used by the client in network games.

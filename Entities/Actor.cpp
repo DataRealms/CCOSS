@@ -965,20 +965,6 @@ void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToI
     // Gib all the regular gibs
     MOSRotating::GibThis(impactImpulse, movableObjectToIgnore);
 
-	if (g_SettingsMan.EnableCrabBombs()) {
-		unsigned short crabCount = 0;
-		for (const MovableObject *inventoryEntry : m_Inventory) {
-			if (inventoryEntry->GetPresetName() == "Crab") { crabCount++; }
-		}
-		// If we have enough crabs gib all actors on scene except brains and doors
-		if (crabCount >= g_SettingsMan.CrabBombThreshold()) {
-			for (int moid = 1; moid < g_MovableMan.GetMOIDCount() - 1; moid++) {
-				Actor *actor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(moid));
-				if (actor && actor != this && actor->GetClassName() != "ADoor" && !actor->IsInGroup("Brains")) { actor->GibThis(); }
-			}
-		}
-	}
-
     // Throw out all the inventory with the appropriate force and directions
     MovableObject *pObject = 0;
     Actor *pPassenger = 0;

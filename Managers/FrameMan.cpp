@@ -421,7 +421,7 @@ namespace RTE {
 			return -1;
 		}
 		if (m_ResX > m_ScreenResX / multiplier || m_ResY > m_ScreenResY / multiplier) {
-			ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nTHIS IS NOT USED TO TOGGLE FULLSCREEN!");
+			ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nNOTE: To toggle fullscreen, use the button in the Options & Controls Menu!");
 			return -1;
 		}
 #ifdef __unix__

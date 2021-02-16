@@ -1658,15 +1658,15 @@ public:
 		bool back;
 	};
 
-    /// <summary>
-    /// Sets the current scene pointer to null
-    /// </summary>
-    void SceneMan::ClearCurrentScene();
+	/// <summary>
+	/// Sets the current scene pointer to null
+	/// </summary>
+	void ClearCurrentScene();
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Protected member variable and method declarations
 
-protected:
+  protected:
 
 
     // Default Scene name to load if nothing else is specified

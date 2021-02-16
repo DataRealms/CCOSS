@@ -164,14 +164,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::string Reader::TrimString(std::string &stringToTrim) const {
+	std::string Reader::TrimString(const std::string &stringToTrim) const {
 		if (stringToTrim.empty()) {
 			return "";
 		}
-		if (stringToTrim.front() == ' ') { stringToTrim.erase(stringToTrim.begin()); }
-		if (stringToTrim.back() == ' ') { stringToTrim.pop_back(); }
+		size_t start{stringToTrim.find_first_not_of(' ')};
+		size_t end{ stringToTrim.find_last_not_of(' ')};
 
-		return stringToTrim;
+		return stringToTrim.substr(start, (end-start+1));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

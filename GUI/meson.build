@@ -30,6 +30,7 @@ sources += files(
 'GUITab.cpp',
 'GUITextBox.cpp',
 'GUITextPanel.cpp',
+'GUIUtil.cpp'
 )
 
 if build_machine.system() == 'windows'

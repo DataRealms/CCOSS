@@ -331,7 +331,8 @@ namespace RTE {
 					Matrix atomRotationForSubgroup(rootParentAsMOSR->FacingAngle(GetRotAngle()) - rootParentAsMOSR->FacingAngle(rootParentAsMOSR->GetRotAngle()));
 					Vector atomOffsetForSubgroup = g_SceneMan.ShortestDistance(rootParentAsMOSR->GetPos(), m_Pos, g_SceneMan.SceneWrapsX());
 					atomOffsetForSubgroup.FlipX(rootParentAsMOSR->IsHFlipped()); //TODO consolidate this into the line above once this returns the vector
-					atomOffsetForSubgroup /= Matrix(rootParentAsMOSR->GetRotAngle() * rootParentAsMOSR->GetFlipFactor());
+					Matrix rootParentAngleToUse(rootParentAsMOSR->GetRotAngle() * rootParentAsMOSR->GetFlipFactor());
+					atomOffsetForSubgroup /= rootParentAngleToUse;
 					rootParentAsMOSR->GetAtomGroup()->UpdateSubAtoms(GetAtomSubgroupID(), atomOffsetForSubgroup, atomRotationForSubgroup);
 				}
 			}

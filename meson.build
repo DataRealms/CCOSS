@@ -1,6 +1,7 @@
 project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++17', 'buildtype=release'], version:'0.1.0-Pre-3.1', meson_version:'>=0.49')
 
 #### Build environment Setup ####
+
 deps = [
   dependency('allegro'),
   dependency('loadpng'),
@@ -11,8 +12,12 @@ deps = [
   dependency('liblz4'),
   dependency('libpng'),
   dependency('boost'), #needed for luabind
-  dependency('x11')
 ]
+
+if host_machine.system() in ['linux']
+  deps += dependency('x11')
+endif
+
 elfname = 'CCCP'
 compiler = meson.get_compiler('cpp')
 build_rpath = ''

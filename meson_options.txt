@@ -1,2 +1,2 @@
-option('full_debug', type:'boolean', value:false)
-option('enable_appimage', type:'boolean', value:false)
+option('full_debug', type: 'boolean', value: false, description: 'Enable certain Debug features, that might slow down the game')
+option('enable_appimage', type: 'boolean', value: false, description: 'Enable the AppImage target')

@@ -25,7 +25,7 @@ suffix=''
 if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   # Build against system libraries on linux
 
-  build_rpath += '$ORIGIN' # Set RUNPATH so that CCCP can find libfmod.so without needing to set LD_LIBRARY_PATH
+  build_rpath = '$ORIGIN:$ORIGIN/../external/lib/linux/x86_64' # Set RUNPATH so that CCCP can find libfmod.so without needing to set LD_LIBRARY_PATH
   suffix = 'x86_64'
   link_args += ['-Wl,--enable-new-dtags'] # Set RUNPATH instead of RPATH
 

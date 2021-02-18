@@ -83,6 +83,7 @@ enum
 
     public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
 
@@ -127,16 +128,6 @@ enum
     // Return value:    None.
 
         void Reset() override { Clear(); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetClassName
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the class name of this Entity.
-    // Arguments:       None.
-    // Return value:    A string with the friendly-formatted type name of this object.
-
-		const std::string & GetClassName() const override { return m_sClassName; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -224,8 +215,6 @@ enum
 
     protected:
 
-        // Member variables
-        static const std::string m_sClassName;
         // The offset of this exit relative the position of its ACraft
         Vector m_Offset;
         // The exiting velocity of anyhting exiting through this
@@ -246,6 +235,8 @@ enum
     // Private member variable and method declarations
 
     private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Method:          Clear
@@ -575,6 +566,13 @@ enum
 	void SetDeliveryDelayMultiplier(float newValue) { m_DeliveryDelayMultiplier = newValue; }
 
 
+	/// <summary>
+	/// Destroys this ACraft and creates its specified Gibs in its place with appropriate velocities. Any Attachables are removed and also given appropriate velocities.
+	/// </summary>
+	/// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen.</param>
+	/// <param name="movableObjectToIgnore">A pointer to an MO which the Gibs and Attachables should not be colliding with.</param>
+	void GibThis(const Vector &impactImpulse = Vector(), MovableObject *movableObjectToIgnore = nullptr) override;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -618,6 +616,8 @@ protected:
     SoundContainer m_CrashSound;
     // The recomended, not absolute, maximum number of actors that fit in the inventory
     int m_MaxPassengers;
+
+	static bool s_CrabBombInEffect; //!< Flag to determine if a craft is triggering the Crab Bomb effect.
 
     ////////
     // AI states

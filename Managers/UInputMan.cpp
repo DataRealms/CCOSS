@@ -16,7 +16,6 @@ extern bool g_LaunchIntoEditor;
 
 namespace RTE {
 
-	const std::string UInputMan::c_ClassName = "UInputMan";
 	GUIInput* UInputMan::s_InputClass = nullptr;
 
 	char *UInputMan::s_PrevKeyStates = new char[KEY_MAX];
@@ -71,25 +70,25 @@ namespace RTE {
 			}
 		}
 
-		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			m_ControlScheme[player].Reset();
 
-			for (short inputState = InputState::Held; inputState < InputState::InputStateCount; inputState++) {
-				for (short element = InputElements::INPUT_L_UP; element < InputElements::INPUT_COUNT; element++) {
+			for (int inputState = InputState::Held; inputState < InputState::InputStateCount; inputState++) {
+				for (int element = InputElements::INPUT_L_UP; element < InputElements::INPUT_COUNT; element++) {
 					m_NetworkInputElementState[player][element][inputState] = false;
 				}
-				for (short mouseButton = MouseButtons::MOUSE_LEFT; mouseButton < MouseButtons::MAX_MOUSE_BUTTONS; mouseButton++) {
+				for (int mouseButton = MouseButtons::MOUSE_LEFT; mouseButton < MouseButtons::MAX_MOUSE_BUTTONS; mouseButton++) {
 					m_NetworkMouseButtonState[player][mouseButton][inputState] = false;
 				}
 			}
 			m_NetworkAccumulatedRawMouseMovement[player].Reset();
 			m_NetworkAnalogMoveData[player].Reset();
-			m_NetworkMouseWheelState[player] = 0;	
+			m_NetworkMouseWheelState[player] = 0;
 			m_TrapMousePosPerPlayer[player] = false;
 		}
 
 		for (int inputState = InputState::Pressed; inputState < InputState::InputStateCount; inputState++) {
-			for (short element = InputElements::INPUT_L_UP; element < InputElements::INPUT_COUNT; element++) {
+			for (int element = InputElements::INPUT_L_UP; element < InputElements::INPUT_COUNT; element++) {
 				m_NetworkAccumulatedElementState[element][inputState] = false;
 			}
 		}
@@ -107,10 +106,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int UInputMan::Create() {
-		if (Serializable::Create() < 0) {
-			return -1;
-		}
+	int UInputMan::Initialize() {
 		if (install_keyboard() != 0) { RTEAbort("Failed to initialize keyboard!"); }
 		if (install_joystick(JOY_TYPE_AUTODETECT) != 0) { RTEAbort("Failed to initialize joysticks!"); }
 
@@ -121,57 +117,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int UInputMan::ReadProperty(std::string propName, Reader &reader) {
-		if (propName == "MouseSensitivity") {
-			reader >> m_MouseSensitivity;
-		} else if (propName == "Player1Scheme" || propName == "Player2Scheme" || propName == "Player3Scheme" || propName == "Player4Scheme") {
-			for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
-				std::string playerNum = std::to_string(player + 1);
-				if (propName == "Player" + playerNum + "Scheme") {
-					reader >> m_ControlScheme[player];
-					break;
-				}
-			}
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int UInputMan::Save(Writer &writer) const {
-		writer.NewLine(false, 2);
-		writer.NewDivider(false);
-		writer.NewLineString("// Input Mapping", false);
-		writer.NewLine(false);
-
-		writer.NewProperty("MouseSensitivity");
-		writer << m_MouseSensitivity;
-
-		writer.NewLine(false);
-		writer.NewLineString("// Input Devices:  0 = Keyboard Only, 1 = Mouse + Keyboard, 2 = Joystick One, 3 = Joystick Two, , 4 = Joystick Three, 5 = Joystick Four");
-		writer.NewLineString("// Scheme Presets: 0 = No Preset, 1 = WASD, 2 = Cursor Keys, 3 = XBox 360 Controller");
-
-		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
-			std::string playerNum = std::to_string(player + 1);
-			writer.NewLine(false, 2);
-			writer.NewDivider(false);
-			writer.NewLineString("// Player " + playerNum, false);
-			writer.NewLine(false);
-			writer.NewProperty("Player" + playerNum + "Scheme");
-			writer << m_ControlScheme[player];
-		}
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void UInputMan::LoadDeviceIcons() {
 		m_DeviceIcons[InputDevice::DEVICE_KEYB_ONLY] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Keyboard"));
 		m_DeviceIcons[InputDevice::DEVICE_MOUSE_KEYB] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Mouse"));
 
-		for (short gamepad = InputDevice::DEVICE_GAMEPAD_1; gamepad < InputDevice::DEVICE_COUNT; gamepad++) {
+		for (int gamepad = InputDevice::DEVICE_GAMEPAD_1; gamepad < InputDevice::DEVICE_COUNT; gamepad++) {
 			std::string gamepadNum = std::to_string(gamepad - 1);
 			m_DeviceIcons[gamepad] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad " + gamepadNum));
 		}
@@ -183,7 +133,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::string UInputMan::GetMappingName(short whichPlayer, int whichElement) {
+	std::string UInputMan::GetMappingName(int whichPlayer, int whichElement) {
 		if (whichPlayer < Players::PlayerOne || whichPlayer >= Players::MaxPlayerCount) {
 			return "";
 		}
@@ -193,7 +143,7 @@ namespace RTE {
 		if (preset != InputPreset::PRESET_NONE && !element->GetPresetDescription().empty()) {
 			return element->GetPresetDescription();
 		}
-		
+
 		InputDevice device = m_ControlScheme[whichPlayer].GetDevice();
 		if (device >= InputDevice::DEVICE_GAMEPAD_1) {
 			int whichJoy = GetJoystickIndex(device);
@@ -226,7 +176,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UInputMan::CaptureKeyMapping(short whichPlayer, int whichInput) {
+	bool UInputMan::CaptureKeyMapping(int whichPlayer, int whichInput) {
 		if (whichPlayer < Players::PlayerOne || whichPlayer >= Players::MaxPlayerCount) {
 			return false;
 		}
@@ -245,7 +195,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UInputMan::CaptureButtonMapping(short whichPlayer, int whichJoy, int whichInput) {
+	bool UInputMan::CaptureButtonMapping(int whichPlayer, int whichJoy, int whichInput) {
 		if (whichPlayer < Players::PlayerOne || whichPlayer >= Players::MaxPlayerCount) {
 			return false;
 		}
@@ -262,7 +212,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UInputMan::CaptureDirectionMapping(short whichPlayer, int whichJoy, int whichInput) {
+	bool UInputMan::CaptureDirectionMapping(int whichPlayer, int whichJoy, int whichInput) {
 		if (whichPlayer < Players::PlayerOne || whichPlayer >= Players::MaxPlayerCount) {
 			return false;
 		}
@@ -285,7 +235,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UInputMan::CaptureJoystickMapping(short whichPlayer, int whichJoy, int whichInput) {
+	bool UInputMan::CaptureJoystickMapping(int whichPlayer, int whichJoy, int whichInput) {
 		if (CaptureButtonMapping(whichPlayer, whichJoy, whichInput)) {
 			return true;
 		}
@@ -297,7 +247,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector UInputMan::AnalogMoveValues(short whichPlayer) {
+	Vector UInputMan::AnalogMoveValues(int whichPlayer) {
 		Vector moveValues(0, 0);
 		InputDevice device = m_ControlScheme[whichPlayer].GetDevice();
 		if (device >= InputDevice::DEVICE_GAMEPAD_1) {
@@ -312,7 +262,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector UInputMan::AnalogAimValues(short whichPlayer) {
+	Vector UInputMan::AnalogAimValues(int whichPlayer) {
 		InputDevice device = m_ControlScheme[whichPlayer].GetDevice();
 
 		if (IsInMultiplayerMode()) { device = InputDevice::DEVICE_MOUSE_KEYB; }
@@ -335,7 +285,7 @@ namespace RTE {
 
 	Vector UInputMan::GetMenuDirectional() {
 		Vector allInput(0,0);
-		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			InputDevice device = m_ControlScheme[player].GetDevice();
 
 			switch (device) {
@@ -402,7 +352,7 @@ namespace RTE {
 		if (KeyPressed(KEY_ESC) || (includeSpacebar && KeyPressed(KEY_SPACE))) {
 			return true;
 		}
-		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			if (ElementPressed(player, InputElements::INPUT_START)) {
 				return true;
 			}
@@ -413,7 +363,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::AnyBackPress() {
-		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			if (ElementPressed(player, InputElements::INPUT_BACK)) {
 				return true;
 			}
@@ -434,8 +384,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	short UInputMan::MouseUsedByPlayer() const {
-		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
+	int UInputMan::MouseUsedByPlayer() const {
+		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 			if (m_ControlScheme[player].GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
 				return player;
 			}
@@ -458,7 +408,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector UInputMan::GetMouseMovement(short whichPlayer) const {
+	Vector UInputMan::GetMouseMovement(int whichPlayer) const {
 		if (IsInMultiplayerMode() && whichPlayer >= Players::PlayerOne && whichPlayer < Players::MaxPlayerCount) {
 			return m_NetworkAccumulatedRawMouseMovement[whichPlayer];
 		}
@@ -470,7 +420,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void UInputMan::SetMousePos(Vector &newPos, short whichPlayer) const {
+	void UInputMan::SetMousePos(Vector &newPos, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
 		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme[whichPlayer].GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
 			position_mouse(static_cast<int>(newPos.GetX()), static_cast<int>(newPos.GetY()));
@@ -480,7 +430,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::AnyMouseButtonPress() const {
-		for (short button = MouseButtons::MOUSE_LEFT; button < MouseButtons::MAX_MOUSE_BUTTONS; ++button) {
+		for (int button = MouseButtons::MOUSE_LEFT; button < MouseButtons::MAX_MOUSE_BUTTONS; ++button) {
 			if (MouseButtonPressed(button, -1)) {
 				return true;
 			}
@@ -490,7 +440,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void UInputMan::TrapMousePos(bool trap, short whichPlayer) {
+	void UInputMan::TrapMousePos(bool trap, int whichPlayer) {
 		if (whichPlayer == Players::NoPlayer || m_ControlScheme[whichPlayer].GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
 			m_TrapMousePos = trap;
 		}
@@ -499,7 +449,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void UInputMan::ForceMouseWithinBox(int x, int y, int width, int height, short whichPlayer) const {
+	void UInputMan::ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
 		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme[whichPlayer].GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
 			position_mouse(Limit(mouse_x, x + width * g_FrameMan.ResolutionMultiplier(), x), Limit(mouse_y, y + height * g_FrameMan.ResolutionMultiplier(), y));
@@ -508,12 +458,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void UInputMan::ForceMouseWithinPlayerScreen(short whichPlayer) const {
+	void UInputMan::ForceMouseWithinPlayerScreen(int whichPlayer) const {
 		if (whichPlayer < Players::PlayerOne || whichPlayer >= Players::PlayerFour) {
 			return;
 		}
-		unsigned short screenWidth = g_FrameMan.GetPlayerFrameBufferWidth(whichPlayer);
-		unsigned short screenHeight = g_FrameMan.GetPlayerFrameBufferHeight(whichPlayer);
+		unsigned int screenWidth = g_FrameMan.GetPlayerFrameBufferWidth(whichPlayer);
+		unsigned int screenHeight = g_FrameMan.GetPlayerFrameBufferHeight(whichPlayer);
 
 		if (g_FrameMan.GetScreenCount() > 1) {
 			switch (whichPlayer) {
@@ -629,7 +579,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector UInputMan::GetNetworkAccumulatedRawMouseMovement(short player) {
+	Vector UInputMan::GetNetworkAccumulatedRawMouseMovement(int player) {
 		Vector accumulatedMovement = m_NetworkAccumulatedRawMouseMovement[player];
 		m_NetworkAccumulatedRawMouseMovement[player].Reset();
 		return accumulatedMovement;
@@ -647,7 +597,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UInputMan::GetInputElementState(short whichPlayer, short whichElement, InputState whichState) {
+	bool UInputMan::GetInputElementState(int whichPlayer, int whichElement, InputState whichState) {
 		if (IsInMultiplayerMode() && whichPlayer >= Players::PlayerOne && whichPlayer < Players::MaxPlayerCount) {
 			return m_TrapMousePosPerPlayer[whichPlayer] ? m_NetworkInputElementState[whichPlayer][whichElement][whichState] : false;
 		}
@@ -658,20 +608,20 @@ namespace RTE {
 		if (!elementState && device == InputDevice::DEVICE_KEYB_ONLY || (device == InputDevice::DEVICE_MOUSE_KEYB && !(whichElement == InputElements::INPUT_AIM_UP || whichElement == InputElements::INPUT_AIM_DOWN))) {
 			elementState = GetKeyboardButtonState(static_cast<char>(element->GetKey()),whichState);
 		}
-		if (!elementState && device == InputDevice::DEVICE_MOUSE_KEYB && m_TrapMousePos) { elementState = GetMouseButtonState(whichPlayer, static_cast<short>(element->GetMouseButton()), whichState); }
+		if (!elementState && device == InputDevice::DEVICE_MOUSE_KEYB && m_TrapMousePos) { elementState = GetMouseButtonState(whichPlayer, element->GetMouseButton(), whichState); }
 
 		if (!elementState && device >= InputDevice::DEVICE_GAMEPAD_1) {
 			int whichJoy = GetJoystickIndex(device);
-			elementState = GetJoystickButtonState(whichJoy, static_cast<short>(element->GetJoyButton()), whichState);
+			elementState = GetJoystickButtonState(whichJoy, element->GetJoyButton(), whichState);
 			if (!elementState && element->JoyDirMapped()) { elementState = GetJoystickDirectionState(whichJoy, element->GetStick(), element->GetAxis(), element->GetDirection(), whichState); }
-		}	
+		}
 		return elementState;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UInputMan::GetMenuButtonState(short whichButton, InputState whichState) {
-		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+	bool UInputMan::GetMenuButtonState(int whichButton, InputState whichState) {
+		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			bool buttonState = false;
 			InputDevice device = m_ControlScheme[player].GetDevice();
 			if (!buttonState && whichButton >= MenuCursorButtons::MENU_PRIMARY) {
@@ -709,13 +659,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UInputMan::GetMouseButtonState(short whichPlayer, short whichButton, InputState whichState) const {
+	bool UInputMan::GetMouseButtonState(int whichPlayer, int whichButton, InputState whichState) const {
 		if (whichButton < MouseButtons::MOUSE_LEFT || whichButton >= MouseButtons::MAX_MOUSE_BUTTONS) {
 			return false;
 		}
 		if (IsInMultiplayerMode()) {
 			if (whichPlayer < Players::PlayerOne || whichPlayer >= Players::MaxPlayerCount) {
-				for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
+				for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 					if (m_NetworkMouseButtonState[player][whichButton][whichState]) {
 						return m_NetworkMouseButtonState[player][whichButton][whichState];
 					}
@@ -740,7 +690,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool UInputMan::GetJoystickButtonState(int whichJoy, short whichButton, InputState whichState) const {
+	bool UInputMan::GetJoystickButtonState(int whichJoy, int whichButton, InputState whichState) const {
 		if (whichJoy < 0 || whichJoy >= num_joysticks || whichButton < 0 || whichButton >= joy[whichJoy].num_buttons) {
 			return false;
 		}
@@ -839,7 +789,8 @@ namespace RTE {
 		}
 
 		if (g_InActivity) {
-			if (AnyStartPress(false) && !dynamic_cast<GameActivity*>(g_ActivityMan.GetActivity())->IsBuyGUIVisible(-1)) {
+			const GameActivity *gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
+			if (AnyStartPress(false) && (!gameActivity || !gameActivity->IsBuyGUIVisible(-1))) {
 				g_ActivityMan.PauseActivity();
 				return;
 			}
@@ -853,10 +804,10 @@ namespace RTE {
 		if (FlagCtrlState() && !FlagAltState()) {
 			// Ctrl+S to save continuous ScreenDumps
 			if (KeyHeld(KEY_S)) {
-				g_FrameMan.SaveScreenToBMP("ScreenDump");
+				g_FrameMan.SaveScreenToPNG("ScreenDump");
 			// Ctrl+W to save a WorldDump
 			} else if (KeyPressed(KEY_W)) {
-				g_FrameMan.SaveWorldToBMP("WorldDump");
+				g_FrameMan.SaveWorldToPNG("WorldDump");
 			// Ctrl+M to cycle draw modes
 			} else if (KeyPressed(KEY_M)) {
 				g_SceneMan.SetLayerDrawMode((g_SceneMan.GetLayerDrawMode() + 1) % 3);
@@ -873,12 +824,12 @@ namespace RTE {
 				g_FrameMan.SwitchResolutionMultiplier((g_FrameMan.ResolutionMultiplier() >= 2) ? 1 : 2);
 			// Alt+W to save ScenePreviewDump (miniature WorldDump)
 			} else if (KeyPressed(KEY_W)) {
-				g_FrameMan.SaveWorldToPreviewBMP("ScenePreviewDump");
+				g_FrameMan.SaveWorldPreviewToPNG("ScenePreviewDump");
 			}
 		} else {
 			// PrntScren to save a single ScreenDump
 			if (KeyPressed(KEY_PRTSCR)) {
-				g_FrameMan.SaveScreenToBMP("ScreenDump");
+				g_FrameMan.SaveScreenToPNG("ScreenDump");
 			} else if (KeyPressed(KEY_F1)) {
 				g_ConsoleMan.ShowShortcuts();
 			} else if (KeyPressed(KEY_F2)) {
@@ -911,7 +862,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::UpdateNetworkMouseMovement() {
-		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
+		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 			if (!m_NetworkAccumulatedRawMouseMovement[player].IsZero()) {
 				// TODO: Figure out why we're multiplying by 3 here. Possibly related to mouse sensitivity.
 				m_NetworkAnalogMoveData[player].m_X += m_NetworkAccumulatedRawMouseMovement[player].m_X * 3;
@@ -922,11 +873,11 @@ namespace RTE {
 
 			// Clear mouse events and inputs as they should've been already processed during by recipients.
 			// This is important so mouse readings are correct, e.g. to ensure events don't trigger multiple times on a single press.
-			for (short inputState = InputState::Pressed; inputState < InputState::InputStateCount; inputState++) {
-				for (short element = InputElements::INPUT_L_UP; element < InputElements::INPUT_COUNT; element++) {
+			for (int inputState = InputState::Pressed; inputState < InputState::InputStateCount; inputState++) {
+				for (int element = InputElements::INPUT_L_UP; element < InputElements::INPUT_COUNT; element++) {
 					m_NetworkInputElementState[player][element][inputState] = false;
 				}
-				for (short mouseButton = MouseButtons::MOUSE_LEFT; mouseButton < MouseButtons::MAX_MOUSE_BUTTONS; mouseButton++) {
+				for (int mouseButton = MouseButtons::MOUSE_LEFT; mouseButton < MouseButtons::MAX_MOUSE_BUTTONS; mouseButton++) {
 					m_NetworkMouseButtonState[player][mouseButton][inputState] = false;
 				}
 			}
@@ -943,12 +894,12 @@ namespace RTE {
 		s_CurrentMouseButtonStates[MouseButtons::MOUSE_LEFT] = mouse_b & 1;
 		s_CurrentMouseButtonStates[MouseButtons::MOUSE_RIGHT] = mouse_b & 2;
 		s_CurrentMouseButtonStates[MouseButtons::MOUSE_MIDDLE] = mouse_b & 4;
-		for (short mouseButton = MouseButtons::MOUSE_LEFT; mouseButton < MouseButtons::MAX_MOUSE_BUTTONS; mouseButton++) {
+		for (int mouseButton = MouseButtons::MOUSE_LEFT; mouseButton < MouseButtons::MAX_MOUSE_BUTTONS; mouseButton++) {
 			s_ChangedMouseButtonStates[mouseButton] = s_CurrentMouseButtonStates[mouseButton] != s_PrevMouseButtonStates[mouseButton];
 		}
 
 		// Detect and store mouse movement input, translated to analog stick emulation
-		short mousePlayer = MouseUsedByPlayer();
+		int mousePlayer = MouseUsedByPlayer();
 		if (mousePlayer != Players::NoPlayer) {
 			// TODO: Figure out why we're multiplying by 3 here. Possibly related to mouse sensitivity.
 			m_AnalogMouseData.m_X += m_RawMouseMovement.m_X * 3;
@@ -999,7 +950,7 @@ namespace RTE {
 
 			float deadZone = 0.0F;
 			int deadZoneType = DeadZoneType::CIRCLE;
-			for (short playerToCheck = Players::PlayerOne; playerToCheck < Players::MaxPlayerCount; playerToCheck++) {
+			for (int playerToCheck = Players::PlayerOne; playerToCheck < Players::MaxPlayerCount; playerToCheck++) {
 				InputDevice device = m_ControlScheme[playerToCheck].GetDevice();
 				int whichJoy = GetJoystickIndex(device);
 				if (whichJoy == joystick) {
@@ -1038,7 +989,7 @@ namespace RTE {
 			for (int stick = 0; stick < joy[joystick].num_sticks; ++stick) {
 				for (int axis = 0; axis < joy[joystick].stick[stick].num_axis; ++axis) {
 					JOYSTICK_AXIS_INFO *joystickAxis = &joy[joystick].stick[stick].axis[axis];
-					
+
 					if (joystickPlayer > Players::NoPlayer && deadZoneType == DeadZoneType::SQUARE && deadZone > 0.0F) {
 						// Adjust joystick values to eliminate values in deadzone. This heavily relies on AnalogAxisValue method of processing joystick data.
 						if (joy[joystick].stick[stick].flags & JOYFLAG_UNSIGNED) {
@@ -1066,8 +1017,8 @@ namespace RTE {
 			std::memcpy(s_PrevJoystickStates, &joy[joystick], sizeof(joy[joystick]));
 		}
 		// Store pressed and released events to be picked by NetworkClient during it's update. These will be cleared after update so we don't care about false but we store the result regardless.
-		for (short inputState = InputState::Pressed; inputState < InputState::InputStateCount; inputState++){
-			for (short element = InputElements::INPUT_L_UP; element < InputElements::INPUT_COUNT; element++) {
+		for (int inputState = InputState::Pressed; inputState < InputState::InputStateCount; inputState++){
+			for (int element = InputElements::INPUT_L_UP; element < InputElements::INPUT_COUNT; element++) {
 				m_NetworkAccumulatedElementState[element][inputState] = GetInputElementState(Players::PlayerOne, element, static_cast<InputState>(inputState));
 			}
 		}

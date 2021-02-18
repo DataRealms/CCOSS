@@ -28,7 +28,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Turret::ReadProperty(std::string propName, Reader &reader) {
+	int Turret::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "MountedDevice") {
 			RemoveAttachable(m_MountedDevice);
 			const Entity *mountedDeviceEntity = g_PresetMan.GetEntityPreset(reader);

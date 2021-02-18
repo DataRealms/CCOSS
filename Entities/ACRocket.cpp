@@ -158,7 +158,7 @@ int ACRocket::Create(const ACRocket &reference) {
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int ACRocket::ReadProperty(std::string propName, Reader &reader) {
+int ACRocket::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "RLeg") {
         RemoveAttachable(m_pRLeg);
         m_pRLeg = new Leg;

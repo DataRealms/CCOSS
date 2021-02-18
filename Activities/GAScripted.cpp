@@ -105,11 +105,10 @@ int GAScripted::Create(const GAScripted &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int GAScripted::ReadProperty(std::string propName, Reader &reader)
+int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 	if (propName == "ScriptFile") {
-		reader >> m_ScriptPath;
-		CorrectBackslashesInPaths(m_ScriptPath);
+		m_ScriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
 	} else if (propName == "LuaClassName")
         reader >> m_LuaClassName;
 	else if (propName == "AddPieSlice")
@@ -131,16 +130,13 @@ int GAScripted::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this GAScripted with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int GAScripted::Save(Writer &writer) const
-{
-    GameActivity::Save(writer);
+int GAScripted::Save(Writer &writer) const {
+	GameActivity::Save(writer);
 
-    writer.NewProperty("ScriptFile");
-    writer << m_ScriptPath;
-    writer.NewProperty("LuaClassName");
-    writer << m_LuaClassName;
+	writer.NewPropertyWithValue("ScriptFile", m_ScriptPath);
+	writer.NewPropertyWithValue("LuaClassName", m_LuaClassName);
 
-    return 0;
+	return 0;
 }
 
 

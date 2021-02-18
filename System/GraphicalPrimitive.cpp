@@ -1,4 +1,4 @@
-#include "Primitive.h"
+#include "GraphicalPrimitive.h"
 #include "Matrix.h"
 #include "FrameMan.h"
 #include "SceneMan.h"
@@ -10,12 +10,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void GraphicalPrimitive::TranslateCoordinates(Vector targetPos, Vector scenePos, Vector & drawLeftPos, Vector & drawRightPos) const {
+	void GraphicalPrimitive::TranslateCoordinates(Vector targetPos, const Vector &scenePos, Vector &drawLeftPos, Vector &drawRightPos) const {
 		drawLeftPos = scenePos;
 		drawRightPos = scenePos;
 
 		if (g_SceneMan.SceneWrapsX()) {
-			int sceneWidth = g_SceneMan.GetSceneWidth();
+			float sceneWidth = static_cast<float>(g_SceneMan.GetSceneWidth());
 			if (targetPos.m_X <= sceneWidth && targetPos.m_X > sceneWidth / 2) { targetPos.m_X -= sceneWidth; }
 			drawLeftPos.m_X = (drawLeftPos.m_X > 0) ? (drawLeftPos.m_X -= sceneWidth) : (drawLeftPos.m_X -= sceneWidth + targetPos.m_X);
 		}
@@ -23,7 +23,7 @@ namespace RTE {
 		drawRightPos.m_X -= targetPos.m_X;
 
 		if (g_SceneMan.SceneWrapsY()) {
-			int sceneHeight = g_SceneMan.GetSceneHeight();
+			float sceneHeight = static_cast<float>(g_SceneMan.GetSceneHeight());
 			if (targetPos.m_Y <= sceneHeight && targetPos.m_Y > sceneHeight / 2) { targetPos.m_Y -= sceneHeight; }
 			drawLeftPos.m_Y = (drawLeftPos.m_Y > 0) ? (drawLeftPos.m_Y -= sceneHeight) : (drawLeftPos.m_Y -= sceneHeight + targetPos.m_Y);
 		}
@@ -33,7 +33,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LinePrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+	void LinePrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			Vector drawEnd = m_EndPos - targetPos;
@@ -54,11 +54,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ArcPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+	void ArcPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			if (m_Thickness > 1) {
-				for (short i = 0; i < m_Thickness; i++) {
+				for (int i = 0; i < m_Thickness; i++) {
 					arc(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
 				}
 			} else {
@@ -71,7 +71,7 @@ namespace RTE {
 			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
 
 			if (m_Thickness > 1) {
-				for (short i = 0; i < m_Thickness; i++){
+				for (int i = 0; i < m_Thickness; i++){
 					arc(drawScreen, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
 					arc(drawScreen, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), ftofix(GetAllegroAngle(m_StartAngle)), ftofix(GetAllegroAngle(m_EndAngle)), (m_Radius - (m_Thickness / 2)) + i, m_Color);
 				}
@@ -84,15 +84,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SplinePrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+	void SplinePrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			Vector drawGuideA = m_GuidePointAPos - targetPos;
 			Vector drawGuideB = m_GuidePointBPos - targetPos;
 			Vector drawEnd = m_EndPos - targetPos;
 
-			int guidePoints[8] = { drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), drawGuideA.GetFloorIntX(), drawGuideA.GetFloorIntY(), drawGuideB.GetFloorIntX(), drawGuideB.GetFloorIntY(), drawEnd.GetFloorIntX(), drawEnd.GetFloorIntY() };
-			spline(drawScreen, guidePoints, m_Color);
+			std::array<int, 8> guidePoints = { drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), drawGuideA.GetFloorIntX(), drawGuideA.GetFloorIntY(), drawGuideB.GetFloorIntX(), drawGuideB.GetFloorIntY(), drawEnd.GetFloorIntX(), drawEnd.GetFloorIntY() };
+			spline(drawScreen, guidePoints.data(), m_Color);
 		} else {
 			Vector drawStartLeft;
 			Vector drawGuideALeft;
@@ -108,17 +108,16 @@ namespace RTE {
 			TranslateCoordinates(targetPos, m_GuidePointBPos, drawGuideBLeft, drawGuideBRight);
 			TranslateCoordinates(targetPos, m_EndPos, drawEndLeft, drawEndRight);
 
-			int guidePointsLeft[8] = { drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), drawGuideALeft.GetFloorIntX(), drawGuideALeft.GetFloorIntY(), drawGuideBLeft.GetFloorIntX(), drawGuideBLeft.GetFloorIntY(), drawEndLeft.GetFloorIntX(), drawEndLeft.GetFloorIntY() };
-			int guidePointsRight[8] = { drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), drawGuideARight.GetFloorIntX(), drawGuideARight.GetFloorIntY(), drawGuideBRight.GetFloorIntX(), drawGuideBRight.GetFloorIntY(), drawEndRight.GetFloorIntX(), drawEndRight.GetFloorIntY() };
-
-			spline(drawScreen, guidePointsLeft, m_Color);
-			spline(drawScreen, guidePointsRight, m_Color);
+			std::array<int, 8> guidePointsLeft = { drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), drawGuideALeft.GetFloorIntX(), drawGuideALeft.GetFloorIntY(), drawGuideBLeft.GetFloorIntX(), drawGuideBLeft.GetFloorIntY(), drawEndLeft.GetFloorIntX(), drawEndLeft.GetFloorIntY() };
+			std::array<int, 8> guidePointsRight = { drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), drawGuideARight.GetFloorIntX(), drawGuideARight.GetFloorIntY(), drawGuideBRight.GetFloorIntX(), drawGuideBRight.GetFloorIntY(), drawEndRight.GetFloorIntX(), drawEndRight.GetFloorIntY() };
+			spline(drawScreen, guidePointsLeft.data(), m_Color);
+			spline(drawScreen, guidePointsRight.data(), m_Color);
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void BoxPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+	void BoxPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			Vector drawEnd = m_EndPos - targetPos;
@@ -139,7 +138,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void BoxFillPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+	void BoxFillPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			Vector drawEnd = m_EndPos - targetPos;
@@ -160,7 +159,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void RoundedBoxPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+	void RoundedBoxPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
+		// TODO: Fix corners drawing incorrectly when vectors are inverted
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			Vector drawEnd = m_EndPos - targetPos;
@@ -172,7 +172,7 @@ namespace RTE {
 			arc(drawScreen, drawEnd.GetFloorIntX() - m_CornerRadius, drawStart.GetFloorIntY() - m_CornerRadius, itofix(-64), itofix(0), m_CornerRadius, m_Color);
 
 			//Draw the top, bottom, left and right planes respectively
-			hline(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawStart.GetFloorIntY(), drawEnd.GetFloorIntX() - m_CornerRadius, m_Color);	
+			hline(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawStart.GetFloorIntY(), drawEnd.GetFloorIntX() - m_CornerRadius, m_Color);
 			hline(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawEnd.GetFloorIntY(), drawEnd.GetFloorIntX() - m_CornerRadius, m_Color);
 			vline(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY() - m_CornerRadius, drawEnd.GetFloorIntY() + m_CornerRadius, m_Color);
 			vline(drawScreen, drawEnd.GetFloorIntX(), drawStart.GetFloorIntY() - m_CornerRadius, drawEnd.GetFloorIntY() + m_CornerRadius, m_Color);
@@ -207,11 +207,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void RoundedBoxFillPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+	void RoundedBoxFillPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
+		// TODO: Fix corners drawing incorrectly when vectors are inverted
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			Vector drawEnd = m_EndPos - targetPos;
-			
+
 			// Draw the top left, bottom left, top right and bottom right corners respectively
 			circlefill(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawEnd.GetFloorIntY() + m_CornerRadius, m_CornerRadius, m_Color);
 			circlefill(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawStart.GetFloorIntY() - m_CornerRadius, m_CornerRadius, m_Color);
@@ -247,7 +248,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void CirclePrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+	void CirclePrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			circle(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), m_Radius, m_Color);
@@ -264,7 +265,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void CircleFillPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+	void CircleFillPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			circlefill(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), m_Radius, m_Color);
@@ -281,7 +282,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void EllipsePrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+	void EllipsePrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			ellipse(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), m_HorizRadius, m_VertRadius, m_Color);
@@ -298,7 +299,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void EllipseFillPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+	void EllipseFillPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			ellipsefill(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), m_HorizRadius, m_VertRadius, m_Color);
@@ -315,7 +316,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void TrianglePrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+	void TrianglePrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawPointA = m_PointAPos - targetPos;
 			Vector drawPointB = m_PointBPos - targetPos;
@@ -346,7 +347,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void TriangleFillPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+	void TriangleFillPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawPointA = m_PointAPos - targetPos;
 			Vector drawPointB = m_PointBPos - targetPos;
@@ -371,7 +372,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void TextPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+	void TextPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			AllegroBitmap playerGUIBitmap(drawScreen);
@@ -400,7 +401,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void BitmapPrimitive::Draw(BITMAP *drawScreen, Vector targetPos) {
+	void BitmapPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
 		if (!m_Bitmap) {
 			return;
 		}

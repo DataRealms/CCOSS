@@ -13,6 +13,7 @@ namespace RTE {
 
 	public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
 		float m_Rotation; //!< The angle, represented in radians. Pi/2 points up.
@@ -292,19 +293,9 @@ namespace RTE {
 		friend Vector & operator/=(Vector &lhs, Matrix &rhs) { return lhs = rhs / lhs; }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Matrix.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Matrix.</returns>
-		const std::string & GetClassName() const override { return c_ClassName; }
-#pragma endregion
-
-	protected:
+	private:
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
-
-	private:
 
 		/// <summary>
 		/// Makes the elements of this matrix update to represent the set angle.

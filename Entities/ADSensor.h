@@ -15,6 +15,7 @@ namespace RTE {
 
 	public:
 
+		SerializableClassNameGetter
 		SerializableOverrideMethods
 
 #pragma region Creation
@@ -88,17 +89,7 @@ namespace RTE {
 		Actor * SenseActor(const Vector &doorPos, const Matrix &doorRot, bool doorHFlipped = false, MOID ignoreMOID = g_NoMOID);
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Entity.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const override { return m_sClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string m_sClassName; //!< A string with the friendly formatted type name of this object.
 		
 		Vector m_StartOffset; //!< The offset of the sensor ray start relative to the position of its ADoor.
 		Vector m_SensorRay; //!< The ray out from the offset.
@@ -106,6 +97,8 @@ namespace RTE {
 		short m_Skip; //!< How many pixels to skip between sensing pixels.
 
 	private:
+
+		static const std::string c_ClassName; //!< A string with the friendly formatted type name of this object.
 
 		/// <summary>
 		/// Clears all the member variables of this ADSensor, effectively resetting the members of this abstraction level only.

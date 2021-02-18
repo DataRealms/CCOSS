@@ -54,7 +54,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ContentFile::ReadProperty(std::string propName, Reader &reader) {
+	int ContentFile::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "FilePath" || propName == "Path") {
 			SetDataPath(reader.ReadPropValue());
 		} else {
@@ -68,10 +68,8 @@ namespace RTE {
 	int ContentFile::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		if (!m_DataPath.empty()) {
-			writer.NewProperty("FilePath");
-			writer << m_DataPath;
-		}
+		if (!m_DataPath.empty()) { writer.NewPropertyWithValue("FilePath", m_DataPath); }
+
 		return 0;
 	}
 
@@ -82,9 +80,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ContentFile::SetDataPath(const std::string &newDataPath) {
-		m_DataPath = newDataPath;
-		CorrectBackslashesInPaths(m_DataPath);
-
+		m_DataPath = CorrectBackslashesInPath(newDataPath);
 		m_DataPathExtension = std::filesystem::path(m_DataPath).extension().string();
 
 		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n" + m_DataPath + "\n" + GetFormattedReaderPosition());

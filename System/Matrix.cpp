@@ -59,7 +59,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Matrix::ReadProperty(std::string propName, Reader &reader) {
+	int Matrix::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "AngleDegrees") {
 			SetDegAngle(std::stof(reader.ReadPropValue()));
 		} else if (propName == "AngleRadians") {
@@ -75,8 +75,7 @@ namespace RTE {
 	int Matrix::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		writer.NewProperty("AngleDegrees");
-		writer << GetDegAngle();
+		writer.NewPropertyWithValue("AngleDegrees", GetDegAngle());
 
 		return 0;
 	}

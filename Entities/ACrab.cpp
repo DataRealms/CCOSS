@@ -256,7 +256,7 @@ int ACrab::Create(const ACrab &reference) {
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int ACrab::ReadProperty(std::string propName, Reader &reader)
+int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "Turret") {
         RemoveAttachable(m_pTurret);

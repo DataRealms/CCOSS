@@ -132,6 +132,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <OmitDefaultLibName>false</OmitDefaultLibName>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51.lib;luabind-debug.lib;RakNet_Debug_Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -178,6 +179,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <OmitDefaultLibName>false</OmitDefaultLibName>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51-64.lib;luabind-debug.lib;RakNet_Debug_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -223,6 +225,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <OmitDefaultLibName>false</OmitDefaultLibName>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmodL_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51.lib;luabind-debug.lib;RakNet_Debug_Win32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -269,6 +272,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <OmitDefaultLibName>false</OmitDefaultLibName>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstat.lib;libpng16_static.lib;fmod_vc.lib;alleg-debug-static.lib;loadpng-debug.lib;liblz4_debug_static.lib;lua51-64.lib;luabind-debug.lib;RakNet_Debug_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -542,7 +546,7 @@
     <ClInclude Include="System\InputMapping.h" />
     <ClInclude Include="System\InputScheme.h" />
     <ClInclude Include="System\NetworkMessages.h" />
-    <ClInclude Include="System\Primitive.h" />
+    <ClInclude Include="System\GraphicalPrimitive.h" />
     <ClInclude Include="System\StandardIncludes.h" />
     <ClInclude Include="System\Box.h" />
     <ClInclude Include="System\Color.h" />
@@ -692,7 +696,7 @@
     <ClCompile Include="System\Entity.cpp" />
     <ClCompile Include="System\InputMapping.cpp" />
     <ClCompile Include="System\InputScheme.cpp" />
-    <ClCompile Include="System\Primitive.cpp" />
+    <ClCompile Include="System\GraphicalPrimitive.cpp" />
     <ClCompile Include="System\StandardIncludes.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">Create</PrecompiledHeader>
@@ -741,7 +745,6 @@
     <ClCompile Include="GUI\AllegroBitmap.cpp" />
     <ClCompile Include="GUI\AllegroInput.cpp" />
     <ClCompile Include="GUI\AllegroScreen.cpp" />
-    <ClCompile Include="GUI\GUI.cpp" />
     <ClCompile Include="GUI\GUIBanner.cpp" />
     <ClCompile Include="GUI\GUIButton.cpp" />
     <ClCompile Include="GUI\GUICheckbox.cpp" />

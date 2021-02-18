@@ -35,7 +35,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int TDExplosive::ReadProperty(std::string propName, Reader &reader) {
+	int TDExplosive::ReadProperty(const std::string_view &propName, Reader &reader) {
 		// TODO: Consider removing DetonationSound as GibSound already exists and could be used in its place
 		if (propName == "DetonationSound") {
 			reader >> m_GibSound;

@@ -183,7 +183,7 @@ int PieMenuGUI::Slice::Create()
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int PieMenuGUI::Slice::ReadProperty(std::string propName, Reader &reader)
+int PieMenuGUI::Slice::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "Description")
         reader >> m_Description;
@@ -192,8 +192,7 @@ int PieMenuGUI::Slice::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "Direction")
         reader >> m_Direction;
 	else if (propName == "ScriptPath") {
-		reader >> m_ScriptPath;
-		CorrectBackslashesInPaths(m_ScriptPath);
+		m_ScriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
 	} else if (propName == "FunctionName")
         reader >> m_FunctionName;
     else
@@ -209,22 +208,16 @@ int PieMenuGUI::Slice::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this Slice with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int PieMenuGUI::Slice::Save(Writer &writer) const
-{
-    Serializable::Save(writer);
+int PieMenuGUI::Slice::Save(Writer &writer) const {
+	Serializable::Save(writer);
 
-    writer.NewProperty("Description");
-    writer << m_Description;
-    writer.NewProperty("Icon");
-    writer << m_Icon;
-    writer.NewProperty("Direction");
-    writer << m_Direction;
-    writer.NewProperty("ScriptPath");
-    writer << m_ScriptPath;
-    writer.NewProperty("FunctionName");
-    writer << m_FunctionName;
+	writer.NewPropertyWithValue("Description", m_Description);
+	writer.NewPropertyWithValue("Icon", m_Icon);
+	writer.NewPropertyWithValue("Direction", m_Direction);
+	writer.NewPropertyWithValue("ScriptPath", m_ScriptPath);
+	writer.NewPropertyWithValue("FunctionName", m_FunctionName);
 
-    return 0;
+	return 0;
 }
 
 

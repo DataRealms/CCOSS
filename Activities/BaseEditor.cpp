@@ -106,7 +106,7 @@ int BaseEditor::Create(const BaseEditor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int BaseEditor::ReadProperty(std::string propName, Reader &reader)
+int BaseEditor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "CPUTeam")
@@ -129,18 +129,9 @@ int BaseEditor::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this BaseEditor with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int BaseEditor::Save(Writer &writer) const
-{
-    Activity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int BaseEditor::Save(Writer &writer) const {
+	Activity::Save(writer);
+	return 0;
 }
 
 
@@ -211,7 +202,7 @@ int BaseEditor::Start()
         g_SceneMan.SetScreenTeam(ScreenOfPlayer(editingPlayer), m_Team[editingPlayer]);
         g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(editingPlayer));
 
-        m_PlayerController[editingPlayer].Destroy();
+        m_PlayerController[editingPlayer].Reset();
         m_PlayerController[editingPlayer].Create(Controller::CIM_PLAYER, editingPlayer);
         m_PlayerController[editingPlayer].SetTeam(m_Team[editingPlayer]);
 

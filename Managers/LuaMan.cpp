@@ -1,5 +1,4 @@
 #include "LuaMan.h"
-#include "System.h"
 
 #include "ACDropShip.h"
 #include "ACrab.h"
@@ -118,8 +117,6 @@ namespace luabind
 
 namespace RTE
 {
-
-const string LuaMan::m_ClassName = "LuaMan";
 
 // Can't have global enums in the master state so we use this dummy struct as a class and register the enums under it.
 struct enum_wrapper {
@@ -464,7 +461,7 @@ void LuaMan::Clear()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int LuaMan::Create() {
+int LuaMan::Initialize() {
     m_pMasterState = luaL_newstate();
     // Attach the master state to LuaBind
     luabind::open(m_pMasterState);
@@ -1540,8 +1537,8 @@ int LuaMan::Create() {
             .def("ClearScreenText", &FrameMan::ClearScreenText)
             .def("FadeInPalette", &FrameMan::FadeInPalette)
             .def("FadeOutPalette", &FrameMan::FadeOutPalette)
-            .def("SaveScreenToBMP", &FrameMan::SaveScreenToBMP)
-            .def("SaveBitmapToBMP", &FrameMan::SaveBitmapToBMP)
+            .def("SaveScreenToPNG", &FrameMan::SaveScreenToPNG)
+            .def("SaveBitmapToPNG", &FrameMan::SaveBitmapToPNG)
             .def("FlashScreen", &FrameMan::FlashScreen)
 			.def("CalculateTextHeight", &FrameMan::CalculateTextHeight)
 			.def("CalculateTextWidth", &FrameMan::CalculateTextWidth),
@@ -1550,40 +1547,40 @@ int LuaMan::Create() {
 			.def("RegisterPostEffect", &PostProcessMan::RegisterPostEffect),
 
 		class_<PrimitiveMan>("PrimitiveManager")
-			.def("DrawLinePrimitive", (void (PrimitiveMan::*)(Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawLinePrimitive)
-			.def("DrawLinePrimitive", (void (PrimitiveMan::*)(short player, Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawLinePrimitive)
-			.def("DrawArcPrimitive", (void (PrimitiveMan::*)(Vector pos, float startAngle, float endAngle, short radius, unsigned char color))&PrimitiveMan::DrawArcPrimitive)
-			.def("DrawArcPrimitive", (void (PrimitiveMan::*)(Vector pos, float startAngle, float endAngle, short radius, unsigned char color, short thickness))&PrimitiveMan::DrawArcPrimitive)
-			.def("DrawArcPrimitive", (void (PrimitiveMan::*)(short player, Vector pos, float startAngle, float endAngle, short radius, unsigned char color))&PrimitiveMan::DrawArcPrimitive)
-			.def("DrawArcPrimitive", (void (PrimitiveMan::*)(short player, Vector pos, float startAngle, float endAngle, short radius, unsigned char color, short thickness))&PrimitiveMan::DrawArcPrimitive)
-			.def("DrawSplinePrimitive", (void (PrimitiveMan::*)(Vector start, Vector guideA, Vector guideB, Vector end, unsigned char color))&PrimitiveMan::DrawSplinePrimitive)
-			.def("DrawSplinePrimitive", (void (PrimitiveMan::*)(short player, Vector start, Vector guideA, Vector guideB, Vector end, unsigned char color))&PrimitiveMan::DrawSplinePrimitive)
-			.def("DrawBoxPrimitive", (void (PrimitiveMan::*)(Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawBoxPrimitive)
-			.def("DrawBoxPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawBoxPrimitive)
-			.def("DrawBoxFillPrimitive", (void (PrimitiveMan::*)(Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawBoxFillPrimitive)
-			.def("DrawBoxFillPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Vector end, unsigned char color))&PrimitiveMan::DrawBoxFillPrimitive)
-			.def("DrawRoundedBoxPrimitive", (void (PrimitiveMan::*)(Vector start, Vector end, float cornerRadius, unsigned char color))&PrimitiveMan::DrawRoundedBoxPrimitive)
-			.def("DrawRoundedBoxPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Vector end, float cornerRadius, unsigned char color))&PrimitiveMan::DrawRoundedBoxPrimitive)
-			.def("DrawRoundedBoxFillPrimitive", (void (PrimitiveMan::*)(Vector start, Vector end, float cornerRadius, unsigned char color))&PrimitiveMan::DrawRoundedBoxFillPrimitive)
-			.def("DrawRoundedBoxFillPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Vector end, float cornerRadius, unsigned char color))&PrimitiveMan::DrawRoundedBoxFillPrimitive)
-			.def("DrawCirclePrimitive", (void (PrimitiveMan::*)(Vector pos, short radius, unsigned char color))&PrimitiveMan::DrawCirclePrimitive)
-			.def("DrawCirclePrimitive", (void (PrimitiveMan::*)(short player, Vector pos, short radius, unsigned char color))&PrimitiveMan::DrawCirclePrimitive)
-			.def("DrawCircleFillPrimitive", (void (PrimitiveMan::*)(Vector pos, short radius, unsigned char color))&PrimitiveMan::DrawCircleFillPrimitive)
-			.def("DrawCircleFillPrimitive", (void (PrimitiveMan::*)(short player, Vector pos, short radius, unsigned char color))&PrimitiveMan::DrawCircleFillPrimitive)
-			.def("DrawEllipsePrimitive", (void (PrimitiveMan::*)(Vector pos, short horizRadius, short vertRadius, unsigned char color))&PrimitiveMan::DrawEllipsePrimitive)
-			.def("DrawEllipsePrimitive", (void (PrimitiveMan::*)(short player, Vector pos, short horizRadius, short vertRadius, unsigned char color))&PrimitiveMan::DrawEllipsePrimitive)
-			.def("DrawEllipseFillPrimitive", (void (PrimitiveMan::*)(Vector pos, short horizRadius, short vertRadius, unsigned char color))&PrimitiveMan::DrawEllipseFillPrimitive)
-			.def("DrawEllipseFillPrimitive", (void (PrimitiveMan::*)(short player, Vector pos, short horizRadius, short vertRadius, unsigned char color))&PrimitiveMan::DrawEllipseFillPrimitive)
-			.def("DrawTrianglePrimitive", (void (PrimitiveMan::*)(Vector pointA, Vector pointB, Vector pointC, unsigned char color))&PrimitiveMan::DrawTrianglePrimitive)
-			.def("DrawTrianglePrimitive", (void (PrimitiveMan::*)(short player, Vector pointA, Vector pointB, Vector pointC, unsigned char color))&PrimitiveMan::DrawTrianglePrimitive)
-			.def("DrawTriangleFillPrimitive", (void (PrimitiveMan::*)(Vector pointA, Vector pointB, Vector pointC, unsigned char color))&PrimitiveMan::DrawTriangleFillPrimitive)
-			.def("DrawTriangleFillPrimitive", (void (PrimitiveMan::*)(short player, Vector pointA, Vector pointB, Vector pointC, unsigned char color))&PrimitiveMan::DrawTriangleFillPrimitive)
-			.def("DrawTextPrimitive", (void (PrimitiveMan::*)(Vector start, std::string text, bool isSmall, short alignment))&PrimitiveMan::DrawTextPrimitive)
-			.def("DrawTextPrimitive", (void (PrimitiveMan::*)(short player, Vector start, std::string text, bool isSmall, short alignment))&PrimitiveMan::DrawTextPrimitive)
-			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(Vector start, Entity *entity, float rotAngle, unsigned short frame))&PrimitiveMan::DrawBitmapPrimitive)
-			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(Vector start, Entity *entity, float rotAngle, unsigned short frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive)
-			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Entity *entity, float rotAngle, unsigned short frame))&PrimitiveMan::DrawBitmapPrimitive)
-			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(short player, Vector start, Entity *entity, float rotAngle, unsigned short frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive),
+			.def("DrawLinePrimitive", (void (PrimitiveMan::*)(const Vector &start, const Vector &end, unsigned char color))&PrimitiveMan::DrawLinePrimitive)
+			.def("DrawLinePrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const Vector &end, unsigned char color))&PrimitiveMan::DrawLinePrimitive)
+			.def("DrawArcPrimitive", (void (PrimitiveMan::*)(const Vector &pos, float startAngle, float endAngle, int radius, unsigned char color))&PrimitiveMan::DrawArcPrimitive)
+			.def("DrawArcPrimitive", (void (PrimitiveMan::*)(const Vector &pos, float startAngle, float endAngle, int radius, unsigned char color, int thickness))&PrimitiveMan::DrawArcPrimitive)
+			.def("DrawArcPrimitive", (void (PrimitiveMan::*)(int player, const Vector &pos, float startAngle, float endAngle, int radius, unsigned char color))&PrimitiveMan::DrawArcPrimitive)
+			.def("DrawArcPrimitive", (void (PrimitiveMan::*)(int player, const Vector &pos, float startAngle, float endAngle, int radius, unsigned char color, int thickness))&PrimitiveMan::DrawArcPrimitive)
+			.def("DrawSplinePrimitive", (void (PrimitiveMan::*)(const Vector &start, const Vector &guideA, const Vector &guideB, const Vector &end, unsigned char color))&PrimitiveMan::DrawSplinePrimitive)
+			.def("DrawSplinePrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const Vector &guideA, const Vector &guideB, const Vector &end, unsigned char color))&PrimitiveMan::DrawSplinePrimitive)
+			.def("DrawBoxPrimitive", (void (PrimitiveMan::*)(const Vector &start, const Vector &end, unsigned char color))&PrimitiveMan::DrawBoxPrimitive)
+			.def("DrawBoxPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const Vector &end, unsigned char color))&PrimitiveMan::DrawBoxPrimitive)
+			.def("DrawBoxFillPrimitive", (void (PrimitiveMan::*)(const Vector &start, const Vector &end, unsigned char color))&PrimitiveMan::DrawBoxFillPrimitive)
+			.def("DrawBoxFillPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const Vector &end, unsigned char color))&PrimitiveMan::DrawBoxFillPrimitive)
+			.def("DrawRoundedBoxPrimitive", (void (PrimitiveMan::*)(const Vector &start, const Vector &end, int cornerRadius, unsigned char color))&PrimitiveMan::DrawRoundedBoxPrimitive)
+			.def("DrawRoundedBoxPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const Vector &end, int cornerRadius, unsigned char color))&PrimitiveMan::DrawRoundedBoxPrimitive)
+			.def("DrawRoundedBoxFillPrimitive", (void (PrimitiveMan::*)(const Vector &start, const Vector &end, int cornerRadius, unsigned char color))&PrimitiveMan::DrawRoundedBoxFillPrimitive)
+			.def("DrawRoundedBoxFillPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const Vector &end, int cornerRadius, unsigned char color))&PrimitiveMan::DrawRoundedBoxFillPrimitive)
+			.def("DrawCirclePrimitive", (void (PrimitiveMan::*)(const Vector & pos, int radius, unsigned char color))&PrimitiveMan::DrawCirclePrimitive)
+			.def("DrawCirclePrimitive", (void (PrimitiveMan::*)(int player, const Vector &pos, int radius, unsigned char color))&PrimitiveMan::DrawCirclePrimitive)
+			.def("DrawCircleFillPrimitive", (void (PrimitiveMan::*)(const Vector &pos, int radius, unsigned char color))&PrimitiveMan::DrawCircleFillPrimitive)
+			.def("DrawCircleFillPrimitive", (void (PrimitiveMan::*)(int player, const Vector &pos, int radius, unsigned char color))&PrimitiveMan::DrawCircleFillPrimitive)
+			.def("DrawEllipsePrimitive", (void (PrimitiveMan::*)(const Vector &pos, int horizRadius, int vertRadius, unsigned char color))&PrimitiveMan::DrawEllipsePrimitive)
+			.def("DrawEllipsePrimitive", (void (PrimitiveMan::*)(int player, const Vector &pos, int horizRadius, int vertRadius, unsigned char color))&PrimitiveMan::DrawEllipsePrimitive)
+			.def("DrawEllipseFillPrimitive", (void (PrimitiveMan::*)(const Vector &pos, int horizRadius, int vertRadius, unsigned char color))&PrimitiveMan::DrawEllipseFillPrimitive)
+			.def("DrawEllipseFillPrimitive", (void (PrimitiveMan::*)(int player, const Vector &pos, int horizRadius, int vertRadius, unsigned char color))&PrimitiveMan::DrawEllipseFillPrimitive)
+			.def("DrawTrianglePrimitive", (void (PrimitiveMan::*)(const Vector &pointA, const Vector &pointB, const Vector &pointC, unsigned char color))&PrimitiveMan::DrawTrianglePrimitive)
+			.def("DrawTrianglePrimitive", (void (PrimitiveMan::*)(int player, const Vector &pointA, const Vector &pointB, const Vector &pointC, unsigned char color))&PrimitiveMan::DrawTrianglePrimitive)
+			.def("DrawTriangleFillPrimitive", (void (PrimitiveMan::*)(const Vector &pointA, const Vector &pointB, const Vector &pointC, unsigned char color))&PrimitiveMan::DrawTriangleFillPrimitive)
+			.def("DrawTriangleFillPrimitive", (void (PrimitiveMan::*)(int player, const Vector &pointA, const Vector &pointB, const Vector &pointC, unsigned char color))&PrimitiveMan::DrawTriangleFillPrimitive)
+			.def("DrawTextPrimitive", (void (PrimitiveMan::*)(const Vector &start, const std::string &text, bool isSmall, int alignment))&PrimitiveMan::DrawTextPrimitive)
+			.def("DrawTextPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, const std::string &text, bool isSmall, int alignment))&PrimitiveMan::DrawTextPrimitive)
+			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(const Vector &start, Entity *entity, float rotAngle, int frame))&PrimitiveMan::DrawBitmapPrimitive)
+			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(const Vector &start, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive)
+			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, Entity *entity, float rotAngle, int frame))&PrimitiveMan::DrawBitmapPrimitive)
+			.def("DrawBitmapPrimitive", (void (PrimitiveMan::*)(int player, const Vector &start, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped))&PrimitiveMan::DrawBitmapPrimitive),
 
         class_<PresetMan>("PresetManager")
             .def("LoadDataModule", (bool (PresetMan::*)(string))&PresetMan::LoadDataModule)
@@ -1633,11 +1630,11 @@ int LuaMan::Create() {
             .def("KeyReleased", &UInputMan::KeyReleased)
             .def("KeyHeld", &UInputMan::KeyHeld)
             .def("WhichKeyHeld", &UInputMan::WhichKeyHeld)
-            .def("MouseButtonPressed", (bool (UInputMan::*)(int,short) const)&UInputMan::MouseButtonPressed) 
+            .def("MouseButtonPressed", (bool (UInputMan::*)(int, int) const)&UInputMan::MouseButtonPressed) 
 			.def("MouseButtonPressed", (bool (UInputMan::*)(int) const)&UInputMan::MouseButtonPressed)
-			.def("MouseButtonReleased", (bool (UInputMan::*)(int, short) const)&UInputMan::MouseButtonReleased)
+			.def("MouseButtonReleased", (bool (UInputMan::*)(int, int) const)&UInputMan::MouseButtonReleased)
 			.def("MouseButtonReleased", (bool (UInputMan::*)(int) const)&UInputMan::MouseButtonReleased)
-			.def("MouseButtonHeld", (bool (UInputMan::*)(int, short) const)&UInputMan::MouseButtonHeld)
+			.def("MouseButtonHeld", (bool (UInputMan::*)(int, int) const)&UInputMan::MouseButtonHeld)
 			.def("MouseButtonHeld", (bool (UInputMan::*)(int) const)&UInputMan::MouseButtonHeld)
 			.def("MouseWheelMoved", &UInputMan::MouseWheelMoved)
             .def("JoyButtonPressed", &UInputMan::JoyButtonPressed)
@@ -2611,7 +2608,7 @@ int LuaMan::FileOpen(std::string filename, std::string mode)
     string dotString = "..";
 	string rteString = ".rte";
 
-	string fullPath = g_System.GetWorkingDirectory()+ "/" + filename;
+	string fullPath = System::GetWorkingDirectory() + filename;
 
 	// Do not open paths with '..'
 	if (fullPath.find(dotString) != string::npos)

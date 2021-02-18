@@ -25,7 +25,7 @@ namespace RTE {
 		/// Creates all the GUI sound effects with Sound::Create and their additional samples with Sound::AddSample and makes the GUISound object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything other than 0 is an error signal.</returns>
-		int Create();
+		int Initialize();
 #pragma endregion
 
 #pragma region Destruction

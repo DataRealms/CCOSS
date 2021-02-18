@@ -98,7 +98,7 @@ int Arm::Create(const Arm &reference) {
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int Arm::ReadProperty(std::string propName, Reader &reader) {
+int Arm::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "HeldDevice") {
         RemoveAttachable(dynamic_cast<Attachable *>(m_pHeldMO));
         const Entity *heldDeviceEntity = g_PresetMan.GetEntityPreset(reader);

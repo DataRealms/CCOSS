@@ -106,7 +106,7 @@ int SceneEditor::Create(const SceneEditor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int SceneEditor::ReadProperty(std::string propName, Reader &reader)
+int SceneEditor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "CPUTeam")
@@ -129,18 +129,9 @@ int SceneEditor::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this SceneEditor with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int SceneEditor::Save(Writer &writer) const
-{
-    EditorActivity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int SceneEditor::Save(Writer &writer) const {
+	EditorActivity::Save(writer);
+	return 0;
 }
 
 

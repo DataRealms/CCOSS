@@ -168,6 +168,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Enabled DPI Awareness to fix issues with resolution settings when Windows scaling is enabled.
 
+- Fixed a bug that caused the game to crash when the crab bomb effect was triggered while there were multiple crab bomb eligible Craft in an activity.
+
 ### Removed
 
 - Removed obsolete graphics drivers and their `Settings.ini` properties `ForceOverlayedWindowGfxDriver` and `ForceNonOverlayedWindowGfxDriver`.

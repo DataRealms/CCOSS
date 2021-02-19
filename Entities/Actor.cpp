@@ -66,7 +66,7 @@ void Actor::Clear()
     m_AlarmSound.Reset();
     m_PainSound.Reset();
     m_DeathSound.Reset();
-    m_DeviceSwitchSound.Reset();
+    m_DeviceSwitchSound = nullptr;
 //    m_FacingRight = true;
     m_Status = STABLE;
     m_Health = m_PrevHealth = m_MaxHealth = 100;
@@ -220,7 +220,7 @@ int Actor::Create(const Actor &reference)
     m_AlarmSound = reference.m_AlarmSound;
     m_PainSound = reference.m_PainSound;
     m_DeathSound = reference.m_DeathSound;
-    m_DeviceSwitchSound = reference.m_DeviceSwitchSound;
+	if (reference.m_DeviceSwitchSound) { m_DeviceSwitchSound = dynamic_cast<SoundContainer*>(reference.m_DeviceSwitchSound->Clone()); }
 //    m_FacingRight = reference.m_FacingRight;
     m_Status = reference.m_Status;
     m_Health = m_PrevHealth = reference.m_Health;
@@ -327,17 +327,18 @@ int Actor::Create(const Actor &reference)
 
 int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "BodyHitSound")
-        reader >> m_BodyHitSound;
-    else if (propName == "AlarmSound")
-        reader >> m_AlarmSound;
-    else if (propName == "PainSound")
-        reader >> m_PainSound;
-    else if (propName == "DeathSound")
-        reader >> m_DeathSound;
-    else if (propName == "DeviceSwitchSound")
-        reader >> m_DeviceSwitchSound;
-    else if (propName == "Status")
+	if (propName == "BodyHitSound")
+		reader >> m_BodyHitSound;
+	else if (propName == "AlarmSound")
+		reader >> m_AlarmSound;
+	else if (propName == "PainSound")
+		reader >> m_PainSound;
+	else if (propName == "DeathSound")
+		reader >> m_DeathSound;
+	else if (propName == "DeviceSwitchSound"){
+		m_DeviceSwitchSound = new SoundContainer;
+		reader >> m_DeviceSwitchSound;
+	} else if (propName == "Status")
         reader >> m_Status;
     else if (propName == "DeploymentID")
         reader >> m_DeploymentID;
@@ -484,6 +485,8 @@ int Actor::Save(Writer &writer) const
 
 void Actor::Destroy(bool notInherited)
 {
+	delete m_DeviceSwitchSound;
+
     for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
         delete (*itr);
 
@@ -811,7 +814,7 @@ MovableObject * Actor::SwapNextInventory(MovableObject *pSwapIn, bool muteSound)
     }
 
     if (playSound && !muteSound)
-        m_DeviceSwitchSound.Play(m_Pos);
+        m_DeviceSwitchSound->Play(m_Pos);
 
     return pRetDev;
 }
@@ -863,7 +866,7 @@ MovableObject * Actor::SwapPrevInventory(MovableObject *pSwapIn)
     }
 
     if (playSound)
-        m_DeviceSwitchSound.Play(m_Pos);
+        m_DeviceSwitchSound->Play(m_Pos);
 
     return pRetDev;
 }

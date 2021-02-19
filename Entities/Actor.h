@@ -1221,6 +1221,20 @@ ClassInfoGetters
 	}
 
 	/// <summary>
+	/// Gets this Actor's DeviceSwitchSound.
+	/// </summary>
+	/// <returns>The SoundContainer for this Actor's DeviceSwitchSound.</returns>
+	SoundContainer* GetDeviceSwitchSound() const { return m_DeviceSwitchSound; }
+
+	/// <summary>
+	/// Sets this Actor's DeviceSwitchSound.
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for the classsName's DeviceSwitchSound</param>
+	void SetDeviceSwitchSound(SoundContainer* newSound) { m_DeviceSwitchSound = newSound; }
+
+
+
+	/// <summary>
 	/// Gets the X and Y thresholds for how fast the actor can travel before losing stability.
 	/// </summary>
 	/// <returns>A Vector with the X and Y thresholds for how fast the actor can travel before losing stability.</returns>
@@ -1271,7 +1285,8 @@ protected:
     SoundContainer m_AlarmSound;
     SoundContainer m_PainSound;
     SoundContainer m_DeathSound;
-    SoundContainer m_DeviceSwitchSound;
+
+    SoundContainer *m_DeviceSwitchSound;
 
 //    bool m_FacingRight;
     int m_Status;

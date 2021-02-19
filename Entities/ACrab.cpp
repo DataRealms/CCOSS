@@ -2311,7 +2311,7 @@ void ACrab::Update()
             if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD))
             {
                 pDevice->Reload();
-                m_DeviceSwitchSound.Play(m_Pos);
+                m_DeviceSwitchSound->Play(m_Pos);
 
                 // Interrupt sharp aiming
                 m_SharpAimTimer.Reset();

@@ -37,6 +37,7 @@ namespace RTE {
 	void FrameMan::Clear() {
 		m_GfxDriver = GFX_AUTODETECT_WINDOWED;
 		m_ForceVirtualFullScreenGfxDriver = false;
+		m_ForceDedicatedFullScreenGfxDriver = false;
 		m_GfxDriverMessage.clear();
 		m_DisableMultiScreenResolutionValidation = false;
 #ifdef _WIN32

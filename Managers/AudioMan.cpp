@@ -116,8 +116,8 @@ namespace RTE {
 
 				int listenerNumber = 0;
 				for (const Vector *humanPlayerPosition : m_CurrentActivityHumanPlayerPositions) {
-					if(status == FMOD_OK){
-						FMOD_VECTOR playerPosition{GetAsFMODVector(*humanPlayerPosition, m_ListenerZOffset)};
+					if (status == FMOD_OK) {
+						FMOD_VECTOR playerPosition{ GetAsFMODVector(*humanPlayerPosition, m_ListenerZOffset) };
 						status = m_AudioSystem->set3DListenerAttributes(listenerNumber, &playerPosition, nullptr, &c_FMODForward, &c_FMODUp);
 					}
 					listenerNumber++;
@@ -129,8 +129,8 @@ namespace RTE {
 					m_CurrentActivityHumanPlayerPositions.clear();
 					status = status == FMOD_OK ? m_AudioSystem->set3DNumListeners(1) : status;
 				}
-				if(status == FMOD_OK){
-					FMOD_VECTOR scrollTarget{GetAsFMODVector(g_SceneMan.GetScrollTarget(), m_ListenerZOffset)};
+				if (status == FMOD_OK) {
+					FMOD_VECTOR scrollTarget{ GetAsFMODVector(g_SceneMan.GetScrollTarget(), m_ListenerZOffset) };
 					status = m_AudioSystem->set3DListenerAttributes(0, &scrollTarget, nullptr, &c_FMODForward, &c_FMODUp);
 				}
 			}
@@ -242,7 +242,7 @@ namespace RTE {
 				g_ConsoleMan.PrintString("ERROR: Could not open music file " + std::string(filePath) + ": " + std::string(FMOD_ErrorString(result)));
 				return;
 			}
-			
+
 			result = musicStream->setLoopCount(loops);
 			if (result != FMOD_OK && (loops != 0 && loops != 1)) {
 				g_ConsoleMan.PrintString("ERROR: Failed to set looping for music file: " + std::string(filePath) + ". This means it will only play 1 time, instead of " + (loops == 0 ? "looping endlessly." : loops + " times.") + std::string(FMOD_ErrorString(result)));
@@ -251,8 +251,8 @@ namespace RTE {
 			FMOD::Channel *musicChannel;
 			result = musicStream->set3DMinMaxDistance(c_SoundMaxAudibleDistance, c_SoundMaxAudibleDistance);
 			result = (result == FMOD_OK) ? m_AudioSystem->playSound(musicStream, m_MusicChannelGroup, true, &musicChannel) : result;
-			if (result == FMOD_OK){
-				FMOD_VECTOR zero_vector{GetAsFMODVector(Vector())};
+			if (result == FMOD_OK) {
+				FMOD_VECTOR zero_vector{ GetAsFMODVector(Vector()) };
 				result = musicChannel->set3DAttributes(&zero_vector, nullptr);
 			}
 			if (result != FMOD_OK) {
@@ -504,7 +504,7 @@ namespace RTE {
 				m_SoundChannelMinimumAudibleDistances.insert({ channelIndex, soundData->MinimumAudibleDistance });
 				result = (result == FMOD_OK) ? channel->set3DLevel(m_SoundPanningEffectStrength) : result;
 
-				FMOD_VECTOR soundContainerPosition{GetAsFMODVector(soundContainer->GetPosition() + soundData->Offset)};
+				FMOD_VECTOR soundContainerPosition{ GetAsFMODVector(soundContainer->GetPosition() + soundData->Offset) };
 				UpdatePositionalEffectsForSoundChannel(channel, &soundContainerPosition);
 			}
 

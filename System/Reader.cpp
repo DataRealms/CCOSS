@@ -168,10 +168,10 @@ namespace RTE {
 		if (stringToTrim.empty()) {
 			return "";
 		}
-		size_t start{stringToTrim.find_first_not_of(' ')};
-		size_t end{ stringToTrim.find_last_not_of(' ')};
+		size_t start = stringToTrim.find_first_not_of(' ');
+		size_t end = stringToTrim.find_last_not_of(' ');
 
-		return stringToTrim.substr(start, (end-start+1));
+		return stringToTrim.substr(start, (end - start + 1));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

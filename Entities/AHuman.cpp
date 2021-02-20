@@ -3697,8 +3697,10 @@ void AHuman::Update()
                 m_ArmClimbing[FGROUND] = false;
 
             // Play the stride sound, if applicable
-            if (playStride && !m_ArmClimbing[FGROUND] && !m_ArmClimbing[BGROUND])
+            if (playStride && !m_ArmClimbing[FGROUND] && !m_ArmClimbing[BGROUND]) {
                 m_StrideSound.Play(m_Pos);
+                RunScriptedFunctionInAppropriateScripts("OnStride");
+            }
 
             ////////////////////////////////////////
             // Arm Climbing if the leg paths failed to find clear spot to restart

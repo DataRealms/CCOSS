@@ -220,7 +220,7 @@ int Actor::Create(const Actor &reference)
     m_AlarmSound = reference.m_AlarmSound;
     m_PainSound = reference.m_PainSound;
     m_DeathSound = reference.m_DeathSound;
-	if (reference.m_DeviceSwitchSound) { m_DeviceSwitchSound = dynamic_cast<SoundContainer*>(reference.m_DeviceSwitchSound->Clone()); }
+	if (reference.m_DeviceSwitchSound) { m_DeviceSwitchSound = dynamic_cast<SoundContainer *>(reference.m_DeviceSwitchSound->Clone()); }
 //    m_FacingRight = reference.m_FacingRight;
     m_Status = reference.m_Status;
     m_Health = m_PrevHealth = reference.m_Health;

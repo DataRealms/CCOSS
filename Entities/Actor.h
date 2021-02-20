@@ -1224,13 +1224,13 @@ ClassInfoGetters
 	/// Gets this Actor's DeviceSwitchSound.
 	/// </summary>
 	/// <returns>The SoundContainer for this Actor's DeviceSwitchSound.</returns>
-	SoundContainer* GetDeviceSwitchSound() const { return m_DeviceSwitchSound; }
+	SoundContainer * GetDeviceSwitchSound() const { return m_DeviceSwitchSound; }
 
 	/// <summary>
 	/// Sets this Actor's DeviceSwitchSound.
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for the classsName's DeviceSwitchSound</param>
-	void SetDeviceSwitchSound(SoundContainer* newSound) { m_DeviceSwitchSound = newSound; }
+	void SetDeviceSwitchSound(SoundContainer *newSound) { m_DeviceSwitchSound = newSound; }
 
 
 

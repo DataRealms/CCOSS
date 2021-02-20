@@ -1055,7 +1055,8 @@ int LuaMan::Initialize() {
             .def("GetAlarmPoint", &Actor::GetAlarmPoint)
             .property("AimDistance", &Actor::GetAimDistance, &Actor::SetAimDistance)
 			.property("SightDistance", &Actor::GetSightDistance, &Actor::SetSightDistance)
-            .property("DeathSound", &Actor::GetDeathSound, &Actor::SetDeathSound),
+            .property("DeathSound", &Actor::GetDeathSound, &Actor::SetDeathSound)
+			.property("DeviceSwitchSound", &Actor::GetDeviceSwitchSound, &Actor::SetDeviceSwitchSound, detail::null_type(), adopt(_2)),
 
 		CONCRETELUABINDING(ADoor, Actor)
 			.enum_("DoorState")[

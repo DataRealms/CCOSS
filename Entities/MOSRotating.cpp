@@ -1004,13 +1004,15 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
             } else {
                 gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.5F + (gibParticleClone->GetAngularVel() * RandomNum())) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
             }
-
             gibParticleClone->SetPos(m_Pos + rotatedGibOffset);
             Vector gibVelocity = rotatedGibOffset.IsZero() ? Vector(minVelocity + RandomNum(0.0F, velocityRange), 0.0F) : rotatedGibOffset.SetMagnitude(minVelocity + RandomNum(0.0F, velocityRange));
-            gibVelocity.RadRotate(impactImpulse.GetAbsRadAngle() + (gibSettingsObject.GetSpread() * RandomNormalNum()));
+			//Always launch off-centered gibs outward from the object!
+			float gibSpread = (rotatedGibOffset.IsZero() && gibSettingsObject.GetSpread() == 0.1F) ? c_PI : gibSettingsObject.GetSpread();
+            gibVelocity.RadRotate(impactImpulse.GetAbsRadAngle() + (gibSpread * RandomNormalNum()));
             gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? m_Vel : Vector()));
-
             if (movableObjectToIgnore) { gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore); }
+			gibParticleClone->SetTeam(m_Team);
+			gibParticleClone->SetIgnoresTeamHits(gibSettingsObject.IgnoresTeamHits());
 
             g_MovableMan.AddParticle(gibParticleClone);
         }

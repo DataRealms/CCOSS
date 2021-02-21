@@ -903,8 +903,7 @@ void MovableObject::PostTravel()
         m_IgnoresAtomGroupHits = m_Vel.GetLargest() < m_IgnoresAGHitsWhenSlowerThan;
 
 	if (m_GetsHitByMOs) {
-		// Replace updated MOID representation to scene after Update
-		Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);
+        if (GetParent() == this) { Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true); }
 		m_AlreadyHitBy.clear();
 	}
 	m_IsUpdated = true;

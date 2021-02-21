@@ -1393,6 +1393,10 @@ void MOSRotating::PostTravel()
 // TODO: don't hardcode the MOPixel limits!
     if (g_MovableMan.IsMOSubtractionEnabled() && (m_ForceDeepCheck || m_DeepCheck))
         DeepCheck(true, 8, 50);
+
+    for (Attachable *attachable : m_Attachables) {
+        attachable->PostTravel();
+    }
 }
 
 
@@ -1445,10 +1449,11 @@ void MOSRotating::Update() {
     Attachable *attachable = nullptr;
     for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
         attachable = *attachableIterator;
-        RTEAssert(attachable, "Broken Attachable!");
+        RTEAssert(attachable, "Broken Attachable!")
         ++attachableIterator;
 
         attachable->Update();
+        RTEAssert(attachable, "Broken Attachable after Update!")
 
         if (attachable->IsAttachedTo(this) && attachable->IsSetToDelete()) {
             RemoveAttachable(attachable, true, true);
@@ -1897,18 +1902,15 @@ bool MOSRotating::HandlePotentialRadiusAffectingAttachable(const Attachable *att
 
 bool MOSRotating::TransferForcesFromAttachable(Attachable *attachable) {
     bool intact = false;
-    if (attachable) {
-        RTEAssert(attachable->IsAttached(), "Tried to transfer forces from Attachable (" + attachable->GetModuleAndPresetName() + ") with no parent, this should never happen!");
-        RTEAssert(attachable->IsAttachedTo(this), "Tried to transfer forces from another parent's (" + attachable->GetParent()->GetModuleAndPresetName() + ") Attachable (" + attachable->GetModuleAndPresetName() + "), this should never happen!");
-        
-        attachable->PostTravel();
-        Vector forces;
-        Vector impulses;
-        intact = attachable->TransferJointForces(forces) && attachable->TransferJointImpulses(impulses);
+    RTEAssert(attachable->IsAttached(), "Tried to transfer forces from Attachable (" + attachable->GetModuleAndPresetName() + ") with no parent, this should never happen!");
+    RTEAssert(attachable->IsAttachedTo(this), "Tried to transfer forces from another parent's (" + attachable->GetParent()->GetModuleAndPresetName() + ") Attachable (" + attachable->GetModuleAndPresetName() + "), this should never happen!");
 
-        if (!forces.IsZero()) { AddForce(forces, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
-        if (!impulses.IsZero()) { AddImpulseForce(impulses, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
-    }
+    Vector forces;
+    Vector impulses;
+    intact = attachable->TransferJointForces(forces) && attachable->TransferJointImpulses(impulses);
+
+    if (!forces.IsZero()) { AddForce(forces, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
+    if (!impulses.IsZero()) { AddImpulseForce(impulses, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
     return intact;
 }
 

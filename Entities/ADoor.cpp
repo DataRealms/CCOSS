@@ -32,7 +32,7 @@ namespace RTE {
 		m_ResetToDefaultStateDelay = 5000;
 		m_DrawMaterialLayerWhenOpen = true;
 		m_DrawMaterialLayerWhenClosed = true;
-		m_DoorMaterialID = 0;
+		m_DoorMaterialID = g_MaterialDoor;
 		m_DoorMaterialDrawn = false;
 		m_DoorMaterialTempErased = false;
 		m_LastDoorMaterialPos.Reset();
@@ -229,7 +229,7 @@ namespace RTE {
 		}
 		if (m_DoorMaterialDrawn) { EraseDoorMaterial(false); }
 
-		m_Door->Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), Vector(), g_DrawMaterial, true);
+		m_Door->Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), Vector(), g_DrawDoor, true);
 		m_LastDoorMaterialPos = m_Door->GetPos();
 		m_DoorMaterialDrawn = true;
 
@@ -241,7 +241,7 @@ namespace RTE {
 	bool ADoor::EraseDoorMaterial(bool updateMaterialArea, bool keepMaterialDrawnFlag) {
 		if (!keepMaterialDrawnFlag) { m_DoorMaterialDrawn = false; }
 
-		if (!m_Door || !g_SceneMan.GetTerrain() || !g_SceneMan.GetTerrain()->GetMaterialBitmap()) {
+		if (!g_SceneMan.GetTerrain() || !g_SceneMan.GetTerrain()->GetMaterialBitmap()) {
 			return false;
 		}
 
@@ -250,7 +250,7 @@ namespace RTE {
 
 		if (g_SceneMan.GetTerrMatter(fillX, fillY) != g_MaterialAir) {
 			floodfill(g_SceneMan.GetTerrain()->GetMaterialBitmap(), fillX, fillY, g_MaterialAir);
-			if (updateMaterialArea) { g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(m_Door->GetBoundingBox()); }
+			if (m_Door && updateMaterialArea) { g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(m_Door->GetBoundingBox()); }
 			return true;
 		}
 		return false;
@@ -269,7 +269,7 @@ namespace RTE {
 		} else {
 			// Draw the door back if we were indeed temporarily suppressing it before
 			if (m_DoorMaterialDrawn && m_DoorMaterialTempErased != enable) {
-				m_Door->Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), Vector(), g_DrawMaterial, true);
+				m_Door->Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), Vector(), g_DrawDoor, true);
 				g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(m_Door->GetBoundingBox());
 			}
 		}

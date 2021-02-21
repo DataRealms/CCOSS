@@ -335,7 +335,7 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 		reader >> m_PainSound;
 	else if (propName == "DeathSound")
 		reader >> m_DeathSound;
-	else if (propName == "DeviceSwitchSound"){
+	else if (propName == "DeviceSwitchSound") {
 		m_DeviceSwitchSound = new SoundContainer;
 		reader >> m_DeviceSwitchSound;
 	} else if (propName == "Status")

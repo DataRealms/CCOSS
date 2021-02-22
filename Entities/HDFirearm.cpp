@@ -42,7 +42,7 @@ void HDFirearm::Clear()
     m_DeactivationSound.Reset();
     m_EmptySound = nullptr;
 	m_ReloadStartSound = nullptr;
-    m_ReloadEndSound.Reset();
+    m_ReloadEndSound = nullptr;
     m_RateOfFire = 0;
     m_ActivationDelay = 0;
     m_DeactivationDelay = 0;
@@ -115,8 +115,8 @@ int HDFirearm::Create(const HDFirearm &reference) {
     m_DeactivationSound = reference.m_DeactivationSound;
 	if (reference.m_EmptySound) { m_EmptySound = dynamic_cast<SoundContainer *>(reference.m_EmptySound->Clone()); }
 	if (reference.m_ReloadStartSound) { m_ReloadStartSound = dynamic_cast<SoundContainer *>(reference.m_ReloadStartSound->Clone()); }
-	m_ReloadEndSound = reference.m_ReloadEndSound;
-    m_RateOfFire = reference.m_RateOfFire;
+	if (reference.m_ReloadEndSound) { m_ReloadEndSound = dynamic_cast<SoundContainer*>(reference.m_ReloadEndSound->Clone()); }
+	m_RateOfFire = reference.m_RateOfFire;
     m_ActivationDelay = reference.m_ActivationDelay;
     m_DeactivationDelay = reference.m_DeactivationDelay;
     m_Reloading = reference.m_Reloading;
@@ -188,8 +188,9 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
 		m_ReloadStartSound = new SoundContainer;
 		reader >> m_ReloadStartSound;
 	} else if (propName == "ReloadEndSound") {
-        reader >> m_ReloadEndSound;
-    } else if (propName == "RateOfFire") {
+		m_ReloadEndSound = new SoundContainer;
+		reader >> m_ReloadEndSound;
+	} else if (propName == "RateOfFire") {
         reader >> m_RateOfFire;
     } else if (propName == "ActivationDelay") {
         reader >> m_ActivationDelay;
@@ -324,7 +325,10 @@ void HDFirearm::Destroy(bool notInherited)
 		m_ReloadStartSound->Stop();
 		delete m_ReloadStartSound;
 	}
-    m_ReloadEndSound.Stop();
+	if (m_ReloadEndSound) {
+		m_ReloadEndSound->Stop();
+		delete m_ReloadEndSound;
+	}
 
     if (!notInherited)
         HeldDevice::Destroy();
@@ -909,7 +913,7 @@ void HDFirearm::Update()
         if (m_pMagazine)
         {
             AddAttachable(m_pMagazine);
-            m_ReloadEndSound.Play(m_Pos);
+			if (m_ReloadEndSound) { m_ReloadEndSound->Play(m_Pos); }
 
             m_ActivationTimer.Reset();
             m_ActivationTimer.Reset();

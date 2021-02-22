@@ -41,7 +41,7 @@ void HDFirearm::Clear()
     m_ActiveSound.Reset();
     m_DeactivationSound.Reset();
     m_EmptySound = nullptr;
-    m_ReloadStartSound.Reset();
+	m_ReloadStartSound = nullptr;
     m_ReloadEndSound.Reset();
     m_RateOfFire = 0;
     m_ActivationDelay = 0;
@@ -113,9 +113,9 @@ int HDFirearm::Create(const HDFirearm &reference) {
 	m_FireEchoSound = reference.m_FireEchoSound;
     m_ActiveSound = reference.m_ActiveSound;
     m_DeactivationSound = reference.m_DeactivationSound;
-	if (reference.m_EmptySound) { m_EmptySound = dynamic_cast<SoundContainer*>(reference.m_EmptySound->Clone()); }
-	m_ReloadStartSound = reference.m_ReloadStartSound;
-    m_ReloadEndSound = reference.m_ReloadEndSound;
+	if (reference.m_EmptySound) { m_EmptySound = dynamic_cast<SoundContainer *>(reference.m_EmptySound->Clone()); }
+	if (reference.m_ReloadStartSound) { m_ReloadStartSound = dynamic_cast<SoundContainer *>(reference.m_ReloadStartSound->Clone()); }
+	m_ReloadEndSound = reference.m_ReloadEndSound;
     m_RateOfFire = reference.m_RateOfFire;
     m_ActivationDelay = reference.m_ActivationDelay;
     m_DeactivationDelay = reference.m_DeactivationDelay;
@@ -185,8 +185,9 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
 		m_EmptySound = new SoundContainer;
 		reader >> m_EmptySound;
 	} else if (propName == "ReloadStartSound") {
-        reader >> m_ReloadStartSound;
-    } else if (propName == "ReloadEndSound") {
+		m_ReloadStartSound = new SoundContainer;
+		reader >> m_ReloadStartSound;
+	} else if (propName == "ReloadEndSound") {
         reader >> m_ReloadEndSound;
     } else if (propName == "RateOfFire") {
         reader >> m_RateOfFire;
@@ -319,7 +320,10 @@ void HDFirearm::Destroy(bool notInherited)
 		m_EmptySound->Stop();
 		delete m_EmptySound;
 	}
-    m_ReloadStartSound.Stop();
+	if (m_ReloadStartSound) {
+		m_ReloadStartSound->Stop();
+		delete m_ReloadStartSound;
+	}
     m_ReloadEndSound.Stop();
 
     if (!notInherited)
@@ -637,7 +641,7 @@ void HDFirearm::Reload()
         if (m_FireSound && m_FireSound->GetLoopSetting() == -1 && m_FireSound->IsBeingPlayed())
             m_FireSound->Stop();
 
-        m_ReloadStartSound.Play(m_Pos);
+		if (m_ReloadStartSound) { m_ReloadStartSound->Play(m_Pos); }
         m_ReloadTmr.Reset();
         m_Reloading = true;
     }

@@ -451,6 +451,18 @@ ClassInfoGetters
 		/// <param name="newSound">The new SoundContainer for this HDFirearm's Empty Sound</param>
 		void SetEmptySound(SoundContainer* newSound) { m_EmptySound = newSound; }
 
+		/// <summary>
+		/// Gets this HDFirearm's Reload Start Sound. Ownership is not transferred!
+		/// </summary>
+		/// <returns>The SoundContainer for this HDFirearm's Reload Start Sound.</returns>
+		SoundContainer* GetReloadStartSound() const { return m_ReloadStartSound; }
+
+		/// <summary>
+		/// Sets this HDFirearm's Reload Start Sound.
+		/// </summary>
+		/// <param name="newSound">The new SoundContainer for this HDFirearm's Reload Start Sound</param>
+		void SetReloadStartSound(SoundContainer* newSound) { m_ReloadStartSound = newSound; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ResetAllTimers
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -710,7 +722,7 @@ protected:
     // The audio of this FireArm being fired empty.
     SoundContainer *m_EmptySound;
     // The audio of this FireArm being reloaded.
-    SoundContainer m_ReloadStartSound;
+    SoundContainer *m_ReloadStartSound;
     SoundContainer m_ReloadEndSound;
 
     // Rate of fire, in rounds per min.

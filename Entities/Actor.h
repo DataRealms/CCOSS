@@ -1285,7 +1285,6 @@ protected:
     SoundContainer m_AlarmSound;
     SoundContainer m_PainSound;
     SoundContainer m_DeathSound;
-
     SoundContainer *m_DeviceSwitchSound;
 
 //    bool m_FacingRight;

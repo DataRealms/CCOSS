@@ -427,6 +427,17 @@ ClassInfoGetters
 
 	void SetMuzzleOffset(Vector newOffset) override { m_MuzzleOff = newOffset; }
 
+		/// <summary>
+		/// Gets this HeldDevice's Fire Sound. Ownership is not transferred!
+		/// </summary>
+		/// <returns>The SoundContainer for this HeldDevice's Fire Sound.</returns>
+		SoundContainer * GetFireSound() const { return m_FireSound; }
+
+		/// <summary>
+		/// Sets this HeldDevice's Fire Sound.
+		/// </summary>
+		/// <param name="newSound">The new SoundContainer for this HeldDevice's Fire Sound</param>
+		void SetFireSound(SoundContainer* newSound) { m_FireSound = newSound; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ResetAllTimers
@@ -678,7 +689,7 @@ protected:
 
     SoundContainer m_PreFireSound; //!< The sound this HDFirearm should play before it starts firing. Distinct from activation sound in that it will play exactly once per trigger pull and not pitch up.
     // The audio of this FireArm being fired.
-    SoundContainer m_FireSound;
+    SoundContainer *m_FireSound;
     SoundContainer m_FireEchoSound; //!< The audio that is played as the echo for the gun. Each shot will restart this sound, so it doesn't ever overlap.
     // The audio that is played immediately upon activation, but perhaps before actual first firing, if there's a pre-delay
     SoundContainer m_ActiveSound;

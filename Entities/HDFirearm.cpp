@@ -36,7 +36,7 @@ void HDFirearm::Clear()
 
     m_pFlash = 0;
     m_PreFireSound.Reset();
-    m_FireSound.Reset();
+    m_FireSound = nullptr;
     m_FireEchoSound.Reset();
     m_ActiveSound.Reset();
     m_DeactivationSound.Reset();
@@ -109,8 +109,8 @@ int HDFirearm::Create(const HDFirearm &reference) {
 
     m_pMagazineReference = reference.m_pMagazineReference;
     m_PreFireSound = reference.m_PreFireSound;
-    m_FireSound = reference.m_FireSound;
-    m_FireEchoSound = reference.m_FireEchoSound;
+	if (reference.m_FireSound) { m_FireSound = dynamic_cast<SoundContainer *>(reference.m_FireSound->Clone()); }
+	m_FireEchoSound = reference.m_FireEchoSound;
     m_ActiveSound = reference.m_ActiveSound;
     m_DeactivationSound = reference.m_DeactivationSound;
     m_EmptySound = reference.m_EmptySound;
@@ -170,11 +170,12 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
     } else if (propName == "PreFireSound") {
         reader >> m_PreFireSound;
         m_DeactivationSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::IGNORE_PLAY);
-    } else if (propName == "FireSound")
-        reader >> m_FireSound;
-    else if (propName == "FireEchoSound") {
-        reader >> m_FireEchoSound;
-        m_FireEchoSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::RESTART);
+	} else if (propName == "FireSound") {
+		m_FireSound = new SoundContainer;
+		reader >> m_FireSound;
+	} else if (propName == "FireEchoSound") {
+		reader >> m_FireEchoSound;
+		m_FireEchoSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::RESTART);
     } else if (propName == "ActiveSound") {
         reader >> m_ActiveSound;
     } else if (propName == "DeactivationSound") {
@@ -306,7 +307,10 @@ int HDFirearm::Save(Writer &writer) const
 void HDFirearm::Destroy(bool notInherited)
 {
     m_PreFireSound.Stop();
-    m_FireSound.Stop();
+	if (m_FireSound) {
+		m_FireSound->Stop();
+		delete m_FireSound;
+	}
     m_FireEchoSound.Stop();
     m_ActiveSound.Stop();
     m_DeactivationSound.Stop();
@@ -582,7 +586,7 @@ void HDFirearm::Deactivate() {
     m_FiredOnce = false;
 
     m_PreFireSound.Stop();
-    if (m_FireSound.GetLoopSetting() == -1) { m_FireSound.Stop(); }
+    if (m_FireSound && m_FireSound->GetLoopSetting() == -1) { m_FireSound->Stop(); }
     if (wasActivated && m_pMagazine && !m_pMagazine->IsEmpty()) { m_DeactivationSound.Play(m_Pos); }
 }
 
@@ -626,8 +630,8 @@ void HDFirearm::Reload()
 
         // Stop any activation
         m_Activated = false;
-        if (m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed())
-            m_FireSound.Stop();
+        if (m_FireSound && m_FireSound->GetLoopSetting() == -1 && m_FireSound->IsBeingPlayed())
+            m_FireSound->Stop();
 
         m_ReloadStartSound.Play(m_Pos);
         m_ReloadTmr.Reset();
@@ -689,7 +693,7 @@ void HDFirearm::Update()
     HeldDevice::Update();
 
     if (m_PreFireSound.IsBeingPlayed()) { m_PreFireSound.SetPosition(m_Pos); }
-    if (m_FireSound.IsBeingPlayed()) { m_FireSound.SetPosition(m_Pos); }
+    if (m_FireSound && m_FireSound->IsBeingPlayed()) { m_FireSound->SetPosition(m_Pos); }
     if (m_ActiveSound.IsBeingPlayed()) { m_ActiveSound.SetPosition(m_Pos); }
     if (m_DeactivationSound.IsBeingPlayed()) { m_DeactivationSound.SetPosition(m_Pos); }
 
@@ -876,31 +880,7 @@ void HDFirearm::Update()
             pRound = 0;
         }
     }
-/* This is done when manually reloading now
-    // No rounds left in current mag, so eject mag and reload!
-// TODO: Implemetn reloading and multiple mags etc
-    else if (m_pMagazine)
-    {
-        // Do something with mag if empty
-        if (roundsFired <= 0 && m_pMagazine->IsEmpty())
-        {
-            m_pMagazine->SetVel(m_Vel + Vector(m_HFlipped ? -3 : 3, 0.3));
-            m_pMagazine->SetAngularVel(6 + (-6 * RandomNum()));
-            m_pMagazine->Detach();
-            g_MovableMan.AddParticle(m_pMagazine);
-            m_pMagazine = 0;
-            m_Activated = false;
 
-            // Stop any looping activation sounds
-            if (m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed())
-                m_FireSound.Stop();
-
-            m_ReloadStartSound.Play(m_Pos);
-
-            m_ReloadTmr.Reset();
-        }
-    }
-*/
     // No or empty magazine, so just click.
     else if (((m_pMagazine && m_pMagazine->IsEmpty()) || !m_pMagazine) && m_Activated && !m_AlreadyClicked )
     {
@@ -942,8 +922,8 @@ void HDFirearm::Update()
 
         m_PreFireSound.Stop();
         // Stop any looping activation sounds
-        if (m_FireSound.GetLoopSetting() == -1)// && m_FireSound.IsBeingPlayed())
-            m_FireSound.Stop();
+        if (m_FireSound && m_FireSound->GetLoopSetting() == -1)// && m_FireSound->IsBeingPlayed())
+            m_FireSound->Stop();
     }
 
     //////////////////////////////////////////////
@@ -983,8 +963,8 @@ void HDFirearm::Update()
         // Play firing sound
         // Only start playing if it's not a looping fire sound that is already playing, and if there's a mag
         if (m_pMagazine) {
-            if (!(m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed())) {
-                m_FireSound.Play(m_Pos);
+            if (m_FireSound && !(m_FireSound->GetLoopSetting() == -1 && m_FireSound->IsBeingPlayed())) {
+                m_FireSound->Play(m_Pos);
             }
             m_FireEchoSound.Play(m_Pos);
         }

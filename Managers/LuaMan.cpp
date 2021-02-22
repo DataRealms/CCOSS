@@ -1412,7 +1412,9 @@ int LuaMan::Initialize() {
             .def("CompareTrajectories", &HDFirearm::CompareTrajectories)
             .def("SetNextMagazineName", &HDFirearm::SetNextMagazineName)
 			.property("IsAnimatedManually", &HDFirearm::IsAnimatedManually, &HDFirearm::SetAnimatedManually)
-			.property("RecoilTransmission", &HDFirearm::GetJointStiffness, &HDFirearm::SetJointStiffness),
+			.property("RecoilTransmission", &HDFirearm::GetJointStiffness, &HDFirearm::SetJointStiffness)
+			.property("FireSound", &HDFirearm::GetFireSound, &HDFirearm::SetFireSound, detail::null_type(), adopt(_2)),
+
 
         CONCRETELUABINDING(ThrownDevice, HeldDevice)
             .property("MinThrowVel", &ThrownDevice::GetMinThrowVel, &ThrownDevice::SetMinThrowVel)

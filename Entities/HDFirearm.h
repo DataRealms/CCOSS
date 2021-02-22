@@ -439,6 +439,18 @@ ClassInfoGetters
 		/// <param name="newSound">The new SoundContainer for this HeldDevice's Fire Sound</param>
 		void SetFireSound(SoundContainer* newSound) { m_FireSound = newSound; }
 
+		/// <summary>
+		/// Gets this HDFirearm's Empty Sound. Ownership is not transferred!
+		/// </summary>
+		/// <returns>The SoundContainer for this HDFirearm's Empty Sound.</returns>
+		SoundContainer* GetEmptySound() const { return m_EmptySound; }
+
+		/// <summary>
+		/// Sets this HDFirearm's Empty Sound.
+		/// </summary>
+		/// <param name="newSound">The new SoundContainer for this HDFirearm's Empty Sound</param>
+		void SetEmptySound(SoundContainer* newSound) { m_EmptySound = newSound; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ResetAllTimers
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -696,7 +708,7 @@ protected:
     // The audio that is played immediately upon cease of activation
     SoundContainer m_DeactivationSound;
     // The audio of this FireArm being fired empty.
-    SoundContainer m_EmptySound;
+    SoundContainer *m_EmptySound;
     // The audio of this FireArm being reloaded.
     SoundContainer m_ReloadStartSound;
     SoundContainer m_ReloadEndSound;

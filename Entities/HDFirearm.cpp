@@ -40,7 +40,7 @@ void HDFirearm::Clear()
     m_FireEchoSound.Reset();
     m_ActiveSound.Reset();
     m_DeactivationSound.Reset();
-    m_EmptySound.Reset();
+    m_EmptySound = nullptr;
     m_ReloadStartSound.Reset();
     m_ReloadEndSound.Reset();
     m_RateOfFire = 0;
@@ -113,8 +113,8 @@ int HDFirearm::Create(const HDFirearm &reference) {
 	m_FireEchoSound = reference.m_FireEchoSound;
     m_ActiveSound = reference.m_ActiveSound;
     m_DeactivationSound = reference.m_DeactivationSound;
-    m_EmptySound = reference.m_EmptySound;
-    m_ReloadStartSound = reference.m_ReloadStartSound;
+	if (reference.m_EmptySound) { m_EmptySound = dynamic_cast<SoundContainer*>(reference.m_EmptySound->Clone()); }
+	m_ReloadStartSound = reference.m_ReloadStartSound;
     m_ReloadEndSound = reference.m_ReloadEndSound;
     m_RateOfFire = reference.m_RateOfFire;
     m_ActivationDelay = reference.m_ActivationDelay;
@@ -182,8 +182,9 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
         reader >> m_DeactivationSound;
         m_DeactivationSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::IGNORE_PLAY);
     } else if (propName == "EmptySound") {
-        reader >> m_EmptySound;
-    } else if (propName == "ReloadStartSound") {
+		m_EmptySound = new SoundContainer;
+		reader >> m_EmptySound;
+	} else if (propName == "ReloadStartSound") {
         reader >> m_ReloadStartSound;
     } else if (propName == "ReloadEndSound") {
         reader >> m_ReloadEndSound;
@@ -314,7 +315,10 @@ void HDFirearm::Destroy(bool notInherited)
     m_FireEchoSound.Stop();
     m_ActiveSound.Stop();
     m_DeactivationSound.Stop();
-    m_EmptySound.Stop();
+	if (m_EmptySound) {
+		m_EmptySound->Stop();
+		delete m_EmptySound;
+	}
     m_ReloadStartSound.Stop();
     m_ReloadEndSound.Stop();
 
@@ -885,7 +889,7 @@ void HDFirearm::Update()
     else if (((m_pMagazine && m_pMagazine->IsEmpty()) || !m_pMagazine) && m_Activated && !m_AlreadyClicked )
     {
         // Play empty pin click sound.
-        m_EmptySound.Play(m_Pos);
+		if (m_EmptySound) { m_EmptySound->Play(m_Pos); }
         m_DeactivationSound.Play(m_Pos);
         // Indicate that we have clicked once during the current activation. 
         m_AlreadyClicked = true;

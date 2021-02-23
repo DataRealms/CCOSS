@@ -64,7 +64,7 @@ void Actor::Clear()
     m_Controller.Reset();
     m_BodyHitSound = nullptr;
     m_AlarmSound.Reset();
-    m_PainSound.Reset();
+    m_PainSound = nullptr;
     m_DeathSound.Reset();
     m_DeviceSwitchSound = nullptr;
 //    m_FacingRight = true;
@@ -192,8 +192,8 @@ int Actor::Create(const Actor &reference)
 
 	if (reference.m_BodyHitSound) { m_BodyHitSound = dynamic_cast<SoundContainer*>(reference.m_BodyHitSound->Clone()); }
 	m_AlarmSound = reference.m_AlarmSound;
-    m_PainSound = reference.m_PainSound;
-    m_DeathSound = reference.m_DeathSound;
+	if (reference.m_PainSound) { m_PainSound = dynamic_cast<SoundContainer*>(reference.m_PainSound->Clone()); }
+	m_DeathSound = reference.m_DeathSound;
 	if (reference.m_DeviceSwitchSound) { m_DeviceSwitchSound = dynamic_cast<SoundContainer *>(reference.m_DeviceSwitchSound->Clone()); }
 //    m_FacingRight = reference.m_FacingRight;
     m_Status = reference.m_Status;
@@ -306,9 +306,10 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 		reader >> m_BodyHitSound;
 	} else if (propName == "AlarmSound")
 		reader >> m_AlarmSound;
-	else if (propName == "PainSound")
+	else if (propName == "PainSound") {
+		m_PainSound = new SoundContainer;
 		reader >> m_PainSound;
-	else if (propName == "DeathSound")
+	} else if (propName == "DeathSound")
 		reader >> m_DeathSound;
 	else if (propName == "DeviceSwitchSound") {
 		m_DeviceSwitchSound = new SoundContainer;
@@ -1429,7 +1430,7 @@ void Actor::Update()
 
     if (m_TravelImpulse.GetMagnitude() > m_TravelImpulseDamage)
 	{
-        m_PainSound.Play(m_Pos);
+		if (m_PainSound) { m_PainSound->Play(m_Pos); }
 		const float impulse = m_TravelImpulse.GetMagnitude() - m_TravelImpulseDamage;
 		const float damage = impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth;
 		if (damage > 0)

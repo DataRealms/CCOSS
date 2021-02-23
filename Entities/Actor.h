@@ -1244,6 +1244,18 @@ ClassInfoGetters
 	/// <param name="newSound">The new SoundContainer for this Actor's Body Hit Sound</param>
 	void SetBodyHitSound(SoundContainer* newSound) { m_BodyHitSound = newSound; }
 
+	/// <summary>
+	/// Gets this Actor's Pain Sound. Ownership is not transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this Actor's Pain Sound.</returns>
+	SoundContainer* GetPainSound() const { return m_PainSound; }
+
+	/// <summary>
+	/// Sets this Actor's Pain Sound.
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this Actor's Pain Sound</param>
+	void SetPainSound(SoundContainer* newSound) { m_PainSound = newSound; }
+
 
 	/// <summary>
 	/// Gets the X and Y thresholds for how fast the actor can travel before losing stability.
@@ -1294,7 +1306,7 @@ protected:
     // Sounds
     SoundContainer *m_BodyHitSound;
     SoundContainer m_AlarmSound;
-    SoundContainer m_PainSound;
+    SoundContainer *m_PainSound;
     SoundContainer m_DeathSound;
     SoundContainer *m_DeviceSwitchSound;
 

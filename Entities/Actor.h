@@ -1232,6 +1232,17 @@ ClassInfoGetters
 	/// <param name="newSound">The new SoundContainer for the classsName's DeviceSwitchSound</param>
 	void SetDeviceSwitchSound(SoundContainer *newSound) { m_DeviceSwitchSound = newSound; }
 
+	/// <summary>
+	/// Gets this Actor's Body Hit Sound. Ownership is not transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this Actor's Body Hit Sound.</returns>
+	SoundContainer* GetBodyHitSound() const { return m_BodyHitSound; }
+
+	/// <summary>
+	/// Sets this Actor's Body Hit Sound.
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this Actor's Body Hit Sound</param>
+	void SetBodyHitSound(SoundContainer* newSound) { m_BodyHitSound = newSound; }
 
 
 	/// <summary>
@@ -1281,7 +1292,7 @@ protected:
     Controller m_Controller;
 
     // Sounds
-    SoundContainer m_BodyHitSound;
+    SoundContainer *m_BodyHitSound;
     SoundContainer m_AlarmSound;
     SoundContainer m_PainSound;
     SoundContainer m_DeathSound;

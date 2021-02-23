@@ -1886,7 +1886,7 @@ bool MOSRotating::HandlePotentialRadiusAffectingAttachable(const Attachable *att
     if (attachable == m_RadiusAffectingAttachable && distanceAndRadiusFromParent < m_FarthestAttachableDistanceAndRadius) {
         m_FarthestAttachableDistanceAndRadius = distanceAndRadiusFromParent;
         if (m_Attachables.size() > 1) {
-            std::for_each(m_Attachables.begin(), m_Attachables.end(), [this](const Attachable *attachableToCheck) { HandlePotentialRadiusAffectingAttachable(attachableToCheck); });
+            std::for_each(m_Attachables.begin(), m_Attachables.end(), [this](Attachable *attachableToCheck) { attachableToCheck->UpdatePositionAndJointPositionBasedOnOffsets(); HandlePotentialRadiusAffectingAttachable(attachableToCheck); });
         }
         return true;
     } else if (distanceAndRadiusFromParent > m_FarthestAttachableDistanceAndRadius) {

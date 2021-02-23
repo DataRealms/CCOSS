@@ -311,15 +311,15 @@ namespace RTE {
 
 	void Attachable::Update() {
 		if (m_Parent) {
-			UpdatePositionAndJointPositionBasedOnOffsets();
-			if (m_ParentOffset != m_PrevParentOffset || m_JointOffset != m_PrevJointOffset) { m_Parent->HandlePotentialRadiusAffectingAttachable(this); }
-			m_Vel = m_Parent->GetVel();
-			m_Team = m_Parent->GetTeam();
 			if (InheritsHFlipped() != 0) { m_HFlipped = m_InheritsHFlipped == 1 ? m_Parent->IsHFlipped() : !m_Parent->IsHFlipped(); }
 			if (InheritsRotAngle()) {
 				SetRotAngle(m_Parent->GetRotAngle() + m_InheritedRotAngleOffset * static_cast<float>(m_Parent->GetFlipFactor()));
 				m_AngularVel = 0.0F;
 			}
+			UpdatePositionAndJointPositionBasedOnOffsets();
+			if (m_ParentOffset != m_PrevParentOffset || m_JointOffset != m_PrevJointOffset) { m_Parent->HandlePotentialRadiusAffectingAttachable(this); }
+			m_Vel = m_Parent->GetVel();
+			m_Team = m_Parent->GetTeam();
 
 			MOSRotating *rootParentAsMOSR = dynamic_cast<MOSRotating *>(GetRootParent());
 			float currentRotAngleOffset = (GetRotAngle() * static_cast<float>(GetFlipFactor())) - rootParentAsMOSR->GetRotAngle();

@@ -1646,6 +1646,19 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
     if (mode == g_DrawMOID && (!m_GetsHitByMOs || m_MOID == g_NoMOID))
         return;
 
+    // Draw all the attached wound emitters, and only if the mode is g_DrawColor and not onlyphysical
+    // Only draw attachables and emitters which are not drawn after parent, so we draw them before
+    if (mode == g_DrawColor || (!onlyPhysical && mode == g_DrawMaterial)) {
+        for (const AEmitter *woundToDraw : m_Wounds) {
+            if (!woundToDraw->IsDrawnAfterParent()) { woundToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
+        }
+    }
+
+    // Draw all the attached attachables
+    for (const Attachable *attachableToDraw : m_Attachables) {
+        if (!attachableToDraw->IsDrawnAfterParent() && attachableToDraw->IsDrawnNormallyByParent()) { attachableToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
+    }
+
 	BITMAP * pTempBitmap = m_pTempBitmap;
 	BITMAP * pFlipBitmap = m_pFlipBitmap;
 	int keyColor = g_MaskColor;
@@ -1733,20 +1746,6 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
             }
         }
     }
-
-	// Draw all the attached wound emitters, and only if the mode is g_DrawColor and not onlyphysical
-	// Only draw attachables and emitters which are not drawn after parent, so we draw them before
-	if (mode == g_DrawColor || (!onlyPhysical && mode == g_DrawMaterial)) {
-        for (const AEmitter *woundToDraw : m_Wounds) {
-            if (!woundToDraw->IsDrawnAfterParent()) { woundToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
-        }
-	}
-
-	// Draw all the attached attachables
-    for (const Attachable *attachableToDraw : m_Attachables) {
-        if (!attachableToDraw->IsDrawnAfterParent() && attachableToDraw->IsDrawnNormallyByParent()) { attachableToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
-    }
-
 
     //////////////////
     // FLIPPED

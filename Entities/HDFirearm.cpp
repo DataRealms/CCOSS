@@ -767,7 +767,8 @@ void HDFirearm::Update()
 
             if (roundsFired >= 1)
             {
-                m_FiredOnce = m_FireFrame = true;
+				m_FiredOnce = true;
+				m_FireFrame = true;
                 m_LastFireTmr.Reset();
             }
 

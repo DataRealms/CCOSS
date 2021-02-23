@@ -1413,7 +1413,14 @@ int LuaMan::Initialize() {
             .def("SetNextMagazineName", &HDFirearm::SetNextMagazineName)
 			.property("IsAnimatedManually", &HDFirearm::IsAnimatedManually, &HDFirearm::SetAnimatedManually)
 			.property("RecoilTransmission", &HDFirearm::GetJointStiffness, &HDFirearm::SetJointStiffness)
-			.property("FireSound", &HDFirearm::GetFireSound, &HDFirearm::SetFireSound, detail::null_type(), adopt(_2)),
+			.property("FireSound", &HDFirearm::GetFireSound, &HDFirearm::SetFireSound, detail::null_type(), adopt(_2))
+			.property("FireEchoSound", &HDFirearm::GetFireEchoSound, &HDFirearm::SetFireEchoSound, detail::null_type(), adopt(_2))
+			.property("EmptySound", &HDFirearm::GetEmptySound, &HDFirearm::SetEmptySound, detail::null_type(), adopt(_2))
+			.property("ReloadStartSound", &HDFirearm::GetReloadStartSound, &HDFirearm::SetReloadStartSound, detail::null_type(), adopt(_2))
+			.property("ReloadEndSound", &HDFirearm::GetReloadEndSound, &HDFirearm::SetReloadEndSound, detail::null_type(), adopt(_2))
+			.property("ActiveSound", &HDFirearm::GetActiveSound, &HDFirearm::SetActiveSound, detail::null_type(), adopt(_2))
+			.property("DeactivationSound", &HDFirearm::GetDeactivationSound, &HDFirearm::SetDeactivationSound, detail::null_type(), adopt(_2))
+			.property("PreFireSound", &HDFirearm::GetPreFireSound, &HDFirearm::SetPreFireSound, detail::null_type(), adopt(_2)),
 
 
         CONCRETELUABINDING(ThrownDevice, HeldDevice)

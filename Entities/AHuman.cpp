@@ -4111,9 +4111,13 @@ void AHuman::Update()
     if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
     {
         float maxLength = m_pFGArm->GetHeldDevice()->GetSharpLength();
-		if (m_MoveState == WALK)
+		if (maxLength == 0) {
+			m_SharpAimProgress = 0;
+			m_SharpAimMaxedOut = true;
+		}
+		else if (m_MoveState == WALK) {
 			maxLength *= 0.7;
-
+		}
         // Use a non-terrain check ray to cap the magnitude, so we can't see into objects etc
         if (m_SharpAimProgress > 0)
         {

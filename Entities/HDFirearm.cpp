@@ -39,7 +39,7 @@ void HDFirearm::Clear()
     m_FireSound = nullptr;
     m_FireEchoSound.Reset();
     m_ActiveSound = nullptr;
-    m_DeactivationSound.Reset();
+    m_DeactivationSound = nullptr;
     m_EmptySound = nullptr;
 	m_ReloadStartSound = nullptr;
     m_ReloadEndSound = nullptr;
@@ -112,7 +112,7 @@ int HDFirearm::Create(const HDFirearm &reference) {
 	if (reference.m_FireSound) { m_FireSound = dynamic_cast<SoundContainer *>(reference.m_FireSound->Clone()); }
 	m_FireEchoSound = reference.m_FireEchoSound;
 	if (reference.m_ActiveSound) { m_ActiveSound = dynamic_cast<SoundContainer *>(reference.m_ActiveSound->Clone()); }
-	m_DeactivationSound = reference.m_DeactivationSound;
+	if (reference.m_DeactivationSound) { m_DeactivationSound = dynamic_cast<SoundContainer *>(reference.m_DeactivationSound->Clone()); }
 	if (reference.m_EmptySound) { m_EmptySound = dynamic_cast<SoundContainer *>(reference.m_EmptySound->Clone()); }
 	if (reference.m_ReloadStartSound) { m_ReloadStartSound = dynamic_cast<SoundContainer *>(reference.m_ReloadStartSound->Clone()); }
 	if (reference.m_ReloadEndSound) { m_ReloadEndSound = dynamic_cast<SoundContainer *>(reference.m_ReloadEndSound->Clone()); }
@@ -169,7 +169,6 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
         }
     } else if (propName == "PreFireSound") {
         reader >> m_PreFireSound;
-        m_DeactivationSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::IGNORE_PLAY);
 	} else if (propName == "FireSound") {
 		m_FireSound = new SoundContainer;
 		reader >> m_FireSound;
@@ -180,8 +179,9 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
 		m_ActiveSound = new SoundContainer;
 		reader >> m_ActiveSound;
 	} else if (propName == "DeactivationSound") {
+		m_DeactivationSound = new SoundContainer;
         reader >> m_DeactivationSound;
-        m_DeactivationSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::IGNORE_PLAY);
+        m_DeactivationSound->SetSoundOverlapMode(SoundContainer::SoundOverlapMode::IGNORE_PLAY);
     } else if (propName == "EmptySound") {
 		m_EmptySound = new SoundContainer;
 		reader >> m_EmptySound;
@@ -320,7 +320,10 @@ void HDFirearm::Destroy(bool notInherited)
 		m_ActiveSound->Stop();
 		delete m_ActiveSound;
 	}
-    m_DeactivationSound.Stop();
+	if (m_DeactivationSound) {
+		m_DeactivationSound->Stop();
+		delete m_DeactivationSound;
+	}
 	if (m_EmptySound) {
 		m_EmptySound->Stop();
 		delete m_EmptySound;
@@ -603,7 +606,7 @@ void HDFirearm::Deactivate() {
 
     m_PreFireSound.Stop();
     if (m_FireSound && m_FireSound->GetLoopSetting() == -1) { m_FireSound->Stop(); }
-    if (wasActivated && m_pMagazine && !m_pMagazine->IsEmpty()) { m_DeactivationSound.Play(m_Pos); }
+    if (m_DeactivationSound && wasActivated && m_pMagazine && !m_pMagazine->IsEmpty()) { m_DeactivationSound->Play(m_Pos); }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -711,7 +714,7 @@ void HDFirearm::Update()
     if (m_PreFireSound.IsBeingPlayed()) { m_PreFireSound.SetPosition(m_Pos); }
     if (m_FireSound && m_FireSound->IsBeingPlayed()) { m_FireSound->SetPosition(m_Pos); }
     if (m_ActiveSound && m_ActiveSound->IsBeingPlayed()) { m_ActiveSound->SetPosition(m_Pos); }
-    if (m_DeactivationSound.IsBeingPlayed()) { m_DeactivationSound.SetPosition(m_Pos); }
+    if (m_DeactivationSound && m_DeactivationSound->IsBeingPlayed()) { m_DeactivationSound->SetPosition(m_Pos); }
 
     /////////////////////////////////
     // Activation/firing logic
@@ -902,7 +905,6 @@ void HDFirearm::Update()
     {
         // Play empty pin click sound.
 		if (m_EmptySound) { m_EmptySound->Play(m_Pos); }
-        m_DeactivationSound.Play(m_Pos);
         // Indicate that we have clicked once during the current activation. 
         m_AlreadyClicked = true;
 
@@ -933,6 +935,7 @@ void HDFirearm::Update()
     // Do stuff to deactivate after being activated
     if (!m_Activated)
     {
+		if (m_AlreadyClicked && m_FiredLastFrame && m_DeactivationSound) { m_DeactivationSound->Play(m_Pos); }
         // Reset the click indicator.
         m_AlreadyClicked = false;
 

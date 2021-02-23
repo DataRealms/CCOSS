@@ -265,6 +265,24 @@ private:
 
     void DoSelection(int Start, int End);
 
+    /// <summary>
+    /// Gets the index of the start of the next contiguous group of letters or special characters in the given string, or the end of the string if there is none.
+    /// Generally used to deal with ctrl + arrows style behaviour.
+    /// </summary>
+    /// <param name="stringToCheck">A string_view of the string to look for the next word in.</param>
+    /// <param name="currentIndex">The index in the string to start looking from.</param>
+    /// <returns>The index of the start of the next contiguous group of letters or special characters in the given string, or the end of the string if there is none.</returns>
+    int GetStartOfNextCharacterGroup(const std::string_view &stringToCheck, int currentIndex) const;
+
+    /// <summary>
+    /// Gets the index of the start of the previous contiguous group of letters or special characters in the given string, or the end of the string if there is none.
+    /// Generally used to deal with ctrl + arrows style behaviour.
+    /// </summary>
+    /// <param name="stringToCheck">A string_view of the string to look for the next word in.</param>
+    /// <param name="currentIndex">The index in the string to start looking from.</param>
+    /// <returns>The index of the start of the previous contiguous group of letters or special characters in the given string, or the end of the string if there is none.</returns>
+    int GetStartOfPreviousCharacterGroup(const std::string_view &stringToCheck, int currentIndex) const;
+
 
 // Members
 

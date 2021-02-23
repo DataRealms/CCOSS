@@ -785,19 +785,6 @@ void HDFirearm::Update()
             MOPixel *pPixel;
             float shake, particleSpread, shellSpread, lethalRange;
 
-			int player = -1;
-			Controller * pController = 0;
-			if (m_Parent)
-			{
-				Actor * pActor = dynamic_cast<Actor *>(m_Parent);
-				if (pActor)
-				{
-					pController = pActor->GetController();
-					if (pController)
-						player = pController->GetPlayer();
-				}
-			}
-
             lethalRange = m_MaxSharpLength + max(g_FrameMan.GetPlayerFrameBufferWidth(-1), g_FrameMan.GetPlayerFrameBufferHeight(-1)) * 0.52;
             Actor *pUser = dynamic_cast<Actor *>(pRootParent);
             if (pUser)

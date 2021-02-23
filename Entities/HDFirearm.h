@@ -475,6 +475,18 @@ ClassInfoGetters
 		/// <param name="newSound">The new SoundContainer for this HDFirearm's Reload End Sound</param>
 		void SetReloadEndSound(SoundContainer* newSound) { m_ReloadEndSound = newSound; }
 
+		/// <summary>
+		/// Gets this HDFirearm's Active Sound. Ownership is not transferred!
+		/// </summary>
+		/// <returns>The SoundContainer for this HDFirearm's Active Sound.</returns>
+		SoundContainer* GetActiveSound() const { return m_ActiveSound; }
+
+		/// <summary>
+		/// Sets this HDFirearm's Active Sound.
+		/// </summary>
+		/// <param name="newSound">The new SoundContainer for this HDFirearm's Active Sound</param>
+		void SetActiveSound(SoundContainer* newSound) { m_ActiveSound = newSound; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ResetAllTimers
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -728,7 +740,7 @@ protected:
     SoundContainer *m_FireSound;
     SoundContainer m_FireEchoSound; //!< The audio that is played as the echo for the gun. Each shot will restart this sound, so it doesn't ever overlap.
     // The audio that is played immediately upon activation, but perhaps before actual first firing, if there's a pre-delay
-    SoundContainer m_ActiveSound;
+    SoundContainer *m_ActiveSound;
     // The audio that is played immediately upon cease of activation
     SoundContainer m_DeactivationSound;
     // The audio of this FireArm being fired empty.

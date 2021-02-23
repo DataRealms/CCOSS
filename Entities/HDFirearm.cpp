@@ -914,20 +914,14 @@ void HDFirearm::Update()
     }
 
     // No magazine, have started to reload, so put new mag in when done
-    if (m_Reloading && !m_pMagazine && m_pMagazineReference && m_ReloadTmr.IsPastSimMS(m_ReloadTime))
-    {
-        m_pMagazine = dynamic_cast<Magazine *>(m_pMagazineReference->Clone());
-        if (m_pMagazine)
-        {
-            AddAttachable(m_pMagazine);
-			if (m_ReloadEndSound) { m_ReloadEndSound->Play(m_Pos); }
+    if (m_Reloading && !m_pMagazine && m_pMagazineReference && m_ReloadTmr.IsPastSimMS(m_ReloadTime)) {
+        SetMagazine(dynamic_cast<Magazine *>(m_pMagazineReference->Clone()));
+		if (m_ReloadEndSound) { m_ReloadEndSound->Play(m_Pos); }
 
-            m_ActivationTimer.Reset();
-            m_ActivationTimer.Reset();
-            m_LastFireTmr.Reset();
+        m_ActivationTimer.Reset();
+        m_LastFireTmr.Reset();
 
-            if (m_Activated) { m_PreFireSound.Play(); }
-        }
+        if (m_Activated) { m_PreFireSound.Play(); }
 
         m_Reloading = false;
         m_DoneReloading = true;

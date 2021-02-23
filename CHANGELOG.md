@@ -93,7 +93,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`limbPath.SegmentCount` (R) - the number of segments in the `LimbPath`.  
 	`limbPath:GetSegment(segmentIndex)` - Gets the segment Vector for the given segment index. You can use this to modify `LimbPaths`.  
 
-- Added `OnStride` special Lua function for `AHumans` that is called whenever they stride (i.e. when their `StrideSound` is played).
+- Added `OnStride` special Lua function for `AHumans` that is called whenever they stride (i.e. when their `StrideSound` is played). Like playing `StrideSound`, this does not happen when the AHuman is climbing.
 
 ### Changed
 
@@ -147,6 +147,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`AudioMan:StopSound(soundContainer);` and `AudioMan:StopSound(soundContainer, player);` have been replaced with `soundContainer:Stop();` and `soundContainer:Stop(player);`
 	
 - Pressing escape when a buy menu is open now closes it instead of pausing the game.
+
+- `GetParent` will now always return null for objects with no parents, instead of returning the self object for things that weren't `Attachables`. This makes things more consistent and reasonable throughout and will rarely, if ever, cause Lua problems.
 
 ### Fixed
 

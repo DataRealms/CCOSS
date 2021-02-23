@@ -4245,7 +4245,8 @@ void AHuman::Update()
         // Upright body posture
 		else
 		{
-            float rotDiff = rot - (GetRotAngleTarget(m_MoveState) * GetFlipFactor());
+            float rotDiff = rot - (GetRotAngleTarget(m_MoveState) * (m_AimAngle > 0 ? 1 - (m_AimAngle / c_HalfPI) : 1) * GetFlipFactor());
+
             if (fabs(rotDiff) > 0.1F) {
                 m_AngularVel -= rotDiff * 0.5F;
             } else if (fabs(m_AngularVel) > 0.3F) {

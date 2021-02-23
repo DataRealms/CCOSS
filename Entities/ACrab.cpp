@@ -2828,11 +2828,7 @@ void ACrab::Update()
     if (m_Status == STABLE)
     {
         // Upright body posture
-        // Break the spring if close to target angle.
-        if (fabs(rot) > (c_HalfPI - c_SixteenthPI))
-            m_AngularVel -= rot * 0.5;//fabs(rot);
-        else if (fabs(m_AngularVel) > 0.3)
-            m_AngularVel *= 0.85;
+		m_AngularVel = m_AngularVel * 0.95F - (rot * 0.2F);
     }
     // While dying, pull body quickly toward down toward horizontal
     else if (m_Status == DYING)

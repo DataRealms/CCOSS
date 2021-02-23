@@ -93,6 +93,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`limbPath.SegmentCount` (R) - the number of segments in the `LimbPath`.  
 	`limbPath:GetSegment(segmentIndex)` - Gets the segment Vector for the given segment index. You can use this to modify `LimbPaths`.  
 
+- Added `OnStride` special Lua function for `AHumans` that is called whenever they stride (i.e. when their `StrideSound` is played). Like playing `StrideSound`, this does not happen when the AHuman is climbing.
+
 ### Changed
 
 - Hands will now draw in transparent drawing mode, i.e. editing menu.
@@ -146,6 +148,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - Pressing escape when a buy menu is open now closes it instead of pausing the game.
 
+- `GetParent` will now always return null for objects with no parents, instead of returning the self object for things that weren't `Attachables`. This makes things more consistent and reasonable throughout and will rarely, if ever, cause Lua problems.
+
 ### Fixed
 
 - `MovableObject:SetWhichMOToNotHit` will now work properly for Attachables. They will also not hit the relevant MO. When they're removed, Attachables will check if they have the same MO for this value and, if so, unset it so they can hit that MO.
@@ -167,6 +171,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The `DeactivationSound` of `HDFirearms` now respects its `SoundOverlapMode` instead of never allowing overlap. If you don't want it overlapping, set it up accordingly.
 
 - Enabled DPI Awareness to fix issues with resolution settings when Windows scaling is enabled.
+
+- Fixed a bug that caused the game to crash when the crab bomb effect was triggered while there were multiple crab bomb eligible Craft in an activity.
 
 ### Removed
 

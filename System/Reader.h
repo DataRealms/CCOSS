@@ -132,7 +132,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="stringToTrim">String to remove whitespace from.</param>
 		/// <returns>The string that was passed in, sans whitespace in the front and end.</returns>
-		std::string TrimString(std::string &stringToTrim) const;
+		std::string TrimString(const std::string &stringToTrim) const;
 
 		/// <summary>
 		/// Discards all whitespace, newlines and comment lines (which start with '//') so that the next thing to be read will be actual data.

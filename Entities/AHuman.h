@@ -88,6 +88,7 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(AHuman)
+AddScriptFunctionNames(Actor, "OnStride")
 SerializableOverrideMethods
 ClassInfoGetters
 

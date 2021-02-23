@@ -483,13 +483,13 @@ friend class Atom;
 	/// Gets the MO which is the parent of this Attachable.
 	/// </summary>
 	/// <returns>A pointer to the parent of this Attachable.</returns>
-	virtual MovableObject * GetParent() { return this; }
+	virtual MovableObject * GetParent() { return nullptr; }
 
 	/// <summary>
 	/// Gets the MO which is the parent of this Attachable. 
 	/// </summary>
 	/// <returns>A pointer to the parent of this Attachable.</returns>
-	virtual const MovableObject * GetParent() const { return this; }
+	virtual const MovableObject * GetParent() const { return nullptr; }
 
 	/// <summary>
 	/// Returns a pointer to this MO, this is to enable Attachables to get their root nodes.

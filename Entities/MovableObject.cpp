@@ -903,8 +903,7 @@ void MovableObject::PostTravel()
         m_IgnoresAtomGroupHits = m_Vel.GetLargest() < m_IgnoresAGHitsWhenSlowerThan;
 
 	if (m_GetsHitByMOs) {
-		// Replace updated MOID representation to scene after Update
-		Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true);
+        if (!GetParent()) { Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true); }
 		m_AlreadyHitBy.clear();
 	}
 	m_IsUpdated = true;
@@ -1022,7 +1021,7 @@ void MovableObject::RegMOID(vector<MovableObject *> &MOIDIndex, MOID rootMOID, b
 		MOIDIndex.push_back(this);
     }
 
-    m_RootMOID = (rootMOID == g_NoMOID ? m_MOID : rootMOID);
+    m_RootMOID = rootMOID == g_NoMOID ? m_MOID : rootMOID;
 }
 
 } // namespace RTE

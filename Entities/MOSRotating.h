@@ -875,10 +875,10 @@ ClassInfoGetters
 protected:
 
     /// <summary>
-    /// Transfers forces and impulse forces from the given Attachable to this MOSRotating or remove the Attachable if needed.
+    /// Transfers forces and impulse forces from the given Attachable to this MOSRotating, gibbing and/or removing the Attachable if needed.
     /// </summary>
     /// <param name="attachable">A pointer to the Attachable to apply forces from. Ownership is NOT transferred!</param>
-    /// <returns>Whether or not the Attachable has been removed, in which case it'll usually be passed to MovableMan or deleted.</returns>
+    /// <returns>Whether or not the Attachable has been removed, in which case it'll usually be passed to MovableMan.</returns>
     bool TransferForcesFromAttachable(Attachable *attachable);
 
 

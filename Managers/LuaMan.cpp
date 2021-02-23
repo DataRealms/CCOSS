@@ -822,6 +822,7 @@ int LuaMan::Initialize() {
 			.property("GibImpulseLimit", &MOSRotating::GetGibImpulseLimit, &MOSRotating::SetGibImpulseLimit)
 			.property("DamageMultiplier", &MOSRotating::GetDamageMultiplier, &MOSRotating::SetDamageMultiplier)
 			.property("WoundCount", (int (MOSRotating:: *)() const) &MOSRotating::GetWoundCount)
+			.property("OrientToVel", &MOSRotating::GetOrientToVel, &MOSRotating::SetOrientToVel)
             .def("AddRecoil", &MOSRotating::AddRecoil)
             .def("SetRecoil", &MOSRotating::SetRecoil)
             .def("IsRecoiled", &MOSRotating::IsRecoiled)

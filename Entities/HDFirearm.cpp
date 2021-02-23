@@ -811,7 +811,8 @@ void HDFirearm::Update()
                     particleSpread = m_ParticleSpreadRange * RandomNormalNum();
                     particleVel.DegRotate(particleSpread);
                     pParticle->SetVel(m_Vel + particleVel);
-                    pParticle->SetRotAngle(particleVel.GetAbsRadAngle());
+                    pParticle->SetRotAngle(particleVel.GetAbsRadAngle() + (m_HFlipped ? c_PI * GetFlipFactor() : 0));
+					pParticle->SetHFlipped(m_HFlipped);
                     // F = m * a
                     totalFireForce += pParticle->GetMass() * pParticle->GetVel().GetMagnitude();
 

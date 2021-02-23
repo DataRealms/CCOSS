@@ -148,6 +148,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - Pressing escape when a buy menu is open now closes it instead of pausing the game.
 
+- `GetParent` will now always return null for objects with no parents, instead of returning the self object for things that weren't `Attachables`. This makes things more consistent and reasonable throughout and will rarely, if ever, cause Lua problems.
+
 ### Fixed
 
 - `MovableObject:SetWhichMOToNotHit` will now work properly for Attachables. They will also not hit the relevant MO. When they're removed, Attachables will check if they have the same MO for this value and, if so, unset it so they can hit that MO.

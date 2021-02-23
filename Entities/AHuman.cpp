@@ -902,7 +902,7 @@ bool AHuman::EquipFirearm(bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound->Play(m_Pos);
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
             }
 
             return true;
@@ -964,8 +964,8 @@ bool AHuman::EquipDeviceInGroup(string group, bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound->Play(m_Pos);
-            }
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+			}
 
             return true;
         }
@@ -1026,8 +1026,8 @@ bool AHuman::EquipLoadedFirearmInGroup(string group, string excludeGroup, bool d
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound->Play(m_Pos);
-            }
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+			}
 
             return true;
         }
@@ -1088,8 +1088,8 @@ bool AHuman::EquipNamedDevice(const string name, bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound->Play(m_Pos);
-            }
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+			}
 
             return true;
         }
@@ -1152,8 +1152,8 @@ bool AHuman::EquipThrowable(bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound->Play(m_Pos);
-            }
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+			}
 
             return true;
         }
@@ -1214,8 +1214,8 @@ bool AHuman::EquipDiggingTool(bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound->Play(m_Pos);
-            }
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+			}
 
             return true;
         }
@@ -1309,7 +1309,7 @@ bool AHuman::EquipShield()
             EquipShieldInBGArm();
 
             // Play the device switching sound
-            m_DeviceSwitchSound->Play(m_Pos);
+			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 
             return true;
         }
@@ -1381,7 +1381,7 @@ bool AHuman::EquipShieldInBGArm()
             // Play the device switching sound only if activity is running
 			if (g_ActivityMan.ActivityRunning())
 			{
-				m_DeviceSwitchSound->Play(m_Pos);
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 			}
 
             return true;
@@ -3322,7 +3322,7 @@ void AHuman::Update()
                 if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
                     m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
                 }
-                m_DeviceSwitchSound->Play(m_Pos);
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 
                 // Interrupt sharp aiming
                 m_SharpAimTimer.Reset();
@@ -3624,8 +3624,8 @@ void AHuman::Update()
                 m_Inventory.push_back(m_pItemInReach);
             }
             m_PieNeedsUpdate = true;
-            m_DeviceSwitchSound->Play(m_Pos);
-        }
+			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+		}
     }
 
     ///////////////////////////////////////////////////

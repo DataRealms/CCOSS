@@ -173,32 +173,6 @@ int Actor::Create()
     return 0;
 }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the Actor object ready for use.
-
-int Actor::Create(BITMAP *pSprite,
-                  Controller *pController,
-                  const float mass,
-                  const Vector &position,
-                  const Vector &velocity,
-                  AtomGroup *hitBody,
-                  const unsigned long lifetime,
-                  Status status,
-                  const int health)
-{
-    // Set MO Type.
-    m_MOType = MovableObject::TypeActor;
-
-    m_Controller = *pController;
-    m_Status = status;
-    m_Health = health;
-
-    return MOSRotating::Create(pSprite, mass, position, velocity, hitBody, lifetime);
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
@@ -814,7 +788,7 @@ MovableObject * Actor::SwapNextInventory(MovableObject *pSwapIn, bool muteSound)
         playSound = true;
     }
 
-    if (playSound && !muteSound)
+    if (m_DeviceSwitchSound && playSound && !muteSound)
         m_DeviceSwitchSound->Play(m_Pos);
 
     return pRetDev;
@@ -866,7 +840,7 @@ MovableObject * Actor::SwapPrevInventory(MovableObject *pSwapIn)
         playSound = true;
     }
 
-    if (playSound)
+    if (m_DeviceSwitchSound && playSound)
         m_DeviceSwitchSound->Play(m_Pos);
 
     return pRetDev;

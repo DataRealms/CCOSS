@@ -849,7 +849,7 @@ void ACraft::Update()
     m_ViewPoint = m_Pos.GetFloored();
     // Add velocity also so the viewpoint moves ahead at high speeds
     if (m_Vel.GetMagnitude() > 10)
-        m_ViewPoint += m_Vel * 6;
+        m_ViewPoint += m_Vel * sqrt(m_Vel.GetMagnitude() * 0.1F);
 
     ///////////////////////////////////////////////////
     // Crash detection and handling

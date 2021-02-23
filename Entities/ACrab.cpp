@@ -2774,7 +2774,7 @@ void ACrab::Update()
 
     // Add velocity also so the viewpoint moves ahead at high speeds
     if (m_Vel.GetMagnitude() > 10.0)
-        m_ViewPoint += m_Vel * 6;
+        m_ViewPoint += m_Vel * sqrt(m_Vel.GetMagnitude() * 0.1F);
 
 /* Done by pie menu now, see HandlePieCommand()
     ////////////////////////////////////////

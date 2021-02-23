@@ -37,7 +37,7 @@ void HDFirearm::Clear()
     m_pFlash = 0;
     m_PreFireSound = nullptr;
     m_FireSound = nullptr;
-    m_FireEchoSound.Reset();
+    m_FireEchoSound = nullptr;
     m_ActiveSound = nullptr;
     m_DeactivationSound = nullptr;
     m_EmptySound = nullptr;
@@ -110,7 +110,7 @@ int HDFirearm::Create(const HDFirearm &reference) {
     m_pMagazineReference = reference.m_pMagazineReference;
 	if (reference.m_PreFireSound) { m_PreFireSound = dynamic_cast<SoundContainer *>(reference.m_PreFireSound->Clone()); }
 	if (reference.m_FireSound) { m_FireSound = dynamic_cast<SoundContainer *>(reference.m_FireSound->Clone()); }
-	m_FireEchoSound = reference.m_FireEchoSound;
+	if (reference.m_FireEchoSound) { m_FireEchoSound = dynamic_cast<SoundContainer*>(reference.m_FireEchoSound->Clone()); }
 	if (reference.m_ActiveSound) { m_ActiveSound = dynamic_cast<SoundContainer *>(reference.m_ActiveSound->Clone()); }
 	if (reference.m_DeactivationSound) { m_DeactivationSound = dynamic_cast<SoundContainer *>(reference.m_DeactivationSound->Clone()); }
 	if (reference.m_EmptySound) { m_EmptySound = dynamic_cast<SoundContainer *>(reference.m_EmptySound->Clone()); }
@@ -174,8 +174,9 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
 		m_FireSound = new SoundContainer;
 		reader >> m_FireSound;
 	} else if (propName == "FireEchoSound") {
+		m_FireEchoSound = new SoundContainer;
 		reader >> m_FireEchoSound;
-		m_FireEchoSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::RESTART);
+		m_FireEchoSound->SetSoundOverlapMode(SoundContainer::SoundOverlapMode::RESTART);
     } else if (propName == "ActiveSound") {
 		m_ActiveSound = new SoundContainer;
 		reader >> m_ActiveSound;
@@ -319,7 +320,10 @@ void HDFirearm::Destroy(bool notInherited)
 		m_FireSound->Stop();
 		delete m_FireSound;
 	}
-    m_FireEchoSound.Stop();
+	if (m_FireEchoSound) {
+		m_FireEchoSound->Stop();
+		delete m_FireEchoSound;
+	}
 	if (m_ActiveSound) {
 		m_ActiveSound->Stop();
 		delete m_ActiveSound;
@@ -971,7 +975,7 @@ void HDFirearm::Update()
             if (m_FireSound && !(m_FireSound->GetLoopSetting() == -1 && m_FireSound->IsBeingPlayed())) {
                 m_FireSound->Play(m_Pos);
             }
-            m_FireEchoSound.Play(m_Pos);
+			if (m_FireEchoSound) { m_FireEchoSound->Play(m_Pos); }
         }
     }
     else {

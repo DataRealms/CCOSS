@@ -65,7 +65,7 @@ void Actor::Clear()
     m_BodyHitSound = nullptr;
     m_AlarmSound.Reset();
     m_PainSound = nullptr;
-    m_DeathSound.Reset();
+    m_DeathSound = nullptr;
     m_DeviceSwitchSound = nullptr;
 //    m_FacingRight = true;
     m_Status = STABLE;
@@ -190,10 +190,10 @@ int Actor::Create(const Actor &reference)
     m_Controller.SetInputMode(Controller::CIM_AI);
     m_Controller.SetControlledActor(this);
 
-	if (reference.m_BodyHitSound) { m_BodyHitSound = dynamic_cast<SoundContainer*>(reference.m_BodyHitSound->Clone()); }
+	if (reference.m_BodyHitSound) { m_BodyHitSound = dynamic_cast<SoundContainer *>(reference.m_BodyHitSound->Clone()); }
 	m_AlarmSound = reference.m_AlarmSound;
-	if (reference.m_PainSound) { m_PainSound = dynamic_cast<SoundContainer*>(reference.m_PainSound->Clone()); }
-	m_DeathSound = reference.m_DeathSound;
+	if (reference.m_PainSound) { m_PainSound = dynamic_cast<SoundContainer *>(reference.m_PainSound->Clone()); }
+	if (reference.m_DeathSound) { m_DeathSound = dynamic_cast<SoundContainer *>(reference.m_DeathSound->Clone()); }
 	if (reference.m_DeviceSwitchSound) { m_DeviceSwitchSound = dynamic_cast<SoundContainer *>(reference.m_DeviceSwitchSound->Clone()); }
 //    m_FacingRight = reference.m_FacingRight;
     m_Status = reference.m_Status;
@@ -309,9 +309,10 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 	else if (propName == "PainSound") {
 		m_PainSound = new SoundContainer;
 		reader >> m_PainSound;
-	} else if (propName == "DeathSound")
+	} else if (propName == "DeathSound") {
+		m_DeathSound = new SoundContainer;
 		reader >> m_DeathSound;
-	else if (propName == "DeviceSwitchSound") {
+	} else if (propName == "DeviceSwitchSound") {
 		m_DeviceSwitchSound = new SoundContainer;
 		reader >> m_DeviceSwitchSound;
 	} else if (propName == "Status")
@@ -939,7 +940,7 @@ void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToI
 {
     // Play death sound
 // TODO: Don't attenuate since death is pretty important.. maybe only make this happen for teh brains
-    m_DeathSound.Play(m_Pos);
+	if (m_DeathSound) { m_DeathSound->Play(m_Pos); }
 
     // Gib all the regular gibs
     MOSRotating::GibThis(impactImpulse, movableObjectToIgnore);
@@ -1499,7 +1500,7 @@ void Actor::Update()
 
     if (m_Status != DYING && m_Status != DEAD && std::floor(m_Health) <= 0)
     {
-        m_DeathSound.Play(m_Pos);
+		if (m_DeathSound) { m_DeathSound->Play(m_Pos); }
 		m_Controller.SetDisabled(true);
         DropAllInventory();
         m_Status = DYING;

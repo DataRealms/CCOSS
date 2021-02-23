@@ -1199,26 +1199,16 @@ ClassInfoGetters
 
 
 	/// <summary>
-	/// Returns the defined sound to be played on death.
+	/// Gets this Actor's Death Sound. Ownership is not transferred!
 	/// </summary>
-	/// <returns>A sound with the death sample of this actor.</returns>
-	SoundContainer GetDeathSound() const { return m_DeathSound; }
-
+	/// <returns>The SoundContainer for this Actor's Death Sound.</returns>
+	SoundContainer* GetDeathSound() const { return m_DeathSound; }
 
 	/// <summary>
-	/// Sets new death sound sample from specified path or sets null.
+	/// Sets this Actor's Death Sound.
 	/// </summary>
-	/// <param name="samplePath">Filepath to new sample or None/nil for no sound.</param>
-	/// <returns>Updated DeathSound.</returns>
-	void SetDeathSound(const char *samplePath) {
-		if (samplePath == nullptr) {
-			m_DeathSound.Reset();
-		} else {
-            SoundContainer newDeathSound;
-			newDeathSound.Create(samplePath);
-			m_DeathSound = newDeathSound;
-		}
-	}
+	/// <param name="newSound">The new SoundContainer for this Actor's Death Sound</param>
+	void SetDeathSound(SoundContainer* newSound) { m_DeathSound = newSound; }
 
 	/// <summary>
 	/// Gets this Actor's DeviceSwitchSound.
@@ -1307,7 +1297,7 @@ protected:
     SoundContainer *m_BodyHitSound;
     SoundContainer m_AlarmSound;
     SoundContainer *m_PainSound;
-    SoundContainer m_DeathSound;
+    SoundContainer *m_DeathSound;
     SoundContainer *m_DeviceSwitchSound;
 
 //    bool m_FacingRight;

@@ -35,7 +35,7 @@ void HDFirearm::Clear()
     m_pMagazine = 0;
 
     m_pFlash = 0;
-    m_PreFireSound.Reset();
+    m_PreFireSound = nullptr;
     m_FireSound = nullptr;
     m_FireEchoSound.Reset();
     m_ActiveSound = nullptr;
@@ -108,7 +108,7 @@ int HDFirearm::Create(const HDFirearm &reference) {
     HeldDevice::Create(reference);
 
     m_pMagazineReference = reference.m_pMagazineReference;
-    m_PreFireSound = reference.m_PreFireSound;
+	if (reference.m_PreFireSound) { m_PreFireSound = dynamic_cast<SoundContainer *>(reference.m_PreFireSound->Clone()); }
 	if (reference.m_FireSound) { m_FireSound = dynamic_cast<SoundContainer *>(reference.m_FireSound->Clone()); }
 	m_FireEchoSound = reference.m_FireEchoSound;
 	if (reference.m_ActiveSound) { m_ActiveSound = dynamic_cast<SoundContainer *>(reference.m_ActiveSound->Clone()); }
@@ -168,7 +168,8 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
             m_pFlash->SetCollidesWithTerrainWhileAttached(false);
         }
     } else if (propName == "PreFireSound") {
-        reader >> m_PreFireSound;
+		m_PreFireSound = new SoundContainer;
+		reader >> m_PreFireSound;
 	} else if (propName == "FireSound") {
 		m_FireSound = new SoundContainer;
 		reader >> m_FireSound;
@@ -310,7 +311,10 @@ int HDFirearm::Save(Writer &writer) const
 
 void HDFirearm::Destroy(bool notInherited)
 {
-    m_PreFireSound.Stop();
+	if (m_PreFireSound) {
+		m_PreFireSound->Stop();
+		delete m_PreFireSound;
+	}
 	if (m_FireSound) {
 		m_FireSound->Stop();
 		delete m_FireSound;
@@ -588,7 +592,7 @@ void HDFirearm::Activate() {
 
     if (!IsReloading()) {
         if (m_ActiveSound && !m_ActiveSound->IsBeingPlayed()) { m_ActiveSound->Play(this->m_Pos); }
-        if (!wasActivated && !m_PreFireSound.IsBeingPlayed()) { m_PreFireSound.Play(this->m_Pos); }
+        if (m_PreFireSound && !wasActivated && !m_PreFireSound->IsBeingPlayed()) { m_PreFireSound->Play(this->m_Pos); }
     }
 }
 
@@ -604,7 +608,7 @@ void HDFirearm::Deactivate() {
     HeldDevice::Deactivate();
     m_FiredOnce = false;
 
-    m_PreFireSound.Stop();
+	if (m_PreFireSound) { m_PreFireSound->Stop(); }
     if (m_FireSound && m_FireSound->GetLoopSetting() == -1) { m_FireSound->Stop(); }
     if (m_DeactivationSound && wasActivated && m_pMagazine && !m_pMagazine->IsEmpty()) { m_DeactivationSound->Play(m_Pos); }
 }
@@ -711,7 +715,7 @@ void HDFirearm::Update()
 {
     HeldDevice::Update();
 
-    if (m_PreFireSound.IsBeingPlayed()) { m_PreFireSound.SetPosition(m_Pos); }
+    if (m_PreFireSound && m_PreFireSound->IsBeingPlayed()) { m_PreFireSound->SetPosition(m_Pos); }
     if (m_FireSound && m_FireSound->IsBeingPlayed()) { m_FireSound->SetPosition(m_Pos); }
     if (m_ActiveSound && m_ActiveSound->IsBeingPlayed()) { m_ActiveSound->SetPosition(m_Pos); }
     if (m_DeactivationSound && m_DeactivationSound->IsBeingPlayed()) { m_DeactivationSound->SetPosition(m_Pos); }
@@ -730,7 +734,7 @@ void HDFirearm::Update()
 
     if (m_pMagazine && !m_pMagazine->IsEmpty())
     {
-        if (m_Activated && !m_PreFireSound.IsBeingPlayed()) {
+        if (m_Activated && !(m_PreFireSound && m_PreFireSound->IsBeingPlayed())) {
 
             // Get the parent root of this AEmitter
 // TODO: Potentially get this once outside instead, like in attach/detach")
@@ -921,7 +925,7 @@ void HDFirearm::Update()
         m_ActivationTimer.Reset();
         m_LastFireTmr.Reset();
 
-        if (m_Activated) { m_PreFireSound.Play(); }
+        if (m_PreFireSound && m_Activated) { m_PreFireSound->Play(); }
 
         m_Reloading = false;
         m_DoneReloading = true;
@@ -934,7 +938,7 @@ void HDFirearm::Update()
         // Reset the click indicator.
         m_AlreadyClicked = false;
 
-        m_PreFireSound.Stop();
+		if (m_PreFireSound) { m_PreFireSound->Stop(); }
         // Stop any looping activation sounds
         if (m_FireSound && m_FireSound->GetLoopSetting() == -1)// && m_FireSound->IsBeingPlayed())
             m_FireSound->Stop();

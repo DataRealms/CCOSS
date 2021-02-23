@@ -499,6 +499,18 @@ ClassInfoGetters
 		/// <param name="newSound">The new SoundContainer for this HDFirearm's Deactivation Sound</param>
 		void SetDeactivationSound(SoundContainer* newSound) { m_DeactivationSound = newSound; }
 
+		/// <summary>
+		/// Gets this HDFirearm's Pre Fire Sound. Ownership is not transferred!
+		/// </summary>
+		/// <returns>The SoundContainer for this HDFirearm's Pre Fire Sound.</returns>
+		SoundContainer* GetPreFireSound() const { return m_PreFireSound; }
+
+		/// <summary>
+		/// Sets this HDFirearm's Pre Fire Sound.
+		/// </summary>
+		/// <param name="newSound">The new SoundContainer for this HDFirearm's Pre Fire Sound</param>
+		void SetPreFireSound(SoundContainer* newSound) { m_PreFireSound = newSound; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ResetAllTimers
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -747,7 +759,7 @@ protected:
     // Muzzle Flash Attachable. Owned
     Attachable *m_pFlash;
 
-    SoundContainer m_PreFireSound; //!< The sound this HDFirearm should play before it starts firing. Distinct from activation sound in that it will play exactly once per trigger pull and not pitch up.
+    SoundContainer *m_PreFireSound; //!< The sound this HDFirearm should play before it starts firing. Distinct from activation sound in that it will play exactly once per trigger pull and not pitch up.
     // The audio of this FireArm being fired.
     SoundContainer *m_FireSound;
     SoundContainer m_FireEchoSound; //!< The audio that is played as the echo for the gun. Each shot will restart this sound, so it doesn't ever overlap.

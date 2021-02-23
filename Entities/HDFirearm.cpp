@@ -623,8 +623,9 @@ void HDFirearm::Reload()
     {
         if (m_pMagazine)
         {
-            m_pMagazine->SetVel(m_Vel + Vector(m_HFlipped ? -3 : 3, 0.3));
-            m_pMagazine->SetAngularVel(6.0F + (-RandomNum(0.0F, 6.0F)));
+			Vector ejectVector = (Vector(2 * GetFlipFactor(), 0) + g_SceneMan.ShortestDistance(m_Pos, m_pMagazine->GetPos(), g_SceneMan.SceneWrapsX()).SetMagnitude(2)).RadRotate(RandomNum(-0.2F, 0.2F));
+			m_pMagazine->SetVel(m_Vel + ejectVector);
+            m_pMagazine->SetAngularVel(3.0F + (-RandomNum(0.0F, 6.0F)));
             if (!m_pMagazine->IsDiscardable()) { m_pMagazine->SetToDelete(); }
             RemoveAttachable(m_pMagazine, m_pMagazine->IsDiscardable(), false);
             m_pMagazine = 0;

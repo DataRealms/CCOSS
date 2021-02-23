@@ -4115,6 +4115,8 @@ void AHuman::Update()
         // Use a non-terrain check ray to cap the magnitude, so we can't see into objects etc
         if (m_SharpAimProgress > 0)
         {
+			if (m_pFGArm->GetHeldDevice()->IsRecoiled())
+				m_SharpAimProgress *= 0.9;
 			Vector notUsed;
             Vector sharpAimVector(maxLength, 0);
             sharpAimVector *= aimMatrix;

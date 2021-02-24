@@ -869,7 +869,9 @@ int LuaMan::Initialize() {
 			.def("RemoveEmitter", (bool (MOSRotating::*)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable)
 			.def("RemoveEmitter", (bool (MOSRotating::*)(long uniqueIDOfAttachableToRemove))&MOSRotating::RemoveAttachable)
 			.def_readonly("Attachables", &MOSRotating::m_Attachables, return_stl_iterator)
-			.def_readonly("Wounds", &MOSRotating::m_Wounds, return_stl_iterator),
+			.def_readonly("Wounds", &MOSRotating::m_Wounds, return_stl_iterator)
+			.property("GibSound", &MOSRotating::GetGibSound, &MOSRotating::SetGibSound, detail::null_type(), adopt(_2)),
+
 
         CONCRETELUABINDING(Attachable, MOSRotating)
             .def("IsAttached", &Attachable::IsAttached)
@@ -919,7 +921,10 @@ int LuaMan::Initialize() {
             .def("TriggerBurst", &AEmitter::TriggerBurst)
             .def("IsSetToBurst", &AEmitter::IsSetToBurst)
             .def("CanTriggerBurst", &AEmitter::CanTriggerBurst)
-			.def_readwrite("Emissions", &AEmitter::m_EmissionList, return_stl_iterator),
+			.def_readwrite("Emissions", &AEmitter::m_EmissionList, return_stl_iterator)
+			.property("EmissionSound", &AEmitter::GetEmissionSound, &AEmitter::SetEmissionSound, detail::null_type(), adopt(_2))
+			.property("BurstSound", &AEmitter::GetBurstSound, &AEmitter::SetBurstSound, detail::null_type(), adopt(_2))
+			.property("EndSound", &AEmitter::GetEndSound, &AEmitter::SetEndSound, detail::null_type(), adopt(_2)),
 
 		CONCRETELUABINDING(PEmitter, MOSParticle)
 			.def("IsEmitting", &PEmitter::IsEmitting)
@@ -1055,8 +1060,11 @@ int LuaMan::Initialize() {
             .def("GetAlarmPoint", &Actor::GetAlarmPoint)
             .property("AimDistance", &Actor::GetAimDistance, &Actor::SetAimDistance)
 			.property("SightDistance", &Actor::GetSightDistance, &Actor::SetSightDistance)
-			.property("DeathSound", &Actor::GetDeathSound, &Actor::SetDeathSound)
-			.property("DeviceSwitchSound", &Actor::GetDeviceSwitchSound, &Actor::SetDeviceSwitchSound, detail::null_type(), adopt(_2)),
+			.property("DeviceSwitchSound", &Actor::GetDeviceSwitchSound, &Actor::SetDeviceSwitchSound, detail::null_type(), adopt(_2))
+			.property("BodyHitSound", &Actor::GetBodyHitSound, &Actor::SetBodyHitSound, detail::null_type(), adopt(_2))
+			.property("PainSound", &Actor::GetPainSound, &Actor::SetPainSound, detail::null_type(), adopt(_2))
+			.property("DeathSound", &Actor::GetDeathSound, &Actor::SetDeathSound, detail::null_type(), adopt(_2))
+			.property("AlarmSound", &Actor::GetAlarmSound, &Actor::SetAlarmSound, detail::null_type(), adopt(_2)),
 
 		CONCRETELUABINDING(ADoor, Actor)
 			.enum_("DoorState")[
@@ -1071,7 +1079,11 @@ int LuaMan::Initialize() {
 			.def("OpenDoor", &ADoor::OpenDoor)
 			.def("CloseDoor", &ADoor::CloseDoor)
 			.def("StopDoor", &ADoor::StopDoor)
-			.def("SetClosedByDefault", &ADoor::SetClosedByDefault),
+			.def("SetClosedByDefault", &ADoor::SetClosedByDefault)
+			.property("DoorMoveStartSound", &ADoor::GetDoorMoveStartSound, &ADoor::SetDoorMoveStartSound, detail::null_type(), adopt(_2))
+			.property("DoorMoveSound", &ADoor::GetDoorMoveSound, &ADoor::SetDoorMoveSound, detail::null_type(), adopt(_2))
+			.property("DoorDirectionChangeSound", &ADoor::GetDoorDirectionChangeSound, &ADoor::SetDoorDirectionChangeSound, detail::null_type(), adopt(_2))
+			.property("DoorMoveEndSound", &ADoor::GetDoorMoveEndSound, &ADoor::SetDoorMoveEndSound, detail::null_type(), adopt(_2)),
 
 		CONCRETELUABINDING(Arm, Attachable)
             .property("HeldDevice", &Arm::GetHeldMO)
@@ -1189,7 +1201,9 @@ int LuaMan::Initialize() {
 			.def("GetLimbPathSpeed", &AHuman::GetLimbPathSpeed)
 			.def("SetLimbPathSpeed", &AHuman::SetLimbPathSpeed)
 			.def("GetRotAngleTarget", &AHuman::GetRotAngleTarget)
-			.def("SetRotAngleTarget", &AHuman::SetRotAngleTarget),
+			.def("SetRotAngleTarget", &AHuman::SetRotAngleTarget)
+			.property("StrideSound", &AHuman::GetStrideSound, &AHuman::SetStrideSound, detail::null_type(), adopt(_2)),
+
         
 		CONCRETELUABINDING(ACrab, Actor)
 			// These are all private/protected so they can't be bound, need to consider making them public.
@@ -1266,7 +1280,9 @@ int LuaMan::Initialize() {
             .def("GetLimbPath", &ACrab::GetLimbPath)
 			.property("LimbPathPushForce", &ACrab::GetLimbPathPushForce, &ACrab::SetLimbPathPushForce)
 			.def("GetLimbPathSpeed", &ACrab::GetLimbPathSpeed)
-			.def("SetLimbPathSpeed", &ACrab::SetLimbPathSpeed),
+			.def("SetLimbPathSpeed", &ACrab::SetLimbPathSpeed)
+			.property("StrideSound", &ACrab::GetStrideSound, &ACrab::SetStrideSound, detail::null_type(), adopt(_2)),
+
 
         CONCRETELUABINDING(Turret, Attachable)
 			.property("MountedDevice", &Turret::GetMountedDevice, &Turret::SetMountedDevice, detail::null_type(), adopt(_2)),
@@ -1302,7 +1318,9 @@ int LuaMan::Initialize() {
             .def("CloseHatch", &ACraft::CloseHatch)
             .property("HatchState", &ACraft::GetHatchState)
             .property("MaxPassengers", &ACraft::GetMaxPassengers)
-            .property("DeliveryDelayMultiplier", &ACraft::GetDeliveryDelayMultiplier),
+            .property("DeliveryDelayMultiplier", &ACraft::GetDeliveryDelayMultiplier)
+			.property("HatchOpenSound", &ACraft::GetHatchOpenSound, &ACraft::SetHatchOpenSound, detail::null_type(), adopt(_2))
+			.property("CrashSound", &ACraft::GetCrashSound, &ACraft::SetCrashSound, detail::null_type(), adopt(_2)),
 
         CONCRETELUABINDING(ACDropShip, ACraft)
             .property("RightEngine", &ACDropShip::GetRightThruster, &ACDropShip::SetRightThruster, detail::null_type(), adopt(_2))

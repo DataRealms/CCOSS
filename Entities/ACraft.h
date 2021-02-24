@@ -573,6 +573,17 @@ enum
 	/// <param name="movableObjectToIgnore">A pointer to an MO which the Gibs and Attachables should not be colliding with.</param>
 	void GibThis(const Vector &impactImpulse = Vector(), MovableObject *movableObjectToIgnore = nullptr) override;
 
+	/// <summary>
+	/// Gets this ACraft's Hatch Open Sound. Ownership is not transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this ACraft's Hatch Open Sound.</returns>
+	SoundContainer* GetHatchOpenSound() const { return m_HatchOpenSound; }
+
+	/// <summary>
+	/// Sets this ACraft's Hatch Open Sound.
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this ACraft's Hatch Open Sound</param>
+	void SetHatchOpenSound(SoundContainer* newSound) { m_HatchOpenSound = newSound; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -590,7 +601,7 @@ protected:
     // The time it takes to open or close the hatch, in ms.
     int m_HatchDelay;
     // Sound for opening the hatch
-    SoundContainer m_HatchOpenSound;
+    SoundContainer *m_HatchOpenSound;
     // The new intermediate inventory of things that have been thrown into the craft while the doors are open,
     // but they shouldn't be ejected until the doors are closed and then opened again.
     std::deque<MovableObject *> m_NewInventory;

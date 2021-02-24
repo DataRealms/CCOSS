@@ -120,6 +120,30 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newSound">The new SoundContainer for this ADoor's Door Move Sound</param>
 		void SetDoorMoveSound(SoundContainer* newSound) { m_DoorMoveSound = newSound; }
+
+		/// <summary>
+		/// Gets this ADoor's Door Direction Change Sound. Ownership is not transferred!
+		/// </summary>
+		/// <returns>The SoundContainer for this ADoor's Door Direction Change Sound.</returns>
+		SoundContainer* GetDoorDirectionChangeSound() const { return m_DoorDirectionChangeSound; }
+
+		/// <summary>
+		/// Sets this ADoor's Door Direction Change Sound.
+		/// </summary>
+		/// <param name="newSound">The new SoundContainer for this ADoor's Door Direction Change Sound</param>
+		void SetDoorDirectionChangeSound(SoundContainer* newSound) { m_DoorDirectionChangeSound = newSound; }
+
+		/// <summary>
+		/// Gets this ADoor's Door Move End Sound. Ownership is not transferred!
+		/// </summary>
+		/// <returns>The SoundContainer for this ADoor's Door Move End Sound.</returns>
+		SoundContainer* GetDoorMoveEndSound() const { return m_DoorMoveEndSound; }
+
+		/// <summary>
+		/// Sets this ADoor's Door Move End Sound.
+		/// </summary>
+		/// <param name="newSound">The new SoundContainer for this ADoor's Door Move End Sound</param>
+		void SetDoorMoveEndSound(SoundContainer* newSound) { m_DoorMoveEndSound = newSound; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -212,8 +236,8 @@ namespace RTE {
 
 		SoundContainer *m_DoorMoveStartSound; //!< Sound played when the door starts moving from fully open/closed position towards the opposite end.
 		SoundContainer *m_DoorMoveSound; //!< Sound played while the door is moving between open/closed position.
-		SoundContainer m_DoorDirectionChangeSound; //!< Sound played when the door is interrupted while moving and changes directions. 
-		SoundContainer m_DoorMoveEndSound; //!< Sound played when the door stops moving and is at fully open/closed position.
+		SoundContainer *m_DoorDirectionChangeSound; //!< Sound played when the door is interrupted while moving and changes directions. 
+		SoundContainer *m_DoorMoveEndSound; //!< Sound played when the door stops moving and is at fully open/closed position.
 
 	private:
 

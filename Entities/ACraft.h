@@ -585,6 +585,18 @@ enum
 	/// <param name="newSound">The new SoundContainer for this ACraft's Hatch Open Sound</param>
 	void SetHatchOpenSound(SoundContainer* newSound) { m_HatchOpenSound = newSound; }
 
+	/// <summary>
+	/// Gets this ACraft's Crash Sound. Ownership is not transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this ACraft's Crash Sound.</returns>
+	SoundContainer* GetCrashSound() const { return m_CrashSound; }
+
+	/// <summary>
+	/// Sets this ACraft's Crash Sound.
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this ACraft's Crash Sound</param>
+	void SetCrashSound(SoundContainer* newSound) { m_CrashSound = newSound; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -624,8 +636,8 @@ protected:
     // Timer to measure how long ago a crash sound was played
     Timer m_CrashTimer;
     // Crash sound
-    SoundContainer m_CrashSound;
-    // The recomended, not absolute, maximum number of actors that fit in the inventory
+    SoundContainer *m_CrashSound;
+    // The maximum number of actors that fit in the inventory
     int m_MaxPassengers;
 
 	static bool s_CrabBombInEffect; //!< Flag to determine if a craft is triggering the Crab Bomb effect.

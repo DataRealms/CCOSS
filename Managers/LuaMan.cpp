@@ -667,8 +667,8 @@ int LuaMan::Initialize() {
             .def("IsOnScenePoint", &SceneObject::IsOnScenePoint),
 
         ABSTRACTLUABINDING(MovableObject, SceneObject)
-			.def("GetParent", (MovableObject * (MovableObject::*)())&MovableObject::GetParent)
-			.def("GetParent", (const MovableObject * (MovableObject::*)() const)&MovableObject::GetParent)
+			.def("GetParent", (MOSRotating * (MovableObject::*)())&MovableObject::GetParent)
+			.def("GetParent", (const MOSRotating * (MovableObject::*)() const)&MovableObject::GetParent)
 			.def("GetRootParent", (MovableObject * (MovableObject::*)())&MovableObject::GetRootParent)
 			.def("GetRootParent", (const MovableObject * (MovableObject::*)() const)&MovableObject::GetRootParent)
 			.property("Material", &MovableObject::GetMaterial)

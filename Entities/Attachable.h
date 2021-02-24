@@ -60,16 +60,16 @@ namespace RTE {
 
 #pragma region Parent Getters and Setters
 		/// <summary>
-		/// Gets the MO which is the parent of this Attachable.
+		/// Gets the MOSRotating which is the parent of this Attachable.
 		/// </summary>
 		/// <returns>A pointer to the parent of this Attachable.</returns>
-		MovableObject * GetParent() override { return m_Parent; }
+		MOSRotating * GetParent() override { return m_Parent; }
 
 		/// <summary>
-		/// Gets the MO which is the parent of this Attachable. 
+		/// Gets the MOSRotating which is the parent of this Attachable. 
 		/// </summary>
 		/// <returns>A pointer to the parent of this Attachable.</returns>
-		const MovableObject * GetParent() const override { return m_Parent; }
+		const MOSRotating * GetParent() const override { return m_Parent; }
 
 		/// <summary>
 		/// Indicates whether this Attachable is attached to an MOSRotating parent or not.

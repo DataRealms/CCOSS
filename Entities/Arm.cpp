@@ -213,7 +213,7 @@ void Arm::SetHeldMO(MovableObject *newHeldMO) {
 
         if (newHeldMO->IsHeldDevice()) {
             Attachable *newHeldDevice = dynamic_cast<Attachable *>(newHeldMO);
-            if (newHeldDevice->IsAttached()) { dynamic_cast<MOSRotating *>(newHeldDevice->GetParent())->RemoveAttachable(newHeldDevice); }
+            if (newHeldDevice->IsAttached()) { newHeldDevice->GetParent()->RemoveAttachable(newHeldDevice); }
             AddAttachable(newHeldDevice);
 
             m_HardcodedAttachableUniqueIDsAndSetters.insert({newHeldDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {

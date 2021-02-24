@@ -562,6 +562,30 @@ ClassInfoGetters
 
 	void SetEmitCountLimit(long newValue) { m_EmitCountLimit = newValue; }
 
+	/// <summary>
+	/// Gets this AEmitter's Emission Sound. Ownership is not transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this AEmitter's Emission Sound.</returns>
+	SoundContainer* GetEmissionSound() const { return m_EmissionSound; }
+
+	/// <summary>
+	/// Sets this AEmitter's Emission Sound.
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this AEmitter's Emission Sound</param>
+	void SetEmissionSound(SoundContainer* newSound) { m_EmissionSound = newSound; }
+
+	/// <summary>
+	/// Gets this AEmitter's Burst Sound. Ownership is not transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this AEmitter's Burst Sound.</returns>
+	SoundContainer* GetBurstSound() const { return m_BurstSound; }
+
+	/// <summary>
+	/// Sets this AEmitter's Burst Sound.
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this AEmitter's Burst Sound</param>
+	void SetBurstSound(SoundContainer* newSound) { m_BurstSound = newSound; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -573,8 +597,8 @@ protected:
     // The list of MO instances that get emitted
     std::list<Emission *> m_EmissionList;
     // Sounds
-    SoundContainer m_EmissionSound;
-    SoundContainer m_BurstSound;
+    SoundContainer *m_EmissionSound;
+    SoundContainer *m_BurstSound;
     SoundContainer m_EndSound;
     // Whether emitting is currently enabled or not.
     bool m_EmitEnabled;

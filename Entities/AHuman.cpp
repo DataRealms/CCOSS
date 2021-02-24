@@ -54,7 +54,7 @@ void AHuman::Clear()
     m_BackupFGFootGroup = nullptr;
     m_pBGFootGroup = 0;
     m_BackupBGFootGroup = nullptr;
-    m_StrideSound.Reset();
+    m_StrideSound = nullptr;
     m_ArmsState = WEAPON_READY;
     m_MoveState = STAND;
     m_ProneState = NOTPRONE;
@@ -193,7 +193,7 @@ int AHuman::Create(const AHuman &reference) {
     m_BackupBGFootGroup->SetOwner(this);
     m_BackupBGFootGroup->SetLimbPos(reference.m_BackupBGFootGroup->GetLimbPos());
 
-    m_StrideSound = reference.m_StrideSound;
+	if (reference.m_StrideSound) { m_StrideSound = dynamic_cast<SoundContainer*>(reference.m_StrideSound->Clone()); }
 
     m_ArmsState = reference.m_ArmsState;
     m_MoveState = reference.m_MoveState;
@@ -304,6 +304,7 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
         m_BackupBGFootGroup = new AtomGroup(*m_pBGFootGroup);
         m_BackupBGFootGroup->RemoveAllAtoms();
     } else if (propName == "StrideSound") {
+		m_StrideSound = new SoundContainer;
         reader >> m_StrideSound;
     } else if (propName == "StandLimbPath") {
         reader >> m_Paths[FGROUND][STAND];
@@ -3698,7 +3699,7 @@ void AHuman::Update()
 
             // Play the stride sound, if applicable
             if (playStride && !m_ArmClimbing[FGROUND] && !m_ArmClimbing[BGROUND]) {
-                m_StrideSound.Play(m_Pos);
+				if (m_StrideSound) { m_StrideSound->Play(m_Pos); }
                 RunScriptedFunctionInAppropriateScripts("OnStride");
             }
 

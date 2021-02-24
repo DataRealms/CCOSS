@@ -53,7 +53,7 @@ void ACrab::Clear()
     m_BackupRFGFootGroup = nullptr;
     m_pRBGFootGroup = 0;
     m_BackupRBGFootGroup = nullptr;
-    m_StrideSound.Reset();
+    m_StrideSound = nullptr;
     m_pJetpack = 0;
     m_JetTimeTotal = 0.0;
     m_JetTimeLeft = 0.0;
@@ -217,7 +217,7 @@ int ACrab::Create(const ACrab &reference) {
     m_BackupRBGFootGroup->SetOwner(this);
     m_BackupRBGFootGroup->SetLimbPos(reference.m_BackupRBGFootGroup->GetLimbPos());
 
-    m_StrideSound = reference.m_StrideSound;
+	if (reference.m_StrideSound) { m_StrideSound = dynamic_cast<SoundContainer*>(reference.m_StrideSound->Clone()); }
 
     m_MoveState = reference.m_MoveState;
 
@@ -324,6 +324,7 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
         m_BackupRFGFootGroup->RemoveAllAtoms();
         m_BackupRBGFootGroup = new AtomGroup(*m_BackupRFGFootGroup);
     } else if (propName == "StrideSound") {
+		m_StrideSound = new SoundContainer;
         reader >> m_StrideSound;
     } else if (propName == "LStandLimbPath" || propName == "LeftStandLimbPath") {
         reader >> m_Paths[LEFTSIDE][FGROUND][STAND];
@@ -2561,7 +2562,7 @@ void ACrab::Update()
 
             // Play the stride sound, if applicable
             if (playStride)
-                m_StrideSound.Play(m_Pos);
+				if (m_StrideSound) { m_StrideSound->Play(m_Pos); }
         }
         // JUMPING
         else if ((m_pRFGLeg || m_pRBGLeg) && m_MoveState == JUMP)

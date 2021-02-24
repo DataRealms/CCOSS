@@ -264,12 +264,15 @@ int AEmitter::Save(Writer &writer) const
 
 void AEmitter::Destroy(bool notInherited)
 {
-
     // Stop playback of sounds gracefully
 	if (m_EmissionSound) {
 		if (m_EndSound) { m_EmissionSound->IsBeingPlayed() ? m_EndSound->Play(m_Pos) : m_EndSound->Stop(); }
 		m_EmissionSound->Stop();
 	}
+
+	delete m_EmissionSound;
+	delete m_BurstSound;
+	delete m_EndSound;
 
 //    m_BurstSound.Stop();
 

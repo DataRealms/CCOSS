@@ -407,47 +407,6 @@ int ACrab::Save(Writer &writer) const
     return 0;
 }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the ACrab object ready for use.
-
-int ACrab::Create(istream &stream, bool checkType)
-{
-    if (checkType)
-    {
-        string name;
-        stream >> name;
-        if (name != m_sClass.GetName())
-        {
-           RTEAbort("Wrong type in stream when passed to Create");
-           return -1;
-        }
-    }
-
-    Actor::Create(stream);
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this ACrab to an output stream for
-//                  later recreation with Create(istream &stream);
-
-int ACrab::Save(ostream &stream) const
-{
-    stream << m_sClass.GetName() << " ";
-
-    Actor::Save(stream);
-//    stream << " ";
-
-    return 0;
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Destroy
@@ -460,6 +419,8 @@ void ACrab::Destroy(bool notInherited)
     delete m_pLBGFootGroup;
     delete m_pRFGFootGroup;
     delete m_pRBGFootGroup;
+
+	delete m_StrideSound;
 //    for (deque<LimbPath *>::iterator itr = m_WalkPaths.begin();
 //         itr != m_WalkPaths.end(); ++itr)
 //        delete *itr;

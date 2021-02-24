@@ -412,6 +412,8 @@ void AHuman::Destroy(bool notInherited) {
     delete m_pFGFootGroup;
     delete m_pBGFootGroup;
 
+	delete m_StrideSound;
+
     if (!notInherited) { Actor::Destroy(); }
     Clear();
 }

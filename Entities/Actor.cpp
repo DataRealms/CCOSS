@@ -464,6 +464,10 @@ int Actor::Save(Writer &writer) const
 void Actor::Destroy(bool notInherited)
 {
 	delete m_DeviceSwitchSound;
+	delete m_BodyHitSound;
+	delete m_PainSound;
+	delete m_DeathSound;
+	delete m_AlarmSound;
 
     for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
         delete (*itr);

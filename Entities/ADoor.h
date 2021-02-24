@@ -108,6 +108,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newSound">The new SoundContainer for this ADoor's Door Move Start Sound</param>
 		void SetDoorMoveStartSound(SoundContainer* newSound) { m_DoorMoveStartSound = newSound; }
+
+		/// <summary>
+		/// Gets this ADoor's Door Move Sound. Ownership is not transferred!
+		/// </summary>
+		/// <returns>The SoundContainer for this ADoor's Door Move Sound.</returns>
+		SoundContainer* GetDoorMoveSound() const { return m_DoorMoveSound; }
+
+		/// <summary>
+		/// Sets this ADoor's Door Move Sound.
+		/// </summary>
+		/// <param name="newSound">The new SoundContainer for this ADoor's Door Move Sound</param>
+		void SetDoorMoveSound(SoundContainer* newSound) { m_DoorMoveSound = newSound; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -199,7 +211,7 @@ namespace RTE {
 		Vector m_LastDoorMaterialPos; //!< The position the door attachable had when its material was drawn to the material bitmap. This is used to erase the previous material representation.
 
 		SoundContainer *m_DoorMoveStartSound; //!< Sound played when the door starts moving from fully open/closed position towards the opposite end.
-		SoundContainer m_DoorMoveSound; //!< Sound played while the door is moving between open/closed position.
+		SoundContainer *m_DoorMoveSound; //!< Sound played while the door is moving between open/closed position.
 		SoundContainer m_DoorDirectionChangeSound; //!< Sound played when the door is interrupted while moving and changes directions. 
 		SoundContainer m_DoorMoveEndSound; //!< Sound played when the door stops moving and is at fully open/closed position.
 

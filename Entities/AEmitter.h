@@ -586,6 +586,18 @@ ClassInfoGetters
 	/// <param name="newSound">The new SoundContainer for this AEmitter's Burst Sound</param>
 	void SetBurstSound(SoundContainer* newSound) { m_BurstSound = newSound; }
 
+	/// <summary>
+	/// Gets this AEmitter's End Sound. Ownership is not transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this AEmitter's End Sound.</returns>
+	SoundContainer* GetEndSound() const { return m_EndSound; }
+
+	/// <summary>
+	/// Sets this AEmitter's End Sound.
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this AEmitter's End Sound</param>
+	void SetEndSound(SoundContainer* newSound) { m_EndSound = newSound; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -599,7 +611,7 @@ protected:
     // Sounds
     SoundContainer *m_EmissionSound;
     SoundContainer *m_BurstSound;
-    SoundContainer m_EndSound;
+    SoundContainer *m_EndSound;
     // Whether emitting is currently enabled or not.
     bool m_EmitEnabled;
     // Whether or not the it was emitting last frame or not.

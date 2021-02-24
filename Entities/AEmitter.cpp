@@ -33,7 +33,7 @@ void AEmitter::Clear()
     m_EmissionList.clear();
     m_EmissionSound = nullptr;
     m_BurstSound = nullptr;
-    m_EndSound.Reset();
+	m_EndSound = nullptr;
     m_EmitEnabled = false;
     m_WasEmitting = false;
     m_EmitCount = 0;
@@ -81,8 +81,8 @@ int AEmitter::Create(const AEmitter &reference) {
 
 	if (reference.m_EmissionSound) { m_EmissionSound = dynamic_cast<SoundContainer*>(reference.m_EmissionSound->Clone()); }
 	if (reference.m_BurstSound) { m_BurstSound = dynamic_cast<SoundContainer*>(reference.m_BurstSound->Clone()); }
-	m_EndSound = reference.m_EndSound;
-    m_EmitEnabled = reference.m_EmitEnabled;
+	if (reference.m_EndSound) { m_EndSound = dynamic_cast<SoundContainer*>(reference.m_EndSound->Clone()); }
+	m_EmitEnabled = reference.m_EmitEnabled;
     m_EmitCount = reference.m_EmitCount;
     m_EmitCountLimit = reference.m_EmitCountLimit;
     m_MinThrottleRange = reference.m_MinThrottleRange;
@@ -125,6 +125,7 @@ int AEmitter::ReadProperty(const std::string_view &propName, Reader &reader) {
 		m_BurstSound = new SoundContainer;
         reader >> m_BurstSound;
     } else if (propName == "EndSound") {
+		m_EndSound = new SoundContainer;
         reader >> m_EndSound;
     } else if (propName == "EmissionEnabled") {
         reader >> m_EmitEnabled;
@@ -263,14 +264,10 @@ int AEmitter::Save(Writer &writer) const
 
 void AEmitter::Destroy(bool notInherited)
 {
-/* Don't own these anymore
-    for (list<MovableObject *>::iterator itr = m_EmissionList.begin();
-         itr != m_EmissionList.end(); ++itr)
-        delete (*itr);
-*/
+
     // Stop playback of sounds gracefully
 	if (m_EmissionSound) {
-		m_EmissionSound->IsBeingPlayed() ? m_EndSound.Play(m_Pos) : m_EndSound.Stop(); 
+		if (m_EndSound) { m_EmissionSound->IsBeingPlayed() ? m_EndSound->Play(m_Pos) : m_EndSound->Stop(); }
 		m_EmissionSound->Stop();
 	}
 
@@ -576,7 +573,7 @@ void AEmitter::Update()
 		{
 			if (m_EmissionSound) { m_EmissionSound->Stop(); }
 			if (m_BurstSound) { m_BurstSound->Stop(); }
-			m_EndSound.Play(m_Pos);
+			if (m_EndSound) { m_EndSound->Play(m_Pos); }
 			m_WasEmitting = false;
 		}
 	}

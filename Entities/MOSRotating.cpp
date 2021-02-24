@@ -1454,15 +1454,17 @@ void MOSRotating::Update() {
     Attachable *attachable = nullptr;
     for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
         attachable = *attachableIterator;
-        RTEAssert(attachable, "Broken Attachable!")
+        RTEAssert(attachable, "Broken Attachable!");
+        RTEAssert(attachable->IsAttached(), "Found Attachable on " + GetModuleAndPresetName() + " (" + attachable->GetModuleAndPresetName() + ") with no parent, this should never happen!");
+        RTEAssert(attachable->IsAttachedTo(this), "Found Attachable on " + GetModuleAndPresetName() + " (" + attachable->GetModuleAndPresetName() + ") with another parent (" + attachable->GetParent()->GetModuleAndPresetName() + "), this should never happen!");
         ++attachableIterator;
 
         attachable->Update();
-        RTEAssert(attachable, "Broken Attachable after Update!")
+        RTEAssert(attachable, "Broken Attachable after Update!");
 
         if (attachable->IsAttachedTo(this) && attachable->IsSetToDelete()) {
             RemoveAttachable(attachable, true, true);
-        } else if (!attachable->IsSetToDelete()) {
+        } else if (attachable->IsAttachedTo(this) && !attachable->IsSetToDelete()) {
             TransferForcesFromAttachable(attachable);
         }
     }
@@ -1906,9 +1908,6 @@ bool MOSRotating::HandlePotentialRadiusAffectingAttachable(const Attachable *att
 
 bool MOSRotating::TransferForcesFromAttachable(Attachable *attachable) {
     bool intact = false;
-    RTEAssert(attachable->IsAttached(), "Tried to transfer forces from Attachable (" + attachable->GetModuleAndPresetName() + ") with no parent, this should never happen!");
-    RTEAssert(attachable->IsAttachedTo(this), "Tried to transfer forces from another parent's (" + attachable->GetParent()->GetModuleAndPresetName() + ") Attachable (" + attachable->GetModuleAndPresetName() + "), this should never happen!");
-
     Vector forces;
     Vector impulses;
     intact = attachable->TransferJointForces(forces) && attachable->TransferJointImpulses(impulses);

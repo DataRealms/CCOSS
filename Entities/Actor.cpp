@@ -63,7 +63,7 @@ void Actor::Clear()
 {
     m_Controller.Reset();
     m_BodyHitSound = nullptr;
-    m_AlarmSound.Reset();
+    m_AlarmSound = nullptr;
     m_PainSound = nullptr;
     m_DeathSound = nullptr;
     m_DeviceSwitchSound = nullptr;
@@ -191,7 +191,7 @@ int Actor::Create(const Actor &reference)
     m_Controller.SetControlledActor(this);
 
 	if (reference.m_BodyHitSound) { m_BodyHitSound = dynamic_cast<SoundContainer *>(reference.m_BodyHitSound->Clone()); }
-	m_AlarmSound = reference.m_AlarmSound;
+	if (reference.m_AlarmSound) { m_AlarmSound = dynamic_cast<SoundContainer*>(reference.m_AlarmSound->Clone()); }
 	if (reference.m_PainSound) { m_PainSound = dynamic_cast<SoundContainer *>(reference.m_PainSound->Clone()); }
 	if (reference.m_DeathSound) { m_DeathSound = dynamic_cast<SoundContainer *>(reference.m_DeathSound->Clone()); }
 	if (reference.m_DeviceSwitchSound) { m_DeviceSwitchSound = dynamic_cast<SoundContainer *>(reference.m_DeviceSwitchSound->Clone()); }
@@ -304,9 +304,10 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 	if (propName == "BodyHitSound") {
 		m_BodyHitSound = new SoundContainer;
 		reader >> m_BodyHitSound;
-	} else if (propName == "AlarmSound")
+	} else if (propName == "AlarmSound") {
+		m_AlarmSound = new SoundContainer;
 		reader >> m_AlarmSound;
-	else if (propName == "PainSound") {
+	} else if (propName == "PainSound") {
 		m_PainSound = new SoundContainer;
 		reader >> m_PainSound;
 	} else if (propName == "DeathSound") {

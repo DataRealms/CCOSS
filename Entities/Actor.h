@@ -811,7 +811,7 @@ ClassInfoGetters
 //                  is there.
 // Return value:    None.
 
-	void AlarmPoint(const Vector &alarmPoint) { if (m_AlarmTimer.GetElapsedSimTimeMS() > 50) { m_AlarmTimer.Reset(); m_LastAlarmPos = m_PointingTarget = alarmPoint; m_AlarmSound.Play(alarmPoint); } }
+	void AlarmPoint(const Vector& alarmPoint) { if (m_AlarmTimer.GetElapsedSimTimeMS() > 50) { m_AlarmTimer.Reset(); m_LastAlarmPos = m_PointingTarget = alarmPoint; if (m_AlarmSound) { m_AlarmSound->Play(alarmPoint); } } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1246,6 +1246,17 @@ ClassInfoGetters
 	/// <param name="newSound">The new SoundContainer for this Actor's Pain Sound</param>
 	void SetPainSound(SoundContainer* newSound) { m_PainSound = newSound; }
 
+	/// <summary>
+	/// Gets this Actor's Alarm Sound. Ownership is not transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this Actor's Alarm Sound.</returns>
+	SoundContainer* GetAlarmSound() const { return m_AlarmSound; }
+
+	/// <summary>
+	/// Sets this Actor's Alarm Sound.
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this Actor's Alarm Sound</param>
+	void SetAlarmSound(SoundContainer* newSound) { m_AlarmSound = newSound; }
 
 	/// <summary>
 	/// Gets the X and Y thresholds for how fast the actor can travel before losing stability.
@@ -1295,7 +1306,7 @@ protected:
 
     // Sounds
     SoundContainer *m_BodyHitSound;
-    SoundContainer m_AlarmSound;
+    SoundContainer *m_AlarmSound;
     SoundContainer *m_PainSound;
     SoundContainer *m_DeathSound;
     SoundContainer *m_DeviceSwitchSound;

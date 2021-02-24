@@ -47,7 +47,7 @@ namespace RTE {
 
 		m_DrawAtomGroupVisualizations = false;
 		m_DrawHandAndFootGroupVisualizations = false;
-		m_DrawWalkPathVisualizations = false;
+		m_DrawLimbPathVisualizations = false;
 		m_PrintDebugInfo = false;
 		m_MeasureModuleLoadTime = false;
 	}
@@ -175,8 +175,10 @@ namespace RTE {
 			reader >> m_DrawAtomGroupVisualizations;
 		} else if (propName == "DrawHandAndFootGroupVisualizations") {
 			reader >> m_DrawHandAndFootGroupVisualizations;
-		} else if (propName == "DrawWalkPathVisualizations") {
-			reader >> m_DrawWalkPathVisualizations;
+		} else if (propName == "DrawLimbPathVisualizations") {
+			reader >> m_DrawLimbPathVisualizations;
+		} else if (propName == "DrawRaycastVisualizations") {
+			reader >> g_SceneMan.m_DrawRayCastVisualizations;
 		} else if (propName == "PrintDebugInfo") {
 			reader >> m_PrintDebugInfo;
 		} else if (propName == "MeasureModuleLoadTime") {
@@ -330,7 +332,8 @@ namespace RTE {
 		writer.NewLine(false);
 		writer.NewPropertyWithValue("DrawAtomGroupVisualizations", m_DrawAtomGroupVisualizations);
 		writer.NewPropertyWithValue("DrawHandAndFootGroupVisualizations", m_DrawHandAndFootGroupVisualizations);
-		writer.NewPropertyWithValue("DrawWalkPathVisualizations", m_DrawWalkPathVisualizations);
+		writer.NewPropertyWithValue("DrawLimbPathVisualizations", m_DrawLimbPathVisualizations);
+		writer.NewPropertyWithValue("DrawRaycastVisualizations", g_SceneMan.m_DrawRayCastVisualizations);
 		writer.NewPropertyWithValue("PrintDebugInfo", m_PrintDebugInfo);
 		writer.NewPropertyWithValue("MeasureModuleLoadTime", m_MeasureModuleLoadTime);
 

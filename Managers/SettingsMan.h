@@ -312,16 +312,16 @@ namespace RTE {
 		void SetDrawHandAndFootGroupVisualizations(bool drawHandAndFootGroupVisualizations) { m_DrawHandAndFootGroupVisualizations = drawHandAndFootGroupVisualizations; }
 
 		/// <summary>
-		/// Gets whether to draw WalkPath visualizations or not.
+		/// Gets whether to draw LimbPath visualizations or not.
 		/// </summary>
-		/// <returns>Whether to draw WalkPath visualizations or not.</returns>
-		bool DrawWalkPathVisualizations() const { return m_DrawWalkPathVisualizations; }
+		/// <returns>Whether to draw LimbPath visualizations or not.</returns>
+		bool DrawLimbPathVisualizations() const { return m_DrawLimbPathVisualizations; }
 
 		/// <summary>
-		/// Sets whether to draw WalkPath visualizations or not.
+		/// Sets whether to draw LimbPath visualizations or not.
 		/// </summary>
 		/// <param name="drawAtomGroupVisualizations">Whether to draw AtomGroup visualizations or not.</param>
-		void SetDrawWalkPathVisualizations(bool drawWalkPathVisualizations) { m_DrawWalkPathVisualizations = drawWalkPathVisualizations; }
+		void SetDrawLimbPathVisualizations(bool drawLimbPathVisualizations) { m_DrawLimbPathVisualizations = drawLimbPathVisualizations; }
 
 		/// <summary>
 		/// Gets whether debug print mode is enabled or not.
@@ -399,7 +399,7 @@ namespace RTE {
 		
 		bool m_DrawAtomGroupVisualizations; //!< Whether to draw MOSRotating AtomGroups to the Scene MO color Bitmap.
 		bool m_DrawHandAndFootGroupVisualizations; //!< Whether to draw Actor HandGroups and FootGroups to the Scene MO color Bitmap.
-		bool m_DrawWalkPathVisualizations; //!< Whether to draw Actor WalkPaths to the Scene MO color Bitmap.
+		bool m_DrawLimbPathVisualizations; //!< Whether to draw Actor LimbPaths to the Scene MO color Bitmap.
 		bool m_PrintDebugInfo; //!< Print some debug info in console.
 		bool m_MeasureModuleLoadTime; //!< Whether to measure the duration of data module loading (extraction included). For benchmarking purposes.
 

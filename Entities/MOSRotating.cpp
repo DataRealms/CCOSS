@@ -1867,12 +1867,10 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
         if (attachableToDraw->IsDrawnAfterParent() && attachableToDraw->IsDrawnNormallyByParent()) { attachableToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
     }
 
-#ifdef DEBUG_BUILD
-    if (mode == g_DrawColor && !onlyPhysical && m_pAtomGroup && GetRootParent() == this) {
+    if (mode == g_DrawColor && !onlyPhysical && m_pAtomGroup && g_SettingsMan.DrawAtomGroupVisualizations() && GetRootParent() == this) {
         m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
         //m_pDeepGroup->Draw(pTargetBitmap, targetPos, false, 13);
     }
-#endif
 }
 
 bool MOSRotating::HandlePotentialRadiusAffectingAttachable(const Attachable *attachable) {

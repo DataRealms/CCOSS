@@ -23,6 +23,7 @@
 #include "HDFirearm.h"
 #include "PieMenuGUI.h"
 #include "Scene.h"
+#include "SettingsMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
@@ -2864,18 +2865,21 @@ void ACrab::Update()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef DEBUG_BUILD
 void ACrab::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     Actor::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-    if (mode == g_DrawColor && !onlyPhysical) {
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawHandAndFootGroupVisualizations()) {
         m_pLFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pLBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pRFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pRBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
     }
+
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawWalkPathVisualizations()) {
+        m_Paths[LEFTSIDE][WALK]->Draw(pTargetBitmap, targetPos, 122);
+        m_Paths[RIGHTSIDE][WALK]->Draw(pTargetBitmap, targetPos, 122);
+    }
 }
-#endif
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

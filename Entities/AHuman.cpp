@@ -4359,21 +4359,20 @@ void AHuman::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode,
     if (m_pFGArm && m_pBGArm && !onlyPhysical && mode == g_DrawColor && m_pBGArm->DidReach() && m_pFGArm->HoldsHeldDevice() && !m_pFGArm->HoldsThrownDevice() && !m_pFGArm->GetHeldDevice()->IsReloading() && !m_pFGArm->GetHeldDevice()->IsShield()) {
         m_pBGArm->DrawHand(pTargetBitmap, targetPos, realMode);
     }
-    
-#ifdef DEBUG_BUILD
-    if (mode == g_DrawDebug) {
-        m_Paths[m_HFlipped][WALK].Draw(pTargetBitmap, targetPos, 122);
-        m_Paths[m_HFlipped][CRAWL].Draw(pTargetBitmap, targetPos, 122);
-        m_Paths[m_HFlipped][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);
-        m_Paths[m_HFlipped][CLIMB].Draw(pTargetBitmap, targetPos, 165);
-    }
-    if (mode == g_DrawColor && !onlyPhysical) {
+
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawHandAndFootGroupVisualizations()) {
         m_pFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pFGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pBGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
     }
-#endif
+
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawWalkPathVisualizations()) {
+        m_Paths[m_HFlipped][WALK].Draw(pTargetBitmap, targetPos, 122);
+        m_Paths[m_HFlipped][CRAWL].Draw(pTargetBitmap, targetPos, 122);
+        m_Paths[m_HFlipped][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);
+        m_Paths[m_HFlipped][CLIMB].Draw(pTargetBitmap, targetPos, 165);
+    }
 }
 
 

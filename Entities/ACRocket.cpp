@@ -19,6 +19,7 @@
 #include "Controller.h"
 #include "Matrix.h"
 #include "AEmitter.h"
+#include "SettingsMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
@@ -1002,15 +1003,13 @@ void ACRocket::ResetEmissionTimers()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef DEBUG_BUILD
 void ACRocket::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     ACraft::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-    if (mode == g_DrawColor) {
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawHandAndFootGroupVisualizations()) {
         m_pRFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pLFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
     }
 }
-#endif
 
 } // namespace RTE

@@ -418,6 +418,11 @@ namespace RTE {
 		if (newParent) {
 			m_Parent = newParent;
 			m_Team = newParent->GetTeam();
+			if (InheritsHFlipped() != 0) { m_HFlipped = m_InheritsHFlipped == 1 ? m_Parent->IsHFlipped() : !m_Parent->IsHFlipped(); }
+			if (InheritsRotAngle()) {
+				SetRotAngle(m_Parent->GetRotAngle() + m_InheritedRotAngleOffset * static_cast<float>(m_Parent->GetFlipFactor()));
+				m_AngularVel = 0.0F;
+			}
 			UpdatePositionAndJointPositionBasedOnOffsets();
 			if (m_CollidesWithTerrainWhileAttached) { AddOrRemoveAtomsFromRootParentAtomGroup(true); }
 		} else {

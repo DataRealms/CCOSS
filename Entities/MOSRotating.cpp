@@ -325,10 +325,8 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
     else if (propName == "GibBlastStrength") {
         reader >> m_GibBlastStrength;
 	} else if (propName == "GibSound") {
-		if (!m_GibSound) {
-			m_GibSound = new SoundContainer;
-			reader >> m_GibSound;
-		}
+		if (!m_GibSound) { m_GibSound = new SoundContainer; }
+		reader >> m_GibSound;
 	} else if (propName == "EffectOnGib")
         reader >> m_EffectOnGib;
     else if (propName == "LoudnessOnGib")

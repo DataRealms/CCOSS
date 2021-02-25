@@ -221,6 +221,18 @@ namespace RTE {
 		void SetTrailLength(const int trailLength) { m_TrailLength = trailLength; }
 
 		/// <summary>
+		/// Gets the length variation scalar of a trail.
+		/// </summary>
+		/// <returns>The length variation scalar of the trail.</returns>
+		float GetTrailLengthVariation() const { return m_TrailLengthVariation; }
+
+		/// <summary>
+		/// Sets the length variation scalar of a trail.
+		/// </summary>
+		/// <param name="trailLengthVariation">The new length variation scalar, 0 meaning no variation and 1 meaning full variation.</param>
+		void SetTrailLengthVariation(const float trailLengthVariation) { m_TrailLengthVariation = trailLengthVariation; }
+
+		/// <summary>
 		/// Gets the offset vector that was first set for this Atom. The GetOffset may have additional offsets baked into it if this is part of an group.
 		/// </summary>
 		/// <returns>The original offset Vector.</returns>
@@ -497,6 +509,7 @@ namespace RTE {
 
 		Color m_TrailColor; //!< Trail color
 		int m_TrailLength; //!< The longest the trail should/can get drawn. If 0, no trail is drawn.
+		float m_TrailLengthVariation; //!< A scalar that randomizes the trail length on each frame.
 
 		// Bresenham line algorithm variables
 		int m_IntPos[2];

@@ -38,6 +38,7 @@ namespace RTE {
 		*/
 		m_TrailColor.Reset();
 		m_TrailLength = 0;
+		m_TrailLengthVariation = 0.1;
 		m_NumPenetrations = 0;
 		m_ChangedDir = true;
 		m_ResultWrapped = false;
@@ -59,6 +60,7 @@ namespace RTE {
 		m_OwnerMO = owner;
 		m_TrailColor = trailColor;
 		m_TrailLength = trailLength;
+		m_TrailLengthVariation = 0;
 
 		return 0;
 	}
@@ -73,6 +75,7 @@ namespace RTE {
 		m_SubgroupID = reference.m_SubgroupID;
 		m_TrailColor = reference.m_TrailColor;
 		m_TrailLength = reference.m_TrailLength;
+		m_TrailLengthVariation = reference.m_TrailLengthVariation;
 
 		// These need to be set manually by the new owner.
 		m_OwnerMO = 0;
@@ -98,6 +101,8 @@ namespace RTE {
 			reader >> m_TrailColor;
 		} else if (propName == "TrailLength") {
 			reader >> m_TrailLength;
+		} else if (propName == "TrailLengthVariation") {
+			reader >> m_TrailLengthVariation;
 		} else {
 			return Serializable::ReadProperty(propName, reader);
 		}
@@ -114,6 +119,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("Material", m_Material);
 		writer.NewPropertyWithValue("TrailColor", m_TrailColor);
 		writer.NewPropertyWithValue("TrailLength", m_TrailLength);
+		writer.NewPropertyWithValue("TrailLengthVariation", m_TrailLengthVariation);
 
 		return 0;
 	}
@@ -962,7 +968,7 @@ namespace RTE {
 
 		// Draw the trail
 		if (g_TimerMan.DrawnSimUpdate() && m_TrailLength) {
-			int length = m_TrailLength /* + 3 * RandomNum()*/;
+			int length = m_TrailLength * RandomNum(1.0 - m_TrailLengthVariation, 1.0);
 			for (int i = trailPoints.size() - std::min(length, static_cast<int>(trailPoints.size())); i < trailPoints.size(); ++i) {
 				putpixel(trailBitmap, trailPoints[i].first, trailPoints[i].second, m_TrailColor.GetIndex());
 			}

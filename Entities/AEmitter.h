@@ -563,40 +563,40 @@ ClassInfoGetters
 	void SetEmitCountLimit(long newValue) { m_EmitCountLimit = newValue; }
 
 	/// <summary>
-	/// Gets this AEmitter's Emission Sound. Ownership is not transferred!
+	/// Gets this AEmitter's emission sound. Ownership is not transferred!
 	/// </summary>
-	/// <returns>The SoundContainer for this AEmitter's Emission Sound.</returns>
-	SoundContainer* GetEmissionSound() const { return m_EmissionSound; }
+	/// <returns>The SoundContainer for this AEmitter's emission sound.</returns>
+	SoundContainer * GetEmissionSound() const { return m_EmissionSound; }
 
 	/// <summary>
-	/// Sets this AEmitter's Emission Sound.
+	/// Sets this AEmitter's emission sound.
 	/// </summary>
-	/// <param name="newSound">The new SoundContainer for this AEmitter's Emission Sound</param>
-	void SetEmissionSound(SoundContainer* newSound) { m_EmissionSound = newSound; }
+	/// <param name="newSound">The new SoundContainer for this AEmitter's emission sound.</param>
+	void SetEmissionSound(SoundContainer *newSound) { m_EmissionSound = newSound; }
 
 	/// <summary>
-	/// Gets this AEmitter's Burst Sound. Ownership is not transferred!
+	/// Gets this AEmitter's burst sound. Ownership is not transferred!
 	/// </summary>
-	/// <returns>The SoundContainer for this AEmitter's Burst Sound.</returns>
-	SoundContainer* GetBurstSound() const { return m_BurstSound; }
+	/// <returns>The SoundContainer for this AEmitter's burst sound.</returns>
+	SoundContainer * GetBurstSound() const { return m_BurstSound; }
 
 	/// <summary>
-	/// Sets this AEmitter's Burst Sound.
+	/// Sets this AEmitter's burst sound.
 	/// </summary>
-	/// <param name="newSound">The new SoundContainer for this AEmitter's Burst Sound</param>
-	void SetBurstSound(SoundContainer* newSound) { m_BurstSound = newSound; }
+	/// <param name="newSound">The new SoundContainer for this AEmitter's burst sound.</param>
+	void SetBurstSound(SoundContainer *newSound) { m_BurstSound = newSound; }
 
 	/// <summary>
-	/// Gets this AEmitter's End Sound. Ownership is not transferred!
+	/// Gets this AEmitter's end sound. Ownership is not transferred!
 	/// </summary>
-	/// <returns>The SoundContainer for this AEmitter's End Sound.</returns>
-	SoundContainer* GetEndSound() const { return m_EndSound; }
+	/// <returns>The SoundContainer for this AEmitter's end sound.</returns>
+	SoundContainer * GetEndSound() const { return m_EndSound; }
 
 	/// <summary>
-	/// Sets this AEmitter's End Sound.
+	/// Sets this AEmitter's end sound.
 	/// </summary>
-	/// <param name="newSound">The new SoundContainer for this AEmitter's End Sound</param>
-	void SetEndSound(SoundContainer* newSound) { m_EndSound = newSound; }
+	/// <param name="newSound">The new SoundContainer for this AEmitter's end sound.</param>
+	void SetEndSound(SoundContainer *newSound) { m_EndSound = newSound; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

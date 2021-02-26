@@ -98,52 +98,52 @@ namespace RTE {
 		bool IsControllable() const override { return false; }
 
 		/// <summary>
-		/// Gets this ADoor's Door Move Start Sound. Ownership is not transferred!
+		/// Gets this ADoor's door move start sound. Ownership is not transferred!
 		/// </summary>
-		/// <returns>The SoundContainer for this ADoor's Door Move Start Sound.</returns>
-		SoundContainer* GetDoorMoveStartSound() const { return m_DoorMoveStartSound; }
+		/// <returns>The SoundContainer for this ADoor's door move start sound.</returns>
+		SoundContainer * GetDoorMoveStartSound() const { return m_DoorMoveStartSound; }
 
 		/// <summary>
-		/// Sets this ADoor's Door Move Start Sound.
+		/// Sets this ADoor's door move start sound.
 		/// </summary>
-		/// <param name="newSound">The new SoundContainer for this ADoor's Door Move Start Sound</param>
-		void SetDoorMoveStartSound(SoundContainer* newSound) { m_DoorMoveStartSound = newSound; }
+		/// <param name="newSound">The new SoundContainer for this ADoor's door move start sound.</param>
+		void SetDoorMoveStartSound(SoundContainer *newSound) { m_DoorMoveStartSound = newSound; }
 
 		/// <summary>
-		/// Gets this ADoor's Door Move Sound. Ownership is not transferred!
+		/// Gets this ADoor's door move sound. Ownership is not transferred!
 		/// </summary>
-		/// <returns>The SoundContainer for this ADoor's Door Move Sound.</returns>
-		SoundContainer* GetDoorMoveSound() const { return m_DoorMoveSound; }
+		/// <returns>The SoundContainer for this ADoor's door move sound.</returns>
+		SoundContainer * GetDoorMoveSound() const { return m_DoorMoveSound; }
 
 		/// <summary>
-		/// Sets this ADoor's Door Move Sound.
+		/// Sets this ADoor's door move sound.
 		/// </summary>
-		/// <param name="newSound">The new SoundContainer for this ADoor's Door Move Sound</param>
-		void SetDoorMoveSound(SoundContainer* newSound) { m_DoorMoveSound = newSound; }
+		/// <param name="newSound">The new SoundContainer for this ADoor's door move sound.</param>
+		void SetDoorMoveSound(SoundContainer *newSound) { m_DoorMoveSound = newSound; }
 
 		/// <summary>
-		/// Gets this ADoor's Door Direction Change Sound. Ownership is not transferred!
+		/// Gets this ADoor's door direction change sound. Ownership is not transferred!
 		/// </summary>
-		/// <returns>The SoundContainer for this ADoor's Door Direction Change Sound.</returns>
-		SoundContainer* GetDoorDirectionChangeSound() const { return m_DoorDirectionChangeSound; }
+		/// <returns>The SoundContainer for this ADoor's door direction change sound.</returns>
+		SoundContainer * GetDoorDirectionChangeSound() const { return m_DoorDirectionChangeSound; }
 
 		/// <summary>
-		/// Sets this ADoor's Door Direction Change Sound.
+		/// Sets this ADoor's door direction change sound.
 		/// </summary>
-		/// <param name="newSound">The new SoundContainer for this ADoor's Door Direction Change Sound</param>
-		void SetDoorDirectionChangeSound(SoundContainer* newSound) { m_DoorDirectionChangeSound = newSound; }
+		/// <param name="newSound">The new SoundContainer for this ADoor's door direction change sound.</param>
+		void SetDoorDirectionChangeSound(SoundContainer *newSound) { m_DoorDirectionChangeSound = newSound; }
 
 		/// <summary>
-		/// Gets this ADoor's Door Move End Sound. Ownership is not transferred!
+		/// Gets this ADoor's door move end sound. Ownership is not transferred!
 		/// </summary>
-		/// <returns>The SoundContainer for this ADoor's Door Move End Sound.</returns>
-		SoundContainer* GetDoorMoveEndSound() const { return m_DoorMoveEndSound; }
+		/// <returns>The SoundContainer for this ADoor's door move end sound.</returns>
+		SoundContainer * GetDoorMoveEndSound() const { return m_DoorMoveEndSound; }
 
 		/// <summary>
-		/// Sets this ADoor's Door Move End Sound.
+		/// Sets this ADoor's door move end sound.
 		/// </summary>
-		/// <param name="newSound">The new SoundContainer for this ADoor's Door Move End Sound</param>
-		void SetDoorMoveEndSound(SoundContainer* newSound) { m_DoorMoveEndSound = newSound; }
+		/// <param name="newSound">The new SoundContainer for this ADoor's door move end sound.</param>
+		void SetDoorMoveEndSound(SoundContainer *newSound) { m_DoorMoveEndSound = newSound; }
 #pragma endregion
 
 #pragma region Concrete Methods

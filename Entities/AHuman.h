@@ -879,16 +879,16 @@ ClassInfoGetters
 
 
 	/// <summary>
-	/// Gets this AHuman's Stride Sound. Ownership is not transferred!
+	/// Gets this AHuman's stride sound. Ownership is not transferred!
 	/// </summary>
-	/// <returns>The SoundContainer for this AHuman's Stride Sound.</returns>
-	SoundContainer* GetStrideSound() const { return m_StrideSound; }
+	/// <returns>The SoundContainer for this AHuman's stride sound.</returns>
+	SoundContainer * GetStrideSound() const { return m_StrideSound; }
 
 	/// <summary>
-	/// Sets this AHuman's Stride Sound.
+	/// Sets this AHuman's stride sound.
 	/// </summary>
-	/// <param name="newSound">The new SoundContainer for this AHuman's Stride Sound</param>
-	void SetStrideSound(SoundContainer* newSound) { m_StrideSound = newSound; }
+	/// <param name="newSound">The new SoundContainer for this AHuman's stride sound.</param>
+	void SetStrideSound(SoundContainer *newSound) { m_StrideSound = newSound; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

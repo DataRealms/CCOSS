@@ -574,28 +574,28 @@ enum
 	void GibThis(const Vector &impactImpulse = Vector(), MovableObject *movableObjectToIgnore = nullptr) override;
 
 	/// <summary>
-	/// Gets this ACraft's Hatch Open Sound. Ownership is not transferred!
+	/// Gets this ACraft's hatch open sound. Ownership is not transferred!
 	/// </summary>
-	/// <returns>The SoundContainer for this ACraft's Hatch Open Sound.</returns>
-	SoundContainer* GetHatchOpenSound() const { return m_HatchOpenSound; }
+	/// <returns>The SoundContainer for this ACraft's hatch open sound.</returns>
+	SoundContainer * GetHatchOpenSound() const { return m_HatchOpenSound; }
 
 	/// <summary>
-	/// Sets this ACraft's Hatch Open Sound.
+	/// Sets this ACraft's hatch open sound.
 	/// </summary>
-	/// <param name="newSound">The new SoundContainer for this ACraft's Hatch Open Sound</param>
-	void SetHatchOpenSound(SoundContainer* newSound) { m_HatchOpenSound = newSound; }
+	/// <param name="newSound">The new SoundContainer for this ACraft's hatch open sound.</param>
+	void SetHatchOpenSound(SoundContainer *newSound) { m_HatchOpenSound = newSound; }
 
 	/// <summary>
-	/// Gets this ACraft's Crash Sound. Ownership is not transferred!
+	/// Gets this ACraft's crash sound. Ownership is not transferred!
 	/// </summary>
-	/// <returns>The SoundContainer for this ACraft's Crash Sound.</returns>
-	SoundContainer* GetCrashSound() const { return m_CrashSound; }
+	/// <returns>The SoundContainer for this ACraft's crash sound.</returns>
+	SoundContainer * GetCrashSound() const { return m_CrashSound; }
 
 	/// <summary>
-	/// Sets this ACraft's Crash Sound.
+	/// Sets this ACraft's crash sound.
 	/// </summary>
-	/// <param name="newSound">The new SoundContainer for this ACraft's Crash Sound</param>
-	void SetCrashSound(SoundContainer* newSound) { m_CrashSound = newSound; }
+	/// <param name="newSound">The new SoundContainer for this ACraft's crash sound.</param>
+	void SetCrashSound(SoundContainer *newSound) { m_CrashSound = newSound; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

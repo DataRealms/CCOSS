@@ -516,16 +516,16 @@ int FirearmActivationDelay() const;
 
 
 	/// <summary>
-	/// Gets this ACrab's Stride Sound. Ownership is not transferred!
+	/// Gets this ACrab's stride sound. Ownership is not transferred!
 	/// </summary>
-	/// <returns>The SoundContainer for this ACrab's Stride Sound.</returns>
-	SoundContainer* GetStrideSound() const { return m_StrideSound; }
+	/// <returns>The SoundContainer for this ACrab's stride sound.</returns>
+	SoundContainer * GetStrideSound() const { return m_StrideSound; }
 
 	/// <summary>
-	/// Sets this ACrab's Stride Sound.
+	/// Sets this ACrab's stride sound.
 	/// </summary>
-	/// <param name="newSound">The new SoundContainer for this ACrab's Stride Sound</param>
-	void SetStrideSound(SoundContainer* newSound) { m_StrideSound = newSound; }
+	/// <param name="newSound">The new SoundContainer for this ACrab's stride sound.</param>
+	void SetStrideSound(SoundContainer *newSound) { m_StrideSound = newSound; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

@@ -1397,7 +1397,12 @@ void MOSRotating::PostTravel()
     if (g_MovableMan.IsMOSubtractionEnabled() && (m_ForceDeepCheck || m_DeepCheck))
         DeepCheck(true, 8, 50);
 
-    for (Attachable *attachable : m_Attachables) {
+
+    Attachable *attachable;
+    for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
+        attachable = *attachableIterator;
+        RTEAssert(attachable, "Broken Attachable in PostTravel!");
+        ++attachableIterator;
         attachable->PostTravel();
     }
 }
@@ -1428,7 +1433,7 @@ void MOSRotating::Update() {
     AEmitter *wound = nullptr;
     for (std::list<AEmitter *>::iterator woundIterator = m_Wounds.begin(); woundIterator != m_Wounds.end(); ) {
         wound = *woundIterator;
-        RTEAssert(wound && wound->IsAttachedTo(this), "Broken wound AEmitter");
+        RTEAssert(wound && wound->IsAttachedTo(this), "Broken wound AEmitter in Update");
         ++woundIterator;
         wound->Update();
 
@@ -1452,13 +1457,13 @@ void MOSRotating::Update() {
     Attachable *attachable = nullptr;
     for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
         attachable = *attachableIterator;
-        RTEAssert(attachable, "Broken Attachable!");
+        RTEAssert(attachable, "Broken Attachable in Update!");
         RTEAssert(attachable->IsAttached(), "Found Attachable on " + GetModuleAndPresetName() + " (" + attachable->GetModuleAndPresetName() + ") with no parent, this should never happen!");
         RTEAssert(attachable->IsAttachedTo(this), "Found Attachable on " + GetModuleAndPresetName() + " (" + attachable->GetModuleAndPresetName() + ") with another parent (" + attachable->GetParent()->GetModuleAndPresetName() + "), this should never happen!");
         ++attachableIterator;
 
         attachable->Update();
-        RTEAssert(attachable, "Broken Attachable after Update!");
+        RTEAssert(attachable, "Broken Attachable after Updating it!");
 
         if (attachable->IsAttachedTo(this) && attachable->IsSetToDelete()) {
             RemoveAttachable(attachable, true, true);

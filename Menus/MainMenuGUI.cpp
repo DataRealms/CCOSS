@@ -352,8 +352,6 @@ int MainMenuGUI::Create(Controller *pController)
 	m_aOptionsCheckbox[SHOWFOREIGNITEMS]->SetCheck(g_SettingsMan.ShowForeignItems());
     m_aOptionsCheckbox[SHOWTOOLTIPS] = dynamic_cast<GUICheckbox *>(m_pGUIController->GetControl("ShowToolTipsCheckbox"));
 	m_aOptionsCheckbox[SHOWTOOLTIPS]->SetCheck(g_SettingsMan.ToolTips());
-	m_aOptionsCheckbox[PRECISECOLLISIONS] = dynamic_cast<GUICheckbox *>(m_pGUIController->GetControl("PreciseCollisionsCheckbox"));
-	m_aOptionsCheckbox[PRECISECOLLISIONS]->SetCheck(g_SettingsMan.PreciseCollisions());
 
     m_pResolutionCombo = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("ComboResolution"));
     UpdateResolutionCombo();
@@ -531,7 +529,7 @@ int MainMenuGUI::Create(Controller *pController)
     // Read all the credits from the file and set the credits label
 	m_CreditsLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("CreditsLabel"));
     Reader creditsReader("Credits.txt");
-    string creditsText = creditsReader.ReadTo('#', true);
+    std::string creditsText = creditsReader.WholeFileAsString();
 
 // TODO: Get Unicode going!
     // Hack here to change the special characters over 128 in the ansi ascii table to match our font files
@@ -648,7 +646,6 @@ void MainMenuGUI::Update()
 				g_SettingsMan.SetBlipOnRevealUnseen(m_aOptionsCheckbox[BLIPONREVEALUNSEEN]->GetCheck());
 				g_SettingsMan.SetShowForeignItems(m_aOptionsCheckbox[SHOWFOREIGNITEMS]->GetCheck());
 				g_SettingsMan.SetShowToolTips(m_aOptionsCheckbox[SHOWTOOLTIPS]->GetCheck());
-				g_SettingsMan.SetPreciseCollisions(m_aOptionsCheckbox[PRECISECOLLISIONS]->GetCheck());
 				g_SettingsMan.UpdateSettingsFile();
 			} else if (m_MenuScreen == MODMANAGERSCREEN) {
 				g_SettingsMan.UpdateSettingsFile();
@@ -715,7 +712,7 @@ void MainMenuGUI::Update()
 
 				if (m_PioneerPromoBox.IsWithinBox(mouse))
 				{
-					OpenBrowserToURL("http://store.steampowered.com/app/300260/");
+					System::OpenBrowserToURL("http://store.steampowered.com/app/300260/");
 				}
 			}
 		}
@@ -1163,7 +1160,6 @@ void MainMenuGUI::Update()
 					g_SettingsMan.SetBlipOnRevealUnseen(m_aOptionsCheckbox[BLIPONREVEALUNSEEN]->GetCheck());
 					g_SettingsMan.SetShowForeignItems(m_aOptionsCheckbox[SHOWFOREIGNITEMS]->GetCheck());
 					g_SettingsMan.SetShowToolTips(m_aOptionsCheckbox[SHOWTOOLTIPS]->GetCheck());
-					g_SettingsMan.SetPreciseCollisions(m_aOptionsCheckbox[PRECISECOLLISIONS]->GetCheck());
 
 					g_SettingsMan.UpdateSettingsFile();
 				}

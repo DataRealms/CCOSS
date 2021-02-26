@@ -12,13 +12,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int TDExplosive::Create(const TDExplosive &reference) {
-		ThrownDevice::Create(reference);
-
-		m_IsAnimatedManually = reference.m_IsAnimatedManually;
-
-		// All Explosives should hit against other objects etc, like grenades flying and hitting actors etc EXCEPT when they are laying on the ground etc
-		m_IgnoresAGHitsWhenSlowerThan = 1.0F;
+	int TDExplosive::Create() {
+		if (ThrownDevice::Create() < 0) {
+			return -1;
+		}
 
 		if (IsInGroup("Bombs - Payloads")) { m_HUDVisible = false; }
 
@@ -27,7 +24,18 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int TDExplosive::ReadProperty(std::string propName, Reader &reader) {
+	int TDExplosive::Create(const TDExplosive &reference) {
+		if (ThrownDevice::Create(reference) < 0) {
+			return -1;
+		}
+		m_IsAnimatedManually = reference.m_IsAnimatedManually;
+
+		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int TDExplosive::ReadProperty(const std::string_view &propName, Reader &reader) {
 		// TODO: Consider removing DetonationSound as GibSound already exists and could be used in its place
 		if (propName == "DetonationSound") {
 			reader >> m_GibSound;
@@ -54,25 +62,16 @@ namespace RTE {
 		ThrownDevice::Update();
 
 		if (m_Activated) {
-			// If not animated manually, play 'fuse lit' animation
 			m_SpriteAnimMode = !m_IsAnimatedManually ? ALWAYSLOOP : NOANIM;
 			m_RestTimer.Reset();
 			m_ToSettle = false;
 		}
-		// Blow up if the activation timer has reached the trigger delay limit
-		if (m_Activated && m_ActivationTimer.GetElapsedSimTimeMS() >= m_TriggerDelay) {
-			m_Activated = false;
-			GibThis();
-		}
+		if (m_Activated && m_ActivationTimer.GetElapsedSimTimeMS() >= m_TriggerDelay) { GibThis(); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TDExplosive::DrawHUD(BITMAP *targetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
-		if (!m_HUDVisible) {
-			return;
-		}
-		// Only draw the pickup HUD if not activated
-		if (!m_Activated) { ThrownDevice::DrawHUD(targetBitmap, targetPos, whichScreen); }
+		if (m_HUDVisible && !m_Activated) { ThrownDevice::DrawHUD(targetBitmap, targetPos, whichScreen); }
 	}
 }

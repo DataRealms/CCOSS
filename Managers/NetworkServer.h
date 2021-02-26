@@ -18,6 +18,7 @@ namespace RTE {
 	/// The centralized singleton manager of the network multiplayer server.
 	/// </summary>
 	class NetworkServer : public Singleton<NetworkServer> {
+		friend class SettingsMan;
 
 	public:
 
@@ -46,13 +47,13 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a NetworkServer object in system memory. This will call Create() so it shouldn't be called after.
 		/// </summary>
-		NetworkServer() { Clear(); Create(); }
+		NetworkServer() { Clear(); Initialize(); }
 
 		/// <summary>
 		/// Makes the NetworkServer object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create();
+		int Initialize();
 #pragma endregion
 
 #pragma region Destruction
@@ -103,7 +104,7 @@ namespace RTE {
 		/// Sets the port this server will be using.
 		/// </summary>
 		/// <param name="newPort">The new port to set.</param>
-		void SetServerPort(std::string newPort) { m_ServerPort = newPort; }
+		void SetServerPort(const std::string &newPort);
 
 		/// <summary>
 		/// Sets whether interlacing is used to reduce bandwidth usage or not.
@@ -124,6 +125,18 @@ namespace RTE {
 		/// <param name="player">The player to get for.</param>
 		/// <returns>The ping time of the player.</returns>
 		unsigned short GetPing(short player) const { return m_Ping[player]; }
+
+		/// <summary>
+		/// Gets whether server puts threads to sleep if it didn't receive anything for 10 seconds to reduce CPU load.
+		/// </summary>
+		/// <returns>Whether threads will be put to sleep when server isn't receiving any data or not.</returns>
+		bool GetServerSleepWhenIdle() const { return m_SleepWhenIdle; }
+
+		/// <summary>
+		/// Gets whether the server will try to put the thread to sleep to reduce CPU load if the sim frame took less time to complete than it should at 30 fps.
+		/// </summary>
+		/// <returns>Whether threads will be put to sleep if server completed frame faster than it normally should or not.</returns>
+		bool GetServerSimSleepWhenIdle() const { return m_SimSleepWhenIdle; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -158,14 +171,6 @@ namespace RTE {
 		void RegisterTerrainChange(SceneMan::TerrainChange terrainChange);
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
 
 		/// <summary>
@@ -181,9 +186,10 @@ namespace RTE {
 			std::string PlayerName; //!<
 		};
 
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
-
 		bool m_IsInServerMode = false; //!<
+
+		bool m_SleepWhenIdle; //!< If true puts thread to sleep if it didn't receive anything for 10 seconds to avoid melting the CPU at 100% even if there are no connections.
+		bool m_SimSleepWhenIdle; //!< If true the server will try to put the thread to sleep to reduce CPU load if the sim frame took less time to complete than it should at 30 fps.
 
 		int m_ThreadExitReason[c_MaxClients]; //!<
 
@@ -196,6 +202,7 @@ namespace RTE {
 
 		ClientConnection m_ClientConnections[c_MaxClients]; //!<
 
+		bool m_UseNATService; //!< Whether a NAT service is used for punch-through.
 		RakNet::NatPunchthroughClient m_NATPunchthroughClient; //!<
 		RakNet::SystemAddress m_NATServiceServerID; //!<
 		bool m_NatServerConnected; //!<
@@ -216,12 +223,19 @@ namespace RTE {
 		int m_MouseEvent2[c_MaxClients]; //!<
 		int m_MouseEvent3[c_MaxClients]; //!<
 
-		bool m_UseHighCompression; //!<
-		bool m_UseFastCompression; //!<
-		int m_HighCompressionLevel; //!<
-		int m_FastAccelerationFactor; //!<
-		bool m_UseInterlacing; //!<
-		int m_EncodingFps; //!<
+		bool m_UseHighCompression; //!< Whether to use higher compression methods (default).
+		bool m_UseFastCompression; //!< Whether to use faster compression methods and conserve CPU.
+		int m_HighCompressionLevel; //!< Compression level. 10 is optimal, 12 is highest.
+
+		/// <summary>
+		/// Acceleration factor, higher values consume more bandwidth but less CPU.
+		/// The larger the acceleration value, the faster the algorithm, but also lesser the compression. It's a trade-off. It can be fine tuned, with each successive value providing roughly +~3% to speed. 
+		/// An acceleration value of "1" is the same as regular LZ4_compress_default(). Values <= 0 will be replaced by ACCELERATION_DEFAULT(currently == 1, see lz4 documentation).
+		/// </summary>
+		int m_FastAccelerationFactor;
+
+		bool m_UseInterlacing; //!< Use interlacing to heavily reduce bandwidth usage at the cost of visual degradation (unusable at 30 fps, but may be suitable at 60 fps).
+		int m_EncodingFps; //!< Frame transmission rate. Higher value equals more CPU and bandwidth consumption.
 
 		bool m_SendEven[c_MaxClients]; //!<
 
@@ -254,10 +268,13 @@ namespace RTE {
 
 		Timer m_LastPackedReceived; //!<
 
-		// Transmit frames divided into boxes instead of lines
-		bool m_TransmitAsBoxes; //!<
-		int m_BoxWidth; //!<
-		int m_BoxHeight; //!<
+		/// <summary>
+		/// Transmit frames as blocks instead of lines. Provides better compression at the cost of higher CPU usage.
+		/// Though the compression is quite high it is recommended that Width * Height are less than MTU size or about 1500 bytes or packets may be fragmented by network hardware or dropped completely.
+		/// </summary>
+		bool m_TransmitAsBoxes;
+		int m_BoxWidth; //!< Width of the transmitted CPU block. Different values may improve bandwidth usage.
+		int m_BoxHeight; //!< Height of the transmitted CPU block. Different values may improve bandwidth usage.
 
 		int m_EmptyBlocks[MAX_STAT_RECORDS]; //!<
 		int m_FullBlocks[MAX_STAT_RECORDS]; //!<
@@ -426,7 +443,7 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
-		void NetworkServer::ClearTerrainChangeQueue(short player);
+		void ClearTerrainChangeQueue(short player);
 
 		/// <summary>
 		/// 
@@ -536,7 +553,7 @@ namespace RTE {
 		/// <param name="address"></param>
 		/// <param name="port"></param>
 		/// <returns></returns>
-		RakNet::SystemAddress NetworkServer::ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, unsigned short port);
+		RakNet::SystemAddress ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, unsigned short port);
 
 		/// <summary>
 		/// Clears all the member variables of this NetworkServer, effectively resetting the members of this abstraction level only.

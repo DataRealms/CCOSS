@@ -23,7 +23,6 @@
 #include "ACRocket.h"
 #include "HeldDevice.h"
 #include "Scene.h"
-#include "System.h"
 #include "DataModule.h"
 
 #include "GUI/GUI.h"
@@ -106,7 +105,7 @@ int AssemblyEditor::Create(const AssemblyEditor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int AssemblyEditor::ReadProperty(std::string propName, Reader &reader)
+int AssemblyEditor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "CPUTeam")
@@ -129,18 +128,9 @@ int AssemblyEditor::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this AssemblyEditor with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int AssemblyEditor::Save(Writer &writer) const
-{
-    EditorActivity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int AssemblyEditor::Save(Writer &writer) const {
+	EditorActivity::Save(writer);
+	return 0;
 }
 
 
@@ -670,7 +660,7 @@ bool AssemblyEditor::SaveAssembly(string saveAsName, bool forceOverwrite)
 		else
 		{
 			sceneFilePath = g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/BunkerAssemblies/" + saveAsName + ".ini";
-			g_System.MakeDirectory((g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/BunkerAssemblies").c_str());
+			System::MakeDirectory((g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/BunkerAssemblies").c_str());
 		}
 
 		if (g_PresetMan.AddEntityPreset(pBA, m_ModuleSpaceID, forceOverwrite, sceneFilePath))

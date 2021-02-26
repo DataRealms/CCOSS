@@ -107,7 +107,7 @@ int ActorEditor::Create(const ActorEditor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int ActorEditor::ReadProperty(std::string propName, Reader &reader)
+int ActorEditor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "CPUTeam")
@@ -130,18 +130,9 @@ int ActorEditor::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this ActorEditor with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int ActorEditor::Save(Writer &writer) const
-{
-    EditorActivity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int ActorEditor::Save(Writer &writer) const {
+	EditorActivity::Save(writer);
+	return 0;
 }
 
 

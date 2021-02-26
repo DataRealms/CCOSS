@@ -61,7 +61,7 @@ public:
 // Description:     Loads a skin for a directory
 // Arguments:       Skin directory and the file within to use
 
-    bool Load(const std::string Directory, const std::string Filename = "skin.ini");
+	bool Load(const std::string &directory, const std::string &fileName = "skin.ini");
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

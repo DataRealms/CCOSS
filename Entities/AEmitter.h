@@ -66,17 +66,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the AEmitter object ready for use.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-   int Create() override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a AEmitter to be identical to another, by deep copy.
@@ -316,6 +305,18 @@ ClassInfoGetters
     void SetBurstSpacing(const float spacing) { m_BurstSpacing = spacing; }
 
 
+    /// <summary>
+    /// Gets the flash of this AEmitter.
+    /// </summary>
+    /// <returns>A pointer to the AEmitter's flash. Ownership is NOT transferred!</returns>
+    Attachable * GetFlash() const { return m_pFlash; }
+
+    /// <summary>
+    /// Sets the flash for this AEmitter. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newFlash">The new flash to use.</param>
+    void SetFlash(Attachable *newFlash);
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetFlashScale
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -449,19 +450,6 @@ ClassInfoGetters
 
     void ResetAllTimers() override { Attachable::ResetAllTimers(); m_BurstTimer.Reset(); m_LastEmitTmr.Reset(); }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-// Arguments:       The impulse (kg * m/s) of the impact causing the gibbing to happen.
-//					The internal blast impulse which will push the gibs away from the center.
-//                  A pointer to an MO which the gibs shuold not be colliding with!
-// Return value:    None.
-
-    void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update

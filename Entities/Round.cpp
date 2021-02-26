@@ -63,7 +63,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Round::ReadProperty(std::string propName, Reader &reader) {
+	int Round::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Particle") {
 			m_Particle = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
 			RTEAssert(m_Particle, "Stream suggests allocating an unallocable type in Round::Create!");

@@ -103,17 +103,15 @@ struct IntRect
 // Parent(s):       Singleton, Serializable.
 // Class history:   12/25/2001 SceneMan created.
 
-class SceneMan:
-    public Singleton<SceneMan>,
-    public Serializable
-{
-
+class SceneMan : public Singleton<SceneMan>, public Serializable {
+	friend class SettingsMan;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
 
 public:
 
+	SerializableClassNameGetter
 	SerializableOverrideMethods
 
 
@@ -277,16 +275,6 @@ public:
 // Return value:    None.
 
     void Destroy();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-	const std::string & GetClassName() const override { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1670,18 +1658,16 @@ public:
 		bool back;
 	};
 
-    /// <summary>
-    /// Sets the current scene pointer to null
-    /// </summary>
-    void SceneMan::ClearCurrentScene();
+	/// <summary>
+	/// Sets the current scene pointer to null
+	/// </summary>
+	void ClearCurrentScene();
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Protected member variable and method declarations
 
-protected:
+  protected:
 
-    // Member variables
-    static const std::string m_ClassName;
 
     // Default Scene name to load if nothing else is specified
     std::string m_DefaultSceneName;
@@ -1764,6 +1750,8 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+	static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

@@ -257,7 +257,7 @@ namespace RTE {
 		unsigned char FrameNumber;
 		int PostEffectsCount;
 	};
-	
+
 	/// <summary>
 	/// 
 	/// </summary>

@@ -1,20 +1,6 @@
 #ifndef _RTETIMERMAN_
 #define _RTETIMERMAN_
 
-// TODO: Figure out where we can include these without imploding the whole game and keeping QPC working and having no method/macro conflicts.
-#include "allegro.h"
-
-#ifdef _WIN32
-#include "winalleg.h"
-#endif
-
-// Windows.h defines these and they conflict with our methods so we need to undefine them manually.
-#undef GetClassName
-#undef PlaySound
-// minwindef.h defines these and they conflict with the std methods so we need to undefine them manually.
-#undef min
-#undef max
-
 #include "Singleton.h"
 
 #define g_TimerMan TimerMan::Instance()
@@ -34,13 +20,13 @@ namespace RTE {
 		/// Constructor method used to instantiate a TimerMan object in system memory. This constructor calls Create() so it shouldn't be called again.
 		/// </summary>
 		// TODO: Figure out why removing Create() here kills fps and if it's already here then why are we calling Create() again during main().
-		TimerMan() { Clear(); Create(); }
+		TimerMan() { Clear(); Initialize(); }
 
 		/// <summary>
 		/// Makes the TimerMan object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create();
+		int Initialize();
 #pragma endregion
 
 #pragma region Destruction
@@ -97,6 +83,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>The number of pure sim updates that have happened since the last drawn.</returns>
 		int SimUpdatesSinceDrawn() const { return m_SimUpdatesSinceDrawn; }
+
+		/// <summary>
+		/// Gets the simulation speed over real time.
+		/// </summary>
+		/// <returns>The value of the simulation speed over real time.</returns>
+		float GetSimSpeed() const { return m_SimSpeed; }
 
 		/// <summary>
 		/// Gets a time scale factor which will be used to speed up or slow down the progress of the simulation time in relation to the real world time.
@@ -232,17 +224,7 @@ namespace RTE {
 		long long GetTimeToSleep() const { return (m_DeltaTime - m_SimAccumulator) / 2; };
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		long long m_StartTime; //!< The point in real time when the simulation (re)started.
 		long long m_TicksPerSecond; //!< The frequency of ticks each second, ie the resolution of the timer.	
@@ -259,6 +241,7 @@ namespace RTE {
 		int m_SimUpdatesSinceDrawn; //!< How many sim updates have been done since the last drawn one.
 		bool m_DrawnSimUpdate; //!< Tells whether the current simulation update will be drawn in a frame.
 
+		float m_SimSpeed; //!< The simulation speed over real time.
 		float m_TimeScale; //!< The relationship between the real world actual time and the simulation time. A value of 2.0 means simulation runs twice as fast as normal, as perceived by a player.
 
 		bool m_AveragingEnabled; //!< Whether calculated delta time averaging is enabled.

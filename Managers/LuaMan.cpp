@@ -819,6 +819,7 @@ int LuaMan::Initialize() {
             .property("RecoilOffset", &MOSRotating::GetRecoilOffset)
 			.property("TravelImpulse", &MOSRotating::GetTravelImpulse, &MOSRotating::SetTravelImpulse)
 			.property("GibWoundLimit", (int (MOSRotating:: *)() const) &MOSRotating::GetGibWoundLimit, &MOSRotating::SetGibWoundLimit)
+			.property("GibSound", &MOSRotating::GetGibSound, &MOSRotating::SetGibSound, detail::null_type(), adopt(_2))
 			.property("GibImpulseLimit", &MOSRotating::GetGibImpulseLimit, &MOSRotating::SetGibImpulseLimit)
 			.property("DamageMultiplier", &MOSRotating::GetDamageMultiplier, &MOSRotating::SetDamageMultiplier)
 			.property("WoundCount", (int (MOSRotating:: *)() const) &MOSRotating::GetWoundCount)
@@ -869,8 +870,7 @@ int LuaMan::Initialize() {
 			.def("RemoveEmitter", (bool (MOSRotating::*)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable)
 			.def("RemoveEmitter", (bool (MOSRotating::*)(long uniqueIDOfAttachableToRemove))&MOSRotating::RemoveAttachable)
 			.def_readonly("Attachables", &MOSRotating::m_Attachables, return_stl_iterator)
-			.def_readonly("Wounds", &MOSRotating::m_Wounds, return_stl_iterator)
-			.property("GibSound", &MOSRotating::GetGibSound, &MOSRotating::SetGibSound, detail::null_type(), adopt(_2)),
+			.def_readonly("Wounds", &MOSRotating::m_Wounds, return_stl_iterator),
 
 
         CONCRETELUABINDING(Attachable, MOSRotating)
@@ -904,6 +904,9 @@ int LuaMan::Initialize() {
         CONCRETELUABINDING(AEmitter, Attachable)
             .def("IsEmitting", &AEmitter::IsEmitting)
             .def("EnableEmission", &AEmitter::EnableEmission)
+			.property("EmissionSound", &AEmitter::GetEmissionSound, &AEmitter::SetEmissionSound, detail::null_type(), adopt(_2))
+			.property("BurstSound", &AEmitter::GetBurstSound, &AEmitter::SetBurstSound, detail::null_type(), adopt(_2))
+			.property("EndSound", &AEmitter::GetEndSound, &AEmitter::SetEndSound, detail::null_type(), adopt(_2))
             .property("BurstScale", &AEmitter::GetBurstScale, &AEmitter::SetBurstScale)
             .property("EmitAngle", &AEmitter::GetEmitAngle, &AEmitter::SetEmitAngle)
             .property("GetThrottle", &AEmitter::GetThrottle, &AEmitter::SetThrottle)
@@ -921,10 +924,8 @@ int LuaMan::Initialize() {
             .def("TriggerBurst", &AEmitter::TriggerBurst)
             .def("IsSetToBurst", &AEmitter::IsSetToBurst)
             .def("CanTriggerBurst", &AEmitter::CanTriggerBurst)
-			.def_readwrite("Emissions", &AEmitter::m_EmissionList, return_stl_iterator)
-			.property("EmissionSound", &AEmitter::GetEmissionSound, &AEmitter::SetEmissionSound, detail::null_type(), adopt(_2))
-			.property("BurstSound", &AEmitter::GetBurstSound, &AEmitter::SetBurstSound, detail::null_type(), adopt(_2))
-			.property("EndSound", &AEmitter::GetEndSound, &AEmitter::SetEndSound, detail::null_type(), adopt(_2)),
+			.def_readwrite("Emissions", &AEmitter::m_EmissionList, return_stl_iterator),
+
 
 		CONCRETELUABINDING(PEmitter, MOSParticle)
 			.def("IsEmitting", &PEmitter::IsEmitting)
@@ -1003,6 +1004,11 @@ int LuaMan::Initialize() {
             .def("IsControllable", &Actor::IsControllable)
             .def("SetControllerMode", &Actor::SetControllerMode)
             .def("SwapControllerModes", &Actor::SwapControllerModes)
+			.property("BodyHitSound", &Actor::GetBodyHitSound, &Actor::SetBodyHitSound, detail::null_type(), adopt(_2))
+			.property("AlarmSound", &Actor::GetAlarmSound, &Actor::SetAlarmSound, detail::null_type(), adopt(_2))
+			.property("PainSound", &Actor::GetPainSound, &Actor::SetPainSound, detail::null_type(), adopt(_2))
+			.property("DeathSound", &Actor::GetDeathSound, &Actor::SetDeathSound, detail::null_type(), adopt(_2))
+			.property("DeviceSwitchSound", &Actor::GetDeviceSwitchSound, &Actor::SetDeviceSwitchSound, detail::null_type(), adopt(_2))
 			.property("ImpulseDamageThreshold", &Actor::GetTravelImpulseDamage, &Actor::SetTravelImpulseDamage)
 			.def("GetStableVelocityThreshold", &Actor::GetStableVel)
 			.def("SetStableVelocityThreshold", (void (Actor::*)(float, float))&Actor::SetStableVel)
@@ -1059,12 +1065,8 @@ int LuaMan::Initialize() {
             .def("SetAlarmPoint", &Actor::AlarmPoint)
             .def("GetAlarmPoint", &Actor::GetAlarmPoint)
             .property("AimDistance", &Actor::GetAimDistance, &Actor::SetAimDistance)
-			.property("SightDistance", &Actor::GetSightDistance, &Actor::SetSightDistance)
-			.property("DeviceSwitchSound", &Actor::GetDeviceSwitchSound, &Actor::SetDeviceSwitchSound, detail::null_type(), adopt(_2))
-			.property("BodyHitSound", &Actor::GetBodyHitSound, &Actor::SetBodyHitSound, detail::null_type(), adopt(_2))
-			.property("PainSound", &Actor::GetPainSound, &Actor::SetPainSound, detail::null_type(), adopt(_2))
-			.property("DeathSound", &Actor::GetDeathSound, &Actor::SetDeathSound, detail::null_type(), adopt(_2))
-			.property("AlarmSound", &Actor::GetAlarmSound, &Actor::SetAlarmSound, detail::null_type(), adopt(_2)),
+			.property("SightDistance", &Actor::GetSightDistance, &Actor::SetSightDistance),
+
 
 		CONCRETELUABINDING(ADoor, Actor)
 			.enum_("DoorState")[
@@ -1170,6 +1172,7 @@ int LuaMan::Initialize() {
             .property("BGLeg", &AHuman::GetBGLeg, &AHuman::SetBGLeg, detail::null_type(), adopt(_2))
 			.property("FGFoot", &AHuman::GetFGFoot, &AHuman::SetFGFoot, detail::null_type(), adopt(_2))
 			.property("BGFoot", &AHuman::GetBGFoot, &AHuman::SetBGFoot, detail::null_type(), adopt(_2))
+			.property("StrideSound", &AHuman::GetStrideSound, &AHuman::SetStrideSound, detail::null_type(), adopt(_2))
             .property("JetTimeTotal", &AHuman::GetJetTimeTotal, &AHuman::SetJetTimeTotal)
             .property("JetTimeLeft", &AHuman::GetJetTimeLeft, &AHuman::SetJetTimeLeft)
 			.property("ThrowPrepTime", &AHuman::GetThrowPrepTime, &AHuman::SetThrowPrepTime)
@@ -1201,8 +1204,7 @@ int LuaMan::Initialize() {
 			.def("GetLimbPathSpeed", &AHuman::GetLimbPathSpeed)
 			.def("SetLimbPathSpeed", &AHuman::SetLimbPathSpeed)
 			.def("GetRotAngleTarget", &AHuman::GetRotAngleTarget)
-			.def("SetRotAngleTarget", &AHuman::SetRotAngleTarget)
-			.property("StrideSound", &AHuman::GetStrideSound, &AHuman::SetStrideSound, detail::null_type(), adopt(_2)),
+			.def("SetRotAngleTarget", &AHuman::SetRotAngleTarget),
 
         
 		CONCRETELUABINDING(ACrab, Actor)
@@ -1264,6 +1266,7 @@ int LuaMan::Initialize() {
             .property("LeftBGLeg", &ACrab::GetLeftBGLeg, &ACrab::SetLeftBGLeg, detail::null_type(), adopt(_2))
             .property("RightFGLeg", &ACrab::GetRightFGLeg, &ACrab::SetRightFGLeg, detail::null_type(), adopt(_2))
             .property("RightBGLeg", &ACrab::GetRightBGLeg, &ACrab::SetRightBGLeg, detail::null_type(), adopt(_2))
+			.property("StrideSound", &ACrab::GetStrideSound, &ACrab::SetStrideSound, detail::null_type(), adopt(_2))
             .property("JetTimeTotal", &ACrab::GetJetTimeTotal, &ACrab::SetJetTimeTotal)
             .property("JetTimeLeft", &ACrab::GetJetTimeLeft)
             .property("EquippedItem", &ACrab::GetEquippedItem)
@@ -1280,8 +1283,7 @@ int LuaMan::Initialize() {
             .def("GetLimbPath", &ACrab::GetLimbPath)
 			.property("LimbPathPushForce", &ACrab::GetLimbPathPushForce, &ACrab::SetLimbPathPushForce)
 			.def("GetLimbPathSpeed", &ACrab::GetLimbPathSpeed)
-			.def("SetLimbPathSpeed", &ACrab::SetLimbPathSpeed)
-			.property("StrideSound", &ACrab::GetStrideSound, &ACrab::SetStrideSound, detail::null_type(), adopt(_2)),
+			.def("SetLimbPathSpeed", &ACrab::SetLimbPathSpeed),
 
 
         CONCRETELUABINDING(Turret, Attachable)
@@ -1317,10 +1319,11 @@ int LuaMan::Initialize() {
             .def("OpenHatch", &ACraft::OpenHatch)
             .def("CloseHatch", &ACraft::CloseHatch)
             .property("HatchState", &ACraft::GetHatchState)
-            .property("MaxPassengers", &ACraft::GetMaxPassengers)
-            .property("DeliveryDelayMultiplier", &ACraft::GetDeliveryDelayMultiplier)
 			.property("HatchOpenSound", &ACraft::GetHatchOpenSound, &ACraft::SetHatchOpenSound, detail::null_type(), adopt(_2))
-			.property("CrashSound", &ACraft::GetCrashSound, &ACraft::SetCrashSound, detail::null_type(), adopt(_2)),
+			.property("CrashSound", &ACraft::GetCrashSound, &ACraft::SetCrashSound, detail::null_type(), adopt(_2))
+            .property("MaxPassengers", &ACraft::GetMaxPassengers)
+            .property("DeliveryDelayMultiplier", &ACraft::GetDeliveryDelayMultiplier),
+
 
         CONCRETELUABINDING(ACDropShip, ACraft)
             .property("RightEngine", &ACDropShip::GetRightThruster, &ACDropShip::SetRightThruster, detail::null_type(), adopt(_2))
@@ -1412,6 +1415,14 @@ int LuaMan::Initialize() {
             .property("RoundInMagCount", &HDFirearm::GetRoundInMagCount)
             .property("Magazine", &HDFirearm::GetMagazine, &HDFirearm::SetMagazine, detail::null_type(), adopt(_2))
             .property("Flash", &HDFirearm::GetFlash, &HDFirearm::SetFlash, detail::null_type(), adopt(_2))
+			.property("FireSound", &HDFirearm::GetFireSound, &HDFirearm::SetFireSound, detail::null_type(), adopt(_2))
+			.property("FireEchoSound", &HDFirearm::GetFireEchoSound, &HDFirearm::SetFireEchoSound, detail::null_type(), adopt(_2))
+			.property("EmptySound", &HDFirearm::GetEmptySound, &HDFirearm::SetEmptySound, detail::null_type(), adopt(_2))
+			.property("ReloadStartSound", &HDFirearm::GetReloadStartSound, &HDFirearm::SetReloadStartSound, detail::null_type(), adopt(_2))
+			.property("ReloadEndSound", &HDFirearm::GetReloadEndSound, &HDFirearm::SetReloadEndSound, detail::null_type(), adopt(_2))
+			.property("ActiveSound", &HDFirearm::GetActiveSound, &HDFirearm::SetActiveSound, detail::null_type(), adopt(_2))
+			.property("DeactivationSound", &HDFirearm::GetDeactivationSound, &HDFirearm::SetDeactivationSound, detail::null_type(), adopt(_2))
+			.property("PreFireSound", &HDFirearm::GetPreFireSound, &HDFirearm::SetPreFireSound, detail::null_type(), adopt(_2))
             .property("ActivationDelay", &HDFirearm::GetActivationDelay, &HDFirearm::SetActivationDelay)
             .property("DeactivationDelay", &HDFirearm::GetDeactivationDelay, &HDFirearm::SetDeactivationDelay)
             .property("ReloadTime", &HDFirearm::GetReloadTime, &HDFirearm::SetReloadTime)
@@ -1430,15 +1441,7 @@ int LuaMan::Initialize() {
             .def("CompareTrajectories", &HDFirearm::CompareTrajectories)
             .def("SetNextMagazineName", &HDFirearm::SetNextMagazineName)
 			.property("IsAnimatedManually", &HDFirearm::IsAnimatedManually, &HDFirearm::SetAnimatedManually)
-			.property("RecoilTransmission", &HDFirearm::GetJointStiffness, &HDFirearm::SetJointStiffness)
-			.property("FireSound", &HDFirearm::GetFireSound, &HDFirearm::SetFireSound, detail::null_type(), adopt(_2))
-			.property("FireEchoSound", &HDFirearm::GetFireEchoSound, &HDFirearm::SetFireEchoSound, detail::null_type(), adopt(_2))
-			.property("EmptySound", &HDFirearm::GetEmptySound, &HDFirearm::SetEmptySound, detail::null_type(), adopt(_2))
-			.property("ReloadStartSound", &HDFirearm::GetReloadStartSound, &HDFirearm::SetReloadStartSound, detail::null_type(), adopt(_2))
-			.property("ReloadEndSound", &HDFirearm::GetReloadEndSound, &HDFirearm::SetReloadEndSound, detail::null_type(), adopt(_2))
-			.property("ActiveSound", &HDFirearm::GetActiveSound, &HDFirearm::SetActiveSound, detail::null_type(), adopt(_2))
-			.property("DeactivationSound", &HDFirearm::GetDeactivationSound, &HDFirearm::SetDeactivationSound, detail::null_type(), adopt(_2))
-			.property("PreFireSound", &HDFirearm::GetPreFireSound, &HDFirearm::SetPreFireSound, detail::null_type(), adopt(_2)),
+			.property("RecoilTransmission", &HDFirearm::GetJointStiffness, &HDFirearm::SetJointStiffness),
 
 
         CONCRETELUABINDING(ThrownDevice, HeldDevice)

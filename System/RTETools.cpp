@@ -126,6 +126,7 @@ namespace RTE {
 				return RoundFloatToPrecision(roundingBuffer, precision);
 			} else {
 				RTEAssert(false, "Error in RoundFloatToPrecision: INVALID ROUNDING MODE");
+				return "";
 			}
 		}
 	}

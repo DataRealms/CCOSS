@@ -2004,7 +2004,9 @@ bool Scene::PlaceResidentBrain(int player, Activity &newActivity)
 {
     if (m_ResidentBrains[player])
     {
+#ifdef DEBUG_BUILD
         RTEAssert(m_ResidentBrains[player]->GetTeam() == newActivity.GetTeamOfPlayer(player), "Resident Brain is of the wrong team!!");
+#endif
 
         Actor *pBrainActor = dynamic_cast<Actor *>(m_ResidentBrains[player]);
         if (pBrainActor)// && pBrainActor->IsActor())

@@ -4091,6 +4091,9 @@ void AHuman::Update()
             // Unstable, so just drop the arm limply
             m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
         }
+	}
+	else if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice()) {
+		m_pFGArm->GetHeldDevice()->SetSupported(false);
     }
 
     /////////////////////////////////////////////////

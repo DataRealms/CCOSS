@@ -28,7 +28,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::BackgroundSendThreadFunction(NetworkServer *server, short player) {
-		const int sleepTime = 1000000 / m_EncodingFps;
+		const int sleepTime = 1000000 / server->m_EncodingFps;
 		while (server->IsServerModeEnabled() && server->IsPlayerConnected(player)) {
 			if (server->NeedToSendSceneSetupData(player) && server->IsSceneAvailable(player)) {
 				server->SendSceneSetupData(player);
@@ -38,19 +38,13 @@ namespace RTE {
 				server->SendSceneData(player);
 			}
 			if (server->SendFrameData(player)) {
-				int ret = server->SendFrame(player);
-				server->SetMSecsToSleep(player, ret / 1000);
-				if (ret > 0) { std::this_thread::sleep_for(std::chrono::microseconds(ret)); }
+				server->SendFrame(player);
+				std::this_thread::sleep_for(std::chrono::microseconds(sleepTime));
 			}
 			server->UpdateStats(player);
 		}
 		server->SetThreadExitReason(player, NetworkServer::THREAD_FINISH);
-/*
-#ifdef DEBUG_BUILD
-		// Not thread safe at all to do this, just for debugging purposes
-		g_ConsoleMan.PrintString("Thread exited " + player);
-#endif
-*/
+
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

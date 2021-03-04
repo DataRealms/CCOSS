@@ -384,7 +384,7 @@ namespace RTE {
 		/// Set the mouse's analog emulation output to be of a specific normalized magnitude.
 		/// </summary>
 		/// <param name="magCap">The normalized magnitude, between 0 and 1.0.</param>
-		void SetMouseValueMagnitude(float magCap) { m_AnalogMouseData.CapMagnitude(m_MouseTrapRadius * magCap); }
+		void SetMouseValueMagnitude(float magCap, short player = Players::NoPlayer); 
 
 		/// <summary>
 		/// Sets the absolute screen position of the mouse cursor.

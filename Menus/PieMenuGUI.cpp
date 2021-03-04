@@ -337,7 +337,7 @@ void PieMenuGUI::SetEnabled(bool enable)
         m_AlreadyActivated = PSI_NONE;
         // Reset mouse position in center of its trap so pre-activation direction doesn't affect the menu
         if (m_pController->IsMouseControlled())
-            g_UInputMan.SetMouseValueMagnitude(0);
+            g_UInputMan.SetMouseValueMagnitude(0, m_pController->GetPlayer());
 		g_GUISound.PieMenuEnterSound()->Play(m_pController->GetPlayer());
     }
     else if (!enable && m_PieEnabled != DISABLED && m_PieEnabled != DISABLING)
@@ -346,7 +346,7 @@ void PieMenuGUI::SetEnabled(bool enable)
         m_EnablingTimer.Reset();
         // Reset mouse position in center of its trap so menu direction doesn't affect an actor's aim
         if (m_pController->IsMouseControlled())
-            g_UInputMan.SetMouseValueMagnitude(0);
+            g_UInputMan.SetMouseValueMagnitude(0, m_pController->GetPlayer());
         // Only play regular exit sound if the special sounds for selected slices won't play
 //        if (!m_pHoveredSlice && !m_pActivatedSlice)
 		g_GUISound.PieMenuExitSound()->Play(m_pController->GetPlayer());

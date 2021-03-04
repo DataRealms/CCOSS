@@ -28,6 +28,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::BackgroundSendThreadFunction(NetworkServer *server, short player) {
+		const int sleepTime = 1000000 / m_EncodingFps;
 		while (server->IsServerModeEnabled() && server->IsPlayerConnected(player)) {
 			if (server->NeedToSendSceneSetupData(player) && server->IsSceneAvailable(player)) {
 				server->SendSceneSetupData(player);
@@ -1158,45 +1159,13 @@ namespace RTE {
 		double fps = static_cast<double>(m_EncodingFps);
 		double secsPerFrame = 1.0 / fps;
 		double secsSinceLastFrame = static_cast<double>(currentTicks - m_LastFrameSentTime[player]) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
-		int microSeconds = 1000000;
 
 		// Fix for an overflow which may happen if server lags for a few seconds when loading activities
 		if (secsSinceLastFrame < 0) { secsSinceLastFrame = secsPerFrame; }
 
-		// Is it time to send frame?
-		// Return time to sleep till next frame in microseconds
-		m_MSecsSinceLastUpdate[player] = static_cast<long>(secsSinceLastFrame * 1000.0);
-
-		if (secsSinceLastFrame < secsPerFrame) {
-			SetThreadExitReason(player, NetworkServer::TOO_EARLY_TO_SEND);
-			return static_cast<int>((secsPerFrame - secsSinceLastFrame) * microSeconds);
-		}
-
-		// Accumulate delayed frames counter for stats
-		if (secsSinceLastFrame > secsPerFrame * 1.5) { m_DelayedFrames[player]++; }
-
 		m_MsecPerFrame[player] = static_cast<int>(secsSinceLastFrame * 1000.0);
 
 		m_LastFrameSentTime[player] = g_TimerMan.GetRealTickCount();
-
-		// Check for congestion
-		RakNet::RakNetStatistics rns;
-
-		m_Server->GetStatistics(m_ClientConnections[player].ClientId, &rns);
-
-		m_SendBufferBytes[player] = (int)rns.bytesInSendBuffer[MEDIUM_PRIORITY] + (int)rns.bytesInSendBuffer[HIGH_PRIORITY];
-		m_SendBufferMessages[player] = (int)rns.messageInSendBuffer[MEDIUM_PRIORITY] + (int)rns.messageInSendBuffer[HIGH_PRIORITY];
-
-		if (rns.isLimitedByCongestionControl) {
-			SetThreadExitReason(player, NetworkServer::SEND_BUFFER_IS_LIMITED_BY_CONGESTION);
-			m_FramesSkipped[player]++;
-			return static_cast<int>((1.0 / fps) * microSeconds);
-		}
-		if (rns.messageInSendBuffer[MEDIUM_PRIORITY] > 1000) {
-			SetThreadExitReason(player, NetworkServer::SEND_BUFFER_IS_FULL);
-			m_FramesSkipped[player]++;
-			return 0;
-		}
 
 		// Wait till FrameMan releases bitmap
 		SetThreadExitReason(player, NetworkServer::LOCKED);
@@ -1804,27 +1773,6 @@ namespace RTE {
 				case ID_NAT_PUNCHTHROUGH_SUCCEEDED:
 					g_ConsoleMan.PrintString("SERVER: ID_NAT_PUNCHTHROUGH_SUCCEEDED");
 					break;
-				/*
-				case ID_UNCONNECTED_PONG:
-				case ID_CONNECTED_PONG:
-				{
-					g_ConsoleMan.PrintString("PONG");
-					int player = -1;
-					for (int index = 0; index < c_MaxClients; index++) {
-						if (m_ClientConnections[index].ClientId == packet->systemAddress) { player = index; }
-					}			
-					if (player > -1 && player < c_MaxClients) {
-						unsigned int dataLength;
-						RakNet::TimeMS time;
-						RakNet::BitStream bsIn(packet->data, packet->length, false);
-						bsIn.IgnoreBytes(1);
-						bsIn.Read(time);
-						dataLength = packet->length - sizeof(unsigned char) - sizeof(RakNet::TimeMS);
-						m_Ping[player] = (unsigned int)(RakNet::GetTimeMS() - time);
-					}
-					break;
-				}
-				*/
 				default:
 					break;
 			}

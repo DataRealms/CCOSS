@@ -377,7 +377,7 @@ namespace RTE {
 		FMOD::ChannelGroup *m_ImmobileSoundChannelGroup; //!< The FMOD ChannelGroup for immobile sounds.
 		
 		bool m_AudioEnabled; //!< Bool to tell whether audio is enabled or not.
-		std::vector<const Vector *> m_CurrentActivityHumanPlayerPositions; //!< The stored positions of each human player in the current activity. Only filled when there's an activity running.
+		std::vector<std::shared_ptr<const RTE::Vector>> m_CurrentActivityHumanPlayerPositions; //!< The stored positions of each human player in the current activity. Only filled when there's an activity running.
 		std::unordered_map<int, float> m_SoundChannelMinimumAudibleDistances; //!<  An unordered map of sound channel indices to floats representing each Sound Channel's minimum audible distances. This is necessary to keep safe data in case the SoundContainer is destroyed while the sound is still playing, as happens often with TDExplosives.
 
 		float m_MusicVolume; //!< Global music volume.

@@ -104,20 +104,20 @@ namespace RTE {
 
 				if (m_CurrentActivityHumanPlayerPositions.size() != currentActivityHumanCount) { status = status == FMOD_OK ? m_AudioSystem->set3DNumListeners(currentActivityHumanCount) : status; }
 
-				if (m_CurrentActivityHumanPlayerPositions.empty() || (m_CurrentActivityHumanPlayerPositions.at(0) == nullptr || m_CurrentActivityHumanPlayerPositions.at(0)->GetFloorIntX() > g_SceneMan.GetSceneWidth() || m_CurrentActivityHumanPlayerPositions.at(0)->GetX() < 0.0F)) {
+				if (m_CurrentActivityHumanPlayerPositions.empty() || (m_CurrentActivityHumanPlayerPositions.at(0) == nullptr || m_CurrentActivityHumanPlayerPositions.at(0).get()->GetFloorIntX() > g_SceneMan.GetSceneWidth() || m_CurrentActivityHumanPlayerPositions.at(0).get()->GetX() < 0.0F)) {
 					m_CurrentActivityHumanPlayerPositions.clear();
 					for (short player = Players::PlayerOne; player < Players::MaxPlayerCount && m_CurrentActivityHumanPlayerPositions.size() < currentActivityHumanCount; player++) {
 						if (currentActivity->PlayerActive(player) && currentActivity->PlayerHuman(player)) {
 							const Vector &humanPlayerPosition = g_SceneMan.GetScrollTarget(currentActivity->ScreenOfPlayer(player));
-							m_CurrentActivityHumanPlayerPositions.push_back(&humanPlayerPosition);
+							m_CurrentActivityHumanPlayerPositions.push_back(std::make_shared<const RTE::Vector>(humanPlayerPosition));
 						}
 					}
 				}
 
 				int listenerNumber = 0;
-				for (const Vector *humanPlayerPosition : m_CurrentActivityHumanPlayerPositions) {
+				for (std::shared_ptr<const RTE::Vector> humanPlayerPosition : m_CurrentActivityHumanPlayerPositions) {
 					if (status == FMOD_OK) {
-						FMOD_VECTOR playerPosition{ GetAsFMODVector(*humanPlayerPosition, m_ListenerZOffset) };
+						FMOD_VECTOR playerPosition{ GetAsFMODVector(*(humanPlayerPosition.get()), m_ListenerZOffset) };
 						status = m_AudioSystem->set3DListenerAttributes(listenerNumber, &playerPosition, nullptr, &c_FMODForward, &c_FMODUp);
 					}
 					listenerNumber++;
@@ -678,7 +678,7 @@ namespace RTE {
 			float channel3dLevel;
 			result = (result == FMOD_OK) ? soundChannel->get3DLevel(&channel3dLevel) : result;
 			if (result == FMOD_OK && m_CurrentActivityHumanPlayerPositions.size() == 1) {
-				float distanceToPlayer = (*m_CurrentActivityHumanPlayerPositions.at(0) - GetAsVector(channelPosition)).GetMagnitude();
+				float distanceToPlayer = (*(m_CurrentActivityHumanPlayerPositions.at(0).get()) - GetAsVector(channelPosition)).GetMagnitude();
 				if (distanceToPlayer < m_MinimumDistanceForPanning) {
 					soundChannel->set3DLevel(0);
 				} else if (distanceToPlayer < m_MinimumDistanceForPanning * 2) {
@@ -724,9 +724,9 @@ namespace RTE {
 
 		float shortestDistance = c_SoundMaxAudibleDistance;
 		float longestDistance = 0;
-		for (const Vector *humanPlayerPosition : m_CurrentActivityHumanPlayerPositions) {
+		for (std::shared_ptr<const RTE::Vector> humanPlayerPosition : m_CurrentActivityHumanPlayerPositions) {
 			for (const FMOD_VECTOR &wrappedChannelPosition : wrappedChannelPositions) {
-				float distanceToChannelPosition = (*humanPlayerPosition - GetAsVector(wrappedChannelPosition)).GetMagnitude();
+				float distanceToChannelPosition = (*(humanPlayerPosition.get()) - GetAsVector(wrappedChannelPosition)).GetMagnitude();
 				if (distanceToChannelPosition < shortestDistance) {
 					shortestDistance = distanceToChannelPosition;
 					channelPosition = wrappedChannelPosition;

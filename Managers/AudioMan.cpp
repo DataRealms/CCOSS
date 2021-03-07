@@ -1,5 +1,6 @@
 #include "AudioMan.h"
 #include "ConsoleMan.h"
+#include "FrameMan.h"
 #include "SettingsMan.h"
 #include "SceneMan.h"
 #include "ActivityMan.h"
@@ -94,8 +95,6 @@ namespace RTE {
 	void AudioMan::Update() {
 		if (m_AudioEnabled) {
 
-			//TODO allow setting vel for AEmitter and PEmitter. Also maybe consider setting vel on listener when SceneMan target scrolling is happening.
-
 			FMOD_RESULT status = FMOD_OK;
 
 			if (g_ActivityMan.ActivityRunning()) {
@@ -104,15 +103,16 @@ namespace RTE {
 
 				if (m_CurrentActivityHumanPlayerPositions.size() != currentActivityHumanCount) { status = status == FMOD_OK ? m_AudioSystem->set3DNumListeners(currentActivityHumanCount) : status; }
 
-				if (m_CurrentActivityHumanPlayerPositions.empty() || (m_CurrentActivityHumanPlayerPositions.at(0) == nullptr || m_CurrentActivityHumanPlayerPositions.at(0).get()->GetFloorIntX() > g_SceneMan.GetSceneWidth() || m_CurrentActivityHumanPlayerPositions.at(0).get()->GetX() < 0.0F)) {
-					m_CurrentActivityHumanPlayerPositions.clear();
-					for (short player = Players::PlayerOne; player < Players::MaxPlayerCount && m_CurrentActivityHumanPlayerPositions.size() < currentActivityHumanCount; player++) {
-						if (currentActivity->PlayerActive(player) && currentActivity->PlayerHuman(player)) {
-							const Vector &humanPlayerPosition = g_SceneMan.GetScrollTarget(currentActivity->ScreenOfPlayer(player));
-							m_CurrentActivityHumanPlayerPositions.push_back(std::make_shared<const RTE::Vector>(humanPlayerPosition));
-						}
+				m_CurrentActivityHumanPlayerPositions.clear();
+				for (short player = Players::PlayerOne; player < Players::MaxPlayerCount && m_CurrentActivityHumanPlayerPositions.size() < currentActivityHumanCount; player++) {
+					if (currentActivity->PlayerActive(player) && currentActivity->PlayerHuman(player)) {
+						short screen = currentActivity->ScreenOfPlayer(player);
+						Vector humanPlayerPosition = g_SceneMan.GetScrollTarget(screen);
+						if (IsInMultiplayerMode()) { humanPlayerPosition += (RTE::Vector(g_FrameMan.GetPlayerFrameBufferWidth(screen), g_FrameMan.GetPlayerFrameBufferHeight(screen)) / 2); }
+						m_CurrentActivityHumanPlayerPositions.push_back(std::make_shared<const RTE::Vector>(humanPlayerPosition));
 					}
 				}
+				
 
 				int listenerNumber = 0;
 				for (std::shared_ptr<const RTE::Vector> humanPlayerPosition : m_CurrentActivityHumanPlayerPositions) {
@@ -347,6 +347,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	SoundContainer *AudioMan::PlaySound(const std::string &filePath, const Vector &position, int player) {
+		if (m_IsInMultiplayerMode) {
+			return false;
+		}
+
 		SoundContainer *newSoundContainer = new SoundContainer();
 		newSoundContainer->SetPosition(position);
 		newSoundContainer->GetTopLevelSoundSet().AddSound(filePath);

@@ -196,10 +196,15 @@ namespace RTE {
 			if (m_DistanceTraveled > m_LethalRange) {
 				if (m_Sharpness < m_LethalSharpness) {
 					m_Sharpness = std::max(m_Sharpness * (1.0F - (20.0F * g_TimerMan.GetDeltaTimeSecs())) - 0.1F, 0.0F);
+					if (m_LethalRange > 0) {
+						float randomNum = RandomNum(0.0F, 0.5F);
+						m_Atom->SetTrailLength(m_Atom->GetTrailLength() * (1.0F - randomNum));
+						m_Lifetime -= (m_Lifetime - m_AgeTimer.GetElapsedSimTimeMS()) * randomNum;
+						m_HitsMOs = RandomNum() < 0.5;
+					}
 				} else {
 					m_Sharpness *= 1.0F - (10.0F * g_TimerMan.GetDeltaTimeSecs());
 				}
-				if (m_LethalRange > 0) { m_HitsMOs = false; }
 			}
 		}
 	}

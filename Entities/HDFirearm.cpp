@@ -777,7 +777,7 @@ void HDFirearm::Update()
 				}
 			}
 
-            lethalRange = m_MaxSharpLength + max(g_FrameMan.GetPlayerFrameBufferWidth(-1), g_FrameMan.GetPlayerFrameBufferHeight(-1)) * 0.52;
+            lethalRange = m_MaxSharpLength * m_SharpAim + max(g_FrameMan.GetPlayerFrameBufferWidth(-1), g_FrameMan.GetPlayerFrameBufferHeight(-1)) * 0.52;
             Actor *pUser = dynamic_cast<Actor *>(pRootParent);
             if (pUser)
                 lethalRange += pUser->GetAimDistance();
@@ -840,9 +840,11 @@ void HDFirearm::Update()
 
                     // Decide for how long until the bullet tumble and start to lose lethality
                     pPixel = dynamic_cast<MOPixel *>(pParticle);
-                    if (pPixel)
-                        pPixel->SetLethalRange(lethalRange);
-
+					if (pPixel) {
+						// Stray bullets heavily affected by bullet shake lose lethality quicker
+						lethalRange *= max(1.0F - shake / 90.0F, 0.1F);
+						pPixel->SetLethalRange(lethalRange);
+					}
                     g_MovableMan.AddParticle(pParticle);
                 }
                 pParticle = 0;

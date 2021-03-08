@@ -4125,7 +4125,7 @@ void AHuman::Update()
         if (m_SharpAimProgress > 0)
         {
 			if (m_pFGArm->GetHeldDevice()->IsRecoiled())
-				m_SharpAimProgress *= 0.9;
+				m_SharpAimProgress *= 1 - min(m_pFGArm->GetHeldDevice()->GetRecoilForce().GetMagnitude() / (m_pFGArm->GetGripStrength() * (m_pFGArm->GetHeldDevice()->GetSupported() ? 1.5F : 1.0F)), 1.0F);
 			Vector notUsed;
             Vector sharpAimVector(maxLength, 0);
             sharpAimVector *= aimMatrix;

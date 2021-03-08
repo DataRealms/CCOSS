@@ -102,17 +102,18 @@ namespace RTE {
 				int currentActivityHumanCount = m_IsInMultiplayerMode ? 1 : currentActivity->GetHumanCount();
 
 				if (m_CurrentActivityHumanPlayerPositions.size() != currentActivityHumanCount) { status = status == FMOD_OK ? m_AudioSystem->set3DNumListeners(currentActivityHumanCount) : status; }
-
-				m_CurrentActivityHumanPlayerPositions.clear();
-				for (short player = Players::PlayerOne; player < Players::MaxPlayerCount && m_CurrentActivityHumanPlayerPositions.size() < currentActivityHumanCount; player++) {
-					if (currentActivity->PlayerActive(player) && currentActivity->PlayerHuman(player)) {
-						short screen = currentActivity->ScreenOfPlayer(player);
-						Vector humanPlayerPosition = g_SceneMan.GetScrollTarget(screen);
-						if (IsInMultiplayerMode()) { humanPlayerPosition += (RTE::Vector(g_FrameMan.GetPlayerFrameBufferWidth(screen), g_FrameMan.GetPlayerFrameBufferHeight(screen)) / 2); }
-						m_CurrentActivityHumanPlayerPositions.push_back(std::make_shared<const RTE::Vector>(humanPlayerPosition));
-					}
-				}
 				
+				//if (IsInMultiplayerMode() || m_CurrentActivityHumanPlayerPositions.empty() || (m_CurrentActivityHumanPlayerPositions.at(0) == nullptr || m_CurrentActivityHumanPlayerPositions.at(0).get()->GetFloorIntX() > g_SceneMan.GetSceneWidth() || m_CurrentActivityHumanPlayerPositions.at(0).get()->GetX() < 0.0F)) {
+					m_CurrentActivityHumanPlayerPositions.clear();
+					for (short player = Players::PlayerOne; player < Players::MaxPlayerCount && m_CurrentActivityHumanPlayerPositions.size() < currentActivityHumanCount; player++) {
+						if (currentActivity->PlayerActive(player) && currentActivity->PlayerHuman(player)) {
+							short screen = currentActivity->ScreenOfPlayer(player);
+							Vector humanPlayerPosition = g_SceneMan.GetScrollTarget(screen);
+							if (IsInMultiplayerMode()) { humanPlayerPosition += (RTE::Vector(g_FrameMan.GetPlayerFrameBufferWidth(screen), g_FrameMan.GetPlayerFrameBufferHeight(screen)) / 2); }
+							m_CurrentActivityHumanPlayerPositions.push_back(std::make_shared<const RTE::Vector>(humanPlayerPosition));
+						}
+					}
+				//}
 
 				int listenerNumber = 0;
 				for (std::shared_ptr<const RTE::Vector> humanPlayerPosition : m_CurrentActivityHumanPlayerPositions) {
@@ -348,7 +349,7 @@ namespace RTE {
 
 	SoundContainer *AudioMan::PlaySound(const std::string &filePath, const Vector &position, int player) {
 		if (m_IsInMultiplayerMode) {
-			return false;
+			return nullptr;
 		}
 
 		SoundContainer *newSoundContainer = new SoundContainer();
@@ -400,6 +401,18 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void AudioMan::ClearMusicEvents(short player) {
+		if (player == -1 || player >= c_MaxClients) {
+			for (int i = 0; i < c_MaxClients; i++) { ClearMusicEvents(i); }
+		} else {
+			g_SoundEventsListMutex[player].lock();
+			m_MusicEvents[player].clear();
+			g_SoundEventsListMutex[player].unlock();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void AudioMan::GetSoundEvents(int player, std::list<NetworkSoundData> &list) {
 		if (player < 0 || player >= c_MaxClients) {
 			return;
@@ -416,9 +429,9 @@ namespace RTE {
 			}
 		}
 		if (lastSetGlobalPitchEvent) { list.push_back(*lastSetGlobalPitchEvent); }
+		m_SoundEvents[player].clear();
 		g_SoundEventsListMutex[player].unlock();
 
-		m_SoundEvents[player].clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -465,6 +478,18 @@ namespace RTE {
 
 			g_SoundEventsListMutex[player].lock();
 			m_SoundEvents[player].insert(m_SoundEvents[player].end(), soundDataVector.begin(), soundDataVector.end());
+			g_SoundEventsListMutex[player].unlock();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void AudioMan::ClearSoundEvents(short player) {
+		if (player == -1 || player >= c_MaxClients) {
+			for (int i = 0; i < c_MaxClients; i++) { ClearSoundEvents(i); }
+		} else {
+			g_SoundEventsListMutex[player].lock();
+			m_SoundEvents[player].clear();
 			g_SoundEventsListMutex[player].unlock();
 		}
 	}

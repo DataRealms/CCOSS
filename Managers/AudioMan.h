@@ -348,6 +348,12 @@ namespace RTE {
 		void RegisterMusicEvent(int player, NetworkMusicState state, const char *filepath, int loopsOrSilence = 0, float position = 0, float pitch = 1.0F);
 
 		/// <summary>
+		/// Clears the list of current Music events for the target player.
+		/// </summary>
+		/// <param name="player">Player to clear music events for. -1 clears for all players</param>
+		void ClearMusicEvents(short player);
+
+		/// <summary>
 		/// Fills the list with sound events happened for the specified network player.
 		/// </summary>
 		/// <param name="player">Player to get events for.</param>
@@ -362,6 +368,12 @@ namespace RTE {
 		/// <param name="soundContainer">A pointer to the SoundContainer this event is happening to, or a null pointer for global events.</param>
 		/// <param name="fadeOutTime">THe amount of time, in MS, to fade out over. This data isn't contained in SoundContainer, so it needs to be passed in separately.</param>
 		void RegisterSoundEvent(int player, NetworkSoundState state, const SoundContainer *soundContainer, int fadeOutTime = 0);
+
+		/// <summary>
+		/// Clears the list of current Sound events for the target player.
+		/// </summary>
+		/// <param name="player">Player to clear sound events for. -1 clears for all players</param>
+		void ClearSoundEvents(short player);
 #pragma endregion
 
 	protected:

@@ -1675,13 +1675,10 @@ namespace RTE {
 		DrawStatisticsData();
 
 		// Clear sound events for unconnected players because AudioMan does not know about their state and stores broadcast sounds to their event lists
-		std::list<AudioMan::NetworkSoundData> soundList;
-		std::list<AudioMan::NetworkMusicData> musicList;
-
 		for (short player = 0; player < c_MaxClients; player++) {
 			if (!IsPlayerConnected(player)) {
-				g_AudioMan.GetSoundEvents(player, soundList);
-				g_AudioMan.GetMusicEvents(player, musicList);
+				g_AudioMan.ClearSoundEvents(player);
+				g_AudioMan.ClearMusicEvents(player);
 			}
 		}
 

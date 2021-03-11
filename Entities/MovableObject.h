@@ -1618,6 +1618,12 @@ enum MOType
 
 	unsigned long int const GetUniqueID() const { return m_UniqueID; }
 
+    /// <summary>
+    /// Gets the preset name and unique ID of this MO, often useful for error messages.
+    /// </summary>
+    /// <returns>A string containing the unique ID and preset name of this MO.</returns>
+    std::string GetPresetNameAndUniqueID() const { return m_PresetName + ", UID: " + std::to_string(m_UniqueID); }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  DamageOnCollision

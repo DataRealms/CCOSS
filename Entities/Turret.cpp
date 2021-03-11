@@ -1,5 +1,4 @@
 #include "Turret.h"
-#include "PresetMan.h"
 
 namespace RTE {
 
@@ -30,16 +29,9 @@ namespace RTE {
 
 	int Turret::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "MountedDevice") {
-			RemoveAttachable(m_MountedDevice);
-			const Entity *mountedDeviceEntity = g_PresetMan.GetEntityPreset(reader);
-			if (mountedDeviceEntity) {
-				m_MountedDevice = dynamic_cast<HeldDevice *>(mountedDeviceEntity->Clone());
-				AddAttachable(m_MountedDevice);
-				m_MountedDevice->SetInheritsRotAngle(false);
-				m_MountedDevice->SetUnPickupable(true);
-				//Force weapons mounted on turrets to never be removed due to forces. This doesn't affect them gibbing from hitting their impulse limits though.
-				m_MountedDevice->SetJointStrength(0.0F);
-			}
+			m_MountedDevice = new HeldDevice;
+			reader >> m_MountedDevice;
+			SetMountedDevice(m_MountedDevice);
 		} else {
 			return Attachable::ReadProperty(propName, reader);
 		}
@@ -74,6 +66,11 @@ namespace RTE {
 				RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetMountedDevice");
 				dynamic_cast<Turret *>(parent)->SetMountedDevice(castedAttachable);
 			}});
+
+			m_MountedDevice->SetInheritsRotAngle(false);
+			m_MountedDevice->SetUnPickupable(true);
+			//Force weapons mounted on turrets to never be removed due to forces. This doesn't affect them gibbing from hitting their impulse limits though.
+			m_MountedDevice->SetJointStrength(0.0F);
 		}
 	}
 

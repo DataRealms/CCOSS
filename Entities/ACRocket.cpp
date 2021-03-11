@@ -161,18 +161,13 @@ int ACRocket::Create(const ACRocket &reference) {
 
 int ACRocket::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "RLeg") {
-        RemoveAttachable(m_pRLeg);
         m_pRLeg = new Leg;
         reader >> m_pRLeg;
-        AddAttachable(m_pRLeg);
-        if (m_pRLeg->HasNoSetDamageMultiplier()) { m_pRLeg->SetDamageMultiplier(1.0F); }
+        SetRightLeg(m_pRLeg);
     } else if (propName == "LLeg") {
-        RemoveAttachable(m_pLLeg);
         m_pLLeg = new Leg;
         reader >> m_pLLeg;
-        AddAttachable(m_pLLeg);
-        m_pLLeg->SetInheritsHFlipped(-1);
-        if (m_pLLeg->HasNoSetDamageMultiplier()) { m_pLLeg->SetDamageMultiplier(1.0F); }
+        SetLeftLeg(m_pLLeg);
     } else if (propName == "RFootGroup") {
         delete m_pRFootGroup;
         m_pRFootGroup = new AtomGroup();
@@ -183,41 +178,26 @@ int ACRocket::ReadProperty(const std::string_view &propName, Reader &reader) {
         m_pLFootGroup = new AtomGroup();
         reader >> m_pLFootGroup;
         m_pLFootGroup->SetOwner(this);
-    } else if (propName == "MThruster"){   
-        RemoveAttachable(m_pMThruster);
+    } else if (propName == "MThruster") {
         m_pMThruster = new AEmitter;
         reader >> m_pMThruster;
-        AddAttachable(m_pMThruster);
-        if (m_pMThruster->HasNoSetDamageMultiplier()) { m_pMThruster->SetDamageMultiplier(1.0F); }
-        m_pMThruster->SetInheritedRotAngleOffset(-c_HalfPI);
+        SetMainThruster(m_pMThruster);
     } else if (propName == "RThruster") {
-        RemoveAttachable(m_pRThruster);
         m_pRThruster = new AEmitter;
         reader >> m_pRThruster;
-        AddAttachable(m_pRThruster);
-        if (m_pRThruster->HasNoSetDamageMultiplier()) { m_pRThruster->SetDamageMultiplier(1.0F); }
-        m_pRThruster->SetInheritedRotAngleOffset(c_EighthPI);
+        SetRightThruster(m_pRThruster);
     } else if (propName == "LThruster") {
-        RemoveAttachable(m_pLThruster);
         m_pLThruster = new AEmitter;
         reader >> m_pLThruster;
-        AddAttachable(m_pLThruster);
-        if (m_pLThruster->HasNoSetDamageMultiplier()) { m_pLThruster->SetDamageMultiplier(1.0F); }
-        m_pLThruster->SetInheritedRotAngleOffset(c_PI - c_EighthPI);
+        SetLeftThruster(m_pLThruster);
     } else if (propName == "URThruster") {
-        RemoveAttachable(m_pURThruster);
         m_pURThruster = new AEmitter;
         reader >> m_pURThruster;
-        AddAttachable(m_pURThruster);
-        if (m_pURThruster->HasNoSetDamageMultiplier()) { m_pURThruster->SetDamageMultiplier(1.0F); }
-        m_pURThruster->SetInheritedRotAngleOffset(c_HalfPI - c_EighthPI);
+        SetURightThruster(m_pURThruster);
     } else if (propName == "ULThruster") {
-        RemoveAttachable(m_pULThruster);
         m_pULThruster = new AEmitter;
         reader >> m_pULThruster;
-        AddAttachable(m_pULThruster);
-        if (m_pULThruster->HasNoSetDamageMultiplier()) { m_pULThruster->SetDamageMultiplier(1.0F); }
-        m_pULThruster->SetInheritedRotAngleOffset(c_HalfPI + c_EighthPI);
+        SetULeftThruster(m_pULThruster);
     } else if (propName == "RaisedGearLimbPath") {
         reader >> m_Paths[RIGHT][RAISED];
     } else if (propName == "LoweredGearLimbPath") {
@@ -858,6 +838,8 @@ void ACRocket::SetRightLeg(Leg *newLeg) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetRightLeg");
             dynamic_cast<ACRocket *>(parent)->SetRightLeg(castedAttachable);
         }});
+
+        if (m_pRLeg->HasNoSetDamageMultiplier()) { m_pRLeg->SetDamageMultiplier(1.0F); }
     }
 }
 
@@ -876,6 +858,9 @@ void ACRocket::SetLeftLeg(Leg *newLeg) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetLeftLeg");
             dynamic_cast<ACRocket *>(parent)->SetLeftLeg(castedAttachable);
         }});
+
+        if (m_pLLeg->HasNoSetDamageMultiplier()) { m_pLLeg->SetDamageMultiplier(1.0F); }
+        m_pLLeg->SetInheritsHFlipped(-1);
     }
 }
 
@@ -895,6 +880,9 @@ void ACRocket::SetMainThruster(AEmitter *newThruster) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetMainThruster");
             dynamic_cast<ACRocket *>(parent)->SetMainThruster(castedAttachable);
         }});
+
+        if (m_pMThruster->HasNoSetDamageMultiplier()) { m_pMThruster->SetDamageMultiplier(1.0F); }
+        m_pMThruster->SetInheritedRotAngleOffset(-c_HalfPI);
     }
 }
 
@@ -914,6 +902,9 @@ void ACRocket::SetRightThruster(AEmitter *newThruster) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetRightThruster");
             dynamic_cast<ACRocket *>(parent)->SetRightThruster(castedAttachable);
         }});
+
+        if (m_pRThruster->HasNoSetDamageMultiplier()) { m_pRThruster->SetDamageMultiplier(1.0F); }
+        m_pRThruster->SetInheritedRotAngleOffset(c_EighthPI);
     }
 }
 
@@ -933,6 +924,9 @@ void ACRocket::SetLeftThruster(AEmitter *newThruster) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetLeftThruster");
             dynamic_cast<ACRocket *>(parent)->SetLeftThruster(castedAttachable);
         }});
+
+        if (m_pLThruster->HasNoSetDamageMultiplier()) { m_pLThruster->SetDamageMultiplier(1.0F); }
+        m_pLThruster->SetInheritedRotAngleOffset(c_PI - c_EighthPI);
     }
 }
 
@@ -952,6 +946,9 @@ void ACRocket::SetURightThruster(AEmitter *newThruster) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetURightThruster");
             dynamic_cast<ACRocket *>(parent)->SetURightThruster(castedAttachable);
         }});
+
+        if (m_pURThruster->HasNoSetDamageMultiplier()) { m_pURThruster->SetDamageMultiplier(1.0F); }
+        m_pURThruster->SetInheritedRotAngleOffset(c_HalfPI - c_EighthPI);
     }
 }
 
@@ -971,6 +968,9 @@ void ACRocket::SetULeftThruster(AEmitter *newThruster) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetULeftThruster");
             dynamic_cast<ACRocket *>(parent)->SetULeftThruster(castedAttachable);
         }});
+
+        if (m_pULThruster->HasNoSetDamageMultiplier()) { m_pULThruster->SetDamageMultiplier(1.0F); }
+        m_pULThruster->SetInheritedRotAngleOffset(c_HalfPI + c_EighthPI);
     }
 }
 

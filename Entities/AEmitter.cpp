@@ -13,7 +13,6 @@
 
 #include "AEmitter.h"
 #include "Atom.h"
-#include "PresetMan.h"
 #include "Emission.h"
 
 namespace RTE {
@@ -165,17 +164,9 @@ int AEmitter::ReadProperty(const std::string_view &propName, Reader &reader) {
     } else if (propName == "EmissionDamage") {
         reader >> m_EmitDamage;
     } else if (propName == "Flash") {
-        RemoveAttachable(m_pFlash);
-        const Entity *flashEntity = g_PresetMan.GetEntityPreset(reader);
-        if (flashEntity) {
-            m_pFlash = dynamic_cast<Attachable *>(flashEntity->Clone());
-            AddAttachable(m_pFlash);
-            m_pFlash->SetDrawnNormallyByParent(false);
-            m_pFlash->SetInheritsRotAngle(false);
-            m_pFlash->SetInheritsHFlipped(0);
-            m_pFlash->SetDeleteWhenRemovedFromParent(true);
-            m_pFlash->SetCollidesWithTerrainWhileAttached(false);
-        }
+        m_pFlash = new Attachable;
+        reader >> m_pFlash;
+        SetFlash(m_pFlash);
     } else if (propName == "FlashScale") {
         reader >> m_FlashScale;
     } else if (propName == "FlashOnlyOnBurst") {
@@ -381,6 +372,12 @@ void AEmitter::SetFlash(Attachable *newFlash) {
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newFlash->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
             dynamic_cast<AEmitter *>(parent)->SetFlash(attachable);
         }});
+
+        m_pFlash->SetDrawnNormallyByParent(false);
+        m_pFlash->SetInheritsRotAngle(false);
+        m_pFlash->SetInheritsHFlipped(0);
+        m_pFlash->SetDeleteWhenRemovedFromParent(true);
+        m_pFlash->SetCollidesWithTerrainWhileAttached(false);
     }
 }
 

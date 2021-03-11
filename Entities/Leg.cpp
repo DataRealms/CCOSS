@@ -1,5 +1,4 @@
 #include "Leg.h"
-#include "PresetMan.h"
 
 namespace RTE {
 
@@ -78,15 +77,9 @@ namespace RTE {
 
 	int Leg::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Foot") {
-			RemoveAttachable(m_Foot);
-			const Entity *footEntity = g_PresetMan.GetEntityPreset(reader);
-			if (footEntity) {
-				m_Foot = dynamic_cast<Attachable *>(footEntity->Clone());
-				AddAttachable(m_Foot);
-				m_Foot->SetInheritsRotAngle(false);
-				m_Foot->SetParentGibBlastStrengthMultiplier(0.0F);
-				m_Foot->SetCollidesWithTerrainWhileAttached(false);
-			}
+			m_Foot = new Attachable;
+			reader >> m_Foot;
+			SetFoot(m_Foot);
 		} else if (propName == "ContractedOffset") {
 			reader >> m_ContractedOffset;
 			m_MinExtension = m_ContractedOffset.GetMagnitude();
@@ -141,6 +134,10 @@ namespace RTE {
 			m_HardcodedAttachableUniqueIDsAndSetters.insert({newFoot->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
 				dynamic_cast<Leg *>(parent)->SetFoot(attachable);
 			}});
+
+			m_Foot->SetInheritsRotAngle(false);
+			m_Foot->SetParentGibBlastStrengthMultiplier(0.0F);
+			m_Foot->SetCollidesWithTerrainWhileAttached(false);
 		}
 	}
 

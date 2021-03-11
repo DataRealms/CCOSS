@@ -258,48 +258,32 @@ int ACrab::Create(const ACrab &reference) {
 int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "Turret") {
-        RemoveAttachable(m_pTurret);
         m_pTurret = new Turret;
         reader >> m_pTurret;
-        AddAttachable(m_pTurret);
-        if (m_pTurret->HasNoSetDamageMultiplier()) { m_pTurret->SetDamageMultiplier(5.0F); }
+        SetTurret(m_pTurret);
     } else if (propName == "Jetpack") {
-        RemoveAttachable(m_pJetpack);
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
-        AddAttachable(m_pJetpack);
-        if (m_pJetpack->HasNoSetDamageMultiplier()) { m_pJetpack->SetDamageMultiplier(0.0F); }
-        m_pJetpack->SetApplyTransferredForcesAtOffset(false);
-        m_pJetpack->SetDeleteWhenRemovedFromParent(true);
+        SetJetpack(m_pJetpack);
     } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         m_JetTimeTotal *= 1000;
     } else if (propName == "LFGLeg" || propName == "LeftFGLeg") {
-        RemoveAttachable(m_pLFGLeg);
         m_pLFGLeg = new Leg;
         reader >> m_pLFGLeg;
-        AddAttachable(m_pLFGLeg);
-        if (m_pLFGLeg->HasNoSetDamageMultiplier()) { m_pLFGLeg->SetDamageMultiplier(1.0F); }
-        m_pLFGLeg->SetInheritsHFlipped(-1);
+        SetLeftFGLeg(m_pLFGLeg);
     } else if (propName == "LBGLeg" || propName == "LeftFGLeg") {
-        RemoveAttachable(m_pLBGLeg);
         m_pLBGLeg = new Leg;
         reader >> m_pLBGLeg;
-        AddAttachable(m_pLBGLeg);
-        if (m_pLBGLeg->HasNoSetDamageMultiplier()) { m_pLBGLeg->SetDamageMultiplier(1.0F); }
-        m_pLBGLeg->SetInheritsHFlipped(-1);
+        SetLeftBGLeg(m_pLBGLeg);
     } else if (propName == "RFGLeg" || propName == "LeftFGLeg") {
-        RemoveAttachable(m_pRFGLeg);
         m_pRFGLeg = new Leg;
         reader >> m_pRFGLeg;
-        AddAttachable(m_pRFGLeg);
-        if (m_pRFGLeg->HasNoSetDamageMultiplier()) { m_pRFGLeg->SetDamageMultiplier(1.0F); }
+        SetRightFGLeg(m_pRFGLeg);
     } else if (propName == "RBGLeg" || propName == "LeftFGLeg") {
-        RemoveAttachable(m_pRBGLeg);
         m_pRBGLeg = new Leg;
         reader >> m_pRBGLeg;
-        AddAttachable(m_pRBGLeg);
-        if (m_pRBGLeg->HasNoSetDamageMultiplier()) { m_pRBGLeg->SetDamageMultiplier(1.0F); }
+        SetRightBGLeg(m_pRBGLeg);
     } else if (propName == "LFootGroup" || propName == "LeftFootGroup") {
         delete m_pLFGFootGroup;
         delete m_pLBGFootGroup;
@@ -528,6 +512,8 @@ void ACrab::SetTurret(Turret *newTurret) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetTurret");
             dynamic_cast<ACrab *>(parent)->SetTurret(castedAttachable);
         }});
+
+        if (m_pTurret->HasNoSetDamageMultiplier()) { m_pTurret->SetDamageMultiplier(5.0F); }
     }
 }
 
@@ -547,6 +533,10 @@ void ACrab::SetJetpack(AEmitter *newJetpack) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetJetpack");
             dynamic_cast<ACrab *>(parent)->SetJetpack(castedAttachable);
         }});
+
+        if (m_pJetpack->HasNoSetDamageMultiplier()) { m_pJetpack->SetDamageMultiplier(0.0F); }
+        m_pJetpack->SetApplyTransferredForcesAtOffset(false);
+        m_pJetpack->SetDeleteWhenRemovedFromParent(true);
     }
 }
 
@@ -566,6 +556,9 @@ void ACrab::SetLeftFGLeg(Leg *newLeg) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetLeftFGLeg");
             dynamic_cast<ACrab *>(parent)->SetLeftFGLeg(castedAttachable);
         }});
+
+        if (m_pLFGLeg->HasNoSetDamageMultiplier()) { m_pLFGLeg->SetDamageMultiplier(1.0F); }
+        m_pLFGLeg->SetInheritsHFlipped(-1);
     }
 }
 
@@ -585,6 +578,9 @@ void ACrab::SetLeftBGLeg(Leg *newLeg) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetLeftBGLeg");
             dynamic_cast<ACrab *>(parent)->SetLeftBGLeg(castedAttachable);
         }});
+
+        if (m_pLBGLeg->HasNoSetDamageMultiplier()) { m_pLBGLeg->SetDamageMultiplier(1.0F); }
+        m_pLBGLeg->SetInheritsHFlipped(-1);
     }
 }
 
@@ -604,6 +600,8 @@ void ACrab::SetRightFGLeg(Leg *newLeg) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetRightFGLeg");
             dynamic_cast<ACrab *>(parent)->SetRightFGLeg(castedAttachable);
         }});
+
+        if (m_pRFGLeg->HasNoSetDamageMultiplier()) { m_pRFGLeg->SetDamageMultiplier(1.0F); }
     }
 }
 
@@ -623,6 +621,8 @@ void ACrab::SetRightBGLeg(Leg *newLeg) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetRightBGLeg");
             dynamic_cast<ACrab *>(parent)->SetRightBGLeg(castedAttachable);
         }});
+
+        if (m_pRBGLeg->HasNoSetDamageMultiplier()) { m_pRBGLeg->SetDamageMultiplier(1.0F); }
     }
 }
 

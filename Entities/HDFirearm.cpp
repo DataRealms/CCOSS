@@ -150,23 +150,13 @@ int HDFirearm::Create(const HDFirearm &reference) {
 
 int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "Magazine") {
-        RemoveAttachable(m_pMagazine);
-        const Entity *magazineEntity = g_PresetMan.GetEntityPreset(reader);
-        if (magazineEntity) {
-            m_pMagazineReference = dynamic_cast<const Magazine *>(magazineEntity);
-            m_pMagazine = dynamic_cast<Magazine *>(magazineEntity->Clone());
-            AddAttachable(m_pMagazine);
-        }
+        m_pMagazine = new Magazine;
+        reader >> m_pMagazine;
+        SetMagazine(m_pMagazine);
     } else if (propName == "Flash") {
-        RemoveAttachable(m_pFlash);
-        const Entity *flashEntity = g_PresetMan.GetEntityPreset(reader);
-        if (flashEntity) {
-            m_pFlash = dynamic_cast<Attachable *>(flashEntity->Clone());
-            AddAttachable(m_pFlash);
-            m_pFlash->SetDrawnNormallyByParent(false);
-            m_pFlash->SetDeleteWhenRemovedFromParent(true);
-            m_pFlash->SetCollidesWithTerrainWhileAttached(false);
-        }
+        m_pFlash = new Attachable;
+        reader >> m_pFlash;
+        SetFlash(m_pFlash);
     } else if (propName == "PreFireSound") {
         reader >> m_PreFireSound;
         m_DeactivationSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::IGNORE_PLAY);
@@ -335,6 +325,9 @@ void HDFirearm::SetMagazine(Magazine *newMagazine) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetMagazine");
             dynamic_cast<HDFirearm *>(parent)->SetMagazine(castedAttachable);
         }});
+
+        const Entity *newMagazineReference = g_PresetMan.GetEntityPreset(newMagazine->GetClassName(), newMagazine->GetPresetName(), newMagazine->GetModuleID());
+        if (newMagazineReference) { m_pMagazineReference = dynamic_cast<const Magazine *>(newMagazineReference); }
     }
 }
 
@@ -352,6 +345,10 @@ void HDFirearm::SetFlash(Attachable *newFlash) {
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newFlash->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
             dynamic_cast<HDFirearm *>(parent)->SetFlash(attachable);
         }});
+
+        m_pFlash->SetDrawnNormallyByParent(false);
+        m_pFlash->SetDeleteWhenRemovedFromParent(true);
+        m_pFlash->SetCollidesWithTerrainWhileAttached(false);
     }
 }
 

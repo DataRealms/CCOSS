@@ -49,7 +49,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	In Lua there's only `InheritedRotAngleOffset` which takes/returns radians, to avoid confusion. For example, `InheritedRotAngleDegOffset = 90` would make the `Attachable` always face perpendicular to its parent.  
 	Does nothing if the `Attachable`'s `InheritsRotAngle` is set to false or the `Attachable` has no parent.  
 	`GibWithParentChance = 0 - 1` allows you to specify whether this `Attachable` should be gibbed when its parent does and what the chance of that happening is. 0 means never, 1 means always.  
-	`ParentGibBlastStrengthMultiplier = number` allows you to specify the multiplier this `Attachable` will apply to its parent's gib blast strength when the parent gibs. Usually this would be a positive number, but it doesn't have to be.
+	`ParentGibBlastStrengthMultiplier = number` allows you to specify a multiplier for how strongly this `Attachable` will apply its parent's gib blast strength to itself when the parent gibs. Usually this would be a positive number, but it doesn't have to be.
 
 - New INI and Lua (R/W) `Arm` property `GripStrength`. This effectively replaces the `JointStrength` of the held `HeldDevice`, allowing `Arms` to control how tightly equipment is held.
 

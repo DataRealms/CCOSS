@@ -173,15 +173,15 @@ namespace RTE {
 		void SetGibWithParentChance(float gibWithParentChance) { m_GibWithParentChance = gibWithParentChance; }
 
 		/// <summary>
-		/// Gets the multiplier this Attachable will apply to its parent's gib blast strength when the parent gibs.
+		/// Gets the multiplier for how strongly this Attachable's parent's gib blast strength will be applied to it when its parent's gibs
 		/// </summary>
-		/// <returns>A float with the gib blast strength multiplier of this Attachable.</returns>
+		/// <returns>A float with the parent gib blast strength multiplier of this Attachable.</returns>
 		float GetParentGibBlastStrengthMultiplier() const { return m_ParentGibBlastStrengthMultiplier; }
 
 		/// <summary>
-		/// Sets the multiplier this Attachable will apply to its parent's gib blast strength when the parent gibs.
+		/// Sets the multiplier for how strongly this Attachable's parent's gib blast strength will be applied to it when its parent's gibs
 		/// </summary>
-		/// <param name="parentGibBlastStrengthMultiplier">A float describing the gib blast strength multiplier of this Attachable.</param>
+		/// <param name="parentGibBlastStrengthMultiplier">A float describing the parent gib blast strength multiplier of this Attachable.</param>
 		void SetParentGibBlastStrengthMultiplier(float parentGibBlastStrengthMultiplier) { m_ParentGibBlastStrengthMultiplier = parentGibBlastStrengthMultiplier; }
 #pragma endregion
 
@@ -501,7 +501,7 @@ namespace RTE {
 		bool m_ApplyTransferredForcesAtOffset; //!< Whether forces transferred from this Attachable should be applied at the rotated parent offset (which will produce torque), or directly at the parent's position. Mostly useful to make jetpacks and similar emitters viable.
 		
 		float m_GibWithParentChance; //!< The percentage chance that this Attachable will gib when its parent does. 0 means never, 1 means always.
-		float m_ParentGibBlastStrengthMultiplier; //!< The multiplier this Attachable will apply to its parent's gib blast strength when the parent gibs.
+		float m_ParentGibBlastStrengthMultiplier; //!< The multiplier for how strongly this Attachable's parent's gib blast strength will be applied to it when its parent's gibs.
 		
 		//TODO This is a stopgap for a dedicated Wound class, that would be helpful to simplify things like this and default damage multiplier handling.
 		bool m_IsWound; //!< Whether or not this Attachable has been added as a wound. Only set and applied for Attachables with parents.

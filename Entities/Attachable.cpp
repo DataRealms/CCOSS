@@ -20,7 +20,7 @@ namespace RTE {
 		m_ApplyTransferredForcesAtOffset = true;
 
 		m_GibWithParentChance = 0.0F;
-		m_ParentGibBlastStrengthMultiplier = 1;
+		m_ParentGibBlastStrengthMultiplier = 1.0F;
 
 		m_IsWound = false;
 

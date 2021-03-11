@@ -234,6 +234,7 @@ int MOSRotating::Create(const MOSRotating &reference) {
         AddWound(dynamic_cast<AEmitter *>(wound->Clone()), wound->GetParentOffset(), false);
     }
 
+    //TODO This could probably be replaced with just using HardcodedAttachableUniqueIDs entirely. At this point in, these lists should have the same UIDs in them, so it should work.
     for (const Attachable *referenceAttachable : reference.m_Attachables) {
         if (m_ReferenceHardcodedAttachableUniqueIDs.find(referenceAttachable->GetUniqueID()) == m_ReferenceHardcodedAttachableUniqueIDs.end()) {
             AddAttachable(dynamic_cast<Attachable *>(referenceAttachable->Clone()));

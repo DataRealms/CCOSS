@@ -228,7 +228,7 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 			RemoveSelectionText();
 		} else {
 			if (m_CursorIndex < m_Text.size()) {
-                int nextCursorIndex = ModKey ? GetStartOfNextCharacterGroup(m_Text, m_CursorIndex) : 1;
+                int nextCursorIndex = ModKey ? GetStartOfNextCharacterGroup(m_Text, m_CursorIndex) : m_CursorIndex + 1;
                 m_Text.erase(m_CursorIndex, nextCursorIndex - m_CursorIndex);
 			}
 		}

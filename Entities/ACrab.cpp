@@ -2875,7 +2875,7 @@ void ACrab::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, 
         m_pRBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
     }
 
-    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawWalkPathVisualizations()) {
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawLimbPathVisualizations()) {
         m_Paths[LEFTSIDE][WALK]->Draw(pTargetBitmap, targetPos, 122);
         m_Paths[RIGHTSIDE][WALK]->Draw(pTargetBitmap, targetPos, 122);
     }

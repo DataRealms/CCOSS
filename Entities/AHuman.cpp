@@ -4367,7 +4367,7 @@ void AHuman::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode,
         m_pBGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
     }
 
-    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawWalkPathVisualizations()) {
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawLimbPathVisualizations()) {
         m_Paths[m_HFlipped][WALK].Draw(pTargetBitmap, targetPos, 122);
         m_Paths[m_HFlipped][CRAWL].Draw(pTargetBitmap, targetPos, 122);
         m_Paths[m_HFlipped][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);

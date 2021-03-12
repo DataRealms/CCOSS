@@ -591,6 +591,8 @@ protected:
     int m_HatchDelay;
     // Sound for opening the hatch
     SoundContainer m_HatchOpenSound;
+    // Sound for closing the hatch
+    SoundContainer m_HatchCloseSound;
     // The new intermediate inventory of things that have been thrown into the craft while the doors are open,
     // but they shouldn't be ejected until the doors are closed and then opened again.
     std::deque<MovableObject *> m_NewInventory;

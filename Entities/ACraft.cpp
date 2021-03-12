@@ -264,6 +264,7 @@ void ACraft::Clear()
     m_HatchTimer.Reset();
     m_HatchDelay = 0;
     m_HatchOpenSound.Reset();
+	m_HatchCloseSound.Reset();
     m_NewInventory.clear();
     m_Exits.clear();
     m_CurrentExit = m_Exits.begin();
@@ -315,6 +316,7 @@ int ACraft::Create(const ACraft &reference)
     m_HatchState = reference.m_HatchState;
     m_HatchDelay = reference.m_HatchDelay;
     m_HatchOpenSound = reference.m_HatchOpenSound;
+	m_HatchCloseSound = reference.m_HatchCloseSound;
     for (deque<MovableObject *>::const_iterator niItr = reference.m_NewInventory.begin(); niItr != reference.m_NewInventory.end(); ++niItr)
         m_NewInventory.push_back(dynamic_cast<MovableObject *>((*niItr)->Clone()));
     for (list<Exit>::const_iterator eItr = reference.m_Exits.begin(); eItr != reference.m_Exits.end(); ++eItr)
@@ -350,6 +352,8 @@ int ACraft::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_HatchDelay;
     else if (propName == "HatchOpenSound")
         reader >> m_HatchOpenSound;
+    else if (propName == "HatchCloseSound")
+        reader >> m_HatchCloseSound;
     else if (propName == "CrashSound")
         reader >> m_CrashSound;
     else if (propName == "AddExit")
@@ -387,6 +391,8 @@ int ACraft::Save(Writer &writer) const
     writer << m_HatchDelay;
     writer.NewProperty("HatchOpenSound");
     writer << m_HatchOpenSound;
+    writer.NewProperty("HatchCloseSound");
+    writer << m_HatchCloseSound;
     for (list<Exit>::const_iterator itr = m_Exits.begin(); itr != m_Exits.end(); ++itr)
     {
         writer.NewProperty("AddExit");
@@ -611,7 +617,7 @@ void ACraft::CloseHatch()
         m_NewInventory.clear();
 
         // PSCHHT
-        m_HatchOpenSound.Play(m_Pos);
+		m_HatchCloseSound.Play(m_Pos);
     }
 }
 

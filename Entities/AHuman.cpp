@@ -4262,7 +4262,7 @@ void AHuman::Update()
         }
     }
     // Keel over
-    else if (m_Status == UNSTABLE)
+    else if (m_Status == UNSTABLE && fabs(m_AngularVel) < 5)
     {
         float rotTarget = 0;
         // If traveling at speed, then always start falling forward

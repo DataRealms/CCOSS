@@ -738,8 +738,8 @@ namespace RTE {
 
 		switch (modeToSave) {
 			case SingleBitmap:
-				if (bitmapToSave && save_png(fullFileName, bitmapToSave, m_Palette) == 0) {
-					g_ConsoleMan.PrintString("SYSTEM: Bitmap was dumped to: " + std::string(fullFileName));
+				if (bitmapToSave && save_png(nameBase, bitmapToSave, m_Palette) == 0) {
+					g_ConsoleMan.PrintString("SYSTEM: Bitmap was dumped to: " + std::string(nameBase));
 					saveSuccess = true;
 				}
 				break;

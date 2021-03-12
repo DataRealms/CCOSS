@@ -677,7 +677,7 @@ bool SceneEditor::SaveScene(string saveAsName, bool forceOverwrite)
 	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Scenes.rte")
 	{
 		string sceneFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".ini");
-		string previewFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".preview.bmp");
+		string previewFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".preview.png");
 		if (g_PresetMan.AddEntityPreset(g_SceneMan.GetScene(), m_ModuleSpaceID, forceOverwrite, sceneFilePath))
 		{
 			// Save preview
@@ -704,7 +704,7 @@ bool SceneEditor::SaveScene(string saveAsName, bool forceOverwrite)
 	{
 		// Try to save to the data module
 		string sceneFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/" + saveAsName + ".ini");
-		string previewFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/" + saveAsName + ".preview.bmp");
+		string previewFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/" + saveAsName + ".preview.png");
 		if (g_PresetMan.AddEntityPreset(g_SceneMan.GetScene(), m_ModuleSpaceID, forceOverwrite, sceneFilePath))
 		{
             // Save preview

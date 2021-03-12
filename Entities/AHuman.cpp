@@ -77,6 +77,7 @@ void AHuman::Clear()
     m_GoldInInventoryChunk = 0;
     m_ThrowTmr.Reset();
     m_ThrowPrepTime = 1000;
+	m_BGArmFlailScalar = 1.0F;
 
     m_DeviceState = SCANNING;
     m_SweepState = NOSWEEP;
@@ -182,6 +183,7 @@ int AHuman::Create(const AHuman &reference) {
     m_JetTimeTotal = reference.m_JetTimeTotal;
     m_JetTimeLeft = reference.m_JetTimeLeft;
 	m_JetAngleRange = reference.m_JetAngleRange;
+	m_BGArmFlailScalar = reference.m_BGArmFlailScalar;
 
     m_pFGHandGroup = dynamic_cast<AtomGroup *>(reference.m_pFGHandGroup->Clone());
     m_pFGHandGroup->SetOwner(this);
@@ -261,6 +263,8 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
         m_JetTimeTotal *= 1000;
 	} else if (propName == "JumpAngleRange") {
 		reader >> m_JetAngleRange;
+	} else if (propName == "BGArmFlailScalar") {
+		reader >> m_BGArmFlailScalar;
     } else if (propName == "FGArm") {
         RemoveAttachable(m_pFGArm);
         m_pFGArm = new Arm;
@@ -373,6 +377,8 @@ int AHuman::Save(Writer &writer) const
     writer << m_JetTimeTotal / 1000;
 	writer.NewProperty("JumpAngleRange");
 	writer << m_JetAngleRange;
+	writer.NewProperty("BGArmFlailScalar");
+	writer << m_BGArmFlailScalar;
     writer.NewProperty("FGArm");
     writer << m_pFGArm;
     writer.NewProperty("BGArm");
@@ -4085,7 +4091,7 @@ void AHuman::Update()
                 EquipShieldInBGArm();
                 // This will likely make the arm idle since the target will be out of range
                 m_pBGArm->Reach(m_pFGHandGroup->GetLimbPos(m_HFlipped));
-                m_pBGArm->SetRotAngle(m_HFlipped ? (-m_AimAngle + -m_Rotation.GetRadAngle()) : (m_AimAngle + m_Rotation.GetRadAngle()));
+                m_pBGArm->SetRotAngle(m_Rotation.GetRadAngle() * m_BGArmFlailScalar + (m_HFlipped ? -m_AimAngle : m_AimAngle));
             }
         } else {
             // Unstable, so just drop the arm limply

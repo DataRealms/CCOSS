@@ -987,8 +987,10 @@ protected:
     int m_GoldInInventoryChunk;
     // For timing throws
     Timer m_ThrowTmr;
-    
-    long m_ThrowPrepTime; //!< The duration it takes this AHuman to fully charge a throw.
+	// The duration it takes this AHuman to fully charge a throw.
+    long m_ThrowPrepTime;
+    // The rate at which this AHuman's BG Arm follows the the bodily rotation. Set to a negative value for a "counterweight" effect.
+	float m_BGArmFlailScalar;
 
     ////////////////
     // AI States

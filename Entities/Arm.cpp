@@ -14,6 +14,7 @@
 #include "Arm.h"
 #include "HDFirearm.h"
 #include "ThrownDevice.h"
+#include "PresetMan.h"
 
 namespace RTE {
 
@@ -99,10 +100,8 @@ int Arm::Create(const Arm &reference) {
 
 int Arm::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "HeldDevice") {
-        //TODO This is ugly but needed cause MO is an abstract class. It'll all be replaced soon anyway.
-        m_pHeldMO = dynamic_cast<MovableObject *>(new Entity);
-        reader >> m_pHeldMO;
-        SetHeldMO(m_pHeldMO);
+        const Entity *heldEntity = g_PresetMan.GetEntityPreset(reader);
+        if (heldEntity) { SetHeldMO(dynamic_cast<MovableObject *>(heldEntity->Clone())); }
     } else if (propName == "GripStrength") {
         reader >> m_GripStrength;
     } else if (propName == "Hand") {

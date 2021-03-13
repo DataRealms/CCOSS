@@ -1,4 +1,5 @@
 #include "Leg.h"
+#include "PresetMan.h"
 
 namespace RTE {
 
@@ -77,9 +78,8 @@ namespace RTE {
 
 	int Leg::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Foot") {
-			m_Foot = new Attachable;
-			reader >> m_Foot;
-			SetFoot(m_Foot);
+			const Entity *footEntity = g_PresetMan.GetEntityPreset(reader);
+			if (footEntity) { SetFoot(dynamic_cast<Attachable *>(footEntity->Clone())); }
 		} else if (propName == "ContractedOffset") {
 			reader >> m_ContractedOffset;
 			m_MinExtension = m_ContractedOffset.GetMagnitude();

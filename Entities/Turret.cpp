@@ -1,4 +1,5 @@
 #include "Turret.h"
+#include "PresetMan.h"
 
 namespace RTE {
 
@@ -29,9 +30,8 @@ namespace RTE {
 
 	int Turret::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "MountedDevice") {
-			m_MountedDevice = new HeldDevice;
-			reader >> m_MountedDevice;
-			SetMountedDevice(m_MountedDevice);
+			const Entity *mountedEntity = g_PresetMan.GetEntityPreset(reader);
+			if (mountedEntity) { SetMountedDevice(dynamic_cast<HeldDevice *>(mountedEntity->Clone())); }
 		} else {
 			return Attachable::ReadProperty(propName, reader);
 		}

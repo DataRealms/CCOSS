@@ -14,6 +14,7 @@
 #include "AEmitter.h"
 #include "Atom.h"
 #include "Emission.h"
+#include "PresetMan.h"
 
 namespace RTE {
 
@@ -164,9 +165,8 @@ int AEmitter::ReadProperty(const std::string_view &propName, Reader &reader) {
     } else if (propName == "EmissionDamage") {
         reader >> m_EmitDamage;
     } else if (propName == "Flash") {
-        m_pFlash = new Attachable;
-        reader >> m_pFlash;
-        SetFlash(m_pFlash);
+        const Entity *flashEntity = g_PresetMan.GetEntityPreset(reader);
+        if (flashEntity) { SetFlash(dynamic_cast<Attachable *>(flashEntity->Clone())); }
     } else if (propName == "FlashScale") {
         reader >> m_FlashScale;
     } else if (propName == "FlashOnlyOnBurst") {

@@ -15,7 +15,7 @@ namespace RTE {
 	class SceneObject;
 
 	/// <summary>
-	/// A GUI for picking object instances for placement to the Scene in Cortex Command editors.
+	/// A GUI for picking object instances for placement to the Scene in various editors.
 	/// </summary>
 	class ObjectPickerGUI {
 
@@ -39,14 +39,9 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up a ObjectPickerGUI object before deletion from system memory.
+		/// Resets the entire ObjectPickerGUI, including its inherited members, to their default settings or values.
 		/// </summary>
-		~ObjectPickerGUI() { Destroy(); }
-
-		/// <summary>
-		/// Destroys and resets (through Clear()) the ObjectPickerGUI object.
-		/// </summary>
-		void Destroy();
+		void Reset() { Clear(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -54,13 +49,13 @@ namespace RTE {
 		/// Reports whether the menu is at all visible or not.
 		/// </summary>
 		/// <returns></returns>
-		bool IsVisible() const { return m_PickerEnabled != PickerState::Disabled; }
+		bool IsVisible() const { return m_PickerState != PickerState::Disabled; }
 
 		/// <summary>
 		/// Reports whether the menu is enabled or not.
 		/// </summary>
 		/// <returns></returns>
-		bool IsEnabled() const { return m_PickerEnabled == PickerState::Enabled || m_PickerEnabled == PickerState::Enabling; }
+		bool IsEnabled() const { return m_PickerState == PickerState::Enabled || m_PickerState == PickerState::Enabling; }
 
 		/// <summary>
 		/// Enables or disables the menu. This will animate it in and out of view.
@@ -71,7 +66,7 @@ namespace RTE {
 		/// <summary>
 		/// Sets the controller used by this. The ownership of the controller is NOT transferred!
 		/// </summary>
-		/// <param name="controller">The new controller for this menu. Ownership is NOT transferred</param>
+		/// <param name="controller">The new controller for this menu. Ownership is NOT transferred!</param>
 		void SetController(Controller *controller) { m_Controller = controller; }
 
 		/// <summary>
@@ -79,18 +74,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newPosX">The new X position of this entire GUI on the screen.</param>
 		/// <param name="newPosY">The new Y position of this entire GUI on the screen.</param>
-		void SetPosOnScreen(int newPosX, int newPosY);
+		void SetPosOnScreen(int newPosX, int newPosY) const;
 
 		/// <summary>
 		/// Sets which DataModule space to be picking objects from. If -1, then let the player pick from all loaded modules.
 		/// </summary>
-		/// <param name="moduleSpaceID">The ID of the module to let the player pick objects from. All official modules' objects will always be presented, in addition to the one passed in here.</param>
-		void SetModuleSpace(int moduleSpaceID = -1);
+		/// <param name="newModuleSpaceID">The ID of the module to let the player pick objects from. All official module objects will always be presented, in addition to the one passed in here.</param>
+		void SetModuleSpace(int newModuleSpaceID = -1);
 
 		/// <summary>
 		/// Sets which DataModule space to be picking objects from. If -1, then let the player pick from all loaded modules.
 		/// </summary>
-		/// <param name="showType">The ID of the module to let the player pick objects from. All official modules' objects will always be presented, in addition to the one passed in here.</param>
+		/// <param name="showType">The ID of the module to let the player pick objects from. All official module objects will always be presented, in addition to the one passed in here.</param>
 		void ShowOnlyType(const std::string_view &showType = "All") { m_ShowType = showType; UpdateGroupsList(); }
 
 		/// <summary>
@@ -123,13 +118,13 @@ namespace RTE {
 		/// Gets the next object in the objects list, even if the picker is disabled.
 		/// </summary>
 		/// <returns>The next object in the picker list, looping around if necessary. 0 if no object can be selected.</returns>
-		const SceneObject * GetNextObject();
+		const SceneObject * GetNextObject() { return GetNextOrPrevObject(false); }
 
 		/// <summary>
 		/// Gets the previous object in the objects list, even if the picker is disabled.
 		/// </summary>
 		/// <returns>The previous object in the picker list, looping around if necessary. 0 if no object can be selected.</returns>
-		const SceneObject * GetPrevObject();
+		const SceneObject * GetPrevObject() { return GetNextOrPrevObject(true); }
 
 		/// <summary>
 		/// Reports whether and which Object has been picked by the player. This may happen even though the player isn't done with the picker, like if a different object is picked each time the user selects something else in the objects list.
@@ -162,9 +157,16 @@ namespace RTE {
 		static BITMAP *s_Cursor; //!< The cursor image shared by all pickers.
 		Vector m_CursorPos; //!< Screen position of the cursor.
 
-		GUIScreen *m_GUIScreen; //!< GUI Screen for use by the in-game GUI.
-		GUIInput *m_GUIInput; //!< Input controller.
-		GUIControlManager *m_GUIController; //!< The control manager which holds all the controls.
+		/// <summary>
+		/// Custom deleters for std::unique_ptr members. Must be defined to avoid including the class headers and just rely on forward declaration.
+		/// </summary>
+		struct GUIScreenDeleter { void operator()(GUIScreen *ptr) const; };
+		struct GUIInputDeleter { void operator()(GUIInput *ptr) const; };
+		struct GUIControlManagerDeleter { void operator()(GUIControlManager *ptr) const; };
+
+		std::unique_ptr<GUIScreen, GUIScreenDeleter> m_GUIScreen; //!< GUI Screen for use by the in-game GUI.
+		std::unique_ptr<GUIInput, GUIInputDeleter> m_GUIInput; //!< Input controller.
+		std::unique_ptr<GUIControlManager, GUIControlManagerDeleter> m_GUIControlManager; //!< The control manager which holds all the controls.
 		GUICollectionBox *m_ParentBox; //!< Collection box of the picker GUI.
 		GUICollectionBox *m_PopupBox; //!< Collection box of the buy popups that contain information about items.
 		GUILabel *m_PopupText; //!< Label displaying the item popup description.
@@ -173,39 +175,22 @@ namespace RTE {
 
 		Controller *m_Controller; //!< Controller which controls this menu. Not owned.
 
-		int m_PickerEnabled; //!< Visibility state of the object picker.
-		int m_PickerFocus; //!< Focus state.
-		int m_FocusChange; //!< Focus change direction - 0 if none, negative if back, positive if forward.
-
-		float m_MenuSpeed; //!< Speed at which the menus appear and disappear.
+		int m_PickerState; //!< Visibility state of the object picker.
+		float m_OpenCloseSpeed; //!< Speed at which the picker appears and disappears.
 
 		int m_ModuleSpaceID; //!< The DataModule ID of the non-official module that this picker should be restricted to, in addition to all the official modules as well. If -1, the picker will be able to pick from ALL loaded DataModules.
 		std::string m_ShowType; //!< Only show objects of this type. Empty string or "All" will show objects of all types.
-
-		int m_SelectedGroupIndex; //!< Which Group in the groups list box we have selected.
-		int m_SelectedObjectIndex; //!< Which object in the Objects list box we have selected.
-		int m_LastHoveredMouseIndex; //!< Which object was last hovered over by the mouse in the objects list.
-
 		int m_NativeTechModule; //!< The ID of the DataModule that contains the native Tech of the Player using this menu.
 		float m_ForeignCostMult; //!< The multiplier of costs of any foreign tech items.
 
+		int m_SelectedGroupIndex; //!< Which Group in the groups list box we have selected.
+		int m_SelectedObjectIndex; //!< Which object in the Objects list box we have selected.
 		const SceneObject *m_PickedObject; //!< Currently picked object. This is 0 until the user actually picks something, not just has the cursor over it. Not owned by this.
 
 		Timer m_RepeatStartTimer; //!< Measures the time to when to start repeating inputs when they're held down.
 		Timer m_RepeatTimer; //!< Measures the interval between input repeats.
 
-		bool *m_ExpandedModules; //!< The modules that have been expanded in the item list.
-
-		/// <summary>
-		/// Adds all groups with a specific type already defined in PresetMan to the current Objects list.
-		/// </summary>
-		void UpdateGroupsList();
-
-		/// <summary>
-		/// Adds all objects of the currently selected group to the Objects list.
-		/// </summary>
-		/// <param name="selectTop">Whether to reset the selection to the top of the list when we're done updating this.</param>
-		void UpdateObjectsList(bool selectTop = true);
+		std::vector<bool> m_ExpandedModules; //!< The modules that have been expanded in the item list.
 
 	private:
 
@@ -217,7 +202,60 @@ namespace RTE {
 		/// <summary>
 		/// Enumeration for the ObjectPicker columns ListBox focus states.
 		/// </summary>
-		enum PickerFocus { Groups, Objects, FocusCount };
+		enum PickerFocus { GroupList, ObjectList };
+
+		PickerFocus m_PickerFocus; //!< The currently focused list in the Picker.
+
+#pragma region List Handling
+		/// <summary>
+		/// Sets the currently focused list in the picker. For list item highlighting and non-mouse input handling.
+		/// </summary>
+		/// <param name="listToFocusOn">The list to focus on. See PickerFocus enumeration.</param>
+		/// <returns>Whether a focus change was made or not.</returns>
+		bool SetListFocus(PickerFocus listToFocusOn);
+
+		/// <summary>
+		/// Gets the next or previous item in the objects list and sets it as the current pick, even if the picker is disabled.
+		/// </summary>
+		/// <param name="getPrev">Whether to get the previous object or the next one. Gets the next object by default.</param>
+		/// <returns>The next object in the picker list, looping around if necessary. 0 if no object can be selected.</returns>
+		const SceneObject * GetNextOrPrevObject(bool getPrev = false);
+
+		/// <summary>
+		/// Displays the popup box with the description of the selected item in the objects list.
+		/// </summary>
+		void ShowDescriptionPopupBox();
+
+		/// <summary>
+		/// Adds all groups with a specific type already defined in PresetMan to the current Objects list.
+		/// </summary>
+		void UpdateGroupsList();
+
+		/// <summary>
+		/// Adds all objects of the currently selected group to the Objects list.
+		/// </summary>
+		/// <param name="selectTop">Whether to reset the selection to the top of the list when we're done updating this.</param>
+		void UpdateObjectsList(bool selectTop = true);
+#pragma endregion
+
+#pragma region Update Breakdown
+		/// <summary>
+		/// Player input handling for all types of input devices.
+		/// </summary>
+		/// <returns>True if the picker was set to be closed or by making a selection from the objects list.</returns>
+		bool HandleInput();
+
+		/// <summary>
+		/// Player mouse input event handling of the GUIControls of this ObjectPickerGUI.
+		/// </summary>
+		/// <returns>True if the picker was set to be closed by clicking off it or by making a selection from the objects list.</returns>
+		bool HandleMouseEvents();
+
+		/// <summary>
+		/// Open/Close animation handling and GUI element enabling/disabling.
+		/// </summary>
+		void AnimateOpenClose();
+#pragma endregion
 
 		/// <summary>
 		/// Clears all the member variables of this ObjectPickerGUI, effectively resetting the members of this abstraction level only.

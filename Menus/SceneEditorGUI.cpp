@@ -115,7 +115,7 @@ int SceneEditorGUI::Create(Controller *pController, FeatureSets featureSet, int 
     if (!m_pPicker)
         m_pPicker = new ObjectPickerGUI();
     else
-        m_pPicker->Destroy();
+        m_pPicker->Reset();
     m_pPicker->Create(pController, whichModuleSpace);
 
     m_NativeTechModule = nativeTechModule;

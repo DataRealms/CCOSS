@@ -91,7 +91,7 @@ int GibEditorGUI::Create(Controller *pController, int whichModuleSpace)
     if (!m_pPicker)
         m_pPicker = new ObjectPickerGUI();
     else
-        m_pPicker->Destroy();
+        m_pPicker->Reset();
     // Only show MovableObject:s as valid gibs to be placed
     m_pPicker->Create(pController, whichModuleSpace, "MovableObject");
 

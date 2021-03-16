@@ -901,7 +901,8 @@ int LuaMan::Initialize() {
 			.property("InheritsRotAngle", &Attachable::InheritsRotAngle, &Attachable::SetInheritsRotAngle)
             .property("InheritedRotAngleOffset", &Attachable::GetInheritedRotAngleOffset, &Attachable::SetInheritedRotAngleOffset)
             .property("AtomSubgroupID", &Attachable::GetAtomSubgroupID)
-			.property("CollidesWithTerrainWhileAttached", &Attachable::GetCollidesWithTerrainWhileAttached, &Attachable::SetCollidesWithTerrainWhileAttached),
+			.property("CollidesWithTerrainWhileAttached", &Attachable::GetCollidesWithTerrainWhileAttached, &Attachable::SetCollidesWithTerrainWhileAttached)
+            .property("CanCollideWithTerrain", &Attachable::CanCollideWithTerrain),
 
 		ABSTRACTLUABINDING(Emission, Entity)
 			.property("ParticlesPerMinute", &Emission::GetRate, &Emission::SetRate)

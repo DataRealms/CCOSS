@@ -390,17 +390,7 @@ EntityAllocation(Scene)
 // Arguments:       The full filepath the where to save the Bitmap data.
 // Return value:    None.
 
-	int SavePreview(string bitmapPath);
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  DrawPlacedObjectsPreview
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draw placed objects onto specified preview bitmap with scaling
-// Arguments:       Bitmap to draw on. Set of scene objects to draw. Width and height of scaled scene layer, 
-//					scaled map offset, scale.
-// Return value:    None.
-
-	void DrawPlacedObjectsPreview(BITMAP * pBitmap, int set, int width, int height, int xOffset, int yOffset, float scale);
+	int SavePreview(const std::string &bitmapPath);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

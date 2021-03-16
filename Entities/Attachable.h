@@ -355,16 +355,23 @@ namespace RTE {
 		void SetAtomSubgroupID(long subgroupID = 0) { m_AtomSubgroupID = subgroupID; }
 
 		/// <summary>
-		/// Whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.
+		/// Gets whether this Attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.
+		/// Attachables with Attachable parents that don't collide with terrain will not collide with terrain. This chains up to the root parent.
 		/// </summary>
 		/// <return>If true, terrain collisions while attached are enabled and atoms are present in parent AtomGroup.</return>
 		bool GetCollidesWithTerrainWhileAttached() const { return m_CollidesWithTerrainWhileAttached; }
 
 		/// <summary>
-		/// Sets whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.
+		/// Sets whether this Attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.
 		/// </summary>
 		/// <param name="collidesWithTerrainWhileAttached">Whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.</param>
 		void SetCollidesWithTerrainWhileAttached(bool collidesWithTerrainWhileAttached);
+
+		/// <summary>
+		/// Gets whether this Attachable is currently able to collide with terrain, taking into account its terrain collision settings and those of its parent and so on.
+		/// </summary>
+		/// <returns>Whether this Attachable is currently able to collide with terrain, taking into account its terrain collision settings and those of its parent and so on.</returns>
+		bool CanCollideWithTerrain() const;
 #pragma endregion
 
 #pragma region Override Methods
@@ -543,7 +550,8 @@ namespace RTE {
 		/// Turns on/off this Attachable's terrain collisions while it is attached by adding/removing its Atoms to/from its root parent's AtomGroup.
 		/// </summary>
 		/// <param name="addAtoms">Whether to add this Attachable's Atoms to the root parent's AtomGroup or remove them.</param>
-		void AddOrRemoveAtomsFromRootParentAtomGroup(bool addAtoms);
+		/// <param name="propagateToChildAttachables">Whether this Atom addition or removal should be propagated to any child Attachables (as appropriate).</param>
+		void AddOrRemoveAtomsFromRootParentAtomGroup(bool addAtoms, bool propagateToChildAttachables);
 
 		/// <summary>
 		/// Clears all the member variables of this Attachable, effectively resetting the members of this abstraction level only.

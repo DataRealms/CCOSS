@@ -3889,8 +3889,13 @@ void AHuman::Update()
             }
         }
         // JUMPING
-        else if ((m_pFGLeg || m_pBGLeg) && m_MoveState == JUMP)
-        {
+        else if ((m_pFGLeg || m_pBGLeg) && m_MoveState == JUMP) {
+            if (m_pFGLeg) {
+                m_pFGFootGroup->SetLimbPos(m_Pos + RotateOffset(m_Paths[FGROUND][STAND].GetStartOffset()));
+            }
+            if (m_pBGLeg) {
+                m_pBGFootGroup->SetLimbPos(m_Pos + RotateOffset(m_Paths[BGROUND][STAND].GetStartOffset()));
+            }
 /*
             if (m_pFGLeg && (!m_Paths[FGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal))
             {

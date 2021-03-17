@@ -179,6 +179,8 @@ namespace RTE {
 			reader >> m_DrawLimbPathVisualizations;
 		} else if (propName == "DrawRaycastVisualizations") {
 			reader >> g_SceneMan.m_DrawRayCastVisualizations;
+		} else if (propName == "DrawPixelCheckVisualizations") {
+			reader >> g_SceneMan.m_DrawPixelCheckVisualizations;
 		} else if (propName == "PrintDebugInfo") {
 			reader >> m_PrintDebugInfo;
 		} else if (propName == "MeasureModuleLoadTime") {
@@ -334,6 +336,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("DrawHandAndFootGroupVisualizations", m_DrawHandAndFootGroupVisualizations);
 		writer.NewPropertyWithValue("DrawLimbPathVisualizations", m_DrawLimbPathVisualizations);
 		writer.NewPropertyWithValue("DrawRaycastVisualizations", g_SceneMan.m_DrawRayCastVisualizations);
+		writer.NewPropertyWithValue("DrawPixelCheckVisualizations", g_SceneMan.m_DrawPixelCheckVisualizations);
 		writer.NewPropertyWithValue("PrintDebugInfo", m_PrintDebugInfo);
 		writer.NewPropertyWithValue("MeasureModuleLoadTime", m_MeasureModuleLoadTime);
 

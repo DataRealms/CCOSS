@@ -107,6 +107,7 @@ void SceneMan::Clear()
 
     m_pUnseenRevealSound = 0;
     m_DrawRayCastVisualizations = false;
+    m_DrawPixelCheckVisualizations = false;
     m_LastUpdatedScreen = 0;
     m_SecondStructPass = false;
 //    m_CalcTimer.Reset();
@@ -219,7 +220,7 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits) {
     pBitmap = 0;
 
     // Create the Debug SceneLayer
-    if (m_DrawRayCastVisualizations) {
+    if (m_DrawRayCastVisualizations || m_DrawPixelCheckVisualizations) {
         delete m_pDebugLayer;
         pBitmap = create_bitmap_ex(8, GetSceneWidth(), GetSceneHeight());
         clear_to_color(pBitmap, g_MaskColor);
@@ -566,6 +567,8 @@ unsigned char SceneMan::GetTerrMatter(int pixelX, int pixelY)
 
     WrapPosition(pixelX, pixelY);
 
+    if (m_pDebugLayer && m_DrawPixelCheckVisualizations) { m_pDebugLayer->SetPixel(pixelX, pixelY, 5); }
+
     BITMAP *pTMatBitmap = m_pCurrentScene->GetTerrain()->GetMaterialBitmap();
 
     // If it's still below or to the sides out of bounds after
@@ -591,6 +594,8 @@ unsigned char SceneMan::GetTerrMatter(int pixelX, int pixelY)
 MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY)
 {
     WrapPosition(pixelX, pixelY);
+
+    if (m_pDebugLayer && m_DrawPixelCheckVisualizations) { m_pDebugLayer->SetPixel(pixelX, pixelY, 5); }
 
     if (pixelX < 0 ||
        pixelX >= m_pMOIDLayer->GetBitmap()->w ||

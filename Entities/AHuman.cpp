@@ -77,6 +77,8 @@ void AHuman::Clear()
     m_GoldInInventoryChunk = 0;
     m_ThrowTmr.Reset();
     m_ThrowPrepTime = 1000;
+	m_SharpAimRevertTimer.Reset();
+	m_FGArmFlailScalar = 0.0F;
 	m_BGArmFlailScalar = 1.0F;
 
     m_DeviceState = SCANNING;
@@ -183,6 +185,7 @@ int AHuman::Create(const AHuman &reference) {
     m_JetTimeTotal = reference.m_JetTimeTotal;
     m_JetTimeLeft = reference.m_JetTimeLeft;
 	m_JetAngleRange = reference.m_JetAngleRange;
+	m_FGArmFlailScalar = reference.m_FGArmFlailScalar;
 	m_BGArmFlailScalar = reference.m_BGArmFlailScalar;
 
     m_pFGHandGroup = dynamic_cast<AtomGroup *>(reference.m_pFGHandGroup->Clone());
@@ -263,6 +266,8 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
         m_JetTimeTotal *= 1000;
 	} else if (propName == "JumpAngleRange") {
 		reader >> m_JetAngleRange;
+	} else if (propName == "FGArmFlailScalar") {
+		reader >> m_FGArmFlailScalar;
 	} else if (propName == "BGArmFlailScalar") {
 		reader >> m_BGArmFlailScalar;
     } else if (propName == "FGArm") {
@@ -377,6 +382,8 @@ int AHuman::Save(Writer &writer) const
     writer << m_JetTimeTotal / 1000;
 	writer.NewProperty("JumpAngleRange");
 	writer << m_JetAngleRange;
+	writer.NewProperty("FGArmFlailScalar");
+	writer << m_FGArmFlailScalar;
 	writer.NewProperty("BGArmFlailScalar");
 	writer << m_BGArmFlailScalar;
     writer.NewProperty("FGArm");
@@ -3463,16 +3470,22 @@ void AHuman::Update()
             // Only go slower outward
 			if (m_SharpAimProgress < aimMag)
 				m_SharpAimProgress += (aimMag - m_SharpAimProgress) * 0.035;
-            else
-                m_SharpAimProgress = aimMag;
-        }
-        else
-            m_SharpAimProgress = 0;
+			else
+				m_SharpAimProgress = aimMag;
+			m_SharpAimRevertTimer.Reset();
+		}
+		else {
+			m_SharpAimProgress *= 0.95F;
+			m_SharpAimRevertTimer.SetElapsedSimTimeMS(m_SharpAimDelay - m_SharpAimTimer.GetElapsedSimTimeMS());
+		}
     }
     else
     {
-        m_SharpAimProgress = 0;
-        m_SharpAimTimer.Reset();
+		m_SharpAimProgress = max(m_SharpAimProgress * 0.95F - 0.1F, 0.0F);
+		if (m_SharpAimRevertTimer.IsPastSimMS(m_SharpAimDelay))
+			m_SharpAimTimer.Reset();
+		else
+			m_SharpAimTimer.SetElapsedSimTimeMS(m_SharpAimDelay - m_SharpAimRevertTimer.GetElapsedSimTimeMS());
     }
 
     ////////////////////////////////////
@@ -4048,7 +4061,15 @@ void AHuman::Update()
     }
 
     if (m_pFGArm && m_pFGArm->IsAttached()) {
-        m_pFGArm->SetRotAngle(m_AimAngle * static_cast<float>(GetFlipFactor()));
+		float bodyAngle = 0.0F;
+		if (m_FGArmFlailScalar && m_SharpAimDelay != 0) {
+			float aimScalar = min(m_SharpAimTimer.GetElapsedSimTimeMS() / m_SharpAimDelay, 1.0);
+			float revertScalar = min(m_SharpAimRevertTimer.GetElapsedSimTimeMS() / m_SharpAimDelay, 1.0);
+			aimScalar = aimScalar > revertScalar ? aimScalar : 1.0F - revertScalar;
+			
+			bodyAngle = m_Rotation.GetRadAngle() * m_FGArmFlailScalar * (1.0F - aimScalar);
+		}
+        m_pFGArm->SetRotAngle(bodyAngle + m_AimAngle * static_cast<float>(GetFlipFactor()));
 
         if (m_Status == STABLE) {
             if (m_ArmClimbing[FGROUND]) {

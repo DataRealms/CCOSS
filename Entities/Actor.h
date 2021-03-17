@@ -1337,7 +1337,7 @@ protected:
     float m_AimDistance;
     // Aiming timing timer
     Timer m_AimTmr;
-    // For timing the transition between regular aim and sharp aim
+    // For timing the transition from regular aim to sharp aim
     Timer m_SharpAimTimer;
     // The time it takes to achieve complete full sharp aiming
     int m_SharpAimDelay;

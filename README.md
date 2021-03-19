@@ -2,7 +2,7 @@
 *The Cortex Command Community Project is Free/Libre and Open Source under GNU AGPL v3*
 
 This is a community-driven effort to continue the development of Cortex Command.  
-Stay up to date in our [Discord channel](https://discord.gg/SdNnKJN).
+Stay up to date in our [Discord channel](https://discord.gg/TSU6StNQUG).
 
 ***
 
@@ -61,18 +61,14 @@ The Linux build uses the meson build system, and builds against system libraries
 
 3. Open a terminal in the Source Repository.
 
-4. `meson builddir`
+4. `meson build` or `meson --buildtype debug build` for debug build (default is release build)
 
-5. `cd builddir`
+5. `cd build`
 
-For `meson` versions `>=0.54` (check `meson --version`) :
+6. `ninja`
 
-6. `meson compile` for debug build, or `meson compile CCCP` for a release build.
-If the build fails because of memory shortage you may need to reduce the number of build threads (meson will use all available threads by default) using the `-j<number of threads>` option, if this doesn't help, increase your swap size to at least 6Gb.
+If you want to change the buildtype aftwerwards, you can use `meson configure --buildtype {release or debug}` in the build directory or create a secondary build directory as in Step 4
 
-For `meson` versions `<0.54` :
-
-6. `ninja` for debug builds, or `ninja CCCP.x86_64` for release builds. Using the `-j<number of threads>` option will also work here.
 
 ## Running:
 

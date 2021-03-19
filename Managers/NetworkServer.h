@@ -443,7 +443,7 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <param name="player"></param>
-		void NetworkServer::ClearTerrainChangeQueue(short player);
+		void ClearTerrainChangeQueue(short player);
 
 		/// <summary>
 		/// 
@@ -553,7 +553,7 @@ namespace RTE {
 		/// <param name="address"></param>
 		/// <param name="port"></param>
 		/// <returns></returns>
-		RakNet::SystemAddress NetworkServer::ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, unsigned short port);
+		RakNet::SystemAddress ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, unsigned short port);
 
 		/// <summary>
 		/// Clears all the member variables of this NetworkServer, effectively resetting the members of this abstraction level only.

@@ -1,4 +1,5 @@
-sources += files('AchievementMan.cpp',
+sources += files(
+'AchievementMan.cpp',
 'ActivityMan.cpp',
 'AudioMan.cpp',
 'ConsoleMan.cpp',
@@ -14,6 +15,6 @@ sources += files('AchievementMan.cpp',
 'PrimitiveMan.cpp',
 'SceneMan.cpp',
 'SettingsMan.cpp',
-#'ThreadMan.cpp',
 'TimerMan.cpp',
-'UInputMan.cpp')
+'UInputMan.cpp',
+)

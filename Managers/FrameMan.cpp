@@ -37,6 +37,7 @@ namespace RTE {
 	void FrameMan::Clear() {
 		m_GfxDriver = GFX_AUTODETECT_WINDOWED;
 		m_ForceVirtualFullScreenGfxDriver = false;
+		m_ForceDedicatedFullScreenGfxDriver = false;
 		m_GfxDriverMessage.clear();
 		m_DisableMultiScreenResolutionValidation = false;
 #ifdef _WIN32
@@ -737,8 +738,8 @@ namespace RTE {
 
 		switch (modeToSave) {
 			case SingleBitmap:
-				if (bitmapToSave && save_png(fullFileName, bitmapToSave, m_Palette) == 0) {
-					g_ConsoleMan.PrintString("SYSTEM: Bitmap was dumped to: " + std::string(fullFileName));
+				if (bitmapToSave && save_png(nameBase, bitmapToSave, m_Palette) == 0) {
+					g_ConsoleMan.PrintString("SYSTEM: Bitmap was dumped to: " + std::string(nameBase));
 					saveSuccess = true;
 				}
 				break;

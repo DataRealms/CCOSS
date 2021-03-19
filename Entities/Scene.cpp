@@ -1041,81 +1041,6 @@ int Scene::SaveData(string pathBase)
     return 0;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  DrawPlacedObjectsPreview
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draw placed objects onto specified preview bitmap with scaling
-
-void Scene::DrawPlacedObjectsPreview(BITMAP * pBitmap, int set, int width, int height, int xOffset, int yOffset, float scale)
-{
-	// Draw placed objects
-    for (list<SceneObject *>::iterator oItr = m_PlacedObjects[set].begin(); oItr != m_PlacedObjects[set].end(); ++oItr)
-    {
-		// Draw assembly schemes
-		BunkerAssemblyScheme *pBAS = dynamic_cast<BunkerAssemblyScheme *>(*oItr);
-
-		if (pBAS)
-        {
-			Vector loc = pBAS->GetPos() + pBAS->GetBitmapOffset();
-			loc.m_X = loc.m_X * scale + xOffset;
-			loc.m_Y = loc.m_Y * scale + yOffset;
-
-			// Do duplicate drawing if the terrain object straddles a wrapping border
-			if (loc.m_X < 0)
-				rect(pBitmap, loc.m_X + width, loc.m_Y, loc.m_X + width + ((float)pBAS->GetBitmapWidth() * scale), loc.m_Y + ((float)pBAS->GetBitmapHeight() * scale), 5);
-			else if (loc.m_X + ((float)pBAS->GetBitmapWidth() * scale) >= width)
-				rect(pBitmap, loc.m_X - width, loc.m_Y, loc.m_X - width + ((float)pBAS->GetBitmapWidth() * scale), loc.m_Y + ((float)pBAS->GetBitmapHeight() * scale), 5);
-
-			// Regular drawing
-			rect(pBitmap, loc.m_X, loc.m_Y, loc.m_X + ((float)pBAS->GetBitmapWidth() * scale), loc.m_Y + ((float)pBAS->GetBitmapHeight() * scale), 5);
-        }
-
-		// Draw terrain objects
-		TerrainObject *pTO = dynamic_cast<TerrainObject *>(*oItr);
-
-		if (pTO)
-        {
-			Vector loc = pTO->GetPos() + pTO->GetBitmapOffset();
-			loc.m_X = loc.m_X * scale + xOffset;
-			loc.m_Y = loc.m_Y * scale + yOffset;
-
-			// Draw modules which must look like terrain on the preview
-			if (pTO->GetDisplayAsTerrain())
-			{
-				BITMAP * bmpBG = pTO->GetBGColorBitmap();
-				BITMAP * bmpFG = pTO->GetFGColorBitmap();
-				
-				if (loc.m_X < 0)
-				{
-					masked_stretch_blit(bmpBG, pBitmap, 0, 0, bmpBG->w, bmpBG->h, loc.m_X + width, loc.m_Y, (float)bmpBG->w * scale, (float)bmpBG->h * scale);
-					masked_stretch_blit(bmpFG, pBitmap, 0, 0, bmpFG->w, bmpFG->h, loc.m_X + width, loc.m_Y, (float)bmpFG->w * scale, (float)bmpFG->h * scale);
-				}
-				else if (loc.m_X + ((float)pTO->GetBitmapWidth() * scale) >= width)
-				{
-					masked_stretch_blit(bmpBG, pBitmap, 0, 0, bmpBG->w, bmpBG->h, loc.m_X - width, loc.m_Y, (float)bmpBG->w * scale, (float)bmpBG->h * scale);
-					masked_stretch_blit(bmpFG, pBitmap, 0, 0, bmpFG->w, bmpFG->h, loc.m_X - width, loc.m_Y, (float)bmpFG->w * scale, (float)bmpFG->h * scale);
-				}
-
-				//Regular drawing
-				masked_stretch_blit(bmpBG, pBitmap, 0, 0, bmpBG->w, bmpBG->h, loc.m_X, loc.m_Y, (float)bmpBG->w * scale, (float)bmpBG->h * scale);
-				masked_stretch_blit(bmpFG, pBitmap, 0, 0, bmpFG->w, bmpFG->h, loc.m_X, loc.m_Y, (float)bmpFG->w * scale, (float)bmpFG->h * scale);
-			}
-			else
-			{
-				//Draw everything else
-				// Do duplicate drawing if the terrain object straddles a wrapping border
-				if (loc.m_X < 0)
-					rectfill(pBitmap, loc.m_X + width, loc.m_Y, loc.m_X + width + ((float)pTO->GetBitmapWidth() * scale), loc.m_Y + ((float)pTO->GetBitmapHeight() * scale), 5);
-				else if (loc.m_X + ((float)pTO->GetBitmapWidth() * scale) >= width)
-					rectfill(pBitmap, loc.m_X - width, loc.m_Y, loc.m_X - width + ((float)pTO->GetBitmapWidth() * scale), loc.m_Y + ((float)pTO->GetBitmapHeight() * scale), 5);
-
-				// Regular drawing
-				rectfill(pBitmap, loc.m_X, loc.m_Y, loc.m_X + ((float)pTO->GetBitmapWidth() * scale), loc.m_Y + ((float)pTO->GetBitmapHeight() * scale), 5);
-			}
-        }
-    }
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SavePreview
@@ -1123,86 +1048,67 @@ void Scene::DrawPlacedObjectsPreview(BITMAP * pBitmap, int set, int width, int h
 // Description:     Saves preview bitmap for this scene.
 //
 
-int Scene::SavePreview(string bitmapPath)
-{
-	//DON'T FORGET TO SET TO FALSE BEFORE RELEASE
-	bool saveAIPlans = false;
-
-	if (!saveAIPlans)
-	{
-		// Do not save preview for metascenes
-		if (m_MetasceneParent.length() > 0)
-			return - 1;
+int Scene::SavePreview(const std::string &bitmapPath) {
+	// Do not save preview for MetaScenes!
+	if (!m_MetasceneParent.empty()) {
+		return -1;
 	}
 
-	// Create new preview bitmap
-	bool needNew = false;
-	if (m_pPreviewBitmap)
-	{
-		if (m_pPreviewBitmap->w != PREVIEW_WIDTH || m_pPreviewBitmap->h != PREVIEW_HEIGHT)
-		{
-			destroy_bitmap(m_pPreviewBitmap);
-			m_pPreviewBitmap = 0;
+	if (m_pPreviewBitmap && (m_pPreviewBitmap->w != PREVIEW_WIDTH || m_pPreviewBitmap->h != PREVIEW_HEIGHT)) {
+		destroy_bitmap(m_pPreviewBitmap);
+		m_pPreviewBitmap = nullptr;
+	}
+	if (!m_pPreviewBitmap) { m_pPreviewBitmap = create_bitmap_ex(8, PREVIEW_WIDTH, PREVIEW_HEIGHT); }
+
+	ContentFile scenePreviewGradient("Base.rte/GUIs/PreviewSkyGradient.png");
+	draw_sprite(m_pPreviewBitmap, scenePreviewGradient.GetAsBitmap(COLORCONV_NONE, true), 0, 0);
+
+	int sceneWidth = m_pTerrain->GetBitmap()->w;
+	int sceneHeight = m_pTerrain->GetBitmap()->h;
+	BITMAP *previewBuffer = create_bitmap_ex(8, sceneWidth, sceneHeight);
+	clear_to_color(previewBuffer, ColorKeys::g_MaskColor);
+
+	masked_blit(m_pTerrain->GetBGColorBitmap(), previewBuffer, 0, 0, 0, 0, sceneWidth, sceneHeight);
+	masked_blit(m_pTerrain->GetFGColorBitmap(), previewBuffer, 0, 0, 0, 0, sceneWidth, sceneHeight);
+
+	for (SceneObject *sceneObject : m_PlacedObjects[PlacedObjectSets::PLACEONLOAD]) {
+		if (const TerrainObject *terrainObject = dynamic_cast<TerrainObject *>(sceneObject)) {
+			Vector pos = terrainObject->GetPos() + terrainObject->GetBitmapOffset();
+			BITMAP *terrainObjectBG = terrainObject->GetBGColorBitmap();
+			BITMAP *terrainObjectFG = terrainObject->GetFGColorBitmap();
+
+			// Wrapped drawing
+			if (pos.GetFloorIntX() < 0) {
+				masked_blit(terrainObjectBG, previewBuffer, 0, 0, pos.GetFloorIntX() + sceneWidth, pos.GetFloorIntY(), terrainObjectBG->w, terrainObjectBG->h);
+				masked_blit(terrainObjectFG, previewBuffer, 0, 0, pos.GetFloorIntX() + sceneWidth, pos.GetFloorIntY(), terrainObjectFG->w, terrainObjectFG->h);
+			} else if (pos.GetFloorIntX() + terrainObject->GetBitmapWidth() >= sceneWidth) {
+				masked_blit(terrainObjectBG, previewBuffer, 0, 0, pos.GetFloorIntX() - sceneWidth, pos.GetFloorIntY(), terrainObjectBG->w, terrainObjectBG->h);
+				masked_blit(terrainObjectFG, previewBuffer, 0, 0, pos.GetFloorIntX() - sceneWidth, pos.GetFloorIntY(), terrainObjectFG->w, terrainObjectFG->h);
+			}
+			masked_blit(terrainObjectBG, previewBuffer, 0, 0, pos.GetFloorIntX(), pos.GetFloorIntY(), terrainObjectBG->w, terrainObjectBG->h);
+			masked_blit(terrainObjectFG, previewBuffer, 0, 0, pos.GetFloorIntX(), pos.GetFloorIntY(), terrainObjectFG->w, terrainObjectFG->h);
 		}
+
+		// TODO: Figure out how to draw the actual modules that compose an assembly that is part of the scheme. For now just disable.
+		/*
+		else if (const BunkerAssemblyScheme *assemblyScheme = dynamic_cast<BunkerAssemblyScheme *>(sceneObject)) {
+			Vector pos = assemblyScheme->GetPos() + assemblyScheme->GetBitmapOffset();
+
+			// Wrapped drawing
+			if (pos.GetFloorIntX() < 0) {
+				rect(previewBuffer, pos.GetFloorIntX() + sceneWidth, pos.GetFloorIntY(), pos.GetFloorIntX() + sceneWidth + assemblyScheme->GetBitmapWidth(), pos.GetFloorIntY() + assemblyScheme->GetBitmapHeight(), 5);
+			} else if (pos.GetFloorIntX() + assemblyScheme->GetBitmapWidth() >= sceneWidth) {
+				rect(previewBuffer, pos.GetFloorIntX() - sceneWidth, pos.GetFloorIntY(), pos.GetFloorIntX() - sceneWidth + assemblyScheme->GetBitmapWidth(), pos.GetFloorIntY() + assemblyScheme->GetBitmapHeight(), 5);
+			}
+			rect(previewBuffer, pos.GetFloorIntX(), pos.GetFloorIntY(), pos.GetFloorIntX() + ((float)assemblyScheme->GetBitmapWidth()), pos.GetFloorIntY() + ((float)assemblyScheme->GetBitmapHeight()), 5);
+		}
+		*/
 	}
 
-	if (!m_pPreviewBitmap)
-	{
-		m_pPreviewBitmap = create_bitmap_ex(8,PREVIEW_WIDTH, PREVIEW_HEIGHT);
-		clear_to_color(m_pPreviewBitmap, g_MaskColor);
-	}
+	masked_stretch_blit(previewBuffer, m_pPreviewBitmap, 0, 0, previewBuffer->w, previewBuffer->h, 0, 0, m_pPreviewBitmap->w, m_pPreviewBitmap->h);
+	destroy_bitmap(previewBuffer);
 
-	// Calculate resized bitmap size and scale
-	int width = PREVIEW_WIDTH;
-	int height = PREVIEW_HEIGHT;
-
-	float scaledWidth = (float)PREVIEW_HEIGHT / (float)GetHeight() * (float)GetWidth();
-	float scaledHeight = (float)PREVIEW_WIDTH / (float)GetWidth() * (float)GetHeight();
-	float scale;
-
-	if (scaledWidth > PREVIEW_WIDTH)
-		scale = (float)PREVIEW_WIDTH / (float)GetWidth();
-	else
-		scale = (float)PREVIEW_HEIGHT / (float)GetHeight();
-
-	width = (float)GetWidth() * scale;
-	height = (float)GetHeight() * scale;
-
-	int xOffset = (PREVIEW_WIDTH - width) / 2;
-	int yOffset = (PREVIEW_HEIGHT - height) / 2;
-
-	// Create new temp bitmap if it does not exist
-	BITMAP * pTemp = create_bitmap_ex(8, width, height);
-
-	//Save default layer
-	clear_to_color(pTemp, g_MaskColor);
-	clear_to_color(m_pPreviewBitmap, g_MaskColor);
-
-	// Draw terrain
-	BITMAP * bmpFG = m_pTerrain->GetFGColorBitmap();
-	//stretch_blit(bmpFG, pTemp, 0,0, bmpFG->w, bmpFG->h, xOffset, yOffset, width, height);
-	stretch_blit(bmpFG, pTemp, 0,0, bmpFG->w, bmpFG->h, 0, 0, width, height);
-	if (saveAIPlans)
-		DrawPlacedObjectsPreview(pTemp, AIPLAN, width, height, 0, 0, scale);
-	else
-		DrawPlacedObjectsPreview(pTemp, PLACEONLOAD, width, height, 0, 0, scale);
-	blit(pTemp, m_pPreviewBitmap, 0,0,xOffset,yOffset,PREVIEW_WIDTH, PREVIEW_HEIGHT);
-
-	int ret = 0;
-
-    // Save out the bitmap
-    if (m_pPreviewBitmap)
-    {
-        PALETTE palette;
-        get_palette(palette);
-        if (save_bmp(bitmapPath.c_str(), m_pPreviewBitmap, palette) != 0)
-			ret = -1;
-		else
-			// Set the new path to point to the new file location - only if there was a successful save of the bitmap
-			m_PreviewBitmapFile.SetDataPath(bitmapPath);
-	}
-
-	destroy_bitmap(pTemp);
+	if (g_FrameMan.SaveBitmapToPNG(m_pPreviewBitmap, bitmapPath.c_str()) == 0) { m_PreviewBitmapFile.SetDataPath(bitmapPath); }
 
 	return 0;
 }
@@ -2004,7 +1910,9 @@ bool Scene::PlaceResidentBrain(int player, Activity &newActivity)
 {
     if (m_ResidentBrains[player])
     {
+#ifdef DEBUG_BUILD
         RTEAssert(m_ResidentBrains[player]->GetTeam() == newActivity.GetTeamOfPlayer(player), "Resident Brain is of the wrong team!!");
+#endif
 
         Actor *pBrainActor = dynamic_cast<Actor *>(m_ResidentBrains[player]);
         if (pBrainActor)// && pBrainActor->IsActor())

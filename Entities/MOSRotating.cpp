@@ -1393,6 +1393,15 @@ void MOSRotating::PostTravel()
 // TODO: don't hardcode the MOPixel limits!
     if (g_MovableMan.IsMOSubtractionEnabled() && (m_ForceDeepCheck || m_DeepCheck))
         DeepCheck(true, 8, 50);
+
+
+    Attachable *attachable;
+    for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
+        attachable = *attachableIterator;
+        RTEAssert(attachable, "Broken Attachable in PostTravel!");
+        ++attachableIterator;
+        attachable->PostTravel();
+    }
 }
 
 
@@ -1421,7 +1430,7 @@ void MOSRotating::Update() {
     AEmitter *wound = nullptr;
     for (std::list<AEmitter *>::iterator woundIterator = m_Wounds.begin(); woundIterator != m_Wounds.end(); ) {
         wound = *woundIterator;
-        RTEAssert(wound && wound->IsAttachedTo(this), "Broken wound AEmitter");
+        RTEAssert(wound && wound->IsAttachedTo(this), "Broken wound AEmitter in Update");
         ++woundIterator;
         wound->Update();
 
@@ -1445,14 +1454,17 @@ void MOSRotating::Update() {
     Attachable *attachable = nullptr;
     for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
         attachable = *attachableIterator;
-        RTEAssert(attachable, "Broken Attachable!");
+        RTEAssert(attachable, "Broken Attachable in Update!");
+        RTEAssert(attachable->IsAttached(), "Found Attachable on " + GetModuleAndPresetName() + " (" + attachable->GetModuleAndPresetName() + ") with no parent, this should never happen!");
+        RTEAssert(attachable->IsAttachedTo(this), "Found Attachable on " + GetModuleAndPresetName() + " (" + attachable->GetModuleAndPresetName() + ") with another parent (" + attachable->GetParent()->GetModuleAndPresetName() + "), this should never happen!");
         ++attachableIterator;
 
         attachable->Update();
+        RTEAssert(attachable, "Broken Attachable after Updating it!");
 
         if (attachable->IsAttachedTo(this) && attachable->IsSetToDelete()) {
             RemoveAttachable(attachable, true, true);
-        } else if (!attachable->IsSetToDelete()) {
+        } else if (attachable->IsAttachedTo(this) && !attachable->IsSetToDelete()) {
             TransferForcesFromAttachable(attachable);
         }
     }
@@ -1513,7 +1525,7 @@ void MOSRotating::AddAttachable(Attachable *attachable) {
 
 void MOSRotating::AddAttachable(Attachable *attachable, const Vector& parentOffsetToSet) {
 	if (attachable) {
-        RTEAssert(!attachable->IsAttached(), "Tried to add Attachable " + attachable->GetModuleAndPresetName() + " but it already has a parent, " + (attachable->GetParent() ? attachable->GetParent()->GetModuleAndPresetName() : "ERROR") + ".");
+        RTEAssert(!attachable->IsAttached(), "Tried to add Attachable " + attachable->GetModuleAndPresetName() + " but it already has a parent, " + (attachable->IsAttached() ? attachable->GetParent()->GetModuleAndPresetName() : "ERROR") + ".");
         if (g_MovableMan.ValidMO(attachable)) { g_MovableMan.RemoveMO(attachable); }
         attachable->SetParentOffset(parentOffsetToSet);
         attachable->SetParent(this);
@@ -1641,6 +1653,19 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
     if (mode == g_DrawMOID && (!m_GetsHitByMOs || m_MOID == g_NoMOID))
         return;
 
+    // Draw all the attached wound emitters, and only if the mode is g_DrawColor and not onlyphysical
+    // Only draw attachables and emitters which are not drawn after parent, so we draw them before
+    if (mode == g_DrawColor || (!onlyPhysical && mode == g_DrawMaterial)) {
+        for (const AEmitter *woundToDraw : m_Wounds) {
+            if (!woundToDraw->IsDrawnAfterParent()) { woundToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
+        }
+    }
+
+    // Draw all the attached attachables
+    for (const Attachable *attachableToDraw : m_Attachables) {
+        if (!attachableToDraw->IsDrawnAfterParent() && attachableToDraw->IsDrawnNormallyByParent()) { attachableToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
+    }
+
 	BITMAP * pTempBitmap = m_pTempBitmap;
 	BITMAP * pFlipBitmap = m_pFlipBitmap;
 	int keyColor = g_MaskColor;
@@ -1728,20 +1753,6 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
             }
         }
     }
-
-	// Draw all the attached wound emitters, and only if the mode is g_DrawColor and not onlyphysical
-	// Only draw attachables and emitters which are not drawn after parent, so we draw them before
-	if (mode == g_DrawColor || (!onlyPhysical && mode == g_DrawMaterial)) {
-        for (const AEmitter *woundToDraw : m_Wounds) {
-            if (!woundToDraw->IsDrawnAfterParent()) { woundToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
-        }
-	}
-
-	// Draw all the attached attachables
-    for (const Attachable *attachableToDraw : m_Attachables) {
-        if (!attachableToDraw->IsDrawnAfterParent() && attachableToDraw->IsDrawnNormallyByParent()) { attachableToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
-    }
-
 
     //////////////////
     // FLIPPED
@@ -1882,7 +1893,7 @@ bool MOSRotating::HandlePotentialRadiusAffectingAttachable(const Attachable *att
     if (attachable == m_RadiusAffectingAttachable && distanceAndRadiusFromParent < m_FarthestAttachableDistanceAndRadius) {
         m_FarthestAttachableDistanceAndRadius = distanceAndRadiusFromParent;
         if (m_Attachables.size() > 1) {
-            std::for_each(m_Attachables.begin(), m_Attachables.end(), [this](const Attachable *attachableToCheck) { HandlePotentialRadiusAffectingAttachable(attachableToCheck); });
+            std::for_each(m_Attachables.begin(), m_Attachables.end(), [this](Attachable *attachableToCheck) { attachableToCheck->UpdatePositionAndJointPositionBasedOnOffsets(); HandlePotentialRadiusAffectingAttachable(attachableToCheck); });
         }
         return true;
     } else if (distanceAndRadiusFromParent > m_FarthestAttachableDistanceAndRadius) {
@@ -1897,18 +1908,12 @@ bool MOSRotating::HandlePotentialRadiusAffectingAttachable(const Attachable *att
 
 bool MOSRotating::TransferForcesFromAttachable(Attachable *attachable) {
     bool intact = false;
-    if (attachable) {
-        RTEAssert(attachable->IsAttached(), "Tried to transfer forces from Attachable (" + attachable->GetModuleAndPresetName() + ") with no parent, this should never happen!");
-        RTEAssert(attachable->IsAttachedTo(this), "Tried to transfer forces from another parent's (" + attachable->GetParent()->GetModuleAndPresetName() + ") Attachable (" + attachable->GetModuleAndPresetName() + "), this should never happen!");
-        
-        attachable->PostTravel();
-        Vector forces;
-        Vector impulses;
-        intact = attachable->TransferJointForces(forces) && attachable->TransferJointImpulses(impulses);
+    Vector forces;
+    Vector impulses;
+    intact = attachable->TransferJointForces(forces) && attachable->TransferJointImpulses(impulses);
 
-        if (!forces.IsZero()) { AddForce(forces, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
-        if (!impulses.IsZero()) { AddImpulseForce(impulses, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
-    }
+    if (!forces.IsZero()) { AddForce(forces, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
+    if (!impulses.IsZero()) { AddImpulseForce(impulses, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
     return intact;
 }
 

@@ -156,7 +156,7 @@ bool PresetMan::LoadDataModule(string moduleName, bool official, ProgressCallbac
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool PresetMan::LoadAllDataModules() {
-	std::chrono::steady_clock::time_point moduleLoadTimerStart = std::chrono::high_resolution_clock::now();
+	auto moduleLoadTimerStart = std::chrono::high_resolution_clock::now();
 
 	// Destroy any possible loaded modules
 	Destroy();

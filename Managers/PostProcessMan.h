@@ -22,7 +22,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a PostEffect object in system memory.
 		/// </summary>
-		PostEffect(const Vector &pos, BITMAP *bitmap, size_t bitmapHash, int strength, float angle) : m_Bitmap(bitmap), m_BitmapHash(bitmapHash), m_Angle(angle), m_Strength(std::clamp(strength, 0, 255)), m_Pos(pos) {}
+		PostEffect(const Vector &pos, BITMAP *bitmap, size_t bitmapHash, int strength, float angle) : m_Bitmap(bitmap), m_BitmapHash(bitmapHash), m_Angle(angle), m_Strength(strength), m_Pos(pos) {}
 	};
 
 	/// <summary>

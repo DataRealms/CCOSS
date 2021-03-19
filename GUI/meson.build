@@ -1,7 +1,7 @@
-sources += files('AllegroBitmap.cpp',
+sources += files(
+'AllegroBitmap.cpp',
 'AllegroInput.cpp',
 'AllegroScreen.cpp',
-'GUI.cpp',
 'GUIBanner.cpp',
 'GUIButton.cpp',
 'GUICheckbox.cpp',
@@ -22,15 +22,16 @@ sources += files('AllegroBitmap.cpp',
 'GUIProperties.cpp',
 'GUIPropertyPage.cpp',
 'GUIRadioButton.cpp',
-'GUIScrollPanel.cpp',
 'GUIScrollbar.cpp',
+'GUIScrollPanel.cpp',
 'GUISkin.cpp',
 'GUISlider.cpp',
 'GUISound.cpp',
 'GUITab.cpp',
 'GUITextBox.cpp',
 'GUITextPanel.cpp',
-'GUIUtil.cpp')
+'GUIUtil.cpp'
+)
 
 if build_machine.system() == 'windows'
   sources+=files('WinUtil.cpp')

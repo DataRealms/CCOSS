@@ -1328,7 +1328,6 @@ bool PlayIntroTitle() {
 					g_ResumeActivity = true;
 					break;
 				case ScenarioGUI::ScenarioUpdateResult::ActivityRestarted:
-					// Make sure the scene is going to be reset with the new parameters
 					g_ResetActivity = true;
 					g_IntroState = FADEOUT;
 					sectionSwitch = true;

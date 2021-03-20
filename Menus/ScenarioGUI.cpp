@@ -32,13 +32,12 @@ namespace RTE {
 
 		m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer32());
 		m_GUIInput = std::make_unique<AllegroInput>(-1, true);
-
 		m_ScenarioGUIController = std::make_unique<GUIControlManager>();
+
 		if (!m_ScenarioGUIController->Create(m_GUIScreen.get(), m_GUIInput.get(), "Base.rte/GUIs/Skins/MainMenu")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu"); }
 		m_ScenarioGUIController->Load("Base.rte/GUIs/ScenarioGUI.ini");
 
 		m_ScenarioCollectionBoxes.at(ScenarioCollections::RootBox) = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("root"));
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::RootBox)->SetPositionAbs(0, 0);
 		m_ScenarioCollectionBoxes.at(ScenarioCollections::RootBox)->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 		m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox) = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("ActivitySelectBox"));
 		m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->SetPositionRel(16, 16);
@@ -67,7 +66,10 @@ namespace RTE {
 		m_ScenePreviewBox = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("ScenePreviewBox"));
 		m_ScenePreviewBox->SetPositionRel(10, 33);
 		m_ScenePreviewBox->SetDrawType(GUICollectionBox::Image);
-
+		m_DefaultPreviewBitmap = std::make_unique<AllegroBitmap>();
+		m_DefaultPreviewBitmap->Create("Base.rte/GUIs/DefaultPreview.png");
+		m_ScenePreviewBitmap = std::make_unique<AllegroBitmap>();
+		m_ScenePreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 32);
 		m_SitePointLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("ScenePlanetLabel"));
 
 		for (int playerIndex = Players::PlayerOne; playerIndex < PlayerColumns::PlayerColumnCount; ++playerIndex) {
@@ -104,13 +106,11 @@ namespace RTE {
 		m_CPULockLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("CPULockLabel"));
 
 		// Populate the tech ComboBoxes with the available tech modules.
-		const DataModule *dataModule = nullptr;
 		std::string techString = " Tech";
-		std::string techName = "";
 		for (int moduleIndex = 0; moduleIndex < g_PresetMan.GetTotalModuleCount(); ++moduleIndex) {
-			dataModule = g_PresetMan.GetDataModule(moduleIndex);
+			const DataModule *dataModule = g_PresetMan.GetDataModule(moduleIndex);
 			if (dataModule) {
-				techName = dataModule->GetFriendlyName();
+				std::string techName = dataModule->GetFriendlyName();
 				size_t techPos = techName.find(techString);
 				if (techPos != string::npos) {
 					techName.replace(techPos, techString.length(), "");
@@ -127,13 +127,8 @@ namespace RTE {
 		m_RequireClearPathToOrbitCheckbox = dynamic_cast<GUICheckbox *>(m_ScenarioGUIController->GetControl("RequireClearPathToOrbitCheckbox"));
 		m_DeployUnitsCheckbox = dynamic_cast<GUICheckbox *>(m_ScenarioGUIController->GetControl("DeployUnitsCheckbox"));
 
-		m_ScenePreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 32);
-		m_DefaultPreviewBitmap->Create("Base.rte/GUIs/DefaultPreview.png");
-
 		GetScenesAndActivities(true);
-
 		UpdateActivityBox();
-
 		HideAllScreens();
 	}
 
@@ -284,7 +279,6 @@ namespace RTE {
 		m_ScenarioActivities.clear();
 		m_ScenarioScenes = nullptr;
 
-		// Get the list of all read in Scene presets.
 		std::list<Entity *> presetList;
 		std::list<Scene *> filteredScenes;
 
@@ -292,7 +286,6 @@ namespace RTE {
 
 		for (Entity *presetEntity : presetList) {
 			Scene *presetScene = dynamic_cast<Scene *>(presetEntity);
-			// Only add non-editor and non-special scenes, or ones that don't have locations defined, or are MetaScenes.
 			if (presetScene && !presetScene->GetLocation().IsZero() && !presetScene->IsMetagameInternal() && (presetScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes())) { filteredScenes.push_back(presetScene); }
 		}
 
@@ -345,7 +338,6 @@ namespace RTE {
 			}
 		}
 
-		// Get the list of all read-in Activity presets.
 		presetList.clear();
 		g_PresetMan.GetAllOfType(presetList, "Activity");
 		Activity *presetActivity = nullptr;
@@ -399,17 +391,14 @@ namespace RTE {
 		Activity *activityInstance = dynamic_cast<Activity *>(m_SelectedActivity->Clone());
 		GameActivity *gameActivity = dynamic_cast<GameActivity *>(activityInstance);
 
-		// Set up the basic settings.
 		if (gameActivity) {
 			gameActivity->SetDifficulty(m_DifficultySlider->GetValue());
 			gameActivity->SetFogOfWarEnabled(m_FogOfWarCheckbox->GetCheck());
 			gameActivity->SetRequireClearPathToOrbit(m_RequireClearPathToOrbitCheckbox->GetCheck());
-			// If gold slider is at its max value then the amount is 'infinite' and we must set some ridiculously high value.
 			gameActivity->SetStartingGold((m_GoldSlider->GetValue() == m_GoldSlider->GetMaximum()) ? 9999999 : m_GoldSlider->GetValue() - (m_GoldSlider->GetValue() % 500));
 		}
 		g_SceneMan.SetSceneToLoad(m_SelectedScene, true, m_DeployUnitsCheckbox->GetCheck());
 
-		// Set up the player and team assignments.
 		activityInstance->ClearPlayers(false);
 		for (int playerIndex = Players::PlayerOne; playerIndex < Players::MaxPlayerCount; ++playerIndex) {
 			for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
@@ -430,14 +419,12 @@ namespace RTE {
 		}
 
 		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
-			// Handle player techs.
 			const GUIListPanel::Item *techItem = m_TeamTechSelect.at(teamIndex)->GetSelectedItem();
 			if (techItem) {
+				// ExtraIndex -2 is "All", -1 "Random"
 				if (techItem->m_ExtraIndex == -2) {
-					// Selected "All".
 					gameActivity->SetTeamTech(teamIndex, "-All-");
 				} else if (techItem->m_ExtraIndex == -1) {
-					// Selected "Random".
 					int selection = RandomNum<int>(2, m_TeamTechSelect.at(teamIndex)->GetListPanel()->GetItemList()->size() - 1);
 					m_TeamTechSelect.at(teamIndex)->SetSelectedIndex(selection);
 					gameActivity->SetTeamTech(teamIndex, g_PresetMan.GetDataModuleName(m_TeamTechSelect.at(teamIndex)->GetSelectedItem()->m_ExtraIndex));
@@ -461,7 +448,7 @@ namespace RTE {
 	void ScenarioGUI::CalculateLinesToSitePoint() {
 		m_LineToSitePoints.clear();
 
-		Vector sitePos = m_PlanetCenter + m_SelectedScene->GetLocation() + m_SelectedScene->GetLocationOffset(); // Target site point.
+		Vector sitePos = m_PlanetCenter + m_SelectedScene->GetLocation() + m_SelectedScene->GetLocationOffset();
 		if (m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->PointInside(sitePos.GetFloorIntX(), sitePos.GetFloorIntY())) {
 			return;
 		}
@@ -531,7 +518,6 @@ namespace RTE {
 				}
 			}
 
-			// Set the description.
 			if (m_ScenarioScenes && m_ScenarioScenes->size() == 1) {
 				m_ActivityLabel->SetText(m_SelectedActivity->GetDescription() + "\n\nThe only site where this activity can be played has been selected for you.");
 			} else if (m_ScenarioScenes && m_ScenarioScenes->size() > 1) {
@@ -555,14 +541,10 @@ namespace RTE {
 			} else {
 				m_DifficultyLabel->SetText("Difficulty: Nuts!");
 			}
-
-			int textHeight = m_ActivityLabel->ResizeHeightToFit();
-			int padding = 110;
-			m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->Resize(m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->GetWidth(), textHeight + padding);
+			m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->Resize(m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->GetWidth(), m_ActivityLabel->ResizeHeightToFit() + 110);
 
 			const GameActivity *selectedGA = dynamic_cast<const GameActivity *>(m_SelectedActivity);
 			if (selectedGA) {
-				// Set gold slider value if activity specifies default gold amounts for difficulties.
 				if (m_DifficultySlider->GetValue() < Activity::CakeDifficulty && selectedGA->GetDefaultGoldCake() > -1) {
 					m_GoldSlider->SetValue(selectedGA->GetDefaultGoldCake());
 				} else if (m_DifficultySlider->GetValue() < Activity::EasyDifficulty && selectedGA->GetDefaultGoldEasy() > -1) {
@@ -578,36 +560,25 @@ namespace RTE {
 				}
 				m_GoldSlider->SetEnabled(selectedGA->GetGoldSwitchEnabled());
 
-				// Set default checkbox states and enable or disable them.
 				int defaultFogOfWar = selectedGA->GetDefaultFogOfWar();
-				if (defaultFogOfWar > -1) {
-					m_FogOfWarCheckbox->SetCheck(defaultFogOfWar != 0);
-				}
+				if (defaultFogOfWar > -1) { m_FogOfWarCheckbox->SetCheck(defaultFogOfWar != 0); }
 				m_FogOfWarCheckbox->SetEnabled(selectedGA->GetFogOfWarSwitchEnabled());
 
 				int defaultReqClearPath = selectedGA->GetDefaultRequireClearPathToOrbit();
-				if (defaultReqClearPath > -1) {
-					m_RequireClearPathToOrbitCheckbox->SetCheck(defaultReqClearPath != 0);
-				}
+				if (defaultReqClearPath > -1) { m_RequireClearPathToOrbitCheckbox->SetCheck(defaultReqClearPath != 0); }
 				m_RequireClearPathToOrbitCheckbox->SetEnabled(selectedGA->GetRequireClearPathToOrbitSwitchEnabled());
 
 				int defaultDeployUnits = selectedGA->GetDefaultDeployUnits();
-				if (defaultDeployUnits > -1) {
-					m_DeployUnitsCheckbox->SetCheck(defaultDeployUnits != 0);
-				}
+				if (defaultDeployUnits > -1) { m_DeployUnitsCheckbox->SetCheck(defaultDeployUnits != 0); }
 				m_DeployUnitsCheckbox->SetEnabled(selectedGA->GetDeployUnitsSwitchEnabled());
 			}
 		} else {
 			m_ScenarioScenes = nullptr;
 			m_ActivityLabel->SetText("No Activity selected.");
 			m_DifficultyLabel->SetVisible(false);
-			if (m_DifficultySlider) {
-				m_DifficultySlider->SetVisible(false);
-			}
+			if (m_DifficultySlider) { m_DifficultySlider->SetVisible(false); }
 
-			int textHeight = m_ActivityLabel->ResizeHeightToFit();
-			int padding = 125;
-			m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->Resize(m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->GetWidth(), textHeight + padding);
+			m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->Resize(m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->GetWidth(), m_ActivityLabel->ResizeHeightToFit() + 125);
 		}
 
 		KeepBoxInScreenBounds(m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox));
@@ -656,7 +627,6 @@ namespace RTE {
 			}
 		}
 
-		// Count players in the teams.
 		int teamsWithPlayers = 0;
 		bool teamWithHumans = false;
 		int humansInTeams = 0;
@@ -722,7 +692,6 @@ namespace RTE {
 		const Icon *playerIcon = (clickedPlayer != PlayerColumns::PlayerCPU) ? g_UInputMan.GetSchemeIcon(clickedPlayer) : dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
 		if (playerIcon) { m_PlayerBoxes.at(clickedPlayer).at(clickedTeam)->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0])); }
 
-		// Clear all un-hovered rows of this column.
 		for (int nonHoveredTeam = Activity::TeamOne; nonHoveredTeam < TeamRows::TeamRowCount; ++nonHoveredTeam) {
 			if (nonHoveredTeam != clickedTeam) {
 				m_PlayerBoxes.at(clickedPlayer).at(nonHoveredTeam)->SetDrawType(GUICollectionBox::Color);
@@ -730,7 +699,7 @@ namespace RTE {
 			}
 		}
 
-		// If CPU changed team, remove human players from the team.
+		// Remove human players from their team row if a CPU player is added to it, and vice - versa for CPU players.
 		if (clickedPlayer == PlayerColumns::PlayerCPU && clickedTeam != TeamRows::DisabledTeam) {
 			for (int humanPlayer = Players::PlayerOne; humanPlayer < Players::MaxPlayerCount; ++humanPlayer) {
 				if (m_PlayerBoxes.at(humanPlayer).at(clickedTeam)->GetDrawType() == GUICollectionBox::Image) {
@@ -741,7 +710,6 @@ namespace RTE {
 					if (playerIcon) { m_PlayerBoxes.at(humanPlayer).at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0])); }
 				}
 			}
-		// If a human player changed team, remove the CPU from the team.
 		} else if (clickedPlayer != PlayerColumns::PlayerCPU && clickedTeam != TeamRows::DisabledTeam && m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(clickedTeam)->GetDrawType() == GUICollectionBox::Image) {
 			m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(clickedTeam)->SetDrawType(GUICollectionBox::Color);
 			m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(clickedTeam)->SetDrawColor(c_GUIColorBlue);
@@ -877,7 +845,6 @@ namespace RTE {
 						const Activity *activity = dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity);
 						if (activity != m_SelectedActivity) {
 							m_SelectedActivity = activity;
-							// The activity selection has changed.
 							UpdateActivityBox();
 
 							// Deselect any previously selected scene. it may not be compatible with the new activity.
@@ -933,7 +900,6 @@ namespace RTE {
 	void ScenarioGUI::DrawSitePoints(BITMAP *drawBitmap) const {
 		if (m_ScenarioScenes && m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->GetVisible()) {
 			for (const Scene *scenePointer : *m_ScenarioScenes) {
-				// Mark user-created scenes to let players distinguish them from built-in.
 				int drawColor = (scenePointer->GetModuleID() == g_PresetMan.GetModuleID("Scenes.rte")) ? c_GUIColorRed : c_GUIColorYellow;
 
 				Vector sitePos(m_PlanetCenter + scenePointer->GetLocation() + scenePointer->GetLocationOffset());
@@ -1002,7 +968,6 @@ namespace RTE {
 		AllegroScreen drawScreen(drawBitmap);
 		m_ScenarioGUIController->Draw(&drawScreen);
 
-		// Draw scene preview after GUI
 		if (m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox)->GetVisible()) {
 			GUICollectionBox *playerSetupBox = m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox);
 
@@ -1037,14 +1002,13 @@ namespace RTE {
 		m_ScenarioGUIController->DrawMouse();
 
 		int device = g_UInputMan.GetLastDeviceWhichControlledGUICursor();
-		BITMAP *deviceIcon = nullptr;
 
 		// Draw the active joystick's sprite next to the mouse.
 		if (device >= InputDevice::DEVICE_GAMEPAD_1) {
 			int mouseX = 0;
 			int mouseY = 0;
 			m_GUIInput->GetMousePosition(&mouseX, &mouseY);
-			deviceIcon = g_UInputMan.GetDeviceIcon(device)->GetBitmaps32()[0];
+			BITMAP *deviceIcon = g_UInputMan.GetDeviceIcon(device)->GetBitmaps32()[0];
 			if (deviceIcon) { draw_sprite(drawBitmap, deviceIcon, mouseX + 16, mouseY - 4); }
 		}
 
@@ -1053,7 +1017,7 @@ namespace RTE {
 			if (g_UInputMan.JoystickActive(playerIndex)) {
 				int matchedDevice = InputDevice::DEVICE_GAMEPAD_1 + playerIndex;
 				if (matchedDevice != device) {
-					deviceIcon = g_UInputMan.GetDeviceIcon(matchedDevice)->GetBitmaps32()[0];
+					BITMAP *deviceIcon = g_UInputMan.GetDeviceIcon(matchedDevice)->GetBitmaps32()[0];
 					if (deviceIcon) { draw_sprite(drawBitmap, deviceIcon, g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * playerIndex, g_FrameMan.GetResY() - 25); }
 				}
 			}

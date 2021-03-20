@@ -99,7 +99,7 @@ namespace RTE {
 		};
 
 		/// <summary>
-		/// These add on the player max counts.
+		/// Enumeration for all the player columns in the player setup screen. "Extends" the Players enumeration by adding an entry for the CPU player.
 		/// </summary>
 		enum PlayerColumns {
 			PlayerCPU = Players::MaxPlayerCount,
@@ -107,7 +107,7 @@ namespace RTE {
 		};
 
 		/// <summary>
-		/// These add on the team max counts.
+		/// Enumeration for all the team rows in the player setup screen. "Extends" the Teams enumeration by adding an entry for unused (disabled) Team.
 		/// </summary>
 		enum TeamRows {
 			DisabledTeam = Activity::Teams::MaxTeamCount,
@@ -136,28 +136,34 @@ namespace RTE {
 		Scene *m_HoveredScene; //!< The scene preset currently hovered. Not owned.
 		Scene *m_SelectedScene; //!< The scene preset currently selected. Not owned.
 		GUILabel *m_SitePointLabel; //!< Hover name label over Scenes.
-
 		std::vector<Vector> m_LineToSitePoints; //!< Collection of points that form lines from a screen point to the selected site point.
 
-		// Activity selection.
+		std::map<Activity *, std::vector<Scene *>> m_ScenarioActivities; //!< The map of Activities and the Scenes compatible with each, neither of which are owned here.
+		const Activity *m_SelectedActivity; //!< The currently selected activity. Not owned.
+
+		int m_LockedCPUTeam = Activity::Teams::NoTeam; //!< Which team the CPU is locked to, if any.
+
+		/// <summary>
+		/// GUI elements that compose the Activity selection box.
+		/// </summary>
 		GUIComboBox *m_ActivitySelectComboBox;
 		GUILabel *m_ActivityLabel;
 		GUILabel *m_DifficultyLabel;
 		GUISlider *m_DifficultySlider;
 
-		std::map<Activity *, std::vector<Scene *>> m_ScenarioActivities; //!< The map of Activities and the Scenes compatible with each, neither of which are owned here.
-		const Activity *m_SelectedActivity; //!< The currently selected activity. Not owned.
-
-		// Scene Info.
+		/// <summary>
+		/// GUI elements that compose the Scene info and preview box.
+		/// </summary>
 		GUIButton *m_SceneCloseButton;
 		GUILabel *m_SceneNameLabel;
 		GUILabel *m_SceneInfoLabel;
 		GUICollectionBox *m_ScenePreviewBox;
+		std::unique_ptr<AllegroBitmap> m_ScenePreviewBitmap;
+		std::unique_ptr<AllegroBitmap> m_DefaultPreviewBitmap;
 
-		std::unique_ptr<AllegroBitmap> m_ScenePreviewBitmap = std::make_unique<AllegroBitmap>();
-		std::unique_ptr<AllegroBitmap> m_DefaultPreviewBitmap = std::make_unique<AllegroBitmap>();
-
-		// Player setup.
+		/// <summary>
+		/// GUI elements that compose the Player setup box.
+		/// </summary>
 		std::array<std::array<GUICollectionBox *, TeamRows::TeamRowCount>, PlayerColumns::PlayerColumnCount> m_PlayerBoxes;
 		std::array<GUICollectionBox *, TeamRows::TeamRowCount> m_TeamBoxes;
 		std::array<GUILabel *, TeamRows::TeamRowCount> m_TeamNameLabels;
@@ -168,11 +174,9 @@ namespace RTE {
 		GUICheckbox *m_FogOfWarCheckbox;
 		GUICheckbox *m_RequireClearPathToOrbitCheckbox;
 		GUICheckbox *m_DeployUnitsCheckbox;
-		std::array<GUIComboBox *, Activity::Teams::MaxTeamCount> m_TeamTechSelect; //!< Tech selection ComboBox array.
-		std::array<GUISlider *, Activity::Teams::MaxTeamCount> m_TeamAISkillSlider; //!< AI skill slider array.
-		std::array<GUILabel *, Activity::Teams::MaxTeamCount> m_TeamAISkillLabel; //!< AI skill label array.
-
-		int m_LockedCPUTeam = Activity::Teams::NoTeam; //!< Which team the CPU is locked to, if any.
+		std::array<GUIComboBox *, Activity::Teams::MaxTeamCount> m_TeamTechSelect;
+		std::array<GUISlider *, Activity::Teams::MaxTeamCount> m_TeamAISkillSlider;
+		std::array<GUILabel *, Activity::Teams::MaxTeamCount> m_TeamAISkillLabel;
 
 #pragma region CollectionBox Handling
 		/// <summary>

@@ -209,8 +209,6 @@ bool ResetActivity() {
 
     // Reset TimerMan again after loading so there's no residual delay
     g_TimerMan.ResetTime();
-    // Enable time averaging since it helps with animation jerkiness
-    g_TimerMan.EnableAveraging(true);
     // Unpause
     g_TimerMan.PauseSim(false);
 
@@ -244,8 +242,6 @@ void ResumeActivity() {
 		g_FrameMan.LoadPalette("Base.rte/palette.bmp");
 
 		g_PerformanceMan.ResetFrameTimer();
-        // Enable time averaging since it helps with animation jerkiness
-		g_TimerMan.EnableAveraging(true);
 		g_TimerMan.PauseSim(false);
 		g_ActivityMan.PauseActivity(false);
 	}
@@ -305,9 +301,6 @@ bool EnterEditorActivity(const std::string &editorToEnter) {
 /// </summary>
 /// <returns></returns>
 bool PlayIntroTitle() {
-    // Disable time averaging since it can make the music timing creep off target.
-    g_TimerMan.EnableAveraging(false);
-    
     // Untrap the mouse and keyboard
     g_UInputMan.DisableKeys(false);
     g_UInputMan.TrapMousePos(false);
@@ -1450,7 +1443,6 @@ bool RunGameLoop() {
 		return true;
 	}
 	g_PerformanceMan.ResetFrameTimer();
-	g_TimerMan.EnableAveraging(true);
 	g_TimerMan.PauseSim(false);
 
 	if (g_ResetActivity) { ResetActivity(); }

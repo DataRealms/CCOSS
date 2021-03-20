@@ -30,6 +30,28 @@ namespace RTE {
 
 	private:
 
+
+		std::array<BITMAP *, 8> m_IntroSlides; //!<
+		MOSParticle m_DataRealmsLogo; //!<
+		MOSParticle m_FmodLogo; //!<
+		SceneLayer m_Nebula; //!<
+		MOSParticle m_GameLogo; //!<
+		MOSParticle m_GameLogoGlow; //!<
+		MOSParticle m_Planet; //!<
+		MOSParticle m_Moon; //!<
+		MOSParticle m_Station; //!<
+
+#pragma region Create Breakdown
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreateTitleElements();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreateIntroSequenceSlides();
+#pragma endregion
 		/// <summary>
 		/// Clears all the member variables of this TitleScreen, effectively resetting the members of this abstraction level only.
 		/// </summary>

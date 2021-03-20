@@ -532,6 +532,7 @@
     <ClInclude Include="Entities\SoundSet.h" />
     <ClInclude Include="GUI\Interface.h" />
     <ClInclude Include="GUI\GUISound.h" />
+    <ClInclude Include="Managers\MenuMan.h" />
     <ClInclude Include="Managers\NetworkClient.h" />
     <ClInclude Include="Managers\NetworkServer.h" />
     <ClInclude Include="Managers\PerformanceMan.h" />
@@ -686,6 +687,7 @@
     <ClCompile Include="Entities\Round.cpp" />
     <ClCompile Include="Entities\SoundSet.cpp" />
     <ClCompile Include="GUI\GUISound.cpp" />
+    <ClCompile Include="Managers\MenuMan.cpp" />
     <ClCompile Include="Managers\NetworkClient.cpp" />
     <ClCompile Include="Managers\NetworkServer.cpp" />
     <ClCompile Include="Managers\PerformanceMan.cpp" />

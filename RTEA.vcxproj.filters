@@ -486,6 +486,9 @@
     <ClInclude Include="Menus\TitleScreen.h">
       <Filter>Menus</Filter>
     </ClInclude>
+    <ClInclude Include="Managers\MenuMan.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -926,6 +929,9 @@
     </ClCompile>
     <ClCompile Include="Menus\TitleScreen.cpp">
       <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Managers\MenuMan.cpp">
+      <Filter>Managers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

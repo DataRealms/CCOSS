@@ -30,8 +30,27 @@ namespace RTE {
 
 	private:
 
+		/// <summary>
+		/// 
+		/// </summary>
+		struct Star {
+			/// <summary>
+			/// Enumeration for the different Star sizes.
+			/// </summary>
+			enum StarSize { StarSmall, StarLarge, StarHuge };
+
+			StarSize Size = StarSize::StarSmall; //!<
+			BITMAP *Bitmap = nullptr; //!<
+			int PosX = 0; //!<
+			int PosY = 0; //!<
+			float ScrollRatio = 1.0F; //!<
+			int Intensity = 0; //!< Intensity value on a scale from 0 to 255.
+		};
 
 		std::array<BITMAP *, 8> m_IntroSlides; //!<
+
+		std::vector<Star> m_BackdropStars; //!<
+
 		MOSParticle m_DataRealmsLogo; //!<
 		MOSParticle m_FmodLogo; //!<
 		SceneLayer m_Nebula; //!<
@@ -46,6 +65,11 @@ namespace RTE {
 		/// 
 		/// </summary>
 		void CreateTitleElements();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreateBackdropStars();
 
 		/// <summary>
 		/// 

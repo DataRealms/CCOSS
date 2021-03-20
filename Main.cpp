@@ -130,20 +130,6 @@ MainMenuGUI *g_pMainMenuGUI = 0;
 ScenarioGUI *g_pScenarioGUI = 0;
 Controller *g_pMainMenuController = 0;
 
-enum StarSize {
-	StarSmall = 0,
-	StarLarge,
-	StarHuge,
-};
-
-struct Star {
-	BITMAP *m_Bitmap = nullptr;
-	int m_PosX = 0;
-	int m_PosY = 0;
-	float m_ScrollRatio = 1.0F;
-	int m_Intensity = 0; //!< Intensity value on a scale from 0 to 255.
-	StarSize m_Size = StarSmall;
-};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -338,40 +324,6 @@ bool PlayIntroTitle() {
     BITMAP *pFadeScreen = create_bitmap_ex(32, resX, resY);
     clear_to_color(pFadeScreen, 0);
     int fadePos = 0;
-
-    // Generate stars!
-    int starArea = resX * pBackdrop->GetBitmap()->h;
-    int starCount = starArea / 1000;
-    ContentFile starSmallFile("Base.rte/GUIs/Title/Stars/StarSmall.png");
-    ContentFile starLargeFile("Base.rte/GUIs/Title/Stars/StarLarge.png");
-    ContentFile starHugeFile("Base.rte/GUIs/Title/Stars/StarHuge.png");
-    int starSmallBitmapCount = 4;
-    int starLargeBitmapCount = 1;
-    int starHugeBitmapCount = 2;
-    BITMAP **apStarSmallBitmaps = starSmallFile.GetAsAnimation(starSmallBitmapCount);
-    BITMAP **apStarLargeBitmaps = starLargeFile.GetAsAnimation(starLargeBitmapCount);
-    BITMAP **apStarHugeBitmaps = starHugeFile.GetAsAnimation(starHugeBitmapCount);
-    Star *stars = new Star[starCount];
-
-	for (int star = 0; star < starCount; ++star) {
-		if (RandomNum() < 0.95F) {
-			// Default size is StarSmall.
-			stars[star].m_Bitmap = apStarSmallBitmaps[RandomNum(0, starSmallBitmapCount - 1)];
-			stars[star].m_Intensity = RandomNum(0, 92);
-		} else if (RandomNum() < 0.85F) {
-			stars[star].m_Size = StarLarge;
-			stars[star].m_Bitmap = apStarLargeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
-			stars[star].m_Intensity = RandomNum(111, 185);
-		} else {
-			stars[star].m_Size = StarHuge;
-			stars[star].m_Bitmap = apStarHugeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
-			stars[star].m_Intensity = RandomNum(166, 185);
-		}
-		stars[star].m_PosX = RandomNum(0, resX);
-		stars[star].m_PosY = RandomNum(0, pBackdrop->GetBitmap()->h);
-        // To match the nebula scroll
-        stars[star].m_ScrollRatio = backdropScrollRatio;
-    }
 
     // Font stuff
     GUISkin *pSkin = g_pMainMenuGUI->GetGUIControlManager()->GetSkin();

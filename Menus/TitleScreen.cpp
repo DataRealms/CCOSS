@@ -36,4 +36,36 @@ namespace RTE {
 		m_IntroSlides.at(7) = ContentFile("Base.rte/GUIs/Title/Intro/IntroSlideH.png").GetAsBitmap(COLORCONV_NONE, false);
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void TitleScreen::CreateBackdropStars() {
+		int starSmallBitmapCount = 4;
+		int starLargeBitmapCount = 1;
+		int starHugeBitmapCount = 2;
+		BITMAP **starSmallBitmaps = ContentFile("Base.rte/GUIs/Title/Stars/StarSmall.png").GetAsAnimation(starSmallBitmapCount);
+		BITMAP **starLargeBitmaps = ContentFile("Base.rte/GUIs/Title/Stars/StarLarge.png").GetAsAnimation(starLargeBitmapCount);
+		BITMAP **starHugeBitmaps = ContentFile("Base.rte/GUIs/Title/Stars/StarHuge.png").GetAsAnimation(starHugeBitmapCount);
+
+		int starCount = (g_FrameMan.GetResX() * m_Nebula.GetBitmap()->h) / 1000;
+		for (int i = 0; i < starCount; ++i) {
+			Star newStar;
+			if (RandomNum() < 0.95F) {
+				newStar.Bitmap = starSmallBitmaps[RandomNum(0, starSmallBitmapCount - 1)];
+				newStar.Intensity = RandomNum(0, 92);
+			} else if (RandomNum() < 0.85F) {
+				newStar.Size = Star::StarSize::StarLarge;
+				newStar.Bitmap = starLargeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
+				newStar.Intensity = RandomNum(111, 185);
+			} else {
+				newStar.Size = Star::StarSize::StarHuge;
+				newStar.Bitmap = starHugeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
+				newStar.Intensity = RandomNum(166, 185);
+			}
+			newStar.PosX = RandomNum(0, g_FrameMan.GetResX());
+			newStar.PosY = RandomNum(0, m_Nebula.GetBitmap()->h);
+			newStar.ScrollRatio = m_BackdropScrollRatio;
+
+			m_BackdropStars.emplace_back(newStar);
+		}
+	}
 }

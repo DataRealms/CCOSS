@@ -538,6 +538,7 @@
     <ClInclude Include="Managers\PostProcessMan.h" />
     <ClInclude Include="Managers\PrimitiveMan.h" />
     <ClInclude Include="Menus\LoadingGUI.h" />
+    <ClInclude Include="Menus\TitleScreen.h" />
     <ClInclude Include="Resources\resource.h" />
     <ClInclude Include="System\Atom.h" />
     <ClInclude Include="System\Constants.h" />
@@ -691,6 +692,7 @@
     <ClCompile Include="Managers\PostProcessMan.cpp" />
     <ClCompile Include="Managers\PrimitiveMan.cpp" />
     <ClCompile Include="Menus\LoadingGUI.cpp" />
+    <ClCompile Include="Menus\TitleScreen.cpp" />
     <ClCompile Include="System\Atom.cpp" />
     <ClCompile Include="System\Controller.cpp" />
     <ClCompile Include="System\Entity.cpp" />

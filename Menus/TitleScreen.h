@@ -10,6 +10,18 @@ namespace RTE {
 
 	public:
 
+		/// <summary>
+		/// 
+		/// </summary>
+		enum IntroSequence {
+			Start,
+			DataRealmsLogoFadeIn,
+			DataRealmsLogoDisplay,
+			DataRealmsLogoFadeOut,
+			FmodLogoFadeIn,
+			FmodLogoDisplay,
+			FmodLogoFadeOut,
+		};
 #pragma region Creation
 		/// <summary>
 		/// 
@@ -47,6 +59,12 @@ namespace RTE {
 			int Intensity = 0; //!< Intensity value on a scale from 0 to 255.
 		};
 
+		IntroSequence m_IntroSequenceState; //!<
+		Timer m_SectionTimer; //!<
+		float m_SectionElapsedTime; //!< How many seconds have elapsed on a section.
+		float m_SectionDuration; //!< How many seconds a section is supposed to elapse.
+		float m_SectionProgress; //!< Progress made on a section, from 0.0 to 1.0.
+		bool m_SectionSwitch; //!<
 		std::array<BITMAP *, 8> m_IntroSlides; //!<
 
 		std::vector<Star> m_BackdropStars; //!<
@@ -59,6 +77,12 @@ namespace RTE {
 		MOSParticle m_Planet; //!<
 		MOSParticle m_Moon; //!<
 		MOSParticle m_Station; //!<
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		void PlayIntroLogoSequence(bool skipSection);
 
 #pragma region Create Breakdown
 		/// <summary>
@@ -76,6 +100,20 @@ namespace RTE {
 		/// </summary>
 		void CreateIntroSequenceSlides();
 #pragma endregion
+
+#pragma region Drawing
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void DrawDataRealmsLogo();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void DrawFmodLogo();
+#pragma endregion
+
 		/// <summary>
 		/// Clears all the member variables of this TitleScreen, effectively resetting the members of this abstraction level only.
 		/// </summary>

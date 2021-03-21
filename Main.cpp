@@ -53,14 +53,6 @@ using namespace RTE;
 /// </summary>
 
 enum TITLESEQUENCE {
-    START = 0,
-    // DRL Logo
-    LOGOFADEIN,
-    LOGODISPLAY,
-    LOGOFADEOUT,
-	FMODLOGOFADEIN,
-	FMODLOGODISPLAY,
-	FMODLOGOFADEOUT,
     // Intro
     FADEIN,
     SPACEPAUSE1,
@@ -412,27 +404,6 @@ bool PlayIntroTitle() {
             scrollOffset.m_Y = EaseOut(planetViewYOffset, topMenuYOffset, sectionProgress);
         }
 
-        ///////////////////////////////////////////////////////
-        // DRL Logo drawing
-
-        if (g_IntroState >= LOGOFADEIN && g_IntroState <= LOGOFADEOUT)
-        {
-            // Draw the early build notice
-            g_FrameMan.ClearBackBuffer32();
-            pDRLogo->SetPos(Vector(g_FrameMan.GetResX() / 2, (g_FrameMan.GetResY() / 2) - 35));
-            pDRLogo->Draw(g_FrameMan.GetBackBuffer32());
-        }
-
-		///////////////////////////////////////////////////////
-		// FMOD Logo drawing
-
-		if (g_IntroState >= FMODLOGOFADEIN && g_IntroState <= FMODLOGOFADEOUT) {
-			g_FrameMan.ClearBackBuffer32();
-			pFMODLogo->SetPos(Vector(g_FrameMan.GetResX() / 2, (g_FrameMan.GetResY() / 2) - 35));
-			pFMODLogo->Draw(g_FrameMan.GetBackBuffer32());
-		}
-
-
         //////////////////////////////////////////////////////////
         // Scene drawing
 
@@ -592,115 +563,6 @@ bool PlayIntroTitle() {
         //////////////////////////////////////////////////////////
         // Intro sequence logic
 
-        if (g_IntroState == START)
-        {
-            g_IntroState = LOGOFADEIN;
-            sectionSwitch = true;
-        }
-        else if (g_IntroState == LOGOFADEIN)
-        {
-            if (sectionSwitch)
-            {
-                // Play juicy logo signature jingle/sound
-				g_GUISound.SplashSound()->Play();
-                // Black fade
-                clear_to_color(pFadeScreen, 0);
-                duration = 0.25;
-                sectionSwitch = false;
-            }
-
-            fadePos = 255 - (255 * sectionProgress);
-            set_trans_blender(fadePos, fadePos, fadePos, fadePos);
-            draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pFadeScreen, 0, 0);
-
-            if (elapsed >= duration)
-            {
-                g_IntroState = LOGODISPLAY;
-                sectionSwitch = true;
-            }
-            else if (keyPressed)
-            {
-                g_IntroState = LOGOFADEOUT;
-                sectionSwitch = true;
-            }
-        }
-        else if (g_IntroState == LOGODISPLAY)
-        {
-            if (sectionSwitch)
-            {
-                duration = 2.0;
-                sectionSwitch = false;
-            }
-            if (elapsed > duration || keyPressed)
-            {
-                g_IntroState = LOGOFADEOUT;
-                sectionSwitch = true;
-            }
-        }
-        else if (g_IntroState == LOGOFADEOUT)
-        {
-            if (sectionSwitch)
-            {
-                // Black fade
-                clear_to_color(pFadeScreen, 0);
-                duration = 0.25;
-                sectionSwitch = false;
-            }
-
-            fadePos = 255 * sectionProgress;
-            set_trans_blender(fadePos, fadePos, fadePos, fadePos);
-            draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pFadeScreen, 0, 0);
-
-            if (elapsed >= duration || keyPressed)
-            {
-                g_IntroState = FMODLOGOFADEIN;
-                sectionSwitch = true;
-            }
-        }
-		else if (g_IntroState == FMODLOGOFADEIN) {
-			if (sectionSwitch) {
-				// Black fade
-				clear_to_color(pFadeScreen, 0);
-				duration = 0.25;
-				sectionSwitch = false;
-			}
-
-			fadePos = 255 - (255 * sectionProgress);
-			set_trans_blender(fadePos, fadePos, fadePos, fadePos);
-			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pFadeScreen, 0, 0);
-
-			if (elapsed >= duration) {
-				g_IntroState = FMODLOGODISPLAY;
-				sectionSwitch = true;
-			} else if (keyPressed) {
-				g_IntroState = FMODLOGOFADEOUT;
-				sectionSwitch = true;
-			}
-		} else if (g_IntroState == FMODLOGODISPLAY) {
-			if (sectionSwitch) {
-				duration = 2.0;
-				sectionSwitch = false;
-			}
-			if (elapsed > duration || keyPressed) {
-				g_IntroState = FMODLOGOFADEOUT;
-				sectionSwitch = true;
-			}
-		} else if (g_IntroState == FMODLOGOFADEOUT) {
-			if (sectionSwitch) {
-				// Black fade
-				clear_to_color(pFadeScreen, 0);
-				duration = 0.25;
-				sectionSwitch = false;
-			}
-			fadePos = 255 * sectionProgress;
-			set_trans_blender(fadePos, fadePos, fadePos, fadePos);
-			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pFadeScreen, 0, 0);
-
-			if (elapsed >= duration || keyPressed) {
-				g_IntroState = NOTICEFADEIN;
-				sectionSwitch = true;
-			}
-		}
         else if (g_IntroState == FADEIN)
         {
             if (sectionSwitch)

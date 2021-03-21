@@ -68,4 +68,104 @@ namespace RTE {
 			m_BackdropStars.emplace_back(newStar);
 		}
 	}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void TitleScreen::PlayIntroLogoSequence(bool skipSection) {
+		switch (m_IntroSequenceState) {
+			case IntroSequence::Start:
+				m_SectionSwitch = true;
+				m_IntroSequenceState = IntroSequence::DataRealmsLogoFadeIn;
+				break;
+			case IntroSequence::DataRealmsLogoFadeIn:
+				if (m_SectionSwitch) {
+					m_SectionSwitch = false;
+					m_SectionDuration = 0.25F;
+					g_GUISound.SplashSound()->Play();
+				}
+				m_FadeAmount = 255 - static_cast<int>(255.0F * m_SectionProgress);
+				if (m_SectionElapsedTime >= m_SectionDuration) {
+					m_SectionSwitch = true;
+					m_IntroSequenceState = IntroSequence::DataRealmsLogoDisplay;
+				} else if (skipSection) {
+					m_SectionSwitch = true;
+					m_IntroSequenceState = IntroSequence::DataRealmsLogoFadeOut;
+				}
+				break;
+			case IntroSequence::DataRealmsLogoDisplay:
+				if (m_SectionSwitch) {
+					m_SectionSwitch = false;
+					m_SectionDuration = 2.0F;
+				}
+				if (m_SectionElapsedTime > m_SectionDuration || skipSection) {
+					m_SectionSwitch = true;
+					m_IntroSequenceState = IntroSequence::DataRealmsLogoFadeOut;
+				}
+				break;
+			case IntroSequence::DataRealmsLogoFadeOut:
+				if (m_SectionSwitch) {
+					m_SectionSwitch = false;
+					m_SectionDuration = 0.25F;
+				}
+				m_FadeAmount = static_cast<int>(255.0F * m_SectionProgress);
+				if (m_SectionElapsedTime >= m_SectionDuration || skipSection) {
+					m_SectionSwitch = true;
+					m_IntroSequenceState = IntroSequence::FmodLogoFadeIn;
+				}
+				break;
+			case IntroSequence::FmodLogoFadeIn:
+				if (m_SectionSwitch) {
+					m_SectionSwitch = false;
+					m_SectionDuration = 0.25F;
+				}
+				m_FadeAmount = 255 - static_cast<int>(255.0F * m_SectionProgress);
+				if (m_SectionElapsedTime >= m_SectionDuration) {
+					m_SectionSwitch = true;
+					m_IntroSequenceState = IntroSequence::FmodLogoDisplay;
+				} else if (skipSection) {
+					m_SectionSwitch = true;
+					m_IntroSequenceState = IntroSequence::FmodLogoFadeOut;
+				}
+				break;
+			case IntroSequence::FmodLogoDisplay:
+				if (m_SectionSwitch) {
+					m_SectionSwitch = false;
+					m_SectionDuration = 2.0F;
+				}
+				if (m_SectionElapsedTime > m_SectionDuration || skipSection) {
+					m_SectionSwitch = true;
+					m_IntroSequenceState = IntroSequence::FmodLogoFadeOut;
+				}
+				break;
+			case IntroSequence::FmodLogoFadeOut:
+				if (m_SectionSwitch) {
+					m_SectionSwitch = false;
+					m_SectionDuration = 0.25F;
+				}
+				m_FadeAmount = static_cast<int>(255.0F * m_SectionProgress);
+				if (m_SectionElapsedTime >= m_SectionDuration || skipSection) {
+					m_SectionSwitch = true;
+					m_IntroSequenceState = IntroSequence::SlideshowFadeIn;
+				}
+				break;
+			default:
+				break;
+		}
+	}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void TitleScreen::DrawDataRealmsLogo() {
+		m_DataRealmsLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), static_cast<float>((g_FrameMan.GetResY() / 2) - 35)));
+		m_DataRealmsLogo.Draw(g_FrameMan.GetBackBuffer32());
+
+		char copyrightNotice[64];
+		std::snprintf(copyrightNotice, sizeof(copyrightNotice), "Cortex Command is TM and %c 2017 Data Realms, LLC", -35);
+		//g_FrameMan.GetLargeFont()->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() - g_FrameMan.GetLargeFont()->GetFontHeight(), std::string(copyrightNotice), GUIFont::Centre);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void TitleScreen::DrawFmodLogo() {
+		m_FmodLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), static_cast<float>((g_FrameMan.GetResY() / 2) - 35)));
+		m_FmodLogo.Draw(g_FrameMan.GetBackBuffer32());
+	}
 }

@@ -5,7 +5,8 @@ on:
   push:
     branches: [ master, development ]
   pull_request:
-    branches: [ development ]
+    types: [opened, ready_for_review]
+    branches: [ master, development ]
 
   workflow_dispatch:
 

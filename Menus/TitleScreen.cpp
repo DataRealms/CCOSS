@@ -98,6 +98,35 @@ namespace RTE {
 			m_BackdropStars.emplace_back(newStar);
 		}
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void TitleScreen::Update(bool skipSection) {
+		if (!m_FinishedPlayingIntro && !g_SettingsMan.SkipIntro()) {
+			UpdateIntro(skipSection);
+			return;
+		}
+	}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void TitleScreen::DrawFadeScreen() {
+		set_trans_blender(m_FadeAmount, m_FadeAmount, m_FadeAmount, m_FadeAmount);
+		draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_FadeScreen, 0, 0);
+	}
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void TitleScreen::Draw() {
+		if (!m_FinishedPlayingIntro && !g_SettingsMan.SkipIntro()) {
+			DrawIntro();
+			return;
+		}
+
+	}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TitleScreen::UpdateIntroLogoSequence(bool skipSection) {
@@ -184,8 +213,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void TitleScreen::Draw() {
-		g_FrameMan.ClearBackBuffer32();
 	void TitleScreen::UpdateIntroSlideshowSequence(bool skipSection) {
 		int textPosY = 0;
 		switch (m_IntroSequenceState) {
@@ -195,8 +222,6 @@ namespace RTE {
 					m_ScrollOffset.SetY(static_cast<float>(m_BackdropScrollStartOffsetY));
 					m_SectionDuration = 1.0F;
 
-		if (m_IntroSequenceState >= IntroSequence::DataRealmsLogoFadeIn && m_IntroSequenceState <= IntroSequence::DataRealmsLogoFadeOut) {
-			draw_sprite(g_FrameMan.GetBackBuffer32(), m_DataRealmsLogo, (g_FrameMan.GetResX() - m_DataRealmsLogo->w) / 2 - 5, (g_FrameMan.GetResY() - m_DataRealmsLogo->h) / 2);
 					g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccintro.ogg", 0);
 					g_AudioMan.SetMusicPosition(0.05F);
 					// Override music volume setting for the intro if it's set to anything
@@ -231,9 +256,6 @@ namespace RTE {
 					//g_FrameMan.GetLargeFont()->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, textPosY, "At the end of humanity's darkest century...", GUIFont::Centre);
 				}
 
-			char copyrightNotice[64];
-			std::snprintf(copyrightNotice, sizeof(copyrightNotice), "Cortex Command is TM and %c 2017 Data Realms, LLC", -35);
-			//g_FrameMan.GetLargeFont()->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() - g_FrameMan.GetLargeFont()->GetFontHeight(), std::string(copyrightNotice), GUIFont::Centre);
 				if (m_SectionElapsedTime >= m_SectionDuration) {
 					m_IntroSequenceState = IntroSequence::ShowSlide2;
 					m_SectionSwitch = true;
@@ -412,15 +434,41 @@ namespace RTE {
 			default:
 				break;
 		}
-		if (m_IntroSequenceState >= IntroSequence::FmodLogoFadeIn && m_IntroSequenceState <= IntroSequence::FmodLogoFadeOut) {
-			draw_sprite(g_FrameMan.GetBackBuffer32(), m_FmodLogo, (g_FrameMan.GetResX() - m_FmodLogo->w) / 2, (g_FrameMan.GetResY() - m_FmodLogo->h) / 2);
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void TitleScreen::UpdateIntro(bool skipSection) {
+		if (m_SectionSwitch) { m_SectionTimer.Reset(); }
+		m_SectionElapsedTime = static_cast<float>(m_SectionTimer.GetElapsedRealTimeS());
+		m_SectionProgress = std::min((m_SectionDuration > 0) ? m_SectionElapsedTime / m_SectionDuration : 0, 0.9999F);
+
+		if (m_IntroSequenceState >= IntroSequence::SlideshowFadeIn && m_IntroSequenceState <= IntroSequence::SlideshowEnd) {
+			if (m_IntroSequenceState == IntroSequence::SlideshowFadeIn && m_SectionSwitch) {
+				m_IntroSongTimer.SetElapsedRealTimeS(0.05F);
+				m_ScrollStart = static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
+				m_ScrollDuration = 66.6F - m_ScrollStart; // 66.6s This is the end of the slideshow
+			}
+			m_ScrollProgress = (static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS()) - m_ScrollStart) / m_ScrollDuration;
+			m_ScrollOffset.SetY(LERP(0, 1.0F, static_cast<float>(m_BackdropScrollStartOffsetY), static_cast<float>(m_TitleAppearOffsetY), m_ScrollProgress));
+		} else if (m_IntroSequenceState >= IntroSequence::GameLogoAppear && m_IntroSequenceState <= IntroSequence::PlanetScroll) {
+			if (m_IntroSequenceState == IntroSequence::GameLogoAppear && m_SectionSwitch) {
+				m_ScrollStart = static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
+				m_ScrollDuration = 92.4F - m_ScrollStart; // This is the end of PlanetScroll
+			}
+			m_ScrollProgress = static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS()) - m_ScrollStart / m_ScrollDuration;
+			m_ScrollOffset.SetY(EaseOut(static_cast<float>(m_TitleAppearOffsetY), static_cast<float>(m_PreMainMenuOffsetY), m_ScrollProgress));
+		} else if (m_IntroSequenceState == IntroSequence::MainMenuAppear) {
+			m_ScrollOffset.SetY(EaseOut(static_cast<float>(m_PreMainMenuOffsetY), static_cast<float>(m_MenuTopOffsetY), m_SectionProgress));
 		}
 
-		if (m_FadeAmount > 0) {
-			set_trans_blender(m_FadeAmount, m_FadeAmount, m_FadeAmount, m_FadeAmount);
-			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_FadeScreen, 0, 0);
+		if (m_IntroSequenceState >= IntroSequence::Start && m_IntroSequenceState <= IntroSequence::FmodLogoFadeOut) {
+			UpdateIntroLogoSequence(skipSection);
+		} else if (m_IntroSequenceState >= IntroSequence::SlideshowFadeIn && m_IntroSequenceState <= IntroSequence::MainMenuAppear) {
+			UpdateIntroSlideshowSequence(skipSection);
 		}
+	}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TitleScreen::DrawSlideshowSlide() {
@@ -458,5 +506,28 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void TitleScreen::DrawIntro() {
+		g_FrameMan.ClearBackBuffer32();
+
+		if (m_IntroSequenceState >= IntroSequence::SlideshowFadeIn) { DrawTitleScreenScene(); }
+		if ((m_IntroSequenceState >= IntroSequence::GameLogoAppear && m_TitleTransitionState < TitleTransition::ScenarioFadeIn) || m_TitleTransitionState == TitleTransition::MainMenuToCampaign) { DrawGameLogo(); }
+
+		if (m_IntroSequenceState >= IntroSequence::DataRealmsLogoFadeIn && m_IntroSequenceState <= IntroSequence::DataRealmsLogoFadeOut) {
+			draw_sprite(g_FrameMan.GetBackBuffer32(), m_DataRealmsLogo, (g_FrameMan.GetResX() - m_DataRealmsLogo->w) / 2 - 5, (g_FrameMan.GetResY() - m_DataRealmsLogo->h) / 2);
+
+			std::string copyrightNotice(64, '\0');
+			std::snprintf(copyrightNotice.data(), copyrightNotice.size(), "Cortex Command is TM and %c 2017 Data Realms, LLC", -35);
+			//m_IntroTextFont.DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() - m_IntroTextFont.GetFontHeight(), copyrightNotice, GUIFont::Centre);
+			if (m_FadeAmount > 0) { DrawFadeScreen(); }
+		} else if (m_IntroSequenceState >= IntroSequence::FmodLogoFadeIn && m_IntroSequenceState <= IntroSequence::FmodLogoFadeOut) {
+			draw_sprite(g_FrameMan.GetBackBuffer32(), m_FmodLogo, (g_FrameMan.GetResX() - m_FmodLogo->w) / 2, (g_FrameMan.GetResY() - m_FmodLogo->h) / 2);
+			if (m_FadeAmount > 0) { DrawFadeScreen(); }
+		} else if (m_IntroSequenceState == IntroSequence::SlideshowFadeIn) {
+			if (m_FadeAmount > 0) { DrawFadeScreen(); }
+		} else if (m_IntroSequenceState >= IntroSequence::ShowSlide1 && m_IntroSequenceState <= ShowSlide8) {
+			DrawSlideshowSlide();
+		}
+
+		g_FrameMan.FlipFrameBuffers();
 	}
 }

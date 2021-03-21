@@ -76,7 +76,16 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Concrete Methods
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="skipSection"></param>
+		void Update(bool skipSection = false);
 
+		/// <summary>
+		/// 
+		/// </summary>
+		void Draw();
 #pragma endregion
 
 	private:
@@ -114,7 +123,6 @@ namespace RTE {
 		Timer m_IntroSongTimer; //!<
 
 		std::array<BITMAP *, 8> m_IntroSlides; //!<
-		Vector m_SlidePos; //!<
 		float m_SlideFadeInDuration; //!<
 		float m_SlideFadeOutDuration; //!<
 
@@ -148,7 +156,6 @@ namespace RTE {
 
 		float m_BackdropScrollRatio; //!<
 
-		float m_SectionSongEnd; //!< When a section is supposed to end, relative to the song timer.
 		int m_BackdropScrollStartOffsetY; //!< Set the start so that the nebula is fully scrolled up.
 
 		int m_TitleAppearOffsetY; //!<
@@ -173,11 +180,20 @@ namespace RTE {
 		/// <returns></returns>
 		void UpdateIntroSlideshowSequence(bool skipSection);
 
+		/// <summary>
+		/// 
+		/// </summary>
+		void UpdateIntro(bool skipSection);
 
 		/// <summary>
 		/// 
 		/// </summary>
 		void DrawSlideshowSlide();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void DrawIntro();
 #pragma endregion
 #pragma region Create Breakdown
 		/// <summary>
@@ -197,6 +213,10 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Drawing
+		/// <summary>
+		/// 
+		/// </summary>
+		void DrawFadeScreen();
 
 		/// <summary>
 		/// 

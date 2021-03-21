@@ -157,9 +157,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `Attachable` terrain collisions will now propagate to any child `Attachables` on them. This means that `Attachables` will not collide with terrain, even if set to, if they're attached to a parent that doesn't collide with terrain.  
 	This means that the `attachable.CollidesWithTerrainWhileAttached` value may not represent the true state of things, you should instead use `attachable.CanCollideWithTerrain` to determine whether a given `Attachable` can collide with terrain.
 	
-- BuyMenu tooltips now display item info as well as a description. This includes the maximum carriable mass and passengers for Craft, mass and passenger slots required for Actors, and mass for other Moveable Objects.
+- The `Actor` property`MaxMass` now no longer includes the `Mass` of the `Actor`, and has been renamed to `MaxInventoryMass` for clarity. In mods, this is most important for `ACraft`, which will now need their total `Mass` subtracted from the old value. 
 
-- `MaxMass` property for Actors now no longer includes that actors mass in the calculation, and has been renamed to `MaxInventoryMass` for clarity. In mods, this is most important for ACraft, which will now need their total mass subtracted from the value. 
+- `BuyMenu` tooltips now display item info as well as a description. This includes `MaxInventoryMass` and `MaxPassengers` for `ACraft`, `Mass` and `PassengerSlots` required for `Actors`, and `Mass` for other `Moveable Objects`.
 
 ### Fixed
 

@@ -4,6 +4,26 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void TitleScreen::Clear() {
+		m_GUIBackBuffer = nullptr;
+		m_IntroSequenceState = IntroSequence::Start;
+		m_TitleTransitionState = TitleTransition::MenusDisabled;
+		m_FadeScreen = nullptr;
+		m_OrbitRotation = c_HalfPI - c_EighthPI;
+		m_OrbitRadius = 274;
+		m_PlanetRadius = 240;
+		m_PreMainMenuOffsetY = 100;
+		m_ScrollOffset.Reset();
+		m_BackdropScrollRatio = 1.0F / 3.0F;
+		m_SlidePos.Reset();
+		m_ScrollDuration = 0;
+		m_ScrollStart = 0;
+		m_ScrollProgress = 0;
+		m_TitleAppearOffsetY = 900;
+		m_MenuTopOffsetY = 0;
+		m_FinishedPlayingIntro = false;
+		m_FadeAmount = 255;
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

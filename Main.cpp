@@ -34,9 +34,6 @@
 #include "MetagameGUI.h"
 
 #include "DataModule.h"
-#include "SceneLayer.h"
-#include "MOSParticle.h"
-#include "MOSRotating.h"
 #include "Controller.h"
 
 #include "MultiplayerServerLobby.h"
@@ -52,54 +49,6 @@ using namespace RTE;
 /// Global variables.
 /// </summary>
 
-enum TITLESEQUENCE {
-    // Intro
-    FADEIN,
-    SPACEPAUSE1,
-    SHOWSLIDE1,
-    SHOWSLIDE2,
-    SHOWSLIDE3,
-    SHOWSLIDE4,
-    SHOWSLIDE5,
-    SHOWSLIDE6,
-    SHOWSLIDE7,
-    SHOWSLIDE8,
-    PRETITLE,
-    TITLEAPPEAR,
-    PLANETSCROLL,
-    PREMENU,
-    MENUAPPEAR,
-    // Main menu is active and operational
-    MENUACTIVE,
-    // Scenario mode views and transitions
-    MAINTOSCENARIO,
-    // Back from a scenario game to the scenario selection menu
-    SCENARIOFADEIN,
-    SCENARIOMENU,
-    // Campaign mode views and transitions
-    MAINTOCAMPAIGN,
-    // Back from a battle to the campaign view
-    CAMPAIGNFADEIN,
-    CAMPAIGNPLAY,
-    // Going back to the main menu view from a planet-centered view
-    PLANETTOMAIN,
-    FADESCROLLOUT,
-    FADEOUT,
-    END
-};
-
-// Intro slides
-enum SLIDES {
-    SLIDEPAST = 0,
-    SLIDENOW,
-    SLIDEVR,
-    SLIDETRAVEL,
-    SLIDEALIENS,
-    SLIDETRADE,
-    SLIDEPEACE,
-    SLIDEFRONTIER,
-    SLIDECOUNT
-};
 
 volatile bool g_Quit = false;
 bool g_ResetRTE = false; //!< Signals to reset the entire RTE next iteration.
@@ -108,7 +57,6 @@ std::string g_EditorToLaunch = ""; //!< String with editor activity name to laun
 bool g_InActivity = false;
 bool g_ResetActivity = false;
 bool g_ResumeActivity = false;
-int g_IntroState = START;
 int g_StationOffsetX;
 int g_StationOffsetY;
 
@@ -117,7 +65,6 @@ bool g_HadResolutionChange = false; //!< Need this so we can restart PlayIntroTi
 MainMenuGUI *g_pMainMenuGUI = 0;
 ScenarioGUI *g_pScenarioGUI = 0;
 Controller *g_pMainMenuController = 0;
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -296,47 +243,6 @@ bool PlayIntroTitle() {
 	// Don't stop the music if reiniting after a resolution change
 	if (!g_FrameMan.ResolutionChanged()) { g_AudioMan.StopAll(); }
 
-    g_FrameMan.ClearBackBuffer32();
-    g_FrameMan.FlipFrameBuffers();
-    int resX = g_FrameMan.GetResX();
-    int resY = g_FrameMan.GetResY();
-
-    // The fade-in/out screens
-    BITMAP *pFadeScreen = create_bitmap_ex(32, resX, resY);
-    clear_to_color(pFadeScreen, 0);
-    int fadePos = 0;
-
-    // Font stuff
-    GUISkin *pSkin = g_pMainMenuGUI->GetGUIControlManager()->GetSkin();
-    GUIFont *pFont = pSkin->GetFont("fatfont.png");
-    AllegroBitmap backBuffer(g_FrameMan.GetBackBuffer32());
-    int yTextPos = 0;
-    // Timers
-    Timer totalTimer, songTimer, sectionTimer;
-    // Convenience for how many seconds have elapsed on each section
-    double elapsed = 0;
-    // How long each section is, in s
-    double duration = 0, scrollDuration = 0, scrollStart = 0, slideFadeInDuration = 0.5, slideFadeOutDuration = 0.5;
-    // Progress made on a section, from 0.0 to 1.0
-    double sectionProgress = 0, scrollProgress = 0;
-    // When a section is supposed to end, relative to the song timer
-    long sectionSongEnd = 0;
-
-    // Scrolling data
-	bool keyPressed = false;
-	bool sectionSwitch = true;
-    float planetRadius = 240;
-    float orbitRadius = 274;
-    float orbitRotation = c_HalfPI - c_EighthPI;
-    // Set the start so that the nebula is fully scrolled up
-    int startYOffset = pBackdrop->GetBitmap()->h / backdropScrollRatio - (resY / backdropScrollRatio);
-    int titleAppearYOffset = 900;
-    int preMenuYOffset = 100;
-    int topMenuYOffset = 0;
-    // So planet is centered on the screen regardless of resolution
-    int planetViewYOffset = 325 + planetRadius - (resY / 2);
-    // Set Y to title offset so there's no jump when entering the main menu
-    Vector scrollOffset(0, preMenuYOffset), planetPos, stationOffset, capsuleOffset, slidePos;
 
     totalTimer.Reset();
     sectionTimer.Reset();

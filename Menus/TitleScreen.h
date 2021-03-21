@@ -21,7 +21,41 @@ namespace RTE {
 			FmodLogoFadeIn,
 			FmodLogoDisplay,
 			FmodLogoFadeOut,
+			SlideshowFadeIn,
+			PreSlideshowPause,
+			ShowSlide1,
+			ShowSlide2,
+			ShowSlide3,
+			ShowSlide4,
+			ShowSlide5,
+			ShowSlide6,
+			ShowSlide7,
+			ShowSlide8,
+			SlideshowEnd,
+			GameLogoAppear,
+			PlanetScroll,
+			PreMainMenu,
+			MainMenuAppear
 		};
+
+		/// <summary>
+		/// 
+		/// </summary>
+		enum TitleTransition {
+			MenusDisabled = -1,
+			MainMenu, // Main menu is active and operational
+			MainMenuToScenario, // Scenario mode views and transitions
+			ScenarioFadeIn, // Back from a scenario game to the scenario selection menu
+			ScenarioMenu,
+			MainMenuToCampaign, // Campaign mode views and transitions
+			CampaignFadeIn, // Back from a battle to the campaign view
+			CampaignPlay,
+			PlanetToMain, // Going back to the main menu view from a planet-centered view
+			FadeScrollOut,
+			FadeOut,
+			End
+		};
+
 #pragma region Creation
 		/// <summary>
 		/// 
@@ -59,24 +93,67 @@ namespace RTE {
 			int Intensity = 0; //!< Intensity value on a scale from 0 to 255.
 		};
 
+		AllegroBitmap m_GUIBackBuffer; //!<
+
 		IntroSequence m_IntroSequenceState; //!<
+		TitleTransition m_TitleTransitionState; //!<
+		bool m_FinishedPlayingIntro; //!<
+
+
 		Timer m_SectionTimer; //!<
 		float m_SectionElapsedTime; //!< How many seconds have elapsed on a section.
 		float m_SectionDuration; //!< How many seconds a section is supposed to elapse.
 		float m_SectionProgress; //!< Progress made on a section, from 0.0 to 1.0.
 		bool m_SectionSwitch; //!<
-		std::array<BITMAP *, 8> m_IntroSlides; //!<
 
-		std::vector<Star> m_BackdropStars; //!<
+		Timer m_IntroSongTimer; //!<
+
+		std::array<BITMAP *, 8> m_IntroSlides; //!<
+		Vector m_SlidePos; //!<
+		float m_SlideFadeInDuration; //!<
+		float m_SlideFadeOutDuration; //!<
+
+		MOSParticle m_Planet; //!<
+		Vector m_PlanetPos; //!<
+		float m_PlanetRadius; //!<
+
+		MOSRotating m_Station; //!<
+		Vector m_StationOffset; //!<
+		int m_StationOffsetX; //!<
+		int m_StationOffsetY; //!<
+		float m_OrbitRadius; //!<
+		float m_OrbitRotation; //!<
+
+
+		Vector m_ScrollOffset; //!<
+
+		BITMAP *m_FadeScreen; //!<
+		int m_FadeAmount;
 
 		MOSParticle m_DataRealmsLogo; //!<
 		MOSParticle m_FmodLogo; //!<
-		SceneLayer m_Nebula; //!<
+
 		MOSParticle m_GameLogo; //!<
 		MOSParticle m_GameLogoGlow; //!<
-		MOSParticle m_Planet; //!<
+
 		MOSParticle m_Moon; //!<
-		MOSParticle m_Station; //!<
+
+		SceneLayer m_Nebula; //!<
+		std::vector<Star> m_BackdropStars; //!<
+
+		float m_BackdropScrollRatio; //!<
+
+		float m_SectionSongEnd; //!< When a section is supposed to end, relative to the song timer.
+		int m_BackdropScrollStartOffsetY; //!< Set the start so that the nebula is fully scrolled up.
+
+		int m_TitleAppearOffsetY; //!<
+		int m_MenuTopOffsetY; //!<
+
+		float m_ScrollDuration; //!<
+		float m_ScrollStart; //!<
+		float m_ScrollProgress; //!<
+		int m_PreMainMenuOffsetY; //!<
+
 
 		/// <summary>
 		/// 

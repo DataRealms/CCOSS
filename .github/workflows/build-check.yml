@@ -9,7 +9,7 @@ on:
     types: [opened, ready_for_review]
     branches: [ master, development ]
 
-  workflow-dispatch:
+  workflow_dispatch:
 
 jobs:
   build-linux:

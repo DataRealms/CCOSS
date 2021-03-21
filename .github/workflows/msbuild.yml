@@ -6,7 +6,7 @@ on:
       - master
       - development
 
-  workflow-dispatch:
+  workflow_dispatch:
 
 env:
   # Path to the solution file relative to the root of the project.

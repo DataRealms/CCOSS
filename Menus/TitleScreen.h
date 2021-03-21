@@ -160,12 +160,25 @@ namespace RTE {
 		int m_PreMainMenuOffsetY; //!<
 
 
+#pragma region Intro Sequence Handling
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		void PlayIntroLogoSequence(bool skipSection);
+		void UpdateIntroLogoSequence(bool skipSection);
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		void UpdateIntroSlideshowSequence(bool skipSection);
+
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void DrawSlideshowSlide();
+#pragma endregion
 #pragma region Create Breakdown
 		/// <summary>
 		/// 

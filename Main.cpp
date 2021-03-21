@@ -61,10 +61,6 @@ enum TITLESEQUENCE {
 	FMODLOGOFADEIN,
 	FMODLOGODISPLAY,
 	FMODLOGOFADEOUT,
-    // Game notice
-    NOTICEFADEIN,
-    NOTICEDISPLAY,
-    NOTICEFADEOUT,
     // Intro
     FADEIN,
     SPACEPAUSE1,
@@ -436,28 +432,6 @@ bool PlayIntroTitle() {
 			pFMODLogo->Draw(g_FrameMan.GetBackBuffer32());
 		}
 
-        ///////////////////////////////////////////////////////
-        // Notice drawing
-
-        if (g_IntroState >= NOTICEFADEIN && g_IntroState <= NOTICEFADEOUT)
-        {
-            // Draw the early build notice
-            g_FrameMan.ClearBackBuffer32();
-            yTextPos = g_FrameMan.GetResY() / 3;
-            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, string("N O T E :"), GUIFont::Centre);
-            yTextPos += pFont->GetFontHeight() * 2;
-            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, string("This game plays great with up to FOUR people on a BIG-SCREEN TV!"), GUIFont::Centre);
-            yTextPos += pFont->GetFontHeight() * 2;
-            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, string("So invite some friends/enemies over, plug in those USB controllers, and have a blast -"), GUIFont::Centre);
-            yTextPos += pFont->GetFontHeight() * 4;
-            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, string("Press ALT+ENTER to toggle FULLSCREEN mode"), GUIFont::Centre);
-
-            // Draw the copyright notice
-            yTextPos = g_FrameMan.GetResY() - pFont->GetFontHeight();
-            char copyRight[512];
-            std::snprintf(copyRight, sizeof(copyRight), "Cortex Command is TM and %c 2017 Data Realms, LLC", -35);
-            pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, copyRight, GUIFont::Centre);
-        }
 
         //////////////////////////////////////////////////////////
         // Scene drawing
@@ -727,64 +701,6 @@ bool PlayIntroTitle() {
 				sectionSwitch = true;
 			}
 		}
-        else if (g_IntroState == NOTICEFADEIN)
-        {
-            if (sectionSwitch)
-            {
-                // Black fade
-                clear_to_color(pFadeScreen, 0);
-                duration = 0.5;
-                sectionSwitch = false;
-            }
-
-            fadePos = 255 - (255 * sectionProgress);
-            set_trans_blender(fadePos, fadePos, fadePos, fadePos);
-            draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pFadeScreen, 0, 0);
-
-            if (elapsed >= duration)
-            {
-                g_IntroState = NOTICEDISPLAY;
-                sectionSwitch = true;
-            }
-            else if (keyPressed)
-            {
-                g_IntroState = NOTICEFADEOUT;
-                sectionSwitch = true;
-            }
-        }
-        else if (g_IntroState == NOTICEDISPLAY)
-        {
-            if (sectionSwitch)
-            {
-                duration = 7.0;
-                sectionSwitch = false;
-            }
-            if (elapsed > duration || keyPressed)
-            {
-                g_IntroState = NOTICEFADEOUT;
-                sectionSwitch = true;
-            }
-        }
-        else if (g_IntroState == NOTICEFADEOUT)
-        {
-            if (sectionSwitch)
-            {
-                // Black fade
-                clear_to_color(pFadeScreen, 0);
-                duration = 0.5;
-                sectionSwitch = false;
-            }
-
-            fadePos = 255 * sectionProgress;
-            set_trans_blender(fadePos, fadePos, fadePos, fadePos);
-            draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pFadeScreen, 0, 0);
-
-            if (elapsed >= duration || keyPressed)
-            {
-                g_IntroState = FADEIN;
-                sectionSwitch = true;
-            }
-        }
         else if (g_IntroState == FADEIN)
         {
             if (sectionSwitch)

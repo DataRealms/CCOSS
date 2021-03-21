@@ -473,13 +473,10 @@ namespace RTE {
 
 	void TitleScreen::DrawSlideshowSlide() {
 		int slide = m_IntroSequenceState - IntroSequence::ShowSlide1;
-		Vector slideCenteredPos(static_cast<float>((g_FrameMan.GetResX() / 2) - (m_IntroSlides.at(slide)->w / 2)), static_cast<float>((g_FrameMan.GetResY() / 2) - (m_IntroSlides.at(slide)->h / 2)));
-		Vector slidePos = slideCenteredPos;
+		Vector slidePos(static_cast<float>((g_FrameMan.GetResX() / 2) - (m_IntroSlides.at(slide)->w / 2)), static_cast<float>((g_FrameMan.GetResY() / 2) - (m_IntroSlides.at(slide)->h / 2)));
 
-		if (m_IntroSlides.at(slide)->w <= g_FrameMan.GetResX())
-			slidePos.SetX(static_cast<float>((g_FrameMan.GetResX() / 2) - (m_IntroSlides.at(slide)->w / 2)));
-		else {
-			// Sideways pan slides that are wider than the screen
+		// Sideways pan slides that are wider than the screen
+		if (m_IntroSlides.at(slide)->w > g_FrameMan.GetResX()) {
 			if (m_SectionElapsedTime < m_SlideFadeInDuration) {
 				slidePos.SetX(0);
 			} else if (m_SectionElapsedTime < m_SectionDuration - m_SlideFadeOutDuration) {
@@ -488,20 +485,9 @@ namespace RTE {
 				slidePos.SetX(static_cast<float>(g_FrameMan.GetResX() - m_IntroSlides.at(slide)->w));
 			}
 		}
-
-		int fadeAmount = 0;
-		if (m_SectionElapsedTime < m_SlideFadeInDuration) {
-			fadeAmount = static_cast<int>(EaseOut(0, 255.0F, m_SectionElapsedTime / m_SlideFadeInDuration));
-		} else if (m_SectionElapsedTime < m_SectionDuration - m_SlideFadeOutDuration) {
-			fadeAmount = 255;
-			slidePos.SetY(slideCenteredPos.GetY());
-		} else {
-			fadeAmount = static_cast<int>(EaseIn(255.0F, 0, (m_SectionElapsedTime - m_SectionDuration + m_SlideFadeOutDuration) / m_SlideFadeOutDuration));
-		}
-		//if (fadeAmount > 0) {
-			set_trans_blender(fadeAmount, fadeAmount, fadeAmount, fadeAmount);
-			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_IntroSlides.at(slide), slidePos.GetFloorIntX(), slidePos.GetFloorIntY());
-		//}
+		m_FadeAmount = static_cast<int>((m_SectionElapsedTime < m_SlideFadeInDuration) ? EaseOut(0, 255.0F, m_SectionElapsedTime / m_SlideFadeInDuration) : EaseIn(255.0F, 0, (m_SectionElapsedTime - m_SectionDuration + m_SlideFadeOutDuration) / m_SlideFadeOutDuration));
+		set_trans_blender(m_FadeAmount, m_FadeAmount, m_FadeAmount, m_FadeAmount);
+		draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_IntroSlides.at(slide), slidePos.GetFloorIntX(), slidePos.GetFloorIntY());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

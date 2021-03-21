@@ -393,6 +393,7 @@ void Arm::UpdateCurrentHandOffset() {
     if (IsAttached()) {
         Vector targetOffset;
         if (m_pHeldMO && !dynamic_cast<ThrownDevice *>(m_pHeldMO)) {
+            m_DidReach = false;
             const HeldDevice *heldDevice = dynamic_cast<HeldDevice *>(m_pHeldMO);
             targetOffset = heldDevice->GetStanceOffset() * m_Rotation;
 
@@ -407,9 +408,14 @@ void Arm::UpdateCurrentHandOffset() {
         } else {
             if (m_TargetPosition.IsZero()) {
                 targetOffset = m_IdleOffset.GetXFlipped(m_HFlipped);
+                m_DidReach = false;
             } else {
                 targetOffset = g_SceneMan.ShortestDistance(m_JointPos, m_TargetPosition, g_SceneMan.SceneWrapsX());
-                if (m_WillIdle && targetOffset.GetMagnitude() > m_MaxLength) { targetOffset = m_IdleOffset.GetXFlipped(m_HFlipped); }
+                m_DidReach = m_WillIdle;
+                if (m_WillIdle && targetOffset.GetMagnitude() > m_MaxLength) {
+                    targetOffset = m_IdleOffset.GetXFlipped(m_HFlipped);
+                    m_DidReach = false;
+                }
             }
         }
 

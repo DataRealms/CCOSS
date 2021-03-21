@@ -1354,12 +1354,12 @@ void Actor::VerifyMOIDs()
 
 void Actor::Update()
 {
+    // Update the controller!
+    m_Controller.Update();
+
     /////////////////////////////////
     // Hit Body update and handling
     MOSRotating::Update();
-
-    // Update the controller!
-    m_Controller.Update();
 
     // Update the viewpoint to be at least what the position is
     m_ViewPoint = m_Pos;

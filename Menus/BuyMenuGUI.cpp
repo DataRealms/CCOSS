@@ -2290,7 +2290,7 @@ void BuyMenuGUI::UpdateTotalPassengersLabel(const ACraft* pCraft, GUILabel* pLab
 	}
 
 	std::string display;
-	if (pCraft && pCraft->GetMaxPassengers() != 0) {
+	if (pCraft && pCraft->GetMaxInventoryMass() != 0 && pCraft->GetMaxPassengers() != 0) {
 		display = std::to_string(GetTotalOrderPassengers());
 		if (pCraft->GetMaxPassengers() > 0) {
 			display += " / " + std::to_string(pCraft->GetMaxPassengers());

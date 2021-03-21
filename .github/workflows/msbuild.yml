@@ -5,11 +5,8 @@ on:
     branches:
       - master
       - development
-  pull_request:
-    types: [opened, ready_for_review]
-    branches:
-      - master
-      - development
+
+  workflow-dispatch:
 
 env:
   # Path to the solution file relative to the root of the project.

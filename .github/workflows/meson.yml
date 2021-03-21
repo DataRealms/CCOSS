@@ -4,10 +4,6 @@ on:
   # Triggers the workflow on push or pull request events but only for the development branch
   push:
     branches: [ master, development ]
-  pull_request:
-    types: [opened, ready_for_review]
-    branches: [ master, development ]
-
   workflow_dispatch:
 
 

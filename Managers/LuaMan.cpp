@@ -1102,7 +1102,6 @@ int LuaMan::Initialize() {
             .property("InventorySize", &Actor::GetInventorySize)
             .def("IsInventoryEmpty", &Actor::IsInventoryEmpty)
             .property("MaxInventoryMass", &Actor::GetMaxInventoryMass)
-            .property("MaxMass", &Actor::GetMaxInventoryMass)
             .def("FlashWhite", &Actor::FlashWhite)
             .def("DrawWaypoints", &Actor::DrawWaypoints)
             .def("SetMovePathToUpdate", &Actor::SetMovePathToUpdate)

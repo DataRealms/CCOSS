@@ -383,7 +383,7 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         RTEAssert(pInvMO, "Reader has been fed bad Inventory MovableObject in Actor::Create");
         m_Inventory.push_back(pInvMO);
     }
-    else if (propName == "MaxMass" || propName == "MaxInventoryMass")
+    else if (propName == "MaxInventoryMass")
         reader >> m_MaxInventoryMass;
     else if (propName == "AddPieSlice")
     {

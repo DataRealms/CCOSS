@@ -27,9 +27,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void TitleScreen::Create() {
+
+		m_FadeScreen = create_bitmap_ex(32, g_FrameMan.GetResX(), g_FrameMan.GetResY());
+		clear_to_color(m_FadeScreen, 0);
+
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void TitleScreen::CreateTitleElements() {
-		m_DataRealmsLogo.Create(ContentFile("Base.rte/GUIs/Title/Intro/DRLogo5x.png"));
-		m_FmodLogo.Create(ContentFile("Base.rte/GUIs/Title/Intro/FMODLogo.png"));
+		m_DataRealmsLogo = ContentFile("Base.rte/GUIs/Title/Intro/DRLogo5x.png").GetAsBitmap(COLORCONV_NONE, false);
+		m_FmodLogo = ContentFile("Base.rte/GUIs/Title/Intro/FMODLogo.png").GetAsBitmap(COLORCONV_NONE, false);
+
 		m_GameLogo.Create(ContentFile("Base.rte/GUIs/Title/Title.png"));
 		m_GameLogoGlow.Create(ContentFile("Base.rte/GUIs/Title/TitleGlow.png"));
 		m_Planet.Create(ContentFile("Base.rte/GUIs/Title/Planet.png"));
@@ -173,19 +183,30 @@ namespace RTE {
 	}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void TitleScreen::DrawDataRealmsLogo() {
-		m_DataRealmsLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), static_cast<float>((g_FrameMan.GetResY() / 2) - 35)));
-		m_DataRealmsLogo.Draw(g_FrameMan.GetBackBuffer32());
+	void TitleScreen::Draw() {
+		g_FrameMan.ClearBackBuffer32();
 
-		char copyrightNotice[64];
-		std::snprintf(copyrightNotice, sizeof(copyrightNotice), "Cortex Command is TM and %c 2017 Data Realms, LLC", -35);
-		//g_FrameMan.GetLargeFont()->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() - g_FrameMan.GetLargeFont()->GetFontHeight(), std::string(copyrightNotice), GUIFont::Centre);
+		if (m_IntroSequenceState >= IntroSequence::DataRealmsLogoFadeIn && m_IntroSequenceState <= IntroSequence::DataRealmsLogoFadeOut) {
+			draw_sprite(g_FrameMan.GetBackBuffer32(), m_DataRealmsLogo, (g_FrameMan.GetResX() - m_DataRealmsLogo->w) / 2 - 5, (g_FrameMan.GetResY() - m_DataRealmsLogo->h) / 2);
+
+			char copyrightNotice[64];
+			std::snprintf(copyrightNotice, sizeof(copyrightNotice), "Cortex Command is TM and %c 2017 Data Realms, LLC", -35);
+			//g_FrameMan.GetLargeFont()->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() - g_FrameMan.GetLargeFont()->GetFontHeight(), std::string(copyrightNotice), GUIFont::Centre);
+		}
+		if (m_IntroSequenceState >= IntroSequence::FmodLogoFadeIn && m_IntroSequenceState <= IntroSequence::FmodLogoFadeOut) {
+			draw_sprite(g_FrameMan.GetBackBuffer32(), m_FmodLogo, (g_FrameMan.GetResX() - m_FmodLogo->w) / 2, (g_FrameMan.GetResY() - m_FmodLogo->h) / 2);
+		}
+
+		if (m_FadeAmount > 0) {
+			set_trans_blender(m_FadeAmount, m_FadeAmount, m_FadeAmount, m_FadeAmount);
+			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_FadeScreen, 0, 0);
+		}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void TitleScreen::DrawFmodLogo() {
-		m_FmodLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), static_cast<float>((g_FrameMan.GetResY() / 2) - 35)));
-		m_FmodLogo.Draw(g_FrameMan.GetBackBuffer32());
 	}
 }

@@ -58,9 +58,14 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
+		/// Constructor method used to instantiate a TitleScreen object in system memory.
+		/// </summary>
+		TitleScreen() { Clear(); Create(); }
+
+		/// <summary>
 		/// 
 		/// </summary>
-		TitleScreen();
+		void Create();
 #pragma endregion
 
 #pragma region Destruction
@@ -130,8 +135,8 @@ namespace RTE {
 		BITMAP *m_FadeScreen; //!<
 		int m_FadeAmount;
 
-		MOSParticle m_DataRealmsLogo; //!<
-		MOSParticle m_FmodLogo; //!<
+		BITMAP *m_DataRealmsLogo; //!<
+		BITMAP *m_FmodLogo; //!<
 
 		MOSParticle m_GameLogo; //!<
 		MOSParticle m_GameLogoGlow; //!<
@@ -183,12 +188,10 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		void DrawDataRealmsLogo();
 
 		/// <summary>
 		/// 
 		/// </summary>
-		void DrawFmodLogo();
 #pragma endregion
 
 		/// <summary>

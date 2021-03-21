@@ -115,19 +115,27 @@ namespace RTE {
 			floatStream << std::fixed << std::setprecision(precision) << input;
 			return floatStream.str();
 		} else {
-			RTEAssert(powf(10.0F, static_cast<float>(precision)) < std::numeric_limits<float>::max(), "PRECISION SET GREATER THAN EXPONENT MAX!");
-			RTEAssert(powf(10.0F, static_cast<float>(precision)) > 0, "NEGATIVE PRECISION WILL YEILD DIVIDE BY ZERO ERROR!");
-			RTEAssert(input < (std::numeric_limits<float>::max() / powf(10.0F, static_cast<float>(precision))), "VALUE WILL EXCEED NUMERIC LIMITS WITH PRECISION " + std::to_string(precision));
-			if (roundingMode == 1) {
-				float roundingBuffer = floor(input * powf(10.0F, static_cast<float>(precision))) / powf(10.0F, static_cast<float>(precision));
-				return RoundFloatToPrecision(roundingBuffer, precision);
-			} else if (roundingMode == 2) {
-				float roundingBuffer = ceil(input * powf(10.0F, static_cast<float>(precision))) / powf(10.0F, static_cast<float>(precision));
-				return RoundFloatToPrecision(roundingBuffer, precision);
-			} else {
-				RTEAssert(false, "Error in RoundFloatToPrecision: INVALID ROUNDING MODE");
-				return "";
+			float precisionMagnitude = powf(10.0F, static_cast<float>(precision));
+			RTEAssert(precisionMagnitude < std::numeric_limits<float>::max(), "Precision set greater than able to display (exponent too high)!");
+			RTEAssert(precisionMagnitude > 0, "Negative precision will yeild divide by zero error!");
+			RTEAssert(input < (std::numeric_limits<float>::max() / precisionMagnitude), "Value will exceed numeric limits with precision " + std::to_string(precision));
+			
+			float roundingBuffer = input * precisionMagnitude;
+
+			switch (roundingMode) {
+				case 1:
+					roundingBuffer = floor(roundingBuffer);
+					break;
+				case 2:
+					roundingBuffer = ceil(roundingBuffer);
+					break;
+				default:
+					RTEAbort("Error in RoundFloatToPrecision: INVALID ROUNDING MODE");
+					break;
 			}
+
+			return RoundFloatToPrecision((roundingBuffer / precisionMagnitude), precision);
+
 		}
 	}
 	

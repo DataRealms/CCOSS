@@ -915,9 +915,9 @@ ClassInfoGetters
 	const std::deque<MovableObject *> * GetInventory() { return &m_Inventory; }
 
 	/// <summary>
-	/// Returns the maximum total mass this Actor can carry in it's inventory.
+	/// Returns the maximum total mass this Actor can carry in its inventory.
 	/// </summary>
-	/// <returns> The maximum carriable mass of this Actor.</returns>
+	/// <returns>The maximum carriable mass of this Actor.</returns>
 
 	float GetMaxInventoryMass() const { return m_MaxInventoryMass; }
 
@@ -1347,9 +1347,7 @@ protected:
     Vector m_ViewPoint;
     // The inventory of carried MovableObjects of this Actor. They are also Owned by this.
     std::deque<MovableObject *> m_Inventory;
-    // The max combined weight of items in this Actor's inventory.
-    // If this is -1 there's no limit.
-    float m_MaxInventoryMass;
+    float m_MaxInventoryMass; //!< The mass limit for this Actor's inventory. -1 means there's no limit.
     // The device that can/will be picked up
     HeldDevice *m_pItemInReach;
     // Whether the pie menu associated with this needs updating

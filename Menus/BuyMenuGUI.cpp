@@ -2256,7 +2256,6 @@ void BuyMenuGUI::AddPresetsToItemList()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BuyMenuGUI::UpdateTotalCostLabel(int whichTeam) {
-	// Total order cost is always rounded up from any remainder.
 	std::string display = "Cost: " + RoundFloatToPrecision(GetTotalOrderCost(), 0, 2) + "/" + RoundFloatToPrecision(g_ActivityMan.GetActivity()->GetTeamFunds(whichTeam), 0);
 	m_pCostLabel->SetText(display);
 }

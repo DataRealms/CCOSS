@@ -1,6 +1,17 @@
 #ifndef _RTETITLESCREEN_
 #define _RTETITLESCREEN_
 
+#include "Timer.h"
+#include "Vector.h"
+
+#include "GUI.h"
+#include "GUIFont.h"
+#include "AllegroBitmap.h"
+
+#include "MOSRotating.h"
+#include "MOSParticle.h"
+#include "SceneLayer.h"
+
 namespace RTE {
 
 	/// <summary>
@@ -70,9 +81,14 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// 
+		/// Destructor method used to clean up a TitleScreen object before deletion from system memory.
 		/// </summary>
-		~TitleScreen();
+		~TitleScreen() { Destroy(); }
+
+		/// <summary>
+		/// Destroys the TitleScreen object.
+		/// </summary>
+		void Destroy();
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -80,7 +96,7 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <param name="skipSection"></param>
-		void Update(bool skipSection = false);
+		TitleTransition Update(bool skipSection = false);
 
 		/// <summary>
 		/// 
@@ -110,9 +126,9 @@ namespace RTE {
 		AllegroBitmap m_GUIBackBuffer; //!<
 
 		IntroSequence m_IntroSequenceState; //!<
-		TitleTransition m_TitleTransitionState; //!<
 		bool m_FinishedPlayingIntro; //!<
 
+		TitleTransition m_TitleTransitionState; //!<
 
 		Timer m_SectionTimer; //!<
 		float m_SectionElapsedTime; //!< How many seconds have elapsed on a section.
@@ -128,7 +144,7 @@ namespace RTE {
 
 		MOSParticle m_Planet; //!<
 		Vector m_PlanetPos; //!<
-		float m_PlanetRadius; //!<
+		int m_PlanetRadius; //!<
 
 		MOSRotating m_Station; //!<
 		Vector m_StationOffset; //!<
@@ -137,11 +153,10 @@ namespace RTE {
 		float m_OrbitRadius; //!<
 		float m_OrbitRotation; //!<
 
-
 		Vector m_ScrollOffset; //!<
 
 		BITMAP *m_FadeScreen; //!<
-		int m_FadeAmount;
+		int m_FadeAmount; //!<
 
 		BITMAP *m_DataRealmsLogo; //!<
 		BITMAP *m_FmodLogo; //!<
@@ -166,6 +181,34 @@ namespace RTE {
 		float m_ScrollProgress; //!<
 		int m_PreMainMenuOffsetY; //!<
 
+#pragma region Create Breakdown
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreateTitleElements();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreateBackdropStars();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreateIntroSequenceSlides();
+#pragma endregion
+
+#pragma region Title Scene Handling
+		/// <summary>
+		/// 
+		/// </summary>
+		void DrawGameLogo();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void DrawTitleScreenScene();
+#pragma endregion
 
 #pragma region Intro Sequence Handling
 		/// <summary>
@@ -194,37 +237,6 @@ namespace RTE {
 		/// 
 		/// </summary>
 		void DrawIntro();
-#pragma endregion
-#pragma region Create Breakdown
-		/// <summary>
-		/// 
-		/// </summary>
-		void CreateTitleElements();
-
-		/// <summary>
-		/// 
-		/// </summary>
-		void CreateBackdropStars();
-
-		/// <summary>
-		/// 
-		/// </summary>
-		void CreateIntroSequenceSlides();
-#pragma endregion
-
-#pragma region Drawing
-		/// <summary>
-		/// 
-		/// </summary>
-		void DrawFadeScreen();
-
-		/// <summary>
-		/// 
-		/// </summary>
-
-		/// <summary>
-		/// 
-		/// </summary>
 #pragma endregion
 
 		/// <summary>

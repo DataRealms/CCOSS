@@ -156,7 +156,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TitleScreen::DrawTitleScreenScene() {
-		m_Nebula.Draw(g_FrameMan.GetBackBuffer32(), Box(), m_ScrollOffset * m_BackdropScrollRatio);
+		Vector nebulaPos = Vector(0, m_ScrollOffset.GetY() * m_BackdropScrollRatio);
+		if (m_Nebula.GetBitmap()->w != g_FrameMan.GetResX()) { nebulaPos.SetX(static_cast<float>((m_Nebula.GetBitmap()->w - g_FrameMan.GetResX()) / 2)); }
+		m_Nebula.Draw(g_FrameMan.GetBackBuffer32(), Box(), nebulaPos);
 
 		for (const Star &star : m_BackdropStars) {
 			int intensity = star.Intensity + RandomNum(0, (star.Size == Star::StarSize::StarSmall) ? 35 : 70);

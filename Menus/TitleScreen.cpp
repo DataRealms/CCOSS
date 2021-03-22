@@ -35,8 +35,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void TitleScreen::Create() {
+	void TitleScreen::Create(GUIFont *introTextFont) {
 		m_GUIBackBuffer = AllegroBitmap(g_FrameMan.GetBackBuffer32());
+
+		m_IntroTextFont = introTextFont;
 
 		m_FadeScreen = create_bitmap_ex(32, g_FrameMan.GetResX(), g_FrameMan.GetResY());
 		clear_to_color(m_FadeScreen, 0);
@@ -298,7 +300,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TitleScreen::UpdateIntroSlideshowSequence(bool skipSection) {
-		int textPosY = 0;
+		m_SlideshowSlideText.clear();
 		switch (m_IntroSequenceState) {
 			case IntroSequence::SlideshowFadeIn:
 				if (m_SectionSwitch) {
@@ -335,11 +337,7 @@ namespace RTE {
 					m_SlideFadeOutDuration = 0.5F;
 					m_SectionDuration = 11.4F - static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
 				}
-				textPosY = (g_FrameMan.GetResY() / 2) + (m_IntroSlides.at(m_IntroSequenceState - IntroSequence::ShowSlide1)->h / 2) + 12;
-				if (m_SectionElapsedTime > 1.25F) {
-					//g_FrameMan.GetLargeFont()->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, textPosY, "At the end of humanity's darkest century...", GUIFont::Centre);
-				}
-
+				if (m_SectionElapsedTime > 1.25F) { m_SlideshowSlideText = "At the end of humanity's darkest century..."; }
 				if (m_SectionElapsedTime >= m_SectionDuration) {
 					m_IntroSequenceState = IntroSequence::ShowSlide2;
 					m_SectionSwitch = true;
@@ -352,10 +350,7 @@ namespace RTE {
 					m_SectionDuration = 17.3F - static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
 					m_SectionSwitch = false;
 				}
-				textPosY = (g_FrameMan.GetResY() / 2) + (m_IntroSlides.at(m_IntroSequenceState - IntroSequence::ShowSlide1)->h / 2) + 12;
-				if (m_SectionElapsedTime < m_SectionDuration - 1.75F) {
-					//g_FrameMan.GetLargeFont()->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, textPosY, "...a curious symbiosis between man and machine emerged.", GUIFont::Centre);
-				}
+				if (m_SectionElapsedTime < m_SectionDuration - 1.75F) { m_SlideshowSlideText = "...a curious symbiosis between man and machine emerged."; }
 				if (m_SectionElapsedTime >= m_SectionDuration) {
 					m_IntroSequenceState = IntroSequence::ShowSlide3;
 					m_SectionSwitch = true;
@@ -368,11 +363,10 @@ namespace RTE {
 					m_SectionDuration = 25.1F - static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
 					m_SectionSwitch = false;
 				}
-				textPosY = (g_FrameMan.GetResY() / 2) + (m_IntroSlides.at(m_IntroSequenceState - IntroSequence::ShowSlide1)->h / 2) + 12;
 				if (m_SectionProgress < 0.49F) {
-					//g_FrameMan.GetLargeFont()->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, textPosY, "This eventually enabled humans to leave their natural bodies...", GUIFont::Centre);
+					m_SlideshowSlideText = "This eventually enabled humans to leave their natural bodies...";
 				} else if (m_SectionProgress > 0.51F) {
-					//g_FrameMan.GetLargeFont()->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, textPosY, "...and to free their minds from obsolete constraints.", GUIFont::Centre);
+					m_SlideshowSlideText = "...and to free their minds from obsolete constraints.";
 				}
 				if (m_SectionElapsedTime >= m_SectionDuration) {
 					m_IntroSequenceState = IntroSequence::ShowSlide4;
@@ -386,8 +380,7 @@ namespace RTE {
 					m_SectionDuration = 31.3F - static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
 					m_SectionSwitch = false;
 				}
-				textPosY = (g_FrameMan.GetResY() / 2) + (m_IntroSlides.at(m_IntroSequenceState - IntroSequence::ShowSlide1)->h / 2) + 12;
-				//g_FrameMan.GetLargeFont()->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, textPosY, "With their brains sustained by artificial means, space travel also became feasible.", GUIFont::Centre);
+				m_SlideshowSlideText = "With their brains sustained by artificial means, space travel also became feasible.";
 				if (m_SectionElapsedTime >= m_SectionDuration) {
 					m_IntroSequenceState = IntroSequence::ShowSlide5;
 					m_SectionSwitch = true;
@@ -400,8 +393,7 @@ namespace RTE {
 					m_SectionDuration = 38.0F - static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
 					m_SectionSwitch = false;
 				}
-				textPosY = (g_FrameMan.GetResY() / 2) + (m_IntroSlides.at(m_IntroSequenceState - IntroSequence::ShowSlide1)->h / 2) + 12;
-				//g_FrameMan.GetLargeFont()->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, textPosY, "Other civilizations were encountered...", GUIFont::Centre);
+				m_SlideshowSlideText = "Other civilizations were encountered...";
 				if (m_SectionElapsedTime >= m_SectionDuration) {
 					m_IntroSequenceState = IntroSequence::ShowSlide6;
 					m_SectionSwitch = true;
@@ -414,8 +406,7 @@ namespace RTE {
 					m_SectionDuration = 44.1F - static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
 					m_SectionSwitch = false;
 				}
-				textPosY = (g_FrameMan.GetResY() / 2) + (m_IntroSlides.at(m_IntroSequenceState - IntroSequence::ShowSlide1)->h / 2) + 12;
-				//g_FrameMan.GetLargeFont()->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, textPosY, "...and peaceful intragalactic trade soon established.", GUIFont::Centre);
+				m_SlideshowSlideText = "...and peaceful intragalactic trade soon established.";
 				if (m_SectionElapsedTime >= m_SectionDuration) {
 					m_IntroSequenceState = IntroSequence::ShowSlide7;
 					m_SectionSwitch = true;
@@ -428,8 +419,7 @@ namespace RTE {
 					m_SectionDuration = 51.5F - static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
 					m_SectionSwitch = false;
 				}
-				textPosY = (g_FrameMan.GetResY() / 2) + (m_IntroSlides.at(m_IntroSequenceState - IntroSequence::ShowSlide1)->h / 2) + 12;
-				//g_FrameMan.GetLargeFont()->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, textPosY, "Now, the growing civilizations create a huge demand for resources...", GUIFont::Centre);
+				m_SlideshowSlideText = "Now, the growing civilizations create a huge demand for resources...";
 				if (m_SectionElapsedTime >= m_SectionDuration) {
 					m_IntroSequenceState = IntroSequence::ShowSlide8;
 					m_SectionSwitch = true;
@@ -442,13 +432,12 @@ namespace RTE {
 					m_SectionDuration = 64.5F - static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
 					m_SectionSwitch = false;
 				}
-				textPosY = (g_FrameMan.GetResY() / 2) + (m_IntroSlides.at(m_IntroSequenceState - IntroSequence::ShowSlide1)->h / 2) + 12;
 				if (m_SectionProgress < 0.30F) {
-					//g_FrameMan.GetLargeFont()->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, textPosY, "...which can only be satisfied by the ever-expanding frontier.", GUIFont::Centre);
+					m_SlideshowSlideText = "...which can only be satisfied by the ever-expanding frontier.";
 				} else if (m_SectionProgress > 0.33F && m_SectionProgress < 0.64F) {
-					//g_FrameMan.GetLargeFont()->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, textPosY, "Competition is brutal and anything goes in this galactic gold rush.", GUIFont::Centre);
+					m_SlideshowSlideText = "Competition is brutal and anything goes in this galactic gold rush.";
 				} else if (m_SectionProgress > 0.67F) {
-					//g_FrameMan.GetLargeFont()->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, textPosY, "You will now join it on a venture to an untapped planet...", GUIFont::Centre);
+					m_SlideshowSlideText = "You will now join it on a venture to an untapped planet...";
 				}
 				if (m_SectionElapsedTime >= m_SectionDuration) {
 					m_IntroSequenceState = IntroSequence::SlideshowEnd;
@@ -460,9 +449,7 @@ namespace RTE {
 					m_SectionDuration = 66.6F - static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
 					m_SectionSwitch = false;
 				}
-				if (m_SectionElapsedTime > 0.05F) {
-					//g_FrameMan.GetLargeFont()->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2, "Prepare to assume...", GUIFont::Centre);
-				}
+				//if (m_SectionElapsedTime > 0.05F) { m_SlideshowSlideText = "Prepare to assume..."; }
 				if (m_SectionElapsedTime >= m_SectionDuration) {
 					m_SectionSwitch = true;
 					m_IntroSequenceState = IntroSequence::GameLogoAppear;
@@ -511,7 +498,7 @@ namespace RTE {
 					m_ScrollOffset.SetY(static_cast<float>(m_PreMainMenuOffsetY));
 					g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccmenu.ogg", -1);
 				}
-				m_ScrollOffset.SetY(EaseOut(static_cast<float>(m_PreMainMenuOffsetY), static_cast<float>(m_MenuTopOffsetY), m_SectionProgress));
+				m_ScrollOffset.SetY(EaseOut(static_cast<float>(m_PreMainMenuOffsetY), 0, m_SectionProgress));
 				m_GameLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), EaseOut(120, 64, m_SectionProgress)));
 				if (m_SectionElapsedTime >= m_SectionDuration /*|| g_NetworkServer.IsServerModeEnabled()*/) {
 					m_SectionSwitch = true;
@@ -574,6 +561,8 @@ namespace RTE {
 		m_FadeAmount = static_cast<int>((m_SectionElapsedTime < m_SlideFadeInDuration) ? EaseOut(0, 255.0F, m_SectionElapsedTime / m_SlideFadeInDuration) : EaseIn(255.0F, 0, (m_SectionElapsedTime - m_SectionDuration + m_SlideFadeOutDuration) / m_SlideFadeOutDuration));
 		set_trans_blender(m_FadeAmount, m_FadeAmount, m_FadeAmount, m_FadeAmount);
 		draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_IntroSlides.at(slide), slidePos.GetFloorIntX(), slidePos.GetFloorIntY());
+
+		if (!m_SlideshowSlideText.empty()) { m_IntroTextFont->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, (g_FrameMan.GetResY() / 2) + (m_IntroSlides.at(m_IntroSequenceState - IntroSequence::ShowSlide1)->h / 2) + 12, m_SlideshowSlideText, GUIFont::Centre); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -585,11 +574,11 @@ namespace RTE {
 		bool drawFadeScreen = false;
 
 		if (m_IntroSequenceState >= IntroSequence::DataRealmsLogoFadeIn && m_IntroSequenceState <= IntroSequence::DataRealmsLogoFadeOut) {
-			draw_sprite(g_FrameMan.GetBackBuffer32(), m_DataRealmsLogo, (g_FrameMan.GetResX() - m_DataRealmsLogo->w) / 2 - 5, (g_FrameMan.GetResY() - m_DataRealmsLogo->h) / 2);
+			draw_sprite(g_FrameMan.GetBackBuffer32(), m_DataRealmsLogo, (g_FrameMan.GetResX() - m_DataRealmsLogo->w) / 2, (g_FrameMan.GetResY() - m_DataRealmsLogo->h) / 2);
 
 			std::string copyrightNotice(64, '\0');
 			std::snprintf(copyrightNotice.data(), copyrightNotice.size(), "Cortex Command is TM and %c 2017 Data Realms, LLC", -35);
-			//m_IntroTextFont.DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() - m_IntroTextFont.GetFontHeight(), copyrightNotice, GUIFont::Centre);
+			m_IntroTextFont->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() - m_IntroTextFont->GetFontHeight(), copyrightNotice, GUIFont::Centre);
 			drawFadeScreen = true;
 		} else if (m_IntroSequenceState >= IntroSequence::FmodLogoFadeIn && m_IntroSequenceState <= IntroSequence::FmodLogoFadeOut) {
 			draw_sprite(g_FrameMan.GetBackBuffer32(), m_FmodLogo, (g_FrameMan.GetResX() - m_FmodLogo->w) / 2, (g_FrameMan.GetResY() - m_FmodLogo->h) / 2);
@@ -598,6 +587,8 @@ namespace RTE {
 			drawFadeScreen = true;
 		} else if (m_IntroSequenceState >= IntroSequence::ShowSlide1 && m_IntroSequenceState <= ShowSlide8) {
 			DrawSlideshowSlide();
+		} else if (m_IntroSequenceState == IntroSequence::SlideshowEnd) {
+			m_IntroTextFont->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2, "Prepare to assume...", GUIFont::Centre);
 		}
 
 		if (drawFadeScreen && m_FadeAmount > 0) {

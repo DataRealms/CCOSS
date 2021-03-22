@@ -71,12 +71,12 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a TitleScreen object in system memory.
 		/// </summary>
-		TitleScreen() { Clear(); Create(); }
+		explicit TitleScreen(GUIFont *introTextFont) { Clear(); Create(introTextFont); }
 
 		/// <summary>
 		/// 
 		/// </summary>
-		void Create();
+		void Create(GUIFont *introTextFont);
 #pragma endregion
 
 #pragma region Destruction
@@ -124,6 +124,9 @@ namespace RTE {
 		};
 
 		AllegroBitmap m_GUIBackBuffer; //!<
+
+		GUIFont *m_IntroTextFont; //!<
+		std::string m_SlideshowSlideText; //!<
 
 		IntroSequence m_IntroSequenceState; //!<
 		bool m_FinishedPlayingIntro; //!<

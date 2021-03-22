@@ -84,6 +84,18 @@ namespace RTE {
 		m_IntroSlides.at(5) = ContentFile("Base.rte/GUIs/Title/Intro/IntroSlideF.png").GetAsBitmap(COLORCONV_NONE, false);
 		m_IntroSlides.at(6) = ContentFile("Base.rte/GUIs/Title/Intro/IntroSlideG.png").GetAsBitmap(COLORCONV_NONE, false);
 		m_IntroSlides.at(7) = ContentFile("Base.rte/GUIs/Title/Intro/IntroSlideH.png").GetAsBitmap(COLORCONV_NONE, false);
+
+		for (int i = 0; i < m_IntroSlides.size(); ++i) {
+			if (m_IntroSlides.at(i)->h > g_FrameMan.GetResY()) {
+				float targetHeight = static_cast<float>(g_FrameMan.GetResY()) - 80.0F;
+				float targetWidth = static_cast<float>(m_IntroSlides.at(i)->w) * (targetHeight / static_cast<float>(m_IntroSlides.at(i)->h));
+				BITMAP *resizeBitmap = create_bitmap_ex(32, static_cast<int>(targetWidth), static_cast<int>(targetHeight));
+				// TODO: implement resizing with bilinear/whatever filtering because nearest neighbor looks pretty bad.
+				stretch_blit(m_IntroSlides.at(i), resizeBitmap, 0, 0, m_IntroSlides.at(i)->w, m_IntroSlides.at(i)->h, 0, 0, resizeBitmap->w, resizeBitmap->h);
+				destroy_bitmap(m_IntroSlides.at(i));
+				m_IntroSlides.at(i) = resizeBitmap;
+			}
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

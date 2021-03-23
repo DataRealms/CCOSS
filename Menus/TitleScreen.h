@@ -178,6 +178,9 @@ namespace RTE {
 		BITMAP *m_DataRealmsLogo; //!<
 		BITMAP *m_FmodLogo; //!<
 
+		MOSParticle m_PreGameLogoText; //!<
+		MOSParticle m_PreGameLogoTextGlow; //!<
+
 		MOSParticle m_GameLogo; //!<
 		MOSParticle m_GameLogoGlow; //!<
 

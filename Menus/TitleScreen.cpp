@@ -62,6 +62,8 @@ namespace RTE {
 		m_DataRealmsLogo = ContentFile("Base.rte/GUIs/Title/Intro/DRLogo5x.png").GetAsBitmap(COLORCONV_NONE, false);
 		m_FmodLogo = ContentFile("Base.rte/GUIs/Title/Intro/FMODLogo.png").GetAsBitmap(COLORCONV_NONE, false);
 
+		m_PreGameLogoText.Create(ContentFile("Base.rte/GUIs/Title/Intro/PreTitle.png"));
+		m_PreGameLogoTextGlow.Create(ContentFile("Base.rte/GUIs/Title/Intro/PreTitleGlow.png"));
 		m_GameLogo.Create(ContentFile("Base.rte/GUIs/Title/Title.png"));
 		m_GameLogoGlow.Create(ContentFile("Base.rte/GUIs/Title/TitleGlow.png"));
 		m_Planet.Create(ContentFile("Base.rte/GUIs/Title/Planet.png"));
@@ -70,6 +72,7 @@ namespace RTE {
 		m_Nebula.Create(ContentFile("Base.rte/GUIs/Title/Nebula.png"), false, Vector(), false, false, Vector(0, -1.0F));
 
 		set_write_alpha_blender();
+		draw_trans_sprite(m_PreGameLogoText.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/Intro/PreTitleAlpha.png").GetAsBitmap(COLORCONV_NONE, false), 0, 0);
 		draw_trans_sprite(m_GameLogo.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/TitleAlpha.png").GetAsBitmap(COLORCONV_NONE, false), 0, 0);
 		draw_trans_sprite(m_Planet.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/PlanetAlpha.png").GetAsBitmap(COLORCONV_NONE, false), 0, 0);
 		draw_trans_sprite(m_Moon.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/MoonAlpha.png").GetAsBitmap(COLORCONV_NONE, false), 0, 0);
@@ -449,7 +452,8 @@ namespace RTE {
 					m_SectionDuration = 66.6F - static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
 					m_SectionSwitch = false;
 				}
-				//if (m_SectionElapsedTime > 0.05F) { m_SlideshowSlideText = "Prepare to assume..."; }
+				m_PreGameLogoText.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), static_cast<float>(g_FrameMan.GetResY() / 2)));
+				m_PreGameLogoTextGlow.SetPos(m_PreGameLogoText.GetPos());
 				if (m_SectionElapsedTime >= m_SectionDuration) {
 					m_SectionSwitch = true;
 					m_IntroSequenceState = IntroSequence::GameLogoAppear;
@@ -588,9 +592,11 @@ namespace RTE {
 		} else if (m_IntroSequenceState >= IntroSequence::ShowSlide1 && m_IntroSequenceState <= ShowSlide8) {
 			DrawSlideshowSlide();
 		} else if (m_IntroSequenceState == IntroSequence::SlideshowEnd) {
-			m_IntroTextFont->DrawAligned(&m_GUIBackBuffer, g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2, "Prepare to assume...", GUIFont::Centre);
+			m_PreGameLogoText.Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawAlpha);
+			int blendAmount = 220 + RandomNum(-35, 35);
+			set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
+			m_PreGameLogoTextGlow.Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawTrans);
 		}
-
 		if (drawFadeScreen && m_FadeAmount > 0) {
 			set_trans_blender(m_FadeAmount, m_FadeAmount, m_FadeAmount, m_FadeAmount);
 			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_FadeScreen, 0, 0);

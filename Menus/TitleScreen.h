@@ -91,6 +91,20 @@ namespace RTE {
 		void Destroy();
 #pragma endregion
 
+#pragma region Getters and Setters
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		TitleTransition GetTitleTransitionState() const { return m_TitleTransitionState; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="newState"></param>
+		void SetTitleTransitionState(TitleTransition newState) { if (newState != m_TitleTransitionState) { m_TitleTransitionState = newState; m_SectionSwitch = true; } }
+#pragma endregion
+
 #pragma region Concrete Methods
 		/// <summary>
 		/// 

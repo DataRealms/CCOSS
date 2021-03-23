@@ -25,14 +25,14 @@
 #include "PerformanceMan.h"
 #include "PrimitiveMan.h"
 #include "UInputMan.h"
+#include "MenuMan.h"
 
 #include "LoadingGUI.h"
 #include "MainMenuGUI.h"
 #include "ScenarioGUI.h"
-#include "MetagameGUI.h"
+#include "TitleScreen.h"
 
 #include "DataModule.h"
-#include "Controller.h"
 
 #include "MultiplayerServerLobby.h"
 #include "NetworkServer.h"
@@ -60,10 +60,6 @@ int g_StationOffsetY;
 
 bool g_HadResolutionChange = false; //!< Need this so we can restart PlayIntroTitle without an endless loop or leaks. Will be set true by ReinitMainMenu and set back to false at the end of the switch.
 
-MainMenuGUI *g_pMainMenuGUI = 0;
-ScenarioGUI *g_pScenarioGUI = 0;
-Controller *g_pMainMenuController = 0;
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /// <summary>
@@ -71,45 +67,6 @@ Controller *g_pMainMenuController = 0;
 /// </summary>
 void QuitHandler(void) { g_Quit = true; }
 END_OF_FUNCTION(QuitHandler)
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/// <summary>
-/// Load and initialize the Main Menu.
-/// </summary>
-void InitMainMenu() {
-    g_FrameMan.LoadPalette("Base.rte/palette.bmp");
-
-    // Create the main menu interface
-	g_pMainMenuGUI = new MainMenuGUI();
-    g_pMainMenuController = new Controller(Controller::CIM_PLAYER, 0);
-    g_pMainMenuController->SetTeam(0);
-    g_pMainMenuGUI->Create(g_pMainMenuController);
-    // As well as the Scenario setup menu interface
-	g_pScenarioGUI = new ScenarioGUI();
-    g_pScenarioGUI->Create(g_pMainMenuController);
-    // And the Metagame GUI too
-    g_MetaMan.GetGUI()->Create(g_pMainMenuController);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/// <summary>
-/// Destroy the Main Menu and initialize it again after a resolution change. Must be done otherwise the GUIs retain the original resolution settings and become all screwy.
-/// </summary>
-void ReinitMainMenu() {
-	g_pMainMenuGUI->Destroy();
-	g_pMainMenuController->Reset();
-	g_pScenarioGUI->Destroy();
-	g_MetaMan.GetGUI()->Destroy();
-
-	g_ConsoleMan.Destroy();
-	g_ConsoleMan.Initialize();
-
-	InitMainMenu();
-	g_FrameMan.DestroyTempBackBuffers();
-	g_HadResolutionChange = true;
-}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -153,7 +110,7 @@ bool ResetActivity() {
 		g_InActivity = false;
 		g_ActivityMan.PauseActivity();
 		g_ConsoleMan.SetEnabled(true);
-		g_IntroState = MAINTOSCENARIO;
+		//g_IntroState = MAINTOSCENARIO;
 		return false;
 	}
     return true;
@@ -208,6 +165,7 @@ void EnterMultiplayerLobby() {
 /// </summary>
 /// <returns>Whether a valid editor name was passed in and set to be launched.</returns>
 bool EnterEditorActivity(const std::string &editorToEnter) {
+	/*
 	if (editorToEnter == "ActorEditor") {
 		g_pMainMenuGUI->StartActorEditor();
 	} else if (editorToEnter == "GibEditor") {
@@ -224,6 +182,7 @@ bool EnterEditorActivity(const std::string &editorToEnter) {
 		g_LaunchIntoEditor = false;
 		return false;
 	}
+	*/
 	return true;
 }
 
@@ -234,18 +193,36 @@ bool EnterEditorActivity(const std::string &editorToEnter) {
 /// </summary>
 /// <returns></returns>
 bool PlayIntroTitle() {
-    // Untrap the mouse and keyboard
-    g_UInputMan.DisableKeys(false);
-    g_UInputMan.TrapMousePos(false);
+	// Untrap the mouse and keyboard
+	g_UInputMan.DisableKeys(false);
+	g_UInputMan.TrapMousePos(false);
 
 	// Don't stop the music if reiniting after a resolution change
 	if (!g_FrameMan.ResolutionChanged()) { g_AudioMan.StopAll(); }
 
+	//g_FrameMan.ClearBackBuffer32();
+	//g_FrameMan.FlipFrameBuffers();
 
+	while (!g_Quit && /*g_IntroState != END &&*/ !g_ResumeActivity) {
+		g_MenuMan.Update();
 
+		if (g_NetworkServer.IsServerModeEnabled()) { g_NetworkServer.Update(); }
 
+		g_MenuMan.Draw();
 
+		////////////////////////////////
+		// Additional user input and skipping handling
+		/*
+		if (g_IntroState >= FADEIN && g_IntroState <= SHOWSLIDE8 && keyPressed) {
+			g_IntroState = MENUAPPEAR;
+			sectionSwitch = true;
 
+			scrollOffset.m_Y = preMenuYOffset;
+			orbitRotation = c_HalfPI - c_EighthPI;
+
+			orbitRotation = -c_PI * 1.20;
+		}
+		*/
 	}
 
 	if (g_FrameMan.ResolutionChanged()) { PlayIntroTitle(); }
@@ -325,14 +302,14 @@ bool RunGameLoop() {
 				g_TimerMan.PauseSim(true);
 				// If we're not in a metagame, then show main menu
 				if (g_MetaMan.GameInProgress()) {
-					g_IntroState = CAMPAIGNFADEIN;
+					//g_IntroState = CAMPAIGNFADEIN;
 				} else {
 					const Activity *activity = g_ActivityMan.GetActivity();
 					// If we edited something then return to main menu instead of scenario menu player will probably switch to area/scene editor.
 					if (activity && activity->GetPresetName() == "None") {
-						g_IntroState = MENUAPPEAR;
+						//g_IntroState = MENUAPPEAR;
 					} else {
-						g_IntroState = MAINTOSCENARIO;
+						//g_IntroState = MAINTOSCENARIO;
 					}
 				}
 				PlayIntroTitle();
@@ -465,6 +442,7 @@ int main(int argc, char **argv) {
     g_ActivityMan.Initialize();
     g_MovableMan.Initialize();
     g_MetaMan.Initialize();
+	g_MenuMan.Initialize();
 
 	HandleMainArgs(argc, argv);
 
@@ -481,7 +459,7 @@ int main(int argc, char **argv) {
 	}
 
 	g_LoadingGUI.InitLoadingScreen();
-	InitMainMenu();
+	//g_MenuMan.InitializeMenus();
 
 	g_FrameMan.PrintForcedGfxDriverMessage();
 
@@ -502,11 +480,11 @@ int main(int argc, char **argv) {
 			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetPreset(InputPreset::PRESET_WASDKEYS);
 			// Start the specified editor activity.
 			if (!EnterEditorActivity(g_EditorToLaunch)) {
-				g_IntroState = g_SettingsMan.SkipIntro() ? MENUAPPEAR : START;
+				//g_IntroState = g_SettingsMan.SkipIntro() ? MENUAPPEAR : START;
 				PlayIntroTitle();
 			}
 		} else if (!g_SettingsMan.LaunchIntoActivity()) {
-			g_IntroState = g_SettingsMan.SkipIntro() ? MENUAPPEAR : START;
+			//g_IntroState = g_SettingsMan.SkipIntro() ? MENUAPPEAR : START;
 			PlayIntroTitle();
 		}
 	} else {

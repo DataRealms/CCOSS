@@ -744,17 +744,17 @@ float BuyMenuGUI::GetTotalOrderCost()
 
 
 float BuyMenuGUI::GetTotalOrderMass() const {
-	float totalMass = 0;
+	float totalMass = 0.0F;
 
-	for (auto cartItem : *m_pCartList->GetItemList()) {
-		totalMass += dynamic_cast<const MOSprite*>(cartItem->m_pEntity)->GetMass();
+	for (const GUIListPanel::Item *cartItem : *m_pCartList->GetItemList()) {
+		const MovableObject *itemAsMO = dynamic_cast<const MovableObject*>(cartItem->m_pEntity);
+		if(itemAsMO) {
+			totalMass += itemAsMO->GetMass();
+		} else {
+			RTEAbort("Tried to add mass of a non-MO object to order total!");
+		}
 	}
 
-	/*
-	for (vector<GUIListPanel::Item*>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr) {
-		totalMass += dynamic_cast<const MOSprite*>((*itr)->m_pEntity)->GetMass();
-	}
-	*/
 	return totalMass;
 }
 

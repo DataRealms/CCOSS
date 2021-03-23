@@ -357,9 +357,9 @@ LUAENTITYCAST(PEmitter)
 #define PROPERTYOWNERSHIPSAFETYFAKER(OBJECTTYPE, PROPERTYTYPE, SETTERFUNCTION) \
     void OBJECTTYPE##SETTERFUNCTION(OBJECTTYPE *luaSelfObject, PROPERTYTYPE *objectToSet) { \
         if (objectToSet) { \
-            luaSelfObject->##SETTERFUNCTION(dynamic_cast<PROPERTYTYPE *>(objectToSet->Clone())); \
+            luaSelfObject->SETTERFUNCTION(dynamic_cast<PROPERTYTYPE *>(objectToSet->Clone())); \
         } else { \
-            luaSelfObject->##SETTERFUNCTION(nullptr); \
+            luaSelfObject->SETTERFUNCTION(nullptr); \
         } \
     } \
 

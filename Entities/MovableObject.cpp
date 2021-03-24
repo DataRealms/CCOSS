@@ -265,13 +265,9 @@ int MovableObject::Create(const MovableObject &reference)
 
 int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-	if (propName == "Mass")
-	{
+	if (propName == "Mass") {
 		reader >> m_Mass;
-		if (m_Mass == 0)
-			m_Mass = 0.0001;
-	}
-	else if (propName == "Velocity")
+	} else if (propName == "Velocity")
 		reader >> m_Vel;
 	else if (propName == "Scale")
 		reader >> m_Scale;

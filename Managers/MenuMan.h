@@ -8,7 +8,7 @@
 namespace RTE {
 
 	class Controller;
-	class LoadingGUI;
+	class LoadingScreen;
 	class TitleScreen;
 	class MainMenuGUI;
 	class ScenarioGUI;
@@ -62,7 +62,7 @@ namespace RTE {
 
 		std::unique_ptr<Controller> m_MenuController; //!<
 
-		std::unique_ptr<LoadingGUI> m_LoadingScreen; //!<
+		std::unique_ptr<LoadingScreen> m_LoadingScreen; //!<
 		std::unique_ptr<TitleScreen> m_TitleScreen; //!<
 		std::unique_ptr<MainMenuGUI> m_MainMenu; //!<
 		std::unique_ptr<ScenarioGUI> m_ScenarioMenu; //!<

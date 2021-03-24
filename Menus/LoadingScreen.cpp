@@ -1,4 +1,4 @@
-#include "LoadingGUI.h"
+#include "LoadingScreen.h"
 #include "Writer.h"
 #include "SceneLayer.h"
 #include "SettingsMan.h"
@@ -15,7 +15,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingGUI::Clear() {
+	void LoadingScreen::Clear() {
 		m_ControlManager = nullptr;
 		m_GUIInput = nullptr;
 		m_GUIScreen = nullptr;
@@ -27,7 +27,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingGUI::Create() {
+	void LoadingScreen::Create() {
 		g_FrameMan.LoadPalette("Base.rte/palette.bmp");
 		g_FrameMan.ClearBackBuffer32();
 
@@ -71,7 +71,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingGUI::CreateProgressReportListbox() {
+	void LoadingScreen::CreateProgressReportListbox() {
 		// Place and clear the sectionProgress box
 		dynamic_cast<GUICollectionBox *>(m_ControlManager->GetControl("root"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 		GUIListBox *listBox = dynamic_cast<GUIListBox *>(m_ControlManager->GetControl("ProgressBox"));
@@ -96,35 +96,35 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingGUI::Destroy() {
+	void LoadingScreen::Destroy() {
 		if (m_ProgressListboxBitmap) { destroy_bitmap(m_ProgressListboxBitmap); }
 		Clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingGUI::LoadingSplashProgressReport(const std::string &reportString, bool newItem) {
+	void LoadingScreen::LoadingSplashProgressReport(const std::string &reportString, bool newItem) {
 		if (System::IsLoggingToCLI()) { System::PrintLoadingToCLI(reportString, newItem); }
 
 		if (newItem) {
 			// Write out the last line to the log file before starting a new one and scroll the bitmap upwards.
-			if (g_LoadingGUI.m_LoadingLogWriter) { *g_LoadingGUI.m_LoadingLogWriter << reportString << "\n"; }
-			if (g_LoadingGUI.m_ProgressListboxBitmap) { blit(g_LoadingGUI.m_ProgressListboxBitmap, g_LoadingGUI.m_ProgressListboxBitmap, 2, 12, 2, 2, g_LoadingGUI.m_ProgressListboxBitmap->w - 3, g_LoadingGUI.m_ProgressListboxBitmap->h - 12); }
+			if (g_LoadingScreen.m_LoadingLogWriter) { *g_LoadingScreen.m_LoadingLogWriter << reportString << "\n"; }
+			if (g_LoadingScreen.m_ProgressListboxBitmap) { blit(g_LoadingScreen.m_ProgressListboxBitmap, g_LoadingScreen.m_ProgressListboxBitmap, 2, 12, 2, 2, g_LoadingScreen.m_ProgressListboxBitmap->w - 3, g_LoadingScreen.m_ProgressListboxBitmap->h - 12); }
 		}
 
-		if (g_LoadingGUI.m_ProgressListboxBitmap) {
-			AllegroBitmap drawBitmap(g_LoadingGUI.m_ProgressListboxBitmap);
+		if (g_LoadingScreen.m_ProgressListboxBitmap) {
+			AllegroBitmap drawBitmap(g_LoadingScreen.m_ProgressListboxBitmap);
 
 			// Clear current line.
-			rectfill(g_LoadingGUI.m_ProgressListboxBitmap, 2, g_LoadingGUI.m_ProgressListboxBitmap->h - 12, g_LoadingGUI.m_ProgressListboxBitmap->w - 3, g_LoadingGUI.m_ProgressListboxBitmap->h - 3, 54);
+			rectfill(g_LoadingScreen.m_ProgressListboxBitmap, 2, g_LoadingScreen.m_ProgressListboxBitmap->h - 12, g_LoadingScreen.m_ProgressListboxBitmap->w - 3, g_LoadingScreen.m_ProgressListboxBitmap->h - 3, 54);
 			// Print new line
-			g_FrameMan.GetSmallFont()->DrawAligned(&drawBitmap, 5, g_LoadingGUI.m_ProgressListboxBitmap->h - 12, reportString.c_str(), GUIFont::Left);
+			g_FrameMan.GetSmallFont()->DrawAligned(&drawBitmap, 5, g_LoadingScreen.m_ProgressListboxBitmap->h - 12, reportString.c_str(), GUIFont::Left);
 			// DrawAligned - MaxWidth is useless here, so we're just drawing lines manually.
-			vline(g_LoadingGUI.m_ProgressListboxBitmap, g_LoadingGUI.m_ProgressListboxBitmap->w - 2, g_LoadingGUI.m_ProgressListboxBitmap->h - 12, g_LoadingGUI.m_ProgressListboxBitmap->h - 2, 33);
-			vline(g_LoadingGUI.m_ProgressListboxBitmap, g_LoadingGUI.m_ProgressListboxBitmap->w - 1, g_LoadingGUI.m_ProgressListboxBitmap->h - 12, g_LoadingGUI.m_ProgressListboxBitmap->h - 2, 33);
+			vline(g_LoadingScreen.m_ProgressListboxBitmap, g_LoadingScreen.m_ProgressListboxBitmap->w - 2, g_LoadingScreen.m_ProgressListboxBitmap->h - 12, g_LoadingScreen.m_ProgressListboxBitmap->h - 2, 33);
+			vline(g_LoadingScreen.m_ProgressListboxBitmap, g_LoadingScreen.m_ProgressListboxBitmap->w - 1, g_LoadingScreen.m_ProgressListboxBitmap->h - 12, g_LoadingScreen.m_ProgressListboxBitmap->h - 2, 33);
 
 			// Draw onto current frame buffer.
-			blit(g_LoadingGUI.m_ProgressListboxBitmap, g_FrameMan.GetBackBuffer32(), 0, 0, g_LoadingGUI.m_PosX, g_LoadingGUI.m_PosY, g_LoadingGUI.m_ProgressListboxBitmap->w, g_LoadingGUI.m_ProgressListboxBitmap->h);
+			blit(g_LoadingScreen.m_ProgressListboxBitmap, g_FrameMan.GetBackBuffer32(), 0, 0, g_LoadingScreen.m_PosX, g_LoadingScreen.m_PosY, g_LoadingScreen.m_ProgressListboxBitmap->w, g_LoadingScreen.m_ProgressListboxBitmap->h);
 
 			g_FrameMan.FlipFrameBuffers();
 		}
@@ -132,17 +132,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingGUI::GUIControlManagerDeleter::operator()(GUIControlManager *ptr) const { ptr->Destroy(); }
+	void LoadingScreen::GUIControlManagerDeleter::operator()(GUIControlManager *ptr) const { ptr->Destroy(); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingGUI::AllegroInputDeleter::operator()(AllegroInput *ptr) const { ptr->Destroy(); }
+	void LoadingScreen::AllegroInputDeleter::operator()(AllegroInput *ptr) const { ptr->Destroy(); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingGUI::AllegroScreenDeleter::operator()(AllegroScreen *ptr) const { ptr->Destroy(); }
+	void LoadingScreen::AllegroScreenDeleter::operator()(AllegroScreen *ptr) const { ptr->Destroy(); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingGUI::WriterDeleter::operator()(Writer *ptr) const { ptr->EndWrite(); }
+	void LoadingScreen::WriterDeleter::operator()(Writer *ptr) const { ptr->EndWrite(); }
 }

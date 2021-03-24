@@ -8,7 +8,7 @@
 #include "TitleScreen.h"
 #include "MainMenuGUI.h"
 #include "ScenarioGUI.h"
-#include "LoadingGUI.h"
+#include "LoadingScreen.h"
 
 extern bool g_ResumeActivity;
 extern bool g_ResetActivity;
@@ -30,7 +30,7 @@ namespace RTE {
 		m_TitleScreen = std::make_unique<TitleScreen>(m_MainMenu->GetGUIControlManager()->GetSkin()->GetFont("fatfont.png"));
 
 		if (initLoadingScreen) {
-			m_LoadingScreen = std::make_unique<LoadingGUI>();
+			m_LoadingScreen = std::make_unique<LoadingScreen>();
 			g_PresetMan.LoadAllDataModules();
 			m_LoadingScreen->Destroy();
 			m_LoadingScreen.reset();

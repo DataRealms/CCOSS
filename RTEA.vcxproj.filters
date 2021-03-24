@@ -423,9 +423,6 @@
     <ClInclude Include="GUI\Interface.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Menus\LoadingGUI.h">
-      <Filter>Menus</Filter>
-    </ClInclude>
     <ClInclude Include="System\Constants.h">
       <Filter>System</Filter>
     </ClInclude>
@@ -488,6 +485,9 @@
     </ClInclude>
     <ClInclude Include="Managers\MenuMan.h">
       <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\LoadingScreen.h">
+      <Filter>Menus</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -876,9 +876,6 @@
     <ClCompile Include="System\RTEError.cpp">
       <Filter>System</Filter>
     </ClCompile>
-    <ClCompile Include="Menus\LoadingGUI.cpp">
-      <Filter>Menus</Filter>
-    </ClCompile>
     <ClCompile Include="System\Controller.cpp">
       <Filter>System</Filter>
     </ClCompile>
@@ -897,7 +894,7 @@
     <ClCompile Include="Entities\SoundContainer.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
-	  <ClCompile Include="Entities\SoundSet.cpp">
+    <ClCompile Include="Entities\SoundSet.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="System\Atom.cpp">
@@ -932,6 +929,9 @@
     </ClCompile>
     <ClCompile Include="Managers\MenuMan.cpp">
       <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\LoadingScreen.cpp">
+      <Filter>Menus</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

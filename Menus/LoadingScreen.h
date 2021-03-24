@@ -1,9 +1,9 @@
-#ifndef _LOADINGGUI_
-#define _LOADINGGUI_
+#ifndef _RTELOADINGSCREEN_
+#define _RTELOADINGSCREEN_
 
 #include "Singleton.h"
 
-#define g_LoadingGUI LoadingGUI::Instance()
+#define g_LoadingScreen LoadingScreen::Instance()
 
 namespace RTE {
 
@@ -15,15 +15,15 @@ namespace RTE {
 	/// <summary>
 	/// Represents the loading screen GUI when starting the game.
 	/// </summary>
-	class LoadingGUI : public Singleton<LoadingGUI> {
+	class LoadingScreen : public Singleton<LoadingScreen> {
 
 	public:
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a LoadingGUI object in system memory.
+		/// Constructor method used to instantiate a LoadingScreen object in system memory.
 		/// </summary>
-		LoadingGUI() { Clear(); Create(); }
+		LoadingScreen() { Clear(); Create(); }
 
 		/// <summary>
 		/// Creates the loading screen GUI and the log writer, then proceeds loading all the DataModules.
@@ -39,7 +39,7 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Destroys and resets (through Clear()) the LoadingGUI object.
+		/// Destroys and resets (through Clear()) the LoadingScreen object.
 		/// </summary>
 		void Destroy();
 #pragma endregion
@@ -63,7 +63,7 @@ namespace RTE {
 		struct AllegroScreenDeleter { void operator()(AllegroScreen *ptr) const; };
 		struct WriterDeleter { void operator()(Writer *ptr) const; };
 
-		std::unique_ptr<GUIControlManager, GUIControlManagerDeleter> m_ControlManager; //!< Manager of the whole LoadingGUI.
+		std::unique_ptr<GUIControlManager, GUIControlManagerDeleter> m_ControlManager; //!< Manager of the whole LoadingScreen.
 		std::unique_ptr<AllegroInput, AllegroInputDeleter> m_GUIInput; //!< Input interface of this.
 		std::unique_ptr<AllegroScreen, AllegroScreenDeleter> m_GUIScreen; //!< Screen interface of this.
 		std::unique_ptr<Writer, WriterDeleter> m_LoadingLogWriter; //!< The Writer that generates the loading log.
@@ -75,13 +75,13 @@ namespace RTE {
 	private:
 
 		/// <summary>
-		/// Clears all the member variables of this LoadingGUI, effectively resetting the members of this abstraction level only.
+		/// Clears all the member variables of this LoadingScreen, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		LoadingGUI(const LoadingGUI &reference) = delete;
-		LoadingGUI &operator=(const LoadingGUI &rhs) = delete;
+		LoadingScreen(const LoadingScreen &reference) = delete;
+		LoadingScreen &operator=(const LoadingScreen &rhs) = delete;
 	};
 }
 #endif

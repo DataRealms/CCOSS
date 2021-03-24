@@ -135,10 +135,10 @@ public:
 // Method:          Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws the GUI to the back buffer.
-// Arguments:       The GUIScreen to draw to, overriding teh one passed in on constuction
+// Arguments:       The GUIScreen to draw to, overriding the one passed in on constuction
 
     void Draw(GUIScreen *pScreen);
-
+	
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          DrawMouse
@@ -303,8 +303,8 @@ public:
 
 private:
 
-    GUIScreen        *m_Screen;
-    GUIInput        *m_Input;
+    GUIScreen        *m_Screen; // Not owned.
+    GUIInput        *m_Input; // Not owned.
     GUISkin            *m_Skin;
     GUIManager        *m_GUIManager;
 

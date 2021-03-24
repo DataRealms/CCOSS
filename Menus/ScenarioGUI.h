@@ -40,7 +40,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate this ScenarioGUI object in system memory.
 		/// </summary>
-		explicit ScenarioGUI(Controller *controller);
+		ScenarioGUI();
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -65,7 +65,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates the state of this Menu each frame.
 		/// </summary>
-		void Update();
+		ScenarioUpdateResult Update();
 
 		/// <summary>
 		/// Draws the menu.
@@ -113,8 +113,6 @@ namespace RTE {
 			DisabledTeam = Activity::Teams::MaxTeamCount,
 			TeamRowCount
 		};
-
-		Controller *m_Controller; //!< The Controller which controls this menu. Not owned.
 
 		std::unique_ptr<GUIScreen> m_GUIScreen; //!< GUI Screen for use by the in-game GUI.
 		std::unique_ptr<GUIInput> m_GUIInput; //!< Input controller.

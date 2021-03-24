@@ -27,9 +27,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	ScenarioGUI::ScenarioGUI(Controller *controller) : m_Controller(controller) {
-		RTEAssert(m_Controller, "No controller sent to ScenarioGUI on creation!");
-
+	ScenarioGUI::ScenarioGUI() {
 		m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer32());
 		m_GUIInput = std::make_unique<AllegroInput>(-1, true);
 		m_ScenarioGUIController = std::make_unique<GUIControlManager>();
@@ -880,12 +878,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ScenarioGUI::Update() {
-		m_Controller->Update();
-
+	ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
 		if (g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly()) {
-			return;
+			return ScenarioUpdateResult::NoEvent;
 		}
+		ScenarioUpdateResult inputUpdateResult = UpdateInput();
 
 		if (m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->GetVisible()) {
 			if (m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->GetVisible()) { m_ScenarioGUIController->GetManager()->SetFocus((m_BlinkTimer.AlternateReal(500)) ? m_ScenarioButtons.at(ScenarioButtons::ResumeButton) : nullptr); }
@@ -893,6 +890,7 @@ namespace RTE {
 		} else if (m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox)->GetVisible()) {
 			UpdatePlayersBox();
 		}
+		return inputUpdateResult;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

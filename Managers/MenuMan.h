@@ -62,7 +62,7 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		bool UpdateScenarioMenu();
+		void UpdateScenarioMenu();
 #pragma endregion
 
 		int m_ActiveScreen; //!<

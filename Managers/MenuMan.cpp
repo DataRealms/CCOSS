@@ -23,6 +23,16 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MenuMan::Initialize(bool initLoadingScreen) {
+		if (initLoadingScreen) {
+			m_LoadingScreen = std::make_unique<LoadingScreen>();
+			g_PresetMan.LoadAllDataModules();
+			m_LoadingScreen->Destroy();
+			m_LoadingScreen.reset();
+
+			// Load the different input device icons. This can't be done during UInputMan::Create() because the icon presets don't exist so we need to do this after modules are loaded.
+			g_UInputMan.LoadDeviceIcons();
+		}
+
 		m_MenuController = std::make_unique<Controller>(Controller::CIM_PLAYER, 0);
 		m_MenuController->SetTeam(0);
 
@@ -30,21 +40,10 @@ namespace RTE {
 		m_MainMenu->Create(m_MenuController.get());
 
 		m_ScenarioMenu = std::make_unique<ScenarioGUI>();
-		m_ScenarioMenu->Create(m_MenuController.get());
 
 		//g_MetaMan.GetGUI()->Create(m_MenuController.get());
 
 		m_TitleScreen = std::make_unique<TitleScreen>(m_MainMenu->GetGUIControlManager()->GetSkin()->GetFont("fatfont.png"));
-
-		if (initLoadingScreen) {
-			m_LoadingScreen = std::make_unique<LoadingScreen>();
-			//g_PresetMan.LoadAllDataModules();
-			m_LoadingScreen->Destroy();
-			m_LoadingScreen.reset();
-
-			// Load the different input device icons. This can't be done during UInputMan::Create() because the icon presets don't exist so we need to do this after modules are loaded.
-			g_UInputMan.LoadDeviceIcons();
-		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +72,7 @@ namespace RTE {
 
 		if (!m_MainMenu->IsEnabled()) {
 			m_MainMenu->SetEnabled(true);
-			m_ScenarioMenu->SetEnabled(false);
+			m_ScenarioMenu->SetEnabled();
 		}
 
 		if (m_TitleScreen->GetActiveMenu() == TitleScreen::ActiveMenu::MainMenuActive) {
@@ -98,19 +97,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool MenuMan::UpdateScenarioMenu() {
-		m_ScenarioMenu->Update();
+	void MenuMan::UpdateScenarioMenu() {
+		ScenarioGUI::ScenarioUpdateResult updateResult = m_ScenarioMenu->Update();
 
-		if (!m_ScenarioMenu->IsEnabled()) {
-			m_ScenarioMenu->SetEnabled(true);
-			m_MainMenu->SetEnabled(false);
-		}
+		//if (!m_ScenarioMenu->IsEnabled()) {
+			//m_ScenarioMenu->SetEnabled(true);
+			//m_MainMenu->SetEnabled(false);
+		//}
 
-		if (m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::MainMenuActive && m_ScenarioMenu->BackToMain()) {
+		if (m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::MainMenuActive && updateResult == ScenarioGUI::ScenarioUpdateResult::BackToMain) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PlanetToMainMenu);
-		} else if (m_ScenarioMenu->ActivityResumed()) {
+		} else if (updateResult == ScenarioGUI::ScenarioUpdateResult::ActivityResumed) {
 			g_ResumeActivity = true;
-		} else if (m_ScenarioMenu->ActivityRestarted()) {
+		} else if (updateResult == ScenarioGUI::ScenarioUpdateResult::ActivityRestarted) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeScrollOut);
 			g_ResetActivity = true;
 		}
@@ -123,9 +122,6 @@ namespace RTE {
 			m_SectionSwitch = true;
 		}
 		*/
-
-
-		return m_ScenarioMenu->QuitProgram();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -145,12 +141,14 @@ namespace RTE {
 		m_ActiveScreen = m_TitleScreen->Update(keyPressed);
 		bool quitResult = false;
 
+		m_MenuController->Update();
+
 		switch (m_ActiveScreen) {
 			case TitleScreen::ActiveMenu::MainMenuActive:
 				quitResult = UpdateMainMenu();
 				break;
 			case TitleScreen::ActiveMenu::ScenarioMenuActive:
-				quitResult = UpdateScenarioMenu();
+				UpdateScenarioMenu();
 				break;
 			case TitleScreen::ActiveMenu::CampaignMenuActive:
 				break;

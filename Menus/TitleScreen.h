@@ -25,7 +25,6 @@ namespace RTE {
 		/// 
 		/// </summary>
 		enum IntroSequence {
-			Start,
 			DataRealmsLogoFadeIn,
 			DataRealmsLogoDisplay,
 			DataRealmsLogoFadeOut,
@@ -145,6 +144,7 @@ namespace RTE {
 		IntroSequence m_IntroSequenceState; //!<
 		bool m_FinishedPlayingIntro; //!<
 
+		float m_PlanetViewOffsetY; //!<
 		TitleTransition m_TitleTransitionState; //!<
 
 		Timer m_SectionTimer; //!<
@@ -161,7 +161,7 @@ namespace RTE {
 
 		MOSParticle m_Planet; //!<
 		Vector m_PlanetPos; //!<
-		int m_PlanetRadius; //!<
+		float m_PlanetRadius; //!<
 
 		MOSRotating m_Station; //!<
 		Vector m_StationOffset; //!<
@@ -191,15 +191,18 @@ namespace RTE {
 
 		float m_BackdropScrollRatio; //!<
 
-		int m_BackdropScrollStartOffsetY; //!< Set the start so that the nebula is fully scrolled up.
+		float m_BackdropScrollStartOffsetY; //!< Set the start so that the nebula is fully scrolled up.
 
-		int m_TitleAppearOffsetY; //!<
-		int m_MenuTopOffsetY; //!<
+		float m_TitleAppearOffsetY; //!<
 
 		float m_ScrollDuration; //!<
 		float m_ScrollStart; //!<
 		float m_ScrollProgress; //!<
-		int m_PreMainMenuOffsetY; //!<
+		float m_PreMainMenuOffsetY; //!<
+
+		int m_ScreenResX;
+		int m_ScreenResY;
+
 
 #pragma region Create Breakdown
 		/// <summary>
@@ -210,15 +213,16 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		void CreateBackdropStars();
+		void CreateIntroSequenceSlides();
+#pragma endregion
 
+#pragma region Title Scene Handling
 		/// <summary>
 		/// 
 		/// </summary>
 		void CreateIntroSequenceSlides();
 #pragma endregion
 
-#pragma region Title Scene Handling
 		/// <summary>
 		/// 
 		/// </summary>

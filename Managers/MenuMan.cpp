@@ -54,6 +54,7 @@ namespace RTE {
 		g_ConsoleMan.Initialize();
 
 		Initialize(false);
+		// Change the screen to the options menu otherwise we're at the main screen after reinitializing.
 		m_MainMenu->SetMenuScreen(MainMenuGUI::OPTIONSSCREEN);
 
 		g_FrameMan.DestroyTempBackBuffers();

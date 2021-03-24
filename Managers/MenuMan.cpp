@@ -27,6 +27,8 @@ namespace RTE {
 		m_ScenarioMenu = std::make_unique<ScenarioGUI>();
 		m_ScenarioMenu->Create(m_MenuController.get());
 
+		//g_MetaMan.GetGUI()->Create(m_MenuController.get());
+
 		m_TitleScreen = std::make_unique<TitleScreen>(m_MainMenu->GetGUIControlManager()->GetSkin()->GetFont("fatfont.png"));
 
 		if (initLoadingScreen) {
@@ -43,31 +45,29 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MenuMan::Reinitialize() {
+		m_MenuController.reset();
 		m_MainMenu.reset();
 		m_ScenarioMenu.reset();
-
-		//g_pMainMenuGUI->Destroy();
-		//g_pMainMenuController->Reset();
-		//g_pScenarioGUI->Destroy();
-		//g_MetaMan.GetGUI()->Destroy();
+		m_TitleScreen.reset();
 
 		g_ConsoleMan.Destroy();
 		g_ConsoleMan.Initialize();
 
-		//g_FrameMan.LoadPalette("Base.rte/palette.bmp");
-
-		m_MainMenu->Create(m_MenuController.get());
-		m_ScenarioMenu->Create(m_MenuController.get());
-
-		//g_MetaMan.GetGUI()->Create(m_MenuController.get());
+		Initialize(false);
+		m_MainMenu->SetMenuScreen(MainMenuGUI::OPTIONSSCREEN);
 
 		g_FrameMan.DestroyTempBackBuffers();
-		//g_HadResolutionChange = true;
+		g_FrameMan.SetResolutionChanged(false);
+	}
+
+
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MenuMan::Update() {
+		if (g_FrameMan.ResolutionChanged()) { Reinitialize(); }
+
 		bool keyPressed = g_UInputMan.AnyStartPress();
 
 		// Reset the key press states

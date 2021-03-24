@@ -58,8 +58,6 @@ bool g_ResumeActivity = false;
 int g_StationOffsetX;
 int g_StationOffsetY;
 
-bool g_HadResolutionChange = false; //!< Need this so we can restart PlayIntroTitle without an endless loop or leaks. Will be set true by ReinitMainMenu and set back to false at the end of the switch.
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /// <summary>

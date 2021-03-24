@@ -66,7 +66,7 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Loads the input device icons from loaded presets. This will be called from LoadingGUI after modules are loaded. Can't do this during Create() because the presets don't exist.
+		/// Loads the input device icons from loaded presets. Can't do this during Create() because the presets don't exist so this will be called from MenuMan::Initialize() after modules are loaded.
 		/// </summary>
 		void LoadDeviceIcons();
 

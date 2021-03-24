@@ -458,9 +458,6 @@ int main(int argc, char **argv) {
 		g_AudioMan.SetMusicVolume(0);
 	}
 
-	g_LoadingGUI.InitLoadingScreen();
-	//g_MenuMan.InitializeMenus();
-
 	g_FrameMan.PrintForcedGfxDriverMessage();
 
 	if (g_ConsoleMan.LoadWarningsExist()) {

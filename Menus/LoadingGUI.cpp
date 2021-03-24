@@ -2,7 +2,6 @@
 #include "Writer.h"
 #include "SceneLayer.h"
 #include "SettingsMan.h"
-#include "PresetMan.h"
 #include "FrameMan.h"
 
 #include "GUI/GUI.h"
@@ -28,7 +27,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingGUI::InitLoadingScreen() {
+	void LoadingGUI::Create() {
 		g_FrameMan.LoadPalette("Base.rte/palette.bmp");
 		g_FrameMan.ClearBackBuffer32();
 
@@ -68,10 +67,6 @@ namespace RTE {
 				m_LoadingLogWriter.reset();
 			}
 		}
-
-		g_PresetMan.LoadAllDataModules();
-
-		Destroy();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

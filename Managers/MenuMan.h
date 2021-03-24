@@ -29,7 +29,7 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		void Initialize();
+		void Initialize(bool initLoadingScreen = true);
 
 		/// <summary>
 		/// Destroy the Main Menu and initialize it again after a resolution change. Must be done otherwise the GUIs retain the original resolution settings and become all screwy.

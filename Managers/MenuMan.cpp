@@ -1,12 +1,14 @@
 #include "MenuMan.h"
 #include "FrameMan.h"
 #include "UInputMan.h"
+#include "PresetMan.h"
 #include "ConsoleMan.h"
 
 #include "Controller.h"
 #include "TitleScreen.h"
 #include "MainMenuGUI.h"
 #include "ScenarioGUI.h"
+#include "LoadingGUI.h"
 
 extern bool g_ResumeActivity;
 extern bool g_ResetActivity;
@@ -15,11 +17,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MenuMan::Initialize() {
+	void MenuMan::Initialize(bool initLoadingScreen) {
 		m_MenuController = std::make_unique<Controller>(Controller::CIM_PLAYER, 0);
 		m_MenuController->SetTeam(0);
-
-		//m_LoadingScreen = std::make_unique<LoadingGUI>();
 
 		m_MainMenu = std::make_unique<MainMenuGUI>();
 		m_MainMenu->Create(m_MenuController.get());
@@ -28,6 +28,13 @@ namespace RTE {
 		m_ScenarioMenu->Create(m_MenuController.get());
 
 		m_TitleScreen = std::make_unique<TitleScreen>(m_MainMenu->GetGUIControlManager()->GetSkin()->GetFont("fatfont.png"));
+
+		if (initLoadingScreen) {
+			m_LoadingScreen = std::make_unique<LoadingGUI>();
+			g_PresetMan.LoadAllDataModules();
+			m_LoadingScreen->Destroy();
+			m_LoadingScreen.reset();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

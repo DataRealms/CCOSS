@@ -23,12 +23,12 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a LoadingGUI object in system memory.
 		/// </summary>
-		LoadingGUI() { Clear(); }
+		LoadingGUI() { Clear(); Create(); }
 
 		/// <summary>
 		/// Creates the loading screen GUI and the log writer, then proceeds loading all the DataModules.
 		/// </summary>
-		void InitLoadingScreen();
+		void Create();
 
 		/// <summary>
 		/// Creates the GUI ListBox that the progress report will be drawn to, if not disabled through the settings file to speed up loading times.

@@ -37,13 +37,6 @@ namespace RTE {
 		void Reinitialize();
 #pragma endregion
 
-#pragma region Destruction
-		/// <summary>
-		/// 
-		/// </summary>
-		~MenuMan() = default;
-#pragma endregion
-
 #pragma region Concrete Methods
 		/// <summary>
 		/// 
@@ -57,6 +50,20 @@ namespace RTE {
 #pragma endregion
 
 	private:
+
+#pragma region Updates
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		bool UpdateMainMenu();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		bool UpdateScenarioMenu();
+#pragma endregion
 
 		int m_ActiveScreen; //!<
 

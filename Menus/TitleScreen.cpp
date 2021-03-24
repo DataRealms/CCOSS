@@ -13,8 +13,12 @@ namespace RTE {
 
 	void TitleScreen::Clear() {
 		m_GUIBackBuffer = nullptr;
-		m_TitleTransitionState = TitleTransition::MenusDisabled;
 		m_IntroSequenceState = IntroSequence::DataRealmsLogoFadeIn;
+		//m_IntroSequenceState = IntroSequence::SlideshowEnd;
+		//m_IntroSequenceState = IntroSequence::SlideshowFadeIn;
+		//m_IntroSequenceState = IntroSequence::MainMenuAppear;
+		m_TitleTransitionState = TitleTransition::Intro;
+		m_ActiveMenu = ActiveMenu::MenusDisabled;
 		m_FadeScreen = nullptr;
 		m_OrbitRotation = c_HalfPI - c_EighthPI;
 		m_OrbitRadius = 274;
@@ -143,6 +147,147 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void TitleScreen::UpdateMenuTransitions() {
+		switch (m_TitleTransitionState) {
+			case TitleTransition::MainMenu:
+				if (m_SectionSwitch) {
+					m_SectionSwitch = false;
+					m_ScrollOffset.SetY(0);
+					m_ActiveMenu = ActiveMenu::MainMenuActive;
+				}
+				break;
+			case TitleTransition::MainMenuToPlanet:
+				if (m_SectionSwitch) {
+					m_SectionSwitch = false;
+					m_ScrollDuration = 2.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier();
+					g_GUISound.SplashSound()->Play();
+					g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
+					m_ActiveMenu = ActiveMenu::ScenarioMenuActive;
+				}
+				m_ScrollOffset.SetY(EaseOut(0, m_PlanetViewOffsetY, m_SectionProgress));
+				m_GameLogo.SetPos(Vector(static_cast<float>(m_ScreenResX / 2), EaseOut(64, -150, m_SectionProgress)));
+				if (m_SectionElapsedTime >= m_ScrollDuration /*|| g_NetworkServer.IsServerModeEnabled()*/) { SetTitleTransitionState(TitleTransition::ScenarioMenu); }
+				break;
+			case TitleTransition::PlanetToMainMenu:
+				if (m_SectionSwitch) {
+					m_SectionSwitch = false;
+					m_ScrollDuration = 2.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier();
+					g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccmenu.ogg", -1);
+					m_ActiveMenu = ActiveMenu::MenusDisabled;
+				}
+				m_ScrollOffset.SetY(EaseOut(m_PlanetViewOffsetY, 0, m_SectionProgress));
+				m_GameLogo.SetPos(Vector(static_cast<float>(m_ScreenResX / 2), EaseOut(-150, 64, m_SectionProgress)));
+				if (m_SectionElapsedTime >= m_ScrollDuration / 2) { SetTitleTransitionState(TitleTransition::MainMenu); }
+				break;
+			case TitleTransition::ScenarioFadeIn:
+				if (m_SectionSwitch) {
+					m_SectionSwitch = false;
+					m_ScrollOffset.SetY(m_PlanetViewOffsetY);
+					m_ScrollDuration = 1.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier();
+				}
+				m_FadeAmount = 255 - static_cast<int>(255.0F * m_SectionProgress);
+				if (m_SectionElapsedTime >= m_SectionDuration) {
+					SetTitleTransitionState(TitleTransition::ScenarioMenu);
+					m_ActiveMenu = ActiveMenu::ScenarioMenuActive;
+				}
+				break;
+			case TitleTransition::ScenarioMenu:
+				if (m_SectionSwitch) {
+					m_SectionSwitch = false;
+					m_ScrollOffset.SetY(m_PlanetViewOffsetY);
+					m_ActiveMenu = ActiveMenu::ScenarioMenuActive;
+				}
+				break;
+			case TitleTransition::MainMenuToCampaign:
+				/*
+				if (m_SectionSwitch) {
+					m_SectionSwitch = false;
+					m_ScrollDuration = 2.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier();
+					g_GUISound.SplashSound()->Play();
+					g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
+				}
+				m_ScrollOffset.SetY(EaseOut(0, m_PlanetViewOffsetY, m_SectionProgress));
+				m_GameLogo.SetPos(Vector(static_cast<float>(m_ScreenResX / 2), EaseOut(64, -150, m_SectionProgress)));
+				if (m_SectionElapsedTime >= m_SectionDuration || keyPressed) {
+					m_SectionSwitch = true;
+					g_IntroState = CAMPAIGNPLAY;
+				}
+				*/
+				break;
+			case TitleTransition::CampaignFadeIn:
+				/*
+				if (m_SectionSwitch) {
+					// Scroll to campaign pos
+					m_ScrollOffset.SetY(m_PlanetViewOffsetY);
+					// Black fade
+					clear_to_color(m_FadeScreen, 0);
+
+					m_ScrollDuration = 1.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier();
+					m_SectionSwitch = false;
+				}
+
+				m_FadeAmount = 255 - (255 * m_SectionProgress);
+				set_trans_blender(m_FadeAmount, m_FadeAmount, m_FadeAmount, m_FadeAmount);
+				draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_FadeScreen, 0, 0);
+
+				if (m_SectionElapsedTime >= m_ScrollDuration) {
+					g_IntroState = CAMPAIGNPLAY;
+					m_SectionSwitch = true;
+				}
+				*/
+				break;
+			case TitleTransition::CampaignPlay:
+				/*
+				if (m_SectionSwitch) {
+					m_ScrollOffset.SetY(static_cast<float>(m_PlanetViewOffsetY));
+					m_SectionSwitch = false;
+				}
+				// Detect quitting of the program from the menu button
+				g_Quit = g_Quit || g_MetaMan.GetGUI()->QuitProgram();
+
+				// Detect if user wants to go back to main menu
+				if (g_MetaMan.GetGUI()->BackToMain()) {
+					g_IntroState = PLANETTOMAIN;
+					m_SectionSwitch = true;
+				}
+
+				// Detect if a game has been commanded to restart
+				if (g_MetaMan.GetGUI()->ActivityRestarted()) {
+					// Make sure the scene is going to be reset with the new parameters
+					g_ResetActivity = true;
+
+					m_TitleTransitionState = FADEOUT;
+					m_SectionSwitch = true;
+				}
+				// Detect if the current game has been commanded to resume
+				if (g_MetaMan.GetGUI()->ActivityResumed()) { g_ResumeActivity = true; }
+				*/
+				break;
+			case TitleTransition::FadeScrollOut:
+				if (m_SectionSwitch) {
+					m_SectionSwitch = false;
+					m_ScrollDuration = 1.5F * g_SettingsMan.GetMenuTransitionDurationMultiplier();
+				}
+				m_ScrollOffset.SetY(EaseIn(0, 250, m_SectionProgress));
+				m_FadeAmount = static_cast<int>(EaseIn(0, 255, m_SectionProgress));
+				g_AudioMan.SetTempMusicVolume(EaseIn(g_AudioMan.GetMusicVolume(), 0, m_SectionProgress));
+				if (m_SectionElapsedTime >= m_ScrollDuration) { SetTitleTransitionState(TitleTransition::End); }
+				break;
+			case TitleTransition::FadeOut:
+				if (m_SectionSwitch) {
+					m_SectionSwitch = false;
+					m_ScrollDuration = 1.5F * g_SettingsMan.GetMenuTransitionDurationMultiplier();
+				}
+				m_FadeAmount = static_cast<int>(EaseIn(0, 255, m_SectionProgress));
+				g_AudioMan.SetTempMusicVolume(EaseIn(g_AudioMan.GetMusicVolume(), 0, m_SectionProgress));
+				if (m_SectionElapsedTime >= m_ScrollDuration) { SetTitleTransitionState(TitleTransition::End); }
+				break;
+			default:
+				break;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	TitleScreen::ActiveMenu TitleScreen::Update(bool skipSection) {
 		if (m_SectionSwitch) { m_SectionTimer.Reset(); }
@@ -151,8 +296,11 @@ namespace RTE {
 
 		if (!m_FinishedPlayingIntro) {
 			UpdateIntro(skipSection);
-			return TitleTransition::MenusDisabled;
+			return ActiveMenu::MenusDisabled;
 		}
+		//if (m_SectionSwitch) { UpdateMenuTransitions(); }
+		UpdateMenuTransitions();
+		return m_ActiveMenu;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -208,6 +356,11 @@ namespace RTE {
 		}
 		DrawTitleScreenScene();
 		DrawGameLogo();
+
+		if (m_FadeAmount > 0) {
+			//set_trans_blender(m_FadeAmount, m_FadeAmount, m_FadeAmount, m_FadeAmount);
+			//draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_FadeScreen, 0, 0);
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

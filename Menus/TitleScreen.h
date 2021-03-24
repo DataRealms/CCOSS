@@ -52,18 +52,29 @@ namespace RTE {
 		/// 
 		/// </summary>
 		enum TitleTransition {
-			MenusDisabled = -1,
+			Intro = -1,
+			//MenusDisabled = -1,
 			MainMenu, // Main menu is active and operational
-			MainMenuToScenario, // Scenario mode views and transitions
+			MainMenuToPlanet, // Scenario mode views and transitions
+			PlanetToMainMenu, // Going back to the main menu view from a planet-centered view
 			ScenarioFadeIn, // Back from a scenario game to the scenario selection menu
 			ScenarioMenu,
 			MainMenuToCampaign, // Campaign mode views and transitions
 			CampaignFadeIn, // Back from a battle to the campaign view
 			CampaignPlay,
-			PlanetToMain, // Going back to the main menu view from a planet-centered view
 			FadeScrollOut,
 			FadeOut,
 			End
+		};
+
+		/// <summary>
+		/// 
+		/// </summary>
+		enum ActiveMenu {
+			MenusDisabled = -1,
+			MainMenuActive,
+			ScenarioMenuActive,
+			CampaignMenuActive
 		};
 
 #pragma region Creation
@@ -95,6 +106,30 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <returns></returns>
+		ActiveMenu GetActiveMenu() const { return m_ActiveMenu; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		bool IsSectionSwitched() const { return m_SectionSwitch; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		Vector GetPlanetPos() const { return m_PlanetPos; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		float GetPlanetRadius() const { return m_PlanetRadius; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
 		TitleTransition GetTitleTransitionState() const { return m_TitleTransitionState; }
 
 		/// <summary>
@@ -109,7 +144,7 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <param name="skipSection"></param>
-		TitleTransition Update(bool skipSection = false);
+		ActiveMenu Update(bool skipSection = false);
 
 		/// <summary>
 		/// 
@@ -145,6 +180,9 @@ namespace RTE {
 		bool m_FinishedPlayingIntro; //!<
 
 		float m_PlanetViewOffsetY; //!<
+
+		ActiveMenu m_ActiveMenu; //!<
+
 		TitleTransition m_TitleTransitionState; //!<
 
 		Timer m_SectionTimer; //!<
@@ -220,8 +258,7 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		void CreateIntroSequenceSlides();
-#pragma endregion
+		void UpdateMenuTransitions();
 
 		/// <summary>
 		/// 

@@ -10,8 +10,13 @@
 #include "ScenarioGUI.h"
 #include "LoadingScreen.h"
 
+#include "NetworkServer.h"
+
 extern bool g_ResumeActivity;
 extern bool g_ResetActivity;
+extern bool g_InActivity;
+
+extern volatile bool g_Quit;
 
 namespace RTE {
 
@@ -33,7 +38,7 @@ namespace RTE {
 
 		if (initLoadingScreen) {
 			m_LoadingScreen = std::make_unique<LoadingScreen>();
-			g_PresetMan.LoadAllDataModules();
+			//g_PresetMan.LoadAllDataModules();
 			m_LoadingScreen->Destroy();
 			m_LoadingScreen.reset();
 
@@ -61,7 +66,66 @@ namespace RTE {
 		g_FrameMan.SetResolutionChanged(false);
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool MenuMan::UpdateMainMenu() {
+		m_MainMenu->Update();
+
+		if (!m_MainMenu->IsEnabled()) {
+			m_MainMenu->SetEnabled(true);
+			m_ScenarioMenu->SetEnabled(false);
+		}
+
+		if (m_TitleScreen->GetActiveMenu() == TitleScreen::ActiveMenu::MainMenuActive) {
+			g_InActivity = false;
+		}
+		if (m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::ScenarioMenuActive && m_MainMenu->ScenarioStarted()) {
+			m_ScenarioMenu->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToPlanet);
+		} else if (m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::CampaignMenuActive && m_MainMenu->CampaignStarted()) {
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCampaign);
+		} else if (m_MainMenu->ActivityResumed()) {
+			g_ResumeActivity = true;
+		} else if (m_MainMenu->ActivityRestarted()) {
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeScrollOut);
+			g_ResetActivity = true;
+		//} else if (g_NetworkServer.IsServerModeEnabled()) {
+		//	m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeScrollOut);
+		//	EnterMultiplayerLobby();
+		}
+		return m_MainMenu->QuitProgram();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool MenuMan::UpdateScenarioMenu() {
+		m_ScenarioMenu->Update();
+
+		if (!m_ScenarioMenu->IsEnabled()) {
+			m_ScenarioMenu->SetEnabled(true);
+			m_MainMenu->SetEnabled(false);
+		}
+
+		if (m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::MainMenuActive && m_ScenarioMenu->BackToMain()) {
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PlanetToMainMenu);
+		} else if (m_ScenarioMenu->ActivityResumed()) {
+			g_ResumeActivity = true;
+		} else if (m_ScenarioMenu->ActivityRestarted()) {
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeScrollOut);
+			g_ResetActivity = true;
+		}
+
+		/*
+		// In server mode once we exited to main or scenario menu we need to start Lobby activity
+		if (g_NetworkServer.IsServerModeEnabled()) {
+			EnterMultiplayerLobby();
+			g_IntroState = FADEOUT;
+			m_SectionSwitch = true;
+		}
+		*/
+
+
+		return m_ScenarioMenu->QuitProgram();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -79,26 +143,22 @@ namespace RTE {
 		g_AudioMan.Update();
 
 		m_ActiveScreen = m_TitleScreen->Update(keyPressed);
+		bool quitResult = false;
 
 		switch (m_ActiveScreen) {
-			case TitleScreen::TitleTransition::MainMenu:
-				m_MainMenu->SetEnabled(true);
-				m_MainMenu->Update();
-
-				if (m_MainMenu->ScenarioStarted()) {
-					m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario);
-				} else if (m_MainMenu->CampaignStarted()) {
-					m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCampaign);
-				} else 	if (m_MainMenu->ActivityResumed()) {
-					g_ResumeActivity = true;
-				}
+			case TitleScreen::ActiveMenu::MainMenuActive:
+				quitResult = UpdateMainMenu();
 				break;
-			case TitleScreen::TitleTransition::ScenarioMenu:
-
+			case TitleScreen::ActiveMenu::ScenarioMenuActive:
+				quitResult = UpdateScenarioMenu();
+				break;
+			case TitleScreen::ActiveMenu::CampaignMenuActive:
 				break;
 			default:
 				break;
 		}
+
+		g_Quit = g_Quit || quitResult;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -109,11 +169,13 @@ namespace RTE {
 		m_TitleScreen->Draw();
 
 		switch (m_ActiveScreen) {
-			case TitleScreen::TitleTransition::MainMenu:
+			case TitleScreen::ActiveMenu::MainMenuActive:
 				m_MainMenu->Draw(g_FrameMan.GetBackBuffer32());
 				break;
-			case TitleScreen::TitleTransition::ScenarioMenu:
+			case TitleScreen::ActiveMenu::ScenarioMenuActive:
 				m_ScenarioMenu->Draw(g_FrameMan.GetBackBuffer32());
+				break;
+			case TitleScreen::ActiveMenu::CampaignMenuActive:
 				break;
 			default:
 				break;
@@ -124,4 +186,15 @@ namespace RTE {
 		//vsync();
 		g_FrameMan.FlipFrameBuffers();
 	}
+
+
+	/*
+			// Metagame menu update and drawing
+			if (m_IntroSequenceState == CAMPAIGNPLAY) {
+				g_MetaMan.GetGUI()->SetPlanetInfo(m_PlanetPos, planetRadius);
+				g_MetaMan.Update();
+				g_MetaMan.Draw(g_FrameMan.GetBackBuffer32());
+			}
+	*/
+
 }

@@ -209,6 +209,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Removed `MOSRotating:ApplyForces` and `MOSRotating:ApplyImpulses` Lua functions. These are both internal functions that should never have been exposed to Lua.
 
+- Removed hardcoded non-zero `Mass` constraint from `MovableObject`. Previously was always set to `Mass = 0.0001`.
+
 ***
 
 ## [0.1.0 pre-release 3.0][0.1.0-pre3.0] - 2020/12/25

@@ -751,7 +751,7 @@ float BuyMenuGUI::GetTotalOrderMass() const {
 		if(itemAsMO) {
 			totalMass += itemAsMO->GetMass();
 		} else {
-			RTEAbort("Tried to add mass of a non-MO object to order total!");
+			RTEAbort("Found a non-MO object in the cart and tried to add it's mass to order total!");
 		}
 	}
 

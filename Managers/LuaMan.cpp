@@ -372,6 +372,12 @@ PROPERTYOWNERSHIPSAFETYFAKER(ADoor, Attachable, SetDoor);
 
 PROPERTYOWNERSHIPSAFETYFAKER(Leg, Attachable, SetFoot);
 
+PROPERTYOWNERSHIPSAFETYFAKER(Actor, SoundContainer, SetBodyHitSound);
+PROPERTYOWNERSHIPSAFETYFAKER(Actor, SoundContainer, SetAlarmSound);
+PROPERTYOWNERSHIPSAFETYFAKER(Actor, SoundContainer, SetPainSound);
+PROPERTYOWNERSHIPSAFETYFAKER(Actor, SoundContainer, SetDeathSound);
+PROPERTYOWNERSHIPSAFETYFAKER(Actor, SoundContainer, SetDeviceSwitchSound);
+
 PROPERTYOWNERSHIPSAFETYFAKER(AHuman, Attachable, SetHead);
 PROPERTYOWNERSHIPSAFETYFAKER(AHuman, AEmitter, SetJetpack);
 PROPERTYOWNERSHIPSAFETYFAKER(AHuman, Arm, SetFGArm);
@@ -1061,11 +1067,11 @@ int LuaMan::Initialize() {
             .def("IsControllable", &Actor::IsControllable)
             .def("SetControllerMode", &Actor::SetControllerMode)
             .def("SwapControllerModes", &Actor::SwapControllerModes)
-			.property("BodyHitSound", &Actor::GetBodyHitSound, &Actor::SetBodyHitSound, detail::null_type(), adopt(_2))
-			.property("AlarmSound", &Actor::GetAlarmSound, &Actor::SetAlarmSound, detail::null_type(), adopt(_2))
-			.property("PainSound", &Actor::GetPainSound, &Actor::SetPainSound, detail::null_type(), adopt(_2))
-			.property("DeathSound", &Actor::GetDeathSound, &Actor::SetDeathSound, detail::null_type(), adopt(_2))
-			.property("DeviceSwitchSound", &Actor::GetDeviceSwitchSound, &Actor::SetDeviceSwitchSound, detail::null_type(), adopt(_2))
+			.property("BodyHitSound", &Actor::GetBodyHitSound, &Actor::SetBodyHitSound)
+			.property("AlarmSound", &Actor::GetAlarmSound, &Actor::SetAlarmSound)
+			.property("PainSound", &Actor::GetPainSound, &Actor::SetPainSound)
+			.property("DeathSound", &Actor::GetDeathSound, &Actor::SetDeathSound)
+			.property("DeviceSwitchSound", &Actor::GetDeviceSwitchSound, &Actor::SetDeviceSwitchSound)
 			.property("ImpulseDamageThreshold", &Actor::GetTravelImpulseDamage, &Actor::SetTravelImpulseDamage)
 			.def("GetStableVelocityThreshold", &Actor::GetStableVel)
 			.def("SetStableVelocityThreshold", (void (Actor::*)(float, float))&Actor::SetStableVel)

@@ -12,30 +12,55 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TitleScreen::Clear() {
-		m_GUIBackBuffer = nullptr;
 		m_IntroSequenceState = IntroSequence::DataRealmsLogoFadeIn;
-		//m_IntroSequenceState = IntroSequence::SlideshowEnd;
-		//m_IntroSequenceState = IntroSequence::SlideshowFadeIn;
-		//m_IntroSequenceState = IntroSequence::MainMenuAppear;
 		m_TitleTransitionState = TitleTransition::Intro;
 		m_ActiveMenu = ActiveMenu::MenusDisabled;
-		m_FadeScreen = nullptr;
-		m_OrbitRotation = c_HalfPI - c_EighthPI;
-		m_OrbitRadius = 274;
-		m_PlanetRadius = 240;
-		m_PreMainMenuOffsetY = 100;
-		m_ScrollOffset.Reset();
-		m_BackdropScrollRatio = 1.0F / 3.0F;
-		m_ScrollDuration = 0;
-		m_ScrollStart = 0;
-		m_ScrollProgress = 0;
-		m_TitleAppearOffsetY = 900;
-		m_FinishedPlayingIntro = false;
-		m_FadeAmount = 255;
-		m_IntroSongTimer.Reset();
-		m_SectionTimer.Reset();
 		m_ScreenResX = g_FrameMan.GetResX();
 		m_ScreenResY = g_FrameMan.GetResY();
+		m_GUIBackBuffer = nullptr;
+		m_FadeScreen = nullptr;
+		m_FadeAmount = 255;
+
+		m_Nebula.Reset();
+		m_BackdropStars.clear();
+		m_Moon.Reset();
+		m_Planet.Reset();
+		m_PlanetPos.Reset();
+		m_PlanetRadius = 240;
+		m_Station.Reset();
+		m_StationOffset.Reset();
+		m_OrbitRadius = 274;
+		m_OrbitRotation = c_HalfPI - c_EighthPI;
+		m_DataRealmsLogo = nullptr;
+		m_FmodLogo = nullptr;
+		m_PreGameLogoText.Reset();
+		m_PreGameLogoTextGlow.Reset();
+		m_GameLogo.Reset();
+		m_GameLogoGlow.Reset();
+
+		m_SectionSwitch = true;
+		m_SectionDuration = 0;
+		m_SectionProgress = 0;
+		m_SectionElapsedTime = 0;
+		m_SectionTimer.Reset();
+
+		m_ScrollStart = 0;
+		m_ScrollDuration = 0;
+		m_ScrollOffset.Reset();
+		m_BackdropScrollRatio = 1.0F / 3.0F;
+		m_BackdropScrollStartOffsetY = 0;
+		m_TitleAppearOffsetY = 900;
+		m_PreMainMenuOffsetY = 100;
+		m_PlanetViewOffsetY = 325 + m_PlanetRadius - (static_cast<float>(m_ScreenResY) / 2);
+
+		m_FinishedPlayingIntro = false;
+		m_IntroSongTimer.Reset();
+		m_IntroTextFont = nullptr;
+		m_SlideshowSlideText.clear();
+		m_SlideFadeInDuration = 0;
+		m_SlideFadeOutDuration = 0;
+
+		std::fill(m_IntroSlides.begin(), m_IntroSlides.end(), nullptr);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -48,8 +73,6 @@ namespace RTE {
 
 		m_BackdropScrollStartOffsetY = (static_cast<float>(m_Nebula.GetBitmap()->h) / m_BackdropScrollRatio) - (static_cast<float>(m_ScreenResY) / m_BackdropScrollRatio);
 		m_ScrollOffset = Vector(0, m_BackdropScrollStartOffsetY);
-
-		m_PlanetViewOffsetY = 325 + m_PlanetRadius - (static_cast<float>(m_ScreenResY) / 2);
 
 		if (!g_SettingsMan.SkipIntro()) {
 			m_GUIBackBuffer = AllegroBitmap(g_FrameMan.GetBackBuffer32());
@@ -342,9 +365,6 @@ namespace RTE {
 		m_OrbitRotation -= 0.0020F;
 		// Keep the rotation angle from getting too large
 		if (m_OrbitRotation < -c_TwoPI) { m_OrbitRotation += c_TwoPI; }
-
-		m_StationOffsetX = m_StationOffset.GetFloorIntX();
-		m_StationOffsetY = m_StationOffset.GetFloorIntY();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -607,15 +627,15 @@ namespace RTE {
 				m_ScrollStart = static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
 				m_ScrollDuration = 66.6F - m_ScrollStart; // 66.6s This is the end of the slideshow
 			}
-			m_ScrollProgress = (static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS()) - m_ScrollStart) / m_ScrollDuration;
-			m_ScrollOffset.SetY(LERP(0, 1.0F, m_BackdropScrollStartOffsetY, m_TitleAppearOffsetY, m_ScrollProgress));
+			float scrollProgress = (static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS()) - m_ScrollStart) / m_ScrollDuration;
+			m_ScrollOffset.SetY(LERP(0, 1.0F, m_BackdropScrollStartOffsetY, m_TitleAppearOffsetY, scrollProgress));
 		} else if (m_IntroSequenceState >= IntroSequence::GameLogoAppear && m_IntroSequenceState <= IntroSequence::PlanetScroll) {
 			if (m_IntroSequenceState == IntroSequence::GameLogoAppear && m_SectionSwitch) {
 				m_ScrollStart = static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
 				m_ScrollDuration = 92.4F - m_ScrollStart; // 92.4s is the end of the planet scrolling
 			}
-			m_ScrollProgress = (static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS()) - m_ScrollStart) / m_ScrollDuration;
-			m_ScrollOffset.SetY(EaseOut(m_TitleAppearOffsetY, m_PreMainMenuOffsetY, m_ScrollProgress));
+			float scrollProgress = (static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS()) - m_ScrollStart) / m_ScrollDuration;
+			m_ScrollOffset.SetY(EaseOut(m_TitleAppearOffsetY, m_PreMainMenuOffsetY, scrollProgress));
 		}
 
 		if (m_IntroSequenceState >= IntroSequence::DataRealmsLogoFadeIn && m_IntroSequenceState <= IntroSequence::FmodLogoFadeOut) {

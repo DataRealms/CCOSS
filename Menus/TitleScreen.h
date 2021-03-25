@@ -24,36 +24,8 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		enum IntroSequence {
-			DataRealmsLogoFadeIn,
-			DataRealmsLogoDisplay,
-			DataRealmsLogoFadeOut,
-			FmodLogoFadeIn,
-			FmodLogoDisplay,
-			FmodLogoFadeOut,
-			SlideshowFadeIn,
-			PreSlideshowPause,
-			ShowSlide1,
-			ShowSlide2,
-			ShowSlide3,
-			ShowSlide4,
-			ShowSlide5,
-			ShowSlide6,
-			ShowSlide7,
-			ShowSlide8,
-			SlideshowEnd,
-			GameLogoAppear,
-			PlanetScroll,
-			PreMainMenu,
-			MainMenuAppear
-		};
-
-		/// <summary>
-		/// 
-		/// </summary>
 		enum TitleTransition {
 			Intro = -1,
-			//MenusDisabled = -1,
 			MainMenu, // Main menu is active and operational
 			MainMenuToPlanet, // Scenario mode views and transitions
 			PlanetToMainMenu, // Going back to the main menu view from a planet-centered view
@@ -163,84 +135,92 @@ namespace RTE {
 			/// </summary>
 			enum StarSize { StarSmall, StarLarge, StarHuge };
 
-			StarSize Size = StarSize::StarSmall; //!<
 			BITMAP *Bitmap = nullptr; //!<
 			int PosX = 0; //!<
 			int PosY = 0; //!<
 			float ScrollRatio = 1.0F; //!<
 			int Intensity = 0; //!< Intensity value on a scale from 0 to 255.
+			StarSize Size = StarSize::StarSmall; //!<
 		};
 
-		AllegroBitmap m_GUIBackBuffer; //!<
-
-		GUIFont *m_IntroTextFont; //!<
-		std::string m_SlideshowSlideText; //!<
+		/// <summary>
+		/// 
+		/// </summary>
+		enum IntroSequence {
+			DataRealmsLogoFadeIn,
+			DataRealmsLogoDisplay,
+			DataRealmsLogoFadeOut,
+			FmodLogoFadeIn,
+			FmodLogoDisplay,
+			FmodLogoFadeOut,
+			SlideshowFadeIn,
+			PreSlideshowPause,
+			ShowSlide1,
+			ShowSlide2,
+			ShowSlide3,
+			ShowSlide4,
+			ShowSlide5,
+			ShowSlide6,
+			ShowSlide7,
+			ShowSlide8,
+			SlideshowEnd,
+			GameLogoAppear,
+			PlanetScroll,
+			PreMainMenu,
+			MainMenuAppear
+		};
 
 		IntroSequence m_IntroSequenceState; //!<
-		bool m_FinishedPlayingIntro; //!<
-
-		float m_PlanetViewOffsetY; //!<
-
+		TitleTransition m_TitleTransitionState; //!<
 		ActiveMenu m_ActiveMenu; //!<
 
-		TitleTransition m_TitleTransitionState; //!<
-
-		Timer m_SectionTimer; //!<
-		float m_SectionElapsedTime; //!< How many seconds have elapsed on a section.
-		float m_SectionDuration; //!< How many seconds a section is supposed to elapse.
-		float m_SectionProgress; //!< Progress made on a section, from 0.0 to 1.0.
-		bool m_SectionSwitch; //!<
-
-		Timer m_IntroSongTimer; //!<
-
-		std::array<BITMAP *, 8> m_IntroSlides; //!<
-		float m_SlideFadeInDuration; //!<
-		float m_SlideFadeOutDuration; //!<
-
-		MOSParticle m_Planet; //!<
-		Vector m_PlanetPos; //!<
-		float m_PlanetRadius; //!<
-
-		MOSRotating m_Station; //!<
-		Vector m_StationOffset; //!<
-		int m_StationOffsetX; //!<
-		int m_StationOffsetY; //!<
-		float m_OrbitRadius; //!<
-		float m_OrbitRotation; //!<
-
-		Vector m_ScrollOffset; //!<
+		int m_ScreenResX; //!<
+		int m_ScreenResY; //!<
+		AllegroBitmap m_GUIBackBuffer; //!<
 
 		BITMAP *m_FadeScreen; //!<
 		int m_FadeAmount; //!<
 
+		std::vector<Star> m_BackdropStars; //!<
+		SceneLayer m_Nebula; //!<
+		MOSParticle m_Moon; //!<
+		MOSParticle m_Planet; //!<
+		Vector m_PlanetPos; //!<
+		float m_PlanetRadius; //!<
+		MOSRotating m_Station; //!<
+		Vector m_StationOffset; //!<
+		float m_OrbitRadius; //!<
+		float m_OrbitRotation; //!<
+
 		BITMAP *m_DataRealmsLogo; //!<
 		BITMAP *m_FmodLogo; //!<
-
 		MOSParticle m_PreGameLogoText; //!<
 		MOSParticle m_PreGameLogoTextGlow; //!<
-
 		MOSParticle m_GameLogo; //!<
 		MOSParticle m_GameLogoGlow; //!<
 
-		MOSParticle m_Moon; //!<
+		bool m_SectionSwitch; //!<
+		float m_SectionDuration; //!< How many seconds a section is supposed to elapse.
+		float m_SectionProgress; //!< Progress made on a section, from 0.0 to 1.0.
+		float m_SectionElapsedTime; //!< How many seconds have elapsed on a section.
+		Timer m_SectionTimer; //!<
 
-		SceneLayer m_Nebula; //!<
-		std::vector<Star> m_BackdropStars; //!<
-
-		float m_BackdropScrollRatio; //!<
-
-		float m_BackdropScrollStartOffsetY; //!< Set the start so that the nebula is fully scrolled up.
-
-		float m_TitleAppearOffsetY; //!<
-
-		float m_ScrollDuration; //!<
 		float m_ScrollStart; //!<
-		float m_ScrollProgress; //!<
+		float m_ScrollDuration; //!<
+		Vector m_ScrollOffset; //!<
+		float m_BackdropScrollRatio; //!<
+		float m_BackdropScrollStartOffsetY; //!< Set the start so that the nebula is fully scrolled up.
+		float m_TitleAppearOffsetY; //!<
 		float m_PreMainMenuOffsetY; //!<
+		float m_PlanetViewOffsetY; //!<
 
-		int m_ScreenResX;
-		int m_ScreenResY;
-
+		bool m_FinishedPlayingIntro; //!<
+		Timer m_IntroSongTimer; //!<
+		GUIFont *m_IntroTextFont; //!<
+		std::string m_SlideshowSlideText; //!<
+		std::array<BITMAP *, 8> m_IntroSlides; //!<
+		float m_SlideFadeInDuration; //!<
+		float m_SlideFadeOutDuration; //!<
 
 #pragma region Create Breakdown
 		/// <summary>

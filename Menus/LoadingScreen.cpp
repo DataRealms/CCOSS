@@ -1,15 +1,15 @@
 #include "LoadingScreen.h"
-#include "Writer.h"
-#include "SceneLayer.h"
-#include "SettingsMan.h"
 #include "FrameMan.h"
+#include "SettingsMan.h"
+#include "SceneLayer.h"
+#include "Writer.h"
 
-#include "GUI/GUI.h"
-#include "GUI/GUICollectionBox.h"
-#include "GUI/GUIListBox.h"
-#include "GUI/AllegroScreen.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroInput.h"
+#include "GUI.h"
+#include "GUICollectionBox.h"
+#include "GUIListBox.h"
+#include "AllegroScreen.h"
+#include "AllegroBitmap.h"
+#include "AllegroInput.h"
 
 namespace RTE {
 
@@ -17,42 +17,31 @@ namespace RTE {
 
 	void LoadingScreen::Clear() {
 		m_ControlManager = nullptr;
-		m_GUIInput = nullptr;
-		m_GUIScreen = nullptr;
 		m_LoadingLogWriter = nullptr;
 		m_ProgressListboxBitmap = nullptr;
-		m_PosX = 0;
-		m_PosY = 0;
+		m_ProgressListboxPosX = 0;
+		m_ProgressListboxPosY = 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingScreen::Create() {
-		g_FrameMan.LoadPalette("Base.rte/palette.bmp");
-		g_FrameMan.ClearBackBuffer32();
-
-		m_GUIInput.reset(new AllegroInput(-1));
-		m_GUIScreen.reset(new AllegroScreen(g_FrameMan.GetBackBuffer32()));
-
+	void LoadingScreen::Create(AllegroScreen *guiScreen, AllegroInput *guiInput) {
 		if (!m_ControlManager) {
 			m_ControlManager.reset(new GUIControlManager());
-			if (!m_ControlManager->Create(m_GUIScreen.get(), m_GUIInput.get(), "Base.rte/GUIs/Skins/MainMenu", "LoadingSkin.ini")) {
-				RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu/LoadingSkin.ini");
-			}
+			if (!m_ControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/MainMenu", "LoadingSkin.ini")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu/LoadingSkin.ini"); }
 			m_ControlManager->Load("Base.rte/GUIs/LoadingGUI.ini");
 		}
-		if (!g_SettingsMan.DisableLoadingScreen()) { CreateProgressReportListbox(); }
-
+		int loadingSplashOffset = 0;
+		if (!g_SettingsMan.DisableLoadingScreen()) {
+			CreateProgressReportListbox();
+			loadingSplashOffset = m_ProgressListboxPosX / 4;
+		}
 		SceneLayer loadingSplash;
-		loadingSplash.Create(ContentFile("Base.rte/GUIs/Title/LoadingSplash.png"), false, Vector(), true, false, Vector(1.0F, 0));
-
-		// Hardcoded offset to make room for the loading box only if DisableLoadingScreen is false.
-		int loadingSplashOffset = g_SettingsMan.DisableLoadingScreen() ? 14 : 120;
+		loadingSplash.Create(ContentFile("Base.rte/GUIs/Title/LoadingSplash.png").GetAsBitmap(COLORCONV_NONE, false), false, Vector(), true, false, Vector(1.0F, 0));
 		loadingSplash.SetOffset(Vector(static_cast<float>(((loadingSplash.GetBitmap()->w - g_FrameMan.GetResX()) / 2) + loadingSplashOffset), 0));
 
 		// Draw onto wrapped strip centered vertically on the screen
-		Box splashBox(Vector(0, static_cast<float>((g_FrameMan.GetResY() - loadingSplash.GetBitmap()->h) / 2)), static_cast<float>(g_FrameMan.GetResX()), static_cast<float>(loadingSplash.GetBitmap()->h));
-		loadingSplash.Draw(g_FrameMan.GetBackBuffer32(), splashBox);
+		loadingSplash.Draw(g_FrameMan.GetBackBuffer32(), Box(Vector(0, static_cast<float>((g_FrameMan.GetResY() - loadingSplash.GetBitmap()->h) / 2)), static_cast<float>(g_FrameMan.GetResX()), static_cast<float>(loadingSplash.GetBitmap()->h)));
 
 		g_FrameMan.FlipFrameBuffers();
 
@@ -61,7 +50,7 @@ namespace RTE {
 		if (g_SettingsMan.SettingsNeedOverwrite()) { g_SettingsMan.UpdateSettingsFile(); }
 
 		if (!m_LoadingLogWriter) {
-			m_LoadingLogWriter.reset(new Writer("LogLoading.txt"));
+			m_LoadingLogWriter = std::make_unique<Writer>("LogLoading.txt");
 			if (!m_LoadingLogWriter->WriterOK()) {
 				ShowMessageBox("Failed to instantiate the Loading Log writer!\nModule loading will proceed without being logged!");
 				m_LoadingLogWriter.reset();
@@ -72,7 +61,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LoadingScreen::CreateProgressReportListbox() {
-		// Place and clear the sectionProgress box
 		dynamic_cast<GUICollectionBox *>(m_ControlManager->GetControl("root"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 		GUIListBox *listBox = dynamic_cast<GUIListBox *>(m_ControlManager->GetControl("ProgressBox"));
 
@@ -89,8 +77,8 @@ namespace RTE {
 			clear_to_color(m_ProgressListboxBitmap, 54);
 			rect(m_ProgressListboxBitmap, 0, 0, listBox->GetWidth() - 1, listBox->GetHeight() - 1, 33);
 			rect(m_ProgressListboxBitmap, 1, 1, listBox->GetWidth() - 2, listBox->GetHeight() - 2, 33);
-			m_PosX = listBox->GetXPos();
-			m_PosY = listBox->GetYPos();
+			m_ProgressListboxPosX = listBox->GetXPos();
+			m_ProgressListboxPosY = listBox->GetYPos();
 		}
 	}
 
@@ -118,13 +106,12 @@ namespace RTE {
 			// Clear current line.
 			rectfill(g_LoadingScreen.m_ProgressListboxBitmap, 2, g_LoadingScreen.m_ProgressListboxBitmap->h - 12, g_LoadingScreen.m_ProgressListboxBitmap->w - 3, g_LoadingScreen.m_ProgressListboxBitmap->h - 3, 54);
 			// Print new line
-			g_FrameMan.GetSmallFont()->DrawAligned(&drawBitmap, 5, g_LoadingScreen.m_ProgressListboxBitmap->h - 12, reportString.c_str(), GUIFont::Left);
-			// DrawAligned - MaxWidth is useless here, so we're just drawing lines manually.
+			g_FrameMan.GetSmallFont()->DrawAligned(&drawBitmap, 5, g_LoadingScreen.m_ProgressListboxBitmap->h - 12, reportString, GUIFont::Left);
+			// Lines are drawing over the right edge of the box and we can't cap the width from DrawAligned here so redraw the right edge
 			vline(g_LoadingScreen.m_ProgressListboxBitmap, g_LoadingScreen.m_ProgressListboxBitmap->w - 2, g_LoadingScreen.m_ProgressListboxBitmap->h - 12, g_LoadingScreen.m_ProgressListboxBitmap->h - 2, 33);
 			vline(g_LoadingScreen.m_ProgressListboxBitmap, g_LoadingScreen.m_ProgressListboxBitmap->w - 1, g_LoadingScreen.m_ProgressListboxBitmap->h - 12, g_LoadingScreen.m_ProgressListboxBitmap->h - 2, 33);
 
-			// Draw onto current frame buffer.
-			blit(g_LoadingScreen.m_ProgressListboxBitmap, g_FrameMan.GetBackBuffer32(), 0, 0, g_LoadingScreen.m_PosX, g_LoadingScreen.m_PosY, g_LoadingScreen.m_ProgressListboxBitmap->w, g_LoadingScreen.m_ProgressListboxBitmap->h);
+			blit(g_LoadingScreen.m_ProgressListboxBitmap, g_FrameMan.GetBackBuffer32(), 0, 0, g_LoadingScreen.m_ProgressListboxPosX, g_LoadingScreen.m_ProgressListboxPosY, g_LoadingScreen.m_ProgressListboxBitmap->w, g_LoadingScreen.m_ProgressListboxBitmap->h);
 
 			g_FrameMan.FlipFrameBuffers();
 		}
@@ -133,16 +120,4 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LoadingScreen::GUIControlManagerDeleter::operator()(GUIControlManager *ptr) const { ptr->Destroy(); }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void LoadingScreen::AllegroInputDeleter::operator()(AllegroInput *ptr) const { ptr->Destroy(); }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void LoadingScreen::AllegroScreenDeleter::operator()(AllegroScreen *ptr) const { ptr->Destroy(); }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void LoadingScreen::WriterDeleter::operator()(Writer *ptr) const { ptr->EndWrite(); }
 }

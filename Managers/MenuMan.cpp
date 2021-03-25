@@ -4,6 +4,10 @@
 #include "PresetMan.h"
 #include "ConsoleMan.h"
 
+#include "GUI.h"
+#include "AllegroScreen.h"
+#include "AllegroInput.h"
+
 #include "Controller.h"
 #include "TitleScreen.h"
 #include "MainMenuGUI.h"
@@ -23,11 +27,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MenuMan::Initialize(bool initLoadingScreen) {
+		m_GUIScreen.reset(new AllegroScreen(g_FrameMan.GetBackBuffer32()));
+		m_GUIInput.reset(new AllegroInput(-1));
+
 		if (initLoadingScreen) {
-			m_LoadingScreen = std::make_unique<LoadingScreen>();
+			g_LoadingScreen.Create(m_GUIScreen.get(), m_GUIInput.get());
 			g_PresetMan.LoadAllDataModules();
-			m_LoadingScreen->Destroy();
-			m_LoadingScreen.reset();
+			g_LoadingScreen.Destroy();
 
 			// Load the different input device icons. This can't be done during UInputMan::Create() because the icon presets don't exist so we need to do this after modules are loaded.
 			g_UInputMan.LoadDeviceIcons();

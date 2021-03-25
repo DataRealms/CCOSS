@@ -27,7 +27,6 @@
 #include "UInputMan.h"
 #include "MenuMan.h"
 
-#include "LoadingScreen.h"
 #include "MainMenuGUI.h"
 #include "ScenarioGUI.h"
 #include "TitleScreen.h"

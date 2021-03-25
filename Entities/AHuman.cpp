@@ -3145,6 +3145,8 @@ void AHuman::Update()
             // Deduct from the jetpack time
             m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS();
             m_MoveState = JUMP;
+            m_Paths[FGROUND][JUMP].Restart();
+            m_Paths[BGROUND][JUMP].Restart();
         }
         // Jetpack is off/turning off
         else
@@ -3858,30 +3860,60 @@ void AHuman::Update()
             }
         }
         // JUMPING
-        else if ((m_pFGLeg || m_pBGLeg) && m_MoveState == JUMP)
-        {
-/*
-            if (m_pFGLeg && (!m_Paths[FGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal))
-            {
-                m_pFGFootGroup->PushAsLimb(m_Pos + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                      m_Vel,
-                                      Matrix(),
-                                      m_Paths[FGROUND][m_MoveState],
-    //                                  mass / 2,
-                                      deltaTime);
+        else if ((m_pFGLeg || m_pBGLeg) && m_MoveState == JUMP) {
+            //TODO 4zK Uncomment this section to keep the limb held static
+            /*
+            if (m_pFGLeg) {
+                m_pFGFootGroup->SetLimbPos(m_Pos + RotateOffset(m_Paths[FGROUND][STAND].GetStartOffset()));
             }
-            if (m_pBGLeg && (!m_Paths[BGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal))
-            {
-                m_pBGFootGroup->PushAsLimb(m_Pos + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                      m_Vel,
-                                      Matrix(),
-                                      m_Paths[BGROUND][m_MoveState],
-    //                                mass / 2,
-                                      deltaTime);
+            if (m_pBGLeg) {
+                m_pBGFootGroup->SetLimbPos(m_Pos + RotateOffset(m_Paths[BGROUND][STAND].GetStartOffset()));
+            }
+            */
+
+            //TODO 4zK Uncomment this section to make the limb follow its jump path. I believe this was data's original intention but
+            // 1. The existing standard jump limbpath is awful, the actor spends all its time squatting
+            // 2. I'm not sure of the details, but this push as limb doesn't seem to be advancing the jump limbpath, so it doesn't work very well, even with my efforts to properly reset it
+            /*
+            if (m_pFGLeg && (!m_Paths[FGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal)) {
+                m_pFGFootGroup->PushAsLimb(
+                    m_Pos + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
+                    m_Vel,
+                    Matrix(),
+                    m_Paths[FGROUND][m_MoveState],
+                    deltaTime);
+            }
+            if (m_pBGLeg && (!m_Paths[BGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal)) {
+                m_pBGFootGroup->PushAsLimb(
+                    m_Pos + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
+                    m_Vel,
+                    Matrix(),
+                    m_Paths[BGROUND][m_MoveState],
+                    deltaTime);
+            }
+            */
+            if (m_pFGLeg && (!m_Paths[FGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal)) {
+                m_pFGFootGroup->FlailAsLimb(
+                    m_Pos,
+                    m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
+                    m_pFGLeg->GetMaxLength(),
+                    g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
+                    m_AngularVel,
+                    m_pFGLeg->GetMass(),
+                    g_TimerMan.GetDeltaTimeSecs());
+            }
+            if (m_pBGLeg && (!m_Paths[BGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal)) {
+                m_pBGFootGroup->FlailAsLimb(
+                    m_Pos,
+                    m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) *m_Rotation,
+                    m_pBGLeg->GetMaxLength(),
+                    g_SceneMan.GetGlobalAcc() *g_TimerMan.GetDeltaTimeSecs(),
+                    m_AngularVel,
+                    m_pBGLeg->GetMass(),
+                    g_TimerMan.GetDeltaTimeSecs());
             }
 
-            if (m_JetTimeLeft <= 0)
-            {
+            if (m_JetTimeLeft <= 0) {
                 m_MoveState = STAND;
                 m_Paths[FGROUND][JUMP].Terminate();
                 m_Paths[BGROUND][JUMP].Terminate();
@@ -3890,7 +3922,6 @@ void AHuman::Update()
                 m_Paths[FGROUND][WALK].Terminate();
                 m_Paths[BGROUND][WALK].Terminate();
             }
-*/
         }
         // CROUCHING
         else if ((m_pFGLeg || m_pBGLeg) && m_MoveState == CROUCH)

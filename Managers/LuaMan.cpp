@@ -363,6 +363,8 @@ LUAENTITYCAST(PEmitter)
         } \
     } \
 
+PROPERTYOWNERSHIPSAFETYFAKER(MOSRotating, SoundContainer, SetGibSound);
+
 PROPERTYOWNERSHIPSAFETYFAKER(Attachable, AEmitter, SetBreakWound);
 PROPERTYOWNERSHIPSAFETYFAKER(Attachable, AEmitter, SetParentBreakWound);
 
@@ -899,7 +901,7 @@ int LuaMan::Initialize() {
             .property("RecoilOffset", &MOSRotating::GetRecoilOffset)
 			.property("TravelImpulse", &MOSRotating::GetTravelImpulse, &MOSRotating::SetTravelImpulse)
 			.property("GibWoundLimit", (int (MOSRotating:: *)() const) &MOSRotating::GetGibWoundLimit, &MOSRotating::SetGibWoundLimit)
-			.property("GibSound", &MOSRotating::GetGibSound, &MOSRotating::SetGibSound, detail::null_type(), adopt(_2))
+			.property("GibSound", &MOSRotating::GetGibSound, &MOSRotating::SetGibSound)
 			.property("GibImpulseLimit", &MOSRotating::GetGibImpulseLimit, &MOSRotating::SetGibImpulseLimit)
 			.property("DamageMultiplier", &MOSRotating::GetDamageMultiplier, &MOSRotating::SetDamageMultiplier)
 			.property("WoundCount", (int (MOSRotating:: *)() const) &MOSRotating::GetWoundCount)

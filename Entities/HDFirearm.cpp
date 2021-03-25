@@ -314,36 +314,37 @@ void HDFirearm::Destroy(bool notInherited)
 {
 	if (m_PreFireSound) {
 		m_PreFireSound->Stop();
-		delete m_PreFireSound;
 	}
 	if (m_FireSound) {
 		m_FireSound->Stop();
-		delete m_FireSound;
 	}
 	if (m_FireEchoSound) {
 		m_FireEchoSound->Stop();
-		delete m_FireEchoSound;
 	}
 	if (m_ActiveSound) {
 		m_ActiveSound->Stop();
-		delete m_ActiveSound;
 	}
 	if (m_DeactivationSound) {
 		m_DeactivationSound->Stop();
-		delete m_DeactivationSound;
 	}
 	if (m_EmptySound) {
 		m_EmptySound->Stop();
-		delete m_EmptySound;
 	}
 	if (m_ReloadStartSound) {
 		m_ReloadStartSound->Stop();
-		delete m_ReloadStartSound;
 	}
 	if (m_ReloadEndSound) {
 		m_ReloadEndSound->Stop();
-		delete m_ReloadEndSound;
 	}
+
+	delete m_PreFireSound;
+	delete m_FireSound;
+	delete m_FireEchoSound;
+	delete m_ActiveSound;
+	delete m_DeactivationSound;
+	delete m_EmptySound;
+	delete m_ReloadStartSound;
+	delete m_ReloadEndSound;
 
     if (!notInherited)
         HeldDevice::Destroy();

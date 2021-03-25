@@ -383,6 +383,11 @@ PROPERTYOWNERSHIPSAFETYFAKER(Actor, SoundContainer, SetPainSound);
 PROPERTYOWNERSHIPSAFETYFAKER(Actor, SoundContainer, SetDeathSound);
 PROPERTYOWNERSHIPSAFETYFAKER(Actor, SoundContainer, SetDeviceSwitchSound);
 
+PROPERTYOWNERSHIPSAFETYFAKER(ADoor, SoundContainer, SetDoorMoveStartSound);
+PROPERTYOWNERSHIPSAFETYFAKER(ADoor, SoundContainer, SetDoorMoveSound);
+PROPERTYOWNERSHIPSAFETYFAKER(ADoor, SoundContainer, SetDoorDirectionChangeSound);
+PROPERTYOWNERSHIPSAFETYFAKER(ADoor, SoundContainer, SetDoorMoveEndSound);
+
 PROPERTYOWNERSHIPSAFETYFAKER(AHuman, Attachable, SetHead);
 PROPERTYOWNERSHIPSAFETYFAKER(AHuman, AEmitter, SetJetpack);
 PROPERTYOWNERSHIPSAFETYFAKER(AHuman, Arm, SetFGArm);
@@ -1162,10 +1167,10 @@ int LuaMan::Initialize() {
 			.def("CloseDoor", &ADoor::CloseDoor)
 			.def("StopDoor", &ADoor::StopDoor)
 			.def("SetClosedByDefault", &ADoor::SetClosedByDefault)
-			.property("DoorMoveStartSound", &ADoor::GetDoorMoveStartSound, &ADoor::SetDoorMoveStartSound, detail::null_type(), adopt(_2))
-			.property("DoorMoveSound", &ADoor::GetDoorMoveSound, &ADoor::SetDoorMoveSound, detail::null_type(), adopt(_2))
-			.property("DoorDirectionChangeSound", &ADoor::GetDoorDirectionChangeSound, &ADoor::SetDoorDirectionChangeSound, detail::null_type(), adopt(_2))
-			.property("DoorMoveEndSound", &ADoor::GetDoorMoveEndSound, &ADoor::SetDoorMoveEndSound, detail::null_type(), adopt(_2)),
+			.property("DoorMoveStartSound", &ADoor::GetDoorMoveStartSound, &ADoor::SetDoorMoveStartSound)
+			.property("DoorMoveSound", &ADoor::GetDoorMoveSound, &ADoor::SetDoorMoveSound)
+			.property("DoorDirectionChangeSound", &ADoor::GetDoorDirectionChangeSound, &ADoor::SetDoorDirectionChangeSound)
+			.property("DoorMoveEndSound", &ADoor::GetDoorMoveEndSound, &ADoor::SetDoorMoveEndSound),
 
 		CONCRETELUABINDING(Arm, Attachable)
             .property("HeldDevice", &Arm::GetHeldMO)

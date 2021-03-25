@@ -367,6 +367,9 @@ PROPERTYOWNERSHIPSAFETYFAKER(Attachable, AEmitter, SetBreakWound);
 PROPERTYOWNERSHIPSAFETYFAKER(Attachable, AEmitter, SetParentBreakWound);
 
 PROPERTYOWNERSHIPSAFETYFAKER(AEmitter, Attachable, SetFlash);
+PROPERTYOWNERSHIPSAFETYFAKER(AEmitter, SoundContainer, SetEmissionSound);
+PROPERTYOWNERSHIPSAFETYFAKER(AEmitter, SoundContainer, SetBurstSound);
+PROPERTYOWNERSHIPSAFETYFAKER(AEmitter, SoundContainer, SetEndSound);
 
 PROPERTYOWNERSHIPSAFETYFAKER(ADoor, Attachable, SetDoor);
 
@@ -978,9 +981,9 @@ int LuaMan::Initialize() {
         CONCRETELUABINDING(AEmitter, Attachable)
             .def("IsEmitting", &AEmitter::IsEmitting)
             .def("EnableEmission", &AEmitter::EnableEmission)
-			.property("EmissionSound", &AEmitter::GetEmissionSound, &AEmitter::SetEmissionSound, detail::null_type(), adopt(_2))
-			.property("BurstSound", &AEmitter::GetBurstSound, &AEmitter::SetBurstSound, detail::null_type(), adopt(_2))
-			.property("EndSound", &AEmitter::GetEndSound, &AEmitter::SetEndSound, detail::null_type(), adopt(_2))
+			.property("EmissionSound", &AEmitter::GetEmissionSound, &AEmitter::SetEmissionSound)
+			.property("BurstSound", &AEmitter::GetBurstSound, &AEmitter::SetBurstSound)
+			.property("EndSound", &AEmitter::GetEndSound, &AEmitter::SetEndSound)
             .property("BurstScale", &AEmitter::GetBurstScale, &AEmitter::SetBurstScale)
             .property("EmitAngle", &AEmitter::GetEmitAngle, &AEmitter::SetEmitAngle)
             .property("GetThrottle", &AEmitter::GetThrottle, &AEmitter::SetThrottle)

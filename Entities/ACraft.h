@@ -574,25 +574,25 @@ enum
 	void GibThis(const Vector &impactImpulse = Vector(), MovableObject *movableObjectToIgnore = nullptr) override;
 
 	/// <summary>
-	/// Gets this ACraft's hatch open sound. Ownership is not transferred!
+	/// Gets this ACraft's hatch open sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this ACraft's hatch open sound.</returns>
 	SoundContainer * GetHatchOpenSound() const { return m_HatchOpenSound; }
 
 	/// <summary>
-	/// Sets this ACraft's hatch open sound.
+	/// Sets this ACraft's hatch open sound. Ownership IS transferred!
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for this ACraft's hatch open sound.</param>
 	void SetHatchOpenSound(SoundContainer *newSound) { m_HatchOpenSound = newSound; }
 
 	/// <summary>
-	/// Gets this ACraft's crash sound. Ownership is not transferred!
+	/// Gets this ACraft's crash sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this ACraft's crash sound.</returns>
 	SoundContainer * GetCrashSound() const { return m_CrashSound; }
 
 	/// <summary>
-	/// Sets this ACraft's crash sound.
+	/// Sets this ACraft's crash sound. Ownership IS transferred!
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for this ACraft's crash sound.</param>
 	void SetCrashSound(SoundContainer *newSound) { m_CrashSound = newSound; }

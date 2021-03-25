@@ -516,13 +516,13 @@ int FirearmActivationDelay() const;
 
 
 	/// <summary>
-	/// Gets this ACrab's stride sound. Ownership is not transferred!
+	/// Gets this ACrab's stride sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this ACrab's stride sound.</returns>
 	SoundContainer * GetStrideSound() const { return m_StrideSound; }
 
 	/// <summary>
-	/// Sets this ACrab's stride sound.
+	/// Sets this ACrab's stride sound. Ownership IS transferred!
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for this ACrab's stride sound.</param>
 	void SetStrideSound(SoundContainer *newSound) { m_StrideSound = newSound; }

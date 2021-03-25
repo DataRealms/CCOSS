@@ -1199,66 +1199,64 @@ ClassInfoGetters
 
 
 	/// <summary>
-	/// Gets this Actor's body hit sound. Ownership is not transferred!
+	/// Gets this Actor's body hit sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this Actor's body hit sound.</returns>
 	SoundContainer * GetBodyHitSound() const { return m_BodyHitSound; }
 
 	/// <summary>
-	/// Sets this Actor's body hit sound.
+	/// Sets this Actor's body hit sound. Ownership IS transferred!
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for this Actor's body hit sound.</param>
 	void SetBodyHitSound(SoundContainer *newSound) { m_BodyHitSound = newSound; }
 
 	/// <summary>
-	/// Gets this Actor's alarm sound. Ownership is not transferred!
+	/// Gets this Actor's alarm sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this Actor's alarm sound.</returns>
 	SoundContainer * GetAlarmSound() const { return m_AlarmSound; }
 
 	/// <summary>
-	/// Sets this Actor's alarm sound.
+	/// Sets this Actor's alarm sound. Ownership IS transferred!
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for this Actor's alarm sound.</param>
 	void SetAlarmSound(SoundContainer *newSound) { m_AlarmSound = newSound; }
 
 	/// <summary>
-	/// Gets this Actor's pain sound. Ownership is not transferred!
+	/// Gets this Actor's pain sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this Actor's pain sound.</returns>
 	SoundContainer * GetPainSound() const { return m_PainSound; }
 
 	/// <summary>
-	/// Sets this Actor's pain sound.
+	/// Sets this Actor's pain sound. Ownership IS transferred!
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for this Actor's pain sound.</param>
 	void SetPainSound(SoundContainer *newSound) { m_PainSound = newSound; }
 
 	/// <summary>
-	/// Gets this Actor's death sound. Ownership is not transferred!
+	/// Gets this Actor's death sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this Actor's death sound.</returns>
 	SoundContainer * GetDeathSound() const { return m_DeathSound; }
 
 	/// <summary>
-	/// Sets this Actor's death sound.
+	/// Sets this Actor's death sound. Ownership IS transferred!
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for this Actor's death sound.</param>
 	void SetDeathSound(SoundContainer *newSound) { m_DeathSound = newSound; }
 
 	/// <summary>
-	/// Gets this Actor's device switch sound. Ownership is not transferred!
+	/// Gets this Actor's device switch sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this Actor's device switch sound.</returns>
 	SoundContainer * GetDeviceSwitchSound() const { return m_DeviceSwitchSound; }
 
 	/// <summary>
-	/// Sets this Actor's device switch sound.
+	/// Sets this Actor's device switch sound. Ownership IS transferred!
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for this Actor's device switch sound.</param>
 	void SetDeviceSwitchSound(SoundContainer *newSound) { m_DeviceSwitchSound = newSound; }
-
-
 
 	/// <summary>
 	/// Gets the X and Y thresholds for how fast the actor can travel before losing stability.

@@ -428,97 +428,97 @@ ClassInfoGetters
 	void SetMuzzleOffset(Vector newOffset) override { m_MuzzleOff = newOffset; }
 
 	/// <summary>
-	/// Gets this HDFirearm's pre fire sound. Ownership is not transferred!
+	/// Gets this HDFirearm's pre fire sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this HDFirearm's pre fire sound.</returns>
 	SoundContainer * GetPreFireSound() const { return m_PreFireSound; }
 
 	/// <summary>
-	/// Sets this HDFirearm's pre fire sound.
+	/// Sets this HDFirearm's pre fire sound. Ownership IS transferred!
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for this HDFirearm's pre fire sound.</param>
 	void SetPreFireSound(SoundContainer *newSound) { m_PreFireSound = newSound; }
 
 	/// <summary>
-	/// Gets this HDFirearm's fire sound. Ownership is not transferred!
+	/// Gets this HDFirearm's fire sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this HDFirearm's fire sound.</returns>
 	SoundContainer * GetFireSound() const { return m_FireSound; }
 
 	/// <summary>
-	/// Sets this HDFirearm's fire sound.
+	/// Sets this HDFirearm's fire sound. Ownership IS transferred!
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for this HDFirearm's fire sound.</param>
 	void SetFireSound(SoundContainer *newSound) { m_FireSound = newSound; }
 
 	/// <summary>
-	/// Gets this HDFirearm's fire echo sound. Ownership is not transferred!
+	/// Gets this HDFirearm's fire echo sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this HDFirearm's fire echo sound.</returns>
 	SoundContainer * GetFireEchoSound() const { return m_FireEchoSound; }
 
 	/// <summary>
-	/// Sets this HDFirearm's fire echo sound.
+	/// Sets this HDFirearm's fire echo sound. Ownership IS transferred!
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for this HDFirearm's fire echo sound.</param>
 	void SetFireEchoSound(SoundContainer *newSound) { m_FireEchoSound = newSound; }
 
 	/// <summary>
-	/// Gets this HDFirearm's active sound. Ownership is not transferred!
+	/// Gets this HDFirearm's active sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this HDFirearm's active sound.</returns>
 	SoundContainer * GetActiveSound() const { return m_ActiveSound; }
 
 	/// <summary>
-	/// Sets this HDFirearm's active sound.
+	/// Sets this HDFirearm's active sound. Ownership IS transferred!
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for this HDFirearm's active sound.</param>
 	void SetActiveSound(SoundContainer *newSound) { m_ActiveSound = newSound; }
 
 	/// <summary>
-	/// Gets this HDFirearm's deactivation sound. Ownership is not transferred!
+	/// Gets this HDFirearm's deactivation sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this HDFirearm's deactivation sound.</returns>
 	SoundContainer * GetDeactivationSound() const { return m_DeactivationSound; }
 
 	/// <summary>
-	/// Sets this HDFirearm's deactivation sound.
+	/// Sets this HDFirearm's deactivation sound. Ownership IS transferred!
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for this HDFirearm's deactivation sound.</param>
 	void SetDeactivationSound(SoundContainer *newSound) { m_DeactivationSound = newSound; }
 
 	/// <summary>
-	/// Gets this HDFirearm's empty sound. Ownership is not transferred!
+	/// Gets this HDFirearm's empty sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this HDFirearm's empty sound.</returns>
 	SoundContainer * GetEmptySound() const { return m_EmptySound; }
 
 	/// <summary>
-	/// Sets this HDFirearm's empty sound.
+	/// Sets this HDFirearm's empty sound. Ownership IS transferred!
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for this HDFirearm's empty sound.</param>
 	void SetEmptySound(SoundContainer *newSound) { m_EmptySound = newSound; }
 
 	/// <summary>
-	/// Gets this HDFirearm's reload start sound. Ownership is not transferred!
+	/// Gets this HDFirearm's reload start sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this HDFirearm's reload start sound.</returns>
 	SoundContainer * GetReloadStartSound() const { return m_ReloadStartSound; }
 
 	/// <summary>
-	/// Sets this HDFirearm's reload start sound.
+	/// Sets this HDFirearm's reload start sound. Ownership IS transferred!
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for this HDFirearm's reload start sound.</param>
 	void SetReloadStartSound(SoundContainer *newSound) { m_ReloadStartSound = newSound; }
 
 	/// <summary>
-	/// Gets this HDFirearm's reload end sound. Ownership is not transferred!
+	/// Gets this HDFirearm's reload end sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this HDFirearm's reload end sound.</returns>
 	SoundContainer * GetReloadEndSound() const { return m_ReloadEndSound; }
 
 	/// <summary>
-	/// Sets this HDFirearm's reload end sound.
+	/// Sets this HDFirearm's reload end sound. Ownership IS transferred!
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for this HDFirearm's reload end sound.</param>
 	void SetReloadEndSound(SoundContainer *newSound) { m_ReloadEndSound = newSound; }

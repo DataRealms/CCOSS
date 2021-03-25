@@ -415,6 +415,14 @@ PROPERTYOWNERSHIPSAFETYFAKER(ACRocket, AEmitter, SetURightThruster);
 
 PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, Magazine, SetMagazine);
 PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, Attachable, SetFlash);
+PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetPreFireSound);
+PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetFireSound);
+PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetFireEchoSound);
+PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetActiveSound);
+PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetDeactivationSound);
+PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetEmptySound);
+PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetReloadStartSound);
+PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetReloadEndSound);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1476,14 +1484,14 @@ int LuaMan::Initialize() {
             .property("RoundInMagCount", &HDFirearm::GetRoundInMagCount)
             .property("Magazine", &HDFirearm::GetMagazine, &HDFirearmSetMagazine)
             .property("Flash", &HDFirearm::GetFlash, &HDFirearmSetFlash)
-			.property("FireSound", &HDFirearm::GetFireSound, &HDFirearm::SetFireSound, detail::null_type(), adopt(_2))
-			.property("FireEchoSound", &HDFirearm::GetFireEchoSound, &HDFirearm::SetFireEchoSound, detail::null_type(), adopt(_2))
-			.property("EmptySound", &HDFirearm::GetEmptySound, &HDFirearm::SetEmptySound, detail::null_type(), adopt(_2))
-			.property("ReloadStartSound", &HDFirearm::GetReloadStartSound, &HDFirearm::SetReloadStartSound, detail::null_type(), adopt(_2))
-			.property("ReloadEndSound", &HDFirearm::GetReloadEndSound, &HDFirearm::SetReloadEndSound, detail::null_type(), adopt(_2))
-			.property("ActiveSound", &HDFirearm::GetActiveSound, &HDFirearm::SetActiveSound, detail::null_type(), adopt(_2))
-			.property("DeactivationSound", &HDFirearm::GetDeactivationSound, &HDFirearm::SetDeactivationSound, detail::null_type(), adopt(_2))
-			.property("PreFireSound", &HDFirearm::GetPreFireSound, &HDFirearm::SetPreFireSound, detail::null_type(), adopt(_2))
+			.property("PreFireSound", &HDFirearm::GetPreFireSound, &HDFirearm::SetPreFireSound)
+			.property("FireSound", &HDFirearm::GetFireSound, &HDFirearm::SetFireSound)
+			.property("FireEchoSound", &HDFirearm::GetFireEchoSound, &HDFirearm::SetFireEchoSound)
+			.property("ActiveSound", &HDFirearm::GetActiveSound, &HDFirearm::SetActiveSound)
+			.property("DeactivationSound", &HDFirearm::GetDeactivationSound, &HDFirearm::SetDeactivationSound)
+			.property("EmptySound", &HDFirearm::GetEmptySound, &HDFirearm::SetEmptySound)
+			.property("ReloadStartSound", &HDFirearm::GetReloadStartSound, &HDFirearm::SetReloadStartSound)
+			.property("ReloadEndSound", &HDFirearm::GetReloadEndSound, &HDFirearm::SetReloadEndSound)
             .property("ActivationDelay", &HDFirearm::GetActivationDelay, &HDFirearm::SetActivationDelay)
             .property("DeactivationDelay", &HDFirearm::GetDeactivationDelay, &HDFirearm::SetDeactivationDelay)
             .property("ReloadTime", &HDFirearm::GetReloadTime, &HDFirearm::SetReloadTime)

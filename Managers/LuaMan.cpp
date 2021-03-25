@@ -401,6 +401,9 @@ PROPERTYOWNERSHIPSAFETYFAKER(ACrab, SoundContainer, SetStrideSound);
 
 PROPERTYOWNERSHIPSAFETYFAKER(Turret, HeldDevice, SetMountedDevice);
 
+PROPERTYOWNERSHIPSAFETYFAKER(ACraft, SoundContainer, SetHatchOpenSound);
+PROPERTYOWNERSHIPSAFETYFAKER(ACraft, SoundContainer, SetCrashSound);
+
 PROPERTYOWNERSHIPSAFETYFAKER(ACDropShip, AEmitter, SetRightThruster);
 PROPERTYOWNERSHIPSAFETYFAKER(ACDropShip, AEmitter, SetLeftThruster);
 PROPERTYOWNERSHIPSAFETYFAKER(ACDropShip, AEmitter, SetURightThruster);
@@ -1392,8 +1395,8 @@ int LuaMan::Initialize() {
             .def("OpenHatch", &ACraft::OpenHatch)
             .def("CloseHatch", &ACraft::CloseHatch)
             .property("HatchState", &ACraft::GetHatchState)
-			.property("HatchOpenSound", &ACraft::GetHatchOpenSound, &ACraft::SetHatchOpenSound, detail::null_type(), adopt(_2))
-			.property("CrashSound", &ACraft::GetCrashSound, &ACraft::SetCrashSound, detail::null_type(), adopt(_2))
+			.property("HatchOpenSound", &ACraft::GetHatchOpenSound, &ACraft::SetHatchOpenSound)
+			.property("CrashSound", &ACraft::GetCrashSound, &ACraft::SetCrashSound)
             .property("MaxPassengers", &ACraft::GetMaxPassengers)
             .property("DeliveryDelayMultiplier", &ACraft::GetDeliveryDelayMultiplier),
 

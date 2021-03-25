@@ -386,6 +386,7 @@ PROPERTYOWNERSHIPSAFETYFAKER(AHuman, Leg, SetFGLeg);
 PROPERTYOWNERSHIPSAFETYFAKER(AHuman, Leg, SetBGLeg);
 PROPERTYOWNERSHIPSAFETYFAKER(AHuman, Attachable, SetFGFoot);
 PROPERTYOWNERSHIPSAFETYFAKER(AHuman, Attachable, SetBGFoot);
+PROPERTYOWNERSHIPSAFETYFAKER(AHuman, SoundContainer, SetStrideSound);
 
 PROPERTYOWNERSHIPSAFETYFAKER(ACrab, Turret, SetTurret);
 PROPERTYOWNERSHIPSAFETYFAKER(ACrab, AEmitter, SetJetpack);
@@ -393,6 +394,7 @@ PROPERTYOWNERSHIPSAFETYFAKER(ACrab, Leg, SetLeftFGLeg);
 PROPERTYOWNERSHIPSAFETYFAKER(ACrab, Leg, SetLeftBGLeg);
 PROPERTYOWNERSHIPSAFETYFAKER(ACrab, Leg, SetRightFGLeg);
 PROPERTYOWNERSHIPSAFETYFAKER(ACrab, Leg, SetRightBGLeg);
+PROPERTYOWNERSHIPSAFETYFAKER(ACrab, SoundContainer, SetStrideSound);
 
 PROPERTYOWNERSHIPSAFETYFAKER(Turret, HeldDevice, SetMountedDevice);
 
@@ -1234,7 +1236,7 @@ int LuaMan::Initialize() {
             .property("BGLeg", &AHuman::GetBGLeg, &AHumanSetBGLeg)
 			.property("FGFoot", &AHuman::GetFGFoot, &AHumanSetFGFoot)
 			.property("BGFoot", &AHuman::GetBGFoot, &AHumanSetBGFoot)
-			.property("StrideSound", &AHuman::GetStrideSound, &AHuman::SetStrideSound, detail::null_type(), adopt(_2))
+			.property("StrideSound", &AHuman::GetStrideSound, &AHuman::SetStrideSound)
             .property("JetTimeTotal", &AHuman::GetJetTimeTotal, &AHuman::SetJetTimeTotal)
             .property("JetTimeLeft", &AHuman::GetJetTimeLeft, &AHuman::SetJetTimeLeft)
 			.property("ThrowPrepTime", &AHuman::GetThrowPrepTime, &AHuman::SetThrowPrepTime)
@@ -1327,8 +1329,8 @@ int LuaMan::Initialize() {
             .property("LeftBGLeg", &ACrab::GetLeftBGLeg, &ACrabSetLeftBGLeg)
             .property("RightFGLeg", &ACrab::GetRightFGLeg, &ACrabSetRightFGLeg)
             .property("RightBGLeg", &ACrab::GetRightBGLeg, &ACrabSetRightBGLeg)
-			.property("StrideSound", &ACrab::GetStrideSound, &ACrab::SetStrideSound, detail::null_type(), adopt(_2))
-            .property("JetTimeTotal", &ACrab::GetJetTimeTotal, &ACrab::SetJetTimeTotal)
+			.property("StrideSound", &ACrab::GetStrideSound, &ACrab::SetStrideSound)
+			.property("JetTimeTotal", &ACrab::GetJetTimeTotal, &ACrab::SetJetTimeTotal)
             .property("JetTimeLeft", &ACrab::GetJetTimeLeft)
             .property("EquippedItem", &ACrab::GetEquippedItem)
             .property("FirearmIsReady", &ACrab::FirearmIsReady)

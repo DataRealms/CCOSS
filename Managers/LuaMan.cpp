@@ -872,7 +872,6 @@ int LuaMan::Initialize() {
 			.def_readonly("Attachables", &MOSRotating::m_Attachables, return_stl_iterator)
 			.def_readonly("Wounds", &MOSRotating::m_Wounds, return_stl_iterator),
 
-
         CONCRETELUABINDING(Attachable, MOSRotating)
             .def("IsAttached", &Attachable::IsAttached)
             .def("IsAttachedTo", &Attachable::IsAttachedTo)
@@ -925,7 +924,6 @@ int LuaMan::Initialize() {
             .def("IsSetToBurst", &AEmitter::IsSetToBurst)
             .def("CanTriggerBurst", &AEmitter::CanTriggerBurst)
 			.def_readwrite("Emissions", &AEmitter::m_EmissionList, return_stl_iterator),
-
 
 		CONCRETELUABINDING(PEmitter, MOSParticle)
 			.def("IsEmitting", &PEmitter::IsEmitting)
@@ -1067,7 +1065,6 @@ int LuaMan::Initialize() {
             .property("AimDistance", &Actor::GetAimDistance, &Actor::SetAimDistance)
 			.property("SightDistance", &Actor::GetSightDistance, &Actor::SetSightDistance),
 
-
 		CONCRETELUABINDING(ADoor, Actor)
 			.enum_("DoorState")[
 				value("CLOSED", ADoor::DoorState::CLOSED),
@@ -1205,7 +1202,6 @@ int LuaMan::Initialize() {
 			.def("SetLimbPathSpeed", &AHuman::SetLimbPathSpeed)
 			.def("GetRotAngleTarget", &AHuman::GetRotAngleTarget)
 			.def("SetRotAngleTarget", &AHuman::SetRotAngleTarget),
-
         
 		CONCRETELUABINDING(ACrab, Actor)
 			// These are all private/protected so they can't be bound, need to consider making them public.
@@ -1285,7 +1281,6 @@ int LuaMan::Initialize() {
 			.def("GetLimbPathSpeed", &ACrab::GetLimbPathSpeed)
 			.def("SetLimbPathSpeed", &ACrab::SetLimbPathSpeed),
 
-
         CONCRETELUABINDING(Turret, Attachable)
 			.property("MountedDevice", &Turret::GetMountedDevice, &Turret::SetMountedDevice, detail::null_type(), adopt(_2)),
 
@@ -1323,7 +1318,6 @@ int LuaMan::Initialize() {
 			.property("CrashSound", &ACraft::GetCrashSound, &ACraft::SetCrashSound, detail::null_type(), adopt(_2))
             .property("MaxPassengers", &ACraft::GetMaxPassengers)
             .property("DeliveryDelayMultiplier", &ACraft::GetDeliveryDelayMultiplier),
-
 
         CONCRETELUABINDING(ACDropShip, ACraft)
             .property("RightEngine", &ACDropShip::GetRightThruster, &ACDropShip::SetRightThruster, detail::null_type(), adopt(_2))
@@ -1442,7 +1436,6 @@ int LuaMan::Initialize() {
             .def("SetNextMagazineName", &HDFirearm::SetNextMagazineName)
 			.property("IsAnimatedManually", &HDFirearm::IsAnimatedManually, &HDFirearm::SetAnimatedManually)
 			.property("RecoilTransmission", &HDFirearm::GetJointStiffness, &HDFirearm::SetJointStiffness),
-
 
         CONCRETELUABINDING(ThrownDevice, HeldDevice)
             .property("MinThrowVel", &ThrownDevice::GetMinThrowVel, &ThrownDevice::SetMinThrowVel)

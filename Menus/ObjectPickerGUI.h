@@ -152,10 +152,17 @@ namespace RTE {
 		void Draw(BITMAP *drawBitmap) const;
 #pragma endregion
 
-	protected:
+	private:
 
-		static BITMAP *s_Cursor; //!< The cursor image shared by all pickers.
-		Vector m_CursorPos; //!< Screen position of the cursor.
+		/// <summary>
+		/// Enumeration for ObjectPicker states when enabling/disabling the ObjectPicker.
+		/// </summary>
+		enum PickerState { Enabling, Enabled, Disabling, Disabled };
+
+		/// <summary>
+		/// Enumeration for the ObjectPicker columns ListBox focus states.
+		/// </summary>
+		enum PickerFocus { GroupList, ObjectList };
 
 		/// <summary>
 		/// Custom deleters for std::unique_ptr members. Must be defined to avoid including the class headers and just rely on forward declaration.
@@ -163,6 +170,9 @@ namespace RTE {
 		struct GUIScreenDeleter { void operator()(GUIScreen *ptr) const; };
 		struct GUIInputDeleter { void operator()(GUIInput *ptr) const; };
 		struct GUIControlManagerDeleter { void operator()(GUIControlManager *ptr) const; };
+
+		static BITMAP *s_Cursor; //!< The cursor image shared by all pickers.
+		Vector m_CursorPos; //!< Screen position of the cursor.
 
 		std::unique_ptr<GUIScreen, GUIScreenDeleter> m_GUIScreen; //!< GUI Screen for use by the in-game GUI.
 		std::unique_ptr<GUIInput, GUIInputDeleter> m_GUIInput; //!< Input controller.
@@ -176,6 +186,7 @@ namespace RTE {
 		Controller *m_Controller; //!< Controller which controls this menu. Not owned.
 
 		int m_PickerState; //!< Visibility state of the object picker.
+		PickerFocus m_PickerFocus; //!< The currently focused list in the Picker.
 		float m_OpenCloseSpeed; //!< Speed at which the picker appears and disappears.
 
 		int m_ModuleSpaceID; //!< The DataModule ID of the non-official module that this picker should be restricted to, in addition to all the official modules as well. If -1, the picker will be able to pick from ALL loaded DataModules.
@@ -191,20 +202,6 @@ namespace RTE {
 		Timer m_RepeatTimer; //!< Measures the interval between input repeats.
 
 		std::vector<bool> m_ExpandedModules; //!< The modules that have been expanded in the item list.
-
-	private:
-
-		/// <summary>
-		/// Enumeration for ObjectPicker states when enabling/disabling the ObjectPicker.
-		/// </summary>
-		enum PickerState { Enabling, Enabled, Disabling, Disabled };
-
-		/// <summary>
-		/// Enumeration for the ObjectPicker columns ListBox focus states.
-		/// </summary>
-		enum PickerFocus { GroupList, ObjectList };
-
-		PickerFocus m_PickerFocus; //!< The currently focused list in the Picker.
 
 #pragma region List Handling
 		/// <summary>

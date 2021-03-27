@@ -137,13 +137,6 @@ namespace RTE {
 
 		bool keyPressed = g_UInputMan.AnyStartPress();
 
-		// Reset the key press states
-		g_UInputMan.Update();
-		g_TimerMan.Update();
-		g_TimerMan.UpdateSim();
-		g_ConsoleMan.Update();
-		g_AudioMan.Update();
-
 		m_ActiveScreen = m_TitleScreen->Update(keyPressed);
 		bool quitResult = false;
 

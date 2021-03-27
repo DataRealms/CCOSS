@@ -50,7 +50,6 @@ using namespace RTE;
 /// Global variables.
 /// </summary>
 
-
 volatile bool g_Quit = false;
 bool g_ResetRTE = false; //!< Signals to reset the entire RTE next iteration.
 bool g_LaunchIntoEditor = false; //!< Flag for launching directly into editor activity.
@@ -190,50 +189,6 @@ bool EnterEditorActivity(const std::string &editorToEnter) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /// <summary>
-/// Load and display the into, title and menu sequence.
-/// </summary>
-/// <returns></returns>
-bool PlayIntroTitle() {
-	// Untrap the mouse and keyboard
-	g_UInputMan.DisableKeys(false);
-	g_UInputMan.TrapMousePos(false);
-
-	// Don't stop the music if reiniting after a resolution change
-	if (!g_FrameMan.ResolutionChanged()) { g_AudioMan.StopAll(); }
-
-	//g_FrameMan.ClearBackBuffer32();
-	//g_FrameMan.FlipFrameBuffers();
-
-	while (!g_Quit && /*g_IntroState != END &&*/ !g_ResumeActivity) {
-		g_MenuMan.Update();
-
-		if (g_NetworkServer.IsServerModeEnabled()) { g_NetworkServer.Update(); }
-
-		g_MenuMan.Draw();
-
-		////////////////////////////////
-		// Additional user input and skipping handling
-		/*
-		if (g_IntroState >= FADEIN && g_IntroState <= SHOWSLIDE8 && keyPressed) {
-			g_IntroState = MENUAPPEAR;
-			sectionSwitch = true;
-
-			scrollOffset.m_Y = preMenuYOffset;
-			orbitRotation = c_HalfPI - c_EighthPI;
-
-			orbitRotation = -c_PI * 1.20;
-		}
-		*/
-	}
-
-	if (g_FrameMan.ResolutionChanged()) { PlayIntroTitle(); }
-
-	return true;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/// <summary>
 /// Orders to reset the entire Retro Terrain Engine system next iteration.
 /// </summary>
 void ResetRTE() { g_ResetRTE = true; }
@@ -245,6 +200,34 @@ void ResetRTE() { g_ResetRTE = true; }
 /// </summary>
 /// <returns>Whether the RTE is about to reset next iteration of the loop or not.</returns>
 bool IsResettingRTE() { return g_ResetRTE; }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/// <summary>
+/// Game menus loop.
+/// </summary>
+/// <returns></returns>
+bool RunMenuLoop() {
+	g_UInputMan.DisableKeys(false);
+	g_UInputMan.TrapMousePos(false);
+
+	// Don't stop the music if reinitializing after a resolution change
+	if (!g_FrameMan.ResolutionChanged()) { g_AudioMan.StopAll(); }
+
+	while (!g_Quit && /*g_IntroState != END &&*/ !g_ResumeActivity) {
+		g_UInputMan.Update();
+		g_TimerMan.Update();
+		g_TimerMan.UpdateSim();
+		g_AudioMan.Update();
+
+		g_MenuMan.Update();
+
+		if (g_NetworkServer.IsServerModeEnabled()) { g_NetworkServer.Update(); }
+
+		g_MenuMan.Draw();
+	}
+	return true;
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -313,7 +296,7 @@ bool RunGameLoop() {
 						//g_IntroState = MAINTOSCENARIO;
 					}
 				}
-				PlayIntroTitle();
+				RunMenuLoop();
 			}
 			// Resetting the simulation
 			if (g_ResetActivity) {
@@ -477,13 +460,9 @@ int main(int argc, char **argv) {
 			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetDevice(InputDevice::DEVICE_MOUSE_KEYB);
 			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetPreset(InputPreset::PRESET_WASDKEYS);
 			// Start the specified editor activity.
-			if (!EnterEditorActivity(g_EditorToLaunch)) {
-				//g_IntroState = g_SettingsMan.SkipIntro() ? MENUAPPEAR : START;
-				PlayIntroTitle();
-			}
+			if (!EnterEditorActivity(g_EditorToLaunch)) { RunMenuLoop(); }
 		} else if (!g_SettingsMan.LaunchIntoActivity()) {
-			//g_IntroState = g_SettingsMan.SkipIntro() ? MENUAPPEAR : START;
-			PlayIntroTitle();
+			RunMenuLoop();
 		}
 	} else {
 		// NETWORK Create multiplayer lobby activity to start as default if server is running
@@ -491,7 +470,7 @@ int main(int argc, char **argv) {
 	}
 
     // If we fail to start/reset the activity, then revert to the intro/menu
-    if (!ResetActivity()) { PlayIntroTitle(); }
+    if (!ResetActivity()) { RunMenuLoop(); }
 	
     RunGameLoop();
 

@@ -46,36 +46,36 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::Clear() {
-		m_pController = 0;
-		m_pGUIScreen = 0;
-		m_pGUIInput = 0;
-		m_pGUIController = 0;
+		m_pController = nullptr;
+		m_pGUIScreen = nullptr;
+		m_pGUIInput = nullptr;
+		m_pGUIController = nullptr;
 		m_MenuEnabled = ENABLED;
 		m_MenuScreen = MAINSCREEN;
 		m_ScreenChange = false;
 		m_MainMenuFocus = CAMPAIGN;
 		m_FocusChange = 0;
-		m_MenuSpeed = 0.3;
+		m_MenuSpeed = 0.3F;
 		m_ListItemIndex = 0;
 		m_BlinkTimer.Reset();
 		m_BlinkMode = NOBLINK;
 		for (int screen = 0; screen < SCREENCOUNT; ++screen) {
-			m_apScreenBox[screen] = 0;
+			m_apScreenBox.at(screen) = nullptr;
 		}
 		for (int button = 0; button < MAINMENUBUTTONCOUNT; ++button) {
-			m_MainMenuButtons[button] = 0;
+			m_MainMenuButtons.at(button) = nullptr;
 		}
-		m_pTeamBox = 0;
-		m_pSceneSelector = 0;
+		m_pTeamBox = nullptr;
+		m_pSceneSelector = nullptr;
 		for (int box = 0; box < SKIRMISHPLAYERCOUNT; ++box) {
-			m_aSkirmishBox[box] = 0;
+			m_aSkirmishBox.at(box) = nullptr;
 		}
 		for (int button = 0; button < SKIRMISHPLAYERCOUNT; ++button) {
-			m_aSkirmishButton[button] = 0;
+			m_aSkirmishButton.at(button) = nullptr;
 		}
-		m_pCPUTeamLabel = 0;
-		m_pEditorPanel = 0;
-		m_pScrollPanel = 0;
+		m_pCPUTeamLabel = nullptr;
+		m_pEditorPanel = nullptr;
+		m_pScrollPanel = nullptr;
 		m_ScrollTimer.Reset();
 		m_ScenarioStarted = false;
 		m_CampaignStarted = false;
@@ -86,7 +86,7 @@ namespace RTE {
 		m_StartTeams = 2;
 		m_StartFunds = 1600;
 		for (int player = Players::PlayerOne; player < SKIRMISHPLAYERCOUNT; ++player) {
-			m_aTeamAssignments[player] = Activity::TeamOne;
+			m_aTeamAssignments.at(player) = Activity::TeamOne;
 		}
 		m_CPUTeam = -1;
 		m_StartDifficulty = Activity::MediumDifficulty;
@@ -94,7 +94,7 @@ namespace RTE {
 
 		// Editor screen
 		for (int button = 0; button < EDITORBUTTONCOUNT; ++button) {
-			m_aEditorButton[button] = 0;
+			m_aEditorButton.at(button) = nullptr;
 		}
 	}
 
@@ -111,25 +111,25 @@ namespace RTE {
 		m_pGUIController->Load("Base.rte/GUIs/MainMenuGUI.ini");
 
 		// Make sure we have convenient points to the containing GUI collection boxes that we will manipulate the positions of
-		m_apScreenBox[ROOT] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("root"));
-		m_apScreenBox[MAINSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("MainScreen"));
-		m_apScreenBox[PLAYERSSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PlayersScreen"));
-		m_apScreenBox[SKIRMISHSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("SkirmishScreen"));
-		m_apScreenBox[DIFFICULTYSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("DifficultyScreen"));
-		m_apScreenBox[OPTIONSSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("OptionsScreen"));
-		m_apScreenBox[CONFIGSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("ConfigScreen"));
-		m_apScreenBox[EDITORSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("EditorScreen"));
-		m_apScreenBox[METASCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("MetaScreen"));
-		m_apScreenBox[CREDITSSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CreditsScreen"));
-		m_apScreenBox[QUITSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("QuitConfirmBox"));
-		m_apScreenBox[MODMANAGERSCREEN] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("ModManagerScreen"));
+		m_apScreenBox.at(ROOT) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("root"));
+		m_apScreenBox.at(MAINSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("MainScreen"));
+		m_apScreenBox.at(PLAYERSSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PlayersScreen"));
+		m_apScreenBox.at(SKIRMISHSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("SkirmishScreen"));
+		m_apScreenBox.at(DIFFICULTYSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("DifficultyScreen"));
+		m_apScreenBox.at(OPTIONSSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("OptionsScreen"));
+		m_apScreenBox.at(CONFIGSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("ConfigScreen"));
+		m_apScreenBox.at(EDITORSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("EditorScreen"));
+		m_apScreenBox.at(METASCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("MetaScreen"));
+		m_apScreenBox.at(CREDITSSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CreditsScreen"));
+		m_apScreenBox.at(QUITSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("QuitConfirmBox"));
+		m_apScreenBox.at(MODMANAGERSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("ModManagerScreen"));
 
-		m_apScreenBox[ROOT]->SetPositionAbs((g_FrameMan.GetResX() - m_apScreenBox[ROOT]->GetWidth()) / 2, 0);// (g_FrameMan.GetResY() - m_apScreenBox[ROOT]->GetHeight()) / 2);
+		m_apScreenBox.at(ROOT)->SetPositionAbs((g_FrameMan.GetResX() - m_apScreenBox.at(ROOT)->GetWidth()) / 2, 0);// (g_FrameMan.GetResY() - m_apScreenBox.at(ROOT)->GetHeight()) / 2);
 	// NO, this screws up the menu positioning!
-	//    m_apScreenBox[ROOT]->Resize(mapScreenBox[ROOT]->GetWidth(), g_FrameMan.GetResY());
+	//    m_apScreenBox.at(ROOT)->Resize(mapScreenBox.at(ROOT)->GetWidth(), g_FrameMan.GetResY());
 
 		// Set up screens' initial positions and visibility
-		m_apScreenBox[QUITSCREEN]->CenterInParent(true, true);
+		m_apScreenBox.at(QUITSCREEN)->CenterInParent(true, true);
 		// Hide all screens, the appropriate screen will reappear on next update
 		HideAllScreens();
 
@@ -138,41 +138,41 @@ namespace RTE {
 		// Credits scrolling panel
 		m_pScrollPanel = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("CreditsPanel"));
 
-		m_MainMenuButtons[CAMPAIGN] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToCampaign"));
-		m_MainMenuButtons[SKIRMISH] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToSkirmish"));
-		m_MainMenuButtons[MULTIPLAYER] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToMultiplayer"));
-		m_MainMenuButtons[OPTIONS] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToOptions"));
-		m_MainMenuButtons[MODMANAGER] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToModManager"));
-		m_MainMenuButtons[EDITOR] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToEditor"));
-		m_MainMenuButtons[CREDITS] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToCreds"));
-		m_MainMenuButtons[QUIT] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonQuit"));
-		m_MainMenuButtons[RESUME] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonResume"));
-		m_MainMenuButtons[PLAYTUTORIAL] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonTutorial"));
-		m_MainMenuButtons[METACONTINUE] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonContinue"));
-		m_MainMenuButtons[BACKTOMAIN] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonBackToMain"));
-		m_MainMenuButtons[QUITCONFIRM] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("QuitConfirmButton"));
-		m_MainMenuButtons[QUITCANCEL] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("QuitCancelButton"));
-		m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
-		m_MainMenuButtons[PLAYTUTORIAL]->SetVisible(false);
-		m_MainMenuButtons[METACONTINUE]->SetVisible(false);
+		m_MainMenuButtons.at(CAMPAIGN) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToCampaign"));
+		m_MainMenuButtons.at(SKIRMISH) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToSkirmish"));
+		m_MainMenuButtons.at(MULTIPLAYER) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToMultiplayer"));
+		m_MainMenuButtons.at(OPTIONS) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToOptions"));
+		m_MainMenuButtons.at(MODMANAGER) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToModManager"));
+		m_MainMenuButtons.at(EDITOR) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToEditor"));
+		m_MainMenuButtons.at(CREDITS) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonMainToCreds"));
+		m_MainMenuButtons.at(QUIT) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonQuit"));
+		m_MainMenuButtons.at(RESUME) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonResume"));
+		m_MainMenuButtons.at(PLAYTUTORIAL) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonTutorial"));
+		m_MainMenuButtons.at(METACONTINUE) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonContinue"));
+		m_MainMenuButtons.at(BACKTOMAIN) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonBackToMain"));
+		m_MainMenuButtons.at(QUITCONFIRM) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("QuitConfirmButton"));
+		m_MainMenuButtons.at(QUITCANCEL) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("QuitCancelButton"));
+		m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(false);
+		m_MainMenuButtons.at(PLAYTUTORIAL)->SetVisible(false);
+		m_MainMenuButtons.at(METACONTINUE)->SetVisible(false);
 
 		m_pSceneSelector = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("ComboScene"));
 		m_pTeamBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PanelTeams"));
-		m_aSkirmishBox[P1TEAM] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PanelP1Team"));
-		m_aSkirmishBox[P2TEAM] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PanelP2Team"));
-		m_aSkirmishBox[P3TEAM] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PanelP3Team"));
-		m_aSkirmishBox[P4TEAM] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PanelP4Team"));
-		m_aSkirmishButton[P1TEAM] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP1Team"));
-		m_aSkirmishButton[P2TEAM] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP2Team"));
-		m_aSkirmishButton[P3TEAM] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP3Team"));
-		m_aSkirmishButton[P4TEAM] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP4Team"));
+		m_aSkirmishBox.at(P1TEAM) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PanelP1Team"));
+		m_aSkirmishBox.at(P2TEAM) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PanelP2Team"));
+		m_aSkirmishBox.at(P3TEAM) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PanelP3Team"));
+		m_aSkirmishBox.at(P4TEAM) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PanelP4Team"));
+		m_aSkirmishButton.at(P1TEAM) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP1Team"));
+		m_aSkirmishButton.at(P2TEAM) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP2Team"));
+		m_aSkirmishButton.at(P3TEAM) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP3Team"));
+		m_aSkirmishButton.at(P4TEAM) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP4Team"));
 		m_pCPUTeamLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelCPUTeam"));
 
-		m_aEditorButton[SCENEEDITOR] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonSceneEditor"));
-		m_aEditorButton[AREAEDITOR] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonAreaEditor"));
-		m_aEditorButton[ASSEMBLYEDITOR] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonAssemblyEditor"));
-		m_aEditorButton[GIBEDITOR] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonGibPlacement"));
-		m_aEditorButton[ACTOREDITOR] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonActorEditor"));
+		m_aEditorButton.at(SCENEEDITOR) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonSceneEditor"));
+		m_aEditorButton.at(AREAEDITOR) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonAreaEditor"));
+		m_aEditorButton.at(ASSEMBLYEDITOR) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonAssemblyEditor"));
+		m_aEditorButton.at(GIBEDITOR) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonGibPlacement"));
+		m_aEditorButton.at(ACTOREDITOR) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonActorEditor"));
 
 		m_pMetaNoticeLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("MetaLabel"));
 
@@ -186,7 +186,7 @@ namespace RTE {
 		std::string creditsText = creditsReader.WholeFileAsString();
 
 		// TODO: Get Unicode going!
-			// Hack here to change the special characters over 128 in the ansi ascii table to match our font files
+			// Hack here to change the special characters over 128 in the ANSI ASCII table to match our font files
 		for (string::iterator sItr = creditsText.begin(); sItr != creditsText.end(); ++sItr) {
 			if (*sItr == -60) { (*sItr) = (char)142; } //'Ä'
 			if (*sItr == -42) { (*sItr) = (char)153; } //'Ö'
@@ -255,16 +255,16 @@ namespace RTE {
 		if (g_UInputMan.KeyPressed(KEY_ESC)) {
 			if (m_MenuScreen == OPTIONSSCREEN || m_MenuScreen == MODMANAGERSCREEN || m_MenuScreen == EDITORSCREEN || m_MenuScreen == CREDITSSCREEN) {
 				HideAllScreens();
-				m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
+				m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(false);
 				m_MenuScreen = MAINSCREEN;
 				m_ScreenChange = true;
 				g_GUISound.BackButtonPressSound()->Play();
 
 				if (m_MenuScreen == OPTIONSSCREEN) {
-					//g_SettingsMan.SetFlashOnBrainDamage(m_aOptionsCheckbox[FLASHONBRAINDAMAGE]->GetCheck());
-					//g_SettingsMan.SetBlipOnRevealUnseen(m_aOptionsCheckbox[BLIPONREVEALUNSEEN]->GetCheck());
-					//g_SettingsMan.SetShowForeignItems(m_aOptionsCheckbox[SHOWFOREIGNITEMS]->GetCheck());
-					//g_SettingsMan.SetShowToolTips(m_aOptionsCheckbox[SHOWTOOLTIPS]->GetCheck());
+					//g_SettingsMan.SetFlashOnBrainDamage(m_aOptionsCheckbox.at(FLASHONBRAINDAMAGE)->GetCheck());
+					//g_SettingsMan.SetBlipOnRevealUnseen(m_aOptionsCheckbox.at(BLIPONREVEALUNSEEN)->GetCheck());
+					//g_SettingsMan.SetShowForeignItems(m_aOptionsCheckbox.at(SHOWFOREIGNITEMS)->GetCheck());
+					//g_SettingsMan.SetShowToolTips(m_aOptionsCheckbox.at(SHOWTOOLTIPS)->GetCheck());
 					g_SettingsMan.UpdateSettingsFile();
 				} else if (m_MenuScreen == MODMANAGERSCREEN) {
 					g_SettingsMan.UpdateSettingsFile();
@@ -287,30 +287,30 @@ namespace RTE {
 
 		if (m_MenuScreen == MAINSCREEN) {
 			if (m_ScreenChange) {
-				m_apScreenBox[MAINSCREEN]->SetVisible(true);
+				m_apScreenBox.at(MAINSCREEN)->SetVisible(true);
 
 				if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing)) {
-					m_apScreenBox[MAINSCREEN]->Resize(128, 220);
-					m_MainMenuButtons[RESUME]->SetVisible(true);
+					m_apScreenBox.at(MAINSCREEN)->Resize(128, 220);
+					m_MainMenuButtons.at(RESUME)->SetVisible(true);
 				} else {
-					m_apScreenBox[MAINSCREEN]->Resize(128, 196);
-					m_MainMenuButtons[RESUME]->SetVisible(false);
+					m_apScreenBox.at(MAINSCREEN)->Resize(128, 196);
+					m_MainMenuButtons.at(RESUME)->SetVisible(false);
 				}
 				// Restore the label on the campaign button
-				m_MainMenuButtons[CAMPAIGN]->SetText("Metagame (WIP)");
+				m_MainMenuButtons.at(CAMPAIGN)->SetText("MetaGame (WIP)");
 
-				m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
-				m_MainMenuButtons[PLAYTUTORIAL]->SetVisible(false);
-				m_MainMenuButtons[METACONTINUE]->SetVisible(false);
+				m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(false);
+				m_MainMenuButtons.at(PLAYTUTORIAL)->SetVisible(false);
+				m_MainMenuButtons.at(METACONTINUE)->SetVisible(false);
 				m_ScreenChange = false;
 			}
 
 			// Blink the resume button to show the game is still going
-			if (m_MainMenuButtons[RESUME]->GetVisible()) {
+			if (m_MainMenuButtons.at(RESUME)->GetVisible()) {
 				if (m_BlinkTimer.AlternateReal(500)) {
-					m_MainMenuButtons[RESUME]->SetFocus();
+					m_MainMenuButtons.at(RESUME)->SetFocus();
 				} else {
-					m_pGUIController->GetManager()->SetFocus(0);
+					m_pGUIController->GetManager()->SetFocus(nullptr);
 				}
 			}
 		}
@@ -320,12 +320,12 @@ namespace RTE {
 
 		else if (m_MenuScreen == PLAYERSSCREEN) {
 			if (m_ScreenChange) {
-				m_apScreenBox[PLAYERSSCREEN]->SetVisible(true);
-				m_MainMenuButtons[BACKTOMAIN]->SetVisible(true);
+				m_apScreenBox.at(PLAYERSSCREEN)->SetVisible(true);
+				m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(true);
 				m_ScreenChange = false;
 			}
 
-			//        m_MainMenuButtons[BACKTOMAIN]->SetFocus();
+			//        m_MainMenuButtons.at(BACKTOMAIN)->SetFocus();
 		}
 
 		//////////////////////////////////////
@@ -333,21 +333,21 @@ namespace RTE {
 
 		else if (m_MenuScreen == SKIRMISHSCREEN) {
 			if (m_ScreenChange) {
-				m_apScreenBox[SKIRMISHSCREEN]->SetVisible(true);
+				m_apScreenBox.at(SKIRMISHSCREEN)->SetVisible(true);
 				// Set up the list of scenes to choose from
 				UpdateScenesBox();
 				//            m_pGUIController->GetControl("ButtonStartSkirmish")->SetVisible(true);
 				UpdateTeamBoxes();
 				// Move main menu button over so the start button fits
-				m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(200, 280);
-				m_MainMenuButtons[BACKTOMAIN]->SetVisible(true);
+				m_MainMenuButtons.at(BACKTOMAIN)->SetPositionRel(200, 280);
+				m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(true);
 				m_ScreenChange = false;
 			}
 
 			//        for (int box = 0; box < SKIRMISHPLAYERCOUNT; ++box)
-			//            m_aSkirmishBox[box] = 0;
+			//            m_aSkirmishBox.at(box) = 0;
 
-			//        m_MainMenuButtons[BACKTOMAIN]->SetFocus();
+			//        m_MainMenuButtons.at(BACKTOMAIN)->SetFocus();
 		}
 
 		//////////////////////////////////////
@@ -355,12 +355,12 @@ namespace RTE {
 
 		else if (m_MenuScreen == DIFFICULTYSCREEN) {
 			if (m_ScreenChange) {
-				m_apScreenBox[DIFFICULTYSCREEN]->SetVisible(true);
-				m_MainMenuButtons[BACKTOMAIN]->SetVisible(true);
+				m_apScreenBox.at(DIFFICULTYSCREEN)->SetVisible(true);
+				m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(true);
 				m_ScreenChange = false;
 			}
 
-			//        m_MainMenuButtons[BACKTOMAIN]->SetFocus();
+			//        m_MainMenuButtons.at(BACKTOMAIN)->SetFocus();
 		}
 
 		//////////////////////////////////////
@@ -368,10 +368,10 @@ namespace RTE {
 
 		else if (m_MenuScreen == OPTIONSSCREEN) {
 			if (m_ScreenChange) {
-				m_apScreenBox[OPTIONSSCREEN]->SetVisible(true);
-				m_MainMenuButtons[BACKTOMAIN]->SetVisible(true);
-				m_apScreenBox[OPTIONSSCREEN]->GUIPanel::AddChild(m_MainMenuButtons[BACKTOMAIN]);
-				m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(180, 220);
+				m_apScreenBox.at(OPTIONSSCREEN)->SetVisible(true);
+				m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(true);
+				m_apScreenBox.at(OPTIONSSCREEN)->GUIPanel::AddChild(m_MainMenuButtons.at(BACKTOMAIN));
+				m_MainMenuButtons.at(BACKTOMAIN)->SetPositionRel(180, 220);
 				//m_pBackToOptionsButton->SetVisible(false);
 				//UpdateDeviceLabels();
 				m_ScreenChange = false;
@@ -383,8 +383,8 @@ namespace RTE {
 
 		else if (m_MenuScreen == CONFIGSCREEN) {
 			if (m_ScreenChange) {
-				m_apScreenBox[CONFIGSCREEN]->SetVisible(true);
-				m_MainMenuButtons[BACKTOMAIN]->SetVisible(false);
+				m_apScreenBox.at(CONFIGSCREEN)->SetVisible(true);
+				m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(false);
 				//m_pBackToOptionsButton->SetVisible(true);
 				// Let this pass through, UpdateConfigScreen uses it
 				//m_ScreenChange = false;
@@ -398,7 +398,7 @@ namespace RTE {
 		// MOD MANAGER SCREEN
 
 		else if (m_MenuScreen == MODMANAGERSCREEN) {
-			if (m_ScreenChange) { m_apScreenBox[MODMANAGERSCREEN]->SetVisible(true); }
+			if (m_ScreenChange) { m_apScreenBox.at(MODMANAGERSCREEN)->SetVisible(true); }
 		}
 
 		//////////////////////////////////////
@@ -406,10 +406,10 @@ namespace RTE {
 
 		else if (m_MenuScreen == EDITORSCREEN) {
 			if (m_ScreenChange) {
-				m_apScreenBox[EDITORSCREEN]->SetVisible(true);
-				m_MainMenuButtons[BACKTOMAIN]->SetVisible(true);
-				m_apScreenBox[EDITORSCREEN]->GUIPanel::AddChild(m_MainMenuButtons[BACKTOMAIN]);
-				m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(4, 145);
+				m_apScreenBox.at(EDITORSCREEN)->SetVisible(true);
+				m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(true);
+				m_apScreenBox.at(EDITORSCREEN)->GUIPanel::AddChild(m_MainMenuButtons.at(BACKTOMAIN));
+				m_MainMenuButtons.at(BACKTOMAIN)->SetPositionRel(4, 145);
 				m_ScreenChange = false;
 			}
 		}
@@ -419,10 +419,10 @@ namespace RTE {
 
 		else if (m_MenuScreen == CREDITSSCREEN) {
 			if (m_ScreenChange) {
-				m_apScreenBox[CREDITSSCREEN]->SetVisible(true);
-				m_MainMenuButtons[BACKTOMAIN]->SetVisible(true);
-				m_apScreenBox[CREDITSSCREEN]->GUIPanel::AddChild(m_MainMenuButtons[BACKTOMAIN]);
-				m_MainMenuButtons[BACKTOMAIN]->SetPositionRel(240, 298);
+				m_apScreenBox.at(CREDITSSCREEN)->SetVisible(true);
+				m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(true);
+				m_apScreenBox.at(CREDITSSCREEN)->GUIPanel::AddChild(m_MainMenuButtons.at(BACKTOMAIN));
+				m_MainMenuButtons.at(BACKTOMAIN)->SetPositionRel(240, 298);
 				m_pScrollPanel->SetPositionRel(0, 0);
 				m_CreditsLabel->SetPositionRel(0, m_pScrollPanel->GetHeight());
 				m_ScrollTimer.Reset();
@@ -439,7 +439,7 @@ namespace RTE {
 				m_ScrollTimer.Reset();
 			}
 
-			//        m_MainMenuButtons[BACKTOMAIN]->SetFocus();
+			//        m_MainMenuButtons.at(BACKTOMAIN)->SetFocus();
 		}
 
 		//////////////////////////////////////
@@ -447,9 +447,9 @@ namespace RTE {
 
 		else if (m_MenuScreen == METASCREEN) {
 			if (m_ScreenChange) {
-				m_apScreenBox[METASCREEN]->SetVisible(true);
-				m_MainMenuButtons[PLAYTUTORIAL]->SetVisible(true);
-				m_MainMenuButtons[METACONTINUE]->SetVisible(true);
+				m_apScreenBox.at(METASCREEN)->SetVisible(true);
+				m_MainMenuButtons.at(PLAYTUTORIAL)->SetVisible(true);
+				m_MainMenuButtons.at(METACONTINUE)->SetVisible(true);
 				m_pMetaNoticeLabel->SetText("- A T T E N T I O N -\n\nPlease note that the Campaign is in an INCOMPLETE, fully playable, yet still imperfect state!\nAs such, it is lacking some polish, audio, and game balancing, and we will be upgrading it significantly in future.\nThat said, you can absolutely enjoy fighting the A.I. and/or up to three friends in co-op, 2 vs 2, etc.\n\nAlso, if you have not yet played Cortex Command, we recommend you first try the tutorial:");
 				m_pMetaNoticeLabel->SetVisible(true);
 				// Flag that this notice has now been shown once, so no need to keep showing it
@@ -457,7 +457,7 @@ namespace RTE {
 				m_ScreenChange = false;
 			}
 
-			//        m_MainMenuButtons[BACKTOMAIN]->SetFocus();
+			//        m_MainMenuButtons.at(BACKTOMAIN)->SetFocus();
 		}
 
 		//////////////////////////////////////
@@ -465,11 +465,11 @@ namespace RTE {
 
 		else if (m_MenuScreen == QUITSCREEN) {
 			if (m_ScreenChange) {
-				m_apScreenBox[QUITSCREEN]->SetVisible(true);
+				m_apScreenBox.at(QUITSCREEN)->SetVisible(true);
 				m_ScreenChange = false;
 			}
 
-			//        m_MainMenuButtons[QUITCONFIRM]->SetFocus();
+			//        m_MainMenuButtons.at(QUITCONFIRM)->SetFocus();
 		}
 
 		//////////////////////////////////////////
@@ -485,21 +485,21 @@ namespace RTE {
 			// Commands
 			if (anEvent.GetType() == GUIEvent::Command) {
 				// Campaign button pressed
-				if (anEvent.GetControl() == m_MainMenuButtons[CAMPAIGN]) {
+				if (anEvent.GetControl() == m_MainMenuButtons.at(CAMPAIGN)) {
 					/*
-									// Disable the campaign button for now
-									if (m_MainMenuButtons[CAMPAIGN]->GetText() == "Campaign")
-									{
-										m_MainMenuButtons[CAMPAIGN]->SetText("COMING SOON!");
-										g_GUISound.ExitMenuSound()->Play();
-									}
-									else
-									{
-										m_MainMenuButtons[CAMPAIGN]->SetText("Campaign");
-										g_GUISound.ButtonPressSound()->Play();
-									}
+						// Disable the campaign button for now
+						if (m_MainMenuButtons.at(CAMPAIGN)->GetText() == "Campaign")
+						{
+							m_MainMenuButtons.at(CAMPAIGN)->SetText("COMING SOON!");
+							g_GUISound.ExitMenuSound()->Play();
+						}
+						else
+						{
+							m_MainMenuButtons.at(CAMPAIGN)->SetText("Campaign");
+							g_GUISound.ButtonPressSound()->Play();
+						}
 					*/
-					// Show the metagame notice screen if it hasn't already been shown yet
+					// Show the MetaGame notice screen if it hasn't already been shown yet
 					if (!m_TutorialOffered)
 						m_MenuScreen = METASCREEN;
 					// Start the campaign right away!
@@ -514,7 +514,7 @@ namespace RTE {
 				}
 
 				// Skirmish button pressed
-				if (anEvent.GetControl() == m_MainMenuButtons[SKIRMISH]) {
+				if (anEvent.GetControl() == m_MainMenuButtons.at(SKIRMISH)) {
 					m_ScenarioStarted = true;
 					m_CampaignStarted = false;
 
@@ -529,7 +529,7 @@ namespace RTE {
 					//                g_GUISound.ExitMenuSound()->Play();
 				}
 
-				if (anEvent.GetControl() == m_MainMenuButtons[MULTIPLAYER]) {
+				if (anEvent.GetControl() == m_MainMenuButtons.at(MULTIPLAYER)) {
 					m_ScenarioStarted = true;
 					m_CampaignStarted = false;
 
@@ -556,7 +556,7 @@ namespace RTE {
 				}
 
 				// Options button pressed
-				if (anEvent.GetControl() == m_MainMenuButtons[OPTIONS]) {
+				if (anEvent.GetControl() == m_MainMenuButtons.at(OPTIONS)) {
 					// Hide all screens, the appropriate screen will reappear on next update
 					HideAllScreens();
 					m_MenuScreen = OPTIONSSCREEN;
@@ -566,7 +566,7 @@ namespace RTE {
 				}
 
 				// Editor button pressed
-				if (anEvent.GetControl() == m_MainMenuButtons[EDITOR]) {
+				if (anEvent.GetControl() == m_MainMenuButtons.at(EDITOR)) {
 					m_CampaignStarted = false;
 
 					if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
@@ -581,7 +581,7 @@ namespace RTE {
 				}
 
 				// Editor button pressed
-				if (anEvent.GetControl() == m_MainMenuButtons[MODMANAGER]) {
+				if (anEvent.GetControl() == m_MainMenuButtons.at(MODMANAGER)) {
 					// Hide all screens, the appropriate screen will reappear on next update
 					HideAllScreens();
 					m_MenuScreen = MODMANAGERSCREEN;
@@ -591,7 +591,7 @@ namespace RTE {
 				}
 
 				// Credits button pressed
-				if (anEvent.GetControl() == m_MainMenuButtons[CREDITS]) {
+				if (anEvent.GetControl() == m_MainMenuButtons.at(CREDITS)) {
 					// Hide all screens, the appropriate screen will reappear on next update
 					HideAllScreens();
 					m_MenuScreen = CREDITSSCREEN;
@@ -601,13 +601,13 @@ namespace RTE {
 				}
 
 				// Quit button pressed
-				if (anEvent.GetControl() == m_MainMenuButtons[QUIT]) {
+				if (anEvent.GetControl() == m_MainMenuButtons.at(QUIT)) {
 					QuitLogic();
 					g_GUISound.ButtonPressSound()->Play();
 				}
 
 				// Resume button pressed
-				if (anEvent.GetControl() == m_MainMenuButtons[RESUME]) {
+				if (anEvent.GetControl() == m_MainMenuButtons.at(RESUME)) {
 					m_ActivityResumed = true;
 
 					g_GUISound.ExitMenuSound()->Play();
@@ -649,12 +649,12 @@ namespace RTE {
 				if (m_MenuScreen == SKIRMISHSCREEN) {
 					for (int player = Players::PlayerOne; player < SKIRMISHPLAYERCOUNT; ++player) {
 						// Player team toggle button
-						if (anEvent.GetControl() == m_aSkirmishButton[player]) {
+						if (anEvent.GetControl() == m_aSkirmishButton.at(player)) {
 							// Toggle
-							if (m_aTeamAssignments[player] == Activity::TeamOne) {
-								m_aTeamAssignments[player] = Activity::TeamTwo;
+							if (m_aTeamAssignments.at(player) == Activity::TeamOne) {
+								m_aTeamAssignments.at(player) = Activity::TeamTwo;
 							} else {
-								m_aTeamAssignments[player] = Activity::TeamOne;
+								m_aTeamAssignments.at(player) = Activity::TeamOne;
 							}
 							UpdateTeamBoxes();
 
@@ -722,11 +722,11 @@ namespace RTE {
 				// EDITOR SCREEN BUTTONS
 
 				if (m_MenuScreen == EDITORSCREEN &&
-					(anEvent.GetControl() == m_aEditorButton[SCENEEDITOR] ||
-						anEvent.GetControl() == m_aEditorButton[AREAEDITOR] ||
-						anEvent.GetControl() == m_aEditorButton[ASSEMBLYEDITOR] ||
-						anEvent.GetControl() == m_aEditorButton[GIBEDITOR] ||
-						anEvent.GetControl() == m_aEditorButton[ACTOREDITOR])) {
+					(anEvent.GetControl() == m_aEditorButton.at(SCENEEDITOR) ||
+						anEvent.GetControl() == m_aEditorButton.at(AREAEDITOR) ||
+						anEvent.GetControl() == m_aEditorButton.at(ASSEMBLYEDITOR) ||
+						anEvent.GetControl() == m_aEditorButton.at(GIBEDITOR) ||
+						anEvent.GetControl() == m_aEditorButton.at(ACTOREDITOR))) {
 					// Hide all screens, the appropriate screen will reappear on next update
 					HideAllScreens();
 					m_MenuScreen = MAINSCREEN;
@@ -735,15 +735,15 @@ namespace RTE {
 					m_ActivityRestarted = true;
 
 					// Create and start the appropriate editor Activity
-					if (anEvent.GetControl() == m_aEditorButton[SCENEEDITOR]) {
+					if (anEvent.GetControl() == m_aEditorButton.at(SCENEEDITOR)) {
 						StartSceneEditor();
-					} else if (anEvent.GetControl() == m_aEditorButton[AREAEDITOR]) {
+					} else if (anEvent.GetControl() == m_aEditorButton.at(AREAEDITOR)) {
 						StartAreaEditor();
-					} else if (anEvent.GetControl() == m_aEditorButton[ASSEMBLYEDITOR]) {
+					} else if (anEvent.GetControl() == m_aEditorButton.at(ASSEMBLYEDITOR)) {
 						StartAssemblyEditor();
-					} else if (anEvent.GetControl() == m_aEditorButton[GIBEDITOR]) {
+					} else if (anEvent.GetControl() == m_aEditorButton.at(GIBEDITOR)) {
 						StartGibEditor();
-					} else if (anEvent.GetControl() == m_aEditorButton[ACTOREDITOR]) {
+					} else if (anEvent.GetControl() == m_aEditorButton.at(ACTOREDITOR)) {
 						StartActorEditor();
 					}
 
@@ -756,7 +756,7 @@ namespace RTE {
 
 				if (m_MenuScreen == METASCREEN) {
 					// Play tutorial button pressed
-					if (anEvent.GetControl() == m_MainMenuButtons[PLAYTUTORIAL]) {
+					if (anEvent.GetControl() == m_MainMenuButtons.at(PLAYTUTORIAL)) {
 						// Hide all screens, the appropriate screen will reappear on next update
 						HideAllScreens();
 						m_MenuScreen = MAINSCREEN;
@@ -772,7 +772,7 @@ namespace RTE {
 						g_GUISound.ButtonPressSound()->Play();
 					}
 					// Go to registration dialog button
-					else if (anEvent.GetControl() == m_MainMenuButtons[METACONTINUE]) {
+					else if (anEvent.GetControl() == m_MainMenuButtons.at(METACONTINUE)) {
 						m_CampaignStarted = true;
 
 						// Hide all screens, and stay in main menu for if/when player comes back to the main menu
@@ -795,7 +795,7 @@ namespace RTE {
 
 				if (m_MenuScreen == QUITSCREEN) {
 					// Confirm quitting of game
-					if (anEvent.GetControl() == m_MainMenuButtons[QUITCONFIRM]) {
+					if (anEvent.GetControl() == m_MainMenuButtons.at(QUITCONFIRM)) {
 						m_Quit = true;
 
 						// Hide all screens, the appropriate screen will reappear on next update
@@ -805,7 +805,7 @@ namespace RTE {
 						g_GUISound.ButtonPressSound()->Play();
 					}
 					// Cancel quitting
-					else if (anEvent.GetControl() == m_MainMenuButtons[QUITCANCEL]) {
+					else if (anEvent.GetControl() == m_MainMenuButtons.at(QUITCANCEL)) {
 						// Hide all screens, the appropriate screen will reappear on next update
 						HideAllScreens();
 						m_MenuScreen = MAINSCREEN;
@@ -919,7 +919,7 @@ namespace RTE {
 
 	void MainMenuGUI::HideAllScreens() {
 		for (int iscreen = MAINSCREEN; iscreen < SCREENCOUNT; ++iscreen) {
-			if (m_apScreenBox[iscreen]) { m_apScreenBox[iscreen]->SetVisible(false); }
+			if (m_apScreenBox.at(iscreen)) { m_apScreenBox.at(iscreen)->SetVisible(false); }
 		}
 		m_ScreenChange = true;
 	}
@@ -957,7 +957,7 @@ namespace RTE {
 				GABrainMatch *pNewGame = new GABrainMatch;
 
 				for (int player = Players::PlayerOne; player < m_StartPlayers; ++player) {
-					pNewGame->SetTeamOfPlayer(player, m_aTeamAssignments[player]);
+					pNewGame->SetTeamOfPlayer(player, m_aTeamAssignments.at(player));
 				}
 				pNewGame->SetCPUTeam(m_CPUTeam);
 				pNewGame->Create();
@@ -971,7 +971,7 @@ namespace RTE {
 				RTEAssert(pNewGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
 
 				for (int player = Players::PlayerOne; player < m_StartPlayers; ++player) {
-					pNewGame->SetTeamOfPlayer(player, m_aTeamAssignments[player]);
+					pNewGame->SetTeamOfPlayer(player, m_aTeamAssignments.at(player));
 				}
 				pNewGame->SetCPUTeam(m_CPUTeam);
 				pNewGame->SetDifficulty(m_StartDifficulty);
@@ -1017,8 +1017,8 @@ namespace RTE {
 
 		// Hide all team assignment panels initially, and center their contents
 		for (int box = 0; box < SKIRMISHPLAYERCOUNT; ++box) {
-			m_aSkirmishBox[box]->SetVisible(false);
-			m_aSkirmishButton[box]->CenterInParent(true, true);
+			m_aSkirmishBox.at(box)->SetVisible(false);
+			m_aSkirmishButton.at(box)->CenterInParent(true, true);
 		}
 
 		// Total area size
@@ -1029,24 +1029,24 @@ namespace RTE {
 		// Single team to set up for single player
 		if (m_StartPlayers == 1) {
 			// Show and resize
-			m_aSkirmishBox[P1TEAM]->Resize(areaWidth, areaHeight);
-			m_aSkirmishButton[P1TEAM]->CenterInParent(true, true);
-			m_aSkirmishBox[P1TEAM]->SetVisible(true);
+			m_aSkirmishBox.at(P1TEAM)->Resize(areaWidth, areaHeight);
+			m_aSkirmishButton.at(P1TEAM)->CenterInParent(true, true);
+			m_aSkirmishBox.at(P1TEAM)->SetVisible(true);
 		}
 		// Two player split one above the other
 		else if (m_StartPlayers == 2) {
 			int boxHeight = (areaHeight - 4) / 2;
 
 			// Player 1
-			m_aSkirmishBox[P1TEAM]->Resize(areaWidth, boxHeight);
-			m_aSkirmishButton[P1TEAM]->CenterInParent(true, true);
-			m_aSkirmishBox[P1TEAM]->SetVisible(true);
+			m_aSkirmishBox.at(P1TEAM)->Resize(areaWidth, boxHeight);
+			m_aSkirmishButton.at(P1TEAM)->CenterInParent(true, true);
+			m_aSkirmishBox.at(P1TEAM)->SetVisible(true);
 
 			// Player 2
-			m_aSkirmishBox[P2TEAM]->Resize(areaWidth, boxHeight);
-			m_aSkirmishBox[P2TEAM]->SetPositionRel(0, boxHeight + 4);
-			m_aSkirmishButton[P2TEAM]->CenterInParent(true, true);
-			m_aSkirmishBox[P2TEAM]->SetVisible(true);
+			m_aSkirmishBox.at(P2TEAM)->Resize(areaWidth, boxHeight);
+			m_aSkirmishBox.at(P2TEAM)->SetPositionRel(0, boxHeight + 4);
+			m_aSkirmishButton.at(P2TEAM)->CenterInParent(true, true);
+			m_aSkirmishBox.at(P2TEAM)->SetVisible(true);
 		}
 		// Four-way split, either three or four players
 		else if (m_StartPlayers >= 3) {
@@ -1054,33 +1054,33 @@ namespace RTE {
 			int boxHeight = (areaHeight - 4) / 2;
 
 			// Player 1
-			m_aSkirmishBox[P1TEAM]->Resize(boxWidth, boxHeight);
-			m_aSkirmishButton[P1TEAM]->CenterInParent(true, true);
-			m_aSkirmishBox[P1TEAM]->SetVisible(true);
+			m_aSkirmishBox.at(P1TEAM)->Resize(boxWidth, boxHeight);
+			m_aSkirmishButton.at(P1TEAM)->CenterInParent(true, true);
+			m_aSkirmishBox.at(P1TEAM)->SetVisible(true);
 
 			// Player 2
-			m_aSkirmishBox[P2TEAM]->Resize(boxWidth, boxHeight);
-			m_aSkirmishBox[P2TEAM]->SetPositionRel(boxWidth + 4, 0);
-			m_aSkirmishButton[P2TEAM]->CenterInParent(true, true);
-			m_aSkirmishBox[P2TEAM]->SetVisible(true);
+			m_aSkirmishBox.at(P2TEAM)->Resize(boxWidth, boxHeight);
+			m_aSkirmishBox.at(P2TEAM)->SetPositionRel(boxWidth + 4, 0);
+			m_aSkirmishButton.at(P2TEAM)->CenterInParent(true, true);
+			m_aSkirmishBox.at(P2TEAM)->SetVisible(true);
 
 			// Player 3
-			m_aSkirmishBox[P3TEAM]->SetVisible(true);
+			m_aSkirmishBox.at(P3TEAM)->SetVisible(true);
 
 			// Player 4
-			if (m_StartPlayers == 4) { m_aSkirmishBox[P4TEAM]->SetVisible(true); }
+			if (m_StartPlayers == 4) { m_aSkirmishBox.at(P4TEAM)->SetVisible(true); }
 		}
 
 		// Update button labels
 		for (int player = Players::PlayerOne; player < SKIRMISHPLAYERCOUNT; ++player) {
-			if (m_aTeamAssignments[player] == Activity::TeamOne) {
-				m_aSkirmishBox[player]->SetDrawColor(makecol(70, 27, 12));
+			if (m_aTeamAssignments.at(player) == Activity::TeamOne) {
+				m_aSkirmishBox.at(player)->SetDrawColor(makecol(70, 27, 12));
 				std::snprintf(str, sizeof(str), "Player %i: %c", player + 1, -62);
 			} else {
-				m_aSkirmishBox[player]->SetDrawColor(makecol(47, 55, 40));
+				m_aSkirmishBox.at(player)->SetDrawColor(makecol(47, 55, 40));
 				std::snprintf(str, sizeof(str), "Player %i: %c", player + 1, -59);
 			}
-			m_aSkirmishButton[player]->SetText(str);
+			m_aSkirmishButton.at(player)->SetText(str);
 		}
 
 		////////////////////////////////
@@ -1090,9 +1090,9 @@ namespace RTE {
 		int team0Count = 0;
 		int team1Count = 0;
 		for (int player = Players::PlayerOne; player < m_StartPlayers; ++player) {
-			if (m_aTeamAssignments[player] == 0) {
+			if (m_aTeamAssignments.at(player) == 0) {
 				team0Count++;
-			} else if (m_aTeamAssignments[player] == 1) {
+			} else if (m_aTeamAssignments.at(player) == 1) {
 				team1Count++;
 			}
 		}
@@ -1114,27 +1114,27 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::StartActorEditor() { StartEditorActivity(new ActorEditor); }
+	void MainMenuGUI::StartActorEditor() const { StartEditorActivity(new ActorEditor); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::StartGibEditor() { StartEditorActivity(new GibEditor); }
+	void MainMenuGUI::StartGibEditor() const { StartEditorActivity(new GibEditor); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::StartSceneEditor() { StartEditorActivity(new SceneEditor); }
+	void MainMenuGUI::StartSceneEditor() const { StartEditorActivity(new SceneEditor); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::StartAreaEditor() { StartEditorActivity(new AreaEditor); }
+	void MainMenuGUI::StartAreaEditor() const { StartEditorActivity(new AreaEditor); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::StartAssemblyEditor() { StartEditorActivity(new AssemblyEditor); }
+	void MainMenuGUI::StartAssemblyEditor() const { StartEditorActivity(new AssemblyEditor); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::StartEditorActivity(EditorActivity *editorActivityToStart) {
+	void MainMenuGUI::StartEditorActivity(EditorActivity *editorActivityToStart) const {
 		g_SceneMan.SetSceneToLoad("Editor Scene");
 		editorActivityToStart->Create();
 		editorActivityToStart->SetEditorMode(EditorActivity::LOADDIALOG);

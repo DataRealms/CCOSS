@@ -83,37 +83,37 @@ namespace RTE {
 		/// Reports whether the menu is enabled or not.
 		/// </summary>
 		/// <returns></returns>
-		bool IsEnabled() { return m_MenuEnabled == ENABLED || m_MenuEnabled == ENABLING; }
+		bool IsEnabled() const { return m_MenuEnabled == ENABLED || m_MenuEnabled == ENABLING; }
 
 		/// <summary>
 		/// Reports whether the player has decided to start playing a Scenario this frame.
 		/// </summary>
 		/// <returns>Whether the Scenario mode should be started.</returns>
-		bool ScenarioStarted() { return m_ScenarioStarted; }
+		bool ScenarioStarted() const { return m_ScenarioStarted; }
 
 		/// <summary>
 		/// Reports whether the player has decided to start playing a Campaign this frame.
 		/// </summary>
 		/// <returns>Whether the Campaign mode should be started.</returns>
-		bool CampaignStarted() { return m_CampaignStarted; }
+		bool CampaignStarted() const { return m_CampaignStarted; }
 
 		/// <summary>
 		/// Reports whether the player has decided to restart an activity this frame. All parameters for the new game has been fed into ActivityMan already.
 		/// </summary>
 		/// <returns>Whether the activity should be restarted.</returns>
-		bool ActivityRestarted() { return m_ActivityRestarted; }
+		bool ActivityRestarted() const { return m_ActivityRestarted; }
 
 		/// <summary>
 		/// Reports whether the player has decided to resume the current activity.
 		/// </summary>
 		/// <returns>Whether the activity should be resumed.</returns>
-		bool ActivityResumed() { return m_ActivityResumed; }
+		bool ActivityResumed() const { return m_ActivityResumed; }
 
 		/// <summary>
 		/// Reports whether the player has decided to quit the program.
 		/// </summary>
 		/// <returns>Whether the program has been commanded to shit down by the user.</returns>
-		bool QuitProgram() { return m_Quit; }
+		bool QuitProgram() const { return m_Quit; }
 
 		/// <summary>
 		/// Updates the state of this Menu each frame.
@@ -130,27 +130,27 @@ namespace RTE {
 		/// <summary>
 		/// Loads "Editor Scene" and starts Actor Editor activity.
 		/// </summary>
-		void StartActorEditor();
+		void StartActorEditor() const;
 
 		/// <summary>
 		/// Loads "Editor Scene" and starts Gib Editor activity.
 		/// </summary>
-		void StartGibEditor();
+		void StartGibEditor() const;
 
 		/// <summary>
 		/// Loads "Editor Scene" and starts Scene Editor activity.
 		/// </summary>
-		void StartSceneEditor();
+		void StartSceneEditor() const;
 
 		/// <summary>
 		/// Loads "Editor Scene" and starts Area Editor activity.
 		/// </summary>
-		void StartAreaEditor();
+		void StartAreaEditor() const;
 
 		/// <summary>
 		/// Loads "Editor Scene" and starts Assembly Editor activity.
 		/// </summary>
-		void StartAssemblyEditor();
+		void StartAssemblyEditor() const;
 #pragma endregion
 
 		/// <summary>
@@ -237,7 +237,7 @@ namespace RTE {
 			BLINKMODECOUNT
 		};
 
-		Controller *m_pController; //!< Controller which conrols this menu. Not owned
+		Controller *m_pController; //!< Controller which controls this menu. Not owned
 		GUIScreen *m_pGUIScreen; //!< GUI Screen for use by the in-game GUI
 		GUIInput *m_pGUIInput; //!< Input controller
 		GUIControlManager *m_pGUIController; //!< The control manager which holds all the controls
@@ -251,19 +251,21 @@ namespace RTE {
 		Timer m_BlinkTimer; //!< Notification blink timer
 		int m_BlinkMode; //!< What we're blinking
 
-		GUICollectionBox *m_apScreenBox[SCREENCOUNT]; //!< Collection box of the buy GUIs
-		GUIButton *m_MainMenuButtons[MAINMENUBUTTONCOUNT]; //!< The main menu buttons
+		
+
+		std::array< GUICollectionBox *, SCREENCOUNT> m_apScreenBox; //!< Collection box of the buy GUIs
+		std::array<GUIButton *, MAINMENUBUTTONCOUNT> m_MainMenuButtons; //!< The main menu buttons
 		GUIComboBox *m_pSceneSelector; //!< Skirmish scene selection box
 
 		//!< The skirmish setup screen team box panels
 		GUICollectionBox *m_pTeamBox;
-		GUICollectionBox *m_aSkirmishBox[SKIRMISHPLAYERCOUNT];
+		std::array<GUICollectionBox *, SKIRMISHPLAYERCOUNT> m_aSkirmishBox;
 
-		GUIButton *m_aSkirmishButton[SKIRMISHPLAYERCOUNT]; //!< The skirmish setup screen buttons
+		std::array<GUIButton *, SKIRMISHPLAYERCOUNT> m_aSkirmishButton; //!< The skirmish setup screen buttons
 
 		GUILabel *m_pCPUTeamLabel; //!< Label describing the CPU team
 
-		GUIButton *m_aEditorButton[EDITORBUTTONCOUNT]; // The editor buttons
+		std::array<GUIButton *, EDITORBUTTONCOUNT> m_aEditorButton; // The editor buttons
 		GUILabel *m_pMetaNoticeLabel; //!< MetaGame notice label
 		GUILabel *m_VersionLabel; //!< CCCP version number.
 
@@ -276,11 +278,11 @@ namespace RTE {
 		bool m_CampaignStarted; //!< Whether Campaign mode was started
 		bool m_ActivityRestarted; //!< Whether the game was restarted this frame or not
 		bool m_ActivityResumed; //!< Whether the game was resumed this frame or not
-		bool m_TutorialOffered; //!< Whether the player has been offered a tutoral yet this program run
+		bool m_TutorialOffered; //!< Whether the player has been offered a tutorial yet this program run
 		int m_StartPlayers; //!< How many players are chosen to be in the new game
 		int m_StartTeams; //!< How many teams are chosen to be in the new game
 		int m_StartFunds; //!< How much money both teams start with in the new game
-		int m_aTeamAssignments[SKIRMISHPLAYERCOUNT]; //!< How many teams are chosen to be in the new game
+		std::array<int, SKIRMISHPLAYERCOUNT> m_aTeamAssignments; //!< How many teams are chosen to be in the new game
 		int m_CPUTeam; //!< Which team is CPU managed, if any (-1)
 		int m_StartDifficulty; //!< Difficulty setting
 		bool m_Quit; //!< Player selected to quit the program
@@ -291,7 +293,7 @@ namespace RTE {
 		/// Loads "Editor Scene" and starts the given editor activity
 		/// </summary>
 		/// <param name="editorActivity"></param>
-		void StartEditorActivity(EditorActivity *editorActivity);
+		void StartEditorActivity(EditorActivity *editorActivity) const;
 
 		/// <summary>
 		/// Clears all the member variables of this MainMenuGUI, effectively resetting the members of this abstraction level only.

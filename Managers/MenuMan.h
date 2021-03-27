@@ -66,14 +66,8 @@ namespace RTE {
 		void UpdateScenarioMenu();
 #pragma endregion
 
-		/// <summary>
-		/// Custom deleters for std::unique_ptr members. Must be defined to avoid including the class headers and just rely on forward declaration.
-		/// </summary>
-		struct AllegroInputDeleter { void operator()(AllegroInput *ptr) const; };
-		struct AllegroScreenDeleter { void operator()(AllegroScreen *ptr) const; };
-
-		std::unique_ptr<AllegroInput, AllegroInputDeleter> m_GUIInput; //!< Input interface of this.
-		std::unique_ptr<AllegroScreen, AllegroScreenDeleter> m_GUIScreen; //!< Screen interface of this.
+		std::unique_ptr<AllegroInput> m_GUIInput; //!< The GUIInput interface of this MenuMan.
+		std::unique_ptr<AllegroScreen> m_GUIScreen; //!< The GUIScreen interface of this MenuMan.
 
 		std::unique_ptr<Controller> m_MenuController; //!<
 

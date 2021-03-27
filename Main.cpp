@@ -18,6 +18,10 @@
 /// Cortex Command Community Project - https://github.com/cortex-command-community
 /// </summary>
 
+#include "GUI.h"
+#include "AllegroInput.h"
+#include "AllegroScreen.h"
+
 #include "MetaMan.h"
 #include "SettingsMan.h"
 #include "ConsoleMan.h"

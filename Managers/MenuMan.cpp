@@ -27,8 +27,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MenuMan::Initialize(bool initLoadingScreen) {
-		m_GUIScreen.reset(new AllegroScreen(g_FrameMan.GetBackBuffer32()));
-		m_GUIInput.reset(new AllegroInput(-1));
+		m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer32());
+		m_GUIInput = std::make_unique<AllegroInput>(-1);
 
 		if (initLoadingScreen) {
 			g_LoadingScreen.Create(m_GUIScreen.get(), m_GUIInput.get());

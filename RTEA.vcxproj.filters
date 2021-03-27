@@ -489,6 +489,12 @@
     <ClInclude Include="Menus\LoadingScreen.h">
       <Filter>Menus</Filter>
     </ClInclude>
+    <ClInclude Include="Menus\ModManagerGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\SettingsGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -931,6 +937,12 @@
       <Filter>Managers</Filter>
     </ClCompile>
     <ClCompile Include="Menus\LoadingScreen.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\ModManagerGUI.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\SettingsGUI.cpp">
       <Filter>Menus</Filter>
     </ClCompile>
   </ItemGroup>

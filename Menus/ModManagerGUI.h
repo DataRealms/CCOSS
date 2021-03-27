@@ -1,5 +1,24 @@
 /*
 
+		class ModRecord {
+		public:
+			std::string ModulePath;
+			std::string ModuleName;
+			std::string Description;
+			bool Disabled;
+
+			bool operator<(const ModRecord &rhs) const { return ModulePath < rhs.ModulePath; }
+		};
+
+		class ScriptRecord {
+		public:
+			std::string PresetName;
+			std::string Description;
+			bool Enabled;
+
+			bool operator<(const ScriptRecord &rhs) const { return PresetName < rhs.PresetName; }
+		};
+
 
 		/// <summary>
 		/// Makes UI displayable string with mod info.

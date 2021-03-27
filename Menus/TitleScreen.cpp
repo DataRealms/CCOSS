@@ -452,9 +452,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TitleScreen::UpdateIntroSlideshowSequence(bool skipSection) {
-		if (skipSection && m_IntroSequenceState > IntroSequence::SlideshowFadeIn) {
+		if (skipSection && (m_IntroSequenceState > IntroSequence::SlideshowFadeIn && m_IntroSequenceState != IntroSequence::MainMenuAppear)) {
 			m_SectionSwitch = true;
 			m_ScrollOffset.SetY(m_PreMainMenuOffsetY);
+			m_OrbitRotation = -c_PI * 1.2F;
 			m_IntroSequenceState = IntroSequence::MainMenuAppear;
 			return;
 		}

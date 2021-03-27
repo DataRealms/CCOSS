@@ -2,7 +2,7 @@
 *The Cortex Command Community Project is Free/Libre and Open Source under GNU AGPL v3*
 
 This is a community-driven effort to continue the development of Cortex Command.  
-Stay up to date in our [Discord channel](https://discord.gg/SdNnKJN).
+Stay up to date in our [Discord channel](https://discord.gg/TSU6StNQUG).
 
 ***
 

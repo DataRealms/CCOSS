@@ -4,34 +4,19 @@
 #include "PresetMan.h"
 #include "ActivityMan.h"
 #include "GameActivity.h"
-#include "AudioMan.h"
 #include "UInputMan.h"
 #include "SettingsMan.h"
 #include "ConsoleMan.h"
 #include "MetaMan.h"
-#include "GlobalScript.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroScreen.h"
-#include "GUI/AllegroInput.h"
-#include "GUI/GUIControlManager.h"
-#include "GUI/GUICollectionBox.h"
-#include "GUI/GUIComboBox.h"
-#include "GUI/GUITab.h"
-#include "GUI/GUIListBox.h"
-#include "GUI/GUITextBox.h"
-#include "GUI/GUIButton.h"
-#include "GUI/GUILabel.h"
-#include "GUI/GUISlider.h"
-#include "GUI/GUICheckbox.h"
+#include "GUI.h"
+#include "AllegroScreen.h"
+#include "AllegroInput.h"
+#include "GUIControlManager.h"
+#include "GUICollectionBox.h"
+#include "GUIButton.h"
+#include "GUILabel.h"
 
-#include "Controller.h"
-#include "Entity.h"
-#include "MOSprite.h"
-#include "DataModule.h"
-#include "GABrainMatch.h"
-#include "GABaseDefense.h"
 #include "GATutorial.h"
 #include "SceneEditor.h"
 #include "AreaEditor.h"
@@ -53,27 +38,14 @@ namespace RTE {
 		m_MenuEnabled = ENABLED;
 		m_MenuScreen = MAINSCREEN;
 		m_ScreenChange = false;
-		m_MainMenuFocus = CAMPAIGN;
-		m_FocusChange = 0;
-		m_MenuSpeed = 0.3F;
-		m_ListItemIndex = 0;
 		m_BlinkTimer.Reset();
-		m_BlinkMode = NOBLINK;
 		for (int screen = 0; screen < SCREENCOUNT; ++screen) {
 			m_apScreenBox.at(screen) = nullptr;
 		}
 		for (int button = 0; button < MAINMENUBUTTONCOUNT; ++button) {
 			m_MainMenuButtons.at(button) = nullptr;
 		}
-		m_pTeamBox = nullptr;
-		m_pSceneSelector = nullptr;
-		for (int box = 0; box < SKIRMISHPLAYERCOUNT; ++box) {
-			m_aSkirmishBox.at(box) = nullptr;
-		}
-		for (int button = 0; button < SKIRMISHPLAYERCOUNT; ++button) {
-			m_aSkirmishButton.at(button) = nullptr;
-		}
-		m_pCPUTeamLabel = nullptr;
+
 		m_pEditorPanel = nullptr;
 		m_pScrollPanel = nullptr;
 		m_ScrollTimer.Reset();
@@ -82,14 +54,7 @@ namespace RTE {
 		m_ActivityRestarted = false;
 		m_ActivityResumed = false;
 		m_TutorialOffered = false;
-		m_StartPlayers = 1;
-		m_StartTeams = 2;
-		m_StartFunds = 1600;
-		for (int player = Players::PlayerOne; player < SKIRMISHPLAYERCOUNT; ++player) {
-			m_aTeamAssignments.at(player) = Activity::TeamOne;
-		}
-		m_CPUTeam = -1;
-		m_StartDifficulty = Activity::MediumDifficulty;
+
 		m_Quit = false;
 
 		// Editor screen
@@ -113,9 +78,6 @@ namespace RTE {
 		// Make sure we have convenient points to the containing GUI collection boxes that we will manipulate the positions of
 		m_apScreenBox.at(ROOT) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("root"));
 		m_apScreenBox.at(MAINSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("MainScreen"));
-		m_apScreenBox.at(PLAYERSSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PlayersScreen"));
-		m_apScreenBox.at(SKIRMISHSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("SkirmishScreen"));
-		m_apScreenBox.at(DIFFICULTYSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("DifficultyScreen"));
 		m_apScreenBox.at(OPTIONSSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("OptionsScreen"));
 		m_apScreenBox.at(CONFIGSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("ConfigScreen"));
 		m_apScreenBox.at(EDITORSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("EditorScreen"));
@@ -124,9 +86,7 @@ namespace RTE {
 		m_apScreenBox.at(QUITSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("QuitConfirmBox"));
 		m_apScreenBox.at(MODMANAGERSCREEN) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("ModManagerScreen"));
 
-		m_apScreenBox.at(ROOT)->SetPositionAbs((g_FrameMan.GetResX() - m_apScreenBox.at(ROOT)->GetWidth()) / 2, 0);// (g_FrameMan.GetResY() - m_apScreenBox.at(ROOT)->GetHeight()) / 2);
-	// NO, this screws up the menu positioning!
-	//    m_apScreenBox.at(ROOT)->Resize(mapScreenBox.at(ROOT)->GetWidth(), g_FrameMan.GetResY());
+		m_apScreenBox.at(ROOT)->SetPositionAbs((g_FrameMan.GetResX() - m_apScreenBox.at(ROOT)->GetWidth()) / 2, 0);
 
 		// Set up screens' initial positions and visibility
 		m_apScreenBox.at(QUITSCREEN)->CenterInParent(true, true);
@@ -155,18 +115,6 @@ namespace RTE {
 		m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(false);
 		m_MainMenuButtons.at(PLAYTUTORIAL)->SetVisible(false);
 		m_MainMenuButtons.at(METACONTINUE)->SetVisible(false);
-
-		m_pSceneSelector = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("ComboScene"));
-		m_pTeamBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PanelTeams"));
-		m_aSkirmishBox.at(P1TEAM) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PanelP1Team"));
-		m_aSkirmishBox.at(P2TEAM) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PanelP2Team"));
-		m_aSkirmishBox.at(P3TEAM) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PanelP3Team"));
-		m_aSkirmishBox.at(P4TEAM) = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PanelP4Team"));
-		m_aSkirmishButton.at(P1TEAM) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP1Team"));
-		m_aSkirmishButton.at(P2TEAM) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP2Team"));
-		m_aSkirmishButton.at(P3TEAM) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP3Team"));
-		m_aSkirmishButton.at(P4TEAM) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonP4Team"));
-		m_pCPUTeamLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelCPUTeam"));
 
 		m_aEditorButton.at(SCENEEDITOR) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonSceneEditor"));
 		m_aEditorButton.at(AREAEDITOR) = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonAreaEditor"));
@@ -197,8 +145,6 @@ namespace RTE {
 
 		// Set initial focus, category list, and label settings
 		m_ScreenChange = true;
-		m_FocusChange = 1;
-		//    CategoryChange();
 
 		return 0;
 	}
@@ -244,7 +190,7 @@ namespace RTE {
 		m_CampaignStarted = false;
 		m_ActivityRestarted = false;
 		m_ActivityResumed = false;
-		m_StartDifficulty = 0;
+
 		m_Quit = false;
 
 		// Don't update the main menu if the console is open
@@ -313,54 +259,6 @@ namespace RTE {
 					m_pGUIController->GetManager()->SetFocus(nullptr);
 				}
 			}
-		}
-
-		//////////////////////////////////////
-		// PLAYERS MENU SCREEN
-
-		else if (m_MenuScreen == PLAYERSSCREEN) {
-			if (m_ScreenChange) {
-				m_apScreenBox.at(PLAYERSSCREEN)->SetVisible(true);
-				m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(true);
-				m_ScreenChange = false;
-			}
-
-			//        m_MainMenuButtons.at(BACKTOMAIN)->SetFocus();
-		}
-
-		//////////////////////////////////////
-		// SKIRMISH SETUP MENU SCREEN
-
-		else if (m_MenuScreen == SKIRMISHSCREEN) {
-			if (m_ScreenChange) {
-				m_apScreenBox.at(SKIRMISHSCREEN)->SetVisible(true);
-				// Set up the list of scenes to choose from
-				UpdateScenesBox();
-				//            m_pGUIController->GetControl("ButtonStartSkirmish")->SetVisible(true);
-				UpdateTeamBoxes();
-				// Move main menu button over so the start button fits
-				m_MainMenuButtons.at(BACKTOMAIN)->SetPositionRel(200, 280);
-				m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(true);
-				m_ScreenChange = false;
-			}
-
-			//        for (int box = 0; box < SKIRMISHPLAYERCOUNT; ++box)
-			//            m_aSkirmishBox.at(box) = 0;
-
-			//        m_MainMenuButtons.at(BACKTOMAIN)->SetFocus();
-		}
-
-		//////////////////////////////////////
-		// DIFFICULTY MENU SCREEN
-
-		else if (m_MenuScreen == DIFFICULTYSCREEN) {
-			if (m_ScreenChange) {
-				m_apScreenBox.at(DIFFICULTYSCREEN)->SetVisible(true);
-				m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(true);
-				m_ScreenChange = false;
-			}
-
-			//        m_MainMenuButtons.at(BACKTOMAIN)->SetFocus();
 		}
 
 		//////////////////////////////////////
@@ -486,19 +384,6 @@ namespace RTE {
 			if (anEvent.GetType() == GUIEvent::Command) {
 				// Campaign button pressed
 				if (anEvent.GetControl() == m_MainMenuButtons.at(CAMPAIGN)) {
-					/*
-						// Disable the campaign button for now
-						if (m_MainMenuButtons.at(CAMPAIGN)->GetText() == "Campaign")
-						{
-							m_MainMenuButtons.at(CAMPAIGN)->SetText("COMING SOON!");
-							g_GUISound.ExitMenuSound()->Play();
-						}
-						else
-						{
-							m_MainMenuButtons.at(CAMPAIGN)->SetText("Campaign");
-							g_GUISound.ButtonPressSound()->Play();
-						}
-					*/
 					// Show the MetaGame notice screen if it hasn't already been shown yet
 					if (!m_TutorialOffered)
 						m_MenuScreen = METASCREEN;
@@ -507,7 +392,6 @@ namespace RTE {
 						m_CampaignStarted = true;
 						m_MenuScreen = MAINSCREEN;
 					}
-
 					HideAllScreens();
 					m_ScreenChange = true;
 					g_GUISound.ButtonPressSound()->Play();
@@ -522,11 +406,9 @@ namespace RTE {
 
 					// Hide all screens, the appropriate screen will reappear on next update
 					HideAllScreens();
-					//                m_MenuScreen = PLAYERSSCREEN;
 					m_MenuScreen = MAINSCREEN;
 					m_ScreenChange = true;
 					g_GUISound.ButtonPressSound()->Play();
-					//                g_GUISound.ExitMenuSound()->Play();
 				}
 
 				if (anEvent.GetControl() == m_MainMenuButtons.at(MULTIPLAYER)) {
@@ -535,13 +417,7 @@ namespace RTE {
 
 					if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
 
-					// Hide all screens, the appropriate screen will reappear on next update
-					//HideAllScreens();
-					//                m_MenuScreen = PLAYERSSCREEN;
-					//m_MenuScreen = MAINSCREEN;
-					//m_ScreenChange = true;
 					g_GUISound.ButtonPressSound()->Play();
-					//                g_GUISound.ExitMenuSound()->Play();
 
 					HideAllScreens();
 					m_MenuScreen = MAINSCREEN;
@@ -610,111 +486,6 @@ namespace RTE {
 				if (anEvent.GetControl() == m_MainMenuButtons.at(RESUME)) {
 					m_ActivityResumed = true;
 
-					g_GUISound.ExitMenuSound()->Play();
-				}
-
-				/////////////////////////////////////////////
-				// PLAYER SCREEN BUTTONS
-				// Player count setting button pressed
-
-				if (m_MenuScreen == PLAYERSSCREEN &&
-					(anEvent.GetControl()->GetName() == "ButtonOnePlayer" ||
-						anEvent.GetControl()->GetName() == "ButtonTwoPlayers" ||
-						anEvent.GetControl()->GetName() == "ButtonThreePlayers" ||
-						anEvent.GetControl()->GetName() == "ButtonFourPlayers")) {
-					// Hide all screens, the appropriate screen will reappear on next update
-					HideAllScreens();
-					m_MenuScreen = SKIRMISHSCREEN;
-					m_ScreenChange = true;
-
-					// Set desired player count
-					if (anEvent.GetControl()->GetName() == "ButtonOnePlayer") {
-						m_StartPlayers = 1;
-					} else if (anEvent.GetControl()->GetName() == "ButtonTwoPlayers") {
-						m_StartPlayers = 2;
-					} else if (anEvent.GetControl()->GetName() == "ButtonThreePlayers") {
-						m_StartPlayers = 3;
-					} else if (anEvent.GetControl()->GetName() == "ButtonFourPlayers") {
-						m_StartPlayers = 4;
-					} else {
-						m_StartPlayers = 0;
-					}
-
-					g_GUISound.ButtonPressSound()->Play();
-				}
-
-				/////////////////////////////////////////////
-				// SKIRMISH SETUP SCREEN BUTTONS
-
-				if (m_MenuScreen == SKIRMISHSCREEN) {
-					for (int player = Players::PlayerOne; player < SKIRMISHPLAYERCOUNT; ++player) {
-						// Player team toggle button
-						if (anEvent.GetControl() == m_aSkirmishButton.at(player)) {
-							// Toggle
-							if (m_aTeamAssignments.at(player) == Activity::TeamOne) {
-								m_aTeamAssignments.at(player) = Activity::TeamTwo;
-							} else {
-								m_aTeamAssignments.at(player) = Activity::TeamOne;
-							}
-							UpdateTeamBoxes();
-
-							g_GUISound.ButtonPressSound()->Play();
-						}
-					}
-
-					// Start Skirmish menu button pressed
-					if (anEvent.GetControl()->GetName() == "ButtonStartSkirmish") {
-						// Hide all screens, the appropriate screen will reappear on next update
-						HideAllScreens();
-
-						// No CPU team, so just start game
-						if (m_CPUTeam < 0) {
-							m_MenuScreen = MAINSCREEN;
-							m_ScreenChange = true;
-							m_ActivityRestarted = true;
-							SetupSkirmishActivity();
-							g_GUISound.ExitMenuSound()->Play();
-						}
-						// CPU team present, so ask for the difficulty level of it before starting
-						else {
-							m_MenuScreen = DIFFICULTYSCREEN;
-							m_ScreenChange = true;
-							g_GUISound.ButtonPressSound()->Play();
-						}
-					}
-				}
-
-				/////////////////////////////////////////////
-				// DIFFICULTY SETUP SCREEN BUTTONS
-
-				if (m_MenuScreen == DIFFICULTYSCREEN &&
-					(anEvent.GetControl()->GetName() == "ButtonStartEasy" ||
-						anEvent.GetControl()->GetName() == "ButtonStartMedium" ||
-						anEvent.GetControl()->GetName() == "ButtonStartHard" ||
-						anEvent.GetControl()->GetName() == "ButtonStartDeath")) {
-					// Hide all screens, the appropriate screen will reappear on next update
-					HideAllScreens();
-					m_MenuScreen = MAINSCREEN;
-					m_ScreenChange = true;
-
-					m_ActivityRestarted = true;
-
-					// Set appropriate difficulty level
-					if (anEvent.GetControl()->GetName() == "ButtonStartEasy") {
-						m_StartDifficulty = Activity::EasyDifficulty;
-					} else if (anEvent.GetControl()->GetName() == "ButtonStartMedium") {
-						m_StartDifficulty = Activity::MediumDifficulty;
-					} else if (anEvent.GetControl()->GetName() == "ButtonStartHard") {
-						m_StartDifficulty = Activity::HardDifficulty;
-					} else if (anEvent.GetControl()->GetName() == "ButtonStartDeath") {
-						m_StartDifficulty = Activity::MaxDifficulty;
-					} else {
-						m_StartDifficulty = Activity::MediumDifficulty;
-					}
-
-					SetupSkirmishActivity();
-
-					//                g_GUISound.BackButtonPressSound()->Play();
 					g_GUISound.ExitMenuSound()->Play();
 				}
 
@@ -840,51 +611,6 @@ namespace RTE {
 
 				// Dead zone sliders control
 				//for (int which = P1DEADZONESLIDER; which < DEADZONESLIDERCOUNT; ++which) { ; }
-				/*
-							// Scrollbar changed
-							if(anEvent.GetControl()->GetName() == "scroll1")
-							{
-								int Value = 0;
-								GUIScrollbar *S = (GUIScrollbar *)anEvent.GetControl();
-								Value = S->GetValue();
-								GUILabel *L = (GUILabel *)m_pGUIController->GetControl("label1");
-								char buf[64];
-								L->SetText(itoa(Value, buf, 10));
-							}
-
-							// Double click on the listbox
-							if(anEvent.GetControl()->GetName() == "list1")
-							{
-								if(anEvent.GetMsg() == GUIListBox::DoubleClicked)
-								{
-									GUILabel *L = (GUILabel *)m_pGUIController->GetControl("label1");
-									GUIListBox *LB = (GUIListBox *)anEvent.GetControl();
-									if(LB->GetSelected())
-										L->SetText(LB->GetSelected()->m_Name);
-								}
-
-								if(anEvent.GetMsg() == GUIListBox::KeyDown)
-								{
-									// Delete
-									if(anEvent.GetData() == GUIInput::Key_Delete)
-									{
-										GUIListBox *LB = (GUIListBox *)anEvent.GetControl();
-										LB->DeleteItem(LB->GetSelectedIndex());
-									}
-								}
-							}
-
-							if(anEvent.GetControl()->GetName() == "text1")
-							{
-								if(anEvent.GetMsg() == GUITextBox::Enter)
-								{
-									GUILabel *L = (GUILabel *)m_pGUIController->GetControl("label1");
-									GUITextBox *T = (GUITextBox *)anEvent.GetControl();
-
-									L->SetText(T->GetText());
-								}
-							}
-				*/
 			}
 		}
 	}
@@ -895,24 +621,6 @@ namespace RTE {
 		AllegroScreen drawScreen(drawBitmap);
 		m_pGUIController->Draw(&drawScreen);
 		m_pGUIController->DrawMouse();
-
-		/*#ifdef DEBUG_BUILD
-				if (g_UInputMan.JoystickActive(0))
-				{
-					Vector aim = g_UInputMan.AnalogAimValues(0);
-					float axis00 = g_UInputMan.AnalogAxisValue(0, 0, 0);
-					float axis01 = g_UInputMan.AnalogAxisValue(0, 0, 1);
-
-					float axis10 = g_UInputMan.AnalogAxisValue(0, 1, 0);
-					float axis11 = g_UInputMan.AnalogAxisValue(0, 1, 1);
-					char s[256];
-					std::snprintf(s, sizeof(s), "Aim %.1f %.1f - Stick 0 %.1f %.1f - Stick 1 %.1f %.1f", aim.GetX(), aim.GetY(), axis00, axis01, axis10, axis11);
-
-					GUILabel * debugLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelDebug"));
-					if (debugLabel)
-						debugLabel->SetText(s);
-				}
-		#endif*/
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -942,175 +650,6 @@ namespace RTE {
 			m_ScreenChange = true;
 		}
 	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void MainMenuGUI::SetupSkirmishActivity() {
-		// If activity restarted, stuff the ActivityMan with the selected data
-		if (m_ActivityRestarted) {
-			// TODO: ******* add the game mode drop down and base the game mode selection off that instead
-
-					// No CPU team, so Brain match
-			if (m_CPUTeam == Activity::NoTeam) {
-				g_SceneMan.SetSceneToLoad(m_pSceneSelector->GetItem(m_pSceneSelector->GetSelectedIndex())->m_Name);
-				// TODO: Let player choose the GABrainMatch activity instance!
-				GABrainMatch *pNewGame = new GABrainMatch;
-
-				for (int player = Players::PlayerOne; player < m_StartPlayers; ++player) {
-					pNewGame->SetTeamOfPlayer(player, m_aTeamAssignments.at(player));
-				}
-				pNewGame->SetCPUTeam(m_CPUTeam);
-				pNewGame->Create();
-				g_ActivityMan.SetStartActivity(pNewGame);
-			}
-			// CPU present, so base defense
-			else {
-				g_SceneMan.SetSceneToLoad(m_pSceneSelector->GetItem(m_pSceneSelector->GetSelectedIndex())->m_Name);
-				// TODO: Let player choose the GABaseDefense activity instance!
-				GABaseDefense *pNewGame = dynamic_cast<GABaseDefense *>(g_PresetMan.GetEntityPreset("GABaseDefense", "Skirmish Defense")->Clone());
-				RTEAssert(pNewGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
-
-				for (int player = Players::PlayerOne; player < m_StartPlayers; ++player) {
-					pNewGame->SetTeamOfPlayer(player, m_aTeamAssignments.at(player));
-				}
-				pNewGame->SetCPUTeam(m_CPUTeam);
-				pNewGame->SetDifficulty(m_StartDifficulty);
-
-				pNewGame->Create();
-				g_ActivityMan.SetStartActivity(pNewGame);
-			}
-
-			// TODO: Reenable and make GUI control for this!
-			/*
-					g_ActivityMan.GetActivity()->SetStartingFunds(m_StartFunds);
-					for (int team = 0; team < m_StartTeams; ++team)
-					{
-						g_ActivityMan.GetActivity()->SetTeamFunds(m_StartFunds, team);
-					}
-			*/
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void MainMenuGUI::UpdateScenesBox() {
-		// Clear out the control
-		m_pSceneSelector->ClearList();
-
-		// Get the list of all read in scenes
-		list<Entity *> sceneList;
-		g_PresetMan.GetAllOfType(sceneList, "Scene");
-
-		// Go through the list and add their names to the combo box
-		for (list<Entity *>::iterator itr = sceneList.begin(); itr != sceneList.end(); ++itr) {
-			m_pSceneSelector->AddItem((*itr)->GetPresetName());
-		}
-
-		// Select the first one
-		m_pSceneSelector->SetSelectedIndex(0);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void MainMenuGUI::UpdateTeamBoxes() {
-		char str[128];
-
-		// Hide all team assignment panels initially, and center their contents
-		for (int box = 0; box < SKIRMISHPLAYERCOUNT; ++box) {
-			m_aSkirmishBox.at(box)->SetVisible(false);
-			m_aSkirmishButton.at(box)->CenterInParent(true, true);
-		}
-
-		// Total area size
-		int areaWidth = m_pTeamBox->GetWidth();
-		int areaHeight = m_pTeamBox->GetHeight();
-
-		// Set up the team assignment boxes and contained labels and buttons
-		// Single team to set up for single player
-		if (m_StartPlayers == 1) {
-			// Show and resize
-			m_aSkirmishBox.at(P1TEAM)->Resize(areaWidth, areaHeight);
-			m_aSkirmishButton.at(P1TEAM)->CenterInParent(true, true);
-			m_aSkirmishBox.at(P1TEAM)->SetVisible(true);
-		}
-		// Two player split one above the other
-		else if (m_StartPlayers == 2) {
-			int boxHeight = (areaHeight - 4) / 2;
-
-			// Player 1
-			m_aSkirmishBox.at(P1TEAM)->Resize(areaWidth, boxHeight);
-			m_aSkirmishButton.at(P1TEAM)->CenterInParent(true, true);
-			m_aSkirmishBox.at(P1TEAM)->SetVisible(true);
-
-			// Player 2
-			m_aSkirmishBox.at(P2TEAM)->Resize(areaWidth, boxHeight);
-			m_aSkirmishBox.at(P2TEAM)->SetPositionRel(0, boxHeight + 4);
-			m_aSkirmishButton.at(P2TEAM)->CenterInParent(true, true);
-			m_aSkirmishBox.at(P2TEAM)->SetVisible(true);
-		}
-		// Four-way split, either three or four players
-		else if (m_StartPlayers >= 3) {
-			int boxWidth = (areaWidth - 4) / 2;
-			int boxHeight = (areaHeight - 4) / 2;
-
-			// Player 1
-			m_aSkirmishBox.at(P1TEAM)->Resize(boxWidth, boxHeight);
-			m_aSkirmishButton.at(P1TEAM)->CenterInParent(true, true);
-			m_aSkirmishBox.at(P1TEAM)->SetVisible(true);
-
-			// Player 2
-			m_aSkirmishBox.at(P2TEAM)->Resize(boxWidth, boxHeight);
-			m_aSkirmishBox.at(P2TEAM)->SetPositionRel(boxWidth + 4, 0);
-			m_aSkirmishButton.at(P2TEAM)->CenterInParent(true, true);
-			m_aSkirmishBox.at(P2TEAM)->SetVisible(true);
-
-			// Player 3
-			m_aSkirmishBox.at(P3TEAM)->SetVisible(true);
-
-			// Player 4
-			if (m_StartPlayers == 4) { m_aSkirmishBox.at(P4TEAM)->SetVisible(true); }
-		}
-
-		// Update button labels
-		for (int player = Players::PlayerOne; player < SKIRMISHPLAYERCOUNT; ++player) {
-			if (m_aTeamAssignments.at(player) == Activity::TeamOne) {
-				m_aSkirmishBox.at(player)->SetDrawColor(makecol(70, 27, 12));
-				std::snprintf(str, sizeof(str), "Player %i: %c", player + 1, -62);
-			} else {
-				m_aSkirmishBox.at(player)->SetDrawColor(makecol(47, 55, 40));
-				std::snprintf(str, sizeof(str), "Player %i: %c", player + 1, -59);
-			}
-			m_aSkirmishButton.at(player)->SetText(str);
-		}
-
-		////////////////////////////////
-		// Update CPU team label
-
-		// Count how many players on each team
-		int team0Count = 0;
-		int team1Count = 0;
-		for (int player = Players::PlayerOne; player < m_StartPlayers; ++player) {
-			if (m_aTeamAssignments.at(player) == 0) {
-				team0Count++;
-			} else if (m_aTeamAssignments.at(player) == 1) {
-				team1Count++;
-			}
-		}
-
-		// See if either team is empty of human players - that becomes the CPU team
-		if (team0Count == 0 || team1Count == 0) {
-			std::snprintf(str, sizeof(str), "CPU Team: %c", team0Count == 0 ? -62 : -59);
-			m_CPUTeam = team0Count == 0 ? 0 : 1;
-		} else {
-			std::snprintf(str, sizeof(str), "No CPU Team (both have players)");
-			m_CPUTeam = -1;
-		}
-
-		// Finally set the label
-		m_pCPUTeamLabel->SetText(str);
-	}
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -1802,18 +1802,6 @@ void MainMenuGUI::Draw(BITMAP *drawBitmap) const
     m_pGUIController->Draw(&drawScreen);
     m_pGUIController->DrawMouse();
 
-	// Show who controls the cursor
-	int device = g_UInputMan.GetLastDeviceWhichControlledGUICursor();
-
-	if (device >= DEVICE_GAMEPAD_1)
-	{
-		int mouseX, mouseY;
-		m_pGUIInput->GetMousePosition(&mouseX, &mouseY);
-
-		const Icon * pIcon = g_UInputMan.GetDeviceIcon(device);
-		if (pIcon)
-			draw_sprite(drawBitmap, pIcon->GetBitmaps8()[0], mouseX + 16, mouseY - 4);
-
 /*#ifdef DEBUG_BUILD
 		if (g_UInputMan.JoystickActive(0))
 		{
@@ -1831,24 +1819,6 @@ void MainMenuGUI::Draw(BITMAP *drawBitmap) const
 				debugLabel->SetText(s);
 		}
 #endif*/
-
-	}
-
-	// Show which joysticks are detected by the game
-	for (int joystick = Players::PlayerOne; joystick < Players::MaxPlayerCount; joystick++)
-	{
-		if (g_UInputMan.JoystickActive(joystick))
-		{
-			int matchedDevice = DEVICE_GAMEPAD_1 + joystick;
-
-			if (matchedDevice != device)
-			{
-				const Icon * pIcon = g_UInputMan.GetDeviceIcon(matchedDevice);
-				if (pIcon)
-					draw_sprite(drawBitmap, pIcon->GetBitmaps8()[0], g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * joystick, g_FrameMan.GetResY() - 25);
-			}
-		}
-	}
 }
 
 

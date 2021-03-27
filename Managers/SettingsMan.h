@@ -288,6 +288,42 @@ namespace RTE {
 		void SetShowToolTips(bool showToolTips) { m_ToolTips = showToolTips; }
 
 		/// <summary>
+		/// Gets whether to draw AtomGroup visualizations or not.
+		/// </summary>
+		/// <returns>Whether to draw AtomGroup visualizations or not.</returns>
+		bool DrawAtomGroupVisualizations() const { return m_DrawAtomGroupVisualizations; }
+
+		/// <summary>
+		/// Sets whether to draw AtomGroup visualizations or not.
+		/// </summary>
+		/// <param name="drawAtomGroupVisualizations">Whether to draw AtomGroup visualizations or not.</param>
+		void SetDrawAtomGroupVisualizations(bool drawAtomGroupVisualizations) { m_DrawAtomGroupVisualizations = drawAtomGroupVisualizations; }
+
+		/// <summary>
+		/// Gets whether to draw HandGroup and FootGroup visualizations or not.
+		/// </summary>
+		/// <returns>Whether to draw HandGroup and FootGroup visualizations or not.</returns>
+		bool DrawHandAndFootGroupVisualizations() const { return m_DrawHandAndFootGroupVisualizations; }
+
+		/// <summary>
+		/// Sets whether to draw HandGroup and FootGroup visualizations or not.
+		/// </summary>
+		/// <param name="drawHandAndFootGroupVisualizations">Whether to draw HandGroup and FootGroup visualizations or not.</param>
+		void SetDrawHandAndFootGroupVisualizations(bool drawHandAndFootGroupVisualizations) { m_DrawHandAndFootGroupVisualizations = drawHandAndFootGroupVisualizations; }
+
+		/// <summary>
+		/// Gets whether to draw LimbPath visualizations or not.
+		/// </summary>
+		/// <returns>Whether to draw LimbPath visualizations or not.</returns>
+		bool DrawLimbPathVisualizations() const { return m_DrawLimbPathVisualizations; }
+
+		/// <summary>
+		/// Sets whether to draw LimbPath visualizations or not.
+		/// </summary>
+		/// <param name="drawAtomGroupVisualizations">Whether to draw AtomGroup visualizations or not.</param>
+		void SetDrawLimbPathVisualizations(bool drawLimbPathVisualizations) { m_DrawLimbPathVisualizations = drawLimbPathVisualizations; }
+
+		/// <summary>
 		/// Gets whether debug print mode is enabled or not.
 		/// </summary>
 		/// <returns>Whether debug print mode is enabled or not.</returns>
@@ -360,6 +396,10 @@ namespace RTE {
 		bool m_DisableLoadingScreen; //!< Whether to display the reader progress report during module loading or not. Greatly increases loading speeds when disabled.
 		int m_LoadingScreenReportPrecision; //!< How accurately the reader progress report tells what line it's reading during module loading. Lower values equal more precision at the cost of loading speed.
 		float m_MenuTransitionDurationMultiplier; //!< Multiplier value for the transition durations between different menus. Lower values equal faster transitions.
+		
+		bool m_DrawAtomGroupVisualizations; //!< Whether to draw MOSRotating AtomGroups to the Scene MO color Bitmap.
+		bool m_DrawHandAndFootGroupVisualizations; //!< Whether to draw Actor HandGroups and FootGroups to the Scene MO color Bitmap.
+		bool m_DrawLimbPathVisualizations; //!< Whether to draw Actor LimbPaths to the Scene MO color Bitmap.
 		bool m_PrintDebugInfo; //!< Print some debug info in console.
 		bool m_MeasureModuleLoadTime; //!< Whether to measure the duration of data module loading (extraction included). For benchmarking purposes.
 

@@ -85,12 +85,9 @@ namespace RTE {
 
 	int ADoor::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Door") {
-			RemoveAttachable(m_Door);
 			m_Door = new Attachable;
 			reader >> m_Door;
-			AddAttachable(m_Door);
-			m_Door->SetInheritsRotAngle(false);
-			m_DoorMaterialID = m_Door->GetMaterial()->GetIndex();
+			SetDoor(m_Door);
 		} else if (propName == "OpenOffset") {
 			reader >> m_OpenOffset;
 		} else if (propName == "ClosedOffset") {
@@ -215,6 +212,9 @@ namespace RTE {
 			m_HardcodedAttachableUniqueIDsAndSetters.insert({newDoor->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
 				dynamic_cast<ADoor *>(parent)->SetDoor(attachable);
 			}});
+
+			m_Door->SetInheritsRotAngle(false);
+			m_DoorMaterialID = m_Door->GetMaterial()->GetIndex();
 		}
 	}
 

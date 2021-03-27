@@ -550,8 +550,6 @@ int MainMenuGUI::Create(Controller *pController)
     m_FocusChange = 1;
 //    CategoryChange();
 
-	m_PioneerPromoVisible = false;
-
     return 0;
 }
 
@@ -695,24 +693,6 @@ void MainMenuGUI::Update()
             else
                 m_pGUIController->GetManager()->SetFocus(0);
         }
-		
-		// Detect whether Planetoid Pioneers promo was clicked and open 
-		if (m_PioneerPromoVisible)
-		{
-			bool buttonHeld = g_UInputMan.MouseButtonPressed(MOUSE_LEFT, -1);
-			if (buttonHeld)
-			{
-				// Get mouse position
-				int mouseX, mouseY;
-				m_pGUIInput->GetMousePosition(&mouseX, &mouseY);
-				Vector mouse(mouseX, mouseY);
-
-				if (m_PioneerPromoBox.IsWithinBox(mouse))
-				{
-					System::OpenBrowserToURL("http://store.steampowered.com/app/300260/");
-				}
-			}
-		}
     }
 
     //////////////////////////////////////

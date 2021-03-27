@@ -236,41 +236,6 @@ public:
 
     void SetStartFunds(int startFunds) { m_StartFunds = startFunds; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Static method:   AllowPioneerPromo
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns true if we're allowed to show Planetoid Pioneer promo
-// Arguments:       None.
-// Return value:    true if we're in the main menu i.e. allowed to show PP promo
-
-	bool AllowPioneerPromo() { return m_MenuScreen == MAINSCREEN; }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Static method:   EnablePioneerPromoButton
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tells the menu that Planetoid Pioneers promo is active and can be clicked
-// Arguments:       None.
-// Return value:    None.
-
-	void EnablePioneerPromoButton() { m_PioneerPromoVisible = true; }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Static method:   EnablePioneerPromoButton
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tells the menu that Planetoid Pioneers promo is not visible active and can't be clicked
-// Arguments:       None.
-// Return value:    None.
-
-	void DisablePioneerPromoButton() { m_PioneerPromoVisible = false; }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Static method:   SetPioneerPromoBox
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tells the menu where Planetoid Pioneers promo pic is located so it could be clicked
-// Arguments:       Location of promo pic clockable area.
-// Return value:    None.
-
-	void SetPioneerPromoBox(Box newBox) { m_PioneerPromoBox = newBox; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -627,10 +592,6 @@ protected:
     Timer m_BlinkTimer;
     // What we're blinking
     int m_BlinkMode;
-	// Whether Pioneer Promo click-area is active
-	bool m_PioneerPromoVisible;
-	// Location of pioneer promo image
-	Box m_PioneerPromoBox;
 
     // Collection box of the buy GUIs
     GUICollectionBox *m_apScreenBox[SCREENCOUNT];

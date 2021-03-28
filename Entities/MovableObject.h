@@ -42,6 +42,7 @@ namespace RTE
 
 struct HitData;
 
+class MOSRotating;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Abstract class:  MovableObject
@@ -54,6 +55,7 @@ class MovableObject:
     public SceneObject
 {
 
+friend class Atom;
 friend class LuaMan;
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +75,6 @@ enum MOType
     TypeThrownDevice
 };
 
-friend class Atom;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -480,16 +481,16 @@ friend class Atom;
 
 
 	/// <summary>
-	/// Gets the MO which is the parent of this Attachable.
+	/// Placeholder method to allow for ease of use with Attachables. Returns nullptr for classes that aren't derived from Attachable.
 	/// </summary>
-	/// <returns>A pointer to the parent of this Attachable.</returns>
-	virtual MovableObject * GetParent() { return nullptr; }
+	/// <returns>Nothing.</returns>
+	virtual MOSRotating * GetParent() { return nullptr; }
 
-	/// <summary>
-	/// Gets the MO which is the parent of this Attachable. 
-	/// </summary>
-	/// <returns>A pointer to the parent of this Attachable.</returns>
-	virtual const MovableObject * GetParent() const { return nullptr; }
+    /// <summary>
+    /// Placeholder method to allow for ease of use with Attachables. Returns nullptr for classes that aren't derived from Attachable.
+    /// </summary>
+    /// <returns>Nothing.</returns>
+	virtual const MOSRotating * GetParent() const { return nullptr; }
 
 	/// <summary>
 	/// Returns a pointer to this MO, this is to enable Attachables to get their root nodes.
@@ -1616,6 +1617,12 @@ friend class Atom;
 // Return value:    Returns this MO's unique persistent ID
 
 	unsigned long int const GetUniqueID() const { return m_UniqueID; }
+
+    /// <summary>
+    /// Gets the preset name and unique ID of this MO, often useful for error messages.
+    /// </summary>
+    /// <returns>A string containing the unique ID and preset name of this MO.</returns>
+    std::string GetPresetNameAndUniqueID() const { return m_PresetName + ", UID: " + std::to_string(m_UniqueID); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

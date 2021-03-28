@@ -123,45 +123,29 @@ int ACDropShip::Create(const ACDropShip &reference) {
 
 int ACDropShip::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "RThruster") {
-        RemoveAttachable(m_pRThruster);
         m_pRThruster = new AEmitter;
         reader >> m_pRThruster;
-        AddAttachable(m_pRThruster);
-        if (m_pRThruster->HasNoSetDamageMultiplier()) { m_pRThruster->SetDamageMultiplier(1.0F); }
-        m_pRThruster->SetInheritsRotAngle(false);
+        SetRightThruster(m_pRThruster);
     } else if (propName == "LThruster") {
-        RemoveAttachable(m_pLThruster);
         m_pLThruster = new AEmitter;
         reader >> m_pLThruster;
-        AddAttachable(m_pLThruster);
-        if (m_pLThruster->HasNoSetDamageMultiplier()) { m_pLThruster->SetDamageMultiplier(1.0F); }
-        m_pLThruster->SetInheritsRotAngle(false);
+        SetLeftThruster(m_pLThruster);
     } else if (propName == "URThruster") {
-        RemoveAttachable(m_pURThruster);
         m_pURThruster = new AEmitter;
         reader >> m_pURThruster;
-        AddAttachable(m_pURThruster);
-        if (m_pURThruster->HasNoSetDamageMultiplier()) { m_pURThruster->SetDamageMultiplier(1.0F); }
+        SetURightThruster(m_pURThruster);
     } else if (propName == "ULThruster") {
-        RemoveAttachable(m_pULThruster);
         m_pULThruster = new AEmitter;
         reader >> m_pULThruster;
-        AddAttachable(m_pULThruster);
-        if (m_pULThruster->HasNoSetDamageMultiplier()) { m_pULThruster->SetDamageMultiplier(1.0F); }
+        SetULeftThruster(m_pULThruster);
     } else if (propName == "RHatchDoor") {
-        RemoveAttachable(m_pRHatch);
         m_pRHatch = new Attachable;
         reader >> m_pRHatch;
-        AddAttachable(m_pRHatch);
-        if (m_pRHatch->HasNoSetDamageMultiplier()) { m_pRHatch->SetDamageMultiplier(1.0F); }
-        m_pRHatch->SetInheritsRotAngle(false);
+        SetRightHatch(m_pRHatch);
     } else if (propName == "LHatchDoor") {
-        RemoveAttachable(m_pLHatch);
         m_pLHatch = new Attachable;
         reader >> m_pLHatch;
-        AddAttachable(m_pLHatch);
-        if (m_pLHatch->HasNoSetDamageMultiplier()) { m_pLHatch->SetDamageMultiplier(1.0F); }
-        m_pLHatch->SetInheritsRotAngle(false);
+        SetLeftHatch(m_pLHatch);
     } else if (propName == "HatchDoorSwingRange") {
         reader >> m_HatchSwingRange;
     } else if (propName == "AutoStabilize") {
@@ -794,6 +778,9 @@ void ACDropShip::SetRightThruster(AEmitter *newThruster) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetRightThruster");
             dynamic_cast<ACDropShip *>(parent)->SetRightThruster(castedAttachable);
         }});
+
+        if (m_pRThruster->HasNoSetDamageMultiplier()) { m_pRThruster->SetDamageMultiplier(1.0F); }
+        m_pRThruster->SetInheritsRotAngle(false);
     }
 }
 
@@ -813,6 +800,9 @@ void ACDropShip::SetLeftThruster(AEmitter *newThruster) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetLeftThruster");
             dynamic_cast<ACDropShip *>(parent)->SetLeftThruster(castedAttachable);
         }});
+
+        if (m_pLThruster->HasNoSetDamageMultiplier()) { m_pLThruster->SetDamageMultiplier(1.0F); }
+        m_pLThruster->SetInheritsRotAngle(false);
     }
 }
 
@@ -832,6 +822,8 @@ void ACDropShip::SetURightThruster(AEmitter *newThruster) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetURightThruster");
             dynamic_cast<ACDropShip *>(parent)->SetURightThruster(castedAttachable);
         }});
+
+        if (m_pURThruster->HasNoSetDamageMultiplier()) { m_pURThruster->SetDamageMultiplier(1.0F); }
     }
 }
 
@@ -851,6 +843,8 @@ void ACDropShip::SetULeftThruster(AEmitter *newThruster) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetULeftThruster");
             dynamic_cast<ACDropShip *>(parent)->SetULeftThruster(castedAttachable);
         }});
+
+        if (m_pULThruster->HasNoSetDamageMultiplier()) { m_pULThruster->SetDamageMultiplier(1.0F); }
     }
 }
 
@@ -868,6 +862,9 @@ void ACDropShip::SetRightHatch(Attachable *newHatch) {
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newHatch->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
             dynamic_cast<ACDropShip *>(parent)->SetRightHatch(attachable);
         }});
+
+        if (m_pRHatch->HasNoSetDamageMultiplier()) { m_pRHatch->SetDamageMultiplier(1.0F); }
+        m_pRHatch->SetInheritsRotAngle(false);
     }
 }
 
@@ -885,6 +882,9 @@ void ACDropShip::SetLeftHatch(Attachable *newHatch) {
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newHatch->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
             dynamic_cast<ACDropShip *>(parent)->SetLeftHatch(attachable);
         }});
+
+        if (m_pLHatch->HasNoSetDamageMultiplier()) { m_pLHatch->SetDamageMultiplier(1.0F); }
+        m_pLHatch->SetInheritsRotAngle(false);
     }
 }
 

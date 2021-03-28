@@ -2,6 +2,7 @@
 #define _RTEMOPIXEL_
 
 #include "MovableObject.h"
+#include "Atom.h"
 
 namespace RTE {
 
@@ -127,6 +128,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="range">The distance in pixels.</param>
 		void SetLethalRange(float range);
+
+		/// <summary>
+		/// Gets the longest a trail can be drawn, in pixels.
+		/// </summary>
+		/// <returns>The new max length, in pixels. If 0, no trail is drawn.</returns>
+		int GetTrailLength() const { return m_Atom->GetTrailLength(); }
+
+		/// <summary>
+		/// Sets the longest a trail can be drawn, in pixels.
+		/// </summary>
+		/// <param name="trailLength">The new max length, in pixels. If 0, no trail is drawn.</param>
+		void SetTrailLength(const int trailLength) { m_Atom->SetTrailLength(trailLength); }
 #pragma endregion
 
 #pragma region Virtual Override Methods

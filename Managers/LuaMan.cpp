@@ -823,7 +823,8 @@ int LuaMan::Initialize() {
 			.property("TransformsInto", &Material::GetSpawnMaterial)
 			.property("IsScrap", &Material::IsScrap),
 
-        CONCRETELUABINDING(MOPixel, MovableObject),
+        CONCRETELUABINDING(MOPixel, MovableObject)
+			.property("TrailLength", (int (MOPixel:: *)() const) &MOPixel::GetTrailLength, &MOPixel::SetTrailLength),
 
         CONCRETELUABINDING(TerrainObject, SceneObject)
             .def("GetBitmapOffset", &TerrainObject::GetBitmapOffset)

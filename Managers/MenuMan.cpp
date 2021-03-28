@@ -42,8 +42,7 @@ namespace RTE {
 		m_MenuController = std::make_unique<Controller>(Controller::CIM_PLAYER, 0);
 		m_MenuController->SetTeam(0);
 
-		m_MainMenu = std::make_unique<MainMenuGUI>();
-		m_MainMenu->Create(m_MenuController.get());
+		m_MainMenu = std::make_unique<MainMenuGUI>(m_GUIScreen.get(), m_GUIInput.get(), m_MenuController.get());
 
 		m_ScenarioMenu = std::make_unique<ScenarioGUI>();
 
@@ -65,7 +64,7 @@ namespace RTE {
 
 		Initialize(false);
 		// Change the screen to the options menu otherwise we're at the main screen after reinitializing.
-		m_MainMenu->SetMenuScreen(MainMenuGUI::OPTIONSSCREEN);
+		m_MainMenu->SetActiveMenuScreen(MainMenuGUI::MenuScreen::SettingsScreen);
 
 		g_FrameMan.DestroyTempBackBuffers();
 		g_FrameMan.SetResolutionChanged(false);

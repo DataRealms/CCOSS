@@ -11,6 +11,7 @@ namespace RTE {
 	class GUIInput;
 	class GUIControlManager;
 	class GUICollectionBox;
+	class GUIControl;
 	class GUIButton;
 	class GUILabel;
 	class EditorActivity;
@@ -51,20 +52,6 @@ namespace RTE {
 		void Create(AllegroScreen *guiScreen, AllegroInput *guiInput, Controller *controller);
 #pragma endregion
 
-/*
-#pragma region Destruction
-		/// <summary>
-		/// Destructor method used to clean up a MainMenuGUI object before deletion from system memory.
-		/// </summary>
-		~MainMenuGUI() { Destroy(); }
-
-		/// <summary>
-		/// Destroys and resets (through Clear()) the MainMenuGUI object.
-		/// </summary>
-		void Destroy();
-#pragma endregion
-*/
-
 #pragma region Getters and Setters
 		/// <summary>
 		/// Reports whether the menu is enabled or not.
@@ -85,10 +72,16 @@ namespace RTE {
 		GUIControlManager * GetGUIControlManager();
 
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		MenuScreen GetActiveMenuScreen() const { return m_ActiveMenuScreen; }
+
+		/// <summary>
 		/// Sets the main menu GUI to display a screen.
 		/// </summary>
 		/// <param name="screenToShow">Which screen to show. See MenuScreen enumeration.</param>
-		void SetMenuScreen(MenuScreen screenToShow) { m_ActiveMenuScreen = screenToShow; }
+		void SetActiveMenuScreen(MenuScreen screenToShow) { m_ActiveMenuScreen = screenToShow; }
 
 		/// <summary>
 		/// Reports whether the player has decided to start playing a Scenario this frame.
@@ -242,6 +235,21 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
+		void ShowMainScreen();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void ShowCampaignScreen();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void ShowEditorsScreen();
+
+		/// <summary>
+		/// 
+		/// </summary>
 		void ShowCreditsScreen();
 #pragma endregion
 
@@ -254,7 +262,14 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		void HandleInputEvents();
+		/// <param name="guiEventControl"></param>
+		/// <returns></returns>
+		bool HandleMainScreenButtonPresses(const GUIControl *guiEventControl);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		bool HandleInputEvents();
 #pragma endregion
 
 		/// <summary>

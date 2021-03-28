@@ -336,8 +336,10 @@ void HDFirearm::SetFlash(Attachable *newFlash) {
         if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
         m_pFlash = nullptr;
     } else {
+		newFlash->SetMass(0.0F);
+
         if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
-        m_pFlash = newFlash;
+		m_pFlash = newFlash;
         AddAttachable(newFlash);
 
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newFlash->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {

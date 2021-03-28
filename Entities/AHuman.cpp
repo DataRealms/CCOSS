@@ -234,52 +234,33 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "ThrowPrepTime") {
         reader >> m_ThrowPrepTime;
     } else if (propName == "Head") {
-        RemoveAttachable(m_pHead);
         m_pHead = new Attachable;
         reader >> m_pHead;
-        AddAttachable(m_pHead);
-        if (m_pHead->HasNoSetDamageMultiplier()) { m_pHead->SetDamageMultiplier(5.0F); }
-        if (m_pHead->IsDrawnAfterParent()) { m_pHead->SetDrawnNormallyByParent(false); }
-        m_pHead->SetInheritsRotAngle(false);
+        SetHead(m_pHead);
     } else if (propName == "Jetpack") {
-        RemoveAttachable(m_pJetpack);
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
-        AddAttachable(m_pJetpack);
-        if (m_pJetpack->HasNoSetDamageMultiplier()) { m_pJetpack->SetDamageMultiplier(0.0F); }
-        m_pJetpack->SetApplyTransferredForcesAtOffset(false);
+        SetJetpack(m_pJetpack);
     } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         // Convert to ms
         m_JetTimeTotal *= 1000;
     } else if (propName == "FGArm") {
-        RemoveAttachable(m_pFGArm);
         m_pFGArm = new Arm;
         reader >> m_pFGArm;
-        AddAttachable(m_pFGArm);
-        if (m_pFGArm->HasNoSetDamageMultiplier()) { m_pFGArm->SetDamageMultiplier(1.0F); }
-        m_pFGArm->SetDrawnAfterParent(true);
-        m_pFGArm->SetDrawnNormallyByParent(false);
+        SetFGArm(m_pFGArm);
     } else if (propName == "BGArm") {
-        RemoveAttachable(m_pBGArm);
         m_pBGArm = new Arm;
         reader >> m_pBGArm;
-        AddAttachable(m_pBGArm);
-        if (m_pBGArm->HasNoSetDamageMultiplier()) { m_pBGArm->SetDamageMultiplier(1.0F); }
-        m_pBGArm->SetDrawnAfterParent(false);
+        SetBGArm(m_pBGArm);
     } else if (propName == "FGLeg") {
-        RemoveAttachable(m_pFGLeg);
         m_pFGLeg = new Leg;
         reader >> m_pFGLeg;
-        AddAttachable(m_pFGLeg);
-        if (m_pFGLeg->HasNoSetDamageMultiplier()) { m_pFGLeg->SetDamageMultiplier(1.0F); }
+        SetFGLeg(m_pFGLeg);
     } else if (propName == "BGLeg") {
-        RemoveAttachable(m_pBGLeg);
         m_pBGLeg = new Leg;
         reader >> m_pBGLeg;
-        AddAttachable(m_pBGLeg);
-        if (m_pBGLeg->HasNoSetDamageMultiplier()) { m_pBGLeg->SetDamageMultiplier(1.0F); }
-        m_pBGLeg->SetDrawnAfterParent(false);
+        SetBGLeg(m_pBGLeg);
     } else if (propName == "HandGroup") {
         delete m_pFGHandGroup;
         delete m_pBGHandGroup;
@@ -517,6 +498,10 @@ void AHuman::SetHead(Attachable *newHead) {
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newHead->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
             dynamic_cast<AHuman *>(parent)->SetHead(attachable);
         }});
+
+        if (m_pHead->HasNoSetDamageMultiplier()) { m_pHead->SetDamageMultiplier(5.0F); }
+        if (m_pHead->IsDrawnAfterParent()) { m_pHead->SetDrawnNormallyByParent(false); }
+        m_pHead->SetInheritsRotAngle(false);
     }
 }
 
@@ -536,6 +521,9 @@ void AHuman::SetJetpack(AEmitter *newJetpack) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetJetpack");
             dynamic_cast<AHuman *>(parent)->SetJetpack(castedAttachable);
         }});
+
+        if (m_pJetpack->HasNoSetDamageMultiplier()) { m_pJetpack->SetDamageMultiplier(0.0F); }
+        m_pJetpack->SetApplyTransferredForcesAtOffset(false);
     }
 }
 
@@ -555,6 +543,10 @@ void AHuman::SetFGArm(Arm *newArm) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetFGArm");
             dynamic_cast<AHuman *>(parent)->SetFGArm(castedAttachable);
         }});
+
+        if (m_pFGArm->HasNoSetDamageMultiplier()) { m_pFGArm->SetDamageMultiplier(1.0F); }
+        m_pFGArm->SetDrawnAfterParent(true);
+        m_pFGArm->SetDrawnNormallyByParent(false);
     }
 }
 
@@ -574,6 +566,9 @@ void AHuman::SetBGArm(Arm *newArm) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetBGArm");
             dynamic_cast<AHuman *>(parent)->SetBGArm(castedAttachable);
         }});
+
+        if (m_pBGArm->HasNoSetDamageMultiplier()) { m_pBGArm->SetDamageMultiplier(1.0F); }
+        m_pBGArm->SetDrawnAfterParent(false);
     }
 }
 
@@ -593,6 +588,8 @@ void AHuman::SetFGLeg(Leg *newLeg) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetFGLeg");
             dynamic_cast<AHuman *>(parent)->SetFGLeg(castedAttachable);
         }});
+
+        if (m_pFGLeg->HasNoSetDamageMultiplier()) { m_pFGLeg->SetDamageMultiplier(1.0F); }
     }
 }
 
@@ -612,6 +609,9 @@ void AHuman::SetBGLeg(Leg *newLeg) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetBGLeg");
             dynamic_cast<AHuman *>(parent)->SetBGLeg(castedAttachable);
         }});
+
+        if (m_pBGLeg->HasNoSetDamageMultiplier()) { m_pBGLeg->SetDamageMultiplier(1.0F); }
+        m_pBGLeg->SetDrawnAfterParent(false);
     }
 }
 
@@ -4390,21 +4390,20 @@ void AHuman::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode,
     if (m_pFGArm && m_pBGArm && !onlyPhysical && mode == g_DrawColor && m_pBGArm->DidReach() && m_pFGArm->HoldsHeldDevice() && !m_pFGArm->HoldsThrownDevice() && !m_pFGArm->GetHeldDevice()->IsReloading() && !m_pFGArm->GetHeldDevice()->IsShield()) {
         m_pBGArm->DrawHand(pTargetBitmap, targetPos, realMode);
     }
-    
-#ifdef DEBUG_BUILD
-    if (mode == g_DrawDebug) {
-        m_Paths[m_HFlipped][WALK].Draw(pTargetBitmap, targetPos, 122);
-        m_Paths[m_HFlipped][CRAWL].Draw(pTargetBitmap, targetPos, 122);
-        m_Paths[m_HFlipped][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);
-        m_Paths[m_HFlipped][CLIMB].Draw(pTargetBitmap, targetPos, 165);
-    }
-    if (mode == g_DrawColor && !onlyPhysical) {
+
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawHandAndFootGroupVisualizations()) {
         m_pFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pFGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pBGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
     }
-#endif
+
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawLimbPathVisualizations()) {
+        m_Paths[m_HFlipped][WALK].Draw(pTargetBitmap, targetPos, 122);
+        m_Paths[m_HFlipped][CRAWL].Draw(pTargetBitmap, targetPos, 122);
+        m_Paths[m_HFlipped][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);
+        m_Paths[m_HFlipped][CLIMB].Draw(pTargetBitmap, targetPos, 165);
+    }
 }
 
 

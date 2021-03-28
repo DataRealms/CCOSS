@@ -15,7 +15,7 @@
 #include "MovableMan.h"
 #include "AtomGroup.h"
 #include "Arm.h"
-#include "Actor.h"
+#include "AHuman.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
@@ -411,13 +411,15 @@ bool HeldDevice::TransferJointImpulses(Vector &jointImpulses, float jointStiffne
     const Arm *parentAsArm = dynamic_cast<Arm *>(parent);
     if (parentAsArm && parentAsArm->GetGripStrength() > 0 && jointStrengthValueToUse < 0) {
         jointStrengthValueToUse = parentAsArm->GetGripStrength() * m_GripStrengthMultiplier;
+        if (m_Supported) {
+            const AHuman *rootParentAsAHuman = dynamic_cast<AHuman *>(GetRootParent());
+            if (rootParentAsAHuman != nullptr) { jointStrengthValueToUse += rootParentAsAHuman->GetBGArm() ? rootParentAsAHuman->GetBGArm()->GetGripStrength() * m_GripStrengthMultiplier : 0.0F; }
+        }
     }
     bool intact = Attachable::TransferJointImpulses(jointImpulses, jointStiffnessValueToUse, jointStrengthValueToUse, gibImpulseLimitValueToUse);
     if (!intact) {
         Actor *rootParentAsActor = dynamic_cast<Actor *>(parent->GetRootParent());
-        if (rootParentAsActor && rootParentAsActor->GetStatus() == Actor::STABLE) {
-            rootParentAsActor->SetStatus(Actor::UNSTABLE);
-        }
+        if (rootParentAsActor && rootParentAsActor->GetStatus() == Actor::STABLE) { rootParentAsActor->SetStatus(Actor::UNSTABLE); }
     }
     return intact;
 }

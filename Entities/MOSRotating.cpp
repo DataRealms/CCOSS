@@ -234,6 +234,7 @@ int MOSRotating::Create(const MOSRotating &reference) {
         AddWound(dynamic_cast<AEmitter *>(wound->Clone()), wound->GetParentOffset(), false);
     }
 
+    //TODO This could probably be replaced with just using HardcodedAttachableUniqueIDs entirely. At this point in, these lists should have the same UIDs in them, so it should work.
     for (const Attachable *referenceAttachable : reference.m_Attachables) {
         if (m_ReferenceHardcodedAttachableUniqueIDs.find(referenceAttachable->GetUniqueID()) == m_ReferenceHardcodedAttachableUniqueIDs.end()) {
             AddAttachable(dynamic_cast<Attachable *>(referenceAttachable->Clone()));
@@ -1032,7 +1033,7 @@ void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, Mova
         }
 
         if (!attachable->GetDeleteWhenRemovedFromParent()) {
-            float attachableGibBlastStrength = (attachable->GetParentGibBlastStrengthMultiplier() == 0 ? 1 : attachable->GetParentGibBlastStrengthMultiplier() * m_GibBlastStrength) / (1 + attachable->GetMass());
+            float attachableGibBlastStrength = (attachable->GetParentGibBlastStrengthMultiplier() * m_GibBlastStrength) / (1 + attachable->GetMass());
             attachable->SetAngularVel((attachable->GetAngularVel() * 0.5F) + (attachable->GetAngularVel() * 0.5F * attachableGibBlastStrength * RandomNormalNum()));
             Vector gibBlastVel = Vector(attachable->GetParentOffset()).SetMagnitude(attachableGibBlastStrength * 0.5F + (attachableGibBlastStrength * RandomNum()));
             attachable->SetVel(m_Vel + gibBlastVel + impactImpulse);
@@ -1552,7 +1553,7 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
     if (!attachable || !attachable->IsAttached()) {
         return false;
     }
-    RTEAssert(attachable->IsAttachedTo(this), "Tried to remove Attachable " + attachable->GetModuleAndPresetName() + " from presumed parent " + GetModuleAndPresetName() + ", but it had a different parent (" + (attachable->GetParent() ? attachable->GetParent()->GetModuleAndPresetName() : "ERROR") + "). This should never happen!");
+    RTEAssert(attachable->IsAttachedTo(this), "Tried to remove Attachable " + attachable->GetPresetNameAndUniqueID() + " from presumed parent " + GetPresetNameAndUniqueID() + ", but it had a different parent (" + (attachable->GetParent() ? attachable->GetParent()->GetPresetNameAndUniqueID() : "ERROR") + "). This should never happen!");
 
     if (!m_Attachables.empty()) { m_Attachables.remove(attachable); }
     attachable->SetParent(nullptr);
@@ -1872,12 +1873,10 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
         if (attachableToDraw->IsDrawnAfterParent() && attachableToDraw->IsDrawnNormallyByParent()) { attachableToDraw->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
     }
 
-#ifdef DEBUG_BUILD
-    if (mode == g_DrawColor && !onlyPhysical && m_pAtomGroup && GetRootParent() == this) {
+    if (mode == g_DrawColor && !onlyPhysical && m_pAtomGroup && g_SettingsMan.DrawAtomGroupVisualizations() && GetRootParent() == this) {
         m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
         //m_pDeepGroup->Draw(pTargetBitmap, targetPos, false, 13);
     }
-#endif
 }
 
 bool MOSRotating::HandlePotentialRadiusAffectingAttachable(const Attachable *attachable) {

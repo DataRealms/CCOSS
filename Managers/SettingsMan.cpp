@@ -44,6 +44,10 @@ namespace RTE {
 		m_DisableLoadingScreen = true;
 		m_LoadingScreenReportPrecision = 100;
 		m_MenuTransitionDurationMultiplier = 1.0F;
+
+		m_DrawAtomGroupVisualizations = false;
+		m_DrawHandAndFootGroupVisualizations = false;
+		m_DrawLimbPathVisualizations = false;
 		m_PrintDebugInfo = false;
 		m_MeasureModuleLoadTime = false;
 	}
@@ -167,6 +171,16 @@ namespace RTE {
 			reader >> g_PerformanceMan.m_AdvancedPerfStats;
 		} else if (propName == "MenuTransitionDuration") {
 			SetMenuTransitionDurationMultiplier(std::stof(reader.ReadPropValue()));
+		} else if (propName == "DrawAtomGroupVisualizations") {
+			reader >> m_DrawAtomGroupVisualizations;
+		} else if (propName == "DrawHandAndFootGroupVisualizations") {
+			reader >> m_DrawHandAndFootGroupVisualizations;
+		} else if (propName == "DrawLimbPathVisualizations") {
+			reader >> m_DrawLimbPathVisualizations;
+		} else if (propName == "DrawRaycastVisualizations") {
+			reader >> g_SceneMan.m_DrawRayCastVisualizations;
+		} else if (propName == "DrawPixelCheckVisualizations") {
+			reader >> g_SceneMan.m_DrawPixelCheckVisualizations;
 		} else if (propName == "PrintDebugInfo") {
 			reader >> m_PrintDebugInfo;
 		} else if (propName == "MeasureModuleLoadTime") {
@@ -313,6 +327,16 @@ namespace RTE {
 		writer.NewPropertyWithValue("ConsoleScreenRatio", g_ConsoleMan.m_ConsoleScreenRatio);
 		writer.NewPropertyWithValue("AdvancedPerformanceStats", g_PerformanceMan.m_AdvancedPerfStats);
 		writer.NewPropertyWithValue("MenuTransitionDuration", m_MenuTransitionDurationMultiplier);
+
+		writer.NewLine(false, 2);
+		writer.NewDivider(false);
+		writer.NewLineString("// Modder Debug Settings", false);
+		writer.NewLine(false);
+		writer.NewPropertyWithValue("DrawAtomGroupVisualizations", m_DrawAtomGroupVisualizations);
+		writer.NewPropertyWithValue("DrawHandAndFootGroupVisualizations", m_DrawHandAndFootGroupVisualizations);
+		writer.NewPropertyWithValue("DrawLimbPathVisualizations", m_DrawLimbPathVisualizations);
+		writer.NewPropertyWithValue("DrawRaycastVisualizations", g_SceneMan.m_DrawRayCastVisualizations);
+		writer.NewPropertyWithValue("DrawPixelCheckVisualizations", g_SceneMan.m_DrawPixelCheckVisualizations);
 		writer.NewPropertyWithValue("PrintDebugInfo", m_PrintDebugInfo);
 		writer.NewPropertyWithValue("MeasureModuleLoadTime", m_MeasureModuleLoadTime);
 

@@ -79,7 +79,7 @@ void AHuman::Clear()
     m_ThrowPrepTime = 1000;
 	m_SharpAimRevertTimer.Reset();
 	m_FGArmFlailScalar = 0.0F;
-	m_BGArmFlailScalar = 1.0F;
+	m_BGArmFlailScalar = 0.7F;
 
     m_DeviceState = SCANNING;
     m_SweepState = NOSWEEP;
@@ -4072,7 +4072,7 @@ void AHuman::Update()
 			float revertScalar = min(m_SharpAimRevertTimer.GetElapsedSimTimeMS() / m_SharpAimDelay, 1.0);
 			aimScalar = aimScalar > revertScalar ? aimScalar : 1.0F - revertScalar;
 			
-			bodyAngle = m_Rotation.GetRadAngle() * m_FGArmFlailScalar * (1.0F - aimScalar);
+			bodyAngle = abs(sin(m_Rotation.GetRadAngle())) * m_Rotation.GetRadAngle() * m_FGArmFlailScalar * (1.0F - aimScalar);
 		}
         m_pFGArm->SetRotAngle(bodyAngle + m_AimAngle * static_cast<float>(GetFlipFactor()));
 
@@ -4117,7 +4117,7 @@ void AHuman::Update()
                 EquipShieldInBGArm();
                 // This will likely make the arm idle since the target will be out of range
                 m_pBGArm->Reach(m_pFGHandGroup->GetLimbPos(m_HFlipped));
-                m_pBGArm->SetRotAngle(m_Rotation.GetRadAngle() * m_BGArmFlailScalar + (m_HFlipped ? -m_AimAngle : m_AimAngle));
+                m_pBGArm->SetRotAngle(abs(sin(m_Rotation.GetRadAngle())) * m_Rotation.GetRadAngle() * m_BGArmFlailScalar + (m_HFlipped ? -m_AimAngle : m_AimAngle));
             }
         } else {
             // Unstable, so just drop the arm limply

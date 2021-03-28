@@ -27,11 +27,13 @@ namespace RTE {
 		enum TitleTransition {
 			Intro = -1,
 			MainMenu, // Main menu is active and operational
-			MainMenuToPlanet, // Scenario mode views and transitions
+			MainMenuToScenario, // Scenario mode views and transitions
+			MainMenuToCampaign, // Campaign mode views and transitions
+			MainMenuToCredits,
+			CreditsToMainMenu,
 			PlanetToMainMenu, // Going back to the main menu view from a planet-centered view
 			ScenarioFadeIn, // Back from a scenario game to the scenario selection menu
 			ScenarioMenu,
-			MainMenuToCampaign, // Campaign mode views and transitions
 			CampaignFadeIn, // Back from a battle to the campaign view
 			CampaignPlay,
 			FadeScrollOut,
@@ -238,7 +240,7 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		void UpdateMenuTransitions();
+		void UpdateTitleTransitions();
 
 		/// <summary>
 		/// 

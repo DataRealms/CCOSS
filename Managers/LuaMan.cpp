@@ -357,9 +357,9 @@ LUAENTITYCAST(PEmitter)
 #define PROPERTYOWNERSHIPSAFETYFAKER(OBJECTTYPE, PROPERTYTYPE, SETTERFUNCTION) \
     void OBJECTTYPE##SETTERFUNCTION(OBJECTTYPE *luaSelfObject, PROPERTYTYPE *objectToSet) { \
         if (objectToSet) { \
-            luaSelfObject->##SETTERFUNCTION(dynamic_cast<PROPERTYTYPE *>(objectToSet->Clone())); \
+            luaSelfObject->SETTERFUNCTION(dynamic_cast<PROPERTYTYPE *>(objectToSet->Clone())); \
         } else { \
-            luaSelfObject->##SETTERFUNCTION(nullptr); \
+            luaSelfObject->SETTERFUNCTION(nullptr); \
         } \
     } \
 
@@ -466,6 +466,19 @@ bool RemoveAttachableLuaSafe2(MOSRotating *luaSelfObject, long attachableUniqueI
 }
 bool RemoveAttachableLuaSafe1(MOSRotating *luaSelfObject, long attachableUniqueID) {
     return RemoveAttachableLuaSafe2(luaSelfObject, attachableUniqueID, false, false);
+}
+
+bool RemoveAttachableFromParentLuaSafe1(Attachable *luaSelfObject) {
+    if (luaSelfObject->IsAttached()) {
+        return RemoveAttachableLuaSafe4(luaSelfObject->GetParent(), luaSelfObject, false, false);
+    }
+    return false;
+}
+bool RemoveAttachableFromParentLuaSafe2(Attachable *luaSelfObject, bool addToMovableMan, bool addBreakWounds) {
+    if (luaSelfObject->IsAttached()) {
+        return RemoveAttachableLuaSafe4(luaSelfObject->GetParent(), luaSelfObject, addToMovableMan, addBreakWounds);
+    }
+    return false;
 }
 
 /*
@@ -725,8 +738,8 @@ int LuaMan::Initialize() {
             .def("IsOnScenePoint", &SceneObject::IsOnScenePoint),
 
         ABSTRACTLUABINDING(MovableObject, SceneObject)
-			.def("GetParent", (MovableObject * (MovableObject::*)())&MovableObject::GetParent)
-			.def("GetParent", (const MovableObject * (MovableObject::*)() const)&MovableObject::GetParent)
+			.def("GetParent", (MOSRotating * (MovableObject::*)())&MovableObject::GetParent)
+			.def("GetParent", (const MOSRotating * (MovableObject::*)() const)&MovableObject::GetParent)
 			.def("GetRootParent", (MovableObject * (MovableObject::*)())&MovableObject::GetRootParent)
 			.def("GetRootParent", (const MovableObject * (MovableObject::*)() const)&MovableObject::GetRootParent)
 			.property("Material", &MovableObject::GetMaterial)
@@ -932,6 +945,8 @@ int LuaMan::Initialize() {
         CONCRETELUABINDING(Attachable, MOSRotating)
             .def("IsAttached", &Attachable::IsAttached)
             .def("IsAttachedTo", &Attachable::IsAttachedTo)
+            .def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe1)
+            .def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe2)
 			.property("ParentOffset", &Attachable::GetParentOffset, &Attachable::SetParentOffset)
             .def("IsDrawnAfterParent", &Attachable::IsDrawnAfterParent)
             .property("JointStrength", &Attachable::GetJointStrength, &Attachable::SetJointStrength)

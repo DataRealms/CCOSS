@@ -136,9 +136,9 @@ namespace RTE {
 		m_CreditsLabel->SetText(creditsText);
 		m_CreditsLabel->ResizeHeightToFit();
 
-		// Set initial focus, category list, and label settings
-		m_ScreenChange = true;
+		m_ModManagerMenu = std::make_unique<ModManagerGUI>(guiScreen, guiInput);
 
+		m_ScreenChange = true;
 		HideAllScreens();
 	}
 

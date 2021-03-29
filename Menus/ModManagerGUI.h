@@ -12,7 +12,7 @@ namespace RTE {
 	class AllegroInput;
 
 	/// <summary>
-	/// 
+	/// Integrated mod and script manager user interface.
 	/// </summary>
 	class ModManagerGUI {
 
@@ -20,7 +20,7 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// 
+		/// Constructor method used to instantiate a ModManagerGUI object in system memory and make it ready for use.
 		/// </summary>
 		ModManagerGUI(AllegroScreen *guiScreen, AllegroInput *guiInput);
 #pragma endregion
@@ -120,6 +120,9 @@ namespace RTE {
 		std::vector<ModRecord> m_KnownMods; //!<
 		std::vector<ScriptRecord> m_KnownScripts; //!<
 
+		/// <summary>
+		/// 
+		/// </summary>
 		GUICollectionBox *m_RootBox;
 		GUICollectionBox *m_ModManagerScreen;
 		GUIButton *m_BackToMainButton;
@@ -128,6 +131,10 @@ namespace RTE {
 		GUIListBox *m_ModsListBox;
 		GUIListBox *m_ScriptsListBox;
 		GUILabel *m_ModOrScriptDescriptionLabel;
+
+		// Disallow the use of some implicit methods.
+		ModManagerGUI(const ModManagerGUI &reference) = delete;
+		ModManagerGUI & operator=(const ModManagerGUI &rhs) = delete;
 	};
 }
 #endif

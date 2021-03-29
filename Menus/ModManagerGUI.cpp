@@ -68,6 +68,7 @@ namespace RTE {
 			m_KnownMods.at(selectedItem->m_ExtraIndex) = modRecord;
 			m_ModsListBox->SetSelectedIndex(index);
 			m_ModsListBox->Invalidate();
+			g_GUISound.ItemChangeSound()->Play();
 		}
 	}
 
@@ -90,6 +91,7 @@ namespace RTE {
 			m_KnownScripts.at(selectedItem->m_ExtraIndex) = scriptRecord;
 			m_ScriptsListBox->SetSelectedIndex(index);
 			m_ScriptsListBox->Invalidate();
+			g_GUISound.ItemChangeSound()->Play();
 		}
 	}
 

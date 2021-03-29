@@ -8,16 +8,16 @@
 #include "SettingsMan.h"
 #include "ConsoleMan.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroScreen.h"
-#include "GUI/AllegroInput.h"
-#include "GUI/GUICollectionBox.h"
-#include "GUI/GUIComboBox.h"
-#include "GUI/GUICheckbox.h"
-#include "GUI/GUIButton.h"
-#include "GUI/GUILabel.h"
-#include "GUI/GUISlider.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
+#include "AllegroScreen.h"
+#include "AllegroInput.h"
+#include "GUICollectionBox.h"
+#include "GUIComboBox.h"
+#include "GUICheckbox.h"
+#include "GUIButton.h"
+#include "GUILabel.h"
+#include "GUISlider.h"
 
 #include "DataModule.h"
 #include "Entity.h"
@@ -27,20 +27,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	ScenarioGUI::ScenarioGUI() {
-		m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer32());
-		m_GUIInput = std::make_unique<AllegroInput>(-1, true);
+	ScenarioGUI::ScenarioGUI(AllegroScreen *guiScreen, AllegroInput *guiInput) {
 		m_ScenarioGUIController = std::make_unique<GUIControlManager>();
-
-		if (!m_ScenarioGUIController->Create(m_GUIScreen.get(), m_GUIInput.get(), "Base.rte/GUIs/Skins/MainMenu")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu"); }
+		if (!m_ScenarioGUIController->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/MainMenu")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu"); }
 		m_ScenarioGUIController->Load("Base.rte/GUIs/ScenarioGUI.ini");
 
 		m_ScenarioCollectionBoxes.at(ScenarioCollections::RootBox) = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("root"));
 		m_ScenarioCollectionBoxes.at(ScenarioCollections::RootBox)->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox) = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("ActivitySelectBox"));
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->SetPositionRel(16, 16);
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox) = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("SceneInfoBox"));
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->SetPositionRel(m_ScenarioCollectionBoxes.at(ScenarioCollections::RootBox)->GetWidth() - m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->GetWidth() - 16, 16);
 		m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox) = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("PlayerSetupBox"));
 		m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox)->CenterInParent(true, true);
 
@@ -51,12 +44,16 @@ namespace RTE {
 		m_ScenarioButtons.at(ScenarioButtons::StartHereButton) = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("SceneSelectButton"));
 		m_ScenarioButtons.at(ScenarioButtons::StartGameButton) = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("StartButton"));
 
+		m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox) = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("ActivitySelectBox"));
+		m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->SetPositionRel(16, 16);
 		m_ActivitySelectComboBox = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController->GetControl("ActivitySelectCombo"));
 		m_ActivityLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("ActivityDescLabel"));
 		m_ActivityLabel->SetFont(m_ScenarioGUIController->GetSkin()->GetFont("smallfont.png"));
 		m_DifficultyLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("DifficultyLabel"));
 		m_DifficultySlider = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl("DifficultySlider"));
 
+		m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox) = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("SceneInfoBox"));
+		m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->SetPositionRel(m_ScenarioCollectionBoxes.at(ScenarioCollections::RootBox)->GetWidth() - m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->GetWidth() - 16, 16);
 		m_SceneCloseButton = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("SceneCloseButton"));
 		m_SceneNameLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("SceneNameLabel"));
 		m_SceneInfoLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("SceneInfoLabel"));

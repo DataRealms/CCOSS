@@ -17,6 +17,8 @@ namespace RTE {
 	class GUISlider;
 	class Scene;
 	class Activity;
+	class AllegroScreen;
+	class AllegroInput;
 	class AllegroBitmap;
 
 	/// <summary>
@@ -40,7 +42,9 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate this ScenarioGUI object in system memory.
 		/// </summary>
-		ScenarioGUI();
+		/// <param name="guiScreen">Pointer to a GUIInput interface that will be used by this ScenarioGUI's GUIControlManager.</param>
+		/// <param name="guiInput">Pointer to a GUIScreen interface that will be used by this ScenarioGUI's GUIControlManager.</param>
+		ScenarioGUI(AllegroScreen *guiScreen, AllegroInput *guiInput);
 #pragma endregion
 
 #pragma region Concrete Methods

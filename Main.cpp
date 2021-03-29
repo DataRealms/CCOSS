@@ -27,15 +27,12 @@
 #include "ConsoleMan.h"
 #include "PresetMan.h"
 #include "PerformanceMan.h"
-#include "PrimitiveMan.h"
 #include "UInputMan.h"
 #include "MenuMan.h"
 
 #include "MainMenuGUI.h"
 #include "ScenarioGUI.h"
 #include "TitleScreen.h"
-
-#include "DataModule.h"
 
 #include "MultiplayerServerLobby.h"
 #include "NetworkServer.h"

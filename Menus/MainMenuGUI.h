@@ -2,6 +2,7 @@
 #define _RTEMAINMENUGUI_
 
 #include "Controller.h"
+#include "ModManagerGUI.h"
 
 namespace RTE {
 
@@ -194,9 +195,6 @@ namespace RTE {
 		bool m_ActivityRestarted; //!< Whether the game was restarted this frame or not.
 		bool m_ActivityResumed; //!< Whether the game was resumed this frame or not.
 
-		std::array<GUICollectionBox *, MenuScreen::ScreenCount> m_MainMenuScreens; //!< Collection box of the buy GUIs.
-		std::array<GUIButton *, MenuButton::ButtonCount> m_MainMenuButtons; //!< The main menu buttons.
-
 		int m_RootCollectionBoxOriginalHeight;
 
 		GUICollectionBox *m_EditorMenuPanel; //!< Panel behind editor menu to be resized depending on which editors are available.
@@ -212,6 +210,11 @@ namespace RTE {
 
 		GUILabel *m_VersionLabel; //!< CCCP version number.
 		bool m_Quit; //!< Player selected to quit the program.
+
+		std::array<GUICollectionBox *, MenuScreen::ScreenCount> m_MainMenuScreens; //!< Collection box of the buy GUIs.
+		std::array<GUIButton *, MenuButton::ButtonCount> m_MainMenuButtons; //!< The main menu buttons.
+
+		std::unique_ptr<ModManagerGUI> m_ModManagerMenu; //!<
 
 #pragma region
 		/// <summary>

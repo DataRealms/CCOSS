@@ -53,6 +53,8 @@ namespace RTE {
 
 		std::fill(m_MainMenuScreens.begin(), m_MainMenuScreens.end(), nullptr);
 		std::fill(m_MainMenuButtons.begin(), m_MainMenuButtons.end(), nullptr);
+
+		m_ModManagerMenu = nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -384,13 +386,11 @@ namespace RTE {
 		m_ActivityRestarted = false;
 		m_ActivityResumed = false;
 
+		m_GUIControlManager->Update();
+
 		GUIEvent guiEvent;
 		while (m_GUIControlManager->GetEvent(&guiEvent)) {
 			if (guiEvent.GetType() == GUIEvent::Command) {
-
-				/////////////////////////////////////////////
-				// EDITOR SCREEN BUTTONS
-
 				if (HandleMainScreenButtonPresses(guiEvent.GetControl())) {
 					return true;
 				}
@@ -459,6 +459,8 @@ namespace RTE {
 			return;
 		}
 
+		bool backToMainMenu = false;
+
 		switch (m_ActiveMenuScreen) {
 			case MenuScreen::MainScreen:
 				if (m_ScreenChange) { ShowMainScreen(); }
@@ -470,6 +472,7 @@ namespace RTE {
 						m_GUIControlManager->GetManager()->SetFocus(nullptr);
 					}
 				}
+				backToMainMenu = HandleInputEvents();
 				break;
 			case MenuScreen::SettingsScreen:
 				/*
@@ -485,32 +488,32 @@ namespace RTE {
 				*/
 				break;
 			case MenuScreen::ModManagerScreen:
-				/*
-				if (m_ScreenChange) { m_MainMenuScreens.at(MenuScreen::ModManagerScreen)->SetVisible(true); }
-				*/
+				if (m_ScreenChange) { m_ModManagerMenu->SetEnabled(); }
+				backToMainMenu = m_ModManagerMenu->HandleInputEvents();
 				break;
 			case MenuScreen::EditorScreen:
 				if (m_ScreenChange) { ShowEditorsScreen(); }
+				backToMainMenu = HandleInputEvents();
 				break;
 			case MenuScreen::CreditsScreen:
 				if (m_ScreenChange) { ShowCreditsScreen(); }
 				RollCredits();
+				backToMainMenu = HandleInputEvents();
 				break;
 			case MenuScreen::CampaignScreen:
 				if (m_ScreenChange) { ShowCampaignScreen(); }
+				backToMainMenu = HandleInputEvents();
 				break;
 			case MenuScreen::QuitScreen:
 				if (m_ScreenChange) {
 					m_ScreenChange = false;
 					m_MainMenuScreens.at(MenuScreen::QuitScreen)->SetVisible(true);
 				}
+				backToMainMenu = HandleInputEvents();
 				break;
 			default:
 				break;
 		}
-
-		m_GUIControlManager->Update();
-		bool backToMainMenu = HandleInputEvents();
 
 		// If esc pressed, show quit dialog if applicable
 		if (backToMainMenu || g_UInputMan.KeyPressed(KEY_ESC)) {
@@ -532,7 +535,7 @@ namespace RTE {
 					g_SettingsMan.UpdateSettingsFile();
 				}
 			} else {
-				//QuitLogic();
+				QuitLogic();
 			}
 		}
 
@@ -557,8 +560,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::Draw(BITMAP *drawBitmap) const {
-		AllegroScreen drawScreen(drawBitmap);
-		m_GUIControlManager->Draw(&drawScreen);
+		if (m_ActiveMenuScreen == MenuScreen::ModManagerScreen) {
+			m_ModManagerMenu->Draw();
+		} else {
+			AllegroScreen drawScreen(drawBitmap);
+			m_GUIControlManager->Draw(&drawScreen);
+		}
 		m_GUIControlManager->DrawMouse();
 	}
 }

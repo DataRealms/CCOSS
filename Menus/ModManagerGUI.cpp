@@ -1,263 +1,205 @@
-/*
+#include "ModManagerGUI.h"
+
+#include "SettingsMan.h"
+#include "PresetMan.h"
+#include "DataModule.h"
+#include "GlobalScript.h"
+
+#include "GUI.h"
+#include "GUILabel.h"
+#include "GUIButton.h"
+#include "GUIListBox.h"
+#include "GUICollectionBox.h"
+#include "AllegroScreen.h"
+#include "AllegroInput.h"
+
+namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	clear {
-		m_pModManagerBackButton = 0;
+	ModManagerGUI::ModManagerGUI(AllegroScreen *guiScreen, AllegroInput *guiInput) {
+		if (!m_GUIControlManager) { m_GUIControlManager = std::make_unique<GUIControlManager>(); }
+		if (!m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/MainMenu")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu"); }
+		m_GUIControlManager->Load("Base.rte/GUIs/ModManagerGUI.ini");
+
+		m_RootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
+		m_RootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+
+		m_ModManagerScreen = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ModManagerScreen"));
+		if (m_RootBox->GetHeight() < 540) {
+			m_ModManagerScreen->CenterInParent(true, true);
+		} else {
+			m_ModManagerScreen->SetPositionAbs((m_RootBox->GetWidth() - m_ModManagerScreen->GetWidth()) / 2, 140);
+		}
+
+		m_BackToMainButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonExitModManager"));
+		m_ToggleModButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonToggleMod"));
+		m_ToggleScriptButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonToggleScript"));
+		m_ModsListBox = dynamic_cast<GUIListBox *>(m_GUIControlManager->GetControl("ModsLB"));
+		m_ScriptsListBox = dynamic_cast<GUIListBox *>(m_GUIControlManager->GetControl("ScriptsLB"));
+		m_ModOrScriptDescriptionLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelDescription"));
+
+		FillKnownModsList();
+		FillKnownScriptsList();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	create {
-		// Mod manager controls
-		m_pModManagerBackButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonExitModManager"));
-		m_pModManagerToggleModButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonToggleMod"));
-		m_pModManagerToggleScriptButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonToggleScript"));
-		m_pModManagerModsListBox = dynamic_cast<GUIListBox *>(m_pGUIController->GetControl("ModsLB"));
-		m_pModManagerScriptsListBox = dynamic_cast<GUIListBox *>(m_pGUIController->GetControl("ScriptsLB"));
-		m_pModManagerDescriptionLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LabelDescription"));
+	void ModManagerGUI::SetEnabled() const {
+		m_RootBox->SetVisible(true);
+	}
 
-		///////////////////////////////////////////////////////////////////////////////////////////////
-		// Load mod data and fill the lists
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ModManagerGUI::ToggleMod() {
+		int index = m_ModsListBox->GetSelectedIndex();
+		if (index > -1) {
+			GUIListPanel::Item *selectedItem = m_ModsListBox->GetSelected();
+			ModRecord modRecord = m_KnownMods.at(selectedItem->m_ExtraIndex);
+			modRecord.Disabled = !modRecord.Disabled;
+			if (modRecord.Disabled) {
+				m_ToggleModButton->SetText("Enable Mod");
+				g_SettingsMan.DisableMod(modRecord.ModulePath);
+			} else {
+				m_ToggleModButton->SetText("Disable Mod");
+				g_SettingsMan.EnableMod(modRecord.ModulePath);
+			}
+			selectedItem->m_Name = MakeModString(modRecord);
+			m_KnownMods.at(selectedItem->m_ExtraIndex) = modRecord;
+			m_ModsListBox->SetSelectedIndex(index);
+			m_ModsListBox->Invalidate();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ModManagerGUI::ToggleScript() {
+		int index = m_ScriptsListBox->GetSelectedIndex();
+		if (index > -1) {
+			GUIListPanel::Item *selectedItem = m_ScriptsListBox->GetSelected();
+			ScriptRecord scriptRecord = m_KnownScripts.at(selectedItem->m_ExtraIndex);
+			scriptRecord.Enabled = !scriptRecord.Enabled;
+			if (scriptRecord.Enabled) {
+				m_ToggleScriptButton->SetText("Disable Script");
+				g_SettingsMan.EnableScript(scriptRecord.PresetName);
+			} else {
+				m_ToggleScriptButton->SetText("Enable Script");
+				g_SettingsMan.DisableScript(scriptRecord.PresetName);
+			}
+			selectedItem->m_Name = MakeScriptString(scriptRecord);
+			m_KnownScripts.at(selectedItem->m_ExtraIndex) = scriptRecord;
+			m_ScriptsListBox->SetSelectedIndex(index);
+			m_ScriptsListBox->Invalidate();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ModManagerGUI::FillKnownModsList() {
 		for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i) {
 			// Discard official modules
 			if (i >= g_PresetMan.GetOfficialModuleCount() && i < g_PresetMan.GetTotalModuleCount() - 2) {
-				const DataModule *pModule = g_PresetMan.GetDataModule(i);
-				if (pModule) {
-					ModRecord r;
-					r.ModulePath = pModule->GetFileName();
-					r.Description = pModule->GetDescription();
-					r.ModuleName = pModule->GetFriendlyName();
-					r.Disabled = g_SettingsMan.IsModDisabled(r.ModulePath);
-
-					m_KnownMods.push_back(r);
+				const DataModule *dataModule = g_PresetMan.GetDataModule(i);
+				if (dataModule) {
+					ModRecord modRecord;
+					modRecord.ModulePath = dataModule->GetFileName();
+					modRecord.Description = dataModule->GetDescription();
+					modRecord.ModuleName = dataModule->GetFriendlyName();
+					modRecord.Disabled = g_SettingsMan.IsModDisabled(modRecord.ModulePath);
+					m_KnownMods.emplace_back(modRecord);
 				}
 			}
 		}
-
-		// Now add missing data from disabled mods settings
-		map<string, bool> disabledMods = g_SettingsMan.GetDisabledModsList();
-		for (std::map<std::string, bool>::iterator itr = disabledMods.begin(); itr != disabledMods.end(); ++itr) {
-			std::string modPath = itr->first;
+		// Add missing data from disabled mods settings
+		std::map<std::string, bool> disabledMods = g_SettingsMan.GetDisabledModsList();
+		for (const std::pair<std::string, bool> &disabledModEntry : disabledMods) {
+			std::string modPath = disabledModEntry.first;
 			std::transform(modPath.begin(), modPath.end(), modPath.begin(), ::tolower);
 
 			bool found = false;
-			// Check if this mod is already in list
-			for (vector<ModRecord>::iterator mItr = m_KnownMods.begin(); mItr != m_KnownMods.end(); ++mItr) {
-				if (modPath == (*mItr).ModulePath) { found = true; }
+			for (const ModRecord &knowModListEntry : m_KnownMods) {
+				if (modPath == knowModListEntry.ModulePath) {
+					found = true;
+					break;
+				}
 			}
 			if (!found) {
-				ModRecord r;
-				r.ModulePath = modPath;
-				r.Description = "n/a, module not loaded";
-				r.ModuleName = "n/a, module not loaded";
-				r.Disabled = itr->second;
-
-				m_KnownMods.push_back(r);
+				ModRecord modRecord;
+				modRecord.ModulePath = modPath;
+				modRecord.Description = "N/A, Module not loaded";
+				modRecord.ModuleName = "N/A, Module not loaded";
+				modRecord.Disabled = disabledModEntry.second;
+				m_KnownMods.emplace_back(modRecord);
 			}
 		}
-
-		// Sort the list
 		std::sort(m_KnownMods.begin(), m_KnownMods.end());
 
-		// Fill the GUI listbox with loaded mod data
 		for (int i = 0; i < m_KnownMods.size(); i++) {
-			ModRecord r = m_KnownMods.at(i);
-			m_pModManagerModsListBox->AddItem(MakeModString(r), "", 0, 0, i);
+			ModRecord modRecord = m_KnownMods.at(i);
+			m_ModsListBox->AddItem(MakeModString(modRecord), std::string(), nullptr, nullptr, i);
 		}
+	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		///////////////////////////////////////////////////////////////////////////////////////////////
-		// Load script data and fill the lists
-		std::list<Entity *> globalScripts;
-		g_PresetMan.GetAllOfType(globalScripts, "GlobalScript");
-
-		for (std::list<Entity *>::iterator sItr = globalScripts.begin(); sItr != globalScripts.end(); ++sItr) {
-			GlobalScript * script = dynamic_cast<GlobalScript *>(*sItr);
-			if (script) {
-				ScriptRecord r;
-				r.PresetName = script->GetModuleAndPresetName();
-				r.Description = script->GetDescription();
-				r.Enabled = g_SettingsMan.IsScriptEnabled(r.PresetName);
-				m_KnownScripts.push_back(r);
+	void ModManagerGUI::FillKnownScriptsList() {
+		std::list<Entity *> globalScriptList;
+		g_PresetMan.GetAllOfType(globalScriptList, "GlobalScript");
+		for (Entity *globalScriptListEntry : globalScriptList) {
+			const GlobalScript *globalScript = dynamic_cast<GlobalScript *>(globalScriptListEntry);
+			if (globalScript) {
+				ScriptRecord scriptRecord;
+				scriptRecord.PresetName = globalScript->GetModuleAndPresetName();
+				scriptRecord.Description = globalScript->GetDescription();
+				scriptRecord.Enabled = g_SettingsMan.IsScriptEnabled(scriptRecord.PresetName);
+				m_KnownScripts.emplace_back(scriptRecord);
 			}
 		}
-
-		// Sort the list
 		std::sort(m_KnownScripts.begin(), m_KnownScripts.end());
 
-		// Fill the GUI listbox with loaded mod data
 		for (int i = 0; i < m_KnownScripts.size(); i++) {
-			ScriptRecord r = m_KnownScripts.at(i);
-			m_pModManagerScriptsListBox->AddItem(MakeScriptString(r), "", 0, 0, i);
+			ScriptRecord scriptRecord = m_KnownScripts.at(i);
+			m_ScriptsListBox->AddItem(MakeScriptString(scriptRecord), std::string(), nullptr, nullptr, i);
 		}
-
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	update {
-		GUIEvent anEvent;
-		while (m_pGUIController->GetEvent(&anEvent)) {
-			if (anEvent.GetType() == GUIEvent::Command) {
-				/////////////////////////////////////////////
-				// MOD MANAGER SCREEN BUTTONS
+	bool ModManagerGUI::HandleInputEvents() {
+		m_GUIControlManager->Update();
 
-				if (m_MenuScreen == MODMANAGERSCREEN) {
-					// Return to main menu button pressed
-					if (anEvent.GetControl() == m_pModManagerBackButton) {
-						// Save settings
-						g_SettingsMan.UpdateSettingsFile();
-
-						// Hide all screens, the appropriate screen will reappear on next update
-						HideAllScreens();
-						m_MenuScreen = MAINSCREEN;
-						m_ScreenChange = true;
-						g_GUISound.BackButtonPressSound()->Play();
-					}
-
-					// Disable/Enable mod pressed
-					if (anEvent.GetControl() == m_pModManagerToggleModButton) {
-						ToggleMod();
-					}
-
-					// Disable/Enable script pressed
-					if (anEvent.GetControl() == m_pModManagerToggleScriptButton) {
-						ToggleScript();
-					}
+		GUIEvent guiEvent;
+		while (m_GUIControlManager->GetEvent(&guiEvent)) {
+			if (guiEvent.GetType() == GUIEvent::Command) {
+				if (guiEvent.GetControl() == m_BackToMainButton) {
+					g_SettingsMan.UpdateSettingsFile();
+					m_RootBox->SetVisible(false);
+					return true;
+				} else if (guiEvent.GetControl() == m_ToggleModButton) {
+					ToggleMod();
+				} else if (guiEvent.GetControl() == m_ToggleScriptButton) {
+					ToggleScript();
 				}
+			} else if (guiEvent.GetType() == GUIEvent::Notification) {
+				if (dynamic_cast<GUIButton *>(guiEvent.GetControl()) && (guiEvent.GetMsg() == GUIButton::Focused)) { g_GUISound.SelectionChangeSound()->Play(); }
 
-			// Notifications
-			else if (anEvent.GetType() == GUIEvent::Notification) {
-			// Button focus notification that we can play a sound to
-			if (dynamic_cast<GUIButton *>(anEvent.GetControl())) {
-				if (anEvent.GetMsg() == GUIButton::Focused) { g_GUISound.SelectionChangeSound()->Play(); }
-			}
-
-			// Mod list pressed
-			if (anEvent.GetControl() == m_pModManagerModsListBox) {
-				if (anEvent.GetMsg() == GUIListBox::Select) {
-					int index = m_pModManagerModsListBox->GetSelectedIndex();
-					if (index > -1) {
-						GUIListPanel::Item *selectedItem = m_pModManagerModsListBox->GetSelected();
-						ModRecord r = m_KnownMods.at(selectedItem->m_ExtraIndex);
-						m_pModManagerDescriptionLabel->SetText(r.Description);
-
-						if (r.Disabled) {
-							m_pModManagerToggleModButton->SetText("Enable");
-						} else {
-							m_pModManagerToggleModButton->SetText("Disable");
-						}
-					}
+				if (guiEvent.GetControl() == m_ModsListBox && (guiEvent.GetMsg() == GUIListBox::Select && m_ModsListBox->GetSelectedIndex() > -1)) {
+					ModRecord modRecord = m_KnownMods.at(m_ModsListBox->GetSelected()->m_ExtraIndex);
+					m_ModOrScriptDescriptionLabel->SetText(modRecord.Description);
+					m_ToggleModButton->SetText(modRecord.Disabled ? "Enable Mod" : "Disable Mod");
+				} else if (guiEvent.GetControl() == m_ScriptsListBox && (guiEvent.GetMsg() == GUIListBox::Select && m_ScriptsListBox->GetSelectedIndex() > -1)) {
+					ScriptRecord scriptRecord = m_KnownScripts.at(m_ScriptsListBox->GetSelected()->m_ExtraIndex);
+					m_ModOrScriptDescriptionLabel->SetText(scriptRecord.Description);
+					m_ToggleScriptButton->SetText(scriptRecord.Enabled ? "Disable Script" : "Enable Script");
 				}
-
-				// Not reliable at all!!
-				//if (anEvent.GetMsg() == GUIListBox::DoubleClick)
-				//{
-				//	ToggleMod();
-				//}
-			}
-
-			// Script list pressed
-			if (anEvent.GetControl() == m_pModManagerScriptsListBox) {
-				if (anEvent.GetMsg() == GUIListBox::Select) {
-					int index = m_pModManagerScriptsListBox->GetSelectedIndex();
-					if (index > -1) {
-						GUIListPanel::Item *selectedItem = m_pModManagerScriptsListBox->GetSelected();
-						ScriptRecord r = m_KnownScripts.at(selectedItem->m_ExtraIndex);
-						m_pModManagerDescriptionLabel->SetText(r.Description);
-
-						if (r.Enabled) {
-							m_pModManagerToggleScriptButton->SetText("Disable");
-						} else {
-							m_pModManagerToggleScriptButton->SetText("Enable");
-						}
-					}
-				}
-
-				//if (anEvent.GetMsg() == GUIListBox::DoubleClick)
-				//{
-				//	ToggleScript();
-				//}
 			}
 		}
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::string MainMenuGUI::MakeModString(ModRecord r) {
-	std::string s;
-
-	if (r.Disabled) {
-		s = "- ";
-	} else {
-		s = "+ ";
-	}
-	s = s + r.ModulePath + " - " + r.ModuleName;
-
-	return s;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-std::string MainMenuGUI::MakeScriptString(ScriptRecord r) {
-	std::string s;
-
-	if (!r.Enabled) {
-		s = "- ";
-	} else {
-		s = "+ ";
-	}
-	s = s + r.PresetName;
-
-	return s;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void MainMenuGUI::ToggleMod() {
-	int index = m_pModManagerModsListBox->GetSelectedIndex();
-	if (index > -1) {
-		GUIListPanel::Item *selectedItem = m_pModManagerModsListBox->GetSelected();
-		ModRecord r = m_KnownMods.at(selectedItem->m_ExtraIndex);
-
-		r.Disabled = !r.Disabled;
-
-		if (r.Disabled) {
-			m_pModManagerToggleModButton->SetText("Enable");
-			g_SettingsMan.DisableMod(r.ModulePath);
-		} else {
-			m_pModManagerToggleModButton->SetText("Disable");
-			g_SettingsMan.EnableMod(r.ModulePath);
-		}
-		selectedItem->m_Name = MakeModString(r);
-		m_KnownMods[selectedItem->m_ExtraIndex] = r;
-		m_pModManagerModsListBox->SetSelectedIndex(index);
-		m_pModManagerModsListBox->Invalidate();
+	void ModManagerGUI::Draw() const {
+		m_GUIControlManager->Draw();
 	}
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void MainMenuGUI::ToggleScript() {
-	int index = m_pModManagerScriptsListBox->GetSelectedIndex();
-	if (index > -1) {
-		GUIListPanel::Item *selectedItem = m_pModManagerScriptsListBox->GetSelected();
-		ScriptRecord r = m_KnownScripts.at(selectedItem->m_ExtraIndex);
-
-		r.Enabled = !r.Enabled;
-
-		if (r.Enabled) {
-			m_pModManagerToggleScriptButton->SetText("Disable");
-			g_SettingsMan.EnableScript(r.PresetName);
-		} else {
-			m_pModManagerToggleScriptButton->SetText("Enable");
-			g_SettingsMan.DisableScript(r.PresetName);
-		}
-		selectedItem->m_Name = MakeScriptString(r);
-		m_KnownScripts[selectedItem->m_ExtraIndex] = r;
-		m_pModManagerScriptsListBox->SetSelectedIndex(index);
-		m_pModManagerScriptsListBox->Invalidate();
-	}
-}
-*/

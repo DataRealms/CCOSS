@@ -1,27 +1,30 @@
-project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++17', 'buildtype=release'], version:'0.1.0-Pre-3.1', meson_version:'>=0.49')
+project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++17', 'buildtype=debug'], version:'0.1.0-Pre-3.1', meson_version:'>=0.49')
 
 #### Build environment Setup ####
 
-deps = [
-  dependency('allegro'),
-  dependency('loadpng'),
-  dependency('flac'),
-  dependency('luajit'),
-  dependency('minizip'),
-  dependency('threads'),
-  dependency('liblz4'),
-  dependency('libpng'),
-  dependency('boost'), #needed for luabind
-]
-
-if host_machine.system() in ['linux']
-  deps += dependency('x11')
+deps=[]
+if host_machine.system() in ['linux','osx']
+  deps = [
+    dependency('allegro'),
+    dependency('loadpng'),
+    dependency('flac'),
+    dependency('luajit'),
+    dependency('minizip'),
+    dependency('threads'),
+    dependency('liblz4'),
+    dependency('libpng'),
+    dependency('boost'), #needed for luabind
+  ]
+  if host_machine.system() == 'linux'
+    deps += dependency('x11')
+  endif
 endif
 
 elfname = 'CCCP'
 compiler = meson.get_compiler('cpp')
 build_rpath = ''
 link_args=[]
+external_objects = []
 extra_args=[]
 preprocessor_flags = []
 preprocessor_flags_debug = []
@@ -41,9 +44,12 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
     elfname += '_debug' # add _debug suffix for debug builds
     extra_args = ['-fpermissive', '-Wno-unknown-pragmas'] # Disable #pragma region complaints
 
-    if not get_option('full_debug')
-      preprocessor_flags += ['-DDEBUG_RELEASE_BUILD'] # enable some debug features
-    else
+    debug_type = get_option('debug_type')
+    if debug_type == 'release'
+      preprocessor_flags += ['-DDEBUG_RELEASE_BUILD'] # enable minimal debug features
+    elif debug_type == 'minimal'
+      preprocessor_flags += ['-DDEBUGMODE'] # enable some debug features
+    elif debug_type == 'full'
       preprocessor_flags += ['-DDEBUG_BUILD'] # enable all debug features; may slow down game
     endif
   else
@@ -55,6 +61,26 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   endif
 elif compiler.get_argument_syntax()== 'msvc'
 #TODO: add MSVC related arguments and stuff in here
+  elfname = 'Cortex Command'
+  if host_machine.cpu_family() == 'x64'
+    elfname += ' x64'
+  endif
+  buildtype_debug = get_option('debug')
+  if buildtype_debug
+    elfname+='.debug'
+    debug_type = get_option('debug_type')
+    if debug_type == 'release'
+      preprocessor_flags += ['-DDEBUG_RELEASE_BUILD'] # enable minimal debug features
+    elif debug_type == 'minimal'
+      elfname += '.minimal'
+      preprocessor_flags += ['-DDEBUGMODE'] # enable some debug features
+    elif debug_type == 'full'
+      elfname += '.full'
+      preprocessor_flags += ['-DDEBUG_BUILD'] # enable all debug features; may slow down game
+    endif
+  else
+    preprocessor_flags += ['-DRELEASE_BUILD']
+  endif
 else
   error('Using unknown compiler, please use gcc or msvc compatible compilers')
 endif

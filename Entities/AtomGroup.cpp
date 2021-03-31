@@ -1256,11 +1256,6 @@ namespace RTE {
 				penetrates = true;
 				break;
 			}
-#ifdef DEBUG_BUILD
-			// TODO: Remove this once AtomGroup drawing in Material layer draw mode is implemented.
-			// Draw a dot for each Atom for visual reference.
-			putpixel(g_SceneMan.GetDebugBitmap(), atomPos.GetFloorIntX(), atomPos.GetFloorIntY(), 112);
-#endif
 		}
 
 		//if (g_SceneMan.SceneIsLocked()) { g_SceneMan.UnlockScene(); }

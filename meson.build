@@ -24,7 +24,6 @@ elfname = 'CCCP'
 compiler = meson.get_compiler('cpp')
 build_rpath = ''
 link_args=[]
-external_objects = []
 extra_args=[]
 preprocessor_flags = []
 preprocessor_flags_debug = []
@@ -105,12 +104,14 @@ subdir('System')
 subdir('Resources')
 
 #### External Libraries ####
+external_objects = []
+external_libs = []
 subdir('external')
 
 #### Target Definitions ####
 executable(
   elfname, ['Main.cpp', sources], include_directories:[source_inc_dirs, external_inc_dirs], cpp_pch:pch, # Sources options
-  link_with:[luabind, raknet], objects:[fmod_so], dependencies:deps,                                     # Link options
+  link_with:external_libs, objects:[external_objects], dependencies:deps,                                     # Link options
   cpp_args:[extra_args, preprocessor_flags], link_args:link_args, build_rpath:build_rpath,               # Compiler setup
   name_suffix:suffix,   # Executable name options
   build_by_default:true # Meson options

@@ -26,11 +26,16 @@ build_rpath = ''
 link_args=[]
 extra_args=[]
 preprocessor_flags = []
+<<<<<<< HEAD
 preprocessor_flags_debug = []
 suffix=''
+=======
+suffix=[]
+>>>>>>> a3f97068 (added native file; added missing compiler flags)
 
 if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   # Build against system libraries on linux
+  message('gcc detected')
 
   build_rpath = '$ORIGIN:$ORIGIN/../external/lib/linux/x86_64' # Set RUNPATH so that CCCP can find libfmod.so without needing to set LD_LIBRARY_PATH
   suffix = 'x86_64'
@@ -49,7 +54,7 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
     elif debug_type == 'minimal'
       preprocessor_flags += ['-DDEBUGMODE'] # enable some debug features
     elif debug_type == 'full'
-      preprocessor_flags += ['-DDEBUG_BUILD'] # enable all debug features; may slow down game
+      preprocessor_flags += ['-DDEBUG_BUILD', '-DDEBUGMODE'] # enable all debug features; may slow down game
     endif
   else
     extra_args = ['-fpermissive', '-w'] # Disable all warnings for release builds
@@ -60,14 +65,20 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   endif
 elif compiler.get_argument_syntax()== 'msvc'
 #TODO: add MSVC related arguments and stuff in here
+message('cl detected')
   elfname = 'Cortex Command'
+  extra_args += []
+  add_project_link_arguments(['winmm.lib', 'ws2_32.lib', 'dinput8.lib', 'ddraw.lib', 'dxguid.lib', 'dsound.lib'], language:'cpp')
   if host_machine.cpu_family() == 'x64'
     elfname += ' x64'
   endif
+  preprocessor_flags += ['-D_CRT_SECURE_NO_DEPRECATE', '-D_WINDOWS', '-DWIN32', '-DWIN32_LEAN_AND_MEAN']
+  link_args+=['-ignore:4099', '-ignore:4217']
   buildtype_debug = get_option('debug')
   if buildtype_debug
     elfname+='.debug'
     debug_type = get_option('debug_type')
+	preprocessor_flags += ['-D_HAS_ITERATOR_DEBUGGING=0']
     if debug_type == 'release'
       preprocessor_flags += ['-DDEBUG_RELEASE_BUILD'] # enable minimal debug features
     elif debug_type == 'minimal'
@@ -75,10 +86,10 @@ elif compiler.get_argument_syntax()== 'msvc'
       preprocessor_flags += ['-DDEBUGMODE'] # enable some debug features
     elif debug_type == 'full'
       elfname += '.full'
-      preprocessor_flags += ['-DDEBUG_BUILD'] # enable all debug features; may slow down game
+      preprocessor_flags += ['-DDEBUG_BUILD', '-DDEBUGMODE'] # enable all debug features; may slow down game
     endif
   else
-    preprocessor_flags += ['-DRELEASE_BUILD']
+    preprocessor_flags += ['-DRELEASE_BUILD', '-DNDEBUG']
   endif
 else
   error('Using unknown compiler, please use gcc or msvc compatible compilers')
@@ -111,10 +122,11 @@ subdir('external')
 #### Target Definitions ####
 executable(
   elfname, ['Main.cpp', sources], include_directories:[source_inc_dirs, external_inc_dirs], cpp_pch:pch, # Sources options
-  link_with:external_libs, objects:[external_objects], dependencies:deps,                                     # Link options
+  link_with:external_libs, objects:[external_objects], dependencies:deps,                                # Link options
   cpp_args:[extra_args, preprocessor_flags], link_args:link_args, build_rpath:build_rpath,               # Compiler setup
   name_suffix:suffix,   # Executable name options
-  build_by_default:true # Meson options
+  build_by_default:true, # Meson options
+  gui_app:true,
 )
 
 # disable appimage target unless option appimage_enabbled is set

@@ -28,15 +28,17 @@ if host_machine.cpu_family() == 'x86'
     )
   endif
 else
+message('using x86_64 libs')
   if get_option('debug')
+  message('using debug libs')
   external_objects += files(
     'x64/alleg-debug-static.lib',
     'x64/RakNet_Debug_x64.lib',
-    'x64/fmodL_vc.lib',
+    'x64/fmod_vc.lib',
     'x64/liblz4_debug_static.lib',
     'x64/libpng16_static.lib',
     'x64/loadpng-debug.lib',
-    'x64/lua51.lib',
+    'x64/lua51-64.lib',
     'x64/luabind-debug.lib',
     'x64/zlibstat.lib',
     )

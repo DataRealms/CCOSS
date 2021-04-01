@@ -5,9 +5,16 @@
 #include "Icon.h"
 
 namespace RTE {
+
+	/// <summary>
+	/// An individual slice in a pie menu.
+	/// </summary>
 	class PieSlice : public Serializable {
 
 	public:
+
+		//SerializableOverrideMethods
+
 		enum PieSliceIndex {
 			PSI_NONE = 0,
 			// Inventory management
@@ -79,19 +86,20 @@ namespace RTE {
 		/// <param name="direction">The direction of the pie slice.</param>
 		/// <param name="enabled">Whether the slice is enabled. Defaults to true.</param>
 		PieSlice(std::string description, PieSliceIndex sliceType, SliceDirection direction, bool enabled = true) { Clear(); m_Description = description; m_SliceType = sliceType; m_Direction = direction; m_Enabled = enabled; }
+		//PieSlice(const std::string &description, PieSliceIndex sliceType, SliceDirection direction, bool enabled = true) : Clear(), m_Description(description), m_SliceType(sliceType), m_Direction(direction), m_Enabled(enabled) { Clear(); }
 
 		/// <summary>
 		/// Makes the Slice object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create() override;
 
 		/// <summary>
 		/// Creates a Slice to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the Slice to deep copy.</param>
 		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const PieSlice &reference);
+		int Create(const PieSlice &reference);
 
 		/// <summary>
 		/// Makes the Serializable ready for use. Pie slices being read from a file will always be scripted SliceType.
@@ -100,7 +108,7 @@ namespace RTE {
 		/// <param name="checkType">Whether there is a class name in the stream to check against to make sure the correct type is being read from the stream.</param>
 		/// <param name="doCreate">Whether to do any additional initialization of the object after reading in all the properties from the Reader. This is done by calling Create().</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(Reader &reader, bool checkType = true, bool doCreate = true) { m_SliceType = PSI_SCRIPTED; return Serializable::Create(reader, checkType, doCreate); }
+		int Create(Reader &reader, bool checkType = true, bool doCreate = true) { m_SliceType = PSI_SCRIPTED; return Serializable::Create(reader, checkType, doCreate); }
 #pragma endregion
 
 #pragma region Destruction

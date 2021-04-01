@@ -35,6 +35,7 @@
 #include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 #include "PieMenuGUI.h"
+#include "InventoryGUI.h"
 #include "BuyMenuGUI.h"
 #include "SceneEditorGUI.h"
 #include "GUIBanner.h"
@@ -70,6 +71,7 @@ void GameActivity::Clear()
         m_LandingZone[player].Reset();
         m_AIReturnCraft[player] = true;
         m_pPieMenu[player] = 0;
+        m_InventoryGUI[player] = nullptr;
         m_pBuyGUI[player] = 0;
         m_pEditorGUI[player] = 0;
         m_pBannerRed[player] = 0;
@@ -169,6 +171,7 @@ int GameActivity::Create(const GameActivity &reference)
         m_LandingZone[player] = reference.m_LandingZone[player];
         m_AIReturnCraft[player] = reference.m_AIReturnCraft[player];
         m_pPieMenu[player] = new PieMenuGUI;
+        m_InventoryGUI[player] = new InventoryGUI;
         m_pBuyGUI[player] = new BuyMenuGUI;
         m_pEditorGUI[player] = new SceneEditorGUI;
         m_pBannerRed[player] = new GUIBanner();
@@ -289,6 +292,7 @@ void GameActivity::Destroy(bool notInherited)
     for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         delete m_pPieMenu[player];
+        delete m_InventoryGUI[player];
         delete m_pBuyGUI[player];
         delete m_pEditorGUI[player];
         delete m_pBannerRed[player];

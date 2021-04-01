@@ -56,9 +56,6 @@ void PieMenuGUI::Clear() {
 
 	m_BGBitmap = 0;
 	m_RedrawBG = true;
-
-	m_EquippedItemBGBitmap = 0;
-	m_InventoryMassDisplayFont = 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -82,8 +79,6 @@ int PieMenuGUI::Create(Controller *controller, Actor *focusActor) {
 		m_BGBitmap = create_bitmap_ex(8, diameter, diameter);
 		clear_to_color(m_BGBitmap, g_MaskColor);
 	}
-	if (!m_EquippedItemBGBitmap) { m_EquippedItemBGBitmap = create_bitmap_ex(8, MAX(s_InventoryIconMaxWidth, s_InventoryIconMaxHeight) + (s_InventoryEquippedIconHighlightWidth * 2), MAX(s_InventoryIconMaxWidth, s_InventoryIconMaxHeight) + (s_InventoryEquippedIconHighlightWidth * 2)); }
-	m_InventoryMassDisplayFont = g_FrameMan.GetSmallFont();
 
 	return 0;
 }
@@ -97,7 +92,6 @@ void PieMenuGUI::SetEnabled(bool enable) {
 	if (!((enable && m_PieEnabled != ENABLED && m_PieEnabled != ENABLING) || (!enable && m_PieEnabled != DISABLED && m_PieEnabled != DISABLING))) {
 		return;
 	}
-
 
 	m_PieEnabled = enable ? ENABLING : DISABLING;
 	m_EnablingTimer.Reset();
@@ -350,16 +344,11 @@ void PieMenuGUI::Update() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void PieMenuGUI::Draw(BITMAP *targetBitmap, const Vector &targetPos) const  {
-
 	GUIFont *menuFont = g_FrameMan.GetLargeFont();
 
 	Vector drawPos;
 	CalculateDrawPositionAccountingForSeamsAndFont(targetBitmap, targetPos, menuFont, drawPos);
 
-	// Draw selected actor's inventory if it exists, alive and actually an actor
-	if (m_PieEnabled == ENABLED && m_LastKnownActor && g_MovableMan.IsActor(m_LastKnownActor) && dynamic_cast<AHuman *>(m_LastKnownActor)) {
-		DrawActorInventory(targetBitmap, drawPos);
-	}
 
 	if (m_PieEnabled != DISABLED) {
 		if (!g_FrameMan.IsInMultiplayerMode()) {
@@ -603,137 +592,6 @@ void PieMenuGUI::CalculateDrawPositionAccountingForSeamsAndFont(const BITMAP *ta
 		drawPos.m_Y = menuDrawRadius;
 	} else if (drawPos.m_Y + menuDrawRadius > targetBitmap->h) {
 		drawPos.m_Y = targetBitmap->h - menuDrawRadius;
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void PieMenuGUI::DrawActorInventory(BITMAP *targetBitmap, const Vector &drawPos) const {
-	const std::deque<MovableObject *> *inventory = m_LastKnownActor->GetInventory();
-	const AHuman *lastKnownActorAsHuman = dynamic_cast<AHuman *>(m_LastKnownActor);
-	MovableObject *equippedItem = lastKnownActorAsHuman != nullptr ? lastKnownActorAsHuman->GetEquippedItem() : nullptr;
-	if (inventory->empty() && equippedItem == nullptr) {
-		return;
-	}
-
-	std::vector<MovableObject *> organizedInventory;
-	organizedInventory.reserve(inventory->size() + 1);
-	std::copy(inventory->begin() + inventory->size() / 2, inventory->end(), std::back_inserter(organizedInventory));
-	organizedInventory.push_back(equippedItem);
-	std::copy(inventory->begin(), inventory->begin() + inventory->size() / 2, std::back_inserter(organizedInventory));
-	
-	std::pair<float, float> inventoryObjectRowRemainders;
-	std::vector<std::array<MovableObject *, s_InventoryIconsPerRow>> inventoryObjectRows;
-	Vector inventoryIconSize = equippedItem == nullptr ? Vector() : Vector(equippedItem->GetGraphicalIcon()->w, equippedItem->GetGraphicalIcon()->h);
-	TransformOrganizedInventoryIntoRowsAndCalculateRemaindersAndIconSizes(organizedInventory, inventoryObjectRowRemainders, inventoryObjectRows, inventoryIconSize);
-
-	DrawInventoryItemIconsAndMassIndicators(targetBitmap, drawPos, organizedInventory.size(), equippedItem, inventoryObjectRowRemainders, inventoryObjectRows, inventoryIconSize);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void PieMenuGUI::TransformOrganizedInventoryIntoRowsAndCalculateRemaindersAndIconSizes(const std::vector<MovableObject *> &organizedInventory, std::pair<float, float> &inventoryObjectRowRemainders, std::vector<std::array<MovableObject *, s_InventoryIconsPerRow>> &inventoryObjectRows, Vector &inventoryIconSize) const {
-	const float remainderFloat = static_cast<float>((organizedInventory.size() - s_InventoryIconsPerRow) % (s_InventoryIconsPerRow * 2)) / 2;
-	inventoryObjectRowRemainders = {
-		(organizedInventory.size() > s_InventoryIconsPerRow) ? std::ceil(remainderFloat) : 0,
-		(organizedInventory.size() > s_InventoryIconsPerRow) ? std::floor(remainderFloat) : 0
-	};
-	
-	int currentInsertIndex = 0;
-	std::array<MovableObject *, s_InventoryIconsPerRow> currentRow;
-	std::fill(currentRow.begin(), currentRow.end(), nullptr);
-
-	for (MovableObject *inventoryObject : organizedInventory) {
-		currentInsertIndex %= s_InventoryIconsPerRow;
-
-		if (inventoryObjectRows.size() == 0 && currentInsertIndex == 0 && inventoryObjectRowRemainders.first > 0) {
-			currentInsertIndex = s_InventoryIconsPerRow - inventoryObjectRowRemainders.first;
-		}
-		currentRow[currentInsertIndex] = inventoryObject;
-		currentInsertIndex++;
-
-		inventoryIconSize.SetXY(
-			MIN(s_InventoryIconMaxWidth, MAX(inventoryIconSize.GetX(), inventoryObject->GetGraphicalIcon()->w)),
-			MIN(s_InventoryIconMaxHeight, MAX(inventoryIconSize.GetY(), inventoryObject->GetGraphicalIcon()->h))
-		);
-
-		if (currentInsertIndex == s_InventoryIconsPerRow || inventoryObject == organizedInventory.at(organizedInventory.size() - 1)) {
-			inventoryObjectRows.push_back(currentRow);
-			std::fill(currentRow.begin(), currentRow.end(), nullptr);
-		}
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void PieMenuGUI::DrawInventoryItemIconsAndMassIndicators(BITMAP *targetBitmap, const Vector& drawPos, float totalOrganizedInventorySize, const MovableObject *equippedItem, std::pair<float, float> inventoryObjectRowRemainders, const std::vector<std::array<MovableObject *, s_InventoryIconsPerRow>> &inventoryObjectRows, const Vector &inventoryIconSize) const {
-	Vector inventoryDrawPos(
-		drawPos.GetX() - ((s_InventoryIconsPerRow / 2) * (inventoryIconSize.GetX() + s_InventoryIconSpacer) + (inventoryIconSize.GetX() / 2)),
-		drawPos.GetY() - (m_EnabledRadius + m_Thickness) - (inventoryObjectRows.size() * (inventoryIconSize.GetY() + m_InventoryMassDisplayFont->GetFontHeight() + 10))
-	);
-	float currentRowUnfilledSpots;
-
-	for (const std::array<MovableObject *, s_InventoryIconsPerRow> &inventoryObjectRow : inventoryObjectRows) {
-		currentRowUnfilledSpots = 0;
-		if (inventoryObjectRows.size() == 1) {
-			currentRowUnfilledSpots = s_InventoryIconsPerRow - totalOrganizedInventorySize;
-		} else if (inventoryObjectRowRemainders.first > 0 && inventoryObjectRow == (*inventoryObjectRows.begin())) {
-			currentRowUnfilledSpots = s_InventoryIconsPerRow - inventoryObjectRowRemainders.first;
-		} else if (inventoryObjectRowRemainders.second > 0 && inventoryObjectRow == (*(inventoryObjectRows.end() - 1))) {
-			currentRowUnfilledSpots = s_InventoryIconsPerRow - inventoryObjectRowRemainders.second;
-		}
-		DrawInventoryItemIconRow(targetBitmap, Vector(inventoryDrawPos.GetX() + (currentRowUnfilledSpots / 2) * (inventoryIconSize.GetX() + s_InventoryIconSpacer), inventoryDrawPos.GetY()), equippedItem, inventoryObjectRow, inventoryIconSize);
-		
-		inventoryDrawPos.SetY(inventoryDrawPos.GetY() + inventoryIconSize.GetY() + m_InventoryMassDisplayFont->GetFontHeight() + 10);
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void PieMenuGUI::DrawInventoryItemIconRow(BITMAP *targetBitmap, Vector &currentInventoryIconDrawPos, const MovableObject *equippedItem, const std::array<MovableObject *, s_InventoryIconsPerRow> &inventoryObjectRow, const Vector &inventoryIconSize) const {
-	BITMAP *currentInventoryIcon;
-	Vector currentInventoryIconSize;
-	float currentInventoryIconWidthHalfDifference;
-
-	AllegroBitmap targetAllegroBitmap(targetBitmap);
-	std::string massString;
-
-	for (MovableObject *currentInventoryObject : inventoryObjectRow) {
-		if (currentInventoryObject == nullptr) {
-			continue;
-		}
-		currentInventoryIcon = currentInventoryObject->GetGraphicalIcon();
-		if (currentInventoryIcon == nullptr) {
-			currentInventoryIconDrawPos.SetX(currentInventoryIconDrawPos.GetX() + inventoryIconSize.GetX() + s_InventoryIconSpacer);
-			continue;
-		}
-
-		currentInventoryIconSize.SetXY(currentInventoryIcon->w, currentInventoryIcon->h);
-		if (currentInventoryIconSize.GetX() > inventoryIconSize.GetX() || currentInventoryIconSize.GetY() > inventoryIconSize.GetY()) {
-			currentInventoryIconSize /= (currentInventoryIconSize / inventoryIconSize).GetLargest();
-		}
-
-		currentInventoryIconWidthHalfDifference = (inventoryIconSize.GetX() - currentInventoryIconSize.GetX()) / 2;
-		currentInventoryIconDrawPos.SetX(currentInventoryIconDrawPos.GetX() + currentInventoryIconWidthHalfDifference);
-		//Comments for maxim - This section draws the outline. I tried here to do a white one surrounded by a black one but it's screwy. If you want one outline colour you just need one of these.
-		if (currentInventoryObject == equippedItem) {
-			clear_to_color(m_EquippedItemBGBitmap, g_MaskColor);
-			stretch_sprite(m_EquippedItemBGBitmap, currentInventoryIcon, 0, 0, currentInventoryIconSize.GetX() + (s_InventoryEquippedIconHighlightWidth * 2), currentInventoryIconSize.GetY() + (s_InventoryEquippedIconHighlightWidth * 2));
-			draw_character_ex(targetBitmap, m_EquippedItemBGBitmap, currentInventoryIconDrawPos.GetX() - s_InventoryEquippedIconHighlightWidth, currentInventoryIconDrawPos.GetY() - s_InventoryEquippedIconHighlightWidth, g_BlackColor, -1);
-			clear_to_color(m_EquippedItemBGBitmap, g_MaskColor);
-			stretch_sprite(m_EquippedItemBGBitmap, currentInventoryIcon, 0, 0, currentInventoryIconSize.GetX() + (s_InventoryEquippedIconHighlightWidth * 2) - 2, currentInventoryIconSize.GetY() + (s_InventoryEquippedIconHighlightWidth * 2 - 2));
-			draw_character_ex(targetBitmap, m_EquippedItemBGBitmap, currentInventoryIconDrawPos.GetX() - s_InventoryEquippedIconHighlightWidth, currentInventoryIconDrawPos.GetY() - s_InventoryEquippedIconHighlightWidth, g_WhiteColor, -1);			
-		}
-		//Comments for maxim - This section draws the gun sprite, stretched (shrunk) to fit if it's super big (like the dropship)
-		if (currentInventoryIcon->w > inventoryIconSize.GetX() || currentInventoryIcon->h > inventoryIconSize.GetY()) {
-			stretch_sprite(targetBitmap, currentInventoryIcon, currentInventoryIconDrawPos.GetX(), currentInventoryIconDrawPos.GetY(), currentInventoryIconSize.GetX(), currentInventoryIconSize.GetY());
-		} else {
-			draw_sprite(targetBitmap, currentInventoryIcon, currentInventoryIconDrawPos.GetX(), currentInventoryIconDrawPos.GetY());
-		}
-		//Comments for maxim - This section draws the mass indicator
-		massString = std::to_string(std::min(999, static_cast<int>(std::round(currentInventoryObject->GetMass())))) + (currentInventoryObject->GetMass() > 999 ? "+" : " ") + "KG";
-		g_FrameMan.GetSmallFont()->DrawAligned(&targetAllegroBitmap, currentInventoryIconDrawPos.GetX() + (currentInventoryIconSize.GetX() / 2), currentInventoryIconDrawPos.GetY() - (inventoryIconSize.GetY() / 2) - (m_InventoryMassDisplayFont->GetFontHeight() / 2) - s_InventoryIconSpacer, massString.c_str(), GUIFont::Centre);
-		currentInventoryIconDrawPos.SetXY(currentInventoryIconDrawPos.GetX() - currentInventoryIconWidthHalfDifference + inventoryIconSize.GetX() + s_InventoryIconSpacer, currentInventoryIconDrawPos.GetY());
 	}
 }
 

@@ -486,6 +486,9 @@
     <ClInclude Include="System\PieSlice.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="Menus\InventoryGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -924,8 +927,11 @@
     <ClCompile Include="System\GraphicalPrimitive.cpp">
       <Filter>System</Filter>
     </ClCompile>
-    <ClCompile Include="PieSlice.cpp">
+    <ClCompile Include="System\PieSlice.cpp">
       <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\InventoryGUI.cpp">
+      <Filter>Menus</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

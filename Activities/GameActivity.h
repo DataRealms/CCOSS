@@ -29,6 +29,7 @@ namespace RTE
 class Actor;
 class ACraft;
 class PieMenuGUI;
+class InventoryGUI;
 class BuyMenuGUI;
 class SceneEditorGUI;
 class GUIBanner;
@@ -1059,6 +1060,8 @@ protected:
     bool m_AIReturnCraft[Players::MaxPlayerCount];
     // The pie menus for each player
     PieMenuGUI *m_pPieMenu[Players::MaxPlayerCount];
+    // The inventory guis for each player controlled actor
+    InventoryGUI *m_InventoryGUI[Players::MaxPlayerCount];
     // The in-game buy GUIs for each player
     BuyMenuGUI *m_pBuyGUI[Players::MaxPlayerCount];
     // The in-game scene editor GUI for each player

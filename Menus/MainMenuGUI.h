@@ -75,7 +75,21 @@ public:
 			bool operator<(const ScriptRecord &rhs) const { return PresetName < rhs.PresetName; }
 	};
 
-
+	enum MenuScreen {
+		ROOT = 0,
+		MAINSCREEN,
+		PLAYERSSCREEN,
+		SKIRMISHSCREEN,
+		DIFFICULTYSCREEN,
+		OPTIONSSCREEN,
+		CONFIGSCREEN,
+		EDITORSCREEN,
+		CREDITSSCREEN,
+		METASCREEN,
+		QUITSCREEN,
+		MODMANAGERSCREEN,
+		SCREENCOUNT
+	};
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     MainMenuGUI
@@ -110,14 +124,14 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire MainMenuGUI, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+    void Reset() { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -229,7 +243,7 @@ public:
 // Arguments:       None.
 // Return value:    true if we're in the main menu i.e. allowed to show PP promo
 
-	virtual bool AllowPioneerPromo() { return m_MenuScreen == MAINSCREEN; }
+	bool AllowPioneerPromo() { return m_MenuScreen == MAINSCREEN; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Static method:   EnablePioneerPromoButton
@@ -266,17 +280,17 @@ public:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  Draw
+// Method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws the menu
 // Arguments:       The bitmap to draw on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *drawBitmap) const;
+    void Draw(BITMAP *drawBitmap) const;
 
 #pragma region Editor Activity Handling
 	/// <summary>
@@ -305,6 +319,12 @@ public:
 	void StartAssemblyEditor();
 #pragma endregion
 
+	/// <summary>
+	/// Sets the main menu GUI to display a screen.
+	/// </summary>
+	/// <param name="screenToShow">Which screen to show. See MenuScreen enumeration.</param>
+	void SetMenuScreen(MenuScreen screenToShow) { m_MenuScreen = screenToShow; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -318,7 +338,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void HideAllScreens();
+    void HideAllScreens();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -338,7 +358,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void SetupSkirmishActivity();
+    void SetupSkirmishActivity();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -348,7 +368,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateScenesBox();
+    void UpdateScenesBox();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -359,7 +379,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateTeamBoxes();
+    void UpdateTeamBoxes();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -369,7 +389,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateResolutionCombo();
+    void UpdateResolutionCombo();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -380,7 +400,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateVolumeSliders();
+    void UpdateVolumeSliders();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -390,7 +410,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateDeviceLabels();
+    void UpdateDeviceLabels();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -400,7 +420,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateConfigScreen();
+    void UpdateConfigScreen();
 
 
 
@@ -411,7 +431,7 @@ protected:
 // Arguments:       None.
 // Return value:    String with mod info.
 
-	virtual std::string MakeModString(ModRecord r);
+	std::string MakeModString(ModRecord r);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -421,7 +441,7 @@ protected:
 // Arguments:       None.
 // Return value:    String with script info.
 
-	virtual std::string MakeScriptString(ScriptRecord r);
+	std::string MakeScriptString(ScriptRecord r);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -431,7 +451,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-	virtual void ToggleMod();
+	void ToggleMod();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -441,18 +461,8 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-	virtual void ToggleScript();
+	void ToggleScript();
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CategoryChange
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes sure all things that to happen when category is changed, happens.
-// Arguments:       None.
-// Return value:    None.
-
-    void CategoryChange();
-*/
 
     enum MenuEnabled
     {
@@ -460,23 +470,6 @@ protected:
         ENABLED,
         DISABLING,
         DISABLED
-    };
-
-    enum MenuScreen
-    {
-        ROOT = 0,
-        MAINSCREEN,
-        PLAYERSSCREEN,
-        SKIRMISHSCREEN,
-        DIFFICULTYSCREEN,
-        OPTIONSSCREEN,
-        CONFIGSCREEN,
-        EDITORSCREEN,
-        CREDITSSCREEN,
-        METASCREEN,
-        QUITSCREEN,
-		MODMANAGERSCREEN,
-        SCREENCOUNT
     };
 
     enum MainButtons
@@ -509,7 +502,7 @@ protected:
 
     enum OptionsButtons
     {
-        RESOLUTIONMULTIPLIER = 0,
+        FULLSCREENORWINDOWED = 0,
         P1NEXT,
         P2NEXT,
         P3NEXT,
@@ -526,6 +519,7 @@ protected:
         P2CLEAR,
         P3CLEAR,
         P4CLEAR,
+    	UPSCALEDFULLSCREEN,
         OPTIONSBUTTONCOUNT
     };
 
@@ -535,7 +529,6 @@ protected:
 		BLIPONREVEALUNSEEN,
 		SHOWFOREIGNITEMS,
 		SHOWTOOLTIPS,
-		PRECISECOLLISIONS,
 		OPTIONSCHECKBOXCOUNT
     };
 
@@ -642,7 +635,7 @@ protected:
     // Collection box of the buy GUIs
     GUICollectionBox *m_apScreenBox[SCREENCOUNT];
     // The main menu buttons
-    GUIButton *m_aMainMenuButton[MAINMENUBUTTONCOUNT];
+    GUIButton *m_MainMenuButtons[MAINMENUBUTTONCOUNT];
     // Skirmish scene selction box
     GUIComboBox *m_pSceneSelector;
     // The skirmish setup screen team box panels
@@ -666,8 +659,6 @@ protected:
     GUICheckbox *m_aOptionsCheckbox[OPTIONSCHECKBOXCOUNT];
     // Resolution combobox
     GUIComboBox *m_pResolutionCombo;
-    // Resolution restart notice
-    GUILabel *m_pResolutionNoticeLabel;
     // Option sound sliders
     GUILabel *m_pSoundLabel;
     GUILabel *m_pMusicLabel;
@@ -693,6 +684,7 @@ protected:
     GUIButton *m_aEditorButton[EDITORBUTTONCOUNT];
     // Metagame notice label
     GUILabel *m_pMetaNoticeLabel;
+	GUILabel *m_VersionLabel; //!< CCCP version number.
 
     // Controller diagram bitmaps
     BITMAP **m_aDPadBitmaps;
@@ -720,6 +712,7 @@ protected:
     GUICollectionBox *m_pEditorPanel;
     // Scrolling panel for the credits
     GUICollectionBox *m_pScrollPanel;
+	GUILabel *m_CreditsLabel; //!< The label containing all the credits text.
     // Timer for credits scrolling pacing
     Timer m_ScrollTimer;
 
@@ -729,6 +722,12 @@ protected:
 	GUIListBox *m_pModManagerModsListBox;
 	GUIListBox *m_pModManagerScriptsListBox;
 	GUILabel *m_pModManagerDescriptionLabel;
+
+	GUICollectionBox *m_ResolutionChangeDialog;
+	GUIButton *m_ButtonConfirmResolutionChange;
+	GUIButton *m_ButtonCancelResolutionChange;
+	GUIButton *m_ButtonConfirmResolutionChangeFullscreen;
+	bool m_ResolutionChangeToUpscaled;
 
 	std::vector<ModRecord> m_KnownMods;
 	std::vector<ScriptRecord> m_KnownScripts;
@@ -786,8 +785,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    MainMenuGUI(const MainMenuGUI &reference);
-    MainMenuGUI & operator=(const MainMenuGUI &rhs);
+	MainMenuGUI(const MainMenuGUI &reference) = delete;
+	MainMenuGUI & operator=(const MainMenuGUI &rhs) = delete;
 
 };
 

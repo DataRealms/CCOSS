@@ -60,12 +60,12 @@ int Deployment::Create()
 
 	if (!m_apArrowLeftBitmap)
 	{
-		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowLeft.bmp");
+		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowLeft.png");
 		m_apArrowLeftBitmap = arrowFile.GetAsAnimation(1);
 	}
 	if (!m_apArrowRightBitmap)
 	{
-		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowRight.bmp");
+		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowRight.png");
 		m_apArrowRightBitmap = arrowFile.GetAsAnimation(1);
 	}
 
@@ -89,12 +89,12 @@ int Deployment::Create(string loadoutName, const Icon &icon, float spawnRadius)
 
 	if (!m_apArrowLeftBitmap)
 	{
-		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowLeft.bmp");
+		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowLeft.png");
 		m_apArrowLeftBitmap = arrowFile.GetAsAnimation(1);
 	}
 	if (!m_apArrowRightBitmap)
 	{
-		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowRight.bmp");
+		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowRight.png");
 		m_apArrowRightBitmap = arrowFile.GetAsAnimation(1);
 	}
 
@@ -130,7 +130,7 @@ int Deployment::Create(const Deployment &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int Deployment::ReadProperty(std::string propName, Reader &reader)
+int Deployment::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "LoadoutName")
         reader >> m_LoadoutName;
@@ -145,7 +145,6 @@ int Deployment::ReadProperty(std::string propName, Reader &reader)
 	else if (propName == "HFlipped")
 		reader >> m_HFlipped;
     else
-        // See if the base class(es) can find a match instead
         return SceneObject::ReadProperty(propName, reader);
 
     return 0;
@@ -257,7 +256,7 @@ Actor * Deployment::CreateDeployedActor(int player, float &costTally)
 						moduleList.push_back(pModule->GetFileName());
 				}
 
-				int selection = SelectRand(1, moduleList.size() - 1);
+				int selection = RandomNum<int>(1, moduleList.size() - 1);
 				nativeModule = g_PresetMan.GetModuleID(moduleList.at(selection));
 			}
 			foreignCostMult = 1.0;
@@ -351,7 +350,7 @@ SceneObject * Deployment::CreateDeployedObject(int player, float &costTally)
 					}
 				}
 
-				int selection = SelectRand(1, moduleList.size() - 1);
+				int selection = RandomNum<int>(1, moduleList.size() - 1);
 				nativeModule = g_PresetMan.GetModuleID(moduleList.at(selection));
 			}
 			foreignCostMult = 1.0;

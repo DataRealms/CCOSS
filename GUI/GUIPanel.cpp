@@ -124,23 +124,23 @@ void GUIPanel::AddChild(GUIPanel *child, bool convertToAbsolutePos)
             child->m_Height -= (child->m_Y + child->m_Height) - (m_Y + m_Height);
 */
         // Make sure the rectangle is valid
-        child->m_Width = MAX(child->m_Width, 0);
-        child->m_Height = MAX(child->m_Height, 0);
+        child->m_Width = std::max(child->m_Width, 0);
+        child->m_Height = std::max(child->m_Height, 0);
 
-        int Z = 0;
-        // Get the last child in the list
+        int zPos = 0;
         if (m_Children.size() > 0) {
-            GUIPanel *p = (GUIPanel *)m_Children.at(m_Children.size()-1);
-            Z = p->GetZPos()+1;
+			GUIPanel *lastChild = m_Children.back();
+			zPos = lastChild->GetZPos() + 1;
         }
 
         // Remove the child from any previous parent
-        if (child->GetParentPanel())
-            child->GetParentPanel()->GUIPanel::RemoveChild(child);
+		if (child->GetParentPanel()) {
+			child->GetParentPanel()->GUIPanel::RemoveChild(child);
+		}
 
         // Setup the inherited values
         child->m_Parent = this;
-        child->Setup(m_Manager, Z);
+        child->Setup(m_Manager, zPos);
 
         // Add the child to the list
         m_Children.push_back(child);
@@ -960,7 +960,7 @@ string GUIPanel::WriteValue(const string Name, int Value)
     string OutString = Name;
     OutString += " = ";
 
-    sprintf_s(buf, sizeof(buf), "%i", Value);
+    std::snprintf(buf, sizeof(buf), "%i", Value);
     OutString += buf;
     OutString += "\n";
 

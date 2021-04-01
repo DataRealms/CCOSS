@@ -14,12 +14,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "RTETools.h"
 #include "SceneObject.h"
-#include "Vector.h"
-#include "FrameMan.h"
 #include "SceneMan.h"
-//#include "MovableMan.h"
 
 #define ICON_WIDTH 69
 #define AREA_PER_DEPLOYMENT 64
@@ -71,7 +67,8 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(BunkerAssemblyScheme)
-
+SerializableOverrideMethods
+ClassInfoGetters
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     BunkerAssemblyScheme
@@ -90,7 +87,7 @@ EntityAllocation(BunkerAssemblyScheme)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~BunkerAssemblyScheme() { Destroy(true); }
+	~BunkerAssemblyScheme() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +98,7 @@ EntityAllocation(BunkerAssemblyScheme)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
@@ -115,22 +112,6 @@ EntityAllocation(BunkerAssemblyScheme)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire BunkerAssemblyScheme, including its inherited members, to
@@ -138,45 +119,8 @@ EntityAllocation(BunkerAssemblyScheme)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); SceneObject::Reset(); }
+    void Reset() override { Clear(); SceneObject::Reset(); }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Pure V. method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this BunkerAssemblyScheme to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the BunkerAssemblyScheme will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the BunkerAssemblyScheme object ready for use.
-// Arguments:       An input stream that the BunkerAssemblyScheme will create itself from.
-//                  Whether there is a class name in the stream to check against to make
-//                  sure the correct type is being read from the stream.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create(std::istream &stream, bool checkType = true);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this BunkerAssemblyScheme to an output stream for
-//                  later recreation with Create(istream &stream);
-// Arguments:       An output stream that the BunkerAssemblyScheme will save itself to.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(std::ostream &stream) const;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Pure V. method:  Destroy
@@ -186,27 +130,7 @@ EntityAllocation(BunkerAssemblyScheme)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -270,7 +194,7 @@ EntityAllocation(BunkerAssemblyScheme)
 // Return value:    A good identifyable graphical representation of this in a BITMAP, if
 //                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
 
-    virtual BITMAP * GetGraphicalIcon();
+    BITMAP * GetGraphicalIcon() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -280,7 +204,7 @@ EntityAllocation(BunkerAssemblyScheme)
 // Arguments:       The assigned team number.
 // Return value:    None.
 
-    virtual void SetTeam(int team);
+	void SetTeam(int team) override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  IsOnScenePoint
@@ -290,7 +214,7 @@ EntityAllocation(BunkerAssemblyScheme)
 // Arguments:       The point in absolute scene coordinates.
 // Return value:    Whether this' graphical rep overlaps the scene point.
 
-    virtual bool IsOnScenePoint(Vector &scenePoint) const;
+	bool IsOnScenePoint(Vector &scenePoint) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -305,20 +229,17 @@ EntityAllocation(BunkerAssemblyScheme)
 //                  like indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetOneTypePerScene
+// Method:  GetOneTypePerScene
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns whether sceneman should select just a single assembly for this scheme
 //					and use it everywhere on the scene.
 // Arguments:       None.
 // Return value:    Whether we allowed to use just one type of assembly for this scheme
 
-	virtual bool IsOneTypePerScene() { return m_IsOneTypePerScene; } ;
+	bool IsOneTypePerScene() { return m_IsOneTypePerScene; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -328,7 +249,7 @@ EntityAllocation(BunkerAssemblyScheme)
 // Arguments:       None.
 // Return value:    Symmetric scheme name.
 
-	virtual string GetSymmetricSchemeName() const { return m_SymmetricScheme; };
+	string GetSymmetricSchemeName() const { return m_SymmetricScheme; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetAssemblyGroup
@@ -337,28 +258,28 @@ EntityAllocation(BunkerAssemblyScheme)
 // Arguments:       None.
 // Return value:    Assembly group name.
 
-	virtual string GetAssemblyGroup() const { return m_AssemblyGroup; };
+	string GetAssemblyGroup() const { return m_AssemblyGroup; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetLimit
+// Method:  GetLimit
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the limit of these schemes per scene. 0 - no limit.
 // Arguments:       None.
 // Return value:    Scheme limit.
 
-	virtual int GetLimit() { return m_Limit; };
+	int GetLimit() { return m_Limit; }
 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMaxDeployments
+// Method:  GetMaxDeployments
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the number of deployments this scheme is allowed to place.
 // Arguments:       None.
 // Return value:    Deployments limit.
 
-	virtual int GetMaxDeployments() const { return m_MaxDeployments; };
+	int GetMaxDeployments() const { return m_MaxDeployments; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -409,8 +330,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    BunkerAssemblyScheme(const BunkerAssemblyScheme &reference) { RTEAbort("Tried to use forbidden method"); }
-    void operator=(const BunkerAssemblyScheme &rhs) { RTEAbort("Tried to use forbidden method"); }
+    BunkerAssemblyScheme(const BunkerAssemblyScheme &reference) = delete;
+    void operator=(const BunkerAssemblyScheme &rhs) = delete;
 
 };
 

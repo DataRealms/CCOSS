@@ -19,40 +19,41 @@ namespace RTE {
 	public:
 
 		/// <summary>
-		/// Constructor method used to instantiate a Singleton object.
-		/// </summary>
-		Singleton() {
-			RTEAssert(!s_Instance, "Trying to create a second instance of a Singleton");
-
-			// Take nonexistent object sitting at address 0x1 in memory,
-			// cast to both Singleton, and whatever is deriving, and with the
-			// difference calculate the singleton's instance pointer.
-			uintptr_t offset = (uintptr_t)(Type *)1 - (uintptr_t)(Singleton<Type> *)(Type *)1;
-			s_Instance = (Type *)((uintptr_t)this + offset);
-		}
-
-		/// <summary>
 		/// Destructor method used to clean up a Singleton object before deletion.
 		/// </summary>
-		~Singleton() {
-			RTEAssert(s_Instance, "Trying to destruct nonexistent Singleton instance");
-			s_Instance = 0;
-		}
+		~Singleton() = default;
 
 		/// <summary>
-		/// Returns this Singleton.
+		/// Returns the sole instance of this Singleton. If there isn't one yet, constructs it.
 		/// </summary>
 		/// <returns>A reference to the sole instance of this Singleton.</returns>
 		static Type & Instance() {
-			RTEAssert(s_Instance, "Trying to use Singleton before instantiation");
+			if (!s_Instance) {
+				try {
+					s_Instance = new Type();
+				} catch (std::bad_alloc &catchResult) {
+					RTEAbort("Failed to instantiate Singleton because: " + std::string(catchResult.what()));
+				}
+			}
 			return *s_Instance;
 		}
+
+	protected:
+
+		/// <summary>
+		/// Constructor method used to instantiate a Singleton object.
+		/// </summary>
+		Singleton() { RTEAssert(!s_Instance, "Trying to create a second instance of a Singleton!"); }
 
 	private:
 
 		static Type *s_Instance; //!< Pointer to instance of this singleton.
+
+		// Disallow the use of some implicit methods.
+		Singleton(const Singleton &reference) = delete;
+		Singleton & operator=(const Singleton &rhs) = delete;
 	};
 
-	template <typename Type> Type * Singleton<Type>::s_Instance = 0;
+	template <typename Type> Type * Singleton<Type>::s_Instance = nullptr;
 }
 #endif

@@ -17,7 +17,6 @@
 #include "RTETools.h"
 #include "SceneObject.h"
 #include "Vector.h"
-#include "FrameMan.h"
 #include "SceneMan.h"
 //#include "MovableMan.h"
 
@@ -48,7 +47,8 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(Deployment)
-
+SerializableOverrideMethods
+ClassInfoGetters
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     Deployment
@@ -67,7 +67,7 @@ EntityAllocation(Deployment)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~Deployment() { Destroy(true); }
+	~Deployment() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -78,7 +78,7 @@ EntityAllocation(Deployment)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -93,7 +93,7 @@ EntityAllocation(Deployment)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(string loadoutName, const Icon &icon, float spawnRadius);
+	int Create(string loadoutName, const Icon &icon, float spawnRadius);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -108,22 +108,6 @@ EntityAllocation(Deployment)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire Deployment, including its inherited members, to
@@ -131,45 +115,8 @@ EntityAllocation(Deployment)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); SceneObject::Reset(); }
+    void Reset() override { Clear(); SceneObject::Reset(); }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Pure V. method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this Deployment to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the Deployment will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the Deployment object ready for use.
-// Arguments:       An input stream that the Deployment will create itself from.
-//                  Whether there is a class name in the stream to check against to make
-//                  sure the correct type is being read from the stream.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create(std::istream &stream, bool checkType = true);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this Deployment to an output stream for
-//                  later recreation with Create(istream &stream);
-// Arguments:       An output stream that the Deployment will save itself to.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(std::ostream &stream) const;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Pure V. method:  Destroy
@@ -179,27 +126,7 @@ EntityAllocation(Deployment)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -211,7 +138,7 @@ EntityAllocation(Deployment)
 // Return value:    A good identifyable graphical representation of this in a BITMAP, if
 //                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
 
-    virtual BITMAP * GetGraphicalIcon() { return m_Icon.GetBitmaps8() ? m_Icon.GetBitmaps8()[0] : 0; }
+    BITMAP * GetGraphicalIcon() override { return m_Icon.GetBitmaps8() ? m_Icon.GetBitmaps8()[0] : 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -231,7 +158,7 @@ EntityAllocation(Deployment)
 // Arguments:       None.
 // Return value:    The Icon that represents this graphically.
 
-    virtual Icon GetIcon() { return m_Icon; }
+	Icon GetIcon() { return m_Icon; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -243,7 +170,7 @@ EntityAllocation(Deployment)
 // Arguments:       None.
 // Return value:    The radius this Deployment will be checking within.
 
-    virtual float GetSpawnRadius() const { return m_SpawnRadius; }
+	float GetSpawnRadius() const { return m_SpawnRadius; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -254,7 +181,7 @@ EntityAllocation(Deployment)
 // Arguments:       The point in absolute scene coordinates.
 // Return value:    Whether this' graphical rep overlaps the scene point.
 
-    virtual bool IsOnScenePoint(Vector &scenePoint) const;
+	bool IsOnScenePoint(Vector &scenePoint) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -269,7 +196,7 @@ EntityAllocation(Deployment)
 // Return value:    The Actor instance, if any, that this Deployment is supposed to spawn.
 //                  OWNERSHIP IS TRANSFERRED!
 
-    virtual Actor * CreateDeployedActor(int player, float &costTally);
+	Actor * CreateDeployedActor(int player, float &costTally);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -283,7 +210,7 @@ EntityAllocation(Deployment)
 // Return value:    The Actor instance, if any, that this Deployment is supposed to spawn.
 //                  OWNERSHIP IS TRANSFERRED!
 
-	virtual Actor * CreateDeployedActor();
+	Actor * CreateDeployedActor();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -296,7 +223,7 @@ EntityAllocation(Deployment)
 // Return value:    The Actor instance, if any, that this Deployment is supposed to spawn.
 //                  OWNERSHIP IS TRANSFERRED!
 
-    virtual SceneObject * CreateDeployedObject(int player, float &costTally);
+	SceneObject * CreateDeployedObject(int player, float &costTally);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -308,7 +235,7 @@ EntityAllocation(Deployment)
 // Return value:    The Actor instance, if any, that this Deployment is supposed to spawn.
 //                  OWNERSHIP IS TRANSFERRED!
 
-	virtual SceneObject * CreateDeployedObject();
+	SceneObject * CreateDeployedObject();
 
 
 
@@ -325,7 +252,7 @@ EntityAllocation(Deployment)
 // Return value:    Whether the deployment spawning is blocked by one of the Objects in
 //                  the list.
 
-    virtual bool DeploymentBlocked(int player, const std::list<SceneObject *> &existingObjects);
+	bool DeploymentBlocked(int player, const std::list<SceneObject *> &existingObjects);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -338,14 +265,14 @@ EntityAllocation(Deployment)
 //                  How much to multiply the value if this happens to be a foreign Tech.
 // Return value:    The cost, in oz of gold.
 
-    virtual float GetGoldValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const { return GetTotalValue(nativeModule, foreignMult, nativeMult); }
+	float GetGoldValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const override { return GetTotalValue(nativeModule, foreignMult, nativeMult); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetGoldValueOld
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     DOES THE SAME THING AS GetGoldValue, USED ONLY TO PRESERVE LUA COMPATIBILITY
 
-    virtual float GetGoldValueOld(int nativeModule = 0, float foreignMult = 1.0) const { return GetTotalValue(nativeModule, foreignMult, 1.0); }
+	float GetGoldValueOld(int nativeModule = 0, float foreignMult = 1.0) const override { return GetTotalValue(nativeModule, foreignMult, 1.0); }
 
 
 
@@ -360,14 +287,14 @@ EntityAllocation(Deployment)
 //                  How much to multiply the value if this happens to be a foreign Tech.
 // Return value:    The current value of this and all contained assets.
 
-    virtual float GetTotalValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const;
+	float GetTotalValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTotalValueOld
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     DOES THE SAME THING AS GetTotalValue, USED ONLY TO PRESERVE LUA COMPATIBILITY
 
-	virtual float GetTotalValueOld(int nativeModule = 0, float foreignMult = 1.0) const { return GetTotalValue(nativeModule, foreignMult, 1.0); } 
+	float GetTotalValueOld(int nativeModule = 0, float foreignMult = 1.0) const override { return GetTotalValue(nativeModule, foreignMult, 1.0); }
 
 
 
@@ -378,7 +305,7 @@ EntityAllocation(Deployment)
 // Arguments:       None.
 // Return value:    This deployment's ID
 
-	virtual unsigned int GetID() const { return m_ID; };
+	unsigned int GetID() const { return m_ID; };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -388,7 +315,7 @@ EntityAllocation(Deployment)
 // Arguments:      Deployment to clone Id from.
 // Return value:    None
 
-	virtual void CloneID(Deployment * from) { if (from) m_ID = from->GetID(); };
+	void CloneID(Deployment * from) { if (from) m_ID = from->GetID(); };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -398,7 +325,7 @@ EntityAllocation(Deployment)
 // Arguments:       None.
 // Return value:    None.
 
-	virtual void NewID() { m_ID = SelectRand(1, 0xFFFF); };
+	void NewID() { m_ID = RandomNum(1, 0xFFFF); };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -413,10 +340,7 @@ EntityAllocation(Deployment)
 //                  like indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -427,7 +351,7 @@ EntityAllocation(Deployment)
 // Arguments:       None.
 // Return value:    Whether flipped or not.
 
-	virtual bool IsHFlipped() const { return m_HFlipped; }
+	bool IsHFlipped() const override { return m_HFlipped; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -438,7 +362,7 @@ EntityAllocation(Deployment)
 // Arguments:       A bool with the new value.
 // Return value:    None.
 
-	virtual void SetHFlipped(const bool flipped) { m_HFlipped = flipped; }
+	void SetHFlipped(const bool flipped) override { m_HFlipped = flipped; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -482,8 +406,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    Deployment(const Deployment &reference) { RTEAbort("Tried to use forbidden method"); }
-    void operator=(const Deployment &rhs) { RTEAbort("Tried to use forbidden method"); }
+    Deployment(const Deployment &reference) = delete;
+    void operator=(const Deployment &rhs) = delete;
 
 };
 

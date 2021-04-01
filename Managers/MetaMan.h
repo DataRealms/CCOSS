@@ -65,6 +65,9 @@ public:
 friend class MetagameGUI;
 friend class MetaSave;
 
+	SerializableClassNameGetter
+	SerializableOverrideMethods
+
     enum MetagameState
     {
         NOGAME = -1,
@@ -111,69 +114,41 @@ friend class MetaSave;
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+	int Initialize();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  NewGame
+// Method:  NewGame
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Wipes any current and sets up a new game based on a size parameter.
-// Arguments:       The size of the new Metagame, from 0 to 1.0, which will affect how
+// Arguments:       The size of the new Metagame, which will affect how
 //                  many Scenes/Sites will ultimately be used.
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int NewGame(float gameSize = 0.5);
+	int NewGame(int gameSize = 3);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  EndGame
+// Method:  EndGame
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Wipes any current metagame and sets things back to as if program start.
 // Arguments:       None.
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int EndGame();
+	int EndGame();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Load
+// Method:  Load
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Load a Metagame from disk out of the special Metagame.rte data module
 // Arguments:       The MetaSave object to load from - Ownership Is Not Transferred!
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Load(const MetaSave *pSave);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this MetaMan to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the MetaMan will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+	int Load(const MetaSave *pSave);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -214,35 +189,23 @@ friend class MetaSave;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire MetaMan, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+	void Reset() override { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Destroy
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Destroys and resets (through Clear()) the MetaMan object.
-// Arguments:       Whether to only destroy the members defined in this derived class, or
-//                  to destroy all inherited members also.
 // Return value:    None.
 
-    void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_ClassName; }
+    void Destroy();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -305,7 +268,7 @@ friend class MetaSave;
 // Arguments:       Which player.
 // Return value:    The team of that player.
 
-    int GetTeamOfPlayer(int metaPlayer) const { return metaPlayer >= Activity::PLAYER_1 && metaPlayer < m_Players.size() ? m_Players[metaPlayer].GetTeam() : Activity::NOTEAM; }
+    int GetTeamOfPlayer(int metaPlayer) const { return metaPlayer >= Players::PlayerOne && metaPlayer < m_Players.size() ? m_Players[metaPlayer].GetTeam() : Activity::NoTeam; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -315,7 +278,7 @@ friend class MetaSave;
 // Arguments:       Which player.
 // Return value:    The requested MetaPlayer
 
-    MetaPlayer * GetPlayer(int metaPlayer) { return (metaPlayer >= Activity::PLAYER_1 && metaPlayer < m_Players.size()) ? &(m_Players[metaPlayer]) : 0; }
+    MetaPlayer * GetPlayer(int metaPlayer) { return (metaPlayer >= Players::PlayerOne && metaPlayer < m_Players.size()) ? &(m_Players[metaPlayer]) : 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -344,8 +307,8 @@ friend class MetaSave;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the next Scene in play that is owned by a specific player.
 // Arguments:       The player to get the next owned Scene of.
-//                  The Scene to start searching from in the current roster of Scenes, OINT.
-// Return value:    A pointer to the next Scene found in the sequence. OINT.
+//                  The Scene to start searching from in the current roster of Scenes, OWNERSHIP IS NOT TRANSFERRED!
+// Return value:    A pointer to the next Scene found in the sequence. OWNERSHIP IS NOT TRANSFERRED!
 
     const Scene * GetNextSceneOfPlayer(int metaPlayer, const Scene *pScene = 0) const;
 
@@ -407,29 +370,6 @@ friend class MetaSave;
 
     int OnlyTeamWithAnyBrainPoolLeft();
 
-/* obsolete, diff win condition now
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OneOrNoneTeamsLeft
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether there is less than two teams left in this game with
-//                  a brain in its ranks at all.
-// Arguments:       None.
-// Return value:    Whether less than two teams have any brains in them left.
-
-    bool OneOrNoneTeamsLeft();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          WhichTeamLeft
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates which single team is left with brains, if any.
-// Arguments:       None.
-// Return value:    Which team stands alone with any brains in its ranks, if any. NOTEAM
-//                  is returned if there's either more than one team, OR there are no
-//                  teams at all left with brains in em.
-
-    int WhichTeamLeft();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          NoBrainsLeftInAnyPool
@@ -527,7 +467,7 @@ friend class MetaSave;
 // Arguments:       None.
 // Return value:    Whether the player index passed in is active for the current game.
 
-    bool IsActivePlayer(int metaPlayer) { return metaPlayer >= Activity::PLAYER_1 && metaPlayer < m_Players.size(); }
+    bool IsActivePlayer(int metaPlayer) { return metaPlayer >= Players::PlayerOne && metaPlayer < m_Players.size(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -537,7 +477,7 @@ friend class MetaSave;
 // Arguments:       None.
 // Return value:    Whether the team index passed in is active for the current game.
 
-    bool IsActiveTeam(int team) { return team >= Activity::TEAM_1 && team < m_TeamCount; }
+    bool IsActiveTeam(int team) { return team >= Activity::TeamOne && team < m_TeamCount; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -545,7 +485,7 @@ friend class MetaSave;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Checks whether one team has ownership of all revealed sites.
 // Arguments:       None.
-// Return value:    Which team has all sites, if any. If not NOTEAM is returned.
+// Return value:    Which team has all sites, if any. If not NoTeam is returned.
 
     int WhichTeamOwnsAllSites();
 
@@ -586,14 +526,13 @@ friend class MetaSave;
 // Method:          SelectScenePresets
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Yields a set of randomly selected Scene presets for a new game.
-// Arguments:       The normalized scalar from 0 to 1.0 that controls the size of the set.
-//                  The number of players that will be playing this new game.
+// Arguments:       The size of the set.
 //                  The list to fill with the selected presets, depending on currently
 //                  set player numbers and loaded eligible scenes. If no list is passed
 //                  it will be ignored. Presets returned in list are NOT OWNED there.
 // Return value:    The count of selected preset scenes.
 
-    int SelectScenePresets(float gameSize, int playerCount, std::list<Scene *> *pSelected = 0);
+    int SelectScenePresets(int gameSize, std::list<Scene *> *pSelected = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -624,7 +563,7 @@ friend class MetaSave;
 // Arguments:       None.
 // Return value:    None.
 
-    void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -643,8 +582,6 @@ friend class MetaSave;
 
 protected:
 
-    // Member variables
-    static const std::string m_ClassName;
     // GUI controller, owned
     MetagameGUI *m_pMetaGUI;
 
@@ -664,7 +601,7 @@ protected:
     // The number of Team:s in play this game
     int m_TeamCount;
     // The flag icons of all teams
-    Icon m_TeamIcons[Activity::MAXTEAMCOUNT];
+    Icon m_TeamIcons[Activity::MaxTeamCount];
     // The current round the game is on, starting with count on 0
     int m_CurrentRound;
     // All Scenes of the current game, OWNED by this. Stored sequentially in order of revealing
@@ -683,7 +620,7 @@ protected:
 	// Game difficulty
 	int m_Difficulty;
 	// Teams AI Skill
-	int m_TeamAISkill[Activity::MAXTEAMCOUNT];
+	int m_TeamAISkill[Activity::MaxTeamCount];
 
     // Timer for measuring how long each phase has gone for
     Timer m_PhaseTimer;
@@ -693,6 +630,8 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+	static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -706,243 +645,10 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    MetaMan(const MetaMan &reference);
-    MetaMan & operator=(const MetaMan &rhs);
+	MetaMan(const MetaMan &reference) = delete;
+	MetaMan & operator=(const MetaMan &rhs) = delete;
 
 };
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           MetaSave
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A light-weight Entity for storing only the necessary info about how
-//                  to load an entire MetaMan state from disk.
-// Parent(s):       Entity.
-// Class history:   07/05/2011 MetaSave created.
-
-class MetaSave:
-    public Entity
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
-
-public:
-
-
-// Concrete allocation and cloning definitions
-EntityAllocation(MetaSave)
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     MetaSave
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Constructor method used to instantiate a MetaSave object in system
-//                  memory. Create() should be called before using the object.
-// Arguments:       None.
-
-    MetaSave() { Clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Destructor:      ~MetaSave
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destructor method used to clean up a MetaSave object before deletion
-//                  from system memory.
-// Arguments:       None.
-
-    virtual ~MetaSave() { Destroy(true); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the MetaSave object ready for use from the currently loaded
-//                  MetaMan state.
-// Arguments:       The path of the file to where the MetaMan state should be saved.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create(std::string savePath);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a MetaSave to be identical to another, by deep copy.
-// Arguments:       A reference to the MetaSave to deep copy.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    int Create(const MetaSave &reference);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets the entire MetaSave, including its inherited members, to their
-//                  default settings or values.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void Reset() { Clear(); Entity::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this MetaSave to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the MetaSave will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the SceneLayer object.
-// Arguments:       Whether to only destroy the members defined in this derived class, or
-//                  to destroy all inherited members also.
-// Return value:    None.
-
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetSavePath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the full path to the ini file that stores the state of the MetaMan
-//                  this is associated with.
-// Arguments:       None.
-// Return value:    The path to the ini with the MetaMan state info.
-
-    std::string GetSavePath() const { return m_SavePath; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetSiteCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total number of Scenes this game has.
-// Arguments:       None.
-// Return value:    The number of Scenes.
-
-    int GetSiteCount() const { return m_SiteCount; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetPlayerCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the total number of players this game has (including AIs)
-// Arguments:       None.
-// Return value:    The player count.
-
-    int GetPlayerCount() const { return m_PlayerCount; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetRoundCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the round number that this game is on.
-// Arguments:       None.
-// Return value:    The round count.
-
-    int GetRoundCount() const { return m_RoundCount; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetDifficulty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the difficulty for this game.
-// Arguments:       None.
-// Return value:    Difficulty setting.
-
-    int GetDifficulty() const { return m_Difficulty; }
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
-
-protected:
-
-    // Member variables
-    static Entity::ClassInfo m_sClass;
-
-    // The full path to the ini file which stores the stat of MetaMan this is associated with
-    std::string m_SavePath;
-    // The site count of this game
-    int m_SiteCount;
-    // The number of players in this saved game.
-    int m_PlayerCount;
-    // The round this game is on
-    int m_RoundCount;
-	//Game difficulty
-	int m_Difficulty;
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
-private:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this MetaSave, effectively
-//                  resetting the members of this abstraction level only.
-// Arguments:       None.
-// Return value:    None.
-
-    void Clear();
-
-
-    // Disallow the use of some implicit methods.
-    MetaSave(const MetaSave &reference);
-    MetaSave & operator=(const MetaSave &rhs);
-
-};
-
 } // namespace RTE
 
 #endif // File

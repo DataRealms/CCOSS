@@ -1,9 +1,10 @@
 #include "ThrownDevice.h"
 
 namespace RTE {
-	ConcreteClassInfo(ThrownDevice, HeldDevice, 0);
-	
-////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	ConcreteClassInfo(ThrownDevice, HeldDevice, 50);
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ThrownDevice::Clear() {
 		m_ActivationSound.Reset();
@@ -21,7 +22,6 @@ namespace RTE {
 		if (HeldDevice::Create() < 0) {
 			return -1;
 		}
-
 		m_MOType = MovableObject::TypeThrownDevice;
 
 		return 0;
@@ -48,24 +48,24 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ThrownDevice::ReadProperty(std::string propName, Reader &reader) {
-		if (propName == "ActivationSound")
+	int ThrownDevice::ReadProperty(const std::string_view &propName, Reader &reader) {
+		if (propName == "ActivationSound") {
 			reader >> m_ActivationSound;
-		else if (propName == "StartThrowOffset")
+		} else if (propName == "StartThrowOffset") {
 			reader >> m_StartThrowOffset;
-		else if (propName == "EndThrowOffset")
+		} else if (propName == "EndThrowOffset") {
 			reader >> m_EndThrowOffset;
-		else if (propName == "MinThrowVel")
+		} else if (propName == "MinThrowVel") {
 			reader >> m_MinThrowVel;
-		else if (propName == "MaxThrowVel")
+		} else if (propName == "MaxThrowVel") {
 			reader >> m_MaxThrowVel;
-		else if (propName == "TriggerDelay")
+		} else if (propName == "TriggerDelay") {
 			reader >> m_TriggerDelay;
-		else if (propName == "ActivatesWhenReleased")
+		} else if (propName == "ActivatesWhenReleased") {
 			reader >> m_ActivatesWhenReleased;
-		else
+		} else {
 			return HeldDevice::ReadProperty(propName, reader);
-
+		}
 		return 0;
 	}
 
@@ -94,50 +94,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ThrownDevice::Destroy(bool notInherited) {
-		if (!notInherited) {
-			HeldDevice::Destroy();
-		}
-
-		Clear();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void ThrownDevice::ResetAllTimers() {
-		double elapsedTime;
-		if (m_Activated) {
-			elapsedTime = m_ActivationTmr.GetElapsedSimTimeMS();
-		}
+		double elapsedTime = m_Activated ? m_ActivationTimer.GetElapsedSimTimeMS() : 0;
 		HeldDevice::ResetAllTimers();
-		if (m_Activated) {
-			m_ActivationTmr.SetElapsedSimTimeMS(elapsedTime);
-		}
+		if (m_Activated) { m_ActivationTimer.SetElapsedSimTimeMS(elapsedTime); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ThrownDevice::Activate() {
 		if (!m_Activated) {
-			m_ActivationTmr.Reset();
+			m_ActivationTimer.Reset();
 			m_ActivationSound.Play(m_Pos);
 			m_Activated = true;
 		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ThrownDevice::RestDetection() {
-		HeldDevice::RestDetection();
-
-		if (m_Activated) {
-			m_RestTimer.Reset();
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	Vector ThrownDevice::GetStanceOffset() const {
-		return m_StanceOffset.GetXFlipped(m_HFlipped);
 	}
 }

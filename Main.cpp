@@ -18,14 +18,13 @@
 /// Cortex Command Community Project - https://github.com/cortex-command-community
 /// </summary>
 
-// Without this nested includes somewhere deep inside Allegro will summon winsock.h and it will conflict with winsock2.h from RakNet.
-#define WIN32_LEAN_AND_MEAN
-
-#include "System.h"
-
-#include "RTEManagers.h"
 #include "MetaMan.h"
+#include "SettingsMan.h"
 #include "ConsoleMan.h"
+#include "PresetMan.h"
+#include "PerformanceMan.h"
+#include "PrimitiveMan.h"
+#include "UInputMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
@@ -42,8 +41,6 @@
 
 #include "MultiplayerServerLobby.h"
 #include "NetworkServer.h"
-#include "NetworkClient.h"
-#include "Network.h"
 
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
@@ -119,44 +116,33 @@ enum SLIDES {
 volatile bool g_Quit = false;
 bool g_ResetRTE = false; //!< Signals to reset the entire RTE next iteration.
 bool g_LaunchIntoEditor = false; //!< Flag for launching directly into editor activity.
-const char *g_EditorToLaunch = ""; //!< String with editor activity name to launch.
+std::string g_EditorToLaunch = ""; //!< String with editor activity name to launch.
 bool g_InActivity = false;
 bool g_ResetActivity = false;
 bool g_ResumeActivity = false;
-bool g_ReturnToMainMenu = false;
 int g_IntroState = START;
-int g_TeamCount = 2;
-int g_PlayerCount = 3;
-int g_DifficultySetting = 4;
 int g_StationOffsetX;
 int g_StationOffsetY;
+
+bool g_HadResolutionChange = false; //!< Need this so we can restart PlayIntroTitle without an endless loop or leaks. Will be set true by ReinitMainMenu and set back to false at the end of the switch.
 
 MainMenuGUI *g_pMainMenuGUI = 0;
 ScenarioGUI *g_pScenarioGUI = 0;
 Controller *g_pMainMenuController = 0;
 
 enum StarSize {
-    StarSmall = 0,
-    StarLarge,
-    StarHuge,
+	StarSmall = 0,
+	StarLarge,
+	StarHuge,
 };
 
 struct Star {
-    // Bitmap representation
-    BITMAP *m_pBitmap;
-    // Center location on screen
-    Vector m_Pos;
-    // Bitmap offset
-//    int m_Offset;
-    // Scrolling ratio
-    float m_ScrollRatio;
-    // Normalized intensity 0-1.0
-    float m_Intensity;
-    // Type
-    StarSize m_Size;
-
-    Star() { m_pBitmap = 0; m_Pos.Reset(); m_ScrollRatio = 1.0; m_Intensity = 1.0; m_Size = StarSmall; }
-    Star(BITMAP *pBitmap, Vector &pos, float scrollRatio, float intensity) { m_pBitmap = pBitmap; m_Pos = pos; m_ScrollRatio = scrollRatio; m_Intensity = intensity; }
+	BITMAP *m_Bitmap = nullptr;
+	int m_PosX = 0;
+	int m_PosY = 0;
+	float m_ScrollRatio = 1.0F;
+	int m_Intensity = 0; //!< Intensity value on a scale from 0 to 255.
+	StarSize m_Size = StarSmall;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -172,8 +158,7 @@ END_OF_FUNCTION(QuitHandler)
 /// <summary>
 /// Load and initialize the Main Menu.
 /// </summary>
-/// <returns></returns>
-bool InitMainMenu() {
+void InitMainMenu() {
     g_FrameMan.LoadPalette("Base.rte/palette.bmp");
 
     // Create the main menu interface
@@ -186,8 +171,25 @@ bool InitMainMenu() {
     g_pScenarioGUI->Create(g_pMainMenuController);
     // And the Metagame GUI too
     g_MetaMan.GetGUI()->Create(g_pMainMenuController);
+}
 
-    return true;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/// <summary>
+/// Destroy the Main Menu and initialize it again after a resolution change. Must be done otherwise the GUIs retain the original resolution settings and become all screwy.
+/// </summary>
+void ReinitMainMenu() {
+	g_pMainMenuGUI->Destroy();
+	g_pMainMenuController->Reset();
+	g_pScenarioGUI->Destroy();
+	g_MetaMan.GetGUI()->Destroy();
+
+	g_ConsoleMan.Destroy();
+	g_ConsoleMan.Initialize();
+
+	InitMainMenu();
+	g_FrameMan.DestroyTempBackBuffers();
+	g_HadResolutionChange = true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -196,8 +198,8 @@ bool InitMainMenu() {
 /// Reset the current activity.
 /// </summary>
 /// <returns></returns>
-bool ResetActivity()
-{
+bool ResetActivity() {
+	g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
     g_ResetActivity = false;
 
     // Clear and reset out things
@@ -246,7 +248,7 @@ bool ResetActivity()
 /// Start the simulation back up after being paused.
 /// </summary>
 void ResumeActivity() {
-	if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::NOTSTARTED) {
+	if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::NotStarted) {
 		g_Quit = false;
 		g_InActivity = true;
 		g_ResumeActivity = false;
@@ -289,20 +291,25 @@ void EnterMultiplayerLobby() {
 /// <summary>
 /// Launch editor activity specified in command-line argument.
 /// </summary>
-void EnterEditorActivity(const char *editorToEnter) {
-	if (std::strcmp(editorToEnter, "ActorEditor") == 0) { 
-		g_pMainMenuGUI->StartActorEditor(); 
-	} else if (std::strcmp(editorToEnter, "GibEditor") == 0) {
+/// <returns>Whether a valid editor name was passed in and set to be launched.</returns>
+bool EnterEditorActivity(const std::string &editorToEnter) {
+	if (editorToEnter == "ActorEditor") {
+		g_pMainMenuGUI->StartActorEditor();
+	} else if (editorToEnter == "GibEditor") {
 		g_pMainMenuGUI->StartGibEditor();
-	} else if (std::strcmp(editorToEnter, "SceneEditor") == 0) {
+	} else if (editorToEnter == "SceneEditor") {
 		g_pMainMenuGUI->StartSceneEditor();
-	} else if (std::strcmp(editorToEnter, "AreaEditor") == 0) {
+	} else if (editorToEnter == "AreaEditor") {
 		g_pMainMenuGUI->StartAreaEditor();
-	} else if (std::strcmp(editorToEnter, "AssemblyEditor") == 0) {
+	} else if (editorToEnter == "AssemblyEditor") {
 		g_pMainMenuGUI->StartAssemblyEditor();
 	} else {
+		g_ConsoleMan.PrintString("ERROR: Invalid editor name passed into \"-editor\" argument!");
+		g_ConsoleMan.SetEnabled(true);
 		g_LaunchIntoEditor = false;
+		return false;
 	}
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -319,8 +326,8 @@ bool PlayIntroTitle() {
     g_UInputMan.DisableKeys(false);
     g_UInputMan.TrapMousePos(false);
 
-    // Stop all audio
-    g_AudioMan.StopAll();
+	// Don't stop the music if reiniting after a resolution change
+	if (!g_FrameMan.ResolutionChanged()) { g_AudioMan.StopAll(); }
 
     g_FrameMan.ClearBackBuffer32();
     g_FrameMan.FlipFrameBuffers();
@@ -334,134 +341,107 @@ bool PlayIntroTitle() {
 
     // Load the Intro slides
     BITMAP **apIntroSlides = new BITMAP *[SLIDECOUNT];
-    ContentFile introSlideFile("Base.rte/GUIs/Title/Intro/IntroSlideA.bmp");
-    apIntroSlides[SLIDEPAST] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideB.bmp");
-    apIntroSlides[SLIDENOW] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideC.bmp");
-    apIntroSlides[SLIDEVR] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideD.bmp");
-    apIntroSlides[SLIDETRAVEL] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideE.bmp");
-    apIntroSlides[SLIDEALIENS] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideF.bmp");
-    apIntroSlides[SLIDETRADE] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideG.bmp");
-    apIntroSlides[SLIDEPEACE] = introSlideFile.LoadAndReleaseBitmap();
-    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideH.bmp");
-    apIntroSlides[SLIDEFRONTIER] = introSlideFile.LoadAndReleaseBitmap();
+    ContentFile introSlideFile("Base.rte/GUIs/Title/Intro/IntroSlideA.png");
+    apIntroSlides[SLIDEPAST] = introSlideFile.GetAsBitmap(COLORCONV_NONE, false);
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideB.png");
+    apIntroSlides[SLIDENOW] = introSlideFile.GetAsBitmap(COLORCONV_NONE, false);
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideC.png");
+    apIntroSlides[SLIDEVR] = introSlideFile.GetAsBitmap(COLORCONV_NONE, false);
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideD.png");
+    apIntroSlides[SLIDETRAVEL] = introSlideFile.GetAsBitmap(COLORCONV_NONE, false);
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideE.png");
+    apIntroSlides[SLIDEALIENS] = introSlideFile.GetAsBitmap(COLORCONV_NONE, false);
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideF.png");
+    apIntroSlides[SLIDETRADE] = introSlideFile.GetAsBitmap(COLORCONV_NONE, false);
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideG.png");
+    apIntroSlides[SLIDEPEACE] = introSlideFile.GetAsBitmap(COLORCONV_NONE, false);
+    introSlideFile.SetDataPath("Base.rte/GUIs/Title/Intro/IntroSlideH.png");
+    apIntroSlides[SLIDEFRONTIER] = introSlideFile.GetAsBitmap(COLORCONV_NONE, false);
 
     ContentFile alphaFile;
     BITMAP *pAlpha = 0;
 
     MOSParticle *pDRLogo = new MOSParticle();
-    pDRLogo->Create(ContentFile("Base.rte/GUIs/Title/Intro/DRLogo5x.bmp"));
+    pDRLogo->Create(ContentFile("Base.rte/GUIs/Title/Intro/DRLogo5x.png"));
     pDRLogo->SetWrapDoubleDrawing(false);
 
 	MOSParticle *pFMODLogo = new MOSParticle();
-	pFMODLogo->Create(ContentFile("Base.rte/GUIs/Title/Intro/FMODLogo.bmp"));
+	pFMODLogo->Create(ContentFile("Base.rte/GUIs/Title/Intro/FMODLogo.png"));
 	pFMODLogo->SetWrapDoubleDrawing(false);
 
     SceneLayer *pBackdrop = new SceneLayer();
-    pBackdrop->Create(ContentFile("Base.rte/GUIs/Title/Nebula.bmp"), false, Vector(), false, false, Vector(0, -1.0));//startYOffset + resY));
+    pBackdrop->Create(ContentFile("Base.rte/GUIs/Title/Nebula.png"), false, Vector(), false, false, Vector(0, -1.0));//startYOffset + resY));
     float backdropScrollRatio = 1.0F / 3.0F;
 
     MOSParticle *pTitle = new MOSParticle();
-    pTitle->Create(ContentFile("Base.rte/GUIs/Title/Title.bmp"));
+    pTitle->Create(ContentFile("Base.rte/GUIs/Title/Title.png"));
     pTitle->SetWrapDoubleDrawing(false);
     // Logo glow effect
     MOSParticle *pTitleGlow = new MOSParticle();
-    pTitleGlow->Create(ContentFile("Base.rte/GUIs/Title/TitleGlow.bmp"));
+    pTitleGlow->Create(ContentFile("Base.rte/GUIs/Title/TitleGlow.png"));
     pTitleGlow->SetWrapDoubleDrawing(false);
     // Add alpha
-    alphaFile.SetDataPath("Base.rte/GUIs/Title/TitleAlpha.bmp");
+    alphaFile.SetDataPath("Base.rte/GUIs/Title/TitleAlpha.png");
     set_write_alpha_blender();
     draw_trans_sprite(pTitle->GetSpriteFrame(0), alphaFile.GetAsBitmap(), 0, 0);
 
     MOSParticle *pPlanet = new MOSParticle();
-    pPlanet->Create(ContentFile("Base.rte/GUIs/Title/Planet.bmp"));
+    pPlanet->Create(ContentFile("Base.rte/GUIs/Title/Planet.png"));
     pPlanet->SetWrapDoubleDrawing(false);
     // Add alpha
-    alphaFile.SetDataPath("Base.rte/GUIs/Title/PlanetAlpha.bmp");
+    alphaFile.SetDataPath("Base.rte/GUIs/Title/PlanetAlpha.png");
     set_write_alpha_blender();
     draw_trans_sprite(pPlanet->GetSpriteFrame(0), alphaFile.GetAsBitmap(), 0, 0);
 
     MOSParticle *pMoon = new MOSParticle();
-    pMoon->Create(ContentFile("Base.rte/GUIs/Title/Moon.bmp"));
+    pMoon->Create(ContentFile("Base.rte/GUIs/Title/Moon.png"));
     pMoon->SetWrapDoubleDrawing(false);
     // Add alpha
-    alphaFile.SetDataPath("Base.rte/GUIs/Title/MoonAlpha.bmp");
+    alphaFile.SetDataPath("Base.rte/GUIs/Title/MoonAlpha.png");
     set_write_alpha_blender();
     draw_trans_sprite(pMoon->GetSpriteFrame(0), alphaFile.GetAsBitmap(), 0, 0);
 
     MOSRotating *pStation = new MOSRotating();
-    pStation->Create(ContentFile("Base.rte/GUIs/Title/Station.bmp"));
+    pStation->Create(ContentFile("Base.rte/GUIs/Title/Station.png"));
     pStation->SetWrapDoubleDrawing(false);
-
-	MOSRotating *pPioneerCapsule = new MOSRotating();
-	pPioneerCapsule->Create(ContentFile("Base.rte/GUIs/Title/Promo/PioneerCapsule.bmp"));
-	pPioneerCapsule->SetWrapDoubleDrawing(false);
-
-	MOSRotating *pPioneerScreaming = new MOSRotating();
-	pPioneerScreaming->Create(ContentFile("Base.rte/GUIs/Title/Promo/PioneerScreaming.bmp"));
-	pPioneerScreaming->SetWrapDoubleDrawing(false);
-
-	MOSRotating *pPioneerPromo = new MOSRotating();
-	pPioneerPromo->Create(ContentFile("Base.rte/GUIs/Title/Promo/PioneerPromo.bmp"));
-	pPioneerPromo->SetWrapDoubleDrawing(false);
-
-	MOSParticle * pFirePuffLarge = dynamic_cast<MOSParticle *>(g_PresetMan.GetEntityPreset("MOSParticle", "Fire Puff Large", "Base.rte")->Clone());
-	MOSParticle * pFirePuffMedium = dynamic_cast<MOSParticle *>(g_PresetMan.GetEntityPreset("MOSParticle", "Fire Puff Medium", "Base.rte")->Clone());
-
-	long long lastShake = 0;
-	long long lastPuffFrame = 0;
-	long long lastPuff = 0;
-	bool puffActive = false;
-	int puffFrame = 0;
-	int puffCount = 0;
-
-	Vector shakeOffset(0, 0);
 
     // Generate stars!
     int starArea = resX * pBackdrop->GetBitmap()->h;
     int starCount = starArea / 1000;
-    ContentFile starSmallFile("Base.rte/GUIs/Title/Stars/StarSmall.bmp");
-    ContentFile starLargeFile("Base.rte/GUIs/Title/Stars/StarLarge.bmp");
-    ContentFile starHugeFile("Base.rte/GUIs/Title/Stars/StarHuge.bmp");
+    ContentFile starSmallFile("Base.rte/GUIs/Title/Stars/StarSmall.png");
+    ContentFile starLargeFile("Base.rte/GUIs/Title/Stars/StarLarge.png");
+    ContentFile starHugeFile("Base.rte/GUIs/Title/Stars/StarHuge.png");
     int starSmallBitmapCount = 4;
     int starLargeBitmapCount = 1;
     int starHugeBitmapCount = 2;
     BITMAP **apStarSmallBitmaps = starSmallFile.GetAsAnimation(starSmallBitmapCount);
     BITMAP **apStarLargeBitmaps = starLargeFile.GetAsAnimation(starLargeBitmapCount);
     BITMAP **apStarHugeBitmaps = starHugeFile.GetAsAnimation(starHugeBitmapCount);
-    Star *aStars = new Star[starCount];
-    StarSize size;
+    Star *stars = new Star[starCount];
 
-    for (int star = 0; star < starCount; ++star) {
-        if (PosRand() < 0.95) {
-            aStars[star].m_Size = StarSmall;
-            aStars[star].m_pBitmap = apStarSmallBitmaps[SelectRand(0, starSmallBitmapCount - 1)];
-            aStars[star].m_Intensity = RangeRand(0.001, 0.5);
-        }
-        else if (PosRand() < 0.85) {
-            aStars[star].m_Size = StarLarge;
-            aStars[star].m_pBitmap = apStarLargeBitmaps[SelectRand(0, starLargeBitmapCount - 1)];
-            aStars[star].m_Intensity = RangeRand(0.6, 1.0);
-        }
-        else {
-            aStars[star].m_Size = StarHuge;
-            aStars[star].m_pBitmap = apStarHugeBitmaps[SelectRand(0, starLargeBitmapCount - 1)];
-            aStars[star].m_Intensity = RangeRand(0.9, 1.0);
-        }
-        aStars[star].m_Pos.SetXY(resX * PosRand(), pBackdrop->GetBitmap()->h * PosRand());//resY * PosRand());
-        aStars[star].m_Pos.Floor();
+	for (int star = 0; star < starCount; ++star) {
+		if (RandomNum() < 0.95F) {
+			// Default size is StarSmall.
+			stars[star].m_Bitmap = apStarSmallBitmaps[RandomNum(0, starSmallBitmapCount - 1)];
+			stars[star].m_Intensity = RandomNum(0, 92);
+		} else if (RandomNum() < 0.85F) {
+			stars[star].m_Size = StarLarge;
+			stars[star].m_Bitmap = apStarLargeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
+			stars[star].m_Intensity = RandomNum(111, 185);
+		} else {
+			stars[star].m_Size = StarHuge;
+			stars[star].m_Bitmap = apStarHugeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
+			stars[star].m_Intensity = RandomNum(166, 185);
+		}
+		stars[star].m_PosX = RandomNum(0, resX);
+		stars[star].m_PosY = RandomNum(0, pBackdrop->GetBitmap()->h);
         // To match the nebula scroll
-        aStars[star].m_ScrollRatio = backdropScrollRatio;
+        stars[star].m_ScrollRatio = backdropScrollRatio;
     }
 
     // Font stuff
     GUISkin *pSkin = g_pMainMenuGUI->GetGUIControlManager()->GetSkin();
-    GUIFont *pFont = pSkin->GetFont("fatfont.bmp");
+    GUIFont *pFont = pSkin->GetFont("fatfont.png");
     AllegroBitmap backBuffer(g_FrameMan.GetBackBuffer32());
     int yTextPos = 0;
     // Timers
@@ -596,7 +576,7 @@ bool PlayIntroTitle() {
             // Draw the copyright notice
             yTextPos = g_FrameMan.GetResY() - pFont->GetFontHeight();
             char copyRight[512];
-            sprintf_s(copyRight, sizeof(copyRight), "Cortex Command is TM and %c 2017 Data Realms, LLC", -35);
+            std::snprintf(copyRight, sizeof(copyRight), "Cortex Command is TM and %c 2017 Data Realms, LLC", -35);
             pFont->DrawAligned(&backBuffer, g_FrameMan.GetResX() / 2, yTextPos, copyRight, GUIFont::Centre);
         }
 
@@ -610,14 +590,13 @@ bool PlayIntroTitle() {
 			Box backdropBox;
             pBackdrop->Draw(g_FrameMan.GetBackBuffer32(), backdropBox, scrollOffset * backdropScrollRatio);
 
-            Vector starDrawPos;
             for (int star = 0; star < starCount; ++star)
             {
-                size = aStars[star].m_Size;
-                int intensity = 185 * aStars[star].m_Intensity + (size == StarSmall ? 35 : 70) * PosRand();
-                set_screen_blender(intensity, intensity, intensity, intensity);
-                starDrawPos.SetXY(aStars[star].m_Pos.m_X, aStars[star].m_Pos.m_Y - scrollOffset.m_Y * aStars[star].m_ScrollRatio);
-                draw_trans_sprite(g_FrameMan.GetBackBuffer32(), aStars[star].m_pBitmap, starDrawPos.GetFloorIntX(), starDrawPos.GetFloorIntY());
+				const int intensity = stars[star].m_Intensity + RandomNum(0, (stars[star].m_Size == StarSmall) ? 35 : 70);
+				set_screen_blender(intensity, intensity, intensity, intensity);
+				const int &starDrawPosX = stars[star].m_PosX;
+				int starDrawPosY = stars[star].m_PosY - static_cast<int>(scrollOffset.m_Y * stars[star].m_ScrollRatio);
+				draw_trans_sprite(g_FrameMan.GetBackBuffer32(), stars[star].m_Bitmap, starDrawPosX, starDrawPosY);
             }
 
             planetPos.SetXY(g_FrameMan.GetResX() / 2, 567 - scrollOffset.GetFloorIntY());
@@ -626,77 +605,6 @@ bool PlayIntroTitle() {
 
             pMoon->Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawAlpha);
             pPlanet->Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawAlpha);
-
-			// Manually shake our shakeOffset to randomize some effects
-			if (g_TimerMan.GetAbsoulteTime() > lastShake + 50000)
-			{
-				shakeOffset.m_X = RangeRand(-3, 3);
-				shakeOffset.m_Y = RangeRand(-3, 3);
-				lastShake = g_TimerMan.GetAbsoulteTime();
-			}
-
-			// Tell the menu that PP promo is off
-			g_pMainMenuGUI->DisablePioneerPromoButton();
-
-
-			// Draw pioneer promo capsule
-			if (g_IntroState < MAINTOCAMPAIGN && orbitRotation < -c_PI * 1.27 && orbitRotation > -c_PI * 1.85)
-			{
-				// Start drawing pioneer capsule
-				// Slowly decrease radius to show that the capsule is falling
-				float radiusperc = 1 - ((fabs(orbitRotation) - (1.27 * c_PI)) / (0.35 * c_PI) / 4);
-				// Slowly decrease size to make the capsule disappear after a while
-				float sizeperc = 1 - ((fabs(orbitRotation) - (1.27 * c_PI)) / (0.35 * c_PI) / 1.5);
-
-				// Rotate, place and draw capsule
-				capsuleOffset.SetXY(orbitRadius * radiusperc, 0);
-				capsuleOffset.RadRotate(orbitRotation);
-				pPioneerCapsule->SetScale(sizeperc);
-				pPioneerCapsule->SetPos(planetPos + capsuleOffset);
-				pPioneerCapsule->SetRotAngle(orbitRotation);
-				pPioneerCapsule->Draw(g_FrameMan.GetBackBuffer32());
-			}
-
-			// Enable promo clickables only if we're in main menu and the station is at the required location (under the menu)
-			if (g_IntroState == MENUACTIVE && g_pMainMenuGUI->AllowPioneerPromo() &&  orbitRotation < -c_PI * 1.25 && orbitRotation > -c_PI * 1.95)
-			{
-				// After capsule flew some time, start showing angry pioneer
-				if (orbitRotation < -c_PI * 1.32 && orbitRotation > -c_PI * 1.65)
-				{
-					Vector pioneerScreamPos = planetPos - Vector(320 - 130, 320 + 44);
-
-					// Draw line to indicate that the screaming guy is the one in the drop pod
-					drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
-					g_pScenarioGUI->SetPlanetInfo(Vector(0,0), planetRadius);
-					g_pScenarioGUI->DrawScreenLineToSitePoint(g_FrameMan.GetBackBuffer32(), pioneerScreamPos, pPioneerCapsule->GetPos(), makecol(255, 255, 255), -1, -1, 40, 0.20);
-					drawing_mode(DRAW_MODE_SOLID, 0, 0, 0);
-
-					// Draw pioneer
-					pPioneerScreaming->SetPos(pioneerScreamPos + shakeOffset);
-					pPioneerScreaming->Draw(g_FrameMan.GetBackBuffer32());
-
-					// Enable the promo banner and tell the menu where it can be clicked
-					g_pMainMenuGUI->EnablePioneerPromoButton();
-
-					Box promoBox(pioneerScreamPos.m_X - 125, pioneerScreamPos.m_Y - 70, pioneerScreamPos.m_X + 125, pioneerScreamPos.m_Y + 70);
-					g_pMainMenuGUI->SetPioneerPromoBox(promoBox);
-				} 
-
-				if (orbitRotation < -c_PI * 1.65 && orbitRotation > -c_PI * 1.95)
-				{
-					Vector promoPos = planetPos - Vector(320 - 128, 320 + 29);
-
-					// Draw pioneer promo
-					pPioneerPromo->SetPos(promoPos);
-					pPioneerPromo->Draw(g_FrameMan.GetBackBuffer32());
-
-					// Enable the promo banner and tell the menu where it can be clicked
-					g_pMainMenuGUI->EnablePioneerPromoButton();
-
-					Box promoBox(promoPos.m_X - 128, promoPos.m_Y - 80, promoPos.m_X + 128, promoPos.m_Y + 80);
-					g_pMainMenuGUI->SetPioneerPromoBox(promoBox);
-				}
-			}
 				
 			// Place, rotate and draw station
 			stationOffset.SetXY(orbitRadius, 0);
@@ -704,64 +612,6 @@ bool PlayIntroTitle() {
 			pStation->SetPos(planetPos + stationOffset);
 			pStation->SetRotAngle(-c_HalfPI + orbitRotation);
 			pStation->Draw(g_FrameMan.GetBackBuffer32());
-
-			// Start explosion effects to show that there's something wrong with the station
-			// but only if we're not in campaign
-			if (g_IntroState < MAINTOCAMPAIGN && orbitRotation < -c_PI * 1.25 && orbitRotation > -c_TwoPI)
-			{
-				// Add explosions delay and count them
-				if (g_TimerMan.GetAbsoulteTime() > lastPuff + 1000000)
-				{
-					lastPuff = g_TimerMan.GetAbsoulteTime();
-					puffActive = true;
-					puffCount++;
-				}
-
-				// If explosion was authorized
-				if (puffActive)
-				{
-					// First explosion is big while other are smaller
-					if (puffCount == 1)
-					{
-						pFirePuffLarge->SetPos(planetPos + stationOffset);
-						if (g_TimerMan.GetAbsoulteTime() > lastPuffFrame + 50000)
-						{
-							lastPuffFrame = g_TimerMan.GetAbsoulteTime();
-							puffFrame++;
-
-							if (puffFrame >= pFirePuffLarge->GetFrameCount())
-							{
-								// Manually reset frame counters and disable other explosions until it's time
-								puffFrame = 0;
-								puffActive = 0;
-							}
-
-							pFirePuffLarge->SetFrame(puffFrame);
-						}
-						pFirePuffLarge->Draw(g_FrameMan.GetBackBuffer32());
-					} else {
-						pFirePuffMedium->SetPos(planetPos + stationOffset + shakeOffset);
-						if (g_TimerMan.GetAbsoulteTime() > lastPuffFrame + 50000)
-						{
-							lastPuffFrame = g_TimerMan.GetAbsoulteTime();
-							puffFrame++;
-
-							if (puffFrame >= pFirePuffLarge->GetFrameCount())
-							{
-								// Manually reset frame counters and disable other explosions until it's time
-								puffFrame = 0;
-								puffActive = 0;
-							}
-
-							pFirePuffMedium->SetFrame(puffFrame);
-						}
-						pFirePuffMedium->Draw(g_FrameMan.GetBackBuffer32());
-					}
-				}
-			} else {
-				//Reset explosions counter
-				puffCount = 0;
-			}
 
 			orbitRotation -= 0.0020; //0.0015
 
@@ -792,7 +642,7 @@ bool PlayIntroTitle() {
 
             pTitle->Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawAlpha);
             // Screen blend the title glow on top, with some flickering in its intensity
-            int blendAmount = 220 + 35 * NormalRand();
+			int blendAmount = 220 + RandomNum(-35, 35);
             set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
             pTitleGlow->Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawTrans);
         }
@@ -801,26 +651,26 @@ bool PlayIntroTitle() {
         // Menu drawing
 
         // Main Menu updating and drawing, behind title
-        if (g_IntroState >= MENUAPPEAR)
-        {
-            if (g_IntroState == MENUAPPEAR)
-            {
-				// TODO: some fancy transparency effect here
-/*
-                g_pMainMenuGUI->Update();
-                clear_to_color(pFadeScreen, 0xFFFF00FF);
-                g_pMainMenuGUI->Draw(pFadeScreen);
-                fadePos = 255 * sectionProgress;
-                set_trans_blender(fadePos, fadePos, fadePos, fadePos);
-                draw_trans_sprite(g_FrameMan.GetBackBuffer32(), pFadeScreen, 0, 0);
-*/
-            }
-            else if (g_IntroState == MENUACTIVE)
-            {
-                g_pMainMenuGUI->Update();
-                g_pMainMenuGUI->Draw(g_FrameMan.GetBackBuffer32());
-            }
-        }
+		if (g_IntroState >= MENUAPPEAR) {
+			//if (g_IntroState == MENUAPPEAR) {}
+
+			if (g_IntroState == MENUACTIVE) {
+				// This will be true after we break from the current PlayIntroTitle and get to this point in the new one, so we must reset the flags here otherwise we will loop for all eternity.
+				if (g_HadResolutionChange) {
+					g_FrameMan.SetResolutionChanged(false);
+					g_HadResolutionChange = false;
+					// Change the screen to the options menu otherwise we're at the main screen after reiniting.
+					g_pMainMenuGUI->SetMenuScreen(MainMenuGUI::OPTIONSSCREEN);
+				}
+				if (g_FrameMan.ResolutionChanged()) {
+					ReinitMainMenu();
+					// Break here so we can go on and destruct everything and start PlayIntroTitle() again to get all the elements properly aligned instead of doing it manually and without any leaks.
+					break;
+				}
+				g_pMainMenuGUI->Update();
+				g_pMainMenuGUI->Draw(g_FrameMan.GetBackBuffer32());
+			}
+		}
 
         // Scenario setup menu update and drawing
         if (g_IntroState == SCENARIOMENU)
@@ -1663,23 +1513,28 @@ bool PlayIntroTitle() {
     }
 
     // Clean up heap data
-    destroy_bitmap(pFadeScreen); pFadeScreen = 0;
-    for (int slide = 0; slide < SLIDECOUNT; ++slide)
-    {
-        destroy_bitmap(apIntroSlides[slide]);
-        apIntroSlides[slide] = 0;
-    }
-    delete [] apIntroSlides; apIntroSlides = 0;
-    delete pBackdrop; pBackdrop = 0;
-    delete pTitle; pTitle = 0;
-    delete pPlanet; pPlanet = 0;
-    delete pMoon; pMoon = 0;
-    delete pStation; pStation = 0;
-	delete pPioneerCapsule; pPioneerCapsule = 0;
-	delete pPioneerScreaming; pPioneerScreaming = 0;
-	delete pFirePuffLarge; pFirePuffLarge = 0;
-	delete pFirePuffMedium; pFirePuffMedium = 0;
-    delete [] aStars; aStars = 0;
+    destroy_bitmap(pFadeScreen);
+	pFadeScreen = nullptr;
+	for (int slide = 0; slide < SLIDECOUNT; ++slide) {
+		destroy_bitmap(apIntroSlides[slide]);
+		apIntroSlides[slide] = nullptr;
+	}
+	delete[] apIntroSlides;
+	apIntroSlides = nullptr;
+    delete pBackdrop;
+	pBackdrop = nullptr;
+    delete pTitle;
+	pTitle = nullptr;
+    delete pPlanet;
+	pPlanet = nullptr;
+    delete pMoon;
+	pMoon = nullptr;
+    delete pStation;
+	pStation = nullptr;
+    delete[] stars;
+	stars = nullptr;
+
+	if (g_FrameMan.ResolutionChanged()) { PlayIntroTitle(); }
 
     return true;
 }
@@ -1731,7 +1586,7 @@ bool RunGameLoop() {
 			// Advance the simulation time by the fixed amount
 			g_TimerMan.UpdateSim();
 
-			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_SIM_TOTAL);
+			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::SimTotal);
 
 			g_UInputMan.Update();
 
@@ -1741,17 +1596,17 @@ bool RunGameLoop() {
 				serverUpdated = true;
 			}
 			g_FrameMan.Update();
-			g_AudioMan.Update();
 			g_LuaMan.Update();
-			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTIVITY);
+			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActivityUpdate);
 			g_ActivityMan.Update();
-			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTIVITY);
+			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActivityUpdate);
 			g_MovableMan.Update();
+            g_AudioMan.Update();
 
 			g_ActivityMan.LateUpdateGlobalScripts();
 
 			g_ConsoleMan.Update();
-			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_SIM_TOTAL);
+			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::SimTotal);
 
 			if (!g_InActivity) {
 				g_TimerMan.PauseSim(true);
@@ -1759,9 +1614,9 @@ bool RunGameLoop() {
 				if (g_MetaMan.GameInProgress()) {
 					g_IntroState = CAMPAIGNFADEIN;
 				} else {
-					Activity * pActivity = g_ActivityMan.GetActivity();
+					const Activity *activity = g_ActivityMan.GetActivity();
 					// If we edited something then return to main menu instead of scenario menu player will probably switch to area/scene editor.
-					if (pActivity && pActivity->GetPresetName() == "None") {
+					if (activity && activity->GetPresetName() == "None") {
 						g_IntroState = MENUAPPEAR;
 					} else {
 						g_IntroState = MAINTOSCENARIO;
@@ -1789,11 +1644,11 @@ bool RunGameLoop() {
 				g_NetworkServer.Update();
 				serverUpdated = true;
 			}
-			if (g_SettingsMan.GetServerSimSleepWhenIdle()) {
-				signed long long ticksToSleep = g_TimerMan.GetTimeToSleep();
+			if (g_NetworkServer.GetServerSimSleepWhenIdle()) {
+				long long ticksToSleep = g_TimerMan.GetTimeToSleep();
 				if (ticksToSleep > 0) {
-					double secsToSleep = (double)ticksToSleep / (double)g_TimerMan.GetTicksPerSecond();
-					long long milisToSleep = (long long)secsToSleep * (1000);
+					double secsToSleep = static_cast<double>(ticksToSleep) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
+					long long milisToSleep = static_cast<long long>(secsToSleep) * 1000;
 					std::this_thread::sleep_for(std::chrono::milliseconds(milisToSleep));
 				}
 			}
@@ -1809,45 +1664,48 @@ bool RunGameLoop() {
 /// <summary>
 /// Command-line argument handling.
 /// </summary>
-/// <param name="argc">Argument name.</param>
-/// <param name="argv">Argument value.</param>
-/// <param name="appExitVar">The appExitVar is what the program should exit with if this returns false.</param>
-/// <returns>False if app should quit right after this.</returns>
-bool HandleMainArgs(int argc, char *argv[], int &appExitVar) {
-
-    // If no additional arguments passed, just continue (first argument is the program path)
-    if (argc == 1) {
-		return true;
+/// <param name="argCount">Argument count.</param>
+/// <param name="argValue">Argument values.</param>
+void HandleMainArgs(int argCount, char **argValue) {
+	// Discard the first argument because it's always the executable path/name
+	argCount--;
+	argValue++;
+	if (argCount == 0) {
+		return;
 	}
-    // Default program return var if fail
-    appExitVar = 2;
+	bool launchModeSet = false;
+	bool singleModuleSet = false;
 
-    if (argc >= 2) {
-        for (int i = 1; i < argc; i++) {
-            // Print loading screen console to cout
-			if (std::strcmp(argv[i], "-cout") == 0) {
-				g_System.SetLogToCLI(true);
-			} else if (i + 1 < argc) {
-				// Launch game in server mode
-                if (std::strcmp(argv[i], "-server") == 0 && i + 1 < argc) {
-                    std::string port = argv[++i];
-                    g_NetworkServer.EnableServerMode();
-                    g_NetworkServer.SetServerPort(port);
-				// Load a single module right after the official modules
-                } else if (std::strcmp(argv[i], "-module") == 0 && i + 1 < argc) {
-					g_PresetMan.SetSingleModuleToLoad(argv[++i]);
-				// Launch game directly into editor activity
-				} else if (std::strcmp(argv[i], "-editor") == 0 && i + 1 < argc) {
-					const char *editorName = argv[++i];
-					if (std::strcmp(editorName, "") == 1) {
-						g_EditorToLaunch = editorName;
-						g_LaunchIntoEditor = true;
-					}
-				}
-            }
-        }
-    }
-    return true;
+	for (int i = 0; i < argCount;) {
+		std::string currentArg = argValue[i];
+		bool lastArg = i + 1 == argCount;
+
+		// Print loading screen console to cout
+		if (currentArg == "-cout") { System::EnableLoggingToCLI(); }
+
+		// Load a single module right after the official modules
+		if (!lastArg && !singleModuleSet && currentArg == "-module") {
+			std::string moduleToLoad = argValue[++i];
+			if (moduleToLoad.find(System::GetModulePackageExtension()) == moduleToLoad.length() - System::GetModulePackageExtension().length()) {
+				g_PresetMan.SetSingleModuleToLoad(moduleToLoad);
+				singleModuleSet = true;
+			}
+		}
+		if (!launchModeSet) {
+			// Launch game in server mode
+			if (currentArg == "-server") {
+				g_NetworkServer.EnableServerMode();
+				g_NetworkServer.SetServerPort(!lastArg ? argValue[++i] : "8000");
+				launchModeSet = true;
+			// Launch game directly into editor activity
+			} else if (!lastArg && currentArg == "-editor") {
+				g_EditorToLaunch = argValue[++i];
+				g_LaunchIntoEditor = true;
+				launchModeSet = true;
+			}
+		}
+		++i;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1855,112 +1713,93 @@ bool HandleMainArgs(int argc, char *argv[], int &appExitVar) {
 /// <summary>
 /// Implementation of the main function.
 /// </summary>
-int main(int argc, char *argv[]) {
+int main(int argc, char **argv) {
 
 	///////////////////////////////////////////////////////////////////
     // Initialize Allegro
 
-/* This is obsolete; only applied when we were loading from a compressed Base.rte // might come in handy sometime later actually
-    // Load the Allegro config data from the base datafile
-    DATAFILE *pConfigFile = load_datafile_object("Base.rte/Base.dat", "AConfig");
-    if (pConfigFile) {
-        set_config_data((char *)pConfigFile->dat, pConfigFile->size);
-        // The above copies the data, so this is safe to do
-        unload_datafile_object(pConfigFile);
-    } */
-
     set_config_file("Base.rte/AllegroConfig.txt");
     allegro_init();
+	loadpng_init();
 
     // Enable the exit button on the window
     LOCK_FUNCTION(QuitHandler);
     set_close_button_callback(QuitHandler);
 
     // Seed the random number generator
-    SeedRand();
+    SeedRNG();
 
-    ///////////////////////////////////////////////////////////////////
-    // Instantiate all the managers
-
-    new ConsoleMan();
-    new LuaMan();
-    new SettingsMan();
-    new TimerMan();
-	new PerformanceMan();
-    new PresetMan();
-    new FrameMan();
-	new PostProcessMan();
-	new PrimitiveMan();
-    new AudioMan();
-    new GUISound();
-    new UInputMan();
-    new ActivityMan();
-    new MovableMan();
-    new SceneMan();
-    new MetaMan();
-
-	new NetworkServer();
-	new NetworkClient();
+	System::Initialize();
 
     ///////////////////////////////////////////////////////////////////
     // Create the essential managers
 
-    g_LuaMan.Create();
-	
-	Reader settingsReader("Base.rte/Settings.ini", false, 0, true);
-    g_SettingsMan.Create(settingsReader);
+	Reader settingsReader("Base.rte/Settings.ini", false, nullptr, true);
+    g_SettingsMan.Initialize(settingsReader);
 
-	g_NetworkServer.Create();
-	g_NetworkClient.Create();
-
-    int exitVar = 0;
-    if (!HandleMainArgs(argc, argv, exitVar)) {
-		return exitVar;
-	}
-    g_TimerMan.Create();
-	g_PerformanceMan.Create();
-    g_PresetMan.Create();
-    g_FrameMan.Create();
-    g_PostProcessMan.Create();
-    if (g_AudioMan.Create() >= 0) {
-        g_GUISound.Create();
+	g_LuaMan.Initialize();
+	g_NetworkServer.Initialize();
+	g_NetworkClient.Initialize();
+    g_TimerMan.Initialize();
+	g_PerformanceMan.Initialize();
+    g_FrameMan.Initialize();
+    g_PostProcessMan.Initialize();
+    if (g_AudioMan.Initialize() >= 0) {
+        g_GUISound.Initialize();
     }
-    g_UInputMan.Create();
-	if (g_NetworkServer.IsServerModeEnabled()) { g_UInputMan.SetMultiplayerMode(true); }
-    g_ConsoleMan.Create();
-    g_ActivityMan.Create();
-    g_MovableMan.Create();
-    g_MetaMan.Create();
+    g_UInputMan.Initialize();
+    g_ConsoleMan.Initialize();
+    g_ActivityMan.Initialize();
+    g_MovableMan.Initialize();
+    g_MetaMan.Initialize();
+
+	HandleMainArgs(argc, argv);
 
     ///////////////////////////////////////////////////////////////////
     // Main game driver
 
 	if (g_NetworkServer.IsServerModeEnabled()) {
 		g_NetworkServer.Start();
+		g_UInputMan.SetMultiplayerMode(true);
 		g_FrameMan.SetMultiplayerMode(true);
 		g_AudioMan.SetMultiplayerMode(true);
 		g_AudioMan.SetSoundsVolume(0);
 		g_AudioMan.SetMusicVolume(0);
 	}
 
-    new LoadingGUI();
 	g_LoadingGUI.InitLoadingScreen();
 	InitMainMenu();
 
-	if (g_LaunchIntoEditor) { 
-		// Force mouse + keyboard with default mapping so we won't need to change manually if player 1 is set to keyboard only or gamepad.
-		g_UInputMan.GetControlScheme(0)->SetDevice(1);
-		g_UInputMan.GetControlScheme(0)->SetPreset(1);
-		// Disable intro sequence.
-		g_SettingsMan.SetPlayIntro(false);
-		// Start the specified editor activity.
-		EnterEditorActivity(g_EditorToLaunch);
+	g_FrameMan.PrintForcedGfxDriverMessage();
+
+	if (g_ConsoleMan.LoadWarningsExist()) {
+		g_ConsoleMan.PrintString("WARNING: References to files that could not be located or failed to load detected during module loading!\nSee \"LogLoadingWarning.txt\" for a list of bad references.");
+		g_ConsoleMan.SaveLoadWarningLog("LogLoadingWarning.txt");
+		// Open the console so the user is aware there are loading warnings.
+		g_ConsoleMan.SetEnabled(true);
+	} else {
+		// Delete an existing log if there are no warnings so there's less junk in the root folder.
+		if (std::filesystem::exists(System::GetWorkingDirectory() + "LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
 	}
 
-    if (g_SettingsMan.PlayIntro() && !g_NetworkServer.IsServerModeEnabled()) { PlayIntroTitle(); }
-
-	// NETWORK Create multiplayer lobby activity to start as default if server is running
-	if (g_NetworkServer.IsServerModeEnabled()) { EnterMultiplayerLobby(); }
+    if (!g_NetworkServer.IsServerModeEnabled()) {
+		if (g_LaunchIntoEditor) {
+			// Force mouse + keyboard with default mapping so we won't need to change manually if player 1 is set to keyboard only or gamepad.
+			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetDevice(InputDevice::DEVICE_MOUSE_KEYB);
+			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetPreset(InputPreset::PRESET_WASDKEYS);
+			// Start the specified editor activity.
+			if (!EnterEditorActivity(g_EditorToLaunch)) {
+				g_IntroState = g_SettingsMan.SkipIntro() ? MENUAPPEAR : START;
+				PlayIntroTitle();
+			}
+		} else if (!g_SettingsMan.LaunchIntoActivity()) {
+			g_IntroState = g_SettingsMan.SkipIntro() ? MENUAPPEAR : START;
+			PlayIntroTitle();
+		}
+	} else {
+		// NETWORK Create multiplayer lobby activity to start as default if server is running
+		EnterMultiplayerLobby();
+	}
 
     // If we fail to start/reset the activity, then revert to the intro/menu
     if (!ResetActivity()) { PlayIntroTitle(); }
@@ -1981,10 +1820,8 @@ int main(int argc, char *argv[]) {
     g_AudioMan.Destroy();
     g_PresetMan.Destroy();
     g_UInputMan.Destroy();
-	g_PerformanceMan.Destroy();
     g_FrameMan.Destroy();
     g_TimerMan.Destroy();
-    g_SettingsMan.Destroy();
     g_LuaMan.Destroy();
     ContentFile::FreeAllLoaded();
     g_ConsoleMan.Destroy();
@@ -1997,4 +1834,6 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+#ifdef _WIN32
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) { return main(__argc, __argv); }
+#endif

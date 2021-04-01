@@ -21,6 +21,7 @@
 #include "SettingsMan.h"
 #include "ConsoleMan.h"
 #include "MetaMan.h"
+#include "MetaSave.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
@@ -71,7 +72,7 @@ using namespace RTE;
 #define BRAINOVERLAP 2
 
 
-const string MetagameGUI::m_ClassName = "MetagameGUI";
+const string MetagameGUI::c_ClassName = "MetagameGUI";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -186,8 +187,8 @@ void MetagameGUI::Clear()
     m_AnimMode = 0;
     m_AnimModeChange = false;
     m_AnimModeDuration = 2000;
-    m_AnimMetaPlayer = Activity::NOPLAYER;
-    m_AnimDefenseTeam = Activity::NOTEAM;
+    m_AnimMetaPlayer = Players::NoPlayer;
+    m_AnimDefenseTeam = Activity::NoTeam;
     m_AnimActivityChange = false;
     Scene *m_pAnimScene = 0;
     m_AnimRatio = 0;
@@ -227,7 +228,7 @@ void MetagameGUI::Clear()
     for (int button = 0; button < METABUTTONCOUNT; ++button)
         m_apMetaButton[button] = 0;
 
-    for (int metaPlayer = 0; metaPlayer < Activity::MAXPLAYERCOUNT; ++metaPlayer)
+    for (int metaPlayer = Players::PlayerOne; metaPlayer < Players::MaxPlayerCount; ++metaPlayer)
     {
         m_apPlayerBox[metaPlayer] = 0;
         m_apPlayerTeamBox[metaPlayer] = 0;
@@ -238,7 +239,7 @@ void MetagameGUI::Clear()
         m_aBattleAttacker[metaPlayer] = false;
         m_aAnimDestroyed[metaPlayer] = false;
         m_aBrainIconPos[metaPlayer].Reset();
-        m_aQuadTakenBy[metaPlayer] = Activity::NOPLAYER;
+        m_aQuadTakenBy[metaPlayer] = Players::NoPlayer;
         m_apBrainPoolLabel[metaPlayer] = 0;
         m_apFundsChangeLabel[metaPlayer] = 0;
         m_apBrainChangeLabel[metaPlayer] = 0;
@@ -270,7 +271,7 @@ void MetagameGUI::Clear()
     m_BattleToResume = false;
     m_PostBattleReview = false;
     m_BattleCausedOwnershipChange = false;
-    m_PreBattleTeamOwnership = Activity::NOTEAM;
+    m_PreBattleTeamOwnership = Activity::NoTeam;
 
     m_pScenePlanetLabel = 0;
     m_pSceneInfoPopup = 0;
@@ -313,7 +314,7 @@ void MetagameGUI::Clear()
     m_ActivityResumed = false;
     m_StartFunds = 1600;
     m_CPUPlayer = -1;
-    m_StartDifficulty = GameActivity::MEDIUMDIFFICULTY;
+    m_StartDifficulty = Activity::MediumDifficulty;
     m_BackToMain = false;
     m_Quit = false;
 }
@@ -341,7 +342,7 @@ void MetagameGUI::SetToStartNewGame()
 
 int MetagameGUI::Create()
 {
-    for (int metaPlayer = Activity::PLAYER_1; metaPlayer < Activity::MAXPLAYERCOUNT; ++metaPlayer)
+    for (int metaPlayer = Players::PlayerOne; metaPlayer < Players::MaxPlayerCount; ++metaPlayer)
     {
         m_ActionSiteLines[metaPlayer].clear();
         // The relevant onces will be enabled again in update
@@ -389,10 +390,10 @@ int MetagameGUI::Create(Controller *pController)
     m_pBannerRedBottom = new GUIBanner();
     m_pBannerYellowTop = new GUIBanner();
     m_pBannerYellowBottom = new GUIBanner();
-    m_pBannerRedTop->Create("Base.rte/GUIs/Fonts/BannerFontRedReg.bmp", "Base.rte/GUIs/Fonts/BannerFontRedBlur.bmp", 32);
-    m_pBannerRedBottom->Create("Base.rte/GUIs/Fonts/BannerFontRedReg.bmp", "Base.rte/GUIs/Fonts/BannerFontRedBlur.bmp", 32);
-    m_pBannerYellowTop->Create("Base.rte/GUIs/Fonts/BannerFontYellowReg.bmp", "Base.rte/GUIs/Fonts/BannerFontYellowBlur.bmp", 32);
-    m_pBannerYellowBottom->Create("Base.rte/GUIs/Fonts/BannerFontYellowReg.bmp", "Base.rte/GUIs/Fonts/BannerFontYellowBlur.bmp", 32);
+    m_pBannerRedTop->Create("Base.rte/GUIs/Fonts/BannerFontRedReg.png", "Base.rte/GUIs/Fonts/BannerFontRedBlur.png", 32);
+    m_pBannerRedBottom->Create("Base.rte/GUIs/Fonts/BannerFontRedReg.png", "Base.rte/GUIs/Fonts/BannerFontRedBlur.png", 32);
+    m_pBannerYellowTop->Create("Base.rte/GUIs/Fonts/BannerFontYellowReg.png", "Base.rte/GUIs/Fonts/BannerFontYellowBlur.png", 32);
+    m_pBannerYellowBottom->Create("Base.rte/GUIs/Fonts/BannerFontYellowReg.png", "Base.rte/GUIs/Fonts/BannerFontYellowBlur.png", 32);
 
     // General game message label
     m_pGameMessageLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("GameMessageLabel"));
@@ -409,7 +410,7 @@ int MetagameGUI::Create(Controller *pController)
     m_pToolTipBox->SetEnabled(false);
     m_pToolTipBox->SetVisible(false);
     // Set the font
-    m_pToolTipText->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
+    m_pToolTipText->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
 
     // Make sure we have convenient points to the containing GUI colleciton boxes that we will manipulate the positions of
     m_apScreenBox[NEWDIALOG] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("NewGameDialog"));
@@ -449,42 +450,42 @@ int MetagameGUI::Create(Controller *pController)
     m_pConfirmationBox->SetVisible(false);
 
     // Floating player bars
-    m_apPlayerBox[Activity::PLAYER_1] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P1Bar"));
-    m_apPlayerBox[Activity::PLAYER_2] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P2Bar"));
-    m_apPlayerBox[Activity::PLAYER_3] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P3Bar"));
-    m_apPlayerBox[Activity::PLAYER_4] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P4Bar"));
-    m_apPlayerTeamBox[Activity::PLAYER_1] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P1Team"));
-    m_apPlayerTeamBox[Activity::PLAYER_2] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P2Team"));
-    m_apPlayerTeamBox[Activity::PLAYER_3] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P3Team"));
-    m_apPlayerTeamBox[Activity::PLAYER_4] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P4Team"));
-    m_apPlayerBarLabel[Activity::PLAYER_1] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P1FundsLabel"));
-    m_apPlayerBarLabel[Activity::PLAYER_2] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P2FundsLabel"));
-    m_apPlayerBarLabel[Activity::PLAYER_3] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P3FundsLabel"));
-    m_apPlayerBarLabel[Activity::PLAYER_4] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P4FundsLabel"));
-    m_apBrainPoolLabel[Activity::PLAYER_1] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P1BrainLabel"));
-    m_apBrainPoolLabel[Activity::PLAYER_2] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P2BrainLabel"));
-    m_apBrainPoolLabel[Activity::PLAYER_3] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P3BrainLabel"));
-    m_apBrainPoolLabel[Activity::PLAYER_4] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P4BrainLabel"));
-    m_apFundsChangeLabel[Activity::PLAYER_1] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P1FundsChangeLabel"));
-    m_apFundsChangeLabel[Activity::PLAYER_2] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P2FundsChangeLabel"));
-    m_apFundsChangeLabel[Activity::PLAYER_3] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P3FundsChangeLabel"));
-    m_apFundsChangeLabel[Activity::PLAYER_4] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P4FundsChangeLabel"));
-    m_apBrainChangeLabel[Activity::PLAYER_1] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P1BrainChangeLabel"));
-    m_apBrainChangeLabel[Activity::PLAYER_2] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P2BrainChangeLabel"));
-    m_apBrainChangeLabel[Activity::PLAYER_3] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P3BrainChangeLabel"));
-    m_apBrainChangeLabel[Activity::PLAYER_4] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P4BrainChangeLabel"));
+    m_apPlayerBox[Players::PlayerOne] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P1Bar"));
+    m_apPlayerBox[Players::PlayerTwo] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P2Bar"));
+    m_apPlayerBox[Players::PlayerThree] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P3Bar"));
+    m_apPlayerBox[Players::PlayerFour] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P4Bar"));
+    m_apPlayerTeamBox[Players::PlayerOne] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P1Team"));
+    m_apPlayerTeamBox[Players::PlayerTwo] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P2Team"));
+    m_apPlayerTeamBox[Players::PlayerThree] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P3Team"));
+    m_apPlayerTeamBox[Players::PlayerFour] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P4Team"));
+    m_apPlayerBarLabel[Players::PlayerOne] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P1FundsLabel"));
+    m_apPlayerBarLabel[Players::PlayerTwo] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P2FundsLabel"));
+    m_apPlayerBarLabel[Players::PlayerThree] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P3FundsLabel"));
+    m_apPlayerBarLabel[Players::PlayerFour] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P4FundsLabel"));
+    m_apBrainPoolLabel[Players::PlayerOne] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P1BrainLabel"));
+    m_apBrainPoolLabel[Players::PlayerTwo] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P2BrainLabel"));
+    m_apBrainPoolLabel[Players::PlayerThree] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P3BrainLabel"));
+    m_apBrainPoolLabel[Players::PlayerFour] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P4BrainLabel"));
+    m_apFundsChangeLabel[Players::PlayerOne] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P1FundsChangeLabel"));
+    m_apFundsChangeLabel[Players::PlayerTwo] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P2FundsChangeLabel"));
+    m_apFundsChangeLabel[Players::PlayerThree] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P3FundsChangeLabel"));
+    m_apFundsChangeLabel[Players::PlayerFour] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P4FundsChangeLabel"));
+    m_apBrainChangeLabel[Players::PlayerOne] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P1BrainChangeLabel"));
+    m_apBrainChangeLabel[Players::PlayerTwo] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P2BrainChangeLabel"));
+    m_apBrainChangeLabel[Players::PlayerThree] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P3BrainChangeLabel"));
+    m_apBrainChangeLabel[Players::PlayerFour] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P4BrainChangeLabel"));
 
     // Battle site display
-    m_apPlayerTeamActionBox[Activity::PLAYER_1] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P1TeamAction"));
-    m_apPlayerTeamActionBox[Activity::PLAYER_2] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P2TeamAction"));
-    m_apPlayerTeamActionBox[Activity::PLAYER_3] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P3TeamAction"));
-    m_apPlayerTeamActionBox[Activity::PLAYER_4] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P4TeamAction"));
-    m_apPlayerBrainTravelLabel[Activity::PLAYER_1] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P1BrainTravelLabel"));
-    m_apPlayerBrainTravelLabel[Activity::PLAYER_2] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P2BrainTravelLabel"));
-    m_apPlayerBrainTravelLabel[Activity::PLAYER_3] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P3BrainTravelLabel"));
-    m_apPlayerBrainTravelLabel[Activity::PLAYER_4] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P4BrainTravelLabel"));
+    m_apPlayerTeamActionBox[Players::PlayerOne] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P1TeamAction"));
+    m_apPlayerTeamActionBox[Players::PlayerTwo] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P2TeamAction"));
+    m_apPlayerTeamActionBox[Players::PlayerThree] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P3TeamAction"));
+    m_apPlayerTeamActionBox[Players::PlayerFour] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("P4TeamAction"));
+    m_apPlayerBrainTravelLabel[Players::PlayerOne] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P1BrainTravelLabel"));
+    m_apPlayerBrainTravelLabel[Players::PlayerTwo] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P2BrainTravelLabel"));
+    m_apPlayerBrainTravelLabel[Players::PlayerThree] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P3BrainTravelLabel"));
+    m_apPlayerBrainTravelLabel[Players::PlayerFour] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P4BrainTravelLabel"));
 
-    for (int metaPlayer = 0; metaPlayer < Activity::MAXPLAYERCOUNT; ++metaPlayer)
+    for (int metaPlayer = Players::PlayerOne; metaPlayer < Players::MaxPlayerCount; ++metaPlayer)
     {
         m_apBrainPoolLabel[metaPlayer]->SetVisible(false);
         m_apBrainPoolLabel[metaPlayer]->SetPositionAbs(m_apScreenBox[ROOTBOX]->GetWidth(), 0);
@@ -507,7 +508,7 @@ int MetagameGUI::Create(Controller *pController)
     // Just get the menu button temporarily so we can set the custom menu icon
     if (GUIButton *pMenuButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("OpenMenuButton")))
     {
-        sprintf_s(str, sizeof(str), "%c", -22);
+        std::snprintf(str, sizeof(str), "%c", -22);
         pMenuButton->SetText(string(str));
     }
 
@@ -522,7 +523,7 @@ int MetagameGUI::Create(Controller *pController)
     m_pSceneOwnerTeam = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("SceneOwnerTeam"));
     m_pSceneResidentsLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneResidentsLabel"));
     m_pSceneInfoLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneInfoLabel"));
-    m_pSceneInfoLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
+    m_pSceneInfoLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
     m_pSceneInfoPopup->SetVisible(false);
     m_pSceneBudgetLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneBudgetLabel"));
     m_pSceneBudgetSlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("SceneBudgetSlider"));
@@ -546,52 +547,52 @@ int MetagameGUI::Create(Controller *pController)
     m_pLengthLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LengthLabel"));
     m_pLengthSlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("LengthSlider"));
     m_pErrorLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("StartErrorLabel"));
-    m_apPlayerControlButton[Activity::PLAYER_1] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("P1ControlButton"));
-    m_apPlayerControlButton[Activity::PLAYER_2] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("P2ControlButton"));
-    m_apPlayerControlButton[Activity::PLAYER_3] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("P3ControlButton"));
-    m_apPlayerControlButton[Activity::PLAYER_4] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("P4ControlButton"));
-    m_apPlayerTeamSelect[Activity::PLAYER_1] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P1TeamCombo"));
-    m_apPlayerTeamSelect[Activity::PLAYER_2] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P2TeamCombo"));
-    m_apPlayerTeamSelect[Activity::PLAYER_3] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P3TeamCombo"));
-    m_apPlayerTeamSelect[Activity::PLAYER_4] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P4TeamCombo"));
-    m_apPlayerTechSelect[Activity::PLAYER_1] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P1TechCombo"));
-    m_apPlayerTechSelect[Activity::PLAYER_2] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P2TechCombo"));
-    m_apPlayerTechSelect[Activity::PLAYER_3] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P3TechCombo"));
-    m_apPlayerTechSelect[Activity::PLAYER_4] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P4TechCombo"));
-    m_apPlayerHandicap[Activity::PLAYER_1] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P1HCCombo"));
-    m_apPlayerHandicap[Activity::PLAYER_2] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P2HCCombo"));
-    m_apPlayerHandicap[Activity::PLAYER_3] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P3HCCombo"));
-    m_apPlayerHandicap[Activity::PLAYER_4] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P4HCCombo"));
-    m_apPlayerNameBox[Activity::PLAYER_1] = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("P1NameText"));
-    m_apPlayerNameBox[Activity::PLAYER_2] = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("P2NameText"));
-    m_apPlayerNameBox[Activity::PLAYER_3] = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("P3NameText"));
-    m_apPlayerNameBox[Activity::PLAYER_4] = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("P4NameText"));
-    m_apPlayerAISkillSlider[Activity::PLAYER_1] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("P1AISkillSlider"));
-    m_apPlayerAISkillSlider[Activity::PLAYER_2] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("P2AISkillSlider"));
-    m_apPlayerAISkillSlider[Activity::PLAYER_3] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("P3AISkillSlider"));
-    m_apPlayerAISkillSlider[Activity::PLAYER_4] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("P4AISkillSlider"));
-	m_apPlayerAISkillLabel[Activity::PLAYER_1] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P1AISkillLabel"));
-	m_apPlayerAISkillLabel[Activity::PLAYER_2] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P2AISkillLabel"));
-	m_apPlayerAISkillLabel[Activity::PLAYER_3] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P3AISkillLabel"));
-	m_apPlayerAISkillLabel[Activity::PLAYER_4] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P4AISkillLabel"));
+    m_apPlayerControlButton[Players::PlayerOne] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("P1ControlButton"));
+    m_apPlayerControlButton[Players::PlayerTwo] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("P2ControlButton"));
+    m_apPlayerControlButton[Players::PlayerThree] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("P3ControlButton"));
+    m_apPlayerControlButton[Players::PlayerFour] = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("P4ControlButton"));
+    m_apPlayerTeamSelect[Players::PlayerOne] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P1TeamCombo"));
+    m_apPlayerTeamSelect[Players::PlayerTwo] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P2TeamCombo"));
+    m_apPlayerTeamSelect[Players::PlayerThree] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P3TeamCombo"));
+    m_apPlayerTeamSelect[Players::PlayerFour] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P4TeamCombo"));
+    m_apPlayerTechSelect[Players::PlayerOne] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P1TechCombo"));
+    m_apPlayerTechSelect[Players::PlayerTwo] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P2TechCombo"));
+    m_apPlayerTechSelect[Players::PlayerThree] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P3TechCombo"));
+    m_apPlayerTechSelect[Players::PlayerFour] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P4TechCombo"));
+    m_apPlayerHandicap[Players::PlayerOne] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P1HCCombo"));
+    m_apPlayerHandicap[Players::PlayerTwo] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P2HCCombo"));
+    m_apPlayerHandicap[Players::PlayerThree] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P3HCCombo"));
+    m_apPlayerHandicap[Players::PlayerFour] = dynamic_cast<GUIComboBox *>(m_pGUIController->GetControl("P4HCCombo"));
+    m_apPlayerNameBox[Players::PlayerOne] = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("P1NameText"));
+    m_apPlayerNameBox[Players::PlayerTwo] = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("P2NameText"));
+    m_apPlayerNameBox[Players::PlayerThree] = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("P3NameText"));
+    m_apPlayerNameBox[Players::PlayerFour] = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("P4NameText"));
+    m_apPlayerAISkillSlider[Players::PlayerOne] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("P1AISkillSlider"));
+    m_apPlayerAISkillSlider[Players::PlayerTwo] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("P2AISkillSlider"));
+    m_apPlayerAISkillSlider[Players::PlayerThree] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("P3AISkillSlider"));
+    m_apPlayerAISkillSlider[Players::PlayerFour] = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("P4AISkillSlider"));
+	m_apPlayerAISkillLabel[Players::PlayerOne] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P1AISkillLabel"));
+	m_apPlayerAISkillLabel[Players::PlayerTwo] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P2AISkillLabel"));
+	m_apPlayerAISkillLabel[Players::PlayerThree] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P3AISkillLabel"));
+	m_apPlayerAISkillLabel[Players::PlayerFour] = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("P4AISkillLabel"));
 
-	m_apPlayerControlButton[Activity::PLAYER_1]->SetText("Human");
-//    m_apPlayerControlButton[Activity::PLAYER_2]->SetText("Human");
-    m_apPlayerControlButton[Activity::PLAYER_2]->SetText("A.I.");
-    m_apPlayerNameBox[Activity::PLAYER_1]->SetText("Player 1");
-    m_apPlayerNameBox[Activity::PLAYER_2]->SetText("Player 2");
-    m_apPlayerNameBox[Activity::PLAYER_3]->SetText("Player 3");
-    m_apPlayerNameBox[Activity::PLAYER_4]->SetText("Player 4");
+	m_apPlayerControlButton[Players::PlayerOne]->SetText("Human");
+//    m_apPlayerControlButton[Players::PlayerTwo]->SetText("Human");
+    m_apPlayerControlButton[Players::PlayerTwo]->SetText("A.I.");
+    m_apPlayerNameBox[Players::PlayerOne]->SetText("Player 1");
+    m_apPlayerNameBox[Players::PlayerTwo]->SetText("Player 2");
+    m_apPlayerNameBox[Players::PlayerThree]->SetText("Player 3");
+    m_apPlayerNameBox[Players::PlayerFour]->SetText("Player 4");
 
     // Add a "Random" tech choice to all the combo boxes first so that's at least in there always
-    m_apPlayerTechSelect[Activity::PLAYER_1]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
-    m_apPlayerTechSelect[Activity::PLAYER_2]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
-    m_apPlayerTechSelect[Activity::PLAYER_3]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
-    m_apPlayerTechSelect[Activity::PLAYER_4]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
-    m_apPlayerTechSelect[Activity::PLAYER_1]->SetSelectedIndex(0);
-    m_apPlayerTechSelect[Activity::PLAYER_2]->SetSelectedIndex(0);
-    m_apPlayerTechSelect[Activity::PLAYER_3]->SetSelectedIndex(0);
-    m_apPlayerTechSelect[Activity::PLAYER_4]->SetSelectedIndex(0);
+    m_apPlayerTechSelect[Players::PlayerOne]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
+    m_apPlayerTechSelect[Players::PlayerTwo]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
+    m_apPlayerTechSelect[Players::PlayerThree]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
+    m_apPlayerTechSelect[Players::PlayerFour]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
+    m_apPlayerTechSelect[Players::PlayerOne]->SetSelectedIndex(0);
+    m_apPlayerTechSelect[Players::PlayerTwo]->SetSelectedIndex(0);
+    m_apPlayerTechSelect[Players::PlayerThree]->SetSelectedIndex(0);
+    m_apPlayerTechSelect[Players::PlayerFour]->SetSelectedIndex(0);
 
     // Populate the tech comboboxes with the available tech modules
     const DataModule *pModule = 0;
@@ -605,22 +606,22 @@ int MetagameGUI::Create(Controller *pController)
         if (pModule && (techPos = techName.find(techString)) != string::npos)
         {
             techName.replace(techPos, techString.length(), "");
-            m_apPlayerTechSelect[Activity::PLAYER_1]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-            m_apPlayerTechSelect[Activity::PLAYER_2]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-            m_apPlayerTechSelect[Activity::PLAYER_3]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-            m_apPlayerTechSelect[Activity::PLAYER_4]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+            m_apPlayerTechSelect[Players::PlayerOne]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+            m_apPlayerTechSelect[Players::PlayerTwo]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+            m_apPlayerTechSelect[Players::PlayerThree]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+            m_apPlayerTechSelect[Players::PlayerFour]->GetListPanel()->AddItem(techName, "", 0, 0, i);
         }
     }
     // Make the lists be scrolled to the top when they are initially dropped
-    m_apPlayerTechSelect[Activity::PLAYER_1]->GetListPanel()->ScrollToTop();
-    m_apPlayerTechSelect[Activity::PLAYER_2]->GetListPanel()->ScrollToTop();
-    m_apPlayerTechSelect[Activity::PLAYER_3]->GetListPanel()->ScrollToTop();
-    m_apPlayerTechSelect[Activity::PLAYER_4]->GetListPanel()->ScrollToTop();
+    m_apPlayerTechSelect[Players::PlayerOne]->GetListPanel()->ScrollToTop();
+    m_apPlayerTechSelect[Players::PlayerTwo]->GetListPanel()->ScrollToTop();
+    m_apPlayerTechSelect[Players::PlayerThree]->GetListPanel()->ScrollToTop();
+    m_apPlayerTechSelect[Players::PlayerFour]->GetListPanel()->ScrollToTop();
 
     // Add the handicap options to the dropdowns
     // Prepare the brain icon
-    sprintf_s(str, sizeof(str), "%c", -48);
-    for (int metaPlayer = 0; metaPlayer < Activity::MAXPLAYERCOUNT; ++metaPlayer)
+    std::snprintf(str, sizeof(str), "%c", -48);
+    for (int metaPlayer = Players::PlayerOne; metaPlayer < Players::MaxPlayerCount; ++metaPlayer)
     {
         m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(string(str) + " +5", "", 0, 0, -1);
         m_apPlayerHandicap[metaPlayer]->GetListPanel()->AddItem(string(str) + " +3", "", 0, 0, -1);
@@ -648,7 +649,7 @@ int MetagameGUI::Create(Controller *pController)
     list<Entity *> flagList;
     g_PresetMan.GetAllOfGroup(flagList, "Flags", "Icon");
     Icon *pIcon = 0;
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         // Set up the combo boxes
         m_apPlayerTeamSelect[player]->ClearList();
@@ -669,18 +670,18 @@ int MetagameGUI::Create(Controller *pController)
 //        m_apPlayerTeamSelect[player]->get
     }
     // Special height for the last one so it doesn't fly out of the dialog box
-    m_apPlayerTeamSelect[Activity::PLAYER_4]->SetDropHeight(40);
-    m_apPlayerTechSelect[Activity::PLAYER_4]->SetDropHeight(40);
-    m_apPlayerHandicap[Activity::PLAYER_4]->SetDropHeight(40);
+    m_apPlayerTeamSelect[Players::PlayerFour]->SetDropHeight(40);
+    m_apPlayerTechSelect[Players::PlayerFour]->SetDropHeight(40);
+    m_apPlayerHandicap[Players::PlayerFour]->SetDropHeight(40);
 
     // Put the new game dialog in order
     UpdatePlayerSetup();
     UpdateGameSizeLabels();
 
-	UpdateAISkillSliders(Activity::PLAYER_1);
-	UpdateAISkillSliders(Activity::PLAYER_2);
-	UpdateAISkillSliders(Activity::PLAYER_3);
-	UpdateAISkillSliders(Activity::PLAYER_4);
+	UpdateAISkillSliders(Players::PlayerOne);
+	UpdateAISkillSliders(Players::PlayerTwo);
+	UpdateAISkillSliders(Players::PlayerThree);
+	UpdateAISkillSliders(Players::PlayerFour);
 
 	MoveLocationsIntoTheScreen();
 
@@ -771,29 +772,29 @@ void MetagameGUI::MoveLocationsIntoTheScreen()
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the Reader's position is untouched.
 
-int MetagameGUI::ReadProperty(string propName, Reader &reader)
+int MetagameGUI::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     Vector tempPos;
 
     if (propName == "P1BoxPos")
     {
         reader >> tempPos;
-        m_apPlayerBox[Activity::PLAYER_1]->SetPositionAbs(tempPos.GetFloorIntX(), tempPos.GetFloorIntY());
+        m_apPlayerBox[Players::PlayerOne]->SetPositionAbs(tempPos.GetFloorIntX(), tempPos.GetFloorIntY());
     }
     else if (propName == "P2BoxPos")
     {
         reader >> tempPos;
-        m_apPlayerBox[Activity::PLAYER_2]->SetPositionAbs(tempPos.GetFloorIntX(), tempPos.GetFloorIntY());
+        m_apPlayerBox[Players::PlayerTwo]->SetPositionAbs(tempPos.GetFloorIntX(), tempPos.GetFloorIntY());
     }
     else if (propName == "P3BoxPos")
     {
         reader >> tempPos;
-        m_apPlayerBox[Activity::PLAYER_3]->SetPositionAbs(tempPos.GetFloorIntX(), tempPos.GetFloorIntY());
+        m_apPlayerBox[Players::PlayerThree]->SetPositionAbs(tempPos.GetFloorIntX(), tempPos.GetFloorIntY());
     }
     else if (propName == "P4BoxPos")
     {
         reader >> tempPos;
-        m_apPlayerBox[Activity::PLAYER_4]->SetPositionAbs(tempPos.GetFloorIntX(), tempPos.GetFloorIntY());
+        m_apPlayerBox[Players::PlayerFour]->SetPositionAbs(tempPos.GetFloorIntX(), tempPos.GetFloorIntY());
     }
     else if (propName == "PhaseBoxPos")
     {
@@ -801,7 +802,6 @@ int MetagameGUI::ReadProperty(string propName, Reader &reader)
         m_pPhaseBox->SetPositionAbs(tempPos.GetFloorIntX(), tempPos.GetFloorIntY());
     }
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -814,29 +814,17 @@ int MetagameGUI::ReadProperty(string propName, Reader &reader)
 // Description:     Saves the complete state of this MetagameGUI to an output stream for
 //                  later recreation with Create(Reader &reader);
 
-int MetagameGUI::Save(Writer &writer) const
-{
-    Serializable::Save(writer);
+int MetagameGUI::Save(Writer &writer) const {
+	Serializable::Save(writer);
 
-    Vector tempPos;
+	writer.NewPropertyWithValue("P1BoxPos", Vector(m_apPlayerBox[Players::PlayerOne]->GetXPos(), m_apPlayerBox[Players::PlayerOne]->GetYPos()));
+	writer.NewPropertyWithValue("P2BoxPos", Vector(m_apPlayerBox[Players::PlayerTwo]->GetXPos(), m_apPlayerBox[Players::PlayerTwo]->GetYPos()));
+	writer.NewPropertyWithValue("P3BoxPos", Vector(m_apPlayerBox[Players::PlayerThree]->GetXPos(), m_apPlayerBox[Players::PlayerThree]->GetYPos()));
+	writer.NewPropertyWithValue("P4BoxPos", Vector(m_apPlayerBox[Players::PlayerFour]->GetXPos(), m_apPlayerBox[Players::PlayerFour]->GetYPos()));
 
-    writer.NewProperty("P1BoxPos");
-    tempPos.SetXY(m_apPlayerBox[Activity::PLAYER_1]->GetXPos(), m_apPlayerBox[Activity::PLAYER_1]->GetYPos());
-    writer << tempPos;
-    writer.NewProperty("P2BoxPos");
-    tempPos.SetXY(m_apPlayerBox[Activity::PLAYER_2]->GetXPos(), m_apPlayerBox[Activity::PLAYER_2]->GetYPos());
-    writer << tempPos;
-    writer.NewProperty("P3BoxPos");
-    tempPos.SetXY(m_apPlayerBox[Activity::PLAYER_3]->GetXPos(), m_apPlayerBox[Activity::PLAYER_3]->GetYPos());
-    writer << tempPos;
-    writer.NewProperty("P4BoxPos");
-    tempPos.SetXY(m_apPlayerBox[Activity::PLAYER_4]->GetXPos(), m_apPlayerBox[Activity::PLAYER_4]->GetYPos());
-    writer << tempPos;
-    writer.NewProperty("PhaseBoxPos");
-    tempPos.SetXY(m_pPhaseBox->GetXPos(), m_pPhaseBox->GetYPos());
-    writer << tempPos;
+	writer.NewPropertyWithValue("PhaseBoxPos", Vector(m_pPhaseBox->GetXPos(), m_pPhaseBox->GetYPos()));
 
-    return 0;
+	return 0;
 }
 
 
@@ -913,13 +901,13 @@ void MetagameGUI::SelectScene(Scene *pScene)
             // If owned by this player's team, make the budget slider represent the currently set setting of this Scene
             if (m_pSelectedScene->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer))
             {
-                m_pSceneBudgetSlider->SetValue(floorf((m_pSelectedScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer()) / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
+                m_pSceneBudgetSlider->SetValue(std::floor((m_pSelectedScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer()) / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
             }
             // Owned by enemy player, so show the attack budget set up for this scene
             else if (g_MetaMan.IsActiveTeam(m_pSelectedScene->GetTeamOwnership()))
             {
                 if (m_pSelectedScene->GetPresetName() == g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName())
-                    m_pSceneBudgetSlider->SetValue(floorf((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
+                    m_pSceneBudgetSlider->SetValue(std::floor((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
                 // Not the current target, so set slider to 0. It will set the new budget as 
                 else
                     m_pSceneBudgetSlider->SetValue(0);
@@ -928,7 +916,7 @@ void MetagameGUI::SelectScene(Scene *pScene)
             else
             {
                 if (m_pSelectedScene->GetPresetName() == g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName())
-                    m_pSceneBudgetSlider->SetValue(floorf((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
+                    m_pSceneBudgetSlider->SetValue(std::floor((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
                 // Not the current target, so set slider to 0. It will set the new budget as 
                 else
                     m_pSceneBudgetSlider->SetValue(0);
@@ -1019,7 +1007,7 @@ string MetagameGUI::GetRoundName(int roundNumber)
             return "TWELVE";
     }
     char numStr[8];
-    sprintf_s(numStr, sizeof(numStr), "%d", roundNumber + 1);
+    std::snprintf(numStr, sizeof(numStr), "%d", roundNumber + 1);
     return string(numStr);
 }
 
@@ -1039,7 +1027,7 @@ bool MetagameGUI::StartNewGame()
     m_NewSiteIndicators.clear();
     m_SiteSwitchIndicators.clear();
 
-    for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+    for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
         g_MetaMan.m_TeamIcons[team].Reset();
 
     // Create the MetaPlayer:s based on the settings in the dialog box
@@ -1051,13 +1039,13 @@ bool MetagameGUI::StartNewGame()
     const Icon *pTeamIcon = 0;
 
 	//Clear metaman's AI skill to defaults
-	for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; team++)
-		g_MetaMan.m_TeamAISkill[team] = Activity::DEFAULTSKILL;
+	for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; team++)
+		g_MetaMan.m_TeamAISkill[team] = Activity::DefaultSkill;
 
     // Starting gold amount is common to all
     int startGold = STARTGOLDMIN + ((STARTGOLDMAX - STARTGOLDMIN) * (float)m_pGoldSlider->GetValue() / 100.0);
 
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         m_ActionSiteLines[player].clear();
         // clear the flag icons on the floating player bars; they will be set on next update in UpdatePlayerBars()
@@ -1073,7 +1061,7 @@ bool MetagameGUI::StartNewGame()
             // Disallow empty player name strings
             if (m_apPlayerNameBox[player]->GetText() == "")
             {
-                sprintf_s(str, sizeof(str), "Player %d", player);
+                std::snprintf(str, sizeof(str), "Player %d", player);
                 m_apPlayerNameBox[player]->SetText(str);
             }
 
@@ -1088,15 +1076,15 @@ bool MetagameGUI::StartNewGame()
 			// Set native cost multypliiers according to difficulty
 			if (!newPlayer.IsHuman())
 			{
-				if (g_MetaMan.m_Difficulty < GameActivity::CAKEDIFFICULTY)
+				if (g_MetaMan.m_Difficulty < Activity::CakeDifficulty)
 					newPlayer.SetNativeCostMultiplier(1.2);
-				else if (g_MetaMan.m_Difficulty < GameActivity::EASYDIFFICULTY)
+				else if (g_MetaMan.m_Difficulty < Activity::EasyDifficulty)
 					newPlayer.SetNativeCostMultiplier(1.1);
-				else if (g_MetaMan.m_Difficulty < GameActivity::MEDIUMDIFFICULTY)
+				else if (g_MetaMan.m_Difficulty < Activity::MediumDifficulty)
 					newPlayer.SetNativeCostMultiplier(1.0);
-				else if (g_MetaMan.m_Difficulty < GameActivity::HARDDIFFICULTY)
+				else if (g_MetaMan.m_Difficulty < Activity::HardDifficulty)
 					newPlayer.SetNativeCostMultiplier(0.80);
-				else if (g_MetaMan.m_Difficulty < GameActivity::NUTSDIFFICULTY)
+				else if (g_MetaMan.m_Difficulty < Activity::NutsDifficulty)
 					newPlayer.SetNativeCostMultiplier(0.60);
 				else
 					newPlayer.SetNativeCostMultiplier(0.40);
@@ -1113,7 +1101,7 @@ bool MetagameGUI::StartNewGame()
 
             // See if the player is designated to a new team or one that has already been created
             bool newTeam = true;
-            for (int team = Activity::TEAM_1; team < g_MetaMan.m_TeamCount; ++team)
+            for (int team = Activity::TeamOne; team < g_MetaMan.m_TeamCount; ++team)
             {
                 // Join existing team!
                 if (pTeamIcon->GetPresetName() == g_MetaMan.m_TeamIcons[team].GetPresetName())
@@ -1144,14 +1132,14 @@ bool MetagameGUI::StartNewGame()
                 // If the "random" selection, choose one from the list of loaded techs
                 if (m_apPlayerTechSelect[player]->GetSelectedIndex() <= 0)//pTechItem->m_ExtraIndex < 0)
                 {
-                    int selection = SelectRand(1, m_apPlayerTechSelect[player]->GetListPanel()->GetItemList()->size() - 1);
+                    int selection = RandomNum<int>(1, m_apPlayerTechSelect[player]->GetListPanel()->GetItemList()->size() - 1);
 					
 					// Don't let the game to chose the same faction twice
 					bool ok = false;
 					while (!ok)
 					{
 						ok = true;
-						selection = SelectRand(1, m_apPlayerTechSelect[player]->GetListPanel()->GetItemList()->size() - 1);
+						selection = RandomNum<int>(1, m_apPlayerTechSelect[player]->GetListPanel()->GetItemList()->size() - 1);
 
 						for (int p = 0; p < player; p++)
 							if (selection == m_apPlayerTechSelect[p]->GetSelectedIndex())
@@ -1169,7 +1157,7 @@ bool MetagameGUI::StartNewGame()
             
             // Set the starting brains for this player
             // Start with the baseline setting
-            newPlayer.m_BrainPool = ceilf(BRAINPOOLMAX * ((float)m_pLengthSlider->GetValue() / 100.0));
+            newPlayer.m_BrainPool = m_pLengthSlider->GetValue();
             // Baseline can never be 0
             newPlayer.m_BrainPool = MAX(newPlayer.m_BrainPool, 1);
             // Apply the handicap!
@@ -1207,10 +1195,10 @@ bool MetagameGUI::StartNewGame()
     }
 
     // Arrange all the floating UI elements neatly, depending on number of playing players
-    m_apPlayerBox[Activity::PLAYER_1]->SetPositionRel(20, 30);
-    m_apPlayerBox[Activity::PLAYER_2]->SetPositionRel(20, m_apScreenBox[ROOTBOX]->GetHeight() - m_apPlayerBox[Activity::PLAYER_2]->GetHeight() - 30);
-    m_apPlayerBox[Activity::PLAYER_3]->SetPositionRel(m_apScreenBox[ROOTBOX]->GetWidth() - m_apPlayerBox[Activity::PLAYER_3]->GetWidth() - 20, m_apScreenBox[ROOTBOX]->GetHeight() - m_apPlayerBox[Activity::PLAYER_3]->GetHeight() - 30);
-    m_apPlayerBox[Activity::PLAYER_4]->SetPositionRel(m_apScreenBox[ROOTBOX]->GetWidth() - m_apPlayerBox[Activity::PLAYER_4]->GetWidth() - 20, 30);
+    m_apPlayerBox[Players::PlayerOne]->SetPositionRel(20, 30);
+    m_apPlayerBox[Players::PlayerTwo]->SetPositionRel(20, m_apScreenBox[ROOTBOX]->GetHeight() - m_apPlayerBox[Players::PlayerTwo]->GetHeight() - 30);
+    m_apPlayerBox[Players::PlayerThree]->SetPositionRel(m_apScreenBox[ROOTBOX]->GetWidth() - m_apPlayerBox[Players::PlayerThree]->GetWidth() - 20, m_apScreenBox[ROOTBOX]->GetHeight() - m_apPlayerBox[Players::PlayerThree]->GetHeight() - 30);
+    m_apPlayerBox[Players::PlayerFour]->SetPositionRel(m_apScreenBox[ROOTBOX]->GetWidth() - m_apPlayerBox[Players::PlayerFour]->GetWidth() - 20, 30);
     UpdatePlayerBars();
 
     // Place Scene Info popup in convenient position
@@ -1227,7 +1215,7 @@ bool MetagameGUI::StartNewGame()
     
 
     // Start game of specified size!
-    g_MetaMan.NewGame((float)m_pSizeSlider->GetValue() / 100.0);
+    g_MetaMan.NewGame(m_pSizeSlider->GetValue());
 
     return true;
 }
@@ -1257,7 +1245,7 @@ bool MetagameGUI::LoadGame()
             UpdateIncomeCounting(true);
 
             // Reconstruct the player action lines - they are important!
-            for (int metaPlayer = Activity::PLAYER_1; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
+            for (int metaPlayer = Players::PlayerOne; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
                 UpdatePlayerActionLines(metaPlayer);
 
             // Re-init some other GUI elements
@@ -1265,7 +1253,7 @@ bool MetagameGUI::LoadGame()
             UpdateScenesBox(true);
 
             // Make sure GUI boxes are on the screen; save game might have been made on wonky resolution
-            for (int metaPlayer = Activity::PLAYER_1; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
+            for (int metaPlayer = Players::PlayerOne; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
                 KeepBoxOnScreen(m_apPlayerBox[metaPlayer], 30);
             KeepBoxOnScreen(m_pPhaseBox, 30);
             KeepBoxOnScreen(m_pSceneInfoPopup, 30);
@@ -1330,16 +1318,13 @@ bool MetagameGUI::SaveGame(string saveName, string savePath, bool resaveSceneDat
     // Now write out the index file of all MetaSaves so the new save is found on next runtime
     Writer indexWriter((string(METASAVEPATH) + string("Index.ini")).c_str());
     indexWriter.ObjectStart("DataModule");
-    indexWriter.NewProperty("ModuleName");
-    indexWriter << "Metagame Saves";
+    indexWriter.NewPropertyWithValue("ModuleName", "Metagame Saves");
     // Get the current list of all MetaSave Preset:s, including the new one we just saved
     list<Entity *> saveList;
     g_PresetMan.GetAllOfType(saveList, "MetaSave");
     // Go through the list and add their names to the combo box
-    for (list<Entity *>::iterator itr = saveList.begin(); itr != saveList.end(); ++itr)
-    {
-        indexWriter.NewProperty("AddMetaSave");
-        indexWriter << (*itr);
+	for (const Entity *saveListEntry : saveList) {
+        indexWriter.NewPropertyWithValue("AddMetaSave", saveListEntry);
     }
     indexWriter.ObjectEnd();
 
@@ -1498,20 +1483,20 @@ void MetagameGUI::Update()
                 char info[512];
 				std::string difficultyString;
 
-				if (pAutoSave->GetDifficulty() < GameActivity::CAKEDIFFICULTY)
+				if (pAutoSave->GetDifficulty() < Activity::CakeDifficulty)
 					difficultyString = "Difficulty: Cake";
-				else if (pAutoSave->GetDifficulty() < GameActivity::EASYDIFFICULTY)
+				else if (pAutoSave->GetDifficulty() < Activity::EasyDifficulty)
 					difficultyString = "Difficulty: Easy";
-				else if (pAutoSave->GetDifficulty() < GameActivity::MEDIUMDIFFICULTY)
+				else if (pAutoSave->GetDifficulty() < Activity::MediumDifficulty)
 					difficultyString = "Difficulty: Medium";
-				else if (pAutoSave->GetDifficulty() < GameActivity::HARDDIFFICULTY)
+				else if (pAutoSave->GetDifficulty() < Activity::HardDifficulty)
 					difficultyString = "Difficulty: Hard";
-				else if (pAutoSave->GetDifficulty() < GameActivity::NUTSDIFFICULTY)
+				else if (pAutoSave->GetDifficulty() < Activity::NutsDifficulty)
 					difficultyString = "Difficulty: Nuts";
 				else
 					difficultyString = "Difficulty: Nuts!";
 
-				sprintf_s(info, sizeof(info), "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pAutoSave->GetSiteCount(), pAutoSave->GetPlayerCount(), pAutoSave->GetRoundCount() + 1, difficultyString.c_str());
+				std::snprintf(info, sizeof(info), "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pAutoSave->GetSiteCount(), pAutoSave->GetPlayerCount(), pAutoSave->GetRoundCount() + 1, difficultyString.c_str());
                 m_pLoadInfoLabel->SetText(info);
                 // Show the Load button since we have one locked in
                 m_apMetaButton[LOADNOW]->SetVisible(true);
@@ -1599,7 +1584,7 @@ void MetagameGUI::Update()
         // Go through all lines and make them fully visible
         for (vector<SiteLine>::iterator slItr = m_IncomeSiteLines.begin(); slItr != m_IncomeSiteLines.end(); ++slItr)
             (*slItr).m_OnlyFirstSegments = (*slItr).m_OnlyLastSegments = -1;
-        for (int metaPlayer = Activity::PLAYER_1; metaPlayer < Activity::MAXPLAYERCOUNT; ++metaPlayer)
+        for (int metaPlayer = Players::PlayerOne; metaPlayer < Players::MaxPlayerCount; ++metaPlayer)
         {
             for (vector<SiteLine>::iterator slItr = m_ActionSiteLines[metaPlayer].begin(); slItr != m_ActionSiteLines[metaPlayer].end(); ++slItr)
                 (*slItr).m_OnlyFirstSegments = (*slItr).m_OnlyLastSegments = -1;
@@ -1781,7 +1766,7 @@ void MetagameGUI::Update()
             int winnerTeam = g_MetaMan.WhichTeamIsLeading();
 
             // Noone left??
-            if (winnerTeam == Activity::NOTEAM)
+            if (winnerTeam == Activity::NoTeam)
             {
                 m_pBannerRedTop->ShowText("EVERYONE", GUIBanner::FLYBYLEFTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.4, 3500, 0);
                 m_pBannerYellowBottom->ShowText("-DIED-", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.6, 3500, 0);                
@@ -1807,7 +1792,7 @@ void MetagameGUI::Update()
                 m_pBannerRedTop->ShowText(winnerNames, GUIBanner::FLYBYLEFTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.4, 3500, 0);
                 m_pBannerYellowBottom->ShowText(plural ? "WIN!" : "WINS!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.6, 3500, 0);
 //                char winStr[256];
-//                sprintf_s(winStr, sizeof(winStr), "Team %d", winner + 1);
+//                std::snprintf(winStr, sizeof(winStr), "Team %d", winner + 1);
 //                m_pBannerRedTop->ShowText(winStr, GUIBanner::FLYBYLEFTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.4, 3500, 0);
 //                m_pBannerYellowBottom->ShowText("WINS!", GUIBanner::FLYBYRIGHTWARD, -1, Vector(g_FrameMan.GetResX(), g_FrameMan.GetResY()), 0.6, 3500, 0);
             }
@@ -1846,7 +1831,7 @@ void MetagameGUI::Update()
         {
             GUICollectionBox *pBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControlUnderPoint(mouseX, mouseY, m_apScreenBox[ROOTBOX], 1));
             bool found = false;
-            for (int metaPlayer = Activity::PLAYER_1; metaPlayer < Activity::MAXPLAYERCOUNT; ++metaPlayer)
+            for (int metaPlayer = Players::PlayerOne; metaPlayer < Players::MaxPlayerCount; ++metaPlayer)
             {
                 // Find hovered box
                 if (pBox == m_apPlayerBox[metaPlayer])
@@ -1857,7 +1842,7 @@ void MetagameGUI::Update()
             }
             // Not hovering over any player box, so don't show any lines
             if (!found)
-                m_ActivePlayerIncomeLines = Activity::NOPLAYER;
+                m_ActivePlayerIncomeLines = Players::NoPlayer;
         }
 
         // Validate mouse position as being over the planet area for hover operations!
@@ -1978,7 +1963,7 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
         // Transparency effect on the scene dots and lines
         drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
         // Screen blend the dots and lines, with some flickering in its intensity
-        int blendAmount = 130 + 45 * NormalRand();
+		int blendAmount = 130 + RandomNum(-45, 45);
         set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
         // Draw the scene location dots
@@ -2005,11 +1990,11 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
             else
             {
                 // Make it flicker more if it's currently being fought over
-                blendAmount = 95 + (battleSite ? 25 : 15) * NormalRand();
+				blendAmount = 95 + (battleSite ? RandomNum(-25, 25) : RandomNum(-15, 15));
                 set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
                 circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 4, c_GUIColorYellow);
                 circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 2, c_GUIColorYellow);
-                blendAmount = 210 + 45 * NormalRand();
+				blendAmount = 210 + RandomNum(-45, 45);
                 set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
                 circlefill(drawBitmap, screenLocation.m_X, screenLocation.m_Y, 1, c_GUIColorYellow);
             }
@@ -2042,7 +2027,7 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
 
         // Action lines
         // If during a player's round phase, and not showing any income lines
-        if (!m_PreTurn && !g_MetaMan.m_StateChanged && g_MetaMan.m_GameState >= MetaMan::PLAYER1TURN && g_MetaMan.m_GameState <= MetaMan::BUILDBASES && m_ActivePlayerIncomeLines == Activity::NOPLAYER)
+        if (!m_PreTurn && !g_MetaMan.m_StateChanged && g_MetaMan.m_GameState >= MetaMan::PLAYER1TURN && g_MetaMan.m_GameState <= MetaMan::BUILDBASES && m_ActivePlayerIncomeLines == Players::NoPlayer)
         {
             int metaPlayer = 0;
             // Show the lines of the relevant player during turns
@@ -2087,7 +2072,7 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
             m_SiteAttackTarget.Draw(drawBitmap);
 
             // Draw the attack lines that are currently being revealed by possibly multiple attackers
-            for (int metaPlayer = Activity::PLAYER_1; metaPlayer < Activity::MAXPLAYERCOUNT; ++metaPlayer)
+            for (int metaPlayer = Players::PlayerOne; metaPlayer < Players::MaxPlayerCount; ++metaPlayer)
             {
                 for (int slI = 0; slI < m_ActionSiteLines[metaPlayer].size(); ++slI)
                 {
@@ -2160,7 +2145,7 @@ void MetagameGUI::UpdateInput()
         GUICollectionBox *pBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControlUnderPoint(mouseX, mouseY, m_apScreenBox[ROOTBOX], 1));
 
         // Player bars
-        for (int metaPlayer = Activity::PLAYER_1; metaPlayer < Activity::MAXPLAYERCOUNT; ++metaPlayer)
+        for (int metaPlayer = Players::PlayerOne; metaPlayer < Players::MaxPlayerCount; ++metaPlayer)
         {
             if (pBox == m_apPlayerBox[metaPlayer])
                 m_pDraggedBox = pBox;
@@ -2255,16 +2240,18 @@ void MetagameGUI::UpdateInput()
 	GUIEvent anEvent;
 	while(m_pGUIController->GetEvent(&anEvent))
     {
+		const std::string eventControlName = anEvent.GetControl()->GetName();
+
         // Commands
 		if (anEvent.GetType() == GUIEvent::Command)
         {
 			// Open game menu button pressed
 			// Most big dialog cancel buttons lead back to the game menu too
-			if (anEvent.GetControl()->GetName() == "OpenMenuButton" ||
-                anEvent.GetControl()->GetName() == "SaveCancelButton" ||
-                anEvent.GetControl()->GetName() == "LoadCancelButton" ||
-                anEvent.GetControl()->GetName() == "NewCancelButton" ||
-                anEvent.GetControl()->GetName() == "ConfirmCancelButton")
+			if (eventControlName == "OpenMenuButton" ||
+                eventControlName == "SaveCancelButton" ||
+                eventControlName == "LoadCancelButton" ||
+				(eventControlName == "NewCancelButton" && g_MetaMan.GameInProgress()) ||
+                eventControlName == "ConfirmCancelButton")
             {
                 g_MetaMan.SetSuspend(true);
                 SwitchToScreen(MENUDIALOG);
@@ -2272,7 +2259,7 @@ void MetagameGUI::UpdateInput()
             }
 
 			// Return to main menu button pressed
-			if (anEvent.GetControl()->GetName() == "MainMenuButton")
+			else if (eventControlName == "MainMenuButton" || eventControlName == "NewCancelButton")
             {
 				//Return Metagame dialog to new game state
 				// weegee SwitchToScreen(NEWDIALOG);
@@ -2285,7 +2272,7 @@ void MetagameGUI::UpdateInput()
             }
 
 			// Open save menu button pressed
-			if (anEvent.GetControl()->GetName() == "MenuSaveButton")
+			else if (eventControlName == "MenuSaveButton")
             {
                 g_MetaMan.SetSuspend(true);
                 SwitchToScreen(SAVEDIALOG);
@@ -2293,8 +2280,8 @@ void MetagameGUI::UpdateInput()
             }
 
 			// Open load menu button pressed
-			if (anEvent.GetControl()->GetName() == "MenuLoadButton" ||
-                anEvent.GetControl()->GetName() == "NewLoadButton")
+			else if (eventControlName == "MenuLoadButton" ||
+                eventControlName == "NewLoadButton")
             {
                 g_MetaMan.SetSuspend(true);
                 SwitchToScreen(LOADDIALOG);
@@ -2302,7 +2289,7 @@ void MetagameGUI::UpdateInput()
             }
 
 			// New Game menu button pressed
-			if (anEvent.GetControl()->GetName() == "MenuNewButton")
+			else if (eventControlName == "MenuNewButton")
             {
                 g_MetaMan.SetSuspend(true);
                 SwitchToScreen(NEWDIALOG);
@@ -2311,7 +2298,7 @@ void MetagameGUI::UpdateInput()
             }
 
 			// Quit Program button pressed
-			if (anEvent.GetControl()->GetName() == "MenuQuitButton")
+			else if (eventControlName == "MenuQuitButton")
             {
                 HideAllScreens();
                 g_MetaMan.SetSuspend(true);
@@ -2322,7 +2309,7 @@ void MetagameGUI::UpdateInput()
             }
 
 			// Resume Game menu button pressed
-			if (anEvent.GetControl()->GetName() == "MenuResumeButton")
+			else if (eventControlName == "MenuResumeButton")
             {
                 g_MetaMan.SetSuspend(false);
                 // If game over, then go to new game dialog on resume
@@ -2373,7 +2360,7 @@ void MetagameGUI::UpdateInput()
 
             // NEW GAME SETUP DIALOG
             // Player Control Setup toggle buttons
-            for (int player = 0; player < Activity::MAXPLAYERCOUNT; ++player)
+            for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
             {
                 if (anEvent.GetControl() == m_apPlayerControlButton[player])
                 {
@@ -2392,7 +2379,7 @@ void MetagameGUI::UpdateInput()
             }
 
 			// Start New Game menu button pressed
-			if (anEvent.GetControl()->GetName() == "StartButton")
+			if (eventControlName == "StartButton")
             {
                 // Current game needs saved or there will be data loss, so show confirmation box
                 if (!g_MetaMan.GameIsSaved())
@@ -2409,7 +2396,7 @@ void MetagameGUI::UpdateInput()
             }
 
 			// Save game button pressed
-			if (anEvent.GetControl()->GetName() == "SaveButton")
+			if (eventControlName == "SaveButton")
             {
                 // Overwrite confirmation click has been done already
                 if (!m_NewSaveBox->GetText().empty() || m_apMetaButton[SAVENOW]->GetText() != "Save")
@@ -2443,7 +2430,7 @@ void MetagameGUI::UpdateInput()
             }
 
 			// Load game button pressed
-			if (anEvent.GetControl()->GetName() == "LoadButton" && m_pSavesToLoadCombo->GetSelectedItem())
+			if (eventControlName == "LoadButton" && m_pSavesToLoadCombo->GetSelectedItem())
             {
                 // Save this Entity selection because the ComboBox gets cleared out when the conf dlg appears, so we can't get to the selection later when we acutally decide to load the damn thing
                 m_pSelectedGameToLoad = m_pSavesToLoadCombo->GetSelectedItem()->m_pEntity;
@@ -2507,7 +2494,7 @@ void MetagameGUI::UpdateInput()
                     BaseEditor *pNewEditor = new BaseEditor;
                     pNewEditor->Create();
                     char str[64];
-                    sprintf_s(str, sizeof(str), "R%dEdit", g_MetaMan.m_CurrentRound + 1);
+                    std::snprintf(str, sizeof(str), "R%dEdit", g_MetaMan.m_CurrentRound + 1);
                     pNewEditor->SetPresetName(g_MetaMan.GetGameName() + str);
 
                     // Gotto deact all players since by default there is one in slot 1
@@ -2538,7 +2525,7 @@ void MetagameGUI::UpdateInput()
                 GAScripted *pScanActivity = new GAScripted;
                 pScanActivity->Create("Base.rte/Activities/SiteScan.lua", "SiteScan");
                 char str[64];
-                sprintf_s(str, sizeof(str), "R%dScan", g_MetaMan.m_CurrentRound + 1);
+                std::snprintf(str, sizeof(str), "R%dScan", g_MetaMan.m_CurrentRound + 1);
                 pScanActivity->SetPresetName(g_MetaMan.GetGameName() + str);
 
                 // Gotto deact all players since by default there is one in slot 1
@@ -2549,7 +2536,7 @@ void MetagameGUI::UpdateInput()
                 if (g_MetaMan.IsActiveTeam(m_pSelectedScene->GetTeamOwnership()))
                 {
                     // Go through all players and add the ones of the defending team, based on who has resident brains here
-                    for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
+                    for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
                     {
                         // Got to remember to translate from metagame player index into the in-game player index and to flag them as not a human so they dont' get their own screens
 //                            if (g_MetaMan.m_Players[mp].GetTeam() == m_pSelectedScene->GetTeamOwnership())
@@ -2589,7 +2576,7 @@ void MetagameGUI::UpdateInput()
 
                     // Update the budget slider to reflect the scan cost being deducted from the funds
                     if (g_MetaMan.m_Players[metaPlayer].GetOffensiveTargetName() == m_pSelectedScene->GetPresetName())
-                        m_pSceneBudgetSlider->SetValue(floorf((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
+                        m_pSceneBudgetSlider->SetValue(std::floor((g_MetaMan.m_Players[metaPlayer].GetOffensiveBudget() / g_MetaMan.m_Players[metaPlayer].GetFunds()) * 100));
 
                     // Play an appropriate sound to indicate that the scan is bought and scheduled
                     g_GUISound.ItemChangeSound()->Play();
@@ -2668,25 +2655,25 @@ void MetagameGUI::UpdateInput()
 			if(anEvent.GetControl() == m_pSizeSlider || anEvent.GetControl() == m_pGoldSlider || anEvent.GetControl() == m_pLengthSlider || anEvent.GetControl() == m_pDifficultySlider)
                 UpdateGameSizeLabels();
 
-			if(anEvent.GetControl() == m_apPlayerAISkillSlider[Activity::PLAYER_1])
-                UpdateAISkillSliders(Activity::PLAYER_1);
-			if(anEvent.GetControl() == m_apPlayerAISkillSlider[Activity::PLAYER_2])
-                UpdateAISkillSliders(Activity::PLAYER_2);
-			if(anEvent.GetControl() == m_apPlayerAISkillSlider[Activity::PLAYER_3])
-                UpdateAISkillSliders(Activity::PLAYER_3);
-			if(anEvent.GetControl() == m_apPlayerAISkillSlider[Activity::PLAYER_4])
-                UpdateAISkillSliders(Activity::PLAYER_4);
+			if(anEvent.GetControl() == m_apPlayerAISkillSlider[Players::PlayerOne])
+                UpdateAISkillSliders(Players::PlayerOne);
+			if(anEvent.GetControl() == m_apPlayerAISkillSlider[Players::PlayerTwo])
+                UpdateAISkillSliders(Players::PlayerTwo);
+			if(anEvent.GetControl() == m_apPlayerAISkillSlider[Players::PlayerThree])
+                UpdateAISkillSliders(Players::PlayerThree);
+			if(anEvent.GetControl() == m_apPlayerAISkillSlider[Players::PlayerFour])
+                UpdateAISkillSliders(Players::PlayerFour);
 
 /* Dun work so well, only if hovering naked box
             // If hovering over any player bar, show the site lines going out from it
-            for (int metaPlayer = Activity::PLAYER_1; metaPlayer < Activity::MAXPLAYERCOUNT; ++metaPlayer)
+            for (int metaPlayer = Players::PlayerOne; metaPlayer < Players::MaxPlayerCount; ++metaPlayer)
             {
                 if (anEvent.GetControl() == m_apPlayerBox[metaPlayer])
                     m_ActivePlayerIncomeLines = metaPlayer;
             }
 */
             // Player flag selection changed
-            for (int player = 0; player < Activity::MAXPLAYERCOUNT; ++player)
+            for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
             {
                 if (anEvent.GetControl() == m_apPlayerTeamSelect[player] && anEvent.GetMsg() == GUIComboBox::Closed)
                 {
@@ -2694,7 +2681,7 @@ void MetagameGUI::UpdateInput()
                     // If some flag has been selected, make sure all other lists don't show the currently selected icon
                     if (m_apPlayerTeamSelect[player]->GetSelectedItem() && m_apPlayerTeamSelect[player]->GetSelectedItem()->m_pEntity)
                     {
-                        for (int otherPlayer = Activity::PLAYER_1; otherPlayer < Activity::MAXPLAYERCOUNT; ++otherPlayer)
+                        for (int otherPlayer = Players::PlayerOne; otherPlayer < Players::MaxPlayerCount; ++otherPlayer)
                         {
                             if (player != otherPlayer && m_apPlayerTeamSelect[otherPlayer]->GetSelectedItem() && m_apPlayerTeamSelect[otherPlayer]->GetSelectedItem()->m_pEntity)
                             {
@@ -2732,20 +2719,20 @@ void MetagameGUI::UpdateInput()
                     char info[512];
 					std::string difficultyString;
 
-					if (pGame->GetDifficulty() < GameActivity::CAKEDIFFICULTY)
+					if (pGame->GetDifficulty() < Activity::CakeDifficulty)
 						difficultyString = "Difficulty: Cake";
-					else if (pGame->GetDifficulty() < GameActivity::EASYDIFFICULTY)
+					else if (pGame->GetDifficulty() < Activity::EasyDifficulty)
 						difficultyString = "Difficulty: Easy";
-					else if (pGame->GetDifficulty() < GameActivity::MEDIUMDIFFICULTY)
+					else if (pGame->GetDifficulty() < Activity::MediumDifficulty)
 						difficultyString = "Difficulty: Medium";
-					else if (pGame->GetDifficulty() < GameActivity::HARDDIFFICULTY)
+					else if (pGame->GetDifficulty() < Activity::HardDifficulty)
 						difficultyString = "Difficulty: Hard";
-					else if (pGame->GetDifficulty() < GameActivity::NUTSDIFFICULTY)
+					else if (pGame->GetDifficulty() < Activity::NutsDifficulty)
 						difficultyString = "Difficulty: Nuts";
 					else
 						difficultyString = "Difficulty: Nuts!";
 
-                    sprintf_s(info, sizeof(info), "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pGame->GetSiteCount(), pGame->GetPlayerCount(), pGame->GetRoundCount() + 1, difficultyString.c_str());
+                    std::snprintf(info, sizeof(info), "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pGame->GetSiteCount(), pGame->GetPlayerCount(), pGame->GetRoundCount() + 1, difficultyString.c_str());
                     m_pLoadInfoLabel->SetText(info);
                     // Show the Load button since we have one locked in
                     m_apMetaButton[LOADNOW]->SetVisible(true);
@@ -2771,20 +2758,20 @@ void MetagameGUI::UpdateInput()
                     char info[512];
 					std::string difficultyString;
 
-					if (pGame->GetDifficulty() < GameActivity::CAKEDIFFICULTY)
+					if (pGame->GetDifficulty() < Activity::CakeDifficulty)
 						difficultyString = "Difficulty: Cake";
-					else if (pGame->GetDifficulty() < GameActivity::EASYDIFFICULTY)
+					else if (pGame->GetDifficulty() < Activity::EasyDifficulty)
 						difficultyString = "Difficulty: Easy";
-					else if (pGame->GetDifficulty() < GameActivity::MEDIUMDIFFICULTY)
+					else if (pGame->GetDifficulty() < Activity::MediumDifficulty)
 						difficultyString = "Difficulty: Medium";
-					else if (pGame->GetDifficulty() < GameActivity::HARDDIFFICULTY)
+					else if (pGame->GetDifficulty() < Activity::HardDifficulty)
 						difficultyString = "Difficulty: Hard";
-					else if (pGame->GetDifficulty() < GameActivity::NUTSDIFFICULTY)
+					else if (pGame->GetDifficulty() < Activity::NutsDifficulty)
 						difficultyString = "Difficulty: Nuts";
 					else
 						difficultyString = "Difficulty: Nuts!";
 
-                    sprintf_s(info, sizeof(info), "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pGame->GetSiteCount(), pGame->GetPlayerCount(), pGame->GetRoundCount() + 1, difficultyString.c_str());
+                    std::snprintf(info, sizeof(info), "Game Size: %d sites\nTotal Players: %d\nDay: %d\n%s", pGame->GetSiteCount(), pGame->GetPlayerCount(), pGame->GetRoundCount() + 1, difficultyString.c_str());
                     m_pSaveInfoLabel->SetText(info);
                     m_pSaveInfoLabel->SetVisible(true);
                     // Show the Save button since we have one to overwrite locked in
@@ -2836,7 +2823,7 @@ void MetagameGUI::HideAllScreens()
     }
 
     // Also hide the player bars
-    for (int player = 0; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         m_apPlayerBox[player]->SetVisible(false);
         m_apBrainPoolLabel[player]->SetVisible(false);
@@ -2910,20 +2897,20 @@ void MetagameGUI::CompletedActivity()
     GAScripted *pDoneScriptedActivity = dynamic_cast<GAScripted *>(g_ActivityMan.GetActivity());
     Scene *pAlteredScene = g_SceneMan.GetScene();
     bool autoResolved = false;
-    int winningTeam = Activity::NOTEAM;
+    int winningTeam = Activity::NoTeam;
 
     // Retain any changes done to the Scene just played to the one that is kept by the MetaMan session
     if (pDoneActivity && pAlteredScene && m_pPlayingScene)
     {
         // There was an error with the activity and it bailed.. try to recover
-        if (pDoneActivity->GetActivityState() == Activity::INERROR)
+        if (pDoneActivity->GetActivityState() == Activity::HasError)
         {
             m_AnimTimer2.Reset();
             m_apMetaButton[CONTINUE]->SetText("Start!");
             m_PreTurn = true;
         }
         // If a MetaFight activity isn't over yet, that means we're just pausing and will resume
-        else if (pDoneScriptedActivity && pDoneScriptedActivity->GetLuaClassName() == "MetaFight" && !pDoneActivity->ActivityOver())
+        else if (pDoneScriptedActivity && pDoneScriptedActivity->GetLuaClassName() == "MetaFight" && !pDoneActivity->IsOver())
         {
             m_AnimTimer2.Reset();
             m_apMetaButton[CONTINUE]->SetText("Resume");
@@ -2946,10 +2933,10 @@ void MetagameGUI::CompletedActivity()
             // Offensive action session needs some things done after a battle is concluded
             else if (pDoneScriptedActivity && pDoneScriptedActivity->GetLuaClassName() == "MetaFight")
             {
-                if (pDoneActivity->ActivityOver())
+                if (pDoneActivity->IsOver())
                 {
                     // If this ended for whatever reason without a winning team, then resolve the rest of the fight automatically
-                    if (pDoneScriptedActivity->GetWinnerTeam() == Activity::NOTEAM)//pDoneActivity->HumanBrainCount() == 0)
+                    if (pDoneScriptedActivity->GetWinnerTeam() == Activity::NoTeam)//pDoneActivity->HumanBrainCount() == 0)
                     {
                         // Resolve the rest of the fight between the AI guys and display the outcome
                         m_BattleCausedOwnershipChange = AutoResolveOffensive(pDoneScriptedActivity, pAlteredScene, true);
@@ -2987,7 +2974,7 @@ void MetagameGUI::CompletedActivity()
                     pAlteredScene->RetrieveResidentBrains(*pDoneActivity);
 /* Later in FinalizeOffensive
                 // Deduct the original funds contribution of each player - less any unused funds of the team, taking original player contribution ratios into account
-                for (int metaPlayer = Activity::PLAYER_1; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
+                for (int metaPlayer = Players::PlayerOne; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
                 {
 // ANIMATE THIS NICELY INSTEAD
                     // Deduct the player's original contribution to team funds
@@ -3034,7 +3021,7 @@ void MetagameGUI::CompletedActivity()
 
             // Clear out the Lua state completely so it's not running some BS in the background
             g_LuaMan.Destroy();
-            g_LuaMan.Create();
+            g_LuaMan.Initialize();
             g_PresetMan.ReloadAllScripts();
 
             // Play some nice ambient music
@@ -3071,7 +3058,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
     // Check all players for active brains, and deactivate them if they don't have them
     if (brainCheck)
     {
-        for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+        for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
         {
             // Deactivate any players which had brains but don't anymore - ie they died and are not in the game anymore
             if (pOffensive->PlayerActive(player) && pOffensive->PlayerHadBrain(player) && !pOffensive->GetPlayerBrain(player))
@@ -3082,7 +3069,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
     // This is effectively a simluation for pure offensive activities where no human player was ever involved
     else
     {
-        for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+        for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
         {
             // Simulate that all active players had a brain at some point
             if (pOffensive->PlayerActive(player))
@@ -3094,8 +3081,8 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
     if (pOffensive->GetPlayerCount() == 1)
     {
         // Find out which single player is visiting this place, and grant him victory
-        int activePlayer = Activity::NOPLAYER;
-        for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+        int activePlayer = Players::NoPlayer;
+        for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
         {
             if (pOffensive->PlayerActive(player))
             {
@@ -3124,7 +3111,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
                 // Also declare winner of the activity
                 pOffensive->SetWinnerTeam(pOffensive->GetTeamOfPlayer(activePlayer));
                 // Just mess with the funds; the metaplayers' funds will be affected afterward, according to their shares etc
-//                pOffensive->SetTeamFunds(pOffensive->GetTeamFunds(pOffensive->GetTeamOfPlayer(activePlayer)) * PosRand(), pOffensive->GetTeamOfPlayer(activePlayer));
+//                pOffensive->SetTeamFunds(pOffensive->GetTeamFunds(pOffensive->GetTeamOfPlayer(activePlayer)) * RandomNum(), pOffensive->GetTeamOfPlayer(activePlayer));
                 // For now, just deduct the price of the brain
                 pOffensive->ChangeTeamFunds(-cost, pOffensive->GetTeamOfPlayer(activePlayer));
                 // Signal that ownership of the site has changed
@@ -3136,18 +3123,18 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
     else
     {
         // First see if NO TEAM will get this - could be all brains die
-        if (PosRand() < 0.05)
+        if (RandomNum() < 0.05F)
         {
             // See if we should signal change of ownership
-            if (pScene->GetTeamOwnership() != Activity::NOTEAM)
+            if (pScene->GetTeamOwnership() != Activity::NoTeam)
                 changedOwnership = true;
 
             // Eliminate all ownership of this place
-			pScene->RemoveAllPlacedActors(Activity::NOTEAM);
-            pScene->SetTeamOwnership(Activity::NOTEAM);
+			pScene->RemoveAllPlacedActors(Activity::NoTeam);
+            pScene->SetTeamOwnership(Activity::NoTeam);
 
             // Each player's brain gets wiped out
-            for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+            for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
             {
                 if (pOffensive->PlayerActive(player))
                     pScene->SetResidentBrain(player, 0);
@@ -3156,17 +3143,17 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
         // Okay, someone got this place - now figure out who
         else
         {
-            MetaPlayer * aMetaPlayers[Activity::MAXPLAYERCOUNT];
+            MetaPlayer * aMetaPlayers[Players::MaxPlayerCount];
             // The normalized scalar chances of each team to win
-            float aTeamChance[Activity::MAXTEAMCOUNT];
-			for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+            float aTeamChance[Activity::MaxTeamCount];
+			for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
 				aTeamChance[team] = 0;
 
             // The total number of 'chance' points that all teams have in aggregate
             float totalPoints = 0;
 
             // Add the points representing the defense investment for the defenders
-            for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+            for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
             {
                 // Invested defenses counts for half the points.. some may have been destroyed, defense is harder etc
                 if (pOffensive->TeamActive(team) && pScene->GetTeamOwnership() == team)
@@ -3174,7 +3161,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
             }
 
             // Now add the funds contributed by each player to each team's chance pool
-            for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+            for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
             {
                 if (pOffensive->PlayerActive(player))
                 {
@@ -3186,24 +3173,24 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
             }
 
             // Now tally up the total chance points
-            for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+            for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
             {
                 if (pOffensive->TeamActive(team))
                     totalPoints += aTeamChance[team];
             }
             // Normalize all the teams' chances
-            for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+            for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
             {
                 if (pOffensive->TeamActive(team))
                     aTeamChance[team] = aTeamChance[team] / totalPoints;
             }
             // The deciding normalized scalar number
-            float decision = PosRand();
+            float decision = RandomNum();
             // Keeps track of the thresholds
             float teamChanceTally = 0;
-            int winnerTeam = Activity::NOTEAM;
+            int winnerTeam = Activity::NoTeam;
             // See who actually won, based on the respective chances
-            for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+            for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
             {
                 if (pOffensive->TeamActive(team))
                 {
@@ -3228,7 +3215,7 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
             // Now change brain residencies if the ownership actually changed
             if (changedOwnership)
             {
-                for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+                for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
                 {
                     pLoadout = 0;
                     pBrain = 0;
@@ -3272,23 +3259,23 @@ bool MetagameGUI::AutoResolveOffensive(GAScripted *pOffensive, Scene *pScene, bo
             }
 
             // Figure out who of the losers actually evacuated instead of dying
-            for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+            for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
             {
                 // LOSER.. but evacuated successfully?
                 if (pOffensive->PlayerActive(player) && pOffensive->PlayerHadBrain(player) && aMetaPlayers[player] && aMetaPlayers[player]->GetTeam() != winnerTeam)
-                    pOffensive->SetBrainEvacuated(player, PosRand() < 0.25);
+                    pOffensive->SetBrainEvacuated(player, RandomNum() < 0.25F);
             }
         }
 
         // Now make the party cost for all the teams
-        for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+        for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
         {
             // Only mess with active teams
             if (pOffensive->TeamActive(team))
             {
                 // Just mess with the funds; the metaplayers' funds will be affected afterward, according to their shares
                 // Never let team funds dip below 0
-                pOffensive->SetTeamFunds(MAX(0, pOffensive->GetTeamFunds(team) * PosRand()), team);
+                pOffensive->SetTeamFunds(MAX(0, pOffensive->GetTeamFunds(team) * RandomNum()), team);
             }
         }
     }
@@ -3308,16 +3295,16 @@ void MetagameGUI::UpdateSiteRevealing()
     if (g_MetaMan.m_StateChanged)
     {
         // Save the number of sites we have reveelaed up til now so we can compare
-        m_AnimCountStart = m_AnimCountCurrent = (int)floorf(g_MetaMan.m_RevealedScenes);
+        m_AnimCountStart = m_AnimCountCurrent = (int)std::floor(g_MetaMan.m_RevealedScenes);
         // Progress the number of site we have revealed with the set rate + the extra
         g_MetaMan.m_RevealedScenes += g_MetaMan.m_RevealRate + g_MetaMan.m_RevealExtra;
         // Reset the extra to 0 now after we've applied it
         g_MetaMan.m_RevealExtra = 0;
         // Don't reveal more than there are scenes!
-        if ((int)floorf(g_MetaMan.m_RevealedScenes) >= g_MetaMan.m_Scenes.size())
+        if ((int)std::floor(g_MetaMan.m_RevealedScenes) >= g_MetaMan.m_Scenes.size())
             g_MetaMan.m_RevealedScenes = g_MetaMan.m_Scenes.size();
         // Figure out how many new sites we gots this round
-        int delta = (int)floorf(g_MetaMan.m_RevealedScenes) - m_AnimCountStart;
+        int delta = (int)std::floor(g_MetaMan.m_RevealedScenes) - m_AnimCountStart;
         // No new sites this round, so just continue onto next phase!
         if (delta < 1)
         {
@@ -3448,7 +3435,7 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
         m_IncomeSiteLines.clear();
         for (int metaPlayer = 0; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
             m_aStationIncomeLineIndices[metaPlayer] = -1;
-        m_AnimMetaPlayer = m_ActivePlayerIncomeLines = Activity::PLAYER_1;
+        m_AnimMetaPlayer = m_ActivePlayerIncomeLines = Players::PlayerOne;
         m_pAnimScene = 0;
         float totalRent, totalIncome, totalEndFunds;
         int channelHeight;
@@ -3881,7 +3868,7 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
             (*slItr).m_OnlyLastSegments = -1;
 
             // Also, if there are any brain liquidation lines, then adjust the brain counter for that poor player
-            if ((*slItr).m_Player >= Activity::PLAYER_1 && (*slItr).m_Player < Activity::MAXPLAYERCOUNT &&
+            if ((*slItr).m_Player >= Players::PlayerOne && (*slItr).m_Player < Players::MaxPlayerCount &&
                 m_aBrainSaleIncomeLineIndices[(*slItr).m_Player] == lineIndex)
             {
                 // Remove the display adjustment and APPLY the actual change to brains when one is liquidated
@@ -3895,7 +3882,7 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
         m_ActivePlayerIncomeLines = -1;
 
         // Make sure all fund labels and line ratios are good
-        for (int metaPlayer = Activity::PLAYER_1; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
+        for (int metaPlayer = Players::PlayerOne; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
         {
             UpdatePlayerLineRatios(m_IncomeSiteLines, metaPlayer, false);
             m_apPlayerBarLabel[metaPlayer]->SetVisible(true);
@@ -3970,7 +3957,7 @@ void MetagameGUI::UpdateBaseBuilding()
     if (g_MetaMan.m_StateChanged)
     {
         // Make sure all fund labels and line ratios are good
-        for (int metaPlayer = Activity::PLAYER_1; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
+        for (int metaPlayer = Players::PlayerOne; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
         {
             // Save the fund levels FROM THE START so we can calculate the after state if players skip the animation
             g_MetaMan.m_Players[metaPlayer].m_PhaseStartFunds = g_MetaMan.m_Players[metaPlayer].m_Funds;
@@ -4000,7 +3987,7 @@ void MetagameGUI::UpdateBaseBuilding()
         }
 
         // Start animating these defensive lines appearing, one after another
-        m_AnimMetaPlayer = Activity::PLAYER_1;
+        m_AnimMetaPlayer = Players::PlayerOne;
         m_AnimActionLine = 0;
         m_AnimActionLineChange = true;
         m_ActionMeterDrawOverride = false;
@@ -4155,7 +4142,7 @@ void MetagameGUI::UpdateBaseBuilding()
                 else
                 {
                     char str[64];
-                    sprintf_s(str, sizeof(str), m_AnimBuildCount == 1 ? "Built %d item" : "Built %d items", m_AnimBuildCount);
+                    std::snprintf(str, sizeof(str), m_AnimBuildCount == 1 ? "Built %d item" : "Built %d items", m_AnimBuildCount);
                     PlayerTextIndication(m_AnimMetaPlayer, str, m_PlanetCenter + m_ActionSiteLines[m_AnimMetaPlayer][m_AnimActionLine].m_PlanetPoint, 2500);
                 }
                 m_ActionSiteLines[m_AnimMetaPlayer][m_AnimActionLine].m_OnlyFirstSegments = -1;
@@ -4204,7 +4191,7 @@ void MetagameGUI::UpdateBaseBuilding()
 
         // Make sure all fund labels and line ratios are good
         Scene *pScene = 0;
-        for (int metaPlayer = Activity::PLAYER_1; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
+        for (int metaPlayer = Players::PlayerOne; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
         {
             // Reset the funds to the full value before we started messing with animating them
             g_MetaMan.m_Players[metaPlayer].m_Funds = g_MetaMan.m_Players[metaPlayer].m_PhaseStartFunds;
@@ -4264,9 +4251,9 @@ void MetagameGUI::SetupOffensives()
     string targetName;
     float offensiveBudget;
     bool playerDone = false;
-    int team = Activity::NOTEAM;
+    int team = Activity::NoTeam;
     int offensiveCount = 0;
-    for (int metaPlayer = Activity::PLAYER_1; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
+    for (int metaPlayer = Players::PlayerOne; metaPlayer < g_MetaMan.m_Players.size(); ++metaPlayer)
     {
         playerDone = false;
         team = g_MetaMan.m_Players[metaPlayer].GetTeam();
@@ -4298,7 +4285,7 @@ void MetagameGUI::SetupOffensives()
                         GAScripted *pOffensive = new GAScripted;
                         pOffensive->Create("Base.rte/Activities/MetaFight.lua", "MetaFight");
                         char str[64];
-                        sprintf_s(str, sizeof(str), "R%dA%d", g_MetaMan.m_CurrentRound + 1, offensiveCount);
+                        std::snprintf(str, sizeof(str), "R%dA%d", g_MetaMan.m_CurrentRound + 1, offensiveCount);
                         pOffensive->SetPresetName(g_MetaMan.GetGameName() + str);
                         // Associate the name of the scene with where this thing is supposed to take place
                         pOffensive->SetSceneName(targetName);
@@ -4307,17 +4294,17 @@ void MetagameGUI::SetupOffensives()
 						// Set difficulty
 						pOffensive->SetDifficulty(g_MetaMan.m_Difficulty);
 						// Set AI skill levels
-						for (int t = Activity::TEAM_1; t < Activity::MAXTEAMCOUNT; t++)
+						for (int t = Activity::TeamOne; t < Activity::MaxTeamCount; t++)
 							pOffensive->SetTeamAISkill(t, g_MetaMan.m_TeamAISkill[t]);
 
                         // Attacker
                         pOffensive->AddPlayer(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer(), g_MetaMan.m_Players[metaPlayer].IsHuman(), team, offensiveBudget, &(g_MetaMan.GetTeamIcon(team)));
 
                         // Unless exploring an unclaimed spot, there's going to be defenders
-                        if ((*sItr)->GetTeamOwnership() != Activity::NOTEAM)
+                        if ((*sItr)->GetTeamOwnership() != Activity::NoTeam)
                         {
                             // Go through all players and add the ones of the defending team, based on who has resident brains here
-                            for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
+                            for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
                             {
                                 // Got to remember to translate from metagame player index into the in-game player index
 // TODO: Remove this requirement to have a brain resident to play? error-prone and not so fun for co-op player on sme team if they can't all play
@@ -4413,7 +4400,7 @@ void MetagameGUI::UpdateOffensives()
     if (m_AnimActivityChange)
     {   
         // Show which mission we're on of all the offensive activities in queue
-        sprintf_s(str, sizeof(str), "Battle %d of %d", (g_MetaMan.m_CurrentOffensive + 1), (int)(g_MetaMan.m_RoundOffensives.size()));
+        std::snprintf(str, sizeof(str), "Battle %d of %d", (g_MetaMan.m_CurrentOffensive + 1), (int)(g_MetaMan.m_RoundOffensives.size()));
         m_pPhaseLabel->SetText(str);
 
         // Find the scene being attacked in this offensive Activity
@@ -4425,11 +4412,11 @@ void MetagameGUI::UpdateOffensives()
         RTEAssert(m_pAnimScene, "Couldn't find the Site that has been selected as attacked!");
 
         // It's owned by a team, so set up and show its defenders
-        if (m_pAnimScene->GetTeamOwnership() != Activity::NOTEAM)
+        if (m_pAnimScene->GetTeamOwnership() != Activity::NoTeam)
             m_AnimDefenseTeam = m_pAnimScene->GetTeamOwnership();
 
         // Set up all the offensive and defensive lines for each player involved in this site's battle
-        for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
+        for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
         {
             // If this player is involved in this fight, show his lines etc
             if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->PlayerActive(g_MetaMan.m_Players[mp].GetInGamePlayer()))
@@ -4520,7 +4507,7 @@ void MetagameGUI::UpdateOffensives()
         // New battle, reset the post battle flags
         m_PostBattleReview = false;
         m_BattleCausedOwnershipChange = false;
-        m_PreBattleTeamOwnership = Activity::NOTEAM;
+        m_PreBattleTeamOwnership = Activity::NoTeam;
 
         ChangeAnimMode(TARGETZEROING);
         m_AnimActivityChange = false;
@@ -4558,7 +4545,7 @@ void MetagameGUI::UpdateOffensives()
         if (NewAnimMode())
         {
             // Make sure all offensive action lines are set up for this phase
-            for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
+            for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
             {
                 // Find all players that are active during this battle
                 if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->PlayerActive(g_MetaMan.m_Players[mp].GetInGamePlayer()))
@@ -4594,7 +4581,7 @@ void MetagameGUI::UpdateOffensives()
         {
             if (m_AnimTimer1.GetElapsedRealTimeMS() > 150)
             {
-                for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
+                for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
                 {
                     // Only care if this player is attacking this site
                     if (m_pAnimScene->GetPresetName() == g_MetaMan.m_Players[mp].GetOffensiveTargetName() && g_MetaMan.m_Players[mp].GetOffensiveBudget() > 0)
@@ -4640,7 +4627,7 @@ void MetagameGUI::UpdateOffensives()
         if (NewAnimMode())
         {
             // Make sure all defensive and unallocated budget action lines are set up for this phase
-            for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
+            for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
             {
 
             }
@@ -4678,7 +4665,7 @@ void MetagameGUI::UpdateOffensives()
         if (NewAnimMode())
         {
             // Make sure all defensive and unallocated budget action lines are set up for this phase
-            for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
+            for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
             {
                 // Only care of this player is involved in this particular battle
                 // Only care about defending players of this site
@@ -4713,7 +4700,7 @@ void MetagameGUI::UpdateOffensives()
         {
             if (m_AnimTimer1.GetElapsedRealTimeMS() > 150)
             {
-                for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
+                for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
                 {
                     // Only care of this player is involved in this particular battle
                     if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->PlayerActive(g_MetaMan.m_Players[mp].GetInGamePlayer()))
@@ -4789,7 +4776,7 @@ void MetagameGUI::UpdateOffensives()
             m_AnimModeDuration = 2000;
 
             // Make sure all offensive action-related lines are set up for this battle review animation
-            for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
+            for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
             {
                 // Only the players of this battle
                 if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->PlayerHadBrain(g_MetaMan.m_Players[mp].GetInGamePlayer()))
@@ -4821,7 +4808,7 @@ void MetagameGUI::UpdateOffensives()
         }
 
         // Find the players who are involved in this battle
-        for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
+        for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
         {
             // Only the players of this battle
             if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->PlayerHadBrain(g_MetaMan.m_Players[mp].GetInGamePlayer()))
@@ -4831,7 +4818,7 @@ void MetagameGUI::UpdateOffensives()
                     !g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->BrainWasEvacuated(g_MetaMan.m_Players[mp].GetInGamePlayer()))
                 {
                     // If not yet blown up, then see if we should yet
-                    if (!m_aAnimDestroyed[mp] && m_AnimTimer2.GetElapsedRealTimeMS() > (m_AnimModeDuration * 0.5) && PosRand() < 0.05)
+                    if (!m_aAnimDestroyed[mp] && m_AnimTimer2.GetElapsedRealTimeMS() > (m_AnimModeDuration * 0.5F) && RandomNum() < 0.05F)
                     {
                         // Add circle explosion effect to where the brain icon used to be
                         m_SiteSwitchIndicators.push_back(SiteTarget(m_aBrainIconPos[mp], 0, SiteTarget::CIRCLEGROW, c_GUIColorRed));
@@ -4889,7 +4876,7 @@ void MetagameGUI::UpdateOffensives()
         {
             // Blow up any remaining brains who are doomed
             // Find the players who are involved in this battle
-            for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
+            for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
             {
                 // Only the players of this battle who didn't evacuate
                 if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->PlayerHadBrain(g_MetaMan.m_Players[mp].GetInGamePlayer()) &&
@@ -4920,13 +4907,13 @@ void MetagameGUI::UpdateOffensives()
         if (NewAnimMode())
         {
             // Make sure all defensive and unallocated budget action lines are set up for this phase
-            for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
+            for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
             {
 
             }
 
             // The duration of this depends on whethere there are any evacuees to travel back
-            m_AnimModeDuration = g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->AnyEvacuees() ? 2000 : 500;
+            m_AnimModeDuration = g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->AnyBrainWasEvacuated() ? 2000 : 500;
             m_AnimTimer1.Reset();
             m_AnimTimer2.Reset();
         }
@@ -4937,7 +4924,7 @@ void MetagameGUI::UpdateOffensives()
         m_SiteAttackTarget.m_AnimProgress = 0.975 + 0.025 * cos(c_TwoPI * (float)((int)m_AnimTimer2.GetElapsedRealTimeMS() % 666) / 666.0f);
 
         // The retreating brain label travel animations get updated to go back to their pools
-        if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->AnyEvacuees())
+        if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->AnyBrainWasEvacuated())
             UpdatePostBattleRetreaters(EaseInOut(0, 1.0, MIN(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
         else
             UpdatePostBattleRetreaters(1.0);
@@ -4950,10 +4937,10 @@ void MetagameGUI::UpdateOffensives()
         if (m_AnimTimer2.GetElapsedRealTimeMS() > m_AnimModeDuration)
         {
             // Change the display to show the evacuees transferring back to their brain pools
-            if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->AnyEvacuees())
+            if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->AnyBrainWasEvacuated())
             {
                 // Find the players who are evacuated anything this battle
-                for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
+                for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
                 {
                     // Only the players of this battle who evac'd their brain
                     if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->BrainWasEvacuated(g_MetaMan.m_Players[mp].GetInGamePlayer()))
@@ -4975,7 +4962,7 @@ void MetagameGUI::UpdateOffensives()
         if (NewAnimMode())
         {
             // Make sure all defensive and unallocated budget action lines are set up for this phase
-            for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
+            for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
             {
 
             }
@@ -4999,7 +4986,7 @@ void MetagameGUI::UpdateOffensives()
             UpdatePostBattleResidents(EaseOut(0, 1.0, MIN(1.0, m_AnimTimer2.GetElapsedRealTimeMS() / m_AnimModeDuration)));
 
         // Find the players who are involved in this battle
-        for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
+        for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
         {
             // Only the players of this battle
             if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->PlayerHadBrain(g_MetaMan.m_Players[mp].GetInGamePlayer()))
@@ -5032,7 +5019,7 @@ void MetagameGUI::UpdateOffensives()
         UpdateSiteNameLabel(false);
 
         // Max out the offensive lines in case the player started the battle before the lines were fully animated as connected
-        for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
+        for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
         {
             // Only care of this player is involved in this particular battle
             if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->PlayerActive(g_MetaMan.m_Players[mp].GetInGamePlayer()))
@@ -5126,7 +5113,7 @@ bool MetagameGUI::FinalizeOffensive()
     }
 
     // Deduct the original funds contribution of each player - less any unused funds of the team, taking original player contribution ratios into account
-    for (int mp = Activity::PLAYER_1; mp < g_MetaMan.m_Players.size(); ++mp)
+    for (int mp = Players::PlayerOne; mp < g_MetaMan.m_Players.size(); ++mp)
     {
         // Only the players who were battling this offensive
         if (g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->PlayerHadBrain(g_MetaMan.m_Players[mp].GetInGamePlayer()))
@@ -5164,7 +5151,7 @@ bool MetagameGUI::FinalizeOffensive()
 
     // If the battle caused ownership change, then show it with a cool indication
     if (m_BattleCausedOwnershipChange)
-        m_SiteSwitchIndicators.push_back(SiteTarget(m_PlanetCenter + m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 0, m_pAnimScene->GetTeamOwnership() != Activity::NOTEAM ? SiteTarget::SQUAREGROW : SiteTarget::CIRCLEGROW, c_GUIColorRed, m_AnimTimer2.GetElapsedRealTimeMS()));
+        m_SiteSwitchIndicators.push_back(SiteTarget(m_PlanetCenter + m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset(), 0, m_pAnimScene->GetTeamOwnership() != Activity::NoTeam ? SiteTarget::SQUAREGROW : SiteTarget::CIRCLEGROW, c_GUIColorRed, m_AnimTimer2.GetElapsedRealTimeMS()));
 
     // Clear the battle info of the last one
     ResetBattleInfo();
@@ -5233,8 +5220,8 @@ void MetagameGUI::ResetBattleInfo()
 void MetagameGUI::UpdateBattleQuads(Vector targetPos)
 {
     // Start with a clean slate
-    for (int q = Activity::PLAYER_1; q < Activity::MAXPLAYERCOUNT; ++q)
-        m_aQuadTakenBy[q] = Activity::NOPLAYER;
+    for (int q = Players::PlayerOne; q < Players::MaxPlayerCount; ++q)
+        m_aQuadTakenBy[q] = Players::NoPlayer;
 
     // Go through all players, assigning the quads depending on how the player bars are positioned in relation to each other
     int mp = 0;
@@ -5249,7 +5236,7 @@ void MetagameGUI::UpdateBattleQuads(Vector targetPos)
 
         // If the initial selection is taken, just find the next available one
         int quadIndex = initialQuad;
-        while (m_aQuadTakenBy[quadIndex] != Activity::NOPLAYER)
+        while (m_aQuadTakenBy[quadIndex] != Players::NoPlayer)
         {
             quadIndex++;
             // Loop around
@@ -5283,7 +5270,7 @@ void MetagameGUI::UpdatePreBattleAttackers(float progress)
 
     int mp = 0;
     char str[256];
-    int quadIndex = Activity::NOPLAYER;
+    int quadIndex = Players::NoPlayer;
     // The screen coordinate position of the current battle site
     Vector siteScreenPos = m_PlanetCenter + m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset();
     // Where the brain label starts from
@@ -5315,7 +5302,7 @@ void MetagameGUI::UpdatePreBattleAttackers(float progress)
             m_apPlayerBrainTravelLabel[mp]->SetVisible(progress > 0);
 
             // Figure out which quad this player is assigned to
-            for (int q = Activity::PLAYER_1; q < Activity::MAXPLAYERCOUNT; ++q)
+            for (int q = Players::PlayerOne; q < Players::MaxPlayerCount; ++q)
             {
                 if (m_aQuadTakenBy[q] == mp)
                 {
@@ -5326,14 +5313,14 @@ void MetagameGUI::UpdatePreBattleAttackers(float progress)
 
             // Write the brain label, with info if applicable for the current progress of animation
             if (progress < 1.0)
-                sprintf_s(str, sizeof(str), "%c", -48);
+                std::snprintf(str, sizeof(str), "%c", -48);
             // When at site destination, take into account the side the brain icon needs to be on
             else
             {
                 if (quadIndex <= 1)
-                    sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
+                    std::snprintf(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
                 else
-                    sprintf_s(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
+                    std::snprintf(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
             }
             m_apPlayerBrainTravelLabel[mp]->SetText(str);
             m_apPlayerBrainTravelLabel[mp]->SetToolTip("The specific brain that is being sent in to attack this place, and the funds he has been budgeted to do so with.");
@@ -5437,7 +5424,7 @@ void MetagameGUI::UpdatePreBattleDefenders(float progress)
 
     int mp = 0;
     char str[256];
-    int quadIndex = Activity::NOPLAYER;
+    int quadIndex = Players::NoPlayer;
     // The screen coordinate position of the current battle site
     Vector siteScreenPos = m_PlanetCenter + m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset();
     // Where the brain label starts from
@@ -5469,7 +5456,7 @@ void MetagameGUI::UpdatePreBattleDefenders(float progress)
             m_apPlayerBrainTravelLabel[mp]->SetVisible(progress > 0);
 
             // Figure out which quad this player is assigned to
-            for (int q = Activity::PLAYER_1; q < Activity::MAXPLAYERCOUNT; ++q)
+            for (int q = Players::PlayerOne; q < Players::MaxPlayerCount; ++q)
             {
                 if (m_aQuadTakenBy[q] == mp)
                 {
@@ -5480,14 +5467,14 @@ void MetagameGUI::UpdatePreBattleDefenders(float progress)
 
             // Write the brain label, with info if applicable for the current progress of animation
             if (progress < 1.0)
-                sprintf_s(str, sizeof(str), "%c", -48);
+                std::snprintf(str, sizeof(str), "%c", -48);
             // When at site destination, take into account the side the brain icon needs to be on
             else
             {
                 if (quadIndex <= 1)
-                    sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
+                    std::snprintf(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
                 else
-                    sprintf_s(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
+                    std::snprintf(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
             }
             m_apPlayerBrainTravelLabel[mp]->SetText(str);
             m_apPlayerBrainTravelLabel[mp]->SetToolTip("The resident brain that is defending this site from attack, and the unallocated funds of its player that he gets to use (beyond the defense investments already made here).");
@@ -5577,7 +5564,7 @@ void MetagameGUI::UpdatePostBattleRetreaters(float progress)
 
     int mp = 0;
     char str[256];
-    int quadIndex = Activity::NOPLAYER;
+    int quadIndex = Players::NoPlayer;
     // The screen coordinate position of the current battle site
     Vector siteScreenPos = m_PlanetCenter + m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset();
     // Where it ends up, aligned properly next to the site, in the proper quadrant
@@ -5609,7 +5596,7 @@ void MetagameGUI::UpdatePostBattleRetreaters(float progress)
             m_apPlayerBrainTravelLabel[mp]->SetVisible(progress < 1.0);
 
             // Figure out which quad this player is assigned to
-            for (int q = Activity::PLAYER_1; q < Activity::MAXPLAYERCOUNT; ++q)
+            for (int q = Players::PlayerOne; q < Players::MaxPlayerCount; ++q)
             {
                 if (m_aQuadTakenBy[q] == mp)
                 {
@@ -5620,14 +5607,14 @@ void MetagameGUI::UpdatePostBattleRetreaters(float progress)
 
             // Write the brain label, with info if applicable for the current progress of animation
             if (progress > 0)
-                sprintf_s(str, sizeof(str), "%c", -48);
+                std::snprintf(str, sizeof(str), "%c", -48);
             // When at site destination, take into account the side the brain icon needs to be on
             else
             {
                 if (quadIndex <= 1)
-                    sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
+                    std::snprintf(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
                 else
-                    sprintf_s(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
+                    std::snprintf(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
             }
             m_apPlayerBrainTravelLabel[mp]->SetText(str);
             m_apPlayerBrainTravelLabel[mp]->SetToolTip("The specific brain that is being sent in to attack this place, and the funds he has been budgeted to do so with.");
@@ -5732,7 +5719,7 @@ void MetagameGUI::UpdatePostBattleResidents(float progress)
 
     int mp = 0;
     char str[256];
-    int quadIndex = Activity::NOPLAYER;
+    int quadIndex = Players::NoPlayer;
     // The screen coordinate position of the current battle site
     Vector siteScreenPos = m_PlanetCenter + m_pAnimScene->GetLocation() + m_pAnimScene->GetLocationOffset();
     // Where the brain label ends at
@@ -5760,7 +5747,7 @@ void MetagameGUI::UpdatePostBattleResidents(float progress)
             !g_MetaMan.m_RoundOffensives[g_MetaMan.m_CurrentOffensive]->BrainWasEvacuated((*mpItr).GetInGamePlayer()))
         {
             // Figure out which quad this player is assigned to
-            for (int q = Activity::PLAYER_1; q < Activity::MAXPLAYERCOUNT; ++q)
+            for (int q = Players::PlayerOne; q < Players::MaxPlayerCount; ++q)
             {
                 if (m_aQuadTakenBy[q] == mp)
                 {
@@ -5780,25 +5767,25 @@ void MetagameGUI::UpdatePostBattleResidents(float progress)
                 {
                     // Death mask
                     if (progress > 0)
-                        sprintf_s(str, sizeof(str), "%c", -26);
+                        std::snprintf(str, sizeof(str), "%c", -26);
                     // Brain with line blinking over it and the funds still showing
                     else
                     {
                         if (quadIndex <= 1)
                         {
                             if (m_aAnimDestroyed[mp])
-                                sprintf_s(str, sizeof(str), "%c %.0f oz     ", -58, m_aBattleFunds[mp]);
+                                std::snprintf(str, sizeof(str), "%c %.0f oz     ", -58, m_aBattleFunds[mp]);
                             else
-                                sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -26);
-//                            sprintf_s(str, sizeof(str), "%c %.0f oz %c", -58, m_aBattleFunds[mp], m_AnimTimer2.AlternateReal(200) ? -39 : -26);
+                                std::snprintf(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -26);
+//                            std::snprintf(str, sizeof(str), "%c %.0f oz %c", -58, m_aBattleFunds[mp], m_AnimTimer2.AlternateReal(200) ? -39 : -26);
                         }
                         else
                         {
                             if (m_aAnimDestroyed[mp])
-                                sprintf_s(str, sizeof(str), "     %c %.0f oz", -58, m_aBattleFunds[mp]);
+                                std::snprintf(str, sizeof(str), "     %c %.0f oz", -58, m_aBattleFunds[mp]);
                             else
-                                sprintf_s(str, sizeof(str), "%c%c %c %.0f oz",  m_aAnimDestroyed[mp] ? ' ' : -26, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
-//                            sprintf_s(str, sizeof(str), "%c %c %.0f oz", m_AnimTimer2.AlternateReal(200) ? -39 : -26, -58, m_aBattleFunds[mp]);
+                                std::snprintf(str, sizeof(str), "%c%c %c %.0f oz",  m_aAnimDestroyed[mp] ? ' ' : -26, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
+//                            std::snprintf(str, sizeof(str), "%c %c %.0f oz", m_AnimTimer2.AlternateReal(200) ? -39 : -26, -58, m_aBattleFunds[mp]);
                         }
                     }
                     m_apPlayerBrainTravelLabel[mp]->SetText(str);
@@ -5865,16 +5852,16 @@ void MetagameGUI::UpdatePostBattleResidents(float progress)
 
                 // Write the brain label, with info if applicable for the current progress of animation
                 if (progress > 0)
-                    sprintf_s(str, sizeof(str), "%c", -48);
+                    std::snprintf(str, sizeof(str), "%c", -48);
                 // When at site start position, take into account the side the brain icon needs to be on
                 else
                 {
                     if (quadIndex <= 1)
-                        sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
-//                        sprintf_s(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], -47, -48);
+                        std::snprintf(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], m_aBattleAttacker[mp] ? -46 : -47, -48);
+//                        std::snprintf(str, sizeof(str), "%c %.0f oz %c%c", -58, m_aBattleFunds[mp], -47, -48);
                     else
-                        sprintf_s(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
-//                        sprintf_s(str, sizeof(str), "%c%c %c %.0f oz", -48, -47, -58, m_aBattleFunds[mp]);
+                        std::snprintf(str, sizeof(str), "%c%c %c %.0f oz", -48, m_aBattleAttacker[mp] ? -46 : -47, -58, m_aBattleFunds[mp]);
+//                        std::snprintf(str, sizeof(str), "%c%c %c %.0f oz", -48, -47, -58, m_aBattleFunds[mp]);
                 }
                 m_apPlayerBrainTravelLabel[mp]->SetText(str);
                 m_apPlayerBrainTravelLabel[mp]->SetToolTip("The new resident brain that has won this site and is settling in here now.");
@@ -5958,7 +5945,7 @@ void MetagameGUI::UpdatePostBattleResidents(float progress)
 float MetagameGUI::UpdatePlayerActionLines(int metaPlayer)//, bool addUnallocated)
 {
     // Make sure we're in a player turn phase
-    if (metaPlayer < Activity::PLAYER_1 || metaPlayer >= g_MetaMan.m_Players.size())
+    if (metaPlayer < Players::PlayerOne || metaPlayer >= g_MetaMan.m_Players.size())
         return 0;
 
     // First clean out all Action sitelines for this player
@@ -5974,7 +5961,7 @@ float MetagameGUI::UpdatePlayerActionLines(int metaPlayer)//, bool addUnallocate
     while (pScene = g_MetaMan.GetNextSceneOfPlayer(metaPlayer, pScene))
     {
         // Add line for scenes which are owned and whose build budgets have been set to something
-        if (pScene->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer) && floorf(pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer())) > 0)
+        if (pScene->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer) && std::floor(pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer())) > 0)
         {
             m_ActionSiteLines[metaPlayer].push_back(SiteLine(metaPlayer, meterStart, pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer()) / totalFunds, pScene->GetLocation() + pScene->GetLocationOffset(), pScene->GetPresetName(), pScene, c_GUIColorGreen, -1, -1, channelHeight, 1.0f, g_MetaMan.IsActiveTeam(pScene->GetTeamOwnership())));
             m_ActionSiteLines[metaPlayer].back().m_FundsAmount = pScene->GetBuildBudget(g_MetaMan.m_Players[metaPlayer].GetInGamePlayer());
@@ -6015,7 +6002,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
     {
         char str[256];
         // Set the close button to have that fancy X
-        sprintf_s(str, sizeof(str), "%c", -36);
+        std::snprintf(str, sizeof(str), "%c", -36);
         m_pSceneCloseButton->SetText(string(str));
 
         // Set the currently selected scene's texts
@@ -6023,14 +6010,14 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
         m_pSceneNameLabel->SetText(m_pSelectedScene->GetPresetName());
 
         // Show which team owns this place, and how many resident brains there are here of that team
-        if (m_pSelectedScene->GetTeamOwnership() > Activity::NOTEAM && m_pSelectedScene->GetTeamOwnership() < Activity::MAXTEAMCOUNT)
+        if (m_pSelectedScene->GetTeamOwnership() > Activity::NoTeam && m_pSelectedScene->GetTeamOwnership() < Activity::MaxTeamCount)
         {
             // Set the team flag icon
             m_pSceneOwnerTeam->SetVisible(true);
             m_pSceneOwnerTeam->SetDrawType(GUICollectionBox::Image);
             m_pSceneOwnerTeam->SetDrawImage(new AllegroBitmap(g_MetaMan.m_TeamIcons[m_pSelectedScene->GetTeamOwnership()].GetBitmaps32()[0]));
             // Show how many resident brains there are hanging out here
-            sprintf_s(str, sizeof(str), "%c", -26);
+            std::snprintf(str, sizeof(str), "%c", -26);
             string brainString = "";
             int brainCount = m_pSelectedScene->GetResidentBrainCount();
             for (int i = 0; i < brainCount; ++i)
@@ -6047,7 +6034,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
         }
 
         // Write the description, and add the total defense investment in this place so far as a lil stat
-        sprintf_s(str, sizeof(str), "Total base investments here: %doz", (int)floorf(m_pSelectedScene->GetTotalInvestment()));
+        std::snprintf(str, sizeof(str), "Total base investments here: %doz", (int)floorf(m_pSelectedScene->GetTotalInvestment()));
         m_pSceneInfoLabel->SetText(m_pSelectedScene->GetDescription() + "\n" + string(str));
         // Adjust the height of the text box and container so it fits the text to display
         int newHeight = m_pSceneInfoLabel->ResizeHeightToFit();
@@ -6067,7 +6054,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
 
             // Set up the slider limit bar
             bool sceneOwnedByPlayer = m_pSelectedScene->GetTeamOwnership() == g_MetaMan.GetTeamOfPlayer(metaPlayer);
-            int blockedWidth = floorf((m_pSceneBudgetSlider->GetWidth() - 4) * g_MetaMan.GetBudgetedRatioOfPlayer(metaPlayer, m_pSelectedScene, sceneOwnedByPlayer));
+            int blockedWidth = std::floor((m_pSceneBudgetSlider->GetWidth() - 4) * g_MetaMan.GetBudgetedRatioOfPlayer(metaPlayer, m_pSelectedScene, sceneOwnedByPlayer));
 
             if (blockedWidth > 0)
             {
@@ -6091,7 +6078,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
             {
                 // Set the budget label as per the slider
                 int budget = floorf(((float)m_pSceneBudgetSlider->GetValue() / 100.0f) * g_MetaMan.m_Players[metaPlayer].GetFunds());
-                sprintf_s(str, sizeof(str), "Build Budget: %d oz", budget);
+                std::snprintf(str, sizeof(str), "Build Budget: %d oz", budget);
                 m_pSceneBudgetLabel->SetText(str);
                 m_apMetaButton[SCANNOW]->SetVisible(false);
                 m_apMetaButton[SCANLATER]->SetVisible(false);
@@ -6111,17 +6098,17 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
                 if (sceneChanged)
                 {
                     // Set the budget label as per the slider
-                    int budget = floorf(((float)m_pSceneBudgetSlider->GetValue() / 100.0f) * g_MetaMan.m_Players[metaPlayer].GetFunds());
+                    int budget = std::floor(((float)m_pSceneBudgetSlider->GetValue() / 100.0f) * g_MetaMan.m_Players[metaPlayer].GetFunds());
                     // Set the appropriate action message, depending on whether this is enemy owned, or merely unexplored
                     if (g_MetaMan.IsActiveTeam(m_pSelectedScene->GetTeamOwnership()))
                     {
-                        sprintf_s(str, sizeof(str), "Attack Budget: %d oz", budget);
+                        std::snprintf(str, sizeof(str), "Attack Budget: %d oz", budget);
                         m_pSceneBudgetLabel->SetToolTip("Sets how much of your total funds will be budgeted toward exploring this site. Any gold that isn't used in the attack will return to your account afterward, but will also be tied up and can't be used for defense if someone else attacks any of your bases during the same turn. You can only attack one site per turn!");
                         m_pSceneBudgetSlider->SetToolTip("Sets how much of your total funds will be budgeted toward exploring this site. Any gold that isn't used in the attack will return to your account afterward, but will also be tied up and can't be used for defense if someone else attacks any of your bases during the same turn. You can only attack one site per turn!");
                     }
                     else
                     {
-                        sprintf_s(str, sizeof(str), "Expedition Budget: %d oz", budget);
+                        std::snprintf(str, sizeof(str), "Expedition Budget: %d oz", budget);
                         m_pSceneBudgetLabel->SetToolTip("Sets how much of your total funds will be budgeted toward attacking this site. Any gold that isn't used in the attack will return to your account afterward, but will also be tied up and can't be used for defense if someone else attacks any of your bases during the same turn. You can only explore one site per turn!");
                         m_pSceneBudgetSlider->SetToolTip("Sets how much of your total funds will be budgeted toward attacking this site. Any gold that isn't used in the attack will return to your account afterward, but will also be tied up and can't be used for defense if someone else attacks any of your bases during the same turn. You can only explore one site per turn!");
                     }
@@ -6147,7 +6134,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
                         m_apMetaButton[SCANNOW]->SetVisible(false);
                         m_apMetaButton[SCANLATER]->SetVisible(false);
                         m_pScanInfoLabel->SetVisible(true);
-                        sprintf_s(str, sizeof(str), "%d", SCANCOST);
+                        std::snprintf(str, sizeof(str), "%d", SCANCOST);
                         m_pScanInfoLabel->SetText("Need " + string(str) + " oz left to Scan!");
                     }
                     // Site can be scheduled to be scanned
@@ -6159,7 +6146,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
                         m_pScanInfoLabel->SetVisible(false);
                         m_apMetaButton[DESIGNBASE]->SetVisible(false);
                         m_apMetaButton[SCENEACTION]->SetVisible(true);
-                        sprintf_s(str, sizeof(str), "%d", SCANCOST);
+                        std::snprintf(str, sizeof(str), "%d", SCANCOST);
                         m_apMetaButton[SCENEACTION]->SetText("Scan Site (" + string(str) + " oz)");
                         m_apMetaButton[SCENEACTION]->SetToolTip("Performs an orbital scan of this site, which will show everything that is on the surface, but will not be able to penetrate far into the ground.");
                     }
@@ -6176,7 +6163,7 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
                     // Make the blockage bar be all over the place
                     m_pSceneBudgetBar->SetVisible(true);
                     m_pSceneBudgetBar->SetPositionAbs(m_pSceneBudgetSlider->GetXPos() - 2, m_pSceneBudgetSlider->GetYPos());
-                    m_pSceneBudgetBar->SetSize(floorf((m_pSceneBudgetSlider->GetWidth() + 4)), m_pSceneBudgetSlider->GetHeight());
+                    m_pSceneBudgetBar->SetSize(std::floor((m_pSceneBudgetSlider->GetWidth() + 4)), m_pSceneBudgetSlider->GetHeight());
                     m_pSceneBudgetSlider->SetVisible(false);
                 }
             }
@@ -6215,11 +6202,11 @@ void MetagameGUI::UpdateScenesBox(bool sceneChanged)
 
 void MetagameGUI::UpdateAISkillSliders(int player)
 {
-	if (player >= Activity::PLAYER_1 && player < Activity::MAXPLAYERCOUNT)
+	if (player >= Players::PlayerOne && player < Players::MaxPlayerCount)
 	{
 		m_apPlayerAISkillLabel[player]->SetText(Activity::GetAISkillString(m_apPlayerAISkillSlider[player]->GetValue()));
 
-		for (int otherPlayer = Activity::PLAYER_1; otherPlayer < Activity::MAXPLAYERCOUNT; otherPlayer++)
+		for (int otherPlayer = Players::PlayerOne; otherPlayer < Players::MaxPlayerCount; otherPlayer++)
 		{
 			if (otherPlayer != player && m_apPlayerTeamSelect[player]->GetSelectedIndex() == m_apPlayerTeamSelect[otherPlayer]->GetSelectedIndex())
 			{
@@ -6240,39 +6227,44 @@ void MetagameGUI::UpdateGameSizeLabels()
 {
     // How many players do we have set to go
     int playerCount = 0;
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
         if (m_apPlayerControlButton[player]->GetText() != "None")
             ++playerCount;
 
-    // How many scenes does the current slider setting yield
-    int selectedCount = g_MetaMan.SelectScenePresets((float)m_pSizeSlider->GetValue() / 100.0, playerCount);
-    // How many scenes are there total
-    int totalCount = g_MetaMan.TotalScenePresets();
+	// How many scenes the game should end up with, according to the specified game size.
+	// Note that it will never be all or none of all the available scenes!
+// TODO: Hook these constants up to settings!!
+	// How many scenes are there total
+	const int totalCount = g_MetaMan.TotalScenePresets();
+	const int minCount = std::clamp((playerCount * 3 / 2), 3, totalCount);
+	m_pSizeSlider->SetMinimum(minCount);
+	m_pSizeSlider->SetMaximum(std::max(totalCount * 7 / 10, minCount));
+	m_pSizeSlider->SetValueResolution(1);
+
     char str[256];
-    sprintf_s(str, sizeof(str), "Game Size: %d/%d sites", selectedCount, totalCount);
+    std::snprintf(str, sizeof(str), "Game Size: %d/%d sites", m_pSizeSlider->GetValue(), totalCount);
     m_pSizeLabel->SetText(str);
 
     // How much starting gold does the slider yield
     int startGold = STARTGOLDMIN + ((STARTGOLDMAX - STARTGOLDMIN) * (float)m_pGoldSlider->GetValue() / 100.0);
-    sprintf_s(str, sizeof(str), "Starting Gold: %c %d oz", -58, startGold);
+    std::snprintf(str, sizeof(str), "Starting Gold: %c %d oz", -58, startGold);
     m_pGoldLabel->SetText(str);
 
     // Set the length label also according to the game length slider
-// TODO: don't hardcode the range of this
-    int brainCount = ceilf(BRAINPOOLMAX * ((float)m_pLengthSlider->GetValue() / 100.0));
+    int brainCount = m_pLengthSlider->GetValue();
     brainCount = MAX(brainCount, 1);
-    sprintf_s(str, sizeof(str), "Game Length: %c%c%d starting brains", -48, -36, brainCount);
+    std::snprintf(str, sizeof(str), "Game Length: %c%c%d starting brains", -48, -36, brainCount);
     m_pLengthLabel->SetText(str);
 
-    if (m_pDifficultySlider->GetValue() < GameActivity::CAKEDIFFICULTY)
+    if (m_pDifficultySlider->GetValue() < Activity::CakeDifficulty)
         m_pDifficultyLabel->SetText("Difficulty: Cake");
-    else if (m_pDifficultySlider->GetValue() < GameActivity::EASYDIFFICULTY)
+    else if (m_pDifficultySlider->GetValue() < Activity::EasyDifficulty)
         m_pDifficultyLabel->SetText("Difficulty: Easy");
-    else if (m_pDifficultySlider->GetValue() < GameActivity::MEDIUMDIFFICULTY)
+    else if (m_pDifficultySlider->GetValue() < Activity::MediumDifficulty)
         m_pDifficultyLabel->SetText("Difficulty: Medium");
-    else if (m_pDifficultySlider->GetValue() < GameActivity::HARDDIFFICULTY)
+    else if (m_pDifficultySlider->GetValue() < Activity::HardDifficulty)
         m_pDifficultyLabel->SetText("Difficulty: Hard");
-    else if (m_pDifficultySlider->GetValue() < GameActivity::NUTSDIFFICULTY)
+    else if (m_pDifficultySlider->GetValue() < Activity::NutsDifficulty)
         m_pDifficultyLabel->SetText("Difficulty: Nuts");
     else
         m_pDifficultyLabel->SetText("Difficulty: Nuts!");
@@ -6290,7 +6282,7 @@ void MetagameGUI::UpdatePlayerSetup()
     int totalPlayers = 0;
     const Icon *pTeamIcon = 0;
     list<const Icon *> teamList;
-    for (int player = Activity::PLAYER_1; player < Activity::MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (m_apPlayerControlButton[player]->GetText() == "None")
         {
@@ -6395,8 +6387,8 @@ void MetagameGUI::UpdatePlayerBars()
             if ((!m_PreTurn && metaPlayer == (g_MetaMan.m_GameState - MetaMan::PLAYER1TURN) && m_pSelectedScene) ||
                 metaPlayer == m_ActivePlayerIncomeLines || g_MetaMan.m_GameState == MetaMan::COUNTINCOME || g_MetaMan.m_GameState == MetaMan::BUILDBASES || g_MetaMan.m_GameState == MetaMan::RUNACTIVITIES || g_MetaMan.m_GameState == MetaMan::ENDROUND)
             {
-                sprintf_s(str, sizeof(str), "%c %.0f oz", -58, (*mpItr).m_Funds);
-//                sprintf_s(str, sizeof(str), "%cx%d %c %.0f oz", -48, (*mpItr).GetBrainPoolCount(), -58, (*mpItr).m_Funds);
+                std::snprintf(str, sizeof(str), "%c %.0f oz", -58, (*mpItr).m_Funds);
+//                std::snprintf(str, sizeof(str), "%cx%d %c %.0f oz", -48, (*mpItr).GetBrainPoolCount(), -58, (*mpItr).m_Funds);
                 m_apPlayerBarLabel[metaPlayer]->SetText(str);
                 m_apPlayerBarLabel[metaPlayer]->SetHAlignment(GUIFont::Right);
                 m_apPlayerBarLabel[metaPlayer]->SetToolTip("This player's total funds");
@@ -6406,7 +6398,7 @@ void MetagameGUI::UpdatePlayerBars()
             {
                 // If the player is out of the game, show a skull before the name
                 if (g_MetaMan.GetTotalBrainCountOfPlayer(metaPlayer) <= 0)
-                    sprintf_s(str, sizeof(str), "%c ", -39);
+                    std::snprintf(str, sizeof(str), "%c ", -39);
                 else
                     str[0] = 0;
 
@@ -6431,7 +6423,7 @@ void MetagameGUI::UpdatePlayerBars()
             // [Brain Icon] [X] Number
             // The number to display is adjusted with whether any brains are out and about in the gui animations
             int brainDisplayCount = (*mpItr).GetBrainPoolCount() - (*mpItr).GetBrainsInTransit();
-            sprintf_s(str, sizeof(str), "%c%c%d", brainDisplayCount > 0 ? -48 : -25, -36, brainDisplayCount);
+            std::snprintf(str, sizeof(str), "%c%c%d", brainDisplayCount > 0 ? -48 : -25, -36, brainDisplayCount);
             m_apBrainPoolLabel[metaPlayer]->SetText(str);
 
             // Animate any funds change indicator labels, make them float upward
@@ -6494,7 +6486,7 @@ void MetagameGUI::UpdatePlayerBars()
         }
 
         // Always hide any remaining player labels
-        while (metaPlayer < Activity::MAXPLAYERCOUNT)
+        while (metaPlayer < Players::MaxPlayerCount)
         {
             m_apFundsChangeLabel[metaPlayer]->SetVisible(false);
             m_apBrainChangeLabel[metaPlayer]->SetVisible(false);
@@ -6564,7 +6556,7 @@ void MetagameGUI::PlayerTextIndication(int metaPlayer, string text, const Vector
 void MetagameGUI::FundsChangeIndication(int metaPlayer, float change, const Vector &screenPos, double animLengthMS)
 {
     char str[256];
-    sprintf_s(str, sizeof(str), change >= 1.0 ? "%c +%.0f oz" : (change <= -1.0 ? "%c %.0f oz" : "%c %.0f oz"), -58, change);
+    std::snprintf(str, sizeof(str), change >= 1.0 ? "%c +%.0f oz" : (change <= -1.0 ? "%c %.0f oz" : "%c %.0f oz"), -58, change);
     m_apFundsChangeLabel[metaPlayer]->SetText(str);
     m_apFundsChangeLabel[metaPlayer]->SetHAlignment(GUIFont::Right);
     m_apFundsChangeLabel[metaPlayer]->SetVAlignment(GUIFont::Top);
@@ -6589,7 +6581,7 @@ void MetagameGUI::BrainsChangeIndication(int metaPlayer, int change, const Vecto
     char str[256];
     // [Brain Icon] [X] Number
     // The number to display is adjusted with whether any brains are out and about in the gui animations
-    sprintf_s(str, sizeof(str), change >= 0 ? "%c+%d" : "%c%d", -48, change);
+    std::snprintf(str, sizeof(str), change >= 0 ? "%c+%d" : "%c%d", -48, change);
     m_apBrainChangeLabel[metaPlayer]->SetText(str);
 
     m_apBrainChangeLabel[metaPlayer]->SetHAlignment(fontAlignment);
@@ -6636,7 +6628,7 @@ bool MetagameGUI::RemoveSiteLine(vector<SiteLine> &lineList, int removeIndex)
 
 float MetagameGUI::GetPlayerLineFunds(vector<SiteLine> &lineList, int metaPlayer, bool onlyVisible)
 {
-    if (metaPlayer < Activity::PLAYER_1 || metaPlayer >= g_MetaMan.m_Players.size())
+    if (metaPlayer < Players::PlayerOne || metaPlayer >= g_MetaMan.m_Players.size())
         return 0;
 
     // Figure out the total visible meter funds of this player
@@ -6657,7 +6649,7 @@ float MetagameGUI::GetPlayerLineFunds(vector<SiteLine> &lineList, int metaPlayer
 
 void MetagameGUI::UpdatePlayerLineRatios(vector<SiteLine> &lineList, int metaPlayer, bool onlyVisible, float total)
 {
-    if (metaPlayer < Activity::PLAYER_1 || metaPlayer >= g_MetaMan.m_Players.size())
+    if (metaPlayer < Players::PlayerOne || metaPlayer >= g_MetaMan.m_Players.size())
         return;
 
     // Figure out the total visible meter funds of this player, unless a total already specifically specified
@@ -6685,7 +6677,7 @@ void MetagameGUI::UpdatePlayerLineRatios(vector<SiteLine> &lineList, int metaPla
 
 void MetagameGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Vector &end, int color)
 {
-    int blendAmount = 210 + 15 * NormalRand();
+	int blendAmount = 210 + RandomNum(-15, 15);
     set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
     line(drawBitmap, start.m_X, start.m_Y, end.m_X, end.m_Y, color);
 /* Looks like ass
@@ -6701,7 +6693,7 @@ void MetagameGUI::DrawGlowLine(BITMAP *drawBitmap, const Vector &start, const Ve
         line(drawBitmap, start.m_X - 1, start.m_Y, end.m_X - 1, end.m_Y, color);
     }
 */
-    blendAmount = 45 + 25 * NormalRand();
+	blendAmount = 45 + RandomNum(-25, 25);
     set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
     line(drawBitmap, start.m_X + 1, start.m_Y, end.m_X + 1, end.m_Y, color);
     line(drawBitmap, start.m_X - 1, start.m_Y, end.m_X - 1, end.m_Y, color);
@@ -6738,7 +6730,7 @@ bool MetagameGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     int totalSegments = 0;
     int drawnFirstSegments = 0;
     int lastSegmentsToDraw = 0;
-    int circleRadius = squareSite ? floorf(6 * circleSize) : floorf(8 * circleSize);
+    int circleRadius = squareSite ? std::floor(6 * circleSize) : std::floor(8 * circleSize);
     int chamferSize = CHAMFERSIZE;
     Vector chamferPoint1;
     Vector chamferPoint2;
@@ -6814,7 +6806,7 @@ bool MetagameGUI::DrawScreenLineToSitePoint(BITMAP *drawBitmap,
     // Draw a circle around the site target
     if (!(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments))
     {
-        int blendAmount = 225 + 20 * NormalRand();
+		int blendAmount = 225 + RandomNum(-20, 20);
         set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
         // If specified, draw a squareSite instead (with chamfered corners)
@@ -6859,7 +6851,7 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
                                           bool squareSite,
                                           bool drawMeterOverride) const
 {
-    RTEAssert(metaPlayer >= Activity::PLAYER_1 && metaPlayer < Activity::MAXPLAYERCOUNT, "Player out of bounds");
+    RTEAssert(metaPlayer >= Players::PlayerOne && metaPlayer < Players::MaxPlayerCount, "Player out of bounds");
     // No part of the line is visible with these params, so just quit
     if ((onlyFirstSegments == 0 || onlyLastSegments == 0) && !drawMeterOverride)
         return false;
@@ -6877,7 +6869,7 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
     int drawnFirstSegments = 0;
     int lastSegmentsToDraw = 0;
     int meterHeight = 5;
-    int circleRadius = squareSite ? floorf(6 * circleSize) : floorf(8 * circleSize);
+    int circleRadius = squareSite ? std::floor(6 * circleSize) : std::floor(8 * circleSize);
     int chamferSize = CHAMFERSIZE;
     Vector chamferPoint1;
     Vector chamferPoint2;
@@ -6978,7 +6970,7 @@ bool MetagameGUI::DrawPlayerLineToSitePoint(BITMAP *drawBitmap,
     // Draw a circle around the site target
     if (!(drawnFirstSegments++ >= onlyFirstSegments || lastSegmentsToDraw-- > onlyLastSegments))
     {
-        int blendAmount = 225 + 20 * NormalRand();
+        int blendAmount = 225 + RandomNum(-20, 20);
         set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 
         // If specified, draw a squareSite instead (with chamfered corners)

@@ -34,7 +34,7 @@
 extern bool g_ResetActivity;
 extern bool g_InActivity;
 
-#define MAPNAME(element) g_UInputMan.GetMappingName(m_TutorialPlayer, UInputMan::element)
+#define MAPNAME(element) g_UInputMan.GetMappingName(m_TutorialPlayer, element)
 
 namespace RTE {
 
@@ -68,18 +68,7 @@ GATutorial::TutStep::TutStep(string text, int stepDuration, string screensPath, 
 
 void GATutorial::Clear()
 {
-/*
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-*/
-    m_TutorialPlayer = Activity::PLAYER_1;
+    m_TutorialPlayer = Players::PlayerOne;
 
     for (int area = 0; area < AREACOUNT; ++area)
     {
@@ -123,23 +112,7 @@ int GATutorial::Create()
         return -1;
 
     m_Description = "A tutorial for learning how to play Cortex Command. A good place to start!";
-/*
-    ////////////////////////////////
-    // Set up teams
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-
-    ///////////////////////////////////////
-    // Set up players
-
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-*/
     return 0;
 }
 
@@ -193,7 +166,7 @@ int GATutorial::Create(const GATutorial &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int GATutorial::ReadProperty(std::string propName, Reader &reader)
+int GATutorial::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "SpawnIntervalEasiest")
@@ -209,7 +182,6 @@ int GATutorial::ReadProperty(std::string propName, Reader &reader)
 
     else
 */
-        // See if the base class(es) can find a match instead
         return GameActivity::ReadProperty(propName, reader);
 
     return 0;
@@ -222,21 +194,9 @@ int GATutorial::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this GATutorial with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int GATutorial::Save(Writer &writer) const
-{
-    GameActivity::Save(writer);
-/*
-    writer.NewProperty("SpawnIntervalEasiest");
-    writer << m_SpawnIntervalEasiest;
-    writer.NewProperty("SpawnIntervalHardest");
-    writer << m_SpawnIntervalHardest;
-    for (vector<Actor *>::const_iterator itr = m_AttackerSpawns.begin(); itr != m_AttackerSpawns.end(); ++itr)
-    {
-        writer.NewProperty("AddAttackerSpawn");
-        writer << (*itr);
-    }
-*/
-    return 0;
+int GATutorial::Save(Writer &writer) const {
+	GameActivity::Save(writer);
+	return 0;
 }
 
 
@@ -247,17 +207,6 @@ int GATutorial::Save(Writer &writer) const
 
 void GATutorial::Destroy(bool notInherited)
 {
-/*
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-*/
     if (!notInherited)
         GameActivity::Destroy();
     Clear();
@@ -270,7 +219,7 @@ void GATutorial::Destroy(bool notInherited)
 // Description:     Tells if a particular Scene supports this specific Activity on it.
 //                  Usually that means certain Area:s need to be defined in the Scene.
 
-bool GATutorial::SceneIsCompatible(Scene *pScene, int teams)
+bool GATutorial::SceneIsCompatible(Scene *pScene, short teams)
 {
     if (!GameActivity::SceneIsCompatible(pScene, teams))
         return false;
@@ -297,18 +246,18 @@ int GATutorial::Start()
     // Set up teams
 
     // Team 2 is always CPU
-    SetCPUTeam(Activity::TEAM_2);
+    SetCPUTeam(Teams::TeamTwo);
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
 
-        if (team == Activity::TEAM_1)
+        if (team == Teams::TeamOne)
         {
             // See if there are specified landing zone areas defined in the scene
             char str[64];
-            sprintf_s(str, sizeof(str), "LZ Team %d", team + 1);
+            std::snprintf(str, sizeof(str), "LZ Team %d", team + 1);
             Scene::Area *pArea = g_SceneMan.GetScene()->GetArea(str);
     //        pArea = pArea ? pArea : g_SceneMan.GetScene()->GetArea("Landing Zone");
             // If area is defined, save a copy so we can lock the LZ selection to within its boxes
@@ -339,9 +288,9 @@ int GATutorial::Start()
                     // No brain found on other team... then just place somewhere in the ground, spaced out
                     else
                     {
-                        if (team == TEAM_1)
+                        if (team == Teams::TeamOne)
                             brainPos.SetXY((float)g_SceneMan.GetSceneWidth() * 0.25, (float)g_SceneMan.GetSceneHeight() * 0.75);
-                        if (team == TEAM_2)
+                        if (team == Teams::TeamTwo)
                             brainPos.SetXY((float)g_SceneMan.GetSceneWidth() * 0.75, (float)g_SceneMan.GetSceneHeight() * 0.75);
                     }
                     m_pCPUBrain->SetPos(brainPos);
@@ -360,7 +309,7 @@ int GATutorial::Start()
     ///////////////////////////////////////
     // Set up players
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -372,7 +321,7 @@ int GATutorial::Start()
         SetBrainLZWidth(player, 0);
 
         // If we can't find an unassigned brain in the scene to give each player, then force to go into editing mode to place one
-        if (!(m_pBrain[player] = g_MovableMan.GetUnassignedBrain(m_Team[player])))
+        if (!(m_Brain[player] = g_MovableMan.GetUnassignedBrain(m_Team[player])))
         {
             g_ConsoleMan.PrintString("ERROR: Can't find brain for tutorial game mode!");
         }
@@ -380,16 +329,16 @@ int GATutorial::Start()
         else
         {
             m_TutorialPlayer = player;
-            SwitchToActor(m_pBrain[player], player, m_Team[player]);
-            m_ActorCursor[player] = m_pBrain[player]->GetPos();
-            m_LandingZone[player].m_X = m_pBrain[player]->GetPos().m_X;
+            SwitchToActor(m_Brain[player], player, m_Team[player]);
+            m_ActorCursor[player] = m_Brain[player]->GetPos();
+            m_LandingZone[player].m_X = m_Brain[player]->GetPos().m_X;
             // Set the observation target to the brain, so that if/when it dies, the view flies to it in observation mode
-            m_ObservationTarget[player] = m_pBrain[player]->GetPos();
+            m_ObservationTarget[player] = m_Brain[player]->GetPos();
         }
 /*
-        if (m_ActivityState == EDITING)
+        if (m_ActivityState == ActivityState::Editing)
             g_FrameMan.SetScreenText((player % 2 == 0) ? "Place your brain vault and build your bunker around it..." : "...then select \"DONE\" from the pie menu!", ScreenOfPlayer(player), 0);
-        else if (m_ActivityState == RUNNING)
+        else if (m_ActivityState == ActivityState::Running)
             g_FrameMan.SetScreenText((player % 2 == 0) ? "Mine Gold and buy more firepower with the funds..." : "...then smash the competing brain to claim victory!", ScreenOfPlayer(player), 0);
 */
     }
@@ -401,7 +350,7 @@ int GATutorial::Start()
     // COMMON SCREENS
     ContentFile screenFile;
     BITMAP **apScreens;
-    screenFile.SetDataPath("Base.rte/GUIs/Tutorial/ScreenStatic.bmp");
+    screenFile.SetDataPath("Base.rte/GUIs/Tutorial/ScreenStatic.png");
     apScreens = screenFile.GetAsAnimation(3);
     m_apCommonScreens[SCREENOFF] = apScreens[0];
     m_apCommonScreens[STATICLITTLE] = apScreens[1];
@@ -416,13 +365,13 @@ int GATutorial::Start()
     for (int room = 0; room < ROOMCOUNT; ++room)
     {
         if (room == ROOM0)
-            signFile.SetDataPath("Base.rte/GUIs/Tutorial/TutEntryA.bmp");
+            signFile.SetDataPath("Base.rte/GUIs/Tutorial/TutEntryA.png");
         else if (room == ROOM1)
-            signFile.SetDataPath("Base.rte/GUIs/Tutorial/TutEntryB.bmp");
+            signFile.SetDataPath("Base.rte/GUIs/Tutorial/TutEntryB.png");
         else if (room == ROOM2)
-            signFile.SetDataPath("Base.rte/GUIs/Tutorial/TutEntryC.bmp");
+            signFile.SetDataPath("Base.rte/GUIs/Tutorial/TutEntryC.png");
         else if (room == ROOM3)
-            signFile.SetDataPath("Base.rte/GUIs/Tutorial/TutEntryD.bmp");
+            signFile.SetDataPath("Base.rte/GUIs/Tutorial/TutEntryD.png");
         apSigns = signFile.GetAsAnimation(2);
         m_aapRoomSigns[room][UNLIT] = apSigns[0];
         m_aapRoomSigns[room][LIT] = apSigns[1];
@@ -443,7 +392,7 @@ int GATutorial::Start()
     SetupAreas();
 
     // Disable all enemy AIs so they dont attack prematurely
-    DisableAIs(true, Activity::TEAM_2);
+    DisableAIs(true, Teams::TeamTwo);
 
     //////////////////////////////////
     // FIGHT TRIGGERS
@@ -472,9 +421,9 @@ int GATutorial::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void GATutorial::Pause(bool pause)
+void GATutorial::SetPaused(bool pause)
 {
-    GameActivity::Pause(pause);
+    GameActivity::SetPaused(pause);
 
     // Re-setup the ares with any updated control mappings that the player might have made in teh menu
     if (!pause)
@@ -493,7 +442,7 @@ void GATutorial::End()
 
     bool playerWon = false;
     // Show appropriate end game messages
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
@@ -502,8 +451,8 @@ void GATutorial::End()
         {
             playerWon = true;
             // Set the winner's observation view to his controlled actors instead of his brain
-            if (m_pControlledActor[player] && g_MovableMan.IsActor(m_pControlledActor[player]))
-                m_ObservationTarget[player] = m_pControlledActor[player]->GetPos();
+            if (m_ControlledActor[player] && g_MovableMan.IsActor(m_ControlledActor[player]))
+                m_ObservationTarget[player] = m_ControlledActor[player]->GetPos();
         }
     }
 
@@ -547,7 +496,7 @@ void GATutorial::UpdateEditing()
 void GATutorial::Update()
 {
     // Avoid game logic when we're editing
-    if (m_ActivityState == EDITING)
+    if (m_ActivityState == ActivityState::Editing)
     {
         UpdateEditing();
         return;
@@ -561,22 +510,22 @@ void GATutorial::Update()
     ///////////////////////////////////////////
     // Iterate through all human players
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
         // The current player's team
         int team = m_Team[player];
-        if (team == NOTEAM)
+        if (team == Teams::NoTeam)
             continue;
 
         // Make sure the game is not already ending
-        if (m_ActivityState != OVER)
+        if (m_ActivityState != ActivityState::Over)
         {
             // Check if any player's brain is dead
-            if (!g_MovableMan.IsActor(m_pBrain[player]))
+            if (!g_MovableMan.IsActor(m_Brain[player]))
             {
-                m_pBrain[player] = 0;
+                m_Brain[player] = 0;
                 g_FrameMan.SetScreenText("Your brain has been destroyed!", ScreenOfPlayer(player), 333);
 
                 // Now see if all brains are dead of this player's team, and if so, end the game
@@ -586,15 +535,15 @@ void GATutorial::Update()
                     End();
                 }
 
-                m_MsgTimer[player].Reset();
+                m_MessageTimer[player].Reset();
             }
             // Mark the player brain to be protected when the fight happens
             else if (m_CurrentFightStage >= DEFENDING)
             {
                 // Update the observation target to the brain, so that if/when it dies, the view flies to it in observation mode
-//                SetObservationTarget(m_pBrain[player]->GetPos(), player);
+//                SetObservationTarget(m_Brain[player]->GetPos(), player);
                 // Mark the player's brain to be protected by his team
-                AddObjectivePoint("Protect!", m_pBrain[player]->GetPos() + Vector(0, 10), team, GameActivity::ARROWUP);
+                AddObjectivePoint("Protect!", m_Brain[player]->GetPos() + Vector(0, 10), team, GameActivity::ARROWUP);
                 // Mark the CPU brain for desctruction too
                 if (g_MovableMan.IsActor(m_pCPUBrain))
                     AddObjectivePoint("Destroy!", m_pCPUBrain->GetPos() + Vector(0, 12), team, GameActivity::ARROWUP);
@@ -614,7 +563,7 @@ void GATutorial::Update()
     ///////////////////////////////////////////
     // Iterate through all teams
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
@@ -624,11 +573,11 @@ void GATutorial::Update()
         if (team == m_CPUTeam)
         {
             // Spawn the CPU team's attacking forces
-            if (m_SpawnTimer.IsPastSimMS(m_SpawnInterval) && m_ActivityState != OVER)
+            if (m_SpawnTimer.IsPastSimMS(m_SpawnInterval) && m_ActivityState != ActivityState::Over)
             {
                 if (!m_AttackerSpawns.empty())
                 {
-                    int whichSpawn = floorf(m_AttackerSpawns.size() * PosRand());
+                    int whichSpawn = std::floor(m_AttackerSpawns.size() * RandomNum());
                     Actor *pSpawn = dynamic_cast<Actor *>(m_AttackerSpawns[whichSpawn]->Clone());
                     if (pSpawn)
                     {
@@ -649,7 +598,7 @@ void GATutorial::Update()
                         }
                         else
                         {
-                            landingZone.m_X = g_SceneMan.GetSceneWidth() * PosRand();
+                            landingZone.m_X = g_SceneMan.GetSceneWidth() * RandomNum();
                         }
                         Vector dropStart(landingZone.m_X, -50);
                         pSpawn->SetPos(dropStart);
@@ -668,7 +617,7 @@ void GATutorial::Update()
         // Check for victory conditions
 
         // Make sure the game is not already ending
-        if (m_ActivityState != OVER && team != m_CPUTeam)
+        if (m_ActivityState != ActivityState::Over && team != m_CPUTeam)
         {
 // TODO: Gotto have budget restrictions in this activity!
 /*
@@ -676,7 +625,7 @@ void GATutorial::Update()
 // TODO Don't hardcode the rocket cost!
             if (m_TeamFunds[team] < 0)//&& Only brain is left of actors)
             {
-                for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+                for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
                 {
                     if (!(m_IsActive[player] && m_IsHuman[player]))
                         continue;
@@ -688,7 +637,7 @@ void GATutorial::Update()
                         g_FrameMan.SetScreenText("Your competition is bankrupt!", ScreenOfPlayer(player));
                         m_WinnerTeam = m_Team[player];
                     }
-                    m_MsgTimer[player].Reset();
+                    m_MessageTimer[player].Reset();
                 }
                 End();
             }
@@ -700,12 +649,12 @@ void GATutorial::Update()
     // TUTORIAL LOGIC
 
     // Detect the player going into new areas
-    if (m_pControlledActor[m_TutorialPlayer])
+    if (m_ControlledActor[m_TutorialPlayer])
     {
         for (int area = 0; area < AREACOUNT; ++area)
         {
             // Switch if within the trigger box of a new area
-            if (area != m_CurrentArea && m_TriggerBoxes[area].IsWithinBox(m_pControlledActor[m_TutorialPlayer]->GetPos()))
+            if (area != m_CurrentArea && m_TriggerBoxes[area].IsWithinBox(m_ControlledActor[m_TutorialPlayer]->GetPos()))
             {
                 // Change to the new area
                 m_PrevArea = m_CurrentArea;
@@ -722,7 +671,7 @@ void GATutorial::Update()
         {
 
             // Switch if within the trigger box of a new area
-            if (area != m_CurrentArea && m_TriggerBoxes[area].IsWithinBox(m_pControlledActor[m_TutorialPlayer]->GetPos()))
+            if (area != m_CurrentArea && m_TriggerBoxes[area].IsWithinBox(m_ControlledActor[m_TutorialPlayer]->GetPos()))
             {
 
             if (m_FightTriggers[stage].Reset();
@@ -757,7 +706,7 @@ void GATutorial::Update()
 
 /* Draw this manually over the current screen in DrawGUI
     // Take over control of screen messages
-    m_MsgTimer[m_TutorialPlayer].Reset();
+    m_MessageTimer[m_TutorialPlayer].Reset();
     // Display the text of the current step
 //    g_FrameMan.ClearScreenText();
     g_FrameMan.SetScreenText(m_TutAreaSteps[m_CurrentArea][m_CurrentStep].m_Text, 0, 500, -1, true);//, m_TutAreaSteps[m_CurrentArea][m_CurrentStep].m_Duration);
@@ -840,19 +789,19 @@ void GATutorial::Update()
     ////////////////////////
     // FIGHT LOGIC
 
-    if (m_pControlledActor[m_TutorialPlayer])
+    if (m_ControlledActor[m_TutorialPlayer])
     {
         // Triggered defending stage
-        if (m_CurrentFightStage == NOFIGHT && m_FightTriggers[DEFENDING].IsWithinBox(m_pControlledActor[m_TutorialPlayer]->GetPos()))
+        if (m_CurrentFightStage == NOFIGHT && m_FightTriggers[DEFENDING].IsWithinBox(m_ControlledActor[m_TutorialPlayer]->GetPos()))
         {
             // Take over control of screen messages
-            m_MsgTimer[m_TutorialPlayer].Reset();
+            m_MessageTimer[m_TutorialPlayer].Reset();
             // Display the text of the current step
             g_FrameMan.ClearScreenText(ScreenOfPlayer(m_TutorialPlayer));
             g_FrameMan.SetScreenText("DEFEND YOUR BRAIN AGAINST THE INCOMING FORCES!", ScreenOfPlayer(m_TutorialPlayer), 500, 8000, true);
             // This will make all the enemy team AI's go into brain hunt mode
             GameActivity::InitAIs();
-            DisableAIs(false, Activity::TEAM_2);
+            DisableAIs(false, Teams::TeamTwo);
 
             // Advance the stage
             m_CurrentFightStage = DEFENDING;
@@ -863,17 +812,17 @@ void GATutorial::Update()
     // Check for victory conditions
 
     // Check if the CPU brain is dead, if we're playing against the CPU
-    if (!g_MovableMan.IsActor(m_pCPUBrain) && m_ActivityState != OVER)
+    if (!g_MovableMan.IsActor(m_pCPUBrain) && m_ActivityState != ActivityState::Over)
     {
         m_pCPUBrain = 0;
         // Proclaim player winner and end
-        m_WinnerTeam = Activity::TEAM_1;
+        m_WinnerTeam = Teams::TeamOne;
         // Finito!
         End();
     }
 
     // After a while of game over and we won, exit to the campaign menu automatically
-    if (m_ActivityState == OVER && m_WinnerTeam == Activity::TEAM_1)
+    if (m_ActivityState == ActivityState::Over && m_WinnerTeam == Teams::TeamOne)
     {
         if (m_GameOverTimer.IsPastSimMS(m_GameOverPeriod))
         {
@@ -899,7 +848,7 @@ void GATutorial::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 {
     GameActivity::DrawGUI(pTargetBitmap, targetPos, which);
 
-    if (Running())// && (m_AreaTimer.AlternateReal(500) || m_AreaTimer.AlternateReal(250) || m_AreaTimer.AlternateReal(125)))
+    if (IsRunning())// && (m_AreaTimer.AlternateReal(500) || m_AreaTimer.AlternateReal(250) || m_AreaTimer.AlternateReal(125)))
     {
         AllegroBitmap pBitmapInt(pTargetBitmap);
         Vector screenTextPos = m_ScreenPositions[m_CurrentArea] + m_TextOffsets[m_CurrentArea] - targetPos;
@@ -947,7 +896,7 @@ void GATutorial::InitAIs()
     Actor *pActor = 0;
     Actor *pFirstActor = 0;
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
@@ -997,7 +946,7 @@ void GATutorial::SetupAreas()
     // Adjust for special commands when using the keyboard-only setup
     string JumpName = MAPNAME(INPUT_L_UP);
     string CrouchName = MAPNAME(INPUT_L_DOWN);
-    if (device == UInputMan::DEVICE_KEYB_ONLY)
+    if (device == DEVICE_KEYB_ONLY)
     {
         JumpName = MAPNAME(INPUT_JUMP);
         CrouchName = MAPNAME(INPUT_CROUCH);
@@ -1006,7 +955,7 @@ void GATutorial::SetupAreas()
     // If no preset, adjust the pie menu and fire names when using the defaults on a gamepad.. otherwise it'll show up as an unhelpful "Joystick"
     string PieName = MAPNAME(INPUT_PIEMENU);
     string FireName = MAPNAME(INPUT_FIRE);
-    if (device >= UInputMan::DEVICE_GAMEPAD_1 && preset == UInputMan::PRESET_NONE)
+    if (device >= DEVICE_GAMEPAD_1 && preset == PRESET_NONE)
     {
         PieName = "Pie Menu Trigger";
         FireName = "Fire Trigger";
@@ -1023,11 +972,11 @@ void GATutorial::SetupAreas()
     m_TextOffsets[BRAINCHAMBER].SetXY(m_apCommonScreens[0]->w / 2, m_apCommonScreens[0]->h + 4);
     // Set up the steps
     m_TutAreaSteps[BRAINCHAMBER].clear();
-    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("Welcome to Cortex Command", 4000, "Base.rte/GUIs/Tutorial/CCLogo.bmp", 2));
-    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("Above is your disembodied brain", 4000, "Base.rte/GUIs/Tutorial/ArrowUp.bmp", 2));
-    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("With it, you can remotely control other bodies", 4000, "Base.rte/GUIs/Tutorial/BodyZap.bmp", 2));
-    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("Switch to one now by using [" + MAPNAME(INPUT_PREV) + "] or [" + MAPNAME(INPUT_NEXT) + "]", 4000, "Base.rte/GUIs/Tutorial/BodyZap.bmp", 2));
-    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("If you haven't set up your controls yet, hit [Esc] and do so", 8000, "Base.rte/GUIs/Tutorial/Joystick.bmp", 2));
+    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("Welcome to Cortex Command", 4000, "Base.rte/GUIs/Tutorial/CCLogo.png", 2));
+    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("Above is your disembodied brain", 4000, "Base.rte/GUIs/Tutorial/ArrowUp.png", 2));
+    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("With it, you can remotely control other bodies", 4000, "Base.rte/GUIs/Tutorial/BodyZap.png", 2));
+    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("Switch to one now by using [" + MAPNAME(INPUT_PREV) + "] or [" + MAPNAME(INPUT_NEXT) + "]", 4000, "Base.rte/GUIs/Tutorial/BodyZap.png", 2));
+    m_TutAreaSteps[BRAINCHAMBER].push_back(TutStep("If you haven't set up your controls yet, hit [Esc] and do so", 8000, "Base.rte/GUIs/Tutorial/Joystick.png", 2));
 
     // BODYSTORAGE
     // Set up the trigger area
@@ -1040,10 +989,10 @@ void GATutorial::SetupAreas()
     m_TextOffsets[BODYSTORAGE].SetXY(m_apCommonScreens[0]->w / 2, m_apCommonScreens[0]->h + 4);
     // Set up the steps
     m_TutAreaSteps[BODYSTORAGE].clear();
-    m_TutAreaSteps[BODYSTORAGE].push_back(TutStep("Here are some dummy bodies for practice", 4000, "Base.rte/GUIs/Tutorial/BodyHop.bmp", 2));
-    m_TutAreaSteps[BODYSTORAGE].push_back(TutStep("Quickly switch control between them left and right with [" + MAPNAME(INPUT_PREV) + "] and [" + MAPNAME(INPUT_NEXT) + "]", 6000, "Base.rte/GUIs/Tutorial/BodyZap.bmp", 2));
-    m_TutAreaSteps[BODYSTORAGE].push_back(TutStep("Or hold down either [" + MAPNAME(INPUT_PREV) + "] or [" + MAPNAME(INPUT_NEXT) + "] to get a selection cursor", 6000, "Base.rte/GUIs/Tutorial/BodyZap.bmp", 2));
-    m_TutAreaSteps[BODYSTORAGE].push_back(TutStep("Switch to the leftmost body and walk it out of the room with [" + MAPNAME(INPUT_L_LEFT) + "]", 8000, "Base.rte/GUIs/Tutorial/ArrowLeft.bmp", 2));
+    m_TutAreaSteps[BODYSTORAGE].push_back(TutStep("Here are some dummy bodies for practice", 4000, "Base.rte/GUIs/Tutorial/BodyHop.png", 2));
+    m_TutAreaSteps[BODYSTORAGE].push_back(TutStep("Quickly switch control between them left and right with [" + MAPNAME(INPUT_PREV) + "] and [" + MAPNAME(INPUT_NEXT) + "]", 6000, "Base.rte/GUIs/Tutorial/BodyZap.png", 2));
+    m_TutAreaSteps[BODYSTORAGE].push_back(TutStep("Or hold down either [" + MAPNAME(INPUT_PREV) + "] or [" + MAPNAME(INPUT_NEXT) + "] to get a selection cursor", 6000, "Base.rte/GUIs/Tutorial/BodyZap.png", 2));
+    m_TutAreaSteps[BODYSTORAGE].push_back(TutStep("Switch to the leftmost body and walk it out of the room with [" + MAPNAME(INPUT_L_LEFT) + "]", 8000, "Base.rte/GUIs/Tutorial/ArrowLeft.png", 2));
 
     // SHAFT
     // Set up the trigger area
@@ -1056,11 +1005,11 @@ void GATutorial::SetupAreas()
     m_TextOffsets[SHAFT].SetXY(m_apCommonScreens[0]->w / 2, m_apCommonScreens[0]->h + 4);
     // Set up the steps
     m_TutAreaSteps[SHAFT].clear();
-    m_TutAreaSteps[SHAFT].push_back(TutStep("Use [" + JumpName + "] to activate jetpack", 4000, "Base.rte/GUIs/Tutorial/ArrowUp.bmp", 2));
-    m_TutAreaSteps[SHAFT].push_back(TutStep("Fire jetpack in bursts for better control", 4000, "Base.rte/GUIs/Tutorial/BodyJetpack.bmp", 2));
-    m_TutAreaSteps[SHAFT].push_back(TutStep("Adjust the jet direction by aiming or looking", 4000, "Base.rte/GUIs/Tutorial/BodyJetpack.bmp", 2));
-    m_TutAreaSteps[SHAFT].push_back(TutStep("Jump height is affected by the body's total weight", 4000, "Base.rte/GUIs/Tutorial/BodyJetpack.bmp", 2));
-    m_TutAreaSteps[SHAFT].push_back(TutStep("So the more you carry, the less you can jump", 8000, "Base.rte/GUIs/Tutorial/BodyJetpack.bmp", 2));
+    m_TutAreaSteps[SHAFT].push_back(TutStep("Use [" + JumpName + "] to activate jetpack", 4000, "Base.rte/GUIs/Tutorial/ArrowUp.png", 2));
+    m_TutAreaSteps[SHAFT].push_back(TutStep("Fire jetpack in bursts for better control", 4000, "Base.rte/GUIs/Tutorial/BodyJetpack.png", 2));
+    m_TutAreaSteps[SHAFT].push_back(TutStep("Adjust the jet direction by aiming or looking", 4000, "Base.rte/GUIs/Tutorial/BodyJetpack.png", 2));
+    m_TutAreaSteps[SHAFT].push_back(TutStep("Jump height is affected by the body's total weight", 4000, "Base.rte/GUIs/Tutorial/BodyJetpack.png", 2));
+    m_TutAreaSteps[SHAFT].push_back(TutStep("So the more you carry, the less you can jump", 8000, "Base.rte/GUIs/Tutorial/BodyJetpack.png", 2));
 
     // OBSTACLECOURSE
     // Set up the trigger area
@@ -1073,11 +1022,11 @@ void GATutorial::SetupAreas()
     m_TextOffsets[OBSTACLECOURSE].SetXY(m_apCommonScreens[0]->w / 2, m_apCommonScreens[0]->h + 4);
     // Set up the steps
     m_TutAreaSteps[OBSTACLECOURSE].clear();
-    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("Obstacle course", 2000, "Base.rte/GUIs/Tutorial/BodyHop.bmp", 2));
-    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("Climb obstacles by holding [" + MAPNAME(INPUT_L_RIGHT) + "]", 4000, "Base.rte/GUIs/Tutorial/ArrowRight.bmp", 2));
-    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("Even climb ladders by simply moving toward them", 8000, "Base.rte/GUIs/Tutorial/BodyClimb.bmp", 2));
-    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("You can also crouch and crawl with [" + CrouchName + "]", 6000, "Base.rte/GUIs/Tutorial/BodyCrawl.bmp", 2));
-    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("In tight spaces, you may need to angle your head down to get through", 8000, "Base.rte/GUIs/Tutorial/BodyCrawl.bmp", 2));
+    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("Obstacle course", 2000, "Base.rte/GUIs/Tutorial/BodyHop.png", 2));
+    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("Climb obstacles by holding [" + MAPNAME(INPUT_L_RIGHT) + "]", 4000, "Base.rte/GUIs/Tutorial/ArrowRight.png", 2));
+    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("Even climb ladders by simply moving toward them", 8000, "Base.rte/GUIs/Tutorial/BodyClimb.png", 2));
+    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("You can also crouch and crawl with [" + CrouchName + "]", 6000, "Base.rte/GUIs/Tutorial/BodyCrawl.png", 2));
+    m_TutAreaSteps[OBSTACLECOURSE].push_back(TutStep("In tight spaces, you may need to angle your head down to get through", 8000, "Base.rte/GUIs/Tutorial/BodyCrawl.png", 2));
 
     // FIRINGRANGE
     // Set up the trigger area
@@ -1090,15 +1039,15 @@ void GATutorial::SetupAreas()
     m_TextOffsets[FIRINGRANGE].SetXY(m_apCommonScreens[0]->w / 2, m_apCommonScreens[0]->h + 4);
     // Set up the steps
     m_TutAreaSteps[FIRINGRANGE].clear();
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Firing range", 2000, "Base.rte/GUIs/Tutorial/FireTarget.bmp", 1));
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Pick up the weapon by first standing over it", 4000, "Base.rte/GUIs/Tutorial/ArrowRight.bmp", 2));
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("And then hold down [" + PieName + "]", 4000, "Base.rte/GUIs/Tutorial/MenuPickUp.bmp", 1, 500));
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Point up to 'Pick Up'", 4000, "Base.rte/GUIs/Tutorial/MenuPickUp.bmp", 2, 500));
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Release [" + PieName + "] to complete the command", 4000, "Base.rte/GUIs/Tutorial/MenuPickUp.bmp", 1));
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("If you aim continuously toward your target", 4000, "Base.rte/GUIs/Tutorial/BodyAim.bmp", 3));
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("It improves your accuracy and view distance", 4000, "Base.rte/GUIs/Tutorial/BodyAim.bmp", 3));
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Use [" + FireName + "] to Fire!", 4000, "Base.rte/GUIs/Tutorial/BodyFire.bmp", 2));
-    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Reload manually with [" + PieName + "] + up", 8000, "Base.rte/GUIs/Tutorial/BodyFire.bmp", 2));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Firing range", 2000, "Base.rte/GUIs/Tutorial/FireTarget.png", 1));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Pick up the weapon by first standing over it", 4000, "Base.rte/GUIs/Tutorial/ArrowRight.png", 2));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("And then hold down [" + PieName + "]", 4000, "Base.rte/GUIs/Tutorial/MenuPickUp.png", 1, 500));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Point up to 'Pick Up'", 4000, "Base.rte/GUIs/Tutorial/MenuPickUp.png", 2, 500));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Release [" + PieName + "] to complete the command", 4000, "Base.rte/GUIs/Tutorial/MenuPickUp.png", 1));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("If you aim continuously toward your target", 4000, "Base.rte/GUIs/Tutorial/BodyAim.png", 3));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("It improves your accuracy and view distance", 4000, "Base.rte/GUIs/Tutorial/BodyAim.png", 3));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Use [" + FireName + "] to Fire!", 4000, "Base.rte/GUIs/Tutorial/BodyFire.png", 2));
+    m_TutAreaSteps[FIRINGRANGE].push_back(TutStep("Reload manually with [" + PieName + "] + up", 8000, "Base.rte/GUIs/Tutorial/BodyFire.png", 2));
 
     // ROOFTOP
     // Set up the trigger area
@@ -1111,18 +1060,18 @@ void GATutorial::SetupAreas()
     m_TextOffsets[ROOFTOP].SetXY(m_apCommonScreens[0]->w / 2, -16);
     // Set up the steps
     m_TutAreaSteps[ROOFTOP].clear();
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Pick up the digging tool", 4000, "Base.rte/GUIs/Tutorial/MenuPickUp.bmp", 2, 500));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Use it on the dirt here", 8000, "Base.rte/GUIs/Tutorial/DigPile.bmp", 2, 750));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("If you dig up gold, it is added to your team's funds", 4000, "Base.rte/GUIs/Tutorial/Funds.bmp", 2, 250));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Funds can be spent in the Buy Menu", 4000, "Base.rte/GUIs/Tutorial/Funds.bmp", 1, 333));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Which is opened through the Command Menu", 4000, "Base.rte/GUIs/Tutorial/MenuBuyMenu.bmp", 1, 500));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Hold [" + PieName + "] and point up-left to 'Buy Menu'", 6000, "Base.rte/GUIs/Tutorial/MenuBuyMenu.bmp", 2, 500));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("The Buy Menu works like a shopping cart", 6000, "Base.rte/GUIs/Tutorial/BuyMenuCargo.bmp", 1, 500));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Add to the Cargo list the items you want delivered", 6000, "Base.rte/GUIs/Tutorial/BuyMenuCargo.bmp", 2, 500));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Then use the BUY button, or click outside the menu", 4000, "Base.rte/GUIs/Tutorial/BuyMenuBuy.bmp", 2, 500));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Finally select a flat area where you want the goods delivered", 8000, "Base.rte/GUIs/Tutorial/BuyMenuBuy.bmp", 1, 500));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Next, you can go explore to the west to try flying and climbing in the wild", 6000, "Base.rte/GUIs/Tutorial/ArrowLeft.bmp", 2));
-    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Or, go to the east to learn about squads!", 8000, "Base.rte/GUIs/Tutorial/ArrowRight.bmp", 2));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Pick up the digging tool", 4000, "Base.rte/GUIs/Tutorial/MenuPickUp.png", 2, 500));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Use it on the dirt here", 8000, "Base.rte/GUIs/Tutorial/DigPile.png", 2, 750));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("If you dig up gold, it is added to your team's funds", 4000, "Base.rte/GUIs/Tutorial/Funds.png", 2, 250));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Funds can be spent in the Buy Menu", 4000, "Base.rte/GUIs/Tutorial/Funds.png", 1, 333));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Which is opened through the Command Menu", 4000, "Base.rte/GUIs/Tutorial/MenuBuyMenu.png", 1, 500));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Hold [" + PieName + "] and point up-left to 'Buy Menu'", 6000, "Base.rte/GUIs/Tutorial/MenuBuyMenu.png", 2, 500));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("The Buy Menu works like a shopping cart", 6000, "Base.rte/GUIs/Tutorial/BuyMenuCargo.png", 1, 500));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Add to the Cargo list the items you want delivered", 6000, "Base.rte/GUIs/Tutorial/BuyMenuCargo.png", 2, 500));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Then use the BUY button, or click outside the menu", 4000, "Base.rte/GUIs/Tutorial/BuyMenuBuy.png", 2, 500));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Finally select a flat area where you want the goods delivered", 8000, "Base.rte/GUIs/Tutorial/BuyMenuBuy.png", 1, 500));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Next, you can go explore to the west to try flying and climbing in the wild", 6000, "Base.rte/GUIs/Tutorial/ArrowLeft.png", 2));
+    m_TutAreaSteps[ROOFTOP].push_back(TutStep("Or, go to the east to learn about squads!", 8000, "Base.rte/GUIs/Tutorial/ArrowRight.png", 2));
 
     // ROOFEAST
     // Set up the trigger area
@@ -1135,12 +1084,12 @@ void GATutorial::SetupAreas()
     m_TextOffsets[ROOFEAST].SetXY(m_apCommonScreens[0]->w / 2, -16);
     // Set up the steps
     m_TutAreaSteps[ROOFEAST].clear();
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Hold [" + PieName + "] and point up-right to 'Form Squad'", 4000, "Base.rte/GUIs/Tutorial/MenuTeam.bmp", 2, 500));
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Adjust selection circle to select nearby bodies", 4000, "Base.rte/GUIs/Tutorial/TeamSelect.bmp", 4, 500));
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("All selected units will follow you, and engage on their own", 4000, "Base.rte/GUIs/Tutorial/TeamFollow.bmp", 2, 500));
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Units with weapons similar to the leader's will fire in unison with him.", 4000, "Base.rte/GUIs/Tutorial/TeamFollow.bmp", 2, 500));
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Hold [" + PieName + "] and point up-right again to disband squad", 4000, "Base.rte/GUIs/Tutorial/MenuTeam.bmp", 2, 500));
-    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Next, you can go to the east for a TRIAL BATTLE!", 8000, "Base.rte/GUIs/Tutorial/ArrowRight.bmp", 2));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Hold [" + PieName + "] and point up-right to 'Form Squad'", 4000, "Base.rte/GUIs/Tutorial/MenuTeam.png", 2, 500));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Adjust selection circle to select nearby bodies", 4000, "Base.rte/GUIs/Tutorial/TeamSelect.png", 4, 500));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("All selected units will follow you, and engage on their own", 4000, "Base.rte/GUIs/Tutorial/TeamFollow.png", 2, 500));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Units with weapons similar to the leader's will fire in unison with him.", 4000, "Base.rte/GUIs/Tutorial/TeamFollow.png", 2, 500));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Hold [" + PieName + "] and point up-right again to disband squad", 4000, "Base.rte/GUIs/Tutorial/MenuTeam.png", 2, 500));
+    m_TutAreaSteps[ROOFEAST].push_back(TutStep("Next, you can go to the east for a TRIAL BATTLE!", 8000, "Base.rte/GUIs/Tutorial/ArrowRight.png", 2));
 
     m_AreaTimer.Reset();
     m_StepTimer.Reset();

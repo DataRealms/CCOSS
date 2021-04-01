@@ -40,6 +40,9 @@ class SceneObject:
 
 public:
 
+	SerializableOverrideMethods
+	ClassInfoGetters
+
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Nested class:    SOPlacer
@@ -59,6 +62,9 @@ public:
 
     public:
 
+		SerializableClassNameGetter
+		SerializableOverrideMethods
+
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Constructor:     SOPlacer
@@ -69,17 +75,6 @@ public:
 
         SOPlacer() { Clear(); }
 
-/*
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Create
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Makes the SOPlacer object ready for use.
-    // Arguments:       None.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Create();
-*/
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Virtual method:  Create
@@ -89,23 +84,7 @@ public:
     // Return value:    An error return value signaling sucess or any particular failure.
     //                  Anything below 0 is an error signal.
 
-        virtual int Create(const SOPlacer &reference);
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  ReadProperty
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Reads a property value from a Reader stream. If the name isn't
-    //                  recognized by this class, then ReadProperty of the parent class
-    //                  is called. If the property isn't recognized by any of the base classes,
-    //                  false is returned, and the Reader's position is untouched.
-    // Arguments:       The name of the property to be read.
-    //                  A Reader lined up to the value of the property to be read.
-    // Return value:    An error return value signaling whether the property was successfully
-    //                  read or not. 0 means it was read successfully, and any nonzero indicates
-    //                  that a property of that name could not be found in this or base classes.
-
-        virtual int ReadProperty(std::string propName, Reader &reader);
+        int Create(const SOPlacer &reference);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -116,29 +95,7 @@ public:
     // Arguments:       None.
     // Return value:    None.
 
-        virtual void Reset() { Clear(); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Save
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Saves the complete state of this SOPlacer to an output stream for
-    //                  later recreation with Create(Reader &reader);
-    // Arguments:       A Writer that the SOPlacer will save itself with.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Save(Writer &writer) const;
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetClassName
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the class name of this Entity.
-    // Arguments:       None.
-    // Return value:    A string with the friendly-formatted type name of this object.
-
-        virtual const std::string & GetClassName() const { return m_sClassName; }
+		void Reset() override { Clear(); }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -148,7 +105,7 @@ public:
     // Arguments:       None.
     // Return value:    A pointer to the reference object to be copied and placed. Not transferred!
 
-        virtual const SceneObject * GetObjectReference() { return m_pObjectReference; }
+		const SceneObject * GetObjectReference() { return m_pObjectReference; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -229,8 +186,6 @@ public:
 
     protected:
 
-        // Member variables
-        static const std::string m_sClassName;
         // The pointer to the preset instance, that copies of which will be placed. Not Owned!
         const SceneObject *m_pObjectReference;
         // Offset placement position from owner/parent's position/origin.
@@ -248,6 +203,8 @@ public:
 
     private:
 
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
+
     //////////////////////////////////////////////////////////////////////////////////////////
     // Method:          Clear
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -260,19 +217,6 @@ public:
 
     };
 
-/* Should be in all concrete subclasses
-//////////////////////////////////////////////////////////////////////////////////////////
-// Static method:   Allocate
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Static method used in conjunction with ClassInfo to allocate an SceneObject.
-//                  This function is passed intothe constructor of this SceneObject's static
-//                  ClassInfo's constructor, so that it can instantiate Objects.
-// Arguments:       None.
-// Return value:    A pointer to the newly dynamically allocated SceneObject. Ownership is
-//                  transferred as well.
-
-    static SceneObject * Allocate();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     SceneObject
@@ -291,7 +235,7 @@ public:
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~SceneObject() { Destroy(true); }
+	~SceneObject() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -302,7 +246,7 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create() { return 0; }
+	int Create() override { return 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -313,35 +257,7 @@ public:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const SceneObject &reference);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Pure V. method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this SceneObject to an output stream for
-//                  later recreation with Create(istream &stream);
-// Arguments:       A Writer that the SceneObject will save itself to.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const = 0;
+	int Create(const SceneObject &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -352,7 +268,7 @@ public:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Entity::Reset(); }
+	void Reset() override { Clear(); Entity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -363,27 +279,7 @@ public:
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this SceneObject.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+	void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -393,7 +289,7 @@ public:
 // Arguments:       None.
 // Return value:    A Vector describing the current absolute position in pixels.
 
-    virtual const Vector & GetPos() const { return m_Pos; }
+	const Vector & GetPos() const { return m_Pos; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -403,7 +299,7 @@ public:
 // Arguments:       A Vector describing the current absolute position in pixels.
 // Return value:    None.
 
-    virtual void SetPos(const Vector &newPos) { m_Pos = newPos; }
+	void SetPos(const Vector &newPos) { m_Pos = newPos; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -445,7 +341,7 @@ public:
 // Arguments:       A bool with the new value.
 // Return value:    None.
 
-    virtual void SetHFlipped(const bool flipped) { ; }
+    virtual void SetHFlipped(const bool flipped) {}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -455,7 +351,7 @@ public:
 // Arguments:       The new absolute angle in radians.
 // Return value:    None.
 
-    virtual void SetRotAngle(float newAngle) { ; }
+    virtual void SetRotAngle(float newAngle) {}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -465,7 +361,7 @@ public:
 // Arguments:       The assigned team number.
 // Return value:    None.
 
-    virtual void SetTeam(int team) { m_Team = team; }
+	virtual void SetTeam(int team) { m_Team = team; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -475,7 +371,7 @@ public:
 // Arguments:       None.
 // Return value:    The currently assigned team number.
 
-    virtual int GetTeam() const { return m_Team; }
+	int GetTeam() const { return m_Team; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -485,7 +381,7 @@ public:
 // Arguments:       The player responsible for placing this is in the scene, if any.
 // Return value:    None.
 
-    virtual void SetPlacedByPlayer(int player) { m_PlacedByPlayer = player; }
+	void SetPlacedByPlayer(int player) { m_PlacedByPlayer = player; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -495,7 +391,7 @@ public:
 // Arguments:       None.
 // Return value:    The player responsible for placing this is in the scene, if any.
 
-    virtual int GetPlacedByPlayer() const { return m_PlacedByPlayer; }
+	int GetPlacedByPlayer() const { return m_PlacedByPlayer; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -519,7 +415,7 @@ public:
 // Arguments:       The cost, in oz of gold.
 // Return value:    None.
 
-	virtual void SetGoldValue(float value) { m_OzValue = value; } 
+	void SetGoldValue(float value) { m_OzValue = value; } 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -594,7 +490,7 @@ public:
 // Arguments:       The point in absolute scene coordinates.
 // Return value:    Whether this' graphical rep overlaps the scene point.
 
-    virtual bool IsOnScenePoint(Vector &scenePoint) const { return false; }
+    virtual bool IsOnScenePoint(Vector &scenePoint) const  { return false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -604,7 +500,7 @@ public:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update() { return; }
+	virtual void Update() { return; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -619,10 +515,7 @@ public:
 //                  like indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const { return; }
+	virtual void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const = 0;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -633,7 +526,7 @@ public:
 //                  The absolute position of the target bitmap's upper left corner in the Scene.
 // Return value:    None.
 
-	virtual void DrawTeamMark(BITMAP *pTargetBitmap, const Vector &targetPos = Vector()) const;
+	void DrawTeamMark(BITMAP *pTargetBitmap, const Vector &targetPos = Vector()) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -641,7 +534,7 @@ public:
 protected:
 
     // Forbidding copying
-    SceneObject(const SceneObject &reference) { }
+	SceneObject(const SceneObject &reference) = delete;
     SceneObject & operator=(const SceneObject &rhs) { return *this; }
 
 

@@ -1,207 +1,140 @@
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            Material.cpp
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Source file for the Material class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
 #include "Material.h"
-#include "RTETools.h"
-#include "FrameMan.h"
+#include "Constants.h"
 
 namespace RTE {
 
-ConcreteClassInfo(Material, Entity, 0)
+	ConcreteClassInfo(Material, Entity, 0)
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this Material, effectively
-//                  resetting the members of this abstraction level only.
+	void Material::Clear() {
+		m_Index = 0;
+		m_Priority = 0;
+		m_Integrity = 0.0F;
+		m_Restitution = 0.0F;
+		m_Friction = 0.0F;
+		m_Stickiness = 0.0F;	
+		m_VolumeDensity = 0.0F;
+		m_PixelDensity = 0.0F;
+		m_GibImpulseLimitPerLiter = 0.0F;
+		m_GibWoundLimitPerLiter = 0.0F;	
+		m_SettleMaterialIndex = 0;
+		m_SpawnMaterialIndex = 0;
+		m_IsScrap = false;
+		m_Color.Reset();
+		m_UseOwnColor = false;
+		m_TextureFile.Reset();
+		m_TerrainTexture = 0;
+	}
 
-void Material::Clear()
-{
-    id = 0;
-    restitution = 0;
-    friction = 0;
-    stickiness = 0;
-    strength = 0;
-    volumeDensity = 0;
-    pixelDensity = 0;
-    gibImpulseLimitPerLitre = 0;
-    gibWoundLimitPerLitre = 0;
-    priority = 0;
-    settleMaterial = 0;
-    spawnMaterial = 0;
-    isScrap = false;
-    color.Reset();
-    m_UseOwnColor = false;
-    m_TextureFile.Reset();
-    m_pTexture = 0;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int Material::Create(const Material &reference) {
+		Entity::Create(reference);
+
+		m_Index = reference.m_Index;
+		m_Priority = reference.m_Priority;
+		m_Integrity = reference.m_Integrity;
+		m_Restitution = reference.m_Restitution;
+		m_Friction = reference.m_Friction;
+		m_Stickiness = reference.m_Stickiness;
+		m_VolumeDensity = reference.m_VolumeDensity;
+		m_PixelDensity = reference.m_PixelDensity;
+		m_GibImpulseLimitPerLiter = reference.m_GibImpulseLimitPerLiter;
+		m_GibWoundLimitPerLiter = reference.m_GibWoundLimitPerLiter;
+		m_SettleMaterialIndex = reference.m_SettleMaterialIndex;
+		m_SpawnMaterialIndex = reference.m_SpawnMaterialIndex;
+		m_IsScrap = reference.m_IsScrap;
+		m_Color = reference.m_Color;
+		m_UseOwnColor = reference.m_UseOwnColor;
+		m_TextureFile = reference.m_TextureFile;
+		m_TerrainTexture = reference.m_TerrainTexture;
+
+		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int Material::ReadProperty(const std::string_view &propName, Reader &reader) {
+		if (propName == "Index") {
+			// TODO: Check for index collisions here
+			reader >> m_Index;	
+		} else if (propName == "Priority") {
+			reader >> m_Priority;
+		} else if (propName == "Integrity" || propName == "StructuralIntegrity") {
+			reader >> m_Integrity;
+		} else if (propName == "Restitution" || propName == "Bounce") {
+			reader >> m_Restitution;
+		} else if (propName == "Friction") {
+			reader >> m_Friction;
+		} else if (propName == "Stickiness") {
+			reader >> m_Stickiness;
+		} else if (propName == "DensityKGPerVolumeL") {
+			reader >> m_VolumeDensity;
+			// Overrides the pixel density
+			m_PixelDensity = m_VolumeDensity * c_LPP;
+		} else if (propName == "DensityKGPerPixel") {
+			reader >> m_PixelDensity;
+			// Overrides the volume density
+			m_VolumeDensity = m_PixelDensity * c_PPL;
+		} else if (propName == "GibImpulseLimitPerVolumeL") {
+			reader >> m_GibImpulseLimitPerLiter;
+		} else if (propName == "GibWoundLimitPerVolumeL") {
+			reader >> m_GibWoundLimitPerLiter;
+		} else if (propName == "SettleMaterial") {
+			reader >> m_SettleMaterialIndex;
+		} else if (propName == "SpawnMaterial" || propName == "TransformsInto") {
+			reader >> m_SpawnMaterialIndex;
+		} else if (propName == "IsScrap") {
+			reader >> m_IsScrap;
+		} else if (propName == "Color") {
+			reader >> m_Color;
+		} else if (propName == "UseOwnColor") {
+			reader >> m_UseOwnColor;
+		} else if (propName == "TextureFile") {
+			reader >> m_TextureFile;
+			m_TerrainTexture = m_TextureFile.GetAsBitmap();
+		} else {
+			return Entity::ReadProperty(propName, reader);
+		}
+		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int Material::Save(Writer &writer) const {
+		Entity::Save(writer);
+		// Materials should never be altered, so no point in saving additional properties when it's a copy
+		if (m_IsOriginalPreset) {
+			writer.NewProperty("Priority");
+			writer << m_Priority;
+			writer.NewProperty("StructuralIntegrity");
+			writer << m_Integrity;
+			writer.NewProperty("Restitution");
+			writer << m_Restitution;
+			writer.NewProperty("Friction");
+			writer << m_Friction;
+			writer.NewProperty("Stickiness");
+			writer << m_Stickiness;
+			writer.NewProperty("DensityKGPerVolumeL");
+			writer << m_VolumeDensity;
+			writer.NewProperty("GibImpulseLimitPerVolumeL");
+			writer << m_GibImpulseLimitPerLiter;
+			writer.NewProperty("GibWoundLimitPerVolumeL");
+			writer << m_GibWoundLimitPerLiter;
+			writer.NewProperty("SettleMaterial");
+			writer << m_SettleMaterialIndex;
+			writer.NewProperty("SpawnMaterial");
+			writer << m_SpawnMaterialIndex;
+			writer.NewProperty("IsScrap");
+			writer << m_IsScrap;
+			writer.NewProperty("Color");
+			writer << m_Color;
+			writer.NewProperty("UseOwnColor");
+			writer << m_UseOwnColor;
+			writer.NewProperty("TextureFile");
+			writer << m_TextureFile;
+		}
+		return 0;
+	}
 }
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the Material object ready for use.
-
-int Material::Create()
-{
-    // Read all the properties
-    if (Entity::Create() < 0)
-        return -1;
-
-    return 0;
-}
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a Arm to be identical to another, by deep copy.
-
-int Material::Create(const Material &reference)
-{
-    Entity::Create(reference);
-
-    id = reference.id;
-    restitution = reference.restitution;
-    friction = reference.friction;
-    stickiness = reference.stickiness;
-    strength = reference.strength;
-    volumeDensity = reference.volumeDensity;
-    pixelDensity = reference.pixelDensity;
-    gibImpulseLimitPerLitre = reference.gibImpulseLimitPerLitre;
-    gibWoundLimitPerLitre = reference.gibWoundLimitPerLitre;
-    priority = reference.priority;
-    settleMaterial = reference.settleMaterial;
-    spawnMaterial = reference.spawnMaterial;
-    isScrap = reference.isScrap;
-    color = reference.color;
-    m_UseOwnColor = reference.m_UseOwnColor;
-    m_TextureFile = reference.m_TextureFile;
-    m_pTexture = reference.m_pTexture;
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the reader's position is untouched.
-
-int Material::ReadProperty(std::string propName, Reader &reader)
-{
-    if (propName == "Index")
-    {
-        reader >> id;
-// TODO: Check for collisions here
-    }
-    else if (propName == "Restitution" || propName == "Bounce")
-        reader >> restitution;
-    else if (propName == "Friction")
-        reader >> friction;
-    else if (propName == "Stickiness")
-        reader >> stickiness;
-    else if (propName == "Strength" || propName == "StructuralIntegrity")
-        reader >> strength;
-    else if (propName == "DensityKGPerVolumeL")
-    {
-        reader >> volumeDensity;
-        // Overrides the pixeldensity
-        pixelDensity = volumeDensity * g_FrameMan.GetLPP();
-    }
-    else if (propName == "DensityKGPerPixel")
-    {
-        reader >> pixelDensity;
-        // Overrides the volumedensity
-        volumeDensity = pixelDensity * g_FrameMan.GetPPL();
-    }
-    else if (propName == "GibImpulseLimitPerVolumeL")
-        reader >> gibImpulseLimitPerLitre;
-    else if (propName == "GibWoundLimitPerVolumeL")
-        reader >> gibWoundLimitPerLitre;
-    else if (propName == "Priority")
-        reader >> priority;
-    else if (propName == "SettleMaterial")
-        reader >> settleMaterial;
-    else if (propName == "SpawnMaterial" || propName == "TransformsInto")
-        reader >> spawnMaterial;
-    else if (propName == "IsScrap")
-        reader >> isScrap;
-    else if (propName == "Color")
-        reader >> color;
-    else if (propName == "UseOwnColor")
-        reader >> m_UseOwnColor;
-    else if (propName == "TextureFile")
-    {
-        reader >> m_TextureFile;
-        m_pTexture = m_TextureFile.GetAsBitmap();
-    }
-    else
-        // See if the base class(es) can find a match instead
-        return Entity::ReadProperty(propName, reader);
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this Material with a Writer for
-//                  later recreation with Create(Reader &reader);
-
-int Material::Save(Writer &writer) const
-{
-    Entity::Save(writer);
-
-    // Materials should never be altered, so no point in saving additional properties when it's a copy
-    if (m_IsOriginalPreset)
-    {
-        writer.NewProperty("Restitution");
-        writer << restitution;
-        writer.NewProperty("Friction");
-        writer << friction;
-        writer.NewProperty("Stickiness");
-        writer << stickiness;
-        writer.NewProperty("StructuralIntegrity");
-        writer << strength;
-        writer.NewProperty("DensityKGPerVolumeL");
-        writer << volumeDensity;
-        writer.NewProperty("GibImpulseLimitPerVolumeL");
-        writer << gibImpulseLimitPerLitre;
-        writer.NewProperty("GibWoundLimitPerVolumeL");
-        writer << gibWoundLimitPerLitre;
-        writer.NewProperty("Priority");
-        writer << priority;
-        writer.NewProperty("SettleMaterial");
-        writer << settleMaterial;
-        writer.NewProperty("SpawnMaterial");
-        writer << spawnMaterial;
-        writer.NewProperty("IsScrap");
-        writer << isScrap;
-        writer.NewProperty("Color");
-        writer << color;
-        writer.NewProperty("UseOwnColor");
-        writer << m_UseOwnColor;
-        writer.NewProperty("TextureFile");
-        writer << m_TextureFile;
-    }
-
-    return 0;
-}
-
-} // namespace RTE

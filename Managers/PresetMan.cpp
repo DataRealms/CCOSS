@@ -7,6 +7,9 @@
 //                  data@datarealms.com
 //                  http://www.datarealms.com
 
+// Suppress compiler warning about unrecognized escape sequence on line 183
+#pragma warning( disable : 4129 )
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
@@ -28,9 +31,6 @@
 
 namespace RTE {
 
-const string PresetMan::m_ClassName = "PresetMan";
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -43,31 +43,6 @@ void PresetMan::Clear()
     m_DataModuleIDs.clear();
     m_OfficialModuleCount = 0;
     m_TotalGroupRegister.clear();
-}
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the PresetMan entity ready for use.
-
-int PresetMan::Create()
-{
-
-    return 0;
-}
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the PresetMan entity ready for use.
-
-int PresetMan::Create()
-{
-    
-
-    return 0;
 }
 
 /*
@@ -163,7 +138,7 @@ bool PresetMan::LoadDataModule(string moduleName, bool official, ProgressCallbac
 
         // Add the name to ID mapping - note that official modules can't be loaded after any non-official ones!
         // Adding the lowercase name version so we can more easily find with case-agnostic search
-		m_DataModuleIDs.insert(pair<string, int>(lowercaseName, m_pDataModules.size() - 1));
+		m_DataModuleIDs.insert(pair<string, size_t>(lowercaseName, m_pDataModules.size() - 1));
     }
 
     // Now actually create it
@@ -181,44 +156,52 @@ bool PresetMan::LoadDataModule(string moduleName, bool official, ProgressCallbac
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool PresetMan::LoadAllDataModules() {
-	// Load all the official modules first!
-	if (!LoadDataModule("Base.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	auto moduleLoadTimerStart = std::chrono::high_resolution_clock::now();
 
-	if (!LoadDataModule("Coalition.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Imperatus.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Techion.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Dummy.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Ronin.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Browncoats.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Uzira.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("MuIlaak.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!LoadDataModule("Missions.rte", true, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
+	// Destroy any possible loaded modules
+	Destroy();
+
+	FindAndExtractZippedModules();
+
+	// Load all the official modules first!
+	std::array<std::string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
+	for (const std::string &officialModule : officialModules) {
+		if (!LoadDataModule(officialModule, true, &LoadingGUI::LoadingSplashProgressReport)) {
+			return false;
+		}
+	}
 
 	// If a single module is specified, skip loading all other unofficial modules and load specified module only.
-	if (m_SingleModuleToLoad != "Base.rte" && m_SingleModuleToLoad != "") {
-		if (!LoadDataModule(m_SingleModuleToLoad, false, &LoadingGUI::LoadingSplashProgressReport)) { return false; } else { return true; }
+	if (!m_SingleModuleToLoad.empty() && std::find(officialModules.begin(), officialModules.end(), m_SingleModuleToLoad) == officialModules.end()) {
+		if (!LoadDataModule(m_SingleModuleToLoad, false, &LoadingGUI::LoadingSplashProgressReport)) {
+			g_ConsoleMan.PrintString("ERROR: Failed to load DataModule \"" + m_SingleModuleToLoad + "\"! Only official modules were loaded!");
+			return false;
+		}
 	} else {
-		al_ffblk moduleInfo;
-		int moduleID = 0;
-
-		for (int result = al_findfirst("*.rte", &moduleInfo, FA_DIREC | FA_RDONLY); result == 0; result = al_findnext(&moduleInfo)) {
-			if (!g_SettingsMan.IsModDisabled(moduleInfo.name)) {
-				moduleID = GetModuleID(moduleInfo.name);
-				// Make sure we don't load properties of already loaded official modules
-				if (strlen(moduleInfo.name) > 0 && (moduleID < 0 || moduleID >= GetOfficialModuleCount()) && string(moduleInfo.name) != "Metagames.rte" && string(moduleInfo.name) != "Scenes.rte") {
+		for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory())) {
+			std::string directoryEntryPath = directoryEntry.path().generic_string();
+			if (std::filesystem::is_directory(directoryEntryPath) && std::regex_match(directoryEntryPath, std::regex(".*\.rte"))) {
+				std::string moduleName = directoryEntryPath.substr(directoryEntryPath.find_last_of('/') + 1, std::string::npos);
+				if (!g_SettingsMan.IsModDisabled(moduleName) && (std::find(officialModules.begin(), officialModules.end(), moduleName) == officialModules.end() && moduleName != "Metagames.rte" && moduleName != "Scenes.rte")) {
+					int moduleID = GetModuleID(moduleName);
 					// NOTE: LoadDataModule can return false (especially since it may try to load already loaded modules, which is okay) and shouldn't cause stop, so we can ignore its return value here.
-                    LoadDataModule(string(moduleInfo.name), false, &LoadingGUI::LoadingSplashProgressReport);
+					if (moduleID < 0 || moduleID >= GetOfficialModuleCount()) { LoadDataModule(moduleName, false, &LoadingGUI::LoadingSplashProgressReport); }
 				}
 			}
 		}
-		// Close the file search to avoid memory leaks
-		al_findclose(&moduleInfo);
+		// Load scenes and MetaGames AFTER all other techs etc are loaded; might be referring to stuff in user mods.
+		if (!LoadDataModule("Scenes.rte", false, &LoadingGUI::LoadingSplashProgressReport)) {
+			return false;
+		}
+		if (!LoadDataModule("Metagames.rte", false, &LoadingGUI::LoadingSplashProgressReport)) {
+			return false;
+		}
 	}
 
-	// Load scenes and MetaGames AFTER all other techs etc are loaded; might be referring to stuff in user mods
-	if (!g_PresetMan.LoadDataModule("Scenes.rte", false, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-	if (!g_PresetMan.LoadDataModule("Metagames.rte", false, &LoadingGUI::LoadingSplashProgressReport)) { return false; }
-
+	if (g_SettingsMan.MeasureModuleLoadTime()) {
+		std::chrono::milliseconds moduleLoadElapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - moduleLoadTimerStart);
+		g_ConsoleMan.PrintString("Module load duration is: " + std::to_string(moduleLoadElapsedTime.count()) + "ms");
+	}
 	return true;
 }
 
@@ -258,7 +241,7 @@ int PresetMan::GetModuleID(string moduleName)
     std::transform(moduleName.begin(), moduleName.end(), moduleName.begin(), ::tolower);
 
     // First pass
-    map<string, int>::iterator itr = m_DataModuleIDs.find(moduleName);
+    map<string, size_t>::iterator itr = m_DataModuleIDs.find(moduleName);
     if (itr != m_DataModuleIDs.end())
         return (*itr).second;
 
@@ -266,7 +249,7 @@ int PresetMan::GetModuleID(string moduleName)
     int dotPos = moduleName.find_last_of('.');
     // Wasnt, so try adding it
     if (dotPos == string::npos)
-        moduleName = moduleName + g_WritePackageExtension;
+        moduleName = moduleName + System::GetModulePackageExtension();
     // There was ".rte", so try to shave it off the name
     else
         moduleName = moduleName.substr(0, dotPos);
@@ -289,7 +272,7 @@ int PresetMan::GetModuleID(string moduleName)
     dotPos = moduleName.find_last_of('.');
     // Wasnt, so try adding it
     if (dotPos == string::npos)
-        moduleName = moduleName + g_WritePackageExtension;
+        moduleName = moduleName + System::GetModulePackageExtension();
     // There was ".rte", so try to shave it off the name
     else
         moduleName = moduleName.substr(0, dotPos);
@@ -421,7 +404,7 @@ const Entity * PresetMan::GetEntityPreset(Reader &reader)
 		{
 			// Abort loading if we can't create entity and it's not in Scenes.rte
 			if (!g_PresetMan.GetDataModule(whichModule)->GetIgnoreMissingItems())
-				RTEAbort("Reading of a preset instance \"" + pNewInstance->GetPresetName() + "\" of class " + pNewInstance->GetClassName() + " failed in file " + reader.GetCurrentFilePath() + ", shortly before line #" + reader.GetCurrentFileLineString());
+				RTEAbort("Reading of a preset instance \"" + pNewInstance->GetPresetName() + "\" of class " + pNewInstance->GetClassName() + " failed in file " + reader.GetCurrentFilePath() + ", shortly before line #" + reader.GetCurrentFileLine());
 		}
 		else if (pNewInstance)
 		{
@@ -480,7 +463,7 @@ Entity * PresetMan::ReadReflectedPreset(Reader &reader)
         if (pNewInstance && pNewInstance->Create(reader, false) < 0)
 		{
 			if (!g_PresetMan.GetDataModule(whichModule)->GetIgnoreMissingItems())
-	            RTEAbort("Reading of a preset instance \"" + pNewInstance->GetPresetName() + "\" of class " + pNewInstance->GetClassName() + " failed in file " + reader.GetCurrentFilePath() + ", shortly before line #" + reader.GetCurrentFileLineString());
+	            RTEAbort("Reading of a preset instance \"" + pNewInstance->GetPresetName() + "\" of class " + pNewInstance->GetClassName() + " failed in file " + reader.GetCurrentFilePath() + ", shortly before line #" + reader.GetCurrentFileLine());
 		}
 		else
 		{
@@ -622,7 +605,7 @@ Entity * PresetMan::GetRandomOfGroup(string group, string type, int whichModule)
 
     // Pick one and return it
     int current = 0;
-    int selection = SelectRand(0, entityList.size() - 1);
+    int selection = RandomNum<int>(0, entityList.size() - 1);
     for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
     {
         if (current == selection)
@@ -710,7 +693,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 
     // Pick one and return it
     int current = 0;
-    int selection = SelectRand(0, entityList.size() - 1);
+    int selection = RandomNum<int>(0, entityList.size() - 1);
 
 	int totalWeight = 0;
 	for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
@@ -722,7 +705,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 		if (totalWeight == 0)
 			return 0;
 
-		selection = SelectRand(0, totalWeight - 1);
+		selection = RandomNum(0, totalWeight - 1);
 
 		for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
 		{
@@ -829,7 +812,7 @@ Entity * PresetMan::GetRandomOfGroupInModuleSpace(string group, string type, int
 
     // Pick one and return it
     int current = 0;
-    int selection = SelectRand(0, entityList.size() - 1);
+    int selection = RandomNum<int>(0, entityList.size() - 1);
     for (list<Entity *>::iterator itr = entityList.begin(); itr != entityList.end(); ++itr)
     {
         if (current == selection)
@@ -1087,6 +1070,16 @@ Actor * PresetMan::GetLoadout(std::string loadoutName, int moduleNumber, bool sp
 	return 0;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void PresetMan::FindAndExtractZippedModules() const {
+	for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory())) {
+		std::string zippedModulePath = std::filesystem::path(directoryEntry).generic_string();
+		if (zippedModulePath.find(System::GetZippedModulePackageExtension()) == zippedModulePath.length() - System::GetZippedModulePackageExtension().length()) {
+			LoadingGUI::LoadingSplashProgressReport("Extracting Data Module from: " + directoryEntry.path().filename().generic_string(), true);
+			LoadingGUI::LoadingSplashProgressReport(System::ExtractZippedDataModule(zippedModulePath), true);
+		}
+	}
+}
 
 } // namespace RTE

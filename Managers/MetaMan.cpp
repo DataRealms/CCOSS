@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "MetaMan.h"
+#include "MetaSave.h"
 #include "PresetMan.h"
 #include "UInputMan.h"
 #include "ConsoleMan.h"
@@ -27,12 +28,10 @@
 
 extern bool g_ResetActivity;
 extern bool g_ResumeActivity;
-extern bool g_InActivity;
 
 namespace RTE {
 
-const string MetaMan::m_ClassName = "MetaMan";
-ConcreteClassInfo(MetaSave, Entity, 0)
+const string MetaMan::c_ClassName = "MetaMan";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -51,7 +50,7 @@ void MetaMan::Clear()
     m_GameName = DEFAULTGAMENAME;
     m_Players.clear();
     m_TeamCount = 0;
-    for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+    for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
         m_TeamIcons[team].Reset();
     m_CurrentRound = 0;
     m_Scenes.clear();
@@ -61,10 +60,10 @@ void MetaMan::Clear()
     m_RoundOffensives.clear();
     m_CurrentOffensive = 0;
     m_PhaseTimer.Reset();
-	m_Difficulty = GameActivity::MEDIUMDIFFICULTY;
+	m_Difficulty = Activity::MediumDifficulty;
 
-	for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; team++)
-		m_TeamAISkill[team] = Activity::DEFAULTSKILL;
+	for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; team++)
+		m_TeamAISkill[team] = Activity::DefaultSkill;
 }
 
 
@@ -73,7 +72,7 @@ void MetaMan::Clear()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes the MetaMan object ready for use.
 
-int MetaMan::Create()
+int MetaMan::Initialize()
 {
 //    if (Serializable::Create() < 0)
 //        return -1;
@@ -91,11 +90,11 @@ int MetaMan::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Wipes any current and sets up a new game based on a size parameter.
 
-int MetaMan::NewGame(float gameSize)
+int MetaMan::NewGame(int gameSize)
 {
     // Grab a random selection of Scene presets from all available
     list<Scene *> scenePresets;
-    SelectScenePresets(gameSize, m_Players.size(), &scenePresets);
+    SelectScenePresets(gameSize, &scenePresets);
 
     // Destroy and clear any pre-existing scenes from previous games
     for (vector<Scene *>::iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
@@ -128,7 +127,7 @@ int MetaMan::NewGame(float gameSize)
 			}
 		}
 		// Finally select some random metascene
-		int selection = SelectRand(0, metascenesList.size() - 1);
+		int selection = RandomNum<int>(0, metascenesList.size() - 1);
 		Scene * pSelectedScene = metascenesList.at(selection);
 
 		//Copy selected scene
@@ -153,7 +152,7 @@ int MetaMan::NewGame(float gameSize)
         // Make them unique presets in their own Data Module so they don't get referenced from the original presets they were made from
         m_Scenes.back()->MigrateToModule(g_PresetMan.GetModuleID(METASAVEMODULENAME));
         // Make them unexplored by all teams
-        for (int team = Activity::TEAM_1; team < m_TeamCount; ++team)
+        for (int team = Activity::TeamOne; team < m_TeamCount; ++team)
             m_Scenes.back()->FillUnseenLayer(Vector(25, 25), team, false);
 
 		//	Go through all AI plan elements and expand all bunker schemes to concrete assemblies 
@@ -231,12 +230,12 @@ int MetaMan::Load(const MetaSave *pSave)
         return -1;
 
 	// Reset Metaman's AI skill in case those won't be loaded from older saves
-	for (int team = Activity::TEAM_1 ; team < Activity::MAXTEAMCOUNT; team++)
-		m_TeamAISkill[team] = Activity::DEFAULTSKILL;
+	for (int team = Activity::TeamOne ; team < Activity::MaxTeamCount; team++)
+		m_TeamAISkill[team] = Activity::DefaultSkill;
 
     // Create the reader to read the metagame state from
     Reader reader(pSave->GetSavePath().c_str(), false, 0, false);
-    if (!reader.IsOK())
+    if (!reader.ReaderOK())
         return -1;
 
     // Clear off players, scenes, and offensive activiies before filling up on new ones read from disk
@@ -266,7 +265,7 @@ int MetaMan::Load(const MetaSave *pSave)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the Reader's position is untouched.
 
-int MetaMan::ReadProperty(string propName, Reader &reader)
+int MetaMan::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "GameState")
         reader >> m_GameState;
@@ -281,13 +280,13 @@ int MetaMan::ReadProperty(string propName, Reader &reader)
     else if (propName == "TeamCount")
         reader >> m_TeamCount;
     else if (propName == "Team1Icon")
-        reader >> m_TeamIcons[Activity::TEAM_1];
+        reader >> m_TeamIcons[Activity::TeamOne];
     else if (propName == "Team2Icon")
-        reader >> m_TeamIcons[Activity::TEAM_2];
+        reader >> m_TeamIcons[Activity::TeamTwo];
     else if (propName == "Team3Icon")
-        reader >> m_TeamIcons[Activity::TEAM_3];
+        reader >> m_TeamIcons[Activity::TeamThree];
     else if (propName == "Team4Icon")
-        reader >> m_TeamIcons[Activity::TEAM_4];
+        reader >> m_TeamIcons[Activity::TeamFour];
     else if (propName == "CurrentRound")
         reader >> m_CurrentRound;
     else if(propName == "AddScene")
@@ -313,17 +312,16 @@ int MetaMan::ReadProperty(string propName, Reader &reader)
     else if (propName == "Difficulty")
         reader >> m_Difficulty;
     else if (propName == "Team1AISkill")
-		reader >> m_TeamAISkill[Activity::TEAM_1];
+		reader >> m_TeamAISkill[Activity::TeamOne];
     else if (propName == "Team2AISkill")
-		reader >> m_TeamAISkill[Activity::TEAM_2];
+		reader >> m_TeamAISkill[Activity::TeamTwo];
     else if (propName == "Team3AISkill")
-		reader >> m_TeamAISkill[Activity::TEAM_3];
+		reader >> m_TeamAISkill[Activity::TeamThree];
     else if (propName == "Team4AISkill")
-		reader >> m_TeamAISkill[Activity::TEAM_4];
+		reader >> m_TeamAISkill[Activity::TeamFour];
     else if (propName == "MetaGUI")
         reader >> m_pMetaGUI;
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -336,79 +334,61 @@ int MetaMan::ReadProperty(string propName, Reader &reader)
 // Description:     Saves the complete state of this MetaMan to an output stream for
 //                  later recreation with Create(Reader &reader);
 
-int MetaMan::Save(Writer &writer) const
-{
-    Serializable::Save(writer);
+int MetaMan::Save(Writer &writer) const {
+	Serializable::Save(writer);
 
-    writer.NewProperty("GameState");
-    writer << m_GameState;
-    writer.NewProperty("GameName");
-    writer << m_GameName;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-	writer.NewProperty("Team1AISkill");
-	writer << m_TeamAISkill[Activity::TEAM_1];
-	writer.NewProperty("Team2AISkill");
-	writer << m_TeamAISkill[Activity::TEAM_2];
-	writer.NewProperty("Team3AISkill");
-	writer << m_TeamAISkill[Activity::TEAM_3];
-	writer.NewProperty("Team4AISkill");
-	writer << m_TeamAISkill[Activity::TEAM_4];
-    for (vector<MetaPlayer>::const_iterator tItr = m_Players.begin(); tItr != m_Players.end(); ++tItr)
-    {
-        writer.NewProperty("AddPlayer");
-        writer << (*tItr);
-    }
-    writer.NewProperty("TeamCount");
-    writer << m_TeamCount;
-    if (m_TeamCount >= 1)
-    {
-        writer.NewProperty("Team1Icon");
-        m_TeamIcons[Activity::TEAM_1].SavePresetCopy(writer);
-    }
-    if (m_TeamCount >= 2)
-    {
-        writer.NewProperty("Team2Icon");
-        m_TeamIcons[Activity::TEAM_2].SavePresetCopy(writer);
-    }
-    if (m_TeamCount >= 3)
-    {
-        writer.NewProperty("Team3Icon");
-        m_TeamIcons[Activity::TEAM_3].SavePresetCopy(writer);
-    }
-    if (m_TeamCount >= 4)
-    {
-        writer.NewProperty("Team4Icon");
-        m_TeamIcons[Activity::TEAM_4].SavePresetCopy(writer);
-    }
-    writer.NewProperty("CurrentRound");
-    writer << m_CurrentRound;
-    for (vector<Scene *>::const_iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
-    {
-        // Save the scene data to a good unique prefix for the Scene's layers' bitmap files as they are saved
-// This should be handled separately from any .ini writing
-//        (*sItr)->SaveData(writer.GetFolderPath() + m_GameName + " - " + (*sItr)->GetPresetName());
-        writer.NewProperty("AddScene");
-        writer << (*sItr);
-    }
-    writer.NewProperty("RevealedScenes");
-    writer << m_RevealedScenes;
-    writer.NewProperty("RevealRate");
-    writer << m_RevealRate;
-    writer.NewProperty("RevealExtra");
-    writer << m_RevealExtra;
-    for (vector<GAScripted *>::const_iterator aItr = m_RoundOffensives.begin(); aItr != m_RoundOffensives.end(); ++aItr)
-    {
-        writer.NewProperty("AddOffensive");
-        writer << (*aItr);
-    }
-    writer.NewProperty("CurrentOffensive");
-    writer << m_CurrentOffensive;
+	writer.NewPropertyWithValue("GameState", m_GameState);
+	writer.NewPropertyWithValue("GameName", m_GameName);
+	writer.NewPropertyWithValue("Difficulty", m_Difficulty);
+	writer.NewPropertyWithValue("Team1AISkill", m_TeamAISkill[Activity::TeamOne]);
+	writer.NewPropertyWithValue("Team2AISkill", m_TeamAISkill[Activity::TeamTwo]);
+	writer.NewPropertyWithValue("Team3AISkill", m_TeamAISkill[Activity::TeamThree]);
+	writer.NewPropertyWithValue("Team4AISkill", m_TeamAISkill[Activity::TeamFour]);
 
-    writer.NewProperty("MetaGUI");
-    writer << m_pMetaGUI;
+	for (const MetaPlayer &metaPlayer : m_Players) {
+		writer.NewPropertyWithValue("AddPlayer", metaPlayer);
+	}
 
-    return 0;
+	writer.NewPropertyWithValue("TeamCount", m_TeamCount);
+
+	if (m_TeamCount >= 1) {
+		writer.NewProperty("Team1Icon");
+		m_TeamIcons[Activity::TeamOne].SavePresetCopy(writer);
+	}
+	if (m_TeamCount >= 2) {
+		writer.NewProperty("Team2Icon");
+		m_TeamIcons[Activity::TeamTwo].SavePresetCopy(writer);
+	}
+	if (m_TeamCount >= 3) {
+		writer.NewProperty("Team3Icon");
+		m_TeamIcons[Activity::TeamThree].SavePresetCopy(writer);
+	}
+	if (m_TeamCount >= 4) {
+		writer.NewProperty("Team4Icon");
+		m_TeamIcons[Activity::TeamFour].SavePresetCopy(writer);
+	}
+
+	writer.NewPropertyWithValue("CurrentRound", m_CurrentRound);
+
+	for (const Scene *metaScene : m_Scenes) {
+		// Save the scene data to a good unique prefix for the Scene's layers' bitmap files as they are saved
+		// This should be handled separately from any .ini writing
+		//(*sItr)->SaveData(writer.GetFolderPath() + m_GameName + " - " + (*sItr)->GetPresetName());
+		writer.NewPropertyWithValue("AddScene", metaScene);
+	}
+
+	writer.NewPropertyWithValue("RevealedScenes", m_RevealedScenes);
+	writer.NewPropertyWithValue("RevealRate", m_RevealRate);
+	writer.NewPropertyWithValue("RevealExtra", m_RevealExtra);
+
+	for (const GAScripted *metaOffensive : m_RoundOffensives) {
+		writer.NewPropertyWithValue("AddOffensive", metaOffensive);
+	}
+
+	writer.NewPropertyWithValue("CurrentOffensive", m_CurrentOffensive);
+	writer.NewPropertyWithValue("MetaGUI", m_pMetaGUI);
+
+	return 0;
 }
 
 
@@ -478,7 +458,7 @@ int MetaMan::ClearSceneData()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Destroys and resets (through Clear()) the MetaMan object.
 
-void MetaMan::Destroy(bool notInherited)
+void MetaMan::Destroy()
 {
     delete m_pMetaGUI;
 
@@ -500,10 +480,10 @@ int MetaMan::GetPlayerTurn() const
 {
     // Player 1's turn is coming up on this round
     if (g_MetaMan.m_GameState <= PLAYER1TURN)
-        return Activity::PLAYER_1;
+        return Players::PlayerOne;
     // we're past the player turns on this round, so player 1 is up next again
     else if ((g_MetaMan.m_GameState - PLAYER1TURN) > (m_Players.size() - 1))
-        return Activity::PLAYER_1;
+        return Players::PlayerOne;
 
     // Return whos player's turn it is
     return g_MetaMan.m_GameState - PLAYER1TURN;
@@ -548,7 +528,7 @@ const Scene * MetaMan::GetNextSceneOfPlayer(int player, const Scene *pStartScene
     for (vector<Scene *>::const_iterator sItr = g_MetaMan.m_Scenes.begin(); sItr != g_MetaMan.m_Scenes.end(); ++sItr)
     {
         // Don't search beyond what has been revealed already
-        if (scenesSearched >= floorf(m_RevealedScenes))
+        if (scenesSearched >= std::floor(m_RevealedScenes))
             break;
 
         // Find the place where to start the actual search for the next owned Scene from
@@ -579,7 +559,7 @@ const Scene * MetaMan::GetNextSceneOfPlayer(int player, const Scene *pStartScene
 
 int MetaMan::GetTotalBrainCountOfPlayer(int metaPlayer, bool countPoolsOnly) const
 {
-    if (metaPlayer <= Activity::NOPLAYER || metaPlayer >= Activity::MAXPLAYERCOUNT)
+    if (metaPlayer <= Players::NoPlayer || metaPlayer >= Players::MaxPlayerCount)
         return 0;
 
     // Count the pool first
@@ -608,12 +588,12 @@ int MetaMan::GetTotalBrainCountOfPlayer(int metaPlayer, bool countPoolsOnly) con
 
 int MetaMan::GetGoldCountOfTeam(int team) const
 {
-    if (team <= Activity::NOTEAM || team >= m_TeamCount)
+    if (team <= Activity::NoTeam || team >= m_TeamCount)
         return 0;
 
     float goldTotal = 0;
     // Go through all players and add up the funds of all who belong to this team
-    for (int metaPlayer = Activity::PLAYER_1; metaPlayer < m_Players.size(); ++metaPlayer)
+    for (int metaPlayer = Players::PlayerOne; metaPlayer < m_Players.size(); ++metaPlayer)
     {
         if (m_Players[metaPlayer].GetTeam() == team)
             goldTotal += m_Players[metaPlayer].GetFunds();
@@ -630,7 +610,7 @@ int MetaMan::GetGoldCountOfTeam(int team) const
 
 int MetaMan::GetSceneCountOfTeam(int team) const
 {
-    if (team <= Activity::NOTEAM || team >= m_TeamCount)
+    if (team <= Activity::NoTeam || team >= m_TeamCount)
         return 0;
 
     // Go through all scenes and add up all the ones owned by this team
@@ -654,13 +634,13 @@ int MetaMan::GetSceneCountOfTeam(int team) const
 
 int MetaMan::GetTotalBrainCountOfTeam(int team, bool countPoolsOnly) const
 {
-    if (team <= Activity::NOTEAM || team >= m_TeamCount)
+    if (team <= Activity::NoTeam || team >= m_TeamCount)
         return 0;
 
     // Go through all players and add up the brains of the ones who are on this team 
     int brainCount = 0;
 
-    for (int metaPlayer = Activity::PLAYER_1; metaPlayer < m_Players.size(); ++metaPlayer)
+    for (int metaPlayer = Players::PlayerOne; metaPlayer < m_Players.size(); ++metaPlayer)
     {
         if (m_Players[metaPlayer].GetTeam() == team)
             brainCount += GetTotalBrainCountOfPlayer(metaPlayer, countPoolsOnly);
@@ -680,8 +660,8 @@ int MetaMan::OnlyTeamWithAnyBrainPoolLeft()
 {
     // See if only one team remains with any brains
     int brainTeamCount = 0;
-    int brainTeam = Activity::NOTEAM;
-    for (int t = Activity::TEAM_1; t < m_TeamCount; ++t)
+    int brainTeam = Activity::NoTeam;
+    for (int t = Activity::TeamOne; t < m_TeamCount; ++t)
     {
         // Only count brains in pools; not resident ones also
         if (GetTotalBrainCountOfTeam(t, true) > 0)
@@ -696,7 +676,7 @@ int MetaMan::OnlyTeamWithAnyBrainPoolLeft()
         return brainTeam;
 
     // None OR more than two teams are left with brains!
-    return Activity::NOTEAM;
+    return Activity::NoTeam;
 }
 
 /*
@@ -710,8 +690,8 @@ bool MetaMan::OneOrNoneTeamsLeft()
 {
     // See if only one team remains with any brains
     int brainTeamCount = 0;
-    int brainTeam = Activity::NOTEAM;
-    for (int t = Activity::TEAM_1; t < m_TeamCount; ++t)
+    int brainTeam = Activity::NoTeam;
+    for (int t = Activity::TeamOne; t < m_TeamCount; ++t)
     {
         // Any brains left on this team? If so, they're a potential winner
         if (GetTotalBrainCountOfTeam(t) > 0)
@@ -722,7 +702,7 @@ bool MetaMan::OneOrNoneTeamsLeft()
     }
 
     // If less than two teams left with any brains, they get indicated
-    // Also, if NO teams with brain are left, that is indicated with NOTEAM
+    // Also, if NO teams with brain are left, that is indicated with NoTeam
     if (brainTeamCount <= 1)
         return true;
 
@@ -738,12 +718,12 @@ bool MetaMan::OneOrNoneTeamsLeft()
 
 int MetaMan::WhichTeamLeft()
 {
-    int whichTeam = Activity::NOTEAM;
+    int whichTeam = Activity::NoTeam;
 
     // See if only one team remains with any brains
     int brainTeamCount = 0;
-    int brainTeam = Activity::NOTEAM;
-    for (int t = Activity::TEAM_1; t < m_TeamCount; ++t)
+    int brainTeam = Activity::NoTeam;
+    for (int t = Activity::TeamOne; t < m_TeamCount; ++t)
     {
         if (GetTotalBrainCountOfTeam(t) > 0)
         {
@@ -757,7 +737,7 @@ int MetaMan::WhichTeamLeft()
         return brainTeam;
 
     // No team is left with brains!
-    return Activity::NOTEAM;
+    return Activity::NoTeam;
 }
 */
 
@@ -787,9 +767,9 @@ bool MetaMan::NoBrainsLeftInAnyPool()
 
 int MetaMan::WhichTeamIsLeading()
 {
-    int leaderTeam = Activity::NOTEAM;
-    bool tiedTeams[Activity::MAXTEAMCOUNT];
-    for (int t = Activity::TEAM_1; t < m_TeamCount; ++t)
+    int leaderTeam = Activity::NoTeam;
+    bool tiedTeams[Activity::MaxTeamCount];
+    for (int t = Activity::TeamOne; t < m_TeamCount; ++t)
         tiedTeams[t] = false;
 
     int baseCount = 0;
@@ -797,14 +777,14 @@ int MetaMan::WhichTeamIsLeading()
     bool baseCountTie = false;
     // This is the record so far; negative so the first team with 0 won't detect as tied
     int highestBaseCount = -1;
-    for (int team = Activity::TEAM_1; team < m_TeamCount; ++team)
+    for (int team = Activity::TeamOne; team < m_TeamCount; ++team)
     {
         baseCount = GetSceneCountOfTeam(team);
         // We have a tie!
         if (baseCount == highestBaseCount)
         {
             // No leader - there's a tie
-            leaderTeam = Activity::NOTEAM;
+            leaderTeam = Activity::NoTeam;
             tiedTeams[team] = true;
             baseCountTie = true;  
         }
@@ -815,7 +795,7 @@ int MetaMan::WhichTeamIsLeading()
             leaderTeam = team;
             highestBaseCount = baseCount;
             // No more tie
-            for (int t = Activity::TEAM_1; t < m_TeamCount; ++t)
+            for (int t = Activity::TeamOne; t < m_TeamCount; ++t)
                 tiedTeams[t] = false;
             // This team is now tied with itself (ie not tied)
             tiedTeams[team] = true;
@@ -829,7 +809,7 @@ int MetaMan::WhichTeamIsLeading()
     {
         float highestGold = 0;
         // Go through all tied teams
-        for (int team = Activity::TEAM_1; team < m_TeamCount; ++team)
+        for (int team = Activity::TeamOne; team < m_TeamCount; ++team)
         {
             // One of the teams tied in bases
             if (tiedTeams[team])
@@ -924,25 +904,25 @@ void MetaMan::SetSuspend(bool suspend)
 
 int MetaMan::WhichTeamOwnsAllSites()
 {
-    int owner = Activity::NOTEAM;
+    int owner = Activity::NoTeam;
     for (vector<Scene *>::iterator sItr = m_Scenes.begin(); sItr != m_Scenes.end(); ++sItr)
     {
         if ((*sItr)->IsRevealed())
         {
             // A site with no owner means that not all sites have been taken duh
-            if ((*sItr)->GetTeamOwnership() == Activity::NOTEAM)
+            if ((*sItr)->GetTeamOwnership() == Activity::NoTeam)
             {
-                owner = Activity::NOTEAM;
+                owner = Activity::NoTeam;
                 break;
             }
 
             // So the site is owned by someone, and that someone is the only encountered owner yet
-            if (owner == Activity::NOTEAM || (*sItr)->GetTeamOwnership() == owner)
+            if (owner == Activity::NoTeam || (*sItr)->GetTeamOwnership() == owner)
                 owner = (*sItr)->GetTeamOwnership();
             // We found two diff teams owning sites, so noone owns em all
             else
             {
-                owner = Activity::NOTEAM;
+                owner = Activity::NoTeam;
                 break;                
             }
         }
@@ -959,13 +939,13 @@ int MetaMan::WhichTeamOwnsAllSites()
 bool MetaMan::IsGameOver()
 {
 // This is the old condition of all sites being conquered
-//    if (m_RevealedScenes >= m_Scenes.size() && WhichTeamOwnsAllSites() != Activity::NOTEAM)
+//    if (m_RevealedScenes >= m_Scenes.size() && WhichTeamOwnsAllSites() != Activity::NoTeam)
 //        return true;
 
     // GAME IS OVER:
     // IF no players have any brains left in their respective pool, OR only one team does AND they are the leader in sites owned
     int onlyTeamLeft = OnlyTeamWithAnyBrainPoolLeft();
-    if (NoBrainsLeftInAnyPool() || (onlyTeamLeft != Activity::NOTEAM && WhichTeamIsLeading() == onlyTeamLeft))
+    if (NoBrainsLeftInAnyPool() || (onlyTeamLeft != Activity::NoTeam && WhichTeamIsLeading() == onlyTeamLeft))
         return true;
 
     return false;
@@ -997,12 +977,7 @@ int MetaMan::TotalScenePresets(std::list<Scene *> *pScenes)
     {
         pScenePreset = dynamic_cast<Scene *>(*sItr);
         // Filter out editor or special scenes, or ones that don't have locations defined.
-        if (pScenePreset && !pScenePreset->GetLocation().IsZero() &&
-            pScenePreset->IsMetagamePlayable() &&
-            pScenePreset->GetPresetName().find("Editor") == string::npos &&
-            pScenePreset->GetPresetName().find("Test") == string::npos &&
-            pScenePreset->GetPresetName().find("Tutorial") == string::npos && 
-			pScenePreset->GetMetasceneParent() == "")
+        if (pScenePreset && !pScenePreset->GetLocation().IsZero() && pScenePreset->IsMetagamePlayable() && pScenePreset->GetMetasceneParent() == "")
         {
             // Make sure this exact site location on the planet isn't occupied already
             locationOK = true;
@@ -1037,33 +1012,23 @@ int MetaMan::TotalScenePresets(std::list<Scene *> *pScenes)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Yields a set of randomly selected Scene presets for a new game.
 
-int MetaMan::SelectScenePresets(float gameSize, int playerCount, list<Scene *> *pSelected)
+int MetaMan::SelectScenePresets(int gameSize, list<Scene *> *pSelected)
 {
     // Get the list of ALL eligible read-in Scene presets
     list<Scene *> scenePresets;
     TotalScenePresets(&scenePresets);
 
-    // How many scenes the game should end up with, according to the specified game size.
-    // Note that it will never be all or none of all the available scenes!
-// TODO: Hook these constants up to settings!!
-    int minCount = MAX(3, MIN(floorf(playerCount * 1.5), scenePresets.size()));
-    int maxCount = MAX(floorf(scenePresets.size() * 0.7), minCount);
-    // Determine the actual game size
-    int gameSceneCount = minCount + floorf((maxCount - minCount) * gameSize);
-    // Clamp
-    gameSceneCount = MIN(gameSceneCount, maxCount);
-    gameSceneCount = MAX(gameSceneCount, minCount);
-
     // If we need to actually fill the list, do so
     if (pSelected)
     {
         // Go through the list and randomly knock out as many presets as necessary to reach the number we need for this game
-        int randomIndex, currentIndex;
-        while (scenePresets.size() > gameSceneCount)
+		int randomIndex;
+		int currentIndex;
+        while (scenePresets.size() > gameSize)
         {
             // Randomly select one of the scenes and remove it
             currentIndex = 0;
-            randomIndex = floorf(scenePresets.size() * PosRand());
+			randomIndex = RandomNum<int>(0, scenePresets.size() - 1);
             for (list<Scene *>::iterator pItr = scenePresets.begin(); pItr != scenePresets.end(); ++pItr)
             {
                 if (currentIndex == randomIndex)
@@ -1077,11 +1042,12 @@ int MetaMan::SelectScenePresets(float gameSize, int playerCount, list<Scene *> *
 
         // Cast and copy (not deep!) to fill the provided list
         pSelected->clear();
-        for (list<Scene *>::iterator pItr = scenePresets.begin(); pItr != scenePresets.end(); ++pItr)
-            pSelected->push_back(dynamic_cast<Scene *>(*pItr));
+		for (Scene *scenePointer : scenePresets) {
+			pSelected->push_back(scenePointer);
+		}
     }
 
-    return gameSceneCount;
+    return gameSize;
 }
 
 
@@ -1121,7 +1087,7 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
 
     // Tally up all the scenes according to who owns them
     int sceneCount = 0;
-    int revealedScenes = floorf(m_RevealedScenes);
+    int revealedScenes = std::floor(m_RevealedScenes);
     vector<Scene *> ownedScenes;
     vector<Scene *> enemyScenes;
     vector<Scene *> unclaimedScenes;
@@ -1142,7 +1108,7 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
         if ((*sItr)->GetTeamOwnership() == pThisPlayer->GetTeam())
             ownedScenes.push_back(*sItr);
         // Enemy-owned scene
-        else if ((*sItr)->GetTeamOwnership() != Activity::NOTEAM)
+        else if ((*sItr)->GetTeamOwnership() != Activity::NoTeam)
 		{
             enemyScenes.push_back(*sItr);
 			// Scenes with heavy investment owned by a team with lots of funds are less likely to attack
@@ -1199,7 +1165,7 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
     {
         pThisPlayer->SetOffensiveBudget(pThisPlayer->GetFunds() * offenseRatio);
 		// Use two methods to select which scene to attack, first one is based on the previously obtained scene mark and the second is mostly random
-		if (PosRand() < 0.6 && pBestAttackCandidateScene)
+		if (RandomNum() < 0.6F && pBestAttackCandidateScene)
 		{
 			pThisPlayer->SetOffensiveTargetName(pBestAttackCandidateScene->GetPresetName());
 		}
@@ -1207,10 +1173,10 @@ void MetaMan::AIPlayerTurn(int metaPlayer)
 		{
 			// And the target scene, randomly selected for now from all unfriendly targets
 			int unfriendlySceneCount = enemyScenes.size() + unclaimedScenes.size();
-			int targetIndex = SelectRand(0, unfriendlySceneCount - 1);
+			int targetIndex = RandomNum(0, unfriendlySceneCount - 1);
 			// Give it a strong preference for unclaimed scenes! They make more strategic sense than to attack a hardened target
 			if (!unclaimedScenes.empty() && targetIndex >= unclaimedScenes.size())
-				targetIndex = PosRand() < 0.75 ? SelectRand(0, unclaimedScenes.size() - 1) : targetIndex;
+				targetIndex = RandomNum() < 0.75F ? RandomNum<int>(0, unclaimedScenes.size() - 1) : targetIndex;
 			// From index to actual Scene and selection
 			Scene *selectedTarget = targetIndex < unclaimedScenes.size() ? unclaimedScenes[targetIndex] : enemyScenes[targetIndex - unclaimedScenes.size()];
 			if (selectedTarget)
@@ -1546,7 +1512,7 @@ void MetaMan::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
     AllegroBitmap pBitmapInt(pTargetBitmap);
 
     // Iterate through all players
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         ;
     }
@@ -1554,134 +1520,4 @@ void MetaMan::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
 
     m_pMetaGUI->Draw(pTargetBitmap);
 }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this MetaSave, effectively
-//                  resetting the members of this abstraction level only.
-
-void MetaSave::Clear()
-{
-    m_SavePath.clear();
-    m_SiteCount = 0;
-    m_PlayerCount = 0;
-    m_RoundCount = 0;
-	m_Difficulty = GameActivity::MEDIUMDIFFICULTY;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the MetaSave object ready for use.
-
-int MetaSave::Create(string savePath)
-{
-    if (Entity::Create() < 0)
-        return -1;
-
-    if (!g_MetaMan.GameInProgress())
-    {
-        g_ConsoleMan.PrintString("ERROR: Tried to save a Metagame that isn't in progress!?");
-        return -1;
-    }
-
-    m_SavePath = savePath;
-
-    // Get some basic info about the game so we can display it in a dialog for the player
-    m_SiteCount = g_MetaMan.m_Scenes.size();
-    m_PlayerCount = g_MetaMan.m_Players.size();
-    m_RoundCount = g_MetaMan.m_CurrentRound;
-	m_Difficulty = g_MetaMan.m_Difficulty;
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a MetaSave to be identical to another, by deep copy.
-
-int MetaSave::Create(const MetaSave &reference)
-{
-    Entity::Create(reference);
-
-    m_SavePath = reference.m_SavePath;
-    m_SiteCount = reference.m_SiteCount;
-    m_PlayerCount = reference.m_PlayerCount;
-    m_RoundCount = reference.m_RoundCount;
-	m_Difficulty = reference.m_Difficulty;
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the reader's position is untouched.
-
-int MetaSave::ReadProperty(std::string propName, Reader &reader)
-{
-    if (propName == "SavePath")
-        reader >> m_SavePath;
-    else if (propName == "SiteCount")
-        reader >> m_SiteCount;
-    else if (propName == "PlayerCount")
-        reader >> m_PlayerCount;
-    else if (propName == "RoundCount")
-        reader >> m_RoundCount;
-    else if (propName == "Difficulty")
-        reader >> m_Difficulty;
-    else
-        // See if the base class(es) can find a match instead
-        return Entity::ReadProperty(propName, reader);
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this MetaSave with a Writer for
-//                  later recreation with Create(Reader &reader);
-
-int MetaSave::Save(Writer &writer) const
-{
-    Entity::Save(writer);
-
-    writer.NewProperty("SavePath");
-    writer << m_SavePath;
-    writer.NewProperty("SiteCount");
-    writer << m_SiteCount;
-    writer.NewProperty("PlayerCount");
-    writer << m_PlayerCount;
-    writer.NewProperty("RoundCount");
-    writer << m_RoundCount;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the MetaSave object.
-
-void MetaSave::Destroy(bool notInherited)
-{
-    if (!notInherited)
-        Entity::Destroy();
-    Clear();
-}
-
 } // namespace RTE

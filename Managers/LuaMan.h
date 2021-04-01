@@ -1,14 +1,6 @@
 #ifndef _RTELUAMAN_
 #define _RTELUAMAN_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            LuaMan.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Header file for the LuaMan class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -47,20 +39,6 @@ class LuaMan:
 
 public:
 
-/*
-enum ServerResult
-{
-    SUCCESS = 0,
-    FAILEDCONNECTION,
-    INVALIDXML,
-    MAXCOUNT,
-    INVALIDKEY,
-    INVALIDPRODUCT,
-    EXPIREDKEY,
-    INVALIDMACHINE,
-    UNKNOWNERROR
-};
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     LuaMan
@@ -79,7 +57,7 @@ enum ServerResult
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~LuaMan() { Destroy(); }
+    ~LuaMan() { Destroy(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -90,46 +68,18 @@ enum ServerResult
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
+	int Initialize();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this LuaMan to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the LuaMan will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire LuaMan, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+	void Reset() { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -140,16 +90,6 @@ enum ServerResult
 // Return value:    None.
 
     void Destroy();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -180,7 +120,7 @@ enum ServerResult
 // Arguments:       None.
 // Return value:    Whether errors exist.
 
-    bool ErrorExists() const { return m_LastError.empty(); }
+    bool ErrorExists() const { return !m_LastError.empty(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -391,9 +331,6 @@ enum ServerResult
 
 protected:
 
-    // Member variables
-    static const std::string m_ClassName;
-
     // The master parent script state
     lua_State *m_pMasterState;
     // Description of the last error that occurred in the script execution
@@ -427,8 +364,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    LuaMan(const LuaMan &reference);
-    LuaMan & operator=(const LuaMan &rhs);
+	LuaMan(const LuaMan &reference) = delete;
+	LuaMan & operator=(const LuaMan &rhs) = delete;
 
 	//Internal list of opened files used by File* functions 
 	FILE * m_Files[MAX_OPEN_FILES];

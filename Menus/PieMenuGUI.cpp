@@ -74,7 +74,7 @@ int PieMenuGUI::Create(Controller *controller, Actor *focusActor) {
 	}
 
 	if (!s_Cursor) {
-		s_Cursor = ContentFile("Base.rte/GUIs/Skins/PieCursor.bmp").GetAsBitmap();
+		s_Cursor = ContentFile("Base.rte/GUIs/Skins/PieCursor.png").GetAsBitmap();
 	}
 
 	if (!m_BGBitmap) {
@@ -539,7 +539,7 @@ void PieMenuGUI::RedrawMenuBackground() {
 
 		// Draw four separator lines between each slice so the resulting separation will be at least 2 pixels thick, regardless of the separated slices' angles.
 		for (const PieSlice *slice : m_CurrentSlices) {
-			separator.SetIntXY(m_InnerRadius + m_Thickness + 2, 0);
+			separator.SetXY(m_InnerRadius + m_Thickness + 2, 0);
 			separator.RadRotate(slice->GetAreaStart());
 			line(m_BGBitmap, centerX, centerY, centerX + separator.GetCeilingIntX(), centerY + separator.GetCeilingIntY(), g_MaskColor);
 			line(m_BGBitmap, centerX + 1, centerY, centerX + 1 + separator.GetCeilingIntX(), centerY + separator.GetCeilingIntY(), g_MaskColor);
@@ -548,7 +548,7 @@ void PieMenuGUI::RedrawMenuBackground() {
 		}
 
 		if (m_HoveredSlice && m_HoveredSlice->IsEnabled()) {
-			separator.SetIntXY(m_InnerRadius + (m_Thickness / 2), 0);
+			separator.SetXY(m_InnerRadius + (m_Thickness / 2), 0);
 			separator.RadRotate(m_HoveredSlice->GetMidAngle());
 			floodfill(m_BGBitmap, centerX + separator.GetFloorIntX(), centerY + separator.GetFloorIntY(), g_BlackColor);
 		}

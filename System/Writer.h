@@ -3,8 +3,6 @@
 
 namespace RTE {
 
-	static constexpr char g_WritePackageExtension[8] = ".rte";
-
 	/// <summary>
 	/// Writes RTE objects to std::ostreams.
 	/// </summary>
@@ -19,40 +17,21 @@ namespace RTE {
 		Writer() { Clear(); }
 
 		/// <summary>
-		/// Constructor method used to instantiate a Writer object in system memory. Create() should be called before using the object.
+		/// Constructor method used to instantiate a Writer object in system memory and make it ready for writing to the passed in file path.
 		/// </summary>
-		/// <param name="filename">Path to the file to open for writing.</param>
+		/// <param name="filename">Path to the file to open for writing. If the directory doesn't exist the stream will fail to open.</param>
 		/// <param name="append">Whether to append to the file if it exists, or to overwrite it.</param>
-		Writer(const char *filename, bool append = false) { Clear(); Create(filename, append); }
+		/// <param name="createDir">Whether to create the directory path to the file name before attempting to open the stream, in case it doesn't exist.</param>
+		Writer(const std::string &fileName, bool append = false, bool createDir = false) { Clear(); Create(fileName, append, createDir); }
 
 		/// <summary>
 		/// Makes the Writer object ready for use.
 		/// </summary>
-		/// <param name="filename">
-		/// The filename of the file to open and write to.
-		/// If the file path doesn't exist, the first directory name is used in an attempt to open a package and then read a file from within that.
-		/// </param>
+		/// <param name="filename">Path to the file to open for writing. If the directory doesn't exist the stream will fail to open.</param>
 		/// <param name="append">Whether to append to the file if it exists, or to overwrite it.</param>
+		/// <param name="createDir">Whether to create the directory path to the file name before attempting to open the stream, in case it doesn't exist.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const char *filename, bool append = false);
-#pragma endregion
-
-#pragma region Destruction
-		/// <summary>
-		/// Destructor method used to clean up a Writer object before deletion from system memory.
-		/// </summary>
-		virtual ~Writer() { Destroy(true); }
-
-		/// <summary>
-		/// Resets the entire Writer, including its inherited members, to their default settings or values.
-		/// </summary>
-		virtual void Reset() { Clear(); }
-
-		/// <summary>
-		/// Destroys and resets (through Clear()) the Writer object.
-		/// </summary>
-		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false) { delete m_Stream; Clear(); }
+		int Create(const std::string &fileName, bool append = false, bool createDir = false);
 #pragma endregion
 
 #pragma region Getters
@@ -80,57 +59,64 @@ namespace RTE {
 		/// Used to specify the start of an object to be written.
 		/// </summary>
 		/// <param name="className">The class name of the object about to be written.</param>
-		virtual void ObjectStart(const std::string &className) { *m_Stream << className; ++m_Indent; }
+		void ObjectStart(const std::string &className) { *m_Stream << className; ++m_IndentCount; }
 
 		/// <summary>
 		/// Used to specify the end of an object that has just been written.
 		/// </summary>
-		virtual void ObjectEnd() { --m_Indent; if (m_Indent == 0) { NewLine(false, 2); } }
+		void ObjectEnd() { --m_IndentCount; if (m_IndentCount == 0) { NewLine(false, 2); } }
 
 		/// <summary>
 		/// Creates a new line that can be properly indented.
 		/// </summary>
 		/// <param name="toIndent">Whether to indent the new line or not.</param>
 		/// <param name="lineCount">How many new lines to create.</param>
-		virtual void NewLine(bool toIndent = true, unsigned short lineCount = 1);
+		void NewLine(bool toIndent = true, int lineCount = 1) const;
 
 		/// <summary>
 		/// Creates a new line and writes the specified string to it.
 		/// </summary>
 		/// <param name="textString">The text string to write to the new line.</param>
 		/// <param name="toIndent">Whether to indent the new line or not.</param>
-		virtual void NewLineString(std::string textString, bool toIndent = true) { NewLine(toIndent); *m_Stream << textString; }
+		void NewLineString(const std::string &textString, bool toIndent = true) const { NewLine(toIndent); *m_Stream << textString; }
 
 		/// <summary>
 		/// Creates a new line and fills it with slashes to create a divider line for INI.
 		/// </summary>
 		/// <param name="toIndent">Whether to indent the new line or not.</param>
 		/// <param name="dividerLength">The length of the divider (number of slashes).</param>
-		virtual void NewDivider(bool toIndent = true, unsigned short dividerLength = 72) {
-			NewLine(toIndent);
-			for (unsigned short slash = 0; slash < dividerLength; slash++) {
-				*m_Stream << "/";
-			}
-		}
+		void NewDivider(bool toIndent = true, int dividerLength = 72) const { NewLine(toIndent); *m_Stream << std::string(dividerLength, '/'); }
 
 		/// <summary>
-		/// Used to specify the name of a new property to be written.
+		/// Creates a new line and writes the name of the property in preparation to writing it's value.
 		/// </summary>
 		/// <param name="propName">The name of the property to be written.</param>
-		virtual void NewProperty(std::string propName) { NewLine(); *m_Stream << propName; *m_Stream << " = "; }
+		void NewProperty(const std::string &propName) const { NewLine(); *m_Stream << propName + " = "; }
+
+		/// <summary>
+		/// Creates a new line and writes the name of the specified property, followed by its set value.
+		/// </summary>
+		/// <param name="propName">The name of the property to be written.</param>
+		/// <param name="propValue">The value of the property.</param>
+		template <typename Type> void NewPropertyWithValue(const std::string &propName, const Type &propValue) { NewProperty(propName); *this << propValue; }
 
 		/// <summary>
 		/// Marks that there is a null reference to an object here.
 		/// </summary>
-		virtual void NoObject() { *m_Stream << "None"; }
+		void NoObject() const { *m_Stream << "None"; }
 #pragma endregion
 
 #pragma region Writer Status
 		/// <summary>
-		/// Shows whether the writer is ok to start accepting data streamed to it.
+		/// Shows whether the writer is ready to start accepting data streamed to it.
 		/// </summary>
-		/// <returns></returns>
-		virtual bool WriterOK() const { return m_Stream && !m_Stream->fail() && m_Stream->is_open(); }
+		/// <returns>Whether the writer is ready to start accepting data streamed to it or not.</returns>
+		bool WriterOK() const { return m_Stream.get() && !m_Stream->fail() && m_Stream->is_open(); }
+
+		/// <summary>
+		/// Flushes and closes the output stream of this Writer. This happens automatically at destruction but needs to be called manually if a written file must be read from in the same scope.
+		/// </summary>
+		void EndWrite() const { m_Stream->flush(); m_Stream->close(); }
 #pragma endregion
 
 #pragma region Operator Overloads
@@ -139,38 +125,30 @@ namespace RTE {
 		/// </summary>
 		/// <param name="var">A reference to the variable that will be written to the ostream.</param>
 		/// <returns>A Writer reference for further use in an expression.</returns>
-		virtual Writer & operator<<(const bool &var) { *m_Stream << var; return *this; }
-		virtual Writer & operator<<(const char &var) { *m_Stream << var; return *this; }
-		virtual Writer & operator<<(const unsigned char &var) { int temp = var; *m_Stream << temp; return *this; }
-		virtual Writer & operator<<(const short &var) { *m_Stream << var; return *this; }
-		virtual Writer & operator<<(const unsigned short &var) { *m_Stream << var; return *this; }
-		virtual Writer & operator<<(const int &var) { *m_Stream << var; return *this; }
-		virtual Writer & operator<<(const unsigned int &var) { *m_Stream << var; return *this; }
-		virtual Writer & operator<<(const long &var) { *m_Stream << var; return *this; }
-		virtual Writer & operator<<(const unsigned long &var) { *m_Stream << var; return *this; }
-		virtual Writer & operator<<(const float &var) { *m_Stream << var; return *this; }
-		virtual Writer & operator<<(const double &var) { *m_Stream << var; return *this; }
-		virtual Writer & operator<<(const char *var) { *m_Stream << var; return *this; }
-		virtual Writer & operator<<(const std::string &var) { *m_Stream << var; return *this; }
-#pragma endregion
-
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Writer.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Writer.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		Writer & operator<<(const bool &var) { *m_Stream << var; return *this; }
+		Writer & operator<<(const char &var) { *m_Stream << var; return *this; }
+		Writer & operator<<(const unsigned char &var) { int temp = var; *m_Stream << temp; return *this; }
+		Writer & operator<<(const short &var) { *m_Stream << var; return *this; }
+		Writer & operator<<(const unsigned short &var) { *m_Stream << var; return *this; }
+		Writer & operator<<(const int &var) { *m_Stream << var; return *this; }
+		Writer & operator<<(const unsigned int &var) { *m_Stream << var; return *this; }
+		Writer & operator<<(const long &var) { *m_Stream << var; return *this; }
+		Writer & operator<<(const long long &var) { *m_Stream << var; return *this; }
+		Writer & operator<<(const unsigned long &var) { *m_Stream << var; return *this; }
+		Writer & operator<<(const unsigned long long &var) { *m_Stream << var; return *this; }
+		Writer & operator<<(const float &var) { *m_Stream << var; return *this; }
+		Writer & operator<<(const double &var) { *m_Stream << var; return *this; }
+		Writer & operator<<(const char *var) { *m_Stream << var; return *this; }
+		Writer & operator<<(const std::string &var) { *m_Stream << var; return *this; }
 #pragma endregion
 
 	protected:
 
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
-
-		std::ofstream *m_Stream; //!< Stream used for writing to files.
-		std::string m_FolderPath; //!< Only the path to the folder that we are writing a file in, excluding the filename
-		std::string m_FilePath; //!< Currently used stream's filepath
-		std::string m_FileName; //!< Only the name of the currently read file, excluding the path
-		short m_Indent; //!< Indent counter.
+		std::unique_ptr<std::ofstream> m_Stream; //!< Stream used for writing to files.
+		std::string m_FilePath; //!< Currently used stream's filepath.
+		std::string m_FolderPath; //!< Only the path to the folder that we are writing a file in, excluding the filename.
+		std::string m_FileName; //!< Only the name of the currently read file, excluding the path.
+		int m_IndentCount; //!< Indentation counter.
 
 	private:
 
@@ -180,8 +158,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		Writer(const Writer &reference);
-		Writer & operator=(const Writer &rhs) {}
+		Writer(const Writer &reference) = delete;
+		Writer & operator=(const Writer &rhs) = delete;
 	};
 }
 #endif

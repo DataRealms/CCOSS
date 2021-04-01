@@ -15,6 +15,7 @@
 // Inclusions of header files
 
 #include "Attachable.h"
+#include "Actor.h"
 #include "PieMenuGUI.h"
 
 namespace RTE
@@ -49,6 +50,8 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(HeldDevice)
+SerializableOverrideMethods
+ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -68,7 +71,7 @@ EntityAllocation(HeldDevice)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~HeldDevice() { Destroy(true); }
+	~HeldDevice() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +82,7 @@ EntityAllocation(HeldDevice)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -94,22 +97,6 @@ EntityAllocation(HeldDevice)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire HeldDevice, including its inherited members, to their
@@ -117,19 +104,7 @@ EntityAllocation(HeldDevice)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Attachable::Reset(); m_MOType = MovableObject::TypeHeldDevice; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this HeldDevice to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the HeldDevice will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+    void Reset() override { Clear(); Attachable::Reset(); m_MOType = MovableObject::TypeHeldDevice; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -140,27 +115,7 @@ EntityAllocation(HeldDevice)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -170,7 +125,7 @@ EntityAllocation(HeldDevice)
 // Arguments:       None.
 // Return value:    A Vector with the absolute position of this' HUD stack top point.
 
-    virtual Vector GetAboveHUDPos() const { return m_Pos + Vector(0, -32); }
+	Vector GetAboveHUDPos() const override { return m_Pos + Vector(0, -32); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -327,6 +282,56 @@ EntityAllocation(HeldDevice)
 
 	void SetSupportOffset(Vector newOffset) { m_SupportOffset = newOffset; }
 
+    /// <summary>
+    /// Gets whether this HeldDevice has any limitations on what can pick it up.
+    /// </summary>
+    /// <returns>Whether this HeldDevice has any limitations on what can pick it up.</returns>
+    bool HasPickupLimitations() const { return IsUnPickupable() || !m_PickupableByPresetNames.empty(); }
+
+    /// <summary>
+    /// Gets whether this HeldDevice cannot be picked up at all.
+    /// </summary>
+    /// <returns>Whether this HeldDevice cannot be picked up at all.</returns>
+    bool IsUnPickupable() const { return m_IsUnPickupable; }
+
+    /// <summary>
+    /// Sets whether this HeldDevice cannot be picked up at all.
+    /// </summary>
+    /// <param name="shouldBeUnPickupable">Whether this HeldDevice cannot be picked up at all. True means it cannot, false means any other limitations will apply normally.</param>
+    void SetUnPickupable(bool shouldBeUnPickupable) { m_IsUnPickupable = shouldBeUnPickupable; }
+
+    /// <summary>
+    /// Checks whether the given Actor can pick up this HeldDevice.
+    /// </summary>
+    /// <param name="actor">The Actor to check. Ownership is NOT transferred.</param>
+    /// <returns>Whether the given Actor can pick up this HeldDevice.</returns>
+    bool IsPickupableBy(const Actor *actor) const { return !HasPickupLimitations() || m_PickupableByPresetNames.find(actor->GetPresetName()) != m_PickupableByPresetNames.end(); }
+
+    /// <summary>
+    /// Specify that objects with the given PresetName can pick up this HeldDevice.
+    /// </summary>
+    /// <param name="presetName">The PresetName of an object that should be able to pick up this HeldDevice.</param>
+    void AddPickupableByPresetName(const std::string &presetName) { SetUnPickupable(false); m_PickupableByPresetNames.insert(presetName); }
+
+    /// <summary>
+    /// Remove allowance for objects with the given PresetName to pick up this HeldDevice.
+    /// Note that if the last allowance is removed, the HeldDevice will no longer have pickup limitations, rather than setting itself as unpickupable.
+    /// </summary>
+    /// <param name="actorPresetName">The PresetName of an object that should no longer be able to pick up this HeldDevice.</param>
+    void RemovePickupableByPresetName(const std::string &actorPresetName);
+
+    /// <summary>
+    /// Gets the multiplier for how well this HeldDevice can be gripped by Arms.
+    /// </summary>
+    /// <returns>The grip strength multiplier for this HeldDevice.</returns>
+    float GetGripStrengthMultiplier() const { return m_GripStrengthMultiplier; }
+
+    /// <summary>
+    /// Sets the multiplier for how well this HeldDevice can be gripped by Arms.
+    /// </summary>
+    /// <param name="gripStrengthMultiplier">The new grip strength multiplier for this HeldDevice.</param>
+    void SetGripStrengthMultiplier(float gripStrengthMultiplier) { m_GripStrengthMultiplier = gripStrengthMultiplier; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetSharpAim
@@ -413,13 +418,13 @@ EntityAllocation(HeldDevice)
 	
 	
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AddPieMenuSlices
+// Method:  AddPieMenuSlices
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Adds all slices this needs on a pie menu.
 // Arguments:       The pie menu to add slices to. Ownership is NOT transferred!
 // Return value:    Whether any slices were added.
 
-    virtual bool AddPieMenuSlices(PieMenuGUI *pPieMenu);
+   bool AddPieMenuSlices(PieMenuGUI *pPieMenu);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -433,7 +438,7 @@ EntityAllocation(HeldDevice)
 // Return value:    Whether the collision has been deemed valid. If false, then disregard
 //                  any impulses in the Hitdata.
 
-    virtual bool CollideAtPoint(HitData &hitData);
+    bool CollideAtPoint(HitData &hitData) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -466,7 +471,7 @@ EntityAllocation(HeldDevice)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reload() { ; }
+    virtual void Reload() {}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -530,18 +535,8 @@ EntityAllocation(HeldDevice)
 // Return value:    Wheter the MovableObject should immediately halt any travel going on
 //                  after this hit.
 
-    virtual bool OnMOHit(MovableObject *pOtherMO);
+	bool OnMOHit(MovableObject *pOtherMO) override;
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Travel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Travels this, using its physical representation.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void Travel();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -550,7 +545,7 @@ EntityAllocation(HeldDevice)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -565,10 +560,7 @@ EntityAllocation(HeldDevice)
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -582,12 +574,26 @@ EntityAllocation(HeldDevice)
 //                  get drawn etc.
 // Return value:    None.
 
-    virtual void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false);
+    void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false) override;
 
 	/// <summary>
 	/// Resest all the timers used by this. Can be emitters, etc. This is to prevent backed up emissions to come out all at once while this has been held dormant in an inventory.
 	/// </summary>
-	virtual void ResetAllTimers() { Attachable::ResetAllTimers(); m_ActivationTmr.Reset(); }
+	void ResetAllTimers() override { Attachable::ResetAllTimers(); m_ActivationTimer.Reset(); }
+
+#pragma region Force Transferral
+    /// <summary>
+    /// Bundles up all the accumulated impulse forces of this HeldDevice and calculates how they transfer to the joint, and therefore to the parent.
+    /// If the accumulated impulse forces exceed the joint strength or gib impulse limit of this HeldDevice, the jointImpulses Vector will be filled up to that limit and false will be returned.
+    /// Additionally, in this case, the HeldDevice will remove itself from its parent, destabilizing said parent if it's an Actor, and gib itself if appropriate.
+    /// </summary>
+    /// <param name="jointImpulses">A vector that will have the impulse forces affecting the joint ADDED to it.</param>
+    /// <param name="jointStiffnessValueToUse">An optional override for the HeldDevice's joint stiffness for this function call. Primarily used to allow subclasses to perform special behavior.</param>
+    /// <param name="jointStrengthValueToUse">An optional override for the HeldDevice's joint strength for this function call. Primarily used to allow subclasses to perform special behavior.</param>
+    /// <param name="gibImpulseLimitValueToUse">An optional override for the HeldDevice's gib impulse limit for this function call. Primarily used to allow subclasses to perform special behavior.</param>
+    /// <returns>False if the HeldDevice has no parent or its accumulated forces are greater than its joint strength or gib impulse limit, otherwise true.</returns>
+    bool TransferJointImpulses(Vector &jointImpulses, float jointStiffnessValueToUse = -1, float jointStrengthValueToUse = -1, float gibImpulseLimitValueToUse = -1) override;
+#pragma endregion
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -602,7 +608,7 @@ protected:
     // Is this HeldDevice that are currently activated?
     bool m_Activated;
     // Timer for timing how long a feature has been activated.
-    Timer m_ActivationTmr;
+    Timer m_ActivationTimer;
     // Can be weilded well with one hand or not
     bool m_OneHanded;
 	// Can be weilded with bg hand or not
@@ -621,6 +627,9 @@ protected:
     float m_MaxSharpLength;
     // If this HeldDevice is currently being supported by a second hand.
     bool m_Supported;
+    bool m_IsUnPickupable; //!< Whether or not this HeldDevice should be able to be picked up at all.
+    std::unordered_set<std::string> m_PickupableByPresetNames; //!< The unordered set of PresetNames that can pick up this HeldDevice if it's dropped. An empty set means there are no PresetName limitations.
+    float m_GripStrengthMultiplier; //!< The multiplier for how well this HeldDevice can be gripped by Arms.
     // Blink timer for the icon
     Timer m_BlinkTimer;
     // Extra pie menu options that this should add to any actor who holds this device
@@ -649,8 +658,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    HeldDevice(const HeldDevice &reference);
-    HeldDevice & operator=(const HeldDevice &rhs);
+	HeldDevice(const HeldDevice &reference) = delete;
+	HeldDevice & operator=(const HeldDevice &rhs) = delete;
 
 };
 

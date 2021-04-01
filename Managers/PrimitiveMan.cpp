@@ -4,32 +4,21 @@
 
 namespace RTE {
 
-	const std::string PrimitiveMan::c_ClassName = "PrimitiveMan";
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PrimitiveMan::DrawBitmapPrimitive(short player, Vector start, Entity *entity, float rotAngle, unsigned short frame) {
+	void PrimitiveMan::DrawBitmapPrimitive(int player, const Vector &centerPos, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped) {
 		const MOSprite *moSprite = dynamic_cast<MOSprite *>(entity);
 		if (moSprite) {
-			BITMAP *pBitmap = moSprite->GetSpriteFrame(frame);
-			if (pBitmap) { m_Primitives.push_back(new BitmapPrimitive(player, start, pBitmap, rotAngle)); }
+			BITMAP *bitmap = moSprite->GetSpriteFrame(frame);
+			if (bitmap) { m_ScheduledPrimitives.push_back(std::make_unique<BitmapPrimitive>(player, centerPos, bitmap, rotAngle, hFlipped, vFlipped)); }
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PrimitiveMan::ClearPrimitivesList() {
-		for (const GraphicalPrimitive *primitive : m_Primitives) {
-			delete primitive;
-		}
-		m_Primitives.clear();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void PrimitiveMan::DrawPrimitives(short player, BITMAP *pTargetBitmap, const Vector &targetPos) {
-		for (GraphicalPrimitive *primitive : m_Primitives) {
-			if (player == primitive->m_Player || primitive->m_Player == -1) { primitive->Draw(pTargetBitmap, targetPos); }
+	void PrimitiveMan::DrawPrimitives(int player, BITMAP *targetBitmap, const Vector &targetPos) const {
+		for (const std::unique_ptr<GraphicalPrimitive> &primitive : m_ScheduledPrimitives) {
+			if (primitive->m_Player == player || primitive->m_Player == -1) { primitive->Draw(targetBitmap, targetPos); }
 		}
 	}
 }

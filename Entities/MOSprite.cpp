@@ -12,8 +12,7 @@
 // Inclusions of header files
 
 #include "MOSprite.h"
-#include "RTEManagers.h"
-#include "RTETools.h"
+#include "PresetMan.h"
 #include "AEmitter.h"
 
 namespace RTE {
@@ -39,8 +38,8 @@ void MOSprite::Clear()
     m_SpriteAnimTimer.Reset();
     m_SpriteAnimIsReversingFrames = false;
     m_HFlipped = false;
-    m_MaxRadius = 1;
-    m_MaxDiameter = 2;
+    m_SpriteRadius = 1.0F;
+    m_SpriteDiameter = 2.0F;
     m_Rotation.Reset();
     m_PrevRotation.Reset();
     m_AngularVel = 0;
@@ -77,8 +76,8 @@ int MOSprite::Create()
         // Calc maximum dimensions from the Pos, based on the sprite
         float maxX = MAX(fabs(m_SpriteOffset.m_X), fabs(m_aSprite[0]->w + m_SpriteOffset.m_X));
         float maxY = MAX(fabs(m_SpriteOffset.m_Y), fabs(m_aSprite[0]->h + m_SpriteOffset.m_Y));
-        m_MaxRadius = sqrt((float)(maxX * maxX) + (maxY * maxY));
-        m_MaxDiameter = m_MaxRadius * 2;
+        m_SpriteRadius = sqrt((float)(maxX * maxX) + (maxY * maxY));
+        m_SpriteDiameter = m_SpriteRadius * 2.0F;
     }
     else
         return -1;
@@ -112,8 +111,8 @@ int MOSprite::Create(ContentFile spriteFile,
     // Calc maximum dimensions from the Pos, based on the sprite
     float maxX = MAX(fabs(m_SpriteOffset.m_X), fabs(m_aSprite[0]->w + m_SpriteOffset.m_X));
     float maxY = MAX(fabs(m_SpriteOffset.m_Y), fabs(m_aSprite[0]->h + m_SpriteOffset.m_Y));
-    m_MaxRadius = sqrt((float)(maxX * maxX) + (maxY * maxY));
-    m_MaxDiameter = m_MaxRadius * 2;
+    m_SpriteRadius = sqrt((float)(maxX * maxX) + (maxY * maxY));
+    m_SpriteDiameter = m_SpriteRadius * 2.0F;
 
     return 0;
 }
@@ -148,8 +147,8 @@ int MOSprite::Create(const MOSprite &reference)
     m_SpriteAnimMode = reference.m_SpriteAnimMode;
     m_SpriteAnimDuration = reference.m_SpriteAnimDuration;
     m_HFlipped = reference.m_HFlipped;
-    m_MaxRadius = reference.m_MaxRadius;
-    m_MaxDiameter = reference.m_MaxDiameter;
+    m_SpriteRadius = reference.m_SpriteRadius;
+    m_SpriteDiameter = reference.m_SpriteDiameter;
 
     m_Rotation = reference.m_Rotation;
     m_AngularVel = reference.m_AngularVel;
@@ -171,7 +170,7 @@ int MOSprite::Create(const MOSprite &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int MOSprite::ReadProperty(std::string propName, Reader &reader)
+int MOSprite::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "SpriteFile")
         reader >> m_SpriteFile;
@@ -214,7 +213,6 @@ int MOSprite::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "ExitWound")
         m_pExitWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader));
     else
-        // See if the base class(es) can find a match instead
         return MovableObject::ReadProperty(propName, reader);
 
     return 0;
@@ -409,7 +407,7 @@ bool MOSprite::IsOnScenePoint(Vector &scenePoint) const
         }
     }
 */
-    if (WithinBox(scenePoint, m_Pos.m_X - m_MaxRadius, m_Pos.m_Y - m_MaxRadius, m_Pos.m_X + m_MaxRadius, m_Pos.m_Y + m_MaxRadius))
+    if (WithinBox(scenePoint, m_Pos.m_X - m_SpriteRadius, m_Pos.m_Y - m_SpriteRadius, m_Pos.m_X + m_SpriteRadius, m_Pos.m_Y + m_SpriteRadius))
     {
         // Get scene point in object's relative space
         Vector spritePoint = scenePoint - m_Pos;
@@ -466,6 +464,16 @@ void MOSprite::Update() {
 		// If animation mode is set to something other than ALWAYSLOOP but only has 2 frames, override it because it's pointless
 		if ((m_SpriteAnimMode == ALWAYSRANDOM || m_SpriteAnimMode == ALWAYSPINGPONG) && m_FrameCount == 2) {
 			m_SpriteAnimMode = ALWAYSLOOP;
+		} else if (m_SpriteAnimMode == OVERLIFETIME) {
+			// If animation mode is set to over lifetime but lifetime is unlimited, override to always loop otherwise it will never animate.
+			if (m_Lifetime == 0) {
+				m_SpriteAnimMode = ALWAYSLOOP;
+			} else {
+				double lifeTimeFrame = static_cast<double>(m_FrameCount) * (m_AgeTimer.GetElapsedSimTimeMS() / static_cast<double>(m_Lifetime));
+				m_Frame = static_cast<int>(std::floor(lifeTimeFrame));
+				if (m_Frame >= m_FrameCount) { m_Frame = m_FrameCount - 1; }
+				return;
+			}
 		}
 	} else {
 		m_SpriteAnimMode = NOANIM;
@@ -483,7 +491,7 @@ void MOSprite::Update() {
 			    break;
 		    case ALWAYSRANDOM:
 			    while (m_Frame == prevFrame) {
-				    m_Frame = floorf(static_cast<float>(m_FrameCount) * PosRand());
+					m_Frame = RandomNum<int>(0, m_FrameCount - 1);
 			    }
                 m_SpriteAnimTimer.Reset();
 			    break;

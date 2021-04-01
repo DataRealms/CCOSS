@@ -1,280 +1,322 @@
 #ifndef _RTENETWORKCLIENT_
 #define _RTENETWORKCLIENT_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            NrtworkClient.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Header file for the NetworkClient class.
-// Project:         Retro Terrain Engine
-// Author(s):       
-
-// Without this nested includes somewhere deep inside Allegro will summon winsock.h and it will conflict with winsock2.h from RakNet
-// and we can't move "Network.h" here because for whatever reasons everything will collapse
-#define WIN32_LEAN_AND_MEAN
-
 #include "Singleton.h"
-#include "UInputMan.h"
-#include "PostProcessMan.h"
 #include "SoundContainer.h"
 
-#include "Network.h"
+#include "NetworkMessages.h"
+
+// TODO: Figure out how to deal with anything that is defined by these and include them in implementation only to remove Windows.h macro pollution from our headers.
+#include "RakPeerInterface.h"
 #include "NatPunchthroughClient.h"
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
+// RakNet includes Windows.h so we need to undefine macros that conflict with our method names.
+#undef GetClassName
 
 #define g_NetworkClient NetworkClient::Instance()
 
-namespace RTE
-{
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Class:           NetworkClient
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     The centralized singleton manager of all Timer:s and overall
-	//                  timekeeping in RTE.
-	// Parent(s):       Singleton
-	// Class history:   
+/////////////////////////////////////////////////////////////////////////
+// TODO: Get Weegee to comment all these because I don't even.
+/////////////////////////////////////////////////////////////////////////
 
-	class NetworkClient :
-		public Singleton<NetworkClient>//,
-	//    public Serializable
-	{
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Public member variable, method and friend function declarations
+namespace RTE {
+
+	struct PostEffect;
+
+	/// <summary>
+	/// The centralized singleton manager of the network multiplayer client.
+	/// </summary>
+	class NetworkClient : public Singleton<NetworkClient> {
+		friend class SettingsMan;
 
 	public:
 
+#pragma region Creation
+		/// <summary>
+		/// Constructor method used to instantiate a NetworkClient object in system memory. Create() should be called before using the object.
+		/// </summary>
+		NetworkClient() { Clear(); Initialize(); }
 
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Constructor:     NetworkClient
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Description:     Constructor method used to instantiate a NetworkClient object in system
-		//                  memory. Create() should be called before using the object.
-		// Arguments:       None.
+		/// <summary>
+		/// Makes the NetworkClient object ready for use.
+		/// </summary>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Initialize();
+#pragma endregion
 
-		NetworkClient() { Clear(); Create(); }
+#pragma region Destruction
+		/// <summary>
+		/// Destructor method used to clean up a NetworkClient object before deletion from system memory.
+		/// </summary>
+		~NetworkClient() { Destroy(); }
 
+		/// <summary>
+		/// Destroys and resets (through Clear()) the NetworkClient object.
+		/// </summary>
+		void Destroy() { Clear(); }
+#pragma endregion
 
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Destructor:      ~NetworkClient
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Description:     Destructor method used to clean up a NetworkClient object before deletion
-		//                  from system memory.
-		// Arguments:       None.
+#pragma region Getters
+		/// <summary>
+		/// Gets whether the client is connected and registered to a server.
+		/// </summary>
+		/// <returns>Whether the client is connected and registered to a server.</returns>
+		bool IsConnectedAndRegistered() const { return m_IsConnected && m_IsRegistered; }
+#pragma endregion
 
-		virtual ~NetworkClient() { Destroy(); }
-
-
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Method:          Create
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Description:     Makes the NetworkClient object ready for use.
-		// Arguments:       None.
-		// Return value:    An error return value signaling sucess or any particular failure.
-		//                  Anything below 0 is an error signal.
-
-		virtual int Create();
-
-
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Virtual method:  Reset
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Description:     Resets the entire NetworkClient, including its inherited members, to
-		//                  their default settings or values.
-		// Arguments:       None.
-		// Return value:    None.
-
-		virtual void Reset() { Clear(); }
-
-
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Method:          Destroy
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Description:     Destroys and resets (through Clear()) the NetworkClient object.
-		// Arguments:       None.
-		// Return value:    None.
-
-		void Destroy();
-
-
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Virtual method:  GetClassName
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Description:     Gets the class name of this Entity.
-		// Arguments:       None.
-		// Return value:    A string with the friendly-formatted type name of this object.
-
-		virtual const std::string & GetClassName() const { return m_ClassName; }
-
-
+#pragma region Concrete Methods
+		/// <summary>
+		/// Updates the state of this NetworkClient. Supposed to be done every frame.
+		/// </summary>
 		void Update();
+#pragma endregion
 
+#pragma region Connection Handling
+		/// <summary>
+		/// Connects the client to a server.
+		/// </summary>
+		/// <param name="serverName">Server name (or address) to connect to.</param>
+		/// <param name="serverPort">Server port.</param>
+		/// <param name="playerName">Player name to be used in network game.</param>
 		void Connect(std::string serverName, unsigned short serverPort, std::string playerName);
 
-		void ConnectNAT(RakNet::SystemAddress addr);
+		/// <summary>
+		/// Connects the client to a server through a NAT service.
+		/// </summary>
+		/// <param name="address">The NAT service address.</param>
+		void ConnectNAT(RakNet::SystemAddress address);
 
-		void PerformNATPunchThrough(std::string serviceServerName, unsigned short serverPort, std::string playerName, std::string serverName, std::string serverPassword);
-
-		RakNet::SystemAddress NetworkClient::ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, unsigned short int port);
-
+		/// <summary>
+		/// Disconnects the client from the currently connected server.
+		/// </summary>
 		void Disconnect();
 
-		bool IsConnectedAndRegistred() { return m_IsConnected && m_IsRegistered; }
+		/// <summary>
+		/// Connects to a NAT service and performs punch-through.
+		/// </summary>
+		/// <param name="serviceServerName">NAT service server name (or address) to use for punch-through.</param>
+		/// <param name="serviceServerPort">NAT service server port.</param>
+		/// <param name="playerName">Player name to be used in network game.</param>
+		/// <param name="serverName">Server name (or address) to connect to.</param>
+		/// <param name="serverPassword">Server password.</param>
+		void PerformNATPunchThrough(std::string serviceServerName, unsigned short serviceServerPort, std::string playerName, std::string serverName, std::string serverPassword);
 
-		struct MsgInput
-		{
-			unsigned char Id;
-
-			int MouseX;
-			int MouseY;
-			bool MouseButtonPressed[UInputMan::MAX_MOUSE_BUTTONS];
-			bool MouseButtonReleased[UInputMan::MAX_MOUSE_BUTTONS];
-			bool MouseButtonHeld[UInputMan::MAX_MOUSE_BUTTONS];
-			bool ResetActivityVote;
-
-			int MouseWheelMoved;
-
-			unsigned int InputElementPressed;
-			unsigned int InputElementReleased;
-			unsigned int InputElementHeld;
-
-		};
-
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Protected member variable and method declarations
+		// TODO: Figure out
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="rakPeer"></param>
+		/// <param name="address"></param>
+		/// <param name="port"></param>
+		/// <returns></returns>
+		RakNet::SystemAddress ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, unsigned short port);
+#pragma endregion
 
 	protected:
 
+		static constexpr unsigned short c_PlayerNameCharLimit = 15; //!< Maximum length of the player name.
+		std::string m_PlayerName; //!< The player name the will be used by the client in network games.
 
-		// Member variables
-		static const std::string m_ClassName;
+		RakNet::RakPeerInterface *m_Client; //!< The client RakPeerInterface.
+		RakNet::SystemAddress m_ClientID; //!< The client's identifier.
 
-		RakNet::SystemAddress m_ClientID;
+		RakNet::SystemAddress m_ServerID; //!< The server's identifier.
+		RakNet::RakNetGUID m_ServerGUID; //!< The server's Globally Unique Identifier.
 
-		RakNet::RakPeerInterface *m_Client;
+		RakNet::NatPunchthroughClient m_NATPunchthroughClient; //!< The NAT punch-through client.
+		RakNet::SystemAddress m_NATServiceServerID; //!< The NAT server's identifier.
 
-		RakNet::NatPunchthroughClient m_NatPunchthroughClient;
+		bool m_UseNATPunchThroughService; //!< Whether to use NAT service for connecting to server.
 
-		RakNet::SystemAddress m_NATServiceServerID;
+		bool m_IsConnected; //!< Is client connected to server.
+		bool m_IsRegistered; //!< Is client registered at server.
+		bool m_IsNATPunched; //!< Is client connected through NAT service.
 
-		RakNet::SystemAddress m_ServerID;
+		unsigned char m_PixelLineBuffer[c_MaxPixelLineBufferSize]; //!<
 
-		RakNet::RakNetGUID m_ServerGuid;
+		long int m_ReceivedData; //!<
+		long int m_CompressedData; //!<
 
-		std::string m_PlayerName;
+		int m_ClientInputFps; //!< The rate (in FPS) the client input is sent to the server.
+		long long m_LastInputSentTime; //!< The last time input was sent in real time ticks.
 
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Private member variable and method declarations
+		int m_CurrentFrame; //!<
+
+		Vector m_TargetPos[c_FramesToRemember]; //!<
+		std::list<PostEffect> m_PostEffects[c_FramesToRemember]; //!< List of post-effects received from server.
+
+		std::unordered_map<int, SoundContainer *> m_ServerSounds; //!< Unordered map of SoundContainers received from server. OWNED!!!
+
+		unsigned char m_SceneID; //!< 
+		int m_CurrentSceneLayerReceived; //!<
+
+		BITMAP *m_SceneBackgroundBitmap; //!<
+		BITMAP *m_SceneForegroundBitmap; //!<
+
+		BITMAP *m_BackgroundBitmaps[c_MaxLayersStoredForNetwork]; //!<
+		LightweightSceneLayer m_BackgroundLayers[c_FramesToRemember][c_MaxLayersStoredForNetwork]; //!<
+		int m_ActiveBackgroundLayers; //!<
+		bool m_SceneWrapsX; //!<
+		int m_SceneWidth; //!<
+		int m_SceneHeight; //!<
+
+		int m_MouseButtonPressedState[3]; //!<
+		int m_MouseButtonReleasedState[3]; //!<
 
 	private:
 
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Method:          Clear
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Description:     Clears all the member variables of this NetworkClient, effectively
-		//                  resetting the members of this abstraction level only.
-		// Arguments:       None.
-		// Return value:    None.
+#pragma region Update Breakdown
+		/// <summary>
+		/// 
+		/// </summary>
+		void HandleNetworkPackets();
+#pragma endregion
 
-		void Clear();
+#pragma region Network Event Handling
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="packet"></param>
+		/// <returns></returns>
+		unsigned char GetPacketIdentifier(RakNet::Packet *packet) const;
 
+		/// <summary>
+		/// 
+		/// </summary>
 		void SendRegisterMsg();
 
-		void SendDisconnectMsg();
-
-		void SendInputMsg();
-
-		void ReceiveFrameSetupMsg(RakNet::Packet * p);
-
-		void ReceiveFrameLineMsg(RakNet::Packet * p);
-
-		void ReceiveFrameBoxMsg(RakNet::Packet * p);
-
-		void ReceiveSceneMsg(RakNet::Packet * p);
-
+		/// <summary>
+		/// 
+		/// </summary>
 		void ReceiveAcceptedMsg();
 
-		void ReceiveSceneSetupMsg(RakNet::Packet * p);
+		/// <summary>
+		/// 
+		/// </summary>
+		void SendDisconnectMsg();
 
-		void SendSceneSetupAcceptedMsg();
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="address"></param>
+		/// <param name="serverName"></param>
+		/// <param name="serverPassword"></param>
+		void SendServerGUIDRequest(RakNet::SystemAddress address, std::string serverName, std::string serverPassword);
 
-		void ReceiveTerrainChangeMsg(RakNet::Packet * p);
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="packet"></param>
+		void ReceiveServerGUIDAnswer(RakNet::Packet *packet);
 
+		/// <summary>
+		/// 
+		/// </summary>
+		void SendInputMsg();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="packet"></param>
+		void ReceiveFrameSetupMsg(RakNet::Packet *packet);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="packet"></param>
+		void ReceiveFrameLineMsg(RakNet::Packet *packet);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="packet"></param>
+		void ReceiveFrameBoxMsg(RakNet::Packet *packet);
+
+		/// <summary>
+		/// 
+		/// </summary>
 		void SendSceneAcceptedMsg();
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="packet"></param>
+		void ReceiveSceneMsg(RakNet::Packet *packet);
+
+		/// <summary>
+		/// 
+		/// </summary>
 		void ReceiveSceneEndMsg();
 
-		void DrawBackgrounds(BITMAP * pTargetBitmap);
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="packet"></param>
+		void ReceiveSceneSetupMsg(RakNet::Packet *packet);
 
-		void DrawFrame();
+		/// <summary>
+		/// 
+		/// </summary>
+		void SendSceneSetupAcceptedMsg();
 
-		void SendServerGuidRequest(RakNet::SystemAddress addr, std::string serverName, std::string serverPassword);
+		/// <summary>
+		/// Receive and handle a packet of terrain change data.
+		/// </summary>
+		/// <param name="packet">The packet to handle.</param>
+		void ReceiveTerrainChangeMsg(RakNet::Packet *packet);
 
-		void ReceiveServerGiudAnswer(RakNet::Packet * p);
+		/// <summary>
+		/// Receive and handle a packet of post-effect data. 
+		/// </summary>
+		/// <param name="packet">The packet to handle.</param>
+		void ReceivePostEffectsMsg(RakNet::Packet *packet);
 
-		void ReceivePosteEffectsMsg(RakNet::Packet * p);
+		/// <summary>
+		/// Receive and handle a packet of sound event data.
+		/// </summary>
+		/// <param name="packet">The packet to handle.</param>
+		void ReceiveSoundEventsMsg(RakNet::Packet *packet);
 
-		void ReceiveSoundEventsMsg(RakNet::Packet * p);
+		/// <summary>
+		/// Receive and handle a packet of music event data.
+		/// </summary>
+		/// <param name="packet">The packet to handle.</param>
+		void ReceiveMusicEventsMsg(RakNet::Packet *packet);
+#pragma endregion
 
-		void ReceiveMusicEventsMsg(RakNet::Packet * p);
+#pragma region Drawing
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="targetBitmap"></param>
+		void DrawBackgrounds(BITMAP *targetBitmap);
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="frame"></param>
 		void DrawPostEffects(int frame);
 
-		unsigned int GetPing();
+		/// <summary>
+		/// 
+		/// </summary>
+		void DrawFrame();
+#pragma endregion
 
+		/// <summary>
+		/// Gets the ping time between the client and the server.
+		/// </summary>
+		/// <returns>The ping time between the client and the server.</returns>
+		unsigned short GetPing() const { return IsConnectedAndRegistered() ? m_Client->GetLastPing(m_ServerID) : 0; }
 
-		int64_t m_LastInputSentTime;
-
-		unsigned char m_aPixelLineBuffer[MAX_PIXEL_LINE_BUFFER_SIZE];
-
-		long int m_ReceivedData;
-
-		long int m_CompressedData;
-
-		bool m_IsConnected;
-
-		bool m_IsRegistered;
-
-		bool m_IsNATPunched;
-
-		int m_ClientInputFps;
-
-		//int m_LastLineReceived;
-
-		int m_CurrentSceneLayerReceived;
-
-		unsigned char m_SceneId;
-
-		int m_CurrentFrame;
-
-		Vector m_TargetPos[FRAMES_TO_REMEMBER];
-		std::list<PostEffect> m_PostEffects[FRAMES_TO_REMEMBER];
-
-		// Unordered map of SoundContainers received from server. OWNED!!!
-		std::unordered_map<unsigned short, SoundContainer *> m_ServerSounds;
-
-		BITMAP * m_pSceneBackgroundBitmap;
-		BITMAP * m_pSceneForegroundBitmap;
-
-		BITMAP * m_BackgroundBitmaps[MAX_BACKGROUND_LAYERS_TRANSMITTED];
-		LightweightSceneLayer m_aBackgroundLayers[FRAMES_TO_REMEMBER][MAX_BACKGROUND_LAYERS_TRANSMITTED];
-		int m_ActiveBackgroundLayers;
-		bool m_SceneWrapsX;
-		int m_SceneWidth;
-		int m_SceneHeight;
-
-		int m_aMouseButtonPressedState[3];
-		int m_aMouseButtonReleasedState[3];
-
-		bool m_UseNATPunchThroughService;
+		/// <summary>
+		/// Clears all the member variables of this NetworkClient, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
 
 		// Disallow the use of some implicit methods.
-		NetworkClient(const NetworkClient &reference);
-		NetworkClient & operator=(const NetworkClient &rhs);
-
-		unsigned char GetPacketIdentifier(RakNet::Packet *p);
+		NetworkClient(const NetworkClient &reference) = delete;
+		NetworkClient & operator=(const NetworkClient &rhs) = delete;
 	};
-
-} // namespace RTE
-
-#endif // File
+}
+#endif

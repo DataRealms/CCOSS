@@ -20,7 +20,7 @@
 namespace RTE {
 
 AbstractClassInfo(SceneObject, Entity)
-const string SceneObject::SOPlacer::m_sClassName = "SOPlacer";
+const string SceneObject::SOPlacer::c_ClassName = "SOPlacer";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ void SceneObject::SOPlacer::Clear()
     m_Offset.Reset();
     m_RotAngle = 0;
     m_HFlipped = false;
-    m_Team = Activity::NOTEAM;
+    m_Team = Activity::NoTeam;
 }
 
 /*
@@ -78,7 +78,7 @@ int SceneObject::SOPlacer::Create(const SOPlacer &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int SceneObject::SOPlacer::ReadProperty(std::string propName, Reader &reader)
+int SceneObject::SOPlacer::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "PlacedObject")
     {
@@ -98,7 +98,6 @@ int SceneObject::SOPlacer::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "Team")
         reader >> m_Team;
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -132,7 +131,7 @@ int SceneObject::SOPlacer::Save(Writer &writer) const
         writer.NewProperty("HFlipped");
         writer << m_HFlipped;
     }
-    if (m_Team >= Activity::TEAM_1)
+    if (m_Team >= Activity::TeamOne)
     {
         writer.NewProperty("Team");
         writer << m_Team;
@@ -201,8 +200,8 @@ void SceneObject::Clear()
     m_Pos.Reset();
     m_OzValue = 0;
     m_Buyable = true;
-    m_Team = Activity::NOTEAM;
-    m_PlacedByPlayer = Activity::NOPLAYER;
+    m_Team = Activity::NoTeam;
+    m_PlacedByPlayer = Players::NoPlayer;
 }
 
 /*
@@ -259,7 +258,7 @@ int SceneObject::Create(const SceneObject &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the Reader's position is untouched.
 
-int SceneObject::ReadProperty(std::string propName, Reader &reader)
+int SceneObject::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "Position")
         reader >> m_Pos;
@@ -278,7 +277,6 @@ int SceneObject::ReadProperty(std::string propName, Reader &reader)
         reader >> m_PlacedByPlayer;
     else
     {
-        // See if the base class(es) can find a match instead
         return Entity::ReadProperty(propName, reader);
     }
 
@@ -352,7 +350,7 @@ string SceneObject::GetGoldValueString(int nativeModule, float foreignMult, floa
     if (subjValue != 0)
     {
         // Just show number since adding oz at the end takes up too much space
-        sprintf_s(returnString, sizeof(returnString), "%.0f", subjValue);
+        std::snprintf(returnString, sizeof(returnString), "%.0f", subjValue);
     }
     else
         return "FREE";

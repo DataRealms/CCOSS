@@ -12,17 +12,15 @@
 // Inclusions of header files
 
 #include "HDFirearm.h"
+#include "PresetMan.h"
 #include "Magazine.h"
-#include "Atom.h"
-#include "RTEManagers.h"
-#include "RTETools.h"
 #include "ThrownDevice.h"
 #include "MOPixel.h"
 #include "Actor.h"
 
 namespace RTE {
 
-ConcreteClassInfo(HDFirearm, HeldDevice, 0)
+ConcreteClassInfo(HDFirearm, HeldDevice, 50)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -37,7 +35,9 @@ void HDFirearm::Clear()
     m_pMagazine = 0;
 
     m_pFlash = 0;
+    m_PreFireSound.Reset();
     m_FireSound.Reset();
+    m_FireEchoSound.Reset();
     m_ActiveSound.Reset();
     m_DeactivationSound.Reset();
     m_EmptySound.Reset();
@@ -51,7 +51,6 @@ void HDFirearm::Clear()
     m_ReloadTime = 0;
     m_FullAuto = false;
     m_FireIgnoresThis = true;
-    m_RecoilTransmission = 1.0;
     m_ShakeRange = 0;
     m_SharpShakeRange = 0;
     m_NoSupportFactor = 0;
@@ -97,23 +96,21 @@ int HDFirearm::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a HDFirearm to be identical to another, by deep copy.
 
-int HDFirearm::Create(const HDFirearm &reference)
-{
+int HDFirearm::Create(const HDFirearm &reference) {
+    if (reference.m_pMagazine) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pMagazine->GetUniqueID());
+        SetMagazine(dynamic_cast<Magazine *>(reference.m_pMagazine->Clone()));
+    }
+    if (reference.m_pFlash) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFlash->GetUniqueID());
+        SetFlash(dynamic_cast<Attachable *>(reference.m_pFlash->Clone()));
+    }
     HeldDevice::Create(reference);
 
     m_pMagazineReference = reference.m_pMagazineReference;
-
-    if (reference.m_pMagazine)
-    {
-        m_pMagazine = dynamic_cast<Magazine *>(reference.m_pMagazine->Clone());
-        AddAttachable(m_pMagazine, m_pMagazine->GetParentOffset(), true);
-    }
-    if (reference.m_pFlash)
-    {
-        m_pFlash = dynamic_cast<Attachable *>(reference.m_pFlash->Clone());
-        m_pFlash->Attach(this, m_pFlash->GetParentOffset());
-    }
+    m_PreFireSound = reference.m_PreFireSound;
     m_FireSound = reference.m_FireSound;
+    m_FireEchoSound = reference.m_FireEchoSound;
     m_ActiveSound = reference.m_ActiveSound;
     m_DeactivationSound = reference.m_DeactivationSound;
     m_EmptySound = reference.m_EmptySound;
@@ -127,7 +124,6 @@ int HDFirearm::Create(const HDFirearm &reference)
     m_ReloadTime = reference.m_ReloadTime;
     m_FullAuto = reference.m_FullAuto;
     m_FireIgnoresThis = reference.m_FireIgnoresThis;
-    m_RecoilTransmission = reference.m_RecoilTransmission;
     m_ShakeRange = reference.m_ShakeRange;
     m_SharpShakeRange = reference.m_SharpShakeRange;
     m_NoSupportFactor = reference.m_NoSupportFactor;
@@ -152,92 +148,72 @@ int HDFirearm::Create(const HDFirearm &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int HDFirearm::ReadProperty(std::string propName, Reader &reader)
-{
-    if (propName == "Magazine")
-    {
-        const Entity *pObj = g_PresetMan.GetEntityPreset(reader);
-        if (pObj)
-        {
-            m_pMagazineReference = dynamic_cast<const Magazine *>(pObj);
-
-            delete m_pMagazine;
-            m_pMagazine = dynamic_cast<Magazine *>(m_pMagazineReference->Clone());
-        }
-    }
-    else if (propName == "Flash")
-    {
-        const Entity *pObj = g_PresetMan.GetEntityPreset(reader);
-        if (pObj)
-        {
-            m_pFlash = dynamic_cast<Attachable *>(pObj->Clone());
-            if (m_pFlash)
-                m_pFlash->Attach(this);
-        }
-    }
-    else if (propName == "FireSound")
+int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
+    if (propName == "Magazine") {
+        const Entity *magazineEntity = g_PresetMan.GetEntityPreset(reader);
+        if (magazineEntity) { SetMagazine(dynamic_cast<Magazine *>(magazineEntity->Clone())); }
+    } else if (propName == "Flash") {
+        const Entity *flashEntity = g_PresetMan.GetEntityPreset(reader);
+        if (flashEntity) { SetFlash(dynamic_cast<Attachable *>(flashEntity->Clone())); }
+    } else if (propName == "PreFireSound") {
+        reader >> m_PreFireSound;
+        m_DeactivationSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::IGNORE_PLAY);
+    } else if (propName == "FireSound")
         reader >> m_FireSound;
-    else if (propName == "ActiveSound") {
+    else if (propName == "FireEchoSound") {
+        reader >> m_FireEchoSound;
+        m_FireEchoSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::RESTART);
+    } else if (propName == "ActiveSound") {
         reader >> m_ActiveSound;
-        m_ActiveSound.SetAffectedByGlobalPitch(false); //Active sound (i.e. weapon spinup) modifies its pitch, so it has to account for global pitch on its own.
-    } else if (propName == "DeactivationSound")
+    } else if (propName == "DeactivationSound") {
         reader >> m_DeactivationSound;
-    else if (propName == "EmptySound")
+        m_DeactivationSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::IGNORE_PLAY);
+    } else if (propName == "EmptySound") {
         reader >> m_EmptySound;
-    else if (propName == "ReloadStartSound")
+    } else if (propName == "ReloadStartSound") {
         reader >> m_ReloadStartSound;
-    else if (propName == "ReloadEndSound")
+    } else if (propName == "ReloadEndSound") {
         reader >> m_ReloadEndSound;
-    else if (propName == "RateOfFire")
+    } else if (propName == "RateOfFire") {
         reader >> m_RateOfFire;
-    else if (propName == "ActivationDelay")
+    } else if (propName == "ActivationDelay") {
         reader >> m_ActivationDelay;
-    else if (propName == "DeactivationDelay")
+    } else if (propName == "DeactivationDelay") {
         reader >> m_DeactivationDelay;
-    else if (propName == "ReloadTime")
+    } else if (propName == "ReloadTime") {
         reader >> m_ReloadTime;
-    else if (propName == "FullAuto")
+    } else if (propName == "FullAuto") {
         reader >> m_FullAuto;
-    else if (propName == "FireIgnoresThis")
+    } else if (propName == "FireIgnoresThis") {
         reader >> m_FireIgnoresThis;
-    else if (propName == "RecoilTransmission")
-        reader >> m_RecoilTransmission;
-	else if (propName == "IsAnimatedManually")
+    } else if (propName == "RecoilTransmission") {
+        reader >> m_JointStiffness;
+    } else if (propName == "IsAnimatedManually") {
 		reader >> m_IsAnimatedManually;
-	else if (propName == "ShakeRange")
-    {
+    } else if (propName == "ShakeRange") {
         reader >> m_ShakeRange;
         m_ShakeRange /= 2;
-    }
-    else if (propName == "SharpShakeRange")
-    {
+    } else if (propName == "SharpShakeRange") {
         reader >> m_SharpShakeRange;
         m_SharpShakeRange /= 2;
-    }
-    else if (propName == "NoSupportFactor")
+    } else if (propName == "NoSupportFactor") {
         reader >> m_NoSupportFactor;
-    else if (propName == "ParticleSpreadRange")
-    {
+    } else if (propName == "ParticleSpreadRange") {
         reader >> m_ParticleSpreadRange;
         m_ParticleSpreadRange /= 2;
-    }
-    else if (propName == "ShellSpreadRange")
-    {
+    } else if (propName == "ShellSpreadRange") {
         reader >> m_ShellSpreadRange;
         m_ShellSpreadRange /= 2;
-    }
-    else if (propName == "ShellAngVelRange")
-    {
+    } else if (propName == "ShellAngVelRange") {
         reader >> m_ShellAngVelRange;
         m_ShellAngVelRange /= 2;
-    }
-    else if (propName == "MuzzleOffset")
+    } else if (propName == "MuzzleOffset") {
         reader >> m_MuzzleOff;
-    else if (propName == "EjectionOffset")
+    } else if (propName == "EjectionOffset") {
         reader >> m_EjectOff;
-    else
-        // See if the base class(es) can find a match instead
+    } else {
         return HeldDevice::ReadProperty(propName, reader);
+    }
 
     return 0;
 }
@@ -257,8 +233,12 @@ int HDFirearm::Save(Writer &writer) const
     writer << m_pMagazine;
     writer.NewProperty("Flash");
     writer << m_pFlash;
+    writer.NewProperty("PreFireSound");
+    writer << m_PreFireSound;
     writer.NewProperty("FireSound");
     writer << m_FireSound;
+    writer.NewProperty("FireEchoSound");
+    writer << m_FireEchoSound;
     writer.NewProperty("ActiveSound");
     writer << m_ActiveSound;
     writer.NewProperty("DeactivationSound");
@@ -282,7 +262,7 @@ int HDFirearm::Save(Writer &writer) const
     writer.NewProperty("FireIgnoresThis");
     writer << m_FireIgnoresThis;
     writer.NewProperty("RecoilTransmission");
-    writer << m_RecoilTransmission;
+    writer << m_JointStiffness;
 	writer.NewProperty("IsAnimatedManually");
 	writer << m_IsAnimatedManually;
 	writer.NewProperty("ShakeRange");
@@ -313,35 +293,64 @@ int HDFirearm::Save(Writer &writer) const
 
 void HDFirearm::Destroy(bool notInherited)
 {
-    delete m_pMagazine;
-    delete m_pFlash;
+    m_PreFireSound.Stop();
     m_FireSound.Stop();
+    m_FireEchoSound.Stop();
     m_ActiveSound.Stop();
     m_DeactivationSound.Stop();
+    m_EmptySound.Stop();
+    m_ReloadStartSound.Stop();
+    m_ReloadEndSound.Stop();
 
     if (!notInherited)
         HeldDevice::Destroy();
     Clear();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this HDFirearm, including the mass of Magazine
-//                  may have inserted.
+void HDFirearm::SetMagazine(Magazine *newMagazine) {
+    if (newMagazine == nullptr) {
+        if (m_pMagazine && m_pMagazine->IsAttached()) { RemoveAttachable(m_pMagazine); }
+        m_pMagazine = nullptr;
+    } else {
+        if (m_pMagazine && m_pMagazine->IsAttached()) { RemoveAttachable(m_pMagazine); }
+        m_pMagazine = newMagazine;
+        AddAttachable(newMagazine);
 
-float HDFirearm::GetMass() const
-{
-    return m_pMagazine ? m_Mass + m_pMagazine->GetMass() : m_Mass;
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newMagazine->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Magazine *castedAttachable = dynamic_cast<Magazine *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetMagazine");
+            dynamic_cast<HDFirearm *>(parent)->SetMagazine(castedAttachable);
+        }});
+
+        const Entity *newMagazineReference = g_PresetMan.GetEntityPreset(newMagazine->GetClassName(), newMagazine->GetPresetName(), newMagazine->GetModuleID());
+        if (newMagazineReference) { m_pMagazineReference = dynamic_cast<const Magazine *>(newMagazineReference); }
+    }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetNextMagazineName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the Preset name of the next Magazine that will be loaded into
-//                  this gun. This changes all future mags that will be reloaded.
+void HDFirearm::SetFlash(Attachable *newFlash) {
+    if (newFlash == nullptr) {
+        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
+        m_pFlash = nullptr;
+    } else {
+        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
+        m_pFlash = newFlash;
+        AddAttachable(newFlash);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newFlash->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            dynamic_cast<HDFirearm *>(parent)->SetFlash(attachable);
+        }});
+
+        m_pFlash->SetDrawnNormallyByParent(false);
+        m_pFlash->SetDeleteWhenRemovedFromParent(true);
+        m_pFlash->SetCollidesWithTerrainWhileAttached(false);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool HDFirearm::SetNextMagazineName(string magName)
 {
@@ -486,13 +495,13 @@ float HDFirearm::CompareTrajectories(HDFirearm * pWeapon)
         time = time * time * 0.5;
         Vector FuturePos1 = GetMuzzlePos();
         g_SceneMan.WrapPosition(FuturePos1);
-        FuturePos1 = FuturePos1 * g_FrameMan.GetMPP() + RotateOffset(Vel1) + g_SceneMan.GetGlobalAcc() * GetBulletAccScalar() * time;
+        FuturePos1 = FuturePos1 * c_MPP + RotateOffset(Vel1) + g_SceneMan.GetGlobalAcc() * GetBulletAccScalar() * time;
 
         Vector FuturePos2 = GetMuzzlePos();
         g_SceneMan.WrapPosition(FuturePos2);
-        FuturePos2 = pWeapon->GetMuzzlePos() * g_FrameMan.GetMPP() + RotateOffset(Vel2) + g_SceneMan.GetGlobalAcc() * pWeapon->GetBulletAccScalar() * time;
+        FuturePos2 = pWeapon->GetMuzzlePos() * c_MPP + RotateOffset(Vel2) + g_SceneMan.GetGlobalAcc() * pWeapon->GetBulletAccScalar() * time;
 
-        return (FuturePos2 - FuturePos1).GetMagnitude() * g_FrameMan.GetPPM();
+        return (FuturePos2 - FuturePos1).GetMagnitude() * c_PPM;
     }
 
     return 100000;
@@ -540,31 +549,19 @@ void HDFirearm::RestDetection()
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-
-void HDFirearm::SetID(const MOID newID)
-{
-    MovableObject::SetID(newID);
-    if (m_pMagazine)
-        m_pMagazine->SetID(newID);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Activate
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Activates one of this HDFirearm's features. Analogous to 'pulling
 //                  the trigger'.
 
-void HDFirearm::Activate()
-{
+void HDFirearm::Activate() {
+    bool wasActivated = m_Activated;
     HeldDevice::Activate();
 
-    // Play the pre-fire sound
-    if (!IsReloading() && !m_ActiveSound.IsBeingPlayed())
-        m_ActiveSound.Play(this->m_Pos);
+    if (!IsReloading()) {
+        if (!m_ActiveSound.IsBeingPlayed()) { m_ActiveSound.Play(this->m_Pos); }
+        if (!wasActivated && !m_PreFireSound.IsBeingPlayed()) { m_PreFireSound.Play(this->m_Pos); }
+    }
 }
 
 
@@ -574,18 +571,14 @@ void HDFirearm::Activate()
 // Description:     Deactivates one of this HDFirearm's features. Analogous to 'releasing
 //                  the trigger'.
 
-void HDFirearm::Deactivate()
-{
+void HDFirearm::Deactivate() {
+    bool wasActivated = m_Activated;
     HeldDevice::Deactivate();
     m_FiredOnce = false;
 
-    // Stop any looping fire sounds
-    if (m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed())
-        m_FireSound.Stop();
-
-    // Play the post-fire sound
-    if (!m_DeactivationSound.IsBeingPlayed())
-        m_DeactivationSound.Play(m_Pos);
+    m_PreFireSound.Stop();
+    if (m_FireSound.GetLoopSetting() == -1) { m_FireSound.Stop(); }
+    if (wasActivated && m_pMagazine && !m_pMagazine->IsEmpty()) { m_DeactivationSound.Play(m_Pos); }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -620,13 +613,9 @@ void HDFirearm::Reload()
         if (m_pMagazine)
         {
             m_pMagazine->SetVel(m_Vel + Vector(m_HFlipped ? -3 : 3, 0.3));
-            m_pMagazine->SetAngularVel(6 + (-6 * PosRand()));
-            m_pMagazine->Detach();
-            // Whether the magazine is ok to release into scene
-            if (m_pMagazine->IsDiscardable())
-                g_MovableMan.AddParticle(m_pMagazine);
-            else
-                delete m_pMagazine;
+            m_pMagazine->SetAngularVel(6.0F + (-RandomNum(0.0F, 6.0F)));
+            if (!m_pMagazine->IsDiscardable()) { m_pMagazine->SetToDelete(); }
+            RemoveAttachable(m_pMagazine, m_pMagazine->IsDiscardable(), false);
             m_pMagazine = 0;
         }
 
@@ -694,6 +683,8 @@ void HDFirearm::Update()
 {
     HeldDevice::Update();
 
+    if (m_PreFireSound.IsBeingPlayed()) { m_PreFireSound.SetPosition(m_Pos); }
+    if (m_FireSound.IsBeingPlayed()) { m_FireSound.SetPosition(m_Pos); }
     if (m_ActiveSound.IsBeingPlayed()) { m_ActiveSound.SetPosition(m_Pos); }
     if (m_DeactivationSound.IsBeingPlayed()) { m_DeactivationSound.SetPosition(m_Pos); }
 
@@ -711,8 +702,7 @@ void HDFirearm::Update()
 
     if (m_pMagazine && !m_pMagazine->IsEmpty())
     {
-        if (m_Activated)
-        {
+        if (m_Activated && !m_PreFireSound.IsBeingPlayed()) {
 
             // Get the parent root of this AEmitter
 // TODO: Potentially get this once outside instead, like in attach/detach")
@@ -731,8 +721,8 @@ void HDFirearm::Update()
                     m_LastFireTmr.SetElapsedSimTimeMS(MAX(m_LastFireTmr.GetElapsedSimTimeMS() - mspr, 0));
                 }
                 // How many rounds are going to fly since holding down activation. Make sure gun can't be fired faster by tapping activation fast
-                if (m_LastFireTmr.GetElapsedSimTimeMS() > (m_ActivationTmr.GetElapsedSimTimeMS() - m_ActivationDelay))
-                    roundsFired += (m_ActivationTmr.GetElapsedSimTimeMS() - m_ActivationDelay) / mspr;
+                if (m_LastFireTmr.GetElapsedSimTimeMS() > (m_ActivationTimer.GetElapsedSimTimeMS() - m_ActivationDelay))
+                    roundsFired += (m_ActivationTimer.GetElapsedSimTimeMS() - m_ActivationDelay) / mspr;
                 else
                     roundsFired += m_LastFireTmr.GetElapsedSimTimeMS() / mspr;
             }
@@ -764,9 +754,9 @@ void HDFirearm::Update()
 
 			int player = -1;
 			Controller * pController = 0;
-			if (m_pParent)
+			if (m_Parent)
 			{
-				Actor * pActor = dynamic_cast<Actor *>(m_pParent);
+				Actor * pActor = dynamic_cast<Actor *>(m_Parent);
 				if (pActor)
 				{
 					pController = pActor->GetController();
@@ -787,10 +777,10 @@ void HDFirearm::Update()
 
                 pRound = m_pMagazine->PopNextRound();
                 shake = (m_ShakeRange - ((m_ShakeRange - m_SharpShakeRange) * m_SharpAim)) *
-                        (m_Supported ? 1.0 : m_NoSupportFactor) * NormalRand();
+                        (m_Supported ? 1.0F : m_NoSupportFactor) * RandomNormalNum();
                 tempNozzle = m_MuzzleOff.GetYFlipped(m_HFlipped);
                 tempNozzle.DegRotate(degAimAngle + shake);
-                roundVel.SetIntXY(pRound->GetFireVel(), 0);
+                roundVel.SetXY(pRound->GetFireVel(), 0);
                 roundVel.DegRotate(degAimAngle + shake);
 
                 Vector particlePos;
@@ -803,11 +793,11 @@ void HDFirearm::Update()
                     pParticle = pRound->PopNextParticle();
 
                     // Only make the particles separate back behind the nozzle, not in front. THis is to avoid silly penetration firings
-                    particlePos = tempNozzle + (roundVel.GetNormalized() * -PosRand() * pRound->GetSeparation());
+					particlePos = tempNozzle + (roundVel.GetNormalized() * (-RandomNum()) * pRound->GetSeparation());
                     pParticle->SetPos(m_Pos + particlePos);
 
                     particleVel = roundVel;
-                    particleSpread = m_ParticleSpreadRange * NormalRand();
+                    particleSpread = m_ParticleSpreadRange * RandomNormalNum();
                     particleVel.DegRotate(particleSpread);
                     pParticle->SetVel(m_Vel + particleVel);
                     pParticle->SetRotAngle(particleVel.GetAbsRadAngle());
@@ -818,7 +808,7 @@ void HDFirearm::Update()
                     Attachable *pAttachable = dynamic_cast<Attachable *>(pParticle);
                     if (pAttachable)
                     {
-                        pAttachable->Detach();
+                        if (pAttachable->IsAttached()) { pAttachable->GetParent()->RemoveAttachable(pAttachable); }
                         // Activate if it is some kind of grenade or whatnot.
                         ThrownDevice *pTD = dynamic_cast<ThrownDevice *>(pAttachable);
                         if (pTD)
@@ -827,7 +817,7 @@ void HDFirearm::Update()
 
                     // Set the fired particle to not hit this HeldDevice's parent, if applicable
                     if (m_FireIgnoresThis)
-                        pParticle->SetWhichMOToNotHit(pRootParent, 1.0f);
+                        pParticle->SetWhichMOToNotHit(this, 1.0f);
 
                     // Set the team so alarm events that happen if these gib won't freak out the guy firing
                     pParticle->SetTeam(m_Team);
@@ -849,16 +839,17 @@ void HDFirearm::Update()
                 if (pShell)
                 {
                     tempEject = m_EjectOff.GetYFlipped(m_HFlipped);
-                    shellSpread = m_ShellSpreadRange * NormalRand();
+                    shellSpread = m_ShellSpreadRange * RandomNormalNum();
                     tempEject.DegRotate(degAimAngle + shellSpread);
                     pShell->SetPos(m_Pos + tempEject);
 
                     // ##@#@@$ TEMP
-                    shellVel.SetIntXY(pRound->GetShellVel(), 0);
+                    shellVel.SetXY(pRound->GetShellVel(), 0);
                     shellVel.DegRotate(degAimAngle + 150 * (m_HFlipped ? -1 : 1) + shellSpread);
                     pShell->SetVel(m_Vel + shellVel);
                     pShell->SetRotAngle(m_Rotation.GetRadAngle());
-                    pShell->SetAngularVel(pShell->GetAngularVel() + (m_ShellAngVelRange * NormalRand()));
+                    pShell->SetAngularVel(pShell->GetAngularVel() + (m_ShellAngVelRange * RandomNormalNum()));
+					pShell->SetHFlipped(m_HFlipped);
 //                  // Set the ejected shell to not hit this HeldDevice's parent, if applicable
 //                  if (m_FireIgnoresThis)
 //                      pParticle->SetWhichMOToNotHit(pRootParent, 1.0f);
@@ -889,7 +880,7 @@ void HDFirearm::Update()
         if (roundsFired <= 0 && m_pMagazine->IsEmpty())
         {
             m_pMagazine->SetVel(m_Vel + Vector(m_HFlipped ? -3 : 3, 0.3));
-            m_pMagazine->SetAngularVel(6 + (-6 * PosRand()));
+            m_pMagazine->SetAngularVel(6 + (-6 * RandomNum()));
             m_pMagazine->Detach();
             g_MovableMan.AddParticle(m_pMagazine);
             m_pMagazine = 0;
@@ -910,6 +901,7 @@ void HDFirearm::Update()
     {
         // Play empty pin click sound.
         m_EmptySound.Play(m_Pos);
+        m_DeactivationSound.Play(m_Pos);
         // Indicate that we have clicked once during the current activation. 
         m_AlreadyClicked = true;
 
@@ -918,18 +910,14 @@ void HDFirearm::Update()
     }
 
     // No magazine, have started to reload, so put new mag in when done
-    if (m_Reloading && !m_pMagazine && m_pMagazineReference && m_ReloadTmr.IsPastSimMS(m_ReloadTime))
-    {
-        m_pMagazine = dynamic_cast<Magazine *>(m_pMagazineReference->Clone());
-        if (m_pMagazine)
-        {
-            m_pMagazine->Attach(this);
-            m_ReloadEndSound.Play(m_Pos);
+    if (m_Reloading && !m_pMagazine && m_pMagazineReference && m_ReloadTmr.IsPastSimMS(m_ReloadTime)) {
+        SetMagazine(dynamic_cast<Magazine *>(m_pMagazineReference->Clone()));
+        m_ReloadEndSound.Play(m_Pos);
 
-            m_ActivationTmr.Reset();
-            m_ActivationTmr.Reset();
-            m_LastFireTmr.Reset();
-        }
+        m_ActivationTimer.Reset();
+        m_LastFireTmr.Reset();
+
+        if (m_Activated) { m_PreFireSound.Play(); }
 
         m_Reloading = false;
         m_DoneReloading = true;
@@ -941,6 +929,7 @@ void HDFirearm::Update()
         // Reset the click indicator.
         m_AlreadyClicked = false;
 
+        m_PreFireSound.Stop();
         // Stop any looping activation sounds
         if (m_FireSound.GetLoopSetting() == -1)// && m_FireSound.IsBeingPlayed())
             m_FireSound.Stop();
@@ -956,7 +945,7 @@ void HDFirearm::Update()
         // Set up the recoil force and shake offsets
         if (m_Recoiled)
         {
-            m_RecoilForce.SetXY(totalFireForce * m_RecoilTransmission, 0);
+            m_RecoilForce.SetXY(totalFireForce * m_JointStiffness, 0);
             m_RecoilForce = RotateOffset(m_RecoilForce);
             m_RecoilForce = -m_RecoilForce;
 
@@ -965,11 +954,7 @@ void HDFirearm::Update()
             m_RecoilOffset.SetMagnitude(1.25);
         }
 
-// TODO: This is broken, revise")
-        if (m_pParent)
-            m_pParent->SetRecoil(m_RecoilForce, m_RecoilOffset, m_Recoiled);
-        else
-            m_ImpulseForces.push_back(make_pair(m_RecoilForce, m_RecoilOffset));
+        AddImpulseForce(m_RecoilForce, m_RecoilOffset);
 
         // Display gun animation
 		if (!m_IsAnimatedManually)
@@ -980,17 +965,18 @@ void HDFirearm::Update()
 
         // Display gun flame frame.
         if (m_pFlash) {
-            m_pFlash->SetHFlipped(m_HFlipped);
-            m_pFlash->SetJointPos(m_Pos + (m_MuzzleOff.GetXFlipped(m_HFlipped) * m_Rotation));
-            m_pFlash->SetRotAngle(m_Rotation.GetRadAngle());
-            m_pFlash->SetFrame(floorf((m_pFlash->GetFrameCount()/* - 1*/) * PosRand() - 0.001));
-            m_pFlash->Update();
+            m_pFlash->SetParentOffset(m_MuzzleOff);
+            m_pFlash->SetFrame(RandomNum(0, m_pFlash->GetFrameCount() - 1));
         }
 
         // Play firing sound
         // Only start playing if it's not a looping fire sound that is already playing, and if there's a mag
-        if (!(m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed()) && m_pMagazine)
-            m_FireSound.Play(m_Pos);
+        if (m_pMagazine) {
+            if (!(m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed())) {
+                m_FireSound.Play(m_Pos);
+            }
+            m_FireEchoSound.Play(m_Pos);
+        }
     }
     else {
         m_Recoiled = false;
@@ -1008,23 +994,23 @@ void HDFirearm::Update()
                 // Max rate of the animation when fully activated and firing
                 int animDuration = m_SpriteAnimDuration;
                 // Spin up - can only spin up if mag is inserted
-                if (m_Activated && !m_Reloading && m_ActivationTmr.GetElapsedSimTimeMS() < m_ActivationDelay)
+                if (m_Activated && !m_Reloading && m_ActivationTimer.GetElapsedSimTimeMS() < m_ActivationDelay)
                 {
-                    animDuration = (int)LERP(0, m_ActivationDelay, (float)(m_SpriteAnimDuration * 10), (float)m_SpriteAnimDuration, m_ActivationTmr.GetElapsedSimTimeMS());
-                    g_AudioMan.SetSoundPitch(&m_ActiveSound, LERP(0, m_ActivationDelay, 0, 1.0, m_ActivationTmr.GetElapsedSimTimeMS()) * g_AudioMan.GetGlobalPitch());
+                    animDuration = (int)LERP(0, m_ActivationDelay, (float)(m_SpriteAnimDuration * 10), (float)m_SpriteAnimDuration, m_ActivationTimer.GetElapsedSimTimeMS());
+                    m_ActiveSound.SetPitch(LERP(0, m_ActivationDelay, 0, 1.0, m_ActivationTimer.GetElapsedSimTimeMS()));
                 }
                 // Spin down
                 if ((!m_Activated || m_Reloading) && m_LastFireTmr.GetElapsedSimTimeMS() < m_DeactivationDelay)
                 {
                     animDuration = (int)LERP(0, m_DeactivationDelay, (float)m_SpriteAnimDuration, (float)(m_SpriteAnimDuration * 10), m_LastFireTmr.GetElapsedSimTimeMS());
-                    g_AudioMan.SetSoundPitch(&m_ActiveSound, LERP(0, m_DeactivationDelay, 1.0, 0, m_LastFireTmr.GetElapsedSimTimeMS()) * g_AudioMan.GetGlobalPitch());
+                    m_ActiveSound.SetPitch(LERP(0, m_DeactivationDelay, 1.0, 0, m_LastFireTmr.GetElapsedSimTimeMS()));
                 }
 
                 if (animDuration > 0 && !(m_Reloading && m_LastFireTmr.GetElapsedSimTimeMS() >= m_DeactivationDelay))
                 {
                     float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % animDuration;
 					if (!m_IsAnimatedManually)
-	                    m_Frame = floorf((cycleTime / (float)animDuration) * (float)m_FrameCount);
+	                    m_Frame = std::floor((cycleTime / (float)animDuration) * (float)m_FrameCount);
                 }
                 else
                     m_ActiveSound.Stop();
@@ -1042,51 +1028,11 @@ void HDFirearm::Update()
     // Update fitted Magazine.
 
     if (m_pMagazine) {
-        m_pMagazine->SetHFlipped(m_HFlipped);
-        m_pMagazine->SetJointPos(m_Pos + RotateOffset(m_pMagazine->GetParentOffset()));
-        m_pMagazine->SetRotAngle(m_Rotation.GetRadAngle());
-        m_pMagazine->Update();
         // Recoil offset has to be applied after the Update or it'll get reset within the update
         m_pMagazine->SetRecoil(m_RecoilForce, m_RecoilOffset, m_Recoiled);
     }
 
-    if (!ApplyAttachableForces(m_pMagazine))
-        m_pMagazine = 0;
-
     m_FiredLastFrame = m_FireFrame;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-
-void HDFirearm::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID,
-                                 bool makeNewMOID)
-{
-    if (m_pMagazine && m_pMagazine->GetsHitByMOs())
-        m_pMagazine->UpdateMOID(MOIDIndex, m_RootMOID, false);
-
-    HeldDevice::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-void HDFirearm::GetMOIDs(std::vector<MOID> &MOIDs) const
-{
-	if (m_pMagazine && m_pMagazine->GetsHitByMOs())
-		m_pMagazine->GetMOIDs(MOIDs);
-
-	HeldDevice::GetMOIDs(MOIDs);
 }
 
 
@@ -1110,32 +1056,25 @@ float HDFirearm::EstimateDigStrenght()
 // Description:     Draws this HDFirearm's current graphical representation to a
 //                  BITMAP of choice.
 
-void HDFirearm::Draw(BITMAP *pTargetBitmap,
-                     const Vector &targetPos,
-                     DrawMode mode,
-                     bool onlyPhysical) const
-{
-    if (m_pMagazine && !m_pMagazine->IsDrawnAfterParent())
-        m_pMagazine->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (m_pFlash && m_FireFrame && !m_pFlash->IsDrawnAfterParent() && mode == g_DrawColor && !onlyPhysical)
+void HDFirearm::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
+    if (m_pFlash && m_FireFrame && !m_pFlash->IsDrawnAfterParent() && mode == g_DrawColor && !onlyPhysical) {
         m_pFlash->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
+    }
 
     HeldDevice::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-    if (m_pMagazine && m_pMagazine->IsDrawnAfterParent())
-        m_pMagazine->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (m_pFlash && m_FireFrame && m_pFlash->IsDrawnAfterParent() && mode == g_DrawColor && !onlyPhysical)
+    if (m_pFlash && m_FireFrame && m_pFlash->IsDrawnAfterParent() && mode == g_DrawColor && !onlyPhysical) {
         m_pFlash->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
+    }
 
     // Fudge the muzzle pos forward a little bit so the glow aligns nicely
     Vector muzzlePos = m_MuzzleOff;
     muzzlePos.m_X += 4;
     muzzlePos = m_Pos + RotateOffset(muzzlePos);
     // Set the screen flash effect to draw at the final post processing stage
-    if (m_FireFrame && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical && !g_SceneMan.ObscuredPoint(muzzlePos))
-		g_PostProcessMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55 + 200 * PosRand(), m_pFlash->GetEffectRotAngle());
+    if (m_FireFrame && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical && !g_SceneMan.ObscuredPoint(muzzlePos)) {
+        g_PostProcessMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55.0F + RandomNum(0.0F, 200.0F), m_pFlash->GetEffectRotAngle());
+    }
 }
 
 
@@ -1151,7 +1090,7 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
 
     // Only draw if the team viewing this is on the same team OR has seen the space where this is located
     int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-    if (viewingTeam != m_Team && viewingTeam != Activity::NOTEAM)
+    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam)
     {
         if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
             return;
@@ -1160,7 +1099,7 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
     HeldDevice::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 
     // Don't bother if the aim distance is really short, or not held
-    if (!m_pParent || m_SharpAim < 0.15)
+    if (!m_Parent || m_SharpAim < 0.15)
         return;
 
     float sharpLength = m_MaxSharpLength * m_SharpAim;
@@ -1187,7 +1126,7 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
         aimPoint4 += m_Pos;
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
-        int glow = 155 + 100 * PosRand();
+		int glow = (155 + RandomNum(0, 100));
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint1, YellowDot, glow);
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
@@ -1226,7 +1165,7 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
         aimPoint3 += m_Pos;
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
-        int glow = 55 + 100 * PosRand();
+        int glow = (55 + RandomNum(0, 100));
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
 		g_PostProcessMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
 

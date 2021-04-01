@@ -1,426 +1,121 @@
 #ifndef _RTETURRET_
 #define _RTETURRET_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            Turret.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Header file for the Turret class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
-#include "Attachable.h"
-
-namespace RTE
-{
-
-class HeldDevice;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           Turret
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A detatchable turret pod that can hold HeldDevices (weapons, tools)
-// Parent(s):       Attachable.
-// Class history:   10/24/2007 Turret created.
-
-class Turret:
-    public Attachable
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
-
-public:
-
-
-// Concrete allocation and cloning definitions
-EntityAllocation(Turret)
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     Turret
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Constructor method used to instantiate a Turret object in system
-//                  memory. Create() should be called before using the object.
-// Arguments:       None.
-
-    Turret() { Clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Destructor:      ~Turret
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destructor method used to clean up a Turret object before deletion
-//                  from system memory.
-// Arguments:       None.
-
-    virtual ~Turret() { Destroy(true); }
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the Turret object ready for use.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create();
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a Turret to be identical to another, by deep copy.
-// Arguments:       A reference to the Turret to deep copy.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    int Create(const Turret &reference);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets the entire Turret, including its inherited members, to their
-//                  default settings or values.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void Reset() { Clear(); Attachable::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this Turret to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the Turret will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the SceneLayer object.
-// Arguments:       Whether to only destroy the members defined in this derived class, or
-//                  to destroy all inherited members also.
-// Return value:    None.
-
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this Turret, including the mass of any device it
-//                  may be holding.
-// Arguments:       None.
-// Return value:    A float describing the mass value in Kilograms (kg).
-
-    virtual float GetMass() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMountedDevice
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the HeldDevice currently held by this Turret, IF the thing held is
-//                  a HeldDevice, that is. Ownership is NOT transferred.
-// Arguments:       None.
-// Return value:    A pointer to the currently held HeldDevice. 0 is returned if no
-//                  HeldDevice is currently held (even though an MO may be held).
-
-    HeldDevice * GetMountedDevice() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsDeviceMounted
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether a device is being held or not. Faster than using
-//                  GetMountedDevice() for the purpose.
-// Arguments:       None.
-// Return value:    A bool indicating whether any device is held by this Turret.
-
-    bool IsDeviceMounted() const { return m_pMountedMO && m_pMountedMO->IsDevice(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsHeldDeviceMounted
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether a HeldDevice is held or not. Faster than using
-//                  GetMountedDevice() for the purpose.
-// Arguments:       None.
-// Return value:    A bool indicating whether a HeldDevice is held by this Turret.
-
-    bool IsHeldDeviceMounted() const { return m_pMountedMO && m_pMountedMO->IsHeldDevice(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsThrownDeviceMounted
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether a ThrownDevice is held or not. Faster than using
-//                  GetMountedDevice() for the purpose.
-// Arguments:       None.
-// Return value:    A bool indicating whether a ThrownDevice is held by this Turret.
-
-    bool IsThrownDeviceMounted() const { return m_pMountedMO && m_pMountedMO->IsThrownDevice(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMountedMO
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the MovableObject currently held by this Turret. Ownership is NOT
-//                  transferred.
-// Arguments:       None.
-// Return value:    A pointer to the currently held MovableObject. 0 is returned if no
-//                  MovableObject is currently held.
-
-    MovableObject * GetMountedMO() const { return m_pMountedMO; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-// Arguments:       A MOID specifying the MOID that this MovableObject is
-//                  assigned for this frame.
-// Return value:    None.
-
-    virtual void SetID(const MOID newID);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetMountedMO
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Replaces the MovableObject currently held by this Turret with a new
-//                  one. Ownership IS transferred. The currently held MovableObject
-//                  (if there is one) will be dropped and become a detached MovableObject,
-// Arguments:       A pointer to the new MovableObject to hold. Ownership IS transferred.
-// Return value:    None.
-
-    void SetMountedMO(MovableObject *newHeldMO);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ReleaseMountedMO
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this arm let go of the MovableObject currently held. Ownership
-//                  IS transferred!
-// Arguments:       None.
-// Return value:    A pointer to the up to this point held MovableObject. 0 is returned
-//                  if no MovableObject is currently held. Ownership IS transferred!
-
-    MovableObject * ReleaseMountedMO();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DropEverything
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this arm let go of anyhthing it holds and give it to the
-//                  MovableMan. Ownership is transferred to MovableMan.
-// Arguments:       None.
-// Return value:    A pointer to the up to this point held anything. 0 is returned if
-//                  nothing is currently held. Ownership is NOT transferred, but given
-//                  to MovableMan.
-
-    MovableObject * DropEverything();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SwapMountedMO
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Replaces the MovableObject currently held by this Turret with a new
-//                  one, and returns the replaced one. Ownership IS transferred both ways.
-// Arguments:       A pointer to the new MovableObject to hold. Ownership IS transferred.
-// Return value:    A pointer to the previously held MO. Ownership IS transferred.
-
-    MovableObject * SwapMountedMO(MovableObject *newMO);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsDeviceMounted
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this Turret is holding a HeldDevice or not.
-// Arguments:       None.
-// Return value:    Whether this Turret is holding a HeldDevice or not.
-
-    bool IsDeviceMounted() { return m_pMountedMO && m_pMountedMO->IsDevice(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsSomethingMounted
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this Turret is holding an MO or not.
-// Arguments:       None.
-// Return value:    Whether this Turret is holding anyhting.
-
-    bool IsSomethingMounted() { return m_pMountedMO != 0; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetMountedRotOffset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the current rotational offset of the mounted device from the rest
-//                  of the turret
-// Arguments:       The new offset angle in radians, relative from the rest of the turret.
-// Return value:    None.
-
-    virtual void SetMountedRotOffset(float newOffsetAngle) { m_MountedRotOffset = newOffsetAngle; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-// Arguments:       The impulse (kg * m/s) of the impact causing the gibbing to happen.
-//					The internal blast impulse which will push the gibs away from the center.
-//                  A pointer to an MO which the gibs shuold not be colliding with!
-// Return value:    None.
-
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this MovableObject. Supposed to be done every frame.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void Update();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this Turret's current graphical representation to a
-//                  BITMAP of choice.
-// Arguments:       A pointer to a BITMAP to draw on.
-//                  The absolute position of the target bitmap's upper left corner in the Scene.
-//                  In which mode to draw in. See the DrawMode enumeration for the modes.
-//                  Whether to not draw any extra 'ghost' items of this MovableObject,
-//                  indicator arrows or hovering HUD text and so on.
-// Return value:    None.
-
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
-
-protected:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame,
-//                  and then finally draws its and its childrens' MOID silhouette onto a
-//                  BITMAP of choice.
-// Arguments:       The MOID index to register itself and its children in.
-//                  The MOID of the root MO of this MO, ie the highest parent of this MO.
-//                  0 means that this MO is the root, ie it is owned by MovableMan.
-//                  Whether this MO should make a new MOID to use for itself, or to use
-//                  the same as the last one in the index (presumably its parent),
-// Return value:    None.
-
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID = g_NoMOID,
-                                 bool makeNewMOID = true);
-
-
-    // Member variables
-    static Entity::ClassInfo m_sClass;
-    // The MovableObject held, updated and held by this Turret, if any.
-    MovableObject *m_pMountedMO;
-    // The relative offset in angle (radians) of the mounted device from this' rotation
-    float m_MountedRotOffset;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
-private:
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this Turret, effectively
-//                  resetting the members of this abstraction level only.
-// Arguments:       None.
-// Return value:    None.
-
-    void Clear();
-
-
-    // Disallow the use of some implicit methods.
-    Turret(const Turret &reference);
-    Turret & operator=(const Turret &rhs);
-
-};
-
-} // namespace RTE
-
-#endif // File
+#include "HeldDevice.h"
+
+namespace RTE {
+
+	class HeldDevice;
+
+	/// <summary>
+	/// A detachable turret pod that can hold HeldDevices.
+	/// </summary>
+	class Turret : public Attachable {
+
+	public:
+
+		EntityAllocation(Turret)
+		SerializableOverrideMethods
+		ClassInfoGetters
+
+#pragma region Creation
+		/// <summary>
+		/// Constructor method used to instantiate a Turret object in system memory. Create() should be called before using the object.
+		/// </summary>
+		Turret() { Clear(); }
+
+		/// <summary>
+		/// Creates a Turret to be identical to another, by deep copy.
+		/// </summary>
+		/// <param name="reference">A reference to the Turret to deep copy.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create(const Turret &reference);
+#pragma endregion
+
+#pragma region Destruction
+		/// <summary>
+		/// Destructor method used to clean up a Turret object before deletion from system memory.
+		/// </summary>
+		~Turret() override { Destroy(true); }
+
+		/// <summary>
+		/// Destroys and resets (through Clear()) the Turret object.
+		/// </summary>
+		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
+		void Destroy(bool notInherited = false) override { if (!notInherited) { Attachable::Destroy(); } Clear(); }
+
+		/// <summary>
+		/// Resets the entire Turret, including its inherited members, to their default settings or values.
+		/// </summary>
+		void Reset() override { Clear(); Attachable::Reset(); }
+#pragma endregion
+
+#pragma region Getters and Setters
+		/// <summary>
+		/// Indicates whether a HeldDevice is mounted or not.
+		/// </summary>
+		/// <returns>Whether or not a HeldDevice is mounted on this Turret.</returns>
+		bool HasMountedDevice() const { return m_MountedDevice != nullptr; }
+
+		/// <summary>
+		/// Gets the mounted HeldDevice of this Turret.
+		/// </summary>
+		/// <returns>A pointer to mounted HeldDevice of this Turret. Ownership is NOT transferred!</returns>
+		HeldDevice * GetMountedDevice() const { return m_MountedDevice; }
+
+		/// <summary>
+		/// Sets the mounted HeldDevice for this Turret. Ownership IS transferred!
+		/// The currently mounted HeldDevice (if there is one) will be dropped and added to MovableMan.
+		/// </summary>
+		/// <param name="newMountedDevice">The new HeldDevice to use.</param>
+		void SetMountedDevice(HeldDevice *newMountedDevice);
+
+		/// <summary>
+		/// Indicates whether a ThrownDevice is mounted or not.
+		/// </summary>
+		/// <returns>Whether or not a ThrownDevice is mounted on this Turret.</returns>
+		bool IsThrownDeviceMounted() const { return m_MountedDevice && m_MountedDevice->IsThrownDevice(); }
+
+		/// <summary>
+		/// Sets the current rotational offset of the mounted HeldDevice from the rest of the Turret.
+		/// </summary>
+		/// <param name="newOffsetAngle">The new offset angle in radians, relative from the rest of the turret.</param>
+		void SetMountedDeviceRotOffset(float newOffsetAngle) { m_MountedDeviceRotOffset = newOffsetAngle; }
+#pragma endregion
+
+#pragma region Override Methods
+		/// <summary>
+		/// Updates this MovableObject. Supposed to be done every frame.
+		/// </summary>
+		void Update() override;
+
+		/// <summary>
+		/// Draws this Turret's current graphical representation to a BITMAP of choice.
+		/// </summary>
+		/// <param name="pTargetBitmap">A pointer to a BITMAP to draw on.</param>
+		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
+		/// <param name="mode">In which mode to draw in. See the DrawMode enumeration for the modes.</param>
+		/// <param name="onlyPhysical">Whether to not draw any extra 'ghost' items of this MovableObject, indicator arrows or hovering HUD text and so on.</param>
+		void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
+#pragma endregion
+
+	protected:
+
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
+
+		HeldDevice *m_MountedDevice; //!< Pointer to the mounted HeldDevice of this Turret, if any.
+		float m_MountedDeviceRotOffset; //!< The relative offset angle (in radians) of the mounted HeldDevice from this Turret's rotation.
+
+	private:
+
+		/// <summary>
+		/// Clears all the member variables of this Turret, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
+
+		// Disallow the use of some implicit methods.
+		Turret(const Turret &reference) = delete;
+		Turret & operator=(const Turret &rhs) = delete;
+	};
+}
+#endif

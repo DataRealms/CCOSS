@@ -14,7 +14,7 @@ namespace RTE {
 	/// </summary>
 	struct PathNode {
 
-		Vector Pos; //!< Absolute position of the center of this node in the scene.    
+		Vector Pos; //!< Absolute position of the center of this node in the scene.
 		bool IsChanged; //!< Whether this has been updated since last call to Reset the pather.
 
 		/// <summary>
@@ -72,22 +72,22 @@ namespace RTE {
 		/// <param name="nodeDimension">The width and height in scene pixels that of each node should represent.</param>
 		/// <param name="allocate">The block size that the node cache is allocated from. Should be about a fourth of the total number of nodes.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(Scene *scene, int nodeDimension = 20, unsigned int allocate = 2000);
+		int Create(Scene *scene, int nodeDimension = 20, unsigned int allocate = 2000);
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up a PathFinder object before deletion.
 		/// </summary>
-		virtual ~PathFinder() { Destroy(); }
+		~PathFinder() override { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) this PathFinder object.
 		/// </summary>
-		virtual void Destroy();
+		void Destroy();
 
 		/// <summary>
-		/// Resets the entire Box object to the default settings or values.
+		/// Resets the entire PathFinder object to the default settings or values.
 		/// </summary>
 		void Reset() { Clear(); }
 #pragma endregion
@@ -119,21 +119,21 @@ namespace RTE {
 		/// Implementation of the abstract interface of Graph.
 		/// Gets the least possible cost to get from node A to B, if it all was air.
 		/// </summary>
-		/// <param name="pStartState">Pointer to node to start from. OINT.</param>
-		/// <param name="pEndState">Node to end up at. OINT.</param>
+		/// <param name="startState">Pointer to node to start from. OWNERSHIP IS NOT TRANSFERRED!</param>
+		/// <param name="endState">Node to end up at. OWNERSHIP IS NOT TRANSFERRED!</param>
 		/// <returns>The cost of the absolutely fastest possible way between the two points, as if traveled through air all the way.</returns>
-		virtual float LeastCostEstimate(void *startState, void *endState);
+		float LeastCostEstimate(void *startState, void *endState) override;
 
 		/// <summary>
 		/// Implementation of the abstract interface of Graph.
 		/// Gets the cost to go to any adjacent node of the one passed in.
 		/// </summary>
-		/// <param name="state">Pointer to node to get to cost of all adjacents for. OINT.</param>
-		/// <param name="pAdjacentList">
+		/// <param name="state">Pointer to node to get to cost of all adjacents for. OWNERSHIP IS NOT TRANSFERRED!</param>
+		/// <param name="adjacentList">
 		/// An empty vector which will be filled out with all the valid nodes adjacent to the one passed in.
 		/// If at non-wrapping edge of seam, those non existent nodes won't be added.
 		/// </param>
-		virtual void AdjacentCost(void *state, std::vector<micropather::StateCost> *adjacentList);
+		void AdjacentCost(void *state, std::vector<micropather::StateCost> *adjacentList) override;
 #pragma endregion
 
 #pragma region Misc
@@ -142,7 +142,7 @@ namespace RTE {
 		/// Since void* aren't really human readable, this will print out some concise info without an ending newline.
 		/// </summary>
 		/// <param name="state">The state to print out info about.</param>
-		virtual void PrintStateInfo(void *state) { ; }
+		void PrintStateInfo(void *state) override {}
 #pragma endregion
 
 	protected:
@@ -170,7 +170,7 @@ namespace RTE {
 		/// Helper function for updating all the values of cost edges going out from a specific node.
 		/// This does NOT update the pather, which is required before solving more paths after calling this.
 		/// </summary>
-		/// <param name="node">The node to update all costs of. OINT. It's safe to pass 0 here.</param>
+		/// <param name="node">The node to update all costs of. It's safe to pass 0 here. OWNERSHIP IS NOT TRANSFERRED!</param>
 		void UpdateNodeCosts(PathNode *node);
 
 		/// <summary>

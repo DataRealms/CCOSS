@@ -12,15 +12,8 @@
 // Inclusions of header files
 
 #include "Loadout.h"
-
 #include "PresetMan.h"
-
-#include "DataModule.h"
-#include "SceneObject.h"
 #include "MovableObject.h"
-#include "MOSprite.h"
-#include "HeldDevice.h"
-#include "AHuman.h"
 #include "ACraft.h"
 
 namespace RTE {
@@ -83,7 +76,7 @@ int Loadout::Create(const Loadout &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int Loadout::ReadProperty(std::string propName, Reader &reader)
+int Loadout::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     // Need to load all this stuff without the assumption that it all is available. Mods might have changed etc so things might still not be around, and that's ok.
     if (propName == "DeliveryCraft")
@@ -127,7 +120,6 @@ int Loadout::ReadProperty(std::string propName, Reader &reader)
         pCargo = 0;
     }
     else
-        // See if the base class(es) can find a match instead
         return Entity::ReadProperty(propName, reader);
 
     return 0;

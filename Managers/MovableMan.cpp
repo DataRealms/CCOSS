@@ -17,7 +17,7 @@
 #include "PresetMan.h"
 #include "AHuman.h"
 #include "MOPixel.h"
-#include "Attachable.h"
+#include "HeldDevice.h"
 #include "SLTerrain.h"
 #include "Controller.h"
 #include "AtomGroup.h"
@@ -27,13 +27,11 @@
 
 namespace RTE {
 
-const string MovableMan::m_ClassName = "MovableMan";
+const string MovableMan::c_ClassName = "MovableMan";
 
 
 // Comparison functor for sorting movable objects by their X position using STL's sort
-struct MOXPosComparison:
-    public std::binary_function<MovableObject *, MovableObject *, bool>
-{
+struct MOXPosComparison {
     bool operator()(MovableObject *pRhs, MovableObject *pLhs) { return pRhs->GetPos().m_X < pLhs->GetPos().m_X; }
 };
 
@@ -52,19 +50,18 @@ void MovableMan::Clear()
     m_AddedActors.clear();
     m_AddedItems.clear();
     m_AddedParticles.clear();
-    m_ActorRoster[Activity::TEAM_1].clear();
-    m_ActorRoster[Activity::TEAM_2].clear();
-    m_ActorRoster[Activity::TEAM_3].clear();
-    m_ActorRoster[Activity::TEAM_4].clear();
-    m_SortTeamRoster[Activity::TEAM_1] = false;
-    m_SortTeamRoster[Activity::TEAM_2] = false;
-    m_SortTeamRoster[Activity::TEAM_3] = false;
-    m_SortTeamRoster[Activity::TEAM_4] = false;
+    m_ActorRoster[Activity::TeamOne].clear();
+    m_ActorRoster[Activity::TeamTwo].clear();
+    m_ActorRoster[Activity::TeamThree].clear();
+    m_ActorRoster[Activity::TeamFour].clear();
+    m_SortTeamRoster[Activity::TeamOne] = false;
+    m_SortTeamRoster[Activity::TeamTwo] = false;
+    m_SortTeamRoster[Activity::TeamThree] = false;
+    m_SortTeamRoster[Activity::TeamFour] = false;
     m_ValiditySearchResults.clear();
     m_AddedAlarmEvents.clear();
     m_AlarmEvents.clear();
     m_MOIDIndex.clear();
-    m_AGResolution = 1;
     m_SplashRatio = 0.75;
     m_MaxDroppedItems = 25;
     m_SloMoTimer.Reset();
@@ -80,7 +77,7 @@ void MovableMan::Clear()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes the MovableMan object ready for use.
 
-int MovableMan::Create()
+int MovableMan::Initialize()
 {
 // TODO: Increase this number, or maybe only for certain classes?
     Entity::ClassInfo::FillAllPools();
@@ -101,7 +98,7 @@ int MovableMan::Create()
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int MovableMan::ReadProperty(std::string propName, Reader &reader)
+int MovableMan::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "AddEffect")
         g_PresetMan.GetEntityPreset(reader);
@@ -111,22 +108,9 @@ int MovableMan::ReadProperty(std::string propName, Reader &reader)
         g_PresetMan.GetEntityPreset(reader);
     else if (propName == "AddActor")
         g_PresetMan.GetEntityPreset(reader);
-    else if (propName == "DefaultAtomGroupResolution")
-        reader >> m_AGResolution;
     else if (propName == "SplashRatio")
         reader >> m_SplashRatio;
-    else if (propName == "MaxUnheldItems")
-        reader >> m_MaxDroppedItems;
-    else if (propName == "SloMoThreshold")
-        reader >> m_SloMoThreshold;
-    else if (propName == "SloMoDurationMS")
-        reader >> m_SloMoDuration;
-    else if (propName == "EnableParticleSettling")
-        reader >> m_SettlingEnabled;
-    else if (propName == "EnableMOSubtraction")
-        reader >> m_MOSubtractionEnabled;
     else
-        // See if the base class(es) can find a match instead
         return Serializable::ReadProperty(propName, reader);
 
     return 0;
@@ -178,16 +162,11 @@ void MovableMan::Destroy()
 // Description:     Gets a MO from its MOID. Note that MOID's are only valid during the
 //                  same frame as they were assigned to the MOs!
 
-MovableObject * MovableMan::GetMOFromID(MOID whichID)
-{
-    RTEAssert(whichID == g_NoMOID || (whichID >= 0 && whichID < m_MOIDIndex.size()), "MOID out of bounds!");
-
-    if (whichID != g_NoMOID && whichID != 0 && whichID < m_MOIDIndex.size())
-    {
-        return m_MOIDIndex[whichID];
-    }
-    
-    return 0;
+MovableObject * MovableMan::GetMOFromID(MOID whichID) {
+	if (whichID != g_NoMOID && whichID != 0 && whichID < m_MOIDIndex.size()) {
+		return m_MOIDIndex[whichID];
+	}
+	return nullptr;
 }
 
 
@@ -242,14 +221,14 @@ void MovableMan::PurgeAllMOs()
     m_AddedActors.clear();
     m_AddedItems.clear();
     m_AddedParticles.clear();
-    m_ActorRoster[Activity::TEAM_1].clear();
-    m_ActorRoster[Activity::TEAM_2].clear();
-    m_ActorRoster[Activity::TEAM_3].clear();
-    m_ActorRoster[Activity::TEAM_4].clear();
-    m_SortTeamRoster[Activity::TEAM_1] = false;
-    m_SortTeamRoster[Activity::TEAM_2] = false;
-    m_SortTeamRoster[Activity::TEAM_3] = false;
-    m_SortTeamRoster[Activity::TEAM_4] = false;
+    m_ActorRoster[Activity::TeamOne].clear();
+    m_ActorRoster[Activity::TeamTwo].clear();
+    m_ActorRoster[Activity::TeamThree].clear();
+    m_ActorRoster[Activity::TeamFour].clear();
+    m_SortTeamRoster[Activity::TeamOne] = false;
+    m_SortTeamRoster[Activity::TeamTwo] = false;
+    m_SortTeamRoster[Activity::TeamThree] = false;
+    m_SortTeamRoster[Activity::TeamFour] = false;
     m_ValiditySearchResults.clear();
     m_AddedAlarmEvents.clear();
     m_AlarmEvents.clear();
@@ -383,7 +362,7 @@ Actor * MovableMan::GetPrevActorInGroup(std::string group, Actor *pBeforeThis)
 
 Actor * MovableMan::GetNextTeamActor(int team, Actor *pAfterThis)
 {
-    if (team < 0 || team >= Activity::MAXTEAMCOUNT || m_ActorRoster[team].empty())
+    if (team < Activity::TeamOne || team >= Activity::MaxTeamCount || m_ActorRoster[team].empty())
         return 0;
 /*
     // Begin at the beginning
@@ -468,7 +447,7 @@ Actor * MovableMan::GetNextTeamActor(int team, Actor *pAfterThis)
 
 Actor * MovableMan::GetPrevTeamActor(int team, Actor *pBeforeThis)
 {
-    if (team < 0 || team >= Activity::MAXTEAMCOUNT || m_Actors.empty() ||  m_ActorRoster[team].empty())
+    if (team < Activity::TeamOne || team >= Activity::MaxTeamCount || m_Actors.empty() ||  m_ActorRoster[team].empty())
         return 0;
 /* Obsolete, now uses team rosters which are sorted
     // Begin at the reverse beginning
@@ -553,7 +532,7 @@ Actor * MovableMan::GetPrevTeamActor(int team, Actor *pBeforeThis)
 
 Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, float &getDistance, const Actor *pExcludeThis)
 {
-    if (team < Activity::NOTEAM || team >= Activity::MAXTEAMCOUNT || m_Actors.empty() ||  m_ActorRoster[team].empty())
+    if (team < Activity::NoTeam || team >= Activity::MaxTeamCount || m_Actors.empty() ||  m_ActorRoster[team].empty())
         return 0;
 
     Activity *pActivity = g_ActivityMan.GetActivity();
@@ -564,11 +543,11 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
     Actor *pClosestActor = 0;
 
     // If we're looking for a noteam actor, then go through the entire actor list instead
-    if (team == Activity::NOTEAM)
+    if (team == Activity::NoTeam)
     {
         for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
         {
-            if ((*aIt) == pExcludeThis || (*aIt)->GetTeam() != Activity::NOTEAM)
+            if ((*aIt) == pExcludeThis || (*aIt)->GetTeam() != Activity::NoTeam)
                 continue;
 
             distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
@@ -615,7 +594,7 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
 
 Actor * MovableMan::GetClosestEnemyActor(int team, const Vector &scenePoint, int maxRadius, Vector &getDistance)
 {
-    if (team < Activity::NOTEAM || team >= Activity::MAXTEAMCOUNT || m_Actors.empty() ||  m_ActorRoster[team].empty())
+    if (team < Activity::NoTeam || team >= Activity::MaxTeamCount || m_Actors.empty() ||  m_ActorRoster[team].empty())
         return 0;
     
     Activity *pActivity = g_ActivityMan.GetActivity();
@@ -693,7 +672,7 @@ Actor * MovableMan::GetClosestActor(Vector &scenePoint, int maxRadius, float &ge
 
 Actor * MovableMan::GetClosestBrainActor(int team, const Vector &scenePoint) const
 {
-    if (team < Activity::TEAM_1 || team >= Activity::MAXTEAMCOUNT || m_Actors.empty() ||  m_ActorRoster[team].empty())
+    if (team < Activity::TeamOne || team >= Activity::MaxTeamCount || m_Actors.empty() ||  m_ActorRoster[team].empty())
         return 0;
 
     Vector distanceVec;
@@ -729,7 +708,7 @@ Actor * MovableMan::GetClosestBrainActor(int team, const Vector &scenePoint) con
 
 Actor * MovableMan::GetClosestOtherBrainActor(int notOfTeam, const Vector &scenePoint) const
 {
-    if (notOfTeam < Activity::TEAM_1 || notOfTeam >= Activity::MAXTEAMCOUNT || m_Actors.empty())
+    if (notOfTeam < Activity::TeamOne || notOfTeam >= Activity::MaxTeamCount || m_Actors.empty())
         return 0;
 
     float testDistance = g_SceneMan.GetSceneDim().GetLargest();
@@ -737,7 +716,7 @@ Actor * MovableMan::GetClosestOtherBrainActor(int notOfTeam, const Vector &scene
     Actor *pClosestBrain = 0;
     Actor *pContenderBrain = 0;
 
-    for (int t = Activity::TEAM_1; t < g_ActivityMan.GetActivity()->GetTeamCount(); ++t)
+    for (int t = Activity::TeamOne; t < g_ActivityMan.GetActivity()->GetTeamCount(); ++t)
     {
         if (t != notOfTeam)
         {
@@ -772,12 +751,12 @@ Actor * MovableMan::GetUnassignedBrain(int team) const
     }
 
     // Also need to look through all the actors added this frame, one might be a brain.
-    int actorTeam = Activity::NOTEAM;
+    int actorTeam = Activity::NoTeam;
     for (deque<Actor *>::const_iterator aaIt = m_AddedActors.begin(); aaIt != m_AddedActors.end(); ++aaIt)
     {
         int actorTeam = (*aaIt)->GetTeam();
         // Accept no-team brains too - ACTUALLY, DON'T
-        if ((actorTeam == team/* || actorTeam == Activity::NOTEAM*/) && (*aaIt)->HasObjectInGroup("Brains") && !g_ActivityMan.GetActivity()->IsAssignedBrain(*aaIt))
+        if ((actorTeam == team/* || actorTeam == Activity::NoTeam*/) && (*aaIt)->HasObjectInGroup("Brains") && !g_ActivityMan.GetActivity()->IsAssignedBrain(*aaIt))
             return *aaIt;
     }
 
@@ -792,21 +771,21 @@ Actor * MovableMan::GetUnassignedBrain(int team) const
 //                  best way to add it is. E.g. if it's an Actor, it will be added as such.
 //                  Ownership IS transferred!
 
-bool MovableMan::AddMO(MovableObject *pMOToAdd)
-{
-    if (!pMOToAdd)
+bool MovableMan::AddMO(MovableObject *pMOToAdd) {
+    if (!pMOToAdd) {
         return false;
+    }
 
     pMOToAdd->SetAsAddedToMovableMan();
 
     // Find out what kind it is and apply accordingly
-    if (Actor *pActor = dynamic_cast<Actor *>(pMOToAdd))
-    {
+    if (Actor *pActor = dynamic_cast<Actor *>(pMOToAdd)) {
         AddActor(pActor);
         return true;
-    }
-    else
-    {
+    } else if (HeldDevice *pHeldDevice = dynamic_cast<HeldDevice *>(pMOToAdd)) {
+        AddItem(pHeldDevice);
+        return true;
+    } else {
         AddParticle(pMOToAdd);
         return true;
     }
@@ -1040,7 +1019,7 @@ void MovableMan::AddActorToTeamRoster(Actor * pActorToAdd)
 	// Also re-set the TEam so that the Team Icons get set up properly
 	pActorToAdd->SetTeam(team);
 	// Only add to a roster if it's on a team AND is controllable (eg doors are not)
-	if (team >= Activity::TEAM_1 && team < Activity::MAXTEAMCOUNT && pActorToAdd->IsControllable())
+	if (team >= Activity::TeamOne && team < Activity::MaxTeamCount && pActorToAdd->IsControllable())
 	{
 		m_ActorRoster[pActorToAdd->GetTeam()].push_back(pActorToAdd);
 		m_ActorRoster[pActorToAdd->GetTeam()].sort(MOXPosComparison());
@@ -1063,7 +1042,7 @@ void MovableMan::RemoveActorFromTeamRoster(Actor * pActorToRem)
 	int team = pActorToRem->GetTeam();
 
 	// Remove from roster as well
-	if (team >= Activity::TEAM_1 && team < Activity::MAXTEAMCOUNT)
+	if (team >= Activity::TeamOne && team < Activity::MaxTeamCount)
 		m_ActorRoster[team].remove(pActorToRem);
 }
 
@@ -1432,7 +1411,7 @@ int MovableMan::EjectAllActors(list<SceneObject *> &actorList, int onlyTeam, boo
     for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
     {
         // Only grab ones of a specific team; delete all others
-        if ((onlyTeam == Activity::NOTEAM || (*aIt)->GetTeam() == onlyTeam) && (!noBrains || !(*aIt)->HasObjectInGroup("Brains")))
+        if ((onlyTeam == Activity::NoTeam || (*aIt)->GetTeam() == onlyTeam) && (!noBrains || !(*aIt)->HasObjectInGroup("Brains")))
         {
             actorList.push_back((*aIt));
             addedCount++;
@@ -1447,7 +1426,7 @@ int MovableMan::EjectAllActors(list<SceneObject *> &actorList, int onlyTeam, boo
     for (deque<Actor *>::iterator aIt = m_AddedActors.begin(); aIt != m_AddedActors.end(); ++aIt)
     {
         // Only grab ones of a specific team; delete all others
-        if ((onlyTeam == Activity::NOTEAM || (*aIt)->GetTeam() == onlyTeam) && (!noBrains || !(*aIt)->HasObjectInGroup("Brains")))
+        if ((onlyTeam == Activity::NoTeam || (*aIt)->GetTeam() == onlyTeam) && (!noBrains || !(*aIt)->HasObjectInGroup("Brains")))
         {
             actorList.push_back((*aIt));
             addedCount++;
@@ -1459,7 +1438,7 @@ int MovableMan::EjectAllActors(list<SceneObject *> &actorList, int onlyTeam, boo
     m_AddedActors.clear();
 
     // Also clear the actor rosters
-    for (int team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; ++team)
+    for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
         m_ActorRoster[team].clear();
 
     return addedCount;
@@ -1504,7 +1483,7 @@ int MovableMan::EjectAllItems(list<SceneObject *> &itemList)
 
 int MovableMan::GetTeamMOIDCount(int team) const
 {
-	if (team > Activity::NOTEAM && team < Activity::MAXTEAMCOUNT)
+	if (team > Activity::NoTeam && team < Activity::MaxTeamCount)
 		return m_TeamMOIDCount[team];
 	else
 		return 0;
@@ -1521,7 +1500,7 @@ void MovableMan::OpenAllDoors(bool open, int team)
     for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
     {
         pDoor = dynamic_cast<ADoor *>(*aIt);
-        if (pDoor && (team == Activity::NOTEAM || pDoor->GetTeam() == team))
+        if (pDoor && (team == Activity::NoTeam || pDoor->GetTeam() == team))
         {
             // Update first so the door attachable piece is in the right position and doesn't take out a werid chunk of the terrain
             pDoor->Update();
@@ -1536,7 +1515,7 @@ void MovableMan::OpenAllDoors(bool open, int team)
     for (deque<Actor *>::iterator aIt = m_AddedActors.begin(); aIt != m_AddedActors.end(); ++aIt)
     {
         pDoor = dynamic_cast<ADoor *>(*aIt);
-        if (pDoor && (team == Activity::NOTEAM || pDoor->GetTeam() == team))
+        if (pDoor && (team == Activity::NoTeam || pDoor->GetTeam() == team))
         {
             // Update first so the door attachable piece is in the right position and doesn't take out a werid chunk of the terrain
             pDoor->Update();
@@ -1563,7 +1542,7 @@ void MovableMan::OverrideMaterialDoors(bool enable, int team)
     for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
     {
         pDoor = dynamic_cast<ADoor *>(*aIt);
-        if (pDoor && (team == Activity::NOTEAM || pDoor->GetTeam() == team))
+        if (pDoor && (team == Activity::NoTeam || pDoor->GetTeam() == team))
         {
             // Update first so the door attachable piece is in the right position and doesn't take out a werid chunk of the terrain
             pDoor->Update();
@@ -1574,7 +1553,7 @@ void MovableMan::OverrideMaterialDoors(bool enable, int team)
     for (deque<Actor *>::iterator aIt = m_AddedActors.begin(); aIt != m_AddedActors.end(); ++aIt)
     {
         pDoor = dynamic_cast<ADoor *>(*aIt);
-        if (pDoor && (team == Activity::NOTEAM || pDoor->GetTeam() == team))
+        if (pDoor && (team == Activity::NoTeam || pDoor->GetTeam() == team))
         {
             // Update first so the door attachable piece is in the right position and doesn't take out a werid chunk of the terrain
             pDoor->Update();
@@ -1656,10 +1635,10 @@ void MovableMan::Update()
 		g_PostProcessMan.ClearScenePostEffects();
 
     // Reset the draw HUD roster line settings
-    m_SortTeamRoster[Activity::TEAM_1] = false;
-    m_SortTeamRoster[Activity::TEAM_2] = false;
-    m_SortTeamRoster[Activity::TEAM_3] = false;
-    m_SortTeamRoster[Activity::TEAM_4] = false;
+    m_SortTeamRoster[Activity::TeamOne] = false;
+    m_SortTeamRoster[Activity::TeamTwo] = false;
+    m_SortTeamRoster[Activity::TeamThree] = false;
+    m_SortTeamRoster[Activity::TeamFour] = false;
     // Clear out MO finding optimization buffer - will be added to each frame as thigns are searched for as curently exisitng in the manager
     m_ValiditySearchResults.clear();
 
@@ -1685,7 +1664,7 @@ void MovableMan::Update()
 
     {
         // Travel Actors
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS1);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsTravel);
         {
             for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
             {
@@ -1707,7 +1686,7 @@ void MovableMan::Update()
                 (*aIt)->NewFrame();
             }
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS1);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsTravel);
 
         // Travel items
         {
@@ -1725,7 +1704,7 @@ void MovableMan::Update()
         }
 
         // Travel particles
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS1);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesTravel);
         {
             for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
             {
@@ -1739,7 +1718,7 @@ void MovableMan::Update()
                 (*parIt)->NewFrame();
             }
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS1);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesTravel);
 
         g_SceneMan.UnlockScene();
     }
@@ -1751,20 +1730,16 @@ void MovableMan::Update()
         g_SceneMan.LockScene();
 
         // Actors
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS2);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
         {
             for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
             {
-				//g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS2);
 				(*aIt)->Update();
-				//g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_PASS2);
-				//g_FrameMan.StartPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
                 (*aIt)->UpdateScripts();
-				//g_FrameMan.StopPerformanceMeasurement(FrameMan::PERF_ACTORS_AI);
                 (*aIt)->ApplyImpulses();
             }
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS2);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsUpdate);
 
         // Items
         {
@@ -1783,7 +1758,7 @@ void MovableMan::Update()
         }
 
         // Particles
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS2);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
         {
             for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
             {
@@ -1799,7 +1774,7 @@ void MovableMan::Update()
                 }
             }
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS2);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
     }
 
     ///////////////////////////////////////////////////
@@ -1872,7 +1847,7 @@ void MovableMan::Update()
 
         // DEATH //////////////////////////////////////////////////////////
         // Transfer dead actors from Actor list to particle list
-        aIt = partition(m_Actors.begin(), m_Actors.end(), std::not1(std::mem_fun(&Actor::IsDead)));
+        aIt = partition(m_Actors.begin(), m_Actors.end(), std::not_fn(std::mem_fn(&Actor::IsDead)));
         amidIt = aIt;
 
         // Move dead Actor to particles list
@@ -1899,7 +1874,7 @@ void MovableMan::Update()
 
         // ITEM SETTLE //////////////////////////////////////////////////////////
         // Transfer excess items to particle list - use stable partition, item orde is important
-        iIt = stable_partition(m_Items.begin(), m_Items.end(), std::not1(std::mem_fun(&MovableObject::ToSettle)));
+        iIt = stable_partition(m_Items.begin(), m_Items.end(), std::not_fn(std::mem_fn(&MovableObject::ToSettle)));
         imidIt = iIt;
 
         // Move force-settled items to particles list
@@ -1919,7 +1894,7 @@ void MovableMan::Update()
         // DELETE //////////////////////////////////////////////////////////
         // Only delete after all travels & updates are done
         // Actors
-        aIt = partition(m_Actors.begin(), m_Actors.end(), std::not1(std::mem_fun(&MovableObject::ToDelete)));
+        aIt = partition(m_Actors.begin(), m_Actors.end(), std::not_fn(std::mem_fn(&MovableObject::ToDelete)));
         amidIt = aIt;
 
         while (aIt != m_Actors.end())
@@ -1935,7 +1910,7 @@ void MovableMan::Update()
 			}
 
             // Remove from team rosters
-			if ((*aIt)->GetTeam() >= Activity::TEAM_1 && (*aIt)->GetTeam() < Activity::MAXTEAMCOUNT)
+			if ((*aIt)->GetTeam() >= Activity::TeamOne && (*aIt)->GetTeam() < Activity::MaxTeamCount)
                 //m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
 				RemoveActorFromTeamRoster(*aIt);
 
@@ -1948,7 +1923,7 @@ void MovableMan::Update()
         m_Actors.erase(amidIt, m_Actors.end());
 
         // Items
-        iIt = stable_partition(m_Items.begin(), m_Items.end(), std::not1(std::mem_fun(&MovableObject::ToDelete)));
+        iIt = stable_partition(m_Items.begin(), m_Items.end(), std::not_fn(std::mem_fn(&MovableObject::ToDelete)));
         imidIt = iIt;
 
         while (iIt != m_Items.end())
@@ -1956,7 +1931,7 @@ void MovableMan::Update()
         m_Items.erase(imidIt, m_Items.end());
 
         // Particles
-        parIt = partition(m_Particles.begin(), m_Particles.end(), std::not1(std::mem_fun(&MovableObject::ToDelete)));
+        parIt = partition(m_Particles.begin(), m_Particles.end(), std::not_fn(std::mem_fn(&MovableObject::ToDelete)));
         midIt = parIt;
 
         while (parIt != m_Particles.end())
@@ -1968,24 +1943,24 @@ void MovableMan::Update()
     // Only settle after all updates and deletions are done
     if (m_SettlingEnabled)
     {
-        parIt = partition(m_Particles.begin(), m_Particles.end(), std::not1(std::mem_fun(&MovableObject::ToSettle)));
+        parIt = partition(m_Particles.begin(), m_Particles.end(), std::not_fn(std::mem_fn(&MovableObject::ToSettle)));
         midIt = parIt;
 
         while (parIt != m_Particles.end())
         {
             Vector parPos((*parIt)->GetPos().GetFloored());
             Material const * terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.m_X, parPos.m_Y));
-            if ((*parIt)->GetDrawPriority() >= terrMat->priority)
+            if ((*parIt)->GetDrawPriority() >= terrMat->GetPriority())
             {
                 // Gold particle special case to avoid compacting of gold
-                if ((*parIt)->GetMaterial()->id == c_GoldMaterialID)
+                if ((*parIt)->GetMaterial()->GetIndex() == c_GoldMaterialID)
                 {
-                    for (int s = 0; terrMat->id == c_GoldMaterialID; ++s)
+                    for (int s = 0; terrMat->GetIndex() == c_GoldMaterialID; ++s)
                     {
                         if (s % 2 == 0)
                             parPos.m_Y -= 1.0;
                         else
-                            parPos.m_X += (PosRand() >= 0.5 ? 1.0 : -1.0);
+                            parPos.m_X += (RandomNum() >= 0.5F ? 1.0F : -1.0F);
                         terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.m_X, parPos.m_Y));
                     }
                     (*parIt)->SetPos(parPos);
@@ -2011,9 +1986,9 @@ void MovableMan::Update()
 
 	// COUNT MOID USAGE PER TEAM  //////////////////////////////////////////////////
 	{
-		int team = Activity::NOTEAM;
+		int team = Activity::NoTeam;
 
-		for (team = Activity::TEAM_1; team < Activity::MAXTEAMCOUNT; team++)
+		for (team = Activity::TeamOne; team < Activity::MaxTeamCount; team++)
 			m_TeamMOIDCount[team] = 0;
 		
 		for (vector<MovableObject *>::iterator itr = m_MOIDIndex.begin(); itr != m_MOIDIndex.end(); ++itr)
@@ -2022,7 +1997,7 @@ void MovableMan::Update()
 			{
 				team = (*itr)->GetTeam();
 
-				if (team > Activity::NOTEAM && team < Activity::MAXTEAMCOUNT)
+				if (team > Activity::NoTeam && team < Activity::MaxTeamCount)
 					m_TeamMOIDCount[team]++;
 			}
 		}
@@ -2037,14 +2012,14 @@ void MovableMan::Update()
 
     // Sort team rosters if necessary
     {
-        if (m_SortTeamRoster[Activity::TEAM_1])
-            m_ActorRoster[Activity::TEAM_1].sort(MOXPosComparison());
-        if (m_SortTeamRoster[Activity::TEAM_2])
-            m_ActorRoster[Activity::TEAM_2].sort(MOXPosComparison());
-        if (m_SortTeamRoster[Activity::TEAM_3])
-            m_ActorRoster[Activity::TEAM_3].sort(MOXPosComparison());
-        if (m_SortTeamRoster[Activity::TEAM_4])
-            m_ActorRoster[Activity::TEAM_4].sort(MOXPosComparison());
+        if (m_SortTeamRoster[Activity::TeamOne])
+            m_ActorRoster[Activity::TeamOne].sort(MOXPosComparison());
+        if (m_SortTeamRoster[Activity::TeamTwo])
+            m_ActorRoster[Activity::TeamTwo].sort(MOXPosComparison());
+        if (m_SortTeamRoster[Activity::TeamThree])
+            m_ActorRoster[Activity::TeamThree].sort(MOXPosComparison());
+        if (m_SortTeamRoster[Activity::TeamFour])
+            m_ActorRoster[Activity::TeamFour].sort(MOXPosComparison());
     }
 }
 
@@ -2131,7 +2106,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
             currentMOID = m_MOIDIndex.size();
         }
         else
-            m_Actors[i]->SetID(g_NoMOID);
+            m_Actors[i]->SetAsNoID();
     }
     for (i = 0; i < iCount; ++i)
     {
@@ -2142,7 +2117,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
             currentMOID = m_MOIDIndex.size();
         }
         else
-            m_Items[i]->SetID(g_NoMOID);
+            m_Items[i]->SetAsNoID();
     }
     for (i = 0; i < parCount; ++i)
     {
@@ -2153,7 +2128,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
             currentMOID = m_MOIDIndex.size();
         }
         else
-            m_Particles[i]->SetID(g_NoMOID);
+            m_Particles[i]->SetAsNoID();
     }
 }
 

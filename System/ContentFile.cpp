@@ -1,4 +1,5 @@
 #include "ContentFile.h"
+#include "AudioMan.h"
 #include "PresetMan.h"
 #include "ConsoleMan.h"
 
@@ -6,27 +7,26 @@ namespace RTE {
 
 	const std::string ContentFile::c_ClassName = "ContentFile";
 
-	std::map<std::string, BITMAP *> ContentFile::s_LoadedBitmaps[BitDepthCount];
-	std::map<std::string, FMOD::Sound *> ContentFile::s_LoadedSamples;
-	std::map<size_t, std::string> ContentFile::s_PathHashes;
+	std::array<std::unordered_map<std::string, BITMAP *>, ContentFile::BitDepths::BitDepthCount> ContentFile::s_LoadedBitmaps;
+	std::unordered_map<std::string, FMOD::Sound *> ContentFile::s_LoadedSamples;
+	std::unordered_map<size_t, std::string> ContentFile::s_PathHashes;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ContentFile::Clear() {
-		m_DataPath.erase();
+		m_DataPath.clear();
+		m_DataPathExtension.clear();
+		m_DataPathWithoutExtension.clear();
+		m_FormattedReaderPosition.clear();
+		m_DataPathAndReaderPosition.clear();
 		m_DataModuleID = 0;
-		//m_DataModified = false;
-		//m_LoadedData = 0;
-		//m_LoadedDataSize = 0;
-		//m_DataFile = 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ContentFile::Create(const char *filePath) {
-		m_DataPath = filePath;
-		s_PathHashes[GetHash()] = m_DataPath;
-		m_DataModuleID = g_PresetMan.GetModuleIDFromPath(m_DataPath);
+		SetDataPath(filePath);
+		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
 		return 0;
 	}
@@ -35,10 +35,9 @@ namespace RTE {
 
 	int ContentFile::Create(const ContentFile &reference) {
 		m_DataPath = reference.m_DataPath;
+		m_DataPathExtension = reference.m_DataPathExtension;
+		m_DataPathWithoutExtension = reference.m_DataPathWithoutExtension;
 		m_DataModuleID = reference.m_DataModuleID;
-		//m_DataModified = reference.m_DataModified;
-		//m_LoadedData = reference.m_LoadedData;
-		//m_LoadedDataSize = reference.m_LoadedDataSize;
 
 		return 0;
 	}
@@ -46,8 +45,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ContentFile::FreeAllLoaded() {
-		for (int depth = Eight; depth < BitDepthCount; ++depth) {
-			for (const std::pair<std::string, BITMAP *> &bitmap : s_LoadedBitmaps[depth]){
+		for (int depth = BitDepths::Eight; depth < BitDepths::BitDepthCount; ++depth) {
+			for (const std::pair<std::string, BITMAP *> &bitmap : s_LoadedBitmaps.at(depth)) {
 				destroy_bitmap(bitmap.second);
 			}
 		}
@@ -55,13 +54,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ContentFile::ReadProperty(std::string propName, Reader &reader) {
-		if (propName == "Path" || propName == "FilePath") {
-			m_DataPath = reader.ReadPropValue();
-			m_DataModuleID = g_PresetMan.GetModuleIDFromPath(m_DataPath);
-			s_PathHashes[GetHash()] = m_DataPath;
+	int ContentFile::ReadProperty(const std::string_view &propName, Reader &reader) {
+		if (propName == "FilePath" || propName == "Path") {
+			SetDataPath(reader.ReadPropValue());
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;
@@ -72,97 +68,68 @@ namespace RTE {
 	int ContentFile::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		if (!m_DataPath.empty()) {
-			writer.NewProperty("FilePath");
-			writer << m_DataPath;
-		}
+		if (!m_DataPath.empty()) { writer.NewPropertyWithValue("FilePath", m_DataPath); }
+
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ContentFile::GetDataModuleID() const { return (m_DataModuleID) < 0 ? g_PresetMan.GetModuleIDFromPath(m_DataPath) : m_DataModuleID; }
+	int ContentFile::GetDataModuleID() const { return (m_DataModuleID < 0) ? g_PresetMan.GetModuleIDFromPath(m_DataPath) : m_DataModuleID; }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ContentFile::SetDataPath(std::string newDataPath) {
-		m_DataPath = newDataPath;
-		s_PathHashes[GetHash()] = m_DataPath;
+	void ContentFile::SetDataPath(const std::string &newDataPath) {
+		m_DataPath = CorrectBackslashesInPath(newDataPath);
+		m_DataPathExtension = std::filesystem::path(m_DataPath).extension().string();
 
-		// Reset the loaded convenience pointer
-		//m_LoadedData = 0;
-		//m_LoadedDataSize = 0;
+		RTEAssert(!m_DataPathExtension.empty(), "Failed to find file extension when trying to find file with path and name:\n" + m_DataPath + "\n" + GetFormattedReaderPosition());
+
+		m_DataPathWithoutExtension = m_DataPath.substr(0, m_DataPath.length() - m_DataPathExtension.length());
+		s_PathHashes[GetHash()] = m_DataPath;
+		m_DataModuleID = g_PresetMan.GetModuleIDFromPath(m_DataPath);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	BITMAP * ContentFile::GetAsBitmap(int conversionMode) {
+	void ContentFile::SetFormattedReaderPosition(const std::string &newPosition) {
+		m_FormattedReaderPosition = newPosition;
+		m_DataPathAndReaderPosition = m_DataPath + "\n" + newPosition;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	BITMAP * ContentFile::GetAsBitmap(int conversionMode, bool storeBitmap, const std::string &dataPathToSpecificFrame) {
 		if (m_DataPath.empty()) {
-			return 0;
+			return nullptr;
 		}
-		BITMAP *returnBitmap = 0;
+		BITMAP *returnBitmap = nullptr;
+		const int bitDepth = (conversionMode == COLORCONV_8_TO_32) ? BitDepths::ThirtyTwo : BitDepths::Eight;
+		std::string dataPathToLoad = dataPathToSpecificFrame.empty() ? m_DataPath : dataPathToSpecificFrame;
+		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
-		// Determine the bit depth this bitmap will be loaded as
-		int bitDepth = conversionMode == COLORCONV_8_TO_32 ? ThirtyTwo : Eight;
-
-		// Check if the file has already been read and loaded from the disk and, if so, use that data. Otherwise, load it
-		std::map<std::string, BITMAP *>::iterator itr = s_LoadedBitmaps[bitDepth].find(m_DataPath);
-		if (itr != s_LoadedBitmaps[bitDepth].end()) {
-			returnBitmap = (*itr).second;
+		// Check if the file has already been read and loaded from the disk and, if so, use that data.
+		std::unordered_map<std::string, BITMAP *>::iterator foundBitmap = s_LoadedBitmaps.at(bitDepth).find(dataPathToLoad);
+		if (foundBitmap != s_LoadedBitmaps.at(bitDepth).end()) {
+			returnBitmap = (*foundBitmap).second;
 		} else {
-			returnBitmap = LoadAndReleaseBitmap(conversionMode); //NOTE: This takes ownership of the bitmap file
-			RTEAssert(returnBitmap, "Failed to load datafile object with following path and name:\n\n" + m_DataPath);
+			if (!std::filesystem::exists(dataPathToLoad)) {
+				const std::string dataPathWithoutExtension = dataPathToLoad.substr(0, dataPathToLoad.length() - m_DataPathExtension.length());
+				const std::string altFileExtension = (m_DataPathExtension == ".png") ? ".bmp" : ".png";
+
+				if (std::filesystem::exists(dataPathWithoutExtension + altFileExtension)) {
+					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
+					SetDataPath(m_DataPathWithoutExtension + altFileExtension);
+					dataPathToLoad = dataPathWithoutExtension + altFileExtension;
+				} else {
+					RTEAbort("Failed to find image file with following path and name:\n\n" + m_DataPath + " or " + altFileExtension + "\n" + m_FormattedReaderPosition);
+				}
+			}
+			returnBitmap = LoadAndReleaseBitmap(conversionMode, dataPathToLoad); // NOTE: This takes ownership of the bitmap file
 
 			// Insert the bitmap into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE
-			s_LoadedBitmaps[bitDepth].insert(std::pair<std::string, BITMAP *>(m_DataPath, returnBitmap));
+			if (storeBitmap) { s_LoadedBitmaps.at(bitDepth).insert({ dataPathToLoad, returnBitmap }); }
 		}
-		return returnBitmap;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	BITMAP *ContentFile::LoadAndReleaseBitmap(int conversionMode) {
-		if (m_DataPath.empty()) {
-			return 0;
-		}
-		BITMAP *returnBitmap = 0;
-		set_color_conversion((conversionMode == 0) ? COLORCONV_MOST : conversionMode);
-
-		// Used for handling separators between the datafile name and the object name in .dat datafiles. NOTE: Not currently used
-		int separatorPos = m_DataPath.find('#');
-
-		if (separatorPos == m_DataPath.length()) {
-			RTEAbort("There was no object name following first pound sign in the ContentFile's datafile path, which means there was no actual object defined. The path was:\n\n" + m_DataPath);
-		} else if (separatorPos == -1) {
-			PACKFILE *pFile = pack_fopen(m_DataPath.c_str(), F_READ);
-			// If the file didn't open, try using animation naming scheme of adding 000 before the extension
-			if (!pFile) {
-				int extensionPos = m_DataPath.rfind('.');
-				RTEAssert(extensionPos > 0, "Could not find file extension when trying to load and release bitmap with path and name:\n\n" + m_DataPath);
-				std::string pathWithoutExtension = m_DataPath;
-				pathWithoutExtension.resize(extensionPos);
-
-				pFile = pack_fopen((pathWithoutExtension + "000.bmp").c_str(), F_READ);
-				RTEAssert(pFile, "Failed to load datafile object with following path and name:\n\n" + m_DataPath);
-			}
-			// Load the bitmap then close the file stream to clean up
-			PALETTE currentPalette;
-			get_palette(currentPalette);
-
-			returnBitmap = load_bmp_pf(pFile, (RGB *)currentPalette);
-			pack_fclose(pFile);
-		} else if (separatorPos != m_DataPath.length() - 1) {
-			RTEAbort("Loading bitmaps from allegro datafiles isn't supported yet!");
-			// Used for loading from DataFiles, disabled because we don't have this properly implemented right now. 
-			/*
-			// Split the datapath into the path and the object name and load the datafile from them
-			m_DataFile = load_datafile_object(m_DataPath.substr(0, separatorPos).c_str(), m_DataPath.substr(separatorPos + 1).c_str());
-			RTEAssert(m_DataFile && m_DataFile->dat && m_DataFile->type == DAT_BITMAP, "Failed to load datafile object with following path and name:\n\n" + m_DataPath);
-
-			returnBitmap = (BITMAP *)m_DataFile->dat;
-			*/
-		}
-		RTEAssert(returnBitmap, "Failed to load datafile object with following path and name:\n\n" + m_DataPath);
 		return returnBitmap;
 	}
 
@@ -170,117 +137,117 @@ namespace RTE {
 
 	BITMAP ** ContentFile::GetAsAnimation(int frameCount, int conversionMode) {
 		if (m_DataPath.empty()) {
-			return 0;
+			return nullptr;
 		}
 		// Create the array of as many BITMAP pointers as requested frames
 		BITMAP **returnBitmaps = new BITMAP *[frameCount];
+		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
 		// Don't try to append numbers if there's only one frame
 		if (frameCount == 1) {
+			// Check for 000 in the file name in case it is part of an animation but the FrameCount was set to 1. Do not warn about this because it's normal operation, but warn about incorrect extension.
+			if (!std::filesystem::exists(m_DataPath)) {
+				const std::string altFileExtension = (m_DataPathExtension == ".png") ? ".bmp" : ".png";
+
+				if (std::filesystem::exists(m_DataPathWithoutExtension + "000" + m_DataPathExtension)) {
+					SetDataPath(m_DataPathWithoutExtension + "000" + m_DataPathExtension);
+				} else if (std::filesystem::exists(m_DataPathWithoutExtension + "000" + altFileExtension)) {
+					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
+					SetDataPath(m_DataPathWithoutExtension + "000" + altFileExtension);
+				}
+			}
 			returnBitmaps[0] = GetAsBitmap(conversionMode);
 			return returnBitmaps;
 		}
-		std::string extension = "";
-		// Used for handling separators between the datafile name and the object name in .dat datafiles. NOTE: Not currently used
-		int separatorPos = m_DataPath.find('#');
-		int extensionPos = 0;
-
-		// No separator, need to separate file extension from datapath
-		if (separatorPos == -1) {
-			extensionPos = m_DataPath.rfind('.');
-			RTEAssert(extensionPos > 0, "Could not find file extension when trying to load an animation from external bitmaps with path and name:\n\n" + m_DataPath);
-			extension.assign(m_DataPath, extensionPos, m_DataPath.length() - extensionPos);
-			m_DataPath.resize(extensionPos);
-		}
-		std::string originalDataPath = m_DataPath;
 		char framePath[1024];
-		// For each frame in the animation, temporarily assign it to the datapath member var so that GetAsBitmap and then load it with GetBitmap
-		for (int i = 0; i < frameCount; i++) {
-			sprintf_s(framePath, sizeof(framePath), "%s%03i%s", originalDataPath.c_str(), i, extension.c_str());
-			m_DataPath = framePath;
-
-			returnBitmaps[i] = GetAsBitmap(conversionMode);
-			RTEAssert(returnBitmaps[i], "Could not get a frame of animation with path and name:\n\n" + m_DataPath);
+		for (int frameNum = 0; frameNum < frameCount; frameNum++) {
+			std::snprintf(framePath, sizeof(framePath), "%s%03i%s", m_DataPathWithoutExtension.c_str(), frameNum, m_DataPathExtension.c_str());
+			returnBitmaps[frameNum] = GetAsBitmap(conversionMode, true, framePath);
 		}
-		m_DataPath = originalDataPath + (extensionPos > 0 ? extension : "");
 		return returnBitmaps;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	FMOD::Sound * ContentFile::GetAsSample(bool abortGameForInvalidSound) {
-		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
-			return 0;
+	BITMAP * ContentFile::LoadAndReleaseBitmap(int conversionMode, const std::string &dataPathToSpecificFrame) {
+		if (m_DataPath.empty()) {
+			return nullptr;
 		}
-		FMOD::Sound *returnSample = 0;
-		std::string errorMessage;
+		const std::string dataPathToLoad = dataPathToSpecificFrame.empty() ? m_DataPath : dataPathToSpecificFrame;
+		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
-		// Check if the file has already been read and loaded from the disk and, if so, use that data. Otherwise, load it
-		std::map<std::string, FMOD::Sound *>::iterator itr = s_LoadedSamples.find(m_DataPath);
-		if (itr != s_LoadedSamples.end()) {
-			returnSample = (*itr).second;
+		BITMAP *returnBitmap = nullptr;
+
+		PALETTE currentPalette;
+		get_palette(currentPalette);
+
+		set_color_conversion((conversionMode == 0) ? COLORCONV_MOST : conversionMode);
+		returnBitmap = load_bitmap(dataPathToLoad.c_str(), currentPalette);
+		RTEAssert(returnBitmap, "Failed to load image file with following path and name:\n\n" + m_DataPathAndReaderPosition + "\nThe file may be corrupt, incorrectly converted or saved with unsupported parameters.");
+
+		return returnBitmap;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	FMOD::Sound * ContentFile::GetAsSound(bool abortGameForInvalidSound, bool asyncLoading) {
+		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
+			return nullptr;
+		}
+		FMOD::Sound *returnSample = nullptr;
+
+		std::unordered_map<std::string, FMOD::Sound *>::iterator foundSound = s_LoadedSamples.find(m_DataPath);
+		if (foundSound != s_LoadedSamples.end()) {
+			returnSample = (*foundSound).second;
 		} else {
-			int separatorPos = m_DataPath.rfind('#'); // Used for handling separators between the datafile name and the object name in .dat datafiles. NOTE: Not currently used
-			long fileSize;
-			char *rawData = 0;
+			returnSample = LoadAndReleaseSound(abortGameForInvalidSound, asyncLoading); //NOTE: This takes ownership of the sample file
 
-			if (separatorPos == m_DataPath.length()) {
-				errorMessage = "There was no object name following first pound sign in the sound ContentFile's datafile path, which means there was no actual object defined. The path was: ";
-				if (abortGameForInvalidSound) { RTEAbort(errorMessage + "\n\n" + m_DataPath); }
-				g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
-				return returnSample;
-			} else if (separatorPos == -1) {
-				// Open the file, allocate space for it, read it and load it in as a Sound object
-				fileSize = file_size(m_DataPath.c_str());
-				PACKFILE *pFile = pack_fopen(m_DataPath.c_str(), F_READ);
+			// Insert the Sound object into the map, PASSING OVER OWNERSHIP OF THE LOADED FILE
+			s_LoadedSamples.insert({ m_DataPath, returnSample });
+		}
+		return returnSample;
+	}
 
-				if (!pFile || fileSize <= 0) {
-					errorMessage = "Failed to load sound file with following path and name: ";
-					if (abortGameForInvalidSound) { RTEAbort(errorMessage + "\n\n" + m_DataPath); }
-					g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
-					return returnSample;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	FMOD::Sound * ContentFile::LoadAndReleaseSound(bool abortGameForInvalidSound, bool asyncLoading) {
+		if (m_DataPath.empty() || !g_AudioMan.IsAudioEnabled()) {
+			return nullptr;
+		}
+
+		if (!std::filesystem::exists(m_DataPath)) {
+			bool foundAltExtension = false;
+			for (const std::string &altFileExtension : c_SupportedAudioFormats) {
+				if (std::filesystem::exists(m_DataPathWithoutExtension + altFileExtension)) {
+					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
+					SetDataPath(m_DataPathWithoutExtension + altFileExtension);
+					foundAltExtension = true;
+					break;
 				}
-
-				rawData = new char[fileSize];
-				int bytesRead = pack_fread(rawData, fileSize, pFile);
-				RTEAssert(bytesRead == fileSize, "Tried to read a sound file but couldn't read the same amount of data as the reported file size! The path and name were: \n\n" +m_DataPath);
-
-				// Setup fmod info, and make sure to use mode OPENMEMORY since we're doing the loading with ContentFile instead of fmod, and we're deleting the raw data after loading it
-				FMOD_CREATESOUNDEXINFO soundInfo = {};
-				soundInfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
-				soundInfo.length = fileSize;
-				//TODO Consider doing FMOD_CREATESAMPLE for dumping audio files into memory and FMOD_NONBLOCKING to async create sounds
-				FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(rawData, FMOD_OPENMEMORY | FMOD_3D, &soundInfo, &returnSample);
-
-				if (result != FMOD_OK) {
-					errorMessage = "Unable to create sound because of FMOD error " + std::string(FMOD_ErrorString(result)) + ". Path and name was: ";
-					if (abortGameForInvalidSound) { RTEAbort(errorMessage + "\n\n" + m_DataPath); }
-					g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
-					return returnSample;
-				}
-
-				// Deallocate the intermediary data and close the file stream
-				delete[] rawData;
-				pack_fclose(pFile);
-			} else if (separatorPos != m_DataPath.length() - 1) {
-				RTEAbort("Loading sounds from allegro datafiles isn't supported yet!");
-				/*
-				// Split the datapath into the path and the object name and load the datafile from them
-				m_DataFile = load_datafile_object(m_DataPath.substr(0, separatorPos).c_str(), m_DataPath.substr(separatorPos + 1).c_str());
-				RTEAssert(m_DataFile && m_DataFile->dat && m_DataFile->type == DAT_BITMAP, "Failed to load datafile object with following path and name:\n\n" + m_DataPath);
-
-				returnSample = (FMOD::Sound *)m_DataFile->dat;
-				*/
 			}
-			if (!returnSample) {
-				errorMessage = "Failed to load sound file with following path and name:";
-				if (abortGameForInvalidSound) { RTEAbort(errorMessage + "\n\n" + m_DataPath); }
-				g_ConsoleMan.PrintString("Error: " + errorMessage + m_DataPath);
-				return returnSample;
+			if (!foundAltExtension) {
+				std::string errorMessage = "Failed to find audio file with following path and name:\n\n" + m_DataPath + " or any alternative supported file type";
+				RTEAssert(!abortGameForInvalidSound, errorMessage + "\n" + m_FormattedReaderPosition);
+				g_ConsoleMan.PrintString(errorMessage + ". The file was not loaded!");
+				return nullptr;
 			}
+		}
+		if (std::filesystem::file_size(m_DataPath) == 0) {
+			const std::string errorMessage = "Failed to create sound because because the file was empty. The path and name were: ";
+			RTEAssert(!abortGameForInvalidSound, errorMessage + "\n\n" + m_DataPathAndReaderPosition);
+			g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
+			return nullptr;
+		}
+		FMOD::Sound *returnSample = nullptr;
 
-			// Insert the Sound object into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE
-			s_LoadedSamples.insert(std::pair<std::string, FMOD::Sound *>(m_DataPath, returnSample));
+		FMOD_MODE fmodFlags = FMOD_CREATESAMPLE | FMOD_3D | (asyncLoading ? FMOD_NONBLOCKING : FMOD_DEFAULT);
+		FMOD_RESULT result = g_AudioMan.GetAudioSystem()->createSound(m_DataPath.c_str(), fmodFlags, nullptr, &returnSample);
+
+		if (result != FMOD_OK) {
+			const std::string errorMessage = "Failed to create sound because of FMOD error:\n" + std::string(FMOD_ErrorString(result)) + "\nThe path and name were: ";
+			RTEAssert(!abortGameForInvalidSound, errorMessage + "\n\n" + m_DataPathAndReaderPosition);
+			g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
+			return returnSample;
 		}
 		return returnSample;
 	}

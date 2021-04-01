@@ -46,7 +46,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Box::ReadProperty(std::string propName, Reader &reader) {
+	int Box::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Corner") {
 			reader >> m_Corner;
 		} else if (propName == "Width") {
@@ -54,7 +54,6 @@ namespace RTE {
 		} else if (propName == "Height") {
 			reader >> m_Height;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;
@@ -65,12 +64,9 @@ namespace RTE {
 	int Box::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		writer.NewProperty("Corner");
-		writer << m_Corner;
-		writer.NewProperty("Width");
-		writer << m_Width;
-		writer.NewProperty("Height");
-		writer << m_Height;
+		writer.NewPropertyWithValue("Corner", m_Corner);
+		writer.NewPropertyWithValue("Width", m_Width);
+		writer.NewPropertyWithValue("Height", m_Height);
 
 		return 0;
 	}

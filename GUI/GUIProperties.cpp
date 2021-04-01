@@ -118,7 +118,7 @@ void GUIProperties::AddVariable(const string Variable, char *Value)
 void GUIProperties::AddVariable(const string Variable, int Value)
 {
     char buf[32];
-    sprintf_s(buf, sizeof(buf), "%i", Value);
+    std::snprintf(buf, sizeof(buf), "%i", Value);
     string Val(buf);
     AddVariable(Variable, Val);
 }
@@ -169,7 +169,7 @@ bool GUIProperties::SetValue(const string Variable, const string Value)
 bool GUIProperties::SetValue(const string Variable, int Value)
 {
     char buf[64];
-    sprintf_s(buf, sizeof(buf), "%i", Value);
+    std::snprintf(buf, sizeof(buf), "%i", Value);
 
     return SetValue(Variable, buf);
 }

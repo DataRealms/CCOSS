@@ -15,7 +15,9 @@
 // Inclusions of header files
 
 #include "MOSprite.h"
+#include "Gib.h"
 #include "PostProcessMan.h"
+#include "SoundContainer.h"
 
 namespace RTE
 {
@@ -24,7 +26,6 @@ class AtomGroup;
 struct HitData;
 class AEmitter;
 class Attachable;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Class:           MOSRotating
@@ -48,237 +49,11 @@ friend class AtomGroup;
 friend class SLTerrain;
 friend class LuaMan;
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Nested class:    Gib
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Something to bundle the properties of Gib piece together.
-    // Parent(s):       Serializable.
-    // Class history:   10/24/2006 Gib created.
-
-    class Gib:
-        public Serializable
-    {
-
-    friend class GibEditor;
-    friend class TDExplosive;
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Public member variable, method and friend function declarations
-
-    public:
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Constructor:     Gib
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Constructor method used to instantiate a Gib object in system
-    //                  memory. Create() should be called before using the object.
-    // Arguments:       None.
-
-        Gib() { Clear(); }
-
-/*
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Create
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Makes the Gib object ready for use.
-    // Arguments:       None.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Create();
-*/
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Create
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Creates a Gib to be identical to another, by deep copy.
-    // Arguments:       A reference to the Gib to deep copy.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Create(const Gib &reference);
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  ReadProperty
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Reads a property value from a Reader stream. If the name isn't
-    //                  recognized by this class, then ReadProperty of the parent class
-    //                  is called. If the property isn't recognized by any of the base classes,
-    //                  false is returned, and the Reader's position is untouched.
-    // Arguments:       The name of the property to be read.
-    //                  A Reader lined up to the value of the property to be read.
-    // Return value:    An error return value signaling whether the property was successfully
-    //                  read or not. 0 means it was read successfully, and any nonzero indicates
-    //                  that a property of that name could not be found in this or base classes.
-
-        virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Reset
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Resets the entire Serializable, including its inherited members, to their
-    //                  default settings or values.
-    // Arguments:       None.
-    // Return value:    None.
-
-        virtual void Reset() { Clear(); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Save
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Saves the complete state of this Gib to an output stream for
-    //                  later recreation with Create(Reader &reader);
-    // Arguments:       A Writer that the Gib will save itself with.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Save(Writer &writer) const;
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetClassName
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the class name of this Entity.
-    // Arguments:       None.
-    // Return value:    A string with the friendly-formatted type name of this object.
-
-        virtual const std::string & GetClassName() const { return m_sClassName; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetParticlePreset
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the reference particle to be used as a gib. Owenership is NOT transferred!
-    // Arguments:       None.
-    // Return value:    A pointer to the particle to be emitted. Not transferred!
-
-        virtual const MovableObject * GetParticlePreset() { return m_pGibParticle; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetOffset
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the spawn offset from the parent's position.
-    // Arguments:       None.
-    // Return value:    The offset in pixels from the parent's position where this gets spawned.
-
-        virtual Vector GetOffset() const { return m_Offset; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetCount
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the number of emissions to make of this emission type in a burst.
-    // Arguments:       None.
-    // Return value:    The number of emissions there should be of this type in an emission.
-
-        virtual int GetCount() const { return m_Count; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetSpread
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the angle spread of velocity of the emitted MO's to each side of
-    //                  the m_EmitAngle angle. in radians. PI/2 would mean that MO's fly out to
-    //                  one side only, with the m_Rotation defining the middle of that half circle.
-    // Arguments:       None.
-    // Return value:    The emission spread in radians.
-
-        virtual float GetSpread() const { return m_Spread; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetMinVelocity
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the specified minimum velocity an emitted MO can have when emitted.
-    // Arguments:       None.
-    // Return value:    The min emission velocity in m/s.
-
-        virtual float GetMinVelocity() const { return MIN(m_MinVelocity, m_MaxVelocity); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetMaxVelocity
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the specified maximum velocity an emitted MO can have when emitted.
-    // Arguments:       None.
-    // Return value:    The max emission velocity in m/s.
-
-        virtual float GetMaxVelocity() const { return MAX(m_MinVelocity, m_MaxVelocity); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetLifeVariation
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the specified variation in lifetime of the gibbed object.
-    // Arguments:       None.
-    // Return value:    The life variation rationally expressed.. 0.1 = up to 10% varitaion.
-
-        virtual float GetLifeVariation() const { return m_LifeVariation; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  InheritsVel
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Shows whether this's gibs should inherit the velocity of the gibbing
-    //                  parent.
-    // Arguments:       None.
-    // Return value:    Whetehr this inherits velocity or not.
-
-        virtual bool InheritsVel() const { return m_InheritsVel; }
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Protected member variable and method declarations
-
-    protected:
-
-        // Member variables
-        static const std::string m_sClassName;
-        // The pointer to the preset instance, that copies of which will be emitted. Not Owned
-        const MovableObject *m_pGibParticle;
-        // Offset spawn position from owner/parent's position
-        Vector m_Offset;
-        // The number of emissions of this type should be emitted
-        int m_Count;
-        // The angle spread of velocity of the emitted MO's to each
-        // side of the m_EmitAngle angle. in radians.
-        // PI/2 would mean that MO's fly out to one side only, with the
-        // m_Rotation defining the middle of that half circle.
-        float m_Spread;
-        // The minimum velocity an emitted MO can have when emitted
-        float m_MinVelocity;
-        // The maximum velocity an emitted MO can have when emitted
-        float m_MaxVelocity;
-        // The per-gib variation in life time, in percentage of the existing life time of the gib
-        float m_LifeVariation;
-        // Whether this gib should inherit the velocity of the exploding parent or not
-        bool m_InheritsVel;
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Private member variable and method declarations
-
-    private:
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Method:          Clear
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Clears all the member variables of this Gib, effectively
-    //                  resetting the members of this abstraction level only.
-    // Arguments:       None.
-    // Return value:    None.
-
-        void Clear();
-
-    };
-
 
 // Concrete allocation and cloning definitions
 EntityAllocation(MOSRotating)
+SerializableOverrideMethods
+ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -298,7 +73,7 @@ EntityAllocation(MOSRotating)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~MOSRotating() { Destroy(true); }
+	~MOSRotating() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -309,7 +84,7 @@ EntityAllocation(MOSRotating)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -326,12 +101,7 @@ EntityAllocation(MOSRotating)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(ContentFile spriteFile,
-                       const int frameCount = 1,
-                       const float mass = 1,
-                       const Vector &position = Vector(0, 0),
-                       const Vector &velocity = Vector(0, 0),
-                       const unsigned long lifetime = 0);
+	int Create(ContentFile spriteFile, const int frameCount = 1, const float mass = 1, const Vector &position = Vector(0, 0), const Vector &velocity = Vector(0, 0), const unsigned long lifetime = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -342,23 +112,7 @@ EntityAllocation(MOSRotating)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const MOSRotating &reference);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
+	int Create(const MOSRotating &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -369,19 +123,7 @@ EntityAllocation(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); MOSprite::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this MOSRotating to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the MOSRotating will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+    void Reset() override { Clear(); MOSprite::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -392,38 +134,75 @@ EntityAllocation(MOSRotating)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+    void Destroy(bool notInherited = false) override;
 
+    /// <summary>
+    /// Gets the radius of this MOSRotating, not including any Attachables.
+    /// </summary>
+    /// <returns></returns>
+    float GetIndividualRadius() const { return m_SpriteRadius; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
+    /// <summary>
+    /// Gets the radius of this MOSRotating, including any Attachables.
+    /// </summary>
+    /// <returns>The radius of this MOSRotating, including any Attachables.</returns>
+    float GetRadius() const override { return std::max(m_SpriteRadius, m_FarthestAttachableDistanceAndRadius); }
 
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
+    /// <summary>
+    /// Gets the diameter of this MOSRotating, not including any Attachables.
+    /// </summary>
+    /// <returns></returns>
+    float GetIndividualDiameter() const { return m_SpriteDiameter; }
 
+    /// <summary>
+    /// Gets the diameter of this MOSRotating, including any Attachables.
+    /// </summary>
+    /// <returns>The diameter of this MOSRotating, including any Attachables.</returns>
+    float GetDiameter() const override { return GetRadius() * 2.0F; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
+    /// <summary>
+    /// Checks if the given Attachable should affect radius, and handles it if it should.
+    /// </summary>
+    /// <param name="attachable">The Attachable to check.</param>
+    /// <returns>Whether the radius affecting Attachable changed as a result of this call.</returns>
+    virtual bool HandlePotentialRadiusAffectingAttachable(const Attachable *attachable);
 
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+    /// <summary>
+    /// Gets the mass value of this MOSRotating, not including any Attachables or wounds.
+    /// </summary>
+    /// <returns>The mass of this MOSRotating.</returns>
+    float GetIndividualMass() const { return MovableObject::GetMass(); }
 
+    /// <summary>
+    /// Gets the mass value of this MOSRotating, including the mass of all its Attachables and wounds, and their Attachables and so on.
+    /// </summary>
+    /// <returns>The mass of this MOSRotating and all of its Attachables and wounds in Kilograms (kg).</returns>
+    float GetMass() const override { return MovableObject::GetMass() + m_AttachableAndWoundMass; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this ACDropShip, including the mass of its
-//                  currently attached body parts and inventory.
-// Arguments:       None.
-// Return value:    A float describing the mass value in Kilograms (kg).
+    /// <summary>
+    /// Updates the total mass of Attachables and wounds for this MOSRotating, intended to be used when Attachables' masses get modified. Simply subtracts the old mass and adds the new one.
+    /// </summary>
+    /// <param name="oldAttachableOrWoundMass">The mass the Attachable or wound had before its mass was modified.</param>
+    /// <param name="newAttachableOrWoundMass">The up-to-date mass of the Attachable or wound after its mass was modified.</param>
+    virtual void UpdateAttachableAndWoundMass(float oldAttachableOrWoundMass, float newAttachableOrWoundMass) { m_AttachableAndWoundMass += newAttachableOrWoundMass - oldAttachableOrWoundMass; }
 
-    virtual float GetMass() const;
+    /// <summary>
+    /// Gets the MOIDs of this MOSRotating and all its Attachables and Wounds, putting them into the MOIDs vector.
+    /// </summary>
+    /// <param name="MOIDs">The vector that will store all the MOIDs of this MOSRotating.</param>
+    void GetMOIDs(std::vector<MOID> &MOIDs) const override;
+
+    /// <summary>
+    /// Sets the MOID of this MOSRotating and any Attachables on it to be g_NoMOID (255) for this frame.
+    /// </summary>
+    void SetAsNoID() override;
+
+    /// <summary>
+    /// Sets this MOSRotating to not hit a specific other MO and all its children even though MO hitting is enabled on this MOSRotating.
+    /// </summary>
+    /// <param name="moToNotHit">A pointer to the MO to not be hitting. Null pointer means don't ignore anything. Ownership is NOT transferred!</param>
+    /// <param name="forHowLong">How long, in seconds, to ignore the specified MO. A negative number means forever.</param>
+    void SetWhichMOToNotHit(MovableObject *moToNotHit = nullptr, float forHowLong = -1) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -443,19 +222,8 @@ EntityAllocation(MOSRotating)
 // Arguments:       None.
 // Return value:    The the Material of this MOSRotating.
 
-    virtual Material const * GetMaterial() const;
+	Material const * GetMaterial() const override;
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HitsMOs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets whether this MovableObject is set to collide with other
-//                  MovableObject:s during travel.
-// Arguments:       None.
-// Return value:    Whether to hit other MO's during travel, or not.
-
-    virtual bool HitsMOs() const;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetDrawPriority
@@ -467,7 +235,7 @@ EntityAllocation(MOSRotating)
 // Return value:    The the priority  of this MovableObject. Higher number, the higher
 //                  priority.
 
-    virtual int GetDrawPriority() const;
+	int GetDrawPriority() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -488,20 +256,7 @@ EntityAllocation(MOSRotating)
 // Return value:    A const reference to the current recoil offset.
 
     const Vector & GetRecoilOffset() const { return m_RecoilOffset; }
-/*
-// TODO: Improve this one! Really crappy fit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetBoundingBox
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the oriented bounding box which is guaranteed to contain this,
-//                  taking rotation etc into account. It's not guaranteed to be fit
-//                  perfectly though. TODO: MAKE FIT BETTER
-// Arguments:       None.
-// Return value:    A Box which is guaranteed to contain this. Does nto take wrapping into
-//                  account, and parts of this box may be out of bounds!
 
-    virtual Box GetBoundingBox() const { return Box(m_Pos + Vector(-m_MaxRadius, -m_MaxRadius), m_MaxDiameter, m_MaxDiameter); }
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetGibList
@@ -511,37 +266,6 @@ EntityAllocation(MOSRotating)
 // Return value:    A pointer to the list of gibs. Ownership is NOT transferred!
 
     std::list<Gib> * GetGibList() { return &m_Gibs; }
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetAtom
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Replaces the current Atom of this MOSRotating with a new one.
-// Arguments:       A reference to the new Atom.
-// Return value:    None.
-
-    void SetAtom(Atom *newAtom);
-*/
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetToHitMOs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets this MovableObject to collide with other MovableObjects during
-//                  travel.
-// Arguments:       Whether to hit other MO's during travel, or not.
-// Return value:    None.
-
-    virtual void SetToHitMOs(bool hitMOs = true);
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsGold
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this MO is made of Gold or not.
-// Arguments:       None.
-// Return value:    Whether this MovableObject is of Gold or not.
-
-    virtual bool IsGold() const { return m_MOType == TypeGeneric && GetMaterial()->id == c_GoldMaterialID; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -616,7 +340,7 @@ EntityAllocation(MOSRotating)
 // Return value:    Whether the collision has been deemed valid. If false, then disregard
 //                  any impulses in the Hitdata.
 
-    virtual bool CollideAtPoint(HitData &hitData);
+    bool CollideAtPoint(HitData &hitData) override;
 
 
     /// <summary>
@@ -625,7 +349,7 @@ EntityAllocation(MOSRotating)
     /// </summary>
     /// <param name="hd">The HitData describing the collision in detail.</param>
     /// <return>Whether the MovableObject should immediately halt any travel going on after this bounce.</return>
-    virtual bool OnBounce(HitData &hd);
+	bool OnBounce(HitData &hd) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -638,7 +362,7 @@ EntityAllocation(MOSRotating)
 // Return value:    Wheter the MovableObject should immediately halt any travel going on
 //                  after this sinkage.
 
-    virtual bool OnSink(HitData &hd);
+	bool OnSink(HitData &hd) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -657,17 +381,12 @@ EntityAllocation(MOSRotating)
     virtual bool ParticlePenetration(HitData &hd);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-// Arguments:       The impulse (kg * m/s) of the impact causing the gibbing to happen.
-//					The internal blast impulse which will push the gibs away from the center.
-//                  A pointer to an MO which the gibs shuold not be colliding with!
-// Return value:    None.
-
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
+    /// <summary>
+    /// Destroys this MOSRotating and creates its specified Gibs in its place with appropriate velocities. Any Attachables are removed and also given appropriate velocities.
+    /// </summary>
+    /// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen.</param>
+    /// <param name="movableObjectToIgnore">A pointer to an MO which the Gibs and Attachables should not be colliding with.</param>
+    virtual void GibThis(const Vector &impactImpulse = Vector(), MovableObject *movableObjectToIgnore = nullptr);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -681,7 +400,7 @@ EntityAllocation(MOSRotating)
 // Return value:    Whether any intersection was successfully resolved. Will return true
 //                  even if there wasn't any intersections to begin with.
 
-    virtual bool MoveOutOfTerrain(unsigned char strongerThan = g_MaterialAir);
+	bool MoveOutOfTerrain(unsigned char strongerThan = g_MaterialAir) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -693,7 +412,7 @@ EntityAllocation(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ApplyForces();
+	void ApplyForces() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -705,22 +424,61 @@ EntityAllocation(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ApplyImpulses();
+	void ApplyImpulses() override;
 
+    /// <summary>
+    /// Adds the passed in Attachable the list of Attachables and sets its parent to this MOSRotating.
+    /// </summary>
+    /// <param name="attachable">The Attachable to add.</param>
+	virtual void AddAttachable(Attachable *attachable);
 
-	void AddAttachable(Attachable *pAttachable);
+    /// <summary>
+    /// Adds the passed in Attachable the list of Attachables, changes its parent offset to the passed in Vector, and sets its parent to this MOSRotating.
+    /// </summary>
+    /// <param name="attachable">The Attachable to add.</param>
+    /// <param name="parentOffsetToSet">The Vector to set as the Attachable's parent offset.</param>
+	virtual void AddAttachable(Attachable *attachable, const Vector &parentOffsetToSet);
 
-	void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet);
+    //TODO All RemoveAttachable methods should return the removed attachable (if it's not deleted) so there's no potential memory leaks or other safety problems. Very little cares about whether this actually succeeded or failed anyway, so returning a boolean here is kind of pointless. This should probably be done as part of Arm cleanup. Also, worth noting, dinosaurs are/were neat.
+    /// <summary>
+    /// Removes the Attachable corresponding to the passed in UniqueID and sets its parent to nullptr. Does not add it to MovableMan or add break wounds.
+    /// </summary>
+    /// <param name="attachableUniqueID">The UniqueID of the Attachable to remove.</param>
+    /// <returns>False if the Attachable is invalid, otherwise true.</returns>
+    virtual bool RemoveAttachable(long attachableUniqueID) { return RemoveAttachable(attachableUniqueID, false, false); }
 
-	void AddAttachable(Attachable *pAttachable, bool isHardcodedAttachable);
+    /// <summary>
+    /// Removes the Attachable corresponding to the passed in UniqueID and sets its parent to nullptr. Optionally adds it to MovableMan and/or adds break wounds.
+    /// If the Attachable is not set to delete or delete when removed from its parent, and addToMovableMan is false, the caller must hang onto a pointer to the Attachable ahead of time to avoid memory leaks.
+    /// </summary>
+    /// <param name="attachableUniqueID">The UniqueID of the Attachable to remove.</param>
+    /// <param name="addToMovableMan">Whether or not to add the Attachable to MovableMan once it has been removed.</param>
+    /// <param name="addBreakWounds">Whether or not to add break wounds to the removed Attachable and this MOSRotating.</param>
+    /// <returns>False if the Attachable is invalid, otherwise true.</returns>
+    virtual bool RemoveAttachable(long attachableUniqueID, bool addToMovableMan, bool addBreakWounds);
 
-	void AddAttachable(Attachable *pAttachable, const Vector& parentOffsetToSet, bool isHardcodedAttachable);
+    /// <summary>
+    /// Removes the passed in Attachable and sets its parent to nullptr. Does not add it to MovableMan or add break wounds.
+    /// </summary>
+    /// <param name="attachable">The Attachable to remove.</param>
+    /// <returns>False if the Attachable is invalid, otherwise true.</returns>
+    virtual bool RemoveAttachable(Attachable *attachable) { return RemoveAttachable(attachable, false, false); }
 
-	bool RemoveAttachable(long attachableUniqueId);
+    /// <summary>
+    /// Removes the passed in Attachable and sets its parent to nullptr. Optionally adds it to MovableMan and/or adds break wounds.
+    /// If the Attachable is not set to delete or delete when removed from its parent, and addToMovableMan is false, the caller must hang onto a pointer to the Attachable ahead of time to avoid memory leaks.
+    /// </summary>
+    /// <param name="attachable">The Attachable to remove.</param>
+    /// <param name="addToMovableMan">Whether or not to add the Attachable to MovableMan once it has been removed.</param>
+    /// <param name="addBreakWounds">Whether or not to add break wounds to the removed Attachable and this MOSRotating.</param>
+    /// <returns>False if the Attachable is invalid, otherwise true.</returns>
+    virtual bool RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds);
 
-	bool RemoveAttachable(Attachable *pAttachable);
-
-	void DetachOrDestroyAll(bool destroy);
+    /// <summary>
+    /// Either removes or deletes all of this MOSRotating's Attachables.
+    /// </summary>
+    /// <param name="destroy">Whether to remove or delete the Attachables. Setting this to true deletes them, setting it to false removes them.</param>
+	void RemoveOrDestroyAllAttachables(bool destroy);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -732,7 +490,7 @@ EntityAllocation(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ResetAllTimers();
+    void ResetAllTimers() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -744,18 +502,15 @@ EntityAllocation(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void RestDetection();
+    void RestDetection() override;
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsOnScenePoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this' current graphical representation overlaps
-//                  a point in absolute scene coordinates.
-// Arguments:       The point in absolute scene coordinates.
-// Return value:    Whether this' graphical rep overlaps the scene point.
-
-    virtual bool IsOnScenePoint(Vector &scenePoint) const;
+    /// <summary>
+    /// Indicates whether this MOSRotating's current graphical representation, including its Attachables, overlaps a point in absolute scene coordinates.
+    /// </summary>
+    /// <param name="scenePoint">The point in absolute scene coordinates to check for overlap with.</param>
+    /// <returns>Whether or not this MOSRotating's graphical representation overlaps the given scene point.</returns>
+	bool IsOnScenePoint(Vector &scenePoint) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -765,7 +520,7 @@ EntityAllocation(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void EraseFromTerrain();
+	void EraseFromTerrain();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -779,7 +534,7 @@ EntityAllocation(MOSRotating)
 //                  erased terrain.
 // Return value:    Whether deep penetration was detected and erasure was done.
 
-    virtual bool DeepCheck(bool makeMOPs = true, int skipMOP = 2, int maxMOP = 100);
+	bool DeepCheck(bool makeMOPs = true, int skipMOP = 2, int maxMOP = 100);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -790,7 +545,7 @@ EntityAllocation(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void PreTravel();
+	void PreTravel() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -800,7 +555,7 @@ EntityAllocation(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Travel();
+	void Travel() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -811,7 +566,7 @@ EntityAllocation(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void PostTravel();
+	void PostTravel() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -821,7 +576,7 @@ EntityAllocation(MOSRotating)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -832,7 +587,7 @@ EntityAllocation(MOSRotating)
 // Arguments:       The MovableObject to check this for overlap against.
 // Return value:    Whether it was drawn or not.
 
-    virtual bool DrawMOIDIfOverlapping(MovableObject *pOverlapMO);
+	bool DrawMOIDIfOverlapping(MovableObject *pOverlapMO) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -847,122 +602,144 @@ EntityAllocation(MOSRotating)
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetGibWoundLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return wound limit for this object.
-// Arguments:       None.
-// Return value:    Wound limit of the object.
+    /// <summary>
+    /// Gets the gib impulse limit for this MOSRotating, i.e. the amount of impulse force required in a frame to gib this MOSRotating.
+    /// </summary>
+    /// <returns>The gib impulse limit of this MOSRotating.</returns>
+	float GetGibImpulseLimit() const { return m_GibImpulseLimit; }
 
-	virtual int GetGibWoundLimit() const { return m_GibWoundLimit; } 
+    /// <summary>
+    /// Sets the gib impulse limit for this MOSRotating, i.e. the amount of impulse force required in a frame to gib this MOSRotating.
+    /// </summary>
+    /// <param name="newGibImpulseLimit">The new gib impulse limit to use.</param>
+    void SetGibImpulseLimit(float newGibImpulseLimit) { m_GibImpulseLimit = newGibImpulseLimit; }
 
+    /// <summary>
+    /// Gets the gib wound limit for this MOSRotating, i.e. the total number of wounds required to gib this MOSRotating. Does not include any Attachables.
+    /// </summary>
+    /// <returns></returns>
+    int GetGibWoundLimit() const { return GetGibWoundLimit(false, false, false); }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetGibImpulseLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Set new impulse limit.
-// Arguments:       New impulse limit.
-// Return value:    None.
+    /// <summary>
+    /// Gets the gib wound limit for this MOSRotating, i.e. the total number of wounds required to gib this MOSRotating.
+    /// Optionally adds the gib wound limits of Attachables (and their Attachables, etc.) that match the conditions set by the provided parameters.
+    /// </summary>
+    /// <param name="includePositiveDamageAttachables">Whether to count wounds from Attachables that have a positive damage multiplier, i.e. those that damage their parent (this MOSRotating) when wounded.</param>
+    /// <param name="includeNegativeDamageAttachables">Whether to count wounds from Attachables that have a negative damage multiplier, i.e. those that heal their parent (this MOSRotating) when wounded.</param>
+    /// <param name="includeNoDamageAttachables">Whether to count wounds from Attachables that a zero damage multiplier, i.e. those that do not affect their parent (this MOSRotating) when wounded.</param>
+    /// <returns>The wound limit of this MOSRotating and, optionally, its Attachables.</returns>
+    int GetGibWoundLimit(bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables) const;
 
-	virtual void SetGibImpulseLimit(int newLimit) { m_GibImpulseLimit = newLimit; }
+    /// <summary>
+    /// Sets the gib wound limit for this MOSRotating, i.e. the total number of wounds required to gib this MOSRotating.
+    /// This will not directly trigger gibbing, even if the limit is lower than the current number of wounds.
+    /// </summary>
+    /// <param name="newLimit">The new gib wound limit to use.</param>
+    void SetGibWoundLimit(int newGibWoundLimit) { m_GibWoundLimit = newGibWoundLimit; }
 
+    /// <summary>
+    /// Gets the gib blast strength this MOSRotating, i.e. the strength with which Gibs and Attachables will be launched when this MOSRotating is gibbed.
+    /// </summary>
+    /// <returns>The gib blast strength of this MOSRotating.</returns>
+	float GetGibBlastStrength() const { return m_GibBlastStrength; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetGibImpulseLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return impulse limit for this object.
-// Arguments:       None.
-// Return value:    Impulse limit of the object.
+    /// <summary>
+    /// Sets the gib blast strength this MOSRotating, i.e. the strength with which Gibs and Attachables will be launched when this MOSRotating is gibbed.
+    /// </summary>
+    /// <param name="newGibBlastStrength">The new gib blast strength to use.</param>
+    void SetGibBlastStrength(float newGibBlastStrength) { m_GibBlastStrength = newGibBlastStrength; }
 
-	virtual int GetGibImpulseLimit() const { return m_GibImpulseLimit; } 
+    /// <summary>
+    /// Gets the number of wounds attached to this MOSRotating.
+    /// Includes any Attachables (and their Attachables, etc.) that have a positive damage multiplier.
+    /// <returns>The number of wounds on this MOSRotating.</returns>
+    /// </summary>
+    int GetWoundCount() const { return GetWoundCount(true, false, false); }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetGibWoundLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Set new wound limit, current wounds are not affected.
-// Arguments:       New wound limit.
-// Return value:    None.
-
-	virtual void SetGibWoundLimit(int newLimit) { m_GibWoundLimit = newLimit; }
-
+    /// <summary>
+    /// Gets the number of wounds attached to this MOSRotating.
+    /// Optionally adds the wound counts of Attachables (and their Attachables, etc.) that match the conditions set by the provided parameters.
+    /// <param name="includePositiveDamageAttachables">Whether to count wounds from Attachables that have a positive damage multiplier, i.e. those that damage their parent (this MOSRotating) when wounded.</param>
+    /// <param name="includeNegativeDamageAttachables">Whether to count wounds from Attachables that have a negative damage multiplier, i.e. those that heal their parent (this MOSRotating) when wounded.</param>
+    /// <param name="includeNoDamageAttachables">Whether to count wounds from Attachables that a zero damage multiplier, i.e. those that do not affect their parent (this MOSRotating) when wounded.</param>
+    /// <returns>The number of wounds on this MOSRotating and, optionally, its Attachables.</returns>
+    /// </summary>
+    int GetWoundCount(bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables) const;
 
 	/// <summary>
-	/// Attaches the passed in wound AEmitter and adds it to the list of wounds, changing its parent offset to the passed in Vector.
+	/// Adds the passed in wound AEmitter to the list of wounds and changes its parent offset to the passed in Vector.
 	/// </summary>
-	/// <param name="pWound">The wound AEmitter to add</param>
-	/// <param name="parentOffsetToSet">The vector to set as the wound AEmitter's parent offset</param>
-	virtual void AddWound(AEmitter *pWound, const Vector& parentOffsetToSet, bool checkGibWoundLimit = true);
+	/// <param name="woundToAdd">The wound AEmitter to add.</param>
+	/// <param name="parentOffsetToSet">The vector to set as the wound AEmitter's parent offset.</param>
+	/// <param name="checkGibWoundLimit">Whether to gib this MOSRotating if adding this wound raises its wound count past its gib wound limit. Defaults to true.</param>
+    virtual void AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet, bool checkGibWoundLimit = true);
 
+    /// <summary>
+    /// Removes the specified number of wounds from this MOSRotating, and returns damage caused by these removed wounds.
+    /// Includes any Attachables (and their Attachables, etc.) that have a positive damage multiplier.
+    /// </summary>
+    /// <param name="numberOfWoundsToRemove">The number of wounds that should be removed.</param>
+    /// <returns>The amount of damage caused by these wounds, taking damage multipliers into account.</returns>
+    virtual float RemoveWounds(int numberOfWoundsToRemove) { return RemoveWounds(numberOfWoundsToRemove, true, false, false); }
 
-	/// <summary>
-	/// Removes a specified amount of wounds and returns damage caused by these wounds. Head multiplier is not used.				
-	/// </summary>
-	/// <param name="amount">Amount of wounds to remove.</param>
-	/// <returns>Amount of damage caused by these wounds.</returns>
-	virtual int RemoveWounds(int amount);
-
+    /// <summary>
+    /// Removes the specified number of wounds from this MOSRotating, and returns damage caused by these removed wounds.
+    /// Optionally removes wounds from Attachables (and their Attachables, etc.) that match the conditions set by the provided inclusion parameters.
+    /// </summary>
+    /// <param name="numberOfWoundsToRemove">The number of wounds that should be removed.</param>
+    /// <param name="includePositiveDamageAttachables">Whether to count wounds from Attachables that have a positive damage multiplier, i.e. those that damage their parent (this MOSRotating) when wounded.</param>
+    /// <param name="includeNegativeDamageAttachables">Whether to count wounds from Attachables that have a negative damage multiplier, i.e. those that heal their parent (this MOSRotating) when wounded.</param>
+    /// <param name="includeNoDamageAttachables">Whether to count wounds from Attachables that a zero damage multiplier, i.e. those that do not affect their parent (this MOSRotating) when wounded.</param>
+    /// <returns>The amount of damage caused by these wounds, taking damage multipliers into account.</returns>
+    virtual float RemoveWounds(int numberOfWoundsToRemove, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables);
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetWoundCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the amount of wound attached to this.
-// Arguments:       Key to retrieve value.
-// Return value:    Wound amount.
-
-	virtual int GetWoundCount() const { return m_Wounds.size(); }; 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetStringValue
+// Method:  GetStringValue
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the string value associated with the specified key or "" if it does not exist.
 // Arguments:       Key to retrieve value.
 // Return value:    String value.
 
-	virtual std::string GetStringValue(std::string key);
+	std::string GetStringValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetNumberValue
+// Method:  GetNumberValue
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the number value associated with the specified key or 0 if it does not exist.
 // Arguments:       Key to retrieve value.
 // Return value:    Number (double) value.
 
-	virtual double GetNumberValue(std::string key);
+	double GetNumberValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetObjectValue
+// Method:  GetObjectValue
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns the object value associated with the specified key or 0 if it does not exist.
 // Arguments:       None.
 // Return value:    Object (Entity *) value.
 
-	virtual Entity * GetObjectValue(std::string key);
+	Entity * GetObjectValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetStringValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the string value associated with the specified key.
-// Arguments:       String key and value to set.
-// Return value:    None.
-
-	virtual void SetStringValue(std::string key, std::string value);
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetNumberValue
+// Method:  SetStringValue
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the string value associated with the specified key.
 // Arguments:       String key and value to set.
 // Return value:    None.
 
-	virtual void SetNumberValue(std::string key, double value);
+	void SetStringValue(std::string key, std::string value);
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:  SetNumberValue
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets the string value associated with the specified key.
+// Arguments:       String key and value to set.
+// Return value:    None.
+
+	void SetNumberValue(std::string key, double value);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetObjectValue
@@ -971,7 +748,7 @@ EntityAllocation(MOSRotating)
 // Arguments:       String key and value to set.
 // Return value:    None.
 
-	virtual void SetObjectValue(std::string key, Entity * value);
+	void SetObjectValue(std::string key, Entity * value);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RemoveStringValue
@@ -980,7 +757,7 @@ EntityAllocation(MOSRotating)
 // Arguments:       String key to remove.
 // Return value:    None.
 
-	virtual void RemoveStringValue(std::string key);
+	void RemoveStringValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RemoveNumberValue
@@ -989,7 +766,7 @@ EntityAllocation(MOSRotating)
 // Arguments:       String key to remove.
 // Return value:    None.
 
-	virtual void RemoveNumberValue(std::string key);
+	void RemoveNumberValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RemoveObjectValue
@@ -998,7 +775,7 @@ EntityAllocation(MOSRotating)
 // Arguments:       String key to remove.
 // Return value:    None.
 
-	virtual void RemoveObjectValue(std::string key);
+	void RemoveObjectValue(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  StringValueExists
@@ -1007,7 +784,7 @@ EntityAllocation(MOSRotating)
 // Arguments:       String key to check.
 // Return value:    True if value exists.
 
-	virtual bool StringValueExists(std::string key);
+	bool StringValueExists(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  NumberValueExists
@@ -1016,7 +793,7 @@ EntityAllocation(MOSRotating)
 // Arguments:       String key to check.
 // Return value:    True if value exists.
 
-	virtual bool NumberValueExists(std::string key);
+	bool NumberValueExists(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ObjectValueExists
@@ -1025,16 +802,7 @@ EntityAllocation(MOSRotating)
 // Arguments:       String key to check.
 // Return value:    True if value exists.
 
-	virtual bool ObjectValueExists(std::string key);
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+	bool ObjectValueExists(std::string key);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetDamageMultiplier
@@ -1043,7 +811,7 @@ EntityAllocation(MOSRotating)
 // Arguments:       New multiplier value.
 // Return value:    None.
 
-	virtual void SetDamageMultiplier(float newValue) { m_DamageMultiplier = newValue; }
+    void SetDamageMultiplier(float newValue) { m_DamageMultiplier = newValue; m_NoSetDamageMultiplier = false; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetDamageMultiplier
@@ -1052,17 +820,13 @@ EntityAllocation(MOSRotating)
 // Arguments:       None.
 // Return value:    Current multiplier value.
 
-	virtual float GetDamageMultiplier() const { return m_DamageMultiplier; }
+	float GetDamageMultiplier() const { return m_DamageMultiplier; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsDamageMultiplierRedefined
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether the damage multiplier was altered in the .INI definition. 
-//					If not, CC will apply default values during actor construction.
-// Arguments:       None.
-// Return value:    Current multiplier value.
-
-	virtual bool IsDamageMultiplierRedefined() const { return m_DamageMultiplierRedefined; }
+    /// <summary>
+    /// Gets whether the damage multiplier for this MOSRotating has been directly set, or is at its default value.
+    /// </summary>
+    /// <returns>Whether the damage multiplier for this MOSRotating has been set.</returns>
+    bool HasNoSetDamageMultiplier() const { return m_NoSetDamageMultiplier; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1072,17 +836,17 @@ EntityAllocation(MOSRotating)
 // Arguments:       None.
 // Return value:    The amount of impulse force exerted on this during the last frame.
 
-	virtual Vector GetTravelImpulse() const { return m_TravelImpulse; }
+	Vector GetTravelImpulse() const { return m_TravelImpulse; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTravelImpulse
+// Method:          SetTravelImpulse
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the amount of impulse force exerted on this during the last frame.
 // Arguments:       New impulse value
 // Return value:    None.
 
-	virtual void SetTravelImpulse(Vector impulse) { m_TravelImpulse = impulse; }
+	void SetTravelImpulse(Vector impulse) { m_TravelImpulse = impulse; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1090,23 +854,12 @@ EntityAllocation(MOSRotating)
 
 protected:
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ApplyAttachableForces
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the joint force transfer stuff for an attachable. Convencinece
-//                  method. If this returns false, it means the attachable has been knocked
-//                  off and has been passed to MovableMan OR deleted. In either case,
-//                  if false is returned just set the pointer to 0 and be done with it.
-// Arguments:       A pointer to the attachable to mess with. Ownership isn't transferred,
-//                  but if the return is false, then the object has been deleted!
-//					If isCritical is true, then if attachable is gibbed created break wound
-//					emits indefenitely to guarantee actor's death.
-// Return value:    Whether or not the joint held up to the forces and impulses which had
-//                  accumulated on the Attachable during this Update(). If false, the passed
-//                  in instance is now deleted and invalid!
-
-    bool ApplyAttachableForces(Attachable *pAttachable, bool isCritical = false);
+    /// <summary>
+    /// Transfers forces and impulse forces from the given Attachable to this MOSRotating, gibbing and/or removing the Attachable if needed.
+    /// </summary>
+    /// <param name="attachable">A pointer to the Attachable to apply forces from. Ownership is NOT transferred!</param>
+    /// <returns>Whether or not the Attachable has been removed, in which case it'll usually be passed to MovableMan.</returns>
+    bool TransferForcesFromAttachable(Attachable *attachable);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1121,9 +874,21 @@ protected:
 //                  the same as the last one in the index (presumably its parent),
 // Return value:    None.
 
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID = g_NoMOID,
-                                 bool makeNewMOID = true);
+    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
+
+    /// <summary>
+    /// Creates the particles specified by this MOSRotating's list of Gibs and adds them to MovableMan with appropriately randomized velocities, based on this MOSRotating's gib blast strength.
+    /// </summary>
+    /// <param name="impactImpulse">The impulse (kg * m/s) of the impact that caused the gibbing to happen.</param>
+    /// <param name="movableObjectToIgnore">A pointer to an MO which the Attachables should not be colliding with.</param>
+    void CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObject *movableObjectToIgnore);
+
+    /// <summary>
+    /// Removes all Attachables from this MOSR, deleting them or adding them to MovableMan as appropriate, and giving them randomized velocities based on their properties and this MOSRotating's gib blast strength.
+    /// </summary>
+    /// <param name="impactImpulse">The impulse (kg * m/s) of the impact that caused the gibbing to happen.</param>
+    /// <param name="movableObjectToIgnore">A pointer to an MO which the Attachables should not be colliding with.</param>
+    void RemoveAttachablesWhenGibbing(const Vector &impactImpulse, MovableObject *movableObjectToIgnore);
 
     // Member variables
     static Entity::ClassInfo m_sClass;
@@ -1151,18 +916,22 @@ protected:
     Vector m_RecoilForce;
     // The vector that the recoil offsets the sprite when m_Recoiled is true.
     Vector m_RecoilOffset;
-    // The list of wound AEmitters currently attached to this MOSRotating, and owned here as well
+    // The list of wound AEmitters currently attached to this MOSRotating, and owned here as well.
     std::list<AEmitter *> m_Wounds;
-    // The list of general Attachables currently attached and Owned by this.
+    // The list of Attachables currently attached and Owned by this.
     std::list<Attachable *> m_Attachables;
-    // The list of all Attachables, including both hardcoded attachables and those added through ini or lua
-    std::list<Attachable *> m_AllAttachables;
+    std::unordered_set<unsigned long> m_ReferenceHardcodedAttachableUniqueIDs; //!< An unordered set is filled with the Unique IDs of all of the reference object's hardcoded Attachables when using the copy Create.
+    std::unordered_map<unsigned long, std::function<void (MOSRotating*, Attachable*)>> m_HardcodedAttachableUniqueIDsAndSetters; //!< An unordered map of Unique IDs to setter lambda functions, used to call the appropriate hardcoded Attachable setter when a hardcoded Attachable is removed.
+    const Attachable *m_RadiusAffectingAttachable; //!< A pointer to the Attachable that is currently affecting the radius. Used for some efficiency benefits.
+    float m_FarthestAttachableDistanceAndRadius; //!< The distance + radius of the radius affecting Attachable.
+    float m_AttachableAndWoundMass; //!< The mass of all Attachables and wounds on this MOSRotating. Used in combination with its actual mass and any other affecting factors to get its total mass.
     // The list of Gib:s this will create when gibbed
     std::list<Gib> m_Gibs;
     // The amount of impulse force required to gib this, in kg * (m/s). 0 means no limit
     float m_GibImpulseLimit;
     // The number of wound emitters allowed before this gets gibbed. 0 means this can't get gibbed
     int m_GibWoundLimit;
+    float m_GibBlastStrength; //!< The strength with which Gibs and Attachables will get launched when this MOSRotating is gibbed.
     // Gib sound effect
     SoundContainer m_GibSound;
     // Whether to flash effect on gib
@@ -1176,10 +945,8 @@ protected:
 	// Map to store any object pointers
 	std::map<std::string, Entity *> m_ObjectValueMap;
 
-	// Damage mutliplier for this attachable
-	float m_DamageMultiplier;
-	// Whether damage multiplier for this attachable was redefined in .ini
-	bool m_DamageMultiplierRedefined;
+	float m_DamageMultiplier; //!< Damage multiplier for this MOSRotating.
+    bool m_NoSetDamageMultiplier; //!< Whether or not the damage multiplier for this MOSRotating was set.
 
     // Intermediary drawing bitmap used to flip rotating bitmaps. Owned!
     BITMAP *m_pFlipBitmap;
@@ -1227,8 +994,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    MOSRotating(const MOSRotating &reference);
-    MOSRotating& operator=(const MOSRotating &rhs);
+	MOSRotating(const MOSRotating &reference) = delete;
+	MOSRotating& operator=(const MOSRotating &rhs) = delete;
 
 };
 

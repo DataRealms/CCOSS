@@ -23,6 +23,7 @@
 namespace RTE
 {
 
+#define OBJARROWFRAMECOUNT 4
 #define LZCURSORFRAMECOUNT 4
 
 class Actor;
@@ -67,6 +68,10 @@ class GameActivity:
 // Public member variable, method and friend function declarations
 
 public:
+
+	SerializableOverrideMethods
+	ClassInfoGetters
+
     enum ObjectiveArrowDir
     {
         ARROWDOWN = 0,
@@ -81,10 +86,6 @@ public:
         YELLOW
     };
 
-/* abstract class
-// Concrete allocation and cloning definitions
-EntityAllocation(GameActivity)
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GameActivity
@@ -103,7 +104,7 @@ EntityAllocation(GameActivity)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~GameActivity() { Destroy(true); }
+	~GameActivity() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -114,7 +115,7 @@ EntityAllocation(GameActivity)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+	int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -125,23 +126,7 @@ EntityAllocation(GameActivity)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const GameActivity &reference);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
+	int Create(const GameActivity &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -152,19 +137,7 @@ EntityAllocation(GameActivity)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Activity::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this GameActivity to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the GameActivity will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+	void Reset() override { Clear(); Activity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -175,47 +148,26 @@ EntityAllocation(GameActivity)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
-
+	void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetCPUTeam
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the current CPU-assisted team, if any (NOTEAM) - LEGACY function
+// Description:     Gets the current CPU-assisted team, if any (NoTeam) - LEGACY function
 // Arguments:       None.
-// Return value:    The current setting. NOTEAM is no team is assisted.
+// Return value:    The current setting. NoTeam is no team is assisted.
 
     int GetCPUTeam() const { return m_CPUTeam; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetCPUTeam
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the current CPU-assisted team, if any (NOTEAM) - LEGACY function
-// Arguments:       The new setting. NOTEAM is no team is assisted.
+// Description:     Sets the current CPU-assisted team, if any (NoTeam) - LEGACY function
+// Arguments:       The new setting. NoTeam is no team is assisted.
 // Return value:    None.
 
-    void SetCPUTeam(int team = Activity::NOTEAM);
+    void SetCPUTeam(int team = Activity::NoTeam);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -227,7 +179,7 @@ EntityAllocation(GameActivity)
 //                  Which player to set it for.
 // Return value:    None.
 
-    void SetObservationTarget(const Vector &newTarget, int player = 0) { if (player >= 0 && player < Activity::MAXPLAYERCOUNT) m_ObservationTarget[player] = newTarget; }
+    void SetObservationTarget(const Vector &newTarget, int player = 0) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) m_ObservationTarget[player] = newTarget; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -239,7 +191,7 @@ EntityAllocation(GameActivity)
 //                  Which player to set it for.
 // Return value:    None.
 
-    void SetDeathViewTarget(const Vector &newTarget, int player = 0) { if (player >= 0 && player < Activity::MAXPLAYERCOUNT) m_DeathViewTarget[player] = newTarget; }
+    void SetDeathViewTarget(const Vector &newTarget, int player = 0) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) m_DeathViewTarget[player] = newTarget; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -250,7 +202,7 @@ EntityAllocation(GameActivity)
 //                  Which player to set it for.
 // Return value:    None.
 
-    void SetLandingZone(const Vector &newZone, int player = 0) { if (player >= 0 && player < Activity::MAXPLAYERCOUNT) m_LandingZone[player] = newZone; }
+    void SetLandingZone(const Vector &newZone, int player = 0) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) m_LandingZone[player] = newZone; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -260,7 +212,7 @@ EntityAllocation(GameActivity)
 // Arguments:       Which player to get it for.
 // Return value:    The new absolute position to set as the last selected landing zone.
 
-    Vector GetLandingZone(int player = 0) { if (player >= 0 && player < Activity::MAXPLAYERCOUNT) return m_LandingZone[player]; else return Vector(); }
+    Vector GetLandingZone(int player = 0) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) return m_LandingZone[player]; else return Vector(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -271,7 +223,7 @@ EntityAllocation(GameActivity)
 //                  Which player to set it for.
 // Return value:    None.
 
-    void SetActorSelectCursor(const Vector &newPos, int player = 0) { if (player >= 0 && player < Activity::MAXPLAYERCOUNT) m_ActorCursor[player] = newPos; }
+    void SetActorSelectCursor(const Vector &newPos, int player = 0) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) m_ActorCursor[player] = newPos; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -283,6 +235,12 @@ EntityAllocation(GameActivity)
 
     BuyMenuGUI * GetBuyGUI(unsigned int which = 0) const { return m_pBuyGUI[which]; }
 
+    /// <summary>
+    /// Checks if the in-game GUI Object is visible for a specific player.
+    /// </summary>
+    /// <param name="which">Which player to check the GUI for. -1 will check all players.</param>
+    /// <returns>Whether or not the BuyMenuGUI is visible for input player(s).</returns>
+    bool IsBuyGUIVisible(int which = 0) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetEditorGUI
@@ -304,7 +262,7 @@ EntityAllocation(GameActivity)
 //                  be added to MovableMan already.
 // Return value:    Whether the focus switch was successful or not.
 
-    virtual bool SwitchToActor(Actor *pActor, int player = 0, int team = 0);
+	bool SwitchToActor(Actor *pActor, short player = 0, short team = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -316,7 +274,7 @@ EntityAllocation(GameActivity)
 //                  An actor pointer to skip in the sequence.
 // Return value:    None.
 
-    virtual void SwitchToNextActor(int player, int team, Actor *pSkip = 0);
+	void SwitchToNextActor(short player, short team, Actor *pSkip = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -328,7 +286,7 @@ EntityAllocation(GameActivity)
 //                  An actor pointer to skip in the sequence.
 // Return value:    None.
 
-    virtual void SwitchToPrevActor(int player, int team, Actor *pSkip = 0);
+	void SwitchToPrevActor(short player, short team, Actor *pSkip = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -363,7 +321,7 @@ EntityAllocation(GameActivity)
 //                  Which player's banner to get.
 // Return value:    A pointer to the GUIBanner object that we can 
 
-    GUIBanner * GetBanner(int whichColor = YELLOW, int player = Activity::PLAYER_1) { return whichColor == YELLOW ? m_pBannerYellow[player] : m_pBannerRed[player]; }
+    GUIBanner * GetBanner(int whichColor = YELLOW, int player = Players::PlayerOne) { return whichColor == YELLOW ? m_pBannerYellow[player] : m_pBannerRed[player]; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -380,9 +338,9 @@ EntityAllocation(GameActivity)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetLZArea
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the Area within which a team can land things. OINT.
+// Description:     Gets the Area within which a team can land things. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       The number of the team we're setting for.
-// Return value:    The Area we're using to limit their landings within. OINT.
+// Return value:    The Area we're using to limit their landings within. OWNERSHIP IS NOT TRANSFERRED!
 
     const Scene::Area & GetLZArea(int team) const { return m_LandingZoneArea[team]; }
 
@@ -420,7 +378,7 @@ EntityAllocation(GameActivity)
 //                  The desired direction of the arrow when the point is on screen.
 // Return value:    None.
 
-    void AddObjectivePoint(std::string description, Vector objPos, int whichTeam = Activity::TEAM_1, ObjectiveArrowDir arrowDir = ARROWDOWN);
+    void AddObjectivePoint(std::string description, Vector objPos, int whichTeam = Teams::TeamOne, ObjectiveArrowDir arrowDir = ARROWDOWN);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -448,7 +406,7 @@ EntityAllocation(GameActivity)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Adds somehting to the purchase list that will override what is set
 //                  in the buy guy next time CreateDelivery is called.
-// Arguments:       The SceneObject preset to add to the override purchase list. OINT!
+// Arguments:       The SceneObject preset to add to the override purchase list. OWNERSHIP IS NOT TRANSFERRED!
 //                  Which player's list to add an override purchase item to.
 // Return value:    The new total value of what's in the override purchase list.
 
@@ -460,7 +418,7 @@ EntityAllocation(GameActivity)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     First clears and then adds all the stuff in a Loadout to the override
 //                  purchase list.
-// Arguments:       The Loadout preset to set the override purchase list to reflect. OINT!
+// Arguments:       The Loadout preset to set the override purchase list to reflect. OWNERSHIP IS NOT TRANSFERRED!
 //                  The player we're talking about.
 // Return value:    The new total value of what's in the override purchase list.
 
@@ -551,7 +509,7 @@ EntityAllocation(GameActivity)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void SetupPlayers();
+	void SetupPlayers() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -562,7 +520,7 @@ EntityAllocation(GameActivity)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Start();
+	int Start() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -572,7 +530,7 @@ EntityAllocation(GameActivity)
 // Arguments:       Whether to pause the game or not.
 // Return value:    None.
 
-    virtual void Pause(bool pause = true);
+	void SetPaused(bool pause = true) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -582,18 +540,18 @@ EntityAllocation(GameActivity)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void End();
+	void End() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateEditing
+// Method:  UpdateEditing
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     This is a special update step for when any player is still editing the
 //                  scene.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateEditing();
+	void UpdateEditing();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -604,7 +562,7 @@ EntityAllocation(GameActivity)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -616,7 +574,7 @@ EntityAllocation(GameActivity)
 //                  Which screen's GUI to draw onto the bitmap.
 // Return value:    None.
 
-    virtual void DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int which = 0);
+	void DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int which = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -624,11 +582,11 @@ EntityAllocation(GameActivity)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws this ActivityMan's current graphical representation to a
 //                  BITMAP of choice. This includes all game-related graphics.
-// Arguments:       A pointer to a BITMAP to draw on. OINT.
+// Arguments:       A pointer to a BITMAP to draw on. OWNERSHIP IS NOT TRANSFERRED!
 //                  The absolute position of the target bitmap's upper left corner in the scene.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector());
+	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector()) override;
 
 
 
@@ -638,13 +596,7 @@ EntityAllocation(GameActivity)
 // Description:     Returns the name of the tech module selected for this team during scenario setup
 // Arguments:       Team to return tech module for
 // Return value:    Tech module name, for example Dummy.rte, or empty string if there is no team
-	std::string GetTeamTech(int team)
-	{
-		if (team >= 0 && team < MAXTEAMCOUNT)
-			return m_TeamTech[team];
-		else
-			return "";
-	}
+	std::string GetTeamTech(int team) { return (team >= Teams::TeamOne && team < Teams::MaxTeamCount) ? m_TeamTech[team] : ""; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetTeamTech
@@ -661,7 +613,7 @@ EntityAllocation(GameActivity)
 // Description:     Indicates whether a specific team is assigned a CPU player in the current game.
 // Arguments:       Which team index to check.
 // Return value:    Whether the team is assigned a CPU player in the current activity.
-    bool TeamIsCPU(int team) const { return (team >= TEAM_1 && team < MAXTEAMCOUNT) ? m_TeamIsCPU[team] : false; }
+    bool TeamIsCPU(int team) const { return (team >= Teams::TeamOne && team < Teams::MaxTeamCount) ? m_TeamIsCPU[team] : false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -918,35 +870,35 @@ EntityAllocation(GameActivity)
 
     virtual void OnPieMenu(Actor *actor) { /* Does nothing, kept here for program control flow. Method is not pure virtual to avoid a bunch of junk implementations in non-scritped activities. */};
 
-	virtual void AddPieMenuSlice(std::string description, std::string functionName, PieSlice::SliceDirection direction, bool isEnabled)
+	void AddPieMenuSlice(std::string description, std::string functionName, PieSlice::SliceDirection direction, bool isEnabled)
 	{ 
-		if (m_CurrentPieMenuPlayer >= 0 && m_CurrentPieMenuPlayer < Activity::MAXPLAYERCOUNT)
+		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
 			m_pPieMenu[m_CurrentPieMenuPlayer]->AddSliceLua(description, functionName, direction, isEnabled);
 	};
 
-	virtual void AlterPieMenuSlice(std::string description, std::string functionName, PieSlice::SliceDirection direction, bool isEnabled)
+	void AlterPieMenuSlice(std::string description, std::string functionName, PieSlice::SliceDirection direction, bool isEnabled)
 	{
-		if (m_CurrentPieMenuPlayer >= 0 && m_CurrentPieMenuPlayer < Activity::MAXPLAYERCOUNT)
+		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
 			m_pPieMenu[m_CurrentPieMenuPlayer]->AlterSliceLua(description, functionName, direction, isEnabled);
 	};
 
-	virtual PieSlice RemovePieMenuSlice(std::string description, std::string functionName)
+    PieSlice RemovePieMenuSlice(std::string description, std::string functionName)
 	{
-		if (m_CurrentPieMenuPlayer >= 0 && m_CurrentPieMenuPlayer < Activity::MAXPLAYERCOUNT)
+		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
 			return m_pPieMenu[m_CurrentPieMenuPlayer]->RemoveSliceLua(description, functionName);
 		return PieSlice("", PieSlice::PieSliceIndex::PSI_NONE, PieSlice::SliceDirection::NONE, false);
 	};
 
-	virtual std::vector<PieSlice *> GetCurrentPieMenuSlices(int player) const 
+	std::vector<PieSlice *> GetCurrentPieMenuSlices(int player) const
 	{ 
-		//if (player >= 0 && player < Activity::MAXPLAYERCOUNT)
+		//if (player >= Players::PlayerOne && player < Players::MaxPlayerCount)
 			return m_pPieMenu[player]->GetCurrentSlices();
 		//return 0;
 	}
 
-	/*virtual std::vector<PieSlice> * GetAvailablePieMenuSlices(int player) const 
+	/*std::vector<PieSlice> * GetAvailablePieMenuSlices(int player) const 
 	{ 
-		if (player >= 0 && player < Activity::MAXPLAYERCOUNT)
+		if (player >= Players::PlayerOne && player < Players::MaxPlayerCount)
 			return &m_pPieMenu[player]->GetAvailableSlices();
 		return 0;
 	}*/
@@ -976,8 +928,8 @@ protected:
 
     struct ObjectivePoint
     {
-        ObjectivePoint() { m_Description.clear(); m_ScenePos.Reset(); m_Team = Activity::NOTEAM; m_ArrowDir = ARROWDOWN; }
-        ObjectivePoint(const std::string &desc, const Vector &pos, int team = -1, ObjectiveArrowDir arrowDir = ARROWDOWN) { m_Description = desc; m_ScenePos = pos; m_Team = (Activity::Team)team; m_ArrowDir = arrowDir; }
+        ObjectivePoint() { m_Description.clear(); m_ScenePos.Reset(); m_Team = Teams::NoTeam; m_ArrowDir = ARROWDOWN; }
+        ObjectivePoint(const std::string &desc, const Vector &pos, int team = -1, ObjectiveArrowDir arrowDir = ARROWDOWN) { m_Description = desc; m_ScenePos = pos; m_Team = (Teams)team; m_ArrowDir = arrowDir; }
 
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -998,16 +950,14 @@ protected:
         // Absolute position in the scene where this is pointed
         Vector m_ScenePos;
         // The team this objective is relevant to
-        Activity::Team m_Team;
+        Teams m_Team;
         // The positioning of the arrow that points at this objective
         ObjectiveArrowDir m_ArrowDir;
     };
 
 
     // Comparison functor for sorting objective points by their y pos using STL's sort
-    struct ObjPointYPosComparison:
-        public std::binary_function<ObjectivePoint &, ObjectivePoint &, bool>
-    {
+    struct ObjPointYPosComparison {
         bool operator()(ObjectivePoint &rhs, ObjectivePoint &lhs) { return rhs.m_ScenePos.m_Y < lhs.m_ScenePos.m_Y; }
     };
 
@@ -1040,7 +990,7 @@ protected:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates which single team is left, if any.
 // Arguments:       None.
-// Return value:    Which team stands alone with any brains in its ranks, if any. NOTEAM
+// Return value:    Which team stands alone with any brains in its ranks, if any. NoTeam
 //                  is returned if there's either more than one team, OR there are no
 //                  teams at all left with brains in em.
 
@@ -1075,10 +1025,10 @@ protected:
 // Description:     Goes through all Actor:s currently in the MovableMan and disables or
 //                  enables each one with a Controller set to AI input.
 // Arguments:       Whether to disable or enable them;
-//                  Which team to do this to. If all, then pass Activity::NOTEAM
+//                  Which team to do this to. If all, then pass Teams::NoTeam
 // Return value:    None.
 
-    void DisableAIs(bool disable = true, int whichTeam = NOTEAM);
+    void DisableAIs(bool disable = true, int whichTeam = Teams::NoTeam);
 
 
 
@@ -1089,52 +1039,52 @@ protected:
     // Which team is CPU-managed, if any (-1) - LEGACY, now controlled by Activity::m_IsHuman
     int m_CPUTeam;
     // Team is active or not this game
-    bool m_TeamIsCPU[MAXTEAMCOUNT];
+    bool m_TeamIsCPU[Teams::MaxTeamCount];
 
     // The observation sceneman scroll targets, for when the game is over or a player is in observation mode
-    Vector m_ObservationTarget[Activity::MAXPLAYERCOUNT];
+    Vector m_ObservationTarget[Players::MaxPlayerCount];
     // The player death sceneman scroll targets, for when a player-controlled actor dies and the view should go to his last position
-    Vector m_DeathViewTarget[Activity::MAXPLAYERCOUNT];
+    Vector m_DeathViewTarget[Players::MaxPlayerCount];
     // Timers for measuring death cam delays.
-    Timer m_DeathTimer[Activity::MAXPLAYERCOUNT];
+    Timer m_DeathTimer[Players::MaxPlayerCount];
     // Times the delay between regular actor swtich, and going into manual siwtch mode
-    Timer m_ActorSelectTimer[Activity::MAXPLAYERCOUNT];
+    Timer m_ActorSelectTimer[Players::MaxPlayerCount];
     // The cursor for selecting new Actors
-    Vector m_ActorCursor[Activity::MAXPLAYERCOUNT];
+    Vector m_ActorCursor[Players::MaxPlayerCount];
     // Highlighted actor while cursor switching; will be switched to if switch button is released now
-    Actor *m_pLastMarkedActor[Activity::MAXPLAYERCOUNT];
+    Actor *m_pLastMarkedActor[Players::MaxPlayerCount];
     // The last selected landing zone
-    Vector m_LandingZone[Activity::MAXPLAYERCOUNT];
+    Vector m_LandingZone[Players::MaxPlayerCount];
     // Whether the last craft was set to return or not after delivering
-    bool m_AIReturnCraft[Activity::MAXPLAYERCOUNT];
+    bool m_AIReturnCraft[Players::MaxPlayerCount];
     // The pie menus for each player
-    PieMenuGUI *m_pPieMenu[Activity::MAXPLAYERCOUNT];
+    PieMenuGUI *m_pPieMenu[Players::MaxPlayerCount];
     // The in-game buy GUIs for each player
-    BuyMenuGUI *m_pBuyGUI[Activity::MAXPLAYERCOUNT];
+    BuyMenuGUI *m_pBuyGUI[Players::MaxPlayerCount];
     // The in-game scene editor GUI for each player
-    SceneEditorGUI *m_pEditorGUI[Activity::MAXPLAYERCOUNT];
+    SceneEditorGUI *m_pEditorGUI[Players::MaxPlayerCount];
     // The in-game important message banners for each player
-    GUIBanner *m_pBannerRed[Activity::MAXPLAYERCOUNT];
-    GUIBanner *m_pBannerYellow[Activity::MAXPLAYERCOUNT];
+    GUIBanner *m_pBannerRed[Players::MaxPlayerCount];
+    GUIBanner *m_pBannerYellow[Players::MaxPlayerCount];
     // How many times a banner has been repeated.. so we dont' annoy by repeating forever
-    int m_BannerRepeats[Activity::MAXPLAYERCOUNT];
+    int m_BannerRepeats[Players::MaxPlayerCount];
     // Whether each player has marked himself as ready to start. Can still edit while this is set, but when all are set, the game starts
-    bool m_ReadyToStart[Activity::MAXPLAYERCOUNT];
+    bool m_ReadyToStart[Players::MaxPlayerCount];
     // An override purchase list that can be set by a script and will be used instead of what's in the buy menu. Object held in here are NOT OWNED
     // Once a delivery is made with anything in here, this list is automatically cleared out, and the next delivery will be what's set in the buy menu.
-    std::list<const SceneObject *> m_PurchaseOverride[Activity::MAXPLAYERCOUNT];
+    std::list<const SceneObject *> m_PurchaseOverride[Players::MaxPlayerCount];
 
     // The delivery queue which contains all the info about all the made orders currently in transit to delivery
-    std::deque<Delivery> m_Deliveries[Activity::MAXTEAMCOUNT];
+    std::deque<Delivery> m_Deliveries[Teams::MaxTeamCount];
     // The box within where landing zones can be put
-    Scene::Area m_LandingZoneArea[Activity::MAXTEAMCOUNT];
+    Scene::Area m_LandingZoneArea[Teams::MaxTeamCount];
     // How wide around the brain the automatic LZ is following
-    int m_BrainLZWidth[Activity::MAXPLAYERCOUNT];
+    int m_BrainLZWidth[Players::MaxPlayerCount];
     // The objective points for each team
     std::list<ObjectivePoint> m_Objectives;
 
     // Tech of player
-    std::string m_TeamTech[Activity::MAXTEAMCOUNT];
+    std::string m_TeamTech[Teams::MaxTeamCount];
 
 	// Initial gold amount selected by player in scenario setup dialog
 	int m_StartingGold;
@@ -1184,7 +1134,7 @@ protected:
 
 	int m_CurrentPieMenuPlayer;
 
-	std::string m_NetworkPlayerNames[MAXPLAYERCOUNT];
+	std::string m_NetworkPlayerNames[Players::MaxPlayerCount];
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

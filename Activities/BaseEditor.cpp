@@ -48,7 +48,6 @@
 #include "GABaseDefense.h"
 
 extern bool g_ResetActivity;
-extern bool g_InActivity;
 
 namespace RTE {
 
@@ -107,7 +106,7 @@ int BaseEditor::Create(const BaseEditor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int BaseEditor::ReadProperty(std::string propName, Reader &reader)
+int BaseEditor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "CPUTeam")
@@ -118,7 +117,6 @@ int BaseEditor::ReadProperty(std::string propName, Reader &reader)
         reader >> m_DeliveryDelay;
     else
 */
-        // See if the base class(es) can find a match instead
         return Activity::ReadProperty(propName, reader);
 
     return 0;
@@ -131,18 +129,9 @@ int BaseEditor::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this BaseEditor with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int BaseEditor::Save(Writer &writer) const
-{
-    Activity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int BaseEditor::Save(Writer &writer) const {
+	Activity::Save(writer);
+	return 0;
 }
 
 
@@ -175,7 +164,7 @@ int BaseEditor::Start()
 //    int error = Activity::Start();
     int error = 0;
 
-    m_ActivityState = RUNNING;
+    m_ActivityState = ActivityState::Running;
     m_Paused = false;
 
     // Reset the mousemoving so that it won't trap the mouse if the window isn't in focus (common after loading)
@@ -191,33 +180,33 @@ int BaseEditor::Start()
         return error;
 
     // Open all doors so we can pathfind past them for brain placement
-    g_MovableMan.OpenAllDoors(true, Activity::NOTEAM);
+    g_MovableMan.OpenAllDoors(true, Teams::NoTeam);
 
     ///////////////////////////////////////
     // Set up player - ONLY ONE ever in a base building activity
 
     // Figure which player is editing this base.. the first active one we find
-    int editingPlayer = Activity::PLAYER_1;
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    int editingPlayer = Players::PlayerOne;
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
         if (m_IsActive[player])
             editingPlayer = player;
 // TODO: support multiple coop players editing the same base?? - A: NO, silly
 
-//    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+//    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
 //    {
 //        if (!m_IsActive[player])
 //            continue;
-        m_ViewState[editingPlayer] = NORMAL;
+        m_ViewState[editingPlayer] = ViewState::Normal;
         g_FrameMan.ClearScreenText(ScreenOfPlayer(editingPlayer));
         // Set the team associations with the first screen so that the correct unseen are shows up
         g_SceneMan.SetScreenTeam(ScreenOfPlayer(editingPlayer), m_Team[editingPlayer]);
         g_SceneMan.SetScreenOcclusion(Vector(), ScreenOfPlayer(editingPlayer));
 
-        m_PlayerController[editingPlayer].Destroy();
+        m_PlayerController[editingPlayer].Reset();
         m_PlayerController[editingPlayer].Create(Controller::CIM_PLAYER, editingPlayer);
         m_PlayerController[editingPlayer].SetTeam(m_Team[editingPlayer]);
 
-        m_MsgTimer[editingPlayer].Reset();
+        m_MessageTimer[editingPlayer].Reset();
 //    }
 
     // Kill off any actors not of this player's team.. they're not supposed to be here
@@ -254,7 +243,7 @@ int BaseEditor::Start()
     ////////////////////////////////
     // Set up teams
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;
@@ -290,7 +279,7 @@ int BaseEditor::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void BaseEditor::Pause(bool pause)
+void BaseEditor::SetPaused(bool pause)
 {
     // Override the pause
     m_Paused = false;
@@ -306,7 +295,7 @@ void BaseEditor::End()
 {
     Activity::End();
 
-    m_ActivityState = OVER;
+    m_ActivityState = ActivityState::Over;
 }
 
 
@@ -345,7 +334,6 @@ void BaseEditor::Update()
 
         // Quit to metagame view
         g_ActivityMan.PauseActivity();
-        g_InActivity = false;
     }
 }
 

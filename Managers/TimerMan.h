@@ -1,497 +1,264 @@
 #ifndef _RTETIMERMAN_
 #define _RTETIMERMAN_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            TimerMan.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Header file for the TimerMan class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
-// TODO: Figure out where we can include this without imploding the whole game and keeping QPC working and having no method/macro conflicts.
-#include <allegro.h>
-#include <winalleg.h>
-
-// Windows.h defines these and they conflict with our methods so we need to undefine them manually.
-#undef GetClassName
-#undef PlaySound
-
-// minwindef.h defines these and they conflict with the std methods so we need to undefine them manually.
-#undef min
-#undef max
-
-//#include "Entity.h"
 #include "Singleton.h"
+
 #define g_TimerMan TimerMan::Instance()
 
-namespace RTE
-{
-
-class QPCTimer;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           TimerMan
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     The centralized singleton manager of all Timer:s and overall
-//                  timekeeping in RTE.
-// Parent(s):       Singleton
-// Class history:   07/07/2004  TimerMan created.
-//                  04/10/2007  Changed to use platform specific, sub-ms resolution timers
-//                              instead of Allegro's crappy ms-only timer. Also implemented
-//                              the model described here: http://www.gaffer.org/game-physics/fix-your-timestep
-
-class TimerMan:
-    public Singleton<TimerMan>//,
-//    public Serializable
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
-
-public:
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     TimerMan
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Constructor method used to instantiate a TimerMan object in system
-//                  memory. Create() should be called before using the object.
-// Arguments:       None.
-
-    TimerMan() { Clear(); Create(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Destructor:      ~TimerMan
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destructor method used to clean up a TimerMan object before deletion
-//                  from system memory.
-// Arguments:       None.
-
-    virtual ~TimerMan() { Destroy(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the TimerMan object ready for use.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets the entire TimerMan, including its inherited members, to
-//                  their default settings or values.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void Reset() { Clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the TimerMan object.
-// Arguments:       None.
-// Return value:    None.
-
-    void Destroy();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_ClassName; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ResetTime
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets the measured real and sim times to 0.
-// Arguments:       None.
-// Return value:    None.
-
-    void ResetTime();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTicksPerSecond
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the number of ticks per second, or the resolution.
-// Arguments:       None.
-// Return value:    The number of ticks per second.
-
-    int64_t GetTicksPerSecond() const { return m_TicksPerSecond; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTicksPerSecondInLua
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the number of ticks per second, or the resolution. Lua can't handle
-//					int64 so we'll expose this specialized function.
-// Arguments:       None.
-// Return value:    The number of ticks per second.
-
-	double GetTicksPerSecondInLua() const { return (double)m_TicksPerSecond; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetRealTickCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a current global real time measured in ticks from the start of the
-//                  simulation up to the last Update of this TimerMan. Use TickFrequency
-//                  to determine how many ticks go in a second.
-// Arguments:       None.
-// Return value:    The number of ticks passed since the simulation started.
-
-    int64_t GetRealTickCount() const { return m_RealTimeTicks; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetSimTickCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a current global simulation time measured in ticks from the start
-//                  of the simulation up to the last Update of this TimerMan. Use TickFrequency
-//                  to determine how many ticks go in a second.
-// Arguments:       None.
-// Return value:    The number of ticks passed since the simulation started.
-
-    int64_t GetSimTickCount() const { return m_SimTimeTicks; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetSimTimeMS
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a current global simulation time measured in ms ticks from the start
-//                  of the simulation up to the last UpdateSim of this TimerMan.
-// Arguments:       None.
-// Return value:    The number of ms passed since the simulation started.
-
-    int64_t GetSimTimeMS() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTimeScale
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a time scale factor which will be used to speed up or slow down
-//                  the progress of the simulation time in relation to the real world
-//                  time.
-// Arguments:       None.
-// Return value:    A factor between the real world time, and the simulation time. A value
-//                  of 2.0 means simulation runs twice as fast as normal.
-
-    float GetTimeScale() const { return m_TimeScale; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetTimeScale
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets a time scale factor which will be used to speed up or slow down
-//                  the progress of the simulation time in relation to the real world
-//                  time.
-// Arguments:       A factor between the real world time, and the simulation time. A value
-//                  of 2.0 means simulation runs twice as fast as normal.
-// Return value:    None.
-
-    void SetTimeScale(float timeScale = 1.0) { m_TimeScale = timeScale; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EnableAveraging
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Enables or disables the averaging of time measurements done each Update().
-//                  These help smooth out and prevent choppy animation.
-// Arguments:       Whether ot not to enable the averaging.
-// Return value:    None.
-
-    void EnableAveraging(bool enable = true) { m_AveragingEnabled = enable; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetRealToSimCap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the cap of the amount of seconds which can be transferred from
-//                  the real time to the simulated time in one update.
-// Arguments:       A float specifying the new cap in seconds.
-// Return value:    None.
-
-    void SetRealToSimCap(float newCap) { m_RealToSimCap = newCap * m_TicksPerSecond; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetRealToSimCap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the cap of the amount of seconds which can be transferred from
-//                  the real time to the simulated time in one update.
-// Arguments:       None.
-// Return value:    A float describing the current cap in seconds.
-
-    float GetRealToSimCap() const { return (float)m_RealToSimCap / (float)m_TicksPerSecond; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetDeltaTimeTicks
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the number of ticks that a simulation update delta time should 
-//                  take.
-// Arguments:       The new delta time in ticks.
-// Return value:    None.
-
-    void SetDeltaTimeTicks(int newDelta) { m_DeltaTime = newDelta; m_DeltaTimeS = m_DeltaTime / m_TicksPerSecond; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetDeltaTimeTicks
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the current number of ticks that the of the simulation updates in.
-// Arguments:       None.
-// Return value:    The current fixed delta time that the simulation should be updating with,
-//                  in ticks.
-
-    int GetDeltaTimeTicks() const { return m_DeltaTime; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetDeltaTimeSecs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the number of secibds that a simulation update delta time should 
-//                  take.
-// Arguments:       The new delta time in seconds.
-// Return value:    None.
-
-    void SetDeltaTimeSecs(float newDelta) { m_DeltaTimeS = newDelta; m_DeltaTime = m_DeltaTimeS * m_TicksPerSecond; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetDeltaTimeSecs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the current fixed delta time of the simulation updates, in seconds.
-// Arguments:       None.
-// Return value:    The current fixed delta time that the simulation should be updating with,
-//                  in seconds.
-
-    float GetDeltaTimeSecs() const { return m_DeltaTimeS; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetDeltaTimeMS
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the current fixed delta time of the simulation updates, in ms.
-// Arguments:       None.
-// Return value:    The current fixed delta time that the simulation should be updating with,
-//                  in ms.
-
-    float GetDeltaTimeMS() const { return m_DeltaTimeS * 1000; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          PauseSim
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the sim to be paused, ie no real time ticks will be transferred
-//                  to the sim accumulator while this is set to true;
-// Arguments:       Whether the sim should be paused or not.
-// Return value:    None.
-
-    void PauseSim(bool pause = false) { m_SimPaused = pause; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetOneSimUpdatePerFrame
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether to force this to artifically make time for only one single
-//                  sim update for the graphics frame. Useful for debugging or profiling.
-// Arguments:       Whether the sim should be set to only update once per graphics frame or not.
-// Return value:    None.
-
-    void SetOneSimUpdatePerFrame(bool oneUpdate = true) { m_OneSimUpdatePerFrame = oneUpdate; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsOneSimUpdatePerFrame
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether to force this to artifically make time for only one single
-//                  sim update for the graphics frame. Useful for debugging or profiling.
-// Arguments:       None.
-// Return value:    Whether the sim should be set to only update once per graphics frame or not.
-
-    bool IsOneSimUpdatePerFrame() const { return m_OneSimUpdatePerFrame; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetSimSpeedLimited
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether to limit the sim speed to not exceed real time, ie 1.0x.
-// Arguments:       Whether the sim speed should be limited to not exceed 1.0.
-// Return value:    None.
-
-    void SetSimSpeedLimited(bool simLimited = true) { m_SimSpeedLimited = simLimited; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsSimSpeedLimited
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether the sim speed is limited to not exceed 1.0x.
-// Arguments:       None.
-// Return value:    Whether the sim is limited to not exceed 1.0x of real time.
-
-    bool IsSimSpeedLimited() const { return m_OneSimUpdatePerFrame && m_SimSpeedLimited; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          TimeForSimUpdate
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tells whether there is enough sim time accumulated to do at least one
-//                  physics update.
-// Arguments:       None.
-// Return value:    Whetehr there is enough sim time to do a physics update.
-
-    bool TimeForSimUpdate() { return m_SimAccumulator >= m_DeltaTime; }
-
-	signed long long GetTimeToSleep() { return (m_DeltaTime - m_SimAccumulator) / 2; };
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DrawnSimUpdate
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tells whether the current simulation update will be drawn in a frame.
-//                  Use this to check if it is necessary to draw purely graphical things
-//                  during the sim update.
-// Arguments:       None.
-// Return value:    Whether this is the last sim update before a frame with its results
-//                  will appear.
-
-    bool DrawnSimUpdate() const { return m_DrawnSimUpdate; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SimUpdatesSinceDrawn
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tells how many sim updates have been performed since the last one that
-//                  ended up being a drawn frame. If negative, it means no sim updates
-//                  have happened, and a same frame will be drawn again.
-// Arguments:       None.
-// Return value:    The number of pure sim updates that have happened since the last drawn.
-
-    int SimUpdatesSinceDrawn() const { return m_SimUpdatesSinceDrawn; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the real time ticks based on the actual time clock time, and
-//                  adding it to the accumulator which the sim ticks will draw from in
-//                  whole DeltaTime-sized chunks.
-// Arguments:       None.
-// Return value:    None.
-
-    void Update();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateSim
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the simulation time to represent the current amount of sim
-//                  time passed from the start of the simulation up to the this last
-//                  update.
-// Arguments:       None.
-// Return value:    None.
-
-    void UpdateSim();
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetAbsoulteTime
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns current time stamp in microseconds unrelated to TimerMan updates.
-//					Can be used to measure time intervals during single frame update.
-// Arguments:       None.
-// Return value:    Current time stamp in microseconds.
-	int64_t GetAbsoulteTime();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
-
-protected:
-
-    // Member variables
-    static const std::string m_ClassName;
-
-    // The point in real time when the simulation (re)started
-    int64_t m_StartTime;
-    // The frequency of ticks each second, ie the resolution of the timer
-    int64_t m_TicksPerSecond;
-    // The number of actual time ticks counted so far
-    int64_t m_RealTimeTicks;
-    // The cap of number of ticks that the real time can add to the accumulator each update
-    int64_t m_RealToSimCap;
-    // Simulation time accumulator keeps track of how much actual time has passed and is chunked into whole DeltaTime:s upon UpdateSim
-    int64_t m_SimAccumulator;
-    // The fixed delta time chunk of the simulation update
-    int64_t m_DeltaTime;
-    // The simulation update step size, in seconds
-    float m_DeltaTimeS;
-    // The number of simulation time ticks counted so far
-    int64_t m_SimTimeTicks;
-    // The number of whole simulation updates have been made since reset
-    int64_t m_SimUpdateCount;
-    // How many sim updates have been done since the last drawn one
-    int m_SimUpdatesSinceDrawn;
-    // Tells whether the current simulation update will be drawn in a frame.
-    bool m_DrawnSimUpdate;
-    // Time scale. The relationship between the real world actual time, and the simulation time.
-    // A value of 2.0 means simulation runs twice as fast as normal, as percieved by a player.
-    float m_TimeScale;
-    // Whether calculated delta time averaging is enabled.
-    bool m_AveragingEnabled;
-    // The buffer of measured the most recent real time differences, used for averaging out the readings
-    std::deque<float> m_DeltaBuffer;
-    // Simulation paused; no real time ticks will go to the sim accumulator
-    bool m_SimPaused;
-    // Whether to force this to artifically make time for only one single sim update for the graphics frame. Useful for debugging or profiling.
-    bool m_OneSimUpdatePerFrame;
-    // Whether the simulation is limted to going at 1.0x and not faster
-    bool m_SimSpeedLimited;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
-private:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this TimerMan, effectively
-//                  resetting the members of this abstraction level only.
-// Arguments:       None.
-// Return value:    None.
-
-    void Clear();
-
-    // Disallow the use of some implicit methods.
-    TimerMan(const TimerMan &reference);
-    TimerMan & operator=(const TimerMan &rhs);
-
-};
-
-} // namespace RTE
-
-#endif // File
+namespace RTE {
+
+	/// <summary>
+	/// The centralized singleton manager of all Timers and overall timekeeping in RTE.
+	/// Uses QueryPerformanceCounter for sub-ms resolution timers and the model described in http://www.gaffer.org/game-physics/fix-your-timestep.
+	/// </summary>
+	class TimerMan : public Singleton<TimerMan> {
+
+	public:
+
+#pragma region Creation
+		/// <summary>
+		/// Constructor method used to instantiate a TimerMan object in system memory. This constructor calls Create() so it shouldn't be called again.
+		/// </summary>
+		// TODO: Figure out why removing Create() here kills fps and if it's already here then why are we calling Create() again during main().
+		TimerMan() { Clear(); Initialize(); }
+
+		/// <summary>
+		/// Makes the TimerMan object ready for use.
+		/// </summary>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Initialize();
+#pragma endregion
+
+#pragma region Destruction
+		/// <summary>
+		/// Destructor method used to clean up a TimerMan object before deletion from system memory.
+		/// </summary>
+		~TimerMan() { Destroy(); }
+
+		/// <summary>
+		/// Destroys and resets (through Clear()) the TimerMan object.
+		/// </summary>
+		void Destroy() { Clear(); }
+
+		/// <summary>
+		/// Resets the entire TimerMan, including its inherited members, to their default settings or values.
+		/// </summary>
+		void Reset() { Clear(); }
+#pragma endregion
+
+#pragma region Getters and Setters
+		/// <summary>
+		/// Gets the current time stamp in microseconds unrelated to TimerMan updates. Can be used to measure time intervals during a single frame update.
+		/// </summary>
+		/// <returns>Current time stamp in microseconds.</returns>
+		long long GetAbsoluteTime() const;
+
+		/// <summary>
+		/// Enables or disables the averaging of time measurements done each Update(). These help smooth out and prevent choppy animation.
+		/// </summary>
+		/// <param name="enable">Whether or not to enable the averaging.</param>
+		void EnableAveraging(bool enable = true) { m_AveragingEnabled = enable; }
+
+		/// <summary>
+		/// Sets the sim to be paused, ie no real time ticks will be transferred to the sim accumulator while this is set to true.
+		/// </summary>
+		/// <param name="pause">Whether the sim should be paused or not.</param>
+		void PauseSim(bool pause = false) { m_SimPaused = pause; }
+
+		/// <summary>
+		/// Tells whether there is enough sim time accumulated to do at least one physics update.
+		/// </summary>
+		/// <returns>Whether there is enough sim time to do a physics update.</returns>
+		bool TimeForSimUpdate() const { return m_SimAccumulator >= m_DeltaTime; }
+
+		/// <summary>
+		/// Tells whether the current simulation update will be drawn in a frame. Use this to check if it is necessary to draw purely graphical things during the sim update.
+		/// </summary>
+		/// <returns>Whether this is the last sim update before a frame with its results will appear.</returns>
+		bool DrawnSimUpdate() const { return m_DrawnSimUpdate; }
+
+		/// <summary>
+		/// Tells how many sim updates have been performed since the last one that ended up being a drawn frame.
+		/// If negative, it means no sim updates have happened, and a same frame will be drawn again.
+		/// </summary>
+		/// <returns>The number of pure sim updates that have happened since the last drawn.</returns>
+		int SimUpdatesSinceDrawn() const { return m_SimUpdatesSinceDrawn; }
+
+		/// <summary>
+		/// Gets the simulation speed over real time.
+		/// </summary>
+		/// <returns>The value of the simulation speed over real time.</returns>
+		float GetSimSpeed() const { return m_SimSpeed; }
+
+		/// <summary>
+		/// Gets a time scale factor which will be used to speed up or slow down the progress of the simulation time in relation to the real world time.
+		/// </summary>
+		/// <returns>A factor between the real world time, and the simulation time.</returns>
+		float GetTimeScale() const { return m_TimeScale; }
+
+		/// <summary>
+		/// Sets a time scale factor which will be used to speed up or slow down the progress of the simulation time in relation to the real world time.
+		/// </summary>
+		/// <param name="timeScale">A factor between the real world time, and the simulation time. A value of 2.0 means simulation runs twice as fast as normal.</param>
+		void SetTimeScale(float timeScale = 1.0F) { m_TimeScale = timeScale; }
+
+		/// <summary>
+		/// Gets the cap of the amount of seconds which can be transferred from the real time to the simulated time in one update.
+		/// </summary>
+		/// <returns>A float describing the current cap in seconds.</returns>
+		float GetRealToSimCap() const { return static_cast<float>(m_RealToSimCap) / static_cast<float>(m_TicksPerSecond); }
+
+		/// <summary>
+		/// Sets the cap of the amount of seconds which can be transferred from the real time to the simulated time in one update.
+		/// </summary>
+		/// <param name="newCap">A float specifying the new cap in seconds.</param>
+		void SetRealToSimCap(float newCap) { m_RealToSimCap = newCap * m_TicksPerSecond; }
+
+		/// <summary>
+		/// Shows whether to force this to artificially make time for only one single sim update for the graphics frame. Useful for debugging or profiling.
+		/// </summary>
+		/// <returns>Whether the sim should be set to only update once per graphics frame or not.</returns>
+		bool IsOneSimUpdatePerFrame() const { return m_OneSimUpdatePerFrame; }
+
+		/// <summary>
+		/// Sets whether to force this to artificially make time for only one single sim update for the graphics frame. Useful for debugging or profiling.
+		/// </summary>
+		/// <param name="oneUpdate">Whether the sim should be set to only update once per graphics frame or not.</param>
+		void SetOneSimUpdatePerFrame(bool oneUpdate = true) { m_OneSimUpdatePerFrame = oneUpdate; }
+
+		/// <summary>
+		/// Shows whether the sim speed is limited to not exceed 1.0x.
+		/// </summary>
+		/// <returns>Whether the sim is limited to not exceed 1.0x of real time.</returns>
+		bool IsSimSpeedLimited() const { return m_OneSimUpdatePerFrame && m_SimSpeedLimited; }
+
+		/// <summary>
+		/// Sets whether to limit the sim speed to not exceed real time.
+		/// </summary>
+		/// <param name="simLimited">Whether the sim speed should be limited to not exceed 1.0.</param>
+		void SetSimSpeedLimited(bool simLimited = true) { m_SimSpeedLimited = simLimited; }
+
+		/// <summary>
+		/// Gets the number of ticks per second (the resolution of the timer).
+		/// </summary>
+		/// <returns>The number of ticks per second.</returns>
+		long long GetTicksPerSecond() const { return m_TicksPerSecond; }
+
+		/// <summary>
+		/// Gets the number of ticks per second. Lua can't handle int64 (or long long apparently) so we'll expose this specialized function.
+		/// </summary>
+		/// <returns>The number of ticks per second.</returns>
+		double GetTicksPerSecondInLua() const { return static_cast<double>(m_TicksPerSecond); }
+
+		/// <summary>
+		/// Gets a current global real time measured in ticks from the start of the simulation up to the last Update of this TimerMan. Use TickFrequency to determine how many ticks go in a second.
+		/// </summary>
+		/// <returns>The number of ticks passed since the simulation started.</returns>
+		long long GetRealTickCount() const { return m_RealTimeTicks; }
+
+		/// <summary>
+		/// Gets a current global simulation time measured in ticks from the start of the simulation up to the last Update of this TimerMan. Use TickFrequency to determine how many ticks go in a second.
+		/// </summary>
+		/// <returns>The number of ticks passed since the simulation started.</returns>
+		long long GetSimTickCount() const { return m_SimTimeTicks; }
+
+		/// <summary>
+		/// Gets a current global simulation time measured in ms ticks from the start of the simulation up to the last UpdateSim of this TimerMan.
+		/// </summary>
+		/// <returns>The number of ms passed since the simulation started.</returns>
+		long long GetSimTimeMS() const { return (m_SimTimeTicks / m_TicksPerSecond) * 0.001F; }
+
+		/// <summary>
+		/// Gets the current number of ticks that the simulation should be updating with.
+		/// </summary>
+		/// <returns>The current fixed delta time that the simulation should be updating with, in ticks.</returns>
+		int GetDeltaTimeTicks() const { return m_DeltaTime; }
+
+		/// <summary>
+		/// Sets the number of ticks that a simulation update delta time should take.
+		/// </summary>
+		/// <param name="newDelta">The new delta time in ticks.</param>
+		void SetDeltaTimeTicks(int newDelta) { m_DeltaTime = newDelta; m_DeltaTimeS = m_DeltaTime / m_TicksPerSecond; }
+
+		/// <summary>
+		/// Gets the current fixed delta time of the simulation updates, in ms.
+		/// </summary>
+		/// <returns>The current fixed delta time that the simulation should be updating with, in ms.</returns>
+		float GetDeltaTimeMS() const { return m_DeltaTimeS * 1000; }
+
+		/// <summary>
+		/// Gets the current fixed delta time of the simulation updates, in seconds.
+		/// </summary>
+		/// <returns>The current fixed delta time that the simulation should be updating with, in seconds.</returns>
+		float GetDeltaTimeSecs() const { return m_DeltaTimeS; }
+
+		/// <summary>
+		/// Sets the number of seconds that a simulation update delta time should take.
+		/// </summary>
+		/// <param name="newDelta">The new delta time in seconds.</param>
+		void SetDeltaTimeSecs(float newDelta) { m_DeltaTimeS = newDelta; m_DeltaTime = m_DeltaTimeS * m_TicksPerSecond; }
+#pragma endregion
+
+#pragma region Concrete Methods
+		/// <summary>
+		/// Resets the measured real and simulation times to 0.
+		/// </summary>
+		void ResetTime();
+
+		/// <summary>
+		/// Updates the simulation time to represent the current amount of simulation time passed from the start of the simulation up to the last update.
+		/// </summary>
+		void UpdateSim();
+
+		/// <summary>
+		/// Updates the real time ticks based on the actual clock time and adds it to the accumulator which the simulation ticks will draw from in whole DeltaTime-sized chunks.
+		/// </summary>
+		void Update();
+#pragma endregion
+
+#pragma region Network Handling
+		/// <summary>
+		/// Gets the duration the thread should be put to sleep. This is used when ServerSimSleepWhenIdle is true to put the thread to sleep if the sim frame is finished faster than it usually should.
+		/// </summary>
+		/// <returns>The duration the thread should be put to sleep.</returns>
+		long long GetTimeToSleep() const { return (m_DeltaTime - m_SimAccumulator) / 2; };
+#pragma endregion
+
+	protected:
+
+		long long m_StartTime; //!< The point in real time when the simulation (re)started.
+		long long m_TicksPerSecond; //!< The frequency of ticks each second, ie the resolution of the timer.	
+		long long m_RealTimeTicks; //!< The number of actual time ticks counted so far.
+		long long m_RealToSimCap; //!< The cap of number of ticks that the real time can add to the accumulator each update.
+		long long m_SimTimeTicks; //!< The number of simulation time ticks counted so far.
+		long long m_SimUpdateCount; //!< The number of whole simulation updates have been made since reset.
+		long long m_SimAccumulator; //!< Simulation time accumulator keeps track of how much actual time has passed and is chunked into whole DeltaTime:s upon UpdateSim.
+
+		long long m_DeltaTime; //!< The fixed delta time chunk of the simulation update.	
+		float m_DeltaTimeS; //!< The simulation update step size, in seconds.
+		std::deque<float> m_DeltaBuffer; //!< Buffer for measuring the most recent real time differences, used for averaging out the readings.
+
+		int m_SimUpdatesSinceDrawn; //!< How many sim updates have been done since the last drawn one.
+		bool m_DrawnSimUpdate; //!< Tells whether the current simulation update will be drawn in a frame.
+
+		float m_SimSpeed; //!< The simulation speed over real time.
+		float m_TimeScale; //!< The relationship between the real world actual time and the simulation time. A value of 2.0 means simulation runs twice as fast as normal, as perceived by a player.
+
+		bool m_AveragingEnabled; //!< Whether calculated delta time averaging is enabled.
+		bool m_SimPaused; //!< Simulation paused; no real time ticks will go to the sim accumulator.
+		bool m_OneSimUpdatePerFrame; //!< Whether to force this to artificially make time for only one single sim update for the graphics frame. Useful for debugging or profiling.
+		bool m_SimSpeedLimited; //!< Whether the simulation is limited to going at 1.0x and not faster.
+
+	private:
+
+		/// <summary>
+		/// Clears all the member variables of this TimerMan, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
+
+		// Disallow the use of some implicit methods.
+		TimerMan(const TimerMan &reference) = delete;
+		TimerMan & operator=(const TimerMan &rhs) = delete;
+	};
+}
+#endif

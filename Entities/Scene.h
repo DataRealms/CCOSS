@@ -14,14 +14,11 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "RTETools.h"
 #include "Entity.h"
-#include "FrameMan.h"
 #include "SceneMan.h"
 #include "ActivityMan.h"
 #include "Box.h"
 #include "BunkerAssembly.h"
-//#include "MovableMan.h"
 
 namespace RTE
 {
@@ -48,6 +45,9 @@ class Scene:
 // Public member variable, method and friend function declarations
 
 public:
+
+	SerializableOverrideMethods
+	ClassInfoGetters
 
 	//Available placed objects sets
 	enum PlacedObjectSets
@@ -81,6 +81,8 @@ public:
 
     public:
 
+		SerializableClassNameGetter
+		SerializableOverrideMethods
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Constructor:     Area
@@ -102,7 +104,7 @@ public:
     // Return value:    An error return value signaling sucess or any particular failure.
     //                  Anything below 0 is an error signal.
 
-        virtual int Create();
+		int Create() override;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -113,23 +115,7 @@ public:
     // Return value:    An error return value signaling sucess or any particular failure.
     //                  Anything below 0 is an error signal.
 
-        virtual int Create(const Area &reference);
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  ReadProperty
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Reads a property value from a Reader stream. If the name isn't
-    //                  recognized by this class, then ReadProperty of the parent class
-    //                  is called. If the property isn't recognized by any of the base classes,
-    //                  false is returned, and the Reader's position is untouched.
-    // Arguments:       The name of the property to be read.
-    //                  A Reader lined up to the value of the property to be read.
-    // Return value:    An error return value signaling whether the property was successfully
-    //                  read or not. 0 means it was read successfully, and any nonzero indicates
-    //                  that a property of that name could not be found in this or base classes.
-
-        virtual int ReadProperty(std::string propName, Reader &reader);
+		int Create(const Area &reference);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -140,29 +126,7 @@ public:
     // Arguments:       None.
     // Return value:    None.
 
-        virtual void Reset() { Clear(); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Save
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Saves the complete state of this Area to an output stream for
-    //                  later recreation with Create(Reader &reader);
-    // Arguments:       A Writer that the Area will save itself with.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Save(Writer &writer) const;
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetClassName
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the class name of this Entity.
-    // Arguments:       None.
-    // Return value:    A string with the friendly-formatted type name of this object.
-
-        virtual const std::string & GetClassName() const { return m_sClassName; }
+        void Reset() override { Clear(); }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -172,7 +136,7 @@ public:
     // Arguments:       The Box to add. A copy will be made and added.
     // Return value:    Whether the Box was successfully added or not.
 
-        virtual bool AddBox(const Box &newBox);
+		bool AddBox(const Box &newBox);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -183,7 +147,7 @@ public:
     // Arguments:       None.
     // Return value:    Whether this Area actually covers any area.
 
-        virtual bool HasNoArea() const;
+		bool HasNoArea() const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -193,7 +157,7 @@ public:
     // Arguments:       The point to check if it's inside the Area, in absolute scene coordinates.
     // Return value:    Whether the point is inside any of this Area's Box:es.
 
-        virtual bool IsInside(const Vector &point) const;
+		bool IsInside(const Vector &point) const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -204,7 +168,7 @@ public:
     // Arguments:       The x coord to check if it's inside the Area, in absolute scene units.
     // Return value:    Whether the point is inside any of this Area's Box:es in the X axis.
 
-        virtual bool IsInsideX(float pointX) const;
+		bool IsInsideX(float pointX) const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -215,7 +179,7 @@ public:
     // Arguments:       The x coord to check if it's inside the Area, in absolute scene units.
     // Return value:    Whether the point is inside any of this Area's Box:es in the Y axis.
 
-        virtual bool IsInsideY(float pointY) const;
+		bool IsInsideY(float pointY) const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -228,7 +192,7 @@ public:
     //                  negative dir, 0 means can look in both directions.
     // Return value:    Whether the point was moved at all to get inside this' x-space.
 
-        virtual bool MovePointInsideX(float &pointX, int direction = 0) const;
+		bool MovePointInsideX(float &pointX, int direction = 0) const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -239,7 +203,7 @@ public:
     // Return value:    Pointer to the first Box which was found to contain the point. 0 if
     //                  none was found. OWNERSHIP IS NOT TRANSFERRED!
 
-        virtual Box * GetBoxInside(const Vector &point);
+		Box * GetBoxInside(const Vector &point);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -249,7 +213,7 @@ public:
     // Arguments:       The point to check for Box collision, in absolute scene coordinates.
     // Return value:    Copy of the Box that was removed. Will be  NoArea Box if none was found.
 
-        virtual Box RemoveBoxInside(const Vector &point);
+		Box RemoveBoxInside(const Vector &point);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -260,7 +224,7 @@ public:
     // Return value:    A center point of this area, can be outside the actual area though, if
     //                  pulled apart by two separate boxes, for example. 0,0 if this has no Area
 
-        virtual Vector GetCenterPoint() const;
+		Vector GetCenterPoint() const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -270,7 +234,7 @@ public:
     // Arguments:       None.
     // Return value:    A random point that is within this Area. 0,0 if this has no Area
 
-        virtual Vector GetRandomPoint() const;
+		Vector GetRandomPoint() const;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -280,7 +244,7 @@ public:
     // Arguments:       None.
     // Return value:    The name used to ID this Area.
 
-        virtual std::string GetName() const { return m_Name; }
+		std::string GetName() const { return m_Name; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -288,8 +252,6 @@ public:
 
     protected:
 
-        // Member variables
-        static const std::string m_sClassName;
         // The list of Box:es defining the Area in the owner Scene
         std::vector<Box> m_BoxList;
         // The name tag of this Area
@@ -300,6 +262,8 @@ public:
     // Private member variable and method declarations
 
     private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Method:          Clear
@@ -353,19 +317,8 @@ EntityAllocation(Scene)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~Scene() { Destroy(true); }
+	~Scene() override { Destroy(true); }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the Scene object ready for use.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Create
@@ -375,7 +328,7 @@ EntityAllocation(Scene)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(SLTerrain *pNewTerrain);
+	int Create(SLTerrain *pNewTerrain);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -403,7 +356,7 @@ EntityAllocation(Scene)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int LoadData(bool placeObjects = true, bool initPathfinding = true, bool placeUnits = true);
+	int LoadData(bool placeObjects = true, bool initPathfinding = true, bool placeUnits = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -414,7 +367,7 @@ EntityAllocation(Scene)
 // Arguments:       None.
 // Return value:    None.
 
-	virtual int ExpandAIPlanAssemblySchemes();
+	int ExpandAIPlanAssemblySchemes();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -426,7 +379,7 @@ EntityAllocation(Scene)
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int SaveData(std::string pathBase);
+	int SaveData(std::string pathBase);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -437,17 +390,7 @@ EntityAllocation(Scene)
 // Arguments:       The full filepath the where to save the Bitmap data.
 // Return value:    None.
 
-	virtual int SavePreview(string bitmapPath);
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  DrawPlacedObjectsPreview
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draw placed objects onto specified preview bitmap with scaling
-// Arguments:       Bitmap to draw on. Set of scene objects to draw. Width and height of scaled scene layer, 
-//					scaled map offset, scale.
-// Return value:    None.
-
-	virtual void DrawPlacedObjectsPreview(BITMAP * pBitmap, int set, int width, int height, int xOffset, int yOffset, float scale);
+	int SavePreview(const std::string &bitmapPath);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -458,23 +401,7 @@ EntityAllocation(Scene)
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int ClearData();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
+	int ClearData();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -485,19 +412,7 @@ EntityAllocation(Scene)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Entity::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Pure V. method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this Scene to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the Scene will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+    void Reset() override { Clear(); Entity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -508,27 +423,7 @@ EntityAllocation(Scene)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -540,7 +435,7 @@ EntityAllocation(Scene)
 // Return value:    Whether the migration was successful. If you tried to migrate to the
 //                  same module it already was in, this would return false.
 
-    virtual bool MigrateToModule(int whichModule);
+	bool MigrateToModule(int whichModule) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -723,7 +618,7 @@ EntityAllocation(Scene)
 //                  LoadData is called on this.
 // Return value:    None.
 
-    void FillUnseenLayer(Vector pixelSize, int team = Activity::TEAM_1, bool createNow = true);
+    void FillUnseenLayer(Vector pixelSize, int team = Activity::TeamOne, bool createNow = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -734,7 +629,7 @@ EntityAllocation(Scene)
 //                  Which team to get the unseen layer for.
 // Return value:    None.
 
-    void SetUnseenLayer(SceneLayer *pNewLayer, int team = Activity::TEAM_1);
+    void SetUnseenLayer(SceneLayer *pNewLayer, int team = Activity::TeamOne);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -745,7 +640,7 @@ EntityAllocation(Scene)
 // Return value:    A pointer to the SceneLayer representing what hasn't been seen by a
 //                  specific team yet. Ownership is NOT transferred!
 
-    SceneLayer * GetUnseenLayer(int team = Activity::TEAM_1) const { return team != Activity::NOTEAM ? m_apUnseenLayer[team] : 0; }
+    SceneLayer * GetUnseenLayer(int team = Activity::TeamOne) const { return team != Activity::NoTeam ? m_apUnseenLayer[team] : 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -755,7 +650,7 @@ EntityAllocation(Scene)
 // Arguments:       Which team to get the unseen layer for.
 // Return value:    The list of pixel coordinates in the unseen layer's scale.
 
-    std::list<Vector> & GetSeenPixels(int team = Activity::TEAM_1) { return m_SeenPixels[team]; }
+    std::list<Vector> & GetSeenPixels(int team = Activity::TeamOne) { return m_SeenPixels[team]; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -765,7 +660,7 @@ EntityAllocation(Scene)
 // Arguments:       Which team to get the unseen layer for.
 // Return value:    None.
 
-    void ClearSeenPixels(int team = Activity::TEAM_1);
+    void ClearSeenPixels(int team = Activity::TeamOne);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -779,7 +674,7 @@ EntityAllocation(Scene)
 //                  Which team's unseen layer to check the pixel on.
 // Return value:    Whether the pixel was deemed to be orphan and thus cleaned up.
 
-    bool CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom = NODIR, int team = Activity::TEAM_1);
+    bool CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom = NODIR, int team = Activity::TeamOne);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -838,7 +733,7 @@ EntityAllocation(Scene)
 // Description:     Places the individual brain of a single player which may be stationed
 //                  on this Scene, and registers them as such in an Activity.
 // Arguments:       The player's brain to place.
-//                  The Activity to register the placed brains with.. OINT!
+//                  The Activity to register the placed brains with. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    If the brain was successfully found as resident and placed.
 
     bool PlaceResidentBrain(int player, Activity &newActivity);
@@ -849,7 +744,7 @@ EntityAllocation(Scene)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Places the individual brains of the various players which may be
 //                  stationed on this Scene, and registers them as such in an Activity.
-// Arguments:       The Activity to register the placed brains with.. OINT!
+// Arguments:       The Activity to register the placed brains with. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    How many brains were finally placed.
 
     int PlaceResidentBrains(Activity &newActivity);
@@ -861,7 +756,7 @@ EntityAllocation(Scene)
 // Description:     Looks at the Activity and its players' registered brain Actors, and
 //                  saves them as resident brains for this Scene. Done when a fight is over
 //                  and the survivors remain!
-// Arguments:       The Activity to check for registered brains.. OINT!
+// Arguments:       The Activity to check for registered brains. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    How many brains were found registered with the passed in Activity.
 
     int RetrieveResidentBrains(Activity &oldActivity);
@@ -873,7 +768,7 @@ EntityAllocation(Scene)
 // Description:     Sucks up all the Actors and Devices currently active in MovableMan and
 //                  puts them into this' list of objects to place on next load.
 //                  Should be done AFTER RetrieveResidentBrains!
-// Arguments:       The team to only retrieve Actors of. If NOTEAM, then all will be grabbed.
+// Arguments:       The team to only retrieve Actors of. If NoTeam, then all will be grabbed.
 //                  Whether to not get any brains at all.
 // Return value:    How many objects were found knocking about in the world, and stored.
 
@@ -973,7 +868,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 // Method:          GetResidentBrain
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the resident brain Actor of a specific player from this scene,
-//                  if there is any. OINT!
+//                  if there is any. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       Which player to get the resident brain of.
 // Return value:    The SO containing the brain, or 0 if there aren't any of that player.
 
@@ -1317,7 +1212,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 // Arguments:       None.
 // Return value:    The number of waypoints in the ScenePath.
 
-    virtual int GetScenePathSize() const { return m_ScenePath.size(); }
+	int GetScenePathSize() const { return m_ScenePath.size(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1365,7 +1260,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 // Arguments:       None.
 // Return value:    None.
 
-    void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1423,12 +1318,12 @@ protected:
     // Total income this place generates per Metagame round for its owner team
     float m_RoundIncome;
     // The special placed brain actors of each player that inhabit this Scene, OWNED here
-    SceneObject *m_ResidentBrains[Activity::MAXPLAYERCOUNT];
+    SceneObject *m_ResidentBrains[Players::MaxPlayerCount];
     // Budget in oz this place is allocated per player for a metagame round for building (applying) blueprint objects.
-    float m_BuildBudget[Activity::MAXPLAYERCOUNT];
+    float m_BuildBudget[Players::MaxPlayerCount];
     // Budget in ratio of the player for a metagame round. This is used to re-set the BuildBudget to match the ratio
     // that a player budgeted to this site in the previous turn.
-    float m_BuildBudgetRatio[Activity::MAXPLAYERCOUNT];
+    float m_BuildBudgetRatio[Players::MaxPlayerCount];
     // Whether this should be automatically designed by the AI Plan even if it's owned by a human player
     bool m_AutoDesigned;
     // The total amount of gold (in oz) that has been invested in the defenses of this site, by all teams
@@ -1447,15 +1342,15 @@ protected:
     // List of background layers, first is the closest to the terrain, last is closest to the back
     std::list<SceneLayer *> m_BackLayerList;
     // Dimensions of the pixels of the unseen layers, when they are dynamically generated. If 0, the layer was not generated
-    Vector m_UnseenPixelSize[Activity::MAXTEAMCOUNT];
+    Vector m_UnseenPixelSize[Activity::MaxTeamCount];
     // Layers representing the unknown areas for each team
-    SceneLayer *m_apUnseenLayer[Activity::MAXTEAMCOUNT];
+    SceneLayer *m_apUnseenLayer[Activity::MaxTeamCount];
     // Which pixels of the unseen map have just been revealed this frame, in the coordinates of the unseen map
-    std::list<Vector> m_SeenPixels[Activity::MAXTEAMCOUNT];
+    std::list<Vector> m_SeenPixels[Activity::MaxTeamCount];
     // Pixels on the unseen map deemed to be orphans and cleaned up, will be moved to seen pixels next update
-    std::list<Vector> m_CleanedPixels[Activity::MAXTEAMCOUNT];
+    std::list<Vector> m_CleanedPixels[Activity::MaxTeamCount];
     // Whether this Scene is scheduled to be orbitally scanned by any team
-    bool m_ScanScheduled[Activity::MAXTEAMCOUNT];
+    bool m_ScanScheduled[Activity::MaxTeamCount];
 
     // List of all the specified Area:s of the scene
     std::list<Area> m_AreaList;
@@ -1497,8 +1392,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    Scene(const Scene &reference) { RTEAbort("Tried to use forbidden method"); }
-    void operator=(const Scene &rhs) { RTEAbort("Tried to use forbidden method"); }
+    Scene(const Scene &reference) = delete;
+    void operator=(const Scene &rhs) = delete;
 
 };
 

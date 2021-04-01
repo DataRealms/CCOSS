@@ -3,25 +3,19 @@
 
 namespace RTE {
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SeedRand() { srand(time(0)); }
+	std::mt19937 g_RNG;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	double PosRand() { return (rand() / (RAND_MAX / 1000 + 1)) / 1000.0; }
+	void SeedRNG() {
+		// Pre-Seed generation
+		std::array<int, 624> seedData;
+		std::random_device randomDevice;
+		std::generate_n(seedData.data(), seedData.size(), std::ref(randomDevice));
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	double NormalRand() { return (static_cast<double>(rand()) / (RAND_MAX / 2)) - 1.0; }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	double RangeRand(float min, float max) { return min + ((max - min) * PosRand()); }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int SelectRand(int min, int max) { return min + static_cast<int>((max - min) * PosRand() + 0.5F); }
+		std::seed_seq sequence(std::begin(seedData), std::end(seedData));
+		g_RNG.seed(sequence);
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -43,7 +37,7 @@ namespace RTE {
 			return end;
 		}
 		float t = 1 - progressScalar;
-		return (end - start) * (std::sinf(-t * c_HalfPI) + 1) + start;
+		return (end - start) * (std::sin(-t * c_HalfPI) + 1) + start;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -54,13 +48,13 @@ namespace RTE {
 		} else if (progressScalar >= 1.0F) {
 			return end;
 		}
-		return (end - start) * -std::sinf(-progressScalar * c_HalfPI) + start;
+		return (end - start) * -std::sin(-progressScalar * c_HalfPI) + start;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float EaseInOut(float start, float end, float progressScalar) {
-		return start * (2 * std::powf(progressScalar, 3) - 3 * std::powf(progressScalar, 2) + 1) + end * (3 * std::powf(progressScalar, 2) - 2 * std::powf(progressScalar, 3));
+		return start * (2 * std::pow(progressScalar, 3) - 3 * std::pow(progressScalar, 2) + 1) + end * (3 * std::pow(progressScalar, 2) - 2 * std::pow(progressScalar, 3));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -112,62 +106,5 @@ namespace RTE {
 
 	bool WithinBox(Vector &point, Vector &boxPos, float width, float height) {
 		return point.m_X >= boxPos.m_X && point.m_X < (boxPos.m_X + width) && point.m_Y >= boxPos.m_Y && point.m_Y < (boxPos.m_Y + height);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void OpenBrowserToURL(std::string goToURL) {
-		system(std::string("start ").append(goToURL).c_str());
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool ASCIIFileContainsString(std::string filePath, std::string findString) {
-		// Open the script file so we can check it out
-		std::ifstream *file = new std::ifstream(filePath.c_str());
-		if (!file->good()) {
-			return false;
-		}
-		char rawLine[1024];
-		std::string line;
-		std::string::size_type pos = 0;
-		std::string::size_type endPos = 0;
-		std::string::size_type commentPos = std::string::npos;
-		bool blockCommented = false;
-
-		while (!file->eof()) {
-			// Go through the script file, line by line
-			file->getline(rawLine, 1024);
-			line = rawLine;
-			pos = endPos = 0;
-
-			// Check for block comments
-			if ((commentPos = line.find("/*", 0) != std::string::npos) && !blockCommented) { blockCommented = true; }
-
-			// Find the end of the block comment
-			if (((commentPos = line.find("*/", commentPos == std::string::npos ? 0 : commentPos)) != std::string::npos) && blockCommented) {
-				blockCommented = false;
-				pos = commentPos;
-			}
-			// Process the line as usual
-			if (!blockCommented) {
-				// See if this line is commented out anywhere
-				commentPos = line.find("//", 0);
-				// Find the string
-				do {
-					pos = line.find(findString.c_str(), pos);
-					if (pos != std::string::npos && pos < commentPos) {
-						// Found it!
-						delete file;
-						file = 0;
-						return true;
-					}
-				} while (pos != std::string::npos && pos < commentPos);
-			}
-		}
-		// Didn't find the search string
-		delete file;
-		file = 0;
-		return false;
 	}
 }

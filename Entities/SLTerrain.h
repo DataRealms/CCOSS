@@ -55,6 +55,9 @@ class SLTerrain:
 
     public:
 
+		SerializableClassNameGetter
+		SerializableOverrideMethods
+
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Constructor:     TerrainFrosting
@@ -75,17 +78,6 @@ class SLTerrain:
 
         TerrainFrosting(const TerrainFrosting &reference) { Clear(); Create(reference); }
 
-/*
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Create
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Makes the TerrainFrosting object ready for use.
-    // Arguments:       None.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Create();
-*/
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Method:          Create
@@ -99,22 +91,6 @@ class SLTerrain:
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  ReadProperty
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Reads a property value from a Reader stream. If the name isn't
-    //                  recognized by this class, then ReadProperty of the parent class
-    //                  is called. If the property isn't recognized by any of the base classes,
-    //                  false is returned, and the Reader's position is untouched.
-    // Arguments:       The name of the property to be read.
-    //                  A Reader lined up to the value of the property to be read.
-    // Return value:    An error return value signaling whether the property was successfully
-    //                  read or not. 0 means it was read successfully, and any nonzero indicates
-    //                  that a property of that name could not be found in this or base classes.
-
-        virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
     // Virtual method:  Reset
     //////////////////////////////////////////////////////////////////////////////////////////
     // Description:     Resets the entire Serializable, including its inherited members, to their
@@ -122,29 +98,7 @@ class SLTerrain:
     // Arguments:       None.
     // Return value:    None.
 
-        virtual void Reset() { Clear(); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Save
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Saves the complete state of this TerrainFrosting to an output stream for
-    //                  later recreation with Create(Reader &reader);
-    // Arguments:       A Writer that the TerrainFrosting will save itself with.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Save(Writer &writer) const;
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetClassName
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the class name of this Entity.
-    // Arguments:       None.
-    // Return value:    A string with the friendly-formatted type name of this object.
-
-        virtual const std::string & GetClassName() const { return m_sClassName; }
+        void Reset() override { Clear(); }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -154,7 +108,7 @@ class SLTerrain:
     // Arguments:       None.
     // Return value:    A copy of the target Material
 
-        virtual Material &GetTargetMaterial() { return m_TargetMaterial; }
+		Material &GetTargetMaterial() { return m_TargetMaterial; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +118,7 @@ class SLTerrain:
     // Arguments:       None.
     // Return value:    A copy of the Material
 
-        virtual Material &GetFrostingMaterial() { return m_FrostingMaterial; }
+		Material &GetFrostingMaterial() { return m_FrostingMaterial; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -175,7 +129,7 @@ class SLTerrain:
     // Arguments:       None.
     // Return value:    The thickness sample.
 
-        virtual int GetThicknessSample() { return m_MinThickness + floor(0.5 + ((m_MaxThickness - m_MinThickness) * PosRand())); }
+		int GetThicknessSample() { return m_MinThickness + RandomNum(0, m_MaxThickness - m_MinThickness); }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -186,7 +140,7 @@ class SLTerrain:
     // Arguments:       None.
     // Return value:    Whether only appears in air particles.
 
-        virtual bool InAirOnly() { return m_InAirOnly; }
+		bool InAirOnly() { return m_InAirOnly; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -194,8 +148,6 @@ class SLTerrain:
 
     protected:
 
-        // Member variables
-        static const std::string m_sClassName;
         // The material this frosting will sit on top in the terrain
         Material m_TargetMaterial;
         // Material of this frosting that will be piled on top of the target
@@ -212,6 +164,8 @@ class SLTerrain:
     // Private member variable and method declarations
 
     private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Method:          Clear
@@ -234,6 +188,8 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(SLTerrain)
+SerializableOverrideMethods
+ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -253,7 +209,7 @@ EntityAllocation(SLTerrain)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~SLTerrain() { Destroy(true); }
+	~SLTerrain() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -264,7 +220,7 @@ EntityAllocation(SLTerrain)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -291,7 +247,7 @@ EntityAllocation(SLTerrain)
 //                  Anything below 0 is an error signal.
 
 // TODO: streamline interface")
-    virtual int Create(char *filename,
+	int Create(char *filename,
                        bool drawTrans,
                        Vector offset,
                        bool wrapX,
@@ -319,7 +275,7 @@ EntityAllocation(SLTerrain)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int LoadData();
+	int LoadData() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -331,7 +287,7 @@ EntityAllocation(SLTerrain)
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int SaveData(std::string pathBase);
+	int SaveData(std::string pathBase) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -342,7 +298,7 @@ EntityAllocation(SLTerrain)
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int ClearData();
+	int ClearData() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -352,23 +308,7 @@ EntityAllocation(SLTerrain)
 // Arguments:       None.
 // Return value:    Whether the data in this' bitmap was loaded from a datafile, or generated.
 
-    virtual bool IsFileData() const { return m_pFGColor && m_pFGColor->IsFileData() && m_pBGColor && m_pBGColor->IsFileData(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
+	bool IsFileData() const override { return m_pFGColor && m_pFGColor->IsFileData() && m_pBGColor && m_pBGColor->IsFileData(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -379,19 +319,7 @@ EntityAllocation(SLTerrain)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); SceneLayer::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this SLTerrain to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the SLTerrain will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+    void Reset() override { Clear(); SceneLayer::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -402,27 +330,7 @@ EntityAllocation(SLTerrain)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -435,7 +343,7 @@ EntityAllocation(SLTerrain)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void LockBitmaps() { SceneLayer::LockBitmaps(); acquire_bitmap(m_pMainBitmap); }
+	void LockBitmaps() override { SceneLayer::LockBitmaps(); acquire_bitmap(m_pMainBitmap); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -448,7 +356,7 @@ EntityAllocation(SLTerrain)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UnlockBitmaps() { SceneLayer::UnlockBitmaps(); release_bitmap(m_pMainBitmap); }
+	void UnlockBitmaps() override { SceneLayer::UnlockBitmaps(); release_bitmap(m_pMainBitmap); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -634,7 +542,7 @@ EntityAllocation(SLTerrain)
 // Arguments:       The Object to apply to this Terrain. Ownership is NOT xferred!
 // Return value:    Whether successful or not.
 
-    virtual bool ApplyObject(Entity *pEntity);
+	bool ApplyObject(Entity *pEntity);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -645,7 +553,7 @@ EntityAllocation(SLTerrain)
 // Arguments:       The MovableObject to apply to this Terrain. Ownership is NOT xferred!
 // Return value:    None.
 
-    virtual void ApplyMovableObject(MovableObject *pMObject);
+	void ApplyMovableObject(MovableObject *pMObject);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -656,10 +564,10 @@ EntityAllocation(SLTerrain)
 // Arguments:       The TerrainObject to apply to this Terrain. Ownership is NOT xferred!
 // Return value:    None.
 
-    virtual void ApplyTerrainObject(TerrainObject *pTObject);
+	void ApplyTerrainObject(TerrainObject *pTObject);
 
 
-	virtual void RegisterTerrainChange(TerrainObject *pTObject);
+	void RegisterTerrainChange(TerrainObject *pTObject);
 
 
 
@@ -747,7 +655,7 @@ EntityAllocation(SLTerrain)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -762,7 +670,7 @@ EntityAllocation(SLTerrain)
 //                  is overridder with it. It becomes the new source coordinates.
 // Return value:    None.
 
-    virtual void DrawBackground(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrollOverride = Vector(-1, -1));
+	void DrawBackground(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrollOverride = Vector(-1, -1));
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -776,7 +684,7 @@ EntityAllocation(SLTerrain)
 //                  is overridder with it. It becomes the new source coordinates.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrollOverride = Vector(-1, -1)) const;
+	void Draw(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrollOverride = Vector(-1, -1)) const override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -835,8 +743,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    SLTerrain(const SLTerrain &reference);
-    SLTerrain & operator=(const SLTerrain &rhs);
+	SLTerrain(const SLTerrain &reference) = delete;
+	SLTerrain & operator=(const SLTerrain &rhs) = delete;
 
 };
 

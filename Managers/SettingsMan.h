@@ -15,6 +15,9 @@ namespace RTE {
 
 	public:
 
+		SerializableClassNameGetter
+		SerializableOverrideMethods
+
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a SettingsMan object in system memory. Create() should be called before using the object.
@@ -24,55 +27,18 @@ namespace RTE {
 		/// <summary>
 		/// Makes the SettingsMan object ready for use.
 		/// </summary>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create() { return (Serializable::Create() < 0) ? -1 : 0; }
-
-		/// <summary>
-		/// Makes the Serializable ready for use.
-		/// </summary>
-		/// <param name="reader">A Reader that the Serializable will create itself from.</param>
+		/// <param name="reader">A Reader that the SettingsMan will create itself from.</param>
 		/// <param name="checkType">Whether there is a class name in the stream to check against to make sure the correct type is being read from the stream.</param>
 		/// <param name="doCreate">Whether to do any additional initialization of the object after reading in all the properties from the Reader.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(Reader &reader, bool checkType = true, bool doCreate = true);
+		int Initialize(Reader &reader, bool checkType = true, bool doCreate = true);
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up a SettingsMan object before deletion from system memory.
-		/// </summary>
-		~SettingsMan() { Destroy(); }
-
-		/// <summary>
-		/// Destroys and resets (through Clear()) the SettingsMan object.
-		/// </summary>
-		void Destroy() { Clear(); }
-
-		/// <summary>
 		/// Resets the entire SettingsMan, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
-#pragma endregion
-
-#pragma region INI Handling
-		/// <summary>
-		/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called.
-		/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
-		/// </summary>
-		/// <param name="propName">The name of the property to be read.</param>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>
-		/// An error return value signaling whether the property was successfully read or not.
-		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
-		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader);
-
-		/// <summary>
-		/// Saves the complete state of this SettingsMan to an output stream for later recreation with Create(Reader &reader);
-		/// </summary>
-		/// <param name="writer">A Writer that the SettingsMan will save itself with.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const;
+		void Reset() override { Clear(); }
 #pragma endregion
 
 #pragma region Settings Manager Operations
@@ -81,6 +47,11 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether Settings.ini needs to be overwritten with the complete list of settings or not.</returns>
 		bool SettingsNeedOverwrite() const { return m_SettingsNeedOverwrite; }
+
+		/// <summary>
+		/// Overwrites the settings file to save changes made from within the game.
+		/// </summary>
+		void UpdateSettingsFile() const;
 #pragma endregion
 
 #pragma region Engine Settings
@@ -88,58 +59,12 @@ namespace RTE {
 		/// Returns the recommended MOID count. If this amount is exceeded then some units may be removed at the start of the activity.
 		/// </summary>
 		/// <returns>Recommended MOID count.</returns>
-		unsigned int RecommendedMOIDCount() const { return m_RecommendedMOIDCount; }
-
-		/// <summary>
-		/// Gets whether we're using additional Draws during MO's PreTravel and PostTravel to update MO layer this frame with more precision, or just data from the last frame with less precision.
-		/// </summary>
-		/// <returns>Whether precise collisions are enabled.</returns>
-		bool PreciseCollisions() const { return m_PreciseCollisions; }
-
-		/// <summary>
-		/// Sets whether to use additional Draws during MO's PreTravel and PostTravel to update MO layer this frame with more precision, or just data from the last frame with less precision.
-		/// </summary>
-		/// <param name="newValue">True for precise collisions.</param>
-		void SetPreciseCollisions(bool newValue) { m_PreciseCollisions = newValue; }
-#pragma endregion
-
-#pragma region Display Settings
-		/// <summary>
-		/// Whether we're told to use windowed driver with borderless style driver via settings. Overrides any other windowed drivers. The driver that will be used is GFX_DIRECTX_WIN_BORDERLESS.
-		/// </summary>
-		/// <returns>True if forced to use software driver.</returns>
-		bool ForceVirtualFullScreenGfxDriver() const { return m_ForceVirtualFullScreenGfxDriver; }
-
-		/// <summary>
-		/// Whether we're told to use non overlapped windowed driver. The driver that will be used is GFX_DIRECTX_OVL.
-		/// </summary>
-		/// <returns>True if forced to use software driver.</returns>
-		bool ForceOverlayedWindowGfxDriver() const { return m_ForceOverlayedWindowGfxDriver; }
-
-		/// <summary>
-		/// Whether we're told to use non-overlay driver. Overrides overlayed driver setting. The driver that will be used is GFX_DIRECTX_WIN.
-		/// </summary>
-		/// <returns>True if forced to use software driver.</returns>
-		bool ForceNonOverlayedWindowGfxDriver() const { return m_ForceNonOverlayedWindowGfxDriver; }
-#pragma endregion
-
-#pragma region Audio Settings
-		/// <summary>
-		/// The strength of the sound panning effect.
-		/// </summary>
-		/// <returns>0 - 1, where 0 is no panning and 1 is fully panned.</returns>
-		float SoundPanningEffectStrength() const { return m_SoundPanningEffectStrength; }
-
-		//////////////////////////////////////////////////
-		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
-		float c_ListenerZOffset() const { return m_ListenerZOffset; }
-		float c_MinimumDistanceForPanning() const { return m_MinimumDistanceForPanning; }
-		//////////////////////////////////////////////////
+		int RecommendedMOIDCount() const { return m_RecommendedMOIDCount; }
 #pragma endregion
 
 #pragma region Gameplay Settings
 		/// <summary>
-		/// Returns true if endless metagame mode is enabled.
+		/// Returns true if endless MetaGame mode is enabled.
 		/// </summary>
 		/// <returns>Whether endless mode is enabled via settings.</returns>
 		bool EndlessMode() const { return m_EndlessMode; }
@@ -181,10 +106,30 @@ namespace RTE {
 		void SetShowForeignItems(bool newValue) { m_ShowForeignItems = newValue; }
 
 		/// <summary>
-		/// Whether random hats on actors are enabled or not.
+		/// Whether randomized hat attachables will be attached to all AHuman actors.
 		/// </summary>
 		/// <returns>Whether random hats are enabled or not.</returns>
 		bool EnableHats() const { return m_EnableHats; }
+
+		/// <summary>
+		/// Gets whether the crab bomb effect is enabled or not. False means releasing whatever number of crabs will do nothing except release a whatever number of crabs.
+		/// </summary>
+		/// <returns>Whether the crab bomb effect is enabled or not.</returns>
+		bool EnableCrabBombs() const { return m_EnableCrabBombs; }
+
+		/// <summary>
+		/// Gets the number of crabs needed to be released at once to trigger the crab bomb effect.
+		/// </summary>
+		/// <returns>The number of crabs needed to be released at once to trigger the crab bomb effect.</returns>
+		int CrabBombThreshold() const { return m_CrabBombThreshold; }
+#pragma endregion
+
+#pragma region Default Activity Settings
+		/// <summary>
+		/// Gets whether the intro and main menu should be skipped on game start and launch directly into the set default activity instead.
+		/// </summary>
+		/// <returns>Whether the game is set to launch directly into the set default activity or not.</returns>
+		bool LaunchIntoActivity() const { return m_LaunchIntoActivity; }
 #pragma endregion
 
 #pragma region Network Settings
@@ -198,7 +143,7 @@ namespace RTE {
 		/// Sets the player name that will be used in network multiplayer matches.
 		/// </summary>
 		/// <param name="newName">String with the new player name to use.</param>
-		void SetPlayerNetworkName(std::string newName) { m_PlayerNetworkName = newName.empty() ? "Dummy" : newName; }
+		void SetPlayerNetworkName(const std::string &newName) { m_PlayerNetworkName = newName.empty() ? "Dummy" : newName; }
 
 		/// <summary>
 		/// Gets the LAN server address to connect to.
@@ -210,7 +155,7 @@ namespace RTE {
 		/// Sets the LAN server address to connect to.
 		/// </summary>
 		/// <param name="newName">New LAN server address to connect to.</param>
-		void SetNetworkServerAddress(std::string newAddress) { m_NetworkServerAddress = newAddress.empty() ? "127.0.0.1:8000" : newAddress; }
+		void SetNetworkServerAddress(const std::string &newAddress) { m_NetworkServerAddress = newAddress.empty() ? "127.0.0.1:8000" : newAddress; }
 
 		/// <summary>
 		/// Gets the NAT punch-through server address.
@@ -222,7 +167,7 @@ namespace RTE {
 		/// Sets the NAT punch-through server address.
 		/// </summary>
 		/// <param name="newValue">New NAT punch-through server address to connect to.</param>
-		void SetNATServiceAddress(std::string newAddress) { m_NATServiceAddress = newAddress.empty() ? "127.0.0.1:61111" : newAddress; }
+		void SetNATServiceAddress(const std::string &newAddress) { m_NATServiceAddress = newAddress.empty() ? "127.0.0.1:61111" : newAddress; }
 
 		/// <summary>
 		/// Gets the server name used when connecting via NAT punch-through service.
@@ -234,7 +179,7 @@ namespace RTE {
 		/// Sets the server name to use when connecting via NAT punch-through service.
 		/// </summary>
 		/// <param name="newValue">New NAT punch-through server name.</param>
-		void SetNATServerName(std::string newName) { m_NATServerName = newName.empty() ? "DefaultServerName" : newName; }
+		void SetNATServerName(const std::string &newName) { m_NATServerName = newName.empty() ? "DefaultServerName" : newName; }
 
 		/// <summary>
 		/// Gets the server password to use when connecting via NAT punch-through service.
@@ -246,85 +191,7 @@ namespace RTE {
 		/// Sets the server password to use when connecting via NAT punch-through service.
 		/// </summary>
 		/// <param name="newValue">New password to use when connecting via NAT punch-through service.</param>
-		void SetNATServerPassword(std::string newValue) { m_NATServerPassword = newValue.empty() ? "DefaultServerPassword" : newValue; }
-
-		/// <summary>
-		/// Gets whether server is using higher compression methods.
-		/// </summary>
-		/// <returns>Whether server is using higher compression methods or not.</returns>
-		bool GetServerUseHighCompression() const { return m_ServerUseHighCompression; }
-
-		/// <summary>
-		/// Gets whether server is using faster compression methods.
-		/// </summary>
-		/// <returns>Whether server is using faster compression methods or not.</returns>
-		bool GetServerUseFastCompression() const { return m_ServerUseFastCompression; }
-
-		/// <summary>
-		/// Gets the compression level used by the server when in high compressing mode.
-		/// </summary>
-		/// <returns>The compression level currently used by the server.</returns>
-		int GetServerHighCompressionLevel() const { return m_ServerHighCompressionLevel; }
-
-		/// <summary>
-		/// Gets the server acceleration factor, higher values consume more bandwidth but less CPU.
-		/// </summary>
-		/// <returns>The acceleration factor currently used by the server.</returns>
-		int GetServerFastAccelerationFactor() const { return m_ServerFastAccelerationFactor; }
-
-		/// <summary>
-		/// Gets whether server is using interlacing to reduce bandwidth usage.
-		/// </summary>
-		/// <returns>Whether server uses interlacing or not.</returns>
-		bool GetServerUseInterlacing() const { return m_ServerUseInterlacing; }
-
-		/// <summary>
-		/// Gets the server frame transmission rate.
-		/// </summary>
-		/// <returns>The server frame transmission rate.</returns>
-		unsigned short GetServerEncodingFps() const { return m_ServerEncodingFps; }
-
-		/// <summary>
-		/// Gets the input send rate between the client and the server.
-		/// </summary>
-		/// <returns>The input send rate.</returns>
-		unsigned short GetClientInputFps() const { return m_ClientInputFps; }
-
-		/// <summary>
-		/// Gets whether the server transmits frames as blocks instead of lines.
-		/// </summary>
-		/// <returns>Whether the server transmits frames as blocks instead of lines or not.</returns>
-		bool GetServerTransmitAsBoxes() const { return m_ServerTransmitAsBoxes; }
-
-		/// <summary>
-		/// Gets the width of the transmitted block when transmitting frames as blocks.
-		/// </summary>
-		/// <returns>The width of the transmitted block.</returns>
-		unsigned short GetServerBoxWidth() const { return m_ServerBoxWidth; }
-
-		/// <summary>
-		/// Gets the height of the transmitted block when transmitting frames as blocks.
-		/// </summary>
-		/// <returns>The height of the transmitted block.</returns>
-		unsigned short GetServerBoxHeight() const { return m_ServerBoxHeight; }
-
-		/// <summary>
-		/// Gets whether a NAT service is used for punch-through.
-		/// </summary>
-		/// <returns>Whether a NAT service is used for punch-through or not.</returns>
-		bool GetUseNATService() { return m_UseNATService; }
-
-		/// <summary>
-		/// Gets whether server puts threads to sleep if it didn't receive anything for 10 seconds to reduce CPU load.
-		/// </summary>
-		/// <returns>Whether threads will be put to sleep when server isn't receiving any data or not.</returns>
-		bool GetServerSleepWhenIdle() { return m_ServerSleepWhenIdle; }
-
-		/// <summary>
-		/// Gets whether the server will try to put the thread to sleep to reduce CPU load if the sim frame took less time to complete than it should at 30 fps.
-		/// </summary>
-		/// <returns>Whether threads will be put to sleep if server completed frame faster than it normally should or not.</returns>
-		bool GetServerSimSleepWhenIdle() { return m_ServerSimSleepWhenIdle; }
+		void SetNATServerPassword(const std::string &newValue) { m_NATServerPassword = newValue.empty() ? "DefaultServerPassword" : newValue; }
 #pragma endregion
 
 #pragma region Editor Settings
@@ -397,16 +264,16 @@ namespace RTE {
 
 #pragma region Misc Settings
 		/// <summary>
-		/// Gets whether the game intro is set to play on game startup or not.
+		/// Gets whether the game intro is set to be skipped on game startup or not.
 		/// </summary>
-		/// <returns>Whether intro is set to play or not.</returns>
-		bool PlayIntro() const { return m_PlayIntro; }
+		/// <returns>Whether intro is set to be skipped or not.</returns>
+		bool SkipIntro() const { return m_SkipIntro; }
 
 		/// <summary>
-		/// Sets whether the game intro should play on game startup or not.
+		/// Sets whether the game intro should be skipped on game startup or not.
 		/// </summary>
-		/// <param name="play">Whether to play game intro or not.</param>
-		void SetPlayIntro(bool play) { m_PlayIntro = play; }
+		/// <param name="play">Whether to skip game intro or not.</param>
+		void SetSkipIntro(bool play) { m_SkipIntro = play; }
 
 		/// <summary>
 		/// Gets whether tooltip display on certain UI elements is enabled or not.
@@ -419,6 +286,42 @@ namespace RTE {
 		/// </summary>
 		/// <param name="showToolTips">Whether to display tooltips or not.</param>
 		void SetShowToolTips(bool showToolTips) { m_ToolTips = showToolTips; }
+
+		/// <summary>
+		/// Gets whether to draw AtomGroup visualizations or not.
+		/// </summary>
+		/// <returns>Whether to draw AtomGroup visualizations or not.</returns>
+		bool DrawAtomGroupVisualizations() const { return m_DrawAtomGroupVisualizations; }
+
+		/// <summary>
+		/// Sets whether to draw AtomGroup visualizations or not.
+		/// </summary>
+		/// <param name="drawAtomGroupVisualizations">Whether to draw AtomGroup visualizations or not.</param>
+		void SetDrawAtomGroupVisualizations(bool drawAtomGroupVisualizations) { m_DrawAtomGroupVisualizations = drawAtomGroupVisualizations; }
+
+		/// <summary>
+		/// Gets whether to draw HandGroup and FootGroup visualizations or not.
+		/// </summary>
+		/// <returns>Whether to draw HandGroup and FootGroup visualizations or not.</returns>
+		bool DrawHandAndFootGroupVisualizations() const { return m_DrawHandAndFootGroupVisualizations; }
+
+		/// <summary>
+		/// Sets whether to draw HandGroup and FootGroup visualizations or not.
+		/// </summary>
+		/// <param name="drawHandAndFootGroupVisualizations">Whether to draw HandGroup and FootGroup visualizations or not.</param>
+		void SetDrawHandAndFootGroupVisualizations(bool drawHandAndFootGroupVisualizations) { m_DrawHandAndFootGroupVisualizations = drawHandAndFootGroupVisualizations; }
+
+		/// <summary>
+		/// Gets whether to draw LimbPath visualizations or not.
+		/// </summary>
+		/// <returns>Whether to draw LimbPath visualizations or not.</returns>
+		bool DrawLimbPathVisualizations() const { return m_DrawLimbPathVisualizations; }
+
+		/// <summary>
+		/// Sets whether to draw LimbPath visualizations or not.
+		/// </summary>
+		/// <param name="drawAtomGroupVisualizations">Whether to draw AtomGroup visualizations or not.</param>
+		void SetDrawLimbPathVisualizations(bool drawLimbPathVisualizations) { m_DrawLimbPathVisualizations = drawLimbPathVisualizations; }
 
 		/// <summary>
 		/// Gets whether debug print mode is enabled or not.
@@ -436,13 +339,13 @@ namespace RTE {
 		/// Gets whether the reader progress report is being displayed during module loading or not.
 		/// </summary>
 		/// <returns>Whether the reader progress report is being displayed during module loading or not.</returns>
-		bool DisableLoadingScreen() { return m_DisableLoadingScreen; }
+		bool DisableLoadingScreen() const { return m_DisableLoadingScreen; }
 
 		/// <summary>
 		/// Gets how accurately the reader progress report tells what line it's reading during module loading.
 		/// </summary>
 		/// <returns>How accurately the reader progress report tells what line it's reading during module loading.</returns>
-		unsigned short LoadingScreenReportPrecision() const { return m_LoadingScreenReportPrecision; }
+		int LoadingScreenReportPrecision() const { return m_LoadingScreenReportPrecision; }
 
 		/// <summary>
 		/// Gets the multiplier value for the transition durations between different menus.
@@ -455,88 +358,58 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newSpeed">New multiplier value for the transition durations between different menus. Lower values equal faster transitions.</param>
 		void SetMenuTransitionDurationMultiplier(float newSpeed) { m_MenuTransitionDurationMultiplier = std::max(0.0F, newSpeed); }
-#pragma endregion
 
-#pragma region Class Info
 		/// <summary>
-		/// Gets the class name of this object.
+		/// Gets whether the duration of module loading (extraction included) should be measured or not. For benchmarking purposes.
 		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
+		/// <returns>Whether duration should be measured or not.</returns>
+		bool MeasureModuleLoadTime() const { return m_MeasureModuleLoadTime; }
 #pragma endregion
 
 	protected:
 
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
-
 		bool m_SettingsNeedOverwrite; //!< Whether the settings file was generated with minimal defaults and needs to be overwritten to be fully populated.
-
-		bool m_ForceVirtualFullScreenGfxDriver; //!< Whether we should try using fullscreen mode.
-		bool m_ForceOverlayedWindowGfxDriver; //!< Whether we should try using overlayed window driver.
-		bool m_ForceNonOverlayedWindowGfxDriver; //!< Whether we should try using non-overlayed window driver.
-
-		float m_SoundPanningEffectStrength; //!< The strength of the sound panning effect, 0 (no panning) - 1 (full panning).
-
-		//////////////////////////////////////////////////
-		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
-		float m_ListenerZOffset;
-		float m_MinimumDistanceForPanning;
-		//////////////////////////////////////////////////
 
 		bool m_ShowForeignItems; //!< Do not show foreign items in buy menu.
 		bool m_FlashOnBrainDamage; //!< Whether red flashes on brain damage are on or off.
-		bool m_BlipOnRevealUnseen; //!< Blip if unseen is revealed.	
-		bool m_EndlessMode; //!< Endless metagame mode.
-		bool m_EnableHats; //!< Hats enabled.
+		bool m_BlipOnRevealUnseen; //!< Blip if unseen is revealed.
+		bool m_EndlessMode; //!< Endless MetaGame mode.
+		bool m_EnableHats; //!< Whether randomized hat attachables will be attached to all AHuman actors.
+		bool m_EnableCrabBombs; //!< Whether all actors (except Brains and Doors) should be annihilated if a number exceeding the crab bomb threshold is released at once.
+		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.
 
 		std::string m_PlayerNetworkName; //!< Player name used in network multiplayer matches.
 		std::string m_NetworkServerAddress; //!< LAN server address to connect to.
-		bool m_UseNATService; //!< Whether a NAT service is used for punch-through.
 		std::string m_NATServiceAddress; //!< NAT punch-through server address.
 		std::string m_NATServerName; //!< Server name to use when connecting via NAT punch-through service.
 		std::string m_NATServerPassword; //!< Server password to use when connecting via NAT punch-through service.
-		unsigned short m_ClientInputFps; //!< The rate (in FPS) the client input is sent to the server.
-		bool m_ServerUseHighCompression; //!< Whether to use higher compression methods (default).
-		bool m_ServerUseFastCompression; //!< Whether to use faster compression methods and conserve CPU.
-		int m_ServerHighCompressionLevel; //!< Compression level. 10 is optimal, 12 is highest.
-		bool m_ServerUseInterlacing; //!< Use interlacing to heavily reduce bandwidth usage at the cost of visual degradation (unusable at 30 fps, but may be suitable at 60 fps).
-		unsigned short m_ServerEncodingFps; //!< Frame transmission rate. Higher value equals more CPU and bandwidth consumption.
-		bool m_ServerSleepWhenIdle; //!< If true puts thread to sleep if it didn't receive anything for 10 seconds to avoid melting the CPU at 100% even if there are no connections.
-		bool m_ServerSimSleepWhenIdle; //!< If true the server will try to put the thread to sleep to reduce CPU load if the sim frame took less time to complete than it should at 30 fps.
-
-		/// <summary>
-		/// Acceleration factor, higher values consume more bandwidth but less CPU.
-		/// The larger the acceleration value, the faster the algorithm, but also lesser the compression. It's a trade-off. It can be fine tuned, with each successive value providing roughly +~3% to speed. 
-		/// An acceleration value of "1" is the same as regular LZ4_compress_default(). Values <= 0 will be replaced by ACCELERATION_DEFAULT(currently == 1, see lz4 documentation).
-		/// </summary>
-		int m_ServerFastAccelerationFactor;
-
-		/// <summary>
-		/// Transmit frames as blocks instead of lines. Provides better compression at the cost of higher CPU usage.
-		/// Though the compression is quite high it is recommended that Width * Height are less than MTU size or about 1500 bytes or packets may be fragmented by network hardware or dropped completely.
-		/// </summary>
-		bool m_ServerTransmitAsBoxes;
-		unsigned short m_ServerBoxWidth; //!< Width of the transmitted CPU block. Different values may improve bandwidth usage.
-		unsigned short m_ServerBoxHeight; //!< Height of the transmitted CPU block. Different values may improve bandwidth usage.
 
 		bool m_AllowSavingToBase; //!< Whether editors will allow to select Base.rte as a module to save in.
 		bool m_ShowMetaScenes; //!< Show MetaScenes in editors and activities.
 
-		unsigned int m_RecommendedMOIDCount; //!< Recommended max MOID's before removing actors from scenes.
-		bool m_PreciseCollisions; //!<Whether to use additional Draws during MO's PreTravel and PostTravel to update MO layer this frame with more precision, or just uses data from the last frame with less precision.
+		int m_RecommendedMOIDCount; //!< Recommended max MOID's before removing actors from scenes.
 
-		bool m_PlayIntro; //!< Whether to play the intro of the game.	
+		bool m_LaunchIntoActivity; //!< Whether to skip the intro and main menu and launch directly into the set default activity instead.
+
+		bool m_SkipIntro; //!< Whether to play the intro of the game or skip directly to the main menu.
 		bool m_ToolTips; //!< Whether ToolTips are enabled or not.
 		bool m_DisableLoadingScreen; //!< Whether to display the reader progress report during module loading or not. Greatly increases loading speeds when disabled.
-		unsigned short m_LoadingScreenReportPrecision; //!< How accurately the reader progress report tells what line it's reading during module loading. Lower values equal more precision at the cost of loading speed.
+		int m_LoadingScreenReportPrecision; //!< How accurately the reader progress report tells what line it's reading during module loading. Lower values equal more precision at the cost of loading speed.
 		float m_MenuTransitionDurationMultiplier; //!< Multiplier value for the transition durations between different menus. Lower values equal faster transitions.
+		
+		bool m_DrawAtomGroupVisualizations; //!< Whether to draw MOSRotating AtomGroups to the Scene MO color Bitmap.
+		bool m_DrawHandAndFootGroupVisualizations; //!< Whether to draw Actor HandGroups and FootGroups to the Scene MO color Bitmap.
+		bool m_DrawLimbPathVisualizations; //!< Whether to draw Actor LimbPaths to the Scene MO color Bitmap.
 		bool m_PrintDebugInfo; //!< Print some debug info in console.
+		bool m_MeasureModuleLoadTime; //!< Whether to measure the duration of data module loading (extraction included). For benchmarking purposes.
 
 		std::list<std::string> m_VisibleAssemblyGroupsList; //!< List of assemblies groups always shown in editors.
 		std::map<std::string, bool> m_DisabledMods; //!< List of the module names we disabled.
 		std::map<std::string, bool> m_EnabledScripts; //!< List of the script names we enabled.
 
 	private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 
 		/// <summary>
 		/// Writes the minimal default settings needed for the game to run to an output stream. These will be overwritten with the full list of available settings as soon as the game begins loading.
@@ -551,8 +424,8 @@ namespace RTE {
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		SettingsMan(const SettingsMan &reference) {}
-		SettingsMan & operator=(const SettingsMan &rhs) {}
+		SettingsMan(const SettingsMan &reference) = delete;
+		SettingsMan & operator=(const SettingsMan &rhs) = delete;
 	};
 }
 #endif

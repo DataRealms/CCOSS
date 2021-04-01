@@ -83,14 +83,14 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire AreaPickerGUI, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+	void Reset() { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -220,17 +220,17 @@ public:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  Draw
+// Method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws the menu
 // Arguments:       The bitmap to draw on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *drawBitmap) const;
+	void Draw(BITMAP *drawBitmap) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -303,8 +303,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    AreaPickerGUI(const AreaPickerGUI &reference);
-    AreaPickerGUI & operator=(const AreaPickerGUI &rhs);
+	AreaPickerGUI(const AreaPickerGUI &reference) = delete;
+	AreaPickerGUI & operator=(const AreaPickerGUI &rhs) = delete;
 
 };
 

@@ -51,18 +51,6 @@ void GAScripted::Clear()
     m_ScriptPath.clear();
     m_LuaClassName.clear();
     m_RequiredAreas.clear();
-
-/*
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-*/
 }
 
 
@@ -117,11 +105,11 @@ int GAScripted::Create(const GAScripted &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int GAScripted::ReadProperty(std::string propName, Reader &reader)
+int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "ScriptFile")
-        reader >> m_ScriptPath;
-    else if (propName == "LuaClassName")
+	if (propName == "ScriptFile") {
+		m_ScriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
+	} else if (propName == "LuaClassName")
         reader >> m_LuaClassName;
 	else if (propName == "AddPieSlice")
 	{
@@ -130,7 +118,6 @@ int GAScripted::ReadProperty(std::string propName, Reader &reader)
 		PieMenuGUI::StoreCustomLuaSlice(newSlice);
 	}
 	else
-        // See if the base class(es) can find a match instead
         return GameActivity::ReadProperty(propName, reader);
 
     return 0;
@@ -143,16 +130,13 @@ int GAScripted::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this GAScripted with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int GAScripted::Save(Writer &writer) const
-{
-    GameActivity::Save(writer);
+int GAScripted::Save(Writer &writer) const {
+	GameActivity::Save(writer);
 
-    writer.NewProperty("ScriptFile");
-    writer << m_ScriptPath;
-    writer.NewProperty("LuaClassName");
-    writer << m_LuaClassName;
+	writer.NewPropertyWithValue("ScriptFile", m_ScriptPath);
+	writer.NewPropertyWithValue("LuaClassName", m_LuaClassName);
 
-    return 0;
+	return 0;
 }
 
 
@@ -163,17 +147,6 @@ int GAScripted::Save(Writer &writer) const
 
 void GAScripted::Destroy(bool notInherited)
 {
-/*
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
-    {
-        ;
-    }
-
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
-    {
-        ;
-    }
-*/
 	// Delete global scripts
 	for (std::vector<GlobalScript *>::iterator sItr = m_GlobalScriptsList.begin(); sItr < m_GlobalScriptsList.end(); ++sItr)
 		delete (*sItr);
@@ -229,7 +202,7 @@ int GAScripted::ReloadScripts()
 // Description:     Tells if a particular Scene supports this specific Activity on it.
 //                  Usually that means certain Area:s need to be defined in the Scene.
 
-bool GAScripted::SceneIsCompatible(Scene *pScene, int teams)
+bool GAScripted::SceneIsCompatible(Scene *pScene, short teams)
 {
     if (!GameActivity::SceneIsCompatible(pScene, teams))
         return false;
@@ -355,9 +328,9 @@ int GAScripted::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void GAScripted::Pause(bool pause)
+void GAScripted::SetPaused(bool pause)
 {
-    GameActivity::Pause(pause);
+    GameActivity::SetPaused(pause);
 
     // Call the defined function, but only after first checking if it exists
     g_LuaMan.RunScriptString("if " + m_LuaClassName + ".PauseActivity then " + m_LuaClassName + ":PauseActivity(" + (pause ? "true" : "false") + "); end");
@@ -421,19 +394,19 @@ void GAScripted::Update()
 {
     GameActivity::Update();
 
-    for (int player = 0; player < MAXPLAYERCOUNT; ++player)
+    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
 
         // The current player's team
         int team = m_Team[player];
-        if (team == NOTEAM)
+        if (team == Teams::NoTeam)
             continue;
     }
 
     // If the game didn't end, keep updating activity
-    if (m_ActivityState != OVER)
+    if (m_ActivityState != ActivityState::Over)
     {   
         // Call the defined function, but only after first checking if it exists
         g_LuaMan.RunScriptString("if " + m_LuaClassName + ".UpdateActivity then " + m_LuaClassName + ":UpdateActivity(); end");
@@ -580,7 +553,7 @@ void GAScripted::InitAIs()
     Actor *pActor = 0;
     Actor *pFirstActor = 0;
 
-    for (int team = 0; team < MAXTEAMCOUNT; ++team)
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
         if (!m_TeamActive[team])
             continue;

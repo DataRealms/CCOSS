@@ -42,7 +42,8 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(Arm)
-
+SerializableOverrideMethods
+ClassInfoGetters
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     Arm
@@ -61,19 +62,14 @@ EntityAllocation(Arm)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~Arm() { Destroy(true); }
+	~Arm() override { Destroy(true); }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the Arm object ready for use.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
 
-    virtual int Create();
-*/
+    /// <summary>
+    /// Makes the Arm object ready for use.
+    /// </summary>
+    /// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+    int Create() override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
@@ -87,22 +83,6 @@ EntityAllocation(Arm)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire Arm, including its inherited members, to their
@@ -110,19 +90,7 @@ EntityAllocation(Arm)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Attachable::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this Arm to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the Arm will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+    void Reset() override { Clear(); Attachable::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -133,38 +101,7 @@ EntityAllocation(Arm)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this Arm, including the mass of any device it
-//                  may be holding.
-// Arguments:       None.
-// Return value:    A float describing the mass value in Kilograms (kg).
-
-    virtual float GetMass() const;
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -174,7 +111,7 @@ EntityAllocation(Arm)
 // Arguments:       None.
 // Return value:    Vector with the current absolute scene hand position.
 
-    Vector GetHandPos() const { return m_Pos + m_HandOffset; }
+    Vector GetHandPos() const { return m_JointPos + m_HandOffset; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -233,6 +170,18 @@ EntityAllocation(Arm)
 
     MovableObject * GetHeldMO() const { return m_pHeldMO; }
 
+    /// <summary>
+    /// Gets the the strength with which this Arm will grip its HeldDevice.
+    /// </summary>
+    /// <returns>The grip strength of this Arm.</returns>
+    float GetGripStrength() const { return m_GripStrength; }
+
+    /// <summary>
+    /// Sets the strength with which this Arm will grip its HeldDevice.
+    /// </summary>
+    /// <param name="newGripStrength">The new grip strength for this Arm to use.</param>
+    void SetGripStrength(float newGripStrength) { m_GripStrength = newGripStrength; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetMaxLength
@@ -243,17 +192,13 @@ EntityAllocation(Arm)
 
     float GetMaxLength() const { return m_MaxLength; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-// Arguments:       A moid specifying the MOID that this MovableObject is
-//                  assigned for this frame.
-// Return value:    None.
-
-    virtual void SetID(const MOID newID);
-
+    /// <summary>
+    /// Replaces the MovableObject currently held by this arm with a new one. Ownership IS transferred.
+    /// The currently held MovableObject (if there is one) will be dropped and become a detached MovableObject.
+    /// This is primarily used to support clone Create. At some point this should be refactored so Arm can only hold HeldDevices or Attachables anyway.
+    /// </summary>
+    /// <param name="newHeldMO">A pointer to the new MovableObject to hold. Ownership IS transferred.</param>
+    void SetHeldMO(Attachable *newHeldMO) { SetHeldMO(dynamic_cast<MovableObject *>(newHeldMO)); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetHeldMO
@@ -275,16 +220,16 @@ EntityAllocation(Arm)
 // Arguments:       Vector with the new absolute scene hand position.
 // Return value:    None.
 
-    void SetHandPos(const Vector &newHandPos) { m_HandOffset = newHandPos - m_Pos; }
+    void SetHandPos(const Vector &newHandPos) { m_HandOffset = newHandPos - m_JointPos; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetIdleOffset
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the offset from the position of this Arm to which its hand will
+// Description:     Gets the offset from the joint position of this Arm to which its hand will
 //                  go when not holding a device and not able to reach a certain target.
 // Arguments:       None.
-// Return value:    Vector with the new idle offset relative to the position of this Arm.
+// Return value:    Vector with the new idle offset relative to the joint position of this Arm.
 
 	Vector GetIdleOffset() const { return m_IdleOffset; }
 
@@ -292,9 +237,9 @@ EntityAllocation(Arm)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetIdleOffset
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the offset from the position of this Arm to which its hand will
+// Description:     Sets the offset from the joint position of this Arm to which its hand will
 //                  go when not holding a device and not able to reach a certain target.
-// Arguments:       Vector with the new idle offset relative to the position of this Arm.
+// Arguments:       Vector with the new idle offset relative to the joint position of this Arm.
 // Return value:    None.
 
     void SetIdleOffset(const Vector &newIdleOffset) { m_IdleOffset = newIdleOffset; }
@@ -369,7 +314,7 @@ EntityAllocation(Arm)
 // Arguments:       None.
 // Return value:    Whether this Arm is holding anyhting.
 
-    bool IsReaching() { return !m_TargetPoint.IsZero(); }
+    bool IsReaching() { return !m_TargetPosition.IsZero(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -413,28 +358,10 @@ EntityAllocation(Arm)
 
     bool HoldsSomething() { return m_pHeldMO != 0; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-// Arguments:       The impulse (kg * m/s) of the impact causing the gibbing to happen.
-//					The internal blast impulse which will push the gibs away from the center.
-//                  A pointer to an MO which the gibs shuold not be colliding with!
-// Return value:    None.
-
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this MovableObject. Supposed to be done every frame.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void Update();
+    /// <summary>
+    /// Updates this Arm. Supposed to be done every frame.
+    /// </summary>
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -449,35 +376,15 @@ EntityAllocation(Arm)
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  DrawHand
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this Arm's hand's graphical representation to a BITMAP of
-//                  choice.
-// Arguments:       A pointer to a BITMAP to draw on.
-//                  The absolute position of the target bitmap's upper left corner in the Scene.
-//                  In which mode to draw in. See the DrawMode enumeration for the modes.
-// Return value:    None.
-
-    virtual void DrawHand(BITMAP *pTargetBitmap,
-                          const Vector &targetPos = Vector(),
-                          DrawMode mode = g_DrawColor) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+    /// <summary>
+    /// Draws this Arm's hand's graphical representation to a BITMAP of choice.
+    /// </summary>
+    /// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
+    /// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
+    /// <param name="mode">Which mode to draw in. See the DrawMode enumeration for available modes.</param>
+	void DrawHand(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor) const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -496,23 +403,6 @@ protected:
     bool ConstrainHand();
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-// Arguments:       The MOID index to register itself and its children in.
-//                  The MOID of the root MO of this MO, ie the highest parent of this MO.
-//                  0 means that this MO is the root, ie it is owned by MovableMan.
-//                  Whether this MO should make a new MOID to use for itself, or to use
-//                  the same as the last one in the index (presumably its parent),
-// Return value:    None.
-
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID = g_NoMOID,
-                                 bool makeNewMOID = true);
-
-
     // Member variables
     static Entity::ClassInfo m_sClass;
 //    // The location of the 'hand' in relation to the MovableObject::m_Pos
@@ -521,26 +411,26 @@ protected:
     MovableObject *m_pHeldMO;
     // Whether or not this arm is currently supporting something held in another hand
     bool m_Supporting;
+    float m_GripStrength; //!< The strength with which this Arm will grip its HeldDevice. Effectively supercedes the HeldDevice's JointStrength.
     // The file containing the hand bitmap.
     ContentFile m_HandFile;
     // The small bitmap holding the hand bitmap.
     BITMAP *m_pHand;
-    // The maximum reaching length of this arm, in pixels, from the m_Pos.
+	// The maximum reaching length of this Arm. Max distance between the joint position and the hand offset. Length of a straight arm sprite in pixels.
     float m_MaxLength;
-    // Current offset position the.hand relative to the m_Pos.
+    // Current offset position of the hand relative to m_JointPos.
     Vector m_HandOffset;
-    // The target offset that this Arm's hand is reaching after.
+    // The target position that this Arm's hand is reaching after.
     // If (0, 0), the Arm is currently not reaching after anything.
-    Vector m_TargetPoint;
-    // The target offset from m_Pos that this Arm's hand is reaching after when
-    // not reaching for or doing anything else.
+    Vector m_TargetPosition;
+    // The target offset relative to m_JointPos that this Arm's hand is moving to while not reaching for or doing anything else.
     Vector m_IdleOffset;
     // How fast the arm moves to a reach target,
     // on a scale from 0.0 (frozen) to 1.0 (instantly there).
     float m_MoveSpeed;
     // Wether this Arm will go to idle position if it didn't reach or not.
     bool m_WillIdle;
-    // Wether this Arm reaached the reach target last Update.
+    // Whether this Arm reached the reach target last Update.
     bool m_DidReach;
 
 
@@ -549,6 +439,19 @@ protected:
 
 private:
 
+
+#pragma region Update Breakdown
+    /// <summary>
+    /// Updates the current hand offset for this Arm. Should only be called from Update.
+    /// If the Arm is attached, the current hand offset is based on the target offset and move speed, and whether the Arm should idle or not, otherwise it puts it in a reasonable position.
+    /// </summary>
+    void UpdateCurrentHandOffset();
+
+    /// <summary>
+    /// Updates the frame for this Arm. Should only be called from Update.
+    /// </summary>
+    void UpdateArmFrame();
+#pragma endregion
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -562,8 +465,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    Arm(const Arm &reference);
-    Arm & operator=(const Arm &rhs);
+	Arm(const Arm &reference) = delete;
+	Arm & operator=(const Arm &rhs) = delete;
 
 };
 

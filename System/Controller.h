@@ -96,7 +96,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="mode">The controller input mode, like AI, player etc.</param>
 		/// <param name="player">Which human player is controlling this.</param>
-		Controller(InputMode mode, int player = 0) { Clear(); Create(mode, player); }
+		Controller(InputMode mode, int player = Players::PlayerOne) { Clear(); Create(mode, player); }
 
 		/// <summary>
 		/// Copy constructor method used to instantiate a Controller object identical to an already existing one.
@@ -107,16 +107,10 @@ namespace RTE {
 		/// <summary>
 		/// Makes the Controller object ready for use.
 		/// </summary>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create() { return 0; }
-
-		/// <summary>
-		/// Makes the Controller object ready for use.
-		/// </summary>
 		/// <param name="mode">The controller input mode, like AI, player etc.</param>
 		/// <param name="controlledActor">The Actor this is supposed to control. Ownership is NOT transferred!</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(InputMode mode, Actor *controlledActor);
+		int Create(InputMode mode, Actor *controlledActor);
 
 		/// <summary>
 		/// Makes the Controller object ready for use.
@@ -124,7 +118,7 @@ namespace RTE {
 		/// <param name="mode">The controller input mode, like AI, player etc.</param>
 		/// <param name="player">Which player is controlling this.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(InputMode mode, int player) { m_InputMode = mode; m_Player = player; return Create(); }
+		int Create(InputMode mode, int player) { m_InputMode = mode; m_Player = player; return 0; }
 
 		/// <summary>
 		/// Creates a Controller to be identical to another, by deep copy.
@@ -136,19 +130,9 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up a Controller object before deletion from system memory.
-		/// </summary>
-		virtual ~Controller() { Destroy(); }
-
-		/// <summary>
-		/// Destroys and resets (through Clear()) the Controller object.
-		/// </summary>
-		virtual void Destroy() { Clear(); }
-
-		/// <summary>
 		/// Resets the entire Controller, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
+		void Reset() { Clear(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -157,7 +141,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="otherThanPlayer">If you want to check if it's controlled by a player, AND that player is someone else than a specific one, pass in that player number here.</param>
 		/// <returns>Whether input mode is set to player input.</returns>
-		bool IsPlayerControlled(int otherThanPlayer = -1) const { return (m_InputMode == CIM_PLAYER && (otherThanPlayer < 0 || m_Player != otherThanPlayer)); }
+		bool IsPlayerControlled(int otherThanPlayer = Players::NoPlayer) const { return (m_InputMode == CIM_PLAYER && (otherThanPlayer < Players::PlayerOne || m_Player != otherThanPlayer)); }
 
 		/// <summary>
 		/// Shows whether this controller is disabled.
@@ -233,7 +217,7 @@ namespace RTE {
 		/// <param name="cursorPos"> The vector to alter.</param>
 		/// <param name="moveScale">The scale of the input. 1.0 is 'normal'.</param>
 		/// <returns>Whether the vector was altered or not.</returns>
-		bool RelativeCursorMovement(Vector &cursorPos, float moveScale = 1.0F);
+		bool RelativeCursorMovement(Vector &cursorPos, float moveScale = 1.0F) const;
 
 		/// <summary>
 		/// Indicates whether this is listening to mouse input at all.
@@ -251,13 +235,13 @@ namespace RTE {
 		/// Gets which player's input this is listening to, if in player input mode.
 		/// </summary>
 		/// <returns>The player number, or -1 if not in player input mode.</returns>
-		int GetPlayer() const { return (m_InputMode == CIM_PLAYER) ? m_Player : -1; }
+		int GetPlayer() const { return (m_InputMode == CIM_PLAYER) ? m_Player : Players::NoPlayer; }
 
 		/// <summary>
 		/// Sets which player's input this is listening to, and will enable player input mode.
 		/// </summary>
 		/// <param name="player">The player number.</param>
-		void SetPlayer(int player) { m_Player = player; if (m_Player >= 0) { m_InputMode = CIM_PLAYER; } }
+		void SetPlayer(int player) { m_Player = player; if (m_Player >= Players::PlayerOne) { m_InputMode = CIM_PLAYER; } }
 
 		/// <summary>
 		/// Gets the Team number using this controller.
@@ -275,20 +259,20 @@ namespace RTE {
 		/// Gets which Actor is being controlled by this. 0 if none.
 		/// </summary>
 		/// <returns>A pointer to the Actor which is being controlled by this. Ownership is NOT transferred!</returns>
-		virtual Actor * GetControlledActor() const { return m_ControlledActor; }
+		Actor * GetControlledActor() const { return m_ControlledActor; }
 
 		/// <summary>
 		/// Sets which Actor is supposed to be controlled by this.
 		/// </summary>
 		/// <param name="controlledActor">A pointer to a an Actor which is being controlled by this. Ownership is NOT transferred!</param>
-		virtual void SetControlledActor(Actor *controlledActor = 0) { m_ControlledActor = controlledActor; }
+		void SetControlledActor(Actor *controlledActor = nullptr) { m_ControlledActor = controlledActor; }
 #pragma endregion
 
 #pragma region Virtual Override Methods
 		/// <summary>
 		/// Updates this Controller. Supposed to be done every frame.
 		/// </summary>
-		virtual void Update();
+		void Update();
 #pragma endregion
 
 #pragma region Operator Overloads
@@ -297,14 +281,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="rhs">A Controller reference.</param>
 		/// <returns>A reference to the changed Controller.</returns>
-		virtual Controller & operator=(const Controller &rhs);
+		Controller & operator=(const Controller &rhs);
 #pragma endregion
 
 	protected:
 
 		static constexpr int m_ReleaseDelay = 250; //!< The delay between releasing a menu button and activating the regular controls, to avoid accidental input.
 
-		bool m_ControlStates[CONTROLSTATECOUNT]; //!< Control states.
+		std::array<bool, ControlState::CONTROLSTATECOUNT> m_ControlStates; //!< Control states.
 		bool m_Disabled; //!< Quick and easy disable to prevent updates from being made.
 
 		InputMode m_InputMode; //!< The current controller input mode, like AI, player etc.
@@ -317,12 +301,12 @@ namespace RTE {
 		/// </summary>
 		int m_Player;
 
-		short m_Team; //!< The last team this controlled. This is necessary so we still have some control after controlled's death.
+		int m_Team; //!< The last team this controlled. This is necessary so we still have some control after controlled's death.
 
 		/// <summary>
-		/// These are hacks to make the switch to brain shortcut work without immediately switching away by 
+		/// These are hacks to make the switch to brain shortcut work without immediately switching away by
 		/// detecting the release of the previous and next buttons after pressing them both down to get to the brain.
-		/// </summary>		
+		/// </summary>
 		bool m_NextIgnore;
 		bool m_PrevIgnore;
 
@@ -333,8 +317,8 @@ namespace RTE {
 		bool m_WeaponDropIgnore;
 		bool m_WeaponReloadIgnore;
 
-		Timer m_ReleaseTimer; //!< Timer for measuring release delays.  
-		Timer m_JoyAccelTimer; //!< Timer for measuring analog joystick-controlled cursor acceleration.   
+		Timer m_ReleaseTimer; //!< Timer for measuring release delays.
+		Timer m_JoyAccelTimer; //!< Timer for measuring analog joystick-controlled cursor acceleration.
 		Timer m_KeyAccelTimer; //!< Timer for measuring keyboard-controlled cursor acceleration.
 
 		Vector m_MouseMovement; //!< Relative mouse movement, if this player uses the mouse.

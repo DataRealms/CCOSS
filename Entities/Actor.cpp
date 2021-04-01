@@ -31,12 +31,11 @@
 #include "PerformanceMan.h"
 
 #include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
 namespace RTE {
 
-ConcreteClassInfo(Actor, MOSRotating, 0);
+ConcreteClassInfo(Actor, MOSRotating, 20);
 
 BITMAP **Actor::m_apNoTeamIcon;
 BITMAP *Actor::m_apAIIcons[AIMODE_COUNT];
@@ -136,6 +135,8 @@ void Actor::Clear()
     m_StuckTimer.Reset();
     m_FallTimer.Reset();
     m_DigStrength = 1;
+
+    m_DamageMultiplier = 1.0F;
 }
 
 
@@ -259,36 +260,36 @@ int Actor::Create(const Actor &reference)
     // Only load the static AI mode icons once
     if (!m_sIconsLoaded)
     {
-        ContentFile noTeamFile("Base.rte/GUIs/TeamIcons/NoTeam.bmp");
+        ContentFile noTeamFile("Base.rte/GUIs/TeamIcons/NoTeam.png");
         m_apNoTeamIcon = noTeamFile.GetAsAnimation(2);
 
-        ContentFile iconFile("Base.rte/GUIs/PieIcons/Blank000.bmp");
+        ContentFile iconFile("Base.rte/GUIs/PieIcons/Blank000.png");
         m_apAIIcons[AIMODE_NONE] = iconFile.GetAsBitmap();
         m_apAIIcons[AIMODE_BOMB] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Eye000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Eye000.png");
         m_apAIIcons[AIMODE_SENTRY] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Cycle000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Cycle000.png");
         m_apAIIcons[AIMODE_PATROL] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/GoTo000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/GoTo000.png");
         m_apAIIcons[AIMODE_GOTO] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Brain000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Brain000.png");
         m_apAIIcons[AIMODE_BRAINHUNT] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Dig000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Dig000.png");
         m_apAIIcons[AIMODE_GOLDDIG] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Return000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Return000.png");
         m_apAIIcons[AIMODE_RETURN] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Land000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Land000.png");
         m_apAIIcons[AIMODE_STAY] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Launch000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Launch000.png");
         m_apAIIcons[AIMODE_DELIVER] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Death000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Death000.png");
         m_apAIIcons[AIMODE_SCUTTLE] = iconFile.GetAsBitmap();
-        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Follow000.bmp");
+        iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Follow000.png");
         m_apAIIcons[AIMODE_SQUAD] = iconFile.GetAsBitmap();
 
-        ContentFile arrowFile("Base.rte/GUIs/Indicators/SelectArrow.bmp");
+        ContentFile arrowFile("Base.rte/GUIs/Indicators/SelectArrow.png");
         m_apSelectArrow = arrowFile.GetAsAnimation(4);
-        ContentFile alarmFile("Base.rte/GUIs/Indicators/AlarmExclamation.bmp");
+        ContentFile alarmFile("Base.rte/GUIs/Indicators/AlarmExclamation.png");
         m_apAlarmExclamation = alarmFile.GetAsAnimation(2);
 
         m_sIconsLoaded = true;
@@ -324,7 +325,7 @@ int Actor::Create(const Actor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int Actor::ReadProperty(std::string propName, Reader &reader)
+int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "BodyHitSound")
         reader >> m_BodyHitSound;
@@ -400,7 +401,6 @@ int Actor::ReadProperty(std::string propName, Reader &reader)
         m_AIMode = static_cast<AIMode>(mode);
     }
     else
-        // See if the base class(es) can find a match instead
         return MOSRotating::ReadProperty(propName, reader);
 
     return 0;
@@ -508,21 +508,15 @@ int Actor::LoadScript(std::string const &scriptPath, bool loadAsEnabledScript) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this Actor, including the mass of its
-//                  currently attached body parts and inventory.
-
-float Actor::GetMass() const
-{
-    float totalMass = MOSRotating::GetMass();
-    for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
-        totalMass += (*itr)->GetMass();
-    totalMass += m_GoldCarried * g_SceneMan.GetKgPerOz();
-    return totalMass;
+float Actor::GetInventoryMass() const {
+    float inventoryMass = 0.0F;
+    for (const MovableObject *inventoryItem : m_Inventory) {
+        inventoryMass += inventoryItem->GetMass();
+    }
+    return inventoryMass;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -700,14 +694,14 @@ bool Actor::Look(float FOVSpread, float range)
     if (lookVector.GetLargest() < 0.01)
     {
         lookVector.SetXY(range, 0);
-        lookVector.DegRotate(180 * NormalRand());
+		lookVector.DegRotate(RandomNum(-180.0F, 180.0F));
     }
     else
     {
         // Set the distance in the look direction
         lookVector.SetMagnitude(range);
         // Add the spread from the directed look
-        lookVector.DegRotate(FOVSpread * NormalRand());
+        lookVector.DegRotate(FOVSpread * RandomNormalNum());
     }
 
 	Vector ignored;
@@ -741,19 +735,6 @@ void Actor::RestDetection()
         m_RestTimer.Reset();
         m_ToSettle = false;
     }
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FacingAngle
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adjusts an absolute aiming angle based on whether this Actor is facing
-//                  left or right.
-
-float Actor::FacingAngle(float angle) const
-{
-    return (m_HFlipped ? c_PI : 0) + (angle * (m_HFlipped ? -1 : 1));
-//    return (angle * m_HFlipped ? -1 : 1);
 }
 
 
@@ -907,37 +888,37 @@ void Actor::DropAllInventory()
 		if (pObject)
 		{
 			// Generate the velocities procedurally
-			velMin = 3.0f;
-			velRange = 10.0f;
+			velMin = 3.0F;
+			velRange = 10.0F;
 
 			// Randomize the offset from center to be within the original object
-			gibROffset.SetXY(m_MaxRadius * 0.35 * NormalRand(), m_MaxRadius * 0.35 * NormalRand());
+			gibROffset.SetXY(m_SpriteRadius * 0.35F * RandomNormalNum(), m_SpriteRadius * 0.35F * RandomNormalNum());
 			// Set up its position and velocity according to the parameters of this AEmitter.
 			pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
 			pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
 			// Rotational angle
-			pObject->SetAngularVel((pObject->GetAngularVel() * 0.35) + (pObject->GetAngularVel() * 0.65 / pObject->GetMass()) * PosRand());
+			pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / pObject->GetMass()) * RandomNum());
 			// Make it rotate away in the appropriate direction depending on which side of the object it is on
 			// If the object is far to the relft or right of the center, make it always rotate outwards to some degree
 			if (gibROffset.m_X > m_aSprite[0]->w / 3)
 			{
 				float offCenterRatio = gibROffset.m_X / (m_aSprite[0]->w / 2);
-				angularVel = fabs(pObject->GetAngularVel() * 0.5);
-				angularVel += fabs(pObject->GetAngularVel() * 0.5 * offCenterRatio);
-				pObject->SetAngularVel(angularVel * (gibROffset.m_X > 0 ? -1 : 1));
+				angularVel = fabs(pObject->GetAngularVel() * 0.5F);
+				angularVel += fabs(pObject->GetAngularVel() * 0.5F * offCenterRatio);
+				pObject->SetAngularVel(angularVel * (gibROffset.m_X > 0.0F ? -1 : 1));
 			}
 			// Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
 			else
 			{
-				pObject->SetAngularVel((pObject->GetAngularVel() * 0.5 + pObject->GetAngularVel() * PosRand()) * (NormalRand() > 0 ? 1 : -1));
+				pObject->SetAngularVel((pObject->GetAngularVel() * 0.5F + pObject->GetAngularVel() * RandomNum()) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
 			}
 
 			// TODO: Optimize making the random angles!")
 			gibVel = gibROffset;
 			if (gibVel.IsZero())
-				gibVel.SetXY(velMin + velRange * PosRand(), 0);
+				gibVel.SetXY(velMin + RandomNum(0.0F, velRange), 0.0F);
 			else
-				gibVel.SetMagnitude(velMin + velRange * PosRand());
+				gibVel.SetMagnitude(velMin + RandomNum(0.0F, velRange));
 			// Don't! the offset was already rotated!
 			//            gibVel = RotateOffset(gibVel);
 			// Distribute any impact implse out over all the gibs
@@ -949,9 +930,9 @@ void Actor::DropAllInventory()
 			// Detect whether we're dealing with a passenger and add it as Actor instead
 			if (pPassenger = dynamic_cast<Actor *>(pObject))
 			{
-				pPassenger->SetRotAngle(c_HalfPI * NormalRand());
-				pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5);
-				pPassenger->SetHFlipped(PosRand() > 0.5);
+				pPassenger->SetRotAngle(c_HalfPI * RandomNormalNum());
+				pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5.0F);
+				pPassenger->SetHFlipped(RandomNum() > 0.5F);
 				pPassenger->SetStatus(UNSTABLE);
 				g_MovableMan.AddActor(pPassenger);
 			}
@@ -975,32 +956,14 @@ void Actor::DropAllInventory()
 // Description:     Gibs this, effectively destroying it and creating multiple gibs or
 //                  pieces in its place.
 
-void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
+void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToIgnore)
 {
     // Play death sound
 // TODO: Don't attenuate since death is pretty important.. maybe only make this happen for teh brains
     m_DeathSound.Play(m_Pos);
 
     // Gib all the regular gibs
-    MOSRotating::GibThis(impactImpulse, internalBlast, pIgnoreMO);
-
-	// Count crabs to simulate crab-bomb behavior
-	int crabs = 0;
-    for (deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
-		if (dynamic_cast<ACrab *>(*gItr) && (*gItr)->GetPresetName() == "Crab")
-			crabs++;
-
-	// If we have enough crabs - gib everything
-	if (crabs > 10 && g_MovableMan.GetMOIDCount() + crabs * 5 > 255)
-	{
-		for (int id = 1; id < g_MovableMan.GetMOIDCount() - 1; id++)
-		{
-			MovableObject * MO = g_MovableMan.GetMOFromID(id);
-			MOSRotating * MOSR = dynamic_cast<MOSRotating *>(MO);
-			if (MOSR && MOSR != this)
-				MOSR->GibThis();
-		}
-	}
+    MOSRotating::GibThis(impactImpulse, movableObjectToIgnore);
 
     // Throw out all the inventory with the appropriate force and directions
     MovableObject *pObject = 0;
@@ -1013,37 +976,37 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
         pObject = *gItr;
 
         // Generate the velocities procedurally
-        velMin = internalBlast / pObject->GetMass();
-        velRange = 10.0f;
+        velMin = m_GibBlastStrength / pObject->GetMass();
+        velRange = 10.0F;
 
         // Randomize the offset from center to be within the original object
-        gibROffset.SetXY(m_MaxRadius * 0.35 * NormalRand(), m_MaxRadius * 0.35 * NormalRand());
+        gibROffset.SetXY(m_SpriteRadius * 0.35F * RandomNormalNum(), m_SpriteRadius * 0.35F * RandomNormalNum());
         // Set up its position and velocity according to the parameters of this AEmitter.
         pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
         pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
         // Rotational angle
-        pObject->SetAngularVel((pObject->GetAngularVel() * 0.35) + (pObject->GetAngularVel() * 0.65 / pObject->GetMass()) * PosRand());
+        pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / pObject->GetMass()) * RandomNum());
         // Make it rotate away in the appropriate direction depending on which side of the object it is on
         // If the object is far to the relft or right of the center, make it always rotate outwards to some degree
         if (gibROffset.m_X > m_aSprite[0]->w / 3)
         {
             float offCenterRatio = gibROffset.m_X / (m_aSprite[0]->w / 2);
-            angularVel = fabs(pObject->GetAngularVel() * 0.5);
-            angularVel += fabs(pObject->GetAngularVel() * 0.5 * offCenterRatio);
+            angularVel = fabs(pObject->GetAngularVel() * 0.5F);
+            angularVel += fabs(pObject->GetAngularVel() * 0.5F * offCenterRatio);
             pObject->SetAngularVel(angularVel * (gibROffset.m_X > 0 ? -1 : 1));
         }
         // Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
         else
         {
-            pObject->SetAngularVel((pObject->GetAngularVel() * 0.5 + pObject->GetAngularVel() * PosRand()) * (NormalRand() > 0 ? 1 : -1));
+            pObject->SetAngularVel((pObject->GetAngularVel() * 0.5F + pObject->GetAngularVel() * RandomNum()) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
         }
 
 // TODO: Optimize making the random angles!")
         gibVel = gibROffset;
         if (gibVel.IsZero())
-            gibVel.SetXY(velMin + velRange * PosRand(), 0);
+            gibVel.SetXY(velMin + RandomNum(0.0F, velRange), 0.0F);
         else
-            gibVel.SetMagnitude(velMin + velRange * PosRand());
+            gibVel.SetMagnitude(velMin + RandomNum(0.0F, velRange));
         gibVel.RadRotate(impactImpulse.GetAbsRadAngle());
 // Don't! the offset was already rotated!
 //            gibVel = RotateOffset(gibVel);
@@ -1054,15 +1017,15 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
         pObject->ResetAllTimers();
 
         // Set the gib to not hit a specific MO
-        if (pIgnoreMO)
-            pObject->SetWhichMOToNotHit(pIgnoreMO);
+        if (movableObjectToIgnore)
+            pObject->SetWhichMOToNotHit(movableObjectToIgnore);
 
         // Detect whether we're dealing with a passenger and add it as Actor instead
         if (pPassenger = dynamic_cast<Actor *>(pObject))
         {
-            pPassenger->SetRotAngle(c_HalfPI * NormalRand());
-            pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5);
-            pPassenger->SetHFlipped(PosRand() > 0.5);
+            pPassenger->SetRotAngle(c_HalfPI * RandomNormalNum());
+            pPassenger->SetAngularVel(pPassenger->GetAngularVel() * 5.0F);
+            pPassenger->SetHFlipped(RandomNum() > 0.5F);
             pPassenger->SetStatus(UNSTABLE);
             g_MovableMan.AddActor(pPassenger);
         }
@@ -1082,7 +1045,7 @@ void Actor::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pI
 	{
 		int brainOfPlayer = g_ActivityMan.GetActivity()->IsBrainOfWhichPlayer(this);
 		// Only flash if player is human (AI players don't have screens!)
-		if (brainOfPlayer != Activity::NOPLAYER && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer))
+		if (brainOfPlayer != Players::NoPlayer && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer))
 		{
 			// Croaked.. flash for a longer period
 			if (m_ToDelete || m_Status == DEAD)
@@ -1296,9 +1259,9 @@ bool Actor::UpdateAIScripted() {
 
     int status = !g_LuaMan.ExpressionIsTrue(m_ScriptPresetName, false) ? ReloadScripts() : 0;
     status = (status >= 0 && !ObjectScriptsInitialized()) ? InitializeObjectScripts() : status;
-    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_AI);
+    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
     status = (status >= 0) ? RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true) : status;
-    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_AI);
+    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAIUpdate);
 
     return status >= 0;
 }
@@ -1370,35 +1333,6 @@ void Actor::UpdateAI()
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAnyRandomWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds from the actor and all standard attachables.
-
-int Actor::RemoveAnyRandomWounds(int amount)
-{
-	float damage = 0;
-
-	for (int i = 0; i < amount; i++)
-	{
-		// Fill the list of damaged bodyparts
-		std::vector<MOSRotating *> bodyParts;
-		if (GetWoundCount() > 0)
-			bodyParts.push_back(this);
-
-		// Stop removing wounds if there are not any left
-		if (bodyParts.size() == 0)
-			break;
-
-		int partIndex = RangeRand(0, bodyParts.size() - 1);
-		MOSRotating * part = bodyParts[partIndex];
-		damage += part->RemoveWounds(1);
-	}
-
-	return damage;
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          VerifyMOIDs
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1422,12 +1356,12 @@ void Actor::VerifyMOIDs()
 
 void Actor::Update()
 {
+    // Update the controller!
+    m_Controller.Update();
+
     /////////////////////////////////
     // Hit Body update and handling
     MOSRotating::Update();
-
-    // Update the controller!
-    m_Controller.Update();
 
     // Update the viewpoint to be at least what the position is
     m_ViewPoint = m_Pos;
@@ -1499,10 +1433,14 @@ void Actor::Update()
     }
 
     /////////////////////////////////////
-    // Detract damage caused by wounds from health
-
-    for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
-        m_Health -= (*itr)->CollectDamage() * m_DamageMultiplier; //Actors must apply DamageMultiplier effects to their main MO by themselves
+    // Take damage/heal from wounds and wounds on Attachables
+    for (AEmitter *wound : m_Wounds) {
+        m_Health -= wound->CollectDamage() * m_DamageMultiplier;
+    }
+    for (Attachable *attachable : m_Attachables) {
+        m_Health -= attachable->CollectDamage();
+    }
+    m_Health = std::min(m_Health, m_MaxHealth);
 
     /////////////////////////////////////////////
     // Take damage from large hits during travel
@@ -1514,10 +1452,8 @@ void Actor::Update()
     if (m_TravelImpulse.GetMagnitude() > m_TravelImpulseDamage)
 	{
         m_PainSound.Play(m_Pos);
-		// TODO: IMPROVE AND DON'T HARDCODE
-        //m_Health -= 10;
-		float impulse = m_TravelImpulse.GetMagnitude() - m_TravelImpulseDamage;
-		float damage = impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * 100;
+		const float impulse = m_TravelImpulse.GetMagnitude() - m_TravelImpulseDamage;
+		const float damage = impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth;
 		if (damage > 0)
 			m_Health -= damage;
 		if (m_Status != DYING && m_Status != DEAD)
@@ -1552,7 +1488,7 @@ void Actor::Update()
 	        DropAllInventory();
 
         Material const * AuMat = g_SceneMan.GetMaterial(std::string("Gold"));
-        int goldCount = m_GoldCarried/*floorf(GetGoldCarried())*/;
+        int goldCount = m_GoldCarried/*std::floor(GetGoldCarried())*/;
         for (int i = 0; i < goldCount; i++)
         {
 /*
@@ -1560,15 +1496,15 @@ void Actor::Update()
             pixelMO->Create(AuMat.color,
                             AuMat.pixelDensity,
                             Vector(m_Pos.m_X, m_Pos.m_Y - 10),
-                            Vector(4 * NormalRand(), RangeRand(-5, -7)),
+                            Vector(4 * NormalRand(), RandomNum(-5, -7)),
                             new Atom(Vector(), AuMat, 0, AuMat.color, 2),
                             0);
 */
-            MOPixel *pixelMO = new MOPixel(AuMat->color,
-                                           AuMat->pixelDensity,
+            MOPixel *pixelMO = new MOPixel(AuMat->GetColor(),
+                                           AuMat->GetPixelDensity(),
                                            Vector(m_Pos.m_X, m_Pos.m_Y - 10),
-                                           Vector(4 * NormalRand(), RangeRand(-5, -7)),
-                                           new Atom(Vector(), AuMat->id, 0, AuMat->color, 2),
+                                           Vector(4.0F * RandomNormalNum(), RandomNum(-5.0F, -7.0F)),
+                                           new Atom(Vector(), AuMat->GetIndex(), 0, AuMat->GetColor(), 2),
                                            0);
 
             pixelMO->SetToHitMOs(false);
@@ -1582,7 +1518,7 @@ void Actor::Update()
     ////////////////////////////////
     // Death logic
 
-    if (m_Status != DYING && m_Status != DEAD && floorf(m_Health) <= 0)
+    if (m_Status != DYING && m_Status != DEAD && std::floor(m_Health) <= 0)
     {
         m_DeathSound.Play(m_Pos);
 		m_Controller.SetDisabled(true);
@@ -1622,7 +1558,7 @@ void Actor::Update()
             {
 // TODO: improve; make this 
                 float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % m_SpriteAnimDuration;
-                m_Frame = floorf((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);           
+                m_Frame = std::floor((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);           
             }
         }
     }
@@ -1649,7 +1585,7 @@ void Actor::Update()
 	if (g_SettingsMan.FlashOnBrainDamage())
 	{
 		int brainOfPlayer = g_ActivityMan.GetActivity()->IsBrainOfWhichPlayer(this);
-		if (brainOfPlayer != Activity::NOPLAYER && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer))
+		if (brainOfPlayer != Players::NoPlayer && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer))
 		{
 			// Got Hurt
 			if (m_PrevHealth - m_Health > 1.5)
@@ -1719,7 +1655,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
     // Only draw if the team viewing this is on the same team OR has seen the space where this is located
     int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-    if (viewingTeam != m_Team && viewingTeam != Activity::NOTEAM)
+    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam)
     {
         if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
             return;
@@ -1794,13 +1730,13 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 				{
 					m_pControllerIcon = 0;
 					if (m_Team == 0)
-						m_pControllerIcon = g_UInputMan.GetDeviceIcon(UInputMan::DEVICE_GAMEPAD_1);
+						m_pControllerIcon = g_UInputMan.GetDeviceIcon(DEVICE_GAMEPAD_1);
 					else if (m_Team == 1)
-						m_pControllerIcon = g_UInputMan.GetDeviceIcon(UInputMan::DEVICE_GAMEPAD_2);
+						m_pControllerIcon = g_UInputMan.GetDeviceIcon(DEVICE_GAMEPAD_2);
 					else if (m_Team == 2)
-						m_pControllerIcon = g_UInputMan.GetDeviceIcon(UInputMan::DEVICE_GAMEPAD_3);
+						m_pControllerIcon = g_UInputMan.GetDeviceIcon(DEVICE_GAMEPAD_3);
 					else if (m_Team == 3)
-						m_pControllerIcon = g_UInputMan.GetDeviceIcon(UInputMan::DEVICE_GAMEPAD_4);
+						m_pControllerIcon = g_UInputMan.GetDeviceIcon(DEVICE_GAMEPAD_4);
 					if (m_pControllerIcon)
 					{
 						BITMAP **apControllerBitmaps = 0;
@@ -1853,7 +1789,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
             }
 */
-            sprintf_s(str, sizeof(str), "%.0f", m_Health);
+            std::snprintf(str, sizeof(str), "%.0f", m_Health);
 //            pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y - 35, str, GUIFont::Left);
             pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
 
@@ -1863,7 +1799,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             if (GetGoldCarried() > 0) {
                 str[0] = m_GoldPicked ? -57 : -58; str[1] = 0;
                 pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-                sprintf_s(str, sizeof(str), "%.0f oz", GetGoldCarried());
+                std::snprintf(str, sizeof(str), "%.0f oz", GetGoldCarried());
                 pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 2, str, GUIFont::Left);
 
                 m_HUDStack += -11;
@@ -1883,7 +1819,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             // Draw the contol pointer, if controlled and under the icon's time limit
             if (m_Controller.IsPlayetControlled() && m_NewControlTmr.GetElapsedSimTimeMS() < 1500)
             {
-                sprintf_s(str, sizeof(str), "%c", -38);
+                std::snprintf(str, sizeof(str), "%c", -38);
                 pSymbolFont->DrawAligned(&bitmapInt, cpuPos.m_X - 0, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
             }
 */
@@ -1896,27 +1832,27 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
     // Obstacle state
     if (m_ObstacleState == PROCEEDING)
-        sprintf_s(str, sizeof(str), "PROCEEDING");
+        std::snprintf(str, sizeof(str), "PROCEEDING");
     else if (m_ObstacleState == BACKSTEPPING)
-        sprintf_s(str, sizeof(str), "BACKSTEPPING");
+        std::snprintf(str, sizeof(str), "BACKSTEPPING");
     else if (m_ObstacleState == JUMPING)
-        sprintf_s(str, sizeof(str), "JUMPING");
+        std::snprintf(str, sizeof(str), "JUMPING");
     else if (m_ObstacleState == SOFTLANDING)
-        sprintf_s(str, sizeof(str), "SOFTLANDING");
+        std::snprintf(str, sizeof(str), "SOFTLANDING");
     else
-        sprintf_s(str, sizeof(str), "DIGPAUSING");
+        std::snprintf(str, sizeof(str), "DIGPAUSING");
     pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 
     // Team Block State
     if (m_TeamBlockState == BLOCKED)
-        sprintf_s(str, sizeof(str), "BLOCKED");
+        std::snprintf(str, sizeof(str), "BLOCKED");
     else if (m_TeamBlockState == IGNORINGBLOCK)
-        sprintf_s(str, sizeof(str), "IGNORINGBLOCK");
+        std::snprintf(str, sizeof(str), "IGNORINGBLOCK");
     else if (m_TeamBlockState == FOLLOWWAIT)
-        sprintf_s(str, sizeof(str), "FOLLOWWAIT");
+        std::snprintf(str, sizeof(str), "FOLLOWWAIT");
     else
-        sprintf_s(str, sizeof(str), "NOTBLOCKED");
+        std::snprintf(str, sizeof(str), "NOTBLOCKED");
     pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
     m_HUDStack += -9;
 
@@ -2002,11 +1938,11 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     // AI Mode team roster HUD lines
     if (/*m_Controller.IsState(PIE_MENU_ACTIVE) || */m_Controller.IsState(ACTOR_NEXT_PREP) || m_Controller.IsState(ACTOR_PREV_PREP))
     {
-        int prevColor = m_Controller.IsState(ACTOR_PREV_PREP) ? 122 : (m_Team == Activity::TEAM_1 ? 13 : 147);
-        int nextColor = m_Controller.IsState(ACTOR_NEXT_PREP) ? 122 : (m_Team == Activity::TEAM_1 ? 13 : 147);
+        int prevColor = m_Controller.IsState(ACTOR_PREV_PREP) ? 122 : (m_Team == Activity::TeamOne ? 13 : 147);
+        int nextColor = m_Controller.IsState(ACTOR_NEXT_PREP) ? 122 : (m_Team == Activity::TeamOne ? 13 : 147);
         int prevSpacing = m_Controller.IsState(ACTOR_PREV_PREP) ? 3 : 9;
         int nextSpacing = m_Controller.IsState(ACTOR_NEXT_PREP) ? 3 : 9;
-        int altColor = m_Team == Activity::TEAM_1 ? 11 : 160;
+        int altColor = m_Team == Activity::TeamOne ? 11 : 160;
 
         Actor *pPrevAdj = 0;
         Actor *pNextAdj = 0;

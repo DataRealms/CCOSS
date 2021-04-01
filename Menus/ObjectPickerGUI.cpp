@@ -110,7 +110,7 @@ int ObjectPickerGUI::Create(Controller *pController, int whichModuleSpace, strin
 
     if (!s_pCursor)
     {
-        ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.bmp");
+        ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.png");
         s_pCursor = cursorFile.GetAsBitmap();
     }
 
@@ -130,7 +130,7 @@ int ObjectPickerGUI::Create(Controller *pController, int whichModuleSpace, strin
         m_pParentBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("PickerGUIBox"));
 
         // Set the background image of the parent collection box
-//        ContentFile backgroundFile("Base.rte/GUIs/BuyMenuBackground.bmp");
+//        ContentFile backgroundFile("Base.rte/GUIs/BuyMenuBackground.png");
 //        m_pParentBox->SetDrawImage(new AllegroBitmap(backgroundFile.GetAsBitmap()));
 //        m_pParentBox->SetDrawBackground(true);
 //        m_pParentBox->SetDrawType(GUICollectionBox::Image);
@@ -151,7 +151,7 @@ int ObjectPickerGUI::Create(Controller *pController, int whichModuleSpace, strin
         m_pPopupBox->SetEnabled(false);
         m_pPopupBox->SetVisible(false);
         // Set the font
-        m_pPopupText->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.bmp"));
+        m_pPopupText->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
     }
 
     m_pGroupsList = dynamic_cast<GUIListBox *>(m_pGUIController->GetControl("GroupsLB"));
@@ -468,7 +468,7 @@ void ObjectPickerGUI::Update()
 
         float enabledPos = g_FrameMan.GetPlayerFrameBufferWidth(m_pController->GetPlayer()) - m_pParentBox->GetWidth();
 
-        float toGo = floorf((enabledPos - (float)m_pParentBox->GetXPos()) * m_MenuSpeed);
+        float toGo = std::floor((enabledPos - (float)m_pParentBox->GetXPos()) * m_MenuSpeed);
         position.m_X = m_pParentBox->GetXPos() + toGo;
         occlusion.m_X = m_pParentBox->GetXPos() - g_FrameMan.GetPlayerFrameBufferWidth(m_pController->GetPlayer());
 
@@ -483,7 +483,7 @@ void ObjectPickerGUI::Update()
     {
         float disabledPos = g_FrameMan.GetPlayerFrameBufferWidth(m_pController->GetPlayer());
 
-        float toGo = ceilf((disabledPos - (float)m_pParentBox->GetXPos()) * m_MenuSpeed);
+        float toGo = std::ceil((disabledPos - (float)m_pParentBox->GetXPos()) * m_MenuSpeed);
         m_pParentBox->SetPositionAbs(m_pParentBox->GetXPos() + toGo, 0);
         g_SceneMan.SetScreenOcclusion(Vector(m_pParentBox->GetXPos() - g_FrameMan.GetPlayerFrameBufferWidth(m_pController->GetPlayer()), 0), g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
         m_pPopupBox->SetVisible(false);
@@ -1279,7 +1279,7 @@ void ObjectPickerGUI::UpdateObjectsList(bool selectTop)
                     pItemBitmap = pModule->GetIcon() ? new AllegroBitmap(pModule->GetIcon()) : 0;
                     // Passing in ownership of the bitmap, making uppercase the name
                     string name = pModule->GetFriendlyName();
-                    transform(name.begin(), name.end(), name.begin(), std::pointer_to_unary_function<int, int>(toupper));
+                    transform(name.begin(), name.end(), name.begin(), ::toupper);
                     m_pObjectsList->AddItem(name, m_aExpandedModules[moduleID] ? "-" : "+", pItemBitmap, 0, moduleID);
                 }
 

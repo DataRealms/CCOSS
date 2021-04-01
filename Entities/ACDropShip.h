@@ -43,7 +43,8 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(ACDropShip)
-
+SerializableOverrideMethods
+ClassInfoGetters
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     ACDropShip
@@ -62,7 +63,7 @@ EntityAllocation(ACDropShip)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~ACDropShip() { Destroy(true); }
+	~ACDropShip() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +74,7 @@ EntityAllocation(ACDropShip)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -88,22 +89,6 @@ EntityAllocation(ACDropShip)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire ACDropShip, including its inherited members, to their
@@ -111,20 +96,7 @@ EntityAllocation(ACDropShip)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); ACraft::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this ACDropShip to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the ACDropShip will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
+    void Reset() override { Clear(); ACraft::Reset(); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Destroy
@@ -134,38 +106,7 @@ EntityAllocation(ACDropShip)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this ACDropShip, including the mass of its
-//                  currently attached body parts and inventory.
-// Arguments:       None.
-// Return value:    A float describing the mass value in Kilograms (kg).
-
-    virtual float GetMass() const;
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -178,7 +119,7 @@ EntityAllocation(ACDropShip)
 //                  here means less calculation.
 // Return value:    The rough altitude over the terrain, in pixels.
 
-    virtual float GetAltitude(int max = 0, int accuracy = 0);
+	float GetAltitude(int max = 0, int accuracy = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -188,45 +129,8 @@ EntityAllocation(ACDropShip)
 // Arguments:       How far ahead of travel direction to check for obstacles.
 // Return value:    Which MOID was detected as obstacle. g_NoMOID means nothing was detected.
 
-    virtual MOID DetectObstacle(float distance);
+	MOID DetectObstacle(float distance);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-// Arguments:       A moid specifying the MOID that this MovableObject is
-//                  assigned for this frame.
-// Return value:    None.
-
-    virtual void SetID(const MOID newID);
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OnBounce
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits and then
-//                  bounces off of something. This is called by the owned Atom/AtomGroup
-//                  of this MovableObject during travel.
-// Arguments:       The position where the bounce-hit occurred.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this bounce.
-
-    virtual bool OnBounce(const Vector &pos);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OnSink
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits and then
-//                  sink into something. This is called by the owned Atom/AtomGroup
-//                  of this MovableObject during travel.
-// Arguments:       The position where the sink-hit occurred.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this sinkage.
-
-    virtual bool OnSink(const Vector &pos);
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AutoStabilizing
@@ -236,31 +140,7 @@ EntityAllocation(ACDropShip)
 // Arguments:       None.
 // Return value:    Wheter this will try to auto stabilize.
 
-    virtual bool AutoStabilizing() { return true; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-// Arguments:       The impulse (kg * m/s) of the impact causing the gibbing to happen.
-//					The internal blast impulse which will push the gibs away from the center.
-//                  A pointer to an MO which the gibs shuold not be colliding with!
-// Return value:    None.
-
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsOnScenePoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this' current graphical representation overlaps
-//                  a point in absolute scene coordinates.
-// Arguments:       The point in absolute scene coordinates.
-// Return value:    Whether this' graphical rep overlaps the scene point.
-
-    virtual bool IsOnScenePoint(Vector &scenePoint) const;
+	bool AutoStabilizing() override { return true; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -271,7 +151,7 @@ EntityAllocation(ACDropShip)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateAI();
+	void UpdateAI() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -281,25 +161,7 @@ EntityAllocation(ACDropShip)
 // Arguments:       Nosssssssne.
 // Return value:    None.
 
-    virtual void Update();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this ACDropShip's current graphical representation to a
-//                  BITMAP of choice.
-// Arguments:       A pointer to a BITMAP to draw on.
-//                  The absolute position of the target bitmap's upper left corner in the Scene.
-//                  In which mode to draw in. See the DrawMode enumeration for the modes.
-//                  Whether to not draw any extra 'ghost' items of this MovableObject,
-//                  indicator arrows or hovering HUD text and so on.
-// Return value:    None.
-
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -311,67 +173,80 @@ EntityAllocation(ACDropShip)
 // Return value:    An integer with the recomended number of actors that fit in the craft.
 //                  Default is four.
 
-    virtual int GetMaxPassengers() const { return m_MaxPassengers > -1 ? m_MaxPassengers : 4; }
+	int GetMaxPassengers() const override { return m_MaxPassengers > -1 ? m_MaxPassengers : 4; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetRThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the right side engine.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Gets the right side thruster of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the right side thruster of this ACDropship. Ownership is NOT transferred.</returns>
+    AEmitter * GetRightThruster() const { return m_pRThruster; }
 
-    AEmitter * GetRThruster() const { return m_pRThruster; }
+    /// <summary>
+    /// Sets the right side thruster for this ACDropship.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetRightThruster(AEmitter *newThruster);
 
+    /// <summary>
+    /// Gets the left side thruster of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the left side thruster of this ACDropship. Ownership is NOT transferred.</returns>
+    AEmitter * GetLeftThruster() const { return m_pLThruster; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetLThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the left side engine.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Sets the left side thruster for this ACDropship.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetLeftThruster(AEmitter *newThruster);
 
-    AEmitter * GetLThruster() const { return m_pLThruster; }
+    /// <summary>
+    /// Gets the right side secondary thruster of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the right side secondary thruster of this ACDropship. Ownership is NOT transferred.</returns>
+    AEmitter * GetURightThruster() const { return m_pURThruster; }
 
+    /// <summary>
+    /// Sets the right side secondary thruster for this ACDropship.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetURightThruster(AEmitter *newThruster);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetURThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the right side secondary thruster.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Gets the left side secondary thruster of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the left side secondary thruster of this ACDropship. Ownership is NOT transferred.</returns>
+    AEmitter * GetULeftThruster() const { return m_pULThruster; }
 
-    AEmitter * GetURThruster() const { return m_pURThruster; }
+    /// <summary>
+    /// Sets the left side secondary thruster for this ACDropship.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetULeftThruster(AEmitter *newThruster);
 
+    /// <summary>
+    /// Gets the left side hatch of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the left side hatch of this ACDropship. Ownership is NOT transferred.</returns>
+    Attachable * GetLeftHatch() const { return m_pLHatch; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetULThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the left side secondary thruster.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Sets the left side hatch for this ACDropship.
+    /// </summary>
+    /// <param name="newHatch">The new hatch to use.</param>
+    void SetLeftHatch(Attachable *newHatch);
 
-    AEmitter * GetULThruster() const { return m_pULThruster; }
+    /// <summary>
+    /// Gets the right side hatch of this ACDropship.
+    /// </summary>
+    /// <returns>A pointer to the right side hatch of this ACDropship. Ownership is NOT transferred.</returns>
+    Attachable * GetRightHatch() const { return m_pRHatch; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetLHatch
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the left side hatch.
-// Arguments:       None.
-// Return value:    An Attachable pointer.
-
-	Attachable * GetLHatch() const { return m_pLHatch; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:	GetRHatch
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the right side hatch.
-// Arguments:       None.
-// Return value:    An Attachable pointer.
-
-	Attachable * GetRHatch() const { return m_pRHatch; }
+    /// <summary>
+    /// Sets the right side hatch for this ACDropship.
+    /// </summary>
+    /// <param name="newHatch">The new hatch to use.</param>
+    void SetRightHatch(Attachable *newHatch);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -382,46 +257,7 @@ EntityAllocation(ACDropShip)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ResetEmissionTimers();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound count of this actor and all vital attachables.
-// Arguments:       None.
-// Return value:    Returns total number of wounds of this actor.
-
-	virtual int GetTotalWoundCount() const; 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound limit of this actor and all vital attachables.
-// Arguments:       None.
-// Return value:    Returns total wound limit of this actor.
-
-	virtual int GetTotalWoundLimit() const; 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAnyRandomWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds from the actor and all standard attachables.
-// Arguments:       Amount of wounds to remove.
-// Return value:    Damage taken from removed wounds.
-
-	virtual int RemoveAnyRandomWounds(int amount);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+    void ResetEmissionTimers() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -431,7 +267,7 @@ EntityAllocation(ACDropShip)
 // Arguments:       None.
 // Return value:    Max engine angle in degrees.
 
-	virtual float GetMaxEngineAngle() const { return m_MaxEngineAngle; }
+	float GetMaxEngineAngle() const { return m_MaxEngineAngle; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -441,7 +277,7 @@ EntityAllocation(ACDropShip)
 // Arguments:       Max engine angle in degrees.
 // Return value:    None.
 
-	virtual void SetMaxEngineAngle(float newAngle) { m_MaxEngineAngle = newAngle; }
+	void SetMaxEngineAngle(float newAngle) { m_MaxEngineAngle = newAngle; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -465,7 +301,7 @@ EntityAllocation(ACDropShip)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetMaxEngineAngle
+// Virtual method:  GetLateralControl
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets lateral control value -1.0 to 1.0 control of sideways movement. 0 means try to stand still in X.
 // Arguments:       None.
@@ -479,28 +315,13 @@ EntityAllocation(ACDropShip)
 
 protected:
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-// Arguments:       The MOID index to register itself and its children in.
-//                  The MOID of the root MO of this MO, ie the highest parent of this MO.
-//                  0 means that this MO is the root, ie it is owned by MovableMan.
-//                  Whether this MO should make a new MOID to use for itself, or to use
-//                  the same as the last one in the index (presumably its parent),
-// Return value:    None.
-
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID = g_NoMOID,
-                                 bool makeNewMOID = true);
-
 
     // Member variables
     static Entity::ClassInfo m_sClass;
     // Body AtomGroups.
     AtomGroup *m_pBodyAG;
     // Thruster emitters.
+    //TODO when this class is cleaned up, these and their getters and setters should probably be renamed (I'd argue the lua bindings should be broken to match but that's debatable). L and R should be Left and Right and they should probably be Primary and Secondary.
     AEmitter *m_pRThruster;
     AEmitter *m_pLThruster;
     AEmitter *m_pURThruster;
@@ -544,8 +365,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    ACDropShip(const ACDropShip &reference);
-    ACDropShip & operator=(const ACDropShip &rhs);
+	ACDropShip(const ACDropShip &reference) = delete;
+	ACDropShip & operator=(const ACDropShip &rhs) = delete;
 
 };
 

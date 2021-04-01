@@ -14,11 +14,26 @@ namespace RTE {
 
 	public:
 
+#pragma region Global Macro Definitions
+		/// <summary>
+		/// Convenience macro to cut down on duplicate ReadProperty and Save methods in classes that extend Serializable.
+		/// </summary>
+		#define SerializableOverrideMethods \
+			int ReadProperty(const std::string_view &propName, Reader &reader) override; \
+			int Save(Writer &writer) const override;
+
+		/// <summary>
+		/// Convenience macro to cut down on duplicate GetClassName methods in non-poolable classes that extend Serializable.
+		/// </summary>
+		#define SerializableClassNameGetter \
+			const std::string & GetClassName() const override { return c_ClassName; }
+#pragma endregion
+
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a Serializable object in system memory. Create() should be called before using the object.
 		/// </summary>
-		Serializable() {}
+		Serializable() = default;
 
 		/// <summary>
 		/// Makes the Serializable object ready for use, usually after all necessary properties have been set with Create(Reader).
@@ -38,24 +53,27 @@ namespace RTE {
 				reader.ReportError("Wrong type in Reader when passed to Serializable::Create()");
 				return -1;
 			}
-
 			// This is the engine for processing all properties of this Serializable upon read creation.
 			while (reader.NextProperty()) {
+				m_FormattedReaderPosition = ("in file " + reader.GetCurrentFilePath() + " on line " + reader.GetCurrentFileLine());
 				std::string propName = reader.ReadPropName();
-				// We need to check if propName != "" because ReadPropName may return "" when it reads an InlcudeFile without any properties,
-				// in a case they are all commented out or it's the last line in file.
+				// We need to check if !propName.empty() because ReadPropName may return "" when it reads an IncludeFile without any properties in case they are all commented out or it's the last line in file.
 				// Also ReadModuleProperty may return "" when it skips IncludeFile till the end of file.
-				if (propName != "" && ReadProperty(propName, reader) < 0) {
-					// TODO: Log here!
+				if (!propName.empty() && ReadProperty(propName, reader) < 0) {
+					// TODO: Could not match property. Log here!
 				}
 			}
-
 			// Now do all the additional initializing needed.
 			return doCreate ? Create() : 0;
 		}
 #pragma endregion
 
 #pragma region Destruction
+		/// <summary>
+		/// Destructor method used to clean up a Serializable object before deletion from system memory.
+		/// </summary>
+		virtual ~Serializable() = default;
+
 		/// <summary>
 		/// Resets the entire Serializable, including its inherited members, to their default settings or values.
 		/// </summary>
@@ -74,7 +92,7 @@ namespace RTE {
 		/// An error return value signaling whether the property was successfully read or not.
 		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
 		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader) {
+		virtual int ReadProperty(const std::string_view &propName, Reader &reader) {
 			// Discard the value of the property which failed to read
 			reader.ReadPropValue();
 			reader.ReportError("Could not match property");
@@ -87,6 +105,21 @@ namespace RTE {
 		/// <param name="writer">A Writer that the Serializable will save itself to.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		virtual int Save(Writer &writer) const { writer.ObjectStart(GetClassName()); return 0; }
+
+		/// <summary>
+		/// Replaces backslashes with forward slashes in file paths to eliminate issues with cross-platform compatibility or invalid escape sequences.
+		/// </summary>
+		/// <param name="pathToCorrect">Reference to the file path string to correct slashes in.</param>
+		// TODO: Add a warning log entry if backslashes are found in a data path. Perhaps overwrite them in the ini file itself.
+		std::string CorrectBackslashesInPath(const std::string &pathToCorrect) const { return std::filesystem::path(pathToCorrect).generic_string(); }
+#pragma endregion
+
+#pragma region Logging
+		/// <summary>
+		/// Gets the file and line that are currently being read. Formatted to be used for logging warnings and errors.
+		/// </summary>
+		/// <returns>A string containing the currently read file path and the line being read.</returns>
+		const std::string & GetFormattedReaderPosition() const { return m_FormattedReaderPosition; }
 #pragma endregion
 
 #pragma region Operator Overloads
@@ -148,10 +181,12 @@ namespace RTE {
 
 	private:
 
+		std::string m_FormattedReaderPosition; //!< A string containing the currently read file path and the line being read. Formatted to be used for logging.
+
 		/// <summary>
 		/// Clears all the member variables of this Object, effectively resetting the members of this abstraction level only.
 		/// </summary>
-		void Clear() { ; }
+		void Clear() {}
 	};
 }
 #endif

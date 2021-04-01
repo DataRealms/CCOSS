@@ -13,6 +13,9 @@ namespace RTE {
 
 	public:
 
+		SerializableClassNameGetter
+		SerializableOverrideMethods
+
 		Vector m_Corner; //!< Vector position of the upper left corner of this box.
 		float m_Width; //!< Width of this box.
 		float m_Height; //!< Height of this box.
@@ -60,7 +63,7 @@ namespace RTE {
 		/// <param name="corner1">Vector position of the upper left corner of this box.</param>
 		/// <param name="corner2">Vector position of the lower right corner of this box.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const Vector &corner1, const Vector &corner2);
+		int Create(const Vector &corner1, const Vector &corner2);
 
 		/// <summary>
 		/// Makes the Box object ready for use.
@@ -70,7 +73,7 @@ namespace RTE {
 		/// <param name="x2">X position of box lower right corner.</param>
 		/// <param name="y2">Y position of box lower right corner.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(float x1, float y1, float x2, float y2);
+		int Create(float x1, float y1, float x2, float y2);
 
 		/// <summary>
 		/// Makes the Box object ready for use.
@@ -79,42 +82,21 @@ namespace RTE {
 		/// <param name="width">Width of this box.</param>
 		/// <param name="height">Height of this box.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const Vector &corner, float width, float height);
+		int Create(const Vector &corner, float width, float height);
 
 		/// <summary>
 		/// Creates a Box to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the Box to deep copy.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const Box &reference);
+		int Create(const Box &reference);
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Resets the entire Box object to the default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
-#pragma endregion
-
-#pragma region INI Handling
-		/// <summary>
-		/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called.
-		/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
-		/// </summary>
-		/// <param name="propName">The name of the property to be read.</param>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>
-		/// An error return value signaling whether the property was successfully read or not.
-		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
-		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader);
-
-		/// <summary>
-		/// Saves the complete state of this Box to an output stream for later recreation with Create(Reader &reader).
-		/// </summary>
-		/// <param name="writer">A Writer that the Box will save itself with.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const;
+		void Reset() override { Clear(); }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -189,7 +171,7 @@ namespace RTE {
 		/// Gets a random point within this box.
 		/// </summary>
 		/// <returns>The random point within the box.</returns>
-		Vector GetRandomPoint() const { return Vector(m_Corner.m_X + m_Width * PosRand(), m_Corner.m_Y + m_Height * PosRand()); }
+		Vector GetRandomPoint() const { return Vector(m_Corner.m_X + RandomNum(0.0F, m_Width), m_Corner.m_Y + RandomNum(0.0F, m_Height)); }
 #pragma endregion
 
 #pragma region Detection
@@ -268,19 +250,9 @@ namespace RTE {
 		friend bool operator!=(const Box &lhs, const Box &rhs) { return lhs.m_Corner != rhs.m_Corner || lhs.m_Width != rhs.m_Width || lhs.m_Height != rhs.m_Height; }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Box.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Box.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
-	protected:
+	private:
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
-
-	private:
 
 		/// <summary>
 		/// Clears all the member variables of this Box, effectively resetting the members of this abstraction level only.

@@ -6,6 +6,7 @@
 #include "Icon.h"
 
 namespace RTE {
+
 	class GUIFont;
 	class MovableObject;
 	class Actor;
@@ -13,6 +14,7 @@ namespace RTE {
 	class PieMenuGUI {
 
 	public:
+
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a PieMenuGUI object in system memory. Create() should be called before using the object.
@@ -25,14 +27,14 @@ namespace RTE {
 		/// <param name="controller">A pointer to a Controller which will control this Menu. Ownership is NOT TRANSFERRED!</param>
 		/// <param name="focusActor">The actor that this menu is currently associated with. Ownership is NOT TRANSFERRED! This is optional.</param>
 		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(Controller *controller, Actor *focusActor = 0);
+		int Create(Controller *controller, Actor *focusActor = nullptr);
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up a PieMenuGUI object before deletion from system memory.
 		/// </summary>
-		virtual ~PieMenuGUI() { Destroy(); }
+		~PieMenuGUI() { Destroy(); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the PieMenuGUI object.
@@ -42,7 +44,7 @@ namespace RTE {
 		/// <summary>
 		/// Resets the entire PieMenuGUI, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
+		void Reset() { Clear(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -80,7 +82,7 @@ namespace RTE {
 		/// Gets the absolute center position of this.
 		/// </summary>
 		/// <returns>A Vector describing the current absolute position in pixels.</returns>
-		const Vector &GetPos() const { return m_CenterPos; }
+		const Vector & GetPos() const { return m_CenterPos; }
 
 		/// <summary>
 		/// Sets the absolute center position of this in the scene.
@@ -142,13 +144,13 @@ namespace RTE {
 		/// </summary>
 		/// <param name="angle">An angle on the circle, in radins, CCW from straight out right.</param>
 		/// <returns>The Slice which exists on that angle, if any. 0 if not. Ownership is NOT transferred!</returns>
-		const PieSlice *GetSliceOnAngle(float angle) const;
+		const PieSlice * GetSliceOnAngle(float angle) const;
 
 		/// <summary>
 		/// Reports whether and which Slice has been activated by the player. This may happen even though the player isn't done with the pie menu.
 		/// </summary>
 		/// <returns>The Slice which has been picked by the player, if any. 0 if not. Ownership is NOT transferred!</returns>
-		const PieSlice *SliceActivated() const { return m_ActivatedSlice; }
+		const PieSlice * SliceActivated() const { return m_ActivatedSlice; }
 #pragma endregion
 
 #pragma region Lua Slice Handling
@@ -381,8 +383,8 @@ namespace RTE {
 		void Clear();
 
 		// Forbidding copying
-		PieMenuGUI(const PieMenuGUI &reference) {}
-		PieMenuGUI &operator=(const PieMenuGUI &rhs) { return *this; }
+		PieMenuGUI(const PieMenuGUI &reference) = delete;
+		PieMenuGUI & operator=(const PieMenuGUI & rhs) = delete;
 	};
 }
 #endif

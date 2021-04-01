@@ -23,7 +23,6 @@
 #include "ACRocket.h"
 #include "HeldDevice.h"
 #include "Scene.h"
-#include "System.h"
 #include "DataModule.h"
 
 #include "GUI/GUI.h"
@@ -47,7 +46,6 @@
 #include "BunkerAssemblyScheme.h"
 
 extern bool g_ResetActivity;
-extern bool g_InActivity;
 
 namespace RTE {
 
@@ -107,7 +105,7 @@ int AssemblyEditor::Create(const AssemblyEditor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int AssemblyEditor::ReadProperty(std::string propName, Reader &reader)
+int AssemblyEditor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "CPUTeam")
@@ -118,7 +116,6 @@ int AssemblyEditor::ReadProperty(std::string propName, Reader &reader)
         reader >> m_DeliveryDelay;
     else
 */
-        // See if the base class(es) can find a match instead
         return EditorActivity::ReadProperty(propName, reader);
 
     return 0;
@@ -131,18 +128,9 @@ int AssemblyEditor::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this AssemblyEditor with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int AssemblyEditor::Save(Writer &writer) const
-{
-    EditorActivity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int AssemblyEditor::Save(Writer &writer) const {
+	EditorActivity::Save(writer);
+	return 0;
 }
 
 
@@ -246,7 +234,7 @@ int AssemblyEditor::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void AssemblyEditor::Pause(bool pause)
+void AssemblyEditor::SetPaused(bool pause)
 {
     // Override the pause
     m_Paused = false;
@@ -264,7 +252,7 @@ void AssemblyEditor::End()
 
     
 
-    m_ActivityState = OVER;
+    m_ActivityState = ActivityState::Over;
 }
 
 
@@ -482,7 +470,6 @@ void AssemblyEditor::Update()
                 if (g_SceneMan.GetScene()->GetPresetName() == "Editor Scene")
                 {
                     g_ActivityMan.PauseActivity();
-                    g_InActivity = false;
                 }
                 // Just do normal cancel of the dialog and go back to editing
                 else
@@ -673,7 +660,7 @@ bool AssemblyEditor::SaveAssembly(string saveAsName, bool forceOverwrite)
 		else
 		{
 			sceneFilePath = g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/BunkerAssemblies/" + saveAsName + ".ini";
-			g_System.MakeDirectory((g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/BunkerAssemblies").c_str());
+			System::MakeDirectory((g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/BunkerAssemblies").c_str());
 		}
 
 		if (g_PresetMan.AddEntityPreset(pBA, m_ModuleSpaceID, forceOverwrite, sceneFilePath))

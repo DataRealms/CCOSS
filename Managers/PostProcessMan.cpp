@@ -6,35 +6,34 @@
 
 namespace RTE {
 
-	const std::string PostProcessMan::c_ClassName = "PostProcessMan";
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PostProcessMan::Clear() {
 		m_PostScreenEffects.clear();
 		m_PostSceneEffects.clear();
-		m_YellowGlow = 0;
+		m_YellowGlow = nullptr;
 		m_YellowGlowHash = 0;
-		m_RedGlow = 0;
+		m_RedGlow = nullptr;
 		m_RedGlowHash = 0;
-		m_BlueGlow = 0;
+		m_BlueGlow = nullptr;
 		m_BlueGlowHash = 0;
-		for (short i = 0; i < c_MaxScreenCount; ++i) {
-			m_ScreenRelativeEffects->clear();
+		m_TempEffectBitmaps.clear();
+		for (int i = 0; i < c_MaxScreenCount; ++i) {
+			m_ScreenRelativeEffects.at(i).clear();
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int PostProcessMan::Create() {
+	int PostProcessMan::Initialize() {
 		// TODO: Make more robust and load more glows!
-		ContentFile glowFile("Base.rte/Effects/Glows/YellowTiny.bmp");
+		ContentFile glowFile("Base.rte/Effects/Glows/YellowTiny.png");
 		m_YellowGlow = glowFile.GetAsBitmap();
 		m_YellowGlowHash = glowFile.GetHash();
-		glowFile.SetDataPath("Base.rte/Effects/Glows/RedTiny.bmp");
+		glowFile.SetDataPath("Base.rte/Effects/Glows/RedTiny.png");
 		m_RedGlow = glowFile.GetAsBitmap();
 		m_RedGlowHash = glowFile.GetHash();
-		glowFile.SetDataPath("Base.rte/Effects/Glows/BlueTiny.bmp");
+		glowFile.SetDataPath("Base.rte/Effects/Glows/BlueTiny.png");
 		m_BlueGlow = glowFile.GetAsBitmap();
 		m_BlueGlowHash = glowFile.GetHash();
 
@@ -54,18 +53,17 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PostProcessMan::Destroy() {
+		for (std::pair<int, BITMAP *> tempBitmapEntry : m_TempEffectBitmaps) {
+			destroy_bitmap(tempBitmapEntry.second);
+		}
 		ClearScreenPostEffects();
 		ClearScenePostEffects();
 		Clear();
-		for (std::pair<unsigned short, BITMAP *> tempBitmapEntry : m_TempEffectBitmaps) {
-			destroy_bitmap(tempBitmapEntry.second);
-		}
-		m_TempEffectBitmaps.clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PostProcessMan::AdjustEffectsPosToPlayerScreen(short playerScreen, BITMAP *targetBitmap, Vector targetBitmapOffset, std::list<PostEffect> &screenRelativeEffectsList, std::list<Box> &screenRelativeGlowBoxesList) {
+	void PostProcessMan::AdjustEffectsPosToPlayerScreen(int playerScreen, BITMAP *targetBitmap, const Vector &targetBitmapOffset, std::list<PostEffect> &screenRelativeEffectsList, std::list<Box> &screenRelativeGlowBoxesList) const {
 		int screenOcclusionOffsetX = g_SceneMan.GetScreenOcclusion(playerScreen).GetFloorIntX();
 		int screenOcclusionOffsetY = g_SceneMan.GetScreenOcclusion(playerScreen).GetFloorIntY();
 		int occludedOffsetX = targetBitmap->w + screenOcclusionOffsetX;
@@ -77,7 +75,7 @@ namespace RTE {
 		// Adjust for the player screen's position on the final buffer
 		for (const PostEffect &postEffect : screenRelativeEffectsList) {
 			// Make sure we won't be adding any effects to a part of the screen that is occluded by menus and such
-			if (postEffect.m_Pos.m_X > screenOcclusionOffsetX && postEffect.m_Pos.m_Y > screenOcclusionOffsetY && postEffect.m_Pos.m_X < occludedOffsetX && postEffect.m_Pos.m_Y < occludedOffsetY) {
+			if (postEffect.m_Pos.GetFloorIntX() > screenOcclusionOffsetX && postEffect.m_Pos.GetFloorIntY() > screenOcclusionOffsetY && postEffect.m_Pos.GetFloorIntX() < occludedOffsetX && postEffect.m_Pos.GetFloorIntY() < occludedOffsetY) {
 				g_PostProcessMan.GetPostScreenEffectsList()->push_back(PostEffect(postEffect.m_Pos + targetBitmapOffset, postEffect.m_Bitmap, postEffect.m_BitmapHash, postEffect.m_Strength, postEffect.m_Angle));
 			}
 		}
@@ -91,7 +89,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PostProcessMan::RegisterPostEffect(const Vector &effectPos, BITMAP *effect, size_t hash, unsigned char strength, float angle) {
+	void PostProcessMan::RegisterPostEffect(const Vector &effectPos, BITMAP *effect, size_t hash, int strength, float angle) {
 		// These effects get applied when there's a drawn frame that followed one or more sim updates.
 		// They are not only registered on drawn sim updates; flashes and stuff could be missed otherwise if they occur on undrawn sim updates.
 		if (effect && g_TimerMan.SimUpdatesSinceDrawn() >= 0) { m_PostSceneEffects.push_back(PostEffect(effectPos, effect, hash, strength, angle)); }
@@ -99,14 +97,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PostProcessMan::GetPostScreenEffectsWrapped(const Vector &boxPos, int boxWidth, int boxHeight, std::list<PostEffect> &effectsList, short team) {
+	bool PostProcessMan::GetPostScreenEffectsWrapped(const Vector &boxPos, int boxWidth, int boxHeight, std::list<PostEffect> &effectsList, int team) {
 		bool found = false;
 
 		// Do the first unwrapped rect
 		found = GetPostScreenEffects(boxPos, boxWidth, boxHeight, effectsList, team);
 
-		int left = boxPos.m_X;
-		int top = boxPos.m_Y;
+		int left = boxPos.GetFloorIntX();
+		int top = boxPos.GetFloorIntY();
 		int right = left + boxWidth;
 		int bottom = top + boxHeight;
 
@@ -127,8 +125,8 @@ namespace RTE {
 
 	BITMAP *PostProcessMan::GetTempEffectBitmap(BITMAP *bitmap) const {
 		// Get the largest dimension of the bitmap and convert it to a multiple of 16, i.e. 16, 32, etc
-		unsigned short bitmapSizeNeeded = std::ceil(static_cast<float>(std::max(bitmap->w, bitmap->h)) / 16) * 16;
-		std::unordered_map<unsigned short, BITMAP *>::const_iterator correspondingBitmapSizeEntry = m_TempEffectBitmaps.find(bitmapSizeNeeded);
+		int bitmapSizeNeeded = static_cast<int>(std::ceil(static_cast<float>(std::max(bitmap->w, bitmap->h)) / 16.0F)) * 16;
+		std::unordered_map<int, BITMAP *>::const_iterator correspondingBitmapSizeEntry = m_TempEffectBitmaps.find(bitmapSizeNeeded);
 
 		// If we didn't find a match then the bitmap size is greater than 512 but that's the biggest we've got, so return it
 		if (correspondingBitmapSizeEntry == m_TempEffectBitmaps.end()) { correspondingBitmapSizeEntry = m_TempEffectBitmaps.find(512); }
@@ -138,7 +136,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PostProcessMan::RegisterGlowDotEffect(const Vector &effectPos, DotGlowColor color, unsigned char strength) {
+	void PostProcessMan::RegisterGlowDotEffect(const Vector &effectPos, DotGlowColor color, int strength) {
 		// These effects only apply only once per drawn sim update, and only on the first frame drawn after one or more sim updates
 		if (color != NoDot && g_TimerMan.DrawnSimUpdate() && g_TimerMan.SimUpdatesSinceDrawn() >= 0) {
 			RegisterPostEffect(effectPos, GetDotGlowEffect(color), GetDotGlowEffectHash(color), strength);
@@ -147,7 +145,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PostProcessMan::GetGlowAreasWrapped(const Vector &boxPos, int boxWidth, int boxHeight, std::list<Box> &areaList) {
+	bool PostProcessMan::GetGlowAreasWrapped(const Vector &boxPos, int boxWidth, int boxHeight, std::list<Box> &areaList) const {
 		bool foundAny = false;
 		Vector intRectPosRelativeToBox;
 
@@ -158,16 +156,16 @@ namespace RTE {
 			g_SceneMan.WrapRect(glowArea, wrappedGlowRects);
 		}
 		std::list<IntRect> wrappedTestRects;
-		g_SceneMan.WrapRect(IntRect(boxPos.m_X, boxPos.m_Y, boxPos.m_X + boxWidth, boxPos.m_Y + boxHeight), wrappedTestRects);
+		g_SceneMan.WrapRect(IntRect(boxPos.GetFloorIntX(), boxPos.GetFloorIntY(), boxPos.GetFloorIntX() + boxWidth, boxPos.GetFloorIntY() + boxHeight), wrappedTestRects);
 
 		// Check for intersections. If any are found, cut down the intersecting IntRect to the bounds of the IntRect we're testing against, then make and store a Box out of it
 		for (IntRect &wrappedTestRect : wrappedTestRects) {
-			for (IntRect &wrappedGlowRect : wrappedGlowRects) {
+			for (const IntRect &wrappedGlowRect : wrappedGlowRects) {
 				if (wrappedTestRect.Intersects(wrappedGlowRect)) {
 					IntRect cutRect(wrappedGlowRect);
 					cutRect.IntersectionCut(wrappedTestRect);
-					intRectPosRelativeToBox = Vector(cutRect.m_Left - boxPos.m_X, cutRect.m_Top - boxPos.m_Y);
-					areaList.push_back(Box(intRectPosRelativeToBox, cutRect.m_Right - cutRect.m_Left, cutRect.m_Bottom - cutRect.m_Top));
+					intRectPosRelativeToBox = Vector(static_cast<float>(cutRect.m_Left) - boxPos.m_X, static_cast<float>(cutRect.m_Top) - boxPos.m_Y);
+					areaList.push_back(Box(intRectPosRelativeToBox, static_cast<float>(cutRect.m_Right - cutRect.m_Left), static_cast<float>(cutRect.m_Bottom - cutRect.m_Top)));
 					foundAny = true;
 				}
 			}
@@ -177,37 +175,37 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PostProcessMan::GetNetworkPostEffectsList(short whichScreen, std::list<PostEffect> & outputList) {
-		ScreenRelativeEffectsMutex[whichScreen].lock();
+	void PostProcessMan::GetNetworkPostEffectsList(int whichScreen, std::list<PostEffect> & outputList) {
+		ScreenRelativeEffectsMutex.at(whichScreen).lock();
 		outputList.clear();
-		for (const PostEffect &postEffect : m_ScreenRelativeEffects[whichScreen]) {
+		for (const PostEffect &postEffect : m_ScreenRelativeEffects.at(whichScreen)) {
 			outputList.push_back(PostEffect(postEffect.m_Pos, postEffect.m_Bitmap, postEffect.m_BitmapHash, postEffect.m_Strength, postEffect.m_Angle));
 		}
-		ScreenRelativeEffectsMutex[whichScreen].unlock();
+		ScreenRelativeEffectsMutex.at(whichScreen).unlock();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PostProcessMan::SetNetworkPostEffectsList(short whichScreen, std::list<PostEffect> & inputList) {
-		ScreenRelativeEffectsMutex[whichScreen].lock();
-		m_ScreenRelativeEffects[whichScreen].clear();
+	void PostProcessMan::SetNetworkPostEffectsList(int whichScreen, std::list<PostEffect> & inputList) {
+		ScreenRelativeEffectsMutex.at(whichScreen).lock();
+		m_ScreenRelativeEffects.at(whichScreen).clear();
 		for (const PostEffect &postEffect : inputList) {
-			m_ScreenRelativeEffects[whichScreen].push_back(PostEffect(postEffect.m_Pos, postEffect.m_Bitmap, postEffect.m_BitmapHash, postEffect.m_Strength, postEffect.m_Angle));
+			m_ScreenRelativeEffects.at(whichScreen).push_back(PostEffect(postEffect.m_Pos, postEffect.m_Bitmap, postEffect.m_BitmapHash, postEffect.m_Strength, postEffect.m_Angle));
 		}
-		ScreenRelativeEffectsMutex[whichScreen].unlock();
+		ScreenRelativeEffectsMutex.at(whichScreen).unlock();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PostProcessMan::GetPostScreenEffects(Vector boxPos, int boxWidth, int boxHeight, std::list<PostEffect> &effectsList, short team) {
+	bool PostProcessMan::GetPostScreenEffects(Vector boxPos, int boxWidth, int boxHeight, std::list<PostEffect> &effectsList, int team) {
 		bool found = false;
 		bool unseen = false;
 		Vector postEffectPosRelativeToBox;
 
 		for (PostEffect &scenePostEffect : m_PostSceneEffects) {
-			if (team != Activity::NOTEAM) { unseen = g_SceneMan.IsUnseen(scenePostEffect.m_Pos.m_X, scenePostEffect.m_Pos.m_Y, team); }
+			if (team != Activity::NoTeam) { unseen = g_SceneMan.IsUnseen(scenePostEffect.m_Pos.GetFloorIntX(), scenePostEffect.m_Pos.GetFloorIntY(), team); }
 
-			if (WithinBox(scenePostEffect.m_Pos, boxPos, boxWidth, boxHeight) && !unseen) {
+			if (WithinBox(scenePostEffect.m_Pos, boxPos, static_cast<float>(boxWidth), static_cast<float>(boxHeight)) && !unseen) {
 				found = true;
 				postEffectPosRelativeToBox = scenePostEffect.m_Pos - boxPos;
 				effectsList.push_back(PostEffect(postEffectPosRelativeToBox, scenePostEffect.m_Bitmap, scenePostEffect.m_BitmapHash, scenePostEffect.m_Strength, scenePostEffect.m_Angle));
@@ -218,17 +216,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PostProcessMan::GetPostScreenEffects(int left, int top, int right, int bottom, std::list<PostEffect> &effectsList, short team) {
+	bool PostProcessMan::GetPostScreenEffects(int left, int top, int right, int bottom, std::list<PostEffect> &effectsList, int team) {
 		bool found = false;
 		bool unseen = false;
 		Vector postEffectPosRelativeToBox;
 
 		for (PostEffect &scenePostEffect : m_PostSceneEffects) {
-			if (team != Activity::NOTEAM) { unseen = g_SceneMan.IsUnseen(scenePostEffect.m_Pos.m_X, scenePostEffect.m_Pos.m_Y, team); }
-				
-			if (WithinBox(scenePostEffect.m_Pos, left, top, right, bottom) && !unseen) {
+			if (team != Activity::NoTeam) { unseen = g_SceneMan.IsUnseen(scenePostEffect.m_Pos.GetFloorIntX(), scenePostEffect.m_Pos.GetFloorIntY(), team); }
+
+			if (WithinBox(scenePostEffect.m_Pos, static_cast<float>(left), static_cast<float>(top), static_cast<float>(right), static_cast<float>(bottom)) && !unseen) {
 				found = true;
-				postEffectPosRelativeToBox = Vector(scenePostEffect.m_Pos.m_X - left, scenePostEffect.m_Pos.m_Y - top);
+				postEffectPosRelativeToBox = Vector(scenePostEffect.m_Pos.m_X - static_cast<float>(left), scenePostEffect.m_Pos.m_Y - static_cast<float>(top));
 				effectsList.push_back(PostEffect(postEffectPosRelativeToBox, scenePostEffect.m_Bitmap, scenePostEffect.m_BitmapHash, scenePostEffect.m_Strength, scenePostEffect.m_Angle));
 			}
 		}
@@ -240,7 +238,7 @@ namespace RTE {
 	BITMAP * PostProcessMan::GetDotGlowEffect(DotGlowColor whichColor) const {
 		switch (whichColor) {
 			case NoDot:
-				return 0;
+				return nullptr;
 			case YellowDot:
 				return m_YellowGlow;
 			case RedDot:
@@ -249,7 +247,7 @@ namespace RTE {
 				return m_BlueGlow;
 			default:
 				RTEAbort("Undefined glow dot color value passed in. See DotGlowColor enumeration for defined values.");
-				return 0;
+				return nullptr;
 		}
 	}
 
@@ -300,21 +298,19 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PostProcessMan::DrawDotGlowEffects() {
-		int x = 0;
-		int y = 0;
 		int startX = 0;
 		int startY = 0;
 		int endX = 0;
 		int endY = 0;
-		unsigned short testpixel = 0;
+		int testpixel = 0;
 
 		// Randomly sample the entire backbuffer, looking for pixels to put a glow on.
 		// NOTE THIS IS SLOW, especially on higher resolutions!
 		for (const Box &glowBox : m_PostScreenGlowBoxes) {
-			startX = glowBox.m_Corner.m_X;
-			startY = glowBox.m_Corner.m_Y;
-			endX = startX + glowBox.m_Width;
-			endY = startY + glowBox.m_Height;
+			startX = glowBox.m_Corner.GetFloorIntX();
+			startY = glowBox.m_Corner.GetFloorIntY();
+			endX = startX + static_cast<int>(glowBox.m_Width);
+			endY = startY + static_cast<int>(glowBox.m_Height);
 
 			// Sanity check a little at least
 			if (startX < 0 || startX >= g_FrameMan.GetBackBuffer8()->w || startY < 0 || startY >= g_FrameMan.GetBackBuffer8()->h ||
@@ -326,13 +322,13 @@ namespace RTE {
 			// Draw a rectangle around the glow box so we see it's position and size
 			rect(g_FrameMan.GetBackBuffer32(), startX, startY, endX, endY, g_RedColor);
 #endif
-			
-			for (y = startY; y < endY; ++y) {
-				for (x = startX; x < endX; ++x) {
+
+			for (int y = startY; y < endY; ++y) {
+				for (int x = startX; x < endX; ++x) {
 					testpixel = _getpixel(g_FrameMan.GetBackBuffer8(), x, y);
 
 					// YELLOW
-					if ((testpixel == g_YellowGlowColor && PosRand() < 0.9) || testpixel == 98 || (testpixel == 120 && PosRand() < 0.7)) {
+					if ((testpixel == g_YellowGlowColor && RandomNum() < 0.9F) || testpixel == 98 || (testpixel == 120 && RandomNum() < 0.7F)) {
 						draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_YellowGlow, x - 2, y - 2);
 					}
 					// TODO: Enable and add more colors once we actually have something that needs these.
@@ -353,11 +349,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PostProcessMan::DrawPostScreenEffects() {
-		BITMAP *effectBitmap = 0;
+	void PostProcessMan::DrawPostScreenEffects() const {
+		BITMAP *effectBitmap = nullptr;
 		int effectPosX = 0;
 		int effectPosY = 0;
-		unsigned char effectStrength = 0;
+		int effectStrength = 0;
 
 		for (const PostEffect &postEffect : m_PostScreenEffects) {
 			if (postEffect.m_Bitmap) {
@@ -374,9 +370,7 @@ namespace RTE {
 					BITMAP *targetBitmap = GetTempEffectBitmap(effectBitmap);
 					clear_to_color(targetBitmap, 0);
 
-					Matrix newAngle;
-					newAngle.SetRadAngle(postEffect.m_Angle);
-
+					Matrix newAngle(postEffect.m_Angle);
 					rotate_sprite(targetBitmap, effectBitmap, 0, 0, ftofix(newAngle.GetAllegroAngle()));
 					draw_trans_sprite(g_FrameMan.GetBackBuffer32(), targetBitmap, effectPosX, effectPosY);
 				}

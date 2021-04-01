@@ -9,10 +9,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-// Without this nested includes somewhere deep inside Allegro will summon winsock.h and it will conflict with winsock2.h from RakNet
-// and we can't move "Network.h" here because for whatever reasons everything will collapse
-#define WIN32_LEAN_AND_MEAN
-
 #include "MultiplayerGame.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
@@ -49,7 +45,6 @@
 
 
 extern bool g_ResetActivity;
-extern bool g_InActivity;
 
 namespace RTE {
 
@@ -122,9 +117,8 @@ namespace RTE {
 	//                  is called. If the property isn't recognized by any of the base classes,
 	//                  false is returned, and the reader's position is untouched.
 
-	int MultiplayerGame::ReadProperty(std::string propName, Reader &reader)
+	int MultiplayerGame::ReadProperty(const std::string_view &propName, Reader &reader)
 	{
-		// See if the base class(es) can find a match instead
 		return Activity::ReadProperty(propName, reader);
 	}
 
@@ -223,11 +217,11 @@ namespace RTE {
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Pauses and unpauses the game.
 
-	void MultiplayerGame::Pause(bool pause)
+	void MultiplayerGame::SetPaused(bool pause)
 	{
 		// Override the pause
 		//m_Paused = false;
-		Activity::Pause(pause);
+		Activity::SetPaused(pause);
 
 		if (pause)
 		{
@@ -261,7 +255,7 @@ namespace RTE {
 	{
 		Activity::End();
 
-		m_ActivityState = OVER;
+		m_ActivityState = ActivityState::Over;
 		g_FrameMan.SetDrawNetworkBackBuffer(false);
 	}
 
@@ -334,7 +328,7 @@ namespace RTE {
 						}
 
 						if (saveSettings)
-							g_SettingsMan.Save(Writer("Base.rte/Settings.ini"));
+							g_SettingsMan.UpdateSettingsFile();
 
 						m_pGUIController->EnableMouse(false);
 						m_Mode = CONNECTION;
@@ -398,7 +392,7 @@ namespace RTE {
 						}
 
 						if (saveSettings)
-							g_SettingsMan.Save(Writer("Base.rte/Settings.ini"));
+							g_SettingsMan.UpdateSettingsFile();
 
 						m_pGUIController->EnableMouse(false);
 						m_Mode = CONNECTION;
@@ -415,7 +409,7 @@ namespace RTE {
 
 		if (m_Mode == CONNECTION)
 		{
-			if (g_NetworkClient.IsConnectedAndRegistred())
+			if (g_NetworkClient.IsConnectedAndRegistered())
 				m_Mode = GAMEPLAY;
 
 			if (m_ConnectionWaitTimer.IsPastRealMS(8000))
@@ -433,7 +427,7 @@ namespace RTE {
 			g_FrameMan.SetDrawNetworkBackBuffer(true);
 			m_pGUIController->EnableMouse(false);
 
-			if (!g_NetworkClient.IsConnectedAndRegistred())
+			if (!g_NetworkClient.IsConnectedAndRegistered())
 			{
 				//g_ActivityMan.EndActivity();
 				//g_ResetActivity = true;
@@ -446,11 +440,6 @@ namespace RTE {
 
 		/*if (g_UInputMan.ElementHeld(0, UInputMan::INPUT_FIRE))
 			g_FrameMan.SetScreenText("FIRE", 0, 0, -1, false);
-		else
-			g_FrameMan.SetScreenText("-", 0, 0, -1, false);*/
-
-		/*if (g_InActivity)
-			g_FrameMan.SetScreenText("IN ACITVITY", 0, 0, -1, false);
 		else
 			g_FrameMan.SetScreenText("-", 0, 0, -1, false);*/
 

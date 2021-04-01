@@ -16,6 +16,7 @@
 
 #include "MOSParticle.h"
 #include "Emission.h"
+#include "SoundContainer.h"
 
 namespace RTE
 {
@@ -24,7 +25,7 @@ namespace RTE
 //////////////////////////////////////////////////////////////////////////////////////////
 // Class:           PEmitter
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     
+// Description:     A particle MO that creates and emits particle MOs.
 // Parent(s):       MOSParticle.
 // Class history:   02/29/2004 PEmitter created.
 
@@ -38,9 +39,12 @@ class PEmitter :
 
 public:
 
+	friend class LuaMan;
 
 	// Concrete allocation and cloning definitions
 	EntityAllocation(PEmitter)
+	SerializableOverrideMethods
+	ClassInfoGetters
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -60,7 +64,7 @@ public:
 	//                  from system memory.
 	// Arguments:       None.
 
-	virtual ~PEmitter() { Destroy(true); }
+	~PEmitter() override { Destroy(true); }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -71,7 +75,7 @@ public:
 	// Return value:    An error return value signaling sucess or any particular failure.
 	//                  Anything below 0 is an error signal.
 
-	virtual int Create();
+	int Create() override;
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -86,22 +90,6 @@ public:
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  ReadProperty
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     Reads a property value from a Reader stream. If the name isn't
-	//                  recognized by this class, then ReadProperty of the parent class
-	//                  is called. If the property isn't recognized by any of the base classes,
-	//                  false is returned, and the Reader's position is untouched.
-	// Arguments:       The name of the property to be read.
-	//                  A Reader lined up to the value of the property to be read.
-	// Return value:    An error return value signaling whether the property was successfully
-	//                  read or not. 0 means it was read successfully, and any nonzero indicates
-	//                  that a property of that name could not be found in this or base classes.
-
-	virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////
 	// Virtual method:  Reset
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Resets the entire PEmitter, including its inherited members, to their
@@ -109,19 +97,7 @@ public:
 	// Arguments:       None.
 	// Return value:    None.
 
-	virtual void Reset() { Clear(); MOSParticle::Reset(); }
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  Save
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     Saves the complete state of this PEmitter to an output stream for
-	//                  later recreation with Create(Reader &reader);
-	// Arguments:       A Writer that the PEmitter will save itself with.
-	// Return value:    An error return value signaling sucess or any particular failure.
-	//                  Anything below 0 is an error signal.
-
-	virtual int Save(Writer &writer) const;
+	void Reset() override { Clear(); MOSParticle::Reset(); }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -132,27 +108,7 @@ public:
 	//                  to destroy all inherited members also.
 	// Return value:    None.
 
-	virtual void Destroy(bool notInherited = false);
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  GetClass
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     Gets the ClassInfo instance of this Entity.
-	// Arguments:       None.
-	// Return value:    A reference to the ClassInfo of this' class.
-
-	virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:   GetClassName
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     Gets the class name of this Entity.
-	// Arguments:       None.
-	// Return value:    A string with the friendly-formatted type name of this object.
-
-	virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+	void Destroy(bool notInherited = false) override;
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -373,6 +329,13 @@ public:
 	void SetFlashScale(float flashScale = 1.0f) { m_FlashScale = flashScale; }
 
 
+	/// <summary>
+	/// Gets the display scale factor of the flash effect. This is purely visual.
+	/// </summary>
+	/// <returns>The scale factor of the flash draw.</returns>
+	float GetFlashScale() const { return m_FlashScale; }
+
+
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Method:          SetEmitAngle
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -482,21 +445,8 @@ public:
 	// Arguments:       None.
 	// Return value:    None.
 
-	virtual void ResetAllTimers() { m_BurstTimer.Reset(); m_LastEmitTmr.Reset(); }
+	void ResetAllTimers() override { m_BurstTimer.Reset(); m_LastEmitTmr.Reset(); }
 
-	/*
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  GibThis
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-	//                  pieces in its place.
-	// Arguments:       The impulse (kg * m/s) of the impact causing the gibbing to happen.
-	//					The internal blast impulse which will push the gibs away from the center.
-	//                  A pointer to an MO which the gibs shuold not be colliding with!
-	// Return value:    None.
-
-	virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
-	*/
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Virtual method:  Update
@@ -505,7 +455,7 @@ public:
 	// Arguments:       None.
 	// Return value:    None.
 
-	virtual void Update();
+	void Update() override;
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -520,10 +470,19 @@ public:
 	//                  indicator arrows or hovering HUD text and so on.
 	// Return value:    None.
 
-	virtual void Draw(BITMAP *pTargetBitmap,
-		const Vector &targetPos = Vector(),
-		DrawMode mode = g_DrawColor,
-		bool onlyPhysical = false) const;
+	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
+
+	/// <summary>
+	/// Gets the number of emissions left before emitter is disabled.
+	/// </summary>
+	/// <returns>The number of emissions left before emitter is disabled.</returns>
+	long GetEmitCountLimit() const { return m_EmitCountLimit; }
+
+	/// <summary>
+	/// Sets the number of emissions left before emitter is disabled.
+	/// </summary>
+	/// <param name="newValue">New number of emissions left.</param>
+	void SetEmitCountLimit(long newValue) { m_EmitCountLimit = newValue; }
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Protected member variable and method declarations
@@ -603,8 +562,8 @@ private:
 
 
 	// Disallow the use of some implicit methods.
-	PEmitter(const PEmitter &reference);
-	PEmitter & operator=(const PEmitter &rhs);
+	PEmitter(const PEmitter &reference) = delete;
+	PEmitter & operator=(const PEmitter &rhs) = delete;
 
 };
 

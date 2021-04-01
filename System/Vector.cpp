@@ -1,6 +1,5 @@
 #include "Vector.h"
 
-#pragma intrinsic (sin, cos)
 #pragma float_control(precise, on)
 
 namespace RTE {
@@ -9,13 +8,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Vector::ReadProperty(std::string propName, Reader &reader) {
+	int Vector::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "X") {
 			reader >> m_X;
 		} else if (propName == "Y") {
 			reader >> m_Y;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;
@@ -26,26 +24,26 @@ namespace RTE {
 	int Vector::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		writer.NewProperty("X");
-		writer << m_X;
-		writer.NewProperty("Y");
-		writer << m_Y;
+		writer.NewPropertyWithValue("X", m_X);
+		writer.NewPropertyWithValue("Y", m_Y);
 
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector &Vector::SetMagnitude(float newMag) {
-		Vector temp(*this);
-		SetXY(newMag, 0);
-		AbsRotateTo(temp);
+	Vector & Vector::SetMagnitude(const float newMag) {
+		if (IsZero()) {
+			SetXY(newMag, 0.0F);
+		} else {
+			*this *= (newMag / GetMagnitude());
+		}
 		return *this;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector &Vector::CapMagnitude(float capMag) {
+	Vector & Vector::CapMagnitude(const float capMag) {
 		if (capMag == 0) { Reset(); }
 		if (GetMagnitude() > capMag) { SetMagnitude(capMag); }
 		return *this;
@@ -53,87 +51,34 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	Vector & Vector::ClampMagnitude(float upperLimit, float lowerLimit) {
+		if (upperLimit < lowerLimit) { std::swap(upperLimit, lowerLimit); }
+		if (upperLimit == 0 && lowerLimit == 0) {
+			Reset();
+		} else if (GetMagnitude() > upperLimit) {
+			SetMagnitude(upperLimit);
+		} else if (GetMagnitude() < lowerLimit) {
+			SetMagnitude(lowerLimit);
+		}
+		return *this;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	float Vector::GetAbsRadAngle() const {
-		if (m_X == 0) {
-			return (m_Y > 0) ? -c_HalfPI : ((m_Y < 0) ? c_HalfPI : 0);
-		}
-		if (m_Y == 0) {
-			return (m_X > 0) ? 0 : ((m_X < 0) ? c_PI : 0);
-		}
-		// TODO: Confirm that this is correct!")
-		float rawAngle = -std::atan(m_Y / m_X);
-		if (m_X < 0) { rawAngle += c_PI; }
-
-		return rawAngle;
+		const float radAngle = -std::atan2(m_Y, m_X);
+		return (radAngle < -c_HalfPI) ? (radAngle + c_TwoPI) : radAngle;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float Vector::GetAbsDegAngle() const {
-		if (m_X == 0) {
-			return (m_Y > 0) ? -90 : ((m_Y < 0) ? 90 : 0);
-		}
-		if (m_Y == 0) {
-			return (m_X > 0) ? 0 : ((m_X < 0) ? 180 : 0);
-		}
-		float rawAngle = -(std::atan(m_Y / m_X) / c_PI) * 180;
-		if (m_X < 0) { rawAngle += 180; }
+	Vector Vector::GetRadRotated(const float angle) {
+		Vector returnVector = *this;
+		const float adjustedAngle = -angle;
+		returnVector.m_X = m_X * std::cos(adjustedAngle) - m_Y * std::sin(adjustedAngle);
+		returnVector.m_Y = m_X * std::sin(adjustedAngle) + m_Y * std::cos(adjustedAngle);
 
-		return rawAngle;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	Vector & Vector::RadRotate(float angle) {
-		angle = -angle;
-		float tempX = m_X * std::cos(angle) - m_Y * std::sin(angle);
-		float tempY = m_X * std::sin(angle) + m_Y * std::cos(angle);
-		m_X = tempX;
-		m_Y = tempY;
-
-		return *this;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	Vector & Vector::DegRotate(float angle) {
-		angle = -angle;
-
-		// Convert to radians.
-		angle /= 180;
-		angle *= c_PI;
-
-		float tempX = m_X * std::cos(angle) - m_Y * std::sin(angle);
-		float tempY = m_X * std::sin(angle) + m_Y * std::cos(angle);
-		m_X = tempX;
-		m_Y = tempY;
-
-		return *this;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	Vector &Vector::AbsRotateTo(const Vector &refVector) {
-		float rawAngle;
-		if (refVector.m_X == 0) {
-			rawAngle = (refVector.m_Y > 0) ? -c_HalfPI : ((refVector.m_Y < 0) ? c_HalfPI : 0);
-		} else if (refVector.m_Y == 0) {
-			rawAngle = (refVector.m_X > 0) ? 0 : ((refVector.m_X < 0) ? c_PI : 0);
-		} else {
-			rawAngle = -std::atan(refVector.m_Y / refVector.m_X);
-			if (refVector.m_X < 0) { rawAngle += c_PI; }
-		}
-		rawAngle = -rawAngle;
-
-		m_X = GetMagnitude();
-		m_Y = 0.0;
-
-		float tempX = m_X * std::cos(rawAngle) - m_Y * std::sin(rawAngle);
-		float tempY = m_X * std::sin(rawAngle) + m_Y * std::cos(rawAngle);
-		m_X = tempX;
-		m_Y = tempY;
-
-		return *this;
+		return returnVector;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -148,13 +93,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector &Vector::operator=(const std::deque<Vector> &rhs) {
-		Clear();
+	Vector & Vector::operator=(const std::deque<Vector> &rhs) {
+		Reset();
 		if (!rhs.empty()) {
 			for (const Vector &vector : rhs) {
 				*this += vector;
 			}
-			*this /= rhs.size();
+			*this /= static_cast<float>(rhs.size());
 		}
 		return *this;
 	}

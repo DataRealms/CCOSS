@@ -14,7 +14,11 @@
 #include "GUI.h"
 #include "GUITextPanel.h"
 
+#ifdef _WIN32
 #include "WinUtil.h"
+#elif defined(__unix__)
+#include "LinuxUtil.h"
+#endif
 
 using namespace RTE;
 
@@ -188,186 +192,170 @@ void GUITextPanel::Draw(GUIScreen *Screen)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Called when a key is pressed (OnDown & repeating).
 
-void GUITextPanel::OnKeyPress(int KeyCode, int Modifier)
-{
-    bool Shift = ((Modifier & MODI_SHIFT) != 0);        // Condition here to stop the compiler
-                                                        // bitching about performance
-    bool ModKey = ((Modifier & MODI_CTRL) != 0);        // Ditto
+void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
+
+	// TODO: Figure out what the "performance bitching" is.
+	// Condition here to stop the compiler bitching about performance
+	bool Shift = ((Modifier & MODI_SHIFT) != 0); 
+	bool ModKey = ((Modifier & MODI_CTRL) != 0);
+
 	// To convert to allegro's crazy scheme with their keyboard function returning the order of the letter when ctrl is pressed
-    int asciiChar = ModKey ? KeyCode + 96 : KeyCode;
+	int asciiChar = ModKey ? KeyCode + 96 : KeyCode;
 
-    if (m_Locked)
-        return;
+	if (m_Locked) {
+		return;
+	}
 
-    // Backspace
-    if (KeyCode == GUIInput::Key_Backspace) {
-        if (m_GotSelection) {
-            RemoveSelectionText();
-        } else {
-            if (m_CursorIndex > 0) {
-                // Decrement the cursor
-                m_CursorIndex--;            
-
-                // Delete the character before the cursor
-                m_Text.erase(m_CursorIndex, 1);
-            }
-        }
-
-        UpdateText();
-
-        SendSignal(Changed, 0);
-
-        return;
-    }
-
-    // Delete
-    if (KeyCode == GUIInput::Key_Delete) {
-        if (m_GotSelection) {
-            RemoveSelectionText();
-        } else {
-            if (m_CursorIndex < m_Text.size()) {
-                // Delete the character after the cursor
-                m_Text.erase(m_CursorIndex,1);
-            }
-        }        
-
-        UpdateText();
-
-        SendSignal(Changed, 0);
-
-        return;
-    }
-
-    // Left Arrow
-    if (KeyCode == GUIInput::Key_LeftArrow) {
-        if (m_CursorIndex > 0) {
-            // Do Selection
-            if (Shift)
-                DoSelection(m_CursorIndex, m_CursorIndex-1);
-            else
-                m_GotSelection = false;
-
-            // Decrement the cursor
-            m_CursorIndex--;
-            
-            UpdateText();
-        }
-
-        return;
-    }
-
-    // Right Arrow
-    if (KeyCode == GUIInput::Key_RightArrow) {
-        if (m_CursorIndex < m_Text.size()) {
-
-            // Do Selection
-            if (Shift)
-                DoSelection(m_CursorIndex, m_CursorIndex+1);
-            else
-                m_GotSelection = false;
-            
-            // Increment the cursor
-            m_CursorIndex++;
-            
-            UpdateText();
-        }
-
-        return;
-    }
-
-    // Home
-    if (KeyCode == GUIInput::Key_Home) {
-        // Do Selection
-        if (Shift)
-            DoSelection(m_CursorIndex, 0);
-        else
-            m_GotSelection = false;
-
-        m_CursorIndex = 0;
-
-        UpdateText();
-
-        return;
-    }
-
-    // End
-    if (KeyCode == GUIInput::Key_End) {
-        // Do Selection
-        if (Shift)
-            DoSelection(m_CursorIndex, m_Text.size());
-        else
-            m_GotSelection = false;
-
-        m_CursorIndex = m_Text.size();
-
-        UpdateText();
-
-        return;
-    }
-
-    // ModKey-X (Cut)
-    if (asciiChar == 'x' && ModKey) {
-        if (m_GotSelection) {
-            // Set the clipboard text
-            WinUtil::SetClipboardText(GetSelectionText());
+	// Backspace
+	if (KeyCode == GUIInput::Key_Backspace) {
+		if (m_GotSelection) {
 			RemoveSelectionText();
+		} else {
+			if (m_CursorIndex > 0) {
+                int newCursorIndex = ModKey ? GetStartOfPreviousCharacterGroup(m_Text, m_CursorIndex) : m_CursorIndex - 1;
+                m_Text.erase(newCursorIndex, m_CursorIndex - newCursorIndex);
+                m_CursorIndex = newCursorIndex;
+			}
+		}
+		UpdateText();
+		SendSignal(Changed, 0);
+		return;
+	}
 
-            SendSignal(Changed, 0);
-        }
+	// Delete
+	if (KeyCode == GUIInput::Key_Delete) {
+		if (m_GotSelection) {
+			RemoveSelectionText();
+		} else {
+			if (m_CursorIndex < m_Text.size()) {
+                int nextCursorIndex = ModKey ? GetStartOfNextCharacterGroup(m_Text, m_CursorIndex) : m_CursorIndex + 1;
+                m_Text.erase(m_CursorIndex, nextCursorIndex - m_CursorIndex);
+			}
+		}
+		UpdateText();
+		SendSignal(Changed, 0);
+		return;
+	}
 
-        return;
-    }
+	// Left Arrow
+	if (KeyCode == GUIInput::Key_LeftArrow) {
+		if (m_CursorIndex > 0) {
+            int newCursorIndex = ModKey ? GetStartOfPreviousCharacterGroup(m_Text, m_CursorIndex) : m_CursorIndex - 1;
+			if (Shift) {
+				DoSelection(m_CursorIndex, newCursorIndex);
+			} else {
+				m_GotSelection = false;
+			}
+			m_CursorIndex = newCursorIndex;
+			UpdateText();
+		}
+		return;
+	}
 
-    // ModKey-C (Copy)
-    if (asciiChar == 'c' && ModKey) {
-        if (m_GotSelection) {		
-            // Set the clipboard text
-            WinUtil::SetClipboardText(GetSelectionText());
-        }
+	// Right Arrow
+	if (KeyCode == GUIInput::Key_RightArrow) {
+		if (m_CursorIndex < m_Text.size()) {
+            int newCursorIndex = ModKey ? GetStartOfNextCharacterGroup(m_Text, m_CursorIndex) : m_CursorIndex + 1;
+			if (Shift) {
+				DoSelection(m_CursorIndex, newCursorIndex);
+			} else {
+				m_GotSelection = false;
+			}
+			m_CursorIndex = newCursorIndex;
+			UpdateText();
+		}
+		return;
+	}
 
-        return;
-    }
+	// Home
+	if (KeyCode == GUIInput::Key_Home) {
+		if (Shift) {
+			DoSelection(m_CursorIndex, 0);
+		} else {
+			m_GotSelection = false;
+		}
+		m_CursorIndex = 0;
+		UpdateText();
+		return;
+	}
 
-    // ModKey-V (Paste)
-    if (asciiChar == 'v' && ModKey) {
-        RemoveSelectionText();
+	// End
+	if (KeyCode == GUIInput::Key_End) {
+		if (Shift) {
+			DoSelection(m_CursorIndex, m_Text.size());
+		} else {
+			m_GotSelection = false;
+		}
+		m_CursorIndex = m_Text.size();
+		UpdateText();
+		return;
+	}
 
-        string Text = "";
-        WinUtil::GetClipboardText(&Text);
-		
-        // Insert the text
-        m_Text.insert(m_CursorIndex, Text);
-        m_CursorIndex += Text.size();
+	// ModKey-X (Cut)
+	if (asciiChar == 'x' && ModKey) {
+		if (m_GotSelection) {
+#ifdef _WIN32
+			WinUtil::SetClipboardText(GetSelectionText());
+#elif defined(__unix__)
+			LinuxUtil::SetClipboardText(GetSelectionText());
+#endif
+			RemoveSelectionText();
+			SendSignal(Changed, 0);
+		}
+		return;
+	}
 
-        UpdateText(true, true);
+	// ModKey-C (Copy)
+	if (asciiChar == 'c' && ModKey) {
+		if (m_GotSelection) {
+#ifdef _WIN32
+			WinUtil::SetClipboardText(GetSelectionText());
+#elif defined(__unix__)
+			LinuxUtil::SetClipboardText(GetSelectionText());
+#endif
+		}
+		return;
+	}
 
-        SendSignal(Changed, 0);
-        
-        return;
-    }
+	// ModKey-V (Paste)
+	if (asciiChar == 'v' && ModKey) {
+		RemoveSelectionText();
+		string Text = "";
+#ifdef _WIN32
+		WinUtil::GetClipboardText(&Text);
+#elif defined(__unix__)
+		LinuxUtil::GetClipboardText(&Text);
+#endif
+		m_Text.insert(m_CursorIndex, Text);
+		m_CursorIndex += Text.size();
+		UpdateText(true, true);
+		SendSignal(Changed, 0);
+		return;
+	}
 
-    // Enter key
-    if (KeyCode == '\n' || KeyCode =='\r') {
-        SendSignal(Enter, 0);
-        return;
-    }
+	// ModKey-A (Select All)
+	if (asciiChar == 'a' && ModKey) {
+		DoSelection(0, m_Text.size());
+		UpdateText();
+		return;
+	}
 
+	// Enter key
+	if (KeyCode == '\n' || KeyCode == '\r') {
+		SendSignal(Enter, 0);
+		return;
+	}
 
-    // Add valid ascii characters
-    if (KeyCode >= 32 && KeyCode < 128) {
-        RemoveSelectionText();
-
-        char buf[2] = {static_cast<char>(KeyCode), '\0'};
-
-        // Insert the text
-        m_Text.insert(m_CursorIndex, buf);
-        m_CursorIndex++;
-
-        SendSignal(Changed, 0);
-
-        UpdateText(true);
-        return;
-    }
+	// Add valid ASCII characters
+	if (KeyCode >= 32 && KeyCode < 128 && KeyCode != 127) {
+		RemoveSelectionText();
+		char buf[2] = { static_cast<char>(KeyCode), '\0' };
+		m_Text.insert(m_CursorIndex, buf);
+		m_CursorIndex++;
+		SendSignal(Changed, 0);
+		UpdateText(true);
+		return;
+	}
 }
 
 
@@ -550,6 +538,40 @@ void GUITextPanel::DoSelection(int Start, int End)
 
     m_SelectionX = MAX(m_SelectionX, 0);
     m_SelectionWidth = MIN(m_SelectionWidth, m_Width);
+}
+
+int RTE::GUITextPanel::GetStartOfNextCharacterGroup(const std::string_view &stringToCheck, int currentIndex) const {
+    auto isNormalCharacter = [](char charToCheck) { return (std::isalnum(charToCheck) || charToCheck == '_'); };
+    auto isNormalCharacterOrSpace = [](char charToCheck) { return (std::isalnum(charToCheck) || charToCheck == '_' || std::isspace(charToCheck)); };
+    auto isSpecialCharacterOrSpace = [](char charToCheck) { return !(std::isalnum(charToCheck) || charToCheck == '_'); };
+
+    std::string_view::const_iterator currentIterator = stringToCheck.cbegin() + currentIndex;
+    currentIterator = isNormalCharacter(*currentIterator) ?
+        std::find_if(currentIterator, stringToCheck.cend(), isSpecialCharacterOrSpace) :
+        std::find_if(currentIterator, stringToCheck.cend(), isNormalCharacterOrSpace);
+
+    if (currentIterator != stringToCheck.cend() && std::isspace(*currentIterator)) {
+        currentIterator = std::find_if_not(currentIterator, stringToCheck.cend(), isspace);
+    }
+    return std::distance(stringToCheck.cbegin(), currentIterator);
+}
+
+int RTE::GUITextPanel::GetStartOfPreviousCharacterGroup(const std::string_view &stringToCheck, int currentIndex) const {
+    auto isNormalCharacter = [](char charToCheck) { return (std::isalnum(charToCheck) || charToCheck == '_'); };
+    auto isNormalCharacterOrSpace = [](char charToCheck) { return (std::isalnum(charToCheck) || charToCheck == '_' || std::isspace(charToCheck)); };
+    auto isSpecialCharacterOrSpace = [](char charToCheck) { return !(std::isalnum(charToCheck) || charToCheck == '_'); };
+
+    std::string_view::reverse_iterator currentIterator = stringToCheck.crbegin() + (m_Text.size() - currentIndex);
+    if (std::isspace(*(currentIterator))) {
+        currentIterator = std::find_if_not(currentIterator, stringToCheck.crend(), isspace);
+    }
+
+    if (currentIterator != stringToCheck.crend()) {
+        currentIterator = isNormalCharacter(*(currentIterator)) ?
+            std::find_if(currentIterator, stringToCheck.crend(), isSpecialCharacterOrSpace) :
+            std::find_if(currentIterator, stringToCheck.crend(), isNormalCharacterOrSpace);
+    }
+    return std::distance(stringToCheck.cbegin(), currentIterator.base());
 }
 
 

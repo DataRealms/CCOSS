@@ -7,8 +7,14 @@
 *.vs
 *.APS
 
+compile_commands.json
+/.ccls-cache
+
+/build*
+
 /_Bin
 /NATPunchServer/Server/NATCompleteServer/Debug
 /NATPunchServer/Server/NATCompleteServer/Release
 /Documentation/Doxygen/Output
 MemCleanupInfo.txt
+RTEA.vcxproj.user

@@ -50,6 +50,8 @@ namespace RTE
 
 		// Concrete allocation and cloning definitions
 		EntityAllocation(MultiplayerGame)
+		SerializableOverrideMethods
+		ClassInfoGetters
 
 
 		enum MultiplayerGameMode
@@ -77,7 +79,7 @@ namespace RTE
 		//                  from system memory.
 		// Arguments:       None.
 
-		virtual ~MultiplayerGame() { Destroy(true); }
+		~MultiplayerGame() override { Destroy(true); }
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -88,7 +90,7 @@ namespace RTE
 		// Return value:    An error return value signaling sucess or any particular failure.
 		//                  Anything below 0 is an error signal.
 
-		virtual int Create();
+		int Create() override;
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -99,23 +101,7 @@ namespace RTE
 		// Return value:    An error return value signaling sucess or any particular failure.
 		//                  Anything below 0 is an error signal.
 
-		virtual int Create(const MultiplayerGame &reference);
-
-
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Virtual method:  ReadProperty
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Description:     Reads a property value from a Reader stream. If the name isn't
-		//                  recognized by this class, then ReadProperty of the parent class
-		//                  is called. If the property isn't recognized by any of the base classes,
-		//                  false is returned, and the Reader's position is untouched.
-		// Arguments:       The name of the property to be read.
-		//                  A Reader lined up to the value of the property to be read.
-		// Return value:    An error return value signaling whether the property was successfully
-		//                  read or not. 0 means it was read successfully, and any nonzero indicates
-		//                  that a property of that name could not be found in this or base classes.
-
-		virtual int ReadProperty(std::string propName, Reader &reader);
+		int Create(const MultiplayerGame &reference);
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -126,19 +112,7 @@ namespace RTE
 		// Arguments:       None.
 		// Return value:    None.
 
-		virtual void Reset() { Clear(); Activity::Reset(); }
-
-
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Virtual method:  Save
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Description:     Saves the complete state of this MultiplayerGame to an output stream for
-		//                  later recreation with Create(Reader &reader);
-		// Arguments:       A Writer that the MultiplayerGame will save itself with.
-		// Return value:    An error return value signaling sucess or any particular failure.
-		//                  Anything below 0 is an error signal.
-
-		virtual int Save(Writer &writer) const;
+		void Reset() override { Clear(); Activity::Reset(); }
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -149,27 +123,7 @@ namespace RTE
 		//                  to destroy all inherited members also.
 		// Return value:    None.
 
-		virtual void Destroy(bool notInherited = false);
-
-
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Virtual method:  GetClass
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Description:     Gets the ClassInfo instance of this Entity.
-		// Arguments:       None.
-		// Return value:    A reference to the ClassInfo of this' class.
-
-		virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Virtual method:   GetClassName
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Description:     Gets the class name of this Entity.
-		// Arguments:       None.
-		// Return value:    A string with the friendly-formatted type name of this object.
-
-		virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+		void Destroy(bool notInherited = false) override;
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -180,7 +134,7 @@ namespace RTE
 		// Return value:    An error return value signaling sucess or any particular failure.
 		//                  Anything below 0 is an error signal.
 
-		virtual int Start();
+		int Start() override;
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -190,7 +144,7 @@ namespace RTE
 		// Arguments:       Whether to pause the game or not.
 		// Return value:    None.
 
-		virtual void Pause(bool pause = true);
+		void SetPaused(bool pause = true) override;
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -200,7 +154,7 @@ namespace RTE
 		// Arguments:       None.
 		// Return value:    None.
 
-		virtual void End();
+		void End() override;
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -211,7 +165,7 @@ namespace RTE
 		// Arguments:       None.
 		// Return value:    None.
 
-		virtual void Update();
+		void Update() override;
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -223,7 +177,7 @@ namespace RTE
 		//                  Which screen's GUI to draw onto the bitmap.
 		// Return value:    None.
 
-		virtual void DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int which = 0);
+		void DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int which = 0) override;
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////
@@ -231,11 +185,11 @@ namespace RTE
 		//////////////////////////////////////////////////////////////////////////////////////////
 		// Description:     Draws this ActivityMan's current graphical representation to a
 		//                  BITMAP of choice. This includes all game-related graphics.
-		// Arguments:       A pointer to a BITMAP to draw on. OINT.
+		// Arguments:       A pointer to a BITMAP to draw on. OWNERSHIP IS NOT TRANSFERRED!
 		//                  The absolute position of the target bitmap's upper left corner in the scene.
 		// Return value:    None.
 
-		virtual void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector());
+		void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector()) override;
 
 
 		//////////////////////////////////////////////////////////////////////////////////////////

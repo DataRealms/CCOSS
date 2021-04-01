@@ -35,6 +35,8 @@ public:
 
 	// Concrete allocation and cloning definitions
 	EntityAllocation(Emission)
+	SerializableOverrideMethods
+	ClassInfoGetters
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Constructor:     Emission
@@ -45,17 +47,6 @@ public:
 
 	Emission() { Clear(); }
 
-	/*
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  Create
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     Makes the Emission object ready for use.
-	// Arguments:       None.
-	// Return value:    An error return value signaling sucess or any particular failure.
-	//                  Anything below 0 is an error signal.
-
-	virtual int Create();
-	*/
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Method:          Create
@@ -69,22 +60,6 @@ public:
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  ReadProperty
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     Reads a property value from a Reader stream. If the name isn't
-	//                  recognized by this class, then ReadProperty of the parent class
-	//                  is called. If the property isn't recognized by any of the base classes,
-	//                  false is returned, and the Reader's position is untouched.
-	// Arguments:       The name of the property to be read.
-	//                  A Reader lined up to the value of the property to be read.
-	// Return value:    An error return value signaling whether the property was successfully
-	//                  read or not. 0 means it was read successfully, and any nonzero indicates
-	//                  that a property of that name could not be found in this or base classes.
-
-	virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////
 	// Virtual method:  Reset
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Resets the entire Serializable, including its inherited members, to their
@@ -92,104 +67,62 @@ public:
 	// Arguments:       None.
 	// Return value:    None.
 
-	virtual void Reset() { Clear(); }
+	void Reset() override { Clear(); }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  Save
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     Saves the complete state of this Emission to an output stream for
-	//                  later recreation with Create(Reader &reader);
-	// Arguments:       A Writer that the Emission will save itself with.
-	// Return value:    An error return value signaling sucess or any particular failure.
-	//                  Anything below 0 is an error signal.
-
-	virtual int Save(Writer &writer) const;
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  GetClassName
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     Gets the class name of this Entity.
-	// Arguments:       None.
-	// Return value:    A string with the friendly-formatted type name of this object.
-
-	//virtual const std::string & GetClassName() const { return m_sClassName; }
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  GetClass
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     Gets the ClassInfo instance of this Entity.
-	// Arguments:       None.
-	// Return value:    A reference to the ClassInfo of this' class.
-
-	virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:   GetClassName
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     Gets the class name of this Entity.
-	// Arguments:       None.
-	// Return value:    A string with the friendly-formatted type name of this object.
-
-	virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  GetEmissionParticlePreset
+	// Method:  GetEmissionParticlePreset
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Gets the reference particle to be emitted. Owenership is NOT transferred!
 	// Arguments:       None.
 	// Return value:    A pointer to the particle to be emitted. Not transferred!
 
-	virtual const MovableObject * GetEmissionParticlePreset() { return m_pEmission; }
+	const MovableObject * GetEmissionParticlePreset() { return m_pEmission; }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  GetRate
+	// Method:  GetRate
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Gets the rate at which these emissions are made, in particles per minute.
 	// Arguments:       None.
 	// Return value:    The emission rate in PPM.
 
-	virtual float GetRate() const { return m_PPM; }
+	float GetRate() const { return m_PPM; }
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  SetRate
+	// Method:  SetRate
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Sets the rate at which these emissions are made, in particles per minute.
 	// Arguments:       The emission rate in PPM.
 	// Return value:    None.
 
-	virtual void SetRate(float newPPM) { m_PPM = newPPM; }
+	void SetRate(float newPPM) { m_PPM = newPPM; }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  GetBurstSize
+	// Method:  GetBurstSize
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Gets the number of extra particles that are bursted at the beginning of
 	//                  emission.
 	// Arguments:       None.
 	// Return value:    The burst size.
 
-	virtual int GetBurstSize() const { return m_BurstSize; }
+	int GetBurstSize() const { return m_BurstSize; }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  SetBurstSize
+	// Method:  SetBurstSize
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Sets the number of extra particles that are bursted at the beginning of
 	//                  emission.
 	// Arguments:       The burst size.
 	// Return value:    None.
 
-	virtual void SetBurstSize(int newSize) { m_BurstSize = newSize; }
+	void SetBurstSize(int newSize) { m_BurstSize = newSize; }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  GetSpread
+	// Method:  GetSpread
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Gets the angle spread of velocity of the emitted MO's to each side of
 	//                  the m_EmitAngle angle. in radians. PI/2 would mean that MO's fly out to
@@ -197,11 +130,11 @@ public:
 	// Arguments:       None.
 	// Return value:    The emission spread in radians.
 
-	virtual float GetSpread() const { return m_Spread; }
+	float GetSpread() const { return m_Spread; }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  SetSpread
+	// Method:  SetSpread
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Sets the angle spread of velocity of the emitted MO's to each side of
 	//                  the m_EmitAngle angle. in radians. PI/2 would mean that MO's fly out to
@@ -209,140 +142,140 @@ public:
 	// Arguments:       The emission spread in radians.
 	// Return value:    None.
 
-	virtual void SetSpread(float newSpread) { m_Spread = newSpread; }
+	void SetSpread(float newSpread) { m_Spread = newSpread; }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  GetMinVelocity
+	// Method:  GetMinVelocity
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Gets the specified minimum velocity an emitted MO can have when emitted.
 	// Arguments:       None.
 	// Return value:    The min emission velocity in m/s.
 
-	virtual float GetMinVelocity() const { return m_MinVelocity; }
+	float GetMinVelocity() const { return m_MinVelocity; }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  SetMinVelocity
+	// Method:  SetMinVelocity
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Sets the specified minimum velocity an emitted MO can have when emitted.
 	// Arguments:       The min emission velocity in m/s.
 	// Return value:    None.
 
-	virtual void SetMinVelocity(float newVel) { m_MinVelocity = newVel; }
+	void SetMinVelocity(float newVel) { m_MinVelocity = newVel; }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  GetMaxVelocity
+	// Method:  GetMaxVelocity
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Gets the specified maximum velocity an emitted MO can have when emitted.
 	// Arguments:       None.
 	// Return value:    The max emission velocity in m/s.
 
-	virtual float GetMaxVelocity() const { return m_MaxVelocity; }
+	float GetMaxVelocity() const { return m_MaxVelocity; }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  SetMaxVelocity
+	// Method:  SetMaxVelocity
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Gets the specified maximum velocity an emitted MO can have when emitted.
 	// Arguments:       The max emission velocity in m/s.
 	// Return value:    None.
 
-	virtual void SetMaxVelocity(float newVel) { m_MaxVelocity = newVel; }
+	void SetMaxVelocity(float newVel) { m_MaxVelocity = newVel; }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  GetLifeVariation
+	// Method:  GetLifeVariation
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Gets the specified variation in lifetime of the emitted particles.
 	// Arguments:       None.
 	// Return value:    The life variation rationally expressed.. 0.1 = up to 10% varitaion.
 
-	virtual float GetLifeVariation() const { return m_LifeVariation; }
+	float GetLifeVariation() const { return m_LifeVariation; }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  SetLifeVariation
+	// Method:  SetLifeVariation
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Sets the specified variation in lifetime of the emitted particles.
 	// Arguments:       The life variation rationally expressed.. 0.1 = up to 10% varitaion.
 	// Return value:    None.
 
-	virtual void SetLifeVariation(float newVariation)  { m_LifeVariation = newVariation; }
+	void SetLifeVariation(float newVariation)  { m_LifeVariation = newVariation; }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  PushesEmitter
+	// Method:  PushesEmitter
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Indicates whether this emission is supposed to push its emitter back
 	//                  because of recoil.
 	// Arguments:       None.
 	// Return value:    Whether recoil pushing is enabled or not for this emitter.
 
-	virtual bool PushesEmitter() const { return m_PushesEmitter; }
+	bool PushesEmitter() const { return m_PushesEmitter; }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  SetPushesEmitter
+	// Method:  SetPushesEmitter
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Sets whether this emission is supposed to push its emitter back
 	//                  because of recoil.
 	// Arguments:       Whether recoil pushing is enabled or not for this emitter.
 	// Return value:    None.
 
-	virtual void SetPushesEmitter(bool newValue) { m_PushesEmitter = newValue; }
+	void SetPushesEmitter(bool newValue) { m_PushesEmitter = newValue; }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  IsEmissionTime
+	// Method:  IsEmissionTime
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Shows whether this should be emitting now or not, based on what its
 	//                  start and end timers are set to.
 	// Arguments:       None.
 	// Return value:    Whether this should be emitting right now.
 
-	virtual bool IsEmissionTime() { return m_StartTimer.IsPastSimTimeLimit() && !m_StopTimer.IsPastSimTimeLimit(); }
+	bool IsEmissionTime() { return m_StartTimer.IsPastSimTimeLimit() && !m_StopTimer.IsPastSimTimeLimit(); }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  ResetEmissionTimers
+	// Method:  ResetEmissionTimers
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Resets the emission timers so they start counting time as to wheter
 	//                  emissions are clearer.
 	// Arguments:       None.
 	// Return value:    None.
 
-	virtual void ResetEmissionTimers() { m_StartTimer.Reset(); m_StopTimer.Reset(); }
+	void ResetEmissionTimers() { m_StartTimer.Reset(); m_StopTimer.Reset(); }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  InheritsVelocity
+	// Method:  InheritsVelocity
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     How much of the root parent's velocity this emission inherit
 	// Arguments:       None.
 	// Return value:    The proportion of the velocity inherited. 0.1 = 10% inheritance.
 
-	virtual float InheritsVelocity() { return m_InheritsVel; }
+	float InheritsVelocity() { return m_InheritsVel; }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  GetOffset
+	// Method:  GetOffset
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Gets offset of the emission point from Emitter's sprite center, which gets rotated with owner Emitter
 	// Arguments:       None.
 	// Return value:    Returns emission offset.
 
-	virtual Vector GetOffset() const { return m_Offset; }
+	Vector GetOffset() const { return m_Offset; }
 
 	//////////////////////////////////////////////////////////////////////////////////////////
-	// Virtual method:  SetOffset
+	// Method:  SetOffset
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Description:     Sets offset of the emission point from Emitter's sprite center, which gets rotated with owner Emitter
 	// Arguments:       New offset value.
 	// Return value:    None.
 
-	virtual void SetOffset(Vector offset) { m_Offset = offset; }
+	void SetOffset(Vector offset) { m_Offset = offset; }
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Protected member variable and method declarations

@@ -1,4 +1,5 @@
 #include "Color.h"
+#include "allegro/color.h"
 
 namespace RTE {
 
@@ -7,9 +8,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Color::Create() {
-		// Read all the properties
-		if (Serializable::Create() < 0) { 
-			return -1; 
+		if (Serializable::Create()) {
+			return -1;
 		}
 		RecalculateIndex();
 		return 0;
@@ -17,25 +17,26 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Color::Create(unsigned char inputR, unsigned char inputG, unsigned char inputB) {
-		m_R = inputR;
-		m_G = inputG;
-		m_B = inputB;
+	int Color::Create(int inputR, int inputG, int inputB) {
+		SetR(inputR);
+		SetG(inputG);
+		SetB(inputB);
 		RecalculateIndex();
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Color::ReadProperty(std::string propName, Reader &reader) {
-		if (propName == "R") {
-			reader >> m_R;
+	int Color::ReadProperty(const std::string_view &propName, Reader &reader) {
+		if (propName == "Index") {
+			SetRGBWithIndex(std::stoi(reader.ReadPropValue()));
+		} else if (propName == "R") {
+			SetR(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "G") {
-			reader >> m_G;
+			SetG(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "B") {
-			reader >> m_B;
+			SetB(std::stoi(reader.ReadPropValue()));
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;
@@ -46,26 +47,30 @@ namespace RTE {
 	int Color::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		writer.NewProperty("R");
-		writer << m_R;
-		writer.NewProperty("G");
-		writer << m_G;
-		writer.NewProperty("B");
-		writer << m_B;
+		writer.NewPropertyWithValue("R", m_R);
+		writer.NewPropertyWithValue("G", m_G);
+		writer.NewPropertyWithValue("B", m_B);
 
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Color::SetRGBWithIndex(unsigned char index) {
-		m_Index = index;
+	void Color::SetRGBWithIndex(int index) {
+		m_Index = std::clamp(index, 0, 255);
 
-		RGB color;
-		get_color(static_cast<int>(m_Index), &color);
+		RGB rgbColor;
+		get_color(m_Index, &rgbColor);
 
-		m_R = color.r * 4;
-		m_G = color.g * 4;
-		m_B = color.b * 4;
+		// Multiply by 4 because the Allegro RGB struct elements are in range 0-63, and proper RGB needs 0-255.
+		m_R = rgbColor.r * 4;
+		m_G = rgbColor.g * 4;
+		m_B = rgbColor.b * 4;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int Color::RecalculateIndex() {
+		return m_Index = makecol8(m_R, m_G, m_B);
 	}
 }

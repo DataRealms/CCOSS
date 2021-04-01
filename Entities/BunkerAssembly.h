@@ -17,7 +17,6 @@
 #include "RTETools.h"
 #include "TerrainObject.h"
 #include "Vector.h"
-#include "FrameMan.h"
 #include "SceneMan.h"
 #include "BunkerAssemblyScheme.h"
 #include "Deployment.h"
@@ -49,7 +48,8 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(BunkerAssembly)
-
+SerializableOverrideMethods
+ClassInfoGetters
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     BunkerAssembly
@@ -68,7 +68,7 @@ EntityAllocation(BunkerAssembly)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~BunkerAssembly() { Destroy(true); }
+	~BunkerAssembly() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ EntityAllocation(BunkerAssembly)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -90,7 +90,7 @@ EntityAllocation(BunkerAssembly)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(BunkerAssemblyScheme * scheme);
+	int Create(BunkerAssemblyScheme * scheme);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -105,22 +105,6 @@ EntityAllocation(BunkerAssembly)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire BunkerAssembly, including its inherited members, to
@@ -128,45 +112,8 @@ EntityAllocation(BunkerAssembly)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); SceneObject::Reset(); }
+    void Reset() override { Clear(); SceneObject::Reset(); }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Pure V. method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this BunkerAssembly to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the BunkerAssembly will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the BunkerAssembly object ready for use.
-// Arguments:       An input stream that the BunkerAssembly will create itself from.
-//                  Whether there is a class name in the stream to check against to make
-//                  sure the correct type is being read from the stream.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create(std::istream &stream, bool checkType = true);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this BunkerAssembly to an output stream for
-//                  later recreation with Create(istream &stream);
-// Arguments:       An output stream that the BunkerAssembly will save itself to.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(std::ostream &stream) const;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Pure V. method:  Destroy
@@ -176,27 +123,7 @@ EntityAllocation(BunkerAssembly)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -219,11 +146,11 @@ EntityAllocation(BunkerAssembly)
 // Arguments:       The point in absolute scene coordinates.
 // Return value:    Whether this' graphical rep overlaps the scene point.
 
-    virtual bool IsOnScenePoint(Vector &scenePoint) const;
+	bool IsOnScenePoint(Vector &scenePoint) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetDeployments
+// Method:  GetDeployments
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Retrieves the list of random deployemtns selected to be deployed by this assembly
 //					based on it's parent scheme MaxDeployments value. This list will always include all
@@ -231,7 +158,7 @@ EntityAllocation(BunkerAssembly)
 // Arguments:       None.
 // Return value:    List of deployments.
 
-	virtual std::vector<Deployment *> GetDeployments();
+	std::vector<Deployment *> GetDeployments();
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -241,7 +168,7 @@ EntityAllocation(BunkerAssembly)
 // Arguments:       The assigned team number.
 // Return value:    None.
 
-    virtual void SetTeam(int team);
+	void SetTeam(int team) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -275,7 +202,7 @@ EntityAllocation(BunkerAssembly)
 // Return value:    A good identifyable graphical representation of this in a BITMAP, if
 //                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
 
-	virtual BITMAP * GetGraphicalIcon() { return m_pPresentationBitmap; };
+	BITMAP * GetGraphicalIcon() override { return m_pPresentationBitmap; };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -285,7 +212,7 @@ EntityAllocation(BunkerAssembly)
 // Arguments:       None.
 // Return value:    Symmetric assembly name.
 
-	virtual string GetSymmetricAssemblyName() const { return m_SymmetricAssembly; };
+	string GetSymmetricAssemblyName() const { return m_SymmetricAssembly; };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -295,7 +222,7 @@ EntityAllocation(BunkerAssembly)
 // Arguments:       Symmetric assembly name.
 // Return value:    None.
 
-	virtual void SetSymmetricAssemblyName(string newSymmetricAssembly) { m_SymmetricAssembly = newSymmetricAssembly; };
+	void SetSymmetricAssemblyName(string newSymmetricAssembly) { m_SymmetricAssembly = newSymmetricAssembly; };
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Draw
@@ -309,10 +236,7 @@ EntityAllocation(BunkerAssembly)
 //                  like indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 
@@ -353,8 +277,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    BunkerAssembly(const BunkerAssembly &reference) { RTEAbort("Tried to use forbidden method"); }
-    void operator=(const BunkerAssembly &rhs) { RTEAbort("Tried to use forbidden method"); }
+    BunkerAssembly(const BunkerAssembly &reference) = delete;
+    void operator=(const BunkerAssembly &rhs) = delete;
 
 };
 

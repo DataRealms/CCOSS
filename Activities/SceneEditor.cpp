@@ -44,7 +44,6 @@
 #include "GABaseDefense.h"
 
 extern bool g_ResetActivity;
-extern bool g_InActivity;
 
 namespace RTE {
 
@@ -107,7 +106,7 @@ int SceneEditor::Create(const SceneEditor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int SceneEditor::ReadProperty(std::string propName, Reader &reader)
+int SceneEditor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "CPUTeam")
@@ -118,7 +117,6 @@ int SceneEditor::ReadProperty(std::string propName, Reader &reader)
         reader >> m_DeliveryDelay;
     else
 */
-        // See if the base class(es) can find a match instead
         return EditorActivity::ReadProperty(propName, reader);
 
     return 0;
@@ -131,18 +129,9 @@ int SceneEditor::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this SceneEditor with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int SceneEditor::Save(Writer &writer) const
-{
-    EditorActivity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int SceneEditor::Save(Writer &writer) const {
+	EditorActivity::Save(writer);
+	return 0;
 }
 
 
@@ -228,7 +217,7 @@ int SceneEditor::Start()
         m_pSaveDialogBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("SaveDialogBox"));
 
         // Set the background image of the parent collection box
-//        ContentFile backgroundFile("Base.rte/GUIs/BuyMenuBackground.bmp");
+//        ContentFile backgroundFile("Base.rte/GUIs/BuyMenuBackground.png");
 //        m_pSaveDialogBox->SetDrawImage(new AllegroBitmap(backgroundFile.GetAsBitmap()));
 //        m_pSaveDialogBox->SetDrawBackground(true);
 //        m_pSaveDialogBox->SetDrawType(GUICollectionBox::Image);
@@ -270,7 +259,7 @@ int SceneEditor::Start()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Pauses and unpauses the game.
 
-void SceneEditor::Pause(bool pause)
+void SceneEditor::SetPaused(bool pause)
 {
     // Override the pause
     m_Paused = false;
@@ -288,7 +277,7 @@ void SceneEditor::End()
 
     
 
-    m_ActivityState = OVER;
+    m_ActivityState = ActivityState::Over;
 }
 
 
@@ -383,24 +372,20 @@ void SceneEditor::Update()
 			Activity * pActivity = dynamic_cast<Activity *>(pActivityPreset->Clone());
 			GameActivity *pTestGame = dynamic_cast<GameActivity *>(pActivity);
             RTEAssert(pTestGame, "Couldn't find the \"Skirmish Defense\" GAScripted Activity! Has it been defined?");
-            pTestGame->SetPlayerCount(1);
-            pTestGame->SetTeamCount(2);
             pTestGame->SetTeamOfPlayer(0, 0);
             pTestGame->SetCPUTeam(1);
 			pTestGame->SetStartingGold(10000);
 			pTestGame->SetFogOfWarEnabled(false);
-            pTestGame->SetDifficulty(GameActivity::MEDIUMDIFFICULTY);
+            pTestGame->SetDifficulty(DifficultySetting::MediumDifficulty);
             g_ActivityMan.SetStartActivity(pTestGame);
             g_ResetActivity = true;
 
 
             /*GABaseDefense *pTestGame = dynamic_cast<GABaseDefense *>(g_PresetMan.GetEntityPreset("GABaseDefense", "Test Activity")->Clone());
             RTEAssert(pTestGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
-            pTestGame->SetPlayerCount(1);
-            pTestGame->SetTeamCount(2);
             pTestGame->SetTeamOfPlayer(0, 0);
             pTestGame->SetCPUTeam(1);
-            pTestGame->SetDifficulty(GameActivity::MAXDIFFICULTY);
+            pTestGame->SetDifficulty(GameActivity::MaxDifficulty);
             pTestGame->Create();
             g_ActivityMan.SetStartActivity(pTestGame);
             g_ResetActivity = true;*/
@@ -466,7 +451,7 @@ void SceneEditor::Update()
                     }
 
 					// Make random planet coord's for this scene
-					float angle = RangeRand(0, 2 * c_PI);
+					float angle = RandomNum(0.0F, c_TwoPI);
                     Vector pos = Vector((int)(150 * cos(angle)), (int)(150 * sin(angle)));
 					pNewScene->SetLocation(pos);
 
@@ -627,7 +612,6 @@ void SceneEditor::Update()
                 if (g_SceneMan.GetScene()->GetPresetName() == "Editor Scene")
                 {
                     g_ActivityMan.PauseActivity();
-                    g_InActivity = false;
                 }
                 // Just do normal cancel of the dialog and go back to editing
                 else
@@ -693,7 +677,7 @@ bool SceneEditor::SaveScene(string saveAsName, bool forceOverwrite)
 	if (g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() == "Scenes.rte")
 	{
 		string sceneFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".ini");
-		string previewFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".preview.bmp");
+		string previewFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/" + saveAsName + ".preview.png");
 		if (g_PresetMan.AddEntityPreset(g_SceneMan.GetScene(), m_ModuleSpaceID, forceOverwrite, sceneFilePath))
 		{
 			// Save preview
@@ -720,7 +704,7 @@ bool SceneEditor::SaveScene(string saveAsName, bool forceOverwrite)
 	{
 		// Try to save to the data module
 		string sceneFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/" + saveAsName + ".ini");
-		string previewFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/" + saveAsName + ".preview.bmp");
+		string previewFilePath(g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/Scenes/" + saveAsName + ".preview.png");
 		if (g_PresetMan.AddEntityPreset(g_SceneMan.GetScene(), m_ModuleSpaceID, forceOverwrite, sceneFilePath))
 		{
             // Save preview

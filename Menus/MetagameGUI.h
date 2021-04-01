@@ -58,6 +58,9 @@ class MetagameGUI:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
 
+	SerializableClassNameGetter
+	SerializableOverrideMethods
+
 public:
 
     enum MenuScreens
@@ -205,42 +208,14 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this MetagameGUI to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the MetagameGUI will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire MetagameGUI, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+	void Reset() override { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -251,16 +226,6 @@ public:
 // Return value:    None.
 
     void Destroy();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -328,7 +293,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SelectScene
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets a specific scene as the currently selected one. OINT.
+// Description:     Sets a specific scene as the currently selected one. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       The Scene to set as selected. Ownership is NOT transferred.
 // Return value:    None.
 
@@ -451,17 +416,17 @@ public:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  Draw
+// Method:  Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws the menu
 // Arguments:       The bitmap to draw on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *drawBitmap);
+	void Draw(BITMAP *drawBitmap);
 
 
 
@@ -490,7 +455,7 @@ protected:
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+	int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -562,8 +527,8 @@ protected:
 // Description:     Automatically resolves an offensive fight without actually launching
 //                  and going through an Activity. Will randomly determine who won and
 //                  what the consequences are.
-// Arguments:       The Offsenive Activity to resolve and manipulate accordingly. OINT
-//                  The Scene this Offensive is supposed to take place on. OINT
+// Arguments:       The Offsenive Activity to resolve and manipulate accordingly. OWNERSHIP IS NOT TRANSFERRED!
+//                  The Scene this Offensive is supposed to take place on. OWNERSHIP IS NOT TRANSFERRED!
 //                  Whether to check the validity of all players based on whether they
 //                  have brains remaining alive. If false, all active players will be
 //                  instead be flagged as having had brains at some point.
@@ -1047,8 +1012,6 @@ protected:
         ANIMMODECOUNT
     };
 
-    // Member variables
-    static const std::string m_ClassName;
 
     // Controller which controls this menu. Not owned
     Controller *m_pController;
@@ -1113,13 +1076,13 @@ protected:
     // The income-related lines to keep drawing each frame
     std::vector<SiteLine> m_IncomeSiteLines;
     // Indices to the player sitelines that point at the moving station
-    int m_aStationIncomeLineIndices[Activity::MAXPLAYERCOUNT];
+    int m_aStationIncomeLineIndices[Players::MaxPlayerCount];
     // Indices to the player sitelines that point at the their own brain pool counters
-    int m_aBrainSaleIncomeLineIndices[Activity::MAXPLAYERCOUNT];
+    int m_aBrainSaleIncomeLineIndices[Players::MaxPlayerCount];
     // Which player are currently showing their player lines. -1 means none
     int m_ActivePlayerIncomeLines;
     // The action-related lines to keep drawing each frame
-    std::vector<SiteLine> m_ActionSiteLines[Activity::MAXPLAYERCOUNT];
+    std::vector<SiteLine> m_ActionSiteLines[Players::MaxPlayerCount];
     // Override to alwasys draw the player action meters, no matter what
     bool m_ActionMeterDrawOverride;
     // The attack target crosshair info
@@ -1157,42 +1120,42 @@ protected:
     GUIButton *m_pConfirmationButton;
 
     // The player floating bars
-    GUICollectionBox *m_apPlayerBox[Activity::MAXPLAYERCOUNT];
+    GUICollectionBox *m_apPlayerBox[Players::MaxPlayerCount];
     // The player flag icon in the floating bars
-    GUICollectionBox *m_apPlayerTeamBox[Activity::MAXPLAYERCOUNT];
+    GUICollectionBox *m_apPlayerTeamBox[Players::MaxPlayerCount];
     // Funds label in the floating bars
-    GUILabel *m_apPlayerBarLabel[Activity::MAXPLAYERCOUNT];
+    GUILabel *m_apPlayerBarLabel[Players::MaxPlayerCount];
     // Brain Pool label next to the floating bars
-    GUILabel *m_apBrainPoolLabel[Activity::MAXPLAYERCOUNT];
+    GUILabel *m_apBrainPoolLabel[Players::MaxPlayerCount];
     // The animated label that shows a message to the player over his bar
-//    GUILabel *m_apPlayerMessageLabel[Activity::MAXPLAYERCOUNT];
+//    GUILabel *m_apPlayerMessageLabel[Players::MaxPlayerCount];
     // The animated label that shows a change in the funds of a player, animating up or downward
-    GUILabel *m_apFundsChangeLabel[Activity::MAXPLAYERCOUNT];
+    GUILabel *m_apFundsChangeLabel[Players::MaxPlayerCount];
     // The animated label that shows a change in the brain pool of a player, animating up or downward
-    GUILabel *m_apBrainChangeLabel[Activity::MAXPLAYERCOUNT];
+    GUILabel *m_apBrainChangeLabel[Players::MaxPlayerCount];
 
     // Timer for animating the message labels going northward
-//    Timer m_apPlayerMessageTimer[Activity::MAXPLAYERCOUNT];
+//    Timer m_apPlayerMessageTimer[Players::MaxPlayerCount];
     // Timer for animating the change labels going northward
-    Timer m_apFundsChangeTimer[Activity::MAXPLAYERCOUNT];
+    Timer m_apFundsChangeTimer[Players::MaxPlayerCount];
     // Timer for animating the change labels going northward
-    Timer m_apBrainsChangeTimer[Activity::MAXPLAYERCOUNT];
+    Timer m_apBrainsChangeTimer[Players::MaxPlayerCount];
     // Previous pos of mouse to calculate dragging
     Vector m_PrevMousePos;
 
     // Battle site display
     // The player flag icon that surrrounds the battle sites
-    GUICollectionBox *m_apPlayerTeamActionBox[Activity::MAXPLAYERCOUNT];
+    GUICollectionBox *m_apPlayerTeamActionBox[Players::MaxPlayerCount];
     // Traveling brain label that ends up around battle sites, showing info
-    GUILabel *m_apPlayerBrainTravelLabel[Activity::MAXPLAYERCOUNT];
+    GUILabel *m_apPlayerBrainTravelLabel[Players::MaxPlayerCount];
     // How much funds have been allocated to each player's battle chest for the next battle
-    float m_aBattleFunds[Activity::MAXPLAYERCOUNT];
+    float m_aBattleFunds[Players::MaxPlayerCount];
     // Which of the players are currently attacking a place - just used for icons
-    bool m_aBattleAttacker[Activity::MAXPLAYERCOUNT];
+    bool m_aBattleAttacker[Players::MaxPlayerCount];
     // Which of the battling brains are yet graphically destroyed
-    bool m_aAnimDestroyed[Activity::MAXPLAYERCOUNT];
+    bool m_aAnimDestroyed[Players::MaxPlayerCount];
     // Where the center of the brain icon is on the traveling brain label
-    Vector m_aBrainIconPos[Activity::MAXPLAYERCOUNT];
+    Vector m_aBrainIconPos[Players::MaxPlayerCount];
     // Which quadrant positions of the battle matrix that have been taken by which metaplayer. NOPLAYER means no player (duh)
     int m_aQuadTakenBy[4];
 
@@ -1249,13 +1212,13 @@ protected:
     GUILabel *m_pLengthLabel;
     GUISlider *m_pLengthSlider;
     GUILabel *m_pErrorLabel;
-    GUIButton *m_apPlayerControlButton[Activity::MAXPLAYERCOUNT];
-    GUIComboBox *m_apPlayerTeamSelect[Activity::MAXPLAYERCOUNT];
-    GUIComboBox *m_apPlayerTechSelect[Activity::MAXPLAYERCOUNT];
-    GUIComboBox *m_apPlayerHandicap[Activity::MAXPLAYERCOUNT];
-    GUITextBox *m_apPlayerNameBox[Activity::MAXPLAYERCOUNT];
-    GUISlider *m_apPlayerAISkillSlider[Activity::MAXPLAYERCOUNT];
-    GUILabel *m_apPlayerAISkillLabel[Activity::MAXPLAYERCOUNT];
+    GUIButton *m_apPlayerControlButton[Players::MaxPlayerCount];
+    GUIComboBox *m_apPlayerTeamSelect[Players::MaxPlayerCount];
+    GUIComboBox *m_apPlayerTechSelect[Players::MaxPlayerCount];
+    GUIComboBox *m_apPlayerHandicap[Players::MaxPlayerCount];
+    GUITextBox *m_apPlayerNameBox[Players::MaxPlayerCount];
+    GUISlider *m_apPlayerAISkillSlider[Players::MaxPlayerCount];
+    GUILabel *m_apPlayerAISkillLabel[Players::MaxPlayerCount];
 
     // SAVING/LOADING GAME DIALOGS
     GUITextBox *m_NewSaveBox;
@@ -1291,6 +1254,8 @@ protected:
 
 private:
 
+	static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1303,8 +1268,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    MetagameGUI(const MetagameGUI &reference);
-    MetagameGUI & operator=(const MetagameGUI &rhs);
+	MetagameGUI(const MetagameGUI &reference) = delete;
+	MetagameGUI & operator=(const MetagameGUI &rhs) = delete;
 
 };
 

@@ -46,7 +46,8 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(GAScripted)
-
+SerializableOverrideMethods
+ClassInfoGetters
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GAScripted
@@ -65,7 +66,7 @@ EntityAllocation(GAScripted)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~GAScripted() { Destroy(true); }
+	~GAScripted() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -76,7 +77,7 @@ EntityAllocation(GAScripted)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+	int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -88,7 +89,7 @@ EntityAllocation(GAScripted)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(std::string scriptPath, std::string scriptClassName) { m_ScriptPath = scriptPath; m_LuaClassName = scriptClassName; return Create(); };
+	int Create(std::string scriptPath, std::string scriptClassName) { m_ScriptPath = scriptPath; m_LuaClassName = scriptClassName; return Create(); };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -99,23 +100,7 @@ EntityAllocation(GAScripted)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const GAScripted &reference);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
+	int Create(const GAScripted &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -126,19 +111,7 @@ EntityAllocation(GAScripted)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Activity::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this GAScripted to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the GAScripted will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+	void Reset() override { Clear(); Activity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -149,7 +122,7 @@ EntityAllocation(GAScripted)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
+	void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -163,27 +136,7 @@ EntityAllocation(GAScripted)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int ReloadScripts();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+	int ReloadScripts() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -193,7 +146,7 @@ EntityAllocation(GAScripted)
 // Arguments:       None.
 // Return value:    A string with the friendly-formatted Lua type name of this object.
 
-    virtual const std::string & GetLuaClassName() const { return m_LuaClassName; }
+	const std::string & GetLuaClassName() const { return m_LuaClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -206,14 +159,14 @@ EntityAllocation(GAScripted)
 //                  but only for a limited number of teams. If -1, not applicable.
 // Return value:    Whether the Scene has the right stuff.
 
-    virtual bool SceneIsCompatible(Scene *pScene, int teams = -1);
+	bool SceneIsCompatible(Scene *pScene, short teams = -1) override;
 
 
     /// <summary>
     /// Indicates an Actor as having left the game scene and entered orbit.  OWNERSHIP IS NOT transferred, as the Actor's inventory is just 'unloaded'.
     /// </summary>
     /// <param name="orbitedCraft">The actor instance that entered orbit. Ownership IS NOT TRANSFERRED!</param>
-    virtual void EnteredOrbit(Actor *orbitedCraft);
+	void EnteredOrbit(Actor *orbitedCraft) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -224,7 +177,7 @@ EntityAllocation(GAScripted)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Start();
+	int Start() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -234,7 +187,7 @@ EntityAllocation(GAScripted)
 // Arguments:       Whether to pause the game or not.
 // Return value:    None.
 
-    virtual void Pause(bool pause = true);
+	void SetPaused(bool pause = true) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -244,19 +197,8 @@ EntityAllocation(GAScripted)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void End();
+	void End() override;
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateEditing
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     This is a special update step for when any player is still editing the
-//                  scene.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void UpdateEditing();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -266,7 +208,7 @@ EntityAllocation(GAScripted)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -276,14 +218,14 @@ EntityAllocation(GAScripted)
 // Arguments:       Whether it's an early update, during Activity update, or late update, after MovableMan
 // Return value:    None.
 
-	virtual void UpdateGlobalScripts(bool lateUpdate);
+	void UpdateGlobalScripts(bool lateUpdate);
 
 
     /// <summary>
     /// Calls this to be processed by derived classes to enable pie-menu dynamic change.
     /// </summary>
     /// <param name="pieMenuActor">The actor which triggered the pie menu event.</param>
-	virtual void OnPieMenu(Actor *pieMenuActor);
+	void OnPieMenu(Actor *pieMenuActor) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -295,7 +237,7 @@ EntityAllocation(GAScripted)
 //                  Which screen's GUI to draw onto the bitmap.
 // Return value:    None.
 
-    virtual void DrawGUI(BITMAP *pTargetBitmap, const Vector& targetPos = Vector(), int which = 0);
+	void DrawGUI(BITMAP *pTargetBitmap, const Vector& targetPos = Vector(), int which = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -307,7 +249,7 @@ EntityAllocation(GAScripted)
 //                  The absolute position of the target bitmap's upper left corner in the scene.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap, const Vector& targetPos = Vector());
+	void Draw(BITMAP *pTargetBitmap, const Vector& targetPos = Vector()) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -317,14 +259,14 @@ protected:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  CollectRequiredAreas
+// Method:  CollectRequiredAreas
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Goes through the script file and checks for any mentions and uses of
 //                  Area:s that are required for this Activity to run in a Scene.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void CollectRequiredAreas();
+	void CollectRequiredAreas();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -336,7 +278,7 @@ protected:
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void InitAIs();
+	void InitAIs() override;
 
 
     // Member variables

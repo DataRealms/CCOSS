@@ -57,7 +57,8 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(ACRocket)
-
+SerializableOverrideMethods
+ClassInfoGetters
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     ACRocket
@@ -76,7 +77,7 @@ EntityAllocation(ACRocket)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~ACRocket() { Destroy(true); }
+	~ACRocket() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -87,7 +88,7 @@ EntityAllocation(ACRocket)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+   int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -98,23 +99,7 @@ EntityAllocation(ACRocket)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const ACRocket &reference);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
+	int Create(const ACRocket &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -125,19 +110,7 @@ EntityAllocation(ACRocket)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); ACraft::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this ACRocket to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the ACRocket will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+    void Reset() override { Clear(); ACraft::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -148,38 +121,7 @@ EntityAllocation(ACRocket)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this ACRocket, including the mass of its
-//                  currently attached body parts and inventory.
-// Arguments:       None.
-// Return value:    A float describing the mass value in Kilograms (kg).
-
-    virtual float GetMass() const;
+    void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -192,57 +134,7 @@ EntityAllocation(ACRocket)
 //                  here means less calculation.
 // Return value:    The rough altitude over the terrain, in pixels.
 
-    virtual float GetAltitude(int max = 0, int accuracy = 0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-// Arguments:       A MOID specifying the MOID that this MovableObject is
-//                  assigned for this frame.
-// Return value:    None.
-
-    virtual void SetID(const MOID newID);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OnBounce
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits and then
-//                  bounces off of something. This is called by the owned Atom/AtomGroup
-//                  of this MovableObject during travel.
-// Arguments:       The position where the bounce-hit occurred.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this bounce.
-
-    virtual bool OnBounce(const Vector &pos);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OnSink
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits and then
-//                  sink into something. This is called by the owned Atom/AtomGroup
-//                  of this MovableObject during travel.
-// Arguments:       The position where the sink-hit occurred.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this sinkage.
-
-    virtual bool OnSink(const Vector &pos);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-// Arguments:       The impulse (kg * m/s) of the impact causing the gibbing to happen.
-//					The internal blast impulse which will push the gibs away from the center.
-//                  A pointer to an MO which the gibs shuold not be colliding with!
-// Return value:    None.
-
-    virtual void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0);
+	float GetAltitude(int max = 0, int accuracy = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -253,7 +145,7 @@ EntityAllocation(ACRocket)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateAI();
+	void UpdateAI() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -263,7 +155,7 @@ EntityAllocation(ACRocket)
 // Arguments:       Nosssssssne.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -274,27 +166,7 @@ EntityAllocation(ACRocket)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ResetEmissionTimers();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound count of this actor and all vital attachables.
-// Arguments:       None.
-// Return value:    Returns total number of wounds of this actor.
-
-	virtual int GetTotalWoundCount() const; 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound limit of this actor and all vital attachables.
-// Arguments:       None.
-// Return value:    Returns total wound limit of this actor.
-
-	virtual int GetTotalWoundLimit() const; 
+	void ResetEmissionTimers() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -309,10 +181,7 @@ EntityAllocation(ACRocket)
 //                  indicator arrows or hovering HUD text and so on.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
+    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -324,76 +193,91 @@ EntityAllocation(ACRocket)
 // Return value:    An integer with the recomended number of actors that fit in the craft.
 //                  Default is two.
 
-    virtual int GetMaxPassengers() const { return m_MaxPassengers > -1 ? m_MaxPassengers : 2; }
+	int GetMaxPassengers() const override { return m_MaxPassengers > -1 ? m_MaxPassengers : 2; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAnyRandomWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds from the actor and all standard attachables.
-// Arguments:       Amount of wounds to remove.
-// Return value:    Damage taken from removed wounds.
+    /// <summary>
+    /// Gets the right leg of this ACRocket.
+    /// </summary>
+    /// <returns>A pointer to the right Leg of this ACRocket. Ownership is NOT transferred.</returns>
+    Leg * GetRightLeg() const { return m_pRLeg; }
 
-	virtual int RemoveAnyRandomWounds(int amount);
+    /// <summary>
+    /// Sets the right Leg for this ACRocket.
+    /// </summary>
+    /// <param name="newLeg">The new Leg to use.</param>
+    void SetRightLeg(Leg *newLeg);
 
+    /// <summary>
+    /// Gets the left Leg of this ACRocket.
+    /// </summary>
+    /// <returns>A pointer to the left Leg of this ACRocket. Ownership is NOT transferred.</returns>
+    Leg * GetLeftLeg() const { return m_pLLeg; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
+    /// <summary>
+    /// Sets the left Leg for this ACRocket.
+    /// </summary>
+    /// <param name="newLeg">The new Leg to use.</param>
+    void SetLeftLeg(Leg *newLeg);
 
-	virtual void GetMOIDs(std::vector<MOID> &MOIDs) const;
+    /// <summary>
+    /// Gets the main thruster of this ACRocket.
+    /// </summary>
+    /// <returns>A pointer to the main thruster of this ACRocket. Ownership is NOT transferred.</returns>
+	AEmitter * GetMainThruster() const { return m_pMThruster; }
 
+    /// <summary>
+    /// Sets the main thruster for this ACRocket.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetMainThruster(AEmitter *newThruster);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			GetMThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the main thruster.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Gets the right side thruster of this ACRocket.
+    /// </summary>
+    /// <returns>A pointer to the right side thruster of this ACRocket. Ownership is NOT transferred.</returns>
+	AEmitter * GetRightThruster() const { return m_pRThruster; }
 
-	virtual AEmitter * GetMThruster() const { return m_pMThruster; }
+    /// <summary>
+    /// Sets the right side thruster for this ACRocket.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetRightThruster(AEmitter *newThruster);
 
+    /// <summary>
+    /// Gets the left side thruster of this ACRocket.
+    /// </summary>
+    /// <returns>A pointer to the left side thruster of this ACRocket. Ownership is NOT transferred.</returns>
+    AEmitter * GetLeftThruster() const { return m_pLThruster; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			GetRThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the right thruster.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Sets the left side thruster for this ACRocket.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetLeftThruster(AEmitter *newThruster);
 
-	virtual AEmitter * GetRThruster() const { return m_pRThruster; }
+    /// <summary>
+    /// Gets the right side secondary thruster of this ACRocket.
+    /// </summary>
+    /// <returns>A pointer to the right side secondary thruster of this ACRocket. Ownership is NOT transferred.</returns>
+    AEmitter * GetURightThruster() const { return m_pURThruster; }
 
+    /// <summary>
+    /// Sets the right side secondary thruster for this ACRocket.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetURightThruster(AEmitter *newThruster);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			GetLThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the left thruster.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
+    /// <summary>
+    /// Gets the left side secondary thruster of this ACRocket.
+    /// </summary>
+    /// <returns>A pointer to the left side secondary thruster of this ACRocket. Ownership is NOT transferred.</returns>
+    AEmitter * GetULeftThruster() const { return m_pULThruster; }
 
-	virtual AEmitter * GetLThruster() const { return m_pLThruster; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			GetURThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the right side secondary thruster.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
-
-	virtual AEmitter * GetURThruster() const { return m_pURThruster; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			GetULThruster
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the left side secondary thruster.
-// Arguments:       None.
-// Return value:    An AEmitter pointer.
-
-	virtual AEmitter * GetULThruster() const { return m_pULThruster; }
+    /// <summary>
+    /// Sets the left side secondary thruster for this ACRocket.
+    /// </summary>
+    /// <param name="newThruster">The new thruster to use.</param>
+    void SetULeftThruster(AEmitter *newThruster);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -403,29 +287,13 @@ EntityAllocation(ACRocket)
 // Arguments:       None.
 // Return value:    Current landing gear state.
 
-	virtual unsigned int GetGearState() const { return m_GearState; }
+	unsigned int GetGearState() const { return m_GearState; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
 protected:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-// Arguments:       The MOID index to register itself and its children in.
-//                  The MOID of the root MO of this MO, ie the highest parent of this MO.
-//                  0 means that this MO is the root, ie it is owned by MovableMan.
-//                  Whether this MO should make a new MOID to use for itself, or to use
-//                  the same as the last one in the index (presumably its parent),
-// Return value:    None.
-
-    virtual void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex,
-                                 MOID rootMOID = g_NoMOID,
-                                 bool makeNewMOID = true);
 
 
     // Member variables
@@ -472,8 +340,8 @@ private:
     void Clear();
 
     // Disallow the use of some implicit methods.
-    ACRocket(const ACRocket &reference);
-    ACRocket & operator=(const ACRocket &rhs);
+	ACRocket(const ACRocket &reference) = delete;
+	ACRocket & operator=(const ACRocket &rhs) = delete;
 
 };
 

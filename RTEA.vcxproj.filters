@@ -96,9 +96,6 @@
     <ClInclude Include="Managers\PresetMan.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="Managers\RTEManagers.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
     <ClInclude Include="Managers\SceneMan.h">
       <Filter>Managers</Filter>
     </ClInclude>
@@ -232,9 +229,6 @@
       <Filter>Entities</Filter>
     </ClInclude>
     <ClInclude Include="Entities\AHuman.h">
-      <Filter>Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="Entities\AllEntities.h">
       <Filter>Entities</Filter>
     </ClInclude>
     <ClInclude Include="Entities\Arm.h">
@@ -408,12 +402,6 @@
     <ClInclude Include="Managers\NetworkServer.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="Managers\Network.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
-    <ClInclude Include="Managers\NetworkMessages.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
     <ClInclude Include="Activities\MultiplayerGame.h">
       <Filter>Activities</Filter>
     </ClInclude>
@@ -462,10 +450,37 @@
     <ClInclude Include="Entities\SoundContainer.h">
       <Filter>Entities</Filter>
     </ClInclude>
-    <ClInclude Include="System\Primitive.h">
-      <Filter>System</Filter>
+    <ClInclude Include="Entities\SoundSet.h">
+      <Filter>Entities</Filter>
     </ClInclude>
     <ClInclude Include="System\Atom.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\ADSensor.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\Gib.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\Round.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="System\NetworkMessages.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\InputScheme.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\InputMapping.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\MetaSave.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Entities\Activity.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="System\GraphicalPrimitive.h">
       <Filter>System</Filter>
     </ClInclude>
     <ClInclude Include="System\PieSlice.h">
@@ -555,9 +570,6 @@
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\AllegroScreen.cpp">
-      <Filter>GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\GUI.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\GUIBanner.cpp">
@@ -882,10 +894,34 @@
     <ClCompile Include="Entities\SoundContainer.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
-    <ClCompile Include="System\Primitive.cpp">
-      <Filter>System</Filter>
+	<ClCompile Include="Entities\SoundSet.cpp">
+      <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="System\Atom.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\ADSensor.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\Gib.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\Round.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="System\InputScheme.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\InputMapping.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\MetaSave.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\Activity.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="System\GraphicalPrimitive.cpp">
       <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="PieSlice.cpp">

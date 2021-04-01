@@ -224,7 +224,7 @@ int SceneLayer::LoadData()
     blit(pCopyFrom, m_pMainBitmap, 0, 0, 0, 0, pCopyFrom->w, pCopyFrom->h);
 */
     // Re-load directly from disk each time; don't do any caching of these bitmaps
-    m_pMainBitmap = m_BitmapFile.LoadAndReleaseBitmap();
+    m_pMainBitmap = m_BitmapFile.GetAsBitmap(COLORCONV_NONE, false);
 
     m_MainBitmapOwned = true;
 
@@ -291,7 +291,7 @@ int SceneLayer::ClearData()
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int SceneLayer::ReadProperty(std::string propName, Reader &reader)
+int SceneLayer::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "BitmapFile")
         reader >> m_BitmapFile;
@@ -313,7 +313,6 @@ int SceneLayer::ReadProperty(std::string propName, Reader &reader)
         SetScaleFactor(m_ScaleFactor);
     }
     else
-        // See if the base class(es) can find a match instead
         return Entity::ReadProperty(propName, reader);
 
     return 0;
@@ -486,13 +485,13 @@ bool SceneLayer::ForceBounds(int &posX, int &posY, bool scaled) const
 
 bool SceneLayer::ForceBounds(Vector &pos, bool scaled) const
 {
-    int posX = floorf(pos.m_X);
-    int posY = floorf(pos.m_Y);
+    int posX = std::floor(pos.m_X);
+    int posY = std::floor(pos.m_Y);
 
     bool wrapped = ForceBounds(posX, posY, scaled);
 
-    pos.m_X = posX + (pos.m_X - floorf(pos.m_X));
-    pos.m_Y = posY + (pos.m_Y - floorf(pos.m_Y));
+    pos.m_X = posX + (pos.m_X - std::floor(pos.m_X));
+    pos.m_Y = posY + (pos.m_Y - std::floor(pos.m_Y));
 
     return wrapped;
 }
@@ -546,13 +545,13 @@ bool SceneLayer::WrapPosition(int &posX, int &posY, bool scaled) const
 
 bool SceneLayer::WrapPosition(Vector &pos, bool scaled) const
 {
-    int posX = floorf(pos.m_X);
-    int posY = floorf(pos.m_Y);
+    int posX = std::floor(pos.m_X);
+    int posY = std::floor(pos.m_Y);
 
     bool wrapped = WrapPosition(posX, posY, scaled);
 
-    pos.m_X = posX + (pos.m_X - floorf(pos.m_X));
-    pos.m_Y = posY + (pos.m_Y - floorf(pos.m_Y));
+    pos.m_X = posX + (pos.m_X - std::floor(pos.m_X));
+    pos.m_Y = posY + (pos.m_Y - std::floor(pos.m_Y));
 
     return wrapped;
 }
@@ -569,6 +568,7 @@ void SceneLayer::Update()
 }
 
 
+// TODO: Declare this in the header and remove the dupe declaration in NetworkClient.cpp
 // Data structure for constructing the draw boxes we'll need to use for drawing
 struct SLDrawBox
 {
@@ -611,8 +611,8 @@ void SceneLayer::Draw(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrol
     // Regular scroll
     else
     {
-        offsetX = floorf(m_Offset.m_X * m_ScrollRatio.m_X);
-        offsetY = floorf(m_Offset.m_Y * m_ScrollRatio.m_Y);
+        offsetX = std::floor(m_Offset.m_X * m_ScrollRatio.m_X);
+        offsetY = std::floor(m_Offset.m_Y * m_ScrollRatio.m_Y);
         // Only force bounds when doing regular scroll offset because the override is used to do terrain object application tricks and sometimes needs the offsets to be < 0
 //        ForceBounds(offsetX, offsetY);
         WrapPosition(offsetX, offsetY);
@@ -766,7 +766,7 @@ void SceneLayer::DrawScaled(BITMAP *pTargetBitmap, Box &targetBox, const Vector 
 
 // TODO: Remove
 //                char balle[245];
-//                sprintf_s(balle, sizeof(balle), "y: %f becomes %f through %f and %f, needs to match: %f, which is: %i", targetPos.m_Y, subOffset.m_Y, resMult.m_Y, resDenom.m_Y, targetPos.m_Y * resMult.m_Y + 0.0001f, (int)(targetPos.m_Y * resMult.m_Y + 0.0001f));
+//                std::snprintf(balle, sizeof(balle), "y: %f becomes %f through %f and %f, needs to match: %f, which is: %i", targetPos.m_Y, subOffset.m_Y, resMult.m_Y, resDenom.m_Y, targetPos.m_Y * resMult.m_Y + 0.0001f, (int)(targetPos.m_Y * resMult.m_Y + 0.0001f));
 //                g_FrameMan.SetScreenText(string(balle));
 
 
@@ -797,8 +797,8 @@ void SceneLayer::DrawScaled(BITMAP *pTargetBitmap, Box &targetBox, const Vector 
     // Regular scroll
     else
     {
-        offsetX = floorf(m_Offset.m_X * m_ScrollRatio.m_X);
-        offsetY = floorf(m_Offset.m_Y * m_ScrollRatio.m_Y);
+        offsetX = std::floor(m_Offset.m_X * m_ScrollRatio.m_X);
+        offsetY = std::floor(m_Offset.m_Y * m_ScrollRatio.m_Y);
         // Only force bounds when doing regular scroll offset because the override is used to do terrain object application tricks and sometimes needs the offsets to be < 0
 //        ForceBounds(offsetX, offsetY);
         WrapPosition(offsetX, offsetY);

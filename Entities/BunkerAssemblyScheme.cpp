@@ -13,9 +13,9 @@
 
 #include "BunkerAssemblyScheme.h"
 #include "PresetMan.h"
-#include "ContentFile.h"
+#include "FrameMan.h"
+
 #include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 
 namespace RTE {
@@ -92,7 +92,7 @@ int BunkerAssemblyScheme::Create(const BunkerAssemblyScheme &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int BunkerAssemblyScheme::ReadProperty(std::string propName, Reader &reader)
+int BunkerAssemblyScheme::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "BitmapFile")
     {
@@ -240,7 +240,6 @@ int BunkerAssemblyScheme::ReadProperty(std::string propName, Reader &reader)
     else if (propName == "AssemblyGroup")
 		reader >> m_AssemblyGroup;
     else
-        // See if the base class(es) can find a match instead
         return SceneObject::ReadProperty(propName, reader);
 
     return 0;

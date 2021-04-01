@@ -1,444 +1,207 @@
 #ifndef _RTEMOPIXEL_
 #define _RTEMOPIXEL_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            MOPixel.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Header file for the MOPixel class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
 #include "MovableObject.h"
-#include "Color.h"
 
-namespace RTE
-{
-
-class Atom;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           MOPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A movable object with mass that is graphically represented by
-//                  dynamic drawing stuff.
-// Parent(s):       MovableObject.
-// Class history:   03/18/2001 MOPixel created.
-
-class MOPixel:
-    public MovableObject
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
-
-public:
-
-
-// Concrete allocation and cloning definitions
-EntityAllocation(MOPixel)
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     MOPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Constructor method used to instantiate a MOPixel object in system
-//                  memory. Create() should be called before using the object.
-// Arguments:       None.
-
-    MOPixel() { Clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     MOPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Convenience constructor to both instantiate a MOPixel in memory and
-//                  and Create it at the same time.
-// Arguments:       See Create() below.
-
-    MOPixel(Color color,
-            const float mass,
-            const Vector &position,
-            const Vector &velocity,
-            Atom *atom,
-            const unsigned long lifetime = 0) { Clear(); Create(color, mass, position, velocity, atom, lifetime); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Destructor:      ~MOPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destructor method used to clean up a MOPixel object before deletion
-//                  from system memory.
-// Arguments:       None.
-
-    virtual ~MOPixel() { Destroy(true); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the MOPixel object ready for use.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the MOPixel object ready for use.
-// Arguments:       A Color object specifying the color of this MOPixel.
-//                  A float specifying the object's mass in Kilograms (kg).
-//                  A Vector specifying the initial position.
-//                  A Vector specifying the initial velocity.
-//                  An Atom that will collide with the terrain.
-//                  The amount of time in ms this MovableObject will exist. 0 means unlim.
-//                  The material Id that this MovableObject will draw upon a material
-//                  bitmap when being recycled.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create(Color color,
-                       const float mass,
-                       const Vector &position,
-                       const Vector &velocity,
-                       Atom *atom,
-                       const unsigned long lifetime = 0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a MOPixel to be identical to another, by deep copy.
-// Arguments:       A reference to the MOPixel to deep copy.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    int Create(const MOPixel &reference);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets the entire MOPixel, including its inherited members, to their
-//                  default settings or values.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void Reset() { Clear(); MovableObject::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this MOPixel with a Writer for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the MOPixel will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the MOPixel object.
-// Arguments:       Whether to only destroy the members defined in this derived class, or
-//                  to destroy all inherited members also.
-// Return value:    None.
-
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMaterial
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the main Material of this MovableObject.
-// Arguments:       None.
-// Return value:    The the Material of this MovableObject.
-
-    virtual Material const * GetMaterial() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetDrawPriority
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the drawing priority of this MovableObject, if two things were
-//                  overlap when copying to the terrain, the higher priority MO would
-//                  end up getting drawn.
-// Arguments:       None.
-// Return value:    The the priority  of this MovableObject. Higher number, the higher
-//                  priority.
-
-    virtual int GetDrawPriority() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetColor
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the color of this MOPixel.
-// Arguments:       None.
-// Return value:    A Color object describing the color.
-
-    Color GetColor() const { return m_Color; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetAtom
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the current Atom of this MOPixel.
-// Arguments:       None.
-// Return value:    A const reference to the current Atom.
-
-    const Atom * GetAtom() const { return m_pAtom; }
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HitsMOs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets whether this MovableObject is set to collide with other
-//                  MovableObject:s during travel.
-// Arguments:       None.
-// Return value:    Whether to hit other MO's during travel, or not.
-
-    virtual bool HitsMOs() const;
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetColor
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the color value of this MOPixel.
-// Arguments:       A Color object specifying the new color index value.
-// Return value:    None.
-
-    void SetColor(Color newColor) { m_Color = newColor; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetAtom
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Replaces the current Atom of this MOPixel with a new one.
-// Arguments:       A reference to the new Atom. Ownership IS transferred!
-// Return value:    None.
-
-    void SetAtom(Atom *newAtom);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetLethalRange
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Travel distance until the bullet start to lose lethality.
-// Arguments:       The distance in pixels.
-// Return value:    None.
-
-    void SetLethalRange(float range);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMaxLethalRangeFactor
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Travel distance until the bullet start to lose lethality.
-// Arguments:       None
-// Return value:    The factor that modifies the base value.
-
-    float GetMaxLethalRangeFactor() const { return m_MaxLethalRange; }
-
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetToHitMOs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets this MovableObject to collide with other MovableObjects during
-//                  travel.
-// Arguments:       Whether to hit other MO's during travel, or not.
-// Return value:    None.
-
-    void SetToHitMOs(bool hitMOs = true);
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsGold
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this MO is made of Gold or not.
-// Arguments:       None.
-// Return value:    Whether this MovableObject is of Gold or not.
-
-    virtual bool IsGold() const { return m_MOType == TypeGeneric && GetMaterial()->id == c_GoldMaterialID; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  CollideAtPoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Calculates the collision response when another MO's Atom collides with
-//                  this MO's physical representation. The effects will be applied
-//                  directly to this MO, and also represented in the passed in HitData.
-// Arguments:       Reference to the HitData struct which describes the collision. This
-//                  will be modified to represent the results of the collision.
-// Return value:    Whether the collision has been deemed valid. If false, then disregard
-//                  any impulses in the Hitdata.
-
-    virtual bool CollideAtPoint(HitData &hitData);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OnBounce
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits and then
-//                  bounces off of something. This is called by the owned Atom/AtomGroup
-//                  of this MovableObject during travel.
-// Arguments:       The HitData describing the collision in detail.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this bounce.
-
-    virtual bool OnBounce(HitData &hd);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          OnSink
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits and then
-//                  sink into something. This is called by the owned Atom/AtomGroup
-//                  of this MovableObject during travel.
-// Arguments:       The HitData describing the collision in detail.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this sinkage.
-
-    virtual bool OnSink(HitData &hd);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RestDetection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Does the calculations necessary to detect whether this MO appears to
-//                  have has settled in the world and is at rest or not. IsAtRest()
-//                  retreves the answer.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void RestDetection();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Travel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Travels this MOSRotatin, using its physical representation.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void Travel();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this MOPixel. Supposed to be done every frame.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void Update();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this MOPixel's current graphical representation to a
-//                  BITMAP of choice.
-// Arguments:       A pointer to a BITMAP to draw on.
-//                  The absolute position of the target bitmap's upper left corner in the Scene.
-//                  In which mode to draw in. See the DrawMode enumeration for the modes.
-//                  Whether to not draw any extra 'ghost' items of this MovableObject,
-//                  indicator arrows or hovering HUD text and so on.
-// Return value:    None.
-
-    virtual void Draw(BITMAP *pTargetBitmap,
-                      const Vector &targetPos = Vector(),
-                      DrawMode mode = g_DrawColor,
-                      bool onlyPhysical = false) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
-
-protected:
-
-    // Member variables
-    static Entity::ClassInfo m_sClass;
-    Color m_Color;
-    Vector m_PrevPos;
-    Atom *m_pAtom;
-    float m_MinLethalRange;     // Lower bound multiplier for setting LethalRange at random. 1.0 equals one screen.
-    float m_MaxLethalRange;     // Upper bound multiplier for setting LethalRange at random. 1.0 equals one screen.
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
-private:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this MOPixel, effectively
-//                  resetting the members of this abstraction level only.
-// Arguments:       None.
-// Return value:    None.
-
-    void Clear();
-
-    // An estimate of how far this MO has traveled since its creation.
-    float m_DistanceTraveled;
-    // After this distance in meters, the damage output of this MO decrease. Default is half a scren plus sharp length for pixels spawned from a gun and one screen otherwise.
-    float m_LethalRange;
-    // When Sharpness has decreased below this threshold the MO becomes m_HitsMOs=false. Default is Sharpness*0.5
-    float m_LethalSharpness;
-
-};
-
-} // namespace RTE
-
-#endif // File
+namespace RTE {
+
+	class Atom;
+
+	/// <summary>
+	/// A movable object with mass that is graphically represented by a single pixel.
+	/// </summary>
+	class MOPixel : public MovableObject {
+
+	public:
+
+		EntityAllocation(MOPixel)
+		ClassInfoGetters
+		SerializableOverrideMethods
+
+#pragma region Creation
+		/// <summary>
+		/// Constructor method used to instantiate a MOPixel object in system memory. Create() should be called before using the object.
+		/// </summary>
+		MOPixel() { Clear(); }
+
+		/// <summary>
+		/// Convenience constructor to both instantiate a MOPixel in memory and Create it at the same time.
+		/// </summary>
+		/// <param name="color">A Color object specifying the color of this MOPixel.</param>
+		/// <param name="mass">A float specifying the object's mass in Kilograms (kg).</param>
+		/// <param name="position">A Vector specifying the initial position.</param>
+		/// <param name="velocity">A Vector specifying the initial velocity.</param>
+		/// <param name="atom">An Atom that will collide with the terrain.</param>
+		/// <param name="lifetime">The amount of time in ms this MOPixel will exist. 0 means unlimited.</param>
+		MOPixel(Color color, const float mass, const Vector &position, const Vector &velocity, Atom *atom, const unsigned long lifetime = 0) { Clear(); Create(color, mass, position, velocity, atom, lifetime); }
+
+		/// <summary>
+		/// Makes the MOPixel object ready for use.
+		/// </summary>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create() override;
+
+		/// <summary>
+		/// Makes the MOPixel object ready for use.
+		/// </summary>
+		/// <param name="color">A Color object specifying the color of this MOPixel.</param>
+		/// <param name="mass">A float specifying the object's mass in Kilograms (kg).</param>
+		/// <param name="position">A Vector specifying the initial position.</param>
+		/// <param name="velocity">A Vector specifying the initial velocity.</param>
+		/// <param name="atom">An Atom that will collide with the terrain.</param>
+		/// <param name="lifetime">The amount of time in ms this MOPixel will exist. 0 means unlimited.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create(Color color, const float mass, const Vector &position, const Vector &velocity, Atom *atom, const unsigned long lifetime = 0);
+
+		/// <summary>
+		/// Creates a MOPixel to be identical to another, by deep copy.
+		/// </summary>
+		/// <param name="reference">A reference to the MOPixel to deep copy.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create(const MOPixel &reference);
+#pragma endregion
+
+#pragma region Destruction
+		/// <summary>
+		/// Destructor method used to clean up a MOPixel object before deletion from system memory.
+		/// </summary>
+		 ~MOPixel() override { Destroy(true); }
+
+		/// <summary>
+		/// Destroys and resets (through Clear()) the MOPixel object.
+		/// </summary>
+		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
+		void Destroy(bool notInherited = false) override;
+
+		/// <summary>
+		/// Resets the entire MOPixel, including its inherited members, to their default settings or values.
+		/// </summary>
+		void Reset() override { Clear(); MovableObject::Reset(); }
+#pragma endregion
+
+#pragma region Getters and Setters
+		/// <summary>
+		/// Gets the drawing priority of this MOPixel, if two things were overlap when copying to the terrain, the higher priority MO would end up getting drawn.
+		/// </summary>
+		/// <returns>The drawing priority of this MOPixel.</returns>
+		int GetDrawPriority() const override;
+
+		/// <summary>
+		/// Gets the main Material of this MOPixel.
+		/// </summary>
+		/// <returns>The Material of this MOPixel.</returns>
+		const Material * GetMaterial() const override;
+
+		/// <summary>
+		/// Gets the current Atom of this MOPixel.
+		/// </summary>
+		/// <returns>A const reference to the current Atom.</returns>
+		const Atom * GetAtom() const { return m_Atom; }
+
+		/// <summary>
+		/// Replaces the current Atom of this MOPixel with a new one.
+		/// </summary>
+		/// <param name="newAtom">A reference to the new Atom. Ownership IS transferred!</param>
+		void SetAtom(Atom *newAtom);
+
+		/// <summary>
+		/// Gets the color of this MOPixel.
+		/// </summary>
+		/// <returns>A Color object describing the color.</returns>
+		Color GetColor() const { return m_Color; }
+
+		/// <summary>
+		/// Sets the color value of this MOPixel.
+		/// </summary>
+		/// <param name="newColor">A Color object specifying the new color index value.</param>
+		void SetColor(Color newColor) { m_Color = newColor; }
+
+		/// <summary>
+		/// Travel distance until the bullet start to lose lethality.
+		/// </summary>
+		/// <returns>The factor that modifies the base value.</returns>
+		float GetMaxLethalRangeFactor() const { return m_MaxLethalRange; }
+
+		/// <summary>
+		/// Travel distance until the bullet start to lose lethality.
+		/// </summary>
+		/// <param name="range">The distance in pixels.</param>
+		void SetLethalRange(float range);
+#pragma endregion
+
+#pragma region Virtual Override Methods
+		/// <summary>
+		/// Travels this MOPixel, using its physical representation.
+		/// </summary>
+		void Travel() override;
+
+		/// <summary>
+		/// Calculates the collision response when another MO's Atom collides with this MO's physical representation.
+		/// The effects will be applied directly to this MO, and also represented in the passed in HitData.
+		/// </summary>
+		/// <param name="hitData">Reference to the HitData struct which describes the collision. This will be modified to represent the results of the collision.</param>
+		/// <returns>Whether the collision has been deemed valid. If false, then disregard any impulses in the HitData.</returns>
+		bool CollideAtPoint(HitData &hitData) override;
+
+		/// <summary>
+		/// Does the calculations necessary to detect whether this MO appears to have has settled in the world and is at rest or not. IsAtRest() retrieves the answer.
+		/// </summary>
+		void RestDetection() override;
+
+		/// <summary>
+		/// Defines what should happen when this MOPixel hits and then bounces off of something. This is called by the owned Atom/AtomGroup of this MOPixel during travel.
+		/// </summary>
+		/// <param name="hd">The HitData describing the collision in detail.</param>
+		/// <returns>Whether the MOPixel should immediately halt any travel going on after this bounce.</returns>
+		bool OnBounce(HitData &hd) override { return false; }
+
+		/// <summary>
+		/// Defines what should happen when this MOPixel hits and then sink into something. This is called by the owned Atom/AtomGroup of this MOPixel during travel.
+		/// </summary>
+		/// <param name="hd">The HitData describing the collision in detail.</param>
+		/// <returns>Whether the MOPixel should immediately halt any travel going on after this sinkage.</returns>
+		bool OnSink(HitData &hd) override { return false; }
+
+		/// <summary>
+		/// Updates this MOPixel. Supposed to be done every frame.
+		/// </summary>
+		void Update() override;
+
+		/// <summary>
+		/// Draws this MOPixel's current graphical representation to a BITMAP of choice.
+		/// </summary>
+		/// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
+		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
+		/// <param name="mode">In which mode to draw in. See the DrawMode enumeration for the modes.</param>
+		/// <param name="onlyPhysical">Whether to not draw any extra 'ghost' items of this MOPixel, indicator arrows or hovering HUD text and so on.</param>
+		void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
+#pragma endregion
+
+	protected:
+
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
+
+		Atom *m_Atom; //!< The single Atom that is responsible for collisions of this MOPixel.
+		Color m_Color; //!< Color representation of this MOPixel. 
+
+		float m_DistanceTraveled; //!< An estimate of how far this MO has traveled since its creation.	
+
+		float m_LethalRange; //!< After this distance in meters, the damage output of this MO decrease. Default is half a screen plus sharp length for pixels spawned from a gun and one screen otherwise.
+		float m_MinLethalRange; //!< Lower bound multiplier for setting LethalRange at random. 1.0 equals one screen.
+		float m_MaxLethalRange; //!< Upper bound multiplier for setting LethalRange at random. 1.0 equals one screen.
+		float m_LethalSharpness; //!< When Sharpness has decreased below this threshold the MO becomes m_HitsMOs = false. Default is Sharpness * 0.5.
+
+	private:
+
+		/// <summary>
+		/// Sets the screen effect to draw at the final post-processing stage.
+		/// </summary>
+		void SetPostScreenEffectToDraw() const;
+
+		/// <summary>
+		/// Clears all the member variables of this MOPixel, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
+	};
+}
+#endif

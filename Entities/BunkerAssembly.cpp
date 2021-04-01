@@ -179,7 +179,7 @@ int BunkerAssembly::Create(const BunkerAssembly &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int BunkerAssembly::ReadProperty(std::string propName, Reader &reader)
+int BunkerAssembly::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     // Ignore TerrainObject's specific properties, but don't let parent class process them
 	if (propName == "FGColorFile")
@@ -260,11 +260,10 @@ int BunkerAssembly::ReadProperty(std::string propName, Reader &reader)
 		} else {
 			// Do not allow to define assemblies prior to corresponding assembly scheme
 			char s[256];
-			sprintf_s(s, sizeof(s), "Required BunkerAssemblyScheme '%s%' not found when trying to load BunkerAssembly '%s'! BunkerAssemblySchemes MUST be defined before dependent BunkerAssmeblies.", parentScheme.c_str(), m_PresetName.c_str());
+			std::snprintf(s, sizeof(s), "Required BunkerAssemblyScheme '%s%' not found when trying to load BunkerAssembly '%s'! BunkerAssemblySchemes MUST be defined before dependent BunkerAssmeblies.", parentScheme.c_str(), m_PresetName.c_str());
 			RTEAbort(s);
 		}
 	} else
-        // See if the base class(es) can find a match instead
         return SceneObject::ReadProperty(propName, reader);
 
     return 0;
@@ -424,7 +423,7 @@ std::vector<Deployment *> BunkerAssembly::GetDeployments()
 		if (candidatesList.size() == 0 )
 			break;
 
-		int selection = SelectRand(0, candidatesList.size() - 1);
+		int selection = RandomNum<int>(0, candidatesList.size() - 1);
 		deploymentsList.push_back(candidatesList.at(selection));
 		candidatesList.erase(candidatesList.begin() + selection);
 	}

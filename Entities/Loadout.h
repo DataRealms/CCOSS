@@ -46,6 +46,8 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(Loadout)
+SerializableOverrideMethods
+ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -79,30 +81,14 @@ EntityAllocation(Loadout)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
+// Method:  Create
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a Loadout to be identical to another, by deep copy.
 // Arguments:       A reference to the Loadout to deep copy.
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const Loadout &reference);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
+	int Create(const Loadout &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -113,54 +99,11 @@ EntityAllocation(Loadout)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); Entity::Reset(); }
+    void Reset() override { Clear(); Entity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this Loadout to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the Loadout will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the Loadout object.
-// Arguments:       Whether to only destroy the members defined in this derived class, or
-//                  to destroy all inherited members also.
-// Return value:    None.
-
-    virtual void Destroy(bool notInherited = false);
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsComplete
+// Method:  IsComplete
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Shows whether this loadout is complete, or some Entity within could
 //                  not be found on load.
@@ -171,7 +114,7 @@ EntityAllocation(Loadout)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  CreateFirstActor
+// Method:  CreateFirstActor
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates and returns the first Actor that this Loadout has and equips.
 //                  Ownership IS transferred!! All items of the Loadout of this Deployment
@@ -181,11 +124,11 @@ EntityAllocation(Loadout)
 // Return value:    The Actor instance, if any, that is first defined in this Loadout.
 //                  OWNERSHIP IS TRANSFERRED!
 
-    virtual Actor * CreateFirstActor(int nativeModule, float foreignMult, float nativeMult, float &costTally) const;
+	Actor * CreateFirstActor(int nativeModule, float foreignMult, float nativeMult, float &costTally) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  CreateFirstDevice
+// Method:  CreateFirstDevice
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates and returns the first Device that is defined in this Loadout.
 //                  Ownership IS transferred!! Only the first Device is created.
@@ -194,49 +137,49 @@ EntityAllocation(Loadout)
 // Return value:    The SceneObject instance, if any, that this Loadout defines first.
 //                  OWNERSHIP IS TRANSFERRED!
 
-    virtual SceneObject * CreateFirstDevice(int nativeModule, float foreignMult, float nativeMult,  float &costTally) const;
+	SceneObject * CreateFirstDevice(int nativeModule, float foreignMult, float nativeMult,  float &costTally) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetDeliveryCraft
+// Method:  GetDeliveryCraft
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the preset of the delivery craft set for this loadout. Owenership
 //                  is NOT transferred!
 // Arguments:       None.
-// Return value:    A pointer to the ACraft preset instance. OINT.
+// Return value:    A pointer to the ACraft preset instance. OWNERSHIP IS NOT TRANSFERRED!
 
-    virtual const ACraft * GetDeliveryCraft() const { return m_pDeliveryCraft; }
+	const ACraft * GetDeliveryCraft() const { return m_pDeliveryCraft; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetDeliveryCraft
+// Method:  SetDeliveryCraft
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the preset of the delivery craft set for this loadout. Owenership
 //                  is NOT transferred!
-// Arguments:       A pointer to the ACraft preset instance. OINT.
+// Arguments:       A pointer to the ACraft preset instance. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    None.
 
-    virtual void SetDeliveryCraft(const ACraft *pCraft) { m_pDeliveryCraft = pCraft; m_Complete = m_Complete && m_pDeliveryCraft; }
+	void SetDeliveryCraft(const ACraft *pCraft) { m_pDeliveryCraft = pCraft; m_Complete = m_Complete && m_pDeliveryCraft; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetCargoList
+// Method:  GetCargoList
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the list of cargo Entity items this Loadout represents.
 // Arguments:       None.
-// Return value:    A pointer to the list of cargo Entity items. OINT.
+// Return value:    A pointer to the list of cargo Entity items. OWNERSHIP IS NOT TRANSFERRED!
 
-    virtual std::list<const SceneObject *> * GetCargoList() { return &m_CargoItems; }
+	std::list<const SceneObject *> * GetCargoList() { return &m_CargoItems; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AddToCargoList
+// Method:  AddToCargoList
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Adds a new Preset to the list of cargo items to be included in this.
 // Arguments:       A const pointer to the ScneObject preset we want to add to this loadout.
 // Return value:    None.
 
-    virtual void AddToCargoList(const SceneObject *pNewItem) { if (pNewItem) m_CargoItems.push_back(pNewItem); }
+	void AddToCargoList(const SceneObject *pNewItem) { if (pNewItem) m_CargoItems.push_back(pNewItem); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

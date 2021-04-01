@@ -23,11 +23,11 @@ namespace RTE {
 	/// Convenience macro to cut down on duplicate ClassInfo methods in classes that extend Entity.
 	/// </summary>
 	#define ClassInfoGetters \
-		const Entity::ClassInfo & GetClass() const { return m_sClass; } \
-		const std::string & GetClassName() const { return m_sClass.GetName(); }
+		const Entity::ClassInfo & GetClass() const override { return m_sClass; } \
+		const std::string & GetClassName() const override { return m_sClass.GetName(); }
 
 	/// <summary>
-	/// Static method used in conjunction with ClassInfo to allocate an Entity. 
+	/// Static method used in conjunction with ClassInfo to allocate an Entity.
 	/// This function is passed into the constructor of this Entity's static ClassInfo's constructor, so that it can instantiate MovableObjects.
 	/// </summary>
 	/// <returns>A pointer to the newly dynamically allocated Entity. Ownership is transferred as well.</returns>
@@ -36,10 +36,10 @@ namespace RTE {
 		static void operator delete (void *instance) { TYPE::m_sClass.ReturnPoolMemory(instance); }		\
 		static void * operator new (size_t size, void *p) throw() { return p; }							\
 		static void operator delete (void *, void *) throw() {  }										\
-		static void * Allocate() { return std::malloc(sizeof(TYPE)); }									\
+		static void * Allocate() { return malloc(sizeof(TYPE)); }										\
 		static void Deallocate(void *instance) { free(instance); }										\
 		static Entity * NewInstance() { return new TYPE; }												\
-		virtual Entity * Clone(Entity *cloneTo = 0) const {												\
+		Entity * Clone(Entity *cloneTo = 0) const override {											\
 			TYPE *ent = cloneTo ? dynamic_cast<TYPE *>(cloneTo) : new TYPE();							\
 			RTEAssert(ent, "Tried to clone to an incompatible instance!");								\
 			if (cloneTo) { ent->Destroy(); }															\
@@ -74,6 +74,8 @@ namespace RTE {
 		friend class DataModule;
 
 	public:
+
+		SerializableOverrideMethods
 
 #pragma region ClassInfo
 		/// <summary>
@@ -111,7 +113,7 @@ namespace RTE {
 			static std::list<std::string> GetClassNames();
 
 			/// <summary>
-			/// Gets the ClassInfo of a particular RTE class corresponding to a friendly-formatted string name. 
+			/// Gets the ClassInfo of a particular RTE class corresponding to a friendly-formatted string name.
 			/// </summary>
 			/// <param name="name">The friendly name of the desired ClassInfo.</param>
 			/// <returns>A pointer to the requested ClassInfo, or 0 if none that matched the name was found. Ownership is NOT transferred!</returns>
@@ -129,14 +131,14 @@ namespace RTE {
 			/// Grabs from the pre-allocated pool, an available chunk of memory the exact size of the Entity this ClassInfo represents. OWNERSHIP IS TRANSFERRED!
 			/// </summary>
 			/// <returns>A pointer to the pre-allocated pool memory. OWNERSHIP IS TRANSFERRED!</returns>
-			virtual void * GetPoolMemory();
+			void * GetPoolMemory();
 
 			/// <summary>
 			/// Returns a raw chunk of memory back to the pre-allocated available pool.
 			/// </summary>
 			/// <param name="returnedMemory">The raw chunk of memory that is being returned. Needs to be the same size as the type this ClassInfo describes. OWNERSHIP IS TRANSFERRED!</param>
 			/// <returns>The count of outstanding memory chunks after this was returned.</returns>
-			virtual int ReturnPoolMemory(void *returnedMemory);
+			int ReturnPoolMemory(void *returnedMemory);
 
 			/// <summary>
 			/// Writes a bunch of useful debug info about the memory pools to a file.
@@ -191,8 +193,8 @@ namespace RTE {
 
 
 			// Forbidding copying
-			ClassInfo(const ClassInfo &reference) {}
-			ClassInfo & operator=(const ClassInfo &rhs) {}
+			ClassInfo(const ClassInfo &reference) = delete;
+			ClassInfo & operator=(const ClassInfo &rhs) = delete;
 		};
 #pragma endregion
 
@@ -206,7 +208,7 @@ namespace RTE {
 		/// Makes the Entity ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create() override;
 
 		/// <summary>
 		/// Creates an Entity to be identical to another, by deep copy.
@@ -222,7 +224,7 @@ namespace RTE {
 		/// <param name="checkType">Whether there is a class name in the stream to check against to make sure the correct type is being read from the stream.</param>
 		/// <param name="doCreate">Whether to do any additional initialization of the object after reading in all the properties from the Reader. This is done by calling Create().</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(Reader &reader, bool checkType = true, bool doCreate = true) { return Serializable::Create(reader, checkType, doCreate); }
+		int Create(Reader &reader, bool checkType = true, bool doCreate = true) override { return Serializable::Create(reader, checkType, doCreate); }
 
 		/// <summary>
 		/// Uses a passed-in instance, or creates a new one, and makes it identical to this.
@@ -247,36 +249,17 @@ namespace RTE {
 		/// <summary>
 		/// Resets the entire Entity, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
+		void Reset() override { Clear(); }
 #pragma endregion
 
 #pragma region INI Handling
 		/// <summary>
-		/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called.
-		/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
-		/// </summary>
-		/// <param name="propName">The name of the property to be read.</param>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>
-		/// An error return value signaling whether the property was successfully read or not.
-		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
-		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader);
-
-		/// <summary>
-		/// Saves the complete state of this Entity to an output stream for later recreation with Create(istream &stream).
-		/// </summary>
-		/// <param name="writer">A Writer that the Entity will save itself to.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const;
-
-		/// <summary> 
 		/// Only saves out a Preset reference of this to the stream.
 		/// Is only applicable to objects that are not original presets and haven't been altered since they were copied from their original.
 		/// </summary>
 		/// <param name="writer">A Writer that the Entity will save itself to.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int SavePresetCopy(Writer &writer) const;
+		int SavePresetCopy(Writer &writer) const;
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -427,12 +410,12 @@ namespace RTE {
 		std::string m_PresetName; //!< The name of the Preset data this was cloned from, if any.
 		std::string m_PresetDescription; //!< The description of the preset in user friendly plain text that will show up in menus etc.
 
-		bool m_IsOriginalPreset; //!< Whether this is to be added to the PresetMan as an original preset instance.  
+		bool m_IsOriginalPreset; //!< Whether this is to be added to the PresetMan as an original preset instance.
 		int m_DefinedInModule; //!< The DataModule ID that this was successfully added to at some point. -1 if not added to anything yet.
 
 		//TODO Consider replacing this with an unordered_set. See https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/88
-		std::list<std::string> m_Groups; //!< List of all tags associated with this. The groups are used to categorize and organize Entities.  
-		std::string m_LastGroupSearch; //!< Last group search string, for more efficient response on multiple tries for the same group name.  
+		std::list<std::string> m_Groups; //!< List of all tags associated with this. The groups are used to categorize and organize Entities.
+		std::string m_LastGroupSearch; //!< Last group search string, for more efficient response on multiple tries for the same group name.
 		bool m_LastGroupResult; //!< Last group search result, for more efficient response on multiple tries for the same group name.
 
 		int m_RandomWeight; //!< Random weight used when picking item using PresetMan::GetRandomBuyableOfGroupFromTech. From 0 to 100. 0 means item won't be ever picked.

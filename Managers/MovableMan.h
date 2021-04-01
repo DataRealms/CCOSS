@@ -14,22 +14,13 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "RTETools.h"
-#include "Singleton.h"
-#define g_MovableMan MovableMan::Instance()
-
 #include "Serializable.h"
 #include "Entity.h"
-#include "FrameMan.h"
 #include "SceneMan.h"
 #include "LuaMan.h"
-#include "ActivityMan.h"
-#include "Vector.h"
-//#include "MOPixel.h"
-//#include "AHuman.h"
-//#include "MovableObject.h"
-//#include "LimbPath.h"
-//#include "AtomGroup.h"
+#include "Singleton.h"
+
+#define g_MovableMan MovableMan::Instance()
 
 namespace RTE
 {
@@ -37,10 +28,7 @@ namespace RTE
 class MovableObject;
 class Actor;
 class MOPixel;
-//class Actor;
 class AHuman;
-//class AtomGroup;
-//class Atom;
 class SceneLayer;
 
 
@@ -53,13 +41,13 @@ class SceneLayer;
 
 struct AlarmEvent
 {
-    AlarmEvent() { m_ScenePos.Reset(); m_Team = Activity::NOTEAM; m_Range = 1; }
-    AlarmEvent(const Vector &pos, int team = Activity::NOTEAM, float range = 1) { m_ScenePos = pos; m_Team = (Activity::Team)team; m_Range = range; }
+    AlarmEvent() { m_ScenePos.Reset(); m_Team = Activity::NoTeam; m_Range = 1; }
+    AlarmEvent(const Vector &pos, int team = Activity::NoTeam, float range = 1) { m_ScenePos = pos; m_Team = (Activity::Teams)team; m_Range = range; }
     
     // Absolute position in the scene where this occurred
     Vector m_ScenePos;
     // The team of whatever object that caused this event
-    Activity::Team m_Team;
+    Activity::Teams m_Team;
     // The range multiplier, that this alarming event can be heard
     float m_Range;
 };
@@ -72,10 +60,8 @@ struct AlarmEvent
 // Parent(s):       Singleton, Serializable.
 // Class history:   12/25/2001 MovableMan created.
 
-class MovableMan:
-    public Singleton<MovableMan>,
-    public Serializable
-{
+class MovableMan : public Singleton<MovableMan>, public Serializable {
+	friend class SettingsMan;
     friend class LuaMan;
 
 
@@ -83,6 +69,9 @@ class MovableMan:
 // Public member variable, method and friend function declarations
 
 public:
+
+	SerializableClassNameGetter
+	SerializableOverrideMethods
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -102,57 +91,29 @@ public:
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~MovableMan() { Destroy(); }
+	~MovableMan() { Destroy(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
+// Method:  Create
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes the MovableMan object ready for use.
 // Arguments:       None.
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+	int Initialize();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this MovableMan to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the MovableMan will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
+// Method:  Reset
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Resets the entire MovableMan, including its inherited members, to
 //                  their default settings or values.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); }
+	void Reset() override { Clear(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -163,16 +124,6 @@ public:
 // Return value:    None.
 
     void Destroy();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -298,7 +249,7 @@ public:
 //                  The maximum radius around that scene point to search.
 //                  A float to be filled out with the distance of the returned closest to
 //                  the search point. Will be unaltered if no object was found within radius.
-//                  An Actor to exclude from the search. OINT.
+//                  An Actor to exclude from the search. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    An Actor pointer to the requested team's Actor closest to the Scene
 //                  point, but not outside the max radius. If no Actor other than the
 //                  excluded one was found within the radius of the point, 0 is returned.
@@ -311,7 +262,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Get a pointer to an Actor in the internal Actor list that is is not of
 //                  the specified team and closest to a specific scene point.
-// Arguments:       Which team to try to get an enemy Actor for. NOTEAM means all teams.
+// Arguments:       Which team to try to get an enemy Actor for. NoTeam means all teams.
 //                  The Scene point to search for the closest to.
 //                  The maximum radius around that scene point to search.
 //                  A vector to be filled out with the distance of the returned closest to
@@ -346,7 +297,7 @@ public:
 //                  The maximum radius around that scene point to search.
 //                  A float to be filled out with the distance of the returned closest to
 //                  the search point. Will be unaltered if no object was found within radius.
-//                  An Actor to exclude from the search. OINT.
+//                  An Actor to exclude from the search. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    An Actor pointer to the requested Actor closest to the Scene
 //                  point, but not outside the max radius. If no Actor other than the
 //                  excluded one was found within the radius of the point, 0 is returned.
@@ -358,11 +309,11 @@ public:
 // Method:          GetClosestBrainActor
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Get a pointer to the brain actor of a specific team that is closest to
-//                  a scene point. OINT.
+//                  a scene point. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       Which team to try to get the brain for. 0 means first team, 1 means 2nd.
 //                  The point in the scene where to look for the closest opposite team brain.
 // Return value:    An Actor pointer to the requested team's brain closest to the point.
-//                  0 if there are no brains of that team. OINT.
+//                  0 if there are no brains of that team. OWNERSHIP IS NOT TRANSFERRED!
 
     Actor * GetClosestBrainActor(int team, const Vector &scenePoint) const;
 
@@ -371,11 +322,11 @@ public:
 // Method:          GetFirstBrainActor
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Get a pointer to the brain actor of a specific team that is closest to
-//                  a scene point. OINT.
+//                  a scene point. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       Which team to try to get the brain for. 0 means first team, 1 means 2nd.
 //                  The point in the scene where to look for the closest opposite team brain.
 // Return value:    An Actor pointer to the requested team's brain closest to the point.
-//                  0 if there are no brains of that team. OINT.
+//                  0 if there are no brains of that team. OWNERSHIP IS NOT TRANSFERRED!
 
     Actor * GetFirstBrainActor(int team) const { return GetClosestBrainActor(team, Vector()); }
 
@@ -384,11 +335,11 @@ public:
 // Method:          GetClosestOtherBrainActor
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Get a pointer to the brain actor NOT of a specific team that is closest
-//                  to a scene point. OINT.
+//                  to a scene point. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       Which team to NOT get the brain for. 0 means first team, 1 means 2nd.
 //                  The point where to look for the closest brain not of this team.
 // Return value:    An Actor pointer to the requested brain closest to the point.
-//                  0 if there are no brains not on that team. OINT.
+//                  0 if there are no brains not on that team. OWNERSHIP IS NOT TRANSFERRED!
 
     Actor * GetClosestOtherBrainActor(int notOfTeam, const Vector &scenePoint) const;
 
@@ -396,10 +347,10 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetFirstOtherBrainActor
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Get a pointer to the brain actor NOT of a specific team. OINT.
+// Description:     Get a pointer to the brain actor NOT of a specific team. OWNERSHIP IS NOT TRANSFERRED!
 // Arguments:       Which team to NOT get the brain for. 0 means first team, 1 means 2nd.
 // Return value:    An Actor pointer to the requested brain of that team.
-//                  0 if there are no brains not on that team. OINT.
+//                  0 if there are no brains not on that team. OWNERSHIP IS NOT TRANSFERRED!
 
     Actor * GetFirstOtherBrainActor(int notOfTeam) const { return GetClosestOtherBrainActor(notOfTeam, Vector()); }
 
@@ -416,20 +367,6 @@ public:
 
     Actor * GetUnassignedBrain(int team = 0) const;
 
-/* uuuh?
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPlayerBrain
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Get a pointer to the resident brain actor of a specific player, or
-//                  failing that, a brain of a team which 
-//                  been assigned to a player yet.
-// Arguments:       Which team to try to get the brain for. 0 means first team, 1 means 2nd.
-// Return value:    An Actor pointer to the requested team's first brain encountered
-//                  in the list that hasn't been assigned to a player. 0 if there are no
-//                  unassigned brains of that team.
-
-    Actor * GetPlayerBrain(int team = 0) const;
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetParticleCount
@@ -439,16 +376,6 @@ public:
 // Return value:    The number of particles.
 
     long GetParticleCount() const { return m_Particles.size(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetAGResolution
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the global default AtomGroup resolution setting.
-// Arguments:       None.
-// Return value:    The global AtomGroup resolution setting, from 1 (highest res) upward.
-
-    int GetAGResolution() const { return m_AGResolution; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -712,7 +639,7 @@ public:
 // Method:          KillAllActors
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Kills and destroys all actors of a specific team.
-// Arguments:       The team to NOT annihilate, if NOTEAM, then ALL actors die.
+// Arguments:       The team to NOT annihilate, if NoTeam, then ALL actors die.
 // Return value:    How many Actors were killed.
 
     int KillAllActors(int exceptTeam = -1);
@@ -724,7 +651,7 @@ public:
 // Description:     Adds to a list ALL Actors in the world and removes them from the
 //                  MovableMan. Ownership IS transferred!
 // Arguments:       The list of Actors to put the evacuated Actor instances in.
-//                  The team to only eject Actors of. If NOTEAM, then all will be grabbed.
+//                  The team to only eject Actors of. If NoTeam, then all will be grabbed.
 //                  Whether to not grab any brains at all.
 // Return value:    How many Actors was transferred to the list.
 
@@ -748,10 +675,10 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Opens all doors and keeps them open until this is called again with false.
 // Arguments:       Whether to open all doors (true), or undo this action (false)
-//                  Which team to do this for. NOTEAM means all teams.
+//                  Which team to do this for. NoTeam means all teams.
 // Return value:    None.
 
-    void OpenAllDoors(bool open = true, int team = Activity::NOTEAM);
+    void OpenAllDoors(bool open = true, int team = Activity::NoTeam);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -761,10 +688,10 @@ public:
 //                  Used for making pathfinding work better, allowing teammember to navigate
 //                  through friendly bases.
 // Arguments:       Whether to enable the override (true), or undo this action (false)
-//                  Which team to do this for. NOTEAM means all teams.
+//                  Which team to do this for. NoTeam means all teams.
 // Return value:    None.
 
-    void OverrideMaterialDoors(bool enable, int team = Activity::NOTEAM);
+    void OverrideMaterialDoors(bool enable, int team = Activity::NoTeam);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -862,7 +789,7 @@ public:
 // Arguments:       None.
 // Return value:    None.
 
-    void Update();
+	void Update();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -887,19 +814,6 @@ public:
 
     void UpdateDrawMOIDs(BITMAP *pTargetBitmap);
 
-
-
-/* Obsolete, now done in SceneMan's version with registered rectangles
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws NoMOID ID where all this MovableMan's MO's with registered MOIDs
-//                  are on a BITMAP of choice. It essentially undos the effect of UpdateDrawMOIDs.
-// Arguments:       None.
-// Return value:    None.
-
-    void ClearMOIDs();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Draw
@@ -994,9 +908,6 @@ public:
 
 protected:
 
-    // Member variables
-    static const std::string m_ClassName;
-
     // All actors in the scene
     std::deque<Actor *> m_Actors;
     // List of items that are pickup-able by actors
@@ -1010,11 +921,11 @@ protected:
     std::deque<MovableObject *> m_AddedParticles;
 
     // Roster of each team's actors, sorted by their X positions in the scene. Actors not owned here
-    std::list<Actor *> m_ActorRoster[Activity::MAXTEAMCOUNT];
+    std::list<Actor *> m_ActorRoster[Activity::MaxTeamCount];
     // Whether to draw HUD lines between the actors of a specific team
-    bool m_SortTeamRoster[Activity::MAXTEAMCOUNT];
+    bool m_SortTeamRoster[Activity::MaxTeamCount];
 	// Every team's MO footprint
-	int m_TeamMOIDCount[Activity::MAXTEAMCOUNT];
+	int m_TeamMOIDCount[Activity::MaxTeamCount];
 
     // Optimization implementation
     // MO's that have already been asked whether they exist in the manager this frame, and the search result.
@@ -1030,8 +941,6 @@ protected:
 
     // The list created each frame to register all the current MO's
     std::vector<MovableObject *> m_MOIDIndex;
-    // Global AtomGroup resolution setting.
-    int m_AGResolution;
     // The ration of terrain pixels to be converted into MOPixel:s upon
     // deep impact of MO.
     float m_SplashRatio;
@@ -1061,6 +970,8 @@ protected:
 
 private:
 
+	static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1073,8 +984,8 @@ private:
 
 
     // Disallow the use of some implicit methods.
-    MovableMan(const MovableMan &reference);
-    MovableMan & operator=(const MovableMan &rhs);
+	MovableMan(const MovableMan &reference) = delete;
+	MovableMan & operator=(const MovableMan &rhs) = delete;
 
 };
 

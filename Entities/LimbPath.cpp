@@ -12,13 +12,12 @@
 // Inclusions of header files
 
 #include "LimbPath.h"
-#include "FrameMan.h"
 #include "PresetMan.h"
 #include "SLTerrain.h"
 
 namespace RTE {
 
-ConcreteClassInfo(LimbPath, Entity, 0)
+ConcreteClassInfo(LimbPath, Entity, 20)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -33,6 +32,7 @@ void LimbPath::Clear()
     m_StartSegCount = 0;
     m_Segments.clear();
 //    m_CurrentSegment = 0;
+    m_FootCollisionsDisabledSegment = -1;
     m_SegProgress = 0.0;
     for (int i = 0; i < SPEEDCOUNT; ++i)
         m_TravelSpeed[i] = 0.0;
@@ -121,6 +121,8 @@ int LimbPath::Create(const LimbPath &reference)
     else
         m_CurrentSegment = m_Segments.end();
 
+    m_FootCollisionsDisabledSegment = reference.m_FootCollisionsDisabledSegment;
+
     m_SegProgress = reference.m_SegProgress;
     for (int i = 0; i < SPEEDCOUNT; ++i)
         m_TravelSpeed[i] = reference.m_TravelSpeed[i];
@@ -145,7 +147,7 @@ int LimbPath::Create(const LimbPath &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int LimbPath::ReadProperty(std::string propName, Reader &reader)
+int LimbPath::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "StartOffset")
         reader >> m_Start;
@@ -159,6 +161,8 @@ int LimbPath::ReadProperty(std::string propName, Reader &reader)
         m_TotalLength += segment.GetMagnitude();
         if (m_Segments.size() >= m_StartSegCount)
             m_RegularLength += segment.GetMagnitude();
+    } else if (propName == "EndSegCount") {
+        reader >> m_FootCollisionsDisabledSegment;
     }
 	else if (propName == "SlowTravelSpeed")
 	{
@@ -181,7 +185,6 @@ int LimbPath::ReadProperty(std::string propName, Reader &reader)
 		//m_PushForce = m_PushForce / 1.5;
 	}
     else
-        // See if the base class(es) can find a match instead
         return Entity::ReadProperty(propName, reader);
 
     return 0;
@@ -300,7 +303,7 @@ Vector LimbPath::GetCurrentVel(const Vector &limbPos)
 
     if (IsStaticPoint())
     {
-        returnVel = distVect * g_FrameMan.GetMPP() / 0.020/* + m_JointVel*/;
+        returnVel = distVect * c_MPP / 0.020/* + m_JointVel*/;
         returnVel.CapMagnitude(m_TravelSpeed[m_WhichSpeed]);
         returnVel += m_JointVel;
 
@@ -344,7 +347,7 @@ float LimbPath::GetNextTimeChunk(const Vector &limbPos)
     {
         Vector distance;
         // Figure out the distance, in meters, between the limb position and the target.
-        distance = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget()) * g_FrameMan.GetMPP();
+        distance = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget()) * c_MPP;
         // Add the distance needed to be traveled due to the joint velocity.
 //        distance += m_JointVel * m_TimeLeft;
 
@@ -404,7 +407,7 @@ void LimbPath::ReportProgress(const Vector &limbPos)
         }
 
         // Make sure we're not stuck on one segment, time that it isn't taking unreasonably long, and restart the path if it seems stuck
-        if (!m_Ended && m_SegTimer.IsPastSimMS(((segMag * g_FrameMan.GetMPP()) / GetSpeed()) * 1000 * 2))
+        if (!m_Ended && m_SegTimer.IsPastSimMS(((segMag * c_MPP) / GetSpeed()) * 1000 * 2))
 //        if (!m_Ended && m_SegTimer.IsPastSimMS(333))
         {
             Terminate();
@@ -419,7 +422,7 @@ void LimbPath::ReportProgress(const Vector &limbPos)
 // Description:     Gets a value representing the total progress that has been made on
 //                  this entire path. If the path has ended, 0.0 is returned.
 
-float LimbPath::GetTotalProgress()
+float LimbPath::GetTotalProgress() const
 {
     if (m_Ended || IsStaticPoint())
         return 0.0;
@@ -441,7 +444,7 @@ float LimbPath::GetTotalProgress()
 //                  If progress has not been made past the starting segments, < 0 will
 //                  be returned. If the path has ended, 0.0 is returned.
 
-float LimbPath::GetRegularProgress()
+float LimbPath::GetRegularProgress() const
 {
     if (m_Ended || IsStaticPoint())
         return 0.0;
@@ -453,6 +456,21 @@ float LimbPath::GetRegularProgress()
 
     return prog / m_RegularLength;
 }
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int LimbPath::GetCurrentSegmentNumber() const {
+    int progress = 0;
+    if (!m_Ended && !IsStaticPoint()) {
+        for (deque<Vector>::const_iterator itr = m_Segments.begin(); itr != m_CurrentSegment; ++itr) {
+            progress++;
+        }
+    }
+    return progress;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

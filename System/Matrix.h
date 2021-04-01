@@ -13,9 +13,12 @@ namespace RTE {
 
 	public:
 
-		float m_Rotation; //!< The angle represented, in radians.
-		bool m_Flipped[2]; //!< Whether or not this Matrix also mirrors the X axis of its invoked Vectors.
-		float m_Elements[2][2]; //!< The elements of the matrix, which represent the angle.
+		SerializableClassNameGetter
+		SerializableOverrideMethods
+
+		float m_Rotation; //!< The angle, represented in radians. Pi/2 points up.
+		bool m_Flipped[2]; //!< Whether or not this Matrix also mirrors the respective axes of its invoked Vectors.
+		float m_Elements[2][2]; //!< The elements of the matrix, which represent the negative of the angle. Allows multiplication between matrices and vectors while considering upside-down coordinate system.
 		bool m_ElementsUpdated; //!< Whether the elements are currently updated to the set angle.
 
 #pragma region Creation
@@ -40,21 +43,21 @@ namespace RTE {
 		/// Makes the Matrix object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create() override;
 
 		/// <summary>
 		/// Makes the Matrix object ready for use.
 		/// </summary>
 		/// <param name="angle">The float angle in radians which this rotational matrix should represent.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(float angle);
+		int Create(float angle);
 
 		/// <summary>
 		/// Creates a Matrix to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the Matrix to deep copy.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create(const Matrix &reference);
+		int Create(const Matrix &reference);
 #pragma endregion
 
 #pragma region Destruction
@@ -62,27 +65,6 @@ namespace RTE {
 		/// Resets this Matrix to an identity Matrix, representing a 0 angle.
 		/// </summary>
 		void Reset() { Clear(); }
-#pragma endregion
-
-#pragma region INI Handling
-		/// <summary>
-		/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called.
-		/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
-		/// </summary>
-		/// <param name="propName">The name of the property to be read.</param>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>
-		/// An error return value signaling whether the property was successfully read or not.
-		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
-		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader);
-
-		/// <summary>
-		/// Saves the complete state of this Matrix to an output stream for later recreation with Create(Reader &reader).
-		/// </summary>
-		/// <param name="writer">A Writer that the Matrix will save itself with.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const;
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -126,13 +108,13 @@ namespace RTE {
 		/// Returns the angle this rotational Matrix is currently representing.
 		/// </summary>
 		/// <returns>A float with the represented angle in degrees.</returns>
-		float GetDegAngle() const { return (m_Rotation / c_PI) * 180; }
+		float GetDegAngle() const { return (m_Rotation / c_PI) * 180.0F; }
 
 		/// <summary>
 		/// Sets the angle that this rotational Matrix should represent.
 		/// </summary>
 		/// <param name="newAngle">A float with the new angle, in degrees.</param>
-		void SetDegAngle(float newAngle) { m_Rotation = (newAngle / 180) * c_PI; m_ElementsUpdated = false; }
+		void SetDegAngle(float newAngle) { m_Rotation = (newAngle / 180.0F) * c_PI; m_ElementsUpdated = false; }
 
 		/// <summary>
 		/// Returns the angle difference between what this is currently representing, to another angle in radians.
@@ -154,7 +136,7 @@ namespace RTE {
 		/// Returns the angle this rotational Matrix is currently representing.
 		/// </summary>
 		/// <returns>A float with the represented angle as full rotations being 256.</returns>
-		float GetAllegroAngle() const { return (m_Rotation / c_PI) * -128; }
+		float GetAllegroAngle() const { return (m_Rotation / c_PI) * -128.0F; }
 #pragma endregion
 
 #pragma region Operator Overloads
@@ -265,6 +247,7 @@ namespace RTE {
 
 		/// <summary>
 		/// Multiplication operator overload for a Matrix and a Vector. The vector will be transformed according to the Matrix's elements.
+		/// Flipping, if set, is performed before rotating.
 		/// </summary>
 		/// <param name="rhs">A Vector reference as the right hand side operand.</param>
 		/// <returns>The resulting transformed Vector.</returns>
@@ -310,24 +293,14 @@ namespace RTE {
 		friend Vector & operator/=(Vector &lhs, Matrix &rhs) { return lhs = rhs / lhs; }
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Matrix.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Matrix.</returns>
-		virtual const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
-	protected:
+	private:
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
-
-	private:
 
 		/// <summary>
 		/// Makes the elements of this matrix update to represent the set angle.
 		/// </summary>
-		virtual void UpdateElements();
+		void UpdateElements();
 
 		/// <summary>
 		/// Clears all the member variables of this Matrix, effectively resetting the members of this abstraction level only.

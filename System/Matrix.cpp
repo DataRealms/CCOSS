@@ -1,7 +1,5 @@
 #include "Matrix.h"
 
-#pragma intrinsic (sin, cos)
-
 namespace RTE {
 
 	const std::string Matrix::c_ClassName = "Matrix";
@@ -38,8 +36,8 @@ namespace RTE {
 		m_ElementsUpdated = true;
 
 		// Inverse angle to make CCW positive direction.
-		float const CosAngle = static_cast<float>(std::cos(-angle));
-		float const SinAngle = static_cast<float>(std::sin(-angle));
+		const float CosAngle = std::cos(-angle);
+		const float SinAngle = std::sin(-angle);
 		m_Elements[0][0] = CosAngle;
 		m_Elements[0][1] = -SinAngle;
 		m_Elements[1][0] = SinAngle;
@@ -61,13 +59,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Matrix::ReadProperty(std::string propName, Reader &reader) {
+	int Matrix::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "AngleDegrees") {
 			SetDegAngle(std::stof(reader.ReadPropValue()));
 		} else if (propName == "AngleRadians") {
 			reader >> m_Rotation;
 		} else {
-			// See if the base class(es) can find a match instead
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;
@@ -78,8 +75,7 @@ namespace RTE {
 	int Matrix::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		writer.NewProperty("AngleDegrees");
-		writer << GetDegAngle();
+		writer.NewPropertyWithValue("AngleDegrees", GetDegAngle());
 
 		return 0;
 	}
@@ -135,6 +131,7 @@ namespace RTE {
 		// Apply flipping as set.
 		retVec.m_X = m_Flipped[X] ? -retVec.m_X : retVec.m_X;
 		retVec.m_Y = m_Flipped[Y] ? -retVec.m_Y : retVec.m_Y;
+
 		// Do the matrix multiplication.
 		retVec.SetXY(m_Elements[0][0] * retVec.m_X + m_Elements[0][1] * retVec.m_Y, m_Elements[1][0] * retVec.m_X + m_Elements[1][1] * retVec.m_Y);
 
@@ -150,6 +147,7 @@ namespace RTE {
 		// Apply flipping as set.
 		retVec.m_X = m_Flipped[X] ? -retVec.m_X : retVec.m_X;
 		retVec.m_Y = m_Flipped[Y] ? -retVec.m_Y : retVec.m_Y;
+
 		// Do the matrix multiplication.
 		retVec.SetXY(m_Elements[0][0] * retVec.m_X + m_Elements[1][0] * retVec.m_Y, m_Elements[0][1] * retVec.m_X + m_Elements[1][1] * retVec.m_Y);
 
@@ -173,9 +171,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Matrix::UpdateElements() {
-		// Inverse angle to make CCW positive direction.
-		float const CosAngle = static_cast<float>(std::cos(-m_Rotation));
-		float const SinAngle = static_cast<float>(std::sin(-m_Rotation));
+		// Negative angle to Account for upside-down coordinate system.
+		const float CosAngle = std::cos(-m_Rotation);
+		const float SinAngle = std::sin(-m_Rotation);
 		m_Elements[0][0] = CosAngle;
 		m_Elements[0][1] = -SinAngle;
 		m_Elements[1][0] = SinAngle;

@@ -4,13 +4,16 @@
 #include "HeldDevice.h"
 
 namespace RTE {
+
 	/// <summary>
-	/// [Abstract Class] - A device that is carried and thrown by Actors.
+	/// A device that is carried and thrown by Actors.
 	/// </summary>
 	class ThrownDevice : public HeldDevice {
 
 	public:
-		EntityAllocation(ThrownDevice);
+
+		EntityAllocation(ThrownDevice)
+		SerializableOverrideMethods
 		ClassInfoGetters
 
 #pragma region Creation
@@ -23,7 +26,7 @@ namespace RTE {
 		/// Makes the ThrownDevice object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Create();
+		int Create() override;
 
 		/// <summary>
 		/// Creates a ThrownDevice to be identical to another, by deep copy.
@@ -33,71 +36,25 @@ namespace RTE {
 		int Create(const ThrownDevice &reference);
 #pragma endregion
 
-#pragma region INI Handling
-		/// <summary>
-		/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called.
-		/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
-		/// </summary>
-		/// <param name="propName">The name of the property to be read.</param>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>
-		/// An error return value signaling whether the property was successfully read or not.
-		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
-		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader);
-
-		/// <summary>
-		/// Saves the complete state of this ThrownDevice to an output stream for later recreation with Create(Reader &reader).
-		/// </summary>
-		/// <param name="writer">A Writer that the ThrownDevice will save itself with.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		virtual int Save(Writer &writer) const;
-#pragma endregion
-
 #pragma region Destruction
 		/// <summary>
 		/// Destructor method used to clean up a ThrownDevice object before deletion from system memory.
 		/// </summary>
-		virtual ~ThrownDevice() { Destroy(true); }
+		~ThrownDevice() override { Destroy(true); }
 
 		/// <summary>
 		/// Destroys and resets (through Clear()) the SceneLayer object.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		virtual void Destroy(bool notInherited = false);
-#pragma endregion
+		void Destroy(bool notInherited = false) override { if (!notInherited) { HeldDevice::Destroy(); } Clear(); }
 
-#pragma region Virtual Override Methods
 		/// <summary>
 		/// Resets the entire ThrownDevice, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); Attachable::Reset(); }
-
-		/// <summary>
-		/// Resets all the timers used by this (e.g. emitters, etc). This is to prevent backed up emissions from coming out all at once while this has been held dormant in an inventory.
-		/// </summary>
-		virtual void ResetAllTimers();
-
-		/// <summary>
-		/// Activates this Device as long as it's not set to activate when released or it has no parent.
-		/// </summary>
-		virtual void Activate();
-
-		/// <summary>
-		/// Does the calculations necessary to detect whether this MO appears to have has settled in the world and is at rest or not. IsAtRest() retrieves the answer.
-		/// </summary>
-		virtual void RestDetection();
+		void Reset() override { Clear(); Attachable::Reset(); }
 #pragma endregion
 
-#pragma region ConcreteOverrideMethods
-		/// <summary>
-		/// Gets the current position offset of this ThrownDevice's joint relative from the parent Actor's position, if attached.
-		/// </summary>
-		/// <returns>A const reference to the current stance parent offset.</returns>
-		Vector GetStanceOffset() const override;
-#pragma endregion
-
-#pragma region GettersAndSetters
+#pragma region Getters and Setters
 		/// <summary>
 		/// Gets the Start throw offset of this ThrownDevice's joint relative from the parent Actor's position, if attached.
 		/// </summary>
@@ -141,27 +98,52 @@ namespace RTE {
 		bool ActivatesWhenReleased() const { return m_ActivatesWhenReleased; }
 #pragma endregion
 
+#pragma region Virtual Override Methods
+		/// <summary>
+		/// Gets the current position offset of this ThrownDevice's joint relative from the parent Actor's position, if attached.
+		/// </summary>
+		/// <returns>A const reference to the current stance parent offset.</returns>
+		Vector GetStanceOffset() const override { return m_StanceOffset.GetXFlipped(m_HFlipped); }
+
+		/// <summary>
+		/// Resets all the timers used by this (e.g. emitters, etc). This is to prevent backed up emissions from coming out all at once while this has been held dormant in an inventory.
+		/// </summary>
+		void ResetAllTimers() override;
+
+		/// <summary>
+		/// Activates this Device as long as it's not set to activate when released or it has no parent.
+		/// </summary>
+		void Activate() override;
+
+		/// <summary>
+		/// Does the calculations necessary to detect whether this MO appears to have has settled in the world and is at rest or not. IsAtRest() retrieves the answer.
+		/// </summary>
+		void RestDetection() override { HeldDevice::RestDetection(); if (m_Activated) { m_RestTimer.Reset(); } }
+#pragma endregion
+
 	protected:
-		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class
 
-		SoundContainer m_ActivationSound; //!< Activation sound
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		Vector m_StartThrowOffset; //!< The position offset at which a throw of this Device begins
-		Vector m_EndThrowOffset; //!< The position offset at which a throw of this Device ends
-		float m_MinThrowVel; //!< The minimum throw velocity this gets when thrown
-		float m_MaxThrowVel; //!< The maximum throw velocity this gets when thrown
-		long m_TriggerDelay; //!< Time in millisecs from the time of being thrown to triggering whatever it is that this ThrownDevice does
-		bool m_ActivatesWhenReleased; //!< Whether this activates when its throw is started, or waits until it is released from the arm that is throwing it
+		SoundContainer m_ActivationSound; //!< Activation sound.
+
+		Vector m_StartThrowOffset; //!< The position offset at which a throw of this Device begins.
+		Vector m_EndThrowOffset; //!< The position offset at which a throw of this Device ends.
+		float m_MinThrowVel; //!< The minimum throw velocity this gets when thrown.
+		float m_MaxThrowVel; //!< The maximum throw velocity this gets when thrown.
+		long m_TriggerDelay; //!< Time in millisecs from the time of being thrown to triggering whatever it is that this ThrownDevice does.
+		bool m_ActivatesWhenReleased; //!< Whether this activates when its throw is started, or waits until it is released from the arm that is throwing it.
 
 	private:
+
 		/// <summary>
 		/// Clears all the member variables of this ThrownDevice, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear();
 
 		// Disallow the use of some implicit methods.
-		ThrownDevice(const ThrownDevice &reference);
-		ThrownDevice & operator=(const ThrownDevice &rhs);
+		ThrownDevice(const ThrownDevice &reference) = delete;
+		ThrownDevice & operator=(const ThrownDevice &rhs) = delete;
 	};
 }
 #endif

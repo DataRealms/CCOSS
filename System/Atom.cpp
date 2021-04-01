@@ -83,7 +83,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Atom::ReadProperty(std::string propName, Reader &reader) {
+	int Atom::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Offset") {
 			reader >> m_Offset;
 		} else if (propName == "OriginalOffset") {
@@ -99,7 +99,6 @@ namespace RTE {
 		} else if (propName == "TrailLength") {
 			reader >> m_TrailLength;
 		} else {
-			// See if the base class(es) can find a match instead.
 			return Serializable::ReadProperty(propName, reader);
 		}
 		return 0;
@@ -110,16 +109,11 @@ namespace RTE {
 	int Atom::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		writer.NewProperty("Offset");
-		writer << m_Offset;
-		writer.NewProperty("OriginalOffset");
-		writer << m_OriginalOffset;
-		writer.NewProperty("Material");
-		writer << m_Material;
-		writer.NewProperty("TrailColor");
-		writer << m_TrailColor;
-		writer.NewProperty("TrailLength");
-		writer << m_TrailLength;
+		writer.NewPropertyWithValue("Offset", m_Offset);
+		writer.NewPropertyWithValue("OriginalOffset", m_OriginalOffset);
+		writer.NewPropertyWithValue("Material", m_Material);
+		writer.NewPropertyWithValue("TrailColor", m_TrailColor);
+		writer.NewPropertyWithValue("TrailLength", m_TrailLength);
 
 		return 0;
 	}
@@ -152,7 +146,7 @@ namespace RTE {
 		if (fillAmount > 0) {
 			// As many as we're asked to make
 			for (int i = 0; i < fillAmount; ++i) {
-				s_AllocatedPool.push_back(std::malloc(sizeof(Atom)));
+				s_AllocatedPool.push_back(malloc(sizeof(Atom)));
 			}
 		}
 	}
@@ -301,8 +295,12 @@ namespace RTE {
 
 			m_LastHit.Body[HITOR] = m_OwnerMO;
 			m_LastHit.Body[HITEE] = g_MovableMan.GetMOFromID(m_MOIDHit);
+
+#ifndef RELEASE_BUILD
 			RTEAssert(m_LastHit.Body[HITEE], "Hitee MO is 0 in Atom::MOHitResponse!");
 			RTEAssert(m_MOIDHit == m_LastHit.Body[HITEE]->GetID(), "g_MovableMan.GetMOFromID messed up in Atom::MOHitResponse!");
+#endif
+
 			// Get the roots for both bodies
 			if (m_LastHit.Body[HITOR]) { m_LastHit.RootBody[HITOR] = m_LastHit.Body[HITOR]->GetRootParent(); }
 			if (m_LastHit.Body[HITEE]) { m_LastHit.RootBody[HITEE] = m_LastHit.Body[HITEE]->GetRootParent(); }
@@ -342,7 +340,7 @@ namespace RTE {
 				// Edit the normal accordingly.
 				m_LastHit.BitmapNormal[m_Dom] = -m_Increment[m_Dom];
 				// Bounce according to the collision.
-				hitAcc[m_Dom] = -hitAcc[m_Dom] - hitAcc[m_Dom] * m_Material->restitution * domMaterial->restitution;
+				hitAcc[m_Dom] = -hitAcc[m_Dom] - hitAcc[m_Dom] * m_Material->GetRestitution() * domMaterial->GetRestitution();
 			}
 
 			// Check for and react upon a collision in the submissive direction of travel.
@@ -354,7 +352,7 @@ namespace RTE {
 				// Edit the normal accordingly.
 				m_LastHit.BitmapNormal[m_Sub] = -m_Increment[m_Sub];
 				// Bounce according to the collision.
-				hitAcc[m_Sub] = -hitAcc[m_Sub] - hitAcc[m_Sub] * m_Material->restitution * subMaterial->restitution;
+				hitAcc[m_Sub] = -hitAcc[m_Sub] - hitAcc[m_Sub] * m_Material->GetRestitution() * subMaterial->GetRestitution();
 			}
 
 			// If hit right on the corner of a pixel, bounce straight back with no friction.
@@ -364,16 +362,16 @@ namespace RTE {
 				m_LastHit.BitmapNormal[m_Sub] = -m_Increment[m_Sub];
 
 				hit[m_Dom] = true;
-				hitAcc[m_Dom] = -hitAcc[m_Dom] - hitAcc[m_Dom] * m_Material->restitution * hitMaterial->restitution;
+				hitAcc[m_Dom] = -hitAcc[m_Dom] - hitAcc[m_Dom] * m_Material->GetRestitution() * hitMaterial->GetRestitution();
 				hit[m_Sub] = true;
-				hitAcc[m_Sub] = -hitAcc[m_Sub] - hitAcc[m_Sub] * m_Material->restitution * hitMaterial->restitution;
+				hitAcc[m_Sub] = -hitAcc[m_Sub] - hitAcc[m_Sub] * m_Material->GetRestitution() * hitMaterial->GetRestitution();
 			} else if (hit[m_Dom] && !hit[m_Sub]) {
 				// Calculate the effects of friction.
-				m_LastHit.BitmapNormal[m_Sub] = -m_Increment[m_Sub] * m_Material->friction * domMaterial->friction;
-				hitAcc[m_Sub] = -hitAcc[m_Sub] * m_Material->friction * domMaterial->friction;
+				m_LastHit.BitmapNormal[m_Sub] = -m_Increment[m_Sub] * m_Material->GetFriction() * domMaterial->GetFriction();
+				hitAcc[m_Sub] = -hitAcc[m_Sub] * m_Material->GetFriction() * domMaterial->GetFriction();
 			} else if (hit[m_Sub] && !hit[m_Dom]) {
-				m_LastHit.BitmapNormal[m_Dom] = -m_Increment[m_Dom] * m_Material->friction * domMaterial->friction;
-				hitAcc[m_Dom] = -hitAcc[m_Dom] * m_Material->friction * subMaterial->friction;
+				m_LastHit.BitmapNormal[m_Dom] = -m_Increment[m_Dom] * m_Material->GetFriction() * domMaterial->GetFriction();
+				hitAcc[m_Dom] = -hitAcc[m_Dom] * m_Material->GetFriction() * subMaterial->GetFriction();
 			}
 			m_LastHit.BitmapNormal.Normalize();
 
@@ -400,11 +398,11 @@ namespace RTE {
 		if (m_IntPos[X] > 0 && m_IntPos[Y] > 0) {
 			m_PrevIntPos[X] = m_IntPos[X];
 			m_PrevIntPos[Y] = m_IntPos[Y];
-			m_IntPos[X] = std::floorf(startPos.m_X);
-			m_IntPos[Y] = std::floorf(startPos.m_Y);
+			m_IntPos[X] = std::floor(startPos.m_X);
+			m_IntPos[Y] = std::floor(startPos.m_Y);
 		} else {
-			m_IntPos[X] = m_PrevIntPos[X] = std::floorf(startPos.m_X);
-			m_IntPos[Y] = m_PrevIntPos[Y] = std::floorf(startPos.m_Y);
+			m_IntPos[X] = m_PrevIntPos[X] = std::floor(startPos.m_X);
+			m_IntPos[Y] = m_PrevIntPos[Y] = std::floor(startPos.m_Y);
 		}
 
 		if ((m_TerrainMatHit = g_SceneMan.GetTerrMatter(m_IntPos[X], m_IntPos[Y])) != g_MaterialAir) {
@@ -435,8 +433,8 @@ namespace RTE {
 		m_SegTraj = trajectory;
 
 		// Bresenham's line drawing algorithm preparation
-		m_Delta[X] = std::floorf(startPos.m_X + trajectory.m_X) - std::floorf(startPos.m_X);
-		m_Delta[Y] = std::floorf(startPos.m_Y + trajectory.m_Y) - std::floorf(startPos.m_Y);
+		m_Delta[X] = std::floor(startPos.m_X + trajectory.m_X) - std::floor(startPos.m_X);
+		m_Delta[Y] = std::floor(startPos.m_Y + trajectory.m_Y) - std::floor(startPos.m_Y);
 		m_DomSteps = 0;
 		m_SubSteps = 0;
 		m_SubStepped = false;
@@ -485,7 +483,7 @@ namespace RTE {
 
 		// Only take the step if the step ratio permits it
 		float prevProgress = m_SegProgress;
-		if (m_Delta[m_Dom] && (m_SegProgress += m_StepRatio) >= std::floorf(prevProgress + 1.0F)) {
+		if (m_Delta[m_Dom] && (m_SegProgress += m_StepRatio) >= std::floor(prevProgress + 1.0F)) {
 			m_StepWasTaken = true;
 			m_MOIDHit = g_NoMOID;
 			m_TerrainMatHit = g_MaterialAir;
@@ -646,8 +644,8 @@ namespace RTE {
 
 		// Loop for all the different straight segments (between bounces etc) that have to be traveled during the timeLeft.
 		do {
-			intPos[X] = std::floorf(position.m_X);
-			intPos[Y] = std::floorf(position.m_Y);
+			intPos[X] = std::floor(position.m_X);
+			intPos[Y] = std::floor(position.m_Y);
 
 			// Get trail bitmap and put first pixel.
 			if (m_TrailLength) {
@@ -655,10 +653,10 @@ namespace RTE {
 				trailPoints.push_back({ intPos[X], intPos[Y] });
 			}
 			// Compute and scale the actual on-screen travel trajectory for this segment, based on the velocity, the travel time and the pixels-per-meter constant.
-			segTraj = velocity * timeLeft * g_FrameMan.GetPPM();
+			segTraj = velocity * timeLeft * c_PPM;
 
-			delta[X] = std::floorf(position.m_X + segTraj.m_X) - intPos[X];
-			delta[Y] = std::floorf(position.m_Y + segTraj.m_Y) - intPos[Y];
+			delta[X] = std::floor(position.m_X + segTraj.m_X) - intPos[X];
+			delta[Y] = std::floor(position.m_Y + segTraj.m_Y) - intPos[Y];
 
 			//segProgress = 0.0F;
 			//delta2[X] = 0;
@@ -741,7 +739,7 @@ namespace RTE {
 				g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
 				///////////////////////////////////////////////////////////////////////////////////////////////////
-				// Atom-MO collision detection and response. 
+				// Atom-MO collision detection and response.
 
 				// Detect hits with non-ignored MO's, if enabled.
 				m_MOIDHit = g_SceneMan.GetMOIDPixel(intPos[X], intPos[Y]);
@@ -772,17 +770,20 @@ namespace RTE {
 
 					m_LastHit.Body[HITOR] = m_OwnerMO;
 					m_LastHit.Body[HITEE] = MO;
+
+#ifndef RELEASE_BUILD
 					RTEAssert(m_LastHit.Body[HITEE], "Hitee MO is 0 in Atom::Travel!");
 					RTEAssert(m_MOIDHit == m_LastHit.Body[HITEE]->GetID(), "g_MovableMan.GetMOFromID messed up in Atom::MOHitResponse!");
+#endif
 
-					// Don't do this normal approximation based on object centers, it causes particles to 'slide into' sprite objects when they should be resting on them. 
+					// Don't do this normal approximation based on object centers, it causes particles to 'slide into' sprite objects when they should be resting on them.
 					// Orthogonal normals only, as the pixel boundaries themselves! See further down for the setting of this.
 					//m_LastHit.BitmapNormal = m_LastHit.Body[HITOR]->GetPos() - m_LastHit.Body[HITEE]->GetPos();
 					//m_LastHit.BitmapNormal.Normalize();
 
 					// Gold special collection case!
 					// TODO: Make material IDs more robust!")
-					if (m_Material->id == c_GoldMaterialID && g_MovableMan.IsOfActor(m_MOIDHit)) {
+					if (m_Material->GetIndex() == c_GoldMaterialID && g_MovableMan.IsOfActor(m_MOIDHit)) {
 						Actor *pActor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(m_LastHit.Body[HITEE]->GetRootID()));
 						if (pActor) {
 							pActor->AddGold(m_OwnerMO->GetMass() * g_SceneMan.GetOzPerKg() * removeOrphansRadius ? 1.25F : 1.0F);
@@ -838,7 +839,7 @@ namespace RTE {
 				}
 
 				///////////////////////////////////////////////////////////////////////////////////////////////////
-				// Atom-Terrain collision detection and response. 
+				// Atom-Terrain collision detection and response.
 
 				// If there was no MO collision detected, then check for terrain hits.
 				else if ((hitMaterialID = g_SceneMan.GetTerrMatter(intPos[X], intPos[Y])) && !m_OwnerMO->m_IgnoreTerrain) {
@@ -853,7 +854,7 @@ namespace RTE {
 					if (m_TrailLength) { putpixel(trailBitmap, intPos[X], intPos[Y], 199); }
 #endif
 					// Try penetration of the terrain.
-					if (hitMaterial->id != g_MaterialOutOfBounds && g_SceneMan.TryPenetrate(intPos[X], intPos[Y], velocity * mass * sharpness, velocity, retardation, 0.65F, m_NumPenetrations, removeOrphansRadius, removeOrphansMaxArea, removeOrphansRate)) {
+					if (hitMaterial->GetIndex() != g_MaterialOutOfBounds && g_SceneMan.TryPenetrate(intPos[X], intPos[Y], velocity * mass * sharpness, velocity, retardation, 0.65F, m_NumPenetrations, removeOrphansRadius, removeOrphansMaxArea, removeOrphansRate)) {
 						hit[dom] = hit[sub] = sinkHit = true;
 						++m_NumPenetrations;
 						m_ChangedDir = false;
@@ -876,7 +877,7 @@ namespace RTE {
 
 						// TODO: improve sticky logic!
 						// Check if particle is sticky and should adhere to where it collided
-						if (m_Material->stickiness >= PosRand() && velocity.GetLargest() > 0.5F) {
+						if (m_Material->GetStickiness() >= RandomNum() && velocity.GetLargest() > 0.5F) {
 							// SPLAT, so update position, apply to terrain and delete, and stop traveling
 							m_OwnerMO->SetPos(Vector(intPos[X], intPos[Y]));
 							g_SceneMan.GetTerrain()->ApplyMovableObject(m_OwnerMO);
@@ -892,7 +893,7 @@ namespace RTE {
 							domMaterial = g_SceneMan.GetMaterialFromID(domMaterialID);
 
 							// Bounce according to the collision.
-							hitAccel[dom] = -velocity[dom] - velocity[dom] * m_Material->restitution * domMaterial->restitution;
+							hitAccel[dom] = -velocity[dom] - velocity[dom] * m_Material->GetRestitution() * domMaterial->GetRestitution();
 						}
 
 						// Check for and react upon a collision in the submissive direction of travel.
@@ -902,20 +903,20 @@ namespace RTE {
 							subMaterial = g_SceneMan.GetMaterialFromID(subMaterialID);
 
 							// Bounce according to the collision.
-							hitAccel[sub] = -velocity[sub] - velocity[sub] * m_Material->restitution * subMaterial->restitution;
+							hitAccel[sub] = -velocity[sub] - velocity[sub] * m_Material->GetRestitution() * subMaterial->GetRestitution();
 						}
 
 						// If hit right on the corner of a pixel, bounce straight back with no friction.
 						if (!hit[dom] && !hit[sub]) {
 							hit[dom] = true;
-							hitAccel[dom] = -velocity[dom] - velocity[dom] * m_Material->restitution *  hitMaterial->restitution;
+							hitAccel[dom] = -velocity[dom] - velocity[dom] * m_Material->GetRestitution() *  hitMaterial->GetRestitution();
 							hit[sub] = true;
-							hitAccel[sub] = -velocity[sub] - velocity[sub] * m_Material->restitution * hitMaterial->restitution;
+							hitAccel[sub] = -velocity[sub] - velocity[sub] * m_Material->GetRestitution() * hitMaterial->GetRestitution();
 						} else if (hit[dom] && !hit[sub]) {
 							// Calculate the effects of friction.
-							hitAccel[sub] -= velocity[sub] * m_Material->friction * domMaterial->friction;
+							hitAccel[sub] -= velocity[sub] * m_Material->GetFriction() * domMaterial->GetFriction();
 						} else if (hit[sub] && !hit[dom]) {
-							hitAccel[dom] -= velocity[dom] * m_Material->friction * subMaterial->friction;
+							hitAccel[dom] -= velocity[dom] * m_Material->GetFriction() * subMaterial->GetFriction();
 						}
 					}
 				} else if (m_TrailLength) {
@@ -961,8 +962,8 @@ namespace RTE {
 
 		// Draw the trail
 		if (g_TimerMan.DrawnSimUpdate() && m_TrailLength) {
-			int length = m_TrailLength /* + 3 * PosRand()*/;
-			for (int i = trailPoints.size() - MIN(length, trailPoints.size()); i < trailPoints.size(); ++i) {
+			int length = m_TrailLength /* + 3 * RandomNum()*/;
+			for (int i = trailPoints.size() - std::min(length, static_cast<int>(trailPoints.size())); i < trailPoints.size(); ++i) {
 				putpixel(trailBitmap, trailPoints[i].first, trailPoints[i].second, m_TrailColor.GetIndex());
 			}
 		}

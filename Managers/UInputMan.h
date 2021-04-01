@@ -1,1736 +1,912 @@
 #ifndef _RTEUINPUTMAN_
 #define _RTEUINPUTMAN_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            UInputMan.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Header file for the UInputMan class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
-#include "RTETools.h"
 #include "Singleton.h"
+#include "Vector.h"
+#include "InputScheme.h"
+
 #define g_UInputMan UInputMan::Instance()
-#include "Serializable.h"
-#include "Timer.h"
 
-#include "FrameMan.h"
-//#include "SceneMan.h"
-//#include "MovableMan.h"
-
-namespace RTE
-{
-
-class GUIInput;
-class Icon;
-	
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           UInputMan
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     The singleton manager over the user input.
-// Parent(s):       Singleton, Serializable.
-// Class history:   12/26/2001 UInputMan created.
-
-class UInputMan:
-    public Singleton<UInputMan>,
-    public Serializable
-{
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
-
-public:
-
-
-enum Players
-{
-    PLAYER_NONE = -1,
-    PLAYER_ONE = 0,
-    PLAYER_TWO,
-    PLAYER_THREE,
-    PLAYER_FOUR,
-    MAX_PLAYERS
-};
-
-enum InputDevice
-{
-    DEVICE_KEYB_ONLY = 0,
-    DEVICE_MOUSE_KEYB,
-    DEVICE_GAMEPAD_1,
-    DEVICE_GAMEPAD_2,
-    DEVICE_GAMEPAD_3,
-    DEVICE_GAMEPAD_4,
-    DEVICE_COUNT
-};
-
-enum InputPreset
-{
-    PRESET_P1DEFAULT = -1,
-    PRESET_P2DEFAULT = -2,
-    PRESET_P3DEFAULT = -3,
-    PRESET_P4DEFAULT = -4,
-    PRESET_NONE = 0,
-    PRESET_WASDKEYS,
-    PRESET_CURSORKEYS,
-    PRESET_XBOX360,
-    PRESET_COUNT
-    
-};
-
-enum InputElements
-{
-    INPUT_L_UP = 0,
-    INPUT_L_DOWN,
-    INPUT_L_LEFT,
-    INPUT_L_RIGHT,
-    INPUT_R_UP,
-    INPUT_R_DOWN,
-    INPUT_R_LEFT,
-    INPUT_R_RIGHT,
-    INPUT_FIRE,
-    INPUT_AIM,
-    INPUT_AIM_UP,
-    INPUT_AIM_DOWN,
-    INPUT_AIM_LEFT,
-    INPUT_AIM_RIGHT,
-    INPUT_PIEMENU,
-    INPUT_JUMP,
-    INPUT_CROUCH,
-    INPUT_NEXT,
-    INPUT_PREV,
-    INPUT_START,
-    INPUT_BACK,
-	INPUT_WEAPON_CHANGE_NEXT,
-	INPUT_WEAPON_CHANGE_PREV,
-	INPUT_WEAPON_PICKUP,
-	INPUT_WEAPON_DROP,
-	INPUT_WEAPON_RELOAD,
-    INPUT_COUNT
-};
-
-enum MouseButtons
-{
-    MOUSE_NONE = -1,
-    MOUSE_LEFT = 0,
-    MOUSE_RIGHT,
-    MOUSE_MIDDLE,
-    MAX_MOUSE_BUTTONS
-};
-
-enum JoyButtons
-{
-    JOY_NONE = -1,
-    JOY_1 = 0,
-    JOY_2,
-    JOY_3,
-    JOY_4,
-    JOY_5,
-    JOY_6,
-    JOY_7,
-    JOY_8,
-    JOY_9,
-    JOY_10,
-    JOY_11,
-    JOY_12,
-    MAX_JOY_BUTTONS
-};
-
-enum JoyDirections
-{
-    JOYDIR_ONE = 0,
-    JOYDIR_TWO
-};
-
-enum MenuCursorButtons
-{
-    MENU_PRIMARY = 0,
-    MENU_SECONDARY,
-    MENU_EITHER
-};
-
-// Specifies joystick dead zone type square or circle. 
-// Square deadzone cuts-off any input from every axis separately. For example if x-axis has less than 20% input and y-axis has more, x-axis input is ignored.
-// Circle uses a round zone to capture stick position on both axis then cut-off if this position is inside the round dead zone.
-enum DeadZoneType
-{
-	CIRCLE = 0,
-	SQUARE = 1
-};
-
-/*
-struct JoyDirMap
-{
-    // Whether this mapping is active or not
-    bool active;
-    // Which stick on the joystick
-    int stick;
-    // Which axis
-    int axis;
-    // Which direction, on that axis, JOYDIR_ONE or JOYDIR_TWO
-    int direction;
-
-    JoyDirMap() { active = false; stick = axis = direction = 0; }
-};
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable, method and friend function declarations
-
-private:
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Nested class:    InputScheme
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     A complete input configuration scheme description for a single player.
-    // Parent(s):       Serializable.
-    // Class history:   1/12/2007 InputScheme created.
-
-    class InputScheme:
-        public Serializable
-    {
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Public member variable, method and friend function declarations
-
-    public:
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Nested class:    InputMapping
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     A map between an input element and specific input device elements.
-        // Parent(s):       Serializable.
-        // Class history:   11/25/2006 InputMapping created.
-        //                  1/12/2007 Nested inside InputScheme
-
-        class InputMapping:
-            public Serializable
-        {
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Public member variable, method and friend function declarations
-
-        public:
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Virtual method:  Reset
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Resets the entire Serializable, including its inherited members, to their
-        //                  default settings or values.
-        // Arguments:       None.
-        // Return value:    None.
-
-            virtual void Reset() { Clear(); }
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Method:          Clear
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Clears all the member variables of this InputMapping, effectively
-        //                  resetting the members of this abstraction level only.
-        // Arguments:       None.
-        // Return value:    None.
-
-            void Clear();
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Constructor:     InputMapping
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Constructor method used to instantiate a InputMapping object in system
-        //                  memory. Create() should be called before using the object.
-        // Arguments:       None.
-
-            InputMapping() { Clear(); }
-
-/*
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Virtual method:  Create
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Makes the InputMapping object ready for use.
-        // Arguments:       None.
-        // Return value:    An error return value signaling sucess or any particular failure.
-        //                  Anything below 0 is an error signal.
-
-            virtual int Create();
-*/
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Method:          Create
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Creates a InputMapping to be identical to another, by deep copy.
-        // Arguments:       A reference to the InputMapping to deep copy.
-        // Return value:    An error return value signaling sucess or any particular failure.
-        //                  Anything below 0 is an error signal.
-
-            int Create(const InputMapping &reference);
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Virtual method:  ReadProperty
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Reads a property value from a Reader stream. If the name isn't
-        //                  recognized by this class, then ReadProperty of the parent class
-        //                  is called. If the property isn't recognized by any of the base classes,
-        //                  false is returned, and the Reader's position is untouched.
-        // Arguments:       The name of the property to be read.
-        //                  A Reader lined up to the value of the property to be read.
-        // Return value:    An error return value signaling whether the property was successfully
-        //                  read or not. 0 means it was read successfully, and any nonzero indicates
-        //                  that a property of that name could not be found in this or base classes.
-
-            virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Virtual method:  Save
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Saves the complete state of this InputMapping to an output stream for
-        //                  later recreation with Create(Reader &reader);
-        // Arguments:       A Writer that the InputMapping will save itself with.
-        // Return value:    An error return value signaling sucess or any particular failure.
-        //                  Anything below 0 is an error signal.
-
-            virtual int Save(Writer &writer) const;
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Virtual method:  GetClassName
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Gets the class name of this Entity.
-        // Arguments:       None.
-        // Return value:    A string with the friendly-formatted type name of this object.
-
-            virtual const std::string & GetClassName() const { return m_sClassName; }
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Method:          SetKey
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Sets the keyboard key this mapped to.
-        // Arguments:       The scancode of the new key to map to.
-        // Return value:    None.
-
-            void SetKey(int newKey) { m_KeyMap = newKey; }
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Method:          SetMouseButton
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Sets the mouse button mapping.
-        // Arguments:       The number of the mouse button this should be mapped to.
-        // Return value:    None.
-
-            void SetMouseButton(int newButton) { m_MouseButtonMap = newButton; }
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Method:          SetJoyButton
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Sets the joystick button mapping.
-        // Arguments:       The number of the joystick button this should be mapped to.
-        // Return value:    None.
-
-            void SetJoyButton(int newButton) { m_JoyButtonMap = newButton; }
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Method:          SetDirection
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Sets the joystick direction mapping.
-        // Arguments:       The stick, axis, and direction to map this to.
-        // Return value:    None.
-
-            void SetDirection(int newStick, int newAxis, int newDirection) { m_DirectionMapped = true; m_StickMap = newStick; m_AxisMap = newAxis; m_DirectionMap = newDirection; }
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Method:          SetPresetDesc
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Sets the description of the input scheme preset that this element is part of,
-        //                  if any preset has been set for this element's scheme.
-        // Arguments:       The desc associated with this element by the scheme preset, if any
-        //                  has been set. This string should be empty otherwise.
-        // Return value:    None.
-
-            void SetPresetDesc(std::string presetDesc) { m_PresetDesc = presetDesc; }
-
-			
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Method:          GetKey
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Gets the keyboard key mapping.
-        // Arguments:       None.
-        // Return value:    The keyboard key this is mapped to.
-
-            int GetKey() const { return m_KeyMap; }
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Method:          GetMouseButton
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Gets the mouse button mapping.
-        // Arguments:       None.
-        // Return value:    The number of the mouse button this is mapped to.
-
-            int GetMouseButton() const { return m_MouseButtonMap; }
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Method:          GetJoyButton
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Gets the joystick button mapping.
-        // Arguments:       None.
-        // Return value:    The number of the joystick button this is mapped to.
-
-            int GetJoyButton() const { return m_JoyButtonMap; }
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Method:          JoyDirMapped
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Shows whether this is mapped to a joy direciton or not.
-        // Arguments:       None.
-        // Return value:    Joy direction mapped or not.
-
-            bool JoyDirMapped() const { return m_DirectionMapped; }
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Method:          GetStick
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Gets the joystick stick number that this is mapped to.
-        // Arguments:       None.
-        // Return value:    The joystick stick number.
-
-            int GetStick() const { return m_StickMap; }
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Method:          GetAxis
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Gets the joystick axis number that this is mapped to.
-        // Arguments:       None.
-        // Return value:    The joystick axis number.
-
-            int GetAxis() const { return m_AxisMap; }
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Method:          GetStick
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Gets the joystick stick number that this is mapped to.
-        // Arguments:       None.
-        // Return value:    The direction, UInputMan::JOYDIR_ONE or UInputMan::JOYDIR_TWO.
-
-            int GetDirection() const { return m_DirectionMap; }
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Method:          GetPresetDesc
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Description:     Gets the description of the input scheme preset that this element is part of,
-        //                  if any preset has been set for this element's scheme.
-        // Arguments:       None.
-        // Return value:    The desc associated with this element by the scheme preset, if any
-        //                  has been set. This string is empty otherwise.
-
-        std::string GetPresetDesc() const { return m_PresetDesc; }
-
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // Protected member variable and method declarations
-
-        protected:
-
-            // Member variables
-            static const std::string m_sClassName;
-            // The keyboard key mapping
-            int m_KeyMap;
-            // The mouse button mapping
-            int m_MouseButtonMap;
-            // The joystick button mapping
-            int m_JoyButtonMap;
-            // Whether joystick direction mapping is enabled
-            bool m_DirectionMapped;
-            // The joystick stick mapping, if any
-            int m_StickMap;
-            // The joystick axis mapping
-            int m_AxisMap;
-            // The joystick direction mapping
-            int m_DirectionMap;
-            // The friendly description that is associated with the scheme preset element, if any is set
-            std::string m_PresetDesc;
-
-        };
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Reset
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Resets the entire Serializable, including its inherited members, to their
-    //                  default settings or values.
-    // Arguments:       None.
-    // Return value:    None.
-
-        virtual void Reset() { Clear(); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Method:          Clear
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Clears all the member variables of this InputScheme, effectively
-    //                  resetting the members of this abstraction level only.
-    // Arguments:       None.
-    // Return value:    None.
-
-        void Clear();
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Constructor:     InputScheme
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Constructor method used to instantiate a InputScheme object in system
-    //                  memory. Create() should be called before using the object.
-    // Arguments:       None.
-
-        InputScheme() { Clear(); }
-
-/*
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Create
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Makes the InputScheme object ready for use.
-    // Arguments:       None.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Create();
-*/
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Method:          Create
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Creates a InputScheme to be identical to another, by deep copy.
-    // Arguments:       A reference to the InputScheme to deep copy.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        int Create(const InputScheme &reference);
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  ReadProperty
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Reads a property value from a Reader stream. If the name isn't
-    //                  recognized by this class, then ReadProperty of the parent class
-    //                  is called. If the property isn't recognized by any of the base classes,
-    //                  false is returned, and the Reader's position is untouched.
-    // Arguments:       The name of the property to be read.
-    //                  A Reader lined up to the value of the property to be read.
-    // Return value:    An error return value signaling whether the property was successfully
-    //                  read or not. 0 means it was read successfully, and any nonzero indicates
-    //                  that a property of that name could not be found in this or base classes.
-
-        virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  Save
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Saves the complete state of this InputScheme to an output stream for
-    //                  later recreation with Create(Reader &reader);
-    // Arguments:       A Writer that the InputScheme will save itself with.
-    // Return value:    An error return value signaling sucess or any particular failure.
-    //                  Anything below 0 is an error signal.
-
-        virtual int Save(Writer &writer) const;
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetClassName
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the class name of this Entity.
-    // Arguments:       None.
-    // Return value:    A string with the friendly-formatted type name of this object.
-
-        virtual const std::string & GetClassName() const { return m_sClassName; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Method:          SetDevice
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Sets the device this scheme is supposed to use.
-    // Arguments:       The number of the device this scheme should use. See InputDevice enum
-    // Return value:    None.
-
-        void SetDevice(int activeDevice = 0) { m_ActiveDevice = activeDevice; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Method:          GetDevice
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the number of the device that this scheme is using.
-    // Arguments:       None.
-    // Return value:    The device number of this scheme. See InputDevice enum
-
-        int GetDevice() const { return m_ActiveDevice; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Method:          SetPreset
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Sets up a specific preset scheme that is sensible and recommended.
-    // Arguments:       The preset number to set the scheme to match. See InputPreset enum
-    // Return value:    None.
-
-        void SetPreset(int schemePreset = 0);
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Method:          GetPreset
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the number of the last preset that this was set to.
-    // Arguments:       None.
-    // Return value:    The last preset number set of this scheme. See InputPreset enum
-
-        int GetPreset() const { return m_SchemePreset; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Method:          GetInputMappings
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the InputMapping:s for this.
-    // Arguments:       None.
-    // Return value:    The input mappings array, which is INPUT_COUNT large.
-
-        InputMapping * GetInputMappings() { return m_aInputMapping; }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Method:          SetupDefaults
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Sets some sensible default bindings for this.
-    // Arguments:       None.
-    // Return value:    None.
-
-        void SetupDefaults();
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Method:          GetJoystickDeadzone
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     Get the deadzone value for this control scheme.
-	// Arguments:       None.
-	// Return value:    Joystick dead zone from 0.0 to 1.0.
-
-	float GetJoystickDeadzone()
-	{
-		return m_JoystickDeadzone;
-	}
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Method:          SetJoystickDeadzone
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     set the deadzone value for this control scheme.
-	// Arguments:       Joystick dead zone from 0.0 to 1.0.
-	// Return value:    None.
-
-	void SetJoystickDeadzone(float val)
-	{
-		m_JoystickDeadzone = val;
-	}
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Method:          GetJoystickDeadzoneType
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     Get the deadzone type for this control scheme.
-	// Arguments:       None.
-	// Return value:    Joystick dead zone InputScheme::DeadZoneType::CIRCLE or InputScheme::DeadZoneType::SQUARE
-
-	int GetJoystickDeadzoneType()
-	{
-		return m_JoystickDeadzoneType;
-	}
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Method:          SetJoystickDeadzoneType
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Description:     Set the deadzone type for this control scheme.
-	// Arguments:       Joystick dead zone InputScheme::DeadZoneType::CIRCLE or InputScheme::DeadZoneType::SQUARE
-	// Return value:    None.
-
-	void SetJoystickDeadzoneType(int val)
-	{
-		m_JoystickDeadzoneType = val;
-	}
-
-
-
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Protected member variable and method declarations
-
-    protected:
-
-        // Member variables
-        static const std::string m_sClassName;
-        // The currently active device for this scheme 
-        int m_ActiveDevice;
-        // The preset this scheme was last set to, if any
-        int m_SchemePreset;
-		// How much of the input to treat like a deadzone input, not registered by the game
-		float m_JoystickDeadzone;
-		// Which deadzone type is used
-		int m_JoystickDeadzoneType;
-        // The device input element mappings
-        InputMapping m_aInputMapping[INPUT_COUNT];
-
-    };
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
-
-public:
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     UInputMan
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Constructor method used to instantiate a UInputMan object in system
-//                  memory. Create() should be called before using the object.
-// Arguments:       None.
-
-    UInputMan() { Clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Destructor:      ~UInputMan
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destructor method used to clean up a UInputMan object before deletion
-//                  from system memory.
-// Arguments:       None.
-
-    ~UInputMan() { Destroy(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the UInputMan object ready for use.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Create();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets the entire UInputMan, including its inherited members, to
-//                  their default settings or values.
-// Arguments:       None.
-// Return value:    None.
-
-    virtual void Reset() { Clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this UInputMan to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the UInputMan will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the UInputMan object.
-// Arguments:       None.
-// Return value:    None.
-
-    void Destroy();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ReInitKeyboard
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Re-initalizes the keyboard for when windows regains focus. This is
-//                  really used to work around an Allegro bug.
-// Arguments:       None.
-// Return value:    None.
-
-    void ReInitKeyboard();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_ClassName; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:			SetInputClass
-//////////////////////////////////////////////////////////////////////////////////////////
-//
-// 
-//
-	void SetInputClass(GUIInput* pInputClass);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetControlScheme
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Access a specific players' control scheme.
-// Arguments:       Which player to get the scheme for.
-// Return value:    A pointer to the requested player's control scheme. Ownership is NOT
-//                  transferred!
-
-	InputScheme * GetControlScheme(int whichPlayer) { if (m_OverrideInput) return &m_aControlScheme[0]; else return &(m_aControlScheme[whichPlayer]); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetSchemeIcon
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Get the current device Icon of a specific player's scheme
-// Arguments:       Which player to get the scheme device icon of.
-// Return value:    A const pointer to the requested player's control scheme icon.
-//                  Ownership is NOT transferred!
-
-    const Icon * GetSchemeIcon(int whichPlayer);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetDeviceIcon
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Get the current device Icon of a specific device
-// Arguments:       Which device to get the icon of.
-// Return value:    A const pointer to the requested device's control scheme icon.
-//                  Ownership is NOT transferred!
-
-	const Icon * GetDeviceIcon(int whichDevice);
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearMapping
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears a all mappings for a specific input element of a specific player.
-// Arguments:       Which player to affect.
-//                  Which input element to clear all mappings of.
-// Return value:    None.
-
-    void ClearMapping(int whichPlayer, int whichInput) { m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].Clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetKeyMapping
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets which keyboard key is mapped to a specific input element.
-// Arguments:       Which player to look up.
-//                  Which input element to look up.
-// Return value:    Which keyboard key is mapped to the specified player and element.
-
-    int GetKeyMapping(int whichPlayer, int whichInput) { return m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].GetKey(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetButtonMapping
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets which joystick button is mapped to a specific input element.
-// Arguments:       Which player to look up.
-//                  Which input element to look up.
-// Return value:    Which joystick button is mapped to the specified player and element.
-
-    int GetButtonMapping(int whichPlayer, int whichInput) { return m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].GetJoyButton(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMappingName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the name of the key/mouse/joy button/key/direction that a
-//                  particular input element is mapped to.
-// Arguments:       Which player to look up.
-//                  Which input element to look up.
-// Return value:    A string with the appropriate clear text description of the mapped thing.
-
-    std::string GetMappingName(int whichPlayer, int whichElement);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetKeyMapping
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets a keyboard key mapped to a specific input element.
-// Arguments:       Which player to do this for.
-//                  Which input element to map to.
-//                  The scancode of which keyboard key to map to above input element.
-// Return value:    None.
-
-    void SetKeyMapping(int whichPlayer, int whichInput, int whichKey) { m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].SetKey(whichKey); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DisableKeys
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     For temporary disabling of most keyboard keys for when typing into a
-//                  dialog is required for example.
-// Arguments:       Whether to disable most keys or not.
-// Return value:    None.
-
-    void DisableKeys(bool disable = true) { m_DisableKeyboard = disable; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetButtonMapping
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets a joystick button mapped to a specific input element.
-// Arguments:       Which player to do this for.
-//                  Which input element to map to.
-//                  Which joystick button to map to above input element.
-// Return value:    None.
-
-    void SetButtonMapping(int whichPlayer, int whichInput, int whichButton) { m_aControlScheme[whichPlayer].GetInputMappings()[whichInput].SetJoyButton(whichButton); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CaptureKeyMapping
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks for the any key press this frame, and creates an input mapping
-//                  for a specific player accordingly.
-// Arguments:       Which player to do create a map for.
-//                  Which input element to map to for that player.
-// Return value:    Whether there were any key presses this frame, and therefore whether
-//                  a mapping was successfully captured or not.
-
-    bool CaptureKeyMapping(int whichPlayer, int whichInput);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CaptureButtonMapping
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks for the any button press this frame, and creates an input mapping
-//                  for a specific player accordingly.
-// Arguments:       Which player to do create a map for.
-//                  Which joystick to scan for button presses.
-//                  Which input element to map to for that player.
-// Return value:    Whether there were any button presses this frame, and therefore whether
-//                  a mapping was successfully captured or not.
-
-    bool CaptureButtonMapping(int whichPlayer, int whichJoy, int whichInput);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CaptureDirectionMapping
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks for the any joystick pad or stick direction press this frame,
-//                  and creates an input mapping for a specific player accordingly.
-// Arguments:       Which player to do create a map for.
-//                  Which joystick to scan for pad and stick direction presses.
-//                  Which input element to map to for that player.
-// Return value:    Whether there were any direction presses this frame, and therefore whether
-//                  a mapping was successfully captured or not.
-
-    bool CaptureDirectionMapping(int whichPlayer, int whichJoy, int whichInput);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CaptureJoystickMapping
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks for the any button or direction press this frame, and creates
-//                  an input mapping for a specific player accordingly.
-// Arguments:       Which player to do create a map for.
-//                  Which joystick to scan for button and stick presses.
-//                  Which input element to map to for that player.
-// Return value:    Whether there were any button or stick presses this frame, and
-//                  therefore whether a mapping was successfully captured or not.
-
-    bool CaptureJoystickMapping(int whichPlayer, int whichJoy, int whichInput);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ElementPressed
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a specific input element was depressed between the last
-//                  update and the one previous to it.
-// Arguments:       Which player to check, and which element of that player.
-// Return value:    Pressed or not.
-
-    bool ElementPressed(int whichPlayer, int whichElement);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ElementReleased
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a specific input element was released between the last
-//                  update and the one previous to it.
-// Arguments:       Which player to check, and which element of that player.
-// Return value:    Pressed or not.
-
-    bool ElementReleased(int whichPlayer, int whichElement);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ElementHeld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a specific input element was held during the last update.
-// Arguments:       Which player to check, and which element of that player.
-// Return value:    Pressed or not.
-
-    bool ElementHeld(int whichPlayer, int whichElement);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          KeyPressed
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a key was depressed between the last update and the one
-//                  previous to it.
-// Arguments:       A const char with the Allegro-defined key enumeration to test.
-// Return value:    Pressed or not.
-
-    bool KeyPressed(const char keyToTest);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          KeyReleased
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a key was released between the last update and the one
-//                  previous to it.
-// Arguments:       A const char with the Allegro-defined key enumeration to test.
-// Return value:    Released or not.
-
-    bool KeyReleased(const char keyToTest);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          KeyHeld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a key is being held right now.
-// Arguments:       A const char with the Allegro-defined key enumeration to test.
-// Return value:    Held or not.
-
-    bool KeyHeld(const char keyToTest);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          WhichKeyHeld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows the scancode of the keyboard key which is currently down.
-// Arguments:       None.
-// Return value:    The scancode (KEY_SPACE, etc) of the first keyboard key in the keyboard
-//                  buffer. 0 means none.
-
-    int WhichKeyHeld();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MouseButtonPressed
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a mosue button was depressed between the last update and
-//                  the one previous to it.
-// Arguments:       Which button. Which network player pressed the button.
-// Return value:    Pressed or not.
-
-    bool MouseButtonPressed(int whichButton, int whichPlayer);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MouseButtonPressed
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     (ONLY FOR LUA BACKWARD COMPATIBILITY) Shows whether a mosue button was depressed between the last update and
-//                  the one previous to it.
-// Arguments:       Which button.
-// Return value:    Pressed or not.
-
-	bool MouseButtonPressed(int whichButton) { return MouseButtonPressed(whichButton, 0); };
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MouseButtonReleased
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a mosue button was released between the last update and
-//                  the one previous to it.
-// Arguments:       Which button. Which network player released the button.
-// Return value:    Released or not.
-
-    bool MouseButtonReleased(int whichButton, int whichPlayer);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MouseButtonReleased
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     (ONLY FOR LUA BACKWARD COMPATIBILITY) Shows whether a mosue button was released between the last update and
-//                  the one previous to it.
-// Arguments:       Which button.
-// Return value:    Released or not.
-
-	bool MouseButtonReleased(int whichButton) { return MouseButtonReleased(whichButton, 0); };
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MouseButtonHeld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a mouse button is being held down right now.
-// Arguments:       Which button. Which network player holds the button.
-// Return value:    Held or not.
-
-    bool MouseButtonHeld(int whichButton, int whichPlayer);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MouseButtonHeld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     (ONLY FOR LUA BACKWARD COMPATIBILITY) Shows whether a mouse button is being held down right now.
-// Arguments:       Which button.
-// Return value:    Held or not.
-
-	bool MouseButtonHeld(int whichButton) { return MouseButtonHeld(whichButton, 0); };
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MouseWheelMoved
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a the mouse wheel has been moved past the threshold
-//                  limit in either direction this frame.
-// Arguments:       None.
-// Return value:    The direction the mouse wheel has been moved which is past tht threshold
-//                  0 means not past, negative means moved down, positive means moved up.
-
-    int MouseWheelMoved() { return m_MouseWheelChange; }
-
-
-	int MouseWheelMovedByPlayer(int player)
-	{
-		if (m_OverrideInput && player >= 0 && player < MAX_PLAYERS)
-		{
-			return m_aNetworkMouseWheelState[player];
+namespace RTE {
+
+	class GUIInput;
+	class Icon;
+
+	/// <summary>
+	/// The singleton manager responsible for handling user input.
+	/// </summary>
+	class UInputMan : public Singleton<UInputMan> {
+		friend class SettingsMan;
+
+	public:
+
+		/// <summary>
+		/// Enumeration for the different states an input element or button can be in.
+		/// </summary>
+		enum InputState {
+			Held = 0,
+			Pressed,
+			Released,
+			InputStateCount
+		};
+
+		/// <summary>
+		/// Enumeration for the mouse cursor actions in menus.
+		/// </summary>
+		enum MenuCursorButtons {
+			MENU_PRIMARY = 0,
+			MENU_SECONDARY,
+			MENU_EITHER
+		};
+
+#pragma region Creation
+		/// <summary>
+		/// Constructor method used to instantiate a UInputMan object in system memory. Create() should be called before using the object.
+		/// </summary>
+		UInputMan() { Clear(); }
+
+		/// <summary>
+		/// Makes the UInputMan object ready for use.
+		/// </summary>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Initialize();
+#pragma endregion
+
+#pragma region Destruction
+		/// <summary>
+		/// Destructor method used to clean up a UInputMan object before deletion from system memory.
+		/// </summary>
+		~UInputMan() { Destroy(); }
+
+		/// <summary>
+		/// Destroys and resets (through Clear()) the UInputMan object.
+		/// </summary>
+		void Destroy() { Clear(); }
+#pragma endregion
+
+#pragma region Concrete Methods
+		/// <summary>
+		/// Loads the input device icons from loaded presets. This will be called from LoadingGUI after modules are loaded. Can't do this during Create() because the presets don't exist.
+		/// </summary>
+		void LoadDeviceIcons();
+
+		/// <summary>
+		/// Re-initializes the keyboard for when windows regains focus. This is really used to work around an Allegro bug.
+		/// </summary>
+		void ReInitKeyboard() { install_keyboard(); }
+
+		/// <summary>
+		/// Updates the state of this UInputMan. Supposed to be done every frame.
+		/// </summary>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Update();
+#pragma endregion
+
+#pragma region Control Scheme and Input Mapping Handling
+		/// <summary>
+		/// Sets the input class for use if one is available.
+		/// </summary>
+		/// <param name="inputClass">The input class to set.</param>
+		void SetInputClass(GUIInput *inputClass) const;
+
+		/// <summary>
+		/// Gets the currently used input device of the specified player.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to get input device for.</param>
+		/// <returns>A number value representing the currently used input device of this player. See InputDevice enumeration for values.</returns>
+		int GetInputDevice(int whichPlayer) const { return m_ControlScheme[whichPlayer].GetDevice(); }
+
+		/// <summary>
+		/// Access a specific player's control scheme.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to get the scheme for.</param>
+		/// <returns>A pointer to the requested player's control scheme. Ownership is NOT transferred!</returns>
+		InputScheme * GetControlScheme(int whichPlayer) { return IsInMultiplayerMode() ? &m_ControlScheme[0] : &m_ControlScheme[whichPlayer]; }
+
+		/// <summary>
+		/// Get the current device Icon of a specific player's scheme.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to get the scheme device icon of.</param>
+		/// <returns>A const pointer to the requested player's control scheme icon. Ownership is NOT transferred!</returns>
+		const Icon * GetSchemeIcon(int whichPlayer) const {
+			return (whichPlayer < Players::PlayerOne || whichPlayer >= Players::MaxPlayerCount) ? nullptr : m_DeviceIcons[m_ControlScheme[whichPlayer].GetDevice()];
 		}
-		return m_MouseWheelChange;
-	}
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          JoyButtonPressed
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a joy button was depressed between the last update and
-//                  the one previous to it.
-// Arguments:       Which joystick to check, and which button on that joystick.
-// Return value:    Pressed or not.
-
-    bool JoyButtonPressed(int whichJoy, int whichButton);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          JoyButtonReleased
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a joy button was released between the last update and
-//                  the one previous to it.
-// Arguments:       Which joystick to check, and which button on that joystick.
-// Return value:    Released or not.
-
-    bool JoyButtonReleased(int whichJoy, int whichButton);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          JoyButtonHeld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a joystick button is being held down right now.
-// Arguments:       Which joystick to check, and which button on that joystick.
-// Return value:    Held or not.
-
-    bool JoyButtonHeld(int whichJoy, int whichButton);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          WhichJoyButtonHeld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows the first joystick button which is currently down.
-// Arguments:       Which joystick to check.
-// Return value:    The first button in the sequence of button enumerations (JOY_1, JOY_2,
-//                  JOY_3) that is held at the time of calling this. JOY_NONE means none.
-
-    int WhichJoyButtonHeld(int whichJoy);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          WhichJoyButtonPressed
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows the first joystick button which was pressed down since last frame.
-// Arguments:       Which joystick to check.
-// Return value:    The first button in the sequence of button enumerations (JOY_1, JOY_2,
-//                  JOY_3) that is pressed since the previous frame. JOY_NONE means none.
-
-    int WhichJoyButtonPressed(int whichJoy);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          JoyDirectionPressed
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a joystick axis direction was depressed between the
-//                  last update and the one previous to it.
-// Arguments:       Which joystick, stick, axis and direction to check.
-// Return value:    Pressed or not.
-
-    bool JoyDirectionPressed(int whichJoy, int whichStick, int whichAxis, int whichDir);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          JoyDirectionReleased
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a joystick d-pad direction was released between the
-//                  last update and the one previous to it.
-// Arguments:       Which joystick, stick, axis and direction to check.
-// Return value:    Released or not.
-
-    bool JoyDirectionReleased(int whichJoy, int whichStick, int whichAxis, int whichDir);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          JoyDirectionHeld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether a joystick axis is being held down in a specific
-//                  direction right now. Two adjacent directions can be held down to produce
-//                  diagonals.
-// Arguments:       Which joystick, stick, axis and direction to check.
-// Return value:    Held or not.
-
-    bool JoyDirectionHeld(int whichJoy, int whichStick, int whichAxis, int whichDir);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnalogMoveValues
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the analog moving values of a specific player's control scheme.
-// Arguments:       Which player to get em for.
-// Return value:    The analog axis values ranging between -1.0 to 1.0, in both axes.
-
-    Vector AnalogMoveValues(int whichPlayer = 0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnalogAimValues
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the analog aiming values of a specific player's control scheme.
-// Arguments:       Which player to get em for.
-// Return value:    The analog axis values ranging between -1.0 to 1.0, in both axes.
-
-    Vector AnalogAimValues(int whichPlayer = 0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetMouseValueMagnitude
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Set the mouse's analog emualtion output to be of a specific normalized
-//                  magnitude.
-// Arguments:       The normalized magnitude, between 0 and 1.0.
-// Return value:    None.
-
-    void SetMouseValueMagnitude(float magCap) { m_AnalogMouseData.CapMagnitude(m_MouseTrapRadius * magCap); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnalogAxisValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the normalized value of a certain joystick's stick's axis.
-// Arguments:       Which joystick, stick and axis to check.
-// Return value:    The analog axis value ranging between -1.0 to 1.0, or 0.0 to 1.0 if
-//                  it's a throttle type control.
-
-    float AnalogAxisValue(int whichJoy = 0, int whichStick = 0, int whichAxis = 0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnalogStickValues
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the analog values of a certain joystick device stick.
-// Arguments:       Which joystick to check, and which stick on that joystick device.
-// Return value:    The analog axis values ranging between -1.0 to 1.0.
-
-    Vector AnalogStickValues(int whichJoy = 0, int whichStick = 0);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MouseUsedByPlayer
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reports if any, and which player is using the mouse for control at
-//                  this time.
-// Arguments:       None.
-// Return value:    Which player is using the mouse. If noone is, then -1 is returned;
-
-    int MouseUsedByPlayer() const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnyMouseButtonPress
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return true if there is any mouse button presses at all
-// Arguments:       None.
-// Return value:    Whether any mouse buttons have been pressed at all since last frame
-
-    bool AnyMouseButtonPress();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          TrapMousePos
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the mouse to be trapped in the middle of the screen, so it doesn't
-//                  go out and click on other windows etc. This is usually used when the
-//                  cursor is invisible and only relative mouse movements are used.
-// Arguments:       Whether to trap the mouse or not.
-//                  Which player is trying ot control the mouse. Only the player with
-//                  actual control over the mouse will affect its trapping here. -1 means
-//                  change mouse trapping regardless of player.
-// Return value:    None.
-
-	void TrapMousePos(bool trap = true, int whichPlayer = -1);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMouseMovement
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the relative movement of the mouse since last update. Only returns
-//                  true if the selected player actuall is using the mouse.
-// Arguments:       Which player to get em for. If the player doesn't use the mouse, then
-//                  this always returns a zero vector.
-// Return value:    The relative mouse movements, in both axes.
-
-    Vector GetMouseMovement(int whichPlayer = -1);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DisableMouseMoving
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Will temporarily disable positioniong of the mouse. This is so that
-//                  when focus is swtiched back to the game window, it avoids having the
-//                  window fly away because the user clicked the title bar of the window.
-// Arguments:       Whether to disable or not.
-// Return value:    None.
-
-    void DisableMouseMoving(bool disable = true);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetMousePos
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the absolute screen position of the mouse cursor.
-// Arguments:       Where to place the mouse.
-//                  Which player is trying ot control the mouse. Only the player with
-//                  actual control over the mouse will affect its trapping here. -1 means
-//                  do it regardless of player.
-// Return value:    None.
-
-    void SetMousePos(Vector &newPos, int whichPlayer = -1);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ForceMouseWithinBox
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Forces the mouse within a box on the screen.
-// Arguments:       The top left corner of the screen box to keep the mouse within, in
-//                  screen coodinates.
-//                  The dimensions of the box, width/height.
-//                  Which player is trying ot control the mouse. Only the player with
-//                  actual control over the mouse will affect its trapping here. -1 means
-//                  do it regardless of player.
-// Return value:    None.
-
-    void ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer = -1);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ForceMouseWithinPlayerScreen
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Forces the mouse within a specific player's screen area.
-// Arguments:       Which player's screen's are to constrain the mouse to. Only the player
-//                  with actual control over the mouse will affect its trapping here.
-// Return value:    None.
-
-    void ForceMouseWithinPlayerScreen(int whichPlayer);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnyJoyInput
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return true if there is any joystick input at all, buttons or d-pad.
-// Arguments:       None.
-// Return value:    Whether any buttons of pads are pressed at all.
-
-    bool AnyJoyInput();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnyJoyPress
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return true if there is any joystick presses at all, buttons or d-pad.
-// Arguments:       None.
-// Return value:    Whether any buttons or pads have been pressed at all since last frame.
-
-    bool AnyJoyPress();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnyJoyButtonPress
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return true if there is any joystick button presses at all, but not
-//                  d-pad input, for a specific joystick.
-// Arguments:       None.
-// Return value:    Whether any joy buttons have been pressed at all since last frame, of
-//                  a specific joystick.
-
-    bool AnyJoyButtonPress(int whichJoy);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMenuDirectional
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the generic direction input from any and all players which can
-//                  affect a shared menu cursor. Normalized to 1.0 max
-// Arguments:       None.
-// Return value:    The vector with the directional input from any or all players.
-
-    Vector GetMenuDirectional();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MenuButtonPressed
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether any generic button with the menu cursor was pressed
-//                  between previous update and this.
-// Arguments:       Which generic menu cursor button to check for.
-// Return value:    Pressed or not.
-
-    bool MenuButtonPressed(int whichButton);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MenuButtonReleased
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether any generic button with the menu cursor is held down.
-// Arguments:       Which generic menu cursor button to check for.
-// Return value:    Released or not.
-
-    bool MenuButtonReleased(int whichButton);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          MenuButtonHeld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Shows whether any generic button with the menu cursor is held down.
-// Arguments:       Which generic menu cursor button to check for.
-// Return value:    Held or not.
-
-    bool MenuButtonHeld(int whichButton);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnyInput
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return true if there is any input at all, keyboard or buttons or d-pad.
-// Arguments:       None.
-// Return value:    Whether any buttons of pads are pressed at all.
-
-    bool AnyInput();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnyPress
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return true if there is any key, button, or d-pad presses at all.
-//                  MUST call Update before calling this for it to work properly!
-// Arguments:       None.
-// Return value:    Whether any buttons of pads have been pressed at all since last frame.
-
-    bool AnyPress();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AnyStartPress
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return true if there is any start key/button presses at all.
-//                  MUST call Update before calling this for it to work properly!
-// Arguments:       None.
-// Return value:    Whether any start buttons or keys have been pressed at all since last frame.
-
-    bool AnyStartPress();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          WaitForSpace
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Halts thread and waits for space to be pressed. This is for debug
-//                  purposes mostly.
-// Arguments:       None.
-// Return value:    None.
-
-    void WaitForSpace();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the state of this UInputMan. Supposed to be done every frame.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    int Update();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetMouseSensitivity
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets mouse sensitivity
-// Arguments:       New sensitivty value.
-// Return value:    None.
-
-	void SetMouseSensitivity(float sensitivity) { m_MouseSensitivity = sensitivity; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMouseSensitivity
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets mouse sensitivity
-// Arguments:       None.
-// Return value:    Returns current mouse sensitivity.
-
-	float GetMouseSensitivity() const { return m_MouseSensitivity; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetLastDeviceWhichControlledGUICursor
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns last device which affected GUI cursor position.
-// Arguments:       None.
-// Return value:    Returns last device which affected GUI cursor position.
-
-	int GetLastDeviceWhichControlledGUICursor() const { return m_LastDeviceWhichControlledGUICursor; }
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          JoystickActive
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns true if specified joystick is active
-// Arguments:       None.
-// Return value:    Returns true if specified joystick is active
-
-	bool JoystickActive(int joystickNumber) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetJoystickCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the number of active joysticks
-// Arguments:       None.
-// Return value:    Returns the number of active joysticks
-
-	int GetJoystickCount() const;
-
-	Vector GetNetworkAccumulatedRawMouseMovement(int player);
-
-	void SetNetworkMouseInput(int player, Vector input);
-
-	void SetNetworkInputElementHeldState(int player, int element, bool state);
-
-	void SetNetworkInputElementPressedState(int player, int element, bool state);
-
-	void SetNetworkInputElementReleasedState(int player, int element, bool state);
-
-	void SetNetworkMouseButtonPressedState(int player, int whichButton, bool state);
-
-	void SetNetworkMouseButtonReleasedState(int player, int whichButton, bool state);
-
-	void SetNetworkMouseButtonHeldState(int player, int whichButton, bool state);
-
-	void SetNetworkMouseWheelState(int player, int state);
-
-	bool OverrideInput() { return m_OverrideInput; };
-
-	void ClearAccumulatedStates();
-
-	bool AccumulatedElementPressed(int element);
-
-	bool AccumulatedElementReleased(int element);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FlagAltState
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the state of the Alt key.
-// Arguments:       None.
-// Return value:    Returns the state of the Alt key.
-
-	bool FlagAltState() const { return (key_shifts & KB_ALT_FLAG) > 0 ? true : false; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FlagCtrlState
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the state of the Ctrl key.
-// Arguments:       None.
-// Return value:    Returns the state of the Ctrl key.
-
-	bool FlagCtrlState() const { return (key_shifts & KB_CTRL_FLAG) > 0 ? true : false; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FlagShiftState
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the state of the Shift key.
-// Arguments:       None.
-// Return value:    Returns the state of the Shift key.
-
-	bool FlagShiftState() const { return (key_shifts & KB_SHIFT_FLAG) > 0 ? true : false; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetMultiplayerMode
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether this instance is in multiplayer mode or not
-// Arguments:       Whether multiplayer mode is on.
-// Return value:    None.
-
-	void SetMultiplayerMode(bool isMultiplayer) { m_IsInMultiplayerMode = isMultiplayer; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
-
-protected:
-
-    // Member variables
-    static const std::string m_ClassName;
-
-    bool m_DebugArmed;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
-private:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this UInputMan, effectively
-//                  resetting the members of this abstraction level only.
-// Arguments:       None.
-// Return value:    None.
-
-    void Clear();
-
-
-    // Key states of the previous update
-    static char *s_aLastKeys;
-    // Key states that have changed
-    static char *s_aChangedKeys;
-	// Current input class if available
-	static GUIInput* s_InputClass; 
-	
-    // Temporarily disable all keyboard input reading
-    bool m_DisableKeyboard;
-
-    // Which control scheme is being used by each player
-    InputScheme m_aControlScheme[MAX_PLAYERS];
-
-    // The Icons representing all different devices
-    const Icon *m_apDeviceIcons[DEVICE_COUNT];
-
-    // The raw absolute movement of the mouse between the last two Updates
-    Vector m_RawMouseMovement;
-    // The emulated analog stick position of the mouse
-    Vector m_AnalogMouseData;
-    // Whetehr the mouse is trapped in the middle of the screen each update or not.
-    bool m_TrapMousePos;
-    // The radius (in pixels) of the circle trapping the mouse for analog mouse data
-    float m_MouseTrapRadius;
-    // The relative mouse wheel pos since last reset of it
-    int m_MouseWheelChange;
-    // Temporary disable for positioniong the mouse, for when the game window is not in focus
-    bool m_DisableMouseMoving;
-    // This is set when focus is swtiched back to the game window, an will cause the m_DisableMouseMoving to switch to
-    // false when the mouse button is RELEASED. This is to avoid having the window fly away because the user clicked the title bar.
-    bool m_PrepareToEnableMouseMoving;
-	// Mouse sensitivity, to replace hardcoded 0.6 value in Update
-	float m_MouseSensitivity;
-
-	// Indicates which device controlled the cursor last time
-	int m_LastDeviceWhichControlledGUICursor;
-
-    // Mouse button states
-    static bool m_aMouseButtonState[MAX_MOUSE_BUTTONS];
-    static bool m_aMousePrevButtonState[MAX_MOUSE_BUTTONS];
-    static bool m_aMouseChangedButtonState[MAX_MOUSE_BUTTONS];
-
-    // Joystick states as they were the previous update
-    static JOYSTICK_INFO s_aaPrevJoyState[MAX_PLAYERS];
-    // Joystick states that have changed
-    static JOYSTICK_INFO s_aaChangedJoyState[MAX_PLAYERS];
-	// Input of this manager is overriden by netowrk input
-	bool m_OverrideInput;
-	// If true then this instance operates in multiplayer mode
-	bool m_IsInMultiplayerMode;
-
-	Vector m_NetworkAccumulatedRawMouseMovement[MAX_PLAYERS];
-
-	bool m_aNetworkAccumulatedElementPressed[INPUT_COUNT];
-	bool m_aNetworkAccumulatedElementReleased[INPUT_COUNT];
-
-	bool m_aNetworkInputElementPressed[MAX_PLAYERS][INPUT_COUNT];
-	bool m_aNetworkInputElementReleased[MAX_PLAYERS][INPUT_COUNT];
-	bool m_aNetworkInputElementHeld[MAX_PLAYERS][INPUT_COUNT];
-
-	bool m_aNetworkMouseButtonPressedState[MAX_PLAYERS][MAX_MOUSE_BUTTONS];
-	bool m_aNetworkMouseButtonReleasedState[MAX_PLAYERS][MAX_MOUSE_BUTTONS];
-	bool m_aNetworkMouseButtonHeldState[MAX_PLAYERS][MAX_MOUSE_BUTTONS];
-
-	Vector m_aNetworkAnalogMoveData[MAX_PLAYERS];
-
-	int m_aNetworkMouseWheelState[MAX_PLAYERS];
-
-	bool m_TrapMousePosPerPlayer[MAX_PLAYERS];
-
-    // Disallow the use of some implicit methods.
-    UInputMan(const UInputMan &reference);
-    UInputMan & operator=(const UInputMan &rhs);
-
-};
-
-} // namespace RTE
-
-#endif // File
+		/// <summary>
+		/// Get the current device Icon of a specific device.
+		/// </summary>
+		/// <param name="whichDevice">Which device to get the icon of.</param>
+		/// <returns>A const pointer to the requested device's control scheme icon. Ownership is NOT transferred!</returns>
+		const Icon * GetDeviceIcon(int whichDevice) const { return (whichDevice < InputDevice::DEVICE_KEYB_ONLY || whichDevice > InputDevice::DEVICE_GAMEPAD_4) ? nullptr : m_DeviceIcons[whichDevice]; }
+
+		/// <summary>
+		/// Clears all mappings for a specific input element of a specific player.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to affect.</param>
+		/// <param name="whichInput">Which input element to clear all mappings of.</param>
+		void ClearMapping(int whichPlayer, int whichInput) { m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].Reset(); }
+
+		/// <summary>
+		/// Gets the name of the key/mouse/joystick button/direction that a particular input element is mapped to.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to look up.</param>
+		/// <param name="whichElement">Which input element to look up.</param>
+		/// <returns>A string with the appropriate clear text description of the mapped thing.</returns>
+		std::string GetMappingName(int whichPlayer, int whichElement);
+
+		/// <summary>
+		/// Gets which keyboard key is mapped to a specific input element.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to look up.</param>
+		/// <param name="whichInput">Which input element to look up.</param>
+		/// <returns>Which keyboard key is mapped to the specified player and element.</returns>
+		int GetKeyMapping(int whichPlayer, int whichInput) { return m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].GetKey(); }
+
+		/// <summary>
+		/// Sets a keyboard key mapped to a specific input element.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to do this for.</param>
+		/// <param name="whichInput">Which input element to map to.</param>
+		/// <param name="whichKey">The scancode of which keyboard key to map to above input element.</param>
+		void SetKeyMapping(int whichPlayer, int whichInput, int whichKey) { m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].SetKey(whichKey); }
+
+		/// <summary>
+		/// Gets which joystick button is mapped to a specific input element.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to look up.</param>
+		/// <param name="whichInput">Which input element to look up.</param>
+		/// <returns>Which joystick button is mapped to the specified player and element.</returns>
+		int GetButtonMapping(int whichPlayer, int whichInput) { return m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].GetJoyButton(); }
+
+		/// <summary>
+		/// Sets a joystick button mapped to a specific input element.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to do this for.</param>
+		/// <param name="whichInput">Which input element to map to.</param>
+		/// <param name="whichButton">Which joystick button to map to the specified input element.</param>
+		void SetButtonMapping(int whichPlayer, int whichInput, int whichButton) { m_ControlScheme[whichPlayer].GetInputMappings()[whichInput].SetJoyButton(whichButton); }
+
+		/// <summary>
+		/// Checks for any key press this frame and creates an input mapping for a specific player accordingly.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to create a map for.</param>
+		/// <param name="whichInput">Which input element to map to for that player.</param>
+		/// <returns>Whether there were any key presses this frame and therefore whether a mapping was successfully captured or not.</returns>
+		bool CaptureKeyMapping(int whichPlayer, int whichInput);
+
+		/// <summary>
+		/// Checks for any button press this frame and creates an input mapping for a specific player accordingly.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to create a map for.</param>
+		/// <param name="whichJoy">Which joystick to scan for button presses.</param>
+		/// <param name="whichInput">Which input element to map to for that player.</param>
+		/// <returns>Whether there were any button presses this frame and therefore whether a mapping was successfully captured or not.</returns>
+		bool CaptureButtonMapping(int whichPlayer, int whichJoy, int whichInput);
+
+		/// <summary>
+		/// Checks for any joystick pad or stick direction press this frame and creates an input mapping for a specific player accordingly.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to create a map for.</param>
+		/// <param name="whichJoy">Which joystick to scan for pad and stick direction presses.</param>
+		/// <param name="whichInput">Which input element to map to for that player.</param>
+		/// <returns>Whether there were any direction presses this frame and therefore whether a mapping was successfully captured or not.</returns>
+		bool CaptureDirectionMapping(int whichPlayer, int whichJoy, int whichInput);
+
+		/// <summary>
+		/// Checks for any button or direction press this frame and creates an input mapping for a specific player accordingly.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to do create a map for.</param>
+		/// <param name="whichJoy">Which joystick to scan for button and stick presses.</param>
+		/// <param name="whichInput">Which input element to map to for that player.</param>
+		/// <returns>Whether there were any button or stick presses this frame and therefore whether a mapping was successfully captured or not.</returns>
+		bool CaptureJoystickMapping(int whichPlayer, int whichJoy, int whichInput);
+#pragma endregion
+
+#pragma region General Input Handling
+		/// <summary>
+		/// Gets the last device which affected GUI cursor position.
+		/// </summary>
+		/// <returns>The last device which affected GUI cursor position.</returns>
+		InputDevice GetLastDeviceWhichControlledGUICursor() const { return m_LastDeviceWhichControlledGUICursor; }
+
+		/// <summary>
+		/// Gets the analog moving values of a specific player's control scheme.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to check for.</param>
+		/// <returns>The analog axis values ranging between -1.0 to 1.0, in both axes.</returns>
+		Vector AnalogMoveValues(int whichPlayer = 0);
+
+		/// <summary>
+		/// Gets the analog aiming values of a specific player's control scheme.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to check for.</param>
+		/// <returns>The analog axis values ranging between -1.0 to 1.0, in both axes.</returns>
+		Vector AnalogAimValues(int whichPlayer = 0);
+
+		/// <summary>
+		/// Gets whether a specific input element was held during the last update.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to check for.</param>
+		/// <param name="whichElement">Which element to check for.</param>
+		/// <returns>Whether the element is held or not.</returns>
+		bool ElementHeld(int whichPlayer, int whichElement) { return GetInputElementState(whichPlayer, whichElement, InputState::Held); }
+
+		/// <summary>
+		/// Gets whether a specific input element was depressed between the last update and the one previous to it.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to check for.</param>
+		/// <param name="whichElement">Which element to check for.</param>
+		/// <returns>Whether the element is pressed or not.</returns>
+		bool ElementPressed(int whichPlayer, int whichElement) { return GetInputElementState(whichPlayer, whichElement, InputState::Pressed); }
+
+		/// <summary>
+		/// Gets whether a specific input element was released between the last update and the one previous to it.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to check for.</param>
+		/// <param name="whichElement">Which element to check for.</param>
+		/// <returns>Whether the element is released or not.</returns>
+		bool ElementReleased(int whichPlayer, int whichElement) { return GetInputElementState(whichPlayer, whichElement, InputState::Released); }
+
+		/// <summary>
+		/// Gets the generic direction input from any and all players which can affect a shared menu cursor. Normalized to 1.0 max.
+		/// </summary>
+		/// <returns>The vector with the directional input from any or all players.</returns>
+		Vector GetMenuDirectional();
+
+		/// <summary>
+		/// Gets whether any generic button with the menu cursor is held down.
+		/// </summary>
+		/// <param name="whichButton">Which generic menu cursor button to check for.</param>
+		/// <returns>Whether the button is held or not.</returns>
+		bool MenuButtonHeld(int whichButton) { return GetMenuButtonState(whichButton, InputState::Held); }
+
+		/// <summary>
+		/// Gets whether any generic button with the menu cursor was pressed between previous update and this.
+		/// </summary>
+		/// <param name="whichButton">Which generic menu cursor button to check for.</param>
+		/// <returns>Whether the button is pressed or not.</returns>
+		bool MenuButtonPressed(int whichButton) { return GetMenuButtonState(whichButton, InputState::Pressed); }
+
+		/// <summary>
+		/// Gets whether any generic button with the menu cursor was released between previous update and this.
+		/// </summary>
+		/// <param name="whichButton">Which generic menu cursor button to check for.</param>
+		/// <returns>Whether the button is released or not.</returns>
+		bool MenuButtonReleased(int whichButton) { return GetMenuButtonState(whichButton, InputState::Released); }
+
+		/// <summary>
+		/// Gets whether there is any input at all, keyboard or buttons or D-pad.
+		/// </summary>
+		/// <returns>Whether any buttons of pads are pressed at all.</returns>
+		bool AnyKeyOrJoyInput() const;
+
+		/// <summary>
+		/// Gets whether there are any key, button, or D-pad presses at all. MUST call Update before calling this for it to work properly!
+		/// </summary>
+		/// <returns>Whether any buttons of pads have been pressed at all since last frame.</returns>
+		bool AnyPress() const;
+
+		/// <summary>
+		/// Gets whether there are any start key/button presses at all. MUST call Update before calling this for it to work properly!
+		/// </summary>
+		/// <param="includeSpacebar">Whether to check for space bar presses or not. 
+		/// <returns>Whether any start buttons or keys have been pressed at all since last frame.</returns>
+		bool AnyStartPress(bool includeSpacebar = true);
+
+		/// <summary>
+		/// Gets whether there are any back button presses at all. MUST call Update before calling this for it to work properly!
+		/// </summary>
+		/// <returns>Whether any back buttons have been pressed at all since last frame.</returns>
+		bool AnyBackPress();
+
+		/// <summary>
+		/// Gets the state of the Ctrl key.
+		/// </summary>
+		/// <returns>The state of the Ctrl key.</returns>
+		bool FlagCtrlState() const { return ((key_shifts & KB_CTRL_FLAG) > 0) ? true : false; }
+
+		/// <summary>
+		/// Gets the state of the Alt key.
+		/// </summary>
+		/// <returns>The state of the Alt key.</returns>
+		bool FlagAltState() const { return ((key_shifts & KB_ALT_FLAG) > 0) ? true : false; }
+
+		/// <summary>
+		/// Gets the state of the Shift key.
+		/// </summary>
+		/// <returns>The state of the Shift key.</returns>
+		bool FlagShiftState() const { return ((key_shifts & KB_SHIFT_FLAG) > 0) ? true : false; }
+#pragma endregion
+
+#pragma region Keyboard Handling
+		/// <summary>
+		/// Temporarily disables most of the keyboard keys. This is used when typing into a dialog box is required.
+		/// </summary>
+		/// <param name="disable">Whether to disable most keys or not.</param>
+		void DisableKeys(bool disable = true) { m_DisableKeyboard = disable; }
+
+		/// <summary>
+		/// Gets whether a key is being held right now.
+		/// </summary>
+		/// <param name="keyToTest">A const char with the Allegro-defined key enumeration to test.</param>
+		/// <returns>Whether the key is held or not.</returns>
+		bool KeyHeld(const char keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Held); }
+
+		/// <summary>
+		/// Shows the scancode of the keyboard key which is currently down.
+		/// </summary>
+		/// <returns>The scancode of the first keyboard key in the keyboard buffer. 0 means none.</returns>
+		int WhichKeyHeld() const { int key = readkey(); return key >> 8; }
+
+		/// <summary>
+		/// Gets whether a key was pressed between the last update and the one previous to it.
+		/// </summary>
+		/// <param name="keyToTest">A const char with the Allegro-defined key enumeration to test.</param>
+		/// <returns>Whether the key is pressed or not.</returns>
+		bool KeyPressed(const char keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Pressed); }
+
+		/// <summary>
+		/// Gets whether a key was released between the last update and the one previous to it.
+		/// </summary>
+		/// <param name="keyToTest">A const char with the Allegro-defined key enumeration to test.</param>
+		/// <returns>Whether the key is released or not.</returns>
+		bool KeyReleased(const char keyToTest) const { return GetKeyboardButtonState(keyToTest, InputState::Released); }
+
+		/// <summary>
+		/// Return true if there are any keyboard button presses at all.
+		/// </summary>
+		/// <returns>Whether any keyboard buttons have been pressed at all since last frame.</returns>
+		bool AnyKeyPress() const;
+#pragma endregion
+
+#pragma region Mouse Handling
+		/// <summary>
+		/// Reports which player is using the mouse for control at this time if any.
+		/// </summary>
+		/// <returns>Which player is using the mouse. If no one is then -1 is returned.</returns>
+		int MouseUsedByPlayer() const;
+
+		/// <summary>
+		/// Will temporarily disable positioning of the mouse.
+		/// This is so that when focus is switched back to the game window, it avoids having the window fly away because the user clicked the title bar of the window.
+		/// </summary>
+		/// <param name="disable">Whether to disable mouse positioning or not.</param>
+		void DisableMouseMoving(bool disable = true);
+
+		/// <summary>
+		/// Gets the relative movement of the mouse since last update. Only returns true if the selected player is actually using the mouse.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to get movement for. If the player doesn't use the mouse this always returns a zero vector.</param>
+		/// <returns>The relative mouse movements, in both axes.</returns>
+		Vector GetMouseMovement(int whichPlayer = -1) const;
+
+		/// <summary>
+		/// Set the mouse's analog emulation output to be of a specific normalized magnitude.
+		/// </summary>
+		/// <param name="magCap">The normalized magnitude, between 0 and 1.0.</param>
+		void SetMouseValueMagnitude(float magCap) { m_AnalogMouseData.CapMagnitude(m_MouseTrapRadius * magCap); }
+
+		/// <summary>
+		/// Sets the absolute screen position of the mouse cursor.
+		/// </summary>
+		/// <param name="newPos">Where to place the mouse.</param>
+		/// <param name="whichPlayer">Which player is trying to control the mouse. Only the player with actual control over the mouse will be affected. -1 means do it regardless of player.</param>
+		void SetMousePos(Vector &newPos, int whichPlayer = -1) const;
+
+		/// <summary>
+		/// Gets mouse sensitivity.
+		/// </summary>
+		/// <returns>The current mouse sensitivity.</returns>
+		float GetMouseSensitivity() const { return m_MouseSensitivity; }
+
+		/// <summary>
+		/// Sets mouse sensitivity.
+		/// </summary>
+		/// <param name="sensitivity">New sensitivity value.</param>
+		void SetMouseSensitivity(float sensitivity) { m_MouseSensitivity = sensitivity; }
+
+		/// <summary>
+		/// Gets whether a mouse button is being held down right now.
+		/// </summary>
+		/// <param name="whichButton">Which button to check for.</param>
+		/// <param name="whichPlayer">Which player to check for.</param>
+		/// <returns>Whether the mouse button is held or not.</returns>
+		bool MouseButtonHeld(int whichButton, int whichPlayer) const { return GetMouseButtonState(whichPlayer, whichButton, InputState::Held); }
+
+		/// <summary>
+		/// (ONLY FOR LUA BACKWARD COMPATIBILITY) Gets whether a mouse button is being held down right now.
+		/// </summary>
+		/// <param name="whichButton">Which button to check for.</param>
+		/// <returns>Whether the mouse button is held or not.</returns>
+		bool MouseButtonHeld(int whichButton) const { return GetMouseButtonState(Players::PlayerOne, whichButton, InputState::Held); }
+
+		/// <summary>
+		/// Gets whether a mouse button was pressed between the last update and the one previous to it.
+		/// </summary>
+		/// <param name="whichButton">Which button to check for.</param>
+		/// <param name="whichPlayer">Which player to check for.</param>
+		/// <returns>Whether the mouse button is pressed or not.</returns>
+		bool MouseButtonPressed(int whichButton, int whichPlayer) const { return GetMouseButtonState(whichPlayer, whichButton, InputState::Pressed); }
+
+		/// <summary>
+		/// (ONLY FOR LUA BACKWARD COMPATIBILITY) Gets whether a mouse button was pressed between the last update and the one previous to it.
+		/// </summary>
+		/// <param name="whichButton">Which button to check for.</param>
+		/// <returns>Whether the mouse button is pressed or not.</returns>
+		bool MouseButtonPressed(int whichButton) const { return GetMouseButtonState(Players::PlayerOne, whichButton, InputState::Pressed); }
+
+		/// <summary>
+		/// Gets whether a mouse button was released between the last update and the one previous to it.
+		/// </summary>
+		/// <param name="whichButton">Which button to check for.</param>
+		/// <param name="whichPlayer">Which player to check for.</param>
+		/// <returns>Whether the mouse button is released or not.</returns>
+		bool MouseButtonReleased(int whichButton, int whichPlayer) const { return GetMouseButtonState(whichPlayer, whichButton, InputState::Released); }
+
+		/// <summary>
+		/// (ONLY FOR LUA BACKWARD COMPATIBILITY) Gets whether a mouse button was released between the last update and the one previous to it.
+		/// </summary>
+		/// <param name="whichButton">Which button to check for.</param>
+		/// <returns>Whether the mouse button is released or not.</returns>
+		bool MouseButtonReleased(int whichButton) const { return GetMouseButtonState(Players::PlayerOne, whichButton, InputState::Released); }
+
+		/// <summary>
+		/// Gets whether the mouse wheel has been moved past the threshold limit in either direction this frame.
+		/// </summary>
+		/// <returns>The direction the mouse wheel has been moved which is past that threshold. 0 means not past, negative means moved down, positive means moved up.</returns>
+		int MouseWheelMoved() const { return m_MouseWheelChange; }
+
+		/// <summary>
+		/// Gets the relative mouse wheel position for the specified player.
+		/// </summary>
+		/// <param name="player">The player to get mouse wheel position for.</param>
+		/// <returns>The relative mouse wheel position for the specified player.</returns>
+		int MouseWheelMovedByPlayer(int player) const {
+			return (IsInMultiplayerMode() && player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_NetworkMouseWheelState[player] : m_MouseWheelChange;
+		}
+
+		/// <summary>
+		/// Return true if there are any mouse button presses at all.
+		/// </summary>
+		/// <returns>Whether any mouse buttons have been pressed at all since last frame.</returns>
+		bool AnyMouseButtonPress() const;
+
+		/// <summary>
+		/// Sets the mouse to be trapped in the middle of the screen so it doesn't go out and click on other windows etc.
+		/// This is usually used when the cursor is invisible and only relative mouse movements are used.
+		/// </summary>
+		/// <param name="trap">Whether to trap the mouse or not.</param>
+		/// <param name="whichPlayer">
+		/// Which player is trying to control the mouse.
+		/// Only the player with actual control over the mouse will affect its trapping here. -1 means change mouse trapping regardless of player.
+		/// </param>
+		void TrapMousePos(bool trap = true, int whichPlayer = -1);
+
+		/// <summary>
+		/// Forces the mouse within a box on the screen.
+		/// </summary>
+		/// <param name="x">X value of the top left corner of the screen box to keep the mouse within, in screen coordinates.</param>
+		/// <param name="y">Y value of the top left corner of the screen box to keep the mouse within, in screen coordinates.</param>
+		/// <param name="width">The width of the box.</param>
+		/// <param name="height">The height of the box.</param>
+		/// <param name="whichPlayer">Which player is trying to control the mouse. Only the player with actual control over the mouse will be affected. -1 means do it regardless of player.</param>
+		void ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer = -1) const;
+
+		/// <summary>
+		/// Forces the mouse within a specific player's screen area.
+		/// Player 1 will always be in the upper-left corner, Player 3 will always be in the lower-left corner, Player 4 will always be in the lower-right quadrant.
+		/// Player 2 will either be in the lower-left corner or the upper-right corner depending on vertical/horizontal splitting.
+		/// </summary>
+		/// <param name="whichPlayer">Which player's screen to constrain the mouse to. Only the player with actual control over the mouse will be affected.</param>
+		void ForceMouseWithinPlayerScreen(int whichPlayer) const;
+#pragma endregion
+
+#pragma region Joystick Handling
+		/// <summary>
+		/// Gets the number of active joysticks.
+		/// </summary>
+		/// <returns>The number of active joysticks.</returns>
+		int GetJoystickCount() const { return (num_joysticks > Players::MaxPlayerCount) ? Players::MaxPlayerCount : num_joysticks; }
+
+		/// <summary>
+		/// Gets the index number of a joystick from InputDevice. Basically just subtract 2 from the passed in value because the Allegro joystick indices are 0-3 and ours are 2-5.
+		/// </summary>
+		/// <param name="device">The InputDevice to get index from.</param>
+		/// <returns>The corrected index. A non-joystick device will result in an out of range value returned which will not affect any active joysticks.</returns>
+		int GetJoystickIndex(InputDevice device) const { return (device >= InputDevice::DEVICE_GAMEPAD_1 && device < InputDevice::DEVICE_COUNT) ? device - InputDevice::DEVICE_GAMEPAD_1 : InputDevice::DEVICE_COUNT ; }
+
+		/// <summary>
+		/// Gets whether the specified joystick is active. The joystick number does not correspond to the player number.
+		/// </summary>
+		/// <param name="joystickNumber">Joystick to check for.</param>
+		/// <returns>Whether the specified joystick is active.</returns>
+		bool JoystickActive(int joystickNumber) const { return joystickNumber >= Players::PlayerOne && joystickNumber < Players::MaxPlayerCount && joystickNumber < num_joysticks; }
+
+		/// <summary>
+		/// Gets whether a joystick button is being held down right now.
+		/// </summary>
+		/// <param name="whichJoy">Which joystick to check for.</param>
+		/// <param name="whichButton">Which joystick button to check for.</param>
+		/// <returns>Whether the joystick button is held or not.</returns>
+		bool JoyButtonHeld(int whichJoy, int whichButton) const { return GetJoystickButtonState(whichJoy, whichButton, InputState::Held); }
+
+		/// <summary>
+		/// Shows the first joystick button which is currently down.
+		/// </summary>
+		/// <param name="whichJoy">Which joystick to check for.</param>
+		/// <returns>The first button in the sequence of button enumerations that is held at the time of calling this. JOY_NONE means none.</returns>
+		int WhichJoyButtonHeld(int whichJoy) const;
+
+		/// <summary>
+		/// Gets whether a joystick button was pressed between the last update and the one previous to it.
+		/// </summary>
+		/// <param name="whichJoy">Which joystick to check for.</param>
+		/// <param name="whichButton">Which joystick button to check for.</param>
+		/// <returns>Whether the joystick button is pressed or not.</returns>
+		bool JoyButtonPressed(int whichJoy, int whichButton) const { return GetJoystickButtonState(whichJoy, whichButton, InputState::Pressed); }
+
+		/// <summary>
+		/// Shows the first joystick button which was pressed down since last frame.
+		/// </summary>
+		/// <param name="whichJoy">Which joystick to check for.</param>
+		/// <returns>The first button in the sequence of button enumerations that is pressed since the previous frame. JOY_NONE means none.</returns>
+		int WhichJoyButtonPressed(int whichJoy) const;
+
+		/// <summary>
+		/// Gets whether a joystick button was released between the last update and the one previous to it.
+		/// </summary>
+		/// <param name="whichJoy">Which joystick to check for.</param>
+		/// <param name="whichButton">Which joystick button to check for.</param>
+		/// <returns>Whether the joystick button is released or not.</returns>
+		bool JoyButtonReleased(int whichJoy, int whichButton) const { return GetJoystickButtonState(whichJoy, whichButton, InputState::Released); }
+
+		/// <summary>
+		/// Gets whether a joystick axis is being held down in a specific direction right now. Two adjacent directions can be held down to produce diagonals.
+		/// </summary>
+		/// <param name="whichJoy">Which joystick to check for.</param>
+		/// <param name="whichStick">Which joystick stick to check for.</param>
+		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
+		/// <param name="whichDir">Which direction to check for.</param>
+		/// <returns>Whether the stick axis is held in the specified direction or not.</returns>
+		bool JoyDirectionHeld(int whichJoy, int whichStick, int whichAxis, int whichDir) const { return GetJoystickDirectionState(whichJoy, whichStick, whichAxis, whichDir, InputState::Held); }
+
+		/// <summary>
+		/// Gets whether a joystick axis direction was pressed between the last update and the one previous to it.
+		/// </summary>
+		/// <param name="whichJoy">Which joystick to check for.</param>
+		/// <param name="whichStick">Which joystick stick to check for.</param>
+		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
+		/// <param name="whichDir">Which direction to check for.</param>
+		/// <returns>Whether the stick axis is pressed or not.</returns>
+		bool JoyDirectionPressed(int whichJoy, int whichStick, int whichAxis, int whichDir) const { return GetJoystickDirectionState(whichJoy, whichStick, whichAxis, whichDir, InputState::Pressed); }
+
+		/// <summary>
+		/// Gets whether a joystick axis direction was released between the last update and the one previous to it.
+		/// </summary>
+		/// <param name="whichJoy">Which joystick to check for.</param>
+		/// <param name="whichStick">Which joystick stick to check for.</param>
+		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
+		/// <param name="whichDir">Which direction to check for.</param>
+		/// <returns>Whether the stick axis is released or not.</returns>
+		bool JoyDirectionReleased(int whichJoy, int whichStick, int whichAxis, int whichDir) const { return GetJoystickDirectionState(whichJoy, whichStick, whichAxis, whichDir, InputState::Released); }
+
+		/// <summary>
+		/// Gets the normalized value of a certain joystick's stick's axis.
+		/// </summary>
+		/// <param name="whichJoy">Which joystick to check for.</param>
+		/// <param name="whichStick">Which joystick stick to check for.</param>
+		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
+		/// <returns>The analog axis value ranging between -1.0 to 1.0, or 0.0 to 1.0 if it's a throttle type control.</returns>
+		float AnalogAxisValue(int whichJoy = 0, int whichStick = 0, int whichAxis = 0) const;
+
+		/// <summary>
+		/// Gets the analog values of a certain joystick device stick.
+		/// </summary>
+		/// <param name="whichJoy">Which joystick to check for.</param>
+		/// <param name="whichStick">Which joystick stick to check for.</param>
+		/// <returns>The analog axis values ranging between -1.0 to 1.0.</returns>
+		Vector AnalogStickValues(int whichJoy = 0, int whichStick = 0) const { return Vector(AnalogAxisValue(whichJoy, whichStick, 0), AnalogAxisValue(whichJoy, whichStick, 1)); }
+
+		/// <summary>
+		/// Gets whether there is any joystick input at all, buttons or D-pad.
+		/// </summary>
+		/// <param name="checkForPresses">Whether to check specifically for presses since last frame.</param>
+		/// <returns>Whether any buttons of pads are pressed at all or since the last frame.</returns>
+		bool AnyJoyInput(bool checkForPresses = false) const;
+
+		/// <summary>
+		/// Return true if there are any joystick presses at all, buttons or D-pad.
+		/// </summary>
+		/// <returns>Whether any buttons or pads have been pressed at all since last frame.</returns>
+		bool AnyJoyPress() const { return AnyJoyInput(true); }
+
+		/// <summary>
+		/// Gets whether there are any joystick button presses at all, but not D-pad input, for a specific joystick.
+		/// </summary>
+		/// <param name="whichJoy">Which joystick to check for.</param>
+		/// <returns>Whether any joystick buttons have been pressed at all since last frame, of a specific joystick.</returns>
+		bool AnyJoyButtonPress(int whichJoy) const;
+#pragma endregion
+
+#pragma region Network Handling
+		/// <summary>
+		/// Returns true if manager is in multiplayer mode.
+		/// </summary>
+		/// <returns>True if in multiplayer mode.</returns>
+		bool IsInMultiplayerMode() const { return m_OverrideInput; }
+
+		/// <summary>
+		/// Sets the multiplayer mode flag.
+		/// </summary>
+		/// <param name="value">Whether this manager should operate in multiplayer mode.</param>
+		void SetMultiplayerMode(bool value) { m_OverrideInput = value; }
+
+		/// <summary>
+		/// Gets the position of the mouse for a player during network multiplayer.
+		/// </summary>
+		/// <param name="player">The player to get for.</param>
+		/// <returns>The position of the mouse for the specified player</returns>
+		Vector GetNetworkAccumulatedRawMouseMovement(int player);
+
+		/// <summary>
+		/// Sets the position of the mouse for a player during network multiplayer.
+		/// </summary>
+		/// <param name="player">The player to set for.</param>
+		/// <param name="input">The new position of the mouse.</param>
+		void SetNetworkMouseMovement(int player, const Vector &input) { m_NetworkAccumulatedRawMouseMovement[player] = input; }
+
+		/// <summary>
+		/// Sets whether an input element is held by a player during network multiplayer.
+		/// </summary>
+		/// <param name="player">Which player to set for.</param>
+		/// <param name="element">Which input element to set for.</param>
+		/// <param name="state">The new state of the input element. True or false.</param>
+		void SetNetworkInputElementHeldState(int player, int element, bool state) { SetNetworkInputElementState(player, element, InputState::Held, state); }
+
+		/// <summary>
+		/// Sets whether an input element is pressed by a player during network multiplayer.
+		/// </summary>
+		/// <param name="player">Which player to set for.</param>
+		/// <param name="element">Which input element to set for.</param>
+		/// <param name="state">The new state of the input element. True or false.</param>
+		void SetNetworkInputElementPressedState(int player, int element, bool state) { SetNetworkInputElementState(player, element, InputState::Pressed, state); }
+
+		/// <summary>
+		/// Sets whether an input element is released by a player during network multiplayer.
+		/// </summary>
+		/// <param name="player">Which player to set for.</param>
+		/// <param name="element">Which input element to set for.</param>
+		/// <param name="state">The new state of the input element. True or false.</param>
+		void SetNetworkInputElementReleasedState(int player, int element, bool state) { SetNetworkInputElementState(player, element, InputState::Released, state); }
+
+		/// <summary>
+		/// Sets whether a mouse button is held by a player during network multiplayer.
+		/// </summary>
+		/// <param name="player">Which player to set for.</param>
+		/// <param name="whichButton">Which mouse button to set for.</param>
+		/// <param name="state">The new state of the mouse button. True or false.</param>
+		void SetNetworkMouseButtonHeldState(int player, int whichButton, bool state) { SetNetworkMouseButtonState(player, whichButton, InputState::Held, state); }
+
+		/// <summary>
+		/// Sets whether a mouse button is pressed by a player during network multiplayer.
+		/// </summary>
+		/// <param name="player">Which player to set for.</param>
+		/// <param name="whichButton">Which mouse button to set for.</param>
+		/// <param name="state">The new state of the mouse button. True or false.</param>
+		void SetNetworkMouseButtonPressedState(int player, int whichButton, bool state) { SetNetworkMouseButtonState(player, whichButton, InputState::Pressed, state); }
+
+		/// <summary>
+		/// Sets whether a mouse button is released by a player during network multiplayer.
+		/// </summary>
+		/// <param name="player">Which player to set for.</param>
+		/// <param name="whichButton">Which mouse button to set for.</param>
+		/// <param name="state">The new state of the mouse button. True or false.</param>
+		void SetNetworkMouseButtonReleasedState(int player, int whichButton, bool state) { SetNetworkMouseButtonState(player, whichButton, InputState::Released, state); }
+
+		/// <summary>
+		/// Sets the state of the mouse wheel for a player during network multiplayer.
+		/// </summary>
+		/// <param name="player">The player to set for.</param>
+		/// <param name="state">The new state of the mouse wheel.</param>
+		void SetNetworkMouseWheelState(int player, int state) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_NetworkMouseWheelState[player] = state; } }
+
+		/// <summary>
+		/// Gets whether the specified input element is pressed during network multiplayer.
+		/// </summary>
+		/// <param name="element">The input element to check for.</param>
+		/// <returns>Whether the specified input element is pressed or not.</returns>
+		bool NetworkAccumulatedElementPressed(int element) const { return NetworkAccumulatedElementState(element, InputState::Pressed); }
+
+		/// <summary>
+		/// Gets whether the specified input element is released during network multiplayer.
+		/// </summary>
+		/// <param name="element">The input element to check for.</param>
+		/// <returns>Whether the specified input element is released or not.</returns>
+		bool NetworkAccumulatedElementReleased(int element) const { return NetworkAccumulatedElementState(element, InputState::Released); }
+
+		/// <summary>
+		/// Clears all the accumulated input element states.
+		/// </summary>
+		void ClearNetworkAccumulatedStates();
+#pragma endregion
+
+	protected:
+
+		static GUIInput* s_InputClass; //!< Current input class if available.
+
+		static char *s_PrevKeyStates; //!< Key states as they were the previous update.
+		static char *s_ChangedKeyStates; //!< Key states that have changed.
+
+		static bool s_CurrentMouseButtonStates[MouseButtons::MAX_MOUSE_BUTTONS]; //!< Current mouse button states.
+		static bool s_PrevMouseButtonStates[MouseButtons::MAX_MOUSE_BUTTONS]; //!< Mouse button states as they were the previous update.
+		static bool s_ChangedMouseButtonStates[MouseButtons::MAX_MOUSE_BUTTONS]; //!< Mouse button states that have changed since previous update.
+
+		static JOYSTICK_INFO s_PrevJoystickStates[Players::MaxPlayerCount]; //!< Joystick states as they were the previous update.
+		static JOYSTICK_INFO s_ChangedJoystickStates[Players::MaxPlayerCount]; //!< Joystick states that have changed.
+
+		bool m_OverrideInput; //!< If true then this instance operates in multiplayer mode and the input is overridden by network input.
+
+		InputScheme m_ControlScheme[Players::MaxPlayerCount]; //!< Which control scheme is being used by each player.
+		const Icon *m_DeviceIcons[InputDevice::DEVICE_COUNT]; //!< The Icons representing all different devices.
+
+		Vector m_RawMouseMovement; //!< The raw absolute movement of the mouse between the last two Updates.
+		Vector m_AnalogMouseData; //!< The emulated analog stick position of the mouse.
+		float m_MouseSensitivity; //!< Mouse sensitivity, to replace hardcoded 0.6 value in Update.
+		int m_MouseWheelChange; //!< The relative mouse wheel position since last reset of it.
+
+		bool m_TrapMousePos; //!< Whether the mouse is trapped in the middle of the screen each update or not.
+		float m_MouseTrapRadius; //!< The radius (in pixels) of the circle trapping the mouse for analog mouse data.
+
+		InputDevice m_LastDeviceWhichControlledGUICursor; //!< Indicates which device controlled the cursor last time.
+
+		bool m_DisableKeyboard; //!< Temporarily disable all keyboard input reading.
+		bool m_DisableMouseMoving; //!< Temporary disable for positioning the mouse, for when the game window is not in focus.
+
+		/// <summary>
+		/// This is set when focus is switched back to the game window and will cause the m_DisableMouseMoving to switch to false when the mouse button is RELEASED.
+		/// This is to avoid having the window fly away because the user clicked the title bar.
+		/// </summary>
+		bool m_PrepareToEnableMouseMoving;
+ 
+		bool m_NetworkAccumulatedElementState[InputElements::INPUT_COUNT][InputState::InputStateCount]; //!< The state of an input element during network multiplayer.
+		bool m_NetworkInputElementState[Players::MaxPlayerCount][InputElements::INPUT_COUNT][InputState::InputStateCount]; //!< The state of a player's input element during network multiplayer.
+		bool m_NetworkMouseButtonState[Players::MaxPlayerCount][MouseButtons::MAX_MOUSE_BUTTONS][InputState::InputStateCount]; //!< The state of a player's mouse button during network multiplayer. 
+
+		Vector m_NetworkAccumulatedRawMouseMovement[Players::MaxPlayerCount]; //!< The position of the mouse for each player during network multiplayer.
+		Vector m_NetworkAnalogMoveData[Players::MaxPlayerCount]; //!< Mouse analog movement data for each player during network multiplayer. 
+		int m_NetworkMouseWheelState[Players::MaxPlayerCount]; //!< The position of a player's mouse wheel during network multiplayer.
+
+		bool m_TrapMousePosPerPlayer[Players::MaxPlayerCount]; //!< Whether to trap the mouse position to the middle of the screen for each player during network multiplayer.
+
+	private:
+
+#pragma region Input State Handling
+		/// <summary>
+		/// Gets whether an input element is in the specified state.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to check for. See Players enumeration.</param>
+		/// <param name="whichElement">Which element to check for. See InputElements enumeration.</param>
+		/// <param name="whichState">Which state to check for. See InputState enumeration.</param>
+		/// <returns>Whether the element is in the specified state or not.</returns>
+		bool GetInputElementState(int whichPlayer, int whichElement, InputState whichState);
+
+		/// <summary>
+		/// Gets whether any generic button with the menu cursor is in the specified state.
+		/// </summary>
+		/// <param name="whichButton">Which menu button to check for. See MenuButtons enumeration.</param>
+		/// <param name="whichState">Which state to check for. See InputState enumeration.</param>
+		/// <returns>Whether the menu button is in the specified state or not.</returns>
+		bool GetMenuButtonState(int whichButton, InputState whichState) ;
+
+		/// <summary>
+		/// Gets whether a keyboard key is in the specified state.
+		/// </summary>
+		/// <param name="keyToTest">A const char with the Allegro-defined key enumeration to test.</param>
+		/// <param name="whichState">Which state to check for. See InputState enumeration.</param>
+		/// <returns>Whether the keyboard key is in the specified state or not.</returns>
+		bool GetKeyboardButtonState(const char keyToTest, InputState whichState) const;
+
+		/// <summary>
+		/// Gets whether a mouse button is in the specified state.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to check for. See Players enumeration.</param>
+		/// <param name="whichButton">Which mouse button to check for. See MouseButtons enumeration.</param>
+		/// <param name="whichState">Which state to check for. See InputState enumeration.</param>
+		/// <returns>Whether the mouse button is in the specified state or not.</returns>
+		bool GetMouseButtonState(int whichPlayer, int whichButton, InputState whichState) const;
+
+		/// <summary>
+		/// Gets whether a joystick button is in the specified state.
+		/// </summary>
+		/// <param name="whichJoy">Which joystick to check for.</param>
+		/// <param name="whichButton">Which joystick button to check for. See JoyButtons enumeration.</param>
+		/// <param name="whichState">Which state to check for. See InputState enumeration.</param>
+		/// <returns>Whether the joystick button is in the specified state or not.</returns>
+		bool GetJoystickButtonState(int whichJoy, int whichButton, InputState whichState) const;
+
+		/// <summary>
+		/// Gets whether a joystick axis direction is in the specified state or not.
+		/// </summary>
+		/// <param name="whichJoy">Which joystick to check for.</param>
+		/// <param name="whichStick">Which joystick stick to check for.</param>
+		/// <param name="whichAxis">Which joystick stick axis to check for.</param>
+		/// <param name="whichDir">Which direction to check for. See JoyDirections enumeration.</param>
+		/// <param name="whichState">Which state to check for. See InputState enumeration.</param>
+		/// <returns>Whether the joystick stick axis is in the specified state or not.</returns>
+		bool GetJoystickDirectionState(int whichJoy, int whichStick, int whichAxis, int whichDir, InputState whichState) const;
+
+		/// <summary>
+		/// Sets an input element of a player to the specified state during network multiplayer.
+		/// </summary>
+		/// <param name="player">Which player to set for. See Players enumeration.</param>
+		/// <param name="element">Which element to set. See InputElements enumeration.</param>
+		/// <param name="whichState">Which input state to set. See InputState enumeration.</param>
+		/// <param name="newState">The new state of the specified InputState. True or false.</param>
+		void SetNetworkInputElementState(int player, int element, InputState whichState, bool newState) {
+			if (element >= InputElements::INPUT_L_UP && element < InputElements::INPUT_COUNT && player >= Players::PlayerOne && player < Players::MaxPlayerCount) {
+				m_NetworkInputElementState[player][element][whichState] = newState;
+			}
+		}
+
+		/// <summary>
+		/// Sets a mouse button for a player to the specified state during network multiplayer.
+		/// </summary>
+		/// <param name="player">Which player to set for. See Players enumeration.</param>
+		/// <param name="whichButton">Which mouse button to set for. See MouseButtons enumeration.</param>
+		/// <param name="whichState">Which input state to set. See InputState enumeration.</param>
+		/// <param name="newState">The new state of the specified InputState. True or false.</param>
+		void SetNetworkMouseButtonState(int player, int whichButton, InputState whichState, bool newState) {
+			if (whichButton >= MouseButtons::MOUSE_LEFT && whichButton < MouseButtons::MAX_MOUSE_BUTTONS && player >= Players::PlayerOne && player < Players::MaxPlayerCount) {
+				m_NetworkMouseButtonState[player][whichButton][whichState] = newState;
+			}
+		}
+
+		/// <summary>
+		/// Gets whether an input element is in the specified state during network multiplayer.
+		/// </summary>
+		/// <param name="element">Which element to check for. See InputElements enumeration.</param>
+		/// <param name="whichState">Which state to check for. See InputState enumeration.</param>
+		/// <returns>Whether the element is in the specified state or not.</returns>
+		bool NetworkAccumulatedElementState(int element, InputState whichState) const {
+			return (element < InputElements::INPUT_L_UP || element >= InputElements::INPUT_COUNT) ? false : m_NetworkAccumulatedElementState[element][whichState];
+		}
+#pragma endregion
+
+#pragma region Update Breakdown
+		/// <summary>
+		/// Capture and handle special key shortcuts and combinations. This is called from Update().
+		/// </summary>
+		void HandleSpecialInput();
+
+		/// <summary>
+		/// Handles the mouse input in network multiplayer. This is called from Update().
+		/// </summary>
+		void UpdateNetworkMouseMovement();
+
+		/// <summary>
+		/// Handles the mouse input. This is called from Update().
+		/// </summary>
+		void UpdateMouseInput();
+
+		/// <summary>
+		/// Handles the joysticks input. This is called from Update().
+		/// </summary>
+		void UpdateJoystickInput();
+
+		/// <summary>
+		/// Stores all the input events that happened during this update to be compared to in the next update. This is called from Update().
+		/// </summary>
+		void StoreInputEventsForNextUpdate();
+#pragma endregion
+
+		/// <summary>
+		/// Clears all the member variables of this UInputMan, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
+
+		// Disallow the use of some implicit methods.
+		UInputMan(const UInputMan &reference) = delete;
+		UInputMan & operator=(const UInputMan &rhs) = delete;
+	};
+}
+#endif

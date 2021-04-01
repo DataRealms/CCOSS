@@ -54,7 +54,8 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(ActorEditor)
-
+SerializableOverrideMethods
+ClassInfoGetters
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     ActorEditor
@@ -73,7 +74,7 @@ EntityAllocation(ActorEditor)
 //                  from system memory.
 // Arguments:       None.
 
-    virtual ~ActorEditor() { Destroy(true); }
+	~ActorEditor() override { Destroy(true); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -84,7 +85,7 @@ EntityAllocation(ActorEditor)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create();
+	int Create() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -95,23 +96,7 @@ EntityAllocation(ActorEditor)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Create(const ActorEditor &reference);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a Reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the Reader's position is untouched.
-// Arguments:       The name of the property to be read.
-//                  A Reader lined up to the value of the property to be read.
-// Return value:    An error return value signaling whether the property was successfully
-//                  read or not. 0 means it was read successfully, and any nonzero indicates
-//                  that a property of that name could not be found in this or base classes.
-
-    virtual int ReadProperty(std::string propName, Reader &reader);
+	int Create(const ActorEditor &reference);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -122,19 +107,7 @@ EntityAllocation(ActorEditor)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Reset() { Clear(); EditorActivity::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this ActorEditor to an output stream for
-//                  later recreation with Create(Reader &reader);
-// Arguments:       A Writer that the ActorEditor will save itself with.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    virtual int Save(Writer &writer) const;
+    void Reset() override { Clear(); EditorActivity::Reset(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -145,27 +118,7 @@ EntityAllocation(ActorEditor)
 //                  to destroy all inherited members also.
 // Return value:    None.
 
-    virtual void Destroy(bool notInherited = false);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the ClassInfo instance of this Entity.
-// Arguments:       None.
-// Return value:    A reference to the ClassInfo of this' class.
-
-    virtual const Entity::ClassInfo & GetClass() const { return m_sClass; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:   GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_sClass.GetName(); }
+	void Destroy(bool notInherited = false) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -196,7 +149,7 @@ EntityAllocation(ActorEditor)
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-    virtual int Start();
+	int Start() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -206,7 +159,7 @@ EntityAllocation(ActorEditor)
 // Arguments:       Whether to pause the game or not.
 // Return value:    None.
 
-    virtual void Pause(bool pause = true);
+	void SetPaused(bool pause = true) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -216,7 +169,7 @@ EntityAllocation(ActorEditor)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void End();
+	void End() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -227,7 +180,7 @@ EntityAllocation(ActorEditor)
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void Update();
+	void Update() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -239,7 +192,7 @@ EntityAllocation(ActorEditor)
 //                  Which screen's GUI to draw onto the bitmap.
 // Return value:    None.
 
-    virtual void DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int which = 0);
+	void DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int which = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -247,11 +200,11 @@ EntityAllocation(ActorEditor)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws this ActivityMan's current graphical representation to a
 //                  BITMAP of choice. This includes all game-related graphics.
-// Arguments:       A pointer to a BITMAP to draw on. OINT.
+// Arguments:       A pointer to a BITMAP to draw on. OWNERSHIP IS NOT TRANSFERRED!
 //                  The absolute position of the target bitmap's upper left corner in the scene.
 // Return value:    None.
 
-    virtual void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector());
+	void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector()) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -264,7 +217,7 @@ protected:
 // Method:          LoadActor
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Reloads the Actor itself and sets up the pie menu to match its setup.
-// Arguments:       An Entity Preset of the Actor to load into the editor. OINT
+// Arguments:       An Entity Preset of the Actor to load into the editor. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    Whether the Actor was loaded successfully from the PresetMan.
 
     bool LoadActor(const Entity *pActorToLoad);

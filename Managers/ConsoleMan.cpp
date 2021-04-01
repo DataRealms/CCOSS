@@ -1,577 +1,415 @@
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            ConsoleMan.cpp
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Source file for the ConsoleMan class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
 #include "ConsoleMan.h"
-#include "RTEManagers.h"
-#include "Writer.h"
-#include "System.h"
+
+#include "LuaMan.h"
+#include "UInputMan.h"
+#include "FrameMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
 #include "GUI/AllegroScreen.h"
 #include "GUI/AllegroInput.h"
-#include "GUI/GUIControlManager.h"
 #include "GUI/GUICollectionBox.h"
 #include "GUI/GUITextBox.h"
 #include "GUI/GUILabel.h"
 
 namespace RTE {
 
-#define MENUSPEED 0.5
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const string ConsoleMan::m_ClassName = "ConsoleMan";
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this ConsoleMan, effectively
-//                  resetting the members of this abstraction level only.
-
-void ConsoleMan::Clear()
-{
-    m_pGUIScreen = 0;
-    m_pGUIInput = 0;
-    m_pGUIController = 0;
-    m_EnabledState = DISABLED;
-    m_ConsoleScreenRatio = 0.333;
-    m_pParentBox = 0;
-    m_pConsoleText = 0;
-    m_pInputTextBox = 0;
-    m_LastInputString.clear();
-    m_InputLog.clear();
-    m_InputLogPosition = m_InputLog.begin();
-    m_LastLogMove = 0;
-	m_ForceVisible = true;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the ConsoleMan object ready for use.
-
-int ConsoleMan::Create()
-{
-    if (!m_pGUIScreen)
-        m_pGUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer32());
-    if (!m_pGUIInput)
-        m_pGUIInput = new AllegroInput(-1);
-    if (!m_pGUIController)
-        m_pGUIController = new GUIControlManager();
-    // Use the MainMenu skin because it uses 32bpp images and will work since we only draw to 32bpp bitmaps
-    if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/MainMenu", "ConsoleSkin.ini"))
-        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu/ConsoleSkin.ini");
-    m_pGUIController->Load("Base.rte/GUIs/ConsoleGUI.ini");
-    m_pGUIController->EnableMouse(false);
-
-    // Stretch the invisible root box to fill the screen
-    dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("base"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
-
-    // Make sure we have convenient points to teh containing GUI colleciton boxes that we will manipulate the positions of
-    if (!m_pParentBox)
-    {
-        m_pParentBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("ConsoleGUIBox"));
-
-        // Set the background image of the parent collection box
-//        ContentFile backgroundFile("Base.rte/GUIs/BuyMenuHeader.bmp");
-//        m_pParentBox->SetDrawImage(new AllegroBitmap(backgroundFile.GetAsBitmap()));
-//        m_pParentBox->SetDrawBackground(true);
-//        m_pParentBox->SetDrawType(GUICollectionBox::Image);
-        m_pParentBox->SetDrawType(GUICollectionBox::Color);
-    }
-    m_pConsoleText = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("ConsoleLabel"));
-    m_pInputTextBox = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("InputTB"));
-
-    // Stretch the parent box to fill the top of the screen widthwise, and as far down as the setting in settings.ini says
-    SetConsoleScreenSize(m_ConsoleScreenRatio);
-
-    // Hide the parent box out of view
-    m_pParentBox->SetPositionAbs(0, -m_pParentBox->GetHeight());
-    m_pParentBox->SetEnabled(false);
-    m_pParentBox->SetVisible(false);
-
-    // Set a nice intro text in the console
-    m_pConsoleText->SetText("- RTE Lua Console -\nSee the Data Realms Wiki for commands:\nhttp://www.datarealms.com/wiki/\n-------------------------------------");
-
-    // Reset the input log
-    m_InputLogPosition = m_InputLog.begin();
-    m_LastLogMove = 0;
-
-    return 0;
-}
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the reader's position is untouched.
-
-int ConsoleMan::ReadProperty(std::string propName, Reader &reader)
-{
-//    if (propName == "AddEffect")
-//        g_PresetMan.GetEntityPreset(reader);
-//    else
-        // See if the base class(es) can find a match instead
-        return Serializable::ReadProperty(propName, reader);
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this ConsoleMan with a Writer for
-//                  later recreation with Create(Reader &reader);
-
-int ConsoleMan::Save(Writer &writer) const
-{
-
-// TODO: "Do this!")
-
-    return 0;
-}
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the ConsoleMan object.
-
-void ConsoleMan::Destroy()
-{
-    // Dump out the text in the console
-    SaveAllText("LogConsole.txt");
-
-    delete m_pGUIController;
-    delete m_pGUIInput;
-    delete m_pGUIScreen;
-
-    Clear();
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetConsoleScreenSize
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets how much of the screen that the console should cover when opened.
-
-void ConsoleMan::SetConsoleScreenSize(float screenRatio)
-{
-    // Clamp to reasonable value
-    if (screenRatio < 0.1)
-        screenRatio = 0.1;
-    if (screenRatio > 1.0)
-        screenRatio = 1.0;
-
-    m_ConsoleScreenRatio = screenRatio;
-
-    // If we're not created yet, then don't do the actual adjusting yet.
-    if (!m_pParentBox || !m_pConsoleText || !m_pInputTextBox)
-        return;
-
-    // Stretch the parent box to fill the top of the screen widthwise, and as far down as the parameter says
-    m_pParentBox->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY() * m_ConsoleScreenRatio);
-
-    // Adjust the other controls to match the screen ratio
-    m_pConsoleText->SetSize(m_pParentBox->GetWidth() - 4, m_pParentBox->GetHeight() - m_pInputTextBox->GetHeight() - 2);
-    m_pInputTextBox->SetPositionRel(m_pInputTextBox->GetRelXPos(), m_pConsoleText->GetHeight());
-    m_pInputTextBox->Resize(m_pParentBox->GetWidth() - 3, m_pInputTextBox->GetHeight());
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetEnabled
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Enables or disables the menu. This will animate it in and out of view.
-
-void ConsoleMan::SetEnabled(bool enable)
-{
-    if (enable && m_EnabledState != ENABLED && m_EnabledState != ENABLING)
-    {
-		if (m_ForceVisible)
-			ForceVisibility(false);
-        m_EnabledState = ENABLING;
-/*
-        // Reset repeat timers
-        m_RepeatStartTimer.Reset();
-        m_RepeatTimer.Reset();
-        // Set the mouse cursor free
-        g_UInputMan.TrapMousePos(false, m_pController->GetPlayer());
-        // Move the mouse cursor to the middle of the player's screen
-        int mouseOffX, mouseOffY;
-        m_pGUIInput->GetMouseOffset(mouseOffX, mouseOffY);
-        Vector mousePos(-mouseOffX + (g_FrameMan.GetPlayerScreenWidth() / 2), -mouseOffY + (g_FrameMan.GetPlayerScreenHeight() / 2));
-        g_UInputMan.SetMousePos(mousePos, m_pController->GetPlayer());
-*/
-        g_GUISound.EnterMenuSound()->Play();
-    }
-    else if (!enable && m_EnabledState != DISABLED && m_EnabledState != DISABLING)
-    {
-        m_EnabledState = DISABLING;
-        // Trap the mouse cursor again
-//        g_UInputMan.TrapMousePos(true, m_pController->GetPlayer());
-        // Only play switching away sound
-        g_GUISound.ExitMenuSound()->Play();
-    }
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          PrintString
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Prints a string into the console.
-
-void ConsoleMan::PrintString(std::string toPrint)
-{
-    // Add the input line to the console
-    m_pConsoleText->SetText(m_pConsoleText->GetText() + "\n" + toPrint);
-	// Print the input line to the command-line
-	if (g_System.GetLogToCLI()) { g_System.PrintToCLI(toPrint); }
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SaveInputLog
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Writes all the input strings to a log in the order they were entered.
-
-void ConsoleMan::SaveInputLog(std::string filePath)
-{
-    Writer writer(filePath.c_str());
-
-    if (writer.WriterOK())
-    {
-        for (deque<string>::reverse_iterator itr = m_InputLog.rbegin(); itr != m_InputLog.rend(); ++itr)
-        {
-            writer << *itr;
-            // Add semicolon so the line input becomes a statement
-            if (!itr->empty() && (*itr)[itr->length() - 1] != ';')
-                writer << ";";
-            writer << "\n";
-        }
-
-        PrintString("SYSTEM: Console input log saved to " + filePath);
-    }
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SaveAllText
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Writes the entire console buffer to a file.
-
-void ConsoleMan::SaveAllText(std::string filePath)
-{
-    Writer writer(filePath.c_str());
-
-    if (writer.WriterOK())
-    {
-        writer << m_pConsoleText->GetText();
-        PrintString("SYSTEM: Entire console contents saved to " + filePath);
-    }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ForceVisibility
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets console visible no matter what.
-// Arguments:       None.
-// Return value:    None.
-
-void ConsoleMan::ForceVisibility(bool visible)
-{
-	m_ForceVisible = visible; 
-	if (m_ForceVisible)
-	{
-		m_pParentBox->SetPositionAbs(0, 0);
-	}
-	else
-	{
-		m_pParentBox->SetPositionAbs(0, -m_pParentBox->GetHeight());
-	}
-	m_pParentBox->SetEnabled(visible);
-	m_pParentBox->SetVisible(visible);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the state of this ConsoleMan. Supposed to be done every frame
-//                  before drawing.
-
-void ConsoleMan::Update()
-{
-	bool inputConsumed = false;
-
-	if (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(KEY_TILDE))
-	{
-		inputConsumed = true;
-		if (IsForceVisible())
-			ForceVisibility(false);
-		else
-			ForceVisibility(true);
+	void ConsoleMan::Clear() {
+		m_ConsoleState = ConsoleState::Disabled;
+		m_ReadOnly = false;
+		m_ConsoleScreenRatio = 0.3F;
+		m_GUIScreen = nullptr;
+		m_GUIInput = nullptr;
+		m_GUIControlManager = nullptr;
+		m_ParentBox = nullptr;
+		m_ConsoleText = nullptr;
+		m_InputTextBox = nullptr;
+		m_InputLog.clear();
+		m_InputLogPosition = m_InputLog.begin();
+		m_LastInputString.clear();
+		m_LastLogMove = 0;
+		m_ConsoleTextBackup.clear();
 	}
 
-    ////////////////////////////////////////////////////////////////////////
-    // Animate the menu into and out of view if enabled or disabled
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    if (m_EnabledState == ENABLING)
-    {
-        m_pParentBox->SetEnabled(true);
-        m_pParentBox->SetVisible(true);
+	int ConsoleMan::Initialize() {
+		if (!m_GUIScreen) { m_GUIScreen = new AllegroScreen(g_FrameMan.GetBackBuffer32()); }
+		if (!m_GUIInput) { m_GUIInput = new AllegroInput(-1); }
+		if (!m_GUIControlManager) { m_GUIControlManager = new GUIControlManager(); }
 
-        float toGo = -floorf((float)m_pParentBox->GetYPos() * MENUSPEED);
-        m_pParentBox->SetPositionAbs(0, m_pParentBox->GetYPos() + toGo);
+		if (!m_GUIControlManager->Create(m_GUIScreen, m_GUIInput, "Base.rte/GUIs/Skins/MainMenu", "ConsoleSkin.ini")) {
+			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu/ConsoleSkin.ini");
+		}
 
-        if (m_pParentBox->GetYPos() >= 0)
-            m_EnabledState = ENABLED;
-    }
-    // Animate the menu out of view
-    else if (m_EnabledState == DISABLING)
-    {
-        float toGo = -ceilf(((float)m_pParentBox->GetHeight() + (float)m_pParentBox->GetYPos()) * MENUSPEED);
-        m_pParentBox->SetPositionAbs(0, m_pParentBox->GetYPos() + toGo);
+		m_GUIControlManager->Load("Base.rte/GUIs/ConsoleGUI.ini");
+		m_GUIControlManager->EnableMouse(false);
 
-        if (m_pParentBox->GetYPos() <= -m_pParentBox->GetHeight())
-        {
-            m_pParentBox->SetEnabled(false);
-            m_pParentBox->SetVisible(false);
-            m_EnabledState = DISABLED;
-        }
-    }
-    else if (m_EnabledState == ENABLED)
-    {
-        // If supposed to be enabled but appears to be disabled, enable it gracefully
-        if (m_pParentBox->GetYPos() < 0)
-            m_EnabledState = ENABLING;
+		// Stretch the invisible root box to fill the screen
+		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
-        m_pParentBox->SetEnabled(true);
-        m_pParentBox->SetVisible(true);
-        m_pInputTextBox->SetEnabled(true);
-        m_pInputTextBox->SetFocus();
-    }
-    else if (m_EnabledState == DISABLED)
-    {
-		if (!m_ForceVisible)
-		{
-			// If supposed to be disabled but appears to be out anyway, disable it gracefully
-			if (m_pParentBox->GetYPos() > -m_pParentBox->GetHeight())
-			{
-				m_pParentBox->SetEnabled(true);
-				m_pParentBox->SetVisible(true);
-				m_EnabledState = DISABLING;
+		if (!m_ParentBox) {
+			m_ParentBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ConsoleGUIBox"));
+			m_ParentBox->SetDrawType(GUICollectionBox::Color);
+		}
+		m_ConsoleText = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("ConsoleLabel"));
+		m_InputTextBox = dynamic_cast<GUITextBox *>(m_GUIControlManager->GetControl("InputTB"));
+
+		SetConsoleScreenSize(m_ConsoleScreenRatio);
+
+		m_ParentBox->SetPositionAbs(0, -m_ParentBox->GetHeight());
+		m_ParentBox->SetEnabled(false);
+		m_ParentBox->SetVisible(false);
+
+		if (!g_FrameMan.ResolutionChanged()) {
+			m_ConsoleText->SetText("- RTE Lua Console -\nSee the Data Realms Wiki for commands: http://www.datarealms.com/wiki/\nPress F1 for a list of helpful shortcuts\n-------------------------------------");
+
+			m_InputLogPosition = m_InputLog.begin();
+			m_LastLogMove = 0;
+		} else {
+			m_ConsoleText->SetText(m_ConsoleTextBackup);
+			m_ConsoleTextBackup.clear();
+		}
+
+		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::Destroy() {
+		if (g_FrameMan.ResolutionChanged()) {
+			m_ConsoleTextBackup = m_ConsoleText->GetText();
+		} else {
+			SaveAllText("LogConsole.txt");
+		}
+
+		delete m_GUIControlManager;
+		delete m_GUIInput;
+		delete m_GUIScreen;
+
+		if (g_FrameMan.ResolutionChanged()) {
+			m_GUIScreen = nullptr;
+			m_GUIInput = nullptr;
+			m_GUIControlManager = nullptr;
+			m_ParentBox = nullptr;
+		} else {
+			Clear();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::SetEnabled(bool enable) {
+		if (enable && m_ConsoleState != ConsoleState::Enabled && m_ConsoleState != ConsoleState::Enabling) {
+			m_ConsoleState = ConsoleState::Enabling;
+			g_GUISound.EnterMenuSound()->Play();
+		} else if (!enable && m_ConsoleState != ConsoleState::Disabled && m_ConsoleState != ConsoleState::Disabling) {
+			m_ConsoleState = ConsoleState::Disabling;
+			g_GUISound.ExitMenuSound()->Play();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::SetReadOnly() {
+		if (!m_ReadOnly) {
+			// Save the current input string before changing to the read-only notice so we can restore it when switching back
+			m_LastInputString = m_InputTextBox->GetText();
+			m_InputTextBox->SetText("- CONSOLE IN READ-ONLY MODE! -");
+			m_ReadOnly = true;
+			SetEnabled(true);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::SetConsoleScreenSize(float screenRatio) {
+		m_ConsoleScreenRatio = Limit(screenRatio, 1.0F, 0.1F);
+
+		if (!m_ParentBox || !m_ConsoleText || !m_InputTextBox) {
+			return;
+		}
+
+		m_ParentBox->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY() * m_ConsoleScreenRatio);
+		m_ConsoleText->SetSize(m_ParentBox->GetWidth() - 4, m_ParentBox->GetHeight() - m_InputTextBox->GetHeight() - 2);
+		m_InputTextBox->SetPositionRel(m_InputTextBox->GetRelXPos(), m_ConsoleText->GetHeight());
+		m_InputTextBox->Resize(m_ParentBox->GetWidth() - 3, m_InputTextBox->GetHeight());
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::AddLoadWarningLogEntry(const std::string &pathToLog, const std::string &readerPosition, const std::string &altFileExtension) {
+		const std::string pathAndAccessLocation = "\"" + pathToLog + "\" referenced " + readerPosition + ". ";
+		std::string newEntry = pathAndAccessLocation + (!altFileExtension.empty() ? "Found and loaded a file with \"" + altFileExtension + "\" extension." : "The file was not loaded.");
+		std::transform(newEntry.begin(), newEntry.end(), newEntry.begin(), ::tolower);
+		if (m_LoadWarningLog.find(newEntry) == m_LoadWarningLog.end()) { m_LoadWarningLog.insert(newEntry); }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::SaveLoadWarningLog(const std::string &filePath) const {
+		Writer logWriter(filePath.c_str());
+		if (logWriter.WriterOK()) {
+			logWriter << "// Warnings produced during loading:";
+			logWriter.NewLine(false);
+			for (const std::string &logEntry : m_LoadWarningLog) {
+				logWriter.NewLineString(logEntry, false);
 			}
-			else
-			{
-				m_pParentBox->SetEnabled(false);
-				m_pParentBox->SetVisible(false);
-				m_pInputTextBox->SetEnabled(false);
-				m_pGUIController->GetManager()->SetFocus(0);
+			PrintString("SYSTEM: Loading warning log saved to " + filePath);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::SaveInputLog(const std::string &filePath) {
+		Writer logWriter(filePath.c_str());
+		if (logWriter.WriterOK()) {
+			for (std::deque<std::string>::reverse_iterator logItr = m_InputLog.rbegin(); logItr != m_InputLog.rend(); ++logItr) {
+				logWriter << *logItr;
+				// Add semicolon so the line input becomes a statement
+				if (!logItr->empty() && (*logItr)[logItr->length() - 1] != ';') { logWriter << ";"; }
+				logWriter << "\n";
+			}
+			PrintString("SYSTEM: Console input log saved to " + filePath);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::SaveAllText(const std::string &filePath) const {
+		Writer logWriter(filePath.c_str());
+		if (logWriter.WriterOK()) {
+			logWriter << m_ConsoleText->GetText();
+			PrintString("SYSTEM: Entire console contents saved to " + filePath);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::ClearLog() {
+		m_InputLog.clear();
+		m_InputLogPosition = m_InputLog.begin();
+		m_ConsoleText->SetText("");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::PrintString(const std::string &stringToPrint) const {
+		m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + stringToPrint);
+		if (System::IsLoggingToCLI()) { System::PrintToCLI(stringToPrint); }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::ShowShortcuts() {
+		if (!IsEnabled()) { SetEnabled(); }
+
+		PrintString("--- SHORTCUTS ---");
+		PrintString("CTRL + ~ - Console in read-only mode without input capture");
+		PrintString("CTRL + DOWN / UP - Increase/decrease console size (Only while console is open)");
+		PrintString("CTRL + S / PrintScrn - Make a screenshot");
+		PrintString("CTRL + W - Make a screenshot of the entire level");
+		PrintString("ALT  + W - Make a miniature preview image of the entire level");
+		PrintString("CTRL + P - Show performance stats");
+		PrintString("CTRL + R - Reset activity");
+		PrintString("CTRL + M - Switch display mode: Draw -> Material -> MO");
+		PrintString("CTRL + O - Toggle one sim update per frame");
+		PrintString("----------------");
+		PrintString("F2 - Reload all Lua scripts");
+		PrintString("F3 - Save console log");
+		PrintString("F4 - Save console user input log");
+		PrintString("F5 - Clear console log ");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::Update() {
+		if (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(KEY_TILDE)) {
+			SetReadOnly();
+		}
+
+		if (!g_UInputMan.FlagShiftState() && (!g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(KEY_TILDE))) {
+			if (IsEnabled()) {
+				if (!m_ReadOnly) {
+					m_InputTextBox->SetEnabled(false);
+					m_GUIControlManager->GetManager()->SetFocus(nullptr);
+					// Save any text being worked on in the input, as the box keeps getting junk added to it
+					m_LastInputString = m_InputTextBox->GetText();
+					SetEnabled(false);
+				} else {
+					// Restore any text being worked on in the input and set the focus and cursor position of the input line
+					m_InputTextBox->SetText(m_LastInputString);
+					m_InputTextBox->SetCursorPos(m_InputTextBox->GetText().length());
+					m_ReadOnly = false;
+				}
+			} else {
+				m_InputTextBox->SetText(m_LastInputString);
+				m_InputTextBox->SetCursorPos(m_InputTextBox->GetText().length());
+				SetEnabled(true);
 			}
 		}
-    }
 
-    // Toggle enabling with traditional tilde key
-    if (!inputConsumed && g_UInputMan.KeyPressed(KEY_TILDE))
-    {
-        if (IsEnabled())
-        {
-            m_pInputTextBox->SetEnabled(false);
-            m_pGUIController->GetManager()->SetFocus(0);
-            // Save any text being worked on in the input, as the box keeps getting junk added to it
-            m_LastInputString = m_pInputTextBox->GetText();
+		if (m_ConsoleState != ConsoleState::Enabled && m_ConsoleState != ConsoleState::Disabled) { ConsoleOpenClose(); }
 
-            m_EnabledState = DISABLING;
-            g_GUISound.ExitMenuSound()->Play();
-        }
-        else
-        {
-            // Set the focus and cursor position of the input line
-            m_pInputTextBox->SetEnabled(true);
-            m_pInputTextBox->SetFocus();
-            // Restore any text being worked on in the input, as the box keeps getting junk added to it
-            m_pInputTextBox->SetText(m_LastInputString);
-            m_pInputTextBox->SetCursorPos(m_pInputTextBox->GetText().length());
+		if (m_ConsoleState != ConsoleState::Enabled) {
+			return;
+		}
 
-            m_EnabledState = ENABLING;
-            g_GUISound.EnterMenuSound()->Play();
-        }
-    }
+		m_GUIControlManager->Update();
 
-    // Quit now if we aren't enabled
-    if (m_EnabledState != ENABLED &&  m_EnabledState != ENABLING)
-        return;
+		if (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(KEY_DOWN)) {
+			SetConsoleScreenSize(m_ConsoleScreenRatio + 0.05F);
+		} else if (g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(KEY_UP)) {
+			SetConsoleScreenSize(m_ConsoleScreenRatio - 0.05F);
+		}
 
-    // Update the GUI components
-    m_pGUIController->Update();
+		if (!m_ReadOnly) {
+			m_InputTextBox->SetEnabled(true);
+			m_InputTextBox->SetFocus();
 
-    // Remove any junk input that will have been entered by the opening/closing of the console
-    if (g_UInputMan.KeyPressed(KEY_TILDE) ||g_UInputMan.KeyHeld(KEY_TILDE))
-    {
-        // Restore any text being worked on in the input, as the box keeps getting junk added to it
-        m_pInputTextBox->SetText(m_LastInputString);
-        m_pInputTextBox->SetCursorPos(m_pInputTextBox->GetText().length());
-    }
+			if (!m_InputLog.empty() && !g_UInputMan.FlagCtrlState()) {
+				if (g_UInputMan.KeyPressed(KEY_UP)) {
+					LoadLoggedInput(false);
+				} else if (g_UInputMan.KeyPressed(KEY_DOWN)) {
+					LoadLoggedInput(true);
+				}
+			}
+			RemoveGraveAccents();
+		} else {
+			m_InputTextBox->SetEnabled(false);
+			m_GUIControlManager->GetManager()->SetFocus(nullptr);
+			return;
+		}
 
-    // If a multi-line string was pasted into the box, we need to check for and submit all but the last line
-    if (m_pInputTextBox->GetText().find_last_of('\n') != string::npos)
-    {
-        char strLine[1024];
-		std::stringstream inputSStream(m_pInputTextBox->GetText());
-        do
-        {
-            inputSStream.getline(strLine, 1024, '\n');
+		// Execute string when Enter is pressed, or execute immediately if a newline character is found, meaning multiple strings were pasted in.
+		if ((g_UInputMan.KeyPressed(KEY_ENTER) || g_UInputMan.KeyPressed(KEY_ENTER_PAD)) || (m_InputTextBox->GetText().find_last_of('\n') != std::string::npos)) {
+			FeedString(m_InputTextBox->GetText().empty() ? true : false);
+		}
 
-            // See if we have hit the end of the string, and if so, don't execute this last line, but put it back into the input line
-            if (!inputSStream.fail() && !inputSStream.eof())
-            {
-                // Clear the errors from the VM so we will get fresh feedback
-                g_LuaMan.ClearErrors();
-                // Add the input line to the console
-                m_pConsoleText->SetText(m_pConsoleText->GetText() + "\n" + string(strLine));
-                // Run the script string
-                g_LuaMan.RunScriptString(string(strLine), false);
-                // Add any error feedback from the lua VM
-                if (!g_LuaMan.ErrorExists())
-                    m_pConsoleText->SetText(m_pConsoleText->GetText() + "\n" + "ERROR: " + g_LuaMan.GetLastError());
+		// TODO: Get this working and see if it actually makes any difference.
+		/*
+		// Cut off the text in the text label at a reasonable height so it doesn't get really slow to draw
+		if (m_ConsoleText->GetTextHeight() > g_FrameMan.GetResY() {
+		}
+		*/
+	}
 
-                // Save the input made to the log, but only if it's different from the last one
-                if (strLine[0] != '\r' && (m_InputLog.empty() || m_InputLog.front().compare(strLine) != 0))
-                    m_InputLog.push_front(strLine);
-                // Reset the log marker
-                m_InputLogPosition = m_InputLog.begin();
-                m_LastLogMove = 0;
-            }
-        }
-        while (!inputSStream.fail() && !inputSStream.eof());
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        // Set the input box to contain the last line of the input string
-        m_pInputTextBox->SetText(string(strLine));
-        m_pInputTextBox->SetCursorPos(m_pInputTextBox->GetText().length());
-    }
+	void ConsoleMan::ConsoleOpenClose() {
+		float travelCompletionDistance;
 
-    // Enter pressed! Feed line input to console and lua script engine
-    if (g_UInputMan.KeyPressed(KEY_ENTER) || g_UInputMan.KeyPressed(KEY_ENTER_PAD))
-    {
-        // Clear the errors from the VM so we will get fresh feedback
-        g_LuaMan.ClearErrors();
-        // Add the input line to the console
-        m_pConsoleText->SetText(m_pConsoleText->GetText() + "\n" + m_pInputTextBox->GetText());
-        // Run the script string
-        g_LuaMan.RunScriptString(m_pInputTextBox->GetText(), false);
+		if (m_ConsoleState == ConsoleState::Enabling) {
+			m_ParentBox->SetEnabled(true);
+			m_ParentBox->SetVisible(true);
 
-        // Add any error feedback from the lua VM
-        if (!g_LuaMan.ErrorExists())
-            m_pConsoleText->SetText(m_pConsoleText->GetText() + "\n" + "ERROR: " + g_LuaMan.GetLastError());
+			travelCompletionDistance = std::floor(static_cast<float>(m_ParentBox->GetYPos()) * 0.5F);
+			m_ParentBox->SetPositionAbs(0, m_ParentBox->GetYPos() - static_cast<int>(travelCompletionDistance));
 
-        // Save the input made to the log, but only if it's different from the last one
-        if (!m_pInputTextBox->GetText().empty() && (m_InputLog.empty() || m_InputLog.front().compare(m_pInputTextBox->GetText()) != 0))
-            m_InputLog.push_front(m_pInputTextBox->GetText());
+			if (m_ParentBox->GetYPos() >= 0) { m_ConsoleState = ConsoleState::Enabled; }
+		} else if (m_ConsoleState == ConsoleState::Disabling) {
+			travelCompletionDistance = std::ceil((static_cast<float>(m_ParentBox->GetHeight()) + static_cast<float>(m_ParentBox->GetYPos())) * 0.5F);
+			m_ParentBox->SetPositionAbs(0, m_ParentBox->GetYPos() - static_cast<int>(travelCompletionDistance));
 
-        // Reset the log marker
-        m_InputLogPosition = m_InputLog.begin();
-        m_LastLogMove = 0;
+			if (m_ParentBox->GetYPos() <= -m_ParentBox->GetHeight()) {
+				m_ParentBox->SetEnabled(false);
+				m_ParentBox->SetVisible(false);
+				m_InputTextBox->SetEnabled(false);
+				m_GUIControlManager->GetManager()->SetFocus(nullptr);
+				m_ConsoleState = ConsoleState::Disabled;
+			}
+		}
 
-        // Clear the input line
-        m_pInputTextBox->SetText("");
-    }
+		// If supposed to be enabled or disabled but appears to be the opposite, enable or disable accordingly.
+		if (m_ConsoleState == ConsoleState::Enabled && (m_ParentBox->GetYPos() < 0)) {
+			m_ConsoleState = ConsoleState::Enabling;
+		} else if (m_ConsoleState == ConsoleState::Disabled && (m_ParentBox->GetYPos() > -m_ParentBox->GetHeight())) {
+			m_ConsoleState = ConsoleState::Disabling;
+		}
+	}
 
-    // Can't load input log entries if the log is empty!
-    if (!m_InputLog.empty())
-    {
-        // Up pressed! Load previous input string into the input line
-        if (g_UInputMan.KeyPressed(KEY_UP))
-        {
-            // See if we should increment doubly because the last move was in the opposite direction
-            if (m_LastLogMove < 0 && m_InputLogPosition != --(m_InputLog.end()))
-                m_InputLogPosition++;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            // Revive logged input and put cursor at the end of it
-            m_pInputTextBox->SetText(*m_InputLogPosition);
-            m_pInputTextBox->SetCursorPos(m_pInputTextBox->GetText().length());
-            m_InputLogPosition++;
-            m_LastLogMove = 1;
+	void ConsoleMan::FeedString(bool feedEmptyString) {
+		char strLine[1024];
+		std::stringstream inputStream(m_InputTextBox->GetText());
 
-            // Avoid falling off the end
-            if (m_InputLogPosition == m_InputLog.end())
-            {
-                m_InputLogPosition--;
-                m_LastLogMove = 0;
-            }
-        }
-        // Down pressed! Load next logged input string into the input line
-        else if (g_UInputMan.KeyPressed(KEY_DOWN))
-        {
-            // See if we should decrement doubly because the last move was in the opposite direction
-            if (m_LastLogMove > 0 && m_InputLogPosition != m_InputLog.begin())
-                m_InputLogPosition--;
+		while (!inputStream.fail()) {
+			inputStream.getline(strLine, 1024, '\n');
+			std::string line = strLine;
 
-            // If already at the beginning, then only put in empty string
-            if (m_InputLogPosition == m_InputLog.begin())
-            {
-                m_pInputTextBox->SetText("");
-                m_LastLogMove = 0;
-            }
-            else
-            {
-                m_InputLogPosition--;
-                // Revive logged input and put cursor at the end of it
-                m_pInputTextBox->SetText(*m_InputLogPosition);
-                m_pInputTextBox->SetCursorPos(m_pInputTextBox->GetText().length());
-                m_LastLogMove = -1;
-            }
-        }
-    }
+			if (!feedEmptyString) {
+				if (!line.empty() && line != "\r") {
+					g_LuaMan.ClearErrors();
+					m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + line);
+					g_LuaMan.RunScriptString(line, false);
 
-// TODO: This sometime.. bleh
-    // Cut off the text in the text label at a reasonable height so it doesn't get really slow to draw
-//    if (m_pConsoleText->GetTextHeight() > g_FrameMan.)
+					if (g_LuaMan.ErrorExists()) { m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + "ERROR: " + g_LuaMan.GetLastError()); }
+					if (m_InputLog.empty() || m_InputLog.front() != line) { m_InputLog.push_front(line); }
+
+					m_InputLogPosition = m_InputLog.begin();
+					m_LastLogMove = 0;
+				}
+			} else {
+				m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n");
+				break;
+			}
+		}
+		m_InputTextBox->SetText("");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::LoadLoggedInput(bool nextEntry) {
+		if (nextEntry) {
+			// See if we should decrement doubly because the last move was in the opposite direction
+			if (m_LastLogMove > 0 && m_InputLogPosition != m_InputLog.begin()) { --m_InputLogPosition; }
+
+			if (m_InputLogPosition == m_InputLog.begin()) {
+				m_InputTextBox->SetText("");
+				m_LastLogMove = 0;
+			} else {
+				--m_InputLogPosition;
+				m_InputTextBox->SetText(*m_InputLogPosition);
+				m_InputTextBox->SetCursorPos(m_InputTextBox->GetText().length());
+				m_LastLogMove = -1;
+			}
+		} else {
+			// See if we should increment doubly because the last move was in the opposite direction
+			if (m_LastLogMove < 0 && m_InputLogPosition != m_InputLog.end() - 1) { ++m_InputLogPosition; }
+
+			m_InputTextBox->SetText(*m_InputLogPosition);
+			m_InputTextBox->SetCursorPos(m_InputTextBox->GetText().length());
+			++m_InputLogPosition;
+			m_LastLogMove = 1;
+
+			// Avoid falling off the end
+			if (m_InputLogPosition == m_InputLog.end()) {
+				--m_InputLogPosition;
+				m_LastLogMove = 0;
+			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::RemoveGraveAccents() const {
+		std::string textBoxString = m_InputTextBox->GetText();
+		if (std::find(textBoxString.begin(), textBoxString.end(), '`') != textBoxString.end()) {
+			textBoxString.erase(std::remove(textBoxString.begin(), textBoxString.end(), '`'), textBoxString.end());
+			m_InputTextBox->SetText(textBoxString);
+			m_InputTextBox->SetCursorPos(textBoxString.length());
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::Draw(BITMAP *targetBitmap) const {
+		if (m_ConsoleState != ConsoleState::Disabled) {
+			AllegroScreen drawScreen(targetBitmap);
+			m_GUIControlManager->Draw(&drawScreen);
+		}
+	}
 }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this ConsoleMan's current graphical representation to a
-//                  BITMAP of choice.
-
-void ConsoleMan::Draw(BITMAP *pTargetBitmap)
-{
-    if (IsVisible() || m_ForceVisible)
-    {
-        AllegroScreen drawScreen(pTargetBitmap);
-        m_pGUIController->Draw(&drawScreen);
-    }
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearLog
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all previous input.
-
-void ConsoleMan::ClearLog()
-{
-    m_InputLog.clear();
-    m_InputLogPosition = m_InputLog.begin();
-    m_pConsoleText->SetText("");
-}
-
-
-} // namespace RTE

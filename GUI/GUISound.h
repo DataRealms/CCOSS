@@ -25,7 +25,7 @@ namespace RTE {
 		/// Creates all the GUI sound effects with Sound::Create and their additional samples with Sound::AddSample and makes the GUISound object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything other than 0 is an error signal.</returns>
-		virtual int Create();
+		int Initialize();
 #pragma endregion
 
 #pragma region Destruction
@@ -37,7 +37,7 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a GUISound object before deletion from system memory.
 		/// </summary>
-		virtual ~GUISound() { Destroy(); }
+		~GUISound() { Destroy(); }
 #pragma endregion
 
 #pragma region Getters

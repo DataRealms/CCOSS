@@ -9,9 +9,6 @@
 
 
 #include "Emission.h"
-#include "MovableObject.h"
-#include "Reader.h"
-#include "RTETools.h"
 #include "PresetMan.h"
 
 namespace RTE {
@@ -19,7 +16,7 @@ namespace RTE {
 
 //const string Emission::m_sClassName = "Emission";
 
-ConcreteClassInfo(Emission, Entity, 0)
+ConcreteClassInfo(Emission, Entity, 100)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -94,7 +91,7 @@ int Emission::Create(const Emission &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int Emission::ReadProperty(std::string propName, Reader &reader)
+int Emission::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 	if (propName == "EmittedParticle")
 	{
@@ -135,7 +132,6 @@ int Emission::ReadProperty(std::string propName, Reader &reader)
 		m_StopTimer.SetSimTimeLimitMS(stopTime);
 	}
 	else
-		// See if the base class(es) can find a match instead
 		return Serializable::ReadProperty(propName, reader);
 
 	return 0;

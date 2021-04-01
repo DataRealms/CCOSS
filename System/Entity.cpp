@@ -1,4 +1,5 @@
 #include "Entity.h"
+#include "RTETools.h"
 #include "PresetMan.h"
 #include "ConsoleMan.h"
 #include "DataModule.h"
@@ -45,15 +46,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Entity::ReadProperty(std::string propName, Reader &reader) {
+	int Entity::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "CopyOf") {
 			std::string refName = reader.ReadPropValue();
-			const Entity *preset = g_PresetMan.GetEntityPreset(GetClassName(), refName, reader.GetReadModuleID());
+			std::string className = GetClassName();
+			const Entity *preset = g_PresetMan.GetEntityPreset(className, refName, reader.GetReadModuleID());
 			if (preset) {
 				preset->Clone(this);
 			} else {
+				if (className == "AtomGroup" || className == "Attachable" || className == "AEmitter") {
+					reader.ReportError("The PresetName to be copied was not found in data modules.");
+				}
 				// If we couldn't find the preset to copy from, read it as an original but report the problem in the console
-				g_ConsoleMan.PrintString("ERROR: Couldn't find the preset '" + refName + "' accessed in " + reader.GetCurrentFilePath() + " at line " + reader.GetCurrentFileLineString());
+				g_ConsoleMan.PrintString("ERROR: Couldn't find the preset '" + refName + "' accessed in " + reader.GetCurrentFilePath() + " at line " + reader.GetCurrentFileLine());
 				// Preset name might have "[ModuleName]/" preceding it, detect it here and select proper module!
 				int slashPos = refName.find_first_of('/');
 				m_PresetName = (slashPos != std::string::npos) ? refName.substr(slashPos + 1) : refName;
@@ -108,23 +113,17 @@ namespace RTE {
 
 		// Is an original preset definition
 		if (m_IsOriginalPreset) {
-			writer.NewProperty("PresetName");
-			writer << m_PresetName;
-			// Only write out a copy reference if there is one
+			writer.NewPropertyWithValue("PresetName", m_PresetName);
+		// Only write out a copy reference if there is one
 		} else if (!m_PresetName.empty() && m_PresetName != "None") {
-			writer.NewProperty("CopyOf");
-			writer << GetModuleAndPresetName();
+			writer.NewPropertyWithValue("CopyOf", GetModuleAndPresetName());
 		}
-		if (!m_PresetDescription.empty()) {
-			writer.NewProperty("Description");
-			writer << m_PresetDescription;
-		}
+		if (!m_PresetDescription.empty()) { writer.NewPropertyWithValue("Description", m_PresetDescription); }
+
 		// TODO: Make proper save system that knows not to save redundant data!
 		/*
-		for (list<string>::const_iterator itr = m_Groups.begin(); itr != m_Groups.end(); ++itr)
-		{
-			writer.NewProperty("AddToGroup");
-			writer << *itr;
+		for (list<string>::const_iterator itr = m_Groups.begin(); itr != m_Groups.end(); ++itr) {
+			writer.NewPropertyWithValue("AddToGroup", *itr);
 		}
 		*/
 		return 0;
@@ -139,8 +138,7 @@ namespace RTE {
 			return -1;
 		}
 		writer.ObjectStart(GetClassName());
-		writer.NewProperty("CopyOf");
-		writer << GetModuleAndPresetName();
+		writer.NewPropertyWithValue("CopyOf", GetModuleAndPresetName());
 		writer.ObjectEnd();
 
 		return 0;

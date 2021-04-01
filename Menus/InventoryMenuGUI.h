@@ -1,5 +1,5 @@
-#ifndef _INVENTORYGUI_
-#define _INVENTORYGUI_
+#ifndef _InventoryMenuGUI_
+#define _InventoryMenuGUI_
 
 #include "StandardIncludes.h"
 #include "Vector.h"
@@ -7,17 +7,17 @@
 
 namespace RTE {
 
-	class InventoryGUI {
+	class InventoryMenuGUI {
 
 	public:
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a InventoryGUI object in system memory. Create() should be called before using the object.
+		/// Constructor method used to instantiate an InventoryMenuGUI object in system memory. Create() should be called before using the object.
 		/// </summary>
-		InventoryGUI() { Clear(); }
+		InventoryMenuGUI() { Clear(); }
 
 		/// <summary>
-		/// Makes the InventoryGUI object ready for use.
+		/// Makes the InventoryMenuGUI object ready for use.
 		/// </summary>
 		/// <param name="inventoryActor">The Actor whose inventory this GUI will display. Ownership is NOT TRANSFERRED! This is optional.</param>
 		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
@@ -26,17 +26,17 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up a InventoryGUI object before deletion from system memory.
+		/// Destructor method used to clean up a InventoryMenuGUI object before deletion from system memory.
 		/// </summary>
-		virtual ~InventoryGUI() { Destroy(); }
+		virtual ~InventoryMenuGUI() { Destroy(); }
 
 		/// <summary>
-		/// Destroys and resets (through Clear()) the InventoryGUI object.
+		/// Destroys and resets (through Clear()) the InventoryMenuGUI object.
 		/// </summary>
 		void Destroy() { destroy_bitmap(m_BGBitmap); Clear(); }
 
 		/// <summary>
-		/// Resets the entire InventoryGUI, including its inherited members, to their default settings or values.
+		/// Resets the entire InventoryMenuGUI, including its inherited members, to their default settings or values.
 		/// </summary>
 		virtual void Reset() { Clear(); }
 #pragma endregion
@@ -119,8 +119,8 @@ namespace RTE {
 		void Clear();
 
 		// Forbidding copying
-		InventoryGUI(const InventoryGUI &reference) {}
-		InventoryGUI &operator=(const InventoryGUI &rhs) { return *this; }
+		InventoryMenuGUI(const InventoryMenuGUI &reference) {}
+		InventoryMenuGUI &operator=(const InventoryMenuGUI &rhs) { return *this; }
 	};
 }
 #endif

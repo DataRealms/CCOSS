@@ -486,7 +486,7 @@
     <ClInclude Include="System\PieSlice.h">
       <Filter>System</Filter>
     </ClInclude>
-    <ClInclude Include="Menus\InventoryGUI.h">
+    <ClInclude Include="Menus\InventoryMenuGUI.h">
       <Filter>Menus</Filter>
     </ClInclude>
   </ItemGroup>
@@ -897,7 +897,7 @@
     <ClCompile Include="Entities\SoundContainer.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
-	<ClCompile Include="Entities\SoundSet.cpp">
+    <ClCompile Include="Entities\SoundSet.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="System\Atom.cpp">
@@ -930,7 +930,7 @@
     <ClCompile Include="System\PieSlice.cpp">
       <Filter>System</Filter>
     </ClCompile>
-    <ClCompile Include="Menus\InventoryGUI.cpp">
+    <ClCompile Include="Menus\InventoryMenuGUI.cpp">
       <Filter>Menus</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,4 +1,4 @@
-#include "InventoryGUI.h"
+#include "InventoryMenuGUI.h"
 
 #include "AHuman.h"
 
@@ -9,7 +9,7 @@ using namespace RTE;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void InventoryGUI::Clear() {
+void InventoryMenuGUI::Clear() {
 	m_Actor = 0;
 	m_BGBitmap = 0;
 	m_MassDisplayFont = 0;
@@ -17,7 +17,7 @@ void InventoryGUI::Clear() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int InventoryGUI::Create(Actor *inventoryActor) {
+int InventoryMenuGUI::Create(Actor *inventoryActor) {
 	m_Actor = inventoryActor;
 	if (!m_BGBitmap) {
 		m_BGBitmap = create_bitmap_ex(8, MAX(s_InventoryIconMaxWidth, s_InventoryIconMaxHeight) + (s_InventoryEquippedIconHighlightWidth * 2), MAX(s_InventoryIconMaxWidth, s_InventoryIconMaxHeight) + (s_InventoryEquippedIconHighlightWidth * 2));
@@ -27,12 +27,12 @@ int InventoryGUI::Create(Actor *inventoryActor) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void InventoryGUI::Update() {
+void InventoryMenuGUI::Update() {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void InventoryGUI::Draw(BITMAP *targetBitmap, const Vector &targetPos) const {
+void InventoryMenuGUI::Draw(BITMAP *targetBitmap, const Vector &targetPos) const {
 	if (m_PieEnabled == ENABLED && m_Actor && g_MovableMan.IsActor(m_Actor) && dynamic_cast<AHuman *>(m_Actor)) {
 		const std::deque<MovableObject *> *inventory = m_Actor->GetInventory();
 		const AHuman *actorAsHuman = dynamic_cast<AHuman *>(m_Actor);
@@ -58,7 +58,7 @@ void InventoryGUI::Draw(BITMAP *targetBitmap, const Vector &targetPos) const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void InventoryGUI::TransformOrganizedInventoryIntoRowsAndCalculateRemaindersAndIconSizes(const std::vector<MovableObject *> &organizedInventory, std::pair<float, float> &inventoryObjectRowRemainders, std::vector<std::array<MovableObject *, s_InventoryIconsPerRow>> &inventoryObjectRows, Vector &inventoryIconSize) const {
+void InventoryMenuGUI::TransformOrganizedInventoryIntoRowsAndCalculateRemaindersAndIconSizes(const std::vector<MovableObject *> &organizedInventory, std::pair<float, float> &inventoryObjectRowRemainders, std::vector<std::array<MovableObject *, s_InventoryIconsPerRow>> &inventoryObjectRows, Vector &inventoryIconSize) const {
 	const float remainderFloat = static_cast<float>((organizedInventory.size() - s_InventoryIconsPerRow) % (s_InventoryIconsPerRow * 2)) / 2;
 	inventoryObjectRowRemainders = {
 		(organizedInventory.size() > s_InventoryIconsPerRow) ? std::ceil(remainderFloat) : 0,
@@ -92,7 +92,7 @@ void InventoryGUI::TransformOrganizedInventoryIntoRowsAndCalculateRemaindersAndI
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void InventoryGUI::DrawInventoryItemIconsAndMassIndicators(BITMAP *targetBitmap, const Vector &drawPos, float totalOrganizedInventorySize, const MovableObject *equippedItem, std::pair<float, float> inventoryObjectRowRemainders, const std::vector<std::array<MovableObject *, s_InventoryIconsPerRow>> &inventoryObjectRows, const Vector &inventoryIconSize) const {
+void InventoryMenuGUI::DrawInventoryItemIconsAndMassIndicators(BITMAP *targetBitmap, const Vector &drawPos, float totalOrganizedInventorySize, const MovableObject *equippedItem, std::pair<float, float> inventoryObjectRowRemainders, const std::vector<std::array<MovableObject *, s_InventoryIconsPerRow>> &inventoryObjectRows, const Vector &inventoryIconSize) const {
 	Vector inventoryDrawPos(
 		drawPos.GetX() - ((s_InventoryIconsPerRow / 2) * (inventoryIconSize.GetX() + s_InventoryIconSpacer) + (inventoryIconSize.GetX() / 2)),
 		drawPos.GetY() - (m_EnabledRadius + m_Thickness) - (inventoryObjectRows.size() * (inventoryIconSize.GetY() + m_MassDisplayFont->GetFontHeight() + 10))
@@ -116,7 +116,7 @@ void InventoryGUI::DrawInventoryItemIconsAndMassIndicators(BITMAP *targetBitmap,
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void InventoryGUI::DrawInventoryItemIconRow(BITMAP *targetBitmap, Vector &currentInventoryIconDrawPos, const MovableObject *equippedItem, const std::array<MovableObject *, s_InventoryIconsPerRow> &inventoryObjectRow, const Vector &inventoryIconSize) const {
+void InventoryMenuGUI::DrawInventoryItemIconRow(BITMAP *targetBitmap, Vector &currentInventoryIconDrawPos, const MovableObject *equippedItem, const std::array<MovableObject *, s_InventoryIconsPerRow> &inventoryObjectRow, const Vector &inventoryIconSize) const {
 	BITMAP *currentInventoryIcon;
 	Vector currentInventoryIconSize;
 	float currentInventoryIconWidthHalfDifference;

@@ -16,7 +16,7 @@ namespace RTE {
 		SerializableOverrideMethods
 		SerializableClassNameGetter
 
-		enum PieSliceIndex {
+		enum class PieSliceIndex {
 			PSI_NONE = 0,
 			// Inventory management
 			PSI_PICKUP,
@@ -65,7 +65,7 @@ namespace RTE {
 		/// <summary>
 		/// An enum for the directions a slice can be placed in, in a given pie menu.
 		/// </summary>
-		enum SliceDirection {
+		enum class SliceDirection {
 			NONE = 0,
 			UP,
 			RIGHT,
@@ -109,7 +109,7 @@ namespace RTE {
 		/// <param name="checkType">Whether there is a class name in the stream to check against to make sure the correct type is being read from the stream.</param>
 		/// <param name="doCreate">Whether to do any additional initialization of the object after reading in all the properties from the Reader. This is done by calling Create().</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(Reader &reader, bool checkType = true, bool doCreate = true) { m_SliceType = PSI_SCRIPTED; return Serializable::Create(reader, checkType, doCreate); }
+		int Create(Reader &reader, bool checkType = true, bool doCreate = true) override { m_SliceType = PieSliceIndex::PSI_SCRIPTED; return Serializable::Create(reader, checkType, doCreate); }
 #pragma endregion
 
 #pragma region Destruction

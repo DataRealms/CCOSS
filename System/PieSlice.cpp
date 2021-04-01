@@ -11,9 +11,9 @@ const string PieSlice::c_ClassName = "Slice";
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void PieSlice::Clear() {
-	m_SliceType = PSI_NONE;
+	m_SliceType = PieSliceIndex::PSI_NONE;
 	m_Description.clear();
-	m_Direction = UP;
+	m_Direction = SliceDirection::UP;
 	m_Enabled = true;
 	m_Icon.Reset();
 	m_AreaStart = 0;
@@ -31,112 +31,112 @@ int PieSlice::Create() {
 	}
 
 	switch (m_SliceType) {
-		case PSI_NONE:
+		case PieSliceIndex::PSI_NONE:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Blank"));
 			break;
-		case PSI_PICKUP:
+		case PieSliceIndex::PSI_PICKUP:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Pick Up"));
 			break;
-		case PSI_DROP:
+		case PieSliceIndex::PSI_DROP:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Drop"));
 			break;
-		case PSI_NEXTITEM:
+		case PieSliceIndex::PSI_NEXTITEM:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Next"));
 			break;
-		case PSI_PREVITEM:
+		case PieSliceIndex::PSI_PREVITEM:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Previous"));
 			break;
-		case PSI_RELOAD:
+		case PieSliceIndex::PSI_RELOAD:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Reload"));
 			break;
-		case PSI_BUYMENU:
+		case PieSliceIndex::PSI_BUYMENU:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Trade Star"));
 			break;
-		case PSI_STATS:
+		case PieSliceIndex::PSI_STATS:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Stats"));
 			break;
-		case PSI_MINIMAP:
+		case PieSliceIndex::PSI_MINIMAP:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Minimap"));
 			break;
-		case PSI_FORMSQUAD:
+		case PieSliceIndex::PSI_FORMSQUAD:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Follow"));
 			break;
-		case PSI_CEASEFIRE:
+		case PieSliceIndex::PSI_CEASEFIRE:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "White Flag"));
 			break;
-		case PSI_SENTRY:
+		case PieSliceIndex::PSI_SENTRY:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Eye"));
 			break;
-		case PSI_PATROL:
+		case PieSliceIndex::PSI_PATROL:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Cycle"));
 			break;
-		case PSI_BRAINHUNT:
+		case PieSliceIndex::PSI_BRAINHUNT:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Brain"));
 			break;
-		case PSI_GOLDDIG:
+		case PieSliceIndex::PSI_GOLDDIG:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Dig"));
 			break;
-		case PSI_GOTO:
+		case PieSliceIndex::PSI_GOTO:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Go To"));
 			break;
-		case PSI_RETURN:
+		case PieSliceIndex::PSI_RETURN:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Launch"));
 			break;
-		case PSI_STAY:
+		case PieSliceIndex::PSI_STAY:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Land"));
 			break;
-		case PSI_SCUTTLE:
+		case PieSliceIndex::PSI_SCUTTLE:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Death"));
 			break;
-		case PSI_DONE:
+		case PieSliceIndex::PSI_DONE:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Check"));
 			break;
-		case PSI_LOAD:
+		case PieSliceIndex::PSI_LOAD:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Load"));
 			break;
-		case PSI_SAVE:
+		case PieSliceIndex::PSI_SAVE:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Save"));
 			break;
-		case PSI_NEW:
+		case PieSliceIndex::PSI_NEW:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Clear"));
 			break;
-		case PSI_PICK:
+		case PieSliceIndex::PSI_PICK:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Menu"));
 			break;
-		case PSI_MOVE:
+		case PieSliceIndex::PSI_MOVE:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Move"));
 			break;
-		case PSI_REMOVE:
+		case PieSliceIndex::PSI_REMOVE:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Remove"));
 			break;
-		case PSI_INFRONT:
+		case PieSliceIndex::PSI_INFRONT:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "In Front"));
 			break;
-		case PSI_BEHIND:
+		case PieSliceIndex::PSI_BEHIND:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Behind"));
 			break;
-		case PSI_ZOOMIN:
+		case PieSliceIndex::PSI_ZOOMIN:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Zoom In"));
 			break;
-		case PSI_ZOOMOUT:
+		case PieSliceIndex::PSI_ZOOMOUT:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Zoom Out"));
 			break;
-		case PSI_TEAM1:
+		case PieSliceIndex::PSI_TEAM1:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Team 1"));
 			break;
-		case PSI_TEAM2:
+		case PieSliceIndex::PSI_TEAM2:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Team 2"));
 			break;
-		case PSI_TEAM3:
+		case PieSliceIndex::PSI_TEAM3:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Team 3"));
 			break;
-		case PSI_TEAM4:
+		case PieSliceIndex::PSI_TEAM4:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Team 4"));
 			break;
-		case PSI_SCRIPTED:
+		case PieSliceIndex::PSI_SCRIPTED:
 			break;
 		default:
-			RTEAbort("Invalid sliceType " + m_SliceType);
+			RTEAbort("Invalid sliceType " + static_cast<int>(m_SliceType));
 	}
 	return 0;
 }
@@ -188,7 +188,7 @@ int PieSlice::Save(Writer &writer) const {
 	writer.NewProperty("Icon");
 	writer << m_Icon;
 	writer.NewProperty("Direction");
-	writer << m_Direction;
+	writer << static_cast<int>(m_Direction);
 	writer.NewProperty("ScriptPath");
 	writer << m_ScriptPath;
 	writer.NewProperty("FunctionName");

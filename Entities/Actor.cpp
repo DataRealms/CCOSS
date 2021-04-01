@@ -755,27 +755,6 @@ bool Actor::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HandlePieCommand
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Handles and does whatever a specific activated Pie Menu slice does to
-//                  this.
-
-bool Actor::HandlePieCommand(int pieSliceIndex)
-{
-/* Actually don't; the PSI_SCRIPTED is handled earlier in PieMenuGUI::Update
-    // Handle scripted pie commands here; run their scripts
-    if (pieSliceIndex == PieMenuGUI::PSI_SCRIPTED)
-    {
-// TODO: THIS
-
-        return true;
-    }
-*/
-    return false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  AddAIMOWaypoint
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Adds an MO in the scene as the next waypoint for this to go to, in order

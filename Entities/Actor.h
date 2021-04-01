@@ -608,16 +608,12 @@ ClassInfoGetters
 	virtual bool AddPieMenuSlices(PieMenuGUI *pPieMenu);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HandlePieCommand
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Handles and does whatever a specific activated Pie Menu slice does to
-//                  this.
-// Arguments:       The pie menu command to handle. See the PieSliceIndex enum.
-// Return value:    Whetehr any slice was handled. False if no matching slice handler was
-//                  found, or there was no slice currently activated by the pie menu.
-
-    virtual bool HandlePieCommand(int pieSliceIndex);
+    /// <summary>
+    /// Handles and does whatever a specific activated Pie Menu slice does to this.
+    /// </summary>
+    /// <param name="pieSliceIndex">The pie menu command to handle. See the enum in PieSlice.</param>
+    /// <returns>Whether any slice was handled. False if no matching slice handler was found, or there was no slice currently activated by the pie menu.</returns>
+    virtual bool HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex) { return false; }
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////

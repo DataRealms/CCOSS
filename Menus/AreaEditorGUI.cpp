@@ -150,7 +150,7 @@ void AreaEditorGUI::SetPosOnScreen(int newPosX, int newPosY)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets any Pie menu slice command activated last update.
 
-int AreaEditorGUI::GetActivatedPieSlice()
+PieSlice::PieSliceIndex AreaEditorGUI::GetActivatedPieSlice()
 {
     return m_pPieMenu->GetPieCommand();
 }
@@ -300,15 +300,15 @@ void AreaEditorGUI::Update()
     ///////////////////////////////////////
     // Handle pie menu selections
 
-    if (m_pPieMenu->GetPieCommand() != PieSlice::PSI_NONE)
+    if (m_pPieMenu->GetPieCommand() != PieSlice::PieSliceIndex::PSI_NONE)
     {
-        if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_PICK)
+        if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_PICK)
             m_EditorGUIMode = PICKINGAREA;
-        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_MOVE)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_MOVE)
             m_EditorGUIMode = PREADDMOVEBOX;
-        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_REMOVE)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_REMOVE)
             m_EditorGUIMode = DELETINGBOX;
-        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_DONE)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_DONE)
             m_EditorGUIMode = DONEEDITING;
         
         UpdatePieMenu();
@@ -698,45 +698,45 @@ void AreaEditorGUI::UpdatePieMenu()
     // Add pie menu slices and align them
     if (m_FullFeatured)
     {
-		PieSlice newAreaSlice("New Area", PieSlice::PSI_NEW, PieSlice::UP);
+		PieSlice newAreaSlice("New Area", PieSlice::PieSliceIndex::PSI_NEW, PieSlice::SliceDirection::UP);
         m_pPieMenu->AddSlice(newAreaSlice);
-        PieSlice loadSceneSlice("Load Scene", PieSlice::PSI_LOAD, PieSlice::UP);
+        PieSlice loadSceneSlice("Load Scene", PieSlice::PieSliceIndex::PSI_LOAD, PieSlice::SliceDirection::UP);
 		m_pPieMenu->AddSlice(loadSceneSlice);
 		
-		PieSlice testSceneSlice("Test Scene", PieSlice::PSI_DONE, PieSlice::UP);
+		PieSlice testSceneSlice("Test Scene", PieSlice::PieSliceIndex::PSI_DONE, PieSlice::SliceDirection::UP);
         m_pPieMenu->AddSlice(testSceneSlice);
-        PieSlice addMoveSlice("Add/Move Box", PieSlice::PSI_MOVE, PieSlice::LEFT);
+        PieSlice addMoveSlice("Add/Move Box", PieSlice::PieSliceIndex::PSI_MOVE, PieSlice::SliceDirection::LEFT);
 		m_pPieMenu->AddSlice(addMoveSlice);
 		
-		PieSlice removeBoxSlice("Remove Box", PieSlice::PSI_REMOVE, PieSlice::LEFT);
+		PieSlice removeBoxSlice("Remove Box", PieSlice::PieSliceIndex::PSI_REMOVE, PieSlice::SliceDirection::LEFT);
         m_pPieMenu->AddSlice(removeBoxSlice);
 		
-		PieSlice selectAreaSlice("Select Area", PieSlice::PSI_PICK, PieSlice::RIGHT);
+		PieSlice selectAreaSlice("Select Area", PieSlice::PieSliceIndex::PSI_PICK, PieSlice::SliceDirection::RIGHT);
         m_pPieMenu->AddSlice(selectAreaSlice);
 		
-		PieSlice saveSceneSlice("Save Scene", PieSlice::PSI_SAVE, PieSlice::DOWN);
+		PieSlice saveSceneSlice("Save Scene", PieSlice::PieSliceIndex::PSI_SAVE, PieSlice::SliceDirection::DOWN);
         m_pPieMenu->AddSlice(saveSceneSlice);
         if (m_pCurrentArea)
         {
             if (dynamic_cast<Actor *>(m_pCurrentArea))
             {
-				PieSlice team1Slice("Team 1 Actor", PieSlice::PSI_TEAM1, PieSlice::DOWN);
+				PieSlice team1Slice("Team 1 Actor", PieSlice::PieSliceIndex::PSI_TEAM1, PieSlice::SliceDirection::DOWN);
                 m_pPieMenu->AddSlice(team1Slice);
-				PieSlice team2Slice("Team 2 Actor", PieSlice::PSI_TEAM2, PieSlice::DOWN);
+				PieSlice team2Slice("Team 2 Actor", PieSlice::PieSliceIndex::PSI_TEAM2, PieSlice::SliceDirection::DOWN);
                 m_pPieMenu->AddSlice(team2Slice);
             }
         }
     }
     else
     {
-		PieSlice moveAreaSlice("(Re)Move Area", PieSlice::PSI_REMOVE, PieSlice::UP, false);
+		PieSlice moveAreaSlice("(Re)Move Area", PieSlice::PieSliceIndex::PSI_REMOVE, PieSlice::SliceDirection::UP, false);
         m_pPieMenu->AddSlice(moveAreaSlice);
-        PieSlice doneSlice("DONE Building!", PieSlice::PSI_DONE, PieSlice::LEFT);
+        PieSlice doneSlice("DONE Building!", PieSlice::PieSliceIndex::PSI_DONE, PieSlice::SliceDirection::LEFT);
 		m_pPieMenu->AddSlice(doneSlice);
 		
-		PieSlice pickAreaSlice("Pick Area", PieSlice::PSI_PICK, PieSlice::RIGHT);
+		PieSlice pickAreaSlice("Pick Area", PieSlice::PieSliceIndex::PSI_PICK, PieSlice::SliceDirection::RIGHT);
         m_pPieMenu->AddSlice(pickAreaSlice);
-        PieSlice saveSceneSlice("Save Scene", PieSlice::PSI_SAVE, PieSlice::DOWN, false);
+        PieSlice saveSceneSlice("Save Scene", PieSlice::PieSliceIndex::PSI_SAVE, PieSlice::SliceDirection::DOWN, false);
 		m_pPieMenu->AddSlice(saveSceneSlice);
     }
     m_pPieMenu->RealignSlices();

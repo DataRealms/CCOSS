@@ -244,7 +244,7 @@ bool AssemblyEditorGUI::SetCurrentObject(SceneObject *pNewObject)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets any Pie menu slice command activated last update.
 
-int AssemblyEditorGUI::GetActivatedPieSlice()
+PieSlice::PieSliceIndex AssemblyEditorGUI::GetActivatedPieSlice()
 {
     return m_pPieMenu->GetPieCommand();
 }
@@ -397,15 +397,15 @@ void AssemblyEditorGUI::Update()
     ///////////////////////////////////////
     // Handle pie menu selections
 
-    if (m_pPieMenu->GetPieCommand() != PieSlice::PSI_NONE)
+    if (m_pPieMenu->GetPieCommand() != PieSlice::PieSliceIndex::PSI_NONE)
     {
-        if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_PICK)
+        if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_PICK)
             m_EditorGUIMode = PICKINGOBJECT;
-        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_MOVE)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_MOVE)
             m_EditorGUIMode = MOVINGOBJECT;
-        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_REMOVE)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_REMOVE)
             m_EditorGUIMode = DELETINGOBJECT;
-        else if (m_pPieMenu->GetPieCommand() == PieSlice::PSI_DONE)
+        else if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_DONE)
             m_EditorGUIMode = DONEEDITING;
 
         UpdateBrainPath();
@@ -1064,24 +1064,24 @@ void AssemblyEditorGUI::UpdatePieMenu()
     // Add pie menu slices and align them
     if (m_FeatureSet == ONLOADEDIT)
     {
-		PieSlice loadSceneSlice("Load Scene", PieSlice::PSI_LOAD, PieSlice::UP);
+		PieSlice loadSceneSlice("Load Scene", PieSlice::PieSliceIndex::PSI_LOAD, PieSlice::SliceDirection::UP);
 		m_pPieMenu->AddSlice(loadSceneSlice);
 		
-        PieSlice moveObjectsSlice("Move Objects", PieSlice::PSI_MOVE, PieSlice::LEFT);
+        PieSlice moveObjectsSlice("Move Objects", PieSlice::PieSliceIndex::PSI_MOVE, PieSlice::SliceDirection::LEFT);
 		m_pPieMenu->AddSlice(moveObjectsSlice);
 		
-		PieSlice removeObjectsSlice("Remove Objects", PieSlice::PSI_REMOVE, PieSlice::LEFT);
+		PieSlice removeObjectsSlice("Remove Objects", PieSlice::PieSliceIndex::PSI_REMOVE, PieSlice::SliceDirection::LEFT);
         m_pPieMenu->AddSlice(removeObjectsSlice);
-		PieSlice addNewSlice("Add New Object", PieSlice::PSI_PICK, PieSlice::RIGHT);
+		PieSlice addNewSlice("Add New Object", PieSlice::PieSliceIndex::PSI_PICK, PieSlice::SliceDirection::RIGHT);
 		m_pPieMenu->AddSlice(addNewSlice);
 		
 		if (!m_pCurrentScheme)
 		{
-			PieSlice saveSceneSlice("Can's save, scheme not selected", PieSlice::PSI_SAVE, PieSlice::DOWN);
+			PieSlice saveSceneSlice("Can's save, scheme not selected", PieSlice::PieSliceIndex::PSI_SAVE, PieSlice::SliceDirection::DOWN);
 			saveSceneSlice.SetEnabled(false);
 			m_pPieMenu->AddSlice(saveSceneSlice);
 		} else {
-			PieSlice saveSceneSlice("Save Assembly", PieSlice::PSI_SAVE, PieSlice::DOWN);
+			PieSlice saveSceneSlice("Save Assembly", PieSlice::PieSliceIndex::PSI_SAVE, PieSlice::SliceDirection::DOWN);
 			m_pPieMenu->AddSlice(saveSceneSlice);
 		}
     }

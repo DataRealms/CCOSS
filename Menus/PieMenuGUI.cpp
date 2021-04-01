@@ -131,17 +131,17 @@ bool PieMenuGUI::AddSlice(PieSlice &newSlice, bool takeAnyFreeCardinal) {
 		newSlice.Create();
 	}
 	std::unordered_map<PieSlice::SliceDirection, PieSlice *> sliceCardinalDirections = {
-		{PieSlice::UP, &m_UpSlice}, {PieSlice::LEFT, &m_LeftSlice}, {PieSlice::DOWN, &m_DownSlice}, {PieSlice::RIGHT, &m_RightSlice}
+		{PieSlice::SliceDirection::UP, &m_UpSlice}, {PieSlice::SliceDirection::LEFT, &m_LeftSlice}, {PieSlice::SliceDirection::DOWN, &m_DownSlice}, {PieSlice::SliceDirection::RIGHT, &m_RightSlice}
 	};
 	std::unordered_map<PieSlice::SliceDirection, std::pair<std::list<PieSlice> *, std::list<PieSlice> *>> sliceIntercardinalDirections = {
-		{PieSlice::UP, {&m_UpRightSlices, &m_UpLeftSlices}},
-		{PieSlice::LEFT, {&m_UpLeftSlices, &m_DownLeftSlices}},
-		{PieSlice::DOWN, {&m_DownLeftSlices, &m_DownRightSlices}},
-		{PieSlice::RIGHT, {&m_UpRightSlices, &m_DownRightSlices}}
+		{PieSlice::SliceDirection::UP, {&m_UpRightSlices, &m_UpLeftSlices}},
+		{PieSlice::SliceDirection::LEFT, {&m_UpLeftSlices, &m_DownLeftSlices}},
+		{PieSlice::SliceDirection::DOWN, {&m_DownLeftSlices, &m_DownRightSlices}},
+		{PieSlice::SliceDirection::RIGHT, {&m_UpRightSlices, &m_DownRightSlices}}
 	};
 
 	for (const auto &[sliceDirection, pieSlice] : sliceCardinalDirections) {
-		if ((takeAnyFreeCardinal || sliceDirection == newSlice.GetDirection()) && pieSlice->GetType() == PieSlice::PSI_NONE) {
+		if ((takeAnyFreeCardinal || sliceDirection == newSlice.GetDirection()) && pieSlice->GetType() == PieSlice::PieSliceIndex::PSI_NONE) {
 			*pieSlice = newSlice;
 			return true;
 		}
@@ -260,7 +260,7 @@ void PieMenuGUI::AlterSliceLua(const std::string &description, const std::string
 		return slice->GetDescription() == description && slice->GetFunctionName() == functionName;
 	});
 
-	if (sliceIterator != m_CurrentSlices.end() && (*sliceIterator)->GetType() != PieSlice::PSI_NONE) {
+	if (sliceIterator != m_CurrentSlices.end() && (*sliceIterator)->GetType() != PieSlice::PieSliceIndex::PSI_NONE) {
 		foundSlice.SetDirection(direction);
 		foundSlice.SetEnabled(isEnabled);
 
@@ -507,9 +507,9 @@ void PieMenuGUI::UpdateSliceActivation() {
 		soundToPlay->Play();
 	}
 
-	if (GetPieCommand() == PieSlice::PSI_SCRIPTED) {
 		g_LuaMan.SetTempEntity(m_Actor);
 		// TODO: Investigate reloading the file each time. I think it's needed cause this stuff isn't in PresetMan, so this is the only way for it to be reloadable. To test, have script on slice, edit it and see what happens with and without this.
+	if (GetPieCommand() == PieSlice::PieSliceIndex::PSI_SCRIPTED) {
 		g_LuaMan.RunScriptFile(m_ActivatedSlice->GetScriptPath());
 		g_LuaMan.RunScriptString(m_ActivatedSlice->GetFunctionName() + "(ToActor(LuaMan.TempEntity));");
 	}

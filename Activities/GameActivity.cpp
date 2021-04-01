@@ -1835,7 +1835,7 @@ void GameActivity::Update()
                     // Add some additional universal ones
 					if (m_BuyMenuEnabled)
 					{
-						PieSlice buySlice("Buy Menu", PieSlice::PSI_BUYMENU, PieSlice::LEFT);
+						PieSlice buySlice("Buy Menu", PieSlice::PieSliceIndex::PSI_BUYMENU, PieSlice::SliceDirection::LEFT);
 						m_pPieMenu[player]->AddSlice(buySlice);
 					}
                     // Brain-specific options
@@ -1871,17 +1871,17 @@ void GameActivity::Update()
         m_pPieMenu[player]->Update();
 
         // If it appears a slice has been activated, then let the controlled actor handle it
-        int command = m_pPieMenu[player]->GetPieCommand();
+        PieSlice::PieSliceIndex command = m_pPieMenu[player]->GetPieCommand();
         if (m_ControlledActor[player] && command != PieSlice::PieSliceIndex::PSI_NONE)
         {
             // AI mode commands that need extra points set in special view modes here
-            if (command == PieSlice::PSI_SENTRY)
+            if (command == PieSlice::PieSliceIndex::PSI_SENTRY)
                 m_ViewState[player] = ViewState::AISentryPoint;
-            else if (command == PieSlice::PSI_PATROL)
+            else if (command == PieSlice::PieSliceIndex::PSI_PATROL)
                 m_ViewState[player] = ViewState::AIPatrolPoints;
-            else if (command == PieSlice::PSI_GOLDDIG)
+            else if (command == PieSlice::PieSliceIndex::PSI_GOLDDIG)
                 m_ViewState[player] = ViewState::AIGoldDigPoint;
-            else if (command == PieSlice::PSI_GOTO)
+            else if (command == PieSlice::PieSliceIndex::PSI_GOTO)
             {
                 m_ViewState[player] = ViewState::AIGoToPoint;
                 // Clear out the waypoints
@@ -1891,7 +1891,7 @@ void GameActivity::Update()
                 // Disable Actor's controller while we set the waypoints
                 m_ControlledActor[player]->GetController()->SetDisabled(true);
             }
-			else if (command == PieSlice::PSI_FORMSQUAD)
+			else if (command == PieSlice::PieSliceIndex::PSI_FORMSQUAD)
             {
 				//Find out if we have any connected units, and disconnect them
 				bool isCommander = false;
@@ -1939,7 +1939,7 @@ void GameActivity::Update()
             // If the actor couldn't handle it, then it's probably a game specific one
             if (!m_ControlledActor[player]->HandlePieCommand(command))
             {
-                if (command == PieSlice::PSI_BUYMENU)
+                if (command == PieSlice::PieSliceIndex::PSI_BUYMENU)
                 {
                     m_pPieMenu[player]->SetEnabled(false);
                     m_pBuyGUI[player]->SetEnabled(true);

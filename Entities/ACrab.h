@@ -288,7 +288,7 @@ public:
 // Return value:    Whetehr any slice was handled. False if no matching slice handler was
 //                  found, or there was no slice currently activated by the pie menu.
 
-	bool HandlePieCommand(int pieSliceIndex) override;
+	bool HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

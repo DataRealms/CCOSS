@@ -97,7 +97,7 @@ namespace RTE {
 		/// Gets the the command issued by this menu in the last update, i.e. the Slice type of the currently activated Slice or None if no slice was activated.
 		/// </summary>
 		/// <returns>The Slice type which has been picked activated, or None if none has been picked. See the PieSliceIndex enum for Slice types.</returns>
-		int GetPieCommand() const { return m_ActivatedSlice == nullptr ? PieSlice::PSI_NONE : m_ActivatedSlice->GetType(); }
+		PieSlice::PieSliceIndex GetPieCommand() const { return m_ActivatedSlice == nullptr ? PieSlice::PieSliceIndex::PSI_NONE : m_ActivatedSlice->GetType(); }
 #pragma endregion
 
 #pragma region Animation Handling

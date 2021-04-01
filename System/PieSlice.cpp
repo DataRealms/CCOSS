@@ -6,7 +6,7 @@
 
 using namespace RTE;
 
-const string PieSlice::m_sClassName = "Slice";
+const string PieSlice::c_ClassName = "Slice";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -160,7 +160,7 @@ int PieSlice::Create(const PieSlice &reference) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int PieSlice::ReadProperty(std::string propName, Reader &reader) {
+int PieSlice::ReadProperty(const std::string_view &propName, Reader &reader) {
 	if (propName == "Description") {
 		reader >> m_Description;
 	} else if (propName == "Icon") {

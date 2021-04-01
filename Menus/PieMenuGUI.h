@@ -11,6 +11,9 @@ namespace RTE {
 	class MovableObject;
 	class Actor;
 
+	/// <summary>
+	/// A GUI for displaying pie menus.
+	/// </summary>
 	class PieMenuGUI {
 
 	public:
@@ -99,7 +102,7 @@ namespace RTE {
 
 #pragma region Animation Handling
 		/// <summary>
-		/// Just plays the disabling animation, regardless of whether the menu was enabled or not. This is for an effect when actors are switched.
+		/// Just plays the disabling animation, regardless of whether the menu was enabled or not.
 		/// </summary>
 		void DisableAnim() { m_InnerRadius = m_EnabledRadius; m_Wobbling = false; m_EnablingTimer.Reset(); m_PieEnabled = DISABLING; }
 

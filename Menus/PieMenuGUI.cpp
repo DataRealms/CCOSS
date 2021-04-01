@@ -22,16 +22,15 @@ void PieMenuGUI::Clear() {
 	m_EnablingTimer.Reset();
 	m_HoverTimer.Reset();
 
-	m_Controller = 0;
-	m_Actor = 0;
-	m_LastKnownActor = 0;
+	m_Controller = nullptr;
+	m_AffectedObject = nullptr;
 
-	m_PieEnabled = DISABLED;
+	m_PieEnabled = PieEnabled::DISABLED;
 	m_CenterPos.Reset();
 
-	m_HoveredSlice = 0;
-	m_ActivatedSlice = 0;
-	m_AlreadyActivatedSlice = 0;
+	m_HoveredSlice = nullptr;
+	m_ActivatedSlice = nullptr;
+	m_AlreadyActivatedSlice = nullptr;
 
 	m_UpSlice.Reset();
 	m_RightSlice.Reset();
@@ -54,7 +53,7 @@ void PieMenuGUI::Clear() {
 	m_Thickness = 16;
 	m_CursorAngle = 0;
 
-	m_BGBitmap = 0;
+	m_BGBitmap = nullptr;
 	m_RedrawBG = true;
 }
 
@@ -106,9 +105,9 @@ void PieMenuGUI::SetEnabled(bool enable) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void PieMenuGUI::ResetSlices() {
-	m_HoveredSlice = 0;
-	m_ActivatedSlice = 0;
-	m_AlreadyActivatedSlice = 0;
+	m_HoveredSlice = nullptr;
+	m_ActivatedSlice = nullptr;
+	m_AlreadyActivatedSlice = nullptr;
 
 	m_UpSlice.Reset();
 	m_RightSlice.Reset();
@@ -141,18 +140,18 @@ bool PieMenuGUI::AddSlice(PieSlice &newSlice, bool takeAnyFreeCardinal) {
 		{PieSlice::RIGHT, {&m_UpRightSlices, &m_DownRightSlices}}
 	};
 
-	for (const std::pair<const PieSlice::SliceDirection, PieSlice *> &sliceEntry : sliceCardinalDirections) {
-		if ((takeAnyFreeCardinal || sliceEntry.first == newSlice.GetDirection()) && sliceEntry.second->GetType() == PieSlice::PSI_NONE) {
-			*sliceEntry.second = newSlice;
+	for (const auto &[sliceDirection, pieSlice] : sliceCardinalDirections) {
+		if ((takeAnyFreeCardinal || sliceDirection == newSlice.GetDirection()) && pieSlice->GetType() == PieSlice::PSI_NONE) {
+			*pieSlice = newSlice;
 			return true;
 		}
 	}
 
-	std::pair<std::list<PieSlice> *, std::list<PieSlice> *> intercardinalDirectionsToCheck = sliceIntercardinalDirections.at(newSlice.GetDirection());
-	if (intercardinalDirectionsToCheck.first->size() <= intercardinalDirectionsToCheck.second->size()) {
-		intercardinalDirectionsToCheck.first->push_back(newSlice);
+	const auto &[firstPieSliceList, secondPieSliceList] = sliceIntercardinalDirections.at(newSlice.GetDirection());
+	if (firstPieSliceList->size() <= secondPieSliceList->size()) {
+		firstPieSliceList->push_back(newSlice);
 	} else {
-		intercardinalDirectionsToCheck.second->push_back(newSlice);
+		secondPieSliceList->push_back(newSlice);
 	}
 
 	return true;
@@ -175,8 +174,8 @@ void PieMenuGUI::RealignSlices() {
 	/// <param name="currentSliceNumber">The current slice number being handled in the current list of intercardinal slices.</param>
 	/// <param name="currentAngleOffset">The current angle offset for this list of intercardinal slices.</param>
 	auto handleIntercardinalSlice = [this](PieSlice &pieSlice, int sliceListSize, int currentSliceNumber, float currentAngleOffset) {
-		pieSlice.SetAreaArc(c_QuarterPI / sliceListSize);
-		pieSlice.SetAreaStart(currentAngleOffset + currentSliceNumber * pieSlice.GetAreaArc());
+		pieSlice.SetAreaArc(c_QuarterPI / static_cast<float>(sliceListSize));
+		pieSlice.SetAreaStart(currentAngleOffset + (static_cast<float>(currentSliceNumber) * pieSlice.GetAreaArc()));
 		m_CurrentSlices.push_back(&pieSlice);
 	};
 
@@ -195,12 +194,12 @@ void PieMenuGUI::RealignSlices() {
 			// Right side slices need to be handled in reverse order to properly traverse the slices in CCW order. Outside of that, all intercardinal slices are handled in the same way.
 			if (i == 0 || i == 3) {
 				for (sliceReverseIterator = currentIntercardinalSliceList.rbegin(); sliceReverseIterator != currentIntercardinalSliceList.rend(); ++sliceReverseIterator) {
-					handleIntercardinalSlice((*sliceReverseIterator), currentIntercardinalSliceList.size(), currentSliceNumber, currentAngleOffset);
+					handleIntercardinalSlice((*sliceReverseIterator), static_cast<int>(currentIntercardinalSliceList.size()), currentSliceNumber, currentAngleOffset);
 					currentSliceNumber++;
 				}
 			} else {
 				for (PieSlice &slice : currentIntercardinalSliceList) {
-					handleIntercardinalSlice(slice, currentIntercardinalSliceList.size(), currentSliceNumber, currentAngleOffset);
+					handleIntercardinalSlice(slice, static_cast<int>(currentIntercardinalSliceList.size()), currentSliceNumber, currentAngleOffset);
 					currentSliceNumber++;
 				}
 			}
@@ -225,7 +224,7 @@ void PieMenuGUI::RealignSlices() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const PieSlice *PieMenuGUI::GetSliceOnAngle(float angle) const {
+const PieSlice * PieMenuGUI::GetSliceOnAngle(float angle) const {
 	float areaEnd;
 	for (const PieSlice *slice : m_CurrentSlices) {
 		areaEnd = slice->GetAreaStart() + slice->GetAreaArc();
@@ -307,7 +306,7 @@ PieSlice PieMenuGUI::RemoveSliceLua(const std::string &description, const std::s
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void PieMenuGUI::Update() {
-	m_ActivatedSlice = 0;
+	m_ActivatedSlice = nullptr;
 
 	if (m_Wobbling) {
 		UpdateWobbling();
@@ -327,7 +326,7 @@ void PieMenuGUI::Update() {
 		UpdateSliceActivation();
 		
 		if (m_HoverTimer.IsPastSimMS(1500)) {
-			m_HoveredSlice = 0;
+			m_HoveredSlice = nullptr;
 			m_RedrawBG = true;
 		}
 	}
@@ -349,13 +348,12 @@ void PieMenuGUI::Draw(BITMAP *targetBitmap, const Vector &targetPos) const  {
 	Vector drawPos;
 	CalculateDrawPositionAccountingForSeamsAndFont(targetBitmap, targetPos, menuFont, drawPos);
 
-
 	if (m_PieEnabled != DISABLED) {
 		if (!g_FrameMan.IsInMultiplayerMode()) {
 			g_FrameMan.SetTransTable(MoreTrans);
-			draw_trans_sprite(targetBitmap, m_BGBitmap, drawPos.m_X - m_BGBitmap->w / 2, drawPos.m_Y - m_BGBitmap->h / 2);
+			draw_trans_sprite(targetBitmap, m_BGBitmap, drawPos.GetFloorIntX() - m_BGBitmap->w / 2, drawPos.GetFloorIntY() - m_BGBitmap->h / 2);
 		} else {
-			draw_sprite(targetBitmap, m_BGBitmap, drawPos.m_X - m_BGBitmap->w / 2, drawPos.m_Y - m_BGBitmap->h / 2);
+			draw_sprite(targetBitmap, m_BGBitmap, drawPos.GetFloorIntX() - m_BGBitmap->w / 2, drawPos.GetFloorIntY() - m_BGBitmap->h / 2);
 		}
 	}
 
@@ -385,10 +383,10 @@ bool PieMenuGUI::SelectSlice(const PieSlice *sliceToSelect, bool moveCursorToSli
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void PieMenuGUI::UpdateWobbling() {
-	float innerRadiusChange = m_EnablingTimer.GetElapsedRealTimeMS() / 6;
+	float innerRadiusChange = static_cast<float>(m_EnablingTimer.GetElapsedRealTimeMS()) / 6.0F;
 
 	m_RedrawBG = true;
-	m_InnerRadius += innerRadiusChange * (m_PieEnabled == DISABLING ? -1 : 1);
+	m_InnerRadius += static_cast<int>(innerRadiusChange) * (m_PieEnabled == DISABLING ? -1 : 1);
 
 	if (m_InnerRadius < 0) {
 		m_PieEnabled = ENABLING;
@@ -396,7 +394,7 @@ void PieMenuGUI::UpdateWobbling() {
 		m_PieEnabled = DISABLING;
 	}
 
-	m_InnerRadius = Limit(m_InnerRadius, 0, m_EnabledRadius / 2);
+	m_InnerRadius = std::clamp(m_InnerRadius, 0, m_EnabledRadius / 2);
 	m_EnablingTimer.Reset();
 }
 
@@ -405,17 +403,19 @@ void PieMenuGUI::UpdateWobbling() {
 void PieMenuGUI::UpdateEnablingAndDisablingAnimations() {
 	m_RedrawBG = true;
 	if (m_PieEnabled == ENABLING) {
-		m_InnerRadius = LERP(0, s_EnablingDelay, 0, m_EnabledRadius, m_EnablingTimer.GetElapsedRealTimeMS());
+		m_InnerRadius = static_cast<int>(LERP(0.0F, static_cast<float>(s_EnablingDelay), 0.0F, static_cast<float>(m_EnabledRadius), static_cast<float>(m_EnablingTimer.GetElapsedRealTimeMS())));
 		if (m_EnablingTimer.IsPastRealMS(s_EnablingDelay)) {
 			m_PieEnabled = ENABLED;
 			m_InnerRadius = m_EnabledRadius;
 		}
 	} else if (m_PieEnabled == DISABLING) {
-		m_InnerRadius = LERP(0, s_EnablingDelay, m_EnabledRadius, 0, m_EnablingTimer.GetElapsedRealTimeMS());
+		m_InnerRadius = static_cast<int>(LERP(0.0F, static_cast<float>(s_EnablingDelay), static_cast<float>(m_EnabledRadius), 0.0F, static_cast<float>(m_EnablingTimer.GetElapsedRealTimeMS())));
 		if (m_EnablingTimer.IsPastRealMS(s_EnablingDelay)) {
 			m_PieEnabled = DISABLED;
 			m_InnerRadius = 0;
-			if (m_Actor) { m_Actor->FlashWhite(); }
+			if (m_AffectedObject && static_cast<Actor *>(m_AffectedObject)) {
+				static_cast<Actor *>(m_AffectedObject)->FlashWhite();
+			}
 		}
 	}
 }
@@ -424,7 +424,7 @@ void PieMenuGUI::UpdateEnablingAndDisablingAnimations() {
 
 bool PieMenuGUI::UpdateAnalogInput() {
 	float cursorDistance = m_Controller->GetAnalogCursor().GetLargest();
-	if (cursorDistance > 0.45) {
+	if (cursorDistance > 0.45F) {
 		m_CursorAngle = m_Controller->GetAnalogCursor().GetAbsRadAngle();
 
 		while (m_CursorAngle < 0) { m_CursorAngle += c_TwoPI; }
@@ -432,7 +432,7 @@ bool PieMenuGUI::UpdateAnalogInput() {
 		SelectSlice(GetSliceOnAngle(m_CursorAngle));
 		return true;
 	} else if (cursorDistance > 0.35 && cursorDistance <= 0.45) {
-		m_HoveredSlice = 0;
+		m_HoveredSlice = nullptr;
 		m_RedrawBG = true;
 		return false;
 	}
@@ -462,21 +462,21 @@ bool PieMenuGUI::UpdateDigitalInput() {
 		{PRESS_RIGHT, {{0, m_LeftSlice.GetMidAngle()}, true}}
 	};
 
-	for (std::pair<ControlState, PieSlice *> controlStateSliceEntry : controlStateSlices) {
-		if (m_Controller->IsState(controlStateSliceEntry.first)) {
-			const std::pair<float, float> &selectionZoomAngles = controlStateSelectionZoomAngles.at(controlStateSliceEntry.first).first;
+	for (const auto &[controlState, pieSlice] : controlStateSlices) {
+		if (m_Controller->IsState(controlState)) {
+			const auto &[firstSelectionZoomAngle, secondSelectionZoomAngle] = controlStateSelectionZoomAngles.at(controlState).first;
 			bool shouldZoom = !m_HoveredSlice;
-			shouldZoom |= controlStateSelectionZoomAngles.at(controlStateSliceEntry.first).second ?
-				(m_CursorAngle > selectionZoomAngles.first && m_CursorAngle < selectionZoomAngles.second) :
-				(m_CursorAngle > selectionZoomAngles.first || m_CursorAngle < selectionZoomAngles.second);
+			shouldZoom |= controlStateSelectionZoomAngles.at(controlState).second ?
+				(m_CursorAngle > firstSelectionZoomAngle && m_CursorAngle < secondSelectionZoomAngle) :
+				(m_CursorAngle > firstSelectionZoomAngle || m_CursorAngle < secondSelectionZoomAngle);
 
 			if (shouldZoom) {
-				return SelectSlice(controlStateSliceEntry.second, true);
-			} else if (m_HoveredSlice != controlStateSliceEntry.second) {
-				const std::pair<float, float> &selectionStepAngles = controlStateSelectionStepAngles.at(controlStateSliceEntry.first).first;
-				float stepDirection = controlStateSelectionStepAngles.at(controlStateSliceEntry.first).second ?
-					((m_CursorAngle > selectionStepAngles.first && m_CursorAngle < selectionStepAngles.second) ? -1 : 1) :
-					((m_CursorAngle > selectionStepAngles.first || m_CursorAngle < selectionStepAngles.second) ? -1 : 1);
+				return SelectSlice(pieSlice, true);
+			} else if (m_HoveredSlice != pieSlice) {
+				const auto &[firstSelectionStepAngle, secondSelectionStepAngle] = controlStateSelectionStepAngles.at(controlState).first;
+				int stepDirection = controlStateSelectionStepAngles.at(controlState).second ?
+					((m_CursorAngle > firstSelectionStepAngle && m_CursorAngle < secondSelectionStepAngle) ? -1 : 1) :
+					((m_CursorAngle > firstSelectionStepAngle || m_CursorAngle < secondSelectionStepAngle) ? -1 : 1);
 
 				vector<PieSlice *>::iterator sliceToSelect = std::find(m_CurrentSlices.begin(), m_CurrentSlices.end(), m_HoveredSlice) + stepDirection;
 				if (sliceToSelect >= m_CurrentSlices.end()) {
@@ -484,6 +484,7 @@ bool PieMenuGUI::UpdateDigitalInput() {
 				} else if (sliceToSelect < m_CurrentSlices.begin()) {
 					sliceToSelect = m_CurrentSlices.end() - 1;
 				}
+
 				if ((*sliceToSelect) != nullptr) {
 					return SelectSlice((*sliceToSelect), true);
 				}
@@ -519,7 +520,7 @@ void PieMenuGUI::RedrawMenuBackground() {
 	int centerX = m_BGBitmap->w / 2;
 	int centerY = m_BGBitmap->h / 2;
 
-	// Circle drawing is done by drawing a larger circle and drawing a smaller one in the mask color (i.e. transparent) on top of it.
+	// Pie menu circle drawing is done by drawing a larger circle and drawing a smaller one in the mask color (i.e. transparent) on top of it.
 	circlefill(m_BGBitmap, centerX, centerY, m_InnerRadius + m_Thickness, 4);
 	circlefill(m_BGBitmap, centerX, centerY, m_InnerRadius, g_MaskColor);
 
@@ -528,7 +529,7 @@ void PieMenuGUI::RedrawMenuBackground() {
 
 		// Draw four separator lines between each slice so the resulting separation will be at least 2 pixels thick, regardless of the separated slices' angles.
 		for (const PieSlice *slice : m_CurrentSlices) {
-			separator.SetXY(m_InnerRadius + m_Thickness + 2, 0);
+			separator.SetXY(static_cast<float>(m_InnerRadius + m_Thickness) + 2.0F, 0.0F);
 			separator.RadRotate(slice->GetAreaStart());
 			line(m_BGBitmap, centerX, centerY, centerX + separator.GetCeilingIntX(), centerY + separator.GetCeilingIntY(), g_MaskColor);
 			line(m_BGBitmap, centerX + 1, centerY, centerX + 1 + separator.GetCeilingIntX(), centerY + separator.GetCeilingIntY(), g_MaskColor);
@@ -537,7 +538,7 @@ void PieMenuGUI::RedrawMenuBackground() {
 		}
 
 		if (m_HoveredSlice && m_HoveredSlice->IsEnabled()) {
-			separator.SetXY(m_InnerRadius + (m_Thickness / 2), 0);
+			separator.SetXY(static_cast<float>(m_InnerRadius + (m_Thickness / 2)), 0.0F);
 			separator.RadRotate(m_HoveredSlice->GetMidAngle());
 			floodfill(m_BGBitmap, centerX + separator.GetFloorIntX(), centerY + separator.GetFloorIntY(), g_BlackColor);
 		}
@@ -554,10 +555,10 @@ void PieMenuGUI::CalculateDrawPositionAccountingForSeamsAndFont(const BITMAP *ta
 	if (!targetPos.IsZero()) {
 		const Box *nearestBox = nullptr;
 
-		Box screenBox(targetPos, targetBitmap->w, targetBitmap->h);
+		Box screenBox(targetPos, static_cast<float>(targetBitmap->w), static_cast<float>(targetBitmap->h));
 		list<Box> wrappedBoxes;
 		bool withinAnyBox = false;
-		float distance, shortestDist = 1000000.0;
+		float distance, shortestDist = 1000000.0F;
 		//TODO under what conditions would the pie menu not be on the screen and, if that's the case, would we still want to draw it? Investigate this!
 		g_SceneMan.WrapBox(screenBox, wrappedBoxes);
 		for (const Box &wrappedBox : wrappedBoxes) {
@@ -583,15 +584,15 @@ void PieMenuGUI::CalculateDrawPositionAccountingForSeamsAndFont(const BITMAP *ta
 	//TODO judging by the comment this will force it onto the screen if it's not on it? Better behaviour would be only draw if it's on the screen. See above TODO as well.
 	// Adjust the draw position so that the menu will always be drawn fully inside the player's screen
 	int menuDrawRadius = m_InnerRadius + m_Thickness + 2 + menuFont->GetFontHeight();
-	if (drawPos.m_X - menuDrawRadius < 0) {
-		drawPos.m_X = menuDrawRadius;
-	} else if (drawPos.m_X + menuDrawRadius > targetBitmap->w) {
-		drawPos.m_X = targetBitmap->w - menuDrawRadius;
+	if (drawPos.m_X - static_cast<float>(menuDrawRadius) < 0.0F) {
+		drawPos.m_X = static_cast<float>(menuDrawRadius);
+	} else if (drawPos.m_X + static_cast<float>(menuDrawRadius) > static_cast<float>(targetBitmap->w)) {
+		drawPos.m_X = static_cast<float>(targetBitmap->w - menuDrawRadius);
 	}
-	if (drawPos.m_Y - menuDrawRadius < 0) {
-		drawPos.m_Y = menuDrawRadius;
-	} else if (drawPos.m_Y + menuDrawRadius > targetBitmap->h) {
-		drawPos.m_Y = targetBitmap->h - menuDrawRadius;
+	if (drawPos.m_Y - static_cast<float>(menuDrawRadius) < 0.0F) {
+		drawPos.m_Y = static_cast<float>(menuDrawRadius);
+	} else if (drawPos.m_Y + static_cast<float>(menuDrawRadius) > static_cast<float>(targetBitmap->h)) {
+		drawPos.m_Y = static_cast<float>(targetBitmap->h - menuDrawRadius);
 	}
 }
 
@@ -615,8 +616,8 @@ void PieMenuGUI::DrawPieIcons(BITMAP *targetBitmap, const Vector &drawPos) const
 				sliceIcon = sliceFrames[PIS_SELECTED];
 			}
 
-			sliceIconOffset = Vector(m_InnerRadius + (m_Thickness / 2), 0).RadRotate(slice->GetMidAngle()) + Vector(1 - (sliceIcon->w / 2), 1 - (sliceIcon->h / 2));
-			draw_sprite(targetBitmap, sliceIcon, drawPos.m_X + sliceIconOffset.m_X, drawPos.m_Y + sliceIconOffset.m_Y);
+			sliceIconOffset = Vector(static_cast<float>(m_InnerRadius + (m_Thickness / 2)), 0.0F).RadRotate(slice->GetMidAngle()) + Vector(1.0F - static_cast<float>(sliceIcon->w / 2), 1.0F - static_cast<float>(sliceIcon->h / 2));
+			draw_sprite(targetBitmap, sliceIcon, drawPos.GetFloorIntX() + sliceIconOffset.GetFloorIntX(), drawPos.GetFloorIntY() + sliceIconOffset.GetFloorIntY());
 		}
 	}
 }
@@ -624,17 +625,17 @@ void PieMenuGUI::DrawPieIcons(BITMAP *targetBitmap, const Vector &drawPos) const
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void PieMenuGUI::DrawPieCursorAndSliceDescriptions(BITMAP *targetBitmap, const Vector &drawPos, GUIFont *menuFont) const {
-	Vector cursorPos = Vector(m_InnerRadius/* - s_Cursor->w*/, 0).RadRotate(m_CursorAngle);
-	pivot_sprite(targetBitmap, s_Cursor, drawPos.m_X + cursorPos.m_X, drawPos.m_Y + cursorPos.m_Y, s_Cursor->w / 2, s_Cursor->h / 2, ftofix((m_CursorAngle / c_PI) * -128));
+	Vector cursorPos = Vector(static_cast<float>(m_InnerRadius)/* - s_Cursor->w*/, 0.0F).RadRotate(m_CursorAngle);
+	pivot_sprite(targetBitmap, s_Cursor, drawPos.GetFloorIntX() + cursorPos.GetFloorIntX(), drawPos.GetFloorIntY() + cursorPos.GetFloorIntY(), s_Cursor->w / 2, s_Cursor->h / 2, ftofix((m_CursorAngle / c_PI) * -128));
 
 	// Align text center, left or right respectively, based on which side of the menu the hovered slice is on.
 	AllegroBitmap allegroBitmap(targetBitmap);
-	Vector textPos = Vector(m_InnerRadius + m_Thickness + menuFont->GetFontHeight() * 0.5, 0).RadRotate(m_HoveredSlice->GetMidAngle()) - Vector(0, menuFont->GetFontHeight() * 0.45);
+	Vector textPos = Vector(static_cast<float>(m_InnerRadius + m_Thickness + menuFont->GetFontHeight()) * 0.5F, 0.0F).RadRotate(m_HoveredSlice->GetMidAngle()) - Vector(0.0F, static_cast<float>(menuFont->GetFontHeight()) * 0.45F);
 	if (m_HoveredSlice == &m_UpSlice || m_HoveredSlice == &m_DownSlice) {
-		menuFont->DrawAligned(&allegroBitmap, drawPos.m_X + textPos.m_X, drawPos.m_Y + textPos.m_Y, m_HoveredSlice->GetDescription().c_str(), GUIFont::Centre);
+		menuFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + textPos.GetFloorIntX(), drawPos.GetFloorIntY() + textPos.GetFloorIntY(), m_HoveredSlice->GetDescription().c_str(), GUIFont::Centre);
 	} else if (m_CursorAngle < c_HalfPI || m_CursorAngle > c_PI + c_HalfPI) {
-		menuFont->DrawAligned(&allegroBitmap, drawPos.m_X + textPos.m_X, drawPos.m_Y + textPos.m_Y, m_HoveredSlice->GetDescription().c_str(), GUIFont::Left);
+		menuFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + textPos.GetFloorIntX(), drawPos.GetFloorIntY() + textPos.GetFloorIntY(), m_HoveredSlice->GetDescription().c_str(), GUIFont::Left);
 	} else {
-		menuFont->DrawAligned(&allegroBitmap, drawPos.m_X + textPos.m_X, drawPos.m_Y + textPos.m_Y, m_HoveredSlice->GetDescription().c_str(), GUIFont::Right);
+		menuFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + textPos.GetFloorIntX(), drawPos.GetFloorIntY() + textPos.GetFloorIntY(), m_HoveredSlice->GetDescription().c_str(), GUIFont::Right);
 	}
 }

@@ -13,7 +13,8 @@ namespace RTE {
 
 	public:
 
-		//SerializableOverrideMethods
+		SerializableOverrideMethods
+		SerializableClassNameGetter
 
 		enum PieSliceIndex {
 			PSI_NONE = 0,
@@ -85,7 +86,7 @@ namespace RTE {
 		/// <param name="sliceType">The type of the pie slice.</param>
 		/// <param name="direction">The direction of the pie slice.</param>
 		/// <param name="enabled">Whether the slice is enabled. Defaults to true.</param>
-		PieSlice(std::string description, PieSliceIndex sliceType, SliceDirection direction, bool enabled = true) { Clear(); m_Description = description; m_SliceType = sliceType; m_Direction = direction; m_Enabled = enabled; }
+		PieSlice(const std::string_view &description, PieSliceIndex sliceType, SliceDirection direction, bool enabled = true) { Clear(); m_Description = description; m_SliceType = sliceType; m_Direction = direction; m_Enabled = enabled; }
 		//PieSlice(const std::string &description, PieSliceIndex sliceType, SliceDirection direction, bool enabled = true) : Clear(), m_Description(description), m_SliceType(sliceType), m_Direction(direction), m_Enabled(enabled) { Clear(); }
 
 		/// <summary>
@@ -115,37 +116,10 @@ namespace RTE {
 		/// <summary>
 		/// Resets the entire Serializable, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
-#pragma endregion
-
-#pragma region INI Handling
-		/// <summary>
-		/// Reads a property value from a Reader stream. If the name isn't recognized by this class, then ReadProperty of the parent class is called.
-		/// If the property isn't recognized by any of the base classes, false is returned, and the Reader's position is untouched.
-		/// </summary>
-		/// <param name="propName">The name of the property to be read.</param>
-		/// <param name="reader">A Reader lined up to the value of the property to be read.</param>
-		/// <returns>
-		/// An error return value signaling whether the property was successfully read or not.
-		/// 0 means it was read successfully, and any nonzero indicates that a property of that name could not be found in this or base classes.
-		/// </returns>
-		virtual int ReadProperty(std::string propName, Reader &reader);
-
-		/// <summary>
-		/// Saves the complete state of this Slice to an output stream for later recreation with Create(Reader &reader).
-		/// </summary>
-		/// <param name="writer">A Writer that the Slice will save itself with. Anything below 0 is an error signal.</param>
-		/// <returns>An error return value signaling sucess or any particular failure.</returns>
-		virtual int Save(Writer &writer) const;
+		void Reset() override { Clear(); }
 #pragma endregion
 
 #pragma region Getters and Setters
-		/// <summary>
-		/// Gets the class name of Slice.
-		/// </summary>
-		/// <returns>The class name of Slice.</returns>
-		const std::string &GetClassName() const { return m_sClassName; }
-
 		/// <summary>
 		/// Gets the type of this Slice.
 		/// </summary>
@@ -186,7 +160,7 @@ namespace RTE {
 		/// Gets the icon for this Slice.
 		/// </summary>
 		/// <returns>The icon for this Slice.</returns>
-		const Icon &GetIcon() const { return m_Icon; }
+		const Icon & GetIcon() const { return m_Icon; }
 
 		/// <summary>
 		/// Gets the start angle this Slice's area is set to be at in its pie menu.
@@ -228,17 +202,17 @@ namespace RTE {
 		/// Gets the file path of the scripted file this Slice should run when activated. Empty if it's not a scripted type. Empty if its SliceType isn't scripted.
 		/// </summary>
 		/// <returns>The file path to the script file this Slice should load when activated.</returns>
-		const std::string &GetScriptPath() const { return m_ScriptPath; }
+		const std::string & GetScriptPath() const { return m_ScriptPath; }
 
 		/// <summary>
 		/// Gets the name of the Lua function to run when this Slice is activated as a scripted pie menu option. Empty if its SliceType isn't scripted.
 		/// </summary>
 		/// <returns>The Lua function name this Slice should execute when activated.</returns>
-		const std::string &GetFunctionName() const { return m_FunctionName; }
+		const std::string & GetFunctionName() const { return m_FunctionName; }
 #pragma endregion
 
 	private:
-		static const std::string m_sClassName; //!< ClassName for Slice.
+		static const std::string c_ClassName; //!< ClassName for Slice.
 
 		PieSliceIndex m_SliceType; //!< The Slice type, also serves as icon index.
 		std::string m_Description; //!< Description of what this slice option does.

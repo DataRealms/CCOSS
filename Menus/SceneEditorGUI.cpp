@@ -668,7 +668,7 @@ void SceneEditorGUI::Update()
             // Pick a brain to install if no one existed already in scene or in hand
             else
             {
-                m_pPicker->SelectSpecificGroup("Brains");
+                m_pPicker->SelectGroupByName("Brains");
                 m_EditorGUIMode = PICKINGOBJECT;
                 m_ModeChanged = true;
                 UpdateBrainPath();
@@ -907,8 +907,8 @@ void SceneEditorGUI::Update()
 						m_EditorGUIMode = PICKINGOBJECT;
 						m_ModeChanged = true;
 						// Try to switch away from brains so it's clear we placed it
-						if (!m_pPicker->SelectSpecificGroup("Primary Weapons"))
-							m_pPicker->SelectSpecificGroup("Weapons");
+						if (!m_pPicker->SelectGroupByName("Weapons - Primary"))
+							m_pPicker->SelectGroupByName("Weapons");
 						// Also jolt the cursor off the newly placed brain to make it even clearer
 						m_CursorPos.m_X += 40;
 						m_CursorPos.m_Y += 10;

@@ -45,6 +45,7 @@ namespace RTE {
 		m_ShowType.clear();
 		m_NativeTechModuleID = 0;
 		m_ForeignCostMult = 4.0F;
+		m_ShownGroupIndex = 0;
 		m_SelectedGroupIndex = 0;
 		m_SelectedObjectIndex = 0;
 		m_PickedObject = nullptr;
@@ -121,7 +122,6 @@ namespace RTE {
 		if (enable && m_PickerState != PickerState::Enabled && m_PickerState != PickerState::Enabling) {
 			m_PickerState = PickerState::Enabling;
 			g_UInputMan.TrapMousePos(false, m_Controller->GetPlayer());
-			// Move the mouse cursor to the middle of the player's screen
 			m_CursorPos.SetXY(static_cast<float>(g_FrameMan.GetPlayerFrameBufferWidth(m_Controller->GetPlayer()) / 2), static_cast<float>(g_FrameMan.GetPlayerFrameBufferHeight(m_Controller->GetPlayer()) / 2));
 			g_UInputMan.SetMousePos(m_CursorPos, m_Controller->GetPlayer());
 
@@ -136,23 +136,6 @@ namespace RTE {
 			g_UInputMan.TrapMousePos(true, m_Controller->GetPlayer());
 			g_GUISound.ExitMenuSound()->Play(m_Controller->GetPlayer());
 		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool ObjectPickerGUI::SelectSpecificGroup(const std::string_view &groupName) {
-		int index = 0;
-		for (const GUIListPanel::Item *groupListItem : *m_GroupsList->GetItemList()) {
-			if (groupListItem->m_Name == groupName) {
-				m_SelectedGroupIndex = index;
-				m_GroupsList->SetSelectedIndex(m_SelectedGroupIndex);
-				UpdateObjectsList();
-				SetListFocus(PickerFocus::ObjectList);
-				return true;
-			}
-			index++;
-		}
-		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,6 +160,77 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool ObjectPickerGUI::SelectGroupByName(const std::string_view &groupName) {
+		for (const GUIListPanel::Item *groupListItem : *m_GroupsList->GetItemList()) {
+			if (groupListItem->m_Name == groupName) {
+				SelectGroupByIndex(groupListItem->m_ID);
+				SetListFocus(PickerFocus::ObjectList);
+				return true;
+			}
+		}
+		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ObjectPickerGUI::SelectGroupByIndex(int groupIndex, bool updateObjectsList) {
+		m_SelectedGroupIndex = (groupIndex < 0) ? m_ShownGroupIndex : groupIndex;
+		m_GroupsList->SetSelectedIndex(m_SelectedGroupIndex);
+
+		if (updateObjectsList) {
+			m_ShownGroupIndex = m_SelectedGroupIndex;
+			UpdateObjectsList();
+		}
+		g_GUISound.ItemChangeSound()->Play(m_Controller->GetPlayer());
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ObjectPickerGUI::SelectNextOrPrevGroup(bool selectPrev) {
+		int groupIndex = m_SelectedGroupIndex;
+		if (selectPrev) {
+			groupIndex--;
+			if (groupIndex < 0) { groupIndex = m_GroupsList->GetItemList()->size() - 1; }
+		} else {
+			groupIndex++;
+			if (groupIndex >= m_GroupsList->GetItemList()->size()) { groupIndex = 0; }
+		}
+		SelectGroupByIndex(groupIndex);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ObjectPickerGUI::SelectObjectByIndex(int objectIndex, bool playSelectionSound) {
+		m_SelectedObjectIndex = objectIndex;
+		m_ObjectsList->SetSelectedIndex(m_SelectedObjectIndex);
+		if (playSelectionSound) { g_GUISound.SelectionChangeSound()->Play(m_Controller->GetPlayer()); }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ObjectPickerGUI::SelectNextOrPrevObject(bool getPrev) {
+		int objectIndex = m_SelectedObjectIndex;
+		if (getPrev) {
+			objectIndex--;
+			if (objectIndex < 0) { objectIndex = m_ObjectsList->GetItemList()->size() - 1; }
+		} else {
+			objectIndex++;
+			if (objectIndex >= m_ObjectsList->GetItemList()->size()) { objectIndex = 0; }
+		}
+		SelectObjectByIndex(objectIndex);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const SceneObject * ObjectPickerGUI::GetSelectedObject() {
+		if (const GUIListPanel::Item *selectedItem = m_ObjectsList->GetSelected()) {
+			return dynamic_cast<const SceneObject *>(selectedItem->m_pEntity);
+		}
+		return nullptr;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool ObjectPickerGUI::SetListFocus(PickerFocus listToFocusOn) {
 		if (listToFocusOn == m_PickerFocus) {
 			return false;
@@ -184,69 +238,15 @@ namespace RTE {
 		if (listToFocusOn == PickerFocus::GroupList) {
 			m_PickerFocus = PickerFocus::GroupList;
 			m_GroupsList->SetFocus();
-			if (!m_GroupsList->GetItemList()->empty() && m_GroupsList->GetSelectedIndex() < 0) {
-				m_SelectedGroupIndex = 0;
-				m_GroupsList->SetSelectedIndex(m_SelectedGroupIndex);
-			} else {
-				m_SelectedGroupIndex = m_GroupsList->GetSelectedIndex();
-				m_GroupsList->ScrollToSelected();
-			}
+			m_GroupsList->ScrollToSelected();
 		} else if (listToFocusOn == PickerFocus::ObjectList) {
 			m_PickerFocus = PickerFocus::ObjectList;
 			m_ObjectsList->SetFocus();
-			if (!m_ObjectsList->GetItemList()->empty() && m_ObjectsList->GetSelectedIndex() < 0) {
-				m_SelectedObjectIndex = 0;
-				m_ObjectsList->SetSelectedIndex(m_SelectedObjectIndex);
-			} else {
-				m_SelectedObjectIndex = m_ObjectsList->GetSelectedIndex();
-				m_ObjectsList->ScrollToSelected();
-			}
+			SelectObjectByIndex((!m_ObjectsList->GetItemList()->empty() && m_ObjectsList->GetSelectedIndex() > 0) ? m_ObjectsList->GetSelectedIndex() : 0);
+			m_ObjectsList->ScrollToSelected();
 		}
 		g_GUISound.FocusChangeSound()->Play(m_Controller->GetPlayer());
 		return true;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ObjectPickerGUI::SelectGroup(bool selectNext, bool selectPrev, bool updateObjectList) {
-		if (selectPrev) {
-			m_SelectedGroupIndex--;
-			if (m_SelectedGroupIndex < 0) {
-				m_SelectedGroupIndex = m_GroupsList->GetItemList()->size() - 1;
-			}
-		} else if (selectNext) {
-			m_SelectedGroupIndex++;
-			if (m_SelectedGroupIndex >= m_GroupsList->GetItemList()->size()) {
-				m_SelectedGroupIndex = 0;
-			}
-		} else if (!selectPrev && !selectNext && updateObjectList) {
-			m_SelectedGroupIndex = m_GroupsList->GetSelectedIndex();
-		}
-		m_GroupsList->SetSelectedIndex(m_SelectedGroupIndex);
-		g_GUISound.ItemChangeSound()->Play(m_Controller->GetPlayer());
-		if (updateObjectList) {
-			m_ShownGroupIndex = m_SelectedGroupIndex;
-			UpdateObjectsList();
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	const SceneObject * ObjectPickerGUI::GetNextOrPrevObject(bool getPrev) {
-		if (getPrev) {
-			m_SelectedObjectIndex--;
-			if (m_SelectedObjectIndex < 0) { m_SelectedObjectIndex = m_ObjectsList->GetItemList()->size() - 1; }
-		} else {
-			m_SelectedObjectIndex++;
-			if (m_SelectedObjectIndex >= m_ObjectsList->GetItemList()->size()) { m_SelectedObjectIndex = 0; }
-		}
-		m_ObjectsList->SetSelectedIndex(m_SelectedObjectIndex);
-
-		if (const GUIListPanel::Item *selectedItem = m_ObjectsList->GetSelected()) {
-			g_GUISound.SelectionChangeSound()->Play(m_Controller->GetPlayer());
-			return dynamic_cast<const SceneObject *>(selectedItem->m_pEntity);
-		}
-		return nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -372,10 +372,9 @@ namespace RTE {
 		}
 		if (selectTop) {
 			m_ObjectsList->ScrollToTop();
-			m_SelectedObjectIndex = 0;
-			m_ObjectsList->SetSelectedIndex(m_SelectedObjectIndex);
+			SelectObjectByIndex(0, false);
 		} else {
-			m_ObjectsList->SetSelectedIndex(m_SelectedObjectIndex);
+			SelectObjectByIndex(m_SelectedObjectIndex, false);
 			m_ObjectsList->ScrollToSelected();
 		}
 		if (const GUIListPanel::Item *selectedItem = m_ObjectsList->GetSelected()) { m_PickedObject = dynamic_cast<const SceneObject *>(selectedItem->m_pEntity); }
@@ -435,17 +434,19 @@ namespace RTE {
 
 			if (m_PickerFocus == PickerFocus::GroupList) {
 				if (pressDown) {
-					SelectGroup(true, false);
+					SelectNextOrPrevGroup(false);
 				} else if (pressUp) {
-					SelectGroup(false, true);
+					SelectNextOrPrevGroup(true);
 				} else if (m_Controller->IsState(ControlState::PRESS_FACEBUTTON) && m_GroupsList->GetItem(m_SelectedGroupIndex)) {
 					SetListFocus(PickerFocus::ObjectList);
 				}
 			} else if (m_PickerFocus == PickerFocus::ObjectList) {
 				if (pressDown) {
-					m_PickedObject = GetNextOrPrevObject(false);
+					SelectNextOrPrevObject(false);
+					m_PickedObject = GetSelectedObject();
 				} else if (pressUp) {
-					m_PickedObject = GetNextOrPrevObject(true);
+					SelectNextOrPrevObject(true);
+					m_PickedObject = GetSelectedObject();
 				} else if (m_Controller->IsState(ControlState::PRESS_FACEBUTTON)) {
 					if (const GUIListPanel::Item *objectListItem = m_ObjectsList->GetSelected()) {
 						if (objectListItem->m_ExtraIndex >= 0) {
@@ -479,23 +480,14 @@ namespace RTE {
 			if (guiEvent.GetType() == GUIEvent::Notification) {
 				if (guiEvent.GetControl() == m_GroupsList) {
 					if (guiEvent.GetMsg() == GUIListBox::MouseDown) {
-						if (m_GroupsList->GetSelected()) {
-							SelectGroup(false, false);
-						} else {
-							// Undo the click deselection if nothing was selected
-							m_GroupsList->SetSelectedIndex(m_SelectedGroupIndex);
-						}
+						SelectGroupByIndex(m_GroupsList->GetSelectedIndex());
 					} else if (guiEvent.GetMsg() == GUIListBox::MouseMove) {
 						const GUIListPanel::Item *groupListItem = m_GroupsList->GetItem(m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
-						if (groupListItem && m_SelectedObjectIndex != groupListItem->m_ID) {
-							m_SelectedGroupIndex = groupListItem->m_ID;
-							SelectGroup(false, false, false);
-						}
+						if (groupListItem && m_SelectedObjectIndex != groupListItem->m_ID) { SelectGroupByIndex(groupListItem->m_ID, false); }
 					} else if (guiEvent.GetMsg() == GUIListBox::MouseEnter) {
 						SetListFocus(PickerFocus::GroupList);
 					} else if (guiEvent.GetMsg() == GUIListBox::MouseLeave && m_SelectedGroupIndex != m_ShownGroupIndex) {
-						m_SelectedGroupIndex = m_ShownGroupIndex;
-						SelectGroup(false, false, false);
+						SelectGroupByIndex(m_ShownGroupIndex, false);
 					}
 				} else if (guiEvent.GetControl() == m_ObjectsList) {
 					if (guiEvent.GetMsg() == GUIListBox::MouseDown) {
@@ -506,17 +498,13 @@ namespace RTE {
 								UpdateObjectsList(false);
 								g_GUISound.ItemChangeSound()->Play(m_Controller->GetPlayer());
 							} else if (objectListItem->m_pEntity) {
-								m_SelectedObjectIndex = m_ObjectsList->GetSelectedIndex();
+								SelectObjectByIndex(m_ObjectsList->GetSelectedIndex());
 								return true;
 							}
 						}
 					} else if (guiEvent.GetMsg() == GUIListBox::MouseMove) {
 						const GUIListPanel::Item *objectListItem = m_ObjectsList->GetItem(m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
-						if (objectListItem && m_SelectedObjectIndex != objectListItem->m_ID) {
-							m_SelectedObjectIndex = objectListItem->m_ID;
-							m_ObjectsList->SetSelectedIndex(m_SelectedObjectIndex);
-							g_GUISound.SelectionChangeSound()->Play(m_Controller->GetPlayer());
-						}
+						if (objectListItem && m_SelectedObjectIndex != objectListItem->m_ID) { SelectObjectByIndex(objectListItem->m_ID); }
 					} else if (guiEvent.GetMsg() == GUIListBox::MouseEnter) {
 						SetListFocus(PickerFocus::ObjectList);
 					}

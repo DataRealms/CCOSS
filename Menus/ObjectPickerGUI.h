@@ -91,13 +91,6 @@ namespace RTE {
 		void ShowOnlyType(const std::string_view &showType = "All") { m_ShowType = showType; UpdateGroupsList(); }
 
 		/// <summary>
-		/// Selects the specified group from the groups list and updates the objects list to show the group's objects.
-		/// </summary>
-		/// <param name="groupName">The name of the group to select in the picker.</param>
-		/// <returns>Whether the group was found and switched to successfully.</returns>
-		bool SelectSpecificGroup(const std::string_view &groupName);
-
-		/// <summary>
 		/// Sets which DataModule ID should be treated as the native tech of the user of this menu.
 		/// </summary>
 		/// <param name="whichModule">The module ID to set as the native one. 0 means everything is native.</param>
@@ -115,6 +108,13 @@ namespace RTE {
 		/// <param name="whichModule">The module ID to set as expanded.</param>
 		/// <param name="expanded">Whether should be expanded or not.</param>
 		void SetModuleExpanded(int whichModule, bool expanded = true);
+
+		/// <summary>
+		/// Selects the specified group from the groups list and updates the objects list to show the group's objects.
+		/// </summary>
+		/// <param name="groupName">The name of the group to select in the picker.</param>
+		/// <returns>Whether the group was found and switched to successfully.</returns>
+		bool SelectGroupByName(const std::string_view &groupName);
 #pragma endregion
 
 #pragma region Object Picking Handling
@@ -122,13 +122,13 @@ namespace RTE {
 		/// Gets the next object in the objects list, even if the picker is disabled.
 		/// </summary>
 		/// <returns>The next object in the picker list, looping around if necessary. 0 if no object can be selected.</returns>
-		const SceneObject * GetNextObject() { return GetNextOrPrevObject(false); }
+		const SceneObject * GetNextObject() { SelectNextOrPrevObject(false); return GetSelectedObject(); }
 
 		/// <summary>
 		/// Gets the previous object in the objects list, even if the picker is disabled.
 		/// </summary>
 		/// <returns>The previous object in the picker list, looping around if necessary. 0 if no object can be selected.</returns>
-		const SceneObject * GetPrevObject() { return GetNextOrPrevObject(true); }
+		const SceneObject * GetPrevObject() { SelectNextOrPrevObject(true); return GetSelectedObject(); }
 
 		/// <summary>
 		/// Reports whether and which object has been picked by the player. There may be an object picked even when the player is not done with the picker, as scrolling through objects (but not mousing over them) picks them.
@@ -203,26 +203,44 @@ namespace RTE {
 
 #pragma region List Handling
 		/// <summary>
-		/// Sets the currently focused list in the picker. For list item highlighting and non-mouse input handling.
+		/// 
 		/// </summary>
-		/// <param name="listToFocusOn">The list to focus on. See PickerFocus enumeration.</param>
-		/// <returns>Whether a focus change was made or not.</returns>
-		bool SetListFocus(PickerFocus listToFocusOn);
+		/// <param name="groupIndex"></param>
+		/// <param name="updateObjectsList"></param>
+		void SelectGroupByIndex(int groupIndex, bool updateObjectsList = true);
 
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="selectNext"></param>
 		/// <param name="selectPrev"></param>
-		/// <param name="updateObjectList"></param>
-		void SelectGroup(bool selectNext = false, bool selectPrev = false, bool updateObjectList = true);
+		void SelectNextOrPrevGroup(bool selectPrev = false);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="objectIndex"></param>
+		/// <param name="playSelectionSound"></param>
+		void SelectObjectByIndex(int objectIndex, bool playSelectionSound = true);
 
 		/// <summary>
 		/// Gets the next or previous item in the objects list and sets it as the current pick, even if the picker is disabled.
 		/// </summary>
 		/// <param name="getPrev">Whether to get the previous object or the next one. Gets the next object by default.</param>
 		/// <returns>The next object in the picker list, looping around if necessary. 0 if no object can be selected.</returns>
-		const SceneObject * GetNextOrPrevObject(bool getPrev = false);
+		void SelectNextOrPrevObject(bool getPrev = false);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		const SceneObject * GetSelectedObject();
+
+		/// <summary>
+		/// Sets the currently focused list in the picker. For list item highlighting and non-mouse input handling.
+		/// </summary>
+		/// <param name="listToFocusOn">The list to focus on. See PickerFocus enumeration.</param>
+		/// <returns>Whether a focus change was made or not.</returns>
+		bool SetListFocus(PickerFocus listToFocusOn);
 
 		/// <summary>
 		/// Displays the popup box with the description of the selected item in the objects list.

@@ -384,7 +384,7 @@ namespace RTE {
 		m_PopupBox->SetVisible(false);
 
 		if (m_PickerState != PickerState::Enabled && m_PickerState != PickerState::Disabled) { AnimateOpenClose(); }
-		if (m_PickerState == PickerState::Enabled || m_PickerState == PickerState::Enabling) { m_GUIControlManager->Update(); }
+		if (m_PickerState == PickerState::Enabled || m_PickerState == PickerState::Enabling) { m_GUIControlManager->Update(true); }
 		if (m_PickerState == PickerState::Enabled) {
 			m_GUIControlManager->EnableMouse(m_Controller->IsMouseControlled());
 

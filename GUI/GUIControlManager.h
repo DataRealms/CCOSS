@@ -119,7 +119,7 @@ public:
 // Description:     Updates the GUI every frame
 // Arguments:       None.
 
-    void Update();
+    void Update(bool ignoreKeyboardEvents = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

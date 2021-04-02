@@ -112,7 +112,7 @@ void GUIManager::AddPanel(GUIPanel *panel)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates the GUI.
 
-void GUIManager::Update(void)
+void GUIManager::Update(bool ignoreKeyboardEvents)
 {
     m_Input->Update();
 
@@ -280,39 +280,41 @@ void GUIManager::Update(void)
         m_MouseOverPanel = CurPanel;
     }
 
-    /*
-     * Keyboard Events
-     */
-    uint8_t KeyboardBuffer[256];
-    m_Input->GetKeyboard(KeyboardBuffer);
+	if (!ignoreKeyboardEvents) {
+		/*
+		 * Keyboard Events
+		 */
+		uint8_t KeyboardBuffer[256];
+		m_Input->GetKeyboard(KeyboardBuffer);
 
-    // If we don't have a panel with focus, just ignore keyboard events
-    if (!m_FocusPanel)
-        return;
-    // If the panel is not enabled, don't send it key events
-    if (!m_FocusPanel->IsEnabled())
-        return;
+		// If we don't have a panel with focus, just ignore keyboard events
+		if (!m_FocusPanel)
+			return;
+		// If the panel is not enabled, don't send it key events
+		if (!m_FocusPanel->IsEnabled())
+			return;
 
 
-    for(i=1; i<256; i++) {
-        switch(KeyboardBuffer[i]) {
-            // KeyDown & KeyPress
-            case GUIInput::Pushed:
-                m_FocusPanel->OnKeyDown(i, Mod);
-                m_FocusPanel->OnKeyPress(i, Mod);
-                break;
+		for(i=1; i<256; i++) {
+			switch(KeyboardBuffer[i]) {
+				// KeyDown & KeyPress
+				case GUIInput::Pushed:
+					m_FocusPanel->OnKeyDown(i, Mod);
+					m_FocusPanel->OnKeyPress(i, Mod);
+					break;
 
-            // KeyUp
-            case GUIInput::Released:
-                m_FocusPanel->OnKeyUp(i, Mod);
-                break;
+				// KeyUp
+				case GUIInput::Released:
+					m_FocusPanel->OnKeyUp(i, Mod);
+					break;
 
-            // KeyPress
-            case GUIInput::Repeat:
-                m_FocusPanel->OnKeyPress(i, Mod);
-                break;
-        }
-    }
+				// KeyPress
+				case GUIInput::Repeat:
+					m_FocusPanel->OnKeyPress(i, Mod);
+					break;
+			}
+		}
+	}
 }
 
 

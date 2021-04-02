@@ -75,7 +75,7 @@ public:
 // Description:     Updates the GUI.
 // Arguments:       None.
 
-    void Update();
+    void Update(bool ignoreKeyboardEvents = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

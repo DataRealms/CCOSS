@@ -103,14 +103,7 @@ namespace RTE {
 		void SetForeignCostMultiplier(float newMultiplier) { m_ForeignCostMult = newMultiplier; }
 
 		/// <summary>
-		/// Sets whether a DataModule shown in the item menu should be expanded or not.
-		/// </summary>
-		/// <param name="whichModule">The module ID to set as expanded.</param>
-		/// <param name="expanded">Whether should be expanded or not.</param>
-		void SetModuleExpanded(int whichModule, bool expanded = true);
-
-		/// <summary>
-		/// Selects the specified group from the groups list and updates the objects list to show the group's objects.
+		/// Selects the specified group name in the groups list and updates the objects list to show the group's objects.
 		/// </summary>
 		/// <param name="groupName">The name of the group to select in the picker.</param>
 		/// <returns>Whether the group was found and switched to successfully.</returns>
@@ -121,13 +114,13 @@ namespace RTE {
 		/// <summary>
 		/// Gets the next object in the objects list, even if the picker is disabled.
 		/// </summary>
-		/// <returns>The next object in the picker list, looping around if necessary. 0 if no object can be selected.</returns>
+		/// <returns>The next object in the picker list, looping around if necessary. If the next object is an invalid SceneObject (e.g. a module subgroup) then this will recurse until a valid object is found.</returns>
 		const SceneObject * GetNextObject() { SelectNextOrPrevObject(false); const SceneObject *object = GetSelectedObject(); return object ? object : GetNextObject(); }
 
 		/// <summary>
 		/// Gets the previous object in the objects list, even if the picker is disabled.
 		/// </summary>
-		/// <returns>The previous object in the picker list, looping around if necessary. 0 if no object can be selected.</returns>
+		/// <returns>The previous object in the picker list, looping around if necessary. If the previous object is an invalid SceneObject (e.g. a module subgroup) then this will recurse until a valid object is found.</returns>
 		const SceneObject * GetPrevObject() { SelectNextOrPrevObject(true); const SceneObject *object = GetSelectedObject(); return object ? object : GetPrevObject(); }
 
 		/// <summary>
@@ -194,63 +187,85 @@ namespace RTE {
 		int m_ShownGroupIndex; //!< Which group in the groups list is currently showing it's objects list.
 		int m_SelectedGroupIndex; //!< Which group in the groups list box we have selected.
 		int m_SelectedObjectIndex; //!< Which object in the objects list box we have selected.
-		const SceneObject *m_PickedObject; //!< Currently picked object. This is 0 until the user actually picks something, not just has the cursor over it. Not owned by this.
+		const SceneObject *m_PickedObject; //!< Currently picked object. This may be a valid object even if the player is not done with the picker, as scrolling through objects (but not mousing over them) picks them. Not owned by this.
 
 		Timer m_RepeatStartTimer; //!< Measures the time to when to start repeating inputs when they're held down.
 		Timer m_RepeatTimer; //!< Measures the interval between input repeats.
 
 		std::vector<bool> m_ExpandedModules; //!< The modules that have been expanded in the item list.
 
-#pragma region List Handling
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="groupIndex"></param>
-		/// <param name="updateObjectsList"></param>
-		void SelectGroupByIndex(int groupIndex, bool updateObjectsList = true);
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="selectPrev"></param>
-		void SelectNextOrPrevGroup(bool selectPrev = false);
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="objectIndex"></param>
-		/// <param name="playSelectionSound"></param>
-		void SelectObjectByIndex(int objectIndex, bool playSelectionSound = true);
-
-		/// <summary>
-		/// Gets the next or previous item in the objects list and sets it as the current pick, even if the picker is disabled.
-		/// </summary>
-		/// <param name="getPrev">Whether to get the previous object or the next one. Gets the next object by default.</param>
-		/// <returns>The next object in the picker list, looping around if necessary. 0 if no object can be selected.</returns>
-		void SelectNextOrPrevObject(bool getPrev = false);
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns></returns>
-		const SceneObject * GetSelectedObject();
-
+#pragma region General List Handling
 		/// <summary>
 		/// Sets the currently focused list in the picker. For list item highlighting and non-mouse input handling.
 		/// </summary>
 		/// <param name="listToFocusOn">The list to focus on. See PickerFocus enumeration.</param>
 		/// <returns>Whether a focus change was made or not.</returns>
 		bool SetListFocus(PickerFocus listToFocusOn);
+#pragma endregion
+
+#pragma region Group List Handling
+		/// <summary>
+		/// Selects the specified group index in the groups list and updates the objects list to show the group's objects.
+		/// </summary>
+		/// <param name="groupIndex">The group index to select.</param>
+		/// <param name="updateObjectsList">Whether to update the objects list after making the selection or not.</param>
+		void SelectGroupByIndex(int groupIndex, bool updateObjectsList = true);
+
+		/// <summary>
+		/// Selects the next or previous group from the one that is currently selected in the groups list.
+		/// </summary>
+		/// <param name="selectPrev">Whether to select the previous group. Next group will be selected by default.</param>
+		void SelectNextOrPrevGroup(bool selectPrev = false);
+
+		/// <summary>
+		/// Adds all groups with a specific type already defined in PresetMan that are within the set ModuleSpaceID and aren't empty to the current objects list.
+		/// </summary>
+		void UpdateGroupsList();
+#pragma endregion
+
+#pragma region Object List Handling
+		/// <summary>
+		/// Gets the SceneObject from the currently selected index in the objects list. Ownership is NOT transferred!
+		/// </summary>
+		/// <returns>The SceneObject of the currently selected index in the objects list. Nullptr if no valid object is selected (eg. a module subgroup).</returns>
+		const SceneObject * GetSelectedObject();
+
+		/// <summary>
+		/// Selects the specified object index in the objects list.
+		/// </summary>
+		/// <param name="objectIndex">The object index to select.</param>
+		/// <param name="playSelectionSound">Whether to play the selection change sound or not.</param>
+		void SelectObjectByIndex(int objectIndex, bool playSelectionSound = true);
+
+		/// <summary>
+		/// Selects the next or previous object from the one that is currently selected in the objects list.
+		/// </summary>
+		/// <param name="getPrev">Whether to select the previous object. Next object will be selected by default.</param>
+		void SelectNextOrPrevObject(bool getPrev = false);
+
+		/// <summary>
+		/// Add the expandable DataModule group separator in the objects list with appropriate name and icon.
+		/// </summary>
+		/// <param name="moduleID">The DataModule ID to add group separator for.</param>
+		void AddObjectsListModuleGroup(int moduleID);
+
+		/// <summary>
+		/// Sets whether a DataModule group separator shown in the objects list should be expanded or collapsed.
+		/// </summary>
+		/// <param name="moduleID">The module ID to set as expanded or collapsed.</param>
+		/// <param name="expanded">Whether should be expanded or not.</param>
+		void SetObjectsListModuleGroupExpanded(int moduleID, bool expanded = true);
+
+		/// <summary>
+		/// Toggles the expansion/collapse of a DataModule group separator in the objects list.
+		/// </summary>
+		/// <param name="moduleID">The module ID to toggle for.</param>
+		void ToggleObjectsListModuleGroupExpansion(int moduleID);
 
 		/// <summary>
 		/// Displays the popup box with the description of the selected item in the objects list.
 		/// </summary>
 		void ShowDescriptionPopupBox();
-
-		/// <summary>
-		/// Adds all groups with a specific type already defined in PresetMan to the current objects list.
-		/// </summary>
-		void UpdateGroupsList();
 
 		/// <summary>
 		/// Adds all objects of the currently selected group to the objects list.

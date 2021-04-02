@@ -43,7 +43,7 @@ namespace RTE {
 		m_OpenCloseSpeed = 0.3F;
 		m_ModuleSpaceID = -1;
 		m_ShowType.clear();
-		m_NativeTechModule = 0;
+		m_NativeTechModuleID = 0;
 		m_ForeignCostMult = 4.0F;
 		m_SelectedGroupIndex = 0;
 		m_SelectedObjectIndex = 0;
@@ -52,10 +52,8 @@ namespace RTE {
 		m_RepeatTimer.Reset();
 
 		m_ExpandedModules.resize(g_PresetMan.GetTotalModuleCount());
+		std::fill(m_ExpandedModules.begin(), m_ExpandedModules.end(), false);
 		m_ExpandedModules.at(0) = true; // Base.rte is always expanded
-		for (int moduleID = 1; moduleID < m_ExpandedModules.size(); ++moduleID) {
-			m_ExpandedModules.at(moduleID) = false;
-		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -64,10 +62,10 @@ namespace RTE {
 		RTEAssert(controller, "No controller sent to ObjectPickerGUI on creation!");
 		m_Controller = controller;
 
-		if (!m_GUIScreen) { m_GUIScreen.reset(new AllegroScreen(g_FrameMan.GetBackBuffer8())); }
-		if (!m_GUIInput) { m_GUIInput.reset(new AllegroInput(controller->GetPlayer())); }
-		if (!m_GUIControlManager) { m_GUIControlManager.reset(new GUIControlManager()); }
-		if (!m_GUIControlManager->Create(m_GUIScreen.get(), m_GUIInput.get(), "Base.rte/GUIs/Skins/Base")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base"); }
+		if (!m_GUIScreen) { m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer8()); }
+		if (!m_GUIInput) { m_GUIInput = std::make_unique<AllegroInput>(controller->GetPlayer()); }
+		if (!m_GUIControlManager) { m_GUIControlManager = std::make_unique<GUIControlManager>(); }
+		RTEAssert(m_GUIControlManager->Create(m_GUIScreen.get(), m_GUIInput.get(), "Base.rte/GUIs/Skins/Base"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
 
 		m_GUIControlManager->Load("Base.rte/GUIs/ObjectPickerGUI.ini");
 		m_GUIControlManager->EnableMouse(controller->IsMouseControlled());
@@ -77,7 +75,6 @@ namespace RTE {
 			s_Cursor = cursorFile.GetAsBitmap();
 		}
 
-		// Stretch the invisible root box to fill the screen
 		if (g_FrameMan.IsInMultiplayerMode()) {
 			dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_FrameMan.GetPlayerFrameBufferWidth(controller->GetPlayer()), g_FrameMan.GetPlayerFrameBufferHeight(controller->GetPlayer()));
 		} else {
@@ -95,7 +92,6 @@ namespace RTE {
 		m_ObjectsList->SetAlternateDrawMode(true);
 		m_ObjectsList->SetMultiSelect(false);
 
-		// Stretch out the layout for all the relevant controls
 		int stretchAmount = g_FrameMan.IsInMultiplayerMode() ? (g_FrameMan.GetPlayerFrameBufferHeight(m_Controller->GetPlayer()) - m_ParentBox->GetHeight()) : (g_FrameMan.GetPlayerScreenHeight() - m_ParentBox->GetHeight());
 		if (stretchAmount != 0) {
 			m_ParentBox->SetSize(m_ParentBox->GetWidth(), m_ParentBox->GetHeight() + stretchAmount);
@@ -113,7 +109,6 @@ namespace RTE {
 			m_PopupBox->SetVisible(false);
 		}
 
-		// Set up the groups to show from the module space and only the objects of the specific type we are working within. This also updates the Objects list
 		SetModuleSpace(whichModuleSpace);
 		ShowOnlyType(onlyOfType);
 
@@ -130,7 +125,6 @@ namespace RTE {
 			m_CursorPos.SetXY(static_cast<float>(g_FrameMan.GetPlayerFrameBufferWidth(m_Controller->GetPlayer()) / 2), static_cast<float>(g_FrameMan.GetPlayerFrameBufferHeight(m_Controller->GetPlayer()) / 2));
 			g_UInputMan.SetMousePos(m_CursorPos, m_Controller->GetPlayer());
 
-			// Default focus to the groups list if the objects are empty
 			SetListFocus(m_ObjectsList->GetItemList()->empty() ? PickerFocus::GroupList : PickerFocus::ObjectList);
 
 			m_RepeatStartTimer.Reset();
@@ -146,22 +140,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ObjectPickerGUI::SetPosOnScreen(int newPosX, int newPosY) const {
-		m_GUIControlManager->SetPosOnScreen(newPosX, newPosY);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ObjectPickerGUI::SetModuleSpace(int newModuleSpaceID) {
-		if (newModuleSpaceID != m_ModuleSpaceID) {
-			m_ModuleSpaceID = newModuleSpaceID;
-			UpdateGroupsList();
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool ObjectPickerGUI::ShowSpecificGroup(const std::string_view &groupName) {
+	bool ObjectPickerGUI::SelectSpecificGroup(const std::string_view &groupName) {
 		int index = 0;
 		for (const GUIListPanel::Item *groupListItem : *m_GroupsList->GetItemList()) {
 			if (groupListItem->m_Name == groupName) {
@@ -180,27 +159,19 @@ namespace RTE {
 
 	void ObjectPickerGUI::SetNativeTechModule(int whichModule) {
 		if (whichModule >= 0 && whichModule < g_PresetMan.GetTotalModuleCount()) {
-			// Set the multipliers and refresh everything that needs refreshing to reflect the change
-			m_NativeTechModule = whichModule;
-			// ObjectPicker is first created with NativeTechModule = 0, which expands all modules but does not display them as expanded
-			// When visually collapsed module is first clicked, it internally turns itself into collapsed while the others display themselves as expanded
-			// To avoid that, just don't expand anything if we pass Base.rte as a native tech as Base.rte is always expanded by default anyway
-			if (whichModule > 0) { SetModuleExpanded(m_NativeTechModule); }
+			m_NativeTechModuleID = whichModule;
+			if (m_NativeTechModuleID > 0) { SetModuleExpanded(m_NativeTechModuleID); }
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ObjectPickerGUI::SetModuleExpanded(int whichModule, bool expanded) {
-		int moduleCount = g_PresetMan.GetTotalModuleCount();
-		if (whichModule > 0 && whichModule < moduleCount) {
+		if (whichModule > 0 && whichModule < g_PresetMan.GetTotalModuleCount()) {
 			m_ExpandedModules.at(whichModule) = expanded;
 			UpdateObjectsList(false);
 		} else {
-			// If base module (0), or out of range module, then affect all
-			for (int moduleID = 0; moduleID < moduleCount; ++moduleID) {
-				m_ExpandedModules.at(moduleID) = expanded;
-			}
+			std::fill(m_ExpandedModules.begin(), m_ExpandedModules.end(), expanded);
 		}
 	}
 
@@ -237,6 +208,27 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void ObjectPickerGUI::SelectGroup(bool selectNext, bool selectPrev) {
+		if (selectPrev) {
+			m_SelectedGroupIndex--;
+			if (m_SelectedGroupIndex < 0) {
+				m_SelectedGroupIndex = m_GroupsList->GetItemList()->size() - 1;
+			}
+		} else if (selectNext) {
+			m_SelectedGroupIndex++;
+			if (m_SelectedGroupIndex >= m_GroupsList->GetItemList()->size()) {
+				m_SelectedGroupIndex = 0;
+			}
+		} else if (!selectPrev && !selectNext) {
+			m_SelectedGroupIndex = m_GroupsList->GetSelectedIndex();
+		}
+		m_GroupsList->SetSelectedIndex(m_SelectedGroupIndex);
+		UpdateObjectsList();
+		g_GUISound.ItemChangeSound()->Play(m_Controller->GetPlayer());
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	const SceneObject * ObjectPickerGUI::GetNextOrPrevObject(bool getPrev) {
 		if (getPrev) {
 			m_SelectedObjectIndex--;
@@ -246,9 +238,8 @@ namespace RTE {
 			if (m_SelectedObjectIndex >= m_ObjectsList->GetItemList()->size()) { m_SelectedObjectIndex = 0; }
 		}
 		m_ObjectsList->SetSelectedIndex(m_SelectedObjectIndex);
-		// Report the newly selected item as being 'picked', but don't close the picker
-		const GUIListPanel::Item *selectedItem = m_ObjectsList->GetSelected();
-		if (selectedItem) {
+
+		if (const GUIListPanel::Item *selectedItem = m_ObjectsList->GetSelected()) {
 			g_GUISound.SelectionChangeSound()->Play(m_Controller->GetPlayer());
 			return dynamic_cast<const SceneObject *>(selectedItem->m_pEntity);
 		}
@@ -263,16 +254,13 @@ namespace RTE {
 		if (objectListItem && objectListItem->m_pEntity && !objectListItem->m_pEntity->GetDescription().empty()) {
 			description = objectListItem->m_pEntity->GetDescription();
 		} else if (objectListItem && objectListItem->m_ExtraIndex >= 0) {
-			// Description for module group items
 			const DataModule *dataModule = g_PresetMan.GetDataModule(objectListItem->m_ExtraIndex);
 			if (dataModule && !dataModule->GetDescription().empty()) { description = dataModule->GetDescription(); }
 		}
 		if (!description.empty()) {
 			m_PopupBox->SetEnabled(false);
 			m_PopupBox->SetVisible(true);
-			// Need to add an offset to make it look better and not have the cursor obscure text
 			m_PopupBox->SetPositionAbs(m_ObjectsList->GetXPos() - m_PopupBox->GetWidth() + 4, m_ObjectsList->GetYPos() + m_ObjectsList->GetStackHeight(objectListItem) - m_ObjectsList->GetScrollVerticalValue());
-			// Make sure the popup box doesn't drop out of sight
 			if (m_PopupBox->GetYPos() + m_PopupBox->GetHeight() > m_ParentBox->GetHeight()) { m_PopupBox->SetPositionAbs(m_PopupBox->GetXPos(), m_ParentBox->GetHeight() - m_PopupBox->GetHeight()); }
 
 			m_PopupText->SetHAlignment(GUIFont::Left);
@@ -285,26 +273,22 @@ namespace RTE {
 
 	void ObjectPickerGUI::UpdateGroupsList() {
 		m_GroupsList->ClearList();
-		bool showSchemes = dynamic_cast<EditorActivity *>(g_ActivityMan.GetActivity());
+		bool showAssemblySchemes = dynamic_cast<EditorActivity *>(g_ActivityMan.GetActivity());
 
-		// Get the registered groups of all official modules loaded before this + the specific module (official or not) one we're picking from
 		std::list<std::string> groupList;
 		g_PresetMan.GetModuleSpaceGroups(groupList, m_ModuleSpaceID, m_ShowType);
 
 		for (const std::string &groupListEntry : groupList) {
-			// Get the actual object list for each group so we can check if they're empty or not
 			std::list<Entity *> objectList;
 			g_PresetMan.GetAllOfGroupInModuleSpace(objectList, groupListEntry, m_ShowType, m_ModuleSpaceID);
 
 			bool onlyAssembliesInGroup = true;
-			bool onlySchemesInGroup = true;
+			bool onlyAssemblySchemesInGroup = true;
 			bool hasObjectsToShow = false;
 
 			for (Entity *objectListEntry : objectList) {
-				// Check if we have any other objects than assemblies to skip assembly groups
 				if (!dynamic_cast<BunkerAssembly *>(objectListEntry)) { onlyAssembliesInGroup = false; }
-				// Check if we have any other objects than schemes to skip schemes group
-				if (!dynamic_cast<BunkerAssemblyScheme *>(objectListEntry)) { onlySchemesInGroup = false; }
+				if (!dynamic_cast<BunkerAssemblyScheme *>(objectListEntry)) { onlyAssemblySchemesInGroup = false; }
 
 				const SceneObject *sceneObject = dynamic_cast<SceneObject *>(objectListEntry);
 				if (sceneObject && sceneObject->IsBuyable()) {
@@ -321,11 +305,9 @@ namespace RTE {
 					}
 				}
 			}
-			// Only add the group if it has something in it!
-			if (!objectList.empty() && hasObjectsToShow && (!onlyAssembliesInGroup || groupListEntry == "Assemblies") && (!onlySchemesInGroup || showSchemes)) { m_GroupsList->AddItem(groupListEntry); }
+			if (!objectList.empty() && hasObjectsToShow && (!onlyAssembliesInGroup || groupListEntry == "Assemblies") && (!onlyAssemblySchemesInGroup || showAssemblySchemes)) { m_GroupsList->AddItem(groupListEntry); }
 		}
 
-		// Select and load the first group
 		if (const GUIListPanel::Item *listItem = m_GroupsList->GetItem(0)) {
 			m_GroupsList->ScrollToTop();
 			m_SelectedGroupIndex = 0;
@@ -341,15 +323,14 @@ namespace RTE {
 		std::vector<std::list<Entity *>> moduleList(g_PresetMan.GetTotalModuleCount(), std::list<Entity *>());
 
 		if (const GUIListPanel::Item *groupListItem = m_GroupsList->GetSelected()) {
-			// Show objects from ALL modules
 			if (m_ModuleSpaceID < 0) {
-				if (g_SettingsMan.ShowForeignItems() || m_NativeTechModule <= 0) {
+				if (g_SettingsMan.ShowForeignItems() || m_NativeTechModuleID <= 0) {
 					for (int moduleID = 0; moduleID < moduleList.size(); ++moduleID) {
 						g_PresetMan.GetAllOfGroup(moduleList.at(moduleID), groupListItem->m_Name, m_ShowType, moduleID);
 					}
 				} else {
 					for (int moduleID = 0; moduleID < moduleList.size(); ++moduleID) {
-						if (moduleID == 0 || moduleID == m_NativeTechModule) { g_PresetMan.GetAllOfGroup(moduleList.at(moduleID), groupListItem->m_Name, m_ShowType, moduleID); }
+						if (moduleID == 0 || moduleID == m_NativeTechModuleID) { g_PresetMan.GetAllOfGroup(moduleList.at(moduleID), groupListItem->m_Name, m_ShowType, moduleID); }
 					}
 				}
 			} else {
@@ -378,11 +359,10 @@ namespace RTE {
 					GUIBitmap *dataModuleIcon = dataModule->GetIcon() ? new AllegroBitmap(dataModule->GetIcon()) : nullptr;
 					m_ObjectsList->AddItem(moduleName, m_ExpandedModules.at(moduleID) ? "-" : "+", dataModuleIcon, nullptr, moduleID);
 				}
-				// If the module is expanded add all the items within it to the actual object list
 				if (moduleID == 0 || m_ExpandedModules.at(moduleID)) {
 					for (SceneObject *objectListEntry : objectList) {
 						GUIBitmap *objectIcon = new AllegroBitmap(objectListEntry->GetGraphicalIcon());
-						m_ObjectsList->AddItem(objectListEntry->GetPresetName(), objectListEntry->GetGoldValueString(m_NativeTechModule, m_ForeignCostMult), objectIcon, objectListEntry);
+						m_ObjectsList->AddItem(objectListEntry->GetPresetName(), objectListEntry->GetGoldValueString(m_NativeTechModuleID, m_ForeignCostMult), objectIcon, objectListEntry);
 					}
 				}
 			}
@@ -395,24 +375,28 @@ namespace RTE {
 			m_ObjectsList->SetSelectedIndex(m_SelectedObjectIndex);
 			m_ObjectsList->ScrollToSelected();
 		}
-		const GUIListPanel::Item *selectedItem = m_ObjectsList->GetSelected();
-		if (selectedItem) { m_PickedObject = dynamic_cast<const SceneObject *>(selectedItem->m_pEntity); }
+		if (const GUIListPanel::Item *selectedItem = m_ObjectsList->GetSelected()) { m_PickedObject = dynamic_cast<const SceneObject *>(selectedItem->m_pEntity); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ObjectPickerGUI::Update() {
-		// Popup box is hidden by default
 		m_PopupBox->SetVisible(false);
 
 		if (m_PickerState != PickerState::Enabled && m_PickerState != PickerState::Disabled) { AnimateOpenClose(); }
 		if (m_PickerState == PickerState::Enabled || m_PickerState == PickerState::Enabling) { m_GUIControlManager->Update(); }
 		if (m_PickerState == PickerState::Enabled) {
-			m_PickedObject = nullptr;
-
-			// Enable mouse input if the controller allows it
 			m_GUIControlManager->EnableMouse(m_Controller->IsMouseControlled());
+
+			m_PickedObject = nullptr;
 			if (HandleInput()) {
+				if (const GUIListPanel::Item *selectedItem = m_ObjectsList->GetSelected()) {
+					m_PickedObject = dynamic_cast<const SceneObject *>(selectedItem->m_pEntity);
+					if (m_PickedObject) {
+						g_GUISound.ObjectPickedSound()->Play(m_Controller->GetPlayer());
+						SetEnabled(false);
+					}
+				}
 				return;
 			}
 			if (m_PickerFocus == PickerFocus::ObjectList) { ShowDescriptionPopupBox(); }
@@ -433,8 +417,6 @@ namespace RTE {
 				m_RepeatStartTimer.Reset();
 				m_RepeatTimer.Reset();
 			}
-
-			// Check if any direction has been held for the starting amount of time to get into repeat mode
 			if (m_RepeatStartTimer.IsPastRealMS(200) && m_RepeatTimer.IsPastRealMS(70)) {
 				if (m_Controller->IsState(ControlState::MOVE_UP)) {
 					pressUp = true;
@@ -449,42 +431,20 @@ namespace RTE {
 			}
 
 			if (m_PickerFocus == PickerFocus::GroupList) {
-				if (pressDown || pressUp) {
-					int listSize = m_GroupsList->GetItemList()->size();
-					if (pressDown) {
-						m_SelectedGroupIndex++;
-						if (m_SelectedGroupIndex >= listSize) { m_SelectedGroupIndex = 0; }
-					} else if (pressUp) {
-						m_SelectedGroupIndex--;
-						if (m_SelectedGroupIndex < 0) { m_SelectedGroupIndex = listSize - 1; }
-					}
-					m_GroupsList->SetSelectedIndex(m_SelectedGroupIndex);
-					if (m_GroupsList->GetSelected()) {
-						UpdateObjectsList();
-						g_GUISound.ItemChangeSound()->Play(m_Controller->GetPlayer());
-					}
+				if (pressDown) {
+					SelectGroup(true, false);
+				} else if (pressUp) {
+					SelectGroup(false, true);
 				} else if (m_Controller->IsState(ControlState::PRESS_FACEBUTTON) && m_GroupsList->GetItem(m_SelectedGroupIndex)) {
-					UpdateObjectsList();
 					SetListFocus(PickerFocus::ObjectList);
 				}
 			} else if (m_PickerFocus == PickerFocus::ObjectList) {
-				if (pressDown || pressUp) {
-					int listSize = m_ObjectsList->GetItemList()->size();
-					if (pressDown) {
-						m_SelectedObjectIndex++;
-						if (m_SelectedObjectIndex >= listSize) { m_SelectedObjectIndex = 0; }
-					} else if (pressUp) {
-						m_SelectedObjectIndex--;
-						if (m_SelectedObjectIndex < 0) { m_SelectedObjectIndex = listSize - 1; }
-					}
-					m_ObjectsList->SetSelectedIndex(m_SelectedObjectIndex);
-					// Report the newly selected item as being 'picked', but don't close the picker
-					const GUIListPanel::Item *objectListItem = m_ObjectsList->GetSelected();
-					if (objectListItem) { m_PickedObject = dynamic_cast<const SceneObject *>(objectListItem->m_pEntity); }
-					g_GUISound.SelectionChangeSound()->Play(m_Controller->GetPlayer());
+				if (pressDown) {
+					m_PickedObject = GetNextOrPrevObject(false);
+				} else if (pressUp) {
+					m_PickedObject = GetNextOrPrevObject(true);
 				} else if (m_Controller->IsState(ControlState::PRESS_FACEBUTTON)) {
 					if (const GUIListPanel::Item *objectListItem = m_ObjectsList->GetSelected()) {
-						// User pressed on a module group item. Toggle its expansion and repopulate the item list with the new module expansion configuration
 						if (objectListItem->m_ExtraIndex >= 0) {
 							m_ExpandedModules.at(objectListItem->m_ExtraIndex) = !m_ExpandedModules.at(objectListItem->m_ExtraIndex);
 							UpdateObjectsList(false);
@@ -496,15 +456,9 @@ namespace RTE {
 				}
 			}
 		}
+
 		if (objectPickedOrPickerClosed || m_Controller->IsState(ControlState::PRESS_SECONDARY)) {
-			if (const GUIListPanel::Item *selectedItem = m_ObjectsList->GetSelected()) {
-				m_PickedObject = dynamic_cast<const SceneObject *>(selectedItem->m_pEntity);
-				if (m_PickedObject) {
-					g_GUISound.ObjectPickedSound()->Play(m_Controller->GetPlayer());
-					SetEnabled(false);
-					return true;
-				}
-			}
+			return true;
 		}
 		return false;
 	}
@@ -523,9 +477,7 @@ namespace RTE {
 				if (guiEvent.GetControl() == m_GroupsList) {
 					if (guiEvent.GetMsg() == GUIListBox::MouseDown) {
 						if (m_GroupsList->GetSelected()) {
-							m_SelectedGroupIndex = m_GroupsList->GetSelectedIndex();
-							UpdateObjectsList();
-							g_GUISound.ItemChangeSound()->Play(m_Controller->GetPlayer());
+							SelectGroup(false, false);
 						} else {
 							// Undo the click deselection if nothing was selected
 							m_GroupsList->SetSelectedIndex(m_SelectedGroupIndex);
@@ -537,7 +489,6 @@ namespace RTE {
 					if (guiEvent.GetMsg() == GUIListBox::MouseDown) {
 						m_ObjectsList->ScrollToSelected();
 						if (const GUIListPanel::Item *objectListItem = m_ObjectsList->GetSelected()) {
-							// User pressed on a module group item. Toggle its expansion and repopulate the item list with the new module expansion configuration
 							if (objectListItem->m_ExtraIndex >= 0) {
 								m_ExpandedModules.at(objectListItem->m_ExtraIndex) = !m_ExpandedModules.at(objectListItem->m_ExtraIndex);
 								UpdateObjectsList(false);
@@ -558,7 +509,6 @@ namespace RTE {
 						SetListFocus(PickerFocus::ObjectList);
 					}
 				} else {
-					// If clicked outside the picker, then close the picker GUI
 					if (guiEvent.GetMsg() == GUIListBox::Click && m_CursorPos.GetFloorIntX() < m_ParentBox->GetXPos()) {
 						return true;
 					}
@@ -604,21 +554,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ObjectPickerGUI::Draw(BITMAP *drawBitmap) const {
-		m_GUIControlManager->Draw(&AllegroScreen(drawBitmap));
-
-		// Draw the cursor on top of everything
+		AllegroScreen drawScreen(drawBitmap);
+		m_GUIControlManager->Draw(&drawScreen);
 		if (IsEnabled() && m_Controller->IsMouseControlled()) { draw_sprite(drawBitmap, s_Cursor, m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY()); }
 	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ObjectPickerGUI::GUIScreenDeleter::operator()(GUIScreen *ptr) const { ptr->Destroy(); }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ObjectPickerGUI::GUIInputDeleter::operator()(GUIInput *ptr) const { ptr->Destroy(); }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ObjectPickerGUI::GUIControlManagerDeleter::operator()(GUIControlManager *ptr) const { ptr->Destroy(); }
 }

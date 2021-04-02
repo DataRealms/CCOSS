@@ -3,12 +3,14 @@
 
 #include "Controller.h"
 
+#include "GUI.h"
+#include "GUIControlManager.h"
+#include "AllegroScreen.h"
+#include "AllegroInput.h"
+
 namespace RTE {
 
 	class Controller;
-	class GUIScreen;
-	class GUIInput;
-	class GUIControlManager;
 	class GUICollectionBox;
 	class GUIListBox;
 	class GUILabel;
@@ -74,13 +76,13 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newPosX">The new X position of this entire GUI on the screen.</param>
 		/// <param name="newPosY">The new Y position of this entire GUI on the screen.</param>
-		void SetPosOnScreen(int newPosX, int newPosY) const;
+		void SetPosOnScreen(int newPosX, int newPosY) const { m_GUIControlManager->SetPosOnScreen(newPosX, newPosY); }
 
 		/// <summary>
 		/// Sets which DataModule space to be picking objects from. If -1, then let the player pick from all loaded modules.
 		/// </summary>
 		/// <param name="newModuleSpaceID">The ID of the module to let the player pick objects from. All official module objects will always be presented, in addition to the one passed in here.</param>
-		void SetModuleSpace(int newModuleSpaceID = -1);
+		void SetModuleSpace(int newModuleSpaceID = -1) { if (newModuleSpaceID != m_ModuleSpaceID) { m_ModuleSpaceID = newModuleSpaceID; UpdateGroupsList(); } }
 
 		/// <summary>
 		/// Sets which DataModule space to be picking objects from. If -1, then let the player pick from all loaded modules.
@@ -89,11 +91,11 @@ namespace RTE {
 		void ShowOnlyType(const std::string_view &showType = "All") { m_ShowType = showType; UpdateGroupsList(); }
 
 		/// <summary>
-		/// Makes a group of a specific name show up in the picker, IF that group is currently shown!
+		/// Selects the specified group from the groups list and updates the objects list to show the group's objects.
 		/// </summary>
-		/// <param name="groupName">The name of the group to show in the picker.</param>
+		/// <param name="groupName">The name of the group to select in the picker.</param>
 		/// <returns>Whether the group was found and switched to successfully.</returns>
-		bool ShowSpecificGroup(const std::string_view &groupName);
+		bool SelectSpecificGroup(const std::string_view &groupName);
 
 		/// <summary>
 		/// Sets which DataModule ID should be treated as the native tech of the user of this menu.
@@ -108,12 +110,14 @@ namespace RTE {
 		void SetForeignCostMultiplier(float newMultiplier) { m_ForeignCostMult = newMultiplier; }
 
 		/// <summary>
-		/// Sets whether a data module shown in the item menu should be expanded or not.
+		/// Sets whether a DataModule shown in the item menu should be expanded or not.
 		/// </summary>
 		/// <param name="whichModule">The module ID to set as expanded.</param>
 		/// <param name="expanded">Whether should be expanded or not.</param>
 		void SetModuleExpanded(int whichModule, bool expanded = true);
+#pragma endregion
 
+#pragma region Object Picking Handling
 		/// <summary>
 		/// Gets the next object in the objects list, even if the picker is disabled.
 		/// </summary>
@@ -127,15 +131,15 @@ namespace RTE {
 		const SceneObject * GetPrevObject() { return GetNextOrPrevObject(true); }
 
 		/// <summary>
-		/// Reports whether and which Object has been picked by the player. This may happen even though the player isn't done with the picker, like if a different object is picked each time the user selects something else in the objects list.
+		/// Reports whether and which object has been picked by the player. There may be an object picked even when the player is not done with the picker, as scrolling through objects (but not mousing over them) picks them.
 		/// </summary>
-		/// <returns>Whether an object has been picked by the player. Nullptr if not. Ownership is NOT transferred!</returns>
+		/// <returns>A pointer to the object picked by the player, or nullptr if none was picked. Ownership is NOT transferred!</returns>
 		const SceneObject * ObjectPicked() const { return m_PickedObject; }
 
 		/// <summary>
-		/// Reports whether the user has finished using the picker, and the final picked Object is returned.
+		/// Reports whether the player has finished using the picker, and the final picked object is returned.
 		/// </summary>
-		/// <returns>Whether an object has been positively and finally picked by the player. Nullptr if not. Ownership is NOT transferred!</returns>
+		/// <returns>The object the player picked before they closed the picker, or nullptr if none was picked. Ownership is NOT transferred!< / returns>
 		const SceneObject * DonePicking() const { return (!IsEnabled() && m_PickedObject) ? m_PickedObject : nullptr; }
 #pragma endregion
 
@@ -157,26 +161,19 @@ namespace RTE {
 		/// <summary>
 		/// Enumeration for ObjectPicker states when enabling/disabling the ObjectPicker.
 		/// </summary>
-		enum PickerState { Enabling, Enabled, Disabling, Disabled };
+		enum class PickerState { Enabling, Enabled, Disabling, Disabled };
 
 		/// <summary>
 		/// Enumeration for the ObjectPicker columns ListBox focus states.
 		/// </summary>
-		enum PickerFocus { GroupList, ObjectList };
-
-		/// <summary>
-		/// Custom deleters for std::unique_ptr members. Must be defined to avoid including the class headers and just rely on forward declaration.
-		/// </summary>
-		struct GUIScreenDeleter { void operator()(GUIScreen *ptr) const; };
-		struct GUIInputDeleter { void operator()(GUIInput *ptr) const; };
-		struct GUIControlManagerDeleter { void operator()(GUIControlManager *ptr) const; };
+		enum class PickerFocus { GroupList, ObjectList };
 
 		static BITMAP *s_Cursor; //!< The cursor image shared by all pickers.
 		Vector m_CursorPos; //!< Screen position of the cursor.
 
-		std::unique_ptr<GUIScreen, GUIScreenDeleter> m_GUIScreen; //!< GUI Screen for use by the in-game GUI.
-		std::unique_ptr<GUIInput, GUIInputDeleter> m_GUIInput; //!< Input controller.
-		std::unique_ptr<GUIControlManager, GUIControlManagerDeleter> m_GUIControlManager; //!< The control manager which holds all the controls.
+		std::unique_ptr<AllegroScreen> m_GUIScreen; //!< The GUIScreen interface that will be used by this ObjectPickerGUI's GUIControlManager.
+		std::unique_ptr<AllegroInput> m_GUIInput; //!< The GUIInput interface that will be used by this ObjectPickerGUI's GUIControlManager.
+		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The control manager which holds all the controls.
 		GUICollectionBox *m_ParentBox; //!< Collection box of the picker GUI.
 		GUICollectionBox *m_PopupBox; //!< Collection box of the buy popups that contain information about items.
 		GUILabel *m_PopupText; //!< Label displaying the item popup description.
@@ -185,17 +182,17 @@ namespace RTE {
 
 		Controller *m_Controller; //!< Controller which controls this menu. Not owned.
 
-		int m_PickerState; //!< Visibility state of the object picker.
+		PickerState m_PickerState; //!< Visibility state of the object picker.
 		PickerFocus m_PickerFocus; //!< The currently focused list in the Picker.
 		float m_OpenCloseSpeed; //!< Speed at which the picker appears and disappears.
 
 		int m_ModuleSpaceID; //!< The DataModule ID of the non-official module that this picker should be restricted to, in addition to all the official modules as well. If -1, the picker will be able to pick from ALL loaded DataModules.
 		std::string m_ShowType; //!< Only show objects of this type. Empty string or "All" will show objects of all types.
-		int m_NativeTechModule; //!< The ID of the DataModule that contains the native Tech of the Player using this menu.
+		int m_NativeTechModuleID; //!< The ID of the DataModule that contains the native Tech of the Player using this menu.
 		float m_ForeignCostMult; //!< The multiplier of costs of any foreign tech items.
 
 		int m_SelectedGroupIndex; //!< Which Group in the groups list box we have selected.
-		int m_SelectedObjectIndex; //!< Which object in the Objects list box we have selected.
+		int m_SelectedObjectIndex; //!< Which object in the objects list box we have selected.
 		const SceneObject *m_PickedObject; //!< Currently picked object. This is 0 until the user actually picks something, not just has the cursor over it. Not owned by this.
 
 		Timer m_RepeatStartTimer; //!< Measures the time to when to start repeating inputs when they're held down.
@@ -212,6 +209,13 @@ namespace RTE {
 		bool SetListFocus(PickerFocus listToFocusOn);
 
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="selectNext"></param>
+		/// <param name="selectPrev"></param>
+		void SelectGroup(bool selectNext = false, bool selectPrev = false);
+
+		/// <summary>
 		/// Gets the next or previous item in the objects list and sets it as the current pick, even if the picker is disabled.
 		/// </summary>
 		/// <param name="getPrev">Whether to get the previous object or the next one. Gets the next object by default.</param>
@@ -224,12 +228,12 @@ namespace RTE {
 		void ShowDescriptionPopupBox();
 
 		/// <summary>
-		/// Adds all groups with a specific type already defined in PresetMan to the current Objects list.
+		/// Adds all groups with a specific type already defined in PresetMan to the current objects list.
 		/// </summary>
 		void UpdateGroupsList();
 
 		/// <summary>
-		/// Adds all objects of the currently selected group to the Objects list.
+		/// Adds all objects of the currently selected group to the objects list.
 		/// </summary>
 		/// <param name="selectTop">Whether to reset the selection to the top of the list when we're done updating this.</param>
 		void UpdateObjectsList(bool selectTop = true);
@@ -249,7 +253,7 @@ namespace RTE {
 		bool HandleMouseEvents();
 
 		/// <summary>
-		/// Open/Close animation handling and GUI element enabling/disabling.
+		/// Open/close animation handling and GUI element enabling/disabling.
 		/// </summary>
 		void AnimateOpenClose();
 #pragma endregion

@@ -154,6 +154,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `Attachable` terrain collisions will now propagate to any child `Attachables` on them. This means that `Attachables` will not collide with terrain, even if set to, if they're attached to a parent that doesn't collide with terrain.  
 	This means that the `attachable.CollidesWithTerrainWhileAttached` value may not represent the true state of things, you should instead use `attachable.CanCollideWithTerrain` to determine whether a given `Attachable` can collide with terrain.
+	
+- Actor selection keys can be used to cycle the selected `ObjectPicker` item while it's closed during building phase and in editors.
 
 ### Fixed
 

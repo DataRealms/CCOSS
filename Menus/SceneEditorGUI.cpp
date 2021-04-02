@@ -592,7 +592,7 @@ void SceneEditorGUI::Update()
         m_CursorInAir = g_SceneMan.GetTerrMatter(snappedPos.GetFloorIntX(), snappedPos.GetFloorIntY()) == g_MaterialAir;
 
         // Mousewheel is used as shortcut for getting next and prev items in teh picker's object list
-        if (m_pController->IsState(SCROLL_UP))
+        if (m_pController->IsState(SCROLL_UP) || m_pController->IsState(ControlState::ACTOR_NEXT))
         {
             // Assign a copy of the next picked object to be the currently held one.
             const SceneObject *pNewObject = m_pPicker->GetPrevObject();
@@ -603,7 +603,7 @@ void SceneEditorGUI::Update()
                     m_pCurrentObject->Update();
             }
         }
-        else if (m_pController->IsState(SCROLL_DOWN))
+        else if (m_pController->IsState(SCROLL_DOWN) || m_pController->IsState(ControlState::ACTOR_PREV))
         {
             // Assign a copy of the next picked object to be the currently held one.
             const SceneObject *pNewObject = m_pPicker->GetNextObject();

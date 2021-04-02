@@ -191,7 +191,8 @@ namespace RTE {
 		int m_NativeTechModuleID; //!< The ID of the DataModule that contains the native Tech of the Player using this menu.
 		float m_ForeignCostMult; //!< The multiplier of costs of any foreign tech items.
 
-		int m_SelectedGroupIndex; //!< Which Group in the groups list box we have selected.
+		int m_ShownGroupIndex; //!< Which group in the groups list is currently showing it's objects list.
+		int m_SelectedGroupIndex; //!< Which group in the groups list box we have selected.
 		int m_SelectedObjectIndex; //!< Which object in the objects list box we have selected.
 		const SceneObject *m_PickedObject; //!< Currently picked object. This is 0 until the user actually picks something, not just has the cursor over it. Not owned by this.
 
@@ -213,7 +214,8 @@ namespace RTE {
 		/// </summary>
 		/// <param name="selectNext"></param>
 		/// <param name="selectPrev"></param>
-		void SelectGroup(bool selectNext = false, bool selectPrev = false);
+		/// <param name="updateObjectList"></param>
+		void SelectGroup(bool selectNext = false, bool selectPrev = false, bool updateObjectList = true);
 
 		/// <summary>
 		/// Gets the next or previous item in the objects list and sets it as the current pick, even if the picker is disabled.

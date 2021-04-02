@@ -208,7 +208,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ObjectPickerGUI::SelectGroup(bool selectNext, bool selectPrev) {
+	void ObjectPickerGUI::SelectGroup(bool selectNext, bool selectPrev, bool updateObjectList) {
 		if (selectPrev) {
 			m_SelectedGroupIndex--;
 			if (m_SelectedGroupIndex < 0) {
@@ -219,12 +219,15 @@ namespace RTE {
 			if (m_SelectedGroupIndex >= m_GroupsList->GetItemList()->size()) {
 				m_SelectedGroupIndex = 0;
 			}
-		} else if (!selectPrev && !selectNext) {
+		} else if (!selectPrev && !selectNext && updateObjectList) {
 			m_SelectedGroupIndex = m_GroupsList->GetSelectedIndex();
 		}
 		m_GroupsList->SetSelectedIndex(m_SelectedGroupIndex);
-		UpdateObjectsList();
 		g_GUISound.ItemChangeSound()->Play(m_Controller->GetPlayer());
+		if (updateObjectList) {
+			m_ShownGroupIndex = m_SelectedGroupIndex;
+			UpdateObjectsList();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -482,8 +485,17 @@ namespace RTE {
 							// Undo the click deselection if nothing was selected
 							m_GroupsList->SetSelectedIndex(m_SelectedGroupIndex);
 						}
+					} else if (guiEvent.GetMsg() == GUIListBox::MouseMove) {
+						const GUIListPanel::Item *groupListItem = m_GroupsList->GetItem(m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY());
+						if (groupListItem && m_SelectedObjectIndex != groupListItem->m_ID) {
+							m_SelectedGroupIndex = groupListItem->m_ID;
+							SelectGroup(false, false, false);
+						}
 					} else if (guiEvent.GetMsg() == GUIListBox::MouseEnter) {
 						SetListFocus(PickerFocus::GroupList);
+					} else if (guiEvent.GetMsg() == GUIListBox::MouseLeave && m_SelectedGroupIndex != m_ShownGroupIndex) {
+						m_SelectedGroupIndex = m_ShownGroupIndex;
+						SelectGroup(false, false, false);
 					}
 				} else if (guiEvent.GetControl() == m_ObjectsList) {
 					if (guiEvent.GetMsg() == GUIListBox::MouseDown) {

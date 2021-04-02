@@ -122,13 +122,13 @@ namespace RTE {
 		/// Gets the next object in the objects list, even if the picker is disabled.
 		/// </summary>
 		/// <returns>The next object in the picker list, looping around if necessary. 0 if no object can be selected.</returns>
-		const SceneObject * GetNextObject() { SelectNextOrPrevObject(false); return GetSelectedObject(); }
+		const SceneObject * GetNextObject() { SelectNextOrPrevObject(false); const SceneObject *object = GetSelectedObject(); return object ? object : GetNextObject(); }
 
 		/// <summary>
 		/// Gets the previous object in the objects list, even if the picker is disabled.
 		/// </summary>
 		/// <returns>The previous object in the picker list, looping around if necessary. 0 if no object can be selected.</returns>
-		const SceneObject * GetPrevObject() { SelectNextOrPrevObject(true); return GetSelectedObject(); }
+		const SceneObject * GetPrevObject() { SelectNextOrPrevObject(true); const SceneObject *object = GetSelectedObject(); return object ? object : GetPrevObject(); }
 
 		/// <summary>
 		/// Reports whether and which object has been picked by the player. There may be an object picked even when the player is not done with the picker, as scrolling through objects (but not mousing over them) picks them.

@@ -3589,9 +3589,10 @@ void AHuman::Update()
 		MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
 		if (pMO) {
 			pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
-			Vector tossVec(5.0F + 2.0F * RandomNormalNum(), -2.0F + 1.0F * RandomNormalNum());
-			pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
-			pMO->SetAngularVel(5.0F * RandomNormalNum());
+			Vector tossVec(RandomNum(3.0F, 6.0F), RandomNum(-3.0F, -1.5F));
+			tossVec.RadRotate(m_AimAngle);
+			pMO->SetVel(m_Vel * 0.5F + tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
+			pMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
 			if (pMO->IsDevice()) {
 				g_MovableMan.AddItem(pMO);
 			} else {

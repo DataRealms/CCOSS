@@ -300,7 +300,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ObjectPickerGUI::SetObjectsListModuleGroupExpanded(int moduleID, bool expanded) {
-		if (moduleID > 0 && moduleID < g_PresetMan.GetTotalModuleCount()) {
+		if (moduleID > 0 && moduleID < m_ExpandedModules.size()) {
 			m_ExpandedModules.at(moduleID) = expanded;
 			UpdateObjectsList(false);
 		} else {
@@ -311,9 +311,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ObjectPickerGUI::ToggleObjectsListModuleGroupExpansion(int moduleID) {
-		m_ExpandedModules.at(moduleID) = !m_ExpandedModules.at(moduleID);
-		UpdateObjectsList(false);
-		g_GUISound.ItemChangeSound()->Play(m_Controller->GetPlayer());
+		if (moduleID > 0 && moduleID < m_ExpandedModules.size()) {
+			m_ExpandedModules.at(moduleID) = !m_ExpandedModules.at(moduleID);
+			UpdateObjectsList(false);
+			g_GUISound.ItemChangeSound()->Play(m_Controller->GetPlayer());
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

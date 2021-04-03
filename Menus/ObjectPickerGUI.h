@@ -207,7 +207,7 @@ namespace RTE {
 		/// <summary>
 		/// Selects the specified group index in the groups list and updates the objects list to show the group's objects.
 		/// </summary>
-		/// <param name="groupIndex">The group index to select.</param>
+		/// <param name="groupIndex">The group index to select. Removing any selection (with index -1) will be overridden and the currently shown group will be selected instead.</param>
 		/// <param name="updateObjectsList">Whether to update the objects list after making the selection or not.</param>
 		void SelectGroupByIndex(int groupIndex, bool updateObjectsList = true);
 
@@ -218,7 +218,7 @@ namespace RTE {
 		void SelectNextOrPrevGroup(bool selectPrev = false);
 
 		/// <summary>
-		/// Adds all groups with a specific type already defined in PresetMan that are within the set ModuleSpaceID and aren't empty to the current objects list.
+		/// Adds all groups with a specific type already defined in PresetMan that are within the set ModuleSpaceID and aren't empty to the current groups list.
 		/// </summary>
 		void UpdateGroupsList();
 #pragma endregion

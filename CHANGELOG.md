@@ -95,7 +95,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `OnStride` special Lua function for `AHumans` that is called whenever they stride (i.e. when their `StrideSound` is played). Like playing `StrideSound`, this does not happen when the AHuman is climbing.
 
+- New INI and Lua (R/W) `AHuman` and `ACrab` INI property `JetAngleRange` which defines the rate at which the angle of the Jetpack's thrust follows the aim angle of the Actor. (default being 0.25)
+
+- Added `AHuman` INI property `LookToAimRatio` at which the Head turns in the direction of aiming. (default being 0.7)
+
+- New `AHuman` INI properties `FGArmFlailScalar` and `BGArmFlailScalar`. Use these to change the rate at which each Arm follows the RotAngle of the Actor, regardless of aim angle. 0 means the Arm will always point in aiming direction.
+
+- New INI and Lua (R/W) `Actor` property `CanRevealUnseen` which can be used to disable the ability to reveal unseen areas.
+
+- New `HDFirearm` INI property `ShellEjectAngle`.
+
+- New `Gib` property `IgnoresTeamHits`.
+
+- Exposed `MOSRotating` property `OrientToVel` to Lua (R/W).
+
+- New Lua (R/W) `MOPixel` property `TrailLength` which returns the trail length of the `Atom` affiliated with this MOPixel.
+
+- New `Atom` property `TrailLengthVariation`. Use this to randomize TrailLength on every frame. 0 means no randomization (default), 1 means anything between full length and zero.
+
+- New `ACraft` property `HatchCloseSound`. This is now required separately to `HatchOpenSound
+
+- Exposed `DataModule` properties `Author`, `Description` and `Version` to Lua (R).
+
 ### Changed
+
+- Jetpack thrust angle is now properly clamped when controlled with an analog stick.
+
+- Aim reticle dots can now be hidden per device by setting `SharpLength` to 0.
+
+- Craft will now automatically scuttle when opening doors at a 90° angle rather than 45°.
+
+- `AHuman` can now aim while walking, however not while reloading.
+
+- Sharp aim progress is now depleted from recoil.
 
 - Hands will now draw in transparent drawing mode, i.e. editing menu.
 
@@ -156,6 +188,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	This means that the `attachable.CollidesWithTerrainWhileAttached` value may not represent the true state of things, you should instead use `attachable.CanCollideWithTerrain` to determine whether a given `Attachable` can collide with terrain.
 
 ### Fixed
+
+- `HFlipped` is now properly assigned to Emissions, Gibs and Particles (shot from HDFirearm/Round) when the source object is also flipped.
 
 - `MovableObject:SetWhichMOToNotHit` will now work properly for Attachables. They will also not hit the relevant MO. When they're removed, Attachables will check if they have the same MO for this value and, if so, unset it so they can hit that MO.
 

@@ -3345,15 +3345,15 @@ void AHuman::Update()
                     m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
                 }
                 m_DeviceSwitchSound.Play(m_Pos);
-
-                // Interrupt sharp aiming
-                m_SharpAimTimer.Reset();
-                m_SharpAimProgress = 0;
             }
 
-            // Detect reloading and move hand accordingly
-			if (pDevice->IsReloading() && m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
-				m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+			if (pDevice->IsReloading()) {
+				// Interrupt sharp aiming while reloading
+				m_SharpAimTimer.Reset();
+				m_SharpAimProgress = 0;
+				// Move BG hand accordingly
+				if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL)
+					m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 			}
 
             // Detect reloading being completed and move hand accordingly

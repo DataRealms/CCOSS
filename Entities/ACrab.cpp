@@ -2314,10 +2314,6 @@ void ACrab::Update()
             {
                 pDevice->Reload();
                 m_DeviceSwitchSound.Play(m_Pos);
-
-                // Interrupt sharp aiming
-                m_SharpAimTimer.Reset();
-                m_SharpAimProgress = 0;
             }
         }
     }

@@ -3182,6 +3182,7 @@ void AHuman::Update()
                 m_JetTimeLeft = m_JetTimeTotal;
         }
 
+		float maxAngle = c_HalfPI * m_JetAngleRange;
         // If pie menu is on, keep the angle to what it was before
         if (m_Controller.IsState(PIE_MENU_ACTIVE))
         {
@@ -3190,20 +3191,15 @@ void AHuman::Update()
         // Direct the jetpack nozzle according to movement stick if analog input is present
         else if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1)
         {
-            float jetAngle = m_Controller.GetAnalogMove().GetAbsRadAngle() + c_PI;
-            // Clamp the angle to 45 degrees down cone with centr straight down on body
-            if (jetAngle > c_PI + c_HalfPI + c_QuarterPI)// - c_SixteenthPI)
-                jetAngle = c_PI + c_HalfPI + c_QuarterPI;// - c_SixteenthPI;
-            else if (jetAngle < c_PI + c_QuarterPI)// + c_SixteenthPI)
-                jetAngle = c_PI + c_QuarterPI;// + c_SixteenthPI;
-
+			float jetAngle = max(min(m_Controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, maxAngle), -maxAngle);
+			jetAngle = jetAngle - c_HalfPI;
             m_pJetpack->SetEmitAngle(FacingAngle(jetAngle));
         }
         // Or just use the aim angle if we're getting digital input
         else
         {
-            float jetAngle = m_AimAngle >= 0 ? (m_AimAngle * m_JetAngleRange) : 0;
-			jetAngle = c_PI + c_HalfPI - (c_HalfPI * m_JetAngleRange) + jetAngle;
+            float jetAngle = m_AimAngle > 0 ? (m_AimAngle * m_JetAngleRange) : 0;
+			jetAngle = jetAngle - maxAngle - c_HalfPI;
             // Don't need to use FacingAngle on this because it's already applied to the AimAngle since last update.
             m_pJetpack->SetEmitAngle(jetAngle);
         }

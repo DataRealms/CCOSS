@@ -1855,7 +1855,10 @@ int LuaMan::Initialize() {
 		class_<DataModule>("DataModule")
 			.def_readwrite("Presets", &DataModule::m_EntityList, return_stl_iterator)
 			.property("FileName", &DataModule::GetFileName)
-			.property("FriendlyName", &DataModule::GetFriendlyName),
+			.property("FriendlyName", &DataModule::GetFriendlyName)
+			.property("Author", &DataModule::GetAuthor)
+			.property("Description", &DataModule::GetDescription)
+			.property("Version", &DataModule::GetVersionNumber),
 
         class_<BuyMenuGUI>("BuyMenuGUI")
             .def("SetMetaPlayer", &BuyMenuGUI::SetMetaPlayer)

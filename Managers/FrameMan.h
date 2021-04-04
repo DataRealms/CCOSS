@@ -87,6 +87,18 @@ namespace RTE {
 
 #pragma region Resolution Handling
 		/// <summary>
+		/// Gets the maximum horizontal resolution the game window can be (desktop width).
+		/// </summary>
+		/// <returns>The maximum horizontal resolution the game window can be (desktop width).</returns>
+		int GetMaxResX() const { return m_ScreenResX; }
+
+		/// <summary>
+		/// Gets the maximum vertical resolution the game window can be (desktop height).
+		/// </summary>
+		/// <returns>The maximum vertical resolution the game window can be (desktop height).</returns>
+		int GetMaxResY() const { return m_ScreenResY; }
+
+		/// <summary>
 		/// Gets the horizontal resolution of the screen.
 		/// </summary>
 		/// <returns>An int describing the horizontal resolution of the screen in pixels.</returns>

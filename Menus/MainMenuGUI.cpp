@@ -51,8 +51,8 @@ namespace RTE {
 
 		m_Quit = false;
 
-		std::fill(m_MainMenuScreens.begin(), m_MainMenuScreens.end(), nullptr);
-		std::fill(m_MainMenuButtons.begin(), m_MainMenuButtons.end(), nullptr);
+		m_MainMenuScreens.fill(nullptr);
+		m_MainMenuButtons.fill(nullptr);
 
 		m_ModManagerMenu = nullptr;
 	}
@@ -66,10 +66,10 @@ namespace RTE {
 		if (!m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/MainMenu")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu"); }
 		m_GUIControlManager->Load("Base.rte/GUIs/MainMenuGUI.ini");
 
-		m_MainMenuScreens.at(MenuScreen::Root) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
-		m_MainMenuScreens.at(MenuScreen::Root)->SetVisible(true);
-		m_MainMenuScreens.at(MenuScreen::Root)->SetPositionAbs((g_FrameMan.GetResX() - m_MainMenuScreens.at(MenuScreen::Root)->GetWidth()) / 2, 0);
-		m_RootCollectionBoxOriginalHeight = m_MainMenuScreens.at(MenuScreen::Root)->GetHeight();
+		m_RootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
+		m_RootBox->SetVisible(true);
+		m_RootBox->SetPositionAbs((g_FrameMan.GetResX() - m_RootBox->GetWidth()) / 2, 0);
+		m_RootBoxOriginalHeight = m_RootBox->GetHeight();
 
 		m_MainMenuScreens.at(MenuScreen::MainScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("MainScreen"));
 		m_MainMenuScreens.at(MenuScreen::SettingsScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("OptionsScreen"));
@@ -211,8 +211,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::HideAllScreens() {
-		for (int screen = MenuScreen::MainScreen; screen < MenuScreen::ScreenCount; ++screen) {
-			if (m_MainMenuScreens.at(screen)) { m_MainMenuScreens.at(screen)->SetVisible(false); }
+		for (GUICollectionBox *menuScreen : m_MainMenuScreens) {
+			if (menuScreen) { menuScreen->SetVisible(false); }
 		}
 		m_ScreenChange = true;
 	}
@@ -221,7 +221,7 @@ namespace RTE {
 
 	void MainMenuGUI::ShowMainScreen() {
 		m_ScreenChange = false;
-		if (m_MainMenuScreens.at(MenuScreen::Root)->GetHeight() != m_RootCollectionBoxOriginalHeight) { m_MainMenuScreens.at(MenuScreen::Root)->Resize(m_MainMenuScreens.at(MenuScreen::Root)->GetWidth(), m_RootCollectionBoxOriginalHeight); }
+		if (m_RootBox->GetHeight() != m_RootBoxOriginalHeight) { m_RootBox->Resize(m_RootBox->GetWidth(), m_RootBoxOriginalHeight); }
 		m_MainMenuScreens.at(MenuScreen::MainScreen)->SetVisible(true);
 
 		if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing)) {
@@ -267,9 +267,9 @@ namespace RTE {
 
 	void MainMenuGUI::ShowCreditsScreen() {
 		m_ScreenChange = false;
-		m_MainMenuScreens.at(MenuScreen::Root)->Resize(m_MainMenuScreens.at(MenuScreen::Root)->GetWidth(), g_FrameMan.GetResY() - m_MainMenuScreens.at(MenuScreen::Root)->GetYPos() - 10);
+		m_RootBox->Resize(m_RootBox->GetWidth(), g_FrameMan.GetResY() - m_RootBox->GetYPos() - 10);
 
-		int scrollPanelHeight = m_MainMenuScreens.at(MenuScreen::Root)->GetHeight() - m_CreditsScrollPanel->GetYPos() - 30;
+		int scrollPanelHeight = m_RootBox->GetHeight() - m_CreditsScrollPanel->GetYPos() - 30;
 		if (m_CreditsScrollPanel->GetHeight() != scrollPanelHeight) { m_CreditsScrollPanel->Resize(m_CreditsScrollPanel->GetWidth(), scrollPanelHeight); }
 		m_CreditsScrollPanel->SetPositionRel(0, 0);
 		m_CreditsLabel->SetPositionRel(0, scrollPanelHeight);
@@ -419,8 +419,7 @@ namespace RTE {
 				} else if (m_ActiveMenuScreen == MenuScreen::CampaignScreen && (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::PlayTutorialButton) || guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::CampaignContinueButton))) {
 					if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::PlayTutorialButton)) {
 						g_ActivityMan.SetStartActivity(dynamic_cast<Activity *>(g_PresetMan.GetEntityPreset("GATutorial", "Tutorial Mission")->Clone()));
-						GameActivity * gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetStartActivity());
-						if (gameActivity) { gameActivity->SetStartingGold(10000); }
+						if (GameActivity * gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetStartActivity())) { gameActivity->SetStartingGold(10000); }
 						g_SceneMan.SetSceneToLoad("Tutorial Bunker");
 						m_ActivityRestarted = true;
 						m_ActiveMenuScreen = MenuScreen::MainScreen;
@@ -541,23 +540,6 @@ namespace RTE {
 				QuitLogic();
 			}
 		}
-
-		//////////////////////////////////////
-		// CONFIGURATION SCREEN
-		/*
-		else if (m_ActiveMenuScreen == CONFIGSCREEN) {
-			if (m_ScreenChange) {
-				m_MainMenuScreens.at(CONFIGSCREEN)->SetVisible(true);
-				m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetVisible(false);
-				//m_pBackToOptionsButton->SetVisible(true);
-				// Let this pass through, UpdateConfigScreen uses it
-				//m_ScreenChange = false;
-			}
-
-			// Continuously update the contents through all the config steps
-			//UpdateConfigScreen();
-		}
-		*/
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

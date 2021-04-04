@@ -29,7 +29,6 @@ namespace RTE {
 		/// 
 		/// </summary>
 		enum MenuScreen {
-			Root,
 			MainScreen,
 			CampaignScreen,
 			SettingsScreen,
@@ -196,7 +195,8 @@ namespace RTE {
 		bool m_ActivityRestarted; //!< Whether the game was restarted this frame or not.
 		bool m_ActivityResumed; //!< Whether the game was resumed this frame or not.
 
-		int m_RootCollectionBoxOriginalHeight;
+		GUICollectionBox *m_RootBox; //!<
+		int m_RootBoxOriginalHeight; //!<
 
 		GUICollectionBox *m_EditorMenuPanel; //!< Panel behind editor menu to be resized depending on which editors are available.
 

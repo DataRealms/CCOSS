@@ -648,7 +648,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TitleScreen::DrawSlideshowSlide() {
-		int slide = m_IntroSequenceState - IntroSequence::ShowSlide1;
+		int slide = static_cast<int>(m_IntroSequenceState) - static_cast<int>(IntroSequence::ShowSlide1);
 		Vector slidePos(static_cast<float>((m_ScreenResX / 2) - (m_IntroSlides.at(slide)->w / 2)), static_cast<float>((m_ScreenResY / 2) - (m_IntroSlides.at(slide)->h / 2)));
 
 		// Sideways pan slides that are wider than the screen
@@ -665,7 +665,7 @@ namespace RTE {
 		set_trans_blender(m_FadeAmount, m_FadeAmount, m_FadeAmount, m_FadeAmount);
 		draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_IntroSlides.at(slide), slidePos.GetFloorIntX(), slidePos.GetFloorIntY());
 
-		if (!m_SlideshowSlideText.empty()) { m_IntroTextFont->DrawAligned(&m_GUIBackBuffer, m_ScreenResX / 2, (m_ScreenResY / 2) + (m_IntroSlides.at(m_IntroSequenceState - IntroSequence::ShowSlide1)->h / 2) + 12, m_SlideshowSlideText, GUIFont::Centre); }
+		if (!m_SlideshowSlideText.empty()) { m_IntroTextFont->DrawAligned(&m_GUIBackBuffer, m_ScreenResX / 2, (m_ScreenResY / 2) + (m_IntroSlides.at(slide)->h / 2) + 12, m_SlideshowSlideText, GUIFont::Centre); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -689,7 +689,7 @@ namespace RTE {
 			drawFadeScreen = true;
 		} else if (m_IntroSequenceState == IntroSequence::SlideshowFadeIn || m_IntroSequenceState == IntroSequence::GameLogoAppear) {
 			drawFadeScreen = true;
-		} else if (m_IntroSequenceState >= IntroSequence::ShowSlide1 && m_IntroSequenceState <= ShowSlide8) {
+		} else if (m_IntroSequenceState >= IntroSequence::ShowSlide1 && m_IntroSequenceState <= IntroSequence::ShowSlide8) {
 			DrawSlideshowSlide();
 		} else if (m_IntroSequenceState == IntroSequence::SlideshowEnd) {
 			m_PreGameLogoText.Draw(g_FrameMan.GetBackBuffer32(), Vector(), g_DrawAlpha);

@@ -24,7 +24,7 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		enum TitleTransition {
+		enum class TitleTransition {
 			Intro = -1,
 			MainMenu, // Main menu is active and operational
 			MainMenuToScenario, // Scenario mode views and transitions
@@ -148,7 +148,7 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		enum IntroSequence {
+		enum class IntroSequence {
 			DataRealmsLogoFadeIn,
 			DataRealmsLogoDisplay,
 			DataRealmsLogoFadeOut,

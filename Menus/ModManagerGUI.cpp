@@ -39,14 +39,15 @@ namespace RTE {
 		m_ScriptsListBox = dynamic_cast<GUIListBox *>(m_GUIControlManager->GetControl("ScriptsLB"));
 		m_ModOrScriptDescriptionLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelDescription"));
 
-		FillKnownModsList();
-		FillKnownScriptsList();
+		PopulateKnownModsList();
+		PopulateKnownScriptsList();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ModManagerGUI::SetEnabled() const {
 		m_RootBox->SetVisible(true);
+		m_ModManagerScreen->SetEnabled(true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -64,7 +65,7 @@ namespace RTE {
 				m_ToggleModButton->SetText("Disable Mod");
 				g_SettingsMan.EnableMod(modRecord.ModulePath);
 			}
-			selectedItem->m_Name = MakeModString(modRecord);
+			selectedItem->m_Name = modRecord.MakeModString();
 			m_KnownMods.at(selectedItem->m_ExtraIndex) = modRecord;
 			m_ModsListBox->SetSelectedIndex(index);
 			m_ModsListBox->Invalidate();
@@ -87,7 +88,7 @@ namespace RTE {
 				m_ToggleScriptButton->SetText("Enable Script");
 				g_SettingsMan.DisableScript(scriptRecord.PresetName);
 			}
-			selectedItem->m_Name = MakeScriptString(scriptRecord);
+			selectedItem->m_Name = scriptRecord.MakeScriptString();
 			m_KnownScripts.at(selectedItem->m_ExtraIndex) = scriptRecord;
 			m_ScriptsListBox->SetSelectedIndex(index);
 			m_ScriptsListBox->Invalidate();
@@ -97,12 +98,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ModManagerGUI::FillKnownModsList() {
+	void ModManagerGUI::PopulateKnownModsList() {
 		for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i) {
 			// Discard official modules
 			if (i >= g_PresetMan.GetOfficialModuleCount() && i < g_PresetMan.GetTotalModuleCount() - 2) {
-				const DataModule *dataModule = g_PresetMan.GetDataModule(i);
-				if (dataModule) {
+				if (const DataModule *dataModule = g_PresetMan.GetDataModule(i)) {
 					ModRecord modRecord;
 					modRecord.ModulePath = dataModule->GetFileName();
 					modRecord.Description = dataModule->GetDescription();
@@ -138,18 +138,17 @@ namespace RTE {
 
 		for (int i = 0; i < m_KnownMods.size(); i++) {
 			ModRecord modRecord = m_KnownMods.at(i);
-			m_ModsListBox->AddItem(MakeModString(modRecord), std::string(), nullptr, nullptr, i);
+			m_ModsListBox->AddItem(modRecord.MakeModString(), std::string(), nullptr, nullptr, i);
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ModManagerGUI::FillKnownScriptsList() {
+	void ModManagerGUI::PopulateKnownScriptsList() {
 		std::list<Entity *> globalScriptList;
 		g_PresetMan.GetAllOfType(globalScriptList, "GlobalScript");
 		for (Entity *globalScriptListEntry : globalScriptList) {
-			const GlobalScript *globalScript = dynamic_cast<GlobalScript *>(globalScriptListEntry);
-			if (globalScript) {
+			if (const GlobalScript *globalScript = dynamic_cast<GlobalScript *>(globalScriptListEntry)) {
 				ScriptRecord scriptRecord;
 				scriptRecord.PresetName = globalScript->GetModuleAndPresetName();
 				scriptRecord.Description = globalScript->GetDescription();
@@ -161,7 +160,7 @@ namespace RTE {
 
 		for (int i = 0; i < m_KnownScripts.size(); i++) {
 			ScriptRecord scriptRecord = m_KnownScripts.at(i);
-			m_ScriptsListBox->AddItem(MakeScriptString(scriptRecord), std::string(), nullptr, nullptr, i);
+			m_ScriptsListBox->AddItem(scriptRecord.MakeScriptString(), std::string(), nullptr, nullptr, i);
 		}
 	}
 
@@ -176,6 +175,7 @@ namespace RTE {
 				if (guiEvent.GetControl() == m_BackToMainButton) {
 					g_SettingsMan.UpdateSettingsFile();
 					m_RootBox->SetVisible(false);
+					m_ModManagerScreen->SetEnabled(false);
 					return true;
 				} else if (guiEvent.GetControl() == m_ToggleModButton) {
 					ToggleMod();

@@ -29,19 +29,19 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// 
+		/// Shows and enables the Mod Manager menu screen.
 		/// </summary>
 		void SetEnabled() const;
 #pragma endregion
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// 
+		/// User input handling for the Mod Manager menu screen.
 		/// </summary>
 		bool HandleInputEvents();
 
 		/// <summary>
-		/// 
+		/// Draws the Mod Manager menu screen to the GUIScreen bitmap of it's GUIControlManager.
 		/// </summary>
 		void Draw() const;
 #pragma endregion
@@ -55,13 +55,19 @@ namespace RTE {
 			std::string ModulePath; //!<
 			std::string ModuleName; //!<
 			std::string Description; //!<
-			bool Disabled;
+			bool Disabled; //!<
 
 			/// <summary>
-			/// 
+			/// Makes UI displayable string with mod info.
 			/// </summary>
-			/// <param name="rhs"></param>
-			/// <returns></returns>
+			/// <returns>String with mod info.</returns>
+			std::string MakeModString() const { return (Disabled ? "- " : "+ ") + ModulePath + " - " + ModuleName; }
+
+			/// <summary>
+			/// Comparison operator for sorting the KnownMods list alphabetically by path with std::sort.
+			/// </summary>
+			/// <param name="rhs">ModRecord to compare with.</param>
+			/// <returns>Bool with result of the alphabetical comparison.</returns>
 			bool operator<(const ModRecord &rhs) const { return ModulePath < rhs.ModulePath; }
 		};
 
@@ -74,28 +80,20 @@ namespace RTE {
 			bool Enabled; //!<
 
 			/// <summary>
-			/// 
+			/// Makes UI displayable string with script info.
 			/// </summary>
-			/// <param name="rhs"></param>
-			/// <returns></returns>
+			/// <returns>String with script info.</returns>
+			std::string MakeScriptString() const { return (!Enabled ? "- " : "+ ") + PresetName; }
+
+			/// <summary>
+			/// Comparison operator for sorting the KnownScripts list alphabetically by PresetName with std::sort.
+			/// </summary>
+			/// <param name="rhs">ScriptRecord to compare with.</param>
+			/// <returns>Bool with result of the alphabetical comparison.</returns>
 			bool operator<(const ScriptRecord &rhs) const { return PresetName < rhs.PresetName; }
 		};
 
 #pragma region Mod and Script Handling
-		/// <summary>
-		/// Makes UI displayable string with mod info.
-		/// </summary>
-		/// <param name="modRecord"></param>
-		/// <returns>String with mod info.</returns>
-		std::string MakeModString(const ModRecord &modRecord) const { return (modRecord.Disabled ? "- " : "+ ") + modRecord.ModulePath + " - " + modRecord.ModuleName; }
-
-		/// <summary>
-		/// Makes UI displayable string with script info.
-		/// </summary>
-		/// <param name="scriptRecord"></param>
-		/// <returns>String with script info.</returns>
-		std::string MakeScriptString(const ScriptRecord &scriptRecord) const { return (!scriptRecord.Enabled ? "- " : "+ ") + scriptRecord.PresetName; }
-
 		/// <summary>
 		/// Turns currently selected mod on and off and changes UI elements accordingly.
 		/// </summary>
@@ -109,21 +107,21 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		void FillKnownModsList();
+		void PopulateKnownModsList();
 
 		/// <summary>
 		/// 
 		/// </summary>
-		void FillKnownScriptsList();
+		void PopulateKnownScriptsList();
 #pragma endregion
 
-		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!<
+		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu screen.
 
 		std::vector<ModRecord> m_KnownMods; //!<
 		std::vector<ScriptRecord> m_KnownScripts; //!<
 
 		/// <summary>
-		/// 
+		/// GUI elements that compose the Mod Manager menu screen.
 		/// </summary>
 		GUICollectionBox *m_RootBox;
 		GUICollectionBox *m_ModManagerScreen;

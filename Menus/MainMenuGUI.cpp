@@ -136,6 +136,7 @@ namespace RTE {
 		m_CreditsLabel->SetText(creditsText);
 		m_CreditsLabel->ResizeHeightToFit();
 
+		m_SettingsMenu = std::make_unique<SettingsGUI>(guiScreen, guiInput, controller);
 		m_ModManagerMenu = std::make_unique<ModManagerGUI>(guiScreen, guiInput);
 
 		m_ScreenChange = true;
@@ -475,6 +476,8 @@ namespace RTE {
 				backToMainMenu = HandleInputEvents();
 				break;
 			case MenuScreen::SettingsScreen:
+				if (m_ScreenChange) { m_SettingsMenu->SetEnabled(); }
+				backToMainMenu = m_SettingsMenu->HandleInputEvents();
 				/*
 				if (m_ScreenChange) {
 					m_MainMenuScreens.at(MenuScreen::SettingsScreen)->SetVisible(true);
@@ -560,11 +563,17 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::Draw(BITMAP *drawBitmap) const {
-		if (m_ActiveMenuScreen == MenuScreen::ModManagerScreen) {
-			m_ModManagerMenu->Draw();
-		} else {
-			AllegroScreen drawScreen(drawBitmap);
-			m_GUIControlManager->Draw(&drawScreen);
+		switch (m_ActiveMenuScreen) {
+			case MenuScreen::SettingsScreen:
+				m_SettingsMenu->Draw();
+				break;
+			case MenuScreen::ModManagerScreen:
+				m_ModManagerMenu->Draw();
+				break;
+			default:
+				AllegroScreen drawScreen(drawBitmap);
+				m_GUIControlManager->Draw(&drawScreen);
+				break;
 		}
 		m_GUIControlManager->DrawMouse();
 	}

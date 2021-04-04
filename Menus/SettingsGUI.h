@@ -1,164 +1,282 @@
-/*
+#ifndef _RTESETTINGSGUI_
+#define _RTESETTINGSGUI_
 
+#include "Constants.h"
+
+struct BITMAP;
+
+namespace RTE {
+
+	class Controller;
+	class GUIButton;
+	class GUILabel;
+	class GUISlider;
+	class GUIComboBox;
+	class GUICheckbox;
+	class GUICollectionBox;
+	class GUIControlManager;
+	class AllegroScreen;
+	class AllegroInput;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	class SettingsGUI {
+
+	public:
+
+#pragma region Creation
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="guiScreen">Pointer to a GUIInput interface that will be used by this SettingsGUI's GUIControlManager.</param>
+		/// <param name="guiInput">Pointer to a GUIScreen interface that will be used by this SettingsGUI's GUIControlManager.</param>
+		/// <param name="controller"></param>
+		SettingsGUI(AllegroScreen *guiScreen, AllegroInput *guiInput, Controller *controller);
+#pragma endregion
+
+#pragma region Getters and Setters
+		/// <summary>
+		/// 
+		/// </summary>
+		void SetEnabled();
+#pragma endregion
+
+#pragma region Concrete Methods
+		/// <summary>
+		/// 
+		/// </summary>
+		bool HandleInputEvents();
 
 		/// <summary>
-		/// Updates the contents of the screen resolution combo box.
+		/// 
 		/// </summary>
-		void UpdateResolutionCombo();
+		void Draw();
+#pragma endregion
+
+	private:
 
 		/// <summary>
-		/// Updates the position of the volume sliders, based on what the AudioMan is currently set to.
+		/// 
 		/// </summary>
-		void UpdateVolumeSliders();
+		struct VideoSettingsMenu {
 
+			/// <summary>
+			/// 
+			/// </summary>
+			struct ResolutionRecord {
+				int Width; //!<
+				int Height; //!<
+				bool Upscaled; //!<
 
-		enum OptionsButtons {
-			FULLSCREENORWINDOWED = 0,
-			P1NEXT,
-			P2NEXT,
-			P3NEXT,
-			P4NEXT,
-			P1PREV,
-			P2PREV,
-			P3PREV,
-			P4PREV,
-			P1CONFIG,
-			P2CONFIG,
-			P3CONFIG,
-			P4CONFIG,
-			P1CLEAR,
-			P2CLEAR,
-			P3CLEAR,
-			P4CLEAR,
-			UPSCALEDFULLSCREEN,
-			OPTIONSBUTTONCOUNT
+				/// <summary>
+				/// Makes UI displayable string with resolution info.
+				/// </summary>
+				/// <returns>String with resolution info.</returns>
+				std::string MakeResolutionString();
+
+				/// <summary>
+				/// 
+				/// </summary>
+				/// <param name="rhs"></param>
+				/// <returns></returns>
+				bool operator<(const ResolutionRecord &rhs) const { return Width < rhs.Width; }
+			};
+
+			std::vector<ResolutionRecord> ValidResolutions; //!<
+			GUIComboBox *ResolutionComboBox; //!<
+			GUIButton *FullscreenOrWindowedButton; //!<
+			GUIButton *UpscaledFullscreenButton; //!<
+
+			GUICollectionBox *ResolutionChangeDialogBox; //!<
+			GUIButton *ConfirmResolutionChangeButton; //!<
+			GUIButton *ConfirmResolutionChangeFullscreenButton; //!<
+			GUIButton *CancelResolutionChangeButton; //!<
+
+			bool m_ResolutionChangeToUpscaled; //!<
+
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="parentControlManager"></param>
+			void Create(GUIControlManager *parentControlManager);
+
+			/// <summary>
+			/// Updates the contents of the screen resolution combo box.
+			/// </summary>
+			void PopulateResolutionsComboBox();
 		};
-
-		enum OptionsCheckboxes {
-			FLASHONBRAINDAMAGE = 0,
-			BLIPONREVEALUNSEEN,
-			SHOWFOREIGNITEMS,
-			SHOWTOOLTIPS,
-			OPTIONSCHECKBOXCOUNT
-		};
-
-
-		enum OptionsLabels {
-			P1DEVICE = 0,
-			P2DEVICE,
-			P3DEVICE,
-			P4DEVICE,
-			OPTIONSLABELCOUNT
-		};
-
-		enum OptionsFocus {
-			MUSICVOLUME = 0,
-			SOUNDVOLUME
-		};
-
-		enum GamepadType {
-			DPAD = 0,
-			DANALOG,
-			XBOX360
-		};
-
-		enum ConfigSteps {
-			KEYBOARDSTEPS = 16,
-			MOUSESTEPS = 11,
-			DPADSTEPS = 13,
-			DANALOGSTEPS = 19,
-			XBOX360STEPS = 19
-		};
-
-		enum ConfigLabels {
-			CONFIGTITLE = 0,
-			CONFIGRECOMMENDATION,
-			CONFIGINSTRUCTION,
-			CONFIGINPUT,
-			CONFIGSTEPS,
-			CONFIGLABELCOUNT
-		};
-
-		enum DeadZoneSliders {
-			P1DEADZONESLIDER = 0,
-			P2DEADZONESLIDER,
-			P3DEADZONESLIDER,
-			P4DEADZONESLIDER,
-			DEADZONESLIDERCOUNT
-		};
-
 
 		/// <summary>
-		/// Updates the text on the configuration labels, based on actual UInputMan settings.
+		/// 
 		/// </summary>
-		void UpdateDeviceLabels();
+		struct AudioSettingsMenu {
+			GUILabel *MusicLabel; //!<
+			GUISlider *MusicSlider; //!<
+			GUILabel *SoundLabel; //!<
+			GUISlider *SoundSlider; //!<
+
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="parentControlManager"></param>
+			void Create(GUIControlManager *parentControlManager);
+
+			/// <summary>
+			/// Updates the position of the volume sliders, based on what the AudioMan is currently set to.
+			/// </summary>
+			//void UpdateVolumeSliders();
+		};
 
 		/// <summary>
-		/// Updates the contents of the control configuration screen.
+		/// 
 		/// </summary>
-		void UpdateConfigScreen();
+		struct InputSettingsMenu {
 
-		GUIButton *m_aOptionButton[OPTIONSBUTTONCOUNT]; //!< The options buttons
-		GUILabel *m_aOptionsLabel[OPTIONSLABELCOUNT]; //!< Labels of the options screen
-		GUILabel *m_aDeadZoneLabel[DEADZONESLIDERCOUNT]; //!< Labels of the options screen
-		GUISlider *m_aDeadZoneSlider[DEADZONESLIDERCOUNT]; //!< Slider for dead zone controls
-		GUICheckbox *m_aDeadZoneCheckbox[DEADZONESLIDERCOUNT]; //!< Checkboxes for dead zone controls
-		GUICheckbox *m_aOptionsCheckbox[OPTIONSCHECKBOXCOUNT]; //!< Checkboxes of the options screen
+			/// <summary>
+			/// 
+			/// </summary>
+			struct PlayerInputSettingsBox {
+				GUILabel *InputDeviceLabel; //!< Label for the input device name that is currently being used.
+				GUIButton *NextInputDeviceButton; //!< Button for changing to the next input device type.
+				GUIButton *PrevInputDeviceButton; //!< Button for changing to the previous input device type.
+				GUIButton *ConfigureControlsButton; //!< Button for starting the controls configuration wizard.
+				GUIButton *ClearControlsButton; //!< Button to clear all mapped controls.
+				GUILabel *DeadZoneLabel; //!< Label for the controller deadzone value.
+				GUISlider *DeadZoneSlider; //!< Slider for setting the controller deadzone value.
+				GUICheckbox *DeadZoneTypeCheckbox; //!< Checkbox for setting the controller deadzone type.
+			};
 
-		GUIComboBox *m_pResolutionCombo; //!< Resolution combobox
+			/// <summary>
+			/// 
+			/// </summary>
+			struct ControlConfigWizard {
 
-		//!< Option sound sliders
-		GUILabel *m_pSoundLabel;
-		GUILabel *m_pMusicLabel;
-		GUISlider *m_pSoundSlider;
-		GUISlider *m_pMusicSlider;
+				/// <summary>
+				/// 
+				/// </summary>
+				enum ConfigWizardLabels {
+					ConfigTitle,
+					ConfigRecommendation,
+					ConfigInstruction,
+					ConfigInput,
+					ConfigSteps,
+					ConfigLabelCount
+				};
 
-		GUIButton *m_pBackToOptionsButton; //!< Back to options from the test and config screens
-		GUIButton *m_pSkipButton; //!< Skip button for config screen
-		GUIButton *m_pDefaultButton; //!< Defualt button for config screen
+				/// <summary>
+				/// 
+				/// </summary>
+				enum ConfigWizardSteps {
+					KeyboardConfigSteps = 16,
+					MouseAndKeyboardConfigSteps = 11,
+					DPadConfigSteps = 13,
+					DualAnalogConfigSteps = 19,
+					Xbox360ConfigSteps = 19
+				};
 
-		int m_ConfiguringPlayer; //!< Which player's control scheme we are currently configuring
-		int m_ConfiguringDevice; //!< Which type of device we are currently configuring
-		int m_ConfiguringGamepad; //!< Which type of gamepad we are currently configuring
-		int m_ConfigureStep; //!< Which step in current configure sequence
+				/// <summary>
+				/// 
+				/// </summary>
+				enum class GamepadType { DPad, DualAnalog, Xbox360 };
 
-		GUILabel *m_pConfigLabel[CONFIGLABELCOUNT]; //!< Labels of the control config screen
+				GUIButton *BackToOptionsButton; //!< Back to options from the test and config screens.
 
-		//!< Controller diagram bitmaps
-		BITMAP **m_aDPadBitmaps;
-		BITMAP **m_aDualAnalogBitmaps;
-		//!< Controller diagram panel
-		GUICollectionBox *m_pRecommendationBox;
-		GUICollectionBox *m_pRecommendationDiagram;
+				Players ConfiguringPlayer; //!< Which player's control scheme we are currently configuring.
+				InputDevice ConfiguringDevice; //!< Which type of device we are currently configuring.
+				GamepadType ConfiguringGamepad; //!< Which type of gamepad we are currently configuring.
+				int ConfigureStep; //!< Which step in current configure sequence.
 
-		GUIButton *m_pConfigSkipButton; //!< Skip forward one config step button
-		GUIButton *m_pConfigBackButton; //!< Go back one config step button
+				std::array<GUILabel *, ConfigWizardLabels::ConfigLabelCount> ConfigLabel; //!< Labels of the control config screen.
 
-		//!< Gamepad type selection UI elements
-		GUICollectionBox *m_pDPadTypeBox;
-		GUICollectionBox *m_pDAnalogTypeBox;
-		GUICollectionBox *m_pXBox360TypeBox;
-		GUICollectionBox *m_pDPadTypeDiagram;
-		GUICollectionBox *m_pDAnalogTypeDiagram;
-		GUICollectionBox *m_pXBox360TypeDiagram;
-		GUIButton *m_pDPadTypeButton;
-		GUIButton *m_pDAnalogTypeButton;
-		GUIButton *m_pXBox360TypeButton;
+				std::array<BITMAP *, ConfigWizardSteps::DPadConfigSteps> DPadBitmaps;
+				std::array<BITMAP *, ConfigWizardSteps::DualAnalogConfigSteps> DualAnalogBitmaps;
 
-		GUICollectionBox *m_ResolutionChangeDialog;
-		GUIButton *m_ButtonConfirmResolutionChange;
-		GUIButton *m_ButtonCancelResolutionChange;
-		GUIButton *m_ButtonConfirmResolutionChangeFullscreen;
-		bool m_ResolutionChangeToUpscaled;
+				GUICollectionBox *RecommendationBox; //!<
+				GUICollectionBox *RecommendationDiagram; //!<
 
-		// Max available resolutions.
-		int m_MaxResX;
-		int m_MaxResY;
+				GUIButton *ConfigSkipButton; //!< Skip forward one config step button.
+				GUIButton *ConfigBackButton; //!< Go back one config step button.
 
+				GUICollectionBox *DPadTypeBox; //!<
+				GUICollectionBox *DPadTypeDiagram; //!<
+				GUIButton *DPadTypeButton; //!<
 
+				GUICollectionBox *DAnalogTypeBox; //!<
+				GUICollectionBox *DAnalogTypeDiagram; //!<
+				GUIButton *DAnalogTypeButton; //!<
 
+				GUICollectionBox *XBox360TypeBox; //!<
+				GUICollectionBox *XBox360TypeDiagram; //!<
+				GUIButton *XBox360TypeButton; //!<
 
+				/// <summary>
+				/// Updates the contents of the control configuration screen.
+				/// </summary>
+				void UpdateConfigScreen();
 
+				/// <summary>
+				/// 
+				/// </summary>
+				/// <returns></returns>
+				bool UpdateKeyboardConfigWizard();
 
+				/// <summary>
+				/// 
+				/// </summary>
+				/// <returns></returns>
+				bool UpdateMouseAndKeyboardConfigWizard();
 
-*/
+				/// <summary>
+				/// 
+				/// </summary>
+				/// <returns></returns>
+				bool UpdateGamepadConfigWizard();
+			};
+
+			ControlConfigWizard ControlConfigWizardMenu; //!<
+
+			std::array<PlayerInputSettingsBox, Players::MaxPlayerCount> PlayerInputSettingsBoxes; //!<
+
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="parentControlManager"></param>
+			void Create(GUIControlManager *parentControlManager);
+
+			/// <summary>
+			/// Updates the text on the configuration labels, based on actual UInputMan settings.
+			/// </summary>
+			//void UpdateDeviceLabels();
+		};
+
+		/// <summary>
+		/// 
+		/// </summary>
+		struct GameplaySettingsMenu {
+			GUICheckbox *FlashOnBrainDamageCheckbox; //!<
+			GUICheckbox *BlipOnRevealUnseenCheckbox; //!<
+			GUICheckbox *ShowForeignItemsCheckbox; //!<
+			GUICheckbox *ShowToolTipsCheckbox; //!<
+
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="parentControlManager"></param>
+			void Create(GUIControlManager *parentControlManager);
+		};
+
+		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!<
+		Controller *m_Controller; //!<
+
+		VideoSettingsMenu m_VideoSettingsMenu; //!<
+		AudioSettingsMenu m_AudioSettingsMenu; //!<
+		InputSettingsMenu m_InputSettingsMenu; //!<
+		GameplaySettingsMenu m_GameplaySettingsMenu; //!<
+
+		// Disallow the use of some implicit methods.
+		SettingsGUI(const SettingsGUI &reference) = delete;
+		SettingsGUI & operator=(const SettingsGUI &rhs) = delete;
+	};
+}
+#endif

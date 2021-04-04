@@ -2,6 +2,7 @@
 #define _RTEMAINMENUGUI_
 
 #include "Controller.h"
+#include "SettingsGUI.h"
 #include "ModManagerGUI.h"
 
 namespace RTE {
@@ -214,6 +215,7 @@ namespace RTE {
 		std::array<GUICollectionBox *, MenuScreen::ScreenCount> m_MainMenuScreens; //!< Collection box of the buy GUIs.
 		std::array<GUIButton *, MenuButton::ButtonCount> m_MainMenuButtons; //!< The main menu buttons.
 
+		std::unique_ptr<SettingsGUI> m_SettingsMenu; //!<
 		std::unique_ptr<ModManagerGUI> m_ModManagerMenu; //!<
 
 #pragma region

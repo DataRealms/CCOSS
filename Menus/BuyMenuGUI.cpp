@@ -748,7 +748,7 @@ float BuyMenuGUI::GetTotalOrderMass() const {
 
 	for (const GUIListPanel::Item *cartItem : *m_pCartList->GetItemList()) {
 		const MovableObject *itemAsMO = dynamic_cast<const MovableObject*>(cartItem->m_pEntity);
-		if(itemAsMO) {
+		if (itemAsMO) {
 			totalMass += itemAsMO->GetMass();
 		} else {
 			RTEAbort("Found a non-MO object in the cart and tried to add it's mass to order total!");
@@ -1214,9 +1214,7 @@ void BuyMenuGUI::Update()
                 } else if (craftMaxMass > 0) {
                     description += "\nMax Mass: " + RoundFloatToPrecision(craftMaxMass, 1) + " kg";
                 }
-                if (craftMaxPassengers >= 0 && craftMaxMass != 0) {
-                    description += (craftMaxPassengers == 0) ? "\nNO PASSENGER SPACE!" : "\nMax Passengers: " + std::to_string(craftMaxPassengers);
-                }
+                if (craftMaxPassengers >= 0 && craftMaxMass != 0) { description += (craftMaxPassengers == 0) ? "\nNO PASSENGER SPACE!" : "\nMax Passengers: " + std::to_string(craftMaxPassengers); }
             } else {
 				// Items in the BuyMenu always have any remainder rounded up in their masses.
                 const Actor *itemAsActor = dynamic_cast<const Actor *>(currentItem);

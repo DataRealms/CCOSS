@@ -918,7 +918,6 @@ ClassInfoGetters
 	/// Returns the maximum total mass this Actor can carry in its inventory.
 	/// </summary>
 	/// <returns>The maximum carriable mass of this Actor.</returns>
-
 	float GetMaxInventoryMass() const { return m_MaxInventoryMass; }
 
 

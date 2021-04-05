@@ -95,8 +95,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `OnStride` special Lua function for `AHumans` that is called whenever they stride (i.e. when their `StrideSound` is played). Like playing `StrideSound`, this does not happen when the AHuman is climbing.
 
-- Added Lua function `RoundFloatToPrecision(floatValue, digitsPastDecimal, roundingMode)`. Utility function to round and format floating point numbers for display in strings.  
-Rounding mode 0 for system default, 1 for floored remainder, 2 for celied remainder
+- Added Lua function `RoundFloatToPrecision()`. Utility function to round and format floating point numbers for display in strings.  
+`RoundFloatToPrecision(floatValue, digitsPastDecimal, roundingMode) -- Rounding mode 0 for system default, 1 for floored remainder, 2 for celied remainder`
 
 - The Lua console (and all text boxes) now support using `Ctrl` to move the cursor around and select or delete text.
 

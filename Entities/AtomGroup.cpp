@@ -202,7 +202,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float AtomGroup::GetMomentOfInertia() {
-		float currentOwnerMass = m_OwnerMOSR->GetMass();
+		float currentOwnerMass = (m_OwnerMOSR->GetMass() ? m_OwnerMOSR->GetMass() : 0.0001F);
 		if (m_MomentOfInertia == 0.0F || std::abs(m_StoredOwnerMass - currentOwnerMass) >= (m_StoredOwnerMass / 10.0F)) {
 			RTEAssert(m_OwnerMOSR, "Tried to calculate moment of inertia for an AtomGroup with no parent!");
 
@@ -740,7 +740,7 @@ namespace RTE {
 		int stepCount = 0;
 		int hitCount = 0;
 		float timeLeft = travelTime;
-		float mass = m_OwnerMOSR->GetMass();
+		float mass = (m_OwnerMOSR->GetMass() ? m_OwnerMOSR->GetMass() : 0.0001F);
 		float retardation;
 		bool halted = false;
 
@@ -1466,8 +1466,8 @@ namespace RTE {
 		if (intersectedMO->GetPinStrength() > 0.0F) {
 			thisExit = totalExitVector;
 		} else {
-			float massA = m_OwnerMOSR->GetMass();
-			float massB = intersectedMO->GetMass();
+			float massA = (m_OwnerMOSR->GetMass() ? m_OwnerMOSR->GetMass() : 0.0001F);
+			float massB = (intersectedMO->GetMass() ? intersectedMO->GetMass() : 0.0001F);
 			float invMassA = 1.0F / massA;
 			float invMassB = 1.0F / massB;
 			float normMassA = invMassA / (invMassA + invMassB);

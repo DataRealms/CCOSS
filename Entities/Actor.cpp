@@ -895,7 +895,7 @@ void Actor::DropAllInventory()
 			pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
 			pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
 			// Rotational angle
-			pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / pObject->GetMass()) * RandomNum());
+			pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / (pObject->GetMass() ? pObject->GetMass() : 0.0001F)) * RandomNum());
 			// Make it rotate away in the appropriate direction depending on which side of the object it is on
 			// If the object is far to the relft or right of the center, make it always rotate outwards to some degree
 			if (gibROffset.m_X > m_aSprite[0]->w / 3)
@@ -974,7 +974,7 @@ void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToI
         pObject = *gItr;
 
         // Generate the velocities procedurally
-        velMin = m_GibBlastStrength / pObject->GetMass();
+		velMin = m_GibBlastStrength / (pObject->GetMass() ? pObject->GetMass() : 0.0001F);
         velRange = 10.0F;
 
         // Randomize the offset from center to be within the original object
@@ -983,7 +983,7 @@ void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToI
         pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
         pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
         // Rotational angle
-        pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / pObject->GetMass()) * RandomNum());
+        pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / (pObject->GetMass() ? pObject->GetMass() : 0.0001F)) * RandomNum());
         // Make it rotate away in the appropriate direction depending on which side of the object it is on
         // If the object is far to the relft or right of the center, make it always rotate outwards to some degree
         if (gibROffset.m_X > m_aSprite[0]->w / 3)

@@ -1,10 +1,8 @@
 #include "TitleScreen.h"
-
-#include "AllegroScreen.h"
-
 #include "FrameMan.h"
+#include "UInputMan.h"
 #include "SettingsMan.h"
-
+#include "AllegroBitmap.h"
 #include "GUISound.h"
 
 namespace RTE {
@@ -17,7 +15,6 @@ namespace RTE {
 		m_ActiveMenu = ActiveMenu::MenusDisabled;
 		m_ScreenResX = g_FrameMan.GetResX();
 		m_ScreenResY = g_FrameMan.GetResY();
-		m_GUIBackBuffer = nullptr;
 		m_FadeScreen = nullptr;
 		m_FadeAmount = 255;
 
@@ -75,11 +72,17 @@ namespace RTE {
 		m_ScrollOffset = Vector(0, m_BackdropScrollStartOffsetY);
 
 		if (!g_SettingsMan.SkipIntro()) {
-			m_GUIBackBuffer = AllegroBitmap(g_FrameMan.GetBackBuffer32());
 			m_IntroTextFont = introTextFont;
 			CreateIntroSequenceSlides();
 		} else {
-			m_IntroSequenceState = IntroSequence::MainMenuAppear;
+			if (g_FrameMan.ResolutionChanged()) {
+				g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccmenu.ogg", -1);
+				m_GameLogo.SetPos(Vector(static_cast<float>(m_ScreenResX / 2), 64));
+				SetTitleTransitionState(TitleTransition::MainMenu);
+				m_FinishedPlayingIntro = true;
+			} else {
+				m_IntroSequenceState = IntroSequence::MainMenuAppear;
+			}
 		}
 	}
 
@@ -311,13 +314,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	TitleScreen::ActiveMenu TitleScreen::Update(bool skipSection) {
+	TitleScreen::ActiveMenu TitleScreen::Update() {
 		if (m_SectionSwitch) { m_SectionTimer.Reset(); }
 		m_SectionElapsedTime = static_cast<float>(m_SectionTimer.GetElapsedRealTimeS());
 		m_SectionProgress = std::min((m_SectionDuration > 0) ? m_SectionElapsedTime / m_SectionDuration : 0, 0.9999F);
 
 		if (!m_FinishedPlayingIntro) {
-			UpdateIntro(skipSection);
+			UpdateIntro(g_UInputMan.AnyStartPress());
 			return ActiveMenu::MenusDisabled;
 		}
 		//if (m_SectionSwitch) { UpdateTitleTransitions(); }
@@ -450,8 +453,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void TitleScreen::UpdateIntroSlideshowSequence(bool skipSection) {
-		if (skipSection && (m_IntroSequenceState > IntroSequence::SlideshowFadeIn && m_IntroSequenceState != IntroSequence::MainMenuAppear)) {
+	void TitleScreen::UpdateIntroSlideshowSequence(bool skipSlideshow) {
+		if (skipSlideshow && (m_IntroSequenceState > IntroSequence::SlideshowFadeIn && m_IntroSequenceState != IntroSequence::MainMenuAppear)) {
 			m_SectionSwitch = true;
 			m_ScrollOffset.SetY(m_PreMainMenuOffsetY);
 			m_OrbitRotation = -c_PI * 1.2F;
@@ -469,8 +472,9 @@ namespace RTE {
 
 					g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccintro.ogg", 0);
 					g_AudioMan.SetMusicPosition(0.05F);
+					// TODO: Setting temp volume doesn't work
 					// Override music volume setting for the intro if it's set to anything
-					if (g_AudioMan.GetMusicVolume() > 0.1F) { g_AudioMan.SetTempMusicVolume(1.0F); }
+					//if (g_AudioMan.GetMusicVolume() < 0.1F) { g_AudioMan.SetTempMusicVolume(1.0F); }
 					m_IntroSongTimer.SetElapsedRealTimeS(0.05F);
 				}
 				m_FadeAmount = 255 - static_cast<int>(255.0F * m_SectionProgress);
@@ -602,7 +606,7 @@ namespace RTE {
 				}
 				m_ScrollOffset.SetY(EaseOut(m_PreMainMenuOffsetY, 0, m_SectionProgress));
 				m_GameLogo.SetPos(Vector(static_cast<float>(m_ScreenResX / 2), EaseOut(120, 64, m_SectionProgress)));
-				if (m_SectionElapsedTime >= m_SectionDuration /*|| g_NetworkServer.IsServerModeEnabled()*/) {
+				if (m_SectionElapsedTime >= m_SectionDuration) {
 					m_FinishedPlayingIntro = true;
 					clear_to_color(m_FadeScreen, 0);
 					SetTitleTransitionState(TitleTransition::MainMenu);
@@ -651,7 +655,6 @@ namespace RTE {
 		int slide = static_cast<int>(m_IntroSequenceState) - static_cast<int>(IntroSequence::ShowSlide1);
 		Vector slidePos(static_cast<float>((m_ScreenResX / 2) - (m_IntroSlides.at(slide)->w / 2)), static_cast<float>((m_ScreenResY / 2) - (m_IntroSlides.at(slide)->h / 2)));
 
-		// Sideways pan slides that are wider than the screen
 		if (m_IntroSlides.at(slide)->w > m_ScreenResX) {
 			if (m_SectionElapsedTime < m_SlideFadeInDuration) {
 				slidePos.SetX(0);
@@ -665,7 +668,10 @@ namespace RTE {
 		set_trans_blender(m_FadeAmount, m_FadeAmount, m_FadeAmount, m_FadeAmount);
 		draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_IntroSlides.at(slide), slidePos.GetFloorIntX(), slidePos.GetFloorIntY());
 
-		if (!m_SlideshowSlideText.empty()) { m_IntroTextFont->DrawAligned(&m_GUIBackBuffer, m_ScreenResX / 2, (m_ScreenResY / 2) + (m_IntroSlides.at(slide)->h / 2) + 12, m_SlideshowSlideText, GUIFont::Centre); }
+		if (!m_SlideshowSlideText.empty()) {
+			AllegroBitmap guiBackBuffer = AllegroBitmap(g_FrameMan.GetBackBuffer32());
+			m_IntroTextFont->DrawAligned(&guiBackBuffer, m_ScreenResX / 2, (m_ScreenResY / 2) + (m_IntroSlides.at(slide)->h / 2) + 12, m_SlideshowSlideText, GUIFont::Centre);
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -681,11 +687,13 @@ namespace RTE {
 
 			std::string copyrightNotice(64, '\0');
 			std::snprintf(copyrightNotice.data(), copyrightNotice.size(), "Cortex Command is TM and %c 2017 Data Realms, LLC", -35);
-			m_IntroTextFont->DrawAligned(&m_GUIBackBuffer, m_ScreenResX / 2, m_ScreenResY - m_IntroTextFont->GetFontHeight(), copyrightNotice, GUIFont::Centre);
+			AllegroBitmap guiBackBuffer = AllegroBitmap(g_FrameMan.GetBackBuffer32());
+			m_IntroTextFont->DrawAligned(&guiBackBuffer, m_ScreenResX / 2, m_ScreenResY - m_IntroTextFont->GetFontHeight(), copyrightNotice, GUIFont::Centre);
 			drawFadeScreen = true;
 		} else if (m_IntroSequenceState >= IntroSequence::FmodLogoFadeIn && m_IntroSequenceState <= IntroSequence::FmodLogoFadeOut) {
 			draw_sprite(g_FrameMan.GetBackBuffer32(), m_FmodLogo, (m_ScreenResX - m_FmodLogo->w) / 2, (m_ScreenResY - m_FmodLogo->h) / 2);
-			m_IntroTextFont->DrawAligned(&m_GUIBackBuffer, m_ScreenResX / 2, m_ScreenResY - m_IntroTextFont->GetFontHeight(), "Made with FMOD Studio by Firelight Technologies Pty Ltd.", GUIFont::Centre);
+			AllegroBitmap guiBackBuffer = AllegroBitmap(g_FrameMan.GetBackBuffer32());
+			m_IntroTextFont->DrawAligned(&guiBackBuffer, m_ScreenResX / 2, m_ScreenResY - m_IntroTextFont->GetFontHeight(), "Made with FMOD Studio by Firelight Technologies Pty Ltd.", GUIFont::Centre);
 			drawFadeScreen = true;
 		} else if (m_IntroSequenceState == IntroSequence::SlideshowFadeIn || m_IntroSequenceState == IntroSequence::GameLogoAppear) {
 			drawFadeScreen = true;

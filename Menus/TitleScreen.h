@@ -3,26 +3,24 @@
 
 #include "Timer.h"
 #include "Vector.h"
-
-#include "GUI.h"
-#include "GUIFont.h"
-#include "AllegroBitmap.h"
-
 #include "MOSRotating.h"
 #include "MOSParticle.h"
 #include "SceneLayer.h"
 
+#include "GUI.h"
+#include "GUIFont.h"
+
 namespace RTE {
 
 	/// <summary>
-	/// 
+	/// Handling for the title screen scene, intro sequence and transitions between menu screens.
 	/// </summary>
 	class TitleScreen {
 
 	public:
 
 		/// <summary>
-		/// 
+		/// Enumeration for the different transition (scrolling) states of the title screen.
 		/// </summary>
 		enum class TitleTransition {
 			Intro = -1,
@@ -55,11 +53,13 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a TitleScreen object in system memory.
 		/// </summary>
+		/// <param name="introTextFont">Pointer to the GUIFont object that will handle text drawing to the screen.</param>
 		explicit TitleScreen(GUIFont *introTextFont) { Clear(); Create(introTextFont); }
 
 		/// <summary>
-		/// 
+		/// Makes the TitleScreen object ready for use.
 		/// </summary>
+		/// <param name="introTextFont">Pointer to the GUIFont object that will handle text drawing to the screen.</param>
 		void Create(GUIFont *introTextFont);
 #pragma endregion
 
@@ -115,35 +115,17 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// 
+		/// Updates the TitleScreen state each frame.
 		/// </summary>
-		/// <param name="skipSection"></param>
-		ActiveMenu Update(bool skipSection = false);
+		ActiveMenu Update();
 
 		/// <summary>
-		/// 
+		/// Draws the TitleScreen to the screen.
 		/// </summary>
 		void Draw();
 #pragma endregion
 
 	private:
-
-		/// <summary>
-		/// 
-		/// </summary>
-		struct Star {
-			/// <summary>
-			/// Enumeration for the different Star sizes.
-			/// </summary>
-			enum StarSize { StarSmall, StarLarge, StarHuge };
-
-			BITMAP *Bitmap = nullptr; //!<
-			int PosX = 0; //!<
-			int PosY = 0; //!<
-			float ScrollRatio = 1.0F; //!<
-			int Intensity = 0; //!< Intensity value on a scale from 0 to 255.
-			StarSize Size = StarSize::StarSmall; //!<
-		};
 
 		/// <summary>
 		/// 
@@ -172,13 +154,29 @@ namespace RTE {
 			MainMenuAppear
 		};
 
+		/// <summary>
+		/// 
+		/// </summary>
+		struct Star {
+			/// <summary>
+			/// Enumeration for the different Star sizes.
+			/// </summary>
+			enum StarSize { StarSmall, StarLarge, StarHuge };
+
+			BITMAP *Bitmap = nullptr; //!<
+			int PosX = 0; //!<
+			int PosY = 0; //!<
+			float ScrollRatio = 1.0F; //!<
+			int Intensity = 0; //!< Intensity value on a scale from 0 to 255.
+			StarSize Size = StarSize::StarSmall; //!<
+		};
+
 		IntroSequence m_IntroSequenceState; //!<
 		TitleTransition m_TitleTransitionState; //!<
 		ActiveMenu m_ActiveMenu; //!<
 
 		int m_ScreenResX; //!<
 		int m_ScreenResY; //!<
-		AllegroBitmap m_GUIBackBuffer; //!<
 
 		BITMAP *m_FadeScreen; //!<
 		int m_FadeAmount; //!<
@@ -226,12 +224,12 @@ namespace RTE {
 
 #pragma region Create Breakdown
 		/// <summary>
-		/// 
+		/// Creates all the elements that compose the title screen scene.
 		/// </summary>
 		void CreateTitleElements();
 
 		/// <summary>
-		/// 
+		/// Creates the intro sequence slideshow slides.
 		/// </summary>
 		void CreateIntroSequenceSlides();
 #pragma endregion
@@ -243,41 +241,42 @@ namespace RTE {
 		void UpdateTitleTransitions();
 
 		/// <summary>
-		/// 
+		/// Draws the game logo and effects to the screen.
 		/// </summary>
 		void DrawGameLogo();
 
 		/// <summary>
-		/// 
+		/// Draws the whole title screen scene to the screen.
 		/// </summary>
 		void DrawTitleScreenScene();
 #pragma endregion
 
 #pragma region Intro Sequence Handling
 		/// <summary>
-		/// 
+		/// Updates the state of the intro sequence logo splash.
 		/// </summary>
-		/// <returns></returns>
-		void UpdateIntroLogoSequence(bool skipSection);
+		/// <param name="skipSection">Whether the current section of the logo splash sequence should be skipped.</param>
+		void UpdateIntroLogoSequence(bool skipSection = false);
 
 		/// <summary>
-		/// 
+		/// Updates the state of the intro sequence slideshow.
 		/// </summary>
-		/// <returns></returns>
-		void UpdateIntroSlideshowSequence(bool skipSection);
+		/// <param name="skipSlideshow">Whether the whole slideshow should be skipped.</param>
+		void UpdateIntroSlideshowSequence(bool skipSlideshow = false);
 
 		/// <summary>
-		/// 
+		/// Updates the state of the intro sequence.
 		/// </summary>
-		void UpdateIntro(bool skipSection);
+		/// <param name="skipSection">Whether the current section of the intro sequence should be skipped.</param>
+		void UpdateIntro(bool skipSection = false);
 
 		/// <summary>
-		/// 
+		/// Draws the current slideshow sequence slide to the screen.
 		/// </summary>
 		void DrawSlideshowSlide();
 
 		/// <summary>
-		/// 
+		/// Draws the current intro sequence state to the screen.
 		/// </summary>
 		void DrawIntro();
 #pragma endregion

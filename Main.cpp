@@ -135,27 +135,6 @@ void ResumeActivity() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /// <summary>
-/// Launch multiplayer lobby activity.
-/// </summary>
-void EnterMultiplayerLobby() {
-	g_SceneMan.SetSceneToLoad("Multiplayer Scene");
-	MultiplayerServerLobby *pMultiplayerServerLobby = new MultiplayerServerLobby;
-	pMultiplayerServerLobby->Create();
-
-	pMultiplayerServerLobby->ClearPlayers(true);
-	pMultiplayerServerLobby->AddPlayer(0, true, 0, 0);
-	pMultiplayerServerLobby->AddPlayer(1, true, 0, 1);
-	pMultiplayerServerLobby->AddPlayer(2, true, 0, 2);
-	pMultiplayerServerLobby->AddPlayer(3, true, 0, 3);
-
-	//g_FrameMan.ResetSplitScreens(true, true);
-	g_ActivityMan.SetStartActivity(pMultiplayerServerLobby);
-	g_ResetActivity = true;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/// <summary>
 /// Orders to reset the entire Retro Terrain Engine system next iteration.
 /// </summary>
 void ResetRTE() { g_ResetRTE = true; }
@@ -428,12 +407,12 @@ int main(int argc, char **argv) {
 		}
 	} else {
 		// NETWORK Create multiplayer lobby activity to start as default if server is running
-		EnterMultiplayerLobby();
+		g_MenuMan.EnterMultiplayerLobby();
 	}
 
     // If we fail to start/reset the activity, then revert to the intro/menu
     if (!ResetActivity()) { RunMenuLoop(); }
-	
+
     RunGameLoop();
 
     ///////////////////////////////////////////////////////////////////
@@ -460,7 +439,7 @@ int main(int argc, char **argv) {
     // Dump out the info about how well memory cleanup went
     Entity::ClassInfo::DumpPoolMemoryInfo(Writer("MemCleanupInfo.txt"));
 #endif
-	
+
     return 0;
 }
 

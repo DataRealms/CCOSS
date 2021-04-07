@@ -61,6 +61,11 @@ namespace RTE {
 		bool EnterEditorActivity();
 
 		/// <summary>
+		/// Launch multiplayer lobby activity.
+		/// </summary>
+		void EnterMultiplayerLobby();
+
+		/// <summary>
 		/// 
 		/// </summary>
 		void Update();

@@ -17,6 +17,7 @@
 #include "LoadingScreen.h"
 
 #include "NetworkServer.h"
+#include "MultiplayerServerLobby.h"
 
 extern bool g_ResumeActivity;
 extern bool g_ResetActivity;
@@ -99,6 +100,24 @@ namespace RTE {
 			m_LaunchIntoEditor = false;
 			return false;
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void MenuMan::EnterMultiplayerLobby() {
+		g_SceneMan.SetSceneToLoad("Multiplayer Scene");
+		MultiplayerServerLobby *multiplayerServerLobby = new MultiplayerServerLobby;
+		multiplayerServerLobby->Create();
+
+		multiplayerServerLobby->ClearPlayers(true);
+		multiplayerServerLobby->AddPlayer(0, true, 0, 0);
+		multiplayerServerLobby->AddPlayer(1, true, 0, 1);
+		multiplayerServerLobby->AddPlayer(2, true, 0, 2);
+		multiplayerServerLobby->AddPlayer(3, true, 0, 3);
+
+		//g_FrameMan.ResetSplitScreens(true, true);
+		g_ActivityMan.SetStartActivity(multiplayerServerLobby);
+		g_ResetActivity = true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

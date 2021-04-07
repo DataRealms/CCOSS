@@ -117,9 +117,6 @@ namespace RTE {
 			TeamRowCount
 		};
 
-		std::unique_ptr<GUIScreen> m_GUIScreen; //!< GUI Screen for use by the in-game GUI.
-		std::unique_ptr<GUIInput> m_GUIInput; //!< Input controller.
-
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The control manager which owns all the GUI elements.
 
 		GUICollectionBox *m_RootBox;

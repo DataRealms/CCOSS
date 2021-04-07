@@ -198,10 +198,6 @@ namespace RTE {
 		m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox)->SetVisible(true);
 
 		if (m_SelectedActivity && m_SelectedScene) {
-			int mouseX = 0;
-			int mouseY = 0;
-			m_GUIInput->GetMousePosition(&mouseX, &mouseY);
-
 			const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(m_SelectedActivity);
 			if (gameActivity) {
 				m_LockedCPUTeam = gameActivity->GetCPUTeam();
@@ -273,8 +269,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ScenarioGUI::HideAllScreens() {
-		for (int collectionBox = 1; collectionBox < ScenarioCollections::CollectionBoxCount; ++collectionBox) {
-			m_ScenarioCollectionBoxes.at(collectionBox)->SetVisible(false);
+		for (GUICollectionBox *collectionBox : m_ScenarioCollectionBoxes) {
+			collectionBox->SetVisible(false);
 		}
 		m_SitePointLabel->SetVisible(false);
 	}
@@ -282,8 +278,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ScenarioGUI::KeepBoxInScreenBounds(GUICollectionBox *collectionBox) const {
-		int clampedPosX = std::clamp(collectionBox->GetXPos(), 0, m_ScenarioCollectionBoxes.at(ScenarioCollections::RootBox)->GetWidth() - collectionBox->GetWidth());
-		int clampedPosY = std::clamp(collectionBox->GetYPos(), 0, m_ScenarioCollectionBoxes.at(ScenarioCollections::RootBox)->GetHeight() - collectionBox->GetHeight());
+		int clampedPosX = std::clamp(collectionBox->GetXPos(), 0, m_RootBox->GetWidth() - collectionBox->GetWidth());
+		int clampedPosY = std::clamp(collectionBox->GetYPos(), 0, m_RootBox->GetHeight() - collectionBox->GetHeight());
 		collectionBox->SetPositionAbs(clampedPosX, clampedPosY);
 	}
 
@@ -318,6 +314,7 @@ namespace RTE {
 		// If site points are overlapping then move one of them towards the planet center.
 		float requiredDistance = 8.0F;
 		bool foundOverlap = true;
+		/*
 		while (foundOverlap) {
 			foundOverlap = false;
 			for (Scene *filteredScene1 : filteredScenes) {
@@ -351,6 +348,7 @@ namespace RTE {
 				}
 			}
 		}
+		*/
 
 		presetList.clear();
 		g_PresetMan.GetAllOfType(presetList, "Activity");
@@ -603,12 +601,13 @@ namespace RTE {
 	void ScenarioGUI::UpdatePlayersBox() {
 		RTEAssert(m_SelectedActivity && m_SelectedScene, "Trying to start a scenario game without an activity or a scene.");
 
-		int mouseX = 0;
-		int mouseY = 0;
-		m_GUIInput->GetMousePosition(&mouseX, &mouseY);
+		int mouseX;
+		int mouseY;
+		m_GUIControlManager->GetManager()->GetInputController()->GetMousePosition(&mouseX, &mouseY);
+
 		const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(m_SelectedActivity);
 
-		const GUICollectionBox *hoveredCell = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox), 1));
+		const GUICollectionBox *hoveredCell = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControlUnderPoint(mouseX, mouseY, m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox), 1));
 		if (hoveredCell) {
 			// Find which cell is being hovered over.
 			int hoveredPlayer = PlayerColumns::PlayerColumnCount;
@@ -788,18 +787,17 @@ namespace RTE {
 			}
 		}
 
-		int mouseX = 0;
-		int mouseY = 0;
-		m_GUIInput->GetMousePosition(&mouseX, &mouseY);
-		Vector mousePos(static_cast<float>(mouseX), static_cast<float>(mouseY));
+		int mouseX;
+		int mouseY;
+		m_GUIControlManager->GetManager()->GetInputController()->GetMousePosition(&mouseX, &mouseY);
 
 		// Handle mouse hover and drag.
 		if (m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->GetVisible()) {
 			UpdateHoveredScene(mouseX, mouseY);
 
 			if (g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER) && m_DraggedBox) {
-				m_DraggedBox->MoveRelative(mousePos.GetFloorIntX() - m_PrevMousePos.GetFloorIntX(), mousePos.GetFloorIntY() - m_PrevMousePos.GetFloorIntY());
-				m_PrevMousePos = mousePos;
+				m_DraggedBox->MoveRelative(mouseX - m_PrevMousePos.GetFloorIntX(), mouseY - m_PrevMousePos.GetFloorIntY());
+				m_PrevMousePos = Vector(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
 				KeepBoxInScreenBounds(m_DraggedBox);
 				if (m_DraggedBox == m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)) { CalculateLinesToSitePoint(); }
@@ -813,23 +811,23 @@ namespace RTE {
 					g_GUISound.ItemChangeSound()->Play();
 				}
 
-				GUICollectionBox *hoveredBox = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, m_ScenarioCollectionBoxes.at(ScenarioCollections::RootBox), 1));
-				const GUIControl *hoveredControl = m_ScenarioGUIController->GetControlUnderPoint(mouseX, mouseY, hoveredBox, 1);
+				GUICollectionBox *hoveredBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControlUnderPoint(mouseX, mouseY, m_RootBox, 1));
+				const GUIControl *hoveredControl = m_GUIControlManager->GetControlUnderPoint(mouseX, mouseY, hoveredBox, 1);
 				bool nonDragControl = (dynamic_cast<const GUIButton *>(hoveredControl) || dynamic_cast<const GUISlider *>(hoveredControl) || dynamic_cast<const GUIComboBox *>(hoveredControl));
 				if (hoveredBox && !nonDragControl && !m_DraggedBox && !m_ActivitySelectComboBox->IsDropped()) {
 					m_DraggedBox = hoveredBox;
-					m_PrevMousePos = mousePos;
+					m_PrevMousePos = Vector(static_cast<float>(mouseX), static_cast<float>(mouseY));
 				}
 			}
 		}
 
-		m_ScenarioGUIController->Update();
+		m_GUIControlManager->Update();
 
 		///////////////////////////////////////
 		// Handle events
 
 		GUIEvent guiEvent;
-		while (m_ScenarioGUIController->GetEvent(&guiEvent)) {
+		while (m_GUIControlManager->GetEvent(&guiEvent)) {
 			const GUIControl *eventControl = guiEvent.GetControl();
 			std::string eventControlName = guiEvent.GetControl()->GetName();
 
@@ -898,10 +896,11 @@ namespace RTE {
 		if (g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly()) {
 			return ScenarioUpdateResult::NoEvent;
 		}
+
 		ScenarioUpdateResult inputUpdateResult = UpdateInput();
 
 		if (m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->GetVisible()) {
-			if (m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->GetVisible()) { m_ScenarioGUIController->GetManager()->SetFocus((m_BlinkTimer.AlternateReal(500)) ? m_ScenarioButtons.at(ScenarioButtons::ResumeButton) : nullptr); }
+			if (m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->GetVisible()) { m_GUIControlManager->GetManager()->SetFocus((m_BlinkTimer.AlternateReal(500)) ? m_ScenarioButtons.at(ScenarioButtons::ResumeButton) : nullptr); }
 			if (m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->GetVisible()) { m_ScenarioButtons.at(ScenarioButtons::StartHereButton)->SetText(m_BlinkTimer.AlternateReal(333) ? "Start Here" : "> Start Here <"); }
 		} else if (m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox)->GetVisible()) {
 			UpdatePlayersBox();
@@ -979,8 +978,7 @@ namespace RTE {
 		if (m_SelectedScene && m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->GetVisible()) { DrawLineToSitePoint(drawBitmap); }
 		drawing_mode(DRAW_MODE_SOLID, nullptr, 0, 0);
 
-		AllegroScreen drawScreen(drawBitmap);
-		m_ScenarioGUIController->Draw(&drawScreen);
+		m_GUIControlManager->Draw();
 
 		if (m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox)->GetVisible()) {
 			GUICollectionBox *playerSetupBox = m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox);
@@ -1001,6 +999,8 @@ namespace RTE {
 				linePosY += 25;
 			}
 
+			AllegroScreen drawScreen(drawBitmap);
+
 			// Manually draw UI elements on top of colored rectangle.
 			for (int teamIndex = Activity::MaxTeamCount - 1; teamIndex >= Activity::TeamOne; --teamIndex) {
 				if (m_TeamTechSelect.at(teamIndex)->GetVisible()) {
@@ -1013,6 +1013,6 @@ namespace RTE {
 				}
 			}
 		}
-		m_ScenarioGUIController->DrawMouse();
+		m_GUIControlManager->DrawMouse();
 	}
 }

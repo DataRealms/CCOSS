@@ -31,6 +31,7 @@ namespace RTE {
 	void MenuMan::Initialize(bool initLoadingScreen) {
 		m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer32());
 		m_GUIInput = std::make_unique<AllegroInput>(-1);
+		m_MenuController = std::make_unique<Controller>(Controller::CIM_PLAYER);
 
 		if (initLoadingScreen) {
 			g_LoadingScreen.Create(m_GUIScreen.get(), m_GUIInput.get());
@@ -40,16 +41,11 @@ namespace RTE {
 			// Load the different input device icons. This can't be done during UInputMan::Create() because the icon presets don't exist so we need to do this after modules are loaded.
 			g_UInputMan.LoadDeviceIcons();
 		}
-
-		m_MenuController = std::make_unique<Controller>(Controller::CIM_PLAYER);
-
 		m_MainMenu = std::make_unique<MainMenuGUI>(m_GUIScreen.get(), m_GUIInput.get(), m_MenuController.get());
-
-		m_ScenarioMenu = std::make_unique<ScenarioGUI>();
-
-		g_MetaMan.GetGUI()->Create(m_MenuController.get());
-
 		m_TitleScreen = std::make_unique<TitleScreen>(m_MainMenu->GetGUIControlManager()->GetSkin()->GetFont("fatfont.png"));
+
+		m_ScenarioMenu = std::make_unique<ScenarioGUI>(m_GUIScreen.get(), m_GUIInput.get());
+		g_MetaMan.GetGUI()->Create(m_MenuController.get());
 
 		m_LaunchIntoEditor = false;
 	}
@@ -117,7 +113,7 @@ namespace RTE {
 		}
 		if (m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::ScenarioMenuActive && m_MainMenu->ScenarioStarted()) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario);
-			m_ScenarioMenu->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
+			//m_ScenarioMenu->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
 			m_ScenarioMenu->SetEnabled();
 		} else if (m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::CampaignMenuActive && m_MainMenu->CampaignStarted()) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCampaign);
@@ -139,6 +135,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MenuMan::UpdateScenarioMenu() {
+		m_ScenarioMenu->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
+
 		ScenarioGUI::ScenarioUpdateResult updateResult = m_ScenarioMenu->Update();
 
 		if (m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::MainMenuActive && updateResult == ScenarioGUI::ScenarioUpdateResult::BackToMain) {

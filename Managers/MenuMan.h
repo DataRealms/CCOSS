@@ -89,7 +89,6 @@ namespace RTE {
 
 		std::unique_ptr<AllegroInput> m_GUIInput; //!< The GUIInput interface of this MenuMan.
 		std::unique_ptr<AllegroScreen> m_GUIScreen; //!< The GUIScreen interface of this MenuMan.
-
 		std::unique_ptr<Controller> m_MenuController; //!<
 
 		std::unique_ptr<TitleScreen> m_TitleScreen; //!<
@@ -100,7 +99,6 @@ namespace RTE {
 
 		bool m_LaunchIntoEditor; //!<
 		std::string_view m_EditorToLaunch; //!<
-
 	};
 }
 #endif

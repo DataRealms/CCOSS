@@ -72,7 +72,7 @@ void MOSRotating::Clear()
     m_GibImpulseLimit = 0;
     m_GibWoundLimit = 0;
     m_GibBlastStrength = 10.0F;
-    m_GibSound.Reset();
+    m_GibSound = nullptr;
     m_EffectOnGib = true;
     m_pFlipBitmap = 0;
 	m_pFlipBitmapS = 0;
@@ -253,8 +253,8 @@ int MOSRotating::Create(const MOSRotating &reference) {
     m_GibImpulseLimit = reference.m_GibImpulseLimit;
     m_GibWoundLimit = reference.m_GibWoundLimit;
     m_GibBlastStrength = reference.m_GibBlastStrength;
-    m_GibSound = reference.m_GibSound;
-    m_EffectOnGib = reference.m_EffectOnGib;
+	if (reference.m_GibSound) { m_GibSound = dynamic_cast<SoundContainer*>(reference.m_GibSound->Clone()); }
+	m_EffectOnGib = reference.m_EffectOnGib;
     m_LoudnessOnGib = reference.m_LoudnessOnGib;
 
 	m_DamageMultiplier = reference.m_DamageMultiplier;
@@ -325,9 +325,10 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_GibWoundLimit;
     else if (propName == "GibBlastStrength") {
         reader >> m_GibBlastStrength;
-    } else if (propName == "GibSound")
-        reader >> m_GibSound;
-    else if (propName == "EffectOnGib")
+	} else if (propName == "GibSound") {
+		if (!m_GibSound) { m_GibSound = new SoundContainer; }
+		reader >> m_GibSound;
+	} else if (propName == "EffectOnGib")
         reader >> m_EffectOnGib;
     else if (propName == "LoudnessOnGib")
         reader >> m_LoudnessOnGib;
@@ -551,6 +552,8 @@ void MOSRotating::Destroy(bool notInherited)
 
 // Not anymore; point to shared static bitmaps
 //    destroy_bitmap(m_pTempBitmap);
+
+	delete m_GibSound;
 
     if (!notInherited)
         MOSprite::Destroy();
@@ -962,7 +965,7 @@ void MOSRotating::GibThis(const Vector &impactImpulse, MovableObject *movableObj
 
     RemoveAttachablesWhenGibbing(impactImpulse, movableObjectToIgnore);
 
-    m_GibSound.Play(m_Pos);
+	if (m_GibSound) { m_GibSound->Play(m_Pos); }
 
     if (m_pScreenEffect && m_EffectOnGib && (m_EffectAlwaysShows || !g_SceneMan.ObscuredPoint(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY()))) {
 		g_PostProcessMan.RegisterPostEffect(m_Pos, m_pScreenEffect, m_ScreenEffectHash, 255, m_EffectRotAngle);

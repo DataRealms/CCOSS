@@ -95,6 +95,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `OnStride` special Lua function for `AHumans` that is called whenever they stride (i.e. when their `StrideSound` is played). Like playing `StrideSound`, this does not happen when the AHuman is climbing.
 
+- Exposed broad range of sounds to Lua (R/W) through their relevant SoundContainers. For each class, these include:  
+	**Actor**: `BodyHitSound`, `PainSound`, `DeathSound`, `DeviceSwitchSound`, `AlarmSound`  
+	**AHuman & ACrab**: `StrideSound`  
+	**HDFirearm**: `FireSound`, `FireEchoSound`, `EmptySound`, `ReloadStartSound`, `ReloadEndSound`, `ActiveSound`, `DeactivationSound`, `PreFireSound`  
+	**AEmitter**: `EmissionSound`, `BurstSound`, `EndSound`  
+	**ACraft**: `HatchOpenSound`, `CrashSound`  
+	**MOSRotating**: `GibSound`  
+	**ADoor**: `DoorMoveStartSound`, `DoorMoveSound`, `DoorDirectionChangeSound`, `DoorMoveEndSound`
+  
 - Added Lua function `RoundFloatToPrecision()`. Utility function to round and format floating point numbers for display in strings.  
 `RoundFloatToPrecision(floatValue, digitsPastDecimal, roundingMode) -- Rounding mode 0 for system default, 1 for floored remainder, 2 for celied remainder`
 

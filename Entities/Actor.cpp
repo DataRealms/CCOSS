@@ -60,55 +60,55 @@ bool Actor::m_sIconsLoaded = false;
 //                  resetting the members of this abstraction level only.
 
 void Actor::Clear() {
-	m_Controller.Reset();
-	m_BodyHitSound.Reset();
-	m_AlarmSound.Reset();
-	m_PainSound.Reset();
-	m_DeathSound.Reset();
-	m_DeviceSwitchSound.Reset();
-	m_Status = STABLE;
-	m_Health = m_PrevHealth = m_MaxHealth = 100;
+    m_Controller.Reset();
+    m_BodyHitSound = nullptr;
+    m_AlarmSound = nullptr;
+    m_PainSound = nullptr;
+    m_DeathSound = nullptr;
+    m_DeviceSwitchSound = nullptr;
+    m_Status = STABLE;
+    m_Health = m_PrevHealth = m_MaxHealth = 100;
 	m_pTeamIcon = nullptr;
 	m_pControllerIcon = nullptr;
-	m_LastSecondTimer.Reset();
-	m_LastSecondPos.Reset();
-	m_RecentMovement.Reset();
+    m_LastSecondTimer.Reset();
+    m_LastSecondPos.Reset();
+    m_RecentMovement.Reset();
 	m_RecentMovementMag = 0.0F;
-	m_TravelImpulseDamage = 750;
-	m_StableVel.SetXY(15, 25);
-	m_HeartBeat.Reset();
-	m_NewControlTmr.Reset();
-	m_DeathTmr.Reset();
+    m_TravelImpulseDamage = 750;
+    m_StableVel.SetXY(15, 25);
+    m_HeartBeat.Reset();
+    m_NewControlTmr.Reset();
+    m_DeathTmr.Reset();
 	m_GoldCarried = 0.0F;
-	m_GoldPicked = false;
-	m_AimState = AIMSTILL;
+    m_GoldPicked = false;
+    m_AimState = AIMSTILL;
 	m_AimAngle = 0.0F;
-	m_AimRange = c_HalfPI;
+    m_AimRange = c_HalfPI;
 	m_AimDistance = 0.0F;
-	m_AimTmr.Reset();
-	m_SharpAimTimer.Reset();
-	m_SharpAimDelay = 250;
+    m_AimTmr.Reset();
+    m_SharpAimTimer.Reset();
+    m_SharpAimDelay = 250;
 	m_SharpAimProgress = 0.0F;
-	m_SharpAimMaxedOut = false;
-	m_PointingTarget.Reset();
-	m_SeenTargetPos.Reset();
-	// Set the limit to soemthing reasonable, if the timer is over it, there's no alarm
-	m_AlarmTimer.SetSimTimeLimitMS(3000);
-	m_AlarmTimer.SetElapsedSimTimeMS(4000);
-	m_LastAlarmPos.Reset();
-	m_SightDistance = 450;
-	m_Perceptiveness = 0.5;
-	m_CharHeight = 0;
-	m_HolsterOffset.Reset();
-	m_ViewPoint.Reset();
-	m_Inventory.clear();
+    m_SharpAimMaxedOut = false;
+    m_PointingTarget.Reset();
+    m_SeenTargetPos.Reset();
+    // Set the limit to soemthing reasonable, if the timer is over it, there's no alarm
+    m_AlarmTimer.SetSimTimeLimitMS(3000);
+    m_AlarmTimer.SetElapsedSimTimeMS(4000);
+    m_LastAlarmPos.Reset();
+    m_SightDistance = 450;
+    m_Perceptiveness = 0.5;
+    m_CharHeight = 0;
+    m_HolsterOffset.Reset();
+    m_ViewPoint.Reset();
+    m_Inventory.clear();
 	m_MaxInventoryMass = -1.0F;
 	m_pItemInReach = nullptr;
-	m_PieNeedsUpdate = false;
-	m_HUDStack = 0;
-	m_FlashWhiteMS = 0;
-	m_WhiteFlashTimer.Reset();
-	m_PieSlices.clear();
+    m_PieNeedsUpdate = false;
+    m_HUDStack = 0;
+    m_FlashWhiteMS = 0;
+    m_WhiteFlashTimer.Reset();
+    m_PieSlices.clear();
 	m_DeploymentID = 0;
     m_PassengerSlots = 1;
 
@@ -171,32 +171,6 @@ int Actor::Create()
     return 0;
 }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the Actor object ready for use.
-
-int Actor::Create(BITMAP *pSprite,
-                  Controller *pController,
-                  const float mass,
-                  const Vector &position,
-                  const Vector &velocity,
-                  AtomGroup *hitBody,
-                  const unsigned long lifetime,
-                  Status status,
-                  const int health)
-{
-    // Set MO Type.
-    m_MOType = MovableObject::TypeActor;
-
-    m_Controller = *pController;
-    m_Status = status;
-    m_Health = health;
-
-    return MOSRotating::Create(pSprite, mass, position, velocity, hitBody, lifetime);
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
@@ -214,11 +188,11 @@ int Actor::Create(const Actor &reference)
     m_Controller.SetInputMode(Controller::CIM_AI);
     m_Controller.SetControlledActor(this);
 
-    m_BodyHitSound = reference.m_BodyHitSound;
-    m_AlarmSound = reference.m_AlarmSound;
-    m_PainSound = reference.m_PainSound;
-    m_DeathSound = reference.m_DeathSound;
-    m_DeviceSwitchSound = reference.m_DeviceSwitchSound;
+	if (reference.m_BodyHitSound) { m_BodyHitSound = dynamic_cast<SoundContainer *>(reference.m_BodyHitSound->Clone()); }
+	if (reference.m_AlarmSound) { m_AlarmSound = dynamic_cast<SoundContainer*>(reference.m_AlarmSound->Clone()); }
+	if (reference.m_PainSound) { m_PainSound = dynamic_cast<SoundContainer *>(reference.m_PainSound->Clone()); }
+	if (reference.m_DeathSound) { m_DeathSound = dynamic_cast<SoundContainer *>(reference.m_DeathSound->Clone()); }
+	if (reference.m_DeviceSwitchSound) { m_DeviceSwitchSound = dynamic_cast<SoundContainer *>(reference.m_DeviceSwitchSound->Clone()); }
 //    m_FacingRight = reference.m_FacingRight;
     m_Status = reference.m_Status;
     m_Health = m_PrevHealth = reference.m_Health;
@@ -325,17 +299,22 @@ int Actor::Create(const Actor &reference)
 
 int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "BodyHitSound")
-        reader >> m_BodyHitSound;
-    else if (propName == "AlarmSound")
-        reader >> m_AlarmSound;
-    else if (propName == "PainSound")
-        reader >> m_PainSound;
-    else if (propName == "DeathSound")
-        reader >> m_DeathSound;
-    else if (propName == "DeviceSwitchSound")
-        reader >> m_DeviceSwitchSound;
-    else if (propName == "Status")
+	if (propName == "BodyHitSound") {
+		m_BodyHitSound = new SoundContainer;
+		reader >> m_BodyHitSound;
+	} else if (propName == "AlarmSound") {
+		m_AlarmSound = new SoundContainer;
+		reader >> m_AlarmSound;
+	} else if (propName == "PainSound") {
+		m_PainSound = new SoundContainer;
+		reader >> m_PainSound;
+	} else if (propName == "DeathSound") {
+		m_DeathSound = new SoundContainer;
+		reader >> m_DeathSound;
+	} else if (propName == "DeviceSwitchSound") {
+		m_DeviceSwitchSound = new SoundContainer;
+		reader >> m_DeviceSwitchSound;
+	} else if (propName == "Status")
         reader >> m_Status;
     else if (propName == "DeploymentID")
         reader >> m_DeploymentID;
@@ -482,6 +461,12 @@ int Actor::Save(Writer &writer) const
 
 void Actor::Destroy(bool notInherited)
 {
+	delete m_DeviceSwitchSound;
+	delete m_BodyHitSound;
+	delete m_PainSound;
+	delete m_DeathSound;
+	delete m_AlarmSound;
+
     for (deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
         delete (*itr);
 
@@ -808,8 +793,8 @@ MovableObject * Actor::SwapNextInventory(MovableObject *pSwapIn, bool muteSound)
         playSound = true;
     }
 
-    if (playSound && !muteSound)
-        m_DeviceSwitchSound.Play(m_Pos);
+    if (m_DeviceSwitchSound && playSound && !muteSound)
+        m_DeviceSwitchSound->Play(m_Pos);
 
     return pRetDev;
 }
@@ -860,8 +845,8 @@ MovableObject * Actor::SwapPrevInventory(MovableObject *pSwapIn)
         playSound = true;
     }
 
-    if (playSound)
-        m_DeviceSwitchSound.Play(m_Pos);
+    if (m_DeviceSwitchSound && playSound)
+        m_DeviceSwitchSound->Play(m_Pos);
 
     return pRetDev;
 }
@@ -958,7 +943,7 @@ void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToI
 {
     // Play death sound
 // TODO: Don't attenuate since death is pretty important.. maybe only make this happen for teh brains
-    m_DeathSound.Play(m_Pos);
+	if (m_DeathSound) { m_DeathSound->Play(m_Pos); }
 
     // Gib all the regular gibs
     MOSRotating::GibThis(impactImpulse, movableObjectToIgnore);
@@ -1443,13 +1428,13 @@ void Actor::Update()
     /////////////////////////////////////////////
     // Take damage from large hits during travel
 
-    if (m_TravelImpulse.GetMagnitude() > m_TravelImpulseDamage / 2)
-    {
-        m_BodyHitSound.Play(m_Pos);
+    if (m_BodyHitSound && m_TravelImpulse.GetMagnitude() > m_TravelImpulseDamage / 2) {
+        m_BodyHitSound->Play(m_Pos);
     }
+
     if (m_TravelImpulse.GetMagnitude() > m_TravelImpulseDamage)
 	{
-        m_PainSound.Play(m_Pos);
+		if (m_PainSound) { m_PainSound->Play(m_Pos); }
 		const float impulse = m_TravelImpulse.GetMagnitude() - m_TravelImpulseDamage;
 		const float damage = impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth;
 		if (damage > 0)
@@ -1518,7 +1503,7 @@ void Actor::Update()
 
     if (m_Status != DYING && m_Status != DEAD && std::floor(m_Health) <= 0)
     {
-        m_DeathSound.Play(m_Pos);
+		if (m_DeathSound) { m_DeathSound->Play(m_Pos); }
 		m_Controller.SetDisabled(true);
         DropAllInventory();
         m_Status = DYING;

@@ -50,6 +50,8 @@ namespace RTE {
 		g_MetaMan.GetGUI()->Create(m_MenuController.get());
 
 		m_TitleScreen = std::make_unique<TitleScreen>(m_MainMenu->GetGUIControlManager()->GetSkin()->GetFont("fatfont.png"));
+
+		m_LaunchIntoEditor = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -69,6 +71,38 @@ namespace RTE {
 
 		g_FrameMan.DestroyTempBackBuffers();
 		g_FrameMan.SetResolutionChanged(false);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool MenuMan::EnterEditorActivity() {
+		bool validEditorName = false;
+		std::array<std::string_view, 5> validEditorNames = { "ActorEditor", "GibEditor", "SceneEditor", "AreaEditor", "AssemblyEditor" };
+		if (std::find(validEditorNames.begin(), validEditorNames.end(), m_EditorToLaunch) != validEditorNames.end()) { validEditorName = true; }
+
+		if (validEditorName) {
+			// Force mouse + keyboard with default mapping so we won't need to change manually if player 1 is set to keyboard only or gamepad.
+			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetDevice(InputDevice::DEVICE_MOUSE_KEYB);
+			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetPreset(InputPreset::PRESET_WASDKEYS);
+
+			if (m_EditorToLaunch == "ActorEditor") {
+				m_MainMenu->StartActorEditor();
+			} else if (m_EditorToLaunch == "GibEditor") {
+				m_MainMenu->StartGibEditor();
+			} else if (m_EditorToLaunch == "SceneEditor") {
+				m_MainMenu->StartSceneEditor();
+			} else if (m_EditorToLaunch == "AreaEditor") {
+				m_MainMenu->StartAreaEditor();
+			} else if (m_EditorToLaunch == "AssemblyEditor") {
+				m_MainMenu->StartAssemblyEditor();
+			}
+			return true;
+		} else {
+			g_ConsoleMan.PrintString("ERROR: Invalid editor name passed into \"-editor\" argument!");
+			g_ConsoleMan.SetEnabled(true);
+			m_LaunchIntoEditor = false;
+			return false;
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

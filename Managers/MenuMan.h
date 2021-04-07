@@ -38,7 +38,28 @@ namespace RTE {
 		void Reinitialize();
 #pragma endregion
 
+#pragma region Getters and Setters
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		bool LaunchIntoEditor() const { return m_LaunchIntoEditor; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="editorName"></param>
+		void SetEditorToLaunch(const std::string_view &editorName) { if (!editorName.empty()) { m_EditorToLaunch = editorName; m_LaunchIntoEditor = true; } }
+#pragma endregion
+
 #pragma region Concrete Methods
+		/// <summary>
+		/// Launch editor activity specified in command-line argument.
+		/// </summary>
+		/// <param name="editorToEnter"></param>
+		/// <returns>Whether a valid editor name was passed in and set to be launched.</returns>
+		bool EnterEditorActivity();
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -76,6 +97,9 @@ namespace RTE {
 		std::unique_ptr<ScenarioGUI> m_ScenarioMenu; //!<
 
 		int m_ActiveScreen; //!<
+
+		bool m_LaunchIntoEditor; //!<
+		std::string_view m_EditorToLaunch; //!<
 
 	};
 }

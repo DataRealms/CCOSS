@@ -49,8 +49,6 @@ using namespace RTE;
 
 volatile bool g_Quit = false;
 bool g_ResetRTE = false; //!< Signals to reset the entire RTE next iteration.
-bool g_LaunchIntoEditor = false; //!< Flag for launching directly into editor activity.
-std::string g_EditorToLaunch = ""; //!< String with editor activity name to launch.
 bool g_InActivity = false;
 bool g_ResetActivity = false;
 bool g_ResumeActivity = false;
@@ -153,34 +151,6 @@ void EnterMultiplayerLobby() {
 	//g_FrameMan.ResetSplitScreens(true, true);
 	g_ActivityMan.SetStartActivity(pMultiplayerServerLobby);
 	g_ResetActivity = true;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/// <summary>
-/// Launch editor activity specified in command-line argument.
-/// </summary>
-/// <returns>Whether a valid editor name was passed in and set to be launched.</returns>
-bool EnterEditorActivity(const std::string &editorToEnter) {
-	/*
-	if (editorToEnter == "ActorEditor") {
-		g_pMainMenuGUI->StartActorEditor();
-	} else if (editorToEnter == "GibEditor") {
-		g_pMainMenuGUI->StartGibEditor();
-	} else if (editorToEnter == "SceneEditor") {
-		g_pMainMenuGUI->StartSceneEditor();
-	} else if (editorToEnter == "AreaEditor") {
-		g_pMainMenuGUI->StartAreaEditor();
-	} else if (editorToEnter == "AssemblyEditor") {
-		g_pMainMenuGUI->StartAssemblyEditor();
-	} else {
-		g_ConsoleMan.PrintString("ERROR: Invalid editor name passed into \"-editor\" argument!");
-		g_ConsoleMan.SetEnabled(true);
-		g_LaunchIntoEditor = false;
-		return false;
-	}
-	*/
-	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -370,8 +340,7 @@ void HandleMainArgs(int argCount, char **argValue) {
 				launchModeSet = true;
 			// Launch game directly into editor activity
 			} else if (!lastArg && currentArg == "-editor") {
-				g_EditorToLaunch = argValue[++i];
-				g_LaunchIntoEditor = true;
+				g_MenuMan.SetEditorToLaunch(argValue[++i]);
 				launchModeSet = true;
 			}
 		}
@@ -452,12 +421,8 @@ int main(int argc, char **argv) {
 	}
 
     if (!g_NetworkServer.IsServerModeEnabled()) {
-		if (g_LaunchIntoEditor) {
-			// Force mouse + keyboard with default mapping so we won't need to change manually if player 1 is set to keyboard only or gamepad.
-			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetDevice(InputDevice::DEVICE_MOUSE_KEYB);
-			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetPreset(InputPreset::PRESET_WASDKEYS);
-			// Start the specified editor activity.
-			if (!EnterEditorActivity(g_EditorToLaunch)) { RunMenuLoop(); }
+		if (g_MenuMan.LaunchIntoEditor()) {
+			if (!g_MenuMan.EnterEditorActivity()) { RunMenuLoop(); }
 		} else if (!g_SettingsMan.LaunchIntoActivity()) {
 			RunMenuLoop();
 		}

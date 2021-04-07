@@ -84,7 +84,6 @@ namespace RTE {
 		/// Enumeration for the GUICollectionBoxes of the Scenario GUI. Used to access elements in the CollectionBoxes array.
 		/// </summary>
 		enum ScenarioCollections {
-			RootBox,
 			ActivitySelectBox,
 			SceneInfoBox,
 			PlayerSetupBox,
@@ -120,7 +119,10 @@ namespace RTE {
 
 		std::unique_ptr<GUIScreen> m_GUIScreen; //!< GUI Screen for use by the in-game GUI.
 		std::unique_ptr<GUIInput> m_GUIInput; //!< Input controller.
-		std::unique_ptr<GUIControlManager> m_ScenarioGUIController; //!< The control manager which owns all the GUI elements.
+
+		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The control manager which owns all the GUI elements.
+
+		GUICollectionBox *m_RootBox;
 
 		std::array<GUICollectionBox *, ScenarioCollections::CollectionBoxCount> m_ScenarioCollectionBoxes; //!< The different dialog/floating boxes.
 		std::array<GUIButton *, ScenarioButtons::ButtonCount> m_ScenarioButtons; //!< The menu buttons we want to manipulate.
@@ -179,6 +181,23 @@ namespace RTE {
 		std::array<GUIComboBox *, Activity::Teams::MaxTeamCount> m_TeamTechSelect;
 		std::array<GUISlider *, Activity::Teams::MaxTeamCount> m_TeamAISkillSlider;
 		std::array<GUILabel *, Activity::Teams::MaxTeamCount> m_TeamAISkillLabel;
+
+#pragma region Create Breakdown
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreateActivitySelectionBox();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreateSceneInfoBox();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreateActivityConfigBox();
+#pragma endregion
 
 #pragma region CollectionBox Handling
 		/// <summary>

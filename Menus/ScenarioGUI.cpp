@@ -28,77 +28,106 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	ScenarioGUI::ScenarioGUI(AllegroScreen *guiScreen, AllegroInput *guiInput) {
-		m_ScenarioGUIController = std::make_unique<GUIControlManager>();
-		if (!m_ScenarioGUIController->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/MainMenu")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu"); }
-		m_ScenarioGUIController->Load("Base.rte/GUIs/ScenarioGUI.ini");
+		m_GUIControlManager = std::make_unique<GUIControlManager>();
+		if (!m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/MainMenu")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu"); }
+		m_GUIControlManager->Load("Base.rte/GUIs/ScenarioGUI.ini");
 
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::RootBox) = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("root"));
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::RootBox)->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox) = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("PlayerSetupBox"));
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox)->CenterInParent(true, true);
+		m_RootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
+		m_RootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
-		m_ScenarioButtons.at(ScenarioButtons::BackToMainButton) = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("BackToMainButton"));
-		m_ScenarioButtons.at(ScenarioButtons::BackToMainButton)->SetPositionRel(m_ScenarioCollectionBoxes.at(ScenarioCollections::RootBox)->GetWidth() - m_ScenarioButtons.at(ScenarioButtons::BackToMainButton)->GetWidth() - 16, m_ScenarioCollectionBoxes.at(ScenarioCollections::RootBox)->GetHeight() - m_ScenarioButtons.at(ScenarioButtons::BackToMainButton)->GetHeight() - 22);
-		m_ScenarioButtons.at(ScenarioButtons::ResumeButton) = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("ButtonResume"));
-		m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->SetPositionRel(m_ScenarioCollectionBoxes.at(ScenarioCollections::RootBox)->GetWidth() - m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->GetWidth() - 16, m_ScenarioCollectionBoxes.at(ScenarioCollections::RootBox)->GetHeight() - m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->GetHeight() - 47);
-		m_ScenarioButtons.at(ScenarioButtons::StartHereButton) = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("SceneSelectButton"));
-		m_ScenarioButtons.at(ScenarioButtons::StartGameButton) = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("StartButton"));
+		m_ScenarioButtons.at(ScenarioButtons::BackToMainButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("BackToMainButton"));
+		m_ScenarioButtons.at(ScenarioButtons::BackToMainButton)->SetPositionRel(m_RootBox->GetWidth() - m_ScenarioButtons.at(ScenarioButtons::BackToMainButton)->GetWidth() - 16, m_RootBox->GetHeight() - m_ScenarioButtons.at(ScenarioButtons::BackToMainButton)->GetHeight() - 22);
+		m_ScenarioButtons.at(ScenarioButtons::ResumeButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonResume"));
+		m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->SetPositionRel(m_RootBox->GetWidth() - m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->GetWidth() - 16, m_RootBox->GetHeight() - m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->GetHeight() - 47);
+		m_ScenarioButtons.at(ScenarioButtons::StartHereButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("SceneSelectButton"));
+		m_ScenarioButtons.at(ScenarioButtons::StartGameButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("StartButton"));
 
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox) = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("ActivitySelectBox"));
+		CreateActivitySelectionBox();
+		CreateSceneInfoBox();
+		CreateActivityConfigBox();
+
+		m_SelectedScene = nullptr;
+
+		GetScenesAndActivities(true);
+		UpdateActivityBox();
+		HideAllScreens();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ScenarioGUI::CreateActivitySelectionBox() {
+		m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ActivitySelectBox"));
 		m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->SetPositionRel(16, 16);
-		m_ActivitySelectComboBox = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController->GetControl("ActivitySelectCombo"));
-		m_ActivityLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("ActivityDescLabel"));
-		m_ActivityLabel->SetFont(m_ScenarioGUIController->GetSkin()->GetFont("smallfont.png"));
-		m_DifficultyLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("DifficultyLabel"));
-		m_DifficultySlider = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl("DifficultySlider"));
+		m_ActivitySelectComboBox = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("ActivitySelectCombo"));
+		m_ActivityLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("ActivityDescLabel"));
+		m_ActivityLabel->SetFont(m_GUIControlManager->GetSkin()->GetFont("smallfont.png"));
+		m_DifficultyLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("DifficultyLabel"));
+		m_DifficultySlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("DifficultySlider"));
+	}
 
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox) = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("SceneInfoBox"));
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->SetPositionRel(m_ScenarioCollectionBoxes.at(ScenarioCollections::RootBox)->GetWidth() - m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->GetWidth() - 16, 16);
-		m_SceneCloseButton = dynamic_cast<GUIButton *>(m_ScenarioGUIController->GetControl("SceneCloseButton"));
-		m_SceneNameLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("SceneNameLabel"));
-		m_SceneInfoLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("SceneInfoLabel"));
-		m_SceneInfoLabel->SetFont(m_ScenarioGUIController->GetSkin()->GetFont("smallfont.png"));
-		m_ScenePreviewBox = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("ScenePreviewBox"));
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ScenarioGUI::CreateSceneInfoBox() {
+		m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("SceneInfoBox"));
+		m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->SetPositionRel(m_RootBox->GetWidth() - m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->GetWidth() - 16, 16);
+		m_SceneCloseButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("SceneCloseButton"));
+		m_SceneNameLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("SceneNameLabel"));
+		m_SceneInfoLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("SceneInfoLabel"));
+		m_SceneInfoLabel->SetFont(m_GUIControlManager->GetSkin()->GetFont("smallfont.png"));
+		m_ScenePreviewBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ScenePreviewBox"));
 		m_ScenePreviewBox->SetPositionRel(10, 33);
 		m_ScenePreviewBox->SetDrawType(GUICollectionBox::Image);
 		m_DefaultPreviewBitmap = std::make_unique<AllegroBitmap>();
 		m_DefaultPreviewBitmap->Create("Base.rte/GUIs/DefaultPreview.png");
 		m_ScenePreviewBitmap = std::make_unique<AllegroBitmap>();
 		m_ScenePreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 32);
-		m_SitePointLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("ScenePlanetLabel"));
+		m_SitePointLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("ScenePlanetLabel"));
+	}
 
-		for (int playerIndex = Players::PlayerOne; playerIndex < PlayerColumns::PlayerColumnCount; ++playerIndex) {
-			for (int teamIndex = Activity::TeamOne; teamIndex < TeamRows::TeamRowCount; ++teamIndex) {
-				m_PlayerBoxes.at(playerIndex).at(teamIndex) = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("P" + std::to_string(playerIndex + 1) + "T" + std::to_string(teamIndex + 1) + "Box"));
-			}
-		}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		m_TeamBoxes.at(TeamRows::DisabledTeam) = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("TDIcon"));
+	void ScenarioGUI::CreateActivityConfigBox() {
+		m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("PlayerSetupBox"));
+		m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox)->CenterInParent(true, true);
+
+		m_TeamBoxes.at(TeamRows::DisabledTeam) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("TDIcon"));
 		m_TeamBoxes.at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Image);
-		m_TeamNameLabels.at(TeamRows::DisabledTeam) = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("TDLabel"));
+		m_TeamNameLabels.at(TeamRows::DisabledTeam) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("TDLabel"));
 
 		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
 			std::string teamNumber = std::to_string(teamIndex + 1);
 
-			m_TeamBoxes.at(teamIndex) = dynamic_cast<GUICollectionBox *>(m_ScenarioGUIController->GetControl("T" + teamNumber + "Icon"));
+			m_TeamBoxes.at(teamIndex) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("T" + teamNumber + "Icon"));
 			m_TeamBoxes.at(teamIndex)->SetDrawType(GUICollectionBox::Image);
 
-			m_TeamNameLabels.at(teamIndex) = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("T" + teamNumber + "Label"));
+			m_TeamNameLabels.at(teamIndex) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("T" + teamNumber + "Label"));
 
-			m_TeamTechSelect.at(teamIndex) = dynamic_cast<GUIComboBox *>(m_ScenarioGUIController->GetControl("T" + teamNumber + "TechCombo"));
+			m_TeamTechSelect.at(teamIndex) = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("T" + teamNumber + "TechCombo"));
 			m_TeamTechSelect.at(teamIndex)->GetListPanel()->AddItem("-All-", "", nullptr, nullptr, -2);
 			m_TeamTechSelect.at(teamIndex)->GetListPanel()->AddItem("-Random-", "", nullptr, nullptr, -1);
 			m_TeamTechSelect.at(teamIndex)->SetSelectedIndex(0);
 
-			m_TeamAISkillSlider.at(teamIndex) = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl("T" + teamNumber + "AISkillSlider"));
+			m_TeamAISkillSlider.at(teamIndex) = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("T" + teamNumber + "AISkillSlider"));
 			m_TeamAISkillSlider.at(teamIndex)->SetValue(Activity::DefaultSkill);
 
-			m_TeamAISkillLabel.at(teamIndex) = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("T" + teamNumber + "AISkillLabel"));
+			m_TeamAISkillLabel.at(teamIndex) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("T" + teamNumber + "AISkillLabel"));
 			m_TeamAISkillLabel.at(teamIndex)->SetText(Activity::GetAISkillString(m_TeamAISkillSlider.at(teamIndex)->GetValue()));
 		}
 
-		m_StartErrorLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("StartErrorLabel"));
-		m_CPULockLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("CPULockLabel"));
+		for (int playerIndex = Players::PlayerOne; playerIndex < PlayerColumns::PlayerColumnCount; ++playerIndex) {
+			for (int teamIndex = Activity::TeamOne; teamIndex < TeamRows::TeamRowCount; ++teamIndex) {
+				m_PlayerBoxes.at(playerIndex).at(teamIndex) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("P" + std::to_string(playerIndex + 1) + "T" + std::to_string(teamIndex + 1) + "Box"));
+			}
+		}
+
+		m_GoldLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("GoldLabel"));
+		m_GoldSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("GoldSlider"));
+		m_FogOfWarCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("FogOfWarCheckbox"));
+		m_RequireClearPathToOrbitCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("RequireClearPathToOrbitCheckbox"));
+		m_DeployUnitsCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("DeployUnitsCheckbox"));
+
+		m_StartErrorLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("StartErrorLabel"));
+		m_CPULockLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("CPULockLabel"));
 
 		// Populate the tech ComboBoxes with the available tech modules.
 		std::string techString = " Tech";
@@ -115,16 +144,6 @@ namespace RTE {
 				}
 			}
 		}
-
-		m_GoldLabel = dynamic_cast<GUILabel *>(m_ScenarioGUIController->GetControl("GoldLabel"));
-		m_GoldSlider = dynamic_cast<GUISlider *>(m_ScenarioGUIController->GetControl("GoldSlider"));
-		m_FogOfWarCheckbox = dynamic_cast<GUICheckbox *>(m_ScenarioGUIController->GetControl("FogOfWarCheckbox"));
-		m_RequireClearPathToOrbitCheckbox = dynamic_cast<GUICheckbox *>(m_ScenarioGUIController->GetControl("RequireClearPathToOrbitCheckbox"));
-		m_DeployUnitsCheckbox = dynamic_cast<GUICheckbox *>(m_ScenarioGUIController->GetControl("DeployUnitsCheckbox"));
-
-		GetScenesAndActivities(true);
-		UpdateActivityBox();
-		HideAllScreens();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

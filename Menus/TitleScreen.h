@@ -20,10 +20,19 @@ namespace RTE {
 	public:
 
 		/// <summary>
+		/// Enumeration for the different menu screens that are active based on transition states.
+		/// </summary>
+		enum ActiveMenu {
+			MenusDisabled = -1,
+			MainMenuActive,
+			ScenarioMenuActive,
+			CampaignMenuActive
+		};
+
+		/// <summary>
 		/// Enumeration for the different transition (scrolling) states of the title screen.
 		/// </summary>
 		enum class TitleTransition {
-			Intro = -1,
 			MainMenu, // Main menu is active and operational
 			MainMenuToScenario, // Scenario mode views and transitions
 			MainMenuToCampaign, // Campaign mode views and transitions
@@ -37,16 +46,6 @@ namespace RTE {
 			FadeScrollOut,
 			FadeOut,
 			End
-		};
-
-		/// <summary>
-		/// 
-		/// </summary>
-		enum ActiveMenu {
-			MenusDisabled = -1,
-			MainMenuActive,
-			ScenarioMenuActive,
-			CampaignMenuActive
 		};
 
 #pragma region Creation
@@ -86,7 +85,13 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		bool IsSectionSwitched() const { return m_SectionSwitch; }
+		TitleTransition GetTitleTransitionState() const { return m_TitleTransitionState; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="newState"></param>
+		void SetTitleTransitionState(TitleTransition newState) { if (newState != m_TitleTransitionState) { m_TitleTransitionState = newState; m_SectionSwitch = true; } }
 
 		/// <summary>
 		/// 
@@ -99,18 +104,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns></returns>
 		float GetPlanetRadius() const { return m_PlanetRadius; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns></returns>
-		TitleTransition GetTitleTransitionState() const { return m_TitleTransitionState; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="newState"></param>
-		void SetTitleTransitionState(TitleTransition newState) { if (newState != m_TitleTransitionState) { m_TitleTransitionState = newState; m_SectionSwitch = true; } }
 #pragma endregion
 
 #pragma region Concrete Methods

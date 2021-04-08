@@ -26,17 +26,16 @@ namespace RTE {
 	public:
 
 		/// <summary>
-		/// 
+		/// Enumeration for the results of the MainMenuGUI input and event update.
 		/// </summary>
-		enum MenuScreen {
-			MainScreen,
-			CampaignScreen,
-			SettingsScreen,
-			ModManagerScreen,
-			EditorScreen,
-			CreditsScreen,
-			QuitScreen,
-			ScreenCount
+		enum MainMenuUpdateResult {
+			NoEvent,
+			BackToMainFromScenario,
+			BackToMainFromCredits,
+			//ScenarioStarted,
+			//CampaignStarted,
+			//ActivityRestarted,
+			//ActivityResumed
 		};
 
 #pragma region Creation
@@ -136,9 +135,26 @@ namespace RTE {
 
 	private:
 
+		/// <summary>
+		/// 
+		/// </summary>
+		enum MenuScreen {
+			MainScreen,
+			CampaignScreen,
+			SettingsScreen,
+			ModManagerScreen,
+			EditorScreen,
+			CreditsScreen,
+			QuitScreen,
+			ScreenCount
+		};
+
+		/// <summary>
+		/// 
+		/// </summary>
 		enum MenuButton {
 			CampaignButton,
-			SkirmishButton,
+			ScenarioButton,
 			MultiplayerButton,
 			SettingsButton,
 			ModManagerButton,
@@ -159,11 +175,8 @@ namespace RTE {
 			ButtonCount
 		};
 
-		Controller *m_Controller; //!< Controller which controls this menu. Not owned.
-		GUIScreen *m_GUIScreen; //!< GUI Screen for use by the in-game GUI.
-		GUIInput *m_GUIInput; //!< Input controller.
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The control manager which holds all the controls.
-
+		Controller *m_Controller; //!< Controller which controls this menu. Not owned.
 
 		bool m_MenuEnabled; //!< Visibility state of the menu.
 		MenuScreen m_ActiveMenuScreen; //!< Screen selection state.

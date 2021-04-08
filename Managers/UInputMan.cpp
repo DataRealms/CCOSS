@@ -10,7 +10,6 @@
 #include "GameActivity.h"
 
 extern volatile bool g_Quit;
-extern bool g_LaunchIntoEditor;
 
 namespace RTE {
 

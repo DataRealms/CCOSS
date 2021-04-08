@@ -29,9 +29,9 @@ namespace RTE {
 	public:
 
 		/// <summary>
-		/// Enumeration for the results of the Scenario GUI input and event update.
+		/// Enumeration for the results of the ScenarioGUI input and event update.
 		/// </summary>
-		enum ScenarioUpdateResult {
+		enum ScenarioMenuUpdateResult {
 			NoEvent,
 			BackToMain,
 			ActivityResumed,
@@ -64,12 +64,12 @@ namespace RTE {
 		/// Updates the user input processing.
 		/// </summary>
 		/// <returns>The result of the user input and event update. See ScenarioUpdateResult enumeration.</returns>
-		ScenarioUpdateResult UpdateInput();
+		ScenarioMenuUpdateResult UpdateInput();
 
 		/// <summary>
 		/// Updates the state of this Menu each frame.
 		/// </summary>
-		ScenarioUpdateResult Update();
+		ScenarioMenuUpdateResult Update();
 
 		/// <summary>
 		/// Draws the menu.

@@ -31,12 +31,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::Clear() {
-		m_Controller = nullptr;
-		m_GUIScreen = nullptr;
-		m_GUIInput = nullptr;
 		m_GUIControlManager = nullptr;
+		m_Controller = nullptr;
 		m_MenuEnabled = false;
-		m_ActiveMenuScreen = MenuScreen::MainScreen;
+		m_ActiveMenuScreen = g_FrameMan.ResolutionChanged() ? MenuScreen::SettingsScreen : MenuScreen::MainScreen; // Set the active screen to the settings screen otherwise we're at the main screen after reinitializing.
 		m_ScreenChange = false;
 		m_BlinkTimer.Reset();
 
@@ -73,11 +71,9 @@ namespace RTE {
 
 		m_MainMenuScreens.at(MenuScreen::MainScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("MainScreen"));
 		m_MainMenuScreens.at(MenuScreen::SettingsScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("OptionsScreen"));
-		//m_MainMenuScreens.at(CONFIGSCREEN) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ConfigScreen"));
 		m_MainMenuScreens.at(MenuScreen::EditorScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("EditorScreen"));
 		m_MainMenuScreens.at(MenuScreen::CampaignScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("MetaScreen"));
 		m_MainMenuScreens.at(MenuScreen::CreditsScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CreditsScreen"));
-		//m_MainMenuScreens.at(MenuScreen::ModManagerScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ModManagerScreen"));
 
 		m_MainMenuScreens.at(MenuScreen::CreditsScreen)->Resize(m_MainMenuScreens.at(MenuScreen::CreditsScreen)->GetWidth(), g_FrameMan.GetResY());
 
@@ -88,7 +84,7 @@ namespace RTE {
 		m_EditorMenuPanel = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("EditorPanel"));
 
 		m_MainMenuButtons.at(MenuButton::CampaignButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToCampaign"));
-		m_MainMenuButtons.at(MenuButton::SkirmishButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToSkirmish"));
+		m_MainMenuButtons.at(MenuButton::ScenarioButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToSkirmish"));
 		m_MainMenuButtons.at(MenuButton::MultiplayerButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToMultiplayer"));
 		m_MainMenuButtons.at(MenuButton::SettingsButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToOptions"));
 		m_MainMenuButtons.at(MenuButton::ModManagerButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToModManager"));
@@ -314,7 +310,7 @@ namespace RTE {
 			m_ScreenChange = true;
 			HideAllScreens();
 			g_GUISound.ButtonPressSound()->Play();
-		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::SkirmishButton)) {
+		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::ScenarioButton)) {
 			m_ScreenChange = true;
 			HideAllScreens();
 			m_ScenarioStarted = true;
@@ -439,9 +435,8 @@ namespace RTE {
 					HideAllScreens();
 					g_GUISound.ButtonPressSound()->Play();
 				}
-			} else if (guiEvent.GetType() == GUIEvent::Notification) {
-				// Button focus notification that we can play a sound to
-				if (dynamic_cast<GUIButton *>(guiEvent.GetControl()) && guiEvent.GetMsg() == GUIButton::Focused) { g_GUISound.SelectionChangeSound()->Play(); }
+			} else if (guiEvent.GetType() == GUIEvent::Notification && (dynamic_cast<GUIButton *>(guiEvent.GetControl()) && guiEvent.GetMsg() == GUIButton::Focused)) {
+				g_GUISound.SelectionChangeSound()->Play();
 			}
 		}
 		return false;
@@ -450,8 +445,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::Update() {
-		//m_Controller->Update();
-
 		m_Quit = false;
 
 		if (!m_MenuEnabled || g_ConsoleMan.IsEnabled()) {
@@ -523,7 +516,6 @@ namespace RTE {
 				m_ActiveMenuScreen = MenuScreen::MainScreen;
 				m_ScreenChange = true;
 				g_GUISound.BackButtonPressSound()->Play();
-				m_ReturnToMainScreen = true;
 
 				if (m_ActiveMenuScreen == MenuScreen::SettingsScreen) {
 					//g_SettingsMan.SetFlashOnBrainDamage(m_aOptionsCheckbox.at(FLASHONBRAINDAMAGE)->GetCheck());

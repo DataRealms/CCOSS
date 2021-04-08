@@ -774,7 +774,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	ScenarioGUI::ScenarioUpdateResult ScenarioGUI::UpdateInput() {
+	ScenarioGUI::ScenarioMenuUpdateResult ScenarioGUI::UpdateInput() {
 		// TODO: if activity is running, allow esc to resume activity instead of quitting.
 		if (g_UInputMan.KeyPressed(KEY_ESC)) {
 			g_GUISound.BackButtonPressSound()->Play();
@@ -783,7 +783,7 @@ namespace RTE {
 				m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->SetVisible(true);
 				ShowScenesBox();
 			} else {
-				return ScenarioUpdateResult::BackToMain;
+				return ScenarioMenuUpdateResult::BackToMain;
 			}
 		}
 
@@ -836,10 +836,10 @@ namespace RTE {
 					if (eventControlName == "BackToMainButton") {
 						HideAllScreens();
 						g_GUISound.BackButtonPressSound()->Play();
-						return ScenarioUpdateResult::BackToMain;
+						return ScenarioMenuUpdateResult::BackToMain;
 					} else if (eventControlName == "ButtonResume") {
 						g_GUISound.BackButtonPressSound()->Play();
-						return ScenarioUpdateResult::ActivityResumed;
+						return ScenarioMenuUpdateResult::ActivityResumed;
 					}
 
 					if (m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->GetVisible()) {
@@ -879,7 +879,7 @@ namespace RTE {
 						HideAllScreens();
 						m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->SetVisible(true);
 						g_GUISound.ButtonPressSound()->Play();
-						return ScenarioUpdateResult::ActivityRestarted;
+						return ScenarioMenuUpdateResult::ActivityRestarted;
 					} else {
 						g_GUISound.UserErrorSound()->Play();
 					}
@@ -887,17 +887,17 @@ namespace RTE {
 			}
 			if (dynamic_cast<const GUIButton *>(eventControl) && guiEvent.GetType() == GUIEvent::Notification && guiEvent.GetMsg() == GUIButton::Focused) { g_GUISound.SelectionChangeSound()->Play(); }
 		}
-		return ScenarioUpdateResult::NoEvent;
+		return ScenarioMenuUpdateResult::NoEvent;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	ScenarioGUI::ScenarioUpdateResult ScenarioGUI::Update() {
+	ScenarioGUI::ScenarioMenuUpdateResult ScenarioGUI::Update() {
 		if (g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly()) {
-			return ScenarioUpdateResult::NoEvent;
+			return ScenarioMenuUpdateResult::NoEvent;
 		}
 
-		ScenarioUpdateResult inputUpdateResult = UpdateInput();
+		ScenarioMenuUpdateResult inputUpdateResult = UpdateInput();
 
 		if (m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->GetVisible()) {
 			if (m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->GetVisible()) { m_GUIControlManager->GetManager()->SetFocus((m_BlinkTimer.AlternateReal(500)) ? m_ScenarioButtons.at(ScenarioButtons::ResumeButton) : nullptr); }

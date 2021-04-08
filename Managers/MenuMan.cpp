@@ -1,4 +1,5 @@
 #include "MenuMan.h"
+#include "SettingsMan.h"
 #include "FrameMan.h"
 #include "UInputMan.h"
 #include "PresetMan.h"
@@ -7,6 +8,7 @@
 
 #include "GUI.h"
 #include "AllegroScreen.h"
+#include "AllegroBitmap.h"
 #include "AllegroInput.h"
 
 #include "Controller.h"
@@ -38,6 +40,8 @@ namespace RTE {
 
 			// Load the different input device icons. This can't be done during UInputMan::Create() because the icon presets don't exist so we need to do this after modules are loaded.
 			g_UInputMan.LoadDeviceIcons();
+
+			if (g_NetworkServer.IsServerModeEnabled()) { g_SettingsMan.SetSkipIntro(true); }
 		}
 		m_MainMenu = std::make_unique<MainMenuGUI>(m_GUIScreen.get(), m_GUIInput.get(), m_MenuController.get());
 		m_TitleScreen = std::make_unique<TitleScreen>(m_MainMenu->GetGUIControlManager()->GetSkin()->GetFont("fatfont.png"));
@@ -60,8 +64,6 @@ namespace RTE {
 		g_ConsoleMan.Initialize();
 
 		Initialize(false);
-		// Change the screen to the options menu otherwise we're at the main screen after reinitializing.
-		m_MainMenu->SetActiveMenuScreen(MainMenuGUI::MenuScreen::SettingsScreen);
 
 		g_FrameMan.DestroyTempBackBuffers();
 		g_FrameMan.SetResolutionChanged(false);
@@ -116,23 +118,25 @@ namespace RTE {
 		if (m_TitleScreen->GetActiveMenu() == TitleScreen::ActiveMenu::MainMenuActive) {
 			g_ActivityMan.SetInActivity(false);
 		}
-		if (m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::ScenarioMenuActive && m_MainMenu->ScenarioStarted()) {
+
+		if (m_MainMenu->ScenarioStarted() && m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::ScenarioMenuActive) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario);
-			//m_ScenarioMenu->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
 			m_ScenarioMenu->SetEnabled();
-		} else if (m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::CampaignMenuActive && m_MainMenu->CampaignStarted()) {
+		} else if (m_MainMenu->CampaignStarted() && m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::CampaignMenuActive) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCampaign);
 			g_MetaMan.GetGUI()->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
 		} else if (m_MainMenu->ActivityResumed()) {
 			g_ResumeActivity = true;
 		} else if (m_MainMenu->ActivityRestarted()) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeScrollOut);
-			g_ResetActivity = true;
-		} else if (m_MainMenu->GetActiveMenuScreen() == MainMenuGUI::MenuScreen::CreditsScreen) {
-			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCredits);
-		//} else if (g_NetworkServer.IsServerModeEnabled()) {
-		//	m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeScrollOut);
-		//	EnterMultiplayerLobby();
+			g_ActivityMan.SetResetActivity(true);
+		//} else if (m_MainMenu->GetActiveMenuScreen() == MainMenuGUI::MenuScreen::CreditsScreen) {
+		//	m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCredits);
+		//} else if (m_MainMenu->ReturnToMainScreen()) {
+		//	m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::CreditsToMainMenu);
+		} else if (g_NetworkServer.IsServerModeEnabled()) {
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeScrollOut);
+			EnterMultiplayerLobby();
 		}
 		return m_MainMenu->QuitProgram();
 	}
@@ -142,13 +146,13 @@ namespace RTE {
 	void MenuMan::UpdateScenarioMenu() {
 		m_ScenarioMenu->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
 
-		ScenarioGUI::ScenarioUpdateResult updateResult = m_ScenarioMenu->Update();
+		ScenarioGUI::ScenarioMenuUpdateResult updateResult = m_ScenarioMenu->Update();
 
-		if (m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::MainMenuActive && updateResult == ScenarioGUI::ScenarioUpdateResult::BackToMain) {
+		if (m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::MainMenuActive && updateResult == ScenarioGUI::ScenarioMenuUpdateResult::BackToMain) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PlanetToMainMenu);
-		} else if (updateResult == ScenarioGUI::ScenarioUpdateResult::ActivityResumed) {
+		} else if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::ActivityResumed) {
 			g_ResumeActivity = true;
-		} else if (updateResult == ScenarioGUI::ScenarioUpdateResult::ActivityRestarted) {
+		} else if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::ActivityRestarted) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeScrollOut);
 			g_ActivityMan.SetResetActivity(true);
 		}
@@ -168,19 +172,11 @@ namespace RTE {
 	void MenuMan::Update() {
 		if (g_FrameMan.ResolutionChanged()) { Reinitialize(); }
 
-		bool keyPressed = g_UInputMan.AnyStartPress();
-
-		m_ActiveScreen = m_TitleScreen->Update(keyPressed);
+		m_ActiveScreen = m_TitleScreen->Update();
 		bool quitResult = false;
-
 
 		//m_MenuController->Update();
 		//m_GUIInput->Update();
-
-		int mouseX = 0;
-		int mouseY = 0;
-		m_GUIInput->GetMousePosition(&mouseX, &mouseY);
-		m_MousePos.SetXY(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
 		switch (m_ActiveScreen) {
 			case TitleScreen::ActiveMenu::MainMenuActive:
@@ -195,6 +191,7 @@ namespace RTE {
 			default:
 				break;
 		}
+		g_ConsoleMan.Update();
 
 		g_Quit = g_Quit || quitResult;
 	}
@@ -219,15 +216,18 @@ namespace RTE {
 			default:
 				break;
 		}
+		g_ConsoleMan.Draw(g_FrameMan.GetBackBuffer32());
 
 		int device = g_UInputMan.GetLastDeviceWhichControlledGUICursor();
 
 		// Draw the active joystick's sprite next to the mouse.
 		if (device >= InputDevice::DEVICE_GAMEPAD_1) {
+			int mouseX = 0;
+			int mouseY = 0;
+			m_GUIInput->GetMousePosition(&mouseX, &mouseY);
 			BITMAP *deviceIcon = g_UInputMan.GetDeviceIcon(device)->GetBitmaps32()[0];
-			if (deviceIcon) { draw_sprite(g_FrameMan.GetBackBuffer32(), deviceIcon, m_MousePos.GetFloorIntX() + 16, m_MousePos.GetFloorIntY() - 4); }
+			if (deviceIcon) { draw_sprite(g_FrameMan.GetBackBuffer32(), deviceIcon, mouseX + 16, mouseY - 4); }
 		}
-
 		// Show which joysticks are detected by the game.
 		for (int playerIndex = Players::PlayerOne; playerIndex < Players::MaxPlayerCount; playerIndex++) {
 			if (g_UInputMan.JoystickActive(playerIndex)) {
@@ -238,9 +238,6 @@ namespace RTE {
 				}
 			}
 		}
-
-		g_ConsoleMan.Draw(g_FrameMan.GetBackBuffer32());
-
 		//vsync();
 		g_FrameMan.FlipFrameBuffers();
 	}

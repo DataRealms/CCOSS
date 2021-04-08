@@ -11,7 +11,7 @@ namespace RTE {
 
 	void TitleScreen::Clear() {
 		m_IntroSequenceState = IntroSequence::DataRealmsLogoFadeIn;
-		m_TitleTransitionState = TitleTransition::Intro;
+		m_TitleTransitionState = TitleTransition::MainMenu;
 		m_ActiveMenu = ActiveMenu::MenusDisabled;
 		m_ScreenResX = g_FrameMan.GetResX();
 		m_ScreenResY = g_FrameMan.GetResY();
@@ -200,8 +200,6 @@ namespace RTE {
 				m_ScrollOffset.SetY(EaseOut(m_PlanetViewOffsetY, 0, m_SectionProgress));
 				if (m_SectionElapsedTime >= m_ScrollDuration / 2) { SetTitleTransitionState(TitleTransition::MainMenu); }
 				break;
-
-
 			case TitleTransition::MainMenuToScenario:
 			case TitleTransition::MainMenuToCampaign:
 				if (m_SectionSwitch) {
@@ -587,6 +585,7 @@ namespace RTE {
 			case IntroSequence::PlanetScroll:
 				if (m_SectionSwitch) {
 					m_SectionSwitch = false;
+					clear_to_color(m_FadeScreen, 0);
 					m_SectionDuration = 92.4F - static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
 				}
 				if (m_SectionProgress > 0.5F) { m_GameLogo.SetPos(Vector(static_cast<float>(m_ScreenResX / 2), EaseIn((static_cast<float>(m_ScreenResY / 2)) - 20, 120, (m_SectionProgress - 0.5F) / 0.5F))); }
@@ -608,8 +607,7 @@ namespace RTE {
 				m_GameLogo.SetPos(Vector(static_cast<float>(m_ScreenResX / 2), EaseOut(120, 64, m_SectionProgress)));
 				if (m_SectionElapsedTime >= m_SectionDuration) {
 					m_FinishedPlayingIntro = true;
-					clear_to_color(m_FadeScreen, 0);
-					SetTitleTransitionState(TitleTransition::MainMenu);
+					m_SectionSwitch = true;
 					return;
 				}
 				break;

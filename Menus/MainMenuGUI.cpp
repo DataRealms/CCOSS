@@ -164,31 +164,28 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::StartActorEditor() const { StartEditorActivity(new ActorEditor); }
+	void MainMenuGUI::StartEditorActivity(const std::string_view &editorToLaunch) const {
+		EditorActivity *editorActivityToStart = nullptr;
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void MainMenuGUI::StartGibEditor() const { StartEditorActivity(new GibEditor); }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void MainMenuGUI::StartSceneEditor() const { StartEditorActivity(new SceneEditor); }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void MainMenuGUI::StartAreaEditor() const { StartEditorActivity(new AreaEditor); }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void MainMenuGUI::StartAssemblyEditor() const { StartEditorActivity(new AssemblyEditor); }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void MainMenuGUI::StartEditorActivity(EditorActivity *editorActivityToStart) const {
-		g_SceneMan.SetSceneToLoad("Editor Scene");
-		editorActivityToStart->Create();
-		editorActivityToStart->SetEditorMode(EditorActivity::LOADDIALOG);
-		g_ActivityMan.SetStartActivity(editorActivityToStart);
+		if (editorToLaunch == "ActorEditor") {
+			editorActivityToStart = new ActorEditor;
+		} else if (editorToLaunch == "GibEditor") {
+			editorActivityToStart = new GibEditor;
+		} else if (editorToLaunch == "SceneEditor") {
+			editorActivityToStart = new SceneEditor;
+		} else if (editorToLaunch == "AreaEditor") {
+			editorActivityToStart = new AreaEditor;
+		} else if (editorToLaunch == "AssemblyEditor") {
+			editorActivityToStart = new AssemblyEditor;
+		}
+		if (editorActivityToStart) {
+			g_SceneMan.SetSceneToLoad("Editor Scene");
+			editorActivityToStart->Create();
+			editorActivityToStart->SetEditorMode(EditorActivity::LOADDIALOG);
+			g_ActivityMan.SetStartActivity(editorActivityToStart);
+		} else {
+			RTEAbort("Failed to instantiate the " + std::string(editorToLaunch) + " Activity!");
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -408,15 +405,15 @@ namespace RTE {
 					g_GUISound.ExitMenuSound()->Play();
 
 					if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::SceneEditorButton)) {
-						StartSceneEditor();
+						StartEditorActivity("SceneEditor");
 					} else if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::AreaEditorButton)) {
-						StartAreaEditor();
+						StartEditorActivity("EditorActivity");
 					} else if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::AssemblyEditorButton)) {
-						StartAssemblyEditor();
+						StartEditorActivity("AssemblyEditor");
 					} else if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::GitEditorButton)) {
-						StartGibEditor();
+						StartEditorActivity("GibEditor");
 					} else if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::ActorEditorButton)) {
-						StartActorEditor();
+						StartEditorActivity("ActorEditor");
 					}
 				} else if (m_ActiveMenuScreen == MenuScreen::CampaignScreen && (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::PlayTutorialButton) || guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::CampaignContinueButton))) {
 					if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::PlayTutorialButton)) {

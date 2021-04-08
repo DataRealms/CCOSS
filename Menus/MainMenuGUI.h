@@ -115,34 +115,13 @@ namespace RTE {
 		bool QuitProgram() const { return m_Quit; }
 #pragma endregion
 
-#pragma region Editor Activity Handling
-		/// <summary>
-		/// Loads "Editor Scene" and starts Actor Editor activity.
-		/// </summary>
-		void StartActorEditor() const;
-
-		/// <summary>
-		/// Loads "Editor Scene" and starts Gib Editor activity.
-		/// </summary>
-		void StartGibEditor() const;
-
-		/// <summary>
-		/// Loads "Editor Scene" and starts Scene Editor activity.
-		/// </summary>
-		void StartSceneEditor() const;
-
-		/// <summary>
-		/// Loads "Editor Scene" and starts Area Editor activity.
-		/// </summary>
-		void StartAreaEditor() const;
-
-		/// <summary>
-		/// Loads "Editor Scene" and starts Assembly Editor activity.
-		/// </summary>
-		void StartAssemblyEditor() const;
-#pragma endregion
-
 #pragma region Concrete Methods
+		/// <summary>
+		/// Loads "Editor Scene" and starts the given editor activity.
+		/// </summary>
+		/// <param name="editorToLaunch"></param>
+		void StartEditorActivity(const std::string_view &editorToLaunch) const;
+
 		/// <summary>
 		/// Updates the state of this Menu each frame.
 		/// </summary>
@@ -223,12 +202,6 @@ namespace RTE {
 		/// Handles quitting of the game.
 		/// </summary>
 		void QuitLogic();
-
-		/// <summary>
-		/// Loads "Editor Scene" and starts the given editor activity
-		/// </summary>
-		/// <param name="editorActivity"></param>
-		void StartEditorActivity(EditorActivity *editorActivity) const;
 #pragma endregion
 
 #pragma region Menu Screen Handling

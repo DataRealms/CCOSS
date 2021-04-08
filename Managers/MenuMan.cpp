@@ -81,18 +81,7 @@ namespace RTE {
 			// Force mouse + keyboard with default mapping so we won't need to change manually if player 1 is set to keyboard only or gamepad.
 			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetDevice(InputDevice::DEVICE_MOUSE_KEYB);
 			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetPreset(InputPreset::PRESET_WASDKEYS);
-
-			if (m_EditorToLaunch == "ActorEditor") {
-				m_MainMenu->StartActorEditor();
-			} else if (m_EditorToLaunch == "GibEditor") {
-				m_MainMenu->StartGibEditor();
-			} else if (m_EditorToLaunch == "SceneEditor") {
-				m_MainMenu->StartSceneEditor();
-			} else if (m_EditorToLaunch == "AreaEditor") {
-				m_MainMenu->StartAreaEditor();
-			} else if (m_EditorToLaunch == "AssemblyEditor") {
-				m_MainMenu->StartAssemblyEditor();
-			}
+			m_MainMenu->StartEditorActivity(m_EditorToLaunch);
 			return true;
 		} else {
 			g_ConsoleMan.PrintString("ERROR: Invalid editor name passed into \"-editor\" argument!");

@@ -39,9 +39,6 @@
 #include "GUI/GUILabel.h"
 #include "GUI/GUIComboBox.h"
 
-
-extern bool g_ResetActivity;
-
 namespace RTE {
 
 AbstractClassInfo(EditorActivity, Activity)

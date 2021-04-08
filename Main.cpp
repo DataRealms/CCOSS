@@ -46,7 +46,6 @@ using namespace RTE;
 
 volatile bool g_Quit = false;
 bool g_ResetRTE = false; //!< Signals to reset the entire RTE next iteration.
-bool g_ResetActivity = false;
 bool g_ResumeActivity = false;
 int g_StationOffsetX;
 int g_StationOffsetY;
@@ -71,7 +70,7 @@ namespace RTE {
 	/// <returns></returns>
 	bool ResetActivity() {
 		g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
-		g_ResetActivity = false;
+		g_ActivityMan.SetResetActivity(false);
 
 		// Clear and reset out things
 		g_FrameMan.ClearBackBuffer8();
@@ -187,7 +186,7 @@ namespace RTE {
 		g_PerformanceMan.ResetFrameTimer();
 		g_TimerMan.PauseSim(false);
 
-		if (g_ResetActivity) { ResetActivity(); }
+		if (g_ActivityMan.IsActivityReset()) { ResetActivity(); }
 
 		while (!g_Quit) {
 			// Need to clear this out; sometimes background layers don't cover the whole back
@@ -245,7 +244,7 @@ namespace RTE {
 					RunMenuLoop();
 				}
 				// Resetting the simulation
-				if (g_ResetActivity) {
+				if (g_ActivityMan.IsActivityReset()) {
 					// Reset and quit if user quit during reset loading
 					if (!ResetActivity()) { break; }
 				}

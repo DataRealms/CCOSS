@@ -279,7 +279,7 @@ namespace RTE {
 				// Detect if a game has been commanded to restart
 				if (g_MetaMan.GetGUI()->ActivityRestarted()) {
 					// Make sure the scene is going to be reset with the new parameters
-					g_ResetActivity = true;
+					g_ActivityMan.SetResetActivity(true);
 
 					m_TitleTransitionState = FADEOUT;
 					m_SectionSwitch = true;

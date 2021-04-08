@@ -43,9 +43,6 @@
 
 #include "NetworkClient.h"
 
-
-extern bool g_ResetActivity;
-
 namespace RTE {
 
 	ConcreteClassInfo(MultiplayerGame, Activity, 0)
@@ -430,7 +427,7 @@ namespace RTE {
 			if (!g_NetworkClient.IsConnectedAndRegistered())
 			{
 				//g_ActivityMan.EndActivity();
-				//g_ResetActivity = true;
+				//g_ActivityMan.SetResetActivity(true);
 				m_Mode = SETUP;
 				m_pGUIController->EnableMouse(true);
 				g_UInputMan.TrapMousePos(false, 0);

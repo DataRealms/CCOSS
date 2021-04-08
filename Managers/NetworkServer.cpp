@@ -20,8 +20,6 @@
 #include <lz4.h>
 #include <lz4hc.h>
 
-extern bool g_ResetActivity;
-
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1702,7 +1700,7 @@ namespace RTE {
 				// Only reset gameplay activities, and not server lobby
 				if (g_ActivityMan.IsInActivity() && g_ActivityMan.GetActivity()->GetPresetName() != "Multiplayer Lobby") {
 					g_ActivityMan.EndActivity();
-					g_ResetActivity = true;
+					g_ActivityMan.SetResetActivity(true);
 					g_ActivityMan.SetInActivity(false);
 				}
 			}

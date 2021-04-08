@@ -107,6 +107,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="isInActivity">In game or not.</param>
 		void SetInActivity(bool isInActivity) { m_InActivity = isInActivity; }
+
+		/// <summary>
+		/// Gets whether the current Activity needs to be restarted.
+		/// </summary>
+		/// <returns>Whether the current Activity needs to be restarted.</returns>
+		bool IsActivityReset() const { return m_ResetActivity; }
+
+		/// <summary>
+		/// Sets whether the current Activity needs to be restarted.
+		/// </summary>
+		/// <param name="resetActivity">Restart the Activity or not.</param>
+		void SetResetActivity(bool resetActivity) { m_ResetActivity = resetActivity; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -162,6 +174,7 @@ namespace RTE {
 		Activity *m_StartActivity; //!< The starting condition of the next Activity to be (re)started. OWNED BY THIS!
 
 		bool m_InActivity; //!< Whether we are currently in game (as in, not in the main menu or any other out-of-game menus), regardless of its state.
+		bool m_ResetActivity; //!< Whether the current Activity needs to be restarted.
 
 		std::string m_LastMusicPath; //!< Path to the last music stream being played.
 		float m_LastMusicPos; //!< What the last position of the in-game music track was before pause, in seconds.

@@ -43,8 +43,6 @@
 #include "PieMenuGUI.h"
 #include "GABaseDefense.h"
 
-extern bool g_ResetActivity;
-
 namespace RTE {
 
 ConcreteClassInfo(AreaEditor, EditorActivity, 0)
@@ -378,7 +376,7 @@ void AreaEditor::Update()
 			pTestGame->SetFogOfWarEnabled(false);
             pTestGame->SetDifficulty(DifficultySetting::MediumDifficulty);
             g_ActivityMan.SetStartActivity(pTestGame);
-            g_ResetActivity = true;
+			g_ActivityMan.SetResetActivity(true);
         }
     }
 

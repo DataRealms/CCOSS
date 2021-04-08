@@ -45,8 +45,6 @@
 #include "PieMenuGUI.h"
 #include "GABaseDefense.h"
 
-extern bool g_ResetActivity;
-
 namespace RTE {
 
 ConcreteClassInfo(ActorEditor, EditorActivity, 0)

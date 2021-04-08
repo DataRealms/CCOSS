@@ -43,9 +43,6 @@
 
 #include "NetworkServer.h"
 
-
-extern bool g_ResetActivity;
-
 namespace RTE {
 
 	ConcreteClassInfo(MultiplayerServerLobby, Activity, 0)
@@ -1007,7 +1004,7 @@ namespace RTE {
 		g_AudioMan.ClearMusicQueue();
 		g_AudioMan.StopMusic();
 
-		g_ResetActivity = true;
+		g_ActivityMan.SetResetActivity(true);
 		g_ActivityMan.SetStartActivity(pActivity);
 
 		// Kill any Campaign games currently running

@@ -26,7 +26,6 @@
 #include "Scene.h"
 #include "SLTerrain.h"
 
-extern bool g_ResetActivity;
 extern bool g_ResumeActivity;
 
 namespace RTE {

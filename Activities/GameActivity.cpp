@@ -39,8 +39,6 @@
 #include "SceneEditorGUI.h"
 #include "GUIBanner.h"
 
-extern bool g_ResetActivity;
-
 #define BRAINLZWIDTHDEFAULT 640
 
 namespace RTE {

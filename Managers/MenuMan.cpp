@@ -20,8 +20,6 @@
 #include "MultiplayerServerLobby.h"
 
 extern bool g_ResumeActivity;
-extern bool g_ResetActivity;
-
 extern volatile bool g_Quit;
 
 namespace RTE {
@@ -105,7 +103,7 @@ namespace RTE {
 
 		//g_FrameMan.ResetSplitScreens(true, true);
 		g_ActivityMan.SetStartActivity(multiplayerServerLobby);
-		g_ResetActivity = true;
+		g_ActivityMan.SetResetActivity(true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -152,7 +150,7 @@ namespace RTE {
 			g_ResumeActivity = true;
 		} else if (updateResult == ScenarioGUI::ScenarioUpdateResult::ActivityRestarted) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeScrollOut);
-			g_ResetActivity = true;
+			g_ActivityMan.SetResetActivity(true);
 		}
 
 		/*

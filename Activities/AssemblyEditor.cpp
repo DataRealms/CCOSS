@@ -45,8 +45,6 @@
 #include "BunkerAssembly.h"
 #include "BunkerAssemblyScheme.h"
 
-extern bool g_ResetActivity;
-
 namespace RTE {
 
 ConcreteClassInfo(AssemblyEditor, EditorActivity, 0)

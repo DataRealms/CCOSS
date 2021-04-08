@@ -10,7 +10,6 @@
 #include "GameActivity.h"
 
 extern volatile bool g_Quit;
-extern bool g_ResetActivity;
 extern bool g_LaunchIntoEditor;
 
 namespace RTE {
@@ -794,8 +793,8 @@ namespace RTE {
 				return;
 			}
 			// Ctrl+R or Back button for controllers to reset activity.
-			if (!g_ResetActivity) { g_ResetActivity = FlagCtrlState() && KeyPressed(KEY_R) || AnyBackPress(); }
-			if (g_ResetActivity) {
+			if (!g_ActivityMan.IsActivityReset()) { g_ActivityMan.SetResetActivity(FlagCtrlState() && KeyPressed(KEY_R) || AnyBackPress()); }
+			if (g_ActivityMan.IsActivityReset()) {
 				return;
 			}
 		}

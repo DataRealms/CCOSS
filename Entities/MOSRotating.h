@@ -848,6 +848,18 @@ ClassInfoGetters
 
 	void SetTravelImpulse(Vector impulse) { m_TravelImpulse = impulse; }
 
+	/// <summary>
+	/// Gets this MOSRotating's gib sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this MOSRotating's gib sound.</returns>
+	SoundContainer * GetGibSound() const { return m_GibSound; }
+
+	/// <summary>
+	/// Sets this MOSRotating's gib sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this MOSRotating's gib sound.</param>
+	void SetGibSound(SoundContainer *newSound) { m_GibSound = newSound; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -933,7 +945,7 @@ protected:
     int m_GibWoundLimit;
     float m_GibBlastStrength; //!< The strength with which Gibs and Attachables will get launched when this MOSRotating is gibbed.
     // Gib sound effect
-    SoundContainer m_GibSound;
+    SoundContainer *m_GibSound;
     // Whether to flash effect on gib
     bool m_EffectOnGib;
     // How far this is audiable (in screens) when gibbing

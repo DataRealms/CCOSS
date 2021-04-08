@@ -115,7 +115,7 @@ int SceneEditorGUI::Create(Controller *pController, FeatureSets featureSet, int 
     if (!m_pPicker)
         m_pPicker = new ObjectPickerGUI();
     else
-        m_pPicker->Destroy();
+        m_pPicker->Reset();
     m_pPicker->Create(pController, whichModuleSpace);
 
     m_NativeTechModule = nativeTechModule;
@@ -592,7 +592,7 @@ void SceneEditorGUI::Update()
         m_CursorInAir = g_SceneMan.GetTerrMatter(snappedPos.GetFloorIntX(), snappedPos.GetFloorIntY()) == g_MaterialAir;
 
         // Mousewheel is used as shortcut for getting next and prev items in teh picker's object list
-        if (m_pController->IsState(SCROLL_UP))
+        if (m_pController->IsState(SCROLL_UP) || m_pController->IsState(ControlState::ACTOR_NEXT))
         {
             // Assign a copy of the next picked object to be the currently held one.
             const SceneObject *pNewObject = m_pPicker->GetPrevObject();
@@ -603,7 +603,7 @@ void SceneEditorGUI::Update()
                     m_pCurrentObject->Update();
             }
         }
-        else if (m_pController->IsState(SCROLL_DOWN))
+        else if (m_pController->IsState(SCROLL_DOWN) || m_pController->IsState(ControlState::ACTOR_PREV))
         {
             // Assign a copy of the next picked object to be the currently held one.
             const SceneObject *pNewObject = m_pPicker->GetNextObject();
@@ -668,7 +668,7 @@ void SceneEditorGUI::Update()
             // Pick a brain to install if no one existed already in scene or in hand
             else
             {
-                m_pPicker->ShowSpecificGroup("Brains");
+                m_pPicker->SelectGroupByName("Brains");
                 m_EditorGUIMode = PICKINGOBJECT;
                 m_ModeChanged = true;
                 UpdateBrainPath();
@@ -907,8 +907,8 @@ void SceneEditorGUI::Update()
 						m_EditorGUIMode = PICKINGOBJECT;
 						m_ModeChanged = true;
 						// Try to switch away from brains so it's clear we placed it
-						if (!m_pPicker->ShowSpecificGroup("Primary Weapons"))
-							m_pPicker->ShowSpecificGroup("Weapons");
+						if (!m_pPicker->SelectGroupByName("Weapons - Primary"))
+							m_pPicker->SelectGroupByName("Weapons");
 						// Also jolt the cursor off the newly placed brain to make it even clearer
 						m_CursorPos.m_X += 40;
 						m_CursorPos.m_Y += 10;

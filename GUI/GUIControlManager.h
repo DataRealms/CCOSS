@@ -117,9 +117,9 @@ public:
 // Method:          Update
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates the GUI every frame
-// Arguments:       None.
+// Arguments:       Whether keyboard events should be ignored or not. Used to avoid conflicts when custom keyboard handling for GUI elements is preset.
 
-    void Update();
+    void Update(bool ignoreKeyboardEvents = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

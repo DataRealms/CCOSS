@@ -636,7 +636,7 @@ protected:
     std::list<PieMenuGUI::Slice> m_PieSlices;
     // How loud this device is when activated. 0 means perfectly quiet 0.5 means half of normal (normal equals audiable from ~half a screen)
     float m_Loudness;
-    // If this weapon belongs to the "Explosive Weapons" grroup or not
+    // If this weapon belongs to the "Explosive Weapons" group or not
     bool m_IsExplosiveWeapon;
 
 

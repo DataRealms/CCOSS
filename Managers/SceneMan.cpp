@@ -514,7 +514,10 @@ BITMAP * SceneMan::GetMOColorBitmap() const { return m_pMOColorLayer->GetBitmap(
 // Description:     Gets the bitmap of the SceneLayer that debug graphics is drawn onto.
 //                  Will only return valid BITMAP if building with DEBUG_BUILD.
 
-BITMAP * SceneMan::GetDebugBitmap() const { return m_pDebugLayer->GetBitmap(); }
+BITMAP *SceneMan::GetDebugBitmap() const {
+    RTEAssert(m_pDebugLayer, "Tried to get debug bitmap but debug layer doesn't exist. Note that the debug layer is only created under certain circumstances.");
+    return m_pDebugLayer->GetBitmap();
+}
 
 
 

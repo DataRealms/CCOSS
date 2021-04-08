@@ -38,6 +38,7 @@ namespace RTE {
 	int TDExplosive::ReadProperty(const std::string_view &propName, Reader &reader) {
 		// TODO: Consider removing DetonationSound as GibSound already exists and could be used in its place
 		if (propName == "DetonationSound") {
+			if (!m_GibSound) { m_GibSound = new SoundContainer; }
 			reader >> m_GibSound;
 		} else if (propName == "IsAnimatedManually") {
 			reader >> m_IsAnimatedManually;

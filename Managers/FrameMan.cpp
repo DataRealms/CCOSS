@@ -20,8 +20,6 @@
 #include <X11/Xlib.h>
 #endif
 
-extern bool g_InActivity;
-
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1091,7 +1089,7 @@ namespace RTE {
 
 		if (IsInMultiplayerMode()) { PrepareFrameForNetwork(); }
 
-		if (g_InActivity) { g_PostProcessMan.PostProcess(); }
+		if (g_ActivityMan.IsInActivity()) { g_PostProcessMan.PostProcess(); }
 
 		// Draw the console on top of everything
 		g_ConsoleMan.Draw(m_BackBuffer32);

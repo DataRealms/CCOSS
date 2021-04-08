@@ -40,7 +40,6 @@
 #include "GUIBanner.h"
 
 extern bool g_ResetActivity;
-extern bool g_InActivity;
 
 #define BRAINLZWIDTHDEFAULT 640
 
@@ -1990,7 +1989,7 @@ void GameActivity::Update()
             if (m_GameOverTimer.IsPastSimMS(55000) || g_UInputMan.AnyStartPress())
             {
                 g_ActivityMan.EndActivity();
-                g_InActivity = false;
+				g_ActivityMan.SetInActivity(false);
             }
         }
 

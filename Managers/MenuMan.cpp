@@ -21,7 +21,6 @@
 
 extern bool g_ResumeActivity;
 extern bool g_ResetActivity;
-extern bool g_InActivity;
 
 extern volatile bool g_Quit;
 
@@ -117,7 +116,7 @@ namespace RTE {
 		m_MainMenu->Update();
 
 		if (m_TitleScreen->GetActiveMenu() == TitleScreen::ActiveMenu::MainMenuActive) {
-			g_InActivity = false;
+			g_ActivityMan.SetInActivity(false);
 		}
 		if (m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::ScenarioMenuActive && m_MainMenu->ScenarioStarted()) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario);

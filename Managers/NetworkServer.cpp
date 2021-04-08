@@ -21,7 +21,6 @@
 #include <lz4hc.h>
 
 extern bool g_ResetActivity;
-extern bool g_InActivity;
 
 namespace RTE {
 
@@ -1543,7 +1542,7 @@ namespace RTE {
 			g_FrameMan.GetLargeFont()->DrawAligned(&guiBMP, midX, 20, "NOT CONNECTED TO NAT SERVICE", GUIFont::Centre);
 		}
 
-		if (g_InActivity) {
+		if (g_ActivityMan.IsInActivity()) {
 			const GameActivity *gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
 			if (gameActivity) {
 				std::snprintf(buf, sizeof(buf), "Activity: %s   Players: %d", gameActivity->GetPresetName().c_str(), gameActivity->GetPlayerCount());
@@ -1701,10 +1700,10 @@ namespace RTE {
 					m_ResetActivityVotes[player] = false;
 				}
 				// Only reset gameplay activities, and not server lobby
-				if (g_InActivity && g_ActivityMan.GetActivity()->GetPresetName() != "Multiplayer Lobby") {
+				if (g_ActivityMan.IsInActivity() && g_ActivityMan.GetActivity()->GetPresetName() != "Multiplayer Lobby") {
 					g_ActivityMan.EndActivity();
 					g_ResetActivity = true;
-					g_InActivity = false;
+					g_ActivityMan.SetInActivity(false);
 				}
 			}
 		}

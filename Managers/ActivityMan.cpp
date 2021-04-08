@@ -10,7 +10,6 @@
 #include "GAScripted.h"
 
 extern bool g_ResumeActivity;
-extern bool g_InActivity;
 
 namespace RTE {
 
@@ -21,6 +20,7 @@ namespace RTE {
 		m_DefaultActivityName = "Tutorial Mission";
 		m_Activity = nullptr;
 		m_StartActivity = nullptr;
+		m_InActivity = false;
 		m_LastMusicPath = "";
 		m_LastMusicPos = 0.0F;
 	}
@@ -65,7 +65,7 @@ namespace RTE {
 		g_ConsoleMan.SetEnabled(false);
 
 		g_ResumeActivity = true;
-		g_InActivity = true;
+		m_InActivity = true;
 
 		g_PostProcessMan.ClearScenePostEffects();
 		g_FrameMan.ClearScreenText();
@@ -102,7 +102,7 @@ namespace RTE {
 			return;
 		}
 
-		if (m_Activity) {		
+		if (m_Activity) {
 			if (pause) {
 				m_LastMusicPath = g_AudioMan.GetMusicPath();
 				m_LastMusicPos = g_AudioMan.GetMusicPosition();
@@ -119,7 +119,7 @@ namespace RTE {
 			}
 
 			m_Activity->SetPaused(pause);
-			g_InActivity = !pause;
+			m_InActivity = !pause;
 			g_AudioMan.PauseAllMobileSounds(pause);
 			g_ConsoleMan.PrintString("SYSTEM: Activity \"" + m_Activity->GetPresetName() + "\" was " + (pause ? "paused" : "resumed"));
 		} else {

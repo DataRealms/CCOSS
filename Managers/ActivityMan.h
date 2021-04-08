@@ -85,7 +85,7 @@ namespace RTE {
 		Activity * GetActivity() const { return m_Activity; }
 
 		/// <summary>
-		/// Indicates whether the game is currently running or not (not editing, over or paused)
+		/// Indicates whether the game is currently running or not (not editing, over or paused).
 		/// </summary>
 		/// <returns>Whether the game is running or not.</returns>
 		bool ActivityRunning() const { return m_Activity ? m_Activity->IsRunning() : false; }
@@ -95,6 +95,18 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether the game is paused or not.</returns>
 		bool ActivityPaused() const { return m_Activity ? m_Activity->IsPaused() : true; }
+
+		/// <summary>
+		/// Gets whether we are currently in game (as in, not in the main menu or any other out-of-game menus), regardless of its state.
+		/// </summary>
+		/// <returns>Whether we are currently in game, regardless of it's state.</returns>
+		bool IsInActivity() const { return m_InActivity; }
+
+		/// <summary>
+		/// Sets whether we are currently in game (as in, not in the main menu or any other out-of-game menus) or not.
+		/// </summary>
+		/// <param name="isInActivity">In game or not.</param>
+		void SetInActivity(bool isInActivity) { m_InActivity = isInActivity; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -145,10 +157,12 @@ namespace RTE {
 
 		std::string m_DefaultActivityType; //!< The type name of the default Activity to be loaded if nothing else is available.
 		std::string m_DefaultActivityName; //!< The preset name of the default Activity to be loaded if nothing else is available.
-		
+
 		Activity *m_Activity; //!< The current Activity in action. OWNED BY THIS!
 		Activity *m_StartActivity; //!< The starting condition of the next Activity to be (re)started. OWNED BY THIS!
-			
+
+		bool m_InActivity; //!< Whether we are currently in game (as in, not in the main menu or any other out-of-game menus), regardless of its state.
+
 		std::string m_LastMusicPath; //!< Path to the last music stream being played.
 		float m_LastMusicPos; //!< What the last position of the in-game music track was before pause, in seconds.
 

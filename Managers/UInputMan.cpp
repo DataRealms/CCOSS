@@ -11,7 +11,6 @@
 
 extern volatile bool g_Quit;
 extern bool g_ResetActivity;
-extern bool g_InActivity;
 extern bool g_LaunchIntoEditor;
 
 namespace RTE {
@@ -788,7 +787,7 @@ namespace RTE {
 			return;
 		}
 
-		if (g_InActivity) {
+		if (g_ActivityMan.IsInActivity()) {
 			const GameActivity *gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
 			if (AnyStartPress(false) && (!gameActivity || !gameActivity->IsBuyGUIVisible(-1))) {
 				g_ActivityMan.PauseActivity();
@@ -911,7 +910,7 @@ namespace RTE {
 				if (m_TrapMousePos) {
 					// Trap the (invisible) mouse cursor in the middle of the screen, so it doesn't fly out in windowed mode and some other window gets clicked
 					position_mouse(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
-				} else if (g_InActivity) {
+				} else if (g_ActivityMan.IsInActivity()) {
 					// The mouse cursor is visible and can move about the screen/window, but it should still be contained within the mouse player's part of the window
 					ForceMouseWithinPlayerScreen(mousePlayer);
 				}
@@ -925,7 +924,7 @@ namespace RTE {
 				m_DisableMouseMoving = m_PrepareToEnableMouseMoving = false;
 			}
 		}
-		if (mousePlayer != Players::NoPlayer || g_InActivity == false) {
+		if (mousePlayer != Players::NoPlayer || !g_ActivityMan.IsInActivity()) {
 			// Mouse wheel update happens while a device is kb+mouse and while in the menus regardless of player devices.
 			// Translate motion into discrete ticks.
 			if (std::abs(mouse_z) >= 1) {

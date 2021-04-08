@@ -46,7 +46,6 @@ using namespace RTE;
 
 volatile bool g_Quit = false;
 bool g_ResetRTE = false; //!< Signals to reset the entire RTE next iteration.
-bool g_InActivity = false;
 bool g_ResetActivity = false;
 bool g_ResumeActivity = false;
 int g_StationOffsetX;
@@ -100,10 +99,10 @@ namespace RTE {
 
 		int error = g_ActivityMan.RestartActivity();
 		if (error >= 0) {
-			g_InActivity = true;
+			g_ActivityMan.SetInActivity(true);
 		} else {
 			// Something went wrong when restarting, so drop out to scenario menu and open the console to show the error messages
-			g_InActivity = false;
+			g_ActivityMan.SetInActivity(false);
 			g_ActivityMan.PauseActivity();
 			g_ConsoleMan.SetEnabled(true);
 			//g_IntroState = MAINTOSCENARIO;
@@ -120,7 +119,7 @@ namespace RTE {
 	void ResumeActivity() {
 		if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::NotStarted) {
 			g_Quit = false;
-			g_InActivity = true;
+			g_ActivityMan.SetInActivity(true);
 			g_ResumeActivity = false;
 
 			g_FrameMan.ClearBackBuffer8();
@@ -229,7 +228,7 @@ namespace RTE {
 				g_ConsoleMan.Update();
 				g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::SimTotal);
 
-				if (!g_InActivity) {
+				if (!g_ActivityMan.IsInActivity()) {
 					g_TimerMan.PauseSim(true);
 					// If we're not in a metagame, then show main menu
 					if (g_MetaMan.GameInProgress()) {
@@ -259,7 +258,7 @@ namespace RTE {
 				if (!g_NetworkServer.ReadyForSimulation()) {
 					g_TimerMan.PauseSim(true);
 				} else {
-					if (g_InActivity) { g_TimerMan.PauseSim(false); }
+					if (g_ActivityMan.IsInActivity()) { g_TimerMan.PauseSim(false); }
 				}
 				if (!serverUpdated) {
 					g_NetworkServer.Update();

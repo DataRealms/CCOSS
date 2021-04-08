@@ -355,6 +355,16 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetHolsterOffset
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets the offset position of the holster where this Actor draws his devices from.
+// Arguments:       None.
+// Return value:    The offset position of the holster.
+
+	Vector GetHolsterOffset() const { return m_HolsterOffset; }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetViewPoint
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the point at which this actor is viewing, or that the scene frame
@@ -464,7 +474,17 @@ ClassInfoGetters
 // Arguments:       A new amount of passenger slots.
 // Return value:    None.
 
-    void SetPassengerSlots(int newPassengerSlots) { m_PassengerSlots = newPassengerSlots;; }
+    void SetPassengerSlots(int newPassengerSlots) { m_PassengerSlots = newPassengerSlots; }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          SetHolsterOffset
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets the offset position of the holster where this Actor draws his devices from.
+// Arguments:       A new holster offset.
+// Return value:    None.
+
+	void SetHolsterOffset(Vector newOffset) { m_HolsterOffset = newOffset; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -1075,6 +1075,7 @@ int LuaMan::Initialize() {
             .def("HasObjectInGroup", &Actor::HasObjectInGroup)
             .property("CPUPos", &Actor::GetCPUPos)
             .property("EyePos", &Actor::GetEyePos)
+            .property("HolsterOffset", &Actor::GetHolsterOffset, &Actor::SetHolsterOffset)
             .property("ViewPoint", &Actor::GetViewPoint, &Actor::SetViewPoint)
             .property("Height", &Actor::GetHeight)
             .def("IsWithinRange", &Actor::IsWithinRange)
@@ -1136,6 +1137,7 @@ int LuaMan::Initialize() {
 
 		CONCRETELUABINDING(Arm, Attachable)
             .property("HeldDevice", &Arm::GetHeldMO)
+			.property("MaxLength", &Arm::GetMaxLength)
 			.property("IdleOffset", &Arm::GetIdleOffset, &Arm::SetIdleOffset)
             .property("GripStrength", &Arm::GetGripStrength, &Arm::SetGripStrength)
 			.property("HandPos", &Arm::GetHandPos, &Arm::SetHandPos),

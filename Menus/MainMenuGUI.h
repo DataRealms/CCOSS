@@ -262,7 +262,8 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		void RollCredits();
+		/// <returns></returns>
+		bool RollCredits();
 
 		/// <summary>
 		/// 

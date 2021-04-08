@@ -285,16 +285,18 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::RollCredits() {
+	bool MainMenuGUI::RollCredits() {
 		int scrollTime = m_CreditsLabel->GetHeight() * 50;
 		int scrollDist = m_CreditsScrollPanel->GetHeight() + m_CreditsLabel->GetHeight();
 		float scrollProgress = static_cast<float>(m_ScrollTimer.GetElapsedRealTimeMS()) / static_cast<float>(scrollTime);
 		m_CreditsLabel->SetPositionRel(0, m_CreditsScrollPanel->GetHeight() - static_cast<int>(static_cast<float>(scrollDist) * scrollProgress));
-		// If we've scrolled through the whole thing, reset to the bottom and restart scroll
-		if (m_ScrollTimer.IsPastRealMS(scrollTime)) {
-			m_CreditsLabel->SetPositionRel(0, m_CreditsScrollPanel->GetHeight());
-			m_ScrollTimer.Reset();
+
+		if (m_ScrollTimer.IsPastRealMS(scrollTime + 1000)) {
+			m_ScreenChange = true;
+			HideAllScreens();
+			return true;
 		}
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -499,8 +501,7 @@ namespace RTE {
 				break;
 			case MenuScreen::CreditsScreen:
 				if (m_ScreenChange) { ShowCreditsScreen(); }
-				RollCredits();
-				backToMainMenu = HandleInputEvents();
+				backToMainMenu = RollCredits() ? true : HandleInputEvents();
 				break;
 			case MenuScreen::CampaignScreen:
 				if (m_ScreenChange) { ShowCampaignScreen(); }

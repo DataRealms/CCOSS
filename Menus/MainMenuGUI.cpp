@@ -38,7 +38,6 @@ namespace RTE {
 		m_ScreenChange = false;
 		m_BlinkTimer.Reset();
 
-		m_EditorMenuPanel = nullptr;
 		m_CreditsScrollPanel = nullptr;
 		m_ScrollTimer.Reset();
 		m_ScenarioStarted = false;
@@ -70,18 +69,8 @@ namespace RTE {
 		m_RootBoxOriginalHeight = m_RootBox->GetHeight();
 
 		m_MainMenuScreens.at(MenuScreen::MainScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("MainScreen"));
-		m_MainMenuScreens.at(MenuScreen::SettingsScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("OptionsScreen"));
-		m_MainMenuScreens.at(MenuScreen::EditorScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("EditorScreen"));
-		m_MainMenuScreens.at(MenuScreen::CampaignScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("MetaScreen"));
-		m_MainMenuScreens.at(MenuScreen::CreditsScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CreditsScreen"));
-
-		m_MainMenuScreens.at(MenuScreen::CreditsScreen)->Resize(m_MainMenuScreens.at(MenuScreen::CreditsScreen)->GetWidth(), g_FrameMan.GetResY());
-
 		m_MainMenuScreens.at(MenuScreen::QuitScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("QuitConfirmBox"));
 		m_MainMenuScreens.at(MenuScreen::QuitScreen)->CenterInParent(true, true);
-
-		// Panel behind editor menu to be resized depending on which editors are available
-		m_EditorMenuPanel = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("EditorPanel"));
 
 		m_MainMenuButtons.at(MenuButton::CampaignButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToCampaign"));
 		m_MainMenuButtons.at(MenuButton::ScenarioButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToSkirmish"));
@@ -92,27 +81,65 @@ namespace RTE {
 		m_MainMenuButtons.at(MenuButton::CreditsButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToCreds"));
 		m_MainMenuButtons.at(MenuButton::QuitButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuit"));
 		m_MainMenuButtons.at(MenuButton::ResumeButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonResume"));
-		m_MainMenuButtons.at(MenuButton::PlayTutorialButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonTutorial"));
-		m_MainMenuButtons.at(MenuButton::CampaignContinueButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonContinue"));
 		m_MainMenuButtons.at(MenuButton::BackToMainButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonBackToMain"));
+		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetVisible(false);
 		m_MainMenuButtons.at(MenuButton::QuitConfirmButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("QuitConfirmButton"));
 		m_MainMenuButtons.at(MenuButton::QuitCancelButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("QuitCancelButton"));
-		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetVisible(false);
+
+		m_VersionLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("VersionLabel"));
+		m_VersionLabel->SetText(c_GameVersion);
+		m_VersionLabel->SetPositionAbs(10, g_FrameMan.GetResY() - m_VersionLabel->GetTextHeight() - 10);
+
+		CreateCampaignScreen();
+		CreateEditorsScreen();
+		CreateCreditsScreen();
+
+		m_SettingsMenu = std::make_unique<SettingsGUI>(guiScreen, guiInput, controller);
+		m_ModManagerMenu = std::make_unique<ModManagerGUI>(guiScreen, guiInput);
+
+		m_ScreenChange = true;
+		HideAllScreens();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void MainMenuGUI::CreateCampaignScreen() {
+		m_MainMenuScreens.at(MenuScreen::CampaignScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("MetaScreen"));
+
+		m_MainMenuButtons.at(MenuButton::PlayTutorialButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonTutorial"));
 		m_MainMenuButtons.at(MenuButton::PlayTutorialButton)->SetVisible(false);
+		m_MainMenuButtons.at(MenuButton::CampaignContinueButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonContinue"));
 		m_MainMenuButtons.at(MenuButton::CampaignContinueButton)->SetVisible(false);
+
+		m_MetaNoticeLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("MetaLabel"));
+
+		const char *metaNotice = {
+			"- A T T E N T I O N -\n\n"
+			"Please note that the Campaign is in an INCOMPLETE, fully playable, yet still imperfect state!\n"
+			"As such, it is lacking some polish, audio, and game balancing, and we will be upgrading it significantly in future.\n"
+			"That said, you can absolutely enjoy fighting the A.I. and/or up to three friends in co-op, 2 vs 2, etc.\n\n"
+			"Also, if you have not yet played Cortex Command, we recommend you first try the tutorial:"
+		};
+		m_MetaNoticeLabel->SetText(metaNotice);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void MainMenuGUI::CreateEditorsScreen() {
+		m_MainMenuScreens.at(MenuScreen::EditorScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("EditorScreen"));
 
 		m_MainMenuButtons.at(MenuButton::SceneEditorButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonSceneEditor"));
 		m_MainMenuButtons.at(MenuButton::AreaEditorButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonAreaEditor"));
 		m_MainMenuButtons.at(MenuButton::AssemblyEditorButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonAssemblyEditor"));
 		m_MainMenuButtons.at(MenuButton::GitEditorButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonGibPlacement"));
 		m_MainMenuButtons.at(MenuButton::ActorEditorButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonActorEditor"));
+	}
 
-		m_MetaNoticeLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("MetaLabel"));
-		m_MetaNoticeLabel->SetText("- A T T E N T I O N -\n\nPlease note that the Campaign is in an INCOMPLETE, fully playable, yet still imperfect state!\nAs such, it is lacking some polish, audio, and game balancing, and we will be upgrading it significantly in future.\nThat said, you can absolutely enjoy fighting the A.I. and/or up to three friends in co-op, 2 vs 2, etc.\n\nAlso, if you have not yet played Cortex Command, we recommend you first try the tutorial:");
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		m_VersionLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("VersionLabel"));
-		m_VersionLabel->SetText(c_GameVersion);
-		m_VersionLabel->SetPositionAbs(10, g_FrameMan.GetResY() - m_VersionLabel->GetTextHeight() - 10);
+	void MainMenuGUI::CreateCreditsScreen() {
+		m_MainMenuScreens.at(MenuScreen::CreditsScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CreditsScreen"));
+		m_MainMenuScreens.at(MenuScreen::CreditsScreen)->Resize(m_MainMenuScreens.at(MenuScreen::CreditsScreen)->GetWidth(), g_FrameMan.GetResY());
 
 		m_CreditsScrollPanel = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CreditsPanel"));
 		m_CreditsLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("CreditsLabel"));
@@ -131,12 +158,6 @@ namespace RTE {
 		}
 		m_CreditsLabel->SetText(creditsText);
 		m_CreditsLabel->ResizeHeightToFit();
-
-		m_SettingsMenu = std::make_unique<SettingsGUI>(guiScreen, guiInput, controller);
-		m_ModManagerMenu = std::make_unique<ModManagerGUI>(guiScreen, guiInput);
-
-		m_ScreenChange = true;
-		HideAllScreens();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -230,6 +251,8 @@ namespace RTE {
 		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetVisible(false);
 		m_MainMenuButtons.at(MenuButton::PlayTutorialButton)->SetVisible(false);
 		m_MainMenuButtons.at(MenuButton::CampaignContinueButton)->SetVisible(false);
+
+		m_VersionLabel->SetVisible(true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -241,6 +264,10 @@ namespace RTE {
 		m_MainMenuButtons.at(MenuButton::CampaignContinueButton)->SetVisible(true);
 
 		m_MetaNoticeLabel->SetVisible(true);
+
+		m_MainMenuScreens.at(MenuScreen::CampaignScreen)->GUIPanel::AddChild(m_MainMenuButtons.at(MenuButton::BackToMainButton));
+		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetVisible(true);
+		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetPositionRel(4, 145);
 
 		// Flag that this notice has now been shown once, so no need to keep showing it
 		m_TutorialOffered = true;
@@ -272,6 +299,8 @@ namespace RTE {
 
 		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetVisible(true);
 		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetPositionAbs((g_FrameMan.GetResX() - m_MainMenuButtons.at(MenuButton::BackToMainButton)->GetWidth()) / 2, m_CreditsScrollPanel->GetYPos() + scrollPanelHeight + 10);
+
+		m_VersionLabel->SetVisible(false);
 
 		m_ScrollTimer.Reset();
 	}

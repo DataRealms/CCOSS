@@ -190,8 +190,6 @@ namespace RTE {
 		GUICollectionBox *m_RootBox; //!<
 		int m_RootBoxOriginalHeight; //!<
 
-		GUICollectionBox *m_EditorMenuPanel; //!< Panel behind editor menu to be resized depending on which editors are available.
-
 		GUICollectionBox *m_CreditsScrollPanel; //!< Scrolling panel for the credits.
 		GUILabel *m_CreditsLabel; //!< The label containing all the credits text.
 		Timer m_ScrollTimer; //!< Timer for credits scrolling pacing.
@@ -209,6 +207,23 @@ namespace RTE {
 
 		std::unique_ptr<SettingsGUI> m_SettingsMenu; //!<
 		std::unique_ptr<ModManagerGUI> m_ModManagerMenu; //!<
+
+#pragma region Create Breakdown
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreateCampaignScreen();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreateEditorsScreen();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreateCreditsScreen();
+#pragma endregion
 
 #pragma region
 		/// <summary>

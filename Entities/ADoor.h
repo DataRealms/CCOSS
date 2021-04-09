@@ -96,6 +96,54 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether a player can control this at all.</returns>
 		bool IsControllable() const override { return false; }
+
+		/// <summary>
+		/// Gets this ADoor's door move start sound. Ownership is NOT transferred!
+		/// </summary>
+		/// <returns>The SoundContainer for this ADoor's door move start sound.</returns>
+		SoundContainer * GetDoorMoveStartSound() const { return m_DoorMoveStartSound; }
+
+		/// <summary>
+		/// Sets this ADoor's door move start sound. Ownership IS transferred!
+		/// </summary>
+		/// <param name="newSound">The new SoundContainer for this ADoor's door move start sound.</param>
+		void SetDoorMoveStartSound(SoundContainer *newSound) { m_DoorMoveStartSound = newSound; }
+
+		/// <summary>
+		/// Gets this ADoor's door move sound. Ownership is NOT transferred!
+		/// </summary>
+		/// <returns>The SoundContainer for this ADoor's door move sound.</returns>
+		SoundContainer * GetDoorMoveSound() const { return m_DoorMoveSound; }
+
+		/// <summary>
+		/// Sets this ADoor's door move sound. Ownership IS transferred!
+		/// </summary>
+		/// <param name="newSound">The new SoundContainer for this ADoor's door move sound.</param>
+		void SetDoorMoveSound(SoundContainer *newSound) { m_DoorMoveSound = newSound; }
+
+		/// <summary>
+		/// Gets this ADoor's door direction change sound. Ownership is NOT transferred!
+		/// </summary>
+		/// <returns>The SoundContainer for this ADoor's door direction change sound.</returns>
+		SoundContainer * GetDoorDirectionChangeSound() const { return m_DoorDirectionChangeSound; }
+
+		/// <summary>
+		/// Sets this ADoor's door direction change sound. Ownership IS transferred!
+		/// </summary>
+		/// <param name="newSound">The new SoundContainer for this ADoor's door direction change sound.</param>
+		void SetDoorDirectionChangeSound(SoundContainer *newSound) { m_DoorDirectionChangeSound = newSound; }
+
+		/// <summary>
+		/// Gets this ADoor's door move end sound. Ownership is NOT transferred!
+		/// </summary>
+		/// <returns>The SoundContainer for this ADoor's door move end sound.</returns>
+		SoundContainer * GetDoorMoveEndSound() const { return m_DoorMoveEndSound; }
+
+		/// <summary>
+		/// Sets this ADoor's door move end sound. Ownership IS transferred!
+		/// </summary>
+		/// <param name="newSound">The new SoundContainer for this ADoor's door move end sound.</param>
+		void SetDoorMoveEndSound(SoundContainer *newSound) { m_DoorMoveEndSound = newSound; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -186,10 +234,10 @@ namespace RTE {
 		bool m_DoorMaterialTempErased; //!< Whether the drawing override is enabled and the door material is erased to allow better pathfinding.
 		Vector m_LastDoorMaterialPos; //!< The position the door attachable had when its material was drawn to the material bitmap. This is used to erase the previous material representation.
 
-		SoundContainer m_DoorMoveStartSound; //!< Sound played when the door starts moving from fully open/closed position towards the opposite end.
-		SoundContainer m_DoorMoveSound; //!< Sound played while the door is moving between open/closed position.
-		SoundContainer m_DoorDirectionChangeSound; //!< Sound played when the door is interrupted while moving and changes directions. 
-		SoundContainer m_DoorMoveEndSound; //!< Sound played when the door stops moving and is at fully open/closed position.
+		SoundContainer *m_DoorMoveStartSound; //!< Sound played when the door starts moving from fully open/closed position towards the opposite end.
+		SoundContainer *m_DoorMoveSound; //!< Sound played while the door is moving between open/closed position.
+		SoundContainer *m_DoorDirectionChangeSound; //!< Sound played when the door is interrupted while moving and changes directions. 
+		SoundContainer *m_DoorMoveEndSound; //!< Sound played when the door stops moving and is at fully open/closed position.
 
 	private:
 

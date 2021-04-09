@@ -27,15 +27,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - Added Lua (R/W) properties for all hardcoded `Attachables`. You can now set them on the fly to be created objects of the relevant type. Note that trying to set things inappropriately (e.g. setting an `HDFirearm` as something's `Leg`) will probably crash the game; that's your problem to deal with.  
 	You can read and write the following properties:  
-	**AHuman** - `Head`, `Jetpack`, `FGArm`, `BGArm`, `FGLeg`, `BGLeg`, `FGFoot`, `BGFoot`  
-	**ACrab** - `Turret`, `Jetpack`, `LeftFGLeg`, `LeftBGLeg`, `RightFGLeg`, `RightBGLeg`  
-	**ACDropship** - `RightEngine`, `LeftEngine`, `RightThruster`, `LeftThruster`, `RightHatch`, `LeftHatch`  
-	**ACRocket** - `RightLeg`, `LeftLeg`, `MainEngine`, `LeftEngine`, `RightEngine`, `LeftThruster`, `RightThruster`  
-	**ADoor** - `Door`  
-	**Turret** - `MountedDevice`  
-	**Leg** - `Foot`  
-	**HDFirearm** - `Magazine`, `Flash`  
-	**AEmitter** - `Flash`
+	**`AHuman`** - `Head`, `Jetpack`, `FGArm`, `BGArm`, `FGLeg`, `BGLeg`, `FGFoot`, `BGFoot`  
+	**`ACrab`** - `Turret`, `Jetpack`, `LeftFGLeg`, `LeftBGLeg`, `RightFGLeg`, `RightBGLeg`  
+	**`ACDropship`** - `RightEngine`, `LeftEngine`, `RightThruster`, `LeftThruster`, `RightHatch`, `LeftHatch`  
+	**`ACRocket`** - `RightLeg`, `LeftLeg`, `MainEngine`, `LeftEngine`, `RightEngine`, `LeftThruster`, `RightThruster`  
+	**`ADoor`** - `Door`  
+	**`Turret`** - `MountedDevice`  
+	**`Leg`** - `Foot`  
+	**`HDFirearm`** - `Magazine`, `Flash`  
+	**`AEmitter`** - `Flash`
 
 - Added `Vector:ClampMagnitude(upperLimit, lowerLimit)` Lua function that lets you limit a Vector's upper and lower magnitude.
 
@@ -49,7 +49,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	In Lua there's only `InheritedRotAngleOffset` which takes/returns radians, to avoid confusion. For example, `InheritedRotAngleDegOffset = 90` would make the `Attachable` always face perpendicular to its parent.  
 	Does nothing if the `Attachable`'s `InheritsRotAngle` is set to false or the `Attachable` has no parent.  
 	`GibWithParentChance = 0 - 1` allows you to specify whether this `Attachable` should be gibbed when its parent does and what the chance of that happening is. 0 means never, 1 means always.  
-	`ParentGibBlastStrengthMultiplier = number` allows you to specify the multiplier this `Attachable` will apply to its parent's gib blast strength when the parent gibs. Usually this would be a positive number, but it doesn't have to be.
+	`ParentGibBlastStrengthMultiplier = number` allows you to specify a multiplier for how strongly this `Attachable` will apply its parent's gib blast strength to itself when the parent gibs. Usually this would be a positive number, but it doesn't have to be.
 
 - New INI and Lua (R/W) `Arm` property `GripStrength`. This effectively replaces the `JointStrength` of the held `HeldDevice`, allowing `Arms` to control how tightly equipment is held.
 
@@ -120,6 +120,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Exposed `Actor` properties `HolsterOffset` and `ItemInReach` to Lua (R/W).
 
 - Exposed `Arm` property `MaxLength` to Lua (R).
+- Exposed broad range of sounds to Lua (R/W) through their relevant SoundContainers. For each class, these include:  
+	**Actor**: `BodyHitSound`, `PainSound`, `DeathSound`, `DeviceSwitchSound`, `AlarmSound`  
+	**AHuman & ACrab**: `StrideSound`  
+	**HDFirearm**: `FireSound`, `FireEchoSound`, `EmptySound`, `ReloadStartSound`, `ReloadEndSound`, `ActiveSound`, `DeactivationSound`, `PreFireSound`  
+	**AEmitter**: `EmissionSound`, `BurstSound`, `EndSound`  
+	**ACraft**: `HatchOpenSound`, `CrashSound`  
+	**MOSRotating**: `GibSound`  
+	**ADoor**: `DoorMoveStartSound`, `DoorMoveSound`, `DoorDirectionChangeSound`, `DoorMoveEndSound`
+  
+- The Lua console (and all text boxes) now support using `Ctrl` to move the cursor around and select or delete text.
+
+- Added `mosRotating:RemoveAttachable(attachableOrUniqueID, addToMovableMan, addBreakWounds)` method that allows you to remove an `Attachable` and specify whether it should be added to `MovableMan` or not, and whether breakwounds should be added (if defined) to the `Attachable` and parent `MOSRotating`.
+
+- Added `attachable:RemoveFromParent()` and `attachable:RemoveFromParent(addToMovableMan, addBreakWounds)` that allow you to remove `Attachables` from their parents without having to use `GetParent` first.
+
+- Added `Settings.ini` debug properties to allow modders to turn on some potentially useful information visualizations.  
+	`DrawAtomGroupVisualizations` - any `MOSRotating` will draw its `AtomGroup` to the standard view.  
+	`DrawHandAndFootGroupVisualizations` - any `Actor` subclasses with  will draw its `AtomGroup` to the standard view.  
+	`DrawLimbPathVisualizations` - any  `AHumans` or `ACrabs` will draw some of their `LimbPaths` to the standard view.  
+	`DrawRayCastVisualizations` - any rays cast by `SceneMan` will be drawn to the standard view.  
+	`DrawPixelCheckVisualizations ` - any pixel checks made by `SceneMan:GetTerrMatter` or `SceneMan:GetMOIDPixel` will be drawn to the standard view.
 
 ### Changed
 
@@ -186,12 +207,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - Pressing escape when a buy menu is open now closes it instead of pausing the game.
 
-- `GetParent` will now always return null for objects with no parents, instead of returning the self object for things that weren't `Attachables`. This makes things more consistent and reasonable throughout and will rarely, if ever, cause Lua problems.
+- `GetParent` will now return an `MOSRotating` instead of a `MovableObject` so it doesn't need to be casted. Additionally, it will always return null for objects with no parents, instead of returning the self object for things that weren't `Attachables`.  
+	This makes things more consistent and reasonable throughout and will rarely, if ever, cause Lua problems.
 
 - Previews generated by the `SceneEditor` are now the same as `ScenePreviewDumps`, also both are now saved as PNGs.
 
 - `Attachable` terrain collisions will now propagate to any child `Attachables` on them. This means that `Attachables` will not collide with terrain, even if set to, if they're attached to a parent that doesn't collide with terrain.  
 	This means that the `attachable.CollidesWithTerrainWhileAttached` value may not represent the true state of things, you should instead use `attachable.CanCollideWithTerrain` to determine whether a given `Attachable` can collide with terrain.
+	
+- Actor selection keys can be used to cycle the selected `ObjectPicker` item while it's closed during building phase and in editors.
 
 ### Fixed
 

@@ -100,12 +100,8 @@ int Arm::Create(const Arm &reference) {
 
 int Arm::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "HeldDevice") {
-        RemoveAttachable(dynamic_cast<Attachable *>(m_pHeldMO));
-        const Entity *heldDeviceEntity = g_PresetMan.GetEntityPreset(reader);
-        if (heldDeviceEntity) {
-            m_pHeldMO = dynamic_cast<MovableObject *>(heldDeviceEntity->Clone());
-            AddAttachable(dynamic_cast<Attachable *>(m_pHeldMO));
-        }
+        const Entity *heldEntity = g_PresetMan.GetEntityPreset(reader);
+        if (heldEntity) { SetHeldMO(dynamic_cast<MovableObject *>(heldEntity->Clone())); }
     } else if (propName == "GripStrength") {
         reader >> m_GripStrength;
     } else if (propName == "Hand") {
@@ -213,7 +209,7 @@ void Arm::SetHeldMO(MovableObject *newHeldMO) {
 
         if (newHeldMO->IsHeldDevice()) {
             Attachable *newHeldDevice = dynamic_cast<Attachable *>(newHeldMO);
-            if (newHeldDevice->IsAttached()) { dynamic_cast<MOSRotating *>(newHeldDevice->GetParent())->RemoveAttachable(newHeldDevice); }
+            if (newHeldDevice->IsAttached()) { newHeldDevice->GetParent()->RemoveAttachable(newHeldDevice); }
             AddAttachable(newHeldDevice);
 
             m_HardcodedAttachableUniqueIDsAndSetters.insert({newHeldDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {

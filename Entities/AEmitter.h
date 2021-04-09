@@ -562,6 +562,42 @@ ClassInfoGetters
 
 	void SetEmitCountLimit(long newValue) { m_EmitCountLimit = newValue; }
 
+	/// <summary>
+	/// Gets this AEmitter's emission sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this AEmitter's emission sound.</returns>
+	SoundContainer * GetEmissionSound() const { return m_EmissionSound; }
+
+	/// <summary>
+	/// Sets this AEmitter's emission sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this AEmitter's emission sound.</param>
+	void SetEmissionSound(SoundContainer *newSound) { m_EmissionSound = newSound; }
+
+	/// <summary>
+	/// Gets this AEmitter's burst sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this AEmitter's burst sound.</returns>
+	SoundContainer * GetBurstSound() const { return m_BurstSound; }
+
+	/// <summary>
+	/// Sets this AEmitter's burst sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this AEmitter's burst sound.</param>
+	void SetBurstSound(SoundContainer *newSound) { m_BurstSound = newSound; }
+
+	/// <summary>
+	/// Gets this AEmitter's end sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this AEmitter's end sound.</returns>
+	SoundContainer * GetEndSound() const { return m_EndSound; }
+
+	/// <summary>
+	/// Sets this AEmitter's end sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this AEmitter's end sound.</param>
+	void SetEndSound(SoundContainer *newSound) { m_EndSound = newSound; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -573,9 +609,9 @@ protected:
     // The list of MO instances that get emitted
     std::list<Emission *> m_EmissionList;
     // Sounds
-    SoundContainer m_EmissionSound;
-    SoundContainer m_BurstSound;
-    SoundContainer m_EndSound;
+    SoundContainer *m_EmissionSound;
+    SoundContainer *m_BurstSound;
+    SoundContainer *m_EndSound;
     // Whether emitting is currently enabled or not.
     bool m_EmitEnabled;
     // Whether or not the it was emitting last frame or not.

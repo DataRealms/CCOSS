@@ -36,10 +36,10 @@ namespace RTE {
 		m_DoorMaterialDrawn = false;
 		m_DoorMaterialTempErased = false;
 		m_LastDoorMaterialPos.Reset();
-		m_DoorMoveStartSound.Reset();
-		m_DoorMoveSound.Reset();
-		m_DoorDirectionChangeSound.Reset();
-		m_DoorMoveEndSound.Reset();
+		m_DoorMoveStartSound = nullptr;
+		m_DoorMoveSound = nullptr;
+		m_DoorDirectionChangeSound = nullptr;
+		m_DoorMoveEndSound = nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -73,10 +73,10 @@ namespace RTE {
 		m_DrawMaterialLayerWhenClosed = reference.m_DrawMaterialLayerWhenClosed;
 		m_DoorMaterialID = reference.m_DoorMaterialID;
 		m_DoorMaterialTempErased = reference.m_DoorMaterialTempErased;
-		m_DoorMoveStartSound = reference.m_DoorMoveStartSound;
-		m_DoorMoveSound = reference.m_DoorMoveSound;
-		m_DoorDirectionChangeSound = reference.m_DoorDirectionChangeSound;
-		m_DoorMoveEndSound = reference.m_DoorMoveEndSound;
+		if (reference.m_DoorMoveStartSound) { m_DoorMoveStartSound = dynamic_cast<SoundContainer*>(reference.m_DoorMoveStartSound->Clone()); }
+		if (reference.m_DoorMoveSound) { m_DoorMoveSound = dynamic_cast<SoundContainer*>(reference.m_DoorMoveSound->Clone()); }
+		if (reference.m_DoorDirectionChangeSound) { m_DoorDirectionChangeSound = dynamic_cast<SoundContainer*>(reference.m_DoorDirectionChangeSound->Clone()); }
+		if (reference.m_DoorMoveEndSound) { m_DoorMoveEndSound = dynamic_cast<SoundContainer*>(reference.m_DoorMoveEndSound->Clone()); }
 
 		return 0;
 	}
@@ -85,12 +85,9 @@ namespace RTE {
 
 	int ADoor::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Door") {
-			RemoveAttachable(m_Door);
 			m_Door = new Attachable;
 			reader >> m_Door;
-			AddAttachable(m_Door);
-			m_Door->SetInheritsRotAngle(false);
-			m_DoorMaterialID = m_Door->GetMaterial()->GetIndex();
+			SetDoor(m_Door);
 		} else if (propName == "OpenOffset") {
 			reader >> m_OpenOffset;
 		} else if (propName == "ClosedOffset") {
@@ -130,12 +127,16 @@ namespace RTE {
 		} else if (propName == "DrawMaterialLayerWhenClosed") {
 			reader >> m_DrawMaterialLayerWhenClosed;
 		} else if (propName == "DoorMoveStartSound") {
+			m_DoorMoveStartSound = new SoundContainer;
 			reader >> m_DoorMoveStartSound;
 		} else if (propName == "DoorMoveSound") {
+			m_DoorMoveSound = new SoundContainer;
 			reader >> m_DoorMoveSound;
 		} else if (propName == "DoorDirectionChangeSound") {
+			m_DoorDirectionChangeSound = new SoundContainer;
 			reader >> m_DoorDirectionChangeSound;
 		} else if (propName == "DoorMoveEndSound") {
+			m_DoorMoveEndSound = new SoundContainer;
 			reader >> m_DoorMoveEndSound;
 		} else {
 			return Actor::ReadProperty(propName, reader);
@@ -189,11 +190,16 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::Destroy(bool notInherited) {
-		m_DoorMoveStartSound.Stop();
-		m_DoorMoveSound.Stop();
-		m_DoorDirectionChangeSound.Stop();
-		m_DoorMoveEndSound.Stop();
+		if (m_DoorMoveStartSound) { m_DoorMoveStartSound->Stop(); }
+		if (m_DoorMoveSound) { m_DoorMoveSound->Stop(); }
+		if (m_DoorDirectionChangeSound) { m_DoorDirectionChangeSound->Stop(); }
+		if (m_DoorMoveEndSound) { m_DoorMoveEndSound->Stop(); }
 		if (!notInherited) { Actor::Destroy(); }
+
+		delete m_DoorMoveStartSound;
+		delete m_DoorMoveSound;
+		delete m_DoorDirectionChangeSound;
+		delete m_DoorMoveEndSound;
 
 		for (ADSensor &sensor : m_Sensors) {
 			sensor.Destroy();
@@ -218,6 +224,9 @@ namespace RTE {
 			m_HardcodedAttachableUniqueIDsAndSetters.insert({newDoor->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
 				dynamic_cast<ADoor *>(parent)->SetDoor(attachable);
 			}});
+
+			m_Door->SetInheritsRotAngle(false);
+			m_DoorMaterialID = m_Door->GetMaterial()->GetIndex();
 		}
 	}
 
@@ -324,8 +333,8 @@ namespace RTE {
 			if (m_DrawMaterialLayerWhenOpen || m_DrawMaterialLayerWhenClosed) { DrawDoorMaterial(); }
 			m_DoorMoveStopTime = m_DoorMoveTime - m_DoorMoveTimer.GetElapsedSimTimeMS();
 			m_DoorStateOnStop = m_DoorState;
-			m_DoorMoveSound.Stop();
-			m_DoorMoveEndSound.Play(m_Pos);
+			if (m_DoorMoveSound) { m_DoorMoveSound->Stop(); }
+			if (m_DoorMoveEndSound) { m_DoorMoveEndSound->Play(m_Pos); }
 			m_DoorState = STOPPED;
 		}
 	}
@@ -334,17 +343,17 @@ namespace RTE {
 
 	void ADoor::SharedDoorControls() {
 		if (m_DoorState == OPEN || m_DoorState == CLOSED) {
-			m_DoorMoveStartSound.Play(m_Pos);
+			if (m_DoorMoveStartSound) { m_DoorMoveStartSound->Play(m_Pos); }
 			m_DoorMoveTimer.Reset();
 			if (m_DoorMaterialDrawn) { EraseDoorMaterial(); }
 			if (m_Door) { m_Door->DeepCheck(true); }
 		} else if (m_DoorState == OPENING || m_DoorState == CLOSING) {
-			m_DoorMoveSound.Stop();
+			if (m_DoorMoveSound) { m_DoorMoveSound->Stop(); }
 			if (!m_ResumeAfterStop) {
-				m_DoorDirectionChangeSound.Play(m_Pos);
+				if (m_DoorDirectionChangeSound) { m_DoorDirectionChangeSound->Play(m_Pos); }
 				m_DoorMoveTimer.SetElapsedSimTimeMS(m_DoorMoveTime - m_DoorMoveTimer.GetElapsedSimTimeMS());
 			} else {
-				m_DoorMoveStartSound.Play(m_Pos);
+				if (m_DoorMoveStartSound) { m_DoorMoveStartSound->Play(m_Pos); }
 				m_DoorMoveTimer.SetElapsedSimTimeMS(m_ChangedDirectionAfterStop ? m_DoorMoveTime - m_DoorMoveStopTime : m_DoorMoveStopTime);
 				m_ChangedDirectionAfterStop = false;
 				m_ResumeAfterStop = false;
@@ -382,8 +391,10 @@ namespace RTE {
 			m_SpriteAnimMode = ALWAYSLOOP;
 			m_SpriteAnimDuration = LERP(0, m_MaxHealth, 10, m_InitialSpriteAnimDuration, m_Health);
 
-			if (!m_DoorMoveSound.IsBeingPlayed()) { m_DoorMoveSound.Play(m_Pos); }
-			m_DoorMoveSound.SetPitch(LERP(10, m_InitialSpriteAnimDuration, 2, 1, m_SpriteAnimDuration));
+			if (m_DoorMoveSound) {
+				if (!m_DoorMoveSound->IsBeingPlayed()) { m_DoorMoveSound->Play(m_Pos); }
+				m_DoorMoveSound->SetPitch(LERP(10, m_InitialSpriteAnimDuration, 2, 1, m_SpriteAnimDuration));
+			}
 
 			m_Health -= 0.4F;
 		}
@@ -443,7 +454,7 @@ namespace RTE {
 			m_Door->SetParentOffset(endOffset);
 			m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * static_cast<float>(GetFlipFactor())));
 		} else if (m_DoorState == OPENING || m_DoorState == CLOSING) {
-			if (!m_DoorMoveSound.IsBeingPlayed()) { m_DoorMoveSound.Play(m_Pos); }
+			if (m_DoorMoveSound && !m_DoorMoveSound->IsBeingPlayed()) { m_DoorMoveSound->Play(m_Pos); }
 
 			if (m_DoorMoveTimer.IsPastSimMS(m_DoorMoveTime)) {
 				m_ResetToDefaultStateTimer.Reset();
@@ -451,8 +462,8 @@ namespace RTE {
 				m_Door->SetParentOffset(endOffset);
 				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * static_cast<float>(GetFlipFactor())));
 
-				m_DoorMoveSound.Stop();
-				m_DoorMoveEndSound.Play(m_Pos);
+				if (m_DoorMoveSound) { m_DoorMoveSound->Stop(); }
+				if (m_DoorMoveEndSound) { m_DoorMoveEndSound->Play(m_Pos); }
 
 				if (m_DoorState == OPENING) {
 					if (m_DrawMaterialLayerWhenOpen) { DrawDoorMaterial(); }

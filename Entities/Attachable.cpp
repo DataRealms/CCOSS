@@ -20,7 +20,7 @@ namespace RTE {
 		m_ApplyTransferredForcesAtOffset = true;
 
 		m_GibWithParentChance = 0.0F;
-		m_ParentGibBlastStrengthMultiplier = 1;
+		m_ParentGibBlastStrengthMultiplier = 1.0F;
 
 		m_IsWound = false;
 
@@ -445,7 +445,18 @@ namespace RTE {
 			m_RestTimer.Reset();
 			m_Team = -1;
 			m_IsWound = false;
-			if (m_pMOToNotHit && m_Parent && m_Parent->GetWhichMOToNotHit() == m_pMOToNotHit) { m_pMOToNotHit = nullptr; }
+
+			MovableObject *rootParent = GetRootParent();
+			if (rootParent) {
+				const MovableObject *whichMOToNotHit = GetWhichMOToNotHit();
+				const MovableObject *rootParentMOToNotHit = rootParent->GetWhichMOToNotHit();
+				if ((whichMOToNotHit && whichMOToNotHit != rootParent) || (rootParentMOToNotHit && rootParentMOToNotHit != this)) {
+					m_pMOToNotHit = nullptr;
+				} else {
+					m_pMOToNotHit = rootParent;
+					rootParent->SetWhichMOToNotHit(this);
+				}
+			}
 
 			if (CanCollideWithTerrain()) { AddOrRemoveAtomsFromRootParentAtomGroup(false, true); }
 			m_Parent = newParent;

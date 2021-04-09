@@ -166,7 +166,7 @@ int ActorEditor::Start()
     // Allocate and (re)create the picker GUI
 
     if (m_pPicker)
-        m_pPicker->Destroy();
+        m_pPicker->Reset();
     else
         m_pPicker = new ObjectPickerGUI;
     m_pPicker->Create(&(m_PlayerController[0]), -1, "Actor");

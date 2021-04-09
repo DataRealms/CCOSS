@@ -55,7 +55,7 @@ void AHuman::Clear()
     m_BackupFGFootGroup = nullptr;
     m_pBGFootGroup = 0;
     m_BackupBGFootGroup = nullptr;
-    m_StrideSound.Reset();
+    m_StrideSound = nullptr;
     m_ArmsState = WEAPON_READY;
     m_MoveState = STAND;
     m_ProneState = NOTPRONE;
@@ -203,7 +203,7 @@ int AHuman::Create(const AHuman &reference) {
     m_BackupBGFootGroup->SetOwner(this);
     m_BackupBGFootGroup->SetLimbPos(reference.m_BackupBGFootGroup->GetLimbPos());
 
-    m_StrideSound = reference.m_StrideSound;
+	if (reference.m_StrideSound) { m_StrideSound = dynamic_cast<SoundContainer*>(reference.m_StrideSound->Clone()); }
 
     m_ArmsState = reference.m_ArmsState;
     m_MoveState = reference.m_MoveState;
@@ -244,22 +244,15 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "ThrowPrepTime") {
         reader >> m_ThrowPrepTime;
     } else if (propName == "Head") {
-        RemoveAttachable(m_pHead);
         m_pHead = new Attachable;
         reader >> m_pHead;
-        AddAttachable(m_pHead);
-        if (m_pHead->HasNoSetDamageMultiplier()) { m_pHead->SetDamageMultiplier(5.0F); }
-        if (m_pHead->IsDrawnAfterParent()) { m_pHead->SetDrawnNormallyByParent(false); }
-        m_pHead->SetInheritsRotAngle(false);
+        SetHead(m_pHead);
 	} else if (propName == "LookToAimRatio") {
 		reader >> m_LookToAimRatio;
     } else if (propName == "Jetpack") {
-        RemoveAttachable(m_pJetpack);
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
-        AddAttachable(m_pJetpack);
-        if (m_pJetpack->HasNoSetDamageMultiplier()) { m_pJetpack->SetDamageMultiplier(0.0F); }
-        m_pJetpack->SetApplyTransferredForcesAtOffset(false);
+        SetJetpack(m_pJetpack);
     } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         // Convert to ms
@@ -271,33 +264,21 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
 	} else if (propName == "BGArmFlailScalar") {
 		reader >> m_BGArmFlailScalar;
     } else if (propName == "FGArm") {
-        RemoveAttachable(m_pFGArm);
         m_pFGArm = new Arm;
         reader >> m_pFGArm;
-        AddAttachable(m_pFGArm);
-        if (m_pFGArm->HasNoSetDamageMultiplier()) { m_pFGArm->SetDamageMultiplier(1.0F); }
-        m_pFGArm->SetDrawnAfterParent(true);
-        m_pFGArm->SetDrawnNormallyByParent(false);
+        SetFGArm(m_pFGArm);
     } else if (propName == "BGArm") {
-        RemoveAttachable(m_pBGArm);
         m_pBGArm = new Arm;
         reader >> m_pBGArm;
-        AddAttachable(m_pBGArm);
-        if (m_pBGArm->HasNoSetDamageMultiplier()) { m_pBGArm->SetDamageMultiplier(1.0F); }
-        m_pBGArm->SetDrawnAfterParent(false);
+        SetBGArm(m_pBGArm);
     } else if (propName == "FGLeg") {
-        RemoveAttachable(m_pFGLeg);
         m_pFGLeg = new Leg;
         reader >> m_pFGLeg;
-        AddAttachable(m_pFGLeg);
-        if (m_pFGLeg->HasNoSetDamageMultiplier()) { m_pFGLeg->SetDamageMultiplier(1.0F); }
+        SetFGLeg(m_pFGLeg);
     } else if (propName == "BGLeg") {
-        RemoveAttachable(m_pBGLeg);
         m_pBGLeg = new Leg;
         reader >> m_pBGLeg;
-        AddAttachable(m_pBGLeg);
-        if (m_pBGLeg->HasNoSetDamageMultiplier()) { m_pBGLeg->SetDamageMultiplier(1.0F); }
-        m_pBGLeg->SetDrawnAfterParent(false);
+        SetBGLeg(m_pBGLeg);
     } else if (propName == "HandGroup") {
         delete m_pFGHandGroup;
         delete m_pBGHandGroup;
@@ -322,6 +303,7 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
         m_BackupBGFootGroup = new AtomGroup(*m_pBGFootGroup);
         m_BackupBGFootGroup->RemoveAllAtoms();
     } else if (propName == "StrideSound") {
+		m_StrideSound = new SoundContainer;
         reader >> m_StrideSound;
     } else if (propName == "StandLimbPath") {
         reader >> m_Paths[FGROUND][STAND];
@@ -437,6 +419,8 @@ void AHuman::Destroy(bool notInherited) {
     delete m_pFGFootGroup;
     delete m_pBGFootGroup;
 
+	delete m_StrideSound;
+
     if (!notInherited) { Actor::Destroy(); }
     Clear();
 }
@@ -543,6 +527,10 @@ void AHuman::SetHead(Attachable *newHead) {
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newHead->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
             dynamic_cast<AHuman *>(parent)->SetHead(attachable);
         }});
+
+        if (m_pHead->HasNoSetDamageMultiplier()) { m_pHead->SetDamageMultiplier(5.0F); }
+        if (m_pHead->IsDrawnAfterParent()) { m_pHead->SetDrawnNormallyByParent(false); }
+        m_pHead->SetInheritsRotAngle(false);
     }
 }
 
@@ -562,6 +550,9 @@ void AHuman::SetJetpack(AEmitter *newJetpack) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetJetpack");
             dynamic_cast<AHuman *>(parent)->SetJetpack(castedAttachable);
         }});
+
+        if (m_pJetpack->HasNoSetDamageMultiplier()) { m_pJetpack->SetDamageMultiplier(0.0F); }
+        m_pJetpack->SetApplyTransferredForcesAtOffset(false);
     }
 }
 
@@ -581,6 +572,10 @@ void AHuman::SetFGArm(Arm *newArm) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetFGArm");
             dynamic_cast<AHuman *>(parent)->SetFGArm(castedAttachable);
         }});
+
+        if (m_pFGArm->HasNoSetDamageMultiplier()) { m_pFGArm->SetDamageMultiplier(1.0F); }
+        m_pFGArm->SetDrawnAfterParent(true);
+        m_pFGArm->SetDrawnNormallyByParent(false);
     }
 }
 
@@ -600,6 +595,9 @@ void AHuman::SetBGArm(Arm *newArm) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetBGArm");
             dynamic_cast<AHuman *>(parent)->SetBGArm(castedAttachable);
         }});
+
+        if (m_pBGArm->HasNoSetDamageMultiplier()) { m_pBGArm->SetDamageMultiplier(1.0F); }
+        m_pBGArm->SetDrawnAfterParent(false);
     }
 }
 
@@ -619,6 +617,8 @@ void AHuman::SetFGLeg(Leg *newLeg) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetFGLeg");
             dynamic_cast<AHuman *>(parent)->SetFGLeg(castedAttachable);
         }});
+
+        if (m_pFGLeg->HasNoSetDamageMultiplier()) { m_pFGLeg->SetDamageMultiplier(1.0F); }
     }
 }
 
@@ -638,6 +638,9 @@ void AHuman::SetBGLeg(Leg *newLeg) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetBGLeg");
             dynamic_cast<AHuman *>(parent)->SetBGLeg(castedAttachable);
         }});
+
+        if (m_pBGLeg->HasNoSetDamageMultiplier()) { m_pBGLeg->SetDamageMultiplier(1.0F); }
+        m_pBGLeg->SetDrawnAfterParent(false);
     }
 }
 
@@ -928,7 +931,7 @@ bool AHuman::EquipFirearm(bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(m_Pos);
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
             }
 
             return true;
@@ -990,8 +993,8 @@ bool AHuman::EquipDeviceInGroup(string group, bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(m_Pos);
-            }
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+			}
 
             return true;
         }
@@ -1052,8 +1055,8 @@ bool AHuman::EquipLoadedFirearmInGroup(string group, string excludeGroup, bool d
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(m_Pos);
-            }
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+			}
 
             return true;
         }
@@ -1114,8 +1117,8 @@ bool AHuman::EquipNamedDevice(const string name, bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(m_Pos);
-            }
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+			}
 
             return true;
         }
@@ -1178,8 +1181,8 @@ bool AHuman::EquipThrowable(bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(m_Pos);
-            }
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+			}
 
             return true;
         }
@@ -1240,8 +1243,8 @@ bool AHuman::EquipDiggingTool(bool doEquip)
                 EquipShieldInBGArm();
 
                 // Play the device switching sound
-                m_DeviceSwitchSound.Play(m_Pos);
-            }
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+			}
 
             return true;
         }
@@ -1335,7 +1338,7 @@ bool AHuman::EquipShield()
             EquipShieldInBGArm();
 
             // Play the device switching sound
-            m_DeviceSwitchSound.Play(m_Pos);
+			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 
             return true;
         }
@@ -1407,7 +1410,7 @@ bool AHuman::EquipShieldInBGArm()
             // Play the device switching sound only if activity is running
 			if (g_ActivityMan.ActivityRunning())
 			{
-				m_DeviceSwitchSound.Play(m_Pos);
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 			}
 
             return true;
@@ -3168,6 +3171,8 @@ void AHuman::Update()
             // Deduct from the jetpack time
             m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS();
             m_MoveState = JUMP;
+            m_Paths[FGROUND][JUMP].Restart();
+            m_Paths[BGROUND][JUMP].Restart();
         }
         // Jetpack is off/turning off
         else
@@ -3351,9 +3356,17 @@ void AHuman::Update()
                 if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
                     m_pBGArm->SetHandPos(pDevice->GetMagazinePos());
                 }
+<<<<<<< HEAD
 				pDevice->Reload();
                 m_DeviceSwitchSound.Play(m_Pos);
 				reloadFG = true;
+=======
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+
+                // Interrupt sharp aiming
+                m_SharpAimTimer.Reset();
+                m_SharpAimProgress = 0;
+>>>>>>> development
             }
 
             // Detect reloading being completed and move hand accordingly
@@ -3674,8 +3687,8 @@ void AHuman::Update()
                 m_Inventory.push_back(m_pItemInReach);
             }
             m_PieNeedsUpdate = true;
-            m_DeviceSwitchSound.Play(m_Pos);
-        }
+			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+		}
     }
 
     ///////////////////////////////////////////////////
@@ -3748,7 +3761,7 @@ void AHuman::Update()
 
             // Play the stride sound, if applicable
             if (playStride && !m_ArmClimbing[FGROUND] && !m_ArmClimbing[BGROUND]) {
-                m_StrideSound.Play(m_Pos);
+				if (m_StrideSound) { m_StrideSound->Play(m_Pos); }
                 RunScriptedFunctionInAppropriateScripts("OnStride");
             }
 
@@ -3906,34 +3919,59 @@ void AHuman::Update()
         }
         // JUMPING
         else if ((m_pFGLeg || m_pBGLeg) && m_MoveState == JUMP) {
+            //TODO 4zK Uncomment this section to keep the limb held static
+            /*
             if (m_pFGLeg) {
                 m_pFGFootGroup->SetLimbPos(m_Pos + RotateOffset(m_Paths[FGROUND][STAND].GetStartOffset()));
             }
             if (m_pBGLeg) {
                 m_pBGFootGroup->SetLimbPos(m_Pos + RotateOffset(m_Paths[BGROUND][STAND].GetStartOffset()));
             }
-/*
-            if (m_pFGLeg && (!m_Paths[FGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal))
-            {
-                m_pFGFootGroup->PushAsLimb(m_Pos + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                      m_Vel,
-                                      Matrix(),
-                                      m_Paths[FGROUND][m_MoveState],
-    //                                  mass / 2,
-                                      deltaTime);
+            */
+
+            //TODO 4zK Uncomment this section to make the limb follow its jump path. I believe this was data's original intention but
+            // 1. The existing standard jump limbpath is awful, the actor spends all its time squatting
+            // 2. I'm not sure of the details, but this push as limb doesn't seem to be advancing the jump limbpath, so it doesn't work very well, even with my efforts to properly reset it
+            /*
+            if (m_pFGLeg && (!m_Paths[FGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal)) {
+                m_pFGFootGroup->PushAsLimb(
+                    m_Pos + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
+                    m_Vel,
+                    Matrix(),
+                    m_Paths[FGROUND][m_MoveState],
+                    deltaTime);
             }
-            if (m_pBGLeg && (!m_Paths[BGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal))
-            {
-                m_pBGFootGroup->PushAsLimb(m_Pos + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                      m_Vel,
-                                      Matrix(),
-                                      m_Paths[BGROUND][m_MoveState],
-    //                                mass / 2,
-                                      deltaTime);
+            if (m_pBGLeg && (!m_Paths[BGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal)) {
+                m_pBGFootGroup->PushAsLimb(
+                    m_Pos + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
+                    m_Vel,
+                    Matrix(),
+                    m_Paths[BGROUND][m_MoveState],
+                    deltaTime);
+            }
+            */
+            if (m_pFGLeg && (!m_Paths[FGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal)) {
+                m_pFGFootGroup->FlailAsLimb(
+                    m_Pos,
+                    m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
+                    m_pFGLeg->GetMaxLength(),
+                    g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
+                    m_AngularVel,
+                    m_pFGLeg->GetMass(),
+                    g_TimerMan.GetDeltaTimeSecs());
+            }
+            if (m_pBGLeg && (!m_Paths[BGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal)) {
+                m_pBGFootGroup->FlailAsLimb(
+                    m_Pos,
+                    m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) *m_Rotation,
+                    m_pBGLeg->GetMaxLength(),
+                    g_SceneMan.GetGlobalAcc() *g_TimerMan.GetDeltaTimeSecs(),
+                    m_AngularVel,
+                    m_pBGLeg->GetMass(),
+                    g_TimerMan.GetDeltaTimeSecs());
             }
 
-            if (m_JetTimeLeft <= 0)
-            {
+            if (m_JetTimeLeft <= 0) {
                 m_MoveState = STAND;
                 m_Paths[FGROUND][JUMP].Terminate();
                 m_Paths[BGROUND][JUMP].Terminate();
@@ -3942,7 +3980,6 @@ void AHuman::Update()
                 m_Paths[FGROUND][WALK].Terminate();
                 m_Paths[BGROUND][WALK].Terminate();
             }
-*/
         }
         // CROUCHING
         else if ((m_pFGLeg || m_pBGLeg) && m_MoveState == CROUCH)
@@ -4430,21 +4467,20 @@ void AHuman::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode,
     if (m_pFGArm && m_pBGArm && !onlyPhysical && mode == g_DrawColor && m_pBGArm->DidReach() && m_pFGArm->HoldsHeldDevice() && !m_pFGArm->HoldsThrownDevice() && !m_pFGArm->GetHeldDevice()->IsReloading() && !m_pFGArm->GetHeldDevice()->IsShield()) {
         m_pBGArm->DrawHand(pTargetBitmap, targetPos, realMode);
     }
-    
-#ifdef DEBUG_BUILD
-    if (mode == g_DrawDebug) {
-        m_Paths[m_HFlipped][WALK].Draw(pTargetBitmap, targetPos, 122);
-        m_Paths[m_HFlipped][CRAWL].Draw(pTargetBitmap, targetPos, 122);
-        m_Paths[m_HFlipped][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);
-        m_Paths[m_HFlipped][CLIMB].Draw(pTargetBitmap, targetPos, 165);
-    }
-    if (mode == g_DrawColor && !onlyPhysical) {
+
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawHandAndFootGroupVisualizations()) {
         m_pFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pFGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pBGHandGroup->Draw(pTargetBitmap, targetPos, true, 13);
     }
-#endif
+
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawLimbPathVisualizations()) {
+        m_Paths[m_HFlipped][WALK].Draw(pTargetBitmap, targetPos, 122);
+        m_Paths[m_HFlipped][CRAWL].Draw(pTargetBitmap, targetPos, 122);
+        m_Paths[m_HFlipped][ARMCRAWL].Draw(pTargetBitmap, targetPos, 13);
+        m_Paths[m_HFlipped][CLIMB].Draw(pTargetBitmap, targetPos, 165);
+    }
 }
 
 

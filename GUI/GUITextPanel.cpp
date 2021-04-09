@@ -212,9 +212,9 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 			RemoveSelectionText();
 		} else {
 			if (m_CursorIndex > 0) {
-				m_CursorIndex--;
-				// Delete the character before the cursor
-				m_Text.erase(m_CursorIndex, 1);
+                int newCursorIndex = ModKey ? GetStartOfPreviousCharacterGroup(m_Text, m_CursorIndex) : m_CursorIndex - 1;
+                m_Text.erase(newCursorIndex, m_CursorIndex - newCursorIndex);
+                m_CursorIndex = newCursorIndex;
 			}
 		}
 		UpdateText();
@@ -228,7 +228,8 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 			RemoveSelectionText();
 		} else {
 			if (m_CursorIndex < m_Text.size()) {
-				m_Text.erase(m_CursorIndex, 1);
+                int nextCursorIndex = ModKey ? GetStartOfNextCharacterGroup(m_Text, m_CursorIndex) : m_CursorIndex + 1;
+                m_Text.erase(m_CursorIndex, nextCursorIndex - m_CursorIndex);
 			}
 		}
 		UpdateText();
@@ -239,12 +240,13 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 	// Left Arrow
 	if (KeyCode == GUIInput::Key_LeftArrow) {
 		if (m_CursorIndex > 0) {
+            int newCursorIndex = ModKey ? GetStartOfPreviousCharacterGroup(m_Text, m_CursorIndex) : m_CursorIndex - 1;
 			if (Shift) {
-				DoSelection(m_CursorIndex, m_CursorIndex - 1);
+				DoSelection(m_CursorIndex, newCursorIndex);
 			} else {
 				m_GotSelection = false;
 			}
-			m_CursorIndex--;
+			m_CursorIndex = newCursorIndex;
 			UpdateText();
 		}
 		return;
@@ -253,12 +255,13 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 	// Right Arrow
 	if (KeyCode == GUIInput::Key_RightArrow) {
 		if (m_CursorIndex < m_Text.size()) {
+            int newCursorIndex = ModKey ? GetStartOfNextCharacterGroup(m_Text, m_CursorIndex) : m_CursorIndex + 1;
 			if (Shift) {
-				DoSelection(m_CursorIndex, m_CursorIndex + 1);
+				DoSelection(m_CursorIndex, newCursorIndex);
 			} else {
 				m_GotSelection = false;
 			}
-			m_CursorIndex++;
+			m_CursorIndex = newCursorIndex;
 			UpdateText();
 		}
 		return;
@@ -344,7 +347,7 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 	}
 
 	// Add valid ASCII characters
-	if (KeyCode >= 32 && KeyCode < 128) {
+	if (KeyCode >= 32 && KeyCode < 128 && KeyCode != 127) {
 		RemoveSelectionText();
 		char buf[2] = { static_cast<char>(KeyCode), '\0' };
 		m_Text.insert(m_CursorIndex, buf);
@@ -535,6 +538,40 @@ void GUITextPanel::DoSelection(int Start, int End)
 
     m_SelectionX = MAX(m_SelectionX, 0);
     m_SelectionWidth = MIN(m_SelectionWidth, m_Width);
+}
+
+int RTE::GUITextPanel::GetStartOfNextCharacterGroup(const std::string_view &stringToCheck, int currentIndex) const {
+    auto isNormalCharacter = [](char charToCheck) { return (std::isalnum(charToCheck) || charToCheck == '_'); };
+    auto isNormalCharacterOrSpace = [](char charToCheck) { return (std::isalnum(charToCheck) || charToCheck == '_' || std::isspace(charToCheck)); };
+    auto isSpecialCharacterOrSpace = [](char charToCheck) { return !(std::isalnum(charToCheck) || charToCheck == '_'); };
+
+    std::string_view::const_iterator currentIterator = stringToCheck.cbegin() + currentIndex;
+    currentIterator = isNormalCharacter(*currentIterator) ?
+        std::find_if(currentIterator, stringToCheck.cend(), isSpecialCharacterOrSpace) :
+        std::find_if(currentIterator, stringToCheck.cend(), isNormalCharacterOrSpace);
+
+    if (currentIterator != stringToCheck.cend() && std::isspace(*currentIterator)) {
+        currentIterator = std::find_if_not(currentIterator, stringToCheck.cend(), isspace);
+    }
+    return std::distance(stringToCheck.cbegin(), currentIterator);
+}
+
+int RTE::GUITextPanel::GetStartOfPreviousCharacterGroup(const std::string_view &stringToCheck, int currentIndex) const {
+    auto isNormalCharacter = [](char charToCheck) { return (std::isalnum(charToCheck) || charToCheck == '_'); };
+    auto isNormalCharacterOrSpace = [](char charToCheck) { return (std::isalnum(charToCheck) || charToCheck == '_' || std::isspace(charToCheck)); };
+    auto isSpecialCharacterOrSpace = [](char charToCheck) { return !(std::isalnum(charToCheck) || charToCheck == '_'); };
+
+    std::string_view::reverse_iterator currentIterator = stringToCheck.crbegin() + (m_Text.size() - currentIndex);
+    if (std::isspace(*(currentIterator))) {
+        currentIterator = std::find_if_not(currentIterator, stringToCheck.crend(), isspace);
+    }
+
+    if (currentIterator != stringToCheck.crend()) {
+        currentIterator = isNormalCharacter(*(currentIterator)) ?
+            std::find_if(currentIterator, stringToCheck.crend(), isSpecialCharacterOrSpace) :
+            std::find_if(currentIterator, stringToCheck.crend(), isNormalCharacterOrSpace);
+    }
+    return std::distance(stringToCheck.cbegin(), currentIterator.base());
 }
 
 

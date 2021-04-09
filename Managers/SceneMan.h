@@ -1729,6 +1729,9 @@ public:
     // Sound of an unseen pixel on an unseen layer being revealed.
     SoundContainer *m_pUnseenRevealSound;
 
+    bool m_DrawRayCastVisualizations; //!< Whether to visibly draw RayCasts to the Scene debug Bitmap.
+    bool m_DrawPixelCheckVisualizations; //!< Whether to visibly draw pixel checks (GetTerrMatter and GetMOIDPixel) to the Scene debug Bitmap.
+
     // The last screen everything has been updated to
     int m_LastUpdatedScreen;
     // Whether we're in second pass of the structural computations.

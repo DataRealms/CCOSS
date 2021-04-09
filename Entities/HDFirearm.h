@@ -427,6 +427,101 @@ ClassInfoGetters
 
 	void SetMuzzleOffset(Vector newOffset) override { m_MuzzleOff = newOffset; }
 
+	/// <summary>
+	/// Gets this HDFirearm's pre fire sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this HDFirearm's pre fire sound.</returns>
+	SoundContainer * GetPreFireSound() const { return m_PreFireSound; }
+
+	/// <summary>
+	/// Sets this HDFirearm's pre fire sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this HDFirearm's pre fire sound.</param>
+	void SetPreFireSound(SoundContainer *newSound) { m_PreFireSound = newSound; }
+
+	/// <summary>
+	/// Gets this HDFirearm's fire sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this HDFirearm's fire sound.</returns>
+	SoundContainer * GetFireSound() const { return m_FireSound; }
+
+	/// <summary>
+	/// Sets this HDFirearm's fire sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this HDFirearm's fire sound.</param>
+	void SetFireSound(SoundContainer *newSound) { m_FireSound = newSound; }
+
+	/// <summary>
+	/// Gets this HDFirearm's fire echo sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this HDFirearm's fire echo sound.</returns>
+	SoundContainer * GetFireEchoSound() const { return m_FireEchoSound; }
+
+	/// <summary>
+	/// Sets this HDFirearm's fire echo sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this HDFirearm's fire echo sound.</param>
+	void SetFireEchoSound(SoundContainer *newSound) { m_FireEchoSound = newSound; }
+
+	/// <summary>
+	/// Gets this HDFirearm's active sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this HDFirearm's active sound.</returns>
+	SoundContainer * GetActiveSound() const { return m_ActiveSound; }
+
+	/// <summary>
+	/// Sets this HDFirearm's active sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this HDFirearm's active sound.</param>
+	void SetActiveSound(SoundContainer *newSound) { m_ActiveSound = newSound; }
+
+	/// <summary>
+	/// Gets this HDFirearm's deactivation sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this HDFirearm's deactivation sound.</returns>
+	SoundContainer * GetDeactivationSound() const { return m_DeactivationSound; }
+
+	/// <summary>
+	/// Sets this HDFirearm's deactivation sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this HDFirearm's deactivation sound.</param>
+	void SetDeactivationSound(SoundContainer *newSound) { m_DeactivationSound = newSound; }
+
+	/// <summary>
+	/// Gets this HDFirearm's empty sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this HDFirearm's empty sound.</returns>
+	SoundContainer * GetEmptySound() const { return m_EmptySound; }
+
+	/// <summary>
+	/// Sets this HDFirearm's empty sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this HDFirearm's empty sound.</param>
+	void SetEmptySound(SoundContainer *newSound) { m_EmptySound = newSound; }
+
+	/// <summary>
+	/// Gets this HDFirearm's reload start sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this HDFirearm's reload start sound.</returns>
+	SoundContainer * GetReloadStartSound() const { return m_ReloadStartSound; }
+
+	/// <summary>
+	/// Sets this HDFirearm's reload start sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this HDFirearm's reload start sound.</param>
+	void SetReloadStartSound(SoundContainer *newSound) { m_ReloadStartSound = newSound; }
+
+	/// <summary>
+	/// Gets this HDFirearm's reload end sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this HDFirearm's reload end sound.</returns>
+	SoundContainer * GetReloadEndSound() const { return m_ReloadEndSound; }
+
+	/// <summary>
+	/// Sets this HDFirearm's reload end sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this HDFirearm's reload end sound.</param>
+	void SetReloadEndSound(SoundContainer *newSound) { m_ReloadEndSound = newSound; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ResetAllTimers
@@ -676,19 +771,19 @@ protected:
     // Muzzle Flash Attachable. Owned
     Attachable *m_pFlash;
 
-    SoundContainer m_PreFireSound; //!< The sound this HDFirearm should play before it starts firing. Distinct from activation sound in that it will play exactly once per trigger pull and not pitch up.
+    SoundContainer *m_PreFireSound; //!< The sound this HDFirearm should play before it starts firing. Distinct from activation sound in that it will play exactly once per trigger pull and not pitch up.
     // The audio of this FireArm being fired.
-    SoundContainer m_FireSound;
-    SoundContainer m_FireEchoSound; //!< The audio that is played as the echo for the gun. Each shot will restart this sound, so it doesn't ever overlap.
+    SoundContainer *m_FireSound;
+    SoundContainer *m_FireEchoSound; //!< The audio that is played as the echo for the gun. Each shot will restart this sound, so it doesn't ever overlap.
     // The audio that is played immediately upon activation, but perhaps before actual first firing, if there's a pre-delay
-    SoundContainer m_ActiveSound;
+    SoundContainer *m_ActiveSound;
     // The audio that is played immediately upon cease of activation
-    SoundContainer m_DeactivationSound;
+    SoundContainer *m_DeactivationSound;
     // The audio of this FireArm being fired empty.
-    SoundContainer m_EmptySound;
+    SoundContainer *m_EmptySound;
     // The audio of this FireArm being reloaded.
-    SoundContainer m_ReloadStartSound;
-    SoundContainer m_ReloadEndSound;
+    SoundContainer *m_ReloadStartSound;
+    SoundContainer *m_ReloadEndSound;
 
     // Rate of fire, in rounds per min.
     // If 0, firearm is semi-automatic (ie only one discharge per activation).

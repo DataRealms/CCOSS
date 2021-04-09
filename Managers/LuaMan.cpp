@@ -357,20 +357,36 @@ LUAENTITYCAST(PEmitter)
 #define PROPERTYOWNERSHIPSAFETYFAKER(OBJECTTYPE, PROPERTYTYPE, SETTERFUNCTION) \
     void OBJECTTYPE##SETTERFUNCTION(OBJECTTYPE *luaSelfObject, PROPERTYTYPE *objectToSet) { \
         if (objectToSet) { \
-            luaSelfObject->##SETTERFUNCTION(dynamic_cast<PROPERTYTYPE *>(objectToSet->Clone())); \
+            luaSelfObject->SETTERFUNCTION(dynamic_cast<PROPERTYTYPE *>(objectToSet->Clone())); \
         } else { \
-            luaSelfObject->##SETTERFUNCTION(nullptr); \
+            luaSelfObject->SETTERFUNCTION(nullptr); \
         } \
     } \
+
+PROPERTYOWNERSHIPSAFETYFAKER(MOSRotating, SoundContainer, SetGibSound);
 
 PROPERTYOWNERSHIPSAFETYFAKER(Attachable, AEmitter, SetBreakWound);
 PROPERTYOWNERSHIPSAFETYFAKER(Attachable, AEmitter, SetParentBreakWound);
 
 PROPERTYOWNERSHIPSAFETYFAKER(AEmitter, Attachable, SetFlash);
+PROPERTYOWNERSHIPSAFETYFAKER(AEmitter, SoundContainer, SetEmissionSound);
+PROPERTYOWNERSHIPSAFETYFAKER(AEmitter, SoundContainer, SetBurstSound);
+PROPERTYOWNERSHIPSAFETYFAKER(AEmitter, SoundContainer, SetEndSound);
 
 PROPERTYOWNERSHIPSAFETYFAKER(ADoor, Attachable, SetDoor);
 
 PROPERTYOWNERSHIPSAFETYFAKER(Leg, Attachable, SetFoot);
+
+PROPERTYOWNERSHIPSAFETYFAKER(Actor, SoundContainer, SetBodyHitSound);
+PROPERTYOWNERSHIPSAFETYFAKER(Actor, SoundContainer, SetAlarmSound);
+PROPERTYOWNERSHIPSAFETYFAKER(Actor, SoundContainer, SetPainSound);
+PROPERTYOWNERSHIPSAFETYFAKER(Actor, SoundContainer, SetDeathSound);
+PROPERTYOWNERSHIPSAFETYFAKER(Actor, SoundContainer, SetDeviceSwitchSound);
+
+PROPERTYOWNERSHIPSAFETYFAKER(ADoor, SoundContainer, SetDoorMoveStartSound);
+PROPERTYOWNERSHIPSAFETYFAKER(ADoor, SoundContainer, SetDoorMoveSound);
+PROPERTYOWNERSHIPSAFETYFAKER(ADoor, SoundContainer, SetDoorDirectionChangeSound);
+PROPERTYOWNERSHIPSAFETYFAKER(ADoor, SoundContainer, SetDoorMoveEndSound);
 
 PROPERTYOWNERSHIPSAFETYFAKER(AHuman, Attachable, SetHead);
 PROPERTYOWNERSHIPSAFETYFAKER(AHuman, AEmitter, SetJetpack);
@@ -380,6 +396,7 @@ PROPERTYOWNERSHIPSAFETYFAKER(AHuman, Leg, SetFGLeg);
 PROPERTYOWNERSHIPSAFETYFAKER(AHuman, Leg, SetBGLeg);
 PROPERTYOWNERSHIPSAFETYFAKER(AHuman, Attachable, SetFGFoot);
 PROPERTYOWNERSHIPSAFETYFAKER(AHuman, Attachable, SetBGFoot);
+PROPERTYOWNERSHIPSAFETYFAKER(AHuman, SoundContainer, SetStrideSound);
 
 PROPERTYOWNERSHIPSAFETYFAKER(ACrab, Turret, SetTurret);
 PROPERTYOWNERSHIPSAFETYFAKER(ACrab, AEmitter, SetJetpack);
@@ -387,8 +404,12 @@ PROPERTYOWNERSHIPSAFETYFAKER(ACrab, Leg, SetLeftFGLeg);
 PROPERTYOWNERSHIPSAFETYFAKER(ACrab, Leg, SetLeftBGLeg);
 PROPERTYOWNERSHIPSAFETYFAKER(ACrab, Leg, SetRightFGLeg);
 PROPERTYOWNERSHIPSAFETYFAKER(ACrab, Leg, SetRightBGLeg);
+PROPERTYOWNERSHIPSAFETYFAKER(ACrab, SoundContainer, SetStrideSound);
 
 PROPERTYOWNERSHIPSAFETYFAKER(Turret, HeldDevice, SetMountedDevice);
+
+PROPERTYOWNERSHIPSAFETYFAKER(ACraft, SoundContainer, SetHatchOpenSound);
+PROPERTYOWNERSHIPSAFETYFAKER(ACraft, SoundContainer, SetCrashSound);
 
 PROPERTYOWNERSHIPSAFETYFAKER(ACDropShip, AEmitter, SetRightThruster);
 PROPERTYOWNERSHIPSAFETYFAKER(ACDropShip, AEmitter, SetLeftThruster);
@@ -407,6 +428,14 @@ PROPERTYOWNERSHIPSAFETYFAKER(ACRocket, AEmitter, SetURightThruster);
 
 PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, Magazine, SetMagazine);
 PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, Attachable, SetFlash);
+PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetPreFireSound);
+PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetFireSound);
+PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetFireEchoSound);
+PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetActiveSound);
+PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetDeactivationSound);
+PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetEmptySound);
+PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetReloadStartSound);
+PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetReloadEndSound);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -466,6 +495,19 @@ bool RemoveAttachableLuaSafe2(MOSRotating *luaSelfObject, long attachableUniqueI
 }
 bool RemoveAttachableLuaSafe1(MOSRotating *luaSelfObject, long attachableUniqueID) {
     return RemoveAttachableLuaSafe2(luaSelfObject, attachableUniqueID, false, false);
+}
+
+bool RemoveAttachableFromParentLuaSafe1(Attachable *luaSelfObject) {
+    if (luaSelfObject->IsAttached()) {
+        return RemoveAttachableLuaSafe4(luaSelfObject->GetParent(), luaSelfObject, false, false);
+    }
+    return false;
+}
+bool RemoveAttachableFromParentLuaSafe2(Attachable *luaSelfObject, bool addToMovableMan, bool addBreakWounds) {
+    if (luaSelfObject->IsAttached()) {
+        return RemoveAttachableLuaSafe4(luaSelfObject->GetParent(), luaSelfObject, addToMovableMan, addBreakWounds);
+    }
+    return false;
 }
 
 /*
@@ -725,8 +767,8 @@ int LuaMan::Initialize() {
             .def("IsOnScenePoint", &SceneObject::IsOnScenePoint),
 
         ABSTRACTLUABINDING(MovableObject, SceneObject)
-			.def("GetParent", (MovableObject * (MovableObject::*)())&MovableObject::GetParent)
-			.def("GetParent", (const MovableObject * (MovableObject::*)() const)&MovableObject::GetParent)
+			.def("GetParent", (MOSRotating * (MovableObject::*)())&MovableObject::GetParent)
+			.def("GetParent", (const MOSRotating * (MovableObject::*)() const)&MovableObject::GetParent)
 			.def("GetRootParent", (MovableObject * (MovableObject::*)())&MovableObject::GetRootParent)
 			.def("GetRootParent", (const MovableObject * (MovableObject::*)() const)&MovableObject::GetRootParent)
 			.property("Material", &MovableObject::GetMaterial)
@@ -878,6 +920,7 @@ int LuaMan::Initialize() {
             .property("RecoilOffset", &MOSRotating::GetRecoilOffset)
 			.property("TravelImpulse", &MOSRotating::GetTravelImpulse, &MOSRotating::SetTravelImpulse)
 			.property("GibWoundLimit", (int (MOSRotating:: *)() const) &MOSRotating::GetGibWoundLimit, &MOSRotating::SetGibWoundLimit)
+			.property("GibSound", &MOSRotating::GetGibSound, &MOSRotatingSetGibSound)
 			.property("GibImpulseLimit", &MOSRotating::GetGibImpulseLimit, &MOSRotating::SetGibImpulseLimit)
 			.property("DamageMultiplier", &MOSRotating::GetDamageMultiplier, &MOSRotating::SetDamageMultiplier)
 			.property("WoundCount", (int (MOSRotating:: *)() const) &MOSRotating::GetWoundCount)
@@ -934,6 +977,8 @@ int LuaMan::Initialize() {
         CONCRETELUABINDING(Attachable, MOSRotating)
             .def("IsAttached", &Attachable::IsAttached)
             .def("IsAttachedTo", &Attachable::IsAttachedTo)
+            .def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe1)
+            .def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe2)
 			.property("ParentOffset", &Attachable::GetParentOffset, &Attachable::SetParentOffset)
             .def("IsDrawnAfterParent", &Attachable::IsDrawnAfterParent)
             .property("JointStrength", &Attachable::GetJointStrength, &Attachable::SetJointStrength)
@@ -963,6 +1008,9 @@ int LuaMan::Initialize() {
         CONCRETELUABINDING(AEmitter, Attachable)
             .def("IsEmitting", &AEmitter::IsEmitting)
             .def("EnableEmission", &AEmitter::EnableEmission)
+			.property("EmissionSound", &AEmitter::GetEmissionSound, &AEmitterSetEmissionSound)
+			.property("BurstSound", &AEmitter::GetBurstSound, &AEmitterSetBurstSound)
+			.property("EndSound", &AEmitter::GetEndSound, &AEmitterSetEndSound)
             .property("BurstScale", &AEmitter::GetBurstScale, &AEmitter::SetBurstScale)
             .property("EmitAngle", &AEmitter::GetEmitAngle, &AEmitter::SetEmitAngle)
             .property("GetThrottle", &AEmitter::GetThrottle, &AEmitter::SetThrottle)
@@ -1059,6 +1107,11 @@ int LuaMan::Initialize() {
             .def("IsControllable", &Actor::IsControllable)
             .def("SetControllerMode", &Actor::SetControllerMode)
             .def("SwapControllerModes", &Actor::SwapControllerModes)
+			.property("BodyHitSound", &Actor::GetBodyHitSound, &ActorSetBodyHitSound)
+			.property("AlarmSound", &Actor::GetAlarmSound, &ActorSetAlarmSound)
+			.property("PainSound", &Actor::GetPainSound, &ActorSetPainSound)
+			.property("DeathSound", &Actor::GetDeathSound, &ActorSetDeathSound)
+			.property("DeviceSwitchSound", &Actor::GetDeviceSwitchSound, &ActorSetDeviceSwitchSound)
 			.property("ImpulseDamageThreshold", &Actor::GetTravelImpulseDamage, &Actor::SetTravelImpulseDamage)
 			.def("GetStableVelocityThreshold", &Actor::GetStableVel)
 			.def("SetStableVelocityThreshold", (void (Actor::*)(float, float))&Actor::SetStableVel)
@@ -1118,8 +1171,7 @@ int LuaMan::Initialize() {
             .def("SetAlarmPoint", &Actor::AlarmPoint)
             .def("GetAlarmPoint", &Actor::GetAlarmPoint)
             .property("AimDistance", &Actor::GetAimDistance, &Actor::SetAimDistance)
-			.property("SightDistance", &Actor::GetSightDistance, &Actor::SetSightDistance)
-            .property("DeathSound", &Actor::GetDeathSound, &Actor::SetDeathSound),
+			.property("SightDistance", &Actor::GetSightDistance, &Actor::SetSightDistance),
 
 		CONCRETELUABINDING(ADoor, Actor)
 			.enum_("DoorState")[
@@ -1134,7 +1186,11 @@ int LuaMan::Initialize() {
 			.def("OpenDoor", &ADoor::OpenDoor)
 			.def("CloseDoor", &ADoor::CloseDoor)
 			.def("StopDoor", &ADoor::StopDoor)
-			.def("SetClosedByDefault", &ADoor::SetClosedByDefault),
+			.def("SetClosedByDefault", &ADoor::SetClosedByDefault)
+			.property("DoorMoveStartSound", &ADoor::GetDoorMoveStartSound, &ADoorSetDoorMoveStartSound)
+			.property("DoorMoveSound", &ADoor::GetDoorMoveSound, &ADoorSetDoorMoveSound)
+			.property("DoorDirectionChangeSound", &ADoor::GetDoorDirectionChangeSound, &ADoorSetDoorDirectionChangeSound)
+			.property("DoorMoveEndSound", &ADoor::GetDoorMoveEndSound, &ADoorSetDoorMoveEndSound),
 
 		CONCRETELUABINDING(Arm, Attachable)
             .property("HeldDevice", &Arm::GetHeldMO)
@@ -1222,7 +1278,8 @@ int LuaMan::Initialize() {
             .property("BGLeg", &AHuman::GetBGLeg, &AHumanSetBGLeg)
 			.property("FGFoot", &AHuman::GetFGFoot, &AHumanSetFGFoot)
 			.property("BGFoot", &AHuman::GetBGFoot, &AHumanSetBGFoot)
-            .property("JetTimeTotal", &AHuman::GetJetTimeTotal, &AHuman::SetJetTimeTotal)
+			.property("StrideSound", &AHuman::GetStrideSound, &AHumanSetStrideSound)
+			.property("JetTimeTotal", &AHuman::GetJetTimeTotal, &AHuman::SetJetTimeTotal)
             .property("JetTimeLeft", &AHuman::GetJetTimeLeft, &AHuman::SetJetTimeLeft)
 			.property("JetAngleRange", &AHuman::GetJetAngleRange, &AHuman::SetJetAngleRange)
 			.property("ThrowPrepTime", &AHuman::GetThrowPrepTime, &AHuman::SetThrowPrepTime)
@@ -1315,7 +1372,8 @@ int LuaMan::Initialize() {
             .property("LeftBGLeg", &ACrab::GetLeftBGLeg, &ACrabSetLeftBGLeg)
             .property("RightFGLeg", &ACrab::GetRightFGLeg, &ACrabSetRightFGLeg)
             .property("RightBGLeg", &ACrab::GetRightBGLeg, &ACrabSetRightBGLeg)
-            .property("JetTimeTotal", &ACrab::GetJetTimeTotal, &ACrab::SetJetTimeTotal)
+			.property("StrideSound", &ACrab::GetStrideSound, &ACrabSetStrideSound)
+			.property("JetTimeTotal", &ACrab::GetJetTimeTotal, &ACrab::SetJetTimeTotal)
             .property("JetTimeLeft", &ACrab::GetJetTimeLeft)
             .property("EquippedItem", &ACrab::GetEquippedItem)
             .property("FirearmIsReady", &ACrab::FirearmIsReady)
@@ -1366,6 +1424,8 @@ int LuaMan::Initialize() {
             .def("OpenHatch", &ACraft::OpenHatch)
             .def("CloseHatch", &ACraft::CloseHatch)
             .property("HatchState", &ACraft::GetHatchState)
+			.property("HatchOpenSound", &ACraft::GetHatchOpenSound, &ACraftSetHatchOpenSound)
+			.property("CrashSound", &ACraft::GetCrashSound, &ACraftSetCrashSound)
             .property("MaxPassengers", &ACraft::GetMaxPassengers)
             .property("DeliveryDelayMultiplier", &ACraft::GetDeliveryDelayMultiplier),
 
@@ -1459,6 +1519,14 @@ int LuaMan::Initialize() {
             .property("RoundInMagCount", &HDFirearm::GetRoundInMagCount)
             .property("Magazine", &HDFirearm::GetMagazine, &HDFirearmSetMagazine)
             .property("Flash", &HDFirearm::GetFlash, &HDFirearmSetFlash)
+			.property("PreFireSound", &HDFirearm::GetPreFireSound, &HDFirearmSetPreFireSound)
+			.property("FireSound", &HDFirearm::GetFireSound, &HDFirearmSetFireSound)
+			.property("FireEchoSound", &HDFirearm::GetFireEchoSound, &HDFirearmSetFireEchoSound)
+			.property("ActiveSound", &HDFirearm::GetActiveSound, &HDFirearmSetActiveSound)
+			.property("DeactivationSound", &HDFirearm::GetDeactivationSound, &HDFirearmSetDeactivationSound)
+			.property("EmptySound", &HDFirearm::GetEmptySound, &HDFirearmSetEmptySound)
+			.property("ReloadStartSound", &HDFirearm::GetReloadStartSound, &HDFirearmSetReloadStartSound)
+			.property("ReloadEndSound", &HDFirearm::GetReloadEndSound, &HDFirearmSetReloadEndSound)
             .property("ActivationDelay", &HDFirearm::GetActivationDelay, &HDFirearm::SetActivationDelay)
             .property("DeactivationDelay", &HDFirearm::GetDeactivationDelay, &HDFirearm::SetDeactivationDelay)
             .property("ReloadTime", &HDFirearm::GetReloadTime, &HDFirearm::SetReloadTime)

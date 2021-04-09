@@ -120,6 +120,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Exposed `Actor` properties `HolsterOffset` and `ItemInReach` to Lua (R/W).
 
 - Exposed `Arm` property `MaxLength` to Lua (R).
+
 - Exposed broad range of sounds to Lua (R/W) through their relevant SoundContainers. For each class, these include:  
 	**Actor**: `BodyHitSound`, `PainSound`, `DeathSound`, `DeviceSwitchSound`, `AlarmSound`  
 	**AHuman & ACrab**: `StrideSound`  
@@ -131,9 +132,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   
 - The Lua console (and all text boxes) now support using `Ctrl` to move the cursor around and select or delete text.
 
-- Added `mosRotating:RemoveAttachable(attachableOrUniqueID, addToMovableMan, addBreakWounds)` method that allows you to remove an `Attachable` and specify whether it should be added to `MovableMan` or not, and whether breakwounds should be added (if defined) to the `Attachable` and parent `MOSRotating`.
+- Added `MOSRotating:RemoveAttachable(attachableOrUniqueID, addToMovableMan, addBreakWounds)` method that allows you to remove an `Attachable` and specify whether it should be added to `MovableMan` or not, and whether breakwounds should be added (if defined) to the `Attachable` and parent `MOSRotating`.
 
-- Added `attachable:RemoveFromParent()` and `attachable:RemoveFromParent(addToMovableMan, addBreakWounds)` that allow you to remove `Attachables` from their parents without having to use `GetParent` first.
+- Added `Attachable:RemoveFromParent()` and `Attachable:RemoveFromParent(addToMovableMan, addBreakWounds)` that allow you to remove `Attachables` from their parents without having to use `GetParent` first.
 
 - Added `Settings.ini` debug properties to allow modders to turn on some potentially useful information visualizations.  
 	`DrawAtomGroupVisualizations` - any `MOSRotating` will draw its `AtomGroup` to the standard view.  

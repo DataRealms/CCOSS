@@ -377,6 +377,18 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetItemInReach
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets the item that is within reach of the Actor at this frame, ready
+//					to be be picked up. Ownership is NOT transferred!
+// Arguments:       None.
+// Return value:    A pointer to the item that has been determined to be within reach of
+//                  this Actor, if any. Ownership is NOT transferred!
+
+	HeldDevice * GetItemInReach() const { return m_pItemInReach; }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetLookVector
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the direction where this is looking/aiming.

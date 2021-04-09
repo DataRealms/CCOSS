@@ -1077,6 +1077,7 @@ int LuaMan::Initialize() {
             .property("EyePos", &Actor::GetEyePos)
             .property("HolsterOffset", &Actor::GetHolsterOffset, &Actor::SetHolsterOffset)
             .property("ViewPoint", &Actor::GetViewPoint, &Actor::SetViewPoint)
+            .property("ItemInReach", &Actor::GetItemInReach, &Actor::SetItemInReach)
             .property("Height", &Actor::GetHeight)
             .def("IsWithinRange", &Actor::IsWithinRange)
             .def("AddHealth", &Actor::AddHealth)

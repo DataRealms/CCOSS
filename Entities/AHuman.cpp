@@ -770,7 +770,7 @@ bool AHuman::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 		
         pPieMenu->AddSlice(pickUpSlice);
     } else {
-		PieMenuGUI::Slice reloadSlice(m_pFGArm ? "Reload" : "NO ARM!", PieMenuGUI::PSI_RELOAD, PieMenuGUI::Slice::UP, m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull());
+		PieMenuGUI::Slice reloadSlice(m_pFGArm ? "Reload" : "NO ARM!", PieMenuGUI::PSI_RELOAD, PieMenuGUI::Slice::UP, (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull()) || (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->GetHeldDevice() && !m_pBGArm->GetHeldDevice()->IsFull()));
         pPieMenu->AddSlice(reloadSlice);
 	}
 	
@@ -3329,7 +3329,7 @@ void AHuman::Update()
 
     ////////////////////////////////////
     // Reload held MO, if applicable
-
+	bool reloadFG = false;
     if (m_pFGArm && m_pFGArm->IsAttached())
     {
         HeldDevice *pDevice = m_pFGArm->GetHeldDevice();
@@ -3337,16 +3337,6 @@ void AHuman::Update()
         // Holds device, check if we are commanded to reload, or do other related stuff
         if (pDevice)
         {
-            // Only reload if no other pickuppable item is in reach
-            if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !m_pItemInReach)
-            {
-                pDevice->Reload();
-                if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
-                    m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-                }
-                m_DeviceSwitchSound.Play(m_Pos);
-            }
-
 			if (pDevice->IsReloading()) {
 				// Interrupt sharp aiming while reloading
 				m_SharpAimTimer.Reset();
@@ -3355,6 +3345,16 @@ void AHuman::Update()
 				if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL)
 					m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 			}
+            // Only reload if no other pickuppable item is in reach
+            if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !m_pItemInReach)
+            {
+                if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
+                    m_pBGArm->SetHandPos(pDevice->GetMagazinePos());
+                }
+				pDevice->Reload();
+                m_DeviceSwitchSound.Play(m_Pos);
+				reloadFG = true;
+            }
 
             // Detect reloading being completed and move hand accordingly
 			if (pDevice->DoneReloading() && m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
@@ -3564,11 +3564,30 @@ void AHuman::Update()
 
     if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->HoldsHeldDevice())
     {
-        m_pBGArm->GetHeldDevice()->SetSharpAim(m_SharpAimProgress);
+		HeldDevice *pDevice = m_pBGArm->GetHeldDevice();
+
+		if (pDevice->IsReloading()) {
+			m_SharpAimTimer.Reset();
+			m_SharpAimProgress = 0;
+			if (m_pFGArm && m_pFGArm->IsAttached() && GetEquippedItem() == NULL)
+				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+		}
+		if (reloadFG == false && !pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !m_pItemInReach)
+		{
+			if (m_pFGArm && m_pFGArm->IsAttached() && GetEquippedItem() == NULL) {
+				m_pFGArm->SetHandPos(pDevice->GetMagazinePos());
+			}
+			pDevice->Reload();
+			m_DeviceSwitchSound.Play(m_Pos);
+		}
+		if (pDevice->DoneReloading() && m_pFGArm && m_pFGArm->IsAttached() && GetEquippedItem() == NULL) {
+			m_pFGArm->SetHandPos(pDevice->GetMagazinePos());
+		}
+		pDevice->SetSharpAim(m_SharpAimProgress);
         if (m_Controller.IsState(WEAPON_FIRE))
-            m_pBGArm->GetHeldDevice()->Activate();
+			pDevice->Activate();
         else
-            m_pBGArm->GetHeldDevice()->Deactivate();
+			pDevice->Deactivate();
     }
 
     // Controller disabled

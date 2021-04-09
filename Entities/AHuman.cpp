@@ -766,7 +766,7 @@ bool AHuman::OnSink(const Vector &pos)
 bool AHuman::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
     if (m_pItemInReach) {
-		PieMenuGUI::Slice pickUpSlice(m_pFGArm ? "Pick Up " + m_pItemInReach->GetPresetName() : "NO ARM!", PieMenuGUI::PSI_PICKUP, PieMenuGUI::Slice::UP, m_pFGArm && m_pFGArm->IsAttached() && m_pItemInReach);
+		PieMenuGUI::Slice pickUpSlice(m_pFGArm ? "Pick Up " + m_pItemInReach->GetPresetName() : "NO ARM!", PieMenuGUI::PSI_PICKUP, PieMenuGUI::Slice::UP, m_pFGArm && m_pFGArm->IsAttached());
 		
         pPieMenu->AddSlice(pickUpSlice);
     } else {

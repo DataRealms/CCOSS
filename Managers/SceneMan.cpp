@@ -2594,7 +2594,7 @@ bool SceneMan::CastFindMORay(const Vector &start, const Vector &ray, MOID target
         m_pDebugLayer->LockBitmaps();
 #endif
 
-    int hitCount = 0, error, dom, sub, domSteps, skipped = skip;;
+    int hitCount = 0, error, dom, sub, domSteps, skipped = skip;
     int intPos[2], delta[2], delta2[2], increment[2];
     MOID hitMOID = g_NoMOID;
     unsigned char hitTerrain = 0;

@@ -117,7 +117,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Exposed `DataModule` properties `Author`, `Description` and `Version` to Lua (R).
 
+- Exposed `Actor` properties `HolsterOffset` and `ItemInReach` to Lua (R/W).
+
+- Exposed `Arm` property `MaxLength` to Lua (R).
+
 ### Changed
+
+- `AHuman` actors can now manually reload BG items.
 
 - Jetpack thrust angle is now properly clamped when controlled with an analog stick.
 
@@ -188,6 +194,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	This means that the `attachable.CollidesWithTerrainWhileAttached` value may not represent the true state of things, you should instead use `attachable.CanCollideWithTerrain` to determine whether a given `Attachable` can collide with terrain.
 
 ### Fixed
+
+- Fixed `MovableMan:GetClosestActor()` where the third argument for distance to be filled out is now a Vector rather than float.
 
 - `HFlipped` is now properly assigned to Emissions, Gibs and Particles (shot from HDFirearm/Round) when the source object is also flipped.
 

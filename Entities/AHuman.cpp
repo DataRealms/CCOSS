@@ -3356,17 +3356,13 @@ void AHuman::Update()
                 if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
                     m_pBGArm->SetHandPos(pDevice->GetMagazinePos());
                 }
-<<<<<<< HEAD
 				pDevice->Reload();
-                m_DeviceSwitchSound.Play(m_Pos);
-				reloadFG = true;
-=======
 				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+				reloadFG = true;
 
                 // Interrupt sharp aiming
                 m_SharpAimTimer.Reset();
                 m_SharpAimProgress = 0;
->>>>>>> development
             }
 
             // Detect reloading being completed and move hand accordingly
@@ -3591,7 +3587,7 @@ void AHuman::Update()
 				m_pFGArm->SetHandPos(pDevice->GetMagazinePos());
 			}
 			pDevice->Reload();
-			m_DeviceSwitchSound.Play(m_Pos);
+			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 		}
 		if (pDevice->DoneReloading() && m_pFGArm && m_pFGArm->IsAttached() && GetEquippedItem() == NULL) {
 			m_pFGArm->SetHandPos(pDevice->GetMagazinePos());

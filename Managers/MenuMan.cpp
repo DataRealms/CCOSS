@@ -71,6 +71,25 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	TitleScreen::TitleTransition MenuMan::GetTitleTransitionState() const {
+		return m_TitleScreen->GetTitleTransitionState();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void MenuMan::SetTitleTransitionStateTarget(TitleScreen::TitleTransition targetState) const {
+		m_TitleScreen->SetTitleTransitionStateTarget(targetState);
+		//m_TitleScreen->SetTitleTransitionState(targetState);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void MenuMan::SetTitlePendingTransition() const {
+		m_TitleScreen->SetTitlePendingTransition();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool MenuMan::EnterEditorActivity() {
 		bool validEditorName = false;
 		std::array<std::string_view, 5> validEditorNames = { "ActorEditor", "GibEditor", "SceneEditor", "AreaEditor", "AssemblyEditor" };
@@ -120,22 +139,22 @@ namespace RTE {
 		}
 
 		if (m_MainMenu->ScenarioStarted() && m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::ScenarioMenuActive) {
-			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario);
+			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::MainMenuToScenario);
 			m_ScenarioMenu->SetEnabled();
 		} else if (m_MainMenu->CampaignStarted() && m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::CampaignMenuActive) {
-			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCampaign);
+			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::MainMenuToCampaign);
 			g_MetaMan.GetGUI()->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
 		} else if (m_MainMenu->ActivityResumed()) {
 			g_ResumeActivity = true;
 		} else if (m_MainMenu->ActivityRestarted()) {
-			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeScrollOut);
+			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::ScrollFadeOut);
 			g_ActivityMan.SetResetActivity(true);
 		//} else if (m_MainMenu->GetActiveMenuScreen() == MainMenuGUI::MenuScreen::CreditsScreen) {
 		//	m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCredits);
 		//} else if (m_MainMenu->ReturnToMainScreen()) {
 		//	m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::CreditsToMainMenu);
 		} else if (g_NetworkServer.IsServerModeEnabled()) {
-			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeScrollOut);
+			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::ScrollFadeOut);
 			EnterMultiplayerLobby();
 		}
 		return m_MainMenu->QuitProgram();
@@ -149,11 +168,11 @@ namespace RTE {
 		ScenarioGUI::ScenarioMenuUpdateResult updateResult = m_ScenarioMenu->Update();
 
 		if (m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::MainMenuActive && updateResult == ScenarioGUI::ScenarioMenuUpdateResult::BackToMain) {
-			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PlanetToMainMenu);
+			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::PlanetToMainMenu);
 		} else if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::ActivityResumed) {
 			g_ResumeActivity = true;
 		} else if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::ActivityRestarted) {
-			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeScrollOut);
+			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::ScrollFadeOut);
 			g_ActivityMan.SetResetActivity(true);
 		}
 
@@ -194,6 +213,8 @@ namespace RTE {
 		g_ConsoleMan.Update();
 
 		g_Quit = g_Quit || quitResult;
+
+		return m_TitleScreen->GetTitleTransitionState() == TitleScreen::TitleTransition::End;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -33,19 +33,20 @@ namespace RTE {
 		/// Enumeration for the different transition (scrolling) states of the title screen.
 		/// </summary>
 		enum class TitleTransition {
+			PendingTransition = -1,
 			MainMenu, // Main menu is active and operational
 			MainMenuToScenario, // Scenario mode views and transitions
 			MainMenuToCampaign, // Campaign mode views and transitions
 			MainMenuToCredits,
 			CreditsToMainMenu,
 			PlanetToMainMenu, // Going back to the main menu view from a planet-centered view
-			ScenarioFadeIn, // Back from a scenario game to the scenario selection menu
 			ScenarioMenu,
+			ScenarioFadeIn, // Back from a scenario game to the scenario selection menu
+			CampaignMenu,
 			CampaignFadeIn, // Back from a battle to the campaign view
-			CampaignPlay,
-			FadeScrollOut,
+			ScrollFadeOut,
 			FadeOut,
-			End
+			End,
 		};
 
 #pragma region Creation
@@ -91,7 +92,13 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <param name="newState"></param>
-		void SetTitleTransitionState(TitleTransition newState) { if (newState != m_TitleTransitionState) { m_TitleTransitionState = newState; m_SectionSwitch = true; } }
+		void SetTitleTransitionStateTarget(TitleTransition targetState) { if (targetState != m_TitleTransitionState) { m_TitleTransitionStateTarget = targetState; m_SectionSwitch = true; } }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="newState"></param>
+		void SetTitlePendingTransition();
 
 		/// <summary>
 		/// 
@@ -166,6 +173,7 @@ namespace RTE {
 
 		IntroSequence m_IntroSequenceState; //!<
 		TitleTransition m_TitleTransitionState; //!<
+		TitleTransition m_TitleTransitionStateTarget; //!<
 		ActiveMenu m_ActiveMenu; //!<
 
 		int m_ScreenResX; //!<

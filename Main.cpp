@@ -104,7 +104,7 @@ namespace RTE {
 			g_ActivityMan.SetInActivity(false);
 			g_ActivityMan.PauseActivity();
 			g_ConsoleMan.SetEnabled(true);
-			//g_IntroState = MAINTOSCENARIO;
+			g_MenuMan.SetTitleTransitionStateTarget(TitleScreen::TitleTransition::MainMenuToScenario);
 			return false;
 		}
 		return true;
@@ -159,13 +159,16 @@ namespace RTE {
 		// Don't stop the music if reinitializing after a resolution change
 		if (!g_FrameMan.ResolutionChanged()) { g_AudioMan.StopAll(); }
 
-		while (!g_Quit && /*g_IntroState != END &&*/ !g_ResumeActivity) {
+		while (!g_Quit && !g_ResumeActivity/* && g_MenuMan.GetTitleTransitionState() != TitleScreen::TitleTransition::End*/) {
 			g_UInputMan.Update();
 			g_TimerMan.Update();
 			g_TimerMan.UpdateSim();
 			g_AudioMan.Update();
 
-			g_MenuMan.Update();
+			if (g_MenuMan.Update()) {
+				g_MenuMan.SetTitlePendingTransition();
+				break;
+			}
 
 			if (g_NetworkServer.IsServerModeEnabled()) { g_NetworkServer.Update(); }
 
@@ -231,14 +234,15 @@ namespace RTE {
 					g_TimerMan.PauseSim(true);
 					// If we're not in a metagame, then show main menu
 					if (g_MetaMan.GameInProgress()) {
-						//g_IntroState = CAMPAIGNFADEIN;
+						g_MenuMan.SetTitleTransitionStateTarget(TitleScreen::TitleTransition::CampaignFadeIn);
 					} else {
 						const Activity *activity = g_ActivityMan.GetActivity();
 						// If we edited something then return to main menu instead of scenario menu player will probably switch to area/scene editor.
 						if (activity && activity->GetPresetName() == "None") {
+							g_MenuMan.SetTitleTransitionStateTarget(TitleScreen::TitleTransition::PlanetToMainMenu);
 							//g_IntroState = MENUAPPEAR;
 						} else {
-							//g_IntroState = MAINTOSCENARIO;
+							g_MenuMan.SetTitleTransitionStateTarget(TitleScreen::TitleTransition::MainMenuToScenario);
 						}
 					}
 					RunMenuLoop();

@@ -88,7 +88,7 @@ namespace RTE {
 		m_VersionLabel->SetText(c_GameVersion);
 		m_VersionLabel->SetPositionAbs(10, g_FrameMan.GetResY() - m_VersionLabel->GetTextHeight() - 10);
 
-		CreateCampaignScreen();
+		CreateCampaignNoticeScreen();
 		CreateEditorsScreen();
 		CreateCreditsScreen();
 
@@ -101,8 +101,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::CreateCampaignScreen() {
-		m_MainMenuScreens.at(MenuScreen::CampaignScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("MetaScreen"));
+	void MainMenuGUI::CreateCampaignNoticeScreen() {
+		m_MainMenuScreens.at(MenuScreen::CampaignNoticeScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("MetaScreen"));
 
 		m_MainMenuButtons.at(MenuButton::PlayTutorialButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonTutorial"));
 		m_MainMenuButtons.at(MenuButton::PlayTutorialButton)->SetVisible(false);
@@ -169,12 +169,6 @@ namespace RTE {
 			g_GUISound.ExitMenuSound()->Play();
 		}
 		m_ScreenChange = true;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	GUIControlManager * MainMenuGUI::GetGUIControlManager() {
-		return m_GUIControlManager.get();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -260,15 +254,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::ShowCampaignScreen() {
+	void MainMenuGUI::ShowCampaignNoticeScreen() {
 		m_ScreenChange = false;
-		m_MainMenuScreens.at(MenuScreen::CampaignScreen)->SetVisible(true);
+		m_MainMenuScreens.at(MenuScreen::CampaignNoticeScreen)->SetVisible(true);
 		m_MainMenuButtons.at(MenuButton::PlayTutorialButton)->SetVisible(true);
 		m_MainMenuButtons.at(MenuButton::CampaignContinueButton)->SetVisible(true);
 
 		m_MetaNoticeLabel->SetVisible(true);
 
-		m_MainMenuScreens.at(MenuScreen::CampaignScreen)->GUIPanel::AddChild(m_MainMenuButtons.at(MenuButton::BackToMainButton));
+		m_MainMenuScreens.at(MenuScreen::CampaignNoticeScreen)->GUIPanel::AddChild(m_MainMenuButtons.at(MenuButton::BackToMainButton));
 		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetVisible(true);
 		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetPositionAbs((g_FrameMan.GetResX() - m_MainMenuButtons.at(MenuButton::BackToMainButton)->GetWidth()) / 2, m_MainMenuButtons.at(MenuButton::CampaignContinueButton)->GetYPos() + 25);
 
@@ -339,8 +333,8 @@ namespace RTE {
 					case MenuScreen::MainScreen:
 						HandleMainScreenInputEvents(guiEvent.GetControl());
 						break;
-					case MenuScreen::CampaignScreen:
-						HandleCampaignScreenInputEvents(guiEvent.GetControl());
+					case MenuScreen::CampaignNoticeScreen:
+						HandleCampaignNoticeScreenInputEvents(guiEvent.GetControl());
 						break;
 					case MenuScreen::EditorScreen:
 						HandleEditorsScreenInputEvents(guiEvent.GetControl());
@@ -363,7 +357,7 @@ namespace RTE {
 	void MainMenuGUI::HandleMainScreenInputEvents(const GUIControl *guiEventControl) {
 		if (guiEventControl == m_MainMenuButtons.at(MenuButton::CampaignButton)) {
 			if (!m_TutorialOffered) {
-				SetActiveMenuScreen(MenuScreen::CampaignScreen);
+				SetActiveMenuScreen(MenuScreen::CampaignNoticeScreen);
 			} else {
 				m_CampaignStarted = true;
 				SetActiveMenuScreen(MenuScreen::MainScreen);
@@ -412,7 +406,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::HandleCampaignScreenInputEvents(const GUIControl *guiEventControl) {
+	void MainMenuGUI::HandleCampaignNoticeScreenInputEvents(const GUIControl *guiEventControl) {
 		if (guiEventControl == m_MainMenuButtons.at(MenuButton::PlayTutorialButton)) {
 			g_ActivityMan.SetStartActivity(dynamic_cast<Activity *>(g_PresetMan.GetEntityPreset("GATutorial", "Tutorial Mission")->Clone()));
 			if (GameActivity * gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetStartActivity())) { gameActivity->SetStartingGold(10000); }
@@ -471,7 +465,7 @@ namespace RTE {
 		m_ActivityRestarted = false;
 		m_ActivityResumed = false;
 
-		if (!m_MenuEnabled || g_ConsoleMan.IsEnabled()) {
+		if (!m_MenuEnabled || (g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly())) {
 			return;
 		}
 
@@ -517,8 +511,8 @@ namespace RTE {
 				if (m_ScreenChange) { ShowCreditsScreen(); }
 				backToMainMenu = RollCredits() ? true : HandleInputEvents();
 				break;
-			case MenuScreen::CampaignScreen:
-				if (m_ScreenChange) { ShowCampaignScreen(); }
+			case MenuScreen::CampaignNoticeScreen:
+				if (m_ScreenChange) { ShowCampaignNoticeScreen(); }
 				backToMainMenu = HandleInputEvents();
 				break;
 			case MenuScreen::QuitScreen:
@@ -534,7 +528,7 @@ namespace RTE {
 
 		// If esc pressed, show quit dialog if applicable
 		if (backToMainMenu || g_UInputMan.KeyPressed(KEY_ESC)) {
-			//if (m_ActiveMenuScreen == MenuScreen::CampaignScreen || m_ActiveMenuScreen == MenuScreen::SettingsScreen || m_ActiveMenuScreen == MenuScreen::ModManagerScreen || m_ActiveMenuScreen == MenuScreen::EditorScreen || m_ActiveMenuScreen == MenuScreen::CreditsScreen) {
+			//if (m_ActiveMenuScreen == MenuScreen::CampaignNoticeScreen || m_ActiveMenuScreen == MenuScreen::SettingsScreen || m_ActiveMenuScreen == MenuScreen::ModManagerScreen || m_ActiveMenuScreen == MenuScreen::EditorScreen || m_ActiveMenuScreen == MenuScreen::CreditsScreen) {
 			if (m_ActiveMenuScreen != MenuScreen::MainScreen) {
 				SetActiveMenuScreen(MenuScreen::MainScreen, false);
 				g_GUISound.BackButtonPressSound()->Play();

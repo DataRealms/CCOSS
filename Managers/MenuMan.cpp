@@ -194,9 +194,6 @@ namespace RTE {
 		m_ActiveScreen = m_TitleScreen->Update();
 		bool quitResult = false;
 
-		//m_MenuController->Update();
-		//m_GUIInput->Update();
-
 		switch (m_ActiveScreen) {
 			case TitleScreen::ActiveMenu::MainMenuActive:
 				quitResult = UpdateMainMenu();
@@ -237,7 +234,6 @@ namespace RTE {
 			default:
 				break;
 		}
-		g_ConsoleMan.Draw(g_FrameMan.GetBackBuffer32());
 
 		int device = g_UInputMan.GetLastDeviceWhichControlledGUICursor();
 
@@ -259,6 +255,9 @@ namespace RTE {
 				}
 			}
 		}
+
+		g_ConsoleMan.Draw(g_FrameMan.GetBackBuffer32());
+
 		//vsync();
 		g_FrameMan.FlipFrameBuffers();
 	}

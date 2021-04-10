@@ -69,7 +69,7 @@ namespace RTE {
 		/// Gets the GUIControlManager owned and used by this.
 		/// </summary>
 		/// <returns>The GUIControlManager. Ownership is not transferred!</returns>
-		GUIControlManager * GetGUIControlManager();
+		GUIControlManager * GetGUIControlManager() const { return m_GUIControlManager.get(); }
 
 		/// <summary>
 		/// 
@@ -133,7 +133,7 @@ namespace RTE {
 		/// </summary>
 		enum MenuScreen {
 			MainScreen,
-			CampaignScreen,
+			CampaignNoticeScreen,
 			SettingsScreen,
 			ModManagerScreen,
 			EditorScreen,
@@ -204,7 +204,7 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		void CreateCampaignScreen();
+		void CreateCampaignNoticeScreen();
 
 		/// <summary>
 		/// 
@@ -244,7 +244,7 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		void ShowCampaignScreen();
+		void ShowCampaignNoticeScreen();
 
 		/// <summary>
 		/// 
@@ -279,7 +279,7 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <param name="guiEventControl"></param>
-		void HandleCampaignScreenInputEvents(const GUIControl *guiEventControl);
+		void HandleCampaignNoticeScreenInputEvents(const GUIControl *guiEventControl);
 
 		/// <summary>
 		/// 

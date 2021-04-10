@@ -39,19 +39,17 @@ namespace RTE {
 
 		m_CreditsScrollPanel = nullptr;
 		m_ScrollTimer.Reset();
-		m_ScenarioStarted = false;
-		m_CampaignStarted = false;
 		m_ActivityRestarted = false;
 		m_ActivityResumed = false;
 		m_TutorialOffered = false;
-
-		m_Quit = false;
 
 		m_MainMenuScreens.fill(nullptr);
 		m_MainMenuButtons.fill(nullptr);
 
 		m_SettingsMenu = nullptr;
 		m_ModManagerMenu = nullptr;
+
+		m_UpdateResult = MainMenuUpdateResult::NoEvent;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -204,7 +202,7 @@ namespace RTE {
 		if (m_ActiveMenuScreen != MenuScreen::QuitScreen && g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing)) {
 			SetActiveMenuScreen(MenuScreen::QuitScreen);
 		} else {
-			m_Quit = true;
+			m_UpdateResult = MainMenuUpdateResult::Quit;
 		}
 	}
 
@@ -359,7 +357,7 @@ namespace RTE {
 			if (!m_TutorialOffered) {
 				SetActiveMenuScreen(MenuScreen::CampaignNoticeScreen);
 			} else {
-				m_CampaignStarted = true;
+				m_UpdateResult = MainMenuUpdateResult::CampaignStarted;
 				SetActiveMenuScreen(MenuScreen::MainScreen);
 			}
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::ScenarioButton)) {
@@ -367,8 +365,8 @@ namespace RTE {
 
 			if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
 
-			m_ScenarioStarted = true;
-			m_CampaignStarted = false;
+			m_UpdateResult = MainMenuUpdateResult::ScenarioStarted;
+
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::MultiplayerButton)) {
 			SetActiveMenuScreen(MenuScreen::MainScreen);
 
@@ -378,8 +376,8 @@ namespace RTE {
 			pMultiplayerGame->Create();
 			g_ActivityMan.SetStartActivity(pMultiplayerGame);
 
-			m_ScenarioStarted = true;
-			m_CampaignStarted = false;
+			m_UpdateResult = MainMenuUpdateResult::MultiplayerStarted;
+
 			m_ActivityRestarted = true;
 
 			g_GUISound.ExitMenuSound()->Play();
@@ -391,11 +389,11 @@ namespace RTE {
 
 			if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
 
-			m_CampaignStarted = false;
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::ModManagerButton)) {
 			SetActiveMenuScreen(MenuScreen::ModManagerScreen);
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::CreditsButton)) {
 			SetActiveMenuScreen(MenuScreen::CreditsScreen);
+			m_UpdateResult = MainMenuUpdateResult::EnterCreditsScreen;
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::QuitButton)) {
 			QuitLogic();
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::ResumeButton)) {
@@ -415,7 +413,7 @@ namespace RTE {
 			m_ActivityRestarted = true;
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::CampaignContinueButton)) {
 			SetActiveMenuScreen(MenuScreen::MainScreen);
-			m_CampaignStarted = true;
+			m_UpdateResult = MainMenuUpdateResult::CampaignStarted;
 		}
 	}
 
@@ -447,7 +445,7 @@ namespace RTE {
 
 	void MainMenuGUI::HandleQuitScreenInputEvents(const GUIControl *guiEventControl) {
 		if (guiEventControl == m_MainMenuButtons.at(MenuButton::QuitConfirmButton)) {
-			m_Quit = true;
+			m_UpdateResult = MainMenuUpdateResult::Quit;
 			m_ScreenChange = true;
 			HideAllScreens();
 			g_GUISound.ButtonPressSound()->Play();
@@ -458,15 +456,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::Update() {
-		m_Quit = false;
-		m_ScenarioStarted = false;
-		m_CampaignStarted = false;
+	MainMenuGUI::MainMenuUpdateResult MainMenuGUI::Update() {
 		m_ActivityRestarted = false;
 		m_ActivityResumed = false;
+		m_UpdateResult = MainMenuUpdateResult::NoEvent;
 
 		if (!m_MenuEnabled || (g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly())) {
-			return;
+			return m_UpdateResult;
 		}
 
 		bool backToMainMenu = false;
@@ -530,9 +526,6 @@ namespace RTE {
 		if (backToMainMenu || g_UInputMan.KeyPressed(KEY_ESC)) {
 			//if (m_ActiveMenuScreen == MenuScreen::CampaignNoticeScreen || m_ActiveMenuScreen == MenuScreen::SettingsScreen || m_ActiveMenuScreen == MenuScreen::ModManagerScreen || m_ActiveMenuScreen == MenuScreen::EditorScreen || m_ActiveMenuScreen == MenuScreen::CreditsScreen) {
 			if (m_ActiveMenuScreen != MenuScreen::MainScreen) {
-				SetActiveMenuScreen(MenuScreen::MainScreen, false);
-				g_GUISound.BackButtonPressSound()->Play();
-
 				if (m_ActiveMenuScreen == MenuScreen::SettingsScreen) {
 					//g_SettingsMan.SetFlashOnBrainDamage(m_aOptionsCheckbox.at(FLASHONBRAINDAMAGE)->GetCheck());
 					//g_SettingsMan.SetBlipOnRevealUnseen(m_aOptionsCheckbox.at(BLIPONREVEALUNSEEN)->GetCheck());
@@ -541,11 +534,16 @@ namespace RTE {
 					g_SettingsMan.UpdateSettingsFile();
 				} else if (m_ActiveMenuScreen == MenuScreen::ModManagerScreen) {
 					g_SettingsMan.UpdateSettingsFile();
+				} else if (m_ActiveMenuScreen == MenuScreen::CreditsScreen) {
+					m_UpdateResult = MainMenuUpdateResult::BackToMainFromCredits;
 				}
+				SetActiveMenuScreen(MenuScreen::MainScreen, false);
+				g_GUISound.BackButtonPressSound()->Play();
 			} else {
 				QuitLogic();
 			}
 		}
+		return m_UpdateResult;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

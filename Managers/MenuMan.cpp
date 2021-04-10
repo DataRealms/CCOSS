@@ -113,32 +113,32 @@ namespace RTE {
 	bool MenuMan::UpdateMainMenu() {
 		if (!m_MainMenu->IsEnabled()) { m_MainMenu->SetEnabled(true); }
 
-		m_MainMenu->Update();
+		MainMenuGUI::MainMenuUpdateResult updateResult = m_MainMenu->Update();
 
 		if (m_TitleScreen->GetActiveMenu() == TitleScreen::ActiveMenu::MainMenuActive) {
 			g_ActivityMan.SetInActivity(false);
 		}
 
-		if (m_MainMenu->ScenarioStarted() && m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::ScenarioMenuActive) {
 			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::MainMenuToScenario);
+		if (updateResult == MainMenuGUI::MainMenuUpdateResult::ScenarioStarted && m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::ScenarioMenuActive) {
 			m_ScenarioMenu->SetEnabled();
-		} else if (m_MainMenu->CampaignStarted() && m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::CampaignMenuActive) {
 			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::MainMenuToCampaign);
+		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::CampaignStarted && m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::CampaignMenuActive) {
 			g_MetaMan.GetGUI()->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
 		} else if (m_MainMenu->ActivityResumed()) {
 			g_ResumeActivity = true;
 		} else if (m_MainMenu->ActivityRestarted()) {
 			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::ScrollFadeOut);
 			g_ActivityMan.SetResetActivity(true);
-		//} else if (m_MainMenu->GetActiveMenuScreen() == MainMenuGUI::MenuScreen::CreditsScreen) {
 		//	m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCredits);
-		//} else if (m_MainMenu->ReturnToMainScreen()) {
 		//	m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::CreditsToMainMenu);
+		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::EnterCreditsScreen) {
+		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::BackToMainFromCredits) {
 		} else if (g_NetworkServer.IsServerModeEnabled()) {
 			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::ScrollFadeOut);
 			EnterMultiplayerLobby();
 		}
-		return m_MainMenu->QuitProgram();
+		return updateResult == MainMenuGUI::MainMenuUpdateResult::Quit;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

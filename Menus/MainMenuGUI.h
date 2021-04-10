@@ -28,14 +28,16 @@ namespace RTE {
 		/// <summary>
 		/// Enumeration for the results of the MainMenuGUI input and event update.
 		/// </summary>
-		enum MainMenuUpdateResult {
+		enum class MainMenuUpdateResult {
 			NoEvent,
+			CampaignStarted,
+			ScenarioStarted,
+			MultiplayerStarted,
+			EnterCreditsScreen,
 			BackToMainFromScenario,
+			BackToMenuFromCampaign,
 			BackToMainFromCredits,
-			//ScenarioStarted,
-			//CampaignStarted,
-			//ActivityRestarted,
-			//ActivityResumed
+			Quit
 		};
 
 #pragma region Creation
@@ -70,25 +72,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns>The GUIControlManager. Ownership is not transferred!</returns>
 		GUIControlManager * GetGUIControlManager() const { return m_GUIControlManager.get(); }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns></returns>
-		//MenuScreen GetActiveMenuScreen() const { return m_ActiveMenuScreen; }
-
-		/// <summary>
-		/// Reports whether the player has decided to start playing a Scenario this frame.
-		/// </summary>
-		/// <returns>Whether the Scenario mode should be started.</returns>
-		bool ScenarioStarted() const { return m_ScenarioStarted; }
-
-		/// <summary>
-		/// Reports whether the player has decided to start playing a Campaign this frame.
-		/// </summary>
-		/// <returns>Whether the Campaign mode should be started.</returns>
-		bool CampaignStarted() const { return m_CampaignStarted; }
-
 		/// <summary>
 		/// Reports whether the player has decided to restart an activity this frame. All parameters for the new game has been fed into ActivityMan already.
 		/// </summary>
@@ -100,12 +83,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether the activity should be resumed.</returns>
 		bool ActivityResumed() const { return m_ActivityResumed; }
-
-		/// <summary>
-		/// Reports whether the player has decided to quit the program.
-		/// </summary>
-		/// <returns>Whether the program has been commanded to shit down by the user.</returns>
-		bool QuitProgram() const { return m_Quit; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -118,7 +95,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates the state of this Menu each frame.
 		/// </summary>
-		void Update();
+		MainMenuUpdateResult Update();
 
 		/// <summary>
 		/// Draws the menu.
@@ -174,10 +151,10 @@ namespace RTE {
 		MenuScreen m_ActiveMenuScreen; //!< Screen selection state.
 		bool m_ScreenChange; //!< Change in menu screens detected.
 
-		bool m_ScenarioStarted; //!< Whether Scenario mode was started.
-		bool m_CampaignStarted; //!< Whether Campaign mode was started.
 		bool m_ActivityRestarted; //!< Whether the game was restarted this frame or not.
 		bool m_ActivityResumed; //!< Whether the game was resumed this frame or not.
+
+		MainMenuUpdateResult m_UpdateResult; //!<
 
 		GUICollectionBox *m_RootBox; //!<
 		int m_RootBoxOriginalHeight; //!<
@@ -192,7 +169,6 @@ namespace RTE {
 		bool m_TutorialOffered; //!< Whether the player has been offered a tutorial yet this program run.
 
 		GUILabel *m_VersionLabel; //!< CCCP version number.
-		bool m_Quit; //!< Player selected to quit the program.
 
 		std::array<GUICollectionBox *, MenuScreen::ScreenCount> m_MainMenuScreens; //!< Collection box of the buy GUIs.
 		std::array<GUIButton *, MenuButton::ButtonCount> m_MainMenuButtons; //!< The main menu buttons.

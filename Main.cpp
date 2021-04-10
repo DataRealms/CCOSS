@@ -102,7 +102,7 @@ namespace RTE {
 			g_ActivityMan.SetInActivity(false);
 			g_ActivityMan.PauseActivity();
 			g_ConsoleMan.SetEnabled(true);
-			g_MenuMan.SetTitleTransitionStateTarget(TitleScreen::TitleTransition::MainMenuToScenario);
+			g_MenuMan.GetTitleScreen()->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::MainMenuToScenario);
 			return false;
 		}
 		return true;
@@ -164,7 +164,7 @@ namespace RTE {
 			g_AudioMan.Update();
 
 			if (g_MenuMan.Update()) {
-				g_MenuMan.SetTitlePendingTransition();
+				g_MenuMan.GetTitleScreen()->SetTitlePendingTransition();
 				break;
 			}
 
@@ -232,15 +232,15 @@ namespace RTE {
 					g_TimerMan.PauseSim(true);
 					// If we're not in a metagame, then show main menu
 					if (g_MetaMan.GameInProgress()) {
-						g_MenuMan.SetTitleTransitionStateTarget(TitleScreen::TitleTransition::CampaignFadeIn);
+						g_MenuMan.GetTitleScreen()->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::CampaignFadeIn);
 					} else {
 						const Activity *activity = g_ActivityMan.GetActivity();
 						// If we edited something then return to main menu instead of scenario menu player will probably switch to area/scene editor.
 						if (activity && activity->GetPresetName() == "None") {
-							g_MenuMan.SetTitleTransitionStateTarget(TitleScreen::TitleTransition::PlanetToMainMenu);
+							g_MenuMan.GetTitleScreen()->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::PlanetToMainMenu);
 							//g_IntroState = MENUAPPEAR;
 						} else {
-							g_MenuMan.SetTitleTransitionStateTarget(TitleScreen::TitleTransition::MainMenuToScenario);
+							g_MenuMan.GetTitleScreen()->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::MainMenuToScenario);
 						}
 					}
 					RunMenuLoop();

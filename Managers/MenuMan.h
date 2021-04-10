@@ -1,8 +1,6 @@
 #ifndef _RTEMENUMAN_
 #define _RTEMENUMAN_
 
-#include "TitleScreen.h"
-
 #include "Singleton.h"
 
 #define g_MenuMan MenuMan::Instance()
@@ -12,7 +10,7 @@ namespace RTE {
 	class AllegroScreen;
 	class AllegroInput;
 	class Controller;
-	//class TitleScreen;
+	class TitleScreen;
 	class MainMenuGUI;
 	class ScenarioGUI;
 
@@ -45,17 +43,7 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		TitleScreen::TitleTransition GetTitleTransitionState() const;
-
-		/// <summary>
-		/// 
-		/// </summary>
-		void SetTitleTransitionStateTarget(TitleScreen::TitleTransition targetState) const;
-
-		/// <summary>
-		/// 
-		/// </summary>
-		void SetTitlePendingTransition() const;
+		TitleScreen * GetTitleScreen() const { return m_TitleScreen.get(); }
 
 		/// <summary>
 		/// 

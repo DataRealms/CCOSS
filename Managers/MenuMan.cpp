@@ -119,23 +119,24 @@ namespace RTE {
 			g_ActivityMan.SetInActivity(false);
 		}
 
-			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::MainMenuToScenario);
 		if (updateResult == MainMenuGUI::MainMenuUpdateResult::ScenarioStarted && m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::ScenarioMenuActive) {
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario);
 			m_ScenarioMenu->SetEnabled();
-			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::MainMenuToCampaign);
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::CampaignStarted && m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::CampaignMenuActive) {
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCampaign);
 			g_MetaMan.GetGUI()->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
 		} else if (m_MainMenu->ActivityResumed()) {
 			g_ResumeActivity = true;
 		} else if (m_MainMenu->ActivityRestarted()) {
-			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::ScrollFadeOut);
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollFadeOut);
 			g_ActivityMan.SetResetActivity(true);
-		//	m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCredits);
-		//	m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::CreditsToMainMenu);
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::EnterCreditsScreen) {
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCredits);
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::BackToMainFromCredits) {
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::CreditsToMainMenu);
+
 		} else if (g_NetworkServer.IsServerModeEnabled()) {
-			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::ScrollFadeOut);
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollFadeOut);
 			EnterMultiplayerLobby();
 		}
 		return updateResult == MainMenuGUI::MainMenuUpdateResult::Quit;
@@ -149,11 +150,11 @@ namespace RTE {
 		ScenarioGUI::ScenarioMenuUpdateResult updateResult = m_ScenarioMenu->Update();
 
 		if (m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::MainMenuActive && updateResult == ScenarioGUI::ScenarioMenuUpdateResult::BackToMain) {
-			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::PlanetToMainMenu);
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PlanetToMainMenu);
 		} else if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::ActivityResumed) {
 			g_ResumeActivity = true;
 		} else if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::ActivityRestarted) {
-			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::ScrollFadeOut);
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeOut);
 			g_ActivityMan.SetResetActivity(true);
 		}
 
@@ -175,9 +176,9 @@ namespace RTE {
 		g_MetaMan.Update();
 
 		if (g_MetaMan.GetGUI()->BackToMain()) {
-			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::PlanetToMainMenu);
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PlanetToMainMenu);
 		} else if (g_MetaMan.GetGUI()->ActivityRestarted()) {
-			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::FadeOut);
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeOut);
 			g_ActivityMan.SetResetActivity(true);
 		} else if (g_MetaMan.GetGUI()->ActivityResumed()) {
 			g_ResumeActivity = true;

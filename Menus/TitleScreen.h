@@ -91,8 +91,8 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="newState"></param>
-		void SetTitleTransitionStateTarget(TitleTransition targetState) { if (targetState != m_TitleTransitionState) { m_TitleTransitionStateTarget = targetState; m_SectionSwitch = true; } }
+		/// <param name="newTransitionState"></param>
+		void SetTitleTransitionState(TitleTransition newTransitionState) { if (newTransitionState != m_TitleTransitionState) { m_TitleTransitionState = newTransitionState; m_SectionSwitch = true; } }
 
 		/// <summary>
 		/// 
@@ -179,7 +179,6 @@ namespace RTE {
 
 		IntroSequence m_IntroSequenceState; //!<
 		TitleTransition m_TitleTransitionState; //!<
-		TitleTransition m_TitleTransitionStateTarget; //!<
 		ActiveMenu m_ActiveMenu; //!<
 
 		int m_ScreenResX; //!<

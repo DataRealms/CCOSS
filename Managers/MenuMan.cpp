@@ -245,7 +245,7 @@ namespace RTE {
 
 		switch (m_ActiveScreen) {
 			case TitleScreen::ActiveMenu::MainMenuActive:
-				m_MainMenu->Draw(g_FrameMan.GetBackBuffer32());
+				m_MainMenu->Draw();
 				break;
 			case TitleScreen::ActiveMenu::ScenarioMenuActive:
 				m_ScenarioMenu->Draw(g_FrameMan.GetBackBuffer32());

@@ -32,7 +32,6 @@ namespace RTE {
 
 	void MainMenuGUI::Clear() {
 		m_GUIControlManager = nullptr;
-		m_Controller = nullptr;
 		m_MenuEnabled = false;
 		m_ActiveMenuScreen = g_FrameMan.ResolutionChanged() ? MenuScreen::SettingsScreen : MenuScreen::MainScreen; // Set the active screen to the settings screen otherwise we're at the main screen after reinitializing.
 		m_ScreenChange = false;
@@ -51,14 +50,13 @@ namespace RTE {
 		m_MainMenuScreens.fill(nullptr);
 		m_MainMenuButtons.fill(nullptr);
 
+		m_SettingsMenu = nullptr;
 		m_ModManagerMenu = nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::Create(AllegroScreen *guiScreen, AllegroInput *guiInput, Controller *controller) {
-		m_Controller = controller;
-
 		if (!m_GUIControlManager) { m_GUIControlManager = std::make_unique<GUIControlManager>(); }
 		if (!m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/MainMenu")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu"); }
 		m_GUIControlManager->Load("Base.rte/GUIs/MainMenuGUI.ini");
@@ -210,15 +208,20 @@ namespace RTE {
 	void MainMenuGUI::QuitLogic() {
 		// If quit confirm dialog not already showing, or an activity is running, show it
 		if (m_ActiveMenuScreen != MenuScreen::QuitScreen && g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing)) {
-			HideAllScreens();
-			m_ActiveMenuScreen = MenuScreen::QuitScreen;
-			m_ScreenChange = true;
+			SetActiveMenuScreen(MenuScreen::QuitScreen);
 		} else {
 			m_Quit = true;
+		}
+	}
 
-			// Hide all screens, the appropriate screen will reappear on next update
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void MainMenuGUI::SetActiveMenuScreen(MenuScreen screenToShow, bool playButtonPressSound) {
+		if (screenToShow != m_ActiveMenuScreen) {
+			m_ActiveMenuScreen = screenToShow;
 			HideAllScreens();
 			m_ScreenChange = true;
+			if (playButtonPressSound) { g_GUISound.ButtonPressSound()->Play(); }
 		}
 	}
 
@@ -267,7 +270,7 @@ namespace RTE {
 
 		m_MainMenuScreens.at(MenuScreen::CampaignScreen)->GUIPanel::AddChild(m_MainMenuButtons.at(MenuButton::BackToMainButton));
 		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetVisible(true);
-		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetPositionRel(4, 145);
+		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetPositionAbs((g_FrameMan.GetResX() - m_MainMenuButtons.at(MenuButton::BackToMainButton)->GetWidth()) / 2, m_MainMenuButtons.at(MenuButton::CampaignContinueButton)->GetYPos() + 25);
 
 		// Flag that this notice has now been shown once, so no need to keep showing it
 		m_TutorialOffered = true;
@@ -323,146 +326,30 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool MainMenuGUI::HandleMainScreenButtonPresses(const GUIControl *guiEventControl) {
-		if (guiEventControl == m_MainMenuButtons.at(MenuButton::BackToMainButton)) {
-			m_ScreenChange = true;
-			HideAllScreens();
-			//m_ActiveMenuScreen = MenuScreen::MainScreen;
-			return true;
-		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::CampaignButton)) {
-			if (!m_TutorialOffered) {
-				m_ActiveMenuScreen = MenuScreen::CampaignScreen;
-			} else {
-				m_CampaignStarted = true;
-				m_ActiveMenuScreen = MenuScreen::MainScreen;
-			}
-			m_ScreenChange = true;
-			HideAllScreens();
-			g_GUISound.ButtonPressSound()->Play();
-		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::ScenarioButton)) {
-			m_ScreenChange = true;
-			HideAllScreens();
-			m_ScenarioStarted = true;
-			m_CampaignStarted = false;
-
-			if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
-
-			m_ActiveMenuScreen = MenuScreen::MainScreen;
-			g_GUISound.ButtonPressSound()->Play();
-		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::MultiplayerButton)) {
-			m_ScreenChange = true;
-			HideAllScreens();
-
-			m_ScenarioStarted = true;
-			m_CampaignStarted = false;
-
-			if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
-
-			g_GUISound.ButtonPressSound()->Play();
-
-			m_ActiveMenuScreen = MenuScreen::MainScreen;
-
-			m_ActivityRestarted = true;
-			g_GUISound.ExitMenuSound()->Play();
-
-			g_SceneMan.SetSceneToLoad("Editor Scene");
-			MultiplayerGame *pMultiplayerGame = new MultiplayerGame;
-			pMultiplayerGame->Create();
-			g_ActivityMan.SetStartActivity(pMultiplayerGame);
-		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::SettingsButton)) {
-			m_ScreenChange = true;
-			HideAllScreens();
-			m_ActiveMenuScreen = MenuScreen::SettingsScreen;
-			g_GUISound.ButtonPressSound()->Play();
-		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::EditorsButton)) {
-			m_ScreenChange = true;
-			HideAllScreens();
-			m_ActiveMenuScreen = MenuScreen::EditorScreen;
-
-			m_CampaignStarted = false;
-			if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
-
-			g_GUISound.ButtonPressSound()->Play();
-		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::ModManagerButton)) {
-			m_ScreenChange = true;
-			HideAllScreens();
-			m_ActiveMenuScreen = MenuScreen::ModManagerScreen;
-			g_GUISound.ButtonPressSound()->Play();
-		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::CreditsButton)) {
-			m_ScreenChange = true;
-			HideAllScreens();
-			m_ActiveMenuScreen = MenuScreen::CreditsScreen;
-			g_GUISound.ButtonPressSound()->Play();
-		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::QuitButton)) {
-			QuitLogic();
-			g_GUISound.ButtonPressSound()->Play();
-		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::ResumeButton)) {
-			m_ActivityResumed = true;
-			g_GUISound.ExitMenuSound()->Play();
-		}
-		return false;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	bool MainMenuGUI::HandleInputEvents() {
-		m_ScenarioStarted = false;
-		m_CampaignStarted = false;
-		m_ActivityRestarted = false;
-		m_ActivityResumed = false;
-
 		m_GUIControlManager->Update();
 
 		GUIEvent guiEvent;
 		while (m_GUIControlManager->GetEvent(&guiEvent)) {
 			if (guiEvent.GetType() == GUIEvent::Command) {
-				if (HandleMainScreenButtonPresses(guiEvent.GetControl())) {
+				if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::BackToMainButton)) {
 					return true;
 				}
-
-				if (m_ActiveMenuScreen == MenuScreen::EditorScreen && (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::SceneEditorButton) || guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::AreaEditorButton) ||
-					guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::AssemblyEditorButton) || guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::GitEditorButton) || guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::ActorEditorButton))) {
-
-					m_ScreenChange = true;
-					HideAllScreens();
-					m_ActivityRestarted = true;
-					m_ActiveMenuScreen = MenuScreen::MainScreen;
-					g_GUISound.ExitMenuSound()->Play();
-
-					if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::SceneEditorButton)) {
-						StartEditorActivity("SceneEditor");
-					} else if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::AreaEditorButton)) {
-						StartEditorActivity("EditorActivity");
-					} else if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::AssemblyEditorButton)) {
-						StartEditorActivity("AssemblyEditor");
-					} else if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::GitEditorButton)) {
-						StartEditorActivity("GibEditor");
-					} else if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::ActorEditorButton)) {
-						StartEditorActivity("ActorEditor");
-					}
-				} else if (m_ActiveMenuScreen == MenuScreen::CampaignScreen && (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::PlayTutorialButton) || guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::CampaignContinueButton))) {
-					if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::PlayTutorialButton)) {
-						g_ActivityMan.SetStartActivity(dynamic_cast<Activity *>(g_PresetMan.GetEntityPreset("GATutorial", "Tutorial Mission")->Clone()));
-						if (GameActivity * gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetStartActivity())) { gameActivity->SetStartingGold(10000); }
-						g_SceneMan.SetSceneToLoad("Tutorial Bunker");
-						m_ActivityRestarted = true;
-						m_ActiveMenuScreen = MenuScreen::MainScreen;
-					} else if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::CampaignContinueButton)) {
-						m_CampaignStarted = true;
-						m_ActiveMenuScreen = MenuScreen::MainScreen;
-					}
-					m_ScreenChange = true;
-					HideAllScreens();
-					g_GUISound.ButtonPressSound()->Play();
-				} else if (m_ActiveMenuScreen == MenuScreen::QuitScreen && (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::QuitConfirmButton) || guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::QuitCancelButton))) {
-					if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::QuitConfirmButton)) {
-						m_Quit = true;
-					} else if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::QuitCancelButton)) {
-						m_ActiveMenuScreen = MenuScreen::MainScreen;
-					}
-					m_ScreenChange = true;
-					HideAllScreens();
-					g_GUISound.ButtonPressSound()->Play();
+				switch (m_ActiveMenuScreen) {
+					case MenuScreen::MainScreen:
+						HandleMainScreenInputEvents(guiEvent.GetControl());
+						break;
+					case MenuScreen::CampaignScreen:
+						HandleCampaignScreenInputEvents(guiEvent.GetControl());
+						break;
+					case MenuScreen::EditorScreen:
+						HandleEditorsScreenInputEvents(guiEvent.GetControl());
+						break;
+					case MenuScreen::QuitScreen:
+						HandleQuitScreenInputEvents(guiEvent.GetControl());
+						break;
+					default:
+						break;
 				}
 			} else if (guiEvent.GetType() == GUIEvent::Notification && (dynamic_cast<GUIButton *>(guiEvent.GetControl()) && guiEvent.GetMsg() == GUIButton::Focused)) {
 				g_GUISound.SelectionChangeSound()->Play();
@@ -473,8 +360,116 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void MainMenuGUI::HandleMainScreenInputEvents(const GUIControl *guiEventControl) {
+		if (guiEventControl == m_MainMenuButtons.at(MenuButton::CampaignButton)) {
+			if (!m_TutorialOffered) {
+				SetActiveMenuScreen(MenuScreen::CampaignScreen);
+			} else {
+				m_CampaignStarted = true;
+				SetActiveMenuScreen(MenuScreen::MainScreen);
+			}
+		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::ScenarioButton)) {
+			SetActiveMenuScreen(MenuScreen::MainScreen);
+
+			if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
+
+			m_ScenarioStarted = true;
+			m_CampaignStarted = false;
+		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::MultiplayerButton)) {
+			SetActiveMenuScreen(MenuScreen::MainScreen);
+
+			if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
+			g_SceneMan.SetSceneToLoad("Editor Scene");
+			MultiplayerGame *pMultiplayerGame = new MultiplayerGame;
+			pMultiplayerGame->Create();
+			g_ActivityMan.SetStartActivity(pMultiplayerGame);
+
+			m_ScenarioStarted = true;
+			m_CampaignStarted = false;
+			m_ActivityRestarted = true;
+
+			g_GUISound.ExitMenuSound()->Play();
+
+		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::SettingsButton)) {
+			SetActiveMenuScreen(MenuScreen::SettingsScreen);
+		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::EditorsButton)) {
+			SetActiveMenuScreen(MenuScreen::EditorScreen);
+
+			if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
+
+			m_CampaignStarted = false;
+		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::ModManagerButton)) {
+			SetActiveMenuScreen(MenuScreen::ModManagerScreen);
+		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::CreditsButton)) {
+			SetActiveMenuScreen(MenuScreen::CreditsScreen);
+		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::QuitButton)) {
+			QuitLogic();
+		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::ResumeButton)) {
+			m_ActivityResumed = true;
+			g_GUISound.ExitMenuSound()->Play();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void MainMenuGUI::HandleCampaignScreenInputEvents(const GUIControl *guiEventControl) {
+		if (guiEventControl == m_MainMenuButtons.at(MenuButton::PlayTutorialButton)) {
+			g_ActivityMan.SetStartActivity(dynamic_cast<Activity *>(g_PresetMan.GetEntityPreset("GATutorial", "Tutorial Mission")->Clone()));
+			if (GameActivity * gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetStartActivity())) { gameActivity->SetStartingGold(10000); }
+			g_SceneMan.SetSceneToLoad("Tutorial Bunker");
+			SetActiveMenuScreen(MenuScreen::MainScreen);
+			m_ActivityRestarted = true;
+		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::CampaignContinueButton)) {
+			SetActiveMenuScreen(MenuScreen::MainScreen);
+			m_CampaignStarted = true;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void MainMenuGUI::HandleEditorsScreenInputEvents(const GUIControl *guiEventControl) {
+		std::string editorToStart;
+		if (guiEventControl == m_MainMenuButtons.at(MenuButton::SceneEditorButton)) {
+			editorToStart = "SceneEditor";
+		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::AreaEditorButton)) {
+			editorToStart = "AreaEditor";
+		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::AssemblyEditorButton)) {
+			editorToStart = "AssemblyEditor";
+		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::GitEditorButton)) {
+			editorToStart = "GibEditor";
+		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::ActorEditorButton)) {
+			editorToStart = "ActorEditor";
+		}
+		if (!editorToStart.empty()) {
+			SetActiveMenuScreen(MenuScreen::MainScreen);
+			g_GUISound.ExitMenuSound()->Play();
+
+			m_ActivityRestarted = true;
+			StartEditorActivity(editorToStart);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void MainMenuGUI::HandleQuitScreenInputEvents(const GUIControl *guiEventControl) {
+		if (guiEventControl == m_MainMenuButtons.at(MenuButton::QuitConfirmButton)) {
+			m_Quit = true;
+			m_ScreenChange = true;
+			HideAllScreens();
+			g_GUISound.ButtonPressSound()->Play();
+		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::QuitCancelButton)) {
+			SetActiveMenuScreen(MenuScreen::MainScreen);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void MainMenuGUI::Update() {
 		m_Quit = false;
+		m_ScenarioStarted = false;
+		m_CampaignStarted = false;
+		m_ActivityRestarted = false;
+		m_ActivityResumed = false;
 
 		if (!m_MenuEnabled || g_ConsoleMan.IsEnabled()) {
 			return;
@@ -539,11 +534,9 @@ namespace RTE {
 
 		// If esc pressed, show quit dialog if applicable
 		if (backToMainMenu || g_UInputMan.KeyPressed(KEY_ESC)) {
-			if (m_ActiveMenuScreen == MenuScreen::SettingsScreen || m_ActiveMenuScreen == MenuScreen::ModManagerScreen || m_ActiveMenuScreen == MenuScreen::EditorScreen || m_ActiveMenuScreen == MenuScreen::CreditsScreen) {
-				HideAllScreens();
-				m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetVisible(false);
-				m_ActiveMenuScreen = MenuScreen::MainScreen;
-				m_ScreenChange = true;
+			//if (m_ActiveMenuScreen == MenuScreen::CampaignScreen || m_ActiveMenuScreen == MenuScreen::SettingsScreen || m_ActiveMenuScreen == MenuScreen::ModManagerScreen || m_ActiveMenuScreen == MenuScreen::EditorScreen || m_ActiveMenuScreen == MenuScreen::CreditsScreen) {
+			if (m_ActiveMenuScreen != MenuScreen::MainScreen) {
+				SetActiveMenuScreen(MenuScreen::MainScreen, false);
 				g_GUISound.BackButtonPressSound()->Play();
 
 				if (m_ActiveMenuScreen == MenuScreen::SettingsScreen) {
@@ -563,7 +556,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::Draw(BITMAP *drawBitmap) const {
+	void MainMenuGUI::Draw() const {
 		switch (m_ActiveMenuScreen) {
 			case MenuScreen::SettingsScreen:
 				m_SettingsMenu->Draw();
@@ -572,8 +565,7 @@ namespace RTE {
 				m_ModManagerMenu->Draw();
 				break;
 			default:
-				AllegroScreen drawScreen(drawBitmap);
-				m_GUIControlManager->Draw(&drawScreen);
+				m_GUIControlManager->Draw();
 				break;
 		}
 		m_GUIControlManager->DrawMouse();

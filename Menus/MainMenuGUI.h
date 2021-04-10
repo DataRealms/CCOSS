@@ -75,13 +75,7 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		MenuScreen GetActiveMenuScreen() const { return m_ActiveMenuScreen; }
-
-		/// <summary>
-		/// Sets the main menu GUI to display a screen.
-		/// </summary>
-		/// <param name="screenToShow">Which screen to show. See MenuScreen enumeration.</param>
-		void SetActiveMenuScreen(MenuScreen screenToShow) { m_ActiveMenuScreen = screenToShow; }
+		//MenuScreen GetActiveMenuScreen() const { return m_ActiveMenuScreen; }
 
 		/// <summary>
 		/// Reports whether the player has decided to start playing a Scenario this frame.
@@ -129,8 +123,7 @@ namespace RTE {
 		/// <summary>
 		/// Draws the menu.
 		/// </summary>
-		/// <param name="drawBitmap">The bitmap to draw on.</param>
-		void Draw(BITMAP *drawBitmap) const;
+		void Draw() const;
 #pragma endregion
 
 	private:
@@ -176,7 +169,6 @@ namespace RTE {
 		};
 
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The control manager which holds all the controls.
-		Controller *m_Controller; //!< Controller which controls this menu. Not owned.
 
 		bool m_MenuEnabled; //!< Visibility state of the menu.
 		MenuScreen m_ActiveMenuScreen; //!< Screen selection state.
@@ -234,6 +226,12 @@ namespace RTE {
 
 #pragma region Menu Screen Handling
 		/// <summary>
+		/// Sets the main menu GUI to display a screen.
+		/// </summary>
+		/// <param name="screenToShow">Which screen to show. See MenuScreen enumeration.</param>
+		void SetActiveMenuScreen(MenuScreen screenToShow, bool playButtonPressSound = true);
+
+		/// <summary>
 		/// Hides all menu screens, so one can easily be unhidden and shown only.
 		/// </summary>
 		void HideAllScreens();
@@ -257,26 +255,43 @@ namespace RTE {
 		/// 
 		/// </summary>
 		void ShowCreditsScreen();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		bool RollCredits();
 #pragma endregion
 
 #pragma region Update Breakdown
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <returns></returns>
-		bool RollCredits();
+		bool HandleInputEvents();
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="guiEventControl"></param>
-		/// <returns></returns>
-		bool HandleMainScreenButtonPresses(const GUIControl *guiEventControl);
+		void HandleMainScreenInputEvents(const GUIControl *guiEventControl);
 
 		/// <summary>
 		/// 
 		/// </summary>
-		bool HandleInputEvents();
+		/// <param name="guiEventControl"></param>
+		void HandleCampaignScreenInputEvents(const GUIControl *guiEventControl);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="guiEventControl"></param>
+		void HandleEditorsScreenInputEvents(const GUIControl *guiEventControl);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="guiEventControl"></param>
+		void HandleQuitScreenInputEvents(const GUIControl *guiEventControl);
 #pragma endregion
 
 		/// <summary>

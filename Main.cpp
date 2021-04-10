@@ -47,8 +47,6 @@ using namespace RTE;
 volatile bool g_Quit = false;
 bool g_ResetRTE = false; //!< Signals to reset the entire RTE next iteration.
 bool g_ResumeActivity = false;
-int g_StationOffsetX;
-int g_StationOffsetY;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -438,6 +438,11 @@ public:
 // Return value:    None.
 	void SetToStartNewGame();
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="newStationPos"></param>
+	void SetStationPos(const Vector &newStationPos) { m_StationPos = newStationPos; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -1247,6 +1252,8 @@ protected:
     bool m_BackToMain;
     // Player selected to quit the program
     bool m_Quit;
+
+	Vector m_StationPos; //!< The position of the station on the planet orbit.
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

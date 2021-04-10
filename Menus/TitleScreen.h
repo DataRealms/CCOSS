@@ -111,6 +111,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns></returns>
 		float GetPlanetRadius() const { return m_PlanetRadius; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		Vector GetStationPos() const { return m_Station.GetPos(); }
 #pragma endregion
 
 #pragma region Concrete Methods

@@ -108,6 +108,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns></returns>
 		void UpdateScenarioMenu();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		bool UpdateCampaignMenu();
 #pragma endregion
 
 		std::unique_ptr<AllegroInput> m_GUIInput; //!< The GUIInput interface of this MenuMan.

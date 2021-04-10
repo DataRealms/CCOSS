@@ -188,7 +188,26 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MenuMan::Update() {
+	bool MenuMan::UpdateCampaignMenu() {
+		g_MetaMan.GetGUI()->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
+		g_MetaMan.GetGUI()->SetStationPos(m_TitleScreen->GetStationPos());
+		g_MetaMan.Update();
+
+		if (g_MetaMan.GetGUI()->BackToMain()) {
+			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::PlanetToMainMenu);
+		} else if (g_MetaMan.GetGUI()->ActivityRestarted()) {
+			m_TitleScreen->SetTitleTransitionStateTarget(TitleScreen::TitleTransition::FadeOut);
+			g_ActivityMan.SetResetActivity(true);
+		} else if (g_MetaMan.GetGUI()->ActivityResumed()) {
+			g_ResumeActivity = true;
+		}
+
+		return g_MetaMan.GetGUI()->QuitProgram();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool MenuMan::Update() {
 		if (g_FrameMan.ResolutionChanged()) { Reinitialize(); }
 
 		m_ActiveScreen = m_TitleScreen->Update();
@@ -205,7 +224,7 @@ namespace RTE {
 				UpdateScenarioMenu();
 				break;
 			case TitleScreen::ActiveMenu::CampaignMenuActive:
-				g_MetaMan.Update();
+				quitResult = UpdateCampaignMenu();
 				break;
 			default:
 				break;

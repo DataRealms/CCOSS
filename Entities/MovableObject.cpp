@@ -821,7 +821,7 @@ void MovableObject::ApplyForces()
     {
         // Continuous force application to transformational velocity.
         // (F = m * a -> a = F / m).
-        m_Vel += ((*fItr).first / (GetMass() ? GetMass() : 0.0001F) * deltaTime;
+        m_Vel += ((*fItr).first / (GetMass() ? GetMass() : 0.0001F) * deltaTime);
     }
 
     // Clear out the forces list

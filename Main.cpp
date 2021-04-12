@@ -338,7 +338,6 @@ int main(int argc, char **argv) {
     }
     g_UInputMan.Initialize();
     g_ConsoleMan.Initialize();
-    g_ActivityMan.Initialize();
     g_MovableMan.Initialize();
     g_MetaMan.Initialize();
 	g_MenuMan.Initialize();
@@ -360,13 +359,11 @@ int main(int argc, char **argv) {
 		if (std::filesystem::exists(System::GetWorkingDirectory() + "LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
 	}
 
-    if (g_NetworkServer.IsServerModeEnabled()) {
-		g_ActivityMan.SetStartMultiplayerServerOverview();
-	// Evaluate LaunchIntoEditor first so it takes priority when both it and LaunchIntoActivity are set, otherwise it is ignored and editor is never launched.
-	} else if ((g_ActivityMan.LaunchIntoEditor() && !g_ActivityMan.SetStartEditorActivitySetToLaunchInto()) || (g_ActivityMan.LaunchIntoActivity() && !ResetActivity())) {
+    if (!g_ActivityMan.Initialize()) {
 		RunMenuLoop();
+	} else {
+		RunGameLoop();
 	}
-	RunGameLoop();
 
     ///////////////////////////////////////////////////////////////////
     // Clean up

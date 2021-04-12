@@ -17,6 +17,7 @@
 #include "ActorEditor.h"
 #include "AssemblyEditor.h"
 
+#include "NetworkServer.h"
 #include "MultiplayerServerLobby.h"
 
 extern bool g_ResumeActivity;
@@ -35,6 +36,13 @@ namespace RTE {
 		m_LastMusicPos = 0.0F;
 		m_LaunchIntoActivity = false;
 		m_LaunchIntoEditor = false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool ActivityMan::Initialize() {
+		// Evaluate LaunchIntoEditor before LaunchIntoActivity so it takes priority when both are set, otherwise it is ignored and editor is never launched.
+		return ((g_NetworkServer.IsServerModeEnabled() && !SetStartMultiplayerServerOverview()) || (LaunchIntoEditor() && !SetStartEditorActivitySetToLaunchInto()) || (LaunchIntoActivity() /*&& !ResetActivity()*/));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

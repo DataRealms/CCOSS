@@ -26,7 +26,7 @@ namespace RTE {
 		/// Makes the ActivityMan object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Initialize() { return 0; }
+		bool Initialize();
 #pragma endregion
 
 #pragma region Destruction

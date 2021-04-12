@@ -72,6 +72,7 @@ namespace RTE {
 		/// </summary>
 		/// <returns>The GUIControlManager. Ownership is not transferred!</returns>
 		GUIControlManager * GetGUIControlManager() const { return m_GUIControlManager.get(); }
+
 		/// <summary>
 		/// Reports whether the player has decided to restart an activity this frame. All parameters for the new game has been fed into ActivityMan already.
 		/// </summary>
@@ -86,12 +87,6 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Concrete Methods
-		/// <summary>
-		/// Loads "Editor Scene" and starts the given editor activity.
-		/// </summary>
-		/// <param name="editorToLaunch"></param>
-		void StartEditorActivity(const std::string_view &editorToLaunch) const;
-
 		/// <summary>
 		/// Updates the state of this Menu each frame.
 		/// </summary>

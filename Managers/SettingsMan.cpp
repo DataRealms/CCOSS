@@ -37,8 +37,6 @@ namespace RTE {
 
 		m_RecommendedMOIDCount = 240;
 
-		m_LaunchIntoActivity = false;
-
 		m_SkipIntro = false;
 		m_ToolTips = true;
 		m_DisableLoadingScreen = true;
@@ -136,7 +134,7 @@ namespace RTE {
 		} else if (propName == "CrabBombThreshold") {
 			reader >> m_CrabBombThreshold;
 		} else if (propName == "LaunchIntoActivity") {
-			reader >> m_LaunchIntoActivity;
+			reader >> g_ActivityMan.m_LaunchIntoActivity;
 		} else if (propName == "DefaultActivityType") {
 			reader >> g_ActivityMan.m_DefaultActivityType;
 		} else if (propName == "DefaultActivityName") {
@@ -294,7 +292,7 @@ namespace RTE {
 		writer.NewDivider(false);
 		writer.NewLineString("// Default Activity Settings", false);
 		writer.NewLine(false);
-		writer.NewPropertyWithValue("LaunchIntoActivity", m_LaunchIntoActivity);
+		writer.NewPropertyWithValue("LaunchIntoActivity", g_ActivityMan.m_LaunchIntoActivity);
 		writer.NewPropertyWithValue("DefaultActivityType", g_ActivityMan.m_DefaultActivityType);
 		writer.NewPropertyWithValue("DefaultActivityName", g_ActivityMan.m_DefaultActivityName);
 		writer.NewPropertyWithValue("DefaultSceneName", g_SceneMan.m_DefaultSceneName);

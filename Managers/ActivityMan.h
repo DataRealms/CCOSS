@@ -43,42 +43,6 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets the type name of the default Activity to be loaded if nothing else is available.
-		/// </summary>
-		/// <returns>The default Activity type name.</returns>
-		std::string GetDefaultActivityType() const { return m_DefaultActivityType; }
-
-		/// <summary>
-		/// Sets the type name of the default Activity to be loaded if nothing else is available.
-		/// </summary>
-		/// <param name="defaultActivityType">The default Activity type name.</param>
-		void SetDefaultActivityType(std::string defaultActivityType) { m_DefaultActivityType = defaultActivityType; }
-
-		/// <summary>
-		/// Gets the name of the default Activity to be loaded if nothing else is available.
-		/// </summary>
-		/// <returns>The default Activity preset name.</returns>
-		std::string GetDefaultActivityName() const { return m_DefaultActivityName; }
-
-		/// <summary>
-		/// Sets the preset name of the default Activity to be loaded if nothing else is available.
-		/// </summary>
-		/// <param name="defaultActivityName">The default Activity preset name.</param>
-		void SetDefaultActivityName(std::string defaultActivityName) { m_DefaultActivityName = defaultActivityName; }
-
-		/// <summary>
-		/// Gets the Activity that will be used in the next restart. Ownership is NOT transferred!
-		/// </summary>
-		/// <returns>The Activity to put into effect next time ResetActivity is called.</returns>
-		Activity * GetStartActivity() const { return m_StartActivity; }
-
-		/// <summary>
-		/// Sets a new Activity to copy for next restart. You have to use RestartActivity to get it going. Ownership IS transferred!
-		/// </summary>
-		/// <param name="newActivity">The new Activity to put into effect next time ResetActivity is called.</param>
-		void SetStartActivity(Activity *newActivity);
-
-		/// <summary>
 		/// Gets the current Activity in effect. Won't be what has been set by SetStartActivity unless RestartActivity has been called since.
 		/// </summary>
 		/// <returns>The current Activity in effect. Will be 0 if no Activity is going.</returns>
@@ -119,6 +83,81 @@ namespace RTE {
 		/// </summary>
 		/// <param name="resetActivity">Restart the Activity or not.</param>
 		void SetResetActivity(bool resetActivity) { m_ResetActivity = resetActivity; }
+#pragma endregion
+
+#pragma region Default Activity Handling
+		/// <summary>
+		/// Gets the type name of the default Activity to be loaded if nothing else is available.
+		/// </summary>
+		/// <returns>The default Activity type name.</returns>
+		std::string GetDefaultActivityType() const { return m_DefaultActivityType; }
+
+		/// <summary>
+		/// Sets the type name of the default Activity to be loaded if nothing else is available.
+		/// </summary>
+		/// <param name="defaultActivityType">The default Activity type name.</param>
+		void SetDefaultActivityType(const std::string_view &defaultActivityType) { m_DefaultActivityType = defaultActivityType; }
+
+		/// <summary>
+		/// Gets the name of the default Activity to be loaded if nothing else is available.
+		/// </summary>
+		/// <returns>The default Activity preset name.</returns>
+		std::string GetDefaultActivityName() const { return m_DefaultActivityName; }
+
+		/// <summary>
+		/// Sets the preset name of the default Activity to be loaded if nothing else is available.
+		/// </summary>
+		/// <param name="defaultActivityName">The default Activity preset name.</param>
+		void SetDefaultActivityName(const std::string_view &defaultActivityName) { m_DefaultActivityName = defaultActivityName; }
+
+		/// <summary>
+		/// Gets whether the intro and main menu should be skipped on game start and launch directly into the set default Activity instead.
+		/// </summary>
+		/// <returns>Whether the game is set to launch directly into the set default Activity or not.</returns>
+		bool LaunchIntoActivity() const { return m_LaunchIntoActivity; }
+
+		/// <summary>
+		/// Gets whether the intro and main menu should be skipped on game start and launch directly into the set editor Activity instead.
+		/// </summary>
+		/// <returns>Whether the game is set to launch directly into the set editor Activity or not.</returns>
+		bool LaunchIntoEditor() const { return m_LaunchIntoEditor; }
+
+		/// <summary>
+		/// Sets the name of the editor to launch directly into.
+		/// </summary>
+		/// <param name="editorName"></param>
+		void SetEditorToLaunch(const std::string_view &editorName) { if (!editorName.empty()) { m_EditorToLaunch = editorName; m_LaunchIntoEditor = true; } }
+#pragma endregion
+
+#pragma region Activity Start Handling
+		/// <summary>
+		/// Gets the Activity that will be used in the next restart. Ownership is NOT transferred!
+		/// </summary>
+		/// <returns>The Activity to put into effect next time ResetActivity is called.</returns>
+		Activity * GetStartActivity() const { return m_StartActivity; }
+
+		/// <summary>
+		/// Sets a new Activity to copy for next restart. You have to use RestartActivity to get it going. Ownership IS transferred!
+		/// </summary>
+		/// <param name="newActivity">The new Activity to put into effect next time ResetActivity is called.</param>
+		void SetStartActivity(Activity *newActivity);
+
+		/// <summary>
+		/// Loads "Editor Scene" and starts the given editor Activity.
+		/// </summary>
+		/// <param name="editorToLaunch">The editor name to put into effect next time ResetActivity is called.</param>
+		void SetStartEditorActivity(const std::string_view &editorToLaunch) const;
+
+		/// <summary>
+		/// Launch editor Activity specified in command-line argument.
+		/// </summary>
+		/// <returns>Whether a valid editor name was passed in and set to be launched next time ResetActivity is called.</returns>
+		bool SetStartEditorActivitySetToLaunchInto();
+
+		/// <summary>
+		/// Launch multiplayer server overview Activity.
+		/// </summary>
+		void SetStartMultiplayerServerOverview() const;
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -178,6 +217,10 @@ namespace RTE {
 
 		std::string m_LastMusicPath; //!< Path to the last music stream being played.
 		float m_LastMusicPos; //!< What the last position of the in-game music track was before pause, in seconds.
+
+		bool m_LaunchIntoActivity; //!< Whether to skip the intro and main menu and launch directly into the set default Activity instead.
+		bool m_LaunchIntoEditor; //!< Whether to skip the intro and main menu and launch directly into the set editor Activity instead.
+		std::string_view m_EditorToLaunch; //!< The name of the editor Activity to launch directly into.
 
 	private:
 

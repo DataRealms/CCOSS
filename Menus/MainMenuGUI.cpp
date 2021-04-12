@@ -18,12 +18,6 @@
 #include "GUILabel.h"
 
 #include "GATutorial.h"
-#include "SceneEditor.h"
-#include "AreaEditor.h"
-#include "GibEditor.h"
-#include "ActorEditor.h"
-#include "AssemblyEditor.h"
-#include "EditorActivity.h"
 #include "MultiplayerGame.h"
 
 namespace RTE {
@@ -167,32 +161,6 @@ namespace RTE {
 			g_GUISound.ExitMenuSound()->Play();
 		}
 		m_ScreenChange = true;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void MainMenuGUI::StartEditorActivity(const std::string_view &editorToLaunch) const {
-		EditorActivity *editorActivityToStart = nullptr;
-
-		if (editorToLaunch == "ActorEditor") {
-			editorActivityToStart = new ActorEditor;
-		} else if (editorToLaunch == "GibEditor") {
-			editorActivityToStart = new GibEditor;
-		} else if (editorToLaunch == "SceneEditor") {
-			editorActivityToStart = new SceneEditor;
-		} else if (editorToLaunch == "AreaEditor") {
-			editorActivityToStart = new AreaEditor;
-		} else if (editorToLaunch == "AssemblyEditor") {
-			editorActivityToStart = new AssemblyEditor;
-		}
-		if (editorActivityToStart) {
-			g_SceneMan.SetSceneToLoad("Editor Scene");
-			editorActivityToStart->Create();
-			editorActivityToStart->SetEditorMode(EditorActivity::LOADDIALOG);
-			g_ActivityMan.SetStartActivity(editorActivityToStart);
-		} else {
-			RTEAbort("Failed to instantiate the " + std::string(editorToLaunch) + " Activity!");
-		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -437,7 +405,7 @@ namespace RTE {
 			g_GUISound.ExitMenuSound()->Play();
 
 			m_ActivityRestarted = true;
-			StartEditorActivity(editorToStart);
+			g_ActivityMan.SetStartEditorActivity(editorToStart);
 		}
 	}
 

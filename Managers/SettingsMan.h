@@ -124,14 +124,6 @@ namespace RTE {
 		int CrabBombThreshold() const { return m_CrabBombThreshold; }
 #pragma endregion
 
-#pragma region Default Activity Settings
-		/// <summary>
-		/// Gets whether the intro and main menu should be skipped on game start and launch directly into the set default activity instead.
-		/// </summary>
-		/// <returns>Whether the game is set to launch directly into the set default activity or not.</returns>
-		bool LaunchIntoActivity() const { return m_LaunchIntoActivity; }
-#pragma endregion
-
 #pragma region Network Settings
 		/// <summary>
 		/// Gets the player name that is used in network multiplayer matches.
@@ -389,14 +381,12 @@ namespace RTE {
 
 		int m_RecommendedMOIDCount; //!< Recommended max MOID's before removing actors from scenes.
 
-		bool m_LaunchIntoActivity; //!< Whether to skip the intro and main menu and launch directly into the set default activity instead.
-
 		bool m_SkipIntro; //!< Whether to play the intro of the game or skip directly to the main menu.
 		bool m_ToolTips; //!< Whether ToolTips are enabled or not.
 		bool m_DisableLoadingScreen; //!< Whether to display the reader progress report during module loading or not. Greatly increases loading speeds when disabled.
 		int m_LoadingScreenReportPrecision; //!< How accurately the reader progress report tells what line it's reading during module loading. Lower values equal more precision at the cost of loading speed.
 		float m_MenuTransitionDurationMultiplier; //!< Multiplier value for the transition durations between different menus. Lower values equal faster transitions.
-		
+
 		bool m_DrawAtomGroupVisualizations; //!< Whether to draw MOSRotating AtomGroups to the Scene MO color Bitmap.
 		bool m_DrawHandAndFootGroupVisualizations; //!< Whether to draw Actor HandGroups and FootGroups to the Scene MO color Bitmap.
 		bool m_DrawLimbPathVisualizations; //!< Whether to draw Actor LimbPaths to the Scene MO color Bitmap.

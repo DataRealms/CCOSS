@@ -7,7 +7,17 @@
 #include "AudioMan.h"
 #include "FrameMan.h"
 #include "PostProcessMan.h"
+
 #include "GAScripted.h"
+
+#include "EditorActivity.h"
+#include "SceneEditor.h"
+#include "AreaEditor.h"
+#include "GibEditor.h"
+#include "ActorEditor.h"
+#include "AssemblyEditor.h"
+
+#include "MultiplayerServerLobby.h"
 
 extern bool g_ResumeActivity;
 
@@ -21,8 +31,10 @@ namespace RTE {
 		m_Activity = nullptr;
 		m_StartActivity = nullptr;
 		m_InActivity = false;
-		m_LastMusicPath = "";
+		m_LastMusicPath.clear();
 		m_LastMusicPos = 0.0F;
+		m_LaunchIntoActivity = false;
+		m_LaunchIntoEditor = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -32,6 +44,67 @@ namespace RTE {
 
 		delete m_StartActivity;
 		m_StartActivity = newActivity;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ActivityMan::SetStartEditorActivity(const std::string_view &editorToLaunch) const {
+		EditorActivity *editorActivityToStart = nullptr;
+
+		if (editorToLaunch == "ActorEditor") {
+			editorActivityToStart = new ActorEditor;
+		} else if (editorToLaunch == "GibEditor") {
+			editorActivityToStart = new GibEditor;
+		} else if (editorToLaunch == "SceneEditor") {
+			editorActivityToStart = new SceneEditor;
+		} else if (editorToLaunch == "AreaEditor") {
+			editorActivityToStart = new AreaEditor;
+		} else if (editorToLaunch == "AssemblyEditor") {
+			editorActivityToStart = new AssemblyEditor;
+		}
+		if (editorActivityToStart) {
+			g_SceneMan.SetSceneToLoad("Editor Scene");
+			editorActivityToStart->Create();
+			editorActivityToStart->SetEditorMode(EditorActivity::LOADDIALOG);
+			g_ActivityMan.SetStartActivity(editorActivityToStart);
+		} else {
+			RTEAbort("Failed to instantiate the " + std::string(editorToLaunch) + " Activity!");
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool ActivityMan::SetStartEditorActivitySetToLaunchInto() {
+		bool validEditorName = false;
+		std::array<std::string_view, 5> validEditorNames = { "ActorEditor", "GibEditor", "SceneEditor", "AreaEditor", "AssemblyEditor" };
+		if (std::find(validEditorNames.begin(), validEditorNames.end(), m_EditorToLaunch) != validEditorNames.end()) { validEditorName = true; }
+
+		if (validEditorName) {
+			// Force mouse + keyboard with default mapping so we won't need to change manually if player 1 is set to keyboard only or gamepad.
+			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetDevice(InputDevice::DEVICE_MOUSE_KEYB);
+			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetPreset(InputPreset::PRESET_WASDKEYS);
+			SetStartEditorActivity(m_EditorToLaunch);
+			return true;
+		} else {
+			g_ConsoleMan.PrintString("ERROR: Invalid editor name passed into \"-editor\" argument!");
+			g_ConsoleMan.SetEnabled(true);
+			m_LaunchIntoEditor = false;
+			return false;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ActivityMan::SetStartMultiplayerServerOverview() const {
+		g_SceneMan.SetSceneToLoad("Multiplayer Scene");
+		MultiplayerServerLobby *multiplayerServerLobby = new MultiplayerServerLobby;
+		multiplayerServerLobby->Create();
+		multiplayerServerLobby->ClearPlayers(true);
+		for (int playerAndTeamNum = Players::PlayerOne; playerAndTeamNum < Players::MaxPlayerCount; ++playerAndTeamNum) {
+			multiplayerServerLobby->AddPlayer(playerAndTeamNum, true, playerAndTeamNum, 0);
+		}
+		g_ActivityMan.SetStartActivity(multiplayerServerLobby);
+		g_ActivityMan.SetResetActivity(true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

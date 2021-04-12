@@ -294,7 +294,7 @@ namespace RTE {
 					launchModeSet = true;
 					// Launch game directly into editor activity
 				} else if (!lastArg && currentArg == "-editor") {
-					g_MenuMan.SetEditorToLaunch(argValue[++i]);
+					g_ActivityMan.SetEditorToLaunch(argValue[++i]);
 					launchModeSet = true;
 				}
 			}
@@ -367,9 +367,9 @@ int main(int argc, char **argv) {
 		g_AudioMan.SetMultiplayerMode(true);
 		g_AudioMan.SetSoundsVolume(0);
 		g_AudioMan.SetMusicVolume(0);
-		g_MenuMan.EnterMultiplayerServerOverview();
+		g_ActivityMan.SetStartMultiplayerServerOverview();
 	// Evaluate LaunchIntoEditor first so it takes priority when both it and LaunchIntoActivity are set, otherwise it is ignored and editor is never launched.
-	} else if ((g_MenuMan.LaunchIntoEditor() && !g_MenuMan.EnterEditorActivity()) || (g_SettingsMan.LaunchIntoActivity() && !ResetActivity())) {
+	} else if ((g_ActivityMan.LaunchIntoEditor() && !g_ActivityMan.SetStartEditorActivitySetToLaunchInto()) || (g_ActivityMan.LaunchIntoActivity() && !ResetActivity())) {
 		RunMenuLoop();
 	}
 	RunGameLoop();

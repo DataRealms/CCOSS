@@ -44,33 +44,9 @@ namespace RTE {
 		/// </summary>
 		/// <returns></returns>
 		TitleScreen * GetTitleScreen() const { return m_TitleScreen.get(); }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns></returns>
-		bool LaunchIntoEditor() const { return m_LaunchIntoEditor; }
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="editorName"></param>
-		void SetEditorToLaunch(const std::string_view &editorName) { if (!editorName.empty()) { m_EditorToLaunch = editorName; m_LaunchIntoEditor = true; } }
 #pragma endregion
 
 #pragma region Concrete Methods
-		/// <summary>
-		/// Launch editor activity specified in command-line argument.
-		/// </summary>
-		/// <param name="editorToEnter"></param>
-		/// <returns>Whether a valid editor name was passed in and set to be launched.</returns>
-		bool EnterEditorActivity();
-
-		/// <summary>
-		/// Launch multiplayer lobby activity.
-		/// </summary>
-		void EnterMultiplayerLobby();
-
 		/// <summary>
 		/// 
 		/// </summary>
@@ -113,9 +89,6 @@ namespace RTE {
 		std::unique_ptr<ScenarioGUI> m_ScenarioMenu; //!<
 
 		int m_ActiveScreen; //!<
-
-		bool m_LaunchIntoEditor; //!<
-		std::string_view m_EditorToLaunch; //!<
 	};
 }
 #endif

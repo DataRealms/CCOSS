@@ -46,7 +46,7 @@ namespace RTE {
 		/// Gets the current Activity in effect. Won't be what has been set by SetStartActivity unless RestartActivity has been called since.
 		/// </summary>
 		/// <returns>The current Activity in effect. Will be 0 if no Activity is going.</returns>
-		Activity * GetActivity() const { return m_Activity; }
+		Activity * GetActivity() const { return m_Activity.get(); }
 
 		/// <summary>
 		/// Indicates whether the game is currently running or not (not editing, over or paused).
@@ -134,7 +134,7 @@ namespace RTE {
 		/// Gets the Activity that will be used in the next restart. Ownership is NOT transferred!
 		/// </summary>
 		/// <returns>The Activity to put into effect next time ResetActivity is called.</returns>
-		Activity * GetStartActivity() const { return m_StartActivity; }
+		Activity * GetStartActivity() const { return m_StartActivity.get(); }
 
 		/// <summary>
 		/// Sets a new Activity to copy for next restart. You have to use RestartActivity to get it going. Ownership IS transferred!
@@ -146,7 +146,7 @@ namespace RTE {
 		/// Loads "Editor Scene" and starts the given editor Activity.
 		/// </summary>
 		/// <param name="editorToLaunch">The editor name to put into effect next time ResetActivity is called.</param>
-		void SetStartEditorActivity(const std::string_view &editorToLaunch) const;
+		void SetStartEditorActivity(const std::string_view &editorToLaunch);
 
 		/// <summary>
 		/// Launch editor Activity specified in command-line argument.
@@ -157,7 +157,7 @@ namespace RTE {
 		/// <summary>
 		/// Launch multiplayer server overview Activity.
 		/// </summary>
-		void SetStartMultiplayerServerOverview() const;
+		void SetStartMultiplayerServerOverview();
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -174,7 +174,7 @@ namespace RTE {
 		/// <param name="className">The class name of the Activity to start.</param>
 		/// <param name="presetName">The PresetName of the Activity to start.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int StartActivity(std::string className, std::string presetName);
+		int StartActivity(const std::string &className, const std::string &presetName);
 
 		/// <summary>
 		/// Pauses/unpauses the game and saving/resuming in-game music if possible, or queuing default music if not.
@@ -191,17 +191,17 @@ namespace RTE {
 		/// <summary>
 		/// Forces the current game's end.
 		/// </summary>
-		void EndActivity();
+		void EndActivity() const;
 
 		/// <summary>
 		/// Only updates Global Scripts of the current activity with LateUpdate flag enabled.
 		/// </summary>
-		void LateUpdateGlobalScripts();
+		void LateUpdateGlobalScripts() const;
 
 		/// <summary>
 		/// Updates the state of this and the current Activity. Supposed to be done every frame before drawing.
 		/// </summary>
-		void Update() { if (m_Activity) { m_Activity->Update(); } }
+		void Update() const { if (m_Activity) { m_Activity->Update(); } }
 #pragma endregion
 
 	protected:
@@ -209,8 +209,8 @@ namespace RTE {
 		std::string m_DefaultActivityType; //!< The type name of the default Activity to be loaded if nothing else is available.
 		std::string m_DefaultActivityName; //!< The preset name of the default Activity to be loaded if nothing else is available.
 
-		Activity *m_Activity; //!< The current Activity in action. OWNED BY THIS!
-		Activity *m_StartActivity; //!< The starting condition of the next Activity to be (re)started. OWNED BY THIS!
+		std::unique_ptr<Activity> m_Activity; //!< The current Activity in action. OWNED BY THIS!
+		std::unique_ptr<Activity> m_StartActivity; //!< The starting condition of the next Activity to be (re)started. OWNED BY THIS!
 
 		bool m_InActivity; //!< Whether we are currently in game (as in, not in the main menu or any other out-of-game menus), regardless of its state.
 		bool m_ResetActivity; //!< Whether the current Activity needs to be restarted.

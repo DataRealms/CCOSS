@@ -41,32 +41,30 @@ namespace RTE {
 
 	void ActivityMan::SetStartActivity(Activity *newActivity) {
 		RTEAssert(newActivity, "Trying to replace an activity with a null one!");
-
-		delete m_StartActivity;
-		m_StartActivity = newActivity;
+		m_StartActivity.reset(newActivity);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ActivityMan::SetStartEditorActivity(const std::string_view &editorToLaunch) const {
-		EditorActivity *editorActivityToStart = nullptr;
+	void ActivityMan::SetStartEditorActivity(const std::string_view &editorToLaunch) {
+		std::unique_ptr<EditorActivity> editorActivityToStart = nullptr;
 
 		if (editorToLaunch == "ActorEditor") {
-			editorActivityToStart = new ActorEditor;
+			editorActivityToStart.reset(new ActorEditor());
 		} else if (editorToLaunch == "GibEditor") {
-			editorActivityToStart = new GibEditor;
+			editorActivityToStart.reset(new GibEditor());
 		} else if (editorToLaunch == "SceneEditor") {
-			editorActivityToStart = new SceneEditor;
+			editorActivityToStart.reset(new SceneEditor());
 		} else if (editorToLaunch == "AreaEditor") {
-			editorActivityToStart = new AreaEditor;
+			editorActivityToStart.reset(new AreaEditor());
 		} else if (editorToLaunch == "AssemblyEditor") {
-			editorActivityToStart = new AssemblyEditor;
+			editorActivityToStart.reset(new AssemblyEditor());
 		}
 		if (editorActivityToStart) {
 			g_SceneMan.SetSceneToLoad("Editor Scene");
 			editorActivityToStart->Create();
 			editorActivityToStart->SetEditorMode(EditorActivity::LOADDIALOG);
-			g_ActivityMan.SetStartActivity(editorActivityToStart);
+			SetStartActivity(editorActivityToStart.release());
 		} else {
 			RTEAbort("Failed to instantiate the " + std::string(editorToLaunch) + " Activity!");
 		}
@@ -95,7 +93,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ActivityMan::SetStartMultiplayerServerOverview() const {
+	void ActivityMan::SetStartMultiplayerServerOverview() {
 		g_SceneMan.SetSceneToLoad("Multiplayer Scene");
 		MultiplayerServerLobby *multiplayerServerLobby = new MultiplayerServerLobby;
 		multiplayerServerLobby->Create();
@@ -112,19 +110,14 @@ namespace RTE {
 	int ActivityMan::StartActivity(Activity *activity) {
 		RTEAssert(activity, "Trying to start a null activity!");
 
-		int error = 0;
-
 		// Stop all music played by the current activity. It will be re-started by the new Activity. 
 		g_AudioMan.StopMusic();
 
-		delete m_StartActivity;
-		m_StartActivity = activity;
-
-		delete m_Activity;
-		m_Activity = dynamic_cast<Activity *>(m_StartActivity->Clone());
+		m_StartActivity.reset(activity);
+		m_Activity.reset(dynamic_cast<Activity *>(m_StartActivity->Clone()));
 
 		m_Activity->SetupPlayers();
-		error = m_Activity->Start();
+		int error = m_Activity->Start();
 
 		if (error >= 0)
 			g_ConsoleMan.PrintString("SYSTEM: Activity \"" + m_Activity->GetPresetName() + "\" was successfully started");
@@ -155,17 +148,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ActivityMan::StartActivity(string className, string presetName) {
-		const Entity *entity = g_PresetMan.GetEntityPreset(className, presetName);
-
-		if (entity) {
-			Activity *newActivity = dynamic_cast<Activity *>(entity->Clone());
-			return StartActivity(newActivity);
+	int ActivityMan::StartActivity(const std::string &className, const std::string &presetName) {
+		if (const Entity *entity = g_PresetMan.GetEntityPreset(className, presetName)) {
+			return StartActivity(dynamic_cast<Activity *>(entity->Clone()));
 		} else {
 			g_ConsoleMan.PrintString("ERROR: Couldn't find the " + className + " named " + presetName + " to start! Has it been defined?");
 			return -1;
 		}
-		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -212,7 +201,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ActivityMan::EndActivity() {
+	void ActivityMan::EndActivity() const {
 		// TODO: Set the activity pointer to nullptr so it doesn't return junk after being destructed. Do it here, or wherever works without crashing.
 		if (m_Activity) {
 			m_Activity->End();
@@ -224,8 +213,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ActivityMan::LateUpdateGlobalScripts() {
-		GAScripted *scriptedActivity = dynamic_cast<GAScripted *>(m_Activity);
-		if (scriptedActivity) { scriptedActivity->UpdateGlobalScripts(true); }
+	void ActivityMan::LateUpdateGlobalScripts() const {
+		if (GAScripted *scriptedActivity = dynamic_cast<GAScripted *>(m_Activity.get())) { scriptedActivity->UpdateGlobalScripts(true); }
 	}
 }

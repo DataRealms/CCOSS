@@ -157,7 +157,7 @@ namespace RTE {
 		/// <summary>
 		/// Launch multiplayer server overview Activity.
 		/// </summary>
-		void SetStartMultiplayerServerOverview();
+		bool SetStartMultiplayerServerOverview();
 #pragma endregion
 
 #pragma region Concrete Methods

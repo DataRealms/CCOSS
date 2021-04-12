@@ -93,16 +93,27 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ActivityMan::SetStartMultiplayerServerOverview() {
-		g_SceneMan.SetSceneToLoad("Multiplayer Scene");
-		MultiplayerServerLobby *multiplayerServerLobby = new MultiplayerServerLobby;
-		multiplayerServerLobby->Create();
-		multiplayerServerLobby->ClearPlayers(true);
-		for (int playerAndTeamNum = Players::PlayerOne; playerAndTeamNum < Players::MaxPlayerCount; ++playerAndTeamNum) {
-			multiplayerServerLobby->AddPlayer(playerAndTeamNum, true, playerAndTeamNum, 0);
+	bool ActivityMan::SetStartMultiplayerServerOverview() {
+		g_NetworkServer.Start();
+
+		if (std::unique_ptr<MultiplayerServerLobby> multiplayerServerLobby = std::make_unique<MultiplayerServerLobby>()) {
+			g_UInputMan.SetMultiplayerMode(true);
+			g_FrameMan.SetMultiplayerMode(true);
+			g_AudioMan.SetMultiplayerMode(true);
+			g_AudioMan.SetSoundsVolume(0);
+			g_AudioMan.SetMusicVolume(0);
+			g_SceneMan.SetSceneToLoad("Multiplayer Scene");
+
+			multiplayerServerLobby->Create();
+			multiplayerServerLobby->ClearPlayers(true);
+			for (int playerAndTeamNum = Players::PlayerOne; playerAndTeamNum < Players::MaxPlayerCount; ++playerAndTeamNum) {
+				multiplayerServerLobby->AddPlayer(playerAndTeamNum, true, playerAndTeamNum, 0);
+			}
+			SetStartActivity(multiplayerServerLobby.release());
+			m_ResetActivity = true;
+			return true;
 		}
-		g_ActivityMan.SetStartActivity(multiplayerServerLobby);
-		g_ActivityMan.SetResetActivity(true);
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

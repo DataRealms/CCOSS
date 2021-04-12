@@ -361,12 +361,6 @@ int main(int argc, char **argv) {
 	}
 
     if (g_NetworkServer.IsServerModeEnabled()) {
-		g_NetworkServer.Start();
-		g_UInputMan.SetMultiplayerMode(true);
-		g_FrameMan.SetMultiplayerMode(true);
-		g_AudioMan.SetMultiplayerMode(true);
-		g_AudioMan.SetSoundsVolume(0);
-		g_AudioMan.SetMusicVolume(0);
 		g_ActivityMan.SetStartMultiplayerServerOverview();
 	// Evaluate LaunchIntoEditor first so it takes priority when both it and LaunchIntoActivity are set, otherwise it is ignored and editor is never launched.
 	} else if ((g_ActivityMan.LaunchIntoEditor() && !g_ActivityMan.SetStartEditorActivitySetToLaunchInto()) || (g_ActivityMan.LaunchIntoActivity() && !ResetActivity())) {

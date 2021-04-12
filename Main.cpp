@@ -23,19 +23,17 @@
 #include "AllegroScreen.h"
 #include "AllegroBitmap.h"
 
-#include "MetaMan.h"
-#include "SettingsMan.h"
-#include "ConsoleMan.h"
-#include "PresetMan.h"
-#include "PerformanceMan.h"
-#include "UInputMan.h"
-#include "MenuMan.h"
-
 #include "MainMenuGUI.h"
 #include "ScenarioGUI.h"
 #include "TitleScreen.h"
 
-#include "MultiplayerServerLobby.h"
+#include "MenuMan.h"
+#include "ConsoleMan.h"
+#include "SettingsMan.h"
+#include "PresetMan.h"
+#include "UInputMan.h"
+#include "PerformanceMan.h"
+#include "MetaMan.h"
 #include "NetworkServer.h"
 
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
@@ -56,7 +54,7 @@ namespace RTE {
 	/// <summary>
 	/// This handles when the quit or exit button is pressed on the window.
 	/// </summary>
-	void QuitHandler(void) { g_Quit = true; }
+	void QuitHandler() { g_Quit = true; }
 	END_OF_FUNCTION(QuitHandler)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -134,7 +132,7 @@ namespace RTE {
 	/// Game menus loop.
 	/// </summary>
 	/// <returns></returns>
-	bool RunMenuLoop() {
+	void RunMenuLoop() {
 		g_UInputMan.DisableKeys(false);
 		g_UInputMan.TrapMousePos(false);
 
@@ -147,16 +145,14 @@ namespace RTE {
 			g_TimerMan.UpdateSim();
 			g_AudioMan.Update();
 
+			if (g_NetworkServer.IsServerModeEnabled()) { g_NetworkServer.Update(); }
+
 			if (g_MenuMan.Update()) {
 				g_MenuMan.GetTitleScreen()->SetTitlePendingTransition();
 				break;
 			}
-
-			if (g_NetworkServer.IsServerModeEnabled()) { g_NetworkServer.Update(); }
-
 			g_MenuMan.Draw();
 		}
-		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -164,9 +160,9 @@ namespace RTE {
 	/// <summary>
 	/// Game simulation loop.
 	/// </summary>
-	bool RunGameLoop() {
+	void RunGameLoop() {
 		if (g_Quit) {
-			return true;
+			return;
 		}
 		g_PerformanceMan.ResetFrameTimer();
 		g_TimerMan.PauseSim(false);
@@ -214,7 +210,6 @@ namespace RTE {
 
 				if (!g_ActivityMan.IsInActivity()) {
 					g_TimerMan.PauseSim(true);
-					// If we're not in a metagame, then show main menu
 					if (g_MetaMan.GameInProgress()) {
 						g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::CampaignFadeIn);
 					} else {
@@ -233,7 +228,6 @@ namespace RTE {
 					// Reset and quit if user quit during reset loading
 					if (!ResetActivity()) { break; }
 				}
-				// Resuming the simulation
 				if (g_ResumeActivity) { ResumeActivity(); }
 			}
 
@@ -244,10 +238,8 @@ namespace RTE {
 				} else {
 					if (g_ActivityMan.IsInActivity()) { g_TimerMan.PauseSim(false); }
 				}
-				if (!serverUpdated) {
-					g_NetworkServer.Update();
-					serverUpdated = true;
-				}
+				if (!serverUpdated) { g_NetworkServer.Update(); }
+
 				if (g_NetworkServer.GetServerSimSleepWhenIdle()) {
 					long long ticksToSleep = g_TimerMan.GetTimeToSleep();
 					if (ticksToSleep > 0) {
@@ -260,7 +252,6 @@ namespace RTE {
 			g_FrameMan.Draw();
 			g_FrameMan.FlipFrameBuffers();
 		}
-		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -318,10 +309,6 @@ namespace RTE {
 /// Implementation of the main function.
 /// </summary>
 int main(int argc, char **argv) {
-
-	///////////////////////////////////////////////////////////////////
-    // Initialize Allegro
-
     set_config_file("Base.rte/AllegroConfig.txt");
     allegro_init();
 	loadpng_init();
@@ -330,10 +317,8 @@ int main(int argc, char **argv) {
     LOCK_FUNCTION(QuitHandler);
     set_close_button_callback(QuitHandler);
 
-    // Seed the random number generator
-    SeedRNG();
-
 	System::Initialize();
+    SeedRNG();
 
     ///////////////////////////////////////////////////////////////////
     // Create the essential managers
@@ -363,15 +348,6 @@ int main(int argc, char **argv) {
     ///////////////////////////////////////////////////////////////////
     // Main game driver
 
-	if (g_NetworkServer.IsServerModeEnabled()) {
-		g_NetworkServer.Start();
-		g_UInputMan.SetMultiplayerMode(true);
-		g_FrameMan.SetMultiplayerMode(true);
-		g_AudioMan.SetMultiplayerMode(true);
-		g_AudioMan.SetSoundsVolume(0);
-		g_AudioMan.SetMusicVolume(0);
-	}
-
 	g_FrameMan.PrintForcedGfxDriverMessage();
 
 	if (g_ConsoleMan.LoadWarningsExist()) {
@@ -384,21 +360,19 @@ int main(int argc, char **argv) {
 		if (std::filesystem::exists(System::GetWorkingDirectory() + "LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
 	}
 
-    if (!g_NetworkServer.IsServerModeEnabled()) {
-		if (g_MenuMan.LaunchIntoEditor()) {
-			if (!g_MenuMan.EnterEditorActivity()) { RunMenuLoop(); }
-		} else if (!g_SettingsMan.LaunchIntoActivity()) {
-			RunMenuLoop();
-		}
-	} else {
-		// NETWORK Create multiplayer lobby activity to start as default if server is running
-		g_MenuMan.EnterMultiplayerLobby();
+    if (g_NetworkServer.IsServerModeEnabled()) {
+		g_NetworkServer.Start();
+		g_UInputMan.SetMultiplayerMode(true);
+		g_FrameMan.SetMultiplayerMode(true);
+		g_AudioMan.SetMultiplayerMode(true);
+		g_AudioMan.SetSoundsVolume(0);
+		g_AudioMan.SetMusicVolume(0);
+		g_MenuMan.EnterMultiplayerServerOverview();
+	// Evaluate LaunchIntoEditor first so it takes priority when both it and LaunchIntoActivity are set, otherwise it is ignored and editor is never launched.
+	} else if ((g_MenuMan.LaunchIntoEditor() && !g_MenuMan.EnterEditorActivity()) || (g_SettingsMan.LaunchIntoActivity() && !ResetActivity())) {
+		RunMenuLoop();
 	}
-
-    // If we fail to start/reset the activity, then revert to the intro/menu
-    if (!ResetActivity()) { RunMenuLoop(); }
-
-    RunGameLoop();
+	RunGameLoop();
 
     ///////////////////////////////////////////////////////////////////
     // Clean up

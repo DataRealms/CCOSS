@@ -186,7 +186,7 @@ namespace RTE {
 		/// Completely restarts whatever Activity was last started.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int RestartActivity();
+		bool RestartActivity();
 
 		/// <summary>
 		/// Forces the current game's end.

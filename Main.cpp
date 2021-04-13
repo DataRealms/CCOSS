@@ -60,54 +60,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/// <summary>
-	/// Reset the current activity.
-	/// </summary>
-	/// <returns></returns>
-	bool ResetActivity() {
-		g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
-		g_ActivityMan.SetResetActivity(false);
-
-		// Clear and reset out things
-		g_FrameMan.ClearBackBuffer8();
-		g_FrameMan.FlipFrameBuffers();
-		g_AudioMan.StopAll();
-
-		// Quit if we should
-		if (g_Quit) {
-			return false;
-		}
-
-		// TODO: Deal with GUI resetting here!$@#")
-		// Clear out all MO's
-		g_MovableMan.PurgeAllMOs();
-		// Have to reset TimerMan before creating anything else because all timers are reset against it
-		g_TimerMan.ResetTime();
-
-		g_FrameMan.LoadPalette("Base.rte/palette.bmp");
-		g_FrameMan.FlipFrameBuffers();
-
-		// Reset TimerMan again after loading so there's no residual delay
-		g_TimerMan.ResetTime();
-		// Unpause
-		g_TimerMan.PauseSim(false);
-
-		int error = g_ActivityMan.RestartActivity();
-		if (error >= 0) {
-			g_ActivityMan.SetInActivity(true);
-		} else {
-			// Something went wrong when restarting, so drop out to scenario menu and open the console to show the error messages
-			g_ActivityMan.SetInActivity(false);
-			g_ActivityMan.PauseActivity();
-			g_ConsoleMan.SetEnabled(true);
-			g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario);
-			return false;
-		}
-		return true;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/// <summary>
 	/// Start the simulation back up after being paused.
 	/// </summary>
 	void ResumeActivity() {
@@ -167,7 +119,7 @@ namespace RTE {
 		g_PerformanceMan.ResetFrameTimer();
 		g_TimerMan.PauseSim(false);
 
-		if (g_ActivityMan.IsActivityReset()) { ResetActivity(); }
+		if (g_ActivityMan.IsActivityReset() && !g_ActivityMan.RestartActivity()) { g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario); }
 
 		while (!g_Quit) {
 			// Need to clear this out; sometimes background layers don't cover the whole back
@@ -223,10 +175,8 @@ namespace RTE {
 					}
 					RunMenuLoop();
 				}
-				// Resetting the simulation
-				if (g_ActivityMan.IsActivityReset()) {
-					// Reset and quit if user quit during reset loading
-					if (!ResetActivity()) { break; }
+				if (g_ActivityMan.IsActivityReset() && !g_ActivityMan.RestartActivity()) {
+					break;
 				}
 				if (g_ResumeActivity) { ResumeActivity(); }
 			}
@@ -359,11 +309,8 @@ int main(int argc, char **argv) {
 		if (std::filesystem::exists(System::GetWorkingDirectory() + "LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
 	}
 
-    if (!g_ActivityMan.Initialize()) {
-		RunMenuLoop();
-	} else {
-		RunGameLoop();
-	}
+    if (!g_ActivityMan.Initialize()) { RunMenuLoop(); }
+	RunGameLoop();
 
     ///////////////////////////////////////////////////////////////////
     // Clean up

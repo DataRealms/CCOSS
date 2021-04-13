@@ -210,12 +210,34 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int ActivityMan::RestartActivity() {
-		if (m_StartActivity) {
-			// Need to pass in a clone of the activity because the original will be deleted and re-set during StartActivity.
-			return StartActivity(dynamic_cast<Activity *>(m_StartActivity->Clone()));
+	bool ActivityMan::RestartActivity() {
+		m_ResetActivity = false;
+		g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
+
+		g_FrameMan.ClearBackBuffer8();
+		g_FrameMan.FlipFrameBuffers();
+
+		g_AudioMan.StopAll();
+		g_MovableMan.PurgeAllMOs();
+		// Have to reset TimerMan before creating anything else because all timers are reset against it
+		g_TimerMan.ResetTime();
+
+		// TODO: Deal with GUI resetting here!$@#") // Figure out what the hell this is about.
+
+		// Need to pass in a clone of the activity because the original will be deleted and re-set during StartActivity.
+		int activityStarted = m_StartActivity ? StartActivity(dynamic_cast<Activity *>(m_StartActivity->Clone())) : StartActivity(m_DefaultActivityType, m_DefaultActivityName);
+		if (activityStarted >= 0) {
+			// Reset TimerMan again after loading so there's no residual delay
+			g_TimerMan.ResetTime();
+			g_TimerMan.PauseSim(false);
+			m_InActivity = true;
+			return true;
+		} else {
+			m_InActivity = false;
+			PauseActivity();
+			g_ConsoleMan.SetEnabled(true);
+			return false;
 		}
-		return StartActivity(m_DefaultActivityType, m_DefaultActivityName);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

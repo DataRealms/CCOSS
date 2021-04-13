@@ -368,6 +368,9 @@ void HDFirearm::SetFlash(Attachable *newFlash) {
         if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
         m_pFlash = nullptr;
     } else {
+        // Note - this is done here because setting mass on attached Attachables causes values to be updated on the parent (and its parent, and so on), which isn't ideal. Better to do it before the new flash is attached, so there are fewer calculations.
+        newFlash->SetMass(0.0F);
+
         if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
 		m_pFlash = newFlash;
         AddAttachable(newFlash);
@@ -376,7 +379,6 @@ void HDFirearm::SetFlash(Attachable *newFlash) {
             dynamic_cast<HDFirearm *>(parent)->SetFlash(attachable);
         }});
 
-		m_pFlash->SetMass(0.0F);
         m_pFlash->SetDrawnNormallyByParent(false);
         m_pFlash->SetDeleteWhenRemovedFromParent(true);
         m_pFlash->SetCollidesWithTerrainWhileAttached(false);

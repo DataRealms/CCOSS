@@ -17,6 +17,25 @@ namespace RTE {
 		static void Initialize();
 #pragma endregion
 
+#pragma region Program Termination
+		/// <summary>
+		/// Gets whether the program was set to be terminated by the user.
+		/// </summary>
+		/// <returns>Whether the program was set to be terminated by the user.</returns>
+		static bool IsSetToQuit() { return s_Quit; }
+
+		/// <summary>
+		/// Sets the program to be terminated.
+		/// </summary>
+		/// <param name="quitOrNot">Terminate or not.</param>
+		static void SetQuit(bool quitOrNot) { s_Quit = quitOrNot; }
+
+		/// <summary>
+		/// Sets termination when the close button (X) is pressed on the program window.
+		/// </summary>
+		static void WindowCloseButtonHandler() { s_Quit = true; }
+#pragma endregion
+
 #pragma region Directories
 		/// <summary>
 		/// Gets the current working directory.
@@ -107,6 +126,7 @@ namespace RTE {
 
 	private:
 
+		static bool s_Quit; //!< Whether the user requested program termination through GUI or the window close button.
 		static bool s_LogToCLI; //!< Bool to tell whether to print the loading log and anything specified with PrintToCLI to command-line or not.
 		static std::string s_WorkingDirectory; //!< String containing the absolute path to current working directory.
 		static const std::string s_ScreenshotDirectory; //!< String containing the folder name of the screenshots directory.

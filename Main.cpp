@@ -40,21 +40,7 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
 using namespace RTE;
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-volatile bool g_Quit = false;
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 namespace RTE {
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/// <summary>
-	/// This handles when the quit or exit button is pressed on the window.
-	/// </summary>
-	void QuitHandler() { g_Quit = true; }
-	END_OF_FUNCTION(QuitHandler)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -69,7 +55,7 @@ namespace RTE {
 		// Don't stop the music if reinitializing after a resolution change
 		if (!g_FrameMan.ResolutionChanged()) { g_AudioMan.StopAll(); }
 
-		while (!g_Quit && !g_ActivityMan.ActivitySetToResume() /* && g_MenuMan.GetTitleTransitionState() != TitleScreen::TitleTransition::End*/) {
+		while (!System::IsSetToQuit() && !g_ActivityMan.ActivitySetToResume() /* && g_MenuMan.GetTitleTransitionState() != TitleScreen::TitleTransition::End*/) {
 			g_UInputMan.Update();
 			g_TimerMan.Update();
 			g_TimerMan.UpdateSim();
@@ -91,7 +77,7 @@ namespace RTE {
 	/// Game simulation loop.
 	/// </summary>
 	void RunGameLoop() {
-		if (g_Quit) {
+		if (System::IsSetToQuit()) {
 			return;
 		}
 		g_PerformanceMan.ResetFrameTimer();
@@ -99,7 +85,7 @@ namespace RTE {
 
 		if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) { g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario); }
 
-		while (!g_Quit) {
+		while (!System::IsSetToQuit()) {
 			// Need to clear this out; sometimes background layers don't cover the whole back
 			g_FrameMan.ClearBackBuffer8();
 
@@ -245,8 +231,8 @@ int main(int argc, char **argv) {
 	loadpng_init();
 
     // Enable the exit button on the window
-    LOCK_FUNCTION(QuitHandler);
-    set_close_button_callback(QuitHandler);
+    LOCK_FUNCTION(System::WindowCloseButtonHandler);
+    set_close_button_callback(System::WindowCloseButtonHandler);
 
 	System::Initialize();
     SeedRNG();

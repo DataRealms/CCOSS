@@ -53,8 +53,6 @@
 #include "DataModule.h"
 #include "Loadout.h"
 
-extern volatile bool g_Quit;
-
 using namespace RTE;
 
 #define CHAMFERSIZE 40
@@ -2112,7 +2110,7 @@ void MetagameGUI::UpdateInput()
     {
         // Just quit if the dialog is already up
         /*if (m_pConfirmationBox->GetVisible() && m_pConfirmationButton->GetText() == "Quit")
-            g_Quit = true;
+            System::SetQuit(true);
         else
         {
             HideAllScreens();
@@ -2324,8 +2322,8 @@ void MetagameGUI::UpdateInput()
 			if (anEvent.GetControl() == m_apMetaButton[CONFIRM])
             {
                 // Confirm Quit Program button
-                if (m_pConfirmationButton->GetText() == "Quit")
-                    g_Quit = true;
+				if (m_pConfirmationButton->GetText() == "Quit")
+					System::SetQuit(true);
 
                 // Do the appropriate thing depending on which screen we're confirming
                 if (m_MenuScreen == NEWDIALOG)

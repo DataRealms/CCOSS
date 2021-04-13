@@ -20,8 +20,6 @@
 
 #include "NetworkServer.h"
 
-extern volatile bool g_Quit;
-
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -161,7 +159,7 @@ namespace RTE {
 		}
 		g_ConsoleMan.Update();
 
-		g_Quit = g_Quit || quitResult;
+		System::SetQuit(quitResult);
 
 		return m_TitleScreen->GetTitleTransitionState() == TitleScreen::TitleTransition::End;
 	}

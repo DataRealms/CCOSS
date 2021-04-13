@@ -220,7 +220,6 @@ namespace RTE {
 
 	void ActivityMan::ResumeActivity() {
 		if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::NotStarted) {
-			//g_Quit = false;
 			m_InActivity = true;
 			m_ResumeActivity = false;
 

@@ -43,7 +43,6 @@ using namespace RTE;
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 volatile bool g_Quit = false;
-bool g_ResumeActivity = false;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -60,27 +59,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/// <summary>
-	/// Start the simulation back up after being paused.
-	/// </summary>
-	void ResumeActivity() {
-		if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::NotStarted) {
-			g_Quit = false;
-			g_ActivityMan.SetInActivity(true);
-			g_ResumeActivity = false;
-
-			g_FrameMan.ClearBackBuffer8();
-			g_FrameMan.FlipFrameBuffers();
-			g_FrameMan.LoadPalette("Base.rte/palette.bmp");
-
-			g_PerformanceMan.ResetFrameTimer();
-			g_TimerMan.PauseSim(false);
-			g_ActivityMan.PauseActivity(false);
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/// <summary>
 	/// Game menus loop.
 	/// </summary>
 	/// <returns></returns>
@@ -91,7 +69,7 @@ namespace RTE {
 		// Don't stop the music if reinitializing after a resolution change
 		if (!g_FrameMan.ResolutionChanged()) { g_AudioMan.StopAll(); }
 
-		while (!g_Quit && !g_ResumeActivity/* && g_MenuMan.GetTitleTransitionState() != TitleScreen::TitleTransition::End*/) {
+		while (!g_Quit && !g_ActivityMan.ActivitySetToResume() /* && g_MenuMan.GetTitleTransitionState() != TitleScreen::TitleTransition::End*/) {
 			g_UInputMan.Update();
 			g_TimerMan.Update();
 			g_TimerMan.UpdateSim();
@@ -178,7 +156,10 @@ namespace RTE {
 				if (g_ActivityMan.IsActivityReset() && !g_ActivityMan.RestartActivity()) {
 					break;
 				}
-				if (g_ResumeActivity) { ResumeActivity(); }
+				if (g_ActivityMan.ActivitySetToResume()) {
+					g_ActivityMan.ResumeActivity();
+					g_PerformanceMan.ResetFrameTimer();
+				}
 			}
 
 			if (g_NetworkServer.IsServerModeEnabled()) {
@@ -317,7 +298,6 @@ int main(int argc, char **argv) {
 
 	g_NetworkClient.Destroy();
 	g_NetworkServer.Destroy();
-
     g_MetaMan.Destroy();
     g_MovableMan.Destroy();
     g_SceneMan.Destroy();

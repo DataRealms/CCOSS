@@ -20,7 +20,6 @@
 
 #include "NetworkServer.h"
 
-extern bool g_ResumeActivity;
 extern volatile bool g_Quit;
 
 namespace RTE {
@@ -73,9 +72,7 @@ namespace RTE {
 
 		MainMenuGUI::MainMenuUpdateResult updateResult = m_MainMenu->Update();
 
-		if (m_TitleScreen->GetActiveMenu() == TitleScreen::ActiveMenu::MainMenuActive) {
-			g_ActivityMan.SetInActivity(false);
-		}
+		//if (m_TitleScreen->GetActiveMenu() == TitleScreen::ActiveMenu::MainMenuActive) { g_ActivityMan.SetInActivity(false); }
 
 		if (updateResult == MainMenuGUI::MainMenuUpdateResult::ScenarioStarted && m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::ScenarioMenuActive) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario);
@@ -84,7 +81,7 @@ namespace RTE {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCampaign);
 			g_MetaMan.GetGUI()->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
 		} else if (m_MainMenu->ActivityResumed()) {
-			g_ResumeActivity = true;
+			g_ActivityMan.SetResumeActivity();
 		} else if (m_MainMenu->ActivityRestarted()) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollFadeOut);
 			g_ActivityMan.SetResetActivity(true);
@@ -106,7 +103,7 @@ namespace RTE {
 		if (m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::MainMenuActive && updateResult == ScenarioGUI::ScenarioMenuUpdateResult::BackToMain) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PlanetToMainMenu);
 		} else if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::ActivityResumed) {
-			g_ResumeActivity = true;
+			g_ActivityMan.SetResumeActivity();
 		} else if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::ActivityRestarted) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeOut);
 			g_ActivityMan.SetResetActivity(true);
@@ -135,7 +132,7 @@ namespace RTE {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeOut);
 			g_ActivityMan.SetResetActivity(true);
 		} else if (g_MetaMan.GetGUI()->ActivityResumed()) {
-			g_ResumeActivity = true;
+			g_ActivityMan.SetResumeActivity();
 		}
 
 		return g_MetaMan.GetGUI()->QuitProgram();

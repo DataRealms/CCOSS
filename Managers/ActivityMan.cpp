@@ -20,8 +20,6 @@
 #include "NetworkServer.h"
 #include "MultiplayerServerLobby.h"
 
-extern bool g_ResumeActivity;
-
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -32,6 +30,8 @@ namespace RTE {
 		m_Activity = nullptr;
 		m_StartActivity = nullptr;
 		m_InActivity = false;
+		m_ResetActivity = false;
+		m_ResumeActivity = false;
 		m_LastMusicPath.clear();
 		m_LastMusicPos = 0.0F;
 		m_LaunchIntoActivity = false;
@@ -157,7 +157,7 @@ namespace RTE {
 		// Close the console in case it was open by the player or because of a previous Activity error.
 		g_ConsoleMan.SetEnabled(false);
 
-		g_ResumeActivity = true;
+		m_ResumeActivity = true;
 		m_InActivity = true;
 
 		g_PostProcessMan.ClearScenePostEffects();
@@ -213,6 +213,22 @@ namespace RTE {
 			g_ConsoleMan.PrintString("SYSTEM: Activity \"" + m_Activity->GetPresetName() + "\" was " + (pause ? "paused" : "resumed"));
 		} else {
 			g_ConsoleMan.PrintString("ERROR: No Activity to pause!");
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ActivityMan::ResumeActivity() {
+		if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::NotStarted) {
+			//g_Quit = false;
+			m_InActivity = true;
+			m_ResumeActivity = false;
+
+			g_FrameMan.ClearBackBuffer8();
+			g_FrameMan.FlipFrameBuffers();
+
+			PauseActivity(false);
+			g_TimerMan.PauseSim(false);
 		}
 	}
 

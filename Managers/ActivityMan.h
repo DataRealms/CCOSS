@@ -83,6 +83,17 @@ namespace RTE {
 		/// </summary>
 		/// <param name="resetActivity">Restart the Activity or not.</param>
 		void SetResetActivity(bool resetActivity) { m_ResetActivity = resetActivity; }
+
+		/// <summary>
+		/// Gets whether the game simulation needs to be started back up after the current Activity was unpaused.
+		/// </summary>
+		/// <returns>Whether the game simulation needs to be started back up after the current Activity was unpaused.</returns>
+		bool ActivitySetToResume() const { return m_ResumeActivity; }
+
+		/// <summary>
+		/// Sets the game simulation to be started back up after the current Activity was unpaused.
+		/// </summary>
+		void SetResumeActivity() { m_ResumeActivity = true; }
 #pragma endregion
 
 #pragma region Default Activity Handling
@@ -188,6 +199,11 @@ namespace RTE {
 		void PauseActivity(bool pause = true);
 
 		/// <summary>
+		/// Start the game simulation back up after the current Activity was unpaused.
+		/// </summary>
+		void ResumeActivity();
+
+		/// <summary>
 		/// Completely restarts whatever Activity was last started.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
@@ -219,6 +235,7 @@ namespace RTE {
 
 		bool m_InActivity; //!< Whether we are currently in game (as in, not in the main menu or any other out-of-game menus), regardless of its state.
 		bool m_ResetActivity; //!< Whether the current Activity needs to be restarted.
+		bool m_ResumeActivity; //!< Whether the game simulation needs to be started back up after the current Activity was unpaused.
 
 		std::string m_LastMusicPath; //!< Path to the last music stream being played.
 		float m_LastMusicPos; //!< What the last position of the in-game music track was before pause, in seconds.

@@ -807,7 +807,7 @@ ClassInfoGetters
 //                  is there.
 // Return value:    None.
 
-	void AlarmPoint(const Vector &alarmPoint) { if (m_AlarmTimer.GetElapsedSimTimeMS() > 50) { m_AlarmTimer.Reset(); m_LastAlarmPos = m_PointingTarget = alarmPoint; m_AlarmSound.Play(alarmPoint); } }
+	void AlarmPoint(const Vector &alarmPoint) { if (m_AlarmTimer.GetElapsedSimTimeMS() > 50) { m_AlarmTimer.Reset(); m_LastAlarmPos = m_PointingTarget = alarmPoint; if (m_AlarmSound) { m_AlarmSound->Play(alarmPoint); } } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -910,16 +910,11 @@ ClassInfoGetters
 
 	const std::deque<MovableObject *> * GetInventory() { return &m_Inventory; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetMaxMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tells how much total mass (in kg) this Actor is recommended to weigh
-//                  at most INCLUDING his own weight AND all his inventory!
-// Arguments:       None.
-// Return value:    The max recommend total mass for this Actor
-
-	float GetMaxMass() const { return m_MaxMass; }
+	/// <summary>
+	/// Returns the maximum total mass this Actor can carry in its inventory.
+	/// </summary>
+	/// <returns>The maximum carriable mass of this Actor.</returns>
+	float GetMaxInventoryMass() const { return m_MaxInventoryMass; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1195,26 +1190,64 @@ ClassInfoGetters
 
 
 	/// <summary>
-	/// Returns the defined sound to be played on death.
+	/// Gets this Actor's body hit sound. Ownership is NOT transferred!
 	/// </summary>
-	/// <returns>A sound with the death sample of this actor.</returns>
-	SoundContainer GetDeathSound() const { return m_DeathSound; }
-
+	/// <returns>The SoundContainer for this Actor's body hit sound.</returns>
+	SoundContainer * GetBodyHitSound() const { return m_BodyHitSound; }
 
 	/// <summary>
-	/// Sets new death sound sample from specified path or sets null.
+	/// Sets this Actor's body hit sound. Ownership IS transferred!
 	/// </summary>
-	/// <param name="samplePath">Filepath to new sample or None/nil for no sound.</param>
-	/// <returns>Updated DeathSound.</returns>
-	void SetDeathSound(const char *samplePath) {
-		if (samplePath == nullptr) {
-			m_DeathSound.Reset();
-		} else {
-            SoundContainer newDeathSound;
-			newDeathSound.Create(samplePath);
-			m_DeathSound = newDeathSound;
-		}
-	}
+	/// <param name="newSound">The new SoundContainer for this Actor's body hit sound.</param>
+	void SetBodyHitSound(SoundContainer *newSound) { m_BodyHitSound = newSound; }
+
+	/// <summary>
+	/// Gets this Actor's alarm sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this Actor's alarm sound.</returns>
+	SoundContainer * GetAlarmSound() const { return m_AlarmSound; }
+
+	/// <summary>
+	/// Sets this Actor's alarm sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this Actor's alarm sound.</param>
+	void SetAlarmSound(SoundContainer *newSound) { m_AlarmSound = newSound; }
+
+	/// <summary>
+	/// Gets this Actor's pain sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this Actor's pain sound.</returns>
+	SoundContainer * GetPainSound() const { return m_PainSound; }
+
+	/// <summary>
+	/// Sets this Actor's pain sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this Actor's pain sound.</param>
+	void SetPainSound(SoundContainer *newSound) { m_PainSound = newSound; }
+
+	/// <summary>
+	/// Gets this Actor's death sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this Actor's death sound.</returns>
+	SoundContainer * GetDeathSound() const { return m_DeathSound; }
+
+	/// <summary>
+	/// Sets this Actor's death sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this Actor's death sound.</param>
+	void SetDeathSound(SoundContainer *newSound) { m_DeathSound = newSound; }
+
+	/// <summary>
+	/// Gets this Actor's device switch sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this Actor's device switch sound.</returns>
+	SoundContainer * GetDeviceSwitchSound() const { return m_DeviceSwitchSound; }
+
+	/// <summary>
+	/// Sets this Actor's device switch sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this Actor's device switch sound.</param>
+	void SetDeviceSwitchSound(SoundContainer *newSound) { m_DeviceSwitchSound = newSound; }
 
 	/// <summary>
 	/// Gets the X and Y thresholds for how fast the actor can travel before losing stability.
@@ -1263,11 +1296,11 @@ protected:
     Controller m_Controller;
 
     // Sounds
-    SoundContainer m_BodyHitSound;
-    SoundContainer m_AlarmSound;
-    SoundContainer m_PainSound;
-    SoundContainer m_DeathSound;
-    SoundContainer m_DeviceSwitchSound;
+    SoundContainer *m_BodyHitSound;
+    SoundContainer *m_AlarmSound;
+    SoundContainer *m_PainSound;
+    SoundContainer *m_DeathSound;
+    SoundContainer *m_DeviceSwitchSound;
 
 //    bool m_FacingRight;
     int m_Status;
@@ -1347,9 +1380,7 @@ protected:
     Vector m_ViewPoint;
     // The inventory of carried MovableObjects of this Actor. They are also Owned by this.
     std::deque<MovableObject *> m_Inventory;
-    // The max recommended weight of this Actor, including himself and all his inventory
-    // If this is 0 or less, there's no recommended limit
-    float m_MaxMass;
+    float m_MaxInventoryMass; //!< The mass limit for this Actor's inventory. -1 means there's no limit.
     // The device that can/will be picked up
     HeldDevice *m_pItemInReach;
     // Whether the pie menu associated with this needs updating

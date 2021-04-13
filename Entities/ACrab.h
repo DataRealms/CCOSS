@@ -513,6 +513,18 @@ int FirearmActivationDelay() const;
 	void SetLimbPathPushForce(float force);
 
 
+	/// <summary>
+	/// Gets this ACrab's stride sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this ACrab's stride sound.</returns>
+	SoundContainer * GetStrideSound() const { return m_StrideSound; }
+
+	/// <summary>
+	/// Sets this ACrab's stride sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this ACrab's stride sound.</param>
+	void SetStrideSound(SoundContainer *newSound) { m_StrideSound = newSound; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -543,7 +555,7 @@ protected:
 	AtomGroup *m_pRBGFootGroup;
 	AtomGroup *m_BackupRBGFootGroup;
 	// The sound of the actor taking a step (think robot servo)
-	SoundContainer m_StrideSound;
+	SoundContainer *m_StrideSound;
 	// Jetpack booster.
 	AEmitter *m_pJetpack;
 	// The max total time, in ms, that the jetpack can be used without pause

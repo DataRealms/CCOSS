@@ -263,7 +263,7 @@ void ACraft::Clear()
     m_HatchState = CLOSED;
     m_HatchTimer.Reset();
     m_HatchDelay = 0;
-    m_HatchOpenSound.Reset();
+    m_HatchOpenSound = nullptr;
     m_NewInventory.clear();
     m_Exits.clear();
     m_CurrentExit = m_Exits.begin();
@@ -274,7 +274,7 @@ void ACraft::Clear()
     m_LandingCraft = true;
     m_FlippedTimer.Reset();
     m_CrashTimer.Reset();
-    m_CrashSound.Reset();
+    m_CrashSound = nullptr;
 
     m_DeliveryState = FALL;
     m_AltitudeMoveState = HOVER;
@@ -314,8 +314,8 @@ int ACraft::Create(const ACraft &reference)
     m_MoveState = reference.m_MoveState;
     m_HatchState = reference.m_HatchState;
     m_HatchDelay = reference.m_HatchDelay;
-    m_HatchOpenSound = reference.m_HatchOpenSound;
-    for (deque<MovableObject *>::const_iterator niItr = reference.m_NewInventory.begin(); niItr != reference.m_NewInventory.end(); ++niItr)
+	if (reference.m_HatchOpenSound) { m_HatchOpenSound = dynamic_cast<SoundContainer *>(reference.m_HatchOpenSound->Clone()); }
+	for (deque<MovableObject *>::const_iterator niItr = reference.m_NewInventory.begin(); niItr != reference.m_NewInventory.end(); ++niItr)
         m_NewInventory.push_back(dynamic_cast<MovableObject *>((*niItr)->Clone()));
     for (list<Exit>::const_iterator eItr = reference.m_Exits.begin(); eItr != reference.m_Exits.end(); ++eItr)
         m_Exits.push_back(*eItr);
@@ -323,7 +323,7 @@ int ACraft::Create(const ACraft &reference)
     m_ExitInterval = reference.m_ExitInterval;
     m_HasDelivered = reference.m_HasDelivered;
     m_LandingCraft = reference.m_LandingCraft;
-    m_CrashSound = reference.m_CrashSound;
+	if (reference.m_CrashSound) { m_CrashSound = dynamic_cast<SoundContainer *>(reference.m_CrashSound->Clone()); }
 
     m_DeliveryState = reference.m_DeliveryState;
     m_AltitudeMoveState = reference.m_AltitudeMoveState;
@@ -348,11 +348,13 @@ int ACraft::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "HatchDelay")
         reader >> m_HatchDelay;
-    else if (propName == "HatchOpenSound")
-        reader >> m_HatchOpenSound;
-    else if (propName == "CrashSound")
-        reader >> m_CrashSound;
-    else if (propName == "AddExit")
+	else if (propName == "HatchOpenSound") {
+		m_HatchOpenSound = new SoundContainer;
+		reader >> m_HatchOpenSound;
+	} else if (propName == "CrashSound") {
+		m_CrashSound = new SoundContainer;
+		reader >> m_CrashSound;
+	} else if (propName == "AddExit")
     {
         Exit exit;
         reader >> exit;
@@ -416,7 +418,8 @@ int ACraft::Save(Writer &writer) const
 
 void ACraft::Destroy(bool notInherited)
 {
-//    g_MovableMan.RemoveEntityPreset(this);
+	delete m_HatchOpenSound;
+	delete m_CrashSound;
 
     if (!notInherited)
         Actor::Destroy();
@@ -584,7 +587,7 @@ void ACraft::OpenHatch()
         m_HatchTimer.Reset();
 
         // PSCHHT
-        m_HatchOpenSound.Play(m_Pos);
+		if (m_HatchOpenSound) { m_HatchOpenSound->Play(m_Pos); }
     }
 }
 
@@ -611,8 +614,8 @@ void ACraft::CloseHatch()
         m_NewInventory.clear();
 
         // PSCHHT
-        m_HatchOpenSound.Play(m_Pos);
-    }
+		if (m_HatchOpenSound) { m_HatchOpenSound->Play(m_Pos); }
+	}
 }
 
 
@@ -770,8 +773,8 @@ void ACraft::DropAllInventory()
     {
         if (m_HatchState != OPENING)
         {
-            m_HatchOpenSound.Play(m_Pos);
-            g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, 0.4));
+			if (m_HatchOpenSound) { m_HatchOpenSound->Play(m_Pos); }
+			g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, 0.4));
             m_HatchTimer.Reset();
         }
         m_HatchState = OPENING;
@@ -860,7 +863,7 @@ void ACraft::Update()
 // TODO: HELLA GHETTO, REWORK
         if (m_CrashTimer.GetElapsedSimTimeMS() > 500)
         {
-            m_CrashSound.Play(m_Pos);
+			if (m_CrashSound) { m_CrashSound->Play(m_Pos); } 
             m_CrashTimer.Reset();
         }
     }
@@ -925,16 +928,6 @@ void ACraft::Update()
         }
     }
 
-/*
-    // Make sure we have ejected everything before actually dying
-    if (m_Status == DEAD && m_HatchState != OPEN)
-    {
-        m_Status = DYING;
-        m_HatchState = OPENING;
-        m_HatchTimer.Reset();
-        m_HatchOpenSound.Play(m_Pos);
-    }
-*/
     /////////////////////////////////////////
     // Check for having gone into orbit
 

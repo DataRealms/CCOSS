@@ -107,4 +107,34 @@ namespace RTE {
 	bool WithinBox(Vector &point, Vector &boxPos, float width, float height) {
 		return point.m_X >= boxPos.m_X && point.m_X < (boxPos.m_X + width) && point.m_Y >= boxPos.m_Y && point.m_Y < (boxPos.m_Y + height);
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::string RoundFloatToPrecision(float input, int precision, int roundingMode) {
+		if (roundingMode == 0) {
+			std::stringstream floatStream;
+			floatStream << std::fixed << std::setprecision(precision) << input;
+			return floatStream.str();
+		} else {
+			float precisionMagnitude = std::powf(10.0F, static_cast<float>(precision));
+			RTEAssert(precisionMagnitude < std::numeric_limits<float>::max(), "Precision set greater than able to display (exponent too high)!");
+			RTEAssert(precisionMagnitude > 0, "Negative precision will yield divide by zero error!");
+			RTEAssert(input < (std::numeric_limits<float>::max() / precisionMagnitude), "Value will exceed numeric limits with precision " + std::to_string(precision));
+
+			float roundingBuffer = input * precisionMagnitude;
+
+			switch (roundingMode) {
+				case 1:
+					roundingBuffer = std::floor(roundingBuffer);
+					break;
+				case 2:
+					roundingBuffer = std::ceil(roundingBuffer);
+					break;
+				default:
+					RTEAbort("Error in RoundFloatToPrecision: INVALID ROUNDING MODE");
+					break;
+			}
+			return RoundFloatToPrecision((roundingBuffer / precisionMagnitude), precision);
+		}
+	}
 }

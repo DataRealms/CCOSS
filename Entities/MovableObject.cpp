@@ -265,13 +265,9 @@ int MovableObject::Create(const MovableObject &reference)
 
 int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-	if (propName == "Mass")
-	{
+	if (propName == "Mass") {
 		reader >> m_Mass;
-		if (m_Mass == 0)
-			m_Mass = 0.0001;
-	}
-	else if (propName == "Velocity")
+	} else if (propName == "Velocity")
 		reader >> m_Vel;
 	else if (propName == "Scale")
 		reader >> m_Scale;
@@ -825,7 +821,7 @@ void MovableObject::ApplyForces()
     {
         // Continuous force application to transformational velocity.
         // (F = m * a -> a = F / m).
-        m_Vel += ((*fItr).first / GetMass()) * deltaTime;
+        m_Vel += ((*fItr).first / (GetMass() != 0 ? GetMass() : 0.0001F) * deltaTime);
     }
 
     // Clear out the forces list
@@ -855,7 +851,7 @@ void MovableObject::ApplyImpulses()
     for (deque<pair<Vector, Vector> >::iterator iItr = m_ImpulseForces.begin(); iItr != m_ImpulseForces.end(); ++iItr) {
         // Impulse force application to the transformational velocity of this MO.
         // Don't timescale these because they're already in kg * m/s (as opposed to kg * m/s^2).
-        m_Vel += (*iItr).first / GetMass();
+        m_Vel += (*iItr).first / (GetMass() != 0 ? GetMass() : 0.0001F);
     }
 
     // Clear out the impulses list

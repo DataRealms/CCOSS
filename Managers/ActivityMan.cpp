@@ -41,8 +41,16 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool ActivityMan::Initialize() {
-		// Evaluate LaunchIntoEditor before LaunchIntoActivity so it takes priority when both are set, otherwise it is ignored and editor is never launched.
-		return ((g_NetworkServer.IsServerModeEnabled() && !SetStartMultiplayerServerOverview()) || (LaunchIntoEditor() && !SetStartEditorActivitySetToLaunchInto()) || (LaunchIntoActivity() /*&& !ResetActivity()*/));
+		if (g_NetworkServer.IsServerModeEnabled()) {
+			return SetStartMultiplayerServerOverview();
+		} else if (LaunchIntoEditor()) {
+			// Evaluate LaunchIntoEditor before LaunchIntoActivity so it takes priority when both are set, otherwise it is ignored and editor is never launched.
+			return SetStartEditorActivitySetToLaunchInto();
+		} else if (LaunchIntoActivity()) {
+			m_RestartActivity = true;
+			return true;
+		}
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,6 +89,7 @@ namespace RTE {
 			editorActivityToStart->Create();
 			editorActivityToStart->SetEditorMode(EditorActivity::LOADDIALOG);
 			SetStartActivity(editorActivityToStart.release());
+			m_RestartActivity = true;
 		} else {
 			RTEAbort("Failed to instantiate the " + std::string(editorToLaunch) + " Activity!");
 		}

@@ -821,7 +821,7 @@ void MovableObject::ApplyForces()
     {
         // Continuous force application to transformational velocity.
         // (F = m * a -> a = F / m).
-        m_Vel += ((*fItr).first / (GetMass() ? GetMass() : 0.0001F) * deltaTime);
+        m_Vel += ((*fItr).first / (GetMass() != 0 ? GetMass() : 0.0001F) * deltaTime);
     }
 
     // Clear out the forces list
@@ -851,7 +851,7 @@ void MovableObject::ApplyImpulses()
     for (deque<pair<Vector, Vector> >::iterator iItr = m_ImpulseForces.begin(); iItr != m_ImpulseForces.end(); ++iItr) {
         // Impulse force application to the transformational velocity of this MO.
         // Don't timescale these because they're already in kg * m/s (as opposed to kg * m/s^2).
-        m_Vel += (*iItr).first / (GetMass() ? GetMass() : 0.0001F);
+        m_Vel += (*iItr).first / (GetMass() != 0 ? GetMass() : 0.0001F);
     }
 
     // Clear out the impulses list

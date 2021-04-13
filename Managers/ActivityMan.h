@@ -76,13 +76,13 @@ namespace RTE {
 		/// Gets whether the current Activity needs to be restarted.
 		/// </summary>
 		/// <returns>Whether the current Activity needs to be restarted.</returns>
-		bool IsActivityReset() const { return m_ResetActivity; }
+		bool ActivitySetToRestart() const { return m_RestartActivity; }
 
 		/// <summary>
 		/// Sets whether the current Activity needs to be restarted.
 		/// </summary>
-		/// <param name="resetActivity">Restart the Activity or not.</param>
-		void SetResetActivity(bool resetActivity) { m_ResetActivity = resetActivity; }
+		/// <param name="restartActivity">Restart the Activity or not.</param>
+		void SetRestartActivity(bool restartActivity = true) { m_RestartActivity = restartActivity; }
 
 		/// <summary>
 		/// Gets whether the game simulation needs to be started back up after the current Activity was unpaused.
@@ -234,7 +234,7 @@ namespace RTE {
 		std::unique_ptr<Activity> m_StartActivity; //!< The starting condition of the next Activity to be (re)started. OWNED BY THIS!
 
 		bool m_InActivity; //!< Whether we are currently in game (as in, not in the main menu or any other out-of-game menus), regardless of its state.
-		bool m_ResetActivity; //!< Whether the current Activity needs to be restarted.
+		bool m_RestartActivity; //!< Whether the current Activity needs to be restarted.
 		bool m_ResumeActivity; //!< Whether the game simulation needs to be started back up after the current Activity was unpaused.
 
 		std::string m_LastMusicPath; //!< Path to the last music stream being played.

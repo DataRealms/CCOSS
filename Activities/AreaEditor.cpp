@@ -376,7 +376,7 @@ void AreaEditor::Update()
 			pTestGame->SetFogOfWarEnabled(false);
             pTestGame->SetDifficulty(DifficultySetting::MediumDifficulty);
             g_ActivityMan.SetStartActivity(pTestGame);
-			g_ActivityMan.SetResetActivity(true);
+			g_ActivityMan.SetRestartActivity();
         }
     }
 

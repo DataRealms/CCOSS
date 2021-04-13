@@ -30,7 +30,7 @@ namespace RTE {
 		m_Activity = nullptr;
 		m_StartActivity = nullptr;
 		m_InActivity = false;
-		m_ResetActivity = false;
+		m_RestartActivity = false;
 		m_ResumeActivity = false;
 		m_LastMusicPath.clear();
 		m_LastMusicPos = 0.0F;
@@ -126,7 +126,7 @@ namespace RTE {
 				multiplayerServerLobby->AddPlayer(playerAndTeamNum, true, playerAndTeamNum, 0);
 			}
 			SetStartActivity(multiplayerServerLobby.release());
-			m_ResetActivity = true;
+			m_RestartActivity = true;
 			return true;
 		}
 		return false;
@@ -235,7 +235,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool ActivityMan::RestartActivity() {
-		m_ResetActivity = false;
+		m_RestartActivity = false;
 		g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
 
 		g_FrameMan.ClearBackBuffer8();

@@ -97,7 +97,7 @@ namespace RTE {
 		g_PerformanceMan.ResetFrameTimer();
 		g_TimerMan.PauseSim(false);
 
-		if (g_ActivityMan.IsActivityReset() && !g_ActivityMan.RestartActivity()) { g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario); }
+		if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) { g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario); }
 
 		while (!g_Quit) {
 			// Need to clear this out; sometimes background layers don't cover the whole back
@@ -153,7 +153,7 @@ namespace RTE {
 					}
 					RunMenuLoop();
 				}
-				if (g_ActivityMan.IsActivityReset() && !g_ActivityMan.RestartActivity()) {
+				if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) {
 					break;
 				}
 				if (g_ActivityMan.ActivitySetToResume()) {

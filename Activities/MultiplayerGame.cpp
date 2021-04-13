@@ -427,7 +427,7 @@ namespace RTE {
 			if (!g_NetworkClient.IsConnectedAndRegistered())
 			{
 				//g_ActivityMan.EndActivity();
-				//g_ActivityMan.SetResetActivity(true);
+				//g_ActivityMan.SetRestartActivity();
 				m_Mode = SETUP;
 				m_pGUIController->EnableMouse(true);
 				g_UInputMan.TrapMousePos(false, 0);

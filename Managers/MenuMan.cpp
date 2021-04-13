@@ -84,7 +84,7 @@ namespace RTE {
 			g_ActivityMan.SetResumeActivity();
 		} else if (m_MainMenu->ActivityRestarted()) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollFadeOut);
-			g_ActivityMan.SetResetActivity(true);
+			g_ActivityMan.SetRestartActivity();
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::EnterCreditsScreen) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCredits);
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::BackToMainFromCredits) {
@@ -106,7 +106,7 @@ namespace RTE {
 			g_ActivityMan.SetResumeActivity();
 		} else if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::ActivityRestarted) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeOut);
-			g_ActivityMan.SetResetActivity(true);
+			g_ActivityMan.SetRestartActivity();
 		}
 
 		/*
@@ -130,7 +130,7 @@ namespace RTE {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PlanetToMainMenu);
 		} else if (g_MetaMan.GetGUI()->ActivityRestarted()) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeOut);
-			g_ActivityMan.SetResetActivity(true);
+			g_ActivityMan.SetRestartActivity();
 		} else if (g_MetaMan.GetGUI()->ActivityResumed()) {
 			g_ActivityMan.SetResumeActivity();
 		}

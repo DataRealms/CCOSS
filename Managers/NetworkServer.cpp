@@ -1700,7 +1700,7 @@ namespace RTE {
 				// Only reset gameplay activities, and not server lobby
 				if (g_ActivityMan.IsInActivity() && g_ActivityMan.GetActivity()->GetPresetName() != "Multiplayer Lobby") {
 					g_ActivityMan.EndActivity();
-					g_ActivityMan.SetResetActivity(true);
+					g_ActivityMan.SetRestartActivity();
 					g_ActivityMan.SetInActivity(false);
 				}
 			}

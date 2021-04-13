@@ -1004,7 +1004,7 @@ namespace RTE {
 		g_AudioMan.ClearMusicQueue();
 		g_AudioMan.StopMusic();
 
-		g_ActivityMan.SetResetActivity(true);
+		g_ActivityMan.SetRestartActivity();
 		g_ActivityMan.SetStartActivity(pActivity);
 
 		// Kill any Campaign games currently running

@@ -376,7 +376,7 @@ void SceneEditor::Update()
 			pTestGame->SetFogOfWarEnabled(false);
             pTestGame->SetDifficulty(DifficultySetting::MediumDifficulty);
             g_ActivityMan.SetStartActivity(pTestGame);
-			g_ActivityMan.SetResetActivity(true);
+			g_ActivityMan.SetRestartActivity();
 
 
             /*GABaseDefense *pTestGame = dynamic_cast<GABaseDefense *>(g_PresetMan.GetEntityPreset("GABaseDefense", "Test Activity")->Clone());
@@ -386,7 +386,7 @@ void SceneEditor::Update()
             pTestGame->SetDifficulty(GameActivity::MaxDifficulty);
             pTestGame->Create();
             g_ActivityMan.SetStartActivity(pTestGame);
-            g_ActivityMan.SetResetActivity(true);*/
+            g_ActivityMan.SetRestartActivity();*/
         }
     }
 

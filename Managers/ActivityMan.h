@@ -143,6 +143,11 @@ namespace RTE {
 		void SetStartActivity(Activity *newActivity);
 
 		/// <summary>
+		/// Loads the "Tutorial Mission" Scene and starts the Tutorial Activity.
+		/// </summary>
+		void SetStartTutorialActivity();
+
+		/// <summary>
 		/// Loads "Editor Scene" and starts the given editor Activity.
 		/// </summary>
 		/// <param name="editorToLaunch">The editor name to put into effect next time ResetActivity is called.</param>

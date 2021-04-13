@@ -54,6 +54,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void ActivityMan::SetStartTutorialActivity() {
+		SetStartActivity(dynamic_cast<Activity *>(g_PresetMan.GetEntityPreset("GATutorial", "Tutorial Mission")->Clone()));
+		if (GameActivity * gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetStartActivity())) { gameActivity->SetStartingGold(10000); }
+		g_SceneMan.SetSceneToLoad("Tutorial Bunker");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void ActivityMan::SetStartEditorActivity(const std::string_view &editorToLaunch) {
 		std::unique_ptr<EditorActivity> editorActivityToStart = nullptr;
 

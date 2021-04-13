@@ -374,9 +374,7 @@ namespace RTE {
 
 	void MainMenuGUI::HandleCampaignNoticeScreenInputEvents(const GUIControl *guiEventControl) {
 		if (guiEventControl == m_MainMenuButtons.at(MenuButton::PlayTutorialButton)) {
-			g_ActivityMan.SetStartActivity(dynamic_cast<Activity *>(g_PresetMan.GetEntityPreset("GATutorial", "Tutorial Mission")->Clone()));
-			if (GameActivity * gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetStartActivity())) { gameActivity->SetStartingGold(10000); }
-			g_SceneMan.SetSceneToLoad("Tutorial Bunker");
+			g_ActivityMan.SetStartTutorialActivity();
 			SetActiveMenuScreen(MenuScreen::MainScreen);
 			m_ActivityRestarted = true;
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::CampaignContinueButton)) {

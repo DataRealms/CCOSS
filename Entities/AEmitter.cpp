@@ -13,8 +13,8 @@
 
 #include "AEmitter.h"
 #include "Atom.h"
-#include "PresetMan.h"
 #include "Emission.h"
+#include "PresetMan.h"
 
 namespace RTE {
 
@@ -31,9 +31,9 @@ void AEmitter::Clear()
 	for (list<Emission *>::const_iterator itr = m_EmissionList.begin(); itr != m_EmissionList.end(); ++itr)
 		delete (*itr);
     m_EmissionList.clear();
-    m_EmissionSound.Reset();
-    m_BurstSound.Reset();
-    m_EndSound.Reset();
+    m_EmissionSound = nullptr;
+    m_BurstSound = nullptr;
+	m_EndSound = nullptr;
     m_EmitEnabled = false;
     m_WasEmitting = false;
     m_EmitCount = 0;
@@ -79,10 +79,10 @@ int AEmitter::Create(const AEmitter &reference) {
         m_EmissionList.push_back(dynamic_cast<Emission *>(referenceEmission->Clone()));
     }
 
-    m_EmissionSound = reference.m_EmissionSound;
-    m_BurstSound = reference.m_BurstSound;
-    m_EndSound = reference.m_EndSound;
-    m_EmitEnabled = reference.m_EmitEnabled;
+	if (reference.m_EmissionSound) { m_EmissionSound = dynamic_cast<SoundContainer*>(reference.m_EmissionSound->Clone()); }
+	if (reference.m_BurstSound) { m_BurstSound = dynamic_cast<SoundContainer*>(reference.m_BurstSound->Clone()); }
+	if (reference.m_EndSound) { m_EndSound = dynamic_cast<SoundContainer*>(reference.m_EndSound->Clone()); }
+	m_EmitEnabled = reference.m_EmitEnabled;
     m_EmitCount = reference.m_EmitCount;
     m_EmitCountLimit = reference.m_EmitCountLimit;
     m_MinThrottleRange = reference.m_MinThrottleRange;
@@ -119,10 +119,13 @@ int AEmitter::ReadProperty(const std::string_view &propName, Reader &reader) {
         reader >> *emission;
         m_EmissionList.push_back(emission);
     } else if (propName == "EmissionSound") {
+		m_EmissionSound = new SoundContainer;
         reader >> m_EmissionSound;
     } else if (propName == "BurstSound") {
+		m_BurstSound = new SoundContainer;
         reader >> m_BurstSound;
     } else if (propName == "EndSound") {
+		m_EndSound = new SoundContainer;
         reader >> m_EndSound;
     } else if (propName == "EmissionEnabled") {
         reader >> m_EmitEnabled;
@@ -165,17 +168,8 @@ int AEmitter::ReadProperty(const std::string_view &propName, Reader &reader) {
     } else if (propName == "EmissionDamage") {
         reader >> m_EmitDamage;
     } else if (propName == "Flash") {
-        RemoveAttachable(m_pFlash);
         const Entity *flashEntity = g_PresetMan.GetEntityPreset(reader);
-        if (flashEntity) {
-            m_pFlash = dynamic_cast<Attachable *>(flashEntity->Clone());
-            AddAttachable(m_pFlash);
-            m_pFlash->SetDrawnNormallyByParent(false);
-            m_pFlash->SetInheritsRotAngle(false);
-            m_pFlash->SetInheritsHFlipped(0);
-            m_pFlash->SetDeleteWhenRemovedFromParent(true);
-            m_pFlash->SetCollidesWithTerrainWhileAttached(false);
-        }
+        if (flashEntity) { SetFlash(dynamic_cast<Attachable *>(flashEntity->Clone())); }
     } else if (propName == "FlashScale") {
         reader >> m_FlashScale;
     } else if (propName == "FlashOnlyOnBurst") {
@@ -261,18 +255,16 @@ int AEmitter::Save(Writer &writer) const
 
 void AEmitter::Destroy(bool notInherited)
 {
-/* Don't own these anymore
-    for (list<MovableObject *>::iterator itr = m_EmissionList.begin();
-         itr != m_EmissionList.end(); ++itr)
-        delete (*itr);
-*/
     // Stop playback of sounds gracefully
-    if (m_EmissionSound.IsBeingPlayed())
-        m_EndSound.Play(m_Pos);
-    else
-        m_EndSound.Stop();
+	if (m_EmissionSound) {
+		if (m_EndSound) { m_EmissionSound->IsBeingPlayed() ? m_EndSound->Play(m_Pos) : m_EndSound->Stop(); }
+		m_EmissionSound->Stop();
+	}
 
-    m_EmissionSound.Stop();
+	delete m_EmissionSound;
+	delete m_BurstSound;
+	delete m_EndSound;
+
 //    m_BurstSound.Stop();
 
     if (!notInherited)
@@ -381,6 +373,12 @@ void AEmitter::SetFlash(Attachable *newFlash) {
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newFlash->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
             dynamic_cast<AEmitter *>(parent)->SetFlash(attachable);
         }});
+
+        m_pFlash->SetDrawnNormallyByParent(false);
+        m_pFlash->SetInheritsRotAngle(false);
+        m_pFlash->SetInheritsHFlipped(0);
+        m_pFlash->SetDeleteWhenRemovedFromParent(true);
+        m_pFlash->SetCollidesWithTerrainWhileAttached(false);
     }
 }
 
@@ -418,7 +416,7 @@ void AEmitter::Update()
         if (!m_WasEmitting)
         {
             // Start playing the sound
-            m_EmissionSound.Play(m_Pos);
+			if (m_EmissionSound) { m_EmissionSound->Play(m_Pos); }
 
             // Reset the timers of all emissions so they will start/stop at the correct relative offsets from now
             for (list<Emission *>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
@@ -426,7 +424,7 @@ void AEmitter::Update()
         }
         // Update the distance attenuation
         else
-            m_EmissionSound.SetPosition(m_Pos);
+			if (m_EmissionSound) { m_EmissionSound->SetPosition(m_Pos); }
 
         // Get the parent root of this AEmitter
 // TODO: Potentially get this once outside instead, like in attach/detach")
@@ -445,7 +443,7 @@ void AEmitter::Update()
         if (m_BurstTriggered && (m_BurstSpacing <= 0 || m_BurstTimer.IsPastSimMS(m_BurstSpacing)))
         {
             // Play burst sound
-            m_BurstSound.Play(m_Pos);
+			if (m_BurstSound) { m_BurstSound->Play(m_Pos); }
             // Start timing until next burst
             m_BurstTimer.Reset();
         }
@@ -573,9 +571,9 @@ void AEmitter::Update()
 	{
 		if (m_WasEmitting)
 		{
-			m_EmissionSound.Stop();
-			m_BurstSound.Stop();
-			m_EndSound.Play(m_Pos);
+			if (m_EmissionSound) { m_EmissionSound->Stop(); }
+			if (m_BurstSound) { m_BurstSound->Stop(); }
+			if (m_EndSound) { m_EndSound->Play(m_Pos); }
 			m_WasEmitting = false;
 		}
 	}

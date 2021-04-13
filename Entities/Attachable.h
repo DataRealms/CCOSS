@@ -60,16 +60,16 @@ namespace RTE {
 
 #pragma region Parent Getters and Setters
 		/// <summary>
-		/// Gets the MO which is the parent of this Attachable.
+		/// Gets the MOSRotating which is the parent of this Attachable.
 		/// </summary>
 		/// <returns>A pointer to the parent of this Attachable.</returns>
-		MovableObject * GetParent() override { return m_Parent; }
+		MOSRotating * GetParent() override { return m_Parent; }
 
 		/// <summary>
-		/// Gets the MO which is the parent of this Attachable. 
+		/// Gets the MOSRotating which is the parent of this Attachable. 
 		/// </summary>
 		/// <returns>A pointer to the parent of this Attachable.</returns>
-		const MovableObject * GetParent() const override { return m_Parent; }
+		const MOSRotating * GetParent() const override { return m_Parent; }
 
 		/// <summary>
 		/// Indicates whether this Attachable is attached to an MOSRotating parent or not.
@@ -173,15 +173,15 @@ namespace RTE {
 		void SetGibWithParentChance(float gibWithParentChance) { m_GibWithParentChance = gibWithParentChance; }
 
 		/// <summary>
-		/// Gets the multiplier this Attachable will apply to its parent's gib blast strength when the parent gibs.
+		/// Gets the multiplier for how strongly this Attachable's parent's gib blast strength will be applied to it when its parent's gibs
 		/// </summary>
-		/// <returns>A float with the gib blast strength multiplier of this Attachable.</returns>
+		/// <returns>A float with the parent gib blast strength multiplier of this Attachable.</returns>
 		float GetParentGibBlastStrengthMultiplier() const { return m_ParentGibBlastStrengthMultiplier; }
 
 		/// <summary>
-		/// Sets the multiplier this Attachable will apply to its parent's gib blast strength when the parent gibs.
+		/// Sets the multiplier for how strongly this Attachable's parent's gib blast strength will be applied to it when its parent's gibs
 		/// </summary>
-		/// <param name="parentGibBlastStrengthMultiplier">A float describing the gib blast strength multiplier of this Attachable.</param>
+		/// <param name="parentGibBlastStrengthMultiplier">A float describing the parent gib blast strength multiplier of this Attachable.</param>
 		void SetParentGibBlastStrengthMultiplier(float parentGibBlastStrengthMultiplier) { m_ParentGibBlastStrengthMultiplier = parentGibBlastStrengthMultiplier; }
 #pragma endregion
 
@@ -355,16 +355,23 @@ namespace RTE {
 		void SetAtomSubgroupID(long subgroupID = 0) { m_AtomSubgroupID = subgroupID; }
 
 		/// <summary>
-		/// Whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.
+		/// Gets whether this Attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.
+		/// Attachables with Attachable parents that don't collide with terrain will not collide with terrain. This chains up to the root parent.
 		/// </summary>
 		/// <return>If true, terrain collisions while attached are enabled and atoms are present in parent AtomGroup.</return>
 		bool GetCollidesWithTerrainWhileAttached() const { return m_CollidesWithTerrainWhileAttached; }
 
 		/// <summary>
-		/// Sets whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.
+		/// Sets whether this Attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.
 		/// </summary>
 		/// <param name="collidesWithTerrainWhileAttached">Whether this attachable currently has terrain collisions enabled and it's atoms are present in the parent AtomGroup.</param>
 		void SetCollidesWithTerrainWhileAttached(bool collidesWithTerrainWhileAttached);
+
+		/// <summary>
+		/// Gets whether this Attachable is currently able to collide with terrain, taking into account its terrain collision settings and those of its parent and so on.
+		/// </summary>
+		/// <returns>Whether this Attachable is currently able to collide with terrain, taking into account its terrain collision settings and those of its parent and so on.</returns>
+		bool CanCollideWithTerrain() const;
 #pragma endregion
 
 #pragma region Override Methods
@@ -501,7 +508,7 @@ namespace RTE {
 		bool m_ApplyTransferredForcesAtOffset; //!< Whether forces transferred from this Attachable should be applied at the rotated parent offset (which will produce torque), or directly at the parent's position. Mostly useful to make jetpacks and similar emitters viable.
 		
 		float m_GibWithParentChance; //!< The percentage chance that this Attachable will gib when its parent does. 0 means never, 1 means always.
-		float m_ParentGibBlastStrengthMultiplier; //!< The multiplier this Attachable will apply to its parent's gib blast strength when the parent gibs.
+		float m_ParentGibBlastStrengthMultiplier; //!< The multiplier for how strongly this Attachable's parent's gib blast strength will be applied to it when its parent's gibs.
 		
 		//TODO This is a stopgap for a dedicated Wound class, that would be helpful to simplify things like this and default damage multiplier handling.
 		bool m_IsWound; //!< Whether or not this Attachable has been added as a wound. Only set and applied for Attachables with parents.
@@ -543,7 +550,8 @@ namespace RTE {
 		/// Turns on/off this Attachable's terrain collisions while it is attached by adding/removing its Atoms to/from its root parent's AtomGroup.
 		/// </summary>
 		/// <param name="addAtoms">Whether to add this Attachable's Atoms to the root parent's AtomGroup or remove them.</param>
-		void AddOrRemoveAtomsFromRootParentAtomGroup(bool addAtoms);
+		/// <param name="propagateToChildAttachables">Whether this Atom addition or removal should be propagated to any child Attachables (as appropriate).</param>
+		void AddOrRemoveAtomsFromRootParentAtomGroup(bool addAtoms, bool propagateToChildAttachables);
 
 		/// <summary>
 		/// Clears all the member variables of this Attachable, effectively resetting the members of this abstraction level only.

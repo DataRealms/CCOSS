@@ -20,7 +20,7 @@ namespace RTE {
 		m_ApplyTransferredForcesAtOffset = true;
 
 		m_GibWithParentChance = 0.0F;
-		m_ParentGibBlastStrengthMultiplier = 1;
+		m_ParentGibBlastStrengthMultiplier = 1.0F;
 
 		m_IsWound = false;
 
@@ -124,7 +124,7 @@ namespace RTE {
 			reader >> m_InheritedRotAngleOffset;
 		} else if (propName == "InheritedRotAngleDegOffset") {
 			m_InheritedRotAngleOffset = DegreesToRadians(std::stof(reader.ReadPropValue()));
-		} else if (propName == "CollidesWithTerrainWhenAttached") {
+		} else if (propName == "CollidesWithTerrainWhileAttached") {
 			reader >> m_CollidesWithTerrainWhileAttached;
 		} else {
 			return MOSRotating::ReadProperty(propName, reader);
@@ -261,9 +261,23 @@ namespace RTE {
 
 	void Attachable::SetCollidesWithTerrainWhileAttached(bool collidesWithTerrainWhileAttached) {
 		if (m_CollidesWithTerrainWhileAttached != collidesWithTerrainWhileAttached) {
-			AddOrRemoveAtomsFromRootParentAtomGroup(collidesWithTerrainWhileAttached);
+			bool previousTerrainCollisionValue = CanCollideWithTerrain();
 			m_CollidesWithTerrainWhileAttached = collidesWithTerrainWhileAttached;
+
+			if (previousTerrainCollisionValue != CanCollideWithTerrain()) {
+				AddOrRemoveAtomsFromRootParentAtomGroup(collidesWithTerrainWhileAttached, true);
+			}
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool Attachable::CanCollideWithTerrain() const {
+		if (m_CollidesWithTerrainWhileAttached && IsAttached() && GetParent() != GetRootParent()) {
+			const Attachable *parentAsAttachable = dynamic_cast<const Attachable *>(GetParent());
+			if (parentAsAttachable) { return parentAsAttachable->CanCollideWithTerrain(); }
+		}
+		return m_CollidesWithTerrainWhileAttached;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -323,9 +337,9 @@ namespace RTE {
 
 			MOSRotating *rootParentAsMOSR = dynamic_cast<MOSRotating *>(GetRootParent());
 			float currentRotAngleOffset = (GetRotAngle() * static_cast<float>(GetFlipFactor())) - rootParentAsMOSR->GetRotAngle();
-			if (rootParentAsMOSR && m_CollidesWithTerrainWhileAttached) {
+			if (rootParentAsMOSR && CanCollideWithTerrain()) {
 				// Note: This safety check exists to ensure the parent's AtomGroup contains this Attachable's Atoms in a subgroup. Hardcoded Attachables need this in order to work, since they're cloned before their parent's AtomGroup exists.
-				if (!rootParentAsMOSR->GetAtomGroup()->ContainsSubGroup(m_AtomSubgroupID)) { AddOrRemoveAtomsFromRootParentAtomGroup(true); }
+				if (!rootParentAsMOSR->GetAtomGroup()->ContainsSubGroup(m_AtomSubgroupID)) { AddOrRemoveAtomsFromRootParentAtomGroup(true, false); }
 
 				if (std::abs(currentRotAngleOffset - m_PrevRotAngleOffset) > 0.01745F) { // Update for 1 degree differences
 					Matrix atomRotationForSubgroup(rootParentAsMOSR->FacingAngle(GetRotAngle()) - rootParentAsMOSR->FacingAngle(rootParentAsMOSR->GetRotAngle()));
@@ -409,6 +423,7 @@ namespace RTE {
 		if (newParent == m_Parent) {
 			return;
 		}
+		RTEAssert(!(m_Parent && newParent), "Tried to set an Attachable's " + GetModuleAndPresetName() + " parent without first unsetting its old parent, " + (IsAttached() ? GetParent()->GetModuleAndPresetName() : "ERROR") + ".");
 		MOSRotating *parentToUseForScriptCall = newParent ? newParent : m_Parent;
 
 		//TODO Get rid of the need for calling ResetAllTimers, if something like inventory swapping needs timers reset it should do it itself! This blanket handling probably has side-effects.
@@ -424,21 +439,29 @@ namespace RTE {
 				m_AngularVel = 0.0F;
 			}
 			UpdatePositionAndJointPositionBasedOnOffsets();
-			if (m_CollidesWithTerrainWhileAttached) { AddOrRemoveAtomsFromRootParentAtomGroup(true); }
+			if (CanCollideWithTerrain()) { AddOrRemoveAtomsFromRootParentAtomGroup(true, true); }
 		} else {
 			m_RootMOID = m_MOID;
 			m_RestTimer.Reset();
 			m_Team = -1;
 			m_IsWound = false;
-			if (m_pMOToNotHit && m_Parent && m_Parent->GetWhichMOToNotHit() == m_pMOToNotHit) { m_pMOToNotHit = nullptr; }
 
-			if (m_CollidesWithTerrainWhileAttached) { AddOrRemoveAtomsFromRootParentAtomGroup(false); }
-			for (Attachable *attachable : m_Attachables) {
-				if (attachable->GetCollidesWithTerrainWhileAttached()) { attachable->AddOrRemoveAtomsFromRootParentAtomGroup(false); }
+			MovableObject *rootParent = GetRootParent();
+			if (rootParent) {
+				const MovableObject *whichMOToNotHit = GetWhichMOToNotHit();
+				const MovableObject *rootParentMOToNotHit = rootParent->GetWhichMOToNotHit();
+				if ((whichMOToNotHit && whichMOToNotHit != rootParent) || (rootParentMOToNotHit && rootParentMOToNotHit != this)) {
+					m_pMOToNotHit = nullptr;
+				} else {
+					m_pMOToNotHit = rootParent;
+					rootParent->SetWhichMOToNotHit(this);
+				}
 			}
+
+			if (CanCollideWithTerrain()) { AddOrRemoveAtomsFromRootParentAtomGroup(false, true); }
 			m_Parent = newParent;
 			for (Attachable *attachable : m_Attachables) {
-				if (attachable->GetCollidesWithTerrainWhileAttached()) { attachable->AddOrRemoveAtomsFromRootParentAtomGroup(true); }
+				if (attachable->m_CollidesWithTerrainWhileAttached) { attachable->AddOrRemoveAtomsFromRootParentAtomGroup(true, true); }
 			}
 		}
 
@@ -460,10 +483,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Attachable::AddOrRemoveAtomsFromRootParentAtomGroup(bool addAtoms) {
-		MOSRotating *rootParentAsMOSR = dynamic_cast<MOSRotating *>(GetRootParent());
-		if (rootParentAsMOSR && IsAttached()) {
-			AtomGroup *rootParentAtomGroup = rootParentAsMOSR->GetAtomGroup();
+	void Attachable::AddOrRemoveAtomsFromRootParentAtomGroup(bool addAtoms, bool propagateToChildAttachables) {
+		if (IsAttached()) {
+			MOSRotating *rootParentAsMOSR = dynamic_cast<MOSRotating *>(GetRootParent());
+			AtomGroup *rootParentAtomGroup = rootParentAsMOSR ? rootParentAsMOSR->GetAtomGroup() : nullptr;
 			if (rootParentAtomGroup) {
 				if (addAtoms && !rootParentAtomGroup->ContainsSubGroup(GetAtomSubgroupID())) {
 					Vector atomOffsetForSubgroup = g_SceneMan.ShortestDistance(rootParentAsMOSR->GetPos(), m_Pos, g_SceneMan.SceneWrapsX());
@@ -472,6 +495,12 @@ namespace RTE {
 					rootParentAtomGroup->AddAtoms(GetAtomGroup()->GetAtomList(), GetAtomSubgroupID(), atomOffsetForSubgroup, atomRotationForSubgroup);
 				} else if (!addAtoms && rootParentAtomGroup->ContainsSubGroup(GetAtomSubgroupID())) {
 					rootParentAtomGroup->RemoveAtoms(GetAtomSubgroupID());
+				}
+
+				if (propagateToChildAttachables) {
+					for (Attachable *attachable : m_Attachables) {
+						if (attachable->m_CollidesWithTerrainWhileAttached) { attachable->AddOrRemoveAtomsFromRootParentAtomGroup(addAtoms, propagateToChildAttachables); }
+					}
 				}
 			}
 		}

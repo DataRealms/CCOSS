@@ -131,7 +131,7 @@ namespace RTE {
 					status = status == FMOD_OK ? m_AudioSystem->set3DNumListeners(1) : status;
 				}
 				if (status == FMOD_OK) {
-					FMOD_VECTOR scrollTarget{ GetAsFMODVector(g_SceneMan.GetScrollTarget(), m_ListenerZOffset) };
+					FMOD_VECTOR scrollTarget = GetAsFMODVector(g_SceneMan.GetScrollTarget(), m_ListenerZOffset);
 					status = m_AudioSystem->set3DListenerAttributes(0, &scrollTarget, nullptr, &c_FMODForward, &c_FMODUp);
 				}
 			}
@@ -253,7 +253,7 @@ namespace RTE {
 			result = musicStream->set3DMinMaxDistance(c_SoundMaxAudibleDistance, c_SoundMaxAudibleDistance);
 			result = (result == FMOD_OK) ? m_AudioSystem->playSound(musicStream, m_MusicChannelGroup, true, &musicChannel) : result;
 			if (result == FMOD_OK) {
-				FMOD_VECTOR zero_vector{ GetAsFMODVector(Vector()) };
+				FMOD_VECTOR zero_vector = GetAsFMODVector(Vector());
 				result = musicChannel->set3DAttributes(&zero_vector, nullptr);
 			}
 			if (result != FMOD_OK) {
@@ -533,7 +533,7 @@ namespace RTE {
 				m_SoundChannelMinimumAudibleDistances.insert({ channelIndex, soundData->MinimumAudibleDistance });
 				result = (result == FMOD_OK) ? channel->set3DLevel(m_SoundPanningEffectStrength) : result;
 
-				FMOD_VECTOR soundContainerPosition{ GetAsFMODVector(soundContainer->GetPosition() + soundData->Offset) };
+				FMOD_VECTOR soundContainerPosition = GetAsFMODVector(soundContainer->GetPosition() + soundData->Offset);
 				UpdatePositionalEffectsForSoundChannel(channel, &soundContainerPosition);
 			}
 

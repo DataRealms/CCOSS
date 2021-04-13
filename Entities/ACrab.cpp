@@ -23,6 +23,7 @@
 #include "HDFirearm.h"
 #include "PieMenuGUI.h"
 #include "Scene.h"
+#include "SettingsMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
@@ -53,7 +54,7 @@ void ACrab::Clear()
     m_BackupRFGFootGroup = nullptr;
     m_pRBGFootGroup = 0;
     m_BackupRBGFootGroup = nullptr;
-    m_StrideSound.Reset();
+    m_StrideSound = nullptr;
     m_pJetpack = 0;
     m_JetTimeTotal = 0.0;
     m_JetTimeLeft = 0.0;
@@ -217,7 +218,7 @@ int ACrab::Create(const ACrab &reference) {
     m_BackupRBGFootGroup->SetOwner(this);
     m_BackupRBGFootGroup->SetLimbPos(reference.m_BackupRBGFootGroup->GetLimbPos());
 
-    m_StrideSound = reference.m_StrideSound;
+	if (reference.m_StrideSound) { m_StrideSound = dynamic_cast<SoundContainer*>(reference.m_StrideSound->Clone()); }
 
     m_MoveState = reference.m_MoveState;
 
@@ -257,48 +258,32 @@ int ACrab::Create(const ACrab &reference) {
 int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "Turret") {
-        RemoveAttachable(m_pTurret);
         m_pTurret = new Turret;
         reader >> m_pTurret;
-        AddAttachable(m_pTurret);
-        if (m_pTurret->HasNoSetDamageMultiplier()) { m_pTurret->SetDamageMultiplier(5.0F); }
+        SetTurret(m_pTurret);
     } else if (propName == "Jetpack") {
-        RemoveAttachable(m_pJetpack);
         m_pJetpack = new AEmitter;
         reader >> m_pJetpack;
-        AddAttachable(m_pJetpack);
-        if (m_pJetpack->HasNoSetDamageMultiplier()) { m_pJetpack->SetDamageMultiplier(0.0F); }
-        m_pJetpack->SetApplyTransferredForcesAtOffset(false);
-        m_pJetpack->SetDeleteWhenRemovedFromParent(true);
+        SetJetpack(m_pJetpack);
     } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         m_JetTimeTotal *= 1000;
     } else if (propName == "LFGLeg" || propName == "LeftFGLeg") {
-        RemoveAttachable(m_pLFGLeg);
         m_pLFGLeg = new Leg;
         reader >> m_pLFGLeg;
-        AddAttachable(m_pLFGLeg);
-        if (m_pLFGLeg->HasNoSetDamageMultiplier()) { m_pLFGLeg->SetDamageMultiplier(1.0F); }
-        m_pLFGLeg->SetInheritsHFlipped(-1);
+        SetLeftFGLeg(m_pLFGLeg);
     } else if (propName == "LBGLeg" || propName == "LeftFGLeg") {
-        RemoveAttachable(m_pLBGLeg);
         m_pLBGLeg = new Leg;
         reader >> m_pLBGLeg;
-        AddAttachable(m_pLBGLeg);
-        if (m_pLBGLeg->HasNoSetDamageMultiplier()) { m_pLBGLeg->SetDamageMultiplier(1.0F); }
-        m_pLBGLeg->SetInheritsHFlipped(-1);
+        SetLeftBGLeg(m_pLBGLeg);
     } else if (propName == "RFGLeg" || propName == "LeftFGLeg") {
-        RemoveAttachable(m_pRFGLeg);
         m_pRFGLeg = new Leg;
         reader >> m_pRFGLeg;
-        AddAttachable(m_pRFGLeg);
-        if (m_pRFGLeg->HasNoSetDamageMultiplier()) { m_pRFGLeg->SetDamageMultiplier(1.0F); }
+        SetRightFGLeg(m_pRFGLeg);
     } else if (propName == "RBGLeg" || propName == "LeftFGLeg") {
-        RemoveAttachable(m_pRBGLeg);
         m_pRBGLeg = new Leg;
         reader >> m_pRBGLeg;
-        AddAttachable(m_pRBGLeg);
-        if (m_pRBGLeg->HasNoSetDamageMultiplier()) { m_pRBGLeg->SetDamageMultiplier(1.0F); }
+        SetRightBGLeg(m_pRBGLeg);
     } else if (propName == "LFootGroup" || propName == "LeftFootGroup") {
         delete m_pLFGFootGroup;
         delete m_pLBGFootGroup;
@@ -324,6 +309,7 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
         m_BackupRFGFootGroup->RemoveAllAtoms();
         m_BackupRBGFootGroup = new AtomGroup(*m_BackupRFGFootGroup);
     } else if (propName == "StrideSound") {
+		m_StrideSound = new SoundContainer;
         reader >> m_StrideSound;
     } else if (propName == "LStandLimbPath" || propName == "LeftStandLimbPath") {
         reader >> m_Paths[LEFTSIDE][FGROUND][STAND];
@@ -406,47 +392,6 @@ int ACrab::Save(Writer &writer) const
     return 0;
 }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the ACrab object ready for use.
-
-int ACrab::Create(istream &stream, bool checkType)
-{
-    if (checkType)
-    {
-        string name;
-        stream >> name;
-        if (name != m_sClass.GetName())
-        {
-           RTEAbort("Wrong type in stream when passed to Create");
-           return -1;
-        }
-    }
-
-    Actor::Create(stream);
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this ACrab to an output stream for
-//                  later recreation with Create(istream &stream);
-
-int ACrab::Save(ostream &stream) const
-{
-    stream << m_sClass.GetName() << " ";
-
-    Actor::Save(stream);
-//    stream << " ";
-
-    return 0;
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Destroy
@@ -459,6 +404,8 @@ void ACrab::Destroy(bool notInherited)
     delete m_pLBGFootGroup;
     delete m_pRFGFootGroup;
     delete m_pRBGFootGroup;
+
+	delete m_StrideSound;
 //    for (deque<LimbPath *>::iterator itr = m_WalkPaths.begin();
 //         itr != m_WalkPaths.end(); ++itr)
 //        delete *itr;
@@ -527,6 +474,8 @@ void ACrab::SetTurret(Turret *newTurret) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetTurret");
             dynamic_cast<ACrab *>(parent)->SetTurret(castedAttachable);
         }});
+
+        if (m_pTurret->HasNoSetDamageMultiplier()) { m_pTurret->SetDamageMultiplier(5.0F); }
     }
 }
 
@@ -546,6 +495,10 @@ void ACrab::SetJetpack(AEmitter *newJetpack) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetJetpack");
             dynamic_cast<ACrab *>(parent)->SetJetpack(castedAttachable);
         }});
+
+        if (m_pJetpack->HasNoSetDamageMultiplier()) { m_pJetpack->SetDamageMultiplier(0.0F); }
+        m_pJetpack->SetApplyTransferredForcesAtOffset(false);
+        m_pJetpack->SetDeleteWhenRemovedFromParent(true);
     }
 }
 
@@ -565,6 +518,9 @@ void ACrab::SetLeftFGLeg(Leg *newLeg) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetLeftFGLeg");
             dynamic_cast<ACrab *>(parent)->SetLeftFGLeg(castedAttachable);
         }});
+
+        if (m_pLFGLeg->HasNoSetDamageMultiplier()) { m_pLFGLeg->SetDamageMultiplier(1.0F); }
+        m_pLFGLeg->SetInheritsHFlipped(-1);
     }
 }
 
@@ -584,6 +540,9 @@ void ACrab::SetLeftBGLeg(Leg *newLeg) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetLeftBGLeg");
             dynamic_cast<ACrab *>(parent)->SetLeftBGLeg(castedAttachable);
         }});
+
+        if (m_pLBGLeg->HasNoSetDamageMultiplier()) { m_pLBGLeg->SetDamageMultiplier(1.0F); }
+        m_pLBGLeg->SetInheritsHFlipped(-1);
     }
 }
 
@@ -603,6 +562,8 @@ void ACrab::SetRightFGLeg(Leg *newLeg) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetRightFGLeg");
             dynamic_cast<ACrab *>(parent)->SetRightFGLeg(castedAttachable);
         }});
+
+        if (m_pRFGLeg->HasNoSetDamageMultiplier()) { m_pRFGLeg->SetDamageMultiplier(1.0F); }
     }
 }
 
@@ -622,6 +583,8 @@ void ACrab::SetRightBGLeg(Leg *newLeg) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetRightBGLeg");
             dynamic_cast<ACrab *>(parent)->SetRightBGLeg(castedAttachable);
         }});
+
+        if (m_pRBGLeg->HasNoSetDamageMultiplier()) { m_pRBGLeg->SetDamageMultiplier(1.0F); }
     }
 }
 
@@ -2311,7 +2274,7 @@ void ACrab::Update()
             if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD))
             {
                 pDevice->Reload();
-                m_DeviceSwitchSound.Play(m_Pos);
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 
                 // Interrupt sharp aiming
                 m_SharpAimTimer.Reset();
@@ -2561,7 +2524,7 @@ void ACrab::Update()
 
             // Play the stride sound, if applicable
             if (playStride)
-                m_StrideSound.Play(m_Pos);
+				if (m_StrideSound) { m_StrideSound->Play(m_Pos); }
         }
         // JUMPING
         else if ((m_pRFGLeg || m_pRBGLeg) && m_MoveState == JUMP)
@@ -2864,18 +2827,21 @@ void ACrab::Update()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef DEBUG_BUILD
 void ACrab::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     Actor::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-    if (mode == g_DrawColor && !onlyPhysical) {
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawHandAndFootGroupVisualizations()) {
         m_pLFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pLBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pRFGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pRBGFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
     }
+
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawLimbPathVisualizations()) {
+        m_Paths[LEFTSIDE][WALK]->Draw(pTargetBitmap, targetPos, 122);
+        m_Paths[RIGHTSIDE][WALK]->Draw(pTargetBitmap, targetPos, 122);
+    }
 }
-#endif
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

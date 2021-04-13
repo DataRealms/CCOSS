@@ -364,13 +364,13 @@ void GUIControlManager::RemoveControl(const string Name, bool RemoveFromParent)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates the GUI every frame
 
-void GUIControlManager::Update(void)
+void GUIControlManager::Update(bool ignoreKeyboardEvents)
 {
     // Clear the event queue
     m_EventQueue.clear();
 
     // Process the manager
-    m_GUIManager->Update();
+    m_GUIManager->Update(ignoreKeyboardEvents);
 
 }
 

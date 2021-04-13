@@ -35,14 +35,14 @@ void HDFirearm::Clear()
     m_pMagazine = 0;
 
     m_pFlash = 0;
-    m_PreFireSound.Reset();
-    m_FireSound.Reset();
-    m_FireEchoSound.Reset();
-    m_ActiveSound.Reset();
-    m_DeactivationSound.Reset();
-    m_EmptySound.Reset();
-    m_ReloadStartSound.Reset();
-    m_ReloadEndSound.Reset();
+    m_PreFireSound = nullptr;
+    m_FireSound = nullptr;
+    m_FireEchoSound = nullptr;
+    m_ActiveSound = nullptr;
+    m_DeactivationSound = nullptr;
+    m_EmptySound = nullptr;
+	m_ReloadStartSound = nullptr;
+    m_ReloadEndSound = nullptr;
     m_RateOfFire = 0;
     m_ActivationDelay = 0;
     m_DeactivationDelay = 0;
@@ -108,15 +108,15 @@ int HDFirearm::Create(const HDFirearm &reference) {
     HeldDevice::Create(reference);
 
     m_pMagazineReference = reference.m_pMagazineReference;
-    m_PreFireSound = reference.m_PreFireSound;
-    m_FireSound = reference.m_FireSound;
-    m_FireEchoSound = reference.m_FireEchoSound;
-    m_ActiveSound = reference.m_ActiveSound;
-    m_DeactivationSound = reference.m_DeactivationSound;
-    m_EmptySound = reference.m_EmptySound;
-    m_ReloadStartSound = reference.m_ReloadStartSound;
-    m_ReloadEndSound = reference.m_ReloadEndSound;
-    m_RateOfFire = reference.m_RateOfFire;
+	if (reference.m_PreFireSound) { m_PreFireSound = dynamic_cast<SoundContainer *>(reference.m_PreFireSound->Clone()); }
+	if (reference.m_FireSound) { m_FireSound = dynamic_cast<SoundContainer *>(reference.m_FireSound->Clone()); }
+	if (reference.m_FireEchoSound) { m_FireEchoSound = dynamic_cast<SoundContainer*>(reference.m_FireEchoSound->Clone()); }
+	if (reference.m_ActiveSound) { m_ActiveSound = dynamic_cast<SoundContainer *>(reference.m_ActiveSound->Clone()); }
+	if (reference.m_DeactivationSound) { m_DeactivationSound = dynamic_cast<SoundContainer *>(reference.m_DeactivationSound->Clone()); }
+	if (reference.m_EmptySound) { m_EmptySound = dynamic_cast<SoundContainer *>(reference.m_EmptySound->Clone()); }
+	if (reference.m_ReloadStartSound) { m_ReloadStartSound = dynamic_cast<SoundContainer *>(reference.m_ReloadStartSound->Clone()); }
+	if (reference.m_ReloadEndSound) { m_ReloadEndSound = dynamic_cast<SoundContainer *>(reference.m_ReloadEndSound->Clone()); }
+	m_RateOfFire = reference.m_RateOfFire;
     m_ActivationDelay = reference.m_ActivationDelay;
     m_DeactivationDelay = reference.m_DeactivationDelay;
     m_Reloading = reference.m_Reloading;
@@ -150,43 +150,38 @@ int HDFirearm::Create(const HDFirearm &reference) {
 
 int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "Magazine") {
-        RemoveAttachable(m_pMagazine);
         const Entity *magazineEntity = g_PresetMan.GetEntityPreset(reader);
-        if (magazineEntity) {
-            m_pMagazineReference = dynamic_cast<const Magazine *>(magazineEntity);
-            m_pMagazine = dynamic_cast<Magazine *>(magazineEntity->Clone());
-            AddAttachable(m_pMagazine);
-        }
+        if (magazineEntity) { SetMagazine(dynamic_cast<Magazine *>(magazineEntity->Clone())); }
     } else if (propName == "Flash") {
-        RemoveAttachable(m_pFlash);
         const Entity *flashEntity = g_PresetMan.GetEntityPreset(reader);
-        if (flashEntity) {
-            m_pFlash = dynamic_cast<Attachable *>(flashEntity->Clone());
-            AddAttachable(m_pFlash);
-            m_pFlash->SetDrawnNormallyByParent(false);
-            m_pFlash->SetDeleteWhenRemovedFromParent(true);
-            m_pFlash->SetCollidesWithTerrainWhileAttached(false);
-        }
+        if (flashEntity) { SetFlash(dynamic_cast<Attachable *>(flashEntity->Clone())); }
     } else if (propName == "PreFireSound") {
-        reader >> m_PreFireSound;
-        m_DeactivationSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::IGNORE_PLAY);
-    } else if (propName == "FireSound")
-        reader >> m_FireSound;
-    else if (propName == "FireEchoSound") {
-        reader >> m_FireEchoSound;
-        m_FireEchoSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::RESTART);
+		m_PreFireSound = new SoundContainer;
+		reader >> m_PreFireSound;
+	} else if (propName == "FireSound") {
+		m_FireSound = new SoundContainer;
+		reader >> m_FireSound;
+	} else if (propName == "FireEchoSound") {
+		m_FireEchoSound = new SoundContainer;
+		reader >> m_FireEchoSound;
+		m_FireEchoSound->SetSoundOverlapMode(SoundContainer::SoundOverlapMode::RESTART);
     } else if (propName == "ActiveSound") {
-        reader >> m_ActiveSound;
-    } else if (propName == "DeactivationSound") {
+		m_ActiveSound = new SoundContainer;
+		reader >> m_ActiveSound;
+	} else if (propName == "DeactivationSound") {
+		m_DeactivationSound = new SoundContainer;
         reader >> m_DeactivationSound;
-        m_DeactivationSound.SetSoundOverlapMode(SoundContainer::SoundOverlapMode::IGNORE_PLAY);
+        m_DeactivationSound->SetSoundOverlapMode(SoundContainer::SoundOverlapMode::IGNORE_PLAY);
     } else if (propName == "EmptySound") {
-        reader >> m_EmptySound;
-    } else if (propName == "ReloadStartSound") {
-        reader >> m_ReloadStartSound;
-    } else if (propName == "ReloadEndSound") {
-        reader >> m_ReloadEndSound;
-    } else if (propName == "RateOfFire") {
+		m_EmptySound = new SoundContainer;
+		reader >> m_EmptySound;
+	} else if (propName == "ReloadStartSound") {
+		m_ReloadStartSound = new SoundContainer;
+		reader >> m_ReloadStartSound;
+	} else if (propName == "ReloadEndSound") {
+		m_ReloadEndSound = new SoundContainer;
+		reader >> m_ReloadEndSound;
+	} else if (propName == "RateOfFire") {
         reader >> m_RateOfFire;
     } else if (propName == "ActivationDelay") {
         reader >> m_ActivationDelay;
@@ -305,14 +300,39 @@ int HDFirearm::Save(Writer &writer) const
 
 void HDFirearm::Destroy(bool notInherited)
 {
-    m_PreFireSound.Stop();
-    m_FireSound.Stop();
-    m_FireEchoSound.Stop();
-    m_ActiveSound.Stop();
-    m_DeactivationSound.Stop();
-    m_EmptySound.Stop();
-    m_ReloadStartSound.Stop();
-    m_ReloadEndSound.Stop();
+	if (m_PreFireSound) {
+		m_PreFireSound->Stop();
+	}
+	if (m_FireSound) {
+		m_FireSound->Stop();
+	}
+	if (m_FireEchoSound) {
+		m_FireEchoSound->Stop();
+	}
+	if (m_ActiveSound) {
+		m_ActiveSound->Stop();
+	}
+	if (m_DeactivationSound) {
+		m_DeactivationSound->Stop();
+	}
+	if (m_EmptySound) {
+		m_EmptySound->Stop();
+	}
+	if (m_ReloadStartSound) {
+		m_ReloadStartSound->Stop();
+	}
+	if (m_ReloadEndSound) {
+		m_ReloadEndSound->Stop();
+	}
+
+	delete m_PreFireSound;
+	delete m_FireSound;
+	delete m_FireEchoSound;
+	delete m_ActiveSound;
+	delete m_DeactivationSound;
+	delete m_EmptySound;
+	delete m_ReloadStartSound;
+	delete m_ReloadEndSound;
 
     if (!notInherited)
         HeldDevice::Destroy();
@@ -335,6 +355,9 @@ void HDFirearm::SetMagazine(Magazine *newMagazine) {
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetMagazine");
             dynamic_cast<HDFirearm *>(parent)->SetMagazine(castedAttachable);
         }});
+
+        const Entity *newMagazineReference = g_PresetMan.GetEntityPreset(newMagazine->GetClassName(), newMagazine->GetPresetName(), newMagazine->GetModuleID());
+        if (newMagazineReference) { m_pMagazineReference = dynamic_cast<const Magazine *>(newMagazineReference); }
     }
 }
 
@@ -352,6 +375,10 @@ void HDFirearm::SetFlash(Attachable *newFlash) {
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newFlash->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
             dynamic_cast<HDFirearm *>(parent)->SetFlash(attachable);
         }});
+
+        m_pFlash->SetDrawnNormallyByParent(false);
+        m_pFlash->SetDeleteWhenRemovedFromParent(true);
+        m_pFlash->SetCollidesWithTerrainWhileAttached(false);
     }
 }
 
@@ -564,8 +591,8 @@ void HDFirearm::Activate() {
     HeldDevice::Activate();
 
     if (!IsReloading()) {
-        if (!m_ActiveSound.IsBeingPlayed()) { m_ActiveSound.Play(this->m_Pos); }
-        if (!wasActivated && !m_PreFireSound.IsBeingPlayed()) { m_PreFireSound.Play(this->m_Pos); }
+        if (m_ActiveSound && !m_ActiveSound->IsBeingPlayed()) { m_ActiveSound->Play(this->m_Pos); }
+        if (m_PreFireSound && !wasActivated && !m_PreFireSound->IsBeingPlayed()) { m_PreFireSound->Play(this->m_Pos); }
     }
 }
 
@@ -581,9 +608,9 @@ void HDFirearm::Deactivate() {
     HeldDevice::Deactivate();
     m_FiredOnce = false;
 
-    m_PreFireSound.Stop();
-    if (m_FireSound.GetLoopSetting() == -1) { m_FireSound.Stop(); }
-    if (wasActivated && m_pMagazine && !m_pMagazine->IsEmpty()) { m_DeactivationSound.Play(m_Pos); }
+	if (m_PreFireSound) { m_PreFireSound->Stop(); }
+    if (m_FireSound && m_FireSound->GetLoopSetting() == -1) { m_FireSound->Stop(); }
+    if (m_DeactivationSound && wasActivated && m_pMagazine && !m_pMagazine->IsEmpty()) { m_DeactivationSound->Play(m_Pos); }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -594,8 +621,8 @@ void HDFirearm::Deactivate() {
 
 void HDFirearm::StopActivationSound()
 {
-    if (m_ActiveSound.IsBeingPlayed())
-        m_ActiveSound.Stop();
+    if (m_ActiveSound && m_ActiveSound->IsBeingPlayed())
+        m_ActiveSound->Stop();
 
 	//TODO: Also stop any animation
 	//Those don't work really, at least we stopped it from making noise
@@ -626,10 +653,10 @@ void HDFirearm::Reload()
 
         // Stop any activation
         m_Activated = false;
-        if (m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed())
-            m_FireSound.Stop();
+        if (m_FireSound && m_FireSound->GetLoopSetting() == -1 && m_FireSound->IsBeingPlayed())
+            m_FireSound->Stop();
 
-        m_ReloadStartSound.Play(m_Pos);
+		if (m_ReloadStartSound) { m_ReloadStartSound->Play(m_Pos); }
         m_ReloadTmr.Reset();
         m_Reloading = true;
     }
@@ -688,10 +715,10 @@ void HDFirearm::Update()
 {
     HeldDevice::Update();
 
-    if (m_PreFireSound.IsBeingPlayed()) { m_PreFireSound.SetPosition(m_Pos); }
-    if (m_FireSound.IsBeingPlayed()) { m_FireSound.SetPosition(m_Pos); }
-    if (m_ActiveSound.IsBeingPlayed()) { m_ActiveSound.SetPosition(m_Pos); }
-    if (m_DeactivationSound.IsBeingPlayed()) { m_DeactivationSound.SetPosition(m_Pos); }
+    if (m_PreFireSound && m_PreFireSound->IsBeingPlayed()) { m_PreFireSound->SetPosition(m_Pos); }
+    if (m_FireSound && m_FireSound->IsBeingPlayed()) { m_FireSound->SetPosition(m_Pos); }
+    if (m_ActiveSound && m_ActiveSound->IsBeingPlayed()) { m_ActiveSound->SetPosition(m_Pos); }
+    if (m_DeactivationSound && m_DeactivationSound->IsBeingPlayed()) { m_DeactivationSound->SetPosition(m_Pos); }
 
     /////////////////////////////////
     // Activation/firing logic
@@ -707,7 +734,7 @@ void HDFirearm::Update()
 
     if (m_pMagazine && !m_pMagazine->IsEmpty())
     {
-        if (m_Activated && !m_PreFireSound.IsBeingPlayed()) {
+        if (m_Activated && !(m_PreFireSound && m_PreFireSound->IsBeingPlayed())) {
 
             // Get the parent root of this AEmitter
 // TODO: Potentially get this once outside instead, like in attach/detach")
@@ -744,7 +771,8 @@ void HDFirearm::Update()
 
             if (roundsFired >= 1)
             {
-                m_FiredOnce = m_FireFrame = true;
+				m_FiredOnce = true;
+				m_FireFrame = true;
                 m_LastFireTmr.Reset();
             }
 
@@ -756,19 +784,6 @@ void HDFirearm::Update()
             Vector tempEject;
             MOPixel *pPixel;
             float shake, particleSpread, shellSpread, lethalRange;
-
-			int player = -1;
-			Controller * pController = 0;
-			if (m_Parent)
-			{
-				Actor * pActor = dynamic_cast<Actor *>(m_Parent);
-				if (pActor)
-				{
-					pController = pActor->GetController();
-					if (pController)
-						player = pController->GetPlayer();
-				}
-			}
 
             lethalRange = m_MaxSharpLength + max(g_FrameMan.GetPlayerFrameBufferWidth(-1), g_FrameMan.GetPlayerFrameBufferHeight(-1)) * 0.52;
             Actor *pUser = dynamic_cast<Actor *>(pRootParent);
@@ -813,7 +828,7 @@ void HDFirearm::Update()
                     Attachable *pAttachable = dynamic_cast<Attachable *>(pParticle);
                     if (pAttachable)
                     {
-                        if (pAttachable->IsAttached()) { dynamic_cast<MOSRotating *>(pAttachable->GetParent())->RemoveAttachable(pAttachable); }
+                        if (pAttachable->IsAttached()) { pAttachable->GetParent()->RemoveAttachable(pAttachable); }
                         // Activate if it is some kind of grenade or whatnot.
                         ThrownDevice *pTD = dynamic_cast<ThrownDevice *>(pAttachable);
                         if (pTD)
@@ -876,37 +891,12 @@ void HDFirearm::Update()
             pRound = 0;
         }
     }
-/* This is done when manually reloading now
-    // No rounds left in current mag, so eject mag and reload!
-// TODO: Implemetn reloading and multiple mags etc
-    else if (m_pMagazine)
-    {
-        // Do something with mag if empty
-        if (roundsFired <= 0 && m_pMagazine->IsEmpty())
-        {
-            m_pMagazine->SetVel(m_Vel + Vector(m_HFlipped ? -3 : 3, 0.3));
-            m_pMagazine->SetAngularVel(6 + (-6 * RandomNum()));
-            m_pMagazine->Detach();
-            g_MovableMan.AddParticle(m_pMagazine);
-            m_pMagazine = 0;
-            m_Activated = false;
 
-            // Stop any looping activation sounds
-            if (m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed())
-                m_FireSound.Stop();
-
-            m_ReloadStartSound.Play(m_Pos);
-
-            m_ReloadTmr.Reset();
-        }
-    }
-*/
     // No or empty magazine, so just click.
     else if (((m_pMagazine && m_pMagazine->IsEmpty()) || !m_pMagazine) && m_Activated && !m_AlreadyClicked )
     {
         // Play empty pin click sound.
-        m_EmptySound.Play(m_Pos);
-        m_DeactivationSound.Play(m_Pos);
+		if (m_EmptySound) { m_EmptySound->Play(m_Pos); }
         // Indicate that we have clicked once during the current activation. 
         m_AlreadyClicked = true;
 
@@ -917,12 +907,12 @@ void HDFirearm::Update()
     // No magazine, have started to reload, so put new mag in when done
     if (m_Reloading && !m_pMagazine && m_pMagazineReference && m_ReloadTmr.IsPastSimMS(m_ReloadTime)) {
         SetMagazine(dynamic_cast<Magazine *>(m_pMagazineReference->Clone()));
-        m_ReloadEndSound.Play(m_Pos);
+		if (m_ReloadEndSound) { m_ReloadEndSound->Play(m_Pos); }
 
         m_ActivationTimer.Reset();
         m_LastFireTmr.Reset();
 
-        if (m_Activated) { m_PreFireSound.Play(); }
+        if (m_PreFireSound && m_Activated) { m_PreFireSound->Play(); }
 
         m_Reloading = false;
         m_DoneReloading = true;
@@ -931,13 +921,14 @@ void HDFirearm::Update()
     // Do stuff to deactivate after being activated
     if (!m_Activated)
     {
+		if (m_AlreadyClicked && m_FiredLastFrame && m_DeactivationSound) { m_DeactivationSound->Play(m_Pos); }
         // Reset the click indicator.
         m_AlreadyClicked = false;
 
-        m_PreFireSound.Stop();
+		if (m_PreFireSound) { m_PreFireSound->Stop(); }
         // Stop any looping activation sounds
-        if (m_FireSound.GetLoopSetting() == -1)// && m_FireSound.IsBeingPlayed())
-            m_FireSound.Stop();
+        if (m_FireSound && m_FireSound->GetLoopSetting() == -1)// && m_FireSound->IsBeingPlayed())
+            m_FireSound->Stop();
     }
 
     //////////////////////////////////////////////
@@ -977,10 +968,10 @@ void HDFirearm::Update()
         // Play firing sound
         // Only start playing if it's not a looping fire sound that is already playing, and if there's a mag
         if (m_pMagazine) {
-            if (!(m_FireSound.GetLoopSetting() == -1 && m_FireSound.IsBeingPlayed())) {
-                m_FireSound.Play(m_Pos);
+            if (m_FireSound && !(m_FireSound->GetLoopSetting() == -1 && m_FireSound->IsBeingPlayed())) {
+                m_FireSound->Play(m_Pos);
             }
-            m_FireEchoSound.Play(m_Pos);
+			if (m_FireEchoSound) { m_FireEchoSound->Play(m_Pos); }
         }
     }
     else {
@@ -994,37 +985,33 @@ void HDFirearm::Update()
     {
         if (m_SpriteAnimMode == LOOPWHENMOVING)
         {
-            if (m_Activated || m_LastFireTmr.GetElapsedSimTimeMS() < m_DeactivationDelay)
-            {
+            if (m_Activated || m_LastFireTmr.GetElapsedSimTimeMS() < m_DeactivationDelay) {
                 // Max rate of the animation when fully activated and firing
                 int animDuration = m_SpriteAnimDuration;
                 // Spin up - can only spin up if mag is inserted
                 if (m_Activated && !m_Reloading && m_ActivationTimer.GetElapsedSimTimeMS() < m_ActivationDelay)
                 {
                     animDuration = (int)LERP(0, m_ActivationDelay, (float)(m_SpriteAnimDuration * 10), (float)m_SpriteAnimDuration, m_ActivationTimer.GetElapsedSimTimeMS());
-                    m_ActiveSound.SetPitch(LERP(0, m_ActivationDelay, 0, 1.0, m_ActivationTimer.GetElapsedSimTimeMS()));
+					if (m_ActiveSound) { m_ActiveSound->SetPitch(LERP(0, m_ActivationDelay, 0, 1.0, m_ActivationTimer.GetElapsedSimTimeMS())); }
                 }
                 // Spin down
                 if ((!m_Activated || m_Reloading) && m_LastFireTmr.GetElapsedSimTimeMS() < m_DeactivationDelay)
                 {
                     animDuration = (int)LERP(0, m_DeactivationDelay, (float)m_SpriteAnimDuration, (float)(m_SpriteAnimDuration * 10), m_LastFireTmr.GetElapsedSimTimeMS());
-                    m_ActiveSound.SetPitch(LERP(0, m_DeactivationDelay, 1.0, 0, m_LastFireTmr.GetElapsedSimTimeMS()));
+					if (m_ActiveSound) { m_ActiveSound->SetPitch(LERP(0, m_DeactivationDelay, 1.0, 0, m_LastFireTmr.GetElapsedSimTimeMS())); }
                 }
 
-                if (animDuration > 0 && !(m_Reloading && m_LastFireTmr.GetElapsedSimTimeMS() >= m_DeactivationDelay))
-                {
+                if (animDuration > 0 && !(m_Reloading && m_LastFireTmr.GetElapsedSimTimeMS() >= m_DeactivationDelay)) {
                     float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % animDuration;
 					if (!m_IsAnimatedManually)
 	                    m_Frame = std::floor((cycleTime / (float)animDuration) * (float)m_FrameCount);
-                }
-                else
-                    m_ActiveSound.Stop();
-            }
-            else
-            {
+				} else {
+					StopActivationSound();
+				}
+            } else {
 				if (!m_IsAnimatedManually)
 					m_Frame = 0;
-                m_ActiveSound.Stop();
+				StopActivationSound();
             }
         }
     }

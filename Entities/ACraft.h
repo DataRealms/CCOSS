@@ -573,6 +573,29 @@ enum
 	/// <param name="movableObjectToIgnore">A pointer to an MO which the Gibs and Attachables should not be colliding with.</param>
 	void GibThis(const Vector &impactImpulse = Vector(), MovableObject *movableObjectToIgnore = nullptr) override;
 
+	/// <summary>
+	/// Gets this ACraft's hatch open sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this ACraft's hatch open sound.</returns>
+	SoundContainer * GetHatchOpenSound() const { return m_HatchOpenSound; }
+
+	/// <summary>
+	/// Sets this ACraft's hatch open sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this ACraft's hatch open sound.</param>
+	void SetHatchOpenSound(SoundContainer *newSound) { m_HatchOpenSound = newSound; }
+
+	/// <summary>
+	/// Gets this ACraft's crash sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this ACraft's crash sound.</returns>
+	SoundContainer * GetCrashSound() const { return m_CrashSound; }
+
+	/// <summary>
+	/// Sets this ACraft's crash sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this ACraft's crash sound.</param>
+	void SetCrashSound(SoundContainer *newSound) { m_CrashSound = newSound; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -590,7 +613,7 @@ protected:
     // The time it takes to open or close the hatch, in ms.
     int m_HatchDelay;
     // Sound for opening the hatch
-    SoundContainer m_HatchOpenSound;
+    SoundContainer *m_HatchOpenSound;
     // The new intermediate inventory of things that have been thrown into the craft while the doors are open,
     // but they shouldn't be ejected until the doors are closed and then opened again.
     std::deque<MovableObject *> m_NewInventory;
@@ -613,8 +636,8 @@ protected:
     // Timer to measure how long ago a crash sound was played
     Timer m_CrashTimer;
     // Crash sound
-    SoundContainer m_CrashSound;
-    // The recomended, not absolute, maximum number of actors that fit in the inventory
+    SoundContainer *m_CrashSound;
+    // The maximum number of actors that fit in the inventory
     int m_MaxPassengers;
 
 	static bool s_CrabBombInEffect; //!< Flag to determine if a craft is triggering the Crab Bomb effect.

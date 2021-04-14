@@ -140,25 +140,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TitleScreen::CreateIntroSequenceSlides() {
-		m_IntroSlides.at(0) = ContentFile("Base.rte/GUIs/Title/Intro/IntroSlideA.png").GetAsBitmap(COLORCONV_NONE, false);
-		m_IntroSlides.at(1) = ContentFile("Base.rte/GUIs/Title/Intro/IntroSlideB.png").GetAsBitmap(COLORCONV_NONE, false);
-		m_IntroSlides.at(2) = ContentFile("Base.rte/GUIs/Title/Intro/IntroSlideC.png").GetAsBitmap(COLORCONV_NONE, false);
-		m_IntroSlides.at(3) = ContentFile("Base.rte/GUIs/Title/Intro/IntroSlideD.png").GetAsBitmap(COLORCONV_NONE, false);
-		m_IntroSlides.at(4) = ContentFile("Base.rte/GUIs/Title/Intro/IntroSlideE.png").GetAsBitmap(COLORCONV_NONE, false);
-		m_IntroSlides.at(5) = ContentFile("Base.rte/GUIs/Title/Intro/IntroSlideF.png").GetAsBitmap(COLORCONV_NONE, false);
-		m_IntroSlides.at(6) = ContentFile("Base.rte/GUIs/Title/Intro/IntroSlideG.png").GetAsBitmap(COLORCONV_NONE, false);
-		m_IntroSlides.at(7) = ContentFile("Base.rte/GUIs/Title/Intro/IntroSlideH.png").GetAsBitmap(COLORCONV_NONE, false);
-
-		for (int i = 0; i < m_IntroSlides.size(); ++i) {
-			if (m_IntroSlides.at(i)->h > m_ScreenResY) {
-				float targetHeight = static_cast<float>(m_ScreenResY) - 80.0F;
-				float targetWidth = static_cast<float>(m_IntroSlides.at(i)->w) * (targetHeight / static_cast<float>(m_IntroSlides.at(i)->h));
-				BITMAP *resizeBitmap = create_bitmap_ex(32, static_cast<int>(targetWidth), static_cast<int>(targetHeight));
-				// TODO: implement resizing with bilinear/whatever filtering because nearest neighbor looks pretty bad.
-				stretch_blit(m_IntroSlides.at(i), resizeBitmap, 0, 0, m_IntroSlides.at(i)->w, m_IntroSlides.at(i)->h, 0, 0, resizeBitmap->w, resizeBitmap->h);
-				destroy_bitmap(m_IntroSlides.at(i));
-				m_IntroSlides.at(i) = resizeBitmap;
-			}
+		std::string highRes = (m_ScreenResY >= 680) ? "HD" : "";
+		for (int slideNum = 0; slideNum < m_IntroSlides.size(); ++slideNum) {
+			m_IntroSlides.at(slideNum) = ContentFile(("Base.rte/GUIs/Title/Intro/IntroSlide" + std::to_string(slideNum + 1) + highRes + ".png").c_str()).GetAsBitmap(COLORCONV_NONE, false);
 		}
 	}
 

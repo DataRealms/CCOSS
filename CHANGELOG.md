@@ -103,7 +103,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New INI and Lua (R/W) `Actor` property `CanRevealUnseen` which can be used to disable the ability to reveal unseen areas.
 
-- New `HDFirearm` INI property `ShellEjectAngle`.
+- New `HDFirearm` INI property `ShellEjectAngle` which lets you define the angle at which Shell particles are ejected relative to the gun's rotation.
 
 - New `Gib` property `IgnoresTeamHits`.
 
@@ -113,7 +113,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Atom` property `TrailLengthVariation`. Use this to randomize TrailLength on every frame. 0 means no randomization (default), 1 means anything between full length and zero.
 
-- New `ACraft` property `HatchCloseSound`. This is now required separately to `HatchOpenSound
+- New `ACraft` property `HatchCloseSound`. This is now required separately to `HatchOpenSound`.
 
 - Exposed `DataModule` properties `Author`, `Description` and `Version` to Lua (R).
 
@@ -132,7 +132,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   
 - The Lua console (and all text boxes) now support using `Ctrl` to move the cursor around and select or delete text.
 
-- Added `MOSRotating:RemoveAttachable(attachableOrUniqueID, addToMovableMan, addBreakWounds)` method that allows you to remove an `Attachable` and specify whether it should be added to `MovableMan` or not, and whether breakwounds should be added (if defined) to the `Attachable` and parent `MOSRotating`.
+- Added `MOSRotating:RemoveAttachable(attachableOrUniqueID, addToMovableMan, addBreakWounds)` `Lua` method that allows you to remove an `Attachable` and specify whether it should be added to `MovableMan` or not, and whether breakwounds should be added (if defined) to the `Attachable` and parent `MOSRotating`.
 
 - Added `Attachable:RemoveFromParent()` and `Attachable:RemoveFromParent(addToMovableMan, addBreakWounds)` that allow you to remove `Attachables` from their parents without having to use `GetParent` first.
 

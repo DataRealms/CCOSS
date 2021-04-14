@@ -1154,7 +1154,7 @@ int LuaMan::Initialize() {
             .def("DropAllInventory", &Actor::DropAllInventory)
             .property("InventorySize", &Actor::GetInventorySize)
             .def("IsInventoryEmpty", &Actor::IsInventoryEmpty)
-            .property("MaxMass", &Actor::GetMaxMass)
+            .property("MaxInventoryMass", &Actor::GetMaxInventoryMass)
             .def("FlashWhite", &Actor::FlashWhite)
             .def("DrawWaypoints", &Actor::DrawWaypoints)
             .def("SetMovePathToUpdate", &Actor::SetMovePathToUpdate)
@@ -2350,6 +2350,7 @@ int LuaMan::Initialize() {
 		def("GetMPP", &GetMPP),
 		def("GetPPL", &GetPPL),
 		def("GetLPP", &GetLPP),
+		def("RoundFloatToPrecision", &RoundFloatToPrecision),
 
 		class_<enum_wrapper::input_device>("InputDevice")
 			.enum_("InputDevice")[

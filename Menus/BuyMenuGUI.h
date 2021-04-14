@@ -299,14 +299,11 @@ public:
     float GetTotalOrderCost();
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTotalOrderMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return teh total mass of everything listed in the order box.
-// Arguments:       None.
-// Return value:    The total mass in kg.
-
-	float GetTotalOrderMass();
+	/// <summary>
+	/// Return the total mass of all items listed in the order box.
+	/// </summary>
+	/// <returns>The total mass (in kg) of the BuyMenu's cart.</returns>
+	float GetTotalOrderMass() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -326,7 +323,7 @@ public:
 // Arguments:       None.
 // Return value:    The total number of passengers.
 
-	int GetTotalOrderPassengers();
+	int GetTotalOrderPassengers() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -659,11 +656,11 @@ protected:
 // Method:          UpdateTotalMassLabel
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Updates the text of the specified label to reflect the total mass of
-//                  all the items in teh order box.
+//                  all the items in the order box.
 // Arguments:       Craft to read MaxMass from. Label to update.
 // Return value:    None.
 
-	void UpdateTotalMassLabel(const ACraft * pCraft, GUILabel * pLabel);
+	void UpdateTotalMassLabel(const ACraft * pCraft, GUILabel * pLabel) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -674,7 +671,7 @@ protected:
 // Arguments:       Craft to read MaxPassengers from. Label to update.
 // Return value:    None.
 
-	void UpdateTotalPassengersLabel(const ACraft * pCraft, GUILabel * pLabel);
+	void UpdateTotalPassengersLabel(const ACraft * pCraft, GUILabel * pLabel) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

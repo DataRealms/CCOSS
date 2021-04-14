@@ -50,7 +50,7 @@ namespace RTE {
 
 	void MainMenuGUI::Create(AllegroScreen *guiScreen, AllegroInput *guiInput, Controller *controller) {
 		if (!m_GUIControlManager) { m_GUIControlManager = std::make_unique<GUIControlManager>(); }
-		if (!m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/MainMenu")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu"); }
+		if (!m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSkin.ini")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSkin.ini"); }
 		m_GUIControlManager->Load("Base.rte/GUIs/MainMenuGUI.ini");
 
 		m_RootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));

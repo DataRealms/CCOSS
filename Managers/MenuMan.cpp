@@ -40,7 +40,7 @@ namespace RTE {
 			if (g_NetworkServer.IsServerModeEnabled()) { g_SettingsMan.SetSkipIntro(true); }
 		}
 		m_MainMenu = std::make_unique<MainMenuGUI>(m_GUIScreen.get(), m_GUIInput.get(), m_MenuController.get());
-		m_TitleScreen = std::make_unique<TitleScreen>(m_MainMenu->GetGUIControlManager()->GetSkin()->GetFont("fatfont.png"));
+		m_TitleScreen = std::make_unique<TitleScreen>(m_MainMenu->GetGUIControlManager()->GetSkin()->GetFont("FontLarge.png"));
 
 		m_ScenarioMenu = std::make_unique<ScenarioGUI>(m_GUIScreen.get(), m_GUIInput.get());
 		g_MetaMan.GetGUI()->Create(m_MenuController.get());

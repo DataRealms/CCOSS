@@ -370,8 +370,7 @@ int MetagameGUI::Create(Controller *pController)
         m_pGUIInput = new AllegroInput(-1, true);
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
-    if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/MainMenu"))
-        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu");
+	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSkin.ini")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSkin.ini"); }
     m_pGUIController->Load("Base.rte/GUIs/MetagameGUI.ini");
 
     // Make sure we have convenient points to the containing GUI colleciton boxes that we will manipulate the positions of
@@ -405,7 +404,7 @@ int MetagameGUI::Create(Controller *pController)
     m_pToolTipBox->SetEnabled(false);
     m_pToolTipBox->SetVisible(false);
     // Set the font
-    m_pToolTipText->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
+    m_pToolTipText->SetFont(m_pGUIController->GetSkin()->GetFont("FontSmall.png"));
 
     // Make sure we have convenient points to the containing GUI colleciton boxes that we will manipulate the positions of
     m_apScreenBox[NEWDIALOG] = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("NewGameDialog"));
@@ -518,7 +517,7 @@ int MetagameGUI::Create(Controller *pController)
     m_pSceneOwnerTeam = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("SceneOwnerTeam"));
     m_pSceneResidentsLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneResidentsLabel"));
     m_pSceneInfoLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneInfoLabel"));
-    m_pSceneInfoLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
+    m_pSceneInfoLabel->SetFont(m_pGUIController->GetSkin()->GetFont("FontSmall.png"));
     m_pSceneInfoPopup->SetVisible(false);
     m_pSceneBudgetLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SceneBudgetLabel"));
     m_pSceneBudgetSlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("SceneBudgetSlider"));

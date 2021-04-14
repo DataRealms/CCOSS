@@ -225,8 +225,7 @@ namespace RTE {
 			m_pGUIInput = new AllegroInput(-1, true);
 		if (!m_pGUIController)
 			m_pGUIController = new GUIControlManager();
-		if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Base"))
-			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
+		if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins", "DefaultSkin.ini")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/DefaultSkin.ini"); }
 
 		m_pGUIController->Load("Base.rte/GUIs/MultiplayerServerLobbyGUI.ini");
 		m_pGUIController->EnableMouse(true);
@@ -242,8 +241,8 @@ namespace RTE {
 		m_pDifficultyLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("DifficultyLabel"));
 		m_pDifficultySlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("DifficultySlider"));
 		//m_pActivitySelect->SetDropHeight(64);
-		//    m_pActivitySelect->GetListPanel()->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
-		//m_pActivityLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
+		//    m_pActivitySelect->GetListPanel()->SetFont(m_pGUIController->GetSkin()->GetFont("FontSmall.png"));
+		//m_pActivityLabel->SetFont(m_pGUIController->GetSkin()->GetFont("FontSmall.png"));
 
 		// Player team assignment box
 		char str[128];

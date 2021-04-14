@@ -29,7 +29,7 @@ namespace RTE {
 
 	ScenarioGUI::ScenarioGUI(AllegroScreen *guiScreen, AllegroInput *guiInput) {
 		m_GUIControlManager = std::make_unique<GUIControlManager>();
-		if (!m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/MainMenu")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu"); }
+		if (!m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSkin.ini")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSkin.ini"); }
 		m_GUIControlManager->Load("Base.rte/GUIs/ScenarioGUI.ini");
 
 		m_RootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
@@ -60,7 +60,7 @@ namespace RTE {
 		m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->SetPositionRel(16, 16);
 		m_ActivitySelectComboBox = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("ActivitySelectCombo"));
 		m_ActivityLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("ActivityDescLabel"));
-		m_ActivityLabel->SetFont(m_GUIControlManager->GetSkin()->GetFont("smallfont.png"));
+		m_ActivityLabel->SetFont(m_GUIControlManager->GetSkin()->GetFont("FontSmall.png"));
 		m_DifficultyLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("DifficultyLabel"));
 		m_DifficultySlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("DifficultySlider"));
 	}
@@ -73,7 +73,7 @@ namespace RTE {
 		m_SceneCloseButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("SceneCloseButton"));
 		m_SceneNameLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("SceneNameLabel"));
 		m_SceneInfoLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("SceneInfoLabel"));
-		m_SceneInfoLabel->SetFont(m_GUIControlManager->GetSkin()->GetFont("smallfont.png"));
+		m_SceneInfoLabel->SetFont(m_GUIControlManager->GetSkin()->GetFont("FontSmall.png"));
 		m_ScenePreviewBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ScenePreviewBox"));
 		m_ScenePreviewBox->SetPositionRel(10, 33);
 		m_ScenePreviewBox->SetDrawType(GUICollectionBox::Image);

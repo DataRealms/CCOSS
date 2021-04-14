@@ -929,13 +929,13 @@ namespace RTE {
 		if (isSmall) {
 			if (!m_SmallFont) {
 				m_SmallFont = new GUIFont("SmallFont");
-				m_SmallFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/smallfont.png");
+				m_SmallFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/FontSmall.png");
 			}
 			return m_SmallFont;
-		}	
+		}
 		if (!m_LargeFont) {
 			m_LargeFont = new GUIFont("FatFont");
-			m_LargeFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/Base/fatfont.png");
+			m_LargeFont->Load(m_GUIScreen, "Base.rte/GUIs/Skins/FontLarge.png");
 		}
 		return m_LargeFont;
 	}

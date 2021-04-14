@@ -66,7 +66,7 @@ namespace RTE {
 		if (!m_GUIScreen) { m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer8()); }
 		if (!m_GUIInput) { m_GUIInput = std::make_unique<AllegroInput>(controller->GetPlayer()); }
 		if (!m_GUIControlManager) { m_GUIControlManager = std::make_unique<GUIControlManager>(); }
-		RTEAssert(m_GUIControlManager->Create(m_GUIScreen.get(), m_GUIInput.get(), "Base.rte/GUIs/Skins/Base"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
+		RTEAssert(m_GUIControlManager->Create(m_GUIScreen.get(), m_GUIInput.get(), "Base.rte/GUIs/Skins", "DefaultSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/DefaultSkin.ini");
 
 		m_GUIControlManager->Load("Base.rte/GUIs/ObjectPickerGUI.ini");
 		m_GUIControlManager->EnableMouse(controller->IsMouseControlled());
@@ -103,7 +103,7 @@ namespace RTE {
 		if (!m_PopupBox) {
 			m_PopupBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("BuyGUIPopup"));
 			m_PopupText = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("PopupText"));
-			m_PopupText->SetFont(m_GUIControlManager->GetSkin()->GetFont("smallfont.png"));
+			m_PopupText->SetFont(m_GUIControlManager->GetSkin()->GetFont("FontSmall.png"));
 
 			// Never enable the popup box because it steals focus and causes other windows to think the cursor left them
 			m_PopupBox->SetEnabled(false);

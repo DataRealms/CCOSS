@@ -155,7 +155,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `AHuman` can now aim while walking, however not while reloading.
 
-- Sharp aim progress is now depleted from recoil.
+- Recoil when firing weapons now lessens sharp aim.
 
 - Hands will now draw in transparent drawing mode, i.e. editing menu.
 

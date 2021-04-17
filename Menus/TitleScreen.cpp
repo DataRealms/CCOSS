@@ -15,7 +15,7 @@ namespace RTE {
 		m_ScreenResX = g_FrameMan.GetResX();
 		m_ScreenResY = g_FrameMan.GetResY();
 		m_FadeScreen = nullptr;
-		m_FadeAmount = 255;
+		m_FadeAmount = 0;
 
 		m_Nebula.Reset();
 		m_BackdropStars.clear();
@@ -211,9 +211,7 @@ namespace RTE {
 					m_ActiveMenu = ActiveMenu::MenusDisabled;
 				}
 				m_ScrollOffset.SetY(EaseOut(m_PlanetViewOffsetY, 0, m_SectionProgress));
-				if (m_SectionElapsedTime >= m_ScrollDuration / 2) {
-					SetTitleTransitionState(TitleTransition::MainMenu);
-				}
+				if (m_SectionElapsedTime >= m_ScrollDuration / 2) { SetTitleTransitionState(TitleTransition::MainMenu); }
 				break;
 			case TitleTransition::ScenarioFadeIn:
 			case TitleTransition::CampaignFadeIn:
@@ -221,11 +219,10 @@ namespace RTE {
 					m_SectionSwitch = false;
 					m_ScrollOffset.SetY(m_PlanetViewOffsetY);
 					m_ScrollDuration = 1.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier();
+					m_ActiveMenu = ActiveMenu::MenusDisabled;
 				}
 				m_FadeAmount = 255 - static_cast<int>(255.0F * m_SectionProgress);
-				if (m_SectionElapsedTime >= m_SectionDuration) {
-					SetTitleTransitionState((m_TitleTransitionState == TitleTransition::ScenarioFadeIn) ? TitleTransition::ScenarioMenu : TitleTransition::CampaignMenu);
-				}
+				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState((m_TitleTransitionState == TitleTransition::ScenarioFadeIn) ? TitleTransition::ScenarioMenu : TitleTransition::CampaignMenu); }
 				break;
 			case TitleTransition::FadeOut:
 				if (m_SectionSwitch) {

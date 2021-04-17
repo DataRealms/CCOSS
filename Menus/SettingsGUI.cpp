@@ -37,6 +37,8 @@ namespace RTE {
 
 		m_BackToMainButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonBackToMainMenu"));
 
+		m_AudioSettingsMenu = std::make_unique<SettingsAudioGUI>(m_GUIControlManager.get());
+
 		CreateVideoSettingsMenu();
 		CreateInputSettingsMenu();
 		CreateGameplaySettingsMenu();
@@ -58,6 +60,9 @@ namespace RTE {
 			}
 
 			switch (m_ActiveSettingsMenu) {
+				case ActiveSettingsMenu::AudioSettingsActive:
+					m_AudioSettingsMenu->HandleInputEvents(guiEvent);
+					break;
 				default:
 					break;
 			}
@@ -382,25 +387,6 @@ namespace RTE {
 						}
 					}
 
-					// Sound Volume slider changed
-					if (guiEvent.GetControl() == m_SoundSlider) {
-						// See if we should play test sound after the volume has been set
-						bool playTest = false;
-						if (((double)m_SoundSlider->GetValue() / 100) != g_AudioMan.GetSoundsVolume() && !g_GUISound.TestSound()->IsBeingPlayed()) { playTest = true; }
-
-						g_AudioMan.SetSoundsVolume((double)m_SoundSlider->GetValue() / 100);
-						UpdateVolumeSliders();
-
-						// Play test sound after new volume is set
-						if (playTest) { g_GUISound.TestSound()->Play(); }
-					}
-
-					// Music Volume slider changed
-					if (guiEvent.GetControl() == m_MusicSlider) {
-						g_AudioMan.SetMusicVolume((double)m_MusicSlider->GetValue() / 100);
-						UpdateVolumeSliders();
-					}
-
 					// Dead zone sliders control
 					for (int which = P1DEADZONESLIDER; which < DEADZONESLIDERCOUNT; ++which) {
 						// Handle the appropriate player's clearing of mappings
@@ -474,14 +460,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsGUI::AudioSettingsMenu::Create(GUIControlManager *parentControlManager) {
-		MusicLabel = dynamic_cast<GUILabel *>(parentControlManager->GetControl("LabelMusicVolume"));
-		MusicSlider = dynamic_cast<GUISlider *>(parentControlManager->GetControl("SliderMusicVolume"));
-		SoundLabel = dynamic_cast<GUILabel *>(parentControlManager->GetControl("LabelSoundVolume"));
-		SoundSlider = dynamic_cast<GUISlider *>(parentControlManager->GetControl("SliderSoundVolume"));
-
-		//UpdateVolumeSliders();
-	}
 	void SettingsGUI::CreateInputSettingsMenu() {
 		m_InputSettingsMenu = InputSettingsMenu();
 
@@ -671,20 +649,6 @@ namespace RTE {
 	*/
 
 /*
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void MainMenuGUI::UpdateVolumeSliders() {
-		char labelText.at(512);
-		int volume = static_cast<int>(std::round(g_AudioMan.GetSoundsVolume() * 100));
-		std::snprintf(labelText, sizeof(labelText), "Sound Volume: %i", volume);
-		m_SoundLabel->SetText(labelText);
-		m_SoundSlider->SetValue(volume);
-
-		volume = static_cast<int>(std::round(g_AudioMan.GetMusicVolume() * 100));
-		std::snprintf(labelText, sizeof(labelText), "Music Volume: %i", volume);
-		m_MusicLabel->SetText(labelText);
-		m_MusicSlider->SetValue(volume);
-	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

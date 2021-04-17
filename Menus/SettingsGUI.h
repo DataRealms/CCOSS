@@ -3,6 +3,8 @@
 
 #include "Constants.h"
 
+#include "SettingsAudioGUI.h"
+
 struct BITMAP;
 
 namespace RTE {
@@ -104,23 +106,6 @@ namespace RTE {
 			/// Updates the contents of the screen resolution combo box.
 			/// </summary>
 			void PopulateResolutionsComboBox();
-		};
-#pragma endregion
-
-#pragma region Audio Settings Menu
-		/// <summary>
-		/// 
-		/// </summary>
-		struct AudioSettingsMenu {
-			GUILabel *MusicLabel; //!<
-			GUISlider *MusicSlider; //!<
-			GUILabel *SoundLabel; //!<
-			GUISlider *SoundSlider; //!<
-
-			/// <summary>
-			/// Updates the position of the volume sliders, based on what the AudioMan is currently set to.
-			/// </summary>
-			//void UpdateVolumeSliders();
 		};
 #pragma endregion
 
@@ -285,8 +270,11 @@ namespace RTE {
 		ActiveSettingsMenu m_ActiveSettingsMenu;
 
 		GUIButton *m_BackToMainButton;
+
+		std::unique_ptr<SettingsAudioGUI> m_AudioSettingsMenu; //!<
+
 		VideoSettingsMenu m_VideoSettingsMenu; //!<
-		AudioSettingsMenu m_AudioSettingsMenu; //!<
+
 		InputSettingsMenu m_InputSettingsMenu; //!<
 		GameplaySettingsMenu m_GameplaySettingsMenu; //!<
 

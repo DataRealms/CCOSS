@@ -38,6 +38,45 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool System::PathExistsCaseSensitive(std::string pathToCheck) {
+#if 1
+		bool exists{false};
+		std::filesystem::path p{pathToCheck};
+		std::filesystem::path pwd{s_WorkingDirectory};
+		std::vector<std::filesystem::path> tree{p};
+		while (p.has_parent_path()) {
+			p = p.parent_path();
+			tree.push_back(p);
+		}
+
+		std::filesystem::directory_iterator it{pwd};
+
+		for (auto file{tree.rbegin()}; file < tree.rend(); ++file) {
+			for (auto dir_entry: it) {
+				if (std::filesystem::hash_value(
+				        dir_entry.path().generic_string()) ==
+				    std::filesystem::hash_value(pwd / (*file))) {
+					exists = true;
+					break;
+				}
+			}
+			if (!exists)
+				return false;
+
+			if (*file == pathToCheck)
+				return true;
+
+			it = std::filesystem::directory_iterator{pwd / (*file)};
+		}
+
+		return exists;
+#else
+		return std::filesystem::exists(filename);
+#endif
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void System::EnableLoggingToCLI() {
 #ifdef _WIN32
 		// Create a console instance for the current process

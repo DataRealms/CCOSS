@@ -56,6 +56,19 @@ namespace RTE {
 		static bool MakeDirectory(const std::string &pathToMake);
 #pragma endregion
 
+#pragma region Filesystem
+		/// <summary>
+		/// Check if filename exists case sensitive.
+		/// On case sensitive filesystems this returns std::filesystem::exists,
+		/// otherwise the working directory will be checked for a matching file.
+		/// </summary>
+		/// <param name="filename">
+		/// The path to check
+		/// </param>
+
+		static bool PathExistsCaseSensitive(std::string pathToCheck);
+#pragma endregion
+
 #pragma region Command-Line Interface
 		/// <summary>
 		/// Tells whether printing loading progress report and console to command-line is enabled or not.

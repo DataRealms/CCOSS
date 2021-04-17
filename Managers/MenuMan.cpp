@@ -65,18 +65,52 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void MenuMan::SetActiveMenu() {
+		ActiveMenu newActiveMenu = ActiveMenu::MenusDisabled;
+
+		switch (m_TitleScreen->GetTitleTransitionState()) {
+			case TitleScreen::TitleTransition::MainMenu:
+			case TitleScreen::TitleTransition::MainMenuToCredits:
+				newActiveMenu = ActiveMenu::MainMenuActive;
+				break;
+			case TitleScreen::TitleTransition::ScenarioMenu:
+				newActiveMenu = ActiveMenu::ScenarioMenuActive;
+				break;
+			case TitleScreen::TitleTransition::CampaignMenu:
+				newActiveMenu = ActiveMenu::CampaignMenuActive;
+				break;
+			default:
+				break;
+		}
+
+		if (newActiveMenu != m_ActiveMenu) {
+			m_ActiveMenu = newActiveMenu;
+			switch (m_ActiveMenu) {
+				case ActiveMenu::ScenarioMenuActive:
+					m_ScenarioMenu->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
+					break;
+				case ActiveMenu::CampaignMenuActive:
+					g_MetaMan.GetGUI()->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
+					break;
+				default:
+					break;
+			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool MenuMan::UpdateMainMenu() {
 		if (!m_MainMenu->IsEnabled()) { m_MainMenu->SetEnabled(true); }
 
 		MainMenuGUI::MainMenuUpdateResult updateResult = m_MainMenu->Update();
 
-		if (updateResult == MainMenuGUI::MainMenuUpdateResult::ScenarioStarted && m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::ScenarioMenuActive) {
+		if (updateResult == MainMenuGUI::MainMenuUpdateResult::ScenarioStarted && m_ActiveMenu != ActiveMenu::ScenarioMenuActive) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario);
 			m_ScenarioMenu->SetEnabled();
 			m_MainMenu->SetEnabled(false);
-		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::CampaignStarted && m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::CampaignMenuActive) {
+		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::CampaignStarted && m_ActiveMenu != ActiveMenu::CampaignMenuActive) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCampaign);
-			g_MetaMan.GetGUI()->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
 			g_MetaMan.GetGUI()->SetEnabled(true);
 			m_MainMenu->SetEnabled(false);
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::ActivityResumed) {
@@ -95,11 +129,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MenuMan::UpdateScenarioMenu() {
-		m_ScenarioMenu->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
-
 		ScenarioGUI::ScenarioMenuUpdateResult updateResult = m_ScenarioMenu->Update();
 
-		if (m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::MainMenuActive && updateResult == ScenarioGUI::ScenarioMenuUpdateResult::BackToMain) {
+		if (m_ActiveMenu != ActiveMenu::MainMenuActive && updateResult == ScenarioGUI::ScenarioMenuUpdateResult::BackToMain) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PlanetToMainMenu);
 		} else if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::ActivityResumed) {
 			g_ActivityMan.SetResumeActivity();
@@ -121,7 +153,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool MenuMan::UpdateCampaignMenu() {
-		g_MetaMan.GetGUI()->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
 		g_MetaMan.GetGUI()->SetStationPos(m_TitleScreen->GetStationPos());
 		g_MetaMan.Update();
 
@@ -142,17 +173,19 @@ namespace RTE {
 	bool MenuMan::Update() {
 		if (g_FrameMan.ResolutionChanged()) { Reinitialize(); }
 
-		m_ActiveScreen = m_TitleScreen->Update();
+		m_TitleScreen->Update();
+		SetActiveMenu();
+
 		bool quitResult = false;
 
-		switch (m_ActiveScreen) {
-			case TitleScreen::ActiveMenu::MainMenuActive:
+		switch (m_ActiveMenu) {
+			case ActiveMenu::MainMenuActive:
 				quitResult = UpdateMainMenu();
 				break;
-			case TitleScreen::ActiveMenu::ScenarioMenuActive:
+			case ActiveMenu::ScenarioMenuActive:
 				UpdateScenarioMenu();
 				break;
-			case TitleScreen::ActiveMenu::CampaignMenuActive:
+			case ActiveMenu::CampaignMenuActive:
 				quitResult = UpdateCampaignMenu();
 				break;
 			default:
@@ -176,14 +209,14 @@ namespace RTE {
 
 		m_TitleScreen->Draw();
 
-		switch (m_ActiveScreen) {
-			case TitleScreen::ActiveMenu::MainMenuActive:
+		switch (m_ActiveMenu) {
+			case ActiveMenu::MainMenuActive:
 				m_MainMenu->Draw();
 				break;
-			case TitleScreen::ActiveMenu::ScenarioMenuActive:
+			case ActiveMenu::ScenarioMenuActive:
 				m_ScenarioMenu->Draw(g_FrameMan.GetBackBuffer32());
 				break;
-			case TitleScreen::ActiveMenu::CampaignMenuActive:
+			case ActiveMenu::CampaignMenuActive:
 				g_MetaMan.Draw(g_FrameMan.GetBackBuffer32());
 				break;
 			default:
@@ -212,7 +245,5 @@ namespace RTE {
 		}
 
 		g_ConsoleMan.Draw(g_FrameMan.GetBackBuffer32());
-
-		g_FrameMan.FlipFrameBuffers();
 	}
 }

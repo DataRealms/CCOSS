@@ -20,16 +20,6 @@ namespace RTE {
 	public:
 
 		/// <summary>
-		/// Enumeration for the different menu screens that are active based on transition states.
-		/// </summary>
-		enum ActiveMenu {
-			MenusDisabled,
-			MainMenuActive,
-			ScenarioMenuActive,
-			CampaignMenuActive
-		};
-
-		/// <summary>
 		/// Enumeration for the different transition (scrolling) states of the title screen.
 		/// </summary>
 		enum class TitleTransition {
@@ -77,12 +67,6 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets the currently active menu screen.
-		/// </summary>
-		/// <returns>The currently active menu screen. See ActiveMenu enumeration for values.</returns>
-		ActiveMenu GetActiveMenu() const { return m_ActiveMenu; }
-
-		/// <summary>
 		/// Gets the current title transition state.
 		/// </summary>
 		/// <returns>The current title transition state. See TitleTransition enumeration for values.</returns>
@@ -95,9 +79,9 @@ namespace RTE {
 		void SetTitleTransitionState(TitleTransition newTransitionState) { if (newTransitionState != m_TitleTransitionState) { m_TitleTransitionState = newTransitionState; m_SectionSwitch = true; } }
 
 		/// <summary>
-		/// Sets the title transition to a pending state, the active menu as disabled and resets the fade screen blend value. This is used to correctly restart transition states after breaking out of the game loop back to the menu loop.
+		/// Sets the title transition to a pending state and resets the fade screen blend value. This is used to correctly restart transition states after breaking out of the game loop back to the menu loop.
 		/// </summary>
-		void SetTitlePendingTransition() { m_TitleTransitionState = TitleTransition::TransitionPending; m_ActiveMenu = ActiveMenu::MenusDisabled; m_FadeAmount = 0; }
+		void SetTitlePendingTransition() { m_TitleTransitionState = TitleTransition::TransitionPending; m_FadeAmount = 0; }
 
 		/// <summary>
 		/// Gets the position of the planet on the title screen scene.
@@ -122,7 +106,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates the TitleScreen state.
 		/// </summary>
-		ActiveMenu Update();
+		void Update();
 
 		/// <summary>
 		/// Draws the TitleScreen to the screen.
@@ -175,7 +159,6 @@ namespace RTE {
 		};
 
 		TitleTransition m_TitleTransitionState; //!< The current title transition (scroll) state.
-		ActiveMenu m_ActiveMenu; //!<
 
 		int m_ScreenResX; //!<
 		int m_ScreenResY; //!<

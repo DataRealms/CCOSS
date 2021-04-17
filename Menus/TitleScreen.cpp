@@ -11,7 +11,6 @@ namespace RTE {
 
 	void TitleScreen::Clear() {
 		m_TitleTransitionState = TitleTransition::TransitionPending;
-		m_ActiveMenu = ActiveMenu::MenusDisabled;
 		m_ScreenResX = g_FrameMan.GetResX();
 		m_ScreenResY = g_FrameMan.GetResY();
 		m_FadeScreen = nullptr;
@@ -161,7 +160,6 @@ namespace RTE {
 				if (m_SectionSwitch) {
 					m_SectionSwitch = false;
 					m_ScrollOffset.SetY(0);
-					m_ActiveMenu = ActiveMenu::MainMenuActive;
 				}
 				break;
 			case TitleTransition::ScenarioMenu:
@@ -169,7 +167,6 @@ namespace RTE {
 				if (m_SectionSwitch) {
 					m_SectionSwitch = false;
 					m_ScrollOffset.SetY(m_PlanetViewOffsetY);
-					m_ActiveMenu = (m_TitleTransitionState == TitleTransition::ScenarioMenu) ? ActiveMenu::ScenarioMenuActive : ActiveMenu::CampaignMenuActive;
 				}
 				break;
 			case TitleTransition::MainMenuToScenario:
@@ -179,18 +176,16 @@ namespace RTE {
 					m_ScrollDuration = 2.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier();
 					g_GUISound.SplashSound()->Play();
 					g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
-					m_ActiveMenu = (m_TitleTransitionState == TitleTransition::MainMenuToScenario) ? m_ActiveMenu = ActiveMenu::ScenarioMenuActive : m_ActiveMenu = ActiveMenu::CampaignMenuActive;
 				}
 				m_ScrollOffset.SetY(EaseOut(0, m_PlanetViewOffsetY, m_SectionProgress));
 				m_GameLogo.SetPos(Vector(static_cast<float>(m_ScreenResX / 2), EaseOut(64, -150, m_SectionProgress)));
-				if (m_SectionElapsedTime >= m_ScrollDuration) { SetTitleTransitionState((m_TitleTransitionState == TitleTransition::MainMenuToScenario) ? TitleTransition::ScenarioMenu : TitleTransition::CampaignMenu); }
+				if (m_SectionElapsedTime >= m_ScrollDuration / 2) { SetTitleTransitionState((m_TitleTransitionState == TitleTransition::MainMenuToScenario) ? TitleTransition::ScenarioMenu : TitleTransition::CampaignMenu); }
 				break;
 			case TitleTransition::PlanetToMainMenu:
 				if (m_SectionSwitch) {
 					m_SectionSwitch = false;
 					m_ScrollDuration = 2.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier();
 					g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccmenu.ogg", -1);
-					m_ActiveMenu = ActiveMenu::MenusDisabled;
 				}
 				m_ScrollOffset.SetY(EaseOut(m_PlanetViewOffsetY, 0, m_SectionProgress));
 				m_GameLogo.SetPos(Vector(static_cast<float>(m_ScreenResX / 2), EaseOut(-150, 64, m_SectionProgress)));
@@ -208,7 +203,6 @@ namespace RTE {
 				if (m_SectionSwitch) {
 					m_SectionSwitch = false;
 					m_ScrollDuration = 2.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier();
-					m_ActiveMenu = ActiveMenu::MenusDisabled;
 				}
 				m_ScrollOffset.SetY(EaseOut(m_PlanetViewOffsetY, 0, m_SectionProgress));
 				if (m_SectionElapsedTime >= m_ScrollDuration / 2) { SetTitleTransitionState(TitleTransition::MainMenu); }
@@ -219,7 +213,6 @@ namespace RTE {
 					m_SectionSwitch = false;
 					m_ScrollOffset.SetY(m_PlanetViewOffsetY);
 					m_ScrollDuration = 1.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier();
-					m_ActiveMenu = ActiveMenu::MenusDisabled;
 				}
 				m_FadeAmount = 255 - static_cast<int>(255.0F * m_SectionProgress);
 				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState((m_TitleTransitionState == TitleTransition::ScenarioFadeIn) ? TitleTransition::ScenarioMenu : TitleTransition::CampaignMenu); }
@@ -228,7 +221,6 @@ namespace RTE {
 				if (m_SectionSwitch) {
 					m_SectionSwitch = false;
 					m_ScrollDuration = 1.5F * g_SettingsMan.GetMenuTransitionDurationMultiplier();
-					m_ActiveMenu = ActiveMenu::MenusDisabled;
 				}
 				m_FadeAmount = static_cast<int>(EaseIn(0, 255, m_SectionProgress));
 				g_AudioMan.SetTempMusicVolume(EaseIn(g_AudioMan.GetMusicVolume(), 0, m_SectionProgress));
@@ -238,7 +230,6 @@ namespace RTE {
 				if (m_SectionSwitch) {
 					m_SectionSwitch = false;
 					m_ScrollDuration = 1.5F * g_SettingsMan.GetMenuTransitionDurationMultiplier();
-					m_ActiveMenu = ActiveMenu::MenusDisabled;
 				}
 				m_ScrollOffset.SetY(EaseIn(0, 250, m_SectionProgress));
 				m_FadeAmount = static_cast<int>(EaseIn(0, 255, m_SectionProgress));
@@ -258,17 +249,16 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	TitleScreen::ActiveMenu TitleScreen::Update() {
+	void TitleScreen::Update() {
 		if (m_SectionSwitch) { m_SectionTimer.Reset(); }
 		m_SectionElapsedTime = static_cast<float>(m_SectionTimer.GetElapsedRealTimeS());
 		m_SectionProgress = std::min((m_SectionDuration > 0) ? m_SectionElapsedTime / m_SectionDuration : 0, 0.9999F);
 
 		if (!m_FinishedPlayingIntro) {
 			UpdateIntro(g_UInputMan.AnyStartPress());
-			return ActiveMenu::MenusDisabled;
+			return;
 		}
 		UpdateTitleTransitions();
-		return m_ActiveMenu;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -67,6 +67,7 @@ namespace RTE {
 				break;
 			}
 			g_MenuMan.Draw();
+			g_FrameMan.FlipFrameBuffers();
 		}
 	}
 

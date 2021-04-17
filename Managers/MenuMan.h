@@ -60,6 +60,16 @@ namespace RTE {
 
 	private:
 
+		/// <summary>
+		/// Enumeration for the different menu screens that are active based on transition states.
+		/// </summary>
+		enum ActiveMenu {
+			MenusDisabled,
+			MainMenuActive,
+			ScenarioMenuActive,
+			CampaignMenuActive
+		};
+
 		std::unique_ptr<AllegroInput> m_GUIInput; //!< The GUIInput interface of this MenuMan.
 		std::unique_ptr<AllegroScreen> m_GUIScreen; //!< The GUIScreen interface of this MenuMan.
 		std::unique_ptr<Controller> m_MenuController; //!<
@@ -68,9 +78,14 @@ namespace RTE {
 		std::unique_ptr<MainMenuGUI> m_MainMenu; //!<
 		std::unique_ptr<ScenarioGUI> m_ScenarioMenu; //!<
 
-		int m_ActiveScreen; //!<
+		ActiveMenu m_ActiveMenu; //!<
 
 #pragma region Updates
+		/// <summary>
+		/// 
+		/// </summary>
+		void SetActiveMenu();
+
 		/// <summary>
 		/// 
 		/// </summary>

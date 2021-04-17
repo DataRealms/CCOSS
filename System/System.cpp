@@ -56,7 +56,7 @@ namespace RTE {
 
 		return false;
 #else
-		return std::filesystem::exists(filename);
+		return std::filesystem::exists(pathToCheck);
 #endif
 	}
 

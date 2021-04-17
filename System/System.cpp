@@ -63,8 +63,10 @@ namespace RTE {
 			if (!exists)
 				return false;
 
-			if (*file == pathToCheck)
-				return true;
+			if (file != (tree.rend() - 1))
+				exists = false;
+			else
+				return exists;
 
 			it = std::filesystem::directory_iterator{pwd / (*file)};
 		}

@@ -32,11 +32,12 @@ namespace RTE {
 			NoEvent,
 			CampaignStarted,
 			ScenarioStarted,
-			MultiplayerStarted,
 			EnterCreditsScreen,
 			BackToMainFromScenario,
 			BackToMenuFromCampaign,
 			BackToMainFromCredits,
+			ActivityStarted,
+			ActivityResumed,
 			Quit
 		};
 
@@ -72,18 +73,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns>The GUIControlManager. Ownership is not transferred!</returns>
 		GUIControlManager * GetGUIControlManager() const { return m_GUIControlManager.get(); }
-
-		/// <summary>
-		/// Reports whether the player has decided to restart an activity this frame. All parameters for the new game has been fed into ActivityMan already.
-		/// </summary>
-		/// <returns>Whether the activity should be restarted.</returns>
-		bool ActivityRestarted() const { return m_ActivityRestarted; }
-
-		/// <summary>
-		/// Reports whether the player has decided to resume the current activity.
-		/// </summary>
-		/// <returns>Whether the activity should be resumed.</returns>
-		bool ActivityResumed() const { return m_ActivityResumed; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -145,9 +134,6 @@ namespace RTE {
 		bool m_MenuEnabled; //!< Visibility state of the menu.
 		MenuScreen m_ActiveMenuScreen; //!< Screen selection state.
 		bool m_ScreenChange; //!< Change in menu screens detected.
-
-		bool m_ActivityRestarted; //!< Whether the game was restarted this frame or not.
-		bool m_ActivityResumed; //!< Whether the game was resumed this frame or not.
 
 		MainMenuUpdateResult m_UpdateResult; //!<
 

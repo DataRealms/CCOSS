@@ -30,8 +30,6 @@ namespace RTE {
 
 		m_CreditsScrollPanel = nullptr;
 		m_ScrollTimer.Reset();
-		m_ActivityRestarted = false;
-		m_ActivityResumed = false;
 		m_TutorialOffered = false;
 
 		m_MainMenuScreens.fill(nullptr);
@@ -326,13 +324,11 @@ namespace RTE {
 				SetActiveMenuScreen(MenuScreen::MainScreen);
 			}
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::ScenarioButton)) {
-			SetActiveMenuScreen(MenuScreen::MainScreen);
-
-			if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
-
+			//if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
 			m_UpdateResult = MainMenuUpdateResult::ScenarioStarted;
-
+			SetActiveMenuScreen(MenuScreen::MainScreen);
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::MultiplayerButton)) {
+			m_UpdateResult = MainMenuUpdateResult::ActivityStarted;
 			SetActiveMenuScreen(MenuScreen::MainScreen);
 			g_ActivityMan.SetStartMultiplayerActivity();
 			g_GUISound.ExitMenuSound()->Play();
@@ -348,7 +344,7 @@ namespace RTE {
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::QuitButton)) {
 			QuitLogic();
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::ResumeButton)) {
-			m_ActivityResumed = true;
+			m_UpdateResult = MainMenuUpdateResult::ActivityResumed;
 			g_GUISound.ExitMenuSound()->Play();
 		}
 	}
@@ -357,12 +353,11 @@ namespace RTE {
 
 	void MainMenuGUI::HandleCampaignNoticeScreenInputEvents(const GUIControl *guiEventControl) {
 		if (guiEventControl == m_MainMenuButtons.at(MenuButton::PlayTutorialButton)) {
-			g_ActivityMan.SetStartTutorialActivity();
+			m_UpdateResult = MainMenuUpdateResult::ActivityStarted;
 			SetActiveMenuScreen(MenuScreen::MainScreen);
-			m_ActivityRestarted = true;
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::CampaignContinueButton)) {
-			SetActiveMenuScreen(MenuScreen::MainScreen);
 			m_UpdateResult = MainMenuUpdateResult::CampaignStarted;
+			SetActiveMenuScreen(MenuScreen::MainScreen);
 		}
 	}
 
@@ -382,11 +377,10 @@ namespace RTE {
 			editorToStart = "ActorEditor";
 		}
 		if (!editorToStart.empty()) {
+			m_UpdateResult = MainMenuUpdateResult::ActivityStarted;
 			SetActiveMenuScreen(MenuScreen::MainScreen);
-			g_GUISound.ExitMenuSound()->Play();
-
-			m_ActivityRestarted = true;
 			g_ActivityMan.SetStartEditorActivity(editorToStart);
+			g_GUISound.ExitMenuSound()->Play();
 		}
 	}
 
@@ -406,8 +400,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	MainMenuGUI::MainMenuUpdateResult MainMenuGUI::Update() {
-		m_ActivityRestarted = false;
-		m_ActivityResumed = false;
 		m_UpdateResult = MainMenuUpdateResult::NoEvent;
 
 		if (!m_MenuEnabled || (g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly())) {

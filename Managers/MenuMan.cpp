@@ -78,9 +78,9 @@ namespace RTE {
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::CampaignStarted && m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::CampaignMenuActive) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCampaign);
 			g_MetaMan.GetGUI()->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
-		} else if (m_MainMenu->ActivityResumed()) {
+		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::ActivityResumed) {
 			g_ActivityMan.SetResumeActivity();
-		} else if (m_MainMenu->ActivityRestarted()) {
+		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::ActivityStarted) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollFadeOut);
 			g_ActivityMan.SetRestartActivity();
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::EnterCreditsScreen) {

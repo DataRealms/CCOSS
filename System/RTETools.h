@@ -216,6 +216,14 @@ namespace RTE {
 	/// <param name="angleRadians">The angle in radians to be converted.</param>
 	/// <returns>The converted angle in degrees.</returns>
 	inline float RadiansToDegrees(float angleRadians) { return angleRadians / c_PI * 180.0F; }
+
+	/// <summary>
+	/// Rounds a float to a set fixed point precision (digits after decimal point) with option to always ceil or always floor the remainder.
+	/// </summary>
+	/// <param name="inputFloat">The input float to round.</param>
+	/// <param name="roundingMode">Method of rounding to use. 0 for system default, 1 for floored remainder, 2 for ceiled remainder.</param>
+	/// <returns>A string of the float, rounded and displayed to chosen precision.</returns>
+	std::string RoundFloatToPrecision(float input, int precision, int roundingMode = 0);
 #pragma endregion
 }
 #endif

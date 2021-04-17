@@ -35,7 +35,6 @@
 #define NODRAWTEXT
 #define NOCOLOR
 #define NOCTLMGR
-#define NOMSG
 #define NOOPENFILE
 #define NOSERVICE
 #define NOSOUND

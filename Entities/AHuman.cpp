@@ -3196,8 +3196,9 @@ void AHuman::Update()
         // Direct the jetpack nozzle according to movement stick if analog input is present
         else if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1)
         {
-			float jetAngle = max(min(m_Controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, maxAngle), -maxAngle);
-			jetAngle = jetAngle - c_HalfPI;
+			float minAngle = -maxAngle - c_HalfPI;
+			maxAngle -= c_HalfPI;
+			float jetAngle = std::clamp(m_Controller.GetAnalogMove().GetAbsRadAngle(), minAngle, maxAngle) - c_PI;
             m_pJetpack->SetEmitAngle(FacingAngle(jetAngle));
         }
         // Or just use the aim angle if we're getting digital input
@@ -3347,13 +3348,13 @@ void AHuman::Update()
 				m_SharpAimTimer.Reset();
 				m_SharpAimProgress = 0;
 				// Move BG hand accordingly
-				if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL)
+				if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == nullptr)
 					m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 			}
             // Only reload if no other pickuppable item is in reach
             if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !m_pItemInReach)
             {
-                if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
+                if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == nullptr) {
                     m_pBGArm->SetHandPos(pDevice->GetMagazinePos());
                 }
 				pDevice->Reload();
@@ -3366,7 +3367,7 @@ void AHuman::Update()
             }
 
             // Detect reloading being completed and move hand accordingly
-			if (pDevice->DoneReloading() && m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {
+			if (pDevice->DoneReloading() && m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == nullptr) {
 				m_pBGArm->SetHandPos(pDevice->GetMagazinePos());
 			}
         }
@@ -3486,7 +3487,7 @@ void AHuman::Update()
     }
     else
     {
-		m_SharpAimProgress = max(m_SharpAimProgress * 0.95F - 0.1F, 0.0F);
+		m_SharpAimProgress = std::max(m_SharpAimProgress * 0.95F - 0.1F, 0.0F);
 		if (m_SharpAimRevertTimer.IsPastSimMS(m_SharpAimDelay))
 			m_SharpAimTimer.Reset();
 		else
@@ -3578,18 +3579,19 @@ void AHuman::Update()
 		if (pDevice->IsReloading()) {
 			m_SharpAimTimer.Reset();
 			m_SharpAimProgress = 0;
-			if (m_pFGArm && m_pFGArm->IsAttached() && GetEquippedItem() == NULL)
+			if (m_pFGArm && m_pFGArm->IsAttached() && GetEquippedItem() == nullptr) {
 				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+			}
 		}
 		if (reloadFG == false && !pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !m_pItemInReach)
 		{
-			if (m_pFGArm && m_pFGArm->IsAttached() && GetEquippedItem() == NULL) {
+			if (m_pFGArm && m_pFGArm->IsAttached() && GetEquippedItem() == nullptr) {
 				m_pFGArm->SetHandPos(pDevice->GetMagazinePos());
 			}
 			pDevice->Reload();
 			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 		}
-		if (pDevice->DoneReloading() && m_pFGArm && m_pFGArm->IsAttached() && GetEquippedItem() == NULL) {
+		if (pDevice->DoneReloading() && m_pFGArm && m_pFGArm->IsAttached() && GetEquippedItem() == nullptr) {
 			m_pFGArm->SetHandPos(pDevice->GetMagazinePos());
 		}
 		pDevice->SetSharpAim(m_SharpAimProgress);
@@ -4115,15 +4117,15 @@ void AHuman::Update()
     }
 
     if (m_pFGArm && m_pFGArm->IsAttached()) {
-		float bodyAngle = 0.0F;
+		float affectingBodyAngle = 0.0F;
 		if (m_FGArmFlailScalar && m_SharpAimDelay != 0) {
-			float aimScalar = min(m_SharpAimTimer.GetElapsedSimTimeMS() / m_SharpAimDelay, 1.0);
-			float revertScalar = min(m_SharpAimRevertTimer.GetElapsedSimTimeMS() / m_SharpAimDelay, 1.0);
+			float aimScalar = std::min(m_SharpAimTimer.GetElapsedSimTimeMS() / m_SharpAimDelay, 1.0);
+			float revertScalar = std::min(m_SharpAimRevertTimer.GetElapsedSimTimeMS() / m_SharpAimDelay, 1.0);
 			aimScalar = aimScalar > revertScalar ? aimScalar : 1.0F - revertScalar;
 			
-			bodyAngle = abs(sin(m_Rotation.GetRadAngle())) * m_Rotation.GetRadAngle() * m_FGArmFlailScalar * (1.0F - aimScalar);
+			affectingBodyAngle = std::abs(std::sin(m_Rotation.GetRadAngle())) * m_Rotation.GetRadAngle() * m_FGArmFlailScalar * (1.0F - aimScalar);
 		}
-        m_pFGArm->SetRotAngle(bodyAngle + m_AimAngle * static_cast<float>(GetFlipFactor()));
+        m_pFGArm->SetRotAngle(affectingBodyAngle + m_AimAngle * static_cast<float>(GetFlipFactor()));
 
         if (m_Status == STABLE) {
             if (m_ArmClimbing[FGROUND]) {
@@ -4172,8 +4174,7 @@ void AHuman::Update()
             // Unstable, so just drop the arm limply
             m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
         }
-	}
-	else if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice()) {
+	} else if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice()) {
 		m_pFGArm->GetHeldDevice()->SetSupported(false);
     }
 
@@ -4198,15 +4199,16 @@ void AHuman::Update()
 		if (maxLength == 0) {
 			m_SharpAimProgress = 0;
 			m_SharpAimMaxedOut = true;
-		}
-		else if (m_MoveState == WALK) {
+		} else if (m_MoveState == WALK) {
 			maxLength *= 0.7;
 		}
         // Use a non-terrain check ray to cap the magnitude, so we can't see into objects etc
         if (m_SharpAimProgress > 0)
         {
-			if (m_pFGArm->GetHeldDevice()->IsRecoiled())
-				m_SharpAimProgress *= 1 - min(m_pFGArm->GetHeldDevice()->GetRecoilForce().GetMagnitude() / (m_pFGArm->GetGripStrength() * (m_pFGArm->GetHeldDevice()->GetSupported() ? 1.5F : 1.0F)), 1.0F);
+			if (m_pFGArm->GetHeldDevice()->IsRecoiled()) {
+				float totalGripStrength = m_pFGArm->GetGripStrength() + (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->HoldsHeldDevice() ? m_pBGArm->GetGripStrength() : 0);
+				m_SharpAimProgress *= 1 - std::min(m_pFGArm->GetHeldDevice()->GetRecoilForce().GetMagnitude() / std::max(totalGripStrength * m_pFGArm->GetHeldDevice()->GetGripStrengthMultiplier(), 1.0F), 1.0F);
+			}
 			Vector notUsed;
             Vector sharpAimVector(maxLength, 0);
             sharpAimVector *= aimMatrix;

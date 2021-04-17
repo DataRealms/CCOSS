@@ -317,6 +317,7 @@ int ACraft::Create(const ACraft &reference)
     m_HatchDelay = reference.m_HatchDelay;
 	if (reference.m_HatchOpenSound) { m_HatchOpenSound = dynamic_cast<SoundContainer *>(reference.m_HatchOpenSound->Clone()); }
 	if (reference.m_HatchCloseSound) { m_HatchCloseSound = dynamic_cast<SoundContainer *>(reference.m_HatchCloseSound->Clone()); }
+	else if (reference.m_HatchOpenSound) { m_HatchCloseSound = dynamic_cast<SoundContainer *>(reference.m_HatchOpenSound->Clone()); }
 	for (deque<MovableObject *>::const_iterator niItr = reference.m_NewInventory.begin(); niItr != reference.m_NewInventory.end(); ++niItr)
         m_NewInventory.push_back(dynamic_cast<MovableObject *>((*niItr)->Clone()));
     for (list<Exit>::const_iterator eItr = reference.m_Exits.begin(); eItr != reference.m_Exits.end(); ++eItr)
@@ -426,6 +427,7 @@ int ACraft::Save(Writer &writer) const
 void ACraft::Destroy(bool notInherited)
 {
 	delete m_HatchOpenSound;
+	delete m_HatchCloseSound;
 	delete m_CrashSound;
 
     if (!notInherited)

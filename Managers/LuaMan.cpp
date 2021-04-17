@@ -409,6 +409,7 @@ PROPERTYOWNERSHIPSAFETYFAKER(ACrab, SoundContainer, SetStrideSound);
 PROPERTYOWNERSHIPSAFETYFAKER(Turret, HeldDevice, SetMountedDevice);
 
 PROPERTYOWNERSHIPSAFETYFAKER(ACraft, SoundContainer, SetHatchOpenSound);
+PROPERTYOWNERSHIPSAFETYFAKER(ACraft, SoundContainer, SetHatchCloseSound);
 PROPERTYOWNERSHIPSAFETYFAKER(ACraft, SoundContainer, SetCrashSound);
 
 PROPERTYOWNERSHIPSAFETYFAKER(ACDropShip, AEmitter, SetRightThruster);
@@ -866,7 +867,7 @@ int LuaMan::Initialize() {
 			.property("IsScrap", &Material::IsScrap),
 
         CONCRETELUABINDING(MOPixel, MovableObject)
-			.property("TrailLength", (int (MOPixel:: *)() const) &MOPixel::GetTrailLength, &MOPixel::SetTrailLength),
+			.property("TrailLength", &MOPixel::GetTrailLength, &MOPixel::SetTrailLength),
 
         CONCRETELUABINDING(TerrainObject, SceneObject)
             .def("GetBitmapOffset", &TerrainObject::GetBitmapOffset)
@@ -1425,6 +1426,7 @@ int LuaMan::Initialize() {
             .def("CloseHatch", &ACraft::CloseHatch)
             .property("HatchState", &ACraft::GetHatchState)
 			.property("HatchOpenSound", &ACraft::GetHatchOpenSound, &ACraftSetHatchOpenSound)
+			.property("HatchCloseSound", &ACraft::GetHatchCloseSound, &ACraftSetHatchCloseSound)
 			.property("CrashSound", &ACraft::GetCrashSound, &ACraftSetCrashSound)
             .property("MaxPassengers", &ACraft::GetMaxPassengers)
             .property("DeliveryDelayMultiplier", &ACraft::GetDeliveryDelayMultiplier),

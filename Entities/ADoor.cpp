@@ -204,9 +204,7 @@ namespace RTE {
 		for (ADSensor &sensor : m_Sensors) {
 			sensor.Destroy();
 		}
-		if (m_DoorMaterialDrawn) {
-			EraseDoorMaterial();
-		}
+		if (m_DoorMaterialDrawn) { EraseDoorMaterial(); }
 		Clear();
 	}
 

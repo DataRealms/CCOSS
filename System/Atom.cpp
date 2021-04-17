@@ -38,7 +38,7 @@ namespace RTE {
 		*/
 		m_TrailColor.Reset();
 		m_TrailLength = 0;
-		m_TrailLengthVariation = 0.1;
+		m_TrailLengthVariation = 0.0F;
 		m_NumPenetrations = 0;
 		m_ChangedDir = true;
 		m_ResultWrapped = false;
@@ -60,7 +60,6 @@ namespace RTE {
 		m_OwnerMO = owner;
 		m_TrailColor = trailColor;
 		m_TrailLength = trailLength;
-		m_TrailLengthVariation = 0;
 
 		return 0;
 	}

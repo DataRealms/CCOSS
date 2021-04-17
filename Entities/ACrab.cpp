@@ -2191,8 +2191,9 @@ void ACrab::Update()
         // Direct the jetpack nozzle according to movement stick if analog input is present
         if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1)
         {
-			float jetAngle = max(min(m_Controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, maxAngle), -maxAngle);
-			jetAngle = jetAngle - c_HalfPI;
+			float minAngle = -maxAngle - c_HalfPI;
+			maxAngle -= c_HalfPI;
+			float jetAngle = std::clamp(m_Controller.GetAnalogMove().GetAbsRadAngle(), minAngle, maxAngle) - c_PI;
             m_pJetpack->SetEmitAngle(FacingAngle(jetAngle));
         }
         // Or just use the aim angle if we're getting digital input
@@ -2783,7 +2784,7 @@ void ACrab::Update()
     if (m_Status == STABLE)
     {
         // Upright body posture
-		m_AngularVel = m_AngularVel * 0.95F - (rot * 0.2F);
+		m_AngularVel = m_AngularVel * 0.9F - (rot * 0.3F);
     }
     // While dying, pull body quickly toward down toward horizontal
     else if (m_Status == DYING)

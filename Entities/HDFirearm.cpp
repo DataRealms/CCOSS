@@ -650,9 +650,11 @@ void HDFirearm::Reload()
     {
         if (m_pMagazine)
         {
-			Vector ejectVector = (Vector(2 * GetFlipFactor(), 0) + g_SceneMan.ShortestDistance(m_Pos, m_pMagazine->GetPos(), g_SceneMan.SceneWrapsX()).SetMagnitude(2)).RadRotate(RandomNum(-0.2F, 0.2F));
+			Vector constrainedMagazineOffset = g_SceneMan.ShortestDistance(m_Pos, m_pMagazine->GetPos(), g_SceneMan.SceneWrapsX()).SetMagnitude(2.0F);
+			Vector ejectVector = Vector(2.0F * GetFlipFactor(), 0.0F) + constrainedMagazineOffset.RadRotate(RandomNum(-0.2F, 0.2F));
 			m_pMagazine->SetVel(m_Vel + ejectVector);
-            m_pMagazine->SetAngularVel(3.0F + (-RandomNum(0.0F, 6.0F)));
+			m_pMagazine->SetAngularVel(RandomNum(-3.0F, 3.0F));
+
             if (!m_pMagazine->IsDiscardable()) { m_pMagazine->SetToDelete(); }
             RemoveAttachable(m_pMagazine, m_pMagazine->IsDiscardable(), false);
             m_pMagazine = 0;
@@ -851,13 +853,14 @@ void HDFirearm::Update()
                     pParticle->SetTeam(m_Team);
 
                     // Also make this not hit team members
+					// TODO: Don't hardcode this???
                     pParticle->SetIgnoresTeamHits(true);
 
                     // Decide for how long until the bullet tumble and start to lose lethality
                     pPixel = dynamic_cast<MOPixel *>(pParticle);
 					if (pPixel) {
-						// Stray bullets heavily affected by bullet shake lose lethality quicker
-						lethalRange *= max(1.0F - shake / 90.0F, 0.1F);
+						// Stray bullets heavily affected by bullet shake lose lethality quicker, as if missing on an imaginary "Z" axis
+						lethalRange *= std::max(1.0F - shake / 90.0F, 0.1F);
 						pPixel->SetLethalRange(lethalRange);
 					}
                     g_MovableMan.AddParticle(pParticle);
@@ -886,6 +889,7 @@ void HDFirearm::Update()
                     // Set the team so alarm events that happen if these gib won't freak out the guy firing
                     pShell->SetTeam(m_Team);
 					// Set this to ignore team hits in case it's lethal
+					// TODO: Don't hardcode this???
 					pShell->SetIgnoresTeamHits(true);
                     g_MovableMan.AddParticle(pShell);
                     pShell = 0;

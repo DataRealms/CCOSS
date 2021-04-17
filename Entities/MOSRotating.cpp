@@ -1008,10 +1008,11 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
             } else {
                 gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.5F + (gibParticleClone->GetAngularVel() * RandomNum())) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
             }
+
             gibParticleClone->SetPos(m_Pos + rotatedGibOffset);
 			gibParticleClone->SetHFlipped(m_HFlipped);
             Vector gibVelocity = rotatedGibOffset.IsZero() ? Vector(minVelocity + RandomNum(0.0F, velocityRange), 0.0F) : rotatedGibOffset.SetMagnitude(minVelocity + RandomNum(0.0F, velocityRange));
-			//Always launch off-centered gibs outward from the object!
+			// TODO: Figure out how much the magnitude of an offset should affect spread
 			float gibSpread = (rotatedGibOffset.IsZero() && gibSettingsObject.GetSpread() == 0.1F) ? c_PI : gibSettingsObject.GetSpread();
             gibVelocity.RadRotate(impactImpulse.GetAbsRadAngle() + (gibSpread * RandomNormalNum()));
             gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? m_Vel : Vector()));
@@ -1430,7 +1431,7 @@ void MOSRotating::Update() {
         m_OrientToVel = std::clamp(m_OrientToVel, 0.0F, 1.0F);
 
         float velInfluence = std::clamp(m_OrientToVel < 1.0F ? m_Vel.GetMagnitude() / 100.0F : 1.0F, 0.0F, 1.0F);
-        float radsToGo = m_Rotation.GetRadAngleTo(m_Vel.GetAbsRadAngle() + (m_HFlipped ? c_PI * GetFlipFactor() : 0));
+        float radsToGo = m_Rotation.GetRadAngleTo(m_Vel.GetAbsRadAngle() + (m_HFlipped ? -c_PI : 0));
         m_Rotation += radsToGo * m_OrientToVel * velInfluence;
     }
 

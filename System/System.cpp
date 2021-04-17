@@ -39,7 +39,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool System::PathExistsCaseSensitive(std::string pathToCheck) {
-#if 1
+#if defined(_WIN32)||defined(__osx__)
 		bool exists{false};
 		std::filesystem::path p{pathToCheck};
 		std::filesystem::path pwd{s_WorkingDirectory};

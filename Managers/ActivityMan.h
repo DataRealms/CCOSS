@@ -171,8 +171,15 @@ namespace RTE {
 		bool SetStartEditorActivitySetToLaunchInto();
 
 		/// <summary>
+		/// Loads "Multiplayer Scene" and starts the MultiplayerGame Activity.
+		/// </summary>
+		/// <returns>Whether the MultiplayerGame Activity was successfully created and set to be launched next time ResetActivity is called.</returns>
+		bool SetStartMultiplayerActivity();
+
+		/// <summary>
 		/// Launch multiplayer server overview Activity.
 		/// </summary>
+		/// <returns>Whether the server overview Activity was successfully created and set to be launched next time ResetActivity is called.</returns>
 		bool SetStartMultiplayerServerOverview();
 #pragma endregion
 

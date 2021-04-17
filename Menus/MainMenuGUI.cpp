@@ -17,9 +17,6 @@
 #include "GUIButton.h"
 #include "GUILabel.h"
 
-#include "GATutorial.h"
-#include "MultiplayerGame.h"
-
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -337,26 +334,12 @@ namespace RTE {
 
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::MultiplayerButton)) {
 			SetActiveMenuScreen(MenuScreen::MainScreen);
-
-			if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
-			g_SceneMan.SetSceneToLoad("Editor Scene");
-			MultiplayerGame *pMultiplayerGame = new MultiplayerGame;
-			pMultiplayerGame->Create();
-			g_ActivityMan.SetStartActivity(pMultiplayerGame);
-
-			m_UpdateResult = MainMenuUpdateResult::MultiplayerStarted;
-
-			m_ActivityRestarted = true;
-
+			g_ActivityMan.SetStartMultiplayerActivity();
 			g_GUISound.ExitMenuSound()->Play();
-
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::SettingsButton)) {
 			SetActiveMenuScreen(MenuScreen::SettingsScreen);
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::EditorsButton)) {
 			SetActiveMenuScreen(MenuScreen::EditorScreen);
-
-			if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
-
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::ModManagerButton)) {
 			SetActiveMenuScreen(MenuScreen::ModManagerScreen);
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::CreditsButton)) {

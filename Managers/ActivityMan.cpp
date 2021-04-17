@@ -7,6 +7,7 @@
 #include "AudioMan.h"
 #include "FrameMan.h"
 #include "PostProcessMan.h"
+#include "MetaMan.h"
 
 #include "GAScripted.h"
 
@@ -19,6 +20,7 @@
 
 #include "NetworkServer.h"
 #include "MultiplayerServerLobby.h"
+#include "MultiplayerGame.h"
 
 namespace RTE {
 
@@ -64,7 +66,7 @@ namespace RTE {
 
 	void ActivityMan::SetStartTutorialActivity() {
 		SetStartActivity(dynamic_cast<Activity *>(g_PresetMan.GetEntityPreset("GATutorial", "Tutorial Mission")->Clone()));
-		if (GameActivity * gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetStartActivity())) { gameActivity->SetStartingGold(10000); }
+		if (GameActivity * gameActivity = dynamic_cast<GameActivity *>(GetStartActivity())) { gameActivity->SetStartingGold(10000); }
 		g_SceneMan.SetSceneToLoad("Tutorial Bunker");
 	}
 
@@ -85,6 +87,7 @@ namespace RTE {
 			editorActivityToStart.reset(new AssemblyEditor());
 		}
 		if (editorActivityToStart) {
+			if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
 			g_SceneMan.SetSceneToLoad("Editor Scene");
 			editorActivityToStart->Create();
 			editorActivityToStart->SetEditorMode(EditorActivity::LOADDIALOG);
@@ -114,6 +117,20 @@ namespace RTE {
 			m_LaunchIntoEditor = false;
 			return false;
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool ActivityMan::SetStartMultiplayerActivity() {
+		if (std::unique_ptr<MultiplayerGame> multiplayerGame = std::make_unique<MultiplayerGame>()) {
+			if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
+			g_SceneMan.SetSceneToLoad("Multiplayer Scene");
+			multiplayerGame->Create();
+			SetStartActivity(multiplayerGame.release());
+			m_RestartActivity = true;
+			return true;
+		}
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -228,7 +245,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ActivityMan::ResumeActivity() {
-		if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::NotStarted) {
+		if (GetActivity()->GetActivityState() != Activity::NotStarted) {
 			m_InActivity = true;
 			m_ResumeActivity = false;
 

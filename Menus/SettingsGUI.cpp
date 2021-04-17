@@ -29,18 +29,19 @@ namespace RTE {
 
 		m_Controller = controller;
 
-		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+		GUICollectionBox *rootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
+		rootBox->SetPositionAbs((g_FrameMan.GetResX() - rootBox->GetWidth()) / 2, 0);
 
-		m_VideoSettingsMenu.Create(m_GUIControlManager.get());
-		m_AudioSettingsMenu.Create(m_GUIControlManager.get());
-		m_InputSettingsMenu.Create(m_GUIControlManager.get());
-		m_GameplaySettingsMenu.Create(m_GUIControlManager.get());
-	}
+		//dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("OptionsScreen"))->SetVisible(false);
+		//dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ConfigScreen"))->SetVisible(false);
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		m_BackToMainButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonBackToMainMenu"));
 
-	void SettingsGUI::SetEnabled() {
+		CreateVideoSettingsMenu();
+		CreateInputSettingsMenu();
+		CreateGameplaySettingsMenu();
 
+		m_ActiveSettingsMenu = ActiveSettingsMenu::AudioSettingsActive;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -48,107 +49,122 @@ namespace RTE {
 	bool SettingsGUI::HandleInputEvents() {
 		m_GUIControlManager->Update();
 
-/*
 		GUIEvent guiEvent;
 		while (m_GUIControlManager->GetEvent(&guiEvent)) {
 			if (guiEvent.GetType() == GUIEvent::Command) {
-
-				// Fullscreen/windowed toggle button pressed
-				if (guiEvent.GetControl() == m_OptionButton.at(FULLSCREENORWINDOWED)) {
-					g_GUISound.ButtonPressSound()->Play();
-
-					if (!g_FrameMan.IsFullscreen() && !g_FrameMan.IsUpscaledFullscreen()) {
-						if (g_ActivityMan.GetActivity()) {
-							m_ResolutionChangeToUpscaled = false;
-							m_ResolutionChangeDialog->SetVisible(true);
-							m_apScreenBox.at(OPTIONSSCREEN)->SetEnabled(false);
-							m_MainMenuButtons.at(BACKTOMAIN)->SetEnabled(false);
-							m_ButtonConfirmResolutionChangeFullscreen->SetVisible(true);
-						} else {
-							HideAllScreens();
-							m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(false);
-							g_FrameMan.SwitchToFullscreen(false);
-						}
-					} else if (g_FrameMan.IsFullscreen() && !g_FrameMan.IsUpscaledFullscreen()) {
-						if (g_ActivityMan.GetActivity()) {
-							m_ResolutionChangeToUpscaled = false;
-							m_ResolutionChangeDialog->SetVisible(true);
-							m_apScreenBox.at(OPTIONSSCREEN)->SetEnabled(false);
-							m_MainMenuButtons.at(BACKTOMAIN)->SetEnabled(false);
-							m_ButtonConfirmResolutionChangeFullscreen->SetVisible(true);
-						} else {
-							HideAllScreens();
-							m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(false);
-							g_FrameMan.SwitchResolution(960, 540);
-						}
-					} else if (!g_FrameMan.IsFullscreen() && g_FrameMan.IsUpscaledFullscreen()) {
-						g_FrameMan.SwitchResolutionMultiplier(1);
-					}
-					UpdateResolutionCombo();
+				if (guiEvent.GetControl() == m_BackToMainButton) {
+					return true;
 				}
+			}
 
-				// Upscaled fullscreen button pressed
-				if (guiEvent.GetControl() == m_OptionButton.at(UPSCALEDFULLSCREEN)) {
-					g_GUISound.ButtonPressSound()->Play();
+			switch (m_ActiveSettingsMenu) {
+				default:
+					break;
+			}
+		}
+		return false;
+	}
 
-					if (!g_FrameMan.IsUpscaledFullscreen()) {
-						if (g_ActivityMan.GetActivity()) {
-							m_ResolutionChangeToUpscaled = true;
-							m_ResolutionChangeDialog->SetVisible(true);
-							m_apScreenBox.at(OPTIONSSCREEN)->SetEnabled(false);
-							m_MainMenuButtons.at(BACKTOMAIN)->SetEnabled(false);
-							m_ButtonConfirmResolutionChangeFullscreen->SetVisible(true);
-						} else {
-							HideAllScreens();
-							m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(false);
-							g_FrameMan.SwitchToFullscreen(true);
-						}
-					}
-					UpdateResolutionCombo();
-				}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-				if (guiEvent.GetControl() == m_ButtonConfirmResolutionChangeFullscreen) {
-					g_GUISound.ButtonPressSound()->Play();
-					HideAllScreens();
-					m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(false);
-					m_MainMenuButtons.at(BACKTOMAIN)->SetEnabled(true);
-					m_ResolutionChangeDialog->SetVisible(false);
-					m_apScreenBox.at(OPTIONSSCREEN)->SetEnabled(true);
-					m_ButtonConfirmResolutionChangeFullscreen->SetVisible(false);
-					if (!m_ResolutionChangeToUpscaled && g_FrameMan.IsFullscreen() && !g_FrameMan.IsUpscaledFullscreen()) {
-						g_FrameMan.SwitchResolution(960, 540, 1, true);
-					} else {
-						g_FrameMan.SwitchToFullscreen(m_ResolutionChangeToUpscaled ? true : false, true);
-					}
-					UpdateResolutionCombo();
-				}
+	void SettingsGUI::HandleVideoSettingsMenuInputEvents(const GUIControl *guiEventControl) {
+		if (guiEventControl == m_VideoSettingsMenu.FullscreenOrWindowedButton) {
+			g_GUISound.ButtonPressSound()->Play();
 
-				if (guiEvent.GetControl() == m_ButtonConfirmResolutionChange) {
-					g_GUISound.ButtonPressSound()->Play();
-					HideAllScreens();
-					m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(false);
-					m_MainMenuButtons.at(BACKTOMAIN)->SetEnabled(true);
-					m_ResolutionChangeDialog->SetVisible(false);
-					m_apScreenBox.at(OPTIONSSCREEN)->SetEnabled(true);
-					m_ButtonConfirmResolutionChange->SetVisible(false);
-					g_FrameMan.SwitchResolution(g_FrameMan.GetNewResX(), g_FrameMan.GetNewResY(), 1, true);
-					UpdateResolutionCombo();
-				}
-
-				// Update the label to whatever we ended up with
-				if (g_FrameMan.GetResX() * g_FrameMan.ResolutionMultiplier() == m_MaxResX && g_FrameMan.GetResY() * g_FrameMan.ResolutionMultiplier() == m_MaxResY) {
-					m_OptionButton.at(FULLSCREENORWINDOWED)->SetText("Windowed");
+			if (!g_FrameMan.IsFullscreen() && !g_FrameMan.IsUpscaledFullscreen()) {
+				/*
+				if (g_ActivityMan.GetActivity()) {
+					m_VideoSettingsMenu.ResolutionChangeToUpscaled = false;
+					m_VideoSettingsMenu.ResolutionChangeDialogBox->SetVisible(true);
+					m_apScreenBox.at(OPTIONSSCREEN)->SetEnabled(false);
+					m_MainMenuButtons.at(BACKTOMAIN)->SetEnabled(false);
+					m_ButtonConfirmResolutionChangeFullscreen->SetVisible(true);
 				} else {
-					m_OptionButton.at(FULLSCREENORWINDOWED)->SetText("Fullscreen");
+					HideAllScreens();
+					m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(false);
+					g_FrameMan.SwitchToFullscreen(false);
 				}
-
-				if (guiEvent.GetControl() == m_ButtonCancelResolutionChange) {
-					g_GUISound.ButtonPressSound()->Play();
-					m_ResolutionChangeDialog->SetVisible(false);
-					m_apScreenBox.at(OPTIONSSCREEN)->SetEnabled(true);
-					m_MainMenuButtons.at(BACKTOMAIN)->SetEnabled(true);
+				*/
+				g_FrameMan.SwitchToFullscreen(false);
+			} else if (g_FrameMan.IsFullscreen() && !g_FrameMan.IsUpscaledFullscreen()) {
+				/*
+				if (g_ActivityMan.GetActivity()) {
+					m_ResolutionChangeToUpscaled = false;
+					m_ResolutionChangeDialog->SetVisible(true);
+					m_apScreenBox.at(OPTIONSSCREEN)->SetEnabled(false);
+					m_MainMenuButtons.at(BACKTOMAIN)->SetEnabled(false);
+					m_ButtonConfirmResolutionChangeFullscreen->SetVisible(true);
+				} else {
+					HideAllScreens();
+					m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(false);
+					g_FrameMan.SwitchResolution(960, 540);
 				}
+				*/
+				g_FrameMan.SwitchResolution(960, 540);
+			} else if (!g_FrameMan.IsFullscreen() && g_FrameMan.IsUpscaledFullscreen()) {
+				g_FrameMan.SwitchResolutionMultiplier(1);
+			}
+			//UpdateResolutionCombo();
+		} else if (guiEventControl == m_VideoSettingsMenu.UpscaledFullscreenButton) {
+			g_GUISound.ButtonPressSound()->Play();
+			/*
+			if (!g_FrameMan.IsUpscaledFullscreen()) {
+				if (g_ActivityMan.GetActivity()) {
+					m_ResolutionChangeToUpscaled = true;
+					m_ResolutionChangeDialog->SetVisible(true);
+					m_apScreenBox.at(OPTIONSSCREEN)->SetEnabled(false);
+					m_MainMenuButtons.at(BACKTOMAIN)->SetEnabled(false);
+					m_ButtonConfirmResolutionChangeFullscreen->SetVisible(true);
+				} else {
+					HideAllScreens();
+					m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(false);
+					g_FrameMan.SwitchToFullscreen(true);
+				}
+			}
+			UpdateResolutionCombo();
+			*/
+		} else if (guiEventControl == m_VideoSettingsMenu.ConfirmResolutionChangeFullscreenButton) {
+			g_GUISound.ButtonPressSound()->Play();
+			/*
+			HideAllScreens();
+			m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(false);
+			m_MainMenuButtons.at(BACKTOMAIN)->SetEnabled(true);
+			m_ResolutionChangeDialog->SetVisible(false);
+			m_apScreenBox.at(OPTIONSSCREEN)->SetEnabled(true);
+			m_ButtonConfirmResolutionChangeFullscreen->SetVisible(false);
+			if (!m_ResolutionChangeToUpscaled && g_FrameMan.IsFullscreen() && !g_FrameMan.IsUpscaledFullscreen()) {
+				g_FrameMan.SwitchResolution(960, 540, 1, true);
+			} else {
+				g_FrameMan.SwitchToFullscreen(m_ResolutionChangeToUpscaled ? true : false, true);
+			}
+			UpdateResolutionCombo();
+			*/
+		} else if (guiEventControl == m_VideoSettingsMenu.ConfirmResolutionChangeButton) {
+			g_GUISound.ButtonPressSound()->Play();
+			/*
+			HideAllScreens();
+			m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(false);
+			m_MainMenuButtons.at(BACKTOMAIN)->SetEnabled(true);
+			m_ResolutionChangeDialog->SetVisible(false);
+			m_apScreenBox.at(OPTIONSSCREEN)->SetEnabled(true);
+			m_ButtonConfirmResolutionChange->SetVisible(false);
+			g_FrameMan.SwitchResolution(g_FrameMan.GetNewResX(), g_FrameMan.GetNewResY(), 1, true);
+			UpdateResolutionCombo();
+			*/
+		} else if (guiEventControl == m_VideoSettingsMenu.CancelResolutionChangeButton) {
+			g_GUISound.ButtonPressSound()->Play();
+			/*
+			m_ResolutionChangeDialog->SetVisible(false);
+			m_apScreenBox.at(OPTIONSSCREEN)->SetEnabled(true);
+			m_MainMenuButtons.at(BACKTOMAIN)->SetEnabled(true);
+			*/
+		}
+	}
 
+
+
+
+	/*
 				// Return to main menu button pressed
 				if (guiEvent.GetControl() == m_MainMenuButtons.at(BACKTOMAIN)) {
 					// Hide all screens, the appropriate screen will reappear on next update
@@ -415,8 +431,6 @@ namespace RTE {
 			}
 		}
 	*/
-		return false;
-	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -427,29 +441,31 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsGUI::VideoSettingsMenu::Create(GUIControlManager *parentControlManager) {
-		ValidResolutions.clear();
+	void SettingsGUI::CreateVideoSettingsMenu() {
+		m_VideoSettingsMenu = VideoSettingsMenu();
 
-		ResolutionComboBox = dynamic_cast<GUIComboBox *>(parentControlManager->GetControl("ComboResolution"));
+		m_VideoSettingsMenu.ValidResolutions.clear();
 
-		FullscreenOrWindowedButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonFullscreen"));
-		UpscaledFullscreenButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonUpscaledFullscreen"));
+		m_VideoSettingsMenu.ResolutionComboBox = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("ComboResolution"));
 
-		ResolutionChangeDialogBox = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("ResolutionChangeDialog"));
-		ResolutionChangeDialogBox->CenterInParent(true, true);
-		ResolutionChangeDialogBox->SetVisible(false);
+		m_VideoSettingsMenu.FullscreenOrWindowedButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonFullscreen"));
+		m_VideoSettingsMenu.UpscaledFullscreenButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonUpscaledFullscreen"));
 
-		ConfirmResolutionChangeButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonConfirmResolutionChange"));
-		ConfirmResolutionChangeButton->SetVisible(false);
-		ConfirmResolutionChangeFullscreenButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonConfirmResolutionChangeFullscreen"));
-		ConfirmResolutionChangeFullscreenButton->SetVisible(false);
-		CancelResolutionChangeButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonCancelResolutionChange"));
+		m_VideoSettingsMenu.ResolutionChangeDialogBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ResolutionChangeDialog"));
+		m_VideoSettingsMenu.ResolutionChangeDialogBox->CenterInParent(true, true);
+		m_VideoSettingsMenu.ResolutionChangeDialogBox->SetVisible(false);
+
+		m_VideoSettingsMenu.ConfirmResolutionChangeButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfirmResolutionChange"));
+		m_VideoSettingsMenu.ConfirmResolutionChangeButton->SetVisible(false);
+		m_VideoSettingsMenu.ConfirmResolutionChangeFullscreenButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfirmResolutionChangeFullscreen"));
+		m_VideoSettingsMenu.ConfirmResolutionChangeFullscreenButton->SetVisible(false);
+		m_VideoSettingsMenu.CancelResolutionChangeButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonCancelResolutionChange"));
 
 		/*
 		if (g_FrameMan.GetResX() * g_FrameMan.ResolutionMultiplier() == g_FrameMan.GetMaxResX() && g_FrameMan.GetResY() * g_FrameMan.ResolutionMultiplier() == g_FrameMan.GetMaxResY()) {
-			FullscreenOrWindowedButton->SetText("Windowed");
+			m_VideoSettingsMenu.FullscreenOrWindowedButton->SetText("Windowed");
 		} else {
-			FullscreenOrWindowedButton->SetText("Fullscreen");
+			m_VideoSettingsMenu.FullscreenOrWindowedButton->SetText("Fullscreen");
 		}
 		*/
 
@@ -466,51 +482,53 @@ namespace RTE {
 
 		//UpdateVolumeSliders();
 	}
+	void SettingsGUI::CreateInputSettingsMenu() {
+		m_InputSettingsMenu = InputSettingsMenu();
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SettingsGUI::InputSettingsMenu::Create(GUIControlManager *parentControlManager) {
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 			std::string playerNum = std::to_string(player + 1);
 
-			PlayerInputSettingsBoxes.at(player) = PlayerInputSettingsBox();
+			/*
+			m_InputSettingsMenu.PlayerInputSettingsBoxes.at(player) = PlayerInputSettingsBox();
 
-			PlayerInputSettingsBoxes.at(player).InputDeviceLabel = dynamic_cast<GUILabel *>(parentControlManager->GetControl("LabelP" + playerNum + "Device"));
-			PlayerInputSettingsBoxes.at(player).NextInputDeviceButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonP" + playerNum + "NextDevice"));
-			PlayerInputSettingsBoxes.at(player).PrevInputDeviceButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonP" + playerNum + "PrevDevice"));
-			PlayerInputSettingsBoxes.at(player).ConfigureControlsButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonP" + playerNum + "Config"));
-			PlayerInputSettingsBoxes.at(player).ClearControlsButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonP" + playerNum + "Clear"));
+			m_InputSettingsMenu.PlayerInputSettingsBoxes.at(player).InputDeviceLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelP" + playerNum + "Device"));
+			m_InputSettingsMenu.PlayerInputSettingsBoxes.at(player).NextInputDeviceButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonP" + playerNum + "NextDevice"));
+			m_InputSettingsMenu.PlayerInputSettingsBoxes.at(player).PrevInputDeviceButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonP" + playerNum + "PrevDevice"));
+			m_InputSettingsMenu.PlayerInputSettingsBoxes.at(player).ConfigureControlsButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonP" + playerNum + "Config"));
+			m_InputSettingsMenu.PlayerInputSettingsBoxes.at(player).ClearControlsButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonP" + playerNum + "Clear"));
 
-			PlayerInputSettingsBoxes.at(player).DeadZoneSlider = dynamic_cast<GUISlider *>(parentControlManager->GetControl("SliderP" + playerNum + "DeadZone"));
-			PlayerInputSettingsBoxes.at(player).DeadZoneSlider->SetValue(static_cast<int>(g_UInputMan.GetControlScheme(0)->GetJoystickDeadzone()) * 250);
+			m_InputSettingsMenu.PlayerInputSettingsBoxes.at(player).DeadZoneSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderP" + playerNum + "DeadZone"));
+			m_InputSettingsMenu.PlayerInputSettingsBoxes.at(player).DeadZoneSlider->SetValue(static_cast<int>(g_UInputMan.GetControlScheme(0)->GetJoystickDeadzone()) * 250);
 
-			PlayerInputSettingsBoxes.at(player).DeadZoneLabel = dynamic_cast<GUILabel *>(parentControlManager->GetControl("LabelP" + playerNum + "DeadZoneValue"));
-			PlayerInputSettingsBoxes.at(player).DeadZoneLabel->SetText(std::to_string(PlayerInputSettingsBoxes.at(player).DeadZoneSlider->GetValue()));
+			m_InputSettingsMenu.PlayerInputSettingsBoxes.at(player).DeadZoneLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelP" + playerNum + "DeadZoneValue"));
+			m_InputSettingsMenu.PlayerInputSettingsBoxes.at(player).DeadZoneLabel->SetText(std::to_string(m_InputSettingsMenu.PlayerInputSettingsBoxes.at(player).DeadZoneSlider->GetValue()));
 
-			PlayerInputSettingsBoxes.at(player).DeadZoneTypeCheckbox = dynamic_cast<GUICheckbox *>(parentControlManager->GetControl("CheckboxP" + playerNum + "DeadZoneType"));
+			m_InputSettingsMenu.PlayerInputSettingsBoxes.at(player).DeadZoneTypeCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxP" + playerNum + "DeadZoneType"));
 
 			if (g_UInputMan.GetControlScheme(0)->GetJoystickDeadzoneType() == DeadZoneType::CIRCLE) {
-				PlayerInputSettingsBoxes.at(player).DeadZoneTypeCheckbox->SetCheck(true);
-				PlayerInputSettingsBoxes.at(player).DeadZoneTypeCheckbox->SetText("O");
+				m_InputSettingsMenu.PlayerInputSettingsBoxes.at(player).DeadZoneTypeCheckbox->SetCheck(true);
+				m_InputSettingsMenu.PlayerInputSettingsBoxes.at(player).DeadZoneTypeCheckbox->SetText("O");
 			} else {
-				PlayerInputSettingsBoxes.at(player).DeadZoneTypeCheckbox->SetCheck(false);
-				PlayerInputSettingsBoxes.at(player).DeadZoneTypeCheckbox->SetText(std::string({ -2, 0 }));
+				m_InputSettingsMenu.PlayerInputSettingsBoxes.at(player).DeadZoneTypeCheckbox->SetCheck(false);
+				m_InputSettingsMenu.PlayerInputSettingsBoxes.at(player).DeadZoneTypeCheckbox->SetText(std::string({ -2, 0 }));
 			}
+			*/
 		}
 
 		//UpdateDeviceLabels();
 
+		/*
 		ControlConfigWizardMenu = ControlConfigWizard();
 
-		ControlConfigWizardMenu.BackToOptionsButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonBackToOptions"));
+		ControlConfigWizardMenu.BackToOptionsButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonBackToOptions"));
 		ControlConfigWizardMenu.BackToOptionsButton->SetVisible(false);
 
 		// Config screen controls
-		ControlConfigWizardMenu.ConfigLabel.at(ControlConfigWizard::ConfigWizardLabels::ConfigTitle) = dynamic_cast<GUILabel *>(parentControlManager->GetControl("LabelConfigTitle"));
-		ControlConfigWizardMenu.ConfigLabel.at(ControlConfigWizard::ConfigWizardLabels::ConfigRecommendation) = dynamic_cast<GUILabel *>(parentControlManager->GetControl("LabelConfigRecKeyDesc"));
-		ControlConfigWizardMenu.ConfigLabel.at(ControlConfigWizard::ConfigWizardLabels::ConfigSteps) = dynamic_cast<GUILabel *>(parentControlManager->GetControl("LabelConfigStep"));
-		ControlConfigWizardMenu.ConfigLabel.at(ControlConfigWizard::ConfigWizardLabels::ConfigInstruction) = dynamic_cast<GUILabel *>(parentControlManager->GetControl("LabelControlConfigWizard::ConfigWizardLabels::ConfigInstruction"));
-		ControlConfigWizardMenu.ConfigLabel.at(ControlConfigWizard::ConfigWizardLabels::ConfigInput) = dynamic_cast<GUILabel *>(parentControlManager->GetControl("LabelConfigInput"));
+		ControlConfigWizardMenu.ConfigLabel.at(ControlConfigWizard::ConfigWizardLabels::ConfigTitle) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelConfigTitle"));
+		ControlConfigWizardMenu.ConfigLabel.at(ControlConfigWizard::ConfigWizardLabels::ConfigRecommendation) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelConfigRecKeyDesc"));
+		ControlConfigWizardMenu.ConfigLabel.at(ControlConfigWizard::ConfigWizardLabels::ConfigSteps) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelConfigStep"));
+		ControlConfigWizardMenu.ConfigLabel.at(ControlConfigWizard::ConfigWizardLabels::ConfigInstruction) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelControlConfigWizard::ConfigWizardLabels::ConfigInstruction"));
+		ControlConfigWizardMenu.ConfigLabel.at(ControlConfigWizard::ConfigWizardLabels::ConfigInput) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelConfigInput"));
 
 		ContentFile diagramFile("Base.rte/GUIs/Controllers/D-Pad.png");
 		BITMAP **tempDPadBitmaps = diagramFile.GetAsAnimation(ControlConfigWizard::ConfigWizardSteps::DPadConfigSteps, COLORCONV_8_TO_32);
@@ -526,28 +544,28 @@ namespace RTE {
 		}
 		delete[] tempDualAnalogBitmaps;
 
-		ControlConfigWizardMenu.RecommendationBox = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("BoxConfigRec"));
-		ControlConfigWizardMenu.RecommendationDiagram = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("BoxConfigRecDiagram"));
-		ControlConfigWizardMenu.ConfigSkipButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonConfigSkip"));
-		ControlConfigWizardMenu.ConfigBackButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonConfigBack"));
+		ControlConfigWizardMenu.RecommendationBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("BoxConfigRec"));
+		ControlConfigWizardMenu.RecommendationDiagram = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("BoxConfigRecDiagram"));
+		ControlConfigWizardMenu.ConfigSkipButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfigSkip"));
+		ControlConfigWizardMenu.ConfigBackButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfigBack"));
 
-		ControlConfigWizardMenu.DPadTypeBox = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("BoxConfigDPadType"));
-		ControlConfigWizardMenu.DPadTypeButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonConfigDPadType"));
-		ControlConfigWizardMenu.DPadTypeDiagram = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("BoxConfigDPadTypeDiagram"));
+		ControlConfigWizardMenu.DPadTypeBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("BoxConfigDPadType"));
+		ControlConfigWizardMenu.DPadTypeButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfigDPadType"));
+		ControlConfigWizardMenu.DPadTypeDiagram = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("BoxConfigDPadTypeDiagram"));
 		ControlConfigWizardMenu.DPadTypeDiagram->Resize(ControlConfigWizardMenu.DPadBitmaps.at(0)->w, ControlConfigWizardMenu.DPadBitmaps.at(0)->h);
 		ControlConfigWizardMenu.DPadTypeDiagram->CenterInParent(true, true);
 		ControlConfigWizardMenu.DPadTypeDiagram->MoveRelative(0, -8);
 
-		ControlConfigWizardMenu.DAnalogTypeBox = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("BoxConfigDAnalogType"));
-		ControlConfigWizardMenu.DAnalogTypeButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonConfigDAnalogType"));
-		ControlConfigWizardMenu.DAnalogTypeDiagram = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("BoxConfigDAnalogTypeDiagram"));
+		ControlConfigWizardMenu.DAnalogTypeBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("BoxConfigDAnalogType"));
+		ControlConfigWizardMenu.DAnalogTypeButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfigDAnalogType"));
+		ControlConfigWizardMenu.DAnalogTypeDiagram = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("BoxConfigDAnalogTypeDiagram"));
 		ControlConfigWizardMenu.DAnalogTypeDiagram->Resize(ControlConfigWizardMenu.DualAnalogBitmaps.at(0)->w, ControlConfigWizardMenu.DualAnalogBitmaps.at(0)->h);
 		ControlConfigWizardMenu.DAnalogTypeDiagram->CenterInParent(true, true);
 		ControlConfigWizardMenu.DAnalogTypeDiagram->MoveRelative(0, -10);
 
-		ControlConfigWizardMenu.XBox360TypeBox = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("BoxConfigXBox360Type"));
-		ControlConfigWizardMenu.XBox360TypeButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonConfigXBox360Type"));
-		ControlConfigWizardMenu.XBox360TypeDiagram = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("BoxConfigXBox360TypeDiagram"));
+		ControlConfigWizardMenu.XBox360TypeBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("BoxConfigXBox360Type"));
+		ControlConfigWizardMenu.XBox360TypeButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfigXBox360Type"));
+		ControlConfigWizardMenu.XBox360TypeDiagram = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("BoxConfigXBox360TypeDiagram"));
 		ControlConfigWizardMenu.XBox360TypeDiagram->Resize(ControlConfigWizardMenu.DualAnalogBitmaps.at(0)->w, ControlConfigWizardMenu.DualAnalogBitmaps.at(0)->h);
 		ControlConfigWizardMenu.XBox360TypeDiagram->CenterInParent(true, true);
 		ControlConfigWizardMenu.XBox360TypeDiagram->MoveRelative(0, -10);
@@ -556,22 +574,25 @@ namespace RTE {
 		ControlConfigWizardMenu.ConfiguringDevice = InputDevice::DEVICE_KEYB_ONLY;
 		ControlConfigWizardMenu.ConfiguringGamepad = ControlConfigWizard::GamepadType::DPad;
 		ControlConfigWizardMenu.ConfigureStep = 0;
+		*/
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsGUI::GameplaySettingsMenu::Create(GUIControlManager *parentControlManager) {
-		FlashOnBrainDamageCheckbox = dynamic_cast<GUICheckbox *>(parentControlManager->GetControl("FlashOnBrainDamageCheckbox"));
-		FlashOnBrainDamageCheckbox->SetCheck(g_SettingsMan.FlashOnBrainDamage());
+	void SettingsGUI::CreateGameplaySettingsMenu() {
+		m_GameplaySettingsMenu = GameplaySettingsMenu();
 
-		BlipOnRevealUnseenCheckbox = dynamic_cast<GUICheckbox *>(parentControlManager->GetControl("BlipOnRevealUnseenCheckbox"));
-		BlipOnRevealUnseenCheckbox->SetCheck(g_SettingsMan.BlipOnRevealUnseen());
+		m_GameplaySettingsMenu.FlashOnBrainDamageCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("FlashOnBrainDamageCheckbox"));
+		m_GameplaySettingsMenu.FlashOnBrainDamageCheckbox->SetCheck(g_SettingsMan.FlashOnBrainDamage());
 
-		ShowForeignItemsCheckbox = dynamic_cast<GUICheckbox *>(parentControlManager->GetControl("ShowForeignItemsCheckbox"));
-		ShowForeignItemsCheckbox->SetCheck(g_SettingsMan.ShowForeignItems());
+		m_GameplaySettingsMenu.BlipOnRevealUnseenCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("BlipOnRevealUnseenCheckbox"));
+		m_GameplaySettingsMenu.BlipOnRevealUnseenCheckbox->SetCheck(g_SettingsMan.BlipOnRevealUnseen());
 
-		ShowToolTipsCheckbox = dynamic_cast<GUICheckbox *>(parentControlManager->GetControl("ShowToolTipsCheckbox"));
-		ShowToolTipsCheckbox->SetCheck(g_SettingsMan.ToolTips());
+		m_GameplaySettingsMenu.ShowForeignItemsCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("ShowForeignItemsCheckbox"));
+		m_GameplaySettingsMenu.ShowForeignItemsCheckbox->SetCheck(g_SettingsMan.ShowForeignItems());
+
+		m_GameplaySettingsMenu.ShowToolTipsCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("ShowToolTipsCheckbox"));
+		m_GameplaySettingsMenu.ShowToolTipsCheckbox->SetCheck(g_SettingsMan.ToolTips());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

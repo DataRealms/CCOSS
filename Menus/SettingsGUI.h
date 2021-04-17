@@ -8,6 +8,7 @@ struct BITMAP;
 namespace RTE {
 
 	class Controller;
+	class GUIControl;
 	class GUIButton;
 	class GUILabel;
 	class GUISlider;
@@ -35,13 +36,6 @@ namespace RTE {
 		SettingsGUI(AllegroScreen *guiScreen, AllegroInput *guiInput, Controller *controller);
 #pragma endregion
 
-#pragma region Getters and Setters
-		/// <summary>
-		/// 
-		/// </summary>
-		void SetEnabled();
-#pragma endregion
-
 #pragma region Concrete Methods
 		/// <summary>
 		/// 
@@ -55,6 +49,16 @@ namespace RTE {
 #pragma endregion
 
 	private:
+
+		/// <summary>
+		/// 
+		/// </summary>
+		enum class ActiveSettingsMenu {
+			VideoSettingsActive,
+			AudioSettingsActive,
+			InputSettingsActive,
+			GameplaySettingsActive
+		};
 
 #pragma region Video Settings Menu
 		/// <summary>
@@ -94,13 +98,7 @@ namespace RTE {
 			GUIButton *ConfirmResolutionChangeFullscreenButton; //!<
 			GUIButton *CancelResolutionChangeButton; //!<
 
-			bool m_ResolutionChangeToUpscaled; //!<
-
-			/// <summary>
-			/// 
-			/// </summary>
-			/// <param name="parentControlManager"></param>
-			void Create(GUIControlManager *parentControlManager);
+			bool ResolutionChangeToUpscaled; //!<
 
 			/// <summary>
 			/// Updates the contents of the screen resolution combo box.
@@ -118,12 +116,6 @@ namespace RTE {
 			GUISlider *MusicSlider; //!<
 			GUILabel *SoundLabel; //!<
 			GUISlider *SoundSlider; //!<
-
-			/// <summary>
-			/// 
-			/// </summary>
-			/// <param name="parentControlManager"></param>
-			void Create(GUIControlManager *parentControlManager);
 
 			/// <summary>
 			/// Updates the position of the volume sliders, based on what the AudioMan is currently set to.
@@ -244,12 +236,6 @@ namespace RTE {
 			std::array<PlayerInputSettingsBox, Players::MaxPlayerCount> PlayerInputSettingsBoxes; //!<
 
 			/// <summary>
-			/// 
-			/// </summary>
-			/// <param name="parentControlManager"></param>
-			void Create(GUIControlManager *parentControlManager);
-
-			/// <summary>
 			/// Updates the text on the configuration labels, based on actual UInputMan settings.
 			/// </summary>
 			//void UpdateDeviceLabels();
@@ -265,18 +251,40 @@ namespace RTE {
 			GUICheckbox *BlipOnRevealUnseenCheckbox; //!<
 			GUICheckbox *ShowForeignItemsCheckbox; //!<
 			GUICheckbox *ShowToolTipsCheckbox; //!<
-
-			/// <summary>
-			/// 
-			/// </summary>
-			/// <param name="parentControlManager"></param>
-			void Create(GUIControlManager *parentControlManager);
 		};
+#pragma endregion
+
+#pragma region Create Breakdown
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreateVideoSettingsMenu();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreateInputSettingsMenu();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreateGameplaySettingsMenu();
+#pragma endregion
+
+#pragma region Updates
+		/// <summary>
+		/// 
+		/// </summary>
+		void HandleVideoSettingsMenuInputEvents(const GUIControl *guiEventControl);
+
 #pragma endregion
 
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!<
 		Controller *m_Controller; //!<
 
+		ActiveSettingsMenu m_ActiveSettingsMenu;
+
+		GUIButton *m_BackToMainButton;
 		VideoSettingsMenu m_VideoSettingsMenu; //!<
 		AudioSettingsMenu m_AudioSettingsMenu; //!<
 		InputSettingsMenu m_InputSettingsMenu; //!<

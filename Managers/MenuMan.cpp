@@ -161,7 +161,7 @@ namespace RTE {
 
 		System::SetQuit(quitResult);
 
-		return m_TitleScreen->GetTitleTransitionState() == TitleScreen::TitleTransition::End;
+		return m_TitleScreen->GetTitleTransitionState() == TitleScreen::TitleTransition::TransitionEnd;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

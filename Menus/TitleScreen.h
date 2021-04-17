@@ -13,7 +13,7 @@
 namespace RTE {
 
 	/// <summary>
-	/// Handling for the title screen scene, intro sequence and transitions between menu screens.
+	/// Handling for the title screen scene composition, intro sequence and transitions between menu screens.
 	/// </summary>
 	class TitleScreen {
 
@@ -23,7 +23,7 @@ namespace RTE {
 		/// Enumeration for the different menu screens that are active based on transition states.
 		/// </summary>
 		enum ActiveMenu {
-			MenusDisabled = -1,
+			MenusDisabled,
 			MainMenuActive,
 			ScenarioMenuActive,
 			CampaignMenuActive
@@ -33,20 +33,20 @@ namespace RTE {
 		/// Enumeration for the different transition (scrolling) states of the title screen.
 		/// </summary>
 		enum class TitleTransition {
-			PendingTransition = -1,
-			MainMenu, // Main menu is active and operational
-			MainMenuToScenario, // Scenario mode views and transitions
-			MainMenuToCampaign, // Campaign mode views and transitions
+			MainMenu,
+			MainMenuToScenario,
+			MainMenuToCampaign,
 			MainMenuToCredits,
 			CreditsToMainMenu,
-			PlanetToMainMenu, // Going back to the main menu view from a planet-centered view
+			PlanetToMainMenu,
 			ScenarioMenu,
-			ScenarioFadeIn, // Back from a scenario game to the scenario selection menu
+			ScenarioFadeIn,
 			CampaignMenu,
-			CampaignFadeIn, // Back from a battle to the campaign view
+			CampaignFadeIn,
 			ScrollFadeOut,
 			FadeOut,
-			End,
+			TransitionEnd,
+			TransitionPending,
 		};
 
 #pragma region Creation
@@ -77,51 +77,50 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// 
+		/// Gets the currently active menu screen.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>The currently active menu screen. See ActiveMenu enumeration for values.</returns>
 		ActiveMenu GetActiveMenu() const { return m_ActiveMenu; }
 
 		/// <summary>
-		/// 
+		/// Gets the current title transition state.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>The current title transition state. See TitleTransition enumeration for values.</returns>
 		TitleTransition GetTitleTransitionState() const { return m_TitleTransitionState; }
 
 		/// <summary>
-		/// 
+		/// Sets the target title transition state and if different from the current, sets the section switch to trigger the transition.
 		/// </summary>
-		/// <param name="newTransitionState"></param>
+		/// <param name="newTransitionState">The target title transition state.</param>
 		void SetTitleTransitionState(TitleTransition newTransitionState) { if (newTransitionState != m_TitleTransitionState) { m_TitleTransitionState = newTransitionState; m_SectionSwitch = true; } }
 
 		/// <summary>
-		/// 
+		/// Sets the title transition to a pending state, the active menu as disabled and resets the fade screen blend value. This is used to correctly restart transition states after breaking out of the game loop back to the menu loop.
 		/// </summary>
-		/// <param name="newState"></param>
-		void SetTitlePendingTransition();
+		void SetTitlePendingTransition() { m_TitleTransitionState = TitleTransition::TransitionPending; m_ActiveMenu = ActiveMenu::MenusDisabled; m_FadeAmount = 0; }
 
 		/// <summary>
-		/// 
+		/// Gets the position of the planet on the title screen scene.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Vector with the position of the planet on the title screen scene.</returns>
 		Vector GetPlanetPos() const { return m_PlanetPos; }
 
 		/// <summary>
-		/// 
+		/// Gets the radius of the planet.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>The radius of the planet.</returns>
 		float GetPlanetRadius() const { return m_PlanetRadius; }
 
 		/// <summary>
-		/// 
+		/// Gets the position of the station on the title screen scene.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Vector with the position of the station on the title screen scene.</returns>
 		Vector GetStationPos() const { return m_Station.GetPos(); }
 #pragma endregion
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Updates the TitleScreen state each frame.
+		/// Updates the TitleScreen state.
 		/// </summary>
 		ActiveMenu Update();
 
@@ -134,7 +133,7 @@ namespace RTE {
 	private:
 
 		/// <summary>
-		/// 
+		/// Enumeration for the different states of the intro sequence.
 		/// </summary>
 		enum class IntroSequence {
 			DataRealmsLogoFadeIn,
@@ -161,24 +160,21 @@ namespace RTE {
 		};
 
 		/// <summary>
-		/// 
+		/// Struct that holds information each title scene backdrop star.
 		/// </summary>
 		struct Star {
 			/// <summary>
 			/// Enumeration for the different Star sizes.
 			/// </summary>
-			enum StarSize { StarSmall, StarLarge, StarHuge };
+			enum class StarSize { StarSmall, StarLarge, StarHuge };
 
-			BITMAP *Bitmap = nullptr; //!<
-			int PosX = 0; //!<
-			int PosY = 0; //!<
-			float ScrollRatio = 1.0F; //!<
-			int Intensity = 0; //!< Intensity value on a scale from 0 to 255.
-			StarSize Size = StarSize::StarSmall; //!<
+			StarSize Size; //!< The size of the Star. Used for the appropriate Bitmap selection and Intensity randomization when drawing.
+			BITMAP *Bitmap; //!< The bitmap to draw, not owned by this.
+			int Intensity; //!< Intensity value on a scale from 0 to 255.
+			Vector Position; //!< The position of the Star on the title scene backdrop.
 		};
 
-		IntroSequence m_IntroSequenceState; //!<
-		TitleTransition m_TitleTransitionState; //!<
+		TitleTransition m_TitleTransitionState; //!< The current title transition (scroll) state.
 		ActiveMenu m_ActiveMenu; //!<
 
 		int m_ScreenResX; //!<
@@ -197,11 +193,6 @@ namespace RTE {
 		Vector m_StationOffset; //!<
 		float m_OrbitRadius; //!<
 		float m_OrbitRotation; //!<
-
-		BITMAP *m_DataRealmsLogo; //!<
-		BITMAP *m_FmodLogo; //!<
-		MOSParticle m_PreGameLogoText; //!<
-		MOSParticle m_PreGameLogoTextGlow; //!<
 		MOSParticle m_GameLogo; //!<
 		MOSParticle m_GameLogoGlow; //!<
 
@@ -211,7 +202,6 @@ namespace RTE {
 		float m_SectionElapsedTime; //!< How many seconds have elapsed on a section.
 		Timer m_SectionTimer; //!<
 
-		float m_ScrollStart; //!<
 		float m_ScrollDuration; //!<
 		Vector m_ScrollOffset; //!<
 		float m_BackdropScrollRatio; //!<
@@ -220,13 +210,18 @@ namespace RTE {
 		float m_PreMainMenuOffsetY; //!<
 		float m_PlanetViewOffsetY; //!<
 
-		bool m_FinishedPlayingIntro; //!<
+		bool m_FinishedPlayingIntro; //!< Whether the intro sequence finished playing.
+		IntroSequence m_IntroSequenceState; //!< The current intro sequence state.
+		BITMAP *m_DataRealmsLogo; //!< The DataRealms logo bitmap used in the logo splash screen.
+		BITMAP *m_FmodLogo; //!< The Fmod logo bitmap used in the logo splash screen.
+		MOSParticle m_PreGameLogoText; //!<
+		MOSParticle m_PreGameLogoTextGlow; //!<
 		Timer m_IntroSongTimer; //!<
+		float m_SlideFadeInDuration; //!<
+		float m_SlideFadeOutDuration; //!<
 		GUIFont *m_IntroTextFont; //!<
 		std::string m_SlideshowSlideText; //!<
 		std::array<BITMAP *, 8> m_IntroSlides; //!<
-		float m_SlideFadeInDuration; //!<
-		float m_SlideFadeOutDuration; //!<
 
 #pragma region Create Breakdown
 		/// <summary>

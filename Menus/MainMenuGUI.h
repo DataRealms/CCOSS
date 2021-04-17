@@ -45,11 +45,16 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a MainMenuGUI object in system memory. Create() should be called before using the object.
 		/// </summary>
+		/// <param name="guiScreen"></param>
+		/// <param name="guiInput"></param>
+		/// <param name="controller"></param>
 		MainMenuGUI(AllegroScreen *guiScreen, AllegroInput *guiInput, Controller *controller) { Clear(); Create(guiScreen, guiInput, controller); }
 
 		/// <summary>
 		/// Makes the MainMenuGUI object ready for use.
 		/// </summary>
+		/// <param name="guiScreen"></param>
+		/// <param name="guiInput"></param>
 		/// <param name="controller">A pointer to a Controller which will control this Menu. Ownership is NOT TRANSFERRED!</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		void Create(AllegroScreen *guiScreen, AllegroInput *guiInput, Controller *controller);
@@ -66,7 +71,7 @@ namespace RTE {
 		/// Enables or disables the menu. This will animate it in and out of view.
 		/// </summary>
 		/// <param name="enable">Whether to enable or disable the menu.</param>
-		void SetEnabled(bool enable = true);
+		void SetEnabled(bool enable = true) { m_MenuEnabled = (enable) ? true : false; m_ScreenChange = true; }
 
 		/// <summary>
 		/// Gets the GUIControlManager owned and used by this.

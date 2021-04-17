@@ -60,6 +60,16 @@ namespace RTE {
 
 	private:
 
+		std::unique_ptr<AllegroInput> m_GUIInput; //!< The GUIInput interface of this MenuMan.
+		std::unique_ptr<AllegroScreen> m_GUIScreen; //!< The GUIScreen interface of this MenuMan.
+		std::unique_ptr<Controller> m_MenuController; //!<
+
+		std::unique_ptr<TitleScreen> m_TitleScreen; //!<
+		std::unique_ptr<MainMenuGUI> m_MainMenu; //!<
+		std::unique_ptr<ScenarioGUI> m_ScenarioMenu; //!<
+
+		int m_ActiveScreen; //!<
+
 #pragma region Updates
 		/// <summary>
 		/// 
@@ -79,16 +89,6 @@ namespace RTE {
 		/// <returns></returns>
 		bool UpdateCampaignMenu();
 #pragma endregion
-
-		std::unique_ptr<AllegroInput> m_GUIInput; //!< The GUIInput interface of this MenuMan.
-		std::unique_ptr<AllegroScreen> m_GUIScreen; //!< The GUIScreen interface of this MenuMan.
-		std::unique_ptr<Controller> m_MenuController; //!<
-
-		std::unique_ptr<TitleScreen> m_TitleScreen; //!<
-		std::unique_ptr<MainMenuGUI> m_MainMenu; //!<
-		std::unique_ptr<ScenarioGUI> m_ScenarioMenu; //!<
-
-		int m_ActiveScreen; //!<
 	};
 }
 #endif

@@ -28,12 +28,12 @@ namespace RTE {
 		/// Sets the program to be terminated.
 		/// </summary>
 		/// <param name="quitOrNot">Terminate or not.</param>
-		static void SetQuit(bool quitOrNot) { s_Quit = quitOrNot; }
+		static void SetQuit(bool quitOrNot = true) { s_Quit = quitOrNot; }
 
 		/// <summary>
 		/// Sets termination when the close button (X) is pressed on the program window.
 		/// </summary>
-		static void WindowCloseButtonHandler() { s_Quit = true; }
+		static void WindowCloseButtonHandler() { SetQuit(); }
 #pragma endregion
 
 #pragma region Directories

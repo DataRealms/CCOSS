@@ -2109,7 +2109,7 @@ void MetagameGUI::UpdateInput()
     {
         // Just quit if the dialog is already up
         /*if (m_pConfirmationBox->GetVisible() && m_pConfirmationButton->GetText() == "Quit")
-            System::SetQuit(true);
+            System::SetQuit();
         else
         {
             HideAllScreens();
@@ -2322,7 +2322,7 @@ void MetagameGUI::UpdateInput()
             {
                 // Confirm Quit Program button
 				if (m_pConfirmationButton->GetText() == "Quit")
-					System::SetQuit(true);
+					System::SetQuit();
 
                 // Do the appropriate thing depending on which screen we're confirming
                 if (m_MenuScreen == NEWDIALOG)

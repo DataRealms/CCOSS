@@ -56,6 +56,7 @@ namespace RTE {
 
 	private:
 
+#pragma region Video Settings Menu
 		/// <summary>
 		/// 
 		/// </summary>
@@ -106,7 +107,9 @@ namespace RTE {
 			/// </summary>
 			void PopulateResolutionsComboBox();
 		};
+#pragma endregion
 
+#pragma region Audio Settings Menu
 		/// <summary>
 		/// 
 		/// </summary>
@@ -127,7 +130,9 @@ namespace RTE {
 			/// </summary>
 			//void UpdateVolumeSliders();
 		};
+#pragma endregion
 
+#pragma region Input Settings Menu
 		/// <summary>
 		/// 
 		/// </summary>
@@ -249,7 +254,9 @@ namespace RTE {
 			/// </summary>
 			//void UpdateDeviceLabels();
 		};
+#pragma endregion
 
+#pragma region Gameplay Settings Menu
 		/// <summary>
 		/// 
 		/// </summary>
@@ -265,6 +272,7 @@ namespace RTE {
 			/// <param name="parentControlManager"></param>
 			void Create(GUIControlManager *parentControlManager);
 		};
+#pragma endregion
 
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!<
 		Controller *m_Controller; //!<

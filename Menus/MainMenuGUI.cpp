@@ -147,19 +147,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::SetEnabled(bool enable) {
-		if (enable && m_MenuEnabled != true) {
-			m_MenuEnabled = true;
-			g_GUISound.EnterMenuSound()->Play();
-		} else if (!enable && m_MenuEnabled != false) {
-			m_MenuEnabled = false;
-			g_GUISound.ExitMenuSound()->Play();
-		}
-		m_ScreenChange = true;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void MainMenuGUI::QuitLogic() {
 		// If quit confirm dialog not already showing, or an activity is running, show it
 		if (m_ActiveMenuScreen != MenuScreen::QuitScreen && g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing)) {

@@ -70,14 +70,15 @@ namespace RTE {
 
 		MainMenuGUI::MainMenuUpdateResult updateResult = m_MainMenu->Update();
 
-		//if (m_TitleScreen->GetActiveMenu() == TitleScreen::ActiveMenu::MainMenuActive) { g_ActivityMan.SetInActivity(false); }
-
 		if (updateResult == MainMenuGUI::MainMenuUpdateResult::ScenarioStarted && m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::ScenarioMenuActive) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario);
 			m_ScenarioMenu->SetEnabled();
+			m_MainMenu->SetEnabled(false);
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::CampaignStarted && m_TitleScreen->GetActiveMenu() != TitleScreen::ActiveMenu::CampaignMenuActive) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCampaign);
 			g_MetaMan.GetGUI()->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
+			g_MetaMan.GetGUI()->SetEnabled(true);
+			m_MainMenu->SetEnabled(false);
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::ActivityResumed) {
 			g_ActivityMan.SetResumeActivity();
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::ActivityStarted) {
@@ -208,7 +209,6 @@ namespace RTE {
 
 		g_ConsoleMan.Draw(g_FrameMan.GetBackBuffer32());
 
-		//vsync();
 		g_FrameMan.FlipFrameBuffers();
 	}
 }

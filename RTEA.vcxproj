@@ -43,7 +43,7 @@
     <PlatformToolset Condition="'$(VisualStudioVersion)'=='15.0'">v141</PlatformToolset>
     <PlatformToolset Condition="'$(VisualStudioVersion)'=='16.0'">v142</PlatformToolset>
     <WindowsTargetPlatformVersion Condition="'$(VisualStudioVersion)'=='15.0'">10.0.17763.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformVersion Condition="'$(VisualStudioVersion)'=='16.0'">10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(VisualStudioVersion)'=='16.0'">10.0</WindowsTargetPlatformVersion>
     <IntDir>_Bin\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>..\Cortex-Command-Community-Project-Data\</OutDir>
     <GenerateManifest>true</GenerateManifest>
@@ -115,7 +115,7 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_55_0;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_BUILD;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -144,7 +144,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <ShowProgress>LinkVerbose</ShowProgress>
-      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4099 /ignore:4098 %(AdditionalOptions)</AdditionalOptions>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <Manifest>
@@ -162,7 +162,7 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_55_0;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_BUILD;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -190,7 +190,7 @@
       <SubSystem>Windows</SubSystem>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <ShowProgress>LinkVerbose</ShowProgress>
-      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4099 /ignore:4098 %(AdditionalOptions)</AdditionalOptions>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <Manifest>
@@ -208,7 +208,7 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_55_0;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -237,7 +237,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <ShowProgress>LinkVerbose</ShowProgress>
-      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4099 /ignore:4098 %(AdditionalOptions)</AdditionalOptions>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <Manifest>
@@ -255,7 +255,7 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_55_0;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -283,7 +283,7 @@
       <SubSystem>Windows</SubSystem>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <ShowProgress>LinkVerbose</ShowProgress>
-      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4099 /ignore:4098 %(AdditionalOptions)</AdditionalOptions>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <Manifest>
@@ -304,7 +304,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_55_0;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -339,7 +339,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <FixedBaseAddress>false</FixedBaseAddress>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4099 /ignore:4098 %(AdditionalOptions)</AdditionalOptions>
       <ProgramDatabaseFile>$(IntDir)\RTEA.pdb</ProgramDatabaseFile>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -361,7 +361,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_55_0;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -396,7 +396,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <FixedBaseAddress>false</FixedBaseAddress>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4099 /ignore:4098 %(AdditionalOptions)</AdditionalOptions>
       <ProgramDatabaseFile>$(IntDir)\RTEA.pdb</ProgramDatabaseFile>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -418,7 +418,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_55_0;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -451,7 +451,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <FixedBaseAddress>false</FixedBaseAddress>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4099 /ignore:4098 %(AdditionalOptions)</AdditionalOptions>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
       <ProgramDatabaseFile>$(IntDir)\RTEA.pdb</ProgramDatabaseFile>
     </Link>
@@ -473,7 +473,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost-1_55_0;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -506,7 +506,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <FixedBaseAddress>false</FixedBaseAddress>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4099 /ignore:4098 %(AdditionalOptions)</AdditionalOptions>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
       <ProgramDatabaseFile>$(IntDir)\RTEA.pdb</ProgramDatabaseFile>
     </Link>

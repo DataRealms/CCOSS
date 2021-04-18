@@ -66,7 +66,7 @@ namespace RTE {
 		/// The path to check
 		/// </param>
 
-		static bool PathExistsCaseSensitive(std::string pathToCheck);
+		static bool PathExistsCaseSensitive(const std::string &pathToCheck);
 #pragma endregion
 
 #pragma region Command-Line Interface

@@ -1,9 +1,14 @@
 ﻿#include "System.h"
 #include "unzip.h"
 
-#ifndef _WIN32
+#ifdef __unix__
 #include <unistd.h>
 #include <sys/stat.h>
+#endif
+
+#ifdef _WIN32
+#include <windows.h>
+#include <fileapi.h>
 #endif
 
 namespace RTE {
@@ -38,37 +43,42 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool System::PathExistsCaseSensitive(std::string pathToCheck) {
+	bool System::PathExistsCaseSensitive(const std::string &pathToCheck) {
 #if defined(_WIN32)||defined(__osx__)
-		bool exists{false};
-		std::filesystem::path p{pathToCheck};
-		std::filesystem::path pwd{s_WorkingDirectory};
-		std::vector<std::filesystem::path> tree{p};
-		while (p.has_parent_path()) {
-			p = p.parent_path();
-			tree.push_back(p);
+		
+		std::vector<size_t> tree{ 0 };
+		size_t delimiter_pos{ pathToCheck.find('/') };
+		if (delimiter_pos == std::string::npos)
+			tree.push_back(delimiter_pos);
+
+		while (delimiter_pos != std::string::npos) {
+			tree.push_back(delimiter_pos + 1);
+
+			delimiter_pos = pathToCheck.find('/', delimiter_pos + 1);
 		}
 
-		std::filesystem::directory_iterator it{pwd};
+		WIN32_FIND_DATAA wfd;
+		HANDLE hFind;
 
-		for (auto file{tree.rbegin()}; file < tree.rend(); ++file) {
-			for (auto dir_entry: it) {
-				if (std::filesystem::hash_value(
-				        dir_entry.path().generic_string()) ==
-				    std::filesystem::hash_value(pwd / (*file))) {
+		bool exists{ false };
+		for (auto file{ tree.begin() + 1 }; file < tree.end(); ++file) {
+
+			hFind = FindFirstFileA(pathToCheck.substr(0, *file - 1).c_str(), &wfd);
+			if (hFind != INVALID_HANDLE_VALUE) {
+				::FindClose(hFind);
+				if (!strcmp(wfd.cFileName, pathToCheck.substr(*(file - 1), *file - *(file - 1) - 1).c_str()))
 					exists = true;
-					break;
-				}
 			}
+
 			if (!exists)
 				return false;
 
-			if (file != (tree.rend() - 1))
+			if (file != (tree.end() - 1))
 				exists = false;
-			else
+			else {
 				return exists;
+			}
 
-			it = std::filesystem::directory_iterator{pwd / (*file)};
 		}
 
 		return exists;

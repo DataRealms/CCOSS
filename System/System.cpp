@@ -9,6 +9,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <fileapi.h>
+#include "SettingsMan.h"
 #endif
 
 namespace RTE {
@@ -44,47 +45,45 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool System::PathExistsCaseSensitive(const std::string &pathToCheck) {
-#if defined(_WIN32)||defined(__osx__)
-		
-		std::vector<size_t> tree{ 0 };
-		size_t delimiter_pos{ pathToCheck.find('/') };
-		if (delimiter_pos == std::string::npos)
+#if defined(_WIN32)
+		if (!g_SettingsMan.IgnoreFileCase() && std::filesystem::exists(pathToCheck)) {
+			std::vector<size_t> tree{ 0 };
+			size_t delimiter_pos{ pathToCheck.find('/') };
+			if (delimiter_pos == std::string::npos)
+				tree.push_back(delimiter_pos);
+
+			while (delimiter_pos != std::string::npos) {
+				tree.push_back(delimiter_pos + 1);
+
+				delimiter_pos = pathToCheck.find('/', delimiter_pos + 1);
+			}
 			tree.push_back(delimiter_pos);
 
-		while (delimiter_pos != std::string::npos) {
-			tree.push_back(delimiter_pos + 1);
+			WIN32_FIND_DATAA wfd;
+			HANDLE hFind;
 
-			delimiter_pos = pathToCheck.find('/', delimiter_pos + 1);
-		}
+			bool exists{ false };
+			for (auto file{ tree.begin() + 1 }; file < tree.end(); ++file) {
 
-		WIN32_FIND_DATAA wfd;
-		HANDLE hFind;
+				hFind = FindFirstFileA(pathToCheck.substr(0, *file - 1).c_str(), &wfd);
+				if (hFind != INVALID_HANDLE_VALUE) {
+					::FindClose(hFind);
+					if (!strcmp(wfd.cFileName, pathToCheck.substr(*(file - 1), *file - *(file - 1) - 1).c_str()))
+						exists = true;
+				}
+				if (exists && *file != tree.back())
+					exists = false;
+				else {
+					return exists;
+				}
 
-		bool exists{ false };
-		for (auto file{ tree.begin() + 1 }; file < tree.end(); ++file) {
-
-			hFind = FindFirstFileA(pathToCheck.substr(0, *file - 1).c_str(), &wfd);
-			if (hFind != INVALID_HANDLE_VALUE) {
-				::FindClose(hFind);
-				if (!strcmp(wfd.cFileName, pathToCheck.substr(*(file - 1), *file - *(file - 1) - 1).c_str()))
-					exists = true;
 			}
 
-			if (!exists)
-				return false;
-
-			if (file != (tree.end() - 1))
-				exists = false;
-			else {
-				return exists;
-			}
-
+			return exists;
 		}
-
-		return exists;
-#else
-		return std::filesystem::exists(pathToCheck);
 #endif
+		return std::filesystem::exists(pathToCheck);
+
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

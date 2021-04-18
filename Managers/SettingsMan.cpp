@@ -43,6 +43,7 @@ namespace RTE {
 		m_ToolTips = true;
 		m_DisableLoadingScreen = true;
 		m_LoadingScreenReportPrecision = 100;
+		m_IgnoreFileCase = false;
 		m_MenuTransitionDurationMultiplier = 1.0F;
 
 		m_DrawAtomGroupVisualizations = false;
@@ -161,6 +162,8 @@ namespace RTE {
 			reader >> m_SkipIntro;
 		} else if (propName == "ToolTips") {
 			reader >> m_ToolTips;
+		} else if (propName == "IgnoreFileCase"){
+			reader >> m_IgnoreFileCase;
 		} else if (propName == "DisableLoadingScreen") {
 			reader >> m_DisableLoadingScreen;
 		} else if (propName == "LoadingScreenReportPrecision") {
@@ -322,6 +325,7 @@ namespace RTE {
 		writer.NewLine(false);
 		writer.NewPropertyWithValue("SkipIntro", m_SkipIntro);
 		writer.NewPropertyWithValue("ToolTips", m_ToolTips);
+		writer.NewPropertyWithValue("IgnoreFileCase", m_IgnoreFileCase);
 		writer.NewPropertyWithValue("DisableLoadingScreen", m_DisableLoadingScreen);
 		writer.NewPropertyWithValue("LoadingScreenReportPrecision", m_LoadingScreenReportPrecision);
 		writer.NewPropertyWithValue("ConsoleScreenRatio", g_ConsoleMan.m_ConsoleScreenRatio);

@@ -4,4 +4,7 @@ cpp = 'clang-cl'
 strip = 'strip'
 
 [host_machine]
-cpp_winlibs = ['winmm.lib', 'ws2_32.lib', 'dinput8.lib', 'ddraw.lib', 'dxguid.lib', 'dsound.lib']
+system = 'windows'
+cpu_family = 'x86'
+cpu = 'i686'
+endian = 'little'

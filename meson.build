@@ -26,12 +26,7 @@ build_rpath = ''
 link_args=[]
 extra_args=[]
 preprocessor_flags = []
-<<<<<<< HEAD
-preprocessor_flags_debug = []
-suffix=''
-=======
 suffix=[]
->>>>>>> a3f97068 (added native file; added missing compiler flags)
 
 if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   # Build against system libraries on linux

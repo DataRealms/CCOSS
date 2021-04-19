@@ -794,7 +794,7 @@ void HDFirearm::Update()
             MOPixel *pPixel;
             float shake, particleSpread, shellSpread, lethalRange;
 
-            lethalRange = m_MaxSharpLength * m_SharpAim + max(g_FrameMan.GetPlayerFrameBufferWidth(-1), g_FrameMan.GetPlayerFrameBufferHeight(-1)) * 0.52;
+            lethalRange = m_MaxSharpLength * m_SharpAim + max(g_FrameMan.GetPlayerFrameBufferWidth(-1), g_FrameMan.GetPlayerFrameBufferHeight(-1)) * 0.51F;
             Actor *pUser = dynamic_cast<Actor *>(pRootParent);
             if (pUser)
                 lethalRange += pUser->GetAimDistance();
@@ -821,7 +821,7 @@ void HDFirearm::Update()
                 {
                     pParticle = pRound->PopNextParticle();
 
-                    // Only make the particles separate back behind the nozzle, not in front. THis is to avoid silly penetration firings
+                    // Only make the particles separate back behind the nozzle, not in front. This is to avoid silly penetration firings
 					particlePos = tempNozzle + (roundVel.GetNormalized() * (-RandomNum()) * pRound->GetSeparation());
                     pParticle->SetPos(m_Pos + particlePos);
 
@@ -860,7 +860,7 @@ void HDFirearm::Update()
                     pPixel = dynamic_cast<MOPixel *>(pParticle);
 					if (pPixel) {
 						// Stray bullets heavily affected by bullet shake lose lethality quicker, as if missing on an imaginary "Z" axis
-						lethalRange *= std::max(1.0F - shake / 90.0F, 0.1F);
+						lethalRange *= std::max(1.0F - std::abs(shake) / 20.0F, 0.1F);
 						pPixel->SetLethalRange(lethalRange);
 					}
                     g_MovableMan.AddParticle(pParticle);

@@ -4340,8 +4340,7 @@ void AHuman::Update()
 		else
 		{
             float rotDiff = rot - (GetRotAngleTarget(m_MoveState) * (m_AimAngle > 0 ? 1 - (m_AimAngle / c_HalfPI) : 1) * GetFlipFactor());
-
-			m_AngularVel = m_AngularVel * 0.9F - (rotDiff * 0.5F);
+			m_AngularVel = m_AngularVel * (0.98F - 0.08F * (m_Health / m_MaxHealth)) - (rotDiff * 0.5F);
         }
     }
     // Keel over

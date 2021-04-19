@@ -92,6 +92,13 @@ namespace RTE {
 		// Manually add qHD (960x540) to the list because it's rarely present in drivers
 		m_PresetResolutions.emplace_back(960, 540, false);
 
+		std::vector<PresetResolutionRecord> upscaledResRecords;
+		for (const PresetResolutionRecord &resRecord : m_PresetResolutions) {
+			PresetResolutionRecord upscaledResRecord(resRecord.Width * 2, resRecord.Height * 2, true);
+			if (upscaledResRecord.Width <= g_FrameMan.GetMaxResX() && upscaledResRecord.Height <= g_FrameMan.GetMaxResY()) { upscaledResRecords.emplace_back(upscaledResRecord); }
+		}
+		m_PresetResolutions.insert(m_PresetResolutions.end(), upscaledResRecords.begin(), upscaledResRecords.end());
+
 		std::sort(m_PresetResolutions.begin(), m_PresetResolutions.end());
 
 		for (const PresetResolutionRecord &resRecord : m_PresetResolutions) {

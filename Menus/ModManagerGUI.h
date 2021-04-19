@@ -27,13 +27,6 @@ namespace RTE {
 		ModManagerGUI(AllegroScreen *guiScreen, AllegroInput *guiInput);
 #pragma endregion
 
-#pragma region Getters and Setters
-		/// <summary>
-		/// Shows and enables the Mod Manager menu screen.
-		/// </summary>
-		void SetEnabled() const;
-#pragma endregion
-
 #pragma region Concrete Methods
 		/// <summary>
 		/// User input handling for the Mod Manager menu screen.

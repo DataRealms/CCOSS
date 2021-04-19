@@ -409,7 +409,6 @@ namespace RTE {
 				backToMainMenu = HandleInputEvents();
 				break;
 			case MenuScreen::SettingsScreen:
-				if (m_ScreenChange) { m_SettingsMenu->SetEnabled(); }
 				backToMainMenu = m_SettingsMenu->HandleInputEvents();
 				/*
 				if (m_ScreenChange) {
@@ -424,7 +423,6 @@ namespace RTE {
 				*/
 				break;
 			case MenuScreen::ModManagerScreen:
-				if (m_ScreenChange) { m_ModManagerMenu->SetEnabled(); }
 				backToMainMenu = m_ModManagerMenu->HandleInputEvents();
 				break;
 			case MenuScreen::EditorScreen:

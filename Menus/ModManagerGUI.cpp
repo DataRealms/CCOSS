@@ -45,13 +45,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ModManagerGUI::SetEnabled() const {
-		m_RootBox->SetVisible(true);
-		m_ModManagerScreen->SetEnabled(true);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void ModManagerGUI::ToggleMod() {
 		int index = m_ModsListBox->GetSelectedIndex();
 		if (index > -1) {
@@ -173,9 +166,6 @@ namespace RTE {
 		while (m_GUIControlManager->GetEvent(&guiEvent)) {
 			if (guiEvent.GetType() == GUIEvent::Command) {
 				if (guiEvent.GetControl() == m_BackToMainButton) {
-					g_SettingsMan.UpdateSettingsFile();
-					m_RootBox->SetVisible(false);
-					m_ModManagerScreen->SetEnabled(false);
 					return true;
 				} else if (guiEvent.GetControl() == m_ToggleModButton) {
 					ToggleMod();

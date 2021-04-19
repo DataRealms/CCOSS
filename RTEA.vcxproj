@@ -542,6 +542,7 @@
     <ClInclude Include="Menus\ModManagerGUI.h" />
     <ClInclude Include="Menus\SettingsAudioGUI.h" />
     <ClInclude Include="Menus\SettingsGUI.h" />
+    <ClInclude Include="Menus\SettingsVideoGUI.h" />
     <ClInclude Include="Menus\TitleScreen.h" />
     <ClInclude Include="Resources\resource.h" />
     <ClInclude Include="System\Atom.h" />
@@ -700,6 +701,7 @@
     <ClCompile Include="Menus\ModManagerGUI.cpp" />
     <ClCompile Include="Menus\SettingsAudioGUI.cpp" />
     <ClCompile Include="Menus\SettingsGUI.cpp" />
+    <ClCompile Include="Menus\SettingsVideoGUI.cpp" />
     <ClCompile Include="Menus\TitleScreen.cpp" />
     <ClCompile Include="System\Atom.cpp" />
     <ClCompile Include="System\Controller.cpp" />

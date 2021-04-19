@@ -3,6 +3,7 @@
 
 #include "Constants.h"
 
+#include "SettingsVideoGUI.h"
 #include "SettingsAudioGUI.h"
 
 struct BITMAP;
@@ -61,53 +62,6 @@ namespace RTE {
 			InputSettingsActive,
 			GameplaySettingsActive
 		};
-
-#pragma region Video Settings Menu
-		/// <summary>
-		/// 
-		/// </summary>
-		struct VideoSettingsMenu {
-
-			/// <summary>
-			/// 
-			/// </summary>
-			struct ResolutionRecord {
-				int Width; //!<
-				int Height; //!<
-				bool Upscaled; //!<
-
-				/// <summary>
-				/// Makes UI displayable string with resolution info.
-				/// </summary>
-				/// <returns>String with resolution info.</returns>
-				std::string MakeResolutionString();
-
-				/// <summary>
-				/// 
-				/// </summary>
-				/// <param name="rhs"></param>
-				/// <returns></returns>
-				bool operator<(const ResolutionRecord &rhs) const { return Width < rhs.Width; }
-			};
-
-			std::vector<ResolutionRecord> ValidResolutions; //!<
-			GUIComboBox *ResolutionComboBox; //!<
-			GUIButton *FullscreenOrWindowedButton; //!<
-			GUIButton *UpscaledFullscreenButton; //!<
-
-			GUICollectionBox *ResolutionChangeDialogBox; //!<
-			GUIButton *ConfirmResolutionChangeButton; //!<
-			GUIButton *ConfirmResolutionChangeFullscreenButton; //!<
-			GUIButton *CancelResolutionChangeButton; //!<
-
-			bool ResolutionChangeToUpscaled; //!<
-
-			/// <summary>
-			/// Updates the contents of the screen resolution combo box.
-			/// </summary>
-			void PopulateResolutionsComboBox();
-		};
-#pragma endregion
 
 #pragma region Input Settings Menu
 		/// <summary>
@@ -243,25 +197,12 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		void CreateVideoSettingsMenu();
-
-		/// <summary>
-		/// 
-		/// </summary>
 		void CreateInputSettingsMenu();
 
 		/// <summary>
 		/// 
 		/// </summary>
 		void CreateGameplaySettingsMenu();
-#pragma endregion
-
-#pragma region Updates
-		/// <summary>
-		/// 
-		/// </summary>
-		void HandleVideoSettingsMenuInputEvents(const GUIControl *guiEventControl);
-
 #pragma endregion
 
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!<
@@ -271,9 +212,8 @@ namespace RTE {
 
 		GUIButton *m_BackToMainButton;
 
+		std::unique_ptr<SettingsVideoGUI> m_VideoSettingsMenu; //!<
 		std::unique_ptr<SettingsAudioGUI> m_AudioSettingsMenu; //!<
-
-		VideoSettingsMenu m_VideoSettingsMenu; //!<
 
 		InputSettingsMenu m_InputSettingsMenu; //!<
 		GameplaySettingsMenu m_GameplaySettingsMenu; //!<

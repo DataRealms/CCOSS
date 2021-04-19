@@ -498,6 +498,9 @@
     <ClInclude Include="Menus\SettingsAudioGUI.h">
       <Filter>Menus</Filter>
     </ClInclude>
+    <ClInclude Include="Menus\SettingsVideoGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -949,6 +952,9 @@
       <Filter>Menus</Filter>
     </ClCompile>
     <ClCompile Include="Menus\SettingsAudioGUI.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\SettingsVideoGUI.cpp">
       <Filter>Menus</Filter>
     </ClCompile>
   </ItemGroup>

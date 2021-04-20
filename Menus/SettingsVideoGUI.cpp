@@ -74,13 +74,8 @@ namespace RTE {
 				int width = resList->mode[i].width;
 				int height = resList->mode[i].height;
 
-				// Resolution width must be in multiples of 4 otherwise Allegro fails to initialize graphics
-				if (g_FrameMan.IsValidResolution(width, height) && width % 4 == 0) {
-					// Ignore wacky resolutions that are taller than wide
-					if (height > width) {
-						continue;
-					}
-					m_PresetResolutions.emplace_back(width, height, false);
+				if (g_FrameMan.IsSupportedResolution(width, height)) {
+					m_PresetResolutions.emplace(width, height, false);
 
 					// If this is what we're currently set to have at next start, select it afterward
 					if ((g_FrameMan.GetNewResX() * g_FrameMan.ResolutionMultiplier()) == width && (g_FrameMan.GetNewResY() * g_FrameMan.ResolutionMultiplier()) == height) { currentResIndex = foundIndex; }
@@ -191,7 +186,7 @@ namespace RTE {
 						int newResY;
 						sscanf(pResItem->m_Name.c_str(), "%4dx%4d", &newResX, &newResY);
 						// Sanity check the values and then set them as the new resolution to be switched to next time FrameMan is created
-						if (g_FrameMan.IsValidResolution(newResX, newResY)) {
+						if (g_FrameMan.IsSupportedResolution(newResX, newResY)) {
 							g_FrameMan.SetNewResX(newResX);
 							g_FrameMan.SetNewResY(newResY);
 						}

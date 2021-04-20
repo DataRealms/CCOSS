@@ -401,16 +401,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool FrameMan::IsValidResolution(int width, int height) const {
-		if ((width >= 640 && height >= 480) && (width <= m_ScreenResX || height <= m_ScreenResY)) {
-			// Disallow 1366x768 outside of dedicated fullscreen because it's not supported.
-			if (!m_ForceDedicatedFullScreenGfxDriver && width == 1366 && height == 768) {
+	bool FrameMan::IsSupportedResolution(int width, int height) const {
+		if ((width >= 640 && height >= 450) && (width <= m_ScreenResX && height <= m_ScreenResY)) {
+			// Disallow wacky resolutions that are taller than wide
+			if (height > width) {
+				return false;
+			}
+			// Disallow resolution width that isn't in multiples of 4 otherwise Allegro fails to initialize graphics, but only in windowed/borderless mode
+			if (!m_ForceDedicatedFullScreenGfxDriver && width % 4 != 0) {
 				return false;
 			}
 			return true;
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -484,7 +487,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int FrameMan::SwitchResolution(int newResX, int newResY, int newMultiplier, bool endActivity) {
-		if (!IsValidResolution(newResX, newResY) || newResX <= 0 || newResX > m_ScreenResX || newResY <= 0 || newResY > m_ScreenResY) {
+		if (!IsSupportedResolution(newResX, newResY) || newResX <= 0 || newResX > m_ScreenResX || newResY <= 0 || newResY > m_ScreenResY) {
 			return -1;
 		}
 

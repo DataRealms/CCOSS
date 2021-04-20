@@ -141,12 +141,12 @@ namespace RTE {
 		bool IsNewResSet() const { return m_NewResX != m_ResX || m_NewResY != m_ResY; }
 
 		/// <summary>
-		/// Returns true if this resolution is supported.
+		/// Checks whether the passed in width and height values make a supported resolution setting.
 		/// </summary>
 		/// <param name="width">Resolution width.</param>
 		/// <param name="height">Resolution height.</param>
-		/// <returns>True if resolution is supported.</returns>
-		bool IsValidResolution(int width, int height) const;
+		/// <returns>Whether the resolution is supported or not.</returns>
+		bool IsSupportedResolution(int width, int height) const;
 
 		/// <summary>
 		/// Tells how many times the screen resolution is being multiplied and the backbuffer stretched across for better readability.

@@ -62,7 +62,7 @@ elif compiler.get_argument_syntax()== 'msvc'
 #TODO: add MSVC related arguments and stuff in here
 message('cl detected')
   elfname = 'Cortex Command'
-  extra_args += []
+  extra_args += ['-D_HAS_ITERATOR_DEBUGGING=0', '-D_HAS_AUTO_PTR_ETC=1']
   add_project_link_arguments(['winmm.lib', 'ws2_32.lib', 'dinput8.lib', 'ddraw.lib', 'dxguid.lib', 'dsound.lib'], language:'cpp')
   if host_machine.cpu_family() == 'x64'
     elfname += ' x64'
@@ -73,7 +73,6 @@ message('cl detected')
   if buildtype_debug
     elfname+='.debug'
     debug_type = get_option('debug_type')
-	preprocessor_flags += ['-D_HAS_ITERATOR_DEBUGGING=0']
     if debug_type == 'release'
       preprocessor_flags += ['-DDEBUG_RELEASE_BUILD'] # enable minimal debug features
     elif debug_type == 'minimal'

@@ -122,6 +122,7 @@ namespace RTE {
 
 		static bool s_LogToCLI; //!< Bool to tell whether to print the loading log and anything specified with PrintToCLI to command-line or not.
 		static std::string s_WorkingDirectory; //!< String containing the absolute path to current working directory.
+		static std::vector<size_t> s_WorkingTree; //!< Vector of the hashes of all filepaths in the working directory
 		static const std::string s_ScreenshotDirectory; //!< String containing the folder name of the screenshots directory.
 		static const std::string s_ModDirectory; //!< String containing the folder name of the mod directory.
 		static const std::string s_ModulePackageExtension; //!< The extension that determines a directory/file is a RTE module.
@@ -131,6 +132,7 @@ namespace RTE {
 		static constexpr int s_MaxFileName = 512; //!< Maximum length of output file directory + name string.
 		static constexpr int s_FileBufferSize = 8192; //!< Buffer to hold data read from the zip file.
 		static constexpr int s_MaxUnzippedFileSize = 104857600; //!< Maximum size of single file being extracted from zip archive (100MiB).
+
 	};
 }
 #endif

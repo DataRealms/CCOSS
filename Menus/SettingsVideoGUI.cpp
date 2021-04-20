@@ -59,7 +59,7 @@ namespace RTE {
 
 	void SettingsVideoGUI::PopulateResolutionsComboBox() {
 	#ifdef _WIN32
-		// Get a list of modes from the fullscreen driver even though we're not using it. This is so we don't need to populate the list manually and has all the reasonable resolutions.
+		// Get a list of modes from the fullscreen driver even though we're not using it. This is so we don't need to populate the list manually and has all the reasonable resolutions (along with some stupid ones but whatever)
 		GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_DIRECTX_ACCEL);
 #elif __unix__
 		GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_XWINDOWS_FULLSCREEN);
@@ -85,16 +85,14 @@ namespace RTE {
 			}
 		}
 		// Manually add qHD (960x540) to the list because it's rarely present in drivers
-		m_PresetResolutions.emplace_back(960, 540, false);
+		m_PresetResolutions.emplace(960, 540, false);
 
-		std::vector<PresetResolutionRecord> upscaledResRecords;
+		std::set<PresetResolutionRecord> upscaledResRecords;
 		for (const PresetResolutionRecord &resRecord : m_PresetResolutions) {
 			PresetResolutionRecord upscaledResRecord(resRecord.Width * 2, resRecord.Height * 2, true);
-			if (upscaledResRecord.Width <= g_FrameMan.GetMaxResX() && upscaledResRecord.Height <= g_FrameMan.GetMaxResY()) { upscaledResRecords.emplace_back(upscaledResRecord); }
+			if (upscaledResRecord.Width <= g_FrameMan.GetMaxResX() && upscaledResRecord.Height <= g_FrameMan.GetMaxResY()) { upscaledResRecords.emplace(upscaledResRecord); }
 		}
-		m_PresetResolutions.insert(m_PresetResolutions.end(), upscaledResRecords.begin(), upscaledResRecords.end());
-
-		std::sort(m_PresetResolutions.begin(), m_PresetResolutions.end());
+		m_PresetResolutions.merge(upscaledResRecords);
 
 		for (const PresetResolutionRecord &resRecord : m_PresetResolutions) {
 			m_PresetResolutionComboBox->AddItem(resRecord.MakeResolutionString());

@@ -71,7 +71,14 @@ namespace RTE {
 			/// </summary>
 			/// <param name="rhs"></param>
 			/// <returns></returns>
-			bool operator<(const PresetResolutionRecord &rhs) const { return Width < rhs.Width; }
+			bool operator<(const PresetResolutionRecord &rhs) const {
+				if (Width == rhs.Width && Height == rhs.Height) {
+					return Upscaled != rhs.Upscaled;
+				} else if (Width == rhs.Width) {
+					return Height < rhs.Height;
+				}
+				return Width < rhs.Width;
+			}
 		};
 
 		/// <summary>
@@ -97,7 +104,7 @@ namespace RTE {
 		GUIComboBox *m_PresetResolutionComboBox; //!<
 		GUIButton *m_PresetResolutionApplyButton; //!<
 		GUILabel *m_PresetResolutionMessageLabel; //!<
-		std::vector<PresetResolutionRecord> m_PresetResolutions; //!<
+		std::set<PresetResolutionRecord> m_PresetResolutions; //!<
 
 		GUICollectionBox *m_CustomResolutionBox; //!<
 

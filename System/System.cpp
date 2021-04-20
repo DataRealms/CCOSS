@@ -52,14 +52,14 @@ namespace RTE {
 				std::filesystem::recursive_directory_iterator it{ s_WorkingDirectory };
 				for (auto file : it) {
 					s_WorkingTree.push_back(
-						std::filesystem::hash_value(file.path().generic_string().substr(s_WorkingDirectory.length()))
+						std::hash<std::string>{}(file.path().generic_string().substr(s_WorkingDirectory.length()))
 					);
 				}
 			}
 			return s_WorkingTree.end() != std::find(
 				s_WorkingTree.begin(),
 				s_WorkingTree.end(),
-				std::filesystem::hash_value(pathToCheck)
+				std::hash<std::string>{}(pathToCheck)
 			);
 		}
 		return std::filesystem::exists(pathToCheck);

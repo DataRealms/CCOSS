@@ -62,16 +62,6 @@ namespace RTE {
 		/// Updates the position of the sound volume slider, based on what the AudioMan is currently set to.
 		/// </summary>
 		void UpdateSoundVolumeSlider();
-
-		/// <summary>
-		/// Mutes the music volume, without overriding the volume slider value.
-		/// </summary>
-		//void MuteMusic();
-
-		/// <summary>
-		/// Mutes the sound effects volume, without overriding the volume slider value.
-		/// </summary>
-		//void MuteSounds();
 #pragma endregion
 
 		// Disallow the use of some implicit methods.

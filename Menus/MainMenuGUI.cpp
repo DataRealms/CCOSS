@@ -453,9 +453,6 @@ namespace RTE {
 			//if (m_ActiveMenuScreen == MenuScreen::CampaignNoticeScreen || m_ActiveMenuScreen == MenuScreen::SettingsScreen || m_ActiveMenuScreen == MenuScreen::ModManagerScreen || m_ActiveMenuScreen == MenuScreen::EditorScreen || m_ActiveMenuScreen == MenuScreen::CreditsScreen) {
 			if (m_ActiveMenuScreen != MenuScreen::MainScreen) {
 				if (m_ActiveMenuScreen == MenuScreen::SettingsScreen) {
-					//g_SettingsMan.SetFlashOnBrainDamage(m_aOptionsCheckbox.at(FLASHONBRAINDAMAGE)->GetCheck());
-					//g_SettingsMan.SetBlipOnRevealUnseen(m_aOptionsCheckbox.at(BLIPONREVEALUNSEEN)->GetCheck());
-					//g_SettingsMan.SetShowForeignItems(m_aOptionsCheckbox.at(SHOWFOREIGNITEMS)->GetCheck());
 					//g_SettingsMan.SetShowToolTips(m_aOptionsCheckbox.at(SHOWTOOLTIPS)->GetCheck());
 					g_SettingsMan.UpdateSettingsFile();
 				} else if (m_ActiveMenuScreen == MenuScreen::ModManagerScreen) {

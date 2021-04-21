@@ -504,6 +504,9 @@
     <ClInclude Include="Menus\SettingsInputGUI.h">
       <Filter>Menus</Filter>
     </ClInclude>
+    <ClInclude Include="Menus\SettingsGameplayGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -961,6 +964,9 @@
       <Filter>Menus</Filter>
     </ClCompile>
     <ClCompile Include="Menus\SettingsInputGUI.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\SettingsGameplayGUI.cpp">
       <Filter>Menus</Filter>
     </ClCompile>
   </ItemGroup>

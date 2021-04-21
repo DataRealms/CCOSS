@@ -34,10 +34,12 @@ namespace RTE {
 		m_VideoSettingsMenu = std::make_unique<SettingsVideoGUI>(m_GUIControlManager.get());
 		m_AudioSettingsMenu = std::make_unique<SettingsAudioGUI>(m_GUIControlManager.get());
 		m_InputSettingsMenu = std::make_unique<SettingsInputGUI>(m_GUIControlManager.get());
+		m_GameplaySettingsMenu = std::make_unique<SettingsGameplayGUI>(m_GUIControlManager.get());
 
-		CreateGameplaySettingsMenu();
+		m_ActiveSettingsMenu = ActiveSettingsMenu::GameplaySettingsActive;
 
-		m_ActiveSettingsMenu = ActiveSettingsMenu::VideoSettingsActive;
+		//m_ShowToolTipsCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("ShowToolTipsCheckbox"));
+		//m_ShowToolTipsCheckbox->SetCheck(g_SettingsMan.ToolTips());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -62,6 +64,9 @@ namespace RTE {
 				case ActiveSettingsMenu::AudioSettingsActive:
 					m_AudioSettingsMenu->HandleInputEvents(guiEvent);
 					break;
+				case ActiveSettingsMenu::GameplaySettingsActive:
+					m_GameplaySettingsMenu->HandleInputEvents(guiEvent);
+					break;
 				default:
 					break;
 			}
@@ -77,9 +82,6 @@ namespace RTE {
 
 				// If leaving the options screen, save the settings!
 				if (m_MenuScreen == OPTIONSSCREEN) {
-					g_SettingsMan.SetFlashOnBrainDamage(m_OptionsCheckbox.at(FLASHONBRAINDAMAGE)->GetCheck());
-					g_SettingsMan.SetBlipOnRevealUnseen(m_OptionsCheckbox.at(BLIPONREVEALUNSEEN)->GetCheck());
-					g_SettingsMan.SetShowForeignItems(m_OptionsCheckbox.at(SHOWFOREIGNITEMS)->GetCheck());
 					g_SettingsMan.SetShowToolTips(m_OptionsCheckbox.at(SHOWTOOLTIPS)->GetCheck());
 
 					g_SettingsMan.UpdateSettingsFile();
@@ -112,23 +114,5 @@ namespace RTE {
 	void SettingsGUI::Draw() {
 		m_GUIControlManager->Draw();
 		m_GUIControlManager->DrawMouse();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SettingsGUI::CreateGameplaySettingsMenu() {
-		m_GameplaySettingsMenu = GameplaySettingsMenu();
-
-		m_GameplaySettingsMenu.FlashOnBrainDamageCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("FlashOnBrainDamageCheckbox"));
-		m_GameplaySettingsMenu.FlashOnBrainDamageCheckbox->SetCheck(g_SettingsMan.FlashOnBrainDamage());
-
-		m_GameplaySettingsMenu.BlipOnRevealUnseenCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("BlipOnRevealUnseenCheckbox"));
-		m_GameplaySettingsMenu.BlipOnRevealUnseenCheckbox->SetCheck(g_SettingsMan.BlipOnRevealUnseen());
-
-		m_GameplaySettingsMenu.ShowForeignItemsCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("ShowForeignItemsCheckbox"));
-		m_GameplaySettingsMenu.ShowForeignItemsCheckbox->SetCheck(g_SettingsMan.ShowForeignItems());
-
-		m_GameplaySettingsMenu.ShowToolTipsCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("ShowToolTipsCheckbox"));
-		m_GameplaySettingsMenu.ShowToolTipsCheckbox->SetCheck(g_SettingsMan.ToolTips());
 	}
 }

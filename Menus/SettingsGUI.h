@@ -1,17 +1,15 @@
 #ifndef _RTESETTINGSGUI_
 #define _RTESETTINGSGUI_
 
-#include "Constants.h"
-
 #include "SettingsVideoGUI.h"
 #include "SettingsAudioGUI.h"
 #include "SettingsInputGUI.h"
+#include "SettingsGameplayGUI.h"
 
 namespace RTE {
 
 	class Controller;
 	class GUIButton;
-	class GUICheckbox;
 	class GUIControlManager;
 	class AllegroScreen;
 	class AllegroInput;
@@ -57,29 +55,7 @@ namespace RTE {
 			GameplaySettingsActive
 		};
 
-#pragma region Gameplay Settings Menu
-		/// <summary>
-		/// 
-		/// </summary>
-		struct GameplaySettingsMenu {
-			GUICheckbox *FlashOnBrainDamageCheckbox; //!<
-			GUICheckbox *BlipOnRevealUnseenCheckbox; //!<
-			GUICheckbox *ShowForeignItemsCheckbox; //!<
-			GUICheckbox *ShowToolTipsCheckbox; //!<
-		};
-#pragma endregion
-
-#pragma region Create Breakdown
-		/// <summary>
-		/// 
-		/// </summary>
-		void CreateInputSettingsMenu();
-
-		/// <summary>
-		/// 
-		/// </summary>
-		void CreateGameplaySettingsMenu();
-#pragma endregion
+		//GUICheckbox *m_ShowToolTipsCheckbox; //!<
 
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!<
 		Controller *m_Controller; //!<
@@ -91,8 +67,7 @@ namespace RTE {
 		std::unique_ptr<SettingsVideoGUI> m_VideoSettingsMenu; //!<
 		std::unique_ptr<SettingsAudioGUI> m_AudioSettingsMenu; //!<
 		std::unique_ptr<SettingsInputGUI> m_InputSettingsMenu; //!<
-
-		GameplaySettingsMenu m_GameplaySettingsMenu; //!<
+		std::unique_ptr<SettingsGameplayGUI> m_GameplaySettingsMenu; //!<
 
 		// Disallow the use of some implicit methods.
 		SettingsGUI(const SettingsGUI &reference) = delete;

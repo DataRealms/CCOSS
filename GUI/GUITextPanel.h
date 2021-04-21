@@ -247,6 +247,12 @@ public:
 	/// <param name="numericOnly">Whether to accept numeric symbols only or not.</param>
 	void SetNumericOnly(bool numericOnly) { m_NumericOnly = numericOnly; }
 
+	/// <summary>
+	/// Sets the maximum length of the text this text panel can contain.
+	/// </summary>
+	/// <param name="maxLength">The maximum length of the text this text panel can contain.</param>
+	void SetMaxTextLength(int maxLength) { m_MaxTextLength = maxLength; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations
 
@@ -319,6 +325,7 @@ private:
     unsigned long            m_SelectedColorIndex;
     int                m_SelectionX, m_SelectionWidth;
 
+	int m_MaxTextLength; //!< The maximum length of the text this text panel can contain.
 	bool m_NumericOnly; //!< Whether this text panel only accepts numeric symbols.
 
 };

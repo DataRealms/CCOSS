@@ -46,6 +46,7 @@ GUITextPanel::GUITextPanel(GUIManager *Manager)
     m_WidthMargin = 3;
     m_HeightMargin = 0;
 
+	m_MaxTextLength = 0;
 	m_NumericOnly = false;
 }
 
@@ -78,6 +79,7 @@ GUITextPanel::GUITextPanel()
     m_WidthMargin = 3;
     m_HeightMargin = 0;
 
+	m_MaxTextLength = 0;
 	m_NumericOnly = false;
 }
 
@@ -360,6 +362,9 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 	if (KeyCode >= minValidKeyCode && KeyCode <= maxValidKeyCode) {
 		RemoveSelectionText();
 		char buf[2] = { static_cast<char>(KeyCode), '\0' };
+		if (m_MaxTextLength > 0 && m_Text.length() >= m_MaxTextLength) {
+			return;
+		}
 		m_Text.insert(m_CursorIndex, buf);
 		m_CursorIndex++;
 		SendSignal(Changed, 0);

@@ -45,6 +45,8 @@ GUITextPanel::GUITextPanel(GUIManager *Manager)
     m_Locked = false;
     m_WidthMargin = 3;
     m_HeightMargin = 0;
+
+	m_NumericOnly = false;
 }
 
 
@@ -75,6 +77,8 @@ GUITextPanel::GUITextPanel()
     m_Locked = false;
     m_WidthMargin = 3;
     m_HeightMargin = 0;
+
+	m_NumericOnly = false;
 }
 
 
@@ -346,8 +350,14 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 		return;
 	}
 
+	int minValidKeyCode = 32;
+	int maxValidKeyCode = 126;
+	if (m_NumericOnly) {
+		minValidKeyCode = 48;
+		maxValidKeyCode = 57;
+	}
 	// Add valid ASCII characters
-	if (KeyCode >= 32 && KeyCode < 128 && KeyCode != 127) {
+	if (KeyCode >= minValidKeyCode && KeyCode <= maxValidKeyCode) {
 		RemoveSelectionText();
 		char buf[2] = { static_cast<char>(KeyCode), '\0' };
 		m_Text.insert(m_CursorIndex, buf);

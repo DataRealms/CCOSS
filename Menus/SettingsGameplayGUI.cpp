@@ -33,9 +33,11 @@ namespace RTE {
 
 		m_MaxUnheldItemsTextbox = dynamic_cast<GUITextBox *>(m_GUIControlManager->GetControl("TextboxMaxUnheldItems"));
 		m_MaxUnheldItemsTextbox->SetText(std::to_string(g_MovableMan.GetMaxDroppedItems()));
+		m_MaxUnheldItemsTextbox->SetNumericOnly(true);
 
 		m_CrabBombThresholdTextbox = dynamic_cast<GUITextBox *>(m_GUIControlManager->GetControl("TextboxCrabBombThreshold"));
 		m_CrabBombThresholdTextbox->SetText(std::to_string(g_SettingsMan.GetCrabBombThreshold()));
+		m_CrabBombThresholdTextbox->SetNumericOnly(true);
 
 		SetEnabled(true);
 	}

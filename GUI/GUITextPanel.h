@@ -241,6 +241,11 @@ public:
 
     bool GetLocked();
 
+	/// <summary>
+	/// Sets this text panel to accept numeric symbols only.
+	/// </summary>
+	/// <param name="numericOnly">Whether to accept numeric symbols only or not.</param>
+	void SetNumericOnly(bool numericOnly) { m_NumericOnly = numericOnly; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations
@@ -313,6 +318,8 @@ private:
     int                m_EndSelection;
     unsigned long            m_SelectedColorIndex;
     int                m_SelectionX, m_SelectionWidth;
+
+	bool m_NumericOnly; //!< Whether this text panel only accepts numeric symbols.
 
 };
 

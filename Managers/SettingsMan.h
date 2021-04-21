@@ -70,6 +70,12 @@ namespace RTE {
 		bool EndlessMode() const { return m_EndlessMode; }
 
 		/// <summary>
+		/// Sets whether endless MetaGame mode is enabled or not.
+		/// </summary>
+		/// <param name="enable">Whether endless MetaGame mode is enabled or not.</param>
+		void SetEndlessMode(bool enable) { m_EndlessMode = enable; }
+
+		/// <summary>
 		/// Whether we need to play blips when unseen layer is revealed.
 		/// </summary>
 		/// <returns>Whether we need to play blips when unseen layer is revealed.</returns>
@@ -112,16 +118,28 @@ namespace RTE {
 		bool EnableHats() const { return m_EnableHats; }
 
 		/// <summary>
-		/// Gets whether the crab bomb effect is enabled or not. False means releasing whatever number of crabs will do nothing except release a whatever number of crabs.
+		/// Gets whether the crab bomb effect is enabled or not.
 		/// </summary>
-		/// <returns>Whether the crab bomb effect is enabled or not.</returns>
-		bool EnableCrabBombs() const { return m_EnableCrabBombs; }
+		/// <returns>Whether the crab bomb effect is enabled or not. False means releasing whatever number of crabs will do nothing except release a whatever number of crabs.</returns>
+		bool CrabBombsEnabled() const { return m_EnableCrabBombs; }
+
+		/// <summary>
+		/// Sets whether the crab bomb effect is enabled or not.
+		/// </summary>
+		/// <param name="enable">Enable the crab bomb effect or not. False means releasing whatever number of crabs will do nothing except release a whatever number of crabs.</param>
+		void SetCrabBombsEnabled(bool enable) { m_EnableCrabBombs = enable; }
 
 		/// <summary>
 		/// Gets the number of crabs needed to be released at once to trigger the crab bomb effect.
 		/// </summary>
 		/// <returns>The number of crabs needed to be released at once to trigger the crab bomb effect.</returns>
-		int CrabBombThreshold() const { return m_CrabBombThreshold; }
+		int GetCrabBombThreshold() const { return m_CrabBombThreshold; }
+
+		/// <summary>
+		/// Sets the number of crabs needed to be released at once to trigger the crab bomb effect.
+		/// </summary>
+		/// <param name="newThreshold">The new number of crabs needed to be released at once to trigger the crab bomb effect.</param>
+		void SetCrabBombThreshold(int newThreshold) { m_CrabBombThreshold = newThreshold; }
 #pragma endregion
 
 #pragma region Network Settings

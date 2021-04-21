@@ -10,6 +10,7 @@ namespace RTE {
 
 	class Controller;
 	class GUIButton;
+	class GUITab;
 	class GUIControlManager;
 	class AllegroScreen;
 	class AllegroInput;
@@ -48,17 +49,23 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		enum class ActiveSettingsMenu {
-			VideoSettingsActive,
-			AudioSettingsActive,
-			InputSettingsActive,
-			GameplaySettingsActive
+		enum ActiveSettingsMenu {
+			VideoSettingsMenu,
+			AudioSettingsMenu,
+			InputSettingsMenu,
+			GameplaySettingsMenu,
+			NetworkSettingsMenu,
+			MiscSettingsMenu,
+			SettingsMenuCount
 		};
 
 		//GUICheckbox *m_ShowToolTipsCheckbox; //!<
 
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!<
 		Controller *m_Controller; //!<
+
+		GUICollectionBox *m_SettingsTabberBox;
+		std::array<GUITab *, ActiveSettingsMenu::SettingsMenuCount> m_SettingsMenuTabs;
 
 		ActiveSettingsMenu m_ActiveSettingsMenu;
 
@@ -68,6 +75,12 @@ namespace RTE {
 		std::unique_ptr<SettingsAudioGUI> m_AudioSettingsMenu; //!<
 		std::unique_ptr<SettingsInputGUI> m_InputSettingsMenu; //!<
 		std::unique_ptr<SettingsGameplayGUI> m_GameplaySettingsMenu; //!<
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="activeMenu"></param>
+		void SetActiveSettingsMenu(ActiveSettingsMenu activeMenu);
 
 		// Disallow the use of some implicit methods.
 		SettingsGUI(const SettingsGUI &reference) = delete;

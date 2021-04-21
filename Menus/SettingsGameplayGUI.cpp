@@ -39,8 +39,6 @@ namespace RTE {
 		m_CrabBombThresholdTextbox->SetText(std::to_string(g_SettingsMan.GetCrabBombThreshold()));
 		m_CrabBombThresholdTextbox->SetNumericOnly(true);
 		m_CrabBombThresholdTextbox->SetMaxTextLength(3);
-
-		SetEnabled(true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

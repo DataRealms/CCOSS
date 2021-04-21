@@ -9,6 +9,7 @@
 #include "GUICollectionBox.h"
 #include "GUICheckbox.h"
 #include "GUIButton.h"
+#include "GUITab.h"
 #include "AllegroScreen.h"
 #include "AllegroInput.h"
 
@@ -25,9 +26,19 @@ namespace RTE {
 
 		GUICollectionBox *rootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
 		rootBox->SetPositionAbs((g_FrameMan.GetResX() - rootBox->GetWidth()) / 2, 0);
+		rootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
-		//dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("OptionsScreen"))->SetVisible(false);
-		//dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ConfigScreen"))->SetVisible(false);
+		m_SettingsTabberBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxSettingsBase"));
+
+		m_SettingsMenuTabs.at(ActiveSettingsMenu::VideoSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabVideoSettings"));
+		m_SettingsMenuTabs.at(ActiveSettingsMenu::AudioSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabAudioSettings"));
+		m_SettingsMenuTabs.at(ActiveSettingsMenu::InputSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabInputSettings"));
+		m_SettingsMenuTabs.at(ActiveSettingsMenu::GameplaySettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabGameplaySettings"));
+		m_SettingsMenuTabs.at(ActiveSettingsMenu::NetworkSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabNetworkSettings"));
+		m_SettingsMenuTabs.at(ActiveSettingsMenu::MiscSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabMiscSettings"));
+
+		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("OptionsScreen"))->SetVisible(false);
+		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ConfigScreen"))->SetVisible(false);
 
 		m_BackToMainButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonBackToMainMenu"));
 
@@ -36,10 +47,43 @@ namespace RTE {
 		m_InputSettingsMenu = std::make_unique<SettingsInputGUI>(m_GUIControlManager.get());
 		m_GameplaySettingsMenu = std::make_unique<SettingsGameplayGUI>(m_GUIControlManager.get());
 
-		m_ActiveSettingsMenu = ActiveSettingsMenu::GameplaySettingsActive;
+		m_SettingsMenuTabs.at(ActiveSettingsMenu::VideoSettingsMenu)->SetCheck(true);
+		SetActiveSettingsMenu(ActiveSettingsMenu::VideoSettingsMenu);
 
 		//m_ShowToolTipsCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("ShowToolTipsCheckbox"));
 		//m_ShowToolTipsCheckbox->SetCheck(g_SettingsMan.ToolTips());
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsGUI::SetActiveSettingsMenu(ActiveSettingsMenu activeMenu) {
+		m_VideoSettingsMenu->SetEnabled(false);
+		m_AudioSettingsMenu->SetEnabled(false);
+		m_InputSettingsMenu->SetEnabled(false);
+		m_GameplaySettingsMenu->SetEnabled(false);
+
+		switch (activeMenu) {
+			case ActiveSettingsMenu::VideoSettingsMenu:
+				m_VideoSettingsMenu->SetEnabled(true);
+				break;
+			case ActiveSettingsMenu::AudioSettingsMenu:
+				m_AudioSettingsMenu->SetEnabled(true);
+				break;
+			case ActiveSettingsMenu::InputSettingsMenu:
+				m_InputSettingsMenu->SetEnabled(true);
+				break;
+			case ActiveSettingsMenu::GameplaySettingsMenu:
+				m_GameplaySettingsMenu->SetEnabled(true);
+				break;
+			case ActiveSettingsMenu::NetworkSettingsMenu:
+				break;
+			case ActiveSettingsMenu::MiscSettingsMenu:
+				break;
+			default:
+				RTEAbort("Invalid settings menu passed to SettingsGUI::SetActiveSettingsMenu!");
+		}
+		m_ActiveSettingsMenu = activeMenu;
+		m_SettingsTabberBox->SetFocus();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -53,57 +97,43 @@ namespace RTE {
 				if (guiEvent.GetControl() == m_BackToMainButton) {
 					return true;
 				}
+			} else if (guiEvent.GetType() == GUIEvent::Notification && guiEvent.GetMsg() == GUITab::Pushed) {
+				if (guiEvent.GetControl() == m_SettingsMenuTabs.at(ActiveSettingsMenu::VideoSettingsMenu)) {
+					SetActiveSettingsMenu(ActiveSettingsMenu::VideoSettingsMenu);
+				} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(ActiveSettingsMenu::AudioSettingsMenu)) {
+					SetActiveSettingsMenu(ActiveSettingsMenu::AudioSettingsMenu);
+				} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(ActiveSettingsMenu::InputSettingsMenu)) {
+					SetActiveSettingsMenu(ActiveSettingsMenu::InputSettingsMenu);
+				} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(ActiveSettingsMenu::GameplaySettingsMenu)) {
+					SetActiveSettingsMenu(ActiveSettingsMenu::GameplaySettingsMenu);
+				} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(ActiveSettingsMenu::NetworkSettingsMenu)) {
+					SetActiveSettingsMenu(ActiveSettingsMenu::NetworkSettingsMenu);
+				} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(ActiveSettingsMenu::MiscSettingsMenu)) {
+					SetActiveSettingsMenu(ActiveSettingsMenu::MiscSettingsMenu);
+				}
 			}
 
 			switch (m_ActiveSettingsMenu) {
-				case ActiveSettingsMenu::VideoSettingsActive:
+				case ActiveSettingsMenu::VideoSettingsMenu:
 					m_VideoSettingsMenu->HandleInputEvents(guiEvent);
 					break;
-				case ActiveSettingsMenu::AudioSettingsActive:
+				case ActiveSettingsMenu::AudioSettingsMenu:
 					m_AudioSettingsMenu->HandleInputEvents(guiEvent);
 					break;
-				case ActiveSettingsMenu::GameplaySettingsActive:
+				case ActiveSettingsMenu::InputSettingsMenu:
+					m_InputSettingsMenu->HandleInputEvents(guiEvent);
+					break;
+				case ActiveSettingsMenu::GameplaySettingsMenu:
 					m_GameplaySettingsMenu->HandleInputEvents(guiEvent);
+					break;
+				case ActiveSettingsMenu::NetworkSettingsMenu:
+					break;
+				case ActiveSettingsMenu::MiscSettingsMenu:
 					break;
 				default:
 					break;
 			}
 		}
-
-
-		/*
-			// Return to main menu button pressed
-			if (guiEvent.GetControl() == m_MainMenuButtons.at(BACKTOMAIN)) {
-				// Hide all screens, the appropriate screen will reappear on next update
-				HideAllScreens();
-				m_MainMenuButtons.at(BACKTOMAIN)->SetVisible(false);
-
-				// If leaving the options screen, save the settings!
-				if (m_MenuScreen == OPTIONSSCREEN) {
-					g_SettingsMan.SetShowToolTips(m_OptionsCheckbox.at(SHOWTOOLTIPS)->GetCheck());
-
-					g_SettingsMan.UpdateSettingsFile();
-				}
-
-				m_MenuScreen = MAINSCREEN;
-				m_ScreenChange = true;
-
-				g_GUISound.BackButtonPressSound()->Play();
-			}
-
-			// Return to options menu button pressed
-			if (guiEvent.GetControl() == m_BackToOptionsButton) {
-				// Hide all screens, the appropriate screen will reappear on next update
-				HideAllScreens();
-				BackToOptionsButton->SetVisible(false);
-				m_MenuScreen = OPTIONSSCREEN;
-				m_ScreenChange = true;
-
-				g_GUISound.BackButtonPressSound()->Play();
-			}
-		*/
-
-
 		return false;
 	}
 

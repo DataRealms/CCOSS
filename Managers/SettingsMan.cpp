@@ -98,10 +98,14 @@ namespace RTE {
 			reader >> g_FrameMan.m_ForceVirtualFullScreenGfxDriver;
 		} else if (propName == "ForceDedicatedFullScreenGfxDriver") {
 			reader >> g_FrameMan.m_ForceDedicatedFullScreenGfxDriver;
-		} else if (propName == "SoundVolume") {
-			g_AudioMan.SetSoundsVolume(std::stof(reader.ReadPropValue()) / 100.0F);
 		} else if (propName == "MusicVolume") {
 			g_AudioMan.SetMusicVolume(std::stof(reader.ReadPropValue()) / 100.0F);
+		} else if (propName == "MuteMusic") {
+			reader >> g_AudioMan.m_MuteMusic;
+		} else if (propName == "SoundVolume") {
+			g_AudioMan.SetSoundsVolume(std::stof(reader.ReadPropValue()) / 100.0F);
+		} else if (propName == "MuteSounds") {
+			reader >> g_AudioMan.m_MuteSounds;
 		} else if (propName == "SoundPanningEffectStrength") {
 			reader >> g_AudioMan.m_SoundPanningEffectStrength;
 
@@ -263,8 +267,10 @@ namespace RTE {
 		writer.NewDivider(false);
 		writer.NewLineString("// Audio Settings", false);
 		writer.NewLine(false);
-		writer.NewPropertyWithValue("SoundVolume", g_AudioMan.m_SoundsVolume * 100);
 		writer.NewPropertyWithValue("MusicVolume", g_AudioMan.m_MusicVolume * 100);
+		writer.NewPropertyWithValue("MuteMusic", g_AudioMan.m_MuteMusic);
+		writer.NewPropertyWithValue("SoundVolume", g_AudioMan.m_SoundsVolume * 100);
+		writer.NewPropertyWithValue("MuteSounds", g_AudioMan.m_MuteSounds);
 		writer.NewPropertyWithValue("SoundPanningEffectStrength", g_AudioMan.m_SoundPanningEffectStrength);
 
 		//////////////////////////////////////////////////

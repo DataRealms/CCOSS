@@ -181,6 +181,18 @@ namespace RTE {
 		bool IsMusicPlaying() const { bool isPlayingMusic; return m_AudioEnabled && m_MusicChannelGroup->isPlaying(&isPlayingMusic) == FMOD_OK ? isPlayingMusic : false; }
 
 		/// <summary>
+		/// Gets whether the music channel is muted or not.
+		/// </summary>
+		/// <returns>Whether the music channel is muted or not.</returns>
+		bool MusicMuted() const { return m_MuteMusic; }
+
+		/// <summary>
+		/// Mutes or unmutes the music channel.
+		/// </summary>
+		/// <param name="muteOrUnmute">Whether to mute or unmute the music channel.</param>
+		void MuteMusic(bool muteOrUnmute = true) { m_MuteMusic = muteOrUnmute; if (m_AudioEnabled) { m_MusicChannelGroup->setMute(m_MuteMusic); } }
+
+		/// <summary>
 		/// Gets the volume of music. Does not get volume of sounds.
 		/// </summary>
 		/// <returns>Current volume scalar value. 0.0-1.0.</returns>
@@ -224,7 +236,19 @@ namespace RTE {
 		void SetMusicPosition(float position);
 #pragma endregion
 
-#pragma region Overall Sound Getters and Setters
+#pragma region Sound Getters and Setters
+		/// <summary>
+		/// Gets whether all the sound effects channels are muted or not.
+		/// </summary>
+		/// <returns>Whether all the sound effects channels are muted or not.</returns>
+		bool SoundsMuted() const { return m_MuteSounds; }
+
+		/// <summary>
+		/// Mutes or unmutes all the sound effects channels.
+		/// </summary>
+		/// <param name="muteOrUnmute">Whether to mute or unmute all the sound effects channels.</param>
+		void MuteSounds(bool muteOrUnmute = true) { m_MuteSounds = muteOrUnmute; if (m_AudioEnabled) { m_SoundChannelGroup->setMute(m_MuteSounds); } }
+
 		/// <summary>
 		/// Gets the volume of all sounds. Does not get volume of music.
 		/// </summary>
@@ -375,11 +399,13 @@ namespace RTE {
 		FMOD::ChannelGroup *m_SoundChannelGroup; //!< The FMOD ChannelGroup for sounds.
 		FMOD::ChannelGroup *m_MobileSoundChannelGroup; //!< The FMOD ChannelGroup for mobile sounds.
 		FMOD::ChannelGroup *m_ImmobileSoundChannelGroup; //!< The FMOD ChannelGroup for immobile sounds.
-		
+
 		bool m_AudioEnabled; //!< Bool to tell whether audio is enabled or not.
 		std::vector<const Vector *> m_CurrentActivityHumanPlayerPositions; //!< The stored positions of each human player in the current activity. Only filled when there's an activity running.
 		std::unordered_map<int, float> m_SoundChannelMinimumAudibleDistances; //!<  An unordered map of sound channel indices to floats representing each Sound Channel's minimum audible distances. This is necessary to keep safe data in case the SoundContainer is destroyed while the sound is still playing, as happens often with TDExplosives.
 
+		bool m_MuteMusic; //!< Whether the music channel is muted.
+		bool m_MuteSounds; //!< Whether all the sound effects channels are muted.
 		float m_MusicVolume; //!< Global music volume.
 		float m_SoundsVolume; //!< Global sounds effects volume.
 		float m_GlobalPitch; //!< Global pitch multiplier.

@@ -15,6 +15,8 @@ namespace RTE {
 		m_CurrentActivityHumanPlayerPositions.clear();
 		m_SoundChannelMinimumAudibleDistances.clear();
 
+		m_MuteMusic = false;
+		m_MuteSounds = false;
 		m_MusicVolume = 1.0F;
 		m_SoundsVolume = 1.0F;
 		m_GlobalPitch = 1.0F;
@@ -43,7 +45,7 @@ namespace RTE {
 
 	int AudioMan::Initialize() {
 		FMOD_RESULT audioSystemSetupResult = FMOD::System_Create(&m_AudioSystem);
-		
+
 		FMOD_ADVANCEDSETTINGS audioSystemAdvancedSettings;
 		memset(&audioSystemAdvancedSettings, 0, sizeof(audioSystemAdvancedSettings));
 		audioSystemAdvancedSettings.cbSize = sizeof(FMOD_ADVANCEDSETTINGS);
@@ -65,12 +67,15 @@ namespace RTE {
 		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_MasterChannelGroup->addGroup(m_SoundChannelGroup) : audioSystemSetupResult;
 		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_SoundChannelGroup->addGroup(m_MobileSoundChannelGroup) : audioSystemSetupResult;
 		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_SoundChannelGroup->addGroup(m_ImmobileSoundChannelGroup) : audioSystemSetupResult;
-		
+
 		m_AudioEnabled = audioSystemSetupResult == FMOD_OK;
 
 		if (!m_AudioEnabled) {
 			return -1;
 		}
+
+		if (m_MuteSounds) { m_SoundChannelGroup->setMute(true); }
+		if (m_MuteMusic) { m_MusicChannelGroup->setMute(true); }
 
 		SetGlobalPitch(m_GlobalPitch, false, false);
 		SetSoundsVolume(m_SoundsVolume);

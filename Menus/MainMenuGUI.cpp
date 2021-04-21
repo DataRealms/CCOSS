@@ -410,17 +410,6 @@ namespace RTE {
 				break;
 			case MenuScreen::SettingsScreen:
 				backToMainMenu = m_SettingsMenu->HandleInputEvents();
-				/*
-				if (m_ScreenChange) {
-					m_MainMenuScreens.at(MenuScreen::SettingsScreen)->SetVisible(true);
-					m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetVisible(true);
-					m_MainMenuScreens.at(MenuScreen::SettingsScreen)->GUIPanel::AddChild(m_MainMenuButtons.at(MenuButton::BackToMainButton));
-					m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetPositionRel(180, 220);
-					//m_pBackToOptionsButton->SetVisible(false);
-					//UpdateDeviceLabels();
-					m_ScreenChange = false;
-				}
-				*/
 				break;
 			case MenuScreen::ModManagerScreen:
 				backToMainMenu = m_ModManagerMenu->HandleInputEvents();
@@ -450,12 +439,8 @@ namespace RTE {
 
 		// If esc pressed, show quit dialog if applicable
 		if (backToMainMenu || g_UInputMan.KeyPressed(KEY_ESC)) {
-			//if (m_ActiveMenuScreen == MenuScreen::CampaignNoticeScreen || m_ActiveMenuScreen == MenuScreen::SettingsScreen || m_ActiveMenuScreen == MenuScreen::ModManagerScreen || m_ActiveMenuScreen == MenuScreen::EditorScreen || m_ActiveMenuScreen == MenuScreen::CreditsScreen) {
 			if (m_ActiveMenuScreen != MenuScreen::MainScreen) {
-				if (m_ActiveMenuScreen == MenuScreen::SettingsScreen) {
-					//g_SettingsMan.SetShowToolTips(m_aOptionsCheckbox.at(SHOWTOOLTIPS)->GetCheck());
-					g_SettingsMan.UpdateSettingsFile();
-				} else if (m_ActiveMenuScreen == MenuScreen::ModManagerScreen) {
+				if (m_ActiveMenuScreen == MenuScreen::SettingsScreen || m_ActiveMenuScreen == MenuScreen::ModManagerScreen) {
 					g_SettingsMan.UpdateSettingsFile();
 				} else if (m_ActiveMenuScreen == MenuScreen::CreditsScreen) {
 					m_UpdateResult = MainMenuUpdateResult::BackToMainFromCredits;

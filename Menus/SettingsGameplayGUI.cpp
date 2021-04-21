@@ -14,7 +14,6 @@ namespace RTE {
 
 	SettingsGameplayGUI::SettingsGameplayGUI(GUIControlManager *parentControlManager) : m_GUIControlManager(parentControlManager) {
 		m_GameplaySettingsBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxGameplaySettings"));
-		m_GameplaySettingsBox->SetVisible(false);
 
 		m_FlashOnBrainDamageCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxFlashOnBrainDamage"));
 		m_FlashOnBrainDamageCheckbox->SetCheck(g_SettingsMan.FlashOnBrainDamage());

@@ -58,8 +58,6 @@ namespace RTE {
 			switch (m_ActiveSettingsMenu) {
 				case ActiveSettingsMenu::VideoSettingsActive:
 					m_VideoSettingsMenu->HandleInputEvents(guiEvent);
-					m_VideoSettingsMenu->SetEnabled(true);
-					m_AudioSettingsMenu->SetEnabled(false);
 					break;
 				case ActiveSettingsMenu::AudioSettingsActive:
 					m_AudioSettingsMenu->HandleInputEvents(guiEvent);

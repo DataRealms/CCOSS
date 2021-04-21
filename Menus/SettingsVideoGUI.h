@@ -12,7 +12,7 @@ namespace RTE {
 	class GUIEvent;
 
 	/// <summary>
-	/// 
+	/// Handling for video settings through the game settings user interface.
 	/// </summary>
 	class SettingsVideoGUI {
 
@@ -58,13 +58,7 @@ namespace RTE {
 			/// Makes UI displayable string with resolution info.
 			/// </summary>
 			/// <returns>String with resolution info.</returns>
-			std::string MakeResolutionString() const {
-				if (Upscaled) {
-					return std::to_string(Width) + "x" + std::to_string(Height) + " Upscaled (" + std::to_string(Width / 2) + "x" + std::to_string(Height / 2) + ")";
-				} else {
-					return std::to_string(Width) + "x" + std::to_string(Height);
-				}
-			}
+			std::string MakeResolutionString() const { return std::to_string(Width) + "x" + std::to_string(Height) + (Upscaled ? " Upscaled (" + std::to_string(Width / 2) + "x" + std::to_string(Height / 2) + ")" : ""); }
 
 			/// <summary>
 			/// 

@@ -33,15 +33,15 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::Clear() {
+		m_GfxDriverMessage.clear();
 		m_GfxDriver = GFX_AUTODETECT_WINDOWED;
 		m_ForceVirtualFullScreenGfxDriver = false;
 		m_ForceDedicatedFullScreenGfxDriver = false;
-		m_GfxDriverMessage.clear();
 		m_DisableMultiScreenResolutionValidation = false;
 #ifdef _WIN32
 		m_NumScreens = GetSystemMetrics(SM_CMONITORS);
-		m_ScreenResX = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-		m_ScreenResY = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+		m_MaxResX = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+		m_MaxResY = GetSystemMetrics(SM_CYVIRTUALSCREEN);
 		m_PrimaryScreenResX = GetSystemMetrics(SM_CXSCREEN);
 		m_PrimaryScreenResY = GetSystemMetrics(SM_CYSCREEN);
 #elif __unix__
@@ -49,17 +49,14 @@ namespace RTE {
 		Display *dpy = XOpenDisplay(NULL);
 		XWindowAttributes ra;
 		XGetWindowAttributes(dpy, DefaultRootWindow(dpy), &ra);
-		m_ScreenResX = m_PrimaryScreenResX = ra.width;
-		m_ScreenResY = m_PrimaryScreenResY = ra.height;
+		m_MaxResX = m_PrimaryScreenResX = ra.width;
+		m_MaxResY = m_PrimaryScreenResY = ra.height;
 		XCloseDisplay(dpy);
 #endif
-		m_ResX = 960;
-		m_ResY = 540;
-		m_NewResX = m_ResX;
-		m_NewResY = m_ResY;
-		m_ResChanged = false;
-		m_Fullscreen = false;
+		m_ResX = c_DefaultResX;
+		m_ResY = c_DefaultResY;
 		m_ResMultiplier = 1;
+		m_ResChanged = false;
 		m_HSplit = false;
 		m_VSplit = false;
 		m_HSplitOverride = false;
@@ -114,7 +111,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::SetGraphicsDriver() {
+	void FrameMan::SetInitialGraphicsDriver() {
 #ifdef _WIN32
 		if (m_ForceVirtualFullScreenGfxDriver) {
 			m_GfxDriver = GFX_DIRECTX_WIN_BORDERLESS;
@@ -126,7 +123,7 @@ namespace RTE {
 			m_GfxDriver = GFX_AUTODETECT_WINDOWED;
 		}
 #else
-		m_GfxDriver = (m_ResX * m_ResMultiplier == m_ScreenResX && m_ResY * m_ResMultiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
+		m_GfxDriver = (m_ResX * m_ResMultiplier == m_MaxResX && m_ResY * m_ResMultiplier == m_MaxResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
 #endif
 	}
 
@@ -147,34 +144,34 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::ValidateResolution(int &resX, int &resY, int &resMultiplier) {
-		if (resX * resMultiplier > m_ScreenResX || resY * resMultiplier > m_ScreenResY) {
+		if (resX * resMultiplier > m_MaxResX || resY * resMultiplier > m_MaxResY) {
 			ShowMessageBox("Resolution too high to fit display, overriding to fit!");
-			resX = m_NewResX = m_ScreenResX / resMultiplier;
-			resY = m_NewResY = m_ScreenResY / resMultiplier;
+			resX = m_MaxResX / resMultiplier;
+			resY = m_MaxResY / resMultiplier;
 		} else if (!m_ForceDedicatedFullScreenGfxDriver && resX * resMultiplier == 1366 && resY * resMultiplier == 768) {
 			ShowMessageBox("Unfortunately, 1366x768 resolution is not supported in windowed or borderless mode. 1360x768 will be used instead!\nTo enable the use of this resolution, please force the dedicated fullscreen driver through \"Settings.ini\".");
-			resX = m_NewResX = 1360 / resMultiplier;
-			resY = m_NewResY = 768 / resMultiplier;
+			resX = 1360 / resMultiplier;
+			resY = 768 / resMultiplier;
 		} else if (!m_ForceDedicatedFullScreenGfxDriver && (resX * resMultiplier) % 4 > 0) {
 			ShowMessageBox("Resolution width that is not divisible by 4 is not supported!\nOverriding to closest valid width!");
-			resX = m_NewResX = static_cast<int>(std::floor(resX / 4) * 4);
+			resX = static_cast<int>(std::floor(resX / 4) * 4);
 		}
 
 		if (m_NumScreens == 1) {
 			float currentAspectRatio = static_cast<float>(resX) / static_cast<float>(resY);
 			if (currentAspectRatio < 1 || currentAspectRatio > 4) {
 				ShowMessageBox("Abnormal aspect ratio detected! Reverting to defaults!");
-				resX = m_NewResX = 960;
-				resY = m_NewResY = 540;
-				resMultiplier = m_ResMultiplier = m_NewResMultiplier = 1;
+				resX = c_DefaultResX;
+				resY = c_DefaultResY;
+				resMultiplier = m_ResMultiplier = 1;
 			}
 		} else if (!m_DisableMultiScreenResolutionValidation && m_NumScreens > 1 && m_NumScreens < 4) {
 			if (resX * resMultiplier > m_PrimaryScreenResX || resY * resMultiplier > m_PrimaryScreenResY) { ValidateMultiScreenResolution(resX, resY, resMultiplier); }
 		} else if (!m_DisableMultiScreenResolutionValidation && m_NumScreens > 3) {
 			ShowMessageBox("Number of screens is too damn high! Overriding to defaults!\n\nPlease disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
-			resX = m_NewResX = 960;
-			resY = m_NewResY = 540;
-			resMultiplier = m_ResMultiplier = m_NewResMultiplier = 1;
+			resX = c_DefaultResX;
+			resY = c_DefaultResY;
+			resMultiplier = m_ResMultiplier = 1;
 		}
 
 		g_SettingsMan.UpdateSettingsFile();
@@ -197,8 +194,8 @@ namespace RTE {
 				"You can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!\n\nResolution settings will be overridden to fit primary screen only!"
 			};
 			ShowMessageBox(leftNotPrimaryMessage);
-			resX = m_NewResX = m_PrimaryScreenResX / resMultiplier;
-			resY = m_NewResY = m_PrimaryScreenResY / resMultiplier;
+			resX = m_PrimaryScreenResX / resMultiplier;
+			resY = m_PrimaryScreenResY / resMultiplier;
 			return;
 		}
 
@@ -210,8 +207,8 @@ namespace RTE {
 
 		if (centerScreenResY != m_PrimaryScreenResY) {
 			ShowMessageBox("Center screen height is not identical to primary screen, overriding to fit primary screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
-			resX = m_NewResX = m_PrimaryScreenResX / resMultiplier;
-			resY = m_NewResY = m_PrimaryScreenResY / resMultiplier;
+			resX = m_PrimaryScreenResX / resMultiplier;
+			resY = m_PrimaryScreenResY / resMultiplier;
 			return;
 		}
 
@@ -224,8 +221,8 @@ namespace RTE {
 
 			if (rightScreenResY != m_PrimaryScreenResY) {
 				ShowMessageBox("Right screen height is not identical to primary screen, overriding to extend to center screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
-				resX = m_NewResX = (m_ScreenResX - (screenInfo.rcMonitor.right - screenInfo.rcMonitor.left)) / resMultiplier;
-				resY = m_NewResY = m_PrimaryScreenResY / resMultiplier;
+				resX = (m_MaxResX - (screenInfo.rcMonitor.right - screenInfo.rcMonitor.left)) / resMultiplier;
+				resY = m_PrimaryScreenResY / resMultiplier;
 				return;
 			}
 		}
@@ -235,22 +232,20 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int FrameMan::Initialize() {
-		SetGraphicsDriver();
 		ValidateResolution(m_ResX, m_ResY, m_ResMultiplier);
+		SetInitialGraphicsDriver();
 		set_color_depth(m_BPP);
 
 		if (set_gfx_mode(m_GfxDriver, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, 0, 0) != 0) {
 			// If a bad resolution somehow slipped past the validation, revert to defaults.
-			ShowMessageBox("Unable to set specified graphics mode because: " + std::string(allegro_error) + "!\n\nNow trying to default back to VGA...");
-			if (set_gfx_mode(GFX_AUTODETECT_WINDOWED, 960, 540, 0, 0) != 0) {
-				set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
-				ShowMessageBox("Unable to set any graphics mode because " + std::string(allegro_error) + "!");
+			ShowMessageBox("Unable to set specified graphics mode because: " + std::string(allegro_error) + "!\n\nTrying to revert to defaults...");
+			if (set_gfx_mode(GFX_AUTODETECT_WINDOWED, c_DefaultResX, c_DefaultResY, 0, 0) != 0) {
+				RTEAbort("Unable to set any graphics mode because " + std::string(allegro_error) + "!");
 				return 1;
 			}
-			// Successfully reverted to defaults. so set that as the current resolution
-			m_ResX = m_NewResX = 960;
-			m_ResY = m_NewResY = 540;
-			m_ResMultiplier = m_NewResMultiplier = 1;
+			m_ResX = c_DefaultResX;
+			m_ResY = c_DefaultResY;
+			m_ResMultiplier = 1;
 		}
 
 		// Clear the screen buffer so it doesn't flash pink
@@ -387,6 +382,8 @@ namespace RTE {
 				destroy_bitmap(m_TempNetworkBackBufferFinalGUI8[f][i]);
 			}
 		}
+
+		m_ResChanged = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -415,127 +412,82 @@ namespace RTE {
 		}
 		return false;
 	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int FrameMan::SwitchResolutionMultiplier(int multiplier) {
-		if (multiplier <= 0 || multiplier > 4 || multiplier == m_ResMultiplier) {
-			return -1;
+	void FrameMan::ChangeResolutionMultiplier(int newMultiplier) {
+		if (newMultiplier <= 0 || newMultiplier > 4 || newMultiplier == m_ResMultiplier) {
+			return;
 		}
-		if (m_ResX > m_ScreenResX / multiplier || m_ResY > m_ScreenResY / multiplier) {
+		if (m_ResX > m_MaxResX / newMultiplier || m_ResY > m_MaxResY / newMultiplier) {
 			ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nNOTE: To toggle fullscreen, use the button in the Options & Controls Menu!");
-			return -1;
+			return;
 		}
-#ifdef __unix__
-		m_GfxDriver = (m_ResX * multiplier == m_ScreenResX && m_ResY * multiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
-#endif
 
-		// Need to save these first for recovery attempts to work (screen might be 0)
-		int resX = m_ResX;
-		int resY = m_ResY;
+#ifdef __unix__
+		m_GfxDriver = (m_ResX * newMultiplier == m_MaxResX && m_ResY * newMultiplier == m_MaxResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
+#endif
 
 		// Set the GFX_TEXT driver to hack around Allegro's window resizing limitations (specifically reducing window size) when switching from 2X mode to 1X mode.
 		// This will force a state where there is no actual game window between multiplier switches and the next set_gfx_mode call will recreate it correctly.
 		set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
 
-		if (set_gfx_mode(m_GfxDriver, resX * multiplier, resY * multiplier, 0, 0) != 0) {
-			// Oops, failed to set windowed mode, so go back to previous multiplier
-			if (set_gfx_mode(m_GfxDriver, resX * m_ResMultiplier, resY * m_ResMultiplier, 0, 0) != 0) {
-				set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
-				ShowMessageBox("Unable to set back to previous windowed mode multiplier because: " + std::string(allegro_error) + "!");
-				return 1;
+		if (set_gfx_mode(m_GfxDriver, m_ResX * newMultiplier, m_ResY * newMultiplier, 0, 0) != 0) {
+			if (set_gfx_mode(m_GfxDriver, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, 0, 0) != 0) {
+				RTEAbort("Unable to set back to previous windowed mode multiplier because: " + std::string(allegro_error) + "!");
 			}
 			g_ConsoleMan.PrintString("ERROR: Failed to switch to new windowed mode multiplier, reverted back to previous setting!");
 			set_palette(m_Palette);
-			return 1;
+			SetDisplaySwitchMode();
+			return;
 		}
+		m_ResMultiplier = newMultiplier;
+
 		set_palette(m_Palette);
-
 		SetDisplaySwitchMode();
-
-		m_ResMultiplier = multiplier;
 
 		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
 		g_SettingsMan.UpdateSettingsFile();
 
 		FlipFrameBuffers();
-		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::SwitchToFullscreen(bool upscaled, bool endActivity) {
-		if ((upscaled && IsUpscaledFullscreen()) || (!upscaled && IsFullscreen())) {
+	void FrameMan::ChangeResolution(int newResX, int newResY, bool upscaled, int newGfxDriver) {
+		int newResMultiplier = upscaled ? 2 : 1;
+
+		if (m_ResX == newResX && m_ResY == newResY && m_ResMultiplier == newResMultiplier && m_GfxDriver == newGfxDriver) {
 			return;
 		}
-		int resX = m_ScreenResX;
-		int resY = m_ScreenResY;
-		int resMultiplier = 1;
-
-		if (upscaled) {
-			if (!IsFullscreen() && m_ResMultiplier == 1 && m_ResX == m_ScreenResX / 2 && m_ResY == m_ScreenResY / 2) {
-				SwitchResolutionMultiplier(2);
-				return;
-			}
-			resX /= 2;
-			resY /= 2;
-			resMultiplier = 2;
-		}	
-		SwitchResolution(resX, resY, resMultiplier, endActivity);
-	}
-	
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int FrameMan::SwitchResolution(int newResX, int newResY, int newMultiplier, bool endActivity) {
-		if (!IsSupportedResolution(newResX, newResY) || newResX <= 0 || newResX > m_ScreenResX || newResY <= 0 || newResY > m_ScreenResY) {
-			return -1;
+		if (newResX <= 0 || newResX > m_MaxResX || newResY <= 0 || newResY > m_MaxResY) {
+			return;
 		}
+		ValidateResolution(newResX, newResY, newResMultiplier);
 
-#ifdef __unix__
-		m_GfxDriver = (newResX * newMultiplier == m_ScreenResX && newResY * newMultiplier == m_ScreenResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
-#endif
-
-		// Must end any running activity otherwise have to deal with recreating all the GUI elements in GameActivity because it crashes when opening the BuyMenu. Easier to just end it.
-		if (g_ActivityMan.GetActivity()) {
-			g_ActivityMan.EndActivity();
-		}
-		
-		// Need to save these first for recovery attempts to work (screen might be 0)
-		int resX = m_ResX;
-		int resY = m_ResY;
-		int resMultiplier = m_ResMultiplier;
-
-		ValidateResolution(newResX, newResY, newMultiplier);
-
-		// Set the GFX_TEXT driver to hack around Allegro's window resizing limitations.
+		// Set the GFX_TEXT driver to hack around Allegro's window resizing limitations (specifically reducing window size) when switching from 2X mode to 1X mode.
+		// This will force a state where there is no actual game window between multiplier switches and the next set_gfx_mode call will recreate it correctly.
 		set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
 
-		ClearBackBuffer8();
-		ClearBackBuffer32();
-
-		if (set_gfx_mode(m_GfxDriver, newResX * newMultiplier, newResY * newMultiplier, 0, 0) != 0) {
-			if (set_gfx_mode(m_GfxDriver, resX * resMultiplier, resY * resMultiplier, 0, 0) != 0) {
-				ShowMessageBox("Unable to set back to previous resolution because: " + std::string(allegro_error) + "!");
-				return 1;
+		if (set_gfx_mode(newGfxDriver, newResX * newResMultiplier, newResY * newResMultiplier, 0, 0) != 0) {
+			if (set_gfx_mode(m_GfxDriver, m_ResX * m_ResMultiplier, m_ResY * m_ResMultiplier, 0, 0) != 0) {
+				RTEAbort("Unable to set back to previous resolution because: " + std::string(allegro_error) + "!");
 			}
 			g_ConsoleMan.PrintString("ERROR: Failed to switch to new resolution, reverted back to previous setting!");
 			set_palette(m_Palette);
-			return 1;
+			SetDisplaySwitchMode();
+			return;
 		}
-		m_ResX = m_NewResX = newResX;
-		m_ResY = m_NewResY = newResY;
-		m_ResMultiplier = m_NewResMultiplier = newMultiplier;
+		m_GfxDriver = newGfxDriver;
+		m_ResX = newResX;
+		m_ResY = newResY;
+		m_ResMultiplier = newResMultiplier;
 
-		RecreateBackBuffers();
 		set_palette(m_Palette);
-
+		RecreateBackBuffers();
 		SetDisplaySwitchMode();
 
 		g_ConsoleMan.PrintString("SYSTEM: Switched to different resolution.");
 		g_SettingsMan.UpdateSettingsFile();
 
 		m_ResChanged = true;
-		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -82,10 +82,8 @@ namespace RTE {
 			reader >> g_FrameMan.m_PaletteFile;
 		} else if (propName == "ResolutionX") {
 			reader >> g_FrameMan.m_ResX;
-			g_FrameMan.m_NewResX = g_FrameMan.m_ResX;
 		} else if (propName == "ResolutionY") {
 			reader >> g_FrameMan.m_ResY;
-			g_FrameMan.m_NewResY = g_FrameMan.m_ResY;
 		} else if (propName == "ResolutionMultiplier") {
 			reader >> g_FrameMan.m_ResMultiplier;
 		} else if (propName == "DisableMultiScreenResolutionValidation") {
@@ -254,8 +252,8 @@ namespace RTE {
 		writer.NewLineString("// Display Settings", false);
 		writer.NewLine(false);
 		writer.NewPropertyWithValue("PaletteFile", g_FrameMan.m_PaletteFile);
-		writer.NewPropertyWithValue("ResolutionX", g_FrameMan.m_NewResX);
-		writer.NewPropertyWithValue("ResolutionY", g_FrameMan.m_NewResY);
+		writer.NewPropertyWithValue("ResolutionX", g_FrameMan.m_ResX);
+		writer.NewPropertyWithValue("ResolutionY", g_FrameMan.m_ResY);
 		writer.NewPropertyWithValue("ResolutionMultiplier", g_FrameMan.m_ResMultiplier);
 		writer.NewPropertyWithValue("DisableMultiScreenResolutionValidation", g_FrameMan.m_DisableMultiScreenResolutionValidation);
 		writer.NewPropertyWithValue("HSplitScreen", g_FrameMan.m_HSplitOverride);

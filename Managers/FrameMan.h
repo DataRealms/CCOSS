@@ -87,16 +87,22 @@ namespace RTE {
 
 #pragma region Resolution Handling
 		/// <summary>
+		/// Gets the graphics driver that is used for rendering.
+		/// </summary>
+		/// <returns>The graphics driver that is used for rendering.</returns>
+		int GetGraphicsDriver() const { return m_GfxDriver; }
+
+		/// <summary>
 		/// Gets the maximum horizontal resolution the game window can be (desktop width).
 		/// </summary>
 		/// <returns>The maximum horizontal resolution the game window can be (desktop width).</returns>
-		int GetMaxResX() const { return m_ScreenResX; }
+		int GetMaxResX() const { return m_MaxResX; }
 
 		/// <summary>
 		/// Gets the maximum vertical resolution the game window can be (desktop height).
 		/// </summary>
 		/// <returns>The maximum vertical resolution the game window can be (desktop height).</returns>
-		int GetMaxResY() const { return m_ScreenResY; }
+		int GetMaxResY() const { return m_MaxResY; }
 
 		/// <summary>
 		/// Gets the horizontal resolution of the screen.
@@ -111,34 +117,8 @@ namespace RTE {
 		int GetResY() const { return m_ResY; }
 
 		/// <summary>
-		/// Gets the horizontal resolution of the screen that will be used next time this FrameMan is Created.
+		/// Gets how many times the screen resolution is being multiplied and the backbuffer stretched across for better readability.
 		/// </summary>
-		/// <returns>An int describing the horizontal resolution of the new screen in pixels.</returns>
-		int GetNewResX() const { return m_NewResX; }
-
-		/// <summary>
-		/// Sets the horizontal resolution of the screen that will be used next time this FrameMan is Created.
-		/// </summary>
-		/// <param name="newResX">An int describing the horizontal resolution of the new screen in pixels.</param>
-		void SetNewResX(int newResX) { m_NewResX = newResX; }
-
-		/// <summary>
-		/// Gets the vertical resolution of the screen that will be used next time this FrameMan is Created.
-		/// </summary>
-		/// <returns>An int describing the vertical resolution of the new screen in pixels.</returns>
-		int GetNewResY() const { return m_NewResY; }
-
-		/// <summary>
-		/// Sets the vertical resolution of the screen that will be used next time this FrameMan is Created.
-		/// </summary>
-		/// <param name="newResY">An int describing the vertical resolution of the new screen in pixels.</param>
-		void SetNewResY(int newResY) { m_NewResY = newResY; }
-
-		/// <summary>
-		/// Indicates whether a new resolution has been set for the next time this FrameMan is created.
-		/// </summary>
-		/// <returns>Whether the new resolution set differs from the current one.</returns>
-		bool IsNewResSet() const { return m_NewResX != m_ResX || m_NewResY != m_ResY; }
 
 		/// <summary>
 		/// Checks whether the passed in width and height values make a supported resolution setting.
@@ -147,44 +127,8 @@ namespace RTE {
 		/// <param name="height">Resolution height.</param>
 		/// <returns>Whether the resolution is supported or not.</returns>
 		bool IsSupportedResolution(int width, int height) const;
-
-		/// <summary>
-		/// Tells how many times the screen resolution is being multiplied and the backbuffer stretched across for better readability.
-		/// </summary>
-		/// <returns>What multiple the screen resolution is run in (1 normal).</returns>
-		int ResolutionMultiplier() const { return m_ResMultiplier; }
-
-		/// <summary>
-		/// Gets whether resolution validation in multi-screen mode is disabled or not.
-		/// </summary>
-		/// <returns>Whether resolution validation in multi-screen mode is disabled or not.</returns>
-		bool IsMultiScreenResolutionValidationDisabled() const { return m_DisableMultiScreenResolutionValidation; }
-
-		/// <summary>
-		/// Sets and switches to a new windowed mode resolution multiplier.
-		/// </summary>
-		/// <param name="multiplier">The multiplier to switch to.</param>
-		/// <returns>Error code, anything other than 0 is an error.</returns>
-		int SwitchResolutionMultiplier(int multiplier = 1);
-
-		/// <summary>
-		/// Gets whether the game window is in fullscreen (borderless window) mode or not.
-		/// </summary>
-		/// <returns>True if the game window resolution matches the desktop resolution.</returns>
-		bool IsFullscreen() const { return m_ResX == m_ScreenResX && m_ResY == m_ScreenResY; }
-
-		/// <summary>
-		/// Gets whether the game window is in upscaled fullscreen (borderless window) mode or not.
-		/// </summary>
-		/// <returns>True if the game window is exactly half of the desktop resolution and the multiplier is set to 2.</returns>
-		bool IsUpscaledFullscreen() const { return m_ResMultiplier == 2 && m_ResX == m_ScreenResX / 2 && m_ResY == m_ScreenResY / 2; }
-		
-		/// <summary>
-		/// Switches the game window into fullscreen or upscaled fullscreen mode.
-		/// </summary>
-		/// <param name="upscaled">Whether to switch to upscaled mode or not.</param>
-		/// <param name="endActivity">Whether the current Activity should be ended before performing the switch.</param>
-		void SwitchToFullscreen(bool upscaled, bool endActivity = false);
+		/// <returns>What multiple the screen resolution is run in.</returns>
+		int GetResMultiplier() const { return m_ResMultiplier; }
 
 		/// <summary>
 		/// Gets whether the game window resolution was changed.
@@ -193,20 +137,19 @@ namespace RTE {
 		bool ResolutionChanged() const { return m_ResChanged; }
 
 		/// <summary>
-		/// Sets whether the game window resolution was changed. Used to reset the flag after the change is complete. This is called from ReinitMainMenu() and should not be called anywhere else.
+		/// Sets and switches to a new windowed mode resolution multiplier.
 		/// </summary>
-		/// <param name="resolutionChanged">Whether the resolution changed or not.</param>
-		void SetResolutionChanged(bool resolutionChanged) { m_ResChanged = resolutionChanged; }
+		/// <param name="newMultiplier">The multiplier to switch to.</param>
+		void ChangeResolutionMultiplier(int newMultiplier = 1);
 
 		/// <summary>
 		/// Switches the game window resolution to the specified dimensions.
 		/// </summary>
 		/// <param name="newResX">New width to set window to.</param>
 		/// <param name="newResY">New height to set window to.</param>
-		/// <param name="newMultiplier">New resolution multiplier to set window to.</param>
+		/// <param name="upscaled"></param>
 		/// <param name="endActivity">Whether the current Activity should be ended before performing the switch.</param>
-		/// <returns>Error code, anything other than 0 is an error.</returns>
-		int SwitchResolution(int newResX, int newResY, int newMultiplier = 1, bool endActivity = false);
+		void ChangeResolution(int newResX, int newResY, bool upscaled, int newGfxDriver);
 #pragma endregion
 
 #pragma region Split-Screen Handling
@@ -556,32 +499,24 @@ namespace RTE {
 
 		static constexpr int m_BPP = 32; //!< Color depth (bits per pixel).
 
+		std::string m_GfxDriverMessage; //!< String containing the currently selected graphics driver message. Used for printing it to the console after all managers finished initializing.
 		int m_GfxDriver; //!< The graphics driver that will be used for rendering.
 		bool m_ForceVirtualFullScreenGfxDriver; //!< Whether to use the borderless window driver. Overrides any other windowed drivers. The driver that will be used is GFX_DIRECTX_WIN_BORDERLESS.
 		bool m_ForceDedicatedFullScreenGfxDriver; //!< Whether to use the dedicated fullscreen driver. Overrides any other driver. The driver that will be used is GFX_DIRECTX_ACCEL.
 
-		std::string m_GfxDriverMessage; //!< String containing the currently selected graphics driver message. Used for printing it to the console after all managers finished initializing.
-
 		bool m_DisableMultiScreenResolutionValidation; //!< Whether to disable resolution validation when running multi-screen mode or not. Allows setting whatever crazy resolution that may or may not crash.
 
 		int m_NumScreens; //!< Number of physical screens.
-		int m_ScreenResX; //!< Width of the primary or all physical screens combined if more than one available (desktop resolution). 
-		int m_ScreenResY; //!< Height of the primary or tallest screen if more than one available (desktop resolution).
+		int m_MaxResX; //!< Width of the primary or all physical screens combined if more than one available (desktop resolution).
+		int m_MaxResY; //!< Height of the primary or tallest screen if more than one available (desktop resolution).
 		int m_PrimaryScreenResX; //!< Width of the primary physical screen only.
 		int m_PrimaryScreenResY; //!< Height of the primary physical screen only.
 
 		int m_ResX; //!< Game window width.
 		int m_ResY; //!< Game window height.
-		int m_NewResX; //!< New game window width that will take effect next time the FrameMan is started.
-		int m_NewResY; //!< New game window height that will take effect next time the FrameMan is started.
-
 		int m_ResMultiplier; //!< The number of times the game window and image should be multiplied and stretched across for better visibility.
-		int m_NewResMultiplier; //!< This is the new multiple that will take effect next time the FrameMan is started.
 
 		bool m_ResChanged; //!< Whether the resolution was changed through the settings fullscreen/upscaled fullscreen buttons.
-
-		bool m_Fullscreen; //!< Whether in fullscreen (borderless window) mode or not. True when resolution matches desktop.
-		bool m_UpscaledFullscreen; //!< Whether in upscaled fullscreen (borderless window) mode or not. True when multiplier equals 2 and resolution matches half of desktop. 
 
 		bool m_HSplit; //!< Whether the screen is split horizontally across the screen, ie as two splitscreens one above the other.
 		bool m_VSplit; //!< Whether the screen is split vertically across the screen, ie as two splitscreens side by side.
@@ -672,7 +607,7 @@ namespace RTE {
 		/// <summary>
 		/// Checks whether a specific driver has been requested and if not uses the default Allegro windowed magic driver. This is called during Create().
 		/// </summary>
-		void SetGraphicsDriver();
+		void SetInitialGraphicsDriver();
 
 		/// <summary>
 		/// Sets the window switching mode and callbacks. These set the behavior of the game window when it loses/gains focus.

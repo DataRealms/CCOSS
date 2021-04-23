@@ -67,7 +67,7 @@ namespace RTE {
 		GUIListBox *listBox = dynamic_cast<GUIListBox *>(m_ControlManager->GetControl("ProgressBox"));
 
 		// Make the box a bit bigger if there's room in higher, HD resolutions
-		if (g_FrameMan.GetResX() >= 960) { listBox->Resize((g_FrameMan.GetResX() / 3) - 12, listBox->GetHeight()); }
+		if (g_FrameMan.GetResX() >= c_DefaultResX) { listBox->Resize((g_FrameMan.GetResX() / 3) - 12, listBox->GetHeight()); }
 
 		// Make the loading progress box fill the right third of the screen
 		listBox->SetPositionRel(g_FrameMan.GetResX() - listBox->GetWidth() - 12, (g_FrameMan.GetResY() / 2) - (listBox->GetHeight() / 2));

@@ -447,7 +447,7 @@ namespace RTE {
 	void UInputMan::ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
 		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme[whichPlayer].GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
-			position_mouse(Limit(mouse_x, x + width * g_FrameMan.ResolutionMultiplier(), x), Limit(mouse_y, y + height * g_FrameMan.ResolutionMultiplier(), y));
+			position_mouse(Limit(mouse_x, x + width * g_FrameMan.GetResMultiplier(), x), Limit(mouse_y, y + height * g_FrameMan.GetResMultiplier(), y));
 		}
 	}
 
@@ -816,7 +816,7 @@ namespace RTE {
 		} else if (!FlagCtrlState() && FlagAltState()) {
 			// Alt+Enter to switch resolution multiplier
 			if (KeyPressed(KEY_ENTER)) {
-				g_FrameMan.SwitchResolutionMultiplier((g_FrameMan.ResolutionMultiplier() >= 2) ? 1 : 2);
+				g_FrameMan.ChangeResolutionMultiplier((g_FrameMan.GetResMultiplier() >= 2) ? 1 : 2);
 			// Alt+W to save ScenePreviewDump (miniature WorldDump)
 			} else if (KeyPressed(KEY_W)) {
 				g_FrameMan.SaveWorldPreviewToPNG("ScenePreviewDump");
@@ -914,8 +914,8 @@ namespace RTE {
 
 			// Enable the mouse cursor positioning again after having been disabled. Only do this when the mouse is within the drawing area so it
 			// won't cause the whole window to move if the user clicks the title bar and unintentionally drags it due to programmatic positioning.
-			int mousePosX = mouse_x / g_FrameMan.ResolutionMultiplier();
-			int mousePosY = mouse_y / g_FrameMan.ResolutionMultiplier();
+			int mousePosX = mouse_x / g_FrameMan.GetResMultiplier();
+			int mousePosY = mouse_y / g_FrameMan.GetResMultiplier();
 			if (m_DisableMouseMoving && m_PrepareToEnableMouseMoving && (mousePosX >= 0 && mousePosX < g_FrameMan.GetResX() && mousePosY >= 0 && mousePosY < g_FrameMan.GetResY())) {
 				m_DisableMouseMoving = m_PrepareToEnableMouseMoving = false;
 			}

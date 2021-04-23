@@ -49,6 +49,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MenuMan::Reinitialize() {
+		g_MetaMan.GetGUI()->Destroy();
+
 		m_MenuController.reset();
 		m_MainMenu.reset();
 		m_ScenarioMenu.reset();

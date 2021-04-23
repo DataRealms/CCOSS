@@ -46,12 +46,11 @@ namespace RTE {
 		m_AudioSettingsMenu = std::make_unique<SettingsAudioGUI>(m_GUIControlManager.get());
 		m_InputSettingsMenu = std::make_unique<SettingsInputGUI>(m_GUIControlManager.get());
 		m_GameplaySettingsMenu = std::make_unique<SettingsGameplayGUI>(m_GUIControlManager.get());
+		m_NetworkSettingsMenu = std::make_unique<SettingsNetworkGUI>(m_GUIControlManager.get());
+		m_MiscSettingsMenu = std::make_unique<SettingsMiscGUI>(m_GUIControlManager.get());
 
 		m_SettingsMenuTabs.at(ActiveSettingsMenu::VideoSettingsMenu)->SetCheck(true);
 		SetActiveSettingsMenu(ActiveSettingsMenu::VideoSettingsMenu);
-
-		//m_ShowToolTipsCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("ShowToolTipsCheckbox"));
-		//m_ShowToolTipsCheckbox->SetCheck(g_SettingsMan.ToolTips());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,6 +60,8 @@ namespace RTE {
 		m_AudioSettingsMenu->SetEnabled(false);
 		m_InputSettingsMenu->SetEnabled(false);
 		m_GameplaySettingsMenu->SetEnabled(false);
+		m_NetworkSettingsMenu->SetEnabled(false);
+		m_MiscSettingsMenu->SetEnabled(false);
 
 		switch (activeMenu) {
 			case ActiveSettingsMenu::VideoSettingsMenu:
@@ -76,8 +77,10 @@ namespace RTE {
 				m_GameplaySettingsMenu->SetEnabled(true);
 				break;
 			case ActiveSettingsMenu::NetworkSettingsMenu:
+				m_NetworkSettingsMenu->SetEnabled(true);
 				break;
 			case ActiveSettingsMenu::MiscSettingsMenu:
+				m_MiscSettingsMenu->SetEnabled(true);
 				break;
 			default:
 				RTEAbort("Invalid settings menu passed to SettingsGUI::SetActiveSettingsMenu!");
@@ -127,8 +130,10 @@ namespace RTE {
 					m_GameplaySettingsMenu->HandleInputEvents(guiEvent);
 					break;
 				case ActiveSettingsMenu::NetworkSettingsMenu:
+					m_NetworkSettingsMenu->HandleInputEvents(guiEvent);
 					break;
 				case ActiveSettingsMenu::MiscSettingsMenu:
+					m_MiscSettingsMenu->HandleInputEvents(guiEvent);
 					break;
 				default:
 					break;

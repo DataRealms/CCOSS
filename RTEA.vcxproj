@@ -544,6 +544,8 @@
     <ClInclude Include="Menus\SettingsGameplayGUI.h" />
     <ClInclude Include="Menus\SettingsGUI.h" />
     <ClInclude Include="Menus\SettingsInputGUI.h" />
+    <ClInclude Include="Menus\SettingsMiscGUI.h" />
+    <ClInclude Include="Menus\SettingsNetworkGUI.h" />
     <ClInclude Include="Menus\SettingsVideoGUI.h" />
     <ClInclude Include="Menus\TitleScreen.h" />
     <ClInclude Include="Resources\resource.h" />
@@ -705,6 +707,8 @@
     <ClCompile Include="Menus\SettingsGameplayGUI.cpp" />
     <ClCompile Include="Menus\SettingsGUI.cpp" />
     <ClCompile Include="Menus\SettingsInputGUI.cpp" />
+    <ClCompile Include="Menus\SettingsMiscGUI.cpp" />
+    <ClCompile Include="Menus\SettingsNetworkGUI.cpp" />
     <ClCompile Include="Menus\SettingsVideoGUI.cpp" />
     <ClCompile Include="Menus\TitleScreen.cpp" />
     <ClCompile Include="System\Atom.cpp" />

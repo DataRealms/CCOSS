@@ -5,6 +5,8 @@
 #include "SettingsAudioGUI.h"
 #include "SettingsInputGUI.h"
 #include "SettingsGameplayGUI.h"
+#include "SettingsNetworkGUI.h"
+#include "SettingsMiscGUI.h"
 
 namespace RTE {
 
@@ -59,8 +61,6 @@ namespace RTE {
 			SettingsMenuCount
 		};
 
-		//GUICheckbox *m_ShowToolTipsCheckbox; //!<
-
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!<
 		Controller *m_Controller; //!<
 
@@ -75,6 +75,8 @@ namespace RTE {
 		std::unique_ptr<SettingsAudioGUI> m_AudioSettingsMenu; //!<
 		std::unique_ptr<SettingsInputGUI> m_InputSettingsMenu; //!<
 		std::unique_ptr<SettingsGameplayGUI> m_GameplaySettingsMenu; //!<
+		std::unique_ptr<SettingsNetworkGUI> m_NetworkSettingsMenu; //!<
+		std::unique_ptr<SettingsMiscGUI> m_MiscSettingsMenu; //!<
 
 		/// <summary>
 		/// 

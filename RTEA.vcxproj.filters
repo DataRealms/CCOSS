@@ -507,6 +507,12 @@
     <ClInclude Include="Menus\SettingsGameplayGUI.h">
       <Filter>Menus</Filter>
     </ClInclude>
+    <ClInclude Include="Menus\SettingsMiscGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\SettingsNetworkGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -967,6 +973,12 @@
       <Filter>Menus</Filter>
     </ClCompile>
     <ClCompile Include="Menus\SettingsGameplayGUI.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\SettingsMiscGUI.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\SettingsNetworkGUI.cpp">
       <Filter>Menus</Filter>
     </ClCompile>
   </ItemGroup>

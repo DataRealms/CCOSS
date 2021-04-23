@@ -37,14 +37,13 @@ namespace RTE {
 		m_SettingsMenuTabs.at(ActiveSettingsMenu::NetworkSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabNetworkSettings"));
 		m_SettingsMenuTabs.at(ActiveSettingsMenu::MiscSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabMiscSettings"));
 
-		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("OptionsScreen"))->SetVisible(false);
 		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ConfigScreen"))->SetVisible(false);
 
 		m_BackToMainButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonBackToMainMenu"));
 
 		m_VideoSettingsMenu = std::make_unique<SettingsVideoGUI>(m_GUIControlManager.get());
 		m_AudioSettingsMenu = std::make_unique<SettingsAudioGUI>(m_GUIControlManager.get());
-		m_InputSettingsMenu = std::make_unique<SettingsInputGUI>(m_GUIControlManager.get());
+		m_InputSettingsMenu = std::make_unique<SettingsInputGUI>(m_GUIControlManager.get(), controller);
 		m_GameplaySettingsMenu = std::make_unique<SettingsGameplayGUI>(m_GUIControlManager.get());
 		m_NetworkSettingsMenu = std::make_unique<SettingsNetworkGUI>(m_GUIControlManager.get());
 		m_MiscSettingsMenu = std::make_unique<SettingsMiscGUI>(m_GUIControlManager.get());

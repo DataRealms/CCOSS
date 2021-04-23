@@ -7,6 +7,7 @@ struct BITMAP;
 
 namespace RTE {
 
+	class Controller;
 	class GUIControlManager;
 	class GUICollectionBox;
 	class GUIComboBox;
@@ -28,7 +29,8 @@ namespace RTE {
 		/// Constructor method used to instantiate a SettingsInputGUI object in system memory and make it ready for use.
 		/// </summary>
 		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which holds all the GUIControls of this SettingsInputGUI.</param>
-		explicit SettingsInputGUI(GUIControlManager *parentControlManager);
+		/// <param name="controller"></param>
+		explicit SettingsInputGUI(GUIControlManager *parentControlManager, Controller *controller);
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -49,21 +51,7 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		struct PlayerInputSettingsBox {
-			GUILabel *InputDeviceLabel; //!< Label for the input device name that is currently being used.
-			GUIButton *NextInputDeviceButton; //!< Button for changing to the next input device type.
-			GUIButton *PrevInputDeviceButton; //!< Button for changing to the previous input device type.
-			GUIButton *ConfigureControlsButton; //!< Button for starting the controls configuration wizard.
-			GUIButton *ClearControlsButton; //!< Button to clear all mapped controls.
-			GUILabel *DeadZoneLabel; //!< Label for the controller deadzone value.
-			GUISlider *DeadZoneSlider; //!< Slider for setting the controller deadzone value.
-			GUICheckbox *DeadZoneTypeCheckbox; //!< Checkbox for setting the controller deadzone type.
-		};
-
-		/// <summary>
-		/// 
-		/// </summary>
-		struct ControlConfigWizard {
+		struct InputConfigWizard {
 
 			/// <summary>
 			/// 
@@ -147,11 +135,33 @@ namespace RTE {
 			bool UpdateGamepadConfigWizard();
 		};
 
+		/// <summary>
+		/// 
+		/// </summary>
+		struct PlayerInputSettingsBox {
+			GUILabel *InputDeviceLabel; //!< Label for the input device name that is currently being used.
+			GUIButton *NextInputDeviceButton; //!< Button for changing to the next input device type.
+			GUIButton *PrevInputDeviceButton; //!< Button for changing to the previous input device type.
+			GUIButton *ConfigureControlsButton; //!< Button for starting the controls configuration wizard.
+			GUIButton *ClearControlsButton; //!< Button to clear all mapped controls.
+			GUILabel *DeadZoneLabel; //!< Label for the controller deadzone value.
+			GUISlider *DeadZoneSlider; //!< Slider for setting the controller deadzone value.
+			GUICheckbox *DeadZoneTypeCheckbox; //!< Checkbox for setting the controller deadzone type.
+		};
+
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
+		Controller *m_Controller;
 
-		ControlConfigWizard ControlConfigWizardMenu; //!<
+		GUICollectionBox *m_InputSettingsBox; //!<
 
-		std::array<PlayerInputSettingsBox, Players::MaxPlayerCount> PlayerInputSettingsBoxes; //!<
+		InputConfigWizard m_InputConfigWizardMenu; //!<
+
+		std::array<PlayerInputSettingsBox, Players::MaxPlayerCount> m_PlayerInputSettingsBoxes; //!<
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreateInputConfigWizard(); //!<
 
 		/// <summary>
 		/// Updates the text on the configuration labels, based on actual UInputMan settings.

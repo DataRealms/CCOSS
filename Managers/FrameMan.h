@@ -119,14 +119,6 @@ namespace RTE {
 		/// <summary>
 		/// Gets how many times the screen resolution is being multiplied and the backbuffer stretched across for better readability.
 		/// </summary>
-
-		/// <summary>
-		/// Checks whether the passed in width and height values make a supported resolution setting.
-		/// </summary>
-		/// <param name="width">Resolution width.</param>
-		/// <param name="height">Resolution height.</param>
-		/// <returns>Whether the resolution is supported or not.</returns>
-		bool IsSupportedResolution(int width, int height) const;
 		/// <returns>What multiple the screen resolution is run in.</returns>
 		int GetResMultiplier() const { return m_ResMultiplier; }
 

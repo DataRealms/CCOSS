@@ -398,20 +398,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool FrameMan::IsSupportedResolution(int width, int height) const {
-		if ((width >= 640 && height >= 450) && (width <= m_ScreenResX && height <= m_ScreenResY)) {
-			// Disallow wacky resolutions that are taller than wide
-			if (height > width) {
-				return false;
-			}
-			// Disallow resolution width that isn't in multiples of 4 otherwise Allegro fails to initialize graphics, but only in windowed/borderless mode
-			if (!m_ForceDedicatedFullScreenGfxDriver && width % 4 != 0) {
-				return false;
-			}
-			return true;
-		}
-		return false;
-	}
 	void FrameMan::ChangeResolutionMultiplier(int newMultiplier) {
 		if (newMultiplier <= 0 || newMultiplier > 4 || newMultiplier == m_ResMultiplier) {
 			return;

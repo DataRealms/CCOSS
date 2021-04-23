@@ -57,6 +57,24 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool SettingsVideoGUI::IsSupportedResolution(int width, int height) const {
+		if ((width >= 640 && height >= 450) && (width <= g_FrameMan.GetMaxResX() && height <= g_FrameMan.GetMaxResY())) {
+			// Disallow wacky resolutions that are taller than wide
+			if (height > width) {
+				return false;
+			}
+			// Disallow resolution width that isn't in multiples of 4 otherwise Allegro fails to initialize graphics, but only in windowed/borderless mode
+			int currentGfxDriver = g_FrameMan.GetGraphicsDriver();
+			if ((currentGfxDriver != GFX_AUTODETECT_FULLSCREEN && currentGfxDriver != GFX_DIRECTX_ACCEL) && width % 4 != 0) {
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void SettingsVideoGUI::PopulateResolutionsComboBox() {
 	#ifdef _WIN32
 		// Get a list of modes from the fullscreen driver even though we're not using it. This is so we don't need to populate the list manually and has all the reasonable resolutions (along with some stupid ones but whatever)
@@ -74,8 +92,8 @@ namespace RTE {
 				int width = resList->mode[i].width;
 				int height = resList->mode[i].height;
 
-				if (g_FrameMan.IsSupportedResolution(width, height)) {
 					m_PresetResolutions.emplace(width, height, false);
+				if (IsSupportedResolution(width, height)) {
 
 					// If this is what we're currently set to have at next start, select it afterward
 					if ((g_FrameMan.GetNewResX() * g_FrameMan.ResolutionMultiplier()) == width && (g_FrameMan.GetNewResY() * g_FrameMan.ResolutionMultiplier()) == height) { currentResIndex = foundIndex; }

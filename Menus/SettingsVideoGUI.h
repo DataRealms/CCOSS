@@ -111,6 +111,14 @@ namespace RTE {
 
 #pragma region Video Settings Handling
 		/// <summary>
+		/// Checks whether the passed in width and height values make a supported resolution setting.
+		/// </summary>
+		/// <param name="width">Resolution width.</param>
+		/// <param name="height">Resolution height.</param>
+		/// <returns>Whether the resolution is supported or not.</returns>
+		bool IsSupportedResolution(int width, int height) const;
+
+		/// <summary>
 		/// Updates the contents of the screen resolution combo box.
 		/// </summary>
 		void PopulateResolutionsComboBox();

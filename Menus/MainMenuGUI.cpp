@@ -23,8 +23,7 @@ namespace RTE {
 
 	void MainMenuGUI::Clear() {
 		m_GUIControlManager = nullptr;
-		m_MenuEnabled = false;
-		m_ActiveMenuScreen = g_FrameMan.ResolutionChanged() ? MenuScreen::SettingsScreen : MenuScreen::MainScreen; // Set the active screen to the settings screen otherwise we're at the main screen after reinitializing.
+		m_ActiveMenuScreen = MenuScreen::ScreenCount;
 		m_ScreenChange = false;
 		m_BlinkTimer.Reset();
 
@@ -82,8 +81,8 @@ namespace RTE {
 		m_SettingsMenu = std::make_unique<SettingsGUI>(guiScreen, guiInput, controller);
 		m_ModManagerMenu = std::make_unique<ModManagerGUI>(guiScreen, guiInput);
 
-		m_ScreenChange = true;
-		HideAllScreens();
+		// Set the active screen to the settings screen otherwise we're at the main screen after reinitializing.
+		SetActiveMenuScreen(g_FrameMan.ResolutionChanged() ? MenuScreen::SettingsScreen : MenuScreen::MainScreen, false);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -389,7 +388,7 @@ namespace RTE {
 	MainMenuGUI::MainMenuUpdateResult MainMenuGUI::Update() {
 		m_UpdateResult = MainMenuUpdateResult::NoEvent;
 
-		if (!m_MenuEnabled || (g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly())) {
+		if (g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly()) {
 			return m_UpdateResult;
 		}
 

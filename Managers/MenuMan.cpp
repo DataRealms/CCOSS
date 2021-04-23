@@ -49,17 +49,19 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MenuMan::Reinitialize() {
-		g_MetaMan.GetGUI()->Destroy();
-
-		m_MenuController.reset();
-		m_MainMenu.reset();
-		m_ScenarioMenu.reset();
-		m_TitleScreen.reset();
+		g_FrameMan.ClearBackBuffer32();
+		g_FrameMan.FlipFrameBuffers();
 
 		g_ConsoleMan.Destroy();
-		g_ConsoleMan.Initialize();
+		g_MetaMan.GetGUI()->Destroy();
+
+		m_ScenarioMenu.reset();
+		m_MainMenu.reset();
+		m_TitleScreen.reset();
+		m_MenuController.reset();
 
 		Initialize(false);
+		g_ConsoleMan.Initialize();
 
 		g_FrameMan.DestroyTempBackBuffers();
 		g_FrameMan.SetResolutionChanged(false);
@@ -102,19 +104,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool MenuMan::UpdateMainMenu() {
-		if (!m_MainMenu->IsEnabled()) { m_MainMenu->SetEnabled(true); }
-
+	bool MenuMan::UpdateMainMenu() const {
 		MainMenuGUI::MainMenuUpdateResult updateResult = m_MainMenu->Update();
 
 		if (updateResult == MainMenuGUI::MainMenuUpdateResult::ScenarioStarted && m_ActiveMenu != ActiveMenu::ScenarioMenuActive) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario);
 			m_ScenarioMenu->SetEnabled();
-			m_MainMenu->SetEnabled(false);
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::CampaignStarted && m_ActiveMenu != ActiveMenu::CampaignMenuActive) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCampaign);
 			g_MetaMan.GetGUI()->SetEnabled(true);
-			m_MainMenu->SetEnabled(false);
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::ActivityResumed) {
 			g_ActivityMan.SetResumeActivity();
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::ActivityStarted) {
@@ -130,7 +128,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MenuMan::UpdateScenarioMenu() {
+	void MenuMan::UpdateScenarioMenu() const {
 		ScenarioGUI::ScenarioMenuUpdateResult updateResult = m_ScenarioMenu->Update();
 
 		if (m_ActiveMenu != ActiveMenu::MainMenuActive && updateResult == ScenarioGUI::ScenarioMenuUpdateResult::BackToMain) {
@@ -154,7 +152,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool MenuMan::UpdateCampaignMenu() {
+	bool MenuMan::UpdateCampaignMenu() const {
 		g_MetaMan.GetGUI()->SetStationPos(m_TitleScreen->GetStationPos());
 		g_MetaMan.Update();
 

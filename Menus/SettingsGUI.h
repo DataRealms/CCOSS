@@ -43,7 +43,7 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		void Draw();
+		void Draw() const;
 #pragma endregion
 
 	private:

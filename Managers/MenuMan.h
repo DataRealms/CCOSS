@@ -90,19 +90,19 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		bool UpdateMainMenu();
+		bool UpdateMainMenu() const;
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		void UpdateScenarioMenu();
+		void UpdateScenarioMenu() const;
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		bool UpdateCampaignMenu();
+		bool UpdateCampaignMenu() const;
 #pragma endregion
 	};
 }

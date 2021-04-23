@@ -52,9 +52,6 @@ namespace RTE {
 		g_UInputMan.DisableKeys(false);
 		g_UInputMan.TrapMousePos(false);
 
-		// Don't stop the music if reinitializing after a resolution change
-		if (!g_FrameMan.ResolutionChanged()) { g_AudioMan.StopAll(); }
-
 		while (!System::IsSetToQuit() && !g_ActivityMan.ActivitySetToResume()) {
 			g_UInputMan.Update();
 			g_TimerMan.Update();

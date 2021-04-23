@@ -74,7 +74,6 @@ namespace RTE {
 			CreateIntroSequenceSlides();
 		} else {
 			if (g_FrameMan.ResolutionChanged()) {
-				g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccmenu.ogg", -1);
 				m_GameLogo.SetPos(Vector(static_cast<float>(m_ScreenResX / 2), 64));
 				SetTitleTransitionState(TitleTransition::MainMenu);
 				m_FinishedPlayingIntro = true;

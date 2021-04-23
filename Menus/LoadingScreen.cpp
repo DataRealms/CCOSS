@@ -28,7 +28,7 @@ namespace RTE {
 	void LoadingScreen::Create(AllegroScreen *guiScreen, AllegroInput *guiInput) {
 		if (!m_ControlManager) {
 			m_ControlManager.reset(new GUIControlManager());
-			if (!m_ControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "LoadingSkin.ini")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/LoadingSkin.ini"); }
+			if (!m_ControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "LoadingScreenSkin.ini")) { RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/LoadingScreenSkin.ini"); }
 			m_ControlManager->Load("Base.rte/GUIs/LoadingGUI.ini");
 		}
 		int loadingSplashOffset = 0;

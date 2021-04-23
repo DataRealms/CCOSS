@@ -62,18 +62,6 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Reports whether the menu is enabled or not.
-		/// </summary>
-		/// <returns></returns>
-		bool IsEnabled() const { return m_MenuEnabled; }
-
-		/// <summary>
-		/// Enables or disables the menu. This will animate it in and out of view.
-		/// </summary>
-		/// <param name="enable">Whether to enable or disable the menu.</param>
-		void SetEnabled(bool enable = true) { m_MenuEnabled = (enable) ? true : false; m_ScreenChange = true; }
-
-		/// <summary>
 		/// Gets the GUIControlManager owned and used by this.
 		/// </summary>
 		/// <returns>The GUIControlManager. Ownership is not transferred!</returns>
@@ -136,7 +124,6 @@ namespace RTE {
 
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The control manager which holds all the controls.
 
-		bool m_MenuEnabled; //!< Visibility state of the menu.
 		MenuScreen m_ActiveMenuScreen; //!< Screen selection state.
 		bool m_ScreenChange; //!< Change in menu screens detected.
 

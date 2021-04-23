@@ -49,9 +49,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MenuMan::Reinitialize() {
-		g_FrameMan.ClearBackBuffer32();
-		g_FrameMan.FlipFrameBuffers();
-
 		g_ConsoleMan.Destroy();
 		g_MetaMan.GetGUI()->Destroy();
 
@@ -205,6 +202,10 @@ namespace RTE {
 
 	void MenuMan::Draw() {
 		g_FrameMan.ClearBackBuffer32();
+
+		if (g_FrameMan.ResolutionChanged()) {
+			return;
+		}
 
 		m_TitleScreen->Draw();
 

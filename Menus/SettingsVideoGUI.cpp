@@ -5,6 +5,7 @@
 #include "GUI.h"
 #include "GUILabel.h"
 #include "GUIButton.h"
+#include "GUIRadioButton.h"
 #include "GUICheckbox.h"
 #include "GUIComboBox.h"
 #include "GUICollectionBox.h"
@@ -19,12 +20,17 @@ namespace RTE {
 		m_WindowedButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickWindowed"));
 		m_BorderlessButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickBorderless"));
 		m_UpscaledBorderlessButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickUpscaledBorderless"));
-		m_DedicatedFullscreenButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickDedicatedFullscreen"));
+		m_DedicatedButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickDedicated"));
+		m_UpscaledDedicatedButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickUpscaledDedicated"));
+
+		m_PresetResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioPresetResolution"));
+		m_CustomResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioCustomResolution"));
 
 		m_PresetResolutionBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionPresetResolution"));
 		m_PresetResolutionComboBox = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("ComboPresetResolution"));
 		m_PresetResolutionApplyButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonApplyPresetResolution"));
-		m_PresetResolutionMessageLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("CollectionPresetResolution"));
+		m_PresetResolutionMessageLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelPresetResolutonValidation"));
+		m_PresetResolutionMessageLabel->SetVisible(false);
 
 		m_CustomResolutionBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionCustomResolution"));
 		m_CustomResolutionBox->SetVisible(false);
@@ -34,13 +40,14 @@ namespace RTE {
 		m_ResolutionChangeDialogBox->SetVisible(false);
 
 		m_ConfirmResolutionChangeButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfirmResolutionChange"));
-		m_ConfirmResolutionChangeButton->SetVisible(false);
-		m_ConfirmResolutionChangeFullscreenButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfirmResolutionChangeFullscreen"));
-		m_ConfirmResolutionChangeFullscreenButton->SetVisible(false);
 		m_CancelResolutionChangeButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonCancelResolutionChange"));
 
-		m_PresetResolutions.clear();
 		PopulateResolutionsComboBox();
+
+		m_NewGraphicsDriver = g_FrameMan.GetGraphicsDriver();
+		m_NewResUpscaled = g_FrameMan.GetResMultiplier() > 1 ? true : false;
+		m_NewResX = g_FrameMan.GetResX();
+		m_NewResY = g_FrameMan.GetResY();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -76,15 +83,20 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsVideoGUI::PopulateResolutionsComboBox() {
-	#ifdef _WIN32
+		m_PresetResolutions.clear();
+
 		// Get a list of modes from the fullscreen driver even though we're not using it. This is so we don't need to populate the list manually and has all the reasonable resolutions (along with some stupid ones but whatever)
+#ifdef _WIN32
 		GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_DIRECTX_ACCEL);
 #elif __unix__
 		GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_XWINDOWS_FULLSCREEN);
 #endif
+
 		// Index of found useful resolution (32bit)
 		int foundIndex = 0;
 		int currentResIndex = -1;
+
+		std::set<PresetResolutionRecord> resRecords;
 
 		for (int i = 0; resList && i < resList->num_modes; ++i) {
 			// Only list 32bpp modes
@@ -92,25 +104,27 @@ namespace RTE {
 				int width = resList->mode[i].width;
 				int height = resList->mode[i].height;
 
-					m_PresetResolutions.emplace(width, height, false);
 				if (IsSupportedResolution(width, height)) {
+					resRecords.emplace(width, height, false);
 
 					// If this is what we're currently set to have at next start, select it afterward
-					if ((g_FrameMan.GetNewResX() * g_FrameMan.ResolutionMultiplier()) == width && (g_FrameMan.GetNewResY() * g_FrameMan.ResolutionMultiplier()) == height) { currentResIndex = foundIndex; }
+					//if ((g_FrameMan.GetNewResX() * g_FrameMan.GetResMultiplier()) == width && (g_FrameMan.GetNewResY() * g_FrameMan.GetResMultiplier()) == height) { currentResIndex = foundIndex; }
 					// Only increment this when we find a usable 32bit resolution
-					foundIndex++;
+					//foundIndex++;
 				}
 			}
 		}
 		// Manually add qHD (960x540) to the list because it's rarely present in drivers
-		m_PresetResolutions.emplace(960, 540, false);
+		resRecords.emplace(960, 540, false);
 
 		std::set<PresetResolutionRecord> upscaledResRecords;
-		for (const PresetResolutionRecord &resRecord : m_PresetResolutions) {
+		for (const PresetResolutionRecord &resRecord : resRecords) {
 			PresetResolutionRecord upscaledResRecord(resRecord.Width * 2, resRecord.Height * 2, true);
 			if (upscaledResRecord.Width <= g_FrameMan.GetMaxResX() && upscaledResRecord.Height <= g_FrameMan.GetMaxResY()) { upscaledResRecords.emplace(upscaledResRecord); }
 		}
-		m_PresetResolutions.merge(upscaledResRecords);
+		resRecords.merge(upscaledResRecords);
+
+		m_PresetResolutions.assign(resRecords.begin(), resRecords.end());
 
 		for (const PresetResolutionRecord &resRecord : m_PresetResolutions) {
 			m_PresetResolutionComboBox->AddItem(resRecord.MakeResolutionString());
@@ -120,14 +134,78 @@ namespace RTE {
 
 
 		// If none of the listed matched our resolution set for next start, add a 'custom' one to display as the current res
+		/*
 		if (currentResIndex < 0) {
-			std::string isUpscaled = (g_FrameMan.ResolutionMultiplier() > 1) ? " Upscaled" : " Custom";
-			std::string resString = std::to_string(g_FrameMan.GetResX() / g_FrameMan.ResolutionMultiplier()) + "x" + std::to_string(g_FrameMan.GetResY() / g_FrameMan.ResolutionMultiplier()) + isUpscaled;
+			std::string isUpscaled = (g_FrameMan.GetResMultiplier() > 1) ? " Upscaled" : " Custom";
+			std::string resString = std::to_string(g_FrameMan.GetResX() / g_FrameMan.GetResMultiplier()) + "x" + std::to_string(g_FrameMan.GetResY() / g_FrameMan.GetResMultiplier()) + isUpscaled;
 			m_PresetResolutionComboBox->AddItem(resString);
 			currentResIndex = m_PresetResolutionComboBox->GetCount() - 1;
 		}
 		// Show the current resolution item to be the selected one
 		m_PresetResolutionComboBox->SetSelectedIndex(currentResIndex);
+		*/
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsVideoGUI::SetNewResolutionProperties(ResolutionChangeType resolutionChangeType, int newResX, int newResY, bool newResUpscaled, int newGfxDriver) {
+		int newResMultiplier = newResUpscaled ? 2 : 1;
+		bool linuxCompatible = false;
+
+#ifdef __unix__
+		linuxCompatible = true;
+#endif
+
+		switch (resolutionChangeType) {
+			case ResolutionChangeType::Windowed:
+				m_NewGraphicsDriver = GFX_AUTODETECT_WINDOWED;
+				m_NewResUpscaled = false;
+				m_NewResX = g_FrameMan.GetMaxResX() / 2;
+				m_NewResY = g_FrameMan.GetMaxResY() / 2;
+				break;
+			case ResolutionChangeType::Borderless:
+				m_NewGraphicsDriver = !linuxCompatible ? GFX_DIRECTX_WIN_BORDERLESS : GFX_AUTODETECT_FULLSCREEN;
+				m_NewResUpscaled = false;
+				m_NewResX = g_FrameMan.GetMaxResX();
+				m_NewResY = g_FrameMan.GetMaxResY();
+				break;
+			case ResolutionChangeType::UpscaledBorderless:
+				m_NewGraphicsDriver = !linuxCompatible ? GFX_DIRECTX_WIN_BORDERLESS : GFX_AUTODETECT_FULLSCREEN;
+				m_NewResUpscaled = true;
+				m_NewResX = g_FrameMan.GetMaxResX() / 2;
+				m_NewResY = g_FrameMan.GetMaxResY() / 2;
+				break;
+			case ResolutionChangeType::Dedicated:
+				m_NewGraphicsDriver = !linuxCompatible ? GFX_DIRECTX_ACCEL : GFX_AUTODETECT_FULLSCREEN;
+				m_NewResUpscaled = false;
+				m_NewResX = g_FrameMan.GetMaxResX();
+				m_NewResY = g_FrameMan.GetMaxResY();
+				break;
+			case ResolutionChangeType::UpscaledDedicated:
+				m_NewGraphicsDriver = !linuxCompatible ? GFX_DIRECTX_ACCEL : GFX_AUTODETECT_FULLSCREEN;
+				m_NewResUpscaled = true;
+				m_NewResX = g_FrameMan.GetMaxResX() / 2;
+				m_NewResY = g_FrameMan.GetMaxResY() / 2;
+				break;
+			default:
+				m_NewGraphicsDriver = newGfxDriver;
+				m_NewResUpscaled = newResUpscaled;
+				m_NewResX = newResX / newResMultiplier;
+				m_NewResY = newResY / newResMultiplier;
+				break;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsVideoGUI::ApplyNewResolution() {
+		g_GUISound.ButtonPressSound()->Play();
+
+		if (g_ActivityMan.GetActivity()) {
+			m_ResolutionChangeDialogBox->SetVisible(true);
+		} else {
+			g_FrameMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewGraphicsDriver);
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -135,87 +213,47 @@ namespace RTE {
 	void SettingsVideoGUI::HandleInputEvents(GUIEvent &guiEvent) {
 		if (guiEvent.GetType() == GUIEvent::Command) {
 			if (guiEvent.GetControl() == m_WindowedButton) {
-				if (g_ActivityMan.GetActivity()) {
-					m_ResolutionChangeToUpscaled = false;
-					m_ResolutionChangeDialogBox->SetVisible(true);
-					m_ConfirmResolutionChangeFullscreenButton->SetVisible(true);
-				} else {
-					g_FrameMan.SwitchResolution(960, 540);
-				}
-				g_GUISound.ButtonPressSound()->Play();
+				SetNewResolutionProperties(ResolutionChangeType::Windowed);
+				ApplyNewResolution();
 			} else if (guiEvent.GetControl() == m_BorderlessButton) {
-				if (!g_FrameMan.IsFullscreen() && !g_FrameMan.IsUpscaledFullscreen()) {
-					if (g_ActivityMan.GetActivity()) {
-						m_ResolutionChangeToUpscaled = false;
-						m_ResolutionChangeDialogBox->SetVisible(true);
-						m_ConfirmResolutionChangeFullscreenButton->SetVisible(true);
-					} else {
-						g_FrameMan.SwitchToFullscreen(false);
-					}
-				}
-				g_GUISound.ButtonPressSound()->Play();
+				SetNewResolutionProperties(ResolutionChangeType::Borderless);
+				ApplyNewResolution();
 			} else if (guiEvent.GetControl() == m_UpscaledBorderlessButton) {
-				if (!g_FrameMan.IsUpscaledFullscreen()) {
-					if (g_ActivityMan.GetActivity()) {
-						m_ResolutionChangeToUpscaled = true;
-						m_ResolutionChangeDialogBox->SetVisible(true);
-						m_ConfirmResolutionChangeFullscreenButton->SetVisible(true);
-					} else {
-						g_FrameMan.SwitchToFullscreen(true);
-					}
-				}
-				g_GUISound.ButtonPressSound()->Play();
-			} else if (guiEvent.GetControl() == m_DedicatedFullscreenButton) {
-				;
-
-			} else if (guiEvent.GetControl() == m_ConfirmResolutionChangeFullscreenButton) {
-				g_GUISound.ButtonPressSound()->Play();
-				m_ResolutionChangeDialogBox->SetVisible(false);
-				m_ConfirmResolutionChangeFullscreenButton->SetVisible(false);
-				if (!m_ResolutionChangeToUpscaled && g_FrameMan.IsFullscreen() && !g_FrameMan.IsUpscaledFullscreen()) {
-					g_FrameMan.SwitchResolution(960, 540, 1, true);
-				} else {
-					g_FrameMan.SwitchToFullscreen(m_ResolutionChangeToUpscaled ? true : false, true);
-				}
+				SetNewResolutionProperties(ResolutionChangeType::UpscaledBorderless);
+				ApplyNewResolution();
+			} else if (guiEvent.GetControl() == m_DedicatedButton) {
+				SetNewResolutionProperties(ResolutionChangeType::Dedicated);
+				ApplyNewResolution();
+			} else if (guiEvent.GetControl() == m_UpscaledDedicatedButton) {
+				SetNewResolutionProperties(ResolutionChangeType::UpscaledDedicated);
+				ApplyNewResolution();
+			} else if (guiEvent.GetControl() == m_PresetResolutionApplyButton || guiEvent.GetControl() == m_CustomResolutionApplyButton) {
+				ApplyNewResolution();
 
 			} else if (guiEvent.GetControl() == m_ConfirmResolutionChangeButton) {
 				g_GUISound.ButtonPressSound()->Play();
-				m_ResolutionChangeDialogBox->SetVisible(false);
-				m_ConfirmResolutionChangeButton->SetVisible(false);
-				g_FrameMan.SwitchResolution(g_FrameMan.GetNewResX(), g_FrameMan.GetNewResY(), 1, true);
-
+				// Must end any running activity otherwise have to deal with recreating all the GUI elements in GameActivity because it crashes when opening the BuyMenu. Easier to just end it.
+				g_ActivityMan.EndActivity();
+				g_FrameMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewGraphicsDriver);
 			} else if (guiEvent.GetControl() == m_CancelResolutionChangeButton) {
 				g_GUISound.ButtonPressSound()->Play();
 				m_ResolutionChangeDialogBox->SetVisible(false);
 			}
 
-
 		} else if (guiEvent.GetType() == GUIEvent::Notification) {
-			// Resolution combobox closed, something new selected
-			if (guiEvent.GetControl() == m_PresetResolutionComboBox) {
-				// Closed it, IE selected something
-				if (guiEvent.GetMsg() == GUIComboBox::Closed) {
-					// Get and read the new resolution data from the item's label
-					GUIListPanel::Item *pResItem = m_PresetResolutionComboBox->GetItem(m_PresetResolutionComboBox->GetSelectedIndex());
-					if (pResItem && !pResItem->m_Name.empty()) {
-						int newResX;
-						int newResY;
-						sscanf(pResItem->m_Name.c_str(), "%4dx%4d", &newResX, &newResY);
-						// Sanity check the values and then set them as the new resolution to be switched to next time FrameMan is created
-						if (g_FrameMan.IsSupportedResolution(newResX, newResY)) {
-							g_FrameMan.SetNewResX(newResX);
-							g_FrameMan.SetNewResY(newResY);
-						}
-					}
-					if (g_FrameMan.IsNewResSet()) {
-						if (g_ActivityMan.GetActivity()) {
-							m_ResolutionChangeDialogBox->SetVisible(true);
-							m_ConfirmResolutionChangeButton->SetVisible(true);
-						} else {
-							g_FrameMan.SwitchResolution(g_FrameMan.GetNewResX(), g_FrameMan.GetNewResY(), 1);
-						}
-					}
-				}
+			if (guiEvent.GetControl() == m_PresetResolutionComboBox && guiEvent.GetMsg() == GUIComboBox::Closed) {
+				int resListEntryID = m_PresetResolutionComboBox->GetSelectedIndex();
+				if (resListEntryID >= 0) { SetNewResolutionPropertiesFromPreset(m_PresetResolutions.at(resListEntryID)); }
+			} else if (guiEvent.GetControl() == m_PresetResolutionRadioButton && guiEvent.GetMsg() == GUIRadioButton::Pushed) {
+				g_GUISound.ButtonPressSound()->Play();
+				m_PresetResolutionBox->SetVisible(true);
+				m_CustomResolutionBox->SetVisible(false);
+				int resListEntryID = m_PresetResolutionComboBox->GetSelectedIndex();
+				if (resListEntryID >= 0) { SetNewResolutionPropertiesFromPreset(m_PresetResolutions.at(resListEntryID)); }
+			} else if (guiEvent.GetControl() == m_CustomResolutionRadioButton && guiEvent.GetMsg() == GUIRadioButton::Pushed) {
+				g_GUISound.ButtonPressSound()->Play();
+				m_PresetResolutionBox->SetVisible(false);
+				m_CustomResolutionBox->SetVisible(true);
 			}
 		}
 	}

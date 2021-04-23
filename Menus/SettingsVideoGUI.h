@@ -8,6 +8,7 @@ namespace RTE {
 	class GUIComboBox;
 	class GUILabel;
 	class GUIButton;
+	class GUIRadioButton;
 	class GUICheckbox;
 	class GUIEvent;
 
@@ -44,6 +45,18 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
+		enum class ResolutionChangeType {
+			Windowed,
+			Borderless,
+			UpscaledBorderless,
+			Dedicated,
+			UpscaledDedicated,
+			ManuallyDefined
+		};
+
+		/// <summary>
+		/// 
+		/// </summary>
 		struct PresetResolutionRecord {
 			int Width; //!<
 			int Height; //!<
@@ -75,16 +88,6 @@ namespace RTE {
 			}
 		};
 
-		/// <summary>
-		/// 
-		/// </summary>
-		struct CustomResolutionRecord {
-			int Width; //!<
-			int Height; //!<
-			bool Upscaled; //!<
-			int GraphicsDriver; //!<
-		};
-
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
 
 		GUICollectionBox *m_VideoSettingsBox; //!< The GUICollectionBox that contains all the Audio Settings menu GUI elements.
@@ -92,22 +95,29 @@ namespace RTE {
 		GUIButton *m_WindowedButton; //!<
 		GUIButton *m_BorderlessButton; //!<
 		GUIButton *m_UpscaledBorderlessButton; //!<
-		GUIButton *m_DedicatedFullscreenButton; //!<
+		GUIButton *m_DedicatedButton; //!<
+		GUIButton *m_UpscaledDedicatedButton; //!<
+
+		GUIRadioButton *m_PresetResolutionRadioButton; //!<
+		GUIRadioButton *m_CustomResolutionRadioButton; //!<
 
 		GUICollectionBox *m_PresetResolutionBox; //!<
 		GUIComboBox *m_PresetResolutionComboBox; //!<
 		GUIButton *m_PresetResolutionApplyButton; //!<
 		GUILabel *m_PresetResolutionMessageLabel; //!<
-		std::set<PresetResolutionRecord> m_PresetResolutions; //!<
+		std::vector<PresetResolutionRecord> m_PresetResolutions; //!<
 
 		GUICollectionBox *m_CustomResolutionBox; //!<
+		GUIButton *m_CustomResolutionApplyButton; //!<
 
 		GUICollectionBox *m_ResolutionChangeDialogBox; //!<
 		GUIButton *m_ConfirmResolutionChangeButton; //!<
-		GUIButton *m_ConfirmResolutionChangeFullscreenButton; //!<
 		GUIButton *m_CancelResolutionChangeButton; //!<
 
-		bool m_ResolutionChangeToUpscaled; //!<
+		int m_NewGraphicsDriver;
+		int m_NewResX; //!< New game window width that will take effect next time the FrameMan is started.
+		int m_NewResY; //!< New game window height that will take effect next time the FrameMan is started.
+		bool m_NewResUpscaled; //!< New window width/height multiple that will take effect next time the FrameMan is started.
 
 #pragma region Video Settings Handling
 		/// <summary>
@@ -122,6 +132,27 @@ namespace RTE {
 		/// Updates the contents of the screen resolution combo box.
 		/// </summary>
 		void PopulateResolutionsComboBox();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="resolutionChangeType"></param>
+		/// <param name="newResX"></param>
+		/// <param name="newResY"></param>
+		/// <param name="newResMultiplier"></param>
+		/// <param name="newGfxDriver"></param>
+		void SetNewResolutionProperties(ResolutionChangeType resolutionChangeType, int newResX = 960, int newResY = 540, bool newResUpscaled = false, int newGfxDriver = 2);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="presetResolutionRecord"></param>
+		void SetNewResolutionPropertiesFromPreset(PresetResolutionRecord presetResolutionRecord) { SetNewResolutionProperties(ResolutionChangeType::ManuallyDefined, presetResolutionRecord.Width, presetResolutionRecord.Height, presetResolutionRecord.Upscaled); }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void ApplyNewResolution();
 #pragma endregion
 
 		// Disallow the use of some implicit methods.

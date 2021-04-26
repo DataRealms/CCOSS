@@ -171,7 +171,7 @@ namespace RTE {
 			case TitleTransition::MainMenuToScenario:
 			case TitleTransition::MainMenuToCampaign:
 				if (m_SectionSwitch) {
-					SetSectionDurationAndResetSwitch(2.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier());
+					SetSectionDurationAndResetSwitch(1.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier());
 					g_GUISound.SplashSound()->Play();
 					g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
 				}
@@ -181,7 +181,7 @@ namespace RTE {
 				break;
 			case TitleTransition::PlanetToMainMenu:
 				if (m_SectionSwitch) {
-					SetSectionDurationAndResetSwitch(2.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier());
+					SetSectionDurationAndResetSwitch(1.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier());
 					g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccmenu.ogg", -1);
 				}
 				m_ScrollOffset.SetY(EaseOut(m_PlanetViewOffsetY, 0, m_SectionProgress));
@@ -189,18 +189,18 @@ namespace RTE {
 				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState(TitleTransition::MainMenu); }
 				break;
 			case TitleTransition::MainMenuToCredits:
-				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(2.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier()); }
+				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(1.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier()); }
 				m_ScrollOffset.SetY(EaseOut(0, m_PlanetViewOffsetY, m_SectionProgress));
 				break;
 			case TitleTransition::CreditsToMainMenu:
-				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(2.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier()); }
+				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(1.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier()); }
 				m_ScrollOffset.SetY(EaseOut(m_PlanetViewOffsetY, 0, m_SectionProgress));
 				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState(TitleTransition::MainMenu); }
 				break;
 			case TitleTransition::ScenarioFadeIn:
 			case TitleTransition::CampaignFadeIn:
 				if (m_SectionSwitch) {
-					SetSectionDurationAndResetSwitch(1.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier());
+					SetSectionDurationAndResetSwitch(0.75F * g_SettingsMan.GetMenuTransitionDurationMultiplier());
 					m_ScrollOffset.SetY(m_PlanetViewOffsetY);
 					g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
 				}
@@ -208,13 +208,13 @@ namespace RTE {
 				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState((m_TitleTransitionState == TitleTransition::ScenarioFadeIn) ? TitleTransition::ScenarioMenu : TitleTransition::CampaignMenu); }
 				break;
 			case TitleTransition::FadeOut:
-				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(1.5F * g_SettingsMan.GetMenuTransitionDurationMultiplier()); }
+				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(0.75F * g_SettingsMan.GetMenuTransitionDurationMultiplier()); }
 				m_FadeAmount = static_cast<int>(EaseIn(0, 255, m_SectionProgress));
 				g_AudioMan.SetTempMusicVolume(EaseIn(g_AudioMan.GetMusicVolume(), 0, m_SectionProgress));
 				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState(TitleTransition::TransitionEnd); }
 				break;
 			case TitleTransition::ScrollFadeOut:
-				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(1.5F * g_SettingsMan.GetMenuTransitionDurationMultiplier()); }
+				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(0.75F * g_SettingsMan.GetMenuTransitionDurationMultiplier()); }
 				m_ScrollOffset.SetY(EaseIn(0, 250, m_SectionProgress));
 				m_FadeAmount = static_cast<int>(EaseIn(0, 255, m_SectionProgress));
 				g_AudioMan.SetTempMusicVolume(EaseIn(g_AudioMan.GetMusicVolume(), 0, m_SectionProgress));
@@ -505,7 +505,7 @@ namespace RTE {
 				break;
 			case IntroSequence::MainMenuAppear:
 				if (m_SectionSwitch) {
-					SetSectionDurationAndResetSwitch(1.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier());
+					SetSectionDurationAndResetSwitch(0.5F * g_SettingsMan.GetMenuTransitionDurationMultiplier());
 					m_FadeAmount = 0;
 					g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccmenu.ogg", -1);
 				}

@@ -2,8 +2,11 @@
 #include "FrameMan.h"
 #include "UInputMan.h"
 #include "SettingsMan.h"
-#include "AllegroBitmap.h"
+
+#include "GUI.h"
 #include "GUISound.h"
+#include "AllegroScreen.h"
+#include "AllegroBitmap.h"
 
 namespace RTE {
 
@@ -61,7 +64,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void TitleScreen::Create(GUIFont *introTextFont) {
+	void TitleScreen::Create(AllegroScreen *guiScreen) {
 		CreateTitleElements();
 
 		m_FadeScreen = create_bitmap_ex(32, m_ScreenResX, m_ScreenResY);
@@ -72,7 +75,8 @@ namespace RTE {
 
 		if (!g_FrameMan.ResolutionChanged()) {
 			if (!g_SettingsMan.SkipIntro()) {
-				m_IntroTextFont = introTextFont;
+				m_IntroTextFont = std::make_unique<GUIFont>("FontLarge");
+				m_IntroTextFont->Load(guiScreen, "Base.rte/GUIs/Skins/Menus/FontLarge.png");
 				CreateIntroSequenceSlides();
 			} else {
 				m_IntroSequenceState = IntroSequence::MainMenuAppear;

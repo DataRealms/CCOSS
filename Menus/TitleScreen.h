@@ -7,10 +7,10 @@
 #include "MOSParticle.h"
 #include "SceneLayer.h"
 
-#include "GUI.h"
-#include "GUIFont.h"
-
 namespace RTE {
+
+	class AllegroScreen;
+	class GUIFont;
 
 	/// <summary>
 	/// Handling for the title screen scene composition, intro sequence and transitions between menu screens.
@@ -43,14 +43,14 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a TitleScreen object in system memory.
 		/// </summary>
-		/// <param name="introTextFont">Pointer to the GUIFont object that will handle text drawing to the screen.</param>
-		explicit TitleScreen(GUIFont *introTextFont) { Clear(); Create(introTextFont); }
+		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used to create this TitleScreen's GUIFont.</param>
+		explicit TitleScreen(AllegroScreen *guiScreen) { Clear(); Create(guiScreen); }
 
 		/// <summary>
 		/// Makes the TitleScreen object ready for use.
 		/// </summary>
-		/// <param name="introTextFont">Pointer to the GUIFont object that will handle text drawing to the screen.</param>
-		void Create(GUIFont *introTextFont);
+		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used to create this TitleScreen's GUIFont.</param>
+		void Create(AllegroScreen *guiScreen);
 #pragma endregion
 
 #pragma region Destruction
@@ -204,7 +204,7 @@ namespace RTE {
 		Timer m_IntroSongTimer; //!<
 		float m_SlideFadeInDuration; //!<
 		float m_SlideFadeOutDuration; //!<
-		GUIFont *m_IntroTextFont; //!<
+		std::unique_ptr<GUIFont> m_IntroTextFont; //!<
 		std::string m_SlideshowSlideText; //!<
 		std::array<BITMAP *, 8> m_IntroSlides; //!<
 

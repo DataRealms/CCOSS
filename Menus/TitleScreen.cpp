@@ -131,7 +131,7 @@ namespace RTE {
 				newStar.Bitmap = starHugeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
 				newStar.Intensity = RandomNum(166, 185);
 			}
-			newStar.Position = Vector(RandomNum(0.0F, static_cast<float>(m_ScreenResX)), RandomNum(0.0F, static_cast<float>(m_Nebula.GetBitmap()->h)));
+			newStar.Position = Vector(RandomNum(0.0F, static_cast<float>(m_ScreenResX)), RandomNum(-100.0F, static_cast<float>(m_Nebula.GetBitmap()->h)));
 
 			m_BackdropStars.emplace_back(newStar);
 		}
@@ -515,7 +515,8 @@ namespace RTE {
 		for (const Star &star : m_BackdropStars) {
 			int intensity = star.Intensity + RandomNum(0, (star.Size == Star::StarSize::StarSmall) ? 35 : 70);
 			set_screen_blender(intensity, intensity, intensity, intensity);
-			draw_trans_sprite(m_BackBuffer, star.Bitmap, star.Position.GetFloorIntX(), static_cast<int>(star.Position.GetY() - (m_ScrollOffset.GetY() * m_BackdropScrollRatio)));
+			int starPosY = static_cast<int>(star.Position.GetY() - (m_ScrollOffset.GetY() * (m_BackdropScrollRatio * ((star.Size == Star::StarSize::StarSmall) ? 0.8F : 1.0F))));
+			draw_trans_sprite(m_BackBuffer, star.Bitmap, star.Position.GetFloorIntX(), starPosY);
 		}
 
 		m_PlanetPos.SetXY(static_cast<float>(m_ScreenResX / 2), static_cast<float>(567 - m_ScrollOffset.GetFloorIntY()));

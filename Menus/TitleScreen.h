@@ -185,6 +185,7 @@ namespace RTE {
 		float m_SectionElapsedTime; //!< How many seconds have elapsed on a section.
 		Timer m_SectionTimer; //!<
 
+		float m_ScrollStart; //!<
 		float m_ScrollDuration; //!<
 		Vector m_ScrollOffset; //!<
 		float m_BackdropScrollRatio; //!<
@@ -220,6 +221,12 @@ namespace RTE {
 
 #pragma region Title Scene Handling
 		/// <summary>
+		/// Sets the duration of a new section and resets the switch.
+		/// </summary>
+		/// <param name="newDuration">The duration of the new section.</param>
+		void SetSectionDurationAndResetSwitch(float newDuration) { m_SectionDuration = newDuration; m_SectionSwitch = false; }
+
+		/// <summary>
 		/// 
 		/// </summary>
 		void UpdateTitleTransitions();
@@ -249,10 +256,9 @@ namespace RTE {
 		void UpdateIntroSlideshowSequence(bool skipSlideshow = false);
 
 		/// <summary>
-		/// Updates the state of the intro sequence.
+		/// Updates the state of the intro pre-main menu sequence.
 		/// </summary>
-		/// <param name="skipSection">Whether the current section of the intro sequence should be skipped.</param>
-		void UpdateIntro(bool skipSection = false);
+		void UpdateIntroPreMainMenuSequence();
 
 		/// <summary>
 		/// Draws the current slideshow sequence slide to the screen.

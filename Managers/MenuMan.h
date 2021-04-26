@@ -15,7 +15,7 @@ namespace RTE {
 	class ScenarioGUI;
 
 	/// <summary>
-	/// 
+	/// The singleton manager responsible for handling all the out-of-game menu screens (main menu, scenario menu, etc.).
 	/// </summary>
 	class MenuMan : public Singleton<MenuMan> {
 
@@ -23,17 +23,17 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// 
+		/// Constructor method used to instantiate a MenuMan object in system memory. Initialize() should be called before using the object.
 		/// </summary>
 		MenuMan() = default;
 
 		/// <summary>
-		/// 
+		/// Makes the MenuMan object ready for use.
 		/// </summary>
 		void Initialize(bool initLoadingScreen = true);
 
 		/// <summary>
-		/// Destroy the Main Menu and initialize it again after a resolution change. Must be done otherwise the GUIs retain the original resolution settings and become all screwy.
+		/// Reinitializes all the Main Menu GUIs after a resolution change. Must be done otherwise the GUIs retain the original resolution settings and become all screwy.
 		/// </summary>
 		void Reinitialize();
 #pragma endregion
@@ -48,12 +48,12 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// 
+		/// Updates the state of this MenuMan.
 		/// </summary>
 		bool Update();
 
 		/// <summary>
-		/// 
+		/// Draws the MenuMan to the screen.
 		/// </summary>
 		void Draw();
 #pragma endregion
@@ -70,6 +70,8 @@ namespace RTE {
 			CampaignMenuActive
 		};
 
+		ActiveMenu m_ActiveMenu; //!< The currently active menu screen that is being updated and drawn. See ActiveMenu enumeration.
+
 		std::unique_ptr<AllegroInput> m_GUIInput; //!< The GUIInput interface of this MenuMan.
 		std::unique_ptr<AllegroScreen> m_GUIScreen; //!< The GUIScreen interface of this MenuMan.
 		std::unique_ptr<Controller> m_MenuController; //!<
@@ -77,8 +79,6 @@ namespace RTE {
 		std::unique_ptr<TitleScreen> m_TitleScreen; //!<
 		std::unique_ptr<MainMenuGUI> m_MainMenu; //!<
 		std::unique_ptr<ScenarioGUI> m_ScenarioMenu; //!<
-
-		ActiveMenu m_ActiveMenu; //!<
 
 #pragma region Updates
 		/// <summary>

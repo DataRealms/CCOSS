@@ -13,7 +13,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	SettingsInputGUI::SettingsInputGUI(GUIControlManager *parentControlManager, Controller *controller) : m_GUIControlManager(parentControlManager), m_Controller(controller) {
+	SettingsInputGUI::SettingsInputGUI(GUIControlManager *parentControlManager) : m_GUIControlManager(parentControlManager) {
 		m_InputSettingsBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxInputSettings"));
 
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {

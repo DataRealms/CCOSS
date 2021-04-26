@@ -17,14 +17,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	SettingsGUI::SettingsGUI(AllegroScreen *guiScreen, AllegroInput *guiInput, Controller *controller) {
+	SettingsGUI::SettingsGUI(AllegroScreen *guiScreen, AllegroInput *guiInput) {
 		if (!m_GUIControlManager) { m_GUIControlManager = std::make_unique<GUIControlManager>(); }
 		if (!m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSkin.ini")) {
 			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSkin.ini");
 		}
 		m_GUIControlManager->Load("Base.rte/GUIs/SettingsGUI.ini");
-
-		m_Controller = controller;
 
 		GUICollectionBox *rootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
 		rootBox->SetPositionAbs((g_FrameMan.GetResX() - rootBox->GetWidth()) / 2, 0);
@@ -45,7 +43,7 @@ namespace RTE {
 
 		m_VideoSettingsMenu = std::make_unique<SettingsVideoGUI>(m_GUIControlManager.get());
 		m_AudioSettingsMenu = std::make_unique<SettingsAudioGUI>(m_GUIControlManager.get());
-		m_InputSettingsMenu = std::make_unique<SettingsInputGUI>(m_GUIControlManager.get(), controller);
+		m_InputSettingsMenu = std::make_unique<SettingsInputGUI>(m_GUIControlManager.get());
 		m_GameplaySettingsMenu = std::make_unique<SettingsGameplayGUI>(m_GUIControlManager.get());
 		m_NetworkSettingsMenu = std::make_unique<SettingsNetworkGUI>(m_GUIControlManager.get());
 		m_MiscSettingsMenu = std::make_unique<SettingsMiscGUI>(m_GUIControlManager.get());

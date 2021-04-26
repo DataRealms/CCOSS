@@ -42,7 +42,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::Create(AllegroScreen *guiScreen, AllegroInput *guiInput, Controller *controller) {
+	void MainMenuGUI::Create(AllegroScreen *guiScreen, AllegroInput *guiInput) {
 		if (!m_GUIControlManager) { m_GUIControlManager = std::make_unique<GUIControlManager>(); }
 		if (!m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSkin.ini")) {
 			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSkin.ini");
@@ -80,7 +80,7 @@ namespace RTE {
 		CreateEditorsScreen();
 		CreateCreditsScreen();
 
-		m_SettingsMenu = std::make_unique<SettingsGUI>(guiScreen, guiInput, controller);
+		m_SettingsMenu = std::make_unique<SettingsGUI>(guiScreen, guiInput);
 		m_ModManagerMenu = std::make_unique<ModManagerGUI>(guiScreen, guiInput);
 
 		// Set the active screen to the settings screen otherwise we're at the main screen after reinitializing.

@@ -29,8 +29,7 @@ namespace RTE {
 		/// Constructor method used to instantiate a SettingsInputGUI object in system memory and make it ready for use.
 		/// </summary>
 		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which holds all the GUIControls of this SettingsInputGUI.</param>
-		/// <param name="controller"></param>
-		explicit SettingsInputGUI(GUIControlManager *parentControlManager, Controller *controller);
+		explicit SettingsInputGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -150,7 +149,6 @@ namespace RTE {
 		};
 
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
-		Controller *m_Controller;
 
 		GUICollectionBox *m_InputSettingsBox; //!<
 

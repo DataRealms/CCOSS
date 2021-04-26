@@ -135,15 +135,6 @@ namespace RTE {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeOut);
 			g_ActivityMan.SetRestartActivity();
 		}
-
-		/*
-		// In server mode once we exited to main or scenario menu we need to start Lobby activity
-		if (g_NetworkServer.IsServerModeEnabled()) {
-			EnterMultiplayerLobby();
-			g_IntroState = FADEOUT;
-			m_SectionSwitch = true;
-		}
-		*/
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

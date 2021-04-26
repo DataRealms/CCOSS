@@ -8,6 +8,7 @@
 #include "GUIInput.h"
 #include "Icon.h"
 #include "GameActivity.h"
+#include "NetworkServer.h"
 
 namespace RTE {
 
@@ -785,7 +786,8 @@ namespace RTE {
 
 		if (g_ActivityMan.IsInActivity()) {
 			const GameActivity *gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
-			if (AnyStartPress(false) && (!gameActivity || !gameActivity->IsBuyGUIVisible(-1))) {
+			// Don't allow pausing and returning to main menu when running in server mode to not disrupt the simulation for the clients
+			if (!g_NetworkServer.IsServerModeEnabled() && AnyStartPress(false) && (!gameActivity || !gameActivity->IsBuyGUIVisible(-1))) {
 				g_ActivityMan.PauseActivity();
 				return;
 			}

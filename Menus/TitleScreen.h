@@ -160,6 +160,7 @@ namespace RTE {
 
 		TitleTransition m_TitleTransitionState; //!< The current title transition (scroll) state.
 
+		BITMAP *m_BackBuffer; //!<
 		int m_ScreenResX; //!<
 		int m_ScreenResY; //!<
 
@@ -227,19 +228,19 @@ namespace RTE {
 		void SetSectionDurationAndResetSwitch(float newDuration) { m_SectionDuration = newDuration; m_SectionSwitch = false; }
 
 		/// <summary>
-		/// 
+		/// Updates the title screen transition states and scrolls the title scene accordingly.
 		/// </summary>
 		void UpdateTitleTransitions();
-
-		/// <summary>
-		/// Draws the game logo and effects to the screen.
-		/// </summary>
-		void DrawGameLogo();
 
 		/// <summary>
 		/// Draws the whole title screen scene to the screen.
 		/// </summary>
 		void DrawTitleScreenScene();
+
+		/// <summary>
+		/// Draws the game logo and effects to the screen.
+		/// </summary>
+		void DrawGameLogo();
 #pragma endregion
 
 #pragma region Intro Sequence Handling
@@ -264,11 +265,6 @@ namespace RTE {
 		/// Draws the current slideshow sequence slide to the screen.
 		/// </summary>
 		void DrawSlideshowSlide();
-
-		/// <summary>
-		/// Draws the current intro sequence state to the screen.
-		/// </summary>
-		void DrawIntro();
 #pragma endregion
 
 		/// <summary>

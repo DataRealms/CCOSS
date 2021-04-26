@@ -51,14 +51,13 @@ namespace RTE {
 	void RunMenuLoop() {
 		g_UInputMan.DisableKeys(false);
 		g_UInputMan.TrapMousePos(false);
+		g_AudioMan.StopAll();
 
 		while (!System::IsSetToQuit() && !g_ActivityMan.ActivitySetToResume()) {
 			g_UInputMan.Update();
 			g_TimerMan.Update();
 			g_TimerMan.UpdateSim();
 			g_AudioMan.Update();
-
-			if (g_NetworkServer.IsServerModeEnabled()) { g_NetworkServer.Update(); }
 
 			if (g_MenuMan.Update()) {
 				break;

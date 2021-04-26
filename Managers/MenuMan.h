@@ -55,7 +55,7 @@ namespace RTE {
 		/// <summary>
 		/// Draws the MenuMan to the screen.
 		/// </summary>
-		void Draw();
+		void Draw() const;
 #pragma endregion
 
 	private:

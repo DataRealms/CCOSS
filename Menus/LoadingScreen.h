@@ -55,7 +55,7 @@ namespace RTE {
 		static void LoadingSplashProgressReport(const std::string &reportString, bool newItem = false);
 #pragma endregion
 
-	protected:
+	private:
 
 		/// <summary>
 		/// Custom deleters for std::unique_ptr members. Must be defined to avoid including the class headers and just rely on forward declaration.
@@ -68,8 +68,6 @@ namespace RTE {
 		BITMAP *m_ProgressListboxBitmap; //!< BITMAP that the progress report will be drawn into.
 		int m_ProgressListboxPosX; //!< Position of the progress report box on X axis.
 		int m_ProgressListboxPosY; //!< Position of the progress report box on Y axis.
-
-	private:
 
 		/// <summary>
 		/// Clears all the member variables of this LoadingScreen, effectively resetting the members of this abstraction level only.

@@ -25,9 +25,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MenuMan::Initialize(bool initLoadingScreen) {
+		m_ActiveMenu = ActiveMenu::MenusDisabled;
+
 		m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer32());
-		m_GUIInput = std::make_unique<AllegroInput>(-1);
-		m_MenuController = std::make_unique<Controller>(Controller::CIM_PLAYER);
+		m_GUIInput = std::make_unique<AllegroInput>(-1, true);
 
 		if (initLoadingScreen) {
 			g_LoadingScreen.Create(m_GUIScreen.get(), m_GUIInput.get());
@@ -42,6 +43,9 @@ namespace RTE {
 		m_TitleScreen = std::make_unique<TitleScreen>(m_GUIScreen.get());
 		m_MainMenu = std::make_unique<MainMenuGUI>(m_GUIScreen.get(), m_GUIInput.get());
 		m_ScenarioMenu = std::make_unique<ScenarioGUI>(m_GUIScreen.get(), m_GUIInput.get());
+
+		// TODO: MetaGameGUI doesn't seem to actually do anything with the Controller but removing conflicts with the second Create() method so that needs to be sorted out sometime in the year 3000.
+		m_MenuController = std::make_unique<Controller>(Controller::CIM_PLAYER);
 		g_MetaMan.GetGUI()->Create(m_MenuController.get());
 	}
 
@@ -86,9 +90,11 @@ namespace RTE {
 			m_ActiveMenu = newActiveMenu;
 			switch (m_ActiveMenu) {
 				case ActiveMenu::ScenarioMenuActive:
+					m_ScenarioMenu->SetEnabled();
 					m_ScenarioMenu->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
 					break;
 				case ActiveMenu::CampaignMenuActive:
+					g_MetaMan.GetGUI()->SetEnabled();
 					g_MetaMan.GetGUI()->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
 					break;
 				default:
@@ -102,21 +108,19 @@ namespace RTE {
 	bool MenuMan::UpdateMainMenu() const {
 		MainMenuGUI::MainMenuUpdateResult updateResult = m_MainMenu->Update();
 
-		if (updateResult == MainMenuGUI::MainMenuUpdateResult::ScenarioStarted && m_ActiveMenu != ActiveMenu::ScenarioMenuActive) {
+		if (updateResult == MainMenuGUI::MainMenuUpdateResult::ScenarioStarted) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario);
-			m_ScenarioMenu->SetEnabled();
-		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::CampaignStarted && m_ActiveMenu != ActiveMenu::CampaignMenuActive) {
+		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::CampaignStarted) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCampaign);
-			g_MetaMan.GetGUI()->SetEnabled(true);
+		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::EnterCreditsScreen) {
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCredits);
+		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::BackToMainFromCredits) {
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::CreditsToMainMenu);
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::ActivityResumed) {
 			g_ActivityMan.SetResumeActivity();
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::ActivityStarted) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollFadeOut);
 			g_ActivityMan.SetRestartActivity();
-		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::EnterCreditsScreen) {
-			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCredits);
-		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::BackToMainFromCredits) {
-			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::CreditsToMainMenu);
 		}
 		return updateResult == MainMenuGUI::MainMenuUpdateResult::Quit;
 	}
@@ -126,7 +130,7 @@ namespace RTE {
 	void MenuMan::UpdateScenarioMenu() const {
 		ScenarioGUI::ScenarioMenuUpdateResult updateResult = m_ScenarioMenu->Update();
 
-		if (m_ActiveMenu != ActiveMenu::MainMenuActive && updateResult == ScenarioGUI::ScenarioMenuUpdateResult::BackToMain) {
+		if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::BackToMain) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PlanetToMainMenu);
 		} else if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::ActivityResumed) {
 			g_ActivityMan.SetResumeActivity();
@@ -190,7 +194,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MenuMan::Draw() {
+	void MenuMan::Draw() const {
 		g_FrameMan.ClearBackBuffer32();
 
 		if (g_FrameMan.ResolutionChanged()) {

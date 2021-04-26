@@ -45,15 +45,15 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a MainMenuGUI object in system memory. Create() should be called before using the object.
 		/// </summary>
-		/// <param name="guiScreen">Pointer to a GUIInput interface that will be used by this SettingsGUI's GUIControlManager.</param>
-		/// <param name="guiInput">Pointer to a GUIScreen interface that will be used by this SettingsGUI's GUIControlManager.</param>
+		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this MainMenuGUI's GUIControlManager.</param>
+		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this MainMenuGUI's GUIControlManager.</param>
 		MainMenuGUI(AllegroScreen *guiScreen, AllegroInput *guiInput) { Clear(); Create(guiScreen, guiInput); }
 
 		/// <summary>
 		/// Makes the MainMenuGUI object ready for use.
 		/// </summary>
-		/// <param name="guiScreen">Pointer to a GUIInput interface that will be used by this SettingsGUI's GUIControlManager.</param>
-		/// <param name="guiInput">Pointer to a GUIScreen interface that will be used by this SettingsGUI's GUIControlManager.</param>
+		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this MainMenuGUI's GUIControlManager.</param>
+		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this MainMenuGUI's GUIControlManager.</param>
 		void Create(AllegroScreen *guiScreen, AllegroInput *guiInput);
 #pragma endregion
 

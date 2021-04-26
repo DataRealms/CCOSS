@@ -139,7 +139,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool MenuMan::UpdateCampaignMenu() const {
-		g_MetaMan.GetGUI()->SetStationPos(m_TitleScreen->GetStationPos());
+		g_MetaMan.GetGUI()->SetStationInfo(m_TitleScreen->GetStationPos());
 		g_MetaMan.Update();
 
 		if (g_MetaMan.GetGUI()->BackToMain()) {

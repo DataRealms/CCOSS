@@ -96,10 +96,10 @@ namespace RTE {
 		float GetPlanetRadius() const { return m_PlanetRadius; }
 
 		/// <summary>
-		/// Gets the position of the station on the title screen scene.
+		/// Gets the position of the station on the planet orbit.
 		/// </summary>
-		/// <returns>Vector with the position of the station on the title screen scene.</returns>
-		Vector GetStationPos() const { return m_Station.GetPos(); }
+		/// <returns>Vector with the position of the station on the planet orbit.</returns>
+		Vector GetStationPos() const { return m_StationOffset; }
 #pragma endregion
 
 #pragma region Concrete Methods

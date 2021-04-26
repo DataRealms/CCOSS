@@ -439,10 +439,10 @@ public:
 	void SetToStartNewGame();
 
 	/// <summary>
-	/// 
+	/// Sets where the station is located on the planet orbit.
 	/// </summary>
-	/// <param name="newStationPos"></param>
-	void SetStationPos(const Vector &newStationPos) { m_StationPos = newStationPos; }
+	/// <param name="newStationPos">The position of the station on the planet orbit.</param>
+	void SetStationInfo(const Vector &newStationPos) { m_StationPosOnOrbit = newStationPos; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -1253,7 +1253,7 @@ protected:
     // Player selected to quit the program
     bool m_Quit;
 
-	Vector m_StationPos; //!< The position of the station on the planet orbit.
+	Vector m_StationPosOnOrbit; //!< The position of the station on the planet orbit.
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

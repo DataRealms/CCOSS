@@ -312,6 +312,8 @@ void MetagameGUI::Clear()
     m_StartDifficulty = Activity::MediumDifficulty;
     m_BackToMain = false;
     m_Quit = false;
+
+	m_StationPosOnOrbit.Reset();
 }
 
 
@@ -1919,7 +1921,7 @@ void MetagameGUI::Update()
     {
         // The tradestar is a moving target
 		if (m_aStationIncomeLineIndices[metaPlayer] >= 0 && !m_IncomeSiteLines.empty())
-			m_IncomeSiteLines[m_aStationIncomeLineIndices[metaPlayer]].m_PlanetPoint = m_StationPos;
+			m_IncomeSiteLines[m_aStationIncomeLineIndices[metaPlayer]].m_PlanetPoint = m_StationPosOnOrbit;
 
         // The brain pool counters might also be if player moves the player bar
         if (m_aBrainSaleIncomeLineIndices[metaPlayer] >= 0 && !m_IncomeSiteLines.empty())
@@ -3456,7 +3458,7 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
 
             // TRADESTAR BANK ACCOUNT AND RENT
             // Add line to show existing funds stored in space station, and deduct rent from
-            m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 0, 1.0, m_StationPos, "TradeStar Midas", 0, c_GUIColorYellow, -1, 0, channelHeight, 2.0f));
+            m_IncomeSiteLines.push_back(SiteLine(m_AnimMetaPlayer, 0, 1.0, m_StationPosOnOrbit, "TradeStar Midas", 0, c_GUIColorYellow, -1, 0, channelHeight, 2.0f));
             m_IncomeSiteLines.back().m_FundsAmount = g_MetaMan.m_Players[m_AnimMetaPlayer].m_PhaseStartFunds;
             m_IncomeSiteLines.back().m_FundsTarget = m_IncomeSiteLines.back().m_FundsAmount - totalRent;
             // Save the index so we can update the line later

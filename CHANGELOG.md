@@ -220,6 +220,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - On Linux `RTEAbort` and `RTEAssert` will now properly exit in debug modes.
 
+- Fixed `Reader::ReadLine` not returning a trimmed string, which prevented some mods to load on linux
+
 - Fixed ISOC++ incompatibilities of MSVC and gcc in various places.
 
 ### Removed

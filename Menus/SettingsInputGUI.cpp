@@ -5,7 +5,7 @@
 #include "GUICollectionBox.h"
 #include "GUIButton.h"
 #include "GUISlider.h"
-#include "GUICheckbox.h"
+#include "GUIRadioButton.h"
 #include "GUILabel.h"
 #include "AllegroBitmap.h"
 
@@ -17,94 +17,92 @@ namespace RTE {
 		m_InputSettingsBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxInputSettings"));
 
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
-			m_PlayerInputSettingsBoxes.at(player) = PlayerInputSettingsBox();
-
 			std::string playerNum = std::to_string(player + 1);
 
-			/*
-			m_PlayerInputSettingsBoxes.at(player).InputDeviceLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelP" + playerNum + "Device"));
-			m_PlayerInputSettingsBoxes.at(player).NextInputDeviceButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonP" + playerNum + "NextDevice"));
-			m_PlayerInputSettingsBoxes.at(player).PrevInputDeviceButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonP" + playerNum + "PrevDevice"));
+			m_PlayerInputSettingsBoxes.at(player).SelectedDeviceLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelP" + playerNum + "SelectedDevice"));
+
+			m_PlayerInputSettingsBoxes.at(player).NextDeviceButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonP" + playerNum + "NextDevice"));
+			m_PlayerInputSettingsBoxes.at(player).PrevDeviceButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonP" + playerNum + "PrevDevice"));
 			m_PlayerInputSettingsBoxes.at(player).ConfigureControlsButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonP" + playerNum + "Config"));
-			m_PlayerInputSettingsBoxes.at(player).ClearControlsButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonP" + playerNum + "Clear"));
+			m_PlayerInputSettingsBoxes.at(player).ResetControlsButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonP" + playerNum + "Clear"));
 
-			m_PlayerInputSettingsBoxes.at(player).DeadZoneSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderP" + playerNum + "DeadZone"));
-			m_PlayerInputSettingsBoxes.at(player).DeadZoneSlider->SetValue(static_cast<int>(g_UInputMan.GetControlScheme(0)->GetJoystickDeadzone()) * 250);
+			m_PlayerInputSettingsBoxes.at(player).SensitivtyLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelP" + playerNum + "Sensitivity"));
+			m_PlayerInputSettingsBoxes.at(player).SensitivitySlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderP" + playerNum + "Sensitivity"));
 
-			m_PlayerInputSettingsBoxes.at(player).DeadZoneLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelP" + playerNum + "DeadZoneValue"));
-			m_PlayerInputSettingsBoxes.at(player).DeadZoneLabel->SetText(std::to_string(m_PlayerInputSettingsBoxes.at(player).DeadZoneSlider->GetValue()));
-
-			m_PlayerInputSettingsBoxes.at(player).DeadZoneTypeCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxP" + playerNum + "DeadZoneType"));
-
-			if (g_UInputMan.GetControlScheme(0)->GetJoystickDeadzoneType() == DeadZoneType::CIRCLE) {
-				m_PlayerInputSettingsBoxes.at(player).DeadZoneTypeCheckbox->SetCheck(true);
-				m_PlayerInputSettingsBoxes.at(player).DeadZoneTypeCheckbox->SetText("O");
-			} else {
-				m_PlayerInputSettingsBoxes.at(player).DeadZoneTypeCheckbox->SetCheck(false);
-				m_PlayerInputSettingsBoxes.at(player).DeadZoneTypeCheckbox->SetText(std::string({ -2, 0 }));
-			}
-			*/
+			m_PlayerInputSettingsBoxes.at(player).DeadZoneControlsBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxP" + playerNum + "DeadzoneControls"));
+			m_PlayerInputSettingsBoxes.at(player).CircleDeadZoneRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioP" + playerNum + "DeadzoneCircle"));
+			m_PlayerInputSettingsBoxes.at(player).SquareDeadZoneRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioP" + playerNum + "DeadzoneSquare"));
 		}
+		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
+			UpdatePlayerSelectedDeviceLabel(player);
+			ShowPlayerSensitivityControls(player);
+		}
+		m_InputConfigMenu.Create(parentControlManager);
+		m_InputConfigWizardMenu.Create(parentControlManager);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsInputGUI::CreateInputConfigWizard() {
-		m_InputConfigWizardMenu = InputConfigWizard();
+	void SettingsInputGUI::InputConfigScreen::Create(GUIControlManager *parentControlManager) {
 
-		m_InputConfigWizardMenu.BackToOptionsButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonBackToOptions"));
-		m_InputConfigWizardMenu.BackToOptionsButton->SetVisible(false);
+	}
 
-		m_InputConfigWizardMenu.ConfigLabel.at(InputConfigWizard::ConfigWizardLabels::ConfigTitle) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelConfigTitle"));
-		m_InputConfigWizardMenu.ConfigLabel.at(InputConfigWizard::ConfigWizardLabels::ConfigRecommendation) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelConfigRecKeyDesc"));
-		m_InputConfigWizardMenu.ConfigLabel.at(InputConfigWizard::ConfigWizardLabels::ConfigSteps) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelConfigStep"));
-		m_InputConfigWizardMenu.ConfigLabel.at(InputConfigWizard::ConfigWizardLabels::ConfigInstruction) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelInputConfigWizard::ConfigWizardLabels::ConfigInstruction"));
-		m_InputConfigWizardMenu.ConfigLabel.at(InputConfigWizard::ConfigWizardLabels::ConfigInput) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelConfigInput"));
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsInputGUI::InputConfigWizard::Create(GUIControlManager *parentControlManager) {
+		BackToOptionsButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonBackToOptions"));
+		BackToOptionsButton->SetVisible(false);
+
+		ConfigLabel.at(InputConfigWizard::ConfigWizardLabels::ConfigTitle) = dynamic_cast<GUILabel *>(parentControlManager->GetControl("LabelConfigTitle"));
+		ConfigLabel.at(InputConfigWizard::ConfigWizardLabels::ConfigRecommendation) = dynamic_cast<GUILabel *>(parentControlManager->GetControl("LabelConfigRecKeyDesc"));
+		ConfigLabel.at(InputConfigWizard::ConfigWizardLabels::ConfigSteps) = dynamic_cast<GUILabel *>(parentControlManager->GetControl("LabelConfigStep"));
+		ConfigLabel.at(InputConfigWizard::ConfigWizardLabels::ConfigInstruction) = dynamic_cast<GUILabel *>(parentControlManager->GetControl("LabelInputConfigWizard::ConfigWizardLabels::ConfigInstruction"));
+		ConfigLabel.at(InputConfigWizard::ConfigWizardLabels::ConfigInput) = dynamic_cast<GUILabel *>(parentControlManager->GetControl("LabelConfigInput"));
 
 		ContentFile diagramFile("Base.rte/GUIs/Controllers/D-Pad.png");
 		BITMAP **tempDPadBitmaps = diagramFile.GetAsAnimation(InputConfigWizard::ConfigWizardSteps::DPadConfigSteps, COLORCONV_8_TO_32);
 		for (int i = 0; i < sizeof(tempDPadBitmaps); ++i) {
-			m_InputConfigWizardMenu.DPadBitmaps.at(i) = tempDPadBitmaps[i];
+			DPadBitmaps.at(i) = tempDPadBitmaps[i];
 		}
 		delete[] tempDPadBitmaps;
 
 		diagramFile.SetDataPath("Base.rte/GUIs/Controllers/DualAnalog.png");
 		BITMAP **tempDualAnalogBitmaps = diagramFile.GetAsAnimation(InputConfigWizard::ConfigWizardSteps::DualAnalogConfigSteps, COLORCONV_8_TO_32);
 		for (int i = 0; i < sizeof(tempDualAnalogBitmaps); ++i) {
-			m_InputConfigWizardMenu.DualAnalogBitmaps.at(i) = tempDualAnalogBitmaps[i];
+			DualAnalogBitmaps.at(i) = tempDualAnalogBitmaps[i];
 		}
 		delete[] tempDualAnalogBitmaps;
 
-		m_InputConfigWizardMenu.RecommendationBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("BoxConfigRec"));
-		m_InputConfigWizardMenu.RecommendationDiagram = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("BoxConfigRecDiagram"));
-		m_InputConfigWizardMenu.ConfigSkipButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfigSkip"));
-		m_InputConfigWizardMenu.ConfigBackButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfigBack"));
+		RecommendationBox = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("BoxConfigRec"));
+		RecommendationDiagram = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("BoxConfigRecDiagram"));
+		ConfigSkipButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonConfigSkip"));
+		ConfigBackButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonConfigBack"));
 
-		m_InputConfigWizardMenu.DPadTypeBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("BoxConfigDPadType"));
-		m_InputConfigWizardMenu.DPadTypeButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfigDPadType"));
-		m_InputConfigWizardMenu.DPadTypeDiagram = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("BoxConfigDPadTypeDiagram"));
-		m_InputConfigWizardMenu.DPadTypeDiagram->Resize(m_InputConfigWizardMenu.DPadBitmaps.at(0)->w, m_InputConfigWizardMenu.DPadBitmaps.at(0)->h);
-		m_InputConfigWizardMenu.DPadTypeDiagram->CenterInParent(true, true);
-		m_InputConfigWizardMenu.DPadTypeDiagram->MoveRelative(0, -8);
+		DPadTypeBox = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("BoxConfigDPadType"));
+		DPadTypeButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonConfigDPadType"));
+		DPadTypeDiagram = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("BoxConfigDPadTypeDiagram"));
+		DPadTypeDiagram->Resize(DPadBitmaps.at(0)->w, DPadBitmaps.at(0)->h);
+		DPadTypeDiagram->CenterInParent(true, true);
+		DPadTypeDiagram->MoveRelative(0, -8);
 
-		m_InputConfigWizardMenu.DAnalogTypeBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("BoxConfigDAnalogType"));
-		m_InputConfigWizardMenu.DAnalogTypeButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfigDAnalogType"));
-		m_InputConfigWizardMenu.DAnalogTypeDiagram = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("BoxConfigDAnalogTypeDiagram"));
-		m_InputConfigWizardMenu.DAnalogTypeDiagram->Resize(m_InputConfigWizardMenu.DualAnalogBitmaps.at(0)->w, m_InputConfigWizardMenu.DualAnalogBitmaps.at(0)->h);
-		m_InputConfigWizardMenu.DAnalogTypeDiagram->CenterInParent(true, true);
-		m_InputConfigWizardMenu.DAnalogTypeDiagram->MoveRelative(0, -10);
+		DAnalogTypeBox = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("BoxConfigDAnalogType"));
+		DAnalogTypeButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonConfigDAnalogType"));
+		DAnalogTypeDiagram = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("BoxConfigDAnalogTypeDiagram"));
+		DAnalogTypeDiagram->Resize(DualAnalogBitmaps.at(0)->w, DualAnalogBitmaps.at(0)->h);
+		DAnalogTypeDiagram->CenterInParent(true, true);
+		DAnalogTypeDiagram->MoveRelative(0, -10);
 
-		m_InputConfigWizardMenu.XBox360TypeBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("BoxConfigXBox360Type"));
-		m_InputConfigWizardMenu.XBox360TypeButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfigXBox360Type"));
-		m_InputConfigWizardMenu.XBox360TypeDiagram = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("BoxConfigXBox360TypeDiagram"));
-		m_InputConfigWizardMenu.XBox360TypeDiagram->Resize(m_InputConfigWizardMenu.DualAnalogBitmaps.at(0)->w, m_InputConfigWizardMenu.DualAnalogBitmaps.at(0)->h);
-		m_InputConfigWizardMenu.XBox360TypeDiagram->CenterInParent(true, true);
-		m_InputConfigWizardMenu.XBox360TypeDiagram->MoveRelative(0, -10);
+		XBox360TypeBox = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("BoxConfigXBox360Type"));
+		XBox360TypeButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonConfigXBox360Type"));
+		XBox360TypeDiagram = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("BoxConfigXBox360TypeDiagram"));
+		XBox360TypeDiagram->Resize(DualAnalogBitmaps.at(0)->w, DualAnalogBitmaps.at(0)->h);
+		XBox360TypeDiagram->CenterInParent(true, true);
+		XBox360TypeDiagram->MoveRelative(0, -10);
 
-		m_InputConfigWizardMenu.ConfiguringPlayer = Players::PlayerOne;
-		m_InputConfigWizardMenu.ConfiguringDevice = InputDevice::DEVICE_KEYB_ONLY;
-		m_InputConfigWizardMenu.ConfiguringGamepad = InputConfigWizard::GamepadType::DPad;
-		m_InputConfigWizardMenu.ConfigureStep = 0;
+		ConfiguringPlayer = Players::PlayerOne;
+		ConfiguringDevice = InputDevice::DEVICE_KEYB_ONLY;
+		ConfiguringGamepad = InputConfigWizard::GamepadType::DPad;
+		ConfigureStep = 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -121,96 +119,198 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void SettingsInputGUI::SetPlayerNextOrPrevInputDevice(int player, bool nextDevice) {
+		int currentDevice = static_cast<int>(g_UInputMan.GetControlScheme(player)->GetDevice());
+
+		if (nextDevice) {
+			currentDevice++;
+			if (currentDevice >= InputDevice::DEVICE_COUNT) { currentDevice = InputDevice::DEVICE_KEYB_ONLY; }
+		} else {
+			currentDevice--;
+			if (currentDevice < InputDevice::DEVICE_KEYB_ONLY) { currentDevice = InputDevice::DEVICE_GAMEPAD_4; }
+		}
+		g_UInputMan.GetControlScheme(player)->SetDevice(static_cast<InputDevice>(currentDevice));
+		UpdatePlayerSelectedDeviceLabel(player);
+		ShowPlayerSensitivityControls(player);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsInputGUI::UpdatePlayerSelectedDeviceLabel(int player) {
+		std::string deviceLabel;
+
+		switch (g_UInputMan.GetControlScheme(player)->GetDevice()) {
+			case InputDevice::DEVICE_KEYB_ONLY:
+				deviceLabel = "Keyboard Only";
+				break;
+			case InputDevice::DEVICE_MOUSE_KEYB:
+				deviceLabel = "Mouse + Keyboard";
+				break;
+			case InputDevice::DEVICE_GAMEPAD_1:
+				deviceLabel = "Gamepad 1";
+				break;
+			case InputDevice::DEVICE_GAMEPAD_2:
+				deviceLabel = "Gamepad 2";
+				break;
+			case InputDevice::DEVICE_GAMEPAD_3:
+				deviceLabel = "Gamepad 3";
+				break;
+			case InputDevice::DEVICE_GAMEPAD_4:
+				deviceLabel = "Gamepad 4";
+				break;
+			default:
+				break;
+		}
+		m_PlayerInputSettingsBoxes.at(player).SelectedDeviceLabel->SetText(deviceLabel);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsInputGUI::ShowPlayerSensitivityControls(int player) {
+		m_PlayerInputSettingsBoxes.at(player).SensitivtyLabel->SetVisible(false);
+		m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetVisible(false);
+		m_PlayerInputSettingsBoxes.at(player).DeadZoneControlsBox->SetVisible(false);
+
+		switch (g_UInputMan.GetControlScheme(player)->GetDevice()) {
+			case InputDevice::DEVICE_KEYB_ONLY:
+				break;
+			case InputDevice::DEVICE_MOUSE_KEYB:
+				// Mouse sensitivity doesn't seem to really work so keep the controls disabled for now, also it's shared between all mouse+keyboard using players.
+				/*
+				m_PlayerInputSettingsBoxes.at(player).SensitivtyLabel->SetVisible(true);
+				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetVisible(true);
+				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetMaximum(100);
+				*/
+				break;
+			default:
+				m_PlayerInputSettingsBoxes.at(player).SensitivtyLabel->SetVisible(true);
+				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetVisible(true);
+				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetMaximum(50);
+				m_PlayerInputSettingsBoxes.at(player).DeadZoneControlsBox->SetVisible(true);
+				break;
+		}
+		UpdatePlayerSensitivityValues(player);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsInputGUI::UpdatePlayerSensitivityValues(int player) {
+		switch (g_UInputMan.GetControlScheme(player)->GetDevice()) {
+			case InputDevice::DEVICE_KEYB_ONLY:
+				break;
+			case InputDevice::DEVICE_MOUSE_KEYB:
+				// Mouse sensitivity is shared between all players
+				for (int otherPlayer = Players::PlayerOne; otherPlayer < Players::MaxPlayerCount; ++otherPlayer) {
+					if (g_UInputMan.GetControlScheme(otherPlayer)->GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
+						m_PlayerInputSettingsBoxes.at(otherPlayer).SensitivitySlider->SetValue(static_cast<int>(g_UInputMan.GetMouseSensitivity() * 100));
+						m_PlayerInputSettingsBoxes.at(otherPlayer).SensitivtyLabel->SetText("Mouse Sensitivity: " + std::to_string(m_PlayerInputSettingsBoxes.at(otherPlayer).SensitivitySlider->GetValue()));
+					}
+				}
+				break;
+			default:
+				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetValue(static_cast<int>(g_UInputMan.GetControlScheme(player)->GetJoystickDeadzone() * 250));
+				m_PlayerInputSettingsBoxes.at(player).SensitivtyLabel->SetText("Stick Deadzone: " + std::to_string(m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->GetValue()));
+
+				if (g_UInputMan.GetControlScheme(player)->GetJoystickDeadzoneType() == DeadZoneType::CIRCLE) {
+					m_PlayerInputSettingsBoxes.at(player).CircleDeadZoneRadioButton->SetCheck(true);
+				} else {
+					m_PlayerInputSettingsBoxes.at(player).SquareDeadZoneRadioButton->SetCheck(true);
+				}
+				break;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsInputGUI::ResetPlayerControlMappings(int player) {
+		if (m_PlayerInputSettingsBoxes.at(player).ResetControlsButton->GetText() == "Reset") {
+			// Reset any other pending mapping reset confirmations
+			for (int otherPlayer = Players::PlayerOne; otherPlayer < Players::MaxPlayerCount; ++otherPlayer) {
+				if (otherPlayer != player) { m_PlayerInputSettingsBoxes.at(otherPlayer).ResetControlsButton->SetText("Reset"); }
+			}
+			m_PlayerInputSettingsBoxes.at(player).ResetControlsButton->SetText("CONFIRM?");
+		} else {
+			InputScheme *playerControlScheme = g_UInputMan.GetControlScheme(player);
+			playerControlScheme->SetDevice(static_cast<InputDevice>(player));
+			playerControlScheme->SetPreset(static_cast<InputPreset>(-(player + 1))); // Player 1's default preset is at -1 and so on.
+
+			if (playerControlScheme->GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
+				g_UInputMan.SetMouseSensitivity(0.6F);
+			} else if (playerControlScheme->GetDevice() != InputDevice::DEVICE_MOUSE_KEYB && playerControlScheme->GetDevice() != InputDevice::DEVICE_KEYB_ONLY) {
+				playerControlScheme->SetJoystickDeadzone(0);
+				playerControlScheme->SetJoystickDeadzoneType(DeadZoneType::CIRCLE);
+			}
+			UpdatePlayerSelectedDeviceLabel(player);
+			ShowPlayerSensitivityControls(player);
+
+			m_PlayerInputSettingsBoxes.at(player).ResetControlsButton->SetText("Reset");
+			g_GUISound.ExitMenuSound()->Play();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void SettingsInputGUI::HandleInputEvents(GUIEvent &guiEvent) {
-		if (guiEvent.GetType() == GUIEvent::Command) {
+		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			/*
-			// Control options
-			if (m_MenuScreen == OPTIONSSCREEN) {
-				int which = 0;
-				int player = 0;
-
-				// Handle all device select button pushes
-				for (which = P1NEXT; which <= P4PREV; ++which) {
-					// Calculate the owner of the currently checked button, and if it's next/prev button
-					player = (which - P1NEXT) % Players::MaxPlayerCount;
-					bool nextButton = which < P1PREV;
-
-					// Handle the appropriate player's device setting
-					if (guiEvent.GetControl() == m_OptionButton.at(which)) {
-						// What's the current device
-						int currentDevice = g_UInputMan.GetControlScheme(player)->GetDevice();
-						// Next button pressed, so increment
-						if (nextButton) {
-							// Loop around to first if we've gone around
-							if (++currentDevice >= DEVICE_COUNT) { currentDevice = 0; }
-						}
-						// Prev button pressed, so decrement
-						else {
-							// Loop around to last if we've gone around
-							if (--currentDevice < 0) { currentDevice = DEVICE_COUNT - 1; }
-						}
-						// Set the device and update labels
-						g_UInputMan.GetControlScheme(player)->SetDevice(static_cast<InputDevice>(currentDevice));
-						UpdateDeviceLabels();
-
-						g_GUISound.ButtonPressSound()->Play();
-					}
+			if (m_InputConfigMenu.Enabled) {
+				if (m_InputConfigWizardMenu.Enabled) {
+					m_InputConfigWizardMenu.HandleInputEvents(guiEvent, player);
+					return;
 				}
-
-				// Handle all control config buttons
-				for (which = P1CONFIG; which <= P4CONFIG; ++which) {
-					// Handle the appropriate player's device setting
-					if (guiEvent.GetControl() == m_OptionButton.at(which)) {
-						m_apScreenBox.at(OPTIONSSCREEN)->SetVisible(false);
-						ConfiguringPlayer = which - P1CONFIG;
-						m_ConfiguringDevice = g_UInputMan.GetControlScheme(ConfiguringPlayer)->GetDevice();
-						ConfigureStep = 0;
-						m_MenuScreen = CONFIGSCREEN;
-						m_ScreenChange = true;
-
-						g_GUISound.ButtonPressSound()->Play();
-					}
+				m_InputConfigMenu.HandleInputEvents(guiEvent, player);
+				return;
+			}
+			*/
+			if (guiEvent.GetType() == GUIEvent::Command) {
+				if (guiEvent.GetControl() == m_PlayerInputSettingsBoxes.at(player).NextDeviceButton) {
+					g_GUISound.ButtonPressSound()->Play();
+					SetPlayerNextOrPrevInputDevice(player, true);
+				} else if (guiEvent.GetControl() == m_PlayerInputSettingsBoxes.at(player).PrevDeviceButton) {
+					g_GUISound.ButtonPressSound()->Play();
+					SetPlayerNextOrPrevInputDevice(player, false);
+				} else if (guiEvent.GetControl() == m_PlayerInputSettingsBoxes.at(player).ConfigureControlsButton) {
+					g_GUISound.ButtonPressSound()->Play();
+					/*
+					m_InputConfigMenu.SetEnabled();
+					SetEnabled(false);
+					*/
+				} else if (guiEvent.GetControl() == m_PlayerInputSettingsBoxes.at(player).ResetControlsButton) {
+					g_GUISound.ButtonPressSound()->Play();
+					ResetPlayerControlMappings(player);
 				}
-
-				// Handle all control reset buttons
-				for (which = P1CLEAR; which <= P4CLEAR; ++which) {
-					// Handle the appropriate player's clearing of mappings
-					if (guiEvent.GetControl() == m_OptionButton.at(which)) {
-						// Make user click twice to confirm
-						if (m_OptionButton.at(which)->GetText() == "Reset") {
-							// Ask to confirm!
-							m_OptionButton.at(which)->SetText("CONFIRM?");
-							// And clear all other buttons of it
-							for (int otherButton = P1CLEAR; otherButton <= P4CLEAR; ++otherButton) {
-								if (otherButton != which) { m_OptionButton.at(otherButton)->SetText("Reset"); }
-							}
-							g_GUISound.ButtonPressSound()->Play();
-						} else {
-							// Set to a default control preset.
-							Players inputPlayer = static_cast<Players>(which - P1CLEAR);
-							InputPreset playerPreset = static_cast<InputPreset>(P1CLEAR - which - 1); // Player 1's default preset is at -1 and so on.
-							g_UInputMan.GetControlScheme(inputPlayer)->SetPreset(playerPreset);
-
-							// Set to a device that fits this preset.
-							InputDevice deviceType.at(4) = { DEVICE_MOUSE_KEYB, DEVICE_KEYB_ONLY, DEVICE_GAMEPAD_1, DEVICE_GAMEPAD_2 };
-							g_UInputMan.GetControlScheme(inputPlayer)->SetDevice(deviceType.at(inputPlayer));
-
-							UpdateDeviceLabels();
-
-							// Set the dead zone slider value
-							m_DeadZoneSlider.at(which - P1CLEAR)->SetValue(g_UInputMan.GetControlScheme(which - P1CLEAR)->GetJoystickDeadzone() * 250);
-
-							//                            m_OptionsLabel.at(P1DEVICE + (which - P1CLEAR))->SetText("NEEDS CONFIG!");
-							//                            m_OptionButton.at(P1CONFIG + (which - P1CLEAR))->SetText("-> CONFIGURE <-");
-							g_GUISound.ExitMenuSound()->Play();
-						}
+			} else if (guiEvent.GetType() == GUIEvent::Notification) {
+				if (guiEvent.GetControl() == m_PlayerInputSettingsBoxes.at(player).SensitivitySlider) {
+					if (g_UInputMan.GetControlScheme(player)->GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
+						g_UInputMan.SetMouseSensitivity(static_cast<float>(m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->GetValue()) / 100.0F);
+					} else {
+						g_UInputMan.GetControlScheme(player)->SetJoystickDeadzone(static_cast<float>(m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->GetValue()) / 250.0F);
 					}
+					UpdatePlayerSensitivityValues(player);
+				} else if (guiEvent.GetControl() == m_PlayerInputSettingsBoxes.at(player).CircleDeadZoneRadioButton && guiEvent.GetMsg() == GUIRadioButton::Pushed) {
+					g_UInputMan.GetControlScheme(player)->SetJoystickDeadzoneType(DeadZoneType::CIRCLE);
+					UpdatePlayerSensitivityValues(player);
+				} else if (guiEvent.GetControl() == m_PlayerInputSettingsBoxes.at(player).SquareDeadZoneRadioButton && guiEvent.GetMsg() == GUIRadioButton::Pushed) {
+					g_UInputMan.GetControlScheme(player)->SetJoystickDeadzoneType(DeadZoneType::SQUARE);
+					UpdatePlayerSensitivityValues(player);
 				}
 			}
+		}
+	}
 
-			//////////////////////////////////
-			// Control config buttons
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void SettingsInputGUI::InputConfigScreen::HandleInputEvents(GUIEvent &guiEvent, int player) {
+		if (guiEvent.GetType() == GUIEvent::Command) {
+
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsInputGUI::InputConfigWizard::HandleInputEvents(GUIEvent &guiEvent, int player) {
+		if (guiEvent.GetType() == GUIEvent::Command) {
+			/*
 			if (m_MenuScreen == CONFIGSCREEN) {
 				// DPad Gamepad type selected
 				if (guiEvent.GetControl() == m_DPadTypeButton) {
@@ -269,70 +369,9 @@ namespace RTE {
 				}
 			}
 			*/
-		} else if (guiEvent.GetType() == GUIEvent::Notification) {
-			/*
-			// Dead zone sliders control
-			for (int which = P1DEADZONESLIDER; which < DEADZONESLIDERCOUNT; ++which) {
-				// Handle the appropriate player's clearing of mappings
-				if (guiEvent.GetControl() == m_DeadZoneSlider.at(which)) {
-					// Display value
-					char s.at(256);
-					std::snprintf(s, sizeof(s), "%d", m_DeadZoneSlider.at(which)->GetValue());
-					m_DeadZoneLabel.at(which)->SetText(s);
-
-					// Update control scheme
-					g_UInputMan.GetControlScheme(which)->SetJoystickDeadzone((float)m_DeadZoneSlider.at(which)->GetValue() / 200.0F);
-				}
-
-				if (guiEvent.GetControl() == m_DeadZoneCheckbox.at(which)) {
-					if (m_DeadZoneCheckbox.at(which)->GetCheck() == 1) {
-						g_UInputMan.GetControlScheme(which)->SetJoystickDeadzoneType(DeadZoneType::CIRCLE);
-						m_DeadZoneCheckbox.at(which)->SetText("O");
-					} else {
-						g_UInputMan.GetControlScheme(which)->SetJoystickDeadzoneType(DeadZoneType::SQUARE);
-						char str[2];
-						str[0] = -2;
-						str[1] = 0;
-						m_DeadZoneCheckbox.at(which)->SetText(str);
-					}
-				}
-			}
-			*/
 		}
 	}
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-	void SettingsInputGUI::UpdateDeviceLabels() {
-		int device = 0;
-		string label;
-
-		// Cycle through all players
-		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-			device = g_UInputMan.GetControlScheme(player)->GetDevice();
-
-			if (device == DEVICE_KEYB_ONLY) {
-				label = "Classic Keyb";
-			} else if (device == DEVICE_MOUSE_KEYB) {
-				label = "Keyb + Mouse";
-			} else if (device == DEVICE_GAMEPAD_1) {
-				label = "Gamepad 1";
-			} else if (device == DEVICE_GAMEPAD_2) {
-				label = "Gamepad 2";
-			} else if (device == DEVICE_GAMEPAD_3) {
-				label = "Gamepad 3";
-			} else if (device == DEVICE_GAMEPAD_4) {
-				label = "Gamepad 4";
-			}
-			// Set the label
-			m_OptionsLabel.at(P1DEVICE + player)->SetText(label);
-
-			// Reset Config and Clear button labels
-			m_OptionButton.at(P1CONFIG + player)->SetText("Configure");
-			m_OptionButton.at(P1CLEAR + player)->SetText("Reset");
-		}
-	}
-*/
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
 	void SettingsInputGUI::InputSettingsMenu::InputConfigWizard::UpdateConfigScreen() {
@@ -352,7 +391,7 @@ namespace RTE {
 			XBox360TypeBox->SetVisible(false);
 		}
 
-		// .at(CHRISK) Use GUI input class for better key detection
+		// Use GUIInput class for better key detection
 		g_UInputMan.SetInputClass(GUIInput);
 
 		switch (ConfiguringDevice) {

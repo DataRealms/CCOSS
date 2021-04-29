@@ -16,7 +16,7 @@ namespace RTE {
 		SerializableOverrideMethods
 		SerializableClassNameGetter
 
-		enum class PieSliceIndex {
+		enum PieSliceIndex {
 			PSI_NONE = 0,
 			// Inventory management
 			PSI_PICKUP,
@@ -65,7 +65,7 @@ namespace RTE {
 		/// <summary>
 		/// An enum for the directions a slice can be placed in, in a given pie menu.
 		/// </summary>
-		enum class SliceDirection {
+		enum SliceDirection {
 			NONE = 0,
 			UP,
 			RIGHT,

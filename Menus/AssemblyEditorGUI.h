@@ -20,6 +20,7 @@
 #include "BunkerAssemblyScheme.h"
 #include "BunkerAssembly.h"
 #include "Controller.h"
+#include "PieSlice.h"
 
 struct BITMAP;
 

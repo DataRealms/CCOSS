@@ -20,6 +20,7 @@
 #include "Vector.h"
 #include "Box.h"
 #include "Controller.h"
+#include "PieSlice.h"
 
 struct BITMAP;
 

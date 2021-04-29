@@ -18,6 +18,7 @@
 #include "Timer.h"
 #include "Vector.h"
 #include "Controller.h"
+#include "PieSlice.h"
 
 struct BITMAP;
 

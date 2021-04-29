@@ -40,7 +40,6 @@
 #include "GUI/GUIComboBox.h"
 
 #include "AreaEditorGUI.h"
-#include "PieSlice.h"
 #include "GABaseDefense.h"
 
 extern bool g_ResetActivity;

@@ -44,7 +44,6 @@
 #include "GUI/GUIComboBox.h"
 
 #include "SceneEditorGUI.h"
-#include "PieSlice.h"
 #include "GABaseDefense.h"
 
 extern bool g_ResetActivity;

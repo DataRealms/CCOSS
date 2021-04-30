@@ -513,6 +513,9 @@
     <ClInclude Include="Menus\SettingsNetworkGUI.h">
       <Filter>Menus</Filter>
     </ClInclude>
+    <ClInclude Include="Menus\SettingsInputMappingWizardGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -979,6 +982,9 @@
       <Filter>Menus</Filter>
     </ClCompile>
     <ClCompile Include="Menus\SettingsNetworkGUI.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\SettingsInputMappingWizardGUI.cpp">
       <Filter>Menus</Filter>
     </ClCompile>
   </ItemGroup>

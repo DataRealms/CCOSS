@@ -98,102 +98,6 @@ namespace RTE {
 			void UpdateMappingLabelsAndButtons(int player);
 		};
 
-		/// <summary>
-		/// 
-		/// </summary>
-		struct InputConfigWizard {
-
-			/// <summary>
-			/// 
-			/// </summary>
-			enum ConfigWizardLabels {
-				ConfigTitle,
-				ConfigRecommendation,
-				ConfigInstruction,
-				ConfigInput,
-				ConfigSteps,
-				ConfigLabelCount
-			};
-
-			/// <summary>
-			/// 
-			/// </summary>
-			enum ConfigWizardSteps {
-				KeyboardConfigSteps = 16,
-				MouseAndKeyboardConfigSteps = 11,
-				DPadConfigSteps = 13,
-				DualAnalogConfigSteps = 19,
-				Xbox360ConfigSteps = 19
-			};
-
-			/// <summary>
-			/// 
-			/// </summary>
-			enum class GamepadType { DPad, DualAnalog, Xbox360 };
-
-			bool Enabled = false; //!<
-
-			GUIButton *BackToOptionsButton; //!< Back to options from the test and config screens.
-
-			Players ConfiguringPlayer; //!< Which player's control scheme we are currently configuring.
-			InputDevice ConfiguringDevice; //!< Which type of device we are currently configuring.
-			GamepadType ConfiguringGamepad; //!< Which type of gamepad we are currently configuring.
-			int ConfigureStep; //!< Which step in current configure sequence.
-
-			std::array<GUILabel *, ConfigWizardLabels::ConfigLabelCount> ConfigLabel; //!< Labels of the control config screen.
-
-			std::array<BITMAP *, ConfigWizardSteps::DPadConfigSteps> DPadBitmaps;
-			std::array<BITMAP *, ConfigWizardSteps::DualAnalogConfigSteps> DualAnalogBitmaps;
-
-			GUICollectionBox *RecommendationBox; //!<
-			GUICollectionBox *RecommendationDiagram; //!<
-
-			GUIButton *ConfigSkipButton; //!< Skip forward one config step button.
-			GUIButton *ConfigBackButton; //!< Go back one config step button.
-
-			GUICollectionBox *DPadTypeBox; //!<
-			GUICollectionBox *DPadTypeDiagram; //!<
-			GUIButton *DPadTypeButton; //!<
-
-			GUICollectionBox *DAnalogTypeBox; //!<
-			GUICollectionBox *DAnalogTypeDiagram; //!<
-			GUIButton *DAnalogTypeButton; //!<
-
-			GUICollectionBox *XBox360TypeBox; //!<
-			GUICollectionBox *XBox360TypeDiagram; //!<
-			GUIButton *XBox360TypeButton; //!<
-
-			/// <summary>
-			/// 
-			/// </summary>
-			/// <param name="parentControlManager">Pointer to the parent GUIControlManager which holds all the GUIControls of this SettingsInputGUI.</param>
-			void Create(GUIControlManager *parentControlManager);
-
-			/// <summary>
-			/// 
-			/// </summary>
-			/// <param name="guiEvent"></param>
-			/// <param name="player"></param>
-			void HandleInputEvents(GUIEvent &guiEvent, int player);
-
-			/// <summary>
-			/// 
-			/// </summary>
-			/// <returns></returns>
-			bool UpdateKeyboardConfigWizard();
-
-			/// <summary>
-			/// 
-			/// </summary>
-			/// <returns></returns>
-			bool UpdateMouseAndKeyboardConfigWizard();
-
-			/// <summary>
-			/// 
-			/// </summary>
-			/// <returns></returns>
-			bool UpdateGamepadConfigWizard();
-		};
 
 		/// <summary>
 		/// 
@@ -216,7 +120,6 @@ namespace RTE {
 		GUICollectionBox *m_InputSettingsBox; //!<
 
 		InputConfigScreen m_InputConfigMenu;
-		InputConfigWizard m_InputConfigWizardMenu; //!<
 
 		std::array<PlayerInputSettingsBox, Players::MaxPlayerCount> m_PlayerInputSettingsBoxes; //!<
 

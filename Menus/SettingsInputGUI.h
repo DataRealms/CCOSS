@@ -1,7 +1,7 @@
 #ifndef _RTESETTINGSINPUTGUI_
 #define _RTESETTINGSINPUTGUI_
 
-#include "Constants.h"
+#include "SettingsInputMappingGUI.h"
 
 struct BITMAP;
 
@@ -51,57 +51,6 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		struct InputConfigScreen {
-
-			/// <summary>
-			/// 
-			/// </summary>
-			enum PlayerInputMappings {
-				InputMappingCount = 18
-			};
-
-			bool Enabled = false; //!<
-			bool InputConfigWizardActive = false; //!<
-
-			GUICollectionBox *MappingConfigBox;
-			GUILabel *MappingConfigLabel;
-			GUIButton *CloseMappingBoxButton;
-			GUIButton *RunConfigWizardButton;
-
-			std::array<GUILabel *, PlayerInputMappings::InputMappingCount> InputMapLabel; //!<
-			std::array<GUIButton *, PlayerInputMappings::InputMappingCount> InputMapButton; //!<
-
-			/// <summary>
-			/// 
-			/// </summary>
-			/// <param name="parentControlManager">Pointer to the parent GUIControlManager which holds all the GUIControls of this SettingsInputGUI.</param>
-			void Create(GUIControlManager *parentControlManager);
-
-			/// <summary>
-			/// 
-			/// </summary>
-			/// <param name="enable"></param>
-			/// <param name="player"></param>
-			void SetEnabled(bool enable, int player = 0);
-
-			/// <summary>
-			/// 
-			/// </summary>
-			/// <param name="guiEvent"></param>
-			/// <param name="player"></param>
-			void HandleInputEvents(GUIEvent &guiEvent, int player);
-
-			/// <summary>
-			/// 
-			/// </summary>
-			/// <param name="player"></param>
-			void UpdateMappingLabelsAndButtons(int player);
-		};
-
-
-		/// <summary>
-		/// 
-		/// </summary>
 		struct PlayerInputSettingsBox {
 			GUILabel *SelectedDeviceLabel; //!< Label for the input device name that is currently being used.
 			GUIButton *NextDeviceButton; //!< Button for changing to the next input device type.
@@ -119,7 +68,7 @@ namespace RTE {
 
 		GUICollectionBox *m_InputSettingsBox; //!<
 
-		InputConfigScreen m_InputConfigMenu;
+		std::unique_ptr<SettingsInputMappingGUI> m_InputConfigMenu;
 
 		std::array<PlayerInputSettingsBox, Players::MaxPlayerCount> m_PlayerInputSettingsBoxes; //!<
 

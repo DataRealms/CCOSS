@@ -22,8 +22,8 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a ModManagerGUI object in system memory and make it ready for use.
 		/// </summary>
-		/// <param name="guiScreen">Pointer to a GUIInput interface that will be used by this ModManagerGUI's GUIControlManager.</param>
-		/// <param name="guiInput">Pointer to a GUIScreen interface that will be used by this ModManagerGUI's GUIControlManager.</param>
+		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this ModManagerGUI's GUIControlManager.</param>
+		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this ModManagerGUI's GUIControlManager.</param>
 		ModManagerGUI(AllegroScreen *guiScreen, AllegroInput *guiInput);
 #pragma endregion
 

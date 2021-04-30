@@ -28,8 +28,8 @@ namespace RTE {
 		/// <summary>
 		/// Creates the loading screen GUI and the log writer.
 		/// </summary>
-		/// <param name="guiScreen">Pointer to a GUIInput interface that will be used by this LoadingScreen's GUIControlManager.</param>
-		/// <param name="guiInput">Pointer to a GUIScreen interface that will be used by this LoadingScreen's GUIControlManager.</param>
+		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this LoadingScreen's GUIControlManager.</param>
+		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this LoadingScreen's GUIControlManager.</param>
 		void Create(AllegroScreen *guiScreen, AllegroInput *guiInput);
 
 		/// <summary>

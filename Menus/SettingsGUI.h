@@ -28,8 +28,8 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a SettingsGUI object in system memory and make it ready for use.
 		/// </summary>
-		/// <param name="guiScreen">Pointer to a GUIInput interface that will be used by this SettingsGUI's GUIControlManager.</param>
-		/// <param name="guiInput">Pointer to a GUIScreen interface that will be used by this SettingsGUI's GUIControlManager.</param>
+		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this SettingsGUI's GUIControlManager.</param>
+		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this SettingsGUI's GUIControlManager.</param>
 		SettingsGUI(AllegroScreen *guiScreen, AllegroInput *guiInput);
 #pragma endregion
 

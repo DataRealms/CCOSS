@@ -63,12 +63,6 @@ namespace RTE {
 		bool IsEnabled() const { return m_EnabledState == EnabledState::Enabled || m_EnabledState == EnabledState::Enabling; }
 
 		/// <summary>
-		/// Gets whether the menu is disabled or not.
-		/// </summary>
-		/// <returns>Whether the menu is enabled.</returns>
-		bool IsDisabled() const { return m_EnabledState == EnabledState::Disabled || m_EnabledState == EnabledState::Disabling; }
-
-		/// <summary>
 		/// Gets whether the menu is in the process of enabling or disabling.
 		/// </summary>
 		/// <returns></returns>
@@ -159,8 +153,9 @@ namespace RTE {
 		/// </summary>
 		enum class CarouselAnimationDirection { Left = -1, None, Right};
 
-		static const int c_MinimumItemPadding = 1; //!< The padding between item icons and their containing boxes. Items will have at least this much padding on all sides. Used for all MenuModes.
 		static const int c_ItemsPerRow = 5; //!< The number of items per row of the inventory display. MUST be an odd nubmer. Used for all MenuModes.
+		static const int c_MinimumItemPadding = 1; //!< The padding between item icons and their containing boxes. Items will have at least this much padding on all sides. Used for all MenuModes.
+		static const int c_MenuVerticalOffset = 30; //!< The offset the menu will have below it, to avoid drawing over its target. Used for all MenuModes.
 
 		static const Vector c_CarouselBoxMaxSize; //!< The size of the largest item box in the carousel, i.e. the one in the middle. Used for Carousel MenuMode.
 		static const Vector c_CarouselBoxMinSize; //!< The size of the smallest item box in the carousel, i.e. the ones at the ends, excluding the exiting box, which is actually one size step smaller. Used for Carousel MenuMode.
@@ -176,34 +171,31 @@ namespace RTE {
 
 		Controller *m_ActivityPlayerController; //!< The Controller which controls this menu. Separate from the Controller of the InventoryActor.
 		Actor *m_InventoryActor; //!< The Actor whose inventory this GUI will display.
-		bool m_InventoryActorIsHuman; //!< Whether the Actor whose inventory this GUI will display is an AHuman.
-		std::vector<MovableObject *> m_InventoryActorEquippedItems; //!< A vector of pointers to the equipped items of the Actor whose inventory this GUI will display, if applicable.
-
 		MenuMode m_MenuMode; //!< The mode this menu is in. See MenuMode enum for more details.
-		bool m_DisplayOnly; //!< Whether this GUI is display only, or can be interacted with, and thereby affect the inventory it's displaying.
+		Vector m_CenterPos; //!< The center position of this menu in the scene.
 
 		EnabledState m_EnabledState; //!< The enabled state of the menu.
-		float m_EnableDisableProgress; //!< The current progress enabling/disabling the menu.
-		Vector m_CenterPos; //!< The center position of this menu in the scene.
+		Timer m_EnableDisableAnimationTimer; //!< Timer for progressing enabling/disabling animations.
+		
+		bool m_InventoryActorIsHuman; //!< Whether the Actor whose inventory this GUI will display is an AHuman.
+		std::vector<MovableObject *> m_InventoryActorEquippedItems; //!< A vector of pointers to the equipped items of the Actor whose inventory this GUI will display, if applicable.
 
 		bool m_CarouselDrawEmptyBoxes; //!< Whether or not the carousel should draw empty item boxes. Used in Carousel MenuMode.
 		bool m_CarouselBackgroundTransparent; //!< Whether or not the carousel's background should be drawn transparently. Used in Carousel MenuMode.
 		int m_CarouselBackgroundBoxColor; //!< The color used for the background box of the carousel. Used in Carousel MenuMode.
 		Vector m_CarouselBackgroundBoxBorderSize; //!< The size of the border around the background box of the carousel. Used in Carousel MenuMode.
 		int m_CarouselBackgroundBoxBorderColor; //!< The color used for the border of the background box of the carousel. Used in Carousel MenuMode.
+		
 		std::unique_ptr<BITMAP> m_CarouselBGBitmap; //!< The intermediary Bitmap onto which the carousel's background boxes are drawn. It is then drawn onto the Bitmap the carousel is drawn to. Used in Carousel MenuMode.
 		std::unique_ptr<BITMAP> m_CarouselBitmap; //!< The intermediary Bitmap onto which the carousel's items and mass indicators are drawn. It is then drawn onto the Bitmap the carousel is drawn to. Used in Carousel MenuMode.
 
 		CarouselAnimationDirection m_CarouselAnimationDirection; //!< Which direction the carousel is currently animating in, if any. Used for Carousel MenuMode animations.
-		float m_CarouselAnimationProgress; //!< A value from 0 to 1.0 describing how far the carousel's animation has progressed.
+		Timer m_CarouselAnimationTimer; //!< Timer for progressing carousel animations.
 		std::array<std::unique_ptr<CarouselItemBox>, c_ItemsPerRow> m_CarouselItemBoxes; //!< An array of CarouselItemBoxes that make up the carousel. Used in Carousel MenuMode.
 		std::unique_ptr<CarouselItemBox> m_CarouselExitingItemBox; //!< A special case CarouselItemBox used to display the item that is exiting during animations. Used in Carousel MenuMode.
 
+		bool m_DisplayOnly; //!< Whether this GUI is display only, or can be interacted with, and thereby affect the inventory it's displaying.
 		std::vector<std::array<MovableObject *, c_ItemsPerRow>> m_InventoryObjectRows; //!< A collection describing the rows of items this InventoryMenuGUI is displaying, when not in Carousel MenuMode.
-
-
-
-
 		/* Full mode stuff here, copied from other guis
 		std::unique_ptr<AllegroScreen> m_GUIScreen; //!< The GUIScreen interface that will be used by this ObjectPickerGUI's GUIControlManager.
 		std::unique_ptr<AllegroInput> m_GUIInput; //!< The GUIInput interface that will be used by this ObjectPickerGUI's GUIControlManager.
@@ -215,11 +207,6 @@ namespace RTE {
 		*/
 
 #pragma region Update Breakdown
-		/// <summary>
-		/// Handles enabling and disabling animations for this menu.
-		/// </summary>
-		void UpdateEnablingAndDisablingProgress();
-
 		/// <summary>
 		/// Handles MenuMode specific updating for when the InventoryMenuGUI is in Carousel MenuMode.
 		/// </summary>

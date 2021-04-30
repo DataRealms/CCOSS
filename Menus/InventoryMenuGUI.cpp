@@ -43,29 +43,32 @@ namespace RTE {
 
 		m_ActivityPlayerController = nullptr;
 		m_InventoryActor = nullptr;
-		m_InventoryActorIsHuman = false;
-
 		m_MenuMode = MenuMode::Carousel;
-		m_DisplayOnly = false;
+		m_CenterPos.Reset();
 
 		m_EnabledState = EnabledState::Disabled;
-		m_EnableDisableProgress = 0;
-		m_CenterPos.Reset();
+		m_EnableDisableAnimationTimer.Reset();
+		m_EnableDisableAnimationTimer.SetRealTimeLimitMS(300);
+
+		m_InventoryActorIsHuman = false;
+		m_InventoryActorEquippedItems.clear();
 
 		m_CarouselDrawEmptyBoxes = true;
 		m_CarouselBackgroundTransparent = true;
 		m_CarouselBackgroundBoxColor = 4;
 		m_CarouselBackgroundBoxBorderSize = Vector(2, 1);
 		m_CarouselBackgroundBoxBorderColor = g_MaskColor;
-		
-		m_CarouselAnimationDirection = CarouselAnimationDirection::None;
-		m_CarouselAnimationProgress = 0;
-		for (std::unique_ptr<CarouselItemBox> &carouselItemBox : m_CarouselItemBoxes) { carouselItemBox = nullptr; }
-		m_CarouselExitingItemBox.reset();
 
 		m_CarouselBGBitmap = nullptr;
 		m_CarouselBitmap = nullptr;
+		
+		m_CarouselAnimationDirection = CarouselAnimationDirection::None;
+		m_CarouselAnimationTimer.Reset();
+		m_CarouselAnimationTimer.SetRealTimeLimitMS(200);
+		for (std::unique_ptr<CarouselItemBox> &carouselItemBox : m_CarouselItemBoxes) { carouselItemBox = nullptr; }
+		m_CarouselExitingItemBox.reset();
 
+		m_DisplayOnly = false;
 		m_InventoryObjectRows.clear();
 	}
 
@@ -75,8 +78,8 @@ namespace RTE {
 		RTEAssert(activityPlayerController, "No controller sent to InventoryMenuGUI on creation!");
 		RTEAssert(c_ItemsPerRow % 2 == 1, "Don't you dare use an even number of items per inventory row, you filthy animal!");
 
-		m_SmallFont = g_FrameMan.GetSmallFont();
-		m_LargeFont = g_FrameMan.GetLargeFont();
+		if (!m_SmallFont) { m_SmallFont = g_FrameMan.GetSmallFont(); }
+		if (!m_LargeFont) { m_LargeFont = g_FrameMan.GetLargeFont(); }
 
 		m_ActivityPlayerController = activityPlayerController;
 		SetInventoryActor(inventoryActor);
@@ -126,6 +129,7 @@ namespace RTE {
 		bool enabledStateDoesNotMatchInput = (enable && m_EnabledState != EnabledState::Enabled && m_EnabledState != EnabledState::Enabling) || (!enable && m_EnabledState != EnabledState::Disabled && m_EnabledState != EnabledState::Disabling);
 		if (enabledStateDoesNotMatchInput) {
 			m_EnabledState = enable ? EnabledState::Enabling : EnabledState::Disabling;
+			m_EnableDisableAnimationTimer.Reset();
 
 			if (m_MenuMode == MenuMode::Full || m_MenuMode == MenuMode::Transfer) {
 				if (m_ActivityPlayerController && m_ActivityPlayerController->IsMouseControlled()) {
@@ -144,24 +148,24 @@ namespace RTE {
 		m_InventoryActor = newInventoryActor;
 		if (m_InventoryActor) {
 			m_InventoryActorIsHuman = dynamic_cast<AHuman *>(m_InventoryActor);
-			m_CenterPos = m_InventoryActor->GetAboveHUDPos() - Vector(0, c_ItemBoxSize);
+			m_CenterPos = m_InventoryActor->GetAboveHUDPos() - Vector(0, c_MenuVerticalOffset);
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void InventoryMenuGUI::Update() {
-		if (IsEnabled() && (!m_ActivityPlayerController || !m_InventoryActor)) { m_EnabledState = EnabledState::Disabling; }
-		if (IsEnablingOrDisabling()) { UpdateEnablingAndDisablingProgress(); }
+		if (IsEnabled() && (!m_ActivityPlayerController || !m_InventoryActor)) { SetEnabled(false); }
+		if (IsEnablingOrDisabling() && m_EnableDisableAnimationTimer.IsPastRealTimeLimit()) { m_EnabledState = (m_EnabledState == EnabledState::Enabling) ? EnabledState::Enabled : EnabledState::Disabled; }
 
-		if (!IsDisabled()) {
+		if (m_EnabledState != EnabledState::Disabled) {
 			if (const AHuman *inventoryActorAsAHuman = m_InventoryActorIsHuman ? dynamic_cast<AHuman *>(m_InventoryActor) : nullptr) {
 				m_InventoryActorEquippedItems.clear();
 				m_InventoryActorEquippedItems.reserve(2);
 				if (inventoryActorAsAHuman->GetEquippedItem()) { m_InventoryActorEquippedItems.push_back(inventoryActorAsAHuman->GetEquippedItem()); }
 				if (inventoryActorAsAHuman->GetEquippedBGItem()) { m_InventoryActorEquippedItems.push_back(inventoryActorAsAHuman->GetEquippedBGItem()); }
 			}
-			if (m_InventoryActorEquippedItems.empty() && m_InventoryActor && m_InventoryActor->IsInventoryEmpty()) { m_EnabledState = EnabledState::Disabling; }
+			if (m_InventoryActorEquippedItems.empty() && m_InventoryActor && m_InventoryActor->IsInventoryEmpty()) { SetEnabled(false); }
 
 			switch (m_MenuMode) {
 				case MenuMode::Carousel:
@@ -176,19 +180,6 @@ namespace RTE {
 				default:
 					RTEAbort("Unsupported InventoryMenuGUI MenuMode during Update " + std::to_string(static_cast<int>(m_MenuMode)));
 			}
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void InventoryMenuGUI::UpdateEnablingAndDisablingProgress() {
-		float maxProgressChange = 0.15F;
-		if (m_EnabledState == EnabledState::Enabling) {
-			m_EnableDisableProgress = std::fminf(m_EnableDisableProgress + maxProgressChange, EaseOut(0, 1.0F, std::fmaxf(0.01F, m_EnableDisableProgress)));
-			if (m_EnableDisableProgress >= 0.99F) { m_EnabledState = EnabledState::Enabled; }
-		} else {
-			m_EnableDisableProgress = std::fmaxf(m_EnableDisableProgress - maxProgressChange, 1.0F - EaseOut(0, 1.0F, 1.0F - std::fminf(0.99F, m_EnableDisableProgress)));
-			if (m_EnableDisableProgress <= 0.01F) { m_EnabledState = EnabledState::Disabled; }
 		}
 	}
 
@@ -222,21 +213,17 @@ namespace RTE {
 
 			if (m_InventoryActor->GetController()->IsState(ControlState::WEAPON_CHANGE_PREV)) {
 				m_CarouselAnimationDirection = CarouselAnimationDirection::Right;
-				m_CarouselAnimationProgress = 0;
+				m_CarouselAnimationTimer.Reset();
 				m_CarouselExitingItemBox->Item = m_CarouselItemBoxes.at(m_CarouselItemBoxes.size() - 1)->Item;
 			} else if (m_InventoryActor->GetController()->IsState(ControlState::WEAPON_CHANGE_NEXT)) {
 				m_CarouselAnimationDirection = CarouselAnimationDirection::Left;
-				m_CarouselAnimationProgress = 0;
+				m_CarouselAnimationTimer.Reset();
 				m_CarouselExitingItemBox->Item = m_CarouselItemBoxes.at(0)->Item;
 			}
 
-			if (m_CarouselAnimationDirection != CarouselAnimationDirection::None) {
-				m_CarouselAnimationProgress += 0.1F;
-				if (m_CarouselAnimationProgress >= 1.0F) {
-					m_CarouselAnimationDirection = CarouselAnimationDirection::None;
-					m_CarouselAnimationProgress = 0;
-					m_CarouselExitingItemBox->Item = nullptr;
-				}
+			if (m_CarouselAnimationDirection != CarouselAnimationDirection::None && m_CarouselAnimationTimer.IsPastRealTimeLimit()) {
+				m_CarouselAnimationDirection = CarouselAnimationDirection::None;
+				m_CarouselExitingItemBox->Item = nullptr;
 			}
 		}
 		UpdateCarouselItemBoxSizesAndPositions();
@@ -247,22 +234,23 @@ namespace RTE {
 	void InventoryMenuGUI::UpdateCarouselItemBoxSizesAndPositions() {
 		float halfMassFontHeight = static_cast<float>(m_SmallFont->GetFontHeight() / 2);
 		int carouselIndex = 0;
-		float directionalAnimationProgress = m_CarouselAnimationProgress * static_cast<float>(m_CarouselAnimationDirection);
+		float carouselAnimationProgress = static_cast<float>(m_CarouselAnimationTimer.RealTimeLimitProgress());
+		float directionalAnimationProgress = carouselAnimationProgress * static_cast<float>(m_CarouselAnimationDirection);
 		float currentBoxHorizontalOffset = (directionalAnimationProgress <= 0 ? directionalAnimationProgress : -(1.0F - directionalAnimationProgress)) * m_CarouselExitingItemBox->FullSize.GetX();
 
 		/// <summary>
 		/// Lambda to do all the repetitive boilerplate of setting up a carousel item box.
 		/// </summary>
-		auto SetupCarouselItemBox = [this, &halfMassFontHeight, &carouselIndex, &currentBoxHorizontalOffset](const std::unique_ptr<CarouselItemBox> &carouselItemBox, bool leftSideRoundedAndBordered, bool rightSideRoundedAndBordered) {
+		auto SetupCarouselItemBox = [this, &halfMassFontHeight, &carouselIndex, &carouselAnimationProgress, &currentBoxHorizontalOffset](const std::unique_ptr<CarouselItemBox> &carouselItemBox, bool leftSideRoundedAndBordered, bool rightSideRoundedAndBordered) {
 			carouselItemBox->CurrentSize = carouselItemBox->FullSize;
 			if (carouselIndex == -1) {
-				carouselItemBox->CurrentSize += c_CarouselBoxSizeStep * (1.0F - m_CarouselAnimationProgress);
+				carouselItemBox->CurrentSize += c_CarouselBoxSizeStep * (1.0F - carouselAnimationProgress);
 			} else if (m_CarouselAnimationDirection != CarouselAnimationDirection::None) {
 				int animationStartSizeIndex = carouselIndex - static_cast<int>(m_CarouselAnimationDirection);
 				if (animationStartSizeIndex < 0 || animationStartSizeIndex >= m_CarouselItemBoxes.size()) {
-					carouselItemBox->CurrentSize -= c_CarouselBoxSizeStep * (1.0F - m_CarouselAnimationProgress);
+					carouselItemBox->CurrentSize -= c_CarouselBoxSizeStep * (1.0F - carouselAnimationProgress);
 				} else {
-					carouselItemBox->CurrentSize += (m_CarouselItemBoxes.at(animationStartSizeIndex)->FullSize - carouselItemBox->CurrentSize) * (1.0F - m_CarouselAnimationProgress);
+					carouselItemBox->CurrentSize += (m_CarouselItemBoxes.at(animationStartSizeIndex)->FullSize - carouselItemBox->CurrentSize) * (1.0F - carouselAnimationProgress);
 				}
 			}
 			carouselItemBox->Pos.SetXY(currentBoxHorizontalOffset, halfMassFontHeight + (c_CarouselBoxMaxSize.GetY() - carouselItemBox->CurrentSize.GetY()) / 2);
@@ -317,6 +305,7 @@ namespace RTE {
 				if (!m_InventoryActor || m_InventoryActor->IsInventoryEmpty() && m_InventoryActorEquippedItems.empty()) {
 					return;
 				}
+				drawPos -= Vector(0, c_CarouselBoxMaxSize.GetY() * 0.5F);
 				DrawCarouselMode(targetBitmap, drawPos);
 				break;
 			case MenuMode::Full:
@@ -334,6 +323,7 @@ namespace RTE {
 		clear_to_color(m_CarouselBitmap.get(), g_MaskColor);
 		clear_to_color(m_CarouselBGBitmap.get(), g_MaskColor);
 		AllegroBitmap carouselAllegroBitmap(m_CarouselBitmap.get());
+		float enableDisableProgress = static_cast<float>(m_EnableDisableAnimationTimer.RealTimeLimitProgress());
 
 		for (const std::unique_ptr<CarouselItemBox> &carouselItemBox : m_CarouselItemBoxes) {
 			if (carouselItemBox->Item || (carouselItemBox->IsForEquippedItems && !m_InventoryActorEquippedItems.empty())) {
@@ -354,20 +344,26 @@ namespace RTE {
 			}
 		}
 		if (IsEnablingOrDisabling()) {
-			int hiddenAreaHalfWidth = static_cast<int>((1.0F - m_EnableDisableProgress) * static_cast<float>(m_CarouselBitmap->w / 2));
+			int hiddenAreaHalfWidth = static_cast<int>((m_EnabledState == EnabledState::Enabling ? 1.0F - enableDisableProgress : enableDisableProgress) * static_cast<float>(m_CarouselBitmap->w / 2));
 			rectfill(m_CarouselBitmap.get(), 0, 0, hiddenAreaHalfWidth, m_CarouselBitmap->h, g_MaskColor);
 			rectfill(m_CarouselBitmap.get(), m_CarouselBitmap->w - hiddenAreaHalfWidth, 0, m_CarouselBitmap->w, m_CarouselBitmap->h, g_MaskColor);
 			rectfill(m_CarouselBGBitmap.get(), 0, 0, hiddenAreaHalfWidth, m_CarouselBGBitmap->h, g_MaskColor);
 			rectfill(m_CarouselBGBitmap.get(), m_CarouselBGBitmap->w - hiddenAreaHalfWidth, 0, m_CarouselBGBitmap->w, m_CarouselBGBitmap->h, g_MaskColor);
 		}
 
-		if (m_CarouselBackgroundTransparent && !g_FrameMan.IsInMultiplayerMode()) {
-			g_FrameMan.SetTransTable(MoreTrans);
-			draw_trans_sprite(targetBitmap, m_CarouselBGBitmap.get(), drawPos.GetFloorIntX() - m_CarouselBGBitmap->w / 2, drawPos.GetFloorIntY() - m_CarouselBGBitmap->h / 2);
-			draw_sprite(targetBitmap, m_CarouselBitmap.get(), drawPos.GetFloorIntX() - m_CarouselBitmap->w / 2, drawPos.GetFloorIntY() - m_CarouselBitmap->h / 2);
-		} else {
-			draw_sprite(m_CarouselBGBitmap.get(), m_CarouselBitmap.get(), 0, 0);
-			draw_sprite(targetBitmap, m_CarouselBGBitmap.get(), drawPos.GetFloorIntX() - m_CarouselBGBitmap->w / 2, drawPos.GetFloorIntY() - m_CarouselBGBitmap->h / 2);
+		bool hasDrawnAtLeastOnce = false;
+		std::list<IntRect> wrappedRectangles;
+		g_SceneMan.WrapRect(IntRect(drawPos.GetFloorIntX(), drawPos.GetFloorIntY(), drawPos.GetFloorIntX() + m_CarouselBitmap->w, drawPos.GetFloorIntY() + m_CarouselBitmap->h), wrappedRectangles);
+		for (const IntRect &wrappedRectangle : wrappedRectangles) {
+			if (m_CarouselBackgroundTransparent && !g_FrameMan.IsInMultiplayerMode()) {
+				g_FrameMan.SetTransTable(MoreTrans);
+				draw_trans_sprite(targetBitmap, m_CarouselBGBitmap.get(), wrappedRectangle.m_Left - m_CarouselBGBitmap->w / 2, wrappedRectangle.m_Top - m_CarouselBGBitmap->h / 2);
+				draw_sprite(targetBitmap, m_CarouselBitmap.get(), wrappedRectangle.m_Left - m_CarouselBitmap->w / 2, wrappedRectangle.m_Top - m_CarouselBitmap->h / 2);
+			} else {
+				if (!hasDrawnAtLeastOnce) { draw_sprite(m_CarouselBGBitmap.get(), m_CarouselBitmap.get(), 0, 0); }
+				draw_sprite(targetBitmap, m_CarouselBGBitmap.get(), wrappedRectangle.m_Left - m_CarouselBGBitmap->w / 2, wrappedRectangle.m_Top - m_CarouselBGBitmap->h / 2);
+			}
+			hasDrawnAtLeastOnce = true;
 		}
 	}
 

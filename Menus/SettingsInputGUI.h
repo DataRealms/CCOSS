@@ -56,22 +56,20 @@ namespace RTE {
 			/// <summary>
 			/// 
 			/// </summary>
-			enum InputMapLabels {
-				InputMapLabelCount
-			};
-
-			/// <summary>
-			/// 
-			/// </summary>
-			enum InputMapButtons {
-				InputMapButtonCount
+			enum PlayerInputMappings {
+				InputMappingCount = 18
 			};
 
 			bool Enabled = false; //!<
 			bool InputConfigWizardActive = false; //!<
 
-			std::array<GUILabel *, InputMapLabels::InputMapLabelCount> InputMapLabel; //!<
-			std::array<GUIButton *, InputMapButtons::InputMapButtonCount> InputMapButton; //!<
+			GUICollectionBox *MappingConfigBox;
+			GUILabel *MappingConfigLabel;
+			GUIButton *CloseMappingBoxButton;
+			GUIButton *RunConfigWizardButton;
+
+			std::array<GUILabel *, PlayerInputMappings::InputMappingCount> InputMapLabel; //!<
+			std::array<GUIButton *, PlayerInputMappings::InputMappingCount> InputMapButton; //!<
 
 			/// <summary>
 			/// 
@@ -82,9 +80,22 @@ namespace RTE {
 			/// <summary>
 			/// 
 			/// </summary>
+			/// <param name="enable"></param>
+			/// <param name="player"></param>
+			void SetEnabled(bool enable, int player = 0);
+
+			/// <summary>
+			/// 
+			/// </summary>
 			/// <param name="guiEvent"></param>
 			/// <param name="player"></param>
 			void HandleInputEvents(GUIEvent &guiEvent, int player);
+
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="player"></param>
+			void UpdateMappingLabelsAndButtons(int player);
 		};
 
 		/// <summary>

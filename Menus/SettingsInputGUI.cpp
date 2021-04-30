@@ -44,7 +44,17 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsInputGUI::InputConfigScreen::Create(GUIControlManager *parentControlManager) {
+		MappingConfigBox = dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("CollectionBoxPlayerInputMapping"));
+		MappingConfigBox->SetVisible(false);
 
+		MappingConfigLabel = dynamic_cast<GUILabel *>(parentControlManager->GetControl("LabelPlayerInputMappingTitle"));
+		CloseMappingBoxButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonCloseMappingBox"));
+		RunConfigWizardButton = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonRunConfigWizard"));
+
+		for (int i = 0; i < 18; ++i) {
+			InputMapLabel.at(i) = dynamic_cast<GUILabel *>(parentControlManager->GetControl("LabelMapping" + std::to_string(i + 1)));
+			InputMapButton.at(i) = dynamic_cast<GUIButton *>(parentControlManager->GetControl("ButtonMapping" + std::to_string(i + 1)));
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -114,6 +124,113 @@ namespace RTE {
 		} else {
 			m_InputSettingsBox->SetVisible(false);
 			m_InputSettingsBox->SetEnabled(false);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsInputGUI::InputConfigScreen::SetEnabled(bool enable, int player) {
+		if (enable) {
+			MappingConfigBox->SetVisible(true);
+			MappingConfigBox->SetEnabled(true);
+			MappingConfigLabel->SetText("P L A Y E R   " + std::to_string(player + 1) + "   I N P U T   M A P P I N G");
+			UpdateMappingLabelsAndButtons(player);
+		} else {
+			MappingConfigBox->SetVisible(false);
+			MappingConfigBox->SetEnabled(false);
+		}
+		Enabled = enable;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsInputGUI::InputConfigScreen::UpdateMappingLabelsAndButtons(int player) {
+		//const InputMapping *inputMappings = g_UInputMan.GetControlScheme(player)->GetInputMappings();
+
+		for (int i = 0; i < PlayerInputMappings::InputMappingCount; ++i) {
+			InputMapLabel.at(i)->SetText("- Map Name");
+			InputMapButton.at(i)->SetText("[Button]");
+		}
+
+		switch (g_UInputMan.GetControlScheme(player)->GetDevice()) {
+			case InputDevice::DEVICE_KEYB_ONLY:
+				InputMapLabel.at(0)->SetText("- Move/Aim Up");
+				InputMapLabel.at(1)->SetText("- Move/Aim Down");
+				InputMapLabel.at(2)->SetText("- Move Left");
+				InputMapLabel.at(3)->SetText("- Move Right");
+				InputMapLabel.at(4)->SetText("- Fire/Activate");
+				InputMapLabel.at(5)->SetText("- Sharp Aim");
+				InputMapLabel.at(6)->SetText("- Command Menu");
+				InputMapLabel.at(7)->SetText("- Jump");
+				InputMapLabel.at(8)->SetText("- Crouch");
+				InputMapLabel.at(9)->SetText("- Prev. Body");
+				InputMapLabel.at(10)->SetText("- Next Body");
+				InputMapLabel.at(11)->SetText("- Reload");
+				InputMapLabel.at(12)->SetText("- Pick Up");
+				InputMapLabel.at(13)->SetText("- Drop Device");
+				InputMapLabel.at(14)->SetText("- Prev. Device");
+				InputMapLabel.at(15)->SetText("- Next. Device");
+				break;
+			case InputDevice::DEVICE_MOUSE_KEYB:
+				InputMapLabel.at(0)->SetText("- Move Up/Jump");
+				InputMapLabel.at(1)->SetText("- Move Down/Crouch");
+				InputMapLabel.at(2)->SetText("- Move Left");
+				InputMapLabel.at(3)->SetText("- Move Right");
+				InputMapLabel.at(4)->SetText("- Reload");
+				InputMapLabel.at(5)->SetText("- Pick Up");
+				InputMapLabel.at(6)->SetText("- Drop Device");
+				InputMapLabel.at(7)->SetText("- Prev. Device");
+				InputMapLabel.at(8)->SetText("- Next. Device");
+				InputMapLabel.at(9)->SetText("- Prev. Body");
+				InputMapLabel.at(10)->SetText("- Next Body");
+				break;
+			default:
+				/*
+				// D-Pad
+				InputMapLabel.at(0)->SetText("- Move/Aim Up");
+				InputMapLabel.at(1)->SetText("- Move/Aim Down");
+				InputMapLabel.at(2)->SetText("- Move Left");
+				InputMapLabel.at(3)->SetText("- Move Right");
+				InputMapLabel.at(4)->SetText("- Sharp Aim");
+				InputMapLabel.at(5)->SetText("- Fire/Activate");
+				InputMapLabel.at(6)->SetText("- Jump");
+				InputMapLabel.at(7)->SetText("- Command Menu");
+				InputMapLabel.at(8)->SetText("- Next Body");
+				InputMapLabel.at(9)->SetText("- Prev. Body");
+				InputMapLabel.at(10)->SetText("- Start");
+				InputMapLabel.at(11)->SetText("- Back");
+				*/
+				/*
+				// Dual Analog
+				InputMapLabel.at(0)->SetText("- Move Up/Jump");
+				InputMapLabel.at(1)->SetText("- Move Down/Crouch");
+				InputMapLabel.at(2)->SetText("- Move Left");
+				InputMapLabel.at(3)->SetText("- Move Right");
+				InputMapLabel.at(4)->SetText("- Aim Up");
+				InputMapLabel.at(5)->SetText("- Aim Down");
+				InputMapLabel.at(6)->SetText("- Aim Left");
+				InputMapLabel.at(7)->SetText("- Aim Right");
+				InputMapLabel.at(8)->SetText("- Fire/Activate");
+				InputMapLabel.at(9)->SetText("- Command Menu");
+				InputMapLabel.at(10)->SetText("- Next Body");
+				InputMapLabel.at(11)->SetText("- Prev. Body");
+				InputMapLabel.at(12)->SetText("- Prev. Device");
+				InputMapLabel.at(13)->SetText("- Next. Device");
+				InputMapLabel.at(14)->SetText("- Pick Up");
+				InputMapLabel.at(15)->SetText("- Reload");
+				InputMapLabel.at(16)->SetText("- Start");
+				InputMapLabel.at(17)->SetText("- Back");
+				*/
+				break;
+		}
+		for (int i = 0; i < PlayerInputMappings::InputMappingCount; ++i) {
+			if (InputMapLabel.at(i)->GetText() == "- Map Name") {
+				InputMapLabel.at(i)->SetVisible(false);
+				InputMapButton.at(i)->SetVisible(false);
+			} else {
+				InputMapLabel.at(i)->SetVisible(true);
+				InputMapButton.at(i)->SetVisible(true);
+			}
 		}
 	}
 
@@ -252,7 +369,6 @@ namespace RTE {
 
 	void SettingsInputGUI::HandleInputEvents(GUIEvent &guiEvent) {
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-			/*
 			if (m_InputConfigMenu.Enabled) {
 				if (m_InputConfigWizardMenu.Enabled) {
 					m_InputConfigWizardMenu.HandleInputEvents(guiEvent, player);
@@ -261,7 +377,6 @@ namespace RTE {
 				m_InputConfigMenu.HandleInputEvents(guiEvent, player);
 				return;
 			}
-			*/
 			if (guiEvent.GetType() == GUIEvent::Command) {
 				if (guiEvent.GetControl() == m_PlayerInputSettingsBoxes.at(player).NextDeviceButton) {
 					g_GUISound.ButtonPressSound()->Play();
@@ -271,10 +386,7 @@ namespace RTE {
 					SetPlayerNextOrPrevInputDevice(player, false);
 				} else if (guiEvent.GetControl() == m_PlayerInputSettingsBoxes.at(player).ConfigureControlsButton) {
 					g_GUISound.ButtonPressSound()->Play();
-					/*
-					m_InputConfigMenu.SetEnabled();
-					SetEnabled(false);
-					*/
+					m_InputConfigMenu.SetEnabled(true, player);
 				} else if (guiEvent.GetControl() == m_PlayerInputSettingsBoxes.at(player).ResetControlsButton) {
 					g_GUISound.ButtonPressSound()->Play();
 					ResetPlayerControlMappings(player);
@@ -302,7 +414,17 @@ namespace RTE {
 
 	void SettingsInputGUI::InputConfigScreen::HandleInputEvents(GUIEvent &guiEvent, int player) {
 		if (guiEvent.GetType() == GUIEvent::Command) {
-
+			if (guiEvent.GetControl() == CloseMappingBoxButton) {
+				g_GUISound.ButtonPressSound()->Play();
+				SetEnabled(false);
+			} else if (guiEvent.GetControl() == RunConfigWizardButton) {
+				;
+			}
+			for (int mapButton = 0; mapButton < PlayerInputMappings::InputMappingCount; ++mapButton) {
+				if (guiEvent.GetControl() == InputMapButton.at(mapButton)) {
+					;
+				}
+			}
 		}
 	}
 

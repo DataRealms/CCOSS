@@ -121,9 +121,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`DrawPixelCheckVisualizations ` - any pixel checks made by `SceneMan:GetTerrMatter` or `SceneMan:GetMOIDPixel` will be drawn to the standard view.
 
 - Added case sensitive loading on Windows.  
-  - New `Settings.ini` property `IgnoreFileCase = 0/1` (default 0) to indicate wether the case checking routine should be used.
-  - New System function `PathExistsCaseSensitive` that checks wether a file exists with matching capitalization.
-  - New System static vector `s_WorkingTree` that is a of all files in the working directory.
+  - New `Settings.ini` property `CaseSensitiveLoading = 0/1` (default 1) to indicate wether the case checking routine should be used.
 
 ### Changed
 
@@ -217,12 +215,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed a bug that caused the game to crash when the crab bomb effect was triggered while there were multiple crab bomb eligible Craft in an activity.
 
 - Renamed `Attachable` INI property `CollidesWithTerrainWhenAttached` to more correct, consistent `CollidesWithTerrainWhileAttached`.
-
-- On Linux `RTEAbort` and `RTEAssert` will now properly exit in debug modes.
-
-- Fixed `Reader::ReadLine` not returning a trimmed string, which prevented some mods to load on linux
-
-- Fixed ISOC++ incompatibilities of MSVC and gcc in various places.
 
 ### Removed
 

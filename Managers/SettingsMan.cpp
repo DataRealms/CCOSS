@@ -324,7 +324,7 @@ namespace RTE {
 		writer.NewLine(false);
 		writer.NewPropertyWithValue("SkipIntro", m_SkipIntro);
 		writer.NewPropertyWithValue("ToolTips", m_ToolTips);
-		writer.NewPropertyWithValue("CaseSensitiveLoading", System::IsCaseSensitveEnabled());
+		writer.NewPropertyWithValue("CaseSensitiveLoading", System::IsCaseSensitiveEnabled());
 		writer.NewPropertyWithValue("DisableLoadingScreen", m_DisableLoadingScreen);
 		writer.NewPropertyWithValue("LoadingScreenReportPrecision", m_LoadingScreenReportPrecision);
 		writer.NewPropertyWithValue("ConsoleScreenRatio", g_ConsoleMan.m_ConsoleScreenRatio);

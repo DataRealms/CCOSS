@@ -25,6 +25,9 @@ namespace RTE {
 		if (s_WorkingDirectory.back() != '/') { s_WorkingDirectory.append("/"); }
 
 		if (!std::filesystem::exists(s_WorkingDirectory + s_ScreenshotDirectory)) { MakeDirectory(s_WorkingDirectory + s_ScreenshotDirectory); }
+#ifdef __unix__
+		EnableLoggingToCLI();
+#endif
 		//if (!std::filesystem::exists(s_WorkingDirectory + s_ModDirectory)) { MakeDirectory(s_WorkingDirectory + s_ModDirectory); }
 	}
 
@@ -41,7 +44,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool System::PathExistsCaseSensitive(const std::string &pathToCheck) {
-#if defined(_WIN32) || defined(_APPLE_) || defined(_MACH_)
+#ifndef __linux__
 		if (s_CaseSensitive) {
 			if (s_WorkingTree.empty()) {
 				for (auto file: std::filesystem::recursive_directory_iterator{s_WorkingDirectory}) {

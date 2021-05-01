@@ -46,7 +46,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool System::PathExistsCaseSensitive(const std::string &pathToCheck) {
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(_APPLE_) || defined(_MACH_)
 		if (!g_SettingsMan.IgnoreFileCase()) {
 			if (s_WorkingTree.empty()) {
 				std::filesystem::recursive_directory_iterator it{ s_WorkingDirectory };
@@ -62,10 +62,8 @@ namespace RTE {
 				std::hash<std::string>{}(pathToCheck)
 			);
 		}
-		return std::filesystem::exists(pathToCheck);
-#else
-		return std::filesystem::exists(pathToCheck);
 #endif
+		return std::filesystem::exists(pathToCheck);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -61,23 +61,20 @@ namespace RTE {
 		/// Check if filename exists case sensitive.
 		/// On case sensitive filesystems this returns std::filesystem::exists, otherwise the working directory will be checked for a matching file.
 		/// </summary>
-		/// <param name="filename">
-		/// The path to check
-		/// </param>
+		/// <param name="pathToCheck"> The path to check. </param>
 		static bool PathExistsCaseSensitive(const std::string &pathToCheck);
 
 		/// <summary>
-		/// Wether to enable case sensitivity when checking if files exist
+		/// Whether to enable case sensitivity when checking if files exist.
 		/// </summary>
+		/// <param name="enabled"> Whether case sensitivity should be enabled or not. </param>
 		static void EnableCaseSensitivity(bool enabled) {s_CaseSensitive=enabled;};
 
 		/// <summary>
-		/// Returns wether case sensitivity for file existance is enabled.
+		/// Returns whether case sensitivity for file existance is enabled.
 		/// </summary>
-		/// <reutrns>
-		/// Wether case sensitivity is enabled.
-		/// </returns>
-		static bool IsCaseSensitveEnabled() {return s_CaseSensitive;}
+		/// <returns> Whether case sensitivity is enabled. </returns>
+		static bool IsCaseSensitiveEnabled() {return s_CaseSensitive;}
 #pragma endregion
 
 #pragma region Command-Line Interface

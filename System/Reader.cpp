@@ -40,9 +40,7 @@ namespace RTE {
 		m_CanFail = failOK;
 
 		m_Stream = std::make_unique<std::ifstream>(fileName);
-		if (!m_CanFail) {
-			RTEAssert(System::PathExistsCaseSensitive(fileName) && m_Stream->good(), "Failed to open data file \"" + m_FilePath + "\"!");
-		}
+		if (!m_CanFail) { RTEAssert(System::PathExistsCaseSensitive(fileName) && m_Stream->good(), "Failed to open data file \"" + m_FilePath + "\"!"); }
 
 		m_OverwriteExisting = overwrites;
 
@@ -277,7 +275,7 @@ namespace RTE {
 		m_FilePath = includeFilePath;
 		m_Stream = std::make_unique<std::ifstream>(m_FilePath);
 
-		if (m_Stream->fail()||!System::PathExistsCaseSensitive(includeFilePath)) {
+		if (m_Stream->fail() || !System::PathExistsCaseSensitive(includeFilePath)) {
 			// Backpedal and set up to read the next property in the old stream
 			m_Stream.reset(m_StreamStack.top().Stream); // Destructs the current m_Stream and takes back ownership and management of the raw StreamInfo std::ifstream pointer.
 			m_FilePath = m_StreamStack.top().FilePath;

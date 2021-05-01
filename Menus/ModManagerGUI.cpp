@@ -24,21 +24,24 @@ namespace RTE {
 		}
 		m_GUIControlManager->Load("Base.rte/GUIs/ModManagerGUI.ini");
 
-		m_RootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
-		m_RootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+		GUICollectionBox *rootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
+		rootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
-		m_ModManagerScreen = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ModManagerScreen"));
-		if (m_RootBox->GetHeight() < 540) {
-			m_ModManagerScreen->CenterInParent(true, true);
-		} else {
-			m_ModManagerScreen->SetPositionAbs((m_RootBox->GetWidth() - m_ModManagerScreen->GetWidth()) / 2, 140);
-		}
+		GUICollectionBox *modManagerMenuBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxModManager"));
+		modManagerMenuBox->CenterInParent(true, true);
+		modManagerMenuBox->SetPositionAbs(modManagerMenuBox->GetXPos(), (rootBox->GetHeight() < 540) ? modManagerMenuBox->GetYPos() - 15 : 140);
 
-		m_BackToMainButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonExitModManager"));
+		m_BackToMainButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonBackToMainMenu"));
+		m_BackToMainButton->SetPositionAbs((rootBox->GetWidth() - m_BackToMainButton->GetWidth()) / 2, modManagerMenuBox->GetYPos() + modManagerMenuBox->GetHeight() + 10);
+
+		m_ModsListBox = dynamic_cast<GUIListBox *>(m_GUIControlManager->GetControl("ListBoxMods"));
+		m_ModsListBox->SetScrollBarThickness(15);
+
+		m_ScriptsListBox = dynamic_cast<GUIListBox *>(m_GUIControlManager->GetControl("ListBoxScripts"));
+		m_ScriptsListBox->SetScrollBarThickness(15);
+
 		m_ToggleModButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonToggleMod"));
 		m_ToggleScriptButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonToggleScript"));
-		m_ModsListBox = dynamic_cast<GUIListBox *>(m_GUIControlManager->GetControl("ModsLB"));
-		m_ScriptsListBox = dynamic_cast<GUIListBox *>(m_GUIControlManager->GetControl("ScriptsLB"));
 		m_ModOrScriptDescriptionLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelDescription"));
 
 		PopulateKnownModsList();
@@ -135,6 +138,7 @@ namespace RTE {
 			ModRecord modRecord = m_KnownMods.at(i);
 			m_ModsListBox->AddItem(modRecord.MakeModString(), std::string(), nullptr, nullptr, i);
 		}
+		m_ModsListBox->ScrollToTop();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -157,6 +161,7 @@ namespace RTE {
 			ScriptRecord scriptRecord = m_KnownScripts.at(i);
 			m_ScriptsListBox->AddItem(scriptRecord.MakeScriptString(), std::string(), nullptr, nullptr, i);
 		}
+		m_ScriptsListBox->ScrollToTop();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

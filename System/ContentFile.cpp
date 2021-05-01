@@ -3,8 +3,6 @@
 #include "PresetMan.h"
 #include "ConsoleMan.h"
 
-#include "System.h"
-
 namespace RTE {
 
 	const std::string ContentFile::c_ClassName = "ContentFile";

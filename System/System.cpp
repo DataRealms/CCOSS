@@ -6,15 +6,12 @@
 #include <sys/stat.h>
 #endif
 
-#ifdef _WIN32
-#include "SettingsMan.h"
-#endif
-
 namespace RTE {
 
 	bool System::s_LogToCLI = false;
 	std::string System::s_WorkingDirectory = ".";
 	std::vector<size_t> System::s_WorkingTree;
+	bool System::s_CaseSensitive=true;
 	const std::string System::s_ScreenshotDirectory = "_ScreenShots";
 	const std::string System::s_ModDirectory = "_Mods";
 	const std::string System::s_ModulePackageExtension = ".rte";
@@ -45,7 +42,7 @@ namespace RTE {
 
 	bool System::PathExistsCaseSensitive(const std::string &pathToCheck) {
 #if defined(_WIN32) || defined(_APPLE_) || defined(_MACH_)
-		if (!g_SettingsMan.IgnoreFileCase()) {
+		if (s_CaseSensitive) {
 			if (s_WorkingTree.empty()) {
 				for (auto file: std::filesystem::recursive_directory_iterator{s_WorkingDirectory}) {
 					s_WorkingTree.emplace_back(std::hash<std::string>{}(file.path().generic_string().substr(s_WorkingDirectory.length())));

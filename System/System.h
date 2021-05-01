@@ -59,14 +59,25 @@ namespace RTE {
 #pragma region Filesystem
 		/// <summary>
 		/// Check if filename exists case sensitive.
-		/// On case sensitive filesystems this returns std::filesystem::exists,
-		/// otherwise the working directory will be checked for a matching file.
+		/// On case sensitive filesystems this returns std::filesystem::exists, otherwise the working directory will be checked for a matching file.
 		/// </summary>
 		/// <param name="filename">
 		/// The path to check
 		/// </param>
-
 		static bool PathExistsCaseSensitive(const std::string &pathToCheck);
+
+		/// <summary>
+		/// Wether to disable case sensitivity when checking if files exist
+		/// </summary>
+		static void EnableCaseSensitivity(bool enabled) {s_CaseSensitive=enabled;};
+
+		/// <summary>
+		/// Returns wether case sensitivity for file existance is enabled.
+		/// </summary>
+		/// <reutrns>
+		/// Wether case sensitivity is enabled.
+		/// </returns>
+		static bool IsCaseSensitveEnabled() {return s_CaseSensitive;}
 #pragma endregion
 
 #pragma region Command-Line Interface
@@ -122,7 +133,8 @@ namespace RTE {
 
 		static bool s_LogToCLI; //!< Bool to tell whether to print the loading log and anything specified with PrintToCLI to command-line or not.
 		static std::string s_WorkingDirectory; //!< String containing the absolute path to current working directory.
-		static std::vector<size_t> s_WorkingTree; //!< Vector of the hashes of all filepaths in the working directory
+		static std::vector<size_t> s_WorkingTree; //!< Vector of the hashes of all filepaths in the working directory.
+		static bool s_CaseSensitive; //!< Bool to tell whether to enable checking if files exist case sensitively.
 		static const std::string s_ScreenshotDirectory; //!< String containing the folder name of the screenshots directory.
 		static const std::string s_ModDirectory; //!< String containing the folder name of the mod directory.
 		static const std::string s_ModulePackageExtension; //!< The extension that determines a directory/file is a RTE module.
@@ -132,7 +144,6 @@ namespace RTE {
 		static constexpr int s_MaxFileName = 512; //!< Maximum length of output file directory + name string.
 		static constexpr int s_FileBufferSize = 8192; //!< Buffer to hold data read from the zip file.
 		static constexpr int s_MaxUnzippedFileSize = 104857600; //!< Maximum size of single file being extracted from zip archive (100MiB).
-
 	};
 }
 #endif

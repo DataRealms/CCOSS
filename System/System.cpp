@@ -49,18 +49,11 @@ namespace RTE {
 #if defined(_WIN32) || defined(_APPLE_) || defined(_MACH_)
 		if (!g_SettingsMan.IgnoreFileCase()) {
 			if (s_WorkingTree.empty()) {
-				std::filesystem::recursive_directory_iterator it{ s_WorkingDirectory };
-				for (auto file : it) {
-					s_WorkingTree.push_back(
-						std::hash<std::string>{}(file.path().generic_string().substr(s_WorkingDirectory.length()))
-					);
+				for (auto file: std::filesystem::recursive_directory_iterator{s_WorkingDirectory}) {
+					s_WorkingTree.emplace_back(std::hash<std::string>{}(file.path().generic_string().substr(s_WorkingDirectory.length())));
 				}
 			}
-			return s_WorkingTree.end() != std::find(
-				s_WorkingTree.begin(),
-				s_WorkingTree.end(),
-				std::hash<std::string>{}(pathToCheck)
-			);
+			return std::find(s_WorkingTree.begin(), s_WorkingTree.end(), std::hash<std::string>{}(pathToCheck)) != s_WorkingTree.end();
 		}
 #endif
 		return std::filesystem::exists(pathToCheck);

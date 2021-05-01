@@ -43,7 +43,6 @@ namespace RTE {
 		m_ToolTips = true;
 		m_DisableLoadingScreen = true;
 		m_LoadingScreenReportPrecision = 100;
-		m_IgnoreFileCase = false;
 		m_MenuTransitionDurationMultiplier = 1.0F;
 
 		m_DrawAtomGroupVisualizations = false;

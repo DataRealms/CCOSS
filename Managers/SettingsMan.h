@@ -348,11 +348,6 @@ namespace RTE {
 		int LoadingScreenReportPrecision() const { return m_LoadingScreenReportPrecision; }
 
 		/// <summary>
-		/// Gets wether to ignore case when reading files
-		/// </summary>
-		bool IgnoreFileCase() const { return m_IgnoreFileCase; }
-
-		/// <summary>
 		/// Gets the multiplier value for the transition durations between different menus.
 		/// </summary>
 		/// <returns>The multiplier value for the transition durations between different menus. Lower values equal faster transitions.</returns>
@@ -400,7 +395,6 @@ namespace RTE {
 		bool m_ToolTips; //!< Whether ToolTips are enabled or not.
 		bool m_DisableLoadingScreen; //!< Whether to display the reader progress report during module loading or not. Greatly increases loading speeds when disabled.
 		int m_LoadingScreenReportPrecision; //!< How accurately the reader progress report tells what line it's reading during module loading. Lower values equal more precision at the cost of loading speed.
-		bool m_IgnoreFileCase;
 		float m_MenuTransitionDurationMultiplier; //!< Multiplier value for the transition durations between different menus. Lower values equal faster transitions.
 		
 		bool m_DrawAtomGroupVisualizations; //!< Whether to draw MOSRotating AtomGroups to the Scene MO color Bitmap.

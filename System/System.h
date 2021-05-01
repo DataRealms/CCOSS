@@ -67,7 +67,7 @@ namespace RTE {
 		static bool PathExistsCaseSensitive(const std::string &pathToCheck);
 
 		/// <summary>
-		/// Wether to disable case sensitivity when checking if files exist
+		/// Wether to enable case sensitivity when checking if files exist
 		/// </summary>
 		static void EnableCaseSensitivity(bool enabled) {s_CaseSensitive=enabled;};
 

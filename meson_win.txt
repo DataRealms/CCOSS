@@ -2,9 +2,3 @@
 c = 'clang-cl'
 cpp = 'clang-cl'
 strip = 'strip'
-
-[host_machine]
-system = 'windows'
-cpu_family = 'x86'
-cpu = 'i686'
-endian = 'little'

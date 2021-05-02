@@ -40,9 +40,7 @@
     <Keyword>Win32Proj</Keyword>
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset Condition="'$(VisualStudioVersion)'=='15.0'">v141</PlatformToolset>
     <PlatformToolset Condition="'$(VisualStudioVersion)'=='16.0'">ClangCL</PlatformToolset>
-    <WindowsTargetPlatformVersion Condition="'$(VisualStudioVersion)'=='15.0'">10.0.17763.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformVersion Condition="'$(VisualStudioVersion)'=='16.0'">10.0</WindowsTargetPlatformVersion>
     <IntDir>_Bin\clang\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>..\Cortex-Command-Community-Project-Data\</OutDir>

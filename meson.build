@@ -62,7 +62,7 @@ elif compiler.get_argument_syntax()== 'msvc'
 #TODO: add MSVC related arguments and stuff in here
 message('cl detected')
   elfname = 'Cortex Command'
-  extra_args += []
+  extra_args += ['/permissive-']
   add_project_link_arguments(['winmm.lib', 'ws2_32.lib', 'dinput8.lib', 'ddraw.lib', 'dxguid.lib', 'dsound.lib'], language:'cpp')
   if host_machine.cpu_family() == 'x64'
     elfname += ' x64'

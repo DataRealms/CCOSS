@@ -296,7 +296,8 @@ int main(int argc, char **argv) {
 
 #ifdef DEBUG_BUILD
     // Dump out the info about how well memory cleanup went
-    Entity::ClassInfo::DumpPoolMemoryInfo(Writer("MemCleanupInfo.txt"));
+	Writer memCleanup("MemCleanupInfo.txt");
+	Entity::ClassInfo::DumpPoolMemoryInfo(memCleanup);
 #endif
 
     return 0;

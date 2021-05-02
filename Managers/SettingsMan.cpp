@@ -161,6 +161,8 @@ namespace RTE {
 			reader >> m_SkipIntro;
 		} else if (propName == "ToolTips") {
 			reader >> m_ToolTips;
+		} else if (propName == "CaseSensitiveFilePaths") {
+			System::EnableFilePathCaseSensitivity(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "DisableLoadingScreen") {
 			reader >> m_DisableLoadingScreen;
 		} else if (propName == "LoadingScreenReportPrecision") {
@@ -324,6 +326,7 @@ namespace RTE {
 		writer.NewLine(false);
 		writer.NewPropertyWithValue("SkipIntro", m_SkipIntro);
 		writer.NewPropertyWithValue("ToolTips", m_ToolTips);
+		writer.NewPropertyWithValue("CaseSensitiveFilePaths", System::FilePathsCaseSensitive());
 		writer.NewPropertyWithValue("DisableLoadingScreen", m_DisableLoadingScreen);
 		writer.NewPropertyWithValue("LoadingScreenReportPrecision", m_LoadingScreenReportPrecision);
 		writer.NewPropertyWithValue("ConsoleScreenRatio", g_ConsoleMan.m_ConsoleScreenRatio);

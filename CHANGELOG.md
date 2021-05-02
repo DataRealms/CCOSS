@@ -122,7 +122,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - New `Settings.ini` properties `MuteMusic = 0/1` and `MuteSound = 0/1` to control muting of music/sound channels without changing the volume property values.	
 
+- New `Settings.ini` property `CaseSensitiveFilePaths = 0/1` to enable/disable file path case sensitivity in INIs. Enabled by default.  
+	It is **STRONGLY** ill-advised to disable this behavior as it makes case sensitivity mismatches immediately obvious and allows fixing them with ease to ensure a path related crash free cross-platform experience.  
+	Only disable this if for some reason case sensitivity increases the loading times on your system (which it generally should not). Loading times can be benchmarked using the `Settings.ini` property `MeasureModuleLoadTime`. The result will be printed to the console.
+
 ### Changed
+
+- File paths in INIs are now case sensitive.
 
 - Hands will now draw in transparent drawing mode, i.e. editing menu.
 

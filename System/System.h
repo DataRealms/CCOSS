@@ -75,6 +75,27 @@ namespace RTE {
 		static bool MakeDirectory(const std::string &pathToMake);
 #pragma endregion
 
+#pragma region Filesystem
+		/// <summary>
+		/// Gets whether case sensitivity is enforced when checking for file existence.
+		/// </summary>
+		/// <returns>Whether case sensitivity is enforced.</returns>
+		static bool FilePathsCaseSensitive() { return s_CaseSensitive; }
+
+		/// <summary>
+		/// Sets whether case sensitivity should be enforced when checking for file existence.
+		/// </summary>
+		/// <param name="enable">Whether case sensitivity should be enforced or not.</param>
+		static void EnableFilePathCaseSensitivity(bool enable) { s_CaseSensitive = enable; }
+
+		/// <summary>
+		/// Checks if a file exists. On case sensitive filesystems returns std::filesystem::exists, otherwise the working directory will be checked for a matching file.
+		/// </summary>
+		/// <param name="pathToCheck">The path to check.</param>
+		/// <returns>Whether the file exists.</returns>
+		static bool PathExistsCaseSensitive(const std::string &pathToCheck);
+#pragma endregion
+
 #pragma region Command-Line Interface
 		/// <summary>
 		/// Tells whether printing loading progress report and console to command-line is enabled or not.
@@ -129,6 +150,8 @@ namespace RTE {
 		static bool s_Quit; //!< Whether the user requested program termination through GUI or the window close button.
 		static bool s_LogToCLI; //!< Bool to tell whether to print the loading log and anything specified with PrintToCLI to command-line or not.
 		static std::string s_WorkingDirectory; //!< String containing the absolute path to current working directory.
+		static std::vector<size_t> s_WorkingTree; //!< Vector of the hashes of all file paths in the working directory.
+		static bool s_CaseSensitive; //!< Whether case sensitivity is enforced when checking for file existence.
 		static const std::string s_ScreenshotDirectory; //!< String containing the folder name of the screenshots directory.
 		static const std::string s_ModDirectory; //!< String containing the folder name of the mod directory.
 		static const std::string s_ModulePackageExtension; //!< The extension that determines a directory/file is a RTE module.

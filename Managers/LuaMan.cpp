@@ -58,7 +58,6 @@
 #include "luabind/iterator_policy.hpp"
 #include "luabind/return_reference_to_policy.hpp"
 // Boost
-using namespace boost::placeholders;
 //#include "boost/detail/shared_ptr_nmt.hpp"
 //#include "boost/shared_ptr.hpp"
 

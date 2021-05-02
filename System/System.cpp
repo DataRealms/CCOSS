@@ -11,7 +11,7 @@ namespace RTE {
 	bool System::s_LogToCLI = false;
 	std::string System::s_WorkingDirectory = ".";
 	std::vector<size_t> System::s_WorkingTree;
-	bool System::s_CaseSensitive=true;
+	bool System::s_CaseSensitive = true;
 	const std::string System::s_ScreenshotDirectory = "_ScreenShots";
 	const std::string System::s_ModDirectory = "_Mods";
 	const std::string System::s_ModulePackageExtension = ".rte";
@@ -25,10 +25,11 @@ namespace RTE {
 		if (s_WorkingDirectory.back() != '/') { s_WorkingDirectory.append("/"); }
 
 		if (!std::filesystem::exists(s_WorkingDirectory + s_ScreenshotDirectory)) { MakeDirectory(s_WorkingDirectory + s_ScreenshotDirectory); }
+		//if (!std::filesystem::exists(s_WorkingDirectory + s_ModDirectory)) { MakeDirectory(s_WorkingDirectory + s_ModDirectory); }
+
 #ifdef __unix__
 		EnableLoggingToCLI();
 #endif
-		//if (!std::filesystem::exists(s_WorkingDirectory + s_ModDirectory)) { MakeDirectory(s_WorkingDirectory + s_ModDirectory); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -47,11 +48,11 @@ namespace RTE {
 #ifndef __linux__
 		if (s_CaseSensitive) {
 			if (s_WorkingTree.empty()) {
-				for (auto file: std::filesystem::recursive_directory_iterator{s_WorkingDirectory}) {
-					s_WorkingTree.emplace_back(std::hash<std::string>{}(file.path().generic_string().substr(s_WorkingDirectory.length())));
+				for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::recursive_directory_iterator(s_WorkingDirectory)) {
+					s_WorkingTree.emplace_back(std::hash<std::string>()(directoryEntry.path().generic_string().substr(s_WorkingDirectory.length())));
 				}
 			}
-			return std::find(s_WorkingTree.begin(), s_WorkingTree.end(), std::hash<std::string>{}(pathToCheck)) != s_WorkingTree.end();
+			return std::find(s_WorkingTree.begin(), s_WorkingTree.end(), std::hash<std::string>()(pathToCheck)) != s_WorkingTree.end();
 		}
 #endif
 		return std::filesystem::exists(pathToCheck);

@@ -58,23 +58,23 @@ namespace RTE {
 
 #pragma region Filesystem
 		/// <summary>
-		/// Check if filename exists case sensitive.
-		/// On case sensitive filesystems this returns std::filesystem::exists, otherwise the working directory will be checked for a matching file.
+		/// Gets whether case sensitivity is enforced when checking for file existence.
 		/// </summary>
-		/// <param name="pathToCheck"> The path to check. </param>
+		/// <returns>Whether case sensitivity is enforced.</returns>
+		static bool FilePathsCaseSensitive() { return s_CaseSensitive; }
+
+		/// <summary>
+		/// Sets whether case sensitivity should be enforced when checking for file existence.
+		/// </summary>
+		/// <param name="enable">Whether case sensitivity should be enforced or not.</param>
+		static void EnableFilePathCaseSensitivity(bool enable) { s_CaseSensitive = enable; }
+
+		/// <summary>
+		/// Checks if a file exists. On case sensitive filesystems returns std::filesystem::exists, otherwise the working directory will be checked for a matching file.
+		/// </summary>
+		/// <param name="pathToCheck">The path to check.</param>
+		/// <returns>Whether the file exists.</returns>
 		static bool PathExistsCaseSensitive(const std::string &pathToCheck);
-
-		/// <summary>
-		/// Whether to enable case sensitivity when checking if files exist.
-		/// </summary>
-		/// <param name="enabled"> Whether case sensitivity should be enabled or not. </param>
-		static void EnableCaseSensitivity(bool enabled) {s_CaseSensitive=enabled;};
-
-		/// <summary>
-		/// Returns whether case sensitivity for file existance is enabled.
-		/// </summary>
-		/// <returns> Whether case sensitivity is enabled. </returns>
-		static bool IsCaseSensitiveEnabled() {return s_CaseSensitive;}
 #pragma endregion
 
 #pragma region Command-Line Interface
@@ -130,8 +130,8 @@ namespace RTE {
 
 		static bool s_LogToCLI; //!< Bool to tell whether to print the loading log and anything specified with PrintToCLI to command-line or not.
 		static std::string s_WorkingDirectory; //!< String containing the absolute path to current working directory.
-		static std::vector<size_t> s_WorkingTree; //!< Vector of the hashes of all filepaths in the working directory.
-		static bool s_CaseSensitive; //!< Bool to tell whether to enable checking if files exist case sensitively.
+		static std::vector<size_t> s_WorkingTree; //!< Vector of the hashes of all file paths in the working directory.
+		static bool s_CaseSensitive; //!< Whether case sensitivity is enforced when checking for file existence.
 		static const std::string s_ScreenshotDirectory; //!< String containing the folder name of the screenshots directory.
 		static const std::string s_ModDirectory; //!< String containing the folder name of the mod directory.
 		static const std::string s_ModulePackageExtension; //!< The extension that determines a directory/file is a RTE module.

@@ -113,11 +113,11 @@ namespace RTE {
 		if (foundBitmap != s_LoadedBitmaps.at(bitDepth).end()) {
 			returnBitmap = (*foundBitmap).second;
 		} else {
-			if (!std::filesystem::exists(dataPathToLoad)) {
+			if (!System::PathExistsCaseSensitive(dataPathToLoad)) {
 				const std::string dataPathWithoutExtension = dataPathToLoad.substr(0, dataPathToLoad.length() - m_DataPathExtension.length());
 				const std::string altFileExtension = (m_DataPathExtension == ".png") ? ".bmp" : ".png";
 
-				if (std::filesystem::exists(dataPathWithoutExtension + altFileExtension)) {
+				if (System::PathExistsCaseSensitive(dataPathWithoutExtension + altFileExtension)) {
 					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
 					SetDataPath(m_DataPathWithoutExtension + altFileExtension);
 					dataPathToLoad = dataPathWithoutExtension + altFileExtension;
@@ -215,10 +215,10 @@ namespace RTE {
 			return nullptr;
 		}
 
-		if (!std::filesystem::exists(m_DataPath)) {
+		if (!System::PathExistsCaseSensitive(m_DataPath)) {
 			bool foundAltExtension = false;
 			for (const std::string &altFileExtension : c_SupportedAudioFormats) {
-				if (std::filesystem::exists(m_DataPathWithoutExtension + altFileExtension)) {
+				if (System::PathExistsCaseSensitive(m_DataPathWithoutExtension + altFileExtension)) {
 					g_ConsoleMan.AddLoadWarningLogEntry(m_DataPath, m_FormattedReaderPosition, altFileExtension);
 					SetDataPath(m_DataPathWithoutExtension + altFileExtension);
 					foundAltExtension = true;

@@ -41,7 +41,7 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   if buildtype_debug
 
     elfname += '_debug' # add _debug suffix for debug builds
-    extra_args = ['-fpermissive', '-Wno-unknown-pragmas'] # Disable #pragma region complaints
+    extra_args = ['-Wno-unknown-pragmas'] # Disable #pragma region complaints
 
     debug_type = get_option('debug_type')
     if debug_type == 'release'
@@ -52,7 +52,7 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
       preprocessor_flags += ['-DDEBUG_BUILD', '-DDEBUGMODE'] # enable all debug features; may slow down game
     endif
   else
-    extra_args = ['-fpermissive', '-w'] # Disable all warnings for release builds
+    extra_args = ['-w'] # Disable all warnings for release builds
     preprocessor_flags += ['-DRELEASE_BUILD'] # disable all debug features
   endif
   if compiler.get_id() =='gcc' and compiler.version().version_compare('<9')
@@ -62,7 +62,7 @@ elif compiler.get_argument_syntax()== 'msvc'
 #TODO: add MSVC related arguments and stuff in here
 message('cl detected')
   elfname = 'Cortex Command'
-  extra_args += ['-D_HAS_ITERATOR_DEBUGGING=0', '-D_HAS_AUTO_PTR_ETC=1']
+  extra_args += ['-permissive-', '-D_HAS_ITERATOR_DEBUGGING=0', '-D_HAS_AUTO_PTR_ETC=1']
   add_project_link_arguments(['winmm.lib', 'ws2_32.lib', 'dinput8.lib', 'ddraw.lib', 'dxguid.lib', 'dsound.lib'], language:'cpp')
   if host_machine.cpu_family() == 'x64'
     elfname += ' x64'

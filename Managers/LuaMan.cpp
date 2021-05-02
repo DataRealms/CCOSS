@@ -58,6 +58,7 @@
 #include "luabind/iterator_policy.hpp"
 #include "luabind/return_reference_to_policy.hpp"
 // Boost
+using namespace boost::placeholders;
 //#include "boost/detail/shared_ptr_nmt.hpp"
 //#include "boost/shared_ptr.hpp"
 
@@ -2647,6 +2648,16 @@ int LuaMan::RunScriptFile(const std::string &filePath, bool consoleErrors) {
         m_LastError = "Can't run a script file with an empty filepath!";
         return -1;
     }
+
+	if (!System::PathExistsCaseSensitive(filePath)){
+		m_LastError = "Script file: " + filePath + " doesn't exist!";
+		if (consoleErrors) {
+			g_ConsoleMan.PrintString("ERROR: " + m_LastError);
+			ClearErrors();
+		}
+		return -1;
+	}
+
     int error = 0;
 
     lua_pushcfunction(m_pMasterState, &AddFileAndLineToError);
@@ -2738,6 +2749,10 @@ int LuaMan::FileOpen(std::string filename, std::string mode)
 
 	// Do not open paths with '..'
 	if (fullPath.find(dotString) != string::npos)
+		return -1;
+
+	// Do not open paths that aren't written correctly
+	if (!System::PathExistsCaseSensitive(std::filesystem::path(fullPath).lexically_normal().generic_string()))
 		return -1;
 
 	// Allow to edit files only inside .rte folders

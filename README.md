@@ -35,7 +35,7 @@ Simply open `RTEA.sln` with Visual Studio, choose your target platform (x86 or x
 
 The first build will take a while, but future ones should be quicker.
 
-`RTEA_clang.sln` is meant for contributors to check ISO-C++ conformity and uses the clang toolset, this requires VS2019 with the `C++-Clang-Tools for Windows` enabled. Note however that builds with clang are only singlethreaded (thus taking significantly longer) due to problems with msbuild. The build process then is identical to the usual procedure.  
+`RTEA_clang.sln` is meant for contributors to check ISO-C++ conformity. This uses the clang toolset, which requires VS2019 with the `C++-Clang-Tools for Windows` enabled. Note however that builds with clang are only singlethreaded (thus taking significantly longer) due to problems with msbuild. The build process then is identical to the usual procedure.  
 
 If using an IDE other than Visual Studio, you will want to build using meson. (Check the [Linux](#building) and [Installing Dependencies](#installing-dependencies) section for pointers)
 
@@ -96,7 +96,7 @@ On X11 media keys and such don't work in fullscreen, this is a known issue (this
 `# pacman -S allegro4 boost flac luajit minizip lz4 libpng libx11 meson ninja xorg-fonts-misc base-devel`
 
 **Ubuntu >=20.04:**  
-`# apt-get install libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  
+`# apt-get install build-essential libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  
 
 **Windows 10 (64-bit)**  
 - [Windows SDK](https://developer.microsoft.com/de-de/windows/downloads/windows-10-sdk/)

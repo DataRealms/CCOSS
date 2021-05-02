@@ -41,7 +41,7 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   if buildtype_debug
 
     elfname += '_debug' # add _debug suffix for debug builds
-    extra_args = ['-fpermissive', '-Wno-unknown-pragmas'] # Disable #pragma region complaints
+    extra_args = ['-Wno-unknown-pragmas'] # Disable #pragma region complaints
 
     debug_type = get_option('debug_type')
     if debug_type == 'release'
@@ -52,7 +52,7 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
       preprocessor_flags += ['-DDEBUG_BUILD', '-DDEBUGMODE'] # enable all debug features; may slow down game
     endif
   else
-    extra_args = ['-fpermissive', '-w'] # Disable all warnings for release builds
+    extra_args = ['-w'] # Disable all warnings for release builds
     preprocessor_flags += ['-DRELEASE_BUILD'] # disable all debug features
   endif
   if compiler.get_id() =='gcc' and compiler.version().version_compare('<9')

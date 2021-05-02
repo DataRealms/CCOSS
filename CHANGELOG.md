@@ -120,11 +120,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`DrawRayCastVisualizations` - any rays cast by `SceneMan` will be drawn to the standard view.  
 	`DrawPixelCheckVisualizations ` - any pixel checks made by `SceneMan:GetTerrMatter` or `SceneMan:GetMOIDPixel` will be drawn to the standard view.
 
+- New `Settings.ini` property `CaseSensitiveFilePaths = 0/1` to enable/disable file path case sensitivity in INIs. Enabled by default.  
+	It is **STRONGLY** ill-advised to disable this behavior as it makes case sensitivity mismatches immediately obvious and allows fixing them with ease to ensure a path related crash free cross-platform experience.  
+	Only disable this if for some reason case sensitivity increases the loading times on your system (which it generally should not). Loading times can be benchmarked using the `Settings.ini` property `MeasureModuleLoadTime`. The result will be printed to the console.
+
 - Added an additional sln for clang-cl until clang-cl either supports /MP or VS supports meson (or someone ports the project to cmake)
 
 - Added compatibility for meson builds on windows.
 
 ### Changed
+
+- File paths in INIs are now case sensitive.
 
 - Hands will now draw in transparent drawing mode, i.e. editing menu.
 

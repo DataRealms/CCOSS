@@ -37,7 +37,7 @@ Simply open `RTEA.sln` with Visual Studio, choose your target platform (x86 or x
 
 The first build will take a while, but future ones should be quicker.
 
-If using an IDE other than Visual Studio, you will want to build using meson. (Check the [Linux](#building) and [Installing Dependencies](#installing-dependencies) section for pointers)
+If you want to use an IDE other than Visual Studio, you will want to build using meson. Check the [Linux](#building) and [Installing Dependencies](#installing-dependencies) section for pointers.
 
 # Linux Build Instructions
 The Linux build uses the meson build system, and builds against system libraries.
@@ -100,7 +100,7 @@ On X11 media keys and such don't work in fullscreen, this is a known issue (this
 
 **Windows 10 (64-bit)**  
 - [Windows SDK](https://developer.microsoft.com/de-de/windows/downloads/windows-10-sdk/)
-- [Clang Toolset](https://github.com/llvm/llvm-project/releases) (Grab the Latest LLVM-...-win64.exe)
+- [Clang Toolset](https://github.com/llvm/llvm-project/releases) (Grab the latest LLVM-...-win64.exe)
 - [git](https://www.git-scm.org)
 - [meson](https://github.com/mesonbuild/meson/releases) (documentation [here](https://www.mesonbuild.com))
 - (optional) Visual Studio for the Developer Consoles since setup otherwise may be unnecessarily hard

@@ -124,10 +124,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	It is **STRONGLY** ill-advised to disable this behavior as it makes case sensitivity mismatches immediately obvious and allows fixing them with ease to ensure a path related crash free cross-platform experience.  
 	Only disable this if for some reason case sensitivity increases the loading times on your system (which it generally should not). Loading times can be benchmarked using the `Settings.ini` property `MeasureModuleLoadTime`. The result will be printed to the console.
 
-- Added an additional sln for clang-cl until clang-cl either supports /MP or VS supports meson (or someone ports the project to cmake)
-
-- Added compatibility for meson builds on windows.
-
 ### Changed
 
 - File paths in INIs are now case sensitive.
@@ -197,9 +193,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `BuyMenu` tooltips now display item info as well as a description. This includes `MaxInventoryMass` and `MaxPassengers` for `ACraft`, `Mass` and `PassengerSlots` required for `Actors`, and `Mass` for other `MoveableObjects`.
 
-- Updated boost to 1.75.00
-  - rebuilt luabind
-
 ### Fixed
 
 - `MovableObject:SetWhichMOToNotHit` will now work properly for Attachables. They will also not hit the relevant MO. When they're removed, Attachables will check if they have the same MO for this value and, if so, unset it so they can hit that MO.
@@ -225,8 +218,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed a bug that caused the game to crash when the crab bomb effect was triggered while there were multiple crab bomb eligible Craft in an activity.
 
 - Renamed `Attachable` INI property `CollidesWithTerrainWhenAttached` to more correct, consistent `CollidesWithTerrainWhileAttached`.
-
-- Fixed various ISOC++ incompatibilities of MSVC and gcc
 
 ### Removed
 

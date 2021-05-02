@@ -103,6 +103,7 @@ On X11 media keys and such don't work in fullscreen, this is a known issue (this
 - [Clang Toolset](https://github.com/llvm/llvm-project/releases) (Grab the Latest LLVM-...-win64.exe)
 - [git](https://www.git-scm.org)
 - [meson](https://github.com/mesonbuild/meson/releases) (documentation [here](https://www.mesonbuild.com))
+- (optional) Visual Studio for the Developer Consoles since setup otherwise may be unnecessarily hard
 
 # More Information
 

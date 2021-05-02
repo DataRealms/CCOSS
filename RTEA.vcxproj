@@ -742,7 +742,16 @@
     <ClCompile Include="Managers\AudioMan.cpp" />
     <ClCompile Include="Managers\ConsoleMan.cpp" />
     <ClCompile Include="managers\FrameMan.cpp" />
-    <ClCompile Include="Managers\LuaMan.cpp" />
+    <ClCompile Include="Managers\LuaMan.cpp">
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">false</ConformanceMode>
+    </ClCompile>
     <ClCompile Include="Managers\MetaMan.cpp" />
     <ClCompile Include="Managers\MovableMan.cpp" />
     <ClCompile Include="Managers\PresetMan.cpp" />

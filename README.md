@@ -35,8 +35,6 @@ Simply open `RTEA.sln` with Visual Studio, choose your target platform (x86 or x
 
 The first build will take a while, but future ones should be quicker.
 
-`RTEA_clang.sln` is meant for contributors to check ISO-C++ conformity. This uses the clang toolset, which requires VS2019 with the `C++-Clang-Tools for Windows` enabled. Note however that builds with clang are only singlethreaded (thus taking significantly longer) due to problems with msbuild. The build process then is identical to the usual procedure.  
-
 If using an IDE other than Visual Studio, you will want to build using meson. (Check the [Linux](#building) and [Installing Dependencies](#installing-dependencies) section for pointers)
 
 # Linux Build Instructions

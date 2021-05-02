@@ -2649,7 +2649,11 @@ int LuaMan::RunScriptFile(const std::string &filePath, bool consoleErrors) {
     }
 
 	if (!System::PathExistsCaseSensitive(filePath)){
-		m_LastError = "Script file doesn't exist!";
+		m_LastError = "Script file: " + filePath + " doesn't exist!";
+		if (consoleErrors) {
+			g_ConsoleMan.PrintString("ERROR: " + m_LastError);
+			ClearErrors();
+		}
 		return -1;
 	}
 

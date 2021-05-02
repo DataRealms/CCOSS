@@ -320,9 +320,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Entity::ClassInfo::DumpPoolMemoryInfo(Writer &fileWriter) {
-		for (const ClassInfo *itr = s_ClassHead; itr != 0; itr = itr->m_NextClass) {
-			if (itr->IsConcrete()) { fileWriter << itr->GetName() << ": " << itr->m_InstancesInUse << "\n"; }
+	void Entity::ClassInfo::DumpPoolMemoryInfo(const Writer &fileWriter) {
+		for (const ClassInfo *itr = s_ClassHead; itr != nullptr; itr = itr->m_NextClass) {
+			if (itr->IsConcrete()) { fileWriter.NewLineString(itr->GetName() + ": " + std::to_string(itr->m_InstancesInUse), false); }
 		}
 	}
 }

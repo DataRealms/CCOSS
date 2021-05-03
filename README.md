@@ -46,12 +46,12 @@ The Linux build uses the meson build system, and builds against system libraries
 * `flac`
 * `luajit`
 * `minizip`
-* `lz4`
+* `lz4>=1.9.0`
 * `libpng`
 * `libX11`
 * `meson>=0.49` (If your distro doesn't have a recent version of meson, use the pip version instead)
 * `boost>=1.55`
-* `xorg-misc-fonts`
+* `xorg-misc-fonts` (probably ArchLinux only)
 
 ## Building:
 
@@ -89,11 +89,10 @@ On X11 media keys and such don't work in fullscreen, this is a known issue (this
 ## Installing Dependencies
 
 **Arch Linux:**  
-`# pacman -S allegro4 flac luajit minizip lz4 libpng libx11 meson xorg-fonts-misc`
+`# pacman -S allegro4 boost flac luajit minizip lz4 libpng libx11 meson ninja xorg-fonts-misc base-devel`
 
-**Ubuntu:**  
-`# apt-get install liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev`  
-`# pip install meson`
+**Ubuntu >=20.04:**  
+`# apt-get install libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  
 
 ***
 

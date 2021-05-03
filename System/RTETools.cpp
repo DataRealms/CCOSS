@@ -116,7 +116,7 @@ namespace RTE {
 			floatStream << std::fixed << std::setprecision(precision) << input;
 			return floatStream.str();
 		} else {
-			float precisionMagnitude = std::powf(10.0F, static_cast<float>(precision));
+			float precisionMagnitude = std::pow(10.0F, static_cast<float>(precision));
 			RTEAssert(precisionMagnitude < std::numeric_limits<float>::max(), "Precision set greater than able to display (exponent too high)!");
 			RTEAssert(precisionMagnitude > 0, "Negative precision will yield divide by zero error!");
 			RTEAssert(input < (std::numeric_limits<float>::max() / precisionMagnitude), "Value will exceed numeric limits with precision " + std::to_string(precision));

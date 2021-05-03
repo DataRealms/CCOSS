@@ -87,6 +87,7 @@ namespace RTE {
 			m_SendFrameData[i] = false;
 
 			m_ResetActivityVotes[i] = false;
+			m_RestartActivityVotes[i] = false;
 
 			m_FrameNumbers[i] = 0;
 
@@ -462,6 +463,7 @@ namespace RTE {
 				msg.MouseButtonHeld[i] = m->MouseButtonHeld[i];
 			}
 			msg.ResetActivityVote = m->ResetActivityVote;
+			msg.RestartActivityVote = m->RestartActivityVote;
 
 			msg.MouseWheelMoved = m->MouseWheelMoved;
 
@@ -483,6 +485,7 @@ namespace RTE {
 					if (msg.MouseButtonHeld[i] != lastmsg.MouseButtonHeld[i]) { skip = false; }
 				}
 				if (msg.ResetActivityVote != lastmsg.ResetActivityVote) { skip = false; }
+				if (msg.RestartActivityVote != lastmsg.RestartActivityVote) { skip = false; }
 
 				if (msg.MouseWheelMoved != lastmsg.MouseWheelMoved) { skip = false; }
 
@@ -538,6 +541,7 @@ namespace RTE {
 			}
 
 			m_ResetActivityVotes[player] = msg.ResetActivityVote;
+			m_RestartActivityVotes[player] = msg.RestartActivityVote;
 
 			// We need to replace mouse input obtained from the allegro with mouse input obtained from network clients
 			GUIInput::SetNetworkMouseMovement(player, msg.MouseX, msg.MouseY);
@@ -1643,31 +1647,51 @@ namespace RTE {
 
 			// Process reset votes
 			int votesNeeded = 0;
-			int votes = 0;
+			int resetVotes = 0;
+			int restartVotes = 0;
+
 			for (short player = 0; player < c_MaxClients; player++) {
 				if (IsPlayerConnected(player)) {
 					votesNeeded++;
-					if (m_ResetActivityVotes[player]) { votes++; }
+					if (m_ResetActivityVotes[player]) { resetVotes++; }
+					if (m_RestartActivityVotes[player]) { restartVotes++; }
 				}
 			}
-			if (votes > 0) {
-				char buf[128];
 
-				std::snprintf(buf, sizeof(buf), "Voting to end activity %d of %d", votes, votesNeeded);
+			std::string displayMsg = "";
+
+			if (resetVotes > 0) {
+				displayMsg = "Voting to end activity: " + std::to_string(resetVotes) + " of " + std::to_string(votesNeeded);
+			}
+			if (restartVotes > 0) {
+				displayMsg += "\nVoting to restart activity: " + std::to_string(restartVotes) + " of " + std::to_string(votesNeeded);
+			}
+
+			if (votesNeeded > 0 && (resetVotes > 0 || restartVotes > 0)) {
 				for (short i = 0; i < c_MaxClients; i++) {
-					g_FrameMan.SetScreenText(buf, i, 0, -1, false);
+					g_FrameMan.SetScreenText(displayMsg, i);
 				}
 
-			}
-			if (votes == votesNeeded && votesNeeded > 0) {
+				if (resetVotes >= votesNeeded) {
+					// Only reset gameplay activities, and not server lobby
+					if (g_InActivity && g_ActivityMan.GetActivity()->GetPresetName() != "Multiplayer Lobby") {
+						g_ActivityMan.EndActivity();
+						g_ResetActivity = true;
+						g_InActivity = false;
+					}
+				}
+				long long currentTicks = g_TimerMan.GetRealTickCount();
+				if (restartVotes >= votesNeeded && ((currentTicks - m_LatestRestartTime > (g_TimerMan.GetTicksPerSecond() * 5) || m_LatestRestartTime == 0))) {
+					if (g_InActivity && g_ActivityMan.GetActivity()->GetPresetName() != "Multiplayer Lobby") {
+						m_LatestRestartTime = currentTicks;
+						g_ActivityMan.RestartActivity();
+					}
+				}
+
 				for (short player = 0; player < c_MaxClients; player++) {
 					m_ResetActivityVotes[player] = false;
-				}
-				// Only reset gameplay activities, and not server lobby
-				if (g_InActivity && g_ActivityMan.GetActivity()->GetPresetName() != "Multiplayer Lobby") {
-					g_ActivityMan.EndActivity();
-					g_ResetActivity = true;
-					g_InActivity = false;
+					m_RestartActivityVotes[player] = false;
+
 				}
 			}
 		}

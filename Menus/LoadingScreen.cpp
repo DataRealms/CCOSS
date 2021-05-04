@@ -43,7 +43,8 @@ namespace RTE {
 		loadingSplash.SetOffset(Vector(static_cast<float>(((loadingSplash.GetBitmap()->w - g_FrameMan.GetResX()) / 2) + loadingSplashOffset), 0));
 
 		// Draw onto wrapped strip centered vertically on the screen
-		loadingSplash.Draw(g_FrameMan.GetBackBuffer32(), Box(Vector(0, static_cast<float>((g_FrameMan.GetResY() - loadingSplash.GetBitmap()->h) / 2)), static_cast<float>(g_FrameMan.GetResX()), static_cast<float>(loadingSplash.GetBitmap()->h)));
+		Box loadingSplashTargetBox(Vector(0, static_cast<float>((g_FrameMan.GetResY() - loadingSplash.GetBitmap()->h) / 2)), static_cast<float>(g_FrameMan.GetResX()), static_cast<float>(loadingSplash.GetBitmap()->h));
+		loadingSplash.Draw(g_FrameMan.GetBackBuffer32(), loadingSplashTargetBox);
 
 		g_FrameMan.FlipFrameBuffers();
 

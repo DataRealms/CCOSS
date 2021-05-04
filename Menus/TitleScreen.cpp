@@ -510,7 +510,8 @@ namespace RTE {
 	void TitleScreen::DrawTitleScreenScene() {
 		Vector nebulaPos(0, m_ScrollOffset.GetY() * m_BackdropScrollRatio);
 		if (m_Nebula.GetBitmap()->w != m_ScreenResX) { nebulaPos.SetX(static_cast<float>((m_Nebula.GetBitmap()->w - m_ScreenResX) / 2)); }
-		m_Nebula.Draw(m_BackBuffer, Box(), nebulaPos);
+		Box nebulaTargetBox;
+		m_Nebula.Draw(m_BackBuffer, nebulaTargetBox, nebulaPos);
 
 		for (const Star &star : m_BackdropStars) {
 			int intensity = star.Intensity + RandomNum(0, (star.Size == Star::StarSize::StarSmall) ? 35 : 70);

@@ -1,6 +1,8 @@
 # Cortex Command Community Project Source
 *The Cortex Command Community Project is Free/Libre and Open Source under GNU AGPL v3*
 
+[![Linux Build](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/meson.yml/badge.svg)](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/meson.yml) [![Windows Build](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/msbuild.yml/badge.svg)](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/actions/workflows/msbuild.yml)
+
 This is a community-driven effort to continue the development of Cortex Command.  
 Stay up to date in our [Discord channel](https://discord.gg/TSU6StNQUG).
 
@@ -35,6 +37,8 @@ Simply open `RTEA.sln` with Visual Studio, choose your target platform (x86 or x
 
 The first build will take a while, but future ones should be quicker.
 
+If you want to use an IDE other than Visual Studio, you will want to build using meson. Check the [Linux](#building) and [Installing Dependencies](#installing-dependencies) section for pointers.
+
 # Linux Build Instructions
 The Linux build uses the meson build system, and builds against system libraries.
 
@@ -55,7 +59,7 @@ The Linux build uses the meson build system, and builds against system libraries
 
 ## Building:
 
-1. Install Dependencies (see below for some distro-specific instructions).
+1. Install Dependencies (see [below](#installing-dependencies) for some distro-specific instructions).
 
 2. Clone this Source Repository and the [Data Respository](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data).
 
@@ -92,9 +96,14 @@ On X11 media keys and such don't work in fullscreen, this is a known issue (this
 `# pacman -S allegro4 boost flac luajit minizip lz4 libpng libx11 meson ninja xorg-fonts-misc base-devel`
 
 **Ubuntu >=20.04:**  
-`# apt-get install libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  
+`# apt-get install build-essential libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  
 
-***
+**Windows 10 (64-bit)**  
+- [Windows SDK](https://developer.microsoft.com/de-de/windows/downloads/windows-10-sdk/)
+- [Clang Toolset](https://github.com/llvm/llvm-project/releases) (Grab the latest LLVM-...-win64.exe)
+- [git](https://www.git-scm.org)
+- [meson](https://github.com/mesonbuild/meson/releases) (documentation [here](https://www.mesonbuild.com))
+- (optional) Visual Studio for the Developer Consoles since setup otherwise may be unnecessarily hard
 
 # More Information
 

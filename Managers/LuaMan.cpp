@@ -50,6 +50,7 @@
 #include "lua.hpp"
 
 // LuaBind
+#define BOOST_BIND_GLOBAL_PLACEHOLDERS 1
 #include "luabind/luabind.hpp"
 #include "luabind/operator.hpp"
 #include "luabind/copy_policy.hpp"

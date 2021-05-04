@@ -17,7 +17,7 @@
 #ifdef _WIN32
 #include "winalleg.h"
 #elif __unix__
-#include <X11/Xlib.h>
+#include <xalleg.h>
 #endif
 
 extern bool g_InActivity;
@@ -26,12 +26,34 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::DisplaySwitchOut(void) { g_UInputMan.DisableMouseMoving(true); }
+	void FrameMan::DisplaySwitchOut(void) { g_UInputMan.DisableMouseMoving(true);
+		#ifdef __unix__
+		// In Fullscreen regrab focus because the window is lost otherwise
+		FullscreenGrabFocus();
+		#endif
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::DisplaySwitchIn(void) { g_UInputMan.DisableMouseMoving(false); }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef __unix
+	void FrameMan::FullscreenGrabFocus(){
+		// Only applies to X11 since XWayland handles this differently (by not supporting deprecated standards)
+		if (_xwin.fs_window && !std::strcmp("x11", std::getenv("XDG_SESSION_TYPE"))) {
+			XSetInputFocus(_xwin.display, _xwin.window, RevertToPointerRoot, CurrentTime);
+			UngrabPointerAndKeyboard();
+		}
+	}
+
+	void FrameMan::UngrabPointerAndKeyboard(){
+		if(_xwin.keyboard_grabbed)
+			XUngrabKeyboard(_xwin.display, CurrentTime);
+		if(_xwin.mouse_grabbed)
+			XUngrabPointer(_xwin.display, CurrentTime);
+	}
+#endif
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::Clear() {
@@ -48,12 +70,8 @@ namespace RTE {
 		m_PrimaryScreenResY = GetSystemMetrics(SM_CYSCREEN);
 #elif __unix__
 		m_NumScreens = 1;
-		Display *dpy = XOpenDisplay(NULL);
-		XWindowAttributes ra;
-		XGetWindowAttributes(dpy, DefaultRootWindow(dpy), &ra);
-		m_ScreenResX = m_PrimaryScreenResX = ra.width;
-		m_ScreenResY = m_PrimaryScreenResY = ra.height;
-		XCloseDisplay(dpy);
+		m_ScreenResX = m_PrimaryScreenResX = DisplayWidth(_xwin.display, _xwin.screen);
+		m_ScreenResY = m_PrimaryScreenResY = DisplayHeight(_xwin.display, _xwin.screen);
 #endif
 		m_ResX = 960;
 		m_ResY = 540;
@@ -260,6 +278,11 @@ namespace RTE {
 
 		SetDisplaySwitchMode();
 
+#ifdef __unix__
+		// Ungrab the keyboard if in fullscreen.
+		UngrabPointerAndKeyboard();
+#endif
+
 		// Sets the allowed color conversions when loading bitmaps from files
 		set_color_conversion(COLORCONV_MOST);
 
@@ -457,6 +480,10 @@ namespace RTE {
 		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
 		g_SettingsMan.UpdateSettingsFile();
 
+#ifdef __unix__
+		UngrabPointerAndKeyboard();
+#endif
+
 		FlipFrameBuffers();
 		return 0;
 	}
@@ -481,6 +508,9 @@ namespace RTE {
 			resMultiplier = 2;
 		}	
 		SwitchResolution(resX, resY, resMultiplier, endActivity);
+#ifdef __unix__
+		UngrabPointerAndKeyboard();
+#endif
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

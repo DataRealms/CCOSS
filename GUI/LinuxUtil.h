@@ -1,5 +1,7 @@
 #ifndef _LINUXUTIL_
 #define _LINUXUTIL_
+typedef unsigned long XID;
+typedef XID Window;
 
 namespace RTE {
 
@@ -14,6 +16,7 @@ namespace RTE {
 		///Constructor method used to instantiate a LinuxUtil object in system memory
 		///</summary>
 		LinuxUtil() {};
+		~LinuxUtil();
 
 		///<summary>
 		/// Gets the text from the Atom CLIPBOARD
@@ -28,6 +31,10 @@ namespace RTE {
 		///<param name="Text">String to put into the clipboard</param>
 		///<returns>Boolean. True if text was added to the clipboard</returns>
 		static bool SetClipboardText(std::string Text);
+
+	private:
+		static Window s_ClipboardWindow;
+		static Window GetWindow();
 	};
 
 }; // namespace RTE

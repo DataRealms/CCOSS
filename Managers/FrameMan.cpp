@@ -38,7 +38,7 @@ namespace RTE {
 	void FrameMan::DisplaySwitchIn(void) { g_UInputMan.DisableMouseMoving(false); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef __unix
+#ifdef __unix__
 	void FrameMan::FullscreenGrabFocus(){
 		// Only applies to X11 since XWayland handles this differently (by not supporting deprecated standards)
 		if (_xwin.fs_window && !std::strcmp("x11", std::getenv("XDG_SESSION_TYPE"))) {

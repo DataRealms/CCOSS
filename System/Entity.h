@@ -39,7 +39,7 @@ namespace RTE {
 		static void * Allocate() { return malloc(sizeof(TYPE)); }										\
 		static void Deallocate(void *instance) { free(instance); }										\
 		static Entity * NewInstance() { return new TYPE; }												\
-		Entity * Clone(Entity *cloneTo = 0) const override {											\
+		Entity * Clone(Entity *cloneTo = nullptr) const override {											\
 			TYPE *ent = cloneTo ? dynamic_cast<TYPE *>(cloneTo) : new TYPE();							\
 			RTEAssert(ent, "Tried to clone to an incompatible instance!");								\
 			if (cloneTo) { ent->Destroy(); }															\

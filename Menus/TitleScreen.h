@@ -41,7 +41,7 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a TitleScreen object in system memory.
+		/// Constructor method used to instantiate a TitleScreen object in system memory and make it ready for use.
 		/// </summary>
 		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used to create this TitleScreen's GUIFont.</param>
 		explicit TitleScreen(AllegroScreen *guiScreen) { Clear(); Create(guiScreen); }
@@ -144,9 +144,10 @@ namespace RTE {
 		};
 
 		/// <summary>
-		/// Struct that holds information each title scene backdrop star.
+		/// Struct that holds information each title screen scene backdrop star.
 		/// </summary>
 		struct Star {
+
 			/// <summary>
 			/// Enumeration for the different Star sizes.
 			/// </summary>
@@ -155,58 +156,56 @@ namespace RTE {
 			StarSize Size; //!< The size of the Star. Used for the appropriate Bitmap selection and Intensity randomization when drawing.
 			BITMAP *Bitmap; //!< The bitmap to draw, not owned by this.
 			int Intensity; //!< Intensity value on a scale from 0 to 255.
-			Vector Position; //!< The position of the Star on the title scene backdrop.
+			Vector Position; //!< The position of the Star on the title screen scene backdrop.
 		};
+
+		BITMAP *m_FadeScreen; //!< Bitmap used for fade in/out effects.
+		int m_FadeAmount; //!< The amount of blending to use when drawing the fade bitmap.
+
+		std::vector<Star> m_BackdropStars; //!< Vector that contains all the individual Stars that are present in the title screen scene background.
+		SceneLayer m_Nebula; //!< The title screen scene nebula background layer.
+		MOSParticle m_Moon; //!< The title screen scene moon.
+		MOSParticle m_Planet; //!< The title screen scene planet.
+		Vector m_PlanetPos; //!< The position of the planet on the title screen scene.
+		float m_PlanetRadius; //!< The radius of the planet.
+		MOSRotating m_Station; //!< The title screen scene station.
+		Vector m_StationOffset; //!< The position of the station on the planet orbit.
+		float m_StationOrbitRotation; //!< The rotation of the station on the planet orbit.
+		float m_OrbitRadius; //!< The radius of the planet orbit.
+		MOSParticle m_GameLogo; //!< The title screen scene Cortex Command logo.
+		MOSParticle m_GameLogoGlow; //!< The title screen scene Cortex Command logo glow.
+		float m_GameLogoMainMenuOffsetY; //!< The game logo position in the main menu.
+		float m_GameLogoPlanetViewOffsetY; //!< The game logo position in planet overview menus.
 
 		TitleTransition m_TitleTransitionState; //!< The current title transition (scroll) state.
 
-		BITMAP *m_BackBuffer; //!<
-		int m_ScreenResX; //!<
-		int m_ScreenResY; //!<
-
-		BITMAP *m_FadeScreen; //!<
-		int m_FadeAmount; //!<
-
-		std::vector<Star> m_BackdropStars; //!<
-		SceneLayer m_Nebula; //!<
-		MOSParticle m_Moon; //!<
-		MOSParticle m_Planet; //!<
-		Vector m_PlanetPos; //!<
-		float m_PlanetRadius; //!<
-		MOSRotating m_Station; //!<
-		Vector m_StationOffset; //!<
-		float m_OrbitRadius; //!<
-		float m_OrbitRotation; //!<
-		MOSParticle m_GameLogo; //!<
-		MOSParticle m_GameLogoGlow; //!<
-
-		bool m_SectionSwitch; //!<
+		bool m_SectionSwitch; //!< Whether a new section or a transition has started and new properties need to be applied.
+		Timer m_SectionTimer; //!< Timer to keep track of the section elapsed time.
+		float m_SectionElapsedTime; //!< How many seconds have elapsed on a section.
 		float m_SectionDuration; //!< How many seconds a section is supposed to elapse.
 		float m_SectionProgress; //!< Progress made on a section, from 0.0 to 1.0.
-		float m_SectionElapsedTime; //!< How many seconds have elapsed on a section.
-		Timer m_SectionTimer; //!<
 
-		float m_ScrollStart; //!<
-		float m_ScrollDuration; //!<
-		Vector m_ScrollOffset; //!<
-		float m_BackdropScrollRatio; //!<
-		float m_BackdropScrollStartOffsetY; //!< Set the start so that the nebula is fully scrolled up.
-		float m_TitleAppearOffsetY; //!<
-		float m_PreMainMenuOffsetY; //!<
-		float m_PlanetViewOffsetY; //!<
+		Vector m_ScrollOffset; //!< The scrolling position of the whole title screen scene.
+		float m_BackdropScrollRatio; //!< The scrolling ratio of the whole title screen scene background (nebula and stars).
+		float m_PlanetViewScrollOffsetY; //!< The title screen scene scroll position when in planet overview menus.
 
 		bool m_FinishedPlayingIntro; //!< Whether the intro sequence finished playing.
 		IntroSequence m_IntroSequenceState; //!< The current intro sequence state.
+		Timer m_IntroSongTimer; //!< Timer used to sync the intro sequence progress with the intro song.
+		float m_IntroScrollStartTime; //!< Time point during the intro sequence where the title screen scene scrolling starts.
+		float m_IntroScrollDuration; //!< How many seconds the duration of the title screen scene scrolling should elapse during the intro sequence.
+		float m_IntroScrollStartOffsetY; //!< The title screen scene starting scroll position during the intro sequence.
+		float m_GameLogoAppearScrollOffsetY; //!< The title screen scene scroll position at which the game logo appears during the intro sequence.
+		float m_PreMainMenuScrollOffsetY; //!< The title screen scene scroll position before scrolling to and activating the main menu.
+		float m_SlideFadeInDuration; //!< How many seconds the duration of a slideshow slide fade in is supposed to elapse.
+		float m_SlideFadeOutDuration; //!< How many seconds the duration of a slideshow slide fade out is supposed to elapse.
+		std::unique_ptr<GUIFont> m_IntroTextFont; //!< The GUIFont used for drawing text during the logo splash screens and slideshow.
+		std::string m_SlideshowSlideText; //!< String containing the slide text during each section of the slideshow.
 		BITMAP *m_DataRealmsLogo; //!< The DataRealms logo bitmap used in the logo splash screen.
 		BITMAP *m_FmodLogo; //!< The Fmod logo bitmap used in the logo splash screen.
-		MOSParticle m_PreGameLogoText; //!<
-		MOSParticle m_PreGameLogoTextGlow; //!<
-		Timer m_IntroSongTimer; //!<
-		float m_SlideFadeInDuration; //!<
-		float m_SlideFadeOutDuration; //!<
-		std::unique_ptr<GUIFont> m_IntroTextFont; //!<
-		std::string m_SlideshowSlideText; //!<
-		std::array<BITMAP *, 8> m_IntroSlides; //!<
+		MOSParticle m_PreGameLogoText; //!< The pre-game logo text that appears at the end of the slideshow.
+		MOSParticle m_PreGameLogoTextGlow; //!< The pre-game logo text glow.
+		std::array<BITMAP *, 8> m_IntroSlides; //!< Array that contains all the slideshow slide bitmaps.
 
 #pragma region Create Breakdown
 		/// <summary>
@@ -228,7 +227,7 @@ namespace RTE {
 		void SetSectionDurationAndResetSwitch(float newDuration) { m_SectionDuration = newDuration; m_SectionSwitch = false; }
 
 		/// <summary>
-		/// Updates the title screen transition states and scrolls the title scene accordingly.
+		/// Updates the title screen transition states and scrolls the title screen scene accordingly.
 		/// </summary>
 		void UpdateTitleTransitions();
 

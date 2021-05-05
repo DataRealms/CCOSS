@@ -134,7 +134,7 @@ namespace RTE {
 		/// Fires up the default browser for the current OS on a specific URL.
 		/// </summary>
 		/// <param name="goToURL">A string with the URL to send the browser to.</param>
-		static void OpenBrowserToURL(const std::string &goToURL) { std::system(std::string("start ").append(goToURL).c_str()); }
+		static void OpenBrowserToURL(const std::string_view &goToURL) { std::system(std::string("start ").append(goToURL).c_str()); }
 
 		/// <summary>
 		/// Searches through an ASCII file on disk for a specific string and tells whether it was found or not.

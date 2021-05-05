@@ -13,7 +13,7 @@ namespace RTE {
 	class Writer;
 
 	/// <summary>
-	/// Represents the loading screen GUI when starting the game.
+	/// Handling for the loading screen composition and loading progress box when starting the game.
 	/// </summary>
 	class LoadingScreen : public Singleton<LoadingScreen> {
 
@@ -26,14 +26,14 @@ namespace RTE {
 		LoadingScreen() { Clear(); }
 
 		/// <summary>
-		/// Creates the loading screen GUI and the log writer.
+		/// Makes the LoadingScreen object ready for use.
 		/// </summary>
 		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this LoadingScreen's GUIControlManager.</param>
 		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this LoadingScreen's GUIControlManager.</param>
 		void Create(AllegroScreen *guiScreen, AllegroInput *guiInput);
 
 		/// <summary>
-		/// Creates the GUI ListBox that the progress report will be drawn to, if not disabled through the settings file to speed up loading times.
+		/// Creates the GUIListBox that the progress report will be drawn to, if not disabled through the settings file to speed up loading times.
 		/// As it turned out, a massive amount of time is spent updating the GUI control and flipping the frame buffers.
 		/// </summary>
 		void CreateProgressReportListbox();
@@ -58,11 +58,11 @@ namespace RTE {
 	private:
 
 		/// <summary>
-		/// Custom deleters for std::unique_ptr members. Must be defined to avoid including the class headers and just rely on forward declaration.
+		/// Custom deleter for the std::unique_ptr GUIControlManager member. Must be defined to avoid including the class header and just rely on forward declaration.
 		/// </summary>
 		struct GUIControlManagerDeleter { void operator()(GUIControlManager *ptr) const; };
 
-		std::unique_ptr<GUIControlManager, GUIControlManagerDeleter> m_ControlManager; //!< Manager of the whole LoadingScreen.
+		std::unique_ptr<GUIControlManager, GUIControlManagerDeleter> m_GUIControlManager; //!< Manager of the whole LoadingScreen.
 		std::unique_ptr<Writer> m_LoadingLogWriter; //!< The Writer that generates the loading log.
 
 		BITMAP *m_ProgressListboxBitmap; //!< BITMAP that the progress report will be drawn into.

@@ -30,7 +30,8 @@ namespace RTE {
 		/// <summary>
 		/// Makes the MenuMan object ready for use.
 		/// </summary>
-		void Initialize(bool initLoadingScreen = true);
+		/// <param name="firstTimeInit">Whether this is initializing for the first time, meaning the game is booting up, so the loading screen needs to be shown and all module loading should happen.</param>
+		void Initialize(bool firstTimeInit = true);
 
 		/// <summary>
 		/// Reinitializes all the Main Menu GUIs after a resolution change. Must be done otherwise the GUIs retain the original resolution settings and become all screwy.
@@ -40,9 +41,9 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// 
+		/// Gets the TitleScreen of this MenuMan.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Pointer to the TitleScreen object of this MenuMan.</returns>
 		TitleScreen * GetTitleScreen() const { return m_TitleScreen.get(); }
 #pragma endregion
 
@@ -50,6 +51,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates the state of this MenuMan.
 		/// </summary>
+		/// <returns>Whether the MenuMan update has reached a state where the menu loop should be exited so the simulation loop can proceed.</returns>
 		bool Update();
 
 		/// <summary>
@@ -74,36 +76,39 @@ namespace RTE {
 
 		std::unique_ptr<AllegroInput> m_GUIInput; //!< The GUIInput interface of this MenuMan.
 		std::unique_ptr<AllegroScreen> m_GUIScreen; //!< The GUIScreen interface of this MenuMan.
-		std::unique_ptr<Controller> m_MenuController; //!<
+		std::unique_ptr<Controller> m_MenuController; //!< A Controller to handle player input in menu screens that require it.
 
-		std::unique_ptr<TitleScreen> m_TitleScreen; //!<
-		std::unique_ptr<MainMenuGUI> m_MainMenu; //!<
-		std::unique_ptr<ScenarioGUI> m_ScenarioMenu; //!<
+		std::unique_ptr<TitleScreen> m_TitleScreen; //!< The title screen.
+		std::unique_ptr<MainMenuGUI> m_MainMenu; //!< The main menu screen.
+		std::unique_ptr<ScenarioGUI> m_ScenarioMenu; //!< The scenario menu screen.
 
 #pragma region Updates
 		/// <summary>
-		/// 
+		/// Sets the active menu screen to be enabled, updated and drawn to the screen, besides the title screen which is always active.
 		/// </summary>
 		void SetActiveMenu();
 
 		/// <summary>
-		/// 
+		/// Updates the main menu screen and handles the update results.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether the program was set to be terminated by the user through the main menu screen.</returns>
 		bool UpdateMainMenu() const;
 
 		/// <summary>
-		/// 
+		/// Updates the scenario menu screen and handles the update results.
 		/// </summary>
-		/// <returns></returns>
 		void UpdateScenarioMenu() const;
 
 		/// <summary>
-		/// 
+		/// Updates the campaign menu screen and handles the update results.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether the program was set to be terminated by the user through the campaign menu screen.</returns>
 		bool UpdateCampaignMenu() const;
 #pragma endregion
+
+		// Disallow the use of some implicit methods.
+		MenuMan(const MenuMan &reference) = delete;
+		MenuMan & operator=(const MenuMan &rhs) = delete;
 	};
 }
 #endif

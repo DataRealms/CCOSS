@@ -16,7 +16,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LoadingScreen::Clear() {
-		m_ControlManager = nullptr;
+		m_GUIControlManager = nullptr;
 		m_LoadingLogWriter = nullptr;
 		m_ProgressListboxBitmap = nullptr;
 		m_ProgressListboxPosX = 0;
@@ -26,12 +26,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LoadingScreen::Create(AllegroScreen *guiScreen, AllegroInput *guiInput) {
-		if (!m_ControlManager) {
-			m_ControlManager.reset(new GUIControlManager());
-			if (!m_ControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "LoadingScreenSkin.ini")) {
+		if (!m_GUIControlManager) {
+			m_GUIControlManager.reset(new GUIControlManager());
+			if (!m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "LoadingScreenSkin.ini")) {
 				RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/LoadingScreenSkin.ini");
 			}
-			m_ControlManager->Load("Base.rte/GUIs/LoadingGUI.ini");
+			m_GUIControlManager->Load("Base.rte/GUIs/LoadingGUI.ini");
 		}
 		int loadingSplashOffset = 0;
 		if (!g_SettingsMan.DisableLoadingScreen()) {
@@ -64,8 +64,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LoadingScreen::CreateProgressReportListbox() {
-		dynamic_cast<GUICollectionBox *>(m_ControlManager->GetControl("root"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
-		GUIListBox *listBox = dynamic_cast<GUIListBox *>(m_ControlManager->GetControl("ProgressBox"));
+		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+		GUIListBox *listBox = dynamic_cast<GUIListBox *>(m_GUIControlManager->GetControl("ProgressBox"));
 
 		// Make the box a bit bigger if there's room in higher, HD resolutions
 		if (g_FrameMan.GetResX() >= c_DefaultResX) { listBox->Resize((g_FrameMan.GetResX() / 3) - 12, listBox->GetHeight()); }
@@ -99,7 +99,7 @@ namespace RTE {
 
 		if (newItem) {
 			// Write out the last line to the log file before starting a new one and scroll the bitmap upwards.
-			if (g_LoadingScreen.m_LoadingLogWriter) { *g_LoadingScreen.m_LoadingLogWriter << reportString << "\n"; }
+			if (g_LoadingScreen.m_LoadingLogWriter) { g_LoadingScreen.m_LoadingLogWriter->NewLineString(reportString, false); }
 			if (g_LoadingScreen.m_ProgressListboxBitmap) { blit(g_LoadingScreen.m_ProgressListboxBitmap, g_LoadingScreen.m_ProgressListboxBitmap, 2, 12, 2, 2, g_LoadingScreen.m_ProgressListboxBitmap->w - 3, g_LoadingScreen.m_ProgressListboxBitmap->h - 12); }
 		}
 

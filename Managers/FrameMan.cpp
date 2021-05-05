@@ -26,21 +26,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::DisplaySwitchOut(void) {
+	void FrameMan::DisplaySwitchOut() {
 		g_UInputMan.DisableMouseMoving(true);
 
 #ifdef __unix__
-		// Only applies to X11 since XWayland handles this differently
-		if (_xwin.fs_window && std::strcmp("x11", std::getenv("XDG_SESSION_TYPE")) == 0) {
-			// In Fullscreen regrab focus because the window is lost otherwise
-			XSetInputFocus(_xwin.display, _xwin.window, RevertToPointerRoot, CurrentTime);
-		}
+		// In fullscreen regrab focus because the window is lost otherwise. Only applies to X11 since XWayland handles this differently.
+		if (_xwin.fs_window && std::strcmp("x11", std::getenv("XDG_SESSION_TYPE")) == 0) { XSetInputFocus(_xwin.display, _xwin.window, RevertToPointerRoot, CurrentTime); }
 #endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::DisplaySwitchIn(void) { g_UInputMan.DisableMouseMoving(false); }
+	void FrameMan::DisplaySwitchIn() {
+		g_UInputMan.DisableMouseMoving(false);
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -152,10 +151,9 @@ namespace RTE {
 		set_display_switch_callback(SWITCH_IN, DisplaySwitchIn);
 
 #ifdef __unix__
-		if (_xwin.keyboard_grabbed)
-			XUngrabKeyboard(_xwin.display, CurrentTime);
-		if (_xwin.mouse_grabbed)
-			XUngrabPointer(_xwin.display, CurrentTime);
+		// Release the mouse and keyboard to keep passing certain keys to the system and avoid effective system hard-locks. This effectively makes a borderless fullscreen window.
+		if (_xwin.keyboard_grabbed) { XUngrabKeyboard(_xwin.display, CurrentTime); }
+		if (_xwin.mouse_grabbed) { XUngrabPointer(_xwin.display, CurrentTime); }
 #endif
 	}
 

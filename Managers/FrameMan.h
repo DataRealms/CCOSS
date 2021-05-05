@@ -663,12 +663,6 @@ namespace RTE {
 		/// This effectively makes it a bordererless fullscreen window.
 		/// </summary>
 		static void UngrabPointerAndKeyboard();
-
-		/// <summary>
-		/// In Fullscreen mode grab the System focus to the main window because
-		/// otherwise the window becomes unusable while still blocking the entire screen.
-		/// </summary>
-		static void FullscreenGrabFocus();
 #endif
 
 #pragma region Create Breakdown

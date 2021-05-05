@@ -30,8 +30,12 @@ namespace RTE {
 		g_UInputMan.DisableMouseMoving(true);
 
 		#ifdef __unix__
-		// In Fullscreen regrab focus because the window is lost otherwise
-		FullscreenGrabFocus();
+		// Only applies to X11 since XWayland handles this differently
+		if (_xwin.fs_window && std::strcmp("x11", std::getenv("XDG_SESSION_TYPE")) == 0) {
+			// In Fullscreen regrab focus because the window is lost otherwise
+			XSetInputFocus(_xwin.display, _xwin.window, RevertToPointerRoot,
+			               CurrentTime);
+		}
 		#endif
 	}
 
@@ -39,23 +43,6 @@ namespace RTE {
 
 	void FrameMan::DisplaySwitchIn(void) { g_UInputMan.DisableMouseMoving(false); }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef __unix__
-	void FrameMan::FullscreenGrabFocus(){
-		// Only applies to X11 since XWayland handles this differently
-		if (_xwin.fs_window && !std::strcmp("x11", std::getenv("XDG_SESSION_TYPE"))) {
-			XSetInputFocus(_xwin.display, _xwin.window, RevertToPointerRoot, CurrentTime);
-			UngrabPointerAndKeyboard();
-		}
-	}
-
-	void FrameMan::UngrabPointerAndKeyboard(){
-		if(_xwin.keyboard_grabbed)
-			XUngrabKeyboard(_xwin.display, CurrentTime);
-		if(_xwin.mouse_grabbed)
-			XUngrabPointer(_xwin.display, CurrentTime);
-	}
-#endif
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::Clear() {
@@ -164,9 +151,9 @@ namespace RTE {
 		set_display_switch_mode(SWITCH_BACKGROUND);
 		set_display_switch_callback(SWITCH_OUT, DisplaySwitchOut);
 		set_display_switch_callback(SWITCH_IN, DisplaySwitchIn);
+
 #ifdef __unix__
-		// Ungrab mouse and keyboard when in fullscreen.
-		UngrabPointerAndKeyboard();
+		UInputMan::UngrabPointerAndKeyboard();
 #endif
 	}
 

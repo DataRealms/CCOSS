@@ -75,6 +75,15 @@ namespace RTE {
 		/// </summary>
 		void ReInitKeyboard() { install_keyboard(); }
 
+#ifdef __unix__
+		/// <summary>
+		/// Ungrab the Mouse and Keyboard to keep passing certain keys to
+		/// the System and avoid effective System hardlocks.
+		/// This effectively makes it a borderless fullscreen window.
+		/// </summary>
+		static void UngrabPointerAndKeyboard();
+#endif
+
 		/// <summary>
 		/// Updates the state of this UInputMan. Supposed to be done every frame.
 		/// </summary>

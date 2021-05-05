@@ -9,6 +9,11 @@
 #include "Icon.h"
 #include "GameActivity.h"
 
+#ifdef __unix__
+#include <allegro.h>
+#include <xalleg.h>
+#endif
+
 extern volatile bool g_Quit;
 extern bool g_ResetActivity;
 extern bool g_InActivity;
@@ -28,7 +33,7 @@ namespace RTE {
 	JOYSTICK_INFO UInputMan::s_PrevJoystickStates[Players::MaxPlayerCount];
 	JOYSTICK_INFO UInputMan::s_ChangedJoystickStates[Players::MaxPlayerCount];
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::Clear() {
 		m_OverrideInput = false;
@@ -1023,4 +1028,13 @@ namespace RTE {
 			}
 		}
 	}
+
+#ifdef __unix__
+	void UInputMan::UngrabPointerAndKeyboard() {
+		if (_xwin.keyboard_grabbed)
+			XUngrabKeyboard(_xwin.display, CurrentTime);
+		if (_xwin.mouse_grabbed)
+			XUngrabPointer(_xwin.display, CurrentTime);
+	}
+#endif
 }

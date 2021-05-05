@@ -84,9 +84,6 @@ If you want to change the buildtype aftwerwards, you can use `meson configure --
 
 4. Run `./CCCP.x86_64` or `./CCCP_debug.x86_64` in the **Data Repository**.
 
-## Troubleshooting:
-In fullscreen you may not be able to switch Programs. This is intentional to prevent situations in which the game window will block the screen with out any way to access it.
-
 ## Installing Dependencies
 
 **Arch Linux:**  

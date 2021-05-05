@@ -9,11 +9,6 @@
 #include "Icon.h"
 #include "GameActivity.h"
 
-#ifdef __unix__
-#include <allegro.h>
-#include <xalleg.h>
-#endif
-
 extern volatile bool g_Quit;
 extern bool g_ResetActivity;
 extern bool g_InActivity;

@@ -26,7 +26,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::DisplaySwitchOut(void) { g_UInputMan.DisableMouseMoving(true);
+	void FrameMan::DisplaySwitchOut(void) {
+		g_UInputMan.DisableMouseMoving(true);
+
 		#ifdef __unix__
 		// In Fullscreen regrab focus because the window is lost otherwise
 		FullscreenGrabFocus();
@@ -162,9 +164,13 @@ namespace RTE {
 		set_display_switch_mode(SWITCH_BACKGROUND);
 		set_display_switch_callback(SWITCH_OUT, DisplaySwitchOut);
 		set_display_switch_callback(SWITCH_IN, DisplaySwitchIn);
+#ifdef __unix__
+		// Ungrab mouse and keyboard when in fullscreen.
+		UngrabPointerAndKeyboard();
+#endif
 	}
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::ValidateResolution(int &resX, int &resY, int &resMultiplier) {
 		if (resX * resMultiplier > m_ScreenResX || resY * resMultiplier > m_ScreenResY) {
@@ -277,11 +283,6 @@ namespace RTE {
 		clear_to_color(screen, 0);
 
 		SetDisplaySwitchMode();
-
-#ifdef __unix__
-		// Ungrab the keyboard if in fullscreen.
-		UngrabPointerAndKeyboard();
-#endif
 
 		// Sets the allowed color conversions when loading bitmaps from files
 		set_color_conversion(COLORCONV_MOST);
@@ -480,10 +481,6 @@ namespace RTE {
 		g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
 		g_SettingsMan.UpdateSettingsFile();
 
-#ifdef __unix__
-		UngrabPointerAndKeyboard();
-#endif
-
 		FlipFrameBuffers();
 		return 0;
 	}
@@ -508,9 +505,6 @@ namespace RTE {
 			resMultiplier = 2;
 		}	
 		SwitchResolution(resX, resY, resMultiplier, endActivity);
-#ifdef __unix__
-		UngrabPointerAndKeyboard();
-#endif
 	}
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -29,13 +29,13 @@ namespace RTE {
 	void FrameMan::DisplaySwitchOut(void) {
 		g_UInputMan.DisableMouseMoving(true);
 
-		#ifdef __unix__
+#ifdef __unix__
 		// Only applies to X11 since XWayland handles this differently
 		if (_xwin.fs_window && std::strcmp("x11", std::getenv("XDG_SESSION_TYPE")) == 0) {
 			// In Fullscreen regrab focus because the window is lost otherwise
 			XSetInputFocus(_xwin.display, _xwin.window, RevertToPointerRoot, CurrentTime);
 		}
-		#endif
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

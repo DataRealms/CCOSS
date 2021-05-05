@@ -656,15 +656,6 @@ namespace RTE {
 		/// </summary>
 		static void DisplaySwitchIn();
 
-#ifdef __unix__
-		/// <summary>
-		/// Ungrab the Mouse and Keyboard to keep passing certain keys to
-		/// the System and avoid effective System hardlocks.
-		/// This effectively makes it a bordererless fullscreen window.
-		/// </summary>
-		static void UngrabPointerAndKeyboard();
-#endif
-
 #pragma region Create Breakdown
 		/// <summary>
 		/// Checks whether a specific driver has been requested and if not uses the default Allegro windowed magic driver. This is called during Create().

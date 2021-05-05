@@ -152,7 +152,10 @@ namespace RTE {
 		set_display_switch_callback(SWITCH_IN, DisplaySwitchIn);
 
 #ifdef __unix__
-		UInputMan::UngrabPointerAndKeyboard();
+        if (_xwin.keyboard_grabbed)
+            XUngrabKeyboard(_xwin.display, CurrentTime);
+        if (_xwin.mouse_grabbed)
+            XUngrabPointer(_xwin.display, CurrentTime);
 #endif
 	}
 

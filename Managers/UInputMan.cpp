@@ -1028,13 +1028,4 @@ namespace RTE {
 			}
 		}
 	}
-
-#ifdef __unix__
-	void UInputMan::UngrabPointerAndKeyboard() {
-		if (_xwin.keyboard_grabbed)
-			XUngrabKeyboard(_xwin.display, CurrentTime);
-		if (_xwin.mouse_grabbed)
-			XUngrabPointer(_xwin.display, CurrentTime);
-	}
-#endif
 }

@@ -85,10 +85,7 @@ If you want to change the buildtype aftwerwards, you can use `meson configure --
 4. Run `./CCCP.x86_64` or `./CCCP_debug.x86_64` in the **Data Repository**.
 
 ## Troubleshooting:
-Until borderless windows are implemented, you might seem get stuck in fullscreen mode.
-Try Alt-Return, or if that doesn't work kill CC with ctrl-alt-end.
-
-On X11 media keys and such don't work in fullscreen, this is a known issue (this does not happen on Wayland).
+In fullscreen you may not be able to switch Programs. This is intentional to prevent situations in which the game window will block the screen with out any way to access it.
 
 ## Installing Dependencies
 

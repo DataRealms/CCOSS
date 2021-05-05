@@ -17,7 +17,7 @@
 #ifdef _WIN32
 #include "winalleg.h"
 #elif __unix__
-#include <X11/Xlib.h>
+#include <xalleg.h>
 #endif
 
 extern bool g_InActivity;
@@ -26,11 +26,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::DisplaySwitchOut(void) { g_UInputMan.DisableMouseMoving(true); }
+	void FrameMan::DisplaySwitchOut() {
+		g_UInputMan.DisableMouseMoving(true);
+
+#ifdef __unix__
+		// In fullscreen regrab focus because the window is lost otherwise. Only applies to X11 since XWayland handles this differently.
+		if (_xwin.fs_window && std::strcmp("x11", std::getenv("XDG_SESSION_TYPE")) == 0) { XSetInputFocus(_xwin.display, _xwin.window, RevertToPointerRoot, CurrentTime); }
+#endif
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::DisplaySwitchIn(void) { g_UInputMan.DisableMouseMoving(false); }
+	void FrameMan::DisplaySwitchIn() {
+		g_UInputMan.DisableMouseMoving(false);
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -48,12 +57,8 @@ namespace RTE {
 		m_PrimaryScreenResY = GetSystemMetrics(SM_CYSCREEN);
 #elif __unix__
 		m_NumScreens = 1;
-		Display *dpy = XOpenDisplay(NULL);
-		XWindowAttributes ra;
-		XGetWindowAttributes(dpy, DefaultRootWindow(dpy), &ra);
-		m_ScreenResX = m_PrimaryScreenResX = ra.width;
-		m_ScreenResY = m_PrimaryScreenResY = ra.height;
-		XCloseDisplay(dpy);
+		m_ScreenResX = m_PrimaryScreenResX = DisplayWidth(_xwin.display, _xwin.screen);
+		m_ScreenResY = m_PrimaryScreenResY = DisplayHeight(_xwin.display, _xwin.screen);
 #endif
 		m_ResX = 960;
 		m_ResY = 540;
@@ -144,6 +149,12 @@ namespace RTE {
 		set_display_switch_mode(SWITCH_BACKGROUND);
 		set_display_switch_callback(SWITCH_OUT, DisplaySwitchOut);
 		set_display_switch_callback(SWITCH_IN, DisplaySwitchIn);
+
+#ifdef __unix__
+		// Release the mouse and keyboard to keep passing certain keys to the system and avoid effective system hard-locks. This effectively makes a borderless fullscreen window.
+		if (_xwin.keyboard_grabbed) { XUngrabKeyboard(_xwin.display, CurrentTime); }
+		if (_xwin.mouse_grabbed) { XUngrabPointer(_xwin.display, CurrentTime); }
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

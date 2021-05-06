@@ -442,6 +442,7 @@ namespace RTE {
 				if (m_SectionSwitch) {
 					SetSectionDurationAndResetSwitch(0.75F * g_SettingsMan.GetMenuTransitionDurationMultiplier());
 					m_ScrollOffset.SetY(m_PlanetViewScrollOffsetY);
+					m_GameLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), m_GameLogoPlanetViewOffsetY));
 					g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
 				}
 				m_FadeAmount = static_cast<int>(LERP(0, 1.0F, 255.0F, 0, m_SectionProgress));

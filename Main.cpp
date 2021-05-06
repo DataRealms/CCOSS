@@ -14,8 +14,9 @@
 /// <summary>
 /// Main driver implementation of the Retro Terrain Engine.
 /// Data Realms, LLC - http://www.datarealms.com
-/// Cortex Command Center - https://discord.gg/SdNnKJN
 /// Cortex Command Community Project - https://github.com/cortex-command-community
+/// Cortex Command Community Project Discord - https://discord.gg/3trkVPYyv5
+/// Cortex Command Center - https://discord.gg/SdNnKJN
 /// </summary>
 
 #include "GUI.h"
@@ -47,7 +48,6 @@ namespace RTE {
 	/// <summary>
 	/// Game menus loop.
 	/// </summary>
-	/// <returns></returns>
 	void RunMenuLoop() {
 		g_UInputMan.DisableKeys(false);
 		g_UInputMan.TrapMousePos(false);
@@ -222,43 +222,43 @@ namespace RTE {
 /// Implementation of the main function.
 /// </summary>
 int main(int argc, char **argv) {
-    set_config_file("Base.rte/AllegroConfig.txt");
-    allegro_init();
+	set_config_file("Base.rte/AllegroConfig.txt");
+	allegro_init();
 	loadpng_init();
 
-    // Enable the exit button on the window
-    LOCK_FUNCTION(System::WindowCloseButtonHandler);
-    set_close_button_callback(System::WindowCloseButtonHandler);
+	// Enable the exit button on the window
+	LOCK_FUNCTION(System::WindowCloseButtonHandler);
+	set_close_button_callback(System::WindowCloseButtonHandler);
 
 	System::Initialize();
-    SeedRNG();
+	SeedRNG();
 
-    ///////////////////////////////////////////////////////////////////
-    // Create the essential managers
+	///////////////////////////////////////////////////////////////////
+	// Create the essential managers
 
 	Reader settingsReader("Base.rte/Settings.ini", false, nullptr, true);
-    g_SettingsMan.Initialize(settingsReader);
+	g_SettingsMan.Initialize(settingsReader);
 
 	g_LuaMan.Initialize();
 	g_NetworkServer.Initialize();
 	g_NetworkClient.Initialize();
-    g_TimerMan.Initialize();
+	g_TimerMan.Initialize();
 	g_PerformanceMan.Initialize();
-    g_FrameMan.Initialize();
-    g_PostProcessMan.Initialize();
-    if (g_AudioMan.Initialize() >= 0) {
-        g_GUISound.Initialize();
-    }
-    g_UInputMan.Initialize();
-    g_ConsoleMan.Initialize();
-    g_MovableMan.Initialize();
-    g_MetaMan.Initialize();
+	g_FrameMan.Initialize();
+	g_PostProcessMan.Initialize();
+	if (g_AudioMan.Initialize() >= 0) {
+		g_GUISound.Initialize();
+	}
+	g_UInputMan.Initialize();
+	g_ConsoleMan.Initialize();
+	g_MovableMan.Initialize();
+	g_MetaMan.Initialize();
 	g_MenuMan.Initialize();
 
 	HandleMainArgs(argc, argv);
 
-    ///////////////////////////////////////////////////////////////////
-    // Main game driver
+	///////////////////////////////////////////////////////////////////
+	// Main game driver
 
 	g_FrameMan.PrintForcedGfxDriverMessage();
 
@@ -272,35 +272,34 @@ int main(int argc, char **argv) {
 		if (std::filesystem::exists(System::GetWorkingDirectory() + "LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
 	}
 
-    if (!g_ActivityMan.Initialize()) { RunMenuLoop(); }
+	if (!g_ActivityMan.Initialize()) { RunMenuLoop(); }
 	RunGameLoop();
 
-    ///////////////////////////////////////////////////////////////////
-    // Clean up
+	///////////////////////////////////////////////////////////////////
+	// Clean up
 
 	g_NetworkClient.Destroy();
 	g_NetworkServer.Destroy();
-    g_MetaMan.Destroy();
-    g_MovableMan.Destroy();
-    g_SceneMan.Destroy();
-    g_ActivityMan.Destroy();
+	g_MetaMan.Destroy();
+	g_MovableMan.Destroy();
+	g_SceneMan.Destroy();
+	g_ActivityMan.Destroy();
 	g_GUISound.Destroy();
-    g_AudioMan.Destroy();
-    g_PresetMan.Destroy();
-    g_UInputMan.Destroy();
-    g_FrameMan.Destroy();
-    g_TimerMan.Destroy();
-    g_LuaMan.Destroy();
-    ContentFile::FreeAllLoaded();
-    g_ConsoleMan.Destroy();
+	g_AudioMan.Destroy();
+	g_PresetMan.Destroy();
+	g_UInputMan.Destroy();
+	g_FrameMan.Destroy();
+	g_TimerMan.Destroy();
+	g_LuaMan.Destroy();
+	ContentFile::FreeAllLoaded();
+	g_ConsoleMan.Destroy();
 
 #ifdef DEBUG_BUILD
-    // Dump out the info about how well memory cleanup went
-	Writer memCleanup("MemCleanupInfo.txt");
-	Entity::ClassInfo::DumpPoolMemoryInfo(memCleanup);
+	// Dump out the info about how well memory cleanup went
+	Entity::ClassInfo::DumpPoolMemoryInfo(Writer("MemCleanupInfo.txt"));
 #endif
 
-    return 0;
+	return 0;
 }
 
 #ifdef _WIN32

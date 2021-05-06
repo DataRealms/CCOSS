@@ -119,7 +119,7 @@ namespace RTE {
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::ActivityResumed) {
 			g_ActivityMan.SetResumeActivity();
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::ActivityStarted) {
-			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollFadeOut);
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeOut);
 			g_ActivityMan.SetRestartActivity();
 		}
 		return updateResult == MainMenuGUI::MainMenuUpdateResult::Quit;

@@ -79,7 +79,7 @@ namespace RTE {
 		g_PerformanceMan.ResetFrameTimer();
 		g_TimerMan.PauseSim(false);
 
-		if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) { g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario); }
+		if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) { g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn); }
 
 		while (!System::IsSetToQuit()) {
 			// Need to clear this out; sometimes background layers don't cover the whole back
@@ -128,7 +128,7 @@ namespace RTE {
 						const Activity *activity = g_ActivityMan.GetActivity();
 						// If we edited something then return to main menu instead of scenario menu player will probably switch to area/scene editor.
 						if (activity && activity->GetPresetName() == "None") {
-							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::PlanetToMainMenu);
+							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
 						} else {
 							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);
 						}

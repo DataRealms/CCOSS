@@ -33,6 +33,7 @@ namespace RTE {
 			ScenarioFadeIn,
 			CampaignMenu,
 			CampaignFadeIn,
+			ScrollingFadeIn,
 			ScrollingFadeOut,
 			FadeOut,
 			TransitionEnd,

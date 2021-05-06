@@ -454,10 +454,18 @@ namespace RTE {
 				g_AudioMan.SetTempMusicVolume(EaseIn(g_AudioMan.GetMusicVolume(), 0, m_SectionProgress));
 				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState(TitleTransition::TransitionEnd); }
 				break;
+			case TitleTransition::ScrollingFadeIn:
+				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(0.75F * g_SettingsMan.GetMenuTransitionDurationMultiplier()); }
+				m_ScrollOffset.SetY(EaseOut(250, 0, m_SectionProgress));
+				m_GameLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), EaseOut(m_GameLogoPlanetViewOffsetY, m_GameLogoMainMenuOffsetY, m_SectionProgress)));
+				m_FadeAmount = static_cast<int>(EaseOut(255, 0, m_SectionProgress));
+				g_AudioMan.SetTempMusicVolume(EaseOut(g_AudioMan.GetMusicVolume(), 0, m_SectionProgress));
+				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState(TitleTransition::MainMenu); }
+				break;
 			case TitleTransition::ScrollingFadeOut:
 				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(0.75F * g_SettingsMan.GetMenuTransitionDurationMultiplier()); }
 				m_ScrollOffset.SetY(EaseIn(0, 250, m_SectionProgress));
-				m_GameLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), EaseOut(m_GameLogoMainMenuOffsetY, m_GameLogoPlanetViewOffsetY, m_SectionProgress)));
+				m_GameLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), EaseIn(m_GameLogoMainMenuOffsetY, m_GameLogoPlanetViewOffsetY, m_SectionProgress)));
 				m_FadeAmount = static_cast<int>(EaseIn(0, 255, m_SectionProgress));
 				g_AudioMan.SetTempMusicVolume(EaseIn(g_AudioMan.GetMusicVolume(), 0, m_SectionProgress));
 				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState(TitleTransition::TransitionEnd); }

@@ -379,23 +379,17 @@ ClassInfoGetters
 	void SetJetTimeLeft(float newValue) { m_JetTimeLeft = newValue < m_JetTimeTotal ? newValue : m_JetTimeTotal; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetJetAngleRange
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
-// Arguments:       None.
-// Return value:    The ratio at which this jetpack follows the aim angle of the user.
-
+	/// <summary>
+	/// Gets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
+	/// </summary>
+	/// <returns>The ratio at which this jetpack follows the aim angle of the user.</returns>
 	float GetJetAngleRange() const { return m_JetAngleRange; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetJetAngleRange
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
-// Arguments:       The ratio at which this jetpack follows the aim angle of the user.
-// Return value:    None.
-
+	/// <summary>
+	/// Sets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
+	/// </summary>
+	/// <param name="newValue">The ratio at which this jetpack follows the aim angle of the user.</param>
 	void SetJetAngleRange(float newValue) { m_JetAngleRange = newValue; }
 
 

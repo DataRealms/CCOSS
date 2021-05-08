@@ -362,13 +362,10 @@ ClassInfoGetters
 	Vector GetAboveHUDPos() const override { return m_Pos + Vector(0, m_HUDStack + 6); }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHolsterOffset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the offset position of the holster where this Actor draws his devices from.
-// Arguments:       None.
-// Return value:    The offset position of the holster.
-
+	/// <summary>
+	/// Gets the offset position of the holster where this Actor draws his devices from.
+	/// </summary>
+	/// <returns>The offset position of the holster.</returns>
 	Vector GetHolsterOffset() const { return m_HolsterOffset; }
 
 
@@ -384,15 +381,10 @@ ClassInfoGetters
     Vector GetViewPoint() const { return m_ViewPoint.IsZero() ? m_Pos : m_ViewPoint; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetItemInReach
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the item that is within reach of the Actor at this frame, ready
-//					to be be picked up. Ownership is NOT transferred!
-// Arguments:       None.
-// Return value:    A pointer to the item that has been determined to be within reach of
-//                  this Actor, if any. Ownership is NOT transferred!
-
+	/// <summary>
+	/// Gets the item that is within reach of the Actor at this frame, ready to be be picked up. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>A pointer to the item that has been determined to be within reach of this Actor, if any.</returns>
 	HeldDevice * GetItemInReach() const { return m_pItemInReach; }
 
 

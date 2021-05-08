@@ -829,23 +829,17 @@ ClassInfoGetters
     bool HasNoSetDamageMultiplier() const { return m_NoSetDamageMultiplier; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetOrientToVel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets velocity orientation scalar of this attachable.
-// Arguments:       New scalar value.
-// Return value:    None.
-
+	/// <summary>
+	/// Sets the velocity orientation scalar of this MOSRotating.
+	/// </summary>
+    /// <param name="newValue">New scalar value.</param>
 	void SetOrientToVel(float newValue) { m_OrientToVel = newValue; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetOrientToVel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns velocity orientation scalar of this attachable.
-// Arguments:       None.
-// Return value:    Current scalar value.
-
+	/// <summary>
+	/// Gets the velocity orientation scalar of this MOSRotating.
+	/// </summary>
+	/// <returns>New scalar value.</returns>
 	float GetOrientToVel() const { return m_OrientToVel; }
 
 

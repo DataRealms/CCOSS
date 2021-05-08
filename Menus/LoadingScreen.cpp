@@ -26,13 +26,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LoadingScreen::Create(AllegroScreen *guiScreen, AllegroInput *guiInput) {
-		if (!m_GUIControlManager) {
-			m_GUIControlManager.reset(new GUIControlManager());
-			if (!m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "LoadingScreenSkin.ini")) {
-				RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/LoadingScreenSkin.ini");
-			}
-			m_GUIControlManager->Load("Base.rte/GUIs/LoadingGUI.ini");
-		}
+		m_GUIControlManager.reset(new GUIControlManager());
+		RTEAssert(m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "LoadingScreenSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/LoadingScreenSkin.ini");
+		m_GUIControlManager->Load("Base.rte/GUIs/LoadingGUI.ini");
+
 		int loadingSplashOffset = 0;
 		if (!g_SettingsMan.DisableLoadingScreen()) {
 			CreateProgressReportListbox();

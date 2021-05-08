@@ -105,6 +105,40 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool MenuMan::Update() {
+		if (g_FrameMan.ResolutionChanged()) { Reinitialize(); }
+
+		m_TitleScreen->Update();
+		SetActiveMenu();
+
+		bool quitResult = false;
+
+		switch (m_ActiveMenu) {
+			case ActiveMenu::MainMenuActive:
+				quitResult = UpdateMainMenu();
+				break;
+			case ActiveMenu::ScenarioMenuActive:
+				UpdateScenarioMenu();
+				break;
+			case ActiveMenu::CampaignMenuActive:
+				quitResult = UpdateCampaignMenu();
+				break;
+			default:
+				break;
+		}
+		g_ConsoleMan.Update();
+
+		System::SetQuit(quitResult);
+
+		if (m_TitleScreen->GetTitleTransitionState() == TitleScreen::TitleTransition::TransitionEnd) {
+			m_TitleScreen->SetTitlePendingTransition();
+			return true;
+		}
+		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool MenuMan::UpdateMainMenu() const {
 		MainMenuGUI::MainMenuUpdateResult updateResult = m_MainMenu->Update();
 
@@ -156,40 +190,6 @@ namespace RTE {
 		}
 
 		return g_MetaMan.GetGUI()->QuitProgram();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool MenuMan::Update() {
-		if (g_FrameMan.ResolutionChanged()) { Reinitialize(); }
-
-		m_TitleScreen->Update();
-		SetActiveMenu();
-
-		bool quitResult = false;
-
-		switch (m_ActiveMenu) {
-			case ActiveMenu::MainMenuActive:
-				quitResult = UpdateMainMenu();
-				break;
-			case ActiveMenu::ScenarioMenuActive:
-				UpdateScenarioMenu();
-				break;
-			case ActiveMenu::CampaignMenuActive:
-				quitResult = UpdateCampaignMenu();
-				break;
-			default:
-				break;
-		}
-		g_ConsoleMan.Update();
-
-		System::SetQuit(quitResult);
-
-		if (m_TitleScreen->GetTitleTransitionState() == TitleScreen::TitleTransition::TransitionEnd) {
-			m_TitleScreen->SetTitlePendingTransition();
-			return true;
-		}
-		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

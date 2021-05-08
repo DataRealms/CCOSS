@@ -62,7 +62,7 @@ namespace RTE {
 		/// </summary>
 		struct GUIControlManagerDeleter { void operator()(GUIControlManager *ptr) const; };
 
-		std::unique_ptr<GUIControlManager, GUIControlManagerDeleter> m_GUIControlManager; //!< Manager of the whole LoadingScreen.
+		std::unique_ptr<GUIControlManager, GUIControlManagerDeleter> m_GUIControlManager; //!< The GUIControlManager which owns all the GUIControls of the LoadingScreen.
 		std::unique_ptr<Writer> m_LoadingLogWriter; //!< The Writer that generates the loading log.
 
 		BITMAP *m_ProgressListboxBitmap; //!< BITMAP that the progress report will be drawn into.

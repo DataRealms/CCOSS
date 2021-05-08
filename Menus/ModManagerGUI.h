@@ -3,16 +3,15 @@
 
 namespace RTE {
 
+	class AllegroScreen;
+	class AllegroInput;
+	class GUIControlManager;
 	class GUILabel;
 	class GUIButton;
 	class GUIListBox;
-	class GUICollectionBox;
-	class GUIControlManager;
-	class AllegroScreen;
-	class AllegroInput;
 
 	/// <summary>
-	/// Integrated mod and script manager user interface.
+	/// Integrated mod and script manager user interface composition and handling.
 	/// </summary>
 	class ModManagerGUI {
 
@@ -29,12 +28,12 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// User input handling for the Mod Manager menu screen.
+		/// Handles the player interaction with the ModManagerGUI GUI elements.
 		/// </summary>
 		bool HandleInputEvents();
 
 		/// <summary>
-		/// Draws the Mod Manager menu screen to the GUIScreen bitmap of it's GUIControlManager.
+		/// Draws the ModManagerGUI to the screen.
 		/// </summary>
 		void Draw() const;
 #pragma endregion
@@ -42,7 +41,7 @@ namespace RTE {
 	private:
 
 		/// <summary>
-		/// 
+		/// Struct containing information about a valid mod DataModule.
 		/// </summary>
 		struct ModRecord {
 			std::string ModulePath; //!<
@@ -51,7 +50,7 @@ namespace RTE {
 			bool Disabled; //!<
 
 			/// <summary>
-			/// Makes UI displayable string with mod info.
+			/// Makes GUI displayable string with mod info.
 			/// </summary>
 			/// <returns>String with mod info.</returns>
 			std::string MakeModString() const { return (Disabled ? "- " : "+ ") + ModulePath + " - " + ModuleName; }
@@ -65,7 +64,7 @@ namespace RTE {
 		};
 
 		/// <summary>
-		/// 
+		/// Struct containing information about a valid GlobalScript.
 		/// </summary>
 		struct ScriptRecord {
 			std::string PresetName; //!<
@@ -73,7 +72,7 @@ namespace RTE {
 			bool Enabled; //!<
 
 			/// <summary>
-			/// Makes UI displayable string with script info.
+			/// Makes GUI displayable string with script info.
 			/// </summary>
 			/// <returns>String with script info.</returns>
 			std::string MakeScriptString() const { return (!Enabled ? "- " : "+ ") + PresetName; }
@@ -88,30 +87,30 @@ namespace RTE {
 
 #pragma region Mod and Script Handling
 		/// <summary>
-		/// Turns currently selected mod on and off and changes UI elements accordingly.
-		/// </summary>
-		void ToggleMod();
-
-		/// <summary>
-		/// Turns currently selected script on and off and changes UI elements accordingly.
-		/// </summary>
-		void ToggleScript();
-
-		/// <summary>
-		/// 
+		/// Fills the KnownMods list with all valid mod DataModules, then fills the ModsListBox using it.
 		/// </summary>
 		void PopulateKnownModsList();
 
 		/// <summary>
-		/// 
+		/// Fills the KnownScripts list with all valid GlobalScripts, then fills the ScriptsListBox using it.
 		/// </summary>
 		void PopulateKnownScriptsList();
+
+		/// <summary>
+		/// Turns currently selected mod on and off and changes GUI elements accordingly.
+		/// </summary>
+		void ToggleMod();
+
+		/// <summary>
+		/// Turns currently selected script on and off and changes GUI elements accordingly.
+		/// </summary>
+		void ToggleScript();
 #pragma endregion
 
-		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu screen.
+		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of the ModManagerGUI.
 
-		std::vector<ModRecord> m_KnownMods; //!<
-		std::vector<ScriptRecord> m_KnownScripts; //!<
+		std::vector<ModRecord> m_KnownMods; //!< Contains ModRecords for all valid mod DataModules.
+		std::vector<ScriptRecord> m_KnownScripts; //!< Contains ScriptRecords for all valid GlobalScripts.
 
 		/// <summary>
 		/// GUI elements that compose the Mod Manager menu screen.

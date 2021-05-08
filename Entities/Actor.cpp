@@ -59,38 +59,36 @@ bool Actor::m_sIconsLoaded = false;
 // Description:     Clears all the member variables of this Actor, effectively
 //                  resetting the members of this abstraction level only.
 
-void Actor::Clear()
-{
+void Actor::Clear() {
     m_Controller.Reset();
     m_BodyHitSound = nullptr;
     m_AlarmSound = nullptr;
     m_PainSound = nullptr;
     m_DeathSound = nullptr;
     m_DeviceSwitchSound = nullptr;
-//    m_FacingRight = true;
     m_Status = STABLE;
     m_Health = m_PrevHealth = m_MaxHealth = 100;
-    m_pTeamIcon = 0;
-	m_pControllerIcon = 0;
+	m_pTeamIcon = nullptr;
+	m_pControllerIcon = nullptr;
     m_LastSecondTimer.Reset();
     m_LastSecondPos.Reset();
     m_RecentMovement.Reset();
-    m_RecentMovementMag = 0;
+	m_RecentMovementMag = 0.0F;
     m_TravelImpulseDamage = 750;
     m_StableVel.SetXY(15, 25);
     m_HeartBeat.Reset();
     m_NewControlTmr.Reset();
     m_DeathTmr.Reset();
-    m_GoldCarried = 0;
+	m_GoldCarried = 0.0F;
     m_GoldPicked = false;
     m_AimState = AIMSTILL;
-    m_AimAngle = 0;
+	m_AimAngle = 0.0F;
     m_AimRange = c_HalfPI;
-    m_AimDistance = 0;
+	m_AimDistance = 0.0F;
     m_AimTmr.Reset();
     m_SharpAimTimer.Reset();
     m_SharpAimDelay = 250;
-    m_SharpAimProgress = 0;
+	m_SharpAimProgress = 0.0F;
     m_SharpAimMaxedOut = false;
     m_PointingTarget.Reset();
     m_SeenTargetPos.Reset();
@@ -105,8 +103,8 @@ void Actor::Clear()
     m_HolsterOffset.Reset();
     m_ViewPoint.Reset();
     m_Inventory.clear();
-    m_MaxMass = 0;
-    m_pItemInReach = 0;
+	m_MaxInventoryMass = -1.0F;
+	m_pItemInReach = nullptr;
     m_PieNeedsUpdate = false;
     m_HUDStack = 0;
     m_FlashWhiteMS = 0;
@@ -120,7 +118,7 @@ void Actor::Clear()
     m_Waypoints.clear();
     m_DrawWaypoints = false;
     m_MoveTarget.Reset();
-    m_pMOMoveTarget = 0;
+	m_pMOMoveTarget = nullptr;
     m_PrevPathTarget.Reset();
     m_MoveVector.Reset();
     m_MovePath.clear();
@@ -228,7 +226,7 @@ int Actor::Create(const Actor &reference)
          ++itr)
         m_Inventory.push_back(dynamic_cast<MovableObject *>((*itr)->Clone()));
 
-    m_MaxMass = reference.m_MaxMass;
+    m_MaxInventoryMass = reference.m_MaxInventoryMass;
 
     for (list<PieMenuGUI::Slice>::const_iterator itr = reference.m_PieSlices.begin(); itr != reference.m_PieSlices.end(); ++itr)
         m_PieSlices.push_back(*itr);
@@ -368,8 +366,8 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         RTEAssert(pInvMO, "Reader has been fed bad Inventory MovableObject in Actor::Create");
         m_Inventory.push_back(pInvMO);
     }
-    else if (propName == "MaxMass")
-        reader >> m_MaxMass;
+    else if (propName == "MaxInventoryMass")
+        reader >> m_MaxInventoryMass;
     else if (propName == "AddPieSlice")
     {
         PieMenuGUI::Slice newSlice;
@@ -448,8 +446,8 @@ int Actor::Save(Writer &writer) const
         writer.NewProperty("AddInventory");
         writer << **itr;
     }
-    writer.NewProperty("MaxMass");
-    writer << m_MaxMass;
+    writer.NewProperty("MaxInventoryMass");
+    writer << m_MaxInventoryMass;
     for (list<PieMenuGUI::Slice>::const_iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
     {
         writer.NewProperty("AddPieSlice");
@@ -888,7 +886,7 @@ void Actor::DropAllInventory()
 			pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
 			pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
 			// Rotational angle
-			pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / pObject->GetMass()) * RandomNum());
+			pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / (pObject->GetMass() != 0 ? pObject->GetMass() : 0.0001F)) * RandomNum());
 			// Make it rotate away in the appropriate direction depending on which side of the object it is on
 			// If the object is far to the relft or right of the center, make it always rotate outwards to some degree
 			if (gibROffset.m_X > m_aSprite[0]->w / 3)
@@ -967,7 +965,7 @@ void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToI
         pObject = *gItr;
 
         // Generate the velocities procedurally
-        velMin = m_GibBlastStrength / pObject->GetMass();
+		velMin = m_GibBlastStrength / (pObject->GetMass() != 0 ? pObject->GetMass() : 0.0001F);
         velRange = 10.0F;
 
         // Randomize the offset from center to be within the original object
@@ -976,7 +974,7 @@ void Actor::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToI
         pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
         pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
         // Rotational angle
-        pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / pObject->GetMass()) * RandomNum());
+        pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / (pObject->GetMass() != 0 ? pObject->GetMass() : 0.0001F)) * RandomNum());
         // Make it rotate away in the appropriate direction depending on which side of the object it is on
         // If the object is far to the relft or right of the center, make it always rotate outwards to some degree
         if (gibROffset.m_X > m_aSprite[0]->w / 3)

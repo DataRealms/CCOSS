@@ -130,6 +130,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	**MOSRotating**: `GibSound`  
 	**ADoor**: `DoorMoveStartSound`, `DoorMoveSound`, `DoorDirectionChangeSound`, `DoorMoveEndSound`
   
+- Added Lua function `RoundFloatToPrecision`. Utility function to round and format floating point numbers for display in strings.  
+`RoundFloatToPrecision(floatValue, digitsPastDecimal, roundingMode) -- Rounding mode 0 for system default, 1 for floored remainder, 2 for ceiled remainder.`
+
 - The Lua console (and all text boxes) now support using `Ctrl` to move the cursor around and select or delete text.
 
 - Added `MOSRotating:RemoveAttachable(attachableOrUniqueID, addToMovableMan, addBreakWounds)` `Lua` method that allows you to remove an `Attachable` and specify whether it should be added to `MovableMan` or not, and whether breakwounds should be added (if defined) to the `Attachable` and parent `MOSRotating`.
@@ -142,6 +145,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`DrawLimbPathVisualizations` - any  `AHumans` or `ACrabs` will draw some of their `LimbPaths` to the standard view.  
 	`DrawRayCastVisualizations` - any rays cast by `SceneMan` will be drawn to the standard view.  
 	`DrawPixelCheckVisualizations ` - any pixel checks made by `SceneMan:GetTerrMatter` or `SceneMan:GetMOIDPixel` will be drawn to the standard view.
+
+- New `Settings.ini` property `CaseSensitiveFilePaths = 0/1` to enable/disable file path case sensitivity in INIs. Enabled by default.  
+	It is **STRONGLY** ill-advised to disable this behavior as it makes case sensitivity mismatches immediately obvious and allows fixing them with ease to ensure a path related crash free cross-platform experience.  
+	Only disable this if for some reason case sensitivity increases the loading times on your system (which it generally should not). Loading times can be benchmarked using the `Settings.ini` property `MeasureModuleLoadTime`. The result will be printed to the console.
 
 ### Changed
 
@@ -156,6 +163,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `AHuman` can now aim while walking, however not while reloading.
 
 - Recoil when firing weapons now lessens sharp aim.
+
+- File paths in INIs are now case sensitive.
 
 - Hands will now draw in transparent drawing mode, i.e. editing menu.
 
@@ -218,6 +227,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - Actor selection keys can be used to cycle the selected `ObjectPicker` item while it's closed during building phase and in editors.
 
+- The `Actor` property `MaxMass` now no longer includes the `Mass` of the `Actor`, and has been renamed to `MaxInventoryMass` for clarity. In mods, this is most important for `ACraft`, which will now need their total `Mass` subtracted from the old value. 
+
+- `BuyMenu` tooltips now display item info as well as a description. This includes `MaxInventoryMass` and `MaxPassengers` for `ACraft`, `Mass` and `PassengerSlots` required for `Actors`, and `Mass` for other `MoveableObjects`.
+
 ### Fixed
 
 - Fixed `MovableMan:GetClosestActor()` where the third argument for distance to be filled out is now a Vector rather than float.
@@ -269,6 +282,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Removed `Attachable:CollectDamage`, `Attachable:TransferJointForces` and `Attachable:TransferJointImpulses` Lua function definitions. These are internal functions that should never have been exposed to Lua.
 
 - Removed `MOSRotating:ApplyForces` and `MOSRotating:ApplyImpulses` Lua functions. These are both internal functions that should never have been exposed to Lua.
+
+- Removed hardcoded INI constraint that forced `Mass` of `MovableObjects` to not be 0. Previously, anytime a `Mass` of 0 was read in from INI, it was changed to 0.0001.
 
 ***
 

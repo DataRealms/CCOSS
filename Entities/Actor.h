@@ -974,16 +974,11 @@ bool GetCanRevealUnseen() const { return m_CanRevealUnseen; }
 
 	const std::deque<MovableObject *> * GetInventory() { return &m_Inventory; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetMaxMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tells how much total mass (in kg) this Actor is recommended to weigh
-//                  at most INCLUDING his own weight AND all his inventory!
-// Arguments:       None.
-// Return value:    The max recommend total mass for this Actor
-
-	float GetMaxMass() const { return m_MaxMass; }
+	/// <summary>
+	/// Returns the maximum total mass this Actor can carry in its inventory.
+	/// </summary>
+	/// <returns>The maximum carriable mass of this Actor.</returns>
+	float GetMaxInventoryMass() const { return m_MaxInventoryMass; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1451,9 +1446,7 @@ protected:
     Vector m_ViewPoint;
     // The inventory of carried MovableObjects of this Actor. They are also Owned by this.
     std::deque<MovableObject *> m_Inventory;
-    // The max recommended weight of this Actor, including himself and all his inventory
-    // If this is 0 or less, there's no recommended limit
-    float m_MaxMass;
+    float m_MaxInventoryMass; //!< The mass limit for this Actor's inventory. -1 means there's no limit.
     // The device that can/will be picked up
     HeldDevice *m_pItemInReach;
     // Whether the pie menu associated with this needs updating

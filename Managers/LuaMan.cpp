@@ -50,6 +50,7 @@
 #include "lua.hpp"
 
 // LuaBind
+#define BOOST_BIND_GLOBAL_PLACEHOLDERS 1
 #include "luabind/luabind.hpp"
 #include "luabind/operator.hpp"
 #include "luabind/copy_policy.hpp"
@@ -1163,7 +1164,7 @@ int LuaMan::Initialize() {
             .def("DropAllInventory", &Actor::DropAllInventory)
             .property("InventorySize", &Actor::GetInventorySize)
             .def("IsInventoryEmpty", &Actor::IsInventoryEmpty)
-            .property("MaxMass", &Actor::GetMaxMass)
+            .property("MaxInventoryMass", &Actor::GetMaxInventoryMass)
             .def("FlashWhite", &Actor::FlashWhite)
             .def("DrawWaypoints", &Actor::DrawWaypoints)
             .def("SetMovePathToUpdate", &Actor::SetMovePathToUpdate)
@@ -2365,6 +2366,7 @@ int LuaMan::Initialize() {
 		def("GetMPP", &GetMPP),
 		def("GetPPL", &GetPPL),
 		def("GetLPP", &GetLPP),
+		def("RoundFloatToPrecision", &RoundFloatToPrecision),
 
 		class_<enum_wrapper::input_device>("InputDevice")
 			.enum_("InputDevice")[
@@ -2661,6 +2663,16 @@ int LuaMan::RunScriptFile(const std::string &filePath, bool consoleErrors) {
         m_LastError = "Can't run a script file with an empty filepath!";
         return -1;
     }
+
+	if (!System::PathExistsCaseSensitive(filePath)){
+		m_LastError = "Script file: " + filePath + " doesn't exist!";
+		if (consoleErrors) {
+			g_ConsoleMan.PrintString("ERROR: " + m_LastError);
+			ClearErrors();
+		}
+		return -1;
+	}
+
     int error = 0;
 
     lua_pushcfunction(m_pMasterState, &AddFileAndLineToError);
@@ -2752,6 +2764,10 @@ int LuaMan::FileOpen(std::string filename, std::string mode)
 
 	// Do not open paths with '..'
 	if (fullPath.find(dotString) != string::npos)
+		return -1;
+
+	// Do not open paths that aren't written correctly
+	if (!System::PathExistsCaseSensitive(std::filesystem::path(fullPath).lexically_normal().generic_string()))
 		return -1;
 
 	// Allow to edit files only inside .rte folders

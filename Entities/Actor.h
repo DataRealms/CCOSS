@@ -209,6 +209,14 @@ ClassInfoGetters
 
     int GetHealth() const { return m_Health; }
 
+
+	/// <summary>
+	/// Gets this Actor's previous health value, prior to this frame.
+	/// </summary>
+	/// <returns>A const int describing this Actor's previous health.</returns>
+    int GetPrevHealth() const { return m_PrevHealth; }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetMaxHealth
 //////////////////////////////////////////////////////////////////////////////////////////

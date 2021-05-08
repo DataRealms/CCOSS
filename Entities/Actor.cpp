@@ -1422,7 +1422,8 @@ void Actor::Update()
         else if (!m_pMOMoveTarget)
             m_AIMode = AIMODE_SENTRY;
     }
-
+	// Save health state so we can compare next update
+	m_PrevHealth = m_Health;
     /////////////////////////////////////
     // Take damage/heal from wounds and wounds on Attachables
     for (AEmitter *wound : m_Wounds) {
@@ -1590,8 +1591,6 @@ void Actor::Update()
 			g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, 0.5));
 		}
 	}
-    // Save health state so we can compare next update
-    m_PrevHealth = m_Health;
 
 // Do NOT mess witht he HUD stack in update... it should only be altered in DrawHUD, or it will jitter when multiple sim updates happen
 //    m_HUDStack = -m_CharHeight / 2;
@@ -1637,6 +1636,8 @@ void Actor::Draw(BITMAP *pTargetBitmap,
 
 void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled)
 {
+    m_HUDStack = -m_CharHeight / 2;
+
     if (!m_HUDVisible)
         return;
 
@@ -1658,7 +1659,6 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     GUIFont *pSymbolFont = g_FrameMan.GetLargeFont();
     GUIFont *pSmallFont = g_FrameMan.GetSmallFont();
     // This should indeed be a local var and not alter a member one in a draw func! Can cause nasty jittering etc if multiple sim updates are done without a drawing in between etc
-    m_HUDStack = -m_CharHeight / 2;
     Vector drawPos = m_Pos - targetPos;
     Vector cpuPos = GetCPUPos() - targetPos;
 

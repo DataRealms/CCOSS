@@ -224,52 +224,32 @@ namespace RTE {
 		bool ShowMetascenes() const { return m_ShowMetaScenes; }
 #pragma endregion
 
-#pragma region Mod Manager
+#pragma region Mod and Script Management
 		/// <summary>
-		/// Returns map of mods which were disabled.
+		/// Gets the map of mods which are disabled.
 		/// </summary>
-		/// <returns>Map of mods which were disabled.</returns>
-		std::map<std::string, bool> GetDisabledModsList() const { return m_DisabledMods; }
+		/// <returns>Map of mods which are disabled.</returns>
+		std::map<std::string, bool> & GetDisabledModsList() { return m_DisabledMods; }
 
 		/// <summary>
-		/// Adds specified mod to internal list of disabled mods.
-		/// </summary>
-		/// <param name="modModule">Mod to enable.</param>
-		void EnableMod(std::string modModule) { std::transform(modModule.begin(), modModule.end(), modModule.begin(), ::tolower); m_DisabledMods[modModule] = false; }
-
-		/// <summary>
-		/// Adds specified mod to internal list of installed workshop mods.
-		/// </summary>
-		/// <param name="modModule">Mod to disable.</param>
-		void DisableMod(std::string modModule) { std::transform(modModule.begin(), modModule.end(), modModule.begin(), ::tolower); m_DisabledMods[modModule] = true; }
-
-		/// <summary>
-		/// Returns true if specified mod is not disabled in the settings.
+		/// Gets whether the specified mod is disabled in the settings.
 		/// </summary>
 		/// <param name="modModule">Mod to check.</param>
 		/// <returns>Whether the mod is disabled via settings.</returns>
-		bool IsModDisabled(std::string modModule);
-#pragma endregion
-
-#pragma region Global Script Manager
-		/// <summary>
-		/// Adds specified mod to internal list of disabled mods.
-		/// </summary>
-		/// <param name="scriptName">Mod to enable.</param>
-		void EnableScript(std::string scriptName) { std::transform(scriptName.begin(), scriptName.end(), scriptName.begin(), ::tolower); m_EnabledScripts[scriptName] = true; }
+		bool IsModDisabled(const std::string &modModule) const { return (m_DisabledMods.find(modModule) != m_DisabledMods.end()) ? m_DisabledMods.at(modModule) : false; }
 
 		/// <summary>
-		/// Adds specified script to internal list of installed scripts.
+		/// Gets the map of global scripts which are enabled.
 		/// </summary>
-		/// <param name="scriptName">Script to disable.</param>
-		void DisableScript(std::string scriptName) { std::transform(scriptName.begin(), scriptName.end(), scriptName.begin(), ::tolower); m_EnabledScripts[scriptName] = false; }
+		/// <returns>Map of global scripts which are enabled.</returns>
+		std::map<std::string, bool> & GetEnabledScriptList() { return m_EnabledGlobalScripts; }
 
 		/// <summary>
-		/// Returns true if specified script is enabled in the settings.
+		/// Gets whether the specified global script is enabled in the settings.
 		/// </summary>
-		/// <param name="scriptName">Mod to check.</param>
-		/// <returns>Whether the script is enabled via settings.</returns>
-		bool IsScriptEnabled(std::string scriptName);
+		/// <param name="scriptName">Global script to check.</param>
+		/// <returns>Whether the global script is enabled via settings.</returns>
+		bool IsGlobalScriptEnabled(const std::string &scriptName) const { return (m_EnabledGlobalScripts.find(scriptName) != m_EnabledGlobalScripts.end()) ? m_EnabledGlobalScripts.at(scriptName) : false; }
 #pragma endregion
 
 #pragma region Misc Settings
@@ -413,7 +393,7 @@ namespace RTE {
 
 		std::list<std::string> m_VisibleAssemblyGroupsList; //!< List of assemblies groups always shown in editors.
 		std::map<std::string, bool> m_DisabledMods; //!< List of the module names we disabled.
-		std::map<std::string, bool> m_EnabledScripts; //!< List of the script names we enabled.
+		std::map<std::string, bool> m_EnabledGlobalScripts; //!< List of the global script names we enabled.
 
 	private:
 

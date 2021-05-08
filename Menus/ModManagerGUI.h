@@ -44,10 +44,10 @@ namespace RTE {
 		/// Struct containing information about a valid mod DataModule.
 		/// </summary>
 		struct ModRecord {
-			std::string ModulePath; //!<
-			std::string ModuleName; //!<
-			std::string Description; //!<
-			bool Disabled; //!<
+			std::string ModulePath; //!< Mod DataModule path.
+			std::string ModuleName; //!< Mod ModuleName.
+			std::string Description; //!< Mod description.
+			bool Disabled; //!< Whether the mod is disabled through the settings file or not.
 
 			/// <summary>
 			/// Makes GUI displayable string with mod info.
@@ -67,9 +67,9 @@ namespace RTE {
 		/// Struct containing information about a valid GlobalScript.
 		/// </summary>
 		struct ScriptRecord {
-			std::string PresetName; //!<
-			std::string Description; //!<
-			bool Enabled; //!<
+			std::string PresetName; //!< Script PresetName.
+			std::string Description; //!< Script description.
+			bool Enabled; //!< Whether the script is enabled through the settings file or not.
 
 			/// <summary>
 			/// Makes GUI displayable string with script info.

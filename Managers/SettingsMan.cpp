@@ -48,6 +48,9 @@ namespace RTE {
 		m_DrawLimbPathVisualizations = false;
 		m_PrintDebugInfo = false;
 		m_MeasureModuleLoadTime = false;
+
+		m_DisabledMods.clear();
+		m_EnabledGlobalScripts.clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -226,9 +229,9 @@ namespace RTE {
 		} else if (propName == "VisibleAssemblyGroup") {
 			m_VisibleAssemblyGroupsList.push_back(reader.ReadPropValue());
 		} else if (propName == "DisableMod") {
-			DisableMod(reader.ReadPropValue());
-		} else if (propName == "EnableScript") {
-			EnableScript(reader.ReadPropValue());
+			m_DisabledMods.try_emplace(reader.ReadPropValue(), true);
+		} else if (propName == "EnableGlobalScript") {
+			m_EnabledGlobalScripts.try_emplace(reader.ReadPropValue(), true);
 		} else if (propName == "MouseSensitivity") {
 			reader >> g_UInputMan.m_MouseSensitivity;
 		} else if (propName == "Player1Scheme" || propName == "Player2Scheme" || propName == "Player3Scheme" || propName == "Player4Scheme") {
@@ -388,18 +391,18 @@ namespace RTE {
 			writer.NewDivider(false);
 			writer.NewLineString("// Disabled Mods", false);
 			writer.NewLine(false);
-			for (const std::pair<std::string, bool> &disabledMod : m_DisabledMods) {
-				if (disabledMod.second) { writer.NewPropertyWithValue("DisableMod", disabledMod.first); }
+			for (const auto &[modPath, modDisabled] : m_DisabledMods) {
+				if (modDisabled) { writer.NewPropertyWithValue("DisableMod", modPath); }
 			}
 		}
 
-		if (!m_EnabledScripts.empty()) {
+		if (!m_EnabledGlobalScripts.empty()) {
 			writer.NewLine(false, 2);
 			writer.NewDivider(false);
 			writer.NewLineString("// Enabled Global Scripts", false);
 			writer.NewLine(false);
-			for (const std::pair<std::string, bool> &enabledScript : m_EnabledScripts) {
-				if (enabledScript.second) { writer.NewPropertyWithValue("EnableScript", enabledScript.first); }
+			for (const auto &[scriptPresetName, scriptEnabled] : m_EnabledGlobalScripts) {
+				if (scriptEnabled) { writer.NewPropertyWithValue("EnableScript", scriptPresetName); }
 			}
 		}
 
@@ -448,25 +451,5 @@ namespace RTE {
 		m_SettingsNeedOverwrite = true;
 
 		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool SettingsMan::IsModDisabled(std::string modModule) {
-		std::transform(modModule.begin(), modModule.end(), modModule.begin(), ::tolower);
-		if (m_DisabledMods.find(modModule) != m_DisabledMods.end()) {
-			return m_DisabledMods[modModule];
-		}
-		return false;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool SettingsMan::IsScriptEnabled(std::string scriptName) {
-		std::transform(scriptName.begin(), scriptName.end(), scriptName.begin(), ::tolower);
-		if (m_EnabledScripts.find(scriptName) != m_EnabledScripts.end()) {
-			return m_EnabledScripts[scriptName];
-		}
-		return false;
 	}
 }

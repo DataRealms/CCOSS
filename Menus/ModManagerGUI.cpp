@@ -90,7 +90,7 @@ namespace RTE {
 
 		for (Entity *globalScriptListEntry : globalScriptList) {
 			if (const GlobalScript *globalScript = dynamic_cast<GlobalScript *>(globalScriptListEntry)) {
-				ScriptRecord scriptRecord = { globalScript->GetModuleAndPresetName(), globalScript->GetDescription(), g_SettingsMan.IsScriptEnabled(scriptRecord.PresetName) };
+				ScriptRecord scriptRecord = { globalScript->GetModuleAndPresetName(), globalScript->GetDescription(), g_SettingsMan.IsGlobalScriptEnabled(scriptRecord.PresetName) };
 				m_KnownScripts.emplace_back(scriptRecord);
 			}
 		}
@@ -107,15 +107,21 @@ namespace RTE {
 	void ModManagerGUI::ToggleMod() {
 		int index = m_ModsListBox->GetSelectedIndex();
 		if (index > -1) {
+			std::map<std::string, bool> &disabledModsList = g_SettingsMan.GetDisabledModsList();
 			GUIListPanel::Item *selectedItem = m_ModsListBox->GetSelected();
 			ModRecord &modRecord = m_KnownMods.at(selectedItem->m_ExtraIndex);
+
 			modRecord.Disabled = !modRecord.Disabled;
 			if (modRecord.Disabled) {
 				m_ToggleModButton->SetText("Enable Mod");
-				g_SettingsMan.DisableMod(modRecord.ModulePath);
+				if (disabledModsList.find(modRecord.ModulePath) != disabledModsList.end()) {
+					disabledModsList.at(modRecord.ModulePath) = true;
+				} else {
+					disabledModsList.try_emplace(modRecord.ModulePath, true);
+				}
 			} else {
 				m_ToggleModButton->SetText("Disable Mod");
-				g_SettingsMan.EnableMod(modRecord.ModulePath);
+				disabledModsList.at(modRecord.ModulePath) = false;
 			}
 			selectedItem->m_Name = modRecord.MakeModString();
 			m_ModsListBox->SetSelectedIndex(index);
@@ -129,15 +135,21 @@ namespace RTE {
 	void ModManagerGUI::ToggleScript() {
 		int index = m_ScriptsListBox->GetSelectedIndex();
 		if (index > -1) {
+			std::map<std::string, bool> &enabledScriptList = g_SettingsMan.GetEnabledScriptList();
 			GUIListPanel::Item *selectedItem = m_ScriptsListBox->GetSelected();
 			ScriptRecord &scriptRecord = m_KnownScripts.at(selectedItem->m_ExtraIndex);
+
 			scriptRecord.Enabled = !scriptRecord.Enabled;
 			if (scriptRecord.Enabled) {
 				m_ToggleScriptButton->SetText("Disable Script");
-				g_SettingsMan.EnableScript(scriptRecord.PresetName);
+				if (enabledScriptList.find(scriptRecord.PresetName) != enabledScriptList.end()) {
+					enabledScriptList.at(scriptRecord.PresetName) = true;
+				} else {
+					enabledScriptList.try_emplace(scriptRecord.PresetName, true);
+				}
 			} else {
 				m_ToggleScriptButton->SetText("Enable Script");
-				g_SettingsMan.DisableScript(scriptRecord.PresetName);
+				enabledScriptList.at(scriptRecord.PresetName) = false;
 			}
 			selectedItem->m_Name = scriptRecord.MakeScriptString();
 			m_ScriptsListBox->SetSelectedIndex(index);

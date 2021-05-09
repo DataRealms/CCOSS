@@ -8,6 +8,10 @@
 #include "SettingsMan.h"
 #include "ConsoleMan.h"
 
+#include "DataModule.h"
+#include "Entity.h"
+#include "Scene.h"
+
 #include "GUI.h"
 #include "AllegroBitmap.h"
 #include "AllegroScreen.h"
@@ -18,10 +22,6 @@
 #include "GUIButton.h"
 #include "GUILabel.h"
 #include "GUISlider.h"
-
-#include "DataModule.h"
-#include "Entity.h"
-#include "Scene.h"
 
 namespace RTE {
 

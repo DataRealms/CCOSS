@@ -5,12 +5,10 @@
 #include "UInputMan.h"
 #include "SettingsMan.h"
 #include "ConsoleMan.h"
-#include "MetaMan.h"
 
 #include "GUI.h"
 #include "AllegroScreen.h"
 #include "AllegroInput.h"
-#include "GUIControlManager.h"
 #include "GUICollectionBox.h"
 #include "GUIButton.h"
 #include "GUILabel.h"

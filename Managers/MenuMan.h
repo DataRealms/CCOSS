@@ -49,7 +49,7 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Updates the state of this MenuMan.
+		/// Updates the MenuMan state.
 		/// </summary>
 		/// <returns>Whether the MenuMan update has reached a state where the menu loop should be exited so the simulation loop can proceed.</returns>
 		bool Update();

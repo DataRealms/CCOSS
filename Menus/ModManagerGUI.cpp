@@ -6,22 +6,20 @@
 #include "GlobalScript.h"
 
 #include "GUI.h"
+#include "AllegroScreen.h"
+#include "AllegroInput.h"
+#include "GUICollectionBox.h"
 #include "GUILabel.h"
 #include "GUIButton.h"
 #include "GUIListBox.h"
-#include "GUICollectionBox.h"
-#include "AllegroScreen.h"
-#include "AllegroInput.h"
 
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	ModManagerGUI::ModManagerGUI(AllegroScreen *guiScreen, AllegroInput *guiInput) {
-		if (!m_GUIControlManager) { m_GUIControlManager = std::make_unique<GUIControlManager>(); }
-		if (!m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSkin.ini")) {
-			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSkin.ini");
-		}
+		m_GUIControlManager = std::make_unique<GUIControlManager>();
+		RTEAssert(m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSkin.ini");
 		m_GUIControlManager->Load("Base.rte/GUIs/ModManagerGUI.ini");
 
 		GUICollectionBox *rootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
@@ -70,8 +68,8 @@ namespace RTE {
 				}
 			}
 			if (!found) {
-				ModRecord modRecord = { modPath, "N/A, Module not loaded", "N/A, Module not loaded", modDisabled };
-				m_KnownMods.emplace_back(modRecord);
+				ModRecord disabledModRecord = { modPath, "N/A, Module not loaded", "N/A, Module not loaded", modDisabled };
+				m_KnownMods.emplace_back(disabledModRecord);
 			}
 		}
 		std::sort(m_KnownMods.begin(), m_KnownMods.end());

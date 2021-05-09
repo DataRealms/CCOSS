@@ -56,12 +56,12 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Updates the main menu state.
+		/// Updates the MainMenuGUI state.
 		/// </summary>
 		MainMenuUpdateResult Update();
 
 		/// <summary>
-		/// Draws the main menu to the screen.
+		/// Draws the MainMenuGUI to the screen.
 		/// </summary>
 		void Draw() const;
 #pragma endregion

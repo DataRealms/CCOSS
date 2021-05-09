@@ -5,11 +5,11 @@
 #include "Writer.h"
 
 #include "GUI.h"
-#include "GUICollectionBox.h"
-#include "GUIListBox.h"
 #include "AllegroScreen.h"
 #include "AllegroBitmap.h"
 #include "AllegroInput.h"
+#include "GUICollectionBox.h"
+#include "GUIListBox.h"
 
 namespace RTE {
 

@@ -117,7 +117,7 @@ namespace RTE {
 			TeamRowCount
 		};
 
-		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The control manager which owns all the GUI elements.
+		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which owns all the GUIControls of the ScenarioGUI.
 
 		GUICollectionBox *m_RootBox;
 

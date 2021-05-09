@@ -4,7 +4,6 @@
 #include "SettingsMan.h"
 
 #include "GUI.h"
-#include "GUISound.h"
 #include "AllegroScreen.h"
 #include "AllegroBitmap.h"
 
@@ -252,9 +251,7 @@ namespace RTE {
 
 					g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccintro.ogg", 0);
 					g_AudioMan.SetMusicPosition(0.05F);
-					// TODO: Setting temp volume doesn't work
-					// Override music volume setting for the intro if it's set to anything
-					//if (g_AudioMan.GetMusicVolume() < 0.1F) { g_AudioMan.SetTempMusicVolume(1.0F); }
+					if (g_AudioMan.GetMusicVolume() < 0.1F) { g_AudioMan.SetTempMusicVolume(1.0F); }
 				}
 				m_FadeAmount = static_cast<int>(LERP(0, 1.0F, 255.0F, 0, m_SectionProgress));
 				break;

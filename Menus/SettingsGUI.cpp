@@ -1,49 +1,38 @@
 #include "SettingsGUI.h"
-
-#include "UInputMan.h"
-#include "SettingsMan.h"
 #include "FrameMan.h"
 
 #include "GUI.h"
-#include "GUIControlManager.h"
-#include "GUICollectionBox.h"
-#include "GUICheckbox.h"
-#include "GUIButton.h"
-#include "GUITab.h"
 #include "AllegroScreen.h"
 #include "AllegroInput.h"
+#include "GUICollectionBox.h"
+#include "GUIButton.h"
+#include "GUITab.h"
 
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	SettingsGUI::SettingsGUI(AllegroScreen *guiScreen, AllegroInput *guiInput) {
-		if (!m_GUIControlManager) { m_GUIControlManager = std::make_unique<GUIControlManager>(); }
-		if (!m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSkin.ini")) {
-			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSkin.ini");
-		}
+		m_GUIControlManager = std::make_unique<GUIControlManager>();
+		RTEAssert(m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSkin.ini");
 		m_GUIControlManager->Load("Base.rte/GUIs/SettingsGUI.ini");
 
 		GUICollectionBox *rootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
 		rootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
-		m_SettingsTabberBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxSettingsBase"));
-		if (rootBox->GetHeight() < 540) {
-			m_SettingsTabberBox->CenterInParent(true, true);
-		} else {
-			m_SettingsTabberBox->SetPositionAbs((rootBox->GetWidth() - m_SettingsTabberBox->GetWidth()) / 2, 140);
-		}
+		GUICollectionBox *tabberBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxSettingsBase"));
+		tabberBox->SetPositionAbs((rootBox->GetWidth() - tabberBox->GetWidth()) / 2, 140);
+		if (rootBox->GetHeight() < 540) { tabberBox->CenterInParent(true, true); }
+
 		m_BackToMainButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonBackToMainMenu"));
-		m_BackToMainButton->SetPositionAbs((rootBox->GetWidth() - m_BackToMainButton->GetWidth()) / 2, m_SettingsTabberBox->GetYPos() + m_SettingsTabberBox->GetHeight() + 10);
+		m_BackToMainButton->SetPositionAbs((rootBox->GetWidth() - m_BackToMainButton->GetWidth()) / 2, tabberBox->GetYPos() + tabberBox->GetHeight() + 10);
 
-		m_SettingsMenuTabs.at(ActiveSettingsMenu::VideoSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabVideoSettings"));
-		m_SettingsMenuTabs.at(ActiveSettingsMenu::AudioSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabAudioSettings"));
-		m_SettingsMenuTabs.at(ActiveSettingsMenu::InputSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabInputSettings"));
-		m_SettingsMenuTabs.at(ActiveSettingsMenu::GameplaySettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabGameplaySettings"));
-		m_SettingsMenuTabs.at(ActiveSettingsMenu::NetworkSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabNetworkSettings"));
-		m_SettingsMenuTabs.at(ActiveSettingsMenu::MiscSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabMiscSettings"));
-
-		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ConfigScreen"))->SetVisible(false);
+		m_SettingsMenuTabs.at(SettingsMenuScreen::VideoSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabVideoSettings"));
+		m_SettingsMenuTabs.at(SettingsMenuScreen::AudioSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabAudioSettings"));
+		m_SettingsMenuTabs.at(SettingsMenuScreen::InputSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabInputSettings"));
+		m_SettingsMenuTabs.at(SettingsMenuScreen::GameplaySettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabGameplaySettings"));
+		m_SettingsMenuTabs.at(SettingsMenuScreen::NetworkSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabNetworkSettings"));
+		m_SettingsMenuTabs.at(SettingsMenuScreen::MiscSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabMiscSettings"));
 
 		m_VideoSettingsMenu = std::make_unique<SettingsVideoGUI>(m_GUIControlManager.get());
 		m_AudioSettingsMenu = std::make_unique<SettingsAudioGUI>(m_GUIControlManager.get());
@@ -52,13 +41,13 @@ namespace RTE {
 		m_NetworkSettingsMenu = std::make_unique<SettingsNetworkGUI>(m_GUIControlManager.get());
 		m_MiscSettingsMenu = std::make_unique<SettingsMiscGUI>(m_GUIControlManager.get());
 
-		m_SettingsMenuTabs.at(ActiveSettingsMenu::VideoSettingsMenu)->SetCheck(true);
-		SetActiveSettingsMenu(ActiveSettingsMenu::VideoSettingsMenu);
+		SetActiveSettingsMenuScreen(SettingsMenuScreen::VideoSettingsMenu, false);
+		m_SettingsMenuTabs.at(m_ActiveSettingsMenuScreen)->SetCheck(true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsGUI::SetActiveSettingsMenu(ActiveSettingsMenu activeMenu) {
+	void SettingsGUI::SetActiveSettingsMenuScreen(SettingsMenuScreen activeMenu, bool playButtonPressSound) {
 		m_VideoSettingsMenu->SetEnabled(false);
 		m_AudioSettingsMenu->SetEnabled(false);
 		m_InputSettingsMenu->SetEnabled(false);
@@ -67,29 +56,33 @@ namespace RTE {
 		m_MiscSettingsMenu->SetEnabled(false);
 
 		switch (activeMenu) {
-			case ActiveSettingsMenu::VideoSettingsMenu:
+			case SettingsMenuScreen::VideoSettingsMenu:
 				m_VideoSettingsMenu->SetEnabled(true);
 				break;
-			case ActiveSettingsMenu::AudioSettingsMenu:
+			case SettingsMenuScreen::AudioSettingsMenu:
 				m_AudioSettingsMenu->SetEnabled(true);
 				break;
-			case ActiveSettingsMenu::InputSettingsMenu:
+			case SettingsMenuScreen::InputSettingsMenu:
 				m_InputSettingsMenu->SetEnabled(true);
 				break;
-			case ActiveSettingsMenu::GameplaySettingsMenu:
+			case SettingsMenuScreen::GameplaySettingsMenu:
 				m_GameplaySettingsMenu->SetEnabled(true);
 				break;
-			case ActiveSettingsMenu::NetworkSettingsMenu:
+			case SettingsMenuScreen::NetworkSettingsMenu:
 				m_NetworkSettingsMenu->SetEnabled(true);
 				break;
-			case ActiveSettingsMenu::MiscSettingsMenu:
+			case SettingsMenuScreen::MiscSettingsMenu:
 				m_MiscSettingsMenu->SetEnabled(true);
 				break;
 			default:
-				RTEAbort("Invalid settings menu passed to SettingsGUI::SetActiveSettingsMenu!");
+				RTEAbort("Invalid settings menu passed to SettingsGUI::SetActiveSettingsMenuScreen!");
+				break;
 		}
-		m_ActiveSettingsMenu = activeMenu;
-		m_SettingsTabberBox->SetFocus();
+		m_ActiveSettingsMenuScreen = activeMenu;
+		// Remove focus so the tab hovered graphic is removed after being pressed, otherwise it remains stuck on the active tab.
+		m_GUIControlManager->GetManager()->SetFocus(nullptr);
+
+		if (playButtonPressSound) { g_GUISound.BackButtonPressSound()->Play(); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -103,42 +96,47 @@ namespace RTE {
 				if (guiEvent.GetControl() == m_BackToMainButton) {
 					return true;
 				}
-			} else if (guiEvent.GetType() == GUIEvent::Notification && guiEvent.GetMsg() == GUITab::Pushed) {
-				if (guiEvent.GetControl() == m_SettingsMenuTabs.at(ActiveSettingsMenu::VideoSettingsMenu)) {
-					SetActiveSettingsMenu(ActiveSettingsMenu::VideoSettingsMenu);
-				} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(ActiveSettingsMenu::AudioSettingsMenu)) {
-					SetActiveSettingsMenu(ActiveSettingsMenu::AudioSettingsMenu);
-				} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(ActiveSettingsMenu::InputSettingsMenu)) {
-					SetActiveSettingsMenu(ActiveSettingsMenu::InputSettingsMenu);
-				} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(ActiveSettingsMenu::GameplaySettingsMenu)) {
-					SetActiveSettingsMenu(ActiveSettingsMenu::GameplaySettingsMenu);
-				} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(ActiveSettingsMenu::NetworkSettingsMenu)) {
-					SetActiveSettingsMenu(ActiveSettingsMenu::NetworkSettingsMenu);
-				} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(ActiveSettingsMenu::MiscSettingsMenu)) {
-					SetActiveSettingsMenu(ActiveSettingsMenu::MiscSettingsMenu);
+			} else if (guiEvent.GetType() == GUIEvent::Notification) {
+				if ((dynamic_cast<GUIButton *>(guiEvent.GetControl()) && guiEvent.GetMsg() == GUIButton::Focused) || (dynamic_cast<GUITab *>(guiEvent.GetControl()) && guiEvent.GetMsg() == GUITab::Hovered)) { g_GUISound.SelectionChangeSound()->Play(); }
+
+				if (guiEvent.GetMsg() == GUITab::Pushed) {
+					if (guiEvent.GetControl() == m_SettingsMenuTabs.at(SettingsMenuScreen::VideoSettingsMenu)) {
+						SetActiveSettingsMenuScreen(SettingsMenuScreen::VideoSettingsMenu);
+					} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(SettingsMenuScreen::AudioSettingsMenu)) {
+						SetActiveSettingsMenuScreen(SettingsMenuScreen::AudioSettingsMenu);
+					} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(SettingsMenuScreen::InputSettingsMenu)) {
+						SetActiveSettingsMenuScreen(SettingsMenuScreen::InputSettingsMenu);
+					} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(SettingsMenuScreen::GameplaySettingsMenu)) {
+						SetActiveSettingsMenuScreen(SettingsMenuScreen::GameplaySettingsMenu);
+					} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(SettingsMenuScreen::NetworkSettingsMenu)) {
+						SetActiveSettingsMenuScreen(SettingsMenuScreen::NetworkSettingsMenu);
+					} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(SettingsMenuScreen::MiscSettingsMenu)) {
+						SetActiveSettingsMenuScreen(SettingsMenuScreen::MiscSettingsMenu);
+					}
 				}
 			}
 
-			switch (m_ActiveSettingsMenu) {
-				case ActiveSettingsMenu::VideoSettingsMenu:
+			switch (m_ActiveSettingsMenuScreen) {
+				case SettingsMenuScreen::VideoSettingsMenu:
 					m_VideoSettingsMenu->HandleInputEvents(guiEvent);
 					break;
-				case ActiveSettingsMenu::AudioSettingsMenu:
+				case SettingsMenuScreen::AudioSettingsMenu:
 					m_AudioSettingsMenu->HandleInputEvents(guiEvent);
 					break;
-				case ActiveSettingsMenu::InputSettingsMenu:
+				case SettingsMenuScreen::InputSettingsMenu:
 					m_InputSettingsMenu->HandleInputEvents(guiEvent);
 					break;
-				case ActiveSettingsMenu::GameplaySettingsMenu:
+				case SettingsMenuScreen::GameplaySettingsMenu:
 					m_GameplaySettingsMenu->HandleInputEvents(guiEvent);
 					break;
-				case ActiveSettingsMenu::NetworkSettingsMenu:
+				case SettingsMenuScreen::NetworkSettingsMenu:
 					m_NetworkSettingsMenu->HandleInputEvents(guiEvent);
 					break;
-				case ActiveSettingsMenu::MiscSettingsMenu:
+				case SettingsMenuScreen::MiscSettingsMenu:
 					m_MiscSettingsMenu->HandleInputEvents(guiEvent);
 					break;
 				default:
+					RTEAbort("Trying to handle input events for an invalid settings menu in SettingsGUI::HandleInputEvents!");
 					break;
 			}
 		}

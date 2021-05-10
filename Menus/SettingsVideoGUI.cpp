@@ -9,6 +9,7 @@
 #include "GUIRadioButton.h"
 #include "GUICheckbox.h"
 #include "GUIComboBox.h"
+#include "GUITextBox.h"
 
 namespace RTE {
 
@@ -31,23 +32,59 @@ namespace RTE {
 		m_PresetResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioPresetResolution"));
 		m_CustomResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioCustomResolution"));
 
+		m_ResolutionChangeDialogBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ResolutionChangeDialog"));
+		m_ResolutionChangeDialogBox->CenterInParent(true, true);
+		m_ResolutionChangeDialogBox->SetVisible(false);
+		m_ResolutionChangeConfirmButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfirmResolutionChange"));
+		m_ResolutionChangeCancelButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonCancelResolutionChange"));
+
+		CreatePresetResolutionBox();
+		CreateCustomResolutionBox();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsVideoGUI::CreatePresetResolutionBox() {
 		m_PresetResolutionBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionPresetResolution"));
 		m_PresetResolutionComboBox = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("ComboPresetResolution"));
 		m_PresetResolutionApplyButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonApplyPresetResolution"));
 		m_PresetResolutionMessageLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelPresetResolutonValidation"));
-		m_PresetResolutionMessageLabel->SetVisible(false);
 
+		if (g_FrameMan.GetMaxResX() == 1366 && g_FrameMan.GetMaxResY() == 768) {
+			m_PresetResolutionMessageLabel->SetText("1366x768 is not supported by the borderless driver for reasons unknown to man.\nPlease use the custom resolution controls with the dedicated driver to set it.");
+		} else {
+			m_PresetResolutionMessageLabel->SetVisible(false);
+		}
+		PopulateResolutionsComboBox();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsVideoGUI::CreateCustomResolutionBox() {
 		m_CustomResolutionBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionCustomResolution"));
 		m_CustomResolutionBox->SetVisible(false);
 
-		m_ResolutionChangeDialogBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ResolutionChangeDialog"));
-		m_ResolutionChangeDialogBox->CenterInParent(true, true);
-		m_ResolutionChangeDialogBox->SetVisible(false);
+		m_CustomResolutionWidthTextBox = dynamic_cast<GUITextBox *>(m_GUIControlManager->GetControl("TextboxCustomWidth"));
+		m_CustomResolutionWidthTextBox->SetNumericOnly(true);
+		m_CustomResolutionWidthTextBox->SetMaxNumericValue(g_FrameMan.GetMaxResX());
+		m_CustomResolutionWidthTextBox->SetMaxTextLength(4);
+		m_CustomResolutionWidthTextBox->SetText(std::to_string(m_NewResX * g_FrameMan.GetResMultiplier()));
 
-		m_ConfirmResolutionChangeButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfirmResolutionChange"));
-		m_CancelResolutionChangeButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonCancelResolutionChange"));
+		m_CustomResolutionHeightTextBox = dynamic_cast<GUITextBox *>(m_GUIControlManager->GetControl("TextboxCustomHeight"));
+		m_CustomResolutionHeightTextBox->SetNumericOnly(true);
+		m_CustomResolutionHeightTextBox->SetMaxNumericValue(g_FrameMan.GetMaxResY());
+		m_CustomResolutionHeightTextBox->SetMaxTextLength(4);
+		m_CustomResolutionHeightTextBox->SetText(std::to_string(m_NewResY * g_FrameMan.GetResMultiplier()));
 
-		PopulateResolutionsComboBox();
+		m_CustomResolutionUpscaledCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxCustomUpscaled"));
+		m_CustomResolutionUpscaledCheckbox->SetCheck(m_NewResUpscaled);
+
+		m_CustomResolutionBorderlessRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioBorderlessDriver"));
+		m_CustomResolutionDedicatedRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioDedicatedDriver"));
+		m_CustomResolutionApplyButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonApplyCustomResolution"));
+		m_CustomResolutionMessageLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelCustomResolutionValidation"));
+		m_CustomResolutionMessageLabel->SetVisible(false);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -233,12 +270,12 @@ namespace RTE {
 					ApplyPresetResolution();
 				} else if (guiEvent.GetControl() == m_CustomResolutionApplyButton) {
 					ApplyCustomResolution();
-				} else if (guiEvent.GetControl() == m_ConfirmResolutionChangeButton) {
+				} else if (guiEvent.GetControl() == m_ResolutionChangeConfirmButton) {
 					g_GUISound.ButtonPressSound()->Play();
 					// Must end any running activity otherwise have to deal with recreating all the GUI elements in GameActivity because it crashes when opening the BuyMenu. Easier to just end it.
 					g_ActivityMan.EndActivity();
 					g_FrameMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewGraphicsDriver);
-				} else if (guiEvent.GetControl() == m_CancelResolutionChangeButton) {
+				} else if (guiEvent.GetControl() == m_ResolutionChangeCancelButton) {
 					g_GUISound.ButtonPressSound()->Play();
 					m_ResolutionChangeDialogBox->SetVisible(false);
 				}

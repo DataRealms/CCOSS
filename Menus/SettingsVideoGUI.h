@@ -10,6 +10,7 @@ namespace RTE {
 	class GUIButton;
 	class GUIRadioButton;
 	class GUICheckbox;
+	class GUITextBox;
 	class GUIEvent;
 
 	/// <summary>
@@ -112,11 +113,29 @@ namespace RTE {
 		GUIButton *m_PresetResolutionApplyButton;
 		GUILabel *m_PresetResolutionMessageLabel;
 		GUICollectionBox *m_CustomResolutionBox;
+		GUITextBox *m_CustomResolutionWidthTextBox;
+		GUITextBox *m_CustomResolutionHeightTextBox;
+		GUICheckbox *m_CustomResolutionUpscaledCheckbox;
+		GUIRadioButton *m_CustomResolutionBorderlessRadioButton;
+		GUIRadioButton *m_CustomResolutionDedicatedRadioButton;
+		GUILabel *m_CustomResolutionMessageLabel;
 		GUIButton *m_CustomResolutionApplyButton;
 		GUICollectionBox *m_ResolutionChangeDialogBox;
-		GUIButton *m_ConfirmResolutionChangeButton;
-		GUIButton *m_CancelResolutionChangeButton;
+		GUIButton *m_ResolutionChangeConfirmButton;
+		GUIButton *m_ResolutionChangeCancelButton;
 		std::array<GUIButton *, ResolutionQuickChangeType::QuickChangeTypeCount> m_ResolutionQuickToggleButtons;
+
+#pragma region Create Breakdown
+		/// <summary>
+		/// Creates all the elements that compose the preset resolution selection box.
+		/// </summary>
+		void CreatePresetResolutionBox();
+
+		/// <summary>
+		/// Creates all the elements that compose the custom resolution controls box.
+		/// </summary>
+		void CreateCustomResolutionBox();
+#pragma endregion
 
 #pragma region Video Settings Handling
 		/// <summary>

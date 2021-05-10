@@ -1293,7 +1293,7 @@ int LuaMan::Initialize() {
             .property("FirearmNeedsReload", &AHuman::FirearmNeedsReload)
             .property("FirearmIsSemiAuto", &AHuman::FirearmIsSemiAuto)
             .property("FirearmActivationDelay", &AHuman::FirearmActivationDelay)
-            .def("ReloadFirearm", &AHuman::ReloadFirearm)
+            .def("ReloadFirearms", &AHuman::ReloadFirearms)
             .def("IsWithinRange", &AHuman::IsWithinRange)
             .def("Look", &AHuman::Look)
             .def("LookForGold", &AHuman::LookForGold)

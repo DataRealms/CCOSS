@@ -26,6 +26,7 @@ namespace RTE {
 			PSI_RELOAD,
 			// Menu and GUI activations
 			PSI_BUYMENU,
+			PSI_FULLINVENTORY,
 			PSI_STATS,
 			PSI_MINIMAP,
 			PSI_FORMSQUAD,

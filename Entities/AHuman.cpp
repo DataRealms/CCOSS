@@ -1550,7 +1550,7 @@ bool AHuman::FirearmIsSemiAuto() const
 // Arguments:       None.
 // Return value:    None.
 
-void AHuman::ReloadFirearm() const
+void AHuman::ReloadFirearms() const
 {
     if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
     {
@@ -1558,6 +1558,13 @@ void AHuman::ReloadFirearm() const
 		if (pWeapon) {
 			pWeapon->Reload();
 		}
+    }
+    if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->HoldsHeldDevice())
+    {
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pBGArm->GetHeldMO());
+        if (pWeapon) {
+            pWeapon->Reload();
+        }
     }
 }
 

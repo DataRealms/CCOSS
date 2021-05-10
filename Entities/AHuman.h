@@ -654,7 +654,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-	void ReloadFirearm() const;
+	void ReloadFirearms() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

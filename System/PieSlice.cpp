@@ -52,6 +52,9 @@ int PieSlice::Create() {
 		case PieSliceIndex::PSI_BUYMENU:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Trade Star"));
 			break;
+		case PieSliceIndex::PSI_FULLINVENTORY:
+			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Unknown"));
+			break;
 		case PieSliceIndex::PSI_STATS:
 			m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Stats"));
 			break;

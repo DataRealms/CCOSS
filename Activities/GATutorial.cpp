@@ -453,22 +453,22 @@ void GATutorial::End()
         }
     }
 
-    // Play the approriate tune on player win/lose
-    if (playerWon)
-    {
-        g_AudioMan.ClearMusicQueue();
-        // Loop it twice, nice tune!
-        g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/uwinfinal.ogg", 2);
-        g_AudioMan.QueueSilence(10);
-        g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/ccambient4.ogg");
-    }
-    else
-    {
-        g_AudioMan.ClearMusicQueue();
-        g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/udiedfinal.ogg", 0);
-        g_AudioMan.QueueSilence(10);
-        g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/ccambient4.ogg");
-    }
+	// Temp fix so music doesn't start playing if ending the Activity when changing resolution through the in-game settings.
+	if (!m_Paused) {
+		// Play the appropriate tune on player win/lose
+		if (playerWon) {
+			g_AudioMan.ClearMusicQueue();
+			// Loop it twice, nice tune!
+			g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/uwinfinal.ogg", 2);
+			g_AudioMan.QueueSilence(10);
+			g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/ccambient4.ogg");
+		} else {
+			g_AudioMan.ClearMusicQueue();
+			g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/udiedfinal.ogg", 0);
+			g_AudioMan.QueueSilence(10);
+			g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/ccambient4.ogg");
+		}
+	}
 }
 
 /*

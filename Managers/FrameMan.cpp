@@ -468,6 +468,9 @@ namespace RTE {
 		if (newResX <= 0 || newResX > m_MaxResX || newResY <= 0 || newResY > m_MaxResY) {
 			return;
 		}
+		bool prevForceDedicatedDriver = m_ForceDedicatedFullScreenGfxDriver;
+		m_ForceDedicatedFullScreenGfxDriver = newGfxDriver == GFX_AUTODETECT_FULLSCREEN || newGfxDriver == GFX_DIRECTX_ACCEL;
+
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
 		// Set the GFX_TEXT driver to hack around Allegro's window resizing limitations (specifically reducing window size) when switching from 2X mode to 1X mode.
@@ -479,6 +482,7 @@ namespace RTE {
 				RTEAbort("Unable to set back to previous resolution because: " + std::string(allegro_error) + "!");
 			}
 			g_ConsoleMan.PrintString("ERROR: Failed to switch to new resolution, reverted back to previous setting!");
+			m_ForceDedicatedFullScreenGfxDriver = prevForceDedicatedDriver;
 			set_palette(m_Palette);
 			SetDisplaySwitchMode();
 			return;

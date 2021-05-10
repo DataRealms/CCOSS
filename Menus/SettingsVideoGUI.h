@@ -23,27 +23,28 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a SettingsVideoGUI object in system memory and make it ready for use.
 		/// </summary>
-		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which holds all the GUIControls of this SettingsVideoGUI.</param>
+		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this SettingsVideoGUI.</param>
 		explicit SettingsVideoGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Enables or disables the Video Settings menu.
+		/// Enables or disables the video settings menu.
 		/// </summary>
-		/// <param name="enable">Show and enable or hide and disable the Video Settings menu.</param>
+		/// <param name="enable">Show and enable or hide and disable the video settings menu.</param>
 		void SetEnabled(bool enable = true) const;
 
 		/// <summary>
-		/// User input handling for the Video Settings menu.
+		/// Handles the player interaction with the SettingsVideoGUI GUI elements.
 		/// </summary>
+		/// <param name="guiEvent">The GUIEvent containing information about the player interaction with an element.</param>
 		void HandleInputEvents(GUIEvent &guiEvent);
 #pragma endregion
 
 	private:
 
 		/// <summary>
-		/// 
+		/// Enumeration for the different types of quick resolution change options.
 		/// </summary>
 		enum class ResolutionChangeType {
 			Windowed,
@@ -55,17 +56,20 @@ namespace RTE {
 		};
 
 		/// <summary>
-		/// 
+		/// Struct containing information about a supported resolution preset.
 		/// </summary>
 		struct PresetResolutionRecord {
-			int Width; //!<
-			int Height; //!<
-			bool Upscaled; //!<
+			int Width; //!< Resolution width.
+			int Height; //!< Resolution height.
+			bool Upscaled; //!< Whether resolution is upscaled.
 
 			/// <summary>
-			/// 
+			/// Constructor method to instantiate a PresetResolutionRecord object in system memory and make it ready for use.
 			/// </summary>
-			PresetResolutionRecord(int width, int height, bool upscaled) : Width(width), Height(height), Upscaled(upscaled) {};
+			/// <param name="width">Resolution width.</param>
+			/// <param name="height">Resolution height.</param>
+			/// <param name="upscaled">Whether resolution is upscaled.</param>
+			PresetResolutionRecord(int width, int height, bool upscaled) : Width(width), Height(height), Upscaled(upscaled) {}
 
 			/// <summary>
 			/// Makes UI displayable string with resolution info.
@@ -74,10 +78,10 @@ namespace RTE {
 			std::string MakeResolutionString() const { return std::to_string(Width) + "x" + std::to_string(Height) + (Upscaled ? " Upscaled (" + std::to_string(Width / 2) + "x" + std::to_string(Height / 2) + ")" : ""); }
 
 			/// <summary>
-			/// 
+			/// Comparison operator for eliminating duplicates and sorting in the temporary PresetResolutionRecord std::sets during PopulateResolutionsComboBox.
 			/// </summary>
-			/// <param name="rhs"></param>
-			/// <returns></returns>
+			/// <param name="rhs">The PresetResolutionRecord to compare with.</param>
+			/// <returns>Bool with the result of the comparison.</returns>
 			bool operator<(const PresetResolutionRecord &rhs) const {
 				if (Width == rhs.Width && Height == rhs.Height) {
 					return Upscaled != rhs.Upscaled;
@@ -90,13 +94,17 @@ namespace RTE {
 
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
 
-		GUICollectionBox *m_VideoSettingsBox; //!< The GUICollectionBox that contains all the Audio Settings menu GUI elements.
+		std::vector<PresetResolutionRecord> m_PresetResolutions; //!< Contains PresetResolutionRecords for all the supported preset resolutions.
 
 		GUIButton *m_WindowedButton; //!<
 		GUIButton *m_BorderlessButton; //!<
 		GUIButton *m_UpscaledBorderlessButton; //!<
 		GUIButton *m_DedicatedButton; //!<
 		GUIButton *m_UpscaledDedicatedButton; //!<
+		int m_NewGraphicsDriver; //!< The new graphics driver to use when changing resolution.
+		int m_NewResX; //!< The new resolution width to use when changing resolution.
+		int m_NewResY; //!< The new resolution height to use when changing resolution.
+		bool m_NewResUpscaled; //!< Whether the new resolution should be upscaled when changing resolution.
 
 		GUIRadioButton *m_PresetResolutionRadioButton; //!<
 		GUIRadioButton *m_CustomResolutionRadioButton; //!<
@@ -105,7 +113,6 @@ namespace RTE {
 		GUIComboBox *m_PresetResolutionComboBox; //!<
 		GUIButton *m_PresetResolutionApplyButton; //!<
 		GUILabel *m_PresetResolutionMessageLabel; //!<
-		std::vector<PresetResolutionRecord> m_PresetResolutions; //!<
 
 		GUICollectionBox *m_CustomResolutionBox; //!<
 		GUIButton *m_CustomResolutionApplyButton; //!<
@@ -114,10 +121,6 @@ namespace RTE {
 		GUIButton *m_ConfirmResolutionChangeButton; //!<
 		GUIButton *m_CancelResolutionChangeButton; //!<
 
-		int m_NewGraphicsDriver;
-		int m_NewResX; //!< New game window width that will take effect next time the FrameMan is started.
-		int m_NewResY; //!< New game window height that will take effect next time the FrameMan is started.
-		bool m_NewResUpscaled; //!< New window width/height multiple that will take effect next time the FrameMan is started.
 
 #pragma region Video Settings Handling
 		/// <summary>
@@ -129,7 +132,7 @@ namespace RTE {
 		bool IsSupportedResolution(int width, int height) const;
 
 		/// <summary>
-		/// Updates the contents of the screen resolution combo box.
+		/// Fills the PresetResolutions list with all valid PresetResolutionRecords, then fills the PresetResolutionComboBox using it and selects the currently selected preset resolution, if any.
 		/// </summary>
 		void PopulateResolutionsComboBox();
 

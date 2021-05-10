@@ -3,18 +3,23 @@
 #include "ActivityMan.h"
 
 #include "GUI.h"
+#include "GUICollectionBox.h"
 #include "GUILabel.h"
 #include "GUIButton.h"
 #include "GUIRadioButton.h"
 #include "GUICheckbox.h"
 #include "GUIComboBox.h"
-#include "GUICollectionBox.h"
 
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	SettingsVideoGUI::SettingsVideoGUI(GUIControlManager *parentControlManager) : m_GUIControlManager(parentControlManager) {
+		m_NewGraphicsDriver = g_FrameMan.GetGraphicsDriver();
+		m_NewResX = g_FrameMan.GetResX();
+		m_NewResY = g_FrameMan.GetResY();
+		m_NewResUpscaled = (g_FrameMan.GetResMultiplier() > 1) ? true : false;
+
 		m_VideoSettingsBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxVideoSettings"));
 
 		m_WindowedButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickWindowed"));
@@ -43,11 +48,6 @@ namespace RTE {
 		m_CancelResolutionChangeButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonCancelResolutionChange"));
 
 		PopulateResolutionsComboBox();
-
-		m_NewGraphicsDriver = g_FrameMan.GetGraphicsDriver();
-		m_NewResUpscaled = g_FrameMan.GetResMultiplier() > 1 ? true : false;
-		m_NewResX = g_FrameMan.GetResX();
-		m_NewResY = g_FrameMan.GetResY();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -66,13 +66,12 @@ namespace RTE {
 
 	bool SettingsVideoGUI::IsSupportedResolution(int width, int height) const {
 		if ((width >= 640 && height >= 450) && (width <= g_FrameMan.GetMaxResX() && height <= g_FrameMan.GetMaxResY())) {
-			// Disallow wacky resolutions that are taller than wide
-			if (height > width) {
+			// Disallow wacky resolutions that are taller than wide and some other dumb ones
+			if ((height > width) || (width == 1152 && height == 864) || (width == 1176 && height == 664)) {
 				return false;
 			}
 			// Disallow resolution width that isn't in multiples of 4 otherwise Allegro fails to initialize graphics, but only in windowed/borderless mode
-			int currentGfxDriver = g_FrameMan.GetGraphicsDriver();
-			if ((currentGfxDriver != GFX_AUTODETECT_FULLSCREEN && currentGfxDriver != GFX_DIRECTX_ACCEL) && width % 4 != 0) {
+			if ((g_FrameMan.GetGraphicsDriver() != GFX_AUTODETECT_FULLSCREEN && g_FrameMan.GetGraphicsDriver() != GFX_DIRECTX_ACCEL) && width % 4 != 0) {
 				return false;
 			}
 			return true;
@@ -106,11 +105,6 @@ namespace RTE {
 
 				if (IsSupportedResolution(width, height)) {
 					resRecords.emplace(width, height, false);
-
-					// If this is what we're currently set to have at next start, select it afterward
-					//if ((g_FrameMan.GetNewResX() * g_FrameMan.GetResMultiplier()) == width && (g_FrameMan.GetNewResY() * g_FrameMan.GetResMultiplier()) == height) { currentResIndex = foundIndex; }
-					// Only increment this when we find a usable 32bit resolution
-					//foundIndex++;
 				}
 			}
 		}
@@ -123,7 +117,6 @@ namespace RTE {
 			if (upscaledResRecord.Width <= g_FrameMan.GetMaxResX() && upscaledResRecord.Height <= g_FrameMan.GetMaxResY()) { upscaledResRecords.emplace(upscaledResRecord); }
 		}
 		resRecords.merge(upscaledResRecords);
-
 		m_PresetResolutions.assign(resRecords.begin(), resRecords.end());
 
 		for (const PresetResolutionRecord &resRecord : m_PresetResolutions) {
@@ -133,17 +126,7 @@ namespace RTE {
 		if (resList) { destroy_gfx_mode_list(resList); }
 
 
-		// If none of the listed matched our resolution set for next start, add a 'custom' one to display as the current res
-		/*
-		if (currentResIndex < 0) {
-			std::string isUpscaled = (g_FrameMan.GetResMultiplier() > 1) ? " Upscaled" : " Custom";
-			std::string resString = std::to_string(g_FrameMan.GetResX() / g_FrameMan.GetResMultiplier()) + "x" + std::to_string(g_FrameMan.GetResY() / g_FrameMan.GetResMultiplier()) + isUpscaled;
-			m_PresetResolutionComboBox->AddItem(resString);
-			currentResIndex = m_PresetResolutionComboBox->GetCount() - 1;
 		}
-		// Show the current resolution item to be the selected one
-		m_PresetResolutionComboBox->SetSelectedIndex(currentResIndex);
-		*/
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -803,6 +803,19 @@ void Actor::RemoveInventoryItem(string presetName)
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+MovableObject *Actor::RemoveInventoryItemAtIndex(int inventoryIndex) {
+    if (inventoryIndex >= 0 && inventoryIndex < m_Inventory.size()) {
+        MovableObject *itemAtIndex = m_Inventory.at(inventoryIndex);
+        m_Inventory.erase(m_Inventory.begin() + inventoryIndex);
+        return itemAtIndex;
+    }
+    return nullptr;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SwapPrevInventory
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -829,6 +842,34 @@ MovableObject * Actor::SwapPrevInventory(MovableObject *pSwapIn)
 
     return pRetDev;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool Actor::SwapInventoryItemsByIndex(int inventoryIndex1, int inventoryIndex2) {
+    if (inventoryIndex1 < 0 || inventoryIndex2 < 0 || inventoryIndex1 >= m_Inventory.size() || inventoryIndex2 >= m_Inventory.size()) {
+        return false;
+    }
+
+    std::swap(m_Inventory.at(inventoryIndex1), m_Inventory.at(inventoryIndex2));
+    return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+MovableObject * Actor::SetInventoryItemAtIndex(MovableObject *newInventoryItem, int inventoryIndex) {
+    if (newInventoryItem) {
+        if (inventoryIndex < 0 || inventoryIndex >= m_Inventory.size()) {
+            m_Inventory.emplace_back(newInventoryItem);
+            return nullptr;
+        }
+        MovableObject *currentInventoryItemAtIndex = m_Inventory.at(inventoryIndex);
+        m_Inventory.at(inventoryIndex) = newInventoryItem;
+        return currentInventoryItemAtIndex;
+    }
+    return nullptr;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -841,6 +841,13 @@ ClassInfoGetters
 
 	void RemoveInventoryItem(string presetName);
 
+    /// <summary>
+    /// Removes and returns the inventory item at the given index. Ownership IS transferred.
+    /// </summary>
+    /// <param name="inventoryIndex">The index of the inventory item to remove.</param>
+    /// <returns>An owning pointer to the removed inventory item.</returns>
+    MovableObject * RemoveInventoryItemAtIndex(int inventoryIndex);
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  SwapNextInventory
@@ -867,6 +874,23 @@ ClassInfoGetters
 //                  If there are no MovableObject:s in inventory, 0 will be returned.
 
 	MovableObject * SwapPrevInventory(MovableObject *pSwapIn = 0);
+
+    /// <summary>
+    /// Swaps the inventory items at the given indices. Will return false if a given index is invalid.
+    /// </summary>
+    /// <param name="inventoryIndex1">The index of one item.</param>
+    /// <param name="inventoryIndex2">The index of the other item.</param>
+    /// <returns>Whether or not the swap was successful.</returns>
+    bool SwapInventoryItemsByIndex(int inventoryIndex1, int inventoryIndex2);
+
+    /// <summary>
+    /// Sets the inventory item at the given index as the new inventory item, and gives back the one that was originally there.
+    /// If an invalid index is given, the new item will be put in the back of the inventory, and nullptr will be returned.
+    /// </summary>
+    /// <param name="newInventoryItem">The new item that should be at the given inventory index. Cannot be a nullptr. Ownership IS transferred.</param>
+    /// <param name="inventoryIndex">The inventory index the new item should be placed at.</param>
+    /// <returns>The inventory item that used to be at the inventory index. Ownership IS transferred.</returns>
+    MovableObject * SetInventoryItemAtIndex(MovableObject *newInventoryItem, int inventoryIndex);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

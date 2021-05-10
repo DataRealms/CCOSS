@@ -402,7 +402,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    One handed device or not.
 
-    bool IsOneHanded() { return m_OneHanded; }
+    bool IsOneHanded() const { return m_OneHanded; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -522,7 +522,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Whetehr magazine is full or not.
 
-    virtual bool IsFull() { return false; }
+    virtual bool IsFull() const { return false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

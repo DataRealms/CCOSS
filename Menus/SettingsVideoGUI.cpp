@@ -134,7 +134,7 @@ namespace RTE {
 	void SettingsVideoGUI::ApplyNewResolution() {
 		g_GUISound.ButtonPressSound()->Play();
 
-		if (g_ActivityMan.GetActivity()) {
+		if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing)) {
 			m_ResolutionChangeDialogBox->SetVisible(true);
 		} else {
 			g_FrameMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewGraphicsDriver);

@@ -40,6 +40,12 @@ namespace RTE {
 
 		CreatePresetResolutionBox();
 		CreateCustomResolutionBox();
+
+		if (m_PresetResolutionComboBox->GetSelectedIndex() < 0 || g_FrameMan.IsUsingDedicatedGraphicsDriver()) {
+			m_CustomResolutionRadioButton->SetCheck(true);
+			m_PresetResolutionBox->SetVisible(false);
+			m_CustomResolutionBox->SetVisible(true);
+			if (g_FrameMan.IsUsingDedicatedGraphicsDriver()) { m_CustomResolutionDedicatedRadioButton->SetCheck(true); }
 		}
 	}
 
@@ -161,7 +167,9 @@ namespace RTE {
 		for (int i = 0; i < m_PresetResolutions.size(); ++i) {
 			const PresetResolutionRecord &resRecord = m_PresetResolutions.at(i);
 			m_PresetResolutionComboBox->AddItem(resRecord.MakeResolutionString());
-			if ((resRecord.Width == g_FrameMan.GetResX() * g_FrameMan.GetResMultiplier()) && (resRecord.Height == g_FrameMan.GetResY() * g_FrameMan.GetResMultiplier()) && (resRecord.Upscaled == g_FrameMan.GetResMultiplier() > 1)) { m_PresetResolutionComboBox->SetSelectedIndex(i); }
+			if (m_PresetResolutionComboBox->GetSelectedIndex() < 0 && (resRecord.Width == g_FrameMan.GetResX() * g_FrameMan.GetResMultiplier()) && (resRecord.Height == g_FrameMan.GetResY() * g_FrameMan.GetResMultiplier()) && (resRecord.Upscaled == g_FrameMan.GetResMultiplier() > 1)) {
+				m_PresetResolutionComboBox->SetSelectedIndex(i);
+			}
 		}
 		destroy_gfx_mode_list(resList);
 	}

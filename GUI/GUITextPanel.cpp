@@ -48,6 +48,7 @@ GUITextPanel::GUITextPanel(GUIManager *Manager)
 
 	m_MaxTextLength = 0;
 	m_NumericOnly = false;
+	m_MaxNumericValue = 0;
 }
 
 
@@ -81,6 +82,7 @@ GUITextPanel::GUITextPanel()
 
 	m_MaxTextLength = 0;
 	m_NumericOnly = false;
+	m_MaxNumericValue = 0;
 }
 
 
@@ -367,6 +369,9 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 		}
 		m_Text.insert(m_CursorIndex, buf);
 		m_CursorIndex++;
+
+		if (m_NumericOnly && m_MaxNumericValue > 0 && std::stoi(m_Text) > m_MaxNumericValue) { m_Text = std::to_string(m_MaxNumericValue); }
+
 		SendSignal(Changed, 0);
 		UpdateText(true);
 		return;

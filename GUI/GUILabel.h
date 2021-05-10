@@ -246,7 +246,7 @@ public:
     /// Sets whether or not this GUILabel should scroll horizontally (right) when it overflows. Mutually exclusive with horizontal overflow scrolling.
     /// </summary>
     /// <param name="newOverflowScroll">Whether or not this GUILabel should scroll horizontally when it overflows.</param>
-    void SetHorizontalOverflowScroll(bool newOverflowScroll) { m_HorizontalOverflowScroll = newOverflowScroll; if (m_HorizontalOverflowScroll) { m_VerticalOverflowScroll = false; } }
+    void SetHorizontalOverflowScroll(bool newOverflowScroll);
 
     /// <summary>
     /// Gets whether or not this this GUILabel should scroll vertically (down) when it overflows.
@@ -258,13 +258,19 @@ public:
     /// Sets whether or not this GUILabel should scroll vertically (down) when it overflows. Mutually exclusive with horizontal overflow scrolling.
     /// </summary>
     /// <param name="newOverflowScroll">Whether or not this GUILabel should scroll vertically when it overflows.</param>
-    void SetVerticalOverflowScroll(bool newOverflowScroll) { m_VerticalOverflowScroll = newOverflowScroll; if (m_VerticalOverflowScroll) { m_HorizontalOverflowScroll = false; } }
+    void SetVerticalOverflowScroll(bool newOverflowScroll);
+
+    /// <summary>
+    /// Gets whether or not horizontal or vertical overflow scrolling is turned on.
+    /// </summary>
+    /// <returns>Whether or not horizontal or vertical overflow scrolling is turned on.</returns>
+    bool OverflowScrollIsEnabled() const { return m_HorizontalOverflowScroll || m_VerticalOverflowScroll; }
 
     /// <summary>
     /// Gets whether or not horizontal/vertical scrolling is happening.
     /// </summary>
     /// <returns>Whether or not horizontal/vertical scrolling is happening.</returns>
-    bool OverflowScrollIsActivated() const { return (m_HorizontalOverflowScroll || m_VerticalOverflowScroll) && m_OverflowScrollState != OverflowScrollState::Deactivated; }
+    bool OverflowScrollIsActivated() const { return OverflowScrollIsEnabled() && m_OverflowScrollState != OverflowScrollState::Deactivated; }
 
     /// <summary>
     /// Sets whether or not horizontal/vertical scrolling should be happening. When it's deactivated, text will instantly go back to unscrolled.

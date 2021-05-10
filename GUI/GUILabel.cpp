@@ -353,9 +353,31 @@ int GUILabel::GetTextHeight()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void GUILabel::SetHorizontalOverflowScroll(bool newOverflowScroll) {
+    m_HorizontalOverflowScroll = newOverflowScroll;
+    if (m_HorizontalOverflowScroll) {
+        m_VerticalOverflowScroll = false;
+    } else if (!m_VerticalOverflowScroll) {
+        m_OverflowScrollState = OverflowScrollState::Deactivated;
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void GUILabel::SetVerticalOverflowScroll(bool newOverflowScroll) {
+    m_VerticalOverflowScroll = newOverflowScroll;
+    if (m_VerticalOverflowScroll) {
+        m_HorizontalOverflowScroll = false;
+    } else if (!m_HorizontalOverflowScroll) {
+        m_OverflowScrollState = OverflowScrollState::Deactivated;
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void GUILabel::ActivateDeactivateOverflowScroll(bool activateScroll) {
-    if (!(activateScroll && OverflowScrollIsActivated())) {
-        m_OverflowScrollState = (activateScroll && (m_HorizontalOverflowScroll || m_VerticalOverflowScroll)) ? OverflowScrollState::WaitAtStart : OverflowScrollState::Deactivated;
+    if (OverflowScrollIsEnabled() && activateScroll != OverflowScrollIsActivated()) {
+        m_OverflowScrollState = activateScroll ? OverflowScrollState::WaitAtStart : OverflowScrollState::Deactivated;
         m_OverflowScrollTimer.SetRealTimeLimitMS(-1);
     }
 }

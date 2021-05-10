@@ -453,11 +453,6 @@ namespace RTE {
 	void InventoryMenuGUI::UpdateFullMode() {
 		if (!FullOrTransferModeReadyForUse()) { SetupFullOrTransferMode(); }
 
-		if (m_ActivityPlayerController->IsState(ControlState::PRESS_SECONDARY)) {
-			SetEnabled(false);
-			return;
-		}
-
 		if (!m_GUIShowEmptyRows) {
 			int numberOfRowsToShow = static_cast<int>(std::ceilf(static_cast<float>(std::min(c_FullViewPageItemLimit, m_InventoryActor->GetInventorySize())) / static_cast<float>(c_ItemsPerRow)));
 			int expectedInventoryHeight = m_GUIInventoryItemButtons.at(0).second->GetHeight() * numberOfRowsToShow;
@@ -477,7 +472,13 @@ namespace RTE {
 		UpdateFullModeInventoryItemButtons(inventory);
 
 		m_GUIControlManager->Update(true);
-		if (!m_GUIDisplayOnly) { HandleInput(); }
+
+		if (!m_GUIDisplayOnly) {
+			HandleInput();
+			if (!IsEnabled()) {
+				return;
+			}
+		}
 
 		m_GUIInformationToggleButton->SetEnabled(true);
 		if ((m_GUIShowInformationText && !m_GUIInformationText->GetVisible()) || (!m_GUIShowInformationText && m_GUIInformationText->GetVisible())) { m_GUIInformationText->SetVisible(m_GUIShowInformationText); }
@@ -646,6 +647,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void InventoryMenuGUI::HandleInput() {
+		if (m_ActivityPlayerController->IsState(ControlState::PRESS_SECONDARY)) {
+			SetEnabled(false);
+			return;
+		}
+
 		//TODO Maybe add support for other click types, e.g. if player right clicks on an item when they have one selected, we can call some custom lua function, so you can do custom stuff like combining items or whatever
 		if (m_ActivityPlayerController->IsMouseControlled()) {
 			if (HandleMouseInput()) {
@@ -795,6 +801,17 @@ namespace RTE {
 			m_KeyboardOrControllerHighlightedButton->SetFocus();
 		}
 
+		if (m_ActivityPlayerController->IsState(ControlState::PRESS_PRIMARY)) {
+			if (m_KeyboardOrControllerHighlightedButton->IsEnabled()) {
+				m_KeyboardOrControllerHighlightedButton->SetCaptureState(true);
+				m_KeyboardOrControllerHighlightedButton->OnMouseUp(m_KeyboardOrControllerHighlightedButton->GetXPos(), m_KeyboardOrControllerHighlightedButton->GetYPos(), GUIInput::Released, 0);
+				m_KeyboardOrControllerHighlightedButton->SetCaptureState(false);
+				return;
+			} else {
+				g_GUISound.UserErrorSound()->Play(m_ActivityPlayerController->GetPlayer());
+			}
+		}
+
 		bool pressUp = m_ActivityPlayerController->IsState(ControlState::PRESS_UP) || m_ActivityPlayerController->IsState(ControlState::SCROLL_UP);
 		bool pressDown = m_ActivityPlayerController->IsState(ControlState::PRESS_DOWN) || m_ActivityPlayerController->IsState(ControlState::SCROLL_DOWN);
 		bool pressLeft = m_ActivityPlayerController->IsState(ControlState::PRESS_LEFT);
@@ -897,9 +914,10 @@ namespace RTE {
 				}
 			}
 		}
-		if (nextButtonToHighlight && !nextButtonToHighlight->HasFocus()) {
+		if (nextButtonToHighlight && m_KeyboardOrControllerHighlightedButton != nextButtonToHighlight && !nextButtonToHighlight->HasFocus()) {
+			m_KeyboardOrControllerHighlightedButton->OnMouseLeave(0, 0, 0, 0);
 			m_KeyboardOrControllerHighlightedButton = nextButtonToHighlight;
-			m_KeyboardOrControllerHighlightedButton->SetFocus();
+			m_KeyboardOrControllerHighlightedButton->OnMouseEnter(0, 0, 0, 0);
 		} else if (!nextButtonToHighlight && (pressUp || pressDown || pressLeft || pressRight)) {
 			g_GUISound.UserErrorSound()->Play(m_ActivityPlayerController->GetPlayer());
 		}

@@ -232,7 +232,7 @@ public:
     /// Sets whether or not this button is currently pushed.
     /// </summary>
     /// <param name="pushed">Whether or not this button should be pushed.</param>
-    void SetPushed(bool pushed = false) { m_Pushed = pushed; }
+    void SetPushed(bool pushed = false);
 
     /// <summary>
     /// Gets whether or not this button is currently being moused over.
@@ -240,22 +240,16 @@ public:
     /// <returns>Whether or not this button is currently being moused over.</returns>
     bool GetOver() const { return m_Over; }
 
+    /// <summary>
+    /// Sets the text of this GUIButton's GUILabel.
+    /// </summary>
+    /// <param name="newText">The new text for this GUIButton's GUILabel.</param>
+    void SetText(const std::string &newText);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetText
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the text.
-// Arguments:       Text.
-
-    void SetText(const std::string Text);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetText
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the text.
-// Arguments:       None.
-
+    /// <summary>
+    /// Gets the text of this GUIButton's GUILabel.
+    /// </summary>
+    /// <returns>The text of this GUIButton's GUILabel.</returns>
     std::string GetText();
 
     /// <summary>

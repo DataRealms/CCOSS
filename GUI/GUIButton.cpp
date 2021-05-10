@@ -295,8 +295,7 @@ void GUIButton::Draw(GUIScreen *Screen)
 void GUIButton::OnMouseDown(int X, int Y, int Buttons, int Modifier)
 {
     if (Buttons & MOUSE_LEFT) {
-        // Push the button down
-        m_Pushed = true;
+        SetPushed(true);
         CaptureMouse();
 
         AddEvent(GUIEvent::Notification, Pushed, 0);
@@ -318,7 +317,7 @@ void GUIButton::OnMouseUp(int X, int Y, int Buttons, int Modifier)
     if (!IsCaptured())
         return;
 
-    m_Pushed = false;
+    SetPushed(false);
     ReleaseMouse();
 
     // If the mouse is over the button, add the command to the event queue
@@ -350,7 +349,7 @@ void GUIButton::OnMouseEnter(int X, int Y, int Buttons, int Modifier)
 
 void GUIButton::OnMouseLeave(int X, int Y, int Buttons, int Modifier) {
     m_Over = false;
-    m_Text->ActivateDeactivateOverflowScroll(false);
+    if (!m_GotFocus && !m_Pushed) { m_Text->ActivateDeactivateOverflowScroll(false); }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -364,7 +363,7 @@ void GUIButton::OnGainFocus() {
 
 void GUIButton::OnLoseFocus() {
     GUIPanel::OnLoseFocus();
-    m_Text->ActivateDeactivateOverflowScroll(false);
+    if (!m_Over && !m_Pushed) { m_Text->ActivateDeactivateOverflowScroll(false); }
 }
 
 
@@ -382,12 +381,12 @@ void GUIButton::OnMouseMove(int X, int Y, int Buttons, int Modifier)
     if (!PointInside(X, Y)) {
         if (m_Pushed) {
             AddEvent(GUIEvent::Notification, UnPushed, 0);
-            m_Pushed = false;
+            SetPushed(false);
         }
     } else {
         if (!m_Pushed) {
             AddEvent(GUIEvent::Notification, Pushed, 0);
-            m_Pushed = true;
+            SetPushed(true);
         }
     }
 }
@@ -427,6 +426,19 @@ void GUIButton::GetControlRect(int *X, int *Y, int *Width, int *Height)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// Method:          StoreProperties
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets the control to store the values into properties.
+
+void GUIButton::StoreProperties(void)
+{
+    m_Properties.AddVariable("Text", m_Text->GetText());
+    m_Properties.AddVariable("HorizontalOverflowScroll", m_Text->GetHorizontalOverflowScroll());
+    m_Properties.AddVariable("VerticalOverflowScroll", m_Text->GetVerticalOverflowScroll());
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Move
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Called when the control needs to be moved.
@@ -453,34 +465,27 @@ void GUIButton::Resize(int Width, int Height)
     BuildBitmap();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          StoreProperties
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the control to store the values into properties.
-
-void GUIButton::StoreProperties(void)
-{
-    m_Properties.AddVariable("Text", m_Text->GetText());
-    m_Properties.AddVariable("HorizontalOverflowScroll", m_Text->GetHorizontalOverflowScroll());
-    m_Properties.AddVariable("VerticalOverflowScroll", m_Text->GetVerticalOverflowScroll());
+void GUIButton::SetPushed(bool pushed) {
+    m_Pushed = pushed;
+    if (pushed) {
+        m_Text->ActivateDeactivateOverflowScroll(true);
+    } else if (!pushed && m_GotFocus && !m_Over) {
+        m_Text->ActivateDeactivateOverflowScroll(false);
+    }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetText
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the text.
-
-void GUIButton::SetText(const std::string Text) {
-    m_Text->SetText(Text);
+void GUIButton::SetText(const std::string &newText) {
+    m_Text->SetText(newText);
     BuildBitmap();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-string GUIButton::GetText(void)
-{
+string GUIButton::GetText(void) {
     return m_Text->GetText();
 }
 

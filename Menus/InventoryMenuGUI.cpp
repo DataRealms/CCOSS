@@ -800,7 +800,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void InventoryMenuGUI::HandleNonMouseInput() {
-		if (!m_KeyboardOrControllerHighlightedButton || (m_KeyboardOrControllerHighlightedButton->GetParent() == m_GUIInventoryItemsBox && m_InventoryActor->IsInventoryEmpty())) { m_KeyboardOrControllerHighlightedButton = m_GUIEquippedItemButton; }
+		if (!m_KeyboardOrControllerHighlightedButton || !m_KeyboardOrControllerHighlightedButton->GetVisible() || (!m_GUIShowEmptyRows && m_KeyboardOrControllerHighlightedButton->GetParent() == m_GUIInventoryItemsBox && m_InventoryActor->IsInventoryEmpty())) { m_KeyboardOrControllerHighlightedButton = m_GUIEquippedItemButton; }
 		if (!m_KeyboardOrControllerHighlightedButton->GetOver()) { m_KeyboardOrControllerHighlightedButton->OnMouseEnter(0, 0, 0, 0); }
 
 		if (m_ActivityPlayerController->IsState(ControlState::PRESS_PRIMARY)) {
@@ -979,7 +979,6 @@ namespace RTE {
 			ClearSelectedItem();
 		}
 		pressedButton->OnLoseFocus();
-		if (m_KeyboardOrControllerHighlightedButton == pressedButton) { m_KeyboardOrControllerHighlightedButton->OnMouseEnter(0, 0, 0, 0); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

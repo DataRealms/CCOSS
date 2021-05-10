@@ -222,14 +222,23 @@ public:
 
     void Resize(int Width, int Height) override;
 
+    /// <summary>
+    /// Gets whether or not this button is currently pushed.
+    /// </summary>
+    /// <returns>Whether or not this button is currently pushed.</returns>
+    bool GetPushed() const { return m_Pushed; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetPushed
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Forces the button to look pressed down or not.
-// Arguments:       Whether to force the pushed look or not.
-
+    /// <summary>
+    /// Sets whether or not this button is currently pushed.
+    /// </summary>
+    /// <param name="pushed">Whether or not this button should be pushed.</param>
     void SetPushed(bool pushed = false) { m_Pushed = pushed; }
+
+    /// <summary>
+    /// Gets whether or not this button is currently being moused over.
+    /// </summary>
+    /// <returns>Whether or not this button is currently being moused over.</returns>
+    bool GetOver() const { return m_Over; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

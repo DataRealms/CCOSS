@@ -22,11 +22,11 @@ namespace RTE {
 
 		m_VideoSettingsBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxVideoSettings"));
 
-		m_WindowedButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickWindowed"));
-		m_BorderlessButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickBorderless"));
-		m_UpscaledBorderlessButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickUpscaledBorderless"));
-		m_DedicatedButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickDedicated"));
-		m_UpscaledDedicatedButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickUpscaledDedicated"));
+		m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::Windowed) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickWindowed"));
+		m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::Borderless) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickBorderless"));
+		m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::UpscaledBorderless) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickUpscaledBorderless"));
+		m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::Dedicated) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickDedicated"));
+		m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::UpscaledDedicated) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickUpscaledDedicated"));
 
 		m_PresetResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioPresetResolution"));
 		m_CustomResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioCustomResolution"));
@@ -129,61 +129,6 @@ namespace RTE {
 		destroy_gfx_mode_list(resList);
 	}
 
-
-
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SettingsVideoGUI::SetNewResolutionProperties(ResolutionChangeType resolutionChangeType, int newResX, int newResY, bool newResUpscaled, int newGfxDriver) {
-		int newResMultiplier = newResUpscaled ? 2 : 1;
-		bool linuxCompatible = false;
-
-#ifdef __unix__
-		linuxCompatible = true;
-#endif
-
-		switch (resolutionChangeType) {
-			case ResolutionChangeType::Windowed:
-				m_NewGraphicsDriver = GFX_AUTODETECT_WINDOWED;
-				m_NewResUpscaled = false;
-				m_NewResX = g_FrameMan.GetMaxResX() / 2;
-				m_NewResY = g_FrameMan.GetMaxResY() / 2;
-				break;
-			case ResolutionChangeType::Borderless:
-				m_NewGraphicsDriver = !linuxCompatible ? GFX_DIRECTX_WIN_BORDERLESS : GFX_AUTODETECT_FULLSCREEN;
-				m_NewResUpscaled = false;
-				m_NewResX = g_FrameMan.GetMaxResX();
-				m_NewResY = g_FrameMan.GetMaxResY();
-				break;
-			case ResolutionChangeType::UpscaledBorderless:
-				m_NewGraphicsDriver = !linuxCompatible ? GFX_DIRECTX_WIN_BORDERLESS : GFX_AUTODETECT_FULLSCREEN;
-				m_NewResUpscaled = true;
-				m_NewResX = g_FrameMan.GetMaxResX() / 2;
-				m_NewResY = g_FrameMan.GetMaxResY() / 2;
-				break;
-			case ResolutionChangeType::Dedicated:
-				m_NewGraphicsDriver = !linuxCompatible ? GFX_DIRECTX_ACCEL : GFX_AUTODETECT_FULLSCREEN;
-				m_NewResUpscaled = false;
-				m_NewResX = g_FrameMan.GetMaxResX();
-				m_NewResY = g_FrameMan.GetMaxResY();
-				break;
-			case ResolutionChangeType::UpscaledDedicated:
-				m_NewGraphicsDriver = !linuxCompatible ? GFX_DIRECTX_ACCEL : GFX_AUTODETECT_FULLSCREEN;
-				m_NewResUpscaled = true;
-				m_NewResX = g_FrameMan.GetMaxResX() / 2;
-				m_NewResY = g_FrameMan.GetMaxResY() / 2;
-				break;
-			default:
-				m_NewGraphicsDriver = newGfxDriver;
-				m_NewResUpscaled = newResUpscaled;
-				m_NewResX = newResX / newResMultiplier;
-				m_NewResY = newResY / newResMultiplier;
-				break;
-		}
-	}
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsVideoGUI::ApplyNewResolution() {
@@ -198,50 +143,117 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void SettingsVideoGUI::ApplyQuickChangeResolution(ResolutionQuickChangeType resolutionChangeType) {
+#ifndef __unix__
+		bool linuxCompatible = false;
+#else
+		bool linuxCompatible = true;
+#endif
+
+		switch (resolutionChangeType) {
+			case ResolutionQuickChangeType::Windowed:
+				m_NewGraphicsDriver = GFX_AUTODETECT_WINDOWED;
+				m_NewResUpscaled = false;
+				m_NewResX = g_FrameMan.GetMaxResX() / 2;
+				m_NewResY = g_FrameMan.GetMaxResY() / 2;
+				break;
+			case ResolutionQuickChangeType::Borderless:
+			case ResolutionQuickChangeType::Dedicated:
+				if (!linuxCompatible) {
+					m_NewGraphicsDriver = (resolutionChangeType == ResolutionQuickChangeType::Borderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL;
+				} else {
+					m_NewGraphicsDriver = GFX_AUTODETECT_FULLSCREEN;
+				}
+				m_NewResUpscaled = false;
+				m_NewResX = g_FrameMan.GetMaxResX();
+				m_NewResY = g_FrameMan.GetMaxResY();
+				break;
+			case ResolutionQuickChangeType::UpscaledBorderless:
+			case ResolutionQuickChangeType::UpscaledDedicated:
+				if (!linuxCompatible) {
+					m_NewGraphicsDriver = (resolutionChangeType == ResolutionQuickChangeType::UpscaledBorderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL;
+				} else {
+					m_NewGraphicsDriver = GFX_AUTODETECT_FULLSCREEN;
+				}
+				m_NewResUpscaled = true;
+				m_NewResX = g_FrameMan.GetMaxResX() / 2;
+				m_NewResY = g_FrameMan.GetMaxResY() / 2;
+				break;
+			default:
+				RTEAbort("Invalid resolution quick change type passed to SettingsVideoGUI::ApplyQuickChangeResolution!")
+				break;
+		}
+		ApplyNewResolution();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsVideoGUI::ApplyPresetResolution() {
+		int presetResListEntryID = m_PresetResolutionComboBox->GetSelectedIndex();
+		if (presetResListEntryID >= 0) {
+			m_NewResUpscaled = m_PresetResolutions.at(presetResListEntryID).Upscaled;
+
+			int newResMultiplier = m_NewResUpscaled ? 2 : 1;
+			m_NewResX = m_PresetResolutions.at(presetResListEntryID).Width / newResMultiplier;
+			m_NewResY = m_PresetResolutions.at(presetResListEntryID).Height / newResMultiplier;
+
+#ifndef __unix__
+			int newGfxDriver = GFX_AUTODETECT_WINDOWED;
+#else
+			int newGfxDriver = ((m_NewResX * newResMultiplier == g_FrameMan.GetMaxResX()) && (m_NewResY * newResMultiplier == g_FrameMan.GetMaxResY())) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
+#endif
+			m_NewGraphicsDriver = newGfxDriver;
+
+			ApplyNewResolution();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsVideoGUI::ApplyCustomResolution() {
+
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void SettingsVideoGUI::HandleInputEvents(GUIEvent &guiEvent) {
 		if (guiEvent.GetType() == GUIEvent::Command) {
-			if (guiEvent.GetControl() == m_WindowedButton) {
-				SetNewResolutionProperties(ResolutionChangeType::Windowed);
-				ApplyNewResolution();
-			} else if (guiEvent.GetControl() == m_BorderlessButton) {
-				SetNewResolutionProperties(ResolutionChangeType::Borderless);
-				ApplyNewResolution();
-			} else if (guiEvent.GetControl() == m_UpscaledBorderlessButton) {
-				SetNewResolutionProperties(ResolutionChangeType::UpscaledBorderless);
-				ApplyNewResolution();
-			} else if (guiEvent.GetControl() == m_DedicatedButton) {
-				SetNewResolutionProperties(ResolutionChangeType::Dedicated);
-				ApplyNewResolution();
-			} else if (guiEvent.GetControl() == m_UpscaledDedicatedButton) {
-				SetNewResolutionProperties(ResolutionChangeType::UpscaledDedicated);
-				ApplyNewResolution();
-			} else if (guiEvent.GetControl() == m_PresetResolutionApplyButton || guiEvent.GetControl() == m_CustomResolutionApplyButton) {
-				ApplyNewResolution();
-
-			} else if (guiEvent.GetControl() == m_ConfirmResolutionChangeButton) {
-				g_GUISound.ButtonPressSound()->Play();
-				// Must end any running activity otherwise have to deal with recreating all the GUI elements in GameActivity because it crashes when opening the BuyMenu. Easier to just end it.
-				g_ActivityMan.EndActivity();
-				g_FrameMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewGraphicsDriver);
-			} else if (guiEvent.GetControl() == m_CancelResolutionChangeButton) {
-				g_GUISound.ButtonPressSound()->Play();
-				m_ResolutionChangeDialogBox->SetVisible(false);
+			if (guiEvent.GetMsg() == GUIButton::Pushed) {
+				if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::Windowed)) {
+					ApplyQuickChangeResolution(ResolutionQuickChangeType::Windowed);
+				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::Borderless)) {
+					ApplyQuickChangeResolution(ResolutionQuickChangeType::Borderless);
+				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::UpscaledBorderless)) {
+					ApplyQuickChangeResolution(ResolutionQuickChangeType::UpscaledBorderless);
+				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::Dedicated)) {
+					ApplyQuickChangeResolution(ResolutionQuickChangeType::Dedicated);
+				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::UpscaledDedicated)) {
+					ApplyQuickChangeResolution(ResolutionQuickChangeType::UpscaledDedicated);
+				} else if (guiEvent.GetControl() == m_PresetResolutionApplyButton) {
+					ApplyPresetResolution();
+				} else if (guiEvent.GetControl() == m_CustomResolutionApplyButton) {
+					ApplyCustomResolution();
+				} else if (guiEvent.GetControl() == m_ConfirmResolutionChangeButton) {
+					g_GUISound.ButtonPressSound()->Play();
+					// Must end any running activity otherwise have to deal with recreating all the GUI elements in GameActivity because it crashes when opening the BuyMenu. Easier to just end it.
+					g_ActivityMan.EndActivity();
+					g_FrameMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewGraphicsDriver);
+				} else if (guiEvent.GetControl() == m_CancelResolutionChangeButton) {
+					g_GUISound.ButtonPressSound()->Play();
+					m_ResolutionChangeDialogBox->SetVisible(false);
+				}
 			}
-
 		} else if (guiEvent.GetType() == GUIEvent::Notification) {
-			if (guiEvent.GetControl() == m_PresetResolutionComboBox && guiEvent.GetMsg() == GUIComboBox::Closed) {
-				int resListEntryID = m_PresetResolutionComboBox->GetSelectedIndex();
-				if (resListEntryID >= 0) { SetNewResolutionPropertiesFromPreset(m_PresetResolutions.at(resListEntryID)); }
-			} else if (guiEvent.GetControl() == m_PresetResolutionRadioButton && guiEvent.GetMsg() == GUIRadioButton::Pushed) {
-				g_GUISound.ButtonPressSound()->Play();
-				m_PresetResolutionBox->SetVisible(true);
-				m_CustomResolutionBox->SetVisible(false);
-				int resListEntryID = m_PresetResolutionComboBox->GetSelectedIndex();
-				if (resListEntryID >= 0) { SetNewResolutionPropertiesFromPreset(m_PresetResolutions.at(resListEntryID)); }
-			} else if (guiEvent.GetControl() == m_CustomResolutionRadioButton && guiEvent.GetMsg() == GUIRadioButton::Pushed) {
-				g_GUISound.ButtonPressSound()->Play();
-				m_PresetResolutionBox->SetVisible(false);
-				m_CustomResolutionBox->SetVisible(true);
+			if (guiEvent.GetMsg() == GUIRadioButton::Pushed) {
+				if (guiEvent.GetControl() == m_PresetResolutionRadioButton) {
+					g_GUISound.ButtonPressSound()->Play();
+					m_PresetResolutionBox->SetVisible(true);
+					m_CustomResolutionBox->SetVisible(false);
+				} else if (guiEvent.GetControl() == m_CustomResolutionRadioButton) {
+					g_GUISound.ButtonPressSound()->Play();
+					m_PresetResolutionBox->SetVisible(false);
+					m_CustomResolutionBox->SetVisible(true);
+				}
 			}
 		}
 	}

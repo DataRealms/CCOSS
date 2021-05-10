@@ -46,13 +46,13 @@ namespace RTE {
 		/// <summary>
 		/// Enumeration for the different types of quick resolution change options.
 		/// </summary>
-		enum class ResolutionChangeType {
+		enum ResolutionQuickChangeType {
 			Windowed,
 			Borderless,
 			UpscaledBorderless,
 			Dedicated,
 			UpscaledDedicated,
-			ManuallyDefined
+			QuickChangeTypeCount
 		};
 
 		/// <summary>
@@ -96,31 +96,27 @@ namespace RTE {
 
 		std::vector<PresetResolutionRecord> m_PresetResolutions; //!< Contains PresetResolutionRecords for all the supported preset resolutions.
 
-		GUIButton *m_WindowedButton; //!<
-		GUIButton *m_BorderlessButton; //!<
-		GUIButton *m_UpscaledBorderlessButton; //!<
-		GUIButton *m_DedicatedButton; //!<
-		GUIButton *m_UpscaledDedicatedButton; //!<
 		int m_NewGraphicsDriver; //!< The new graphics driver to use when changing resolution.
 		int m_NewResX; //!< The new resolution width to use when changing resolution.
 		int m_NewResY; //!< The new resolution height to use when changing resolution.
 		bool m_NewResUpscaled; //!< Whether the new resolution should be upscaled when changing resolution.
 
-		GUIRadioButton *m_PresetResolutionRadioButton; //!<
-		GUIRadioButton *m_CustomResolutionRadioButton; //!<
-
-		GUICollectionBox *m_PresetResolutionBox; //!<
-		GUIComboBox *m_PresetResolutionComboBox; //!<
-		GUIButton *m_PresetResolutionApplyButton; //!<
-		GUILabel *m_PresetResolutionMessageLabel; //!<
-
-		GUICollectionBox *m_CustomResolutionBox; //!<
-		GUIButton *m_CustomResolutionApplyButton; //!<
-
-		GUICollectionBox *m_ResolutionChangeDialogBox; //!<
-		GUIButton *m_ConfirmResolutionChangeButton; //!<
-		GUIButton *m_CancelResolutionChangeButton; //!<
-
+		/// <summary>
+		/// GUI elements that compose the video settings menu screen.
+		/// </summary>
+		GUICollectionBox *m_VideoSettingsBox;
+		GUIRadioButton *m_PresetResolutionRadioButton;
+		GUIRadioButton *m_CustomResolutionRadioButton;
+		GUICollectionBox *m_PresetResolutionBox;
+		GUIComboBox *m_PresetResolutionComboBox;
+		GUIButton *m_PresetResolutionApplyButton;
+		GUILabel *m_PresetResolutionMessageLabel;
+		GUICollectionBox *m_CustomResolutionBox;
+		GUIButton *m_CustomResolutionApplyButton;
+		GUICollectionBox *m_ResolutionChangeDialogBox;
+		GUIButton *m_ConfirmResolutionChangeButton;
+		GUIButton *m_CancelResolutionChangeButton;
+		std::array<GUIButton *, ResolutionQuickChangeType::QuickChangeTypeCount> m_ResolutionQuickToggleButtons;
 
 #pragma region Video Settings Handling
 		/// <summary>
@@ -139,23 +135,23 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="resolutionChangeType"></param>
-		/// <param name="newResX"></param>
-		/// <param name="newResY"></param>
-		/// <param name="newResMultiplier"></param>
-		/// <param name="newGfxDriver"></param>
-		void SetNewResolutionProperties(ResolutionChangeType resolutionChangeType, int newResX = 960, int newResY = 540, bool newResUpscaled = false, int newGfxDriver = 2);
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="presetResolutionRecord"></param>
-		void SetNewResolutionPropertiesFromPreset(PresetResolutionRecord presetResolutionRecord) { SetNewResolutionProperties(ResolutionChangeType::ManuallyDefined, presetResolutionRecord.Width, presetResolutionRecord.Height, presetResolutionRecord.Upscaled); }
-
-		/// <summary>
-		/// 
-		/// </summary>
 		void ApplyNewResolution();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="resolutionChangeType"></param>
+		void ApplyQuickChangeResolution(ResolutionQuickChangeType resolutionChangeType);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void ApplyPresetResolution();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void ApplyCustomResolution();
 #pragma endregion
 
 		// Disallow the use of some implicit methods.

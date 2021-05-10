@@ -93,6 +93,12 @@ namespace RTE {
 		int GetGraphicsDriver() const { return m_GfxDriver; }
 
 		/// <summary>
+		/// Gets whether the dedicated fullscreen graphics driver is currently being used or not.
+		/// </summary>
+		/// <returns>Whether the dedicated fullscreen graphics driver is currently being used or not.</returns>
+		bool IsUsingDedicatedGraphicsDriver() const { return m_GfxDriver == GFX_AUTODETECT_FULLSCREEN || m_GfxDriver == GFX_DIRECTX_ACCEL; }
+
+		/// <summary>
 		/// Gets the maximum horizontal resolution the game window can be (desktop width).
 		/// </summary>
 		/// <returns>The maximum horizontal resolution the game window can be (desktop width).</returns>

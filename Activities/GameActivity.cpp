@@ -292,7 +292,7 @@ void GameActivity::Destroy(bool notInherited)
     for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         delete m_pPieMenu[player];
-        delete m_InventoryMenuGUI[player];
+        if (m_InventoryMenuGUI[player]) { m_InventoryMenuGUI[player]->Reset(); }
         delete m_pBuyGUI[player];
         delete m_pEditorGUI[player];
         delete m_pBannerRed[player];

@@ -13,6 +13,8 @@
 
 #include "GUI.h"
 #include "GUIButton.h"
+#include "AllegroBitmap.h"
+#include "GUILabel.h"
 
 using namespace RTE;
 
@@ -27,11 +29,12 @@ GUIButton::GUIButton(GUIManager *Manager, GUIControlManager *ControlManager)
   GUIControl()
 {
     m_ControlID = "BUTTON";
-    m_DrawBitmap = 0;
+    m_DrawBitmap = nullptr;
     m_ControlManager = ControlManager;
     m_Pushed = false;
     m_Over = false;
-    m_Text = "";
+    m_Text = nullptr;
+    m_Icon = nullptr;
 }
 
 
@@ -66,6 +69,17 @@ void GUIButton::Create(const std::string Name, int X, int Y, int Width, int Heig
     // Make sure the button isn't too small
     m_Width = MAX(m_Width, m_MinWidth);
     m_Height = MAX(m_Height, m_MinHeight);
+
+    if (!m_Text) {
+        m_Text = std::make_unique<GUILabel>(m_Manager, m_ControlManager);
+        m_Text->SetHAlignment(GUIFont::Centre);
+        m_Text->SetVAlignment(GUIFont::Top);
+        m_Text->SetFont(m_Font);
+        m_Text->SetVisible(false);
+        m_Text->SetEnabled(false);
+        GUIPanel::AddChild(m_Text.get());
+    }
+    if (!m_Icon) { m_Icon = std::make_unique<AllegroBitmap>(); }
 }
 
 
@@ -93,8 +107,27 @@ void GUIButton::Create(GUIProperties *Props)
     m_Width = MAX(m_Width, m_MinWidth);
     m_Height = MAX(m_Height, m_MinHeight);
 
+    if (!m_Text) {
+        m_Text = std::make_unique<GUILabel>(m_Manager, m_ControlManager);
+        m_Text->SetHAlignment(GUIFont::Centre);
+        m_Text->SetVAlignment(GUIFont::Top);
+        m_Text->SetFont(m_Font);
+        m_Text->SetVisible(false);
+        m_Text->SetEnabled(false);
+        GUIPanel::AddChild(m_Text.get());
+    }
+    if (!m_Icon) { m_Icon = std::make_unique<AllegroBitmap>(); }
+
     // Load the values
-    Props->GetValue("Text", &m_Text);
+    std::string text;
+    Props->GetValue("Text", &text);
+    m_Text->SetText(text);
+    bool overflowScroll = false;
+    Props->GetValue("HorizontalOverflowScroll", &overflowScroll);
+    m_Text->SetHorizontalOverflowScroll(overflowScroll);
+    overflowScroll = false;
+    Props->GetValue("VerticalOverflowScroll", &overflowScroll);
+    m_Text->SetVerticalOverflowScroll(overflowScroll);
 }
 
 
@@ -109,7 +142,7 @@ void GUIButton::Destroy(void)
     if (m_DrawBitmap) {
         m_DrawBitmap->Destroy();
         delete m_DrawBitmap;
-        m_DrawBitmap = 0;
+        m_DrawBitmap = nullptr;
     }
 }
 
@@ -155,6 +188,8 @@ void GUIButton::BuildBitmap(void)
     
     m_FontColor = m_Skin->ConvertColor(m_FontColor, m_DrawBitmap->GetColorDepth());
     
+    //TODO consider getting rid of this line. Because of it GuiButton::SetFont does nothing, which is weird, but maybe there's a good reason for it. Test and investigate.
+    // Also, with the change of m_Text from a std::string to a GUILabel this seems maybe even sillier. SetFont should probably set the label's font
     m_Font = m_Skin->GetFont(Filename);
     if (m_Font)
         m_Font->CacheColor(m_FontColor);
@@ -164,16 +199,67 @@ void GUIButton::BuildBitmap(void)
     m_Skin->BuildStandardRect(m_DrawBitmap, "Button_Over", 0, m_Height, m_Width, m_Height);
     m_Skin->BuildStandardRect(m_DrawBitmap, "Button_Down", 0, m_Height*2, m_Width, m_Height);
 
-    // Draw the text
-    //int y = m_Height/2-m_Font->CalculateHeight(m_Text)+2;
-    int y = (m_Height / 2) - (m_Font->GetFontHeight() / 2) - 1;
+    const GUIRect buttonBorders = {1, 1, 2, 2};
+    const int buttonContentPadding = 1;
+    const int contentMaxWidth = m_Width - buttonBorders.left - buttonBorders.right - (buttonContentPadding * 2) - 1;
+    const int contentMaxHeight = m_Height - buttonBorders.top - buttonBorders.bottom - (buttonContentPadding * 2) - 1;
 
-    m_Font->SetColor(m_FontColor);
-    m_Font->SetKerning(m_FontKerning);
+    int centerY = m_Height / 2;
+    bool hasIcon = m_Icon->HasBitmap();
+    bool hasText = !m_Text->GetText().empty();
 
-    m_Font->DrawAligned(m_DrawBitmap, m_Width/2, y, m_Text, GUIFont::Centre, GUIFont::Top, m_Width, m_FontShadow);
-    m_Font->DrawAligned(m_DrawBitmap, m_Width/2, m_Height+y, m_Text, GUIFont::Centre, GUIFont::Top, m_Width, m_FontShadow);
-    m_Font->DrawAligned(m_DrawBitmap, m_Width/2+1, m_Height*2+y+1, m_Text, GUIFont::Centre, GUIFont::Top, m_Width, m_FontShadow);
+    int iconYPos = 0;
+    float iconStretchRatio = 1;
+    int textYPos = 0;
+
+    if (hasIcon && !hasText) {
+        iconYPos = centerY - (m_Icon->GetHeight() / 2);
+    } else if (!hasIcon && hasText) {
+        //int y = m_Height/2-m_Font->CalculateHeight(m_Text)+2; //Note this commented line was here from CCOSS, it was here so that the idea of using the full height of the text stays around.
+        textYPos = centerY - (m_Font->GetFontHeight() / 2) - 1;
+    } else if (hasIcon && hasText) {
+        int iconAndTextHeight = m_Text->GetHorizontalOverflowScroll() ? m_Font->GetFontHeight() : m_Font->CalculateHeight(m_Text->GetText(), contentMaxWidth);
+
+        if (m_Icon->GetWidth() > contentMaxWidth || (m_Icon->GetHeight() + iconAndTextHeight) > contentMaxHeight) {
+            iconStretchRatio = std::min(static_cast<float>(contentMaxWidth) / static_cast<float>(m_Icon->GetWidth()), static_cast<float>(contentMaxHeight - iconAndTextHeight) / static_cast<float>(m_Icon->GetHeight()));
+            iconAndTextHeight += static_cast<int>(static_cast<float>(m_Icon->GetHeight()) * iconStretchRatio);
+        } else {
+            iconAndTextHeight += m_Icon->GetHeight();
+        }
+
+        iconYPos = centerY - (iconAndTextHeight / 2);
+        textYPos = iconYPos + static_cast<int>(static_cast<float>(m_Icon->GetHeight()) * iconStretchRatio);
+    }
+
+    if (hasIcon) {
+        int iconXPos = (m_Width / 2) - static_cast<int>(static_cast<float>(m_Icon->GetWidth()) * iconStretchRatio / 2.0F);
+        if (iconStretchRatio == 1) {
+            m_Icon->DrawTrans(m_DrawBitmap, iconXPos, iconYPos, nullptr);
+            m_Icon->DrawTrans(m_DrawBitmap, iconXPos, m_Height + iconYPos, nullptr);
+            m_Icon->DrawTrans(m_DrawBitmap, iconXPos + 1, (m_Height * 2) + iconYPos + 1, nullptr);
+        } else {
+            int scaledWidth = static_cast<int>(static_cast<float>(m_Icon->GetWidth()) * iconStretchRatio);
+            int scaledHeight = static_cast<int>(static_cast<float>(m_Icon->GetHeight()) * iconStretchRatio);
+            m_Icon->DrawTransScaled(m_DrawBitmap, iconXPos, iconYPos, scaledWidth, scaledHeight);
+            m_Icon->DrawTransScaled(m_DrawBitmap, iconXPos, m_Height + iconYPos, scaledWidth, scaledHeight);
+            m_Icon->DrawTransScaled(m_DrawBitmap, iconXPos + 1, (m_Height * 2) + iconYPos + 1, scaledWidth, scaledHeight);
+        }
+    }
+
+    if (hasText) {
+        m_Font->SetColor(m_FontColor);
+        m_Font->SetKerning(m_FontKerning);
+        m_Text->SetFont(m_Font);
+        m_Text->SetSize(contentMaxWidth, contentMaxHeight);
+
+        int textXPos = buttonBorders.left + buttonContentPadding;
+        m_Text->SetPositionAbs(textXPos, textYPos);
+        m_Text->Draw(m_DrawBitmap, false);
+        m_Text->SetPositionAbs(textXPos, m_Height + textYPos);
+        m_Text->Draw(m_DrawBitmap, false);
+        m_Text->SetPositionAbs(textXPos + 1, (m_Height * 2) + textYPos + 1);
+        m_Text->Draw(m_DrawBitmap, false);
+    }
 }
 
 
@@ -192,6 +278,8 @@ void GUIButton::Draw(GUIScreen *Screen)
         y = m_Height;
 
     SetRect(&Rect, 0, y, m_Width, y+m_Height);
+
+    if (m_Text->OverflowScrollIsActivated()) { BuildBitmap(); }
 
     m_DrawBitmap->DrawTrans(Screen->GetBitmap(), m_X, m_Y, &Rect);
 
@@ -249,6 +337,7 @@ void GUIButton::OnMouseUp(int X, int Y, int Buttons, int Modifier)
 void GUIButton::OnMouseEnter(int X, int Y, int Buttons, int Modifier)
 {
     m_Over = true;
+    m_Text->ActivateDeactivateOverflowScroll(true);
 
     AddEvent(GUIEvent::Notification, Focused, 0);
 }
@@ -259,9 +348,23 @@ void GUIButton::OnMouseEnter(int X, int Y, int Buttons, int Modifier)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Called when the mouse leaves the panel.
 
-void GUIButton::OnMouseLeave(int X, int Y, int Buttons, int Modifier)
-{
+void GUIButton::OnMouseLeave(int X, int Y, int Buttons, int Modifier) {
     m_Over = false;
+    m_Text->ActivateDeactivateOverflowScroll(false);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void GUIButton::OnGainFocus() {
+    GUIPanel::OnGainFocus();
+    m_Text->ActivateDeactivateOverflowScroll(true);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void GUIButton::OnLoseFocus() {
+    GUIPanel::OnLoseFocus();
+    m_Text->ActivateDeactivateOverflowScroll(false);
 }
 
 
@@ -358,20 +461,9 @@ void GUIButton::Resize(int Width, int Height)
 
 void GUIButton::StoreProperties(void)
 {
-    m_Properties.AddVariable("Text", m_Text);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetText
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the text.
-
-void GUIButton::SetText(const string Text)
-{
-    m_Text = Text;
-
-    BuildBitmap();
+    m_Properties.AddVariable("Text", m_Text->GetText());
+    m_Properties.AddVariable("HorizontalOverflowScroll", m_Text->GetHorizontalOverflowScroll());
+    m_Properties.AddVariable("VerticalOverflowScroll", m_Text->GetVerticalOverflowScroll());
 }
 
 
@@ -380,11 +472,40 @@ void GUIButton::SetText(const string Text)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the text.
 
-string GUIButton::GetText(void)
-{
-    return m_Text;
+void GUIButton::SetText(const std::string Text) {
+    m_Text->SetText(Text);
+    BuildBitmap();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+string GUIButton::GetText(void)
+{
+    return m_Text->GetText();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void GUIButton::SetHorizontalOverflowScroll(bool newOverflowScroll) {
+    m_Text->SetHorizontalOverflowScroll(newOverflowScroll);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void GUIButton::SetVerticalOverflowScroll(bool newOverflowScroll) {
+    m_Text->SetVerticalOverflowScroll(newOverflowScroll);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void GUIButton::SetIcon(BITMAP *newIcon) {
+    if (m_Icon && m_Icon->GetBitmap() != newIcon) {
+        m_Icon->SetBitmap(newIcon);
+        BuildBitmap();
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ApplyProperties
@@ -395,7 +516,15 @@ void GUIButton::ApplyProperties(GUIProperties *Props)
 {
     GUIControl::ApplyProperties(Props);
 
-    m_Properties.GetValue("Text", &m_Text);
+    std::string text;
+    m_Properties.GetValue("Text", &text);
+    m_Text->SetText(text);
+    bool overflowScroll = false;
+    m_Properties.GetValue("HorizontalOverflowScroll", &overflowScroll);
+    m_Text->SetHorizontalOverflowScroll(overflowScroll);
+    overflowScroll = false;
+    m_Properties.GetValue("VerticalOverflowScroll", &overflowScroll);
+    m_Text->SetVerticalOverflowScroll(overflowScroll);
 
     BuildBitmap();
 }

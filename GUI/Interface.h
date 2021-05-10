@@ -48,6 +48,18 @@ namespace RTE {
 		virtual bool HasBitmap() = 0;
 
 		/// <summary>
+		/// Gets the underlying BITMAP of this GUIBitmap.
+		/// </summary>
+		/// <returns>The underlying BITMAP of this GUIBitmap.</returns>
+		virtual BITMAP *GetBitmap() = 0;
+
+		/// <summary>
+		/// Sets the underlying Bitmap for this GUIBitmap. Ownership is NOT transferred.
+		/// </summary>
+		/// <param name="newBitmap">A pointer to the new Bitmap for this AllegroBitmap.</param>
+		virtual void SetBitmap(BITMAP *newBitmap) = 0;
+
+		/// <summary>
 		/// Gets the Width of the bitmap.
 		/// </summary>
 		virtual int GetWidth() { return 0; }

@@ -14,6 +14,7 @@
 namespace RTE
 {
 
+    class GUILabel;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Class:           GUIButton
@@ -140,6 +141,23 @@ public:
 
     void OnMouseLeave(int X, int Y, int Buttons, int Modifier) override;
 
+ //////////////////////////////////////////////////////////////////////////////////////////
+// Method:  OnGainFocus
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Called when the panel gains focus.
+// Arguments:       None.
+
+    void OnGainFocus() override;
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:  OnLoseFocus
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Called when the panel looses focus.
+// Arguments:       None.
+
+    void OnLoseFocus() override;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  OnKeyDown
@@ -231,6 +249,29 @@ public:
 
     std::string GetText();
 
+    /// <summary>
+    /// Sets whether or not this GUIButton's text should scroll horizontally (right) when it overflows the button.
+    /// </summary>
+    /// <param name="newOverflowScroll">Whether or not this GUIButton's text should scroll horizontally when it overflows.</param>
+    void SetHorizontalOverflowScroll(bool newOverflowScroll);
+
+    /// <summary>
+    /// Sets whether or not this GUIButton's text should scroll vertically (down) when it overflows the button.
+    /// </summary>
+    /// <param name="newOverflowScroll">Whether or not this GUIButton's text should scroll vertically when it overflows.</param>
+    void SetVerticalOverflowScroll(bool newOverflowScroll);
+
+    /// <summary>
+    /// Gets whether or not this GUIButton has an icon with a Bitmap.
+    /// </summary>
+    bool HasIcon() const { return m_Icon->HasBitmap(); }
+
+    /// <summary>
+    /// Sets the icon for this GUIButton. Ownership is NOT transferred.
+    /// </summary>
+    /// <param name="newIcon">A pointer to the new icon BITMAP for this GUIButton.</param>
+    void SetIcon(BITMAP *newIcon);
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ApplyProperties
@@ -258,11 +299,12 @@ private:
 
 // Members
 
-    GUIBitmap        *m_DrawBitmap;
+    GUIBitmap *m_DrawBitmap;
 
     bool            m_Pushed;
     bool            m_Over;
-    std::string        m_Text;
+    std::unique_ptr<GUILabel> m_Text;
+    std::unique_ptr<GUIBitmap> m_Icon; //!< A GUIBitmap that should be drawn on the button, as well as text.
 
 };
 

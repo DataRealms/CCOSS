@@ -23,7 +23,7 @@ void PieMenuGUI::Clear() {
 	m_HoverTimer.Reset();
 
 	m_Controller = nullptr;
-	m_AffectedObject = nullptr;
+	m_Actor = nullptr;
 
 	m_PieEnabled = PieEnabled::DISABLED;
 	m_CenterPos.Reset();
@@ -413,8 +413,8 @@ void PieMenuGUI::UpdateEnablingAndDisablingAnimations() {
 		if (m_EnablingTimer.IsPastRealMS(s_EnablingDelay)) {
 			m_PieEnabled = DISABLED;
 			m_InnerRadius = 0;
-			if (m_AffectedObject && static_cast<Actor *>(m_AffectedObject)) {
-				static_cast<Actor *>(m_AffectedObject)->FlashWhite();
+			if (m_Actor) {
+				m_Actor->FlashWhite();
 			}
 		}
 	}

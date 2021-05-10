@@ -33,8 +33,9 @@ namespace RTE {
 		m_CustomResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioCustomResolution"));
 
 		m_ResolutionChangeDialogBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ResolutionChangeDialog"));
-		m_ResolutionChangeDialogBox->CenterInParent(true, true);
+		m_ResolutionChangeDialogBox->SetPositionAbs(m_VideoSettingsBox->GetXPos() + ((m_VideoSettingsBox->GetWidth() - m_ResolutionChangeDialogBox->GetWidth()) / 2), m_VideoSettingsBox->GetYPos() + ((m_VideoSettingsBox->GetHeight() - m_ResolutionChangeDialogBox->GetHeight()) / 2));
 		m_ResolutionChangeDialogBox->SetVisible(false);
+
 		m_ResolutionChangeConfirmButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfirmResolutionChange"));
 		m_ResolutionChangeCancelButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonCancelResolutionChange"));
 
@@ -114,7 +115,7 @@ namespace RTE {
 				return false;
 			}
 			// Disallow resolution width that isn't in multiples of 4 otherwise Allegro fails to initialize graphics, but only in windowed/borderless mode
-			if ((g_FrameMan.GetGraphicsDriver() != GFX_AUTODETECT_FULLSCREEN && g_FrameMan.GetGraphicsDriver() != GFX_DIRECTX_ACCEL) && width % 4 != 0) {
+			if (!g_FrameMan.IsUsingDedicatedGraphicsDriver() && (width % 4 != 0)) {
 				return false;
 			}
 			return true;
@@ -127,7 +128,7 @@ namespace RTE {
 	void SettingsVideoGUI::PopulateResolutionsComboBox() {
 		m_PresetResolutions.clear();
 
-		// Get a list of modes from the fullscreen driver even though we're not using it. This is so we don't need to populate the list manually and has all the reasonable resolutions (along with some stupid ones but whatever)
+		// Get a list of modes from the fullscreen driver even though we're not necessarily using it. This is so we don't need to populate the list manually and has all the reasonable resolutions.
 #ifdef _WIN32
 		GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_DIRECTX_ACCEL);
 #elif __unix__
@@ -177,10 +178,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsVideoGUI::ApplyNewResolution() {
-		g_GUISound.ButtonPressSound()->Play();
-
 		if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing)) {
 			m_ResolutionChangeDialogBox->SetVisible(true);
+			m_VideoSettingsBox->SetEnabled(false);
+			m_GUIControlManager->GetControl("CollectionBoxSettingsBase")->SetEnabled(false);
 		} else {
 			g_FrameMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewGraphicsDriver);
 		}
@@ -189,10 +190,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsVideoGUI::ApplyQuickChangeResolution(ResolutionQuickChangeType resolutionChangeType) {
-#ifndef __unix__
 		bool linuxCompatible = false;
-#else
-		bool linuxCompatible = true;
+
+#ifdef __unix__
+		linuxCompatible = true;
+		m_NewGraphicsDriver = GFX_AUTODETECT_FULLSCREEN;
 #endif
 
 		switch (resolutionChangeType) {
@@ -204,22 +206,14 @@ namespace RTE {
 				break;
 			case ResolutionQuickChangeType::Borderless:
 			case ResolutionQuickChangeType::Dedicated:
-				if (!linuxCompatible) {
-					m_NewGraphicsDriver = (resolutionChangeType == ResolutionQuickChangeType::Borderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL;
-				} else {
-					m_NewGraphicsDriver = GFX_AUTODETECT_FULLSCREEN;
-				}
+				if (!linuxCompatible) { m_NewGraphicsDriver = (resolutionChangeType == ResolutionQuickChangeType::Borderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL; }
 				m_NewResUpscaled = false;
 				m_NewResX = g_FrameMan.GetMaxResX();
 				m_NewResY = g_FrameMan.GetMaxResY();
 				break;
 			case ResolutionQuickChangeType::UpscaledBorderless:
 			case ResolutionQuickChangeType::UpscaledDedicated:
-				if (!linuxCompatible) {
-					m_NewGraphicsDriver = (resolutionChangeType == ResolutionQuickChangeType::UpscaledBorderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL;
-				} else {
-					m_NewGraphicsDriver = GFX_AUTODETECT_FULLSCREEN;
-				}
+				if (!linuxCompatible) { m_NewGraphicsDriver = (resolutionChangeType == ResolutionQuickChangeType::UpscaledBorderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL; }
 				m_NewResUpscaled = true;
 				m_NewResX = g_FrameMan.GetMaxResX() / 2;
 				m_NewResY = g_FrameMan.GetMaxResY() / 2;
@@ -228,6 +222,7 @@ namespace RTE {
 				RTEAbort("Invalid resolution quick change type passed to SettingsVideoGUI::ApplyQuickChangeResolution!")
 				break;
 		}
+		g_GUISound.ButtonPressSound()->Play();
 		ApplyNewResolution();
 	}
 
@@ -241,14 +236,13 @@ namespace RTE {
 			int newResMultiplier = m_NewResUpscaled ? 2 : 1;
 			m_NewResX = m_PresetResolutions.at(presetResListEntryID).Width / newResMultiplier;
 			m_NewResY = m_PresetResolutions.at(presetResListEntryID).Height / newResMultiplier;
+			m_NewGraphicsDriver = GFX_AUTODETECT_WINDOWED;
 
-#ifndef __unix__
-			int newGfxDriver = GFX_AUTODETECT_WINDOWED;
-#else
-			int newGfxDriver = ((m_NewResX * newResMultiplier == g_FrameMan.GetMaxResX()) && (m_NewResY * newResMultiplier == g_FrameMan.GetMaxResY())) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
+#ifdef __unix__
+			m_NewGraphicsDriver = ((m_NewResX * newResMultiplier == g_FrameMan.GetMaxResX()) && (m_NewResY * newResMultiplier == g_FrameMan.GetMaxResY())) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
 #endif
-			m_NewGraphicsDriver = newGfxDriver;
 
+			g_GUISound.ButtonPressSound()->Play();
 			ApplyNewResolution();
 		}
 	}
@@ -256,7 +250,39 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsVideoGUI::ApplyCustomResolution() {
+		m_CustomResolutionMessageLabel->SetVisible(false);
 
+		m_NewResUpscaled = m_CustomResolutionUpscaledCheckbox->GetCheck();
+		int newMultiplier = m_NewResUpscaled ? 2 : 1;
+		m_NewResX = std::stoi(m_CustomResolutionWidthTextBox->GetText()) / newMultiplier;
+		m_NewResY = std::stoi(m_CustomResolutionHeightTextBox->GetText()) / newMultiplier;
+
+#ifndef __unix__
+		m_NewGraphicsDriver = m_CustomResolutionBorderlessRadioButton->GetCheck() ? GFX_AUTODETECT_WINDOWED : GFX_DIRECTX_ACCEL;
+#else
+		m_NewGraphicsDriver = m_CustomResolutionBorderlessRadioButton->GetCheck() ? GFX_AUTODETECT_WINDOWED : GFX_AUTODETECT_FULLSCREEN;
+#endif
+
+		bool invalidResolution = false;
+
+		if (m_NewGraphicsDriver == GFX_AUTODETECT_WINDOWED && m_NewResX % 4 != 0) {
+			m_CustomResolutionMessageLabel->SetText("Resolution width not divisible by 4 is not supported by the borderless driver.\nPlease use the dedicated driver instead.");
+			invalidResolution = true;
+		} else if (m_NewResY > m_NewResX) {
+			m_CustomResolutionMessageLabel->SetText("Resolution that is taller than wide is not supported.");
+			invalidResolution = true;
+		} else if (m_NewResX * newMultiplier < 640 || m_NewResY * newMultiplier < 450) {
+			m_CustomResolutionMessageLabel->SetText("Resolution width or height lower than the minimum (640x450) is not supported.");
+			invalidResolution = true;
+		}
+		g_GUISound.ButtonPressSound()->Play();
+
+		if (invalidResolution) {
+			m_CustomResolutionMessageLabel->SetVisible(true);
+			return;
+		} else {
+			ApplyNewResolution();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -282,23 +308,33 @@ namespace RTE {
 					g_GUISound.ButtonPressSound()->Play();
 					// Must end any running activity otherwise have to deal with recreating all the GUI elements in GameActivity because it crashes when opening the BuyMenu. Easier to just end it.
 					g_ActivityMan.EndActivity();
+					m_ResolutionChangeDialogBox->SetVisible(false);
+					m_VideoSettingsBox->SetEnabled(true);
+					m_GUIControlManager->GetControl("CollectionBoxSettingsBase")->SetEnabled(true);
 					g_FrameMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewGraphicsDriver);
 				} else if (guiEvent.GetControl() == m_ResolutionChangeCancelButton) {
 					g_GUISound.ButtonPressSound()->Play();
 					m_ResolutionChangeDialogBox->SetVisible(false);
+					m_VideoSettingsBox->SetEnabled(true);
+					m_GUIControlManager->GetControl("CollectionBoxSettingsBase")->SetEnabled(true);
 				}
 			}
-		} else if (guiEvent.GetType() == GUIEvent::Notification) {
-			if (guiEvent.GetMsg() == GUIRadioButton::Pushed) {
-				if (guiEvent.GetControl() == m_PresetResolutionRadioButton) {
-					g_GUISound.ButtonPressSound()->Play();
-					m_PresetResolutionBox->SetVisible(true);
-					m_CustomResolutionBox->SetVisible(false);
-				} else if (guiEvent.GetControl() == m_CustomResolutionRadioButton) {
-					g_GUISound.ButtonPressSound()->Play();
-					m_PresetResolutionBox->SetVisible(false);
-					m_CustomResolutionBox->SetVisible(true);
-				}
+		} else if (guiEvent.GetType() == GUIEvent::Notification && guiEvent.GetMsg() == GUIRadioButton::Pushed) {
+			if (guiEvent.GetControl() == m_PresetResolutionRadioButton) {
+				g_GUISound.ButtonPressSound()->Play();
+				m_PresetResolutionBox->SetVisible(true);
+				m_CustomResolutionBox->SetVisible(false);
+			} else if (guiEvent.GetControl() == m_CustomResolutionRadioButton) {
+				g_GUISound.ButtonPressSound()->Play();
+				m_PresetResolutionBox->SetVisible(false);
+				m_CustomResolutionBox->SetVisible(true);
+			} else if (guiEvent.GetControl() == m_CustomResolutionBorderlessRadioButton) {
+				g_GUISound.ButtonPressSound()->Play();
+				m_CustomResolutionMessageLabel->SetVisible(false);
+			} else if (guiEvent.GetControl() == m_CustomResolutionDedicatedRadioButton) {
+				g_GUISound.ButtonPressSound()->Play();
+				m_CustomResolutionMessageLabel->SetText("WARNING: ATTEMPTING TO SET A RESOLUTION NOT SUPPORTED BY YOUR GRAPHICS CARD OR MONITOR WITH THE DEDICATED DRIVER MAY LEAD TO THE GAME OR SYSTEM HARD-LOCKING!");
+				m_CustomResolutionMessageLabel->SetVisible(true);
 			}
 		}
 	}

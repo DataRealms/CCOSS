@@ -152,23 +152,23 @@ namespace RTE {
 		void PopulateResolutionsComboBox();
 
 		/// <summary>
-		/// 
+		/// Attempts to change the resolution using the new values set by this SettingsVideoGUI, or if an Activity is running, first prompts to end it.
 		/// </summary>
 		void ApplyNewResolution();
 
 		/// <summary>
-		/// 
+		/// Attempts to change the resolution using the new values set by the appropriate quick change type.
 		/// </summary>
-		/// <param name="resolutionChangeType"></param>
+		/// <param name="resolutionChangeType">The type quick resolution change to apply. See ResolutionQuickChangeType enumeration.</param>
 		void ApplyQuickChangeResolution(ResolutionQuickChangeType resolutionChangeType);
 
 		/// <summary>
-		/// 
+		/// Attempts to change the resolution using the new values set from the selected preset resolution.
 		/// </summary>
 		void ApplyPresetResolution();
 
 		/// <summary>
-		/// 
+		/// Attempts to change the resolution using the new values set from the custom resolution controls.
 		/// </summary>
 		void ApplyCustomResolution();
 #pragma endregion

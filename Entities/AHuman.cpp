@@ -774,6 +774,9 @@ bool AHuman::AddPieMenuSlices(PieMenuGUI *pPieMenu)
     PieSlice huntAISlice("Brain Hunt AI Mode", PieSlice::PieSliceIndex::PSI_BRAINHUNT, PieSlice::SliceDirection::RIGHT);
 	pPieMenu->AddSlice(huntAISlice);
 
+    PieSlice fullInventorySlice("Show Full Inventory", PieSlice::PieSliceIndex::PSI_FULLINVENTORY, PieSlice::SliceDirection::RIGHT, GetEquippedItem() || GetEquippedBGItem() || !m_Inventory.empty());
+    pPieMenu->AddSlice(fullInventorySlice);
+
     // Add any custom added slices after we've added the hardcoded ones, so they are lower priorty and don't hog the cardinal axes
     Actor::AddPieMenuSlices(pPieMenu);
 

@@ -91,21 +91,23 @@ namespace RTE {
 		GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_XWINDOWS_FULLSCREEN);
 #endif
 
-		// Index of found useful resolution (32bit)
-		int foundIndex = 0;
-		int currentResIndex = -1;
+		if (!resList) {
+			m_PresetResolutionComboBox->SetVisible(false);
+			m_PresetResolutionApplyButton->SetVisible(false);
+
+			m_PresetResolutionMessageLabel->SetText("Failed to get the preset resolution list from the graphics driver!\nPlease use the custom resolution controls instead.");
+			m_PresetResolutionMessageLabel->SetVisible(true);
+			m_PresetResolutionMessageLabel->CenterInParent(true, true);
+			return;
+		}
 
 		std::set<PresetResolutionRecord> resRecords;
-
-		for (int i = 0; resList && i < resList->num_modes; ++i) {
+		for (int i = 0; i < resList->num_modes; ++i) {
 			// Only list 32bpp modes
 			if (resList->mode[i].bpp == 32) {
 				int width = resList->mode[i].width;
 				int height = resList->mode[i].height;
-
-				if (IsSupportedResolution(width, height)) {
-					resRecords.emplace(width, height, false);
-				}
+				if (IsSupportedResolution(width, height)) { resRecords.emplace(width, height, false); }
 			}
 		}
 		// Manually add qHD (960x540) to the list because it's rarely present in drivers
@@ -114,16 +116,19 @@ namespace RTE {
 		std::set<PresetResolutionRecord> upscaledResRecords;
 		for (const PresetResolutionRecord &resRecord : resRecords) {
 			PresetResolutionRecord upscaledResRecord(resRecord.Width * 2, resRecord.Height * 2, true);
-			if (upscaledResRecord.Width <= g_FrameMan.GetMaxResX() && upscaledResRecord.Height <= g_FrameMan.GetMaxResY()) { upscaledResRecords.emplace(upscaledResRecord); }
+			if (IsSupportedResolution(upscaledResRecord.Width, upscaledResRecord.Height)) { upscaledResRecords.emplace(upscaledResRecord); }
 		}
 		resRecords.merge(upscaledResRecords);
 		m_PresetResolutions.assign(resRecords.begin(), resRecords.end());
 
-		for (const PresetResolutionRecord &resRecord : m_PresetResolutions) {
+		for (int i = 0; i < m_PresetResolutions.size(); ++i) {
+			const PresetResolutionRecord &resRecord = m_PresetResolutions.at(i);
 			m_PresetResolutionComboBox->AddItem(resRecord.MakeResolutionString());
+			if ((resRecord.Width == g_FrameMan.GetResX() * g_FrameMan.GetResMultiplier()) && (resRecord.Height == g_FrameMan.GetResY() * g_FrameMan.GetResMultiplier()) && (resRecord.Upscaled == g_FrameMan.GetResMultiplier() > 1)) { m_PresetResolutionComboBox->SetSelectedIndex(i); }
 		}
+		destroy_gfx_mode_list(resList);
+	}
 
-		if (resList) { destroy_gfx_mode_list(resList); }
 
 
 		}

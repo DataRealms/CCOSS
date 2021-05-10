@@ -413,6 +413,17 @@ namespace RTE {
 		if (newMultiplier <= 0 || newMultiplier > 4 || newMultiplier == m_ResMultiplier) {
 			return;
 		}
+
+#ifdef _WIN32
+		// This can be made to work but it doesn't really make any sense because regardless of the resolution or the multiplier it's still full screen.
+		// It just switches back and forth between a crisp upscaled image and a blurry badly interpolated by the monitor image (if the un-upscaled resolution is even supported).
+		// Windows only for now because Linux switches to dedicated fullscreen because lack of borderless and this won't allow it to switch back to windowed.
+		if (IsUsingDedicatedGraphicsDriver()) {
+			ShowMessageBox("Quick resolution multiplier change while running in dedicated fullscreen mode is not supported!\nNo change will be made!");
+			return;
+		}
+#endif
+
 		if (m_ResX > m_MaxResX / newMultiplier || m_ResY > m_MaxResY / newMultiplier) {
 			ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nNOTE: To toggle fullscreen, use the button in the Options & Controls Menu!");
 			return;

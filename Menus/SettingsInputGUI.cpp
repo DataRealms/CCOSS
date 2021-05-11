@@ -7,7 +7,6 @@
 #include "GUISlider.h"
 #include "GUIRadioButton.h"
 #include "GUILabel.h"
-#include "AllegroBitmap.h"
 
 namespace RTE {
 
@@ -16,7 +15,7 @@ namespace RTE {
 	SettingsInputGUI::SettingsInputGUI(GUIControlManager *parentControlManager) : m_GUIControlManager(parentControlManager) {
 		m_InputSettingsBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxInputSettings"));
 
-		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
+		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			std::string playerNum = std::to_string(player + 1);
 
 			m_PlayerInputSettingsBoxes.at(player).SelectedDeviceLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelP" + playerNum + "SelectedDevice"));
@@ -33,9 +32,9 @@ namespace RTE {
 			m_PlayerInputSettingsBoxes.at(player).CircleDeadZoneRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioP" + playerNum + "DeadzoneCircle"));
 			m_PlayerInputSettingsBoxes.at(player).SquareDeadZoneRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioP" + playerNum + "DeadzoneSquare"));
 		}
-		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
+		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			UpdatePlayerSelectedDeviceLabel(player);
-			ShowPlayerSensitivityControls(player);
+			ShowPlayerInputDeviceSensitivityControls(player);
 		}
 		m_InputConfigMenu = std::make_unique<SettingsInputMappingGUI>(parentControlManager);
 	}
@@ -54,6 +53,35 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void SettingsInputGUI::ResetPlayerInputSettings(int player) {
+		if (m_PlayerInputSettingsBoxes.at(player).ResetControlsButton->GetText() == "Reset") {
+			// Reset any other pending mapping reset confirmations
+			for (int otherPlayer = Players::PlayerOne; otherPlayer < Players::MaxPlayerCount; ++otherPlayer) {
+				if (otherPlayer != player) { m_PlayerInputSettingsBoxes.at(otherPlayer).ResetControlsButton->SetText("Reset"); }
+			}
+			m_PlayerInputSettingsBoxes.at(player).ResetControlsButton->SetText("CONFIRM?");
+		} else {
+			InputScheme *playerControlScheme = g_UInputMan.GetControlScheme(player);
+			playerControlScheme->SetDevice(static_cast<InputDevice>(player));
+			playerControlScheme->SetPreset(static_cast<InputPreset>(-(player + 1))); // Player 1's default preset is at -1 and so on.
+
+			if (playerControlScheme->GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
+				g_UInputMan.SetMouseSensitivity(0.6F);
+			} else if (playerControlScheme->GetDevice() != InputDevice::DEVICE_MOUSE_KEYB && playerControlScheme->GetDevice() != InputDevice::DEVICE_KEYB_ONLY) {
+				playerControlScheme->SetJoystickDeadzone(0);
+				playerControlScheme->SetJoystickDeadzoneType(DeadZoneType::CIRCLE);
+			}
+			UpdatePlayerSelectedDeviceLabel(player);
+			ShowPlayerInputDeviceSensitivityControls(player);
+			UpdatePlayerInputSensitivityControlValues(player);
+
+			m_PlayerInputSettingsBoxes.at(player).ResetControlsButton->SetText("Reset");
+			g_GUISound.ExitMenuSound()->Play();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void SettingsInputGUI::SetPlayerNextOrPrevInputDevice(int player, bool nextDevice) {
 		int currentDevice = static_cast<int>(g_UInputMan.GetControlScheme(player)->GetDevice());
 
@@ -66,7 +94,7 @@ namespace RTE {
 		}
 		g_UInputMan.GetControlScheme(player)->SetDevice(static_cast<InputDevice>(currentDevice));
 		UpdatePlayerSelectedDeviceLabel(player);
-		ShowPlayerSensitivityControls(player);
+		ShowPlayerInputDeviceSensitivityControls(player);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +129,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsInputGUI::ShowPlayerSensitivityControls(int player) {
+	void SettingsInputGUI::ShowPlayerInputDeviceSensitivityControls(int player) {
 		m_PlayerInputSettingsBoxes.at(player).SensitivtyLabel->SetVisible(false);
 		m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetVisible(false);
 		m_PlayerInputSettingsBoxes.at(player).DeadZoneControlsBox->SetVisible(false);
@@ -124,12 +152,12 @@ namespace RTE {
 				m_PlayerInputSettingsBoxes.at(player).DeadZoneControlsBox->SetVisible(true);
 				break;
 		}
-		UpdatePlayerSensitivityValues(player);
+		UpdatePlayerInputSensitivityControlValues(player);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsInputGUI::UpdatePlayerSensitivityValues(int player) {
+	void SettingsInputGUI::UpdatePlayerInputSensitivityControlValues(int player) {
 		switch (g_UInputMan.GetControlScheme(player)->GetDevice()) {
 			case InputDevice::DEVICE_KEYB_ONLY:
 				break;
@@ -157,34 +185,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsInputGUI::ResetPlayerControlMappings(int player) {
-		if (m_PlayerInputSettingsBoxes.at(player).ResetControlsButton->GetText() == "Reset") {
-			// Reset any other pending mapping reset confirmations
-			for (int otherPlayer = Players::PlayerOne; otherPlayer < Players::MaxPlayerCount; ++otherPlayer) {
-				if (otherPlayer != player) { m_PlayerInputSettingsBoxes.at(otherPlayer).ResetControlsButton->SetText("Reset"); }
-			}
-			m_PlayerInputSettingsBoxes.at(player).ResetControlsButton->SetText("CONFIRM?");
-		} else {
-			InputScheme *playerControlScheme = g_UInputMan.GetControlScheme(player);
-			playerControlScheme->SetDevice(static_cast<InputDevice>(player));
-			playerControlScheme->SetPreset(static_cast<InputPreset>(-(player + 1))); // Player 1's default preset is at -1 and so on.
-
-			if (playerControlScheme->GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
-				g_UInputMan.SetMouseSensitivity(0.6F);
-			} else if (playerControlScheme->GetDevice() != InputDevice::DEVICE_MOUSE_KEYB && playerControlScheme->GetDevice() != InputDevice::DEVICE_KEYB_ONLY) {
-				playerControlScheme->SetJoystickDeadzone(0);
-				playerControlScheme->SetJoystickDeadzoneType(DeadZoneType::CIRCLE);
-			}
-			UpdatePlayerSelectedDeviceLabel(player);
-			ShowPlayerSensitivityControls(player);
-
-			m_PlayerInputSettingsBoxes.at(player).ResetControlsButton->SetText("Reset");
-			g_GUISound.ExitMenuSound()->Play();
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void SettingsInputGUI::HandleInputEvents(GUIEvent &guiEvent) {
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			if (guiEvent.GetType() == GUIEvent::Command) {
@@ -199,7 +199,7 @@ namespace RTE {
 					m_InputConfigMenu->SetEnabled(true, player);
 				} else if (guiEvent.GetControl() == m_PlayerInputSettingsBoxes.at(player).ResetControlsButton) {
 					g_GUISound.ButtonPressSound()->Play();
-					ResetPlayerControlMappings(player);
+					ResetPlayerInputSettings(player);
 				}
 			} else if (guiEvent.GetType() == GUIEvent::Notification) {
 				if (guiEvent.GetControl() == m_PlayerInputSettingsBoxes.at(player).SensitivitySlider) {
@@ -208,13 +208,13 @@ namespace RTE {
 					} else {
 						g_UInputMan.GetControlScheme(player)->SetJoystickDeadzone(static_cast<float>(m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->GetValue()) / 250.0F);
 					}
-					UpdatePlayerSensitivityValues(player);
+					UpdatePlayerInputSensitivityControlValues(player);
 				} else if (guiEvent.GetControl() == m_PlayerInputSettingsBoxes.at(player).CircleDeadZoneRadioButton && guiEvent.GetMsg() == GUIRadioButton::Pushed) {
 					g_UInputMan.GetControlScheme(player)->SetJoystickDeadzoneType(DeadZoneType::CIRCLE);
-					UpdatePlayerSensitivityValues(player);
+					UpdatePlayerInputSensitivityControlValues(player);
 				} else if (guiEvent.GetControl() == m_PlayerInputSettingsBoxes.at(player).SquareDeadZoneRadioButton && guiEvent.GetMsg() == GUIRadioButton::Pushed) {
 					g_UInputMan.GetControlScheme(player)->SetJoystickDeadzoneType(DeadZoneType::SQUARE);
-					UpdatePlayerSensitivityValues(player);
+					UpdatePlayerInputSensitivityControlValues(player);
 				}
 			}
 			m_InputConfigMenu->HandleInputEvents(guiEvent, player);

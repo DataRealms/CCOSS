@@ -3,7 +3,6 @@
 #include "MovableMan.h"
 
 #include "GUI.h"
-#include "GUIControlManager.h"
 #include "GUICollectionBox.h"
 #include "GUICheckbox.h"
 #include "GUITextBox.h"

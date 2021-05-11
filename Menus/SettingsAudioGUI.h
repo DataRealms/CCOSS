@@ -21,20 +21,21 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a SettingsAudioGUI object in system memory and make it ready for use.
 		/// </summary>
-		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which holds all the GUIControls of this SettingsAudioGUI.</param>
+		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this SettingsAudioGUI.</param>
 		explicit SettingsAudioGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Enables or disables the Audio Settings menu.
+		/// Enables or disables the audio settings menu.
 		/// </summary>
-		/// <param name="enable">Show and enable or hide and disable the Audio Settings menu.</param>
+		/// <param name="enable">Show and enable or hide and disable the audio settings menu.</param>
 		void SetEnabled(bool enable = true) const;
 
 		/// <summary>
-		/// User input handling for the Audio Settings menu.
+		/// Handles the player interaction with the AudioVideoGUI GUI elements.
 		/// </summary>
+		/// <param name="guiEvent">The GUIEvent containing information about the player interaction with an element.</param>
 		void HandleInputEvents(GUIEvent &guiEvent);
 #pragma endregion
 
@@ -42,15 +43,16 @@ namespace RTE {
 
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
 
-		GUICollectionBox *m_AudioSettingsBox; //!< The GUICollectionBox that contains all the Audio Settings menu GUI elements.
-
-		GUILabel *m_MusicLabel; //!< GUILabel that shows the current music volume value.
-		GUISlider *m_MusicVolumeSlider; //!< GUISlider that controls the music volume.
-		GUICheckbox *m_MusicMuteCheckbox; //!< GUICheckbox that mutes and unmutes the music volume.
-
-		GUILabel *m_SoundLabel; //!< GUILabel that shows the current sound effects volume value.
-		GUISlider *m_SoundVolumeSlider; //!< GUISlider that controls the sound effects volume.
-		GUICheckbox *m_SoundMuteCheckbox; //!< GUICheckbox that mutes and unmutes the sound effects volume.
+		/// <summary>
+		/// GUI elements that compose the audio settings menu screen.
+		/// </summary>
+		GUICollectionBox *m_AudioSettingsBox;
+		GUILabel *m_MusicVolumeLabel;
+		GUISlider *m_MusicVolumeSlider;
+		GUICheckbox *m_MusicMuteCheckbox;
+		GUILabel *m_SoundVolumeLabel;
+		GUISlider *m_SoundVolumeSlider;
+		GUICheckbox *m_SoundMuteCheckbox;
 
 #pragma region Audio Settings Handling
 		/// <summary>

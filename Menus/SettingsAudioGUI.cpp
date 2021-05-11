@@ -2,10 +2,10 @@
 #include "AudioMan.h"
 
 #include "GUI.h"
+#include "GUICollectionBox.h"
 #include "GUILabel.h"
 #include "GUISlider.h"
 #include "GUICheckbox.h"
-#include "GUICollectionBox.h"
 
 namespace RTE {
 
@@ -14,12 +14,12 @@ namespace RTE {
 	SettingsAudioGUI::SettingsAudioGUI(GUIControlManager *parentControlManager) : m_GUIControlManager(parentControlManager) {
 		m_AudioSettingsBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxAudioSettings"));
 
-		m_MusicLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelMusicVolume"));
+		m_MusicVolumeLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelMusicVolume"));
 		m_MusicVolumeSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderMusicVolume"));
 		m_MusicMuteCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxMuteMusic"));
 		m_MusicMuteCheckbox->SetCheck(g_AudioMan.MusicMuted());
 
-		m_SoundLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelSoundVolume"));
+		m_SoundVolumeLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelSoundVolume"));
 		m_SoundVolumeSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderSoundVolume"));
 		m_SoundMuteCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxMuteSound"));
 		m_SoundMuteCheckbox->SetCheck(g_AudioMan.SoundsMuted());
@@ -44,7 +44,7 @@ namespace RTE {
 
 	void SettingsAudioGUI::UpdateMusicVolumeSlider() {
 		int musicVolume = static_cast<int>(std::round(g_AudioMan.GetMusicVolume() * 100));
-		m_MusicLabel->SetText("Volume: " + std::to_string(musicVolume));
+		m_MusicVolumeLabel->SetText("Volume: " + std::to_string(musicVolume));
 		m_MusicVolumeSlider->SetValue(musicVolume);
 	}
 
@@ -52,7 +52,7 @@ namespace RTE {
 
 	void SettingsAudioGUI::UpdateSoundVolumeSlider() {
 		int soundVolume = static_cast<int>(std::round(g_AudioMan.GetSoundsVolume() * 100));
-		m_SoundLabel->SetText("Volume: " + std::to_string(soundVolume));
+		m_SoundVolumeLabel->SetText("Volume: " + std::to_string(soundVolume));
 		m_SoundVolumeSlider->SetValue(soundVolume);
 	}
 

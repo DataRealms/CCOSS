@@ -471,7 +471,7 @@ void GUIButton::SetPushed(bool pushed) {
     m_Pushed = pushed;
     if (pushed) {
         m_Text->ActivateDeactivateOverflowScroll(true);
-    } else if (!pushed && m_GotFocus && !m_Over) {
+    } else if (!pushed && !m_GotFocus && !m_Over) {
         m_Text->ActivateDeactivateOverflowScroll(false);
     }
 }

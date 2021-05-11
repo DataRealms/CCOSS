@@ -226,7 +226,7 @@ public:
     /// Gets whether or not this button is currently pushed.
     /// </summary>
     /// <returns>Whether or not this button is currently pushed.</returns>
-    bool GetPushed() const { return m_Pushed; }
+    bool IsPushed() const { return m_Pushed; }
 
     /// <summary>
     /// Sets whether or not this button is currently pushed.
@@ -238,7 +238,7 @@ public:
     /// Gets whether or not this button is currently being moused over.
     /// </summary>
     /// <returns>Whether or not this button is currently being moused over.</returns>
-    bool GetOver() const { return m_Over; }
+    bool IsMousedOver() const { return m_Over; }
 
     /// <summary>
     /// Sets the text of this GUIButton's GUILabel.

@@ -523,9 +523,19 @@ namespace RTE {
 				}
 			}
 		}
-		m_GUIInformationToggleButton->SetIcon(m_GUIInformationToggleButton->IsEnabled() ? m_GUIInformationToggleButton->HasFocus() ? m_GUIInformationToggleButtonIcon->GetBitmaps8()[1] : m_GUIInformationToggleButtonIcon->GetBitmaps8()[0] : m_GUIInformationToggleButtonIcon->GetBitmaps8()[2]);
-		m_GUIReloadButton->SetIcon(m_GUIReloadButton->IsEnabled() ? m_GUIReloadButton->HasFocus() ? m_GUIReloadButtonIcon->GetBitmaps8()[1] : m_GUIReloadButtonIcon->GetBitmaps8()[0] : m_GUIReloadButtonIcon->GetBitmaps8()[2]);
-		m_GUIDropButton->SetIcon(m_GUIDropButton->IsEnabled() ? m_GUIDropButton->HasFocus() ? m_GUIDropButtonIcon->GetBitmaps8()[1] : m_GUIDropButtonIcon->GetBitmaps8()[0] : m_GUIDropButtonIcon->GetBitmaps8()[2]);
+
+		std::vector<std::pair<GUIButton *, const Icon *>> buttonsToCheckIconsFor = {{m_GUIInformationToggleButton, m_GUIInformationToggleButtonIcon} , {m_GUIReloadButton, m_GUIReloadButtonIcon}, {m_GUIDropButton, m_GUIDropButtonIcon}};
+		for (auto [button, icon] : buttonsToCheckIconsFor) {
+			if (button->IsEnabled()) {
+				if (button->HasFocus() || button->IsMousedOver() || button->IsPushed()) {
+					button->SetIcon(icon->GetBitmaps8()[1]);
+				} else {
+					button->SetIcon(icon->GetBitmaps8()[0]);
+				}
+			} else {
+				button->SetIcon(icon->GetBitmaps8()[2]);
+			}
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -715,6 +725,14 @@ namespace RTE {
 				if (m_GUISelectedItem->DragWasHeldForLongEnough()) { g_GUISound.ItemChangeSound()->Play(m_ActivityPlayerController->GetPlayer()); }
 			}
 
+			if (m_GUIEquippedItemButton->IsPushed() && !m_GUIEquippedItemButton->PointInside(mouseX, mouseY)) { m_GUIEquippedItemButton->SetPushed(false); }
+			if (m_GUIOffhandEquippedItemButton->IsPushed() && !m_GUIOffhandEquippedItemButton->PointInside(mouseX, mouseY)) { m_GUIOffhandEquippedItemButton->SetPushed(false); }
+			if (m_GUIReloadButton->IsPushed() && !m_GUIReloadButton->PointInside(mouseX, mouseY)) { m_GUIReloadButton->SetPushed(false); }
+			if (m_GUIDropButton->IsPushed() && !m_GUIDropButton->PointInside(mouseX, mouseY)) { m_GUIDropButton->SetPushed(false); }
+			for (const auto &[_, inventoryItemButton] : m_GUIInventoryItemButtons) {
+				if (inventoryItemButton->IsPushed() && !inventoryItemButton->PointInside(mouseX, mouseY)) { inventoryItemButton->SetPushed(false); }
+			}
+
 			int mouseEvents[3];
 			int mouseStates[3];
 			m_GUIInput->GetMouseButtons(mouseEvents, mouseStates);
@@ -731,8 +749,8 @@ namespace RTE {
 				DropSelectedItem(&cursorPosDifference.CapMagnitude(25));
 			} else {
 				if (m_GUIEquippedItemButton->PointInside(mouseX, mouseY)) {
-					if (mouseHeld && !m_GUIEquippedItemButton->HasFocus()) {
-						m_GUIEquippedItemButton->OnGainFocus();
+					if (mouseHeld && !m_GUIEquippedItemButton->IsPushed()) {
+						m_GUIEquippedItemButton->SetPushed(true);
 						g_GUISound.SelectionChangeSound()->Play(m_ActivityPlayerController->GetPlayer());
 					} else if (mouseReleased) {
 						HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.at(0), 0);
@@ -741,8 +759,8 @@ namespace RTE {
 						}
 					}
 				} else if (m_GUIOffhandEquippedItemButton->PointInside(mouseX, mouseY)) {
-					if (mouseHeld && !m_GUIOffhandEquippedItemButton->HasFocus()) {
-						m_GUIOffhandEquippedItemButton->OnGainFocus();
+					if (mouseHeld && !m_GUIOffhandEquippedItemButton->IsPushed()) {
+						m_GUIOffhandEquippedItemButton->SetPushed(true);
 						g_GUISound.SelectionChangeSound()->Play(m_ActivityPlayerController->GetPlayer());
 					} else if (mouseReleased) {
 						HandleItemButtonPressOrHold(m_GUIOffhandEquippedItemButton, m_InventoryActorEquippedItems.at(std::min(static_cast<int>(m_InventoryActorEquippedItems.size() - 1), 1)), 1);
@@ -751,29 +769,24 @@ namespace RTE {
 						}
 					}
 				} else if (m_GUIReloadButton->IsEnabled() && m_GUIReloadButton->PointInside(mouseX, mouseY)) {
-					if (mouseHeld && !m_GUIReloadButton->HasFocus()) {
-						m_GUIReloadButton->OnGainFocus();
+					if (mouseHeld && !m_GUIReloadButton->IsPushed()) {
+						m_GUIReloadButton->SetPushed(true);
 						g_GUISound.SelectionChangeSound()->Play(m_ActivityPlayerController->GetPlayer());
 					} else if (mouseReleased) {
 						ReloadSelectedItem();
 					}
 				} else if (m_GUIDropButton->IsEnabled() && m_GUIDropButton->PointInside(mouseX, mouseY)) {
-					if (mouseHeld && !m_GUIDropButton->HasFocus()) {
-						m_GUIDropButton->OnGainFocus();
+					if (mouseHeld && !m_GUIDropButton->IsPushed()) {
+						m_GUIDropButton->SetPushed(true);
 						g_GUISound.SelectionChangeSound()->Play(m_ActivityPlayerController->GetPlayer());
 					} else if (mouseReleased) {
 						DropSelectedItem();
 					}
 				} else {
-					if (m_GUISelectedItem->Button != m_GUIEquippedItemButton && m_GUIEquippedItemButton->HasFocus()) { m_GUIEquippedItemButton->OnLoseFocus(); }
-					if (m_GUISelectedItem->Button != m_GUIOffhandEquippedItemButton && m_GUIOffhandEquippedItemButton->HasFocus()) { m_GUIOffhandEquippedItemButton->OnLoseFocus(); }
-					if (m_GUIReloadButton->HasFocus()) { m_GUIReloadButton->OnLoseFocus(); }
-					if (m_GUIDropButton->HasFocus()) { m_GUIDropButton->OnLoseFocus(); }
-					
 					for (const auto &[inventoryObject, inventoryItemButton] : m_GUIInventoryItemButtons) {
 						if (inventoryItemButton->PointInside(mouseX, mouseY)) {
-							if (mouseHeld && !inventoryItemButton->HasFocus()) {
-								inventoryItemButton->OnGainFocus();
+							if (mouseHeld && !inventoryItemButton->IsPushed()) {
+								inventoryItemButton->SetPushed(true);
 								g_GUISound.SelectionChangeSound()->Play(m_ActivityPlayerController->GetPlayer());
 							} else if (mouseReleased) {
 								HandleItemButtonPressOrHold(inventoryItemButton, inventoryObject, -1);
@@ -782,8 +795,6 @@ namespace RTE {
 								}
 								break;
 							}
-						} else if (m_GUISelectedItem->Button != inventoryItemButton && inventoryItemButton->HasFocus()){
-							inventoryItemButton->OnLoseFocus();
 						}
 					}
 				}
@@ -801,7 +812,7 @@ namespace RTE {
 
 	void InventoryMenuGUI::HandleNonMouseInput() {
 		if (!m_KeyboardOrControllerHighlightedButton || !m_KeyboardOrControllerHighlightedButton->GetVisible() || (!m_GUIShowEmptyRows && m_KeyboardOrControllerHighlightedButton->GetParent() == m_GUIInventoryItemsBox && m_InventoryActor->IsInventoryEmpty())) { m_KeyboardOrControllerHighlightedButton = m_GUIEquippedItemButton; }
-		if (!m_KeyboardOrControllerHighlightedButton->GetOver()) { m_KeyboardOrControllerHighlightedButton->OnMouseEnter(0, 0, 0, 0); }
+		if (!m_KeyboardOrControllerHighlightedButton->IsMousedOver()) { m_KeyboardOrControllerHighlightedButton->OnMouseEnter(0, 0, 0, 0); }
 
 		if (m_ActivityPlayerController->IsState(ControlState::PRESS_PRIMARY)) {
 			if (m_KeyboardOrControllerHighlightedButton->IsEnabled()) {
@@ -916,7 +927,7 @@ namespace RTE {
 				}
 			}
 		}
-		if (nextButtonToHighlight && m_KeyboardOrControllerHighlightedButton != nextButtonToHighlight && !nextButtonToHighlight->GetOver()) {
+		if (nextButtonToHighlight && m_KeyboardOrControllerHighlightedButton != nextButtonToHighlight && !nextButtonToHighlight->IsMousedOver()) {
 			m_KeyboardOrControllerHighlightedButton->OnMouseLeave(0, 0, 0, 0);
 			m_KeyboardOrControllerHighlightedButton = nextButtonToHighlight;
 			m_KeyboardOrControllerHighlightedButton->OnMouseEnter(0, 0, 0, 0);

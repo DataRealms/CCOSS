@@ -307,8 +307,8 @@ private:
     bool            m_Pushed;
     bool            m_Over;
     std::unique_ptr<GUILabel> m_Text;
-    std::unique_ptr<GUIBitmap> m_Icon; //!< A GUIBitmap that should be drawn on the button, as well as text.
-
+    std::unique_ptr<GUIBitmap> m_Icon;
+    std::unique_ptr<GUIRect> m_BorderSizes;
 };
 
 

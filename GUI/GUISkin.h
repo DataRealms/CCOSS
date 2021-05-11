@@ -161,8 +161,9 @@ public:
 // Description:     Builds a bitmap from a standard skin property section.
 // Arguments:       Destination bitmap, Section name, Position, Size. Whether to draw the
 //                  background and frame.
+// Returns:         A GUIRect describing the border sizes of the four sides of the built standard rect.
 
-    void BuildStandardRect(GUIBitmap *Dest, const std::string Section, int X, int Y,
+    GUIRect & BuildStandardRect(GUIBitmap *Dest, const std::string Section, int X, int Y,
                            int Width, int Height, bool buildBG = true, bool buildFrame = true);
 
 

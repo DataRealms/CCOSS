@@ -35,6 +35,7 @@ GUIButton::GUIButton(GUIManager *Manager, GUIControlManager *ControlManager)
     m_Over = false;
     m_Text = nullptr;
     m_Icon = nullptr;
+    m_BorderSizes = nullptr;
 }
 
 
@@ -80,6 +81,7 @@ void GUIButton::Create(const std::string Name, int X, int Y, int Width, int Heig
         GUIPanel::AddChild(m_Text.get());
     }
     if (!m_Icon) { m_Icon = std::make_unique<AllegroBitmap>(); }
+    if (!m_BorderSizes) { m_BorderSizes = std::make_unique<GUIRect>(); }
 }
 
 
@@ -117,6 +119,7 @@ void GUIButton::Create(GUIProperties *Props)
         GUIPanel::AddChild(m_Text.get());
     }
     if (!m_Icon) { m_Icon = std::make_unique<AllegroBitmap>(); }
+    if (!m_BorderSizes) { m_BorderSizes = std::make_unique<GUIRect>(); }
 
     // Load the values
     std::string text;
@@ -195,14 +198,15 @@ void GUIButton::BuildBitmap(void)
         m_Font->CacheColor(m_FontColor);
 
     // Create the button image
-    m_Skin->BuildStandardRect(m_DrawBitmap, "Button_Up", 0, 0, m_Width, m_Height);
+    const GUIRect buttonBorders = m_Skin->BuildStandardRect(m_DrawBitmap, "Button_Up", 0, 0, m_Width, m_Height);
+    SetRect(m_BorderSizes.get(), buttonBorders.left, buttonBorders.top, buttonBorders.right, buttonBorders.bottom);
     m_Skin->BuildStandardRect(m_DrawBitmap, "Button_Over", 0, m_Height, m_Width, m_Height);
     m_Skin->BuildStandardRect(m_DrawBitmap, "Button_Down", 0, m_Height*2, m_Width, m_Height);
 
-    const GUIRect buttonBorders = {1, 1, 2, 2};
-    const int buttonContentPadding = 1;
-    const int contentMaxWidth = m_Width - buttonBorders.left - buttonBorders.right - (buttonContentPadding * 2) - 1;
-    const int contentMaxHeight = m_Height - buttonBorders.top - buttonBorders.bottom - (buttonContentPadding * 2) - 1;
+    //TODO this should be 1 pixel ideally, to give space between content and the border. However, the green skin, which this is primarly used for, has padding built-in and doesn't work properly without it.
+    const int buttonContentPadding = 0;
+    const int contentMaxWidth = m_Width - m_BorderSizes->left - m_BorderSizes->right - (buttonContentPadding * 2) - 1;
+    const int contentMaxHeight = m_Height - m_BorderSizes->top - m_BorderSizes->bottom - (buttonContentPadding * 2) - 1;
 
     int centerY = m_Height / 2;
     bool hasIcon = m_Icon->HasBitmap();
@@ -252,7 +256,7 @@ void GUIButton::BuildBitmap(void)
         m_Text->SetFont(m_Font);
         m_Text->SetSize(contentMaxWidth, contentMaxHeight);
 
-        int textXPos = buttonBorders.left + buttonContentPadding;
+        int textXPos = m_BorderSizes->left + buttonContentPadding;
         m_Text->SetPositionAbs(textXPos, textYPos);
         m_Text->Draw(m_DrawBitmap, false);
         m_Text->SetPositionAbs(textXPos, m_Height + textYPos);

@@ -179,7 +179,7 @@ public:
 // Description:     Sets the text of the label.
 // Arguments:       text.
 
-    void SetText(const std::string text) { m_Text = text; }
+    void SetText(const std::string_view &text) { m_Text = text; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -188,7 +188,7 @@ public:
 // Description:     Gets the text of the label.
 // Arguments:       None.
 
-    std::string GetText() const { return m_Text; }
+    const std::string &GetText() const { return m_Text; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

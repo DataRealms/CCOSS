@@ -245,7 +245,7 @@ public:
     /// Gets the underlying BITMAP of this AllegroBitmap.
     /// </summary>
     /// <returns>The underlying BITMAP of this AllegroBitmap.</returns>
-    BITMAP *GetBitmap() override { return m_pBitmap; }
+    BITMAP * GetBitmap() override { return m_pBitmap; }
 
     /// <summary>
     /// Indicates whether this AllegroBitmap even contains loaded bitmap data.

@@ -283,7 +283,7 @@ void GUIButton::Draw(GUIScreen *Screen)
 
     SetRect(&Rect, 0, y, m_Width, y+m_Height);
 
-    if (m_Text->OverflowScrollIsActivated()) { BuildBitmap(); }
+    if (m_Text->OverflowScrollIsActivated() && m_Font->CalculateWidth(m_Text->GetText()) > m_Width - m_BorderSizes->left - m_BorderSizes->right) { BuildBitmap(); }
 
     m_DrawBitmap->DrawTrans(Screen->GetBitmap(), m_X, m_Y, &Rect);
 
@@ -353,7 +353,10 @@ void GUIButton::OnMouseEnter(int X, int Y, int Buttons, int Modifier)
 
 void GUIButton::OnMouseLeave(int X, int Y, int Buttons, int Modifier) {
     m_Over = false;
-    if (!m_GotFocus && !m_Pushed) { m_Text->ActivateDeactivateOverflowScroll(false); }
+    if (!m_GotFocus && !m_Pushed) {
+        m_Text->ActivateDeactivateOverflowScroll(false);
+        BuildBitmap();
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -367,7 +370,10 @@ void GUIButton::OnGainFocus() {
 
 void GUIButton::OnLoseFocus() {
     GUIPanel::OnLoseFocus();
-    if (!m_Over && !m_Pushed) { m_Text->ActivateDeactivateOverflowScroll(false); }
+    if (!m_Over && !m_Pushed) {
+        m_Text->ActivateDeactivateOverflowScroll(false);
+        BuildBitmap();
+    }
 }
 
 
@@ -477,19 +483,22 @@ void GUIButton::SetPushed(bool pushed) {
         m_Text->ActivateDeactivateOverflowScroll(true);
     } else if (!pushed && !m_GotFocus && !m_Over) {
         m_Text->ActivateDeactivateOverflowScroll(false);
+        BuildBitmap();
     }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void GUIButton::SetText(const std::string &newText) {
-    m_Text->SetText(newText);
-    BuildBitmap();
+void GUIButton::SetText(const std::string_view &newText, bool noBitmapRebuild) {
+    if (GetText() != newText) {
+        m_Text->SetText(newText);
+        if (!noBitmapRebuild) { BuildBitmap(); }
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-string GUIButton::GetText(void) {
+const string & GUIButton::GetText(void) const {
     return m_Text->GetText();
 }
 
@@ -497,21 +506,30 @@ string GUIButton::GetText(void) {
 
 void GUIButton::SetHorizontalOverflowScroll(bool newOverflowScroll) {
     m_Text->SetHorizontalOverflowScroll(newOverflowScroll);
+    if (m_Text->GetHorizontalOverflowScroll()) { BuildBitmap(); }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void GUIButton::SetVerticalOverflowScroll(bool newOverflowScroll) {
     m_Text->SetVerticalOverflowScroll(newOverflowScroll);
+    if (m_Text->GetVerticalOverflowScroll()) { BuildBitmap(); }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void GUIButton::SetIcon(BITMAP *newIcon) {
+void GUIButton::SetIcon(BITMAP *newIcon, bool noBitmapRebuild) {
     if (m_Icon && m_Icon->GetBitmap() != newIcon) {
         m_Icon->SetBitmap(newIcon);
-        BuildBitmap();
+        if (!noBitmapRebuild) { BuildBitmap(); }
     }
+}
+
+void GUIButton::SetIconAndText(BITMAP *newIcon, const std::string_view &newText) {
+    bool bitmapNeedsRebuild = (m_Icon && m_Icon->GetBitmap() != newIcon) || (m_Text && m_Text->GetText() != newText);
+    SetIcon(newIcon, true);
+    SetText(newText, true);
+    if (bitmapNeedsRebuild) { BuildBitmap(); }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

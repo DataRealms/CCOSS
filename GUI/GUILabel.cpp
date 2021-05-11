@@ -180,10 +180,10 @@ void GUILabel::Draw(GUIBitmap *Bitmap, bool overwiteFontColorAndKerning) {
             yPos += (m_Height)-1;
 
 
-        int textFullWidth = m_Font->CalculateWidth(m_Text);
-        int textFullHeight = m_Font->CalculateHeight(m_Text);
-        bool modifyXPos = m_HorizontalOverflowScroll && textFullWidth > m_Width;
-        bool modifyYPos = m_VerticalOverflowScroll && textFullHeight > m_Height;
+        int textFullWidth = m_HorizontalOverflowScroll ? m_Font->CalculateWidth(m_Text) : 0;
+        int textFullHeight = m_VerticalOverflowScroll ? m_Font->CalculateHeight(m_Text) : 0;
+        bool modifyXPos = textFullWidth > m_Width;
+        bool modifyYPos = textFullHeight > m_Height;
         xPos = modifyXPos ? m_X : xPos;
         yPos = modifyYPos ? m_Y : yPos;
         if (OverflowScrollIsActivated()) {
@@ -200,12 +200,12 @@ void GUILabel::Draw(GUIBitmap *Bitmap, bool overwiteFontColorAndKerning) {
                     break;
                 case OverflowScrollState::Scrolling:
                     if (m_OverflowScrollTimer.GetRealTimeLimitMS() == -1) {
-                        //TODO Maybe time limits should account for extra size vs width, so it scrolls slower on small labels, since it's harder to read fast text on smaller areas.
+                        //TODO Maybe time limits should account for extra size vs width, so it scrolls slower on small labels, since it can be harder to read fast text on smaller areas. I think it's fine as-is though.
                         // Note - time limits set so 5 characters of fatfont horizontal overflow or one line of fatfont vertical overflow will take 1 second.
-                        if (m_HorizontalOverflowScroll) {
+                        if (modifyXPos) {
                             m_OverflowScrollTimer.SetRealTimeLimitMS((1000.0 / 30.0) * static_cast<double>(textFullWidth - m_Width));
-                        } else {
-                            m_OverflowScrollTimer.SetRealTimeLimitMS((1000.0 / 8.0) * static_cast<double>(textFullWidth - m_Height));
+                        } else if (modifyYPos) {
+                            m_OverflowScrollTimer.SetRealTimeLimitMS((1000.0 / 8.0) * static_cast<double>(textFullHeight - m_Height));
                         }
                         m_OverflowScrollTimer.Reset();
                     } else if (m_OverflowScrollTimer.IsPastRealTimeLimit()) {

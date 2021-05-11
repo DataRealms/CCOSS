@@ -241,16 +241,17 @@ public:
     bool IsMousedOver() const { return m_Over; }
 
     /// <summary>
-    /// Sets the text of this GUIButton's GUILabel.
-    /// </summary>
-    /// <param name="newText">The new text for this GUIButton's GUILabel.</param>
-    void SetText(const std::string &newText);
-
-    /// <summary>
     /// Gets the text of this GUIButton's GUILabel.
     /// </summary>
     /// <returns>The text of this GUIButton's GUILabel.</returns>
-    std::string GetText();
+    const std::string &GetText() const;
+
+    /// <summary>
+    /// Sets the text of this GUIButton's GUILabel.
+    /// </summary>
+    /// <param name="newText">The new text for this GUIButton's GUILabel.</param>
+    /// <param name="noBitmapRebuild">Lets this method NOT rebuild the button bitmap, even if the icon has changed. Defaults to false and should almost always stay that way.</param>
+    void SetText(const std::string_view &newText, bool noBitmapRebuild = false);
 
     /// <summary>
     /// Sets whether or not this GUIButton's text should scroll horizontally (right) when it overflows the button.
@@ -273,7 +274,15 @@ public:
     /// Sets the icon for this GUIButton. Ownership is NOT transferred.
     /// </summary>
     /// <param name="newIcon">A pointer to the new icon BITMAP for this GUIButton.</param>
-    void SetIcon(BITMAP *newIcon);
+    /// <param name="noBitmapRebuild">Lets this method NOT rebuild the button bitmap, even if the icon has changed. Defaults to false and should almost always stay that way.</param>
+    void SetIcon(BITMAP *newIcon, bool noBitmapRebuild = false);
+
+    /// <summary>
+    /// Helper method to set both text and icon for this GUIButton at the same time.
+    /// </summary>
+    /// <param name="newIcon">A pointer to the new icon BITMAP for this GUIButton.</param>
+    /// <param name="newText">The new text for this GUIButton's GUILabel.</param>
+    void SetIconAndText(BITMAP *newIcon, const std::string_view &newText);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

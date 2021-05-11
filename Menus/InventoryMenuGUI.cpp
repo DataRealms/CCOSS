@@ -543,49 +543,42 @@ namespace RTE {
 	void InventoryMenuGUI::UpdateFullModeEquippedItemButtons() {
 		if (!m_InventoryActorEquippedItems.empty()) {
 			m_GUIEquippedItemButton->SetEnabled(true);
-			if (m_GUISelectedItem && m_GUISelectedItem->DragWasHeldForLongEnough() && m_GUISelectedItem->Button == m_GUIEquippedItemButton && m_GUIEquippedItemButton->HasIcon()) {
-				m_GUIEquippedItemButton->SetIcon(nullptr);
-				m_GUIEquippedItemButton->SetText(">>>");
-			} else {
-				m_GUIEquippedItemButton->SetIcon(m_InventoryActorEquippedItems.at(0)->GetGraphicalIcon());
-				m_GUIEquippedItemButton->SetText(m_InventoryActorEquippedItems.at(0)->GetPresetName());
+			if (m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough() && m_GUIEquippedItemButton->HasIcon()) {
+				m_GUIEquippedItemButton->SetIconAndText(nullptr, ">>>");
+			} else if (!(m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough()) && !m_GUIEquippedItemButton->HasIcon()) {
+				m_GUIEquippedItemButton->SetIconAndText(m_InventoryActorEquippedItems.at(0)->GetGraphicalIcon(), m_InventoryActorEquippedItems.at(0)->GetPresetName());
 			}
 
 			if (m_InventoryActorEquippedItems.size() > 1) {
 				m_GUIOffhandEquippedItemButton->SetEnabled(true);
-				if (m_GUISelectedItem && m_GUISelectedItem->DragWasHeldForLongEnough() && m_GUISelectedItem->Button == m_GUIOffhandEquippedItemButton && m_GUIOffhandEquippedItemButton->HasIcon()) {
-					m_GUIOffhandEquippedItemButton->SetIcon(nullptr);
-					m_GUIOffhandEquippedItemButton->SetText(">>>");
-				} else {
-					m_GUIOffhandEquippedItemButton->SetIcon(m_InventoryActorEquippedItems.at(1)->GetGraphicalIcon());
-					m_GUIOffhandEquippedItemButton->SetText(m_InventoryActorEquippedItems.at(1)->GetPresetName());
+				if (m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIOffhandEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough() && m_GUIOffhandEquippedItemButton->HasIcon()) {
+					m_GUIOffhandEquippedItemButton->SetIconAndText(nullptr, ">>>");
+				} else if (!(m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIOffhandEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough()) && !m_GUIOffhandEquippedItemButton->HasIcon()) {
+					m_GUIOffhandEquippedItemButton->SetIconAndText(m_InventoryActorEquippedItems.at(1)->GetGraphicalIcon(), m_InventoryActorEquippedItems.at(1)->GetPresetName());
 				}
 			} else if (m_GUIOffhandEquippedItemButton->HasIcon()) {
 				m_GUIOffhandEquippedItemButton->SetEnabled(m_GUISelectedItem != nullptr);
-				m_GUIOffhandEquippedItemButton->SetIcon(nullptr);
-				m_GUIOffhandEquippedItemButton->SetText("> <");
+				m_GUIOffhandEquippedItemButton->SetIconAndText(nullptr, "> <");
 			} else {
 				m_GUIOffhandEquippedItemButton->SetEnabled(m_GUISelectedItem != nullptr);
 			}
 
 			bool showOffhandButton = m_InventoryActorEquippedItems.size() > 1 || (dynamic_cast<HeldDevice *>(m_InventoryActorEquippedItems.at(0)) ? dynamic_cast<HeldDevice *>(m_InventoryActorEquippedItems.at(0))->IsOneHanded() : false);
 			if (showOffhandButton && !m_GUIOffhandEquippedItemButton->GetVisible()) {
-				m_GUIEquippedItemButton->SetSize(m_GUIEquippedItemButton->GetWidth() / 2, m_GUIEquippedItemButton->GetHeight());
+				m_GUIEquippedItemButton->Resize(m_GUIEquippedItemButton->GetWidth() / 2, m_GUIEquippedItemButton->GetHeight());
 				m_GUIOffhandEquippedItemButton->SetVisible(true);
 			} else if (!showOffhandButton && m_GUIOffhandEquippedItemButton->GetVisible()) {
-				m_GUIEquippedItemButton->SetSize(m_GUIEquippedItemButton->GetWidth() * 2, m_GUIEquippedItemButton->GetHeight());
+				m_GUIEquippedItemButton->Resize(m_GUIEquippedItemButton->GetWidth() * 2, m_GUIEquippedItemButton->GetHeight());
 				m_GUIOffhandEquippedItemButton->SetVisible(false);
 			}
 		} else {
 			m_GUIEquippedItemButton->SetEnabled(m_GUISelectedItem != nullptr);
 			if (m_GUIEquippedItemButton->HasIcon()) {
-				m_GUIEquippedItemButton->SetIcon(nullptr);
-				m_GUIEquippedItemButton->SetText("> <");
+				m_GUIEquippedItemButton->SetIconAndText(nullptr, "> <");
 			}
 			m_GUIOffhandEquippedItemButton->SetEnabled(m_GUISelectedItem != nullptr);
 			if (m_GUIOffhandEquippedItemButton->HasIcon()) {
-				m_GUIOffhandEquippedItemButton->SetIcon(nullptr);
-				m_GUIOffhandEquippedItemButton->SetText("> <");
+				m_GUIOffhandEquippedItemButton->SetIconAndText(nullptr, "> <");
 			}
 		}
 	}
@@ -631,12 +624,10 @@ namespace RTE {
 				inventoryItem = inventory->at(i);
 				itemButton->SetEnabled(true);
 				m_GUIInventoryItemButtons.at(i - startIndex).first = inventoryItem;
-				if (m_GUISelectedItem && m_GUISelectedItem->DragWasHeldForLongEnough() && m_GUISelectedItem->Button == itemButton && itemButton->HasIcon()) {
-					itemButton->SetIcon(nullptr);
-					itemButton->SetText(">>>");
-				} else {
-					itemButton->SetIcon(inventoryItem->GetGraphicalIcon());
-					itemButton->SetText(inventoryItem->GetPresetName());
+				if (m_GUISelectedItem && m_GUISelectedItem->Button == itemButton && m_GUISelectedItem->DragWasHeldForLongEnough() && itemButton->HasIcon()) {
+					itemButton->SetIconAndText(nullptr, ">>>");
+				} else if (!(m_GUISelectedItem && m_GUISelectedItem->Button == itemButton && m_GUISelectedItem->DragWasHeldForLongEnough()) && !itemButton->HasIcon()) {
+					itemButton->SetIconAndText(inventoryItem->GetGraphicalIcon(), inventoryItem->GetPresetName());
 				}
 			} else if (i > lastPopulatedIndex) {
 				if (!m_GUIShowEmptyRows && inventory->size() < c_FullViewPageItemLimit && ((i - startIndex) >= (inventory->size() + c_ItemsPerRow - (inventory->size() % c_ItemsPerRow)))) {
@@ -644,8 +635,7 @@ namespace RTE {
 				}
 				if (itemButton->HasIcon()) {
 					m_GUIInventoryItemButtons.at(i - startIndex).first = nullptr;
-					itemButton->SetIcon(nullptr);
-					itemButton->SetText("> <");
+					itemButton->SetIconAndText(nullptr, "> <");
 				}
 				itemButton->SetEnabled(m_GUISelectedItem != nullptr);
 			}

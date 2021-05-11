@@ -46,7 +46,11 @@ namespace RTE {
 			m_CustomResolutionRadioButton->SetCheck(true);
 			m_PresetResolutionBox->SetVisible(false);
 			m_CustomResolutionBox->SetVisible(true);
-			if (g_FrameMan.IsUsingDedicatedGraphicsDriver()) { m_CustomResolutionDedicatedRadioButton->SetCheck(true); }
+			if (g_FrameMan.IsUsingDedicatedGraphicsDriver()) {
+				m_CustomResolutionDedicatedRadioButton->SetCheck(true);
+				m_CustomResolutionMessageLabel->SetText("WARNING: ATTEMPTING TO SET A RESOLUTION NOT SUPPORTED BY YOUR GRAPHICS CARD OR MONITOR WITH THE DEDICATED DRIVER MAY LEAD TO THE GAME OR SYSTEM HARD-LOCKING!");
+				m_CustomResolutionMessageLabel->SetVisible(true);
+			}
 		}
 	}
 
@@ -319,22 +323,27 @@ namespace RTE {
 					m_GUIControlManager->GetControl("CollectionBoxSettingsBase")->SetEnabled(true);
 				}
 			}
-		} else if (guiEvent.GetType() == GUIEvent::Notification && guiEvent.GetMsg() == GUIRadioButton::Pushed) {
-			if (guiEvent.GetControl() == m_PresetResolutionRadioButton) {
-				g_GUISound.ButtonPressSound()->Play();
-				m_PresetResolutionBox->SetVisible(true);
-				m_CustomResolutionBox->SetVisible(false);
-			} else if (guiEvent.GetControl() == m_CustomResolutionRadioButton) {
-				g_GUISound.ButtonPressSound()->Play();
-				m_PresetResolutionBox->SetVisible(false);
-				m_CustomResolutionBox->SetVisible(true);
-			} else if (guiEvent.GetControl() == m_CustomResolutionBorderlessRadioButton) {
-				g_GUISound.ButtonPressSound()->Play();
-				m_CustomResolutionMessageLabel->SetVisible(false);
-			} else if (guiEvent.GetControl() == m_CustomResolutionDedicatedRadioButton) {
-				g_GUISound.ButtonPressSound()->Play();
-				m_CustomResolutionMessageLabel->SetText("WARNING: ATTEMPTING TO SET A RESOLUTION NOT SUPPORTED BY YOUR GRAPHICS CARD OR MONITOR WITH THE DEDICATED DRIVER MAY LEAD TO THE GAME OR SYSTEM HARD-LOCKING!");
-				m_CustomResolutionMessageLabel->SetVisible(true);
+		} else if (guiEvent.GetType() == GUIEvent::Notification) {
+			// Clicking off focused textboxes does not remove their focus and they will still capture keyboard input, so remove focus when clicking CollectionBoxes.
+			if (guiEvent.GetMsg() == GUICollectionBox::Clicked && !m_VideoSettingsBox->HasFocus() && (guiEvent.GetControl() == m_VideoSettingsBox || guiEvent.GetControl() == m_CustomResolutionBox)) { m_VideoSettingsBox->SetFocus(); }
+
+			if (guiEvent.GetMsg() == GUIRadioButton::Pushed) {
+				if (guiEvent.GetControl() == m_PresetResolutionRadioButton) {
+					g_GUISound.ButtonPressSound()->Play();
+					m_PresetResolutionBox->SetVisible(true);
+					m_CustomResolutionBox->SetVisible(false);
+				} else if (guiEvent.GetControl() == m_CustomResolutionRadioButton) {
+					g_GUISound.ButtonPressSound()->Play();
+					m_PresetResolutionBox->SetVisible(false);
+					m_CustomResolutionBox->SetVisible(true);
+				} else if (guiEvent.GetControl() == m_CustomResolutionBorderlessRadioButton) {
+					g_GUISound.ButtonPressSound()->Play();
+					m_CustomResolutionMessageLabel->SetVisible(false);
+				} else if (guiEvent.GetControl() == m_CustomResolutionDedicatedRadioButton) {
+					g_GUISound.ButtonPressSound()->Play();
+					m_CustomResolutionMessageLabel->SetText("WARNING: ATTEMPTING TO SET A RESOLUTION NOT SUPPORTED BY YOUR GRAPHICS CARD OR MONITOR WITH THE DEDICATED DRIVER MAY LEAD TO THE GAME OR SYSTEM HARD-LOCKING!");
+					m_CustomResolutionMessageLabel->SetVisible(true);
+				}
 			}
 		}
 	}

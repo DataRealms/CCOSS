@@ -15,8 +15,10 @@ namespace RTE {
 		m_CurrentActivityHumanPlayerPositions.clear();
 		m_SoundChannelMinimumAudibleDistances.clear();
 
+		m_MuteMaster = false;
 		m_MuteMusic = false;
 		m_MuteSounds = false;
+		m_MasterVolume = 0.5F;
 		m_MusicVolume = 1.0F;
 		m_SoundsVolume = 1.0F;
 		m_GlobalPitch = 1.0F;
@@ -74,12 +76,14 @@ namespace RTE {
 			return -1;
 		}
 
-		if (m_MuteSounds) { m_SoundChannelGroup->setMute(true); }
-		if (m_MuteMusic) { m_MusicChannelGroup->setMute(true); }
+		if (m_MuteSounds) { MuteSounds(); }
+		if (m_MuteMusic) { MuteMusic(); }
+		if (m_MuteMaster) { MuteMaster(); }
 
 		SetGlobalPitch(m_GlobalPitch, false, false);
 		SetSoundsVolume(m_SoundsVolume);
 		SetMusicVolume(m_MusicVolume);
+		SetMasterVolume(m_MasterVolume);
 
 		return 0;
 	}

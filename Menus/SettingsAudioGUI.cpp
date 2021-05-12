@@ -14,6 +14,11 @@ namespace RTE {
 	SettingsAudioGUI::SettingsAudioGUI(GUIControlManager *parentControlManager) : m_GUIControlManager(parentControlManager) {
 		m_AudioSettingsBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxAudioSettings"));
 
+		m_MasterVolumeLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelMasterVolume"));
+		m_MasterVolumeSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderMasterVolume"));
+		m_MasterMuteCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxMuteMaster"));
+		m_MasterMuteCheckbox->SetCheck(g_AudioMan.MasterMuted());
+
 		m_MusicVolumeLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelMusicVolume"));
 		m_MusicVolumeSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderMusicVolume"));
 		m_MusicMuteCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxMuteMusic"));
@@ -24,8 +29,9 @@ namespace RTE {
 		m_SoundMuteCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxMuteSound"));
 		m_SoundMuteCheckbox->SetCheck(g_AudioMan.SoundsMuted());
 
-		UpdateMusicVolumeSlider();
-		UpdateSoundVolumeSlider();
+		UpdateMasterVolumeControls();
+		UpdateMusicVolumeControls();
+		UpdateSoundVolumeControls();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -42,7 +48,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsAudioGUI::UpdateMusicVolumeSlider() {
+	void SettingsAudioGUI::UpdateMasterVolumeControls() {
+		int masterVolume = static_cast<int>(std::round(g_AudioMan.GetMasterVolume() * 100));
+		m_MasterVolumeLabel->SetText("Volume: " + std::to_string(masterVolume));
+		m_MasterVolumeSlider->SetValue(masterVolume);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsAudioGUI::UpdateMusicVolumeControls() {
 		int musicVolume = static_cast<int>(std::round(g_AudioMan.GetMusicVolume() * 100));
 		m_MusicVolumeLabel->SetText("Volume: " + std::to_string(musicVolume));
 		m_MusicVolumeSlider->SetValue(musicVolume);
@@ -50,7 +64,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsAudioGUI::UpdateSoundVolumeSlider() {
+	void SettingsAudioGUI::UpdateSoundVolumeControls() {
 		int soundVolume = static_cast<int>(std::round(g_AudioMan.GetSoundsVolume() * 100));
 		m_SoundVolumeLabel->SetText("Volume: " + std::to_string(soundVolume));
 		m_SoundVolumeSlider->SetValue(soundVolume);
@@ -60,14 +74,19 @@ namespace RTE {
 
 	void SettingsAudioGUI::HandleInputEvents(GUIEvent &guiEvent) {
 		if (guiEvent.GetType() == GUIEvent::Notification) {
-			if (guiEvent.GetControl() == m_MusicVolumeSlider) {
+			if (guiEvent.GetControl() == m_MasterVolumeSlider) {
+				g_AudioMan.SetMasterVolume(static_cast<float>(m_MasterVolumeSlider->GetValue()) / 100);
+				UpdateMasterVolumeControls();
+			} else if (guiEvent.GetControl() == m_MusicVolumeSlider) {
 				g_AudioMan.SetMusicVolume(static_cast<float>(m_MusicVolumeSlider->GetValue()) / 100);
-				UpdateMusicVolumeSlider();
+				UpdateMusicVolumeControls();
 			} else if (guiEvent.GetControl() == m_SoundVolumeSlider) {
 				float newSoundVolume = (static_cast<float>(m_SoundVolumeSlider->GetValue()) / 100);
 				if (newSoundVolume != g_AudioMan.GetSoundsVolume() && !g_GUISound.TestSound()->IsBeingPlayed()) { g_GUISound.TestSound()->Play(); }
 				g_AudioMan.SetSoundsVolume(newSoundVolume);
-				UpdateSoundVolumeSlider();
+				UpdateSoundVolumeControls();
+			} else if (guiEvent.GetControl() == m_MasterMuteCheckbox) {
+				g_AudioMan.MuteMaster(m_MasterMuteCheckbox->GetCheck());
 			} else if (guiEvent.GetControl() == m_MusicMuteCheckbox) {
 				g_AudioMan.MuteMusic(m_MusicMuteCheckbox->GetCheck());
 			} else if (guiEvent.GetControl() == m_SoundMuteCheckbox) {

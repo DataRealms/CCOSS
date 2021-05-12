@@ -153,6 +153,30 @@ namespace RTE {
 		int GetTotalRealChannelCount() const { int channelCount; return m_AudioSystem->getSoftwareChannels(&channelCount) == FMOD_OK ? channelCount : 0; }
 
 		/// <summary>
+		/// Gets whether all audio is muted or not.
+		/// </summary>
+		/// <returns>Whether all the audio is muted or not.</returns>
+		bool MasterMuted() const { return m_MuteMaster; }
+
+		/// <summary>
+		/// Mutes or unmutes all audio.
+		/// </summary>
+		/// <param name="muteOrUnmute">Whether to mute or unmute all the audio.</param>
+		void MuteMaster(bool muteOrUnmute = true) { m_MuteMaster = muteOrUnmute; if (m_AudioEnabled) { m_MasterChannelGroup->setMute(m_MuteMaster); } }
+
+		/// <summary>
+		/// Gets the volume of all audio. Does not get music or sounds individual volumes.
+		/// </summary>
+		/// <returns>Current volume scalar value. 0.0-1.0.</returns>
+		float GetMasterVolume() const { return m_MasterVolume; }
+
+		/// <summary>
+		/// Sets all the audio to a specific volume. Does not affect music or sounds individual volumes.
+		/// </summary>
+		/// <param name="volume">The desired volume scalar. 0.0-1.0.</param>
+		void SetMasterVolume(float volume = 1.0F) { m_MasterVolume = std::clamp(volume, 0.0F, 1.0F); if (m_AudioEnabled) { m_MasterChannelGroup->setVolume(m_MasterVolume); } }
+
+		/// <summary>
 		/// Gets the global pitch scalar value for all sounds and music.
 		/// </summary>
 		/// <returns>The current pitch scalar. Will be > 0.</returns>
@@ -404,8 +428,10 @@ namespace RTE {
 		std::vector<const Vector *> m_CurrentActivityHumanPlayerPositions; //!< The stored positions of each human player in the current activity. Only filled when there's an activity running.
 		std::unordered_map<int, float> m_SoundChannelMinimumAudibleDistances; //!<  An unordered map of sound channel indices to floats representing each Sound Channel's minimum audible distances. This is necessary to keep safe data in case the SoundContainer is destroyed while the sound is still playing, as happens often with TDExplosives.
 
+		bool m_MuteMaster; //!< Whether the all audio is muted.
 		bool m_MuteMusic; //!< Whether the music channel is muted.
 		bool m_MuteSounds; //!< Whether all the sound effects channels are muted.
+		float m_MasterVolume; //!< Global volume of all audio.
 		float m_MusicVolume; //!< Global music volume.
 		float m_SoundsVolume; //!< Global sounds effects volume.
 		float m_GlobalPitch; //!< Global pitch multiplier.

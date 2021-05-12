@@ -99,6 +99,10 @@ namespace RTE {
 			reader >> g_FrameMan.m_ForceVirtualFullScreenGfxDriver;
 		} else if (propName == "ForceDedicatedFullScreenGfxDriver") {
 			reader >> g_FrameMan.m_ForceDedicatedFullScreenGfxDriver;
+		} else if (propName == "MasterVolume") {
+			g_AudioMan.SetMasterVolume(std::stof(reader.ReadPropValue()) / 100.0F);
+		} else if (propName == "MuteMaster") {
+			reader >> g_AudioMan.m_MuteMaster;
 		} else if (propName == "MusicVolume") {
 			g_AudioMan.SetMusicVolume(std::stof(reader.ReadPropValue()) / 100.0F);
 		} else if (propName == "MuteMusic") {
@@ -270,6 +274,8 @@ namespace RTE {
 		writer.NewDivider(false);
 		writer.NewLineString("// Audio Settings", false);
 		writer.NewLine(false);
+		writer.NewPropertyWithValue("MasterVolume", g_AudioMan.m_MasterVolume * 100);
+		writer.NewPropertyWithValue("MuteMaster", g_AudioMan.m_MuteMaster);
 		writer.NewPropertyWithValue("MusicVolume", g_AudioMan.m_MusicVolume * 100);
 		writer.NewPropertyWithValue("MuteMusic", g_AudioMan.m_MuteMusic);
 		writer.NewPropertyWithValue("SoundVolume", g_AudioMan.m_SoundsVolume * 100);

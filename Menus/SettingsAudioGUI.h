@@ -47,6 +47,9 @@ namespace RTE {
 		/// GUI elements that compose the audio settings menu screen.
 		/// </summary>
 		GUICollectionBox *m_AudioSettingsBox;
+		GUILabel *m_MasterVolumeLabel;
+		GUISlider *m_MasterVolumeSlider;
+		GUICheckbox *m_MasterMuteCheckbox;
 		GUILabel *m_MusicVolumeLabel;
 		GUISlider *m_MusicVolumeSlider;
 		GUICheckbox *m_MusicMuteCheckbox;
@@ -56,14 +59,19 @@ namespace RTE {
 
 #pragma region Audio Settings Handling
 		/// <summary>
-		/// Updates the position of the music volume slider, based on what the AudioMan is currently set to.
+		/// Updates the position of the master volume slider and volume value label, based on what the AudioMan is currently set to.
 		/// </summary>
-		void UpdateMusicVolumeSlider();
+		void UpdateMasterVolumeControls();
 
 		/// <summary>
-		/// Updates the position of the sound volume slider, based on what the AudioMan is currently set to.
+		/// Updates the position of the music volume slider and volume value label, based on what the AudioMan is currently set to.
 		/// </summary>
-		void UpdateSoundVolumeSlider();
+		void UpdateMusicVolumeControls();
+
+		/// <summary>
+		/// Updates the position of the sound volume slider and volume value label, based on what the AudioMan is currently set to.
+		/// </summary>
+		void UpdateSoundVolumeControls();
 #pragma endregion
 
 		// Disallow the use of some implicit methods.

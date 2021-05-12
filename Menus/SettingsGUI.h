@@ -5,7 +5,6 @@
 #include "SettingsAudioGUI.h"
 #include "SettingsInputGUI.h"
 #include "SettingsGameplayGUI.h"
-#include "SettingsNetworkGUI.h"
 #include "SettingsMiscGUI.h"
 
 namespace RTE {
@@ -54,7 +53,6 @@ namespace RTE {
 			AudioSettingsMenu,
 			InputSettingsMenu,
 			GameplaySettingsMenu,
-			NetworkSettingsMenu,
 			MiscSettingsMenu,
 			SettingsMenuCount
 		};
@@ -70,7 +68,6 @@ namespace RTE {
 		std::unique_ptr<SettingsAudioGUI> m_AudioSettingsMenu; //!< The audio settings sub-menu.
 		std::unique_ptr<SettingsInputGUI> m_InputSettingsMenu; //!< The input settings sub-menu.
 		std::unique_ptr<SettingsGameplayGUI> m_GameplaySettingsMenu; //!< The gameplay settings sub-menu.
-		std::unique_ptr<SettingsNetworkGUI> m_NetworkSettingsMenu; //!< The network multiplayer settings sub-menu.
 		std::unique_ptr<SettingsMiscGUI> m_MiscSettingsMenu; //!< The misc settings sub-menu.
 
 #pragma region Settings Menu Handling

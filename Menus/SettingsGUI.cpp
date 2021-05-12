@@ -31,14 +31,12 @@ namespace RTE {
 		m_SettingsMenuTabs.at(SettingsMenuScreen::AudioSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabAudioSettings"));
 		m_SettingsMenuTabs.at(SettingsMenuScreen::InputSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabInputSettings"));
 		m_SettingsMenuTabs.at(SettingsMenuScreen::GameplaySettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabGameplaySettings"));
-		m_SettingsMenuTabs.at(SettingsMenuScreen::NetworkSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabNetworkSettings"));
 		m_SettingsMenuTabs.at(SettingsMenuScreen::MiscSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabMiscSettings"));
 
 		m_VideoSettingsMenu = std::make_unique<SettingsVideoGUI>(m_GUIControlManager.get());
 		m_AudioSettingsMenu = std::make_unique<SettingsAudioGUI>(m_GUIControlManager.get());
 		m_InputSettingsMenu = std::make_unique<SettingsInputGUI>(m_GUIControlManager.get());
 		m_GameplaySettingsMenu = std::make_unique<SettingsGameplayGUI>(m_GUIControlManager.get());
-		m_NetworkSettingsMenu = std::make_unique<SettingsNetworkGUI>(m_GUIControlManager.get());
 		m_MiscSettingsMenu = std::make_unique<SettingsMiscGUI>(m_GUIControlManager.get());
 
 		SetActiveSettingsMenuScreen(SettingsMenuScreen::VideoSettingsMenu, false);
@@ -52,7 +50,6 @@ namespace RTE {
 		m_AudioSettingsMenu->SetEnabled(false);
 		m_InputSettingsMenu->SetEnabled(false);
 		m_GameplaySettingsMenu->SetEnabled(false);
-		m_NetworkSettingsMenu->SetEnabled(false);
 		m_MiscSettingsMenu->SetEnabled(false);
 
 		switch (activeMenu) {
@@ -67,9 +64,6 @@ namespace RTE {
 				break;
 			case SettingsMenuScreen::GameplaySettingsMenu:
 				m_GameplaySettingsMenu->SetEnabled(true);
-				break;
-			case SettingsMenuScreen::NetworkSettingsMenu:
-				m_NetworkSettingsMenu->SetEnabled(true);
 				break;
 			case SettingsMenuScreen::MiscSettingsMenu:
 				m_MiscSettingsMenu->SetEnabled(true);
@@ -108,8 +102,6 @@ namespace RTE {
 						SetActiveSettingsMenuScreen(SettingsMenuScreen::InputSettingsMenu);
 					} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(SettingsMenuScreen::GameplaySettingsMenu)) {
 						SetActiveSettingsMenuScreen(SettingsMenuScreen::GameplaySettingsMenu);
-					} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(SettingsMenuScreen::NetworkSettingsMenu)) {
-						SetActiveSettingsMenuScreen(SettingsMenuScreen::NetworkSettingsMenu);
 					} else if (guiEvent.GetControl() == m_SettingsMenuTabs.at(SettingsMenuScreen::MiscSettingsMenu)) {
 						SetActiveSettingsMenuScreen(SettingsMenuScreen::MiscSettingsMenu);
 					}
@@ -128,9 +120,6 @@ namespace RTE {
 					break;
 				case SettingsMenuScreen::GameplaySettingsMenu:
 					m_GameplaySettingsMenu->HandleInputEvents(guiEvent);
-					break;
-				case SettingsMenuScreen::NetworkSettingsMenu:
-					m_NetworkSettingsMenu->HandleInputEvents(guiEvent);
 					break;
 				case SettingsMenuScreen::MiscSettingsMenu:
 					m_MiscSettingsMenu->HandleInputEvents(guiEvent);

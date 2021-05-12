@@ -555,7 +555,6 @@
     <ClInclude Include="Menus\SettingsInputMappingGUI.h" />
     <ClInclude Include="Menus\SettingsInputMappingWizardGUI.h" />
     <ClInclude Include="Menus\SettingsMiscGUI.h" />
-    <ClInclude Include="Menus\SettingsNetworkGUI.h" />
     <ClInclude Include="Menus\SettingsVideoGUI.h" />
     <ClInclude Include="Menus\TitleScreen.h" />
     <ClInclude Include="Resources\resource.h" />
@@ -720,7 +719,6 @@
     <ClCompile Include="Menus\SettingsInputMappingGUI.cpp" />
     <ClCompile Include="Menus\SettingsInputMappingWizardGUI.cpp" />
     <ClCompile Include="Menus\SettingsMiscGUI.cpp" />
-    <ClCompile Include="Menus\SettingsNetworkGUI.cpp" />
     <ClCompile Include="Menus\SettingsVideoGUI.cpp" />
     <ClCompile Include="Menus\TitleScreen.cpp" />
     <ClCompile Include="System\Atom.cpp" />

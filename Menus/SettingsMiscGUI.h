@@ -45,7 +45,11 @@ namespace RTE {
 		/// GUI elements that compose the misc settings menu screen.
 		/// </summary>
 		GUICollectionBox *m_MiscSettingsBox;
+		GUICheckbox *m_SkipIntroCheckbox;
 		GUICheckbox *m_ShowToolTipsCheckbox;
+		GUICheckbox *m_DisableLoadingScreenReportCheckbox;
+		GUICheckbox *m_ShowAdvancedPerfStatsCheckbox;
+		GUICheckbox *m_MeasureLoadTimeCheckbox;
 
 		// Disallow the use of some implicit methods.
 		SettingsMiscGUI(const SettingsMiscGUI &reference) = delete;

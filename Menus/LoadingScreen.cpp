@@ -31,7 +31,7 @@ namespace RTE {
 		m_GUIControlManager->Load("Base.rte/GUIs/LoadingGUI.ini");
 
 		int loadingSplashOffset = 0;
-		if (!g_SettingsMan.DisableLoadingScreen()) {
+		if (!g_SettingsMan.LoadingScreenProgressReportDisabled()) {
 			CreateProgressReportListbox();
 			loadingSplashOffset = m_ProgressListboxPosX / 4;
 		}

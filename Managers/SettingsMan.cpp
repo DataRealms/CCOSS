@@ -39,8 +39,8 @@ namespace RTE {
 
 		m_SkipIntro = false;
 		m_ShowToolTips = true;
-		m_DisableLoadingScreen = true;
-		m_LoadingScreenReportPrecision = 100;
+		m_DisableLoadingScreenProgressReport = true;
+		m_LoadingScreenProgressReportPrecision = 100;
 		m_MenuTransitionDurationMultiplier = 1.0F;
 
 		m_DrawAtomGroupVisualizations = false;
@@ -170,10 +170,10 @@ namespace RTE {
 			reader >> m_ShowToolTips;
 		} else if (propName == "CaseSensitiveFilePaths") {
 			System::EnableFilePathCaseSensitivity(std::stoi(reader.ReadPropValue()));
-		} else if (propName == "DisableLoadingScreen") {
-			reader >> m_DisableLoadingScreen;
-		} else if (propName == "LoadingScreenReportPrecision") {
-			reader >> m_LoadingScreenReportPrecision;
+		} else if (propName == "DisableLoadingScreenProgressReport") {
+			reader >> m_DisableLoadingScreenProgressReport;
+		} else if (propName == "LoadingScreenProgressReportPrecision") {
+			reader >> m_LoadingScreenProgressReportPrecision;
 		} else if (propName == "ConsoleScreenRatio") {
 			g_ConsoleMan.SetConsoleScreenSize(std::stof(reader.ReadPropValue()));
 		} else if (propName == "AdvancedPerformanceStats") {
@@ -336,8 +336,8 @@ namespace RTE {
 		writer.NewPropertyWithValue("SkipIntro", m_SkipIntro);
 		writer.NewPropertyWithValue("ShowToolTips", m_ShowToolTips);
 		writer.NewPropertyWithValue("CaseSensitiveFilePaths", System::FilePathsCaseSensitive());
-		writer.NewPropertyWithValue("DisableLoadingScreen", m_DisableLoadingScreen);
-		writer.NewPropertyWithValue("LoadingScreenReportPrecision", m_LoadingScreenReportPrecision);
+		writer.NewPropertyWithValue("DisableLoadingScreenProgressReport", m_DisableLoadingScreenProgressReport);
+		writer.NewPropertyWithValue("LoadingScreenProgressReportPrecision", m_LoadingScreenProgressReportPrecision);
 		writer.NewPropertyWithValue("ConsoleScreenRatio", g_ConsoleMan.m_ConsoleScreenRatio);
 		writer.NewPropertyWithValue("AdvancedPerformanceStats", g_PerformanceMan.m_AdvancedPerfStats);
 		writer.NewPropertyWithValue("MenuTransitionDuration", m_MenuTransitionDurationMultiplier);

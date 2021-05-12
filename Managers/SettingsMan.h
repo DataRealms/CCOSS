@@ -326,16 +326,22 @@ namespace RTE {
 		void SetPrintDebugInfo(bool printDebugInfo) { m_PrintDebugInfo = printDebugInfo; }
 
 		/// <summary>
-		/// Gets whether the reader progress report is being displayed during module loading or not.
+		/// Gets whether displaying the reader progress report during module loading is disabled or not.
 		/// </summary>
 		/// <returns>Whether the reader progress report is being displayed during module loading or not.</returns>
-		bool DisableLoadingScreen() const { return m_DisableLoadingScreen; }
+		bool LoadingScreenProgressReportDisabled() const { return m_DisableLoadingScreenProgressReport; }
+
+		/// <summary>
+		/// Sets whether the reader progress report should be displayed during module loading or not.
+		/// </summary>
+		/// <param name="disable">Display the reader progress report during module loading or not.</param>
+		void DisableLoadingScreenProgressReport(bool disable) { m_DisableLoadingScreenProgressReport = disable; }
 
 		/// <summary>
 		/// Gets how accurately the reader progress report tells what line it's reading during module loading.
 		/// </summary>
 		/// <returns>How accurately the reader progress report tells what line it's reading during module loading.</returns>
-		int LoadingScreenReportPrecision() const { return m_LoadingScreenReportPrecision; }
+		int LoadingScreenProgressReportPrecision() const { return m_LoadingScreenProgressReportPrecision; }
 
 		/// <summary>
 		/// Gets the multiplier value for the transition durations between different menus.
@@ -350,10 +356,16 @@ namespace RTE {
 		void SetMenuTransitionDurationMultiplier(float newSpeed) { m_MenuTransitionDurationMultiplier = std::max(0.0F, newSpeed); }
 
 		/// <summary>
-		/// Gets whether the duration of module loading (extraction included) should be measured or not. For benchmarking purposes.
+		/// Gets whether the duration of module loading (extraction included) is being measured or not. For benchmarking purposes.
 		/// </summary>
-		/// <returns>Whether duration should be measured or not.</returns>
-		bool MeasureModuleLoadTime() const { return m_MeasureModuleLoadTime; }
+		/// <returns>Whether duration is being measured or not.</returns>
+		bool IsMeasuringModuleLoadTime() const { return m_MeasureModuleLoadTime; }
+
+		/// <summary>
+		/// Sets whether the duration of module loading (extraction included) should be measured or not. For benchmarking purposes.
+		/// </summary>
+		/// <param name="measure">Whether duration should be measured or not.</param>
+		void MeasureModuleLoadTime(bool measure) { m_MeasureModuleLoadTime = measure; }
 #pragma endregion
 
 	protected:
@@ -381,8 +393,8 @@ namespace RTE {
 
 		bool m_SkipIntro; //!< Whether to play the intro of the game or skip directly to the main menu.
 		bool m_ShowToolTips; //!< Whether ToolTips are enabled or not.
-		bool m_DisableLoadingScreen; //!< Whether to display the reader progress report during module loading or not. Greatly increases loading speeds when disabled.
-		int m_LoadingScreenReportPrecision; //!< How accurately the reader progress report tells what line it's reading during module loading. Lower values equal more precision at the cost of loading speed.
+		bool m_DisableLoadingScreenProgressReport; //!< Whether to display the reader progress report during module loading or not. Greatly increases loading speeds when disabled.
+		int m_LoadingScreenProgressReportPrecision; //!< How accurately the reader progress report tells what line it's reading during module loading. Lower values equal more precision at the cost of loading speed.
 		float m_MenuTransitionDurationMultiplier; //!< Multiplier value for the transition durations between different menus. Lower values equal faster transitions.
 
 		bool m_DrawAtomGroupVisualizations; //!< Whether to draw MOSRotating AtomGroups to the Scene MO color Bitmap.

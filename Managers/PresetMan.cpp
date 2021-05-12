@@ -198,7 +198,7 @@ bool PresetMan::LoadAllDataModules() {
 		}
 	}
 
-	if (g_SettingsMan.MeasureModuleLoadTime()) {
+	if (g_SettingsMan.IsMeasuringModuleLoadTime()) {
 		std::chrono::milliseconds moduleLoadElapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - moduleLoadTimerStart);
 		g_ConsoleMan.PrintString("Module load duration is: " + std::to_string(moduleLoadElapsedTime.count()) + "ms");
 	}

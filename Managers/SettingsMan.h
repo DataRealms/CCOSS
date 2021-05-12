@@ -269,13 +269,13 @@ namespace RTE {
 		/// Gets whether tooltip display on certain UI elements is enabled or not.
 		/// </summary>
 		/// <returns>Whether tooltips are displayed or not.</returns>
-		bool ToolTips() const { return m_ToolTips; }
+		bool ShowToolTips() const { return m_ShowToolTips; }
 
 		/// <summary>
 		/// Sets whether to display tooltips on certain UI elements or not.
 		/// </summary>
 		/// <param name="showToolTips">Whether to display tooltips or not.</param>
-		void SetShowToolTips(bool showToolTips) { m_ToolTips = showToolTips; }
+		void SetShowToolTips(bool showToolTips) { m_ShowToolTips = showToolTips; }
 
 		/// <summary>
 		/// Gets whether to draw AtomGroup visualizations or not.
@@ -380,7 +380,7 @@ namespace RTE {
 		int m_RecommendedMOIDCount; //!< Recommended max MOID's before removing actors from scenes.
 
 		bool m_SkipIntro; //!< Whether to play the intro of the game or skip directly to the main menu.
-		bool m_ToolTips; //!< Whether ToolTips are enabled or not.
+		bool m_ShowToolTips; //!< Whether ToolTips are enabled or not.
 		bool m_DisableLoadingScreen; //!< Whether to display the reader progress report during module loading or not. Greatly increases loading speeds when disabled.
 		int m_LoadingScreenReportPrecision; //!< How accurately the reader progress report tells what line it's reading during module loading. Lower values equal more precision at the cost of loading speed.
 		float m_MenuTransitionDurationMultiplier; //!< Multiplier value for the transition durations between different menus. Lower values equal faster transitions.

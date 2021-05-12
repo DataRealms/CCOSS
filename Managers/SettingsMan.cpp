@@ -38,7 +38,7 @@ namespace RTE {
 		m_RecommendedMOIDCount = 240;
 
 		m_SkipIntro = false;
-		m_ToolTips = true;
+		m_ShowToolTips = true;
 		m_DisableLoadingScreen = true;
 		m_LoadingScreenReportPrecision = 100;
 		m_MenuTransitionDurationMultiplier = 1.0F;
@@ -166,8 +166,8 @@ namespace RTE {
 			reader >> m_ShowMetaScenes;
 		} else if (propName == "SkipIntro") {
 			reader >> m_SkipIntro;
-		} else if (propName == "ToolTips") {
-			reader >> m_ToolTips;
+		} else if (propName == "ShowToolTips") {
+			reader >> m_ShowToolTips;
 		} else if (propName == "CaseSensitiveFilePaths") {
 			System::EnableFilePathCaseSensitivity(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "DisableLoadingScreen") {
@@ -334,7 +334,7 @@ namespace RTE {
 		writer.NewLineString("// Misc Settings", false);
 		writer.NewLine(false);
 		writer.NewPropertyWithValue("SkipIntro", m_SkipIntro);
-		writer.NewPropertyWithValue("ToolTips", m_ToolTips);
+		writer.NewPropertyWithValue("ShowToolTips", m_ShowToolTips);
 		writer.NewPropertyWithValue("CaseSensitiveFilePaths", System::FilePathsCaseSensitive());
 		writer.NewPropertyWithValue("DisableLoadingScreen", m_DisableLoadingScreen);
 		writer.NewPropertyWithValue("LoadingScreenReportPrecision", m_LoadingScreenReportPrecision);

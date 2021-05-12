@@ -13,7 +13,7 @@ namespace RTE {
 		m_MiscSettingsBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxMiscSettings"));
 
 		m_ShowToolTipsCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxShowToolTips"));
-		m_ShowToolTipsCheckbox->SetCheck(g_SettingsMan.ToolTips());
+		m_ShowToolTipsCheckbox->SetCheck(g_SettingsMan.ShowToolTips());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

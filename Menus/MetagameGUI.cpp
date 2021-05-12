@@ -2195,7 +2195,7 @@ void MetagameGUI::UpdateInput()
     // Show the ToolTip popup, if we are hovering over anything that has one to show
     string toolTip = "";
     GUIControl *pCurrentHover = m_pGUIController->GetControlUnderPoint(mouseX, mouseY);
-    if (g_SettingsMan.ToolTips() && pCurrentHover && !(toolTip = pCurrentHover->GetToolTip()).empty())
+    if (g_SettingsMan.ShowToolTips() && pCurrentHover && !(toolTip = pCurrentHover->GetToolTip()).empty())
     {
         // Restart timer if there's a new thing we're hovering over
         if (pCurrentHover != m_pHoveredControl)

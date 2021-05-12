@@ -19,7 +19,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a SettingsMiscGUI object in system memory and make it ready for use.
 		/// </summary>
-		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which holds all the GUIControls of this SettingsMiscGUI.</param>
+		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this SettingsMiscGUI.</param>
 		explicit SettingsMiscGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 
@@ -27,12 +27,13 @@ namespace RTE {
 		/// <summary>
 		/// Enables or disables the Misc Settings menu.
 		/// </summary>
-		/// <param name="enable">Show and enable or hide and disable the Misc Settings menu.</param>
+		/// <param name="enable">Show and enable or hide and disable the misc settings menu.</param>
 		void SetEnabled(bool enable = true) const;
 
 		/// <summary>
-		/// User input handling for the Audio Settings menu.
+		/// Handles the player interaction with the SettingsMiscGUI GUI elements.
 		/// </summary>
+		/// <param name="guiEvent">The GUIEvent containing information about the player interaction with an element.</param>
 		void HandleInputEvents(GUIEvent &guiEvent);
 #pragma endregion
 
@@ -40,9 +41,11 @@ namespace RTE {
 
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
 
-		GUICollectionBox *m_MiscSettingsBox; //!< The GUICollectionBox that contains all the Misc Settings menu GUI elements.
-
-		GUICheckbox *m_ShowToolTipsCheckbox; //!<
+		/// <summary>
+		/// GUI elements that compose the misc settings menu screen.
+		/// </summary>
+		GUICollectionBox *m_MiscSettingsBox;
+		GUICheckbox *m_ShowToolTipsCheckbox;
 
 		// Disallow the use of some implicit methods.
 		SettingsMiscGUI(const SettingsMiscGUI &reference) = delete;

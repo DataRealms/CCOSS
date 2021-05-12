@@ -29,6 +29,10 @@ namespace RTE {
 		m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::Dedicated) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickDedicated"));
 		m_ResolutionQuickToggleButtons.at(ResolutionQuickChangeType::UpscaledDedicated) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickUpscaledDedicated"));
 
+		m_TwoPlayerSplitscreenHSplitRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioSplitscreenHoriz"));
+		m_TwoPlayerSplitscreenVSplitRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioSplitscreenVert"));
+		m_TwoPlayerSplitscreenVSplitRadioButton->SetCheck(g_FrameMan.GetTwoPlayerVSplit());
+
 		m_PresetResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioPresetResolution"));
 		m_CustomResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioCustomResolution"));
 
@@ -328,7 +332,13 @@ namespace RTE {
 			if (guiEvent.GetMsg() == GUICollectionBox::Clicked && !m_VideoSettingsBox->HasFocus() && (guiEvent.GetControl() == m_VideoSettingsBox || guiEvent.GetControl() == m_CustomResolutionBox)) { m_VideoSettingsBox->SetFocus(); }
 
 			if (guiEvent.GetMsg() == GUIRadioButton::Pushed) {
-				if (guiEvent.GetControl() == m_PresetResolutionRadioButton) {
+				if (guiEvent.GetControl() == m_TwoPlayerSplitscreenHSplitRadioButton) {
+					g_GUISound.ButtonPressSound()->Play();
+					g_FrameMan.SetTwoPlayerVSplit(false);
+				} else if (guiEvent.GetControl() == m_TwoPlayerSplitscreenVSplitRadioButton) {
+					g_GUISound.ButtonPressSound()->Play();
+					g_FrameMan.SetTwoPlayerVSplit(true);
+				} else if (guiEvent.GetControl() == m_PresetResolutionRadioButton) {
 					g_GUISound.ButtonPressSound()->Play();
 					m_PresetResolutionBox->SetVisible(true);
 					m_CustomResolutionBox->SetVisible(false);

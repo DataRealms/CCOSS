@@ -91,14 +91,12 @@ namespace RTE {
 			reader >> g_FrameMan.m_ResMultiplier;
 		} else if (propName == "DisableMultiScreenResolutionValidation") {
 			reader >> g_FrameMan.m_DisableMultiScreenResolutionValidation;
-		} else if (propName == "HSplitScreen") {
-			reader >> g_FrameMan.m_HSplitOverride;
-		} else if (propName == "VSplitScreen") {
-			reader >> g_FrameMan.m_VSplitOverride;
 		} else if (propName == "ForceVirtualFullScreenGfxDriver") {
 			reader >> g_FrameMan.m_ForceVirtualFullScreenGfxDriver;
 		} else if (propName == "ForceDedicatedFullScreenGfxDriver") {
 			reader >> g_FrameMan.m_ForceDedicatedFullScreenGfxDriver;
+		} else if (propName == "TwoPlayerSplitscreenVertSplit") {
+			reader >> g_FrameMan.m_TwoPlayerVSplit;
 		} else if (propName == "MasterVolume") {
 			g_AudioMan.SetMasterVolume(std::stof(reader.ReadPropValue()) / 100.0F);
 		} else if (propName == "MuteMaster") {
@@ -265,10 +263,9 @@ namespace RTE {
 		writer.NewPropertyWithValue("ResolutionY", g_FrameMan.m_ResY);
 		writer.NewPropertyWithValue("ResolutionMultiplier", g_FrameMan.m_ResMultiplier);
 		writer.NewPropertyWithValue("DisableMultiScreenResolutionValidation", g_FrameMan.m_DisableMultiScreenResolutionValidation);
-		writer.NewPropertyWithValue("HSplitScreen", g_FrameMan.m_HSplitOverride);
-		writer.NewPropertyWithValue("VSplitScreen", g_FrameMan.m_VSplitOverride);
 		writer.NewPropertyWithValue("ForceVirtualFullScreenGfxDriver", g_FrameMan.m_ForceVirtualFullScreenGfxDriver);
 		writer.NewPropertyWithValue("ForceDedicatedFullScreenGfxDriver", g_FrameMan.m_ForceDedicatedFullScreenGfxDriver);
+		writer.NewPropertyWithValue("TwoPlayerSplitscreenVertSplit", g_FrameMan.m_TwoPlayerVSplit);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

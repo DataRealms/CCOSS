@@ -106,6 +106,8 @@ namespace RTE {
 		/// GUI elements that compose the video settings menu screen.
 		/// </summary>
 		GUICollectionBox *m_VideoSettingsBox;
+		GUIRadioButton *m_TwoPlayerSplitscreenHSplitRadioButton;
+		GUIRadioButton *m_TwoPlayerSplitscreenVSplitRadioButton;
 		GUIRadioButton *m_PresetResolutionRadioButton;
 		GUIRadioButton *m_CustomResolutionRadioButton;
 		GUICollectionBox *m_PresetResolutionBox;

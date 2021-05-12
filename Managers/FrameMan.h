@@ -176,6 +176,18 @@ namespace RTE {
 		void SetVSplit(bool vSplit) { m_VSplit = vSplit; }
 
 		/// <summary>
+		/// Gets whether the screen is being split vertically when in two player splitscreen, or is default split horizontally.
+		/// </summary>
+		/// <returns>Whether the screen is being split vertically when two player splitscreen or not.</returns>
+		bool GetTwoPlayerVSplit() const { return m_TwoPlayerVSplit; }
+
+		/// <summary>
+		/// Sets whether the screen should be split vertically when in two player splitscreen or default to the horizontal split.
+		/// </summary>
+		/// <param name="vSplit">Whether the screen should be split vertically when in two player splitscreen or default to the horizontal split.</param>
+		void SetTwoPlayerVSplit(bool vSplit) { m_TwoPlayerVSplit = vSplit; }
+
+		/// <summary>
 		/// Sets new values for the split screen configuration.
 		/// </summary>
 		/// <param name="hSplit">Whether the new setting should be horizontally split (over and under).</param>
@@ -518,8 +530,7 @@ namespace RTE {
 
 		bool m_HSplit; //!< Whether the screen is split horizontally across the screen, ie as two splitscreens one above the other.
 		bool m_VSplit; //!< Whether the screen is split vertically across the screen, ie as two splitscreens side by side.
-		bool m_HSplitOverride; //!< Whether the screen is set to split horizontally in settings.
-		bool m_VSplitOverride; //!< Whether the screen is set to split vertically in settings.
+		bool m_TwoPlayerVSplit; //!< Whether the screen is set to be split vertically when in two player splitscreen, or is default split horizontally.
 
 		ContentFile m_PaletteFile; //!< File of the screen palette.
 		PALETTE m_Palette; //!< Array of RGB entries read from the palette file.

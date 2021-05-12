@@ -64,8 +64,7 @@ namespace RTE {
 		m_ResChanged = false;
 		m_HSplit = false;
 		m_VSplit = false;
-		m_HSplitOverride = false;
-		m_VSplitOverride = false;
+		m_TwoPlayerVSplit = false;
 		m_PlayerScreen = nullptr;
 		m_PlayerScreenWidth = 0;
 		m_PlayerScreenHeight = 0;
@@ -508,9 +507,9 @@ namespace RTE {
 		if (m_PlayerScreen) { release_bitmap(m_PlayerScreen); }
 
 		// Override screen splitting according to settings if needed
-		if ((hSplit || vSplit) && !(hSplit && vSplit) && (m_HSplitOverride || m_VSplitOverride)) {
-			hSplit = m_HSplitOverride;
-			vSplit = m_VSplitOverride;
+		if ((hSplit || vSplit) && !(hSplit && vSplit) && m_TwoPlayerVSplit) {
+			hSplit = false;
+			vSplit = m_TwoPlayerVSplit;
 		}
 		m_HSplit = hSplit;
 		m_VSplit = vSplit;

@@ -34,9 +34,11 @@ namespace RTE {
 
 		m_ModsListBox = dynamic_cast<GUIListBox *>(m_GUIControlManager->GetControl("ListBoxMods"));
 		m_ModsListBox->SetScrollBarThickness(15);
+		m_ModsListBox->SetScrollBarPadding(2);
 
 		m_ScriptsListBox = dynamic_cast<GUIListBox *>(m_GUIControlManager->GetControl("ListBoxScripts"));
 		m_ScriptsListBox->SetScrollBarThickness(15);
+		m_ScriptsListBox->SetScrollBarPadding(2);
 
 		m_ToggleModButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonToggleMod"));
 		m_ToggleScriptButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonToggleScript"));

@@ -10,6 +10,7 @@ namespace RTE {
 	class GUIComboBox;
 	class GUILabel;
 	class GUIButton;
+	class GUIScrollbar;
 	class GUIEvent;
 
 	/// <summary>
@@ -44,16 +45,10 @@ namespace RTE {
 
 	private:
 
-		/// <summary>
-		/// 
-		/// </summary>
-		enum PlayerInputMappings {
-			InputMappingCount = 22
-		};
-
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
 
 		Players m_ConfiguringPlayer; //!< The player this SettingsInputMappingGUI is configuring input mapping for.
+		int m_LastInputMapScrollingBoxScrollbarValue; //!< The previous value of the input mappings scrolling box scrollbar. Used to calculate the scroll position.
 
 		std::unique_ptr<SettingsInputMappingWizardGUI> m_InputConfigWizardMenu; //!< The input mapping config wizard.
 
@@ -64,15 +59,21 @@ namespace RTE {
 		GUILabel *m_InputMappingSettingsLabel;
 		GUIButton *m_CloseMappingBoxButton;
 		GUIButton *m_RunConfigWizardButton;
-		std::array<GUILabel *, PlayerInputMappings::InputMappingCount> m_InputMapLabel;
-		std::array<GUIButton *, PlayerInputMappings::InputMappingCount> m_InputMapButton;
+		GUICollectionBox *m_InputMapScrollingBox;
+		GUIScrollbar *m_InputMapScrollingBoxScrollbar;
+		std::array<GUILabel *, InputElements::INPUT_COUNT> m_InputMapLabel;
+		std::array<GUIButton *, InputElements::INPUT_COUNT> m_InputMapButton;
 
 #pragma region Input Mapping Settings Handling
 		/// <summary>
-		/// 
+		/// Updates the mapping name labels and button key label with the configuring player's InputScheme mappings.
 		/// </summary>
-		/// <param name="player"></param>
-		void UpdateMappingLabelsAndButtons(int player);
+		void UpdateMappingLabelsAndButtons();
+
+		/// <summary>
+		/// Updates the input mapping scrolling box scroll position.
+		/// </summary>
+		void UpdateScrollingInputBoxScrollPosition();
 #pragma endregion
 
 		// Disallow the use of some implicit methods.

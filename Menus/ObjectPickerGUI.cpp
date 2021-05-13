@@ -87,9 +87,13 @@ namespace RTE {
 		m_ParentBox->SetEnabled(false);
 		m_ParentBox->SetVisible(false);
 		m_GroupsList = dynamic_cast<GUIListBox *>(m_GUIControlManager->GetControl("GroupsLB"));
+		m_GroupsList->EnableScrollbars(false, true);
+		m_GroupsList->SetScrollBarThickness(13);
 		m_GroupsList->SetAlternateDrawMode(false);
 		m_GroupsList->SetMultiSelect(false);
 		m_ObjectsList = dynamic_cast<GUIListBox *>(m_GUIControlManager->GetControl("ObjectsLB"));
+		m_ObjectsList->EnableScrollbars(false, true);
+		m_ObjectsList->SetScrollBarThickness(13);
 		m_ObjectsList->SetAlternateDrawMode(true);
 		m_ObjectsList->SetMultiSelect(false);
 

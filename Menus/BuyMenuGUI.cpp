@@ -264,7 +264,9 @@ int BuyMenuGUI::Create(Controller *pController)
 //    m_pCartList->SetHotTracking(true);
     m_pCraftBox->SetLocked(true);
     m_pShopList->EnableScrollbars(false, true);
+	m_pShopList->SetScrollBarThickness(13);
     m_pCartList->EnableScrollbars(false, true);
+	m_pCartList->SetScrollBarThickness(13);
 
     // Load the loadouts initially.. this might be done again later as well by Activity scripts after they set metaplayer etc
     LoadAllLoadoutsFromFile();

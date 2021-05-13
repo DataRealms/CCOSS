@@ -545,7 +545,7 @@ namespace RTE {
 			m_GUIEquippedItemButton->SetEnabled(true);
 			if (m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough() && m_GUIEquippedItemButton->HasIcon()) {
 				m_GUIEquippedItemButton->SetIconAndText(nullptr, ">>>");
-			} else if (!(m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough()) && !m_GUIEquippedItemButton->HasIcon()) {
+			} else {
 				m_GUIEquippedItemButton->SetIconAndText(m_InventoryActorEquippedItems.at(0)->GetGraphicalIcon(), m_InventoryActorEquippedItems.at(0)->GetPresetName());
 			}
 
@@ -553,14 +553,12 @@ namespace RTE {
 				m_GUIOffhandEquippedItemButton->SetEnabled(true);
 				if (m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIOffhandEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough() && m_GUIOffhandEquippedItemButton->HasIcon()) {
 					m_GUIOffhandEquippedItemButton->SetIconAndText(nullptr, ">>>");
-				} else if (!(m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIOffhandEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough()) && !m_GUIOffhandEquippedItemButton->HasIcon()) {
+				} else {
 					m_GUIOffhandEquippedItemButton->SetIconAndText(m_InventoryActorEquippedItems.at(1)->GetGraphicalIcon(), m_InventoryActorEquippedItems.at(1)->GetPresetName());
 				}
-			} else if (m_GUIOffhandEquippedItemButton->HasIcon()) {
-				m_GUIOffhandEquippedItemButton->SetEnabled(m_GUISelectedItem != nullptr);
-				m_GUIOffhandEquippedItemButton->SetIconAndText(nullptr, "> <");
 			} else {
 				m_GUIOffhandEquippedItemButton->SetEnabled(m_GUISelectedItem != nullptr);
+				if (m_GUIOffhandEquippedItemButton->HasIcon()) { m_GUIOffhandEquippedItemButton->SetIconAndText(nullptr, "> <"); }
 			}
 
 			bool showOffhandButton = m_InventoryActorEquippedItems.size() > 1 || (dynamic_cast<HeldDevice *>(m_InventoryActorEquippedItems.at(0)) ? dynamic_cast<HeldDevice *>(m_InventoryActorEquippedItems.at(0))->IsOneHanded() : false);
@@ -573,13 +571,9 @@ namespace RTE {
 			}
 		} else {
 			m_GUIEquippedItemButton->SetEnabled(m_GUISelectedItem != nullptr);
-			if (m_GUIEquippedItemButton->HasIcon()) {
-				m_GUIEquippedItemButton->SetIconAndText(nullptr, "> <");
-			}
+			if (m_GUIEquippedItemButton->HasIcon()) { m_GUIEquippedItemButton->SetIconAndText(nullptr, "> <"); }
 			m_GUIOffhandEquippedItemButton->SetEnabled(m_GUISelectedItem != nullptr);
-			if (m_GUIOffhandEquippedItemButton->HasIcon()) {
-				m_GUIOffhandEquippedItemButton->SetIconAndText(nullptr, "> <");
-			}
+			if (m_GUIOffhandEquippedItemButton->HasIcon()) { m_GUIOffhandEquippedItemButton->SetIconAndText(nullptr, "> <"); }
 		}
 	}
 
@@ -626,7 +620,7 @@ namespace RTE {
 				m_GUIInventoryItemButtons.at(i - startIndex).first = inventoryItem;
 				if (m_GUISelectedItem && m_GUISelectedItem->Button == itemButton && m_GUISelectedItem->DragWasHeldForLongEnough() && itemButton->HasIcon()) {
 					itemButton->SetIconAndText(nullptr, ">>>");
-				} else if (!(m_GUISelectedItem && m_GUISelectedItem->Button == itemButton && m_GUISelectedItem->DragWasHeldForLongEnough()) && !itemButton->HasIcon()) {
+				} else {
 					itemButton->SetIconAndText(inventoryItem->GetGraphicalIcon(), inventoryItem->GetPresetName());
 				}
 			} else if (i > lastPopulatedIndex) {
@@ -986,8 +980,9 @@ namespace RTE {
 
 	void InventoryMenuGUI::SwapEquippedItemAndInventoryItem(MovableObject *equippedItemToSwapOut, int inventoryItemIndexToSwapIn) {
 		MovableObject *offhandEquippedItemToAddToInventory = nullptr;
-		if (const HeldDevice *inventoryItemToSwapIn = inventoryItemIndexToSwapIn < m_InventoryActor->GetInventorySize() ? dynamic_cast<const HeldDevice *>(m_InventoryActor->GetInventory()->at(inventoryItemIndexToSwapIn)) : nullptr; inventoryItemToSwapIn && m_InventoryActorEquippedItems.size() > 1 && !inventoryItemToSwapIn->IsOneHanded()) {
-			if (m_InventoryActorEquippedItems.at(0)) {
+		if (m_InventoryActorEquippedItems.size() > 1 && inventoryItemIndexToSwapIn >= 0 && inventoryItemIndexToSwapIn < m_InventoryActor->GetInventorySize()) {
+			const HeldDevice *inventoryItemToSwapIn = dynamic_cast<const HeldDevice *>(m_InventoryActor->GetInventory()->at(inventoryItemIndexToSwapIn));
+			if (m_InventoryActorEquippedItems.at(0) && !inventoryItemToSwapIn->IsOneHanded() && !inventoryItemToSwapIn->HasObjectInGroup("Shields")) {
 				equippedItemToSwapOut = m_InventoryActorEquippedItems.at(0);
 				offhandEquippedItemToAddToInventory = m_InventoryActorEquippedItems.at(1);
 			}

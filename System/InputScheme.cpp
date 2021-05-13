@@ -145,6 +145,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void InputScheme::SetPreset(InputPreset schemePreset) {
+		for (InputMapping &inputMapping : m_InputMappings) {
+			inputMapping.Reset();
+		}
+
 		m_SchemePreset = schemePreset;
 		switch (m_SchemePreset) {
 			case InputPreset::PRESET_XBOX360:

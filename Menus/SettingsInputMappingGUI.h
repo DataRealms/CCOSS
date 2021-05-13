@@ -13,7 +13,7 @@ namespace RTE {
 	class GUIEvent;
 
 	/// <summary>
-	/// 
+	/// Handling for player input mapping settings through the game settings user interface.
 	/// </summary>
 	class SettingsInputMappingGUI {
 
@@ -23,24 +23,23 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a SettingsInputMappingGUI object in system memory and make it ready for use.
 		/// </summary>
-		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which holds all the GUIControls of this SettingsInputMappingGUI.</param>
+		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this SettingsInputMappingGUI.</param>
 		explicit SettingsInputMappingGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Enables or disables the Input Mapping Settings menu.
+		/// Enables or disables the input mapping settings menu.
 		/// </summary>
-		/// <param name="enable">Show and enable or hide and disable the Input Mapping Settings menu.</param>
-		/// <param name="player"></param>
+		/// <param name="enable">Show and enable or hide and disable the input mapping settings menu.</param>
+		/// <param name="player">The player this SettingsInputMappingGUI is configuring input mapping for.</param>
 		void SetEnabled(bool enable = true, int player = 0);
 
 		/// <summary>
-		/// User input handling for the Input Settings menu.
+		/// Handles the player interaction with the SettingsInputMappingGUI GUI elements.
 		/// </summary>
-		/// <param name="guiEvent"></param>
-		/// <param name="player"></param>
-		void HandleInputEvents(GUIEvent &guiEvent, int player);
+		/// <param name="guiEvent">The GUIEvent containing information about the player interaction with an element.</param>
+		void HandleInputEvents(GUIEvent &guiEvent);
 #pragma endregion
 
 	private:
@@ -49,24 +48,24 @@ namespace RTE {
 		/// 
 		/// </summary>
 		enum PlayerInputMappings {
-			InputMappingCount = 18
+			InputMappingCount = 22
 		};
 
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
 
-		GUICollectionBox *m_InputMappingSettingsBox; //!<
+		Players m_ConfiguringPlayer; //!< The player this SettingsInputMappingGUI is configuring input mapping for.
 
-		GUICollectionBox *m_MappingConfigBox;
-		GUILabel *m_MappingConfigLabel;
+		std::unique_ptr<SettingsInputMappingWizardGUI> m_InputConfigWizardMenu; //!< The input mapping config wizard.
+
+		/// <summary>
+		/// GUI elements that compose the input mapping settings menu screen.
+		/// </summary>
+		GUICollectionBox *m_InputMappingSettingsBox;
+		GUILabel *m_InputMappingSettingsLabel;
 		GUIButton *m_CloseMappingBoxButton;
 		GUIButton *m_RunConfigWizardButton;
-
-		std::array<GUILabel *, PlayerInputMappings::InputMappingCount> m_InputMapLabel; //!<
-		std::array<GUIButton *, PlayerInputMappings::InputMappingCount> m_InputMapButton; //!<
-
-		bool m_InputConfigWizardActive = false; //!<
-
-		std::unique_ptr<SettingsInputMappingWizardGUI> m_InputConfigWizardMenu; //!<
+		std::array<GUILabel *, PlayerInputMappings::InputMappingCount> m_InputMapLabel;
+		std::array<GUIButton *, PlayerInputMappings::InputMappingCount> m_InputMapButton;
 
 #pragma region Input Mapping Settings Handling
 		/// <summary>

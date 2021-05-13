@@ -2,28 +2,26 @@
 #include "UInputMan.h"
 
 #include "GUI.h"
+#include "AllegroBitmap.h"
 #include "GUICollectionBox.h"
 #include "GUIButton.h"
-#include "GUISlider.h"
-#include "GUIRadioButton.h"
 #include "GUILabel.h"
-#include "AllegroBitmap.h"
 
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	SettingsInputMappingGUI::SettingsInputMappingGUI(GUIControlManager *parentControlManager) : m_GUIControlManager(parentControlManager) {
-		m_MappingConfigBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxPlayerInputMapping"));
-		m_MappingConfigBox->SetVisible(false);
+		m_InputMappingSettingsBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxPlayerInputMapping"));
+		m_InputMappingSettingsBox->SetVisible(false);
 
-		m_MappingConfigLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelPlayerInputMappingTitle"));
+		m_InputMappingSettingsLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelPlayerInputMappingTitle"));
 		m_CloseMappingBoxButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonCloseMappingBox"));
 		m_RunConfigWizardButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonRunConfigWizard"));
 
 		for (int i = 0; i < 18; ++i) {
-			m_InputMapLabel.at(i) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelMapping" + std::to_string(i + 1)));
-			m_InputMapButton.at(i) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMapping" + std::to_string(i + 1)));
+			m_InputMapLabel.at(i) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelInputMapping" + std::to_string(i + 1)));
+			m_InputMapButton.at(i) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonInputMapping" + std::to_string(i + 1)));
 		}
 		m_InputConfigWizardMenu = std::make_unique<SettingsInputMappingWizardGUI>(parentControlManager);
 	}
@@ -32,13 +30,15 @@ namespace RTE {
 
 	void SettingsInputMappingGUI::SetEnabled(bool enable, int player) {
 		if (enable) {
-			m_MappingConfigBox->SetVisible(true);
-			m_MappingConfigBox->SetEnabled(true);
-			m_MappingConfigLabel->SetText("P L A Y E R   " + std::to_string(player + 1) + "   I N P U T   M A P P I N G");
-			UpdateMappingLabelsAndButtons(player);
+			m_InputMappingSettingsBox->SetVisible(true);
+			m_InputMappingSettingsBox->SetEnabled(true);
+			m_InputMappingSettingsLabel->SetText("P L A Y E R   " + std::to_string(player + 1) + "   I N P U T   M A P P I N G");
+			m_ConfiguringPlayer = static_cast<Players>(player);
+			//UpdateMappingLabelsAndButtons(player);
 		} else {
-			m_MappingConfigBox->SetVisible(false);
-			m_MappingConfigBox->SetEnabled(false);
+			m_InputMappingSettingsBox->SetVisible(false);
+			m_InputMappingSettingsBox->SetEnabled(false);
+			m_ConfiguringPlayer = Players::NoPlayer;
 		}
 	}
 
@@ -136,13 +136,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsInputMappingGUI::HandleInputEvents(GUIEvent &guiEvent, int player) {
+	void SettingsInputMappingGUI::HandleInputEvents(GUIEvent &guiEvent) {
 		if (guiEvent.GetType() == GUIEvent::Command) {
 			if (guiEvent.GetControl() == m_CloseMappingBoxButton) {
 				g_GUISound.ButtonPressSound()->Play();
 				SetEnabled(false);
 			} else if (guiEvent.GetControl() == m_RunConfigWizardButton) {
-				;
+				m_InputConfigWizardMenu->SetEnabled(true, m_ConfiguringPlayer);
 			}
 			for (int mapButton = 0; mapButton < PlayerInputMappings::InputMappingCount; ++mapButton) {
 				if (guiEvent.GetControl() == m_InputMapButton.at(mapButton)) {
@@ -150,6 +150,6 @@ namespace RTE {
 				}
 			}
 		}
-		m_InputConfigWizardMenu->HandleInputEvents(guiEvent, player);
+		m_InputConfigWizardMenu->HandleInputEvents(guiEvent);
 	}
 }

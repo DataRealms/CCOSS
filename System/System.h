@@ -131,7 +131,7 @@ namespace RTE {
 		static bool s_LogToCLI; //!< Bool to tell whether to print the loading log and anything specified with PrintToCLI to command-line or not.
 		static std::string s_WorkingDirectory; //!< String containing the absolute path to current working directory.
 		static std::vector<size_t> s_WorkingTree; //!< Vector of the hashes of all file paths in the working directory.
-		static std::filesystem::file_time_type s_ProgramStartTime; //!< Low precision time point of program start for checking if a file was created after starting
+		static std::filesystem::file_time_type s_ProgramStartTime; //!< Low precision time point of program start for checking if a file was created after starting.
 
 		static bool s_CaseSensitive; //!< Whether case sensitivity is enforced when checking for file existence.
 		static const std::string s_ScreenshotDirectory; //!< String containing the folder name of the screenshots directory.

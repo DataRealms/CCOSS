@@ -47,6 +47,7 @@
 #include <cstdlib>
 #include <cstdarg>
 #include <cstddef>
+#include <chrono>
 #include <functional>
 #include <thread>
 #include <mutex>

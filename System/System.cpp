@@ -6,8 +6,6 @@
 #include <sys/stat.h>
 #endif
 
-#include "chrono"
-
 namespace RTE {
 
 	bool System::s_LogToCLI = false;

@@ -235,6 +235,12 @@ enum MOType
 	bool DisableScript(const std::string &scriptPath);
 
     /// <summary>
+    /// Enables or disables all scripts on this MovableObject.
+    /// </summary>
+    /// <param name="enableScripts">Whether to enable (true) or disable (false) all scripts on this MovableObject.</param>
+    void EnableOrDisableAllScripts(bool enableScripts);
+
+    /// <summary>
     /// Runs the given function for the given script, with the given arguments. The first argument to the function will always be 'self'.
     /// If either argument list is not empty, its entries will be passed into the Lua function in order, with entity arguments first.
     /// </summary>

@@ -592,16 +592,19 @@ bool MovableObject::AddScript(const std::string &scriptPath) {
             }
             return true;
         case -1:
-            g_ConsoleMan.PrintString("ERROR: The script path was empty.");
+            g_ConsoleMan.PrintString("ERROR: The script path " + scriptPath + " was empty.");
             break;
         case -2:
-            g_ConsoleMan.PrintString("ERROR: The script path did not point to a valid file.");
+            g_ConsoleMan.PrintString("ERROR: The script path " + scriptPath + "  did not point to a valid file.");
             break;
         case -3:
             g_ConsoleMan.PrintString("ERROR: The script path " + scriptPath + " is already loaded onto this object.");
             break;
         case -4:
             g_ConsoleMan.PrintString("ERROR: Failed to do necessary setup to add scripts while attempting to add the script with path " + scriptPath + ". This has nothing to do with your script, please report it to a developer.");
+            break;
+        case -5:
+            g_ConsoleMan.PrintString("ERROR: The file with script path " + scriptPath +" could not be run. Please check that this is a valid Lua file.");
             break;
         default:
             RTEAbort("Reached default case while adding script. This should never happen!");
@@ -644,6 +647,18 @@ bool MovableObject::DisableScript(const std::string &scriptPath) {
         return true;
     }
     return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableObject::EnableOrDisableAllScripts(bool enableScripts) {
+    for (const auto &[scriptPath, scriptIsEnabled] : m_AllLoadedScripts) {
+        if (enableScripts && !scriptIsEnabled) {
+            EnableScript(scriptPath);
+        } else if (!enableScripts && scriptIsEnabled) {
+            DisableScript(scriptPath);
+        }
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

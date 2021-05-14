@@ -484,7 +484,7 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
     // Return an error if the script path is empty or already there
     if (scriptPath.empty()) {
         return -1;
-    } else if (!std::filesystem::exists(scriptPath)) {
+    } else if (!System::PathExistsCaseSensitive(scriptPath)) {
         return -2;
     } else if (HasScript(scriptPath)) {
         return -3;

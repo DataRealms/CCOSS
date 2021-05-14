@@ -219,6 +219,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Renamed `Attachable` INI property `CollidesWithTerrainWhenAttached` to more correct, consistent `CollidesWithTerrainWhileAttached`.
 
+- You can now modify `Foot`, `Magazine` and `Flash` (both `HDFirearm` and `AEmitter`) `CopyOfs` in your `Leg`/`HDFirearm``AEmitter` definition without setting a new `PresetName`.
+
 ### Removed
 
 - Removed obsolete graphics drivers and their `Settings.ini` properties `ForceOverlayedWindowGfxDriver` and `ForceNonOverlayedWindowGfxDriver`.

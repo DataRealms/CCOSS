@@ -258,32 +258,32 @@ int ACrab::Create(const ACrab &reference) {
 int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "Turret") {
-        m_pTurret = new Turret;
-        reader >> m_pTurret;
-        SetTurret(m_pTurret);
+        Turret iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetTurret(dynamic_cast<Turret *>(iniDefinedObject.Clone()));
     } else if (propName == "Jetpack") {
-        m_pJetpack = new AEmitter;
-        reader >> m_pJetpack;
-        SetJetpack(m_pJetpack);
+        AEmitter iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetJetpack(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
     } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         m_JetTimeTotal *= 1000;
     } else if (propName == "LFGLeg" || propName == "LeftFGLeg") {
-        m_pLFGLeg = new Leg;
-        reader >> m_pLFGLeg;
-        SetLeftFGLeg(m_pLFGLeg);
+        Leg iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetLeftFGLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
     } else if (propName == "LBGLeg" || propName == "LeftFGLeg") {
-        m_pLBGLeg = new Leg;
-        reader >> m_pLBGLeg;
-        SetLeftBGLeg(m_pLBGLeg);
+        Leg iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetLeftBGLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
     } else if (propName == "RFGLeg" || propName == "LeftFGLeg") {
-        m_pRFGLeg = new Leg;
-        reader >> m_pRFGLeg;
-        SetRightFGLeg(m_pRFGLeg);
+        Leg iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetRightFGLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
     } else if (propName == "RBGLeg" || propName == "LeftFGLeg") {
-        m_pRBGLeg = new Leg;
-        reader >> m_pRBGLeg;
-        SetRightBGLeg(m_pRBGLeg);
+        Leg iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetRightBGLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
     } else if (propName == "LFootGroup" || propName == "LeftFootGroup") {
         delete m_pLFGFootGroup;
         delete m_pLBGFootGroup;

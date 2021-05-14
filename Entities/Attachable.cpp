@@ -351,6 +351,8 @@ namespace RTE {
 			}
 			m_DeepCheck = false;
 			m_PrevRotAngleOffset = currentRotAngleOffset;
+		} else {
+			UpdatePositionAndJointPositionBasedOnOffsets();
 		}
 
 		MOSRotating::Update();

@@ -48,27 +48,25 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool System::PathExistsCaseSensitive(const std::string &pathToCheck) {
-		#ifndef __linux__
+#ifndef __linux__
 		if (s_CaseSensitive) {
 			if (s_WorkingTree.empty()) {
-				for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::recursive_directory_iterator(s_WorkingDirectory, std::filesystem::directory_options::follow_directory_symlink)) {
+				for (const std::filesystem::directory_entry &directoryEntry: std::filesystem::recursive_directory_iterator(s_WorkingDirectory, std::filesystem::directory_options::follow_directory_symlink)) {
 					s_WorkingTree.emplace_back(std::hash<std::string>()(directoryEntry.path().generic_string().substr(s_WorkingDirectory.length())));
 				}
-				std::cout << "built dir_iterator with size: " << s_WorkingTree.size() << std::endl;
 			}
-			bool exists = std::find(s_WorkingTree.begin(), s_WorkingTree.end(), std::hash<std::string>()(pathToCheck)) != s_WorkingTree.end();
-			if (exists) {
+			if (std::find(s_WorkingTree.begin(), s_WorkingTree.end(), std::hash<std::string>()(pathToCheck)) != s_WorkingTree.end()) {
 				return true;
 			} else if (std::filesystem::exists(pathToCheck)) {
 				auto file_time = std::filesystem::last_write_time(pathToCheck);
-				if(file_time > s_ProgramStartTime){
+				if (file_time > s_ProgramStartTime) {
 					s_WorkingTree.emplace_back(std::hash<std::string>()(pathToCheck));
 					return true;
 				}
 			}
 			return false;
 		}
-		#endif
+#endif
 		return std::filesystem::exists(pathToCheck);
 	}
 

@@ -259,7 +259,7 @@ namespace RTE {
 
 		unsigned char m_SceneID; //!<
 
-		bool m_ResetActivityVotes[c_MaxClients]; //!< Votes from each player required to return to the Multiplayer Lobby.
+		bool m_EndActivityVotes[c_MaxClients]; //!< Votes from each player required to return to the Multiplayer Lobby.
 		bool m_RestartActivityVotes[c_MaxClients]; //!< Votes from each player required to restart the current activity.
 
 		long long m_LatestRestartTime; //!< 

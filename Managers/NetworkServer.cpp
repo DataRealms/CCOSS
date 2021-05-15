@@ -86,7 +86,7 @@ namespace RTE {
 			m_SceneAvailable[i] = false;
 			m_SendFrameData[i] = false;
 
-			m_ResetActivityVotes[i] = false;
+			m_EndActivityVotes[i] = false;
 			m_RestartActivityVotes[i] = false;
 
 			m_FrameNumbers[i] = 0;
@@ -540,7 +540,7 @@ namespace RTE {
 				bitMask <<= 1;
 			}
 
-			m_ResetActivityVotes[player] = msg.ResetActivityVote;
+			m_EndActivityVotes[player] = msg.ResetActivityVote;
 			m_RestartActivityVotes[player] = msg.RestartActivityVote;
 
 			// We need to replace mouse input obtained from the allegro with mouse input obtained from network clients
@@ -1647,32 +1647,32 @@ namespace RTE {
 
 			// Process reset votes
 			int votesNeeded = 0;
-			int resetVotes = 0;
+			int endActivityVotes = 0;
 			int restartVotes = 0;
 
 			for (short player = 0; player < c_MaxClients; player++) {
 				if (IsPlayerConnected(player)) {
 					votesNeeded++;
-					if (m_ResetActivityVotes[player]) { resetVotes++; }
+					if (m_EndActivityVotes[player]) { endActivityVotes++; }
 					if (m_RestartActivityVotes[player]) { restartVotes++; }
 				}
 			}
 
 			std::string displayMsg = "";
 
-			if (resetVotes > 0) {
-				displayMsg = "Voting to end activity: " + std::to_string(resetVotes) + " of " + std::to_string(votesNeeded);
+			if (endActivityVotes > 0) {
+				displayMsg = "Voting to end activity: " + std::to_string(endActivityVotes) + " of " + std::to_string(votesNeeded);
 			}
 			if (restartVotes > 0) {
 				displayMsg += "\nVoting to restart activity: " + std::to_string(restartVotes) + " of " + std::to_string(votesNeeded);
 			}
-
-			if (votesNeeded > 0 && (resetVotes > 0 || restartVotes > 0)) {
+			
+			if (votesNeeded > 0 && (endActivityVotes > 0 || restartVotes > 0)) {
 				for (short i = 0; i < c_MaxClients; i++) {
-					g_FrameMan.SetScreenText(displayMsg, i);
+					g_FrameMan.SetScreenText(displayMsg, g_ActivityMan.GetActivity()->ScreenOfPlayer(i));
 				}
 
-				if (resetVotes >= votesNeeded) {
+				if (endActivityVotes >= votesNeeded) {
 					// Only reset gameplay activities, and not server lobby
 					if (g_InActivity && g_ActivityMan.GetActivity()->GetPresetName() != "Multiplayer Lobby") {
 						g_ActivityMan.EndActivity();
@@ -1689,7 +1689,7 @@ namespace RTE {
 				}
 
 				for (short player = 0; player < c_MaxClients; player++) {
-					m_ResetActivityVotes[player] = false;
+					m_EndActivityVotes[player] = false;
 					m_RestartActivityVotes[player] = false;
 
 				}

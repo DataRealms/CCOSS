@@ -168,8 +168,9 @@ int AEmitter::ReadProperty(const std::string_view &propName, Reader &reader) {
     } else if (propName == "EmissionDamage") {
         reader >> m_EmitDamage;
     } else if (propName == "Flash") {
-        const Entity *flashEntity = g_PresetMan.GetEntityPreset(reader);
-        if (flashEntity) { SetFlash(dynamic_cast<Attachable *>(flashEntity->Clone())); }
+        Attachable iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetFlash(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
     } else if (propName == "FlashScale") {
         reader >> m_FlashScale;
     } else if (propName == "FlashOnlyOnBurst") {
@@ -394,6 +395,8 @@ void AEmitter::SetFlash(Attachable *newFlash) {
 
 void AEmitter::Update()
 {
+    Attachable::PreUpdate();
+
 // TODO: Really hardcode this?
     // Set animation to loop if emitting
     if (m_FrameCount > 1)

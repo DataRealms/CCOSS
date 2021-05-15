@@ -645,6 +645,7 @@ namespace RTE {
 		BITMAP *m_TempNetworkBackBufferFinal8[2][c_MaxScreenCount];
 		BITMAP *m_TempNetworkBackBufferFinalGUI8[2][c_MaxScreenCount];
 
+#pragma region Display Switch Callbacks
 		/// <summary>
 		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched away from the game window. 
 		/// It will temporarily disable positioning of the mouse so that when focus is switched back to the game window, the game window won't fly away because the user clicked the title bar of the window.
@@ -655,6 +656,7 @@ namespace RTE {
 		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched back to the game window.
 		/// </summary>
 		static void DisplaySwitchIn();
+#pragma endregion
 
 #pragma region Create Breakdown
 		/// <summary>

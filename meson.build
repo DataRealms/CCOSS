@@ -2,20 +2,22 @@ project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++17', 'build
 
 #### Build environment Setup ####
 
-deps = [
-  dependency('allegro'),
-  dependency('loadpng'),
-  dependency('flac'),
-  dependency('luajit'),
-  dependency('minizip'),
-  dependency('threads'),
-  dependency('liblz4'),
-  dependency('libpng'),
-  dependency('boost'), #needed for luabind
-]
-
-if host_machine.system() in ['linux']
-  deps += dependency('x11')
+deps=[]
+if host_machine.system() in ['linux','osx']
+  deps = [
+    dependency('allegro'),
+    dependency('loadpng'),
+    dependency('flac'),
+    dependency('luajit'),
+    dependency('minizip'),
+    dependency('threads'),
+    dependency('liblz4'),
+    dependency('libpng'),
+    dependency('boost'), #needed for luabind
+  ]
+  if host_machine.system() == 'linux'
+    deps += dependency('x11')
+  endif
 endif
 
 elfname = 'CCCP'
@@ -24,11 +26,11 @@ build_rpath = ''
 link_args=[]
 extra_args=[]
 preprocessor_flags = []
-preprocessor_flags_debug = []
-suffix=''
+suffix=[]
 
 if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   # Build against system libraries on linux
+  message('gcc detected')
 
   build_rpath = '$ORIGIN:$ORIGIN/../external/lib/linux/x86_64' # Set RUNPATH so that CCCP can find libfmod.so without needing to set LD_LIBRARY_PATH
   suffix = 'x86_64'
@@ -39,15 +41,18 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   if buildtype_debug
 
     elfname += '_debug' # add _debug suffix for debug builds
-    extra_args = ['-fpermissive', '-Wno-unknown-pragmas'] # Disable #pragma region complaints
+    extra_args = ['-Wno-unknown-pragmas'] # Disable #pragma region complaints
 
-    if not get_option('full_debug')
-      preprocessor_flags += ['-DDEBUG_RELEASE_BUILD'] # enable some debug features
-    else
-      preprocessor_flags += ['-DDEBUG_BUILD'] # enable all debug features; may slow down game
+    debug_type = get_option('debug_type')
+    if debug_type == 'release'
+      preprocessor_flags += ['-DDEBUG_RELEASE_BUILD'] # enable minimal debug features
+    elif debug_type == 'minimal'
+      preprocessor_flags += ['-DDEBUGMODE'] # enable some debug features
+    elif debug_type == 'full'
+      preprocessor_flags += ['-DDEBUG_BUILD', '-DDEBUGMODE'] # enable all debug features; may slow down game
     endif
   else
-    extra_args = ['-fpermissive', '-w'] # Disable all warnings for release builds
+    extra_args = ['-w'] # Disable all warnings for release builds
     preprocessor_flags += ['-DRELEASE_BUILD'] # disable all debug features
   endif
   if compiler.get_id() =='gcc' and compiler.version().version_compare('<9')
@@ -55,6 +60,31 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   endif
 elif compiler.get_argument_syntax()== 'msvc'
 #TODO: add MSVC related arguments and stuff in here
+message('cl detected')
+  elfname = 'Cortex Command'
+  extra_args += ['-permissive-', '-D_HAS_ITERATOR_DEBUGGING=0', '-D_HAS_AUTO_PTR_ETC=1']
+  add_project_link_arguments(['winmm.lib', 'ws2_32.lib', 'dinput8.lib', 'ddraw.lib', 'dxguid.lib', 'dsound.lib'], language:'cpp')
+  if host_machine.cpu_family() == 'x64'
+    elfname += ' x64'
+  endif
+  preprocessor_flags += ['-D_CRT_SECURE_NO_DEPRECATE', '-D_WINDOWS', '-DWIN32', '-DWIN32_LEAN_AND_MEAN']
+  link_args+=['-ignore:4099', '-ignore:4217']
+  buildtype_debug = get_option('debug')
+  if buildtype_debug
+    elfname+='.debug'
+    debug_type = get_option('debug_type')
+    if debug_type == 'release'
+      preprocessor_flags += ['-DDEBUG_RELEASE_BUILD'] # enable minimal debug features
+    elif debug_type == 'minimal'
+      elfname += '.minimal'
+      preprocessor_flags += ['-DDEBUGMODE'] # enable some debug features
+    elif debug_type == 'full'
+      elfname += '.full'
+      preprocessor_flags += ['-DDEBUG_BUILD', '-DDEBUGMODE'] # enable all debug features; may slow down game
+    endif
+  else
+    preprocessor_flags += ['-DRELEASE_BUILD', '-DNDEBUG']
+  endif
 else
   error('Using unknown compiler, please use gcc or msvc compatible compilers')
 endif
@@ -79,15 +109,18 @@ subdir('System')
 subdir('Resources')
 
 #### External Libraries ####
+external_objects = []
+external_libs = []
 subdir('external')
 
 #### Target Definitions ####
 executable(
   elfname, ['Main.cpp', sources], include_directories:[source_inc_dirs, external_inc_dirs], cpp_pch:pch, # Sources options
-  link_with:[luabind, raknet], objects:[fmod_so], dependencies:deps,                                     # Link options
+  link_with:external_libs, objects:[external_objects], dependencies:deps,                                # Link options
   cpp_args:[extra_args, preprocessor_flags], link_args:link_args, build_rpath:build_rpath,               # Compiler setup
   name_suffix:suffix,   # Executable name options
-  build_by_default:true # Meson options
+  build_by_default:true, # Meson options
+  gui_app:true,
 )
 
 # disable appimage target unless option appimage_enabbled is set

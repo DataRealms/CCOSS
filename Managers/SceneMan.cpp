@@ -3531,7 +3531,7 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
 
 //            std::snprintf(str, sizeof(str), "Normal Layer Draw Mode\nHit M to cycle modes");
 
-            if (m_pDebugLayer) { m_pDebugLayer->Draw(pTargetBitmap, Box()); }
+            if (m_pDebugLayer) { m_pDebugLayer->Draw(pTargetBitmap, targetBox); }
     }
 }
 

@@ -144,7 +144,7 @@ namespace RTE {
 			/// Writes a bunch of useful debug info about the memory pools to a file.
 			/// </summary>
 			/// <param name="fileWriter">The writer to write info to.</param>
-			static void DumpPoolMemoryInfo(Writer &fileWriter);
+			static void DumpPoolMemoryInfo(const Writer &fileWriter);
 
 			/// <summary>
 			/// Adds a certain number of newly allocated instances to this' pool.

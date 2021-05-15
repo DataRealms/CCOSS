@@ -29,7 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	You can read and write the following properties:  
 	**`AHuman`** - `Head`, `Jetpack`, `FGArm`, `BGArm`, `FGLeg`, `BGLeg`, `FGFoot`, `BGFoot`  
 	**`ACrab`** - `Turret`, `Jetpack`, `LeftFGLeg`, `LeftBGLeg`, `RightFGLeg`, `RightBGLeg`  
-	**`ACDropship`** - `RightEngine`, `LeftEngine`, `RightThruster`, `LeftThruster`, `RightHatch`, `LeftHatch`  
+	**`ACDropShip`** - `RightEngine`, `LeftEngine`, `RightThruster`, `LeftThruster`, `RightHatch`, `LeftHatch`  
 	**`ACRocket`** - `RightLeg`, `LeftLeg`, `MainEngine`, `LeftEngine`, `RightEngine`, `LeftThruster`, `RightThruster`  
 	**`ADoor`** - `Door`  
 	**`Turret`** - `MountedDevice`  
@@ -120,7 +120,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`DrawRayCastVisualizations` - any rays cast by `SceneMan` will be drawn to the standard view.  
 	`DrawPixelCheckVisualizations ` - any pixel checks made by `SceneMan:GetTerrMatter` or `SceneMan:GetMOIDPixel` will be drawn to the standard view.
 
+- New `Settings.ini` property `CaseSensitiveFilePaths = 0/1` to enable/disable file path case sensitivity in INIs. Enabled by default.  
+	It is **STRONGLY** ill-advised to disable this behavior as it makes case sensitivity mismatches immediately obvious and allows fixing them with ease to ensure a path related crash free cross-platform experience.  
+	Only disable this if for some reason case sensitivity increases the loading times on your system (which it generally should not). Loading times can be benchmarked using the `Settings.ini` property `MeasureModuleLoadTime`. The result will be printed to the console.
+
+- Added `MovableObject` Lua function `EnableOrDisableAllScripts` that allows you to enable or disable all scripts on a `MovableObject` based on the passed in value.
+
 ### Changed
+
+- File paths in INIs are now case sensitive.
 
 - Hands will now draw in transparent drawing mode, i.e. editing menu.
 
@@ -153,6 +161,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Renamed `ACrab` `LFGLeg`, `LBGLeg`, `RFGLeg` and `RBGLeg` Lua properties to `LeftFGLeg`, `LeftBGLeg`, `RightFGLeg`, `RightBGLeg` respectively, to be more consistent with other naming.  
 	For the time being, the INI properties (as well as the ones for setting `FootGroups` and `LimbPaths`) support both single letter and written out versions (i.e. `LStandLimbPath` and `LeftStandLimbPath` are both supported). This single letter versions will probably be deprecated over time.
+
+- To better align with the other changes, hardcoded `Attachable` INI definitions for `ACDropShips` and `ACRockets` can now support spelled out words. The following options are all supported in INI:  
+	**`ACDropShip`** - `RThruster`/`RightThruster`/`RightEngine`, `LThruster`/`LeftThruster`/`LeftEngine`, `URThruster`/`UpRightThruster`, `ULThruster`/`UpLeftThruster`, `RHatchDoor`/`RightHatchDoor`, `LHatchDoor`/`LeftHatchDoor`  
+	**`ACRocket`** - `RLeg`/`RightLeg`, `LLeg`/`LeftLeg`, `RFootGroup`/`RightFootGroup`, `LFootGroup`/`LeftFootGroup`, `MThruster`/`MainThruster`, `RThruster`/`RightThruster`, `LThruster`/`LeftThruster`, `URThruster`/`UpRightThruster`, `ULThruster`/`UpLeftThruster`
 
 - `MovableMan:AddMO` will now add `HeldDevices` (or any child class of `HeldDevice`) to its `Items` collection, making it able to provide the functionality of `AddParticle`, `AddActor` and `AddItem`.
 
@@ -212,6 +224,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed a bug that caused the game to crash when the crab bomb effect was triggered while there were multiple crab bomb eligible Craft in an activity.
 
 - Renamed `Attachable` INI property `CollidesWithTerrainWhenAttached` to more correct, consistent `CollidesWithTerrainWhileAttached`.
+
+- You can now modify `Foot`, `Magazine` and `Flash` (both `HDFirearm` and `AEmitter`) `CopyOfs` in your `Leg`/`HDFirearm``AEmitter` definition without setting a new `PresetName`.
+
+- `OnCollideWithMO` now works for `MOPixels` and `MOSParticles` so you can use it to check if your bullets collide with things.
+
+- `OnCollideWithMO` and `OnCollideWithTerrain` (and other special functions) will run more reliably right after the object is spawned. E.g. `OnCollideWithTerrain` should now work even if your gun is jammed into terrain when you shoot.
 
 ### Removed
 

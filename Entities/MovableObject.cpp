@@ -663,7 +663,7 @@ void MovableObject::EnableOrDisableAllScripts(bool enableScripts) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
+int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, const std::vector<Entity *> &functionEntityArguments, const std::vector<std::string> &functionLiteralArguments) const {
     if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized()) {
         return -1;
     }
@@ -672,9 +672,6 @@ int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std:
     std::string fullFunctionName = presetAndFunctionName + "[\"" + scriptPath + "\"]";
     
     int status = g_LuaMan.RunScriptedFunction(fullFunctionName, m_ScriptObjectName, {presetAndFunctionName, m_ScriptObjectName, fullFunctionName}, functionEntityArguments, functionLiteralArguments);
-    functionEntityArguments.clear();
-    functionLiteralArguments.clear();
-    
     if (status < 0 && m_AllLoadedScripts.size() > 1) {
         g_ConsoleMan.PrintString("ERROR: An error occured while trying to run the " + functionName + " function for script at path " + scriptPath);
         return -2;
@@ -685,9 +682,11 @@ int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std:
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
-    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || !ObjectScriptsInitialized() || m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end()) {
+int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, const std::vector<Entity *> &functionEntityArguments, const std::vector<std::string> &functionLiteralArguments) {
+    if (m_AllLoadedScripts.empty() || m_ScriptPresetName.empty() || m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end()) {
         return -1;
+    } else if (!ObjectScriptsInitialized()) {
+        InitializeObjectScripts();
     }
 
     int status = 0;
@@ -795,6 +794,11 @@ bool MovableObject::OnMOHit(HitData &hd)
         RunScriptedFunctionInAppropriateScripts("OnCollideWithMO", false, false, {hd.Body[hd.Body[HITOR] == this ? HITEE : HITOR], hd.RootBody[hd.Body[HITOR] == this ? HITEE : HITOR]});
     }
     return hd.Terminate[hd.RootBody[HITOR] == this ? HITOR : HITEE] = OnMOHit(hd.RootBody[hd.RootBody[HITOR] == this ? HITEE : HITOR]);
+}
+
+bool MovableObject::OnMOHit(MovableObject *pOtherMO) {
+    if (pOtherMO != this) { RunScriptedFunctionInAppropriateScripts("OnCollideWithMO", false, false, {pOtherMO, pOtherMO ? pOtherMO->GetRootParent() : nullptr}); }
+    return false;
 }
 
 void MovableObject::SetHitWhatTerrMaterial(unsigned char matID) {

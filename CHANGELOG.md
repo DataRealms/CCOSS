@@ -227,6 +227,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - You can now modify `Foot`, `Magazine` and `Flash` (both `HDFirearm` and `AEmitter`) `CopyOfs` in your `Leg`/`HDFirearm``AEmitter` definition without setting a new `PresetName`.
 
+- `OnCollideWithMO` now works for `MOPixels` and `MOSParticles` so you can use it to check if you bullet collides with something.
+
+- `OnCollideWithMO` and `OnCollideWithTerrain` (and other special functions) will run more reliably right after the object is spawned. No longer will these functions fail to run if you shoot with your gun jammed into terrain.
+
 ### Removed
 
 - Removed obsolete graphics drivers and their `Settings.ini` properties `ForceOverlayedWindowGfxDriver` and `ForceNonOverlayedWindowGfxDriver`.

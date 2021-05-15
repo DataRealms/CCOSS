@@ -353,6 +353,8 @@ void Arm::ReachToward(const Vector &scenePoint)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Arm::Update() {
+    Attachable::PreUpdate();
+
     if (!IsAttached()) {
         RemoveAttachable(dynamic_cast<Attachable *>(m_pHeldMO), true, false);
     } else {

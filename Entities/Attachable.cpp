@@ -324,12 +324,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Attachable::Update() {
+		if (!m_PreUpdateHasRunThisFrame) { PreUpdate(); }
 		if (m_Parent) {
-			if (InheritsHFlipped() != 0) { m_HFlipped = m_InheritsHFlipped == 1 ? m_Parent->IsHFlipped() : !m_Parent->IsHFlipped(); }
-			if (InheritsRotAngle()) {
-				SetRotAngle(m_Parent->GetRotAngle() + m_InheritedRotAngleOffset * static_cast<float>(m_Parent->GetFlipFactor()));
-				m_AngularVel = 0.0F;
-			}
 			UpdatePositionAndJointPositionBasedOnOffsets();
 			if (m_ParentOffset != m_PrevParentOffset || m_JointOffset != m_PrevJointOffset) { m_Parent->HandlePotentialRadiusAffectingAttachable(this); }
 			m_Vel = m_Parent->GetVel();
@@ -364,6 +360,22 @@ namespace RTE {
 		m_PrevVel = m_Vel;
 		m_PrevParentOffset = m_ParentOffset;
 		m_PrevJointOffset = m_JointOffset;
+		m_PreUpdateHasRunThisFrame = false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Attachable::PreUpdate() {
+		if (!m_PreUpdateHasRunThisFrame) {
+			if (m_Parent) {
+				if (InheritsHFlipped() != 0) { m_HFlipped = m_InheritsHFlipped == 1 ? m_Parent->IsHFlipped() : !m_Parent->IsHFlipped(); }
+				if (InheritsRotAngle()) {
+					SetRotAngle(m_Parent->GetRotAngle() + m_InheritedRotAngleOffset * static_cast<float>(m_Parent->GetFlipFactor()));
+					m_AngularVel = 0.0F;
+				}
+			}
+			m_PreUpdateHasRunThisFrame = true;
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

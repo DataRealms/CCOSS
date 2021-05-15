@@ -395,6 +395,8 @@ void AEmitter::SetFlash(Attachable *newFlash) {
 
 void AEmitter::Update()
 {
+    Attachable::PreUpdate();
+
 // TODO: Really hardcode this?
     // Set animation to loop if emitting
     if (m_FrameCount > 1)

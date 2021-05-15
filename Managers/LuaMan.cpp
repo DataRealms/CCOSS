@@ -50,6 +50,7 @@
 #include "lua.hpp"
 
 // LuaBind
+#define BOOST_BIND_GLOBAL_PLACEHOLDERS 1
 #include "luabind/luabind.hpp"
 #include "luabind/operator.hpp"
 #include "luabind/copy_policy.hpp"
@@ -778,6 +779,7 @@ int LuaMan::Initialize() {
             .def("ScriptEnabled", &MovableObject::ScriptEnabled)
             .def("EnableScript", &MovableObject::EnableScript)
             .def("DisableScript", &MovableObject::DisableScript)
+            .def("EnableOrDisableAllScripts", &MovableObject::EnableOrDisableAllScripts)
             .property("Mass", &MovableObject::GetMass, &MovableObject::SetMass)
             .property("Pos", &MovableObject::GetPos, &MovableObject::SetPos)
             .property("Vel", &MovableObject::GetVel, &MovableObject::SetVel)

@@ -160,44 +160,44 @@ int ACRocket::Create(const ACRocket &reference) {
 //                  false is returned, and the reader's position is untouched.
 
 int ACRocket::ReadProperty(const std::string_view &propName, Reader &reader) {
-    if (propName == "RLeg") {
-        m_pRLeg = new Leg;
-        reader >> m_pRLeg;
-        SetRightLeg(m_pRLeg);
-    } else if (propName == "LLeg") {
-        m_pLLeg = new Leg;
-        reader >> m_pLLeg;
-        SetLeftLeg(m_pLLeg);
-    } else if (propName == "RFootGroup") {
+    if (propName == "RLeg" || propName == "RightLeg") {
+        Leg iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetRightLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
+    } else if (propName == "LLeg" || propName == "LeftLeg") {
+        Leg iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetLeftLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
+    } else if (propName == "RFootGroup" || propName == "RightFootGroup") {
         delete m_pRFootGroup;
         m_pRFootGroup = new AtomGroup();
         reader >> m_pRFootGroup;
         m_pRFootGroup->SetOwner(this);
-    } else if (propName == "LFootGroup") {
+    } else if (propName == "LFootGroup" || propName == "LeftFootGroup") {
         delete m_pLFootGroup;
         m_pLFootGroup = new AtomGroup();
         reader >> m_pLFootGroup;
         m_pLFootGroup->SetOwner(this);
-    } else if (propName == "MThruster") {
-        m_pMThruster = new AEmitter;
-        reader >> m_pMThruster;
-        SetMainThruster(m_pMThruster);
-    } else if (propName == "RThruster") {
-        m_pRThruster = new AEmitter;
-        reader >> m_pRThruster;
-        SetRightThruster(m_pRThruster);
-    } else if (propName == "LThruster") {
-        m_pLThruster = new AEmitter;
-        reader >> m_pLThruster;
-        SetLeftThruster(m_pLThruster);
-    } else if (propName == "URThruster") {
-        m_pURThruster = new AEmitter;
-        reader >> m_pURThruster;
-        SetURightThruster(m_pURThruster);
-    } else if (propName == "ULThruster") {
-        m_pULThruster = new AEmitter;
-        reader >> m_pULThruster;
-        SetULeftThruster(m_pULThruster);
+    } else if (propName == "MThruster" || propName == "MainThruster") {
+        AEmitter iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetMainThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+    } else if (propName == "RThruster" || propName == "RightThruster") {
+        AEmitter iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetRightThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+    } else if (propName == "LThruster" || propName == "LeftThruster") {
+        AEmitter iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetLeftThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+    } else if (propName == "URThruster" || propName == "UpRightThruster") {
+        AEmitter iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetURightThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+    } else if (propName == "ULThruster" || propName == "UpLeftThruster") {
+        AEmitter iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetULeftThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
     } else if (propName == "RaisedGearLimbPath") {
         reader >> m_Paths[RIGHT][RAISED];
     } else if (propName == "LoweredGearLimbPath") {

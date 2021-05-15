@@ -357,8 +357,6 @@ namespace RTE {
 		newSoundContainer->GetTopLevelSoundSet().AddSound(filePath);
 		if (newSoundContainer->HasAnySounds()) {
 			PlaySoundContainer(newSoundContainer, player);
-		} else {
-			delete newSoundContainer;
 		}
 		return newSoundContainer;
 	}

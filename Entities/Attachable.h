@@ -403,9 +403,15 @@ namespace RTE {
 
 		/// <summary>
 		/// Updates this Attachable. Supposed to be done every frame.
+		///	NOTE - Attachable subclasses that do things before calling Attachable::Update should make sure to call Attachable::PreUpdate.
 		/// </summary>
 		void Update() override;
 #pragma endregion
+
+		/// <summary>
+		/// Pre-update method that should be run by all Attachable sub-classes that do things before calling Attachable::Update.
+		/// </summary>
+		void PreUpdate();
 
 #pragma region Override Methods for Handling Mass
 		/// <summary>
@@ -532,6 +538,7 @@ namespace RTE {
 		Vector m_PrevParentOffset; //!< The previous frame's parent offset.
 		Vector m_PrevJointOffset; //!< The previous frame's joint offset.
 		float m_PrevRotAngleOffset; //!< The previous frame's difference between this Attachable's RotAngle and it's root parent's RotAngle.
+		bool m_PreUpdateHasRunThisFrame; //!< Whether or not PreUpdate has run this frame. PreUpdate, like Update, should only run once per frame.
 
 		/// <summary>
 		/// Sets this Attachable's parent MOSRotating, and also sets its Team based on its parent and, if the Attachable is set to collide, adds/removes Atoms to its new/old parent.

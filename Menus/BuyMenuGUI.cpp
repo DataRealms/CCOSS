@@ -1257,19 +1257,19 @@ void BuyMenuGUI::Update()
         // User selected to add an item to cart list!
         if (m_pController->IsState(PRESS_FACEBUTTON)) {
             // User pressed on a module group item; toggle its expansion!
-            if (pItem && pItem->m_ExtraIndex >= 0) {
-                // Make appropriate sound
-                if (!m_aExpandedModules[pItem->m_ExtraIndex]) {
-                    g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
-                    // Different, maybe?
-                } else {
-                    g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
-                    // Toggle the expansion of the module group item's items below
-                    m_aExpandedModules[pItem->m_ExtraIndex] = !m_aExpandedModules[pItem->m_ExtraIndex];
-                    // Re-populate the item list with the new module expansion configuation
-                    CategoryChange(false);
-                }
-            }
+			if (pItem && pItem->m_ExtraIndex >= 0) {
+				// Make appropriate sound
+				if (!m_aExpandedModules[pItem->m_ExtraIndex]) {
+					g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
+				} else {
+					// Different, maybe?
+					g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
+				}
+				// Toggle the expansion of the module group item's items below
+				m_aExpandedModules[pItem->m_ExtraIndex] = !m_aExpandedModules[pItem->m_ExtraIndex];
+				// Re-populate the item list with the new module expansion configuation
+				CategoryChange(false);
+			}
             // User pressed on a loadout set, so load it into the menu
             else if (pItem && m_MenuCategory == SETS) {
                 // Beep if there's an error

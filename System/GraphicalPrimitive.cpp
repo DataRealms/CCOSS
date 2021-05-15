@@ -160,22 +160,22 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void RoundedBoxPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
-		// TODO: Fix corners drawing incorrectly when vectors are inverted
+		if (m_StartPos.m_X > m_EndPos.m_X) { std::swap(m_StartPos.m_X, m_EndPos.m_X); }
+		if (m_StartPos.m_Y > m_EndPos.m_Y) { std::swap(m_StartPos.m_Y, m_EndPos.m_Y); }
+
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			Vector drawEnd = m_EndPos - targetPos;
 
-			// Draw the top left, bottom left, top right and bottom right corners respectively
-			arc(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawEnd.GetFloorIntY() + m_CornerRadius, itofix(64), itofix(128), m_CornerRadius, m_Color);
-			arc(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawStart.GetFloorIntY() - m_CornerRadius, itofix(128), itofix(-64), m_CornerRadius, m_Color);
-			arc(drawScreen, drawEnd.GetFloorIntX() - m_CornerRadius, drawEnd.GetFloorIntY() + m_CornerRadius, itofix(0), itofix(64), m_CornerRadius, m_Color);
-			arc(drawScreen, drawEnd.GetFloorIntX() - m_CornerRadius, drawStart.GetFloorIntY() - m_CornerRadius, itofix(-64), itofix(0), m_CornerRadius, m_Color);
+			arc(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawStart.GetFloorIntY() + m_CornerRadius, itofix(64), itofix(128), m_CornerRadius, m_Color);
+			arc(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawEnd.GetFloorIntY() - m_CornerRadius, itofix(128), itofix(-64), m_CornerRadius, m_Color);
+			arc(drawScreen, drawEnd.GetFloorIntX() - m_CornerRadius, drawStart.GetFloorIntY() + m_CornerRadius, itofix(0), itofix(64), m_CornerRadius, m_Color);
+			arc(drawScreen, drawEnd.GetFloorIntX() - m_CornerRadius, drawEnd.GetFloorIntY() - m_CornerRadius, itofix(-64), itofix(0), m_CornerRadius, m_Color);
 
-			//Draw the top, bottom, left and right planes respectively
 			hline(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawStart.GetFloorIntY(), drawEnd.GetFloorIntX() - m_CornerRadius, m_Color);
 			hline(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawEnd.GetFloorIntY(), drawEnd.GetFloorIntX() - m_CornerRadius, m_Color);
-			vline(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY() - m_CornerRadius, drawEnd.GetFloorIntY() + m_CornerRadius, m_Color);
-			vline(drawScreen, drawEnd.GetFloorIntX(), drawStart.GetFloorIntY() - m_CornerRadius, drawEnd.GetFloorIntY() + m_CornerRadius, m_Color);
+			vline(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY() + m_CornerRadius, drawEnd.GetFloorIntY() - m_CornerRadius, m_Color);
+			vline(drawScreen, drawEnd.GetFloorIntX(), drawStart.GetFloorIntY() + m_CornerRadius, drawEnd.GetFloorIntY() - m_CornerRadius, m_Color);
 		} else {
 			Vector drawStartLeft;
 			Vector drawEndLeft;
@@ -185,41 +185,42 @@ namespace RTE {
 			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
 			TranslateCoordinates(targetPos, m_EndPos, drawEndLeft, drawEndRight);
 
-			arc(drawScreen, drawStartLeft.GetFloorIntX() + m_CornerRadius, drawEndLeft.GetFloorIntY() + m_CornerRadius, itofix(64), itofix(128), m_CornerRadius, m_Color);
-			arc(drawScreen, drawStartLeft.GetFloorIntX() + m_CornerRadius, drawStartLeft.GetFloorIntY() - m_CornerRadius, itofix(128), itofix(-64), m_CornerRadius, m_Color);
-			arc(drawScreen, drawEndLeft.GetFloorIntX() - m_CornerRadius, drawEndLeft.GetFloorIntY() + m_CornerRadius, itofix(0), itofix(64), m_CornerRadius, m_Color);
-			arc(drawScreen, drawEndLeft.GetFloorIntX() - m_CornerRadius, drawStartLeft.GetFloorIntY() - m_CornerRadius, itofix(-64), itofix(0), m_CornerRadius, m_Color);
+			arc(drawScreen, drawStartLeft.GetFloorIntX() + m_CornerRadius, drawStartLeft.GetFloorIntY() + m_CornerRadius, itofix(64), itofix(128), m_CornerRadius, m_Color);
+			arc(drawScreen, drawStartLeft.GetFloorIntX() + m_CornerRadius, drawEndLeft.GetFloorIntY() - m_CornerRadius, itofix(128), itofix(-64), m_CornerRadius, m_Color);
+			arc(drawScreen, drawEndLeft.GetFloorIntX() - m_CornerRadius, drawStartLeft.GetFloorIntY() + m_CornerRadius, itofix(0), itofix(64), m_CornerRadius, m_Color);
+			arc(drawScreen, drawEndLeft.GetFloorIntX() - m_CornerRadius, drawEndLeft.GetFloorIntY() - m_CornerRadius, itofix(-64), itofix(0), m_CornerRadius, m_Color);
 			hline(drawScreen, drawStartLeft.GetFloorIntX() + m_CornerRadius, drawStartLeft.GetFloorIntY(), drawEndLeft.GetFloorIntX() - m_CornerRadius, m_Color);
 			hline(drawScreen, drawStartLeft.GetFloorIntX() + m_CornerRadius, drawEndLeft.GetFloorIntY(), drawEndLeft.GetFloorIntX() - m_CornerRadius, m_Color);
-			vline(drawScreen, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY() - m_CornerRadius, drawEndLeft.GetFloorIntY() + m_CornerRadius, m_Color);
-			vline(drawScreen, drawEndLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY() - m_CornerRadius, drawEndLeft.GetFloorIntY() + m_CornerRadius, m_Color);
+			vline(drawScreen, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY() + m_CornerRadius, drawEndLeft.GetFloorIntY() - m_CornerRadius, m_Color);
+			vline(drawScreen, drawEndLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY() + m_CornerRadius, drawEndLeft.GetFloorIntY() - m_CornerRadius, m_Color);
 
-			arc(drawScreen, drawStartRight.GetFloorIntX() + m_CornerRadius, drawEndRight.GetFloorIntY() + m_CornerRadius, itofix(64), itofix(128), m_CornerRadius, m_Color);
-			arc(drawScreen, drawStartRight.GetFloorIntX() + m_CornerRadius, drawStartRight.GetFloorIntY() - m_CornerRadius, itofix(128), itofix(-64), m_CornerRadius, m_Color);
-			arc(drawScreen, drawEndRight.GetFloorIntX() - m_CornerRadius, drawEndRight.GetFloorIntY() + m_CornerRadius, itofix(0), itofix(64), m_CornerRadius, m_Color);
-			arc(drawScreen, drawEndRight.GetFloorIntX() - m_CornerRadius, drawStartRight.GetFloorIntY() - m_CornerRadius, itofix(-64), itofix(0), m_CornerRadius, m_Color);
+			arc(drawScreen, drawStartRight.GetFloorIntX() + m_CornerRadius, drawStartRight.GetFloorIntY() + m_CornerRadius, itofix(64), itofix(128), m_CornerRadius, m_Color);
+			arc(drawScreen, drawStartRight.GetFloorIntX() + m_CornerRadius, drawEndRight.GetFloorIntY() - m_CornerRadius, itofix(128), itofix(-64), m_CornerRadius, m_Color);
+			arc(drawScreen, drawEndRight.GetFloorIntX() - m_CornerRadius, drawStartRight.GetFloorIntY() + m_CornerRadius, itofix(0), itofix(64), m_CornerRadius, m_Color);
+			arc(drawScreen, drawEndRight.GetFloorIntX() - m_CornerRadius, drawEndRight.GetFloorIntY() - m_CornerRadius, itofix(-64), itofix(0), m_CornerRadius, m_Color);
 			hline(drawScreen, drawStartRight.GetFloorIntX() + m_CornerRadius, drawStartRight.GetFloorIntY(), drawEndRight.GetFloorIntX() - m_CornerRadius, m_Color);
 			hline(drawScreen, drawStartRight.GetFloorIntX() + m_CornerRadius, drawEndRight.GetFloorIntY(), drawEndRight.GetFloorIntX() - m_CornerRadius, m_Color);
-			vline(drawScreen, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY() - m_CornerRadius, drawEndRight.GetFloorIntY() + m_CornerRadius, m_Color);
-			vline(drawScreen, drawEndRight.GetFloorIntX(), drawStartRight.GetFloorIntY() - m_CornerRadius, drawEndRight.GetFloorIntY() + m_CornerRadius, m_Color);
+			vline(drawScreen, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY() + m_CornerRadius, drawEndRight.GetFloorIntY() - m_CornerRadius, m_Color);
+			vline(drawScreen, drawEndRight.GetFloorIntX(), drawStartRight.GetFloorIntY() + m_CornerRadius, drawEndRight.GetFloorIntY() - m_CornerRadius, m_Color);
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void RoundedBoxFillPrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
-		// TODO: Fix corners drawing incorrectly when vectors are inverted
+		if (m_StartPos.m_X > m_EndPos.m_X) { std::swap(m_StartPos.m_X, m_EndPos.m_X); }
+		if (m_StartPos.m_Y > m_EndPos.m_Y) { std::swap(m_StartPos.m_Y, m_EndPos.m_Y); }
+
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			Vector drawEnd = m_EndPos - targetPos;
 
-			// Draw the top left, bottom left, top right and bottom right corners respectively
-			circlefill(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawEnd.GetFloorIntY() + m_CornerRadius, m_CornerRadius, m_Color);
-			circlefill(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawStart.GetFloorIntY() - m_CornerRadius, m_CornerRadius, m_Color);
-			circlefill(drawScreen, drawEnd.GetFloorIntX() - m_CornerRadius, drawEnd.GetFloorIntY() + m_CornerRadius, m_CornerRadius, m_Color);
-			circlefill(drawScreen, drawEnd.GetFloorIntX() - m_CornerRadius, drawStart.GetFloorIntY() - m_CornerRadius, m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawStart.GetFloorIntY() + m_CornerRadius, m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawEnd.GetFloorIntY() - m_CornerRadius, m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawEnd.GetFloorIntX() - m_CornerRadius, drawStart.GetFloorIntY() + m_CornerRadius, m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawEnd.GetFloorIntX() - m_CornerRadius, drawEnd.GetFloorIntY() - m_CornerRadius, m_CornerRadius, m_Color);
 
-			rectfill(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY() - m_CornerRadius, drawEnd.GetFloorIntX(), drawEnd.GetFloorIntY() + m_CornerRadius, m_Color);
+			rectfill(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY() + m_CornerRadius, drawEnd.GetFloorIntX(), drawEnd.GetFloorIntY() - m_CornerRadius, m_Color);
 			rectfill(drawScreen, drawStart.GetFloorIntX() + m_CornerRadius, drawStart.GetFloorIntY(), drawEnd.GetFloorIntX() - m_CornerRadius, drawEnd.GetFloorIntY(), m_Color);
 		} else {
 			Vector drawStartLeft;
@@ -230,18 +231,18 @@ namespace RTE {
 			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
 			TranslateCoordinates(targetPos, m_EndPos, drawEndLeft, drawEndRight);
 
-			circlefill(drawScreen, drawStartLeft.GetFloorIntX() + m_CornerRadius, drawEndLeft.GetFloorIntY() + m_CornerRadius, m_CornerRadius, m_Color);
-			circlefill(drawScreen, drawStartLeft.GetFloorIntX() + m_CornerRadius, drawStartLeft.GetFloorIntY() - m_CornerRadius, m_CornerRadius, m_Color);
-			circlefill(drawScreen, drawEndLeft.GetFloorIntX() - m_CornerRadius, drawEndLeft.GetFloorIntY() + m_CornerRadius, m_CornerRadius, m_Color);
-			circlefill(drawScreen, drawEndLeft.GetFloorIntX() - m_CornerRadius, drawStartLeft.GetFloorIntY() - m_CornerRadius, m_CornerRadius, m_Color);
-			rectfill(drawScreen, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY() - m_CornerRadius, drawEndLeft.GetFloorIntX(), drawEndLeft.GetFloorIntY() + m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawStartLeft.GetFloorIntX() + m_CornerRadius, drawStartLeft.GetFloorIntY() + m_CornerRadius, m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawStartLeft.GetFloorIntX() + m_CornerRadius, drawEndLeft.GetFloorIntY() - m_CornerRadius, m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawEndLeft.GetFloorIntX() - m_CornerRadius, drawStartLeft.GetFloorIntY() + m_CornerRadius, m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawEndLeft.GetFloorIntX() - m_CornerRadius, drawEndLeft.GetFloorIntY() - m_CornerRadius, m_CornerRadius, m_Color);
+			rectfill(drawScreen, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY() + m_CornerRadius, drawEndLeft.GetFloorIntX(), drawEndLeft.GetFloorIntY() - m_CornerRadius, m_Color);
 			rectfill(drawScreen, drawStartLeft.GetFloorIntX() + m_CornerRadius, drawStartLeft.GetFloorIntY(), drawEndLeft.GetFloorIntX() - m_CornerRadius, drawEndLeft.GetFloorIntY(), m_Color);
 
-			circlefill(drawScreen, drawStartRight.GetFloorIntX() + m_CornerRadius, drawEndRight.GetFloorIntY() + m_CornerRadius, m_CornerRadius, m_Color);
-			circlefill(drawScreen, drawStartRight.GetFloorIntX() + m_CornerRadius, drawStartRight.GetFloorIntY() - m_CornerRadius, m_CornerRadius, m_Color);
-			circlefill(drawScreen, drawEndRight.GetFloorIntX() - m_CornerRadius, drawEndRight.GetFloorIntY() + m_CornerRadius, m_CornerRadius, m_Color);
-			circlefill(drawScreen, drawEndRight.GetFloorIntX() - m_CornerRadius, drawStartRight.GetFloorIntY() - m_CornerRadius, m_CornerRadius, m_Color);
-			rectfill(drawScreen, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY() - m_CornerRadius, drawEndRight.GetFloorIntX(), drawEndRight.GetFloorIntY() + m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawStartRight.GetFloorIntX() + m_CornerRadius, drawStartRight.GetFloorIntY() + m_CornerRadius, m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawStartRight.GetFloorIntX() + m_CornerRadius, drawEndRight.GetFloorIntY() - m_CornerRadius, m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawEndRight.GetFloorIntX() - m_CornerRadius, drawStartRight.GetFloorIntY() + m_CornerRadius, m_CornerRadius, m_Color);
+			circlefill(drawScreen, drawEndRight.GetFloorIntX() - m_CornerRadius, drawEndRight.GetFloorIntY() - m_CornerRadius, m_CornerRadius, m_Color);
+			rectfill(drawScreen, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY() + m_CornerRadius, drawEndRight.GetFloorIntX(), drawEndRight.GetFloorIntY() - m_CornerRadius, m_Color);
 			rectfill(drawScreen, drawStartRight.GetFloorIntX() + m_CornerRadius, drawStartRight.GetFloorIntY(), drawEndRight.GetFloorIntX() - m_CornerRadius, drawEndRight.GetFloorIntY(), m_Color);
 		}
 	}

@@ -1,5 +1,5 @@
 #include "InputScheme.h"
-#include "allegro.h"
+#include "UInputMan.h"
 
 namespace RTE {
 
@@ -334,6 +334,107 @@ namespace RTE {
 			default:
 				break;
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::string InputScheme::GetMappingName(int whichElement) const {
+		InputScheme::InputPreset preset = GetPreset();
+		const InputMapping *element = &(m_InputMappings[whichElement]);
+		if (preset != InputScheme::InputPreset::NoPreset && !element->GetPresetDescription().empty()) {
+			return element->GetPresetDescription();
+		}
+
+		InputDevice device = GetDevice();
+		if (device >= InputDevice::DEVICE_GAMEPAD_1) {
+			int whichJoy = g_UInputMan.GetJoystickIndex(device);
+
+			// Check joystick button presses and axis directions
+			if (element->GetJoyButton() != JoyButtons::JOY_NONE) {
+				return joy[whichJoy].button[element->GetJoyButton()].name;
+			}
+			if (element->JoyDirMapped()) {
+				return "Joystick";
+			}
+		} else if (device == InputDevice::DEVICE_MOUSE_KEYB && element->GetMouseButton() != MouseButtons::MOUSE_NONE) {
+			int button = element->GetMouseButton();
+
+			switch (button) {
+				case MouseButtons::MOUSE_LEFT:
+					return "Left Mouse";
+				case MouseButtons::MOUSE_RIGHT:
+					return "Right Mouse";
+				case MouseButtons::MOUSE_MIDDLE:
+					return "Middle Mouse";
+				default:
+					return "";
+			}
+		} else if (device == InputDevice::DEVICE_KEYB_ONLY || (device == InputDevice::DEVICE_MOUSE_KEYB && !(whichElement == InputElements::INPUT_AIM_UP || whichElement == InputElements::INPUT_AIM_DOWN)) && element->GetKey() != 0) {
+			return scancode_to_name(element->GetKey());
+		}
+		return "";
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool InputScheme::CaptureKeyMapping(int whichInput) {
+		if (keyboard_needs_poll()) { poll_keyboard(); }
+
+		for (char whichKey = KEY_A; whichKey < KEY_MAX; ++whichKey) {
+			if (g_UInputMan.KeyPressed(whichKey)) {
+				// Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
+				m_InputMappings[whichInput].Reset();
+				SetKeyMapping(whichInput, whichKey);
+				return true;
+			}
+		}
+		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool InputScheme::CaptureJoystickMapping(int whichJoy, int whichInput) {
+		if (CaptureJoyButtonMapping(whichJoy, whichInput)) {
+			return true;
+		}
+		if (CaptureJoyDirectionMapping(whichJoy, whichInput)) {
+			return true;
+		}
+		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool InputScheme::CaptureJoyButtonMapping(int whichJoy, int whichInput) {
+		int whichButton = g_UInputMan.WhichJoyButtonPressed(whichJoy);
+
+		if (whichButton != JoyButtons::JOY_NONE) {
+			// Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
+			m_InputMappings[whichInput].Reset();
+			SetJoyButtonMapping(whichInput, whichButton);
+			return true;
+		}
+		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool InputScheme::CaptureJoyDirectionMapping(int whichJoy, int whichInput) {
+		for (int stick = 0; stick < joy[whichJoy].num_sticks; ++stick) {
+			for (int axis = 0; axis < joy[whichJoy].stick[stick].num_axis; ++axis) {
+				if (joy[whichJoy].stick[stick].axis[axis].d1 /*&& s_ChangedJoystickStates[whichJoy].stick[stick].axis[axis].d1*/) {
+					// Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
+					m_InputMappings[whichInput].Reset();
+					m_InputMappings[whichInput].SetDirection(stick, axis, JOYDIR_ONE);
+					return true;
+				} else if (joy[whichJoy].stick[stick].axis[axis].d2 /*&& s_ChangedJoystickStates[whichJoy].stick[stick].axis[axis].d2*/) {
+					m_InputMappings[whichInput].Reset();
+					m_InputMappings[whichInput].SetDirection(stick, axis, JOYDIR_TWO);
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 		}
 	}

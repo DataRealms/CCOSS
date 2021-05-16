@@ -83,6 +83,43 @@ namespace RTE {
 		/// </summary>
 		/// <returns>The input mappings array, which is INPUT_COUNT large.</returns>
 		InputMapping * GetInputMappings() { return m_InputMappings.data(); }
+#pragma endregion
+
+#pragma region Input Mapping Getters and Setters
+		/// <summary>
+		/// Gets the name of the key/mouse/joystick button/direction that a particular input element is mapped to.
+		/// </summary>
+		/// <param name="whichElement">Which input element to look up.</param>
+		/// <returns>A string with the appropriate clear text description of the mapped thing.</returns>
+		std::string GetMappingName(int whichElement) const;
+
+		/// <summary>
+		/// Gets which keyboard key is mapped to a specific input element.
+		/// </summary>
+		/// <param name="whichInput">Which input element to look up.</param>
+		/// <returns>Which keyboard key is mapped to the specified player and element.</returns>
+		int GetKeyMapping(int whichInput) const { return m_InputMappings[whichInput].GetKey(); }
+
+		/// <summary>
+		/// Sets a keyboard key mapped to a specific input element.
+		/// </summary>
+		/// <param name="whichInput">Which input element to map to.</param>
+		/// <param name="whichKey">The scan code of which keyboard key to map to above input element.</param>
+		void SetKeyMapping(int whichInput, int whichKey) { m_InputMappings[whichInput].SetKey(whichKey); }
+
+		/// <summary>
+		/// Gets which joystick button is mapped to a specific input element.
+		/// </summary>
+		/// <param name="whichInput">Which input element to look up.</param>
+		/// <returns>Which joystick button is mapped to the specified player and element.</returns>
+		int GetJoyButtonMapping(int whichInput) const { return m_InputMappings[whichInput].GetJoyButton(); }
+
+		/// <summary>
+		/// Sets a joystick button mapped to a specific input element.
+		/// </summary>
+		/// <param name="whichInput">Which input element to map to.</param>
+		/// <param name="whichButton">Which joystick button to map to the specified input element.</param>
+		void SetJoyButtonMapping(int whichInput, int whichButton) { m_InputMappings[whichInput].SetJoyButton(whichButton); }
 
 		/// <summary>
 		/// Get the deadzone value for this control scheme.
@@ -107,6 +144,45 @@ namespace RTE {
 		/// </summary>
 		/// <param name="deadzoneType">The DeadZoneType this scheme should use. See DeadZoneType enumeration.</param>
 		void SetJoystickDeadzoneType(DeadZoneType deadzoneType) { m_JoystickDeadzoneType = deadzoneType; }
+#pragma endregion
+
+#pragma region Input Mapping Capture Handling
+		/// <summary>
+		/// Clears all mappings for a specific input element of a specific player.
+		/// </summary>
+		/// <param name="whichInput">Which input element to clear all mappings of.</param>
+		void ClearMapping(int whichInput) { m_InputMappings[whichInput].Reset(); }
+
+		/// <summary>
+		/// Checks for any key press this frame and creates an input mapping for a specific player accordingly.
+		/// </summary>
+		/// <param name="whichInput">Which input element to map to for that player.</param>
+		/// <returns>Whether there were any key presses this frame and therefore whether a mapping was successfully captured or not.</returns>
+		bool CaptureKeyMapping(int whichInput);
+
+		/// <summary>
+		/// Checks for any button or direction press this frame and creates an input mapping for a specific player accordingly.
+		/// </summary>
+		/// <param name="whichJoy">Which joystick to scan for button and stick presses.</param>
+		/// <param name="whichInput">Which input element to map to for that player.</param>
+		/// <returns>Whether there were any button or stick presses this frame and therefore whether a mapping was successfully captured or not.</returns>
+		bool CaptureJoystickMapping(int whichJoy, int whichInput);
+
+		/// <summary>
+		/// Checks for any button press this frame and creates an input mapping for a specific player accordingly.
+		/// </summary>
+		/// <param name="whichJoy">Which joystick to scan for button presses.</param>
+		/// <param name="whichInput">Which input element to map to for that player.</param>
+		/// <returns>Whether there were any button presses this frame and therefore whether a mapping was successfully captured or not.</returns>
+		bool CaptureJoyButtonMapping(int whichJoy, int whichInput);
+
+		/// <summary>
+		/// Checks for any joystick pad or stick direction press this frame and creates an input mapping for a specific player accordingly.
+		/// </summary>
+		/// <param name="whichJoy">Which joystick to scan for pad and stick direction presses.</param>
+		/// <param name="whichInput">Which input element to map to for that player.</param>
+		/// <returns>Whether there were any direction presses this frame and therefore whether a mapping was successfully captured or not.</returns>
+		bool CaptureJoyDirectionMapping(int whichJoy, int whichInput);
 #pragma endregion
 
 #pragma region Concrete Methods

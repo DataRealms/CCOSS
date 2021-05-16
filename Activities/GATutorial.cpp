@@ -31,7 +31,7 @@
 #include "BuyMenuGUI.h"
 #include "SceneEditorGUI.h"
 
-#define MAPNAME(element) g_UInputMan.GetMappingName(m_TutorialPlayer, element)
+#define MAPNAME(element) g_UInputMan.GetControlScheme(m_TutorialPlayer)->GetMappingName(element)
 
 namespace RTE {
 

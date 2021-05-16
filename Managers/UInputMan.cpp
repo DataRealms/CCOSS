@@ -134,9 +134,9 @@ namespace RTE {
 			return "";
 		}
 
-		InputPreset preset = m_ControlScheme[whichPlayer].GetPreset();
+		InputScheme::InputPreset preset = m_ControlScheme[whichPlayer].GetPreset();
 		const InputMapping *element = &(m_ControlScheme[whichPlayer].GetInputMappings()[whichElement]);
-		if (preset != InputPreset::PRESET_NONE && !element->GetPresetDescription().empty()) {
+		if (preset != InputScheme::InputPreset::NoPreset && !element->GetPresetDescription().empty()) {
 			return element->GetPresetDescription();
 		}
 

@@ -106,21 +106,6 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// Enumeration for different input scheme presets.
-	/// </summary>
-	enum InputPreset {
-		PRESET_P1DEFAULT = -1,
-		PRESET_P2DEFAULT = -2,
-		PRESET_P3DEFAULT = -3,
-		PRESET_P4DEFAULT = -4,
-		PRESET_NONE = 0,
-		PRESET_WASDKEYS,
-		PRESET_CURSORKEYS,
-		PRESET_XBOX360,
-		PRESET_COUNT
-	};
-
-	/// <summary>
 	/// Enumeration for different elements the input scheme is composed of.
 	/// </summary>
 	enum InputElements {

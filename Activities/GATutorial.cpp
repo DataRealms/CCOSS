@@ -952,7 +952,7 @@ void GATutorial::SetupAreas()
     // If no preset, adjust the pie menu and fire names when using the defaults on a gamepad.. otherwise it'll show up as an unhelpful "Joystick"
     string PieName = MAPNAME(INPUT_PIEMENU);
     string FireName = MAPNAME(INPUT_FIRE);
-    if (device >= DEVICE_GAMEPAD_1 && preset == PRESET_NONE)
+    if (device >= DEVICE_GAMEPAD_1 && preset == InputScheme::InputPreset::NoPreset)
     {
         PieName = "Pie Menu Trigger";
         FireName = "Fire Trigger";

@@ -16,6 +16,22 @@ namespace RTE {
 		SerializableClassNameGetter
 		SerializableOverrideMethods
 
+		/// <summary>
+		/// Enumeration for different input scheme presets.
+		/// </summary>
+		enum InputPreset {
+			NoPreset,
+			PresetArrowKeys,
+			PresetWASDKeys,
+			PresetMouseWASDKeys,
+			PresetGenericDPad,
+			PresetGenericDualAnalog,
+			PresetGamepadSNES,
+			PresetGamepadDS4,
+			PresetGamepadXbox360,
+			InputPresetCount
+		};
+
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate an InputScheme object in system memory. Create() should be called before using the object.

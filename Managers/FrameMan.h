@@ -83,6 +83,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>A pointer to the BITMAP 32bpp backbuffer. OWNERSHIP IS NOT TRANSFERRED!</returns>
 		BITMAP * GetBackBuffer32() const { return m_BackBuffer32; }
+
+		/// <summary>
+		/// Gets the 32bpp bitmap that is used for overlaying the screen.
+		/// </summary>
+		/// <returns>A pointer to the overlay BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
+		BITMAP * GetOverlayBitmap32() const { return m_OverlayBitmap32; }
 #pragma endregion
 
 #pragma region Resolution Handling
@@ -563,6 +569,7 @@ namespace RTE {
 
 		BITMAP *m_BackBuffer8; //!< Screen backbuffer, always 8bpp, gets copied to the 32bpp buffer for post-processing.
 		BITMAP *m_BackBuffer32; //!< 32bpp backbuffer, only used for post-processing.
+		BITMAP *m_OverlayBitmap32; //!< 32bpp bitmap used for overlaying (fading in/out or darkening) the screen.
 		BITMAP *m_ScreenDumpBuffer; //!< Temporary buffer for making quick screencaps.
 		BITMAP *m_WorldDumpBuffer; //!< Temporary buffer for making whole scene screencaps.
 		BITMAP *m_ScenePreviewDumpGradient; //!< BITMAP for the scene preview sky gradient (easier to load from a pre-made file because it's dithered).
@@ -595,6 +602,7 @@ namespace RTE {
 		/// </summary>
 		BITMAP *m_TempBackBuffer8;
 		BITMAP *m_TempBackBuffer32;
+		BITMAP *m_TempOverlayBitmap32;
 		BITMAP *m_TempPlayerScreen;
 		BITMAP *m_TempNetworkBackBufferIntermediate8[2][c_MaxScreenCount];
 		BITMAP *m_TempNetworkBackBufferIntermediateGUI8[2][c_MaxScreenCount];

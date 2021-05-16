@@ -12,7 +12,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TitleScreen::Clear() {
-		m_FadeScreen = nullptr;
 		m_FadeAmount = 0;
 
 		m_BackdropStars.clear();
@@ -66,9 +65,6 @@ namespace RTE {
 
 	void TitleScreen::Create(AllegroScreen *guiScreen) {
 		CreateTitleElements();
-
-		m_FadeScreen = create_bitmap_ex(32, g_FrameMan.GetResX(), g_FrameMan.GetResY());
-		clear_to_color(m_FadeScreen, 0);
 
 		m_IntroScrollStartOffsetY = (static_cast<float>(m_Nebula.GetBitmap()->h) / m_BackdropScrollRatio) - (static_cast<float>(g_FrameMan.GetResY()) / m_BackdropScrollRatio);
 		m_ScrollOffset.SetXY(0, m_IntroScrollStartOffsetY);
@@ -149,7 +145,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TitleScreen::Destroy() {
-		if (m_FadeScreen) { destroy_bitmap(m_FadeScreen); }
 		for (BITMAP *slide : m_IntroSlides) {
 			if (slide) { destroy_bitmap(slide); }
 		}
@@ -351,7 +346,7 @@ namespace RTE {
 					SetSectionDurationAndResetSwitch(68.2F - static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS()));
 					m_IntroScrollStartTime = static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
 					m_IntroScrollDuration = 92.4F - m_IntroScrollStartTime; // 92.4s is the end of the planet scrolling
-					clear_to_color(m_FadeScreen, 0xFFFFFFFF); // White fade
+					clear_to_color(g_FrameMan.GetOverlayBitmap32(), 0xFFFFFFFF); // White fade
 				}
 				m_GameLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), static_cast<float>(g_FrameMan.GetResY() / 2) - 20));
 				m_FadeAmount = static_cast<int>(LERP(0, 1.0F, 255.0F, 0, m_SectionProgress));
@@ -359,7 +354,7 @@ namespace RTE {
 			case IntroSequence::PlanetScroll:
 				if (m_SectionSwitch) {
 					SetSectionDurationAndResetSwitch(92.4F - static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS()));
-					clear_to_color(m_FadeScreen, 0);
+					clear_to_color(g_FrameMan.GetOverlayBitmap32(), 0);
 				}
 				if (m_SectionProgress > 0.5F) { m_GameLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), EaseIn((static_cast<float>(g_FrameMan.GetResY() / 2)) - 20, 120, (m_SectionProgress - 0.5F) / 0.5F))); }
 				break;
@@ -509,7 +504,7 @@ namespace RTE {
 		}
 		if (m_FadeAmount > 0) {
 			set_trans_blender(m_FadeAmount, m_FadeAmount, m_FadeAmount, m_FadeAmount);
-			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_FadeScreen, 0, 0);
+			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), g_FrameMan.GetOverlayBitmap32(), 0, 0);
 		}
 	}
 

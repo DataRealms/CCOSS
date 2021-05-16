@@ -160,8 +160,7 @@ namespace RTE {
 			Vector Position; //!< The position of the Star on the title screen scene backdrop.
 		};
 
-		BITMAP *m_FadeScreen; //!< Bitmap used for fade in/out effects.
-		int m_FadeAmount; //!< The amount of blending to use when drawing the fade bitmap.
+		int m_FadeAmount; //!< The amount of blending to use when drawing the screen overlay bitmap.
 
 		std::vector<Star> m_BackdropStars; //!< Vector that contains all the individual Stars that are present in the title screen scene background.
 		SceneLayer m_Nebula; //!< The title screen scene nebula background layer.

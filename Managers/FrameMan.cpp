@@ -73,6 +73,7 @@ namespace RTE {
 		m_ScenePreviewDumpGradient = nullptr;
 		m_BackBuffer8 = nullptr;
 		m_BackBuffer32 = nullptr;
+		m_OverlayBitmap32 = nullptr;
 		m_DrawNetworkBackBuffer = false;
 		m_StoreNetworkBackBuffer = false;
 		m_NetworkFrameCurrent = 0;
@@ -87,6 +88,7 @@ namespace RTE {
 
 		m_TempBackBuffer8 = nullptr;
 		m_TempBackBuffer32 = nullptr;
+		m_TempOverlayBitmap32 = nullptr;
 		m_TempPlayerScreen = nullptr;
 
 		for (int screenCount = 0; screenCount < c_MaxScreenCount; ++screenCount) {
@@ -296,6 +298,9 @@ namespace RTE {
 		m_BackBuffer32 = create_bitmap_ex(32, m_ResX, m_ResY);
 		ClearBackBuffer32();
 
+		m_OverlayBitmap32 = create_bitmap_ex(32, m_ResX, m_ResY);
+		clear_to_color(m_OverlayBitmap32, 0);
+
 		// Create all the network 8bpp back buffers
 		for (int i = 0; i < c_MaxScreenCount; i++) {
 			for (int f = 0; f < 2; f++) {
@@ -337,6 +342,7 @@ namespace RTE {
 	void FrameMan::RecreateBackBuffers() {
 		m_TempBackBuffer8 = m_BackBuffer8;
 		m_TempBackBuffer32 = m_BackBuffer32;
+		m_TempOverlayBitmap32 = m_OverlayBitmap32;
 
 		for (int i = 0; i < c_MaxScreenCount; i++) {
 			for (int f = 0; f < 2; f++) {
@@ -356,6 +362,7 @@ namespace RTE {
 	void FrameMan::Destroy() {
 		destroy_bitmap(m_BackBuffer8);
 		destroy_bitmap(m_BackBuffer32);
+		destroy_bitmap(m_OverlayBitmap32);
 		destroy_bitmap(m_PlayerScreen);
 		destroy_bitmap(m_ScreenDumpBuffer);
 		destroy_bitmap(m_WorldDumpBuffer);
@@ -382,6 +389,7 @@ namespace RTE {
 	void FrameMan::DestroyTempBackBuffers() {
 		destroy_bitmap(m_TempBackBuffer8);
 		destroy_bitmap(m_TempBackBuffer32);
+		destroy_bitmap(m_TempOverlayBitmap32);
 		destroy_bitmap(m_TempPlayerScreen);
 
 		for (int i = 0; i < c_MaxScreenCount; i++) {

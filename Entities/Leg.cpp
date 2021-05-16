@@ -78,8 +78,9 @@ namespace RTE {
 
 	int Leg::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Foot") {
-			const Entity *footEntity = g_PresetMan.GetEntityPreset(reader);
-			if (footEntity) { SetFoot(dynamic_cast<Attachable *>(footEntity->Clone())); }
+			Attachable iniDefinedObject;
+			reader >> &iniDefinedObject;
+			SetFoot(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
 		} else if (propName == "ContractedOffset") {
 			reader >> m_ContractedOffset;
 			m_MinExtension = m_ContractedOffset.GetMagnitude();
@@ -144,6 +145,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Leg::Update() {
+		Attachable::PreUpdate();
+
 		UpdateCurrentAnkleOffset();
 
 		if (m_Foot) {
@@ -172,6 +175,7 @@ namespace RTE {
 
 	void Leg::UpdateCurrentAnkleOffset() {
 		if (IsAttached()) {
+			//TODO When flipping, the target position gets set very far from where the leg currently is, so the leg ends up drawing at a weird spot for one frame. This happened in older versions and it's probably better to wait til legs are redone to use IK than to try to fix it.
 			Vector targetOffset = g_SceneMan.ShortestDistance(m_JointPos, m_TargetPosition, g_SceneMan.SceneWrapsX());
 			if (m_WillIdle && targetOffset.m_Y < -3) { targetOffset = m_IdleOffset.GetXFlipped(m_HFlipped); }
 

@@ -28,6 +28,7 @@ namespace RTE {
 
 		for (int i = 0; i < InputElements::INPUT_COUNT; ++i) {
 			m_InputMapLabel.at(i) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelInputName" + std::to_string(i + 1)));
+			m_InputMapLabel.at(i)->SetText(c_InputElementNames.at(i));
 			m_InputMapButton.at(i) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonInputKey" + std::to_string(i + 1)));
 		}
 		m_InputConfigWizardMenu = std::make_unique<SettingsInputMappingWizardGUI>(parentControlManager);

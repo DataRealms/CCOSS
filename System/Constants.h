@@ -138,6 +138,35 @@ namespace RTE {
 		INPUT_COUNT
 	};
 
+	static const std::array<std::string, InputElements::INPUT_COUNT> c_InputElementNames = {
+		"Move Up",			// INPUT_L_UP
+		"Move Down",		// INPUT_L_DOWN
+		"Move Left",		// INPUT_L_LEFT
+		"Move Right",		// INPUT_L_RIGHT
+		"not sure",			// INPUT_R_UP
+		"not sure",			// INPUT_R_DOWN
+		"not sure",			// INPUT_R_LEFT
+		"not sure",			// INPUT_R_RIGHT
+		"Fire/Activate",	// INPUT_FIRE
+		"Sharp Aim",		// INPUT_AIM
+		"Aim Up",			// INPUT_AIM_UP
+		"Aim Down",			// INPUT_AIM_DOWN
+		"Aim Left",			// INPUT_AIM_LEFT
+		"Aim Right",		// INPUT_AIM_RIGHT
+		"Pie Menu",			// INPUT_PIEMENU
+		"Jump",				// INPUT_JUMP
+		"Crouch",			// INPUT_CROUCH
+		"Next Actor",		// INPUT_NEXT
+		"Prev. Actor",		// INPUT_PREV
+		"Start",			// INPUT_START
+		"Back",				// INPUT_BACK
+		"Next Device",		// INPUT_WEAPON_CHANGE_NEXT
+		"Prev. Device",		// INPUT_WEAPON_CHANGE_PREV
+		"Pick Up Device",	// INPUT_WEAPON_PICKUP
+		"Drop Device",		// INPUT_WEAPON_DROP
+		"Reload Weapon"		// INPUT_WEAPON_RELOAD
+	};
+
 	/// <summary>
 	/// Enumeration for mouse button types.
 	/// </summary>

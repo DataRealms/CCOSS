@@ -298,6 +298,13 @@ public:
     bool Load(const std::string &Filename, bool keepOld = false);
 
 
+	/// <summary>
+	/// Gets the GUIScreen that this GUIControlManager is drawing itself to.
+	/// </summary>
+	/// <returns>Pointer to the GUIScreen that this GUIControlManager is drawing itself to.</returns>
+	GUIScreen * GetScreen() const { return m_Screen; }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations
 

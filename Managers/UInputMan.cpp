@@ -67,7 +67,7 @@ namespace RTE {
 		}
 
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-			m_ControlScheme[player].Reset();
+			m_ControlScheme.at(player).Reset();
 
 			for (int inputState = InputState::Held; inputState < InputState::InputStateCount; inputState++) {
 				for (int element = InputElements::INPUT_L_UP; element < InputElements::INPUT_COUNT; element++) {
@@ -131,10 +131,10 @@ namespace RTE {
 
 	Vector UInputMan::AnalogMoveValues(int whichPlayer) {
 		Vector moveValues(0, 0);
-		InputDevice device = m_ControlScheme[whichPlayer].GetDevice();
+		InputDevice device = m_ControlScheme.at(whichPlayer).GetDevice();
 		if (device >= InputDevice::DEVICE_GAMEPAD_1) {
 			int whichJoy = GetJoystickIndex(device);
-			const InputMapping *element = m_ControlScheme[whichPlayer].GetInputMappings();
+			const InputMapping *element = m_ControlScheme.at(whichPlayer).GetInputMappings();
 			// Assume axes are stretched out over up-down, and left-right
 			if (element[InputElements::INPUT_L_LEFT].JoyDirMapped()) { moveValues.SetX(AnalogAxisValue(whichJoy, element[InputElements::INPUT_L_LEFT].GetStick(), element[InputElements::INPUT_L_LEFT].GetAxis())); }
 			if (element[InputElements::INPUT_L_UP].JoyDirMapped()) { moveValues.SetY(AnalogAxisValue(whichJoy, element[InputElements::INPUT_L_UP].GetStick(), element[InputElements::INPUT_L_UP].GetAxis())); }
@@ -145,7 +145,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Vector UInputMan::AnalogAimValues(int whichPlayer) {
-		InputDevice device = m_ControlScheme[whichPlayer].GetDevice();
+		InputDevice device = m_ControlScheme.at(whichPlayer).GetDevice();
 
 		if (IsInMultiplayerMode()) { device = InputDevice::DEVICE_MOUSE_KEYB; }
 
@@ -155,7 +155,7 @@ namespace RTE {
 		}
 		if (device >= InputDevice::DEVICE_GAMEPAD_1) {
 			int whichJoy = GetJoystickIndex(device);
-			const InputMapping *element = m_ControlScheme[whichPlayer].GetInputMappings();
+			const InputMapping *element = m_ControlScheme.at(whichPlayer).GetInputMappings();
 			// Assume axes are stretched out over up-down, and left-right
 			if (element[InputElements::INPUT_R_LEFT].JoyDirMapped()) { aimValues.SetX(AnalogAxisValue(whichJoy, element[InputElements::INPUT_R_LEFT].GetStick(), element[InputElements::INPUT_R_LEFT].GetAxis())); }
 			if (element[InputElements::INPUT_R_UP].JoyDirMapped()) { aimValues.SetY(AnalogAxisValue(whichJoy, element[InputElements::INPUT_R_UP].GetStick(), element[InputElements::INPUT_R_UP].GetAxis())); }
@@ -168,7 +168,7 @@ namespace RTE {
 	Vector UInputMan::GetMenuDirectional() {
 		Vector allInput(0,0);
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-			InputDevice device = m_ControlScheme[player].GetDevice();
+			InputDevice device = m_ControlScheme.at(player).GetDevice();
 
 			switch (device) {
 				case InputDevice::DEVICE_KEYB_ONLY:
@@ -268,7 +268,7 @@ namespace RTE {
 
 	int UInputMan::MouseUsedByPlayer() const {
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
-			if (m_ControlScheme[player].GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
+			if (m_ControlScheme.at(player).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
 				return player;
 			}
 		}
@@ -294,7 +294,7 @@ namespace RTE {
 		if (IsInMultiplayerMode() && whichPlayer >= Players::PlayerOne && whichPlayer < Players::MaxPlayerCount) {
 			return m_NetworkAccumulatedRawMouseMovement[whichPlayer];
 		}
-		if (whichPlayer == Players::NoPlayer || m_ControlScheme[whichPlayer].GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
+		if (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
 			return m_RawMouseMovement;
 		}
 		return Vector(0, 0);
@@ -304,7 +304,7 @@ namespace RTE {
 
 	void UInputMan::SetMousePos(Vector &newPos, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
-		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme[whichPlayer].GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
+		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
 			position_mouse(static_cast<int>(newPos.GetX()), static_cast<int>(newPos.GetY()));
 		}
 	}
@@ -323,7 +323,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::TrapMousePos(bool trap, int whichPlayer) {
-		if (whichPlayer == Players::NoPlayer || m_ControlScheme[whichPlayer].GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
+		if (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
 			m_TrapMousePos = trap;
 		}
 		m_TrapMousePosPerPlayer[whichPlayer] = trap;
@@ -333,7 +333,7 @@ namespace RTE {
 
 	void UInputMan::ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
-		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme[whichPlayer].GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
+		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
 			position_mouse(Limit(mouse_x, x + width * g_FrameMan.GetResMultiplier(), x), Limit(mouse_y, y + height * g_FrameMan.GetResMultiplier(), y));
 		}
 	}
@@ -484,8 +484,8 @@ namespace RTE {
 			return m_TrapMousePosPerPlayer[whichPlayer] ? m_NetworkInputElementState[whichPlayer][whichElement][whichState] : false;
 		}
 		bool elementState = false;
-		InputDevice device = m_ControlScheme[whichPlayer].GetDevice();
-		const InputMapping *element = &(m_ControlScheme[whichPlayer].GetInputMappings()[whichElement]);
+		InputDevice device = m_ControlScheme.at(whichPlayer).GetDevice();
+		const InputMapping *element = &(m_ControlScheme.at(whichPlayer).GetInputMappings()[whichElement]);
 
 		if (!elementState && device == InputDevice::DEVICE_KEYB_ONLY || (device == InputDevice::DEVICE_MOUSE_KEYB && !(whichElement == InputElements::INPUT_AIM_UP || whichElement == InputElements::INPUT_AIM_DOWN))) {
 			elementState = GetKeyboardButtonState(static_cast<char>(element->GetKey()),whichState);
@@ -505,7 +505,7 @@ namespace RTE {
 	bool UInputMan::GetMenuButtonState(int whichButton, InputState whichState) {
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			bool buttonState = false;
-			InputDevice device = m_ControlScheme[player].GetDevice();
+			InputDevice device = m_ControlScheme.at(player).GetDevice();
 			if (!buttonState && whichButton >= MenuCursorButtons::MENU_PRIMARY) {
 				buttonState = GetInputElementState(player, InputElements::INPUT_FIRE, whichState) || GetMouseButtonState(player, MouseButtons::MOUSE_LEFT, whichState);
 			}
@@ -834,11 +834,11 @@ namespace RTE {
 			float deadZone = 0.0F;
 			int deadZoneType = DeadZoneType::CIRCLE;
 			for (int playerToCheck = Players::PlayerOne; playerToCheck < Players::MaxPlayerCount; playerToCheck++) {
-				InputDevice device = m_ControlScheme[playerToCheck].GetDevice();
+				InputDevice device = m_ControlScheme.at(playerToCheck).GetDevice();
 				int whichJoy = GetJoystickIndex(device);
 				if (whichJoy == joystick) {
-					deadZone = m_ControlScheme[playerToCheck].GetJoystickDeadzone();
-					deadZoneType = m_ControlScheme[playerToCheck].GetJoystickDeadzoneType();
+					deadZone = m_ControlScheme.at(playerToCheck).GetJoystickDeadzone();
+					deadZoneType = m_ControlScheme.at(playerToCheck).GetJoystickDeadzoneType();
 					joystickPlayer = static_cast<Players>(playerToCheck);
 					break;
 				}

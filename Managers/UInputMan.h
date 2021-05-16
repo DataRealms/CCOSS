@@ -94,23 +94,21 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichPlayer">Which player to get input device for.</param>
 		/// <returns>A number value representing the currently used input device of this player. See InputDevice enumeration for values.</returns>
-		int GetInputDevice(int whichPlayer) const { return m_ControlScheme[whichPlayer].GetDevice(); }
+		int GetInputDevice(int whichPlayer) const { return m_ControlScheme.at(whichPlayer).GetDevice(); }
 
 		/// <summary>
 		/// Access a specific player's control scheme.
 		/// </summary>
 		/// <param name="whichPlayer">Which player to get the scheme for.</param>
 		/// <returns>A pointer to the requested player's control scheme. Ownership is NOT transferred!</returns>
-		InputScheme * GetControlScheme(int whichPlayer) { return IsInMultiplayerMode() ? &m_ControlScheme[0] : &m_ControlScheme[whichPlayer]; }
+		InputScheme * GetControlScheme(int whichPlayer) { return IsInMultiplayerMode() ? &m_ControlScheme.at(Players::PlayerOne) : &m_ControlScheme.at(whichPlayer); }
 
 		/// <summary>
 		/// Get the current device Icon of a specific player's scheme.
 		/// </summary>
 		/// <param name="whichPlayer">Which player to get the scheme device icon of.</param>
 		/// <returns>A const pointer to the requested player's control scheme icon. Ownership is NOT transferred!</returns>
-		const Icon * GetSchemeIcon(int whichPlayer) const {
-			return (whichPlayer < Players::PlayerOne || whichPlayer >= Players::MaxPlayerCount) ? nullptr : m_DeviceIcons[m_ControlScheme[whichPlayer].GetDevice()];
-		}
+		const Icon * GetSchemeIcon(int whichPlayer) const { return (whichPlayer < Players::PlayerOne || whichPlayer >= Players::MaxPlayerCount) ? nullptr : m_DeviceIcons[m_ControlScheme.at(whichPlayer).GetDevice()]; }
 
 		/// <summary>
 		/// Get the current device Icon of a specific device.
@@ -664,7 +662,7 @@ namespace RTE {
 
 		bool m_OverrideInput; //!< If true then this instance operates in multiplayer mode and the input is overridden by network input.
 
-		InputScheme m_ControlScheme[Players::MaxPlayerCount]; //!< Which control scheme is being used by each player.
+		std::array<InputScheme, Players::MaxPlayerCount> m_ControlScheme; //!< Which control scheme is being used by each player.
 		const Icon *m_DeviceIcons[InputDevice::DEVICE_COUNT]; //!< The Icons representing all different devices.
 
 		Vector m_RawMouseMovement; //!< The raw absolute movement of the mouse between the last two Updates.

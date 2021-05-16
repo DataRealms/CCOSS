@@ -147,6 +147,34 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void InputScheme::ResetToPlayerDefaults(Players player) {
+		switch (player) {
+			case Players::PlayerOne:
+				m_ActiveDevice = InputDevice::DEVICE_MOUSE_KEYB;
+				SetPreset(InputPreset::PresetMouseWASDKeys);
+				break;
+			case Players::PlayerTwo:
+				m_ActiveDevice = InputDevice::DEVICE_KEYB_ONLY;
+				SetPreset(InputPreset::PresetArrowKeys);
+				break;
+			case Players::PlayerThree:
+				m_ActiveDevice = InputDevice::DEVICE_GAMEPAD_1;
+				SetPreset(InputPreset::PresetGenericDualAnalog);
+				break;
+			case Players::PlayerFour:
+				m_ActiveDevice = InputDevice::DEVICE_GAMEPAD_2;
+				SetPreset(InputPreset::PresetGenericDualAnalog);
+				break;
+			default:
+				RTEAbort("Invalid Player passed into InputScheme::ResetToDefault!");
+				break;
+		}
+		m_JoystickDeadzoneType = DeadZoneType::CIRCLE;
+		m_JoystickDeadzone = 0.01F;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void InputScheme::SetPreset(InputPreset schemePreset) {
 		if (schemePreset == InputPreset::NoPreset || schemePreset == InputPreset::InputPresetCount) {
 			return;
@@ -435,7 +463,5 @@ namespace RTE {
 			}
 		}
 		return false;
-	}
-		}
 	}
 }

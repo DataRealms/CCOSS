@@ -51,6 +51,12 @@ namespace RTE {
 		/// Resets the entire InputScheme, including its inherited members, to their default settings or values.
 		/// </summary>
 		void Reset() override { Clear(); }
+
+		/// <summary>
+		/// Resets this InputScheme to the specified player's default input device and mappings.
+		/// </summary>
+		/// <param name="player">The preset player defaults this InputScheme should reset to.</param>
+		void ResetToPlayerDefaults(Players player);
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -76,7 +82,7 @@ namespace RTE {
 		/// Sets up a specific preset scheme that is sensible and recommended.
 		/// </summary>
 		/// <param name="schemePreset">The preset number to set the scheme to match. See InputPreset enumeration.</param>
-		void SetPreset(InputPreset schemePreset = InputPreset::PRESET_NONE);
+		void SetPreset(InputPreset schemePreset = InputPreset::NoPreset);
 
 		/// <summary>
 		/// Gets the InputMappings for this.
@@ -183,13 +189,6 @@ namespace RTE {
 		/// <param name="whichInput">Which input element to map to for that player.</param>
 		/// <returns>Whether there were any direction presses this frame and therefore whether a mapping was successfully captured or not.</returns>
 		bool CaptureJoyDirectionMapping(int whichJoy, int whichInput);
-#pragma endregion
-
-#pragma region Concrete Methods
-		/// <summary>
-		/// Sets some sensible default bindings for this.
-		/// </summary>
-		//void SetupDefaults();
 #pragma endregion
 
 	protected:

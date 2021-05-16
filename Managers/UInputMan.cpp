@@ -68,6 +68,7 @@ namespace RTE {
 
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			m_ControlScheme.at(player).Reset();
+			m_ControlScheme.at(player).ResetToPlayerDefaults(static_cast<Players>(player));
 
 			for (int inputState = InputState::Held; inputState < InputState::InputStateCount; inputState++) {
 				for (int element = InputElements::INPUT_L_UP; element < InputElements::INPUT_COUNT; element++) {
@@ -88,16 +89,6 @@ namespace RTE {
 				m_NetworkAccumulatedElementState[element][inputState] = false;
 			}
 		}
-
-		// Set up the default key mappings for each player
-		m_ControlScheme[Players::PlayerOne].SetDevice(InputDevice::DEVICE_MOUSE_KEYB);
-		m_ControlScheme[Players::PlayerOne].SetPreset(InputPreset::PRESET_P1DEFAULT);
-		m_ControlScheme[Players::PlayerTwo].SetDevice(InputDevice::DEVICE_KEYB_ONLY);
-		m_ControlScheme[Players::PlayerTwo].SetPreset(InputPreset::PRESET_P2DEFAULT);
-		m_ControlScheme[Players::PlayerThree].SetDevice(InputDevice::DEVICE_GAMEPAD_1);
-		m_ControlScheme[Players::PlayerThree].SetPreset(InputPreset::PRESET_P3DEFAULT);
-		m_ControlScheme[Players::PlayerFour].SetDevice(InputDevice::DEVICE_GAMEPAD_2);
-		m_ControlScheme[Players::PlayerFour].SetPreset(InputPreset::PRESET_P4DEFAULT);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

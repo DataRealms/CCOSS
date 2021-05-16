@@ -62,15 +62,9 @@ namespace RTE {
 			m_PlayerInputSettingsBoxes.at(player).ResetControlsButton->SetText("CONFIRM?");
 		} else {
 			InputScheme *playerControlScheme = g_UInputMan.GetControlScheme(player);
-			playerControlScheme->SetDevice(static_cast<InputDevice>(player));
-			playerControlScheme->SetPreset(static_cast<InputPreset>(-(player + 1))); // Player 1's default preset is at -1 and so on.
+			playerControlScheme->ResetToPlayerDefaults(static_cast<Players>(player));
+			if (playerControlScheme->GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) { g_UInputMan.SetMouseSensitivity(0.6F); }
 
-			if (playerControlScheme->GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
-				g_UInputMan.SetMouseSensitivity(0.6F);
-			} else if (playerControlScheme->GetDevice() != InputDevice::DEVICE_MOUSE_KEYB && playerControlScheme->GetDevice() != InputDevice::DEVICE_KEYB_ONLY) {
-				playerControlScheme->SetJoystickDeadzone(0);
-				playerControlScheme->SetJoystickDeadzoneType(DeadZoneType::CIRCLE);
-			}
 			UpdatePlayerSelectedDeviceLabel(player);
 			ShowPlayerInputDeviceSensitivityControls(player);
 			UpdatePlayerInputSensitivityControlValues(player);

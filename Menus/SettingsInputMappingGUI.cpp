@@ -22,7 +22,8 @@ namespace RTE {
 
 		m_InputMapScrollingBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxScrollingMappingBox"));
 		m_InputMapScrollingBoxScrollbar = dynamic_cast<GUIScrollbar *>(m_GUIControlManager->GetControl("ScrollbarScrollingMappingBox"));
-		m_InputMapScrollingBoxScrollbar->SetMaximum(m_InputMapScrollingBox->GetHeight() / 2 + 5);
+		m_InputMapScrollingBoxScrollbar->SetMaximum(m_InputMapScrollingBox->GetHeight());
+		m_InputMapScrollingBoxScrollbar->SetPageSize(m_InputMapScrollingBoxScrollbar->GetMaximum() / 2 - 5);
 		m_LastInputMapScrollingBoxScrollbarValue = m_InputMapScrollingBoxScrollbar->GetValue();
 
 		for (int i = 0; i < InputElements::INPUT_COUNT; ++i) {
@@ -53,95 +54,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsInputMappingGUI::UpdateMappingLabelsAndButtons() {
-		const InputMapping *inputMappings = g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->GetInputMappings();
-
 		for (int i = 0; i < InputElements::INPUT_COUNT; ++i) {
-			m_InputMapLabel.at(i)->SetText("InputName");
-			m_InputMapButton.at(i)->SetText("[InputKey]");
+			std::string inputDescription = g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->GetInputMappings()[i].GetPresetDescription();
+			m_InputMapButton.at(i)->SetText(!inputDescription.empty() ? "[" + inputDescription + "]" : "[Undefined]");
 		}
-
-		switch (g_UInputMan.GetControlScheme(player)->GetDevice()) {
-			case InputDevice::DEVICE_KEYB_ONLY:
-				m_InputMapLabel.at(0)->SetText("- Move/Aim Up");
-				m_InputMapLabel.at(1)->SetText("- Move/Aim Down");
-				m_InputMapLabel.at(2)->SetText("- Move Left");
-				m_InputMapLabel.at(3)->SetText("- Move Right");
-				m_InputMapLabel.at(4)->SetText("- Fire/Activate");
-				m_InputMapLabel.at(5)->SetText("- Sharp Aim");
-				m_InputMapLabel.at(6)->SetText("- Command Menu");
-				m_InputMapLabel.at(7)->SetText("- Jump");
-				m_InputMapLabel.at(8)->SetText("- Crouch");
-				m_InputMapLabel.at(9)->SetText("- Prev. Body");
-				m_InputMapLabel.at(10)->SetText("- Next Body");
-				m_InputMapLabel.at(11)->SetText("- Reload");
-				m_InputMapLabel.at(12)->SetText("- Pick Up");
-				m_InputMapLabel.at(13)->SetText("- Drop Device");
-				m_InputMapLabel.at(14)->SetText("- Prev. Device");
-				m_InputMapLabel.at(15)->SetText("- Next. Device");
-				break;
-			case InputDevice::DEVICE_MOUSE_KEYB:
-				m_InputMapLabel.at(0)->SetText("- Move Up/Jump");
-				m_InputMapLabel.at(1)->SetText("- Move Down/Crouch");
-				m_InputMapLabel.at(2)->SetText("- Move Left");
-				m_InputMapLabel.at(3)->SetText("- Move Right");
-				m_InputMapLabel.at(4)->SetText("- Reload");
-				m_InputMapLabel.at(5)->SetText("- Pick Up");
-				m_InputMapLabel.at(6)->SetText("- Drop Device");
-				m_InputMapLabel.at(7)->SetText("- Prev. Device");
-				m_InputMapLabel.at(8)->SetText("- Next. Device");
-				m_InputMapLabel.at(9)->SetText("- Prev. Body");
-				m_InputMapLabel.at(10)->SetText("- Next Body");
-				break;
-			default:
-				/*
-				// D-Pad
-				m_InputMapLabel.at(0)->SetText("- Move/Aim Up");
-				m_InputMapLabel.at(1)->SetText("- Move/Aim Down");
-				m_InputMapLabel.at(2)->SetText("- Move Left");
-				m_InputMapLabel.at(3)->SetText("- Move Right");
-				m_InputMapLabel.at(4)->SetText("- Sharp Aim");
-				m_InputMapLabel.at(5)->SetText("- Fire/Activate");
-				m_InputMapLabel.at(6)->SetText("- Jump");
-				m_InputMapLabel.at(7)->SetText("- Command Menu");
-				m_InputMapLabel.at(8)->SetText("- Next Body");
-				m_InputMapLabel.at(9)->SetText("- Prev. Body");
-				m_InputMapLabel.at(10)->SetText("- Start");
-				m_InputMapLabel.at(11)->SetText("- Back");
-				*/
-				/*
-				// Dual Analog
-				m_InputMapLabel.at(0)->SetText("- Move Up/Jump");
-				m_InputMapLabel.at(1)->SetText("- Move Down/Crouch");
-				m_InputMapLabel.at(2)->SetText("- Move Left");
-				m_InputMapLabel.at(3)->SetText("- Move Right");
-				m_InputMapLabel.at(4)->SetText("- Aim Up");
-				m_InputMapLabel.at(5)->SetText("- Aim Down");
-				m_InputMapLabel.at(6)->SetText("- Aim Left");
-				m_InputMapLabel.at(7)->SetText("- Aim Right");
-				m_InputMapLabel.at(8)->SetText("- Fire/Activate");
-				m_InputMapLabel.at(9)->SetText("- Command Menu");
-				m_InputMapLabel.at(10)->SetText("- Next Body");
-				m_InputMapLabel.at(11)->SetText("- Prev. Body");
-				m_InputMapLabel.at(12)->SetText("- Prev. Device");
-				m_InputMapLabel.at(13)->SetText("- Next. Device");
-				m_InputMapLabel.at(14)->SetText("- Pick Up");
-				m_InputMapLabel.at(15)->SetText("- Reload");
-				m_InputMapLabel.at(16)->SetText("- Start");
-				m_InputMapLabel.at(17)->SetText("- Back");
-				*/
-				break;
-		}
-		/*
-		for (int i = 0; i < InputElements::INPUT_COUNT; ++i) {
-			if (m_InputMapLabel.at(i)->GetText() == "InputName") {
-				m_InputMapLabel.at(i)->SetVisible(false);
-				m_InputMapButton.at(i)->SetVisible(false);
-			} else {
-				m_InputMapLabel.at(i)->SetVisible(true);
-				m_InputMapButton.at(i)->SetVisible(true);
-			}
-		}
-		*/
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

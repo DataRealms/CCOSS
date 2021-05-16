@@ -15,7 +15,7 @@ namespace RTE {
 	class GUIEvent;
 
 	/// <summary>
-	/// 
+	/// Handling for the user input mapping wizard through the game settings user interface.
 	/// </summary>
 	class SettingsInputMappingWizardGUI {
 
@@ -25,27 +25,37 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a SettingsInputMappingWizardGUI object in system memory and make it ready for use.
 		/// </summary>
-		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which holds all the GUIControls of this SettingsInputMappingWizardGUI.</param>
+		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this SettingsInputMappingWizardGUI.</param>
 		explicit SettingsInputMappingWizardGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Enables or disables the Input Mapping Wizard menu.
+		/// Enables or disables the input mapping wizard menu.
 		/// </summary>
-		/// <param name="enable">Show and enable or hide and disable the Input Mapping Wizard menu.</param>
-		/// <param name="player"></param>
+		/// <param name="enable">Show and enable or hide and disable the input mapping wizard menu.</param>
+		/// <param name="player">The player this SettingsInputMappingWizardGUI is mapping inputs for.</param>
 		void SetEnabled(bool enable = true, int player = 0);
 
 		/// <summary>
-		/// User input handling for the Input Settings menu.
+		/// Handles the player interaction with the SettingsInputMappingWizardGUI GUI elements.
 		/// </summary>
-		/// <param name="guiEvent"></param>
-		/// <param name="player"></param>
-		void HandleInputEvents(GUIEvent &guiEvent, int player);
+		/// <param name="guiEvent">The GUIEvent containing information about the player interaction with an element.</param>
+		void HandleInputEvents(GUIEvent &guiEvent);
 #pragma endregion
 
 	private:
+
+		/// <summary>
+		/// 
+		/// </summary>
+		enum ConfigWizardSteps {
+			KeyboardConfigSteps = 16,
+			MouseAndKeyboardConfigSteps = 11,
+			DPadConfigSteps = 13,
+			DualAnalogConfigSteps = 19,
+			Xbox360ConfigSteps = 19
+		};
 
 		/// <summary>
 		/// 
@@ -62,52 +72,37 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		enum ConfigWizardSteps {
-			KeyboardConfigSteps = 16,
-			MouseAndKeyboardConfigSteps = 11,
-			DPadConfigSteps = 13,
-			DualAnalogConfigSteps = 19,
-			Xbox360ConfigSteps = 19
-		};
-
-		/// <summary>
-		/// 
-		/// </summary>
 		enum class GamepadType { DPad, DualAnalog, Xbox360 };
 
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
-
-		GUICollectionBox *m_InputMappingWizardBox; //!<
-
-		GUIButton *m_BackToOptionsButton; //!< Back to options from the test and config screens.
 
 		Players m_ConfiguringPlayer; //!< Which player's control scheme we are currently configuring.
 		InputDevice m_ConfiguringDevice; //!< Which type of device we are currently configuring.
 		GamepadType m_ConfiguringGamepad; //!< Which type of gamepad we are currently configuring.
 		int m_ConfigureStep; //!< Which step in current configure sequence.
 
-		std::array<GUILabel *, ConfigWizardLabels::ConfigLabelCount> m_ConfigLabel; //!< Labels of the control config screen.
-
 		std::array<BITMAP *, ConfigWizardSteps::DPadConfigSteps> m_DPadBitmaps;
 		std::array<BITMAP *, ConfigWizardSteps::DualAnalogConfigSteps> m_DualAnalogBitmaps;
 
-		GUICollectionBox *m_RecommendationBox; //!<
-		GUICollectionBox *m_RecommendationDiagram; //!<
-
-		GUIButton *m_ConfigSkipButton; //!< Skip forward one config step button.
-		GUIButton *m_ConfigBackButton; //!< Go back one config step button.
-
-		GUICollectionBox *m_DPadTypeBox; //!<
-		GUICollectionBox *m_DPadTypeDiagram; //!<
-		GUIButton *m_DPadTypeButton; //!<
-
-		GUICollectionBox *m_DAnalogTypeBox; //!<
-		GUICollectionBox *m_DAnalogTypeDiagram; //!<
-		GUIButton *m_DAnalogTypeButton; //!<
-
-		GUICollectionBox *m_XBox360TypeBox; //!<
-		GUICollectionBox *m_XBox360TypeDiagram; //!<
-		GUIButton *m_XBox360TypeButton; //!<
+		/// <summary>
+		/// GUI elements that compose the input mapping wizard menu screen.
+		/// </summary>
+		GUICollectionBox *m_InputMappingWizardBox;
+		GUIButton *m_BackToOptionsButton;
+		GUICollectionBox *m_RecommendationBox;
+		GUICollectionBox *m_RecommendationDiagram;
+		GUIButton *m_ConfigSkipButton;
+		GUIButton *m_ConfigBackButton;
+		GUICollectionBox *m_DPadTypeBox;
+		GUICollectionBox *m_DPadTypeDiagram;
+		GUIButton *m_DPadTypeButton;
+		GUICollectionBox *m_DAnalogTypeBox;
+		GUICollectionBox *m_DAnalogTypeDiagram;
+		GUIButton *m_DAnalogTypeButton;
+		GUICollectionBox *m_XBox360TypeBox;
+		GUICollectionBox *m_XBox360TypeDiagram;
+		GUIButton *m_XBox360TypeButton;
+		std::array<GUILabel *, ConfigWizardLabels::ConfigLabelCount> m_ConfigLabel;
 
 #pragma region Input Mapping Wizard Handling
 		/// <summary>

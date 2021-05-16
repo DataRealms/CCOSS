@@ -2,10 +2,10 @@
 #include "UInputMan.h"
 
 #include "GUI.h"
+#include "AllegroBitmap.h"
 #include "GUICollectionBox.h"
 #include "GUIButton.h"
 #include "GUILabel.h"
-#include "AllegroBitmap.h"
 
 namespace RTE {
 
@@ -61,7 +61,7 @@ namespace RTE {
 		m_XBox360TypeDiagram->CenterInParent(true, true);
 		m_XBox360TypeDiagram->MoveRelative(0, -10);
 
-		m_ConfiguringPlayer = Players::PlayerOne;
+		m_ConfiguringPlayer = Players::NoPlayer;
 		m_ConfiguringDevice = InputDevice::DEVICE_KEYB_ONLY;
 		m_ConfiguringGamepad = GamepadType::DPad;
 		m_ConfigureStep = 0;
@@ -69,7 +69,21 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsInputMappingWizardGUI::HandleInputEvents(GUIEvent &guiEvent, int player) {
+	void SettingsInputMappingWizardGUI::SetEnabled(bool enable, int player) {
+		if (enable) {
+			m_InputMappingWizardBox->SetVisible(true);
+			m_InputMappingWizardBox->SetEnabled(true);
+			m_ConfiguringPlayer = static_cast<Players>(player);
+		} else {
+			m_InputMappingWizardBox->SetVisible(false);
+			m_InputMappingWizardBox->SetEnabled(false);
+			m_ConfiguringPlayer = Players::NoPlayer;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsInputMappingWizardGUI::HandleInputEvents(GUIEvent &guiEvent) {
 		if (guiEvent.GetType() == GUIEvent::Command) {
 			/*
 			if (m_MenuScreen == CONFIGSCREEN) {

@@ -108,36 +108,39 @@ namespace RTE {
 
 		writer.NewPropertyWithValue("Device", m_ActiveDevice);
 
-		if (m_SchemePreset > InputPreset::PRESET_NONE) { writer.NewPropertyWithValue("Preset", m_SchemePreset); }
-
-		writer.NewPropertyWithValue("LeftUp", m_InputMappings.at(InputElements::INPUT_L_UP));
-		writer.NewPropertyWithValue("LeftDown", m_InputMappings.at(InputElements::INPUT_L_DOWN));
-		writer.NewPropertyWithValue("LeftLeft", m_InputMappings.at(InputElements::INPUT_L_LEFT));
-		writer.NewPropertyWithValue("LeftRight", m_InputMappings.at(InputElements::INPUT_L_RIGHT));
-		writer.NewPropertyWithValue("RightUp", m_InputMappings.at(InputElements::INPUT_R_UP));
-		writer.NewPropertyWithValue("RightDown", m_InputMappings.at(InputElements::INPUT_R_DOWN));
-		writer.NewPropertyWithValue("RightLeft", m_InputMappings.at(InputElements::INPUT_R_LEFT));
-		writer.NewPropertyWithValue("RightRight", m_InputMappings.at(InputElements::INPUT_R_RIGHT));
-		writer.NewPropertyWithValue("Fire", m_InputMappings.at(InputElements::INPUT_FIRE));
-		writer.NewPropertyWithValue("Aim", m_InputMappings.at(InputElements::INPUT_AIM));
-		writer.NewPropertyWithValue("AimUp", m_InputMappings.at(InputElements::INPUT_AIM_UP));
-		writer.NewPropertyWithValue("AimDown", m_InputMappings.at(InputElements::INPUT_AIM_DOWN));
-		writer.NewPropertyWithValue("AimLeft", m_InputMappings.at(InputElements::INPUT_AIM_LEFT));
-		writer.NewPropertyWithValue("AimRight", m_InputMappings.at(InputElements::INPUT_AIM_RIGHT));
-		writer.NewPropertyWithValue("PieMenu", m_InputMappings.at(InputElements::INPUT_PIEMENU));
-		writer.NewPropertyWithValue("Jump", m_InputMappings.at(InputElements::INPUT_JUMP));
-		writer.NewPropertyWithValue("Crouch", m_InputMappings.at(InputElements::INPUT_CROUCH));
-		writer.NewPropertyWithValue("Next", m_InputMappings.at(InputElements::INPUT_NEXT));
-		writer.NewPropertyWithValue("Prev", m_InputMappings.at(InputElements::INPUT_PREV));
-		writer.NewPropertyWithValue("Start", m_InputMappings.at(InputElements::INPUT_START));
-		writer.NewPropertyWithValue("Back", m_InputMappings.at(InputElements::INPUT_BACK));
-		writer.NewPropertyWithValue("WeaponChangeNext", m_InputMappings.at(InputElements::INPUT_WEAPON_CHANGE_NEXT));
-		writer.NewPropertyWithValue("WeaponChangePrev", m_InputMappings.at(InputElements::INPUT_WEAPON_CHANGE_PREV));
-		writer.NewPropertyWithValue("WeaponPickup", m_InputMappings.at(InputElements::INPUT_WEAPON_PICKUP));
-		writer.NewPropertyWithValue("WeaponDrop", m_InputMappings.at(InputElements::INPUT_WEAPON_DROP));
-		writer.NewPropertyWithValue("WeaponReload", m_InputMappings.at(InputElements::INPUT_WEAPON_RELOAD));
-		writer.NewPropertyWithValue("JoystickDeadzoneType", m_JoystickDeadzoneType);
-		writer.NewPropertyWithValue("JoystickDeadzone", m_JoystickDeadzone);
+		// TODO: Make sure to reset preset when mapping manually otherwise nothing it written.
+		if (m_SchemePreset > InputPreset::NoPreset) {
+			writer.NewPropertyWithValue("Preset", m_SchemePreset);
+		} else {
+			writer.NewPropertyWithValue("LeftUp", m_InputMappings.at(InputElements::INPUT_L_UP));
+			writer.NewPropertyWithValue("LeftDown", m_InputMappings.at(InputElements::INPUT_L_DOWN));
+			writer.NewPropertyWithValue("LeftLeft", m_InputMappings.at(InputElements::INPUT_L_LEFT));
+			writer.NewPropertyWithValue("LeftRight", m_InputMappings.at(InputElements::INPUT_L_RIGHT));
+			writer.NewPropertyWithValue("RightUp", m_InputMappings.at(InputElements::INPUT_R_UP));
+			writer.NewPropertyWithValue("RightDown", m_InputMappings.at(InputElements::INPUT_R_DOWN));
+			writer.NewPropertyWithValue("RightLeft", m_InputMappings.at(InputElements::INPUT_R_LEFT));
+			writer.NewPropertyWithValue("RightRight", m_InputMappings.at(InputElements::INPUT_R_RIGHT));
+			writer.NewPropertyWithValue("Fire", m_InputMappings.at(InputElements::INPUT_FIRE));
+			writer.NewPropertyWithValue("Aim", m_InputMappings.at(InputElements::INPUT_AIM));
+			writer.NewPropertyWithValue("AimUp", m_InputMappings.at(InputElements::INPUT_AIM_UP));
+			writer.NewPropertyWithValue("AimDown", m_InputMappings.at(InputElements::INPUT_AIM_DOWN));
+			writer.NewPropertyWithValue("AimLeft", m_InputMappings.at(InputElements::INPUT_AIM_LEFT));
+			writer.NewPropertyWithValue("AimRight", m_InputMappings.at(InputElements::INPUT_AIM_RIGHT));
+			writer.NewPropertyWithValue("PieMenu", m_InputMappings.at(InputElements::INPUT_PIEMENU));
+			writer.NewPropertyWithValue("Jump", m_InputMappings.at(InputElements::INPUT_JUMP));
+			writer.NewPropertyWithValue("Crouch", m_InputMappings.at(InputElements::INPUT_CROUCH));
+			writer.NewPropertyWithValue("Next", m_InputMappings.at(InputElements::INPUT_NEXT));
+			writer.NewPropertyWithValue("Prev", m_InputMappings.at(InputElements::INPUT_PREV));
+			writer.NewPropertyWithValue("Start", m_InputMappings.at(InputElements::INPUT_START));
+			writer.NewPropertyWithValue("Back", m_InputMappings.at(InputElements::INPUT_BACK));
+			writer.NewPropertyWithValue("WeaponChangeNext", m_InputMappings.at(InputElements::INPUT_WEAPON_CHANGE_NEXT));
+			writer.NewPropertyWithValue("WeaponChangePrev", m_InputMappings.at(InputElements::INPUT_WEAPON_CHANGE_PREV));
+			writer.NewPropertyWithValue("WeaponPickup", m_InputMappings.at(InputElements::INPUT_WEAPON_PICKUP));
+			writer.NewPropertyWithValue("WeaponDrop", m_InputMappings.at(InputElements::INPUT_WEAPON_DROP));
+			writer.NewPropertyWithValue("WeaponReload", m_InputMappings.at(InputElements::INPUT_WEAPON_RELOAD));
+			writer.NewPropertyWithValue("JoystickDeadzoneType", m_JoystickDeadzoneType);
+			writer.NewPropertyWithValue("JoystickDeadzone", m_JoystickDeadzone);
+		}
 
 		return 0;
 	}

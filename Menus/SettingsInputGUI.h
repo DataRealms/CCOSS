@@ -65,10 +65,10 @@ namespace RTE {
 
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
 
-		std::unique_ptr<SettingsInputMappingGUI> m_InputConfigMenu; //!< The input mapping configuration sub-menu.
+		std::unique_ptr<SettingsInputMappingGUI> m_InputMappingConfigMenu; //!< The input mapping configuration sub-menu.
 
 		/// <summary>
-		/// GUI elements that compose the video settings menu screen.
+		/// GUI elements that compose the input settings menu screen.
 		/// </summary>
 		GUICollectionBox *m_InputSettingsBox;
 		std::array<PlayerInputSettingsBox, Players::MaxPlayerCount> m_PlayerInputSettingsBoxes;

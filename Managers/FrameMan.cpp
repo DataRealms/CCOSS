@@ -121,7 +121,7 @@ namespace RTE {
 #ifdef _WIN32
 		if (m_ForceVirtualFullScreenGfxDriver) {
 			m_GfxDriver = GFX_DIRECTX_WIN_BORDERLESS;
-			m_GfxDriverMessage = "SYSTEM: Using DirectX fullscreen-windowed driver!";
+			m_GfxDriverMessage = "SYSTEM: Using DirectX borderless window driver!";
 		} else if (m_ForceDedicatedFullScreenGfxDriver) {
 			m_GfxDriver = GFX_DIRECTX_ACCEL;
 			m_GfxDriverMessage = "SYSTEM: Using DirectX dedicated fullscreen driver!";
@@ -155,18 +155,26 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::ValidateResolution(int &resX, int &resY, int &resMultiplier) {
+	void FrameMan::ValidateResolution(int &resX, int &resY, int &resMultiplier) const {
 		if (resX * resMultiplier > m_MaxResX || resY * resMultiplier > m_MaxResY) {
-			ShowMessageBox("Resolution too high to fit display, overriding to fit!");
 			resX = m_MaxResX / resMultiplier;
 			resY = m_MaxResY / resMultiplier;
+			ShowMessageBox("Resolution too high to fit display, overriding to fit!");
 		} else if (!m_ForceDedicatedFullScreenGfxDriver && resX * resMultiplier == 1366 && resY * resMultiplier == 768) {
-			ShowMessageBox("Unfortunately, 1366x768 resolution is not supported in windowed or borderless mode. 1360x768 will be used instead!\nTo enable the use of this resolution, please force the dedicated fullscreen driver through \"Settings.ini\".");
 			resX = 1360 / resMultiplier;
 			resY = 768 / resMultiplier;
+			const char *invalidResolutionMessage = {
+				"Unfortunately, 1366x768 resolution is not supported in windowed or borderless mode. 1360x768 will be used instead!\n"
+				"To enable the use of this resolution, please force the dedicated fullscreen driver through \"Settings.ini\" or through the in-game custom resolution settings."
+			};
+			ShowMessageBox(invalidResolutionMessage);
 		} else if (!m_ForceDedicatedFullScreenGfxDriver && (resX * resMultiplier) % 4 > 0) {
-			ShowMessageBox("Resolution width that is not divisible by 4 is not supported!\nOverriding to closest valid width!");
 			resX = static_cast<int>(std::floor(resX / 4) * 4);
+			const char *invalidResolutionMessage = {
+				"Resolution width that is not divisible by 4 is not supported in windowed or borderless mode!\nOverriding to closest valid width!\n"
+				"To enable the use of this resolution, please force the dedicated fullscreen driver through \"Settings.ini\" or through the in-game custom resolution settings."
+			};
+			ShowMessageBox(invalidResolutionMessage);
 		}
 
 		if (m_NumScreens == 1) {
@@ -175,15 +183,15 @@ namespace RTE {
 				ShowMessageBox("Abnormal aspect ratio detected! Reverting to defaults!");
 				resX = c_DefaultResX;
 				resY = c_DefaultResY;
-				resMultiplier = m_ResMultiplier = 1;
+				resMultiplier = 1;
 			}
 		} else if (!m_DisableMultiScreenResolutionValidation && m_NumScreens > 1 && m_NumScreens < 4) {
 			if (resX * resMultiplier > m_PrimaryScreenResX || resY * resMultiplier > m_PrimaryScreenResY) { ValidateMultiScreenResolution(resX, resY, resMultiplier); }
 		} else if (!m_DisableMultiScreenResolutionValidation && m_NumScreens > 3) {
-			ShowMessageBox("Number of screens is too damn high! Overriding to defaults!\n\nPlease disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
 			resX = c_DefaultResX;
 			resY = c_DefaultResY;
-			resMultiplier = m_ResMultiplier = 1;
+			resMultiplier = 1;
+			ShowMessageBox("Number of screens is too damn high! Overriding to defaults!\n\nPlease disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
 		}
 
 		g_SettingsMan.UpdateSettingsFile();
@@ -191,36 +199,34 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::ValidateMultiScreenResolution(int &resX, int &resY, int &resMultiplier) {
+	void FrameMan::ValidateMultiScreenResolution(int &resX, int &resY, int resMultiplier) const {
 #ifdef _WIN32
 		POINT pointOnScreen;
 		HMONITOR screenHandle;
-		MONITORINFO screenInfo;
+		MONITORINFO screenInfo = { sizeof(MONITORINFO) };
 
 		pointOnScreen = { -1 , 0 };
 		screenHandle = MonitorFromPoint(pointOnScreen, MONITOR_DEFAULTTONULL);
 		if (screenHandle != NULL) {
+			resX = m_PrimaryScreenResX / resMultiplier;
+			resY = m_PrimaryScreenResY / resMultiplier;
 			const char *leftNotPrimaryMessage = {
 				"Due to limitations in Cortex Command's graphics API it is impossible to properly run multi-screen mode when the left-most screen is not set as primary.\n"
 				"Please configure your left-most screen to be primary to utilize all screens, as the game window will extend right but will not extend left, leaving any screen left of the primary unused.\n\n"
 				"You can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!\n\nResolution settings will be overridden to fit primary screen only!"
 			};
 			ShowMessageBox(leftNotPrimaryMessage);
-			resX = m_PrimaryScreenResX / resMultiplier;
-			resY = m_PrimaryScreenResY / resMultiplier;
 			return;
 		}
 
 		pointOnScreen = { m_PrimaryScreenResX + 1 , 0 };
 		screenHandle = MonitorFromPoint(pointOnScreen, MONITOR_DEFAULTTONULL);
-		screenInfo = { sizeof(MONITORINFO) };
 		GetMonitorInfo(screenHandle, &screenInfo);
-		int centerScreenResY = screenInfo.rcMonitor.bottom;
 
-		if (centerScreenResY != m_PrimaryScreenResY) {
-			ShowMessageBox("Center screen height is not identical to primary screen, overriding to fit primary screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
+		if (m_PrimaryScreenResY != screenInfo.rcMonitor.bottom) {
 			resX = m_PrimaryScreenResX / resMultiplier;
 			resY = m_PrimaryScreenResY / resMultiplier;
+			ShowMessageBox("Center screen height is not identical to primary screen, overriding to fit primary screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
 			return;
 		}
 
@@ -229,12 +235,11 @@ namespace RTE {
 			screenHandle = MonitorFromPoint(pointOnScreen, MONITOR_DEFAULTTONULL);
 			screenInfo = { sizeof(MONITORINFO) };
 			GetMonitorInfo(screenHandle, &screenInfo);
-			int rightScreenResY = screenInfo.rcMonitor.bottom;
 
-			if (rightScreenResY != m_PrimaryScreenResY) {
-				ShowMessageBox("Right screen height is not identical to primary screen, overriding to extend to center screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
+			if (m_PrimaryScreenResY != screenInfo.rcMonitor.bottom) {
 				resX = (m_MaxResX - (screenInfo.rcMonitor.right - screenInfo.rcMonitor.left)) / resMultiplier;
 				resY = m_PrimaryScreenResY / resMultiplier;
+				ShowMessageBox("Right screen height is not identical to primary screen, overriding to extend to center screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
 				return;
 			}
 		}

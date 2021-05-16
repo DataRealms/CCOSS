@@ -61,14 +61,18 @@ namespace RTE {
 
 		SettingsMenuScreen m_ActiveSettingsMenuScreen; //!< The currently active settings menu that is being updated and drawn to the screen. See SettingsMenuScreen enumeration.
 
-		std::array<GUITab *, SettingsMenuScreen::SettingsMenuCount> m_SettingsMenuTabs; //!< Array containing all the tabs for the settings tabber.
-		GUIButton *m_BackToMainButton; //!< Back to main menu button.
 
 		std::unique_ptr<SettingsVideoGUI> m_VideoSettingsMenu; //!< The video settings sub-menu.
 		std::unique_ptr<SettingsAudioGUI> m_AudioSettingsMenu; //!< The audio settings sub-menu.
 		std::unique_ptr<SettingsInputGUI> m_InputSettingsMenu; //!< The input settings sub-menu.
 		std::unique_ptr<SettingsGameplayGUI> m_GameplaySettingsMenu; //!< The gameplay settings sub-menu.
 		std::unique_ptr<SettingsMiscGUI> m_MiscSettingsMenu; //!< The misc settings sub-menu.
+
+		/// <summary>
+		/// GUI elements that compose the settings menu screen.
+		/// </summary>
+		GUIButton *m_BackToMainButton;
+		std::array<GUITab *, SettingsMenuScreen::SettingsMenuCount> m_SettingsMenuTabs;
 
 #pragma region Settings Menu Handling
 		/// <summary>

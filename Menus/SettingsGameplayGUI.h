@@ -43,7 +43,7 @@ namespace RTE {
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
 
 		/// <summary>
-		/// GUI elements that compose the video settings menu screen.
+		/// GUI elements that compose the gameplay settings menu screen.
 		/// </summary>
 		GUICollectionBox *m_GameplaySettingsBox;
 		GUICheckbox *m_FlashOnBrainDamageCheckbox;

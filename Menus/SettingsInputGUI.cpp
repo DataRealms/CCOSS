@@ -36,7 +36,7 @@ namespace RTE {
 			UpdatePlayerSelectedDeviceLabel(player);
 			ShowPlayerInputDeviceSensitivityControls(player);
 		}
-		m_InputConfigMenu = std::make_unique<SettingsInputMappingGUI>(parentControlManager);
+		m_InputMappingConfigMenu = std::make_unique<SettingsInputMappingGUI>(parentControlManager);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -196,7 +196,7 @@ namespace RTE {
 					SetPlayerNextOrPrevInputDevice(player, false);
 				} else if (guiEvent.GetControl() == m_PlayerInputSettingsBoxes.at(player).ConfigureControlsButton) {
 					g_GUISound.ButtonPressSound()->Play();
-					m_InputConfigMenu->SetEnabled(true, player);
+					m_InputMappingConfigMenu->SetEnabled(true, player);
 				} else if (guiEvent.GetControl() == m_PlayerInputSettingsBoxes.at(player).ResetControlsButton) {
 					g_GUISound.ButtonPressSound()->Play();
 					ResetPlayerInputSettings(player);
@@ -217,7 +217,7 @@ namespace RTE {
 					UpdatePlayerInputSensitivityControlValues(player);
 				}
 			}
-			m_InputConfigMenu->HandleInputEvents(guiEvent, player);
+			m_InputMappingConfigMenu->HandleInputEvents(guiEvent);
 		}
 	}
 }

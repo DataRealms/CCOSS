@@ -91,7 +91,7 @@ namespace RTE {
 					return true;
 				}
 			} else if (guiEvent.GetType() == GUIEvent::Notification) {
-				if ((dynamic_cast<GUIButton *>(guiEvent.GetControl()) && guiEvent.GetMsg() == GUIButton::Focused) || (dynamic_cast<GUITab *>(guiEvent.GetControl()) && guiEvent.GetMsg() == GUITab::Hovered)) { g_GUISound.SelectionChangeSound()->Play(); }
+				if ((guiEvent.GetMsg() == GUIButton::Focused) && dynamic_cast<GUIButton *>(guiEvent.GetControl()) || (guiEvent.GetMsg() == GUITab::Hovered && dynamic_cast<GUITab *>(guiEvent.GetControl()))) { g_GUISound.SelectionChangeSound()->Play(); }
 
 				if (guiEvent.GetMsg() == GUITab::Pushed) {
 					if (guiEvent.GetControl() == m_SettingsMenuTabs.at(SettingsMenuScreen::VideoSettingsMenu)) {

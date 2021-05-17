@@ -174,7 +174,7 @@ namespace RTE {
 					ToggleScript();
 				}
 			} else if (guiEvent.GetType() == GUIEvent::Notification) {
-				if (dynamic_cast<GUIButton *>(guiEvent.GetControl()) && (guiEvent.GetMsg() == GUIButton::Focused)) { g_GUISound.SelectionChangeSound()->Play(); }
+				if (guiEvent.GetMsg() == GUIButton::Focused && dynamic_cast<GUIButton *>(guiEvent.GetControl())) { g_GUISound.SelectionChangeSound()->Play(); }
 
 				if (guiEvent.GetControl() == m_ModsListBox && (guiEvent.GetMsg() == GUIListBox::Select && m_ModsListBox->GetSelectedIndex() > -1)) {
 					const ModRecord &modRecord = m_KnownMods.at(m_ModsListBox->GetSelected()->m_ExtraIndex);

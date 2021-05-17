@@ -30,6 +30,11 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
+		/// Gets whether this input mapping settings menu is currently visible and enabled.
+		/// </summary>
+		bool IsEnabled() const;
+
+		/// <summary>
 		/// Enables or disables the input mapping settings menu.
 		/// </summary>
 		/// <param name="enable">Show and enable or hide and disable the input mapping settings menu.</param>

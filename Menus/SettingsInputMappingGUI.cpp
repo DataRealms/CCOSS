@@ -36,6 +36,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool SettingsInputMappingGUI::IsEnabled() const {
+		return m_InputMappingSettingsBox->GetVisible() && m_InputMappingSettingsBox->GetEnabled();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void SettingsInputMappingGUI::SetEnabled(bool enable, int player) {
 		if (enable) {
 			m_InputMappingSettingsBox->SetVisible(true);
@@ -72,6 +78,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsInputMappingGUI::HandleInputEvents(GUIEvent &guiEvent) {
+		if (m_InputConfigWizardMenu->IsEnabled()) {
+			m_InputConfigWizardMenu->HandleInputEvents(guiEvent);
+			return;
+		}
 		if (guiEvent.GetType() == GUIEvent::Command) {
 			if (guiEvent.GetControl() == m_CloseMappingBoxButton) {
 				g_GUISound.ButtonPressSound()->Play();
@@ -87,6 +97,5 @@ namespace RTE {
 		} else if (guiEvent.GetType() == GUIEvent::Notification && guiEvent.GetControl() == m_InputMapScrollingBoxScrollbar && guiEvent.GetMsg() == GUIScrollbar::ChangeValue) {
 			UpdateScrollingInputBoxScrollPosition();
 		}
-		m_InputConfigWizardMenu->HandleInputEvents(guiEvent);
 	}
 }

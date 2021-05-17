@@ -180,6 +180,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsInputGUI::HandleInputEvents(GUIEvent &guiEvent) {
+		if (m_InputMappingConfigMenu->IsEnabled()) {
+			m_InputMappingConfigMenu->HandleInputEvents(guiEvent);
+			return;
+		}
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			if (guiEvent.GetType() == GUIEvent::Command) {
 				if (guiEvent.GetControl() == m_PlayerInputSettingsBoxes.at(player).NextDeviceButton) {
@@ -211,7 +215,6 @@ namespace RTE {
 					UpdatePlayerInputSensitivityControlValues(player);
 				}
 			}
-			m_InputMappingConfigMenu->HandleInputEvents(guiEvent);
 		}
 	}
 }

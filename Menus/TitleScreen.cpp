@@ -105,26 +105,28 @@ namespace RTE {
 		draw_trans_sprite(m_Moon.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/MoonAlpha.png").GetAsBitmap(COLORCONV_NONE, false), 0, 0);
 
 		int starSmallBitmapCount = 4;
+		std::vector<BITMAP *> starSmallBitmaps = ConvertDoublePointerToVectorOfPointers(ContentFile("Base.rte/GUIs/Title/Stars/StarSmall.png").GetAsAnimation(starSmallBitmapCount), starSmallBitmapCount);
+
 		int starLargeBitmapCount = 1;
+		std::vector<BITMAP *> starLargeBitmaps = ConvertDoublePointerToVectorOfPointers(ContentFile("Base.rte/GUIs/Title/Stars/StarLarge.png").GetAsAnimation(starLargeBitmapCount), starLargeBitmapCount);
+
 		int starHugeBitmapCount = 2;
-		BITMAP **starSmallBitmaps = ContentFile("Base.rte/GUIs/Title/Stars/StarSmall.png").GetAsAnimation(starSmallBitmapCount);
-		BITMAP **starLargeBitmaps = ContentFile("Base.rte/GUIs/Title/Stars/StarLarge.png").GetAsAnimation(starLargeBitmapCount);
-		BITMAP **starHugeBitmaps = ContentFile("Base.rte/GUIs/Title/Stars/StarHuge.png").GetAsAnimation(starHugeBitmapCount);
+		std::vector<BITMAP *> starHugeBitmaps = ConvertDoublePointerToVectorOfPointers(ContentFile("Base.rte/GUIs/Title/Stars/StarHuge.png").GetAsAnimation(starHugeBitmapCount), starHugeBitmapCount);
 
 		int starCount = (g_FrameMan.GetResX() * m_Nebula.GetBitmap()->h) / 1000;
 		for (int i = 0; i < starCount; ++i) {
 			Star newStar;
 			if (RandomNum() < 0.95F) {
 				newStar.Size = Star::StarSize::StarSmall;
-				newStar.Bitmap = starSmallBitmaps[RandomNum(0, starSmallBitmapCount - 1)];
+				newStar.Bitmap = starSmallBitmaps.at(RandomNum(0, starSmallBitmapCount - 1));
 				newStar.Intensity = RandomNum(0, 92);
 			} else if (RandomNum() < 0.85F) {
 				newStar.Size = Star::StarSize::StarLarge;
-				newStar.Bitmap = starLargeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
+				newStar.Bitmap = starLargeBitmaps.at(RandomNum(0, starLargeBitmapCount - 1));
 				newStar.Intensity = RandomNum(111, 185);
 			} else {
 				newStar.Size = Star::StarSize::StarHuge;
-				newStar.Bitmap = starHugeBitmaps[RandomNum(0, starLargeBitmapCount - 1)];
+				newStar.Bitmap = starHugeBitmaps.at(RandomNum(0, starLargeBitmapCount - 1));
 				newStar.Intensity = RandomNum(166, 185);
 			}
 			newStar.Position = Vector(RandomNum(0.0F, static_cast<float>(g_FrameMan.GetResX())), RandomNum(-100.0F, static_cast<float>(m_Nebula.GetBitmap()->h)));

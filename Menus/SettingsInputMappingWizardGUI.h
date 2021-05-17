@@ -31,6 +31,11 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
+		/// Gets whether this input mapping wizard menu is currently visible and enabled.
+		/// </summary>
+		bool IsEnabled() const;
+
+		/// <summary>
 		/// Enables or disables the input mapping wizard menu.
 		/// </summary>
 		/// <param name="enable">Show and enable or hide and disable the input mapping wizard menu.</param>

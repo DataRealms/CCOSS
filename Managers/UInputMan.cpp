@@ -421,7 +421,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::SetMouseValueMagnitude(float magCap, short player) { 
-		if (IsInMultiplayerMode() && player != Players::NoPlayer) {
+		if (IsInMultiplayerMode() && player != Players::NoPlayer && player >= Players::PlayerOne && player < Players::MaxPlayerCount) {
 			m_NetworkAnalogMoveData[player].CapMagnitude(m_MouseTrapRadius * magCap);
 		}
 		m_AnalogMouseData.CapMagnitude(m_MouseTrapRadius * magCap);

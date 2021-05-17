@@ -7,6 +7,7 @@ struct BITMAP;
 
 namespace RTE {
 
+	class InputScheme;
 	class GUIControlManager;
 	class GUICollectionBox;
 	class GUIComboBox;
@@ -40,7 +41,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="enable">Show and enable or hide and disable the input mapping wizard menu.</param>
 		/// <param name="player">The player this SettingsInputMappingWizardGUI is mapping inputs for.</param>
-		void SetEnabled(bool enable = true, int player = 0);
+		void SetEnabled(bool enable = true, int player = 0, InputScheme *playerScheme = nullptr);
 
 		/// <summary>
 		/// Handles the player interaction with the SettingsInputMappingWizardGUI GUI elements.
@@ -65,51 +66,84 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		enum ConfigWizardLabels {
-			ConfigTitle,
-			ConfigRecommendation,
-			ConfigInstruction,
-			ConfigInput,
-			ConfigSteps,
-			ConfigLabelCount
+		enum GamepadType { DPad, AnalogDualShock, AnalogXbox };
+
+		/// <summary>
+		/// Struct containing GUI elements that compose the input mapping wizard manual configuration menu screen.
+		/// </summary>
+		struct WizardManualConfigScreen {
+			GUICollectionBox *ManualConfigBox;
+			GUILabel *ConfigStepDescriptionLabel;
+			GUILabel *ConfigStepRecommendedKeyLabel;
+			GUICollectionBox *GamepadConfigRecommendedBox;
+			GUILabel *GamepadConfigStepRecommendedInputLabel;
+			GUICollectionBox *GamepadConfigRecommendedDiagramBox;
+			GUILabel *ConfigStepLabel;
+			GUIButton *PrevConfigStepButton;
+			GUIButton *NextConfigStepButton;
+			GUIButton *ResetConfigButton;
+			GUIButton *DiscardOrApplyConfigButton;
 		};
 
 		/// <summary>
-		/// 
+		/// Struct containing GUI elements that compose the input mapping wizard preset selection menu screen.
 		/// </summary>
-		enum class GamepadType { DPad, DualAnalog, Xbox360 };
+		struct WizardPresetSelectScreen {
+			GUICollectionBox *PresetSelectBox;
+			GUIButton *CloseWizardButton;
+			GUIButton *PresetSelectSNESButton;
+			GUIButton *PresetSelectDS4Button;
+			GUIButton *PresetSelectXB360Button;
+			GUIButton *StartConfigDPadTypeButton;
+			GUIButton *StartConfigAnalogDSTypeButton;
+			GUIButton *StartConfigAnalogXBTypeButton;
+		};
 
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
 
-		Players m_ConfiguringPlayer; //!< Which player's control scheme we are currently configuring.
+		Players m_ConfiguringPlayer; //!< The player this SettingsInputMappingWizardGUI is configuring input mapping for.
+		InputScheme *m_ConfiguringPlayerScheme; //!< The InputScheme of the configuring player.
+
 		InputDevice m_ConfiguringDevice; //!< Which type of device we are currently configuring.
-		GamepadType m_ConfiguringGamepad; //!< Which type of gamepad we are currently configuring.
+		bool m_ConfiguringDeviceIsGamepad; //!< Whether the device being configured is a gamepad of any type.
+		GamepadType m_ConfiguringGamepadType; //!< Which type of gamepad we are currently configuring.
 		int m_ConfigureStep; //!< Which step in current configure sequence.
 
-		std::array<BITMAP *, ConfigWizardSteps::DPadConfigSteps> m_DPadBitmaps;
-		std::array<BITMAP *, ConfigWizardSteps::DualAnalogConfigSteps> m_DualAnalogBitmaps;
+		std::vector<BITMAP *> m_DPadDiagramBitmaps; //!<
+		std::vector<BITMAP *> m_DualAnalogDSDiagramBitmaps; //!<
+		std::vector<BITMAP *> m_DualAnalogXBDiagramBitmaps; //!<
+
+		WizardManualConfigScreen m_WizardManualConfigScreen; //!<
+		WizardPresetSelectScreen m_WizardPresetSelectScreen; //!<
 
 		/// <summary>
 		/// GUI elements that compose the input mapping wizard menu screen.
 		/// </summary>
-		GUICollectionBox *m_InputMappingWizardBox;
-		GUIButton *m_BackToOptionsButton;
-		GUICollectionBox *m_RecommendationBox;
-		GUICollectionBox *m_RecommendationDiagram;
-		GUIButton *m_ConfigSkipButton;
-		GUIButton *m_ConfigBackButton;
-		GUICollectionBox *m_DPadTypeBox;
-		GUICollectionBox *m_DPadTypeDiagram;
-		GUIButton *m_DPadTypeButton;
-		GUICollectionBox *m_DAnalogTypeBox;
-		GUICollectionBox *m_DAnalogTypeDiagram;
-		GUIButton *m_DAnalogTypeButton;
-		GUICollectionBox *m_XBox360TypeBox;
-		GUICollectionBox *m_XBox360TypeDiagram;
-		GUIButton *m_XBox360TypeButton;
-		std::array<GUILabel *, ConfigWizardLabels::ConfigLabelCount> m_ConfigLabel;
+		GUICollectionBox *m_InputWizardScreenBox;
+		GUILabel *m_InputWizardTitleLabel;
+
+#pragma region Create Breakdown
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreateManualConfigScreen();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void CreatePresetSelectionScreen();
+#pragma endregion
 
 #pragma region Input Mapping Wizard Handling
+		/// <summary>
+		/// 
+		/// </summary>
+		void ShowManualConfigScreen();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void ShowPresetSelectionScreen();
 		/// <summary>
 		/// 
 		/// </summary>
@@ -127,6 +161,20 @@ namespace RTE {
 		/// </summary>
 		/// <returns></returns>
 		bool UpdateGamepadConfigWizard();
+#pragma endregion
+
+#pragma region Input Event Handling Breakdown
+		/// <summary>
+		/// Handles the player interaction with the SettingsInputMappingWizardGUI's WizardManualConfigScreen GUI elements.
+		/// </summary>
+		/// <param name="guiEvent">The GUIEvent containing information about the player interaction with an element.</param>
+		void HandleManualConfigScreenInputEvenets(GUIEvent &guiEvent);
+
+		/// <summary>
+		/// Handles the player interaction with the SettingsInputMappingWizardGUI's WizardPresetSelectScreen GUI elements.
+		/// </summary>
+		/// <param name="guiEvent">The GUIEvent containing information about the player interaction with an element.</param>
+		void HandlePresetSelectScreenInputEvents(GUIEvent &guiEvent);
 #pragma endregion
 
 		// Disallow the use of some implicit methods.

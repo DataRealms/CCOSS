@@ -32,6 +32,9 @@ namespace RTE {
 			m_InputMapButton.at(i) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonInputKey" + std::to_string(i + 1)));
 		}
 		m_InputConfigWizardMenu = std::make_unique<SettingsInputMappingWizardGUI>(parentControlManager);
+
+		m_ConfiguringPlayer = Players::NoPlayer;
+		m_ConfiguringPlayerInputScheme = nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -48,21 +51,25 @@ namespace RTE {
 			m_InputMappingSettingsBox->SetEnabled(true);
 			m_InputMappingSettingsLabel->SetText("P L A Y E R   " + std::to_string(player + 1) + "   I N P U T   M A P P I N G");
 			m_ConfiguringPlayer = static_cast<Players>(player);
+			m_ConfiguringPlayerInputScheme = g_UInputMan.GetControlScheme(player);
 			m_InputMapScrollingBoxScrollbar->SetValue(0);
 			UpdateScrollingInputBoxScrollPosition();
-			UpdateMappingLabelsAndButtons();
+			UpdateMappingButtonLabels();
 		} else {
 			m_InputMappingSettingsBox->SetVisible(false);
 			m_InputMappingSettingsBox->SetEnabled(false);
 			m_ConfiguringPlayer = Players::NoPlayer;
+			m_ConfiguringPlayerInputScheme = nullptr;
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsInputMappingGUI::UpdateMappingLabelsAndButtons() {
+	void SettingsInputMappingGUI::UpdateMappingButtonLabels() {
+		const std::array<InputMapping, InputElements::INPUT_COUNT> *inputMappings = m_ConfiguringPlayerInputScheme->GetInputMappings();
 		for (int i = 0; i < InputElements::INPUT_COUNT; ++i) {
-			std::string inputDescription = g_UInputMan.GetControlScheme(m_ConfiguringPlayer)->GetInputMappings()[i].GetPresetDescription();
+			std::string inputDescription = inputMappings->at(i).GetPresetDescription();
+			if (inputDescription.empty()) { inputDescription = m_ConfiguringPlayerInputScheme->GetMappingName(i); }
 			m_InputMapButton.at(i)->SetText(!inputDescription.empty() ? "[" + inputDescription + "]" : "[Undefined]");
 		}
 	}
@@ -79,7 +86,7 @@ namespace RTE {
 
 	void SettingsInputMappingGUI::HandleInputEvents(GUIEvent &guiEvent) {
 		if (m_InputConfigWizardMenu->IsEnabled()) {
-			m_InputConfigWizardMenu->HandleInputEvents(guiEvent);
+			if (m_InputConfigWizardMenu->HandleInputEvents(guiEvent)) { UpdateMappingButtonLabels(); }
 			return;
 		}
 		if (guiEvent.GetType() == GUIEvent::Command) {
@@ -87,7 +94,8 @@ namespace RTE {
 				g_GUISound.ButtonPressSound()->Play();
 				SetEnabled(false);
 			} else if (guiEvent.GetControl() == m_RunConfigWizardButton) {
-				m_InputConfigWizardMenu->SetEnabled(true, m_ConfiguringPlayer);
+				g_GUISound.ButtonPressSound()->Play();
+				m_InputConfigWizardMenu->SetEnabled(true, m_ConfiguringPlayer, m_ConfiguringPlayerInputScheme);
 			}
 			for (int mapButton = 0; mapButton < InputElements::INPUT_COUNT; ++mapButton) {
 				if (guiEvent.GetControl() == m_InputMapButton.at(mapButton)) {

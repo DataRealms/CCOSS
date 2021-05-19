@@ -59,6 +59,8 @@ namespace RTE {
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
 
 		Players m_ConfiguringPlayer; //!< The player this SettingsInputMappingGUI is configuring input mapping for.
+		InputScheme *m_ConfiguringPlayerInputScheme; //!< The InputScheme of the configuring player.
+
 		int m_LastInputMapScrollingBoxScrollbarValue; //!< The previous value of the input mappings scrolling box scrollbar. Used to calculate the scroll position.
 
 		std::unique_ptr<SettingsInputMappingWizardGUI> m_InputConfigWizardMenu; //!< The input mapping config wizard.
@@ -77,9 +79,9 @@ namespace RTE {
 
 #pragma region Input Mapping Settings Handling
 		/// <summary>
-		/// Updates the mapping name labels and button key label with the configuring player's InputScheme mappings.
+		/// Updates the mapping button key labels with the configuring player's InputScheme mappings.
 		/// </summary>
-		void UpdateMappingLabelsAndButtons();
+		void UpdateMappingButtonLabels();
 
 		/// <summary>
 		/// Updates the input mapping scrolling box scroll position.

@@ -129,6 +129,9 @@ namespace RTE {
 					break;
 			}
 		}
+		// Input wizard manual config sequence has to be updated outside the GUI event handling loop otherwise input capture doesn't work.
+		if (m_InputSettingsMenu->InputConfigWizardConfiguringManually()) { m_InputSettingsMenu->HandleConfigWizardManualConfiguration(); }
+
 		return false;
 	}
 

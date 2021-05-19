@@ -31,6 +31,19 @@ namespace RTE {
 		explicit SettingsInputGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 
+#pragma region Input Config Wizard Handling
+		/// <summary>
+		/// Gets whether the player is currently manually configuring the InputScheme through the input mapping wizard.
+		/// </summary>
+		/// <returns>Whether the player is currently manually configuring the InputScheme through the input mapping wizard.</returns>
+		bool InputConfigWizardConfiguringManually() const { return m_InputMappingConfigMenu->GetInputConfigWizardMenu()->IsConfiguringManually(); }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void HandleConfigWizardManualConfiguration() const { m_InputMappingConfigMenu->GetInputConfigWizardMenu()->HandleManualConfigSequence(); }
+#pragma endregion
+
 #pragma region Concrete Methods
 		/// <summary>
 		/// Enables or disables the input settings menu.

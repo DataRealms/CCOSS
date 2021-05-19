@@ -30,6 +30,12 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		SettingsInputMappingWizardGUI * GetInputConfigWizardMenu() { return m_InputConfigWizardMenu.get(); }
+
+		/// <summary>
 		/// Gets whether this input mapping settings menu is currently visible and enabled.
 		/// </summary>
 		bool IsEnabled() const;

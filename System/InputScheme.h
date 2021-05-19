@@ -88,7 +88,7 @@ namespace RTE {
 		/// Gets the InputMappings for this.
 		/// </summary>
 		/// <returns>The input mappings array, which is INPUT_COUNT large.</returns>
-		InputMapping * GetInputMappings() { return m_InputMappings.data(); }
+		std::array<InputMapping, InputElements::INPUT_COUNT> * GetInputMappings() { return &m_InputMappings; }
 #pragma endregion
 
 #pragma region Input Mapping Getters and Setters
@@ -104,28 +104,28 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichInput">Which input element to look up.</param>
 		/// <returns>Which keyboard key is mapped to the specified player and element.</returns>
-		int GetKeyMapping(int whichInput) const { return m_InputMappings[whichInput].GetKey(); }
+		int GetKeyMapping(int whichInput) const { return m_InputMappings.at(whichInput).GetKey(); }
 
 		/// <summary>
 		/// Sets a keyboard key mapped to a specific input element.
 		/// </summary>
 		/// <param name="whichInput">Which input element to map to.</param>
 		/// <param name="whichKey">The scan code of which keyboard key to map to above input element.</param>
-		void SetKeyMapping(int whichInput, int whichKey) { m_InputMappings[whichInput].SetKey(whichKey); }
+		void SetKeyMapping(int whichInput, int whichKey) { m_InputMappings.at(whichInput).SetKey(whichKey); }
 
 		/// <summary>
 		/// Gets which joystick button is mapped to a specific input element.
 		/// </summary>
 		/// <param name="whichInput">Which input element to look up.</param>
 		/// <returns>Which joystick button is mapped to the specified player and element.</returns>
-		int GetJoyButtonMapping(int whichInput) const { return m_InputMappings[whichInput].GetJoyButton(); }
+		int GetJoyButtonMapping(int whichInput) const { return m_InputMappings.at(whichInput).GetJoyButton(); }
 
 		/// <summary>
 		/// Sets a joystick button mapped to a specific input element.
 		/// </summary>
 		/// <param name="whichInput">Which input element to map to.</param>
 		/// <param name="whichButton">Which joystick button to map to the specified input element.</param>
-		void SetJoyButtonMapping(int whichInput, int whichButton) { m_InputMappings[whichInput].SetJoyButton(whichButton); }
+		void SetJoyButtonMapping(int whichInput, int whichButton) { m_InputMappings.at(whichInput).SetJoyButton(whichButton); }
 
 		/// <summary>
 		/// Get the deadzone value for this control scheme.
@@ -157,7 +157,7 @@ namespace RTE {
 		/// Clears all mappings for a specific input element of a specific player.
 		/// </summary>
 		/// <param name="whichInput">Which input element to clear all mappings of.</param>
-		void ClearMapping(int whichInput) { m_InputMappings[whichInput].Reset(); }
+		void ClearMapping(int whichInput) { m_InputMappings.at(whichInput).Reset(); }
 
 		/// <summary>
 		/// Checks for any key press this frame and creates an input mapping for a specific player accordingly.

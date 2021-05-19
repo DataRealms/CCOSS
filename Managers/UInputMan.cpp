@@ -125,10 +125,11 @@ namespace RTE {
 		InputDevice device = m_ControlScheme.at(whichPlayer).GetDevice();
 		if (device >= InputDevice::DEVICE_GAMEPAD_1) {
 			int whichJoy = GetJoystickIndex(device);
-			const InputMapping *element = m_ControlScheme.at(whichPlayer).GetInputMappings();
+			const std::array<InputMapping, InputElements::INPUT_COUNT> *inputElements = m_ControlScheme.at(whichPlayer).GetInputMappings();
+
 			// Assume axes are stretched out over up-down, and left-right
-			if (element[InputElements::INPUT_L_LEFT].JoyDirMapped()) { moveValues.SetX(AnalogAxisValue(whichJoy, element[InputElements::INPUT_L_LEFT].GetStick(), element[InputElements::INPUT_L_LEFT].GetAxis())); }
-			if (element[InputElements::INPUT_L_UP].JoyDirMapped()) { moveValues.SetY(AnalogAxisValue(whichJoy, element[InputElements::INPUT_L_UP].GetStick(), element[InputElements::INPUT_L_UP].GetAxis())); }
+			if (inputElements->at(InputElements::INPUT_L_LEFT).JoyDirMapped()) { moveValues.SetX(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_L_LEFT).GetStick(), inputElements->at(InputElements::INPUT_L_LEFT).GetAxis())); }
+			if (inputElements->at(InputElements::INPUT_L_UP).JoyDirMapped()) { moveValues.SetY(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_L_UP).GetStick(), inputElements->at(InputElements::INPUT_L_UP).GetAxis())); }
 		}
 		return moveValues;
 	}
@@ -146,10 +147,11 @@ namespace RTE {
 		}
 		if (device >= InputDevice::DEVICE_GAMEPAD_1) {
 			int whichJoy = GetJoystickIndex(device);
-			const InputMapping *element = m_ControlScheme.at(whichPlayer).GetInputMappings();
+			const std::array<InputMapping, InputElements::INPUT_COUNT> *inputElements = m_ControlScheme.at(whichPlayer).GetInputMappings();
+
 			// Assume axes are stretched out over up-down, and left-right
-			if (element[InputElements::INPUT_R_LEFT].JoyDirMapped()) { aimValues.SetX(AnalogAxisValue(whichJoy, element[InputElements::INPUT_R_LEFT].GetStick(), element[InputElements::INPUT_R_LEFT].GetAxis())); }
-			if (element[InputElements::INPUT_R_UP].JoyDirMapped()) { aimValues.SetY(AnalogAxisValue(whichJoy, element[InputElements::INPUT_R_UP].GetStick(), element[InputElements::INPUT_R_UP].GetAxis())); }
+			if (inputElements->at(InputElements::INPUT_R_LEFT).JoyDirMapped()) { aimValues.SetX(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_R_LEFT).GetStick(), inputElements->at(InputElements::INPUT_R_LEFT).GetAxis())); }
+			if (inputElements->at(InputElements::INPUT_R_UP).JoyDirMapped()) { aimValues.SetY(AnalogAxisValue(whichJoy, inputElements->at(InputElements::INPUT_R_UP).GetStick(), inputElements->at(InputElements::INPUT_R_UP).GetAxis())); }
 		}
 		return aimValues;
 	}
@@ -476,7 +478,7 @@ namespace RTE {
 		}
 		bool elementState = false;
 		InputDevice device = m_ControlScheme.at(whichPlayer).GetDevice();
-		const InputMapping *element = &(m_ControlScheme.at(whichPlayer).GetInputMappings()[whichElement]);
+		const InputMapping *element = &(m_ControlScheme.at(whichPlayer).GetInputMappings()->at(whichElement));
 
 		if (!elementState && device == InputDevice::DEVICE_KEYB_ONLY || (device == InputDevice::DEVICE_MOUSE_KEYB && !(whichElement == InputElements::INPUT_AIM_UP || whichElement == InputElements::INPUT_AIM_DOWN))) {
 			elementState = GetKeyboardButtonState(static_cast<char>(element->GetKey()),whichState);
@@ -836,19 +838,19 @@ namespace RTE {
 			}
 			if (joystickPlayer > Players::NoPlayer && deadZoneType == DeadZoneType::CIRCLE && deadZone > 0.0F) {
 				Vector aimValues;
-				const InputMapping *element = m_ControlScheme[joystickPlayer].GetInputMappings();
+				const std::array<InputMapping, InputElements::INPUT_COUNT> *inputElements = m_ControlScheme.at(joystickPlayer).GetInputMappings();
 				std::array<InputElements, 4> elementsToCheck = { InputElements::INPUT_L_LEFT, InputElements::INPUT_L_UP, InputElements::INPUT_R_LEFT, InputElements::INPUT_R_UP };
 
 				for (int i = 0; i < elementsToCheck.size() - 1; i += 2) {
-					if (element[elementsToCheck[i]].JoyDirMapped()) { aimValues.m_X = AnalogAxisValue(joystick, element[elementsToCheck[i]].GetStick(), element[elementsToCheck[i]].GetAxis()); }
-					if (element[elementsToCheck[i + 1]].JoyDirMapped()) { aimValues.m_Y = AnalogAxisValue(joystick, element[elementsToCheck[i + 1]].GetStick(), element[elementsToCheck[i + 1]].GetAxis()); }
+					if (inputElements->at(elementsToCheck.at(i)).JoyDirMapped()) { aimValues.m_X = AnalogAxisValue(joystick, inputElements->at(elementsToCheck.at(i)).GetStick(), inputElements->at(elementsToCheck.at(i)).GetAxis()); }
+					if (inputElements->at(elementsToCheck.at(i + 1)).JoyDirMapped()) { aimValues.m_Y = AnalogAxisValue(joystick, inputElements->at(elementsToCheck.at(i + 1)).GetStick(), inputElements->at(elementsToCheck.at(i + 1)).GetAxis()); }
 
 					if (aimValues.GetMagnitude() < deadZone * 2) {
 						for (int j = 0; j < 2; j++) {
 							InputElements whichElementDirection = elementsToCheck[i + j];
-							if (element[whichElementDirection].JoyDirMapped()) {
-								JOYSTICK_AXIS_INFO *joystickAxis = &joy[joystick].stick[element[whichElementDirection].GetStick()].axis[element[whichElementDirection].GetAxis()];
-								if (joy[joystick].stick[element[whichElementDirection].GetStick()].flags & JOYFLAG_UNSIGNED) {
+							if (inputElements->at(whichElementDirection).JoyDirMapped()) {
+								JOYSTICK_AXIS_INFO *joystickAxis = &joy[joystick].stick[inputElements->at(whichElementDirection).GetStick()].axis[inputElements->at(whichElementDirection).GetAxis()];
+								if (joy[joystick].stick[inputElements->at(whichElementDirection).GetStick()].flags & JOYFLAG_UNSIGNED) {
 									joystickAxis->pos = 128;
 									joystickAxis->d1 = joystickAxis->d2 = 0;
 								} else {

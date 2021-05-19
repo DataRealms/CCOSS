@@ -368,7 +368,7 @@ namespace RTE {
 
 	std::string InputScheme::GetMappingName(int whichElement) const {
 		InputScheme::InputPreset preset = GetPreset();
-		const InputMapping *element = &(m_InputMappings[whichElement]);
+		const InputMapping *element = &(m_InputMappings.at(whichElement));
 		if (preset != InputScheme::InputPreset::NoPreset && !element->GetPresetDescription().empty()) {
 			return element->GetPresetDescription();
 		}
@@ -411,7 +411,7 @@ namespace RTE {
 		for (char whichKey = KEY_A; whichKey < KEY_MAX; ++whichKey) {
 			if (g_UInputMan.KeyPressed(whichKey)) {
 				// Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
-				m_InputMappings[whichInput].Reset();
+				m_InputMappings.at(whichInput).Reset();
 				SetKeyMapping(whichInput, whichKey);
 				return true;
 			}
@@ -438,7 +438,7 @@ namespace RTE {
 
 		if (whichButton != JoyButtons::JOY_NONE) {
 			// Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
-			m_InputMappings[whichInput].Reset();
+			m_InputMappings.at(whichInput).Reset();
 			SetJoyButtonMapping(whichInput, whichButton);
 			return true;
 		}
@@ -452,12 +452,12 @@ namespace RTE {
 			for (int axis = 0; axis < joy[whichJoy].stick[stick].num_axis; ++axis) {
 				if (joy[whichJoy].stick[stick].axis[axis].d1 /*&& s_ChangedJoystickStates[whichJoy].stick[stick].axis[axis].d1*/) {
 					// Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
-					m_InputMappings[whichInput].Reset();
-					m_InputMappings[whichInput].SetDirection(stick, axis, JOYDIR_ONE);
+					m_InputMappings.at(whichInput).Reset();
+					m_InputMappings.at(whichInput).SetDirection(stick, axis, JOYDIR_ONE);
 					return true;
 				} else if (joy[whichJoy].stick[stick].axis[axis].d2 /*&& s_ChangedJoystickStates[whichJoy].stick[stick].axis[axis].d2*/) {
-					m_InputMappings[whichInput].Reset();
-					m_InputMappings[whichInput].SetDirection(stick, axis, JOYDIR_TWO);
+					m_InputMappings.at(whichInput).Reset();
+					m_InputMappings.at(whichInput).SetDirection(stick, axis, JOYDIR_TWO);
 					return true;
 				}
 			}

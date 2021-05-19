@@ -628,12 +628,321 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool SettingsInputMappingWizardGUI::UpdateGamepadDPadConfigSequence() {
+		/*
+		if (ConfiguringGamepad == DPAD) {
+			if (m_ScreenChange) {
+				std::snprintf(str, sizeof(str), "D-Pad Gamepad Configuration - Player %i", ConfiguringPlayer + 1);
+				ConfigLabel.at(ConfigWizardLabels::ConfigTitle)->SetText(str);
+				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetVisible(false);
+				ConfigLabel.at(ConfigWizardLabels::ConfigInstruction)->SetText("Press the button or move the stick for");
+				RecommendationDiagram->SetVisible(true);
+				RecommendationDiagram->Resize(DPadBitmaps.at(0)->w, DPadBitmaps.at(0)->h);
+				RecommendationDiagram->CenterInParent(true, true);
+				RecommendationDiagram->MoveRelative(0, 4);
+				m_ScreenChange = false;
+			}
+
+			// Step label update
+			std::snprintf(str, sizeof(str), "Step %i / %i", ConfigureStep + 1, ConfigWizardSteps::DPadConfigSteps);
+			ConfigLabel.at(ConfigWizardLabels::ConfigSteps)->SetText(str);
+
+			// Diagram update
+			// Not passing in ownership of the BITMAP
+			pDiagramBitmap = new AllegroBitmap(DPadBitmaps.at(m_BlinkTimer.AlternateReal(500) ? 0 : ConfigureStep));
+			// Passing in ownership of the AllegroBitmap, but again, not the BITMAP contained within
+			RecommendationDiagram->SetDrawImage(pDiagramBitmap);
+			pDiagramBitmap = 0;
+
+			switch (ConfigureStep) {
+				case 1:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE or AIM UP");
+
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_AIM_UP)) {
+						//                        g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_L_UP);
+						g_UInputMan.ClearMapping(ConfiguringPlayer, INPUT_L_UP);
+						g_UInputMan.ClearMapping(ConfiguringPlayer, INPUT_R_UP);
+						//                        g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_R_UP);
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 2:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE or AIM DOWN");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_AIM_DOWN)) {
+						//                        g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_L_DOWN);
+						g_UInputMan.ClearMapping(ConfiguringPlayer, INPUT_L_DOWN);
+						g_UInputMan.ClearMapping(ConfiguringPlayer, INPUT_R_DOWN);
+						//                        g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_R_DOWN);
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 3:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE LEFT");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_L_LEFT)) {
+						g_UInputMan.ClearMapping(ConfiguringPlayer, INPUT_R_LEFT);
+						//                        g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_R_LEFT);
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 4:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE RIGHT");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_L_RIGHT)) {
+						g_UInputMan.ClearMapping(ConfiguringPlayer, INPUT_R_RIGHT);
+						//                        g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_R_RIGHT);
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 5:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("SHARP AIM");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_AIM)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 6:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("FIRE / ACTIVATE");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_FIRE)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 7:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("JUMP");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_JUMP)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 8:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("COMMAND MENU");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_PIEMENU)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 9:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("NEXT BODY");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_NEXT)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 10:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("PREVIOUS BODY");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_PREV)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 11:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("START BUTTON");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_START)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 12:
+					// Hide the skip button on this last step
+					ConfigSkipButton->SetVisible(false);
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("BACK BUTTON");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_BACK)) {
+						// Done, go back to options screen
+						m_apScreenBox.at(CONFIGSCREEN)->SetVisible(false);
+						m_MenuScreen = OPTIONSSCREEN;
+						m_ScreenChange = true;
+						return true;
+					}
+					break;
+				default:
+					break;
+			}
+		}
+		*/
 		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool SettingsInputMappingWizardGUI::UpdateGamepadAnalogConfigSequence() {
+		/*
+		if (ConfiguringGamepad == DANALOG || ConfiguringGamepad == XBOX360) {
+			if (m_ScreenChange) {
+				std::snprintf(str, sizeof(str), "Dual Analog Gamepad Configuration - Player %i", ConfiguringPlayer + 1);
+				ConfigLabel.at(ConfigWizardLabels::ConfigTitle)->SetText(str);
+				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetVisible(false);
+				ConfigLabel.at(ConfigWizardLabels::ConfigInstruction)->SetText("Press the button or move the stick for");
+				RecommendationDiagram->SetVisible(true);
+				RecommendationDiagram->Resize(DualAnalogBitmaps.at(0)->w, DualAnalogBitmaps.at(0)->h);
+				RecommendationDiagram->CenterInParent(true, true);
+				RecommendationDiagram->MoveRelative(0, 8);
+				m_ScreenChange = false;
+			}
+
+			// Step label update
+			std::snprintf(str, sizeof(str), "Step %i / %i", ConfigureStep + 1, ConfigWizardSteps::DualAnalogConfigSteps);
+			ConfigLabel.at(ConfigWizardLabels::ConfigSteps)->SetText(str);
+
+			// Diagram update
+			// Not passing in ownership of the BITMAP
+			pDiagramBitmap = new AllegroBitmap(DualAnalogBitmaps.at(m_BlinkTimer.AlternateReal(500) ? 0 : ConfigureStep));
+			// Passing in ownership of the AllegroBitmap, but again, not the BITMAP contained within
+			RecommendationDiagram->SetDrawImage(pDiagramBitmap);
+			pDiagramBitmap = 0;
+
+			switch (ConfigureStep) {
+				case 1:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE UP or JUMP");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_L_UP)) {
+						g_UInputMan.ClearMapping(ConfiguringPlayer, INPUT_AIM_UP);
+						g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_JUMP);
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 2:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE DOWN or CROUCH");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_L_DOWN)) {
+						g_UInputMan.ClearMapping(ConfiguringPlayer, INPUT_AIM_DOWN);
+						g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_CROUCH);
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 3:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE LEFT");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_L_LEFT)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 4:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE RIGHT");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_L_RIGHT)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 5:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("AIM UP");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_R_UP)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 6:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("AIM DOWN");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_R_DOWN)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 7:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("AIM LEFT");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_R_LEFT)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 8:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("AIM RIGHT");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_R_RIGHT)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 9:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("FIRE / ACTIVATE");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_FIRE)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 10:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("COMMAND MENU");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_PIEMENU)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 11:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("NEXT BODY");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_NEXT)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 12:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("PREVIOUS BODY");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_PREV)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 13:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("PREVIOUS WEAPON");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_WEAPON_CHANGE_PREV)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 14:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("NEXT WEAPON");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_WEAPON_CHANGE_NEXT)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 15:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("PICKUP WEAPON");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_WEAPON_PICKUP)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 16:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("RELOAD WEAPON");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_WEAPON_RELOAD)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 17:
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("START BUTTON");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_START)) {
+						ConfigureStep++;
+						m_ScreenChange = true;
+					}
+					break;
+				case 18:
+					// Hide the skip button on this last step
+					ConfigSkipButton->SetVisible(false);
+					ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("BACK BUTTON");
+					if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_BACK)) {
+						// If Xbox controller; if the A button has not been mapped to Activate/fire, then map it automatically
+						// These redundancies should apply to all custom analog setups, really
+						//if (ConfiguringGamepad == XBOX360)
+						{
+							// No button assigned to fire, so give it 'A' on the controller (in addition to any axis inputs)
+							if (g_UInputMan.GetButtonMapping(ConfiguringPlayer, INPUT_FIRE) == JOY_NONE) { g_UInputMan.SetButtonMapping(ConfiguringPlayer, INPUT_FIRE, JOY_1); }
+							// No button assigned to pie menu, so give it 'B' on the controller (in addition to whatever axis it's assinged to)
+							if (g_UInputMan.GetButtonMapping(ConfiguringPlayer, INPUT_PIEMENU) == JOY_NONE) { g_UInputMan.SetButtonMapping(ConfiguringPlayer, INPUT_PIEMENU, JOY_2); }
+						}
+
+						// Done, go back to options screen
+						m_apScreenBox.at(CONFIGSCREEN)->SetVisible(false);
+						m_MenuScreen = OPTIONSSCREEN;
+						m_ScreenChange = true;
+						return true;
+					}
+					break;
+				default:
+					break;
+			}
+		}
+		*/
 		return false;
 	}
 
@@ -690,312 +999,8 @@ namespace RTE {
 			}
 
 			// D-pad
-			if (ConfiguringGamepad == DPAD) {
-				if (m_ScreenChange) {
-					std::snprintf(str, sizeof(str), "D-Pad Gamepad Configuration - Player %i", ConfiguringPlayer + 1);
-					ConfigLabel.at(ConfigWizardLabels::ConfigTitle)->SetText(str);
-					ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetVisible(false);
-					ConfigLabel.at(ConfigWizardLabels::ConfigInstruction)->SetText("Press the button or move the stick for");
-					RecommendationDiagram->SetVisible(true);
-					RecommendationDiagram->Resize(DPadBitmaps.at(0)->w, DPadBitmaps.at(0)->h);
-					RecommendationDiagram->CenterInParent(true, true);
-					RecommendationDiagram->MoveRelative(0, 4);
-					m_ScreenChange = false;
-				}
 
-				// Step label update
-				std::snprintf(str, sizeof(str), "Step %i / %i", ConfigureStep + 1, ConfigWizardSteps::DPadConfigSteps);
-				ConfigLabel.at(ConfigWizardLabels::ConfigSteps)->SetText(str);
-
-				// Diagram update
-				// Not passing in ownership of the BITMAP
-				pDiagramBitmap = new AllegroBitmap(DPadBitmaps.at(m_BlinkTimer.AlternateReal(500) ? 0 : ConfigureStep));
-				// Passing in ownership of the AllegroBitmap, but again, not the BITMAP contained within
-				RecommendationDiagram->SetDrawImage(pDiagramBitmap);
-				pDiagramBitmap = 0;
-
-				switch (ConfigureStep) {
-					case 1:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE or AIM UP");
-
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_AIM_UP)) {
-							//                        g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_L_UP);
-							g_UInputMan.ClearMapping(ConfiguringPlayer, INPUT_L_UP);
-							g_UInputMan.ClearMapping(ConfiguringPlayer, INPUT_R_UP);
-							//                        g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_R_UP);
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 2:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE or AIM DOWN");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_AIM_DOWN)) {
-							//                        g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_L_DOWN);
-							g_UInputMan.ClearMapping(ConfiguringPlayer, INPUT_L_DOWN);
-							g_UInputMan.ClearMapping(ConfiguringPlayer, INPUT_R_DOWN);
-							//                        g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_R_DOWN);
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 3:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE LEFT");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_L_LEFT)) {
-							g_UInputMan.ClearMapping(ConfiguringPlayer, INPUT_R_LEFT);
-							//                        g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_R_LEFT);
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 4:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE RIGHT");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_L_RIGHT)) {
-							g_UInputMan.ClearMapping(ConfiguringPlayer, INPUT_R_RIGHT);
-							//                        g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_R_RIGHT);
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 5:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("SHARP AIM");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_AIM)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 6:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("FIRE / ACTIVATE");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_FIRE)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 7:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("JUMP");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_JUMP)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 8:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("COMMAND MENU");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_PIEMENU)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 9:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("NEXT BODY");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_NEXT)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 10:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("PREVIOUS BODY");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_PREV)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 11:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("START BUTTON");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_START)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 12:
-						// Hide the skip button on this last step
-						ConfigSkipButton->SetVisible(false);
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("BACK BUTTON");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_BACK)) {
-							// Done, go back to options screen
-							m_apScreenBox.at(CONFIGSCREEN)->SetVisible(false);
-							m_MenuScreen = OPTIONSSCREEN;
-							m_ScreenChange = true;
-							return true;
-						}
-						break;
-					default:
-						break;
-				}
-			}
 			// Dual analog OR XBox Controller
-			else if (ConfiguringGamepad == DANALOG || ConfiguringGamepad == XBOX360) {
-				if (m_ScreenChange) {
-					std::snprintf(str, sizeof(str), "Dual Analog Gamepad Configuration - Player %i", ConfiguringPlayer + 1);
-					ConfigLabel.at(ConfigWizardLabels::ConfigTitle)->SetText(str);
-					ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetVisible(false);
-					ConfigLabel.at(ConfigWizardLabels::ConfigInstruction)->SetText("Press the button or move the stick for");
-					RecommendationDiagram->SetVisible(true);
-					RecommendationDiagram->Resize(DualAnalogBitmaps.at(0)->w, DualAnalogBitmaps.at(0)->h);
-					RecommendationDiagram->CenterInParent(true, true);
-					RecommendationDiagram->MoveRelative(0, 8);
-					m_ScreenChange = false;
-				}
-
-				// Step label update
-				std::snprintf(str, sizeof(str), "Step %i / %i", ConfigureStep + 1, ConfigWizardSteps::DualAnalogConfigSteps);
-				ConfigLabel.at(ConfigWizardLabels::ConfigSteps)->SetText(str);
-
-				// Diagram update
-				// Not passing in ownership of the BITMAP
-				pDiagramBitmap = new AllegroBitmap(DualAnalogBitmaps.at(m_BlinkTimer.AlternateReal(500) ? 0 : ConfigureStep));
-				// Passing in ownership of the AllegroBitmap, but again, not the BITMAP contained within
-				RecommendationDiagram->SetDrawImage(pDiagramBitmap);
-				pDiagramBitmap = 0;
-
-				switch (ConfigureStep) {
-					case 1:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE UP or JUMP");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_L_UP)) {
-							g_UInputMan.ClearMapping(ConfiguringPlayer, INPUT_AIM_UP);
-							g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_JUMP);
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 2:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE DOWN or CROUCH");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_L_DOWN)) {
-							g_UInputMan.ClearMapping(ConfiguringPlayer, INPUT_AIM_DOWN);
-							g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_CROUCH);
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 3:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE LEFT");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_L_LEFT)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 4:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE RIGHT");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_L_RIGHT)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 5:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("AIM UP");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_R_UP)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 6:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("AIM DOWN");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_R_DOWN)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 7:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("AIM LEFT");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_R_LEFT)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 8:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("AIM RIGHT");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_R_RIGHT)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 9:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("FIRE / ACTIVATE");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_FIRE)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 10:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("COMMAND MENU");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_PIEMENU)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 11:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("NEXT BODY");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_NEXT)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 12:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("PREVIOUS BODY");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_PREV)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 13:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("PREVIOUS WEAPON");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_WEAPON_CHANGE_PREV)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 14:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("NEXT WEAPON");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_WEAPON_CHANGE_NEXT)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 15:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("PICKUP WEAPON");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_WEAPON_PICKUP)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 16:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("RELOAD WEAPON");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_WEAPON_RELOAD)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 17:
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("START BUTTON");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_START)) {
-							ConfigureStep++;
-							m_ScreenChange = true;
-						}
-						break;
-					case 18:
-						// Hide the skip button on this last step
-						ConfigSkipButton->SetVisible(false);
-						ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("BACK BUTTON");
-						if (g_UInputMan.CaptureJoystickMapping(ConfiguringPlayer, whichJoy, INPUT_BACK)) {
-							// If Xbox controller; if the A button has not been mapped to Activate/fire, then map it automatically
-							// These redundancies should apply to all custom analog setups, really
-							//if (ConfiguringGamepad == XBOX360)
-							{
-								// No button assigned to fire, so give it 'A' on the controller (in addition to any axis inputs)
-								if (g_UInputMan.GetButtonMapping(ConfiguringPlayer, INPUT_FIRE) == JOY_NONE) { g_UInputMan.SetButtonMapping(ConfiguringPlayer, INPUT_FIRE, JOY_1); }
-								// No button assigned to pie menu, so give it 'B' on the controller (in addition to whatever axis it's assinged to)
-								if (g_UInputMan.GetButtonMapping(ConfiguringPlayer, INPUT_PIEMENU) == JOY_NONE) { g_UInputMan.SetButtonMapping(ConfiguringPlayer, INPUT_PIEMENU, JOY_2); }
-							}
-
-							// Done, go back to options screen
-							m_apScreenBox.at(CONFIGSCREEN)->SetVisible(false);
-							m_MenuScreen = OPTIONSSCREEN;
-							m_ScreenChange = true;
-							return true;
-						}
-						break;
-					default:
-						break;
-				}
-			}
 		}
 		*/
 		return false;

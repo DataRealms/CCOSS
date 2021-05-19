@@ -647,7 +647,8 @@ namespace RTE {
 		/// <param name="resX">Game window width to check.</param>
 		/// <param name="resY">Game window height to check.</param>
 		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
-		void ValidateMultiScreenResolution(int &resX, int &resY, int resMultiplier) const;
+		/// <returns>Whether multi-screen validation performed any overrides to settings.</returns>
+		bool ValidateMultiScreenResolution(int &resX, int &resY, int resMultiplier) const;
 
 		/// <summary>
 		/// Creates all the frame buffer bitmaps to be used by FrameMan. This is called during Create().

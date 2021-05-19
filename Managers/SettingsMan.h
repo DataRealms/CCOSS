@@ -49,6 +49,11 @@ namespace RTE {
 		bool SettingsNeedOverwrite() const { return m_SettingsNeedOverwrite; }
 
 		/// <summary>
+		/// Sets Settings.ini to be overwritten during the boot sequence for overrides to be applied (e.g. resolution validation).
+		/// </summary>
+		void SetSettingsNeedOverwrite() { m_SettingsNeedOverwrite = true; }
+
+		/// <summary>
 		/// Overwrites the settings file to save changes made from within the game.
 		/// </summary>
 		void UpdateSettingsFile() const;

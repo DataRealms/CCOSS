@@ -156,11 +156,15 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::ValidateResolution(int &resX, int &resY, int &resMultiplier) const {
+		bool settingsNeedOverwrite = false;
+
 		if (resX * resMultiplier > m_MaxResX || resY * resMultiplier > m_MaxResY) {
+			settingsNeedOverwrite = true;
 			resX = m_MaxResX / resMultiplier;
 			resY = m_MaxResY / resMultiplier;
 			ShowMessageBox("Resolution too high to fit display, overriding to fit!");
 		} else if (!m_ForceDedicatedFullScreenGfxDriver && resX * resMultiplier == 1366 && resY * resMultiplier == 768) {
+			settingsNeedOverwrite = true;
 			resX = 1360 / resMultiplier;
 			resY = 768 / resMultiplier;
 			const char *invalidResolutionMessage = {
@@ -169,6 +173,7 @@ namespace RTE {
 			};
 			ShowMessageBox(invalidResolutionMessage);
 		} else if (!m_ForceDedicatedFullScreenGfxDriver && (resX * resMultiplier) % 4 > 0) {
+			settingsNeedOverwrite = true;
 			resX = static_cast<int>(std::floor(resX / 4) * 4);
 			const char *invalidResolutionMessage = {
 				"Resolution width that is not divisible by 4 is not supported in windowed or borderless mode!\nOverriding to closest valid width!\n"
@@ -180,26 +185,28 @@ namespace RTE {
 		if (m_NumScreens == 1) {
 			float currentAspectRatio = static_cast<float>(resX) / static_cast<float>(resY);
 			if (currentAspectRatio < 1 || currentAspectRatio > 4) {
-				ShowMessageBox("Abnormal aspect ratio detected! Reverting to defaults!");
+				settingsNeedOverwrite = true;
 				resX = c_DefaultResX;
 				resY = c_DefaultResY;
 				resMultiplier = 1;
+				ShowMessageBox("Abnormal aspect ratio detected! Reverting to defaults!");
 			}
 		} else if (!m_DisableMultiScreenResolutionValidation && m_NumScreens > 1 && m_NumScreens < 4) {
-			if (resX * resMultiplier > m_PrimaryScreenResX || resY * resMultiplier > m_PrimaryScreenResY) { ValidateMultiScreenResolution(resX, resY, resMultiplier); }
+			if (resX * resMultiplier > m_PrimaryScreenResX || resY * resMultiplier > m_PrimaryScreenResY) { settingsNeedOverwrite = ValidateMultiScreenResolution(resX, resY, resMultiplier); }
 		} else if (!m_DisableMultiScreenResolutionValidation && m_NumScreens > 3) {
+			settingsNeedOverwrite = true;
 			resX = c_DefaultResX;
 			resY = c_DefaultResY;
 			resMultiplier = 1;
 			ShowMessageBox("Number of screens is too damn high! Overriding to defaults!\n\nPlease disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
 		}
 
-		g_SettingsMan.UpdateSettingsFile();
+		if (settingsNeedOverwrite) { g_SettingsMan.SetSettingsNeedOverwrite(); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void FrameMan::ValidateMultiScreenResolution(int &resX, int &resY, int resMultiplier) const {
+	bool FrameMan::ValidateMultiScreenResolution(int &resX, int &resY, int resMultiplier) const {
 #ifdef _WIN32
 		POINT pointOnScreen;
 		HMONITOR screenHandle;
@@ -216,7 +223,7 @@ namespace RTE {
 				"You can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!\n\nResolution settings will be overridden to fit primary screen only!"
 			};
 			ShowMessageBox(leftNotPrimaryMessage);
-			return;
+			return true;
 		}
 
 		pointOnScreen = { m_PrimaryScreenResX + 1 , 0 };
@@ -227,7 +234,7 @@ namespace RTE {
 			resX = m_PrimaryScreenResX / resMultiplier;
 			resY = m_PrimaryScreenResY / resMultiplier;
 			ShowMessageBox("Center screen height is not identical to primary screen, overriding to fit primary screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
-			return;
+			return true;
 		}
 
 		if (m_NumScreens == 3) {
@@ -240,10 +247,12 @@ namespace RTE {
 				resX = (m_MaxResX - (screenInfo.rcMonitor.right - screenInfo.rcMonitor.left)) / resMultiplier;
 				resY = m_PrimaryScreenResY / resMultiplier;
 				ShowMessageBox("Right screen height is not identical to primary screen, overriding to extend to center screen only!\n\nYou can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!");
-				return;
+				return true;
 			}
 		}
 #endif
+
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

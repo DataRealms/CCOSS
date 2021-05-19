@@ -173,22 +173,6 @@ namespace RTE {
 		/// <param name="whichInput">Which input element to map to for that player.</param>
 		/// <returns>Whether there were any button or stick presses this frame and therefore whether a mapping was successfully captured or not.</returns>
 		bool CaptureJoystickMapping(int whichJoy, int whichInput);
-
-		/// <summary>
-		/// Checks for any button press this frame and creates an input mapping for a specific player accordingly.
-		/// </summary>
-		/// <param name="whichJoy">Which joystick to scan for button presses.</param>
-		/// <param name="whichInput">Which input element to map to for that player.</param>
-		/// <returns>Whether there were any button presses this frame and therefore whether a mapping was successfully captured or not.</returns>
-		bool CaptureJoyButtonMapping(int whichJoy, int whichInput);
-
-		/// <summary>
-		/// Checks for any joystick pad or stick direction press this frame and creates an input mapping for a specific player accordingly.
-		/// </summary>
-		/// <param name="whichJoy">Which joystick to scan for pad and stick direction presses.</param>
-		/// <param name="whichInput">Which input element to map to for that player.</param>
-		/// <returns>Whether there were any direction presses this frame and therefore whether a mapping was successfully captured or not.</returns>
-		bool CaptureJoyDirectionMapping(int whichJoy, int whichInput);
 #pragma endregion
 
 	protected:

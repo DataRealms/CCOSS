@@ -107,11 +107,9 @@ namespace RTE {
 		Serializable::Save(writer);
 
 		writer.NewPropertyWithValue("Device", m_ActiveDevice);
+		writer.NewPropertyWithValue("Preset", m_SchemePreset);
 
-		// TODO: Make sure to reset preset when mapping manually otherwise nothing it written.
-		if (m_SchemePreset > InputPreset::NoPreset) {
-			writer.NewPropertyWithValue("Preset", m_SchemePreset);
-		} else {
+		if (m_SchemePreset == InputPreset::NoPreset) {
 			writer.NewPropertyWithValue("LeftUp", m_InputMappings.at(InputElements::INPUT_L_UP));
 			writer.NewPropertyWithValue("LeftDown", m_InputMappings.at(InputElements::INPUT_L_DOWN));
 			writer.NewPropertyWithValue("LeftLeft", m_InputMappings.at(InputElements::INPUT_L_LEFT));
@@ -138,9 +136,10 @@ namespace RTE {
 			writer.NewPropertyWithValue("WeaponPickup", m_InputMappings.at(InputElements::INPUT_WEAPON_PICKUP));
 			writer.NewPropertyWithValue("WeaponDrop", m_InputMappings.at(InputElements::INPUT_WEAPON_DROP));
 			writer.NewPropertyWithValue("WeaponReload", m_InputMappings.at(InputElements::INPUT_WEAPON_RELOAD));
-			writer.NewPropertyWithValue("JoystickDeadzoneType", m_JoystickDeadzoneType);
-			writer.NewPropertyWithValue("JoystickDeadzone", m_JoystickDeadzone);
 		}
+
+		writer.NewPropertyWithValue("JoystickDeadzoneType", m_JoystickDeadzoneType);
+		writer.NewPropertyWithValue("JoystickDeadzone", m_JoystickDeadzone);
 
 		return 0;
 	}
@@ -176,14 +175,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void InputScheme::SetPreset(InputPreset schemePreset) {
+		m_SchemePreset = schemePreset;
+
 		if (schemePreset == InputPreset::NoPreset || schemePreset == InputPreset::InputPresetCount) {
 			return;
 		}
 		for (InputMapping &inputMapping : m_InputMappings) {
 			inputMapping.Reset();
 		}
-
-		m_SchemePreset = schemePreset;
 		switch (m_SchemePreset) {
 			case InputPreset::PresetArrowKeys:
 				m_InputMappings.at(InputElements::INPUT_L_UP).SetKey(KEY_UP);
@@ -367,38 +366,31 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::string InputScheme::GetMappingName(int whichElement) const {
-		InputScheme::InputPreset preset = GetPreset();
-		const InputMapping *element = &(m_InputMappings.at(whichElement));
-		if (preset != InputScheme::InputPreset::NoPreset && !element->GetPresetDescription().empty()) {
-			return element->GetPresetDescription();
+		const InputMapping *inputElement = &(m_InputMappings.at(whichElement));
+		if (m_SchemePreset != InputScheme::InputPreset::NoPreset && !inputElement->GetPresetDescription().empty()) {
+			return inputElement->GetPresetDescription();
 		}
-
-		InputDevice device = GetDevice();
-		if (device >= InputDevice::DEVICE_GAMEPAD_1) {
-			int whichJoy = g_UInputMan.GetJoystickIndex(device);
-
-			// Check joystick button presses and axis directions
-			if (element->GetJoyButton() != JoyButtons::JOY_NONE) {
-				return joy[whichJoy].button[element->GetJoyButton()].name;
-			}
-			if (element->JoyDirMapped()) {
-				return "Joystick";
-			}
-		} else if (device == InputDevice::DEVICE_MOUSE_KEYB && element->GetMouseButton() != MouseButtons::MOUSE_NONE) {
-			int button = element->GetMouseButton();
-
-			switch (button) {
+		if (m_ActiveDevice == InputDevice::DEVICE_KEYB_ONLY || (m_ActiveDevice == InputDevice::DEVICE_MOUSE_KEYB && (!(whichElement == InputElements::INPUT_AIM_UP || whichElement == InputElements::INPUT_AIM_DOWN))) && inputElement->GetKey() != 0) {
+			std::string keyName = scancode_to_name(inputElement->GetKey());
+			return (keyName != "(none)") ? keyName : "";
+		} else if (m_ActiveDevice == InputDevice::DEVICE_MOUSE_KEYB && inputElement->GetMouseButton() != MouseButtons::MOUSE_NONE) {
+			switch (inputElement->GetMouseButton()) {
 				case MouseButtons::MOUSE_LEFT:
-					return "Left Mouse";
+					return "Mouse Left";
 				case MouseButtons::MOUSE_RIGHT:
-					return "Right Mouse";
+					return "Mouse Right";
 				case MouseButtons::MOUSE_MIDDLE:
-					return "Middle Mouse";
+					return "Mouse Middle";
 				default:
 					return "";
 			}
-		} else if (device == InputDevice::DEVICE_KEYB_ONLY || (device == InputDevice::DEVICE_MOUSE_KEYB && !(whichElement == InputElements::INPUT_AIM_UP || whichElement == InputElements::INPUT_AIM_DOWN)) && element->GetKey() != 0) {
-			return scancode_to_name(element->GetKey());
+		} else if (m_ActiveDevice >= InputDevice::DEVICE_GAMEPAD_1) {
+			if (inputElement->GetJoyButton() != JoyButtons::JOY_NONE) {
+				std::string buttonName = joy[g_UInputMan.GetJoystickIndex(m_ActiveDevice)].button[inputElement->GetJoyButton()].name;
+				return (buttonName != "unused") ? buttonName : "";
+			} else if (inputElement->JoyDirMapped()) {
+				return "Analog Stick";
+			}
 		}
 		return "";
 	}
@@ -408,8 +400,8 @@ namespace RTE {
 	bool InputScheme::CaptureKeyMapping(int whichInput) {
 		if (keyboard_needs_poll()) { poll_keyboard(); }
 
-		for (char whichKey = KEY_A; whichKey < KEY_MAX; ++whichKey) {
-			if (g_UInputMan.KeyPressed(whichKey)) {
+		for (int whichKey = KEY_A; whichKey < KEY_MAX; ++whichKey) {
+			if (g_UInputMan.KeyReleased(static_cast<char>(whichKey))) {
 				// Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
 				m_InputMappings.at(whichInput).Reset();
 				SetKeyMapping(whichInput, whichKey);
@@ -422,42 +414,21 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool InputScheme::CaptureJoystickMapping(int whichJoy, int whichInput) {
-		if (CaptureJoyButtonMapping(whichJoy, whichInput)) {
-			return true;
-		}
-		if (CaptureJoyDirectionMapping(whichJoy, whichInput)) {
-			return true;
-		}
-		return false;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool InputScheme::CaptureJoyButtonMapping(int whichJoy, int whichInput) {
 		int whichButton = g_UInputMan.WhichJoyButtonPressed(whichJoy);
-
 		if (whichButton != JoyButtons::JOY_NONE) {
-			// Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
 			m_InputMappings.at(whichInput).Reset();
 			SetJoyButtonMapping(whichInput, whichButton);
 			return true;
 		}
-		return false;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool InputScheme::CaptureJoyDirectionMapping(int whichJoy, int whichInput) {
 		for (int stick = 0; stick < joy[whichJoy].num_sticks; ++stick) {
 			for (int axis = 0; axis < joy[whichJoy].stick[stick].num_axis; ++axis) {
 				if (joy[whichJoy].stick[stick].axis[axis].d1 /*&& s_ChangedJoystickStates[whichJoy].stick[stick].axis[axis].d1*/) {
-					// Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
 					m_InputMappings.at(whichInput).Reset();
-					m_InputMappings.at(whichInput).SetDirection(stick, axis, JOYDIR_ONE);
+					m_InputMappings.at(whichInput).SetDirection(stick, axis, JoyDirections::JOYDIR_ONE);
 					return true;
 				} else if (joy[whichJoy].stick[stick].axis[axis].d2 /*&& s_ChangedJoystickStates[whichJoy].stick[stick].axis[axis].d2*/) {
 					m_InputMappings.at(whichInput).Reset();
-					m_InputMappings.at(whichInput).SetDirection(stick, axis, JOYDIR_TWO);
+					m_InputMappings.at(whichInput).SetDirection(stick, axis, JoyDirections::JOYDIR_TWO);
 					return true;
 				}
 			}

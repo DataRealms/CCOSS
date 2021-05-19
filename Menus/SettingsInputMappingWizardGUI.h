@@ -175,8 +175,6 @@ namespace RTE {
 		/// 
 		/// </summary>
 		void ApplyGamepadInputPreset(GamepadType gamepadType);
-
-
 #pragma endregion
 
 #pragma region Input Event Handling Breakdown
@@ -184,7 +182,7 @@ namespace RTE {
 		/// Handles the player interaction with the SettingsInputMappingWizardGUI's WizardManualConfigScreen GUI elements.
 		/// </summary>
 		/// <param name="guiEvent">The GUIEvent containing information about the player interaction with an element.</param>
-		void HandleManualConfigScreenInputEvenets(GUIEvent &guiEvent);
+		void HandleManualConfigScreenInputEvents(GUIEvent &guiEvent);
 
 		/// <summary>
 		/// Handles the player interaction with the SettingsInputMappingWizardGUI's WizardPresetSelectScreen GUI elements.
@@ -204,7 +202,7 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		bool UpdateMouseAndKeyboardConfigSequence();
+		void UpdateMouseAndKeyboardConfigSequence();
 
 		/// <summary>
 		/// 

@@ -219,6 +219,11 @@ namespace RTE {
 	void SettingsInputMappingWizardGUI::ApplyManuallyConfiguredScheme() {
 		m_ConfiguringPlayerScheme->SetDevice(m_NewInputScheme.GetDevice());
 		m_ConfiguringPlayerScheme->SetPreset(InputScheme::InputPreset::NoPreset);
+
+		if (m_ConfiguringDevice == InputDevice::DEVICE_MOUSE_KEYB) {
+			m_NewInputScheme.GetInputMappings()->at(InputElements::INPUT_FIRE).SetMouseButton(MouseButtons::MOUSE_LEFT);
+			m_NewInputScheme.GetInputMappings()->at(InputElements::INPUT_PIEMENU).SetMouseButton(MouseButtons::MOUSE_RIGHT);
+		}
 		std::swap(*m_ConfiguringPlayerScheme->GetInputMappings(), *m_NewInputScheme.GetInputMappings());
 
 		g_UInputMan.SetInputClass(nullptr);
@@ -230,7 +235,7 @@ namespace RTE {
 
 	bool SettingsInputMappingWizardGUI::HandleInputEvents(GUIEvent &guiEvent) {
 		if (m_WizardManualConfigScreen.ManualConfigBox->GetVisible()) {
-			HandleManualConfigScreenInputEvenets(guiEvent);
+			HandleManualConfigScreenInputEvents(guiEvent);
 		} else if (m_WizardPresetSelectScreen.PresetSelectBox->GetVisible()) {
 			HandlePresetSelectScreenInputEvents(guiEvent);
 		}
@@ -243,7 +248,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsInputMappingWizardGUI::HandleManualConfigScreenInputEvenets(GUIEvent &guiEvent) {
+	void SettingsInputMappingWizardGUI::HandleManualConfigScreenInputEvents(GUIEvent &guiEvent) {
 		if (guiEvent.GetType() == GUIEvent::Command) {
 			if (guiEvent.GetControl() == m_WizardManualConfigScreen.PrevConfigStepButton) {
 				g_GUISound.ButtonPressSound()->Play();
@@ -304,31 +309,38 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsInputMappingWizardGUI::HandleManualConfigSequence() {
-		ConfigWizardSteps configuringDeviceSteps = ConfigWizardSteps::NoConfigSteps;
+		if (m_ConfigStepChange) {
+			ConfigWizardSteps configuringDeviceSteps = ConfigWizardSteps::NoConfigSteps;
 
+			switch (m_ConfiguringDevice) {
+				case InputDevice::DEVICE_KEYB_ONLY:
+					configuringDeviceSteps = ConfigWizardSteps::KeyboardConfigSteps;
+					break;
+				case InputDevice::DEVICE_MOUSE_KEYB:
+					configuringDeviceSteps = ConfigWizardSteps::MouseAndKeyboardConfigSteps;
+					break;
+				default:
+					configuringDeviceSteps = (m_ConfiguringGamepadType == SettingsInputMappingWizardGUI::DPad) ? ConfigWizardSteps::DPadConfigSteps : ConfigWizardSteps::DualAnalogConfigSteps;
+					break;
+			}
+			std::string configStepLabel(16, '\0');
+			std::snprintf(configStepLabel.data(), configStepLabel.size(), "Step %i of %i", m_ConfigStep + 1, configuringDeviceSteps);
+			m_WizardManualConfigScreen.ConfigStepLabel->SetText(configStepLabel);
+		}
 		switch (m_ConfiguringDevice) {
 			case InputDevice::DEVICE_KEYB_ONLY:
-				configuringDeviceSteps = ConfigWizardSteps::KeyboardConfigSteps;
 				UpdateKeyboardConfigSequence();
 				break;
 			case InputDevice::DEVICE_MOUSE_KEYB:
-				configuringDeviceSteps = ConfigWizardSteps::MouseAndKeyboardConfigSteps;
 				UpdateMouseAndKeyboardConfigSequence();
 				break;
 			default:
 				if (m_ConfiguringGamepadType == SettingsInputMappingWizardGUI::DPad) {
-					configuringDeviceSteps = ConfigWizardSteps::DPadConfigSteps;
 					UpdateGamepadDPadConfigSequence();
 				} else {
-					configuringDeviceSteps = ConfigWizardSteps::DualAnalogConfigSteps;
 					UpdateGamepadAnalogConfigSequence();
 				}
 				break;
-		}
-		if (m_ConfigStepChange) {
-			std::string configStepLabel(16, '\0');
-			std::snprintf(configStepLabel.data(), configStepLabel.size(), "Step %i of %i", m_ConfigStep + 1, configuringDeviceSteps);
-			m_WizardManualConfigScreen.ConfigStepLabel->SetText(configStepLabel);
 		}
 	}
 
@@ -492,137 +504,130 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool SettingsInputMappingWizardGUI::UpdateMouseAndKeyboardConfigSequence() {
-		/*
-		if (m_ScreenChange) {
-			ConfigLabel.at(ConfigWizardLabels::ConfigInstruction)->SetVisible(true);
-			ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetVisible(true);
-			std::snprintf(str, sizeof(str), "Mouse + Keyboard Configuration - Player %i", ConfiguringPlayer + 1);
-			ConfigLabel.at(ConfigWizardLabels::ConfigTitle)->SetText(str);
-			ConfigLabel.at(ConfigWizardLabels::ConfigInstruction)->SetText("Press the key for");
-			ConfigLabel.at(ConfigWizardLabels::ConfigSteps)->SetVisible(true);
-			RecommendationBox->SetVisible(true);
-			ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetVisible(true);
-			ConfigSkipButton->SetVisible(true);
-			ConfigBackButton->SetVisible(true);
-			m_ScreenChange = false;
-		}
-
-		// Step label update
-		std::snprintf(str, sizeof(str), "Step %i / %i", ConfigureStep + 1, ConfigWizardSteps::MouseAndKeyboardConfigSteps);
-		ConfigLabel.at(ConfigWizardLabels::ConfigSteps)->SetText(str);
-
-		switch (ConfigureStep) {
+	void SettingsInputMappingWizardGUI::UpdateMouseAndKeyboardConfigSequence() {
+		bool inputCaptured = false;
+		switch (m_ConfigStep) {
 			case 0:
-				// Hide the back button on this first step
-				ConfigBackButton->SetVisible(false);
-
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE UP or JUMP");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText("[W]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_L_UP)) {
-					g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_R_UP);
-					g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_JUMP);
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.PrevConfigStepButton->SetVisible(false);
+					m_WizardManualConfigScreen.NextConfigStepButton->SetVisible(true);
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("MOVE UP or JUMP");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[W]");
+					m_ConfigStepChange = false;
+				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_L_UP)) {
+					m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_R_UP);
+					m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_JUMP);
+					inputCaptured = true;
 				}
 				break;
 			case 1:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE DOWN or CROUCH");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText("[S]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_L_DOWN)) {
-					g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_R_DOWN);
-					g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_CROUCH);
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.PrevConfigStepButton->SetVisible(true);
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("MOVE DOWN or CROUCH");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[S]");
+					m_ConfigStepChange = false;
+				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_L_DOWN)) {
+					m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_R_DOWN);
+					m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_CROUCH);
+					inputCaptured = true;
 				}
 				break;
 			case 2:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE LEFT");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText("[A]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_L_LEFT)) {
-					g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_R_LEFT);
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("MOVE LEFT");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[A]");
+					m_ConfigStepChange = false;
+				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_L_LEFT)) {
+					m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_R_LEFT);
+					inputCaptured = true;
 				}
 				break;
 			case 3:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE RIGHT");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText("[D]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_L_RIGHT)) {
-					g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_R_RIGHT);
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("MOVE RIGHT");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[D]");
+					m_ConfigStepChange = false;
+				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_L_RIGHT)) {
+					m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_R_RIGHT);
+					inputCaptured = true;
 				}
 				break;
 			case 4:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("RELOAD");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText("[R]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_WEAPON_RELOAD)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("PREVIOUS BODY");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[Q]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_PREV)) { inputCaptured = true; }
 				break;
 			case 5:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("PICK UP");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText("[F]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_WEAPON_PICKUP)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("NEXT BODY");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[E]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_NEXT)) { inputCaptured = true; }
 				break;
 			case 6:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("DROP");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText("[G]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_WEAPON_DROP)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("RELOAD WEAPON");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[R]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_WEAPON_RELOAD)) { inputCaptured = true; }
 				break;
 			case 7:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("PREV WEAPON");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText("[X]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_WEAPON_CHANGE_PREV)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("PICK UP DEVICE");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[F]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_WEAPON_PICKUP)) { inputCaptured = true; }
 				break;
 			case 8:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("NEXT WEAPON");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText("[C]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_WEAPON_CHANGE_NEXT)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("DROP DEVICE");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[G]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_WEAPON_DROP)) { inputCaptured = true; }
 				break;
 			case 9:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("PREVIOUS BODY");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText("[Q]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_PREV)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.NextConfigStepButton->SetVisible(true);
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("PREVIOUS DEVICE");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[X]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_WEAPON_CHANGE_PREV)) { inputCaptured = true; }
 				break;
 			case 10:
-				// Hide skip button on this last step
-				ConfigSkipButton->SetVisible(false);
-
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("NEXT BODY");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText("[E]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_NEXT)) {
-					//                ConfigureStep++;
-					//                m_ScreenChange = true;
-									// Done, go back to options screen
-					m_apScreenBox.at(CONFIGSCREEN)->SetVisible(false);
-					m_MenuScreen = OPTIONSSCREEN;
-					m_ScreenChange = true;
-					return true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.NextConfigStepButton->SetVisible(false);
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("NEXT DEVICE");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[C]");
+					m_ConfigStepChange = false;
+				}
+				if (!m_ConfigFinished && m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_WEAPON_CHANGE_NEXT)) { inputCaptured = true; }
+				if (inputCaptured) {
+					g_GUISound.ExitMenuSound()->Play();
+					m_WizardManualConfigScreen.DiscardOrApplyConfigButton->SetText("Apply Changes");
+					m_ConfigFinished = true;
+					return;
 				}
 				break;
 			default:
 				break;
 		}
-		*/
-		return false;
+		if (inputCaptured) {
+			g_GUISound.ExitMenuSound()->Play();
+			m_ConfigStep++;
+			m_ConfigStepChange = true;
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

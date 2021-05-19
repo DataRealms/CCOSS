@@ -1,7 +1,7 @@
 #ifndef _RTESETTINGSINPUTMAPPINGWIZARDGUI_
 #define _RTESETTINGSINPUTMAPPINGWIZARDGUI_
 
-#include "Constants.h"
+#include "InputScheme.h"
 
 struct BITMAP;
 
@@ -10,7 +10,6 @@ namespace RTE {
 	class InputScheme;
 	class GUIControlManager;
 	class GUICollectionBox;
-	class GUIComboBox;
 	class GUILabel;
 	class GUIButton;
 	class GUIEvent;
@@ -30,7 +29,7 @@ namespace RTE {
 		explicit SettingsInputMappingWizardGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 
-#pragma region Concrete Methods
+#pragma region Getters and Setters
 		/// <summary>
 		/// Gets whether this input mapping wizard menu is currently visible and enabled.
 		/// </summary>
@@ -44,10 +43,24 @@ namespace RTE {
 		void SetEnabled(bool enable = true, int player = 0, InputScheme *playerScheme = nullptr);
 
 		/// <summary>
+		/// Gets whether the input mapping wizard needs to capture input for manual configuration.
+		/// </summary>
+		/// <returns>Whether the input mapping wizard needs to capture input for manual configuration.</returns>
+		bool IsConfiguringManually() const { return m_ConfiguringManually; }
+#pragma endregion
+
+#pragma region Concrete Methods
+		/// <summary>
 		/// Handles the player interaction with the SettingsInputMappingWizardGUI GUI elements.
 		/// </summary>
 		/// <param name="guiEvent">The GUIEvent containing information about the player interaction with an element.</param>
-		void HandleInputEvents(GUIEvent &guiEvent);
+		/// <returns>Whether this SettingsInputMappingGUI changed the input scheme of the configuring player.</returns>
+		bool HandleInputEvents(GUIEvent &guiEvent);
+
+		/// <summary>
+		/// Handles updating and progressing the manual input configuration sequence.
+		/// </summary>
+		void HandleManualConfigSequence();
 #pragma endregion
 
 	private:
@@ -56,11 +69,11 @@ namespace RTE {
 		/// 
 		/// </summary>
 		enum ConfigWizardSteps {
+			NoConfigSteps = 0,
 			KeyboardConfigSteps = 16,
 			MouseAndKeyboardConfigSteps = 11,
 			DPadConfigSteps = 13,
 			DualAnalogConfigSteps = 19,
-			Xbox360ConfigSteps = 19
 		};
 
 		/// <summary>
@@ -73,6 +86,7 @@ namespace RTE {
 		/// </summary>
 		struct WizardManualConfigScreen {
 			GUICollectionBox *ManualConfigBox;
+			GUILabel *ConfigDeviceTypeLabel;
 			GUILabel *ConfigStepDescriptionLabel;
 			GUILabel *ConfigStepRecommendedKeyLabel;
 			GUICollectionBox *GamepadConfigRecommendedBox;
@@ -107,7 +121,14 @@ namespace RTE {
 		InputDevice m_ConfiguringDevice; //!< Which type of device we are currently configuring.
 		bool m_ConfiguringDeviceIsGamepad; //!< Whether the device being configured is a gamepad of any type.
 		GamepadType m_ConfiguringGamepadType; //!< Which type of gamepad we are currently configuring.
-		int m_ConfigureStep; //!< Which step in current configure sequence.
+
+		bool m_ConfiguringManually; //!<
+		bool m_ConfigFinished; //!<
+		int m_ConfigStep; //!< Which step in current configure sequence.
+		bool m_ConfigStepChange; //!<
+
+		InputScheme m_NewInputScheme; //!<
+		bool m_NewInputSchemeApplied; //!< Whether the new InputScheme was applied as the configuring player's active InputScheme.
 
 		std::vector<BITMAP *> m_DPadDiagramBitmaps; //!<
 		std::vector<BITMAP *> m_DualAnalogDSDiagramBitmaps; //!<
@@ -144,23 +165,18 @@ namespace RTE {
 		/// 
 		/// </summary>
 		void ShowPresetSelectionScreen();
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns></returns>
-		bool UpdateKeyboardConfigWizard();
 
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <returns></returns>
-		bool UpdateMouseAndKeyboardConfigWizard();
+		void ApplyManuallyConfiguredScheme();
 
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <returns></returns>
-		bool UpdateGamepadConfigWizard();
+		void ApplyGamepadInputPreset(GamepadType gamepadType);
+
+
 #pragma endregion
 
 #pragma region Input Event Handling Breakdown
@@ -176,6 +192,41 @@ namespace RTE {
 		/// <param name="guiEvent">The GUIEvent containing information about the player interaction with an element.</param>
 		void HandlePresetSelectScreenInputEvents(GUIEvent &guiEvent);
 #pragma endregion
+
+#pragma region Input Configuration Sequence Handling Breakdown
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		void UpdateKeyboardConfigSequence();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		bool UpdateMouseAndKeyboardConfigSequence();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		bool UpdateGamepadDPadConfigSequence();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		bool UpdateGamepadAnalogConfigSequence();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		bool UpdateGamepadConfigSequence();
+#pragma endregion
+
+		/// <summary>
+		/// Clears all the member variables of this SettingsInputMappingWizardGUI, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
 
 		// Disallow the use of some implicit methods.
 		SettingsInputMappingWizardGUI(const SettingsInputMappingWizardGUI &reference) = delete;

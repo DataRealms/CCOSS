@@ -11,7 +11,32 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void SettingsInputMappingWizardGUI::Clear() {
+		m_ConfiguringPlayer = Players::NoPlayer;
+		m_ConfiguringPlayerScheme = nullptr;
+
+		m_ConfiguringDevice = InputDevice::DEVICE_KEYB_ONLY;
+		m_ConfiguringDeviceIsGamepad = false;
+		m_ConfiguringGamepadType = GamepadType::DPad;
+
+		m_ConfiguringManually = false;
+		m_ConfigFinished = false;
+		m_ConfigStep = 0;
+		m_ConfigStepChange = false;
+
+		m_NewInputScheme.Reset();
+		m_NewInputSchemeApplied = false;
+
+		m_DPadDiagramBitmaps.clear();
+		m_DualAnalogDSDiagramBitmaps.clear();
+		m_DualAnalogXBDiagramBitmaps.clear();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	SettingsInputMappingWizardGUI::SettingsInputMappingWizardGUI(GUIControlManager *parentControlManager) : m_GUIControlManager(parentControlManager) {
+		Clear();
+
 		m_InputWizardScreenBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxInputMappingWizard"));
 		m_InputWizardTitleLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelPlayerInputMappingWizardTitle"));
 
@@ -24,11 +49,6 @@ namespace RTE {
 
 		CreateManualConfigScreen();
 		CreatePresetSelectionScreen();
-
-		m_ConfiguringPlayer = Players::NoPlayer;
-		m_ConfiguringDevice = InputDevice::DEVICE_KEYB_ONLY;
-		m_ConfiguringDeviceIsGamepad = false; //m_ConfiguringDevice != InputDevice::DEVICE_KEYB_ONLY && m_ConfiguringDevice != InputDevice::DEVICE_MOUSE_KEYB;
-		m_ConfigureStep = 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -36,6 +56,7 @@ namespace RTE {
 	void SettingsInputMappingWizardGUI::CreateManualConfigScreen() {
 		m_WizardManualConfigScreen.ManualConfigBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxWizardManualConfig"));
 
+		m_WizardManualConfigScreen.ConfigDeviceTypeLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelConfigDeviceType"));
 		m_WizardManualConfigScreen.ConfigStepDescriptionLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelConfigInputDescription"));
 		m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelRecommendedKeyInput"));
 		m_WizardManualConfigScreen.GamepadConfigRecommendedBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxGamepadRecommendedInput"));
@@ -62,17 +83,13 @@ namespace RTE {
 		m_WizardPresetSelectScreen.StartConfigAnalogDSTypeButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfigAnalogTypeDS"));
 		m_WizardPresetSelectScreen.StartConfigAnalogXBTypeButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfigAnalogTypeXB"));
 
-		AllegroBitmap *dpadDiagramBitmap = new AllegroBitmap(m_DPadDiagramBitmaps.at(0));
-		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxConfigDPadTypeDiagram"))->SetDrawImage(dpadDiagramBitmap);
-		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxPresetDPadSNESDiagram"))->SetDrawImage(dpadDiagramBitmap);
-
-		AllegroBitmap *analogDSDiagramBitmap = new AllegroBitmap(m_DualAnalogDSDiagramBitmaps.at(0));
-		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxConfigAnalogTypeDSDiagram"))->SetDrawImage(analogDSDiagramBitmap);
-		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxPresetAnalogDS4Diagram"))->SetDrawImage(analogDSDiagramBitmap);
-
-		AllegroBitmap *analogXBDiagramBitmap = new AllegroBitmap(m_DualAnalogXBDiagramBitmaps.at(0));
-		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxConfigAnalogTypeXBDiagram"))->SetDrawImage(analogXBDiagramBitmap);
-		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxPresetAnalogXB360Diagram"))->SetDrawImage(analogXBDiagramBitmap);
+		// Ownership of the AllegroBitmaps is passed to the GUIControlManager.
+		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxConfigDPadTypeDiagram"))->SetDrawImage(new AllegroBitmap(m_DPadDiagramBitmaps.at(0)));
+		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxPresetDPadSNESDiagram"))->SetDrawImage(new AllegroBitmap(m_DPadDiagramBitmaps.at(0)));
+		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxConfigAnalogTypeDSDiagram"))->SetDrawImage(new AllegroBitmap(m_DualAnalogDSDiagramBitmaps.at(0)));
+		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxPresetAnalogDS4Diagram"))->SetDrawImage(new AllegroBitmap(m_DualAnalogDSDiagramBitmaps.at(0)));
+		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxConfigAnalogTypeXBDiagram"))->SetDrawImage(new AllegroBitmap(m_DualAnalogXBDiagramBitmaps.at(0)));
+		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxPresetAnalogXB360Diagram"))->SetDrawImage(new AllegroBitmap(m_DualAnalogXBDiagramBitmaps.at(0)));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -105,6 +122,8 @@ namespace RTE {
 			m_InputWizardScreenBox->SetEnabled(false);
 			m_ConfiguringPlayer = Players::NoPlayer;
 			m_ConfiguringPlayerScheme = nullptr;
+			m_ConfigFinished = false;
+			m_NewInputSchemeApplied = false;
 		}
 	}
 
@@ -117,6 +136,46 @@ namespace RTE {
 		m_WizardManualConfigScreen.ManualConfigBox->SetVisible(true);
 		m_WizardManualConfigScreen.ManualConfigBox->SetEnabled(true);
 		m_WizardManualConfigScreen.GamepadConfigRecommendedBox->SetVisible(m_ConfiguringDeviceIsGamepad);
+
+		std::string inputDeviceName;
+		if (m_ConfiguringDeviceIsGamepad) {
+			switch (m_ConfiguringGamepadType) {
+				case SettingsInputMappingWizardGUI::DPad:
+					inputDeviceName = "Gamepad (DPad Style)";
+					break;
+				case SettingsInputMappingWizardGUI::AnalogDualShock:
+					inputDeviceName = "Dual Analog Gamepad (DualShock Style)";
+					break;
+				case SettingsInputMappingWizardGUI::AnalogXbox:
+					inputDeviceName = "Dual Analog Gamepad (Xbox Style)";
+					break;
+				default:
+					break;
+			}
+		} else {
+			if (m_ConfiguringDevice == InputDevice::DEVICE_KEYB_ONLY) {
+				inputDeviceName = "Keyboard Only";
+			} else if (m_ConfiguringDevice == InputDevice::DEVICE_MOUSE_KEYB) {
+				inputDeviceName = "Mouse + Keyboard";
+			}
+		}
+		m_WizardManualConfigScreen.ConfigDeviceTypeLabel->SetText(inputDeviceName);
+
+		m_WizardManualConfigScreen.DiscardOrApplyConfigButton->SetText("Discard Changes");
+		//m_WizardManualConfigScreen.PrevConfigStepButton->SetVisible(false);
+		//m_WizardManualConfigScreen.NextConfigStepButton->SetVisible(true);
+
+		m_ConfiguringManually = true;
+		m_ConfigFinished = false;
+
+		m_ConfigStep = 0;
+		m_ConfigStepChange = true;
+
+		m_NewInputScheme.Reset();
+		m_NewInputScheme.SetDevice(m_ConfiguringDevice);
+
+		// Use GUIInput class for better key detection
+		g_UInputMan.SetInputClass(m_GUIControlManager->GetManager()->GetInputController());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -127,35 +186,87 @@ namespace RTE {
 
 		m_WizardPresetSelectScreen.PresetSelectBox->SetVisible(true);
 		m_WizardPresetSelectScreen.PresetSelectBox->SetEnabled(true);
+
+		m_ConfiguringManually = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsInputMappingWizardGUI::StartManualInputConfig() {
-		// Use GUIInput class for better key detection
-		g_UInputMan.SetInputClass(m_GUIControlManager->GetManager()->GetInputController());
+	void SettingsInputMappingWizardGUI::ApplyGamepadInputPreset(GamepadType gamepadType) {
+		switch (gamepadType) {
+			case GamepadType::DPad:
+				// TODO: Doesn't have an actual preset at the moment so don't apply any.
+				//m_ConfiguringPlayerScheme->SetPreset(InputScheme::InputPreset::PresetGamepadSNES);
+				break;
+			case GamepadType::AnalogDualShock:
+				// TODO: Doesn't have an actual preset at the moment so don't apply any.
+				//m_ConfiguringPlayerScheme->SetPreset(InputScheme::InputPreset::PresetGamepadDS4);
+				break;
+			case GamepadType::AnalogXbox:
+				m_ConfiguringPlayerScheme->SetPreset(InputScheme::InputPreset::PresetGamepadXbox360);
+				SetEnabled(false);
+				break;
+			default:
+				RTEAbort("Invalid GamepadType passed to SettingsInputMappingWizardGUI::ApplyGamepadInputPreset!");
+				break;
+		}
+		g_GUISound.ButtonPressSound()->Play();
+		m_NewInputSchemeApplied = true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsInputMappingWizardGUI::HandleInputEvents(GUIEvent &guiEvent) {
+	void SettingsInputMappingWizardGUI::ApplyManuallyConfiguredScheme() {
+		m_ConfiguringPlayerScheme->SetDevice(m_NewInputScheme.GetDevice());
+		m_ConfiguringPlayerScheme->SetPreset(InputScheme::InputPreset::NoPreset);
+		std::swap(*m_ConfiguringPlayerScheme->GetInputMappings(), *m_NewInputScheme.GetInputMappings());
+
+		g_UInputMan.SetInputClass(nullptr);
+		m_NewInputSchemeApplied = true;
+		m_ConfiguringManually = false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool SettingsInputMappingWizardGUI::HandleInputEvents(GUIEvent &guiEvent) {
 		if (m_WizardManualConfigScreen.ManualConfigBox->GetVisible()) {
 			HandleManualConfigScreenInputEvenets(guiEvent);
 		} else if (m_WizardPresetSelectScreen.PresetSelectBox->GetVisible()) {
 			HandlePresetSelectScreenInputEvents(guiEvent);
 		}
+		if (m_NewInputSchemeApplied) {
+			SetEnabled(false);
+			return true;
+		}
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsInputMappingWizardGUI::HandleManualConfigScreenInputEvenets(GUIEvent &guiEvent) {
 		if (guiEvent.GetType() == GUIEvent::Command) {
-			if (guiEvent.GetControl() == m_WizardManualConfigScreen.DiscardOrApplyConfigButton) {
+			if (guiEvent.GetControl() == m_WizardManualConfigScreen.PrevConfigStepButton) {
+				g_GUISound.ButtonPressSound()->Play();
+				m_ConfigStep--;
+				m_ConfigStepChange = true;
+			} else if (guiEvent.GetControl() == m_WizardManualConfigScreen.NextConfigStepButton) {
+				g_GUISound.ButtonPressSound()->Play();
+				m_ConfigStep++;
+				m_ConfigStepChange = true;
+			} else if (guiEvent.GetControl() == m_WizardManualConfigScreen.ResetConfigButton) {
+				g_GUISound.ButtonPressSound()->Play();
+				m_ConfigStep = 0;
+				m_ConfigStepChange = true;
+			} else if (guiEvent.GetControl() == m_WizardManualConfigScreen.DiscardOrApplyConfigButton) {
 				g_GUISound.ButtonPressSound()->Play();
 				if (m_ConfiguringDeviceIsGamepad) {
 					ShowPresetSelectionScreen();
 				} else {
-					SetEnabled(false);
+					if (m_ConfigFinished) {
+						ApplyManuallyConfiguredScheme();
+					} else {
+						SetEnabled(false);
+					}
 				}
 			}
 		}
@@ -165,219 +276,224 @@ namespace RTE {
 
 	void SettingsInputMappingWizardGUI::HandlePresetSelectScreenInputEvents(GUIEvent &guiEvent) {
 		if (guiEvent.GetType() == GUIEvent::Command) {
+			if (guiEvent.GetControl() == m_WizardPresetSelectScreen.CloseWizardButton) {
+				g_GUISound.ButtonPressSound()->Play();
+				SetEnabled(false);
+			} else if (guiEvent.GetControl() == m_WizardPresetSelectScreen.StartConfigDPadTypeButton) {
+				g_GUISound.ButtonPressSound()->Play();
+				m_ConfiguringGamepadType = GamepadType::DPad;
+				ShowManualConfigScreen();
+			} else if (guiEvent.GetControl() == m_WizardPresetSelectScreen.StartConfigAnalogDSTypeButton) {
+				g_GUISound.ButtonPressSound()->Play();
+				m_ConfiguringGamepadType = GamepadType::AnalogDualShock;
+				ShowManualConfigScreen();
+			} else if (guiEvent.GetControl() == m_WizardPresetSelectScreen.StartConfigAnalogXBTypeButton) {
+				g_GUISound.ButtonPressSound()->Play();
+				m_ConfiguringGamepadType = GamepadType::AnalogXbox;
+				ShowManualConfigScreen();
+			} else if (guiEvent.GetControl() == m_WizardPresetSelectScreen.PresetSelectSNESButton) {
+				ApplyGamepadInputPreset(GamepadType::DPad);
+			} else if (guiEvent.GetControl() == m_WizardPresetSelectScreen.PresetSelectDS4Button) {
+				ApplyGamepadInputPreset(GamepadType::AnalogDualShock);
+			} else if (guiEvent.GetControl() == m_WizardPresetSelectScreen.PresetSelectXB360Button) {
+				ApplyGamepadInputPreset(GamepadType::AnalogXbox);
+			}
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-	void SettingsInputMappingWizardGUI::UpdateConfigScreen() {
-		char str[256];
 
-		if (m_ScreenChange) {
-			// Hide most things first, enable as needed
-			ConfigLabel.at(ConfigWizardLabels::ConfigInstruction)->SetVisible(false);
-			ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetVisible(false);
-			RecommendationBox->SetVisible(false);
-			RecommendationDiagram->SetVisible(false);
-			ConfigLabel.at(ConfigWizardLabels::ConfigSteps)->SetVisible(false);
-			ConfigSkipButton->SetVisible(false);
-			ConfigBackButton->SetVisible(false);
-			DPadTypeBox->SetVisible(false);
-			DAnalogTypeBox->SetVisible(false);
-			XBox360TypeBox->SetVisible(false);
-		}
+	void SettingsInputMappingWizardGUI::HandleManualConfigSequence() {
+		ConfigWizardSteps configuringDeviceSteps = ConfigWizardSteps::NoConfigSteps;
 
-		switch (ConfiguringDevice) {
+		switch (m_ConfiguringDevice) {
 			case InputDevice::DEVICE_KEYB_ONLY:
-				UpdateKeyboardConfigWizard();
+				configuringDeviceSteps = ConfigWizardSteps::KeyboardConfigSteps;
+				UpdateKeyboardConfigSequence();
 				break;
 			case InputDevice::DEVICE_MOUSE_KEYB:
-				UpdateMouseAndKeyboardConfigWizard();
+				configuringDeviceSteps = ConfigWizardSteps::MouseAndKeyboardConfigSteps;
+				UpdateMouseAndKeyboardConfigSequence();
 				break;
-			case InputDevice::DEVICE_GAMEPAD_1:
-			case InputDevice::DEVICE_GAMEPAD_2:
-			case InputDevice::DEVICE_GAMEPAD_3:
-			case InputDevice::DEVICE_GAMEPAD_4:
-				UpdateGamepadConfigWizard();
 			default:
+				if (m_ConfiguringGamepadType == SettingsInputMappingWizardGUI::DPad) {
+					configuringDeviceSteps = ConfigWizardSteps::DPadConfigSteps;
+					UpdateGamepadDPadConfigSequence();
+				} else {
+					configuringDeviceSteps = ConfigWizardSteps::DualAnalogConfigSteps;
+					UpdateGamepadAnalogConfigSequence();
+				}
 				break;
 		}
-
-		g_UInputMan.SetInputClass(NULL);
-		if (m_ScreenChange) { g_GUISound.ExitMenuSound()->Play(); }
-	}
-*/
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-	bool SettingsInputMappingWizardGUI::UpdateKeyboardConfigWizard() {
-		if (m_ScreenChange) {
-			ConfigLabel.at(ConfigWizardLabels::ConfigInstruction)->SetVisible(true);
-			ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetVisible(true);
-			std::snprintf(str, sizeof(str), "Keyboard Configuration - Player %i", ConfiguringPlayer + 1);
-			ConfigLabel.at(ConfigWizardLabels::ConfigTitle)->SetText(str);
-			ConfigLabel.at(ConfigWizardLabels::ConfigInstruction)->SetText("Press the key for");
-			ConfigLabel.at(ConfigWizardLabels::ConfigSteps)->SetVisible(true);
-			RecommendationBox->SetVisible(true);
-			ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetVisible(true);
-			ConfigSkipButton->SetVisible(true);
-			ConfigBackButton->SetVisible(true);
-			m_ScreenChange = false;
+		if (m_ConfigStepChange) {
+			std::string configStepLabel(16, '\0');
+			std::snprintf(configStepLabel.data(), configStepLabel.size(), "Step %i of %i", m_ConfigStep + 1, configuringDeviceSteps);
+			m_WizardManualConfigScreen.ConfigStepLabel->SetText(configStepLabel);
 		}
+	}
 
-		// Step label update
-		std::snprintf(str, sizeof(str), "Step %i / %i", ConfigureStep + 1, ConfigWizardSteps::KeyboardConfigSteps);
-		ConfigLabel.at(ConfigWizardLabels::ConfigSteps)->SetText(str);
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		switch (ConfigureStep) {
+	void SettingsInputMappingWizardGUI::UpdateKeyboardConfigSequence() {
+		bool inputCaptured = false;
+		switch (m_ConfigStep) {
 			case 0:
-				// Hide the back button on this first step
-				ConfigBackButton->SetVisible(false);
-
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE or AIM UP");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText(ConfiguringPlayer % 2 ? "[Up Cursor]" : "[W]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_AIM_UP)) {
-					g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_L_UP);
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.PrevConfigStepButton->SetVisible(false);
+					m_WizardManualConfigScreen.NextConfigStepButton->SetVisible(true);
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("MOVE or AIM UP");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[W] or [Up Arrow]");
+					m_ConfigStepChange = false;
+				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_AIM_UP)) {
+					m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_L_UP);
+					inputCaptured = true;
 				}
 				break;
 			case 1:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE or AIM DOWN");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText(ConfiguringPlayer % 2 ? "[Down Cursor]" : "[S)");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_AIM_DOWN)) {
-					g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_L_DOWN);
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.PrevConfigStepButton->SetVisible(true);
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("MOVE or AIM DOWN");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[S] or [Down Arrow]");
+					m_ConfigStepChange = false;
+				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_AIM_DOWN)) {
+					m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_L_DOWN);
+					inputCaptured = true;
 				}
 				break;
 			case 2:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE LEFT");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText(ConfiguringPlayer % 2 ? "[Left Cursor]" : "[A]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_L_LEFT)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("MOVE LEFT");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[A] or [Left Arrow]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_L_LEFT)) { inputCaptured = true; }
 				break;
 			case 3:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("MOVE RIGHT");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText(ConfiguringPlayer % 2 ? "[Right Cursor]" : "[D]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_L_RIGHT)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
-				}
+				m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("MOVE RIGHT");
+				m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[D] or [Right Arrow]");
+				m_ConfigStepChange = false;
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_L_RIGHT)) { inputCaptured = true; }
 				break;
 			case 4:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("FIRE / ACTIVATE");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText(ConfiguringPlayer % 2 ? "[Num 1]" : "[H]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_FIRE))
-
-				{
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("FIRE or ACTIVATE");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[H] or [Num 1]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_FIRE)) { inputCaptured = true; }
 				break;
 			case 5:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("SHARP AIM");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText(ConfiguringPlayer % 2 ? "[Num 2]" : "[J]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_AIM)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("SHARP AIM");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[J] or [Num 2]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_AIM)) { inputCaptured = true; }
 				break;
 			case 6:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("COMMAND MENU");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText(ConfiguringPlayer % 2 ? "[Num 3]" : "[K]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_PIEMENU)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("PIE MENU");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[K] or [Num 3]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_PIEMENU)) { inputCaptured = true; }
 				break;
 			case 7:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("JUMP");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText(ConfiguringPlayer % 2 ? "[Num Enter]" : "[L]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_JUMP)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("JUMP");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[L] or [Num Enter]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_JUMP)) { inputCaptured = true; }
 				break;
 			case 8:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("CROUCH");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText(ConfiguringPlayer % 2 ? "[Num Del]" : "[.]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_CROUCH)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("CROUCH");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[C] or [Num 0]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_CROUCH)) { inputCaptured = true; }
 				break;
 			case 9:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("PREVIOUS BODY");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText(ConfiguringPlayer % 2 ? "[Num 4]" : "[Q]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_PREV)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("PREVIOUS BODY");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[U] or [Num 4]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_PREV)) { inputCaptured = true; }
 				break;
 			case 10:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("NEXT BODY");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText(ConfiguringPlayer % 2 ? "[Num 5]" : "[E]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_NEXT)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("NEXT BODY");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[Y] or [Num 5]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_NEXT)) { inputCaptured = true; }
 				break;
 			case 11:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("RELOAD");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText(ConfiguringPlayer % 2 ? "[Num 0]" : "[R]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_WEAPON_RELOAD)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("RELOAD WEAPON");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[R] or [Num Del.]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_WEAPON_RELOAD)) { inputCaptured = true; }
 				break;
 			case 12:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("PICK UP");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText(ConfiguringPlayer % 2 ? "[Num 9]" : "[F]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_WEAPON_PICKUP)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("PICK UP DEVICE");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[F] or [Num 6]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_WEAPON_PICKUP)) { inputCaptured = true; }
 				break;
 			case 13:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("DROP");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText(ConfiguringPlayer % 2 ? "[Num 6]" : "[G]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_WEAPON_DROP)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("DROP DEVICE");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[B] or [Num 9]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_WEAPON_DROP)) { inputCaptured = true; }
 				break;
 			case 14:
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("PREVIOUS WEAPON");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText(ConfiguringPlayer % 2 ? "[Num 7]" : "[X]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_WEAPON_CHANGE_PREV)) {
-					ConfigureStep++;
-					m_ScreenChange = true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.NextConfigStepButton->SetVisible(true);
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("PREVIOUS DEVICE");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[Q] or [Num 7]");
+					m_ConfigStepChange = false;
 				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_WEAPON_CHANGE_PREV)) { inputCaptured = true; }
 				break;
 			case 15:
-				// Hide skip button on this last step
-				ConfigSkipButton->SetVisible(false);
-
-				ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetText("NEXT WEAPON");
-				ConfigLabel.at(ConfigWizardLabels::ConfigRecommendation)->SetText(ConfiguringPlayer % 2 ? "[Num 8]" : "[C]");
-				if (g_UInputMan.CaptureKeyMapping(ConfiguringPlayer, INPUT_WEAPON_CHANGE_NEXT)) {
-					m_apScreenBox.at(CONFIGSCREEN)->SetVisible(false);
-					m_MenuScreen = OPTIONSSCREEN;
-					m_ScreenChange = true;
-					return true;
+				if (m_ConfigStepChange) {
+					m_WizardManualConfigScreen.NextConfigStepButton->SetVisible(false);
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("NEXT DEVICE");
+					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[E] or [Num 8]");
+					m_ConfigStepChange = false;
+				}
+				if (!m_ConfigFinished && m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_WEAPON_CHANGE_NEXT)) { inputCaptured = true; }
+				if (inputCaptured) {
+					g_GUISound.ExitMenuSound()->Play();
+					m_WizardManualConfigScreen.DiscardOrApplyConfigButton->SetText("Apply Changes");
+					m_ConfigFinished = true;
+					return;
 				}
 				break;
 			default:
 				break;
 		}
-		return false;
+		if (inputCaptured) {
+			g_GUISound.ExitMenuSound()->Play();
+			m_ConfigStep++;
+			m_ConfigStepChange = true;
+		}
 	}
-*/
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-	bool SettingsInputMappingWizardGUI::UpdateMouseAndKeyboardConfigWizard() {
+
+	bool SettingsInputMappingWizardGUI::UpdateMouseAndKeyboardConfigSequence() {
+		/*
 		if (m_ScreenChange) {
 			ConfigLabel.at(ConfigWizardLabels::ConfigInstruction)->SetVisible(true);
 			ConfigLabel.at(ConfigWizardLabels::ConfigInput)->SetVisible(true);
@@ -505,12 +621,26 @@ namespace RTE {
 			default:
 				break;
 		}
+		*/
 		return false;
 	}
-*/
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-	bool SettingsInputMappingWizardGUI::UpdateGamepadConfigWizard() {
+
+	bool SettingsInputMappingWizardGUI::UpdateGamepadDPadConfigSequence() {
+		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool SettingsInputMappingWizardGUI::UpdateGamepadAnalogConfigSequence() {
+		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool SettingsInputMappingWizardGUI::UpdateGamepadConfigSequence() {
+		/*
 		int whichJoy = ConfiguringDevice - InputDevice::DEVICE_GAMEPAD_1;
 		AllegroBitmap *pDiagramBitmap = 0;
 
@@ -867,7 +997,7 @@ namespace RTE {
 				}
 			}
 		}
+		*/
 		return false;
 	}
-*/
 }

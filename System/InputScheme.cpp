@@ -47,14 +47,6 @@ namespace RTE {
 			reader >> m_InputMappings.at(InputElements::INPUT_L_LEFT);
 		} else if (propName == "LeftRight") {
 			reader >> m_InputMappings.at(InputElements::INPUT_L_RIGHT);
-		} else if (propName == "RightUp") {
-			reader >> m_InputMappings.at(InputElements::INPUT_R_UP);
-		} else if (propName == "RightDown") {
-			reader >> m_InputMappings.at(InputElements::INPUT_R_DOWN);
-		} else if (propName == "RightLeft") {
-			reader >> m_InputMappings.at(InputElements::INPUT_R_LEFT);
-		} else if (propName == "RightRight") {
-			reader >> m_InputMappings.at(InputElements::INPUT_R_RIGHT);
 		} else if (propName == "Fire") {
 			reader >> m_InputMappings.at(InputElements::INPUT_FIRE);
 		} else if (propName == "Aim") {
@@ -77,10 +69,6 @@ namespace RTE {
 			reader >> m_InputMappings.at(InputElements::INPUT_NEXT);
 		} else if (propName == "Prev") {
 			reader >> m_InputMappings.at(InputElements::INPUT_PREV);
-		} else if (propName == "Start") {
-			reader >> m_InputMappings.at(InputElements::INPUT_START);
-		} else if (propName == "Back") {
-			reader >> m_InputMappings.at(InputElements::INPUT_BACK);
 		} else if (propName == "WeaponChangeNext") {
 			reader >> m_InputMappings.at(InputElements::INPUT_WEAPON_CHANGE_NEXT);
 		} else if (propName == "WeaponChangePrev") {
@@ -91,6 +79,18 @@ namespace RTE {
 			reader >> m_InputMappings.at(InputElements::INPUT_WEAPON_DROP);
 		} else if (propName == "WeaponReload") {
 			reader >> m_InputMappings.at(InputElements::INPUT_WEAPON_RELOAD);
+		} else if (propName == "Start") {
+			reader >> m_InputMappings.at(InputElements::INPUT_START);
+		} else if (propName == "Back") {
+			reader >> m_InputMappings.at(InputElements::INPUT_BACK);
+		} else if (propName == "RightUp") {
+			reader >> m_InputMappings.at(InputElements::INPUT_R_UP);
+		} else if (propName == "RightDown") {
+			reader >> m_InputMappings.at(InputElements::INPUT_R_DOWN);
+		} else if (propName == "RightLeft") {
+			reader >> m_InputMappings.at(InputElements::INPUT_R_LEFT);
+		} else if (propName == "RightRight") {
+			reader >> m_InputMappings.at(InputElements::INPUT_R_RIGHT);
 		} else if (propName == "JoystickDeadzoneType") {
 			SetJoystickDeadzoneType(static_cast<DeadZoneType>(std::stoi(reader.ReadPropValue())));
 		} else if (propName == "JoystickDeadzone") {
@@ -114,10 +114,6 @@ namespace RTE {
 			writer.NewPropertyWithValue("LeftDown", m_InputMappings.at(InputElements::INPUT_L_DOWN));
 			writer.NewPropertyWithValue("LeftLeft", m_InputMappings.at(InputElements::INPUT_L_LEFT));
 			writer.NewPropertyWithValue("LeftRight", m_InputMappings.at(InputElements::INPUT_L_RIGHT));
-			writer.NewPropertyWithValue("RightUp", m_InputMappings.at(InputElements::INPUT_R_UP));
-			writer.NewPropertyWithValue("RightDown", m_InputMappings.at(InputElements::INPUT_R_DOWN));
-			writer.NewPropertyWithValue("RightLeft", m_InputMappings.at(InputElements::INPUT_R_LEFT));
-			writer.NewPropertyWithValue("RightRight", m_InputMappings.at(InputElements::INPUT_R_RIGHT));
 			writer.NewPropertyWithValue("Fire", m_InputMappings.at(InputElements::INPUT_FIRE));
 			writer.NewPropertyWithValue("Aim", m_InputMappings.at(InputElements::INPUT_AIM));
 			writer.NewPropertyWithValue("AimUp", m_InputMappings.at(InputElements::INPUT_AIM_UP));
@@ -129,13 +125,17 @@ namespace RTE {
 			writer.NewPropertyWithValue("Crouch", m_InputMappings.at(InputElements::INPUT_CROUCH));
 			writer.NewPropertyWithValue("Next", m_InputMappings.at(InputElements::INPUT_NEXT));
 			writer.NewPropertyWithValue("Prev", m_InputMappings.at(InputElements::INPUT_PREV));
-			writer.NewPropertyWithValue("Start", m_InputMappings.at(InputElements::INPUT_START));
-			writer.NewPropertyWithValue("Back", m_InputMappings.at(InputElements::INPUT_BACK));
 			writer.NewPropertyWithValue("WeaponChangeNext", m_InputMappings.at(InputElements::INPUT_WEAPON_CHANGE_NEXT));
 			writer.NewPropertyWithValue("WeaponChangePrev", m_InputMappings.at(InputElements::INPUT_WEAPON_CHANGE_PREV));
 			writer.NewPropertyWithValue("WeaponPickup", m_InputMappings.at(InputElements::INPUT_WEAPON_PICKUP));
 			writer.NewPropertyWithValue("WeaponDrop", m_InputMappings.at(InputElements::INPUT_WEAPON_DROP));
 			writer.NewPropertyWithValue("WeaponReload", m_InputMappings.at(InputElements::INPUT_WEAPON_RELOAD));
+			writer.NewPropertyWithValue("Start", m_InputMappings.at(InputElements::INPUT_START));
+			writer.NewPropertyWithValue("Back", m_InputMappings.at(InputElements::INPUT_BACK));
+			writer.NewPropertyWithValue("RightUp", m_InputMappings.at(InputElements::INPUT_R_UP));
+			writer.NewPropertyWithValue("RightDown", m_InputMappings.at(InputElements::INPUT_R_DOWN));
+			writer.NewPropertyWithValue("RightLeft", m_InputMappings.at(InputElements::INPUT_R_LEFT));
+			writer.NewPropertyWithValue("RightRight", m_InputMappings.at(InputElements::INPUT_R_RIGHT));
 		}
 
 		writer.NewPropertyWithValue("JoystickDeadzoneType", m_JoystickDeadzoneType);

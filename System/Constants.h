@@ -113,28 +113,28 @@ namespace RTE {
 		INPUT_L_DOWN,
 		INPUT_L_LEFT,
 		INPUT_L_RIGHT,
-		INPUT_R_UP,
-		INPUT_R_DOWN,
-		INPUT_R_LEFT,
-		INPUT_R_RIGHT,
-		INPUT_FIRE,
-		INPUT_AIM,
 		INPUT_AIM_UP,
 		INPUT_AIM_DOWN,
 		INPUT_AIM_LEFT,
 		INPUT_AIM_RIGHT,
+		INPUT_FIRE,
+		INPUT_AIM,
 		INPUT_PIEMENU,
 		INPUT_JUMP,
 		INPUT_CROUCH,
 		INPUT_NEXT,
 		INPUT_PREV,
-		INPUT_START,
-		INPUT_BACK,
 		INPUT_WEAPON_CHANGE_NEXT,
 		INPUT_WEAPON_CHANGE_PREV,
 		INPUT_WEAPON_PICKUP,
 		INPUT_WEAPON_DROP,
 		INPUT_WEAPON_RELOAD,
+		INPUT_START,
+		INPUT_BACK,
+		INPUT_R_UP,
+		INPUT_R_DOWN,
+		INPUT_R_LEFT,
+		INPUT_R_RIGHT,
 		INPUT_COUNT
 	};
 
@@ -143,28 +143,28 @@ namespace RTE {
 		"Move Down",		// INPUT_L_DOWN
 		"Move Left",		// INPUT_L_LEFT
 		"Move Right",		// INPUT_L_RIGHT
-		"not sure",			// INPUT_R_UP
-		"not sure",			// INPUT_R_DOWN
-		"not sure",			// INPUT_R_LEFT
-		"not sure",			// INPUT_R_RIGHT
-		"Fire/Activate",	// INPUT_FIRE
-		"Sharp Aim",		// INPUT_AIM
 		"Aim Up",			// INPUT_AIM_UP
 		"Aim Down",			// INPUT_AIM_DOWN
 		"Aim Left",			// INPUT_AIM_LEFT
 		"Aim Right",		// INPUT_AIM_RIGHT
+		"Fire/Activate",	// INPUT_FIRE
+		"Sharp Aim",		// INPUT_AIM
 		"Pie Menu",			// INPUT_PIEMENU
 		"Jump",				// INPUT_JUMP
 		"Crouch",			// INPUT_CROUCH
-		"Next Actor",		// INPUT_NEXT
-		"Prev. Actor",		// INPUT_PREV
-		"Start",			// INPUT_START
-		"Back",				// INPUT_BACK
+		"Next Body",		// INPUT_NEXT
+		"Prev. Body",		// INPUT_PREV
 		"Next Device",		// INPUT_WEAPON_CHANGE_NEXT
 		"Prev. Device",		// INPUT_WEAPON_CHANGE_PREV
 		"Pick Up Device",	// INPUT_WEAPON_PICKUP
 		"Drop Device",		// INPUT_WEAPON_DROP
-		"Reload Weapon"		// INPUT_WEAPON_RELOAD
+		"Reload Weapon",	// INPUT_WEAPON_RELOAD
+		"Start",			// INPUT_START
+		"Back",				// INPUT_BACK
+		"Analog Aim Up",	// INPUT_R_UP
+		"Analog Aim Down",	// INPUT_R_DOWN
+		"Analog Aim Left",	// INPUT_R_LEFT
+		"Analog Aim Right"	// INPUT_R_RIGHT
 	};
 
 	/// <summary>

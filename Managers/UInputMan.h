@@ -21,23 +21,9 @@ namespace RTE {
 	public:
 
 		/// <summary>
-		/// Enumeration for the different states an input element or button can be in.
-		/// </summary>
-		enum InputState {
-			Held = 0,
-			Pressed,
-			Released,
-			InputStateCount
-		};
-
-		/// <summary>
 		/// Enumeration for the mouse cursor actions in menus.
 		/// </summary>
-		enum MenuCursorButtons {
-			MENU_PRIMARY = 0,
-			MENU_SECONDARY,
-			MENU_EITHER
-		};
+		enum MenuCursorButtons { MENU_PRIMARY, MENU_SECONDARY, MENU_EITHER };
 
 #pragma region Creation
 		/// <summary>
@@ -647,6 +633,11 @@ namespace RTE {
 #pragma endregion
 
 	protected:
+
+		/// <summary>
+		/// Enumeration for the different states an input element or button can be in.
+		/// </summary>
+		enum InputState { Held, Pressed, Released, InputStateCount };
 
 		static GUIInput* s_InputClass; //!< Current input class if available.
 

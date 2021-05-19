@@ -71,6 +71,7 @@ namespace RTE {
 		/// <summary>
 		/// GUI elements that compose the settings menu screen.
 		/// </summary>
+		GUICollectionBox *m_SettingsTabberBox;
 		GUIButton *m_BackToMainButton;
 		std::array<GUITab *, SettingsMenuScreen::SettingsMenuCount> m_SettingsMenuTabs;
 
@@ -81,6 +82,11 @@ namespace RTE {
 		/// <param name="activeMenu">Which settings menu screen to display. See MenuScreen enumeration. See the SettingsMenuScreen enumeration.</param>
 		/// <param name="playButtonPressSound">Whether to play a sound if the menu screen change is triggered by a button/tab press.</param>
 		void SetActiveSettingsMenuScreen(SettingsMenuScreen activeMenu, bool playButtonPressSound = true);
+
+		/// <summary>
+		/// Disables the settings menu tabber and back buttons. This is used when a settings sub-menu dialog box is active.
+		/// </summary>
+		void DisableSettingsMenuNavigation(bool disable) const;
 #pragma endregion
 
 		// Disallow the use of some implicit methods.

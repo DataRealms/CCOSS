@@ -20,12 +20,12 @@ namespace RTE {
 		GUICollectionBox *rootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
 		rootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
-		GUICollectionBox *tabberBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxSettingsBase"));
-		tabberBox->SetPositionAbs((rootBox->GetWidth() - tabberBox->GetWidth()) / 2, 140);
-		if (rootBox->GetHeight() < 540) { tabberBox->CenterInParent(true, true); }
+		m_SettingsTabberBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxSettingsBase"));
+		m_SettingsTabberBox->SetPositionAbs((rootBox->GetWidth() - m_SettingsTabberBox->GetWidth()) / 2, 140);
+		if (rootBox->GetHeight() < 540) { m_SettingsTabberBox->CenterInParent(true, true); }
 
 		m_BackToMainButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonBackToMainMenu"));
-		m_BackToMainButton->SetPositionAbs((rootBox->GetWidth() - m_BackToMainButton->GetWidth()) / 2, tabberBox->GetYPos() + tabberBox->GetHeight() + 10);
+		m_BackToMainButton->SetPositionAbs((rootBox->GetWidth() - m_BackToMainButton->GetWidth()) / 2, m_SettingsTabberBox->GetYPos() + m_SettingsTabberBox->GetHeight() + 10);
 
 		m_SettingsMenuTabs.at(SettingsMenuScreen::VideoSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabVideoSettings"));
 		m_SettingsMenuTabs.at(SettingsMenuScreen::AudioSettingsMenu) = dynamic_cast<GUITab *>(m_GUIControlManager->GetControl("TabAudioSettings"));
@@ -79,6 +79,12 @@ namespace RTE {
 		if (playButtonPressSound) { g_GUISound.BackButtonPressSound()->Play(); }
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsGUI::DisableSettingsMenuNavigation(bool disable) const {
+		m_SettingsTabberBox->SetEnabled(!disable);
+		m_BackToMainButton->SetEnabled(!disable);
+	}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool SettingsGUI::HandleInputEvents() {

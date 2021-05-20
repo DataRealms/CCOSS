@@ -72,8 +72,8 @@ namespace RTE {
 			NoConfigSteps = 0,
 			KeyboardConfigSteps = 16,
 			MouseAndKeyboardConfigSteps = 11,
-			DPadConfigSteps = 13,
-			DualAnalogConfigSteps = 19,
+			DPadConfigSteps = 12,
+			DualAnalogConfigSteps = 18,
 		};
 
 		/// <summary>
@@ -207,18 +207,12 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		bool UpdateGamepadDPadConfigSequence();
+		void UpdateGamepadDPadConfigSequence();
 
 		/// <summary>
 		/// 
 		/// </summary>
-		bool UpdateGamepadAnalogConfigSequence();
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns></returns>
-		bool UpdateGamepadConfigSequence();
+		void UpdateGamepadAnalogConfigSequence();
 #pragma endregion
 
 		/// <summary>

@@ -537,7 +537,6 @@ namespace RTE {
 					m_ConfigStepChange = false;
 				}
 				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_L_UP)) {
-					m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_R_UP);
 					m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_JUMP);
 					inputCaptured = true;
 				}
@@ -550,7 +549,6 @@ namespace RTE {
 					m_ConfigStepChange = false;
 				}
 				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_L_DOWN)) {
-					m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_R_DOWN);
 					m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_CROUCH);
 					inputCaptured = true;
 				}
@@ -561,10 +559,7 @@ namespace RTE {
 					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[A]");
 					m_ConfigStepChange = false;
 				}
-				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_L_LEFT)) {
-					m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_R_LEFT);
-					inputCaptured = true;
-				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_L_LEFT)) { inputCaptured = true; }
 				break;
 			case 3:
 				if (m_ConfigStepChange) {
@@ -572,10 +567,7 @@ namespace RTE {
 					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[D]");
 					m_ConfigStepChange = false;
 				}
-				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_L_RIGHT)) {
-					m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_R_RIGHT);
-					inputCaptured = true;
-				}
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_L_RIGHT)) { inputCaptured = true; }
 				break;
 			case 4:
 				if (m_ConfigStepChange) {
@@ -656,8 +648,7 @@ namespace RTE {
 	void SettingsInputMappingWizardGUI::UpdateGamepadDPadConfigSequence() {
 		bool inputCaptured = false;
 
-		int whichJoy = m_ConfiguringDevice - InputDevice::DEVICE_GAMEPAD_1;
-
+		int whichJoy = g_UInputMan.GetJoystickIndex(m_ConfiguringDevice);
 
 		switch (m_ConfigStep) {
 			case 0:
@@ -790,8 +781,7 @@ namespace RTE {
 	void SettingsInputMappingWizardGUI::UpdateGamepadAnalogConfigSequence() {
 		bool inputCaptured = false;
 
-		int whichJoy = m_ConfiguringDevice - InputDevice::DEVICE_GAMEPAD_1;
-
+		int whichJoy = g_UInputMan.GetJoystickIndex(m_ConfiguringDevice);
 
 		switch (m_ConfigStep) {
 			case 0:

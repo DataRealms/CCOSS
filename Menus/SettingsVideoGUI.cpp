@@ -196,6 +196,8 @@ namespace RTE {
 			m_ResolutionChangeDialogBox->SetVisible(true);
 			m_VideoSettingsBox->SetEnabled(false);
 		} else {
+			m_ResolutionChangeDialogBox->SetVisible(false);
+			m_VideoSettingsBox->SetEnabled(true);
 			g_FrameMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewGraphicsDriver);
 		}
 	}
@@ -321,9 +323,7 @@ namespace RTE {
 					g_GUISound.ButtonPressSound()->Play();
 					// Must end any running activity otherwise have to deal with recreating all the GUI elements in GameActivity because it crashes when opening the BuyMenu. Easier to just end it.
 					g_ActivityMan.EndActivity();
-					m_ResolutionChangeDialogBox->SetVisible(false);
-					m_VideoSettingsBox->SetEnabled(true);
-					g_FrameMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewGraphicsDriver);
+					ApplyNewResolution();
 				} else if (guiEvent.GetControl() == m_ResolutionChangeCancelButton) {
 					g_GUISound.ButtonPressSound()->Play();
 					m_ResolutionChangeDialogBox->SetVisible(false);

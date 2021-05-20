@@ -27,6 +27,8 @@ namespace RTE {
 		m_NewInputScheme.Reset();
 		m_NewInputSchemeApplied = false;
 
+		m_GamepadRecommendedDiagramBlinkTimer.Reset();
+
 		m_DPadDiagramBitmaps.clear();
 		m_DualAnalogDSDiagramBitmaps.clear();
 		m_DualAnalogXBDiagramBitmaps.clear();
@@ -148,17 +150,21 @@ namespace RTE {
 		if (m_ConfiguringDeviceIsGamepad) {
 			switch (m_ConfiguringGamepadType) {
 				case SettingsInputMappingWizardGUI::DPad:
-					inputDeviceName = "Gamepad (DPad Style)";
+					inputDeviceName = "Gamepad (Classic D-Pad Style)";
+					m_WizardManualConfigScreen.GamepadConfigRecommendedDiagramBox->Resize(m_DPadDiagramBitmaps.at(0)->w, m_DPadDiagramBitmaps.at(0)->h);
 					break;
 				case SettingsInputMappingWizardGUI::AnalogDualShock:
 					inputDeviceName = "Dual Analog Gamepad (DualShock Style)";
+					m_WizardManualConfigScreen.GamepadConfigRecommendedDiagramBox->Resize(m_DualAnalogDSDiagramBitmaps.at(0)->w, m_DualAnalogDSDiagramBitmaps.at(0)->h);
 					break;
 				case SettingsInputMappingWizardGUI::AnalogXbox:
 					inputDeviceName = "Dual Analog Gamepad (Xbox Style)";
+					m_WizardManualConfigScreen.GamepadConfigRecommendedDiagramBox->Resize(m_DualAnalogXBDiagramBitmaps.at(0)->w, m_DualAnalogXBDiagramBitmaps.at(0)->h);
 					break;
 				default:
 					break;
 			}
+			m_WizardManualConfigScreen.GamepadConfigRecommendedDiagramBox->CenterInParent(true, true);
 		} else {
 			if (m_ConfiguringDevice == InputDevice::DEVICE_KEYB_ONLY) {
 				inputDeviceName = "Keyboard Only";
@@ -327,7 +333,7 @@ namespace RTE {
 					configuringDeviceSteps = ConfigWizardSteps::MouseAndKeyboardConfigSteps;
 					break;
 				default:
-					configuringDeviceSteps = (m_ConfiguringGamepadType == SettingsInputMappingWizardGUI::DPad) ? ConfigWizardSteps::DPadConfigSteps : ConfigWizardSteps::DualAnalogConfigSteps;
+					configuringDeviceSteps = (m_ConfiguringGamepadType == GamepadType::DPad) ? ConfigWizardSteps::DPadConfigSteps : ConfigWizardSteps::DualAnalogConfigSteps;
 					break;
 			}
 			std::string configStepLabel(16, '\0');
@@ -342,9 +348,16 @@ namespace RTE {
 				UpdateMouseAndKeyboardConfigSequence();
 				break;
 			default:
-				if (m_ConfiguringGamepadType == SettingsInputMappingWizardGUI::DPad) {
+				int diagramBitmapIndex = m_GamepadRecommendedDiagramBlinkTimer.AlternateReal(500) ? m_ConfigStep + 1 : 0;
+				if (m_ConfiguringGamepadType == GamepadType::DPad) {
+					m_WizardManualConfigScreen.GamepadConfigRecommendedDiagramBox->SetDrawImage(new AllegroBitmap(m_DPadDiagramBitmaps.at(diagramBitmapIndex)));
 					UpdateGamepadDPadConfigSequence();
 				} else {
+					if (m_ConfiguringGamepadType == GamepadType::AnalogDualShock) {
+						m_WizardManualConfigScreen.GamepadConfigRecommendedDiagramBox->SetDrawImage(new AllegroBitmap(m_DualAnalogDSDiagramBitmaps.at(diagramBitmapIndex)));
+					} else {
+						m_WizardManualConfigScreen.GamepadConfigRecommendedDiagramBox->SetDrawImage(new AllegroBitmap(m_DualAnalogXBDiagramBitmaps.at(diagramBitmapIndex)));
+					}
 					UpdateGamepadAnalogConfigSequence();
 				}
 				break;
@@ -644,7 +657,6 @@ namespace RTE {
 
 		int whichJoy = m_ConfiguringDevice - InputDevice::DEVICE_GAMEPAD_1;
 
-		if (m_ConfigStepChange) { m_WizardManualConfigScreen.GamepadConfigRecommendedDiagramBox->SetDrawImage(new AllegroBitmap(m_DPadDiagramBitmaps.at(m_ConfigStep + 1))); }
 
 		switch (m_ConfigStep) {
 			case 0:
@@ -779,7 +791,6 @@ namespace RTE {
 
 		int whichJoy = m_ConfiguringDevice - InputDevice::DEVICE_GAMEPAD_1;
 
-		if (m_ConfigStepChange) { m_WizardManualConfigScreen.GamepadConfigRecommendedDiagramBox->SetDrawImage(new AllegroBitmap((m_ConfiguringGamepadType == GamepadType::AnalogDualShock) ? m_DualAnalogDSDiagramBitmaps.at(m_ConfigStep + 1) : m_DualAnalogXBDiagramBitmaps.at(m_ConfigStep + 1))); }
 
 		switch (m_ConfigStep) {
 			case 0:

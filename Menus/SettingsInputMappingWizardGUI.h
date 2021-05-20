@@ -1,6 +1,7 @@
 #ifndef _RTESETTINGSINPUTMAPPINGWIZARDGUI_
 #define _RTESETTINGSINPUTMAPPINGWIZARDGUI_
 
+#include "Timer.h"
 #include "InputScheme.h"
 
 struct BITMAP;
@@ -135,6 +136,8 @@ namespace RTE {
 
 		InputScheme m_NewInputScheme; //!<
 		bool m_NewInputSchemeApplied; //!< Whether the new InputScheme was applied as the configuring player's active InputScheme.
+
+		Timer m_GamepadRecommendedDiagramBlinkTimer; //!<
 
 		std::vector<BITMAP *> m_DPadDiagramBitmaps; //!<
 		std::vector<BITMAP *> m_DualAnalogDSDiagramBitmaps; //!<

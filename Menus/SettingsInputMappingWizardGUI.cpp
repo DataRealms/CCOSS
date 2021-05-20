@@ -126,6 +126,8 @@ namespace RTE {
 			m_ConfiguringPlayerScheme = nullptr;
 			m_ConfigFinished = false;
 			m_NewInputSchemeApplied = false;
+
+			g_UInputMan.SetInputClass(nullptr);
 		}
 	}
 
@@ -239,7 +241,6 @@ namespace RTE {
 		}
 		std::swap(*m_ConfiguringPlayerScheme->GetInputMappings(), *m_NewInputScheme.GetInputMappings());
 
-		g_UInputMan.SetInputClass(nullptr);
 		m_NewInputSchemeApplied = true;
 		m_ConfiguringManually = false;
 	}

@@ -276,8 +276,6 @@ namespace RTE {
 		// Need to pass in a clone of the activity because the original will be deleted and re-set during StartActivity.
 		int activityStarted = m_StartActivity ? StartActivity(dynamic_cast<Activity *>(m_StartActivity->Clone())) : StartActivity(m_DefaultActivityType, m_DefaultActivityName);
 		if (activityStarted >= 0) {
-			// Reset TimerMan again after loading so there's no residual delay
-			g_TimerMan.ResetTime();
 			g_TimerMan.PauseSim(false);
 			m_InActivity = true;
 			return true;

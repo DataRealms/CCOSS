@@ -81,6 +81,8 @@ namespace RTE {
 			if (inputDescription.empty()) { inputDescription = m_ConfiguringPlayerInputScheme->GetMappingName(i); }
 			m_InputMapButton.at(i)->SetText(!inputDescription.empty() ? "[" + inputDescription + "]" : "[Undefined]");
 		}
+		// Adjust the scrolling box scroll range to hide mappings that are only relevant to gamepads.
+		m_InputMapScrollingBoxScrollbar->SetPageSize(m_InputMapScrollingBoxScrollbar->GetMaximum() / 2 - ((m_ConfiguringPlayerInputScheme->GetDevice() < InputDevice::DEVICE_GAMEPAD_1) ? -71 : 5));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

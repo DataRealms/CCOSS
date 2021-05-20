@@ -240,6 +240,11 @@ namespace RTE {
 		/// Draws the game logo and effects to the screen.
 		/// </summary>
 		void DrawGameLogo();
+
+		/// <summary>
+		/// Draws the overlay bitmap for fade in/out or darkening effects to the screen.
+		/// </summary>
+		void DrawOverlayEffectBitmap() const;
 #pragma endregion
 
 #pragma region Intro Sequence Handling

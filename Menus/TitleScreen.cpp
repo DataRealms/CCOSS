@@ -425,10 +425,12 @@ namespace RTE {
 			case TitleTransition::MainMenuToCredits:
 				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(1.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier()); }
 				m_ScrollOffset.SetY(EaseOut(0, m_PlanetViewScrollOffsetY, m_SectionProgress));
+				m_FadeAmount = static_cast<int>(EaseOut(0, 128.0F, m_SectionProgress));
 				break;
 			case TitleTransition::CreditsToMainMenu:
 				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(1.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier()); }
 				m_ScrollOffset.SetY(EaseOut(m_PlanetViewScrollOffsetY, 0, m_SectionProgress));
+				m_FadeAmount = static_cast<int>(EaseOut(128.0F, 0, m_SectionProgress));
 				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState(TitleTransition::MainMenu); }
 				break;
 			case TitleTransition::ScenarioFadeIn:
@@ -484,6 +486,13 @@ namespace RTE {
 	void TitleScreen::Draw() {
 		if (m_FinishedPlayingIntro) {
 			DrawTitleScreenScene();
+
+			// In credits have to draw the overlay before the game logo otherwise re-drawing it on top of an existing one causes glow effect to look wonky.
+			if (m_TitleTransitionState == TitleTransition::MainMenuToCredits || m_TitleTransitionState == TitleTransition::CreditsToMainMenu) {
+				if (m_FadeAmount > 0) { DrawOverlayEffectBitmap(); }
+				DrawGameLogo();
+				return;
+			}
 			DrawGameLogo();
 		} else {
 			if (m_IntroSequenceState >= IntroSequence::SlideshowFadeIn) { DrawTitleScreenScene(); }
@@ -508,10 +517,7 @@ namespace RTE {
 				m_PreGameLogoTextGlow.Draw(g_FrameMan.GetBackBuffer32(), Vector(), DrawMode::g_DrawTrans);
 			}
 		}
-		if (m_FadeAmount > 0) {
-			set_trans_blender(m_FadeAmount, m_FadeAmount, m_FadeAmount, m_FadeAmount);
-			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), g_FrameMan.GetOverlayBitmap32(), 0, 0);
-		}
+		if (m_FadeAmount > 0) { DrawOverlayEffectBitmap(); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -579,5 +585,12 @@ namespace RTE {
 			AllegroBitmap guiBackBuffer(g_FrameMan.GetBackBuffer32());
 			m_IntroTextFont->DrawAligned(&guiBackBuffer, g_FrameMan.GetResX() / 2, (g_FrameMan.GetResY() / 2) + (m_IntroSlides.at(slide)->h / 2) + 12, m_SlideshowSlideText, GUIFont::Centre);
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void TitleScreen::DrawOverlayEffectBitmap() const {
+		set_trans_blender(m_FadeAmount, m_FadeAmount, m_FadeAmount, m_FadeAmount);
+		draw_trans_sprite(g_FrameMan.GetBackBuffer32(), g_FrameMan.GetOverlayBitmap32(), 0, 0);
 	}
 }

@@ -28,13 +28,21 @@ namespace RTE {
 		explicit SettingsVideoGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 
-#pragma region Concrete Methods
+#pragma region Getters and Setters
 		/// <summary>
 		/// Enables or disables the video settings menu.
 		/// </summary>
 		/// <param name="enable">Show and enable or hide and disable the video settings menu.</param>
 		void SetEnabled(bool enable = true) const;
 
+		/// <summary>
+		/// Gets the currently active GUICollectionBox that acts as a dialog box and requires disabling navigation and drawing an overlay.
+		/// </summary>
+		/// <returns>Pointer to the GUICollectionBox that is the currently active dialog box, if any.</returns>
+		GUICollectionBox * GetActiveDialogBox() const;
+#pragma endregion
+
+#pragma region Concrete Methods
 		/// <summary>
 		/// Handles the player interaction with the SettingsVideoGUI GUI elements.
 		/// </summary>

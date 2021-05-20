@@ -129,6 +129,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	GUICollectionBox * SettingsInputMappingWizardGUI::GetActiveDialogBox() const {
+		return (m_InputWizardScreenBox->GetEnabled() && m_InputWizardScreenBox->GetVisible()) ? m_InputWizardScreenBox : nullptr;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void SettingsInputMappingWizardGUI::ShowManualConfigScreen() {
 		m_WizardPresetSelectScreen.PresetSelectBox->SetVisible(false);
 		m_WizardPresetSelectScreen.PresetSelectBox->SetEnabled(false);

@@ -116,6 +116,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	GUICollectionBox * SettingsVideoGUI::GetActiveDialogBox() const {
+		return (m_ResolutionChangeDialogBox->GetEnabled() && m_ResolutionChangeDialogBox->GetVisible()) ? m_ResolutionChangeDialogBox : nullptr;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool SettingsVideoGUI::IsSupportedResolution(int width, int height) const {
 		if ((width >= 640 && height >= 450) && (width <= g_FrameMan.GetMaxResX() && height <= g_FrameMan.GetMaxResY())) {
 			// Disallow wacky resolutions that are taller than wide and some other dumb ones
@@ -189,7 +195,6 @@ namespace RTE {
 		if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing)) {
 			m_ResolutionChangeDialogBox->SetVisible(true);
 			m_VideoSettingsBox->SetEnabled(false);
-			m_GUIControlManager->GetControl("CollectionBoxSettingsBase")->SetEnabled(false);
 		} else {
 			g_FrameMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewGraphicsDriver);
 		}
@@ -318,13 +323,11 @@ namespace RTE {
 					g_ActivityMan.EndActivity();
 					m_ResolutionChangeDialogBox->SetVisible(false);
 					m_VideoSettingsBox->SetEnabled(true);
-					m_GUIControlManager->GetControl("CollectionBoxSettingsBase")->SetEnabled(true);
 					g_FrameMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResUpscaled, m_NewGraphicsDriver);
 				} else if (guiEvent.GetControl() == m_ResolutionChangeCancelButton) {
 					g_GUISound.ButtonPressSound()->Play();
 					m_ResolutionChangeDialogBox->SetVisible(false);
 					m_VideoSettingsBox->SetEnabled(true);
-					m_GUIControlManager->GetControl("CollectionBoxSettingsBase")->SetEnabled(true);
 				}
 			}
 		} else if (guiEvent.GetType() == GUIEvent::Notification) {

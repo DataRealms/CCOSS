@@ -19,6 +19,7 @@ namespace RTE {
 
 	void MainMenuGUI::Clear() {
 		m_GUIControlManager = nullptr;
+		m_ActiveDialogBox = nullptr;
 
 		m_ActiveMenuScreen = MenuScreen::ScreenCount;
 		m_UpdateResult = MainMenuUpdateResult::NoEvent;
@@ -294,6 +295,7 @@ namespace RTE {
 				break;
 			case MenuScreen::SettingsScreen:
 				backToMainMenu = m_SettingsMenu->HandleInputEvents();
+				m_ActiveDialogBox = m_SettingsMenu->GetActiveDialogBox();
 				break;
 			case MenuScreen::ModManagerScreen:
 				backToMainMenu = m_ModManagerMenu->HandleInputEvents();
@@ -308,6 +310,7 @@ namespace RTE {
 				break;
 			case MenuScreen::QuitScreen:
 				backToMainMenu = HandleInputEvents();
+				m_ActiveDialogBox = m_MainMenuScreens.at(MenuScreen::QuitScreen);
 				break;
 			default:
 				break;
@@ -447,7 +450,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::Draw() const {
+	void MainMenuGUI::Draw() {
 		switch (m_ActiveMenuScreen) {
 			case MenuScreen::SettingsScreen:
 				m_SettingsMenu->Draw();
@@ -458,6 +461,13 @@ namespace RTE {
 			default:
 				m_GUIControlManager->Draw();
 				break;
+		}
+		if (m_ActiveDialogBox) {
+			set_trans_blender(128, 128, 128, 128);
+			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), g_FrameMan.GetOverlayBitmap32(), 0, 0);
+			// Whatever this box may be at this point it's already been drawn by the owning GUIControlManager, but we need to draw it again on top of the overlay so it's not affected by it.
+			m_ActiveDialogBox->Draw(m_GUIControlManager->GetScreen());
+			m_ActiveDialogBox = nullptr;
 		}
 		m_GUIControlManager->DrawMouse();
 	}

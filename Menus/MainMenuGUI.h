@@ -63,7 +63,7 @@ namespace RTE {
 		/// <summary>
 		/// Draws the MainMenuGUI to the screen.
 		/// </summary>
-		void Draw() const;
+		void Draw();
 #pragma endregion
 
 	private:
@@ -109,6 +109,7 @@ namespace RTE {
 		};
 
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which owns all the GUIControls of the MainMenuGUI.
+		GUICollectionBox *m_ActiveDialogBox; // The currently active GUICollectionBox in any of the main or sub-menu screens that acts as a dialog box and requires drawing an overlay.
 
 		MenuScreen m_ActiveMenuScreen; //!< The currently active menu screen that is being updated and drawn to the screen. See MenuScreen enumeration.
 		MainMenuUpdateResult m_UpdateResult; //!< The result of the MainMenuGUI update. See MainMenuUpdateResult enumeration.

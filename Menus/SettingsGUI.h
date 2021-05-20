@@ -31,6 +31,14 @@ namespace RTE {
 		SettingsGUI(AllegroScreen *guiScreen, AllegroInput *guiInput);
 #pragma endregion
 
+#pragma region Getters
+		/// <summary>
+		/// Gets the currently active GUICollectionBox of this SettingsGUI or any of its sub-menus that acts as a dialog box and requires disabling navigation and drawing an overlay.
+		/// </summary>
+		/// <returns>Pointer to the GUICollectionBox that is the currently active dialog box.</returns>
+		GUICollectionBox * GetActiveDialogBox() const;
+#pragma endregion
+
 #pragma region Concrete Methods
 		/// <summary>
 		/// Handles the player interaction with the SettingsGUI GUI elements.
@@ -61,7 +69,6 @@ namespace RTE {
 
 		SettingsMenuScreen m_ActiveSettingsMenuScreen; //!< The currently active settings menu that is being updated and drawn to the screen. See SettingsMenuScreen enumeration.
 
-
 		std::unique_ptr<SettingsVideoGUI> m_VideoSettingsMenu; //!< The video settings sub-menu.
 		std::unique_ptr<SettingsAudioGUI> m_AudioSettingsMenu; //!< The audio settings sub-menu.
 		std::unique_ptr<SettingsInputGUI> m_InputSettingsMenu; //!< The input settings sub-menu.
@@ -77,16 +84,16 @@ namespace RTE {
 
 #pragma region Settings Menu Handling
 		/// <summary>
+		/// Disables the settings menu tabber and back buttons. This is used when a settings sub-menu dialog box is active.
+		/// </summary>
+		void DisableSettingsMenuNavigation(bool disable) const;
+
+		/// <summary>
 		/// Sets the SettingsGUI to display a settings menu screen.
 		/// </summary>
 		/// <param name="activeMenu">Which settings menu screen to display. See MenuScreen enumeration. See the SettingsMenuScreen enumeration.</param>
 		/// <param name="playButtonPressSound">Whether to play a sound if the menu screen change is triggered by a button/tab press.</param>
 		void SetActiveSettingsMenuScreen(SettingsMenuScreen activeMenu, bool playButtonPressSound = true);
-
-		/// <summary>
-		/// Disables the settings menu tabber and back buttons. This is used when a settings sub-menu dialog box is active.
-		/// </summary>
-		void DisableSettingsMenuNavigation(bool disable) const;
 #pragma endregion
 
 		// Disallow the use of some implicit methods.

@@ -28,13 +28,7 @@ namespace RTE {
 		explicit SettingsInputMappingGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 
-#pragma region Concrete Methods
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns></returns>
-		SettingsInputMappingWizardGUI * GetInputConfigWizardMenu() { return m_InputConfigWizardMenu.get(); }
-
+#pragma region Getters and Setters
 		/// <summary>
 		/// Gets whether this input mapping settings menu is currently visible and enabled.
 		/// </summary>
@@ -47,6 +41,20 @@ namespace RTE {
 		/// <param name="player">The player this SettingsInputMappingGUI is configuring input mapping for.</param>
 		void SetEnabled(bool enable = true, int player = 0);
 
+		/// <summary>
+		/// Gets the currently active GUICollectionBox that acts as a dialog box and requires disabling navigation and drawing an overlay.
+		/// </summary>
+		/// <returns>Pointer to the GUICollectionBox that is the currently active dialog box, if any.</returns>
+		GUICollectionBox * GetActiveDialogBox() const;
+
+		/// <summary>
+		/// Gets the SettingsInputMappingWizardGUI of this SettingsInputMappingGUI.
+		/// </summary>
+		/// <returns>Pointer to the SettingsInputMappingWizardGUI of this SettingsInputMappingGUI.</returns>
+		SettingsInputMappingWizardGUI * GetInputConfigWizardMenu() { return m_InputConfigWizardMenu.get(); }
+#pragma endregion
+
+#pragma region Concrete Methods
 		/// <summary>
 		/// Handles the player interaction with the SettingsInputMappingGUI GUI elements.
 		/// </summary>

@@ -31,6 +31,20 @@ namespace RTE {
 		explicit SettingsInputGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 
+#pragma region Getters and Setters
+		/// <summary>
+		/// Enables or disables the input settings menu.
+		/// </summary>
+		/// <param name="enable">Show and enable or hide and disable the input settings menu.</param>
+		void SetEnabled(bool enable = true) const;
+
+		/// <summary>
+		/// Gets the currently active GUICollectionBox that acts as a dialog box and requires disabling navigation and drawing an overlay.
+		/// </summary>
+		/// <returns>Pointer to the GUICollectionBox that is the currently active dialog box, if any.</returns>
+		GUICollectionBox * GetActiveDialogBox() const { return m_InputMappingConfigMenu->GetActiveDialogBox(); }
+#pragma endregion
+
 #pragma region Input Config Wizard Handling
 		/// <summary>
 		/// Gets whether the player is currently manually configuring the InputScheme through the input mapping wizard.
@@ -45,12 +59,6 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Concrete Methods
-		/// <summary>
-		/// Enables or disables the input settings menu.
-		/// </summary>
-		/// <param name="enable">Show and enable or hide and disable the input settings menu.</param>
-		void SetEnabled(bool enable = true) const;
-
 		/// <summary>
 		/// Handles the player interaction with the SettingsInputGUI GUI elements.
 		/// </summary>

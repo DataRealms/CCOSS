@@ -65,6 +65,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	GUICollectionBox * SettingsInputMappingGUI::GetActiveDialogBox() const {
+		if (m_InputConfigWizardMenu->IsEnabled()) {
+			return m_InputConfigWizardMenu->GetActiveDialogBox();
+		}
+		return (m_InputMappingSettingsBox->GetEnabled() && m_InputMappingSettingsBox->GetVisible()) ? m_InputMappingSettingsBox : nullptr;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void SettingsInputMappingGUI::UpdateMappingButtonLabels() {
 		const std::array<InputMapping, InputElements::INPUT_COUNT> *inputMappings = m_ConfiguringPlayerInputScheme->GetInputMappings();
 		for (int i = 0; i < InputElements::INPUT_COUNT; ++i) {

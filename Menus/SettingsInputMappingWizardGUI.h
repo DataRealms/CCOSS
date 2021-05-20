@@ -43,6 +43,12 @@ namespace RTE {
 		void SetEnabled(bool enable = true, int player = 0, InputScheme *playerScheme = nullptr);
 
 		/// <summary>
+		/// Gets the currently active GUICollectionBox that acts as a dialog box and requires disabling navigation and drawing an overlay.
+		/// </summary>
+		/// <returns>Pointer to the GUICollectionBox that is the currently active dialog box, if any.</returns>
+		GUICollectionBox * GetActiveDialogBox() const;
+
+		/// <summary>
 		/// Gets whether the input mapping wizard needs to capture input for manual configuration.
 		/// </summary>
 		/// <returns>Whether the input mapping wizard needs to capture input for manual configuration.</returns>

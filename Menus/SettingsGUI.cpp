@@ -45,6 +45,34 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	GUICollectionBox * SettingsGUI::GetActiveDialogBox() const {
+		GUICollectionBox *activeDialogBox = nullptr;
+		switch (m_ActiveSettingsMenuScreen) {
+			case SettingsMenuScreen::VideoSettingsMenu:
+				activeDialogBox = m_VideoSettingsMenu->GetActiveDialogBox();
+				break;
+			case SettingsMenuScreen::InputSettingsMenu:
+				activeDialogBox = m_InputSettingsMenu->GetActiveDialogBox();
+				break;
+			default:
+				break;
+		}
+		DisableSettingsMenuNavigation(activeDialogBox ? true : false);
+
+		return activeDialogBox;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsGUI::DisableSettingsMenuNavigation(bool disable) const {
+		m_BackToMainButton->SetEnabled(!disable);
+		for (GUITab *settingsTabberTab : m_SettingsMenuTabs) {
+			settingsTabberTab->SetEnabled(!disable);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void SettingsGUI::SetActiveSettingsMenuScreen(SettingsMenuScreen activeMenu, bool playButtonPressSound) {
 		m_VideoSettingsMenu->SetEnabled(false);
 		m_AudioSettingsMenu->SetEnabled(false);
@@ -81,12 +109,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsGUI::DisableSettingsMenuNavigation(bool disable) const {
-		m_SettingsTabberBox->SetEnabled(!disable);
-		m_BackToMainButton->SetEnabled(!disable);
-	}
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	bool SettingsGUI::HandleInputEvents() {
 		m_GUIControlManager->Update();
 
@@ -113,7 +135,6 @@ namespace RTE {
 					}
 				}
 			}
-
 			switch (m_ActiveSettingsMenuScreen) {
 				case SettingsMenuScreen::VideoSettingsMenu:
 					m_VideoSettingsMenu->HandleInputEvents(guiEvent);

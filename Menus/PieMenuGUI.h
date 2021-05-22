@@ -35,16 +35,6 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Destructor method used to clean up a PieMenuGUI object before deletion from system memory.
-		/// </summary>
-		~PieMenuGUI() { Destroy(); }
-
-		/// <summary>
-		/// Destroys and resets (through Clear()) the PieMenuGUI object.
-		/// </summary>
-		void Destroy() { destroy_bitmap(m_BGBitmap); Clear(); }
-
-		/// <summary>
 		/// Resets the entire PieMenuGUI, including its inherited members, to their default settings or values.
 		/// </summary>
 		void Reset() { Clear(); }
@@ -64,22 +54,28 @@ namespace RTE {
 		void SetActor(Actor *actor) { m_Actor = actor; m_LastKnownActor = actor; }
 
 		/// <summary>
-		/// Enables or disables the menu and animates it in and out of view.
-		/// </summary>
-		/// <param name="enable">Whether to enable or disable the menu.</param>
-		void SetEnabled(bool enable);
-
-		/// <summary>
 		/// Gets whether the menu is enabled or not.
 		/// </summary>
 		/// <returns>Whether the menu is enabled.</returns>
-		bool IsEnabled() const { return (m_PieEnabled == ENABLED || m_PieEnabled == ENABLING) && !m_Wobbling; }
+		bool IsEnabled() const { return (m_EnabledState == EnabledState::Enabled || m_EnabledState == EnabledState::Enabling) && !m_Wobbling; }
+
+		/// <summary>
+		/// Gets whether the menu is in the process of enabling or disabling.
+		/// </summary>
+		/// <returns></returns>
+		bool IsEnablingOrDisabling() const { return m_EnabledState == EnabledState::Enabling || m_EnabledState == EnabledState::Disabling; }
 
 		/// <summary>
 		/// Gets whether the menu is at all visible or not.
 		/// </summary>
 		/// <returns>Whether the menu is visible.</returns>
-		bool IsVisible() const { return m_PieEnabled != DISABLED; }
+		bool IsVisible() const { return m_EnabledState != EnabledState::Disabled; }
+
+		/// <summary>
+		/// Enables or disables the menu and animates it in and out of view.
+		/// </summary>
+		/// <param name="enable">Whether to enable or disable the menu.</param>
+		void SetEnabled(bool enable);
 
 		/// <summary>
 		/// Gets the absolute center position of this.
@@ -104,7 +100,7 @@ namespace RTE {
 		/// <summary>
 		/// Just plays the disabling animation, regardless of whether the menu was enabled or not.
 		/// </summary>
-		void DisableAnim() { m_InnerRadius = m_EnabledRadius; m_Wobbling = false; m_EnablingTimer.Reset(); m_PieEnabled = DISABLING; }
+		void DisableAnim() { m_InnerRadius = m_EnabledRadius; m_Wobbling = false; m_EnablingTimer.Reset(); m_EnabledState = EnabledState::Disabling; }
 
 		/// <summary>
 		/// Plays an animation of the pie menu circle expanding and contracting continuously. The menu is effectively disabled while doing this. It will continue until the next call to SetEnabled.
@@ -207,12 +203,10 @@ namespace RTE {
 
 	private:
 
-		enum PieEnabled {
-			ENABLING = 0,
-			ENABLED,
-			DISABLING,
-			DISABLED
-		};
+		/// <summary>
+		/// Enumeration for enabled states when enabling/disabling the PieMenuGUI.
+		/// </summary>
+		enum class EnabledState { Enabling, Enabled, Disabling, Disabled };
 
 		enum PieIconSelection {
 			PIS_NORMAL = 0,
@@ -222,7 +216,7 @@ namespace RTE {
 		};
 
 		static std::unordered_map<std::string, PieSlice> s_AllCustomLuaSlices; //<! All Slices ever added to this pie-menu, serves as directory of Slices available to add.
-		static BITMAP *s_Cursor; //<! A static pointer to the bitmap to use as the cursor in any menu.
+		static BITMAP *s_CursorBitmap; //<! A static pointer to the bitmap to use as the cursor in any menu.
 		static const int s_EnablingDelay = 50; //<! Time in ms for how long it takes to enable/disable.
 		
 		Timer m_EnablingTimer; //<! Timer for the appear and disappear animations.
@@ -232,7 +226,7 @@ namespace RTE {
 		Actor *m_Actor; //<! The actor that this menu is attached to and getting some options from.
 		Actor *m_LastKnownActor; //<! This actor pointer is not cleared every time, I'm not touching the original to not ruin something. ?????
 		
-		PieEnabled m_PieEnabled; //<! The enabled state of the menu.
+		EnabledState m_EnabledState; //<! The enabled state of the menu.
 		Vector m_CenterPos; //<! The center position of this in the scene.
 		
 		const PieSlice *m_HoveredSlice; //<! The Slice currently being hovered over.

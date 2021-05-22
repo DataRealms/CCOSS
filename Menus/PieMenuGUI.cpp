@@ -13,7 +13,7 @@
 
 using namespace RTE;
 
-BITMAP *PieMenuGUI::s_Cursor;
+BITMAP *PieMenuGUI::s_CursorBitmap;
 std::unordered_map<std::string, PieSlice> PieMenuGUI::s_AllCustomLuaSlices;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25,7 +25,7 @@ void PieMenuGUI::Clear() {
 	m_Controller = nullptr;
 	m_Actor = nullptr;
 
-	m_PieEnabled = PieEnabled::DISABLED;
+	m_EnabledState = EnabledState::Disabled;
 	m_CenterPos.Reset();
 
 	m_HoveredSlice = nullptr;
@@ -69,8 +69,8 @@ int PieMenuGUI::Create(Controller *controller, Actor *focusActor) {
 		m_LastKnownActor = m_Actor;
 	}
 
-	if (!s_Cursor) {
-		s_Cursor = ContentFile("Base.rte/GUIs/Skins/PieCursor.png").GetAsBitmap();
+	if (!s_CursorBitmap) {
+		s_CursorBitmap = ContentFile("Base.rte/GUIs/Skins/PieCursor.png").GetAsBitmap();
 	}
 
 	if (!m_BGBitmap) {
@@ -88,11 +88,11 @@ void PieMenuGUI::SetEnabled(bool enable) {
 	m_Wobbling = false;
 	m_Freeze = false;
 
-	if (!((enable && m_PieEnabled != ENABLED && m_PieEnabled != ENABLING) || (!enable && m_PieEnabled != DISABLED && m_PieEnabled != DISABLING))) {
+	if (!((enable && m_EnabledState != EnabledState::Enabled && m_EnabledState != EnabledState::Enabling) || (!enable && m_EnabledState != EnabledState::Disabled && m_EnabledState != EnabledState::Disabling))) {
 		return;
 	}
 
-	m_PieEnabled = enable ? ENABLING : DISABLING;
+	m_EnabledState = enable ? EnabledState::Enabling : EnabledState::Disabling;
 	m_EnablingTimer.Reset();
 	if (m_Controller->IsMouseControlled()) {
 		g_UInputMan.SetMouseValueMagnitude(0);
@@ -311,8 +311,8 @@ void PieMenuGUI::Update() {
 	if (m_Wobbling) {
 		UpdateWobbling();
 	} else if (m_Freeze) {
-		m_PieEnabled = ENABLING;
-	} else if (m_PieEnabled == ENABLING || m_PieEnabled == DISABLING) {
+		m_EnabledState = EnabledState::Enabling;
+	} else if (m_EnabledState == EnabledState::Enabling || m_EnabledState == EnabledState::Disabling) {
 		UpdateEnablingAndDisablingAnimations();
 	}
 
@@ -322,7 +322,7 @@ void PieMenuGUI::Update() {
 
 	if (IsEnabled() && (UpdateAnalogInput() || UpdateDigitalInput())) { m_HoverTimer.Reset(); }
 
-	if (m_HoveredSlice && m_PieEnabled != DISABLED) {
+	if (m_HoveredSlice && m_EnabledState != EnabledState::Disabled) {
 		UpdateSliceActivation();
 		
 		if (m_HoverTimer.IsPastSimMS(1500)) {
@@ -332,7 +332,7 @@ void PieMenuGUI::Update() {
 	}
 
 	//TODO try moving this into draw, it'd make more sense there
-	if (m_RedrawBG && m_PieEnabled != DISABLED) { RedrawMenuBackground(); }
+	if (m_RedrawBG && m_EnabledState != EnabledState::Disabled) { RedrawMenuBackground(); }
 
 	//TODO All this actor stuff should be gotten rid of/replaced so pie menus can be on any MO
 	// Clear out actor and last known actor cause it may have been deleted by the time we next update.
@@ -348,7 +348,7 @@ void PieMenuGUI::Draw(BITMAP *targetBitmap, const Vector &targetPos) const  {
 	Vector drawPos;
 	CalculateDrawPositionAccountingForSeamsAndFont(targetBitmap, targetPos, menuFont, drawPos);
 
-	if (m_PieEnabled != DISABLED) {
+	if (m_EnabledState != EnabledState::Disabled) {
 		if (!g_FrameMan.IsInMultiplayerMode()) {
 			g_FrameMan.SetTransTable(MoreTrans);
 			draw_trans_sprite(targetBitmap, m_BGBitmap, drawPos.GetFloorIntX() - m_BGBitmap->w / 2, drawPos.GetFloorIntY() - m_BGBitmap->h / 2);
@@ -357,7 +357,7 @@ void PieMenuGUI::Draw(BITMAP *targetBitmap, const Vector &targetPos) const  {
 		}
 	}
 
-	if (m_PieEnabled == ENABLED) {
+	if (m_EnabledState == EnabledState::Enabled) {
 		DrawPieIcons(targetBitmap, drawPos);
 		if (m_HoveredSlice) { DrawPieCursorAndSliceDescriptions(targetBitmap, drawPos, menuFont); }
 	}
@@ -386,12 +386,12 @@ void PieMenuGUI::UpdateWobbling() {
 	float innerRadiusChange = static_cast<float>(m_EnablingTimer.GetElapsedRealTimeMS()) / 6.0F;
 
 	m_RedrawBG = true;
-	m_InnerRadius += static_cast<int>(innerRadiusChange) * (m_PieEnabled == DISABLING ? -1 : 1);
+	m_InnerRadius += static_cast<int>(innerRadiusChange) * (m_EnabledState == EnabledState::Disabling ? -1 : 1);
 
 	if (m_InnerRadius < 0) {
-		m_PieEnabled = ENABLING;
+		m_EnabledState = EnabledState::Enabling;
 	} else if (m_InnerRadius > m_EnabledRadius / 2) {
-		m_PieEnabled = DISABLING;
+		m_EnabledState = EnabledState::Disabling;
 	}
 
 	m_InnerRadius = std::clamp(m_InnerRadius, 0, m_EnabledRadius / 2);
@@ -402,16 +402,16 @@ void PieMenuGUI::UpdateWobbling() {
 
 void PieMenuGUI::UpdateEnablingAndDisablingAnimations() {
 	m_RedrawBG = true;
-	if (m_PieEnabled == ENABLING) {
+	if (m_EnabledState == EnabledState::Enabling) {
 		m_InnerRadius = static_cast<int>(LERP(0.0F, static_cast<float>(s_EnablingDelay), 0.0F, static_cast<float>(m_EnabledRadius), static_cast<float>(m_EnablingTimer.GetElapsedRealTimeMS())));
 		if (m_EnablingTimer.IsPastRealMS(s_EnablingDelay)) {
-			m_PieEnabled = ENABLED;
+			m_EnabledState = EnabledState::Enabled;
 			m_InnerRadius = m_EnabledRadius;
 		}
-	} else if (m_PieEnabled == DISABLING) {
+	} else if (m_EnabledState == EnabledState::Disabling) {
 		m_InnerRadius = static_cast<int>(LERP(0.0F, static_cast<float>(s_EnablingDelay), static_cast<float>(m_EnabledRadius), 0.0F, static_cast<float>(m_EnablingTimer.GetElapsedRealTimeMS())));
 		if (m_EnablingTimer.IsPastRealMS(s_EnablingDelay)) {
-			m_PieEnabled = DISABLED;
+			m_EnabledState = EnabledState::Disabled;
 			m_InnerRadius = 0;
 			if (m_Actor) {
 				m_Actor->FlashWhite();
@@ -524,7 +524,7 @@ void PieMenuGUI::RedrawMenuBackground() {
 	circlefill(m_BGBitmap, centerX, centerY, m_InnerRadius + m_Thickness, 4);
 	circlefill(m_BGBitmap, centerX, centerY, m_InnerRadius, g_MaskColor);
 
-	if (m_PieEnabled == ENABLED) {
+	if (m_EnabledState == EnabledState::Enabled) {
 		Vector separator;
 
 		// Draw four separator lines between each slice so the resulting separation will be at least 2 pixels thick, regardless of the separated slices' angles.
@@ -625,8 +625,8 @@ void PieMenuGUI::DrawPieIcons(BITMAP *targetBitmap, const Vector &drawPos) const
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void PieMenuGUI::DrawPieCursorAndSliceDescriptions(BITMAP *targetBitmap, const Vector &drawPos, GUIFont *menuFont) const {
-	Vector cursorPos = Vector(static_cast<float>(m_InnerRadius)/* - s_Cursor->w*/, 0.0F).RadRotate(m_CursorAngle);
-	pivot_sprite(targetBitmap, s_Cursor, drawPos.GetFloorIntX() + cursorPos.GetFloorIntX(), drawPos.GetFloorIntY() + cursorPos.GetFloorIntY(), s_Cursor->w / 2, s_Cursor->h / 2, ftofix((m_CursorAngle / c_PI) * -128));
+	Vector cursorPos = Vector(static_cast<float>(m_InnerRadius)/* - s_CursorBitmap->w*/, 0.0F).RadRotate(m_CursorAngle);
+	pivot_sprite(targetBitmap, s_CursorBitmap, drawPos.GetFloorIntX() + cursorPos.GetFloorIntX(), drawPos.GetFloorIntY() + cursorPos.GetFloorIntY(), s_CursorBitmap->w / 2, s_CursorBitmap->h / 2, ftofix((m_CursorAngle / c_PI) * -128));
 
 	// Align text center, left or right respectively, based on which side of the menu the hovered slice is on.
 	AllegroBitmap allegroBitmap(targetBitmap);

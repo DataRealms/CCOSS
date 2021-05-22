@@ -291,7 +291,7 @@ void GameActivity::Destroy(bool notInherited)
 {
     for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
-        delete m_pPieMenu[player];
+        if (m_pPieMenu[player]) { m_pPieMenu[player]->Reset(); }
         if (m_InventoryMenuGUI[player]) { m_InventoryMenuGUI[player]->Reset(); }
         delete m_pBuyGUI[player];
         delete m_pEditorGUI[player];
@@ -889,7 +889,7 @@ int GameActivity::Start()
 
         // Allocate and (re)create the Pie Menus
         if (m_pPieMenu[player])
-            m_pPieMenu[player]->Destroy();
+            m_pPieMenu[player]->Reset();
         else
             m_pPieMenu[player] = new PieMenuGUI;
         m_pPieMenu[player]->Create(&m_PlayerController[player]);

@@ -1827,8 +1827,8 @@ void GameActivity::Update()
         ////////////////////////////////////////
         // Update the Pie Menu
 
-        // Set the valid actor (or 0) so it can be flashed by the piemenu when it activates/deactivates
-        m_pPieMenu[player]->SetActor(m_ControlledActor[player]);
+        // Set the affected object so it can be flashed by the piemenu when it activates/deactivates
+        m_pPieMenu[player]->SetAffectedObject(m_ControlledActor[player]);
         m_InventoryMenuGUI[player]->SetInventoryActor(m_ControlledActor[player]);
 
         if (m_ControlledActor[player] && m_ViewState[player] != ViewState::DeathWatch && m_ViewState[player] != ViewState::ActorSelect && m_ViewState[player] != ViewState::AIGoToPoint && m_ViewState[player] != ViewState::UnitSelectCircle)

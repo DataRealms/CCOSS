@@ -2,14 +2,14 @@
 #define _PIEMENUGUI_
 
 #include "PieSlice.h"
-#include "Controller.h"
-#include "Icon.h"
+#include "Timer.h"
+#include "Vector.h"
 
 namespace RTE {
 
-	class GUIFont;
+	class Controller;
 	class MovableObject;
-	class Actor;
+	class GUIFont;
 
 	/// <summary>
 	/// A GUI for displaying pie menus.
@@ -27,10 +27,10 @@ namespace RTE {
 		/// <summary>
 		/// Makes the PieMenuGUI object ready for use.
 		/// </summary>
-		/// <param name="controller">A pointer to a Controller which will control this Menu. Ownership is NOT TRANSFERRED!</param>
-		/// <param name="focusActor">The actor that this menu is currently associated with. Ownership is NOT TRANSFERRED! This is optional.</param>
+		/// <param name="controller">A pointer to a Controller which will control this Menu. Ownership is NOT transferred!</param>
+		/// <param name="affectedObject">The object that this menu is will affect. Ownership is NOT transferred! This is optional.</param>
 		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(Controller *controller, Actor *focusActor = nullptr);
+		int Create(Controller *controller, MovableObject *affectedObject = nullptr);
 #pragma endregion
 
 #pragma region Destruction
@@ -42,16 +42,22 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Sets the controller used by this. The ownership of the controller is NOT transferred!
+		/// Sets the controller used by this. Ownership is NOT transferred!
 		/// </summary>
 		/// <param name="controller">The new controller for this menu. Ownership is NOT transferred!</param>
 		void SetController(Controller *controller) { m_Controller = controller; }
 
 		/// <summary>
-		/// Sets the currently attached-to Actor. It will populate this menu with some of its options. The ownership of the Actor is NOT transferred!
+		/// Gets the currently affected MovableObject. Ownership is NOT transferred!
 		/// </summary>
-		/// <param name="actor">The new actor associated for this menu. Ownership is NOT transferred!</param>
-		void SetActor(Actor *actor) { m_Actor = actor; m_LastKnownActor = actor; }
+		/// <returns>The MovableObject this menu affects. Ownership is NOT transferred!</returns>
+		const MovableObject * GetAffectedObject() const { return m_AffectedObject; }
+
+		/// <summary>
+		/// Sets the MovableObject this menu should affect. Ownership is NOT transferred!
+		/// </summary>
+		/// <param name="affectedObject">The new MovableObject affected by this menu. Ownership is NOT transferred!</param>
+		void SetAffectedObject(MovableObject *affectedObject) { m_AffectedObject = affectedObject; }
 
 		/// <summary>
 		/// Gets whether the menu is enabled or not.
@@ -215,16 +221,16 @@ namespace RTE {
 			PIS_COUNT
 		};
 
+		static const int c_EnablingDelay = 50; //<! Time in ms for how long it takes to enable/disable.
+
 		static std::unordered_map<std::string, PieSlice> s_AllCustomLuaSlices; //<! All Slices ever added to this pie-menu, serves as directory of Slices available to add.
 		static BITMAP *s_CursorBitmap; //<! A static pointer to the bitmap to use as the cursor in any menu.
-		static const int s_EnablingDelay = 50; //<! Time in ms for how long it takes to enable/disable.
 		
 		Timer m_EnablingTimer; //<! Timer for the appear and disappear animations.
 		Timer m_HoverTimer; //<! Timer to measure how long to hold a hovered over slice.
 		
 		Controller *m_Controller; //<! The Controller which controls this menu. Not owned.
-		Actor *m_Actor; //<! The actor that this menu is attached to and getting some options from.
-		Actor *m_LastKnownActor; //<! This actor pointer is not cleared every time, I'm not touching the original to not ruin something. ?????
+		MovableObject *m_AffectedObject; //!< The MovableObject this menu affects, if any.
 		
 		EnabledState m_EnabledState; //<! The enabled state of the menu.
 		Vector m_CenterPos; //<! The center position of this in the scene.
@@ -233,31 +239,35 @@ namespace RTE {
 		const PieSlice *m_ActivatedSlice; //<! The currently activated Slice, if there is one, or 0 if there's not.
 		const PieSlice *m_AlreadyActivatedSlice; //<! The Slice that was most recently activated by pressing Primary. Used to avoid duplicate activation when releasing the pie menu.
 		
-		//<! The cardinal axis slices, owned here
+		/// <summary>
+		/// The cardinal axis slices, owned here.
+		/// </summary>
 		PieSlice m_UpSlice;
 		PieSlice m_RightSlice;
 		PieSlice m_DownSlice;
 		PieSlice m_LeftSlice;
 
-		//<! The slices between the cardinal axes, owned here
+		/// <summary>
+		/// The slices between the cardinal axes, owned here.
+		/// </summary>
 		std::list<PieSlice> m_UpRightSlices;
 		std::list<PieSlice> m_UpLeftSlices;
 		std::list<PieSlice> m_DownLeftSlices;
 		std::list<PieSlice> m_DownRightSlices;
 
-		std::vector<PieSlice *> m_CurrentSlices; //<! All the Slices, in order and aligned, not owned here, just pointing to the ones above.
-		int m_SliceGroupCount; //<! How many groups there currently are in the menu.
+		std::vector<PieSlice *> m_CurrentSlices; //!< All the Slices, in order and aligned, not owned here, just pointing to the ones above.
+		int m_SliceGroupCount; //!< How many groups there currently are in the menu.
 
-		bool m_Wobbling; //<! Special mode where the menu circle expands and contracts continuously, while being effectively disabled.
-		bool m_Freeze; //<! Special mode where the menu circle is frozen at the current m_InnerRadius.
+		bool m_Wobbling; //!< Special mode where the menu circle expands and contracts continuously, while being effectively disabled.
+		bool m_Freeze; //!< Special mode where the menu circle is frozen at the current m_InnerRadius.
 
-		int m_InnerRadius; //<! The current radius of the innermost circle of the pie menu, in pixels.
-		int m_EnabledRadius; //<! When fully enabled, the inner radius is this, in pixels.
-		int m_Thickness; //<! The thickness of the pie menu circle, in pixels.
-		float m_CursorAngle; //<! Position of the cursor on the circle, in radians, counterclockwise from straight out to rhe right.
+		int m_InnerRadius; //!< The current radius of the innermost circle of the pie menu, in pixels.
+		int m_EnabledRadius; //!< When fully enabled, the inner radius of the pie menu, in pixels.
+		int m_Thickness; //!< The thickness of the pie menu circle, in pixels.
+		float m_CursorAngle; //!< Position of the cursor on the circle, in radians, counterclockwise from straight out to rhe right.
 		
-		BITMAP *m_BGBitmap; //<! The intermediary bitmap used to first draw the menu background, which will be blitted to the final draw target surface.
-		bool m_RedrawBG; //<! Whether we need to redraw the BG bitmap.
+		BITMAP *m_BGBitmap; //!< The intermediary bitmap used to first draw the menu background, which will be blitted to the final draw target surface.
+		bool m_RedrawBG; //!< Whether we need to redraw the BG bitmap.
 
 		/// <summary>
 		/// Sets a slice to be selected.
@@ -275,7 +285,7 @@ namespace RTE {
 		/// <summary>
 		/// Handles the enabling and disabling part of Update.
 		/// </summary>
-		void UpdateEnablingAndDisablingAnimations();
+		void UpdateEnablingAndDisablingProgress();
 
 		/// <summary>
 		/// Handles the analog input conversion part of Update.
@@ -328,7 +338,7 @@ namespace RTE {
 		/// </summary>
 		void Clear();
 
-		// Forbidding copying
+		// Disallow the use of some implicit methods.
 		PieMenuGUI(const PieMenuGUI &reference) = delete;
 		PieMenuGUI & operator=(const PieMenuGUI & rhs) = delete;
 	};

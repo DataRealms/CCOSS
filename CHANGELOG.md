@@ -20,8 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - New `Settings.ini` property `ForceDedicatedFullScreenGfxDriver` to force the game to run in previously removed dedicated fullscreen mode, allowing using lower resolutions (and 1366x768) while still maintaining fullscreen.
 
-- New INI and Lua (R/W) properties for Attachables:  
-	`TransfersDamageToParent = 0/1`. If enabled, the Attachable will act like hardcoded ones and transfer damage to its parent. For `Attachables` attached to other `Attachables`, the parent `Attachable` (and any of its parents, etc.) must have this enabled for it to affect the root parent.  
+- New INI and Lua (R/W) property for Attachables:  
 	`ParentBreakWound = AEmitter...`. Use this to define a `BreakWound` that will be applied to the `Attachable`'s parent when the `Attachable` is removed.  
 	`BreakWound` is also now R/W accessible to Lua.
 	

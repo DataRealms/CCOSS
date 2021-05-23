@@ -169,7 +169,7 @@ namespace RTE {
 				break;
 		}
 		m_JoystickDeadzoneType = DeadZoneType::CIRCLE;
-		m_JoystickDeadzone = 0;
+		m_JoystickDeadzone = 0.01F;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -277,22 +277,22 @@ namespace RTE {
 				m_InputMappings.at(InputElements::INPUT_START).SetJoyButton(JoyButtons::JOY_8);
 				m_InputMappings.at(InputElements::INPUT_BACK).SetJoyButton(JoyButtons::JOY_7);
 
-				m_InputMappings.at(InputElements::INPUT_L_UP).SetDirection(0, 1, JOYDIR_ONE);
-				m_InputMappings.at(InputElements::INPUT_L_DOWN).SetDirection(0, 1, JOYDIR_TWO);
-				m_InputMappings.at(InputElements::INPUT_L_LEFT).SetDirection(0, 0, JOYDIR_ONE);
-				m_InputMappings.at(InputElements::INPUT_L_RIGHT).SetDirection(0, 0, JOYDIR_TWO);
-				m_InputMappings.at(InputElements::INPUT_R_UP).SetDirection(2, 0, JOYDIR_ONE);
-				m_InputMappings.at(InputElements::INPUT_R_DOWN).SetDirection(2, 0, JOYDIR_TWO);
-				m_InputMappings.at(InputElements::INPUT_R_LEFT).SetDirection(1, 0, JOYDIR_ONE);
-				m_InputMappings.at(InputElements::INPUT_R_RIGHT).SetDirection(1, 0, JOYDIR_TWO);
-				m_InputMappings.at(InputElements::INPUT_FIRE).SetDirection(0, 2, JOYDIR_ONE);
-				m_InputMappings.at(InputElements::INPUT_JUMP).SetDirection(0, 1, JOYDIR_ONE);
-				m_InputMappings.at(InputElements::INPUT_CROUCH).SetDirection(0, 1, JOYDIR_TWO);
-				m_InputMappings.at(InputElements::INPUT_PIEMENU).SetDirection(0, 2, JOYDIR_TWO);
-				m_InputMappings.at(InputElements::INPUT_WEAPON_CHANGE_PREV).SetDirection(3, 0, JOYDIR_ONE);
-				m_InputMappings.at(InputElements::INPUT_WEAPON_CHANGE_NEXT).SetDirection(3, 0, JOYDIR_TWO);
-				m_InputMappings.at(InputElements::INPUT_WEAPON_RELOAD).SetDirection(3, 1, JOYDIR_ONE);
-				m_InputMappings.at(InputElements::INPUT_WEAPON_PICKUP).SetDirection(3, 1, JOYDIR_TWO);
+				m_InputMappings.at(InputElements::INPUT_L_UP).SetDirection(0, 1, JoyDirections::JOYDIR_ONE);
+				m_InputMappings.at(InputElements::INPUT_L_DOWN).SetDirection(0, 1, JoyDirections::JOYDIR_TWO);
+				m_InputMappings.at(InputElements::INPUT_L_LEFT).SetDirection(0, 0, JoyDirections::JOYDIR_ONE);
+				m_InputMappings.at(InputElements::INPUT_L_RIGHT).SetDirection(0, 0, JoyDirections::JOYDIR_TWO);
+				m_InputMappings.at(InputElements::INPUT_R_UP).SetDirection(1, 0, JoyDirections::JOYDIR_ONE);
+				m_InputMappings.at(InputElements::INPUT_R_DOWN).SetDirection(1, 0, JoyDirections::JOYDIR_TWO);
+				m_InputMappings.at(InputElements::INPUT_R_LEFT).SetDirection(2, 0, JoyDirections::JOYDIR_ONE);
+				m_InputMappings.at(InputElements::INPUT_R_RIGHT).SetDirection(2, 0, JoyDirections::JOYDIR_TWO);
+				m_InputMappings.at(InputElements::INPUT_FIRE).SetDirection(0, 2, JoyDirections::JOYDIR_ONE);
+				m_InputMappings.at(InputElements::INPUT_JUMP).SetDirection(0, 1, JoyDirections::JOYDIR_ONE);
+				m_InputMappings.at(InputElements::INPUT_CROUCH).SetDirection(0, 1, JoyDirections::JOYDIR_TWO);
+				m_InputMappings.at(InputElements::INPUT_PIEMENU).SetDirection(0, 2, JoyDirections::JOYDIR_TWO);
+				m_InputMappings.at(InputElements::INPUT_WEAPON_CHANGE_PREV).SetDirection(3, 0, JoyDirections::JOYDIR_ONE);
+				m_InputMappings.at(InputElements::INPUT_WEAPON_CHANGE_NEXT).SetDirection(3, 0, JoyDirections::JOYDIR_TWO);
+				m_InputMappings.at(InputElements::INPUT_WEAPON_RELOAD).SetDirection(3, 1, JoyDirections::JOYDIR_ONE);
+				m_InputMappings.at(InputElements::INPUT_WEAPON_PICKUP).SetDirection(3, 1, JoyDirections::JOYDIR_TWO);
 				break;
 			case InputPreset::PresetGamepadSNES:
 				// TODO: Add a SNES style d-pad preset that makes sense. Use generic for now.

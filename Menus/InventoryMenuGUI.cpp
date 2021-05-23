@@ -51,7 +51,7 @@ namespace RTE {
 		m_SmallFont = nullptr;
 		m_LargeFont = nullptr;
 
-		m_ActivityPlayerController = nullptr;
+		m_MenuController = nullptr;
 		m_InventoryActor = nullptr;
 		m_MenuMode = MenuMode::Carousel;
 		m_CenterPos.Reset();
@@ -125,7 +125,7 @@ namespace RTE {
 		if (!m_SmallFont) { m_SmallFont = g_FrameMan.GetSmallFont(); }
 		if (!m_LargeFont) { m_LargeFont = g_FrameMan.GetLargeFont(); }
 
-		m_ActivityPlayerController = activityPlayerController;
+		m_MenuController = activityPlayerController;
 		SetInventoryActor(inventoryActor);
 		m_MenuMode = menuMode;
 
@@ -178,24 +178,24 @@ namespace RTE {
 	int InventoryMenuGUI::SetupFullOrTransferMode() {
 		if (!m_GUIControlManager) { m_GUIControlManager = std::make_unique<GUIControlManager>(); }
 		if (!m_GUIScreen) { m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer8()); }
-		if (!m_GUIInput) { m_GUIInput = std::make_unique<AllegroInput>(m_ActivityPlayerController->GetPlayer()); }
+		if (!m_GUIInput) { m_GUIInput = std::make_unique<AllegroInput>(m_MenuController->GetPlayer()); }
 		RTEAssert(m_GUIControlManager->Create(m_GUIScreen.get(), m_GUIInput.get(), "Base.rte/GUIs/Skins/Base", "InventoryMenuGUISkin.ini"), "Failed to create InventoryMenuGUI GUIControlManager and load it from Base.rte/GUIs/Skins/Base.");
 
 		m_GUIControlManager->Load("Base.rte/GUIs/InventoryMenuGUI.ini");
-		m_GUIControlManager->EnableMouse(m_ActivityPlayerController->IsMouseControlled());
+		m_GUIControlManager->EnableMouse(m_MenuController->IsMouseControlled());
 		if (!s_CursorBitmap) {
 			ContentFile cursorFile("Base.rte/GUIs/Skins/Cursor.png");
 			s_CursorBitmap = cursorFile.GetAsBitmap();
 		}
 
 		if (g_FrameMan.IsInMultiplayerMode()) {
-			dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_FrameMan.GetPlayerFrameBufferWidth(m_ActivityPlayerController->GetPlayer()), g_FrameMan.GetPlayerFrameBufferHeight(m_ActivityPlayerController->GetPlayer()));
+			dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_FrameMan.GetPlayerFrameBufferWidth(m_MenuController->GetPlayer()), g_FrameMan.GetPlayerFrameBufferHeight(m_MenuController->GetPlayer()));
 		} else {
 			dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("base"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 		}
 
 		m_GUITopLevelBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBox_InventoryMenuGUI"));
-		m_GUITopLevelBox->SetPositionAbs(g_FrameMan.GetPlayerFrameBufferWidth(m_ActivityPlayerController->GetPlayer()), 0);
+		m_GUITopLevelBox->SetPositionAbs(g_FrameMan.GetPlayerFrameBufferWidth(m_MenuController->GetPlayer()), 0);
 		m_GUITopLevelBoxFullSize.SetXY(static_cast<float>(m_GUITopLevelBox->GetWidth()), static_cast<float>(m_GUITopLevelBox->GetHeight()));
 		m_GUIInformationText = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("Label_InformationText"));
 		m_GUIInformationToggleButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("Button_InformationToggle"));
@@ -267,7 +267,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void InventoryMenuGUI::SetEnabled(bool enable) {
-		if (!m_ActivityPlayerController || !m_InventoryActor) {
+		if (!m_MenuController || !m_InventoryActor) {
 			return;
 		}
 
@@ -310,7 +310,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void InventoryMenuGUI::Update() {
-		if (IsEnabled() && (!m_ActivityPlayerController || !m_InventoryActor || !g_MovableMan.ValidMO(m_InventoryActor))) {
+		if (IsEnabled() && (!m_MenuController || !m_InventoryActor || !g_MovableMan.ValidMO(m_InventoryActor))) {
 			SetEnabled(false);
 			m_EnableDisableAnimationTimer.SetElapsedRealTimeMS(m_EnableDisableAnimationTimer.GetRealTimeLimitMS());
 		}
@@ -321,11 +321,15 @@ namespace RTE {
 		}
 
 		if (m_InventoryActor && m_EnabledState != EnabledState::Disabled) {
+			if (!g_MovableMan.ValidMO(m_InventoryActor)) { m_InventoryActor = nullptr; }
+
 			if (const AHuman *inventoryActorAsAHuman = m_InventoryActorIsHuman ? dynamic_cast<AHuman *>(m_InventoryActor) : nullptr) {
 				m_InventoryActorEquippedItems.clear();
 				m_InventoryActorEquippedItems.reserve(2);
 				if (inventoryActorAsAHuman->GetEquippedItem()) { m_InventoryActorEquippedItems.push_back(inventoryActorAsAHuman->GetEquippedItem()); }
 				if (inventoryActorAsAHuman->GetEquippedBGItem()) { m_InventoryActorEquippedItems.push_back(inventoryActorAsAHuman->GetEquippedBGItem()); }
+			} else if (!m_InventoryActorEquippedItems.empty()) {
+				m_InventoryActorEquippedItems.clear();
 			}
 			switch (m_MenuMode) {
 				case MenuMode::Carousel:
@@ -497,9 +501,9 @@ namespace RTE {
 					if (m_GUIReloadButton->GetEnabled()) { informationText += "the reload button to reload it, "; }
 					informationText += "or the drop button to drop it. Drag it out of the inventory window to toss it.";
 				} else {
-					informationText = m_ActivityPlayerController->IsMouseControlled() ? "Click another item to swap places with it, " : "Press another item to swap places with it, ";
+					informationText = m_MenuController->IsMouseControlled() ? "Click another item to swap places with it, " : "Press another item to swap places with it, ";
 					if (m_GUIReloadButton->GetEnabled()) { informationText += "the reload button to reload it, "; }
-					informationText += m_ActivityPlayerController->IsMouseControlled() ? "or the drop button " : "or press the drop button/use the drop key ";
+					informationText += m_MenuController->IsMouseControlled() ? "or the drop button " : "or press the drop button/use the drop key ";
 					informationText += "to drop it.";
 				}
 				m_GUIInformationText->SetText(informationText);
@@ -519,7 +523,7 @@ namespace RTE {
 				} else  if (m_InventoryActorEquippedItems.empty() && inventory->empty()) {
 					m_GUIInformationText->SetText("No items to display.");
 				} else {
-					m_GUIInformationText->SetText(m_ActivityPlayerController->IsMouseControlled() ? "Click an item to interact with it. You can also click and hold to drag items." : "Press an item to interact with it.");
+					m_GUIInformationText->SetText(m_MenuController->IsMouseControlled() ? "Click an item to interact with it. You can also click and hold to drag items." : "Press an item to interact with it.");
 				}
 			}
 		}
@@ -645,13 +649,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void InventoryMenuGUI::HandleInput() {
-		if (m_ActivityPlayerController->IsState(ControlState::PRESS_SECONDARY)) {
+		if (m_MenuController->IsState(ControlState::PRESS_SECONDARY)) {
 			SetEnabled(false);
 			return;
 		}
 
 		//TODO Maybe add support for other click types, e.g. if player right clicks on an item when they have one selected, we can call some custom lua function, so you can do custom stuff like combining items or whatever
-		if (m_ActivityPlayerController->IsMouseControlled()) {
+		if (m_MenuController->IsMouseControlled()) {
 			if (HandleMouseInput()) {
 				return;
 			}
@@ -659,21 +663,21 @@ namespace RTE {
 			HandleNonMouseInput();
 		}
 
-		if (m_GUISelectedItem && m_ActivityPlayerController->IsState(ControlState::WEAPON_DROP)) { DropSelectedItem(); }
+		if (m_GUISelectedItem && m_MenuController->IsState(ControlState::WEAPON_DROP)) { DropSelectedItem(); }
 		
 		GUIEvent guiEvent;
 		const GUIControl *guiControl;
 		while (m_GUIControlManager->GetEvent(&guiEvent)) {
 			guiControl = guiEvent.GetControl();
 			if (guiEvent.GetType() == GUIEvent::Notification && guiEvent.GetMsg() == GUIButton::Focused) {
-				g_GUISound.SelectionChangeSound()->Play(m_ActivityPlayerController->GetPlayer());
+				g_GUISound.SelectionChangeSound()->Play(m_MenuController->GetPlayer());
 				break;
 			}
 			bool buttonHeld = guiEvent.GetType() == GUIEvent::Notification && guiEvent.GetMsg() == GUIButton::Pushed;
 			if (buttonHeld || guiEvent.GetType() == GUIEvent::Command) {
 				if (!buttonHeld && guiControl == m_GUIInformationToggleButton) {
 					m_GUIShowInformationText = !m_GUIShowInformationText;
-					g_GUISound.ItemChangeSound()->Play(m_ActivityPlayerController->GetPlayer());
+					g_GUISound.ItemChangeSound()->Play(m_MenuController->GetPlayer());
 					m_GUIInformationToggleButton->OnLoseFocus();
 				} else if (!buttonHeld && guiControl == m_GUISwapSetButton) {
 					SwapEquippedItemSet();
@@ -706,7 +710,7 @@ namespace RTE {
 		if (m_GUISelectedItem && m_GUISelectedItem->IsBeingDragged) {
 			if (!m_GUISelectedItem->DragWasHeldForLongEnough()) {
 				m_GUISelectedItem->DragHoldCount++;
-				if (m_GUISelectedItem->DragWasHeldForLongEnough()) { g_GUISound.ItemChangeSound()->Play(m_ActivityPlayerController->GetPlayer()); }
+				if (m_GUISelectedItem->DragWasHeldForLongEnough()) { g_GUISound.ItemChangeSound()->Play(m_MenuController->GetPlayer()); }
 			}
 
 			if (m_GUIEquippedItemButton->IsPushed() && !m_GUIEquippedItemButton->PointInside(mouseX, mouseY)) { m_GUIEquippedItemButton->SetPushed(false); }
@@ -735,7 +739,7 @@ namespace RTE {
 				if (m_GUIEquippedItemButton->PointInside(mouseX, mouseY)) {
 					if (mouseHeld && !m_GUIEquippedItemButton->IsPushed()) {
 						m_GUIEquippedItemButton->SetPushed(true);
-						g_GUISound.SelectionChangeSound()->Play(m_ActivityPlayerController->GetPlayer());
+						g_GUISound.SelectionChangeSound()->Play(m_MenuController->GetPlayer());
 					} else if (mouseReleased) {
 						HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.at(0), 0);
 						if (!m_GUISelectedItem) {
@@ -745,7 +749,7 @@ namespace RTE {
 				} else if (m_GUIOffhandEquippedItemButton->PointInside(mouseX, mouseY)) {
 					if (mouseHeld && !m_GUIOffhandEquippedItemButton->IsPushed()) {
 						m_GUIOffhandEquippedItemButton->SetPushed(true);
-						g_GUISound.SelectionChangeSound()->Play(m_ActivityPlayerController->GetPlayer());
+						g_GUISound.SelectionChangeSound()->Play(m_MenuController->GetPlayer());
 					} else if (mouseReleased) {
 						HandleItemButtonPressOrHold(m_GUIOffhandEquippedItemButton, m_InventoryActorEquippedItems.at(std::min(static_cast<int>(m_InventoryActorEquippedItems.size() - 1), 1)), 1);
 						if (!m_GUISelectedItem) {
@@ -755,14 +759,14 @@ namespace RTE {
 				} else if (m_GUIReloadButton->IsEnabled() && m_GUIReloadButton->PointInside(mouseX, mouseY)) {
 					if (mouseHeld && !m_GUIReloadButton->IsPushed()) {
 						m_GUIReloadButton->SetPushed(true);
-						g_GUISound.SelectionChangeSound()->Play(m_ActivityPlayerController->GetPlayer());
+						g_GUISound.SelectionChangeSound()->Play(m_MenuController->GetPlayer());
 					} else if (mouseReleased) {
 						ReloadSelectedItem();
 					}
 				} else if (m_GUIDropButton->IsEnabled() && m_GUIDropButton->PointInside(mouseX, mouseY)) {
 					if (mouseHeld && !m_GUIDropButton->IsPushed()) {
 						m_GUIDropButton->SetPushed(true);
-						g_GUISound.SelectionChangeSound()->Play(m_ActivityPlayerController->GetPlayer());
+						g_GUISound.SelectionChangeSound()->Play(m_MenuController->GetPlayer());
 					} else if (mouseReleased) {
 						DropSelectedItem();
 					}
@@ -771,7 +775,7 @@ namespace RTE {
 						if (inventoryItemButton->PointInside(mouseX, mouseY)) {
 							if (mouseHeld && !inventoryItemButton->IsPushed()) {
 								inventoryItemButton->SetPushed(true);
-								g_GUISound.SelectionChangeSound()->Play(m_ActivityPlayerController->GetPlayer());
+								g_GUISound.SelectionChangeSound()->Play(m_MenuController->GetPlayer());
 							} else if (mouseReleased) {
 								HandleItemButtonPressOrHold(inventoryItemButton, inventoryObject, -1);
 								if (!m_GUISelectedItem) {
@@ -798,33 +802,33 @@ namespace RTE {
 		if (!m_KeyboardOrControllerHighlightedButton || !m_KeyboardOrControllerHighlightedButton->GetVisible() || (!m_GUIShowEmptyRows && m_KeyboardOrControllerHighlightedButton->GetParent() == m_GUIInventoryItemsBox && m_InventoryActor->IsInventoryEmpty())) { m_KeyboardOrControllerHighlightedButton = m_GUIEquippedItemButton; }
 		if (!m_KeyboardOrControllerHighlightedButton->IsMousedOver()) { m_KeyboardOrControllerHighlightedButton->OnMouseEnter(0, 0, 0, 0); }
 
-		if (m_ActivityPlayerController->IsState(ControlState::PRESS_PRIMARY)) {
+		if (m_MenuController->IsState(ControlState::PRESS_PRIMARY)) {
 			if (m_KeyboardOrControllerHighlightedButton->IsEnabled()) {
 				m_KeyboardOrControllerHighlightedButton->SetCaptureState(true);
 				m_KeyboardOrControllerHighlightedButton->OnMouseUp(m_KeyboardOrControllerHighlightedButton->GetXPos(), m_KeyboardOrControllerHighlightedButton->GetYPos(), GUIInput::Released, 0);
 				m_KeyboardOrControllerHighlightedButton->SetCaptureState(false);
 				return;
 			} else {
-				g_GUISound.UserErrorSound()->Play(m_ActivityPlayerController->GetPlayer());
+				g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
 			}
 		}
 
-		bool pressUp = m_ActivityPlayerController->IsState(ControlState::PRESS_UP) || m_ActivityPlayerController->IsState(ControlState::SCROLL_UP);
-		bool pressDown = m_ActivityPlayerController->IsState(ControlState::PRESS_DOWN) || m_ActivityPlayerController->IsState(ControlState::SCROLL_DOWN);
-		bool pressLeft = m_ActivityPlayerController->IsState(ControlState::PRESS_LEFT);
-		bool pressRight = m_ActivityPlayerController->IsState(ControlState::PRESS_RIGHT);
-		if (!(m_ActivityPlayerController->IsState(ControlState::MOVE_UP) || m_ActivityPlayerController->IsState(ControlState::MOVE_DOWN) || m_ActivityPlayerController->IsState(ControlState::MOVE_LEFT) || m_ActivityPlayerController->IsState(ControlState::MOVE_RIGHT))) {
+		bool pressUp = m_MenuController->IsState(ControlState::PRESS_UP) || m_MenuController->IsState(ControlState::SCROLL_UP);
+		bool pressDown = m_MenuController->IsState(ControlState::PRESS_DOWN) || m_MenuController->IsState(ControlState::SCROLL_DOWN);
+		bool pressLeft = m_MenuController->IsState(ControlState::PRESS_LEFT);
+		bool pressRight = m_MenuController->IsState(ControlState::PRESS_RIGHT);
+		if (!(m_MenuController->IsState(ControlState::MOVE_UP) || m_MenuController->IsState(ControlState::MOVE_DOWN) || m_MenuController->IsState(ControlState::MOVE_LEFT) || m_MenuController->IsState(ControlState::MOVE_RIGHT))) {
 			m_GUIRepeatStartTimer.Reset();
 			m_GUIRepeatTimer.Reset();
 		}
 		if (m_GUIRepeatStartTimer.IsPastRealMS(200) && m_GUIRepeatTimer.IsPastRealMS(70)) {
-			if (m_ActivityPlayerController->IsState(ControlState::MOVE_UP)) {
+			if (m_MenuController->IsState(ControlState::MOVE_UP)) {
 				pressUp = true;
-			} else if (m_ActivityPlayerController->IsState(ControlState::MOVE_DOWN)) {
+			} else if (m_MenuController->IsState(ControlState::MOVE_DOWN)) {
 				pressDown = true;
-			} else if (m_ActivityPlayerController->IsState(ControlState::MOVE_LEFT)) {
+			} else if (m_MenuController->IsState(ControlState::MOVE_LEFT)) {
 				pressLeft = true;
-			} else if (m_ActivityPlayerController->IsState(ControlState::MOVE_RIGHT)) {
+			} else if (m_MenuController->IsState(ControlState::MOVE_RIGHT)) {
 				pressRight = true;
 			}
 			m_GUIRepeatTimer.Reset();
@@ -916,7 +920,7 @@ namespace RTE {
 			m_KeyboardOrControllerHighlightedButton = nextButtonToHighlight;
 			m_KeyboardOrControllerHighlightedButton->OnMouseEnter(0, 0, 0, 0);
 		} else if (!nextButtonToHighlight && (pressUp || pressDown || pressLeft || pressRight)) {
-			g_GUISound.UserErrorSound()->Play(m_ActivityPlayerController->GetPlayer());
+			g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
 		}
 	}
 
@@ -937,7 +941,7 @@ namespace RTE {
 		}
 
 		if (m_GUISelectedItem == nullptr) {
-			if (!buttonHeld) { g_GUISound.ItemChangeSound()->Play(m_ActivityPlayerController->GetPlayer()); }
+			if (!buttonHeld) { g_GUISound.ItemChangeSound()->Play(m_MenuController->GetPlayer()); }
 			if (buttonEquippedItemIndex > -1) {
 				SetSelectedItem(pressedButton, buttonObject, -1, pressedButtonItemIndex, buttonHeld);
 			} else {
@@ -945,7 +949,7 @@ namespace RTE {
 			}
 		} else if (m_GUISelectedItem->Object == buttonObject) {
 			ClearSelectedItem();
-			g_GUISound.ItemChangeSound()->Play(m_ActivityPlayerController->GetPlayer());
+			g_GUISound.ItemChangeSound()->Play(m_MenuController->GetPlayer());
 		} else {
 			if (m_GUISelectedItem->EquippedItemIndex > -1) {
 				if (buttonEquippedItemIndex > -1) {
@@ -955,7 +959,7 @@ namespace RTE {
 					buttonObjectArm->ReleaseHeldMO();
 					selectedItemArm->SetHeldMO(buttonObject);
 					buttonObjectArm->SetHeldMO(m_GUISelectedItem->Object);
-					m_InventoryActor->GetDeviceSwitchSound()->Play(m_ActivityPlayerController->GetPlayer());
+					m_InventoryActor->GetDeviceSwitchSound()->Play(m_MenuController->GetPlayer());
 				} else {
 					SwapEquippedItemAndInventoryItem(m_GUISelectedItem->Object, pressedButtonItemIndex);
 				}
@@ -968,7 +972,7 @@ namespace RTE {
 					} else {
 						m_InventoryActor->SwapInventoryItemsByIndex(m_GUISelectedItem->InventoryIndex, pressedButtonItemIndex);
 					}
-					m_InventoryActor->GetDeviceSwitchSound()->Play(m_ActivityPlayerController->GetPlayer());
+					m_InventoryActor->GetDeviceSwitchSound()->Play(m_MenuController->GetPlayer());
 				}
 			}
 			ClearSelectedItem();
@@ -991,7 +995,7 @@ namespace RTE {
 		Arm *equippedItemArm = dynamic_cast<Arm *>(equippedItemToSwapOut->GetParent());
 		equippedItemArm->SetHeldMO(m_InventoryActor->SetInventoryItemAtIndex(equippedItemArm->ReleaseHeldMO(), inventoryItemIndexToSwapIn));
 		if (offhandEquippedItemToAddToInventory) { m_InventoryActor->AddInventoryItem(dynamic_cast<Arm *>(offhandEquippedItemToAddToInventory->GetParent())->ReleaseHeldMO()); }
-		m_InventoryActor->GetDeviceSwitchSound()->Play(m_ActivityPlayerController->GetPlayer());
+		m_InventoryActor->GetDeviceSwitchSound()->Play(m_MenuController->GetPlayer());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1047,7 +1051,7 @@ namespace RTE {
 		} else {
 			LaunchInventoryItem(m_InventoryActor->RemoveInventoryItemAtIndex(m_GUISelectedItem->InventoryIndex));
 		}
-		m_InventoryActor->GetDeviceSwitchSound()->Play(m_ActivityPlayerController->GetPlayer());
+		m_InventoryActor->GetDeviceSwitchSound()->Play(m_MenuController->GetPlayer());
 		ClearSelectedItem();
 		m_GUIDropButton->OnLoseFocus();
 	}
@@ -1197,7 +1201,7 @@ namespace RTE {
 
 		AllegroScreen guiScreen(targetBitmap);
 		m_GUIControlManager->Draw(&guiScreen);
-		if (IsEnabled() && !m_GUIDisplayOnly && m_ActivityPlayerController->IsMouseControlled()) {
+		if (IsEnabled() && !m_GUIDisplayOnly && m_MenuController->IsMouseControlled()) {
 			if (m_GUISelectedItem && m_GUISelectedItem->DragWasHeldForLongEnough()) {
 				BITMAP *selectedObjectIcon = m_GUISelectedItem->Object->GetGraphicalIcon();
 				draw_sprite(targetBitmap, selectedObjectIcon, m_GUICursorPos.GetFloorIntX() - (selectedObjectIcon->w / 2), m_GUICursorPos.GetFloorIntY() - (selectedObjectIcon->h / 2));

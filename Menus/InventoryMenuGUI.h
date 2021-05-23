@@ -31,7 +31,7 @@ namespace RTE {
 	public:
 
 		/// <summary>
-		/// An enum for the the modes an InventoryMenuGUI can have.
+		/// Enumeration for the the modes an InventoryMenuGUI can have.
 		/// </summary>
 		enum class MenuMode { Carousel, Full, Transfer };
 
@@ -63,7 +63,7 @@ namespace RTE {
 		/// Sets the controller used by this. The ownership of the controller is NOT transferred!
 		/// </summary>
 		/// <param name="controller">The new controller for this menu. Ownership is NOT transferred!</param>
-		void SetController(Controller *controller) { m_ActivityPlayerController = controller; }
+		void SetController(Controller *controller) { m_MenuController = controller; }
 
 		/// <summary>
 		/// Gets the Actor whose inventory this GUI will display. The ownership of the Actor is NOT transferred!
@@ -221,7 +221,7 @@ namespace RTE {
 		GUIFont *m_SmallFont; //!< A pointer to the small font from FrameMan. Not owned here.
 		GUIFont *m_LargeFont; //!< A pointer to the large font from FrameMan. Not owned here.
 
-		Controller *m_ActivityPlayerController; //!< The Controller which controls this menu. Separate from the Controller of the InventoryActor.
+		Controller *m_MenuController; //!< The Controller which controls this menu.
 		Actor *m_InventoryActor; //!< The Actor whose inventory this GUI will display.
 		MenuMode m_MenuMode; //!< The mode this menu is in. See MenuMode enum for more details.
 		Vector m_CenterPos; //!< The center position of this menu in the scene.

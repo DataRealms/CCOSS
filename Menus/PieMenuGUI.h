@@ -96,9 +96,9 @@ namespace RTE {
 		void SetEnabled(bool enable);
 
 		/// <summary>
-		/// Gets the the command issued by this menu in the last update, i.e. the Slice type of the currently activated Slice or None if no slice was activated.
+		/// Gets the the command issued by this menu in the last update, i.e. the PieSlice type of the currently activated PieSlice or None if no slice was activated.
 		/// </summary>
-		/// <returns>The Slice type which has been picked activated, or None if none has been picked. See the PieSliceIndex enum for Slice types.</returns>
+		/// <returns>The PieSlice type which has been picked activated, or None if none has been picked. See the PieSliceIndex enum for PieSlice types.</returns>
 		PieSlice::PieSliceIndex GetPieCommand() const { return m_ActivatedSlice == nullptr ? PieSlice::PieSliceIndex::PSI_NONE : m_ActivatedSlice->GetType(); }
 #pragma endregion
 
@@ -120,19 +120,19 @@ namespace RTE {
 		void FreezeAtRadius(int radius) { m_MenuMode = MenuMode::Freeze; m_InnerRadius = radius; m_BGBitmapNeedsRedrawing = true; }
 #pragma endregion
 
-#pragma region Slice Handling
+#pragma region PieSlice Handling
 		/// <summary>
 		/// Resets and removes all Slices from the menu so that new ones can be added.
 		/// </summary>
 		void ResetSlices();
 
 		/// <summary>
-		/// Adds a Slice to the menu. It will be placed according to what's already in there, and what placement apriority parameters it has.
+		/// Adds a PieSlice to the menu. It will be placed according to what's already in there, and what placement apriority parameters it has.
 		/// </summary>
-		/// <param name="newSlice">The new slice to add.</param>
-		/// <param name="takeAnyFreeCardinal">Whether the new Slice can be placed on the closest free cardinal if the one specified in it isn't free. If false, it will be placed in a corner spot as close to its desired direction as possible.</param>
-		/// <returns>Whether the Slice was added successfully. If there wasn't enough room or there was duplicate Slice, then this will return false.</returns>
-		bool AddSlice(PieSlice &newSlice, bool takeAnyFreeCardinal = false);
+		/// <param name="newPieSlice">The new slice to add.</param>
+		/// <param name="takeAnyFreeCardinal">Whether the new PieSlice can be placed on the closest free cardinal if the one specified in it isn't free. If false, it will be placed in a corner spot as close to its desired direction as possible.</param>
+		/// <returns>Whether the PieSlice was added successfully. If there wasn't enough room or there was duplicate PieSlice, then this will return false.</returns>
+		bool AddSlice(PieSlice &newPieSlice, bool takeAnyFreeCardinal = false);
 
 		/// <summary>
 		/// Gets the current Slices in the menu.
@@ -145,39 +145,39 @@ namespace RTE {
 		void RealignSlices();
 #pragma endregion
 
-#pragma region Lua Slice Handling
+#pragma region Lua PieSlice Handling
 		/// <summary>
-		/// Adds a Slice to the map of custom Lua slices.
+		/// Adds a PieSlice to the map of custom Lua slices.
 		/// </summary>
-		/// <param name="newSlice">The Slice to add to the map of custom Lua slices.</param>
-		static void StoreCustomLuaSlice(PieSlice newSlice) { s_AllCustomLuaSlices[newSlice.GetDescription() + "::" + newSlice.GetFunctionName()] = newSlice; }
+		/// <param name="newPieSlice">The PieSlice to add to the map of custom Lua slices.</param>
+		static void StoreCustomLuaPieSlice(PieSlice newPieSlice) { s_AllCustomLuaSlices[newPieSlice.GetDescription() + "::" + newPieSlice.GetFunctionName()] = newPieSlice; }
 
 		/// <summary>
-		/// Adds a Slice to the menu, searching by description and functionName for a slice defined in INI. Should only be used by Lua.
+		/// Adds a PieSlice to the menu, searching by description and functionName for a slice defined in INI. Should only be used by Lua.
 		/// </summary>
 		/// <param name="description">The description to search for.</param>
 		/// <param name="functionName">The functionName to search for.</param>
-		/// <param name="direction">The direction the Slice should be added at.</param>
-		/// <param name="isEnabled">Whether the Slice should be enabled or disabled.</param>
-		/// <returns>Whether or not the Slice was succesfully added.</returns>
-		bool AddSliceLua(const std::string &description, const std::string &functionName, PieSlice::SliceDirection direction, bool isEnabled);
+		/// <param name="direction">The direction the PieSlice should be added at.</param>
+		/// <param name="isEnabled">Whether the PieSlice should be enabled or disabled.</param>
+		/// <returns>Whether or not the PieSlice was succesfully added.</returns>
+		bool AddPieSliceLua(const std::string &description, const std::string &functionName, PieSlice::SliceDirection direction, bool isEnabled);
 
 		/// <summary>
-		/// Removes a Slice from the menu, searching for it by description and functionName. Should only be used by Lua.
+		/// Removes a PieSlice from the menu, searching for it by description and functionName. Should only be used by Lua.
 		/// </summary>
 		/// <param name="description">The description to search for.</param>
 		/// <param name="functionName">The functionName to search for.</param>
-		/// <returns>The Slice that was removed.</returns>
-		PieSlice RemoveSliceLua(const std::string &description, const std::string &functionName);
+		/// <returns>The PieSlice that was removed.</returns>
+		PieSlice RemovePieSliceLua(const std::string &description, const std::string &functionName);
 
 		/// <summary>
-		/// Alters a Slice in the menu, searching for it by description and functionName, and setting its direction and enabled status according to the given arguments. Should only be used by Lua.
+		/// Alters a PieSlice in the menu, searching for it by description and functionName, and setting its direction and enabled status according to the given arguments. Should only be used by Lua.
 		/// </summary>
 		/// <param name="description">The description to search for.</param>
 		/// <param name="functionName">The functionName to search for.</param>
-		/// <param name="direction">The direction the Slice should be moved to.</param>
-		/// <param name="isEnabled">Whether the Slice should be enabled or disabled.</param>
-		void AlterSliceLua(const std::string &description, const std::string &functionName, PieSlice::SliceDirection direction, bool isEnabled);
+		/// <param name="direction">The direction the PieSlice should be moved to.</param>
+		/// <param name="isEnabled">Whether the PieSlice should be enabled or disabled.</param>
+		void AlterPieSliceLua(const std::string &description, const std::string &functionName, PieSlice::SliceDirection direction, bool isEnabled);
 #pragma endregion
 
 #pragma region Updating

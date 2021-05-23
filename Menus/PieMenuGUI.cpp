@@ -114,8 +114,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PieMenuGUI::AddSlice(PieSlice &newSlice, bool takeAnyFreeCardinal) {
-		if (!newSlice.HasIcon()) { newSlice.Create(); }
+	bool PieMenuGUI::AddSlice(PieSlice &newPieSlice, bool takeAnyFreeCardinal) {
+		if (!newPieSlice.HasIcon()) { newPieSlice.Create(); }
 
 		std::unordered_map<PieSlice::SliceDirection, PieSlice *> sliceCardinalDirections = {
 			{PieSlice::SliceDirection::UP, &m_UpSlice}, {PieSlice::SliceDirection::LEFT, &m_LeftSlice}, {PieSlice::SliceDirection::DOWN, &m_DownSlice}, {PieSlice::SliceDirection::RIGHT, &m_RightSlice}
@@ -128,17 +128,17 @@ namespace RTE {
 		};
 
 		for (const auto &[sliceDirection, pieSlice] : sliceCardinalDirections) {
-			if ((takeAnyFreeCardinal || sliceDirection == newSlice.GetDirection()) && pieSlice->GetType() == PieSlice::PieSliceIndex::PSI_NONE) {
-				*pieSlice = newSlice;
+			if ((takeAnyFreeCardinal || sliceDirection == newPieSlice.GetDirection()) && pieSlice->GetType() == PieSlice::PieSliceIndex::PSI_NONE) {
+				*pieSlice = newPieSlice;
 				return true;
 			}
 		}
 
-		const auto &[firstPieSliceList, secondPieSliceList] = sliceIntercardinalDirections.at(newSlice.GetDirection());
+		const auto &[firstPieSliceList, secondPieSliceList] = sliceIntercardinalDirections.at(newPieSlice.GetDirection());
 		if (firstPieSliceList->size() <= secondPieSliceList->size()) {
-			firstPieSliceList->push_back(newSlice);
+			firstPieSliceList->push_back(newPieSlice);
 		} else {
-			secondPieSliceList->push_back(newSlice);
+			secondPieSliceList->push_back(newPieSlice);
 		}
 
 		return true;
@@ -212,7 +212,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PieMenuGUI::AddSliceLua(const std::string &description, const std::string &functionName, PieSlice::SliceDirection direction, bool isEnabled) {
+	bool PieMenuGUI::AddPieSliceLua(const std::string &description, const std::string &functionName, PieSlice::SliceDirection direction, bool isEnabled) {
 		if (s_AllCustomLuaSlices.find(description + "::" + functionName) != s_AllCustomLuaSlices.end()) {
 			PieSlice foundSlice = s_AllCustomLuaSlices[description + "::" + functionName];
 			foundSlice.SetDirection(direction);
@@ -225,7 +225,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PieMenuGUI::AlterSliceLua(const std::string &description, const std::string &functionName, PieSlice::SliceDirection direction, bool isEnabled) {
+	void PieMenuGUI::AlterPieSliceLua(const std::string &description, const std::string &functionName, PieSlice::SliceDirection direction, bool isEnabled) {
 		std::vector<PieSlice *>::iterator sliceIterator = std::find_if(m_CurrentSlices.begin(), m_CurrentSlices.end(), [&description, &functionName](const PieSlice *slice) {
 			return slice->GetDescription() == description && slice->GetFunctionName() == functionName;
 		});
@@ -235,7 +235,7 @@ namespace RTE {
 			foundSlice.SetDirection(direction);
 			foundSlice.SetEnabled(isEnabled);
 
-			RemoveSliceLua(description, functionName);
+			RemovePieSliceLua(description, functionName);
 			AddSlice(foundSlice);
 
 			RealignSlices();
@@ -244,7 +244,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	PieSlice PieMenuGUI::RemoveSliceLua(const std::string &description, const std::string &functionName) {
+	PieSlice PieMenuGUI::RemovePieSliceLua(const std::string &description, const std::string &functionName) {
 		PieSlice removedSlice;
 
 		if (m_UpSlice.GetDescription() == description && m_UpSlice.GetFunctionName() == functionName)

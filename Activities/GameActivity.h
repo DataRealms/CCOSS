@@ -874,19 +874,19 @@ public:
 	void AddPieMenuSlice(std::string description, std::string functionName, PieSlice::SliceDirection direction, bool isEnabled)
 	{ 
 		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
-			m_pPieMenu[m_CurrentPieMenuPlayer]->AddSliceLua(description, functionName, direction, isEnabled);
+			m_pPieMenu[m_CurrentPieMenuPlayer]->AddPieSliceLua(description, functionName, direction, isEnabled);
 	};
 
 	void AlterPieMenuSlice(std::string description, std::string functionName, PieSlice::SliceDirection direction, bool isEnabled)
 	{
 		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
-			m_pPieMenu[m_CurrentPieMenuPlayer]->AlterSliceLua(description, functionName, direction, isEnabled);
+			m_pPieMenu[m_CurrentPieMenuPlayer]->AlterPieSliceLua(description, functionName, direction, isEnabled);
 	};
 
     PieSlice RemovePieMenuSlice(std::string description, std::string functionName)
 	{
 		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
-			return m_pPieMenu[m_CurrentPieMenuPlayer]->RemoveSliceLua(description, functionName);
+			return m_pPieMenu[m_CurrentPieMenuPlayer]->RemovePieSliceLua(description, functionName);
 		return PieSlice("", PieSlice::PieSliceIndex::PSI_NONE, PieSlice::SliceDirection::NONE, false);
 	};
 

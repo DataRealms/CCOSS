@@ -209,7 +209,7 @@ int HeldDevice::ReadProperty(const std::string_view &propName, Reader &reader)
         PieSlice newSlice;
         reader >> newSlice;
         m_PieSlices.push_back(newSlice);
-		PieMenuGUI::StoreCustomLuaSlice(newSlice);
+		PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
     }
     else
         return Attachable::ReadProperty(propName, reader);

@@ -87,6 +87,14 @@ namespace RTE {
 
 		if (entity) {
 			Activity *newActivity = dynamic_cast<Activity *>(entity->Clone());
+			if (GameActivity *newActivityAsGameActivity = dynamic_cast<GameActivity *>(newActivity)) {
+				newActivityAsGameActivity->SetStartingGold(newActivityAsGameActivity->GetDefaultGoldMedium());
+				if (newActivityAsGameActivity->GetStartingGold() <= 0) {
+					newActivityAsGameActivity->SetStartingGold(static_cast<int>(newActivityAsGameActivity->GetTeamFunds(0)));
+				} else {
+					newActivityAsGameActivity->SetTeamFunds(static_cast<float>(newActivityAsGameActivity->GetStartingGold()), 0);
+				}
+			}
 			return StartActivity(newActivity);
 		} else {
 			g_ConsoleMan.PrintString("ERROR: Couldn't find the " + className + " named " + presetName + " to start! Has it been defined?");

@@ -387,7 +387,7 @@ namespace RTE {
 		for (const std::unique_ptr<CarouselItemBox> &carouselItemBox : m_CarouselItemBoxes) { carouselItemBox->Item = nullptr; }
 		if (const std::deque<MovableObject *> *inventory = m_InventoryActor->GetInventory(); !inventory->empty()) {
 			int leftSideItemCount = std::min(static_cast<int>(std::floorf(static_cast<float>(inventory->size()) / 2)), c_ItemsPerRow / 2);
-			int rightSideItemCount = std::min(static_cast<int>(std::ceilf(static_cast<float>(inventory->size()) / 2)), c_ItemsPerRow / 2);
+			int rightSideItemCount = std::min(static_cast<int>(std::ceil(static_cast<float>(inventory->size()) / 2)), c_ItemsPerRow / 2);
 			
 			int carouselIndex = 0;
 			std::vector<MovableObject *> temporaryLeftSideItemsForProperOrdering;
@@ -487,7 +487,7 @@ namespace RTE {
 		if (!FullOrTransferModeReadyForUse()) { SetupFullOrTransferMode(); }
 
 		if (!m_GUIShowEmptyRows) {
-			int numberOfRowsToShow = static_cast<int>(std::ceilf(static_cast<float>(std::min(c_FullViewPageItemLimit, m_InventoryActor->GetInventorySize())) / static_cast<float>(c_ItemsPerRow)));
+			int numberOfRowsToShow = static_cast<int>(std::ceil(static_cast<float>(std::min(c_FullViewPageItemLimit, m_InventoryActor->GetInventorySize())) / static_cast<float>(c_ItemsPerRow)));
 			int expectedInventoryHeight = m_GUIInventoryItemButtons.at(0).second->GetHeight() * numberOfRowsToShow;
 			if (numberOfRowsToShow * c_ItemsPerRow < c_FullViewPageItemLimit) { expectedInventoryHeight -= 1; }
 			if (m_GUIInventoryItemsBox->GetHeight() != expectedInventoryHeight) {
@@ -581,7 +581,7 @@ namespace RTE {
 
 	void InventoryMenuGUI::UpdateFullModeScrollbar(const std::deque<MovableObject *> *inventory) {
 		if (inventory->size() > c_FullViewPageItemLimit) {
-			m_GUIInventoryItemsScrollbar->SetMaximum(static_cast<int>(std::ceilf(static_cast<float>(inventory->size() - c_FullViewPageItemLimit) / static_cast<float>(c_ItemsPerRow))) + 1);
+			m_GUIInventoryItemsScrollbar->SetMaximum(static_cast<int>(std::ceil(static_cast<float>(inventory->size() - c_FullViewPageItemLimit) / static_cast<float>(c_ItemsPerRow))) + 1);
 			if (!m_GUIInventoryItemsScrollbar->GetVisible()) {
 				m_GUIInventoryItemsScrollbar->SetVisible(true);
 				m_GUIInventoryItemsScrollbar->SetEnabled(true);
@@ -958,7 +958,7 @@ namespace RTE {
 						m_GUIInventoryItemsScrollbar->SetValue(m_GUIInventoryItemsScrollbar->GetValue() + 1);
 						nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex - c_ItemsPerRow + 1).second;
 					} else {
-						int numberOfVisibleButtons = m_GUIShowEmptyRows ? c_FullViewPageItemLimit : c_ItemsPerRow * static_cast<int>(std::ceilf(static_cast<float>(std::min(c_FullViewPageItemLimit, m_InventoryActor->GetInventorySize())) / static_cast<float>(c_ItemsPerRow)));
+						int numberOfVisibleButtons = m_GUIShowEmptyRows ? c_FullViewPageItemLimit : c_ItemsPerRow * static_cast<int>(std::ceil(static_cast<float>(std::min(c_FullViewPageItemLimit, m_InventoryActor->GetInventorySize())) / static_cast<float>(c_ItemsPerRow)));
 						if (highlightedButtonIndex < numberOfVisibleButtons - 1) { nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex + 1).second; }
 					}
 				} catch (std::invalid_argument) {
@@ -1198,7 +1198,7 @@ namespace RTE {
 				float stretchedWidth = static_cast<float>(iconToDraw->w) / stretchRatio;
 				float stretchedHeight = static_cast<float>(iconToDraw->h) / stretchRatio;
 				stretch_sprite(m_CarouselBitmap.get(), iconToDraw,
-					itemBoxToDraw.IconCenterPosition.GetFloorIntX() - static_cast<int>((itemBoxToDraw.RoundedAndBorderedSides.first ? std::floorf : std::ceilf)(stretchedWidth / 2.0F)) + multiItemDrawOffset.GetFloorIntX() + (itemBoxToDraw.RoundedAndBorderedSides.first ? m_CarouselBackgroundBoxBorderSize.GetFloorIntX() / 2 : 0) - (itemBoxToDraw.RoundedAndBorderedSides.second ? m_CarouselBackgroundBoxBorderSize.GetFloorIntX() / 2 : 0),
+					itemBoxToDraw.IconCenterPosition.GetFloorIntX() - static_cast<int>(itemBoxToDraw.RoundedAndBorderedSides.first ? std::floorf(stretchedWidth / 2.0F) : std::ceil(stretchedWidth / 2.0F)) + multiItemDrawOffset.GetFloorIntX() + (itemBoxToDraw.RoundedAndBorderedSides.first ? m_CarouselBackgroundBoxBorderSize.GetFloorIntX() / 2 : 0) - (itemBoxToDraw.RoundedAndBorderedSides.second ? m_CarouselBackgroundBoxBorderSize.GetFloorIntX() / 2 : 0),
 					itemBoxToDraw.IconCenterPosition.GetFloorIntY() - static_cast<int>(stretchedHeight / 2.0F) + multiItemDrawOffset.GetFloorIntY(),
 					static_cast<int>((itemBoxToDraw.RoundedAndBorderedSides.first ? std::ceilf : std::floorf)(stretchedWidth)), static_cast<int>(stretchedHeight));
 			} else {

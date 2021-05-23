@@ -237,7 +237,8 @@ namespace RTE {
 		inventoryItemButtonProperties.AddVariable("Height", inventoryItemButtonTemplate->GetHeight());
 		inventoryItemButtonProperties.AddVariable("Visible", true);
 		inventoryItemButtonProperties.AddVariable("Enabled", true);
-		inventoryItemButtonProperties.AddVariable("Text", "> <");
+		std::string emptyButtonText = "> <";
+		inventoryItemButtonProperties.AddVariable("Text", emptyButtonText);
 		inventoryItemButtonProperties.AddVariable("HorizontalOverflowScroll", true);
 		std::pair<MovableObject *, GUIButton *> itemButtonPair;
 
@@ -260,7 +261,7 @@ namespace RTE {
 		m_InventoryActor = newInventoryActor;
 		if (m_InventoryActor) {
 			m_InventoryActorIsHuman = dynamic_cast<AHuman *>(m_InventoryActor);
-			m_CenterPos = m_InventoryActor->GetAboveHUDPos();
+			m_CenterPos = m_InventoryActor->GetCPUPos();
 		}
 	}
 
@@ -368,7 +369,7 @@ namespace RTE {
 				if (!m_InventoryActor) {
 					return;
 				}
-				drawPos -= Vector((m_GUITopLevelBoxFullSize.GetX() - static_cast<float>(m_GUIInventoryItemsScrollbar->IsEnabled() ? m_GUIInventoryItemsScrollbar->GetWidth() : 0)) / 2.0F, m_GUITopLevelBoxFullSize.GetY());
+				drawPos -= Vector((m_GUITopLevelBoxFullSize.GetX() - static_cast<float>(m_GUIInventoryItemsScrollbar->IsEnabled() ? m_GUIInventoryItemsScrollbar->GetWidth() : 0)) / 2.0F, m_GUITopLevelBoxFullSize.GetY() + c_FullMenuVerticalOffset);
 				DrawFullMode(targetBitmap, drawPos);
 				break;
 			case MenuMode::Transfer:
@@ -500,7 +501,9 @@ namespace RTE {
 		UpdateFullModeEquippedItemButtons();
 
 		const std::deque<MovableObject *> *inventory = m_InventoryActor->GetInventory();
+
 		UpdateFullModeScrollbar(inventory);
+
 		UpdateFullModeInventoryItemButtons(inventory);
 
 		m_GUIControlManager->Update(true);
@@ -638,7 +641,7 @@ namespace RTE {
 	void InventoryMenuGUI::UpdateFullModeInformationText(const std::deque<MovableObject *> *inventory) {
 		if (!m_GUIShowInformationText && m_GUIInformationText->GetVisible()) {
 			m_GUIInformationText->SetVisible(false);
-		} else {
+		} else if (m_GUIShowInformationText) {
 			if (!m_GUIInformationText->GetVisible()) { m_GUIInformationText->SetVisible(true); }
 
 			std::string informationText;
@@ -655,11 +658,11 @@ namespace RTE {
 				}
 			} else {
 				if (m_GUIDisplayOnly) {
-					m_GUIInformationText->SetText(">> DISPLAY ONLY <<");
+					informationText = ">> DISPLAY ONLY <<";
 				} else  if (m_InventoryActorEquippedItems.empty() && inventory->empty()) {
-					m_GUIInformationText->SetText("No items to display.");
+					informationText = "No items to display.";
 				} else {
-					m_GUIInformationText->SetText(m_MenuController->IsMouseControlled() ? "Click an item to interact with it. You can also click and hold to drag items." : "Press an item to interact with it.");
+					informationText = m_MenuController->IsMouseControlled() ? "Click an item to interact with it. You can also click and hold to drag items." : "Press an item to interact with it.";
 				}
 			}
 			m_GUIInformationText->SetText(informationText);

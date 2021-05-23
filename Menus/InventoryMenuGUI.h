@@ -207,14 +207,15 @@ namespace RTE {
 		static const int c_ItemsPerRow = 5; //!< The number of items per row of the inventory display. MUST be an odd nubmer. Used in all MenuModes.
 		static const int c_MinimumItemPadding = 1; //!< The padding between item icons and their containing boxes. Items will have at least this much padding on all sides. Used in all MenuModes.
 
-		static const int c_CarouselMenuVerticalOffset = 40; //!< The offset the menu will have below it, to avoid drawing over its target. Used in all MenuModes.
+		static const int c_CarouselMenuVerticalOffset = 85; //!< How high above its target the carousel will be. Used in Carousel MenuModes.
 		static const Vector c_CarouselBoxMaxSize; //!< The size of the largest item box in the carousel, i.e. the one in the middle. Used in Carousel MenuMode.
 		static const Vector c_CarouselBoxMinSize; //!< The size of the smallest item box in the carousel, i.e. the ones at the ends, excluding the exiting box, which is actually one size step smaller. Used in Carousel MenuMode.
 		static const Vector c_CarouselBoxSizeStep; //!< The size step between each item box in the carousel. Used in Carousel MenuMode.
 		static const int c_CarouselBoxCornerRadius; //!< The radius of the circles used to make rounded corners for carousel boxes. Calculated automatically based on max and min size. Used in Carousel MenuMode.
 		static const int c_MultipleItemInBoxOffset = 3; //!< How many pixels up and right items should be offset if there are more than one in a item box. Used in Carousel MenuMode.
 
-		static const int c_FullViewPageItemLimit = c_ItemsPerRow * 3; //!< The default number of rows in the inventory display. Used in Full/Transfer MenuModes.
+		static const int c_FullViewPageItemLimit = c_ItemsPerRow * 3; //!< The default number of rows in the full inventory display. Used in Full/Transfer MenuModes.
+		static const int c_FullMenuVerticalOffset = 35; //!< How high above its target the full GUI will be. Used in Full/Transfer MenuModes.
 
 		static BITMAP *s_CursorBitmap; //!< The cursor image shared by all GUIs.
 

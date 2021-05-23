@@ -1961,6 +1961,7 @@ void GameActivity::Update()
                     skipBuyUpdate = true;
                 } else if (command == PieSlice::PieSliceIndex::PSI_FULLINVENTORY) {
                     m_pPieMenu[player]->SetEnabled(false);
+                    m_InventoryMenuGUI[player]->SetEnabled(false);
                     m_InventoryMenuGUI[player]->SetMenuMode(InventoryMenuGUI::MenuMode::Full);
                     m_InventoryMenuGUI[player]->SetEnabled(true);
                 }

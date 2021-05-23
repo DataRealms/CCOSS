@@ -119,6 +119,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`DrawLimbPathVisualizations` - any  `AHumans` or `ACrabs` will draw some of their `LimbPaths` to the standard view.  
 	`DrawRayCastVisualizations` - any rays cast by `SceneMan` will be drawn to the standard view.  
 	`DrawPixelCheckVisualizations ` - any pixel checks made by `SceneMan:GetTerrMatter` or `SceneMan:GetMOIDPixel` will be drawn to the standard view.
+	
+- A fully featured inventory view for managing `AHumans'` inventories (to be expanded to other things in future).
 
 - New `Settings.ini` property `CaseSensitiveFilePaths = 0/1` to enable/disable file path case sensitivity in INIs. Enabled by default.  
 	It is **STRONGLY** ill-advised to disable this behavior as it makes case sensitivity mismatches immediately obvious and allows fixing them with ease to ensure a path related crash free cross-platform experience.  
@@ -198,6 +200,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The `Actor` property `MaxMass` now no longer includes the `Mass` of the `Actor`, and has been renamed to `MaxInventoryMass` for clarity. In mods, this is most important for `ACraft`, which will now need their total `Mass` subtracted from the old value. 
 
 - `BuyMenu` tooltips now display item info as well as a description. This includes `MaxInventoryMass` and `MaxPassengers` for `ACraft`, `Mass` and `PassengerSlots` required for `Actors`, and `Mass` for other `MoveableObjects`.
+
+- Replaced the above-HUD pie menu inventory view with an animating inventory carousel.
+
+- `AHuman:ReloadFirearm` Lua function has been changed to `AHuman:ReloadFirearms` and will now reload offhand weapons as well, if appropriate.
 
 ### Fixed
 

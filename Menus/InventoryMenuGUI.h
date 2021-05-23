@@ -191,7 +191,7 @@ namespace RTE {
 			/// Whether this selected item was being dragged for long enough that it matters. This helps make dragging not cause problems during instant clicks and releases.
 			/// </summary>
 			/// <returns>Whether this selected item was being dragged for long enough that it matters.</returns>
-			bool DragWasHeldForLongEnough() { return IsBeingDragged && DragHoldCount > 5; }
+			bool DragWasHeldForLongEnough() const { return IsBeingDragged && DragHoldCount > 5; }
 		};
 
 		/// <summary>
@@ -340,6 +340,17 @@ namespace RTE {
 		/// </summary>
 		/// <param name="inventory">A pointer to the inventory this InventoryMenuGUI is displaying.</param>
 		void UpdateFullModeInventoryItemButtons(const std::deque<MovableObject *> *inventory);
+
+		/// <summary>
+		/// Handles everything for displaying information text in Full MenuMode.
+		/// </summary>
+		/// <param name="inventory">A pointer to the inventory this InventoryMenuGUI is displaying.</param>
+		void UpdateFullModeInformationText(const std::deque<MovableObject *> *inventory);
+
+		/// <summary>
+		/// Handles updating icons for non-item buttons in Full MenuMode.
+		/// </summary>
+		void UpdateFullModeNonItemButtonIcons();
 
 		/// <summary>
 		/// Handles MenuMode specific updating for when the InventoryMenuGUI is in Transfer MenuMode.

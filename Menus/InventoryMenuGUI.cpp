@@ -353,6 +353,33 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void InventoryMenuGUI::Draw(BITMAP *targetBitmap, const Vector &targetPos) const {
+		Vector drawPos = m_CenterPos - targetPos;
+
+		switch (m_MenuMode) {
+			case MenuMode::Carousel:
+				if (!m_InventoryActor || m_InventoryActor->IsInventoryEmpty() && m_InventoryActorEquippedItems.empty()) {
+					return;
+				}
+				drawPos -= Vector(0, c_CarouselMenuVerticalOffset + c_CarouselBoxMaxSize.GetY() * 0.5F);
+				DrawCarouselMode(targetBitmap, drawPos);
+				break;
+			case MenuMode::Full:
+				if (!m_InventoryActor) {
+					return;
+				}
+				drawPos -= Vector((m_GUITopLevelBoxFullSize.GetX() - static_cast<float>(m_GUIInventoryItemsScrollbar->IsEnabled() ? m_GUIInventoryItemsScrollbar->GetWidth() : 0)) / 2.0F, m_GUITopLevelBoxFullSize.GetY());
+				DrawFullMode(targetBitmap, drawPos);
+				break;
+			case MenuMode::Transfer:
+				break;
+			default:
+				RTEAbort("Unsupported InventoryMenuGUI MenuMode during Draw " + std::to_string(static_cast<int>(m_MenuMode)));
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void InventoryMenuGUI::UpdateCarouselMode() {
 		if (!CarouselModeReadyForUse()) { SetupCarouselMode(); }
 
@@ -486,28 +513,12 @@ namespace RTE {
 		}
 
 		m_GUIInformationToggleButton->SetEnabled(true);
-		if ((m_GUIShowInformationText && !m_GUIInformationText->GetVisible()) || (!m_GUIShowInformationText && m_GUIInformationText->GetVisible())) { m_GUIInformationText->SetVisible(m_GUIShowInformationText); }
 
 		if (m_GUISelectedItem) {
 			m_GUISelectedItem->Button->OnGainFocus();
 			if (m_GUISelectedItem->DragWasHeldForLongEnough()) { m_GUIInformationToggleButton->SetEnabled(false); }
 			if (const HDFirearm *selectedItemAsFirearm = dynamic_cast<HDFirearm *>(m_GUISelectedItem->Object)) {m_GUIReloadButton->SetEnabled(!selectedItemAsFirearm->IsFull()); }
 			m_GUIDropButton->SetEnabled(true);
-
-			if (m_GUIShowInformationText) {
-				std::string informationText;
-				if (m_GUISelectedItem->DragWasHeldForLongEnough()) {
-					informationText = "Drag this item to another one to swap places with it, ";
-					if (m_GUIReloadButton->GetEnabled()) { informationText += "the reload button to reload it, "; }
-					informationText += "or the drop button to drop it. Drag it out of the inventory window to toss it.";
-				} else {
-					informationText = m_MenuController->IsMouseControlled() ? "Click another item to swap places with it, " : "Press another item to swap places with it, ";
-					if (m_GUIReloadButton->GetEnabled()) { informationText += "the reload button to reload it, "; }
-					informationText += m_MenuController->IsMouseControlled() ? "or the drop button " : "or press the drop button/use the drop key ";
-					informationText += "to drop it.";
-				}
-				m_GUIInformationText->SetText(informationText);
-			}
 		} else {
 			m_GUIReloadButton->SetEnabled(false);
 			for (const MovableObject *equippedItem : m_InventoryActorEquippedItems) {
@@ -517,29 +528,11 @@ namespace RTE {
 				}
 			}
 			m_GUIDropButton->SetEnabled(false);
-			if (m_GUIShowInformationText) {
-				if (m_GUIDisplayOnly) {
-					m_GUIInformationText->SetText(">> DISPLAY ONLY <<");
-				} else  if (m_InventoryActorEquippedItems.empty() && inventory->empty()) {
-					m_GUIInformationText->SetText("No items to display.");
-				} else {
-					m_GUIInformationText->SetText(m_MenuController->IsMouseControlled() ? "Click an item to interact with it. You can also click and hold to drag items." : "Press an item to interact with it.");
-				}
-			}
 		}
 
-		std::vector<std::pair<GUIButton *, const Icon *>> buttonsToCheckIconsFor = {{m_GUIInformationToggleButton, m_GUIInformationToggleButtonIcon} , {m_GUIReloadButton, m_GUIReloadButtonIcon}, {m_GUIDropButton, m_GUIDropButtonIcon}};
-		for (auto [button, icon] : buttonsToCheckIconsFor) {
-			if (button->IsEnabled()) {
-				if (button->HasFocus() || button->IsMousedOver() || button->IsPushed()) {
-					button->SetIcon(icon->GetBitmaps8()[1]);
-				} else {
-					button->SetIcon(icon->GetBitmaps8()[0]);
-				}
-			} else {
-				button->SetIcon(icon->GetBitmaps8()[2]);
-			}
-		}
+		UpdateFullModeInformationText(inventory);
+
+		UpdateFullModeNonItemButtonIcons();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -636,6 +629,61 @@ namespace RTE {
 					itemButton->SetIconAndText(nullptr, "> <");
 				}
 				itemButton->SetEnabled(m_GUISelectedItem != nullptr);
+			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void InventoryMenuGUI::UpdateFullModeInformationText(const std::deque<MovableObject *> *inventory) {
+		if (!m_GUIShowInformationText && m_GUIInformationText->GetVisible()) {
+			m_GUIInformationText->SetVisible(false);
+		} else {
+			if (!m_GUIInformationText->GetVisible()) { m_GUIInformationText->SetVisible(true); }
+
+			std::string informationText;
+			if (m_GUISelectedItem) {
+				if (m_GUISelectedItem->DragWasHeldForLongEnough()) {
+					informationText = "Drag this item to another one to swap places with it, ";
+					informationText += m_GUIReloadButton->GetEnabled() ? "the reload button to reload it, " : "";
+					informationText += "or the drop button to drop it. Drag it out of the inventory window to toss it.";
+				} else {
+					informationText = m_MenuController->IsMouseControlled() ? "Click another item to swap places with it, " : "Press another item to swap places with it, ";
+					informationText += m_GUIReloadButton->GetEnabled() ? "the reload button to reload it, " : "";
+					informationText += m_MenuController->IsMouseControlled() ? "or the drop button " : "or press the drop button/use the drop key ";
+					informationText += "to drop it.";
+				}
+			} else {
+				if (m_GUIDisplayOnly) {
+					m_GUIInformationText->SetText(">> DISPLAY ONLY <<");
+				} else  if (m_InventoryActorEquippedItems.empty() && inventory->empty()) {
+					m_GUIInformationText->SetText("No items to display.");
+				} else {
+					m_GUIInformationText->SetText(m_MenuController->IsMouseControlled() ? "Click an item to interact with it. You can also click and hold to drag items." : "Press an item to interact with it.");
+				}
+			}
+			m_GUIInformationText->SetText(informationText);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void InventoryMenuGUI::UpdateFullModeNonItemButtonIcons() {
+		std::vector<std::pair<GUIButton *, const Icon *>> buttonsToCheckIconsFor = {
+			{m_GUIInformationToggleButton, m_GUIInformationToggleButtonIcon},
+			{m_GUIReloadButton, m_GUIReloadButtonIcon},
+			{m_GUIDropButton, m_GUIDropButtonIcon}
+		};
+
+		for (const auto &[button, icon] : buttonsToCheckIconsFor) {
+			if (button->IsEnabled()) {
+				if (button->HasFocus() || button->IsMousedOver() || button->IsPushed()) {
+					button->SetIcon(icon->GetBitmaps8()[1]);
+				} else {
+					button->SetIcon(icon->GetBitmaps8()[0]);
+				}
+			} else {
+				button->SetIcon(icon->GetBitmaps8()[2]);
 			}
 		}
 	}
@@ -1054,33 +1102,6 @@ namespace RTE {
 		m_InventoryActor->GetDeviceSwitchSound()->Play(m_MenuController->GetPlayer());
 		ClearSelectedItem();
 		m_GUIDropButton->OnLoseFocus();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void InventoryMenuGUI::Draw(BITMAP *targetBitmap, const Vector &targetPos) const {
-		Vector drawPos = m_CenterPos - targetPos;
-
-		switch (m_MenuMode) {
-			case MenuMode::Carousel:
-				if (!m_InventoryActor || m_InventoryActor->IsInventoryEmpty() && m_InventoryActorEquippedItems.empty()) {
-					return;
-				}
-				drawPos -= Vector(0, c_CarouselMenuVerticalOffset + c_CarouselBoxMaxSize.GetY() * 0.5F);
-				DrawCarouselMode(targetBitmap, drawPos);
-				break;
-			case MenuMode::Full:
-				if (!m_InventoryActor) {
-					return;
-				}
-				drawPos -= Vector((m_GUITopLevelBoxFullSize.GetX() - static_cast<float>(m_GUIInventoryItemsScrollbar->IsEnabled() ? m_GUIInventoryItemsScrollbar->GetWidth() : 0)) / 2.0F, m_GUITopLevelBoxFullSize.GetY());
-				DrawFullMode(targetBitmap, drawPos);
-				break;
-			case MenuMode::Transfer:
-				break;
-			default:
-				RTEAbort("Unsupported InventoryMenuGUI MenuMode during Draw " + std::to_string(static_cast<int>(m_MenuMode)));
-		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

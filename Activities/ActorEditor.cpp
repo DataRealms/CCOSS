@@ -298,15 +298,12 @@ void ActorEditor::Update()
         m_pPieMenu->SetEnabled(false);
 
     // Handle what user does with the pie menu
-    const PieSlice *pSlice = m_pPieMenu->SliceActivated();
-    if (pSlice)
-    {
+    if (m_pPieMenu->GetPieCommand() != PieSlice::PieSliceIndex::PSI_NONE) {
         // User chose to reload the Actor's data
-        if (pSlice->GetType() == PieSlice::PieSliceIndex::PSI_LOAD)
+        if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_LOAD) {
             ReloadActorData();
         // User chose to pick a new Actor to edit
-        else if (pSlice->GetType() == PieSlice::PieSliceIndex::PSI_PICK)
-        {
+        } else if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_PICK) {
             m_EditorMode = EditorActivity::LOADDIALOG;
             m_ModeChange = true;
         }

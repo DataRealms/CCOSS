@@ -19,42 +19,32 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PieMenuGUI::Clear() {
-		m_EnablingTimer.Reset();
-		m_HoverTimer.Reset();
+		m_LargeFont = nullptr;
 
-		m_Controller = nullptr;
+		m_MenuController = nullptr;
 		m_AffectedObject = nullptr;
-
-		m_EnabledState = EnabledState::Disabled;
+		m_MenuMode = MenuMode::Normal;
 		m_CenterPos.Reset();
 
-		m_HoveredSlice = nullptr;
-		m_ActivatedSlice = nullptr;
-		m_AlreadyActivatedSlice = nullptr;
+		m_EnabledState = EnabledState::Disabled;
+		m_EnableDisableAnimationTimer.Reset();
+		m_HoverTimer.Reset();
 
-		m_UpSlice.Reset();
-		m_RightSlice.Reset();
-		m_DownSlice.Reset();
-		m_LeftSlice.Reset();
+		m_IconSeparatorMode = IconSeparatorMode::Line;
+		m_BackgroundThickness = 16;
+		m_BackgroundSeparatorSize = 2;
+		m_DrawBackgroundTransparent = true;
+		m_BackgroundColor = 4;
+		m_BackgroundBorderColor = g_MaskColor;
+		m_SelectedItemBackgroundColor = g_BlackColor;
 
-		m_UpRightSlices.clear();
-		m_UpLeftSlices.clear();
-		m_DownLeftSlices.clear();
-		m_DownRightSlices.clear();
+		ResetSlices();
 
-		m_CurrentSlices.clear();
-		m_SliceGroupCount = 0;
-
-		m_Wobbling = false;
-		m_Freeze = false;
-
+		m_FullRadius = 58;
 		m_InnerRadius = 0;
-		m_EnabledRadius = 58;
-		m_Thickness = 16;
 		m_CursorAngle = 0;
 
 		m_BGBitmap = nullptr;
-		m_RedrawBG = true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -64,7 +54,9 @@ namespace RTE {
 
 		if (!s_CursorBitmap) { s_CursorBitmap = ContentFile("Base.rte/GUIs/Skins/PieCursor.png").GetAsBitmap(); }
 
-		m_Controller = controller;
+		if (!m_LargeFont) { m_LargeFont = g_FrameMan.GetLargeFont(); }
+
+		m_MenuController = controller;
 		m_AffectedObject = affectedObject;
 		if (m_AffectedObject) {
 			const Actor *affectedObjectAsActor = static_cast<Actor *>(m_AffectedObject);
@@ -72,7 +64,7 @@ namespace RTE {
 		}
 
 		if (!m_BGBitmap) {
-			int diameter = (m_EnabledRadius + m_Thickness + 2) * 2;
+			int diameter = (m_FullRadius + std::max(m_BackgroundThickness, m_BackgroundSeparatorSize) + 2) * 2;
 			m_BGBitmap = create_bitmap_ex(8, diameter, diameter);
 			clear_to_color(m_BGBitmap, g_MaskColor);
 		}
@@ -83,16 +75,15 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PieMenuGUI::SetEnabled(bool enable) {
-		m_Wobbling = false;
-		m_Freeze = false;
+		m_MenuMode = MenuMode::Normal;
 
 		bool enabledStateDoesNotMatchInput = (enable && m_EnabledState != EnabledState::Enabled && m_EnabledState != EnabledState::Enabling) || (!enable && m_EnabledState != EnabledState::Disabled && m_EnabledState != EnabledState::Disabling);
 		if (enabledStateDoesNotMatchInput) {
 			m_EnabledState = enable ? EnabledState::Enabling : EnabledState::Disabling;
-			m_EnablingTimer.Reset();
-			if (m_Controller->IsMouseControlled()) {
+			m_EnableDisableAnimationTimer.Reset();
+			if (m_MenuController->IsMouseControlled()) {
 				g_UInputMan.SetMouseValueMagnitude(0);
-				m_Controller->m_AnalogCursor = Vector();
+				m_MenuController->m_AnalogCursor = Vector();
 			}
 			SoundContainer *soundToPlay = enable ? g_GUISound.PieMenuEnterSound() : g_GUISound.PieMenuExitSound();
 			soundToPlay->Play();
@@ -107,9 +98,9 @@ namespace RTE {
 		m_AlreadyActivatedSlice = nullptr;
 
 		m_UpSlice.Reset();
-		m_RightSlice.Reset();
-		m_DownSlice.Reset();
 		m_LeftSlice.Reset();
+		m_DownSlice.Reset();
+		m_RightSlice.Reset();
 
 		m_UpRightSlices.clear();
 		m_UpLeftSlices.clear();
@@ -118,15 +109,14 @@ namespace RTE {
 
 		m_CurrentSlices.clear();
 		m_SliceGroupCount = 0;
-		m_RedrawBG = true;
+		m_BGBitmapNeedsRedrawing = true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool PieMenuGUI::AddSlice(PieSlice &newSlice, bool takeAnyFreeCardinal) {
-		if (newSlice.GetIcon().GetFrameCount() <= 0) {
-			newSlice.Create();
-		}
+		if (!newSlice.HasIcon()) { newSlice.Create(); }
+
 		std::unordered_map<PieSlice::SliceDirection, PieSlice *> sliceCardinalDirections = {
 			{PieSlice::SliceDirection::UP, &m_UpSlice}, {PieSlice::SliceDirection::LEFT, &m_LeftSlice}, {PieSlice::SliceDirection::DOWN, &m_DownSlice}, {PieSlice::SliceDirection::RIGHT, &m_RightSlice}
 		};
@@ -173,7 +163,7 @@ namespace RTE {
 		auto handleIntercardinalSlice = [this](PieSlice &pieSlice, int sliceListSize, int currentSliceNumber, float currentAngleOffset) {
 			pieSlice.SetAreaArc(c_QuarterPI / static_cast<float>(sliceListSize));
 			pieSlice.SetAreaStart(currentAngleOffset + (static_cast<float>(currentSliceNumber) * pieSlice.GetAreaArc()));
-			m_CurrentSlices.push_back(&pieSlice);
+			m_CurrentSlices.emplace_back(&pieSlice);
 		};
 
 		std::list<PieSlice>::reverse_iterator sliceReverseIterator;
@@ -208,7 +198,7 @@ namespace RTE {
 			spaceToRemove = (i == 3 && !intercardinalSliceCollections[0]->empty()) ? sliceSpacer : 0;
 			cardinalSlices[i]->SetAreaArc((intercardinalSliceCollections[i]->empty() ? c_HalfPI : c_QuarterPI + sliceSpacer) - spaceToRemove);
 
-			m_CurrentSlices.push_back(cardinalSlices[i]);
+			m_CurrentSlices.emplace_back(cardinalSlices[i]);
 
 			currentAngleOffset += c_HalfPI;
 		}
@@ -216,24 +206,8 @@ namespace RTE {
 		for (PieSlice *slice : m_CurrentSlices) {
 			slice->SetMidAngle(slice->GetAreaStart() + (slice->GetAreaArc() / 2));
 		}
-		m_RedrawBG = true;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	const PieSlice *PieMenuGUI::GetSliceOnAngle(float angle) const {
-		float areaEnd;
-		for (const PieSlice *slice : m_CurrentSlices) {
-			areaEnd = slice->GetAreaStart() + slice->GetAreaArc();
-			if (slice->GetAreaStart() <= angle && areaEnd > angle) {
-				return slice;
-			}
-			// Check for if the target slice overlaps the 0 point on the arc
-			if (areaEnd > c_TwoPI && angle >= 0 && angle < (areaEnd - c_TwoPI)) {
-				return slice;
-			}
-		}
-		return 0;
+		
+		m_BGBitmapNeedsRedrawing = true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -252,11 +226,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PieMenuGUI::AlterSliceLua(const std::string &description, const std::string &functionName, PieSlice::SliceDirection direction, bool isEnabled) {
-		PieSlice foundSlice;
 		std::vector<PieSlice *>::iterator sliceIterator = std::find_if(m_CurrentSlices.begin(), m_CurrentSlices.end(), [&description, &functionName](const PieSlice *slice) {
 			return slice->GetDescription() == description && slice->GetFunctionName() == functionName;
 		});
 
+		PieSlice foundSlice;
 		if (sliceIterator != m_CurrentSlices.end() && (*sliceIterator)->GetType() != PieSlice::PieSliceIndex::PSI_NONE) {
 			foundSlice.SetDirection(direction);
 			foundSlice.SetEnabled(isEnabled);
@@ -286,7 +260,7 @@ namespace RTE {
 			for (std::list<PieSlice> *sliceList : sliceCollections) {
 				std::list<PieSlice>::iterator sliceIterator = std::find_if(sliceList->begin(), sliceList->end(), [&description, &functionName](const PieSlice &slice) {
 					return slice.GetDescription() == description && slice.GetFunctionName() == functionName;
-					});
+				});
 				if (sliceIterator != sliceList->end()) {
 					removedSlice = (*sliceIterator);
 					sliceList->erase(sliceIterator);
@@ -305,45 +279,42 @@ namespace RTE {
 	void PieMenuGUI::Update() {
 		m_ActivatedSlice = nullptr;
 
-		if (m_Wobbling) {
+		if (m_MenuMode == MenuMode::Wobble) {
 			UpdateWobbling();
-		} else if (m_Freeze) {
+		} else if (m_MenuMode == MenuMode::Freeze) {
 			m_EnabledState = EnabledState::Enabling;
 		} else if (m_EnabledState == EnabledState::Enabling || m_EnabledState == EnabledState::Disabling) {
 			UpdateEnablingAndDisablingProgress();
 		}
 
-		if (m_Controller->IsDisabled()) {
+		if (m_MenuController->IsDisabled()) {
 			return;
 		}
 
-		if (IsEnabled() && (UpdateAnalogInput() || UpdateDigitalInput())) { m_HoverTimer.Reset(); }
+		if (m_AffectedObject && !g_MovableMan.ValidMO(m_AffectedObject)) { m_AffectedObject = nullptr; }
+
+		if (IsEnabled() && (HandleMouseInput() || HandleNonMouseInput())) { m_HoverTimer.Reset(); }
 
 		if (m_HoveredSlice && m_EnabledState != EnabledState::Disabled) {
 			UpdateSliceActivation();
 
 			if (m_HoverTimer.IsPastSimMS(1500)) {
 				m_HoveredSlice = nullptr;
-				m_RedrawBG = true;
+				m_BGBitmapNeedsRedrawing = true;
 			}
 		}
 
-		//TODO try moving this into draw, it'd make more sense there
-		if (m_RedrawBG && m_EnabledState != EnabledState::Disabled) { RedrawMenuBackground(); }
-
-		if (m_AffectedObject && !g_MovableMan.ValidMO(m_AffectedObject)) { m_AffectedObject = nullptr; }
+		if (m_BGBitmapNeedsRedrawing && m_EnabledState != EnabledState::Disabled) { UpdatePredrawnMenuBackgroundBitmap(); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PieMenuGUI::Draw(BITMAP *targetBitmap, const Vector &targetPos) const {
-		GUIFont *menuFont = g_FrameMan.GetLargeFont();
-
 		Vector drawPos;
-		CalculateDrawPositionAccountingForSeamsAndFont(targetBitmap, targetPos, menuFont, drawPos);
+		CalculateDrawPositionAccountingForSeamsAndFont(targetBitmap, targetPos, drawPos);
 
 		if (m_EnabledState != EnabledState::Disabled) {
-			if (!g_FrameMan.IsInMultiplayerMode()) {
+			if (m_DrawBackgroundTransparent && !g_FrameMan.IsInMultiplayerMode()) {
 				g_FrameMan.SetTransTable(MoreTrans);
 				draw_trans_sprite(targetBitmap, m_BGBitmap, drawPos.GetFloorIntX() - m_BGBitmap->w / 2, drawPos.GetFloorIntY() - m_BGBitmap->h / 2);
 			} else {
@@ -353,58 +324,41 @@ namespace RTE {
 
 		if (m_EnabledState == EnabledState::Enabled) {
 			DrawPieIcons(targetBitmap, drawPos);
-			if (m_HoveredSlice) { DrawPieCursorAndSliceDescriptions(targetBitmap, drawPos, menuFont); }
+			if (m_HoveredSlice) { DrawPieCursorAndSliceDescriptions(targetBitmap, drawPos); }
 		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool PieMenuGUI::SelectSlice(const PieSlice *sliceToSelect, bool moveCursorToSlice) {
-		if (sliceToSelect == nullptr || sliceToSelect == m_HoveredSlice) {
-			return false;
-		}
-
-		m_HoveredSlice = sliceToSelect;
-
-		m_RedrawBG = true;
-		if (moveCursorToSlice) { m_CursorAngle = m_HoveredSlice->GetMidAngle(); }
-
-		SoundContainer *soundToPlay = sliceToSelect->IsEnabled() ? g_GUISound.HoverChangeSound() : g_GUISound.HoverDisabledSound();
-		soundToPlay->Play();
-		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PieMenuGUI::UpdateWobbling() {
-		float innerRadiusChange = static_cast<float>(m_EnablingTimer.GetElapsedRealTimeMS()) / 6.0F;
+		float innerRadiusChange = static_cast<float>(m_EnableDisableAnimationTimer.GetElapsedRealTimeMS()) / 6.0F;
 
-		m_RedrawBG = true;
+		m_BGBitmapNeedsRedrawing = true;
 		m_InnerRadius += static_cast<int>(innerRadiusChange) * (m_EnabledState == EnabledState::Disabling ? -1 : 1);
 
 		if (m_InnerRadius < 0) {
 			m_EnabledState = EnabledState::Enabling;
-		} else if (m_InnerRadius > m_EnabledRadius / 2) {
+		} else if (m_InnerRadius > m_FullRadius / 2) {
 			m_EnabledState = EnabledState::Disabling;
 		}
 
-		m_InnerRadius = std::clamp(m_InnerRadius, 0, m_EnabledRadius / 2);
-		m_EnablingTimer.Reset();
+		m_InnerRadius = std::clamp(m_InnerRadius, 0, m_FullRadius / 2);
+		m_EnableDisableAnimationTimer.Reset();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PieMenuGUI::UpdateEnablingAndDisablingProgress() {
-		m_RedrawBG = true;
+		m_BGBitmapNeedsRedrawing = true;
 		if (m_EnabledState == EnabledState::Enabling) {
-			m_InnerRadius = static_cast<int>(LERP(0.0F, static_cast<float>(c_EnablingDelay), 0.0F, static_cast<float>(m_EnabledRadius), static_cast<float>(m_EnablingTimer.GetElapsedRealTimeMS())));
-			if (m_EnablingTimer.IsPastRealMS(c_EnablingDelay)) {
+			m_InnerRadius = static_cast<int>(LERP(0.0F, static_cast<float>(c_EnablingDelay), 0.0F, static_cast<float>(m_FullRadius), static_cast<float>(m_EnableDisableAnimationTimer.GetElapsedRealTimeMS())));
+			if (m_EnableDisableAnimationTimer.IsPastRealMS(c_EnablingDelay)) {
 				m_EnabledState = EnabledState::Enabled;
-				m_InnerRadius = m_EnabledRadius;
+				m_InnerRadius = m_FullRadius;
 			}
 		} else if (m_EnabledState == EnabledState::Disabling) {
-			m_InnerRadius = static_cast<int>(LERP(0.0F, static_cast<float>(c_EnablingDelay), static_cast<float>(m_EnabledRadius), 0.0F, static_cast<float>(m_EnablingTimer.GetElapsedRealTimeMS())));
-			if (m_EnablingTimer.IsPastRealMS(c_EnablingDelay)) {
+			m_InnerRadius = static_cast<int>(LERP(0.0F, static_cast<float>(c_EnablingDelay), static_cast<float>(m_FullRadius), 0.0F, static_cast<float>(m_EnableDisableAnimationTimer.GetElapsedRealTimeMS())));
+			if (m_EnableDisableAnimationTimer.IsPastRealMS(c_EnablingDelay)) {
 				m_EnabledState = EnabledState::Disabled;
 				m_InnerRadius = 0;
 				if (Actor *affectedObjectAsActor = dynamic_cast<Actor *>(m_AffectedObject)) { affectedObjectAsActor->FlashWhite(); }
@@ -414,17 +368,24 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PieMenuGUI::UpdateAnalogInput() {
-		if (float cursorDistance = m_Controller->GetAnalogCursor().GetLargest(); cursorDistance > 0.45F) {
-			m_CursorAngle = m_Controller->GetAnalogCursor().GetAbsRadAngle();
+	bool PieMenuGUI::HandleMouseInput() {
+		if (float cursorDistance = m_MenuController->GetAnalogCursor().GetLargest(); cursorDistance > 0.45F) {
+			m_CursorAngle = m_MenuController->GetAnalogCursor().GetAbsRadAngle();
 
 			while (m_CursorAngle < 0) { m_CursorAngle += c_TwoPI; }
 
-			SelectSlice(GetSliceOnAngle(m_CursorAngle));
+			float pieSliceAreaEnd;
+			for (const PieSlice *pieSlice : m_CurrentSlices) {
+				pieSliceAreaEnd = pieSlice->GetAreaStart() + pieSlice->GetAreaArc();
+				if ((pieSlice->GetAreaStart() <= m_CursorAngle && pieSliceAreaEnd > m_CursorAngle) || (pieSliceAreaEnd > c_TwoPI && m_CursorAngle >= 0 && m_CursorAngle < (pieSliceAreaEnd - c_TwoPI))) {
+					SelectPieSlice(pieSlice);
+					break;
+				}
+			}
 			return true;
 		} else if (cursorDistance > 0.35 && cursorDistance <= 0.45) {
 			m_HoveredSlice = nullptr;
-			m_RedrawBG = true;
+			m_BGBitmapNeedsRedrawing = true;
 			return false;
 		}
 
@@ -433,7 +394,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PieMenuGUI::UpdateDigitalInput() {
+	bool PieMenuGUI::HandleNonMouseInput() {
 		std::map<ControlState, PieSlice *> controlStateSlices = {
 			{PRESS_UP, &m_UpSlice},
 			{PRESS_LEFT, &m_LeftSlice},
@@ -454,7 +415,7 @@ namespace RTE {
 		};
 
 		for (const auto &[controlState, pieSlice] : controlStateSlices) {
-			if (m_Controller->IsState(controlState)) {
+			if (m_MenuController->IsState(controlState)) {
 				const auto &[firstSelectionZoomAngle, secondSelectionZoomAngle] = controlStateSelectionZoomAngles.at(controlState).first;
 				bool shouldZoom = !m_HoveredSlice;
 				shouldZoom |= controlStateSelectionZoomAngles.at(controlState).second ?
@@ -462,7 +423,7 @@ namespace RTE {
 					(m_CursorAngle > firstSelectionZoomAngle || m_CursorAngle < secondSelectionZoomAngle);
 
 				if (shouldZoom) {
-					return SelectSlice(pieSlice, true);
+					return SelectPieSlice(pieSlice, true);
 				} else if (m_HoveredSlice != pieSlice) {
 					const auto &[firstSelectionStepAngle, secondSelectionStepAngle] = controlStateSelectionStepAngles.at(controlState).first;
 					int stepDirection = controlStateSelectionStepAngles.at(controlState).second ?
@@ -477,7 +438,7 @@ namespace RTE {
 					}
 
 					if ((*sliceToSelect) != nullptr) {
-						return SelectSlice((*sliceToSelect), true);
+						return SelectPieSlice((*sliceToSelect), true);
 					}
 				}
 			}
@@ -489,7 +450,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PieMenuGUI::UpdateSliceActivation() {
-		if (m_Controller->IsState(PRESS_PRIMARY) || (m_HoveredSlice != m_AlreadyActivatedSlice && m_Controller->IsState(RELEASE_SECONDARY))) {
+		if (m_MenuController->IsState(PRESS_PRIMARY) || (m_HoveredSlice != m_AlreadyActivatedSlice && m_MenuController->IsState(RELEASE_SECONDARY))) {
 			m_HoverTimer.Reset();
 			m_ActivatedSlice = m_HoveredSlice->IsEnabled() ? m_HoveredSlice : m_ActivatedSlice;
 			m_AlreadyActivatedSlice = m_ActivatedSlice;
@@ -517,42 +478,80 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PieMenuGUI::RedrawMenuBackground() {
-		clear_to_color(m_BGBitmap, g_MaskColor);
+	void PieMenuGUI::UpdatePredrawnMenuBackgroundBitmap() {
 		int centerX = m_BGBitmap->w / 2;
 		int centerY = m_BGBitmap->h / 2;
 
-		// Pie menu circle drawing is done by drawing a larger circle and drawing a smaller one in the mask color (i.e. transparent) on top of it.
-		circlefill(m_BGBitmap, centerX, centerY, m_InnerRadius + m_Thickness, 4);
+		/// <summary>
+		/// Lambda for drawing separators when in Line IconSeparatorMode.
+		/// It draws four separator lines between each PieSlice so the resulting separation will be at least 2 pixels thick, regardless of the PieSlice's angles.
+		/// </summary>
+		auto DrawLineIconSeparator = [this, &centerX, &centerY](const PieSlice *slice, Vector &separator) {
+			separator.SetXY(static_cast<float>(m_InnerRadius + m_BackgroundThickness + m_BackgroundSeparatorSize), 0).RadRotate(slice->GetAreaStart());
+			line(m_BGBitmap, centerX, centerY, centerX + separator.GetCeilingIntX(), centerY + separator.GetCeilingIntY(), m_BackgroundBorderColor);
+			line(m_BGBitmap, centerX + 1, centerY, centerX + 1 + separator.GetCeilingIntX(), centerY + separator.GetCeilingIntY(), m_BackgroundBorderColor);
+			line(m_BGBitmap, centerX, centerY + 1, centerX + separator.GetCeilingIntX(), centerY + 1 + separator.GetCeilingIntY(), m_BackgroundBorderColor);
+			line(m_BGBitmap, centerX + 1, centerY + 1, centerX + 1 + separator.GetCeilingIntX(), centerY + 1 + separator.GetCeilingIntY(), m_BackgroundBorderColor);
+		};
+
+		/// <summary>
+		/// Lambda for drawing separators when in Circle IconSeparatorMode. It draws background circles for each PieSlice.
+		/// </summary>
+		auto DrawCircleIconSeparator = [this, &centerX, &centerY](const PieSlice *slice, Vector &positionOffset) {
+			positionOffset = Vector(static_cast<float>(m_InnerRadius) + (static_cast<float>(m_BackgroundThickness) / 2.0F), 0).RadRotate(slice->GetMidAngle());
+			circlefill(m_BGBitmap, centerX + positionOffset.GetFloorIntX(), centerY + positionOffset.GetFloorIntY(), m_BackgroundSeparatorSize, m_BackgroundBorderColor);
+			circlefill(m_BGBitmap, centerX + positionOffset.GetFloorIntX(), centerY + positionOffset.GetFloorIntY(), m_BackgroundSeparatorSize - 1, slice == m_HoveredSlice && slice->IsEnabled() ? m_SelectedItemBackgroundColor : m_BackgroundColor);
+		};
+
+		clear_to_color(m_BGBitmap, g_MaskColor);
+		circlefill(m_BGBitmap, centerX, centerY, m_InnerRadius + m_BackgroundThickness, m_BackgroundColor);
 		circlefill(m_BGBitmap, centerX, centerY, m_InnerRadius, g_MaskColor);
 
 		if (m_EnabledState == EnabledState::Enabled) {
-			Vector separator;
+			Vector separatorVector;
+			switch (m_IconSeparatorMode) {
+				case IconSeparatorMode::Line:
+					for (const PieSlice *slice : m_CurrentSlices) { DrawLineIconSeparator(slice, separatorVector); }
 
-			// Draw four separator lines between each slice so the resulting separation will be at least 2 pixels thick, regardless of the separated slices' angles.
-			for (const PieSlice *slice : m_CurrentSlices) {
-				separator.SetXY(static_cast<float>(m_InnerRadius + m_Thickness) + 2.0F, 0.0F);
-				separator.RadRotate(slice->GetAreaStart());
-				line(m_BGBitmap, centerX, centerY, centerX + separator.GetCeilingIntX(), centerY + separator.GetCeilingIntY(), g_MaskColor);
-				line(m_BGBitmap, centerX + 1, centerY, centerX + 1 + separator.GetCeilingIntX(), centerY + separator.GetCeilingIntY(), g_MaskColor);
-				line(m_BGBitmap, centerX, centerY + 1, centerX + separator.GetCeilingIntX(), centerY + 1 + separator.GetCeilingIntY(), g_MaskColor);
-				line(m_BGBitmap, centerX + 1, centerY + 1, centerX + 1 + separator.GetCeilingIntX(), centerY + 1 + separator.GetCeilingIntY(), g_MaskColor);
-			}
-
-			if (m_HoveredSlice && m_HoveredSlice->IsEnabled()) {
-				separator.SetXY(static_cast<float>(m_InnerRadius + (m_Thickness / 2)), 0.0F);
-				separator.RadRotate(m_HoveredSlice->GetMidAngle());
-				floodfill(m_BGBitmap, centerX + separator.GetFloorIntX(), centerY + separator.GetFloorIntY(), g_BlackColor);
+					if (m_HoveredSlice && m_HoveredSlice->IsEnabled()) {
+						separatorVector.SetXY(static_cast<float>(m_InnerRadius + (m_BackgroundThickness / 2)), 0.0F).RadRotate(m_HoveredSlice->GetMidAngle());
+						floodfill(m_BGBitmap, centerX + separatorVector.GetFloorIntX(), centerY + separatorVector.GetFloorIntY(), m_SelectedItemBackgroundColor);
+					}
+					break;
+				case IconSeparatorMode::Circle:
+					for (const PieSlice *slice : m_CurrentSlices) {
+						if (slice->GetType() != PieSlice::PieSliceIndex::PSI_NONE) { DrawCircleIconSeparator(slice, separatorVector); }
+					}
+					break;
+				default:
+					RTEAbort("Invalid icon separator mode in PieMenuGUI.");
 			}
 		}
 
-		m_RedrawBG = false;
+		m_BGBitmapNeedsRedrawing = false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool PieMenuGUI::SelectPieSlice(const PieSlice *pieSliceToSelect, bool moveCursorToSlice) {
+		if (pieSliceToSelect == nullptr || pieSliceToSelect == m_HoveredSlice) {
+			return false;
+		}
+
+		m_HoveredSlice = pieSliceToSelect;
+
+		m_BGBitmapNeedsRedrawing = true;
+		if (moveCursorToSlice) { m_CursorAngle = m_HoveredSlice->GetMidAngle(); }
+
+		SoundContainer *soundToPlay = pieSliceToSelect->IsEnabled() ? g_GUISound.HoverChangeSound() : g_GUISound.HoverDisabledSound();
+		soundToPlay->Play();
+		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//TODO Need to investigate this stuff, I don't fully understand what it does and maybe it's mostly undesirable since we'll want to be able to draw pie menus partly off the screen
-	void PieMenuGUI::CalculateDrawPositionAccountingForSeamsAndFont(const BITMAP *targetBitmap, const Vector &targetPos, GUIFont *menuFont, Vector &drawPos) const {
+	void PieMenuGUI::CalculateDrawPositionAccountingForSeamsAndFont(const BITMAP *targetBitmap, const Vector &targetPos, Vector &drawPos) const {
 		drawPos = m_CenterPos - targetPos;
 		if (!targetPos.IsZero()) {
 			const Box *nearestBox = nullptr;
@@ -586,7 +585,7 @@ namespace RTE {
 
 		//TODO judging by the comment this will force it onto the screen if it's not on it? Better behaviour would be only draw if it's on the screen. See above TODO as well.
 		// Adjust the draw position so that the menu will always be drawn fully inside the player's screen
-		int menuDrawRadius = m_InnerRadius + m_Thickness + 2 + menuFont->GetFontHeight();
+		int menuDrawRadius = m_InnerRadius + m_BackgroundThickness + 2 + m_LargeFont->GetFontHeight();
 		if (drawPos.m_X - static_cast<float>(menuDrawRadius) < 0.0F) {
 			drawPos.m_X = static_cast<float>(menuDrawRadius);
 		} else if (drawPos.m_X + static_cast<float>(menuDrawRadius) > static_cast<float>(targetBitmap->w)) {
@@ -617,19 +616,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PieMenuGUI::DrawPieCursorAndSliceDescriptions(BITMAP *targetBitmap, const Vector &drawPos, GUIFont *menuFont) const {
+	void PieMenuGUI::DrawPieCursorAndSliceDescriptions(BITMAP *targetBitmap, const Vector &drawPos) const {
 		Vector cursorPos = Vector(static_cast<float>(m_InnerRadius)/* - s_CursorBitmap->w*/, 0.0F).RadRotate(m_CursorAngle);
 		pivot_sprite(targetBitmap, s_CursorBitmap, drawPos.GetFloorIntX() + cursorPos.GetFloorIntX(), drawPos.GetFloorIntY() + cursorPos.GetFloorIntY(), s_CursorBitmap->w / 2, s_CursorBitmap->h / 2, ftofix((m_CursorAngle / c_PI) * -128));
 
 		// Align text center, left or right respectively, based on which side of the menu the hovered slice is on.
 		AllegroBitmap allegroBitmap(targetBitmap);
-		Vector textPos = Vector(static_cast<float>(m_InnerRadius + m_Thickness + menuFont->GetFontHeight()) * 0.5F, 0.0F).RadRotate(m_HoveredSlice->GetMidAngle()) - Vector(0.0F, static_cast<float>(menuFont->GetFontHeight()) * 0.45F);
+		Vector textPos = Vector(static_cast<float>(m_InnerRadius + m_BackgroundThickness + m_LargeFont->GetFontHeight()) * 0.5F, 0.0F).RadRotate(m_HoveredSlice->GetMidAngle()) - Vector(0.0F, static_cast<float>(m_LargeFont->GetFontHeight()) * 0.45F);
 		if (m_HoveredSlice == &m_UpSlice || m_HoveredSlice == &m_DownSlice) {
-			menuFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + textPos.GetFloorIntX(), drawPos.GetFloorIntY() + textPos.GetFloorIntY(), m_HoveredSlice->GetDescription().c_str(), GUIFont::Centre);
+			m_LargeFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + textPos.GetFloorIntX(), drawPos.GetFloorIntY() + textPos.GetFloorIntY(), m_HoveredSlice->GetDescription().c_str(), GUIFont::Centre);
 		} else if (m_CursorAngle < c_HalfPI || m_CursorAngle > c_PI + c_HalfPI) {
-			menuFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + textPos.GetFloorIntX(), drawPos.GetFloorIntY() + textPos.GetFloorIntY(), m_HoveredSlice->GetDescription().c_str(), GUIFont::Left);
+			m_LargeFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + textPos.GetFloorIntX(), drawPos.GetFloorIntY() + textPos.GetFloorIntY(), m_HoveredSlice->GetDescription().c_str(), GUIFont::Left);
 		} else {
-			menuFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + textPos.GetFloorIntX(), drawPos.GetFloorIntY() + textPos.GetFloorIntY(), m_HoveredSlice->GetDescription().c_str(), GUIFont::Right);
+			m_LargeFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + textPos.GetFloorIntX(), drawPos.GetFloorIntY() + textPos.GetFloorIntY(), m_HoveredSlice->GetDescription().c_str(), GUIFont::Right);
 		}
 	}
 }

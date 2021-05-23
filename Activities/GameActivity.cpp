@@ -401,7 +401,7 @@ bool GameActivity::SwitchToActor(Actor *pActor, short player, short team)
         return false;
 
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
-    m_pPieMenu[player]->DisableAnim();
+    m_pPieMenu[player]->DoDisableAnimation();
 
     // Disable the AI command mode since it's connected to the current actor
     if (m_ViewState[player] == ViewState::AISentryPoint || m_ViewState[player] == ViewState::AIPatrolPoints || m_ViewState[player] == ViewState::AIGoldDigPoint || m_ViewState[player] == ViewState::AIGoToPoint || m_ViewState[player] == ViewState::UnitSelectCircle)
@@ -420,7 +420,7 @@ bool GameActivity::SwitchToActor(Actor *pActor, short player, short team)
 void GameActivity::SwitchToNextActor(short player, short team, Actor *pSkip)
 {
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
-    m_pPieMenu[player]->DisableAnim();
+    m_pPieMenu[player]->DoDisableAnimation();
 
     // Disable the AI command mode since it's connected to the current actor
     if (m_ViewState[player] == ViewState::AISentryPoint || m_ViewState[player] == ViewState::AIPatrolPoints || m_ViewState[player] == ViewState::AIGoldDigPoint || m_ViewState[player] == ViewState::AIGoToPoint || m_ViewState[player] == ViewState::UnitSelectCircle)
@@ -439,7 +439,7 @@ void GameActivity::SwitchToNextActor(short player, short team, Actor *pSkip)
 void GameActivity::SwitchToPrevActor(short player, short team, Actor *pSkip)
 {
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
-    m_pPieMenu[player]->DisableAnim();
+    m_pPieMenu[player]->DoDisableAnimation();
 
     // Disable the AI command mode since it's connected to the current actor
     if (m_ViewState[player] == ViewState::AISentryPoint || m_ViewState[player] == ViewState::AIPatrolPoints || m_ViewState[player] == ViewState::AIGoldDigPoint || m_ViewState[player] == ViewState::AIGoToPoint  || m_ViewState[player] == ViewState::UnitSelectCircle)
@@ -1481,7 +1481,7 @@ void GameActivity::Update()
                 // Play err sound to indicate cancellation
                 g_GUISound.UserErrorSound()->Play(player);
                 // Flash the same actor, jsut to show the control went back to him
-                m_pPieMenu[player]->DisableAnim();
+                m_pPieMenu[player]->DoDisableAnimation();
             }
             // Player is done selecting new actor; switch to it if we have anything marked
             else if (m_PlayerController[player].IsState(ACTOR_NEXT) || m_PlayerController[player].IsState(ACTOR_PREV))// || m_PlayerController[player].IsState(PRESS_FACEBUTTON) || m_PlayerController[player].IsState(PRESS_PRIMARY))
@@ -1502,7 +1502,7 @@ void GameActivity::Update()
                 // Stop displaying the message
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
                 // Flash the same actor, jsut to show the control went back to him
-                m_pPieMenu[player]->DisableAnim();
+                m_pPieMenu[player]->DoDisableAnimation();
             }
             else
             {
@@ -1513,7 +1513,7 @@ void GameActivity::Update()
                     m_pPieMenu[player]->SetPos(pMarkedActor->GetPos());
 
                     if (markedDistance > g_FrameMan.GetPlayerFrameBufferWidth(player) / 4)
-                        m_pPieMenu[player]->WobbleAnim();
+                        m_pPieMenu[player]->Wobble();
                     else
                         m_pPieMenu[player]->FreezeAtRadius(30);
                 }
@@ -1767,7 +1767,7 @@ void GameActivity::Update()
                 m_MessageTimer[player].Reset();
                 g_GUISound.UserErrorSound()->Play(player);
                 // Flash the same actor, jsut to show the control went back to him
-                m_pPieMenu[player]->DisableAnim();
+                m_pPieMenu[player]->DoDisableAnimation();
             }
             // Player is done selecting LZ,
             else if (m_PlayerController[player].IsState(PRESS_FACEBUTTON) || m_PlayerController[player].IsState(PRESS_PRIMARY))
@@ -1789,7 +1789,7 @@ void GameActivity::Update()
                 // Stop displaying the LZ message
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
                 // Flash the same actor, jsut to show the control went back to him
-                m_pPieMenu[player]->DisableAnim();
+                m_pPieMenu[player]->DoDisableAnimation();
             }
 
             bool wrapped = g_SceneMan.ForceBounds(m_LandingZone[player]);

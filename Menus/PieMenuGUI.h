@@ -45,7 +45,7 @@ namespace RTE {
 		/// Sets the controller used by this. Ownership is NOT transferred!
 		/// </summary>
 		/// <param name="controller">The new controller for this menu. Ownership is NOT transferred!</param>
-		void SetController(Controller *controller) { m_Controller = controller; }
+		void SetController(Controller *controller) { m_MenuController = controller; }
 
 		/// <summary>
 		/// Gets the currently affected MovableObject. Ownership is NOT transferred!
@@ -60,16 +60,28 @@ namespace RTE {
 		void SetAffectedObject(MovableObject *affectedObject) { m_AffectedObject = affectedObject; }
 
 		/// <summary>
+		/// Gets the absolute center position of this.
+		/// </summary>
+		/// <returns>A Vector describing the current absolute position in pixels.</returns>
+		const Vector & GetPos() const { return m_CenterPos; }
+
+		/// <summary>
+		/// Sets the absolute center position of this in the scene.
+		/// </summary>
+		/// <param name="newPos">A Vector describing the current absolute position in pixels, in the scene.</param>
+		void SetPos(const Vector &newPos) { m_CenterPos = newPos; }
+
+		/// <summary>
 		/// Gets whether the menu is enabled or not.
 		/// </summary>
 		/// <returns>Whether the menu is enabled.</returns>
-		bool IsEnabled() const { return (m_EnabledState == EnabledState::Enabled || m_EnabledState == EnabledState::Enabling) && !m_Wobbling; }
+		bool IsEnabled() const { return (m_EnabledState == EnabledState::Enabled || m_EnabledState == EnabledState::Enabling) && m_MenuMode != MenuMode::Wobble; }
 
 		/// <summary>
 		/// Gets whether the menu is in the process of enabling or disabling.
 		/// </summary>
 		/// <returns></returns>
-		bool IsEnablingOrDisabling() const { return m_EnabledState == EnabledState::Enabling || m_EnabledState == EnabledState::Disabling; }
+		bool IsEnablingOrDisabling() const { return (m_EnabledState == EnabledState::Enabling || m_EnabledState == EnabledState::Disabling) && m_MenuMode != MenuMode::Wobble; }
 
 		/// <summary>
 		/// Gets whether the menu is at all visible or not.
@@ -84,40 +96,28 @@ namespace RTE {
 		void SetEnabled(bool enable);
 
 		/// <summary>
-		/// Gets the absolute center position of this.
-		/// </summary>
-		/// <returns>A Vector describing the current absolute position in pixels.</returns>
-		const Vector & GetPos() const { return m_CenterPos; }
-
-		/// <summary>
-		/// Sets the absolute center position of this in the scene.
-		/// </summary>
-		/// <param name="newPos">A Vector describing the current absolute position in pixels, in the scene.</param>
-		void SetPos(const Vector &newPos) { m_CenterPos = newPos; }
-
-		/// <summary>
 		/// Gets the the command issued by this menu in the last update, i.e. the Slice type of the currently activated Slice or None if no slice was activated.
 		/// </summary>
 		/// <returns>The Slice type which has been picked activated, or None if none has been picked. See the PieSliceIndex enum for Slice types.</returns>
 		PieSlice::PieSliceIndex GetPieCommand() const { return m_ActivatedSlice == nullptr ? PieSlice::PieSliceIndex::PSI_NONE : m_ActivatedSlice->GetType(); }
 #pragma endregion
 
-#pragma region Animation Handling
+#pragma region Special Animation Handling
 		/// <summary>
 		/// Just plays the disabling animation, regardless of whether the menu was enabled or not.
 		/// </summary>
-		void DisableAnim() { m_InnerRadius = m_EnabledRadius; m_Wobbling = false; m_EnablingTimer.Reset(); m_EnabledState = EnabledState::Disabling; }
+		void DoDisableAnimation() { m_InnerRadius = m_FullRadius; m_MenuMode = MenuMode::Normal; m_EnableDisableAnimationTimer.Reset(); m_EnabledState = EnabledState::Disabling; }
 
 		/// <summary>
 		/// Plays an animation of the pie menu circle expanding and contracting continuously. The menu is effectively disabled while doing this. It will continue until the next call to SetEnabled.
 		/// </summary>
-		void WobbleAnim() { m_Wobbling = true; m_Freeze = false; }
+		void Wobble() { m_MenuMode = MenuMode::Wobble; }
 
 		/// <summary>
 		/// Makes the background circle freeze at a certain radius until SetEnabled is called. The menu is effectively disabled while doing this.
 		/// </summary>
 		/// <param name="radius">The radius to make the background circle freeze at.</param>
-		void FreezeAtRadius(int radius) { m_Freeze = true; m_Wobbling = false; m_InnerRadius = radius; m_RedrawBG = true; }
+		void FreezeAtRadius(int radius) { m_MenuMode = MenuMode::Freeze; m_InnerRadius = radius; m_BGBitmapNeedsRedrawing = true; }
 #pragma endregion
 
 #pragma region Slice Handling
@@ -143,19 +143,6 @@ namespace RTE {
 		/// Makes sure all currently added Slices' areas are set up correctly position and sizewise on the pie menu circle.
 		/// </summary>
 		void RealignSlices();
-
-		/// <summary>
-		/// Gets a specific Slice based on an angle on the pie menu.
-		/// </summary>
-		/// <param name="angle">An angle on the circle, in radins, CCW from straight out right.</param>
-		/// <returns>The Slice which exists on that angle, if any. 0 if not. Ownership is NOT transferred!</returns>
-		const PieSlice * GetSliceOnAngle(float angle) const;
-
-		/// <summary>
-		/// Reports whether and which Slice has been activated by the player. This may happen even though the player isn't done with the pie menu.
-		/// </summary>
-		/// <returns>The Slice which has been picked by the player, if any. 0 if not. Ownership is NOT transferred!</returns>
-		const PieSlice * SliceActivated() const { return m_ActivatedSlice; }
 #pragma endregion
 
 #pragma region Lua Slice Handling
@@ -214,38 +201,52 @@ namespace RTE {
 		/// </summary>
 		enum class EnabledState { Enabling, Enabled, Disabling, Disabled };
 
-		enum PieIconSelection {
-			PIS_NORMAL = 0,
-			PIS_SELECTED,
-			PIS_DISABLED,
-			PIS_COUNT
-		};
+		/// <summary>
+		/// Enumeration for the the modes a PieMenuGUI can have.
+		/// </summary>
+		enum class MenuMode { Normal, Wobble, Freeze };
 
-		static const int c_EnablingDelay = 50; //<! Time in ms for how long it takes to enable/disable.
+		/// <summary>
+		/// Enumeration for the different item separator modes available to the PieMenuGUI.
+		/// </summary>
+		enum class IconSeparatorMode { Line, Circle };
 
-		static std::unordered_map<std::string, PieSlice> s_AllCustomLuaSlices; //<! All Slices ever added to this pie-menu, serves as directory of Slices available to add.
-		static BITMAP *s_CursorBitmap; //<! A static pointer to the bitmap to use as the cursor in any menu.
-		
-		Timer m_EnablingTimer; //<! Timer for the appear and disappear animations.
-		Timer m_HoverTimer; //<! Timer to measure how long to hold a hovered over slice.
-		
-		Controller *m_Controller; //<! The Controller which controls this menu. Not owned.
+		static const int c_EnablingDelay = 50; //!< Time in ms for how long it takes to enable/disable.
+
+		//TODO replace this with proper presetman handling for pie slices, instead of adding them by name like this
+		static std::unordered_map<std::string, PieSlice> s_AllCustomLuaSlices; //!< All Slices ever added to this pie-menu, serves as directory of Slices available to add.
+		static BITMAP *s_CursorBitmap; //!< A static pointer to the bitmap to use as the cursor in any menu.
+
+		GUIFont *m_LargeFont; //!< A pointer to the large font from FrameMan. Not owned here.
+
+		Controller *m_MenuController; //!< The Controller which controls this menu. Separate from the Controller of the affected object (if there is one).
 		MovableObject *m_AffectedObject; //!< The MovableObject this menu affects, if any.
+		MenuMode m_MenuMode; //!< The mdoe this menu is in. See MenuMode enum for more details.
+		Vector m_CenterPos; //!< The center position of this in the scene.
+
+		EnabledState m_EnabledState; //!< The enabled state of the menu.
+		Timer m_EnableDisableAnimationTimer; //!< Timer for progressing enabling/disabling animations.
+		Timer m_HoverTimer; //!< Timer to measure how long to hold a hovered over slice.
+
+		IconSeparatorMode m_IconSeparatorMode; //!< The icon separator mode of this menu.
+		int m_BackgroundThickness; //!< The thickness of the menu's background, in pixels.
+		int m_BackgroundSeparatorSize; //!< The size of the menu's background separators, in pixels. Used differently based on the menu's IconSeparatorMode.
+		bool m_DrawBackgroundTransparent; //!< Whether or not the menu's background should be drawn transparently.
+		int m_BackgroundColor; //!< The colour used for drawing the menu's background.
+		int m_BackgroundBorderColor; //!< The colour used for drawing borders for the menu's background.
+		int m_SelectedItemBackgroundColor; //!< The colour used for drawing selected menu items' backgrounds.
 		
-		EnabledState m_EnabledState; //<! The enabled state of the menu.
-		Vector m_CenterPos; //<! The center position of this in the scene.
-		
-		const PieSlice *m_HoveredSlice; //<! The Slice currently being hovered over.
-		const PieSlice *m_ActivatedSlice; //<! The currently activated Slice, if there is one, or 0 if there's not.
-		const PieSlice *m_AlreadyActivatedSlice; //<! The Slice that was most recently activated by pressing Primary. Used to avoid duplicate activation when releasing the pie menu.
+		const PieSlice *m_HoveredSlice; //!< The PieSlice currently being hovered over.
+		const PieSlice *m_ActivatedSlice; //!< The currently activated PieSlice, if there is one, or 0 if there's not.
+		const PieSlice *m_AlreadyActivatedSlice; //!< The PieSlice that was most recently activated by pressing Primary. Used to avoid duplicate activation when releasing the pie menu.
 		
 		/// <summary>
 		/// The cardinal axis slices, owned here.
 		/// </summary>
 		PieSlice m_UpSlice;
-		PieSlice m_RightSlice;
-		PieSlice m_DownSlice;
 		PieSlice m_LeftSlice;
+		PieSlice m_DownSlice;
+		PieSlice m_RightSlice;
 
 		/// <summary>
 		/// The slices between the cardinal axes, owned here.
@@ -255,28 +256,17 @@ namespace RTE {
 		std::list<PieSlice> m_DownLeftSlices;
 		std::list<PieSlice> m_DownRightSlices;
 
-		std::vector<PieSlice *> m_CurrentSlices; //!< All the Slices, in order and aligned, not owned here, just pointing to the ones above.
+		std::vector<PieSlice *> m_CurrentSlices; //!< All the PieSlices, in order and aligned. Not owned here, just pointing to the ones above.
 		int m_SliceGroupCount; //!< How many groups there currently are in the menu.
 
-		bool m_Wobbling; //!< Special mode where the menu circle expands and contracts continuously, while being effectively disabled.
-		bool m_Freeze; //!< Special mode where the menu circle is frozen at the current m_InnerRadius.
-
+		int m_FullRadius; //!< The radius the menu should have when fully enabled, in pixels.
 		int m_InnerRadius; //!< The current radius of the innermost circle of the pie menu, in pixels.
-		int m_EnabledRadius; //!< When fully enabled, the inner radius of the pie menu, in pixels.
-		int m_Thickness; //!< The thickness of the pie menu circle, in pixels.
-		float m_CursorAngle; //!< Position of the cursor on the circle, in radians, counterclockwise from straight out to rhe right.
+		float m_CursorAngle; //!< Position of the cursor on the circle, in radians, counterclockwise from straight out to the right.
 		
 		BITMAP *m_BGBitmap; //!< The intermediary bitmap used to first draw the menu background, which will be blitted to the final draw target surface.
-		bool m_RedrawBG; //!< Whether we need to redraw the BG bitmap.
+		bool m_BGBitmapNeedsRedrawing; //!< Whether the BG bitmap should be redrawn during the next Update call.
 
-		/// <summary>
-		/// Sets a slice to be selected.
-		/// </summary>
-		/// <param name="sliceToSelect">The slice to be selected. Has to be a slice currently in this menu.</param>
-		/// <param name="moveCursorToSlice">Whether to also move the cursor to the center of the newly selected slice. Defaults to false.</param>
-		/// <returns>Whether or not this resulted in a different slice being selected. Also returns false if a null slice was passed in.</returns>
-		bool SelectSlice(const PieSlice *sliceToSelect, bool moveCursorToSlice = false);
-
+#pragma region Update Breakdown
 		/// <summary>
 		/// Handles the wobbling portion of Update.
 		/// </summary>
@@ -288,16 +278,16 @@ namespace RTE {
 		void UpdateEnablingAndDisablingProgress();
 
 		/// <summary>
-		/// Handles the analog input conversion part of Update.
+		/// Handles the mouse input when updating.
 		/// </summary>
 		/// <returns>Whether or not enough input was received to do something.</returns>
-		bool UpdateAnalogInput();
+		bool HandleMouseInput();
 
 		/// <summary>
-		/// Handles the digital input conversion part of Update.
+		/// Handles the keyboard or controller input when updating.
 		/// </summary>
 		/// <returns>Whether or not enough input was received to do something.</returns>
-		bool UpdateDigitalInput();
+		bool HandleNonMouseInput();
 
 		/// <summary>
 		/// Handles the slice activation part of Update.
@@ -305,18 +295,27 @@ namespace RTE {
 		void UpdateSliceActivation();
 
 		/// <summary>
-		/// Handles background and slice separator redrawing.
+		/// Redraws the predrawn background bitmap so it's up-to-date.
 		/// </summary>
-		void RedrawMenuBackground();
+		void UpdatePredrawnMenuBackgroundBitmap();
+#pragma endregion
 
+		/// <summary>
+		/// Sets a slice to be selected.
+		/// </summary>
+		/// <param name="pieSliceToSelect">The slice to be selected. Has to be a slice currently in this menu.</param>
+		/// <param name="moveCursorToSlice">Whether to also move the cursor to the center of the newly selected slice. Defaults to false.</param>
+		/// <returns>Whether or not this resulted in a different slice being selected. Also returns false if a null slice was passed in.</returns>
+		bool SelectPieSlice(const PieSlice *pieSliceToSelect, bool moveCursorToSlice = false);
+
+#pragma region Draw Breakdown
 		/// <summary>
 		/// Handles figuring out the position to draw the menu at, accounting for any Scene seams.
 		/// </summary>
 		/// <param name="targetBitmap">A pointer to the BITMAP to draw on. Generally a screen BITMAP.</param>
 		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the scene.</param>
-		/// <param name="menuFont">The font being used for text in the menu.</param>
 		/// <param name="drawPos">Out param, a Vector to be filled in with the position at which the menu should be drawn.</param>
-		void CalculateDrawPositionAccountingForSeamsAndFont(const BITMAP *targetBitmap, const Vector &targetPos, GUIFont *menuFont, Vector &drawPos) const;
+		void CalculateDrawPositionAccountingForSeamsAndFont(const BITMAP *targetBitmap, const Vector &targetPos, Vector &drawPos) const;
 
 		/// <summary>
 		/// Handles drawing icons on pie menu slices.
@@ -330,8 +329,8 @@ namespace RTE {
 		/// </summary>
 		/// <param name="targetBitmap">A pointer to the BITMAP to draw on. Generally a screen BITMAP.</param>
 		/// <param name="drawPos">The seam corrected position at which the pie menu is being drawn.</param>
-		/// <param name="menuFont">The font being used for text in the menu.</param>
-		void DrawPieCursorAndSliceDescriptions(BITMAP *targetBitmap, const Vector &drawPos, GUIFont *menuFont) const;
+		void DrawPieCursorAndSliceDescriptions(BITMAP *targetBitmap, const Vector &drawPos) const;
+#pragma endregion
 
 		/// <summary>
 		/// Clears all the member variables of this PieMenuGUI, effectively resetting the members of this abstraction level only.

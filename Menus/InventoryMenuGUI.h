@@ -207,7 +207,7 @@ namespace RTE {
 		static const int c_ItemsPerRow = 5; //!< The number of items per row of the inventory display. MUST be an odd nubmer. Used in all MenuModes.
 		static const int c_MinimumItemPadding = 1; //!< The padding between item icons and their containing boxes. Items will have at least this much padding on all sides. Used in all MenuModes.
 
-		static const int c_CarouselMenuVerticalOffset = 30; //!< The offset the menu will have below it, to avoid drawing over its target. Used in all MenuModes.
+		static const int c_CarouselMenuVerticalOffset = 40; //!< The offset the menu will have below it, to avoid drawing over its target. Used in all MenuModes.
 		static const Vector c_CarouselBoxMaxSize; //!< The size of the largest item box in the carousel, i.e. the one in the middle. Used in Carousel MenuMode.
 		static const Vector c_CarouselBoxMinSize; //!< The size of the smallest item box in the carousel, i.e. the ones at the ends, excluding the exiting box, which is actually one size step smaller. Used in Carousel MenuMode.
 		static const Vector c_CarouselBoxSizeStep; //!< The size step between each item box in the carousel. Used in Carousel MenuMode.

@@ -76,12 +76,12 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a Slice object in system memory. Create() should be called before using the object.
+		/// Constructor method used to instantiate a PieSlice object in system memory. Create() should be called before using the object.
 		/// </summary>
 		PieSlice() { Clear(); }
 
 		/// <summary>
-		/// Constructor method used to instantiate a Slice object in system memory. Create() should be called before using the object.
+		/// Constructor method used to instantiate a PieSlice object in system memory. Create() should be called before using the object.
 		/// </summary>
 		/// <param name="description">The description of the pie slice.</param>
 		/// <param name="sliceType">The type of the pie slice.</param>
@@ -91,15 +91,15 @@ namespace RTE {
 		//PieSlice(const std::string &description, PieSliceIndex sliceType, SliceDirection direction, bool enabled = true) : Clear(), m_Description(description), m_SliceType(sliceType), m_Direction(direction), m_Enabled(enabled) { Clear(); }
 
 		/// <summary>
-		/// Makes the Slice object ready for use.
+		/// Makes the PieSlice object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create() override;
 
 		/// <summary>
-		/// Creates a Slice to be identical to another, by deep copy.
+		/// Creates a PieSlice to be identical to another, by deep copy.
 		/// </summary>
-		/// <param name="reference">A reference to the Slice to deep copy.</param>
+		/// <param name="reference">A reference to the PieSlice to deep copy.</param>
 		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(const PieSlice &reference);
 
@@ -158,16 +158,17 @@ namespace RTE {
 		void SetEnabled(bool enabled) { m_Enabled = enabled; }
 
 		/// <summary>
-		/// Gets the icon for this Slice.
+		/// Gets whether or not this PieSlice has a valid Icon.
 		/// </summary>
-		/// <returns>The icon for this Slice.</returns>
-		const Icon & GetIcon() const { return m_Icon; }
+		/// <returns>Whether or not this PieSlice has a valid Icon.</returns>
+		bool HasIcon() const { return m_Icon.GetFrameCount() > 0; }
 
 		/// <summary>
-		/// Gets the start angle this Slice's area is set to be at in its pie menu.
+		/// Gets the appropriate icon frame for this PieSlice.
 		/// </summary>
-		/// <returns>The start angle of this Slice's area.</returns>
-		float GetAreaStart() const { return m_AreaStart; }
+		/// <param name="sliceIsSelected">Whether or not this PieSlice is selected, which may affect which icon is appropriate.</param>
+		/// <returns>The icon for this PieSlice.</returns>
+		BITMAP * GetAppropriateIcon(bool sliceIsSelected = false) const;
 
 		/// <summary>
 		/// Sets the start angle this Slice's area should be at in its pie menu.

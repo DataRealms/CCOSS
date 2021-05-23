@@ -163,6 +163,21 @@ int PieSlice::Create(const PieSlice &reference) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+BITMAP *RTE::PieSlice::GetAppropriateIcon(bool sliceIsSelected) const {
+	if (int iconFrameCount = m_Icon.GetFrameCount(); iconFrameCount > 0) {
+		if (!IsEnabled() && iconFrameCount > 2) {
+			return m_Icon.GetBitmaps8()[2];
+		} else if (sliceIsSelected && iconFrameCount > 1) {
+			return m_Icon.GetBitmaps8()[1];
+		} else {
+			return m_Icon.GetBitmaps8()[0];
+		}
+	}
+	return nullptr;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 int PieSlice::ReadProperty(const std::string_view &propName, Reader &reader) {
 	if (propName == "Description") {
 		reader >> m_Description;

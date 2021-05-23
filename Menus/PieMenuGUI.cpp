@@ -603,23 +603,13 @@ namespace RTE {
 
 	void PieMenuGUI::DrawPieIcons(BITMAP *targetBitmap, const Vector &drawPos) const {
 		BITMAP *sliceIcon;
-		BITMAP **sliceFrames;
-		int sliceFrameCount;
 		Vector sliceIconOffset;
 
 		for (const PieSlice *slice : m_CurrentSlices) {
-			sliceFrames = slice->GetIcon().GetBitmaps8();
-			sliceFrameCount = slice->GetIcon().GetFrameCount();
+			sliceIcon = slice->GetAppropriateIcon(slice == m_HoveredSlice);
 
-			if (sliceFrames && sliceFrameCount > 0) {
-				sliceIcon = sliceFrames[PIS_NORMAL];
-				if (!slice->IsEnabled() && sliceFrameCount > PIS_DISABLED) {
-					sliceIcon = sliceFrames[PIS_DISABLED];
-				} else if (slice == m_HoveredSlice && sliceFrameCount > PIS_SELECTED) {
-					sliceIcon = sliceFrames[PIS_SELECTED];
-				}
-
-				sliceIconOffset = Vector(static_cast<float>(m_InnerRadius + (m_Thickness / 2)), 0.0F).RadRotate(slice->GetMidAngle()) + Vector(1.0F - static_cast<float>(sliceIcon->w / 2), 1.0F - static_cast<float>(sliceIcon->h / 2));
+			if (sliceIcon) {
+				sliceIconOffset = Vector(static_cast<float>(m_InnerRadius + (m_BackgroundThickness / 2)), 0).RadRotate(slice->GetMidAngle()) + Vector(1.0F - static_cast<float>(sliceIcon->w / 2), 1.0F - static_cast<float>(sliceIcon->h / 2));
 				draw_sprite(targetBitmap, sliceIcon, drawPos.GetFloorIntX() + sliceIconOffset.GetFloorIntX(), drawPos.GetFloorIntY() + sliceIconOffset.GetFloorIntY());
 			}
 		}

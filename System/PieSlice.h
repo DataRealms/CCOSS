@@ -122,39 +122,39 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets the type of this Slice.
+		/// Gets the type of this PieSlice.
 		/// </summary>
-		/// <returns>The type of this Slice.</returns>
-		const PieSliceIndex &GetType() const { return m_SliceType; }
+		/// <returns>The type of this PieSlice.</returns>
+		const PieSliceIndex & GetType() const { return m_SliceType; }
 
 		/// <summary>
-		/// Gets the description this Slice shows when selected in its pie menu.
+		/// Gets the description this PieSlice shows when selected in its pie menu.
 		/// </summary>
-		/// <returns>The description of this Slice.</returns>
-		const std::string &GetDescription() const { return m_Description; }
+		/// <returns>The description of this PieSlice.</returns>
+		const std::string & GetDescription() const { return m_Description; }
 
 		/// <summary>
-		/// Gets the direction this Slice is set to be at in its pie menu.
+		/// Gets the direction this PieSlice is set to be at in its pie menu.
 		/// </summary>
-		/// <returns>The direction of this Slice.</returns>
-		const SliceDirection &GetDirection() const { return m_Direction; }
+		/// <returns>The direction of this PieSlice.</returns>
+		const SliceDirection & GetDirection() const { return m_Direction; }
 
 		/// <summary>
-		/// Sets the direction this Slice should be at in its pie menu.
+		/// Sets the direction this PieSlice should be at in its pie menu.
 		/// </summary>
-		/// <param name="direction">The direction to set for the Slice.</param>
+		/// <param name="direction">The direction to set for the PieSlice.</param>
 		void SetDirection(SliceDirection direction) { m_Direction = direction; }
 
 		/// <summary>
-		/// Gets whether or not this Slice is enabled.
+		/// Gets whether or not this PieSlice is enabled.
 		/// </summary>
-		/// <returns>Whether or not this Slice is enabled.</returns>
+		/// <returns>Whether or not this PieSlice is enabled.</returns>
 		bool IsEnabled() const { return m_Enabled; }
 
 		/// <summary>
-		/// Sets whether or not this Slice should be enabled.
+		/// Sets whether or not this PieSlice should be enabled.
 		/// </summary>
-		/// <param name="enabled">Whether or not this Slice should be enabled.</param>
+		/// <param name="enabled">Whether or not this PieSlice should be enabled.</param>
 		void SetEnabled(bool enabled) { m_Enabled = enabled; }
 
 		/// <summary>
@@ -171,66 +171,74 @@ namespace RTE {
 		BITMAP * GetAppropriateIcon(bool sliceIsSelected = false) const;
 
 		/// <summary>
-		/// Sets the start angle this Slice's area should be at in its pie menu.
+		/// Gets the file path of the scripted file this PieSlice should run when activated. Empty if it's not a scripted type. Empty if its SliceType isn't scripted.
 		/// </summary>
-		/// <param name="areaStart">The start angle to set for the Slice's area.</param>
+		/// <returns>The file path to the script file this PieSlice should load when activated.</returns>
+		const std::string &GetScriptPath() const { return m_ScriptPath; }
+
+		/// <summary>
+		/// Gets the name of the Lua function to run when this PieSlice is activated as a scripted pie menu option. Empty if its SliceType isn't scripted.
+		/// </summary>
+		/// <returns>The Lua function name this PieSlice should execute when activated.</returns>
+		const std::string &GetFunctionName() const { return m_FunctionName; }
+#pragma endregion
+
+#pragma region Angle Getter and Setters
+		/// <summary>
+		/// Gets the start angle this PieSlice's area is set to be at in its pie menu.
+		/// </summary>
+		/// <returns>The start angle of this PieSlice's area.</returns>
+		float GetAreaStart() const { return m_AreaStart; }
+
+		/// <summary>
+		/// Sets the start angle this PieSlice's area should be at in its pie menu.
+		/// </summary>
+		/// <param name="areaStart">The start angle to set for the PieSlice's area.</param>
 		void SetAreaStart(float areaStart) { m_AreaStart = areaStart; }
 
 		/// <summary>
-		/// Gets the arc length this of this Slice's area.
+		/// Gets the arc length this of this PieSlice's area.
 		/// </summary>
-		/// <returns>The arc length of this Slice's area.</returns>
+		/// <returns>The arc length of this PieSlice's area.</returns>
 		float GetAreaArc() const { return m_AreaArc; }
 
 		/// <summary>
-		/// Sets the arc length of this Slice's area.
+		/// Sets the arc length of this PieSlice's area.
 		/// </summary>
-		/// <param name="areaArc">The arc length to set for the Slice's area.</param>
+		/// <param name="areaArc">The arc length to set for the PieSlice's area.</param>
 		void SetAreaArc(float areaArc) { m_AreaArc = areaArc; }
 
 		/// <summary>
-		/// Gets the mid angle this Slice's area is set to be at in its pie menu.
+		/// Gets the mid angle this PieSlice's area is set to be at in its pie menu.
 		/// </summary>
-		/// <returns>The mid angle of this Slice's area.</returns>
+		/// <returns>The mid angle of this PieSlice's area.</returns>
 		float GetMidAngle() const { return m_MidAngle; }
 
 		/// <summary>
-		/// Sets the mid angle this Slice's area should be at in its pie menu.
+		/// Sets the mid angle this PieSlice's area should be at in its pie menu.
 		/// </summary>
-		/// <param name="midAngle">The mid angle to set for the Slice's area.</param>
+		/// <param name="midAngle">The mid angle to set for the PieSlice's area.</param>
 		void SetMidAngle(float midAngle) { m_MidAngle = midAngle; }
-
-		/// <summary>
-		/// Gets the file path of the scripted file this Slice should run when activated. Empty if it's not a scripted type. Empty if its SliceType isn't scripted.
-		/// </summary>
-		/// <returns>The file path to the script file this Slice should load when activated.</returns>
-		const std::string & GetScriptPath() const { return m_ScriptPath; }
-
-		/// <summary>
-		/// Gets the name of the Lua function to run when this Slice is activated as a scripted pie menu option. Empty if its SliceType isn't scripted.
-		/// </summary>
-		/// <returns>The Lua function name this Slice should execute when activated.</returns>
-		const std::string & GetFunctionName() const { return m_FunctionName; }
 #pragma endregion
 
 	private:
-		static const std::string c_ClassName; //!< ClassName for Slice.
+		static const std::string c_ClassName; //!< ClassName for PieSlice.
 
-		PieSliceIndex m_SliceType; //!< The Slice type, also serves as icon index.
+		PieSliceIndex m_SliceType; //!< The PieSlice type, also serves as icon index.
 		std::string m_Description; //!< Description of what this slice option does.
 		SliceDirection m_Direction; //!< The desired direction/location of this on the pie menu.
 		bool m_Enabled; //!< Whether this slice is enabled or disabled and greyed out.
 		Icon m_Icon; //!< The icon of this pie slice.
 
+		std::string m_ScriptPath; //!< Path to the script file this should run if this is a scripted selection.
+		std::string m_FunctionName; //!< Name of the function in the script that this should run if a scripted pie option.
+
 		float m_AreaStart; //!< The start angle of this' area on the pie menu, counted in radians from straight out right and going counter clockwise.
 		float m_AreaArc; //!< The arc length of the slice area, so that the icon should be drawn at the areastart + halfway of this.
 		float m_MidAngle; //!< Mid angle, basically m_AreaStart + (m_AreaArc / 2).
 
-		std::string m_ScriptPath; //!< Path to the script file this should run if this is a scripted selection.
-		std::string m_FunctionName; //!< Name of the function in the script that this should run if a scripted pie option.
-
 		/// <summary>
-		/// Clears all the member variables of this Slice, effectively resetting the members of this abstraction level only.
+		/// Clears all the member variables of this PieSlice, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear();
 	};

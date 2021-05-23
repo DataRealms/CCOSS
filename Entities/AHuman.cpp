@@ -3321,7 +3321,7 @@ void AHuman::Update()
         if (pDevice)
         {
             // Only reload if no other pickuppable item is in reach
-            if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !m_pItemInReach)
+            if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD))
             {
                 pDevice->Reload();
                 if (m_pBGArm && m_pBGArm->IsAttached() && GetEquippedBGItem() == NULL) {

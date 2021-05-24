@@ -1646,55 +1646,54 @@ namespace RTE {
 			}
 
 			// Process reset votes
-			int votesNeeded = 0;
-			int endActivityVotes = 0;
-			int restartVotes = 0;
+			// Only reset gameplay activities, and not server lobby
+			if (g_InActivity && g_ActivityMan.GetActivity()->GetPresetName() != "Multiplayer Lobby") {
 
-			for (short player = 0; player < c_MaxClients; player++) {
-				if (IsPlayerConnected(player)) {
-					votesNeeded++;
-					if (m_EndActivityVotes[player]) { endActivityVotes++; }
-					if (m_RestartActivityVotes[player]) { restartVotes++; }
-				}
-			}
+				int votesNeeded = 0;
+				int endActivityVotes = 0;
+				int restartVotes = 0;
 
-			std::string displayMsg = "";
-
-			if (endActivityVotes > 0) {
-				displayMsg = "Voting to end activity: " + std::to_string(endActivityVotes) + " of " + std::to_string(votesNeeded);
-			}
-			if (restartVotes > 0) {
-				if (!displayMsg.empty()) { displayMsg += "\n"; }
-				displayMsg += "Voting to restart activity: " + std::to_string(restartVotes) + " of " + std::to_string(votesNeeded);
-			}
-			
-			if (votesNeeded > 0 && (endActivityVotes > 0 || restartVotes > 0)) {
-				for (short i = 0; i < c_MaxClients; i++) {
-					g_FrameMan.SetScreenText(displayMsg, g_ActivityMan.GetActivity()->ScreenOfPlayer(i), 0, 500);
-					g_ActivityMan.GetActivity()->ResetMessageTimer(i);
+				for (short player = 0; player < c_MaxClients; player++) {
+					if (IsPlayerConnected(player)) {
+						votesNeeded++;
+						if (m_EndActivityVotes[player]) { endActivityVotes++; }
+						if (m_RestartActivityVotes[player]) { restartVotes++; }
+					}
 				}
 
-				if (endActivityVotes >= votesNeeded) {
-					// Only reset gameplay activities, and not server lobby
-					if (g_InActivity && g_ActivityMan.GetActivity()->GetPresetName() != "Multiplayer Lobby") {
+				std::string displayMsg = "";
+
+				if (endActivityVotes > 0) {
+					displayMsg = "Voting to end activity: " + std::to_string(endActivityVotes) + " of " + std::to_string(votesNeeded);
+				}
+				if (restartVotes > 0) {
+					if (!displayMsg.empty()) { displayMsg += "\n"; }
+					displayMsg += "Voting to restart activity: " + std::to_string(restartVotes) + " of " + std::to_string(votesNeeded);
+				}
+
+				if (votesNeeded > 0 && (endActivityVotes > 0 || restartVotes > 0)) {
+					for (short i = 0; i < c_MaxClients; i++) {
+						g_FrameMan.SetScreenText(displayMsg, g_ActivityMan.GetActivity()->ScreenOfPlayer(i), 0, 500);
+						g_ActivityMan.GetActivity()->ResetMessageTimer(i);
+					}
+
+					// establish timer so restarts can only occur once per 5 seconds
+					long long currentTicks = g_TimerMan.GetRealTickCount();
+					int minRestartInterval = 5; 
+
+					if (endActivityVotes >= votesNeeded) {
 						g_ActivityMan.EndActivity();
 						g_ResetActivity = true;
 						g_InActivity = false;
-					}
-				}
-
-				// establish timer so restarts can only occur once per 5 seconds
-				long long currentTicks = g_TimerMan.GetRealTickCount();
-				if (restartVotes >= votesNeeded && ((currentTicks - m_LatestRestartTime > (g_TimerMan.GetTicksPerSecond() * 5) || m_LatestRestartTime == 0))) {
-					if (g_InActivity && g_ActivityMan.GetActivity()->GetPresetName() != "Multiplayer Lobby") {
+					} else if (restartVotes >= votesNeeded && ((currentTicks - m_LatestRestartTime > (g_TimerMan.GetTicksPerSecond() * minRestartInterval) || m_LatestRestartTime == 0))) {
 						m_LatestRestartTime = currentTicks;
 						g_ActivityMan.RestartActivity();
 					}
-				}
 
-				for (short player = 0; player < c_MaxClients; player++) {
-					m_EndActivityVotes[player] = false;
-					m_RestartActivityVotes[player] = false;
+					for (short player = 0; player < c_MaxClients; player++) {
+						m_EndActivityVotes[player] = false;
+						m_RestartActivityVotes[player] = false;
+					}
 				}
 			}
 		}

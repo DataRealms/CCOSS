@@ -23,7 +23,7 @@ namespace RTE {
 		m_InputMapScrollingBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxScrollingMappingBox"));
 		m_InputMapScrollingBoxScrollbar = dynamic_cast<GUIScrollbar *>(m_GUIControlManager->GetControl("ScrollbarScrollingMappingBox"));
 		m_InputMapScrollingBoxScrollbar->SetMaximum(m_InputMapScrollingBox->GetHeight());
-		m_InputMapScrollingBoxScrollbar->SetPageSize(m_InputMapScrollingBoxScrollbar->GetMaximum() / 2 - 5);
+		m_InputMapScrollingBoxScrollbar->SetPageSize(m_InputMapScrollingBoxScrollbar->GetMaximum() / 2);
 		m_LastInputMapScrollingBoxScrollbarValue = m_InputMapScrollingBoxScrollbar->GetValue();
 
 		for (int i = 0; i < InputElements::INPUT_COUNT; ++i) {
@@ -82,7 +82,8 @@ namespace RTE {
 			m_InputMapButton.at(i)->SetText(!inputDescription.empty() ? "[" + inputDescription + "]" : "[Undefined]");
 		}
 		// Adjust the scrolling box scroll range to hide mappings that are only relevant to gamepads.
-		m_InputMapScrollingBoxScrollbar->SetPageSize(m_InputMapScrollingBoxScrollbar->GetMaximum() / 2 - ((m_ConfiguringPlayerInputScheme->GetDevice() < InputDevice::DEVICE_GAMEPAD_1) ? -71 : 5));
+		m_InputMapScrollingBoxScrollbar->SetMaximum(m_InputMapScrollingBox->GetHeight() - ((m_ConfiguringPlayerInputScheme->GetDevice() < InputDevice::DEVICE_GAMEPAD_1) ? 141 : -8));
+		m_InputMapScrollingBoxScrollbar->SetPageSize(m_InputMapScrollingBoxScrollbar->GetMaximum() / 2);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,7 +114,7 @@ namespace RTE {
 					m_InputMapButton.at(mapButton)->SetText("Press Any Key");
 				}
 			}
-		} else if (guiEvent.GetType() == GUIEvent::Notification && guiEvent.GetControl() == m_InputMapScrollingBoxScrollbar && guiEvent.GetMsg() == GUIScrollbar::ChangeValue) {
+		} else if (guiEvent.GetType() == GUIEvent::Notification && guiEvent.GetMsg() == GUIScrollbar::ChangeValue && guiEvent.GetControl() == m_InputMapScrollingBoxScrollbar) {
 			UpdateScrollingInputBoxScrollPosition();
 		}
 	}

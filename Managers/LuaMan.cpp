@@ -442,6 +442,7 @@ PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetReloadEndSound);
 //////////////////////////////////////////////////////////////////////////////////////////
 // Other misc adapters to eliminate/emulate default parameters etc
 
+void SetPresetName(Entity *selfObject, const std::string &presetName) { selfObject->SetPresetName(presetName, true); }
 void GibThis(MOSRotating *pThis) { pThis->GibThis(); }
 void AddMO(MovableMan &This, MovableObject *pMO)
 {
@@ -694,7 +695,7 @@ int LuaMan::Initialize() {
             .def("Reset", &Entity::Reset)
             .def(tostring(const_self))
             .property("ClassName", &Entity::GetClassName)
-            .property("PresetName", &Entity::GetPresetName, &Entity::SetPresetName)
+            .property("PresetName", &Entity::GetPresetName, SetPresetName)
             .property("Description", &Entity::GetDescription, &Entity::SetDescription)
             .def("GetModuleAndPresetName", &Entity::GetModuleAndPresetName)
             .property("IsOriginalPreset", &Entity::IsOriginalPreset)

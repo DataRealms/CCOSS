@@ -285,8 +285,10 @@ namespace RTE {
 		/// Sets the name of this Entity's data Preset.
 		/// </summary>
 		/// <param name="newName">A string reference with the instance name of this Entity.</param>
+		/// <param name="calledFromLua">Whether this method was called from Lua, in which case this change is cosmetic only and shouldn't affect scripts.</param>
+		// TODO: Replace the calledFromLua flag with some DisplayName property
 		// TODO: Figure out how to handle if same name was set, still make it wasgivenname = true?
-		virtual void SetPresetName(const std::string &newName) { /*if (m_PresetName != newName) { m_IsOriginalPreset = true; }*/ m_IsOriginalPreset = true; m_PresetName = newName; }
+		virtual void SetPresetName(const std::string &newName, bool calledFromLua = false) { /*if (m_PresetName != newName) { m_IsOriginalPreset = true; }*/ m_IsOriginalPreset = calledFromLua ? m_IsOriginalPreset : true; m_PresetName = newName; }
 
 		/// <summary>
 		/// Gets the plain text description of this Entity's data Preset.

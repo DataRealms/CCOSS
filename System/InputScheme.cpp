@@ -414,6 +414,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool InputScheme::CaptureJoystickMapping(int whichJoy, int whichInput) {
+		if (whichJoy < 0) {
+			return false;
+		}
 		int whichButton = g_UInputMan.WhichJoyButtonPressed(whichJoy);
 		if (whichButton != JoyButtons::JOY_NONE) {
 			m_InputMappings.at(whichInput).Reset();
@@ -422,11 +425,11 @@ namespace RTE {
 		}
 		for (int stick = 0; stick < joy[whichJoy].num_sticks; ++stick) {
 			for (int axis = 0; axis < joy[whichJoy].stick[stick].num_axis; ++axis) {
-				if (joy[whichJoy].stick[stick].axis[axis].d1 /*&& s_ChangedJoystickStates[whichJoy].stick[stick].axis[axis].d1*/) {
+				if (g_UInputMan.JoyDirectionReleased(whichJoy, stick, axis, JoyDirections::JOYDIR_ONE)) {
 					m_InputMappings.at(whichInput).Reset();
 					m_InputMappings.at(whichInput).SetDirection(stick, axis, JoyDirections::JOYDIR_ONE);
 					return true;
-				} else if (joy[whichJoy].stick[stick].axis[axis].d2 /*&& s_ChangedJoystickStates[whichJoy].stick[stick].axis[axis].d2*/) {
+				} else if (g_UInputMan.JoyDirectionReleased(whichJoy, stick, axis, JoyDirections::JOYDIR_TWO)) {
 					m_InputMappings.at(whichInput).Reset();
 					m_InputMappings.at(whichInput).SetDirection(stick, axis, JoyDirections::JOYDIR_TWO);
 					return true;

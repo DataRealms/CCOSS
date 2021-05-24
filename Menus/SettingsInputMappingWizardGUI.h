@@ -80,7 +80,7 @@ namespace RTE {
 			KeyboardConfigSteps = 16,
 			MouseAndKeyboardConfigSteps = 11,
 			DPadConfigSteps = 12,
-			DualAnalogConfigSteps = 18,
+			DualAnalogConfigSteps = 20,
 		};
 
 		/// <summary>
@@ -128,6 +128,7 @@ namespace RTE {
 		InputDevice m_ConfiguringDevice; //!< Which type of device we are currently configuring.
 		bool m_ConfiguringDeviceIsGamepad; //!< Whether the device being configured is a gamepad of any type.
 		GamepadType m_ConfiguringGamepadType; //!< Which type of gamepad we are currently configuring.
+		int m_ConfiguringGamepadIndex; //!< The index number of the configuring gamepad. See UInputMan::GetJoystickIndex for info.
 
 		bool m_ConfiguringManually; //!<
 		bool m_ConfigFinished; //!<

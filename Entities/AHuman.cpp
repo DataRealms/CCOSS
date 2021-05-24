@@ -955,7 +955,9 @@ bool AHuman::EquipDeviceInGroup(string group, bool doEquip)
                 if (m_pFGArm->HoldsSomething())
                 {
                     m_pFGArm->GetHeldDevice()->Deactivate();
-                    m_Inventory.push_back(m_pFGArm->ReleaseHeldMO());
+                    MovableObject *previouslyHeldItem = m_pFGArm->ReleaseHeldMO();
+                    if (previouslyHeldItem->GetsHitByMOs()) { previouslyHeldItem->Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawNoMOID, true); }
+                    m_Inventory.emplace_back(previouslyHeldItem);
                 }
 
                 // Now put the device we were looking for and found into the hand

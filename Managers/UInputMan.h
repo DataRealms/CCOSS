@@ -52,14 +52,14 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
+		/// Workaround for Allegro being unable to detect joystick plugging/unplugging at runtime to enable/disable them accordingly. Uses OS functions to check if the number of connected joysticks changed and reinitializes the joystick handler if necessary.
+		/// </summary>
+		void DetectJoystickHotPlug() const;
+
+		/// <summary>
 		/// Loads the input device icons from loaded presets. Can't do this during Create() because the presets don't exist so this will be called from MenuMan::Initialize() after modules are loaded.
 		/// </summary>
 		void LoadDeviceIcons();
-
-		/// <summary>
-		/// Re-initializes the keyboard for when windows regains focus. This is really used to work around an Allegro bug.
-		/// </summary>
-		void ReInitKeyboard() { install_keyboard(); }
 
 		/// <summary>
 		/// Updates the state of this UInputMan. Supposed to be done every frame.

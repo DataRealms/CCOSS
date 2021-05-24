@@ -134,6 +134,8 @@ namespace RTE {
 			m_TitleScreen->SetTitlePendingTransition();
 			return true;
 		}
+		g_UInputMan.DetectJoystickHotPlug();
+
 		return false;
 	}
 

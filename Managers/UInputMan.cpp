@@ -10,6 +10,10 @@
 #include "GameActivity.h"
 #include "NetworkServer.h"
 
+#ifdef _WIN32
+#include "joystickapi.h"
+#endif
+
 namespace RTE {
 
 	GUIInput* UInputMan::s_InputClass = nullptr;
@@ -107,6 +111,25 @@ namespace RTE {
 		poll_joystick();
 
 		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::DetectJoystickHotPlug() const {
+#ifdef _WIN32
+		if (joyGetNumDevs() > 0) {
+			static JOYINFOEX joyInfo = { sizeof(JOYINFOEX), JOY_RETURNBUTTONS };
+			int numDetectedJoysticks = 0;
+
+			for (int i = 0; i < 5; ++i) {
+				if (joyGetPosEx(i, &joyInfo) == JOYERR_NOERROR) { numDetectedJoysticks++; }
+			}
+			if (numDetectedJoysticks != num_joysticks) {
+				remove_joystick();
+				if (numDetectedJoysticks > 0 && install_joystick(JOY_TYPE_AUTODETECT) != 0) { RTEAbort("Failed to initialize joysticks!"); }
+			}
+		}
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

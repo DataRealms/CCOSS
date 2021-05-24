@@ -64,15 +64,15 @@ namespace RTE {
 		bool IsConnectedAndRegistered() const { return m_IsConnected && m_IsRegistered; }
 		
 		/// <summary>
-		/// Gets scene width for network client
+		/// Gets scene width for network client.
 		/// </summary>
-		/// <returns>Current scene width</returns>
+		/// <returns>Current scene width.</returns>
 		int GetSceneWidth() const { return m_SceneWidth; }
 
 		/// <summary>
-		/// Gets scene height for network client
+		/// Gets scene height for network client.
 		/// </summary>
-		/// <returns>Current scene height</returns>
+		/// <returns>Current scene height.</returns>
 		int GetSceneHeight() const { return m_SceneHeight; }
 		
 		/// <summary>

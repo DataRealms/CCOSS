@@ -262,7 +262,7 @@ namespace RTE {
 		bool m_EndActivityVotes[c_MaxClients]; //!< Votes from each player required to return to the Multiplayer Lobby.
 		bool m_RestartActivityVotes[c_MaxClients]; //!< Votes from each player required to restart the current activity.
 
-		long long m_LatestRestartTime; //!< 
+		long long m_LatestRestartTime; //!< The time, in ticks, that the last activity restart took place on the server.
 
 		int m_FrameNumbers[c_MaxClients]; //!<
 

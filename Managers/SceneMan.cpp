@@ -437,7 +437,7 @@ Vector SceneMan::GetSceneDim() const
 int SceneMan::GetSceneWidth() const
 {
 	if (g_NetworkClient.IsConnectedAndRegistered()) {
-		return g_NetworkClient.SceneWrapsX();
+		return g_NetworkClient.GetSceneWidth();
 	}
 
 	if (m_pCurrentScene)

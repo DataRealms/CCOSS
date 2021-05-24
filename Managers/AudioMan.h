@@ -372,7 +372,7 @@ namespace RTE {
 		/// <summary>
 		/// Clears the list of current Sound events for the target player.
 		/// </summary>
-		/// <param name="player">Player to clear sound events for. -1 clears for all players</param>
+		/// <param name="player">Player to clear sound events for. -1 clears for all players.</param>
 		void ClearSoundEvents(short player);
 #pragma endregion
 

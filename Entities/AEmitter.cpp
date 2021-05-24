@@ -397,13 +397,13 @@ void AEmitter::Update()
 {
     Attachable::PreUpdate();
 
-// TODO: Really hardcode this?
-    // Set animation to loop if emitting
-    if (m_FrameCount > 1)
-    {
-        m_SpriteAnimMode = m_EmitEnabled ? ALWAYSLOOP : NOANIM;
-        if (!m_EmitEnabled)
+    if (m_FrameCount > 1) {
+        if (m_EmitEnabled && m_SpriteAnimMode == NOANIM) {
+            m_SpriteAnimMode = ALWAYSLOOP;
+        } else if (!m_EmitEnabled) {
+            m_SpriteAnimMode = NOANIM;
             m_Frame = 0;
+        }
     }
 
     // Update and show flash if there is one

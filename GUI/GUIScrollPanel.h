@@ -261,6 +261,12 @@ public:
 
     int GetSmallChange();
 
+	/// <summary>
+	/// Gets the value resolution for this scroll panel.
+	/// </summary>
+	/// <returns>The value resolution</returns>
+	int GetValueResolution() const;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -377,6 +383,7 @@ private:
     bool                m_GrabbedBackg;
     int                    m_GrabbedPos;
     int                    m_GrabbedSide;
+	int m_ValueResolution; //!< How much the value increases/decreases on each mouse wheel change when scrolling.
 };
 
 

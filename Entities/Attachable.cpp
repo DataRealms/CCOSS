@@ -36,6 +36,7 @@ namespace RTE {
 		m_InheritsHFlipped = 1;
 		m_InheritsRotAngle = true;
 		m_InheritedRotAngleOffset = 0.0F;
+		m_InheritsFrame = false;
 
 		m_AtomSubgroupID = -1L;
 		m_CollidesWithTerrainWhileAttached = true;
@@ -81,6 +82,7 @@ namespace RTE {
 		m_InheritsHFlipped = reference.m_InheritsHFlipped;
 		m_InheritsRotAngle = reference.m_InheritsRotAngle;
 		m_InheritedRotAngleOffset = reference.m_InheritedRotAngleOffset;
+		m_InheritsFrame = reference.m_InheritsFrame;
 
 		m_AtomSubgroupID = GetUniqueID();
 		m_CollidesWithTerrainWhileAttached = reference.m_CollidesWithTerrainWhileAttached;
@@ -124,6 +126,8 @@ namespace RTE {
 			reader >> m_InheritedRotAngleOffset;
 		} else if (propName == "InheritedRotAngleDegOffset") {
 			m_InheritedRotAngleOffset = DegreesToRadians(std::stof(reader.ReadPropValue()));
+		} else if (propName == "InheritsFrame") {
+			reader >> m_InheritsFrame;
 		} else if (propName == "CollidesWithTerrainWhileAttached") {
 			reader >> m_CollidesWithTerrainWhileAttached;
 		} else {
@@ -352,6 +356,8 @@ namespace RTE {
 		}
 
 		MOSRotating::Update();
+
+		if (m_Parent && m_InheritsFrame) { SetFrame(m_Parent->GetFrame()); }
 
 		// If we're attached to something, MovableMan doesn't own us, and therefore isn't calling our UpdateScripts method (and neither is our parent), so we should here.
 		if (m_Parent != nullptr && GetRootParent()->HasEverBeenAddedToMovableMan()) { UpdateScripts(); }

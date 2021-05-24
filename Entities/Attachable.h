@@ -339,6 +339,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="inheritedRotAngleOffset">Thee new rotation angle offset for this Attachable.</param>
 		void SetInheritedRotAngleOffset(float inheritedRotAngleOffset) { m_InheritedRotAngleOffset = inheritedRotAngleOffset; }
+
+		/// <summary>
+		/// Gets whether or not this Attachable inherits its Frame from its parent, if attached.
+		/// </summary>
+		/// <returns>Whether or not this Attachable inherits its parent's Frame.</returns>
+		bool InheritsFrame() const { return m_InheritsFrame; }
+
+		/// <summary>
+		/// Sets whether or not this Attachable inherits its Frame from its parent, if attached.
+		/// </summary>
+		/// <param name="inheritsFrame">Whether or not to inherit its parent's Frame.</param>
+		void SetInheritsFrame(bool inheritsFrame) { m_InheritsFrame = inheritsFrame; }
 #pragma endregion
 
 #pragma region Collision Management
@@ -531,6 +543,7 @@ namespace RTE {
 		int m_InheritsHFlipped; //!< Whether this Attachable should inherit its parent's HFlipped. Defaults to 1 (normal inheritance).
 		bool m_InheritsRotAngle; //!< Whether this Attachable should inherit its parent's RotAngle. Defaults to true.
 		float m_InheritedRotAngleOffset; //!< The offset by which this Attachable should be rotated when it's set to inherit its parent's rotation angle. Defaults to 0.
+		bool m_InheritsFrame; //!< Whether this Attachable should inherit its parent's Frame. Defaults to false.
 
 		long m_AtomSubgroupID; //!< The Atom IDs this' atoms will have when attached and added to a parent's AtomGroup.
 		bool m_CollidesWithTerrainWhileAttached; //!< Whether this attachable currently has terrain collisions enabled while it's attached to a parent.

@@ -991,6 +991,7 @@ int LuaMan::Initialize() {
             .property("InheritsHFlipped", &Attachable::InheritsHFlipped, &Attachable::SetInheritsHFlipped)
 			.property("InheritsRotAngle", &Attachable::InheritsRotAngle, &Attachable::SetInheritsRotAngle)
             .property("InheritedRotAngleOffset", &Attachable::GetInheritedRotAngleOffset, &Attachable::SetInheritedRotAngleOffset)
+            .property("InheritsFrame", &Attachable::InheritsFrame, &Attachable::SetInheritsFrame)
             .property("AtomSubgroupID", &Attachable::GetAtomSubgroupID)
 			.property("CollidesWithTerrainWhileAttached", &Attachable::GetCollidesWithTerrainWhileAttached, &Attachable::SetCollidesWithTerrainWhileAttached)
             .property("CanCollideWithTerrain", &Attachable::CanCollideWithTerrain),

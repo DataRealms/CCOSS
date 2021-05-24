@@ -53,7 +53,7 @@ namespace RTE {
 		/// Gets whether the input mapping wizard needs to capture input for manual configuration.
 		/// </summary>
 		/// <returns>Whether the input mapping wizard needs to capture input for manual configuration.</returns>
-		bool IsConfiguringManually() const { return m_ConfiguringManually; }
+		bool IsConfiguringManually() const;
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -73,7 +73,7 @@ namespace RTE {
 	private:
 
 		/// <summary>
-		/// 
+		/// Enumeration for the manual configuration step count for each type of input device.
 		/// </summary>
 		enum ConfigWizardSteps {
 			NoConfigSteps = 0,
@@ -84,7 +84,7 @@ namespace RTE {
 		};
 
 		/// <summary>
-		/// 
+		/// Enumeration for the different types of gamepads that can be configured.
 		/// </summary>
 		enum GamepadType { DPad, AnalogDualShock, AnalogXbox };
 
@@ -130,22 +130,22 @@ namespace RTE {
 		GamepadType m_ConfiguringGamepadType; //!< Which type of gamepad we are currently configuring.
 		int m_ConfiguringGamepadIndex; //!< The index number of the configuring gamepad. See UInputMan::GetJoystickIndex for info.
 
-		bool m_ConfiguringManually; //!<
-		bool m_ConfigFinished; //!<
-		int m_ConfigStep; //!< Which step in current configure sequence.
-		bool m_ConfigStepChange; //!<
+		bool m_ConfiguringManually; //!< Indicates that the SettingsInputMappingWizardGUI needs to capture input because the player is configuring manually.
+		bool m_ConfigFinished; //!< Whether the last input was mapped and the manual configuration mode is ready to apply the new InputScheme.
+		int m_ConfigStep; //!< The current step in the manual configuration sequence.
+		bool m_ConfigStepChange; //!< Whether a configuration step was completed and the sequence needs updating to start handling the next step.
 
-		InputScheme m_NewInputScheme; //!<
+		InputScheme m_NewInputScheme; //!< The new InputScheme that was configured in manual configuration mode.
 		bool m_NewInputSchemeApplied; //!< Whether the new InputScheme was applied as the configuring player's active InputScheme.
 
-		Timer m_GamepadRecommendedDiagramBlinkTimer; //!<
+		Timer m_GamepadRecommendedDiagramBlinkTimer; //!< Timer for animating the recommended input diagram when configuring gamepads.
 
-		std::vector<BITMAP *> m_DPadDiagramBitmaps; //!<
-		std::vector<BITMAP *> m_DualAnalogDSDiagramBitmaps; //!<
-		std::vector<BITMAP *> m_DualAnalogXBDiagramBitmaps; //!<
+		std::vector<BITMAP *> m_DPadDiagramBitmaps; //!< Vector containing all the D-Pad type gamepad recommended input diagram bitmaps.
+		std::vector<BITMAP *> m_DualAnalogDSDiagramBitmaps; //!< Vector containing all the DualShock type gamepad recommended input diagram bitmaps.
+		std::vector<BITMAP *> m_DualAnalogXBDiagramBitmaps; //!< Vector containing all the Xbox type gamepad recommended input diagram bitmaps.
 
-		WizardManualConfigScreen m_WizardManualConfigScreen; //!<
-		WizardPresetSelectScreen m_WizardPresetSelectScreen; //!<
+		WizardManualConfigScreen m_WizardManualConfigScreen; //!< The manual input configuration menu screen.
+		WizardPresetSelectScreen m_WizardPresetSelectScreen; //!< The preset selection menu screen.
 
 		/// <summary>
 		/// GUI elements that compose the input mapping wizard menu screen.
@@ -155,34 +155,39 @@ namespace RTE {
 
 #pragma region Create Breakdown
 		/// <summary>
-		/// 
+		/// Creates all the elements that compose the manual input configuration box.
 		/// </summary>
 		void CreateManualConfigScreen();
 
 		/// <summary>
-		/// 
+		/// Creates all the elements that compose the gamepad input preset selection box.
 		/// </summary>
 		void CreatePresetSelectionScreen();
 #pragma endregion
 
 #pragma region Input Mapping Wizard Handling
 		/// <summary>
-		/// 
+		/// Makes the manual input configuration menu screen visible to be interacted with by the player.
 		/// </summary>
 		void ShowManualConfigScreen();
 
 		/// <summary>
-		/// 
+		/// Makes the gamepad input preset selection menu screen visible to be interacted with by the player.
 		/// </summary>
 		void ShowPresetSelectionScreen();
 
 		/// <summary>
-		/// 
+		/// Clears the InputScheme that was configured during manual configuration and resets the sequence to the first step.
+		/// </summary>
+		void ResetManualConfigSequence();
+
+		/// <summary>
+		/// Applies the manually configured InputScheme as the active InputScheme of the configuring player.
 		/// </summary>
 		void ApplyManuallyConfiguredScheme();
 
 		/// <summary>
-		/// 
+		/// Applies a gamepad InputScheme preset as the active InputScheme of the configuring player.
 		/// </summary>
 		void ApplyGamepadInputPreset(GamepadType gamepadType);
 #pragma endregion
@@ -203,26 +208,28 @@ namespace RTE {
 
 #pragma region Input Configuration Sequence Handling Breakdown
 		/// <summary>
-		/// 
+		/// Handles capturing input and progressing the keyboard only configuration sequence.
 		/// </summary>
-		/// <returns></returns>
-		void UpdateKeyboardConfigSequence();
+		/// <returns>Whether input was captured and the sequence needs to progress.</returns>
+		bool UpdateKeyboardConfigSequence();
 
 		/// <summary>
-		/// 
+		/// Handles capturing input and progressing the mouse and keyboard configuration sequence.
 		/// </summary>
-		/// <returns></returns>
-		void UpdateMouseAndKeyboardConfigSequence();
+		/// <returns>Whether input was captured and the sequence needs to progress.</returns>
+		bool UpdateMouseAndKeyboardConfigSequence();
 
 		/// <summary>
-		/// 
+		/// Handles capturing input and progressing the D-Pad type gamepad configuration sequence.
 		/// </summary>
-		void UpdateGamepadDPadConfigSequence();
+		/// <returns>Whether input was captured and the sequence needs to progress.</returns>
+		bool UpdateGamepadDPadConfigSequence();
 
 		/// <summary>
-		/// 
+		/// Handles capturing input and progressing the dual-analog type gamepad (DualShock/Xbox) configuration sequence.
 		/// </summary>
-		void UpdateGamepadAnalogConfigSequence();
+		/// <returns>Whether input was captured and the sequence needs to progress.</returns>
+		bool UpdateGamepadAnalogConfigSequence();
 #pragma endregion
 
 		/// <summary>

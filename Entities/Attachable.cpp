@@ -187,8 +187,8 @@ namespace RTE {
 		}
 
 		Vector totalForce;
-		for (const std::pair<Vector, Vector> &force : m_Forces) {
-			totalForce += force.first;
+		for (const auto &[force, forceOffset] : m_Forces) {
+			totalForce += force;
 		}
 
 		jointForces += totalForce;
@@ -211,8 +211,8 @@ namespace RTE {
 		if (gibImpulseLimitValueToUse > 0) { gibImpulseLimitValueToUse = std::max(gibImpulseLimitValueToUse, jointStrengthValueToUse); }
 
 		Vector totalImpulseForce;
-		for (const std::pair<Vector, Vector> &impulseForce : m_ImpulseForces) {
-			totalImpulseForce += impulseForce.first;
+		for (const auto &[impulseForce, impulseForceOffset] : m_ImpulseForces) {
+			totalImpulseForce += impulseForce;
 		}
 		totalImpulseForce *= jointStiffnessValueToUse;
 
@@ -232,9 +232,9 @@ namespace RTE {
 		// The first part is getting the Dot/Scalar product of the perpendicular of the offset vector for the force onto the force vector itself (dot product is the amount two vectors are pointing in the same direction).
 		// The second part is dividing that Dot product by the moment of inertia, i.e. the torque needed to make it turn. All of this is multiplied by 1 - JointStiffness, because max stiffness joints transfer all force to parents and min stiffness transfer none.
 		if (!m_InheritsRotAngle) {
-			for (const std::pair<Vector, Vector> &impulseForce : m_ImpulseForces) {
-				if (!impulseForce.second.IsZero()) {
-					m_AngularVel += (impulseForce.second.GetPerpendicular().Dot(impulseForce.first) / m_pAtomGroup->GetMomentOfInertia()) * (1.0F - jointStiffnessValueToUse);
+			for (const auto &[impulseForce, impulseForceOffset] : m_ImpulseForces) {
+				if (!impulseForceOffset.IsZero()) {
+					m_AngularVel += (impulseForceOffset.GetPerpendicular().Dot(impulseForce) / m_pAtomGroup->GetMomentOfInertia()) * (1.0F - jointStiffnessValueToUse);
 				}
 			}
 		}
@@ -278,8 +278,7 @@ namespace RTE {
 
 	bool Attachable::CanCollideWithTerrain() const {
 		if (m_CollidesWithTerrainWhileAttached && IsAttached() && GetParent() != GetRootParent()) {
-			const Attachable *parentAsAttachable = dynamic_cast<const Attachable *>(GetParent());
-			if (parentAsAttachable) { return parentAsAttachable->CanCollideWithTerrain(); }
+			if (const Attachable *parentAsAttachable = dynamic_cast<const Attachable *>(GetParent())) { return parentAsAttachable->CanCollideWithTerrain(); }
 		}
 		return m_CollidesWithTerrainWhileAttached;
 	}
@@ -295,8 +294,7 @@ namespace RTE {
 			if (hd.Body[HITOR]->DamageOnPenetration() != 0) { AddDamage(hd.Body[HITOR]->DamageOnPenetration()); }
 
 			// If the parent is an actor, generate an alarm point for them, moving it slightly away from the body (in the direction they got hit from) to get a good reaction.
-			Actor *parentAsActor = dynamic_cast<Actor *>(GetRootParent());
-			if (parentAsActor) {
+			if (Actor *parentAsActor = dynamic_cast<Actor *>(GetRootParent())) {
 				Vector extruded(hd.HitVel[HITOR]);
 				extruded.SetMagnitude(parentAsActor->GetHeight());
 				extruded = m_Pos - extruded;
@@ -344,7 +342,7 @@ namespace RTE {
 				if (std::abs(currentRotAngleOffset - m_PrevRotAngleOffset) > 0.01745F) { // Update for 1 degree differences
 					Matrix atomRotationForSubgroup(rootParentAsMOSR->FacingAngle(GetRotAngle()) - rootParentAsMOSR->FacingAngle(rootParentAsMOSR->GetRotAngle()));
 					Vector atomOffsetForSubgroup(g_SceneMan.ShortestDistance(rootParentAsMOSR->GetPos(), m_Pos, g_SceneMan.SceneWrapsX()).FlipX(rootParentAsMOSR->IsHFlipped()));
-					Matrix rootParentAngleToUse(rootParentAsMOSR->GetRotAngle() * rootParentAsMOSR->GetFlipFactor());
+					Matrix rootParentAngleToUse(rootParentAsMOSR->GetRotAngle() * static_cast<float>(rootParentAsMOSR->GetFlipFactor()));
 					atomOffsetForSubgroup /= rootParentAngleToUse;
 					rootParentAsMOSR->GetAtomGroup()->UpdateSubAtoms(GetAtomSubgroupID(), atomOffsetForSubgroup, atomRotationForSubgroup);
 				}
@@ -360,7 +358,7 @@ namespace RTE {
 		if (m_Parent && m_InheritsFrame) { SetFrame(m_Parent->GetFrame()); }
 
 		// If we're attached to something, MovableMan doesn't own us, and therefore isn't calling our UpdateScripts method (and neither is our parent), so we should here.
-		if (m_Parent != nullptr && GetRootParent()->HasEverBeenAddedToMovableMan()) { UpdateScripts(); }
+		if (m_Parent && GetRootParent()->HasEverBeenAddedToMovableMan()) { UpdateScripts(); }
 
 		m_PrevPos = m_Pos;
 		m_PrevVel = m_Vel;
@@ -466,8 +464,7 @@ namespace RTE {
 			m_Team = -1;
 			m_IsWound = false;
 
-			MovableObject *rootParent = GetRootParent();
-			if (rootParent) {
+			if (MovableObject *rootParent = GetRootParent()) {
 				const MovableObject *whichMOToNotHit = GetWhichMOToNotHit();
 				const MovableObject *rootParentMOToNotHit = rootParent->GetWhichMOToNotHit();
 				if ((whichMOToNotHit && whichMOToNotHit != rootParent) || (rootParentMOToNotHit && rootParentMOToNotHit != this)) {

@@ -227,7 +227,7 @@ void Activity::Clear() {
 		writer << m_InCampaignStage;
 
 		for (short player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
-			std::string playerNum = std::to_string(player);
+			std::string playerNum = std::to_string(player + 1);
 			if (m_IsActive[player]) {
 				writer.NewProperty("TeamOfPlayer" + playerNum);
 				writer << m_Team[player];

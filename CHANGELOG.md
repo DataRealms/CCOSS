@@ -20,8 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - New `Settings.ini` property `ForceDedicatedFullScreenGfxDriver` to force the game to run in previously removed dedicated fullscreen mode, allowing using lower resolutions (and 1366x768) while still maintaining fullscreen.
 
-- New INI and Lua (R/W) properties for Attachables:  
-	`TransfersDamageToParent = 0/1`. If enabled, the Attachable will act like hardcoded ones and transfer damage to its parent. For `Attachables` attached to other `Attachables`, the parent `Attachable` (and any of its parents, etc.) must have this enabled for it to affect the root parent.  
+- New INI and Lua (R/W) property for Attachables:  
 	`ParentBreakWound = AEmitter...`. Use this to define a `BreakWound` that will be applied to the `Attachable`'s parent when the `Attachable` is removed.  
 	`BreakWound` is also now R/W accessible to Lua.
 	
@@ -29,7 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	You can read and write the following properties:  
 	**`AHuman`** - `Head`, `Jetpack`, `FGArm`, `BGArm`, `FGLeg`, `BGLeg`, `FGFoot`, `BGFoot`  
 	**`ACrab`** - `Turret`, `Jetpack`, `LeftFGLeg`, `LeftBGLeg`, `RightFGLeg`, `RightBGLeg`  
-	**`ACDropship`** - `RightEngine`, `LeftEngine`, `RightThruster`, `LeftThruster`, `RightHatch`, `LeftHatch`  
+	**`ACDropShip`** - `RightEngine`, `LeftEngine`, `RightThruster`, `LeftThruster`, `RightHatch`, `LeftHatch`  
 	**`ACRocket`** - `RightLeg`, `LeftLeg`, `MainEngine`, `LeftEngine`, `RightEngine`, `LeftThruster`, `RightThruster`  
 	**`ADoor`** - `Door`  
 	**`Turret`** - `MountedDevice`  
@@ -150,6 +149,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	It is **STRONGLY** ill-advised to disable this behavior as it makes case sensitivity mismatches immediately obvious and allows fixing them with ease to ensure a path related crash free cross-platform experience.  
 	Only disable this if for some reason case sensitivity increases the loading times on your system (which it generally should not). Loading times can be benchmarked using the `Settings.ini` property `MeasureModuleLoadTime`. The result will be printed to the console.
 
+- Added `MovableObject` Lua function `EnableOrDisableAllScripts` that allows you to enable or disable all scripts on a `MovableObject` based on the passed in value.
+
 ### Changed
 
 - `AHuman` actors can now manually reload BG items.
@@ -197,6 +198,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Renamed `ACrab` `LFGLeg`, `LBGLeg`, `RFGLeg` and `RBGLeg` Lua properties to `LeftFGLeg`, `LeftBGLeg`, `RightFGLeg`, `RightBGLeg` respectively, to be more consistent with other naming.  
 	For the time being, the INI properties (as well as the ones for setting `FootGroups` and `LimbPaths`) support both single letter and written out versions (i.e. `LStandLimbPath` and `LeftStandLimbPath` are both supported). This single letter versions will probably be deprecated over time.
+
+- To better align with the other changes, hardcoded `Attachable` INI definitions for `ACDropShips` and `ACRockets` can now support spelled out words. The following options are all supported in INI:  
+	**`ACDropShip`** - `RThruster`/`RightThruster`/`RightEngine`, `LThruster`/`LeftThruster`/`LeftEngine`, `URThruster`/`UpRightThruster`, `ULThruster`/`UpLeftThruster`, `RHatchDoor`/`RightHatchDoor`, `LHatchDoor`/`LeftHatchDoor`  
+	**`ACRocket`** - `RLeg`/`RightLeg`, `LLeg`/`LeftLeg`, `RFootGroup`/`RightFootGroup`, `LFootGroup`/`LeftFootGroup`, `MThruster`/`MainThruster`, `RThruster`/`RightThruster`, `LThruster`/`LeftThruster`, `URThruster`/`UpRightThruster`, `ULThruster`/`UpLeftThruster`
 
 - `MovableMan:AddMO` will now add `HeldDevices` (or any child class of `HeldDevice`) to its `Items` collection, making it able to provide the functionality of `AddParticle`, `AddActor` and `AddItem`.
 
@@ -261,6 +266,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Renamed `Attachable` INI property `CollidesWithTerrainWhenAttached` to more correct, consistent `CollidesWithTerrainWhileAttached`.
 
+- You can now modify `Foot`, `Magazine` and `Flash` (both `HDFirearm` and `AEmitter`) `CopyOfs` in your `Leg`/`HDFirearm``AEmitter` definition without setting a new `PresetName`.
+
+- `OnCollideWithMO` now works for `MOPixels` and `MOSParticles` so you can use it to check if your bullets collide with things.
+
+- `OnCollideWithMO` and `OnCollideWithTerrain` (and other special functions) will run more reliably right after the object is spawned. E.g. `OnCollideWithTerrain` should now work even if your gun is jammed into terrain when you shoot.
+
 ### Removed
 
 - Removed obsolete graphics drivers and their `Settings.ini` properties `ForceOverlayedWindowGfxDriver` and `ForceNonOverlayedWindowGfxDriver`.
@@ -284,6 +295,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Removed `MOSRotating:ApplyForces` and `MOSRotating:ApplyImpulses` Lua functions. These are both internal functions that should never have been exposed to Lua.
 
 - Removed hardcoded INI constraint that forced `Mass` of `MovableObjects` to not be 0. Previously, anytime a `Mass` of 0 was read in from INI, it was changed to 0.0001.
+
+- Removed the ability to set `HDFirearms'` `Magazine` or `Flash`, or `AEmitters'` `Flash` to None in INI. This was a necessary result of some core changes, and may be undone in future if it's possible. If you want no `Magazine` or `Flash` just don't set one, or use a Null one like is done for limbs and other hardcoded `Attachables`.
 
 ***
 

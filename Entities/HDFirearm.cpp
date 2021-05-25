@@ -152,11 +152,13 @@ int HDFirearm::Create(const HDFirearm &reference) {
 
 int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "Magazine") {
-        const Entity *magazineEntity = g_PresetMan.GetEntityPreset(reader);
-        if (magazineEntity) { SetMagazine(dynamic_cast<Magazine *>(magazineEntity->Clone())); }
+        Magazine iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetMagazine(dynamic_cast<Magazine *>(iniDefinedObject.Clone()));
     } else if (propName == "Flash") {
-        const Entity *flashEntity = g_PresetMan.GetEntityPreset(reader);
-        if (flashEntity) { SetFlash(dynamic_cast<Attachable *>(flashEntity->Clone())); }
+        Attachable iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetFlash(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
     } else if (propName == "PreFireSound") {
 		m_PreFireSound = new SoundContainer;
 		reader >> m_PreFireSound;

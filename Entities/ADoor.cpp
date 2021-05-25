@@ -85,9 +85,9 @@ namespace RTE {
 
 	int ADoor::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Door") {
-			m_Door = new Attachable;
-			reader >> m_Door;
-			SetDoor(m_Door);
+			Attachable iniDefinedObject;
+			reader >> &iniDefinedObject;
+			SetDoor(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
 		} else if (propName == "OpenOffset") {
 			reader >> m_OpenOffset;
 		} else if (propName == "ClosedOffset") {

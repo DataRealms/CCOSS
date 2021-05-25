@@ -235,6 +235,12 @@ enum MOType
 	bool DisableScript(const std::string &scriptPath);
 
     /// <summary>
+    /// Enables or disables all scripts on this MovableObject.
+    /// </summary>
+    /// <param name="enableScripts">Whether to enable (true) or disable (false) all scripts on this MovableObject.</param>
+    void EnableOrDisableAllScripts(bool enableScripts);
+
+    /// <summary>
     /// Runs the given function for the given script, with the given arguments. The first argument to the function will always be 'self'.
     /// If either argument list is not empty, its entries will be passed into the Lua function in order, with entity arguments first.
     /// </summary>
@@ -243,7 +249,7 @@ enum MOType
     /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
     /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-    int RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
+    int RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, const std::vector<Entity *> &functionEntityArguments = std::vector<Entity *>(), const std::vector<std::string> &functionLiteralArguments = std::vector<std::string>()) const;
 
     /// <summary>
     /// Runs the given function in all scripts that have it, with the given arguments, with the ability to not run on disabled scripts and to cease running if there's an error.
@@ -255,7 +261,7 @@ enum MOType
     /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
     /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-    int RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
+    int RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, const std::vector<Entity *> &functionEntityArguments = std::vector<Entity *>(), const std::vector<std::string> &functionLiteralArguments = std::vector<std::string>());
 
     /// <summary>
     /// Gets whether or not the object has a script name, and there were no errors when initializing its Lua scripts. If there were, the object would need to be reloaded.
@@ -1316,7 +1322,7 @@ enum MOType
 // Return value:    Wheter the MovableObject should immediately halt any travel going on
 //                  after this hit.
 
-    virtual bool OnMOHit(MovableObject *pOtherMO) { return false; }
+    virtual bool OnMOHit(MovableObject *pOtherMO);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

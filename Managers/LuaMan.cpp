@@ -780,6 +780,7 @@ int LuaMan::Initialize() {
             .def("ScriptEnabled", &MovableObject::ScriptEnabled)
             .def("EnableScript", &MovableObject::EnableScript)
             .def("DisableScript", &MovableObject::DisableScript)
+            .def("EnableOrDisableAllScripts", &MovableObject::EnableOrDisableAllScripts)
             .property("Mass", &MovableObject::GetMass, &MovableObject::SetMass)
             .property("Pos", &MovableObject::GetPos, &MovableObject::SetPos)
             .property("Vel", &MovableObject::GetVel, &MovableObject::SetVel)

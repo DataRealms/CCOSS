@@ -122,30 +122,30 @@ int ACDropShip::Create(const ACDropShip &reference) {
 //                  false is returned, and the reader's position is untouched.
 
 int ACDropShip::ReadProperty(const std::string_view &propName, Reader &reader) {
-    if (propName == "RThruster") {
-        m_pRThruster = new AEmitter;
-        reader >> m_pRThruster;
-        SetRightThruster(m_pRThruster);
-    } else if (propName == "LThruster") {
-        m_pLThruster = new AEmitter;
-        reader >> m_pLThruster;
-        SetLeftThruster(m_pLThruster);
-    } else if (propName == "URThruster") {
-        m_pURThruster = new AEmitter;
-        reader >> m_pURThruster;
-        SetURightThruster(m_pURThruster);
-    } else if (propName == "ULThruster") {
-        m_pULThruster = new AEmitter;
-        reader >> m_pULThruster;
-        SetULeftThruster(m_pULThruster);
-    } else if (propName == "RHatchDoor") {
-        m_pRHatch = new Attachable;
-        reader >> m_pRHatch;
-        SetRightHatch(m_pRHatch);
-    } else if (propName == "LHatchDoor") {
-        m_pLHatch = new Attachable;
-        reader >> m_pLHatch;
-        SetLeftHatch(m_pLHatch);
+    if (propName == "RThruster" || propName == "RightThruster" || propName == "RightEngine") {
+        AEmitter iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetRightThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+    } else if (propName == "LThruster" || propName == "LeftThruster" || propName == "LeftEngine") {
+        AEmitter iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetLeftThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+    } else if (propName == "URThruster" || propName == "UpRightThruster") {
+        AEmitter iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetURightThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+    } else if (propName == "ULThruster" || propName == "UpLeftThruster") {
+        AEmitter iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetULeftThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+    } else if (propName == "RHatchDoor" || propName == "RightHatchDoor") {
+        Attachable iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetRightHatch(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
+    } else if (propName == "LHatchDoor" || propName == "LeftHatchDoor") {
+        Attachable iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetLeftHatch(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
     } else if (propName == "HatchDoorSwingRange") {
         reader >> m_HatchSwingRange;
     } else if (propName == "AutoStabilize") {

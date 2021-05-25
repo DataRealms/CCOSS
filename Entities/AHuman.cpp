@@ -244,15 +244,15 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "ThrowPrepTime") {
         reader >> m_ThrowPrepTime;
     } else if (propName == "Head") {
-        m_pHead = new Attachable;
-        reader >> m_pHead;
-        SetHead(m_pHead);
+        Attachable iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetHead(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
 	} else if (propName == "LookToAimRatio") {
 		reader >> m_LookToAimRatio;
     } else if (propName == "Jetpack") {
-        m_pJetpack = new AEmitter;
-        reader >> m_pJetpack;
-        SetJetpack(m_pJetpack);
+        AEmitter iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetJetpack(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
     } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         // Convert to ms
@@ -264,21 +264,21 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
 	} else if (propName == "BGArmFlailScalar") {
 		reader >> m_BGArmFlailScalar;
     } else if (propName == "FGArm") {
-        m_pFGArm = new Arm;
-        reader >> m_pFGArm;
-        SetFGArm(m_pFGArm);
+        Arm iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetFGArm(dynamic_cast<Arm *>(iniDefinedObject.Clone()));
     } else if (propName == "BGArm") {
-        m_pBGArm = new Arm;
-        reader >> m_pBGArm;
-        SetBGArm(m_pBGArm);
+        Arm iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetBGArm(dynamic_cast<Arm *>(iniDefinedObject.Clone()));
     } else if (propName == "FGLeg") {
-        m_pFGLeg = new Leg;
-        reader >> m_pFGLeg;
-        SetFGLeg(m_pFGLeg);
+        Leg iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetFGLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
     } else if (propName == "BGLeg") {
-        m_pBGLeg = new Leg;
-        reader >> m_pBGLeg;
-        SetBGLeg(m_pBGLeg);
+        Leg iniDefinedObject;
+        reader >> &iniDefinedObject;
+        SetBGLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
     } else if (propName == "HandGroup") {
         delete m_pFGHandGroup;
         delete m_pBGHandGroup;

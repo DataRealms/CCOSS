@@ -316,8 +316,11 @@ int ACraft::Create(const ACraft &reference)
     m_HatchState = reference.m_HatchState;
     m_HatchDelay = reference.m_HatchDelay;
 	if (reference.m_HatchOpenSound) { m_HatchOpenSound = dynamic_cast<SoundContainer *>(reference.m_HatchOpenSound->Clone()); }
-	if (reference.m_HatchCloseSound) { m_HatchCloseSound = dynamic_cast<SoundContainer *>(reference.m_HatchCloseSound->Clone()); }
-	else if (reference.m_HatchOpenSound) { m_HatchCloseSound = dynamic_cast<SoundContainer *>(reference.m_HatchOpenSound->Clone()); }
+	if (reference.m_HatchCloseSound) {
+		m_HatchCloseSound = dynamic_cast<SoundContainer *>(reference.m_HatchCloseSound->Clone());
+	} else if (reference.m_HatchOpenSound) {
+		m_HatchCloseSound = dynamic_cast<SoundContainer *>(reference.m_HatchOpenSound->Clone());
+	}
 	for (deque<MovableObject *>::const_iterator niItr = reference.m_NewInventory.begin(); niItr != reference.m_NewInventory.end(); ++niItr)
         m_NewInventory.push_back(dynamic_cast<MovableObject *>((*niItr)->Clone()));
     for (list<Exit>::const_iterator eItr = reference.m_Exits.begin(); eItr != reference.m_Exits.end(); ++eItr)
@@ -766,9 +769,8 @@ void ACraft::DropAllInventory()
         {
             m_HasDelivered = true;
 
-            // Kill craft if it is lying down.
-            if (fabs(m_Rotation.GetRadAngle()) > c_HalfPI && m_Status != DYING)
-            {
+			// Kill craft if it is lying down.
+			if (std::fabs(m_Rotation.GetRadAngle()) > c_HalfPI && m_Status != DYING) {
                 m_Status = DYING;
                 m_DeathTmr.Reset();
             }
@@ -859,9 +861,8 @@ void ACraft::Update()
 
     // Set viewpoint based on how we are aiming etc.
     m_ViewPoint = m_Pos.GetFloored();
-    // Add velocity also so the viewpoint moves ahead at high speeds
-    if (m_Vel.GetMagnitude() > 10)
-        m_ViewPoint += m_Vel * sqrt(m_Vel.GetMagnitude() * 0.1F);
+	// Add velocity also so the viewpoint moves ahead at high speeds
+	if (m_Vel.GetMagnitude() > 10) { m_ViewPoint += m_Vel * std::sqrt(m_Vel.GetMagnitude() * 0.1F); }
 
     ///////////////////////////////////////////////////
     // Crash detection and handling

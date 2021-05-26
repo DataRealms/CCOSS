@@ -967,7 +967,7 @@ namespace RTE {
 
 		// Draw the trail
 		if (g_TimerMan.DrawnSimUpdate() && m_TrailLength) {
-			int length = m_TrailLength * RandomNum(1.0 - m_TrailLengthVariation, 1.0);
+			int length = static_cast<int>(static_cast<float>(m_TrailLength) * RandomNum(1.0F - m_TrailLengthVariation, 1.0F));
 			for (int i = trailPoints.size() - std::min(length, static_cast<int>(trailPoints.size())); i < trailPoints.size(); ++i) {
 				putpixel(trailBitmap, trailPoints[i].first, trailPoints[i].second, m_TrailColor.GetIndex());
 			}

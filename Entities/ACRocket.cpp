@@ -744,9 +744,8 @@ void ACRocket::Update()
     float rot = m_Rotation.GetRadAngle();
 
 	// Eliminate rotations over half a turn
-	if (fabs(rot) > c_PI)
-	{
-		rot += (rot > 0 ? -c_TwoPI : c_TwoPI);
+	if (std::fabs(rot) > c_PI) {
+		rot += (rot > 0) ? -c_TwoPI : c_TwoPI;
 		m_Rotation.SetRadAngle(rot);
 	}
     // If tipped too far for too long, die

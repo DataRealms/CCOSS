@@ -300,7 +300,7 @@ enum MOType
 	/// Gets the previous position vector of this MovableObject, prior to this frame.
 	/// </summary>
 	/// <returns>A Vector describing the previous position vector.</returns>
-    const Vector & GetPrevPos() const { return m_PrevPos; }
+	const Vector & GetPrevPos() const { return m_PrevPos; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

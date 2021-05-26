@@ -230,7 +230,7 @@ namespace RTE {
 		/// Sets the length variation scalar of a trail.
 		/// </summary>
 		/// <param name="trailLengthVariation">The new length variation scalar, 0 meaning no variation and 1 meaning full variation.</param>
-		void SetTrailLengthVariation(const float trailLengthVariation) { m_TrailLengthVariation = trailLengthVariation; }
+		void SetTrailLengthVariation(float trailLengthVariation) { m_TrailLengthVariation = trailLengthVariation; }
 
 		/// <summary>
 		/// Gets the offset vector that was first set for this Atom. The GetOffset may have additional offsets baked into it if this is part of an group.

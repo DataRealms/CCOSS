@@ -214,7 +214,7 @@ ClassInfoGetters
 	/// Gets this Actor's previous health value, prior to this frame.
 	/// </summary>
 	/// <returns>A const int describing this Actor's previous health.</returns>
-    int GetPrevHealth() const { return m_PrevHealth; }
+	int GetPrevHealth() const { return m_PrevHealth; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -368,6 +368,12 @@ ClassInfoGetters
 	/// <returns>The offset position of the holster.</returns>
 	Vector GetHolsterOffset() const { return m_HolsterOffset; }
 
+	/// <summary>
+	/// Sets the offset position of the holster where this Actor draws his devices from.
+	/// </summary>
+	/// <param name="newOffset">A new holster offset.</param>
+	void SetHolsterOffset(Vector newOffset) { m_HolsterOffset = newOffset; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetViewPoint
@@ -487,16 +493,6 @@ ClassInfoGetters
 // Return value:    None.
 
     void SetPassengerSlots(int newPassengerSlots) { m_PassengerSlots = newPassengerSlots; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetHolsterOffset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the offset position of the holster where this Actor draws his devices from.
-// Arguments:       A new holster offset.
-// Return value:    None.
-
-	void SetHolsterOffset(Vector newOffset) { m_HolsterOffset = newOffset; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -834,24 +830,17 @@ ClassInfoGetters
 	float GetPerceptiveness() const { return m_Perceptiveness; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  SetCanRevealUnseen
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether this actor can reveal unseen areas by looking.
-// Arguments:       Whether this actor can reveal unseen areas.
-// Return value:    None.
+	/// <summary>
+	/// Gets whether this actor is able to reveal unseen areas by looking.
+	/// </summary>
+	/// <returns>Whether this actor can reveal unseen areas.</returns>
+	bool GetCanRevealUnseen() const { return m_CanRevealUnseen; }
 
-void SetCanRevealUnseen(bool newCanRevealUnseen) { m_CanRevealUnseen = newCanRevealUnseen; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetCanRevealUnseen
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets whether this actor is able to reveal unseen areas by looking.
-// Arguments:       None.
-// Return value:    Whether this actor can reveal unseen areas.
-
-bool GetCanRevealUnseen() const { return m_CanRevealUnseen; }
+	/// <summary>
+	/// Sets whether this actor can reveal unseen areas by looking.
+	/// </summary>
+	/// <param name="newCanRevealUnseen">Whether this actor can reveal unseen areas.</param>
+	void SetCanRevealUnseen(bool newCanRevealUnseen) { m_CanRevealUnseen = newCanRevealUnseen; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -94,25 +94,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `OnStride` special Lua function for `AHumans` that is called whenever they stride (i.e. when their `StrideSound` is played). Like playing `StrideSound`, this does not happen when the AHuman is climbing.
 
-- New INI and Lua (R/W) `AHuman` and `ACrab` INI property `JetAngleRange` which defines the rate at which the angle of the Jetpack's thrust follows the aim angle of the Actor. (default being 0.25)
+- New `AHuman` and `ACrab` INI and Lua (R/W) property `JetAngleRange` which defines the rate at which the angle of the `Jetpack`'s thrust follows the aim angle of the actor (default being 0.25). 
 
-- Added `AHuman` INI property `LookToAimRatio` at which the Head turns in the direction of aiming. (default being 0.7)
+- New `AHuman` INI property `LookToAimRatio` at which the `Head` turns in the direction of aiming (default being 0.7).
 
-- New `AHuman` INI properties `FGArmFlailScalar` and `BGArmFlailScalar`. Use these to change the rate at which each Arm follows the RotAngle of the Actor, regardless of aim angle. 0 means the Arm will always point in aiming direction.
+- New `AHuman` INI properties `FGArmFlailScalar` and `BGArmFlailScalar`. Used to change the rate at which each `Arm` follows the rotation angle of the `Actor`, regardless of aim angle. 0 means the `Arm` will always point in aiming direction.
 
-- New INI and Lua (R/W) `Actor` property `CanRevealUnseen` which can be used to disable the ability to reveal unseen areas.
+- New `Actor` INI and Lua (R/W) property `CanRevealUnseen` which can be used to disable the ability to reveal unseen areas.
 
-- New `HDFirearm` INI property `ShellEjectAngle` which lets you define the angle at which Shell particles are ejected relative to the gun's rotation.
+- New `MOPixel` Lua (R/W) property `TrailLength` which returns the trail length of the `Atom` affiliated with this `MOPixel`.
 
-- New `Gib` property `IgnoresTeamHits`.
+- New `HDFirearm` INI property `ShellEjectAngle` which lets you define the angle at which `Shell` particles are ejected relative to the `HDFirearm`'s rotation.
+
+- New `Gib` INI property `IgnoresTeamHits`.
+
+- New `Atom` INI property `TrailLengthVariation`. Used to randomize `TrailLength` on every frame. 0 means no randomization (default), 1 means anything between full length and zero.
+
+- New `ACraft` INI and Lua (R/W) property `HatchCloseSound`. This is now required separately to `HatchOpenSound`.
 
 - Exposed `MOSRotating` property `OrientToVel` to Lua (R/W).
-
-- New Lua (R/W) `MOPixel` property `TrailLength` which returns the trail length of the `Atom` affiliated with this MOPixel.
-
-- New `Atom` property `TrailLengthVariation`. Use this to randomize TrailLength on every frame. 0 means no randomization (default), 1 means anything between full length and zero.
-
-- New `ACraft` property `HatchCloseSound`. This is now required separately to `HatchOpenSound`.
 
 - Exposed `DataModule` properties `Author`, `Description` and `Version` to Lua (R).
 
@@ -125,7 +125,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	**AHuman & ACrab**: `StrideSound`  
 	**HDFirearm**: `FireSound`, `FireEchoSound`, `EmptySound`, `ReloadStartSound`, `ReloadEndSound`, `ActiveSound`, `DeactivationSound`, `PreFireSound`  
 	**AEmitter**: `EmissionSound`, `BurstSound`, `EndSound`  
-	**ACraft**: `HatchOpenSound`, `CrashSound`  
+	**ACraft**: `HatchOpenSound`, `HatchCloseSound`, `CrashSound`  
 	**MOSRotating**: `GibSound`  
 	**ADoor**: `DoorMoveStartSound`, `DoorMoveSound`, `DoorDirectionChangeSound`, `DoorMoveEndSound`
   
@@ -134,9 +134,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The Lua console (and all text boxes) now support using `Ctrl` to move the cursor around and select or delete text.
 
-- Added `MOSRotating:RemoveAttachable(attachableOrUniqueID, addToMovableMan, addBreakWounds)` `Lua` method that allows you to remove an `Attachable` and specify whether it should be added to `MovableMan` or not, and whether breakwounds should be added (if defined) to the `Attachable` and parent `MOSRotating`.
+- Added `mosRotating:RemoveAttachable(attachableOrUniqueID, addToMovableMan, addBreakWounds)` method that allows you to remove an `Attachable` and specify whether it should be added to `MovableMan` or not, and whether breakwounds should be added (if defined) to the `Attachable` and parent `MOSRotating`.
 
-- Added `Attachable:RemoveFromParent()` and `Attachable:RemoveFromParent(addToMovableMan, addBreakWounds)` that allow you to remove `Attachables` from their parents without having to use `GetParent` first.
+- Added `attachable:RemoveFromParent()` and `attachable:RemoveFromParent(addToMovableMan, addBreakWounds)` that allow you to remove `Attachables` from their parents without having to use `GetParent` first.
 
 - Added `Settings.ini` debug properties to allow modders to turn on some potentially useful information visualizations.  
 	`DrawAtomGroupVisualizations` - any `MOSRotating` will draw its `AtomGroup` to the standard view.  
@@ -153,7 +153,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
-- `AHuman` actors can now manually reload BG items.
+- `AHuman` can now manually reload BG devices.
 
 - Jetpack thrust angle is now properly clamped when controlled with an analog stick.
 
@@ -163,7 +163,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `AHuman` can now aim while walking, however not while reloading.
 
-- Recoil when firing weapons now lessens sharp aim.
+- Recoil when firing weapons now affects sharp aim.
+
+- The third argument for `distance` to be filled out in `MovableMan:GetClosestActor()` is now a `Vector` rather than `float`.
 
 - File paths in INIs are now case sensitive.
 
@@ -238,9 +240,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
-- Fixed `MovableMan:GetClosestActor()` where the third argument for distance to be filled out is now a Vector rather than float.
-
-- `HFlipped` is now properly assigned to Emissions, Gibs and Particles (shot from HDFirearm/Round) when the source object is also flipped.
+- `HFlipped` is now properly assigned to emissions, gibs and particles that are shot from a `HDFirearm`'s `Round` when the source object is also flipped.
 
 - `MovableObject:SetWhichMOToNotHit` will now work properly for Attachables. They will also not hit the relevant MO. When they're removed, Attachables will check if they have the same MO for this value and, if so, unset it so they can hit that MO.
 

@@ -828,19 +828,17 @@ ClassInfoGetters
     /// <returns>Whether the damage multiplier for this MOSRotating has been set.</returns>
     bool HasNoSetDamageMultiplier() const { return m_NoSetDamageMultiplier; }
 
-
-	/// <summary>
-	/// Sets the velocity orientation scalar of this MOSRotating.
-	/// </summary>
-    /// <param name="newValue">New scalar value.</param>
-	void SetOrientToVel(float newValue) { m_OrientToVel = newValue; }
-
-
 	/// <summary>
 	/// Gets the velocity orientation scalar of this MOSRotating.
 	/// </summary>
 	/// <returns>New scalar value.</returns>
 	float GetOrientToVel() const { return m_OrientToVel; }
+
+	/// <summary>
+	/// Sets the velocity orientation scalar of this MOSRotating.
+	/// </summary>
+	/// <param name="newValue">New scalar value.</param>
+	void SetOrientToVel(float newValue) { m_OrientToVel = newValue; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

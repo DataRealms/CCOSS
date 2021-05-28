@@ -316,14 +316,15 @@ namespace RTE {
 				break;
 		}
 
-		// If esc pressed, show quit dialog if applicable
-		if (backToMainMenu || g_UInputMan.KeyPressed(KEY_ESC)) {
+		// If esc pressed, show quit dialog if applicable. Don't allow esc when any dialog is active except the quit dialog.
+		if ((!m_ActiveDialogBox || m_ActiveDialogBox == m_MainMenuScreens.at(MenuScreen::QuitScreen)) && (backToMainMenu || g_UInputMan.KeyPressed(KEY_ESC))) {
 			if (m_ActiveMenuScreen != MenuScreen::MainScreen) {
 				if (m_ActiveMenuScreen == MenuScreen::SettingsScreen || m_ActiveMenuScreen == MenuScreen::ModManagerScreen) {
 					g_SettingsMan.UpdateSettingsFile();
 				} else if (m_ActiveMenuScreen == MenuScreen::CreditsScreen) {
 					m_UpdateResult = MainMenuUpdateResult::BackToMainFromCredits;
 				}
+				m_ActiveDialogBox = nullptr;
 				SetActiveMenuScreen(MenuScreen::MainScreen, false);
 				g_GUISound.BackButtonPressSound()->Play();
 			} else {
@@ -467,7 +468,6 @@ namespace RTE {
 			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), g_FrameMan.GetOverlayBitmap32(), 0, 0);
 			// Whatever this box may be at this point it's already been drawn by the owning GUIControlManager, but we need to draw it again on top of the overlay so it's not affected by it.
 			m_ActiveDialogBox->Draw(m_GUIControlManager->GetScreen());
-			m_ActiveDialogBox = nullptr;
 		}
 		m_GUIControlManager->DrawMouse();
 	}

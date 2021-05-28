@@ -38,8 +38,10 @@ namespace RTE {
 		m_CustomResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioCustomResolution"));
 
 		m_ResolutionChangeDialogBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ResolutionChangeDialog"));
-		m_ResolutionChangeDialogBox->SetPositionAbs(m_VideoSettingsBox->GetXPos() + ((m_VideoSettingsBox->GetWidth() - m_ResolutionChangeDialogBox->GetWidth()) / 2), m_VideoSettingsBox->GetYPos() + ((m_VideoSettingsBox->GetHeight() - m_ResolutionChangeDialogBox->GetHeight()) / 2));
 		m_ResolutionChangeDialogBox->SetVisible(false);
+
+		GUICollectionBox *settingsRootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxSettingsBase"));
+		m_ResolutionChangeDialogBox->SetPositionAbs(settingsRootBox->GetXPos() + ((settingsRootBox->GetWidth() - m_ResolutionChangeDialogBox->GetWidth()) / 2), settingsRootBox->GetYPos() + ((settingsRootBox->GetHeight() - m_ResolutionChangeDialogBox->GetHeight()) / 2));
 
 		m_ResolutionChangeConfirmButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonConfirmResolutionChange"));
 		m_ResolutionChangeCancelButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonCancelResolutionChange"));

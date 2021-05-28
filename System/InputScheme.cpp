@@ -401,6 +401,10 @@ namespace RTE {
 		if (keyboard_needs_poll()) { poll_keyboard(); }
 
 		for (int whichKey = KEY_A; whichKey < KEY_MAX; ++whichKey) {
+			// Don't allow mapping special keys used by UInputMan.
+			if (whichKey == KEY_ESC || whichKey == KEY_TILDE || whichKey == KEY_PRTSCR || whichKey == KEY_F1 || whichKey == KEY_F2 || whichKey == KEY_F3 || whichKey == KEY_F4 || whichKey == KEY_F5) {
+				continue;
+			}
 			if (g_UInputMan.KeyReleased(static_cast<char>(whichKey))) {
 				// Clear out all the mappings for this input first, because otherwise old device mappings may linger and interfere
 				m_InputMappings.at(whichInput).Reset();

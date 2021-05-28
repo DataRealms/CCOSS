@@ -31,10 +31,20 @@ namespace RTE {
 			m_InputMapLabel.at(i)->SetText(c_InputElementNames.at(i));
 			m_InputMapButton.at(i) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonInputKey" + std::to_string(i + 1)));
 		}
+		m_InputMappingCaptureBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxInputCapture"));
+		m_InputMappingCaptureBox->SetVisible(false);
+
+		GUICollectionBox *settingsRootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxSettingsBase"));
+		m_InputMappingCaptureBox->SetPositionAbs(settingsRootBox->GetXPos() + ((settingsRootBox->GetWidth() - m_InputMappingCaptureBox->GetWidth()) / 2), settingsRootBox->GetYPos() + ((settingsRootBox->GetHeight() - m_InputMappingCaptureBox->GetHeight()) / 2));
+
+		m_InputElementCapturingInputNameLabel = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonLabelInputMappingName"));
+
 		m_InputConfigWizardMenu = std::make_unique<SettingsInputMappingWizardGUI>(parentControlManager);
 
 		m_ConfiguringPlayer = Players::NoPlayer;
 		m_ConfiguringPlayerInputScheme = nullptr;
+		m_ConfiguringManually = false;
+		m_InputElementCapturingInput = InputElements::INPUT_COUNT;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -52,6 +62,14 @@ namespace RTE {
 			m_InputMappingSettingsLabel->SetText("P L A Y E R   " + std::to_string(player + 1) + "   I N P U T   M A P P I N G");
 			m_ConfiguringPlayer = static_cast<Players>(player);
 			m_ConfiguringPlayerInputScheme = g_UInputMan.GetControlScheme(player);
+
+			// Don't want to deal with special handling for mouse so don't allow remapping any mouse controls when using mouse+keyboard.
+			// TODO: Add handling for input mapping with mouse directions and buttons (extra buttons too if applicable).
+			std::array<InputElements, 7> inputElementsUsedByMouse = { InputElements::INPUT_FIRE, InputElements::INPUT_PIEMENU, InputElements::INPUT_AIM, InputElements::INPUT_AIM_UP, InputElements::INPUT_AIM_DOWN, InputElements::INPUT_AIM_LEFT, InputElements::INPUT_AIM_RIGHT };
+			for (const InputElements &inputElement : inputElementsUsedByMouse) {
+				m_InputMapButton.at(inputElement)->SetEnabled((m_ConfiguringPlayerInputScheme->GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) ? false : true);
+			}
+
 			m_InputMapScrollingBoxScrollbar->SetValue(0);
 			UpdateScrollingInputBoxScrollPosition();
 			UpdateMappingButtonLabels();
@@ -68,8 +86,41 @@ namespace RTE {
 	GUICollectionBox * SettingsInputMappingGUI::GetActiveDialogBox() const {
 		if (m_InputConfigWizardMenu->IsEnabled()) {
 			return m_InputConfigWizardMenu->GetActiveDialogBox();
+		} else if (m_InputMappingCaptureBox->GetEnabled() && m_InputMappingCaptureBox->GetVisible()) {
+			return m_InputMappingCaptureBox;
 		}
 		return (m_InputMappingSettingsBox->GetEnabled() && m_InputMappingSettingsBox->GetVisible()) ? m_InputMappingSettingsBox : nullptr;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool SettingsInputMappingGUI::IsConfiguringManually() const {
+		return m_ConfiguringManually && m_InputMappingCaptureBox->GetVisible() && m_InputMappingCaptureBox->GetEnabled();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsInputMappingGUI::ShowInputMappingCaptureBox(InputElements inputElement) {
+		m_InputMappingSettingsBox->SetEnabled(false);
+		m_InputMappingCaptureBox->SetVisible(true);
+		m_InputMappingCaptureBox->SetEnabled(true);
+		m_InputElementCapturingInput = inputElement;
+		m_InputElementCapturingInputNameLabel->SetText(m_InputMapLabel.at(inputElement)->GetText());
+		m_ConfiguringManually = true;
+
+		// Use GUIInput class for better key detection
+		g_UInputMan.SetInputClass(m_GUIControlManager->GetManager()->GetInputController());
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsInputMappingGUI::HideInputMappingCaptureBox() {
+		m_InputMappingSettingsBox->SetEnabled(true);
+		m_InputMappingCaptureBox->SetVisible(false);
+		m_InputMappingCaptureBox->SetEnabled(false);
+		m_ConfiguringManually = false;
+
+		g_UInputMan.SetInputClass(nullptr);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -108,14 +159,45 @@ namespace RTE {
 			} else if (guiEvent.GetControl() == m_RunConfigWizardButton) {
 				g_GUISound.ButtonPressSound()->Play();
 				m_InputConfigWizardMenu->SetEnabled(true, m_ConfiguringPlayer, m_ConfiguringPlayerInputScheme);
-			}
-			for (int mapButton = 0; mapButton < InputElements::INPUT_COUNT; ++mapButton) {
-				if (guiEvent.GetControl() == m_InputMapButton.at(mapButton)) {
-					m_InputMapButton.at(mapButton)->SetText("Press Any Key");
+			} else if (guiEvent.GetMsg() == GUIButton::Pushed) {
+				for (int mapButton = 0; mapButton < InputElements::INPUT_COUNT; ++mapButton) {
+					if (guiEvent.GetControl() == m_InputMapButton.at(mapButton)) {
+						g_GUISound.ButtonPressSound()->Play();
+						ShowInputMappingCaptureBox(static_cast<InputElements>(mapButton));
+						break;
+					}
 				}
 			}
 		} else if (guiEvent.GetType() == GUIEvent::Notification && guiEvent.GetMsg() == GUIScrollbar::ChangeValue && guiEvent.GetControl() == m_InputMapScrollingBoxScrollbar) {
 			UpdateScrollingInputBoxScrollPosition();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsInputMappingGUI::HandleManualConfigSequence() {
+		bool inputCaptured = false;
+		if (g_UInputMan.KeyReleased(KEY_ESC)) {
+			g_GUISound.ButtonPressSound()->Play();
+			HideInputMappingCaptureBox();
+			return;
+		} else if (g_UInputMan.KeyReleased(KEY_DEL)) {
+			m_ConfiguringPlayerInputScheme->ClearMapping(m_InputElementCapturingInput);
+			inputCaptured = true;
+		}
+		if (!inputCaptured) {
+			InputDevice inputDevice = m_ConfiguringPlayerInputScheme->GetDevice();
+			if (inputDevice == InputDevice::DEVICE_KEYB_ONLY || inputDevice == InputDevice::DEVICE_MOUSE_KEYB) {
+				inputCaptured = m_ConfiguringPlayerInputScheme->CaptureKeyMapping(m_InputElementCapturingInput);
+			} else {
+				inputCaptured = m_ConfiguringPlayerInputScheme->CaptureJoystickMapping(g_UInputMan.GetJoystickIndex(inputDevice), m_InputElementCapturingInput);
+			}
+		}
+		if (inputCaptured) {
+			g_GUISound.ExitMenuSound()->Play();
+			m_ConfiguringPlayerInputScheme->SetPreset(InputScheme::InputPreset::NoPreset);
+			UpdateMappingButtonLabels();
+			HideInputMappingCaptureBox();
 		}
 	}
 }

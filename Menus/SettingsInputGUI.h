@@ -47,13 +47,24 @@ namespace RTE {
 
 #pragma region Input Config Wizard Handling
 		/// <summary>
+		/// Gets whether the player is currently manually configuring an InputMapping through the input mapping menu screen.
+		/// </summary>
+		/// <returns></returns>
+		bool InputMappingConfigConfiguringManually() const { return m_InputMappingConfigMenu->IsConfiguringManually(); }
+
+		/// <summary>
+		/// Handles input capture logic of the input mapping menu screen manual configuration sequence.
+		/// </summary>
+		void HandleMappingConfigManualConfiguration() const { m_InputMappingConfigMenu->HandleManualConfigSequence(); }
+
+		/// <summary>
 		/// Gets whether the player is currently manually configuring the InputScheme through the input mapping wizard.
 		/// </summary>
 		/// <returns>Whether the player is currently manually configuring the InputScheme through the input mapping wizard.</returns>
 		bool InputConfigWizardConfiguringManually() const { return m_InputMappingConfigMenu->GetInputConfigWizardMenu()->IsConfiguringManually(); }
 
 		/// <summary>
-		/// 
+		/// Handles input capture logic of the input mapping wizard manual configuration sequence.
 		/// </summary>
 		void HandleConfigWizardManualConfiguration() const { m_InputMappingConfigMenu->GetInputConfigWizardMenu()->HandleManualConfigSequence(); }
 #pragma endregion

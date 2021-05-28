@@ -48,6 +48,12 @@ namespace RTE {
 		GUICollectionBox * GetActiveDialogBox() const;
 
 		/// <summary>
+		/// Gets whether the input mapping settings menu needs to capture input for manual configuration.
+		/// </summary>
+		/// <returns>Whether the input mapping settings menu needs to capture input for manual configuration.</returns>
+		bool IsConfiguringManually() const;
+
+		/// <summary>
 		/// Gets the SettingsInputMappingWizardGUI of this SettingsInputMappingGUI.
 		/// </summary>
 		/// <returns>Pointer to the SettingsInputMappingWizardGUI of this SettingsInputMappingGUI.</returns>
@@ -60,6 +66,11 @@ namespace RTE {
 		/// </summary>
 		/// <param name="guiEvent">The GUIEvent containing information about the player interaction with an element.</param>
 		void HandleInputEvents(GUIEvent &guiEvent);
+
+		/// <summary>
+		/// Handles capturing input and updating the manual input configuration sequence.
+		/// </summary>
+		void HandleManualConfigSequence();
 #pragma endregion
 
 	private:
@@ -68,6 +79,9 @@ namespace RTE {
 
 		Players m_ConfiguringPlayer; //!< The player this SettingsInputMappingGUI is configuring input mapping for.
 		InputScheme *m_ConfiguringPlayerInputScheme; //!< The InputScheme of the configuring player.
+
+		bool m_ConfiguringManually; //!< Indicates that the SettingsInputMappingGUI needs to capture input because the player is configuring manually.
+		InputElements m_InputElementCapturingInput; //!< The InputElement in the configuring player's InputScheme that is currently being configured and is capturing input.
 
 		int m_LastInputMapScrollingBoxScrollbarValue; //!< The previous value of the input mappings scrolling box scrollbar. Used to calculate the scroll position.
 
@@ -82,10 +96,23 @@ namespace RTE {
 		GUIButton *m_RunConfigWizardButton;
 		GUICollectionBox *m_InputMapScrollingBox;
 		GUIScrollbar *m_InputMapScrollingBoxScrollbar;
+		GUICollectionBox *m_InputMappingCaptureBox;
+		GUIButton *m_InputElementCapturingInputNameLabel;
 		std::array<GUILabel *, InputElements::INPUT_COUNT> m_InputMapLabel;
 		std::array<GUIButton *, InputElements::INPUT_COUNT> m_InputMapButton;
 
 #pragma region Input Mapping Settings Handling
+		/// <summary>
+		/// Shows and enables the input mapping capture box, starting the input capture sequence.
+		/// </summary>
+		/// <param name="inputElement"></param>
+		void ShowInputMappingCaptureBox(InputElements inputElement);
+
+		/// <summary>
+		/// Hides and disables the input mapping capture box, ending the input capture sequence.
+		/// </summary>
+		void HideInputMappingCaptureBox();
+
 		/// <summary>
 		/// Updates the mapping button key labels with the configuring player's InputScheme mappings.
 		/// </summary>

@@ -706,7 +706,10 @@ namespace RTE {
 				return;
 			}
 		}
-
+		// If InputClass is set for input capture pressing F1 will open console and hard-lock during manual input configuration, so just skip processing all special input until it's nullptr again.
+		if (s_InputClass) {
+			return;
+		}
 		if (FlagCtrlState() && !FlagAltState()) {
 			// Ctrl+S to save continuous ScreenDumps
 			if (KeyHeld(KEY_S)) {

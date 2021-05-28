@@ -35,9 +35,7 @@ namespace RTE {
 
 	int InputMapping::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "KeyMap") {
-			int key;
-			reader >> key;
-			if (key != 0) { m_KeyMap = key; }
+			reader >> m_KeyMap;
 		} else if (propName == "MouseButtonMap") {
 			reader >> m_MouseButtonMap;
 		} else if (propName == "JoyButtonMap") {

@@ -96,6 +96,8 @@ void MovableObject::Clear()
 	m_DamageOnCollision = 0.0;
 	m_DamageOnPenetration = 0.0;
 	m_WoundDamageMultiplier = 1.0;
+    m_ApplyWoundDamageOnCollision = false;
+    m_ApplyWoundBurstDamageOnCollision = false;
 	m_IgnoreTerrain = false;
 
 	m_MOIDHit = g_NoMOID;

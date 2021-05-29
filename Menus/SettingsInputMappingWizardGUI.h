@@ -138,7 +138,7 @@ namespace RTE {
 		InputScheme m_NewInputScheme; //!< The new InputScheme that was configured in manual configuration mode.
 		bool m_NewInputSchemeApplied; //!< Whether the new InputScheme was applied as the configuring player's active InputScheme.
 
-		Timer m_GamepadRecommendedDiagramBlinkTimer; //!< Timer for animating the recommended input diagram when configuring gamepads.
+		Timer m_BlinkTimer; //!< Timer for blinking the "Apply Changes" button and animating the recommended input diagram when configuring gamepads.
 
 		std::vector<BITMAP *> m_DPadDiagramBitmaps; //!< Vector containing all the D-Pad type gamepad recommended input diagram bitmaps.
 		std::vector<BITMAP *> m_DualAnalogDSDiagramBitmaps; //!< Vector containing all the DualShock type gamepad recommended input diagram bitmaps.

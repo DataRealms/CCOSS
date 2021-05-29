@@ -28,7 +28,7 @@ namespace RTE {
 		m_NewInputScheme.Reset();
 		m_NewInputSchemeApplied = false;
 
-		m_GamepadRecommendedDiagramBlinkTimer.Reset();
+		m_BlinkTimer.Reset();
 
 		m_DPadDiagramBitmaps.clear();
 		m_DualAnalogDSDiagramBitmaps.clear();
@@ -377,34 +377,41 @@ namespace RTE {
 				m_WizardManualConfigScreen.NextConfigStepButton->SetVisible(true);
 			}
 		}
-		bool inputCaptured = false;
-		switch (m_ConfiguringDevice) {
-			case InputDevice::DEVICE_KEYB_ONLY:
-				inputCaptured = UpdateKeyboardConfigSequence();
-				break;
-			case InputDevice::DEVICE_MOUSE_KEYB:
-				inputCaptured = UpdateMouseAndKeyboardConfigSequence();
-				break;
-			default:
-				int diagramBitmapIndex = 0;
-				if (!m_ConfigFinished) { diagramBitmapIndex = m_GamepadRecommendedDiagramBlinkTimer.AlternateReal(500) ? m_ConfigStep + 1 : 0; }
-				if (m_ConfiguringGamepadType == GamepadType::DPad) {
-					m_WizardManualConfigScreen.GamepadConfigRecommendedDiagramBox->SetDrawImage(new AllegroBitmap(m_DPadDiagramBitmaps.at(diagramBitmapIndex)));
-					inputCaptured = UpdateGamepadDPadConfigSequence();
-				} else {
-					if (m_ConfiguringGamepadType == GamepadType::AnalogDualShock) {
-						m_WizardManualConfigScreen.GamepadConfigRecommendedDiagramBox->SetDrawImage(new AllegroBitmap(m_DualAnalogDSDiagramBitmaps.at(diagramBitmapIndex)));
+		if (m_ConfigFinished) {
+			if (m_BlinkTimer.AlternateReal(500)) {
+				m_WizardManualConfigScreen.DiscardOrApplyConfigButton->SetFocus();
+			} else {
+				m_GUIControlManager->GetManager()->SetFocus(nullptr);
+			}
+		} else {
+			bool inputCaptured = false;
+			switch (m_ConfiguringDevice) {
+				case InputDevice::DEVICE_KEYB_ONLY:
+					inputCaptured = UpdateKeyboardConfigSequence();
+					break;
+				case InputDevice::DEVICE_MOUSE_KEYB:
+					inputCaptured = UpdateMouseAndKeyboardConfigSequence();
+					break;
+				default:
+					int diagramBitmapIndex = m_BlinkTimer.AlternateReal(500) ? m_ConfigStep + 1 : 0;
+					if (m_ConfiguringGamepadType == GamepadType::DPad) {
+						m_WizardManualConfigScreen.GamepadConfigRecommendedDiagramBox->SetDrawImage(new AllegroBitmap(m_DPadDiagramBitmaps.at(diagramBitmapIndex)));
+						inputCaptured = UpdateGamepadDPadConfigSequence();
 					} else {
-						m_WizardManualConfigScreen.GamepadConfigRecommendedDiagramBox->SetDrawImage(new AllegroBitmap(m_DualAnalogXBDiagramBitmaps.at(diagramBitmapIndex)));
+						if (m_ConfiguringGamepadType == GamepadType::AnalogDualShock) {
+							m_WizardManualConfigScreen.GamepadConfigRecommendedDiagramBox->SetDrawImage(new AllegroBitmap(m_DualAnalogDSDiagramBitmaps.at(diagramBitmapIndex)));
+						} else {
+							m_WizardManualConfigScreen.GamepadConfigRecommendedDiagramBox->SetDrawImage(new AllegroBitmap(m_DualAnalogXBDiagramBitmaps.at(diagramBitmapIndex)));
+						}
+						inputCaptured = UpdateGamepadAnalogConfigSequence();
 					}
-					inputCaptured = UpdateGamepadAnalogConfigSequence();
-				}
-				break;
-		}
-		if (inputCaptured) {
-			if (!m_ConfigFinished) { m_ConfigStep++; }
-			g_GUISound.ExitMenuSound()->Play();
-			m_ConfigStepChange = true;
+					break;
+			}
+			if (inputCaptured) {
+				if (!m_ConfigFinished) { m_ConfigStep++; }
+				g_GUISound.ExitMenuSound()->Play();
+				m_ConfigStepChange = true;
+			}
 		}
 	}
 

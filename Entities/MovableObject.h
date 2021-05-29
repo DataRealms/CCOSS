@@ -1695,6 +1695,30 @@ enum MOType
 
 	void SetWoundDamageMultiplier(float value) { m_WoundDamageMultiplier = value; }
 
+    /// <summary>
+    /// Gets whether or not this MovableObject should apply wound damage when it collides with another MovableObject.
+    /// </summary>
+    /// <returns>Whether or not this MovableObject should apply wound damage when it collides with another MovableObject.</returns>
+    bool GetApplyWoundDamageOnCollision() const { return m_ApplyWoundDamageOnCollision; }
+
+    /// <summary>
+    /// Sets whether or not this MovableObject should apply wound damage when it collides with another MovableObject.
+    /// </summary>
+    /// <param name="applyWoundDamageOnCollision">Whether or not this MovableObject should apply wound damage on collision.</param>
+    void SetApplyWoundDamageOnCollision(bool applyWoundDamageOnCollision) { m_ApplyWoundDamageOnCollision = applyWoundDamageOnCollision; }
+
+    /// <summary>
+    /// Gets whether or not this MovableObject should apply burst wound damage when it collides with another MovableObject.
+    /// </summary>
+    /// <returns>Whether or not this MovableObject should apply burst wound damage when it collides with another MovableObject.</returns>
+    bool GetApplyWoundBurstDamageOnCollision() const { return m_ApplyWoundBurstDamageOnCollision; }
+
+    /// <summary>
+    /// Sets whether or not this MovableObject should apply burst wound damage when it collides with another MovableObject.
+    /// </summary>
+    /// <param name="applyWoundDamageOnCollision">Whether or not this MovableObject should apply burst wound damage on collision.</param>
+    void SetApplyWoundBurstDamageOnCollision(bool applyWoundBurstDamageOnCollision) { m_ApplyWoundBurstDamageOnCollision = applyWoundBurstDamageOnCollision; }
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1960,6 +1984,8 @@ protected:
 	float m_DamageOnPenetration;
 	// Damage multiplier transferred to wound inflicted by this object on penetration
 	float m_WoundDamageMultiplier;
+    bool m_ApplyWoundDamageOnCollision; //!< Whether or not this should apply wound damage on collision, respecting WoundDamageMultiplier and without creating a wound.
+    bool m_ApplyWoundBurstDamageOnCollision; //!< Whether or not this should apply wound burst damage on collision, respecting WoundDamageMultiplier and without creating a wound.
 	//Whether this MO should ignore terrain when traveling
 	bool m_IgnoreTerrain;
 	// MOID hit during last Travel

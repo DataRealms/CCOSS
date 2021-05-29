@@ -288,18 +288,23 @@ namespace RTE {
 	bool Attachable::ParticlePenetration(HitData &hd) {
 		bool penetrated = MOSRotating::ParticlePenetration(hd);
 
-		if (hd.Body[HITOR]->DamageOnCollision() != 0) { AddDamage(hd.Body[HITOR]->DamageOnCollision()); }
+		if (m_Parent) {
+			MovableObject *hitor = hd.Body[HITOR];
+			float damageToAdd = hitor->DamageOnCollision();
+			damageToAdd += penetrated ? hitor->DamageOnPenetration() : 0;
+			if (hitor->GetApplyWoundDamageOnCollision()) { damageToAdd += m_pEntryWound->GetEmitDamage() * hitor->WoundDamageMultiplier(); }
+			if (hitor->GetApplyWoundBurstDamageOnCollision()) { damageToAdd += m_pEntryWound->GetBurstDamage() * hitor->WoundDamageMultiplier(); }
 
-		if (penetrated && m_Parent) {
-			if (hd.Body[HITOR]->DamageOnPenetration() != 0) { AddDamage(hd.Body[HITOR]->DamageOnPenetration()); }
+			if (damageToAdd != 0) {
+				AddDamage(damageToAdd);
 
-			// If the parent is an actor, generate an alarm point for them, moving it slightly away from the body (in the direction they got hit from) to get a good reaction.
-			if (Actor *parentAsActor = dynamic_cast<Actor *>(GetRootParent())) {
-				Vector extruded(hd.HitVel[HITOR]);
-				extruded.SetMagnitude(parentAsActor->GetHeight());
-				extruded = m_Pos - extruded;
-				g_SceneMan.WrapPosition(extruded);
-				parentAsActor->AlarmPoint(extruded);
+				if (Actor *parentAsActor = dynamic_cast<Actor *>(GetRootParent()); parentAsActor && parentAsActor->GetPerceptiveness() > 0) {
+					Vector extruded(hd.HitVel[HITOR]);
+					extruded.SetMagnitude(parentAsActor->GetHeight());
+					extruded = m_Pos - extruded;
+					g_SceneMan.WrapPosition(extruded);
+					parentAsActor->AlarmPoint(extruded);
+				}
 			}
 		}
 

@@ -367,6 +367,10 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 		reader >> m_DamageOnPenetration;
 	else if (propName == "WoundDamageMultiplier")
 		reader >> m_WoundDamageMultiplier;
+    else if (propName == "ApplyWoundDamageOnCollision")
+        reader >> m_ApplyWoundDamageOnCollision;
+    else if (propName == "ApplyWoundBurstDamageOnCollision")
+        reader >> m_ApplyWoundBurstDamageOnCollision;
 	else if (propName == "IgnoreTerrain")
 		reader >> m_IgnoreTerrain;
 	else

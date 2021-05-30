@@ -310,7 +310,7 @@ namespace RTE {
 				break;
 			case MenuScreen::QuitScreen:
 				backToMainMenu = HandleInputEvents();
-				m_ActiveDialogBox = m_MainMenuScreens.at(MenuScreen::QuitScreen);
+				m_ActiveDialogBox = m_MainMenuScreens.at(MenuScreen::QuitScreen)->GetVisible() ? m_MainMenuScreens.at(MenuScreen::QuitScreen) : nullptr;
 				break;
 			default:
 				break;

@@ -478,12 +478,13 @@ namespace RTE {
 				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState(TitleTransition::MainMenu); }
 				break;
 			case TitleTransition::ScrollingFadeOut:
+			case TitleTransition::ScrollingFadeOutQuit:
 				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(0.75F * g_SettingsMan.GetMenuTransitionDurationMultiplier()); }
 				g_AudioMan.SetTempMusicVolume(EaseIn(g_AudioMan.GetMusicVolume(), 0, m_SectionProgress));
 				m_ScrollOffset.SetY(EaseIn(0, 250, m_SectionProgress));
 				m_GameLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), EaseIn(m_GameLogoMainMenuOffsetY, m_GameLogoPlanetViewOffsetY, m_SectionProgress)));
 				m_FadeAmount = static_cast<int>(EaseIn(0, 255, m_SectionProgress));
-				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState(TitleTransition::TransitionEnd); }
+				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState((m_TitleTransitionState == TitleTransition::ScrollingFadeOutQuit) ? TitleTransition::TransitionEndQuit : TitleTransition::TransitionEnd); }
 				break;
 			case TitleTransition::TransitionEnd:
 				if (m_SectionSwitch) {

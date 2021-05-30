@@ -35,8 +35,10 @@ namespace RTE {
 			CampaignFadeIn,
 			ScrollingFadeIn,
 			ScrollingFadeOut,
+			ScrollingFadeOutQuit,
 			FadeOut,
 			TransitionEnd,
+			TransitionEndQuit,
 			TransitionPending,
 		};
 

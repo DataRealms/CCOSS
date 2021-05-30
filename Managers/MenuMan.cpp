@@ -126,16 +126,18 @@ namespace RTE {
 			default:
 				break;
 		}
-		g_ConsoleMan.Update();
-
-		System::SetQuit(quitResult);
-
-		if (m_TitleScreen->GetTitleTransitionState() == TitleScreen::TitleTransition::TransitionEnd) {
+		if (!quitResult && m_TitleScreen->GetTitleTransitionState() != TitleScreen::TitleTransition::ScrollingFadeOutQuit) {
+			g_ConsoleMan.Update();
+			if (g_UInputMan.DetectJoystickHotPlug()) { m_GUIInput->SetKeyJoyMouseCursor(g_UInputMan.GetJoystickCount() > 0); }
+		} else {
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeOutQuit);
+		}
+		if (m_TitleScreen->GetTitleTransitionState() == TitleScreen::TitleTransition::TransitionEndQuit) {
+			System::SetQuit();
+		} else if (m_TitleScreen->GetTitleTransitionState() == TitleScreen::TitleTransition::TransitionEnd) {
 			m_TitleScreen->SetTitlePendingTransition();
 			return true;
 		}
-		if (g_UInputMan.DetectJoystickHotPlug()) { m_GUIInput->SetKeyJoyMouseCursor(g_UInputMan.GetJoystickCount() > 0); }
-
 		return false;
 	}
 

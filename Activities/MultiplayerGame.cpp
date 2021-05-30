@@ -70,6 +70,8 @@ namespace RTE {
 
 		m_pStatusLabel = 0;
 
+		m_BackToMainButton = nullptr;
+
 		m_Mode = SETUP;
 
 		m_LastMusic = "";
@@ -183,10 +185,13 @@ namespace RTE {
 		if (pRootBox)
 			pRootBox->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
+		m_BackToMainButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("ButtonBackToMain"));
+
 		GUICollectionBox *pDialogBox = dynamic_cast<GUICollectionBox *>(m_pGUIController->GetControl("ConnectDialogBox"));
 		if (pDialogBox)
 		{
 			pDialogBox->SetPositionAbs(g_FrameMan.GetResX() / 2 - pDialogBox->GetWidth() / 2, g_FrameMan.GetResY() / 2 - pDialogBox->GetHeight() / 2);
+			m_BackToMainButton->SetPositionAbs((g_FrameMan.GetResX() - m_BackToMainButton->GetWidth()) / 2, pDialogBox->GetYPos() + pDialogBox->GetHeight() + 10);
 		}
 
 		m_pServerNameTextBox = dynamic_cast<GUITextBox *>(m_pGUIController->GetControl("ServerNameTB"));
@@ -283,6 +288,11 @@ namespace RTE {
 			{
 				if (anEvent.GetType() == GUIEvent::Command)
 				{
+					if (anEvent.GetControl() == m_BackToMainButton) {
+						g_ActivityMan.PauseActivity();
+						return;
+					}
+
 					if (anEvent.GetControl() == m_pConnectButton)
 					{
 						std::string serverName;

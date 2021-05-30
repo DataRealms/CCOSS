@@ -169,7 +169,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void AudioMan::SetTempMusicVolume(float volume) {
-		// TODO: Setting temp volume doesn't seem to work
 		if (m_AudioEnabled && IsMusicPlaying()) {
 			FMOD::Channel *musicChannel;
 			FMOD_RESULT result = m_MusicChannelGroup->getChannel(0, &musicChannel);

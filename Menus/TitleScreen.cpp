@@ -258,7 +258,6 @@ namespace RTE {
 
 					g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccintro.ogg", 0);
 					g_AudioMan.SetMusicPosition(0.05F);
-					if (g_AudioMan.GetMusicVolume() < 0.1F) { g_AudioMan.SetTempMusicVolume(1.0F); }
 				}
 				m_FadeAmount = static_cast<int>(LERP(0, 1.0F, 255.0F, 0, m_SectionProgress));
 				break;

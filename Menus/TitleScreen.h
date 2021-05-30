@@ -63,7 +63,7 @@ namespace RTE {
 		/// <summary>
 		/// Destroys the TitleScreen object.
 		/// </summary>
-		void Destroy();
+		void Destroy() const;
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -184,6 +184,8 @@ namespace RTE {
 		float m_SectionElapsedTime; //!< How many seconds have elapsed on a section.
 		float m_SectionDuration; //!< How many seconds a section is supposed to elapse.
 		float m_SectionProgress; //!< Progress made on a section, from 0.0 to 1.0.
+
+		Timer m_OrbitTimer; //!< Station orbit progress timer to limit it from going too fast.
 
 		Vector m_ScrollOffset; //!< The scrolling position of the whole title screen scene.
 		float m_BackdropScrollRatio; //!< The scrolling ratio of the whole title screen scene background (nebula and stars).

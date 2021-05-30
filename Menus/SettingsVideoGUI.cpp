@@ -20,7 +20,7 @@ namespace RTE {
 		m_NewGraphicsDriver = g_FrameMan.GetGraphicsDriver();
 		m_NewResX = g_FrameMan.GetResX();
 		m_NewResY = g_FrameMan.GetResY();
-		m_NewResUpscaled = (g_FrameMan.GetResMultiplier() > 1) ? true : false;
+		m_NewResUpscaled = g_FrameMan.GetResMultiplier() > 1;
 
 		m_VideoSettingsBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxVideoSettings"));
 

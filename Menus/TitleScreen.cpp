@@ -37,6 +37,8 @@ namespace RTE {
 		m_SectionDuration = 0;
 		m_SectionProgress = 0;
 
+		m_OrbitTimer.Reset();
+
 		m_ScrollOffset.Reset();
 		m_BackdropScrollRatio = 1.0F / 3.0F;
 		m_PlanetViewScrollOffsetY = 325 + m_PlanetRadius - (static_cast<float>(g_FrameMan.GetResY()) / 2);
@@ -146,7 +148,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void TitleScreen::Destroy() {
+	void TitleScreen::Destroy() const {
 		for (BITMAP *slide : m_IntroSlides) {
 			if (slide) { destroy_bitmap(slide); }
 		}
@@ -547,9 +549,13 @@ namespace RTE {
 		m_Station.SetRotAngle(-c_HalfPI + m_StationOrbitRotation);
 		m_Station.Draw(g_FrameMan.GetBackBuffer32());
 
-		m_StationOrbitRotation -= 0.0020F;
-		// Keep the rotation angle from getting too large
-		if (m_StationOrbitRotation < -c_TwoPI) { m_StationOrbitRotation += c_TwoPI; }
+		// Limit station orbit progress to ~75fps so it's not crazy fast when running low resolution on a high refresh rate display.
+		if (m_OrbitTimer.IsPastRealMS(13)) {
+			m_StationOrbitRotation -= 0.0020F;
+			m_OrbitTimer.Reset();
+			// Keep the rotation angle from getting too large
+			if (m_StationOrbitRotation < -c_TwoPI) { m_StationOrbitRotation += c_TwoPI; }
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

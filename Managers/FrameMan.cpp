@@ -486,9 +486,6 @@ namespace RTE {
 		if (m_ResX == newResX && m_ResY == newResY && m_ResMultiplier == newResMultiplier && m_GfxDriver == newGfxDriver) {
 			return;
 		}
-		if (newResX <= 0 || newResX > m_MaxResX || newResY <= 0 || newResY > m_MaxResY) {
-			return;
-		}
 		bool prevForceDedicatedDriver = m_ForceDedicatedFullScreenGfxDriver;
 		m_ForceDedicatedFullScreenGfxDriver = newGfxDriver == GFX_AUTODETECT_FULLSCREEN || newGfxDriver == GFX_DIRECTX_ACCEL;
 

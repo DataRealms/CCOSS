@@ -22,7 +22,10 @@ namespace RTE {
 		m_PlanetRadius = 240;
 		m_Station.Reset();
 		m_StationOffset.Reset();
-		m_StationOrbitRotation = c_HalfPI - c_EighthPI;
+		m_StationOrbitRotation = 0;
+		m_StationOrbitTimer.Reset();
+		m_StationOrbitTimerElapsedTime = 0;
+		m_StationOrbitProgress = 0;
 		m_OrbitRadius = 274;
 		m_GameLogo.Reset();
 		m_GameLogoGlow.Reset();
@@ -36,8 +39,6 @@ namespace RTE {
 		m_SectionElapsedTime = 0;
 		m_SectionDuration = 0;
 		m_SectionProgress = 0;
-
-		m_OrbitTimer.Reset();
 
 		m_ScrollOffset.Reset();
 		m_BackdropScrollRatio = 1.0F / 3.0F;
@@ -70,6 +71,8 @@ namespace RTE {
 
 		m_IntroScrollStartOffsetY = (static_cast<float>(m_Nebula.GetBitmap()->h) / m_BackdropScrollRatio) - (static_cast<float>(g_FrameMan.GetResY()) / m_BackdropScrollRatio);
 		m_ScrollOffset.SetXY(0, m_IntroScrollStartOffsetY);
+
+		m_StationOrbitTimer.SetElapsedRealTimeS(15);
 
 		if (!g_FrameMan.ResolutionChanged()) {
 			if (!g_SettingsMan.SkipIntro()) {
@@ -161,6 +164,10 @@ namespace RTE {
 		m_SectionElapsedTime = static_cast<float>(m_SectionTimer.GetElapsedRealTimeS());
 		m_SectionProgress = std::min((m_SectionDuration > 0) ? m_SectionElapsedTime / m_SectionDuration : 0, 0.9999F);
 
+		if (m_StationOrbitProgress >= 0.999F) { m_StationOrbitTimer.Reset(); }
+		m_StationOrbitProgress = std::clamp(static_cast<float>(m_StationOrbitTimer.GetElapsedRealTimeS()) / 60.0F, 0.0F, 0.9999F);
+		m_StationOrbitRotation = LERP(0, 1.0F, c_PI, -c_PI, m_StationOrbitProgress);
+
 		if (m_FinishedPlayingIntro) {
 			UpdateTitleTransitions();
 		} else {
@@ -235,7 +242,7 @@ namespace RTE {
 			m_SectionSwitch = true;
 			m_IntroSequenceState = IntroSequence::MainMenuAppear;
 			m_GameLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), 120));
-			m_StationOrbitRotation = -c_PI * 1.2F;
+			m_StationOrbitTimer.SetElapsedRealTimeS(19);
 			return;
 		}
 		m_SlideshowSlideText.clear();
@@ -354,6 +361,7 @@ namespace RTE {
 					SetSectionDurationAndResetSwitch(68.2F - static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS()));
 					m_IntroScrollStartTime = static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
 					m_IntroScrollDuration = 92.4F - m_IntroScrollStartTime; // 92.4s is the end of the planet scrolling
+					m_StationOrbitTimer.SetElapsedRealTimeS(40);
 					clear_to_color(g_FrameMan.GetOverlayBitmap32(), 0xFFFFFFFF); // White fade
 				}
 				m_FadeAmount = static_cast<int>(LERP(0, 1.0F, 255.0F, 0, m_SectionProgress));
@@ -444,6 +452,7 @@ namespace RTE {
 					SetSectionDurationAndResetSwitch(0.75F * g_SettingsMan.GetMenuTransitionDurationMultiplier());
 					m_ScrollOffset.SetY(m_PlanetViewScrollOffsetY);
 					m_GameLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), m_GameLogoPlanetViewOffsetY));
+					m_StationOrbitTimer.SetElapsedRealTimeS(m_StationOrbitTimerElapsedTime);
 					g_AudioMan.PlayMusic("Base.rte/Music/dBSoundworks/thisworld5.ogg", -1);
 				}
 				g_AudioMan.SetTempMusicVolume(EaseOut(0, g_AudioMan.GetMusicVolume(), m_SectionProgress));
@@ -459,6 +468,7 @@ namespace RTE {
 			case TitleTransition::ScrollingFadeIn:
 				if (m_SectionSwitch) {
 					SetSectionDurationAndResetSwitch(0.75F * g_SettingsMan.GetMenuTransitionDurationMultiplier());
+					m_StationOrbitTimer.SetElapsedRealTimeS(m_StationOrbitTimerElapsedTime);
 					g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccmenu.ogg", -1);
 				}
 				g_AudioMan.SetTempMusicVolume(EaseOut(0, g_AudioMan.GetMusicVolume(), m_SectionProgress));
@@ -551,14 +561,6 @@ namespace RTE {
 		m_Station.SetPos(m_PlanetPos + m_StationOffset);
 		m_Station.SetRotAngle(-c_HalfPI + m_StationOrbitRotation);
 		m_Station.Draw(g_FrameMan.GetBackBuffer32());
-
-		// Limit station orbit progress to ~75fps so it's not crazy fast when running low resolution on a high refresh rate display.
-		if (m_OrbitTimer.IsPastRealMS(13)) {
-			m_StationOrbitRotation -= 0.0020F;
-			m_OrbitTimer.Reset();
-			// Keep the rotation angle from getting too large
-			if (m_StationOrbitRotation < -c_TwoPI) { m_StationOrbitRotation += c_TwoPI; }
-		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -153,6 +153,7 @@ namespace RTE {
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::BackToMainFromCredits) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::CreditsToMainMenu);
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::ActivityResumed) {
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::TransitionEnd);
 			g_ActivityMan.SetResumeActivity();
 		} else if (updateResult == MainMenuGUI::MainMenuUpdateResult::ActivityStarted) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeOut);
@@ -169,6 +170,7 @@ namespace RTE {
 		if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::BackToMain) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PlanetToMainMenu);
 		} else if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::ActivityResumed) {
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::TransitionEnd);
 			g_ActivityMan.SetResumeActivity();
 		} else if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::ActivityRestarted) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeOut);
@@ -188,6 +190,7 @@ namespace RTE {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeOut);
 			g_ActivityMan.SetRestartActivity();
 		} else if (g_MetaMan.GetGUI()->ActivityResumed()) {
+			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::TransitionEnd);
 			g_ActivityMan.SetResumeActivity();
 		}
 

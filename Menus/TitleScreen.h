@@ -80,9 +80,9 @@ namespace RTE {
 		void SetTitleTransitionState(TitleTransition newTransitionState) { if (newTransitionState != m_TitleTransitionState) { m_TitleTransitionState = newTransitionState; m_SectionSwitch = true; } }
 
 		/// <summary>
-		/// Sets the title transition to a pending state and resets the fade screen blend value. This is used to correctly restart transition states after breaking out of the game loop back to the menu loop.
+		/// Sets the title transition to a pending state, stores the orbit timer elapsed time and resets the fade screen blend value. This is used to correctly restart transition states after breaking out of the game loop back to the menu loop.
 		/// </summary>
-		void SetTitlePendingTransition() { m_TitleTransitionState = TitleTransition::TransitionPending; m_FadeAmount = 0; }
+		void SetTitlePendingTransition() { m_TitleTransitionState = TitleTransition::TransitionPending; m_StationOrbitTimerElapsedTime = static_cast<float>(m_StationOrbitTimer.GetElapsedRealTimeS()); m_FadeAmount = 0; }
 
 		/// <summary>
 		/// Gets the position of the planet on the title screen scene.
@@ -171,6 +171,9 @@ namespace RTE {
 		MOSRotating m_Station; //!< The title screen scene station.
 		Vector m_StationOffset; //!< The position of the station on the planet orbit.
 		float m_StationOrbitRotation; //!< The rotation of the station on the planet orbit.
+		Timer m_StationOrbitTimer; //!< Timer to keep track of the station orbit elapsed time.
+		float m_StationOrbitTimerElapsedTime; //!< The elapsed time of the station orbit timer at the point of breaking out of the menu loop. Used to restore the station to last position when returning to menu.
+		float m_StationOrbitProgress; //!< Progress the station made on the orbit, from 0.0 to 1.0;
 		float m_OrbitRadius; //!< The radius of the planet orbit.
 		MOSParticle m_GameLogo; //!< The title screen scene Cortex Command logo.
 		MOSParticle m_GameLogoGlow; //!< The title screen scene Cortex Command logo glow.
@@ -184,8 +187,6 @@ namespace RTE {
 		float m_SectionElapsedTime; //!< How many seconds have elapsed on a section.
 		float m_SectionDuration; //!< How many seconds a section is supposed to elapse.
 		float m_SectionProgress; //!< Progress made on a section, from 0.0 to 1.0.
-
-		Timer m_OrbitTimer; //!< Station orbit progress timer to limit it from going too fast.
 
 		Vector m_ScrollOffset; //!< The scrolling position of the whole title screen scene.
 		float m_BackdropScrollRatio; //!< The scrolling ratio of the whole title screen scene background (nebula and stars).

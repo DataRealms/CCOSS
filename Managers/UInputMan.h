@@ -54,7 +54,8 @@ namespace RTE {
 		/// <summary>
 		/// Workaround for Allegro being unable to detect joystick plugging/unplugging at runtime to enable/disable them accordingly. Uses OS functions to check if the number of connected joysticks changed and reinitializes the joystick handler if necessary.
 		/// </summary>
-		void DetectJoystickHotPlug() const;
+		/// <returns>Whether plugging/unplugging was detected and the joystick handler was reinitialized.</returns>
+		bool DetectJoystickHotPlug() const;
 
 		/// <summary>
 		/// Loads the input device icons from loaded presets. Can't do this during Create() because the presets don't exist so this will be called from MenuMan::Initialize() after modules are loaded.

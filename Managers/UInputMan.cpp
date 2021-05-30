@@ -115,7 +115,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void UInputMan::DetectJoystickHotPlug() const {
+	bool UInputMan::DetectJoystickHotPlug() const {
 #ifdef _WIN32
 		if (joyGetNumDevs() > 0) {
 			static JOYINFOEX joyInfo = { sizeof(JOYINFOEX), JOY_RETURNBUTTONS };
@@ -127,9 +127,11 @@ namespace RTE {
 			if (numDetectedJoysticks != num_joysticks) {
 				remove_joystick();
 				if (numDetectedJoysticks > 0 && install_joystick(JOY_TYPE_AUTODETECT) != 0) { RTEAbort("Failed to initialize joysticks!"); }
+				return true;
 			}
 		}
 #endif
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

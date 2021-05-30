@@ -28,7 +28,7 @@ namespace RTE {
 		m_ActiveMenu = ActiveMenu::MenusDisabled;
 
 		m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer32());
-		m_GUIInput = std::make_unique<AllegroInput>(-1, true);
+		m_GUIInput = std::make_unique<AllegroInput>(-1, g_UInputMan.GetJoystickCount() > 0);
 
 		if (firstTimeInit) {
 			g_LoadingScreen.Create(m_GUIScreen.get(), m_GUIInput.get());
@@ -134,7 +134,7 @@ namespace RTE {
 			m_TitleScreen->SetTitlePendingTransition();
 			return true;
 		}
-		g_UInputMan.DetectJoystickHotPlug();
+		if (g_UInputMan.DetectJoystickHotPlug()) { m_GUIInput->SetKeyJoyMouseCursor(g_UInputMan.GetJoystickCount() > 0); }
 
 		return false;
 	}

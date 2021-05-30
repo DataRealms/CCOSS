@@ -182,6 +182,12 @@ public:
 		return m_MouseWheelChange;
 	}
 
+	/// <summary>
+	/// Sets whether the keyboard and joysticks also control the mouse.
+	/// </summary>
+	/// <param name="enableKeyJoyMouseCursor">Whether the keyboard and joysticks also control the mouse or not.</param>
+	void SetKeyJoyMouseCursor(bool enableKeyJoyMouseCursor) { m_KeyJoyMouseCursor = enableKeyJoyMouseCursor; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

@@ -174,8 +174,9 @@ namespace RTE {
 		} else if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::ActivityResumed) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::TransitionEnd);
 			g_ActivityMan.SetResumeActivity();
-		} else if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::ActivityRestarted) {
+		} else if (updateResult == ScenarioGUI::ScenarioMenuUpdateResult::ActivityStarted) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeOut);
+			if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
 			g_ActivityMan.SetRestartActivity();
 		}
 	}

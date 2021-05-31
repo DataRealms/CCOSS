@@ -3,12 +3,12 @@
 #include "FrameMan.h"
 #include "PresetMan.h"
 #include "ActivityMan.h"
-#include "MetaMan.h"
 #include "UInputMan.h"
 #include "SettingsMan.h"
 #include "ConsoleMan.h"
 
 #include "DataModule.h"
+#include "GameActivity.h"
 #include "Entity.h"
 #include "Scene.h"
 
@@ -29,9 +29,7 @@ namespace RTE {
 
 	ScenarioGUI::ScenarioGUI(AllegroScreen *guiScreen, AllegroInput *guiInput) {
 		m_GUIControlManager = std::make_unique<GUIControlManager>();
-		if (!m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSkin.ini")) {
-			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSkin.ini");
-		}
+		RTEAssert(m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSkin.ini");
 		m_GUIControlManager->Load("Base.rte/GUIs/ScenarioGUI.ini");
 
 		m_RootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
@@ -58,78 +56,80 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ScenarioGUI::CreateActivitySelectionBox() {
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ActivitySelectBox"));
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->SetPositionRel(16, 16);
-		m_ActivitySelectComboBox = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("ActivitySelectCombo"));
-		m_ActivityLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("ActivityDescLabel"));
-		m_ActivityLabel->SetFont(m_GUIControlManager->GetSkin()->GetFont("FontSmall.png"));
-		m_DifficultyLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("DifficultyLabel"));
-		m_DifficultySlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("DifficultySlider"));
+		m_ActivityInfoBox.ActivityInfoBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ActivitySelectBox"));
+		m_ActivityInfoBox.ActivityInfoBox->SetPositionRel(16, 16);
+
+		m_ActivityInfoBox.ActivitySelectComboBox = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("ActivitySelectCombo"));
+		m_ActivityInfoBox.ActivityDescriptionLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("ActivityDescLabel"));
+		m_ActivityInfoBox.DifficultyLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("DifficultyLabel"));
+		m_ActivityInfoBox.DifficultyLabel->SetFont(m_GUIControlManager->GetSkin()->GetFont("FontSmall.png"));
+
+		m_ActivityInfoBox.DifficultySlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("DifficultySlider"));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ScenarioGUI::CreateSceneInfoBox() {
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("SceneInfoBox"));
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->SetPositionRel(m_RootBox->GetWidth() - m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->GetWidth() - 16, 16);
-		m_SceneCloseButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("SceneCloseButton"));
-		m_SceneNameLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("SceneNameLabel"));
-		m_SceneInfoLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("SceneInfoLabel"));
-		m_SceneInfoLabel->SetFont(m_GUIControlManager->GetSkin()->GetFont("FontSmall.png"));
-		m_ScenePreviewBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ScenePreviewBox"));
-		m_ScenePreviewBox->SetPositionRel(10, 33);
-		m_ScenePreviewBox->SetDrawType(GUICollectionBox::Image);
-		m_DefaultPreviewBitmap = std::make_unique<AllegroBitmap>();
-		m_DefaultPreviewBitmap->Create("Base.rte/GUIs/DefaultPreview.png");
-		m_ScenePreviewBitmap = std::make_unique<AllegroBitmap>();
-		m_ScenePreviewBitmap->Create(c_ScenePreviewWidth, c_ScenePreviewHeight, 32);
+		m_SceneInfoBox.SceneInfoBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("SceneInfoBox"));
+		m_SceneInfoBox.SceneInfoBox->SetPositionRel(m_RootBox->GetWidth() - m_SceneInfoBox.SceneInfoBox->GetWidth() - 16, 16);
+		m_SceneInfoBox.SceneCloseButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("SceneCloseButton"));
+		m_SceneInfoBox.SceneNameLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("SceneNameLabel"));
+		m_SceneInfoBox.SceneInfoLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("SceneInfoLabel"));
+		m_SceneInfoBox.SceneInfoLabel->SetFont(m_GUIControlManager->GetSkin()->GetFont("FontSmall.png"));
+		m_SceneInfoBox.ScenePreviewBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ScenePreviewBox"));
+		//m_SceneInfoBox.ScenePreviewBox->SetPositionRel(10, 33);
+		//m_SceneInfoBox.ScenePreviewBox->SetDrawType(GUICollectionBox::Image);
+		m_SceneInfoBox.DefaultPreviewBitmap = std::make_unique<AllegroBitmap>();
+		m_SceneInfoBox.DefaultPreviewBitmap->Create("Base.rte/GUIs/DefaultPreview.png");
+		m_SceneInfoBox.ScenePreviewBitmap = std::make_unique<AllegroBitmap>();
+		m_SceneInfoBox.ScenePreviewBitmap->Create(c_ScenePreviewWidth, c_ScenePreviewHeight, 32);
 		m_SitePointLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("ScenePlanetLabel"));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ScenarioGUI::CreateActivityConfigBox() {
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("PlayerSetupBox"));
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox)->CenterInParent(true, true);
+		m_ActivitySetupBox.ActivitySetupBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("PlayerSetupBox"));
+		m_ActivitySetupBox.ActivitySetupBox->CenterInParent(true, true);
 
-		m_TeamBoxes.at(TeamRows::DisabledTeam) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("TDIcon"));
-		m_TeamBoxes.at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Image);
-		m_TeamNameLabels.at(TeamRows::DisabledTeam) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("TDLabel"));
+		m_ActivitySetupBox.TeamBoxes.at(TeamRows::DisabledTeam) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("TDIcon"));
+		m_ActivitySetupBox.TeamBoxes.at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Image);
+		m_ActivitySetupBox.TeamNameLabels.at(TeamRows::DisabledTeam) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("TDLabel"));
 
 		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
 			std::string teamNumber = std::to_string(teamIndex + 1);
 
-			m_TeamBoxes.at(teamIndex) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("T" + teamNumber + "Icon"));
-			m_TeamBoxes.at(teamIndex)->SetDrawType(GUICollectionBox::Image);
+			m_ActivitySetupBox.TeamBoxes.at(teamIndex) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("T" + teamNumber + "Icon"));
+			m_ActivitySetupBox.TeamBoxes.at(teamIndex)->SetDrawType(GUICollectionBox::Image);
 
-			m_TeamNameLabels.at(teamIndex) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("T" + teamNumber + "Label"));
+			m_ActivitySetupBox.TeamNameLabels.at(teamIndex) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("T" + teamNumber + "Label"));
 
-			m_TeamTechSelect.at(teamIndex) = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("T" + teamNumber + "TechCombo"));
-			m_TeamTechSelect.at(teamIndex)->GetListPanel()->AddItem("-All-", "", nullptr, nullptr, -2);
-			m_TeamTechSelect.at(teamIndex)->GetListPanel()->AddItem("-Random-", "", nullptr, nullptr, -1);
-			m_TeamTechSelect.at(teamIndex)->SetSelectedIndex(0);
+			m_ActivitySetupBox.TeamTechSelect.at(teamIndex) = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("T" + teamNumber + "TechCombo"));
+			m_ActivitySetupBox.TeamTechSelect.at(teamIndex)->GetListPanel()->AddItem("-All-", "", nullptr, nullptr, -2);
+			m_ActivitySetupBox.TeamTechSelect.at(teamIndex)->GetListPanel()->AddItem("-Random-", "", nullptr, nullptr, -1);
+			m_ActivitySetupBox.TeamTechSelect.at(teamIndex)->SetSelectedIndex(0);
 
-			m_TeamAISkillSlider.at(teamIndex) = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("T" + teamNumber + "AISkillSlider"));
-			m_TeamAISkillSlider.at(teamIndex)->SetValue(Activity::DefaultSkill);
+			m_ActivitySetupBox.TeamAISkillSlider.at(teamIndex) = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("T" + teamNumber + "AISkillSlider"));
+			m_ActivitySetupBox.TeamAISkillSlider.at(teamIndex)->SetValue(Activity::DefaultSkill);
 
-			m_TeamAISkillLabel.at(teamIndex) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("T" + teamNumber + "AISkillLabel"));
-			m_TeamAISkillLabel.at(teamIndex)->SetText(Activity::GetAISkillString(m_TeamAISkillSlider.at(teamIndex)->GetValue()));
+			m_ActivitySetupBox.TeamAISkillLabel.at(teamIndex) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("T" + teamNumber + "AISkillLabel"));
+			m_ActivitySetupBox.TeamAISkillLabel.at(teamIndex)->SetText(Activity::GetAISkillString(m_ActivitySetupBox.TeamAISkillSlider.at(teamIndex)->GetValue()));
 		}
 
 		for (int playerIndex = Players::PlayerOne; playerIndex < PlayerColumns::PlayerColumnCount; ++playerIndex) {
 			for (int teamIndex = Activity::TeamOne; teamIndex < TeamRows::TeamRowCount; ++teamIndex) {
-				m_PlayerBoxes.at(playerIndex).at(teamIndex) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("P" + std::to_string(playerIndex + 1) + "T" + std::to_string(teamIndex + 1) + "Box"));
+				m_ActivitySetupBox.PlayerBoxes.at(playerIndex).at(teamIndex) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("P" + std::to_string(playerIndex + 1) + "T" + std::to_string(teamIndex + 1) + "Box"));
 			}
 		}
 
-		m_GoldLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("GoldLabel"));
-		m_GoldSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("GoldSlider"));
-		m_FogOfWarCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("FogOfWarCheckbox"));
-		m_RequireClearPathToOrbitCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("RequireClearPathToOrbitCheckbox"));
-		m_DeployUnitsCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("DeployUnitsCheckbox"));
+		m_ActivitySetupBox.GoldLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("GoldLabel"));
+		m_ActivitySetupBox.GoldSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("GoldSlider"));
+		m_ActivitySetupBox.FogOfWarCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("FogOfWarCheckbox"));
+		m_ActivitySetupBox.RequireClearPathToOrbitCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("RequireClearPathToOrbitCheckbox"));
+		m_ActivitySetupBox.DeployUnitsCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("DeployUnitsCheckbox"));
 
-		m_StartErrorLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("StartErrorLabel"));
-		m_CPULockLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("CPULockLabel"));
+		m_ActivitySetupBox.StartErrorLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("StartErrorLabel"));
+		m_ActivitySetupBox.CPULockLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("CPULockLabel"));
 
 		// Populate the tech ComboBoxes with the available tech modules.
 		std::string techString = " Tech";
@@ -141,7 +141,7 @@ namespace RTE {
 				if (techPos != string::npos) {
 					techName.replace(techPos, techString.length(), "");
 					for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
-						m_TeamTechSelect.at(teamIndex)->GetListPanel()->AddItem(techName, "", nullptr, nullptr, moduleIndex);
+						m_ActivitySetupBox.TeamTechSelect.at(teamIndex)->GetListPanel()->AddItem(techName, "", nullptr, nullptr, moduleIndex);
 					}
 				}
 			}
@@ -152,7 +152,7 @@ namespace RTE {
 
 	void ScenarioGUI::SetEnabled() {
 		HideAllScreens();
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->SetVisible(true);
+		m_ActivityInfoBox.ActivityInfoBox->SetVisible(true);
 		// Reload all scenes and activities to reflect scene changes player might do in scene editor.
 		GetScenesAndActivities(false);
 
@@ -176,45 +176,44 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ScenarioGUI::ShowScenesBox() {
-		clear_to_color(m_ScenePreviewBitmap->GetBitmap(), ColorKeys::g_MaskColor);
+		clear_to_color(m_SceneInfoBox.ScenePreviewBitmap->GetBitmap(), ColorKeys::g_MaskColor);
 		if (m_SelectedScene) {
-			m_SceneNameLabel->SetText(m_SelectedScene->GetPresetName());
-			m_SceneInfoLabel->SetText(m_SelectedScene->GetDescription());
+			m_SceneInfoBox.SceneNameLabel->SetText(m_SelectedScene->GetPresetName());
+			m_SceneInfoBox.SceneInfoLabel->SetText(m_SelectedScene->GetDescription());
 
 			BITMAP *preview = m_SelectedScene->GetPreviewBitmap();
-			if (!preview) { preview = m_DefaultPreviewBitmap->GetBitmap(); }
-			draw_sprite(m_ScenePreviewBitmap->GetBitmap(), preview, 0, 0);
-			m_ScenePreviewBox->SetDrawImage(new AllegroBitmap(m_ScenePreviewBitmap->GetBitmap()));
+			if (!preview) { preview = m_SceneInfoBox.DefaultPreviewBitmap->GetBitmap(); }
+			draw_sprite(m_SceneInfoBox.ScenePreviewBitmap->GetBitmap(), preview, 0, 0);
+			m_SceneInfoBox.ScenePreviewBox->SetDrawImage(new AllegroBitmap(m_SceneInfoBox.ScenePreviewBitmap->GetBitmap()));
 		}
 
-		int textHeight = m_SceneInfoLabel->ResizeHeightToFit();
+		int textHeight = m_SceneInfoBox.SceneInfoLabel->ResizeHeightToFit();
 		int padding = 140;
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->Resize(m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->GetWidth(), textHeight + padding);
-		KeepBoxInScreenBounds(m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox));
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->SetVisible(true);
+		m_SceneInfoBox.SceneInfoBox->Resize(m_SceneInfoBox.SceneInfoBox->GetWidth(), textHeight + padding);
+		KeepBoxInScreenBounds(m_SceneInfoBox.SceneInfoBox);
+		m_SceneInfoBox.SceneInfoBox->SetVisible(true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ScenarioGUI::ShowPlayersBox() {
-		m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox)->SetVisible(true);
+		m_ActivitySetupBox.ActivitySetupBox->SetVisible(true);
 
 		if (m_SelectedActivity && m_SelectedScene) {
-			const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(m_SelectedActivity);
-			if (gameActivity) {
+			if (const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(m_SelectedActivity)) {
 				m_LockedCPUTeam = gameActivity->GetCPUTeam();
-				if (m_LockedCPUTeam != Activity::NoTeam) { m_CPULockLabel->SetPositionAbs(m_CPULockLabel->GetXPos(), m_TeamNameLabels.at(m_LockedCPUTeam)->GetYPos()); }
+				if (m_LockedCPUTeam != Activity::NoTeam) { m_ActivitySetupBox.CPULockLabel->SetPositionAbs(m_ActivitySetupBox.CPULockLabel->GetXPos(), m_ActivitySetupBox.TeamNameLabels.at(m_LockedCPUTeam)->GetYPos()); }
 			}
 
 			m_ScenarioButtons.at(ScenarioButtons::StartGameButton)->SetVisible(false);
-			m_StartErrorLabel->SetVisible(true);
-			m_CPULockLabel->SetVisible(m_LockedCPUTeam != Activity::NoTeam);
+			m_ActivitySetupBox.StartErrorLabel->SetVisible(true);
+			m_ActivitySetupBox.CPULockLabel->SetVisible(m_LockedCPUTeam != Activity::NoTeam);
 
 			// Set up initial color for all cells.
 			for (int playerIndex = Players::PlayerOne; playerIndex < PlayerColumns::PlayerColumnCount; ++playerIndex) {
 				for (int teamIndex = Activity::TeamOne; teamIndex < TeamRows::TeamRowCount; ++teamIndex) {
-					m_PlayerBoxes.at(playerIndex).at(teamIndex)->SetDrawType(GUICollectionBox::Color);
-					m_PlayerBoxes.at(playerIndex).at(teamIndex)->SetDrawColor(c_GUIColorBlue);
+					m_ActivitySetupBox.PlayerBoxes.at(playerIndex).at(teamIndex)->SetDrawType(GUICollectionBox::Color);
+					m_ActivitySetupBox.PlayerBoxes.at(playerIndex).at(teamIndex)->SetDrawColor(c_GUIColorBlue);
 				}
 			}
 
@@ -222,25 +221,25 @@ namespace RTE {
 
 			// Human players start on the disabled team row.
 			for (int playerIndex = Players::PlayerOne; playerIndex < Players::MaxPlayerCount; ++playerIndex) {
-				m_PlayerBoxes.at(playerIndex).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Image);
+				m_ActivitySetupBox.PlayerBoxes.at(playerIndex).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Image);
 				iconPointer = g_UInputMan.GetSchemeIcon(playerIndex);
-				if (iconPointer) { m_PlayerBoxes.at(playerIndex).at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0])); }
+				if (iconPointer) { m_ActivitySetupBox.PlayerBoxes.at(playerIndex).at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0])); }
 			}
 
 			// CPU player either has a locked team or starts on the disabled team row.
 			int InitialCPUTeam = (m_LockedCPUTeam != Activity::NoTeam) ? m_LockedCPUTeam : TeamRows::DisabledTeam;
-			m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(InitialCPUTeam)->SetDrawType(GUICollectionBox::Image);
+			m_ActivitySetupBox.PlayerBoxes.at(PlayerColumns::PlayerCPU).at(InitialCPUTeam)->SetDrawType(GUICollectionBox::Image);
 			iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
-			if (iconPointer) { m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(InitialCPUTeam)->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0])); }
+			if (iconPointer) { m_ActivitySetupBox.PlayerBoxes.at(PlayerColumns::PlayerCPU).at(InitialCPUTeam)->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0])); }
 
 			iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Disabled Team"));
-			m_TeamNameLabels.at(TeamRows::DisabledTeam)->SetText("Not Playing:");
-			if (iconPointer) { m_TeamBoxes.at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0])); }
+			m_ActivitySetupBox.TeamNameLabels.at(TeamRows::DisabledTeam)->SetText("Not Playing:");
+			if (iconPointer) { m_ActivitySetupBox.TeamBoxes.at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0])); }
 
 			for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
 				// Reset GUI controls to default values.
-				m_TeamTechSelect.at(teamIndex)->SetSelectedIndex(0);
-				m_TeamAISkillSlider.at(teamIndex)->SetValue(Activity::DefaultSkill);
+				m_ActivitySetupBox.TeamTechSelect.at(teamIndex)->SetSelectedIndex(0);
+				m_ActivitySetupBox.TeamAISkillSlider.at(teamIndex)->SetValue(Activity::DefaultSkill);
 
 				if (m_SelectedActivity->TeamActive(teamIndex)) {
 					iconPointer = m_SelectedActivity->GetTeamIcon(teamIndex);
@@ -248,22 +247,22 @@ namespace RTE {
 						std::string teamString = "Team " + std::to_string(teamIndex + 1) + " Default";
 						iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", teamString));
 					}
-					m_TeamNameLabels.at(teamIndex)->SetText(m_SelectedActivity->GetTeamName(teamIndex) + ":");
-					m_TeamTechSelect.at(teamIndex)->SetEnabled(true);
-					m_TeamTechSelect.at(teamIndex)->SetVisible(true);
-					m_TeamAISkillSlider.at(teamIndex)->SetEnabled(true);
-					m_TeamAISkillSlider.at(teamIndex)->SetVisible(true);
-					m_TeamAISkillLabel.at(teamIndex)->SetVisible(true);
+					m_ActivitySetupBox.TeamNameLabels.at(teamIndex)->SetText(m_SelectedActivity->GetTeamName(teamIndex) + ":");
+					m_ActivitySetupBox.TeamTechSelect.at(teamIndex)->SetEnabled(true);
+					m_ActivitySetupBox.TeamTechSelect.at(teamIndex)->SetVisible(true);
+					m_ActivitySetupBox.TeamAISkillSlider.at(teamIndex)->SetEnabled(true);
+					m_ActivitySetupBox.TeamAISkillSlider.at(teamIndex)->SetVisible(true);
+					m_ActivitySetupBox.TeamAISkillLabel.at(teamIndex)->SetVisible(true);
 				} else {
 					iconPointer = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Locked Team"));
-					m_TeamNameLabels.at(teamIndex)->SetText("Unavailable");
-					m_TeamTechSelect.at(teamIndex)->SetEnabled(false);
-					m_TeamTechSelect.at(teamIndex)->SetVisible(false);
-					m_TeamAISkillSlider.at(teamIndex)->SetEnabled(false);
-					m_TeamAISkillSlider.at(teamIndex)->SetVisible(false);
-					m_TeamAISkillLabel.at(teamIndex)->SetVisible(false);
+					m_ActivitySetupBox.TeamNameLabels.at(teamIndex)->SetText("Unavailable");
+					m_ActivitySetupBox.TeamTechSelect.at(teamIndex)->SetEnabled(false);
+					m_ActivitySetupBox.TeamTechSelect.at(teamIndex)->SetVisible(false);
+					m_ActivitySetupBox.TeamAISkillSlider.at(teamIndex)->SetEnabled(false);
+					m_ActivitySetupBox.TeamAISkillSlider.at(teamIndex)->SetVisible(false);
+					m_ActivitySetupBox.TeamAISkillLabel.at(teamIndex)->SetVisible(false);
 				}
-				if (iconPointer) { m_TeamBoxes.at(teamIndex)->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0])); }
+				if (iconPointer) { m_ActivitySetupBox.TeamBoxes.at(teamIndex)->SetDrawImage(new AllegroBitmap(iconPointer->GetBitmaps32()[0])); }
 			}
 		}
 	}
@@ -271,10 +270,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ScenarioGUI::HideAllScreens() {
+		/*
 		for (GUICollectionBox *collectionBox : m_ScenarioCollectionBoxes) {
 			collectionBox->SetVisible(false);
 		}
 		m_SitePointLabel->SetVisible(false);
+		*/
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -356,10 +357,10 @@ namespace RTE {
 		g_PresetMan.GetAllOfType(presetList, "Activity");
 		Activity *presetActivity = nullptr;
 
-		int previousSelectedActivityIndex = m_ActivitySelectComboBox->GetSelectedIndex();
+		int previousSelectedActivityIndex = m_ActivityInfoBox.ActivitySelectComboBox->GetSelectedIndex();
 
 		// Associate all Scenes compatible with each Activity and populate the activities selection list.
-		m_ActivitySelectComboBox->ClearList();
+		m_ActivityInfoBox.ActivitySelectComboBox->ClearList();
 		int index = 0;
 		int tutorialIndex = -1;
 		for (Entity *presetEntity : presetList) {
@@ -371,16 +372,16 @@ namespace RTE {
 				}
 				m_ScenarioActivities.insert(newPair);
 				// Add to the activity selection ComboBox, and attach the activity pointer, not passing in ownership.
-				m_ActivitySelectComboBox->AddItem(presetActivity->GetPresetName(), "", nullptr, presetActivity);
+				m_ActivityInfoBox.ActivitySelectComboBox->AddItem(presetActivity->GetPresetName(), "", nullptr, presetActivity);
 
 				// Save the tutorial mission so we can select it by default.
 				if (selectTutorial && presetActivity->GetClassName() == "GATutorial") { tutorialIndex = index; }
 				index++;
 			}
 		}
-		m_ActivitySelectComboBox->SetSelectedIndex((selectTutorial && tutorialIndex >= 0) ? tutorialIndex : previousSelectedActivityIndex);
+		m_ActivityInfoBox.ActivitySelectComboBox->SetSelectedIndex((selectTutorial && tutorialIndex >= 0) ? tutorialIndex : previousSelectedActivityIndex);
 
-		m_SelectedActivity = dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity);
+		m_SelectedActivity = dynamic_cast<const Activity *>(m_ActivityInfoBox.ActivitySelectComboBox->GetSelectedItem()->m_pEntity);
 
 		UpdateActivityBox();
 		SetSelectedScene((m_ScenarioScenes && (m_ScenarioScenes->size() == 1 || selectTutorial)) ? m_ScenarioScenes->front() : nullptr);
@@ -394,7 +395,7 @@ namespace RTE {
 			ShowScenesBox();
 			CalculateLinesToSitePoint();
 		} else {
-			m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->SetVisible(false);
+			m_SceneInfoBox.SceneInfoBox->SetVisible(false);
 			m_LineToSitePoints.clear();
 		}
 	}
@@ -406,17 +407,17 @@ namespace RTE {
 		GameActivity *gameActivity = dynamic_cast<GameActivity *>(activityInstance);
 
 		if (gameActivity) {
-			gameActivity->SetDifficulty(m_DifficultySlider->GetValue());
-			gameActivity->SetFogOfWarEnabled(m_FogOfWarCheckbox->GetCheck());
-			gameActivity->SetRequireClearPathToOrbit(m_RequireClearPathToOrbitCheckbox->GetCheck());
-			gameActivity->SetStartingGold((m_GoldSlider->GetValue() == m_GoldSlider->GetMaximum()) ? 9999999 : m_GoldSlider->GetValue() - (m_GoldSlider->GetValue() % 500));
+			gameActivity->SetDifficulty(m_ActivityInfoBox.DifficultySlider->GetValue());
+			gameActivity->SetFogOfWarEnabled(m_ActivitySetupBox.FogOfWarCheckbox->GetCheck());
+			gameActivity->SetRequireClearPathToOrbit(m_ActivitySetupBox.RequireClearPathToOrbitCheckbox->GetCheck());
+			gameActivity->SetStartingGold((m_ActivitySetupBox.GoldSlider->GetValue() == m_ActivitySetupBox.GoldSlider->GetMaximum()) ? 9999999 : m_ActivitySetupBox.GoldSlider->GetValue() - (m_ActivitySetupBox.GoldSlider->GetValue() % 500));
 		}
-		g_SceneMan.SetSceneToLoad(m_SelectedScene, true, m_DeployUnitsCheckbox->GetCheck());
+		g_SceneMan.SetSceneToLoad(m_SelectedScene, true, m_ActivitySetupBox.DeployUnitsCheckbox->GetCheck());
 
 		activityInstance->ClearPlayers(false);
 		for (int playerIndex = Players::PlayerOne; playerIndex < Players::MaxPlayerCount; ++playerIndex) {
 			for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
-				if (m_PlayerBoxes.at(playerIndex).at(teamIndex)->GetDrawType() == GUICollectionBox::Image) {
+				if (m_ActivitySetupBox.PlayerBoxes.at(playerIndex).at(teamIndex)->GetDrawType() == GUICollectionBox::Image) {
 					activityInstance->AddPlayer(playerIndex, true, teamIndex, 0);
 					break;
 				}
@@ -425,7 +426,7 @@ namespace RTE {
 
 		if (gameActivity) {
 			for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
-				if (m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(teamIndex)->GetDrawType() == GUICollectionBox::Image) {
+				if (m_ActivitySetupBox.PlayerBoxes.at(PlayerColumns::PlayerCPU).at(teamIndex)->GetDrawType() == GUICollectionBox::Image) {
 					gameActivity->SetCPUTeam(teamIndex);
 					break;
 				}
@@ -433,26 +434,23 @@ namespace RTE {
 		}
 
 		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; ++teamIndex) {
-			const GUIListPanel::Item *techItem = m_TeamTechSelect.at(teamIndex)->GetSelectedItem();
-			if (techItem) {
+			if (const GUIListPanel::Item *techItem = m_ActivitySetupBox.TeamTechSelect.at(teamIndex)->GetSelectedItem()) {
 				// ExtraIndex -2 is "All", -1 "Random"
 				if (techItem->m_ExtraIndex == -2) {
 					gameActivity->SetTeamTech(teamIndex, "-All-");
 				} else if (techItem->m_ExtraIndex == -1) {
-					int selection = RandomNum<int>(2, m_TeamTechSelect.at(teamIndex)->GetListPanel()->GetItemList()->size() - 1);
-					m_TeamTechSelect.at(teamIndex)->SetSelectedIndex(selection);
-					gameActivity->SetTeamTech(teamIndex, g_PresetMan.GetDataModuleName(m_TeamTechSelect.at(teamIndex)->GetSelectedItem()->m_ExtraIndex));
+					int selection = RandomNum<int>(2, m_ActivitySetupBox.TeamTechSelect.at(teamIndex)->GetListPanel()->GetItemList()->size() - 1);
+					m_ActivitySetupBox.TeamTechSelect.at(teamIndex)->SetSelectedIndex(selection);
+					gameActivity->SetTeamTech(teamIndex, g_PresetMan.GetDataModuleName(m_ActivitySetupBox.TeamTechSelect.at(teamIndex)->GetSelectedItem()->m_ExtraIndex));
 				} else {
 					gameActivity->SetTeamTech(teamIndex, g_PresetMan.GetDataModuleName(techItem->m_ExtraIndex));
 				}
 			}
-			gameActivity->SetTeamAISkill(teamIndex, (m_TeamAISkillSlider.at(teamIndex)->IsEnabled()) ? m_TeamAISkillSlider.at(teamIndex)->GetValue() : Activity::DefaultSkill);
+			gameActivity->SetTeamAISkill(teamIndex, (m_ActivitySetupBox.TeamAISkillSlider.at(teamIndex)->IsEnabled()) ? m_ActivitySetupBox.TeamAISkillSlider.at(teamIndex)->GetValue() : Activity::DefaultSkill);
 		}
 
 		g_LuaMan.FileCloseAll();
 		g_ActivityMan.SetStartActivity(activityInstance);
-
-		if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
 
 		return true;
 	}
@@ -463,12 +461,12 @@ namespace RTE {
 		m_LineToSitePoints.clear();
 
 		Vector sitePos = m_PlanetCenter + m_SelectedScene->GetLocation() + m_SelectedScene->GetLocationOffset();
-		if (m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->PointInside(sitePos.GetFloorIntX(), sitePos.GetFloorIntY())) {
+		if (m_SceneInfoBox.SceneInfoBox->PointInside(sitePos.GetFloorIntX(), sitePos.GetFloorIntY())) {
 			return;
 		}
 
-		int halfBoxHeight = m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->GetHeight() / 2;
-		Vector sceneBoxCenter(static_cast<float>(m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->GetXPos() + (m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->GetWidth() / 2)), static_cast<float>(m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->GetYPos() + halfBoxHeight));
+		int halfBoxHeight = m_SceneInfoBox.SceneInfoBox->GetHeight() / 2;
+		Vector sceneBoxCenter(static_cast<float>(m_SceneInfoBox.SceneInfoBox->GetXPos() + (m_SceneInfoBox.SceneInfoBox->GetWidth() / 2)), static_cast<float>(m_SceneInfoBox.SceneInfoBox->GetYPos() + halfBoxHeight));
 		float yDirMult = sitePos.GetY() < sceneBoxCenter.GetY() ? -1.0F : 1.0F;
 		Vector sceneBoxEdge = sceneBoxCenter + Vector(0, static_cast<float>(halfBoxHeight)) * yDirMult; // Point on the scene box where the line starts.
 		int circleRadius = 8; // Radius of the circle drawn around the site point.
@@ -533,69 +531,69 @@ namespace RTE {
 			}
 
 			if (m_ScenarioScenes && m_ScenarioScenes->size() == 1) {
-				m_ActivityLabel->SetText(m_SelectedActivity->GetDescription() + "\n\nThe only site where this activity can be played has been selected for you.");
+				m_ActivityInfoBox.ActivityDescriptionLabel->SetText(m_SelectedActivity->GetDescription() + "\n\nThe only site where this activity can be played has been selected for you.");
 			} else if (m_ScenarioScenes && m_ScenarioScenes->size() > 1) {
-				m_ActivityLabel->SetText(m_SelectedActivity->GetDescription() + "\n\nSites where this activity can be played appear on the planet. Select one to begin!");
+				m_ActivityInfoBox.ActivityDescriptionLabel->SetText(m_SelectedActivity->GetDescription() + "\n\nSites where this activity can be played appear on the planet. Select one to begin!");
 			} else {
-				m_ActivityLabel->SetText(m_SelectedActivity->GetDescription() + "\n\nNo sites appear to be compatible with this selected activity! Please try another.");
+				m_ActivityInfoBox.ActivityDescriptionLabel->SetText(m_SelectedActivity->GetDescription() + "\n\nNo sites appear to be compatible with this selected activity! Please try another.");
 			}
 
-			m_DifficultyLabel->SetVisible(true);
-			m_DifficultySlider->SetVisible(true);
-			if (m_DifficultySlider->GetValue() < Activity::CakeDifficulty) {
-				m_DifficultyLabel->SetText("Difficulty: Cake");
-			} else if (m_DifficultySlider->GetValue() < Activity::EasyDifficulty) {
-				m_DifficultyLabel->SetText("Difficulty: Easy");
-			} else if (m_DifficultySlider->GetValue() < Activity::MediumDifficulty) {
-				m_DifficultyLabel->SetText("Difficulty: Medium");
-			} else if (m_DifficultySlider->GetValue() < Activity::HardDifficulty) {
-				m_DifficultyLabel->SetText("Difficulty: Hard");
-			} else if (m_DifficultySlider->GetValue() < Activity::NutsDifficulty) {
-				m_DifficultyLabel->SetText("Difficulty: Nuts");
+			m_ActivityInfoBox.DifficultyLabel->SetVisible(true);
+			m_ActivityInfoBox.DifficultySlider->SetVisible(true);
+			if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::CakeDifficulty) {
+				m_ActivityInfoBox.DifficultyLabel->SetText("Difficulty: Cake");
+			} else if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::EasyDifficulty) {
+				m_ActivityInfoBox.DifficultyLabel->SetText("Difficulty: Easy");
+			} else if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::MediumDifficulty) {
+				m_ActivityInfoBox.DifficultyLabel->SetText("Difficulty: Medium");
+			} else if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::HardDifficulty) {
+				m_ActivityInfoBox.DifficultyLabel->SetText("Difficulty: Hard");
+			} else if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::NutsDifficulty) {
+				m_ActivityInfoBox.DifficultyLabel->SetText("Difficulty: Nuts");
 			} else {
-				m_DifficultyLabel->SetText("Difficulty: Nuts!");
+				m_ActivityInfoBox.DifficultyLabel->SetText("Difficulty: Nuts!");
 			}
-			m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->Resize(m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->GetWidth(), m_ActivityLabel->ResizeHeightToFit() + 110);
+			m_ActivityInfoBox.ActivityInfoBox->Resize(m_ActivityInfoBox.ActivityInfoBox->GetWidth(), m_ActivityInfoBox.ActivityDescriptionLabel->ResizeHeightToFit() + 110);
 
 			const GameActivity *selectedGA = dynamic_cast<const GameActivity *>(m_SelectedActivity);
 			if (selectedGA) {
-				if (m_DifficultySlider->GetValue() < Activity::CakeDifficulty && selectedGA->GetDefaultGoldCake() > -1) {
-					m_GoldSlider->SetValue(selectedGA->GetDefaultGoldCake());
-				} else if (m_DifficultySlider->GetValue() < Activity::EasyDifficulty && selectedGA->GetDefaultGoldEasy() > -1) {
-					m_GoldSlider->SetValue(selectedGA->GetDefaultGoldEasy());
-				} else if (m_DifficultySlider->GetValue() < Activity::MediumDifficulty && selectedGA->GetDefaultGoldMedium() > -1) {
-					m_GoldSlider->SetValue(selectedGA->GetDefaultGoldMedium());
-				} else if (m_DifficultySlider->GetValue() < Activity::HardDifficulty && selectedGA->GetDefaultGoldHard() > -1) {
-					m_GoldSlider->SetValue(selectedGA->GetDefaultGoldHard());
-				} else if (m_DifficultySlider->GetValue() < Activity::NutsDifficulty && selectedGA->GetDefaultGoldNuts() > -1) {
-					m_GoldSlider->SetValue(selectedGA->GetDefaultGoldNuts());
+				if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::CakeDifficulty && selectedGA->GetDefaultGoldCake() > -1) {
+					m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldCake());
+				} else if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::EasyDifficulty && selectedGA->GetDefaultGoldEasy() > -1) {
+					m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldEasy());
+				} else if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::MediumDifficulty && selectedGA->GetDefaultGoldMedium() > -1) {
+					m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldMedium());
+				} else if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::HardDifficulty && selectedGA->GetDefaultGoldHard() > -1) {
+					m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldHard());
+				} else if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::NutsDifficulty && selectedGA->GetDefaultGoldNuts() > -1) {
+					m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldNuts());
 				} else if (selectedGA->GetDefaultGoldNuts() > -1) {
-					m_GoldSlider->SetValue(selectedGA->GetDefaultGoldNuts());
+					m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldNuts());
 				}
-				m_GoldSlider->SetEnabled(selectedGA->GetGoldSwitchEnabled());
+				m_ActivitySetupBox.GoldSlider->SetEnabled(selectedGA->GetGoldSwitchEnabled());
 
 				int defaultFogOfWar = selectedGA->GetDefaultFogOfWar();
-				if (defaultFogOfWar > -1) { m_FogOfWarCheckbox->SetCheck(defaultFogOfWar != 0); }
-				m_FogOfWarCheckbox->SetEnabled(selectedGA->GetFogOfWarSwitchEnabled());
+				if (defaultFogOfWar > -1) { m_ActivitySetupBox.FogOfWarCheckbox->SetCheck(defaultFogOfWar != 0); }
+				m_ActivitySetupBox.FogOfWarCheckbox->SetEnabled(selectedGA->GetFogOfWarSwitchEnabled());
 
 				int defaultReqClearPath = selectedGA->GetDefaultRequireClearPathToOrbit();
-				if (defaultReqClearPath > -1) { m_RequireClearPathToOrbitCheckbox->SetCheck(defaultReqClearPath != 0); }
-				m_RequireClearPathToOrbitCheckbox->SetEnabled(selectedGA->GetRequireClearPathToOrbitSwitchEnabled());
+				if (defaultReqClearPath > -1) { m_ActivitySetupBox.RequireClearPathToOrbitCheckbox->SetCheck(defaultReqClearPath != 0); }
+				m_ActivitySetupBox.RequireClearPathToOrbitCheckbox->SetEnabled(selectedGA->GetRequireClearPathToOrbitSwitchEnabled());
 
 				int defaultDeployUnits = selectedGA->GetDefaultDeployUnits();
-				if (defaultDeployUnits > -1) { m_DeployUnitsCheckbox->SetCheck(defaultDeployUnits != 0); }
-				m_DeployUnitsCheckbox->SetEnabled(selectedGA->GetDeployUnitsSwitchEnabled());
+				if (defaultDeployUnits > -1) { m_ActivitySetupBox.DeployUnitsCheckbox->SetCheck(defaultDeployUnits != 0); }
+				m_ActivitySetupBox.DeployUnitsCheckbox->SetEnabled(selectedGA->GetDeployUnitsSwitchEnabled());
 			}
 		} else {
 			m_ScenarioScenes = nullptr;
-			m_ActivityLabel->SetText("No Activity selected.");
-			m_DifficultyLabel->SetVisible(false);
-			if (m_DifficultySlider) { m_DifficultySlider->SetVisible(false); }
+			m_ActivityInfoBox.ActivityDescriptionLabel->SetText("No Activity selected.");
+			m_ActivityInfoBox.DifficultyLabel->SetVisible(false);
+			if (m_ActivityInfoBox.DifficultySlider) { m_ActivityInfoBox.DifficultySlider->SetVisible(false); }
 
-			m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->Resize(m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->GetWidth(), m_ActivityLabel->ResizeHeightToFit() + 125);
+			m_ActivityInfoBox.ActivityInfoBox->Resize(m_ActivityInfoBox.ActivityInfoBox->GetWidth(), m_ActivityInfoBox.ActivityDescriptionLabel->ResizeHeightToFit() + 125);
 		}
 
-		KeepBoxInScreenBounds(m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox));
+		KeepBoxInScreenBounds(m_ActivityInfoBox.ActivityInfoBox);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -608,20 +606,18 @@ namespace RTE {
 		m_GUIControlManager->GetManager()->GetInputController()->GetMousePosition(&mouseX, &mouseY);
 
 		const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(m_SelectedActivity);
-
-		const GUICollectionBox *hoveredCell = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControlUnderPoint(mouseX, mouseY, m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox), 1));
-		if (hoveredCell) {
+		if (const GUICollectionBox *hoveredCell = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControlUnderPoint(mouseX, mouseY, m_ActivitySetupBox.ActivitySetupBox, 1))) {
 			// Find which cell is being hovered over.
 			int hoveredPlayer = PlayerColumns::PlayerColumnCount;
 			int hoveredTeam = TeamRows::TeamRowCount;
 			for (int playerIndex = Players::PlayerOne; playerIndex < PlayerColumns::PlayerColumnCount; ++playerIndex) {
 				for (int teamIndex = Activity::TeamOne; teamIndex < TeamRows::TeamRowCount; ++teamIndex) {
-					if (m_PlayerBoxes.at(playerIndex).at(teamIndex) == hoveredCell) {
+					if (m_ActivitySetupBox.PlayerBoxes.at(playerIndex).at(teamIndex) == hoveredCell) {
 						hoveredPlayer = playerIndex;
 						hoveredTeam = teamIndex;
-					} else if (m_PlayerBoxes.at(playerIndex).at(teamIndex)->GetDrawType() == GUICollectionBox::Color) {
+					} else if (m_ActivitySetupBox.PlayerBoxes.at(playerIndex).at(teamIndex)->GetDrawType() == GUICollectionBox::Color) {
 						// Un-highlight all other cells.
-						m_PlayerBoxes.at(playerIndex).at(teamIndex)->SetDrawColor(c_GUIColorBlue);
+						m_ActivitySetupBox.PlayerBoxes.at(playerIndex).at(teamIndex)->SetDrawColor(c_GUIColorBlue);
 					}
 				}
 			}
@@ -631,12 +627,12 @@ namespace RTE {
 			// It's not a team row locked to the CPU.
 			// It's not the CPU player if he is locked to a CPU team.
 			// It doesn't already contain an image.
-			if ((m_SelectedActivity->TeamActive(hoveredTeam) || hoveredTeam == TeamRows::DisabledTeam) && m_LockedCPUTeam != hoveredTeam && (m_LockedCPUTeam == Activity::NoTeam || hoveredPlayer != PlayerColumns::PlayerCPU) && m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawType() != GUICollectionBox::Image) {
+			if ((m_SelectedActivity->TeamActive(hoveredTeam) || hoveredTeam == TeamRows::DisabledTeam) && m_LockedCPUTeam != hoveredTeam && (m_LockedCPUTeam == Activity::NoTeam || hoveredPlayer != PlayerColumns::PlayerCPU) && m_ActivitySetupBox.PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawType() != GUICollectionBox::Image) {
 				if (g_UInputMan.MenuButtonReleased(UInputMan::MENU_EITHER)) {
 					ClickInPlayerSetup(hoveredPlayer, hoveredTeam);
-				} else if (m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawType() == GUICollectionBox::Color && m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawColor() != c_GUIColorLightBlue) {
+				} else if (m_ActivitySetupBox.PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawType() == GUICollectionBox::Color && m_ActivitySetupBox.PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawColor() != c_GUIColorLightBlue) {
 					// Just highlight the cell.
-					m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->SetDrawColor(c_GUIColorLightBlue);
+					m_ActivitySetupBox.PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->SetDrawColor(c_GUIColorLightBlue);
 					g_GUISound.SelectionChangeSound()->Play();
 				}
 			}
@@ -649,7 +645,7 @@ namespace RTE {
 			bool foundPlayer = false;
 			if (m_SelectedActivity->TeamActive(teamIndex)) {
 				for (int playerIndex = Players::PlayerOne; playerIndex < PlayerColumns::PlayerColumnCount; ++playerIndex) {
-					if (m_PlayerBoxes.at(playerIndex).at(teamIndex)->GetDrawType() == GUICollectionBox::Image) {
+					if (m_ActivitySetupBox.PlayerBoxes.at(playerIndex).at(teamIndex)->GetDrawType() == GUICollectionBox::Image) {
 						foundPlayer = true;
 						if (playerIndex != PlayerColumns::PlayerCPU) {
 							++humansInTeams;
@@ -667,35 +663,35 @@ namespace RTE {
 			if (humansInTeams > maxHumanPlayers) {
 				m_ScenarioButtons.at(ScenarioButtons::StartGameButton)->SetVisible(false);
 				std::string msgString = "Too many players assigned! Max for this activity is " + std::to_string(maxHumanPlayers);
-				m_StartErrorLabel->SetText(msgString);
-				m_StartErrorLabel->SetVisible(true);
+				m_ActivitySetupBox.StartErrorLabel->SetText(msgString);
+				m_ActivitySetupBox.StartErrorLabel->SetVisible(true);
 			} else if (minTeamsRequired > teamsWithPlayers) {
 				m_ScenarioButtons.at(ScenarioButtons::StartGameButton)->SetVisible(false);
 				std::string msgString = "Assign players to at\nleast " + std::to_string(minTeamsRequired) + " of the teams!";
-				m_StartErrorLabel->SetText(msgString);
-				m_StartErrorLabel->SetVisible(true);
+				m_ActivitySetupBox.StartErrorLabel->SetText(msgString);
+				m_ActivitySetupBox.StartErrorLabel->SetVisible(true);
 			} else if (teamWithHumans == 0) {
 				m_ScenarioButtons.at(ScenarioButtons::StartGameButton)->SetVisible(false);
-				m_StartErrorLabel->SetText("Assign human players\nto at least one team!");
-				m_StartErrorLabel->SetVisible(true);
+				m_ActivitySetupBox.StartErrorLabel->SetText("Assign human players\nto at least one team!");
+				m_ActivitySetupBox.StartErrorLabel->SetVisible(true);
 			} else {
 				m_ScenarioButtons.at(ScenarioButtons::StartGameButton)->SetVisible(true);
-				m_StartErrorLabel->SetVisible(false);
+				m_ActivitySetupBox.StartErrorLabel->SetVisible(false);
 			}
 		}
 
 		char goldString[256];
-		if (m_GoldSlider->GetValue() == m_GoldSlider->GetMaximum()) {
+		if (m_ActivitySetupBox.GoldSlider->GetValue() == m_ActivitySetupBox.GoldSlider->GetMaximum()) {
 			std::snprintf(goldString, sizeof(goldString), "Starting Gold: %c Infinite", -58);
 		} else {
-			int startGold = m_GoldSlider->GetValue();
+			int startGold = m_ActivitySetupBox.GoldSlider->GetValue();
 			startGold = startGold - (startGold % 500);
 			std::snprintf(goldString, sizeof(goldString), "Starting Gold: %c %d oz", -58, startGold);
 		}
-		m_GoldLabel->SetText(goldString);
+		m_ActivitySetupBox.GoldLabel->SetText(goldString);
 
 		for (int teamIndex = Activity::TeamOne; teamIndex < Activity::MaxTeamCount; teamIndex++) {
-			m_TeamAISkillLabel.at(teamIndex)->SetText(Activity::GetAISkillString(m_TeamAISkillSlider.at(teamIndex)->GetValue()));
+			m_ActivitySetupBox.TeamAISkillLabel.at(teamIndex)->SetText(Activity::GetAISkillString(m_ActivitySetupBox.TeamAISkillSlider.at(teamIndex)->GetValue()));
 		}
 	}
 
@@ -703,34 +699,34 @@ namespace RTE {
 
 	void ScenarioGUI::ClickInPlayerSetup(int clickedPlayer, int clickedTeam) {
 		// Move the player's icon to the correct row.
-		m_PlayerBoxes.at(clickedPlayer).at(clickedTeam)->SetDrawType(GUICollectionBox::Image);
+		m_ActivitySetupBox.PlayerBoxes.at(clickedPlayer).at(clickedTeam)->SetDrawType(GUICollectionBox::Image);
 		const Icon *playerIcon = (clickedPlayer != PlayerColumns::PlayerCPU) ? g_UInputMan.GetSchemeIcon(clickedPlayer) : dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
-		if (playerIcon) { m_PlayerBoxes.at(clickedPlayer).at(clickedTeam)->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0])); }
+		if (playerIcon) { m_ActivitySetupBox.PlayerBoxes.at(clickedPlayer).at(clickedTeam)->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0])); }
 
 		for (int nonHoveredTeam = Activity::TeamOne; nonHoveredTeam < TeamRows::TeamRowCount; ++nonHoveredTeam) {
 			if (nonHoveredTeam != clickedTeam) {
-				m_PlayerBoxes.at(clickedPlayer).at(nonHoveredTeam)->SetDrawType(GUICollectionBox::Color);
-				m_PlayerBoxes.at(clickedPlayer).at(nonHoveredTeam)->SetDrawColor(c_GUIColorBlue);
+				m_ActivitySetupBox.PlayerBoxes.at(clickedPlayer).at(nonHoveredTeam)->SetDrawType(GUICollectionBox::Color);
+				m_ActivitySetupBox.PlayerBoxes.at(clickedPlayer).at(nonHoveredTeam)->SetDrawColor(c_GUIColorBlue);
 			}
 		}
 
 		// Remove human players from their team row if a CPU player is added to it, and vice - versa for CPU players.
 		if (clickedPlayer == PlayerColumns::PlayerCPU && clickedTeam != TeamRows::DisabledTeam) {
 			for (int humanPlayer = Players::PlayerOne; humanPlayer < Players::MaxPlayerCount; ++humanPlayer) {
-				if (m_PlayerBoxes.at(humanPlayer).at(clickedTeam)->GetDrawType() == GUICollectionBox::Image) {
-					m_PlayerBoxes.at(humanPlayer).at(clickedTeam)->SetDrawType(GUICollectionBox::Color);
-					m_PlayerBoxes.at(humanPlayer).at(clickedTeam)->SetDrawColor(c_GUIColorBlue);
-					m_PlayerBoxes.at(humanPlayer).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Image);
+				if (m_ActivitySetupBox.PlayerBoxes.at(humanPlayer).at(clickedTeam)->GetDrawType() == GUICollectionBox::Image) {
+					m_ActivitySetupBox.PlayerBoxes.at(humanPlayer).at(clickedTeam)->SetDrawType(GUICollectionBox::Color);
+					m_ActivitySetupBox.PlayerBoxes.at(humanPlayer).at(clickedTeam)->SetDrawColor(c_GUIColorBlue);
+					m_ActivitySetupBox.PlayerBoxes.at(humanPlayer).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Image);
 					playerIcon = g_UInputMan.GetSchemeIcon(humanPlayer);
-					if (playerIcon) { m_PlayerBoxes.at(humanPlayer).at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0])); }
+					if (playerIcon) { m_ActivitySetupBox.PlayerBoxes.at(humanPlayer).at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0])); }
 				}
 			}
-		} else if (clickedPlayer != PlayerColumns::PlayerCPU && clickedTeam != TeamRows::DisabledTeam && m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(clickedTeam)->GetDrawType() == GUICollectionBox::Image) {
-			m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(clickedTeam)->SetDrawType(GUICollectionBox::Color);
-			m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(clickedTeam)->SetDrawColor(c_GUIColorBlue);
-			m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Image);
+		} else if (clickedPlayer != PlayerColumns::PlayerCPU && clickedTeam != TeamRows::DisabledTeam && m_ActivitySetupBox.PlayerBoxes.at(PlayerColumns::PlayerCPU).at(clickedTeam)->GetDrawType() == GUICollectionBox::Image) {
+			m_ActivitySetupBox.PlayerBoxes.at(PlayerColumns::PlayerCPU).at(clickedTeam)->SetDrawType(GUICollectionBox::Color);
+			m_ActivitySetupBox.PlayerBoxes.at(PlayerColumns::PlayerCPU).at(clickedTeam)->SetDrawColor(c_GUIColorBlue);
+			m_ActivitySetupBox.PlayerBoxes.at(PlayerColumns::PlayerCPU).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Image);
 			playerIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
-			if (playerIcon) { m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0])); }
+			if (playerIcon) { m_ActivitySetupBox.PlayerBoxes.at(PlayerColumns::PlayerCPU).at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0])); }
 		}
 		g_GUISound.FocusChangeSound()->Play();
 	}
@@ -739,7 +735,7 @@ namespace RTE {
 
 	void ScenarioGUI::UpdateHoveredScene(int mouseX, int mouseY) {
 		bool foundAnyHover = false;
-		if (m_ScenarioScenes && !m_DraggedBox && !m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->PointInside(mouseX, mouseY) && !m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->PointInside(mouseX, mouseY)) {
+		if (m_ScenarioScenes && !m_DraggedBox && !m_ActivityInfoBox.ActivityInfoBox->PointInside(mouseX, mouseY) && !m_SceneInfoBox.SceneInfoBox->PointInside(mouseX, mouseY)) {
 			Scene *candidateScene = nullptr;
 			float shortestDist = 10.0F;
 			Vector mousePos(static_cast<float>(mouseX), static_cast<float>(mouseY));
@@ -776,13 +772,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	ScenarioGUI::ScenarioMenuUpdateResult ScenarioGUI::UpdateInput() {
+	ScenarioGUI::ScenarioMenuUpdateResult ScenarioGUI::HandleInputEvents() {
 		// TODO: if activity is running, allow esc to resume activity instead of quitting.
 		if (g_UInputMan.KeyPressed(KEY_ESC)) {
 			g_GUISound.BackButtonPressSound()->Play();
-			if (m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox)->GetVisible()) {
+			if (m_ActivitySetupBox.ActivitySetupBox->GetVisible()) {
 				HideAllScreens();
-				m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->SetVisible(true);
+				m_ActivityInfoBox.ActivityInfoBox->SetVisible(true);
 				ShowScenesBox();
 			} else {
 				return ScenarioMenuUpdateResult::BackToMain;
@@ -794,7 +790,7 @@ namespace RTE {
 		m_GUIControlManager->GetManager()->GetInputController()->GetMousePosition(&mouseX, &mouseY);
 
 		// Handle mouse hover and drag.
-		if (m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->GetVisible()) {
+		if (m_ActivityInfoBox.ActivityInfoBox->GetVisible()) {
 			UpdateHoveredScene(mouseX, mouseY);
 
 			if (g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER) && m_DraggedBox) {
@@ -802,7 +798,7 @@ namespace RTE {
 				m_PrevMousePos = Vector(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
 				KeepBoxInScreenBounds(m_DraggedBox);
-				if (m_DraggedBox == m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)) { CalculateLinesToSitePoint(); }
+				if (m_DraggedBox == m_SceneInfoBox.SceneInfoBox) { CalculateLinesToSitePoint(); }
 			} else {
 				m_DraggedBox = nullptr;
 			}
@@ -816,7 +812,7 @@ namespace RTE {
 				GUICollectionBox *hoveredBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControlUnderPoint(mouseX, mouseY, m_RootBox, 1));
 				const GUIControl *hoveredControl = m_GUIControlManager->GetControlUnderPoint(mouseX, mouseY, hoveredBox, 1);
 				bool nonDragControl = (dynamic_cast<const GUIButton *>(hoveredControl) || dynamic_cast<const GUISlider *>(hoveredControl) || dynamic_cast<const GUIComboBox *>(hoveredControl));
-				if (hoveredBox && !nonDragControl && !m_DraggedBox && !m_ActivitySelectComboBox->IsDropped()) {
+				if (hoveredBox && !nonDragControl && !m_DraggedBox && !m_ActivityInfoBox.ActivitySelectComboBox->IsDropped()) {
 					m_DraggedBox = hoveredBox;
 					m_PrevMousePos = Vector(static_cast<float>(mouseX), static_cast<float>(mouseY));
 				}
@@ -833,7 +829,7 @@ namespace RTE {
 			const GUIControl *eventControl = guiEvent.GetControl();
 			std::string eventControlName = guiEvent.GetControl()->GetName();
 
-			if (m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->GetVisible()) {
+			if (m_ActivityInfoBox.ActivityInfoBox->GetVisible()) {
 				if (guiEvent.GetType() == GUIEvent::Command) {
 					if (eventControlName == "BackToMainButton") {
 						HideAllScreens();
@@ -844,19 +840,19 @@ namespace RTE {
 						return ScenarioMenuUpdateResult::ActivityResumed;
 					}
 
-					if (m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->GetVisible()) {
+					if (m_SceneInfoBox.SceneInfoBox->GetVisible()) {
 						if (eventControl == m_ScenarioButtons.at(ScenarioButtons::StartHereButton)) {
 							HideAllScreens();
 							ShowPlayersBox();
 							g_GUISound.ButtonPressSound()->Play();
-						} else if (eventControl == m_SceneCloseButton) {
+						} else if (eventControl == m_SceneInfoBox.SceneCloseButton) {
 							SetSelectedScene(nullptr);
 							g_GUISound.ButtonPressSound()->Play();
 						}
 					}
 				} else if (guiEvent.GetType() == GUIEvent::Notification) {
-					if (eventControl == m_ActivitySelectComboBox && guiEvent.GetMsg() == GUIComboBox::Closed) {
-						const Activity *activity = dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity);
+					if (eventControl == m_ActivityInfoBox.ActivitySelectComboBox && guiEvent.GetMsg() == GUIComboBox::Closed) {
+						const Activity *activity = dynamic_cast<const Activity *>(m_ActivityInfoBox.ActivitySelectComboBox->GetSelectedItem()->m_pEntity);
 						if (activity != m_SelectedActivity) {
 							m_SelectedActivity = activity;
 							UpdateActivityBox();
@@ -866,22 +862,22 @@ namespace RTE {
 
 							g_GUISound.ItemChangeSound()->Play();
 						}
-					} else if (eventControl == m_DifficultySlider) {
+					} else if (eventControl == m_ActivityInfoBox.DifficultySlider) {
 						UpdateActivityBox();
 					}
 				}
-			} else if (m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox)->GetVisible() && guiEvent.GetType() == GUIEvent::Command) {
+			} else if (m_ActivitySetupBox.ActivitySetupBox->GetVisible() && guiEvent.GetType() == GUIEvent::Command) {
 				if (eventControlName == "PlayerCancelButton") {
 					HideAllScreens();
-					m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->SetVisible(true);
+					m_ActivityInfoBox.ActivityInfoBox->SetVisible(true);
 					ShowScenesBox();
 					g_GUISound.BackButtonPressSound()->Play();
 				} else if (eventControl == m_ScenarioButtons.at(ScenarioButtons::StartGameButton)) {
 					if (StartGame()) {
 						HideAllScreens();
-						m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->SetVisible(true);
+						m_ActivityInfoBox.ActivityInfoBox->SetVisible(true);
 						g_GUISound.ButtonPressSound()->Play();
-						return ScenarioMenuUpdateResult::ActivityRestarted;
+						return ScenarioMenuUpdateResult::ActivityStarted;
 					} else {
 						g_GUISound.UserErrorSound()->Play();
 					}
@@ -895,16 +891,18 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	ScenarioGUI::ScenarioMenuUpdateResult ScenarioGUI::Update() {
+		m_UpdateResult = ScenarioMenuUpdateResult::NoEvent;
+
 		if (g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly()) {
-			return ScenarioMenuUpdateResult::NoEvent;
+			return m_UpdateResult;
 		}
 
-		ScenarioMenuUpdateResult inputUpdateResult = UpdateInput();
+		ScenarioMenuUpdateResult inputUpdateResult = HandleInputEvents();
 
-		if (m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->GetVisible()) {
+		if (m_ActivityInfoBox.ActivityInfoBox->GetVisible()) {
 			if (m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->GetVisible()) { m_GUIControlManager->GetManager()->SetFocus((m_BlinkTimer.AlternateReal(500)) ? m_ScenarioButtons.at(ScenarioButtons::ResumeButton) : nullptr); }
-			if (m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->GetVisible()) { m_ScenarioButtons.at(ScenarioButtons::StartHereButton)->SetText(m_BlinkTimer.AlternateReal(333) ? "Start Here" : "> Start Here <"); }
-		} else if (m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox)->GetVisible()) {
+			if (m_SceneInfoBox.SceneInfoBox->GetVisible()) { m_ScenarioButtons.at(ScenarioButtons::StartHereButton)->SetText(m_BlinkTimer.AlternateReal(333) ? "Start Here" : "> Start Here <"); }
+		} else if (m_ActivitySetupBox.ActivitySetupBox->GetVisible()) {
 			UpdatePlayersBox();
 		}
 		return inputUpdateResult;
@@ -913,7 +911,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ScenarioGUI::DrawSitePoints(BITMAP *drawBitmap) const {
-		if (m_ScenarioScenes && m_ScenarioCollectionBoxes.at(ScenarioCollections::ActivitySelectBox)->GetVisible()) {
+		if (m_ScenarioScenes && m_ActivityInfoBox.ActivityInfoBox->GetVisible()) {
 			for (const Scene *scenePointer : *m_ScenarioScenes) {
 				int drawColor = (scenePointer->GetModuleID() == g_PresetMan.GetModuleID("Scenes.rte")) ? c_GUIColorRed : c_GUIColorYellow;
 
@@ -977,13 +975,13 @@ namespace RTE {
 	void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
 		drawing_mode(DRAW_MODE_TRANS, nullptr, 0, 0);
 		DrawSitePoints(drawBitmap);
-		if (m_SelectedScene && m_ScenarioCollectionBoxes.at(ScenarioCollections::SceneInfoBox)->GetVisible()) { DrawLineToSitePoint(drawBitmap); }
+		if (m_SelectedScene && m_SceneInfoBox.SceneInfoBox->GetVisible()) { DrawLineToSitePoint(drawBitmap); }
 		drawing_mode(DRAW_MODE_SOLID, nullptr, 0, 0);
 
 		m_GUIControlManager->Draw();
 
-		if (m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox)->GetVisible()) {
-			GUICollectionBox *playerSetupBox = m_ScenarioCollectionBoxes.at(ScenarioCollections::PlayerSetupBox);
+		if (m_ActivitySetupBox.ActivitySetupBox->GetVisible()) {
+			GUICollectionBox *playerSetupBox = m_ActivitySetupBox.ActivitySetupBox;
 
 			// Draw the Player-Team matrix lines and disabled overlay effects.
 			int linePosY = 80;
@@ -1005,13 +1003,13 @@ namespace RTE {
 
 			// Manually draw UI elements on top of colored rectangle.
 			for (int teamIndex = Activity::MaxTeamCount - 1; teamIndex >= Activity::TeamOne; --teamIndex) {
-				if (m_TeamTechSelect.at(teamIndex)->GetVisible()) {
-					m_TeamTechSelect.at(teamIndex)->Draw(&drawScreen);
-					if (m_TeamTechSelect.at(teamIndex)->IsDropped()) { m_TeamTechSelect.at(teamIndex)->GetListPanel()->Draw(&drawScreen); }
+				if (m_ActivitySetupBox.TeamTechSelect.at(teamIndex)->GetVisible()) {
+					m_ActivitySetupBox.TeamTechSelect.at(teamIndex)->Draw(&drawScreen);
+					if (m_ActivitySetupBox.TeamTechSelect.at(teamIndex)->IsDropped()) { m_ActivitySetupBox.TeamTechSelect.at(teamIndex)->GetListPanel()->Draw(&drawScreen); }
 				}
-				if (m_TeamAISkillSlider.at(teamIndex)->GetVisible()) {
-					m_TeamAISkillSlider.at(teamIndex)->Draw(&drawScreen);
-					m_TeamAISkillLabel.at(teamIndex)->Draw(&drawScreen);
+				if (m_ActivitySetupBox.TeamAISkillSlider.at(teamIndex)->GetVisible()) {
+					m_ActivitySetupBox.TeamAISkillSlider.at(teamIndex)->Draw(&drawScreen);
+					m_ActivitySetupBox.TeamAISkillLabel.at(teamIndex)->Draw(&drawScreen);
 				}
 			}
 		}

@@ -6,8 +6,11 @@
 
 namespace RTE {
 
-	class GUIScreen;
-	class GUIInput;
+	class Activity;
+	class Scene;
+	class AllegroScreen;
+	class AllegroInput;
+	class AllegroBitmap;
 	class GUIControlManager;
 	class GUICollectionBox;
 	class GUIComboBox;
@@ -15,14 +18,9 @@ namespace RTE {
 	class GUIButton;
 	class GUILabel;
 	class GUISlider;
-	class Scene;
-	class Activity;
-	class AllegroScreen;
-	class AllegroInput;
-	class AllegroBitmap;
 
 	/// <summary>
-	/// A menu for setting up and launching scenario games.
+	/// Handling for the scenario menu screen composition and sub-menu interaction.
 	/// </summary>
 	class ScenarioGUI {
 
@@ -31,11 +29,11 @@ namespace RTE {
 		/// <summary>
 		/// Enumeration for the results of the ScenarioGUI input and event update.
 		/// </summary>
-		enum ScenarioMenuUpdateResult {
+		enum class ScenarioMenuUpdateResult {
 			NoEvent,
 			BackToMain,
 			ActivityResumed,
-			ActivityRestarted
+			ActivityStarted
 		};
 
 #pragma region Creation
@@ -47,7 +45,7 @@ namespace RTE {
 		ScenarioGUI(AllegroScreen *guiScreen, AllegroInput *guiInput);
 #pragma endregion
 
-#pragma region Concrete Methods
+#pragma region Setters
 		/// <summary>
 		/// Enables the menu by making the activity box visible and fetching the available activities and scenes.
 		/// </summary>
@@ -59,13 +57,9 @@ namespace RTE {
 		/// <param name="center">The absolute screen coordinates of the planet's center.</param>
 		/// <param name="radius">The radius, in screen pixel units, of the planet.</param>
 		void SetPlanetInfo(const Vector &center, float radius);
+#pragma endregion
 
-		/// <summary>
-		/// Updates the user input processing.
-		/// </summary>
-		/// <returns>The result of the user input and event update. See ScenarioUpdateResult enumeration.</returns>
-		ScenarioMenuUpdateResult UpdateInput();
-
+#pragma region Concrete Methods
 		/// <summary>
 		/// Updates the state of this Menu each frame.
 		/// </summary>
@@ -79,16 +73,6 @@ namespace RTE {
 #pragma endregion
 
 	private:
-
-		/// <summary>
-		/// Enumeration for the GUICollectionBoxes of the Scenario GUI. Used to access elements in the CollectionBoxes array.
-		/// </summary>
-		enum ScenarioCollections {
-			ActivitySelectBox,
-			SceneInfoBox,
-			PlayerSetupBox,
-			CollectionBoxCount
-		};
 
 		/// <summary>
 		/// Enumeration for the GUIButtons of the Scenario GUI. Used to access elements in the Buttons array.
@@ -117,11 +101,53 @@ namespace RTE {
 			TeamRowCount
 		};
 
+		/// <summary>
+		/// GUI elements that compose the Activity info and selection box.
+		/// </summary>
+		struct ActivityInfoBox {
+			GUICollectionBox *ActivityInfoBox;
+			GUIComboBox *ActivitySelectComboBox;
+			GUILabel *ActivityDescriptionLabel;
+			GUILabel *DifficultyLabel;
+			GUISlider *DifficultySlider;
+		};
+
+		/// <summary>
+		/// GUI elements that compose the Scene info and preview box.
+		/// </summary>
+		struct SceneInfoBox {
+			GUICollectionBox *SceneInfoBox;
+			GUIButton *SceneCloseButton;
+			GUILabel *SceneNameLabel;
+			GUILabel *SceneInfoLabel;
+			GUICollectionBox *ScenePreviewBox;
+			std::unique_ptr<AllegroBitmap> ScenePreviewBitmap;
+			std::unique_ptr<AllegroBitmap> DefaultPreviewBitmap;
+		};
+
+		/// <summary>
+		/// GUI elements that compose the Activity setup box.
+		/// </summary>
+		struct ActivitySetupBox {
+			GUICollectionBox *ActivitySetupBox;
+			std::array<std::array<GUICollectionBox *, TeamRows::TeamRowCount>, PlayerColumns::PlayerColumnCount> PlayerBoxes;
+			std::array<GUICollectionBox *, TeamRows::TeamRowCount> TeamBoxes;
+			std::array<GUILabel *, TeamRows::TeamRowCount> TeamNameLabels;
+			GUILabel *StartErrorLabel;
+			GUILabel *CPULockLabel;
+			GUILabel *GoldLabel;
+			GUISlider *GoldSlider;
+			GUICheckbox *FogOfWarCheckbox;
+			GUICheckbox *RequireClearPathToOrbitCheckbox;
+			GUICheckbox *DeployUnitsCheckbox;
+			std::array<GUIComboBox *, Activity::Teams::MaxTeamCount> TeamTechSelect;
+			std::array<GUISlider *, Activity::Teams::MaxTeamCount> TeamAISkillSlider;
+			std::array<GUILabel *, Activity::Teams::MaxTeamCount> TeamAISkillLabel;
+		};
+
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which owns all the GUIControls of the ScenarioGUI.
+		ScenarioMenuUpdateResult m_UpdateResult; //!< The result of the ScenarioGUI update. See ScenarioMenuUpdateResult enumeration.
 
-		GUICollectionBox *m_RootBox;
-
-		std::array<GUICollectionBox *, ScenarioCollections::CollectionBoxCount> m_ScenarioCollectionBoxes; //!< The different dialog/floating boxes.
 		std::array<GUIButton *, ScenarioButtons::ButtonCount> m_ScenarioButtons; //!< The menu buttons we want to manipulate.
 
 		Timer m_BlinkTimer; //!< Notification blink timer.
@@ -136,7 +162,6 @@ namespace RTE {
 
 		Scene *m_HoveredScene; //!< The scene preset currently hovered. Not owned.
 		Scene *m_SelectedScene; //!< The scene preset currently selected. Not owned.
-		GUILabel *m_SitePointLabel; //!< Hover name label over Scenes.
 		std::vector<Vector> m_LineToSitePoints; //!< Collection of points that form lines from a screen point to the selected site point.
 
 		std::map<Activity *, std::vector<Scene *>> m_ScenarioActivities; //!< The map of Activities and the Scenes compatible with each, neither of which are owned here.
@@ -144,40 +169,15 @@ namespace RTE {
 
 		int m_LockedCPUTeam = Activity::Teams::NoTeam; //!< Which team the CPU is locked to, if any.
 
-		/// <summary>
-		/// GUI elements that compose the Activity selection box.
-		/// </summary>
-		GUIComboBox *m_ActivitySelectComboBox;
-		GUILabel *m_ActivityLabel;
-		GUILabel *m_DifficultyLabel;
-		GUISlider *m_DifficultySlider;
+		ActivityInfoBox m_ActivityInfoBox; //!<
+		SceneInfoBox m_SceneInfoBox; //!<
+		ActivitySetupBox m_ActivitySetupBox; //!<
 
 		/// <summary>
-		/// GUI elements that compose the Scene info and preview box.
+		/// GUI elements that compose the scenario menu screen.
 		/// </summary>
-		GUIButton *m_SceneCloseButton;
-		GUILabel *m_SceneNameLabel;
-		GUILabel *m_SceneInfoLabel;
-		GUICollectionBox *m_ScenePreviewBox;
-		std::unique_ptr<AllegroBitmap> m_ScenePreviewBitmap;
-		std::unique_ptr<AllegroBitmap> m_DefaultPreviewBitmap;
-
-		/// <summary>
-		/// GUI elements that compose the Player setup box.
-		/// </summary>
-		std::array<std::array<GUICollectionBox *, TeamRows::TeamRowCount>, PlayerColumns::PlayerColumnCount> m_PlayerBoxes;
-		std::array<GUICollectionBox *, TeamRows::TeamRowCount> m_TeamBoxes;
-		std::array<GUILabel *, TeamRows::TeamRowCount> m_TeamNameLabels;
-		GUILabel *m_StartErrorLabel;
-		GUILabel *m_CPULockLabel;
-		GUILabel *m_GoldLabel;
-		GUISlider *m_GoldSlider;
-		GUICheckbox *m_FogOfWarCheckbox;
-		GUICheckbox *m_RequireClearPathToOrbitCheckbox;
-		GUICheckbox *m_DeployUnitsCheckbox;
-		std::array<GUIComboBox *, Activity::Teams::MaxTeamCount> m_TeamTechSelect;
-		std::array<GUISlider *, Activity::Teams::MaxTeamCount> m_TeamAISkillSlider;
-		std::array<GUILabel *, Activity::Teams::MaxTeamCount> m_TeamAISkillLabel;
+		GUICollectionBox *m_RootBox;
+		GUILabel *m_SitePointLabel; //!< Hover name label over Scenes.
 
 #pragma region Create Breakdown
 		/// <summary>
@@ -257,7 +257,14 @@ namespace RTE {
 		void DrawLineToSitePoint(BITMAP *drawBitmap) const;
 #pragma endregion
 
-#pragma region Updates
+#pragma region Update Breakdown
+		/// <summary>
+		/// Handles the player interaction with the ScenarioGUI GUI elements.
+		/// </summary>
+		/// <returns>The result of the user input and event update. See ScenarioUpdateResult enumeration.</returns>
+		ScenarioMenuUpdateResult HandleInputEvents();
+
+
 		/// <summary>
 		/// Updates the contents of the Activity selection box.
 		/// </summary>

@@ -26,6 +26,9 @@ namespace RTE {
 	static constexpr int c_DefaultResX = 960; //!< Default game window width.
 	static constexpr int c_DefaultResY = 540; //!< Default game window height.
 
+	static constexpr int c_ScenePreviewWidth = 170; //< Width of the scene preview bitmap.
+	static constexpr int c_ScenePreviewHeight = 80; //< Height of the scene preview bitmap.
+
 	static constexpr unsigned short c_MaxScreenCount = 4; //!< Maximum number of player screens.
 	static constexpr unsigned short c_PaletteEntriesNumber = 256; //!< Number of indexes in the graphics palette.
 	static constexpr unsigned short c_MOIDLayerBitDepth = 16; //!< Bit depth of MOID layer bitmap.

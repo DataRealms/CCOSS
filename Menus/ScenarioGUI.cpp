@@ -82,7 +82,7 @@ namespace RTE {
 		m_DefaultPreviewBitmap = std::make_unique<AllegroBitmap>();
 		m_DefaultPreviewBitmap->Create("Base.rte/GUIs/DefaultPreview.png");
 		m_ScenePreviewBitmap = std::make_unique<AllegroBitmap>();
-		m_ScenePreviewBitmap->Create(Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT, 32);
+		m_ScenePreviewBitmap->Create(c_ScenePreviewWidth, c_ScenePreviewHeight, 32);
 		m_SitePointLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("ScenePlanetLabel"));
 	}
 

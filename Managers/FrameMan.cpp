@@ -749,7 +749,7 @@ namespace RTE {
 				if (modeToSave == ScenePreviewDump) {
 					DrawWorldDump(true);
 
-					BITMAP *scenePreviewDumpBuffer = create_bitmap_ex(32, 140, 55);
+					BITMAP *scenePreviewDumpBuffer = create_bitmap_ex(32, c_ScenePreviewWidth, c_ScenePreviewHeight);
 					blit(m_ScenePreviewDumpGradient, scenePreviewDumpBuffer, 0, 0, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
 					masked_stretch_blit(m_WorldDumpBuffer, scenePreviewDumpBuffer, 0, 0, m_WorldDumpBuffer->w, m_WorldDumpBuffer->h, 0, 0, scenePreviewDumpBuffer->w, scenePreviewDumpBuffer->h);
 

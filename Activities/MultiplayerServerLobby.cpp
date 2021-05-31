@@ -337,7 +337,7 @@ namespace RTE {
 
 		m_pStartScenarioButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("StartButton"));
 
-		m_pScenePreviewBitmap = create_bitmap_ex(8, Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT);
+		m_pScenePreviewBitmap = create_bitmap_ex(8, c_ScenePreviewWidth, c_ScenePreviewHeight);
 
 		ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview.png");
 		m_pDefaultPreviewBitmap = defaultPreview.GetAsBitmap(COLORCONV_NONE, false);

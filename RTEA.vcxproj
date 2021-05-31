@@ -548,6 +548,7 @@
     <ClInclude Include="Managers\PrimitiveMan.h" />
     <ClInclude Include="Menus\LoadingScreen.h" />
     <ClInclude Include="Menus\ModManagerGUI.h" />
+    <ClInclude Include="Menus\ScenarioActivityConfigGUI.h" />
     <ClInclude Include="Menus\SettingsAudioGUI.h" />
     <ClInclude Include="Menus\SettingsGameplayGUI.h" />
     <ClInclude Include="Menus\SettingsGUI.h" />
@@ -712,6 +713,7 @@
     <ClCompile Include="Managers\PrimitiveMan.cpp" />
     <ClCompile Include="Menus\LoadingScreen.cpp" />
     <ClCompile Include="Menus\ModManagerGUI.cpp" />
+    <ClCompile Include="Menus\ScenarioActivityConfigGUI.cpp" />
     <ClCompile Include="Menus\SettingsAudioGUI.cpp" />
     <ClCompile Include="Menus\SettingsGameplayGUI.cpp" />
     <ClCompile Include="Menus\SettingsGUI.cpp" />

@@ -1,7 +1,7 @@
 #ifndef _RTESCENARIOGUI_
 #define _RTESCENARIOGUI_
 
-#include "Activity.h"
+#include "ScenarioActivityConfigGUI.h"
 #include "Timer.h"
 
 namespace RTE {
@@ -86,22 +86,6 @@ namespace RTE {
 		};
 
 		/// <summary>
-		/// Enumeration for all the player columns in the player setup screen. "Extends" the Players enumeration by adding an entry for the CPU player.
-		/// </summary>
-		enum PlayerColumns {
-			PlayerCPU = Players::MaxPlayerCount,
-			PlayerColumnCount
-		};
-
-		/// <summary>
-		/// Enumeration for all the team rows in the player setup screen. "Extends" the Teams enumeration by adding an entry for unused (disabled) Team.
-		/// </summary>
-		enum TeamRows {
-			DisabledTeam = Activity::Teams::MaxTeamCount,
-			TeamRowCount
-		};
-
-		/// <summary>
 		/// GUI elements that compose the Activity info and selection box.
 		/// </summary>
 		struct ActivityInfoBox {
@@ -123,26 +107,6 @@ namespace RTE {
 			GUICollectionBox *ScenePreviewBox;
 			std::unique_ptr<AllegroBitmap> ScenePreviewBitmap;
 			std::unique_ptr<AllegroBitmap> DefaultPreviewBitmap;
-		};
-
-		/// <summary>
-		/// GUI elements that compose the Activity setup box.
-		/// </summary>
-		struct ActivitySetupBox {
-			GUICollectionBox *ActivitySetupBox;
-			std::array<std::array<GUICollectionBox *, TeamRows::TeamRowCount>, PlayerColumns::PlayerColumnCount> PlayerBoxes;
-			std::array<GUICollectionBox *, TeamRows::TeamRowCount> TeamBoxes;
-			std::array<GUILabel *, TeamRows::TeamRowCount> TeamNameLabels;
-			GUILabel *StartErrorLabel;
-			GUILabel *CPULockLabel;
-			GUILabel *GoldLabel;
-			GUISlider *GoldSlider;
-			GUICheckbox *FogOfWarCheckbox;
-			GUICheckbox *RequireClearPathToOrbitCheckbox;
-			GUICheckbox *DeployUnitsCheckbox;
-			std::array<GUIComboBox *, Activity::Teams::MaxTeamCount> TeamTechSelect;
-			std::array<GUISlider *, Activity::Teams::MaxTeamCount> TeamAISkillSlider;
-			std::array<GUILabel *, Activity::Teams::MaxTeamCount> TeamAISkillLabel;
 		};
 
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which owns all the GUIControls of the ScenarioGUI.
@@ -171,7 +135,8 @@ namespace RTE {
 
 		ActivityInfoBox m_ActivityInfoBox; //!<
 		SceneInfoBox m_SceneInfoBox; //!<
-		ActivitySetupBox m_ActivitySetupBox; //!<
+
+		std::unique_ptr<ScenarioActivityConfigGUI> m_ActivitySetupBox; //!<
 
 		/// <summary>
 		/// GUI elements that compose the scenario menu screen.
@@ -189,11 +154,6 @@ namespace RTE {
 		/// 
 		/// </summary>
 		void CreateSceneInfoBox();
-
-		/// <summary>
-		/// 
-		/// </summary>
-		void CreateActivityConfigBox();
 #pragma endregion
 
 #pragma region CollectionBox Handling
@@ -201,11 +161,6 @@ namespace RTE {
 		/// Shows the Scene info box.
 		/// </summary>
 		void ShowScenesBox();
-
-		/// <summary>
-		/// Shows the player configuration box.
-		/// </summary>
-		void ShowPlayersBox();
 
 		/// <summary>
 		/// Hides all menu screens, so a single screen can be unhidden and shown alone.
@@ -230,12 +185,6 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newSelectedScene">The new selected scene or nullptr to deselect the current selection.</param>
 		void SetSelectedScene(Scene *newSelectedScene);
-
-		/// <summary>
-		/// Sets up and starts the currently selected Activity and settings.
-		/// </summary>
-		/// <returns>Whether the game was set up and started successfully.</returns>
-		bool StartGame();
 #pragma endregion
 
 #pragma region Planet Site Handling
@@ -264,23 +213,10 @@ namespace RTE {
 		/// <returns>The result of the user input and event update. See ScenarioUpdateResult enumeration.</returns>
 		ScenarioMenuUpdateResult HandleInputEvents();
 
-
 		/// <summary>
 		/// Updates the contents of the Activity selection box.
 		/// </summary>
 		void UpdateActivityBox();
-
-		/// <summary>
-		/// Updates the contents of the player configuration box.
-		/// </summary>
-		void UpdatePlayersBox();
-
-		/// <summary>
-		/// Handles player and team selection boxes in the player configuration box.
-		/// </summary>
-		/// <param name="clickedPlayer">The player box that was clicked.</param>
-		/// <param name="clickedTeam">The team box that was clicked.</param>
-		void ClickInPlayerSetup(int clickedPlayer, int clickedTeam);
 
 		/// <summary>
 		/// Displays the site's name label if the mouse is over a site point. Otherwise the label is hidden.

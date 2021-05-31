@@ -516,6 +516,9 @@
     <ClInclude Include="Menus\SettingsInputMappingWizardGUI.h">
       <Filter>Menus</Filter>
     </ClInclude>
+    <ClInclude Include="Menus\ScenarioActivityConfigGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -985,6 +988,9 @@
       <Filter>Menus</Filter>
     </ClCompile>
     <ClCompile Include="Menus\SettingsInputMappingWizardGUI.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\ScenarioActivityConfigGUI.cpp">
       <Filter>Menus</Filter>
     </ClCompile>
   </ItemGroup>

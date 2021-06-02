@@ -14,10 +14,8 @@ namespace RTE {
 	class GUIControlManager;
 	class GUICollectionBox;
 	class GUIComboBox;
-	class GUICheckbox;
 	class GUIButton;
 	class GUILabel;
-	class GUISlider;
 
 	/// <summary>
 	/// Handling for the scenario menu screen composition and sub-menu interaction.
@@ -42,7 +40,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this ScenarioGUI's GUIControlManager.</param>
 		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this ScenarioGUI's GUIControlManager.</param>
-		ScenarioGUI(AllegroScreen *guiScreen, AllegroInput *guiInput);
+		ScenarioGUI(AllegroScreen *guiScreen, AllegroInput *guiInput) { Clear(); Create(guiScreen, guiInput); }
+
+		/// <summary>
+		/// Makes the ScenarioGUI object ready for use.
+		/// </summary>
+		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this ScenarioGUI's GUIControlManager.</param>
+		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this ScenarioGUI's GUIControlManager.</param>
+		void Create(AllegroScreen *guiScreen, AllegroInput *guiInput);
 #pragma endregion
 
 #pragma region Setters
@@ -61,138 +66,124 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Updates the state of this Menu each frame.
+		/// Updates the ScenarioGUI state.
 		/// </summary>
+		/// <returns></returns>
 		ScenarioMenuUpdateResult Update();
 
 		/// <summary>
-		/// Draws the menu.
+		/// Draws the ScenarioGUI to the screen.
 		/// </summary>
-		/// <param name="drawBitmap">The bitmap to draw on.</param>
-		void Draw(BITMAP *drawBitmap) const;
+		void Draw() const;
 #pragma endregion
 
 	private:
 
-		/// <summary>
-		/// Enumeration for the GUIButtons of the Scenario GUI. Used to access elements in the Buttons array.
-		/// </summary>
-		enum ScenarioButtons {
-			BackToMainButton,
-			StartHereButton,
-			StartGameButton,
-			ResumeButton,
-			ButtonCount
-		};
-
-		/// <summary>
-		/// GUI elements that compose the Activity info and selection box.
-		/// </summary>
-		struct ActivityInfoBox {
-			GUICollectionBox *ActivityInfoBox;
-			GUIComboBox *ActivitySelectComboBox;
-			GUILabel *ActivityDescriptionLabel;
-			GUILabel *DifficultyLabel;
-			GUISlider *DifficultySlider;
-		};
-
-		/// <summary>
-		/// GUI elements that compose the Scene info and preview box.
-		/// </summary>
-		struct SceneInfoBox {
-			GUICollectionBox *SceneInfoBox;
-			GUIButton *SceneCloseButton;
-			GUILabel *SceneNameLabel;
-			GUILabel *SceneInfoLabel;
-			GUICollectionBox *ScenePreviewBox;
-			std::unique_ptr<AllegroBitmap> ScenePreviewBitmap;
-			std::unique_ptr<AllegroBitmap> DefaultPreviewBitmap;
-		};
-
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which owns all the GUIControls of the ScenarioGUI.
 		ScenarioMenuUpdateResult m_UpdateResult; //!< The result of the ScenarioGUI update. See ScenarioMenuUpdateResult enumeration.
-
-		std::array<GUIButton *, ScenarioButtons::ButtonCount> m_ScenarioButtons; //!< The menu buttons we want to manipulate.
-
-		Timer m_BlinkTimer; //!< Notification blink timer.
-
-		GUICollectionBox *m_DraggedBox; //!< Currently dragged GUI box.
-		Vector m_PrevMousePos; //!< Previous position of the mouse to calculate dragging.
-
-		Vector m_PlanetCenter; //!< The absolute screen position of the planet center.
-		float m_PlanetRadius; //!< The screen radius of the planet.
-
-		std::vector<Scene *> *m_ScenarioScenes; //!< Pointer to the current set of Scenes being displayed. Not owned, and neither are the scenes.
-
-		Scene *m_HoveredScene; //!< The scene preset currently hovered. Not owned.
-		Scene *m_SelectedScene; //!< The scene preset currently selected. Not owned.
-		std::vector<Vector> m_LineToSitePoints; //!< Collection of points that form lines from a screen point to the selected site point.
 
 		std::map<Activity *, std::vector<Scene *>> m_ScenarioActivities; //!< The map of Activities and the Scenes compatible with each, neither of which are owned here.
 		const Activity *m_SelectedActivity; //!< The currently selected activity. Not owned.
 
-		int m_LockedCPUTeam = Activity::Teams::NoTeam; //!< Which team the CPU is locked to, if any.
+		std::vector<Scene *> *m_ActivityScenes; //!< Pointer to the current set of Scenes being displayed. Not owned, and neither are the scenes.
+		Scene *m_SelectedScene; //!< The scene preset currently selected. Not owned.
+		Scene *m_HoveredScene; //!< The scene preset currently hovered. Not owned.
 
-		ActivityInfoBox m_ActivityInfoBox; //!<
-		SceneInfoBox m_SceneInfoBox; //!<
+		Vector m_PlanetCenter; //!< The absolute screen position of the planet center.
+		float m_PlanetRadius; //!< The screen radius of the planet.
+		std::vector<Vector> m_LineToSitePoints; //!< Collection of points that form lines from a screen point to the selected site point.
 
-		std::unique_ptr<ScenarioActivityConfigGUI> m_ActivitySetupBox; //!<
+		GUICollectionBox *m_DraggedBox; //!< Currently dragged GUI box.
+		Vector m_PrevMousePos; //!< Previous position of the mouse to calculate dragging.
+
+		Timer m_BlinkTimer; //!< Notification blink timer.
+
+		std::unique_ptr<ScenarioActivityConfigGUI> m_ActivityConfigBox; //!<
 
 		/// <summary>
 		/// GUI elements that compose the scenario menu screen.
 		/// </summary>
 		GUICollectionBox *m_RootBox;
-		GUILabel *m_SitePointLabel; //!< Hover name label over Scenes.
+		GUIButton *m_BackToMainButton;
+		GUIButton *m_ResumeButton;
+		GUICollectionBox *m_ActivityInfoBox;
+		GUIComboBox *m_ActivitySelectComboBox;
+		GUILabel *m_ActivityDescriptionLabel;
+		GUICollectionBox *m_SceneInfoBox;
+		GUIButton *m_SceneBoxCloseButton;
+		GUILabel *m_SceneNameLabel;
+		GUILabel *m_SceneDescriptionLabel;
+		GUICollectionBox *m_ScenePreviewImageBox;
+		std::unique_ptr<AllegroBitmap> m_DefaultPreviewBitmap;
+		std::unique_ptr<AllegroBitmap> m_ScenePreviewBitmap;
+		GUIButton *m_StartActivityConfigButton;
+		GUILabel *m_SitePointNameLabel;
 
 #pragma region Create Breakdown
 		/// <summary>
-		/// 
+		/// Creates all the elements that compose the Activity info box.
 		/// </summary>
-		void CreateActivitySelectionBox();
+		void CreateActivityInfoBox();
 
 		/// <summary>
-		/// 
+		/// Creates all the elements that compose the Scene info box.
 		/// </summary>
 		void CreateSceneInfoBox();
 #pragma endregion
 
-#pragma region CollectionBox Handling
+#pragma region Scenario Menu Handling
 		/// <summary>
-		/// Shows the Scene info box.
+		/// 
 		/// </summary>
-		void ShowScenesBox();
+		/// <param name="mouseX"></param>
+		/// <param name="mouseY"></param>
+		void SetDraggedBox(int mouseX, int mouseY);
 
 		/// <summary>
-		/// Hides all menu screens, so a single screen can be unhidden and shown alone.
+		/// Updates the contents of the Activity selection box.
 		/// </summary>
-		void HideAllScreens();
-
-		/// <summary>
-		/// Makes sure a specific box doesn't move off-screen.
-		/// </summary>
-		/// <param name="screenBox">The GUICollectionBox to adjust, if necessary.</param>
-		void KeepBoxInScreenBounds(GUICollectionBox *screenBox) const;
-#pragma endregion
-
-#pragma region Scenes and Activities Handling
-		/// <summary>
-		/// Gathers all the available Scenes and Activity presets there are.
-		/// </summary>
-		void GetScenesAndActivities(bool selectTutorial);
+		/// <param name="newSelectedActivity"></param>
+		void SetSelectedActivity(const Activity *newSelectedActivity);
 
 		/// <summary>
 		/// Sets the currently selected scene.
 		/// </summary>
 		/// <param name="newSelectedScene">The new selected scene or nullptr to deselect the current selection.</param>
 		void SetSelectedScene(Scene *newSelectedScene);
-#pragma endregion
 
-#pragma region Planet Site Handling
 		/// <summary>
-		/// Calculates how to draw lines from the scene info box to the selected site point on the planet.
+		/// 
+		/// </summary>
+		/// <param name="mouseX"></param>
+		/// <param name="mouseY"></param>
+		void DragBox(int mouseX, int mouseY);
+
+		/// <summary>
+		/// Gathers all the available Scenes and Activity presets there are.
+		/// </summary>
+		void GetScenesAndActivities();
+
+		/// <summary>
+		/// Calculates how to draw lines from the Scene info box to the selected site point on the planet.
 		/// </summary>
 		void CalculateLinesToSitePoint();
+#pragma endregion
 
+#pragma region Update Breakdown
+		/// <summary>
+		/// Displays the site's name label if the mouse is over a site point. Otherwise the label is hidden.
+		/// </summary>
+		/// <param name="mouseX"></param>
+		/// <param name="mouseY"></param>
+		void UpdateHoveredScene(int mouseX, int mouseY);
+
+		/// <summary>
+		/// Handles the player interaction with the ScenarioGUI GUI elements.
+		/// </summary>
+		void HandleInputEvents();
+#pragma endregion
+
+#pragma region Draw Breakdown
 		/// <summary>
 		/// Draws the site points on top of the planet.
 		/// </summary>
@@ -200,29 +191,16 @@ namespace RTE {
 		void DrawSitePoints(BITMAP *drawBitmap) const;
 
 		/// <summary>
-		/// Draws fancy thick flickering lines to point out the selected scene point on the planet, from the scene info box.
+		/// Draws fancy thick flickering lines from the Scene info box to the selected scene point on the planet.
 		/// </summary>
 		/// <param name="drawBitmap">The bitmap to draw to.</param>
-		void DrawLineToSitePoint(BITMAP *drawBitmap) const;
+		void DrawLinesToSitePoint(BITMAP *drawBitmap) const;
 #pragma endregion
 
-#pragma region Update Breakdown
 		/// <summary>
-		/// Handles the player interaction with the ScenarioGUI GUI elements.
+		/// Clears all the member variables of this ScenarioGUI, effectively resetting the members of this abstraction level only.
 		/// </summary>
-		/// <returns>The result of the user input and event update. See ScenarioUpdateResult enumeration.</returns>
-		ScenarioMenuUpdateResult HandleInputEvents();
-
-		/// <summary>
-		/// Updates the contents of the Activity selection box.
-		/// </summary>
-		void UpdateActivityBox();
-
-		/// <summary>
-		/// Displays the site's name label if the mouse is over a site point. Otherwise the label is hidden.
-		/// </summary>
-		void UpdateHoveredScene(int mouseX, int mouseY);
-#pragma endregion
+		void Clear();
 
 		// Disallow the use of some implicit methods.
 		ScenarioGUI(const ScenarioGUI &reference) = delete;

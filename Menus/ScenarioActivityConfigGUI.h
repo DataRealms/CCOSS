@@ -57,10 +57,14 @@ namespace RTE {
 
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
 
+		int m_LockedCPUTeam = Activity::Teams::NoTeam; //!< Which team the CPU is locked to, if any.
+
 		/// <summary>
 		/// GUI elements that compose the Activity setup box.
 		/// </summary>
 		GUICollectionBox *m_ActivitySetupBox;
+		GUILabel *m_ActivityDifficultyLabel;
+		GUISlider *m_ActivityDifficultySlider;
 		std::array<std::array<GUICollectionBox *, TeamRows::TeamRowCount>, PlayerColumns::PlayerColumnCount> m_PlayerBoxes;
 		std::array<GUICollectionBox *, TeamRows::TeamRowCount> m_TeamBoxes;
 		std::array<GUILabel *, TeamRows::TeamRowCount> m_TeamNameLabels;
@@ -99,6 +103,10 @@ namespace RTE {
 		/// <returns>Whether the game was set up and started successfully.</returns>
 		//bool StartGame();
 #pragma endregion
+
+		// Disallow the use of some implicit methods.
+		ScenarioActivityConfigGUI(const ScenarioActivityConfigGUI &reference) = delete;
+		ScenarioActivityConfigGUI & operator=(const ScenarioActivityConfigGUI &rhs) = delete;
 	};
 }
 #endif

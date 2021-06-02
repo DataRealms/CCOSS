@@ -21,6 +21,9 @@ namespace RTE {
 		m_ActivitySetupBox->SetVisible(false);
 
 		/*
+		m_ActivityDifficultyLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelActivityDifficulty"));
+		m_ActivityDifficultySlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderActivityDifficulty"));
+
 		m_ActivitySetupBox.TeamBoxes.at(TeamRows::DisabledTeam) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("TDIcon"));
 		m_ActivitySetupBox.TeamBoxes.at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Image);
 		m_ActivitySetupBox.TeamNameLabels.at(TeamRows::DisabledTeam) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("TDLabel"));
@@ -402,7 +405,52 @@ namespace RTE {
 	}
 	*/
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/*
+	m_ActivityDifficultyLabel->SetVisible(true);
+	m_ActivityDifficultySlider->SetVisible(true);
+	if (m_ActivityDifficultySlider->GetValue() < Activity::CakeDifficulty) {
+		m_ActivityDifficultyLabel->SetText("Difficulty: Cake");
+	} else if (m_ActivityDifficultySlider->GetValue() < Activity::EasyDifficulty) {
+		m_ActivityDifficultyLabel->SetText("Difficulty: Easy");
+	} else if (m_ActivityDifficultySlider->GetValue() < Activity::MediumDifficulty) {
+		m_ActivityDifficultyLabel->SetText("Difficulty: Medium");
+	} else if (m_ActivityDifficultySlider->GetValue() < Activity::HardDifficulty) {
+		m_ActivityDifficultyLabel->SetText("Difficulty: Hard");
+	} else if (m_ActivityDifficultySlider->GetValue() < Activity::NutsDifficulty) {
+		m_ActivityDifficultyLabel->SetText("Difficulty: Nuts");
+	} else {
+		m_ActivityDifficultyLabel->SetText("Difficulty: Nuts!");
+	}
+	m_ActivityInfoBox->Resize(m_ActivityInfoBox->GetWidth(), m_ActivityDescriptionLabel->ResizeHeightToFit() + 110);
 
+	const GameActivity *selectedGA = dynamic_cast<const GameActivity *>(m_SelectedActivity);
+	if (selectedGA) {
+		if (m_DifficultySlider->GetValue() < Activity::CakeDifficulty && selectedGA->GetDefaultGoldCake() > -1) {
+			m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldCake());
+		} else if (m_DifficultySlider->GetValue() < Activity::EasyDifficulty && selectedGA->GetDefaultGoldEasy() > -1) {
+			m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldEasy());
+		} else if (m_DifficultySlider->GetValue() < Activity::MediumDifficulty && selectedGA->GetDefaultGoldMedium() > -1) {
+			m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldMedium());
+		} else if (m_DifficultySlider->GetValue() < Activity::HardDifficulty && selectedGA->GetDefaultGoldHard() > -1) {
+			m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldHard());
+		} else if (m_DifficultySlider->GetValue() < Activity::NutsDifficulty && selectedGA->GetDefaultGoldNuts() > -1) {
+			m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldNuts());
+		} else if (selectedGA->GetDefaultGoldNuts() > -1) {
+			m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldNuts());
+		}
+		m_ActivitySetupBox.GoldSlider->SetEnabled(selectedGA->GetGoldSwitchEnabled());
 
+		int defaultFogOfWar = selectedGA->GetDefaultFogOfWar();
+		if (defaultFogOfWar > -1) { m_ActivitySetupBox.FogOfWarCheckbox->SetCheck(defaultFogOfWar != 0); }
+		m_ActivitySetupBox.FogOfWarCheckbox->SetEnabled(selectedGA->GetFogOfWarSwitchEnabled());
 
+		int defaultReqClearPath = selectedGA->GetDefaultRequireClearPathToOrbit();
+		if (defaultReqClearPath > -1) { m_ActivitySetupBox.RequireClearPathToOrbitCheckbox->SetCheck(defaultReqClearPath != 0); }
+		m_ActivitySetupBox.RequireClearPathToOrbitCheckbox->SetEnabled(selectedGA->GetRequireClearPathToOrbitSwitchEnabled());
+
+		int defaultDeployUnits = selectedGA->GetDefaultDeployUnits();
+		if (defaultDeployUnits > -1) { m_ActivitySetupBox.DeployUnitsCheckbox->SetCheck(defaultDeployUnits != 0); }
+		m_ActivitySetupBox.DeployUnitsCheckbox->SetEnabled(selectedGA->GetDeployUnitsSwitchEnabled());
+	}
+	*/
 }

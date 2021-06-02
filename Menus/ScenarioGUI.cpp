@@ -7,7 +7,6 @@
 #include "SettingsMan.h"
 #include "ConsoleMan.h"
 
-#include "DataModule.h"
 #include "GameActivity.h"
 #include "Entity.h"
 #include "Scene.h"
@@ -18,90 +17,93 @@
 #include "AllegroInput.h"
 #include "GUICollectionBox.h"
 #include "GUIComboBox.h"
-#include "GUICheckbox.h"
 #include "GUIButton.h"
 #include "GUILabel.h"
-#include "GUISlider.h"
 
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	ScenarioGUI::ScenarioGUI(AllegroScreen *guiScreen, AllegroInput *guiInput) {
+	void ScenarioGUI::Clear() {
+		m_UpdateResult = ScenarioMenuUpdateResult::NoEvent;
+
+		m_ScenarioActivities.clear();
+		m_SelectedActivity = nullptr;
+
+		m_ActivityScenes = nullptr;
+		m_SelectedScene = nullptr;
+		m_HoveredScene = nullptr;
+
+		m_PlanetCenter.Reset();
+		m_PlanetRadius = 0;
+		m_LineToSitePoints.clear();
+
+		m_DraggedBox = nullptr;
+		m_PrevMousePos.Reset();
+
+		m_BlinkTimer.Reset();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ScenarioGUI::Create(AllegroScreen *guiScreen, AllegroInput *guiInput) {
 		m_GUIControlManager = std::make_unique<GUIControlManager>();
 		RTEAssert(m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSkin.ini");
 		m_GUIControlManager->Load("Base.rte/GUIs/ScenarioGUI.ini");
 
 		m_RootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
 		m_RootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+		m_BackToMainButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("BackToMainButton"));
+		m_BackToMainButton->SetPositionRel(m_RootBox->GetWidth() - m_BackToMainButton->GetWidth() - 16, m_RootBox->GetHeight() - m_BackToMainButton->GetHeight() - 22);
+		m_ResumeButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonResume"));
+		m_ResumeButton->SetPositionRel(m_RootBox->GetWidth() - m_ResumeButton->GetWidth() - 16, m_RootBox->GetHeight() - m_ResumeButton->GetHeight() - 47);
 
-		m_ScenarioButtons.at(ScenarioButtons::BackToMainButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("BackToMainButton"));
-		m_ScenarioButtons.at(ScenarioButtons::BackToMainButton)->SetPositionRel(m_RootBox->GetWidth() - m_ScenarioButtons.at(ScenarioButtons::BackToMainButton)->GetWidth() - 16, m_RootBox->GetHeight() - m_ScenarioButtons.at(ScenarioButtons::BackToMainButton)->GetHeight() - 22);
-		m_ScenarioButtons.at(ScenarioButtons::ResumeButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonResume"));
-		m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->SetPositionRel(m_RootBox->GetWidth() - m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->GetWidth() - 16, m_RootBox->GetHeight() - m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->GetHeight() - 47);
-		m_ScenarioButtons.at(ScenarioButtons::StartHereButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("SceneSelectButton"));
-		m_ScenarioButtons.at(ScenarioButtons::StartGameButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("StartButton"));
+		m_SitePointNameLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelSceneNameOnPlanet"));
 
-		CreateActivitySelectionBox();
+		CreateActivityInfoBox();
 		CreateSceneInfoBox();
-		//CreateActivityConfigBox();
 
-		m_SelectedScene = nullptr;
-
-		GetScenesAndActivities(true);
-		UpdateActivityBox();
-		HideAllScreens();
-
-		m_ActivitySetupBox = std::make_unique<ScenarioActivityConfigGUI>(m_GUIControlManager.get());
+		m_ActivityConfigBox = std::make_unique<ScenarioActivityConfigGUI>(m_GUIControlManager.get());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ScenarioGUI::CreateActivitySelectionBox() {
-		m_ActivityInfoBox.ActivityInfoBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ActivitySelectBox"));
-		m_ActivityInfoBox.ActivityInfoBox->SetPositionRel(16, 16);
-
-		m_ActivityInfoBox.ActivitySelectComboBox = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("ActivitySelectCombo"));
-		m_ActivityInfoBox.ActivityDescriptionLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("ActivityDescLabel"));
-		m_ActivityInfoBox.DifficultyLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("DifficultyLabel"));
-		m_ActivityInfoBox.DifficultyLabel->SetFont(m_GUIControlManager->GetSkin()->GetFont("FontSmall.png"));
-
-		m_ActivityInfoBox.DifficultySlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("DifficultySlider"));
+	void ScenarioGUI::CreateActivityInfoBox() {
+		m_ActivityInfoBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxActivityInfo"));
+		m_ActivityInfoBox->SetPositionRel(16, 16);
+		m_ActivitySelectComboBox = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("ComboBoxActivitySelect"));
+		m_ActivitySelectComboBox->Move(m_ActivityInfoBox->GetXPos() + 8, m_ActivityInfoBox->GetYPos() + 25);
+		m_ActivityDescriptionLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelActivityDescription"));
+		m_ActivityDescriptionLabel->SetFont(m_GUIControlManager->GetSkin()->GetFont("FontSmall.png"));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ScenarioGUI::CreateSceneInfoBox() {
-		m_SceneInfoBox.SceneInfoBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("SceneInfoBox"));
-		m_SceneInfoBox.SceneInfoBox->SetPositionRel(m_RootBox->GetWidth() - m_SceneInfoBox.SceneInfoBox->GetWidth() - 16, 16);
-		m_SceneInfoBox.SceneCloseButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("SceneCloseButton"));
-		m_SceneInfoBox.SceneNameLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("SceneNameLabel"));
-		m_SceneInfoBox.SceneInfoLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("SceneInfoLabel"));
-		m_SceneInfoBox.SceneInfoLabel->SetFont(m_GUIControlManager->GetSkin()->GetFont("FontSmall.png"));
-		m_SceneInfoBox.ScenePreviewBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ScenePreviewBox"));
-		//m_SceneInfoBox.ScenePreviewBox->SetPositionRel(10, 33);
-		//m_SceneInfoBox.ScenePreviewBox->SetDrawType(GUICollectionBox::Image);
-		m_SceneInfoBox.DefaultPreviewBitmap = std::make_unique<AllegroBitmap>();
-		m_SceneInfoBox.DefaultPreviewBitmap->Create("Base.rte/GUIs/DefaultPreview.png");
-		m_SceneInfoBox.ScenePreviewBitmap = std::make_unique<AllegroBitmap>();
-		m_SceneInfoBox.ScenePreviewBitmap->Create(c_ScenePreviewWidth, c_ScenePreviewHeight, 32);
-		m_SitePointLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("ScenePlanetLabel"));
+		m_SceneInfoBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxSceneInfo"));
+		m_SceneInfoBox->SetPositionRel(m_RootBox->GetWidth() - m_SceneInfoBox->GetWidth() - 16, 16);
+		m_SceneBoxCloseButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonCloseSceneBox"));
+		m_SceneNameLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelSceneName"));
+		m_SceneDescriptionLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelSceneDescription"));
+		m_SceneDescriptionLabel->SetFont(m_GUIControlManager->GetSkin()->GetFont("FontSmall.png"));
+		m_ScenePreviewImageBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxScenePreview"));
+		m_StartActivityConfigButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonStartActivityConfig"));
+
+		m_DefaultPreviewBitmap = std::make_unique<AllegroBitmap>();
+		m_DefaultPreviewBitmap->Create("Base.rte/GUIs/DefaultPreview.png");
+		m_ScenePreviewBitmap = std::make_unique<AllegroBitmap>();
+		m_ScenePreviewBitmap->Create(c_ScenePreviewWidth, c_ScenePreviewHeight, 32);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ScenarioGUI::SetEnabled() {
-		HideAllScreens();
-		m_ActivityInfoBox.ActivityInfoBox->SetVisible(true);
 		// Reload all scenes and activities to reflect scene changes player might do in scene editor.
-		GetScenesAndActivities(false);
+		GetScenesAndActivities();
 
-		const Activity *currentActivity = g_ActivityMan.GetActivity();
-		if (currentActivity && (currentActivity->GetActivityState() == Activity::Running || currentActivity->GetActivityState() == Activity::Editing)) {
-			if (!m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->GetVisible()) { m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->SetVisible(true); }
-		} else if (m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->GetVisible()) {
-			m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->SetVisible(false);
-		}
+		// Don't show resume button if the current Activity is an editor or online multiplayer, those are resumed from the main menu.
+		const GameActivity *currentActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
+		m_ResumeButton->SetVisible(currentActivity && (currentActivity->GetActivityState() == Activity::Running || currentActivity->GetActivityState() == Activity::Editing));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -110,81 +112,115 @@ namespace RTE {
 		bool centerChanged = (center != m_PlanetCenter);
 		m_PlanetCenter = center;
 		m_PlanetRadius = radius;
-		if (centerChanged && m_SelectedScene) { CalculateLinesToSitePoint(); }
+		if (centerChanged) { CalculateLinesToSitePoint(); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ScenarioGUI::ShowScenesBox() {
-		clear_to_color(m_SceneInfoBox.ScenePreviewBitmap->GetBitmap(), ColorKeys::g_MaskColor);
+	void ScenarioGUI::SetDraggedBox(int mouseX, int mouseY) {
+		GUICollectionBox *hoveredBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControlUnderPoint(mouseX, mouseY, m_RootBox, 1));
+		const GUIControl *hoveredControl = m_GUIControlManager->GetControlUnderPoint(mouseX, mouseY, hoveredBox, 1);
+		bool nonDragControl = (dynamic_cast<const GUIButton *>(hoveredControl) || dynamic_cast<const GUIComboBox *>(hoveredControl));
+		if (hoveredBox && !nonDragControl && !m_DraggedBox && !m_ActivitySelectComboBox->IsDropped()) { m_DraggedBox = hoveredBox; }
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ScenarioGUI::SetSelectedActivity(const Activity *newSelectedActivity) {
+		if (newSelectedActivity != m_SelectedActivity) {
+			m_SelectedActivity = newSelectedActivity;
+			m_ActivityScenes = nullptr;
+
+			if (m_SelectedActivity) {
+				for (auto &[activity, sceneList] : m_ScenarioActivities) {
+					if (activity == m_SelectedActivity) {
+						m_ActivityScenes = &sceneList;
+						break;
+					}
+				}
+				if (m_ActivityScenes && m_ActivityScenes->size() == 1) {
+					m_ActivityDescriptionLabel->SetText(m_SelectedActivity->GetDescription() + "\n\nThe only site where this activity can be played has been selected for you.");
+				} else if (m_ActivityScenes && m_ActivityScenes->size() > 1) {
+					m_ActivityDescriptionLabel->SetText(m_SelectedActivity->GetDescription() + "\n\nSites where this activity can be played appear on the planet. Select one to begin!");
+				} else {
+					m_ActivityDescriptionLabel->SetText(m_SelectedActivity->GetDescription() + "\n\nNo sites appear to be compatible with this selected activity! Please try another.");
+				}
+				// Deselect any previously selected scene. it may not be compatible with the new activity.
+				SetSelectedScene((m_ActivityScenes && m_ActivityScenes->size() == 1) ? m_ActivityScenes->front() : nullptr);
+			} else {
+				m_ActivityDescriptionLabel->SetText("No Activity selected.");
+			}
+			m_ActivityInfoBox->Resize(m_ActivityInfoBox->GetWidth(), m_ActivityDescriptionLabel->ResizeHeightToFit() + 60);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ScenarioGUI::SetSelectedScene(Scene *newSelectedScene) {
+		m_SelectedScene = newSelectedScene;
 		if (m_SelectedScene) {
-			m_SceneInfoBox.SceneNameLabel->SetText(m_SelectedScene->GetPresetName());
-			m_SceneInfoBox.SceneInfoLabel->SetText(m_SelectedScene->GetDescription());
+			m_SceneInfoBox->SetVisible(true);
 
 			BITMAP *preview = m_SelectedScene->GetPreviewBitmap();
-			if (!preview) { preview = m_SceneInfoBox.DefaultPreviewBitmap->GetBitmap(); }
-			draw_sprite(m_SceneInfoBox.ScenePreviewBitmap->GetBitmap(), preview, 0, 0);
-			m_SceneInfoBox.ScenePreviewBox->SetDrawImage(new AllegroBitmap(m_SceneInfoBox.ScenePreviewBitmap->GetBitmap()));
+			if (!preview) { preview = m_DefaultPreviewBitmap->GetBitmap(); }
+			clear_to_color(m_ScenePreviewBitmap->GetBitmap(), ColorKeys::g_MaskColor);
+			draw_sprite(m_ScenePreviewBitmap->GetBitmap(), preview, 0, 0);
+			m_ScenePreviewImageBox->SetDrawImage(new AllegroBitmap(m_ScenePreviewBitmap->GetBitmap()));
+
+			m_SceneNameLabel->SetText(m_SelectedScene->GetPresetName());
+			m_SceneDescriptionLabel->SetText(m_SelectedScene->GetDescription());
+
+			m_SceneInfoBox->Resize(m_SceneInfoBox->GetWidth(), m_SceneDescriptionLabel->ResizeHeightToFit() + 152);
+
+			CalculateLinesToSitePoint();
+		} else {
+			m_SceneInfoBox->SetVisible(false);
+			m_LineToSitePoints.clear();
 		}
-
-		int textHeight = m_SceneInfoBox.SceneInfoLabel->ResizeHeightToFit();
-		int padding = 140;
-		m_SceneInfoBox.SceneInfoBox->Resize(m_SceneInfoBox.SceneInfoBox->GetWidth(), textHeight + padding);
-		KeepBoxInScreenBounds(m_SceneInfoBox.SceneInfoBox);
-		m_SceneInfoBox.SceneInfoBox->SetVisible(true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ScenarioGUI::HideAllScreens() {
-		/*
-		for (GUICollectionBox *collectionBox : m_ScenarioCollectionBoxes) {
-			collectionBox->SetVisible(false);
+	void ScenarioGUI::DragBox(int mouseX, int mouseY) {
+		if (m_DraggedBox) {
+			m_DraggedBox->MoveRelative(mouseX - m_PrevMousePos.GetFloorIntX(), mouseY - m_PrevMousePos.GetFloorIntY());
+			// Keep the box within screen bounds.
+			m_DraggedBox->SetPositionAbs(std::clamp(m_DraggedBox->GetXPos(), 0, m_RootBox->GetWidth() - m_DraggedBox->GetWidth()), std::clamp(m_DraggedBox->GetYPos(), 0, m_RootBox->GetHeight() - m_DraggedBox->GetHeight()));
+			if (m_DraggedBox == m_ActivityInfoBox) {
+				// The Activity ComboBox isn't a child of the Activity info box (dirty hack to allow the drop-down list to extend beyond the parent box bounds without clipping) so we need to move as well.
+				m_ActivitySelectComboBox->Move(m_ActivityInfoBox->GetXPos() + 8, m_ActivityInfoBox->GetYPos() + 25);
+			} else if (m_DraggedBox == m_SceneInfoBox) {
+				CalculateLinesToSitePoint();
+			}
 		}
-		m_SitePointLabel->SetVisible(false);
-		*/
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ScenarioGUI::KeepBoxInScreenBounds(GUICollectionBox *collectionBox) const {
-		int clampedPosX = std::clamp(collectionBox->GetXPos(), 0, m_RootBox->GetWidth() - collectionBox->GetWidth());
-		int clampedPosY = std::clamp(collectionBox->GetYPos(), 0, m_RootBox->GetHeight() - collectionBox->GetHeight());
-		collectionBox->SetPositionAbs(clampedPosX, clampedPosY);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ScenarioGUI::GetScenesAndActivities(bool selectTutorial) {
+	void ScenarioGUI::GetScenesAndActivities() {
 		m_ScenarioActivities.clear();
-		m_ScenarioScenes = nullptr;
+		m_ActivityScenes = nullptr;
 
 		std::list<Entity *> presetList;
-		std::list<Scene *> filteredScenes;
-
 		g_PresetMan.GetAllOfType(presetList, "Scene");
 
+		std::list<Scene *> filteredScenes;
 		for (Entity *presetEntity : presetList) {
 			Scene *presetScene = dynamic_cast<Scene *>(presetEntity);
-			if (presetScene && !presetScene->GetLocation().IsZero() && !presetScene->IsMetagameInternal() && (presetScene->GetMetasceneParent() == "" || g_SettingsMan.ShowMetascenes())) { filteredScenes.push_back(presetScene); }
+			if (presetScene && !presetScene->GetLocation().IsZero() && !presetScene->IsMetagameInternal() && (presetScene->GetMetasceneParent().empty() || g_SettingsMan.ShowMetascenes())) { filteredScenes.push_back(presetScene); }
 		}
-
-		// We need to calculate planet center manually because m_PlanetCenter reflects coordinates of moving planet which is outside the screen when this is called first time.
-		Vector planetCenter = m_PlanetCenter.IsZero() ? Vector(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2) : m_PlanetCenter;
 
 		// If a scene is on the planet but outside the screen then move it into the screen.
 		for (Scene *filteredScene : filteredScenes) {
-			float sceneYPos = (planetCenter + filteredScene->GetLocation() + filteredScene->GetLocationOffset()).GetY();
+			int sceneYPos = (m_PlanetCenter + filteredScene->GetLocation() + filteredScene->GetLocationOffset()).GetFloorIntY();
 			if (std::abs(filteredScene->GetLocation().GetY()) < m_PlanetRadius + 100 && std::abs(filteredScene->GetLocation().GetX()) < m_PlanetRadius + 100) {
-				if (sceneYPos < 10) { filteredScene->SetLocationOffset(filteredScene->GetLocationOffset() + Vector(0, 10 - sceneYPos)); }
-				if (sceneYPos > g_FrameMan.GetResY() - 10) { filteredScene->SetLocationOffset(filteredScene->GetLocationOffset() + Vector(0, g_FrameMan.GetResY() - 10 - sceneYPos)); }
+				if (sceneYPos < 10) { filteredScene->SetLocationOffset(filteredScene->GetLocationOffset() + Vector(0, static_cast<float>(10 - sceneYPos))); }
+				if (sceneYPos > g_FrameMan.GetResY() - 10) { filteredScene->SetLocationOffset(filteredScene->GetLocationOffset() + Vector(0, static_cast<float>(g_FrameMan.GetResY() - 10 - sceneYPos))); }
 			}
 		}
-
 		// If site points are overlapping then move one of them towards the planet center.
 		float requiredDistance = 8.0F;
 		bool foundOverlap = true;
-		/*
 		while (foundOverlap) {
 			foundOverlap = false;
 			for (Scene *filteredScene1 : filteredScenes) {
@@ -194,7 +230,6 @@ namespace RTE {
 						Vector pos2 = filteredScene2->GetLocation() + filteredScene2->GetLocationOffset();
 						Vector overlap = pos1 - pos2;
 						float overlapMagnitude = overlap.GetMagnitude();
-
 						if (overlapMagnitude < requiredDistance) {
 							foundOverlap = true;
 							float overlapY = overlap.GetY();
@@ -218,52 +253,33 @@ namespace RTE {
 				}
 			}
 		}
-		*/
 
 		presetList.clear();
 		g_PresetMan.GetAllOfType(presetList, "Activity");
-		Activity *presetActivity = nullptr;
 
-		int previousSelectedActivityIndex = m_ActivityInfoBox.ActivitySelectComboBox->GetSelectedIndex();
+		int previousSelectedActivityIndex = m_ActivitySelectComboBox->GetSelectedIndex();
+		m_ActivitySelectComboBox->ClearList();
 
-		// Associate all Scenes compatible with each Activity and populate the activities selection list.
-		m_ActivityInfoBox.ActivitySelectComboBox->ClearList();
 		int index = 0;
-		int tutorialIndex = -1;
 		for (Entity *presetEntity : presetList) {
-			presetActivity = dynamic_cast<Activity *>(presetEntity);
-			if (presetActivity && presetActivity->GetClassName().find("Editor") == std::string::npos) {
-				std::pair<Activity *, std::vector<Scene *>> newPair(presetActivity, std::vector<Scene *>());
+			if (GameActivity *presetActivity = dynamic_cast<GameActivity *>(presetEntity)) {
+				std::pair<Activity *, std::vector<Scene *>> activityAndCompatibleScenes(presetActivity, std::vector<Scene *>());
 				for (Scene *filteredScene : filteredScenes) {
-					if (presetActivity->SceneIsCompatible(filteredScene)) { newPair.second.push_back(filteredScene); }
+					if (presetActivity->SceneIsCompatible(filteredScene)) { activityAndCompatibleScenes.second.push_back(filteredScene); }
 				}
-				m_ScenarioActivities.insert(newPair);
+				m_ScenarioActivities.insert(activityAndCompatibleScenes);
 				// Add to the activity selection ComboBox, and attach the activity pointer, not passing in ownership.
-				m_ActivityInfoBox.ActivitySelectComboBox->AddItem(presetActivity->GetPresetName(), "", nullptr, presetActivity);
+				m_ActivitySelectComboBox->AddItem(presetActivity->GetPresetName(), "", nullptr, presetActivity);
 
 				// Save the tutorial mission so we can select it by default.
-				if (selectTutorial && presetActivity->GetClassName() == "GATutorial") { tutorialIndex = index; }
+				if (previousSelectedActivityIndex < 0 && presetActivity->GetClassName() == "GATutorial") { previousSelectedActivityIndex = index; }
 				index++;
 			}
 		}
-		m_ActivityInfoBox.ActivitySelectComboBox->SetSelectedIndex((selectTutorial && tutorialIndex >= 0) ? tutorialIndex : previousSelectedActivityIndex);
-
-		m_SelectedActivity = dynamic_cast<const Activity *>(m_ActivityInfoBox.ActivitySelectComboBox->GetSelectedItem()->m_pEntity);
-
-		UpdateActivityBox();
-		SetSelectedScene((m_ScenarioScenes && (m_ScenarioScenes->size() == 1 || selectTutorial)) ? m_ScenarioScenes->front() : nullptr);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ScenarioGUI::SetSelectedScene(Scene *newSelectedScene) {
-		m_SelectedScene = newSelectedScene;
-		if (m_SelectedScene) {
-			ShowScenesBox();
-			CalculateLinesToSitePoint();
-		} else {
-			m_SceneInfoBox.SceneInfoBox->SetVisible(false);
-			m_LineToSitePoints.clear();
+		if (previousSelectedActivityIndex >= 0) {
+			m_ActivitySelectComboBox->SetSelectedIndex(previousSelectedActivityIndex);
+			SetSelectedActivity(dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity));
+			SetSelectedScene((m_ActivityScenes && m_ActivityScenes->size() == 1) ? m_ActivityScenes->front() : nullptr);
 		}
 	}
 
@@ -271,14 +287,17 @@ namespace RTE {
 
 	void ScenarioGUI::CalculateLinesToSitePoint() {
 		m_LineToSitePoints.clear();
-
-		Vector sitePos = m_PlanetCenter + m_SelectedScene->GetLocation() + m_SelectedScene->GetLocationOffset();
-		if (m_SceneInfoBox.SceneInfoBox->PointInside(sitePos.GetFloorIntX(), sitePos.GetFloorIntY())) {
+		if (!m_SelectedScene) {
 			return;
 		}
 
-		int halfBoxHeight = m_SceneInfoBox.SceneInfoBox->GetHeight() / 2;
-		Vector sceneBoxCenter(static_cast<float>(m_SceneInfoBox.SceneInfoBox->GetXPos() + (m_SceneInfoBox.SceneInfoBox->GetWidth() / 2)), static_cast<float>(m_SceneInfoBox.SceneInfoBox->GetYPos() + halfBoxHeight));
+		Vector sitePos = m_PlanetCenter + m_SelectedScene->GetLocation() + m_SelectedScene->GetLocationOffset();
+		if (m_SceneInfoBox->PointInside(sitePos.GetFloorIntX(), sitePos.GetFloorIntY())) {
+			return;
+		}
+
+		int halfBoxHeight = m_SceneInfoBox->GetHeight() / 2;
+		Vector sceneBoxCenter(static_cast<float>(m_SceneInfoBox->GetXPos() + (m_SceneInfoBox->GetWidth() / 2)), static_cast<float>(m_SceneInfoBox->GetYPos() + halfBoxHeight));
 		float yDirMult = sitePos.GetY() < sceneBoxCenter.GetY() ? -1.0F : 1.0F;
 		Vector sceneBoxEdge = sceneBoxCenter + Vector(0, static_cast<float>(halfBoxHeight)) * yDirMult; // Point on the scene box where the line starts.
 		int circleRadius = 8; // Radius of the circle drawn around the site point.
@@ -331,280 +350,158 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ScenarioGUI::UpdateActivityBox() {
-		if (m_SelectedActivity) {
-			// Pull out the list of Scenes that are compatible with this Activity.
-			m_ScenarioScenes = nullptr;
-			for (std::pair<Activity * const, std::vector<Scene *>> &activityScenePair : m_ScenarioActivities) {
-				if (activityScenePair.first == m_SelectedActivity) {
-					m_ScenarioScenes = &(activityScenePair.second);
-					break;
-				}
-			}
-
-			if (m_ScenarioScenes && m_ScenarioScenes->size() == 1) {
-				m_ActivityInfoBox.ActivityDescriptionLabel->SetText(m_SelectedActivity->GetDescription() + "\n\nThe only site where this activity can be played has been selected for you.");
-			} else if (m_ScenarioScenes && m_ScenarioScenes->size() > 1) {
-				m_ActivityInfoBox.ActivityDescriptionLabel->SetText(m_SelectedActivity->GetDescription() + "\n\nSites where this activity can be played appear on the planet. Select one to begin!");
-			} else {
-				m_ActivityInfoBox.ActivityDescriptionLabel->SetText(m_SelectedActivity->GetDescription() + "\n\nNo sites appear to be compatible with this selected activity! Please try another.");
-			}
-
-			m_ActivityInfoBox.DifficultyLabel->SetVisible(true);
-			m_ActivityInfoBox.DifficultySlider->SetVisible(true);
-			if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::CakeDifficulty) {
-				m_ActivityInfoBox.DifficultyLabel->SetText("Difficulty: Cake");
-			} else if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::EasyDifficulty) {
-				m_ActivityInfoBox.DifficultyLabel->SetText("Difficulty: Easy");
-			} else if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::MediumDifficulty) {
-				m_ActivityInfoBox.DifficultyLabel->SetText("Difficulty: Medium");
-			} else if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::HardDifficulty) {
-				m_ActivityInfoBox.DifficultyLabel->SetText("Difficulty: Hard");
-			} else if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::NutsDifficulty) {
-				m_ActivityInfoBox.DifficultyLabel->SetText("Difficulty: Nuts");
-			} else {
-				m_ActivityInfoBox.DifficultyLabel->SetText("Difficulty: Nuts!");
-			}
-			m_ActivityInfoBox.ActivityInfoBox->Resize(m_ActivityInfoBox.ActivityInfoBox->GetWidth(), m_ActivityInfoBox.ActivityDescriptionLabel->ResizeHeightToFit() + 110);
-
-			const GameActivity *selectedGA = dynamic_cast<const GameActivity *>(m_SelectedActivity);
-			if (selectedGA) {
-				/*
-				if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::CakeDifficulty && selectedGA->GetDefaultGoldCake() > -1) {
-					m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldCake());
-				} else if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::EasyDifficulty && selectedGA->GetDefaultGoldEasy() > -1) {
-					m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldEasy());
-				} else if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::MediumDifficulty && selectedGA->GetDefaultGoldMedium() > -1) {
-					m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldMedium());
-				} else if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::HardDifficulty && selectedGA->GetDefaultGoldHard() > -1) {
-					m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldHard());
-				} else if (m_ActivityInfoBox.DifficultySlider->GetValue() < Activity::NutsDifficulty && selectedGA->GetDefaultGoldNuts() > -1) {
-					m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldNuts());
-				} else if (selectedGA->GetDefaultGoldNuts() > -1) {
-					m_ActivitySetupBox.GoldSlider->SetValue(selectedGA->GetDefaultGoldNuts());
-				}
-				m_ActivitySetupBox.GoldSlider->SetEnabled(selectedGA->GetGoldSwitchEnabled());
-
-				int defaultFogOfWar = selectedGA->GetDefaultFogOfWar();
-				if (defaultFogOfWar > -1) { m_ActivitySetupBox.FogOfWarCheckbox->SetCheck(defaultFogOfWar != 0); }
-				m_ActivitySetupBox.FogOfWarCheckbox->SetEnabled(selectedGA->GetFogOfWarSwitchEnabled());
-
-				int defaultReqClearPath = selectedGA->GetDefaultRequireClearPathToOrbit();
-				if (defaultReqClearPath > -1) { m_ActivitySetupBox.RequireClearPathToOrbitCheckbox->SetCheck(defaultReqClearPath != 0); }
-				m_ActivitySetupBox.RequireClearPathToOrbitCheckbox->SetEnabled(selectedGA->GetRequireClearPathToOrbitSwitchEnabled());
-
-				int defaultDeployUnits = selectedGA->GetDefaultDeployUnits();
-				if (defaultDeployUnits > -1) { m_ActivitySetupBox.DeployUnitsCheckbox->SetCheck(defaultDeployUnits != 0); }
-				m_ActivitySetupBox.DeployUnitsCheckbox->SetEnabled(selectedGA->GetDeployUnitsSwitchEnabled());
-				*/
-			}
-		} else {
-			m_ScenarioScenes = nullptr;
-			m_ActivityInfoBox.ActivityDescriptionLabel->SetText("No Activity selected.");
-			m_ActivityInfoBox.DifficultyLabel->SetVisible(false);
-			if (m_ActivityInfoBox.DifficultySlider) { m_ActivityInfoBox.DifficultySlider->SetVisible(false); }
-
-			m_ActivityInfoBox.ActivityInfoBox->Resize(m_ActivityInfoBox.ActivityInfoBox->GetWidth(), m_ActivityInfoBox.ActivityDescriptionLabel->ResizeHeightToFit() + 125);
-		}
-
-		KeepBoxInScreenBounds(m_ActivityInfoBox.ActivityInfoBox);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ScenarioGUI::UpdateHoveredScene(int mouseX, int mouseY) {
-		bool foundAnyHover = false;
-		if (m_ScenarioScenes && !m_DraggedBox && !m_ActivityInfoBox.ActivityInfoBox->PointInside(mouseX, mouseY) && !m_SceneInfoBox.SceneInfoBox->PointInside(mouseX, mouseY)) {
-			Scene *candidateScene = nullptr;
-			float shortestDist = 10.0F;
-			Vector mousePos(static_cast<float>(mouseX), static_cast<float>(mouseY));
-			for (Scene *scenarioScene : *m_ScenarioScenes) {
-				float distance = (m_PlanetCenter + scenarioScene->GetLocation() + scenarioScene->GetLocationOffset() - mousePos).GetMagnitude();
-				if (distance < shortestDist) {
-					shortestDist = distance;
-					candidateScene = scenarioScene;
-					foundAnyHover = true;
-				}
-			}
-
-			// Set new hovered scene to be the one closest to the cursor, if there is any and if it is different than the currently hovered one.
-			if (candidateScene && candidateScene != m_HoveredScene) {
-				m_HoveredScene = candidateScene;
-				g_GUISound.SelectionChangeSound()->Play();
-
-				m_SitePointLabel->SetText(m_HoveredScene->GetPresetName());
-
-				Vector labelAbsPos = m_PlanetCenter + Vector(m_HoveredScene->GetLocation() + m_HoveredScene->GetLocationOffset()) - Vector(m_SitePointLabel->GetWidth() / 2, 0.0F) - Vector(0.0F, m_SitePointLabel->GetHeight() * 1.5F);
-				float padding = 6.0F;
-				labelAbsPos.m_X = std::clamp(labelAbsPos.m_X, padding, g_FrameMan.GetResX() - m_SitePointLabel->GetWidth() - padding);
-				labelAbsPos.m_Y = std::clamp(labelAbsPos.m_Y, padding, g_FrameMan.GetResY() - m_SitePointLabel->GetHeight() - padding);
-				m_SitePointLabel->SetPositionAbs(labelAbsPos.GetFloorIntX(), labelAbsPos.GetFloorIntY());
-
-				m_SitePointLabel->SetVisible(true);
-			}
-		}
-		if (!foundAnyHover) {
-			m_HoveredScene = nullptr;
-			m_SitePointLabel->SetVisible(false);
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	ScenarioGUI::ScenarioMenuUpdateResult ScenarioGUI::HandleInputEvents() {
-		// TODO: if activity is running, allow esc to resume activity instead of quitting.
-		if (g_UInputMan.KeyPressed(KEY_ESC)) {
-			g_GUISound.BackButtonPressSound()->Play();
-			//if (m_ActivitySetupBox.ActivitySetupBox->GetVisible()) {
-			//	HideAllScreens();
-			//	m_ActivityInfoBox.ActivityInfoBox->SetVisible(true);
-			//	ShowScenesBox();
-			//} else {
-				return ScenarioMenuUpdateResult::BackToMain;
-			//}
-		}
-
-		int mouseX;
-		int mouseY;
-		m_GUIControlManager->GetManager()->GetInputController()->GetMousePosition(&mouseX, &mouseY);
-
-		// Handle mouse hover and drag.
-		if (m_ActivityInfoBox.ActivityInfoBox->GetVisible()) {
-			UpdateHoveredScene(mouseX, mouseY);
-
-			if (g_UInputMan.MenuButtonHeld(UInputMan::MENU_EITHER) && m_DraggedBox) {
-				m_DraggedBox->MoveRelative(mouseX - m_PrevMousePos.GetFloorIntX(), mouseY - m_PrevMousePos.GetFloorIntY());
-				m_PrevMousePos = Vector(static_cast<float>(mouseX), static_cast<float>(mouseY));
-
-				KeepBoxInScreenBounds(m_DraggedBox);
-				if (m_DraggedBox == m_SceneInfoBox.SceneInfoBox) { CalculateLinesToSitePoint(); }
-			} else {
-				m_DraggedBox = nullptr;
-			}
-
-			if (g_UInputMan.MenuButtonPressed(UInputMan::MENU_EITHER)) {
-				if (m_HoveredScene) {
-					SetSelectedScene(m_HoveredScene);
-					g_GUISound.ItemChangeSound()->Play();
-				}
-
-				GUICollectionBox *hoveredBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControlUnderPoint(mouseX, mouseY, m_RootBox, 1));
-				const GUIControl *hoveredControl = m_GUIControlManager->GetControlUnderPoint(mouseX, mouseY, hoveredBox, 1);
-				bool nonDragControl = (dynamic_cast<const GUIButton *>(hoveredControl) || dynamic_cast<const GUISlider *>(hoveredControl) || dynamic_cast<const GUIComboBox *>(hoveredControl));
-				if (hoveredBox && !nonDragControl && !m_DraggedBox && !m_ActivityInfoBox.ActivitySelectComboBox->IsDropped()) {
-					m_DraggedBox = hoveredBox;
-					m_PrevMousePos = Vector(static_cast<float>(mouseX), static_cast<float>(mouseY));
-				}
-			}
-		}
-
-		m_GUIControlManager->Update();
-
-		///////////////////////////////////////
-		// Handle events
-
-		GUIEvent guiEvent;
-		while (m_GUIControlManager->GetEvent(&guiEvent)) {
-			const GUIControl *eventControl = guiEvent.GetControl();
-			std::string eventControlName = guiEvent.GetControl()->GetName();
-
-			if (m_ActivityInfoBox.ActivityInfoBox->GetVisible()) {
-				if (guiEvent.GetType() == GUIEvent::Command) {
-					if (eventControlName == "BackToMainButton") {
-						HideAllScreens();
-						g_GUISound.BackButtonPressSound()->Play();
-						return ScenarioMenuUpdateResult::BackToMain;
-					} else if (eventControlName == "ButtonResume") {
-						g_GUISound.BackButtonPressSound()->Play();
-						return ScenarioMenuUpdateResult::ActivityResumed;
-					}
-
-					if (m_SceneInfoBox.SceneInfoBox->GetVisible()) {
-						if (eventControl == m_ScenarioButtons.at(ScenarioButtons::StartHereButton)) {
-							HideAllScreens();
-							//ShowPlayersBox();
-							g_GUISound.ButtonPressSound()->Play();
-						} else if (eventControl == m_SceneInfoBox.SceneCloseButton) {
-							SetSelectedScene(nullptr);
-							g_GUISound.ButtonPressSound()->Play();
-						}
-					}
-				} else if (guiEvent.GetType() == GUIEvent::Notification) {
-					if (eventControl == m_ActivityInfoBox.ActivitySelectComboBox && guiEvent.GetMsg() == GUIComboBox::Closed) {
-						const Activity *activity = dynamic_cast<const Activity *>(m_ActivityInfoBox.ActivitySelectComboBox->GetSelectedItem()->m_pEntity);
-						if (activity != m_SelectedActivity) {
-							m_SelectedActivity = activity;
-							UpdateActivityBox();
-
-							// Deselect any previously selected scene. it may not be compatible with the new activity.
-							SetSelectedScene((m_ScenarioScenes && m_ScenarioScenes->size() == 1) ? m_ScenarioScenes->front() : nullptr);
-
-							g_GUISound.ItemChangeSound()->Play();
-						}
-					} else if (eventControl == m_ActivityInfoBox.DifficultySlider) {
-						UpdateActivityBox();
-					}
-				}
-			}
-			if (dynamic_cast<const GUIButton *>(eventControl) && guiEvent.GetType() == GUIEvent::Notification && guiEvent.GetMsg() == GUIButton::Focused) { g_GUISound.SelectionChangeSound()->Play(); }
-		}
-		return ScenarioMenuUpdateResult::NoEvent;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	ScenarioGUI::ScenarioMenuUpdateResult ScenarioGUI::Update() {
 		m_UpdateResult = ScenarioMenuUpdateResult::NoEvent;
 
 		if (g_ConsoleMan.IsEnabled() && !g_ConsoleMan.IsReadOnly()) {
 			return m_UpdateResult;
 		}
-
-		ScenarioMenuUpdateResult inputUpdateResult = HandleInputEvents();
-
-		if (m_ActivityInfoBox.ActivityInfoBox->GetVisible()) {
-			if (m_ScenarioButtons.at(ScenarioButtons::ResumeButton)->GetVisible()) { m_GUIControlManager->GetManager()->SetFocus((m_BlinkTimer.AlternateReal(500)) ? m_ScenarioButtons.at(ScenarioButtons::ResumeButton) : nullptr); }
-			if (m_SceneInfoBox.SceneInfoBox->GetVisible()) { m_ScenarioButtons.at(ScenarioButtons::StartHereButton)->SetText(m_BlinkTimer.AlternateReal(333) ? "Start Here" : "> Start Here <"); }
-		//} else if (m_ActivitySetupBox.ActivitySetupBox->GetVisible()) {
-		//	UpdatePlayersBox();
+		if (g_UInputMan.KeyPressed(KEY_ESC)) {
+			g_GUISound.BackButtonPressSound()->Play();
+			return ScenarioMenuUpdateResult::BackToMain;
 		}
-		return inputUpdateResult;
+
+		int mousePosX;
+		int mousePosY;
+		m_GUIControlManager->GetManager()->GetInputController()->GetMousePosition(&mousePosX, &mousePosY);
+		UpdateHoveredScene(mousePosX, mousePosY);
+
+		if (g_UInputMan.MouseButtonPressed(UInputMan::MenuCursorButtons::MENU_PRIMARY)) {
+			if (m_HoveredScene) {
+				g_GUISound.ItemChangeSound()->Play();
+				SetSelectedScene(m_HoveredScene);
+			} else {
+				SetDraggedBox(mousePosX, mousePosY);
+			}
+		} else if (g_UInputMan.MouseButtonReleased(UInputMan::MenuCursorButtons::MENU_PRIMARY)) {
+			m_DraggedBox = nullptr;
+		}
+		if (g_UInputMan.MenuButtonHeld(UInputMan::MenuCursorButtons::MENU_PRIMARY)) { DragBox(mousePosX, mousePosY); }
+		m_PrevMousePos.SetXY(static_cast<float>(mousePosX), static_cast<float>(mousePosY));
+
+		HandleInputEvents();
+
+		if (m_SceneInfoBox->GetVisible()) { m_StartActivityConfigButton->SetText(m_BlinkTimer.AlternateReal(333) ? "Start Here" : "> Start Here <"); }
+		if (m_ResumeButton->GetVisible()) { m_GUIControlManager->GetManager()->SetFocus((m_BlinkTimer.AlternateReal(500)) ? m_ResumeButton : nullptr); }
+
+		return m_UpdateResult;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ScenarioGUI::DrawSitePoints(BITMAP *drawBitmap) const {
-		if (m_ScenarioScenes && m_ActivityInfoBox.ActivityInfoBox->GetVisible()) {
-			for (const Scene *scenePointer : *m_ScenarioScenes) {
-				int drawColor = (scenePointer->GetModuleID() == g_PresetMan.GetModuleID("Scenes.rte")) ? c_GUIColorRed : c_GUIColorYellow;
+	void ScenarioGUI::UpdateHoveredScene(int mouseX, int mouseY) {
+		bool foundAnyHover = false;
+		if (m_ActivityScenes && !m_DraggedBox && !m_ActivityInfoBox->PointInside(mouseX, mouseY) && !m_SceneInfoBox->PointInside(mouseX, mouseY)) {
+			Scene *candidateScene = nullptr;
+			float shortestDist = 10.0F;
+			for (Scene *activityScene : *m_ActivityScenes) {
+				float distance = (m_PlanetCenter + activityScene->GetLocation() + activityScene->GetLocationOffset() - Vector(static_cast<float>(mouseX), static_cast<float>(mouseY))).GetMagnitude();
+				if (distance < shortestDist) {
+					shortestDist = distance;
+					candidateScene = activityScene;
+					foundAnyHover = true;
+				}
+			}
+			if (candidateScene && candidateScene != m_HoveredScene) {
+				g_GUISound.SelectionChangeSound()->Play();
+				m_HoveredScene = candidateScene;
 
-				Vector sitePos(m_PlanetCenter + scenePointer->GetLocation() + scenePointer->GetLocationOffset());
-				int sitePosX = sitePos.GetFloorIntX();
-				int sitePosY = sitePos.GetFloorIntY();
+				m_SitePointNameLabel->SetText(m_HoveredScene->GetPresetName());
+				Vector sceneLabelPos = m_PlanetCenter + Vector(m_HoveredScene->GetLocation() + m_HoveredScene->GetLocationOffset()) - Vector(static_cast<float>(m_SitePointNameLabel->GetWidth() / 2), 0) - Vector(0, static_cast<float>(m_SitePointNameLabel->GetHeight()) * 1.5F);
+				int padding = 5;
+				sceneLabelPos.SetX(static_cast<float>(std::clamp(sceneLabelPos.GetFloorIntX(), padding, g_FrameMan.GetResX() - m_SitePointNameLabel->GetWidth() - padding)));
+				sceneLabelPos.SetY(static_cast<float>(std::clamp(sceneLabelPos.GetFloorIntY(), padding, g_FrameMan.GetResY() - m_SitePointNameLabel->GetHeight() - padding)));
+				m_SitePointNameLabel->SetPositionAbs(sceneLabelPos.GetFloorIntX(), sceneLabelPos.GetFloorIntY());
+				m_SitePointNameLabel->SetVisible(true);
+			}
+		}
+		if (!foundAnyHover) {
+			m_HoveredScene = nullptr;
+			m_SitePointNameLabel->SetVisible(false);
+		}
+	}
 
-				int blendAmount = 70 + RandomNum(0, 40);
-				set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-				circlefill(drawBitmap, sitePosX, sitePosY, 4, drawColor);
-				circlefill(drawBitmap, sitePosX, sitePosY, 2, drawColor);
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-				blendAmount = 145 + RandomNum(0, 110);
-				set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-				circlefill(drawBitmap, sitePosX, sitePosY, 1, drawColor);
+	void ScenarioGUI::HandleInputEvents() {
+		m_GUIControlManager->Update();
+
+		GUIEvent guiEvent;
+		while (m_GUIControlManager->GetEvent(&guiEvent)) {
+			if (guiEvent.GetType() == GUIEvent::Command) {
+				if (guiEvent.GetControl() == m_BackToMainButton) {
+					g_GUISound.BackButtonPressSound()->Play();
+					m_UpdateResult = ScenarioMenuUpdateResult::BackToMain;
+				} else if (guiEvent.GetControl() == m_ResumeButton) {
+					g_GUISound.BackButtonPressSound()->Play();
+					m_UpdateResult = ScenarioMenuUpdateResult::ActivityResumed;
+				} else if (guiEvent.GetControl() == m_SceneBoxCloseButton) {
+					g_GUISound.ButtonPressSound()->Play();
+					SetSelectedScene(nullptr);
+				} else if (guiEvent.GetControl() == m_StartActivityConfigButton) {
+					g_GUISound.ButtonPressSound()->Play();
+					//ShowPlayersBox();
+				}
+			} else if (guiEvent.GetType() == GUIEvent::Notification) {
+				if (guiEvent.GetMsg() == GUIButton::Focused && dynamic_cast<const GUIButton *>(guiEvent.GetControl())) { g_GUISound.SelectionChangeSound()->Play(); }
+
+				if (guiEvent.GetMsg() == GUIComboBox::Closed && guiEvent.GetControl() == m_ActivitySelectComboBox) {
+					g_GUISound.ItemChangeSound()->Play();
+					SetSelectedActivity((m_ActivitySelectComboBox->GetSelectedItem()) ? dynamic_cast<const Activity *>(m_ActivitySelectComboBox->GetSelectedItem()->m_pEntity) : nullptr);
+				}
 			}
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ScenarioGUI::DrawLineToSitePoint(BITMAP *drawBitmap) const {
-		int drawColor = c_GUIColorWhite;
-		int blendAmount = 0;
+	void ScenarioGUI::Draw() const {
+		if (m_ActivityScenes) {
+			drawing_mode(DRAW_MODE_TRANS, nullptr, 0, 0);
+			DrawSitePoints(g_FrameMan.GetBackBuffer32());
+			if (m_SelectedScene && m_SceneInfoBox->GetVisible()) { DrawLinesToSitePoint(g_FrameMan.GetBackBuffer32()); }
+			drawing_mode(DRAW_MODE_SOLID, nullptr, 0, 0);
+		}
+		m_GUIControlManager->Draw();
+		m_GUIControlManager->DrawMouse();
+	}
 
-		for (int index = 1; index < m_LineToSitePoints.size(); index++) {
-			int lineStartX = m_LineToSitePoints.at(index - 1).GetFloorIntX();
-			int lineStartY = m_LineToSitePoints.at(index - 1).GetFloorIntY();
-			int lineEndX = m_LineToSitePoints.at(index).GetFloorIntX();
-			int lineEndY = m_LineToSitePoints.at(index).GetFloorIntY();
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ScenarioGUI::DrawSitePoints(BITMAP *drawBitmap) const {
+		int blendAmount = 0;
+		for (const Scene *scenePointer : *m_ActivityScenes) {
+			int drawColor = 0;
+			if (scenePointer->GetModuleID() == g_PresetMan.GetModuleID("Base.rte")) {
+				drawColor = c_GUIColorYellow;
+			} else {
+				drawColor = (scenePointer->GetModuleID() == g_PresetMan.GetModuleID("Missions.rte")) ? c_GUIColorGreen : c_GUIColorCyan;
+			}
+			Vector sitePos(m_PlanetCenter + scenePointer->GetLocation() + scenePointer->GetLocationOffset());
+			int sitePosX = sitePos.GetFloorIntX();
+			int sitePosY = sitePos.GetFloorIntY();
+
+			blendAmount = 70 + RandomNum(0, 40);
+			set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
+			circlefill(drawBitmap, sitePosX, sitePosY, 4, drawColor);
+			circlefill(drawBitmap, sitePosX, sitePosY, 2, drawColor);
+
+			blendAmount = 145 + RandomNum(0, 110);
+			set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
+			circlefill(drawBitmap, sitePosX, sitePosY, 1, drawColor);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ScenarioGUI::DrawLinesToSitePoint(BITMAP *drawBitmap) const {
+		int blendAmount = 0;
+		int drawColor = c_GUIColorWhite;
+		for (int i = 1; i < m_LineToSitePoints.size(); i++) {
+			int lineStartX = m_LineToSitePoints.at(i - 1).GetFloorIntX();
+			int lineStartY = m_LineToSitePoints.at(i - 1).GetFloorIntY();
+			int lineEndX = m_LineToSitePoints.at(i).GetFloorIntX();
+			int lineEndY = m_LineToSitePoints.at(i).GetFloorIntY();
 
 			blendAmount = 195 + RandomNum(0, 30);
 			set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
@@ -617,7 +514,6 @@ namespace RTE {
 			line(drawBitmap, lineStartX, lineStartY + 1, lineEndX, lineEndY + 1, drawColor);
 			line(drawBitmap, lineStartX, lineStartY - 1, lineEndX, lineEndY - 1, drawColor);
 		}
-
 		// Draw a circle around the selected site point.
 		Vector sitePos = m_PlanetCenter + m_SelectedScene->GetLocation() + m_SelectedScene->GetLocationOffset();
 		int sitePosX = sitePos.GetFloorIntX();
@@ -631,17 +527,5 @@ namespace RTE {
 		blendAmount = 120 + RandomNum(0, 50);
 		set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 		circle(drawBitmap, sitePosX, sitePosY, circleRadius - 1, drawColor);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ScenarioGUI::Draw(BITMAP *drawBitmap) const {
-		drawing_mode(DRAW_MODE_TRANS, nullptr, 0, 0);
-		DrawSitePoints(drawBitmap);
-		if (m_SelectedScene && m_SceneInfoBox.SceneInfoBox->GetVisible()) { DrawLineToSitePoint(drawBitmap); }
-		drawing_mode(DRAW_MODE_SOLID, nullptr, 0, 0);
-
-		m_GUIControlManager->Draw();
-		m_GUIControlManager->DrawMouse();
 	}
 }

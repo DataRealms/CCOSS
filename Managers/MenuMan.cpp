@@ -90,12 +90,12 @@ namespace RTE {
 			m_ActiveMenu = newActiveMenu;
 			switch (m_ActiveMenu) {
 				case ActiveMenu::ScenarioMenuActive:
-					m_ScenarioMenu->SetEnabled();
 					m_ScenarioMenu->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
+					m_ScenarioMenu->SetEnabled();
 					break;
 				case ActiveMenu::CampaignMenuActive:
-					g_MetaMan.GetGUI()->SetEnabled();
 					g_MetaMan.GetGUI()->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
+					g_MetaMan.GetGUI()->SetEnabled();
 					break;
 				default:
 					break;
@@ -216,7 +216,7 @@ namespace RTE {
 				m_MainMenu->Draw();
 				break;
 			case ActiveMenu::ScenarioMenuActive:
-				m_ScenarioMenu->Draw(g_FrameMan.GetBackBuffer32());
+				m_ScenarioMenu->Draw();
 				break;
 			case ActiveMenu::CampaignMenuActive:
 				g_MetaMan.Draw(g_FrameMan.GetBackBuffer32());

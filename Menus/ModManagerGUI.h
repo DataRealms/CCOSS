@@ -30,6 +30,7 @@ namespace RTE {
 		/// <summary>
 		/// Handles the player interaction with the ModManagerGUI GUI elements.
 		/// </summary>
+		/// <returns>Whether the player requested to return to the main menu.</returns>
 		bool HandleInputEvents();
 
 		/// <summary>

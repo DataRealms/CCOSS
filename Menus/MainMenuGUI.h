@@ -30,8 +30,6 @@ namespace RTE {
 			CampaignStarted,
 			ScenarioStarted,
 			EnterCreditsScreen,
-			BackToMainFromScenario,
-			BackToMenuFromCampaign,
 			BackToMainFromCredits,
 			ActivityStarted,
 			ActivityResumed,
@@ -205,6 +203,7 @@ namespace RTE {
 		/// <summary>
 		/// Handles the player interaction with the MainMenuGUI GUI elements.
 		/// </summary>
+		/// <returns>Whether the player requested to return to the main menu from one of the sub-menus.</returns>
 		bool HandleInputEvents();
 
 		/// <summary>

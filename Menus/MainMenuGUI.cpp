@@ -63,6 +63,7 @@ namespace RTE {
 		m_MainMenuScreens.at(MenuScreen::QuitScreen)->CenterInParent(true, true);
 
 		m_MainMenuButtons.at(MenuButton::CampaignButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToCampaign"));
+		m_MainMenuButtons.at(MenuButton::CampaignButton)->SetText("MetaGame (WIP)");
 		m_MainMenuButtons.at(MenuButton::ScenarioButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToSkirmish"));
 		m_MainMenuButtons.at(MenuButton::MultiplayerButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToMultiplayer"));
 		m_MainMenuButtons.at(MenuButton::SettingsButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToOptions"));
@@ -163,7 +164,7 @@ namespace RTE {
 		m_MainMenuScreens.at(MenuScreen::MainScreen)->Resize(128, 196);
 		m_MainMenuScreens.at(MenuScreen::MainScreen)->SetVisible(true);
 
-		m_MainMenuButtons.at(MenuButton::CampaignButton)->SetText("MetaGame (WIP)");
+		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetVisible(false);
 		m_MainMenuButtons.at(MenuButton::ResumeButton)->SetVisible(false);
 
 		m_MenuScreenChange = false;
@@ -361,7 +362,7 @@ namespace RTE {
 					default:
 						break;
 				}
-			} else if (guiEvent.GetType() == GUIEvent::Notification && (dynamic_cast<GUIButton *>(guiEvent.GetControl()) && guiEvent.GetMsg() == GUIButton::Focused)) {
+			} else if (guiEvent.GetType() == GUIEvent::Notification && (guiEvent.GetMsg() == GUIButton::Focused && dynamic_cast<GUIButton *>(guiEvent.GetControl()))) {
 				g_GUISound.SelectionChangeSound()->Play();
 			}
 		}

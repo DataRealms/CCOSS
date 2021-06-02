@@ -54,6 +54,7 @@ namespace RTE {
 	#define c_GUIColorYellow makecol(255, 255, 128)
 	#define c_GUIColorRed makecol(255, 100, 100)
 	#define c_GUIColorGreen makecol(128, 255, 128)
+	#define c_GUIColorCyan makecol(127, 255, 255)
 	#define c_GUIColorLightBlue makecol(109, 117, 170)
 	#define c_GUIColorBlue makecol(59, 65, 83)
 	#define c_GUIColorDarkBlue makecol(12, 20, 39)

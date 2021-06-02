@@ -43,6 +43,7 @@ namespace RTE {
 		/// <summary>
 		/// Handles the player interaction with the SettingsGUI GUI elements.
 		/// </summary>
+		/// <returns>Whether the player requested to return to the main menu.</returns>
 		bool HandleInputEvents();
 
 		/// <summary>

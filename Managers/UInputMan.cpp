@@ -116,6 +116,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::DetectJoystickHotPlug() const {
+		// TODO: Add Linux implementation.
 #ifdef _WIN32
 		if (joyGetNumDevs() > 0) {
 			static JOYINFOEX joyInfo = { sizeof(JOYINFOEX), JOY_RETURNBUTTONS };

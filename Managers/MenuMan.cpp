@@ -224,28 +224,28 @@ namespace RTE {
 			default:
 				break;
 		}
+		if (m_ActiveMenu != ActiveMenu::MenusDisabled && g_UInputMan.GetJoystickCount() > 0) {
+			int device = g_UInputMan.GetLastDeviceWhichControlledGUICursor();
 
-		int device = g_UInputMan.GetLastDeviceWhichControlledGUICursor();
-
-		// Draw the active joystick's sprite next to the mouse.
-		if (device >= InputDevice::DEVICE_GAMEPAD_1) {
-			int mouseX = 0;
-			int mouseY = 0;
-			m_GUIInput->GetMousePosition(&mouseX, &mouseY);
-			BITMAP *deviceIcon = g_UInputMan.GetDeviceIcon(device)->GetBitmaps32()[0];
-			if (deviceIcon) { draw_sprite(g_FrameMan.GetBackBuffer32(), deviceIcon, mouseX + 16, mouseY - 4); }
-		}
-		// Show which joysticks are detected by the game.
-		for (int playerIndex = Players::PlayerOne; playerIndex < Players::MaxPlayerCount; playerIndex++) {
-			if (g_UInputMan.JoystickActive(playerIndex)) {
-				int matchedDevice = InputDevice::DEVICE_GAMEPAD_1 + playerIndex;
-				if (matchedDevice != device) {
-					BITMAP *deviceIcon = g_UInputMan.GetDeviceIcon(matchedDevice)->GetBitmaps32()[0];
-					if (deviceIcon) { draw_sprite(g_FrameMan.GetBackBuffer32(), deviceIcon, g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * playerIndex, g_FrameMan.GetResY() - 25); }
+			// Draw the active joystick's sprite next to the mouse.
+			if (device >= InputDevice::DEVICE_GAMEPAD_1) {
+				int mouseX = 0;
+				int mouseY = 0;
+				m_GUIInput->GetMousePosition(&mouseX, &mouseY);
+				BITMAP *deviceIcon = g_UInputMan.GetDeviceIcon(device)->GetBitmaps32()[0];
+				if (deviceIcon) { draw_sprite(g_FrameMan.GetBackBuffer32(), deviceIcon, mouseX + 16, mouseY - 4); }
+			}
+			// Show which joysticks are detected by the game.
+			for (int playerIndex = Players::PlayerOne; playerIndex < Players::MaxPlayerCount; playerIndex++) {
+				if (g_UInputMan.JoystickActive(playerIndex)) {
+					int matchedDevice = InputDevice::DEVICE_GAMEPAD_1 + playerIndex;
+					if (matchedDevice != device) {
+						BITMAP *deviceIcon = g_UInputMan.GetDeviceIcon(matchedDevice)->GetBitmaps32()[0];
+						if (deviceIcon) { draw_sprite(g_FrameMan.GetBackBuffer32(), deviceIcon, g_FrameMan.GetResX() - 30 * g_UInputMan.GetJoystickCount() + 30 * playerIndex, g_FrameMan.GetResY() - 25); }
+					}
 				}
 			}
 		}
-
 		g_ConsoleMan.Draw(g_FrameMan.GetBackBuffer32());
 	}
 }

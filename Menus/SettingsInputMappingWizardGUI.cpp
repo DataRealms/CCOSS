@@ -378,11 +378,7 @@ namespace RTE {
 			}
 		}
 		if (m_ConfigFinished) {
-			if (m_BlinkTimer.AlternateReal(500)) {
-				m_WizardManualConfigScreen.DiscardOrApplyConfigButton->SetFocus();
-			} else {
-				m_GUIControlManager->GetManager()->SetFocus(nullptr);
-			}
+			m_GUIControlManager->GetManager()->SetFocus(m_BlinkTimer.AlternateReal(500) ? m_WizardManualConfigScreen.DiscardOrApplyConfigButton : nullptr);
 		} else {
 			bool inputCaptured = false;
 			switch (m_ConfiguringDevice) {

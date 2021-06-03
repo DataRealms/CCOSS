@@ -5,6 +5,8 @@
 
 namespace RTE {
 
+	class Activity;
+	class Scene;
 	class AllegroBitmap;
 	class GUIControlManager;
 	class GUICollectionBox;
@@ -13,6 +15,7 @@ namespace RTE {
 	class GUIButton;
 	class GUILabel;
 	class GUISlider;
+	class GUIEvent;
 
 	/// <summary>
 	/// 
@@ -29,12 +32,33 @@ namespace RTE {
 		explicit ScenarioActivityConfigGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 
-#pragma region Setters
+#pragma region Getters and Setters
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		bool IsEnabled() const;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="enabled"></param>
+		void SetEnabled(bool enable, const Activity *selectedActivity = nullptr, Scene *selectedScene = nullptr);
 
 #pragma endregion
 
 #pragma region Concrete Methods
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="mouseX"></param>
+		/// <param name="mouseY"></param>
+		void Update(int mouseX, int mouseY);
 
+		/// <summary>
+		/// 
+		/// </summary>
+		void Draw();
 #pragma endregion
 
 	private:
@@ -42,36 +66,45 @@ namespace RTE {
 		/// <summary>
 		/// Enumeration for all the player columns in the player setup screen. "Extends" the Players enumeration by adding an entry for the CPU player.
 		/// </summary>
-		enum PlayerColumns {
-			PlayerCPU = Players::MaxPlayerCount,
-			PlayerColumnCount
-		};
+		enum PlayerColumns { PlayerCPU = Players::MaxPlayerCount, PlayerColumnCount };
 
 		/// <summary>
 		/// Enumeration for all the team rows in the player setup screen. "Extends" the Teams enumeration by adding an entry for unused (disabled) Team.
 		/// </summary>
-		enum TeamRows {
-			DisabledTeam = Activity::Teams::MaxTeamCount,
-			TeamRowCount
-		};
+		enum TeamRows { DisabledTeam = Activity::Teams::MaxTeamCount, TeamRowCount };
 
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
 
 		int m_LockedCPUTeam = Activity::Teams::NoTeam; //!< Which team the CPU is locked to, if any.
 
+		const Activity *m_SelectedActivity;
+		Scene *m_SelectedScene;
+
 		/// <summary>
 		/// GUI elements that compose the Activity setup box.
 		/// </summary>
-		GUICollectionBox *m_ActivitySetupBox;
+		GUICollectionBox *m_ActivityConfigBox;
+
 		GUILabel *m_ActivityDifficultyLabel;
 		GUISlider *m_ActivityDifficultySlider;
-		std::array<std::array<GUICollectionBox *, TeamRows::TeamRowCount>, PlayerColumns::PlayerColumnCount> m_PlayerBoxes;
-		std::array<GUICollectionBox *, TeamRows::TeamRowCount> m_TeamBoxes;
+		GUILabel *m_StartingGoldLabel;
+		GUISlider *m_StartingGoldSlider;
+
+
+		GUIButton *m_StartGameButton;
+		GUIButton *m_CancelConfigButton;
+
+		GUICollectionBox *m_PlayersAndTeamsConfigBox;
+
+		std::array<GUICollectionBox *, TeamRows::TeamRowCount> m_TeamIconBoxes;
 		std::array<GUILabel *, TeamRows::TeamRowCount> m_TeamNameLabels;
+
+		std::array<std::array<GUICollectionBox *, TeamRows::TeamRowCount>, PlayerColumns::PlayerColumnCount> m_PlayerBoxes;
+
+
 		GUILabel *m_StartErrorLabel;
 		GUILabel *m_CPULockLabel;
-		GUILabel *m_GoldLabel;
-		GUISlider *m_GoldSlider;
+
 		GUICheckbox *m_FogOfWarCheckbox;
 		GUICheckbox *m_RequireClearPathToOrbitCheckbox;
 		GUICheckbox *m_DeployUnitsCheckbox;
@@ -81,27 +114,39 @@ namespace RTE {
 
 #pragma region Activity Config Screen Handling
 		/// <summary>
+		/// 
+		/// </summary>
+		void PopulateTechComboBoxes();
+
+		/// <summary>
 		/// Shows the player configuration box.
 		/// </summary>
-		//void ShowPlayersBox();
+		void ShowPlayersBox();
 
 		/// <summary>
 		/// Updates the contents of the player configuration box.
 		/// </summary>
-		//void UpdatePlayersBox();
+		/// <param name="mouseX"></param>
+		/// <param name="mouseY"></param>
+		//void UpdatePlayersBox(int mouseX, int mouseY);
 
 		/// <summary>
 		/// Handles player and team selection boxes in the player configuration box.
 		/// </summary>
 		/// <param name="clickedPlayer">The player box that was clicked.</param>
 		/// <param name="clickedTeam">The team box that was clicked.</param>
-		//void ClickInPlayerSetup(int clickedPlayer, int clickedTeam);
+		void ClickInPlayerSetup(int clickedPlayer, int clickedTeam);
 
 		/// <summary>
 		/// Sets up and starts the currently selected Activity and settings.
 		/// </summary>
 		/// <returns>Whether the game was set up and started successfully.</returns>
-		//bool StartGame();
+		bool StartGame();
+
+		/// <summary>
+		/// Handles the player interaction with the ScenarioActivityConfigGUI GUI elements.
+		/// </summary>
+		void HandleInputEvents();
 #pragma endregion
 
 		// Disallow the use of some implicit methods.

@@ -161,7 +161,13 @@ namespace RTE {
 		/// <summary>
 		/// Gathers all the available Scenes and Activity presets there are.
 		/// </summary>
-		void GetScenesAndActivities();
+		void PopulateActivitiesAndScenesLists();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="sceneList"></param>
+		void AdjustSitePointOffsetsOnPlanet(const std::list<Scene *> &sceneList) const;
 
 		/// <summary>
 		/// Calculates how to draw lines from the Scene info box to the selected site point on the planet.
@@ -180,7 +186,9 @@ namespace RTE {
 		/// <summary>
 		/// Handles the player interaction with the ScenarioGUI GUI elements.
 		/// </summary>
-		void HandleInputEvents();
+		/// <param name="mouseX"></param>
+		/// <param name="mouseY"></param>
+		void HandleInputEvents(int mouseX, int mouseY);
 #pragma endregion
 
 #pragma region Draw Breakdown

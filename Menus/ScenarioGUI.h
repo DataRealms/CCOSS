@@ -104,6 +104,7 @@ namespace RTE {
 		/// GUI elements that compose the scenario menu screen.
 		/// </summary>
 		GUICollectionBox *m_RootBox;
+		GUICollectionBox *m_ActivityConfigBoxRootBox;
 		GUIButton *m_BackToMainButton;
 		GUIButton *m_ResumeButton;
 		GUICollectionBox *m_ActivityInfoBox;

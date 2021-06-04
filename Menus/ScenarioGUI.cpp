@@ -53,6 +53,8 @@ namespace RTE {
 
 		m_RootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
 		m_RootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+		m_ActivityConfigBoxRootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ConfigRoot"));
+		m_ActivityConfigBoxRootBox->Resize(m_RootBox->GetWidth(), m_RootBox->GetHeight());
 		m_BackToMainButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("BackToMainButton"));
 		m_BackToMainButton->SetPositionRel(m_RootBox->GetWidth() - m_BackToMainButton->GetWidth() - 16, m_RootBox->GetHeight() - m_BackToMainButton->GetHeight() - 22);
 		m_ResumeButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonResume"));
@@ -372,11 +374,8 @@ namespace RTE {
 		int mousePosY;
 		m_GUIControlManager->GetManager()->GetInputController()->GetMousePosition(&mousePosX, &mousePosY);
 		if (!m_ActivityConfigBox->IsEnabled()) {
-			m_ActivityInfoBox->SetVisible(true);
-			m_ActivitySelectComboBox->SetVisible(true);
-			m_SceneInfoBox->SetVisible(true);
-			m_ResumeButton->SetVisible(true);
-			m_BackToMainButton->SetVisible(true);
+			m_RootBox->SetVisible(true);
+			m_ActivityConfigBoxRootBox->SetVisible(false);
 
 			UpdateHoveredScene(mousePosX, mousePosY);
 			HandleInputEvents(mousePosX, mousePosY);
@@ -384,11 +383,8 @@ namespace RTE {
 			if (m_SceneInfoBox->GetVisible()) { m_StartActivityConfigButton->SetText(m_BlinkTimer.AlternateReal(333) ? "Start Here" : "> Start Here <"); }
 			if (m_ResumeButton->GetVisible()) { m_GUIControlManager->GetManager()->SetFocus((m_BlinkTimer.AlternateReal(500)) ? m_ResumeButton : nullptr); }
 		} else {
-			m_ActivityInfoBox->SetVisible(false);
-			m_ActivitySelectComboBox->SetVisible(false);
-			m_SceneInfoBox->SetVisible(false);
-			m_ResumeButton->SetVisible(false);
-			m_BackToMainButton->SetVisible(false);
+			m_RootBox->SetVisible(false);
+			m_ActivityConfigBoxRootBox->SetVisible(true);
 
 			if (m_ActivityConfigBox->Update(mousePosX, mousePosY)) { m_UpdateResult = ScenarioMenuUpdateResult::ActivityStarted; }
 		}

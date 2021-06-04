@@ -170,8 +170,10 @@ namespace RTE {
 			m_SceneNameLabel->SetText(m_SelectedScene->GetPresetName());
 			m_SceneDescriptionLabel->SetText(m_SelectedScene->GetDescription());
 
-			m_SceneInfoBox->Resize(m_SceneInfoBox->GetWidth(), m_SceneDescriptionLabel->ResizeHeightToFit() + 152);
-
+			// TODO: Some stupidity going on so have to do this twice, otherwise everything resizes correctly but some description text gets cut off as if it didn't.
+			for (int i = 0; i < 2; ++i) {
+				m_SceneInfoBox->Resize(m_SceneInfoBox->GetWidth(), m_SceneDescriptionLabel->ResizeHeightToFit() + 152);
+			}
 			CalculateLinesToSitePoint();
 		} else {
 			m_SceneInfoBox->SetVisible(false);

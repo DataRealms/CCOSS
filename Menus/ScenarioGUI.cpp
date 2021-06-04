@@ -99,22 +99,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ScenarioGUI::SetEnabled() {
-		// Reload all scenes and activities to reflect scene changes player might do in scene editor.
-		PopulateActivitiesAndScenesLists();
-
-		// Don't show resume button if the current Activity is an editor or online multiplayer, those are resumed from the main menu.
-		const GameActivity *currentActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
-		m_ResumeButton->SetVisible(currentActivity && (currentActivity->GetActivityState() == Activity::Running || currentActivity->GetActivityState() == Activity::Editing));
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void ScenarioGUI::SetPlanetInfo(const Vector &center, float radius) {
+	void ScenarioGUI::SetEnabled(const Vector &center, float radius) {
 		bool centerChanged = (center != m_PlanetCenter);
 		m_PlanetCenter = center;
 		m_PlanetRadius = radius;
 		if (centerChanged) { CalculateLinesToSitePoint(); }
+
+		// Reload all scenes and activities to reflect scene changes player might do in scene editor.
+		FetchActivitiesAndScenesLists();
+
+		// Don't show resume button if the current Activity is an editor or online multiplayer, those are resumed from the main menu.
+		const GameActivity *currentActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
+		m_ResumeButton->SetVisible(currentActivity && (currentActivity->GetActivityState() == Activity::Running || currentActivity->GetActivityState() == Activity::Editing));
+
+		m_ActivityInfoBox->SetVisible(true);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -199,7 +197,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ScenarioGUI::PopulateActivitiesAndScenesLists() {
+	void ScenarioGUI::FetchActivitiesAndScenesLists() {
 		int prevSelectedActivityIndex = m_ActivitySelectComboBox->GetSelectedIndex();
 		Scene *prevSelectedScene = m_SelectedScene;
 
@@ -311,24 +309,24 @@ namespace RTE {
 		Vector sceneBoxCenter(static_cast<float>(m_SceneInfoBox->GetXPos() + (m_SceneInfoBox->GetWidth() / 2)), static_cast<float>(m_SceneInfoBox->GetYPos() + halfBoxHeight));
 		float yDirMult = sitePos.GetY() < sceneBoxCenter.GetY() ? -1.0F : 1.0F;
 		Vector sceneBoxEdge = sceneBoxCenter + Vector(0, static_cast<float>(halfBoxHeight)) * yDirMult; // Point on the scene box where the line starts.
+
 		int circleRadius = 8; // Radius of the circle drawn around the site point.
 		int minStraightLength = 15; // Minimum length of straight line at the box edge and site point edge.
 		int minSiteDistance = circleRadius + minStraightLength; // Minimum distance from a chamfer point to the site point.
 
+		// No bends, meaning the line goes straight up/down to the site circle.
 		if (std::abs(sceneBoxCenter.GetFloorIntX() - sitePos.GetFloorIntX()) < minSiteDistance) {
-			// No bends, meaning the line goes straight up/down to the site circle.
 			m_LineToSitePoints.emplace_back(sceneBoxEdge + Vector(sitePos.GetX() - sceneBoxEdge.GetX(), 0));
 			m_LineToSitePoints.emplace_back(sitePos + Vector(0, (static_cast<float>(circleRadius + 1)) * -yDirMult));
 			return;
 		}
-
 		m_LineToSitePoints.emplace_back(sceneBoxEdge); // Point at the scene info box edge.
 
 		int minChamferSize = 15; // Minimum x and y lengths of the chamfer.
 		int maxChamferSize = 40; // Maximum x and y lengths of the chamfer.
 		float xDirMult = sitePos.GetX() < sceneBoxEdge.GetX() ? -1.0F : 1.0F;
 
-		int chamferSize;
+		int chamferSize = 0;
 		if (std::abs(sitePos.GetFloorIntY() - sceneBoxCenter.GetFloorIntY()) > halfBoxHeight + minStraightLength) {
 			// One bend.
 			Vector bendPoint(sceneBoxEdge.GetX(), sitePos.GetY()); // At this point the line bends. If the bend is chamfered then the two chamfer points will be equally distanced from this point.
@@ -474,6 +472,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ScenarioGUI::Draw() const {
+		// Early return to avoid single frame flicker before title screen goes into fadeout.
 		if (m_UpdateResult == ScenarioMenuUpdateResult::ActivityStarted) {
 			return;
 		}
@@ -539,7 +538,6 @@ namespace RTE {
 			line(drawBitmap, lineStartX, lineStartY + 1, lineEndX, lineEndY + 1, drawColor);
 			line(drawBitmap, lineStartX, lineStartY - 1, lineEndX, lineEndY - 1, drawColor);
 		}
-		// Draw a circle around the selected site point.
 		Vector sitePos = m_PlanetCenter + m_SelectedScene->GetLocation() + m_SelectedScene->GetLocationOffset();
 		int sitePosX = sitePos.GetFloorIntX();
 		int sitePosY = sitePos.GetFloorIntY();

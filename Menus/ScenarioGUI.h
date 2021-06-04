@@ -52,16 +52,11 @@ namespace RTE {
 
 #pragma region Setters
 		/// <summary>
-		/// Enables the menu by making the activity box visible and fetching the available activities and scenes.
-		/// </summary>
-		void SetEnabled();
-
-		/// <summary>
-		/// Sets where the planet is on the screen and its other data so the menu can overlay properly on it.
+		/// Sets the planet coordinates on the screen so the menu can overlay properly on it, fetches the Scenes and Activities lists and enables the appropriate GUI elements.
 		/// </summary>
 		/// <param name="center">The absolute screen coordinates of the planet's center.</param>
 		/// <param name="radius">The radius, in screen pixel units, of the planet.</param>
-		void SetPlanetInfo(const Vector &center, float radius);
+		void SetEnabled(const Vector &center, float radius);
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -83,9 +78,9 @@ namespace RTE {
 		ScenarioMenuUpdateResult m_UpdateResult; //!< The result of the ScenarioGUI update. See ScenarioMenuUpdateResult enumeration.
 
 		std::map<Activity *, std::vector<Scene *>> m_ScenarioActivities; //!< The map of Activities and the Scenes compatible with each, neither of which are owned here.
-		const Activity *m_SelectedActivity; //!< The currently selected activity. Not owned.
+		const Activity *m_SelectedActivity; //!< The currently selected Activity. Not owned.
 
-		std::vector<Scene *> *m_ActivityScenes; //!< Pointer to the current set of Scenes being displayed. Not owned, and neither are the scenes.
+		std::vector<Scene *> *m_ActivityScenes; //!< Pointer to the current set of Scenes being displayed. Not owned, and neither are the Scenes.
 		Scene *m_SelectedScene; //!< The scene preset currently selected. Not owned.
 		Scene *m_HoveredScene; //!< The scene preset currently hovered. Not owned.
 
@@ -96,9 +91,9 @@ namespace RTE {
 		GUICollectionBox *m_DraggedBox; //!< Currently dragged GUI box.
 		Vector m_PrevMousePos; //!< Previous position of the mouse to calculate dragging.
 
-		Timer m_BlinkTimer; //!< Notification blink timer.
+		Timer m_BlinkTimer; //!< Timer for blinking the resume and config start buttons.
 
-		std::unique_ptr<ScenarioActivityConfigGUI> m_ActivityConfigBox; //!<
+		std::unique_ptr<ScenarioActivityConfigGUI> m_ActivityConfigBox; //!< The Activity configuration box.
 
 		/// <summary>
 		/// GUI elements that compose the scenario menu screen.
@@ -134,40 +129,40 @@ namespace RTE {
 
 #pragma region Scenario Menu Handling
 		/// <summary>
-		/// 
+		/// Sets the CollectionBox that is currently being dragged, if applicable.
 		/// </summary>
-		/// <param name="mouseX"></param>
-		/// <param name="mouseY"></param>
+		/// <param name="mouseX">Mouse X position.</param>
+		/// <param name="mouseY">Mouse Y position.</param>
 		void SetDraggedBox(int mouseX, int mouseY);
 
 		/// <summary>
-		/// Updates the contents of the Activity selection box.
+		/// Sets the selected Activity, refreshes the compatible Scenes on the planet and updates the Activity info box appropriately.
 		/// </summary>
-		/// <param name="newSelectedActivity"></param>
+		/// <param name="newSelectedActivity">The new selected Activity.</param>
 		void SetSelectedActivity(const Activity *newSelectedActivity);
 
 		/// <summary>
-		/// Sets the currently selected scene.
+		/// Sets the currently selected Scene and updates the Scene info box appropriately.
 		/// </summary>
-		/// <param name="newSelectedScene">The new selected scene or nullptr to deselect the current selection.</param>
+		/// <param name="newSelectedScene">The new selected Scene.</param>
 		void SetSelectedScene(Scene *newSelectedScene);
 
 		/// <summary>
-		/// 
+		/// Moves the CollectionBox that is selected as being dragged, if any.
 		/// </summary>
-		/// <param name="mouseX"></param>
-		/// <param name="mouseY"></param>
+		/// <param name="mouseX">Mouse X position to calculate box position.</param>
+		/// <param name="mouseY">Mouse Y position to calculate box position.</param>
 		void DragBox(int mouseX, int mouseY);
 
 		/// <summary>
-		/// Gathers all the available Scenes and Activity presets there are.
+		/// Fetches all the available Scenes and Activity presets from PresetMan.
 		/// </summary>
-		void PopulateActivitiesAndScenesLists();
+		void FetchActivitiesAndScenesLists();
 
 		/// <summary>
-		/// 
+		/// Adjusts the positions of the site points on the planet if they don't fit the screen or overlap.
 		/// </summary>
-		/// <param name="sceneList"></param>
+		/// <param name="sceneList">List of Scenes to adjust positions for.</param>
 		void AdjustSitePointOffsetsOnPlanet(const std::list<Scene *> &sceneList) const;
 
 		/// <summary>
@@ -178,17 +173,17 @@ namespace RTE {
 
 #pragma region Update Breakdown
 		/// <summary>
-		/// Displays the site's name label if the mouse is over a site point. Otherwise the label is hidden.
+		/// Displays the site name label if the mouse is over a site point.
 		/// </summary>
-		/// <param name="mouseX"></param>
-		/// <param name="mouseY"></param>
+		/// <param name="mouseX">Mouse X position.</param>
+		/// <param name="mouseY">Mouse Y position.</param>
 		void UpdateHoveredScene(int mouseX, int mouseY);
 
 		/// <summary>
 		/// Handles the player interaction with the ScenarioGUI GUI elements.
 		/// </summary>
-		/// <param name="mouseX"></param>
-		/// <param name="mouseY"></param>
+		/// <param name="mouseX">Mouse X position.</param>
+		/// <param name="mouseY">Mouse Y position.</param>
 		void HandleInputEvents(int mouseX, int mouseY);
 #pragma endregion
 

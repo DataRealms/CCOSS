@@ -90,8 +90,7 @@ namespace RTE {
 			m_ActiveMenu = newActiveMenu;
 			switch (m_ActiveMenu) {
 				case ActiveMenu::ScenarioMenuActive:
-					m_ScenarioMenu->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
-					m_ScenarioMenu->SetEnabled();
+					m_ScenarioMenu->SetEnabled(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
 					break;
 				case ActiveMenu::CampaignMenuActive:
 					g_MetaMan.GetGUI()->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());

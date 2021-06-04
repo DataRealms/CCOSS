@@ -5,8 +5,7 @@
 
 namespace RTE {
 
-	class Activity;
-	class Scene;
+	class GameActivity;
 	class AllegroBitmap;
 	class GUIControlManager;
 	class GUICollectionBox;
@@ -53,7 +52,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="mouseX"></param>
 		/// <param name="mouseY"></param>
-		void Update(int mouseX, int mouseY);
+		bool Update(int mouseX, int mouseY);
 
 		/// <summary>
 		/// 
@@ -77,7 +76,9 @@ namespace RTE {
 
 		int m_LockedCPUTeam = Activity::Teams::NoTeam; //!< Which team the CPU is locked to, if any.
 
-		const Activity *m_SelectedActivity;
+		Timer m_BlinkTimer; //!< Notification blink timer.
+
+		const GameActivity *m_SelectedActivity;
 		Scene *m_SelectedScene;
 
 		/// <summary>
@@ -108,9 +109,9 @@ namespace RTE {
 		GUICheckbox *m_FogOfWarCheckbox;
 		GUICheckbox *m_RequireClearPathToOrbitCheckbox;
 		GUICheckbox *m_DeployUnitsCheckbox;
-		std::array<GUIComboBox *, Activity::Teams::MaxTeamCount> m_TeamTechSelect;
-		std::array<GUISlider *, Activity::Teams::MaxTeamCount> m_TeamAISkillSlider;
-		std::array<GUILabel *, Activity::Teams::MaxTeamCount> m_TeamAISkillLabel;
+		std::array<GUIComboBox *, Activity::Teams::MaxTeamCount> m_TeamTechComboBoxes;
+		std::array<GUISlider *, Activity::Teams::MaxTeamCount> m_TeamAISkillSliders;
+		std::array<GUILabel *, Activity::Teams::MaxTeamCount> m_TeamAISkillLabels;
 
 #pragma region Activity Config Screen Handling
 		/// <summary>
@@ -121,14 +122,18 @@ namespace RTE {
 		/// <summary>
 		/// Shows the player configuration box.
 		/// </summary>
-		void ShowPlayersBox();
+		void ResetActivityConfigBox();
 
 		/// <summary>
-		/// Updates the contents of the player configuration box.
+		/// 
 		/// </summary>
-		/// <param name="mouseX"></param>
-		/// <param name="mouseY"></param>
-		//void UpdatePlayersBox(int mouseX, int mouseY);
+		/// <returns></returns>
+		void UpdateStartingGoldSlider();
+
+		/// <summary>
+		/// Sets up and starts the currently selected Activity and settings.
+		/// </summary>
+		void StartGame();
 
 		/// <summary>
 		/// Handles player and team selection boxes in the player configuration box.
@@ -138,15 +143,9 @@ namespace RTE {
 		void ClickInPlayerSetup(int clickedPlayer, int clickedTeam);
 
 		/// <summary>
-		/// Sets up and starts the currently selected Activity and settings.
-		/// </summary>
-		/// <returns>Whether the game was set up and started successfully.</returns>
-		bool StartGame();
-
-		/// <summary>
 		/// Handles the player interaction with the ScenarioActivityConfigGUI GUI elements.
 		/// </summary>
-		void HandleInputEvents();
+		bool HandleInputEvents();
 #pragma endregion
 
 		// Disallow the use of some implicit methods.

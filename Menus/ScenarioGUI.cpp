@@ -372,13 +372,25 @@ namespace RTE {
 		int mousePosY;
 		m_GUIControlManager->GetManager()->GetInputController()->GetMousePosition(&mousePosX, &mousePosY);
 		if (!m_ActivityConfigBox->IsEnabled()) {
+			m_ActivityInfoBox->SetVisible(true);
+			m_ActivitySelectComboBox->SetVisible(true);
+			m_SceneInfoBox->SetVisible(true);
+			m_ResumeButton->SetVisible(true);
+			m_BackToMainButton->SetVisible(true);
+
 			UpdateHoveredScene(mousePosX, mousePosY);
 			HandleInputEvents(mousePosX, mousePosY);
 
 			if (m_SceneInfoBox->GetVisible()) { m_StartActivityConfigButton->SetText(m_BlinkTimer.AlternateReal(333) ? "Start Here" : "> Start Here <"); }
 			if (m_ResumeButton->GetVisible()) { m_GUIControlManager->GetManager()->SetFocus((m_BlinkTimer.AlternateReal(500)) ? m_ResumeButton : nullptr); }
 		} else {
-			m_ActivityConfigBox->Update(mousePosX, mousePosY);
+			m_ActivityInfoBox->SetVisible(false);
+			m_ActivitySelectComboBox->SetVisible(false);
+			m_SceneInfoBox->SetVisible(false);
+			m_ResumeButton->SetVisible(false);
+			m_BackToMainButton->SetVisible(false);
+
+			if (m_ActivityConfigBox->Update(mousePosX, mousePosY)) { m_UpdateResult = ScenarioMenuUpdateResult::ActivityStarted; }
 		}
 		return m_UpdateResult;
 	}
@@ -464,6 +476,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ScenarioGUI::Draw() const {
+		if (m_UpdateResult == ScenarioMenuUpdateResult::ActivityStarted) {
+			return;
+		}
 		if (!m_ActivityConfigBox->IsEnabled()) {
 			if (m_ActivityScenes) {
 				drawing_mode(DRAW_MODE_TRANS, nullptr, 0, 0);

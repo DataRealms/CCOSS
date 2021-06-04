@@ -216,7 +216,7 @@ void GATutorial::Destroy(bool notInherited)
 // Description:     Tells if a particular Scene supports this specific Activity on it.
 //                  Usually that means certain Area:s need to be defined in the Scene.
 
-bool GATutorial::SceneIsCompatible(Scene *pScene, short teams)
+bool GATutorial::SceneIsCompatible(Scene *pScene, int teams)
 {
     if (!GameActivity::SceneIsCompatible(pScene, teams))
         return false;

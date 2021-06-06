@@ -1597,8 +1597,6 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
             }
         }
     }
-    if (attachable->GetDeleteWhenRemovedFromParent()) { attachable->SetToDelete(); }
-    if (addToMovableMan || attachable->IsSetToDelete()) { g_MovableMan.AddMO(attachable); }
 
     if (attachable == m_RadiusAffectingAttachable) {
         m_RadiusAffectingAttachable = nullptr;
@@ -1610,6 +1608,11 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
             thisAsAttachable->m_Parent->HandlePotentialRadiusAffectingAttachable(thisAsAttachable);
         }
     }
+
+    if (attachable->GetDeleteWhenRemovedFromParent()) { attachable->SetToDelete(); }
+    //TODO in future RemoveAttachable should return the attachable (if it's not been added to MovableMan) so its caller can deal with it. That'll mean this safety bit below for avoiding memory leaks can go away.
+    if (!addToMovableMan) { attachable->SetToDelete(); }
+    if (addToMovableMan || attachable->IsSetToDelete()) { g_MovableMan.AddMO(attachable); }
 
     return true;
 }

@@ -69,7 +69,6 @@ namespace RTE {
 			if (HasMountedDevice()) {
 				HeldDevice *removedDevice = m_MountedDevices.at(0).get();
 				RemoveAttachable(m_MountedDevices.at(0).get());
-				delete removedDevice;
 			}
 		} else {
 			if (HasMountedDevice()) { RemoveAttachable(m_MountedDevices.at(0).get()); }

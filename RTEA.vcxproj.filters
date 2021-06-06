@@ -891,7 +891,7 @@
     <ClCompile Include="Entities\SoundContainer.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
-	  <ClCompile Include="Entities\SoundSet.cpp">
+    <ClCompile Include="Entities\SoundSet.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="System\Atom.cpp">
@@ -919,6 +919,9 @@
       <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="System\GraphicalPrimitive.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Serializable.cpp">
       <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>

@@ -18,7 +18,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::Clear() {
-		m_GUIControlManager = nullptr;
+		m_MainMenuScreenGUIControlManager = nullptr;
+		m_SubMenuScreenGUIControlManager = nullptr;
+		m_ActiveGUIControlManager = nullptr;
 		m_ActiveDialogBox = nullptr;
 
 		m_ActiveMenuScreen = MenuScreen::ScreenCount;
@@ -26,15 +28,12 @@ namespace RTE {
 		m_MenuScreenChange = false;
 		m_CampaignNoticeShown = false;
 
-		m_RootBoxOriginalHeight = 0;
-
 		m_ResumeButtonBlinkTimer.Reset();
 		m_CreditsScrollTimer.Reset();
 
 		m_SettingsMenu = nullptr;
 		m_ModManagerMenu = nullptr;
 
-		m_RootBox = nullptr;
 		m_VersionLabel = nullptr;
 		m_CreditsTextLabel = nullptr;
 		m_CreditsScrollPanel = nullptr;
@@ -45,41 +44,28 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::Create(AllegroScreen *guiScreen, AllegroInput *guiInput) {
-		m_GUIControlManager = std::make_unique<GUIControlManager>();
-		RTEAssert(m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSkin.ini");
-		m_GUIControlManager->Load("Base.rte/GUIs/MainMenuGUI.ini");
+		m_MainMenuScreenGUIControlManager = std::make_unique<GUIControlManager>();
+		RTEAssert(m_MainMenuScreenGUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuScreenSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuScreenSkin.ini");
+		m_MainMenuScreenGUIControlManager->Load("Base.rte/GUIs/MainMenuGUI.ini");
 
-		m_RootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
-		m_RootBox->SetVisible(true);
-		m_RootBox->SetPositionAbs((g_FrameMan.GetResX() - m_RootBox->GetWidth()) / 2, 0);
-		m_RootBoxOriginalHeight = m_RootBox->GetHeight();
+		m_SubMenuScreenGUIControlManager = std::make_unique<GUIControlManager>();
+		RTEAssert(m_SubMenuScreenGUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSubMenuSkin.ini");
+		m_SubMenuScreenGUIControlManager->Load("Base.rte/GUIs/MainMenuSubMenuGUI.ini");
 
-		m_VersionLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("VersionLabel"));
-		m_VersionLabel->SetText(c_GameVersion);
-		m_VersionLabel->SetPositionAbs(10, g_FrameMan.GetResY() - m_VersionLabel->GetTextHeight() - 5);
+		GUICollectionBox *mainScreenRootBox = dynamic_cast<GUICollectionBox *>(m_MainMenuScreenGUIControlManager->GetControl("root"));
+		mainScreenRootBox->Resize(g_FrameMan.GetResX(), mainScreenRootBox->GetHeight());
 
-		m_MainMenuScreens.at(MenuScreen::MainScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("MainScreen"));
-		m_MainMenuScreens.at(MenuScreen::QuitScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("QuitConfirmBox"));
-		m_MainMenuScreens.at(MenuScreen::QuitScreen)->CenterInParent(true, true);
+		GUICollectionBox *subMenuScreenRootBox = dynamic_cast<GUICollectionBox *>(m_SubMenuScreenGUIControlManager->GetControl("root"));
+		subMenuScreenRootBox->Resize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
 
-		m_MainMenuButtons.at(MenuButton::CampaignButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToCampaign"));
-		m_MainMenuButtons.at(MenuButton::CampaignButton)->SetText("MetaGame (WIP)");
-		m_MainMenuButtons.at(MenuButton::ScenarioButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToSkirmish"));
-		m_MainMenuButtons.at(MenuButton::MultiplayerButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToMultiplayer"));
-		m_MainMenuButtons.at(MenuButton::SettingsButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToOptions"));
-		m_MainMenuButtons.at(MenuButton::ModManagerButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToModManager"));
-		m_MainMenuButtons.at(MenuButton::EditorsButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToEditor"));
-		m_MainMenuButtons.at(MenuButton::CreditsButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonMainToCreds"));
-		m_MainMenuButtons.at(MenuButton::QuitButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuit"));
-		m_MainMenuButtons.at(MenuButton::ResumeButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonResume"));
-		m_MainMenuButtons.at(MenuButton::BackToMainButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonBackToMain"));
-		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetVisible(false);
-		m_MainMenuButtons.at(MenuButton::QuitConfirmButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("QuitConfirmButton"));
-		m_MainMenuButtons.at(MenuButton::QuitCancelButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("QuitCancelButton"));
+		m_MainMenuButtons.at(MenuButton::BackToMainButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("ButtonBackToMain"));
+		m_MainMenuButtons.at(MenuButton::BackToMainButton)->CenterInParent(true, false);
 
+		CreateMainScreen();
 		CreateCampaignNoticeScreen();
 		CreateEditorsScreen();
 		CreateCreditsScreen();
+		CreateQuitScreen();
 
 		m_SettingsMenu = std::make_unique<SettingsGUI>(guiScreen, guiInput);
 		m_ModManagerMenu = std::make_unique<ModManagerGUI>(guiScreen, guiInput);
@@ -90,35 +76,71 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::CreateCampaignNoticeScreen() {
-		m_MainMenuScreens.at(MenuScreen::CampaignNoticeScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("MetaScreen"));
+	void MainMenuGUI::CreateMainScreen() {
+		m_MainMenuScreens.at(MenuScreen::MainScreen) = dynamic_cast<GUICollectionBox *>(m_MainMenuScreenGUIControlManager->GetControl("MainScreen"));
+		m_MainMenuScreens.at(MenuScreen::MainScreen)->CenterInParent(true, false);
 
-		m_MainMenuButtons.at(MenuButton::PlayTutorialButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonTutorial"));
-		m_MainMenuButtons.at(MenuButton::CampaignContinueButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonContinue"));
+		m_MainMenuButtons.at(MenuButton::CampaignButton) = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToCampaign"));
+		m_MainMenuButtons.at(MenuButton::CampaignButton)->SetText("MetaGame");
+		m_MainMenuButtons.at(MenuButton::ScenarioButton) = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToSkirmish"));
+		m_MainMenuButtons.at(MenuButton::MultiplayerButton) = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToMultiplayer"));
+		m_MainMenuButtons.at(MenuButton::SettingsButton) = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToOptions"));
+		m_MainMenuButtons.at(MenuButton::ModManagerButton) = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToModManager"));
+		m_MainMenuButtons.at(MenuButton::EditorsButton) = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToEditor"));
+		m_MainMenuButtons.at(MenuButton::CreditsButton) = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToCreds"));
+		m_MainMenuButtons.at(MenuButton::QuitButton) = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonQuit"));
+		m_MainMenuButtons.at(MenuButton::ResumeButton) = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonResume"));
+
+		for (int mainScreenButton = 0; mainScreenButton < 9; ++mainScreenButton) {
+			m_MainMenuButtons.at(mainScreenButton)->CenterInParent(true, false);
+			std::string buttonText = m_MainMenuButtons.at(mainScreenButton)->GetText();
+			std::transform(buttonText.begin(), buttonText.end(), buttonText.begin(), ::toupper);
+			m_MainScreenButtonUppercaseStrings.at(mainScreenButton) = buttonText;
+			std::transform(buttonText.begin(), buttonText.end(), buttonText.begin(), ::tolower);
+			m_MainScreenButtonLowercaseStrings.at(mainScreenButton) = buttonText;
+
+			m_MainMenuButtons.at(mainScreenButton)->SetText(m_MainScreenButtonLowercaseStrings.at(mainScreenButton));
+		}
+
+		m_VersionLabel = dynamic_cast<GUILabel *>(m_MainMenuScreenGUIControlManager->GetControl("VersionLabel"));
+		m_VersionLabel->SetText(c_GameVersion);
+		m_VersionLabel->SetPositionAbs(10, g_FrameMan.GetResY() - m_VersionLabel->GetTextHeight() - 5);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void MainMenuGUI::CreateCampaignNoticeScreen() {
+		m_MainMenuScreens.at(MenuScreen::CampaignNoticeScreen) = dynamic_cast<GUICollectionBox *>(m_SubMenuScreenGUIControlManager->GetControl("MetaScreen"));
+		m_MainMenuScreens.at(MenuScreen::CampaignNoticeScreen)->CenterInParent(true, false);
+
+		m_MainMenuButtons.at(MenuButton::PlayTutorialButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("ButtonTutorial"));
+		m_MainMenuButtons.at(MenuButton::CampaignContinueButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("ButtonContinue"));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::CreateEditorsScreen() {
-		m_MainMenuScreens.at(MenuScreen::EditorScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("EditorScreen"));
+		m_MainMenuScreens.at(MenuScreen::EditorScreen) = dynamic_cast<GUICollectionBox *>(m_SubMenuScreenGUIControlManager->GetControl("EditorScreen"));
+		m_MainMenuScreens.at(MenuScreen::EditorScreen)->CenterInParent(true, false);
 
-		m_MainMenuButtons.at(MenuButton::SceneEditorButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonSceneEditor"));
-		m_MainMenuButtons.at(MenuButton::AreaEditorButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonAreaEditor"));
-		m_MainMenuButtons.at(MenuButton::AssemblyEditorButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonAssemblyEditor"));
-		m_MainMenuButtons.at(MenuButton::GitEditorButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonGibPlacement"));
-		m_MainMenuButtons.at(MenuButton::ActorEditorButton) = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonActorEditor"));
+		m_MainMenuButtons.at(MenuButton::SceneEditorButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("ButtonSceneEditor"));
+		m_MainMenuButtons.at(MenuButton::AreaEditorButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("ButtonAreaEditor"));
+		m_MainMenuButtons.at(MenuButton::AssemblyEditorButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("ButtonAssemblyEditor"));
+		m_MainMenuButtons.at(MenuButton::GitEditorButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("ButtonGibPlacement"));
+		m_MainMenuButtons.at(MenuButton::ActorEditorButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("ButtonActorEditor"));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::CreateCreditsScreen() {
-		m_MainMenuScreens.at(MenuScreen::CreditsScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CreditsScreen"));
+		m_MainMenuScreens.at(MenuScreen::CreditsScreen) = dynamic_cast<GUICollectionBox *>(m_SubMenuScreenGUIControlManager->GetControl("CreditsScreen"));
 		m_MainMenuScreens.at(MenuScreen::CreditsScreen)->Resize(m_MainMenuScreens.at(MenuScreen::CreditsScreen)->GetWidth(), g_FrameMan.GetResY());
 		m_MainMenuScreens.at(MenuScreen::CreditsScreen)->CenterInParent(true, false);
 
-		m_CreditsScrollPanel = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CreditsPanel"));
-		m_CreditsTextLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("CreditsLabel"));
+		m_CreditsScrollPanel = dynamic_cast<GUICollectionBox *>(m_SubMenuScreenGUIControlManager->GetControl("CreditsPanel"));
 		m_CreditsScrollPanel->Resize(m_CreditsScrollPanel->GetWidth(), g_FrameMan.GetResY() - m_CreditsScrollPanel->GetYPos() - 50);
+
+		m_CreditsTextLabel = dynamic_cast<GUILabel *>(m_SubMenuScreenGUIControlManager->GetControl("CreditsLabel"));
 
 		std::string creditsText = Reader("Credits.txt").WholeFileAsString();
 
@@ -139,6 +161,16 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void MainMenuGUI::CreateQuitScreen() {
+		m_MainMenuScreens.at(MenuScreen::QuitScreen) = dynamic_cast<GUICollectionBox *>(m_SubMenuScreenGUIControlManager->GetControl("QuitConfirmBox"));
+		m_MainMenuScreens.at(MenuScreen::QuitScreen)->CenterInParent(true, false);
+
+		m_MainMenuButtons.at(MenuButton::QuitConfirmButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("QuitConfirmButton"));
+		m_MainMenuButtons.at(MenuButton::QuitCancelButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("QuitCancelButton"));
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void MainMenuGUI::HideAllScreens() {
 		for (GUICollectionBox *menuScreen : m_MainMenuScreens) {
 			if (menuScreen) { menuScreen->SetVisible(false); }
@@ -152,6 +184,7 @@ namespace RTE {
 		if (screenToShow != m_ActiveMenuScreen) {
 			HideAllScreens();
 			m_ActiveMenuScreen = screenToShow;
+			m_ActiveGUIControlManager = (m_ActiveMenuScreen == MenuScreen::MainScreen) ? m_MainMenuScreenGUIControlManager.get() : m_SubMenuScreenGUIControlManager.get();
 			m_MenuScreenChange = true;
 		}
 		if (playButtonPressSound) { g_GUISound.ButtonPressSound()->Play(); }
@@ -180,7 +213,7 @@ namespace RTE {
 		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetVisible(true);
 		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetPositionAbs((g_FrameMan.GetResX() - m_MainMenuButtons.at(MenuButton::BackToMainButton)->GetWidth()) / 2, m_MainMenuButtons.at(MenuButton::CampaignContinueButton)->GetYPos() + 25);
 
-		GUILabel *metaNoticeLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("MetaLabel"));
+		GUILabel *metaNoticeLabel = dynamic_cast<GUILabel *>(m_SubMenuScreenGUIControlManager->GetControl("MetaLabel"));
 
 		const char *metaNotice = {
 			"- A T T E N T I O N -\n\n"
@@ -335,10 +368,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool MainMenuGUI::HandleInputEvents() {
-		m_GUIControlManager->Update();
+		m_ActiveGUIControlManager->Update();
 
 		GUIEvent guiEvent;
-		while (m_GUIControlManager->GetEvent(&guiEvent)) {
+		while (m_ActiveGUIControlManager->GetEvent(&guiEvent)) {
 			if (guiEvent.GetType() == GUIEvent::Command) {
 				if (guiEvent.GetControl() == m_MainMenuButtons.at(MenuButton::BackToMainButton)) {
 					return true;
@@ -458,15 +491,15 @@ namespace RTE {
 				m_ModManagerMenu->Draw();
 				break;
 			default:
-				m_GUIControlManager->Draw();
+				m_ActiveGUIControlManager->Draw();
 				break;
 		}
 		if (m_ActiveDialogBox) {
 			set_trans_blender(128, 128, 128, 128);
 			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), g_FrameMan.GetOverlayBitmap32(), 0, 0);
 			// Whatever this box may be at this point it's already been drawn by the owning GUIControlManager, but we need to draw it again on top of the overlay so it's not affected by it.
-			m_ActiveDialogBox->Draw(m_GUIControlManager->GetScreen());
+			m_ActiveDialogBox->Draw(m_ActiveGUIControlManager->GetScreen());
 		}
-		m_GUIControlManager->DrawMouse();
+		m_ActiveGUIControlManager->DrawMouse();
 	}
 }

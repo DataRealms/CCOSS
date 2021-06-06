@@ -106,15 +106,15 @@ namespace RTE {
 			ButtonCount
 		};
 
-		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which owns all the GUIControls of the MainMenuGUI.
+		std::unique_ptr<GUIControlManager> m_MainMenuScreenGUIControlManager; //!< The GUIControlManager which owns all the GUIControls of the MainMenuGUI main screen.
+		std::unique_ptr<GUIControlManager> m_SubMenuScreenGUIControlManager; //!< The GUIControlManager which owns all the GUIControls of the MainMenuGUI sub-menus.
+		GUIControlManager *m_ActiveGUIControlManager; //!< The GUIControlManager that is currently being updated and drawn to the screen.
 		GUICollectionBox *m_ActiveDialogBox; // The currently active GUICollectionBox in any of the main or sub-menu screens that acts as a dialog box and requires drawing an overlay.
 
 		MenuScreen m_ActiveMenuScreen; //!< The currently active menu screen that is being updated and drawn to the screen. See MenuScreen enumeration.
 		MainMenuUpdateResult m_UpdateResult; //!< The result of the MainMenuGUI update. See MainMenuUpdateResult enumeration.
 		bool m_MenuScreenChange; //!< Whether the active menu screen was changed and a different one needs to be shown.
 		bool m_CampaignNoticeShown; //!< Whether the campaign notice and tutorial offer have been shown to the player.
-
-		int m_RootBoxOriginalHeight; //!< The initial height of the top-level CollectionBox. Used to resize the box back to original height when returning to the main screen from the credits screen.
 
 		Timer m_ResumeButtonBlinkTimer; //!< Activity resume button blink timer.
 		Timer m_CreditsScrollTimer; //!< Credits scrolling timer.
@@ -125,7 +125,6 @@ namespace RTE {
 		/// <summary>
 		/// GUI elements that compose the main menu screen.
 		/// </summary>
-		GUICollectionBox *m_RootBox;
 		GUILabel *m_VersionLabel;
 		GUILabel *m_CreditsTextLabel;
 		GUICollectionBox *m_CreditsScrollPanel;
@@ -133,6 +132,11 @@ namespace RTE {
 		std::array<GUIButton *, MenuButton::ButtonCount> m_MainMenuButtons;
 
 #pragma region Create Breakdown
+		/// <summary>
+		/// Creates all the elements that compose the main menu screen.
+		/// </summary>
+		void CreateMainScreen();
+
 		/// <summary>
 		/// Creates all the elements that compose the campaign notice menu screen.
 		/// </summary>
@@ -147,6 +151,11 @@ namespace RTE {
 		/// Creates all the elements that compose the credits menu screen.
 		/// </summary>
 		void CreateCreditsScreen();
+
+		/// <summary>
+		/// Creates all the elements that compose the quit confirmation menu screen.
+		/// </summary>
+		void CreateQuitScreen();
 #pragma endregion
 
 #pragma region Menu Screen Handling

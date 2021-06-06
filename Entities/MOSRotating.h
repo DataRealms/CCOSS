@@ -934,6 +934,7 @@ protected:
     std::list<Attachable *> m_Attachables;
     std::unordered_set<unsigned long> m_ReferenceHardcodedAttachableUniqueIDs; //!< An unordered set is filled with the Unique IDs of all of the reference object's hardcoded Attachables when using the copy Create.
     std::unordered_map<unsigned long, std::function<void (MOSRotating*, Attachable*)>> m_HardcodedAttachableUniqueIDsAndSetters; //!< An unordered map of Unique IDs to setter lambda functions, used to call the appropriate hardcoded Attachable setter when a hardcoded Attachable is removed.
+    std::unordered_map<unsigned long, std::function<void(MOSRotating *, Attachable *)>> m_HardcodedAttachableUniqueIDsAndRemovers; //!< An unordered map of Unique IDs to remove lambda functions, used to call the appropriate hardcoded Attachable remover when a hardcoded Attachable is removed and calling the setter with nullptr won't work.
     const Attachable *m_RadiusAffectingAttachable; //!< A pointer to the Attachable that is currently affecting the radius. Used for some efficiency benefits.
     float m_FarthestAttachableDistanceAndRadius; //!< The distance + radius of the radius affecting Attachable.
     float m_AttachableAndWoundMass; //!< The mass of all Attachables and wounds on this MOSRotating. Used in combination with its actual mass and any other affecting factors to get its total mass.

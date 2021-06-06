@@ -65,6 +65,7 @@ void MOSRotating::Clear()
     m_Attachables.clear();
     m_ReferenceHardcodedAttachableUniqueIDs.clear();
     m_HardcodedAttachableUniqueIDsAndSetters.clear();
+    m_HardcodedAttachableUniqueIDsAndRemovers.clear();
     m_RadiusAffectingAttachable = nullptr;
     m_FarthestAttachableDistanceAndRadius = 0.0F;
     m_AttachableAndWoundMass = 0.0F;
@@ -542,10 +543,12 @@ void MOSRotating::Destroy(bool notInherited)
     delete m_pAtomGroup;
     delete m_pDeepGroup;
 
-    for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
-        delete (*itr);
-    for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr)
-        delete (*aItr);
+    for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) { delete (*itr); }
+    for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr) {
+        if (m_HardcodedAttachableUniqueIDsAndRemovers.find((*aItr)->GetUniqueID()) == m_HardcodedAttachableUniqueIDsAndRemovers.end()) {
+            delete (*aItr);
+        }
+    }
 
     destroy_bitmap(m_pFlipBitmap);
     destroy_bitmap(m_pFlipBitmapS);
@@ -1567,6 +1570,13 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
     if (hardcodedAttachableMapEntry != m_HardcodedAttachableUniqueIDsAndSetters.end()) {
         hardcodedAttachableMapEntry->second(this, nullptr);
         m_HardcodedAttachableUniqueIDsAndSetters.erase(hardcodedAttachableMapEntry);
+    }
+    
+    // Note, this version handles cases where you can't pass null to a setter cause you're calling a remover function, i.e. when dealing with hardcoded Attachable lists.
+    hardcodedAttachableMapEntry = m_HardcodedAttachableUniqueIDsAndRemovers.find(attachable->GetUniqueID());
+    if (hardcodedAttachableMapEntry != m_HardcodedAttachableUniqueIDsAndRemovers.end()) {
+        hardcodedAttachableMapEntry->second(this, attachable);
+        m_HardcodedAttachableUniqueIDsAndRemovers.erase(hardcodedAttachableMapEntry);
     }
     
     if (addBreakWounds) {

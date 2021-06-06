@@ -407,7 +407,7 @@ PROPERTYOWNERSHIPSAFETYFAKER(ACrab, Leg, SetRightFGLeg);
 PROPERTYOWNERSHIPSAFETYFAKER(ACrab, Leg, SetRightBGLeg);
 PROPERTYOWNERSHIPSAFETYFAKER(ACrab, SoundContainer, SetStrideSound);
 
-PROPERTYOWNERSHIPSAFETYFAKER(Turret, HeldDevice, SetMountedDevice);
+PROPERTYOWNERSHIPSAFETYFAKER(Turret, HeldDevice, SetFirstMountedDevice);
 
 PROPERTYOWNERSHIPSAFETYFAKER(ACraft, SoundContainer, SetHatchOpenSound);
 PROPERTYOWNERSHIPSAFETYFAKER(ACraft, SoundContainer, SetCrashSound);
@@ -510,6 +510,10 @@ bool RemoveAttachableFromParentLuaSafe2(Attachable *luaSelfObject, bool addToMov
         return RemoveAttachableLuaSafe4(luaSelfObject->GetParent(), luaSelfObject, addToMovableMan, addBreakWounds);
     }
     return false;
+}
+
+void TurretAddMountedFirearm(Turret *luaSelfObject, HDFirearm *newMountedDevice) {
+    luaSelfObject->AddMountedDevice(newMountedDevice);
 }
 
 /*
@@ -1391,7 +1395,11 @@ int LuaMan::Initialize() {
 			.def("SetLimbPathSpeed", &ACrab::SetLimbPathSpeed),
 
         CONCRETELUABINDING(Turret, Attachable)
-			.property("MountedDevice", &Turret::GetMountedDevice, &TurretSetMountedDevice),
+			.property("MountedDevice", &Turret::GetFirstMountedDevice, &TurretSetFirstMountedDevice)
+            .property("MountedDeviceRotationOffset", &Turret::GetMountedDeviceRotationOffset, &Turret::SetMountedDeviceRotationOffset)
+            .def("GetMountedDevices", &Turret::GetMountedDevicesLua, return_stl_iterator)
+            .def("AddMountedDevice", &Turret::AddMountedDevice, adopt(_2))
+            .def("AddMountedDevice", TurretAddMountedFirearm, adopt(_2)),
 
 		ABSTRACTLUABINDING(ACraft, Actor)
 			.enum_("HatchState")[

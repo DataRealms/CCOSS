@@ -234,33 +234,21 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "ThrowPrepTime") {
         reader >> m_ThrowPrepTime;
     } else if (propName == "Head") {
-        Attachable iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetHead(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
+        SetHead(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "Jetpack") {
-        AEmitter iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetJetpack(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+        SetJetpack(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         // Convert to ms
         m_JetTimeTotal *= 1000;
     } else if (propName == "FGArm") {
-        Arm iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetFGArm(dynamic_cast<Arm *>(iniDefinedObject.Clone()));
+        SetFGArm(dynamic_cast<Arm *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "BGArm") {
-        Arm iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetBGArm(dynamic_cast<Arm *>(iniDefinedObject.Clone()));
+        SetBGArm(dynamic_cast<Arm *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "FGLeg") {
-        Leg iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetFGLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
+        SetFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "BGLeg") {
-        Leg iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetBGLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
+        SetBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "HandGroup") {
         delete m_pFGHandGroup;
         delete m_pBGHandGroup;

@@ -35,9 +35,9 @@ namespace RTE {
 
 	int Turret::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "MountedDevice") {
-			if (Entity *mountedEntity = g_PresetMan.ReadReflectedPreset(reader)) { SetFirstMountedDevice(dynamic_cast<HeldDevice *>(mountedEntity)); }
+			SetFirstMountedDevice(dynamic_cast<HeldDevice *>(g_PresetMan.ReadReflectedPreset(reader)));
 		} else if (propName == "AddMountedDevice") {
-			if (Entity *mountedEntity = g_PresetMan.ReadReflectedPreset(reader)) { AddMountedDevice(dynamic_cast<HeldDevice *>(mountedEntity)); }
+			AddMountedDevice(dynamic_cast<HeldDevice *>(g_PresetMan.ReadReflectedPreset(reader)));
 		} else if (propName == "MountedDeviceRotationOffset") {
 			reader >> m_MountedDeviceRotationOffset;
 		} else {

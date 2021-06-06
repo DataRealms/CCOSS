@@ -16,6 +16,7 @@
 #include "Controller.h"
 #include "Matrix.h"
 #include "AEmitter.h"
+#include "PresetMan.h"
 
 namespace RTE {
 
@@ -123,29 +124,17 @@ int ACDropShip::Create(const ACDropShip &reference) {
 
 int ACDropShip::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "RThruster" || propName == "RightThruster" || propName == "RightEngine") {
-        AEmitter iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetRightThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+        SetRightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "LThruster" || propName == "LeftThruster" || propName == "LeftEngine") {
-        AEmitter iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetLeftThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+        SetLeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "URThruster" || propName == "UpRightThruster") {
-        AEmitter iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetURightThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+        SetURightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "ULThruster" || propName == "UpLeftThruster") {
-        AEmitter iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetULeftThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+        SetULeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "RHatchDoor" || propName == "RightHatchDoor") {
-        Attachable iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetRightHatch(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
+        SetRightHatch(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "LHatchDoor" || propName == "LeftHatchDoor") {
-        Attachable iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetLeftHatch(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
+        SetLeftHatch(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "HatchDoorSwingRange") {
         reader >> m_HatchSwingRange;
     } else if (propName == "AutoStabilize") {

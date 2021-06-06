@@ -168,9 +168,7 @@ int AEmitter::ReadProperty(const std::string_view &propName, Reader &reader) {
     } else if (propName == "EmissionDamage") {
         reader >> m_EmitDamage;
     } else if (propName == "Flash") {
-        Attachable iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetFlash(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
+        SetFlash(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "FlashScale") {
         reader >> m_FlashScale;
     } else if (propName == "FlashOnlyOnBurst") {

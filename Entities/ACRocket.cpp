@@ -20,6 +20,7 @@
 #include "Matrix.h"
 #include "AEmitter.h"
 #include "SettingsMan.h"
+#include "PresetMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
@@ -161,13 +162,9 @@ int ACRocket::Create(const ACRocket &reference) {
 
 int ACRocket::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "RLeg" || propName == "RightLeg") {
-        Leg iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetRightLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
+        SetRightLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "LLeg" || propName == "LeftLeg") {
-        Leg iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetLeftLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
+        SetLeftLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "RFootGroup" || propName == "RightFootGroup") {
         delete m_pRFootGroup;
         m_pRFootGroup = new AtomGroup();
@@ -179,25 +176,15 @@ int ACRocket::ReadProperty(const std::string_view &propName, Reader &reader) {
         reader >> m_pLFootGroup;
         m_pLFootGroup->SetOwner(this);
     } else if (propName == "MThruster" || propName == "MainThruster") {
-        AEmitter iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetMainThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+        SetMainThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "RThruster" || propName == "RightThruster") {
-        AEmitter iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetRightThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+        SetRightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "LThruster" || propName == "LeftThruster") {
-        AEmitter iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetLeftThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+        SetLeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "URThruster" || propName == "UpRightThruster") {
-        AEmitter iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetURightThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+        SetURightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "ULThruster" || propName == "UpLeftThruster") {
-        AEmitter iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetULeftThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+        SetULeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "RaisedGearLimbPath") {
         reader >> m_Paths[RIGHT][RAISED];
     } else if (propName == "LoweredGearLimbPath") {

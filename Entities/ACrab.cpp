@@ -24,6 +24,7 @@
 #include "PieMenuGUI.h"
 #include "Scene.h"
 #include "SettingsMan.h"
+#include "PresetMan.h"
 
 #include "GUI/GUI.h"
 #include "GUI/AllegroBitmap.h"
@@ -258,32 +259,20 @@ int ACrab::Create(const ACrab &reference) {
 int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "Turret") {
-        Turret iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetTurret(dynamic_cast<Turret *>(iniDefinedObject.Clone()));
+        SetTurret(dynamic_cast<Turret *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "Jetpack") {
-        AEmitter iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetJetpack(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+        SetJetpack(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         m_JetTimeTotal *= 1000;
     } else if (propName == "LFGLeg" || propName == "LeftFGLeg") {
-        Leg iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetLeftFGLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
-    } else if (propName == "LBGLeg" || propName == "LeftFGLeg") {
-        Leg iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetLeftBGLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
-    } else if (propName == "RFGLeg" || propName == "LeftFGLeg") {
-        Leg iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetRightFGLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
-    } else if (propName == "RBGLeg" || propName == "LeftFGLeg") {
-        Leg iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetRightBGLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
+        SetLeftFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "LBGLeg" || propName == "LeftBGLeg") {
+        SetLeftBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "RFGLeg" || propName == "RightFGLeg") {
+        SetRightFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "RBGLeg" || propName == "RightBGLeg") {
+        SetRightBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "LFootGroup" || propName == "LeftFootGroup") {
         delete m_pLFGFootGroup;
         delete m_pLBGFootGroup;

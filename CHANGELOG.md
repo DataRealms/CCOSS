@@ -279,8 +279,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Removed hardcoded INI constraint that forced `Mass` of `MovableObjects` to not be 0. Previously, anytime a `Mass` of 0 was read in from INI, it was changed to 0.0001.
 
-- Removed the ability to set `HDFirearms'` `Magazine` or `Flash`, or `AEmitters'` `Flash` to None in INI. This was a necessary result of some core changes, and may be undone in future if it's possible. If you want no `Magazine` or `Flash` just don't set one, or use a Null one like is done for limbs and other hardcoded `Attachables`.
-
 ***
 
 ## [0.1.0 pre-release 3.0][0.1.0-pre3.0] - 2020/12/25

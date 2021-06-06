@@ -987,7 +987,7 @@ int LuaMan::Initialize() {
             .def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe1)
             .def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe2)
 			.property("ParentOffset", &Attachable::GetParentOffset, &Attachable::SetParentOffset)
-            .def("IsDrawnAfterParent", &Attachable::IsDrawnAfterParent)
+            .property("DrawnAfterParent", &Attachable::IsDrawnAfterParent, &Attachable::SetDrawnAfterParent)
             .property("JointStrength", &Attachable::GetJointStrength, &Attachable::SetJointStrength)
             .property("JointStiffness", &Attachable::GetJointStiffness, &Attachable::SetJointStiffness)
             .property("JointOffset", &Attachable::GetJointOffset, &Attachable::SetJointOffset)

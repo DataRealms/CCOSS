@@ -114,9 +114,11 @@ namespace RTE {
 	void MainMenuGUI::CreateCreditsScreen() {
 		m_MainMenuScreens.at(MenuScreen::CreditsScreen) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CreditsScreen"));
 		m_MainMenuScreens.at(MenuScreen::CreditsScreen)->Resize(m_MainMenuScreens.at(MenuScreen::CreditsScreen)->GetWidth(), g_FrameMan.GetResY());
+		m_MainMenuScreens.at(MenuScreen::CreditsScreen)->CenterInParent(true, false);
 
 		m_CreditsScrollPanel = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CreditsPanel"));
 		m_CreditsTextLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("CreditsLabel"));
+		m_CreditsScrollPanel->Resize(m_CreditsScrollPanel->GetWidth(), g_FrameMan.GetResY() - m_CreditsScrollPanel->GetYPos() - 50);
 
 		std::string creditsText = Reader("Credits.txt").WholeFileAsString();
 
@@ -158,10 +160,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::ShowMainScreen() {
-		if (m_RootBox->GetHeight() != m_RootBoxOriginalHeight) { m_RootBox->Resize(m_RootBox->GetWidth(), m_RootBoxOriginalHeight); }
 		m_VersionLabel->SetVisible(true);
 
-		m_MainMenuScreens.at(MenuScreen::MainScreen)->Resize(128, 196);
+		m_MainMenuScreens.at(MenuScreen::MainScreen)->Resize(300, 196);
 		m_MainMenuScreens.at(MenuScreen::MainScreen)->SetVisible(true);
 
 		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetVisible(false);
@@ -212,20 +213,16 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::ShowCreditsScreen() {
-		m_RootBox->Resize(m_RootBox->GetWidth(), g_FrameMan.GetResY() - m_RootBox->GetYPos() - 10);
-		m_VersionLabel->SetVisible(false);
-
 		m_MainMenuScreens.at(MenuScreen::CreditsScreen)->SetVisible(true);
 		m_MainMenuScreens.at(MenuScreen::CreditsScreen)->GUIPanel::AddChild(m_MainMenuButtons.at(MenuButton::BackToMainButton));
 
-		int scrollPanelHeight = m_RootBox->GetHeight() - m_CreditsScrollPanel->GetYPos() - 30;
-		if (m_CreditsScrollPanel->GetHeight() != scrollPanelHeight) { m_CreditsScrollPanel->Resize(m_CreditsScrollPanel->GetWidth(), scrollPanelHeight); }
-		m_CreditsScrollPanel->SetPositionRel(0, 0);
-		m_CreditsTextLabel->SetPositionRel(0, scrollPanelHeight);
-		m_CreditsScrollTimer.Reset();
-
 		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetVisible(true);
-		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetPositionAbs((g_FrameMan.GetResX() - m_MainMenuButtons.at(MenuButton::BackToMainButton)->GetWidth()) / 2, m_CreditsScrollPanel->GetYPos() + scrollPanelHeight + 10);
+		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetPositionAbs((g_FrameMan.GetResX() - m_MainMenuButtons.at(MenuButton::BackToMainButton)->GetWidth()) / 2, g_FrameMan.GetResY() - 35);
+
+		m_VersionLabel->SetVisible(false);
+
+		m_CreditsTextLabel->SetPositionRel(0, g_FrameMan.GetResY() - m_CreditsScrollPanel->GetYPos() - 50);
+		m_CreditsScrollTimer.Reset();
 
 		m_MenuScreenChange = false;
 	}
@@ -247,7 +244,7 @@ namespace RTE {
 	void MainMenuGUI::ShowAndBlinkResumeButton() {
 		if (!m_MainMenuButtons.at(MenuButton::ResumeButton)->GetVisible()) {
 			if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing)) {
-				m_MainMenuScreens.at(MenuScreen::MainScreen)->Resize(128, 220);
+				m_MainMenuScreens.at(MenuScreen::MainScreen)->Resize(300, 220);
 				m_MainMenuButtons.at(MenuButton::ResumeButton)->SetVisible(true);
 			}
 		} else {

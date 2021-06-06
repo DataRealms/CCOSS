@@ -124,6 +124,34 @@ namespace RTE {
 			/// </summary>
 			/// <returns>A pointer to the parent ClassInfo. 0 if this is a root class.</returns>
 			const ClassInfo * GetParent() const { return m_ParentInfo; }
+
+			/// <summary>
+			/// Gets whether or not this ClassInfo is the same as, or a parent of the ClassInfo corresponding to the given class name.
+			/// </summary>
+			/// <param name="classNameToCheck">The name of the class to check for.</param>
+			/// <returns>Whether or not this ClassInfo is the same as, or a parent of corresponding ClassInfo for the given class.</returns>
+			bool IsClassOrParentClassOf(const std::string &classNameToCheck) const { return GetClass(classNameToCheck)->IsClassOrChildClassOf(this); }
+
+			/// <summary>
+			/// Gets whether or not this ClassInfo is the same as, or a parent of the given ClassInfo.
+			/// </summary>
+			/// <param name="classNameToCheck">The name of the class to check for.</param>
+			/// <returns>Whether or not this ClassInfo is the same as, or a parent of the given ClassInfo.</returns>
+			bool IsClassOrParentClassOf(const ClassInfo *classInfoToCheck) const { return classInfoToCheck->IsClassOrChildClassOf(this); }
+
+			/// <summary>
+			/// Gets whether or not this ClassInfo is the same as, or a child of the ClassInfo corresponding to the given class name.
+			/// </summary>
+			/// <param name="classNameToCheck">The name of the class to check for.</param>
+			/// <returns>Whether or not this ClassInfo is the same as, or a child of corresponding ClassInfo for the given class.</returns>
+			bool IsClassOrChildClassOf(const std::string &classNameToCheck) const { return IsClassOrChildClassOf(GetClass(classNameToCheck)); }
+
+			/// <summary>
+			/// Gets whether or not this ClassInfo is the same as, or a child of the given ClassInfo.
+			/// </summary>
+			/// <param name="classNameToCheck">The name of the class to check for.</param>
+			/// <returns>Whether or not this ClassInfo is the same as, or a child of the given ClassInfo.</returns>
+			bool IsClassOrChildClassOf(const ClassInfo *classInfoToCheck) const;
 #pragma endregion
 
 #pragma region Memory Management

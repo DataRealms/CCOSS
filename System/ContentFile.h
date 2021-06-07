@@ -95,7 +95,7 @@ namespace RTE {
 		void SetDataPath(const std::string &newDataPath);
 
 		/// <summary>
-		/// Sets the DataPath combined with the file and line it's being created from. This is used in cases we can't get the file and line from Serializable::Create(&reader).
+		/// Sets the DataPath combined with the file and line it's being created from. This is used in cases we can't get the file and line from Serializable::Create(&amp;reader).
 		/// For example when creating a ContentFile for the sound during the readSound lambda in SoundContainer::ReadAndGetSound.
 		/// </summary>
 		/// <param name="newPosition">The file and line that are currently being read.</param>

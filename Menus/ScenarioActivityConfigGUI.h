@@ -77,6 +77,7 @@ namespace RTE {
 		int m_LockedCPUTeam = Activity::Teams::NoTeam; //!< Which team the CPU is locked to, if any.
 
 		Timer m_BlinkTimer; //!< Notification blink timer.
+		bool m_StartingGoldAdjustedManually; //!<
 
 		const GameActivity *m_SelectedActivity;
 		Scene *m_SelectedScene;
@@ -128,7 +129,7 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		void UpdateStartingGoldSlider();
+		void UpdateStartingGoldSliderAndLabel();
 
 		/// <summary>
 		/// Sets up and starts the currently selected Activity and settings.

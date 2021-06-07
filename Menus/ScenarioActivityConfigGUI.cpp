@@ -126,22 +126,9 @@ namespace RTE {
 	void ScenarioActivityConfigGUI::ResetActivityConfigBox() {
 		m_ActivityDifficultyLabel->SetText(" " + Activity::GetDifficultyString(m_ActivityDifficultySlider->GetValue()));
 
-		if (m_ActivityDifficultySlider->GetValue() < Activity::DifficultySetting::CakeDifficulty && m_SelectedActivity->GetDefaultGoldCake() > -1) {
-			m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldCake());
-		} else if (m_ActivityDifficultySlider->GetValue() < Activity::DifficultySetting::EasyDifficulty && m_SelectedActivity->GetDefaultGoldEasy() > -1) {
-			m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldEasy());
-		} else if (m_ActivityDifficultySlider->GetValue() < Activity::DifficultySetting::MediumDifficulty && m_SelectedActivity->GetDefaultGoldMedium() > -1) {
-			m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldMedium());
-		} else if (m_ActivityDifficultySlider->GetValue() < Activity::DifficultySetting::HardDifficulty && m_SelectedActivity->GetDefaultGoldHard() > -1) {
-			m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldHard());
-		} else if (m_ActivityDifficultySlider->GetValue() < Activity::DifficultySetting::NutsDifficulty && m_SelectedActivity->GetDefaultGoldNuts() > -1) {
-			m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldNuts());
-		} else if (m_SelectedActivity->GetDefaultGoldNuts() > -1) {
-			m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldNuts());
-		}
+		m_StartingGoldAdjustedManually = false;
 		m_StartingGoldSlider->SetEnabled(m_SelectedActivity->GetGoldSwitchEnabled());
-
-		UpdateStartingGoldSlider();
+		UpdateStartingGoldSliderAndLabel();
 
 		int defaultFogOfWar = m_SelectedActivity->GetDefaultFogOfWar();
 		if (defaultFogOfWar > -1) { m_FogOfWarCheckbox->SetCheck(defaultFogOfWar != 0); }
@@ -327,8 +314,23 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ScenarioActivityConfigGUI::UpdateStartingGoldSlider() {
-		std::string goldString(32, '\0');
+	void ScenarioActivityConfigGUI::UpdateStartingGoldSliderAndLabel() {
+		if (!m_StartingGoldAdjustedManually) {
+			if (m_ActivityDifficultySlider->GetValue() < Activity::DifficultySetting::CakeDifficulty && m_SelectedActivity->GetDefaultGoldCake() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldCake());
+			} else if (m_ActivityDifficultySlider->GetValue() < Activity::DifficultySetting::EasyDifficulty && m_SelectedActivity->GetDefaultGoldEasy() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldEasy());
+			} else if (m_ActivityDifficultySlider->GetValue() < Activity::DifficultySetting::MediumDifficulty && m_SelectedActivity->GetDefaultGoldMedium() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldMedium());
+			} else if (m_ActivityDifficultySlider->GetValue() < Activity::DifficultySetting::HardDifficulty && m_SelectedActivity->GetDefaultGoldHard() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldHard());
+			} else if (m_ActivityDifficultySlider->GetValue() < Activity::DifficultySetting::NutsDifficulty && m_SelectedActivity->GetDefaultGoldNuts() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldNuts());
+			} else if (m_SelectedActivity->GetDefaultGoldNuts() > -1) {
+				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldNuts());
+			}
+		}
+		std::string goldString(16, '\0');
 		if (m_StartingGoldSlider->GetValue() == m_StartingGoldSlider->GetMaximum()) {
 			std::snprintf(goldString.data(), goldString.size(), " %c Infinite", -58);
 		} else {
@@ -395,8 +397,10 @@ namespace RTE {
 			} else if (guiEvent.GetType() == GUIEvent::Notification) {
 				if (guiEvent.GetControl() == m_ActivityDifficultySlider) {
 					m_ActivityDifficultyLabel->SetText(" " + Activity::GetDifficultyString(m_ActivityDifficultySlider->GetValue()));
+					if (!m_StartingGoldAdjustedManually) { UpdateStartingGoldSliderAndLabel(); }
 				} else if (guiEvent.GetControl() == m_StartingGoldSlider) {
-					UpdateStartingGoldSlider();
+					if (m_StartingGoldSlider->HasFocus()) { m_StartingGoldAdjustedManually = true; }
+					UpdateStartingGoldSliderAndLabel();
 				}
 			}
 		}

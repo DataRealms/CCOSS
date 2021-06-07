@@ -373,6 +373,8 @@ namespace RTE {
 		int mousePosX;
 		int mousePosY;
 		m_GUIControlManager->GetManager()->GetInputController()->GetMousePosition(&mousePosX, &mousePosY);
+		m_GUIControlManager->Update();
+
 		if (!m_ActivityConfigBox->IsEnabled()) {
 			m_RootBox->SetVisible(true);
 			m_ActivityConfigBoxRootBox->SetVisible(false);
@@ -428,8 +430,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ScenarioGUI::HandleInputEvents(int mouseX, int mouseY) {
-		m_GUIControlManager->Update();
-
 		GUIEvent guiEvent;
 		while (m_GUIControlManager->GetEvent(&guiEvent)) {
 			if (guiEvent.GetType() == GUIEvent::Command) {

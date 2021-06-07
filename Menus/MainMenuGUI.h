@@ -106,7 +106,7 @@ namespace RTE {
 			ButtonCount
 		};
 
-		std::unique_ptr<GUIControlManager> m_MainMenuScreenGUIControlManager; //!< The GUIControlManager which owns all the GUIControls of the MainMenuGUI main screen.
+		std::unique_ptr<GUIControlManager> m_MainMenuScreenGUIControlManager; //!< The GUIControlManager which owns all the GUIControls of the MainMenuGUI main screen. Alternative to changing skins at runtime which is expensive, since the main screen now has a unique skin.
 		std::unique_ptr<GUIControlManager> m_SubMenuScreenGUIControlManager; //!< The GUIControlManager which owns all the GUIControls of the MainMenuGUI sub-menus.
 		GUIControlManager *m_ActiveGUIControlManager; //!< The GUIControlManager that is currently being updated and drawn to the screen.
 		GUICollectionBox *m_ActiveDialogBox; // The currently active GUICollectionBox in any of the main or sub-menu screens that acts as a dialog box and requires drawing an overlay.
@@ -121,6 +121,13 @@ namespace RTE {
 
 		std::unique_ptr<SettingsGUI> m_SettingsMenu; //!< The settings menu screen.
 		std::unique_ptr<ModManagerGUI> m_ModManagerMenu; //!< The mod manager menu screen.
+
+		// TODO: Rework this hacky garbage implementation when setting button font at runtime without loading a different skin is fixed. Would eliminate the need for a second GUIControlManager as well.
+		// Right now the way this works is the font graphic has different character visuals for uppercase and lowercase and the visual change happens by applying the appropriate case string when hovering/unhovering.
+		std::array<std::string, 9> m_MainScreenButtonHoveredText; //!< Array containing uppercase strings of the main screen buttons text that are used to display the larger font when a button is hovered over.
+		std::array<std::string, 9> m_MainScreenButtonUnhoveredText; //!< Array containing lowercase strings of the main menu screen buttons text that are used to display the smaller font when a button is not hovered over.
+		GUIButton *m_MainScreenHoveredButton; //!< The currently hovered main screen button.
+		int m_MainScreenPrevHoveredButtonIndex; //!< The index of the previously hovered main screen button in the main menu button array.
 
 		/// <summary>
 		/// GUI elements that compose the main menu screen.
@@ -209,6 +216,12 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Update Breakdown
+		/// <summary>
+		/// Updates the currently hovered main screen button text to give the hovered visual and updates the previously hovered button to remove the hovered visual.
+		/// </summary>
+		/// <param name="hoveredButton">Pointer to the currently hovered main screen button, if any. Acquired by GUIControlManager::GetControlUnderPoint.</param>
+		void UpdateMainScreenHoveredButton(const GUIButton *hoveredButton);
+
 		/// <summary>
 		/// Handles the player interaction with the MainMenuGUI GUI elements.
 		/// </summary>

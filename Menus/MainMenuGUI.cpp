@@ -39,6 +39,11 @@ namespace RTE {
 		m_CreditsScrollPanel = nullptr;
 		m_MainMenuScreens.fill(nullptr);
 		m_MainMenuButtons.fill(nullptr);
+
+		m_MainScreenButtonHoveredText.fill(std::string());
+		m_MainScreenButtonUnhoveredText.fill(std::string());
+		m_MainScreenHoveredButton = nullptr;
+		m_MainScreenPrevHoveredButtonIndex = 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -95,11 +100,11 @@ namespace RTE {
 			m_MainMenuButtons.at(mainScreenButton)->CenterInParent(true, false);
 			std::string buttonText = m_MainMenuButtons.at(mainScreenButton)->GetText();
 			std::transform(buttonText.begin(), buttonText.end(), buttonText.begin(), ::toupper);
-			m_MainScreenButtonUppercaseStrings.at(mainScreenButton) = buttonText;
+			m_MainScreenButtonHoveredText.at(mainScreenButton) = buttonText;
 			std::transform(buttonText.begin(), buttonText.end(), buttonText.begin(), ::tolower);
-			m_MainScreenButtonLowercaseStrings.at(mainScreenButton) = buttonText;
+			m_MainScreenButtonUnhoveredText.at(mainScreenButton) = buttonText;
 
-			m_MainMenuButtons.at(mainScreenButton)->SetText(m_MainScreenButtonLowercaseStrings.at(mainScreenButton));
+			m_MainMenuButtons.at(mainScreenButton)->SetText(m_MainScreenButtonUnhoveredText.at(mainScreenButton));
 		}
 
 		m_VersionLabel = dynamic_cast<GUILabel *>(m_MainMenuScreenGUIControlManager->GetControl("VersionLabel"));
@@ -276,16 +281,14 @@ namespace RTE {
 
 	void MainMenuGUI::ShowAndBlinkResumeButton() {
 		if (!m_MainMenuButtons.at(MenuButton::ResumeButton)->GetVisible()) {
+			m_ResumeButtonBlinkTimer.Reset();
 			if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing)) {
 				m_MainMenuScreens.at(MenuScreen::MainScreen)->Resize(300, 220);
 				m_MainMenuButtons.at(MenuButton::ResumeButton)->SetVisible(true);
 			}
 		} else {
-			if (m_ResumeButtonBlinkTimer.AlternateReal(500)) {
-				m_MainMenuButtons.at(MenuButton::ResumeButton)->SetFocus();
-			} else {
-				m_GUIControlManager->GetManager()->SetFocus(nullptr);
-			}
+			const std::string &buttonText = (m_MainScreenHoveredButton && m_MainScreenHoveredButton == m_MainMenuButtons.at(MenuButton::ResumeButton)) ? m_MainScreenButtonHoveredText.at(MenuButton::ResumeButton) : m_MainScreenButtonUnhoveredText.at(MenuButton::ResumeButton);
+			m_MainMenuButtons.at(MenuButton::ResumeButton)->SetText(m_ResumeButtonBlinkTimer.AlternateReal(500) ? buttonText : ">" + buttonText + "<");
 		}
 	}
 
@@ -317,8 +320,8 @@ namespace RTE {
 		switch (m_ActiveMenuScreen) {
 			case MenuScreen::MainScreen:
 				if (m_MenuScreenChange) { ShowMainScreen(); }
-				ShowAndBlinkResumeButton();
 				backToMainMenu = HandleInputEvents();
+				ShowAndBlinkResumeButton();
 				break;
 			case MenuScreen::CampaignNoticeScreen:
 				if (m_MenuScreenChange) { ShowCampaignNoticeScreen(); }
@@ -367,7 +370,31 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void MainMenuGUI::UpdateMainScreenHoveredButton(const GUIButton *hoveredButton) {
+		int hoveredButtonIndex = -1;
+		if (hoveredButton) {
+			hoveredButtonIndex = std::distance(m_MainMenuButtons.begin(), std::find(m_MainMenuButtons.begin(), m_MainMenuButtons.begin() + 8, hoveredButton));
+			if (hoveredButton != m_MainScreenHoveredButton) { m_MainMenuButtons.at(hoveredButtonIndex)->SetText(m_MainScreenButtonHoveredText.at(hoveredButtonIndex)); }
+			m_MainScreenHoveredButton = m_MainMenuButtons.at(hoveredButtonIndex);
+		}
+		if (!hoveredButton || hoveredButtonIndex != m_MainScreenPrevHoveredButtonIndex) { m_MainMenuButtons.at(m_MainScreenPrevHoveredButtonIndex)->SetText(m_MainScreenButtonUnhoveredText.at(m_MainScreenPrevHoveredButtonIndex)); }
+
+		if (hoveredButtonIndex >= 0) {
+			m_MainScreenPrevHoveredButtonIndex = hoveredButtonIndex;
+		} else {
+			m_MainScreenHoveredButton = nullptr;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool MainMenuGUI::HandleInputEvents() {
+		if (m_ActiveMenuScreen == MenuScreen::MainScreen) {
+			int mouseX = 0;
+			int mouseY = 0;
+			m_ActiveGUIControlManager->GetManager()->GetInputController()->GetMousePosition(&mouseX, &mouseY);
+			UpdateMainScreenHoveredButton(dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControlUnderPoint(mouseX, mouseY, m_MainMenuScreens.at(MenuScreen::MainScreen), 1)));
+		}
 		m_ActiveGUIControlManager->Update();
 
 		GUIEvent guiEvent;
@@ -392,9 +419,7 @@ namespace RTE {
 					default:
 						break;
 				}
-			} else if (guiEvent.GetType() == GUIEvent::Notification && (guiEvent.GetMsg() == GUIButton::Focused && dynamic_cast<GUIButton *>(guiEvent.GetControl()))) {
-				g_GUISound.SelectionChangeSound()->Play();
-			}
+			} else if (guiEvent.GetType() == GUIEvent::Notification && (guiEvent.GetMsg() == GUIButton::Focused && dynamic_cast<GUIButton *>(guiEvent.GetControl()))) { g_GUISound.SelectionChangeSound()->Play(); }
 		}
 		return false;
 	}
@@ -483,6 +508,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::Draw() {
+		// Early return to avoid single frame flicker when title screen goes into transition from the meta notice screen to meta config screen.
+		if (m_UpdateResult == MainMenuUpdateResult::CampaignStarted) {
+			return;
+		}
 		switch (m_ActiveMenuScreen) {
 			case MenuScreen::SettingsScreen:
 				m_SettingsMenu->Draw();

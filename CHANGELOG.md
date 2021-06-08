@@ -108,9 +108,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The Lua console (and all text boxes) now support using `Ctrl` to move the cursor around and select or delete text.
 
-- Added `mosRotating:RemoveAttachable(attachableOrUniqueID, addToMovableMan, addBreakWounds)` method that allows you to remove an `Attachable` and specify whether it should be added to `MovableMan` or not, and whether breakwounds should be added (if defined) to the `Attachable` and parent `MOSRotating`.
+- Added `mosRotating:RemoveAttachable(attachableOrUniqueID, addToMovableMan, addBreakWounds)` method that allows you to remove an `Attachable` and specify whether it should be added to `MovableMan` or not, and whether breakwounds should be added (if defined) to the `Attachable` and parent `MOSRotating`. This method returns the removed `Attachable`, see the `Changed` section for important details on that.
 
-- Added `attachable:RemoveFromParent()` and `attachable:RemoveFromParent(addToMovableMan, addBreakWounds)` that allow you to remove `Attachables` from their parents without having to use `GetParent` first.
+- Added `mosRotating:RemoveEmitter(attachableOrUniqueID, addToMovableMan, addBreakWounds)` method that is identical to the `RemoveAttachable` function mentioned above.  
+
+- Added `attachable:RemoveFromParent()` and `attachable:RemoveFromParent(addToMovableMan, addBreakWounds)` that allow you to remove `Attachables` from their parents without having to use `GetParent` first. Their return value is the same as `RemoveAttachable` above.
 
 - Added `Settings.ini` debug properties to allow modders to turn on some potentially useful information visualizations.  
 	`DrawAtomGroupVisualizations` - any `MOSRotating` will draw its `AtomGroup` to the standard view.  
@@ -214,6 +216,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `AEmitter`s will now obey `SpriteAnimMode` set in Lua while they're emitting. When they stop emitting this will reset to `NOANIM`.
 
 - `Attachable` Lua method `IsDrawnAfterParent` has been changed to the property `DrawnAfterParent`, and is now R/W.
+
+- All `mosRotating:RemoveAttachable`, `mosRotating:RemoveEmitter` and `attachable:RemoveFromParent` functions will return the removed `Attachable` if it hasn't been added to `MovableMan`, or nil if it has. If the `Attachable` is returned, it will belong to Lua like it would if it were newly Created. You could then, for example, add it to MovableMan or to an inventory.
 
 ### Fixed
 

@@ -475,17 +475,17 @@ void AddParticle(MovableMan &This, MovableObject *pParticle)
 double NormalRand() { return RandomNormalNum<double>(); }
 double PosRand() { return RandomNum<double>(); }
 
-bool RemoveAttachableFromParentLuaSafe1(Attachable *luaSelfObject) {
+Attachable * RemoveAttachableFromParentLuaSafe1(Attachable *luaSelfObject) {
     if (luaSelfObject->IsAttached()) {
-        return luaSelfObject->GetParent()->RemoveAttachable(luaSelfObject, false, false);
+        return luaSelfObject->GetParent()->RemoveAttachable(luaSelfObject);
     }
-    return false;
+    return luaSelfObject;
 }
-bool RemoveAttachableFromParentLuaSafe2(Attachable *luaSelfObject, bool addToMovableMan, bool addBreakWounds) {
+Attachable * RemoveAttachableFromParentLuaSafe2(Attachable *luaSelfObject, bool addToMovableMan, bool addBreakWounds) {
     if (luaSelfObject->IsAttached()) {
         return luaSelfObject->GetParent()->RemoveAttachable(luaSelfObject, addToMovableMan, addBreakWounds);
     }
-    return false;
+    return luaSelfObject;
 }
 
 void TurretAddMountedFirearm(Turret *luaSelfObject, HDFirearm *newMountedDevice) {
@@ -940,24 +940,24 @@ int LuaMan::Initialize() {
             .def("ObjectValueExists", &MOSRotating::ObjectValueExists)
             .def("AddAttachable", (void (MOSRotating::*)(Attachable *attachableToAdd))&MOSRotating::AddAttachable, adopt(_2))
             .def("AddAttachable", (void (MOSRotating::*)(Attachable *attachableToAdd, const Vector &parentOffset))&MOSRotating::AddAttachable, adopt(_2))
-            .def("RemoveAttachable", (bool (MOSRotating:: *)(long uniqueIDOfAttachableToRemove)) &MOSRotating::RemoveAttachable)
-            .def("RemoveAttachable", (bool (MOSRotating:: *)(long uniqueIDOfAttachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable)
-            .def("RemoveAttachable", (bool (MOSRotating::*)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable)
-            .def("RemoveAttachable", (bool (MOSRotating:: *)(Attachable *attachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable)
+            .def("RemoveAttachable", (Attachable *(MOSRotating:: *)(long uniqueIDOfAttachableToRemove)) &MOSRotating::RemoveAttachable, adopt(return_value))
+            .def("RemoveAttachable", (Attachable *(MOSRotating:: *)(long uniqueIDOfAttachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable, adopt(return_value))
+            .def("RemoveAttachable", (Attachable *(MOSRotating:: *)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable, adopt(return_value))
+            .def("RemoveAttachable", (Attachable *(MOSRotating:: *)(Attachable *attachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable)
 			.def("AddEmitter", (void (MOSRotating::*)(Attachable *attachableToAdd))&MOSRotating::AddAttachable, adopt(_2))
 			.def("AddEmitter", (void (MOSRotating::*)(Attachable *attachableToAdd, const Vector &parentOffset))&MOSRotating::AddAttachable, adopt(_2))
-            .def("RemoveEmitter", (bool (MOSRotating:: *)(long uniqueIDOfAttachableToRemove)) &MOSRotating::RemoveAttachable)
-            .def("RemoveEmitter", (bool (MOSRotating:: *)(long uniqueIDOfAttachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable)
-            .def("RemoveEmitter", (bool (MOSRotating:: *)(Attachable *attachableToRemove)) &MOSRotating::RemoveAttachable)
-            .def("RemoveEmitter", (bool (MOSRotating:: *)(Attachable *attachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable)
+            .def("RemoveEmitter", (Attachable *(MOSRotating:: *)(long uniqueIDOfAttachableToRemove)) &MOSRotating::RemoveAttachable, adopt(return_value))
+            .def("RemoveEmitter", (Attachable *(MOSRotating:: *)(long uniqueIDOfAttachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable, adopt(return_value))
+            .def("RemoveEmitter", (Attachable *(MOSRotating:: *)(Attachable *attachableToRemove)) &MOSRotating::RemoveAttachable, adopt(return_value))
+            .def("RemoveEmitter", (Attachable *(MOSRotating:: *)(Attachable *attachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable, adopt(return_value))
 			.def_readonly("Attachables", &MOSRotating::m_Attachables, return_stl_iterator)
 			.def_readonly("Wounds", &MOSRotating::m_Wounds, return_stl_iterator),
 
         CONCRETELUABINDING(Attachable, MOSRotating)
             .def("IsAttached", &Attachable::IsAttached)
             .def("IsAttachedTo", &Attachable::IsAttachedTo)
-            .def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe1)
-            .def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe2)
+            .def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe1, adopt(return_value))
+            .def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe2, adopt(return_value))
 			.property("ParentOffset", &Attachable::GetParentOffset, &Attachable::SetParentOffset)
             .property("DrawnAfterParent", &Attachable::IsDrawnAfterParent, &Attachable::SetDrawnAfterParent)
             .property("JointStrength", &Attachable::GetJointStrength, &Attachable::SetJointStrength)

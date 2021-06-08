@@ -523,7 +523,7 @@ void AEmitter::Update()
 					emitVel.RadRotate(m_EmitAngle.GetRadAngle() + spread * RandomNormalNum());
                     emitVel = RotateOffset(emitVel);
                     pParticle->SetVel(parentVel + emitVel);
-					pParticle->SetRotAngle(emitVel.GetAbsRadAngle() + (m_HFlipped ? c_PI * GetFlipFactor() : 0));
+					pParticle->SetRotAngle(emitVel.GetAbsRadAngle() + (m_HFlipped ? -c_PI : 0));
 					pParticle->SetHFlipped(m_HFlipped);
 
                     if (pParticle->GetLifetime() != 0)

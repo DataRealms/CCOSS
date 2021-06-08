@@ -447,7 +447,7 @@ void Arm::UpdateArmFrame() {
 void Arm::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     Attachable::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-    if (!onlyPhysical && (mode == g_DrawColor || mode == g_DrawWhite || mode == g_DrawTrans) && (m_pHeldMO || !m_DidReach) && m_Parent) {
+    if (!onlyPhysical && (mode == g_DrawColor || mode == g_DrawWhite || mode == g_DrawTrans) && (m_pHeldMO || !m_DidReach)) {
         DrawHand(pTargetBitmap, targetPos, mode);
         if (m_pHeldMO && m_pHeldMO->IsDrawnAfterParent()) { m_pHeldMO->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
     }

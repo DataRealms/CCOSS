@@ -1634,6 +1634,7 @@ void Actor::Draw(BITMAP *pTargetBitmap,
 
 void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled)
 {
+	// This should indeed be a local var and not alter a member one in a draw func! Can cause nasty jittering etc if multiple sim updates are done without a drawing in between etc
     m_HUDStack = -m_CharHeight / 2;
 
     if (!m_HUDVisible)
@@ -1656,7 +1657,6 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
     GUIFont *pSymbolFont = g_FrameMan.GetLargeFont();
     GUIFont *pSmallFont = g_FrameMan.GetSmallFont();
-    // This should indeed be a local var and not alter a member one in a draw func! Can cause nasty jittering etc if multiple sim updates are done without a drawing in between etc
     Vector drawPos = m_Pos - targetPos;
     Vector cpuPos = GetCPUPos() - targetPos;
 

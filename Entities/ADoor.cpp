@@ -41,6 +41,9 @@ namespace RTE {
 		m_DoorMoveSound = nullptr;
 		m_DoorDirectionChangeSound = nullptr;
 		m_DoorMoveEndSound = nullptr;
+
+		// NOTE: This special override of a parent class member variable avoids needing an extra variable to avoid overwriting INI values.
+		m_CanBeSquished = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

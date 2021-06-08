@@ -435,10 +435,8 @@ void Arm::UpdateCurrentHandOffset() {
 void Arm::UpdateArmFrame() {
     if (IsAttached()) {
         float halfMax = m_MaxLength / 2.0F;
-        //TODO this should be replaced with floor I think. If I remember right, casting float to int always rounds to 0, which should function the same but is harder to remember than clearly flooring it.
-        int newFrame = static_cast<int>(((m_HandOffset.GetMagnitude() - halfMax) / halfMax) * static_cast<float>(m_FrameCount));
-        RTEAssert(newFrame <= m_FrameCount, "Arm frame is out of bounds for " + GetClassName() + ": " + GetPresetName() + ".");
-        m_Frame = std::clamp(static_cast<unsigned int>(newFrame), 0U, m_FrameCount - 1);
+        unsigned int newFrame = static_cast<unsigned int>(std::floor(((m_HandOffset.GetMagnitude() - halfMax) / halfMax) * static_cast<float>(m_FrameCount)));
+        m_Frame = std::clamp(newFrame, 0U, m_FrameCount - 1);
     }
 }
 

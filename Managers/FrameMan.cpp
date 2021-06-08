@@ -55,8 +55,8 @@ namespace RTE {
 		m_PrimaryScreenResY = GetSystemMetrics(SM_CYSCREEN);
 #elif __unix__
 		m_NumScreens = 1;
-		m_ScreenResX = m_PrimaryScreenResX = DisplayWidth(_xwin.display, _xwin.screen);
-		m_ScreenResY = m_PrimaryScreenResY = DisplayHeight(_xwin.display, _xwin.screen);
+		m_MaxResX = m_PrimaryScreenResX = DisplayWidth(_xwin.display, _xwin.screen);
+		m_MaxResY = m_PrimaryScreenResY = DisplayHeight(_xwin.display, _xwin.screen);
 #endif
 		m_ResX = c_DefaultResX;
 		m_ResY = c_DefaultResY;

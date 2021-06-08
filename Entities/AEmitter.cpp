@@ -362,13 +362,13 @@ float AEmitter::EstimateImpulse(bool burst)
 
 void AEmitter::SetFlash(Attachable *newFlash) {
     if (newFlash == nullptr) {
-        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
+        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAndDeleteAttachable(m_pFlash); }
         m_pFlash = nullptr;
     } else {
         // Note - this is done here because setting mass on attached Attachables causes values to be updated on the parent (and its parent, and so on), which isn't ideal. Better to do it before the new flash is attached, so there are fewer calculations.
         newFlash->SetMass(0.0F);
 
-        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
+        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAndDeleteAttachable(m_pFlash); }
         m_pFlash = newFlash;
         AddAttachable(newFlash);
 

@@ -755,10 +755,10 @@ void ACDropShip::Update()
 
 void ACDropShip::SetRightThruster(AEmitter *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pRThruster && m_pRThruster->IsAttached()) { RemoveAttachable(m_pRThruster); }
+        if (m_pRThruster && m_pRThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pRThruster); }
         m_pRThruster = nullptr;
     } else {
-        if (m_pRThruster && m_pRThruster->IsAttached()) { RemoveAttachable(m_pRThruster); }
+        if (m_pRThruster && m_pRThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pRThruster); }
         m_pRThruster = newThruster;
         AddAttachable(newThruster);
 
@@ -777,10 +777,10 @@ void ACDropShip::SetRightThruster(AEmitter *newThruster) {
 
 void ACDropShip::SetLeftThruster(AEmitter *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pLThruster && m_pLThruster->IsAttached()) { RemoveAttachable(m_pLThruster); }
+        if (m_pLThruster && m_pLThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pLThruster); }
         m_pLThruster = nullptr;
     } else {
-        if (m_pLThruster && m_pLThruster->IsAttached()) { RemoveAttachable(m_pLThruster); }
+        if (m_pLThruster && m_pLThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pLThruster); }
         m_pLThruster = newThruster;
         AddAttachable(newThruster);
 
@@ -799,10 +799,10 @@ void ACDropShip::SetLeftThruster(AEmitter *newThruster) {
 
 void ACDropShip::SetURightThruster(AEmitter *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pURThruster && m_pURThruster->IsAttached()) { RemoveAttachable(m_pURThruster); }
+        if (m_pURThruster && m_pURThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pURThruster); }
         m_pURThruster = nullptr;
     } else {
-        if (m_pURThruster && m_pURThruster->IsAttached()) { RemoveAttachable(m_pURThruster); }
+        if (m_pURThruster && m_pURThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pURThruster); }
         m_pURThruster = newThruster;
         AddAttachable(newThruster);
 
@@ -820,10 +820,10 @@ void ACDropShip::SetURightThruster(AEmitter *newThruster) {
 
 void ACDropShip::SetULeftThruster(AEmitter *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pULThruster && m_pULThruster->IsAttached()) { RemoveAttachable(m_pULThruster); }
+        if (m_pULThruster && m_pULThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pULThruster); }
         m_pULThruster = nullptr;
     } else {
-        if (m_pULThruster && m_pULThruster->IsAttached()) { RemoveAttachable(m_pULThruster); }
+        if (m_pULThruster && m_pULThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pULThruster); }
         m_pULThruster = newThruster;
         AddAttachable(newThruster);
 
@@ -841,10 +841,10 @@ void ACDropShip::SetULeftThruster(AEmitter *newThruster) {
 
 void ACDropShip::SetRightHatch(Attachable *newHatch) {
     if (newHatch == nullptr) {
-        if (m_pRHatch && m_pRHatch->IsAttached()) { RemoveAttachable(m_pRHatch); }
+        if (m_pRHatch && m_pRHatch->IsAttached()) { RemoveAndDeleteAttachable(m_pRHatch); }
         m_pRHatch = nullptr;
     } else {
-        if (m_pRHatch && m_pRHatch->IsAttached()) { RemoveAttachable(m_pRHatch); }
+        if (m_pRHatch && m_pRHatch->IsAttached()) { RemoveAndDeleteAttachable(m_pRHatch); }
         m_pRHatch = newHatch;
         AddAttachable(newHatch);
 
@@ -861,10 +861,10 @@ void ACDropShip::SetRightHatch(Attachable *newHatch) {
 
 void ACDropShip::SetLeftHatch(Attachable *newHatch) {
     if (newHatch == nullptr) {
-        if (m_pLHatch && m_pLHatch->IsAttached()) { RemoveAttachable(m_pLHatch); }
+        if (m_pLHatch && m_pLHatch->IsAttached()) { RemoveAndDeleteAttachable(m_pLHatch); }
         m_pLHatch = nullptr;
     } else {
-        if (m_pLHatch && m_pLHatch->IsAttached()) { RemoveAttachable(m_pLHatch); }
+        if (m_pLHatch && m_pLHatch->IsAttached()) { RemoveAndDeleteAttachable(m_pLHatch); }
         m_pLHatch = newHatch;
         AddAttachable(newHatch);
 

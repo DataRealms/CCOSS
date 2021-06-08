@@ -125,10 +125,10 @@ namespace RTE {
 
 	void Leg::SetFoot(Attachable *newFoot) {
 		if (newFoot == nullptr) {
-			if (m_Foot && m_Foot->IsAttached()) { RemoveAttachable(m_Foot); }
+			if (m_Foot && m_Foot->IsAttached()) { RemoveAndDeleteAttachable(m_Foot); }
 			m_Foot = nullptr;
 		} else {
-			if (m_Foot && m_Foot->IsAttached()) { RemoveAttachable(m_Foot); }
+			if (m_Foot && m_Foot->IsAttached()) { RemoveAndDeleteAttachable(m_Foot); }
 			m_Foot = newFoot;
 			AddAttachable(newFoot);
 

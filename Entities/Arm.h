@@ -205,7 +205,7 @@ ClassInfoGetters
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Replaces the MovableObject currently held by this Arm with a new
 //                  one. Ownership IS transferred. The currently held MovableObject
-//                  (if there is one) will be dropped and become a detached MovableObject,
+//                  (if there is one) will be deleted.
 // Arguments:       A pointer to the new MovableObject to hold. Ownership IS transferred.
 // Return value:    None.
 

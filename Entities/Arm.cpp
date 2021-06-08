@@ -197,17 +197,17 @@ HeldDevice * Arm::GetHeldDevice() const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Replaces the MovableObject currently held by this Arm with a new
 //                  one. Ownership IS transferred. The currently held MovableObject
-//                  (if there is one) will be dropped and become a detached MovableObject,
+//                  (if there is one) will be deleted.
 
 void Arm::SetHeldMO(MovableObject *newHeldMO) {
     if (newHeldMO == nullptr) {
         Attachable *heldMOAsAttachable = dynamic_cast<Attachable *>(m_pHeldMO);
-        if (heldMOAsAttachable && heldMOAsAttachable->IsAttached()) { RemoveAttachable(heldMOAsAttachable); }
+        if (heldMOAsAttachable && heldMOAsAttachable->IsAttached()) { RemoveAndDeleteAttachable(heldMOAsAttachable); }
         m_pHeldMO = nullptr;
     } else {
         //TODO All this needs cleaning up, this should do the basics, some other method should be responsible for replacing held things
         if (m_pHeldMO && m_pHeldMO->IsHeldDevice() && dynamic_cast<HeldDevice *>(m_pHeldMO)->IsAttached()) {
-            RemoveAttachable(dynamic_cast<HeldDevice *>(m_pHeldMO), true, false);
+            RemoveAndDeleteAttachable(dynamic_cast<HeldDevice *>(m_pHeldMO));
             m_pHeldMO = nullptr;
         }
 

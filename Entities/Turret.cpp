@@ -68,10 +68,10 @@ namespace RTE {
 		if (newMountedDevice == nullptr) {
 			if (HasMountedDevice()) {
 				HeldDevice *removedDevice = m_MountedDevices.at(0).get();
-				RemoveAttachable(m_MountedDevices.at(0).get());
+				RemoveAndDeleteAttachable(m_MountedDevices.at(0).get());
 			}
 		} else {
-			if (HasMountedDevice()) { RemoveAttachable(m_MountedDevices.at(0).get()); }
+			if (HasMountedDevice()) { RemoveAndDeleteAttachable(m_MountedDevices.at(0).get()); }
 			m_MountedDevices.emplace(m_MountedDevices.begin(), std::unique_ptr<HeldDevice>(newMountedDevice));
 			AddAttachable(newMountedDevice);
 

@@ -813,10 +813,10 @@ void ACRocket::Update()
 
 void ACRocket::SetRightLeg(Leg *newLeg) {
     if (newLeg == nullptr) {
-        if (m_pRLeg && m_pRLeg->IsAttached()) { RemoveAttachable(m_pRLeg); }
+        if (m_pRLeg && m_pRLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pRLeg); }
         m_pRLeg = nullptr;
     } else {
-        if (m_pRLeg && m_pRLeg->IsAttached()) { RemoveAttachable(m_pRLeg); }
+        if (m_pRLeg && m_pRLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pRLeg); }
         m_pRLeg = newLeg;
         AddAttachable(newLeg);
 
@@ -834,10 +834,10 @@ void ACRocket::SetRightLeg(Leg *newLeg) {
 
 void ACRocket::SetLeftLeg(Leg *newLeg) {
     if (newLeg == nullptr) {
-        if (m_pLLeg && m_pLLeg->IsAttached()) { RemoveAttachable(m_pLLeg); }
+        if (m_pLLeg && m_pLLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pLLeg); }
         m_pLLeg = nullptr;
     } else {
-        if (m_pLLeg && m_pLLeg->IsAttached()) { RemoveAttachable(m_pLLeg); }
+        if (m_pLLeg && m_pLLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pLLeg); }
         m_pLLeg = newLeg;
         AddAttachable(newLeg);
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
@@ -855,10 +855,10 @@ void ACRocket::SetLeftLeg(Leg *newLeg) {
 
 void ACRocket::SetMainThruster(AEmitter *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pMThruster && m_pMThruster->IsAttached()) { RemoveAttachable(m_pMThruster); }
+        if (m_pMThruster && m_pMThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pMThruster); }
         m_pMThruster = nullptr;
     } else {
-        if (m_pMThruster && m_pMThruster->IsAttached()) { RemoveAttachable(m_pMThruster); }
+        if (m_pMThruster && m_pMThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pMThruster); }
         m_pMThruster = newThruster;
         AddAttachable(newThruster);
 
@@ -877,10 +877,10 @@ void ACRocket::SetMainThruster(AEmitter *newThruster) {
 
 void ACRocket::SetRightThruster(AEmitter *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pRThruster && m_pRThruster->IsAttached()) { RemoveAttachable(m_pRThruster); }
+        if (m_pRThruster && m_pRThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pRThruster); }
         m_pRThruster = nullptr;
     } else {
-        if (m_pRThruster && m_pRThruster->IsAttached()) { RemoveAttachable(m_pRThruster); }
+        if (m_pRThruster && m_pRThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pRThruster); }
         m_pRThruster = newThruster;
         AddAttachable(newThruster);
 
@@ -899,10 +899,10 @@ void ACRocket::SetRightThruster(AEmitter *newThruster) {
 
 void ACRocket::SetLeftThruster(AEmitter *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pLThruster && m_pLThruster->IsAttached()) { RemoveAttachable(m_pLThruster); }
+        if (m_pLThruster && m_pLThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pLThruster); }
         m_pLThruster = nullptr;
     } else {
-        if (m_pLThruster && m_pLThruster->IsAttached()) { RemoveAttachable(m_pLThruster); }
+        if (m_pLThruster && m_pLThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pLThruster); }
         m_pLThruster = newThruster;
         AddAttachable(newThruster);
         
@@ -921,10 +921,10 @@ void ACRocket::SetLeftThruster(AEmitter *newThruster) {
 
 void ACRocket::SetURightThruster(AEmitter *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pURThruster && m_pURThruster->IsAttached()) { RemoveAttachable(m_pURThruster); }
+        if (m_pURThruster && m_pURThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pURThruster); }
         m_pURThruster = nullptr;
     } else {
-        if (m_pURThruster && m_pURThruster->IsAttached()) { RemoveAttachable(m_pURThruster); }
+        if (m_pURThruster && m_pURThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pURThruster); }
         m_pURThruster = newThruster;
         AddAttachable(newThruster);
 
@@ -943,10 +943,10 @@ void ACRocket::SetURightThruster(AEmitter *newThruster) {
 
 void ACRocket::SetULeftThruster(AEmitter *newThruster) {
     if (newThruster == nullptr) {
-        if (m_pULThruster && m_pULThruster->IsAttached()) { RemoveAttachable(m_pULThruster); }
+        if (m_pULThruster && m_pULThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pULThruster); }
         m_pULThruster = nullptr;
     } else {
-        if (m_pULThruster && m_pULThruster->IsAttached()) { RemoveAttachable(m_pULThruster); }
+        if (m_pULThruster && m_pULThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pULThruster); }
         m_pULThruster = newThruster;
         AddAttachable(newThruster);
 

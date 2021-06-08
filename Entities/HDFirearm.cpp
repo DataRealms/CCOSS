@@ -341,10 +341,10 @@ void HDFirearm::Destroy(bool notInherited)
 
 void HDFirearm::SetMagazine(Magazine *newMagazine) {
     if (newMagazine == nullptr) {
-        if (m_pMagazine && m_pMagazine->IsAttached()) { RemoveAttachable(m_pMagazine); }
+        if (m_pMagazine && m_pMagazine->IsAttached()) { RemoveAndDeleteAttachable(m_pMagazine); }
         m_pMagazine = nullptr;
     } else {
-        if (m_pMagazine && m_pMagazine->IsAttached()) { RemoveAttachable(m_pMagazine); }
+        if (m_pMagazine && m_pMagazine->IsAttached()) { RemoveAndDeleteAttachable(m_pMagazine); }
         m_pMagazine = newMagazine;
         AddAttachable(newMagazine);
 
@@ -363,13 +363,13 @@ void HDFirearm::SetMagazine(Magazine *newMagazine) {
 
 void HDFirearm::SetFlash(Attachable *newFlash) {
     if (newFlash == nullptr) {
-        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
+        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAndDeleteAttachable(m_pFlash); }
         m_pFlash = nullptr;
     } else {
         // Note - this is done here because setting mass on attached Attachables causes values to be updated on the parent (and its parent, and so on), which isn't ideal. Better to do it before the new flash is attached, so there are fewer calculations.
         newFlash->SetMass(0.0F);
 
-        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
+        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAndDeleteAttachable(m_pFlash); }
 		m_pFlash = newFlash;
         AddAttachable(newFlash);
 
@@ -825,7 +825,7 @@ void HDFirearm::Update()
                     // F = m * a
                     totalFireForce += pParticle->GetMass() * pParticle->GetVel().GetMagnitude();
 
-                    // Detach if it's an attachable
+                    // Remove from parent if it's an attachable
                     Attachable *pAttachable = dynamic_cast<Attachable *>(pParticle);
                     if (pAttachable)
                     {

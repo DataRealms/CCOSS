@@ -439,13 +439,12 @@ ClassInfoGetters
     /// <param name="parentOffsetToSet">The Vector to set as the Attachable's parent offset.</param>
 	virtual void AddAttachable(Attachable *attachable, const Vector &parentOffsetToSet);
 
-    //TODO All RemoveAttachable methods should return the removed attachable (if it's not deleted) so there's no potential memory leaks or other safety problems. Very little cares about whether this actually succeeded or failed anyway, so returning a boolean here is kind of pointless. This should probably be done as part of Arm cleanup. Also, worth noting, dinosaurs are/were neat.
     /// <summary>
     /// Removes the Attachable corresponding to the passed in UniqueID and sets its parent to nullptr. Does not add it to MovableMan or add break wounds.
     /// </summary>
     /// <param name="attachableUniqueID">The UniqueID of the Attachable to remove.</param>
-    /// <returns>False if the Attachable is invalid, otherwise true.</returns>
-    virtual bool RemoveAttachable(long attachableUniqueID) { return RemoveAttachable(attachableUniqueID, false, false); }
+    /// <returns>A pointer to the removed Attachable. Ownership IS transferred!</returns>
+    virtual Attachable * RemoveAttachable(long attachableUniqueID) { return RemoveAttachable(attachableUniqueID, false, false); }
 
     /// <summary>
     /// Removes the Attachable corresponding to the passed in UniqueID and sets its parent to nullptr. Optionally adds it to MovableMan and/or adds break wounds.
@@ -454,15 +453,15 @@ ClassInfoGetters
     /// <param name="attachableUniqueID">The UniqueID of the Attachable to remove.</param>
     /// <param name="addToMovableMan">Whether or not to add the Attachable to MovableMan once it has been removed.</param>
     /// <param name="addBreakWounds">Whether or not to add break wounds to the removed Attachable and this MOSRotating.</param>
-    /// <returns>False if the Attachable is invalid, otherwise true.</returns>
-    virtual bool RemoveAttachable(long attachableUniqueID, bool addToMovableMan, bool addBreakWounds);
+    /// <returns>A pointer to the removed Attachable, if it wasn't added to MovableMan or nullptr if it was. Ownership IS transferred!</returns>
+    virtual Attachable * RemoveAttachable(long attachableUniqueID, bool addToMovableMan, bool addBreakWounds);
 
     /// <summary>
     /// Removes the passed in Attachable and sets its parent to nullptr. Does not add it to MovableMan or add break wounds.
     /// </summary>
     /// <param name="attachable">The Attachable to remove.</param>
-    /// <returns>False if the Attachable is invalid, otherwise true.</returns>
-    virtual bool RemoveAttachable(Attachable *attachable) { return RemoveAttachable(attachable, false, false); }
+    /// <returns>A pointer to the removed Attachable. Ownership IS transferred!</returns>
+    virtual Attachable * RemoveAttachable(Attachable *attachable) { return RemoveAttachable(attachable, false, false); }
 
     /// <summary>
     /// Removes the passed in Attachable and sets its parent to nullptr. Optionally adds it to MovableMan and/or adds break wounds.
@@ -471,8 +470,14 @@ ClassInfoGetters
     /// <param name="attachable">The Attachable to remove.</param>
     /// <param name="addToMovableMan">Whether or not to add the Attachable to MovableMan once it has been removed.</param>
     /// <param name="addBreakWounds">Whether or not to add break wounds to the removed Attachable and this MOSRotating.</param>
-    /// <returns>False if the Attachable is invalid, otherwise true.</returns>
-    virtual bool RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds);
+    /// <returns>A pointer to the removed Attachable, if it wasn't added to MovableMan or nullptr if it was. Ownership IS transferred!</returns>
+    virtual Attachable * RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds);
+
+    /// <summary>
+    /// Removes the passed in Attachable, and sets it to delete so it will go straight to MovableMan and be handled there.
+    /// </summary>
+    /// <param name="attachable">The Attacahble to remove and delete.</param>
+    void RemoveAndDeleteAttachable(Attachable *attachable);
 
     /// <summary>
     /// Either removes or deletes all of this MOSRotating's Attachables.

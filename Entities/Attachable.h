@@ -456,8 +456,8 @@ namespace RTE {
 		/// Removes the Attachable corresponding to the passed in UniqueID and sets its parent to nullptr. Does not add it to MovableMan or add break wounds.
 		/// </summary>
 		/// <param name="attachableUniqueID">The UniqueID of the Attachable to remove.</param>
-		/// <returns>False if the Attachable is invalid, otherwise true.</returns>
-		bool RemoveAttachable(long attachableUniqueID) final { return MOSRotating::RemoveAttachable(attachableUniqueID); }
+		/// <returns>A pointer to the removed Attachable. Ownership IS transferred!</returns>
+		Attachable * RemoveAttachable(long attachableUniqueID) final { return MOSRotating::RemoveAttachable(attachableUniqueID); }
 
 		/// <summary>
 		/// Removes the Attachable corresponding to the passed in UniqueID and sets its parent to nullptr. Optionally adds it to MovableMan and/or adds break wounds.
@@ -466,15 +466,15 @@ namespace RTE {
 		/// <param name="attachableUniqueID">The UniqueID of the Attachable to remove.</param>
 		/// <param name="addToMovableMan">Whether or not to add the Attachable to MovableMan once it has been removed.</param>
 		/// <param name="addBreakWounds">Whether or not to add break wounds to the removed Attachable and this Attachable.</param>
-		/// <returns>False if the Attachable is invalid, otherwise true.</returns>
-		bool RemoveAttachable(long attachableUniqueID, bool addToMovableMan, bool addBreakWounds) final { return MOSRotating::RemoveAttachable(attachableUniqueID, addToMovableMan, addBreakWounds); }
+		/// <returns>A pointer to the removed Attachable, if it wasn't added to MovableMan or nullptr if it was. Ownership IS transferred!</returns>
+		Attachable * RemoveAttachable(long attachableUniqueID, bool addToMovableMan, bool addBreakWounds) final { return MOSRotating::RemoveAttachable(attachableUniqueID, addToMovableMan, addBreakWounds); }
 
 		/// <summary>
 		/// Removes the passed in Attachable and sets its parent to nullptr. Does not add it to MovableMan or add break wounds.
 		/// </summary>
 		/// <param name="attachable">The Attachable to remove.</param>
-		/// <returns>False if the Attachable is invalid, otherwise true.</returns>
-		bool RemoveAttachable(Attachable *attachable) final { return MOSRotating::RemoveAttachable(attachable); }
+		/// <returns>A pointer to the removed Attachable. Ownership IS transferred!</returns>
+		Attachable * RemoveAttachable(Attachable *attachable) final { return MOSRotating::RemoveAttachable(attachable); }
 
 		/// <summary>
 		/// Removes the passed in Attachable and sets its parent to nullptr. Optionally adds it to MovableMan and/or adds break wounds.
@@ -483,8 +483,8 @@ namespace RTE {
 		/// <param name="attachable">The Attachable to remove.</param>
 		/// <param name="addToMovableMan">Whether or not to add the Attachable to MovableMan once it has been removed.</param>
 		/// <param name="addBreakWounds">Whether or not to add break wounds to the removed Attachable and this Attachable.</param>
-		/// <returns>False if the Attachable is invalid, otherwise true.</returns>
-		bool RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds) final;
+		/// <returns>A pointer to the removed Attachable, if it wasn't added to MovableMan or nullptr if it was. Ownership IS transferred!</returns>
+		Attachable * RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds) final;
 
 		/// <summary>
 		/// Adds the passed in wound AEmitter to the list of wounds and changes its parent offset to the passed in Vector.

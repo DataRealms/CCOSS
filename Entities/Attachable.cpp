@@ -416,11 +416,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool Attachable::RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds) {
+	Attachable * Attachable::RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds) {
 		float previousMassForUpdatingParent = m_Parent ? GetMass() : 0.0F;
-		bool result = MOSRotating::RemoveAttachable(attachable, addToMovableMan, addBreakWounds);
+		Attachable *removedAttachable = MOSRotating::RemoveAttachable(attachable, addToMovableMan, addBreakWounds);
 		if (m_Parent) { m_Parent->UpdateAttachableAndWoundMass(previousMassForUpdatingParent, GetMass()); }
-		return result;
+		return removedAttachable;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

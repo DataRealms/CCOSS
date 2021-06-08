@@ -1545,20 +1545,19 @@ void MOSRotating::AddAttachable(Attachable *attachable, const Vector& parentOffs
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool MOSRotating::RemoveAttachable(long attachableUniqueID, bool addToMovableMan, bool addBreakWounds) {
-    MovableObject *attachableAsMovableObject = g_MovableMan.FindObjectByUniqueID(attachableUniqueID);
-    if (attachableAsMovableObject) {
+Attachable * MOSRotating::RemoveAttachable(long attachableUniqueID, bool addToMovableMan, bool addBreakWounds) {
+    if (MovableObject *attachableAsMovableObject = g_MovableMan.FindObjectByUniqueID(attachableUniqueID)) {
         return RemoveAttachable(dynamic_cast<Attachable *>(attachableAsMovableObject), addToMovableMan, addBreakWounds);
     }
-    return false;
+    return nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds) {
+Attachable * MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds) {
     if (!attachable || !attachable->IsAttached()) {
-        return false;
+        return attachable;
     }
     RTEAssert(attachable->IsAttachedTo(this), "Tried to remove Attachable " + attachable->GetPresetNameAndUniqueID() + " from presumed parent " + GetPresetNameAndUniqueID() + ", but it had a different parent (" + (attachable->GetParent() ? attachable->GetParent()->GetPresetNameAndUniqueID() : "ERROR") + "). This should never happen!");
 
@@ -1610,11 +1609,19 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
     }
 
     if (attachable->GetDeleteWhenRemovedFromParent()) { attachable->SetToDelete(); }
-    //TODO in future RemoveAttachable should return the attachable (if it's not been added to MovableMan) so its caller can deal with it. That'll mean this safety bit below for avoiding memory leaks can go away.
-    if (!addToMovableMan) { attachable->SetToDelete(); }
-    if (addToMovableMan || attachable->IsSetToDelete()) { g_MovableMan.AddMO(attachable); }
+    if (addToMovableMan || attachable->IsSetToDelete()) {
+        g_MovableMan.AddMO(attachable);
+        return nullptr;
+    }
 
-    return true;
+    return attachable;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MOSRotating::RemoveAndDeleteAttachable(Attachable *attachable) {
+    attachable->SetToDelete();
+    RemoveAttachable(attachable);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1627,9 +1634,9 @@ void MOSRotating::RemoveOrDestroyAllAttachables(bool destroy) {
         ++attachableIterator;
 
         if (destroy) {
-            delete attachable;
+            RemoveAndDeleteAttachable(attachable);
         } else {
-            RemoveAttachable(attachable);
+            RemoveAttachable(attachable, true, true);
         }
     }
 	m_Attachables.clear();

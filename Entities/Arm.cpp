@@ -100,12 +100,7 @@ int Arm::Create(const Arm &reference) {
 
 int Arm::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "HeldDevice") {
-        //TODO turn this on when Arm is cleaned up and only supports HeldDevices. The reader operator will need to actually account for polymorphism for this to work.
-        //HeldDevice iniDefinedObject;
-        //reader >> &iniDefinedObject;
-        //SetHeldMO(dynamic_cast<HeldDevice *>(iniDefinedObject.Clone()));
-        const Entity *heldEntity = g_PresetMan.GetEntityPreset(reader);
-        if (heldEntity) { SetHeldMO(dynamic_cast<MovableObject *>(heldEntity->Clone())); }
+        SetHeldMO(dynamic_cast<MovableObject *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "GripStrength") {
         reader >> m_GripStrength;
     } else if (propName == "Hand") {

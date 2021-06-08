@@ -124,6 +124,7 @@ namespace RTE {
 
 	private:
 
+		//TODO I think things would be cleaner if this (and all hardcoded attachable pointers) used weak_ptrs. It would solve some weird ownership stuff, particularly with this. However, for that to be possible, m_Attachables has to be shared_ptrs though.
 		std::vector<std::unique_ptr<HeldDevice>> m_MountedDevices; //!< Vector of unique_ptrs to the mounted HeldDevices of this Turret, if any.
 		std::vector<HeldDevice *> m_MountedDevicesForLua; //!< A vector of HeldDevice pointers to be filled in when lua tries to get the mounted devices for this Turret. Should not be considered valid except when accessed through the appropriate getter.
 		float m_MountedDeviceRotationOffset; //!< The relative offset angle (in radians) of the mounted HeldDevice from this Turret's rotation.

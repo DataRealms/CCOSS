@@ -127,6 +127,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="range">The distance in pixels.</param>
 		void SetLethalRange(float range);
+
+		/// <summary>
+		/// Gets the longest a trail can be drawn, in pixels.
+		/// </summary>
+		/// <returns>The new max length, in pixels. If 0, no trail is drawn.</returns>
+		int GetTrailLength() const;
+
+		/// <summary>
+		/// Sets the longest a trail can be drawn, in pixels.
+		/// </summary>
+		/// <param name="trailLength">The new max length, in pixels. If 0, no trail is drawn.</param>
+		void SetTrailLength(int trailLength);
 #pragma endregion
 
 #pragma region Virtual Override Methods
@@ -186,9 +198,9 @@ namespace RTE {
 
 		float m_DistanceTraveled; //!< An estimate of how far this MO has traveled since its creation.	
 
-		float m_LethalRange; //!< After this distance in meters, the damage output of this MO decrease. Default is half a screen plus sharp length for pixels spawned from a gun and one screen otherwise.
-		float m_MinLethalRange; //!< Lower bound multiplier for setting LethalRange at random. 1.0 equals one screen.
-		float m_MaxLethalRange; //!< Upper bound multiplier for setting LethalRange at random. 1.0 equals one screen.
+		float m_LethalRange; //!< After this distance in meters, the MO has a chance to no longer hit MOs, and its Lifetime decreases. Defaults to the length of a player's screen.
+		float m_MinLethalRange; //!< Lower bound multiplier for setting LethalRange at random. By default, 1.0 equals one screen.
+		float m_MaxLethalRange; //!< Upper bound multiplier for setting LethalRange at random. By default, 1.0 equals one screen.
 		float m_LethalSharpness; //!< When Sharpness has decreased below this threshold the MO becomes m_HitsMOs = false. Default is Sharpness * 0.5.
 
 	private:

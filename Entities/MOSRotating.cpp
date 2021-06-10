@@ -1011,11 +1011,15 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
             }
 
             gibParticleClone->SetPos(m_Pos + rotatedGibOffset);
+			gibParticleClone->SetHFlipped(m_HFlipped);
             Vector gibVelocity = rotatedGibOffset.IsZero() ? Vector(minVelocity + RandomNum(0.0F, velocityRange), 0.0F) : rotatedGibOffset.SetMagnitude(minVelocity + RandomNum(0.0F, velocityRange));
-            gibVelocity.RadRotate(impactImpulse.GetAbsRadAngle() + (gibSettingsObject.GetSpread() * RandomNormalNum()));
+			// TODO: Figure out how much the magnitude of an offset should affect spread
+			float gibSpread = (rotatedGibOffset.IsZero() && gibSettingsObject.GetSpread() == 0.1F) ? c_PI : gibSettingsObject.GetSpread();
+            gibVelocity.RadRotate(impactImpulse.GetAbsRadAngle() + (gibSpread * RandomNormalNum()));
             gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? m_Vel : Vector()));
-
             if (movableObjectToIgnore) { gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore); }
+			gibParticleClone->SetTeam(m_Team);
+			gibParticleClone->SetIgnoresTeamHits(gibSettingsObject.IgnoresTeamHits());
 
             g_MovableMan.AddParticle(gibParticleClone);
         }
@@ -1428,7 +1432,7 @@ void MOSRotating::Update() {
         m_OrientToVel = std::clamp(m_OrientToVel, 0.0F, 1.0F);
 
         float velInfluence = std::clamp(m_OrientToVel < 1.0F ? m_Vel.GetMagnitude() / 100.0F : 1.0F, 0.0F, 1.0F);
-        float radsToGo = m_Rotation.GetRadAngleTo(m_Vel.GetAbsRadAngle());
+        float radsToGo = m_Rotation.GetRadAngleTo(m_Vel.GetAbsRadAngle() + (m_HFlipped ? -c_PI : 0));
         m_Rotation += radsToGo * m_OrientToVel * velInfluence;
     }
 
@@ -1694,7 +1698,7 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
         clear_to_color(pTempBitmap, keyColor);
 
 // TODO: Fix that MaterialAir and KeyColor don't work at all because they're drawing 0 to a field of 0's
-        // Draw the requested material sihouette on the material bitmap
+        // Draw the requested material silhouette on the material bitmap
         if (mode == g_DrawMaterial)
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, m_SettleMaterialDisabled ? GetMaterial()->GetIndex() : GetMaterial()->GetSettleMaterial(), -1);
         else if (mode == g_DrawAir)
@@ -1707,6 +1711,8 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, m_MOID, -1);
         else if (mode == g_DrawNoMOID)
             draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_NoMOID, -1);
+		else if (mode == g_DrawDoor)
+			draw_character_ex(pTempBitmap, m_aSprite[m_Frame], 0, 0, g_MaterialDoor, -1);
         else if (mode == g_DrawRedTrans)
             draw_trans_sprite(pTempBitmap, m_aSprite[m_Frame], 0, 0);
         else

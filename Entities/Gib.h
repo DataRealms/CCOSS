@@ -94,6 +94,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether this Gib's GibParticles should inherit the velocity of the gibbing parent.</returns>
 		bool InheritsVelocity() const { return m_InheritsVel; }
+
+		/// <summary>
+		/// Gets whether this Gib's GibParticles should ignore hits with the team of the gibbing parent.
+		/// </summary>
+		/// <returns>Whether this Gib's GibParticles should ignore hits with the team of the gibbing parent.</returns>
+		bool IgnoresTeamHits() const { return m_IgnoresTeamHits; }
 #pragma endregion
 
 	protected:
@@ -106,6 +112,7 @@ namespace RTE {
 		float m_MaxVelocity; //!< The maximum velocity a GibParticle object can have when spawned.
 		float m_LifeVariation; //!< The per-Gib variation in Lifetime, in percentage of the existing Lifetime of the gib.
 		bool m_InheritsVel; //!< Whether this Gib should inherit the velocity of the exploding parent or not.
+		bool m_IgnoresTeamHits; //!< Whether this Gib should ignore hits with the team of the exploding parent or not.
 
 	private:
 

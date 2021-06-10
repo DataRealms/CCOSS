@@ -12,11 +12,12 @@ namespace RTE {
 		m_GibParticle = 0;
 		m_Offset.Reset();
 		m_Count = 1;
-		m_Spread = c_PI;
+		m_Spread = 0.1F;
 		m_MinVelocity = 0;
 		m_MaxVelocity = 0;
 		m_LifeVariation = 0.1F;
 		m_InheritsVel = true;
+		m_IgnoresTeamHits = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,6 +31,7 @@ namespace RTE {
 		m_MaxVelocity = reference.m_MaxVelocity;
 		m_LifeVariation = reference.m_LifeVariation;
 		m_InheritsVel = reference.m_InheritsVel;
+		m_IgnoresTeamHits = reference.m_IgnoresTeamHits;
 
 		return 0;
 	}
@@ -54,6 +56,8 @@ namespace RTE {
 			reader >> m_LifeVariation;
 		} else if (propName == "InheritsVel") {
 			reader >> m_InheritsVel;
+		} else if (propName == "IgnoresTeamHits") {
+			reader >> m_IgnoresTeamHits;
 		} else {
 			return Serializable::ReadProperty(propName, reader);
 		}

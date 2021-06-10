@@ -264,6 +264,7 @@ void ACraft::Clear()
     m_HatchTimer.Reset();
     m_HatchDelay = 0;
     m_HatchOpenSound = nullptr;
+    m_HatchCloseSound = nullptr;
     m_NewInventory.clear();
     m_Exits.clear();
     m_CurrentExit = m_Exits.begin();
@@ -315,6 +316,11 @@ int ACraft::Create(const ACraft &reference)
     m_HatchState = reference.m_HatchState;
     m_HatchDelay = reference.m_HatchDelay;
 	if (reference.m_HatchOpenSound) { m_HatchOpenSound = dynamic_cast<SoundContainer *>(reference.m_HatchOpenSound->Clone()); }
+	if (reference.m_HatchCloseSound) {
+		m_HatchCloseSound = dynamic_cast<SoundContainer *>(reference.m_HatchCloseSound->Clone());
+	} else if (reference.m_HatchOpenSound) {
+		m_HatchCloseSound = dynamic_cast<SoundContainer *>(reference.m_HatchOpenSound->Clone());
+	}
 	for (deque<MovableObject *>::const_iterator niItr = reference.m_NewInventory.begin(); niItr != reference.m_NewInventory.end(); ++niItr)
         m_NewInventory.push_back(dynamic_cast<MovableObject *>((*niItr)->Clone()));
     for (list<Exit>::const_iterator eItr = reference.m_Exits.begin(); eItr != reference.m_Exits.end(); ++eItr)
@@ -351,6 +357,9 @@ int ACraft::ReadProperty(const std::string_view &propName, Reader &reader)
 	else if (propName == "HatchOpenSound") {
 		m_HatchOpenSound = new SoundContainer;
 		reader >> m_HatchOpenSound;
+	} else if (propName == "HatchCloseSound") {
+		m_HatchCloseSound = new SoundContainer;
+		reader >> m_HatchCloseSound;
 	} else if (propName == "CrashSound") {
 		m_CrashSound = new SoundContainer;
 		reader >> m_CrashSound;
@@ -389,6 +398,8 @@ int ACraft::Save(Writer &writer) const
     writer << m_HatchDelay;
     writer.NewProperty("HatchOpenSound");
     writer << m_HatchOpenSound;
+    writer.NewProperty("HatchCloseSound");
+    writer << m_HatchCloseSound;
     for (list<Exit>::const_iterator itr = m_Exits.begin(); itr != m_Exits.end(); ++itr)
     {
         writer.NewProperty("AddExit");
@@ -419,6 +430,7 @@ int ACraft::Save(Writer &writer) const
 void ACraft::Destroy(bool notInherited)
 {
 	delete m_HatchOpenSound;
+	delete m_HatchCloseSound;
 	delete m_CrashSound;
 
     if (!notInherited)
@@ -614,7 +626,7 @@ void ACraft::CloseHatch()
         m_NewInventory.clear();
 
         // PSCHHT
-		if (m_HatchOpenSound) { m_HatchOpenSound->Play(m_Pos); }
+		if (m_HatchCloseSound) { m_HatchCloseSound->Play(m_Pos); }
 	}
 }
 
@@ -757,9 +769,8 @@ void ACraft::DropAllInventory()
         {
             m_HasDelivered = true;
 
-            // Kill craft if it is lying down.
-            if (fabs(m_Rotation.GetRadAngle()) > c_QuarterPI && m_Status != DYING)
-            {
+			// Kill craft if it is lying down.
+			if (std::fabs(m_Rotation.GetRadAngle()) > c_HalfPI && m_Status != DYING) {
                 m_Status = DYING;
                 m_DeathTmr.Reset();
             }
@@ -850,9 +861,8 @@ void ACraft::Update()
 
     // Set viewpoint based on how we are aiming etc.
     m_ViewPoint = m_Pos.GetFloored();
-    // Add velocity also so the viewpoint moves ahead at high speeds
-    if (m_Vel.GetMagnitude() > 10)
-        m_ViewPoint += m_Vel * 6;
+	// Add velocity also so the viewpoint moves ahead at high speeds
+	if (m_Vel.GetMagnitude() > 10) { m_ViewPoint += m_Vel * std::sqrt(m_Vel.GetMagnitude() * 0.1F); }
 
     ///////////////////////////////////////////////////
     // Crash detection and handling

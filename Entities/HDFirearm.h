@@ -823,6 +823,8 @@ protected:
     float m_NoSupportFactor;
     // Range of spread angle of fired particles, in one direction
     float m_ParticleSpreadRange;
+	// Angle in which shells are ejected relative to this weapon
+	float m_ShellEjectAngle;
     // Range of spread angle of ejected shells, in one direction
     float m_ShellSpreadRange;
     // Range of spread in ang vel of ejected shells, in one direction

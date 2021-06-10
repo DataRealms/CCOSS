@@ -1523,7 +1523,7 @@ void GameActivity::Update()
 
             // If we are pointing to an actor to follow, then snap cursor to that actor's position
             Actor *pTargetActor = 0;
-            float distance = 0;
+			Vector distance;
             if (pTargetActor = g_MovableMan.GetClosestActor(m_ActorCursor[player], 40, distance, m_ControlledActor[player]))
             {
 //                m_ActorCursor[player] = pTargetActor->GetPos();

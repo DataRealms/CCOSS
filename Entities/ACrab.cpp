@@ -58,6 +58,7 @@ void ACrab::Clear()
     m_pJetpack = 0;
     m_JetTimeTotal = 0.0;
     m_JetTimeLeft = 0.0;
+	m_JetAngleRange = 0.25;
     m_MoveState = STAND;
     for (int side = 0; side < SIDECOUNT; ++side)
     {
@@ -196,6 +197,7 @@ int ACrab::Create(const ACrab &reference) {
 
     m_JetTimeTotal = reference.m_JetTimeTotal;
     m_JetTimeLeft = reference.m_JetTimeLeft;
+	m_JetAngleRange = reference.m_JetAngleRange;
 
     m_pLFGFootGroup = dynamic_cast<AtomGroup *>(reference.m_pLFGFootGroup->Clone());
     m_pLFGFootGroup->SetOwner(this);
@@ -268,6 +270,8 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
     } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         m_JetTimeTotal *= 1000;
+	} else if (propName == "JumpAngleRange") {
+		reader >> m_JetAngleRange;
     } else if (propName == "LFGLeg" || propName == "LeftFGLeg") {
         Leg iniDefinedObject;
         reader >> &iniDefinedObject;
@@ -352,6 +356,8 @@ int ACrab::Save(Writer &writer) const
     writer.NewProperty("JumpTime");
     // Convert to seconds
     writer << m_JetTimeTotal / 1000;
+	writer.NewProperty("JumpAngleRange");
+	writer << m_JetAngleRange;
     writer.NewProperty("LFGLeg");
     writer << m_pLFGLeg;
     writer.NewProperty("LBGLeg");
@@ -2181,23 +2187,20 @@ void ACrab::Update()
                 m_JetTimeLeft = m_JetTimeTotal;
         }
 
+		float maxAngle = c_HalfPI * m_JetAngleRange;
         // Direct the jetpack nozzle according to movement stick if analog input is present
         if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1)
         {
-            float jetAngle = m_Controller.GetAnalogMove().GetAbsRadAngle() + c_PI;
-            // Clamp the angle to 45 degrees down cone with centr straight down on body
-            if (jetAngle > c_PI + c_HalfPI + c_QuarterPI)// - c_SixteenthPI)
-                jetAngle = c_PI + c_HalfPI + c_QuarterPI;// - c_SixteenthPI;
-            else if (jetAngle < c_PI + c_QuarterPI)// + c_SixteenthPI)
-                jetAngle = c_PI + c_QuarterPI;// + c_SixteenthPI;
-
+			float minAngle = -maxAngle - c_HalfPI;
+			maxAngle -= c_HalfPI;
+			float jetAngle = std::clamp(m_Controller.GetAnalogMove().GetAbsRadAngle(), minAngle, maxAngle) - c_PI;
             m_pJetpack->SetEmitAngle(FacingAngle(jetAngle));
         }
         // Or just use the aim angle if we're getting digital input
         else
         {
-            float jetAngle = m_AimAngle >= 0 ? (m_AimAngle * 0.25) : 0;
-            jetAngle = c_PI + c_QuarterPI + c_EighthPI + jetAngle;
+			float jetAngle = m_AimAngle > 0 ? (m_AimAngle * m_JetAngleRange) : 0;
+			jetAngle = jetAngle - maxAngle - c_HalfPI;
             // Don't need to use FacingAngle on this becuase it's already applied to the AimAngle since last update.
             m_pJetpack->SetEmitAngle(jetAngle);
         }
@@ -2275,10 +2278,6 @@ void ACrab::Update()
             {
                 pDevice->Reload();
 				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
-
-                // Interrupt sharp aiming
-                m_SharpAimTimer.Reset();
-                m_SharpAimProgress = 0;
             }
         }
     }
@@ -2731,7 +2730,7 @@ void ACrab::Update()
 
     // Add velocity also so the viewpoint moves ahead at high speeds
     if (m_Vel.GetMagnitude() > 10.0)
-        m_ViewPoint += m_Vel * 6;
+        m_ViewPoint += m_Vel * std::sqrt(m_Vel.GetMagnitude() * 0.1F);
 
 /* Done by pie menu now, see HandlePieCommand()
     ////////////////////////////////////////
@@ -2785,11 +2784,7 @@ void ACrab::Update()
     if (m_Status == STABLE)
     {
         // Upright body posture
-        // Break the spring if close to target angle.
-        if (fabs(rot) > (c_HalfPI - c_SixteenthPI))
-            m_AngularVel -= rot * 0.5;//fabs(rot);
-        else if (fabs(m_AngularVel) > 0.3)
-            m_AngularVel *= 0.85;
+		m_AngularVel = m_AngularVel * 0.9F - (rot * 0.3F);
     }
     // While dying, pull body quickly toward down toward horizontal
     else if (m_Status == DYING)
@@ -2935,15 +2930,20 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             }
         }
 
-        // Weight and jetpack energy
-        if (m_pJetpack && m_pJetpack->IsAttached() && m_MoveState == JUMP)
-        {
-            float mass = GetMass();
-// TODO: Don't hardcode the mass indicator! Figure out how to calculate the jetpack threshold values
-            str[0] = mass < 135 ? -31 : (mass < 160 ? -30 : -29); str[1] = 0;
-            // Do the blinky blink
-            if ((str[0] == -29 || str[0] == -30) && m_IconBlinkTimer.AlternateSim(250))
-                str[0] = -28;
+		// Weight and jetpack energy
+		if (m_pJetpack && m_pJetpack->IsAttached() && m_Controller.IsState(BODY_JUMP)) {
+			float mass = GetMass();
+			if (m_JetTimeLeft < 100) {
+				// Draw empty fuel indicator
+				str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
+			} else {
+				// Display normal jet icons
+				// TODO: Don't hardcode the mass indicator! Figure out how to calculate the jetpack threshold values
+				str[0] = mass < 135 ? -31 : (mass < 150 ? -30 : (mass < 165 ? -29 : -28));
+				// Do the blinky blink
+				if ((str[0] == -28 || str[0] == -29) && m_IconBlinkTimer.AlternateSim(250)) { str[0] = -27; }
+			}
+			str[1] = 0;
             pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Centre);
 
             float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;

@@ -94,12 +94,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `OnStride` special Lua function for `AHumans` that is called whenever they stride (i.e. when their `StrideSound` is played). Like playing `StrideSound`, this does not happen when the AHuman is climbing.
 
+- New `AHuman` and `ACrab` INI and Lua (R/W) property `JetAngleRange` which defines the rate at which the angle of the `Jetpack`'s thrust follows the aim angle of the actor (default being 0.25). 
+
+- New `AHuman` INI property `LookToAimRatio` at which the `Head` turns in the direction of aiming (default being 0.7).
+
+- New `AHuman` INI properties `FGArmFlailScalar` and `BGArmFlailScalar`. Used to change the rate at which each `Arm` follows the rotation angle of the `Actor`, regardless of aim angle. 0 means the `Arm` will always point in aiming direction.
+
+- New `Actor` INI and Lua (R/W) property `CanRevealUnseen` which can be used to disable the ability to reveal unseen areas.
+
+- New `MOPixel` Lua (R/W) property `TrailLength` which returns the trail length of the `Atom` affiliated with this `MOPixel`.
+
+- New `HDFirearm` INI property `ShellEjectAngle` which lets you define the angle at which `Shell` particles are ejected relative to the `HDFirearm`'s rotation.
+
+- New `Gib` INI property `IgnoresTeamHits`.
+
+- New `Atom` INI property `TrailLengthVariation`. Used to randomize `TrailLength` on every frame. 0 means no randomization (default), 1 means anything between full length and zero.
+
+- New `ACraft` INI and Lua (R/W) property `HatchCloseSound`. This is now required separately to `HatchOpenSound`.
+
+- Exposed `MOSRotating` property `OrientToVel` to Lua (R/W).
+
+- Exposed `DataModule` properties `Author`, `Description` and `Version` to Lua (R).
+
+- Exposed `Actor` properties `HolsterOffset` and `ItemInReach` to Lua (R/W).
+
+- Exposed `Arm` property `MaxLength` to Lua (R).
+
 - Exposed broad range of sounds to Lua (R/W) through their relevant SoundContainers. For each class, these include:  
 	**Actor**: `BodyHitSound`, `PainSound`, `DeathSound`, `DeviceSwitchSound`, `AlarmSound`  
 	**AHuman & ACrab**: `StrideSound`  
 	**HDFirearm**: `FireSound`, `FireEchoSound`, `EmptySound`, `ReloadStartSound`, `ReloadEndSound`, `ActiveSound`, `DeactivationSound`, `PreFireSound`  
 	**AEmitter**: `EmissionSound`, `BurstSound`, `EndSound`  
-	**ACraft**: `HatchOpenSound`, `CrashSound`  
+	**ACraft**: `HatchOpenSound`, `HatchCloseSound`, `CrashSound`  
 	**MOSRotating**: `GibSound`  
 	**ADoor**: `DoorMoveStartSound`, `DoorMoveSound`, `DoorDirectionChangeSound`, `DoorMoveEndSound`
   
@@ -128,6 +154,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Added `MovableObject` Lua function `EnableOrDisableAllScripts` that allows you to enable or disable all scripts on a `MovableObject` based on the passed in value.
 
 ### Changed
+
+- `AHuman` can now manually reload BG devices.
+
+- Jetpack thrust angle is now properly clamped when controlled with an analog stick.
+
+- Aim reticle dots can now be hidden per device by setting `SharpLength` to 0.
+
+- Craft will now automatically scuttle when opening doors at a 90° angle rather than 45°.
+
+- `AHuman` can now aim while walking, however not while reloading.
+
+- Recoil when firing weapons now affects sharp aim.
+
+- The third argument for `distance` to be filled out in `MovableMan:GetClosestActor()` is now a `Vector` rather than `float`.
 
 - File paths in INIs are now case sensitive.
 
@@ -203,6 +243,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - In the scenarios screen, scenes from `Scenes.rte` will appear red. Previously they were green and not very distinguishable from regular scenes.
 
 ### Fixed
+
+- `HFlipped` is now properly assigned to emissions, gibs and particles that are shot from a `HDFirearm`'s `Round` when the source object is also flipped.
 
 - `MovableObject:SetWhichMOToNotHit` will now work properly for Attachables. They will also not hit the relevant MO. When they're removed, Attachables will check if they have the same MO for this value and, if so, unset it so they can hit that MO.
 

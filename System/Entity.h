@@ -59,6 +59,7 @@ namespace RTE {
 		g_DrawWhite,
 		g_DrawMOID,
 		g_DrawNoMOID,
+		g_DrawDoor,
 		g_DrawDebug,
 		g_DrawLess,
 		g_DrawTrans,

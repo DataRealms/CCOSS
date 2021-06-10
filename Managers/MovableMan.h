@@ -265,7 +265,7 @@ public:
 // Arguments:       Which team to try to get an enemy Actor for. NoTeam means all teams.
 //                  The Scene point to search for the closest to.
 //                  The maximum radius around that scene point to search.
-//                  A vector to be filled out with the distance of the returned closest to
+//                  A Vector to be filled out with the distance of the returned closest to
 //                  the search point. Will be unaltered if no object was found within radius.
 // Return value:    An Actor pointer to the enemy closest to the Scene
 //                  point, but not outside the max radius. If no Actor
@@ -295,14 +295,14 @@ public:
 // Arguments:       Which team to try to get an Actor for. 0 means first team, 1 means 2nd.
 //                  The Scene point to search for the closest to.
 //                  The maximum radius around that scene point to search.
-//                  A float to be filled out with the distance of the returned closest to
+//                  A Vector to be filled out with the distance of the returned closest to
 //                  the search point. Will be unaltered if no object was found within radius.
 //                  An Actor to exclude from the search. OWNERSHIP IS NOT TRANSFERRED!
 // Return value:    An Actor pointer to the requested Actor closest to the Scene
 //                  point, but not outside the max radius. If no Actor other than the
 //                  excluded one was found within the radius of the point, 0 is returned.
 
-    Actor * GetClosestActor(Vector &scenePoint, int maxRadius, float &getDistance, const Actor *pExcludeThis = 0);
+    Actor * GetClosestActor(const Vector &scenePoint, int maxRadius, Vector &getDistance, const Actor *pExcludeThis = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

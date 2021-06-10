@@ -108,8 +108,15 @@ namespace RTE {
 
 	int UInputMan::Initialize() {
 		if (install_keyboard() != 0) { RTEAbort("Failed to initialize keyboard!"); }
-		if (install_joystick(JOY_TYPE_AUTODETECT) != 0) { RTEAbort("Failed to initialize joysticks!"); }
 
+#ifdef _WIN32
+		// JOY_TYPE_AUTODETECT is failing to select the correct joystick driver, so a dual analog ends up with a non-functional right stick and the triggers being treated as one instead.
+		// This overrides the setting to force it to use the correct driver (without modifying AllegroConfig). Not sure why this is happening but appears to have started after updating Allegro.
+		const char *overrideData = "[joystick]\njoytype=W32";
+		override_config_data(overrideData, ustrsize(overrideData));
+#endif
+
+		if (install_joystick(JOY_TYPE_AUTODETECT) != 0) { RTEAbort("Failed to initialize joysticks!"); }
 		poll_joystick();
 
 		return 0;

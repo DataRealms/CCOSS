@@ -296,6 +296,13 @@ enum MOType
     virtual float GetMass() const { return m_Mass; }
 
 
+	/// <summary>
+	/// Gets the previous position vector of this MovableObject, prior to this frame.
+	/// </summary>
+	/// <returns>A Vector describing the previous position vector.</returns>
+	const Vector & GetPrevPos() const { return m_PrevPos; }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetVel
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -304,6 +311,13 @@ enum MOType
 // Return value:    A Vector describing the current velocity vector.
 
     const Vector & GetVel() const { return m_Vel; }
+
+
+	/// <summary>
+	/// Gets the previous velocity vector of this MovableObject, prior to this frame.
+	/// </summary>
+	/// <returns>A Vector describing the previous velocity vector.</returns>
+	const Vector & GetPrevVel() const { return m_PrevVel; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

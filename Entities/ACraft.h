@@ -574,16 +574,28 @@ enum
 	void GibThis(const Vector &impactImpulse = Vector(), MovableObject *movableObjectToIgnore = nullptr) override;
 
 	/// <summary>
-	/// Gets this ACraft's hatch open sound. Ownership is NOT transferred!
+	/// Gets this ACraft's hatch opening sound. Ownership is NOT transferred!
 	/// </summary>
-	/// <returns>The SoundContainer for this ACraft's hatch open sound.</returns>
+	/// <returns>The SoundContainer for this ACraft's hatch opening sound.</returns>
 	SoundContainer * GetHatchOpenSound() const { return m_HatchOpenSound; }
 
 	/// <summary>
-	/// Sets this ACraft's hatch open sound. Ownership IS transferred!
+	/// Sets this ACraft's hatch opening sound. Ownership IS transferred!
 	/// </summary>
-	/// <param name="newSound">The new SoundContainer for this ACraft's hatch open sound.</param>
+	/// <param name="newSound">The new SoundContainer for this ACraft's hatch opening sound.</param>
 	void SetHatchOpenSound(SoundContainer *newSound) { m_HatchOpenSound = newSound; }
+
+	/// <summary>
+	/// Gets this ACraft's hatch closing sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this ACraft's hatch closing sound.</returns>
+	SoundContainer * GetHatchCloseSound() const { return m_HatchCloseSound; }
+
+	/// <summary>
+	/// Sets this ACraft's hatch closing sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this ACraft's hatch closing sound.</param>
+	void SetHatchCloseSound(SoundContainer *newSound) { m_HatchCloseSound = newSound; }
 
 	/// <summary>
 	/// Gets this ACraft's crash sound. Ownership is NOT transferred!
@@ -614,6 +626,8 @@ protected:
     int m_HatchDelay;
     // Sound for opening the hatch
     SoundContainer *m_HatchOpenSound;
+	// Sound for closing the hatch
+	SoundContainer *m_HatchCloseSound;
     // The new intermediate inventory of things that have been thrown into the craft while the doors are open,
     // but they shouldn't be ejected until the doors are closed and then opened again.
     std::deque<MovableObject *> m_NewInventory;

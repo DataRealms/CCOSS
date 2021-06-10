@@ -252,6 +252,13 @@ ClassInfoGetters
     void SetSharpLength(float newLength) { m_MaxSharpLength = newLength; }
 
 
+	/// <summary>
+	/// Gets whether this HeldDevice is currently supported by a second hand.
+	/// </summary>
+	/// <returns>Whether the device is supported or not.</returns>
+	bool GetSupported() { return m_Supported; }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetSupported
 //////////////////////////////////////////////////////////////////////////////////////////

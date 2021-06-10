@@ -209,6 +209,14 @@ ClassInfoGetters
 
     int GetHealth() const { return m_Health; }
 
+
+	/// <summary>
+	/// Gets this Actor's previous health value, prior to this frame.
+	/// </summary>
+	/// <returns>A const int describing this Actor's previous health.</returns>
+	int GetPrevHealth() const { return m_PrevHealth; }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetMaxHealth
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -354,6 +362,19 @@ ClassInfoGetters
 	Vector GetAboveHUDPos() const override { return m_Pos + Vector(0, m_HUDStack + 6); }
 
 
+	/// <summary>
+	/// Gets the offset position of the holster where this Actor draws his devices from.
+	/// </summary>
+	/// <returns>The offset position of the holster.</returns>
+	Vector GetHolsterOffset() const { return m_HolsterOffset; }
+
+	/// <summary>
+	/// Sets the offset position of the holster where this Actor draws his devices from.
+	/// </summary>
+	/// <param name="newOffset">A new holster offset.</param>
+	void SetHolsterOffset(Vector newOffset) { m_HolsterOffset = newOffset; }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetViewPoint
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -364,6 +385,13 @@ ClassInfoGetters
 // Return value:    The point in absolute scene coordinates.
 
     Vector GetViewPoint() const { return m_ViewPoint.IsZero() ? m_Pos : m_ViewPoint; }
+
+
+	/// <summary>
+	/// Gets the item that is within reach of the Actor at this frame, ready to be be picked up. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>A pointer to the item that has been determined to be within reach of this Actor, if any.</returns>
+	HeldDevice * GetItemInReach() const { return m_pItemInReach; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -464,7 +492,7 @@ ClassInfoGetters
 // Arguments:       A new amount of passenger slots.
 // Return value:    None.
 
-    void SetPassengerSlots(int newPassengerSlots) { m_PassengerSlots = newPassengerSlots;; }
+    void SetPassengerSlots(int newPassengerSlots) { m_PassengerSlots = newPassengerSlots; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -796,6 +824,19 @@ ClassInfoGetters
 // Return value:    The current perceptiveness, 0.0 - 1.0
 
 	float GetPerceptiveness() const { return m_Perceptiveness; }
+
+
+	/// <summary>
+	/// Gets whether this actor is able to reveal unseen areas by looking.
+	/// </summary>
+	/// <returns>Whether this actor can reveal unseen areas.</returns>
+	bool GetCanRevealUnseen() const { return m_CanRevealUnseen; }
+
+	/// <summary>
+	/// Sets whether this actor can reveal unseen areas by looking.
+	/// </summary>
+	/// <param name="newCanRevealUnseen">Whether this actor can reveal unseen areas.</param>
+	void SetCanRevealUnseen(bool newCanRevealUnseen) { m_CanRevealUnseen = newCanRevealUnseen; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1370,7 +1411,7 @@ protected:
     float m_AimDistance;
     // Aiming timing timer
     Timer m_AimTmr;
-    // For timing the transition between regular aim and sharp aim
+    // For timing the transition from regular aim to sharp aim
     Timer m_SharpAimTimer;
     // The time it takes to achieve complete full sharp aiming
     int m_SharpAimDelay;
@@ -1392,6 +1433,8 @@ protected:
     float m_SightDistance;
     // How perceptive this is of alarming events going on around him, 0.0 - 1.0
     float m_Perceptiveness;
+	// Whether or not this actor can reveal unseen areas by looking
+	bool m_CanRevealUnseen;
     // About How tall is the Actor, in pixels?
     float m_CharHeight;
     // Speed at which the m_AimAngle will change, in radians/s.

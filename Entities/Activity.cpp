@@ -737,8 +737,8 @@ void Activity::Clear() {
 		}
 
 		char messageString[64];
-		float foreignCostMult = 1.0F;
-		float nativeCostMult = 1.0F;
+		float foreignCostMult = 0.9F;
+		float nativeCostMult = 0.9F;
 		short orbitedCraftTeam = orbitedCraft->GetTeam(); //TODO this should be explicitly casted. Preferred solution would be to use short consistently for teams.
 		bool brainOnBoard = orbitedCraft->HasObjectInGroup("Brains");
 		

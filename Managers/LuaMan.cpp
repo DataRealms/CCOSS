@@ -410,6 +410,7 @@ PROPERTYOWNERSHIPSAFETYFAKER(ACrab, SoundContainer, SetStrideSound);
 PROPERTYOWNERSHIPSAFETYFAKER(Turret, HeldDevice, SetMountedDevice);
 
 PROPERTYOWNERSHIPSAFETYFAKER(ACraft, SoundContainer, SetHatchOpenSound);
+PROPERTYOWNERSHIPSAFETYFAKER(ACraft, SoundContainer, SetHatchCloseSound);
 PROPERTYOWNERSHIPSAFETYFAKER(ACraft, SoundContainer, SetCrashSound);
 
 PROPERTYOWNERSHIPSAFETYFAKER(ACDropShip, AEmitter, SetRightThruster);
@@ -783,6 +784,8 @@ int LuaMan::Initialize() {
             .property("Mass", &MovableObject::GetMass, &MovableObject::SetMass)
             .property("Pos", &MovableObject::GetPos, &MovableObject::SetPos)
             .property("Vel", &MovableObject::GetVel, &MovableObject::SetVel)
+			.property("PrevPos", &MovableObject::GetPrevPos)
+			.property("PrevVel", &MovableObject::GetPrevVel)
             .property("AngularVel", &MovableObject::GetAngularVel, &MovableObject::SetAngularVel)
             .property("Radius", &MovableObject::GetRadius)
             .property("Diameter", &MovableObject::GetDiameter)
@@ -867,7 +870,8 @@ int LuaMan::Initialize() {
 			.property("TransformsInto", &Material::GetSpawnMaterial)
 			.property("IsScrap", &Material::IsScrap),
 
-        CONCRETELUABINDING(MOPixel, MovableObject),
+        CONCRETELUABINDING(MOPixel, MovableObject)
+			.property("TrailLength", &MOPixel::GetTrailLength, &MOPixel::SetTrailLength),
 
         CONCRETELUABINDING(TerrainObject, SceneObject)
             .def("GetBitmapOffset", &TerrainObject::GetBitmapOffset)
@@ -925,6 +929,7 @@ int LuaMan::Initialize() {
 			.property("GibImpulseLimit", &MOSRotating::GetGibImpulseLimit, &MOSRotating::SetGibImpulseLimit)
 			.property("DamageMultiplier", &MOSRotating::GetDamageMultiplier, &MOSRotating::SetDamageMultiplier)
 			.property("WoundCount", (int (MOSRotating:: *)() const) &MOSRotating::GetWoundCount)
+			.property("OrientToVel", &MOSRotating::GetOrientToVel, &MOSRotating::SetOrientToVel)
             .def("AddRecoil", &MOSRotating::AddRecoil)
             .def("SetRecoil", &MOSRotating::SetRecoil)
             .def("IsRecoiled", &MOSRotating::IsRecoiled)
@@ -1118,6 +1123,7 @@ int LuaMan::Initialize() {
 			.def("SetStableVelocityThreshold", (void (Actor::*)(Vector))&Actor::SetStableVel)
             .property("Status", &Actor::GetStatus, &Actor::SetStatus)
             .property("Health", &Actor::GetHealth, &Actor::SetHealth)
+            .property("PrevHealth", &Actor::GetPrevHealth)
             .property("MaxHealth", &Actor::GetMaxHealth, &Actor::SetMaxHealth)
             .property("InventoryMass", &Actor::GetInventoryMass)
             .property("GoldCarried", &Actor::GetGoldCarried, &Actor::SetGoldCarried)
@@ -1128,7 +1134,9 @@ int LuaMan::Initialize() {
             .def("HasObjectInGroup", &Actor::HasObjectInGroup)
             .property("CPUPos", &Actor::GetCPUPos)
             .property("EyePos", &Actor::GetEyePos)
+            .property("HolsterOffset", &Actor::GetHolsterOffset, &Actor::SetHolsterOffset)
             .property("ViewPoint", &Actor::GetViewPoint, &Actor::SetViewPoint)
+            .property("ItemInReach", &Actor::GetItemInReach, &Actor::SetItemInReach)
             .property("Height", &Actor::GetHeight)
             .def("IsWithinRange", &Actor::IsWithinRange)
             .def("AddHealth", &Actor::AddHealth)
@@ -1149,6 +1157,7 @@ int LuaMan::Initialize() {
             .def("RemoveMovePathBeginning", &Actor::RemoveMovePathBeginning)
             .def("RemoveMovePathEnd", &Actor::RemoveMovePathEnd)
             .property("Perceptiveness", &Actor::GetPerceptiveness, &Actor::SetPerceptiveness)
+			.property("CanRevealUnseen", &Actor::GetCanRevealUnseen, &Actor::SetCanRevealUnseen)
             .def("AddInventoryItem", &Actor::AddInventoryItem, adopt(_2))
             .def("RemoveInventoryItem", &Actor::RemoveInventoryItem)
             .def("SwapNextInventory", &Actor::SwapNextInventory)
@@ -1191,6 +1200,7 @@ int LuaMan::Initialize() {
 
 		CONCRETELUABINDING(Arm, Attachable)
             .property("HeldDevice", &Arm::GetHeldMO)
+			.property("MaxLength", &Arm::GetMaxLength)
 			.property("IdleOffset", &Arm::GetIdleOffset, &Arm::SetIdleOffset)
             .property("GripStrength", &Arm::GetGripStrength, &Arm::SetGripStrength)
 			.property("HandPos", &Arm::GetHandPos, &Arm::SetHandPos),
@@ -1277,6 +1287,7 @@ int LuaMan::Initialize() {
 			.property("StrideSound", &AHuman::GetStrideSound, &AHumanSetStrideSound)
 			.property("JetTimeTotal", &AHuman::GetJetTimeTotal, &AHuman::SetJetTimeTotal)
             .property("JetTimeLeft", &AHuman::GetJetTimeLeft, &AHuman::SetJetTimeLeft)
+			.property("JetAngleRange", &AHuman::GetJetAngleRange, &AHuman::SetJetAngleRange)
 			.property("ThrowPrepTime", &AHuman::GetThrowPrepTime, &AHuman::SetThrowPrepTime)
             .def("EquipFirearm", &AHuman::EquipFirearm)
             .def("EquipThrowable", &AHuman::EquipThrowable)
@@ -1420,6 +1431,7 @@ int LuaMan::Initialize() {
             .def("CloseHatch", &ACraft::CloseHatch)
             .property("HatchState", &ACraft::GetHatchState)
 			.property("HatchOpenSound", &ACraft::GetHatchOpenSound, &ACraftSetHatchOpenSound)
+			.property("HatchCloseSound", &ACraft::GetHatchCloseSound, &ACraftSetHatchCloseSound)
 			.property("CrashSound", &ACraft::GetCrashSound, &ACraftSetCrashSound)
             .property("MaxPassengers", &ACraft::GetMaxPassengers)
             .property("DeliveryDelayMultiplier", &ACraft::GetDeliveryDelayMultiplier),
@@ -1921,7 +1933,10 @@ int LuaMan::Initialize() {
 		class_<DataModule>("DataModule")
 			.def_readwrite("Presets", &DataModule::m_EntityList, return_stl_iterator)
 			.property("FileName", &DataModule::GetFileName)
-			.property("FriendlyName", &DataModule::GetFriendlyName),
+			.property("FriendlyName", &DataModule::GetFriendlyName)
+			.property("Author", &DataModule::GetAuthor)
+			.property("Description", &DataModule::GetDescription)
+			.property("Version", &DataModule::GetVersionNumber),
 
         class_<BuyMenuGUI>("BuyMenuGUI")
             .def("SetMetaPlayer", &BuyMenuGUI::SetMetaPlayer)

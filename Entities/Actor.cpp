@@ -98,6 +98,7 @@ void Actor::Clear() {
     m_LastAlarmPos.Reset();
     m_SightDistance = 450;
     m_Perceptiveness = 0.5;
+	m_CanRevealUnseen = true;
     m_CharHeight = 0;
     m_HolsterOffset.Reset();
     m_ViewPoint.Reset();
@@ -216,6 +217,7 @@ int Actor::Create(const Actor &reference)
     m_SeenTargetPos = reference.m_SeenTargetPos;
     m_SightDistance = reference.m_SightDistance;
     m_Perceptiveness = reference.m_Perceptiveness;
+	m_CanRevealUnseen = reference.m_CanRevealUnseen;
     m_CharHeight = reference.m_CharHeight;
     m_HolsterOffset = reference.m_HolsterOffset;
 
@@ -352,6 +354,8 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_SightDistance;
     else if (propName == "Perceptiveness")
         reader >> m_Perceptiveness;
+	else if (propName == "CanRevealUnseen")
+		reader >> m_CanRevealUnseen;
     else if (propName == "CharHeight")
         reader >> m_CharHeight;
     else if (propName == "HolsterOffset")
@@ -431,6 +435,8 @@ int Actor::Save(Writer &writer) const
     writer << m_SightDistance;
     writer.NewProperty("Perceptiveness");
     writer << m_Perceptiveness;
+	writer.NewProperty("CanRevealUnseen");
+	writer << m_CanRevealUnseen;
     writer.NewProperty("CharHeight");
     writer << m_CharHeight;
     writer.NewProperty("HolsterOffset");
@@ -653,7 +659,7 @@ Controller::InputMode Actor::SwapControllerModes(Controller::InputMode newMode, 
 
 bool Actor::Look(float FOVSpread, float range)
 {
-    if (!g_SceneMan.AnythingUnseen(m_Team))
+    if (!g_SceneMan.AnythingUnseen(m_Team) || m_CanRevealUnseen == false)
         return false;
 
     // Use the 'eyes' on the 'head', if applicable
@@ -1418,7 +1424,8 @@ void Actor::Update()
         else if (!m_pMOMoveTarget)
             m_AIMode = AIMODE_SENTRY;
     }
-
+	// Save health state so we can compare next update
+	m_PrevHealth = m_Health;
     /////////////////////////////////////
     // Take damage/heal from wounds and wounds on Attachables
     for (AEmitter *wound : m_Wounds) {
@@ -1586,8 +1593,6 @@ void Actor::Update()
 			g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, 0.5));
 		}
 	}
-    // Save health state so we can compare next update
-    m_PrevHealth = m_Health;
 
 // Do NOT mess witht he HUD stack in update... it should only be altered in DrawHUD, or it will jitter when multiple sim updates happen
 //    m_HUDStack = -m_CharHeight / 2;
@@ -1633,6 +1638,9 @@ void Actor::Draw(BITMAP *pTargetBitmap,
 
 void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled)
 {
+	// This should indeed be a local var and not alter a member one in a draw func! Can cause nasty jittering etc if multiple sim updates are done without a drawing in between etc
+    m_HUDStack = -m_CharHeight / 2;
+
     if (!m_HUDVisible)
         return;
 
@@ -1653,8 +1661,6 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
     GUIFont *pSymbolFont = g_FrameMan.GetLargeFont();
     GUIFont *pSmallFont = g_FrameMan.GetSmallFont();
-    // This should indeed be a local var and not alter a member one in a draw func! Can cause nasty jittering etc if multiple sim updates are done without a drawing in between etc
-    m_HUDStack = -m_CharHeight / 2;
     Vector drawPos = m_Pos - targetPos;
     Vector cpuPos = GetCPUPos() - targetPos;
 

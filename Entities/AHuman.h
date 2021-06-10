@@ -379,6 +379,20 @@ ClassInfoGetters
 	void SetJetTimeLeft(float newValue) { m_JetTimeLeft = newValue < m_JetTimeTotal ? newValue : m_JetTimeTotal; }
 
 
+	/// <summary>
+	/// Gets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
+	/// </summary>
+	/// <returns>The ratio at which this jetpack follows the aim angle of the user.</returns>
+	float GetJetAngleRange() const { return m_JetAngleRange; }
+
+
+	/// <summary>
+	/// Sets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
+	/// </summary>
+	/// <param name="newValue">The ratio at which this jetpack follows the aim angle of the user.</param>
+	void SetJetAngleRange(float newValue) { m_JetAngleRange = newValue; }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  CollideAtPoint
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -923,6 +937,8 @@ protected:
     static Entity::ClassInfo m_sClass;
     // Articulated head.
     Attachable *m_pHead;
+	// Ratio at which the head's rotation follows the aim angle
+	float m_LookToAimRatio;
     // Foreground arm.
     Arm *m_pFGArm;
     // Background arm.
@@ -946,6 +962,8 @@ protected:
     float m_JetTimeTotal;
     // How much time left the jetpack can go, in ms
     float m_JetTimeLeft;
+	// Ratio at which the jetpack angle follows aim angle
+	float m_JetAngleRange;
     // Blink timer
     Timer m_IconBlinkTimer;
     // Current upper body state.
@@ -974,8 +992,14 @@ protected:
     int m_GoldInInventoryChunk;
     // For timing throws
     Timer m_ThrowTmr;
-    
-    long m_ThrowPrepTime; //!< The duration it takes this AHuman to fully charge a throw.
+	// The duration it takes this AHuman to fully charge a throw.
+    long m_ThrowPrepTime;
+	// For timing the transition from sharp aim back to regular aim
+	Timer m_SharpAimRevertTimer;
+    // The rate at which this AHuman's FG Arm follows the the bodily rotation. Best to keep this at 0 so it doesn't complicate aiming.
+	float m_FGArmFlailScalar;
+    // The rate at which this AHuman's BG Arm follows the the bodily rotation. Set to a negative value for a "counterweight" effect.
+	float m_BGArmFlailScalar;
 
     ////////////////
     // AI States

@@ -1,6 +1,7 @@
 #include "TitleScreen.h"
 #include "FrameMan.h"
 #include "UInputMan.h"
+#include "ActivityMan.h"
 #include "SettingsMan.h"
 
 #include "GUI.h"
@@ -75,7 +76,7 @@ namespace RTE {
 		m_StationOrbitTimer.SetElapsedRealTimeS(15);
 
 		if (!g_FrameMan.ResolutionChanged()) {
-			if (!g_SettingsMan.SkipIntro()) {
+			if (!g_SettingsMan.SkipIntro() && !g_ActivityMan.LaunchIntoActivity()) {
 				m_IntroTextFont = std::make_unique<GUIFont>("FontLarge");
 				m_IntroTextFont->Load(guiScreen, "Base.rte/GUIs/Skins/Menus/FontLarge.png");
 				CreateIntroSequenceSlides();

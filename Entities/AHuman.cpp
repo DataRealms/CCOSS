@@ -769,11 +769,11 @@ bool AHuman::OnSink(const Vector &pos)
 bool AHuman::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
     if (m_pItemInReach) {
-		PieMenuGUI::Slice pickUpSlice(m_pFGArm ? "Pick Up " + m_pItemInReach->GetPresetName() : "NO ARM!", PieMenuGUI::PSI_PICKUP, PieMenuGUI::Slice::UP, m_pFGArm && m_pFGArm->IsAttached());
+		PieSlice pickUpSlice(m_pFGArm ? "Pick Up " + m_pItemInReach->GetPresetName() : "NO ARM!", PieSlice::PieSliceIndex::PSI_PICKUP, PieSlice::SliceDirection::UP, m_pFGArm && m_pFGArm->IsAttached());
 		
         pPieMenu->AddSlice(pickUpSlice);
     } else {
-		PieMenuGUI::Slice reloadSlice(m_pFGArm ? "Reload" : "NO ARM!", PieMenuGUI::PSI_RELOAD, PieMenuGUI::Slice::UP, (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull()) || (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->GetHeldDevice() && !m_pBGArm->GetHeldDevice()->IsFull()));
+        PieSlice reloadSlice(m_pFGArm ? "Reload" : "NO ARM!", PieSlice::PieSliceIndex::PSI_RELOAD, PieSlice::SliceDirection::UP, (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull()) || (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->GetHeldDevice() && !m_pBGArm->GetHeldDevice()->IsFull()));
         pPieMenu->AddSlice(reloadSlice);
 	}
 	

@@ -261,6 +261,18 @@ ClassInfoGetters
 //                  0 means normal, -1.0 means least emission rate.
 
     float GetThrottle() const { return m_Throttle; }
+
+	/// <summary>
+	/// Gets the minimum throttle range of this AEmitter.
+	/// </summary>
+	/// <returns>The minimum throttle range of this AEmitter.</returns>
+    float GetMinThrottle() const { return m_MinThrottleRange; }
+
+	/// <summary>
+	/// Gets the maximum throttle range of this AEmitter.
+	/// </summary>
+	/// <returns>The maximum throttle range of this AEmitter.</returns>
+    float GetMaxThrottle() const { return m_MaxThrottleRange; }
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetEmitRate
@@ -620,12 +632,9 @@ protected:
     long m_EmitCount;
     // The max number of emissions to emit per emit being enabled
     long m_EmitCountLimit;
-    // The range negative throttle has on emission rate. 1.0 means the rate can be throttled down to 0%, 0 means negative throttle has no effect
-    double m_MinThrottleRange;
-    // The range positive throttle has on emission rate. 1.0 means the rate can be throttled up to 200%, 0 means negative throttle has no effect
-    double m_MaxThrottleRange;
-    // The normalized throttle which controls the MSPE between 1.0 * m_MSPERange and -1.0 * m_MSPERange. 0 means emit the regular m_PPM amount.
-    float m_Throttle;
+	float m_MinThrottleRange; //!< The range negative throttle has on emission rate. 1.0 means the rate can be throttled down to 0%, 0 means negative throttle has no effect
+	float m_MaxThrottleRange; //!< The range positive throttle has on emission rate. 1.0 means the rate can be throttled up to 200%, 0 means positive throttle has no effect
+	float m_Throttle; //!< The normalized throttle which controls the MSPE between 1.0 * m_MSPERange and -1.0 * m_MSPERange. 0 means emit the regular m_PPM amount.
     // Whether or not this' emissions ignore hits with itself, even if they are set to hit other MOs.
     bool m_EmissionsIgnoreThis;
     // The scale factor that will be applied to the regular spread and emission
@@ -652,8 +661,6 @@ protected:
     Timer m_LastEmitTmr;
     // Emission flash Attachable
     Attachable *m_pFlash;
-    // Flash offset.
-//    Vector m_FlashOff; nah dont need it
     // Flash display scale
     float m_FlashScale;
     // How large impulse this emitter generates when bursting

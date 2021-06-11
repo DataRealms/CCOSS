@@ -2152,18 +2152,23 @@ void ACrab::Update()
 
     if (m_pJetpack && m_pJetpack->IsAttached())
     {
-        // Start Jetpack burn
-        if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0)
-        {
-            m_pJetpack->TriggerBurst();
-            // This is to make sure se get loose from being stuck
-            m_ForceDeepCheck = true;
-            m_pJetpack->EnableEmission(true);
-            // Quadruple this for the burst
-            m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS() * 10;
-            if (m_JetTimeLeft < 0)
-                m_JetTimeLeft = 0;
-        }
+		if (m_JetTimeTotal > 0) {
+			// Throttle depletes based on throttle range
+			float jetTimeRatio = std::max(m_JetTimeLeft / m_JetTimeTotal, 0.0F);
+			m_pJetpack->SetThrottle(jetTimeRatio * 2.0F - 1.0F);
+			float minScale = 1.0F - m_pJetpack->GetMinThrottle();
+			m_pJetpack->SetFlashScale(minScale + (1.0F + m_pJetpack->GetMaxThrottle() - minScale) * jetTimeRatio);
+		}
+		// Start Jetpack burn
+		if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0 && m_Status != INACTIVE)
+		{
+			m_pJetpack->TriggerBurst();
+			// This is to make sure se get loose from being stuck
+			m_ForceDeepCheck = true;
+			m_pJetpack->EnableEmission(true);
+			// Quadruple this for the burst
+			m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS() * 10.0F;
+		}
         // Jetpack is burning
         else if (m_Controller.IsState(BODY_JUMP) && m_JetTimeLeft > 0)
         {
@@ -2175,21 +2180,18 @@ void ACrab::Update()
             m_MoveState = JUMP;
         }
         // Jetpack is off/turning off
-        else
-        {
+        else {
             m_pJetpack->EnableEmission(false);
-            if (m_MoveState == JUMP)
-                m_MoveState = STAND;
+			if (m_MoveState == JUMP) { m_MoveState = STAND; }
 
             // Replenish the jetpack time, twice as fast
             m_JetTimeLeft += g_TimerMan.GetDeltaTimeMS() * 2;
-            if (m_JetTimeLeft >= m_JetTimeTotal)
-                m_JetTimeLeft = m_JetTimeTotal;
+			if (m_JetTimeLeft >= m_JetTimeTotal) { m_JetTimeLeft = m_JetTimeTotal; }
         }
 
 		float maxAngle = c_HalfPI * m_JetAngleRange;
         // Direct the jetpack nozzle according to movement stick if analog input is present
-        if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1)
+        if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1F)
         {
 			float minAngle = -maxAngle - c_HalfPI;
 			maxAngle -= c_HalfPI;
@@ -2197,10 +2199,10 @@ void ACrab::Update()
             m_pJetpack->SetEmitAngle(FacingAngle(jetAngle));
         }
         // Or just use the aim angle if we're getting digital input
-        else
-        {
-			float jetAngle = m_AimAngle > 0 ? (m_AimAngle * m_JetAngleRange) : 0;
-			jetAngle = jetAngle - maxAngle - c_HalfPI;
+        else {
+			// Halve the jet angle when looking downwards so the actor isn't forced to go sideways (To-do: don't hardcode this value?)
+			float jetAngle = m_AimAngle > 0 ? m_AimAngle * m_JetAngleRange : -m_AimAngle * m_JetAngleRange * 0.5F;
+			jetAngle -= (maxAngle + c_HalfPI);
             // Don't need to use FacingAngle on this becuase it's already applied to the AimAngle since last update.
             m_pJetpack->SetEmitAngle(jetAngle);
         }

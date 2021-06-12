@@ -242,9 +242,15 @@ namespace RTE {
 		m_ConfiguringPlayerScheme->SetDevice(m_NewInputScheme.GetDevice());
 		m_ConfiguringPlayerScheme->SetPreset(InputScheme::InputPreset::NoPreset);
 
+		// Hard map the mouse controls and set names so they don't show as undefined after applying the new scheme.
 		if (m_ConfiguringDevice == InputDevice::DEVICE_MOUSE_KEYB) {
 			m_NewInputScheme.GetInputMappings()->at(InputElements::INPUT_FIRE).SetMouseButton(MouseButtons::MOUSE_LEFT);
 			m_NewInputScheme.GetInputMappings()->at(InputElements::INPUT_PIEMENU).SetMouseButton(MouseButtons::MOUSE_RIGHT);
+			m_NewInputScheme.GetInputMappings()->at(InputElements::INPUT_AIM).SetPresetDescription("Mouse Move");
+			m_NewInputScheme.GetInputMappings()->at(InputElements::INPUT_AIM_UP).SetPresetDescription("Mouse Move");
+			m_NewInputScheme.GetInputMappings()->at(InputElements::INPUT_AIM_DOWN).SetPresetDescription("Mouse Move");
+			m_NewInputScheme.GetInputMappings()->at(InputElements::INPUT_AIM_LEFT).SetPresetDescription("Mouse Move");
+			m_NewInputScheme.GetInputMappings()->at(InputElements::INPUT_AIM_RIGHT).SetPresetDescription("Mouse Move");
 		}
 		std::swap(*m_ConfiguringPlayerScheme->GetInputMappings(), *m_NewInputScheme.GetInputMappings());
 

@@ -10,6 +10,8 @@
 
 namespace RTE {
 
+	std::array<InputElements, 7> SettingsInputMappingGUI::m_InputElementsUsedByMouse = { InputElements::INPUT_FIRE, InputElements::INPUT_PIEMENU, InputElements::INPUT_AIM, InputElements::INPUT_AIM_UP, InputElements::INPUT_AIM_DOWN, InputElements::INPUT_AIM_LEFT, InputElements::INPUT_AIM_RIGHT };
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	SettingsInputMappingGUI::SettingsInputMappingGUI(GUIControlManager *parentControlManager) : m_GUIControlManager(parentControlManager) {
@@ -62,13 +64,6 @@ namespace RTE {
 			m_InputMappingSettingsLabel->SetText("P L A Y E R   " + std::to_string(player + 1) + "   I N P U T   M A P P I N G");
 			m_ConfiguringPlayer = static_cast<Players>(player);
 			m_ConfiguringPlayerInputScheme = g_UInputMan.GetControlScheme(player);
-
-			// Don't want to deal with special handling for mouse so don't allow remapping any mouse controls when using mouse+keyboard.
-			// TODO: Add handling for input mapping with mouse directions and buttons (extra buttons too if applicable).
-			std::array<InputElements, 7> inputElementsUsedByMouse = { InputElements::INPUT_FIRE, InputElements::INPUT_PIEMENU, InputElements::INPUT_AIM, InputElements::INPUT_AIM_UP, InputElements::INPUT_AIM_DOWN, InputElements::INPUT_AIM_LEFT, InputElements::INPUT_AIM_RIGHT };
-			for (const InputElements &inputElement : inputElementsUsedByMouse) {
-				m_InputMapButton.at(inputElement)->SetEnabled((m_ConfiguringPlayerInputScheme->GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) ? false : true);
-			}
 
 			m_InputMapScrollingBoxScrollbar->SetValue(0);
 			UpdateScrollingInputBoxScrollPosition();
@@ -162,8 +157,16 @@ namespace RTE {
 			} else if (guiEvent.GetMsg() == GUIButton::Pushed) {
 				for (int mapButton = 0; mapButton < InputElements::INPUT_COUNT; ++mapButton) {
 					if (guiEvent.GetControl() == m_InputMapButton.at(mapButton)) {
-						g_GUISound.ButtonPressSound()->Play();
-						ShowInputMappingCaptureBox(static_cast<InputElements>(mapButton));
+						// Don't want to deal with special handling for mouse so don't allow remapping any mouse controls when using mouse+keyboard.
+						// TODO: Add handling for input mapping with mouse directions and buttons (extra buttons too if applicable).
+						if (m_ConfiguringPlayerInputScheme->GetDevice() == InputDevice::DEVICE_MOUSE_KEYB && std::find(m_InputElementsUsedByMouse.begin(), m_InputElementsUsedByMouse.end(), mapButton) != m_InputElementsUsedByMouse.end()) {
+							g_GUISound.UserErrorSound()->Play();
+						} else {
+							g_GUISound.ButtonPressSound()->Play();
+							ShowInputMappingCaptureBox(static_cast<InputElements>(mapButton));
+						}
+						// Remove focus so the mapping button doesn't remain stuck with the hovered state graphic after being pressed.
+						m_InputMappingSettingsBox->SetFocus();
 						break;
 					}
 				}

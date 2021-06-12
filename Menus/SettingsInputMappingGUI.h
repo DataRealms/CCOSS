@@ -75,6 +75,8 @@ namespace RTE {
 
 	private:
 
+		static std::array<InputElements, 7> m_InputElementsUsedByMouse; //!< Array containing InputElements that are hard mapped to mouse controls when using mouse + keyboard.
+
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
 
 		Players m_ConfiguringPlayer; //!< The player this SettingsInputMappingGUI is configuring input mapping for.

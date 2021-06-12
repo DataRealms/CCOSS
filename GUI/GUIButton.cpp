@@ -198,7 +198,8 @@ void GUIButton::BuildBitmap(void)
         m_Font->CacheColor(m_FontColor);
 
     // Create the button image
-    const GUIRect buttonBorders = m_Skin->BuildStandardRect(m_DrawBitmap, "Button_Up", 0, 0, m_Width, m_Height);
+    GUIRect buttonBorders;
+    m_Skin->BuildStandardRect(m_DrawBitmap, "Button_Up", 0, 0, m_Width, m_Height, true, true, &buttonBorders);
     SetRect(m_BorderSizes.get(), buttonBorders.left, buttonBorders.top, buttonBorders.right, buttonBorders.bottom);
     m_Skin->BuildStandardRect(m_DrawBitmap, "Button_Over", 0, m_Height, m_Width, m_Height);
     m_Skin->BuildStandardRect(m_DrawBitmap, "Button_Down", 0, m_Height*2, m_Width, m_Height);

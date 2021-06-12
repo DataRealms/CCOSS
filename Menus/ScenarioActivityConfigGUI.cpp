@@ -127,8 +127,8 @@ namespace RTE {
 		m_ActivityDifficultyLabel->SetText(" " + Activity::GetDifficultyString(m_ActivityDifficultySlider->GetValue()));
 
 		m_StartingGoldAdjustedManually = false;
-		m_StartingGoldSlider->SetEnabled(m_SelectedActivity->GetGoldSwitchEnabled());
 		UpdateStartingGoldSliderAndLabel();
+		m_StartingGoldSlider->SetEnabled(m_SelectedActivity->GetGoldSwitchEnabled());
 
 		int defaultFogOfWar = m_SelectedActivity->GetDefaultFogOfWar();
 		if (defaultFogOfWar > -1) { m_FogOfWarCheckbox->SetCheck(defaultFogOfWar != 0); }
@@ -241,7 +241,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool ScenarioActivityConfigGUI::Update(int mouseX, int mouseY) {
-
 		if (const GUICollectionBox *hoveredCell = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControlUnderPoint(mouseX, mouseY, m_PlayersAndTeamsConfigBox, 1))) {
 			// Find which cell is being hovered over.
 			int hoveredPlayer = PlayerColumns::PlayerColumnCount;
@@ -259,7 +258,7 @@ namespace RTE {
 			}
 			if ((m_SelectedActivity->TeamActive(hoveredTeam) || hoveredTeam == TeamRows::DisabledTeam) && hoveredTeam != m_LockedCPUTeam && (m_LockedCPUTeam == Activity::Teams::NoTeam || hoveredPlayer != PlayerColumns::PlayerCPU) && m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawType() != GUICollectionBox::Image) {
 				if (g_UInputMan.MenuButtonReleased(UInputMan::MENU_PRIMARY)) {
-					ClickInPlayerSetup(hoveredPlayer, hoveredTeam);
+					ClickInPlayerTeamSetup(hoveredPlayer, hoveredTeam);
 				} else if (m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawType() == GUICollectionBox::Color && m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawColor() != c_GUIColorLightBlue) {
 					m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->SetDrawColor(c_GUIColorLightBlue);
 					g_GUISound.SelectionChangeSound()->Play();
@@ -267,8 +266,6 @@ namespace RTE {
 			}
 		}
 
-		int maxHumanPlayers = m_SelectedActivity->GetMaxPlayerSupport();
-		int minTeamsRequired = m_SelectedActivity->GetMinTeamsRequired();
 		int teamsWithPlayers = 0;
 		bool teamWithHumans = false;
 		int humansInTeams = 0;
@@ -287,27 +284,26 @@ namespace RTE {
 				if (foundPlayer) { teamsWithPlayers++; }
 			}
 		}
+
+		int maxHumanPlayers = m_SelectedActivity->GetMaxPlayerSupport();
+		int minTeamsRequired = m_SelectedActivity->GetMinTeamsRequired();
 		if (humansInTeams > maxHumanPlayers) {
 			m_StartGameButton->SetVisible(false);
-			m_StartErrorLabel->SetText("Too many players assigned! Max for this activity is " + std::to_string(maxHumanPlayers));
 			m_StartErrorLabel->SetVisible(true);
+			m_StartErrorLabel->SetText("Too many players assigned! Max for this activity is " + std::to_string(maxHumanPlayers));
 		} else if (minTeamsRequired > teamsWithPlayers) {
 			m_StartGameButton->SetVisible(false);
-			m_StartErrorLabel->SetText("Assign players to at least " + std::to_string(minTeamsRequired) + " of the teams!");
 			m_StartErrorLabel->SetVisible(true);
+			m_StartErrorLabel->SetText("Assign players to at least " + std::to_string(minTeamsRequired) + " of the teams!");
 		} else if (teamWithHumans == 0) {
 			m_StartGameButton->SetVisible(false);
-			m_StartErrorLabel->SetText("Assign human players to at least one team!");
 			m_StartErrorLabel->SetVisible(true);
+			m_StartErrorLabel->SetText("Assign human players to at least one team!");
 		} else {
 			m_StartGameButton->SetVisible(true);
 			m_StartErrorLabel->SetVisible(false);
 		}
-
-		for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; team++) {
-			m_TeamAISkillLabels.at(team)->SetText(Activity::GetAISkillString(m_TeamAISkillSliders.at(team)->GetValue()));
-		}
-		if (m_StartGameButton->GetVisible()) { m_GUIControlManager->GetManager()->SetFocus(m_BlinkTimer.AlternateReal(500) ? m_StartGameButton : nullptr); }
+		if (m_StartGameButton->GetVisible()) { m_GUIControlManager->GetManager()->SetFocus(m_StartGameButtonBlinkTimer.AlternateReal(500) ? m_StartGameButton : nullptr); }
 
 		return HandleInputEvents();
 	}
@@ -343,7 +339,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ScenarioActivityConfigGUI::ClickInPlayerSetup(int clickedPlayer, int clickedTeam) {
+	void ScenarioActivityConfigGUI::ClickInPlayerTeamSetup(int clickedPlayer, int clickedTeam) {
 		// Move the player's icon to the correct row.
 		m_PlayerBoxes.at(clickedPlayer).at(clickedTeam)->SetDrawType(GUICollectionBox::Image);
 		const Icon *playerIcon = (clickedPlayer != PlayerColumns::PlayerCPU) ? g_UInputMan.GetSchemeIcon(clickedPlayer) : dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
@@ -399,6 +395,10 @@ namespace RTE {
 				} else if (guiEvent.GetControl() == m_StartingGoldSlider) {
 					if (m_StartingGoldSlider->HasFocus()) { m_StartingGoldAdjustedManually = true; }
 					UpdateStartingGoldSliderAndLabel();
+				} else if (guiEvent.GetMsg() == GUISlider::Changed) {
+					for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; team++) {
+						if (guiEvent.GetControl() == m_TeamAISkillLabels.at(team)) { m_TeamAISkillLabels.at(team)->SetText(Activity::GetAISkillString(m_TeamAISkillSliders.at(team)->GetValue())); }
+					}
 				}
 			}
 		}

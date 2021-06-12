@@ -39,11 +39,11 @@ namespace RTE {
 		bool IsEnabled() const;
 
 		/// <summary>
-		/// 
+		/// Enables or disables the Activity configuration menu.
 		/// </summary>
-		/// <param name="enable"></param>
-		/// <param name="selectedActivity"></param>
-		/// <param name="selectedScene"></param>
+		/// <param name="enable">Show and enable or hide and disable the Activity configuration menu.</param>
+		/// <param name="selectedActivity">Pointer to the Activity this ScenarioActivityConfigGUI will be configuring for.</param>
+		/// <param name="selectedScene">Pointer to the Scene the passed in Activity will be using.</param>
 		void SetEnabled(bool enable, const Activity *selectedActivity = nullptr, Scene *selectedScene = nullptr);
 #pragma endregion
 
@@ -75,13 +75,13 @@ namespace RTE {
 
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
 
-		const GameActivity *m_SelectedActivity; //!<
-		Scene *m_SelectedScene; //!<
+		const GameActivity *m_SelectedActivity; //!< The Activity this ScenarioActivityConfigGUI is configuring for.
+		Scene *m_SelectedScene; //!< The Scene the selected Activity will be using.
 		int m_LockedCPUTeam = Activity::Teams::NoTeam; //!< Which team the CPU is locked to, if any.
 
-		bool m_StartingGoldAdjustedManually; //!<
+		bool m_StartingGoldAdjustedManually; //!< Whether the player adjusted the starting gold, meaning it should stop automatically adjusting to the difficulty setting default starting gold where applicable.
 
-		Timer m_BlinkTimer; //!< Notification blink timer.
+		Timer m_StartGameButtonBlinkTimer; //!< Timer for blinking the start game button.
 
 		/// <summary>
 		/// GUI elements that compose the Activity setup box.
@@ -108,32 +108,32 @@ namespace RTE {
 
 #pragma region Activity Configuration Screen Handling
 		/// <summary>
-		/// 
+		/// Fills each team's Tech ComboBox with all valid Tech DataModules.
 		/// </summary>
 		void PopulateTechComboBoxes();
 
 		/// <summary>
-		/// Shows the player configuration box.
+		/// Resets the configuration screen to the selected Activity's default settings and enables/disables attribute settings accordingly, making the configuration screen ready for interaction.
 		/// </summary>
 		void ResetActivityConfigBox();
 
 		/// <summary>
-		/// 
+		/// Sets up and starts the currently selected Activity with the configured settings.
+		/// </summary>
+		void StartGame();
+
+		/// <summary>
+		/// Updates the starting gold slider to the Activity difficulty setting (when applicable) and updates the value in the label according to the value in the slider.
 		/// </summary>
 		/// <returns></returns>
 		void UpdateStartingGoldSliderAndLabel();
 
 		/// <summary>
-		/// Sets up and starts the currently selected Activity and settings.
-		/// </summary>
-		void StartGame();
-
-		/// <summary>
-		/// Handles player and team selection boxes in the player configuration box.
+		/// Handles the player interaction with the players and teams config box.
 		/// </summary>
 		/// <param name="clickedPlayer">The player box that was clicked.</param>
 		/// <param name="clickedTeam">The team box that was clicked.</param>
-		void ClickInPlayerSetup(int clickedPlayer, int clickedTeam);
+		void ClickInPlayerTeamSetup(int clickedPlayer, int clickedTeam);
 
 		/// <summary>
 		/// Handles the player interaction with the ScenarioActivityConfigGUI GUI elements.

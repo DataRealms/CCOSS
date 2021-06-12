@@ -29,7 +29,7 @@ namespace RTE {
 		/// Enables or disables the gameplay settings menu.
 		/// </summary>
 		/// <param name="enable">Show and enable or hide and disable the gameplay settings menu.</param>
-		void SetEnabled(bool enable = true) const;
+		void SetEnabled(bool enable = true);
 
 		/// <summary>
 		/// Handles the player interaction with the SettingsInputGUI GUI elements.

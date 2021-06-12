@@ -42,10 +42,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsGameplayGUI::SetEnabled(bool enable) const {
+	void SettingsGameplayGUI::SetEnabled(bool enable) {
 		if (enable) {
 			m_GameplaySettingsBox->SetVisible(true);
 			m_GameplaySettingsBox->SetEnabled(true);
+
+			UpdateMaxUnheldItemsTextbox();
+			UpdateCrabBombThresholdTextbox();
 		} else {
 			m_GameplaySettingsBox->SetVisible(false);
 			m_GameplaySettingsBox->SetEnabled(false);
@@ -55,7 +58,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsGameplayGUI::UpdateMaxUnheldItemsTextbox() {
-		if (m_MaxUnheldItemsTextbox->GetText().empty()) { m_MaxUnheldItemsTextbox->SetText("0"); }
+		if (m_MaxUnheldItemsTextbox->GetText().empty()) { m_MaxUnheldItemsTextbox->SetText(std::to_string(g_MovableMan.GetMaxDroppedItems())); }
 		g_MovableMan.SetMaxDroppedItems(std::stoi(m_MaxUnheldItemsTextbox->GetText()));
 		m_GameplaySettingsBox->SetFocus();
 	}
@@ -63,7 +66,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsGameplayGUI::UpdateCrabBombThresholdTextbox() {
-		if (m_CrabBombThresholdTextbox->GetText().empty() || std::stoi(m_CrabBombThresholdTextbox->GetText()) == 0) { m_CrabBombThresholdTextbox->SetText("1"); }
+		if (m_CrabBombThresholdTextbox->GetText().empty()) { m_CrabBombThresholdTextbox->SetText(std::to_string(g_SettingsMan.GetCrabBombThreshold())); }
+		if (std::stoi(m_CrabBombThresholdTextbox->GetText()) == 0) { m_CrabBombThresholdTextbox->SetText("1"); }
 		g_SettingsMan.SetCrabBombThreshold(std::stoi(m_CrabBombThresholdTextbox->GetText()));
 		m_GameplaySettingsBox->SetFocus();
 	}

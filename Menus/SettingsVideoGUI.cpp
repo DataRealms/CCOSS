@@ -111,6 +111,9 @@ namespace RTE {
 		if (enable) {
 			m_VideoSettingsBox->SetVisible(true);
 			m_VideoSettingsBox->SetEnabled(true);
+
+			if (m_CustomResolutionWidthTextBox->GetText().empty()) { m_CustomResolutionWidthTextBox->SetText(std::to_string(g_FrameMan.GetResX())); }
+			if (m_CustomResolutionHeightTextBox->GetText().empty()) { m_CustomResolutionHeightTextBox->SetText(std::to_string(g_FrameMan.GetResY())); }
 		} else {
 			m_VideoSettingsBox->SetVisible(false);
 			m_VideoSettingsBox->SetEnabled(false);
@@ -336,7 +339,11 @@ namespace RTE {
 			}
 		} else if (guiEvent.GetType() == GUIEvent::Notification) {
 			// Clicking off focused textboxes does not remove their focus and they will still capture keyboard input, so remove focus when clicking CollectionBoxes.
-			if (guiEvent.GetMsg() == GUICollectionBox::Clicked && !m_VideoSettingsBox->HasFocus() && (guiEvent.GetControl() == m_VideoSettingsBox || guiEvent.GetControl() == m_CustomResolutionBox)) { m_VideoSettingsBox->SetFocus(); }
+			if (guiEvent.GetMsg() == GUICollectionBox::Clicked && !m_VideoSettingsBox->HasFocus() && (guiEvent.GetControl() == m_VideoSettingsBox || guiEvent.GetControl() == m_CustomResolutionBox)) {
+				if (m_CustomResolutionWidthTextBox->GetText().empty()) { m_CustomResolutionWidthTextBox->SetText(std::to_string(g_FrameMan.GetResX())); }
+				if (m_CustomResolutionHeightTextBox->GetText().empty()) { m_CustomResolutionHeightTextBox->SetText(std::to_string(g_FrameMan.GetResY())); }
+				m_VideoSettingsBox->SetFocus();
+			}
 
 			if (guiEvent.GetMsg() == GUIRadioButton::Pushed) {
 				if (guiEvent.GetControl() == m_TwoPlayerSplitscreenHSplitRadioButton) {

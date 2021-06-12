@@ -41,6 +41,11 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
+		/// Sets the currently active settings menu screen again to refresh it. This is used in case textboxes were left empty or focused on settings screen exit via back button or esc.
+		/// </summary>
+		void RefreshActiveSettingsMenuScreen() { SetActiveSettingsMenuScreen(m_ActiveSettingsMenuScreen, false); }
+
+		/// <summary>
 		/// Handles the player interaction with the SettingsGUI GUI elements.
 		/// </summary>
 		/// <returns>Whether the player requested to return to the main menu.</returns>

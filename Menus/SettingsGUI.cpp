@@ -116,6 +116,7 @@ namespace RTE {
 		while (m_GUIControlManager->GetEvent(&guiEvent)) {
 			if (guiEvent.GetType() == GUIEvent::Command) {
 				if (guiEvent.GetControl() == m_BackToMainButton) {
+					RefreshActiveSettingsMenuScreen();
 					return true;
 				}
 			} else if (guiEvent.GetType() == GUIEvent::Notification) {

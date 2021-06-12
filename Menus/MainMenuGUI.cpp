@@ -354,6 +354,7 @@ namespace RTE {
 		if ((!m_ActiveDialogBox || m_ActiveDialogBox == m_MainMenuScreens.at(MenuScreen::QuitScreen)) && (backToMainMenu || g_UInputMan.KeyPressed(KEY_ESC))) {
 			if (m_ActiveMenuScreen != MenuScreen::MainScreen) {
 				if (m_ActiveMenuScreen == MenuScreen::SettingsScreen || m_ActiveMenuScreen == MenuScreen::ModManagerScreen) {
+					if (m_ActiveMenuScreen == MenuScreen::SettingsScreen) { m_SettingsMenu->RefreshActiveSettingsMenuScreen(); }
 					g_SettingsMan.UpdateSettingsFile();
 				} else if (m_ActiveMenuScreen == MenuScreen::CreditsScreen) {
 					m_UpdateResult = MainMenuUpdateResult::BackToMainFromCredits;

@@ -367,7 +367,11 @@ namespace RTE {
 		}
 		if (g_UInputMan.KeyPressed(KEY_ESC)) {
 			g_GUISound.BackButtonPressSound()->Play();
-			return ScenarioMenuUpdateResult::BackToMain;
+			if (m_ActivityConfigBox->IsEnabled()) {
+				m_ActivityConfigBox->SetEnabled(false);
+			} else {
+				return ScenarioMenuUpdateResult::BackToMain;
+			}
 		}
 
 		int mousePosX;

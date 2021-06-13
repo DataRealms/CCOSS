@@ -40,6 +40,11 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Pointer to the GUICollectionBox that is the currently active dialog box, if any.</returns>
 		GUICollectionBox * GetActiveDialogBox() const;
+
+		/// <summary>
+		/// Closes the currently active GUICollectionBox that acts as a dialog box by hiding it. If the active dialog box is a sub-menu, disables it.
+		/// </summary>
+		void CloseActiveDialogBox() const;
 #pragma endregion
 
 #pragma region Concrete Methods

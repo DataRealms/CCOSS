@@ -57,9 +57,26 @@ namespace RTE {
 			default:
 				break;
 		}
-		DisableSettingsMenuNavigation(activeDialogBox ? true : false);
+		DisableSettingsMenuNavigation(activeDialogBox);
 
 		return activeDialogBox;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsGUI::CloseActiveDialogBox() const {
+		switch (m_ActiveSettingsMenuScreen) {
+			case SettingsMenuScreen::VideoSettingsMenu:
+				m_VideoSettingsMenu->CloseActiveDialogBox();
+				g_GUISound.BackButtonPressSound()->Play();
+				break;
+			case SettingsMenuScreen::InputSettingsMenu:
+				m_InputSettingsMenu->CloseActiveDialogBox();
+				g_GUISound.BackButtonPressSound()->Play();
+				break;
+			default:
+				break;
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -350,7 +350,6 @@ namespace RTE {
 				break;
 		}
 
-		// If esc pressed, show quit dialog if applicable. Don't allow esc when any dialog is active except the quit dialog.
 		if ((!m_ActiveDialogBox || m_ActiveDialogBox == m_MainMenuScreens.at(MenuScreen::QuitScreen)) && (backToMainMenu || g_UInputMan.KeyPressed(KEY_ESC))) {
 			if (m_ActiveMenuScreen != MenuScreen::MainScreen) {
 				if (m_ActiveMenuScreen == MenuScreen::SettingsScreen || m_ActiveMenuScreen == MenuScreen::ModManagerScreen) {
@@ -365,6 +364,8 @@ namespace RTE {
 			} else {
 				ShowQuitScreenOrQuit();
 			}
+		} else if (m_ActiveMenuScreen == MenuScreen::SettingsScreen && m_ActiveDialogBox && g_UInputMan.KeyPressed(KEY_ESC)) {
+			m_SettingsMenu->CloseActiveDialogBox();
 		}
 		return m_UpdateResult;
 	}

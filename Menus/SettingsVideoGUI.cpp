@@ -128,6 +128,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void SettingsVideoGUI::CloseActiveDialogBox() const {
+		if (m_ResolutionChangeDialogBox->GetEnabled() && m_ResolutionChangeDialogBox->GetVisible()) {
+			m_ResolutionChangeDialogBox->SetVisible(false);
+			m_VideoSettingsBox->SetEnabled(true);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool SettingsVideoGUI::IsSupportedResolution(int width, int height) const {
 		if ((width >= 640 && height >= 450) && (width <= g_FrameMan.GetMaxResX() && height <= g_FrameMan.GetMaxResY())) {
 			// Disallow wacky resolutions that are taller than wide and some other dumb ones

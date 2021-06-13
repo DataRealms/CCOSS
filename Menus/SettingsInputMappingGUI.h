@@ -48,6 +48,11 @@ namespace RTE {
 		GUICollectionBox * GetActiveDialogBox() const;
 
 		/// <summary>
+		/// Closes the currently active GUICollectionBox that acts as a dialog box by hiding it. If the active dialog box is a sub-menu, disables it.
+		/// </summary>
+		void CloseActiveDialogBox();
+
+		/// <summary>
 		/// Gets whether the input mapping settings menu needs to capture input for manual configuration.
 		/// </summary>
 		/// <returns>Whether the input mapping settings menu needs to capture input for manual configuration.</returns>

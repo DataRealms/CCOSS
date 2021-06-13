@@ -89,6 +89,18 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void SettingsInputMappingGUI::CloseActiveDialogBox() {
+		if (m_InputConfigWizardMenu->IsEnabled()) {
+			m_InputConfigWizardMenu->SetEnabled(false);
+		} else if (m_InputMappingCaptureBox->GetEnabled() && m_InputMappingCaptureBox->GetVisible()) {
+			HideInputMappingCaptureBox();
+		} else if (m_InputMappingSettingsBox->GetEnabled() && m_InputMappingSettingsBox->GetVisible()) {
+			SetEnabled(false);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool SettingsInputMappingGUI::IsConfiguringManually() const {
 		return m_ConfiguringManually && m_InputMappingCaptureBox->GetVisible() && m_InputMappingCaptureBox->GetEnabled();
 	}
@@ -180,11 +192,7 @@ namespace RTE {
 
 	void SettingsInputMappingGUI::HandleManualConfigSequence() {
 		bool inputCaptured = false;
-		if (g_UInputMan.KeyReleased(KEY_ESC)) {
-			g_GUISound.ButtonPressSound()->Play();
-			HideInputMappingCaptureBox();
-			return;
-		} else if (g_UInputMan.KeyReleased(KEY_DEL)) {
+		if (g_UInputMan.KeyReleased(KEY_DEL)) {
 			m_ConfiguringPlayerInputScheme->ClearMapping(m_InputElementCapturingInput);
 			inputCaptured = true;
 		}

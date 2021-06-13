@@ -204,6 +204,7 @@ namespace RTE {
 	void MenuMan::Draw() const {
 		g_FrameMan.ClearBackBuffer32();
 
+		// Early return when changing resolution so screen remains black while everything is being recreated instead of being stuck showing a badly aligned title screen.
 		if (g_FrameMan.ResolutionChanged()) {
 			return;
 		}

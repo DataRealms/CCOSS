@@ -102,7 +102,7 @@ namespace RTE {
 		/// <summary>
 		/// Sets the SettingsGUI to display a settings menu screen.
 		/// </summary>
-		/// <param name="activeMenu">Which settings menu screen to display. See MenuScreen enumeration. See the SettingsMenuScreen enumeration.</param>
+		/// <param name="activeMenu">Which settings menu screen to display. See the SettingsMenuScreen enumeration.</param>
 		/// <param name="playButtonPressSound">Whether to play a sound if the menu screen change is triggered by a button/tab press.</param>
 		void SetActiveSettingsMenuScreen(SettingsMenuScreen activeMenu, bool playButtonPressSound = true);
 #pragma endregion

@@ -339,7 +339,7 @@ namespace RTE {
 
 		m_pScenePreviewBitmap = create_bitmap_ex(8, c_ScenePreviewWidth, c_ScenePreviewHeight);
 
-		ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview.png");
+		ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview000.png");
 		m_pDefaultPreviewBitmap = defaultPreview.GetAsBitmap(COLORCONV_NONE, false);
 
 		clear_to_color(m_pScenePreviewBitmap, g_MaskColor);

@@ -2,7 +2,7 @@
 #define _RTESCENARIOGUI_
 
 #include "ScenarioActivityConfigGUI.h"
-#include "Timer.h"
+#include "MOSParticle.h"
 
 namespace RTE {
 
@@ -93,6 +93,9 @@ namespace RTE {
 
 		Timer m_BlinkTimer; //!< Timer for blinking the resume and config start buttons.
 
+		MOSParticle m_DefaultScenePreview; //!< MOSParticle that acts as the default Scene preview image, to avoid having to animate manually.
+		bool m_DrawDefaultScenePreview; //!< Whether the default Scene preview should be drawn or not.
+
 		std::unique_ptr<ScenarioActivityConfigGUI> m_ActivityConfigBox; //!< The Activity configuration box.
 
 		/// <summary>
@@ -110,7 +113,6 @@ namespace RTE {
 		GUILabel *m_SceneNameLabel;
 		GUILabel *m_SceneDescriptionLabel;
 		GUICollectionBox *m_ScenePreviewImageBox;
-		std::unique_ptr<AllegroBitmap> m_DefaultPreviewBitmap;
 		std::unique_ptr<AllegroBitmap> m_ScenePreviewBitmap;
 		GUIButton *m_StartActivityConfigButton;
 		GUILabel *m_SitePointNameLabel;

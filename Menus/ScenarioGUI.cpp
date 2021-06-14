@@ -42,6 +42,9 @@ namespace RTE {
 		m_PrevMousePos.Reset();
 
 		m_BlinkTimer.Reset();
+
+		m_DefaultScenePreview.Reset();
+		m_DrawDefaultScenePreview = true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -91,8 +94,11 @@ namespace RTE {
 		m_ScenePreviewImageBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxScenePreview"));
 		m_StartActivityConfigButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonStartActivityConfig"));
 
-		m_DefaultPreviewBitmap = std::make_unique<AllegroBitmap>();
-		m_DefaultPreviewBitmap->Create("Base.rte/GUIs/DefaultPreview.png");
+		m_DefaultScenePreview.Create(ContentFile("Base.rte/GUIs/DefaultPreview.png"), 5);
+		m_DefaultScenePreview.SetSpriteAnimMode(MOSprite::SpriteAnimMode::ALWAYSLOOP);
+		m_DefaultScenePreview.SetSpriteAnimDuration(200);
+		m_DefaultScenePreview.SetPos(Vector(static_cast<float>(m_ScenePreviewImageBox->GetXPos() + (m_ScenePreviewImageBox->GetWidth() / 2)), static_cast<float>(m_ScenePreviewImageBox->GetYPos() + (m_ScenePreviewImageBox->GetHeight() / 2))));
+
 		m_ScenePreviewBitmap = std::make_unique<AllegroBitmap>();
 		m_ScenePreviewBitmap->Create(c_ScenePreviewWidth, c_ScenePreviewHeight, 32);
 	}
@@ -159,11 +165,14 @@ namespace RTE {
 		if (m_SelectedScene) {
 			m_SceneInfoBox->SetVisible(true);
 
-			BITMAP *preview = m_SelectedScene->GetPreviewBitmap();
-			if (!preview) { preview = m_DefaultPreviewBitmap->GetBitmap(); }
-			clear_to_color(m_ScenePreviewBitmap->GetBitmap(), ColorKeys::g_MaskColor);
-			draw_sprite(m_ScenePreviewBitmap->GetBitmap(), preview, 0, 0);
-			m_ScenePreviewImageBox->SetDrawImage(new AllegroBitmap(m_ScenePreviewBitmap->GetBitmap()));
+			if (BITMAP *preview = m_SelectedScene->GetPreviewBitmap()) {
+				clear_to_color(m_ScenePreviewBitmap->GetBitmap(), ColorKeys::g_MaskColor);
+				draw_sprite(m_ScenePreviewBitmap->GetBitmap(), preview, 0, 0);
+				m_ScenePreviewImageBox->SetDrawImage(new AllegroBitmap(m_ScenePreviewBitmap->GetBitmap()));
+				m_DrawDefaultScenePreview = false;
+			} else {
+				m_DrawDefaultScenePreview = true;
+			}
 
 			m_SceneNameLabel->SetText(m_SelectedScene->GetPresetName());
 			m_SceneDescriptionLabel->SetText(m_SelectedScene->GetDescription());
@@ -190,6 +199,8 @@ namespace RTE {
 				// The Activity ComboBox isn't a child of the Activity info box (dirty hack to allow the drop-down list to extend beyond the parent box bounds without clipping) so we need to move as well.
 				m_ActivitySelectComboBox->Move(m_ActivityInfoBox->GetXPos() + 8, m_ActivityInfoBox->GetYPos() + 25);
 			} else if (m_DraggedBox == m_SceneInfoBox) {
+				// The default preview "bitmap" isn't actually a bitmap and isn't a child of the Scene info box so we need to move it as well.
+				m_DefaultScenePreview.SetPos(Vector(static_cast<float>(m_ScenePreviewImageBox->GetXPos() + (m_ScenePreviewImageBox->GetWidth() / 2)), static_cast<float>(m_ScenePreviewImageBox->GetYPos() + (m_ScenePreviewImageBox->GetHeight() / 2))));
 				CalculateLinesToSitePoint();
 			}
 		}
@@ -386,7 +397,10 @@ namespace RTE {
 			UpdateHoveredScene(mousePosX, mousePosY);
 			HandleInputEvents(mousePosX, mousePosY);
 
-			if (m_SceneInfoBox->GetVisible()) { m_StartActivityConfigButton->SetText(m_BlinkTimer.AlternateReal(333) ? "Start Here" : "> Start Here <"); }
+			if (m_SceneInfoBox->GetVisible()) {
+				m_StartActivityConfigButton->SetText(m_BlinkTimer.AlternateReal(333) ? "Start Here" : "> Start Here <");
+				if (m_DrawDefaultScenePreview) { m_DefaultScenePreview.Update(); }
+			}
 			if (m_ResumeButton->GetVisible()) { m_GUIControlManager->GetManager()->SetFocus((m_BlinkTimer.AlternateReal(500)) ? m_ResumeButton : nullptr); }
 		} else {
 			m_RootBox->SetVisible(false);
@@ -488,6 +502,7 @@ namespace RTE {
 				drawing_mode(DRAW_MODE_SOLID, nullptr, 0, 0);
 			}
 			m_GUIControlManager->Draw();
+			if (m_DrawDefaultScenePreview && m_SceneInfoBox->GetVisible()) { m_DefaultScenePreview.Draw(g_FrameMan.GetBackBuffer32()); }
 		} else {
 			m_ActivityConfigBox->Draw();
 		}

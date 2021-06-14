@@ -337,7 +337,9 @@ namespace RTE {
 
 		m_pStartScenarioButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("StartButton"));
 
-		m_pScenePreviewBitmap = create_bitmap_ex(8, c_ScenePreviewWidth, c_ScenePreviewHeight);
+		// TODO: Use old dimensions because don't feel like redesigning this whole GUI. Deal with this eventually.
+		m_pScenePreviewBitmap = create_bitmap_ex(8, 140, 55);
+		//m_pScenePreviewBitmap = create_bitmap_ex(8, c_ScenePreviewWidth, c_ScenePreviewHeight);
 
 		ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview000.png");
 		m_pDefaultPreviewBitmap = defaultPreview.GetAsBitmap(COLORCONV_NONE, false);
@@ -1333,13 +1335,17 @@ namespace RTE {
 				{
 					int xOffset = 0;
 					int yOffset = 0;
-					blit(preview, m_pScenePreviewBitmap, xOffset, yOffset, 0, 0, m_pScenePreviewBitmap->w, m_pScenePreviewBitmap->h);
+					// TODO: Scale down the previews to old dimensions so they fit. Deal with this when redesigning GUI one day.
+					stretch_blit(preview, m_pScenePreviewBitmap, xOffset, yOffset, c_ScenePreviewWidth, c_ScenePreviewHeight, 0, 0, 140, 55 );
+					//blit(preview, m_pScenePreviewBitmap, xOffset, yOffset, 0, 0, m_pScenePreviewBitmap->w, m_pScenePreviewBitmap->h);
 				}
 				else 
 				{
 					int xOffset = 0;
 					int yOffset = 0;
-					blit(m_pDefaultPreviewBitmap, m_pScenePreviewBitmap, xOffset, yOffset, 0, 0, m_pScenePreviewBitmap->w, m_pScenePreviewBitmap->h);
+					// TODO: Scale down the previews to old dimensions so they fit. Deal with this when redesigning GUI one day.
+					stretch_blit(m_pDefaultPreviewBitmap, m_pScenePreviewBitmap, xOffset, yOffset, c_ScenePreviewWidth, c_ScenePreviewHeight, 0, 0, 140, 55);
+					//blit(m_pDefaultPreviewBitmap, m_pScenePreviewBitmap, xOffset, yOffset, 0, 0, m_pScenePreviewBitmap->w, m_pScenePreviewBitmap->h);
 				}
 				draw_sprite(drawBitmap, m_pScenePreviewBitmap,  419, 57);
 			}

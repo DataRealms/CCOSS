@@ -56,7 +56,7 @@ namespace RTE {
 		/// <summary>
 		/// Sets the underlying Bitmap for this GUIBitmap. Ownership is NOT transferred.
 		/// </summary>
-		/// <param name="newBitmap">A pointer to the new Bitmap for this AllegroBitmap.</param>
+		/// <param name="newBitmap">A pointer to the new Bitmap for this GUIBitmap.</param>
 		virtual void SetBitmap(BITMAP *newBitmap) = 0;
 
 		/// <summary>

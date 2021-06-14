@@ -1,5 +1,5 @@
-#ifndef _InventoryMenuGUI_
-#define _InventoryMenuGUI_
+#ifndef _RTEINVENTORYMENUGUI_
+#define _RTEINVENTORYMENUGUI_
 
 #include "StandardIncludes.h"
 #include "Timer.h"
@@ -31,7 +31,7 @@ namespace RTE {
 	public:
 
 		/// <summary>
-		/// Enumeration for the the modes an InventoryMenuGUI can have.
+		/// Enumeration for the modes an InventoryMenuGUI can have.
 		/// </summary>
 		enum class MenuMode { Carousel, Full, Transfer };
 
@@ -47,7 +47,7 @@ namespace RTE {
 		/// <param name="activityPlayerController">A pointer to a Controller which will control this Menu. Ownership is NOT transferred!</param>
 		/// <param name="inventoryActor">The Actor whose inventory this GUI will display. Ownership is NOT transferred!</param>
 		/// <param name="menuMode">The mode this menu should use when it's enabled. Defaults to Carousel.</param>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(Controller *activityPlayerController, Actor *inventoryActor = nullptr, MenuMode menuMode = MenuMode::Carousel);
 #pragma endregion
 
@@ -55,7 +55,7 @@ namespace RTE {
 		/// <summary>
 		/// Resets the entire InventoryMenuGUI, including its inherited members, to their default settings or values.
 		/// </summary>
-		virtual void Reset() { Clear(); }
+		void Reset() { Clear(); }
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -69,7 +69,7 @@ namespace RTE {
 		/// Gets the Actor whose inventory this GUI will display. The ownership of the Actor is NOT transferred!
 		/// </summary>
 		/// <returns>The Actor whose inventory this GUI will display. Ownership is NOT transferred!</returns>
-		const Actor *GetInventoryActor() const { return m_InventoryActor; }
+		const Actor * GetInventoryActor() const { return m_InventoryActor; }
 
 		/// <summary>
 		/// Sets the Actor whose inventory this GUI will display. The ownership of the Actor is NOT transferred!
@@ -81,7 +81,7 @@ namespace RTE {
 		/// Gets the MenuMode this InventoryMenuGUI is currently in.
 		/// </summary>
 		/// <returns>The current MenuMode of this InventoryMenuGUI.</returns>
-		MenuMode GetMenuMode() { return m_MenuMode; }
+		MenuMode GetMenuMode() const { return m_MenuMode; }
 
 		/// <summary>
 		/// Sets the MenuMode for this InventoryMenuGUI to be in.
@@ -142,14 +142,14 @@ namespace RTE {
 		/// <summary>
 		/// Updates the state of this GUI each frame.
 		/// </summary>
-		virtual void Update();
+		void Update();
 
 		/// <summary>
 		/// Draws the GUI.
 		/// </summary>
 		/// <param name="targetBitmap">A pointer to a BITMAP to draw on. Generally a screen BITMAP.</param>
 		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the scene.</param>
-		virtual void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector()) const;
+		void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector()) const;
 #pragma endregion
 
 	private:
@@ -204,7 +204,7 @@ namespace RTE {
 		/// </summary>
 		enum class CarouselAnimationDirection { Left = -1, None, Right};
 
-		static const int c_ItemsPerRow = 5; //!< The number of items per row of the inventory display. MUST be an odd nubmer. Used in all MenuModes.
+		static const int c_ItemsPerRow = 5; //!< The number of items per row of the inventory display. MUST be an odd number. Used in all MenuModes.
 		static const int c_MinimumItemPadding = 1; //!< The padding between item icons and their containing boxes. Items will have at least this much padding on all sides. Used in all MenuModes.
 
 		static const int c_CarouselMenuVerticalOffset = 85; //!< How high above its target the carousel will be. Used in Carousel MenuModes.
@@ -254,12 +254,15 @@ namespace RTE {
 
 		Timer m_GUIRepeatStartTimer; //!< Measures the time to when to start repeating inputs when they're held down. Used in Full/Transfer MenuModes.
 		Timer m_GUIRepeatTimer; //!< Measures the interval between input repeats. Used in Full/Transfer MenuModes.
-		GUIButton *m_KeyboardOrControllerHighlightedButton; //!< A pointer to the GUIButton currently hightlighted by the keyboard or controller.
+		GUIButton *m_KeyboardOrControllerHighlightedButton; //!< A pointer to the GUIButton currently highlighted by the keyboard or controller.
 
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The control manager which holds all the controls. All GUI elements are only used in Full/Transfer MenuModes.
 		std::unique_ptr<AllegroScreen> m_GUIScreen; //!< The GUIScreen interface that will be used by this InventoryMenuGUI's GUIControlManager.
 		std::unique_ptr<AllegroInput> m_GUIInput; //!< The GUIInput interface that will be used by this InventoryMenuGUI's GUIControlManager.
 		
+		/// <summary>
+		/// GUI elements that make up the full mode InventoryMenuGUI.
+		/// </summary>
 		GUICollectionBox *m_GUITopLevelBox; //!< The top-level GUICollectionBox of the InventoryMenuGUI.
 		Vector m_GUITopLevelBoxFullSize; //!< A Vector holding the full size of the top level box for enabling/disabling animations.
 		GUILabel *m_GUIInformationText; //!< A GUILabel to used to display useful information while operating the menu.
@@ -280,32 +283,29 @@ namespace RTE {
 		GUIScrollbar *m_GUIInventoryItemsScrollbar; //!< A GUIScrollbar for scrolling through inventory items.
 		std::vector<std::pair<MovableObject *, GUIButton *>> m_GUIInventoryItemButtons; //!< A vector of pairs of MovableObject pointers and GUIButton pointers, connecting inventory GUIButtons to their corresponding MovableObjects.
 
-		GUICollectionBox *m_GUIPopupBox; //!< A GUICollectionBox for the popup showing item information.
-		GUILabel *m_GUIPopupText; //!< A GUILabel displaying the item popup description.
-
 #pragma region Create Breakdown
 		/// <summary>
 		/// Gets whether the InventoryMenuGUI is ready to be activated in Carousel MenuMode. If it's not, that mode should be setup.
 		/// </summary>
 		/// <returns>Whether or not the InventoryMenuGUI is ready to be activated in carousel MenuMode.</returns>
-		bool CarouselModeReadyForUse() { return m_CarouselBitmap && m_CarouselBGBitmap; }
+		bool CarouselModeReadyForUse() const { return m_CarouselBitmap && m_CarouselBGBitmap; }
 
 		/// <summary>
 		/// Makes the InventoryMenuGUI object ready for Carousel MenuMode use.
 		/// </summary>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int SetupCarouselMode();
 
 		/// <summary>
 		/// Gets whether the InventoryMenuGUI is ready to be activated in Full or Transfer MenuMode. If it's not, that mode should be setup.
 		/// </summary>
 		/// <returns>Whether or not the InventoryMenuGUI is ready to be activated in Full or Transfer MenuMode.</returns>
-		bool FullOrTransferModeReadyForUse() { return m_GUIControlManager && m_GUIScreen && m_GUIInput; }
+		bool FullOrTransferModeReadyForUse() const { return m_GUIControlManager && m_GUIScreen && m_GUIInput; }
 
 		/// <summary>
 		/// Makes the InventoryMenuGUI object ready for Full or Transfer MenuMode use.
 		/// </summary>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int SetupFullOrTransferMode();
 #pragma endregion
 
@@ -387,10 +387,11 @@ namespace RTE {
 #pragma endregion
 
 #pragma region GUI Button Actions
+		//TODO implement swap mode
 		/// <summary>
 		/// Handles set swap button press command events from the GUIControls of this InventoryMenuGUI.
 		/// </summary>
-		void SwapEquippedItemSet() {}
+		//void SwapEquippedItemSet() {}
 
 		/// <summary>
 		/// Swaps an equipped item with one in the inventory Actor's inventory.
@@ -405,7 +406,7 @@ namespace RTE {
 		void ReloadSelectedItem();
 
 		/// <summary>
-		/// Drops the selected item, roating its drop velocity in the direction of the passed in dropDirection Vector.
+		/// Drops the selected item, rotating its drop velocity in the direction of the passed in dropDirection Vector.
 		/// </summary>
 		/// <param name="dropDirection">A pointer to a Vector containing the direction the selected item should be dropped in. Nullptr means standard dropping will be used.</param>
 		void DropSelectedItem(const Vector *dropDirection = nullptr);

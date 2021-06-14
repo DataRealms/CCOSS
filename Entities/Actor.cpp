@@ -811,7 +811,7 @@ void Actor::RemoveInventoryItem(string presetName)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-MovableObject *Actor::RemoveInventoryItemAtIndex(int inventoryIndex) {
+MovableObject * Actor::RemoveInventoryItemAtIndex(int inventoryIndex) {
     if (inventoryIndex >= 0 && inventoryIndex < m_Inventory.size()) {
         MovableObject *itemAtIndex = m_Inventory.at(inventoryIndex);
         m_Inventory.erase(m_Inventory.begin() + inventoryIndex);

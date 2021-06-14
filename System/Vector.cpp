@@ -83,7 +83,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector &Vector::operator=(const Vector &rhs) {
+	Vector & Vector::operator=(const Vector &rhs) {
 		if (*this != rhs) {
 			m_X = rhs.m_X;
 			m_Y = rhs.m_Y;

@@ -29,7 +29,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="controller">A pointer to a Controller which will control this Menu. Ownership is NOT transferred!</param>
 		/// <param name="affectedObject">The object that this menu is will affect. Ownership is NOT transferred! This is optional.</param>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(Controller *controller, MovableObject *affectedObject = nullptr);
 #pragma endregion
 
@@ -96,7 +96,7 @@ namespace RTE {
 		void SetEnabled(bool enable);
 
 		/// <summary>
-		/// Gets the the command issued by this menu in the last update, i.e. the PieSlice type of the currently activated PieSlice or None if no slice was activated.
+		/// Gets the command issued by this menu in the last update, i.e. the PieSlice type of the currently activated PieSlice or None if no slice was activated.
 		/// </summary>
 		/// <returns>The PieSlice type which has been picked activated, or None if none has been picked. See the PieSliceIndex enum for PieSlice types.</returns>
 		PieSlice::PieSliceIndex GetPieCommand() const { return m_ActivatedSlice == nullptr ? PieSlice::PieSliceIndex::PSI_NONE : m_ActivatedSlice->GetType(); }
@@ -106,7 +106,7 @@ namespace RTE {
 		/// <summary>
 		/// Just plays the disabling animation, regardless of whether the menu was enabled or not.
 		/// </summary>
-		void DoDisableAnimation() { m_InnerRadius = m_FullRadius; m_MenuMode = MenuMode::Normal; m_EnableDisableAnimationTimer.Reset(); m_EnabledState = EnabledState::Disabling; }
+		void DoDisableAnimation() { m_InnerRadius = c_FullRadius; m_MenuMode = MenuMode::Normal; m_EnableDisableAnimationTimer.Reset(); m_EnabledState = EnabledState::Disabling; }
 
 		/// <summary>
 		/// Plays an animation of the pie menu circle expanding and contracting continuously. The menu is effectively disabled while doing this. It will continue until the next call to SetEnabled.
@@ -127,7 +127,7 @@ namespace RTE {
 		void ResetSlices();
 
 		/// <summary>
-		/// Adds a PieSlice to the menu. It will be placed according to what's already in there, and what placement apriority parameters it has.
+		/// Adds a PieSlice to the menu. It will be placed according to what's already in there, and what placement priority parameters it has.
 		/// </summary>
 		/// <param name="newPieSlice">The new slice to add.</param>
 		/// <param name="takeAnyFreeCardinal">Whether the new PieSlice can be placed on the closest free cardinal if the one specified in it isn't free. If false, it will be placed in a corner spot as close to its desired direction as possible.</param>
@@ -159,7 +159,7 @@ namespace RTE {
 		/// <param name="functionName">The functionName to search for.</param>
 		/// <param name="direction">The direction the PieSlice should be added at.</param>
 		/// <param name="isEnabled">Whether the PieSlice should be enabled or disabled.</param>
-		/// <returns>Whether or not the PieSlice was succesfully added.</returns>
+		/// <returns>Whether or not the PieSlice was successfully added.</returns>
 		bool AddPieSliceLua(const std::string &description, const std::string &functionName, PieSlice::SliceDirection direction, bool isEnabled);
 
 		/// <summary>
@@ -184,14 +184,14 @@ namespace RTE {
 		/// <summary>
 		/// Updates the state of this Menu each frame.
 		/// </summary>
-		virtual void Update();
+		void Update();
 
 		/// <summary>
 		/// Draws the menu.
 		/// </summary>
 		/// <param name="targetBitmap">A pointer to a BITMAP to draw on. Generally a screen BITMAP.</param>
 		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the scene.</param>
-		virtual void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector()) const;
+		void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector()) const;
 #pragma endregion
 
 	private:
@@ -202,7 +202,7 @@ namespace RTE {
 		enum class EnabledState { Enabling, Enabled, Disabling, Disabled };
 
 		/// <summary>
-		/// Enumeration for the the modes a PieMenuGUI can have.
+		/// Enumeration for the modes a PieMenuGUI can have.
 		/// </summary>
 		enum class MenuMode { Normal, Wobble, Freeze };
 
@@ -212,6 +212,7 @@ namespace RTE {
 		enum class IconSeparatorMode { Line, Circle };
 
 		static const int c_EnablingDelay = 50; //!< Time in ms for how long it takes to enable/disable.
+		static const int c_FullRadius = 58; //!< The radius the menu should have when fully enabled, in pixels.
 
 		//TODO replace this with proper presetman handling for pie slices, instead of adding them by name like this
 		static std::unordered_map<std::string, PieSlice> s_AllCustomLuaSlices; //!< All Slices ever added to this pie-menu, serves as directory of Slices available to add.
@@ -221,7 +222,7 @@ namespace RTE {
 
 		Controller *m_MenuController; //!< The Controller which controls this menu. Separate from the Controller of the affected object (if there is one).
 		MovableObject *m_AffectedObject; //!< The MovableObject this menu affects, if any.
-		MenuMode m_MenuMode; //!< The mdoe this menu is in. See MenuMode enum for more details.
+		MenuMode m_MenuMode; //!< The mode this menu is in. See MenuMode enum for more details.
 		Vector m_CenterPos; //!< The center position of this in the scene.
 
 		EnabledState m_EnabledState; //!< The enabled state of the menu.
@@ -232,9 +233,9 @@ namespace RTE {
 		int m_BackgroundThickness; //!< The thickness of the menu's background, in pixels.
 		int m_BackgroundSeparatorSize; //!< The size of the menu's background separators, in pixels. Used differently based on the menu's IconSeparatorMode.
 		bool m_DrawBackgroundTransparent; //!< Whether or not the menu's background should be drawn transparently.
-		int m_BackgroundColor; //!< The colour used for drawing the menu's background.
-		int m_BackgroundBorderColor; //!< The colour used for drawing borders for the menu's background.
-		int m_SelectedItemBackgroundColor; //!< The colour used for drawing selected menu items' backgrounds.
+		int m_BackgroundColor; //!< The color used for drawing the menu's background.
+		int m_BackgroundBorderColor; //!< The color used for drawing borders for the menu's background.
+		int m_SelectedItemBackgroundColor; //!< The color used for drawing selected menu items' backgrounds.
 		
 		const PieSlice *m_HoveredSlice; //!< The PieSlice currently being hovered over.
 		const PieSlice *m_ActivatedSlice; //!< The currently activated PieSlice, if there is one, or 0 if there's not.
@@ -259,7 +260,6 @@ namespace RTE {
 		std::vector<PieSlice *> m_CurrentSlices; //!< All the PieSlices, in order and aligned. Not owned here, just pointing to the ones above.
 		int m_SliceGroupCount; //!< How many groups there currently are in the menu.
 
-		int m_FullRadius; //!< The radius the menu should have when fully enabled, in pixels.
 		int m_InnerRadius; //!< The current radius of the innermost circle of the pie menu, in pixels.
 		float m_CursorAngle; //!< Position of the cursor on the circle, in radians, counterclockwise from straight out to the right.
 		
@@ -300,14 +300,6 @@ namespace RTE {
 		void UpdatePredrawnMenuBackgroundBitmap();
 #pragma endregion
 
-		/// <summary>
-		/// Sets a slice to be selected.
-		/// </summary>
-		/// <param name="pieSliceToSelect">The slice to be selected. Has to be a slice currently in this menu.</param>
-		/// <param name="moveCursorToSlice">Whether to also move the cursor to the center of the newly selected slice. Defaults to false.</param>
-		/// <returns>Whether or not this resulted in a different slice being selected. Also returns false if a null slice was passed in.</returns>
-		bool SelectPieSlice(const PieSlice *pieSliceToSelect, bool moveCursorToSlice = false);
-
 #pragma region Draw Breakdown
 		/// <summary>
 		/// Handles figuring out the position to draw the menu at, accounting for any Scene seams.
@@ -331,6 +323,14 @@ namespace RTE {
 		/// <param name="drawPos">The seam corrected position at which the pie menu is being drawn.</param>
 		void DrawPieCursorAndSliceDescriptions(BITMAP *targetBitmap, const Vector &drawPos) const;
 #pragma endregion
+
+		/// <summary>
+		/// Sets a slice to be selected.
+		/// </summary>
+		/// <param name="pieSliceToSelect">The slice to be selected. Has to be a slice currently in this menu.</param>
+		/// <param name="moveCursorToSlice">Whether to also move the cursor to the center of the newly selected slice. Defaults to false.</param>
+		/// <returns>Whether or not this resulted in a different slice being selected. Also returns false if a null slice was passed in.</returns>
+		bool SelectPieSlice(const PieSlice *pieSliceToSelect, bool moveCursorToSlice = false);
 
 		/// <summary>
 		/// Clears all the member variables of this PieMenuGUI, effectively resetting the members of this abstraction level only.

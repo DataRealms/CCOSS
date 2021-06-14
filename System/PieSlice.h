@@ -1,5 +1,5 @@
-#ifndef _PIESLICE_
-#define _PIESLICE_
+#ifndef _RTEPIESLICE_
+#define _RTEPIESLICE_
 
 #include "Serializable.h"
 #include "Icon.h"
@@ -16,6 +16,9 @@ namespace RTE {
 		SerializableOverrideMethods
 		SerializableClassNameGetter
 
+		/// <summary>
+		/// Enumeration for the types of PieSlices.
+		/// </summary>
 		enum PieSliceIndex {
 			PSI_NONE = 0,
 			// Inventory management
@@ -93,14 +96,14 @@ namespace RTE {
 		/// <summary>
 		/// Makes the PieSlice object ready for use.
 		/// </summary>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create() override;
 
 		/// <summary>
 		/// Creates a PieSlice to be identical to another, by deep copy.
 		/// </summary>
 		/// <param name="reference">A reference to the PieSlice to deep copy.</param>
-		/// <returns>An error return value signaling sucess or any particular failure. Anything below 0 is an error signal.</returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(const PieSlice &reference);
 
 		/// <summary>
@@ -222,12 +225,13 @@ namespace RTE {
 #pragma endregion
 
 	private:
+		
 		static const std::string c_ClassName; //!< ClassName for PieSlice.
 
 		PieSliceIndex m_SliceType; //!< The PieSlice type, also serves as icon index.
 		std::string m_Description; //!< Description of what this slice option does.
 		SliceDirection m_Direction; //!< The desired direction/location of this on the pie menu.
-		bool m_Enabled; //!< Whether this slice is enabled or disabled and greyed out.
+		bool m_Enabled; //!< Whether this slice is enabled or disabled and grayed out.
 		Icon m_Icon; //!< The icon of this pie slice.
 
 		std::string m_ScriptPath; //!< Path to the script file this should run if this is a scripted selection.

@@ -35,7 +35,7 @@ namespace RTE {
 			itemIcons.reserve(equippedItems->size());
 			for (const MovableObject *equippedItem : *equippedItems) {
 				if (equippedItem) {
-					itemIcons.push_back(equippedItem->GetGraphicalIcon());
+					itemIcons.emplace_back(equippedItem->GetGraphicalIcon());
 					totalItemMass += equippedItem->GetMass();
 				}
 			}
@@ -72,7 +72,9 @@ namespace RTE {
 		m_CarouselAnimationDirection = CarouselAnimationDirection::None;
 		m_CarouselAnimationTimer.Reset();
 		m_CarouselAnimationTimer.SetRealTimeLimitMS(200);
-		for (std::unique_ptr<CarouselItemBox> &carouselItemBox : m_CarouselItemBoxes) { carouselItemBox = nullptr; }
+		for (std::unique_ptr<CarouselItemBox> &carouselItemBox : m_CarouselItemBoxes) {
+			carouselItemBox = nullptr;
+		}
 		m_CarouselExitingItemBox.reset();
 		m_CarouselBitmap = nullptr;
 		m_CarouselBGBitmap = nullptr;
@@ -111,9 +113,6 @@ namespace RTE {
 		m_GUIInventoryItemsScrollbar = nullptr;
 		m_GUIInventoryItemButtons.clear();
 		m_GUIInventoryItemButtons.reserve(c_FullViewPageItemLimit);
-
-		m_GUIPopupBox = nullptr;
-		m_GUIPopupText = nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -122,8 +121,8 @@ namespace RTE {
 		RTEAssert(activityPlayerController, "No controller sent to InventoryMenuGUI on creation!");
 		RTEAssert(c_ItemsPerRow % 2 == 1, "Don't you dare use an even number of items per inventory row, you filthy animal!");
 
-		if (!m_SmallFont) { m_SmallFont = g_FrameMan.GetSmallFont(); }
-		if (!m_LargeFont) { m_LargeFont = g_FrameMan.GetLargeFont(); }
+		if (!m_SmallFont) { m_SmallFont = m_GUIControlManager->GetSkin()->GetFont("smallfont.png"); }
+		if (!m_LargeFont) { m_LargeFont = m_GUIControlManager->GetSkin()->GetFont("fatfont.png");; }
 
 		m_MenuController = activityPlayerController;
 		SetInventoryActor(inventoryActor);
@@ -248,9 +247,6 @@ namespace RTE {
 			itemButtonPair.second->SetPositionRel(inventoryItemButtonTemplate->GetRelXPos() + ((i % c_ItemsPerRow) * inventoryItemButtonTemplate->GetWidth()), inventoryItemButtonTemplate->GetRelYPos() + ((i / c_ItemsPerRow) * inventoryItemButtonTemplate->GetHeight()));
 			m_GUIInventoryItemButtons.emplace_back(itemButtonPair);
 		}
-
-		m_GUIPopupBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBox_Popup"));
-		m_GUIPopupText = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("Label_PopupText"));
 
 		return 0;
 	}
@@ -384,7 +380,7 @@ namespace RTE {
 	void InventoryMenuGUI::UpdateCarouselMode() {
 		if (!CarouselModeReadyForUse()) { SetupCarouselMode(); }
 
-		for (const std::unique_ptr<CarouselItemBox> &carouselItemBox : m_CarouselItemBoxes) { carouselItemBox->Item = nullptr; }
+		m_CarouselItemBoxes.fill(nullptr);
 		if (const std::deque<MovableObject *> *inventory = m_InventoryActor->GetInventory(); !inventory->empty()) {
 			int leftSideItemCount = std::min(static_cast<int>(std::floor(static_cast<float>(inventory->size()) / 2)), c_ItemsPerRow / 2);
 			int rightSideItemCount = std::min(static_cast<int>(std::ceil(static_cast<float>(inventory->size()) / 2)), c_ItemsPerRow / 2);
@@ -673,18 +669,14 @@ namespace RTE {
 
 	void InventoryMenuGUI::UpdateFullModeNonItemButtonIcons() {
 		std::vector<std::pair<GUIButton *, const Icon *>> buttonsToCheckIconsFor = {
-			{m_GUIInformationToggleButton, m_GUIInformationToggleButtonIcon},
-			{m_GUIReloadButton, m_GUIReloadButtonIcon},
-			{m_GUIDropButton, m_GUIDropButtonIcon}
+			{ m_GUIInformationToggleButton, m_GUIInformationToggleButtonIcon },
+			{ m_GUIReloadButton, m_GUIReloadButtonIcon },
+			{ m_GUIDropButton, m_GUIDropButtonIcon }
 		};
 
 		for (const auto &[button, icon] : buttonsToCheckIconsFor) {
 			if (button->IsEnabled()) {
-				if (button->HasFocus() || button->IsMousedOver() || button->IsPushed()) {
-					button->SetIcon(icon->GetBitmaps8()[1]);
-				} else {
-					button->SetIcon(icon->GetBitmaps8()[0]);
-				}
+				button->SetIcon((button->HasFocus() || button->IsMousedOver() || button->IsPushed()) ? icon->GetBitmaps8()[1] : icon->GetBitmaps8()[0]);
 			} else {
 				button->SetIcon(icon->GetBitmaps8()[2]);
 			}
@@ -730,8 +722,6 @@ namespace RTE {
 					m_GUIShowInformationText = !m_GUIShowInformationText;
 					g_GUISound.ItemChangeSound()->Play(m_MenuController->GetPlayer());
 					m_GUIInformationToggleButton->OnLoseFocus();
-				} else if (!buttonHeld && guiControl == m_GUISwapSetButton) {
-					SwapEquippedItemSet();
 				} else if (guiControl == m_GUIEquippedItemButton) {
 					HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.at(0), 0, buttonHeld);
 				} else if (guiControl == m_GUIOffhandEquippedItemButton) {

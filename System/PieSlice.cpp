@@ -205,16 +205,13 @@ namespace RTE {
 	int PieSlice::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		writer.NewProperty("Description");
-		writer << m_Description;
-		writer.NewProperty("Icon");
-		writer << m_Icon;
-		writer.NewProperty("Direction");
-		writer << static_cast<int>(m_Direction);
-		writer.NewProperty("ScriptPath");
-		writer << m_ScriptPath;
-		writer.NewProperty("FunctionName");
-		writer << m_FunctionName;
+		writer.NewPropertyWithValue("Description", m_Description);
+		writer.NewPropertyWithValue("Icon", m_Icon);
+		writer.NewPropertyWithValue("Direction", static_cast<int>(m_Direction));
+		if (!m_ScriptPath.empty() && !m_FunctionName.empty()) {
+			writer.NewPropertyWithValue("ScriptPath", m_ScriptPath);
+			writer.NewPropertyWithValue("FunctionName", m_FunctionName);
+		}
 
 		return 0;
 	}

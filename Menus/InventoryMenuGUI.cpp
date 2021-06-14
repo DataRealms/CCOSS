@@ -228,7 +228,7 @@ namespace RTE {
 		GUIButton *inventoryItemButtonTemplate = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("Button_InventoryItemTemplate"));
 		inventoryItemButtonTemplate->SetEnabled(false);
 		inventoryItemButtonTemplate->SetVisible(false);
-		
+
 		GUIProperties inventoryItemButtonProperties;
 		inventoryItemButtonProperties.AddVariable("ControlType", GUIButton::GetControlID());
 		inventoryItemButtonProperties.AddVariable("Parent", inventoryItemButtonTemplate->GetParent()->GetName());
@@ -386,7 +386,7 @@ namespace RTE {
 		if (const std::deque<MovableObject *> *inventory = m_InventoryActor->GetInventory(); !inventory->empty()) {
 			int leftSideItemCount = std::min(static_cast<int>(std::floor(static_cast<float>(inventory->size()) / 2)), c_ItemsPerRow / 2);
 			int rightSideItemCount = std::min(static_cast<int>(std::ceil(static_cast<float>(inventory->size()) / 2)), c_ItemsPerRow / 2);
-			
+
 			int carouselIndex = 0;
 			std::vector<MovableObject *> temporaryLeftSideItemsForProperOrdering;
 			temporaryLeftSideItemsForProperOrdering.reserve(leftSideItemCount);
@@ -709,7 +709,7 @@ namespace RTE {
 		}
 
 		if (m_GUISelectedItem && m_MenuController->IsState(ControlState::WEAPON_DROP)) { DropSelectedItem(); }
-		
+
 		GUIEvent guiEvent;
 		const GUIControl *guiControl;
 		while (m_GUIControlManager->GetEvent(&guiEvent)) {

@@ -153,7 +153,7 @@ namespace RTE {
 #pragma endregion
 
 	private:
-		
+
 		/// <summary>
 		/// A struct containing all information required to drawn and animate a carousel item box in Carousel MenuMode.
 		/// </summary>
@@ -229,7 +229,7 @@ namespace RTE {
 
 		EnabledState m_EnabledState; //!< The enabled state of the menu.
 		Timer m_EnableDisableAnimationTimer; //!< Timer for progressing enabling/disabling animations.
-		
+
 		bool m_InventoryActorIsHuman; //!< Whether the Actor whose inventory this GUI will display is an AHuman.
 		std::vector<MovableObject *> m_InventoryActorEquippedItems; //!< A vector of pointers to the equipped items of the Actor whose inventory this GUI will display, if applicable.
 
@@ -238,7 +238,7 @@ namespace RTE {
 		int m_CarouselBackgroundBoxColor; //!< The color used for the background box of the carousel. Used in Carousel MenuMode.
 		Vector m_CarouselBackgroundBoxBorderSize; //!< The size of the border around the background box of the carousel. Used in Carousel MenuMode.
 		int m_CarouselBackgroundBoxBorderColor; //!< The color used for the border of the background box of the carousel. Used in Carousel MenuMode.
-		
+
 		CarouselAnimationDirection m_CarouselAnimationDirection; //!< Which direction the carousel is currently animating in, if any. Used in Carousel MenuMode animations.
 		Timer m_CarouselAnimationTimer; //!< Timer for progressing carousel animations.
 		std::array<std::unique_ptr<CarouselItemBox>, c_ItemsPerRow> m_CarouselItemBoxes; //!< An array of CarouselItemBoxes that make up the carousel. Used in Carousel MenuMode.
@@ -259,7 +259,7 @@ namespace RTE {
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The control manager which holds all the controls. All GUI elements are only used in Full/Transfer MenuModes.
 		std::unique_ptr<AllegroScreen> m_GUIScreen; //!< The GUIScreen interface that will be used by this InventoryMenuGUI's GUIControlManager.
 		std::unique_ptr<AllegroInput> m_GUIInput; //!< The GUIInput interface that will be used by this InventoryMenuGUI's GUIControlManager.
-		
+
 		/// <summary>
 		/// GUI elements that make up the full mode InventoryMenuGUI.
 		/// </summary>
@@ -278,7 +278,7 @@ namespace RTE {
 		const Icon *m_GUIReloadButtonIcon; //!< A pointer to the PresetMan pie icon for reloading, used here for the reload button. Not Owned here.
 		GUIButton *m_GUIDropButton; //!< A GUIButton for dropping the selected item.
 		const Icon *m_GUIDropButtonIcon; //!< T pointer to the PresetMan pie icon for dropping items, used here for the drop button. Not Owned here.
-		
+
 		GUICollectionBox *m_GUIInventoryItemsBox; //!< A GUICollectionBox for inventory items and the scrollbar.
 		GUIScrollbar *m_GUIInventoryItemsScrollbar; //!< A GUIScrollbar for scrolling through inventory items.
 		std::vector<std::pair<MovableObject *, GUIButton *>> m_GUIInventoryItemButtons; //!< A vector of pairs of MovableObject pointers and GUIButton pointers, connecting inventory GUIButtons to their corresponding MovableObjects.

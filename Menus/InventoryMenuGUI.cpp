@@ -380,7 +380,9 @@ namespace RTE {
 	void InventoryMenuGUI::UpdateCarouselMode() {
 		if (!CarouselModeReadyForUse()) { SetupCarouselMode(); }
 
-		m_CarouselItemBoxes.fill(nullptr);
+		for (const std::unique_ptr<CarouselItemBox> &carouselItemBox : m_CarouselItemBoxes) {
+			carouselItemBox->Item = nullptr;
+		}
 		if (const std::deque<MovableObject *> *inventory = m_InventoryActor->GetInventory(); !inventory->empty()) {
 			int leftSideItemCount = std::min(static_cast<int>(std::floor(static_cast<float>(inventory->size()) / 2)), c_ItemsPerRow / 2);
 			int rightSideItemCount = std::min(static_cast<int>(std::ceil(static_cast<float>(inventory->size()) / 2)), c_ItemsPerRow / 2);
@@ -758,7 +760,7 @@ namespace RTE {
 			if (m_GUIOffhandEquippedItemButton->IsPushed() && !m_GUIOffhandEquippedItemButton->PointInside(mouseX, mouseY)) { m_GUIOffhandEquippedItemButton->SetPushed(false); }
 			if (m_GUIReloadButton->IsPushed() && !m_GUIReloadButton->PointInside(mouseX, mouseY)) { m_GUIReloadButton->SetPushed(false); }
 			if (m_GUIDropButton->IsPushed() && !m_GUIDropButton->PointInside(mouseX, mouseY)) { m_GUIDropButton->SetPushed(false); }
-			for (const auto &[_, inventoryItemButton] : m_GUIInventoryItemButtons) {
+			for (const auto &[unused, inventoryItemButton] : m_GUIInventoryItemButtons) {
 				if (inventoryItemButton->IsPushed() && !inventoryItemButton->PointInside(mouseX, mouseY)) { inventoryItemButton->SetPushed(false); }
 			}
 

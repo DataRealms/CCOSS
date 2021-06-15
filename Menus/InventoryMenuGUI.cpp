@@ -40,7 +40,7 @@ namespace RTE {
 				}
 			}
 		} else {
-			itemIcons.push_back(Item->GetGraphicalIcon());
+			itemIcons.emplace_back(Item->GetGraphicalIcon());
 			totalItemMass += Item->GetMass();
 		}
 	}

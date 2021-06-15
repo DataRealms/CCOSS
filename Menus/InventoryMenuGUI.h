@@ -256,32 +256,30 @@ namespace RTE {
 		Timer m_GUIRepeatTimer; //!< Measures the interval between input repeats. Used in Full/Transfer MenuModes.
 		GUIButton *m_KeyboardOrControllerHighlightedButton; //!< A pointer to the GUIButton currently highlighted by the keyboard or controller.
 
-		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The control manager which holds all the controls. All GUI elements are only used in Full/Transfer MenuModes.
-		std::unique_ptr<AllegroScreen> m_GUIScreen; //!< The GUIScreen interface that will be used by this InventoryMenuGUI's GUIControlManager.
-		std::unique_ptr<AllegroInput> m_GUIInput; //!< The GUIInput interface that will be used by this InventoryMenuGUI's GUIControlManager.
+		Vector m_GUITopLevelBoxFullSize; //!< A Vector holding the full size of the top level box for enabling/disabling animations.
+		bool m_GUIShowInformationText; //!< Whether or information text explaining how to use the menu should be showing.
+		const Icon *m_GUIInformationToggleButtonIcon; //!< A pointer to the PresetMan pie icon for information, used here for the information toggle button. Not Owned here.
+		const Icon *m_GUIReloadButtonIcon; //!< A pointer to the PresetMan pie icon for reloading, used here for the reload button. Not Owned here.
+		const Icon *m_GUIDropButtonIcon; //!< A pointer to the PresetMan pie icon for dropping items, used here for the drop button. Not Owned here.
+		std::vector<std::pair<MovableObject *, GUIButton *>> m_GUIInventoryItemButtons; //!< A vector of pairs of MovableObject pointers and GUIButton pointers, connecting inventory GUIButtons to their corresponding MovableObjects.
 
 		/// <summary>
 		/// GUI elements that make up the full mode InventoryMenuGUI.
 		/// </summary>
-		GUICollectionBox *m_GUITopLevelBox; //!< The top-level GUICollectionBox of the InventoryMenuGUI.
-		Vector m_GUITopLevelBoxFullSize; //!< A Vector holding the full size of the top level box for enabling/disabling animations.
-		GUILabel *m_GUIInformationText; //!< A GUILabel to used to display useful information while operating the menu.
-		bool m_GUIShowInformationText; //!< Whether or information text explaining how to use the menu should be showing.
-		GUIButton *m_GUIInformationToggleButton; //!< A GUIButton for showing and hiding the information text.
-		const Icon *m_GUIInformationToggleButtonIcon; //!< A pointer to the PresetMan pie icon for information, used here for the information toggle button. Not Owned here.
-
-		GUICollectionBox *m_GUIEquippedItemsBox; //!< A GUICollectionBox for equipped items and related content.
-		GUIButton *m_GUISwapSetButton; //!< A GUIButton for swapping equipment sets.
-		GUIButton *m_GUIEquippedItemButton; //!< A GUIButton containing the equipped item if any.
-		GUIButton *m_GUIOffhandEquippedItemButton; //!< A GUIButton containing the offhand equipped item if any.
-		GUIButton *m_GUIReloadButton; //!< A GUIButton for reloading the selected item.
-		const Icon *m_GUIReloadButtonIcon; //!< A pointer to the PresetMan pie icon for reloading, used here for the reload button. Not Owned here.
-		GUIButton *m_GUIDropButton; //!< A GUIButton for dropping the selected item.
-		const Icon *m_GUIDropButtonIcon; //!< T pointer to the PresetMan pie icon for dropping items, used here for the drop button. Not Owned here.
-
-		GUICollectionBox *m_GUIInventoryItemsBox; //!< A GUICollectionBox for inventory items and the scrollbar.
-		GUIScrollbar *m_GUIInventoryItemsScrollbar; //!< A GUIScrollbar for scrolling through inventory items.
-		std::vector<std::pair<MovableObject *, GUIButton *>> m_GUIInventoryItemButtons; //!< A vector of pairs of MovableObject pointers and GUIButton pointers, connecting inventory GUIButtons to their corresponding MovableObjects.
+		std::unique_ptr<GUIControlManager> m_GUIControlManager;
+		std::unique_ptr<AllegroScreen> m_GUIScreen;
+		std::unique_ptr<AllegroInput> m_GUIInput;
+		GUICollectionBox *m_GUITopLevelBox;
+		GUILabel *m_GUIInformationText;
+		GUIButton *m_GUIInformationToggleButton;
+		GUICollectionBox *m_GUIEquippedItemsBox;
+		GUIButton *m_GUISwapSetButton;
+		GUIButton *m_GUIEquippedItemButton;
+		GUIButton *m_GUIOffhandEquippedItemButton;
+		GUIButton *m_GUIReloadButton;
+		GUIButton *m_GUIDropButton;
+		GUICollectionBox *m_GUIInventoryItemsBox;
+		GUIScrollbar *m_GUIInventoryItemsScrollbar;
 
 #pragma region Create Breakdown
 		/// <summary>

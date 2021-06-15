@@ -205,7 +205,7 @@ namespace RTE {
 		for (PieSlice *slice : m_CurrentSlices) {
 			slice->SetMidAngle(slice->GetAreaStart() + (slice->GetAreaArc() / 2));
 		}
-		
+
 		m_BGBitmapNeedsRedrawing = true;
 	}
 

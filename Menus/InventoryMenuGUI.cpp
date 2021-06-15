@@ -89,30 +89,28 @@ namespace RTE {
 		m_GUIRepeatTimer.Reset();
 		m_KeyboardOrControllerHighlightedButton = nullptr;
 
+		m_GUITopLevelBoxFullSize.Reset();
+		m_GUIShowInformationText = true;
+		m_GUIInformationToggleButtonIcon = nullptr;
+		m_GUIReloadButtonIcon = nullptr;
+		m_GUIDropButtonIcon = nullptr;
+		m_GUIInventoryItemButtons.clear();
+		m_GUIInventoryItemButtons.reserve(c_FullViewPageItemLimit);
+
 		m_GUIControlManager = nullptr;
 		m_GUIScreen = nullptr;
 		m_GUIInput = nullptr;
-
 		m_GUITopLevelBox = nullptr;
-		m_GUITopLevelBoxFullSize.Reset();
 		m_GUIInformationText = nullptr;
-		m_GUIShowInformationText = true;
 		m_GUIInformationToggleButton = nullptr;
-		m_GUIInformationToggleButtonIcon = nullptr;
-
 		m_GUIEquippedItemsBox = nullptr;
 		m_GUISwapSetButton = nullptr;
 		m_GUIEquippedItemButton = nullptr;
 		m_GUIOffhandEquippedItemButton = nullptr;
 		m_GUIReloadButton = nullptr;
-		m_GUIReloadButtonIcon = nullptr;
 		m_GUIDropButton = nullptr;
-		m_GUIDropButtonIcon = nullptr;
-
 		m_GUIInventoryItemsBox = nullptr;
 		m_GUIInventoryItemsScrollbar = nullptr;
-		m_GUIInventoryItemButtons.clear();
-		m_GUIInventoryItemButtons.reserve(c_FullViewPageItemLimit);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -210,13 +208,9 @@ namespace RTE {
 		m_GUIOffhandEquippedItemButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("Button_OffhandEquippedItem"));
 		m_GUIOffhandEquippedItemButton->SetHorizontalOverflowScroll(true);
 		m_GUIReloadButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("Button_Reload"));
-		m_GUIReloadButton->SetEnabled(false);
-		m_GUIReloadButton->SetVisible(m_InventoryActorIsHuman);
 		m_GUIReloadButton->SetText("");
 		m_GUIReloadButtonIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Reload"));
 		m_GUIDropButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("Button_Drop"));
-		m_GUIDropButton->SetEnabled(false);
-		m_GUIDropButton->SetVisible(m_InventoryActorIsHuman);
 		m_GUIDropButton->SetText("");
 		m_GUIDropButtonIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Drop"));
 
@@ -234,8 +228,6 @@ namespace RTE {
 		inventoryItemButtonProperties.AddVariable("Parent", inventoryItemButtonTemplate->GetParent()->GetName());
 		inventoryItemButtonProperties.AddVariable("Width", inventoryItemButtonTemplate->GetWidth());
 		inventoryItemButtonProperties.AddVariable("Height", inventoryItemButtonTemplate->GetHeight());
-		inventoryItemButtonProperties.AddVariable("Visible", true);
-		inventoryItemButtonProperties.AddVariable("Enabled", true);
 		std::string emptyButtonText = "> <";
 		inventoryItemButtonProperties.AddVariable("Text", emptyButtonText);
 		inventoryItemButtonProperties.AddVariable("HorizontalOverflowScroll", true);
@@ -320,7 +312,7 @@ namespace RTE {
 		if (m_InventoryActor && m_EnabledState != EnabledState::Disabled) {
 			if (!g_MovableMan.ValidMO(m_InventoryActor)) { m_InventoryActor = nullptr; }
 
-			if (const AHuman *inventoryActorAsAHuman = m_InventoryActorIsHuman ? dynamic_cast<AHuman *>(m_InventoryActor) : nullptr) {
+			if (const AHuman *inventoryActorAsAHuman = (m_InventoryActorIsHuman ? dynamic_cast<AHuman *>(m_InventoryActor) : nullptr)) {
 				m_InventoryActorEquippedItems.clear();
 				m_InventoryActorEquippedItems.reserve(2);
 				if (inventoryActorAsAHuman->GetEquippedItem()) { m_InventoryActorEquippedItems.push_back(inventoryActorAsAHuman->GetEquippedItem()); }
@@ -383,7 +375,8 @@ namespace RTE {
 		for (const std::unique_ptr<CarouselItemBox> &carouselItemBox : m_CarouselItemBoxes) {
 			carouselItemBox->Item = nullptr;
 		}
-		if (const std::deque<MovableObject *> *inventory = m_InventoryActor->GetInventory(); !inventory->empty()) {
+		const std::deque<MovableObject *> *inventory = m_InventoryActor->GetInventory();
+		if (inventory && !inventory->empty()) {
 			int leftSideItemCount = std::min(static_cast<int>(std::floor(static_cast<float>(inventory->size()) / 2)), c_ItemsPerRow / 2);
 			int rightSideItemCount = std::min(static_cast<int>(std::ceil(static_cast<float>(inventory->size()) / 2)), c_ItemsPerRow / 2);
 
@@ -518,12 +511,17 @@ namespace RTE {
 		if (m_GUISelectedItem) {
 			m_GUISelectedItem->Button->OnGainFocus();
 			if (m_GUISelectedItem->DragWasHeldForLongEnough()) { m_GUIInformationToggleButton->SetEnabled(false); }
-			if (const HDFirearm *selectedItemAsFirearm = dynamic_cast<HDFirearm *>(m_GUISelectedItem->Object)) {m_GUIReloadButton->SetEnabled(!selectedItemAsFirearm->IsFull()); }
+			if (const HDFirearm *selectedItemAsFirearm = dynamic_cast<HDFirearm *>(m_GUISelectedItem->Object)) {
+				m_GUIReloadButton->SetEnabled(!selectedItemAsFirearm->IsFull());
+			} else {
+				m_GUIReloadButton->SetEnabled(false);
+			}
 			m_GUIDropButton->SetEnabled(true);
 		} else {
 			m_GUIReloadButton->SetEnabled(false);
 			for (const MovableObject *equippedItem : m_InventoryActorEquippedItems) {
-				if (const HDFirearm *equippedItemAsFirearm = dynamic_cast<const HDFirearm *>(equippedItem); equippedItemAsFirearm && !equippedItemAsFirearm->IsFull()) {
+				const HDFirearm *equippedItemAsFirearm = dynamic_cast<const HDFirearm *>(equippedItem);
+				if (equippedItemAsFirearm && !equippedItemAsFirearm->IsFull()) {
 					m_GUIReloadButton->SetEnabled(true);
 					break;
 				}
@@ -1186,7 +1184,8 @@ namespace RTE {
 		if (itemBoxToDraw.RoundedAndBorderedSides.first) { iconMaxSize.SetX(iconMaxSize.GetX() - m_CarouselBackgroundBoxBorderSize.GetX()); }
 		if (itemBoxToDraw.RoundedAndBorderedSides.second) { iconMaxSize.SetX(iconMaxSize.GetX() - m_CarouselBackgroundBoxBorderSize.GetX()); }
 		std::for_each(itemIcons.crbegin(), itemIcons.crend(), [this, &itemBoxToDraw, &multiItemDrawOffset, &iconMaxSize](BITMAP *iconToDraw) {
-			if (float stretchRatio = std::max(static_cast<float>(iconToDraw->w - 1 + (multiItemDrawOffset.GetFloorIntX() / 2)) / iconMaxSize.GetX(), static_cast<float>(iconToDraw->h - 1 + (multiItemDrawOffset.GetFloorIntY() / 2)) / iconMaxSize.GetY()); stretchRatio > 1) {
+			float stretchRatio = std::max(static_cast<float>(iconToDraw->w - 1 + (multiItemDrawOffset.GetFloorIntX() / 2)) / iconMaxSize.GetX(), static_cast<float>(iconToDraw->h - 1 + (multiItemDrawOffset.GetFloorIntY() / 2)) / iconMaxSize.GetY());
+			if (stretchRatio > 1) {
 				float stretchedWidth = static_cast<float>(iconToDraw->w) / stretchRatio;
 				float stretchedHeight = static_cast<float>(iconToDraw->h) / stretchRatio;
 				stretch_sprite(m_CarouselBitmap.get(), iconToDraw,

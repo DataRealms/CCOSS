@@ -168,7 +168,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	BITMAP *RTE::PieSlice::GetAppropriateIcon(bool sliceIsSelected) const {
-		if (int iconFrameCount = m_Icon.GetFrameCount(); iconFrameCount > 0) {
+		int iconFrameCount = m_Icon.GetFrameCount();
+		if (iconFrameCount > 0) {
 			if (!IsEnabled() && iconFrameCount > 2) {
 				return m_Icon.GetBitmaps8()[2];
 			} else if (sliceIsSelected && iconFrameCount > 1) {

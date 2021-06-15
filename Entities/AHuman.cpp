@@ -130,7 +130,7 @@ int AHuman::Create()
     }
 
     // If empty-handed, equip first thing in inventory
-    if (m_pFGArm && !m_pFGArm->GetHeldMO())
+    if (m_pFGArm && m_pFGArm->IsAttached() && !m_pFGArm->GetHeldMO())
     {
         m_pFGArm->SetHeldMO(SwapNextInventory(0, true));
         m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
@@ -437,7 +437,7 @@ float AHuman::GetTotalValue(int nativeModule, float foreignMult, float nativeMul
     float totalValue = Actor::GetTotalValue(nativeModule, foreignMult, nativeMult);
 
     // If holding something, then add its value, too
-    if (m_pFGArm && m_pFGArm->GetHeldMO())
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldMO())
         totalValue += m_pFGArm->GetHeldMO()->GetTotalValue(nativeModule, foreignMult, nativeMult);
 
     return totalValue;
@@ -455,9 +455,9 @@ bool AHuman::HasObject(string objectName) const
     bool found = Actor::HasObject(objectName);
 
     // If holding something, then check that too
-    if (m_pFGArm && m_pFGArm->GetHeldMO())
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldMO())
         found = found || m_pFGArm->GetHeldMO()->HasObject(objectName);
-    if (m_pBGArm && m_pBGArm->GetHeldMO())
+    if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->GetHeldMO())
         found = found || m_pBGArm->GetHeldMO()->HasObject(objectName);
 
     return found;
@@ -476,9 +476,9 @@ bool AHuman::HasObjectInGroup(std::string groupName) const
     bool found = Actor::HasObjectInGroup(groupName);
 
     // If holding something, then check that too
-    if (m_pFGArm && m_pFGArm->GetHeldMO())
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldMO())
         found = found || m_pFGArm->GetHeldMO()->HasObjectInGroup(groupName);
-    if (m_pBGArm && m_pBGArm->GetHeldMO())
+    if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->GetHeldMO())
         found = found || m_pBGArm->GetHeldMO()->HasObjectInGroup(groupName);
 
     return found;
@@ -492,7 +492,8 @@ bool AHuman::HasObjectInGroup(std::string groupName) const
 
 Vector AHuman::GetCPUPos() const
 {
-	if (m_pHead) { return m_Pos + ((m_pHead->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation) * 1.5F); }
+    if (m_pHead && m_pHead->IsAttached())
+        return m_Pos + ((m_pHead->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation) * 1.5);
 
     return m_Pos;
 }
@@ -505,7 +506,9 @@ Vector AHuman::GetCPUPos() const
 
 Vector AHuman::GetEyePos() const
 {
-	if (m_pHead) { return m_Pos + m_pHead->GetParentOffset() * 1.2F; }
+	if (m_pHead && m_pHead->IsAttached()) {
+		return m_Pos + m_pHead->GetParentOffset() * 1.2F;
+	}
 
     return m_Pos;
 }
@@ -513,10 +516,11 @@ Vector AHuman::GetEyePos() const
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetHead(Attachable *newHead) {
-	if (m_pHead && m_pHead->IsAttached()) { RemoveAttachable(m_pHead); }
     if (newHead == nullptr) {
+        if (m_pHead && m_pHead->IsAttached()) { RemoveAttachable(m_pHead); }
         m_pHead = nullptr;
     } else {
+        if (m_pHead && m_pHead->IsAttached()) { RemoveAttachable(m_pHead); }
         m_pHead = newHead;
         AddAttachable(newHead);
 
@@ -533,10 +537,11 @@ void AHuman::SetHead(Attachable *newHead) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetJetpack(AEmitter *newJetpack) {
-	if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
     if (newJetpack == nullptr) {
+        if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
         m_pJetpack = nullptr;
     } else {
+        if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
         m_pJetpack = newJetpack;
         AddAttachable(newJetpack);
 
@@ -554,10 +559,11 @@ void AHuman::SetJetpack(AEmitter *newJetpack) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetFGArm(Arm *newArm) {
-	if (m_pFGArm && m_pFGArm->IsAttached()) { RemoveAttachable(m_pFGArm); }
     if (newArm == nullptr) {
+        if (m_pFGArm && m_pFGArm->IsAttached()) { RemoveAttachable(m_pFGArm); }
         m_pFGArm = nullptr;
     } else {
+        if (m_pFGArm && m_pFGArm->IsAttached()) { RemoveAttachable(m_pFGArm); }
         m_pFGArm = newArm;
         AddAttachable(newArm);
 
@@ -576,10 +582,11 @@ void AHuman::SetFGArm(Arm *newArm) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetBGArm(Arm *newArm) {
-	if (m_pBGArm && m_pBGArm->IsAttached()) { RemoveAttachable(m_pBGArm); }
     if (newArm == nullptr) {
+        if (m_pBGArm && m_pBGArm->IsAttached()) { RemoveAttachable(m_pBGArm); }
         m_pBGArm = nullptr;
     } else {
+        if (m_pBGArm && m_pBGArm->IsAttached()) { RemoveAttachable(m_pBGArm); }
         m_pBGArm = newArm;
         AddAttachable(newArm);
 
@@ -597,10 +604,11 @@ void AHuman::SetBGArm(Arm *newArm) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetFGLeg(Leg *newLeg) {
-	if (m_pFGLeg && m_pFGLeg->IsAttached()) { RemoveAttachable(m_pFGLeg); }
     if (newLeg == nullptr) {
+        if (m_pFGLeg && m_pFGLeg->IsAttached()) { RemoveAttachable(m_pFGLeg); }
         m_pFGLeg = nullptr;
     } else {
+        if (m_pFGLeg && m_pFGLeg->IsAttached()) { RemoveAttachable(m_pFGLeg); }
         m_pFGLeg = newLeg;
         AddAttachable(newLeg);
 
@@ -617,10 +625,11 @@ void AHuman::SetFGLeg(Leg *newLeg) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetBGLeg(Leg *newLeg) {
-	if (m_pBGLeg && m_pBGLeg->IsAttached()) { RemoveAttachable(m_pBGLeg); }
     if (newLeg == nullptr) {
+        if (m_pBGLeg && m_pBGLeg->IsAttached()) { RemoveAttachable(m_pBGLeg); }
         m_pBGLeg = nullptr;
     } else {
+        if (m_pBGLeg && m_pBGLeg->IsAttached()) { RemoveAttachable(m_pBGLeg); }
         m_pBGLeg = newLeg;
         AddAttachable(newLeg);
 
@@ -638,7 +647,7 @@ void AHuman::SetBGLeg(Leg *newLeg) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BITMAP *AHuman::GetHeadBitmap() const {
-    return (m_pHead) ? m_pHead->GetSpriteFrame(0) : nullptr;
+    return (m_pHead && m_pHead->IsAttached()) ? m_pHead->GetSpriteFrame(0) : nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -760,11 +769,11 @@ bool AHuman::OnSink(const Vector &pos)
 bool AHuman::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
     if (m_pItemInReach) {
-		PieMenuGUI::Slice pickUpSlice(m_pFGArm ? "Pick Up " + m_pItemInReach->GetPresetName() : "NO ARM!", PieMenuGUI::PSI_PICKUP, PieMenuGUI::Slice::UP, m_pFGArm);
+		PieMenuGUI::Slice pickUpSlice(m_pFGArm ? "Pick Up " + m_pItemInReach->GetPresetName() : "NO ARM!", PieMenuGUI::PSI_PICKUP, PieMenuGUI::Slice::UP, m_pFGArm && m_pFGArm->IsAttached());
 		
         pPieMenu->AddSlice(pickUpSlice);
     } else {
-		PieMenuGUI::Slice reloadSlice(m_pFGArm ? "Reload" : "NO ARM!", PieMenuGUI::PSI_RELOAD, PieMenuGUI::Slice::UP, (m_pFGArm && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull()) || (m_pBGArm && m_pBGArm->GetHeldDevice() && !m_pBGArm->GetHeldDevice()->IsFull()));
+		PieMenuGUI::Slice reloadSlice(m_pFGArm ? "Reload" : "NO ARM!", PieMenuGUI::PSI_RELOAD, PieMenuGUI::Slice::UP, (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull()) || (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->GetHeldDevice() && !m_pBGArm->GetHeldDevice()->IsFull()));
         pPieMenu->AddSlice(reloadSlice);
 	}
 	
@@ -795,7 +804,7 @@ bool AHuman::AddPieMenuSlices(PieMenuGUI *pPieMenu)
     Actor::AddPieMenuSlices(pPieMenu);
 
     // Add any custom slices from a currently held device
-    if (m_pFGArm && m_pFGArm->HoldsDevice())
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsDevice())
         m_pFGArm->GetHeldDevice()->AddPieMenuSlices(pPieMenu);
 
     return true;
@@ -858,7 +867,7 @@ bool AHuman::HandlePieCommand(int pieSliceIndex)
 void AHuman::AddInventoryItem(MovableObject *pItemToAdd)
 {
     // If we have nothing in inventory, and nothing in our hands, just grab this first things added to us
-    if (pItemToAdd && m_Inventory.empty() && m_pFGArm && !m_pFGArm->GetHeldMO())
+    if (pItemToAdd && m_Inventory.empty() && m_pFGArm && m_pFGArm->IsAttached() && !m_pFGArm->GetHeldMO())
     {
         m_pFGArm->SetHeldMO(pItemToAdd);
         m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
@@ -880,7 +889,7 @@ void AHuman::AddInventoryItem(MovableObject *pItemToAdd)
 
 bool AHuman::EquipFirearm(bool doEquip)
 {
-    if (!m_pFGArm)
+    if (!(m_pFGArm && m_pFGArm->IsAttached()))
         return false;
 
     HDFirearm *pWeapon = 0;
@@ -942,7 +951,7 @@ bool AHuman::EquipFirearm(bool doEquip)
 
 bool AHuman::EquipDeviceInGroup(string group, bool doEquip)
 {
-    if (!m_pFGArm)
+    if (!(m_pFGArm && m_pFGArm->IsAttached()))
         return false;
 
     HeldDevice *pDevice = 0;
@@ -1004,7 +1013,7 @@ bool AHuman::EquipDeviceInGroup(string group, bool doEquip)
 
 bool AHuman::EquipLoadedFirearmInGroup(string group, string excludeGroup, bool doEquip)
 {
-    if (!m_pFGArm)
+    if (!(m_pFGArm && m_pFGArm->IsAttached()))
         return false;
 
     HDFirearm *pFirearm = 0;
@@ -1066,7 +1075,7 @@ bool AHuman::EquipLoadedFirearmInGroup(string group, string excludeGroup, bool d
 
 bool AHuman::EquipNamedDevice(const string name, bool doEquip)
 {
-    if (!m_pFGArm)
+    if (!(m_pFGArm && m_pFGArm->IsAttached()))
         return false;
 
     HeldDevice *pDevice = 0;
@@ -1128,7 +1137,7 @@ bool AHuman::EquipNamedDevice(const string name, bool doEquip)
 
 bool AHuman::EquipThrowable(bool doEquip)
 {
-    if (!m_pFGArm)
+    if (!(m_pFGArm && m_pFGArm->IsAttached()))
         return false;
 
     ThrownDevice *pThrown = 0;
@@ -1192,7 +1201,7 @@ bool AHuman::EquipThrowable(bool doEquip)
 
 bool AHuman::EquipDiggingTool(bool doEquip)
 {
-    if (!m_pFGArm)
+    if (!(m_pFGArm && m_pFGArm->IsAttached()))
         return false;
 
     HDFirearm *pTool = 0;
@@ -1254,7 +1263,7 @@ float AHuman::EstimateDigStrenght()
 {
     float maxPenetration = 1;
     
-    if (!m_pFGArm)
+    if (!(m_pFGArm && m_pFGArm->IsAttached()))
         return maxPenetration;
     
     HDFirearm *pTool = 0;
@@ -1289,7 +1298,7 @@ float AHuman::EstimateDigStrenght()
 
 bool AHuman::EquipShield()
 {
-    if (!m_pFGArm)
+    if (!(m_pFGArm && m_pFGArm->IsAttached()))
         return false;
 
     HeldDevice *pShield = 0;
@@ -1348,7 +1357,7 @@ bool AHuman::EquipShield()
 
 bool AHuman::EquipShieldInBGArm()
 {
-    if (!m_pBGArm)
+    if (!(m_pBGArm && m_pBGArm->IsAttached()))
         return false;
 
     HeldDevice *pShield = 0;
@@ -1361,7 +1370,7 @@ bool AHuman::EquipShieldInBGArm()
         {
             // If we're holding a shield, but aren't supposed to, because we need to support the FG hand's two-handed device,
             // then let go of the shield and put it back in inventory
-            if (m_pFGArm && m_pFGArm->HoldsHeldDevice() && !m_pFGArm->GetHeldDevice()->IsOneHanded())
+            if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice() && !m_pFGArm->GetHeldDevice()->IsOneHanded())
             {
                 m_pBGArm->GetHeldDevice()->Deactivate();
                 m_Inventory.push_back(m_pBGArm->ReleaseHeldMO());
@@ -1372,7 +1381,7 @@ bool AHuman::EquipShieldInBGArm()
     }
 
     // Only equip if the BG hand isn't occupied with supporting a two handed device
-    if (m_pFGArm && m_pFGArm->HoldsHeldDevice() && !m_pFGArm->GetHeldDevice()->IsOneHanded())
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice() && !m_pFGArm->GetHeldDevice()->IsOneHanded())
         return false;
 
     // Go through the inventory looking for the proper device
@@ -1421,7 +1430,7 @@ bool AHuman::EquipShieldInBGArm()
 
 bool AHuman::UnequipBGArm()
 {
-    if (!m_pBGArm)
+    if (!(m_pBGArm && m_pBGArm->IsAttached()))
         return false;
 
     // Put back into the inventory what we had in our hand, if anything
@@ -1444,7 +1453,7 @@ bool AHuman::UnequipBGArm()
 MovableObject * AHuman::GetEquippedItem() const
 {
     // Check if the currently held device is already the desired type
-    if (m_pFGArm && m_pFGArm->HoldsSomething())
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsSomething())
     {
         return m_pFGArm->GetHeldMO();
     }
@@ -1459,7 +1468,7 @@ MovableObject * AHuman::GetEquippedItem() const
 MovableObject * AHuman::GetEquippedBGItem() const
 {
 	// Check if the currently held device is already the desired type
-	if (m_pBGArm && m_pBGArm->HoldsSomething())
+	if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->HoldsSomething())
 	{
 		return m_pBGArm->GetHeldMO();
 	}
@@ -1475,7 +1484,7 @@ MovableObject * AHuman::GetEquippedBGItem() const
 bool AHuman::FirearmIsReady() const
 {
     // Check if the currently held device is already the desired type
-    if (m_pFGArm && m_pFGArm->HoldsSomething())
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsSomething())
     {
         const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         if (pWeapon && pWeapon->GetRoundInMagCount() != 0)
@@ -1494,7 +1503,7 @@ bool AHuman::FirearmIsReady() const
 bool AHuman::ThrowableIsReady() const
 {
     // Check if the currently held thrown device is already the desired type
-    if (m_pFGArm && m_pFGArm->HoldsSomething())
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsSomething())
     {
         const ThrownDevice *pThrown = dynamic_cast<ThrownDevice *>(m_pFGArm->GetHeldMO());
         if (pThrown)// && pThrown->blah() > 0)
@@ -1512,7 +1521,7 @@ bool AHuman::ThrowableIsReady() const
 
 bool AHuman::FirearmIsEmpty() const
 {
-    if (m_pFGArm && m_pFGArm->HoldsHeldDevice())
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
     {
         const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         if (pWeapon && pWeapon->GetRoundInMagCount() == 0)
@@ -1530,7 +1539,7 @@ bool AHuman::FirearmIsEmpty() const
 
 bool AHuman::FirearmNeedsReload() const
 {
-    if (m_pFGArm && m_pFGArm->HoldsHeldDevice())
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
     {
         const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         if (pWeapon && pWeapon->NeedsReloading())
@@ -1548,7 +1557,7 @@ bool AHuman::FirearmNeedsReload() const
 
 bool AHuman::FirearmIsSemiAuto() const
 {
-    if (m_pFGArm && m_pFGArm->HoldsHeldDevice())
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
     {
         const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         return pWeapon && !pWeapon->IsFullAuto();
@@ -1566,7 +1575,7 @@ bool AHuman::FirearmIsSemiAuto() const
 
 void AHuman::ReloadFirearm() const
 {
-    if (m_pFGArm && m_pFGArm->HoldsHeldDevice())
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
     {
         HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
 		if (pWeapon) {
@@ -1585,7 +1594,7 @@ void AHuman::ReloadFirearm() const
 int AHuman::FirearmActivationDelay() const
 {
     // Check if the currently held device is already the desired type
-    if (m_pFGArm && m_pFGArm->HoldsSomething())
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsSomething())
     {
         const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         if (pWeapon)
@@ -1622,7 +1631,7 @@ bool AHuman::IsWithinRange(Vector &point) const
         range = m_AimDistance;
 
         // Add the sharp range of the equipped weapon
-        if (m_pFGArm && m_pFGArm->HoldsHeldDevice())
+        if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
             range += m_pFGArm->GetHeldDevice()->GetSharpLength() + 150;
     }
     else if (ThrowableIsReady())
@@ -1652,13 +1661,14 @@ bool AHuman::Look(float FOVSpread, float range)
     Vector aimPos = m_Pos;
 
     // If aiming down the barrel, look through that
-    if (m_Controller.IsState(AIM_SHARP) && m_pFGArm && m_pFGArm->HoldsHeldDevice())
+    if (m_Controller.IsState(AIM_SHARP) && m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
     {
         aimPos = m_pFGArm->GetHeldDevice()->GetPos();
         aimDistance += m_pFGArm->GetHeldDevice()->GetSharpLength();
     }
     // If just looking, use the eyes on the head instead
-    else if (m_pHead) {
+    else if (m_pHead && m_pHead->IsAttached())
+    {
         aimPos = GetEyePos();
     }
 
@@ -1707,13 +1717,14 @@ MovableObject * AHuman::LookForMOs(float FOVSpread, unsigned char ignoreMaterial
     float aimDistance = m_AimDistance + g_FrameMan.GetPlayerScreenWidth() * 0.51;   // Set the length of the look vector
 
     // If aiming down the barrel, look through that
-    if (m_Controller.IsState(AIM_SHARP) && m_pFGArm && m_pFGArm->HoldsHeldDevice())
+    if (m_Controller.IsState(AIM_SHARP) && m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
     {
         aimPos = m_pFGArm->GetHeldDevice()->GetPos();
         aimDistance += m_pFGArm->GetHeldDevice()->GetSharpLength();
     }
     // If just looking, use the eyes on the head instead
-    else if (m_pHead) {
+    else if (m_pHead && m_pHead->IsAttached())
+    {
         aimPos = GetEyePos();
     }
 
@@ -2418,7 +2429,7 @@ void AHuman::UpdateAI()
             m_SeenTargetPos = g_SceneMan.GetLastRayHitPos();//pSeenActor->GetCPUPos();
 
             // If we have something to fire with
-            if (m_pFGArm && m_pFGArm->HoldsHeldDevice())
+            if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
             {
                 // Don't press the trigger too fast in succession
                 if (m_FireTimer.IsPastSimMS(250))
@@ -2918,7 +2929,7 @@ void AHuman::UpdateAI()
             Vector heading(g_SceneMan.ShortestDistance(m_Pos, m_PrevPathTarget));
             heading.SetMagnitude(m_CharHeight * 0.5);
             // Don't crawl if it's too steep, just let him climb then instead
-            if (std::abs(heading.m_X) > std::abs(heading.m_Y) && m_pHead)
+            if (fabs(heading.m_X) > fabs(heading.m_Y) && m_pHead && m_pHead->IsAttached())
             {
                 Vector topHeadPos = m_Pos;
                 // Stack up the maximum height the top back of the head can have over the body's position
@@ -3075,10 +3086,10 @@ int AHuman::OnPieMenu(Actor *pieMenuActor) {
 	int status = Actor::OnPieMenu(pieMenuActor);
 
     // Note: This is a bit ugly, but it should make this function output different error statuses based on whether the AHuman's OnPieMenuFunction fails, or its weapons' do, though the specifics can't be sussed out by the error alone.
-    if (m_pFGArm && m_pFGArm->HoldsDevice()) {
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsDevice()) {
         status += m_pFGArm->GetHeldDevice()->OnPieMenu(pieMenuActor);
     }
-    if (m_pBGArm && m_pBGArm->HoldsDevice()) {
+    if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->HoldsDevice()) {
         status += m_pBGArm->GetHeldDevice()->OnPieMenu(pieMenuActor);
     }
 
@@ -3325,7 +3336,8 @@ void AHuman::Update()
     ////////////////////////////////////
     // Reload held MO, if applicable
 	bool reloadFG = false;
-    if (m_pFGArm) {
+    if (m_pFGArm && m_pFGArm->IsAttached())
+    {
         HeldDevice *pDevice = m_pFGArm->GetHeldDevice();
 
 		// Holds device, check if we are commanded to reload, or do other related stuff
@@ -3335,11 +3347,11 @@ void AHuman::Update()
 				m_SharpAimTimer.Reset();
 				m_SharpAimProgress = 0;
 				// Move BG hand accordingly
-				if (m_pBGArm && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped)); }
+				if (m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped)); }
 			}
 			// Only reload if no other pickuppable item is in reach
 			if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !m_pItemInReach) {
-				if (m_pBGArm && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(pDevice->GetMagazinePos()); }
+				if (m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(pDevice->GetMagazinePos()); }
 				pDevice->Reload();
 				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 				reloadFG = true;
@@ -3350,7 +3362,7 @@ void AHuman::Update()
 			}
 
 			// Detect reloading being completed and move hand accordingly
-			if (pDevice->DoneReloading() && m_pBGArm && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(pDevice->GetMagazinePos()); }
+			if (pDevice->DoneReloading() && m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(pDevice->GetMagazinePos()); }
 		}
 	}
 
@@ -3474,7 +3486,7 @@ void AHuman::Update()
     // Fire/Activate held devices
 
 	ThrownDevice *pThrown = nullptr;
-	if (m_pFGArm) {
+	if (m_pFGArm && m_pFGArm->IsAttached()) {
 		// DOn't reach toward anything
 		m_pFGArm->ReachToward(Vector());
 

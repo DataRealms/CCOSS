@@ -462,6 +462,10 @@ namespace RTE {
 		}
 
 		for (const std::unique_ptr<CarouselItemBox> &carouselItemBox : m_CarouselItemBoxes) {
+			if (carouselIndex == 0 && m_CarouselAnimationDirection == CarouselAnimationDirection::Right && directionalAnimationProgress == 0.0F) {
+				carouselIndex++;
+				continue;
+			}
 			std::pair<bool, bool> roundedAndBorderedSides;
 			if (carouselIndex < c_ItemsPerRow / 2) {
 				roundedAndBorderedSides = {true, m_CarouselAnimationDirection == CarouselAnimationDirection::Left && carouselIndex == (c_ItemsPerRow / 2) - 1 && directionalAnimationProgress > -0.5F};

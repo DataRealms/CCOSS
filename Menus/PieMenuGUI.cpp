@@ -310,7 +310,7 @@ namespace RTE {
 
 	void PieMenuGUI::Draw(BITMAP *targetBitmap, const Vector &targetPos) const {
 		Vector drawPos;
-		CalculateDrawPositionAccountingForSeamsAndFont(targetBitmap, targetPos, drawPos);
+		CalculateDrawPosition(targetBitmap, targetPos, drawPos);
 
 		if (m_EnabledState != EnabledState::Disabled) {
 			if (m_DrawBackgroundTransparent && !g_FrameMan.IsInMultiplayerMode()) {
@@ -531,7 +531,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//TODO Need to investigate this stuff, I don't fully understand what it does and maybe it's mostly undesirable since we'll want to be able to draw pie menus partly off the screen
-	void PieMenuGUI::CalculateDrawPositionAccountingForSeamsAndFont(const BITMAP *targetBitmap, const Vector &targetPos, Vector &drawPos) const {
+	void PieMenuGUI::CalculateDrawPosition(const BITMAP *targetBitmap, const Vector &targetPos, Vector &drawPos) const {
 		drawPos = m_CenterPos - targetPos;
 		if (!targetPos.IsZero()) {
 			const Box *nearestBox = nullptr;
@@ -541,7 +541,7 @@ namespace RTE {
 			bool withinAnyBox = false;
 			float distance = std::numeric_limits<float>::max();
 			float shortestDist = std::numeric_limits<float>::max();
-			//TODO under what conditions would the pie menu not be on the screen and, if that's the case, would we still want to draw it? Investigate this!
+			//TODO under what conditions would the pie menu not be on the screen and, if that's the case, would we still want to draw it? Try to remove this in next pass of PieMenu changes, or replace it with more standard wrapping handling.
 			g_SceneMan.WrapBox(screenBox, wrappedBoxes);
 			for (const Box &wrappedBox : wrappedBoxes) {
 				if (wrappedBox.IsWithinBox(m_CenterPos)) {

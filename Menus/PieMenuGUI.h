@@ -307,7 +307,7 @@ namespace RTE {
 		/// <param name="targetBitmap">A pointer to the BITMAP to draw on. Generally a screen BITMAP.</param>
 		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the scene.</param>
 		/// <param name="drawPos">Out param, a Vector to be filled in with the position at which the menu should be drawn.</param>
-		void CalculateDrawPositionAccountingForSeamsAndFont(const BITMAP *targetBitmap, const Vector &targetPos, Vector &drawPos) const;
+		void CalculateDrawPosition(const BITMAP *targetBitmap, const Vector &targetPos, Vector &drawPos) const;
 
 		/// <summary>
 		/// Handles drawing icons on pie menu slices.

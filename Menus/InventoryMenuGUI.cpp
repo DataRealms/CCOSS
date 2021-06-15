@@ -271,6 +271,9 @@ namespace RTE {
 
 			if (m_MenuMode == MenuMode::Full || m_MenuMode == MenuMode::Transfer) {
 				ClearSelectedItem();
+				for (const auto &[inventoryItem, inventoryItemButton] : m_GUIInventoryItemButtons) {
+					inventoryItemButton->OnMouseLeave(0, 0, 0, 0);
+				}
 				SoundContainer *soundToPlay = enable ? g_GUISound.EnterMenuSound() : g_GUISound.ExitMenuSound();
 				soundToPlay->Play();
 			}
@@ -908,11 +911,17 @@ namespace RTE {
 			} else if (m_KeyboardOrControllerHighlightedButton->GetParent() == m_GUIInventoryItemsBox) {
 				try {
 					int highlightedButtonIndex = std::stoi(m_KeyboardOrControllerHighlightedButton->GetName());
-					if (highlightedButtonIndex + c_ItemsPerRow < c_FullViewPageItemLimit) {
-						nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex + c_ItemsPerRow).second;
-					} else if (highlightedButtonIndex + c_ItemsPerRow >= c_FullViewPageItemLimit && m_GUIInventoryItemsScrollbar->GetValue() + 1 < m_GUIInventoryItemsScrollbar->GetMaximum()) {
+					if (highlightedButtonIndex + c_ItemsPerRow >= c_FullViewPageItemLimit && m_GUIInventoryItemsScrollbar->GetValue() + 1 < m_GUIInventoryItemsScrollbar->GetMaximum()) {
 						m_GUIInventoryItemsScrollbar->SetValue(m_GUIInventoryItemsScrollbar->GetValue() + 1);
 						nextButtonToHighlight = m_KeyboardOrControllerHighlightedButton;
+					} else {
+						int numberOfAccessibleButtons = std::min(c_FullViewPageItemLimit, m_InventoryActor->GetInventorySize());
+						if (m_GUISelectedItem) { numberOfAccessibleButtons = m_GUIShowEmptyRows ? c_FullViewPageItemLimit : c_ItemsPerRow * static_cast<int>(std::ceil(static_cast<float>(numberOfAccessibleButtons) / static_cast<float>(c_ItemsPerRow))); }
+						if (highlightedButtonIndex + c_ItemsPerRow < numberOfAccessibleButtons) {
+							nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex + c_ItemsPerRow).second;
+						} else if (highlightedButtonIndex != numberOfAccessibleButtons - 1 && highlightedButtonIndex / c_ItemsPerRow < (numberOfAccessibleButtons - 1) / c_ItemsPerRow) {
+							nextButtonToHighlight = m_GUIInventoryItemButtons.at(numberOfAccessibleButtons - 1).second;
+						}
 					}
 				} catch (std::invalid_argument) {
 					RTEAbort("Invalid inventory item button when pressing DOWN in InventoryMenuGUI keyboard/controller handling - " + m_KeyboardOrControllerHighlightedButton->GetName());
@@ -948,12 +957,13 @@ namespace RTE {
 			} else if (m_KeyboardOrControllerHighlightedButton->GetParent() == m_GUIInventoryItemsBox) {
 				try {
 					int highlightedButtonIndex = std::stoi(m_KeyboardOrControllerHighlightedButton->GetName());
-					if (highlightedButtonIndex == c_FullViewPageItemLimit - 1 && m_GUIInventoryItemsScrollbar->GetValue() < m_GUIInventoryItemsScrollbar->GetMaximum() - 1) {
+					if (highlightedButtonIndex == c_FullViewPageItemLimit - 1 && m_GUIInventoryItemsScrollbar->GetValue() + 1 < m_GUIInventoryItemsScrollbar->GetMaximum()) {
 						m_GUIInventoryItemsScrollbar->SetValue(m_GUIInventoryItemsScrollbar->GetValue() + 1);
 						nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex - c_ItemsPerRow + 1).second;
 					} else {
-						int numberOfVisibleButtons = m_GUIShowEmptyRows ? c_FullViewPageItemLimit : c_ItemsPerRow * static_cast<int>(std::ceil(static_cast<float>(std::min(c_FullViewPageItemLimit, m_InventoryActor->GetInventorySize())) / static_cast<float>(c_ItemsPerRow)));
-						if (highlightedButtonIndex < numberOfVisibleButtons - 1) { nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex + 1).second; }
+						int numberOfAccessibleButtons = std::min(c_FullViewPageItemLimit, m_InventoryActor->GetInventorySize());
+						if (m_GUISelectedItem) { numberOfAccessibleButtons = m_GUIShowEmptyRows ? c_FullViewPageItemLimit : c_ItemsPerRow * static_cast<int>(std::ceil(static_cast<float>(numberOfAccessibleButtons) / static_cast<float>(c_ItemsPerRow))); }
+						if (highlightedButtonIndex + 1 < numberOfAccessibleButtons) { nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex + 1).second; }
 					}
 				} catch (std::invalid_argument) {
 					RTEAbort("Invalid inventory item button when pressing RIGHT in InventoryMenuGUI keyboard/controller handling - " + m_KeyboardOrControllerHighlightedButton->GetName());

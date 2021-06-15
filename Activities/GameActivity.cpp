@@ -291,8 +291,8 @@ void GameActivity::Destroy(bool notInherited)
 {
     for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
-        if (m_pPieMenu[player]) { m_pPieMenu[player]->Reset(); }
-        if (m_InventoryMenuGUI[player]) { m_InventoryMenuGUI[player]->Reset(); }
+        delete m_pPieMenu[player];
+        delete m_InventoryMenuGUI[player];
         delete m_pBuyGUI[player];
         delete m_pEditorGUI[player];
         delete m_pBannerRed[player];
@@ -402,6 +402,7 @@ bool GameActivity::SwitchToActor(Actor *pActor, short player, short team)
 
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
     m_pPieMenu[player]->DoDisableAnimation();
+    m_InventoryMenuGUI[player]->SetEnabled(false);
 
     // Disable the AI command mode since it's connected to the current actor
     if (m_ViewState[player] == ViewState::AISentryPoint || m_ViewState[player] == ViewState::AIPatrolPoints || m_ViewState[player] == ViewState::AIGoldDigPoint || m_ViewState[player] == ViewState::AIGoToPoint || m_ViewState[player] == ViewState::UnitSelectCircle)
@@ -421,6 +422,7 @@ void GameActivity::SwitchToNextActor(short player, short team, Actor *pSkip)
 {
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
     m_pPieMenu[player]->DoDisableAnimation();
+    m_InventoryMenuGUI[player]->SetEnabled(false);
 
     // Disable the AI command mode since it's connected to the current actor
     if (m_ViewState[player] == ViewState::AISentryPoint || m_ViewState[player] == ViewState::AIPatrolPoints || m_ViewState[player] == ViewState::AIGoldDigPoint || m_ViewState[player] == ViewState::AIGoToPoint || m_ViewState[player] == ViewState::UnitSelectCircle)
@@ -440,6 +442,7 @@ void GameActivity::SwitchToPrevActor(short player, short team, Actor *pSkip)
 {
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
     m_pPieMenu[player]->DoDisableAnimation();
+    m_InventoryMenuGUI[player]->SetEnabled(false);
 
     // Disable the AI command mode since it's connected to the current actor
     if (m_ViewState[player] == ViewState::AISentryPoint || m_ViewState[player] == ViewState::AIPatrolPoints || m_ViewState[player] == ViewState::AIGoldDigPoint || m_ViewState[player] == ViewState::AIGoToPoint  || m_ViewState[player] == ViewState::UnitSelectCircle)

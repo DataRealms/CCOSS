@@ -119,8 +119,8 @@ namespace RTE {
 		RTEAssert(activityPlayerController, "No controller sent to InventoryMenuGUI on creation!");
 		RTEAssert(c_ItemsPerRow % 2 == 1, "Don't you dare use an even number of items per inventory row, you filthy animal!");
 
-		if (!m_SmallFont) { m_SmallFont = m_GUIControlManager->GetSkin()->GetFont("smallfont.png"); }
-		if (!m_LargeFont) { m_LargeFont = m_GUIControlManager->GetSkin()->GetFont("fatfont.png");; }
+		if (!m_SmallFont) { m_SmallFont = g_FrameMan.GetSmallFont(); }
+		if (!m_LargeFont) { m_LargeFont = g_FrameMan.GetLargeFont(); }
 
 		m_MenuController = activityPlayerController;
 		SetInventoryActor(inventoryActor);
@@ -177,6 +177,10 @@ namespace RTE {
 		if (!m_GUIScreen) { m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer8()); }
 		if (!m_GUIInput) { m_GUIInput = std::make_unique<AllegroInput>(m_MenuController->GetPlayer()); }
 		RTEAssert(m_GUIControlManager->Create(m_GUIScreen.get(), m_GUIInput.get(), "Base.rte/GUIs/Skins/Base", "InventoryMenuGUISkin.ini"), "Failed to create InventoryMenuGUI GUIControlManager and load it from Base.rte/GUIs/Skins/Base.");
+
+		//TODO When this is split into 2 classes, full mode should use the fonts from its gui control manager while transfer mode, will need to get its fonts from FrameMan. May be good for the ingame menu base class to have these font pointers, even if some subclasses set em up in different ways.
+		//if (!m_SmallFont) { m_SmallFont = m_GUIControlManager->GetSkin()->GetFont("smallfont.png"); }
+		//if (!m_LargeFont) { m_LargeFont = m_GUIControlManager->GetSkin()->GetFont("fatfont.png"); }
 
 		m_GUIControlManager->Load("Base.rte/GUIs/InventoryMenuGUI.ini");
 		m_GUIControlManager->EnableMouse(m_MenuController->IsMouseControlled());

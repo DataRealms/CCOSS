@@ -530,14 +530,14 @@ void ACraft::SetTeam(int team)
 
 bool ACraft::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
-	PieMenuGUI::Slice deliverSlice("Deliver Cargo", PieMenuGUI::PSI_DELIVER, PieMenuGUI::Slice::RIGHT);
+	PieSlice deliverSlice("Deliver Cargo", PieSlice::PieSliceIndex::PSI_DELIVER, PieSlice::SliceDirection::RIGHT);
     pPieMenu->AddSlice(deliverSlice);
-    PieMenuGUI::Slice returnSlice("Return", PieMenuGUI::PSI_RETURN, PieMenuGUI::Slice::UP);
+    PieSlice returnSlice("Return", PieSlice::PieSliceIndex::PSI_RETURN, PieSlice::SliceDirection::UP);
 	pPieMenu->AddSlice(returnSlice);
 	
-	PieMenuGUI::Slice staySlice("Stay", PieMenuGUI::PSI_STAY, PieMenuGUI::Slice::DOWN);
+	PieSlice staySlice("Stay", PieSlice::PieSliceIndex::PSI_STAY, PieSlice::SliceDirection::DOWN);
     pPieMenu->AddSlice(staySlice);
-    PieMenuGUI::Slice scuttleSlice("Scuttle!", PieMenuGUI::PSI_SCUTTLE, PieMenuGUI::Slice::LEFT);
+    PieSlice scuttleSlice("Scuttle!", PieSlice::PieSliceIndex::PSI_SCUTTLE, PieSlice::SliceDirection::LEFT);
 	pPieMenu->AddSlice(scuttleSlice);
 
     Actor::AddPieMenuSlices(pPieMenu);
@@ -552,27 +552,27 @@ bool ACraft::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 // Description:     Handles and does whatever a specific activated Pie Menu slice does to
 //                  this.
 
-bool ACraft::HandlePieCommand(int pieSliceIndex)
+bool ACraft::HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex)
 {
-    if (pieSliceIndex != PieMenuGUI::PSI_NONE)
+    if (pieSliceIndex != PieSlice::PieSliceIndex::PSI_NONE)
     {
-        if (pieSliceIndex == PieMenuGUI::PSI_DELIVER)
+        if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_DELIVER)
         {
             m_AIMode = AIMODE_DELIVER;
             m_DeliveryState = FALL;
             m_HasDelivered = false;
         }
-        else if (pieSliceIndex == PieMenuGUI::PSI_RETURN)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_RETURN)
         {
             m_AIMode = AIMODE_RETURN;
             m_DeliveryState = LAUNCH;
         }
-        else if (pieSliceIndex == PieMenuGUI::PSI_STAY)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_STAY)
         {
             m_AIMode = AIMODE_STAY;
             m_DeliveryState = FALL;
         }
-        else if (pieSliceIndex == PieMenuGUI::PSI_SCUTTLE)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_SCUTTLE)
             m_AIMode = AIMODE_SCUTTLE;
         else
             return Actor::HandlePieCommand(pieSliceIndex);

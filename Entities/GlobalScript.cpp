@@ -69,9 +69,9 @@ int GlobalScript::ReadProperty(const std::string_view &propName, Reader &reader)
 		reader >> m_LateUpdate;
 	else if (propName == "AddPieSlice")
 	{
-		PieMenuGUI::Slice newSlice;
+		PieSlice newSlice;
 		reader >> newSlice;
-		PieMenuGUI::AddAvailableSlice(newSlice);
+		PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
 	}
 	else
         return Entity::ReadProperty(propName, reader);

@@ -37,6 +37,13 @@ public:
         Clicked = 0,
     } Notification;
 
+    enum class OverflowScrollState {
+        Deactivated = 0,
+        WaitAtStart,
+        Scrolling,
+        WaitAtEnd
+    };
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUILabel
@@ -82,6 +89,13 @@ public:
 // Arguments:       Screen class
 
     void Draw(GUIScreen *Screen) override;
+
+    /// <summary>
+    /// Draws the Label to the given GUIBitmap.
+    /// </summary>
+    /// <param name="Bitmap">The GUIBitmap to draw the label to.</param>
+    /// <param name="overwiteFontColorAndKerning">Whether to overwrite the font's color and kerning with the stored values. Defaults to true, which is usually what you want.</param>
+    void Draw(GUIBitmap *Bitmap, bool overwiteFontColorAndKerning = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -163,9 +177,9 @@ public:
 // Method:          SetText
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the text of the label.
-// Arguments:       Text.
+// Arguments:       text.
 
-    void SetText(const std::string Text);
+    void SetText(const std::string_view &text) { m_Text = text; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -174,7 +188,7 @@ public:
 // Description:     Gets the text of the label.
 // Arguments:       None.
 
-    std::string GetText();
+    const std::string &GetText() const { return m_Text; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -211,7 +225,7 @@ public:
 // Description:     Gets the horizontal alignment of the text of this label.
 // Arguments:       None.
 
-    int GetHAlignment() { return m_HAlignment; }
+    int GetHAlignment() const { return m_HAlignment; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -220,7 +234,49 @@ public:
 // Description:     Gets the vertical alignment of the text of this label.
 // Arguments:       The desired alignement.
 
-    int GetVAlignment() { return m_VAlignment; }
+    int GetVAlignment() const { return m_VAlignment; }
+
+    /// <summary>
+    /// Gets whether or not this this GUILabel should scroll horizontally (right) when it overflows.
+    /// </summary>
+    /// <returns>Whether or not this GUILabel should scroll horizontally when it overflows.</returns>
+    bool GetHorizontalOverflowScroll() const { return m_HorizontalOverflowScroll; }
+
+    /// <summary>
+    /// Sets whether or not this GUILabel should scroll horizontally (right) when it overflows. Mutually exclusive with horizontal overflow scrolling.
+    /// </summary>
+    /// <param name="newOverflowScroll">Whether or not this GUILabel should scroll horizontally when it overflows.</param>
+    void SetHorizontalOverflowScroll(bool newOverflowScroll);
+
+    /// <summary>
+    /// Gets whether or not this this GUILabel should scroll vertically (down) when it overflows.
+    /// </summary>
+    /// <returns>Whether or not this GUILabel should scroll vertically when it overflows.</returns>
+    bool GetVerticalOverflowScroll() const { return m_VerticalOverflowScroll; }
+
+    /// <summary>
+    /// Sets whether or not this GUILabel should scroll vertically (down) when it overflows. Mutually exclusive with horizontal overflow scrolling.
+    /// </summary>
+    /// <param name="newOverflowScroll">Whether or not this GUILabel should scroll vertically when it overflows.</param>
+    void SetVerticalOverflowScroll(bool newOverflowScroll);
+
+    /// <summary>
+    /// Gets whether or not horizontal or vertical overflow scrolling is turned on.
+    /// </summary>
+    /// <returns>Whether or not horizontal or vertical overflow scrolling is turned on.</returns>
+    bool OverflowScrollIsEnabled() const { return m_HorizontalOverflowScroll || m_VerticalOverflowScroll; }
+
+    /// <summary>
+    /// Gets whether or not horizontal/vertical scrolling is happening.
+    /// </summary>
+    /// <returns>Whether or not horizontal/vertical scrolling is happening.</returns>
+    bool OverflowScrollIsActivated() const { return OverflowScrollIsEnabled() && m_OverflowScrollState != OverflowScrollState::Deactivated; }
+
+    /// <summary>
+    /// Sets whether or not horizontal/vertical scrolling should be happening. When it's deactivated, text will instantly go back to unscrolled.
+    /// </summary>
+    /// <param name="activateScroll">Whether the overflow scrolling should activete (true) or deactivate (false).</param>
+    void ActivateDeactivateOverflowScroll(bool activateScroll);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -249,6 +305,10 @@ private:
     std::string        m_Text;
     int                m_HAlignment;
     int                m_VAlignment;
+    bool m_HorizontalOverflowScroll; //!< Note that horizontal overflow scrolling means text will always be on one line.
+    bool m_VerticalOverflowScroll;
+    OverflowScrollState m_OverflowScrollState;
+    Timer m_OverflowScrollTimer;
 };
 
 

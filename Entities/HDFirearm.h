@@ -628,7 +628,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Whetehr magazine is full or not.
 
-	bool IsFull() override;
+	bool IsFull() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

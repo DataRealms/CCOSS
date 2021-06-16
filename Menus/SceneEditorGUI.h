@@ -18,6 +18,7 @@
 #include "Timer.h"
 #include "Vector.h"
 #include "Controller.h"
+#include "PieSlice.h"
 
 struct BITMAP;
 
@@ -178,7 +179,7 @@ public:
 // Arguments:       None.
 // Return value:    The enum'd int of any slice activated. See the PieSliceIndex enum.
 
-    int GetActivatedPieSlice();
+    PieSlice::PieSliceIndex GetActivatedPieSlice();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

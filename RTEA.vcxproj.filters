@@ -483,6 +483,12 @@
     <ClInclude Include="System\GraphicalPrimitive.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="System\PieSlice.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\InventoryMenuGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -891,7 +897,7 @@
     <ClCompile Include="Entities\SoundContainer.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
-	  <ClCompile Include="Entities\SoundSet.cpp">
+    <ClCompile Include="Entities\SoundSet.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
     <ClCompile Include="System\Atom.cpp">
@@ -920,6 +926,12 @@
     </ClCompile>
     <ClCompile Include="System\GraphicalPrimitive.cpp">
       <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\PieSlice.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\InventoryMenuGUI.cpp">
+      <Filter>Menus</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

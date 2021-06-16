@@ -426,7 +426,7 @@ ClassInfoGetters
 // Return value:    Whetehr any slice was handled. False if no matching slice handler was
 //                  found, or there was no slice currently activated by the pie menu.
 
-    bool HandlePieCommand(int pieSliceIndex) override;
+    bool HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -668,7 +668,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-	void ReloadFirearm() const;
+	void ReloadFirearms() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -733,7 +733,7 @@ ClassInfoGetters
 // Return value:    A good identifyable graphical representation of this in a BITMAP, if
 //                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
 
-    BITMAP * GetGraphicalIcon() override { return GetHeadBitmap(); }
+    BITMAP * GetGraphicalIcon() const override { return GetHeadBitmap(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

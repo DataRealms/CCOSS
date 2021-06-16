@@ -35,9 +35,14 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Resets the entire PieMenuGUI, including its inherited members, to their default settings or values.
+		/// Destructor method used to clean up an PieMenuGUI object before deletion from system memory.
 		/// </summary>
-		void Reset() { Clear(); }
+		~PieMenuGUI() { Destroy(); }
+
+		/// <summary>
+		/// Destroys and resets the PieMenuGUI object.
+		/// </summary>
+		void Destroy();
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -236,11 +241,11 @@ namespace RTE {
 		int m_BackgroundColor; //!< The color used for drawing the menu's background.
 		int m_BackgroundBorderColor; //!< The color used for drawing borders for the menu's background.
 		int m_SelectedItemBackgroundColor; //!< The color used for drawing selected menu items' backgrounds.
-		
+
 		const PieSlice *m_HoveredSlice; //!< The PieSlice currently being hovered over.
 		const PieSlice *m_ActivatedSlice; //!< The currently activated PieSlice, if there is one, or 0 if there's not.
 		const PieSlice *m_AlreadyActivatedSlice; //!< The PieSlice that was most recently activated by pressing Primary. Used to avoid duplicate activation when releasing the pie menu.
-		
+
 		/// <summary>
 		/// The cardinal axis slices, owned here.
 		/// </summary>
@@ -262,7 +267,7 @@ namespace RTE {
 
 		int m_InnerRadius; //!< The current radius of the innermost circle of the pie menu, in pixels.
 		float m_CursorAngle; //!< Position of the cursor on the circle, in radians, counterclockwise from straight out to the right.
-		
+
 		BITMAP *m_BGBitmap; //!< The intermediary bitmap used to first draw the menu background, which will be blitted to the final draw target surface.
 		bool m_BGBitmapNeedsRedrawing; //!< Whether the BG bitmap should be redrawn during the next Update call.
 

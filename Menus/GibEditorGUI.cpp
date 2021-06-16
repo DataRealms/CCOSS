@@ -81,7 +81,7 @@ int GibEditorGUI::Create(Controller *pController, int whichModuleSpace)
     if (!m_pPieMenu)
         m_pPieMenu = new PieMenuGUI();
     else
-        m_pPieMenu->Reset();
+        m_pPieMenu->Destroy();
     m_pPieMenu->Create(pController);
 
     // Init the pie menu

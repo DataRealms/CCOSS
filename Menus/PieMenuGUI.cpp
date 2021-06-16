@@ -73,6 +73,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void PieMenuGUI::Destroy() {
+		destroy_bitmap(m_BGBitmap);
+
+		Clear();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void PieMenuGUI::SetEnabled(bool enable) {
 		m_MenuMode = MenuMode::Normal;
 
@@ -563,7 +571,6 @@ namespace RTE {
 			}
 		}
 
-		//TODO judging by the comment this will force it onto the screen if it's not on it? Better behaviour would be only draw if it's on the screen. See above TODO as well.
 		// Adjust the draw position so that the menu will always be drawn fully inside the player's screen
 		int menuDrawRadius = m_InnerRadius + m_BackgroundThickness + 2 + m_LargeFont->GetFontHeight();
 		if (drawPos.m_X - static_cast<float>(menuDrawRadius) < 0.0F) {

@@ -172,7 +172,7 @@ int ActorEditor::Start()
     m_pPicker->Create(&(m_PlayerController[0]), -1, "Actor");
 
     if (m_pPieMenu)
-        m_pPieMenu->Reset();
+        m_pPieMenu->Destroy();
     else
         m_pPieMenu = new PieMenuGUI;
     m_pPieMenu->Create(&(m_PlayerController[0]));

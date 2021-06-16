@@ -892,14 +892,14 @@ int GameActivity::Start()
 
         // Allocate and (re)create the Pie Menus
         if (m_pPieMenu[player])
-            m_pPieMenu[player]->Reset();
+            m_pPieMenu[player]->Destroy();
         else
             m_pPieMenu[player] = new PieMenuGUI;
         m_pPieMenu[player]->Create(&m_PlayerController[player]);
 
         // Allocate and (re)create the Inventory Menu GUIs
         if (m_InventoryMenuGUI[player]) {
-            m_InventoryMenuGUI[player]->Reset();
+            m_InventoryMenuGUI[player]->Destroy();
         } else {
             m_InventoryMenuGUI[player] = new InventoryMenuGUI;
         }

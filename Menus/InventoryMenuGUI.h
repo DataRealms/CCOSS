@@ -53,9 +53,14 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// Resets the entire InventoryMenuGUI, including its inherited members, to their default settings or values.
+		/// Destructor method used to clean up an InventoryMenuGUI object before deletion from system memory.
 		/// </summary>
-		void Reset() { Clear(); }
+		~InventoryMenuGUI() { Destroy(); }
+
+		/// <summary>
+		/// Destroys and resets the InventoryMenuGUI object.
+		/// </summary>
+		void Destroy();
 #pragma endregion
 
 #pragma region Getters and Setters

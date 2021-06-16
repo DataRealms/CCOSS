@@ -144,8 +144,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`DrawLimbPathVisualizations` - any  `AHumans` or `ACrabs` will draw some of their `LimbPaths` to the standard view.  
 	`DrawRayCastVisualizations` - any rays cast by `SceneMan` will be drawn to the standard view.  
 	`DrawPixelCheckVisualizations ` - any pixel checks made by `SceneMan:GetTerrMatter` or `SceneMan:GetMOIDPixel` will be drawn to the standard view.
-	
+
 - New `Settings.ini` properties `MuteMusic = 0/1` and `MuteSound = 0/1` to control muting of music/sound channels without changing the volume property values.	
+
+- Added a fully featured inventory view for managing `AHuman` inventories (to be expanded to other things in future).
 
 - New `Settings.ini` property `CaseSensitiveFilePaths = 0/1` to enable/disable file path case sensitivity in INIs. Enabled by default.  
 	It is **STRONGLY** ill-advised to disable this behavior as it makes case sensitivity mismatches immediately obvious and allows fixing them with ease to ensure a path related crash free cross-platform experience.  
@@ -241,6 +243,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `BuyMenu` tooltips now display item info as well as a description. This includes `MaxInventoryMass` and `MaxPassengers` for `ACraft`, `Mass` and `PassengerSlots` required for `Actors`, and `Mass` for other `MoveableObjects`.
 
 - In the scenarios screen, scenes from `Scenes.rte` will appear red. Previously they were green and not very distinguishable from regular scenes.
+
+- Replaced the above-HUD pie menu inventory view with an animating inventory carousel.
+
+- `AHuman:ReloadFirearm` Lua function has been changed to `AHuman:ReloadFirearms` and will now reload offhand weapons as well, if appropriate.
 
 ### Fixed
 

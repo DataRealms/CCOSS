@@ -4,6 +4,7 @@ sources += files(
 'AssemblyEditorGUI.cpp',
 'BuyMenuGUI.cpp',
 'GibEditorGUI.cpp',
+'InventoryMenuGUI.cpp',
 'LoadingScreen.cpp',
 'MainMenuGUI.cpp',
 'MetagameGUI.cpp',

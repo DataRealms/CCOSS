@@ -700,7 +700,7 @@ bool HDFirearm::NeedsReloading() const
 // Description:     Tells whether the device is curtrently full and reloading won't have
 //                  any effect.
 
-bool HDFirearm::IsFull()
+bool HDFirearm::IsFull() const
 {
     if (!m_Reloading)
     {

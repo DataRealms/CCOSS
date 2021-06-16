@@ -9,6 +9,7 @@ sources += files(
 'MetagameGUI.cpp',
 'ObjectPickerGUI.cpp',
 'PieMenuGUI.cpp',
+'InventoryMenuGUI.cpp',
 'ScenarioGUI.cpp',
 'SceneEditorGUI.cpp',
 )

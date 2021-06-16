@@ -27,7 +27,7 @@ using namespace RTE;
 AllegroBitmap::AllegroBitmap()
 {
     m_BitmapFile.Reset();
-    m_pBitmap = 0;
+    m_pBitmap = nullptr;
     m_SelfCreated = false;
 }
 
@@ -95,7 +95,7 @@ void AllegroBitmap::Destroy(void)
     if (m_SelfCreated && m_pBitmap)
         destroy_bitmap(m_pBitmap);
 
-    m_pBitmap = 0;
+    m_pBitmap = nullptr;
 }
 
 
@@ -369,13 +369,10 @@ string AllegroBitmap::GetDataPath()
     return m_BitmapFile.GetDataPath();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the BITMAP.
-
-BITMAP *AllegroBitmap::GetBitmap()
-{
-    return m_pBitmap;
+void AllegroBitmap::SetBitmap(BITMAP *newBitmap) {
+    m_BitmapFile.Reset();
+    m_pBitmap = newBitmap;
+    m_SelfCreated = false;
 }

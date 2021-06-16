@@ -32,6 +32,10 @@ GUILabel::GUILabel(GUIManager *Manager, GUIControlManager *ControlManager)
     m_Text = "";
     m_HAlignment = GUIFont::Left;
     m_VAlignment = GUIFont::Middle;
+    m_HorizontalOverflowScroll = false;
+    m_VerticalOverflowScroll = false;
+    m_OverflowScrollState = OverflowScrollState::Deactivated;
+    m_OverflowScrollTimer = Timer();
 }
 
 
@@ -112,6 +116,9 @@ void GUILabel::Create(GUIProperties *Props)
         m_VAlignment = GUIFont::Middle;
     if (stricmp(alignString.c_str(), "bottom") == 0)
         m_VAlignment = GUIFont::Bottom;
+
+    Props->GetValue("HorizontalOverflowScroll", &m_HorizontalOverflowScroll);
+    Props->GetValue("VerticalOverflowScroll", &m_VerticalOverflowScroll);
 }
 
 
@@ -144,14 +151,20 @@ void GUILabel::ChangeSkin(GUISkin *Skin)
 
 void GUILabel::Draw(GUIScreen *Screen)
 {
-    // Setup the clipping
-    Screen->GetBitmap()->AddClipRect(GetRect());
+    Draw(Screen->GetBitmap());
+    GUIPanel::Draw(Screen);
+}
 
-    if (m_Font)
-    {
-        m_Font->SetColor(m_FontColor);
-        m_Font->SetKerning(m_FontKerning);
-        
+void GUILabel::Draw(GUIBitmap *Bitmap, bool overwiteFontColorAndKerning) {
+    // Setup the clipping
+    Bitmap->AddClipRect(GetRect());
+
+    if (m_Font) {
+        if (overwiteFontColorAndKerning) {
+            m_Font->SetColor(m_FontColor);
+            m_Font->SetKerning(m_FontKerning);
+        }
+
         // Adjust for horizontal alignment
         int xPos = m_X;
         if (m_HAlignment == GUIFont::Centre)
@@ -164,22 +177,75 @@ void GUILabel::Draw(GUIScreen *Screen)
         if (m_VAlignment == GUIFont::Middle)
             yPos += (m_Height / 2) - 1;
         else if (m_VAlignment == GUIFont::Bottom)
-            yPos += (m_Height) - 1;
+            yPos += (m_Height)-1;
 
-        m_Font->DrawAligned(Screen->GetBitmap(),
-                            xPos,
-//                            m_Y + m_Height/2-m_Font->CalculateHeight(m_Text)+2,
-                            yPos,
-                            m_Text,
-                            m_HAlignment,
-                            m_VAlignment,
-                            m_Width,
-                            m_FontShadow);
+
+        int textFullWidth = m_HorizontalOverflowScroll ? m_Font->CalculateWidth(m_Text) : 0;
+        int textFullHeight = m_VerticalOverflowScroll ? m_Font->CalculateHeight(m_Text) : 0;
+        bool modifyXPos = textFullWidth > m_Width;
+        bool modifyYPos = textFullHeight > m_Height;
+        xPos = modifyXPos ? m_X : xPos;
+        yPos = modifyYPos ? m_Y : yPos;
+        if (OverflowScrollIsActivated()) {
+            switch (m_OverflowScrollState) {
+                case OverflowScrollState::WaitAtStart:
+                    if (m_OverflowScrollTimer.GetRealTimeLimitMS() == -1) {
+                        m_OverflowScrollTimer.SetRealTimeLimitMS(1000);
+                        m_OverflowScrollTimer.Reset();
+                    } else if (m_OverflowScrollTimer.IsPastRealTimeLimit()) {
+                        m_OverflowScrollState = OverflowScrollState::Scrolling;
+                        m_OverflowScrollTimer.SetRealTimeLimitMS(-1);
+                        break;
+                    }
+                    break;
+                case OverflowScrollState::Scrolling:
+                    if (m_OverflowScrollTimer.GetRealTimeLimitMS() == -1) {
+                        //TODO Maybe time limits should account for extra size vs width, so it scrolls slower on small labels, since it can be harder to read fast text on smaller areas. I think it's fine as-is though.
+                        // Note - time limits set so 5 characters of fatfont horizontal overflow or one line of fatfont vertical overflow will take 1 second.
+                        if (modifyXPos) {
+                            m_OverflowScrollTimer.SetRealTimeLimitMS((1000.0 / 30.0) * static_cast<double>(textFullWidth - m_Width));
+                        } else if (modifyYPos) {
+                            m_OverflowScrollTimer.SetRealTimeLimitMS((1000.0 / 8.0) * static_cast<double>(textFullHeight - m_Height));
+                        }
+                        m_OverflowScrollTimer.Reset();
+                    } else if (m_OverflowScrollTimer.IsPastRealTimeLimit()) {
+                        m_OverflowScrollTimer.SetRealTimeLimitMS(-1);
+                        m_OverflowScrollState = OverflowScrollState::WaitAtEnd;
+                        break;
+                    }
+                    xPos -= modifyXPos ? static_cast<int>(static_cast<double>(textFullWidth - m_Width) * m_OverflowScrollTimer.RealTimeLimitProgress()) : 0;
+                    yPos -= modifyYPos ? static_cast<int>(static_cast<double>(textFullHeight - m_Height) * m_OverflowScrollTimer.RealTimeLimitProgress()) : 0;
+                    break;
+                case OverflowScrollState::WaitAtEnd:
+                    if (m_OverflowScrollTimer.GetRealTimeLimitMS() == -1) {
+                        m_OverflowScrollTimer.SetRealTimeLimitMS(1000);
+                        m_OverflowScrollTimer.Reset();
+                    } else if (m_OverflowScrollTimer.IsPastRealTimeLimit()) {
+                        m_OverflowScrollTimer.SetRealTimeLimitMS(-1);
+                        m_OverflowScrollState = OverflowScrollState::WaitAtStart;
+                        break;
+                    }
+                    xPos -= modifyXPos ? (textFullWidth - m_Width) : 0;
+                    yPos -= modifyYPos ? (textFullHeight - m_Height) : 0;
+                    break;
+                default:
+                    RTEAbort("Invalid GUILabel overflow scroll state " + static_cast<int>(m_OverflowScrollState));
+                    break;
+            }
+        }
+
+        m_Font->DrawAligned(Bitmap,
+            xPos,
+            //                            m_Y + m_Height/2-m_Font->CalculateHeight(m_Text)+2,
+            yPos,
+            m_Text,
+            m_HorizontalOverflowScroll && textFullWidth > m_Width ? GUIFont::Left : m_HAlignment,
+            m_VerticalOverflowScroll && textFullHeight > m_Height ? GUIFont::Top : m_VAlignment,
+            m_HorizontalOverflowScroll ? textFullWidth : m_Width,
+            m_FontShadow);
     }
-    
-//    Screen->GetBitmap()->SetClipRect(0);
 
-    GUIPanel::Draw(Screen);
+    Bitmap->SetClipRect(nullptr);
 }
 
 
@@ -276,28 +342,6 @@ void GUILabel::GetControlRect(int *X, int *Y, int *Width, int *Height)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetText
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the text of the label.
-
-void GUILabel::SetText(const string Text)
-{
-    m_Text = Text;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetText
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the text of the label.
-
-string GUILabel::GetText(void)
-{
-    return m_Text;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTextHeight
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Shows how tall the current text is with the current width and font etc.
@@ -306,6 +350,39 @@ int GUILabel::GetTextHeight()
 {
     return m_Font->CalculateHeight(m_Text, m_Width);
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void GUILabel::SetHorizontalOverflowScroll(bool newOverflowScroll) {
+    m_HorizontalOverflowScroll = newOverflowScroll;
+    if (m_HorizontalOverflowScroll) {
+        m_VerticalOverflowScroll = false;
+    } else if (!m_VerticalOverflowScroll) {
+        m_OverflowScrollState = OverflowScrollState::Deactivated;
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void GUILabel::SetVerticalOverflowScroll(bool newOverflowScroll) {
+    m_VerticalOverflowScroll = newOverflowScroll;
+    if (m_VerticalOverflowScroll) {
+        m_HorizontalOverflowScroll = false;
+    } else if (!m_HorizontalOverflowScroll) {
+        m_OverflowScrollState = OverflowScrollState::Deactivated;
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void GUILabel::ActivateDeactivateOverflowScroll(bool activateScroll) {
+    if (OverflowScrollIsEnabled() && activateScroll != OverflowScrollIsActivated()) {
+        m_OverflowScrollState = activateScroll ? OverflowScrollState::WaitAtStart : OverflowScrollState::Deactivated;
+        m_OverflowScrollTimer.SetRealTimeLimitMS(-1);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -330,6 +407,9 @@ void GUILabel::StoreProperties(void)
         m_Properties.AddVariable("VAlignment", "middle");
     else if (m_VAlignment == GUIFont::Bottom)
         m_Properties.AddVariable("VAlignment", "bottom");
+
+    m_Properties.AddVariable("HorizontalOverflowScroll", m_HorizontalOverflowScroll);
+    m_Properties.AddVariable("VerticalOverflowScroll", m_VerticalOverflowScroll);
 }
 
 
@@ -360,4 +440,7 @@ void GUILabel::ApplyProperties(GUIProperties *Props)
         m_VAlignment = GUIFont::Middle;
     if (stricmp(alignString.c_str(), "bottom") == 0)
         m_VAlignment = GUIFont::Bottom;
+
+    m_Properties.GetValue("HorizontalOverflowScroll", &m_HorizontalOverflowScroll);
+    m_Properties.GetValue("VerticalOverflowScroll", &m_VerticalOverflowScroll);
 }

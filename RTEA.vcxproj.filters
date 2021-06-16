@@ -483,6 +483,12 @@
     <ClInclude Include="System\GraphicalPrimitive.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="System\PieSlice.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\InventoryMenuGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -920,6 +926,12 @@
     </ClCompile>
     <ClCompile Include="System\GraphicalPrimitive.cpp">
       <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\PieSlice.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\InventoryMenuGUI.cpp">
+      <Filter>Menus</Filter>
     </ClCompile>
     <ClCompile Include="System\Serializable.cpp">
       <Filter>System</Filter>

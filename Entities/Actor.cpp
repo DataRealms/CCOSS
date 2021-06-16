@@ -228,7 +228,7 @@ int Actor::Create(const Actor &reference)
 
     m_MaxInventoryMass = reference.m_MaxInventoryMass;
 
-    for (list<PieMenuGUI::Slice>::const_iterator itr = reference.m_PieSlices.begin(); itr != reference.m_PieSlices.end(); ++itr)
+    for (list<PieSlice>::const_iterator itr = reference.m_PieSlices.begin(); itr != reference.m_PieSlices.end(); ++itr)
         m_PieSlices.push_back(*itr);
     
     // Only load the static AI mode icons once
@@ -370,10 +370,10 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_MaxInventoryMass;
     else if (propName == "AddPieSlice")
     {
-        PieMenuGUI::Slice newSlice;
+        PieSlice newSlice;
         reader >> newSlice;
         m_PieSlices.push_back(newSlice);
-		PieMenuGUI::AddAvailableSlice(newSlice);
+		PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
     }
     else if (propName == "AIMode")
     {
@@ -448,7 +448,7 @@ int Actor::Save(Writer &writer) const
     }
     writer.NewProperty("MaxInventoryMass");
     writer << m_MaxInventoryMass;
-    for (list<PieMenuGUI::Slice>::const_iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
+    for (list<PieSlice>::const_iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
     {
         writer.NewProperty("AddPieSlice");
         writer << *itr;
@@ -735,32 +735,11 @@ void Actor::RestDetection()
 bool Actor::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
     // Add the custom scripted options of this Actor
-    for (list<PieMenuGUI::Slice>::iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
+    for (list<PieSlice>::iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
         pPieMenu->AddSlice(*itr);
 
     m_PieNeedsUpdate = false;
     return true;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HandlePieCommand
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Handles and does whatever a specific activated Pie Menu slice does to
-//                  this.
-
-bool Actor::HandlePieCommand(int pieSliceIndex)
-{
-/* Actually don't; the PSI_SCRIPTED is handled earlier in PieMenuGUI::Update
-    // Handle scripted pie commands here; run their scripts
-    if (pieSliceIndex == PieMenuGUI::PSI_SCRIPTED)
-    {
-// TODO: THIS
-
-        return true;
-    }
-*/
-    return false;
 }
 
 
@@ -830,6 +809,19 @@ void Actor::RemoveInventoryItem(string presetName)
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+MovableObject * Actor::RemoveInventoryItemAtIndex(int inventoryIndex) {
+    if (inventoryIndex >= 0 && inventoryIndex < m_Inventory.size()) {
+        MovableObject *itemAtIndex = m_Inventory.at(inventoryIndex);
+        m_Inventory.erase(m_Inventory.begin() + inventoryIndex);
+        return itemAtIndex;
+    }
+    return nullptr;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SwapPrevInventory
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -856,6 +848,34 @@ MovableObject * Actor::SwapPrevInventory(MovableObject *pSwapIn)
 
     return pRetDev;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool Actor::SwapInventoryItemsByIndex(int inventoryIndex1, int inventoryIndex2) {
+    if (inventoryIndex1 < 0 || inventoryIndex2 < 0 || inventoryIndex1 >= m_Inventory.size() || inventoryIndex2 >= m_Inventory.size()) {
+        return false;
+    }
+
+    std::swap(m_Inventory.at(inventoryIndex1), m_Inventory.at(inventoryIndex2));
+    return true;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+MovableObject * Actor::SetInventoryItemAtIndex(MovableObject *newInventoryItem, int inventoryIndex) {
+    if (newInventoryItem) {
+        if (inventoryIndex < 0 || inventoryIndex >= m_Inventory.size()) {
+            m_Inventory.emplace_back(newInventoryItem);
+            return nullptr;
+        }
+        MovableObject *currentInventoryItemAtIndex = m_Inventory.at(inventoryIndex);
+        m_Inventory.at(inventoryIndex) = newInventoryItem;
+        return currentInventoryItemAtIndex;
+    }
+    return nullptr;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

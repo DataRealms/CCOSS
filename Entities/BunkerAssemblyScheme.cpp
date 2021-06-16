@@ -292,7 +292,7 @@ void BunkerAssemblyScheme::Destroy(bool notInherited)
 // Description:     Gets a bitmap showing a good identifyable icon of this, for use in
 //                  GUI lists etc.
 
-BITMAP * BunkerAssemblyScheme::GetGraphicalIcon()
+BITMAP * BunkerAssemblyScheme::GetGraphicalIcon() const
 {
 	return m_pIconBitmap;
 }

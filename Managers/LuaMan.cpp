@@ -1286,7 +1286,7 @@ int LuaMan::Initialize() {
             .property("FirearmNeedsReload", &AHuman::FirearmNeedsReload)
             .property("FirearmIsSemiAuto", &AHuman::FirearmIsSemiAuto)
             .property("FirearmActivationDelay", &AHuman::FirearmActivationDelay)
-            .def("ReloadFirearm", &AHuman::ReloadFirearm)
+            .def("ReloadFirearms", &AHuman::ReloadFirearms)
             .def("IsWithinRange", &AHuman::IsWithinRange)
             .def("Look", &AHuman::Look)
             .def("LookForGold", &AHuman::LookForGold)
@@ -2168,58 +2168,58 @@ int LuaMan::Initialize() {
             .def("RemovePieMenuSlice", &GameActivity::RemovePieMenuSlice)
 			.def_readwrite("PieMenuSlices", &GameActivity::m_CurrentPieMenuSlices, return_stl_iterator),
 		
-		class_<PieMenuGUI::Slice>("Slice")
-			.enum_("SliceDirection")[
-				value("NONE", PieMenuGUI::Slice::SliceDirection::NONE),
-				value("UP", PieMenuGUI::Slice::SliceDirection::UP),
-				value("RIGHT", PieMenuGUI::Slice::SliceDirection::RIGHT),
-				value("DOWN", PieMenuGUI::Slice::SliceDirection::DOWN),
-				value("LEFT", PieMenuGUI::Slice::SliceDirection::LEFT)
+        class_<PieSlice>("Slice")
+			.enum_("Direction")[
+				value("NONE", PieSlice::SliceDirection::NONE),
+					value("UP", PieSlice::SliceDirection::UP),
+					value("RIGHT", PieSlice::SliceDirection::RIGHT),
+					value("DOWN", PieSlice::SliceDirection::DOWN),
+					value("LEFT", PieSlice::SliceDirection::LEFT)
 			]
 			.enum_("PieSliceIndex")[
-				value("PSI_NONE", PieMenuGUI::PieSliceIndex::PSI_NONE),
-				value("PSI_PICKUP", PieMenuGUI::PieSliceIndex::PSI_PICKUP),
-				value("PSI_DROP", PieMenuGUI::PieSliceIndex::PSI_DROP),
-				value("PSI_NEXTITEM", PieMenuGUI::PieSliceIndex::PSI_NEXTITEM),
-				value("PSI_PREVITEM", PieMenuGUI::PieSliceIndex::PSI_PREVITEM),
-				value("PSI_RELOAD", PieMenuGUI::PieSliceIndex::PSI_RELOAD),
-				value("PSI_BUYMENU", PieMenuGUI::PieSliceIndex::PSI_BUYMENU),
-				value("PSI_STATS", PieMenuGUI::PieSliceIndex::PSI_STATS),
-				value("PSI_MINIMAP", PieMenuGUI::PieSliceIndex::PSI_MINIMAP),
-				value("PSI_FORMSQUAD", PieMenuGUI::PieSliceIndex::PSI_FORMSQUAD),
-				value("PSI_CEASEFIRE", PieMenuGUI::PieSliceIndex::PSI_CEASEFIRE),
-				value("PSI_SENTRY", PieMenuGUI::PieSliceIndex::PSI_SENTRY),
-				value("PSI_PATROL", PieMenuGUI::PieSliceIndex::PSI_PATROL),
-				value("PSI_BRAINHUNT", PieMenuGUI::PieSliceIndex::PSI_BRAINHUNT),
-				value("PSI_GOLDDIG", PieMenuGUI::PieSliceIndex::PSI_GOLDDIG),
-				value("PSI_GOTO", PieMenuGUI::PieSliceIndex::PSI_GOTO),
-				value("PSI_RETURN", PieMenuGUI::PieSliceIndex::PSI_RETURN),
-				value("PSI_STAY", PieMenuGUI::PieSliceIndex::PSI_STAY),
-				value("PSI_DELIVER", PieMenuGUI::PieSliceIndex::PSI_DELIVER),
-				value("PSI_SCUTTLE", PieMenuGUI::PieSliceIndex::PSI_SCUTTLE),
-				value("PSI_DONE", PieMenuGUI::PieSliceIndex::PSI_DONE),
-				value("PSI_LOAD", PieMenuGUI::PieSliceIndex::PSI_LOAD),
-				value("PSI_SAVE", PieMenuGUI::PieSliceIndex::PSI_SAVE),
-				value("PSI_NEW", PieMenuGUI::PieSliceIndex::PSI_NEW),
-				value("PSI_PICK", PieMenuGUI::PieSliceIndex::PSI_PICK),
-				value("PSI_MOVE", PieMenuGUI::PieSliceIndex::PSI_MOVE),
-				value("PSI_REMOVE", PieMenuGUI::PieSliceIndex::PSI_REMOVE),
-				value("PSI_INFRONT", PieMenuGUI::PieSliceIndex::PSI_INFRONT),
-				value("PSI_BEHIND", PieMenuGUI::PieSliceIndex::PSI_BEHIND),
-				value("PSI_ZOOMIN", PieMenuGUI::PieSliceIndex::PSI_ZOOMIN),
-				value("PSI_ZOOMOUT", PieMenuGUI::PieSliceIndex::PSI_ZOOMOUT),
-				value("PSI_TEAM1", PieMenuGUI::PieSliceIndex::PSI_TEAM1),
-				value("PSI_TEAM2", PieMenuGUI::PieSliceIndex::PSI_TEAM2),
-				value("PSI_TEAM3", PieMenuGUI::PieSliceIndex::PSI_TEAM3),
-				value("PSI_TEAM4", PieMenuGUI::PieSliceIndex::PSI_TEAM4),
-				value("PSI_SCRIPTED", PieMenuGUI::PieSliceIndex::PSI_SCRIPTED),
-				value("PSI_COUNT", PieMenuGUI::PieSliceIndex::PSI_COUNT)
+				value("PSI_NONE", PieSlice::PieSliceIndex::PSI_NONE),
+				value("PSI_PICKUP", PieSlice::PieSliceIndex::PSI_PICKUP),
+				value("PSI_DROP", PieSlice::PieSliceIndex::PSI_DROP),
+				value("PSI_NEXTITEM", PieSlice::PieSliceIndex::PSI_NEXTITEM),
+				value("PSI_PREVITEM", PieSlice::PieSliceIndex::PSI_PREVITEM),
+				value("PSI_RELOAD", PieSlice::PieSliceIndex::PSI_RELOAD),
+				value("PSI_BUYMENU", PieSlice::PieSliceIndex::PSI_BUYMENU),
+				value("PSI_STATS", PieSlice::PieSliceIndex::PSI_STATS),
+				value("PSI_MINIMAP", PieSlice::PieSliceIndex::PSI_MINIMAP),
+				value("PSI_FORMSQUAD", PieSlice::PieSliceIndex::PSI_FORMSQUAD),
+				value("PSI_CEASEFIRE", PieSlice::PieSliceIndex::PSI_CEASEFIRE),
+				value("PSI_SENTRY", PieSlice::PieSliceIndex::PSI_SENTRY),
+				value("PSI_PATROL", PieSlice::PieSliceIndex::PSI_PATROL),
+				value("PSI_BRAINHUNT", PieSlice::PieSliceIndex::PSI_BRAINHUNT),
+				value("PSI_GOLDDIG", PieSlice::PieSliceIndex::PSI_GOLDDIG),
+				value("PSI_GOTO", PieSlice::PieSliceIndex::PSI_GOTO),
+				value("PSI_RETURN", PieSlice::PieSliceIndex::PSI_RETURN),
+				value("PSI_STAY", PieSlice::PieSliceIndex::PSI_STAY),
+				value("PSI_DELIVER", PieSlice::PieSliceIndex::PSI_DELIVER),
+				value("PSI_SCUTTLE", PieSlice::PieSliceIndex::PSI_SCUTTLE),
+				value("PSI_DONE", PieSlice::PieSliceIndex::PSI_DONE),
+				value("PSI_LOAD", PieSlice::PieSliceIndex::PSI_LOAD),
+				value("PSI_SAVE", PieSlice::PieSliceIndex::PSI_SAVE),
+				value("PSI_NEW", PieSlice::PieSliceIndex::PSI_NEW),
+				value("PSI_PICK", PieSlice::PieSliceIndex::PSI_PICK),
+				value("PSI_MOVE", PieSlice::PieSliceIndex::PSI_MOVE),
+				value("PSI_REMOVE", PieSlice::PieSliceIndex::PSI_REMOVE),
+				value("PSI_INFRONT", PieSlice::PieSliceIndex::PSI_INFRONT),
+				value("PSI_BEHIND", PieSlice::PieSliceIndex::PSI_BEHIND),
+				value("PSI_ZOOMIN", PieSlice::PieSliceIndex::PSI_ZOOMIN),
+				value("PSI_ZOOMOUT", PieSlice::PieSliceIndex::PSI_ZOOMOUT),
+				value("PSI_TEAM1", PieSlice::PieSliceIndex::PSI_TEAM1),
+				value("PSI_TEAM2", PieSlice::PieSliceIndex::PSI_TEAM2),
+				value("PSI_TEAM3", PieSlice::PieSliceIndex::PSI_TEAM3),
+				value("PSI_TEAM4", PieSlice::PieSliceIndex::PSI_TEAM4),
+				value("PSI_SCRIPTED", PieSlice::PieSliceIndex::PSI_SCRIPTED),
+				value("PSI_COUNT", PieSlice::PieSliceIndex::PSI_COUNT)
 			]
 			.def(constructor<>())
-			.property("FunctionName", &PieMenuGUI::Slice::GetFunctionName)
-			.property("Description", &PieMenuGUI::Slice::GetDescription)
-			.property("Type", &PieMenuGUI::Slice::GetType)
-			.property("Direction", &PieMenuGUI::Slice::GetDirection),
+			.property("FunctionName", &PieSlice::GetFunctionName)
+			.property("Description", &PieSlice::GetDescription)
+			.property("Type", &PieSlice::GetType)
+			.property("Direction", &PieSlice::GetDirection),
 
         ABSTRACTLUABINDING(GlobalScript, Entity)
 			.def("Deactivate", &GlobalScript::Deactivate),

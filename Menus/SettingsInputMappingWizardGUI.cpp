@@ -895,7 +895,7 @@ namespace RTE {
 				break;
 			case 4:
 				if (m_ConfigStepChange) {
-					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("AIM UP");
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("ANALOG AIM UP");
 					m_WizardManualConfigScreen.GamepadConfigStepRecommendedInputLabel->SetText("[R. Stick Up]");
 					m_ConfigStepChange = false;
 				}
@@ -905,7 +905,7 @@ namespace RTE {
 				break;
 			case 5:
 				if (m_ConfigStepChange) {
-					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("AIM DOWN");
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("ANALOG AIM DOWN");
 					m_WizardManualConfigScreen.GamepadConfigStepRecommendedInputLabel->SetText("[R. Stick Down]");
 					m_ConfigStepChange = false;
 				}
@@ -915,7 +915,7 @@ namespace RTE {
 				break;
 			case 6:
 				if (m_ConfigStepChange) {
-					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("AIM LEFT");
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("ANALOG AIM LEFT");
 					m_WizardManualConfigScreen.GamepadConfigStepRecommendedInputLabel->SetText("[R. Stick Left]");
 					m_ConfigStepChange = false;
 				}
@@ -925,7 +925,7 @@ namespace RTE {
 				break;
 			case 7:
 				if (m_ConfigStepChange) {
-					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("AIM RIGHT");
+					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("ANALOG AIM RIGHT");
 					m_WizardManualConfigScreen.GamepadConfigStepRecommendedInputLabel->SetText("[R. Stick Right]");
 					m_ConfigStepChange = false;
 				}
@@ -948,7 +948,7 @@ namespace RTE {
 				if (m_ConfigStepChange) {
 					m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetText("SHARP AIM");
 					std::string buttonName = (m_ConfiguringGamepadType == GamepadType::AnalogDualShock) ? "[Square Button]" : "[X Button]";
-					m_WizardManualConfigScreen.GamepadConfigStepRecommendedInputLabel->SetText(buttonName + " or [L. Trigger]");
+					m_WizardManualConfigScreen.GamepadConfigStepRecommendedInputLabel->SetText(buttonName + " or" + ((m_ConfiguringGamepadType == GamepadType::AnalogDualShock) ? "\n" : " ") + "[L. Trigger]");
 					m_ConfigStepChange = false;
 				}
 				if (m_NewInputScheme.CaptureJoystickMapping(m_ConfiguringGamepadIndex, InputElements::INPUT_AIM)) {

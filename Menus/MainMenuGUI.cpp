@@ -287,8 +287,11 @@ namespace RTE {
 				m_MainMenuButtons.at(MenuButton::ResumeButton)->SetVisible(true);
 			}
 		} else {
-			const std::string &buttonText = (m_MainScreenHoveredButton && m_MainScreenHoveredButton == m_MainMenuButtons.at(MenuButton::ResumeButton)) ? m_MainScreenButtonHoveredText.at(MenuButton::ResumeButton) : m_MainScreenButtonUnhoveredText.at(MenuButton::ResumeButton);
-			m_MainMenuButtons.at(MenuButton::ResumeButton)->SetText(m_ResumeButtonBlinkTimer.AlternateReal(500) ? buttonText : ">" + buttonText + "<");
+			if (m_MainScreenHoveredButton && m_MainScreenHoveredButton == m_MainMenuButtons.at(MenuButton::ResumeButton)) {
+				m_MainMenuButtons.at(MenuButton::ResumeButton)->SetText(m_ResumeButtonBlinkTimer.AlternateReal(500) ? m_MainScreenButtonHoveredText.at(MenuButton::ResumeButton) : "]" + m_MainScreenButtonHoveredText.at(MenuButton::ResumeButton) + "[");
+			} else {
+				m_MainMenuButtons.at(MenuButton::ResumeButton)->SetText(m_ResumeButtonBlinkTimer.AlternateReal(500) ? m_MainScreenButtonUnhoveredText.at(MenuButton::ResumeButton) : ">" + m_MainScreenButtonUnhoveredText.at(MenuButton::ResumeButton) + "<");
+			}
 		}
 	}
 

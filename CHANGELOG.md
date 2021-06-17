@@ -17,7 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Color/TrailColor = Color
 		Index = 0-255 // Corresponds with index in palette.bmp
 	```
-	
+
 - New `Settings.ini` property `ForceDedicatedFullScreenGfxDriver` to force the game to run in previously removed dedicated fullscreen mode, allowing using lower resolutions (and 1366x768) while still maintaining fullscreen.
 
 - New INI and Lua (R/W) property for Attachables:  
@@ -145,8 +145,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`DrawRayCastVisualizations` - any rays cast by `SceneMan` will be drawn to the standard view.  
 	`DrawPixelCheckVisualizations ` - any pixel checks made by `SceneMan:GetTerrMatter` or `SceneMan:GetMOIDPixel` will be drawn to the standard view.
 
-- New `Settings.ini` properties `MuteMusic = 0/1` and `MuteSound = 0/1` to control muting of music/sound channels without changing the volume property values.	
-
 - Added a fully featured inventory view for managing `AHuman` inventories (to be expanded to other things in future).
 
 - New `Settings.ini` property `CaseSensitiveFilePaths = 0/1` to enable/disable file path case sensitivity in INIs. Enabled by default.  
@@ -154,6 +152,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Only disable this if for some reason case sensitivity increases the loading times on your system (which it generally should not). Loading times can be benchmarked using the `Settings.ini` property `MeasureModuleLoadTime`. The result will be printed to the console.
 
 - Added `MovableObject` Lua function `EnableOrDisableAllScripts` that allows you to enable or disable all scripts on a `MovableObject` based on the passed in value.
+
+- New `Settings.ini` properties `MuteMaster = 0/1`, `MuteMusic = 0/1` and `MuteSound = 0/1` to control muting of master/music/sound channels without changing the volume property values.	
+
+- New `Settings.ini` property `TwoPlayerSplitscreenVertSplit = 0/1` to force two player splitscreen into a vertical split mode (horizontal by default).
+
+- Ingame settings menu was reworked to make it less useless.
+
+- Controller hot-plugging is now supported (Windows only).
 
 ### Changed
 
@@ -242,11 +248,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `BuyMenu` tooltips now display item info as well as a description. This includes `MaxInventoryMass` and `MaxPassengers` for `ACraft`, `Mass` and `PassengerSlots` required for `Actors`, and `Mass` for other `MoveableObjects`.
 
-- In the scenarios screen, scenes from `Scenes.rte` will appear red. Previously they were green and not very distinguishable from regular scenes.
 
 - Replaced the above-HUD pie menu inventory view with an animating inventory carousel.
 
 - `AHuman:ReloadFirearm` Lua function has been changed to `AHuman:ReloadFirearms` and will now reload offhand weapons as well, if appropriate.
+
+- `Settings.ini` property `MenuTransitionDuration` renamed to `MenuTransitionDurationMultiplier`.
+
+- `Settings.ini` property `DisableLoadingScreen` renamed to `DisableLoadingScreenProgressReport`.
+
+- Scenario scene markers are now color coded to help distinguish them visually:  
+	`Base.rte` scenes are yellow as always.  
+	`Missions.rte` scenes are now green.  
+	`Scenes.rte` or any other mod/user scenes are now cyan.
+
+- Main menu and sub-menus were given a facelift.
+
+- Esc has been disabled in server mode to not disrupt simulation for clients, use Alt+F4 or the window close button to exit.
 
 ### Fixed
 
@@ -311,6 +329,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Removed the ability to set `HDFirearms'` `Magazine` or `Flash`, or `AEmitters'` `Flash` to None in INI. This was a necessary result of some core changes, and may be undone in future if it's possible. If you want no `Magazine` or `Flash` just don't set one, or use a Null one like is done for limbs and other hardcoded `Attachables`.
 
 - Removed the quit-confirmation dialog from the scenarios screen. Now pressing escape will lead back to the main menu.
+
+- Removed `Settings.ini` properties `HSplitScreen` and `VSplitScreen`. Superseded by `TwoPlayerSplitscreenVertSplit`.
 
 ***
 

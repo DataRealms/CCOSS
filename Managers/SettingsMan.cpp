@@ -176,7 +176,7 @@ namespace RTE {
 			g_ConsoleMan.SetConsoleScreenSize(std::stof(reader.ReadPropValue()));
 		} else if (propName == "AdvancedPerformanceStats") {
 			reader >> g_PerformanceMan.m_AdvancedPerfStats;
-		} else if (propName == "MenuTransitionDuration") {
+		} else if (propName == "MenuTransitionDurationMultiplier") {
 			SetMenuTransitionDurationMultiplier(std::stof(reader.ReadPropValue()));
 		} else if (propName == "DrawAtomGroupVisualizations") {
 			reader >> m_DrawAtomGroupVisualizations;
@@ -337,7 +337,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("LoadingScreenProgressReportPrecision", m_LoadingScreenProgressReportPrecision);
 		writer.NewPropertyWithValue("ConsoleScreenRatio", g_ConsoleMan.m_ConsoleScreenRatio);
 		writer.NewPropertyWithValue("AdvancedPerformanceStats", g_PerformanceMan.m_AdvancedPerfStats);
-		writer.NewPropertyWithValue("MenuTransitionDuration", m_MenuTransitionDurationMultiplier);
+		writer.NewPropertyWithValue("MenuTransitionDurationMultiplier", m_MenuTransitionDurationMultiplier);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

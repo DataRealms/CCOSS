@@ -370,6 +370,8 @@ namespace RTE {
 		} else if (m_ActiveMenuScreen == MenuScreen::SettingsScreen && m_ActiveDialogBox && g_UInputMan.KeyPressed(KEY_ESC)) {
 			m_SettingsMenu->CloseActiveDialogBox();
 		}
+
+		if (m_UpdateResult == MainMenuUpdateResult::ActivityStarted || m_UpdateResult == MainMenuUpdateResult::ActivityResumed) { m_MainMenuButtons.at(MenuButton::ResumeButton)->SetVisible(false); }
 		return m_UpdateResult;
 	}
 
@@ -441,10 +443,8 @@ namespace RTE {
 			}
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::ScenarioButton)) {
 			m_UpdateResult = MainMenuUpdateResult::ScenarioStarted;
-			SetActiveMenuScreen(MenuScreen::MainScreen);
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::MultiplayerButton)) {
 			m_UpdateResult = MainMenuUpdateResult::ActivityStarted;
-			SetActiveMenuScreen(MenuScreen::MainScreen, false);
 			g_GUISound.BackButtonPressSound()->Play();
 			g_ActivityMan.SetStartMultiplayerActivity();
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::SettingsButton)) {

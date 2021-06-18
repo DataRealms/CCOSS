@@ -92,6 +92,7 @@ namespace RTE {
 		Vector m_PrevMousePos; //!< Previous position of the mouse to calculate dragging.
 
 		Timer m_BlinkTimer; //!< Timer for blinking the resume and config start buttons.
+		Timer m_ScenePreviewAnimTimer; //!< Timer for animating the Scene preview image.
 
 		MOSParticle m_DefaultScenePreview; //!< MOSParticle that acts as the default Scene preview image, to avoid having to animate manually.
 		bool m_DrawDefaultScenePreview; //!< Whether the default Scene preview should be drawn or not.

@@ -42,6 +42,7 @@ namespace RTE {
 		m_PrevMousePos.Reset();
 
 		m_BlinkTimer.Reset();
+		m_ScenePreviewAnimTimer.Reset();
 
 		m_DefaultScenePreview.Reset();
 		m_DrawDefaultScenePreview = true;
@@ -119,6 +120,8 @@ namespace RTE {
 		m_ResumeButton->SetVisible(currentActivity && (currentActivity->GetActivityState() == Activity::Running || currentActivity->GetActivityState() == Activity::Editing));
 
 		m_ActivityInfoBox->SetVisible(true);
+
+		m_ScenePreviewAnimTimer.Reset();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -399,7 +402,11 @@ namespace RTE {
 
 			if (m_SceneInfoBox->GetVisible()) {
 				m_StartActivityConfigButton->SetText(m_BlinkTimer.AlternateReal(333) ? "Start Here" : "> Start Here <");
-				if (m_DrawDefaultScenePreview) { m_DefaultScenePreview.Update(); }
+
+				if (m_DrawDefaultScenePreview && m_ScenePreviewAnimTimer.GetElapsedRealTimeMS() > m_DefaultScenePreview.GetSpriteAnimDuration() / m_DefaultScenePreview.GetFrameCount()) {
+					m_DefaultScenePreview.SetNextFrame();
+					m_ScenePreviewAnimTimer.Reset();
+				}
 			}
 			if (m_ResumeButton->GetVisible()) { m_GUIControlManager->GetManager()->SetFocus((m_BlinkTimer.AlternateReal(500)) ? m_ResumeButton : nullptr); }
 		} else {

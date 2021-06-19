@@ -124,7 +124,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Leg::SetFoot(Attachable *newFoot) {
-		if (m_Foot) { RemoveAndDeleteAttachable(m_Foot); }
+		if (m_Foot && m_Foot->IsAttached()) { RemoveAndDeleteAttachable(m_Foot); }
 		if (newFoot == nullptr) {
 			m_Foot = nullptr;
 		} else {

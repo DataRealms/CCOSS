@@ -456,7 +456,7 @@ Vector ACrab::GetEyePos() const
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACrab::SetTurret(Turret *newTurret) {
-    if (m_pTurret) { RemoveAndDeleteAttachable(m_pTurret); }
+    if (m_pTurret && m_pTurret->IsAttached()) { RemoveAndDeleteAttachable(m_pTurret); }
     if (newTurret == nullptr) {
         m_pTurret = nullptr;
     } else {
@@ -476,7 +476,7 @@ void ACrab::SetTurret(Turret *newTurret) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACrab::SetJetpack(AEmitter *newJetpack) {
-    if (m_pJetpack) { RemoveAndDeleteAttachable(m_pJetpack); }
+    if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAndDeleteAttachable(m_pJetpack); }
     if (newJetpack == nullptr) {
         m_pJetpack = nullptr;
     } else {
@@ -498,7 +498,7 @@ void ACrab::SetJetpack(AEmitter *newJetpack) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACrab::SetLeftFGLeg(Leg *newLeg) {
-    if (m_pLFGLeg) { RemoveAndDeleteAttachable(m_pLFGLeg); }
+    if (m_pLFGLeg && m_pLFGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pLFGLeg); }
     if (newLeg == nullptr) {
         m_pLFGLeg = nullptr;
     } else {
@@ -519,7 +519,7 @@ void ACrab::SetLeftFGLeg(Leg *newLeg) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACrab::SetLeftBGLeg(Leg *newLeg) {
-    if (m_pLBGLeg) { RemoveAndDeleteAttachable(m_pLBGLeg); }
+    if (m_pLBGLeg && m_pLBGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pLBGLeg); }
     if (newLeg == nullptr) {
         m_pLBGLeg = nullptr;
     } else {
@@ -540,7 +540,7 @@ void ACrab::SetLeftBGLeg(Leg *newLeg) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACrab::SetRightFGLeg(Leg *newLeg) {
-    if (m_pRFGLeg) { RemoveAndDeleteAttachable(m_pRFGLeg); }
+    if (m_pRFGLeg && m_pRFGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pRFGLeg); }
     if (newLeg == nullptr) {
         m_pRFGLeg = nullptr;
     } else {
@@ -560,7 +560,7 @@ void ACrab::SetRightFGLeg(Leg *newLeg) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACrab::SetRightBGLeg(Leg *newLeg) {
-    if (m_pRBGLeg) { RemoveAndDeleteAttachable(m_pRBGLeg); }
+    if (m_pRBGLeg && m_pRBGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pRBGLeg); }
     if (newLeg == nullptr) {
         m_pRBGLeg = nullptr;
     } else {

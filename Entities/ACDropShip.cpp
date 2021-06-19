@@ -751,7 +751,7 @@ void ACDropShip::Update()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetRightThruster(AEmitter *newThruster) {
-    if (m_pRThruster) { RemoveAndDeleteAttachable(m_pRThruster); }
+    if (m_pRThruster && m_pRThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pRThruster); }
     if (newThruster == nullptr) {
         m_pRThruster = nullptr;
     } else {
@@ -772,7 +772,7 @@ void ACDropShip::SetRightThruster(AEmitter *newThruster) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetLeftThruster(AEmitter *newThruster) {
-    if (m_pLThruster) { RemoveAndDeleteAttachable(m_pLThruster); }
+    if (m_pLThruster && m_pLThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pLThruster); }
     if (newThruster == nullptr) {
         m_pLThruster = nullptr;
     } else {
@@ -793,7 +793,7 @@ void ACDropShip::SetLeftThruster(AEmitter *newThruster) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetURightThruster(AEmitter *newThruster) {
-    if (m_pURThruster) { RemoveAndDeleteAttachable(m_pURThruster); }
+    if (m_pURThruster && m_pURThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pURThruster); }
     if (newThruster == nullptr) {
         m_pURThruster = nullptr;
     } else {
@@ -813,7 +813,7 @@ void ACDropShip::SetURightThruster(AEmitter *newThruster) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetULeftThruster(AEmitter *newThruster) {
-    if (m_pULThruster) { RemoveAndDeleteAttachable(m_pULThruster); }
+    if (m_pULThruster && m_pULThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pULThruster); }
     if (newThruster == nullptr) {
         m_pULThruster = nullptr;
     } else {
@@ -833,7 +833,7 @@ void ACDropShip::SetULeftThruster(AEmitter *newThruster) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetRightHatch(Attachable *newHatch) {
-    if (m_pRHatch) { RemoveAndDeleteAttachable(m_pRHatch); }
+    if (m_pRHatch && m_pRHatch->IsAttached()) { RemoveAndDeleteAttachable(m_pRHatch); }
     if (newHatch == nullptr) {
         m_pRHatch = nullptr;
     } else {
@@ -852,7 +852,7 @@ void ACDropShip::SetRightHatch(Attachable *newHatch) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetLeftHatch(Attachable *newHatch) {
-    if (m_pLHatch) { RemoveAndDeleteAttachable(m_pLHatch); }
+    if (m_pLHatch && m_pLHatch->IsAttached()) { RemoveAndDeleteAttachable(m_pLHatch); }
     if (newHatch == nullptr) {
         m_pLHatch = nullptr;
     } else {

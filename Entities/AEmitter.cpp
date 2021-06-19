@@ -361,7 +361,7 @@ float AEmitter::EstimateImpulse(bool burst)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AEmitter::SetFlash(Attachable *newFlash) {
-    if (m_pFlash) { RemoveAndDeleteAttachable(m_pFlash); }
+    if (m_pFlash && m_pFlash->IsAttached()) { RemoveAndDeleteAttachable(m_pFlash); }
     if (newFlash == nullptr) {
         m_pFlash = nullptr;
     } else {

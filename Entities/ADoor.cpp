@@ -213,7 +213,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::SetDoor(Attachable *newDoor) {
-		if (m_Door) { RemoveAndDeleteAttachable(m_Door); }
+		if (m_Door && m_Door->IsAttached()) { RemoveAndDeleteAttachable(m_Door); }
 		if (newDoor == nullptr) {
 			m_Door = nullptr;
 		} else {

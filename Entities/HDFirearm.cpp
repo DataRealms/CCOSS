@@ -346,7 +346,7 @@ void HDFirearm::Destroy(bool notInherited)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void HDFirearm::SetMagazine(Magazine *newMagazine) {
-    if (m_pMagazine) { RemoveAndDeleteAttachable(m_pMagazine); }
+    if (m_pMagazine && m_pMagazine->IsAttached()) { RemoveAndDeleteAttachable(m_pMagazine); }
     if (newMagazine == nullptr) {
         m_pMagazine = nullptr;
     } else {
@@ -367,7 +367,7 @@ void HDFirearm::SetMagazine(Magazine *newMagazine) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void HDFirearm::SetFlash(Attachable *newFlash) {
-    if (m_pFlash) { RemoveAndDeleteAttachable(m_pFlash); }
+    if (m_pFlash && m_pFlash->IsAttached()) { RemoveAndDeleteAttachable(m_pFlash); }
     if (newFlash == nullptr) {
         m_pFlash = nullptr;
     } else {

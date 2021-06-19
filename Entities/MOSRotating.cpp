@@ -1574,14 +1574,14 @@ Attachable * MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMov
         hardcodedAttachableMapEntry->second(this, nullptr);
         m_HardcodedAttachableUniqueIDsAndSetters.erase(hardcodedAttachableMapEntry);
     }
-    
+
     // Note, this version handles cases where you can't pass null to a setter cause you're calling a remover function, i.e. when dealing with hardcoded Attachable lists.
     hardcodedAttachableMapEntry = m_HardcodedAttachableUniqueIDsAndRemovers.find(attachable->GetUniqueID());
     if (hardcodedAttachableMapEntry != m_HardcodedAttachableUniqueIDsAndRemovers.end()) {
         hardcodedAttachableMapEntry->second(this, attachable);
         m_HardcodedAttachableUniqueIDsAndRemovers.erase(hardcodedAttachableMapEntry);
     }
-    
+
     if (addBreakWounds) {
         if (!m_ToDelete && attachable->GetParentBreakWound()) {
             AEmitter *parentBreakWound = dynamic_cast<AEmitter *>(attachable->GetParentBreakWound()->Clone());

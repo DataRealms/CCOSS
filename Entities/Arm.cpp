@@ -195,27 +195,19 @@ HeldDevice * Arm::GetHeldDevice() const
 //                  (if there is one) will be deleted.
 
 void Arm::SetHeldMO(MovableObject *newHeldMO) {
+    Attachable *oldHeldMOAsAttachable = dynamic_cast<Attachable *>(m_pHeldMO);
+    if (oldHeldMOAsAttachable && oldHeldMOAsAttachable->IsAttached()) { RemoveAndDeleteAttachable(oldHeldMOAsAttachable); }
     if (newHeldMO == nullptr) {
-        Attachable *heldMOAsAttachable = dynamic_cast<Attachable *>(m_pHeldMO);
-        if (heldMOAsAttachable && heldMOAsAttachable->IsAttached()) { RemoveAndDeleteAttachable(heldMOAsAttachable); }
         m_pHeldMO = nullptr;
     } else {
-        //TODO All this needs cleaning up, this should do the basics, some other method should be responsible for replacing held things
-        if (m_pHeldMO && m_pHeldMO->IsHeldDevice() && dynamic_cast<HeldDevice *>(m_pHeldMO)->IsAttached()) {
-            RemoveAndDeleteAttachable(dynamic_cast<HeldDevice *>(m_pHeldMO));
-            m_pHeldMO = nullptr;
-        }
+        m_pHeldMO = newHeldMO;
+        if (Attachable *heldMOAsAttachable = dynamic_cast<Attachable *>(newHeldMO)) {
+            AddAttachable(heldMOAsAttachable);
 
-        if (newHeldMO->IsHeldDevice()) {
-            Attachable *newHeldDevice = dynamic_cast<Attachable *>(newHeldMO);
-            if (newHeldDevice->IsAttached()) { newHeldDevice->GetParent()->RemoveAttachable(newHeldDevice); }
-            AddAttachable(newHeldDevice);
-
-            m_HardcodedAttachableUniqueIDsAndSetters.insert({newHeldDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            m_HardcodedAttachableUniqueIDsAndSetters.insert({heldMOAsAttachable->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
                 dynamic_cast<Arm *>(parent)->SetHeldMO(attachable);
             }});
         }
-        m_pHeldMO = newHeldMO;
     }
 }
 

@@ -504,11 +504,10 @@ Vector AHuman::GetEyePos() const
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetHead(Attachable *newHead) {
+    if (m_pHead && m_pHead->IsAttached()) { RemoveAndDeleteAttachable(m_pHead); }
     if (newHead == nullptr) {
-        if (m_pHead && m_pHead->IsAttached()) { RemoveAndDeleteAttachable(m_pHead); }
         m_pHead = nullptr;
     } else {
-        if (m_pHead && m_pHead->IsAttached()) { RemoveAndDeleteAttachable(m_pHead); }
         m_pHead = newHead;
         AddAttachable(newHead);
 
@@ -525,11 +524,10 @@ void AHuman::SetHead(Attachable *newHead) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetJetpack(AEmitter *newJetpack) {
+    if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAndDeleteAttachable(m_pJetpack); }
     if (newJetpack == nullptr) {
-        if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAndDeleteAttachable(m_pJetpack); }
         m_pJetpack = nullptr;
     } else {
-        if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAndDeleteAttachable(m_pJetpack); }
         m_pJetpack = newJetpack;
         AddAttachable(newJetpack);
 
@@ -547,11 +545,10 @@ void AHuman::SetJetpack(AEmitter *newJetpack) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetFGArm(Arm *newArm) {
+    if (m_pFGArm && m_pFGArm->IsAttached()) { RemoveAndDeleteAttachable(m_pFGArm); }
     if (newArm == nullptr) {
-        if (m_pFGArm && m_pFGArm->IsAttached()) { RemoveAndDeleteAttachable(m_pFGArm); }
         m_pFGArm = nullptr;
     } else {
-        if (m_pFGArm && m_pFGArm->IsAttached()) { RemoveAndDeleteAttachable(m_pFGArm); }
         m_pFGArm = newArm;
         AddAttachable(newArm);
 
@@ -570,11 +567,10 @@ void AHuman::SetFGArm(Arm *newArm) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetBGArm(Arm *newArm) {
+    if (m_pBGArm && m_pBGArm->IsAttached()) { RemoveAndDeleteAttachable(m_pBGArm); }
     if (newArm == nullptr) {
-        if (m_pBGArm && m_pBGArm->IsAttached()) { RemoveAndDeleteAttachable(m_pBGArm); }
         m_pBGArm = nullptr;
     } else {
-        if (m_pBGArm && m_pBGArm->IsAttached()) { RemoveAndDeleteAttachable(m_pBGArm); }
         m_pBGArm = newArm;
         AddAttachable(newArm);
 
@@ -592,11 +588,10 @@ void AHuman::SetBGArm(Arm *newArm) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetFGLeg(Leg *newLeg) {
+    if (m_pFGLeg && m_pFGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pFGLeg); }
     if (newLeg == nullptr) {
-        if (m_pFGLeg && m_pFGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pFGLeg); }
         m_pFGLeg = nullptr;
     } else {
-        if (m_pFGLeg && m_pFGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pFGLeg); }
         m_pFGLeg = newLeg;
         AddAttachable(newLeg);
 
@@ -613,11 +608,10 @@ void AHuman::SetFGLeg(Leg *newLeg) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetBGLeg(Leg *newLeg) {
+    if (m_pBGLeg && m_pBGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pBGLeg); }
     if (newLeg == nullptr) {
-        if (m_pBGLeg && m_pBGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pBGLeg); }
         m_pBGLeg = nullptr;
     } else {
-        if (m_pBGLeg && m_pBGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pBGLeg); }
         m_pBGLeg = newLeg;
         AddAttachable(newLeg);
 

@@ -65,13 +65,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Turret::SetFirstMountedDevice(HeldDevice *newMountedDevice) {
-		if (newMountedDevice == nullptr) {
-			if (HasMountedDevice()) {
-				HeldDevice *removedDevice = m_MountedDevices.at(0).get();
-				RemoveAndDeleteAttachable(m_MountedDevices.at(0).get());
-			}
-		} else {
-			if (HasMountedDevice()) { RemoveAndDeleteAttachable(m_MountedDevices.at(0).get()); }
+		if (HasMountedDevice()) { RemoveAndDeleteAttachable(m_MountedDevices.at(0).get()); }
+		if (newMountedDevice != nullptr) {
 			m_MountedDevices.emplace(m_MountedDevices.begin(), std::unique_ptr<HeldDevice>(newMountedDevice));
 			AddAttachable(newMountedDevice);
 

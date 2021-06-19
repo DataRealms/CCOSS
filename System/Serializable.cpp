@@ -4,7 +4,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int RTE::Serializable::Create(Reader &reader, bool checkType, bool doCreate) {
+	int Serializable::Create(Reader &reader, bool checkType, bool doCreate) {
 		if (checkType && reader.ReadPropValue() != GetClassName()) {
 			reader.ReportError("Wrong type in Reader when passed to Serializable::Create()");
 			return -1;

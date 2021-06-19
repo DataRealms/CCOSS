@@ -2167,8 +2167,7 @@ void ACrab::Update()
 			m_ForceDeepCheck = true;
 			m_pJetpack->EnableEmission(true);
 			// Quadruple this for the burst
-			m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS() * 10.0F;
-			if (m_JetTimeLeft < 0) { m_JetTimeLeft = 0; }
+			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * 10.0F, 0.0F);
 		}
         // Jetpack is burning
         else if (m_Controller.IsState(BODY_JUMP) && m_JetTimeLeft > 0)
@@ -2177,8 +2176,7 @@ void ACrab::Update()
             // Jetpacks are noisy!
             m_pJetpack->AlarmOnEmit(m_Team);
             // Deduct from the jetpack time
-            m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS();
-			if (m_JetTimeLeft < 0) { m_JetTimeLeft = 0; }
+            m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS(), 0.0F);
             m_MoveState = JUMP;
         }
         // Jetpack is off/turning off
@@ -2187,8 +2185,7 @@ void ACrab::Update()
 			if (m_MoveState == JUMP) { m_MoveState = STAND; }
 
             // Replenish the jetpack time, twice as fast
-            m_JetTimeLeft += g_TimerMan.GetDeltaTimeMS() * 2;
-			if (m_JetTimeLeft >= m_JetTimeTotal) { m_JetTimeLeft = m_JetTimeTotal; }
+			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * 2.0F, m_JetTimeTotal);
         }
 
         // Direct the jetpack nozzle according to movement stick if analog input is present

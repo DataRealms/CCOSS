@@ -3167,8 +3167,7 @@ void AHuman::Update()
 			m_ForceDeepCheck = true;
 			m_pJetpack->EnableEmission(true);
 			// Quadruple this for the burst
-			m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS() * 10.0F;
-			if (m_JetTimeLeft < 0) { m_JetTimeLeft = 0; }
+			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * 10.0F, 0.0F);
 		}
 		// Jetpack is ordered to be burning, or the pie menu is on and was burning before it went on
 		else if ((m_Controller.IsState(BODY_JUMP) || (m_MoveState == JUMP && m_Controller.IsState(PIE_MENU_ACTIVE))) && m_JetTimeLeft > 0)
@@ -3177,24 +3176,17 @@ void AHuman::Update()
 			// Jetpacks are noisy!
 			m_pJetpack->AlarmOnEmit(m_Team);
 			// Deduct from the jetpack time
-			m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS();
-			if (m_JetTimeLeft < 0) { m_JetTimeLeft = 0; }
+			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS(), 0.0F);
 			m_MoveState = JUMP;
 			m_Paths[FGROUND][JUMP].Restart();
 			m_Paths[BGROUND][JUMP].Restart();
 		}
 		// Jetpack is off/turning off
-		else
-		{
+		else {
 			m_pJetpack->EnableEmission(false);
-			if (m_MoveState == JUMP) {
-				m_MoveState = STAND;
-			}
+			if (m_MoveState == JUMP) { m_MoveState = STAND; }
 			// Replenish the jetpack time, twice as fast
-			m_JetTimeLeft += g_TimerMan.GetDeltaTimeMS() * 2;
-			if (m_JetTimeLeft >= m_JetTimeTotal) {
-				m_JetTimeLeft = m_JetTimeTotal;
-			}
+			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * 2.0F, m_JetTimeTotal);
 		}
 
 		// If pie menu is on, keep the angle to what it was before

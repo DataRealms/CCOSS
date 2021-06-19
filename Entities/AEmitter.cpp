@@ -521,8 +521,6 @@ void AEmitter::Update()
                     emitVel.SetXY(velMin + RandomNum(0.0F, velRange), 0.0F);
 					emitVel.RadRotate(m_EmitAngle.GetRadAngle() + spread * RandomNormalNum());
                     emitVel = RotateOffset(emitVel);
-					// Scale particle velocity based on throttle?
-					//emitVel *= throttleFactor;
                     pParticle->SetVel(parentVel + emitVel);
 					pParticle->SetRotAngle(emitVel.GetAbsRadAngle() + (m_HFlipped ? -c_PI : 0));
 					pParticle->SetHFlipped(m_HFlipped);
@@ -558,7 +556,7 @@ void AEmitter::Update()
 
         // Count the the damage caused by the emissions, and only if we're not bursting
 		if (!m_BurstTriggered) {
-			m_DamageCount += (float)emissionCountTotal * m_EmitDamage * m_EmitterDamageMultiplier;
+			m_DamageCount += static_cast<float>(emissionCountTotal) * m_EmitDamage * m_EmitterDamageMultiplier;
 		} else {	// Count the the damage caused by the burst
 			m_DamageCount += m_BurstDamage * m_EmitterDamageMultiplier;
 		}

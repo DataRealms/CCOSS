@@ -2153,7 +2153,7 @@ void ACrab::Update()
     if (m_pJetpack && m_pJetpack->IsAttached())
     {
 		if (m_JetTimeTotal > 0) {
-			// Throttle depletes based on throttle range
+			// Jetpack throttle depletes relative to jet time, but only if throttle range values have been defined
 			float jetTimeRatio = std::max(m_JetTimeLeft / m_JetTimeTotal, 0.0F);
 			m_pJetpack->SetThrottle(jetTimeRatio * 2.0F - 1.0F);
 			float minScale = 1.0F - m_pJetpack->GetMinThrottle();
@@ -2168,6 +2168,7 @@ void ACrab::Update()
 			m_pJetpack->EnableEmission(true);
 			// Quadruple this for the burst
 			m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS() * 10.0F;
+			if (m_JetTimeLeft < 0) { m_JetTimeLeft = 0; }
 		}
         // Jetpack is burning
         else if (m_Controller.IsState(BODY_JUMP) && m_JetTimeLeft > 0)
@@ -2177,6 +2178,7 @@ void ACrab::Update()
             m_pJetpack->AlarmOnEmit(m_Team);
             // Deduct from the jetpack time
             m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS();
+			if (m_JetTimeLeft < 0) { m_JetTimeLeft = 0; }
             m_MoveState = JUMP;
         }
         // Jetpack is off/turning off

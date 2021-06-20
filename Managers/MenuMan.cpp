@@ -144,27 +144,27 @@ namespace RTE {
 
 	bool MenuMan::UpdateMainMenu() const {
 		switch (m_MainMenu->Update()) {
-			case RTE::MainMenuGUI::MainMenuUpdateResult::CampaignStarted:
+			case MainMenuGUI::MainMenuUpdateResult::CampaignStarted:
 				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCampaign);
 				break;
-			case RTE::MainMenuGUI::MainMenuUpdateResult::ScenarioStarted:
+			case MainMenuGUI::MainMenuUpdateResult::ScenarioStarted:
 				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario);
 				break;
-			case RTE::MainMenuGUI::MainMenuUpdateResult::EnterCreditsScreen:
+			case MainMenuGUI::MainMenuUpdateResult::EnterCreditsScreen:
 				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCredits);
 				break;
-			case RTE::MainMenuGUI::MainMenuUpdateResult::BackToMainFromCredits:
+			case MainMenuGUI::MainMenuUpdateResult::BackToMainFromCredits:
 				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::CreditsToMainMenu);
 				break;
-			case RTE::MainMenuGUI::MainMenuUpdateResult::ActivityStarted:
+			case MainMenuGUI::MainMenuUpdateResult::ActivityStarted:
 				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeOut);
 				g_ActivityMan.SetRestartActivity();
 				break;
-			case RTE::MainMenuGUI::MainMenuUpdateResult::ActivityResumed:
+			case MainMenuGUI::MainMenuUpdateResult::ActivityResumed:
 				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::TransitionEnd);
 				g_ActivityMan.SetResumeActivity();
 				break;
-			case RTE::MainMenuGUI::MainMenuUpdateResult::Quit:
+			case MainMenuGUI::MainMenuUpdateResult::Quit:
 				return true;
 			default:
 				break;
@@ -176,14 +176,14 @@ namespace RTE {
 
 	void MenuMan::UpdateScenarioMenu() const {
 		switch (m_ScenarioMenu->Update()) {
-			case RTE::ScenarioGUI::ScenarioMenuUpdateResult::BackToMain:
+			case ScenarioGUI::ScenarioMenuUpdateResult::BackToMain:
 				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PlanetToMainMenu);
 				break;
-			case RTE::ScenarioGUI::ScenarioMenuUpdateResult::ActivityResumed:
+			case ScenarioGUI::ScenarioMenuUpdateResult::ActivityResumed:
 				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::TransitionEnd);
 				g_ActivityMan.SetResumeActivity();
 				break;
-			case RTE::ScenarioGUI::ScenarioMenuUpdateResult::ActivityStarted:
+			case ScenarioGUI::ScenarioMenuUpdateResult::ActivityStarted:
 				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::FadeOut);
 				if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
 				g_ActivityMan.SetRestartActivity();

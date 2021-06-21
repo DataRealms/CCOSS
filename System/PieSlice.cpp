@@ -90,6 +90,9 @@ namespace RTE {
 			case PieSliceIndex::PSI_STAY:
 				m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Land"));
 				break;
+			case PieSliceIndex::PSI_DELIVER:
+				m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Return"));
+				break;
 			case PieSliceIndex::PSI_SCUTTLE:
 				m_Icon = *dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Death"));
 				break;

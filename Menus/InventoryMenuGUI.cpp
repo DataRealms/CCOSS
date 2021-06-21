@@ -393,7 +393,7 @@ namespace RTE {
 		const std::deque<MovableObject *> *inventory = m_InventoryActor->GetInventory();
 		if (inventory && !inventory->empty()) {
 			int leftSideItemCount = std::min(static_cast<int>(std::floor(static_cast<float>(inventory->size()) / 2)), c_ItemsPerRow / 2);
-			int rightSideItemCount = std::min(static_cast<int>(std::ceil(static_cast<float>(inventory->size()) / 2)), c_ItemsPerRow / 2);
+			int rightSideItemCount = std::min(static_cast<int>(std::ceil(static_cast<float>(inventory->size()) / 2)), c_ItemsPerRow / 2 + (m_InventoryActorEquippedItems.empty() ? 1 : 0));
 
 			int carouselIndex = 0;
 			std::vector<MovableObject *> temporaryLeftSideItemsForProperOrdering;
@@ -405,12 +405,18 @@ namespace RTE {
 			}
 			std::for_each(temporaryLeftSideItemsForProperOrdering.crbegin(), temporaryLeftSideItemsForProperOrdering.crend(), [this, &carouselIndex, &leftSideItemCount](MovableObject *carouselItem) {
 				m_CarouselItemBoxes.at(carouselIndex + (c_ItemsPerRow / 2) - leftSideItemCount)->Item = carouselItem;
+				m_CarouselItemBoxes.at(carouselIndex)->IsForEquippedItems = false;
 				carouselIndex++;
 			});
-			carouselIndex = c_ItemsPerRow / 2 + 1;
+			carouselIndex = c_ItemsPerRow / 2;
+			if (!m_InventoryActorEquippedItems.empty()) {
+				m_CarouselItemBoxes.at(carouselIndex)->IsForEquippedItems = true;
+				carouselIndex++;
+			}
 			if (rightSideItemCount > 0) {
 				std::for_each(inventory->cbegin(), inventory->cbegin() + rightSideItemCount, [this, &carouselIndex](MovableObject *carouselItem) {
 					m_CarouselItemBoxes.at(carouselIndex)->Item = carouselItem;
+					m_CarouselItemBoxes.at(carouselIndex)->IsForEquippedItems = false;
 					carouselIndex++;
 				});
 			}

@@ -38,8 +38,8 @@ void AEmitter::Clear()
     m_WasEmitting = false;
     m_EmitCount = 0;
     m_EmitCountLimit = 0;
-	m_MinThrottleRange = 0;
-	m_MaxThrottleRange = 0;
+	m_MinThrottleRange = 1.0F;
+	m_MaxThrottleRange = 1.0F;
     m_Throttle = 0;
     m_EmissionsIgnoreThis = false;
     m_BurstScale = 1.0F;

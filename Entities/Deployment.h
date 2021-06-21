@@ -138,7 +138,7 @@ ClassInfoGetters
 // Return value:    A good identifyable graphical representation of this in a BITMAP, if
 //                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
 
-    BITMAP * GetGraphicalIcon() override { return m_Icon.GetBitmaps8() ? m_Icon.GetBitmaps8()[0] : 0; }
+    BITMAP * GetGraphicalIcon() const override { return m_Icon.GetBitmaps8() ? m_Icon.GetBitmaps8()[0] : nullptr; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

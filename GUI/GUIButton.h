@@ -14,6 +14,7 @@
 namespace RTE
 {
 
+    class GUILabel;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Class:           GUIButton
@@ -140,6 +141,23 @@ public:
 
     void OnMouseLeave(int X, int Y, int Buttons, int Modifier) override;
 
+ //////////////////////////////////////////////////////////////////////////////////////////
+// Method:  OnGainFocus
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Called when the panel gains focus.
+// Arguments:       None.
+
+    void OnGainFocus() override;
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:  OnLoseFocus
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Called when the panel looses focus.
+// Arguments:       None.
+
+    void OnLoseFocus() override;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  OnKeyDown
@@ -204,32 +222,67 @@ public:
 
     void Resize(int Width, int Height) override;
 
+    /// <summary>
+    /// Gets whether or not this button is currently pushed.
+    /// </summary>
+    /// <returns>Whether or not this button is currently pushed.</returns>
+    bool IsPushed() const { return m_Pushed; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetPushed
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Forces the button to look pressed down or not.
-// Arguments:       Whether to force the pushed look or not.
+    /// <summary>
+    /// Sets whether or not this button is currently pushed.
+    /// </summary>
+    /// <param name="pushed">Whether or not this button should be pushed.</param>
+    void SetPushed(bool pushed = false);
 
-    void SetPushed(bool pushed = false) { m_Pushed = pushed; }
+    /// <summary>
+    /// Gets whether or not this button is currently being moused over.
+    /// </summary>
+    /// <returns>Whether or not this button is currently being moused over.</returns>
+    bool IsMousedOver() const { return m_Over; }
 
+    /// <summary>
+    /// Gets the text of this GUIButton's GUILabel.
+    /// </summary>
+    /// <returns>The text of this GUIButton's GUILabel.</returns>
+    const std::string &GetText() const;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetText
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the text.
-// Arguments:       Text.
+    /// <summary>
+    /// Sets the text of this GUIButton's GUILabel.
+    /// </summary>
+    /// <param name="newText">The new text for this GUIButton's GUILabel.</param>
+    /// <param name="noBitmapRebuild">Lets this method NOT rebuild the button bitmap, even if the icon has changed. Defaults to false and should almost always stay that way.</param>
+    void SetText(const std::string_view &newText, bool noBitmapRebuild = false);
 
-    void SetText(const std::string Text);
+    /// <summary>
+    /// Sets whether or not this GUIButton's text should scroll horizontally (right) when it overflows the button.
+    /// </summary>
+    /// <param name="newOverflowScroll">Whether or not this GUIButton's text should scroll horizontally when it overflows.</param>
+    void SetHorizontalOverflowScroll(bool newOverflowScroll);
 
+    /// <summary>
+    /// Sets whether or not this GUIButton's text should scroll vertically (down) when it overflows the button.
+    /// </summary>
+    /// <param name="newOverflowScroll">Whether or not this GUIButton's text should scroll vertically when it overflows.</param>
+    void SetVerticalOverflowScroll(bool newOverflowScroll);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetText
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the text.
-// Arguments:       None.
+    /// <summary>
+    /// Gets whether or not this GUIButton has an icon with a Bitmap.
+    /// </summary>
+    bool HasIcon() const { return m_Icon->HasBitmap(); }
 
-    std::string GetText();
+    /// <summary>
+    /// Sets the icon for this GUIButton. Ownership is NOT transferred.
+    /// </summary>
+    /// <param name="newIcon">A pointer to the new icon BITMAP for this GUIButton.</param>
+    /// <param name="noBitmapRebuild">Lets this method NOT rebuild the button bitmap, even if the icon has changed. Defaults to false and should almost always stay that way.</param>
+    void SetIcon(BITMAP *newIcon, bool noBitmapRebuild = false);
+
+    /// <summary>
+    /// Helper method to set both text and icon for this GUIButton at the same time.
+    /// </summary>
+    /// <param name="newIcon">A pointer to the new icon BITMAP for this GUIButton.</param>
+    /// <param name="newText">The new text for this GUIButton's GUILabel.</param>
+    void SetIconAndText(BITMAP *newIcon, const std::string_view &newText);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -258,12 +311,13 @@ private:
 
 // Members
 
-    GUIBitmap        *m_DrawBitmap;
+    GUIBitmap *m_DrawBitmap;
 
     bool            m_Pushed;
     bool            m_Over;
-    std::string        m_Text;
-
+    std::unique_ptr<GUILabel> m_Text;
+    std::unique_ptr<GUIBitmap> m_Icon;
+    std::unique_ptr<GUIRect> m_BorderSizes;
 };
 
 

@@ -636,16 +636,12 @@ ClassInfoGetters
 	virtual bool AddPieMenuSlices(PieMenuGUI *pPieMenu);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HandlePieCommand
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Handles and does whatever a specific activated Pie Menu slice does to
-//                  this.
-// Arguments:       The pie menu command to handle. See the PieSliceIndex enum.
-// Return value:    Whetehr any slice was handled. False if no matching slice handler was
-//                  found, or there was no slice currently activated by the pie menu.
-
-    virtual bool HandlePieCommand(int pieSliceIndex);
+    /// <summary>
+    /// Handles and does whatever a specific activated Pie Menu slice does to this.
+    /// </summary>
+    /// <param name="pieSliceIndex">The pie menu command to handle. See the enum in PieSlice.</param>
+    /// <returns>Whether any slice was handled. False if no matching slice handler was found, or there was no slice currently activated by the pie menu.</returns>
+    virtual bool HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex) { return false; }
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -873,7 +869,7 @@ ClassInfoGetters
 // Arguments:       An pointer to the new item to add. Ownership IS TRANSFERRED!
 // Return value:    None..
 
-    virtual void AddInventoryItem(MovableObject *pItemToAdd) { if (pItemToAdd) { m_Inventory.push_back(pItemToAdd); } }
+    virtual void AddInventoryItem(MovableObject *pItemToAdd) { if (pItemToAdd) { m_Inventory.emplace_back(pItemToAdd); } }
 
 
 
@@ -885,6 +881,13 @@ ClassInfoGetters
 // Return value:    None.
 
 	void RemoveInventoryItem(string presetName);
+
+    /// <summary>
+    /// Removes and returns the inventory item at the given index. Ownership IS transferred.
+    /// </summary>
+    /// <param name="inventoryIndex">The index of the inventory item to remove.</param>
+    /// <returns>An owning pointer to the removed inventory item.</returns>
+    MovableObject * RemoveInventoryItemAtIndex(int inventoryIndex);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -912,6 +915,23 @@ ClassInfoGetters
 //                  If there are no MovableObject:s in inventory, 0 will be returned.
 
 	MovableObject * SwapPrevInventory(MovableObject *pSwapIn = 0);
+
+    /// <summary>
+    /// Swaps the inventory items at the given indices. Will return false if a given index is invalid.
+    /// </summary>
+    /// <param name="inventoryIndex1">The index of one item.</param>
+    /// <param name="inventoryIndex2">The index of the other item.</param>
+    /// <returns>Whether or not the swap was successful.</returns>
+    bool SwapInventoryItemsByIndex(int inventoryIndex1, int inventoryIndex2);
+
+    /// <summary>
+    /// Sets the inventory item at the given index as the new inventory item, and gives back the one that was originally there.
+    /// If an invalid index is given, the new item will be put in the back of the inventory, and nullptr will be returned.
+    /// </summary>
+    /// <param name="newInventoryItem">The new item that should be at the given inventory index. Cannot be a nullptr. Ownership IS transferred.</param>
+    /// <param name="inventoryIndex">The inventory index the new item should be placed at.</param>
+    /// <returns>The inventory item that used to be at the inventory index. Ownership IS transferred.</returns>
+    MovableObject * SetInventoryItemAtIndex(MovableObject *newInventoryItem, int inventoryIndex);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1439,7 +1459,7 @@ protected:
     // The timer that measures and deducts past time from the remaining white flash time
     Timer m_WhiteFlashTimer;
     // Extra pie menu options that this should add to any Pie Menu that focuses on this
-    std::list<PieMenuGUI::Slice> m_PieSlices;
+    std::list<PieSlice> m_PieSlices;
     // What material strength this actor is capable of digging trough.
     float m_DigStrength;
 	// ID of deployment which spawned this actor

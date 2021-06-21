@@ -233,7 +233,7 @@ ClassInfoGetters
 // Return value:    A good identifyable graphical representation of this in a BITMAP, if
 //                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
 
-    BITMAP * GetGraphicalIcon() override;
+    BITMAP * GetGraphicalIcon() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

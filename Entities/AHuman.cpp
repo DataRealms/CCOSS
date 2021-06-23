@@ -3139,173 +3139,166 @@ void AHuman::Update()
 		}
 	}
 
-    float deltaTime = g_TimerMan.GetDeltaTimeSecs();
+	float deltaTime = g_TimerMan.GetDeltaTimeSecs();
+	// Get the rotation in radians.
+	float rot = m_Rotation.GetRadAngle();
 
-    // Set Default direction of all the paths!
-    m_Paths[FGROUND][WALK].SetHFlip(m_HFlipped);
-    m_Paths[BGROUND][WALK].SetHFlip(m_HFlipped);
-    m_Paths[FGROUND][CROUCH].SetHFlip(m_HFlipped);
-    m_Paths[BGROUND][CROUCH].SetHFlip(m_HFlipped);
-    m_Paths[FGROUND][CRAWL].SetHFlip(m_HFlipped);
-    m_Paths[BGROUND][CRAWL].SetHFlip(m_HFlipped);
-    m_Paths[FGROUND][ARMCRAWL].SetHFlip(m_HFlipped);
-    m_Paths[BGROUND][ARMCRAWL].SetHFlip(m_HFlipped);
-    m_Paths[FGROUND][CLIMB].SetHFlip(m_HFlipped);
-    m_Paths[BGROUND][CLIMB].SetHFlip(m_HFlipped);
-    m_Paths[FGROUND][STAND].SetHFlip(m_HFlipped);
-    m_Paths[BGROUND][STAND].SetHFlip(m_HFlipped);
+	// Set Default direction of all the paths!
+	m_Paths[FGROUND][WALK].SetHFlip(m_HFlipped);
+	m_Paths[BGROUND][WALK].SetHFlip(m_HFlipped);
+	m_Paths[FGROUND][CROUCH].SetHFlip(m_HFlipped);
+	m_Paths[BGROUND][CROUCH].SetHFlip(m_HFlipped);
+	m_Paths[FGROUND][CRAWL].SetHFlip(m_HFlipped);
+	m_Paths[BGROUND][CRAWL].SetHFlip(m_HFlipped);
+	m_Paths[FGROUND][ARMCRAWL].SetHFlip(m_HFlipped);
+	m_Paths[BGROUND][ARMCRAWL].SetHFlip(m_HFlipped);
+	m_Paths[FGROUND][CLIMB].SetHFlip(m_HFlipped);
+	m_Paths[BGROUND][CLIMB].SetHFlip(m_HFlipped);
+	m_Paths[FGROUND][STAND].SetHFlip(m_HFlipped);
+	m_Paths[BGROUND][STAND].SetHFlip(m_HFlipped);
 
-    ////////////////////////////////////
-    // Jetpack activation and blast direction
+	////////////////////////////////////
+	// Jetpack activation and blast direction
 
-    if (m_pJetpack && m_pJetpack->IsAttached())
-    {
-        // Start Jetpack burn
-        if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0 && m_Status != INACTIVE)
-        {
-            m_pJetpack->TriggerBurst();
-            // This is to make sure se get loose from being stuck
-            m_ForceDeepCheck = true;
-            m_pJetpack->EnableEmission(true);
-            // Quadruple this for the burst
-            m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS() * 10;
-            if (m_JetTimeLeft < 0)
-                m_JetTimeLeft = 0;
-        }
-        // Jetpack is ordered to be burning, or the pie menu is on and was burning before it went on
-        else if ((m_Controller.IsState(BODY_JUMP) || (m_MoveState == JUMP && m_Controller.IsState(PIE_MENU_ACTIVE))) && m_JetTimeLeft > 0)
-        {
-            m_pJetpack->EnableEmission(true);
-            // Jetpacks are noisy!
-            m_pJetpack->AlarmOnEmit(m_Team);
-            // Deduct from the jetpack time
-            m_JetTimeLeft -= g_TimerMan.GetDeltaTimeMS();
-            m_MoveState = JUMP;
-            m_Paths[FGROUND][JUMP].Restart();
-            m_Paths[BGROUND][JUMP].Restart();
-        }
-        // Jetpack is off/turning off
-        else
-        {
-            m_pJetpack->EnableEmission(false);
-            if (m_MoveState == JUMP)
-                m_MoveState = STAND;
+	if (m_pJetpack)
+	{
+		if (m_JetTimeTotal > 0) {
+			// Jetpack throttle depletes relative to jet time, but only if throttle range values have been defined
+			float jetTimeRatio = std::max(m_JetTimeLeft / m_JetTimeTotal, 0.0F);
+			m_pJetpack->SetThrottle(jetTimeRatio * 2.0F - 1.0F);
+			float minScale = 1.0F - m_pJetpack->GetMinThrottle();
+			m_pJetpack->SetFlashScale(minScale + (1.0F + m_pJetpack->GetMaxThrottle() - minScale) * jetTimeRatio);
+		}
+		// Start Jetpack burn
+		if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0 && m_Status != INACTIVE)
+		{
+			m_pJetpack->TriggerBurst();
+			// This is to make sure se get loose from being stuck
+			m_ForceDeepCheck = true;
+			m_pJetpack->EnableEmission(true);
+			// Quadruple this for the burst
+			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * 10.0F, 0.0F);
+		}
+		// Jetpack is ordered to be burning, or the pie menu is on and was burning before it went on
+		else if ((m_Controller.IsState(BODY_JUMP) || (m_MoveState == JUMP && m_Controller.IsState(PIE_MENU_ACTIVE))) && m_JetTimeLeft > 0)
+		{
+			m_pJetpack->EnableEmission(true);
+			// Jetpacks are noisy!
+			m_pJetpack->AlarmOnEmit(m_Team);
+			// Deduct from the jetpack time
+			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS(), 0.0F);
+			m_MoveState = JUMP;
+			m_Paths[FGROUND][JUMP].Restart();
+			m_Paths[BGROUND][JUMP].Restart();
+		}
+		// Jetpack is off/turning off
+		else {
+			m_pJetpack->EnableEmission(false);
+			if (m_MoveState == JUMP) { m_MoveState = STAND; }
+			// Replenish the jetpack time, twice as fast
+			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * 2.0F, m_JetTimeTotal);
+		}
 
-            // Replenish the jetpack time, twice as fast
-            m_JetTimeLeft += g_TimerMan.GetDeltaTimeMS() * 2;
-            if (m_JetTimeLeft >= m_JetTimeTotal)
-                m_JetTimeLeft = m_JetTimeTotal;
-        }
+		// If pie menu is on, keep the angle to what it was before
+		if (m_Controller.IsState(PIE_MENU_ACTIVE))
+		{
+			// Don't change anything
+		}
+		// Direct the jetpack nozzle according to movement stick if analog input is present
+		else if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1F)
+		{
+			//To-do: test whether this works properly
+			float jetAngle = (m_Controller.GetAnalogMove().GetAbsRadAngle() - c_PI);
+			if (jetAngle > c_PI) { jetAngle -= c_TwoPI; }
+			m_pJetpack->SetEmitAngle(FacingAngle(jetAngle * m_JetAngleRange));
+		}
+		// Or just use the aim angle if we're getting digital input
+		else {
+			// Halve the jet angle when looking downwards so the actor isn't forced to go sideways (To-do: don't hardcode this value?)
+			float jetAngle = m_AimAngle > 0 ? m_AimAngle * m_JetAngleRange : -m_AimAngle * m_JetAngleRange * 0.5F;
+			jetAngle -= (c_HalfPI * m_JetAngleRange + c_HalfPI);
+			// Don't need to use FacingAngle on this because it's already applied to the AimAngle since last update.
+			m_pJetpack->SetEmitAngle(jetAngle);
+		}
+	}
 
-		float maxAngle = c_HalfPI * m_JetAngleRange;
-        // If pie menu is on, keep the angle to what it was before
-        if (m_Controller.IsState(PIE_MENU_ACTIVE))
-        {
-            // Don't change anything
-        }
-        // Direct the jetpack nozzle according to movement stick if analog input is present
-        else if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1)
-        {
-			float minAngle = -maxAngle - c_HalfPI;
-			maxAngle -= c_HalfPI;
-			float jetAngle = std::clamp(m_Controller.GetAnalogMove().GetAbsRadAngle(), minAngle, maxAngle) - c_PI;
-            m_pJetpack->SetEmitAngle(FacingAngle(jetAngle));
-        }
-        // Or just use the aim angle if we're getting digital input
-        else
-        {
-            float jetAngle = m_AimAngle > 0 ? (m_AimAngle * m_JetAngleRange) : 0;
-			jetAngle = jetAngle - maxAngle - c_HalfPI;
-            // Don't need to use FacingAngle on this because it's already applied to the AimAngle since last update.
-            m_pJetpack->SetEmitAngle(jetAngle);
-        }
-    }
+	////////////////////////////////////
+	// Movement direction
 
-    ////////////////////////////////////
-    // Movement direction
+	// If the pie menu is on, try to preserve whatever move state we had before it going into effect
+	if (m_Controller.IsState(PIE_MENU_ACTIVE))
+	{
+		// Just keep the previous movestate, don't stand up or stop walking or stop jumping
+	}
+	else if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP && m_Status != INACTIVE)
+	{
+		// Only if not jumping, OR if jumping, and apparently stuck on something - then help out with the limbs
+		if (m_MoveState != JUMP || (m_MoveState == JUMP && m_Vel.GetLargest() < 0.1))
+		{
+			// Restart the stride if we're just starting to walk or crawl
+			if ((m_MoveState != WALK && !m_Controller.IsState(BODY_CROUCH)) ||
+				(m_MoveState != CRAWL && m_Controller.IsState(BODY_CROUCH)))
+			{
+				m_StrideStart = true;
+				MoveOutOfTerrain(g_MaterialGrass);
+			}
 
-    // If the pie menu is on, try to preserve whatever move state we had before it going into effect
-    if (m_Controller.IsState(PIE_MENU_ACTIVE))
-    {
-        // Just keep the previous movestate, don't stand up or stop walking or stop jumping
-    }
-    else if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP && m_Status != INACTIVE)
-    {
-        // Only if not jumping, OR if jumping, and apparently stuck on something - then help out with the limbs
-        if (m_MoveState != JUMP || (m_MoveState == JUMP && m_Vel.GetLargest() < 0.1))
-        {
-            // Restart the stride if we're just starting to walk or crawl
-            if ((m_MoveState != WALK && !m_Controller.IsState(BODY_CROUCH)) ||
-                (m_MoveState != CRAWL && m_Controller.IsState(BODY_CROUCH)))
-            {
-                m_StrideStart = true;
-                MoveOutOfTerrain(g_MaterialGrass);
-            }
+			// Crawling or walking?
+			m_MoveState = m_Controller.IsState(BODY_CROUCH) ? CRAWL : WALK;
 
-            // Crawling or walking?
-            m_MoveState = m_Controller.IsState(BODY_CROUCH) ? CRAWL : WALK;
+			// Engage prone state, this makes the body's rotational spring pull it horizontal instead of upright
+			if (m_MoveState == CRAWL && m_ProneState == NOTPRONE)
+			{
+				m_ProneState = GOPRONE;
+				m_ProneTimer.Reset();
+			}
 
-            // Engage prone state, this makes the body's rotational spring pull it horizontal instead of upright
-            if (m_MoveState == CRAWL && m_ProneState == NOTPRONE)
-            {
-                m_ProneState = GOPRONE;
-                m_ProneTimer.Reset();
-            }
+			m_Paths[FGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
+			m_Paths[BGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
+		}
 
-            m_Paths[FGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
-            m_Paths[BGROUND][m_MoveState].SetSpeed(m_Controller.IsState(MOVE_FAST) ? FAST : NORMAL);
-        }
+		// Walk backwards if the aiming is done in the opposite direction of travel
+		if (std::abs(m_Controller.GetAnalogAim().m_X) > 0.1F)
+		{
+			// Walk backwards if necessary
+			m_Paths[FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
+			m_Paths[BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
+		}
+		// Flip if we're moving in the opposite direction
+		else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped))
+		{
+			m_HFlipped = !m_HFlipped;
+			//                // Instead of simply carving out a silhouette of the now flipped actor, isntead disable any atoms which are embedded int eh terrain until they emerge again
+			//                m_ForceDeepCheck = true;
+			m_CheckTerrIntersection = true;
+			if (m_ProneState == NOTPRONE) { MoveOutOfTerrain(g_MaterialGrass); }
+			m_Paths[FGROUND][m_MoveState].SetHFlip(m_HFlipped);
+			m_Paths[BGROUND][m_MoveState].SetHFlip(m_HFlipped);
 
-        // Walk backwards if the aiming is done in the opposite direction of travel
-        if (fabs(m_Controller.GetAnalogAim().m_X) > 0.1)
-        {
-            // Walk backwards if necessary
-            m_Paths[FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
-            m_Paths[BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
-        }
-        // Flip if we're moving in the opposite direction
-        else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped))
-        {
-            m_HFlipped = !m_HFlipped;
-//                // Instead of simply carving out a silhouette of the now flipped actor, isntead disable any atoms which are embedded int eh terrain until they emerge again
-//                m_ForceDeepCheck = true;
-            m_CheckTerrIntersection = true;
-            if (m_ProneState == NOTPRONE)
-                MoveOutOfTerrain(g_MaterialGrass);
-            m_Paths[FGROUND][m_MoveState].SetHFlip(m_HFlipped);
-            m_Paths[BGROUND][m_MoveState].SetHFlip(m_HFlipped);
-
-            m_Paths[FGROUND][WALK].Terminate();
-            m_Paths[BGROUND][WALK].Terminate();
-            m_Paths[FGROUND][CROUCH].Terminate();
-            m_Paths[BGROUND][CROUCH].Terminate();
-            m_Paths[FGROUND][CLIMB].Terminate();
-            m_Paths[BGROUND][CLIMB].Terminate();
-            m_Paths[FGROUND][CRAWL].Terminate();
-            m_Paths[BGROUND][CRAWL].Terminate();
-            m_Paths[FGROUND][ARMCRAWL].Terminate();
-            m_Paths[BGROUND][ARMCRAWL].Terminate();
-            m_Paths[FGROUND][STAND].Terminate();
-            m_Paths[BGROUND][STAND].Terminate();
-            m_StrideStart = true;
-            // Stop the going prone spring
-            if (m_ProneState == GOPRONE)
-                m_ProneState = PRONE;
-        }
-    }
-    // Not moving, so check if we need to be crouched or not
-    // Crouching before having gone prone?
-    else if (m_Controller.IsState(BODY_CROUCH))
-    {
-        // Don't go back to crouching if we're already prone. Player has to let go of the crouch button first
-        if (m_ProneState == NOTPRONE)
-            m_MoveState = CROUCH;
-        // If already laying down, just don't do anything and keep laying there
-        else
-            m_MoveState = NOMOVE;
-    }
-    else
-        m_MoveState = STAND;
+			m_Paths[FGROUND][WALK].Terminate();
+			m_Paths[BGROUND][WALK].Terminate();
+			m_Paths[FGROUND][CROUCH].Terminate();
+			m_Paths[BGROUND][CROUCH].Terminate();
+			m_Paths[FGROUND][CLIMB].Terminate();
+			m_Paths[BGROUND][CLIMB].Terminate();
+			m_Paths[FGROUND][CRAWL].Terminate();
+			m_Paths[BGROUND][CRAWL].Terminate();
+			m_Paths[FGROUND][ARMCRAWL].Terminate();
+			m_Paths[BGROUND][ARMCRAWL].Terminate();
+			m_Paths[FGROUND][STAND].Terminate();
+			m_Paths[BGROUND][STAND].Terminate();
+			m_StrideStart = true;
+			// Stop the going prone spring
+			if (m_ProneState == GOPRONE) { m_ProneState = PRONE; }
+		}
+	// Not moving, so check if we need to be crouched or not
+	} else if (m_Controller.IsState(BODY_CROUCH)) {
+		// Don't go back to crouching if we're already prone, player has to let go of the crouch button first
+		// If already laying down, just don't do anything and keep laying there
+		m_MoveState = m_ProneState == NOTPRONE ? CROUCH : NOMOVE;
+	} else {
+		m_MoveState = STAND;
+	}
 
     // Disengage the prone state as soon as the crouch is released when the pie menu isn't active
     if (!m_Controller.IsState(BODY_CROUCH) && !m_Controller.IsState(PIE_MENU_ACTIVE))
@@ -4266,9 +4259,6 @@ void AHuman::Update()
     ////////////////////////////////////////
     // Balance stuff
 
-    // Get the rotation in radians.
-    float rot = m_Rotation.GetRadAngle();
-//        rot = fabs(rot) < c_QuarterPI ? rot : (rot > 0 ? c_QuarterPI : -c_QuarterPI);
     // Eliminate full rotations
     while (fabs(rot) > c_TwoPI) {
         rot -= rot > 0 ? c_TwoPI : -c_TwoPI;

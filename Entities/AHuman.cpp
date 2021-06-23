@@ -768,47 +768,45 @@ bool AHuman::OnSink(const Vector &pos)
 
 bool AHuman::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
-	if (m_pItemInReach) {
-		PieMenuGUI::Slice pickUpSlice(m_pFGArm ? "Pick Up " + m_pItemInReach->GetPresetName() : "NO ARM!", PieMenuGUI::PSI_PICKUP, PieMenuGUI::Slice::UP, m_pFGArm && m_Status != INACTIVE);
-
-		pPieMenu->AddSlice(pickUpSlice);
-	} else {
-		PieMenuGUI::Slice reloadSlice(m_pFGArm ? "Reload" : "NO ARM!", PieMenuGUI::PSI_RELOAD, PieMenuGUI::Slice::UP, ((m_pFGArm && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull()) || (m_pBGArm && m_pBGArm->GetHeldDevice() && !m_pBGArm->GetHeldDevice()->IsFull())) && m_Status != INACTIVE);
-		pPieMenu->AddSlice(reloadSlice);
+    if (m_pItemInReach) {
+		PieMenuGUI::Slice pickUpSlice(m_pFGArm ? "Pick Up " + m_pItemInReach->GetPresetName() : "NO ARM!", PieMenuGUI::PSI_PICKUP, PieMenuGUI::Slice::UP, m_pFGArm && m_pFGArm->IsAttached());
+		
+        pPieMenu->AddSlice(pickUpSlice);
+    } else {
+		PieMenuGUI::Slice reloadSlice(m_pFGArm ? "Reload" : "NO ARM!", PieMenuGUI::PSI_RELOAD, PieMenuGUI::Slice::UP, (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull()) || (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->GetHeldDevice() && !m_pBGArm->GetHeldDevice()->IsFull()));
+        pPieMenu->AddSlice(reloadSlice);
 	}
-	//To-do: don't oneline this?
-	PieMenuGUI::Slice dropSlice(m_pFGArm && m_pFGArm->GetHeldMO() ? "Drop " + m_pFGArm->GetHeldMO()->GetPresetName() : m_pBGArm ? (m_pBGArm->GetHeldMO() ? "Drop " + m_pBGArm->GetHeldMO()->GetPresetName() : (!m_Inventory.empty() ? "Drop Inventory" : "Not holding anything!")) : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieMenuGUI::PSI_DROP, PieMenuGUI::Slice::DOWN, ((m_pFGArm && m_pFGArm->GetHeldMO()) || (m_pBGArm && (m_pBGArm->GetHeldMO() || !m_Inventory.empty()))) && m_Status != INACTIVE);
-	pPieMenu->AddSlice(dropSlice);
+	
+	PieMenuGUI::Slice dropSlice(m_pFGArm && m_pFGArm->GetHeldMO() ? "Drop " + m_pFGArm->GetHeldMO()->GetPresetName() : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieMenuGUI::PSI_DROP, PieMenuGUI::Slice::DOWN, m_pFGArm && m_pFGArm->GetHeldMO());
+    pPieMenu->AddSlice(dropSlice);
 
-	PieMenuGUI::Slice nextItemSlice(m_pFGArm ? "Next Item" : "NO ARM!", PieMenuGUI::PSI_NEXTITEM, PieMenuGUI::Slice::RIGHT, m_pFGArm && (!m_Inventory.empty() || GetEquippedBGItem()) && m_Status != INACTIVE);
-	pPieMenu->AddSlice(nextItemSlice);
-	PieMenuGUI::Slice prevItemSlice(m_pFGArm ? "Prev Item" : "NO ARM!", PieMenuGUI::PSI_PREVITEM, PieMenuGUI::Slice::LEFT, m_pFGArm && (!m_Inventory.empty() || GetEquippedBGItem()) && m_Status != INACTIVE);
+	PieMenuGUI::Slice nextItemSlice(m_pFGArm ? "Next Item" : "NO ARM!", PieMenuGUI::PSI_NEXTITEM, PieMenuGUI::Slice::RIGHT, m_pFGArm && !m_Inventory.empty());
+    pPieMenu->AddSlice(nextItemSlice);
+    PieMenuGUI::Slice prevItemSlice(m_pFGArm ? "Prev Item" : "NO ARM!", PieMenuGUI::PSI_PREVITEM, PieMenuGUI::Slice::LEFT, m_pFGArm && !m_Inventory.empty());
 	pPieMenu->AddSlice(prevItemSlice);
 
 	PieMenuGUI::Slice sentryAISlice("Sentry AI Mode", PieMenuGUI::PSI_SENTRY, PieMenuGUI::Slice::DOWN);
-	pPieMenu->AddSlice(sentryAISlice);
-	PieMenuGUI::Slice patrolAISlice("Patrol AI Mode", PieMenuGUI::PSI_PATROL, PieMenuGUI::Slice::DOWN);
+    pPieMenu->AddSlice(sentryAISlice);
+    PieMenuGUI::Slice patrolAISlice("Patrol AI Mode", PieMenuGUI::PSI_PATROL, PieMenuGUI::Slice::DOWN);
 	pPieMenu->AddSlice(patrolAISlice);
 	PieMenuGUI::Slice formSquadSlice("Form Squad", PieMenuGUI::PSI_FORMSQUAD, PieMenuGUI::Slice::UP);
-	pPieMenu->AddSlice(formSquadSlice);
-
+    pPieMenu->AddSlice(formSquadSlice);
+	
 	PieMenuGUI::Slice goToSlice("Go-To AI Mode", PieMenuGUI::PSI_GOTO, PieMenuGUI::Slice::DOWN);
-	pPieMenu->AddSlice(goToSlice);
-	PieMenuGUI::Slice goldAISlice("Gold Dig AI Mode", PieMenuGUI::PSI_GOLDDIG, PieMenuGUI::Slice::DOWN);
+    pPieMenu->AddSlice(goToSlice);
+    PieMenuGUI::Slice goldAISlice("Gold Dig AI Mode", PieMenuGUI::PSI_GOLDDIG, PieMenuGUI::Slice::DOWN);
 	pPieMenu->AddSlice(goldAISlice);
 
-	PieMenuGUI::Slice huntAISlice("Brain Hunt AI Mode", PieMenuGUI::PSI_BRAINHUNT, PieMenuGUI::Slice::RIGHT);
+    PieMenuGUI::Slice huntAISlice("Brain Hunt AI Mode", PieMenuGUI::PSI_BRAINHUNT, PieMenuGUI::Slice::RIGHT);
 	pPieMenu->AddSlice(huntAISlice);
 
-	if (m_Status != INACTIVE) {
-		// Add any custom added slices after we've added the hardcoded ones, so they are lower priorty and don't hog the cardinal axes
-		Actor::AddPieMenuSlices(pPieMenu);
+    // Add any custom added slices after we've added the hardcoded ones, so they are lower priorty and don't hog the cardinal axes
+    Actor::AddPieMenuSlices(pPieMenu);
 
-		// Add any custom slices from a currently held device
-		if (m_pFGArm && m_pFGArm->HoldsDevice()) { m_pFGArm->GetHeldDevice()->AddPieMenuSlices(pPieMenu); }
-	} else {
-		m_PieNeedsUpdate = false;
-	}
+    // Add any custom slices from a currently held device
+    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsDevice())
+        m_pFGArm->GetHeldDevice()->AddPieMenuSlices(pPieMenu);
+
     return true;
 }
 

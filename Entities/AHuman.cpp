@@ -3659,48 +3659,42 @@ void AHuman::Update()
     ////////////////////////////////////////
     // Item pickup logic
 
-    float reach = m_CharHeight / 3;
+	float reach = m_SpriteRadius;
+	Vector reachPoint = m_Pos;
 
-    // Try to detect a new item
-    if (!m_pItemInReach && m_Status == STABLE)
-    {
-        MOID itemMOID = g_SceneMan.CastMORay(m_Pos, Vector((m_HFlipped ? -reach : reach) * RandomNum(), RandomNum(0.0F, reach)), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
+	// Try to detect a new item
+	if (m_pFGArm && m_Status == STABLE) {
+		reach += m_pFGArm->GetMaxLength();
+		reachPoint = m_pFGArm->GetPos();
+		if (!m_pItemInReach) {
+			MOID itemMOID = g_SceneMan.CastMORay(reachPoint, Vector((m_HFlipped ? -reach : reach) * RandomNum(), RandomNum(0.0F, reach)), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
 
-        MovableObject *pItem = g_MovableMan.GetMOFromID(itemMOID);
-        if (pItem)
-        {
-            m_pItemInReach = pItem ? dynamic_cast<HeldDevice *>(pItem->GetRootParent()) : 0;
-			if (m_pItemInReach)
-				m_PieNeedsUpdate = true;
-        }
-    }
+			MovableObject *pItem = g_MovableMan.GetMOFromID(itemMOID);
+			if (pItem) {
+				m_pItemInReach = pItem ? dynamic_cast<HeldDevice *>(pItem->GetRootParent()) : 0;
+				if (m_pItemInReach) { m_PieNeedsUpdate = true; }
+			}
+		}
+	}
 
     // Item currently set to be within reach has expired or is now out of range
-    if (m_pItemInReach && (m_pItemInReach->IsUnPickupable() || (m_pItemInReach->HasPickupLimitations() && !m_pItemInReach->IsPickupableBy(this)) || !g_MovableMan.IsDevice(m_pItemInReach) || (m_pItemInReach->GetPos() - m_Pos).GetMagnitude() > reach)) {
+    if (m_pItemInReach && (m_pItemInReach->IsUnPickupable() || (m_pItemInReach->HasPickupLimitations() && !m_pItemInReach->IsPickupableBy(this)) || !g_MovableMan.IsDevice(m_pItemInReach) || g_SceneMan.ShortestDistance(reachPoint, m_pItemInReach->GetPos(), g_SceneMan.SceneWrapsX()).GetMagnitude() > reach + m_pItemInReach->GetRadius())) {
         m_pItemInReach = 0;
         m_PieNeedsUpdate = true;
     }
 
     // Pick up the designated item
-    if (m_pItemInReach && m_pFGArm && m_pFGArm->IsAttached() && m_Controller.IsState(WEAPON_PICKUP))
+    if (m_pItemInReach && m_pFGArm && m_Controller.IsState(WEAPON_PICKUP) && m_Status != INACTIVE)
     {
         // Remove the item from the scene, it's gong into the hands of this
         if (g_MovableMan.RemoveMO(m_pItemInReach))
         {
-            // If we have an arm to hold the picked up item in, replace whatever's in it (if anything) with what we are picking up
-            if (m_pFGArm && m_pFGArm->IsAttached())
-            {
-                MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
-                if (pMO)
-                    m_Inventory.push_back(pMO);
-                m_pFGArm->SetHeldMO(m_pItemInReach);
-                m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-            }
-            // No arms to hold newly picked up item with, so just put it into inventory instead
-            else
-            {
-                m_Inventory.push_back(m_pItemInReach);
-            }
+            // Replace whatever's in the FG arm (if anything) with what we are picking up
+            MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
+			if (pMO) { m_Inventory.push_back(pMO); }
+            m_pFGArm->SetHeldMO(m_pItemInReach);
+            m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+
             m_PieNeedsUpdate = true;
 			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 		}

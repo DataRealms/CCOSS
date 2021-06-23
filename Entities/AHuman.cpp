@@ -4127,25 +4127,23 @@ void AHuman::Update()
         m_pBGLeg->SetTargetPosition(m_pBGFootGroup->GetLimbPos(m_HFlipped));
     }
 
-	if (m_pFGArm && m_pFGArm->IsAttached()) {
+	if (m_pFGArm) {
 		float affectingBodyAngle = 0.0F;
 		if (m_FGArmFlailScalar != 0 && m_SharpAimDelay != 0) {
 			float aimScalar = std::min(static_cast<float>(m_SharpAimTimer.GetElapsedSimTimeMS()) / static_cast<float>(m_SharpAimDelay), 1.0F);
 			float revertScalar = std::min(static_cast<float>(m_SharpAimRevertTimer.GetElapsedSimTimeMS()) / static_cast<float>(m_SharpAimDelay), 1.0F);
 			aimScalar = (aimScalar > revertScalar) ? aimScalar : 1.0F - revertScalar;
 
-			affectingBodyAngle = std::abs(std::sin(m_Rotation.GetRadAngle())) * m_Rotation.GetRadAngle() * m_FGArmFlailScalar * (1.0F - aimScalar);
+			affectingBodyAngle = std::abs(std::sin(rot)) * rot * m_FGArmFlailScalar * (1.0F - aimScalar);
 		}
 		m_pFGArm->SetRotAngle(affectingBodyAngle + m_AimAngle * static_cast<float>(GetFlipFactor()));
 
         if (m_Status == STABLE) {
             if (m_ArmClimbing[FGROUND]) {
-                // Can't climb with anything in the arm?
-                //UnequipBGArm();
                 m_pFGArm->ReachToward(m_pFGHandGroup->GetLimbPos(m_HFlipped));
             } else if (!m_pFGArm->IsReaching()) {
-                // This will likely make the arm idle since the target will be out of range
-                m_pFGArm->Reach(m_pFGHandGroup->GetLimbPos(m_HFlipped));
+				// Use an unreachable position to force this arm to idle, so it wont bug out where the AtomGroup was left off
+				m_pFGArm->Reach(Vector());
             }
         } else {
             // Unstable, so just drop the arm limply
@@ -4153,39 +4151,39 @@ void AHuman::Update()
         }
     }
 
-    if (m_pBGArm && m_pBGArm->IsAttached()) {
-        if (m_Status == STABLE) {
-            if (m_ArmClimbing[BGROUND]) {
-                // Can't climb with the shield
-                UnequipBGArm();
-                m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
-            } else if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice() && !m_pBGArm->HoldsHeldDevice()) {
-                // Re-equip shield in BG arm after climbing
-                EquipShieldInBGArm();
-                m_pBGArm->Reach(m_pFGArm->GetHeldDevice()->GetSupportPos());
-                //            m_pBGArm->ReachToward(m_Pos + m_WalkPaths.front()->GetCurrentPos());
+    if (m_pBGArm) {
+		m_pBGArm->SetRotAngle(std::abs(std::sin(rot)) * rot * m_BGArmFlailScalar + (m_AimAngle * static_cast<float>(GetFlipFactor())));
+        if (m_Status == STABLE) { 
+			if (m_ArmClimbing[BGROUND]) {
+				// Can't climb or crawl with the shield
+				if (m_MoveState == CLIMB || (m_MoveState == CRAWL && m_ProneState == PRONE)) { UnequipBGArm(); }
+				m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
 
-                // BGArm does reach to support the device held by FGArm.
-                if (m_pBGArm->DidReach()) {
-                    m_pFGArm->GetHeldDevice()->SetSupported(true);
-                    m_pBGArm->SetRecoil(m_pFGArm->GetHeldDevice()->GetRecoilForce(), m_pFGArm->GetHeldDevice()->GetRecoilOffset(), m_pFGArm->GetHeldDevice()->IsRecoiled());
-                } else {
-					// BGArm did not reach to support the device. Count device as supported anyway, if crouching
-					m_pFGArm->GetHeldDevice()->SetSupported(m_MoveState == CROUCH || m_ProneState == PRONE);
-                    m_pBGArm->SetRecoil(Vector(), Vector(), false);
-                }
-            } else {
-                // Re-equip shield in BG arm after climbing
-                EquipShieldInBGArm();
-                // This will likely make the arm idle since the target will be out of range
-                m_pBGArm->Reach(m_pFGHandGroup->GetLimbPos(m_HFlipped));
-                m_pBGArm->SetRotAngle(std::abs(std::sin(m_Rotation.GetRadAngle())) * m_Rotation.GetRadAngle() * m_BGArmFlailScalar + (m_AimAngle * static_cast<float>(GetFlipFactor())));
-            }
+			} else {
+				// Re-equip shield in BG arm after climbing
+				EquipShieldInBGArm();
+				if (m_pFGArm && m_pFGArm->HoldsHeldDevice() && !m_pBGArm->HoldsHeldDevice()) {
+					m_pBGArm->Reach(m_pFGArm->GetHeldDevice()->GetSupportPos());
+
+					// BGArm does reach to support the device held by FGArm.
+					if (m_pBGArm->DidReach()) {
+						m_pFGArm->GetHeldDevice()->SetSupported(true);
+						m_pBGArm->SetRecoil(m_pFGArm->GetHeldDevice()->GetRecoilForce(), m_pFGArm->GetHeldDevice()->GetRecoilOffset(), m_pFGArm->GetHeldDevice()->IsRecoiled());
+					} else {
+						// BGArm did not reach to support the device. Count device as supported anyway, if crouching
+						m_pFGArm->GetHeldDevice()->SetSupported(m_MoveState == CROUCH || m_ProneState == PRONE);
+						m_pBGArm->SetRecoil(Vector(), Vector(), false);
+					}
+				} else {
+					// Use an unreachable position to force this arm to idle, so it wont bug out where the AtomGroup was left off
+					m_pBGArm->Reach(Vector());
+				}
+			}
         } else {
             // Unstable, so just drop the arm limply
             m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
         }
-	} else if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice()) {
+	} else if (m_pFGArm && m_pFGArm->HoldsHeldDevice()) {
 		m_pFGArm->GetHeldDevice()->SetSupported(false);
     }
 

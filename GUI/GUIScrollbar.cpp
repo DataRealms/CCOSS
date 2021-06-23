@@ -42,8 +42,8 @@ void GUIScrollbar::Create(const std::string Name, int X, int Y, int Width, int H
     GUIControl::Create(Name, X, Y, Width, Height);
 
     // Minimum size of the control
-    m_MinWidth = 12;
-    m_MinHeight = 12;
+    m_MinWidth = 9;
+    m_MinHeight = 9;
 
     // Note:: Default is Horizontal
     // Default size of the control
@@ -76,8 +76,8 @@ void GUIScrollbar::Create(GUIProperties *Props)
     GUIControl::Create(Props);
 
     // Minimum size of the control
-    m_MinWidth = 12;
-    m_MinHeight = 12;
+    m_MinWidth = 9;
+    m_MinHeight = 9;
 
     // Note:: Default is Horizontal
     // Default size of the control

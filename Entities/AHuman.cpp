@@ -769,35 +769,38 @@ bool AHuman::OnSink(const Vector &pos)
 bool AHuman::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
 	if (m_pItemInReach) {
-		PieMenuGUI::Slice pickUpSlice(m_pFGArm ? "Pick Up " + m_pItemInReach->GetPresetName() : "NO ARM!", PieMenuGUI::PSI_PICKUP, PieMenuGUI::Slice::UP, m_pFGArm && m_Status != INACTIVE);
+		PieSlice pickUpSlice(m_pFGArm ? "Pick Up " + m_pItemInReach->GetPresetName() : "NO ARM!", PieSlice::PieSliceIndex::PSI_PICKUP, PieSlice::SliceDirection::UP, m_pFGArm && m_Status != INACTIVE);
 		pPieMenu->AddSlice(pickUpSlice);
 	} else {
-		PieMenuGUI::Slice reloadSlice(GetEquippedItem() || GetEquippedBGItem() ? "Reload" : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieMenuGUI::PSI_RELOAD, PieMenuGUI::Slice::UP, ((m_pFGArm && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull()) || (m_pBGArm && m_pBGArm->GetHeldDevice() && !m_pBGArm->GetHeldDevice()->IsFull())) && m_Status != INACTIVE);
+		PieSlice reloadSlice(GetEquippedItem() || GetEquippedBGItem() ? "Reload" : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieSlice::PieSliceIndex::PSI_RELOAD, PieSlice::SliceDirection::UP, ((m_pFGArm && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull()) || (m_pBGArm && m_pBGArm->GetHeldDevice() && !m_pBGArm->GetHeldDevice()->IsFull())) && m_Status != INACTIVE);
 		pPieMenu->AddSlice(reloadSlice);
 	}
 	//To-do: don't oneline this?
-	PieMenuGUI::Slice dropSlice(m_pFGArm && m_pFGArm->GetHeldMO() ? "Drop " + m_pFGArm->GetHeldMO()->GetPresetName() : m_pBGArm ? (m_pBGArm->GetHeldMO() ? "Drop " + m_pBGArm->GetHeldMO()->GetPresetName() : (!m_Inventory.empty() ? "Drop Inventory" : "Not holding anything!")) : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieMenuGUI::PSI_DROP, PieMenuGUI::Slice::DOWN, ((m_pFGArm && m_pFGArm->GetHeldMO()) || (m_pBGArm && (m_pBGArm->GetHeldMO() || !m_Inventory.empty()))) && m_Status != INACTIVE);
+	PieSlice dropSlice(m_pFGArm && m_pFGArm->GetHeldMO() ? "Drop " + m_pFGArm->GetHeldMO()->GetPresetName() : m_pBGArm ? (m_pBGArm->GetHeldMO() ? "Drop " + m_pBGArm->GetHeldMO()->GetPresetName() : (!m_Inventory.empty() ? "Drop Inventory" : "Not holding anything!")) : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieSlice::PieSliceIndex::PSI_DROP, PieSlice::SliceDirection::DOWN, ((m_pFGArm && m_pFGArm->GetHeldMO()) || (m_pBGArm && (m_pBGArm->GetHeldMO() || !m_Inventory.empty()))) && m_Status != INACTIVE);
 	pPieMenu->AddSlice(dropSlice);
 
-	PieMenuGUI::Slice nextItemSlice(m_pFGArm ? "Next Item" : "NO ARM!", PieMenuGUI::PSI_NEXTITEM, PieMenuGUI::Slice::RIGHT, m_pFGArm && (!m_Inventory.empty() || GetEquippedBGItem()) && m_Status != INACTIVE);
+	PieSlice nextItemSlice(m_pFGArm ? "Next Item" : "NO ARM!", PieSlice::PieSliceIndex::PSI_NEXTITEM, PieSlice::SliceDirection::RIGHT, m_pFGArm && (!m_Inventory.empty() || GetEquippedBGItem()) && m_Status != INACTIVE);
 	pPieMenu->AddSlice(nextItemSlice);
-	PieMenuGUI::Slice prevItemSlice(m_pFGArm ? "Prev Item" : "NO ARM!", PieMenuGUI::PSI_PREVITEM, PieMenuGUI::Slice::LEFT, m_pFGArm && (!m_Inventory.empty() || GetEquippedBGItem()) && m_Status != INACTIVE);
+	PieSlice prevItemSlice(m_pFGArm ? "Prev Item" : "NO ARM!", PieSlice::PieSliceIndex::PSI_PREVITEM, PieSlice::SliceDirection::LEFT, m_pFGArm && (!m_Inventory.empty() || GetEquippedBGItem()) && m_Status != INACTIVE);
 	pPieMenu->AddSlice(prevItemSlice);
 
-	PieMenuGUI::Slice sentryAISlice("Sentry AI Mode", PieMenuGUI::PSI_SENTRY, PieMenuGUI::Slice::DOWN);
+	PieSlice sentryAISlice("Sentry AI Mode", PieSlice::PieSliceIndex::PSI_SENTRY, PieSlice::SliceDirection::DOWN);
     pPieMenu->AddSlice(sentryAISlice);
-    PieMenuGUI::Slice patrolAISlice("Patrol AI Mode", PieMenuGUI::PSI_PATROL, PieMenuGUI::Slice::DOWN);
+    PieSlice patrolAISlice("Patrol AI Mode", PieSlice::PieSliceIndex::PSI_PATROL, PieSlice::SliceDirection::DOWN);
 	pPieMenu->AddSlice(patrolAISlice);
-	PieMenuGUI::Slice formSquadSlice("Form Squad", PieMenuGUI::PSI_FORMSQUAD, PieMenuGUI::Slice::UP);
+	PieSlice formSquadSlice("Form Squad", PieSlice::PieSliceIndex::PSI_FORMSQUAD, PieSlice::SliceDirection::UP);
     pPieMenu->AddSlice(formSquadSlice);
 	
-	PieMenuGUI::Slice goToSlice("Go-To AI Mode", PieMenuGUI::PSI_GOTO, PieMenuGUI::Slice::DOWN);
+	PieSlice goToSlice("Go-To AI Mode", PieSlice::PieSliceIndex::PSI_GOTO, PieSlice::SliceDirection::DOWN);
     pPieMenu->AddSlice(goToSlice);
-    PieMenuGUI::Slice goldAISlice("Gold Dig AI Mode", PieMenuGUI::PSI_GOLDDIG, PieMenuGUI::Slice::DOWN);
+    PieSlice goldAISlice("Gold Dig AI Mode", PieSlice::PieSliceIndex::PSI_GOLDDIG, PieSlice::SliceDirection::DOWN);
 	pPieMenu->AddSlice(goldAISlice);
 
-    PieMenuGUI::Slice huntAISlice("Brain Hunt AI Mode", PieMenuGUI::PSI_BRAINHUNT, PieMenuGUI::Slice::RIGHT);
+    PieSlice huntAISlice("Brain Hunt AI Mode", PieSlice::PieSliceIndex::PSI_BRAINHUNT, PieSlice::SliceDirection::RIGHT);
 	pPieMenu->AddSlice(huntAISlice);
+
+    PieSlice fullInventorySlice("Show Full Inventory", PieSlice::PieSliceIndex::PSI_FULLINVENTORY, PieSlice::SliceDirection::RIGHT, GetEquippedItem() || GetEquippedBGItem() || !m_Inventory.empty());
+    pPieMenu->AddSlice(fullInventorySlice);
 
     // Add any custom slices from a currently held device
 	if (m_Status != INACTIVE) {
@@ -819,38 +822,38 @@ bool AHuman::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 // Description:     Handles and does whatever a specific activated Pie Menu slice does to
 //                  this.
 
-bool AHuman::HandlePieCommand(int pieSliceIndex)
+bool AHuman::HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex)
 {
-    if (pieSliceIndex != PieMenuGUI::PSI_NONE)
+    if (pieSliceIndex != PieSlice::PieSliceIndex::PSI_NONE)
     {
-        if (pieSliceIndex == PieMenuGUI::PSI_PICKUP)
+        if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_PICKUP)
             m_Controller.SetState(WEAPON_PICKUP);
-        else if (pieSliceIndex == PieMenuGUI::PSI_DROP)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_DROP)
             m_Controller.SetState(WEAPON_DROP);
-        else if (pieSliceIndex == PieMenuGUI::PSI_RELOAD)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_RELOAD)
             m_Controller.SetState(WEAPON_RELOAD);
-        else if (pieSliceIndex == PieMenuGUI::PSI_NEXTITEM)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_NEXTITEM)
             m_Controller.SetState(WEAPON_CHANGE_NEXT, true);
-        else if (pieSliceIndex == PieMenuGUI::PSI_PREVITEM)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_PREVITEM)
             m_Controller.SetState(WEAPON_CHANGE_PREV, true);
-        else if (pieSliceIndex == PieMenuGUI::PSI_SENTRY)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_SENTRY)
             m_AIMode = AIMODE_SENTRY;
-        else if (pieSliceIndex == PieMenuGUI::PSI_PATROL)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_PATROL)
             m_AIMode = AIMODE_PATROL;
-        else if (pieSliceIndex == PieMenuGUI::PSI_BRAINHUNT)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_BRAINHUNT)
         {
             m_AIMode = AIMODE_BRAINHUNT;
             // Clear out the waypoints; player will set new ones with UI in gameactivity
             ClearAIWaypoints();
         }
-        else if (pieSliceIndex == PieMenuGUI::PSI_GOTO)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_GOTO)
         {
             m_AIMode = AIMODE_GOTO;
             // Clear out the waypoints; player will set new ones with UI in gameactivity
             ClearAIWaypoints();
             m_UpdateMovePath = true;
         }
-        else if (pieSliceIndex == PieMenuGUI::PSI_GOLDDIG)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_GOLDDIG)
             m_AIMode = AIMODE_GOLDDIG;
         else
             return Actor::HandlePieCommand(pieSliceIndex);
@@ -1575,7 +1578,7 @@ bool AHuman::FirearmIsSemiAuto() const
 // Arguments:       None.
 // Return value:    None.
 
-void AHuman::ReloadFirearm() const
+void AHuman::ReloadFirearms() const
 {
     if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
     {
@@ -1583,6 +1586,13 @@ void AHuman::ReloadFirearm() const
 		if (pWeapon) {
 			pWeapon->Reload();
 		}
+    }
+    if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->HoldsHeldDevice())
+    {
+        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pBGArm->GetHeldMO());
+        if (pWeapon) {
+            pWeapon->Reload();
+        }
     }
 }
 

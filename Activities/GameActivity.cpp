@@ -35,6 +35,7 @@
 #include "GUI/GUIFont.h"
 #include "GUI/AllegroBitmap.h"
 #include "PieMenuGUI.h"
+#include "InventoryMenuGUI.h"
 #include "BuyMenuGUI.h"
 #include "SceneEditorGUI.h"
 #include "GUIBanner.h"
@@ -70,6 +71,7 @@ void GameActivity::Clear()
         m_LandingZone[player].Reset();
         m_AIReturnCraft[player] = true;
         m_pPieMenu[player] = 0;
+        m_InventoryMenuGUI[player] = nullptr;
         m_pBuyGUI[player] = 0;
         m_pEditorGUI[player] = 0;
         m_pBannerRed[player] = 0;
@@ -169,6 +171,7 @@ int GameActivity::Create(const GameActivity &reference)
         m_LandingZone[player] = reference.m_LandingZone[player];
         m_AIReturnCraft[player] = reference.m_AIReturnCraft[player];
         m_pPieMenu[player] = new PieMenuGUI;
+        m_InventoryMenuGUI[player] = new InventoryMenuGUI;
         m_pBuyGUI[player] = new BuyMenuGUI;
         m_pEditorGUI[player] = new SceneEditorGUI;
         m_pBannerRed[player] = new GUIBanner();
@@ -289,6 +292,7 @@ void GameActivity::Destroy(bool notInherited)
     for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
     {
         delete m_pPieMenu[player];
+        delete m_InventoryMenuGUI[player];
         delete m_pBuyGUI[player];
         delete m_pEditorGUI[player];
         delete m_pBannerRed[player];
@@ -397,7 +401,8 @@ bool GameActivity::SwitchToActor(Actor *pActor, short player, short team)
         return false;
 
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
-    m_pPieMenu[player]->DisableAnim();
+    m_pPieMenu[player]->DoDisableAnimation();
+    m_InventoryMenuGUI[player]->SetEnabled(false);
 
     // Disable the AI command mode since it's connected to the current actor
     if (m_ViewState[player] == ViewState::AISentryPoint || m_ViewState[player] == ViewState::AIPatrolPoints || m_ViewState[player] == ViewState::AIGoldDigPoint || m_ViewState[player] == ViewState::AIGoToPoint || m_ViewState[player] == ViewState::UnitSelectCircle)
@@ -416,7 +421,8 @@ bool GameActivity::SwitchToActor(Actor *pActor, short player, short team)
 void GameActivity::SwitchToNextActor(short player, short team, Actor *pSkip)
 {
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
-    m_pPieMenu[player]->DisableAnim();
+    m_pPieMenu[player]->DoDisableAnimation();
+    m_InventoryMenuGUI[player]->SetEnabled(false);
 
     // Disable the AI command mode since it's connected to the current actor
     if (m_ViewState[player] == ViewState::AISentryPoint || m_ViewState[player] == ViewState::AIPatrolPoints || m_ViewState[player] == ViewState::AIGoldDigPoint || m_ViewState[player] == ViewState::AIGoToPoint || m_ViewState[player] == ViewState::UnitSelectCircle)
@@ -435,7 +441,8 @@ void GameActivity::SwitchToNextActor(short player, short team, Actor *pSkip)
 void GameActivity::SwitchToPrevActor(short player, short team, Actor *pSkip)
 {
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
-    m_pPieMenu[player]->DisableAnim();
+    m_pPieMenu[player]->DoDisableAnimation();
+    m_InventoryMenuGUI[player]->SetEnabled(false);
 
     // Disable the AI command mode since it's connected to the current actor
     if (m_ViewState[player] == ViewState::AISentryPoint || m_ViewState[player] == ViewState::AIPatrolPoints || m_ViewState[player] == ViewState::AIGoldDigPoint || m_ViewState[player] == ViewState::AIGoToPoint  || m_ViewState[player] == ViewState::UnitSelectCircle)
@@ -889,6 +896,14 @@ int GameActivity::Start()
         else
             m_pPieMenu[player] = new PieMenuGUI;
         m_pPieMenu[player]->Create(&m_PlayerController[player]);
+
+        // Allocate and (re)create the Inventory Menu GUIs
+        if (m_InventoryMenuGUI[player]) {
+            m_InventoryMenuGUI[player]->Destroy();
+        } else {
+            m_InventoryMenuGUI[player] = new InventoryMenuGUI;
+        }
+        m_InventoryMenuGUI[player]->Create(&m_PlayerController[player]);
 
         // Allocate and (re)create the Editor GUIs
         if (m_pEditorGUI[player])
@@ -1469,7 +1484,7 @@ void GameActivity::Update()
                 // Play err sound to indicate cancellation
                 g_GUISound.UserErrorSound()->Play(player);
                 // Flash the same actor, jsut to show the control went back to him
-                m_pPieMenu[player]->DisableAnim();
+                m_pPieMenu[player]->DoDisableAnimation();
             }
             // Player is done selecting new actor; switch to it if we have anything marked
             else if (m_PlayerController[player].IsState(ACTOR_NEXT) || m_PlayerController[player].IsState(ACTOR_PREV))// || m_PlayerController[player].IsState(PRESS_FACEBUTTON) || m_PlayerController[player].IsState(PRESS_PRIMARY))
@@ -1490,7 +1505,7 @@ void GameActivity::Update()
                 // Stop displaying the message
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
                 // Flash the same actor, jsut to show the control went back to him
-                m_pPieMenu[player]->DisableAnim();
+                m_pPieMenu[player]->DoDisableAnimation();
             }
             else
             {
@@ -1501,7 +1516,7 @@ void GameActivity::Update()
                     m_pPieMenu[player]->SetPos(pMarkedActor->GetPos());
 
                     if (markedDistance > g_FrameMan.GetPlayerFrameBufferWidth(player) / 4)
-                        m_pPieMenu[player]->WobbleAnim();
+                        m_pPieMenu[player]->Wobble();
                     else
                         m_pPieMenu[player]->FreezeAtRadius(30);
                 }
@@ -1755,7 +1770,7 @@ void GameActivity::Update()
                 m_MessageTimer[player].Reset();
                 g_GUISound.UserErrorSound()->Play(player);
                 // Flash the same actor, jsut to show the control went back to him
-                m_pPieMenu[player]->DisableAnim();
+                m_pPieMenu[player]->DoDisableAnimation();
             }
             // Player is done selecting LZ,
             else if (m_PlayerController[player].IsState(PRESS_FACEBUTTON) || m_PlayerController[player].IsState(PRESS_PRIMARY))
@@ -1777,7 +1792,7 @@ void GameActivity::Update()
                 // Stop displaying the LZ message
                 g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
                 // Flash the same actor, jsut to show the control went back to him
-                m_pPieMenu[player]->DisableAnim();
+                m_pPieMenu[player]->DoDisableAnimation();
             }
 
             bool wrapped = g_SceneMan.ForceBounds(m_LandingZone[player]);
@@ -1815,13 +1830,19 @@ void GameActivity::Update()
         ////////////////////////////////////////
         // Update the Pie Menu
 
-        // Set the valid actor (or 0) so it can be flashed by the piemenu when it activates/deactivates
-        m_pPieMenu[player]->SetActor(m_ControlledActor[player]);
+        // Set the affected object so it can be flashed by the piemenu when it activates/deactivates
+        m_pPieMenu[player]->SetAffectedObject(m_ControlledActor[player]);
+        m_InventoryMenuGUI[player]->SetInventoryActor(m_ControlledActor[player]);
 
         if (m_ControlledActor[player] && m_ViewState[player] != ViewState::DeathWatch && m_ViewState[player] != ViewState::ActorSelect && m_ViewState[player] != ViewState::AIGoToPoint && m_ViewState[player] != ViewState::UnitSelectCircle)
         {
             if (m_PlayerController[player].IsState(PIE_MENU_ACTIVE))
             {
+                if (m_InventoryMenuGUI[player]->GetMenuMode() == InventoryMenuGUI::MenuMode::Carousel || !m_InventoryMenuGUI[player]->IsVisible()) {
+                    m_InventoryMenuGUI[player]->SetMenuMode(InventoryMenuGUI::MenuMode::Carousel);
+                    m_InventoryMenuGUI[player]->SetEnabled(true);
+                }
+
                 if (!m_pPieMenu[player]->IsEnabled() || m_ControlledActor[player]->PieNeedsUpdate())
                 {
                     // Remove all previous slices
@@ -1831,15 +1852,15 @@ void GameActivity::Update()
                     // Add some additional universal ones
 					if (m_BuyMenuEnabled)
 					{
-						PieMenuGUI::Slice buySlice("Buy Menu", PieMenuGUI::PSI_BUYMENU, PieMenuGUI::Slice::LEFT);
+						PieSlice buySlice("Buy Menu", PieSlice::PieSliceIndex::PSI_BUYMENU, PieSlice::SliceDirection::LEFT);
 						m_pPieMenu[player]->AddSlice(buySlice);
 					}
                     // Brain-specific options
                     if (m_ControlledActor[player] == m_Brain[player])
                     {
-						//PieMenuGUI::Slice statsSlice("Statistics", PieMenuGUI::PSI_STATS, PieMenuGUI::Slice::RIGHT, false);
+						//PieSlice statsSlice("Statistics", PieMenuGUI::PSI_STATS, PieSlice::RIGHT, false);
                         //m_pPieMenu[player]->AddSlice(statsSlice, true);
-						//PieMenuGUI::Slice ceaseFireSlice("Propose Cease Fire", PieMenuGUI::PSI_CEASEFIRE, PieMenuGUI::Slice::RIGHT, false);
+						//PieSlice ceaseFireSlice("Propose Cease Fire", PieMenuGUI::PSI_CEASEFIRE, PieSlice::RIGHT, false);
 						//m_pPieMenu[player]->AddSlice(ceaseFireSlice, true);
                     }
 
@@ -1856,8 +1877,10 @@ void GameActivity::Update()
                     m_pPieMenu[player]->SetEnabled(true);
                 }
             }
-            else
+            else {
                 m_pPieMenu[player]->SetEnabled(false);
+                if (m_InventoryMenuGUI[player]->GetMenuMode() == InventoryMenuGUI::MenuMode::Carousel) { m_InventoryMenuGUI[player]->SetEnabled(false); }
+            }
 // TODO: FIX CRASH BUG HERE WHEN GAME OVER!
             // Set/save position of the menu
             m_pPieMenu[player]->SetPos(m_ControlledActor[player]->GetCPUPos());
@@ -1867,17 +1890,17 @@ void GameActivity::Update()
         m_pPieMenu[player]->Update();
 
         // If it appears a slice has been activated, then let the controlled actor handle it
-        int command = m_pPieMenu[player]->GetPieCommand();
-        if (m_ControlledActor[player] && command != PieMenuGUI::PSI_NONE)
+        PieSlice::PieSliceIndex command = m_pPieMenu[player]->GetPieCommand();
+        if (m_ControlledActor[player] && command != PieSlice::PieSliceIndex::PSI_NONE)
         {
             // AI mode commands that need extra points set in special view modes here
-            if (command == PieMenuGUI::PSI_SENTRY)
+            if (command == PieSlice::PieSliceIndex::PSI_SENTRY)
                 m_ViewState[player] = ViewState::AISentryPoint;
-            else if (command == PieMenuGUI::PSI_PATROL)
+            else if (command == PieSlice::PieSliceIndex::PSI_PATROL)
                 m_ViewState[player] = ViewState::AIPatrolPoints;
-            else if (command == PieMenuGUI::PSI_GOLDDIG)
+            else if (command == PieSlice::PieSliceIndex::PSI_GOLDDIG)
                 m_ViewState[player] = ViewState::AIGoldDigPoint;
-            else if (command == PieMenuGUI::PSI_GOTO)
+            else if (command == PieSlice::PieSliceIndex::PSI_GOTO)
             {
                 m_ViewState[player] = ViewState::AIGoToPoint;
                 // Clear out the waypoints
@@ -1887,7 +1910,7 @@ void GameActivity::Update()
                 // Disable Actor's controller while we set the waypoints
                 m_ControlledActor[player]->GetController()->SetDisabled(true);
             }
-			else if (command == PieMenuGUI::PSI_FORMSQUAD)
+			else if (command == PieSlice::PieSliceIndex::PSI_FORMSQUAD)
             {
 				//Find out if we have any connected units, and disconnect them
 				bool isCommander = false;
@@ -1935,11 +1958,15 @@ void GameActivity::Update()
             // If the actor couldn't handle it, then it's probably a game specific one
             if (!m_ControlledActor[player]->HandlePieCommand(command))
             {
-                if (command == PieMenuGUI::PSI_BUYMENU)
-                {
+                if (command == PieSlice::PieSliceIndex::PSI_BUYMENU) {
                     m_pPieMenu[player]->SetEnabled(false);
                     m_pBuyGUI[player]->SetEnabled(true);
                     skipBuyUpdate = true;
+                } else if (command == PieSlice::PieSliceIndex::PSI_FULLINVENTORY) {
+                    m_pPieMenu[player]->SetEnabled(false);
+                    m_InventoryMenuGUI[player]->SetEnabled(false);
+                    m_InventoryMenuGUI[player]->SetMenuMode(InventoryMenuGUI::MenuMode::Full);
+                    m_InventoryMenuGUI[player]->SetEnabled(true);
                 }
 /*
                 else if (command == PieMenuGUI::PSI_STATS)
@@ -1951,6 +1978,9 @@ void GameActivity::Update()
 */
             }
         }
+        
+        // Update inventory guis
+        m_InventoryMenuGUI[player]->Update();
 
         ///////////////////////////////////////
         // Update Buy Menu GUIs
@@ -1962,8 +1992,8 @@ void GameActivity::Update()
             m_pBuyGUI[player]->Update();
         }
 
-        // Trap the mouse if we're in gameplay and not in the buy menu
-		g_UInputMan.TrapMousePos(!m_pBuyGUI[player]->IsEnabled(), player);
+        // Trap the mouse if we're in gameplay and not in menus
+		g_UInputMan.TrapMousePos(!m_pBuyGUI[player]->IsEnabled() && !m_InventoryMenuGUI[player]->IsEnabledAndNotCarousel(), player);
 
         // Start LZ picking mode if a purchase was made
         if (m_pBuyGUI[player]->PurchaseMade())
@@ -2000,10 +2030,13 @@ void GameActivity::Update()
         if (m_ControlledActor[player])
         {
             // Don't disable when pie menu is active; it is done inside the Controller Update
-            if (m_pBuyGUI[player]->IsVisible() || m_ViewState[player] == ViewState::ActorSelect || m_ViewState[player] == ViewState::LandingZoneSelect || m_ViewState[player] == ViewState::Observe)
+            if (m_pBuyGUI[player]->IsVisible() || m_ViewState[player] == ViewState::ActorSelect || m_ViewState[player] == ViewState::LandingZoneSelect || m_ViewState[player] == ViewState::Observe) {
                 m_ControlledActor[player]->GetController()->SetInputMode(Controller::CIM_AI);
-            else
+            } else if (m_InventoryMenuGUI[player]->IsEnabledAndNotCarousel()) {
+                m_ControlledActor[player]->GetController()->SetInputMode(Controller::CIM_DISABLED);
+            } else {
                 m_ControlledActor[player]->GetController()->SetInputMode(Controller::CIM_PLAYER);
+            }
         }
 
         ///////////////////////////////////////
@@ -2360,6 +2393,8 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
         // Pie menu may be visible if we're choosing actors
         if (/*m_ControlledActor[PoS] && */m_pPieMenu[PoS] && m_pPieMenu[PoS]->IsVisible())
             m_pPieMenu[PoS]->Draw(pTargetBitmap, targetPos);
+
+        if (m_InventoryMenuGUI[PoS] && m_InventoryMenuGUI[PoS]->IsVisible()) { m_InventoryMenuGUI[PoS]->Draw(pTargetBitmap, targetPos); }
 
         if (m_pBuyGUI[PoS] && m_pBuyGUI[PoS]->IsVisible())
             m_pBuyGUI[PoS]->Draw(pTargetBitmap);

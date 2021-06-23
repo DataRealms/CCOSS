@@ -241,23 +241,23 @@ public:
 	std::string GetDataPath() override;
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the BITMAP.
-// Arguments:       None.
+    /// <summary>
+    /// Gets the underlying BITMAP of this AllegroBitmap.
+    /// </summary>
+    /// <returns>The underlying BITMAP of this AllegroBitmap.</returns>
+    BITMAP * GetBitmap() override { return m_pBitmap; }
 
-    BITMAP * GetBitmap();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HasBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this GUI bitmap even contains loaded bitmap data.
-// Arguments:       None.
-// Returns:         Whether this contains bitmap data or not.
-
+    /// <summary>
+    /// Indicates whether this AllegroBitmap even contains loaded bitmap data.
+    /// </summary>
+    /// <returns>Whether this contains bitmap data or not.</returns>
 	bool HasBitmap() override { return m_pBitmap != 0; }
+
+    /// <summary>
+    /// Sets the underlying Bitmap for this AllegroBitmap. Ownership is NOT transferred.
+    /// </summary>
+    /// <param name="newBitmap">A pointer to the new Bitmap for this AllegroBitmap.</param>
+    void SetBitmap(BITMAP *newBitmap) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

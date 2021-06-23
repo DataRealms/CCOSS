@@ -676,28 +676,28 @@ bool ACrab::OnSink(const Vector &pos)
 
 bool ACrab::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
-	PieMenuGUI::Slice reloadSlice("Reload", PieMenuGUI::PSI_RELOAD, PieMenuGUI::Slice::UP);
+	PieSlice reloadSlice("Reload", PieSlice::PieSliceIndex::PSI_RELOAD, PieSlice::SliceDirection::UP);
     pPieMenu->AddSlice(reloadSlice);
 
-	PieMenuGUI::Slice sentryAISlice("Sentry AI Mode", PieMenuGUI::PSI_SENTRY, PieMenuGUI::Slice::DOWN);
+	PieSlice sentryAISlice("Sentry AI Mode", PieSlice::PieSliceIndex::PSI_SENTRY, PieSlice::SliceDirection::DOWN);
     pPieMenu->AddSlice(sentryAISlice);
 
     if (!HasObjectInGroup("Turrets"))
     {
-	    PieMenuGUI::Slice aiModeSlice("Go-To AI Mode", PieMenuGUI::PSI_GOTO, PieMenuGUI::Slice::DOWN);
+	    PieSlice aiModeSlice("Go-To AI Mode", PieSlice::PieSliceIndex::PSI_GOTO, PieSlice::SliceDirection::DOWN);
         pPieMenu->AddSlice(aiModeSlice);
     }
 
-	PieMenuGUI::Slice patrolAISlice("Patrol AI Mode", PieMenuGUI::PSI_PATROL, PieMenuGUI::Slice::DOWN);
+	PieSlice patrolAISlice("Patrol AI Mode", PieSlice::PieSliceIndex::PSI_PATROL, PieSlice::SliceDirection::DOWN);
 	pPieMenu->AddSlice(patrolAISlice);
 
     if (!HasObjectInGroup("Turrets"))
     {
-	    PieMenuGUI::Slice formSquadSlice("Form Squad", PieMenuGUI::PSI_FORMSQUAD, PieMenuGUI::Slice::UP);
+	    PieSlice formSquadSlice("Form Squad", PieSlice::PieSliceIndex::PSI_FORMSQUAD, PieSlice::SliceDirection::UP);
         pPieMenu->AddSlice(formSquadSlice);
     }
 
-//    pPieMenu->AddSlice(PieMenuGUI::Slice("Gold Dig AI Mode", PieMenuGUI::PSI_GOLDDIG, PieMenuGUI::Slice::DOWN));
+//    pPieMenu->AddSlice(PieSlice("Gold Dig AI Mode", PieMenuGUI::PSI_GOLDDIG, PieSlice::DOWN));
 
     Actor::AddPieMenuSlices(pPieMenu);
 
@@ -715,23 +715,23 @@ bool ACrab::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 // Description:     Handles and does whatever a specific activated Pie Menu slice does to
 //                  this.
 
-bool ACrab::HandlePieCommand(int pieSliceIndex)
+bool ACrab::HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex)
 {
-    if (pieSliceIndex != PieMenuGUI::PSI_NONE)
+    if (pieSliceIndex != PieSlice::PieSliceIndex::PSI_NONE)
     {
-        if (pieSliceIndex == PieMenuGUI::PSI_RELOAD)
+        if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_RELOAD)
             m_Controller.SetState(WEAPON_RELOAD);
-        else if (pieSliceIndex == PieMenuGUI::PSI_SENTRY)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_SENTRY)
             m_AIMode = AIMODE_SENTRY;
-        else if (pieSliceIndex == PieMenuGUI::PSI_PATROL)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_PATROL)
             m_AIMode = AIMODE_PATROL;
-        else if (pieSliceIndex == PieMenuGUI::PSI_BRAINHUNT)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_BRAINHUNT)
         {
             m_AIMode = AIMODE_BRAINHUNT;
             // Clear out the waypoints; player will set new ones with UI in gameactivity
             ClearAIWaypoints();
         }
-        else if (pieSliceIndex == PieMenuGUI::PSI_GOTO)
+        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_GOTO)
         {
             m_AIMode = AIMODE_GOTO;
             // Clear out the waypoints; player will set new ones with UI in gameactivity

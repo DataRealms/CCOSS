@@ -384,7 +384,7 @@ void GUISkin::DrawMouse(int Image, int X, int Y)
 // Description:     Builds a bitmap from a standard skin property section.
 
 void GUISkin::BuildStandardRect(GUIBitmap *Dest, const std::string Section, int X, int Y,
-                                int Width, int Height, bool buildBG, bool buildFrame)
+                                int Width, int Height, bool buildBG, bool buildFrame, GUIRect *borderSizes)
 {
     /*
      * Note:
@@ -474,6 +474,8 @@ void GUISkin::BuildStandardRect(GUIBitmap *Dest, const std::string Section, int 
         SetRect(&Rect, VBottomLeft[0], VBottomLeft[1], VBottomLeft[0]+VBottomLeft[2], VBottomLeft[1]+VBottomLeft[3]);
         SrcBitmap->DrawTrans(Dest, X, Y+Height-VBottomLeft[3], &Rect);
     }
+
+    if (borderSizes) { SetRect(borderSizes, VLeft[2], VTop[3], VRight[2], VBottom[3]); }
 }
 
 

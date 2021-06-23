@@ -113,9 +113,9 @@ int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_LuaClassName;
 	else if (propName == "AddPieSlice")
 	{
-		PieMenuGUI::Slice newSlice;
+		PieSlice newSlice;
 		reader >> newSlice;
-		PieMenuGUI::AddAvailableSlice(newSlice);
+		PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
 	}
 	else
         return GameActivity::ReadProperty(propName, reader);

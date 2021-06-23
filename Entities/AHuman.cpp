@@ -3307,47 +3307,53 @@ void AHuman::Update()
         m_ProneState = NOTPRONE;
 
     ////////////////////////////////////
-    // Change held MovableObjects
+    // Change and reload held MovableObjects
 
-    if (!m_Inventory.empty() && m_Controller.IsState(WEAPON_CHANGE_NEXT)) {
-        if (m_pFGArm && m_pFGArm->IsAttached()) {
-			//Force spinning weapons to shut up
-			HDFirearm * pFireArm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-			if (pFireArm)
-				pFireArm->StopActivationSound();
-
-            m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
-            m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-            // Equip shield in BG hand if applicable
-            EquipShieldInBGArm();
-            m_PieNeedsUpdate = true;
-        }
-    }
-    if (!m_Inventory.empty() && m_Controller.IsState(WEAPON_CHANGE_PREV)) {
-        if (m_pFGArm && m_pFGArm->IsAttached()) {
-			//Force spinning weapons to shut up
-			HDFirearm * pFireArm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-			if (pFireArm)
-				pFireArm->StopActivationSound();
-
-			m_pFGArm->SetHeldMO(SwapPrevInventory(m_pFGArm->ReleaseHeldMO()));
-            m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-            // Equip shield in BG hand if applicable
-            EquipShieldInBGArm();
-            m_PieNeedsUpdate = true;
-        }
-    }
-
-    ////////////////////////////////////
-    // Reload held MO, if applicable
 	bool reloadFG = false;
-    if (m_pFGArm && m_pFGArm->IsAttached())
-    {
-        HeldDevice *pDevice = m_pFGArm->GetHeldDevice();
+	if (m_pFGArm && m_Status != INACTIVE) {
+		HDFirearm * pFireArm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
+		if (m_Controller.IsState(WEAPON_CHANGE_NEXT)) {
 
-		// Holds device, check if we are commanded to reload, or do other related stuff
-		if (pDevice) {
-			if (pDevice->IsReloading()) {
+			if (!m_Inventory.empty()) {
+				//Force spinning weapons to shut up
+				if (pFireArm) { pFireArm->StopActivationSound(); }
+
+				m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
+				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+				m_PieNeedsUpdate = true;
+			} else if (GetEquippedBGItem()) {
+				//Force spinning weapons to shut up
+				if (pFireArm) { pFireArm->StopActivationSound(); }
+
+				UnequipBGArm();
+				m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
+				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+				m_PieNeedsUpdate = true;
+			}
+		}
+		if (m_Controller.IsState(WEAPON_CHANGE_PREV)) {
+
+			if (!m_Inventory.empty()) {
+				//Force spinning weapons to shut up
+				if (pFireArm) { pFireArm->StopActivationSound(); }
+
+				m_pFGArm->SetHeldMO(SwapPrevInventory(m_pFGArm->ReleaseHeldMO()));
+				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+				m_PieNeedsUpdate = true;
+			} else if (GetEquippedBGItem()) {
+				//Force spinning weapons to shut up
+				if (pFireArm) { pFireArm->StopActivationSound(); }
+
+				UnequipBGArm();
+				m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
+				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+				m_PieNeedsUpdate = true;
+			}
+        }
+
+		// Reload held MO, if applicable
+		if (pFireArm) {
+			if (pFireArm->IsReloading()) {
 				// Interrupt sharp aiming while reloading
 				m_SharpAimTimer.Reset();
 				m_SharpAimProgress = 0;
@@ -3355,9 +3361,9 @@ void AHuman::Update()
 				if (m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped)); }
 			}
 			// Only reload if no other pickuppable item is in reach
-			if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !m_pItemInReach) {
-				if (m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(pDevice->GetMagazinePos()); }
-				pDevice->Reload();
+			if (!pFireArm->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !m_pItemInReach) {
+				if (m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(pFireArm->GetMagazinePos()); }
+				pFireArm->Reload();
 				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 				reloadFG = true;
 
@@ -3365,11 +3371,10 @@ void AHuman::Update()
 				m_SharpAimTimer.Reset();
 				m_SharpAimProgress = 0;
 			}
-
 			// Detect reloading being completed and move hand accordingly
-			if (pDevice->DoneReloading() && m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(pDevice->GetMagazinePos()); }
+			if (pFireArm->DoneReloading() && m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(pFireArm->GetMagazinePos()); }
 		}
-	}
+    }
 
     ////////////////////////////////////
     // Aiming
@@ -3601,26 +3606,53 @@ void AHuman::Update()
     ////////////////////////////////////////
     // Item dropping logic
 
-	if (m_Controller.IsState(WEAPON_DROP) && m_pFGArm && m_pFGArm->IsAttached()) {
-		if (MovableObject *pMO = m_pFGArm->ReleaseHeldMO()) {
-			pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
-			Vector tossVec(RandomNum(3.0F, 6.0F), RandomNum(-3.0F, -1.5F));
-			tossVec.RadRotate(m_AimAngle);
-			pMO->SetVel(m_Vel * 0.5F + tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
-			pMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
-			if (pMO->IsDevice()) {
-				g_MovableMan.AddItem(pMO);
-			} else {
-				if (pMO->IsGold()) {
-					m_GoldInInventoryChunk = 0;
-					ChunkGold();
+	if (m_Controller.IsState(WEAPON_DROP) && m_Status != INACTIVE) {
+		if (m_pFGArm && m_pFGArm->HoldsSomething()) {
+			if (MovableObject *pMO = m_pFGArm->ReleaseHeldMO()) {
+
+				pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
+				Vector tossVec(RandomNum(3.0F, 6.0F), RandomNum(-3.0F, -1.5F));
+				tossVec.RadRotate(m_AimAngle);
+				pMO->SetVel(m_Vel * 0.5F + tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
+				pMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
+				if (pMO->IsDevice()) {
+					g_MovableMan.AddItem(pMO);
 				}
-				g_MovableMan.AddParticle(pMO);
+				else {
+					if (pMO->IsGold()) {
+						m_GoldInInventoryChunk = 0;
+						ChunkGold();
+					}
+					g_MovableMan.AddParticle(pMO);
+				}
+			}
+			if (!m_Inventory.empty()) {
+				m_pFGArm->SetHeldMO(SwapNextInventory());
+				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+			}
+		} else if (m_pBGArm) {
+			if (MovableObject *pMO = m_pBGArm->ReleaseHeldMO()) {
+
+				pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
+				Vector tossVec(RandomNum(3.0F, 6.0F), RandomNum(-3.0F, -1.5F));
+				tossVec.RadRotate(m_AimAngle);
+				pMO->SetVel(m_Vel * 0.5F + tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
+				pMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
+				if (pMO->IsDevice()) {
+					g_MovableMan.AddItem(pMO);
+				}
+				else {
+					if (pMO->IsGold()) {
+						m_GoldInInventoryChunk = 0;
+						ChunkGold();
+					}
+					g_MovableMan.AddParticle(pMO);
+				}
+			} else {
+				DropAllInventory();
+				m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 			}
 		}
-
-		m_pFGArm->SetHeldMO(SwapNextInventory());
-		m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 		m_PieNeedsUpdate = true;
 	}
 

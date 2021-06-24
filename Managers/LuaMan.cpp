@@ -1805,14 +1805,6 @@ int LuaMan::Initialize() {
             .property("FlagCtrlState", &UInputMan::FlagCtrlState)
             .property("FlagShiftState", &UInputMan::FlagShiftState),
 
-        class_<IntRect>("IntRect")
-            .def(luabind::constructor<>())
-            .def(luabind::constructor<int, int, int, int>())
-            .def_readwrite("Left", &IntRect::m_Left)
-            .def_readwrite("Top", &IntRect::m_Top)
-            .def_readwrite("Right", &IntRect::m_Right)
-            .def_readwrite("Bottom", &IntRect::m_Bottom),
-
 		CONCRETELUABINDING(Scene, Entity)
 			.enum_("PlacedObjectSets")[
 				value("PLACEONLOAD", Scene::PlacedObjectSets::PLACEONLOAD),

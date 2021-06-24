@@ -25,6 +25,9 @@
     <Filter Include="Activities">
       <UniqueIdentifier>{4d361173-4982-4e1b-8967-8ab53105dc7f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lua">
+      <UniqueIdentifier>{ac503e37-087b-40b8-b1b8-427ab55a4f9e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="System\Box.h">
@@ -488,6 +491,9 @@
     </ClInclude>
     <ClInclude Include="Menus\InventoryMenuGUI.h">
       <Filter>Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="Lua\LuaMacros.h">
+      <Filter>Lua</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

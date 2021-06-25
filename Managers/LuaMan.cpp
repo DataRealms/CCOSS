@@ -177,25 +177,85 @@ int LuaMan::Initialize() {
     // It is possible to set the error handler function that Luabind will use globally:
     //set_pcall_callback(&AddFileAndLineToError); //NOTE: This seems to do nothing
 
-    // Declare all useful classes in the master state
-    module(m_pMasterState)
-    [
+    // Register all relevant bindings to the master state. Note that the order of registration is important, as bindings can't derive from an unregistered type (inheritance and all that).
+	luabind::module(m_pMasterState) [
+		SystemLuaBindings::RegisterVectorLuaBindings(),
+		SystemLuaBindings::RegisterBoxLuaBindings(),
+		EntityLuaBindings::RegisterSceneAreaLuaBindings(),
+		EntityLuaBindings::RegisterEntityLuaBindings(),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, SoundContainer),
+		EntityLuaBindings::RegisterSoundSetLuaBindings(),
+		EntityLuaBindings::RegisterLimbPathLuaBindings(),
+		RegisterLuaBindingsOfAbstractType(EntityLuaBindings, SceneObject),
+		RegisterLuaBindingsOfAbstractType(EntityLuaBindings, MovableObject),
+		EntityLuaBindings::RegisterMaterialLuaBindings(),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, MOPixel),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, TerrainObject),
+		RegisterLuaBindingsOfAbstractType(EntityLuaBindings, MOSprite),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, MOSParticle),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, MOSRotating),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Attachable),
+		RegisterLuaBindingsOfAbstractType(EntityLuaBindings, Emission),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, AEmitter),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PEmitter),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Actor),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ADoor),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Arm),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Leg),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, AHuman),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ACrab),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Turret),
+		RegisterLuaBindingsOfAbstractType(EntityLuaBindings, ACraft),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ACDropShip),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ACRocket),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, HeldDevice),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Magazine),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Round),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, HDFirearm),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ThrownDevice),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, TDExplosive),
+		SystemLuaBindings::RegisterControllerLuaBindings(),
+		SystemLuaBindings::RegisterTimerLuaBindings(),
+		RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Scene),
+		RegisterLuaBindingsOfAbstractType(EntityLuaBindings, Deployment),
+		SystemLuaBindings::RegisterDataModuleLuaBindings(),
+		ActivityLuaBindings::RegisterActivityLuaBindings(),
+		RegisterLuaBindingsOfAbstractType(ActivityLuaBindings, GameActivity),
+		SystemLuaBindings::RegisterPieSliceLuaBindings(),
+		RegisterLuaBindingsOfAbstractType(EntityLuaBindings, GlobalScript),
+		EntityLuaBindings::RegisterMetaPlayerLuaBindings(),
+		GUILuaBindings::RegisterGUIBannerLuaBindings(),
+		GUILuaBindings::RegisterBuyMenuGUILuaBindings(),
+		GUILuaBindings::RegisterSceneEditorGUILuaBindings(),
+		ManagerLuaBindings::RegisterActivityManLuaBindings(),
+		ManagerLuaBindings::RegisterAudioManLuaBindings(),
+		ManagerLuaBindings::RegisterConsoleManLuaBindings(),
+		ManagerLuaBindings::RegisterFrameManLuaBindings(),
+		ManagerLuaBindings::RegisterMetaManLuaBindings(),
+		ManagerLuaBindings::RegisterMovableManLuaBindings(),
+		ManagerLuaBindings::RegisterPostProcessManLuaBindings(),
+		ManagerLuaBindings::RegisterPresetManLuaBindings(),
+		ManagerLuaBindings::RegisterPrimitiveManLuaBindings(),
+		ManagerLuaBindings::RegisterSceneManLuaBindings(),
+		ManagerLuaBindings::RegisterSettingsManLuaBindings(),
+		ManagerLuaBindings::RegisterTimerManLuaBindings(),
+		ManagerLuaBindings::RegisterUInputManLuaBindings(),
 
-        class_<AlarmEvent>("AlarmEvent")
-            .def(constructor<>())
-            .def(constructor<const Vector &, int, float>())
-            .def_readwrite("ScenePos", &AlarmEvent::m_ScenePos)
-            .def_readwrite("Team", &AlarmEvent::m_Team)
-            .def_readwrite("Range", &AlarmEvent::m_Range),
+		luabind::class_<AlarmEvent>("AlarmEvent")
+			.def(luabind::constructor<>())
+			.def(luabind::constructor<const Vector &, int, float>())
+			.def_readwrite("ScenePos", &AlarmEvent::m_ScenePos)
+			.def_readwrite("Team", &AlarmEvent::m_Team)
+			.def_readwrite("Range", &AlarmEvent::m_Range),
 
-        class_<LuaMan>("LuaManager")
-            .property("TempEntity", &LuaMan::GetTempEntity)
-            .def_readonly("TempEntities", &LuaMan::m_TempEntityVector, return_stl_iterator)
-            .def("FileOpen", &LuaMan::FileOpen)
-            .def("FileClose", &LuaMan::FileClose)
-            .def("FileReadLine", &LuaMan::FileReadLine)
-            .def("FileWriteLine", &LuaMan::FileWriteLine)
-            .def("FileEOF", &LuaMan::FileEOF),
+		luabind::class_<LuaMan>("LuaManager")
+			.property("TempEntity", &LuaMan::GetTempEntity)
+			.def_readonly("TempEntities", &LuaMan::m_TempEntityVector, return_stl_iterator)
+			.def("FileOpen", &LuaMan::FileOpen)
+			.def("FileClose", &LuaMan::FileClose)
+			.def("FileReadLine", &LuaMan::FileReadLine)
+			.def("FileWriteLine", &LuaMan::FileWriteLine)
+			.def("FileEOF", &LuaMan::FileEOF),
 
         // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
         def("DeleteEntity", &DeleteEntity, adopt(_1)),

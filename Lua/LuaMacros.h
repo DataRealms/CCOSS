@@ -4,6 +4,50 @@
 //namespace RTE {
 
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="TYPE"></param>
+	#define LuaBindingRegisterFunctionForType(TYPENAME) \
+		static luabind::scope Register##TYPENAME##LuaBindings()
+
+	/// <summary>
+	/// 
+	/// </summary>
+	#define AbstractTypeLuaClassDefinition(TYPE, PARENTTYPE) \
+		luabind::class_<TYPE, PARENTTYPE>(#TYPE) \
+			.property("ClassName", &TYPE::GetClassName)
+
+	/// <summary>
+	/// 
+	/// </summary>
+	#define ConcreteTypeLuaClassDefinition(TYPE, PARENTTYPE) \
+		luabind::class_<TYPE, PARENTTYPE>(#TYPE) \
+			.def("Clone", &Clone##TYPE, adopt(result)) \
+			.property("ClassName", &TYPE::GetClassName)
+
+	/// <summary>
+	/// 
+	/// </summary>
+	#define RegisterLuaBindingsOfAbstractType(OWNINGSCOPENAME, TYPE) \
+		def((std::string("To") + std::string(#TYPE)).c_str(), (TYPE *(*)(Entity *))&To##TYPE), \
+		def((std::string("To") + std::string(#TYPE)).c_str(), (const TYPE *(*)(const Entity *))&ToConst##TYPE), \
+		OWNINGSCOPENAME##::Register##TYPE##LuaBindings()
+
+	/// <summary>
+	/// 
+	/// </summary>
+	#define RegisterLuaBindingsOfConcreteType(OWNINGSCOPENAME, TYPE) \
+		def((std::string("Create") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string, std::string))&Create##TYPE, adopt(result)), \
+		def((std::string("Create") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string))&Create##TYPE, adopt(result)), \
+		def((std::string("Random") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string, int))&Random##TYPE, adopt(result)), \
+		def((std::string("Random") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string, std::string))&Random##TYPE, adopt(result)), \
+		def((std::string("Random") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string))&Random##TYPE, adopt(result)), \
+		def((std::string("To") + std::string(#TYPE)).c_str(), (TYPE *(*)(Entity *))&To##TYPE), \
+		def((std::string("To") + std::string(#TYPE)).c_str(), (const TYPE *(*)(const Entity *))&ToConst##TYPE),	\
+		def((std::string("Is") + std::string(#TYPE)).c_str(), (bool(*)(const Entity *))&Is##TYPE),	\
+		OWNINGSCOPENAME##::Register##TYPE##LuaBindings()
+
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Preset clone adapters that will return the exact pre-cast types so we don't have to do:
 	// myNewActor = ToActor(PresetMan:GetPreset("AHuman", "Soldier Light", "All")):Clone()
@@ -90,24 +134,7 @@
     bool Is##TYPE(Entity *pEntity) { return dynamic_cast<TYPE *>(pEntity) ? true : false; }
 
 
-#define ABSTRACTLUABINDING(TYPE, PARENT) \
-    def((string("To") + string(#TYPE)).c_str(), (TYPE *(*)(Entity *))&To##TYPE), \
-    def((string("To") + string(#TYPE)).c_str(), (const TYPE *(*)(const Entity *))&ToConst##TYPE), \
-    class_<TYPE, PARENT/*, boost::shared_ptr<Entity> */>(#TYPE) \
-        .property("ClassName", &TYPE::GetClassName)
 
-#define CONCRETELUABINDING(TYPE, PARENT) \
-    def((string("Create") + string(#TYPE)).c_str(), (TYPE *(*)(string, string))&Create##TYPE, adopt(result)), \
-    def((string("Create") + string(#TYPE)).c_str(), (TYPE *(*)(string))&Create##TYPE, adopt(result)), \
-    def((string("Random") + string(#TYPE)).c_str(), (TYPE *(*)(string, int))&Random##TYPE, adopt(result)), \
-    def((string("Random") + string(#TYPE)).c_str(), (TYPE *(*)(string, string))&Random##TYPE, adopt(result)), \
-    def((string("Random") + string(#TYPE)).c_str(), (TYPE *(*)(string))&Random##TYPE, adopt(result)), \
-    def((string("To") + string(#TYPE)).c_str(), (TYPE *(*)(Entity *))&To##TYPE), \
-    def((string("To") + string(#TYPE)).c_str(), (const TYPE *(*)(const Entity *))&ToConst##TYPE), \
-    def((string("Is") + string(#TYPE)).c_str(), (bool(*)(const Entity *))&Is##TYPE), \
-    class_<TYPE, PARENT/*, boost::shared_ptr<Entity> */>(#TYPE) \
-        .def("Clone", &Clone##TYPE, adopt(result)) \
-        .property("ClassName", &TYPE::GetClassName)
 
 /// <summary>
 /// Special handling for passing ownership through properties. If you try to pass null to this normally, luajit crashes.

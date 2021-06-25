@@ -36,7 +36,7 @@ class PieMenuGUI;
 class Actor:
     public MOSRotating
 {
-    friend class LuaMan;
+    friend struct EntityLuaBindings;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations

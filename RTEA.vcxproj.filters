@@ -498,6 +498,9 @@
     <ClInclude Include="Lua\LuaBindingsSystem.h">
       <Filter>Lua</Filter>
     </ClInclude>
+    <ClInclude Include="Lua\LuaBindingsEntities.h">
+      <Filter>Lua</Filter>
+    </ClInclude>
     <ClInclude Include="Lua\LuaEntityAdapters.h">
       <Filter>Lua</Filter>
     </ClInclude>

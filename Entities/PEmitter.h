@@ -39,7 +39,7 @@ class PEmitter :
 
 public:
 
-	friend class LuaMan;
+	friend struct EntityLuaBindings;
 
 	// Concrete allocation and cloning definitions
 	EntityAllocation(PEmitter)

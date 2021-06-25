@@ -501,6 +501,9 @@
     <ClInclude Include="Lua\LuaEntityAdapters.h">
       <Filter>Lua</Filter>
     </ClInclude>
+    <ClInclude Include="Lua\LuaBindingsManagers.h">
+      <Filter>Lua</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">

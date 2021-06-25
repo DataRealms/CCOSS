@@ -37,7 +37,7 @@ class DataModule;
 // Class history:   05/30/2008 Changed name to PresetMan.
 
 class PresetMan : public Singleton<PresetMan> {
-	friend class LuaMan;
+	friend struct ManagerLuaBindings;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations

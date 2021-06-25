@@ -540,6 +540,7 @@
     <ClInclude Include="Entities\SoundSet.h" />
     <ClInclude Include="GUI\Interface.h" />
     <ClInclude Include="GUI\GUISound.h" />
+    <ClInclude Include="Lua\LuaEntityAdapters.h" />
     <ClInclude Include="Lua\LuaMacros.h" />
     <ClInclude Include="Managers\NetworkClient.h" />
     <ClInclude Include="Managers\NetworkServer.h" />

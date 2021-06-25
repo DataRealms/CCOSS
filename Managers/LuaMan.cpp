@@ -4,8 +4,6 @@
 #include "lua.hpp"
 
 
-using namespace luabind;
-
 /// <summary>
 /// Special callback function for adding file name and line number to error messages when calling functions incorrectly.
 /// </summary>
@@ -30,46 +28,12 @@ int AddFileAndLineToError(lua_State* pState) {
 }
 
 
-// From LuaBind documentation:
-// You also have to supply two functions for your smart pointer.
-// One that returns the type of const version of the smart pointer type (boost::shared_ptr<const A> in this case).
-// And one function that extracts the raw pointer from the smart pointer.
-// The first function is needed because luabind has to allow the non-const -> conversion when passing values from Lua to C++.
-// The second function is needed when Lua calls member functions on held types, the this pointer must be a raw pointer, it is also needed to allow the smart_pointer -> raw_pointer conversion from Lua to C++.
 
-namespace luabind
-{
-    template<class T>
-    T * get_pointer(boost::shared_ptr<T> &p)
-    {
-        return p.get();
-    }
 
-// From LuaBind documentation:
-// IMPORTANT
-// get_const_holder() has been removed.
-// Automatic conversions between smart_ptr<X> and smart_ptr<X const> no longer work.
-    /*template<class A>
-    boost::shared_ptr<const A> * get_const_holder(boost::shared_ptr<A> *)
-    {
-        return 0;
-    }*/
-}
 
 
 namespace RTE {
 
-// Can't have global enums in the master state so we use this dummy struct as a class and register the enums under it.
-struct enum_wrapper {
-	// Nested structs for each enum because we can't register enum_wrapper multiple times under a different name.
-	// We're doing this so we can access each enum separately by name rather than having all of them accessed from a shared name.
-	// If this proves to be a hassle then we can easily revert to the shared name access by registering everything under enum_wrapper.
-	struct input_device {};
-	struct input_elements {};
-	struct mouse_buttons {};
-	struct joy_buttons {};
-	struct joy_directions {};
-};
 
 
 

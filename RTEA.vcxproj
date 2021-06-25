@@ -540,6 +540,7 @@
     <ClInclude Include="Entities\SoundSet.h" />
     <ClInclude Include="GUI\Interface.h" />
     <ClInclude Include="GUI\GUISound.h" />
+    <ClInclude Include="Lua\LuaBindDefinitions.h" />
     <ClInclude Include="Lua\LuaBindingsActivities.h" />
     <ClInclude Include="Lua\LuaBindingsEntities.h" />
     <ClInclude Include="Lua\LuaBindingsGUI.h" />

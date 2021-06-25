@@ -1,0 +1,42 @@
+#ifndef _RTELUABINDDEFS_
+#define _RTELUABINDDEFS_
+
+#include "luabind.hpp"
+#include "operator.hpp"
+#include "copy_policy.hpp"
+#include "adopt_policy.hpp"
+#include "out_value_policy.hpp"
+#include "iterator_policy.hpp"
+#include "return_reference_to_policy.hpp"
+
+namespace luabind {
+	/// <summary>
+	/// Can't have global enums in the master state so we use this dummy struct as a class and register the enums under it.
+	/// </summary>
+	struct enum_wrapper {};
+
+	/// <summary>
+	/// Function that extracts the raw pointer from the smart pointer. This is needed when Lua calls member functions on held types, the 'this' pointer must be a raw pointer, it is also needed to allow the smart_pointer to raw_pointer conversion from Lua to C++.
+	/// </summary>
+	/// <param name="ptr">The smart pointer to get raw pointer for.</param>
+	/// <returns>Raw pointer of the passed in smart pointer.</returns>
+	template<class Type> Type * get_pointer(boost::shared_ptr<Type> &ptr) {
+		return ptr.get();
+	}
+}
+
+using namespace luabind;
+
+namespace RTE {
+	/// <summary>
+	/// Nested structs for each enum because we can't register enum_wrapper multiple times under a different name.
+	/// We're doing this so we can access each enum separately by name rather than having all of them accessed from a shared name.
+	/// If this proves to be a hassle then we can easily revert to the shared name access by registering everything under enum_wrapper.
+	/// </summary>
+	struct input_device : public luabind::enum_wrapper {};
+	struct input_elements : public luabind::enum_wrapper {};
+	struct mouse_buttons : public luabind::enum_wrapper {};
+	struct joy_buttons : public luabind::enum_wrapper {};
+	struct joy_directions : public luabind::enum_wrapper {};
+}
+#endif

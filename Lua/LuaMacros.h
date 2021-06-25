@@ -1,15 +1,7 @@
 #ifndef _RTELUAMACROS_
 #define _RTELUAMACROS_
 
-#include "luabind.hpp"
-#include "operator.hpp"
-#include "copy_policy.hpp"
-#include "adopt_policy.hpp"
-#include "out_value_policy.hpp"
-#include "iterator_policy.hpp"
-#include "return_reference_to_policy.hpp"
-
-using namespace luabind;
+#include "LuaBindDefinitions.h"
 
 	/// <summary>
 	/// 

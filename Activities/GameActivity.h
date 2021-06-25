@@ -47,7 +47,7 @@ class GameActivity:
     public Activity
 {
 
-    friend class LuaMan;
+    friend struct ActivityLuaBindings;
 
     // Keeps track of everything about a delivery in transit after purchase has been made with the menu
     struct Delivery

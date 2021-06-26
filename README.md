@@ -6,7 +6,9 @@
 This is a community-driven effort to continue the development of Cortex Command.  
 Stay up to date in our [Discord channel](https://discord.gg/TSU6StNQUG).
 
-# Playing the game on Windows without building it
+***
+
+# How to Play the Game
 If you just want to play the latest version of the game you can get it from our [website](https://cortex-command-community.github.io), and you can get mods from our [mod portal](https://cccp.mod.io).
 
 ***

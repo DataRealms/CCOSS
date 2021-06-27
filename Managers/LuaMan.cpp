@@ -1367,7 +1367,7 @@ int LuaMan::Initialize() {
             .property("FirearmNeedsReload", &ACrab::FirearmNeedsReload)
             .property("FirearmIsSemiAuto", &ACrab::FirearmIsSemiAuto)
             .property("FirearmActivationDelay", &ACrab::FirearmActivationDelay)
-            .def("ReloadFirearm", &ACrab::ReloadFirearm)
+            .def("ReloadFirearms", &ACrab::ReloadFirearms)
             .def("IsWithinRange", &ACrab::IsWithinRange)
             .def("Look", &ACrab::Look)
             .def("LookForMOs", &ACrab::LookForMOs)

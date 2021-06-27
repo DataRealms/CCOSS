@@ -811,13 +811,13 @@ bool ACrab::FirearmIsSemiAuto() const
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  ReloadFirearm
+// Virtual Method:  ReloadFirearms
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reloads the currently held firearm, if any.
+// Description:     Reloads the currently held firearms, if any.
 // Arguments:       None.
 // Return value:    None.
 
-void ACrab::ReloadFirearm() {
+void ACrab::ReloadFirearms() {
     if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice()) {
         for (const std::unique_ptr<HeldDevice> &mountedDevice : m_pTurret->GetMountedDevices()) {
             if (HDFirearm *mountedFirearm = dynamic_cast<HDFirearm *>(mountedDevice.get())) {
@@ -2241,7 +2241,7 @@ void ACrab::Update()
     // Reload held MO, if applicable
 
     if (m_Controller.IsState(WEAPON_RELOAD) && FirearmNeedsReload()) {
-        ReloadFirearm();
+        ReloadFirearms();
 
         if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 

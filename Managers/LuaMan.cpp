@@ -2771,7 +2771,6 @@ int LuaMan::FileOpen(std::string filename, std::string mode)
 	if (!System::PathExistsCaseSensitive(std::filesystem::path(filename).lexically_normal().generic_string()))
 		return -1;
 
-
 	// Allow to edit files only inside .rte folders
 	if (fullPath.find(rteString) == string::npos)
 		return -1;

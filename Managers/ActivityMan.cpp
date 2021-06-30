@@ -268,7 +268,7 @@ namespace RTE {
 
 		g_AudioMan.StopAll();
 		g_MovableMan.PurgeAllMOs();
-		// Have to reset TimerMan before creating anything else because all timers are reset against it
+		// Have to reset TimerMan before creating anything else because all timers are reset against it.
 		g_TimerMan.ResetTime();
 
 		// TODO: Deal with GUI resetting here!$@#") // Figure out what the hell this is about.

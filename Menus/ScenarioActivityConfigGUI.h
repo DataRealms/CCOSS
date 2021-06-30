@@ -27,7 +27,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a ScenarioActivityConfigGUI object in system memory and make it ready for use.
 		/// </summary>
-		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this ScenarioActivityConfigGUI.</param>
+		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this ScenarioActivityConfigGUI. Ownership is NOT transferred!</param>
 		explicit ScenarioActivityConfigGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 

@@ -82,20 +82,18 @@ namespace RTE {
 		if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) { g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn); }
 
 		while (!System::IsSetToQuit()) {
-			// Need to clear this out; sometimes background layers don't cover the whole back
+			// Need to clear this out; sometimes background layers don't cover the whole back.
 			g_FrameMan.ClearBackBuffer8();
 
-			// Update the real time measurement and increment
 			g_TimerMan.Update();
 
 			bool serverUpdated = false;
 
-			// Simulation update, as many times as the fixed update step allows in the span since last frame draw
+			// Simulation update, as many times as the fixed update step allows in the span since last frame draw.
 			while (g_TimerMan.TimeForSimUpdate()) {
 				serverUpdated = false;
 				g_PerformanceMan.NewPerformanceSample();
 
-				// Advance the simulation time by the fixed amount
 				g_TimerMan.UpdateSim();
 
 				g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::SimTotal);
@@ -126,7 +124,7 @@ namespace RTE {
 						g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::CampaignFadeIn);
 					} else {
 						const Activity *activity = g_ActivityMan.GetActivity();
-						// If we edited something then return to main menu instead of scenario menu player will probably switch to area/scene editor.
+						// If we edited something then return to main menu instead of scenario menu.
 						if (activity && activity->GetPresetName() == "None") {
 							g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
 						} else {
@@ -188,10 +186,8 @@ namespace RTE {
 			std::string currentArg = argValue[i];
 			bool lastArg = i + 1 == argCount;
 
-			// Print loading screen console to cout
 			if (currentArg == "-cout") { System::EnableLoggingToCLI(); }
 
-			// Load a single module right after the official modules
 			if (!lastArg && !singleModuleSet && currentArg == "-module") {
 				std::string moduleToLoad = argValue[++i];
 				if (moduleToLoad.find(System::GetModulePackageExtension()) == moduleToLoad.length() - System::GetModulePackageExtension().length()) {
@@ -200,12 +196,10 @@ namespace RTE {
 				}
 			}
 			if (!launchModeSet) {
-				// Launch game in server mode
 				if (currentArg == "-server") {
 					g_NetworkServer.EnableServerMode();
 					g_NetworkServer.SetServerPort(!lastArg ? argValue[++i] : "8000");
 					launchModeSet = true;
-					// Launch game directly into editor activity
 				} else if (!lastArg && currentArg == "-editor") {
 					g_ActivityMan.SetEditorToLaunch(argValue[++i]);
 					launchModeSet = true;
@@ -295,7 +289,6 @@ int main(int argc, char **argv) {
 	g_ConsoleMan.Destroy();
 
 #ifdef DEBUG_BUILD
-	// Dump out the info about how well memory cleanup went
 	Entity::ClassInfo::DumpPoolMemoryInfo(Writer("MemCleanupInfo.txt"));
 #endif
 

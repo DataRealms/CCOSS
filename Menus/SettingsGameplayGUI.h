@@ -20,7 +20,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a SettingsGameplayGUI object in system memory and make it ready for use.
 		/// </summary>
-		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this SettingsGameplayGUI.</param>
+		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this SettingsGameplayGUI. Ownership is NOT transferred!</param>
 		explicit SettingsGameplayGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 

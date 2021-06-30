@@ -43,7 +43,7 @@ namespace RTE {
 		/// <summary>
 		/// Gets the TitleScreen of this MenuMan.
 		/// </summary>
-		/// <returns>Pointer to the TitleScreen object of this MenuMan.</returns>
+		/// <returns>Pointer to the TitleScreen object of this MenuMan. Ownership is NOT transferred!</returns>
 		TitleScreen * GetTitleScreen() const { return m_TitleScreen.get(); }
 #pragma endregion
 

@@ -277,7 +277,7 @@ namespace RTE {
 #pragma endregion
 
 		/// <summary>
-		/// Clears all the member variables of this TitleScreen, effectively resetting the members of this abstraction level only.
+		/// Clears all the member variables of this TitleScreen, effectively resetting the members of this object.
 		/// </summary>
 		void Clear();
 

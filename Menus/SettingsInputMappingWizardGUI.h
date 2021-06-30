@@ -26,7 +26,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a SettingsInputMappingWizardGUI object in system memory and make it ready for use.
 		/// </summary>
-		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this SettingsInputMappingWizardGUI.</param>
+		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this SettingsInputMappingWizardGUI. Ownership is NOT transferred!</param>
 		explicit SettingsInputMappingWizardGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 
@@ -46,7 +46,7 @@ namespace RTE {
 		/// <summary>
 		/// Gets the currently active GUICollectionBox that acts as a dialog box and requires disabling navigation and drawing an overlay.
 		/// </summary>
-		/// <returns>Pointer to the GUICollectionBox that is the currently active dialog box, if any.</returns>
+		/// <returns>Pointer to the GUICollectionBox that is the currently active dialog box, if any. Ownership is NOT transferred!</returns>
 		GUICollectionBox * GetActiveDialogBox() const;
 
 		/// <summary>
@@ -233,7 +233,7 @@ namespace RTE {
 #pragma endregion
 
 		/// <summary>
-		/// Clears all the member variables of this SettingsInputMappingWizardGUI, effectively resetting the members of this abstraction level only.
+		/// Clears all the member variables of this SettingsInputMappingWizardGUI, effectively resetting the members of this object.
 		/// </summary>
 		void Clear();
 

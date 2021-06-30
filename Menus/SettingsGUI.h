@@ -26,8 +26,8 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a SettingsGUI object in system memory and make it ready for use.
 		/// </summary>
-		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this SettingsGUI's GUIControlManager.</param>
-		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this SettingsGUI's GUIControlManager.</param>
+		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this SettingsGUI's GUIControlManager. Ownership is NOT transferred!</param>
+		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this SettingsGUI's GUIControlManager. Ownership is NOT transferred!</param>
 		SettingsGUI(AllegroScreen *guiScreen, AllegroInput *guiInput);
 #pragma endregion
 
@@ -35,7 +35,7 @@ namespace RTE {
 		/// <summary>
 		/// Gets the currently active GUICollectionBox of this SettingsGUI or any of its sub-menus that acts as a dialog box and requires disabling navigation and drawing an overlay.
 		/// </summary>
-		/// <returns>Pointer to the GUICollectionBox that is the currently active dialog box.</returns>
+		/// <returns>Pointer to the GUICollectionBox that is the currently active dialog box. Ownership is NOT transferred!</returns>
 		GUICollectionBox * GetActiveDialogBox() const;
 
 		/// <summary>

@@ -28,8 +28,8 @@ namespace RTE {
 		/// <summary>
 		/// Makes the LoadingScreen object ready for use.
 		/// </summary>
-		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this LoadingScreen's GUIControlManager.</param>
-		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this LoadingScreen's GUIControlManager.</param>
+		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this LoadingScreen's GUIControlManager. Ownership is NOT transferred!</param>
+		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this LoadingScreen's GUIControlManager. Ownership is NOT transferred!</param>
 		void Create(AllegroScreen *guiScreen, AllegroInput *guiInput);
 
 		/// <summary>

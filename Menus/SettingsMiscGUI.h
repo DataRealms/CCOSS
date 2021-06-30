@@ -19,13 +19,13 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a SettingsMiscGUI object in system memory and make it ready for use.
 		/// </summary>
-		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this SettingsMiscGUI.</param>
+		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this SettingsMiscGUI. Ownership is NOT transferred!</param>
 		explicit SettingsMiscGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Enables or disables the Misc Settings menu.
+		/// Enables or disables the misc settings menu.
 		/// </summary>
 		/// <param name="enable">Show and enable or hide and disable the misc settings menu.</param>
 		void SetEnabled(bool enable = true) const;

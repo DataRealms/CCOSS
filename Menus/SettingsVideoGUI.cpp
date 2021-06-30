@@ -157,7 +157,7 @@ namespace RTE {
 	void SettingsVideoGUI::PopulateResolutionsComboBox() {
 		m_PresetResolutions.clear();
 
-		// Get a list of modes from the fullscreen driver even though we're not necessarily using it. This is so we don't need to populate the list manually and has all the reasonable resolutions.
+		// Get a list of modes from the fullscreen driver even though we're not necessarily using it. This is so we don't need to populate the list manually, and have all the reasonable resolutions.
 #ifdef _WIN32
 		GFX_MODE_LIST *resList = get_gfx_mode_list(GFX_DIRECTX_ACCEL);
 #elif __unix__
@@ -176,14 +176,13 @@ namespace RTE {
 
 		std::set<PresetResolutionRecord> resRecords;
 		for (int i = 0; i < resList->num_modes; ++i) {
-			// Only list 32bpp modes
 			if (resList->mode[i].bpp == 32) {
 				int width = resList->mode[i].width;
 				int height = resList->mode[i].height;
 				if (IsSupportedResolution(width, height)) { resRecords.emplace(width, height, false); }
 			}
 		}
-		// Manually add qHD (960x540) to the list because it's rarely present in drivers
+		// Manually add qHD (960x540) to the list because it's rarely present in drivers.
 		resRecords.emplace(960, 540, false);
 
 		std::set<PresetResolutionRecord> upscaledResRecords;

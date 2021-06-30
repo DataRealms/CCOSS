@@ -40,15 +40,15 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a MainMenuGUI object in system memory and makes it ready for use.
 		/// </summary>
-		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this MainMenuGUI's GUIControlManager.</param>
-		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this MainMenuGUI's GUIControlManager.</param>
+		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this MainMenuGUI's GUIControlManager. Ownership is NOT transferred!</param>
+		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this MainMenuGUI's GUIControlManager. Ownership is NOT transferred!</param>
 		MainMenuGUI(AllegroScreen *guiScreen, AllegroInput *guiInput) { Clear(); Create(guiScreen, guiInput); }
 
 		/// <summary>
 		/// Makes the MainMenuGUI object ready for use.
 		/// </summary>
-		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this MainMenuGUI's GUIControlManager.</param>
-		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this MainMenuGUI's GUIControlManager.</param>
+		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this MainMenuGUI's GUIControlManager. Ownership is NOT transferred!</param>
+		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this MainMenuGUI's GUIControlManager. Ownership is NOT transferred!</param>
 		void Create(AllegroScreen *guiScreen, AllegroInput *guiInput);
 #pragma endregion
 
@@ -254,7 +254,7 @@ namespace RTE {
 #pragma endregion
 
 		/// <summary>
-		/// Clears all the member variables of this MainMenuGUI, effectively resetting the members of this abstraction level only.
+		/// Clears all the member variables of this MainMenuGUI, effectively resetting the members of this object.
 		/// </summary>
 		void Clear();
 

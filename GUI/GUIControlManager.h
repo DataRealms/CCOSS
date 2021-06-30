@@ -138,7 +138,7 @@ public:
 // Arguments:       The GUIScreen to draw to, overriding the one passed in on constuction
 
     void Draw(GUIScreen *pScreen);
-	
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          DrawMouse
@@ -301,7 +301,7 @@ public:
 	/// <summary>
 	/// Gets the GUIScreen that this GUIControlManager is drawing itself to.
 	/// </summary>
-	/// <returns>Pointer to the GUIScreen that this GUIControlManager is drawing itself to.</returns>
+	/// <returns>Pointer to the GUIScreen that this GUIControlManager is drawing itself to. Ownership is NOT transferred!</returns>
 	GUIScreen * GetScreen() const { return m_Screen; }
 
 

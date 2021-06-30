@@ -157,7 +157,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `TwoPlayerSplitscreenVertSplit = 0/1` to force two player splitscreen into a vertical split mode (horizontal by default).
 
-- Ingame settings menu was reworked to make it less useless.
+- In-game settings menu was reworked to make it less useless.
 
 - Controller hot-plugging is now supported (Windows only).
 
@@ -247,7 +247,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - The `Actor` property `MaxMass` now no longer includes the `Mass` of the `Actor`, and has been renamed to `MaxInventoryMass` for clarity. In mods, this is most important for `ACraft`, which will now need their total `Mass` subtracted from the old value. 
 
 - `BuyMenu` tooltips now display item info as well as a description. This includes `MaxInventoryMass` and `MaxPassengers` for `ACraft`, `Mass` and `PassengerSlots` required for `Actors`, and `Mass` for other `MoveableObjects`.
-
 
 - Replaced the above-HUD pie menu inventory view with an animating inventory carousel.
 

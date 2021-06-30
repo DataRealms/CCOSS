@@ -190,7 +190,7 @@ namespace RTE {
 		/// <summary>
 		/// Gets whether the screen is being split vertically when in two player splitscreen, or is default split horizontally.
 		/// </summary>
-		/// <returns>Whether the screen is being split vertically when two player splitscreen or not.</returns>
+		/// <returns>Whether the screen is being split vertically when in two player splitscreen or not.</returns>
 		bool GetTwoPlayerVSplit() const { return m_TwoPlayerVSplit; }
 
 		/// <summary>

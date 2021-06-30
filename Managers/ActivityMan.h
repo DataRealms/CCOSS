@@ -45,7 +45,7 @@ namespace RTE {
 		/// <summary>
 		/// Gets the current Activity in effect. Won't be what has been set by SetStartActivity unless RestartActivity has been called since.
 		/// </summary>
-		/// <returns>The current Activity in effect. Will be 0 if no Activity is going.</returns>
+		/// <returns>The current Activity in effect. Will be nullptr if no Activity is going.</returns>
 		Activity * GetActivity() const { return m_Activity.get(); }
 
 		/// <summary>

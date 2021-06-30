@@ -24,7 +24,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a SettingsVideoGUI object in system memory and make it ready for use.
 		/// </summary>
-		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this SettingsVideoGUI.</param>
+		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this SettingsVideoGUI. Ownership is NOT transferred!</param>
 		explicit SettingsVideoGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 
@@ -38,7 +38,7 @@ namespace RTE {
 		/// <summary>
 		/// Gets the currently active GUICollectionBox that acts as a dialog box and requires disabling navigation and drawing an overlay.
 		/// </summary>
-		/// <returns>Pointer to the GUICollectionBox that is the currently active dialog box, if any.</returns>
+		/// <returns>Pointer to the GUICollectionBox that is the currently active dialog box, if any. Ownership is NOT transferred!</returns>
 		GUICollectionBox * GetActiveDialogBox() const;
 
 		/// <summary>
@@ -174,7 +174,7 @@ namespace RTE {
 		/// <summary>
 		/// Attempts to change the resolution using the new values set by the appropriate quick change type.
 		/// </summary>
-		/// <param name="resolutionChangeType">The type quick resolution change to apply. See ResolutionQuickChangeType enumeration.</param>
+		/// <param name="resolutionChangeType">The type of quick resolution change to apply. See ResolutionQuickChangeType enumeration.</param>
 		void ApplyQuickChangeResolution(ResolutionQuickChangeType resolutionChangeType);
 
 		/// <summary>

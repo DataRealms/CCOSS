@@ -24,7 +24,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a SettingsInputMappingGUI object in system memory and make it ready for use.
 		/// </summary>
-		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this SettingsInputMappingGUI.</param>
+		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this SettingsInputMappingGUI. Ownership is NOT transferred!</param>
 		explicit SettingsInputMappingGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 
@@ -44,7 +44,7 @@ namespace RTE {
 		/// <summary>
 		/// Gets the currently active GUICollectionBox that acts as a dialog box and requires disabling navigation and drawing an overlay.
 		/// </summary>
-		/// <returns>Pointer to the GUICollectionBox that is the currently active dialog box, if any.</returns>
+		/// <returns>Pointer to the GUICollectionBox that is the currently active dialog box, if any. Ownership is NOT transferred!</returns>
 		GUICollectionBox * GetActiveDialogBox() const;
 
 		/// <summary>
@@ -61,7 +61,7 @@ namespace RTE {
 		/// <summary>
 		/// Gets the SettingsInputMappingWizardGUI of this SettingsInputMappingGUI.
 		/// </summary>
-		/// <returns>Pointer to the SettingsInputMappingWizardGUI of this SettingsInputMappingGUI.</returns>
+		/// <returns>Pointer to the SettingsInputMappingWizardGUI of this SettingsInputMappingGUI. Ownership is NOT transferred!</returns>
 		SettingsInputMappingWizardGUI * GetInputConfigWizardMenu() { return m_InputConfigWizardMenu.get(); }
 #pragma endregion
 

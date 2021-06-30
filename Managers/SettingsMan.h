@@ -125,13 +125,13 @@ namespace RTE {
 		/// <summary>
 		/// Gets whether the crab bomb effect is enabled or not.
 		/// </summary>
-		/// <returns>Whether the crab bomb effect is enabled or not. False means releasing whatever number of crabs will do nothing except release a whatever number of crabs.</returns>
+		/// <returns>Whether the crab bomb effect is enabled or not. False means releasing whatever number of crabs will do nothing except release whatever number of crabs.</returns>
 		bool CrabBombsEnabled() const { return m_EnableCrabBombs; }
 
 		/// <summary>
 		/// Sets whether the crab bomb effect is enabled or not.
 		/// </summary>
-		/// <param name="enable">Enable the crab bomb effect or not. False means releasing whatever number of crabs will do nothing except release a whatever number of crabs.</param>
+		/// <param name="enable">Enable the crab bomb effect or not. False means releasing whatever number of crabs will do nothing except release whatever number of crabs.</param>
 		void SetCrabBombsEnabled(bool enable) { m_EnableCrabBombs = enable; }
 
 		/// <summary>
@@ -339,7 +339,7 @@ namespace RTE {
 		/// <summary>
 		/// Sets whether the reader progress report should be displayed during module loading or not.
 		/// </summary>
-		/// <param name="disable">Display the reader progress report during module loading or not.</param>
+		/// <param name="disable">Whether to display the reader progress report during module loading or not.</param>
 		void DisableLoadingScreenProgressReport(bool disable) { m_DisableLoadingScreenProgressReport = disable; }
 
 		/// <summary>

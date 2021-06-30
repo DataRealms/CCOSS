@@ -21,7 +21,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a SettingsAudioGUI object in system memory and make it ready for use.
 		/// </summary>
-		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this SettingsAudioGUI.</param>
+		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this SettingsAudioGUI. Ownership is NOT transferred!</param>
 		explicit SettingsAudioGUI(GUIControlManager *parentControlManager);
 #pragma endregion
 

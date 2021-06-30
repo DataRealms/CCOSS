@@ -260,7 +260,7 @@ namespace RTE {
 		void SetMusicPosition(float position);
 #pragma endregion
 
-#pragma region Sound Getters and Setters
+#pragma region Overall Sound Getters and Setters
 		/// <summary>
 		/// Gets whether all the sound effects channels are muted or not.
 		/// </summary>
@@ -428,7 +428,7 @@ namespace RTE {
 		std::vector<const Vector *> m_CurrentActivityHumanPlayerPositions; //!< The stored positions of each human player in the current activity. Only filled when there's an activity running.
 		std::unordered_map<int, float> m_SoundChannelMinimumAudibleDistances; //!<  An unordered map of sound channel indices to floats representing each Sound Channel's minimum audible distances. This is necessary to keep safe data in case the SoundContainer is destroyed while the sound is still playing, as happens often with TDExplosives.
 
-		bool m_MuteMaster; //!< Whether the all audio is muted.
+		bool m_MuteMaster; //!< Whether all the audio is muted.
 		bool m_MuteMusic; //!< Whether the music channel is muted.
 		bool m_MuteSounds; //!< Whether all the sound effects channels are muted.
 		float m_MasterVolume; //!< Global volume of all audio.

@@ -131,7 +131,7 @@ namespace RTE {
 		m_MainMenuButtons.at(MenuButton::SceneEditorButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("ButtonSceneEditor"));
 		m_MainMenuButtons.at(MenuButton::AreaEditorButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("ButtonAreaEditor"));
 		m_MainMenuButtons.at(MenuButton::AssemblyEditorButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("ButtonAssemblyEditor"));
-		m_MainMenuButtons.at(MenuButton::GitEditorButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("ButtonGibPlacement"));
+		m_MainMenuButtons.at(MenuButton::GibEditorButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("ButtonGibPlacement"));
 		m_MainMenuButtons.at(MenuButton::ActorEditorButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("ButtonActorEditor"));
 	}
 
@@ -220,7 +220,7 @@ namespace RTE {
 
 		GUILabel *metaNoticeLabel = dynamic_cast<GUILabel *>(m_SubMenuScreenGUIControlManager->GetControl("MetaLabel"));
 
-		const char *metaNotice = {
+		std::string metaNotice = {
 			"- A T T E N T I O N -\n\n"
 			"Please note that the Campaign is in an INCOMPLETE, fully playable, yet still imperfect state!\n"
 			"As such, it is lacking some polish, audio, and game balancing, and we will be upgrading it significantly in future.\n"
@@ -486,7 +486,7 @@ namespace RTE {
 			editorToStart = "AreaEditor";
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::AssemblyEditorButton)) {
 			editorToStart = "AssemblyEditor";
-		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::GitEditorButton)) {
+		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::GibEditorButton)) {
 			editorToStart = "GibEditor";
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::ActorEditorButton)) {
 			editorToStart = "ActorEditor";

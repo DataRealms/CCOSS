@@ -76,9 +76,9 @@ namespace RTE {
 			return -1;
 		}
 
-		if (m_MuteSounds) { MuteSounds(); }
-		if (m_MuteMusic) { MuteMusic(); }
-		if (m_MuteMaster) { MuteMaster(); }
+		if (m_MuteSounds) { SetSoundsMuted(); }
+		if (m_MuteMusic) { SetMusicMuted(); }
+		if (m_MuteMaster) { SetMasterMuted(); }
 
 		SetGlobalPitch(m_GlobalPitch, false, false);
 		SetSoundsVolume(m_SoundsVolume);

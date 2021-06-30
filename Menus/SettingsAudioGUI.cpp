@@ -17,17 +17,17 @@ namespace RTE {
 		m_MasterVolumeLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelMasterVolume"));
 		m_MasterVolumeSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderMasterVolume"));
 		m_MasterMuteCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxMuteMaster"));
-		m_MasterMuteCheckbox->SetCheck(g_AudioMan.MasterMuted());
+		m_MasterMuteCheckbox->SetCheck(g_AudioMan.GetMasterMuted());
 
 		m_MusicVolumeLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelMusicVolume"));
 		m_MusicVolumeSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderMusicVolume"));
 		m_MusicMuteCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxMuteMusic"));
-		m_MusicMuteCheckbox->SetCheck(g_AudioMan.MusicMuted());
+		m_MusicMuteCheckbox->SetCheck(g_AudioMan.GetMusicMuted());
 
 		m_SoundVolumeLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelSoundVolume"));
 		m_SoundVolumeSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderSoundVolume"));
 		m_SoundMuteCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxMuteSound"));
-		m_SoundMuteCheckbox->SetCheck(g_AudioMan.SoundsMuted());
+		m_SoundMuteCheckbox->SetCheck(g_AudioMan.GetSoundsMuted());
 
 		UpdateMasterVolumeControls();
 		UpdateMusicVolumeControls();
@@ -86,11 +86,11 @@ namespace RTE {
 				g_AudioMan.SetSoundsVolume(newSoundVolume);
 				UpdateSoundVolumeControls();
 			} else if (guiEvent.GetControl() == m_MasterMuteCheckbox) {
-				g_AudioMan.MuteMaster(m_MasterMuteCheckbox->GetCheck());
+				g_AudioMan.SetMasterMuted(m_MasterMuteCheckbox->GetCheck());
 			} else if (guiEvent.GetControl() == m_MusicMuteCheckbox) {
-				g_AudioMan.MuteMusic(m_MusicMuteCheckbox->GetCheck());
+				g_AudioMan.SetMusicMuted(m_MusicMuteCheckbox->GetCheck());
 			} else if (guiEvent.GetControl() == m_SoundMuteCheckbox) {
-				g_AudioMan.MuteSounds(m_SoundMuteCheckbox->GetCheck());
+				g_AudioMan.SetSoundsMuted(m_SoundMuteCheckbox->GetCheck());
 			}
 		}
 	}

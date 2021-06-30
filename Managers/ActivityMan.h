@@ -43,9 +43,9 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets the current Activity in effect. Won't be what has been set by SetStartActivity unless RestartActivity has been called since.
+		/// Gets the currently active Activity. Won't be what has been set by SetStartActivity unless RestartActivity has been called since.
 		/// </summary>
-		/// <returns>The current Activity in effect. Will be nullptr if no Activity is going.</returns>
+		/// <returns>The currently active Activity. Will be nullptr if no Activity is going.</returns>
 		Activity * GetActivity() const { return m_Activity.get(); }
 
 		/// <summary>
@@ -237,8 +237,8 @@ namespace RTE {
 		std::string m_DefaultActivityType; //!< The type name of the default Activity to be loaded if nothing else is available.
 		std::string m_DefaultActivityName; //!< The preset name of the default Activity to be loaded if nothing else is available.
 
-		std::unique_ptr<Activity> m_Activity; //!< The current Activity in action. OWNED BY THIS!
-		std::unique_ptr<Activity> m_StartActivity; //!< The starting condition of the next Activity to be (re)started. OWNED BY THIS!
+		std::unique_ptr<Activity> m_Activity; //!< The currently active Activity.
+		std::unique_ptr<Activity> m_StartActivity; //!< The starting condition of the next Activity to be (re)started.
 
 		bool m_InActivity; //!< Whether we are currently in game (as in, not in the main menu or any other out-of-game menus), regardless of its state.
 		bool m_RestartActivity; //!< Whether the current Activity needs to be restarted.

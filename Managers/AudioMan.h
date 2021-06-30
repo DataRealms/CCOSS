@@ -156,13 +156,13 @@ namespace RTE {
 		/// Gets whether all audio is muted or not.
 		/// </summary>
 		/// <returns>Whether all the audio is muted or not.</returns>
-		bool MasterMuted() const { return m_MuteMaster; }
+		bool GetMasterMuted() const { return m_MuteMaster; }
 
 		/// <summary>
 		/// Mutes or unmutes all audio.
 		/// </summary>
 		/// <param name="muteOrUnmute">Whether to mute or unmute all the audio.</param>
-		void MuteMaster(bool muteOrUnmute = true) { m_MuteMaster = muteOrUnmute; if (m_AudioEnabled) { m_MasterChannelGroup->setMute(m_MuteMaster); } }
+		void SetMasterMuted(bool muteOrUnmute = true) { m_MuteMaster = muteOrUnmute; if (m_AudioEnabled) { m_MasterChannelGroup->setMute(m_MuteMaster); } }
 
 		/// <summary>
 		/// Gets the volume of all audio. Does not get music or sounds individual volumes.
@@ -208,13 +208,13 @@ namespace RTE {
 		/// Gets whether the music channel is muted or not.
 		/// </summary>
 		/// <returns>Whether the music channel is muted or not.</returns>
-		bool MusicMuted() const { return m_MuteMusic; }
+		bool GetMusicMuted() const { return m_MuteMusic; }
 
 		/// <summary>
 		/// Mutes or unmutes the music channel.
 		/// </summary>
 		/// <param name="muteOrUnmute">Whether to mute or unmute the music channel.</param>
-		void MuteMusic(bool muteOrUnmute = true) { m_MuteMusic = muteOrUnmute; if (m_AudioEnabled) { m_MusicChannelGroup->setMute(m_MuteMusic); } }
+		void SetMusicMuted(bool muteOrUnmute = true) { m_MuteMusic = muteOrUnmute; if (m_AudioEnabled) { m_MusicChannelGroup->setMute(m_MuteMusic); } }
 
 		/// <summary>
 		/// Gets the volume of music. Does not get volume of sounds.
@@ -265,13 +265,13 @@ namespace RTE {
 		/// Gets whether all the sound effects channels are muted or not.
 		/// </summary>
 		/// <returns>Whether all the sound effects channels are muted or not.</returns>
-		bool SoundsMuted() const { return m_MuteSounds; }
+		bool GetSoundsMuted() const { return m_MuteSounds; }
 
 		/// <summary>
 		/// Mutes or unmutes all the sound effects channels.
 		/// </summary>
 		/// <param name="muteOrUnmute">Whether to mute or unmute all the sound effects channels.</param>
-		void MuteSounds(bool muteOrUnmute = true) { m_MuteSounds = muteOrUnmute; if (m_AudioEnabled) { m_SoundChannelGroup->setMute(m_MuteSounds); } }
+		void SetSoundsMuted(bool muteOrUnmute = true) { m_MuteSounds = muteOrUnmute; if (m_AudioEnabled) { m_SoundChannelGroup->setMute(m_MuteSounds); } }
 
 		/// <summary>
 		/// Gets the volume of all sounds. Does not get volume of music.

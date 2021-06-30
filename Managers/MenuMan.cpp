@@ -131,7 +131,6 @@ namespace RTE {
 				break;
 		}
 		if (!quitResult && m_TitleScreen->GetTitleTransitionState() != TitleScreen::TitleTransition::ScrollingFadeOutQuit) {
-			g_ConsoleMan.Update();
 			if (g_UInputMan.DetectJoystickHotPlug()) { m_GUIInput->SetKeyJoyMouseCursor(g_UInputMan.GetJoystickCount() > 0); }
 		} else {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeOutQuit);
@@ -264,6 +263,5 @@ namespace RTE {
 				}
 			}
 		}
-		g_ConsoleMan.Draw(g_FrameMan.GetBackBuffer32());
 	}
 }

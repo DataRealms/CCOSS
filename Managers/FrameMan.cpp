@@ -174,8 +174,8 @@ namespace RTE {
 			ShowMessageBox(invalidResolutionMessage);
 		} else if (!m_ForceDedicatedFullScreenGfxDriver && (resX * resMultiplier) % 4 > 0) {
 			settingsNeedOverwrite = true;
-			resX = static_cast<int>(std::floor(resX / 4) * 4);
-			const char *invalidResolutionMessage = {
+			resX = static_cast<int>(std::floor(static_cast<float>(resX) / 4.0F) * 4.0F);
+			std::string invalidResolutionMessage = {
 				"Resolution width that is not divisible by 4 is not supported in windowed or borderless mode!\nOverriding to closest valid width!\n"
 				"To enable the use of this resolution, please force the dedicated fullscreen driver through \"Settings.ini\" or through the in-game custom resolution settings."
 			};
@@ -217,7 +217,8 @@ namespace RTE {
 		if (screenHandle != NULL) {
 			resX = m_PrimaryScreenResX / resMultiplier;
 			resY = m_PrimaryScreenResY / resMultiplier;
-			const char *leftNotPrimaryMessage = {
+
+			std::string leftNotPrimaryMessage = {
 				"Due to limitations in Cortex Command's graphics API it is impossible to properly run multi-screen mode when the left-most screen is not set as primary.\n"
 				"Please configure your left-most screen to be primary to utilize all screens, as the game window will extend right but will not extend left, leaving any screen left of the primary unused.\n\n"
 				"You can disable multi-screen resolution validation in \"Settings.ini\" and run at your own risk!\n\nResolution settings will be overridden to fit primary screen only!"

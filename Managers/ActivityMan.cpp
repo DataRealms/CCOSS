@@ -142,8 +142,7 @@ namespace RTE {
 			g_UInputMan.SetMultiplayerMode(true);
 			g_FrameMan.SetMultiplayerMode(true);
 			g_AudioMan.SetMultiplayerMode(true);
-			g_AudioMan.SetSoundsVolume(0);
-			g_AudioMan.SetMusicVolume(0);
+			g_AudioMan.SetMasterMuted();
 			g_SceneMan.SetSceneToLoad("Multiplayer Scene");
 
 			multiplayerServerLobby->Create();

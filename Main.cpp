@@ -62,7 +62,10 @@ namespace RTE {
 			if (g_MenuMan.Update()) {
 				break;
 			}
+			g_ConsoleMan.Update();
+
 			g_MenuMan.Draw();
+			g_ConsoleMan.Draw(g_FrameMan.GetBackBuffer32());
 			g_FrameMan.FlipFrameBuffers();
 		}
 	}

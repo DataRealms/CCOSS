@@ -142,14 +142,15 @@ namespace RTE {
 		m_DeviceIcons[InputDevice::DEVICE_MOUSE_KEYB] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Mouse"));
 
 		for (int gamepad = InputDevice::DEVICE_GAMEPAD_1; gamepad < InputDevice::DEVICE_COUNT; gamepad++) {
-			std::string gamepadNum = std::to_string(gamepad - 1);
-			m_DeviceIcons[gamepad] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad " + gamepadNum));
+			m_DeviceIcons[gamepad] = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device Gamepad " + std::to_string(gamepad - 1)));
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void UInputMan::SetInputClass(GUIInput* inputClass) const { s_InputClass = inputClass; }
+	void UInputMan::SetInputClass(GUIInput *inputClass) const {
+		s_InputClass = inputClass;
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

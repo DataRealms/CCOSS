@@ -72,13 +72,13 @@ namespace RTE {
 		/// Returns true if endless MetaGame mode is enabled.
 		/// </summary>
 		/// <returns>Whether endless mode is enabled via settings.</returns>
-		bool EndlessMode() const { return m_EndlessMode; }
+		bool EndlessMetaGameMode() const { return m_EndlessMetaGameMode; }
 
 		/// <summary>
 		/// Sets whether endless MetaGame mode is enabled or not.
 		/// </summary>
 		/// <param name="enable">Whether endless MetaGame mode is enabled or not.</param>
-		void SetEndlessMode(bool enable) { m_EndlessMode = enable; }
+		void SetEndlessMetaGameMode(bool enable) { m_EndlessMetaGameMode = enable; }
 
 		/// <summary>
 		/// Whether we need to play blips when unseen layer is revealed.
@@ -334,13 +334,13 @@ namespace RTE {
 		/// Gets whether displaying the reader progress report during module loading is disabled or not.
 		/// </summary>
 		/// <returns>Whether the reader progress report is being displayed during module loading or not.</returns>
-		bool LoadingScreenProgressReportDisabled() const { return m_DisableLoadingScreenProgressReport; }
+		bool GetLoadingScreenProgressReportDisabled() const { return m_DisableLoadingScreenProgressReport; }
 
 		/// <summary>
 		/// Sets whether the reader progress report should be displayed during module loading or not.
 		/// </summary>
 		/// <param name="disable">Whether to display the reader progress report during module loading or not.</param>
-		void DisableLoadingScreenProgressReport(bool disable) { m_DisableLoadingScreenProgressReport = disable; }
+		void SetLoadingScreenProgressReportDisabled(bool disable) { m_DisableLoadingScreenProgressReport = disable; }
 
 		/// <summary>
 		/// Gets how accurately the reader progress report tells what line it's reading during module loading.
@@ -380,7 +380,7 @@ namespace RTE {
 		bool m_ShowForeignItems; //!< Do not show foreign items in buy menu.
 		bool m_FlashOnBrainDamage; //!< Whether red flashes on brain damage are on or off.
 		bool m_BlipOnRevealUnseen; //!< Blip if unseen is revealed.
-		bool m_EndlessMode; //!< Endless MetaGame mode.
+		bool m_EndlessMetaGameMode; //!< Endless MetaGame mode.
 		bool m_EnableHats; //!< Whether randomized hat attachables will be attached to all AHuman actors.
 		bool m_EnableCrabBombs; //!< Whether all actors (except Brains and Doors) should be annihilated if a number exceeding the crab bomb threshold is released at once.
 		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.

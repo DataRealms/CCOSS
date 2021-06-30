@@ -20,7 +20,7 @@ namespace RTE {
 		m_ShowToolTipsCheckbox->SetCheck(g_SettingsMan.ShowToolTips());
 
 		m_DisableLoadingScreenReportCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxDisableLoadingScreenReport"));
-		m_DisableLoadingScreenReportCheckbox->SetCheck(!g_SettingsMan.LoadingScreenProgressReportDisabled());
+		m_DisableLoadingScreenReportCheckbox->SetCheck(!g_SettingsMan.GetLoadingScreenProgressReportDisabled());
 
 		m_ShowAdvancedPerfStatsCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxShowAdvancedPerfStats"));
 		m_ShowAdvancedPerfStatsCheckbox->SetCheck(g_PerformanceMan.AdvancedPerformanceStatsEnabled());
@@ -50,7 +50,7 @@ namespace RTE {
 			} else if (guiEvent.GetControl() == m_ShowToolTipsCheckbox) {
 				g_SettingsMan.SetShowToolTips(m_ShowToolTipsCheckbox->GetCheck());
 			} else if (guiEvent.GetControl() == m_DisableLoadingScreenReportCheckbox) {
-				g_SettingsMan.DisableLoadingScreenProgressReport(!m_DisableLoadingScreenReportCheckbox->GetCheck());
+				g_SettingsMan.SetLoadingScreenProgressReportDisabled(!m_DisableLoadingScreenReportCheckbox->GetCheck());
 			} else if (guiEvent.GetControl() == m_ShowAdvancedPerfStatsCheckbox) {
 				g_PerformanceMan.ShowAdvancedPerformanceStats(m_ShowAdvancedPerfStatsCheckbox->GetCheck());
 			} else if (guiEvent.GetControl() == m_MeasureLoadTimeCheckbox) {

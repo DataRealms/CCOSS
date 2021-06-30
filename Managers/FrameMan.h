@@ -157,7 +157,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newResX">New width to set window to.</param>
 		/// <param name="newResY">New height to set window to.</param>
-		/// <param name="upscaled"></param>
+		/// <param name="upscaled">Whether the new resolution is upscaled.</param>
 		/// <param name="endActivity">Whether the current Activity should be ended before performing the switch.</param>
 		void ChangeResolution(int newResX, int newResY, bool upscaled, int newGfxDriver);
 #pragma endregion

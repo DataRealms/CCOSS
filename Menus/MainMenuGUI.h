@@ -101,7 +101,7 @@ namespace RTE {
 			SceneEditorButton,
 			AreaEditorButton,
 			AssemblyEditorButton,
-			GitEditorButton,
+			GibEditorButton,
 			ActorEditorButton,
 			ButtonCount
 		};

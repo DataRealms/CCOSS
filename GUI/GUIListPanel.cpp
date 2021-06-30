@@ -975,14 +975,14 @@ void GUIListPanel::AdjustScrollbars(void)
 
     // If both scrollbars are visible, adjust the size so they don't intersect
     if (m_VertScroll->_GetVisible() && m_HorzScroll->_GetVisible()) {
-        m_VertScroll->SetSize(m_VertScroll->GetWidth(), m_Height-m_HorzScroll->GetHeight() - (m_ScrollBarPadding * 2));
-        m_HorzScroll->SetSize(m_Width-m_VertScroll->GetWidth() - (m_ScrollBarPadding * 2), m_HorzScroll->GetHeight());
+		m_VertScroll->SetSize(m_VertScroll->GetWidth(), m_Height - m_HorzScroll->GetHeight() - (m_ScrollBarPadding * 2));
+		m_HorzScroll->SetSize(m_Width - m_VertScroll->GetWidth() - (m_ScrollBarPadding * 2), m_HorzScroll->GetHeight());
     } else {
         // Normal size
         if (m_VertScroll->_GetVisible())
-            m_VertScroll->SetSize(m_VertScroll->GetWidth(), m_Height - (m_ScrollBarPadding * 2));
+			m_VertScroll->SetSize(m_VertScroll->GetWidth(), m_Height - (m_ScrollBarPadding * 2));
         if (m_HorzScroll->_GetVisible())
-            m_HorzScroll->SetSize(m_Width - (m_ScrollBarPadding * 2), m_HorzScroll->GetHeight());
+			m_HorzScroll->SetSize(m_Width - (m_ScrollBarPadding * 2), m_HorzScroll->GetHeight());
     }
 }
 

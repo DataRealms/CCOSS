@@ -1,6 +1,5 @@
 #include "LoadingScreen.h"
 #include "FrameMan.h"
-#include "SettingsMan.h"
 #include "SceneLayer.h"
 #include "Writer.h"
 
@@ -25,13 +24,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingScreen::Create(AllegroScreen *guiScreen, AllegroInput *guiInput) {
+	void LoadingScreen::Create(AllegroScreen *guiScreen, AllegroInput *guiInput, bool progressReportDisabled) {
 		m_GUIControlManager.reset(new GUIControlManager());
 		RTEAssert(m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "LoadingScreenSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/LoadingScreenSkin.ini");
 		m_GUIControlManager->Load("Base.rte/GUIs/LoadingGUI.ini");
 
 		int loadingSplashOffset = 0;
-		if (!g_SettingsMan.LoadingScreenProgressReportDisabled()) {
+		if (!progressReportDisabled) {
 			CreateProgressReportListbox();
 			loadingSplashOffset = m_ProgressListboxPosX / 4;
 		}
@@ -44,10 +43,6 @@ namespace RTE {
 		loadingSplash.Draw(g_FrameMan.GetBackBuffer32(), loadingSplashTargetBox);
 
 		g_FrameMan.FlipFrameBuffers();
-
-		// Overwrite Settings.ini after all the managers are created to fully populate the file. Up until this moment Settings.ini is populated only with minimal required properties to run.
-		// When the overwrite happens there is a short delay which causes the screen to remain black, so this is done here after the flip to mask that black screen.
-		if (g_SettingsMan.SettingsNeedOverwrite()) { g_SettingsMan.UpdateSettingsFile(); }
 
 		if (!m_LoadingLogWriter) {
 			m_LoadingLogWriter = std::make_unique<Writer>("LogLoading.txt");

@@ -31,7 +31,12 @@ namespace RTE {
 		m_GUIInput = std::make_unique<AllegroInput>(-1, g_UInputMan.GetJoystickCount() > 0);
 
 		if (firstTimeInit) {
-			g_LoadingScreen.Create(m_GUIScreen.get(), m_GUIInput.get());
+			g_LoadingScreen.Create(m_GUIScreen.get(), m_GUIInput.get(), g_SettingsMan.GetLoadingScreenProgressReportDisabled());
+
+			// Overwrite Settings.ini after all the managers are created to fully populate the file. Up until this moment Settings.ini is populated only with minimal required properties to run.
+			// If Settings.ini already exists and is fully populated, this will deal with overwriting it to apply any overrides performed by the managers at boot (e.g resolution validation).
+			if (g_SettingsMan.SettingsNeedOverwrite()) { g_SettingsMan.UpdateSettingsFile(); }
+
 			g_PresetMan.LoadAllDataModules();
 			g_LoadingScreen.Destroy();
 

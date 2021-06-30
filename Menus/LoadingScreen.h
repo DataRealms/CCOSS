@@ -30,7 +30,8 @@ namespace RTE {
 		/// </summary>
 		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this LoadingScreen's GUIControlManager. Ownership is NOT transferred!</param>
 		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this LoadingScreen's GUIControlManager. Ownership is NOT transferred!</param>
-		void Create(AllegroScreen *guiScreen, AllegroInput *guiInput);
+		/// <param name="progressReportDisabled">Whether the loading screen progress report is disabled meaning GUI elements and adjustments relevant to it can be skipped.</param>
+		void Create(AllegroScreen *guiScreen, AllegroInput *guiInput, bool progressReportDisabled);
 
 		/// <summary>
 		/// Creates the GUIListBox that the progress report will be drawn to, if not disabled through the settings file to speed up loading times.

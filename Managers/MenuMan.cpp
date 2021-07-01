@@ -18,8 +18,6 @@
 #include "MetagameGUI.h"
 #include "LoadingScreen.h"
 
-#include "NetworkServer.h"
-
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,10 +28,8 @@ namespace RTE {
 		m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer32());
 		m_GUIInput = std::make_unique<AllegroInput>(-1, g_UInputMan.GetJoystickCount() > 0);
 
-		if (firstTimeInit) {
-			g_LoadingScreen.Create(m_GUIScreen.get(), m_GUIInput.get(), g_SettingsMan.GetLoadingScreenProgressReportDisabled());
-			if (g_NetworkServer.IsServerModeEnabled()) { g_SettingsMan.SetSkipIntro(true); }
-		}
+		if (firstTimeInit) { g_LoadingScreen.Create(m_GUIScreen.get(), m_GUIInput.get(), g_SettingsMan.GetLoadingScreenProgressReportDisabled()); }
+
 		m_TitleScreen = std::make_unique<TitleScreen>(m_GUIScreen.get());
 		m_MainMenu = std::make_unique<MainMenuGUI>(m_GUIScreen.get(), m_GUIInput.get());
 		m_ScenarioMenu = std::make_unique<ScenarioGUI>(m_GUIScreen.get(), m_GUIInput.get());

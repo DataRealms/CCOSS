@@ -163,6 +163,13 @@ namespace RTE {
 			g_TimerMan.UpdateSim();
 			g_AudioMan.Update();
 
+			if (g_FrameMan.ResolutionChanged()) {
+				g_MenuMan.Reinitialize();
+				g_ConsoleMan.Destroy();
+				g_ConsoleMan.Initialize();
+				g_FrameMan.DestroyTempBackBuffers();
+			}
+
 			if (g_MenuMan.Update()) {
 				break;
 			}

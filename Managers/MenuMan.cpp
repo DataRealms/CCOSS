@@ -3,7 +3,6 @@
 #include "FrameMan.h"
 #include "UInputMan.h"
 #include "PresetMan.h"
-#include "ConsoleMan.h"
 #include "MetaMan.h"
 
 #include "GUI.h"
@@ -42,7 +41,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MenuMan::Reinitialize() {
-		g_ConsoleMan.Destroy();
 		g_MetaMan.GetGUI()->Destroy();
 
 		m_ScenarioMenu.reset();
@@ -51,9 +49,6 @@ namespace RTE {
 		m_MenuController.reset();
 
 		Initialize(false);
-		g_ConsoleMan.Initialize();
-
-		g_FrameMan.DestroyTempBackBuffers();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -95,8 +90,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool MenuMan::Update() {
-		if (g_FrameMan.ResolutionChanged()) { Reinitialize(); }
-
 		m_TitleScreen->Update();
 		SetActiveMenu();
 

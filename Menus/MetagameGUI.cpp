@@ -3888,7 +3888,7 @@ void MetagameGUI::UpdateIncomeCounting(bool initOverride)
             if (g_MetaMan.GetTotalBrainCountOfPlayer(metaPlayer) > 0)
                 g_MetaMan.m_Players[metaPlayer].m_Funds = GetPlayerLineFunds(m_IncomeSiteLines, metaPlayer, false);
 
-			if (g_SettingsMan.EndlessMode())
+			if (g_SettingsMan.EndlessMetaGameMode())
 			{
 				g_MetaMan.m_Players[metaPlayer].ChangeBrainPoolCount(20 - g_MetaMan.m_Players[metaPlayer].GetBrainPoolCount());
 				g_MetaMan.m_Players[metaPlayer].ChangeFunds(10000 - g_MetaMan.m_Players[metaPlayer].GetFunds());

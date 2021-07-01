@@ -20,7 +20,7 @@ namespace RTE {
 
 		m_FlashOnBrainDamage = true;
 		m_BlipOnRevealUnseen = true;
-		m_EndlessMode = false;
+		m_EndlessMetaGameMode = false;
 		m_EnableHats = false;
 		m_EnableCrabBombs = false;
 		m_CrabBombThreshold = 42;
@@ -133,7 +133,7 @@ namespace RTE {
 		} else if (propName == "SloMoDurationMS") {
 			reader >> g_MovableMan.m_SloMoDuration;
 		} else if (propName == "EndlessMode") {
-			reader >> m_EndlessMode;
+			reader >> m_EndlessMetaGameMode;
 		} else if (propName == "EnableHats") {
 			reader >> m_EnableHats;
 		} else if (propName == "EnableCrabBombs") {
@@ -295,7 +295,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("MaxUnheldItems", g_MovableMan.m_MaxDroppedItems);
 		writer.NewPropertyWithValue("SloMoThreshold", g_MovableMan.m_SloMoThreshold);
 		writer.NewPropertyWithValue("SloMoDurationMS", g_MovableMan.m_SloMoDuration);
-		writer.NewPropertyWithValue("EndlessMode", m_EndlessMode);
+		writer.NewPropertyWithValue("EndlessMetaGameMode", m_EndlessMetaGameMode);
 		writer.NewPropertyWithValue("EnableHats", m_EnableHats);
 		writer.NewPropertyWithValue("EnableCrabBombs", m_EnableCrabBombs);
 		writer.NewPropertyWithValue("CrabBombThreshold", m_CrabBombThreshold);

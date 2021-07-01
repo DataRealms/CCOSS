@@ -220,13 +220,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsVideoGUI::ApplyQuickChangeResolution(ResolutionQuickChangeType resolutionChangeType) {
-		bool linuxCompatible = false;
-
-#ifdef __unix__
-		linuxCompatible = true;
-		m_NewGraphicsDriver = GFX_AUTODETECT_FULLSCREEN;
-#endif
-
 		switch (resolutionChangeType) {
 			case ResolutionQuickChangeType::Windowed:
 				m_NewGraphicsDriver = GFX_AUTODETECT_WINDOWED;
@@ -236,14 +229,14 @@ namespace RTE {
 				break;
 			case ResolutionQuickChangeType::Borderless:
 			case ResolutionQuickChangeType::Dedicated:
-				if (!linuxCompatible) { m_NewGraphicsDriver = (resolutionChangeType == ResolutionQuickChangeType::Borderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL; }
+				m_NewGraphicsDriver = (resolutionChangeType == ResolutionQuickChangeType::Borderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL;
 				m_NewResUpscaled = false;
 				m_NewResX = g_FrameMan.GetMaxResX();
 				m_NewResY = g_FrameMan.GetMaxResY();
 				break;
 			case ResolutionQuickChangeType::UpscaledBorderless:
 			case ResolutionQuickChangeType::UpscaledDedicated:
-				if (!linuxCompatible) { m_NewGraphicsDriver = (resolutionChangeType == ResolutionQuickChangeType::UpscaledBorderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL; }
+				m_NewGraphicsDriver = (resolutionChangeType == ResolutionQuickChangeType::UpscaledBorderless) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_DIRECTX_ACCEL;
 				m_NewResUpscaled = true;
 				m_NewResX = g_FrameMan.GetMaxResX() / 2;
 				m_NewResY = g_FrameMan.GetMaxResY() / 2;
@@ -286,12 +279,7 @@ namespace RTE {
 		int newMultiplier = m_NewResUpscaled ? 2 : 1;
 		m_NewResX = std::stoi(m_CustomResolutionWidthTextBox->GetText()) / newMultiplier;
 		m_NewResY = std::stoi(m_CustomResolutionHeightTextBox->GetText()) / newMultiplier;
-
-#ifndef __unix__
 		m_NewGraphicsDriver = m_CustomResolutionBorderlessRadioButton->GetCheck() ? GFX_AUTODETECT_WINDOWED : GFX_DIRECTX_ACCEL;
-#else
-		m_NewGraphicsDriver = m_CustomResolutionBorderlessRadioButton->GetCheck() ? GFX_AUTODETECT_WINDOWED : GFX_AUTODETECT_FULLSCREEN;
-#endif
 
 		bool invalidResolution = false;
 

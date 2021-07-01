@@ -96,8 +96,8 @@ namespace RTE {
 		/// <summary>
 		/// Makes the AudioMan object ready for use.
 		/// </summary>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Initialize();
+		/// <returns>Whether the audio system was initialized successfully. If not, no audio will be available.</returns>
+		bool Initialize();
 #pragma endregion
 
 #pragma region Destruction

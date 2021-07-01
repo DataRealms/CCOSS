@@ -52,13 +52,13 @@ namespace RTE {
 		/// Indicates whether the game is currently running or not (not editing, over or paused).
 		/// </summary>
 		/// <returns>Whether the game is running or not.</returns>
-		bool ActivityRunning() const { return m_Activity ? m_Activity->IsRunning() : false; }
+		bool ActivityRunning() const { return m_Activity && m_Activity->IsRunning(); }
 
 		/// <summary>
 		/// Indicates whether the game is currently paused or not.
 		/// </summary>
 		/// <returns>Whether the game is paused or not.</returns>
-		bool ActivityPaused() const { return m_Activity ? m_Activity->IsPaused() : true; }
+		bool ActivityPaused() const { return !m_Activity || m_Activity->IsPaused(); }
 
 		/// <summary>
 		/// Gets whether we are currently in game (as in, not in the main menu or any other out-of-game menus), regardless of its state.
@@ -125,13 +125,13 @@ namespace RTE {
 		/// Gets whether the intro and main menu should be skipped on game start and launch directly into the set default Activity instead.
 		/// </summary>
 		/// <returns>Whether the game is set to launch directly into the set default Activity or not.</returns>
-		bool LaunchIntoActivity() const { return m_LaunchIntoActivity; }
+		bool IsSetToLaunchIntoActivity() const { return m_LaunchIntoActivity; }
 
 		/// <summary>
 		/// Gets whether the intro and main menu should be skipped on game start and launch directly into the set editor Activity instead.
 		/// </summary>
 		/// <returns>Whether the game is set to launch directly into the set editor Activity or not.</returns>
-		bool LaunchIntoEditor() const { return m_LaunchIntoEditor; }
+		bool IsSetToLaunchIntoEditor() const { return m_LaunchIntoEditor; }
 
 		/// <summary>
 		/// Sets the name of the editor to launch directly into.

@@ -424,7 +424,6 @@ namespace RTE {
 		}
 
 		int linePosY = 25;
-		// Draw line separators between each team row.
 		for (int i = 0; i < 6; ++i) {
 			hline(g_FrameMan.GetBackBuffer32(), m_PlayersAndTeamsConfigBox->GetXPos() + 2, m_PlayersAndTeamsConfigBox->GetYPos() + linePosY, m_PlayersAndTeamsConfigBox->GetXPos() + m_PlayersAndTeamsConfigBox->GetWidth() - 2, c_GUIColorLightBlue);
 			linePosY += 25;

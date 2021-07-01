@@ -692,7 +692,7 @@ namespace RTE {
 
 	void UInputMan::HandleSpecialInput() {
 		// If we launched into editor directly, skip the logic and quit quickly.
-		if (g_ActivityMan.LaunchIntoEditor() && KeyPressed(KEY_ESC)) {
+		if (g_ActivityMan.IsSetToLaunchIntoEditor() && KeyPressed(KEY_ESC)) {
 			System::SetQuit();
 			return;
 		}

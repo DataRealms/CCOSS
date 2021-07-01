@@ -27,7 +27,7 @@ namespace RTE {
 		m_EnableCrabBombsCheckbox->SetCheck(g_SettingsMan.CrabBombsEnabled());
 
 		m_EndlessMetaGameCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxEndlessMetaGame"));
-		m_EndlessMetaGameCheckbox->SetCheck(g_SettingsMan.EndlessMode());
+		m_EndlessMetaGameCheckbox->SetCheck(g_SettingsMan.EndlessMetaGameMode());
 
 		m_MaxUnheldItemsTextbox = dynamic_cast<GUITextBox *>(m_GUIControlManager->GetControl("TextboxMaxUnheldItems"));
 		m_MaxUnheldItemsTextbox->SetText(std::to_string(g_MovableMan.GetMaxDroppedItems()));
@@ -43,15 +43,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsGameplayGUI::SetEnabled(bool enable) {
-		if (enable) {
-			m_GameplaySettingsBox->SetVisible(true);
-			m_GameplaySettingsBox->SetEnabled(true);
+		m_GameplaySettingsBox->SetVisible(enable);
+		m_GameplaySettingsBox->SetEnabled(enable);
 
+		if (enable) {
 			UpdateMaxUnheldItemsTextbox();
 			UpdateCrabBombThresholdTextbox();
-		} else {
-			m_GameplaySettingsBox->SetVisible(false);
-			m_GameplaySettingsBox->SetEnabled(false);
 		}
 	}
 
@@ -85,12 +82,12 @@ namespace RTE {
 			} else if (guiEvent.GetControl() == m_EnableCrabBombsCheckbox) {
 				g_SettingsMan.SetCrabBombsEnabled(m_EnableCrabBombsCheckbox->GetCheck());
 			} else if (guiEvent.GetControl() == m_EndlessMetaGameCheckbox) {
-				g_SettingsMan.SetEndlessMode(m_EndlessMetaGameCheckbox->GetCheck());
+				g_SettingsMan.SetEndlessMetaGameMode(m_EndlessMetaGameCheckbox->GetCheck());
 			} else if (guiEvent.GetControl() == m_MaxUnheldItemsTextbox && guiEvent.GetMsg() == GUITextBox::Enter) {
 				UpdateMaxUnheldItemsTextbox();
 			} else if (guiEvent.GetControl() == m_CrabBombThresholdTextbox && guiEvent.GetMsg() == GUITextBox::Enter) {
 				UpdateCrabBombThresholdTextbox();
-			// Update both textboxes when clicking the main CollectionBox, otherwise clicking off focused textboxes does not remove their focus or update the setting values and they will still capture keyboard input
+			// Update both textboxes when clicking the main CollectionBox, otherwise clicking off focused textboxes does not remove their focus or update the setting values and they will still capture keyboard input.
 			} else if (guiEvent.GetControl() == m_GameplaySettingsBox && guiEvent.GetMsg() == GUICollectionBox::Clicked && !m_GameplaySettingsBox->HasFocus()) {
 				UpdateMaxUnheldItemsTextbox();
 				UpdateCrabBombThresholdTextbox();

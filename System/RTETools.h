@@ -233,8 +233,7 @@ namespace RTE {
 	/// <param name="arrayOfType">The double pointer to convert to a std::vector.</param>
 	/// <param name="arraySize">The size of the double pointer array.</param>
 	template <typename Type> std::vector<Type *> ConvertDoublePointerToVectorOfPointers(Type **arrayOfType, size_t arraySize) {
-		std::unique_ptr<Type *[]> doublePointerArray;
-		doublePointerArray.reset(arrayOfType);
+		std::unique_ptr<Type *[]> doublePointerArray = std::unique_ptr<Type *[]>(arrayOfType);
 		std::vector<Type *> outputVector;
 		for (size_t i = 0; i < arraySize; ++i) {
 			outputVector.emplace_back(doublePointerArray[i]);

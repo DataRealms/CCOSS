@@ -46,6 +46,109 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/// <summary>
+	/// Initializes all the essential managers.
+	/// </summary>
+	void InitializeManagers() {
+		Reader settingsReader("Base.rte/Settings.ini", false, nullptr, true);
+		g_SettingsMan.Initialize(settingsReader);
+
+		g_LuaMan.Initialize();
+		g_NetworkServer.Initialize();
+		g_NetworkClient.Initialize();
+		g_TimerMan.Initialize();
+		g_PerformanceMan.Initialize();
+		g_FrameMan.Initialize();
+		g_PostProcessMan.Initialize();
+
+		if (g_AudioMan.Initialize()) { g_GUISound.Initialize(); }
+
+		g_UInputMan.Initialize();
+		g_ConsoleMan.Initialize();
+		g_MovableMan.Initialize();
+		g_MetaMan.Initialize();
+		g_MenuMan.Initialize();
+
+		// Overwrite Settings.ini after all the managers are created to fully populate the file. Up until this moment Settings.ini is populated only with minimal required properties to run.
+		// If Settings.ini already exists and is fully populated, this will deal with overwriting it to apply any overrides performed by the managers at boot (e.g resolution validation).
+		if (g_SettingsMan.SettingsNeedOverwrite()) { g_SettingsMan.UpdateSettingsFile(); }
+
+		g_FrameMan.PrintForcedGfxDriverMessage();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/// <summary>
+	/// Destroys all the managers and frees all loaded data before termination.
+	/// </summary>
+	void DestroyManagers() {
+		g_NetworkClient.Destroy();
+		g_NetworkServer.Destroy();
+		g_MetaMan.Destroy();
+		g_MovableMan.Destroy();
+		g_SceneMan.Destroy();
+		g_ActivityMan.Destroy();
+		g_GUISound.Destroy();
+		g_AudioMan.Destroy();
+		g_PresetMan.Destroy();
+		g_UInputMan.Destroy();
+		g_FrameMan.Destroy();
+		g_TimerMan.Destroy();
+		g_LuaMan.Destroy();
+		ContentFile::FreeAllLoaded();
+		g_ConsoleMan.Destroy();
+
+#ifdef DEBUG_BUILD
+		Entity::ClassInfo::DumpPoolMemoryInfo(Writer("MemCleanupInfo.txt"));
+#endif
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/// <summary>
+	/// Command-line argument handling.
+	/// </summary>
+	/// <param name="argCount">Argument count.</param>
+	/// <param name="argValue">Argument values.</param>
+	void HandleMainArgs(int argCount, char **argValue) {
+		// Discard the first argument because it's always the executable path/name
+		argCount--;
+		argValue++;
+		if (argCount == 0) {
+			return;
+		}
+		bool launchModeSet = false;
+		bool singleModuleSet = false;
+
+		for (int i = 0; i < argCount;) {
+			std::string currentArg = argValue[i];
+			bool lastArg = i + 1 == argCount;
+
+			if (currentArg == "-cout") { System::EnableLoggingToCLI(); }
+
+			if (!lastArg && !singleModuleSet && currentArg == "-module") {
+				std::string moduleToLoad = argValue[++i];
+				if (moduleToLoad.find(System::GetModulePackageExtension()) == moduleToLoad.length() - System::GetModulePackageExtension().length()) {
+					g_PresetMan.SetSingleModuleToLoad(moduleToLoad);
+					singleModuleSet = true;
+				}
+			}
+			if (!launchModeSet) {
+				if (currentArg == "-server") {
+					g_NetworkServer.EnableServerMode();
+					g_NetworkServer.SetServerPort(!lastArg ? argValue[++i] : "8000");
+					launchModeSet = true;
+				} else if (!lastArg && currentArg == "-editor") {
+					g_ActivityMan.SetEditorToLaunch(argValue[++i]);
+					launchModeSet = true;
+				}
+			}
+			++i;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/// <summary>
 	/// Game menus loop.
 	/// </summary>
 	void RunMenuLoop() {
@@ -147,11 +250,9 @@ namespace RTE {
 
 			if (g_NetworkServer.IsServerModeEnabled()) {
 				// Pause sim while we're waiting for scene transmission or scene will start changing before clients receive them and those changes will be lost.
-				if (!g_NetworkServer.ReadyForSimulation()) {
-					g_TimerMan.PauseSim(true);
-				} else {
-					if (g_ActivityMan.IsInActivity()) { g_TimerMan.PauseSim(false); }
-				}
+				//g_TimerMan.PauseSim(g_NetworkServer.ReadyForSimulation() ? !g_ActivityMan.IsInActivity() : true);
+				g_TimerMan.PauseSim(!(g_NetworkServer.ReadyForSimulation() && g_ActivityMan.IsInActivity()));
+
 				if (!serverUpdated) { g_NetworkServer.Update(); }
 
 				if (g_NetworkServer.GetServerSimSleepWhenIdle()) {
@@ -167,50 +268,6 @@ namespace RTE {
 			g_FrameMan.FlipFrameBuffers();
 		}
 	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/// <summary>
-	/// Command-line argument handling.
-	/// </summary>
-	/// <param name="argCount">Argument count.</param>
-	/// <param name="argValue">Argument values.</param>
-	void HandleMainArgs(int argCount, char **argValue) {
-		// Discard the first argument because it's always the executable path/name
-		argCount--;
-		argValue++;
-		if (argCount == 0) {
-			return;
-		}
-		bool launchModeSet = false;
-		bool singleModuleSet = false;
-
-		for (int i = 0; i < argCount;) {
-			std::string currentArg = argValue[i];
-			bool lastArg = i + 1 == argCount;
-
-			if (currentArg == "-cout") { System::EnableLoggingToCLI(); }
-
-			if (!lastArg && !singleModuleSet && currentArg == "-module") {
-				std::string moduleToLoad = argValue[++i];
-				if (moduleToLoad.find(System::GetModulePackageExtension()) == moduleToLoad.length() - System::GetModulePackageExtension().length()) {
-					g_PresetMan.SetSingleModuleToLoad(moduleToLoad);
-					singleModuleSet = true;
-				}
-			}
-			if (!launchModeSet) {
-				if (currentArg == "-server") {
-					g_NetworkServer.EnableServerMode();
-					g_NetworkServer.SetServerPort(!lastArg ? argValue[++i] : "8000");
-					launchModeSet = true;
-				} else if (!lastArg && currentArg == "-editor") {
-					g_ActivityMan.SetEditorToLaunch(argValue[++i]);
-					launchModeSet = true;
-				}
-			}
-			++i;
-		}
-	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -222,42 +279,18 @@ int main(int argc, char **argv) {
 	set_config_file("Base.rte/AllegroConfig.txt");
 	allegro_init();
 	loadpng_init();
-
-	// Enable the exit button on the window
-	LOCK_FUNCTION(System::WindowCloseButtonHandler);
 	set_close_button_callback(System::WindowCloseButtonHandler);
 
 	System::Initialize();
 	SeedRNG();
 
-	///////////////////////////////////////////////////////////////////
-	// Create the essential managers
-
-	Reader settingsReader("Base.rte/Settings.ini", false, nullptr, true);
-	g_SettingsMan.Initialize(settingsReader);
-
-	g_LuaMan.Initialize();
-	g_NetworkServer.Initialize();
-	g_NetworkClient.Initialize();
-	g_TimerMan.Initialize();
-	g_PerformanceMan.Initialize();
-	g_FrameMan.Initialize();
-	g_PostProcessMan.Initialize();
-	if (g_AudioMan.Initialize() >= 0) {
-		g_GUISound.Initialize();
-	}
-	g_UInputMan.Initialize();
-	g_ConsoleMan.Initialize();
-	g_MovableMan.Initialize();
-	g_MetaMan.Initialize();
-	g_MenuMan.Initialize();
+	InitializeManagers();
 
 	HandleMainArgs(argc, argv);
 
-	///////////////////////////////////////////////////////////////////
-	// Main game driver
-
-	g_FrameMan.PrintForcedGfxDriverMessage();
+	g_PresetMan.LoadAllDataModules();
+	// Load the different input device icons. This can't be done during UInputMan::Create() because the icon presets don't exist so we need to do this after modules are loaded.
+	g_UInputMan.LoadDeviceIcons();
 
 	if (g_ConsoleMan.LoadWarningsExist()) {
 		g_ConsoleMan.PrintString("WARNING: References to files that could not be located or failed to load detected during module loading!\nSee \"LogLoadingWarning.txt\" for a list of bad references.");
@@ -272,29 +305,7 @@ int main(int argc, char **argv) {
 	if (!g_ActivityMan.Initialize()) { RunMenuLoop(); }
 	RunGameLoop();
 
-	///////////////////////////////////////////////////////////////////
-	// Clean up
-
-	g_NetworkClient.Destroy();
-	g_NetworkServer.Destroy();
-	g_MetaMan.Destroy();
-	g_MovableMan.Destroy();
-	g_SceneMan.Destroy();
-	g_ActivityMan.Destroy();
-	g_GUISound.Destroy();
-	g_AudioMan.Destroy();
-	g_PresetMan.Destroy();
-	g_UInputMan.Destroy();
-	g_FrameMan.Destroy();
-	g_TimerMan.Destroy();
-	g_LuaMan.Destroy();
-	ContentFile::FreeAllLoaded();
-	g_ConsoleMan.Destroy();
-
-#ifdef DEBUG_BUILD
-	Entity::ClassInfo::DumpPoolMemoryInfo(Writer("MemCleanupInfo.txt"));
-#endif
-
+	DestroyManagers();
 	return 0;
 }
 

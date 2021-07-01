@@ -142,7 +142,7 @@ namespace RTE {
 		INPUT_COUNT
 	};
 
-	static const std::array<std::string, InputElements::INPUT_COUNT> c_InputElementNames = {
+	static const std::array<const std::string_view, InputElements::INPUT_COUNT> c_InputElementNames = {
 		"Move Up",			// INPUT_L_UP
 		"Move Down",		// INPUT_L_DOWN
 		"Move Left",		// INPUT_L_LEFT

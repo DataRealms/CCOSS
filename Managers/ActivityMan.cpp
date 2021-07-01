@@ -45,10 +45,10 @@ namespace RTE {
 	bool ActivityMan::Initialize() {
 		if (g_NetworkServer.IsServerModeEnabled()) {
 			return SetStartMultiplayerServerOverview();
-		} else if (LaunchIntoEditor()) {
+		} else if (IsSetToLaunchIntoEditor()) {
 			// Evaluate LaunchIntoEditor before LaunchIntoActivity so it takes priority when both are set, otherwise it is ignored and editor is never launched.
 			return SetStartEditorActivitySetToLaunchInto();
-		} else if (LaunchIntoActivity()) {
+		} else if (IsSetToLaunchIntoActivity()) {
 			m_RestartActivity = true;
 			return true;
 		}

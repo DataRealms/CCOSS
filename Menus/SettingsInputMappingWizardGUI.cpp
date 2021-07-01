@@ -185,7 +185,7 @@ namespace RTE {
 		}
 		m_WizardManualConfigScreen.ConfigDeviceTypeLabel->SetText(inputDeviceName);
 
-		// Use GUIInput class for better key detection
+		// Use GUIInput class for better key detection.
 		g_UInputMan.SetInputClass(m_GUIControlManager->GetManager()->GetInputController());
 
 		ResetManualConfigSequence();

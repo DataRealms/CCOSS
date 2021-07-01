@@ -45,7 +45,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int AudioMan::Initialize() {
+	bool AudioMan::Initialize() {
 		FMOD_RESULT audioSystemSetupResult = FMOD::System_Create(&m_AudioSystem);
 
 		FMOD_ADVANCEDSETTINGS audioSystemAdvancedSettings;
@@ -73,7 +73,7 @@ namespace RTE {
 		m_AudioEnabled = audioSystemSetupResult == FMOD_OK;
 
 		if (!m_AudioEnabled) {
-			return -1;
+			return false;
 		}
 
 		if (m_MuteSounds) { SetSoundsMuted(); }
@@ -85,7 +85,7 @@ namespace RTE {
 		SetMusicVolume(m_MusicVolume);
 		SetMasterVolume(m_MasterVolume);
 
-		return 0;
+		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

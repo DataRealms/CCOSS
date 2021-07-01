@@ -36,7 +36,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int GUISound::Initialize() {
+	void GUISound::Initialize() {
 		// Interface sounds should not be pitched to reinforce the appearance of time decoupling between simulation and UI.
 
 		m_SplashSound.Create("Base.rte/Sounds/GUIs/MetaStart.flac", true, false);
@@ -111,7 +111,5 @@ namespace RTE {
 		m_PlacementGravel.GetTopLevelSoundSet().AddSound("Base.rte/Sounds/GUIs/PlacementGravel2.flac", true);
 		m_PlacementGravel.GetTopLevelSoundSet().AddSound("Base.rte/Sounds/GUIs/PlacementGravel3.flac", true);
 		m_PlacementGravel.GetTopLevelSoundSet().AddSound("Base.rte/Sounds/GUIs/PlacementGravel4.flac", true);
-
-		return 0;
 	}
 }

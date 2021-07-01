@@ -27,7 +27,7 @@ namespace RTE {
 		/// </summary>
 		enum class MainMenuUpdateResult {
 			NoEvent,
-			CampaignStarted,
+			MetaGameStarted,
 			ScenarioStarted,
 			EnterCreditsScreen,
 			BackToMainFromCredits,
@@ -71,7 +71,7 @@ namespace RTE {
 		/// </summary>
 		enum MenuScreen {
 			MainScreen,
-			CampaignNoticeScreen,
+			MetaGameNoticeScreen,
 			SettingsScreen,
 			ModManagerScreen,
 			EditorScreen,
@@ -84,7 +84,7 @@ namespace RTE {
 		/// Enumeration for all the different buttons of the main menu and sub-menus.
 		/// </summary>
 		enum MenuButton {
-			CampaignButton,
+			MetaGameButton,
 			ScenarioButton,
 			MultiplayerButton,
 			SettingsButton,
@@ -95,7 +95,7 @@ namespace RTE {
 			ResumeButton,
 			BackToMainButton,
 			PlayTutorialButton,
-			CampaignContinueButton,
+			MetaGameContinueButton,
 			QuitConfirmButton,
 			QuitCancelButton,
 			SceneEditorButton,
@@ -114,7 +114,7 @@ namespace RTE {
 		MenuScreen m_ActiveMenuScreen; //!< The currently active menu screen that is being updated and drawn to the screen. See MenuScreen enumeration.
 		MainMenuUpdateResult m_UpdateResult; //!< The result of the MainMenuGUI update. See MainMenuUpdateResult enumeration.
 		bool m_MenuScreenChange; //!< Whether the active menu screen was changed and a different one needs to be shown.
-		bool m_CampaignNoticeShown; //!< Whether the campaign notice and tutorial offer have been shown to the player.
+		bool m_MetaGameNoticeShown; //!< Whether the MetaGame notice and tutorial offer have been shown to the player.
 
 		Timer m_ResumeButtonBlinkTimer; //!< Activity resume button blink timer.
 		Timer m_CreditsScrollTimer; //!< Credits scrolling timer.
@@ -145,9 +145,9 @@ namespace RTE {
 		void CreateMainScreen();
 
 		/// <summary>
-		/// Creates all the elements that compose the campaign notice menu screen.
+		/// Creates all the elements that compose the MetaGame notice menu screen.
 		/// </summary>
-		void CreateCampaignNoticeScreen();
+		void CreateMetaGameNoticeScreen();
 
 		/// <summary>
 		/// Creates all the elements that compose the editor selection menu screen.
@@ -184,9 +184,9 @@ namespace RTE {
 		void ShowMainScreen();
 
 		/// <summary>
-		/// Makes the campaign notice menu screen visible to be interacted with by the player.
+		/// Makes the MetaGame notice menu screen visible to be interacted with by the player.
 		/// </summary>
-		void ShowCampaignNoticeScreen();
+		void ShowMetaGameNoticeScreen();
 
 		/// <summary>
 		/// Makes the editor selection menu screen visible to be interacted with by the player.
@@ -235,10 +235,10 @@ namespace RTE {
 		void HandleMainScreenInputEvents(const GUIControl *guiEventControl);
 
 		/// <summary>
-		/// Handles the player interaction with the campaign notice screen GUI elements.
+		/// Handles the player interaction with the MetaGame notice screen GUI elements.
 		/// </summary>
 		/// <param name="guiEventControl">Pointer to the GUI element that the player interacted with.</param>
-		void HandleCampaignNoticeScreenInputEvents(const GUIControl *guiEventControl);
+		void HandleMetaGameNoticeScreenInputEvents(const GUIControl *guiEventControl);
 
 		/// <summary>
 		/// Handles the player interaction with the editor selection screen GUI elements.

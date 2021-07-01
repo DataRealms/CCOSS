@@ -32,13 +32,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsMiscGUI::SetEnabled(bool enable) const {
-		if (enable) {
-			m_MiscSettingsBox->SetVisible(true);
-			m_MiscSettingsBox->SetEnabled(true);
-		} else {
-			m_MiscSettingsBox->SetVisible(false);
-			m_MiscSettingsBox->SetEnabled(false);
-		}
+		m_MiscSettingsBox->SetVisible(enable);
+		m_MiscSettingsBox->SetEnabled(enable);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

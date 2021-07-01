@@ -69,7 +69,7 @@ namespace RTE {
 			MenusDisabled,
 			MainMenuActive,
 			ScenarioMenuActive,
-			CampaignMenuActive
+			MetaGameMenuActive
 		};
 
 		ActiveMenu m_ActiveMenu; //!< The currently active menu screen that is being updated and drawn. See ActiveMenu enumeration.
@@ -100,10 +100,10 @@ namespace RTE {
 		void UpdateScenarioMenu() const;
 
 		/// <summary>
-		/// Updates the campaign menu screen and handles the update results.
+		/// Updates the MetaGame menu screen and handles the update results.
 		/// </summary>
-		/// <returns>Whether the program was set to be terminated by the user through the campaign menu screen.</returns>
-		bool UpdateCampaignMenu() const;
+		/// <returns>Whether the program was set to be terminated by the user through the MetaGame menu screen.</returns>
+		bool UpdateMetaGameMenu() const;
 #pragma endregion
 
 		// Disallow the use of some implicit methods.

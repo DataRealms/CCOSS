@@ -108,16 +108,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsVideoGUI::SetEnabled(bool enable) const {
-		if (enable) {
-			m_VideoSettingsBox->SetVisible(true);
-			m_VideoSettingsBox->SetEnabled(true);
+		m_VideoSettingsBox->SetVisible(enable);
+		m_VideoSettingsBox->SetEnabled(enable);
 
-			if (m_CustomResolutionWidthTextBox->GetText().empty()) { m_CustomResolutionWidthTextBox->SetText(std::to_string(g_FrameMan.GetResX())); }
-			if (m_CustomResolutionHeightTextBox->GetText().empty()) { m_CustomResolutionHeightTextBox->SetText(std::to_string(g_FrameMan.GetResY())); }
-		} else {
-			m_VideoSettingsBox->SetVisible(false);
-			m_VideoSettingsBox->SetEnabled(false);
-		}
+		if (m_CustomResolutionWidthTextBox->GetText().empty()) { m_CustomResolutionWidthTextBox->SetText(std::to_string(g_FrameMan.GetResX())); }
+		if (m_CustomResolutionHeightTextBox->GetText().empty()) { m_CustomResolutionHeightTextBox->SetText(std::to_string(g_FrameMan.GetResY())); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -195,7 +190,7 @@ namespace RTE {
 
 		for (int i = 0; i < m_PresetResolutions.size(); ++i) {
 			const PresetResolutionRecord &resRecord = m_PresetResolutions.at(i);
-			m_PresetResolutionComboBox->AddItem(resRecord.MakeResolutionString());
+			m_PresetResolutionComboBox->AddItem(resRecord.GetDisplayString());
 			if (m_PresetResolutionComboBox->GetSelectedIndex() < 0 && (resRecord.Width == g_FrameMan.GetResX() * g_FrameMan.GetResMultiplier()) && (resRecord.Height == g_FrameMan.GetResY() * g_FrameMan.GetResMultiplier()) && (resRecord.Upscaled == g_FrameMan.GetResMultiplier() > 1)) {
 				m_PresetResolutionComboBox->SetSelectedIndex(i);
 			}

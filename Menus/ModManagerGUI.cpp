@@ -52,7 +52,6 @@ namespace RTE {
 
 	void ModManagerGUI::PopulateKnownModsList() {
 		for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i) {
-			// Discard official modules
 			if (i >= g_PresetMan.GetOfficialModuleCount() && i < g_PresetMan.GetTotalModuleCount() - 2) {
 				if (const DataModule *dataModule = g_PresetMan.GetDataModule(i)) {
 					ModRecord modRecord = { dataModule->GetFileName(), dataModule->GetFriendlyName(), dataModule->GetDescription(), g_SettingsMan.IsModDisabled(dataModule->GetFileName()) };
@@ -77,7 +76,7 @@ namespace RTE {
 		std::sort(m_KnownMods.begin(), m_KnownMods.end());
 
 		for (int i = 0; i < m_KnownMods.size(); i++) {
-			m_ModsListBox->AddItem(m_KnownMods.at(i).MakeModString(), std::string(), nullptr, nullptr, i);
+			m_ModsListBox->AddItem(m_KnownMods.at(i).GetDisplayString(), std::string(), nullptr, nullptr, i);
 		}
 		m_ModsListBox->ScrollToTop();
 	}
@@ -97,7 +96,7 @@ namespace RTE {
 		std::sort(m_KnownScripts.begin(), m_KnownScripts.end());
 
 		for (int i = 0; i < m_KnownScripts.size(); i++) {
-			m_ScriptsListBox->AddItem(m_KnownScripts.at(i).MakeScriptString(), std::string(), nullptr, nullptr, i);
+			m_ScriptsListBox->AddItem(m_KnownScripts.at(i).GetDisplayString(), std::string(), nullptr, nullptr, i);
 		}
 		m_ScriptsListBox->ScrollToTop();
 	}
@@ -123,7 +122,7 @@ namespace RTE {
 				m_ToggleModButton->SetText("Disable Mod");
 				disabledModsList.at(modRecord.ModulePath) = false;
 			}
-			selectedItem->m_Name = modRecord.MakeModString();
+			selectedItem->m_Name = modRecord.GetDisplayString();
 			m_ModsListBox->SetSelectedIndex(index);
 			m_ModsListBox->Invalidate();
 			g_GUISound.ItemChangeSound()->Play();
@@ -151,7 +150,7 @@ namespace RTE {
 				m_ToggleScriptButton->SetText("Enable Script");
 				enabledScriptList.at(scriptRecord.PresetName) = false;
 			}
-			selectedItem->m_Name = scriptRecord.MakeScriptString();
+			selectedItem->m_Name = scriptRecord.GetDisplayString();
 			m_ScriptsListBox->SetSelectedIndex(index);
 			m_ScriptsListBox->Invalidate();
 			g_GUISound.ItemChangeSound()->Play();

@@ -58,9 +58,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsInputMappingGUI::SetEnabled(bool enable, int player) {
+		m_InputMappingSettingsBox->SetVisible(enable);
+		m_InputMappingSettingsBox->SetEnabled(enable);
+
 		if (enable) {
-			m_InputMappingSettingsBox->SetVisible(true);
-			m_InputMappingSettingsBox->SetEnabled(true);
 			m_InputMappingSettingsLabel->SetText("P L A Y E R   " + std::to_string(player + 1) + "   I N P U T   M A P P I N G");
 			m_ConfiguringPlayer = static_cast<Players>(player);
 			m_ConfiguringPlayerInputScheme = g_UInputMan.GetControlScheme(player);
@@ -69,8 +70,6 @@ namespace RTE {
 			UpdateScrollingInputBoxScrollPosition();
 			UpdateMappingButtonLabels();
 		} else {
-			m_InputMappingSettingsBox->SetVisible(false);
-			m_InputMappingSettingsBox->SetEnabled(false);
 			m_ConfiguringPlayer = Players::NoPlayer;
 			m_ConfiguringPlayerInputScheme = nullptr;
 		}

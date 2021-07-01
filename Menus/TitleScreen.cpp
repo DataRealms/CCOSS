@@ -409,14 +409,14 @@ namespace RTE {
 				}
 				break;
 			case TitleTransition::ScenarioMenu:
-			case TitleTransition::CampaignMenu:
+			case TitleTransition::MetaGameMenu:
 				if (m_SectionSwitch) {
 					m_SectionSwitch = false;
 					m_ScrollOffset.SetY(m_PlanetViewScrollOffsetY);
 				}
 				break;
 			case TitleTransition::MainMenuToScenario:
-			case TitleTransition::MainMenuToCampaign:
+			case TitleTransition::MainMenuToMetaGame:
 				if (m_SectionSwitch) {
 					SetSectionDurationAndResetSwitch(1.0F * g_SettingsMan.GetMenuTransitionDurationMultiplier());
 					g_GUISound.SplashSound()->Play();
@@ -424,7 +424,7 @@ namespace RTE {
 				}
 				m_ScrollOffset.SetY(EaseOut(0, m_PlanetViewScrollOffsetY, m_SectionProgress));
 				m_GameLogo.SetPos(Vector(static_cast<float>(g_FrameMan.GetResX() / 2), EaseOut(m_GameLogoMainMenuOffsetY, m_GameLogoPlanetViewOffsetY, m_SectionProgress)));
-				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState((m_TitleTransitionState == TitleTransition::MainMenuToScenario) ? TitleTransition::ScenarioMenu : TitleTransition::CampaignMenu); }
+				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState((m_TitleTransitionState == TitleTransition::MainMenuToScenario) ? TitleTransition::ScenarioMenu : TitleTransition::MetaGameMenu); }
 				break;
 			case TitleTransition::PlanetToMainMenu:
 				if (m_SectionSwitch) {
@@ -447,7 +447,7 @@ namespace RTE {
 				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState(TitleTransition::MainMenu); }
 				break;
 			case TitleTransition::ScenarioFadeIn:
-			case TitleTransition::CampaignFadeIn:
+			case TitleTransition::MetaGameFadeIn:
 				if (m_SectionSwitch) {
 					SetSectionDurationAndResetSwitch(0.75F * g_SettingsMan.GetMenuTransitionDurationMultiplier());
 					m_ScrollOffset.SetY(m_PlanetViewScrollOffsetY);
@@ -457,7 +457,7 @@ namespace RTE {
 				}
 				g_AudioMan.SetTempMusicVolume(EaseOut(0, 1.0F, m_SectionProgress));
 				m_FadeAmount = static_cast<int>(LERP(0, 1.0F, 255.0F, 0, m_SectionProgress));
-				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState((m_TitleTransitionState == TitleTransition::ScenarioFadeIn) ? TitleTransition::ScenarioMenu : TitleTransition::CampaignMenu); }
+				if (m_SectionElapsedTime >= m_SectionDuration) { SetTitleTransitionState((m_TitleTransitionState == TitleTransition::ScenarioFadeIn) ? TitleTransition::ScenarioMenu : TitleTransition::MetaGameMenu); }
 				break;
 			case TitleTransition::FadeOut:
 				if (m_SectionSwitch) { SetSectionDurationAndResetSwitch(0.75F * g_SettingsMan.GetMenuTransitionDurationMultiplier()); }

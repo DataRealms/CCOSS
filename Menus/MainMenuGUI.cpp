@@ -26,7 +26,7 @@ namespace RTE {
 		m_ActiveMenuScreen = MenuScreen::ScreenCount;
 		m_UpdateResult = MainMenuUpdateResult::NoEvent;
 		m_MenuScreenChange = false;
-		m_CampaignNoticeShown = false;
+		m_MetaGameNoticeShown = false;
 
 		m_ResumeButtonBlinkTimer.Reset();
 		m_CreditsScrollTimer.Reset();
@@ -67,7 +67,7 @@ namespace RTE {
 		m_MainMenuButtons.at(MenuButton::BackToMainButton)->CenterInParent(true, false);
 
 		CreateMainScreen();
-		CreateCampaignNoticeScreen();
+		CreateMetaGameNoticeScreen();
 		CreateEditorsScreen();
 		CreateCreditsScreen();
 		CreateQuitScreen();
@@ -85,8 +85,7 @@ namespace RTE {
 		m_MainMenuScreens.at(MenuScreen::MainScreen) = dynamic_cast<GUICollectionBox *>(m_MainMenuScreenGUIControlManager->GetControl("MainScreen"));
 		m_MainMenuScreens.at(MenuScreen::MainScreen)->CenterInParent(true, false);
 
-		m_MainMenuButtons.at(MenuButton::CampaignButton) = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToCampaign"));
-		m_MainMenuButtons.at(MenuButton::CampaignButton)->SetText("MetaGame");
+		m_MainMenuButtons.at(MenuButton::MetaGameButton) = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToMetaGame"));
 		m_MainMenuButtons.at(MenuButton::ScenarioButton) = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToSkirmish"));
 		m_MainMenuButtons.at(MenuButton::MultiplayerButton) = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToMultiplayer"));
 		m_MainMenuButtons.at(MenuButton::SettingsButton) = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToOptions"));
@@ -114,12 +113,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::CreateCampaignNoticeScreen() {
-		m_MainMenuScreens.at(MenuScreen::CampaignNoticeScreen) = dynamic_cast<GUICollectionBox *>(m_SubMenuScreenGUIControlManager->GetControl("MetaScreen"));
-		m_MainMenuScreens.at(MenuScreen::CampaignNoticeScreen)->CenterInParent(true, false);
+	void MainMenuGUI::CreateMetaGameNoticeScreen() {
+		m_MainMenuScreens.at(MenuScreen::MetaGameNoticeScreen) = dynamic_cast<GUICollectionBox *>(m_SubMenuScreenGUIControlManager->GetControl("MetaScreen"));
+		m_MainMenuScreens.at(MenuScreen::MetaGameNoticeScreen)->CenterInParent(true, false);
 
 		m_MainMenuButtons.at(MenuButton::PlayTutorialButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("ButtonTutorial"));
-		m_MainMenuButtons.at(MenuButton::CampaignContinueButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("ButtonContinue"));
+		m_MainMenuButtons.at(MenuButton::MetaGameContinueButton) = dynamic_cast<GUIButton *>(m_SubMenuScreenGUIControlManager->GetControl("ButtonContinue"));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -211,12 +210,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::ShowCampaignNoticeScreen() {
-		m_MainMenuScreens.at(MenuScreen::CampaignNoticeScreen)->SetVisible(true);
-		m_MainMenuScreens.at(MenuScreen::CampaignNoticeScreen)->GUIPanel::AddChild(m_MainMenuButtons.at(MenuButton::BackToMainButton));
+	void MainMenuGUI::ShowMetaGameNoticeScreen() {
+		m_MainMenuScreens.at(MenuScreen::MetaGameNoticeScreen)->SetVisible(true);
+		m_MainMenuScreens.at(MenuScreen::MetaGameNoticeScreen)->GUIPanel::AddChild(m_MainMenuButtons.at(MenuButton::BackToMainButton));
 
 		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetVisible(true);
-		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetPositionAbs((g_FrameMan.GetResX() - m_MainMenuButtons.at(MenuButton::BackToMainButton)->GetWidth()) / 2, m_MainMenuButtons.at(MenuButton::CampaignContinueButton)->GetYPos() + 25);
+		m_MainMenuButtons.at(MenuButton::BackToMainButton)->SetPositionAbs((g_FrameMan.GetResX() - m_MainMenuButtons.at(MenuButton::BackToMainButton)->GetWidth()) / 2, m_MainMenuButtons.at(MenuButton::MetaGameContinueButton)->GetYPos() + 25);
 
 		GUILabel *metaNoticeLabel = dynamic_cast<GUILabel *>(m_SubMenuScreenGUIControlManager->GetControl("MetaLabel"));
 
@@ -231,7 +230,7 @@ namespace RTE {
 		metaNoticeLabel->SetVisible(true);
 
 		// Flag that this notice has now been shown once, so no need to keep showing it
-		m_CampaignNoticeShown = true;
+		m_MetaGameNoticeShown = true;
 
 		m_MenuScreenChange = false;
 	}
@@ -326,8 +325,8 @@ namespace RTE {
 				backToMainMenu = HandleInputEvents();
 				ShowAndBlinkResumeButton();
 				break;
-			case MenuScreen::CampaignNoticeScreen:
-				if (m_MenuScreenChange) { ShowCampaignNoticeScreen(); }
+			case MenuScreen::MetaGameNoticeScreen:
+				if (m_MenuScreenChange) { ShowMetaGameNoticeScreen(); }
 				backToMainMenu = HandleInputEvents();
 				break;
 			case MenuScreen::SettingsScreen:
@@ -414,8 +413,8 @@ namespace RTE {
 					case MenuScreen::MainScreen:
 						HandleMainScreenInputEvents(guiEvent.GetControl());
 						break;
-					case MenuScreen::CampaignNoticeScreen:
-						HandleCampaignNoticeScreenInputEvents(guiEvent.GetControl());
+					case MenuScreen::MetaGameNoticeScreen:
+						HandleMetaGameNoticeScreenInputEvents(guiEvent.GetControl());
 						break;
 					case MenuScreen::EditorScreen:
 						HandleEditorsScreenInputEvents(guiEvent.GetControl());
@@ -434,11 +433,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MainMenuGUI::HandleMainScreenInputEvents(const GUIControl *guiEventControl) {
-		if (guiEventControl == m_MainMenuButtons.at(MenuButton::CampaignButton)) {
-			if (!m_CampaignNoticeShown) {
-				SetActiveMenuScreen(MenuScreen::CampaignNoticeScreen);
+		if (guiEventControl == m_MainMenuButtons.at(MenuButton::MetaGameButton)) {
+			if (!m_MetaGameNoticeShown) {
+				SetActiveMenuScreen(MenuScreen::MetaGameNoticeScreen);
 			} else {
-				m_UpdateResult = MainMenuUpdateResult::CampaignStarted;
+				m_UpdateResult = MainMenuUpdateResult::MetaGameStarted;
 				SetActiveMenuScreen(MenuScreen::MainScreen);
 			}
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::ScenarioButton)) {
@@ -466,12 +465,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void MainMenuGUI::HandleCampaignNoticeScreenInputEvents(const GUIControl *guiEventControl) {
+	void MainMenuGUI::HandleMetaGameNoticeScreenInputEvents(const GUIControl *guiEventControl) {
 		if (guiEventControl == m_MainMenuButtons.at(MenuButton::PlayTutorialButton)) {
 			m_UpdateResult = MainMenuUpdateResult::ActivityStarted;
 			SetActiveMenuScreen(MenuScreen::MainScreen);
-		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::CampaignContinueButton)) {
-			m_UpdateResult = MainMenuUpdateResult::CampaignStarted;
+		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::MetaGameContinueButton)) {
+			m_UpdateResult = MainMenuUpdateResult::MetaGameStarted;
 			SetActiveMenuScreen(MenuScreen::MainScreen);
 		}
 	}
@@ -514,7 +513,7 @@ namespace RTE {
 
 	void MainMenuGUI::Draw() {
 		// Early return to avoid single frame flicker when title screen goes into transition from the meta notice screen to meta config screen.
-		if (m_UpdateResult == MainMenuUpdateResult::CampaignStarted) {
+		if (m_UpdateResult == MainMenuUpdateResult::MetaGameStarted) {
 			return;
 		}
 		switch (m_ActiveMenuScreen) {

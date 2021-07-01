@@ -101,16 +101,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ScenarioActivityConfigGUI::SetEnabled(bool enable, const Activity *selectedActivity, Scene *selectedScene) {
+		m_ActivityConfigBox->SetEnabled(enable);
+		m_ActivityConfigBox->SetVisible(enable);
+
 		if (enable) {
 			m_SelectedActivity = dynamic_cast<const GameActivity *>(selectedActivity);
 			m_SelectedScene = selectedScene;
 			RTEAssert(m_SelectedActivity && m_SelectedScene, "Trying to start a scenario game without an Activity or a Scene!");
-
-			m_ActivityConfigBox->SetEnabled(true);
-			m_ActivityConfigBox->SetVisible(true);
 		} else {
-			m_ActivityConfigBox->SetEnabled(false);
-			m_ActivityConfigBox->SetVisible(false);
 			m_SelectedActivity = nullptr;
 			m_SelectedScene = nullptr;
 		}

@@ -37,13 +37,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsAudioGUI::SetEnabled(bool enable) const {
-		if (enable) {
-			m_AudioSettingsBox->SetVisible(true);
-			m_AudioSettingsBox->SetEnabled(true);
-		} else {
-			m_AudioSettingsBox->SetVisible(false);
-			m_AudioSettingsBox->SetEnabled(false);
-		}
+		m_AudioSettingsBox->SetVisible(enable);
+		m_AudioSettingsBox->SetEnabled(enable);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

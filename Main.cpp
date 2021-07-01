@@ -235,7 +235,7 @@ namespace RTE {
 				if (!g_ActivityMan.IsInActivity()) {
 					g_TimerMan.PauseSim(true);
 					if (g_MetaMan.GameInProgress()) {
-						g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::CampaignFadeIn);
+						g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::MetaGameFadeIn);
 					} else {
 						const Activity *activity = g_ActivityMan.GetActivity();
 						// If we edited something then return to main menu instead of scenario menu.
@@ -258,7 +258,6 @@ namespace RTE {
 
 			if (g_NetworkServer.IsServerModeEnabled()) {
 				// Pause sim while we're waiting for scene transmission or scene will start changing before clients receive them and those changes will be lost.
-				//g_TimerMan.PauseSim(g_NetworkServer.ReadyForSimulation() ? !g_ActivityMan.IsInActivity() : true);
 				g_TimerMan.PauseSim(!(g_NetworkServer.ReadyForSimulation() && g_ActivityMan.IsInActivity()));
 
 				if (!serverUpdated) { g_NetworkServer.Update(); }

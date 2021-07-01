@@ -25,7 +25,7 @@ namespace RTE {
 			m_PlayerInputSettingsBoxes.at(player).ConfigureControlsButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonP" + playerNum + "Config"));
 			m_PlayerInputSettingsBoxes.at(player).ResetControlsButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonP" + playerNum + "Clear"));
 
-			m_PlayerInputSettingsBoxes.at(player).SensitivtyLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelP" + playerNum + "Sensitivity"));
+			m_PlayerInputSettingsBoxes.at(player).SensitivityLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelP" + playerNum + "Sensitivity"));
 			m_PlayerInputSettingsBoxes.at(player).SensitivitySlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderP" + playerNum + "Sensitivity"));
 
 			m_PlayerInputSettingsBoxes.at(player).DeadZoneControlsBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxP" + playerNum + "DeadzoneControls"));
@@ -42,13 +42,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsInputGUI::SetEnabled(bool enable) const {
-		if (enable) {
-			m_InputSettingsBox->SetVisible(true);
-			m_InputSettingsBox->SetEnabled(true);
-		} else {
-			m_InputSettingsBox->SetVisible(false);
-			m_InputSettingsBox->SetEnabled(false);
-		}
+		m_InputSettingsBox->SetVisible(enable);
+		m_InputSettingsBox->SetEnabled(enable);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -124,7 +119,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsInputGUI::ShowPlayerInputDeviceSensitivityControls(int player) {
-		m_PlayerInputSettingsBoxes.at(player).SensitivtyLabel->SetVisible(false);
+		m_PlayerInputSettingsBoxes.at(player).SensitivityLabel->SetVisible(false);
 		m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetVisible(false);
 		m_PlayerInputSettingsBoxes.at(player).DeadZoneControlsBox->SetVisible(false);
 
@@ -134,13 +129,13 @@ namespace RTE {
 			case InputDevice::DEVICE_MOUSE_KEYB:
 				// Mouse sensitivity doesn't seem to really work so keep the controls disabled for now, also it's shared between all mouse+keyboard using players.
 				/*
-				m_PlayerInputSettingsBoxes.at(player).SensitivtyLabel->SetVisible(true);
+				m_PlayerInputSettingsBoxes.at(player).SensitivityLabel->SetVisible(true);
 				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetVisible(true);
 				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetMaximum(100);
 				*/
 				break;
 			default:
-				m_PlayerInputSettingsBoxes.at(player).SensitivtyLabel->SetVisible(true);
+				m_PlayerInputSettingsBoxes.at(player).SensitivityLabel->SetVisible(true);
 				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetVisible(true);
 				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetMaximum(50);
 				m_PlayerInputSettingsBoxes.at(player).DeadZoneControlsBox->SetVisible(true);
@@ -160,13 +155,13 @@ namespace RTE {
 				for (int otherPlayer = Players::PlayerOne; otherPlayer < Players::MaxPlayerCount; ++otherPlayer) {
 					if (g_UInputMan.GetControlScheme(otherPlayer)->GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
 						m_PlayerInputSettingsBoxes.at(otherPlayer).SensitivitySlider->SetValue(static_cast<int>(g_UInputMan.GetMouseSensitivity() * 100));
-						m_PlayerInputSettingsBoxes.at(otherPlayer).SensitivtyLabel->SetText("Mouse Sensitivity: " + std::to_string(m_PlayerInputSettingsBoxes.at(otherPlayer).SensitivitySlider->GetValue()));
+						m_PlayerInputSettingsBoxes.at(otherPlayer).SensitivityLabel->SetText("Mouse Sensitivity: " + std::to_string(m_PlayerInputSettingsBoxes.at(otherPlayer).SensitivitySlider->GetValue()));
 					}
 				}
 				break;
 			default:
 				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetValue(static_cast<int>(g_UInputMan.GetControlScheme(player)->GetJoystickDeadzone() * 250));
-				m_PlayerInputSettingsBoxes.at(player).SensitivtyLabel->SetText("Stick Deadzone: " + std::to_string(m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->GetValue()));
+				m_PlayerInputSettingsBoxes.at(player).SensitivityLabel->SetText("Stick Deadzone: " + std::to_string(m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->GetValue()));
 
 				if (g_UInputMan.GetControlScheme(player)->GetJoystickDeadzoneType() == DeadZoneType::CIRCLE) {
 					m_PlayerInputSettingsBoxes.at(player).CircleDeadZoneRadioButton->SetCheck(true);

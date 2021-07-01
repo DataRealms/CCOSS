@@ -64,8 +64,8 @@ namespace RTE {
 			case TitleScreen::TitleTransition::ScenarioMenu:
 				newActiveMenu = ActiveMenu::ScenarioMenuActive;
 				break;
-			case TitleScreen::TitleTransition::CampaignMenu:
-				newActiveMenu = ActiveMenu::CampaignMenuActive;
+			case TitleScreen::TitleTransition::MetaGameMenu:
+				newActiveMenu = ActiveMenu::MetaGameMenuActive;
 				break;
 			default:
 				break;
@@ -77,7 +77,7 @@ namespace RTE {
 				case ActiveMenu::ScenarioMenuActive:
 					m_ScenarioMenu->SetEnabled(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
 					break;
-				case ActiveMenu::CampaignMenuActive:
+				case ActiveMenu::MetaGameMenuActive:
 					g_MetaMan.GetGUI()->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
 					g_MetaMan.GetGUI()->SetEnabled();
 					break;
@@ -102,8 +102,8 @@ namespace RTE {
 			case ActiveMenu::ScenarioMenuActive:
 				UpdateScenarioMenu();
 				break;
-			case ActiveMenu::CampaignMenuActive:
-				quitResult = UpdateCampaignMenu();
+			case ActiveMenu::MetaGameMenuActive:
+				quitResult = UpdateMetaGameMenu();
 				break;
 			default:
 				break;
@@ -126,8 +126,8 @@ namespace RTE {
 
 	bool MenuMan::UpdateMainMenu() const {
 		switch (m_MainMenu->Update()) {
-			case MainMenuGUI::MainMenuUpdateResult::CampaignStarted:
-				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToCampaign);
+			case MainMenuGUI::MainMenuUpdateResult::MetaGameStarted:
+				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToMetaGame);
 				break;
 			case MainMenuGUI::MainMenuUpdateResult::ScenarioStarted:
 				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MainMenuToScenario);
@@ -177,7 +177,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool MenuMan::UpdateCampaignMenu() const {
+	bool MenuMan::UpdateMetaGameMenu() const {
 		g_MetaMan.GetGUI()->SetStationInfo(m_TitleScreen->GetStationPos());
 		g_MetaMan.Update();
 
@@ -213,7 +213,7 @@ namespace RTE {
 			case ActiveMenu::ScenarioMenuActive:
 				m_ScenarioMenu->Draw();
 				break;
-			case ActiveMenu::CampaignMenuActive:
+			case ActiveMenu::MetaGameMenuActive:
 				g_MetaMan.Draw(g_FrameMan.GetBackBuffer32());
 				break;
 			default:

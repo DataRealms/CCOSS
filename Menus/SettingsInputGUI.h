@@ -93,7 +93,7 @@ namespace RTE {
 			GUIButton *PrevDeviceButton;
 			GUIButton *ConfigureControlsButton;
 			GUIButton *ResetControlsButton;
-			GUILabel *SensitivtyLabel;
+			GUILabel *SensitivityLabel;
 			GUISlider *SensitivitySlider;
 			GUICollectionBox *DeadZoneControlsBox;
 			GUIRadioButton *CircleDeadZoneRadioButton;

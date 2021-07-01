@@ -104,10 +104,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsInputMappingWizardGUI::SetEnabled(bool enable, int player, InputScheme *playerScheme) {
+		m_InputWizardScreenBox->SetVisible(enable);
+		m_InputWizardScreenBox->SetEnabled(enable);
+
 		if (enable) {
 			m_InputWizardTitleLabel->SetText("P L A Y E R   " + std::to_string(player + 1) + "   I N P U T   C O N F I G U R A T I O N");
-			m_InputWizardScreenBox->SetVisible(true);
-			m_InputWizardScreenBox->SetEnabled(true);
 
 			m_ConfiguringPlayer = static_cast<Players>(player);
 			m_ConfiguringPlayerScheme = playerScheme;
@@ -123,8 +124,6 @@ namespace RTE {
 				ShowPresetSelectionScreen();
 			}
 		} else {
-			m_InputWizardScreenBox->SetVisible(false);
-			m_InputWizardScreenBox->SetEnabled(false);
 			m_ConfiguringPlayer = Players::NoPlayer;
 			m_ConfiguringPlayerScheme = nullptr;
 			m_ConfigFinished = false;

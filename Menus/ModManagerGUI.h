@@ -54,7 +54,7 @@ namespace RTE {
 			/// Makes GUI displayable string with mod info.
 			/// </summary>
 			/// <returns>String with mod info.</returns>
-			std::string MakeModString() const { return (Disabled ? "- " : "+ ") + ModulePath + " - " + ModuleName; }
+			std::string GetDisplayString() const { return (Disabled ? "- " : "+ ") + ModulePath + " - " + ModuleName; }
 
 			/// <summary>
 			/// Comparison operator for sorting the KnownMods list alphabetically by path with std::sort.
@@ -76,7 +76,7 @@ namespace RTE {
 			/// Makes GUI displayable string with script info.
 			/// </summary>
 			/// <returns>String with script info.</returns>
-			std::string MakeScriptString() const { return (!Enabled ? "- " : "+ ") + PresetName; }
+			std::string GetDisplayString() const { return (!Enabled ? "- " : "+ ") + PresetName; }
 
 			/// <summary>
 			/// Comparison operator for sorting the KnownScripts list alphabetically by PresetName with std::sort.

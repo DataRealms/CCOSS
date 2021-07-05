@@ -153,6 +153,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `MovableObject` Lua function `EnableOrDisableAllScripts` that allows you to enable or disable all scripts on a `MovableObject` based on the passed in value.
 
+WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
+- Added `AEmitter` Lua properties `MinThrottleRangeTODOFIXNAMEHERE` and `MaxThrottleRangeTODOFIXNAMEHERE` that allow you to 4zK PLEASE FILL IN
+
 ### Changed
 
 - `AHuman` can now manually reload BG devices.

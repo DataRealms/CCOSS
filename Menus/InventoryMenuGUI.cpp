@@ -556,7 +556,7 @@ namespace RTE {
 
 		UpdateFullModeInformationText(inventory);
 
-		UpdateFullModeNonItemButtonIcons();
+		UpdateFullModeNonItemButtonIconsAndHighlightWidths();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -692,7 +692,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void InventoryMenuGUI::UpdateFullModeNonItemButtonIcons() {
+	void InventoryMenuGUI::UpdateFullModeNonItemButtonIconsAndHighlightWidths() {
 		std::vector<std::pair<GUIButton *, const Icon *>> buttonsToCheckIconsFor = {
 			{ m_GUIInformationToggleButton, m_GUIInformationToggleButtonIcon },
 			{ m_GUIReloadButton, m_GUIReloadButtonIcon },

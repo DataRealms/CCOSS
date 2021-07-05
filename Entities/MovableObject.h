@@ -752,11 +752,23 @@ enum MOType
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetEffectRotAngle
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the current absolute angle of rotation of this MovableObject's effect.
+// Description:     Gets the current absolute angle of rotation of this MovableObject's effect.
 // Arguments:       None.
 // Return value:    The absolute angle in radians.
 
 	float GetEffectRotAngle() const { return m_EffectRotAngle; }
+
+	/// <summary>
+	/// Gets the starting strength of this MovableObject's effect.
+	/// </summary>
+	/// <returns>The starting strength of the effect, 0-255.</returns>
+	int GetEffectStartStrength() const { return m_EffectStartStrength; }
+
+	/// <summary>
+	/// Gets the stopping strength of this MovableObject's effect.
+	/// </summary>
+	/// <returns>The stopping strength of the effect, 0-255.</returns>
+	int GetEffectStopStrength() const { return m_EffectStopStrength; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetAngularVel

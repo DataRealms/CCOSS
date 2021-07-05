@@ -290,6 +290,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool InventoryMenuGUI::EnableIfNotEmpty() {
+		bool shouldEnable = !m_InventoryActorEquippedItems.empty() || !m_InventoryActor->IsInventoryEmpty();
+		SetEnabled(shouldEnable);
+		return shouldEnable;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void InventoryMenuGUI::ClearSelectedItem() {
 		if (m_GUISelectedItem) {
 			m_GUISelectedItem->Button->OnLoseFocus();
@@ -324,9 +332,7 @@ namespace RTE {
 			if (m_EnabledState == EnabledState::Enabled && m_MenuMode != MenuMode::Carousel) { m_GUITopLevelBox->SetSize(m_GUITopLevelBoxFullSize.GetFloorIntX(), m_GUITopLevelBoxFullSize.GetFloorIntY()); }
 		}
 
-		if (m_InventoryActor && m_EnabledState != EnabledState::Disabled) {
-			if (!g_MovableMan.ValidMO(m_InventoryActor)) { m_InventoryActor = nullptr; }
-
+		if (m_InventoryActor && g_MovableMan.ValidMO(m_InventoryActor)) {
 			if (const AHuman *inventoryActorAsAHuman = (m_InventoryActorIsHuman ? dynamic_cast<AHuman *>(m_InventoryActor) : nullptr)) {
 				m_InventoryActorEquippedItems.clear();
 				m_InventoryActorEquippedItems.reserve(2);
@@ -335,13 +341,14 @@ namespace RTE {
 			} else if (!m_InventoryActorEquippedItems.empty()) {
 				m_InventoryActorEquippedItems.clear();
 			}
+		} else {
+			m_InventoryActor = nullptr;
+		}
+
+		if (m_InventoryActor && IsVisible()) {
 			switch (m_MenuMode) {
 				case MenuMode::Carousel:
-					if (m_InventoryActorEquippedItems.empty() && m_InventoryActor->IsInventoryEmpty()) {
-						SetEnabled(false);
-					} else {
-						UpdateCarouselMode();
-					}
+					if (EnableIfNotEmpty()) { UpdateCarouselMode(); }
 					break;
 				case MenuMode::Full:
 					UpdateFullMode();
@@ -362,7 +369,7 @@ namespace RTE {
 
 		switch (m_MenuMode) {
 			case MenuMode::Carousel:
-				if (!m_InventoryActor || m_InventoryActor->IsInventoryEmpty() && m_InventoryActorEquippedItems.empty()) {
+				if (!m_InventoryActor || (m_InventoryActor->IsInventoryEmpty() && m_InventoryActorEquippedItems.empty() && m_EnabledState != EnabledState::Disabling)) {
 					return;
 				}
 				drawPos -= Vector(0, c_CarouselMenuVerticalOffset + c_CarouselBoxMaxSize.GetY() * 0.5F);

@@ -351,9 +351,9 @@ namespace RTE {
 		void UpdateFullModeInformationText(const std::deque<MovableObject *> *inventory);
 
 		/// <summary>
-		/// Handles updating icons for non-item buttons in Full MenuMode.
+		/// Handles updating icons and widths to support higlighting, for non-item buttons in Full MenuMode.
 		/// </summary>
-		void UpdateFullModeNonItemButtonIcons();
+		void UpdateFullModeNonItemButtonIconsAndHighlightWidths();
 
 		/// <summary>
 		/// Handles MenuMode specific updating for when the InventoryMenuGUI is in Transfer MenuMode.

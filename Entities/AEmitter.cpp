@@ -40,6 +40,7 @@ void AEmitter::Clear()
     m_EmitCountLimit = 0;
 	m_MinThrottleRange = 1.0F;
 	m_MaxThrottleRange = 1.0F;
+    m_ThrottleRangeRedefined = false;
     m_Throttle = 0;
     m_EmissionsIgnoreThis = false;
     m_BurstScale = 1.0F;
@@ -87,6 +88,7 @@ int AEmitter::Create(const AEmitter &reference) {
     m_EmitCountLimit = reference.m_EmitCountLimit;
     m_MinThrottleRange = reference.m_MinThrottleRange;
     m_MaxThrottleRange = reference.m_MaxThrottleRange;
+    m_ThrottleRangeRedefined = reference.m_ThrottleRangeRedefined;
     m_Throttle = reference.m_Throttle;
     m_EmissionsIgnoreThis = reference.m_EmissionsIgnoreThis;
     m_BurstScale = reference.m_BurstScale;
@@ -140,8 +142,10 @@ int AEmitter::ReadProperty(const std::string_view &propName, Reader &reader) {
         for (Emission *emission : m_EmissionList) { emission->m_PPM = ppm / static_cast<float>(m_EmissionList.size()); }
     } else if (propName == "MinThrottleRange") {
         reader >> m_MinThrottleRange;
+        m_ThrottleRangeRedefined = true;
     } else if (propName == "MaxThrottleRange") {
         reader >> m_MaxThrottleRange;
+        m_ThrottleRangeRedefined = true;
     } else if (propName == "Throttle") {
         reader >> m_Throttle;
     } else if (propName == "EmissionsIgnoreThis") {

@@ -266,13 +266,31 @@ ClassInfoGetters
 	/// Gets the minimum throttle range of this AEmitter.
 	/// </summary>
 	/// <returns>The minimum throttle range of this AEmitter.</returns>
-    float GetMinThrottle() const { return m_MinThrottleRange; }
+    float GetMinThrottleRange() const { return m_MinThrottleRange; }
+
+    /// <summary>
+    /// Sets the minimum throttle range for this AEmitter.
+    /// </summary>
+    /// <param name="minThrottleRange">The new minimum throttle range for this AEmitter.</param>
+    void SetMinThrottleRange(float minThrottleRange) { m_MinThrottleRange = minThrottleRange; m_ThrottleRangeRedefined = true; }
 
 	/// <summary>
 	/// Gets the maximum throttle range of this AEmitter.
 	/// </summary>
 	/// <returns>The maximum throttle range of this AEmitter.</returns>
-    float GetMaxThrottle() const { return m_MaxThrottleRange; }
+    float GetMaxThrottleRange() const { return m_MaxThrottleRange; }
+
+    /// <summary>
+    /// Sets the maximum throttle range for this AEmitter.
+    /// </summary>
+    /// <param name="maxThrottleRange">The new maximum throttle range for this AEmitter.</param>
+    void SetMaxThrottleRange(float maxThrottleRange) { m_MaxThrottleRange = maxThrottleRange; m_ThrottleRangeRedefined = true; }
+
+    /// <summary>
+    /// Gets whether or not the MinThrottleRange or MaxThrottleRange of this AEmitter have been redefined in INI.
+    /// </summary>
+    /// <returns>Whether or not the MinThrottleRange or MaxThrottleRange have been redefined in INI.</returns>
+    bool GetThrottleRangeRedefined() const { return m_ThrottleRangeRedefined; }
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetEmitRate
@@ -634,6 +652,7 @@ protected:
     long m_EmitCountLimit;
 	float m_MinThrottleRange; //!< The range negative throttle has on emission rate. 1.0 means the rate can be throttled down to 0%, 0 means negative throttle has no effect
 	float m_MaxThrottleRange; //!< The range positive throttle has on emission rate. 1.0 means the rate can be throttled up to 200%, 0 means positive throttle has no effect
+    bool m_ThrottleRangeRedefined; //!< Whether or not the MinThrottleRange or MaxThrottleRange has been redefined in INI.
 	float m_Throttle; //!< The normalized throttle which controls the MSPE between 1.0 * m_MSPERange and -1.0 * m_MSPERange. 0 means emit the regular m_PPM amount.
     // Whether or not this' emissions ignore hits with itself, even if they are set to hit other MOs.
     bool m_EmissionsIgnoreThis;

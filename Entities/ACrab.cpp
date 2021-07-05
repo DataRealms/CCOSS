@@ -505,6 +505,11 @@ void ACrab::SetJetpack(AEmitter *newJetpack) {
         if (m_pJetpack->HasNoSetDamageMultiplier()) { m_pJetpack->SetDamageMultiplier(0.0F); }
         m_pJetpack->SetApplyTransferredForcesAtOffset(false);
         m_pJetpack->SetDeleteWhenRemovedFromParent(true);
+
+        if (!m_pJetpack->GetThrottleRangeRedefined()) {
+            m_pJetpack->SetMinThrottleRange(0);
+            m_pJetpack->SetMaxThrottleRange(0);
+        }
     }
 }
 
@@ -2156,8 +2161,8 @@ void ACrab::Update()
 			// Jetpack throttle depletes relative to jet time, but only if throttle range values have been defined
 			float jetTimeRatio = std::max(m_JetTimeLeft / m_JetTimeTotal, 0.0F);
 			m_pJetpack->SetThrottle(jetTimeRatio * 2.0F - 1.0F);
-			float minScale = 1.0F - m_pJetpack->GetMinThrottle();
-			m_pJetpack->SetFlashScale(minScale + (1.0F + m_pJetpack->GetMaxThrottle() - minScale) * jetTimeRatio);
+			float minScale = 1.0F - m_pJetpack->GetMinThrottleRange();
+			m_pJetpack->SetFlashScale(minScale + (1.0F + m_pJetpack->GetMaxThrottleRange() - minScale) * jetTimeRatio);
 		}
 		// Start Jetpack burn
 		if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0 && m_Status != INACTIVE)

@@ -300,14 +300,16 @@ namespace RTE {
 
 		if (m_AffectedObject && !g_MovableMan.ValidMO(m_AffectedObject)) { m_AffectedObject = nullptr; }
 
-		if (IsEnabled() && (HandleMouseInput() || HandleNonMouseInput())) {
-			m_HoverTimer.Reset();
-		} else if (m_HoverTimer.IsPastRealMS(500)) {
-			m_HoveredSlice = nullptr;
-			m_BGBitmapNeedsRedrawing = true;
-		}
+		if (m_MenuMode == MenuMode::Normal) {
+			if (IsEnabled() && (HandleMouseInput() || HandleNonMouseInput())) {
+				m_HoverTimer.Reset();
+			} else if (m_HoverTimer.IsPastRealMS(500)) {
+				m_HoveredSlice = nullptr;
+				m_BGBitmapNeedsRedrawing = true;
+			}
 
-		if (m_HoveredSlice && m_EnabledState != EnabledState::Disabled) { UpdateSliceActivation(); }
+			if (m_HoveredSlice && m_EnabledState != EnabledState::Disabled) { UpdateSliceActivation(); }
+		}
 
 		if (m_BGBitmapNeedsRedrawing && m_EnabledState != EnabledState::Disabled) { UpdatePredrawnMenuBackgroundBitmap(); }
 	}

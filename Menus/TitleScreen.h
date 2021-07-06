@@ -56,18 +56,6 @@ namespace RTE {
 		void Create(AllegroScreen *guiScreen);
 #pragma endregion
 
-#pragma region Destruction
-		/// <summary>
-		/// Destructor method used to clean up a TitleScreen object before deletion from system memory.
-		/// </summary>
-		~TitleScreen() { Destroy(); }
-
-		/// <summary>
-		/// Destroys the TitleScreen object.
-		/// </summary>
-		void Destroy() const;
-#pragma endregion
-
 #pragma region Getters and Setters
 		/// <summary>
 		/// Gets the current title transition state.

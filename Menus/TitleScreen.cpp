@@ -92,8 +92,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TitleScreen::CreateTitleElements() {
-		m_DataRealmsLogo = ContentFile("Base.rte/GUIs/Title/Intro/DRLogo5x.png").GetAsBitmap(COLORCONV_NONE, false);
-		m_FmodLogo = ContentFile("Base.rte/GUIs/Title/Intro/FMODLogo.png").GetAsBitmap(COLORCONV_NONE, false);
+		m_DataRealmsLogo = ContentFile("Base.rte/GUIs/Title/Intro/DRLogo5x.png").GetAsBitmap();
+		m_FmodLogo = ContentFile("Base.rte/GUIs/Title/Intro/FMODLogo.png").GetAsBitmap();
 
 		m_PreGameLogoText.Create(ContentFile("Base.rte/GUIs/Title/Intro/PreTitle.png"));
 		m_PreGameLogoTextGlow.Create(ContentFile("Base.rte/GUIs/Title/Intro/PreTitleGlow.png"));
@@ -105,10 +105,10 @@ namespace RTE {
 		m_Nebula.Create(ContentFile("Base.rte/GUIs/Title/Nebula.png"), false, Vector(), false, false, Vector(0, -1.0F));
 
 		set_write_alpha_blender();
-		draw_trans_sprite(m_PreGameLogoText.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/Intro/PreTitleAlpha.png").GetAsBitmap(COLORCONV_NONE, false), 0, 0);
-		draw_trans_sprite(m_GameLogo.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/TitleAlpha.png").GetAsBitmap(COLORCONV_NONE, false), 0, 0);
-		draw_trans_sprite(m_Planet.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/PlanetAlpha.png").GetAsBitmap(COLORCONV_NONE, false), 0, 0);
-		draw_trans_sprite(m_Moon.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/MoonAlpha.png").GetAsBitmap(COLORCONV_NONE, false), 0, 0);
+		draw_trans_sprite(m_PreGameLogoText.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/Intro/PreTitleAlpha.png").GetAsBitmap(), 0, 0);
+		draw_trans_sprite(m_GameLogo.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/TitleAlpha.png").GetAsBitmap(), 0, 0);
+		draw_trans_sprite(m_Planet.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/PlanetAlpha.png").GetAsBitmap(), 0, 0);
+		draw_trans_sprite(m_Moon.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/MoonAlpha.png").GetAsBitmap(), 0, 0);
 
 		int starSmallBitmapCount = 4;
 		std::vector<BITMAP *> starSmallBitmaps = ConvertDoublePointerToVectorOfPointers(ContentFile("Base.rte/GUIs/Title/Stars/StarSmall.png").GetAsAnimation(starSmallBitmapCount), starSmallBitmapCount);
@@ -146,15 +146,7 @@ namespace RTE {
 	void TitleScreen::CreateIntroSequenceSlides() {
 		std::string highRes = (g_FrameMan.GetResY() >= 680) ? "HD" : "";
 		for (int slideNum = 0; slideNum < m_IntroSlides.size(); ++slideNum) {
-			m_IntroSlides.at(slideNum) = ContentFile(("Base.rte/GUIs/Title/Intro/IntroSlide" + std::to_string(slideNum + 1) + highRes + ".png").c_str()).GetAsBitmap(COLORCONV_NONE, false);
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void TitleScreen::Destroy() const {
-		for (BITMAP *slide : m_IntroSlides) {
-			if (slide) { destroy_bitmap(slide); }
+			m_IntroSlides.at(slideNum) = ContentFile(("Base.rte/GUIs/Title/Intro/IntroSlide" + std::to_string(slideNum + 1) + highRes + ".png").c_str()).GetAsBitmap();
 		}
 	}
 

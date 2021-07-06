@@ -56,6 +56,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates the MainMenuGUI state.
 		/// </summary>
+		/// <returns>The result of the MainMenuGUI input and event update. See MainMenuUpdateResult enumeration.</returns>
 		MainMenuUpdateResult Update();
 
 		/// <summary>

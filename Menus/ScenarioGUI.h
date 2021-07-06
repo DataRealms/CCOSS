@@ -63,7 +63,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates the ScenarioGUI state.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>The result of the ScenarioGUI input and event update. See ScenarioMenuUpdateResult enumeration.</returns>
 		ScenarioMenuUpdateResult Update();
 
 		/// <summary>

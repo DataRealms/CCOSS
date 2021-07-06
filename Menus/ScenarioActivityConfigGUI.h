@@ -35,7 +35,7 @@ namespace RTE {
 		/// <summary>
 		/// Gets whether this Activity configuration menu is currently visible and enabled.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether this Activity configuration menu is currently visible and enabled.</returns>
 		bool IsEnabled() const;
 
 		/// <summary>
@@ -53,6 +53,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="mouseX">Mouse X position.</param>
 		/// <param name="mouseY">Mouse Y position.</param>
+		/// <returns>Whether the player started a new game through the ScenarioActivityConfigGUI.</returns>
 		bool Update(int mouseX, int mouseY);
 
 		/// <summary>
@@ -138,6 +139,7 @@ namespace RTE {
 		/// <summary>
 		/// Handles the player interaction with the ScenarioActivityConfigGUI GUI elements.
 		/// </summary>
+		/// <returns>Whether the player started a new game through the ScenarioActivityConfigGUI.</returns>
 		bool HandleInputEvents();
 #pragma endregion
 

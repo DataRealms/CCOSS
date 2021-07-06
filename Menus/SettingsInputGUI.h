@@ -54,7 +54,7 @@ namespace RTE {
 		/// <summary>
 		/// Gets whether the player is currently manually configuring an InputMapping through the input mapping menu screen.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether the player is currently manually configuring an InputMapping through the input mapping menu screen.</returns>
 		bool InputMappingConfigConfiguringManually() const { return m_InputMappingConfigMenu->IsConfiguringManually(); }
 
 		/// <summary>

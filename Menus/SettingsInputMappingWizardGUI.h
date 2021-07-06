@@ -34,6 +34,7 @@ namespace RTE {
 		/// <summary>
 		/// Gets whether this input mapping wizard menu is currently visible and enabled.
 		/// </summary>
+		/// <returns>Whether this input mapping wizard menu is currently visible and enabled.</returns>
 		bool IsEnabled() const;
 
 		/// <summary>

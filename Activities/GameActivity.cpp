@@ -2361,7 +2361,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     if (pIcon)
         draw_sprite(pTargetBitmap, pIcon->GetBitmaps8()[0], MAX(2, g_SceneMan.GetScreenOcclusion(which).m_X + 2), 2);
     // Gold
-    std::snprintf(str, sizeof(str), "%c Funds: %.0f oz", TeamFundsChanged(which) ? -57 : -58, GetTeamFunds(m_Team[PoS]));
+    std::snprintf(str, sizeof(str), "%c Funds: %.10g oz", TeamFundsChanged(which) ? -57 : -58, GetTeamFunds(m_Team[PoS]));
     g_FrameMan.GetLargeFont()->DrawAligned(&pBitmapInt, MAX(16, g_SceneMan.GetScreenOcclusion(which).m_X + 16), yTextPos, str, GUIFont::Left);
 /* Not applicable anymore to the 4-team games
     // Body losses

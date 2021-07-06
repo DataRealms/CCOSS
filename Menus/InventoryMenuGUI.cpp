@@ -348,7 +348,11 @@ namespace RTE {
 		if (m_InventoryActor && IsVisible()) {
 			switch (m_MenuMode) {
 				case MenuMode::Carousel:
-					if (EnableIfNotEmpty()) { UpdateCarouselMode(); }
+					if (m_InventoryActorEquippedItems.empty() && m_InventoryActor->IsInventoryEmpty()) {
+						SetEnabled(false);
+					} else {
+						UpdateCarouselMode();
+					}
 					break;
 				case MenuMode::Full:
 					UpdateFullMode();

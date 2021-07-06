@@ -328,7 +328,7 @@ namespace RTE {
 		}
 		if (IsEnablingOrDisabling() && m_EnableDisableAnimationTimer.IsPastRealTimeLimit()) {
 			m_EnabledState = (m_EnabledState == EnabledState::Enabling) ? EnabledState::Enabled : EnabledState::Disabled;
-			//Note gui size setting is handled rather than in Full Mode updating so it can be made to only happen once when things are fully enabled, instead of setting over-and-over and potentially triggering extra redrawing.
+			//Note gui size setting is handled here rather than in Full Mode updating so it can be made to only happen once when things are fully enabled, instead of setting over-and-over and potentially triggering extra redrawing.
 			if (m_EnabledState == EnabledState::Enabled && m_MenuMode != MenuMode::Carousel) { m_GUITopLevelBox->SetSize(m_GUITopLevelBoxFullSize.GetFloorIntX(), m_GUITopLevelBoxFullSize.GetFloorIntY()); }
 		}
 
@@ -618,18 +618,19 @@ namespace RTE {
 				m_GUIInventoryItemsScrollbar->SetVisible(true);
 				m_GUIInventoryItemsScrollbar->SetEnabled(true);
 
-				m_GUITopLevelBoxFullSize.SetXY(static_cast<float>(m_GUITopLevelBox->GetWidth() + m_GUIInventoryItemsScrollbar->GetWidth()), static_cast<float>(m_GUITopLevelBox->GetHeight()));
+				m_GUITopLevelBoxFullSize.SetX(m_GUITopLevelBoxFullSize.GetX() + static_cast<float>(m_GUIInventoryItemsScrollbar->GetWidth()));
 				m_GUITopLevelBox->SetSize(m_GUITopLevelBoxFullSize.GetFloorIntX(), m_GUITopLevelBoxFullSize.GetFloorIntY());
 				m_GUIEquippedItemsBox->SetSize(m_GUIEquippedItemsBox->GetWidth() + m_GUIInventoryItemsScrollbar->GetWidth(), m_GUIEquippedItemsBox->GetHeight());
 				m_GUIInventoryItemsBox->SetSize(m_GUIInventoryItemsBox->GetWidth() + m_GUIInventoryItemsScrollbar->GetWidth(), m_GUIInventoryItemsBox->GetHeight());
 				m_GUIInformationToggleButton->SetPositionAbs(m_GUIInformationToggleButton->GetXPos() + m_GUIInventoryItemsScrollbar->GetWidth(), m_GUIInformationToggleButton->GetYPos());
 			}
 		} else if (m_GUIInventoryItemsScrollbar->GetVisible() && inventory->size() <= c_FullViewPageItemLimit) {
+			m_GUIInventoryItemsScrollbar->SetValue(0);
 			m_GUIInventoryItemsScrollbar->SetMaximum(1);
 			m_GUIInventoryItemsScrollbar->SetVisible(false);
 			m_GUIInventoryItemsScrollbar->SetEnabled(false);
 
-			m_GUITopLevelBoxFullSize.SetXY(static_cast<float>(m_GUITopLevelBox->GetWidth() - m_GUIInventoryItemsScrollbar->GetWidth()), static_cast<float>(m_GUITopLevelBox->GetHeight()));
+			m_GUITopLevelBoxFullSize.SetX(m_GUITopLevelBoxFullSize.GetX() - static_cast<float>(m_GUIInventoryItemsScrollbar->GetWidth()));
 			m_GUITopLevelBox->SetSize(m_GUITopLevelBoxFullSize.GetFloorIntX(), m_GUITopLevelBoxFullSize.GetFloorIntY());
 			m_GUIEquippedItemsBox->SetSize(m_GUIEquippedItemsBox->GetWidth() - m_GUIInventoryItemsScrollbar->GetWidth(), m_GUIEquippedItemsBox->GetHeight());
 			m_GUIInventoryItemsBox->SetSize(m_GUIInventoryItemsBox->GetWidth() - m_GUIInventoryItemsScrollbar->GetWidth(), m_GUIInventoryItemsBox->GetHeight());
@@ -792,6 +793,12 @@ namespace RTE {
 		m_PreviousGUICursorPos.SetXY(m_GUICursorPos.GetX(), m_GUICursorPos.GetY());
 		m_GUICursorPos.SetXY(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
+		if (m_GUIInventoryItemsScrollbar->GetVisible()) {
+			int mouseWheelChange = -m_GUIInput->GetMouseWheelChange();
+			mouseWheelChange = m_MenuController->IsState(ControlState::SCROLL_UP) ? -1 : (m_MenuController->IsState(ControlState::SCROLL_DOWN) ? 1 : 0);
+			if (mouseWheelChange != 0) { m_GUIInventoryItemsScrollbar->SetValue(std::clamp(m_GUIInventoryItemsScrollbar->GetValue() + mouseWheelChange, m_GUIInventoryItemsScrollbar->GetMinimum(), m_GUIInventoryItemsScrollbar->GetMaximum())); }
+		}
+
 		if (m_GUISelectedItem && m_GUISelectedItem->IsBeingDragged) {
 			if (!m_GUISelectedItem->DragWasHeldForLongEnough()) {
 				m_GUISelectedItem->DragHoldCount++;
@@ -827,6 +834,7 @@ namespace RTE {
 						g_GUISound.SelectionChangeSound()->Play(m_MenuController->GetPlayer());
 					} else if (mouseReleased) {
 						HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.at(0), 0);
+						m_GUIEquippedItemButton->SetPushed(false);
 						if (!m_GUISelectedItem) {
 							return true;
 						}
@@ -837,6 +845,7 @@ namespace RTE {
 						g_GUISound.SelectionChangeSound()->Play(m_MenuController->GetPlayer());
 					} else if (mouseReleased) {
 						HandleItemButtonPressOrHold(m_GUIOffhandEquippedItemButton, m_InventoryActorEquippedItems.at(std::min(static_cast<int>(m_InventoryActorEquippedItems.size() - 1), 1)), 1);
+						m_GUIOffhandEquippedItemButton->SetPushed(false);
 						if (!m_GUISelectedItem) {
 							return true;
 						}
@@ -847,6 +856,7 @@ namespace RTE {
 						g_GUISound.SelectionChangeSound()->Play(m_MenuController->GetPlayer());
 					} else if (mouseReleased) {
 						ReloadSelectedItem();
+						m_GUIReloadButton->SetPushed(false);
 					}
 				} else if (m_GUIDropButton->IsEnabled() && m_GUIDropButton->PointInside(mouseX, mouseY)) {
 					if (mouseHeld && !m_GUIDropButton->IsPushed()) {
@@ -854,6 +864,7 @@ namespace RTE {
 						g_GUISound.SelectionChangeSound()->Play(m_MenuController->GetPlayer());
 					} else if (mouseReleased) {
 						DropSelectedItem();
+						m_GUIDropButton->SetPushed(false);
 					}
 				} else {
 					for (const auto &[inventoryObject, inventoryItemButton] : m_GUIInventoryItemButtons) {
@@ -863,6 +874,7 @@ namespace RTE {
 								g_GUISound.SelectionChangeSound()->Play(m_MenuController->GetPlayer());
 							} else if (mouseReleased) {
 								HandleItemButtonPressOrHold(inventoryItemButton, inventoryObject, -1);
+								inventoryItemButton->SetPushed(false);
 								if (!m_GUISelectedItem) {
 									return true;
 								}

@@ -122,6 +122,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="enable">Whether to enable or disable the menu.</param>
 		void SetEnabled(bool enable);
+
+		/// <summary>
+		/// Enables or disables the InventoryMenuGUI based on whether or not it's empty (i.e. its actor has equipped or inventory items).
+		/// </summary>
+		/// <returns>Whether it tried to enable InventoryMenuGUI (true) or disable it (false).</returns>
+		bool EnableIfNotEmpty();
 #pragma endregion
 
 #pragma region Full And Transfer Mode Getters and Setters
@@ -219,7 +225,7 @@ namespace RTE {
 		static constexpr int c_MultipleItemInBoxOffset = 3; //!< How many pixels up and right items should be offset if there are more than one in a item box. Used in Carousel MenuMode.
 
 		static constexpr int c_FullViewPageItemLimit = c_ItemsPerRow * 3; //!< The default number of rows in the full inventory display. Used in Full/Transfer MenuModes.
-		static constexpr int c_FullMenuVerticalOffset = 35; //!< How high above its target the full GUI will be. Used in Full/Transfer MenuModes.
+		static constexpr int c_FullMenuVerticalOffset = 50; //!< How high above its target the full GUI will be. Used in Full/Transfer MenuModes.
 
 		static BITMAP *s_CursorBitmap; //!< The cursor image shared by all GUIs.
 

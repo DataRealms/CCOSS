@@ -76,24 +76,24 @@ namespace RTE {
 		/// Gets whether the current Activity needs to be restarted.
 		/// </summary>
 		/// <returns>Whether the current Activity needs to be restarted.</returns>
-		bool ActivitySetToRestart() const { return m_RestartActivity; }
+		bool ActivitySetToRestart() const { return m_ActivityNeedsRestart; }
 
 		/// <summary>
 		/// Sets whether the current Activity needs to be restarted.
 		/// </summary>
 		/// <param name="restartActivity">Restart the Activity or not.</param>
-		void SetRestartActivity(bool restartActivity = true) { m_RestartActivity = restartActivity; }
+		void SetRestartActivity(bool restartActivity = true) { m_ActivityNeedsRestart = restartActivity; }
 
 		/// <summary>
 		/// Gets whether the game simulation needs to be started back up after the current Activity was unpaused.
 		/// </summary>
 		/// <returns>Whether the game simulation needs to be started back up after the current Activity was unpaused.</returns>
-		bool ActivitySetToResume() const { return m_ResumeActivity; }
+		bool ActivitySetToResume() const { return m_ActivityNeedsResume; }
 
 		/// <summary>
 		/// Sets the game simulation to be started back up after the current Activity was unpaused.
 		/// </summary>
-		void SetResumeActivity() { m_ResumeActivity = true; }
+		void SetResumeActivity() { m_ActivityNeedsResume = true; }
 #pragma endregion
 
 #pragma region Default Activity Handling
@@ -241,8 +241,8 @@ namespace RTE {
 		std::unique_ptr<Activity> m_StartActivity; //!< The starting condition of the next Activity to be (re)started.
 
 		bool m_InActivity; //!< Whether we are currently in game (as in, not in the main menu or any other out-of-game menus), regardless of its state.
-		bool m_RestartActivity; //!< Whether the current Activity needs to be restarted.
-		bool m_ResumeActivity; //!< Whether the game simulation needs to be started back up after the current Activity was unpaused.
+		bool m_ActivityNeedsRestart; //!< Whether the current Activity needs to be restarted.
+		bool m_ActivityNeedsResume; //!< Whether the game simulation needs to be started back up after the current Activity was unpaused.
 
 		std::string m_LastMusicPath; //!< Path to the last music stream being played.
 		float m_LastMusicPos; //!< What the last position of the in-game music track was before pause, in seconds.

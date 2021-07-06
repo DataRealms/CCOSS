@@ -157,8 +157,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `TwoPlayerSplitscreenVertSplit = 0/1` to force two player splitscreen into a vertical split mode (horizontal by default).
 
-- In-game settings menu was reworked to make it less useless.
-
 - Controller hot-plugging is now supported (Windows only).
 
 ### Changed
@@ -262,6 +260,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`Scenes.rte` or any other mod/user scenes are now cyan.
 
 - Main menu and sub-menus were given a facelift.
+
+- In-game settings menu was reworked to make it less useless.
 
 - Esc has been disabled in server mode to not disrupt simulation for clients, use Alt+F4 or the window close button to exit.
 

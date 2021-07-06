@@ -46,13 +46,13 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a TitleScreen object in system memory and make it ready for use.
 		/// </summary>
-		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used to create this TitleScreen's GUIFont.</param>
+		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used to create this TitleScreen's GUIFont. Ownership is NOT transferred!</param>
 		explicit TitleScreen(AllegroScreen *guiScreen) { Clear(); Create(guiScreen); }
 
 		/// <summary>
 		/// Makes the TitleScreen object ready for use.
 		/// </summary>
-		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used to create this TitleScreen's GUIFont.</param>
+		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used to create this TitleScreen's GUIFont. Ownership is NOT transferred!</param>
 		void Create(AllegroScreen *guiScreen);
 #pragma endregion
 
@@ -64,13 +64,14 @@ namespace RTE {
 		TitleTransition GetTitleTransitionState() const { return m_TitleTransitionState; }
 
 		/// <summary>
-		/// Sets the target title transition state and if different from the current, sets the section switch to trigger the transition.
+		/// Sets the target title transition state and, if different from the current, sets the section switch to trigger the transition.
 		/// </summary>
 		/// <param name="newTransitionState">The target title transition state.</param>
 		void SetTitleTransitionState(TitleTransition newTransitionState) { if (newTransitionState != m_TitleTransitionState) { m_TitleTransitionState = newTransitionState; m_SectionSwitch = true; } }
 
 		/// <summary>
-		/// Sets the title transition to a pending state, stores the orbit timer elapsed time and resets the fade screen blend value. This is used to correctly restart transition states after breaking out of the game loop back to the menu loop.
+		/// Sets the title transition to a pending state, stores the orbit timer elapsed time and resets the fade screen blend value.
+		/// This is used to correctly restart transition states after breaking out of the game loop back to the menu loop.
 		/// </summary>
 		void SetTitlePendingTransition() { m_TitleTransitionState = TitleTransition::TransitionPending; m_StationOrbitTimerElapsedTime = static_cast<float>(m_StationOrbitTimer.GetElapsedRealTimeS()); m_FadeAmount = 0; }
 
@@ -135,10 +136,9 @@ namespace RTE {
 		};
 
 		/// <summary>
-		/// Struct that holds information each title screen scene backdrop star.
+		/// Struct that holds information for a title screen scene backdrop star.
 		/// </summary>
 		struct Star {
-
 			/// <summary>
 			/// Enumeration for the different Star sizes.
 			/// </summary>
@@ -216,7 +216,7 @@ namespace RTE {
 		/// <summary>
 		/// Sets the duration of a new section and resets the switch.
 		/// </summary>
-		/// <param name="newDuration">The duration of the new section.</param>
+		/// <param name="newDuration">The duration of the new section, in seconds.</param>
 		void SetSectionDurationAndResetSwitch(float newDuration) { m_SectionDuration = newDuration; m_SectionSwitch = false; }
 
 		/// <summary>

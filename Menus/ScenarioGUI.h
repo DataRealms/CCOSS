@@ -165,8 +165,8 @@ namespace RTE {
 		/// <summary>
 		/// Adjusts the positions of the site points on the planet if they don't fit the screen or overlap.
 		/// </summary>
-		/// <param name="sceneList">List of Scenes to adjust positions for.</param>
-		void AdjustSitePointOffsetsOnPlanet(const std::list<Scene *> &sceneList) const;
+		/// <param name="sceneList">Vector of Scenes to adjust positions for.</param>
+		void AdjustSitePointOffsetsOnPlanet(const std::vector<Scene *> &sceneList) const;
 
 		/// <summary>
 		/// Calculates how to draw lines from the Scene info box to the selected site point on the planet.

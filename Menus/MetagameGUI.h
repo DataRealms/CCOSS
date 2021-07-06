@@ -442,7 +442,7 @@ public:
 	/// Sets where the station is located on the planet orbit.
 	/// </summary>
 	/// <param name="newStationPos">The position of the station on the planet orbit.</param>
-	void SetStationInfo(const Vector &newStationPos) { m_StationPosOnOrbit = newStationPos; }
+	void SetStationOrbitPos(const Vector &newStationPos) { m_StationPosOnOrbit = newStationPos; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

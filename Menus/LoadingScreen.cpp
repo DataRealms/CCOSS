@@ -113,5 +113,5 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingScreen::GUIControlManagerDeleter::operator()(GUIControlManager *ptr) const { ptr->Destroy(); }
+	void LoadingScreen::GUIControlManagerDeleter::operator()(GUIControlManager *ptr) const { delete ptr; }
 }

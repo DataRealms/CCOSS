@@ -108,10 +108,10 @@ namespace RTE {
 			default:
 				break;
 		}
-		if (!quitResult && m_TitleScreen->GetTitleTransitionState() != TitleScreen::TitleTransition::ScrollingFadeOutQuit) {
-			if (g_UInputMan.DetectJoystickHotPlug()) { m_GUIInput->SetKeyJoyMouseCursor(g_UInputMan.GetJoystickCount() > 0); }
-		} else {
+		if (quitResult) {
 			m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeOutQuit);
+		} else if (m_TitleScreen->GetTitleTransitionState() != TitleScreen::TitleTransition::ScrollingFadeOutQuit && g_UInputMan.DetectJoystickHotPlug()) {
+			m_GUIInput->SetKeyJoyMouseCursor(g_UInputMan.GetJoystickCount() > 0);
 		}
 		if (m_TitleScreen->GetTitleTransitionState() == TitleScreen::TitleTransition::TransitionEndQuit) {
 			System::SetQuit();
@@ -178,7 +178,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool MenuMan::UpdateMetaGameMenu() const {
-		g_MetaMan.GetGUI()->SetStationInfo(m_TitleScreen->GetStationPos());
+		g_MetaMan.GetGUI()->SetStationOrbitPos(m_TitleScreen->GetStationPos());
 		g_MetaMan.Update();
 
 		if (g_MetaMan.GetGUI()->BackToMain()) {
@@ -228,7 +228,7 @@ namespace RTE {
 				int mouseY = 0;
 				m_GUIInput->GetMousePosition(&mouseX, &mouseY);
 				BITMAP *deviceIcon = g_UInputMan.GetDeviceIcon(device)->GetBitmaps32()[0];
-				if (deviceIcon) { draw_sprite(g_FrameMan.GetBackBuffer32(), deviceIcon, mouseX + 16, mouseY - 4); }
+				if (deviceIcon) { draw_sprite(g_FrameMan.GetBackBuffer32(), deviceIcon, mouseX + (deviceIcon->w / 2), mouseY - (deviceIcon->h / 5)); }
 			}
 			// Show which joysticks are detected by the game.
 			for (int playerIndex = Players::PlayerOne; playerIndex < Players::MaxPlayerCount; playerIndex++) {

@@ -221,10 +221,10 @@ namespace RTE {
 
 		std::list<Entity *> presetList;
 		g_PresetMan.GetAllOfType(presetList, "Scene");
-		std::list<Scene *> filteredScenes;
+		std::vector<Scene *> filteredScenes;
 		for (Entity *presetEntity : presetList) {
 			Scene *presetScene = dynamic_cast<Scene *>(presetEntity);
-			if (presetScene && !presetScene->GetLocation().IsZero() && !presetScene->IsMetagameInternal() && (presetScene->GetMetasceneParent().empty() || g_SettingsMan.ShowMetascenes())) { filteredScenes.push_back(presetScene); }
+			if (presetScene && !presetScene->GetLocation().IsZero() && !presetScene->IsMetagameInternal() && (presetScene->GetMetasceneParent().empty() || g_SettingsMan.ShowMetascenes())) { filteredScenes.emplace_back(presetScene); }
 		}
 		AdjustSitePointOffsetsOnPlanet(filteredScenes);
 
@@ -235,7 +235,7 @@ namespace RTE {
 			if (GameActivity *presetActivity = dynamic_cast<GameActivity *>(presetEntity)) {
 				std::pair<Activity *, std::vector<Scene *>> activityAndCompatibleScenes(presetActivity, std::vector<Scene *>());
 				for (Scene *filteredScene : filteredScenes) {
-					if (presetActivity->SceneIsCompatible(filteredScene)) { activityAndCompatibleScenes.second.push_back(filteredScene); }
+					if (presetActivity->SceneIsCompatible(filteredScene)) { activityAndCompatibleScenes.second.emplace_back(filteredScene); }
 				}
 				m_ScenarioActivities.insert(activityAndCompatibleScenes);
 				// Add to the activity selection ComboBox and attach the activity pointer, not passing in ownership.
@@ -257,8 +257,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ScenarioGUI::AdjustSitePointOffsetsOnPlanet(const std::list<Scene *> &sceneList) const {
-		// If a scene is on the planet but outside the screen then move it into the screen.
+	void ScenarioGUI::AdjustSitePointOffsetsOnPlanet(const std::vector<Scene *> &sceneList) const {
 		for (Scene *sceneListEntry : sceneList) {
 			int sceneYPos = (m_PlanetCenter + sceneListEntry->GetLocation() + sceneListEntry->GetLocationOffset()).GetFloorIntY();
 			if (std::abs(sceneListEntry->GetLocation().GetY()) < m_PlanetRadius + 100 && std::abs(sceneListEntry->GetLocation().GetX()) < m_PlanetRadius + 100) {
@@ -322,11 +321,12 @@ namespace RTE {
 		int halfBoxHeight = m_SceneInfoBox->GetHeight() / 2;
 		Vector sceneBoxCenter(static_cast<float>(m_SceneInfoBox->GetXPos() + (m_SceneInfoBox->GetWidth() / 2)), static_cast<float>(m_SceneInfoBox->GetYPos() + halfBoxHeight));
 		float yDirMult = sitePos.GetY() < sceneBoxCenter.GetY() ? -1.0F : 1.0F;
-		Vector sceneBoxEdge = sceneBoxCenter + Vector(0, static_cast<float>(halfBoxHeight)) * yDirMult; // Point on the scene box where the line starts.
+		Vector sceneBoxEdge = sceneBoxCenter + Vector(0, static_cast<float>(halfBoxHeight)) * yDirMult;
 
-		int circleRadius = 8; // Radius of the circle drawn around the site point.
-		int minStraightLength = 15; // Minimum length of straight line at the box edge and site point edge.
-		int minSiteDistance = circleRadius + minStraightLength; // Minimum distance from a chamfer point to the site point.
+		int circleRadius = 8;
+		int minStraightLength = 15;
+		// Minimum distance from a chamfer point to the site point.
+		int minSiteDistance = circleRadius + minStraightLength;
 
 		// No bends, meaning the line goes straight up/down to the site circle.
 		if (std::abs(sceneBoxCenter.GetFloorIntX() - sitePos.GetFloorIntX()) < minSiteDistance) {
@@ -334,16 +334,16 @@ namespace RTE {
 			m_LineToSitePoints.emplace_back(sitePos + Vector(0, (static_cast<float>(circleRadius + 1)) * -yDirMult));
 			return;
 		}
-		m_LineToSitePoints.emplace_back(sceneBoxEdge); // Point at the scene info box edge.
-
-		int minChamferSize = 15; // Minimum x and y lengths of the chamfer.
-		int maxChamferSize = 40; // Maximum x and y lengths of the chamfer.
-		float xDirMult = sitePos.GetX() < sceneBoxEdge.GetX() ? -1.0F : 1.0F;
+		m_LineToSitePoints.emplace_back(sceneBoxEdge);
 
 		int chamferSize = 0;
+		int minChamferSize = 15;
+		int maxChamferSize = 40;
+		float xDirMult = sitePos.GetX() < sceneBoxEdge.GetX() ? -1.0F : 1.0F;
+
+		// One bend. At this point the line bends. If the bend is chamfered then the two chamfer points will be equally distanced from this point.
 		if (std::abs(sitePos.GetFloorIntY() - sceneBoxCenter.GetFloorIntY()) > halfBoxHeight + minStraightLength) {
-			// One bend.
-			Vector bendPoint(sceneBoxEdge.GetX(), sitePos.GetY()); // At this point the line bends. If the bend is chamfered then the two chamfer points will be equally distanced from this point.
+			Vector bendPoint(sceneBoxEdge.GetX(), sitePos.GetY());
 
 			chamferSize = std::min(std::abs(sceneBoxEdge.GetFloorIntX() - sitePos.GetFloorIntX()) - minSiteDistance, std::abs(sceneBoxEdge.GetFloorIntY() - sitePos.GetFloorIntY()) - minStraightLength);
 			chamferSize = std::min(chamferSize, maxChamferSize);
@@ -353,8 +353,7 @@ namespace RTE {
 			if (chamferSize > 0) { m_LineToSitePoints.emplace_back(Vector(bendPoint.GetX() + static_cast<float>(chamferSize) * xDirMult, bendPoint.GetY())); }
 			m_LineToSitePoints.emplace_back(sitePos + Vector((static_cast<float>(circleRadius + 1)) * -xDirMult, 0));
 		} else {
-			// Two bends.
-			// extraLength ensures that there will be straight lines coming out of the site and the box, and that they are nearly as short as possible.
+			// Two bends. extraLength ensures that there will be straight lines coming out of the site and the box, and that they are nearly as short as possible.
 			int extraLength = std::clamp(minSiteDistance + (sitePos.GetFloorIntY() - sceneBoxEdge.GetFloorIntY()) * static_cast<int>(yDirMult), 0, minSiteDistance);
 
 			Vector firstBend(sceneBoxEdge.GetX(), sceneBoxEdge.GetY() + (static_cast<float>(extraLength + minStraightLength)) * yDirMult);
@@ -524,8 +523,10 @@ namespace RTE {
 			int drawColor = 0;
 			if (scenePointer->GetModuleID() == g_PresetMan.GetModuleID("Base.rte")) {
 				drawColor = c_GUIColorYellow;
+			} else if (scenePointer->GetModuleID() == g_PresetMan.GetModuleID("Missions.rte")) {
+				drawColor = c_GUIColorGreen;
 			} else {
-				drawColor = (scenePointer->GetModuleID() == g_PresetMan.GetModuleID("Missions.rte")) ? c_GUIColorGreen : c_GUIColorCyan;
+				drawColor = c_GUIColorCyan;
 			}
 			Vector sitePos(m_PlanetCenter + scenePointer->GetLocation() + scenePointer->GetLocationOffset());
 			int sitePosX = sitePos.GetFloorIntX();
@@ -547,11 +548,11 @@ namespace RTE {
 	void ScenarioGUI::DrawLinesToSitePoint(BITMAP *drawBitmap) const {
 		int blendAmount = 0;
 		int drawColor = c_GUIColorWhite;
-		for (int i = 1; i < m_LineToSitePoints.size(); i++) {
-			int lineStartX = m_LineToSitePoints.at(i - 1).GetFloorIntX();
-			int lineStartY = m_LineToSitePoints.at(i - 1).GetFloorIntY();
-			int lineEndX = m_LineToSitePoints.at(i).GetFloorIntX();
-			int lineEndY = m_LineToSitePoints.at(i).GetFloorIntY();
+		for (int i = 0; i < m_LineToSitePoints.size() - 1; i++) {
+			int lineStartX = m_LineToSitePoints.at(i).GetFloorIntX();
+			int lineStartY = m_LineToSitePoints.at(i).GetFloorIntY();
+			int lineEndX = m_LineToSitePoints.at(i + 1).GetFloorIntX();
+			int lineEndY = m_LineToSitePoints.at(i + 1).GetFloorIntY();
 
 			blendAmount = 195 + RandomNum(0, 30);
 			set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);

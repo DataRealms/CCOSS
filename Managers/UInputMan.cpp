@@ -118,11 +118,12 @@ namespace RTE {
 	bool UInputMan::DetectJoystickHotPlug() const {
 		// TODO: Add Linux implementation.
 #ifdef _WIN32
-		if (joyGetNumDevs() > 0) {
+		int numDevices = joyGetNumDevs();
+		if (numDevices > 0) {
 			static JOYINFOEX joyInfo = { sizeof(JOYINFOEX), JOY_RETURNBUTTONS };
 			int numDetectedJoysticks = 0;
 
-			for (int i = 0; i < 5; ++i) {
+			for (int i = 0; i < numDevices; ++i) {
 				if (joyGetPosEx(i, &joyInfo) == JOYERR_NOERROR) { numDetectedJoysticks++; }
 			}
 			if (numDetectedJoysticks != num_joysticks) {

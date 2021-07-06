@@ -157,13 +157,12 @@ namespace RTE {
 		m_SectionElapsedTime = static_cast<float>(m_SectionTimer.GetElapsedRealTimeS());
 		m_SectionProgress = std::min((m_SectionDuration > 0) ? m_SectionElapsedTime / m_SectionDuration : 0, 0.9999F);
 
+		// Checking for 0.999 instead of 0.9999 or 1.0 here otherwise there is a hiccup between ending and starting a new orbit cycle.
 		if (m_StationOrbitProgress >= 0.999F) { m_StationOrbitTimer.Reset(); }
 		m_StationOrbitProgress = std::clamp(static_cast<float>(m_StationOrbitTimer.GetElapsedRealTimeS()) / 60.0F, 0.0F, 0.9999F);
 		m_StationOrbitRotation = LERP(0, 1.0F, c_PI, -c_PI, m_StationOrbitProgress);
 
-		if (m_FinishedPlayingIntro) {
-			UpdateTitleTransitions();
-		} else {
+		if (!m_FinishedPlayingIntro) {
 			float introScrollProgress = (static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS()) - m_IntroScrollStartTime) / m_IntroScrollDuration;
 
 			if (m_IntroSequenceState >= IntroSequence::DataRealmsLogoFadeIn && m_IntroSequenceState <= IntroSequence::FmodLogoFadeOut) {
@@ -179,6 +178,8 @@ namespace RTE {
 				m_SectionSwitch = true;
 				m_IntroSequenceState = static_cast<IntroSequence>(static_cast<int>(m_IntroSequenceState) + 1);
 			}
+		} else {
+			UpdateTitleTransitions();
 		}
 	}
 
@@ -354,7 +355,7 @@ namespace RTE {
 					m_IntroScrollStartTime = static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS());
 					m_IntroScrollDuration = 92.4F - m_IntroScrollStartTime; // 92.4s is the end of the planet scrolling
 					m_StationOrbitTimer.SetElapsedRealTimeS(40);
-					clear_to_color(g_FrameMan.GetOverlayBitmap32(), 0xFFFFFFFF); // White fade
+					clear_to_color(g_FrameMan.GetOverlayBitmap32(), 0xFFFFFFFF);
 				}
 				m_FadeAmount = static_cast<int>(LERP(0, 1.0F, 255.0F, 0, m_SectionProgress));
 				break;
@@ -492,17 +493,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TitleScreen::Draw() {
-		if (m_FinishedPlayingIntro) {
-			DrawTitleScreenScene();
-
-			// In credits have to draw the overlay before the game logo otherwise re-drawing it on top of an existing one causes glow effect to look wonky.
-			if (m_TitleTransitionState == TitleTransition::MainMenuToCredits || m_TitleTransitionState == TitleTransition::CreditsToMainMenu) {
-				if (m_FadeAmount > 0) { DrawOverlayEffectBitmap(); }
-				DrawGameLogo();
-				return;
-			}
-			DrawGameLogo();
-		} else {
+		if (!m_FinishedPlayingIntro) {
 			if (m_IntroSequenceState >= IntroSequence::SlideshowFadeIn) { DrawTitleScreenScene(); }
 			if (m_IntroSequenceState >= IntroSequence::GameLogoAppear) { DrawGameLogo(); }
 
@@ -524,6 +515,16 @@ namespace RTE {
 				set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
 				m_PreGameLogoTextGlow.Draw(g_FrameMan.GetBackBuffer32(), Vector(), DrawMode::g_DrawTrans);
 			}
+		} else {
+			DrawTitleScreenScene();
+
+			// In credits have to draw the overlay before the game logo otherwise drawing the game logo again on top of an existing one causes the glow effect to look wonky.
+			if (m_TitleTransitionState == TitleTransition::MainMenuToCredits || m_TitleTransitionState == TitleTransition::CreditsToMainMenu) {
+				if (m_FadeAmount > 0) { DrawOverlayEffectBitmap(); }
+				DrawGameLogo();
+				return;
+			}
+			DrawGameLogo();
 		}
 		if (m_FadeAmount > 0) { DrawOverlayEffectBitmap(); }
 	}

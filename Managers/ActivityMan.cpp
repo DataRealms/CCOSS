@@ -32,8 +32,8 @@ namespace RTE {
 		m_Activity = nullptr;
 		m_StartActivity = nullptr;
 		m_InActivity = false;
-		m_RestartActivity = false;
-		m_ResumeActivity = false;
+		m_ActivityNeedsRestart = false;
+		m_ActivityNeedsResume = false;
 		m_LastMusicPath.clear();
 		m_LastMusicPos = 0.0F;
 		m_LaunchIntoActivity = false;
@@ -49,7 +49,7 @@ namespace RTE {
 			// Evaluate LaunchIntoEditor before LaunchIntoActivity so it takes priority when both are set, otherwise it is ignored and editor is never launched.
 			return SetStartEditorActivitySetToLaunchInto();
 		} else if (IsSetToLaunchIntoActivity()) {
-			m_RestartActivity = true;
+			m_ActivityNeedsRestart = true;
 			return true;
 		}
 		return false;
@@ -76,15 +76,15 @@ namespace RTE {
 		std::unique_ptr<EditorActivity> editorActivityToStart = nullptr;
 
 		if (editorToLaunch == "ActorEditor") {
-			editorActivityToStart.reset(new ActorEditor());
+			editorActivityToStart = std::make_unique<ActorEditor>();
 		} else if (editorToLaunch == "GibEditor") {
-			editorActivityToStart.reset(new GibEditor());
+			editorActivityToStart = std::make_unique<GibEditor>();
 		} else if (editorToLaunch == "SceneEditor") {
-			editorActivityToStart.reset(new SceneEditor());
+			editorActivityToStart = std::make_unique<SceneEditor>();
 		} else if (editorToLaunch == "AreaEditor") {
-			editorActivityToStart.reset(new AreaEditor());
+			editorActivityToStart = std::make_unique<AreaEditor>();
 		} else if (editorToLaunch == "AssemblyEditor") {
-			editorActivityToStart.reset(new AssemblyEditor());
+			editorActivityToStart = std::make_unique<AssemblyEditor>();
 		}
 		if (editorActivityToStart) {
 			if (g_MetaMan.GameInProgress()) { g_MetaMan.EndGame(); }
@@ -92,7 +92,7 @@ namespace RTE {
 			editorActivityToStart->Create();
 			editorActivityToStart->SetEditorMode(EditorActivity::LOADDIALOG);
 			SetStartActivity(editorActivityToStart.release());
-			m_RestartActivity = true;
+			m_ActivityNeedsRestart = true;
 		} else {
 			RTEAbort("Failed to instantiate the " + std::string(editorToLaunch) + " Activity!");
 		}
@@ -101,11 +101,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool ActivityMan::SetStartEditorActivitySetToLaunchInto() {
-		bool validEditorName = false;
 		std::array<std::string_view, 5> validEditorNames = { "ActorEditor", "GibEditor", "SceneEditor", "AreaEditor", "AssemblyEditor" };
-		if (std::find(validEditorNames.begin(), validEditorNames.end(), m_EditorToLaunch) != validEditorNames.end()) { validEditorName = true; }
 
-		if (validEditorName) {
+		if (std::find(validEditorNames.begin(), validEditorNames.end(), m_EditorToLaunch) != validEditorNames.end()) {
 			// Force mouse + keyboard with default mapping so we won't need to change manually if player 1 is set to keyboard only or gamepad.
 			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetDevice(InputDevice::DEVICE_MOUSE_KEYB);
 			g_UInputMan.GetControlScheme(Players::PlayerOne)->SetPreset(InputScheme::InputPreset::PresetMouseWASDKeys);
@@ -127,7 +125,7 @@ namespace RTE {
 			g_SceneMan.SetSceneToLoad("Multiplayer Scene");
 			multiplayerGame->Create();
 			SetStartActivity(multiplayerGame.release());
-			m_RestartActivity = true;
+			m_ActivityNeedsRestart = true;
 			return true;
 		}
 		return false;
@@ -151,7 +149,7 @@ namespace RTE {
 				multiplayerServerLobby->AddPlayer(playerAndTeamNum, true, playerAndTeamNum, 0);
 			}
 			SetStartActivity(multiplayerServerLobby.release());
-			m_RestartActivity = true;
+			m_ActivityNeedsRestart = true;
 			return true;
 		}
 		return false;
@@ -182,7 +180,7 @@ namespace RTE {
 		// Close the console in case it was open by the player or because of a previous Activity error.
 		g_ConsoleMan.SetEnabled(false);
 
-		m_ResumeActivity = true;
+		m_ActivityNeedsResume = true;
 		m_InActivity = true;
 
 		g_PostProcessMan.ClearScenePostEffects();
@@ -246,7 +244,7 @@ namespace RTE {
 	void ActivityMan::ResumeActivity() {
 		if (GetActivity()->GetActivityState() != Activity::NotStarted) {
 			m_InActivity = true;
-			m_ResumeActivity = false;
+			m_ActivityNeedsResume = false;
 
 			g_FrameMan.ClearBackBuffer8();
 			g_FrameMan.FlipFrameBuffers();
@@ -259,7 +257,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool ActivityMan::RestartActivity() {
-		m_RestartActivity = false;
+		m_ActivityNeedsRestart = false;
 		g_ConsoleMan.PrintString("SYSTEM: Activity was reset!");
 
 		g_FrameMan.ClearBackBuffer8();

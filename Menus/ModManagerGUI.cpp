@@ -44,8 +44,8 @@ namespace RTE {
 		m_ToggleScriptButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonToggleScript"));
 		m_ModOrScriptDescriptionLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelDescription"));
 
-		PopulateKnownModsList();
-		PopulateKnownScriptsList();
+		m_ModsListFetched = false;
+		m_ScriptsListFetched = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -79,6 +79,7 @@ namespace RTE {
 			m_ModsListBox->AddItem(m_KnownMods.at(i).GetDisplayString(), std::string(), nullptr, nullptr, i);
 		}
 		m_ModsListBox->ScrollToTop();
+		m_ModsListFetched = true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,6 +100,7 @@ namespace RTE {
 			m_ScriptsListBox->AddItem(m_KnownScripts.at(i).GetDisplayString(), std::string(), nullptr, nullptr, i);
 		}
 		m_ScriptsListBox->ScrollToTop();
+		m_ScriptsListFetched = true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -160,6 +162,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool ModManagerGUI::HandleInputEvents() {
+		if (!ListsFetched()) {
+			PopulateKnownModsList();
+			PopulateKnownScriptsList();
+		}
 		m_GUIControlManager->Update();
 
 		GUIEvent guiEvent;

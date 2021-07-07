@@ -88,6 +88,12 @@ namespace RTE {
 
 #pragma region Mod and Script Handling
 		/// <summary>
+		/// Gets whether both lists were fetched, even if nothing valid was added to them.
+		/// </summary>
+		/// <returns>Whether both lists were fetched, even if nothing valid was added to them.</returns>
+		bool ListsFetched() const { return m_ModsListFetched && m_ScriptsListFetched; }
+
+		/// <summary>
 		/// Fills the KnownMods list with all valid mod DataModules, then fills the ModsListBox using it.
 		/// </summary>
 		void PopulateKnownModsList();
@@ -112,6 +118,9 @@ namespace RTE {
 
 		std::vector<ModRecord> m_KnownMods; //!< Contains ModRecords for all valid mod DataModules.
 		std::vector<ScriptRecord> m_KnownScripts; //!< Contains ScriptRecords for all valid GlobalScripts.
+
+		bool m_ModsListFetched; //!< Whether the known mods list was fetched, even if no valid mod DataModules were added to it.
+		bool m_ScriptsListFetched; //!< Whether the known scripts list was fetched, even if no valid GlobalScripts were added to it.
 
 		/// <summary>
 		/// GUI elements that compose the Mod Manager menu screen.

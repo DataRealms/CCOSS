@@ -33,15 +33,15 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets whether this Activity configuration menu is currently visible and enabled.
+		/// Gets whether this ScenarioActivityConfigGUI is currently visible and enabled.
 		/// </summary>
-		/// <returns>Whether this Activity configuration menu is currently visible and enabled.</returns>
+		/// <returns>Whether this ScenarioActivityConfigGUI is currently visible and enabled.</returns>
 		bool IsEnabled() const;
 
 		/// <summary>
-		/// Enables or disables the Activity configuration menu.
+		/// Enables or disables the ScenarioActivityConfigGUI.
 		/// </summary>
-		/// <param name="enable">Show and enable or hide and disable the Activity configuration menu.</param>
+		/// <param name="enable">Show and enable or hide and disable the ScenarioActivityConfigGUI.</param>
 		/// <param name="selectedActivity">Pointer to the Activity this ScenarioActivityConfigGUI will be configuring for.</param>
 		/// <param name="selectedScene">Pointer to the Scene the passed in Activity will be using.</param>
 		void SetEnabled(bool enable, const Activity *selectedActivity = nullptr, Scene *selectedScene = nullptr);

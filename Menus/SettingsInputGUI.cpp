@@ -34,7 +34,7 @@ namespace RTE {
 		}
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			UpdatePlayerSelectedDeviceLabel(player);
-			ShowPlayerInputDeviceSensitivityControls(player);
+			ShowOrHidePlayerInputDeviceSensitivityControls(player);
 		}
 		m_InputMappingConfigMenu = std::make_unique<SettingsInputMappingGUI>(parentControlManager);
 	}
@@ -61,7 +61,7 @@ namespace RTE {
 			if (playerControlScheme->GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) { g_UInputMan.SetMouseSensitivity(0.6F); }
 
 			UpdatePlayerSelectedDeviceLabel(player);
-			ShowPlayerInputDeviceSensitivityControls(player);
+			ShowOrHidePlayerInputDeviceSensitivityControls(player);
 			UpdatePlayerInputSensitivityControlValues(player);
 
 			m_PlayerInputSettingsBoxes.at(player).ResetControlsButton->SetText("Reset");
@@ -83,7 +83,7 @@ namespace RTE {
 		}
 		g_UInputMan.GetControlScheme(player)->SetDevice(static_cast<InputDevice>(currentDevice));
 		UpdatePlayerSelectedDeviceLabel(player);
-		ShowPlayerInputDeviceSensitivityControls(player);
+		ShowOrHidePlayerInputDeviceSensitivityControls(player);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -118,7 +118,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SettingsInputGUI::ShowPlayerInputDeviceSensitivityControls(int player) {
+	void SettingsInputGUI::ShowOrHidePlayerInputDeviceSensitivityControls(int player) {
 		m_PlayerInputSettingsBoxes.at(player).SensitivityLabel->SetVisible(false);
 		m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetVisible(false);
 		m_PlayerInputSettingsBoxes.at(player).DeadZoneControlsBox->SetVisible(false);

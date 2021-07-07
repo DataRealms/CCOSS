@@ -285,22 +285,19 @@ namespace RTE {
 
 		int maxHumanPlayers = m_SelectedActivity->GetMaxPlayerSupport();
 		int minTeamsRequired = m_SelectedActivity->GetMinTeamsRequired();
+
+		std::string errorMessage = "";
 		if (humansInTeams > maxHumanPlayers) {
-			m_StartGameButton->SetVisible(false);
-			m_StartErrorLabel->SetVisible(true);
-			m_StartErrorLabel->SetText("Too many players assigned! Max for this activity is " + std::to_string(maxHumanPlayers));
+			errorMessage = "Too many players assigned! Max for this activity is " + std::to_string(maxHumanPlayers);
 		} else if (minTeamsRequired > teamsWithPlayers) {
-			m_StartGameButton->SetVisible(false);
-			m_StartErrorLabel->SetVisible(true);
-			m_StartErrorLabel->SetText("Assign players to at least " + std::to_string(minTeamsRequired) + " of the teams!");
+			errorMessage = "Assign players to at least " + std::to_string(minTeamsRequired) + " of the teams!";
 		} else if (teamWithHumans == 0) {
-			m_StartGameButton->SetVisible(false);
-			m_StartErrorLabel->SetVisible(true);
-			m_StartErrorLabel->SetText("Assign human players to at least one team!");
-		} else {
-			m_StartGameButton->SetVisible(true);
-			m_StartErrorLabel->SetVisible(false);
+			errorMessage = "Assign human players to at least one team!";
 		}
+		m_StartErrorLabel->SetText(errorMessage);
+		m_StartErrorLabel->SetVisible(!errorMessage.empty());
+		m_StartGameButton->SetVisible(errorMessage.empty());
+
 		if (m_StartGameButton->GetVisible()) { m_GUIControlManager->GetManager()->SetFocus(m_StartGameButtonBlinkTimer.AlternateReal(500) ? m_StartGameButton : nullptr); }
 
 		return HandleInputEvents();
@@ -310,15 +307,15 @@ namespace RTE {
 
 	void ScenarioActivityConfigGUI::UpdateStartingGoldSliderAndLabel() {
 		if (!m_StartingGoldAdjustedManually) {
-			if (m_ActivityDifficultySlider->GetValue() < Activity::DifficultySetting::CakeDifficulty && m_SelectedActivity->GetDefaultGoldCake() > -1) {
+			if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::CakeDifficulty && m_SelectedActivity->GetDefaultGoldCake() > -1) {
 				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldCake());
-			} else if (m_ActivityDifficultySlider->GetValue() < Activity::DifficultySetting::EasyDifficulty && m_SelectedActivity->GetDefaultGoldEasy() > -1) {
+			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::EasyDifficulty && m_SelectedActivity->GetDefaultGoldEasy() > -1) {
 				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldEasy());
-			} else if (m_ActivityDifficultySlider->GetValue() < Activity::DifficultySetting::MediumDifficulty && m_SelectedActivity->GetDefaultGoldMedium() > -1) {
+			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::MediumDifficulty && m_SelectedActivity->GetDefaultGoldMedium() > -1) {
 				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldMedium());
-			} else if (m_ActivityDifficultySlider->GetValue() < Activity::DifficultySetting::HardDifficulty && m_SelectedActivity->GetDefaultGoldHard() > -1) {
+			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::HardDifficulty && m_SelectedActivity->GetDefaultGoldHard() > -1) {
 				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldHard());
-			} else if (m_ActivityDifficultySlider->GetValue() < Activity::DifficultySetting::NutsDifficulty && m_SelectedActivity->GetDefaultGoldNuts() > -1) {
+			} else if (m_ActivityDifficultySlider->GetValue() <= Activity::DifficultySetting::NutsDifficulty && m_SelectedActivity->GetDefaultGoldNuts() > -1) {
 				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldNuts());
 			} else if (m_SelectedActivity->GetDefaultGoldNuts() > -1) {
 				m_StartingGoldSlider->SetValue(m_SelectedActivity->GetDefaultGoldNuts());
@@ -338,7 +335,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ScenarioActivityConfigGUI::ClickInPlayerTeamSetup(int clickedPlayer, int clickedTeam) {
-		// Move the player's icon to the correct row.
 		m_PlayerBoxes.at(clickedPlayer).at(clickedTeam)->SetDrawType(GUICollectionBox::Image);
 		const Icon *playerIcon = (clickedPlayer != PlayerColumns::PlayerCPU) ? g_UInputMan.GetSchemeIcon(clickedPlayer) : dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
 		if (playerIcon) { m_PlayerBoxes.at(clickedPlayer).at(clickedTeam)->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0])); }

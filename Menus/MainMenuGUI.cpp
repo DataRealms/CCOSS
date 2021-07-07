@@ -190,8 +190,9 @@ namespace RTE {
 			m_ActiveMenuScreen = screenToShow;
 			m_ActiveGUIControlManager = (m_ActiveMenuScreen == MenuScreen::MainScreen) ? m_MainMenuScreenGUIControlManager.get() : m_SubMenuScreenGUIControlManager.get();
 			m_MenuScreenChange = true;
+
+			if (playButtonPressSound) { g_GUISound.ButtonPressSound()->Play(); }
 		}
-		if (playButtonPressSound) { g_GUISound.ButtonPressSound()->Play(); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

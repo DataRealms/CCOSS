@@ -27,9 +27,9 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Enables or disables the audio settings menu.
+		/// Enables or disables the SettingsAudioGUI.
 		/// </summary>
-		/// <param name="enable">Show and enable or hide and disable the audio settings menu.</param>
+		/// <param name="enable">Show and enable or hide and disable the SettingsAudioGUI.</param>
 		void SetEnabled(bool enable = true) const;
 
 		/// <summary>

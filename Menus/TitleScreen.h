@@ -145,7 +145,7 @@ namespace RTE {
 			enum class StarSize { StarSmall, StarLarge, StarHuge };
 
 			StarSize Size; //!< The size of the Star. Used for the appropriate Bitmap selection and Intensity randomization when drawing.
-			BITMAP *Bitmap; //!< The bitmap to draw, not owned by this.
+			BITMAP *Bitmap; //!< The bitmap to draw, not owned by this. Not Owned.
 			int Intensity; //!< Intensity value on a scale from 0 to 255.
 			Vector Position; //!< The position of the Star on the title screen scene backdrop.
 		};
@@ -194,11 +194,11 @@ namespace RTE {
 		float m_SlideFadeOutDuration; //!< How many seconds the duration of a slideshow slide fade out is supposed to elapse.
 		std::unique_ptr<GUIFont> m_IntroTextFont; //!< The GUIFont used for drawing text during the logo splash screens and slideshow.
 		std::string m_SlideshowSlideText; //!< String containing the slide text during each section of the slideshow.
-		BITMAP *m_DataRealmsLogo; //!< The DataRealms logo bitmap used in the logo splash screen.
-		BITMAP *m_FmodLogo; //!< The Fmod logo bitmap used in the logo splash screen.
+		BITMAP *m_DataRealmsLogo; //!< The DataRealms logo bitmap used in the logo splash screen. Not Owned.
+		BITMAP *m_FmodLogo; //!< The Fmod logo bitmap used in the logo splash screen. Not Owned.
 		MOSParticle m_PreGameLogoText; //!< The pre-game logo text that appears at the end of the slideshow.
 		MOSParticle m_PreGameLogoTextGlow; //!< The pre-game logo text glow.
-		std::array<BITMAP *, 8> m_IntroSlides; //!< Array that contains all the slideshow slide bitmaps.
+		std::array<BITMAP *, 8> m_IntroSlides; //!< Array that contains all the slideshow slide bitmaps. Not Owned.
 
 #pragma region Create Breakdown
 		/// <summary>

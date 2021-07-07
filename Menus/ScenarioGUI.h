@@ -52,7 +52,7 @@ namespace RTE {
 
 #pragma region Setters
 		/// <summary>
-		/// Sets the planet coordinates on the screen so the menu can overlay properly on it, fetches the Scenes and Activities lists and enables the appropriate GUI elements.
+		/// Enables the GUI elements for the menu, sets the planet coordinates on the screen so the menu can properly overlay it, and fetches the Scenes and Activities lists.
 		/// </summary>
 		/// <param name="center">The absolute screen coordinates of the planet's center.</param>
 		/// <param name="radius">The radius, in screen pixel units, of the planet.</param>
@@ -180,7 +180,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="mouseX">Mouse X position.</param>
 		/// <param name="mouseY">Mouse Y position.</param>
-		void UpdateHoveredScene(int mouseX, int mouseY);
+		void UpdateHoveredSitePointLabel(int mouseX, int mouseY);
 
 		/// <summary>
 		/// Handles the player interaction with the ScenarioGUI GUI elements.

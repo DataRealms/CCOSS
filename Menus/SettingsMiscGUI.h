@@ -25,9 +25,9 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Enables or disables the misc settings menu.
+		/// Enables or disables the SettingsMiscGUI.
 		/// </summary>
-		/// <param name="enable">Show and enable or hide and disable the misc settings menu.</param>
+		/// <param name="enable">Show and enable or hide and disable the SettingsMiscGUI.</param>
 		void SetEnabled(bool enable = true) const;
 
 		/// <summary>

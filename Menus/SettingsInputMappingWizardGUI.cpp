@@ -172,6 +172,7 @@ namespace RTE {
 					m_WizardManualConfigScreen.GamepadConfigRecommendedDiagramBox->Resize(m_DualAnalogXBDiagramBitmaps.at(0)->w, m_DualAnalogXBDiagramBitmaps.at(0)->h);
 					break;
 				default:
+					RTEAbort("Invalid GamepadType passed to SettingsInputMappingWizardGUI::ShowManualConfigScreen!");
 					break;
 			}
 			m_WizardManualConfigScreen.GamepadConfigRecommendedDiagramBox->CenterInParent(true, true);
@@ -338,50 +339,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsInputMappingWizardGUI::HandleManualConfigSequence() {
-		if (m_ConfigStepChange) {
-			ConfigWizardSteps configuringDeviceSteps = ConfigWizardSteps::NoConfigSteps;
+		if (m_ConfigStepChange) { HandleManualConfigStepChange(); }
 
-			switch (m_ConfiguringDevice) {
-				case InputDevice::DEVICE_KEYB_ONLY:
-					configuringDeviceSteps = ConfigWizardSteps::KeyboardConfigSteps;
-					break;
-				case InputDevice::DEVICE_MOUSE_KEYB:
-					configuringDeviceSteps = ConfigWizardSteps::MouseAndKeyboardConfigSteps;
-					break;
-				default:
-					configuringDeviceSteps = (m_ConfiguringGamepadType == GamepadType::DPad) ? ConfigWizardSteps::DPadConfigSteps : ConfigWizardSteps::DualAnalogConfigSteps;
-					break;
-			}
-			if (!m_ConfigFinished) {
-				std::string configStepLabel(16, '\0');
-				std::snprintf(configStepLabel.data(), configStepLabel.size(), "Step %i of %i", m_ConfigStep + 1, configuringDeviceSteps);
-				m_WizardManualConfigScreen.ConfigStepLabel->SetText(configStepLabel);
-				m_WizardManualConfigScreen.DiscardOrApplyConfigButton->SetText("Discard Changes");
-				m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetVisible(true);
-				if (m_ConfiguringDeviceIsGamepad) {
-					m_WizardManualConfigScreen.GamepadConfigRecommendedBox->SetVisible(true);
-				} else {
-					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetVisible(true);
-				}
-			} else {
-				m_WizardManualConfigScreen.ConfigStepLabel->SetText("Config Complete");
-				m_WizardManualConfigScreen.DiscardOrApplyConfigButton->SetText("Apply Changes");
-				m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetVisible(false);
-				m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetVisible(false);
-				m_WizardManualConfigScreen.GamepadConfigRecommendedBox->SetVisible(false);
-				if (m_ConfigStep < configuringDeviceSteps - 1) { m_ConfigFinished = false; }
-			}
-			if (m_ConfigStep == 0) {
-				m_WizardManualConfigScreen.PrevConfigStepButton->SetVisible(false);
-				m_WizardManualConfigScreen.NextConfigStepButton->SetVisible(true);
-			} else if (m_ConfigStep >= configuringDeviceSteps - 1) {
-				m_WizardManualConfigScreen.PrevConfigStepButton->SetVisible(true);
-				m_WizardManualConfigScreen.NextConfigStepButton->SetVisible(false);
-			} else {
-				m_WizardManualConfigScreen.PrevConfigStepButton->SetVisible(true);
-				m_WizardManualConfigScreen.NextConfigStepButton->SetVisible(true);
-			}
-		}
 		if (m_ConfigFinished) {
 			m_GUIControlManager->GetManager()->SetFocus(m_BlinkTimer.AlternateReal(500) ? m_WizardManualConfigScreen.DiscardOrApplyConfigButton : nullptr);
 		} else {
@@ -414,6 +373,49 @@ namespace RTE {
 				m_ConfigStepChange = true;
 			}
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SettingsInputMappingWizardGUI::HandleManualConfigStepChange() {
+		int configuringDeviceSteps = 0;
+
+		switch (m_ConfiguringDevice) {
+			case InputDevice::DEVICE_KEYB_ONLY:
+				configuringDeviceSteps = m_KeyboardConfigSteps;
+				break;
+			case InputDevice::DEVICE_MOUSE_KEYB:
+				configuringDeviceSteps = m_MouseAndKeyboardConfigSteps;
+				break;
+			case InputDevice::DEVICE_GAMEPAD_1:
+			case InputDevice::DEVICE_GAMEPAD_2:
+			case InputDevice::DEVICE_GAMEPAD_3:
+			case InputDevice::DEVICE_GAMEPAD_4:
+				configuringDeviceSteps = (m_ConfiguringGamepadType == GamepadType::DPad) ? m_DPadConfigSteps : m_DualAnalogConfigSteps;
+				break;
+			default:
+				RTEAbort("Invalid InputDevice passed to SettingsInputMappingWizardGUI::HandleManualConfigSequence!");
+				break;
+		}
+		if (!m_ConfigFinished) {
+			m_WizardManualConfigScreen.ConfigStepLabel->SetText("Step " + std::to_string(m_ConfigStep + 1) + " of " + std::to_string(configuringDeviceSteps));
+			m_WizardManualConfigScreen.DiscardOrApplyConfigButton->SetText("Discard Changes");
+			m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetVisible(true);
+			if (m_ConfiguringDeviceIsGamepad) {
+				m_WizardManualConfigScreen.GamepadConfigRecommendedBox->SetVisible(true);
+			} else {
+				m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetVisible(true);
+			}
+		} else {
+			m_WizardManualConfigScreen.ConfigStepLabel->SetText("Config Complete");
+			m_WizardManualConfigScreen.DiscardOrApplyConfigButton->SetText("Apply Changes");
+			m_WizardManualConfigScreen.ConfigStepDescriptionLabel->SetVisible(false);
+			m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetVisible(false);
+			m_WizardManualConfigScreen.GamepadConfigRecommendedBox->SetVisible(false);
+			if (m_ConfigStep < configuringDeviceSteps - 1) { m_ConfigFinished = false; }
+		}
+		m_WizardManualConfigScreen.PrevConfigStepButton->SetVisible(m_ConfigStep != 0);
+		m_WizardManualConfigScreen.NextConfigStepButton->SetVisible(m_ConfigStep < configuringDeviceSteps - 1);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

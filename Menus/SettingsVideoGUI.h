@@ -30,9 +30,9 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Enables or disables the video settings menu.
+		/// Enables or disables the SettingsVideoGUI.
 		/// </summary>
-		/// <param name="enable">Show and enable or hide and disable the video settings menu.</param>
+		/// <param name="enable">Show and enable or hide and disable the SettingsVideoGUI.</param>
 		void SetEnabled(bool enable = true) const;
 
 		/// <summary>

@@ -26,9 +26,9 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Enables or disables the gameplay settings menu.
+		/// Enables or disables the SettingsGameplayGUI.
 		/// </summary>
-		/// <param name="enable">Show and enable or hide and disable the gameplay settings menu.</param>
+		/// <param name="enable">Show and enable or hide and disable the SettingsGameplayGUI.</param>
 		void SetEnabled(bool enable = true);
 
 		/// <summary>

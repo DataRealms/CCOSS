@@ -33,9 +33,9 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Enables or disables the input settings menu.
+		/// Enables or disables the SettingsInputGUI.
 		/// </summary>
-		/// <param name="enable">Show and enable or hide and disable the input settings menu.</param>
+		/// <param name="enable">Show and enable or hide and disable the SettingsInputGUI.</param>
 		void SetEnabled(bool enable = true) const;
 
 		/// <summary>
@@ -55,7 +55,7 @@ namespace RTE {
 		/// Gets whether the player is currently manually configuring an InputMapping through the input mapping menu screen.
 		/// </summary>
 		/// <returns>Whether the player is currently manually configuring an InputMapping through the input mapping menu screen.</returns>
-		bool InputMappingConfigConfiguringManually() const { return m_InputMappingConfigMenu->IsConfiguringManually(); }
+		bool InputMappingConfigIsConfiguringManually() const { return m_InputMappingConfigMenu->IsConfiguringManually(); }
 
 		/// <summary>
 		/// Handles input capture logic of the input mapping menu screen manual configuration sequence.
@@ -66,7 +66,7 @@ namespace RTE {
 		/// Gets whether the player is currently manually configuring the InputScheme through the input mapping wizard.
 		/// </summary>
 		/// <returns>Whether the player is currently manually configuring the InputScheme through the input mapping wizard.</returns>
-		bool InputConfigWizardConfiguringManually() const { return m_InputMappingConfigMenu->GetInputConfigWizardMenu()->IsConfiguringManually(); }
+		bool InputConfigWizardIsConfiguringManually() const { return m_InputMappingConfigMenu->GetInputConfigWizardMenu()->IsConfiguringManually(); }
 
 		/// <summary>
 		/// Handles input capture logic of the input mapping wizard manual configuration sequence.
@@ -134,7 +134,7 @@ namespace RTE {
 		/// Enables the input sensitivity controls for a player if applicable to the selected input device.
 		/// </summary>
 		/// <param name="player">The player to enable input sensitivity controls for.</param>
-		void ShowPlayerInputDeviceSensitivityControls(int player);
+		void ShowOrHidePlayerInputDeviceSensitivityControls(int player);
 
 		/// <summary>
 		/// Updates the input sensitivity controls of a player according to the InputScheme.

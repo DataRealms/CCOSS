@@ -200,7 +200,7 @@ namespace RTE {
 		void ShowCreditsScreen();
 
 		/// <summary>
-		/// Makes the quit confirmation menu screen visible to be interacted with by the user if a game is in progress, or immediately sets the UpdateResult to Quit if not.
+		/// Makes the quit confirmation menu screen visible to be interacted with by the player if a game is in progress, or immediately sets the UpdateResult to Quit if not.
 		/// </summary>
 		void ShowQuitScreenOrQuit();
 

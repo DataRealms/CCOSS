@@ -70,13 +70,15 @@ namespace RTE {
 	void SettingsAudioGUI::HandleInputEvents(GUIEvent &guiEvent) {
 		if (guiEvent.GetType() == GUIEvent::Notification) {
 			if (guiEvent.GetControl() == m_MasterVolumeSlider) {
-				g_AudioMan.SetMasterVolume(static_cast<float>(m_MasterVolumeSlider->GetValue()) / 100);
+				float newMasterVolume = static_cast<float>(m_MasterVolumeSlider->GetValue()) / 100.0F;
+				if (newMasterVolume != g_AudioMan.GetSoundsVolume() && !g_GUISound.TestSound()->IsBeingPlayed()) { g_GUISound.TestSound()->Play(); }
+				g_AudioMan.SetMasterVolume(newMasterVolume);
 				UpdateMasterVolumeControls();
 			} else if (guiEvent.GetControl() == m_MusicVolumeSlider) {
-				g_AudioMan.SetMusicVolume(static_cast<float>(m_MusicVolumeSlider->GetValue()) / 100);
+				g_AudioMan.SetMusicVolume(static_cast<float>(m_MusicVolumeSlider->GetValue()) / 100.0F);
 				UpdateMusicVolumeControls();
 			} else if (guiEvent.GetControl() == m_SoundVolumeSlider) {
-				float newSoundVolume = (static_cast<float>(m_SoundVolumeSlider->GetValue()) / 100);
+				float newSoundVolume = static_cast<float>(m_SoundVolumeSlider->GetValue()) / 100.0F;
 				if (newSoundVolume != g_AudioMan.GetSoundsVolume() && !g_GUISound.TestSound()->IsBeingPlayed()) { g_GUISound.TestSound()->Play(); }
 				g_AudioMan.SetSoundsVolume(newSoundVolume);
 				UpdateSoundVolumeControls();

@@ -32,15 +32,15 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets whether this input mapping wizard menu is currently visible and enabled.
+		/// Gets whether this SettingsInputMappingWizardGUI is currently visible and enabled.
 		/// </summary>
-		/// <returns>Whether this input mapping wizard menu is currently visible and enabled.</returns>
+		/// <returns>Whether this SettingsInputMappingWizardGUI is currently visible and enabled.</returns>
 		bool IsEnabled() const;
 
 		/// <summary>
-		/// Enables or disables the input mapping wizard menu.
+		/// Enables or disables the SettingsInputMappingWizardGUI.
 		/// </summary>
-		/// <param name="enable">Show and enable or hide and disable the input mapping wizard menu.</param>
+		/// <param name="enable">Show and enable or hide and disable the SettingsInputMappingWizardGUI.</param>
 		/// <param name="player">The player this SettingsInputMappingWizardGUI is mapping inputs for.</param>
 		void SetEnabled(bool enable = true, int player = 0, InputScheme *playerScheme = nullptr);
 
@@ -51,9 +51,9 @@ namespace RTE {
 		GUICollectionBox * GetActiveDialogBox() const;
 
 		/// <summary>
-		/// Gets whether the input mapping wizard needs to capture input for manual configuration.
+		/// Gets whether this SettingsInputMappingWizardGUI needs to capture input for manual configuration.
 		/// </summary>
-		/// <returns>Whether the input mapping wizard needs to capture input for manual configuration.</returns>
+		/// <returns>Whether this SettingsInputMappingWizardGUI needs to capture input for manual configuration.</returns>
 		bool IsConfiguringManually() const;
 #pragma endregion
 
@@ -72,17 +72,6 @@ namespace RTE {
 #pragma endregion
 
 	private:
-
-		/// <summary>
-		/// Enumeration for the manual configuration step count for each type of input device.
-		/// </summary>
-		enum ConfigWizardSteps {
-			NoConfigSteps = 0,
-			KeyboardConfigSteps = 16,
-			MouseAndKeyboardConfigSteps = 11,
-			DPadConfigSteps = 12,
-			DualAnalogConfigSteps = 20,
-		};
 
 		/// <summary>
 		/// Enumeration for the different types of gamepads that can be configured.
@@ -120,6 +109,11 @@ namespace RTE {
 			GUIButton *StartConfigAnalogDSTypeButton;
 			GUIButton *StartConfigAnalogXBTypeButton;
 		};
+
+		static constexpr int m_KeyboardConfigSteps = 16; //!< The step count for keyboard only manual configuration.
+		static constexpr int m_MouseAndKeyboardConfigSteps = 11; //!< The step count for mouse + keyboard manual configuration.
+		static constexpr int m_DPadConfigSteps = 12; //!< The step count for DPad type gamepad manual configuration.
+		static constexpr int m_DualAnalogConfigSteps = 20; //!< The step count for DualAnalog type gamepad manual configuration.
 
 		GUIControlManager *m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of this menu. Not owned by this.
 
@@ -208,6 +202,11 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Input Configuration Sequence Handling Breakdown
+		/// <summary>
+		/// Handles step changes in the manual input configuration sequence.
+		/// </summary>
+		void HandleManualConfigStepChange();
+
 		/// <summary>
 		/// Handles capturing input and progressing the keyboard only configuration sequence.
 		/// </summary>

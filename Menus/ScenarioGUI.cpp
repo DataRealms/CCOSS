@@ -112,10 +112,9 @@ namespace RTE {
 		m_PlanetRadius = radius;
 		if (centerChanged) { CalculateLinesToSitePoint(); }
 
-		// Reload all scenes and activities to reflect scene changes player might do in scene editor.
 		FetchActivitiesAndScenesLists();
 
-		// Don't show resume button if the current Activity is an editor or online multiplayer, those are resumed from the main menu.
+		// Only show the resume button if the current Activity is a GameActivity. Editor or Multiplayer Activities are resumed from the main menu, so the resume button shouldn't show for them.
 		const GameActivity *currentActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
 		m_ResumeButton->SetVisible(currentActivity && (currentActivity->GetActivityState() == Activity::Running || currentActivity->GetActivityState() == Activity::Editing));
 
@@ -153,7 +152,6 @@ namespace RTE {
 			} else {
 				m_ActivityDescriptionLabel->SetText(m_SelectedActivity->GetDescription() + "\n\nNo sites appear to be compatible with this selected activity! Please try another.");
 			}
-			// Deselect any previously selected scene. it may not be compatible with the new activity.
 			SetSelectedScene((m_ActivityScenes && m_ActivityScenes->size() == 1) ? m_ActivityScenes->front() : nullptr);
 		} else {
 			m_ActivityDescriptionLabel->SetText("No Activity selected.");
@@ -196,7 +194,6 @@ namespace RTE {
 	void ScenarioGUI::DragBox(int mouseX, int mouseY) {
 		if (m_DraggedBox) {
 			m_DraggedBox->MoveRelative(mouseX - m_PrevMousePos.GetFloorIntX(), mouseY - m_PrevMousePos.GetFloorIntY());
-			// Keep the box within screen bounds.
 			m_DraggedBox->SetPositionAbs(std::clamp(m_DraggedBox->GetXPos(), 0, m_RootBox->GetWidth() - m_DraggedBox->GetWidth()), std::clamp(m_DraggedBox->GetYPos(), 0, m_RootBox->GetHeight() - m_DraggedBox->GetHeight()));
 			if (m_DraggedBox == m_ActivityInfoBox) {
 				// The Activity ComboBox isn't a child of the Activity info box (dirty hack to allow the drop-down list to extend beyond the parent box bounds without clipping) so we need to move as well.
@@ -396,7 +393,7 @@ namespace RTE {
 			m_RootBox->SetVisible(true);
 			m_ActivityConfigBoxRootBox->SetVisible(false);
 
-			UpdateHoveredScene(mousePosX, mousePosY);
+			UpdateHoveredSitePointLabel(mousePosX, mousePosY);
 			HandleInputEvents(mousePosX, mousePosY);
 
 			if (m_SceneInfoBox->GetVisible()) {
@@ -419,7 +416,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ScenarioGUI::UpdateHoveredScene(int mouseX, int mouseY) {
+	void ScenarioGUI::UpdateHoveredSitePointLabel(int mouseX, int mouseY) {
 		bool foundAnyHover = false;
 		if (m_ActivityScenes && !m_DraggedBox && !m_ActivityInfoBox->PointInside(mouseX, mouseY) && !m_SceneInfoBox->PointInside(mouseX, mouseY)) {
 			Scene *candidateScene = nullptr;

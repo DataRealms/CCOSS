@@ -30,15 +30,15 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets whether this input mapping settings menu is currently visible and enabled.
+		/// Gets whether this SettingsInputMappingGUI is currently visible and enabled.
 		/// </summary>
-		/// <returns>Whether this input mapping settings menu is currently visible and enabled.</returns>
+		/// <returns>Whether this SettingsInputMappingGUI is currently visible and enabled.</returns>
 		bool IsEnabled() const;
 
 		/// <summary>
-		/// Enables or disables the input mapping settings menu.
+		/// Enables or disables the SettingsInputMappingGUI.
 		/// </summary>
-		/// <param name="enable">Show and enable or hide and disable the input mapping settings menu.</param>
+		/// <param name="enable">Show and enable or hide and disable the SettingsInputMappingGUI.</param>
 		/// <param name="player">The player this SettingsInputMappingGUI is configuring input mapping for.</param>
 		void SetEnabled(bool enable = true, int player = 0);
 
@@ -54,9 +54,9 @@ namespace RTE {
 		void CloseActiveDialogBox();
 
 		/// <summary>
-		/// Gets whether the input mapping settings menu needs to capture input for manual configuration.
+		/// Gets whether this SettingsInputMappingGUI needs to capture input for manual configuration.
 		/// </summary>
-		/// <returns>Whether the input mapping settings menu needs to capture input for manual configuration.</returns>
+		/// <returns>Whether this SettingsInputMappingGUI needs to capture input for manual configuration.</returns>
 		bool IsConfiguringManually() const;
 
 		/// <summary>

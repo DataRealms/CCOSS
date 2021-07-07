@@ -176,9 +176,9 @@ namespace RTE {
 		}
 		// Manual input config sequence has to be updated outside the GUI event handling loop otherwise input capture doesn't work (loop only runs if event queue isn't empty).
 		if (m_ActiveSettingsMenuScreen == SettingsMenuScreen::InputSettingsMenu) {
-			if (m_InputSettingsMenu->InputMappingConfigConfiguringManually()) {
+			if (m_InputSettingsMenu->InputMappingConfigIsConfiguringManually()) {
 				m_InputSettingsMenu->HandleMappingConfigManualConfiguration();
-			} else if (m_InputSettingsMenu->InputConfigWizardConfiguringManually()) {
+			} else if (m_InputSettingsMenu->InputConfigWizardIsConfiguringManually()) {
 				m_InputSettingsMenu->HandleConfigWizardManualConfiguration();
 			}
 		}

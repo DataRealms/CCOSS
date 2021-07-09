@@ -182,8 +182,8 @@ namespace RTE {
 			/// </summary>
 			/// <param name="itemIcons">A vector of Bitmaps to be filled in with the icon(s) for this CarouselItemBox's item(s).</param>
 			/// <param name="totalItemMass">A float to be filled in with the total mass of this CarouselItemBox's item(s).</param>
-			/// <param name="equippedItems">A pointer to the vector of equipped items to be used if the CarouselItemBox IsForEquippedItem.</param>
-			void GetIconsAndMass(std::vector<BITMAP *> &itemIcons, float &totalItemMass, const std::vector<MovableObject *> *equippedItems) const;
+			/// <param name="equippedItems">A pointer to the vector of sets of equipped items to be used if the CarouselItemBox IsForEquippedItem.</param>
+			void GetIconsAndMass(std::vector<BITMAP *> &itemIcons, float &totalItemMass, const std::vector<std::pair<MovableObject *, MovableObject *>> *equippedItems) const;
 		};
 
 		/// <summary>
@@ -241,7 +241,7 @@ namespace RTE {
 		Timer m_EnableDisableAnimationTimer; //!< Timer for progressing enabling/disabling animations.
 
 		bool m_InventoryActorIsHuman; //!< Whether the Actor whose inventory this GUI will display is an AHuman.
-		std::vector<MovableObject *> m_InventoryActorEquippedItems; //!< A vector of pointers to the equipped items of the Actor whose inventory this GUI will display, if applicable.
+		std::vector<std::pair<MovableObject *, MovableObject *>> m_InventoryActorEquippedItems; //!< A vector of pairs of pointers to the equipped item and equipped offhand item of the Actor whose inventory this GUI will display, if applicable. Pointers are NOT owned.
 
 		bool m_CarouselDrawEmptyBoxes; //!< Whether or not the carousel should draw empty item boxes. Used in Carousel MenuMode.
 		bool m_CarouselBackgroundTransparent; //!< Whether or not the carousel's background should be drawn transparently. Used in Carousel MenuMode.
@@ -260,6 +260,7 @@ namespace RTE {
 		bool m_GUIShowEmptyRows; //!< Whether this GUI should show empty rows, up to the FullPageViewItemLimit.
 		Vector m_GUICursorPos; //!< Screen position of the cursor. Used in Full/Transfer MenuModes.
 		Vector m_PreviousGUICursorPos; //!< The previous screen position of the cursor. Used in Full/Transfer MenuModes.
+		int m_GUIInventoryActorCurrentEquipmentSetIndex; //!< An int describing the index in InventoryActorEquippedItems which is currently being shown by the gui. Used in Full/Transfer MenuModes.
 		std::unique_ptr<GUISelectedItem> m_GUISelectedItem; //!< The selected item for this InventoryMenuGUI. Used in Full/Transfer MenuModes.
 
 		Timer m_GUIRepeatStartTimer; //!< Measures the time to when to start repeating inputs when they're held down. Used in Full/Transfer MenuModes.

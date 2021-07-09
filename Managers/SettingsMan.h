@@ -28,10 +28,8 @@ namespace RTE {
 		/// Makes the SettingsMan object ready for use.
 		/// </summary>
 		/// <param name="reader">A Reader that the SettingsMan will create itself from.</param>
-		/// <param name="checkType">Whether there is a class name in the stream to check against to make sure the correct type is being read from the stream.</param>
-		/// <param name="doCreate">Whether to do any additional initialization of the object after reading in all the properties from the Reader.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Initialize(Reader &reader, bool checkType = true, bool doCreate = true);
+		int Initialize(Reader &reader);
 #pragma endregion
 
 #pragma region Destruction
@@ -415,13 +413,6 @@ namespace RTE {
 	private:
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
-
-		/// <summary>
-		/// Writes the minimal default settings needed for the game to run to an output stream. These will be overwritten with the full list of available settings as soon as the game begins loading.
-		/// </summary>
-		/// <param name="writer">A Writer that the SettingsMan will save itself with.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int WriteDefaultSettings(Writer &writer);
 
 		/// <summary>
 		/// Clears all the member variables of this SettingsMan, effectively resetting the members of this abstraction level only.

@@ -78,7 +78,7 @@ namespace RTE {
 		m_StoreNetworkBackBuffer = false;
 		m_NetworkFrameCurrent = 0;
 		m_NetworkFrameReady = 1;
-		m_PaletteFile.Reset();
+		m_PaletteFile = ContentFile("Base.rte/palette.bmp");
 		m_BlackColor = 245;
 		m_AlmostBlackColor = 245;
 		m_GUIScreen = nullptr;

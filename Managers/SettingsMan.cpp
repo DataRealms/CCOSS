@@ -55,20 +55,21 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SettingsMan::Initialize(Reader &reader, bool checkType, bool doCreate) {
-		if (reader.ReaderOK()) {
-			return Serializable::Create(reader, checkType);
+	int SettingsMan::Initialize(Reader &reader) {
+		if (!reader.ReaderOK()) {
+			Writer settingsWriter("Base.rte/Settings.ini");
+			RTEAssert(settingsWriter.WriterOK(), "After failing to open the Base.rte/Settings.ini, could not then even create a new one to save settings to!\nAre you trying to run the game from a read-only disk?\nYou need to install the game to a writable area before running it!");
+
+			// Settings file doesn't need to be populated with anything right now besides this manager's ClassName for serialization. It will be overwritten with the full list of settings with default values from all the managers before modules start loading.
+			settingsWriter.ObjectStart(GetClassName());
+			settingsWriter.EndWrite();
+
+			m_SettingsNeedOverwrite = true;
+
+			Reader settingsReader("Base.rte/Settings.ini");
+			return Serializable::Create(settingsReader);
 		}
-
-		// Couldn't find the settings file, so create a new one with all the good defaults!
-		Writer settingsWriter("Base.rte/Settings.ini");
-		RTEAssert(settingsWriter.WriterOK(), "After failing to open the Base.rte/Settings.ini, could not then even create a new one to save settings to!\nAre you trying to run the game from a read-only disk?\nYou need to install the game to a writable area before running it!");
-
-		WriteDefaultSettings(settingsWriter);
-		settingsWriter.EndWrite();
-
-		Reader settingsReader("Base.rte/Settings.ini");
-		return Serializable::Create(settingsReader, true, doCreate);
+		return Serializable::Create(reader);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -429,29 +430,6 @@ namespace RTE {
 		}
 
 		writer.ObjectEnd();
-
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	int SettingsMan::WriteDefaultSettings(Writer &writer) {
-		if (!writer.WriterOK()) {
-			return -1;
-		}
-		writer.ObjectStart(GetClassName());
-
-		writer.NewPropertyWithValue("PaletteFile", ContentFile("Base.rte/palette.bmp"));
-		writer.NewPropertyWithValue("ResolutionX", 960);
-		writer.NewPropertyWithValue("ResolutionY", 540);
-		writer.NewPropertyWithValue("ResolutionMultiplier", true);
-		writer.NewPropertyWithValue("DisableMultiScreenResolutionValidation", false);
-		writer.NewPropertyWithValue("SoundVolume", 40);
-		writer.NewPropertyWithValue("MusicVolume", 60);
-
-		writer.ObjectEnd();
-
-		m_SettingsNeedOverwrite = true;
 
 		return 0;
 	}

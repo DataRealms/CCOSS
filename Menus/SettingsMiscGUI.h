@@ -50,6 +50,7 @@ namespace RTE {
 		GUICheckbox *m_DisableLoadingScreenReportCheckbox;
 		GUICheckbox *m_ShowAdvancedPerfStatsCheckbox;
 		GUICheckbox *m_MeasureLoadTimeCheckbox;
+		GUICheckbox *m_UseMonospaceConsoleFontCheckbox;
 
 		// Disallow the use of some implicit methods.
 		SettingsMiscGUI(const SettingsMiscGUI &reference) = delete;

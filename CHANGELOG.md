@@ -159,6 +159,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Controller hot-plugging is now supported (Windows only).
 
+- Console text can be set to use a monospace font through `Settings.ini` property `ConsoleUseMonospaceFont = 0/1` or through the in-game settings.
+
 ### Changed
 
 - `AHuman` can now manually reload BG devices.

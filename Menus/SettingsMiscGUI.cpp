@@ -1,5 +1,6 @@
 #include "SettingsMiscGUI.h"
 #include "SettingsMan.h"
+#include "ConsoleMan.h"
 #include "PerformanceMan.h"
 
 #include "GUI.h"
@@ -27,6 +28,9 @@ namespace RTE {
 
 		m_MeasureLoadTimeCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxMeasureLoadingTime"));
 		m_MeasureLoadTimeCheckbox->SetCheck(g_SettingsMan.IsMeasuringModuleLoadTime());
+
+		m_UseMonospaceConsoleFontCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxUseMonospaceConsoleFont"));
+		m_UseMonospaceConsoleFontCheckbox->SetCheck(g_ConsoleMan.GetConsoleUseMonospaceFont());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -50,6 +54,8 @@ namespace RTE {
 				g_PerformanceMan.ShowAdvancedPerformanceStats(m_ShowAdvancedPerfStatsCheckbox->GetCheck());
 			} else if (guiEvent.GetControl() == m_MeasureLoadTimeCheckbox) {
 				g_SettingsMan.MeasureModuleLoadTime(m_MeasureLoadTimeCheckbox->GetCheck());
+			} else if (guiEvent.GetControl() == m_UseMonospaceConsoleFontCheckbox) {
+				g_ConsoleMan.SetConsoleUseMonospaceFont(m_UseMonospaceConsoleFontCheckbox->GetCheck());
 			}
 		}
 	}

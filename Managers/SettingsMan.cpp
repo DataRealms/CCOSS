@@ -175,6 +175,8 @@ namespace RTE {
 			reader >> m_LoadingScreenProgressReportPrecision;
 		} else if (propName == "ConsoleScreenRatio") {
 			g_ConsoleMan.SetConsoleScreenSize(std::stof(reader.ReadPropValue()));
+		} else if (propName == "ConsoleUseMonospaceFont") {
+			reader >> g_ConsoleMan.m_ConsoleUseMonospaceFont;
 		} else if (propName == "AdvancedPerformanceStats") {
 			reader >> g_PerformanceMan.m_AdvancedPerfStats;
 		} else if (propName == "MenuTransitionDurationMultiplier") {
@@ -337,6 +339,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("DisableLoadingScreenProgressReport", m_DisableLoadingScreenProgressReport);
 		writer.NewPropertyWithValue("LoadingScreenProgressReportPrecision", m_LoadingScreenProgressReportPrecision);
 		writer.NewPropertyWithValue("ConsoleScreenRatio", g_ConsoleMan.m_ConsoleScreenRatio);
+		writer.NewPropertyWithValue("ConsoleUseMonospaceFont", g_ConsoleMan.m_ConsoleUseMonospaceFont);
 		writer.NewPropertyWithValue("AdvancedPerformanceStats", g_PerformanceMan.m_AdvancedPerfStats);
 		writer.NewPropertyWithValue("MenuTransitionDurationMultiplier", m_MenuTransitionDurationMultiplier);
 

@@ -168,13 +168,13 @@ namespace RTE {
 		/// A struct containing all information required to drawn and animate a carousel item box in Carousel MenuMode.
 		/// </summary>
 		struct CarouselItemBox {
-			MovableObject *Item;
-			bool IsForEquippedItems;
-			Vector FullSize;
-			Vector CurrentSize;
-			Vector Pos;
-			Vector IconCenterPosition;
-			std::pair<bool, bool> RoundedAndBorderedSides;
+			MovableObject *Item; //!< A pointer to the item being displayed in the CarouselItemBox.
+			bool IsForEquippedItems; //!< Whether or not this CarouselItemBox is for displaying equipped items.
+			Vector FullSize; //!< The full size for this CarouselItemBox when it's not animating.
+			Vector CurrentSize; //!< The current size of this CarouselItemBox.
+			Vector Pos; //!< The position this CarouselItemBox should be drawn at.
+			Vector IconCenterPosition; //!< The calculated position for the center of the icon this CarouselItemBox is displaying.
+			std::pair<bool, bool> RoundedAndBorderedSides; //!< Whether the left and right sides, respectively, of this CarouselItemBox should have rounded corners and a border.
 
 			/// <summary>
 			/// Fills the passed in vector of Bitmaps and float with the appropriate graphical icons and mass for the Item of this CarouselItemBox.
@@ -190,12 +190,12 @@ namespace RTE {
 		/// A struct containing all information required to describe a selected item in Full/Transfer MenuMode.
 		/// </summary>
 		struct GUISelectedItem {
-			GUIButton *Button;
-			MovableObject *Object;
-			int InventoryIndex;
-			int EquippedItemIndex;
-			bool IsBeingDragged;
-			int DragHoldCount;
+			GUIButton *Button; //!< A pointer to the button for this GUISelectedItem.
+			MovableObject *Object; //!< A pointer to the MovableObject for this GUISelectedItem. Should always match up with what the Button is displaying.
+			int InventoryIndex; //!< The index in the InventoryItemsBox that this GUISelectedItem is for. Either this or the EquippedItemIndex must have a value.
+			int EquippedItemIndex; //!< The index in the EquippedItemIndex that this GUISelectedItem is for. Either this or the InventoryIndex must have a value.
+			bool IsBeingDragged; //!< Whether or not the GUISelectedItem is currently being dragged.
+			int DragHoldCount; //!< How long dragging has been held for, used to determine if the GUISelectedItem was actually dragged or just clicked.
 
 			/// <summary>
 			/// Whether this selected item was being dragged for long enough that it matters. This helps make dragging not cause problems during instant clicks and releases.

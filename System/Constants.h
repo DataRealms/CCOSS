@@ -206,6 +206,11 @@ namespace RTE {
 		PlayerFour,
 		MaxPlayerCount
 	};
+
+	/// <summary>
+	/// Enumeration for cardinal directions, as well as None.
+	/// </summary>
+	enum class Direction { None = -1, Up, Down, Left, Right };
 #pragma endregion
 
 #pragma region Un-Definitions

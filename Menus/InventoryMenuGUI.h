@@ -384,9 +384,39 @@ namespace RTE {
 		bool HandleMouseInput();
 
 		/// <summary>
-		/// Player keyboard or controller input event handling of the GUIControls of this InventoryMenuGUI.
+		/// Player keyboard or gamepad input event handling of the GUIControls of this InventoryMenuGUI.
 		/// </summary>
 		void HandleNonMouseInput();
+
+		/// <summary>
+		/// Gets any keyboard or gamepad directional input.
+		/// </summary>
+		/// <returns>The direction of found input. Priority matches ordering of the Direction enumeration.</returns>
+		Direction GetNonMouseButtonControllerMovement();
+
+		/// <summary>
+		/// Breakdown of HandleNonMouseInput for handling pressing/holding up.
+		/// </summary>
+		/// <returns>The next button to highlight, based on input handling.</returns>
+		GUIButton * HandleNonMouseUpInput();
+
+		/// <summary>
+		/// Breakdown of HandleNonMouseInput for handling pressing/holding down.
+		/// </summary>
+		/// <returns>The next button to highlight, based on input handling.</returns>
+		GUIButton * HandleNonMouseDownInput();
+
+		/// <summary>
+		/// Breakdown of HandleNonMouseInput for handling pressing/holding left.
+		/// </summary>
+		/// <returns>The next button to highlight, based on input handling.</returns>
+		GUIButton * HandleNonMouseLeftInput();
+
+		/// <summary>
+		/// Breakdown of HandleNonMouseInput for handling pressing/holding right.
+		/// </summary>
+		/// <returns>The next button to highlight, based on input handling.</returns>
+		GUIButton * HandleNonMouseRightInput();
 
 		/// <summary>
 		/// Handles item button press command events from the GUIControls of this InventoryMenuGUI by selecting/de-selecting the corresponding item.

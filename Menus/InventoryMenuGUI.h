@@ -265,7 +265,10 @@ namespace RTE {
 
 		Timer m_GUIRepeatStartTimer; //!< Measures the time to when to start repeating inputs when they're held down. Used in Full/Transfer MenuModes.
 		Timer m_GUIRepeatTimer; //!< Measures the interval between input repeats. Used in Full/Transfer MenuModes.
-		GUIButton *m_KeyboardOrControllerHighlightedButton; //!< A pointer to the GUIButton currently highlighted by the keyboard or controller.
+		GUIButton *m_NonMouseHighlightedButton; //!< A pointer to the GUIButton currently highlighted by the keyboard or gamepad.
+		GUIButton *m_NonMousePreviousEquippedItemsBoxButton; //!< A pointer to the last GUIButton in the EquippedItemsBox that was highlighted by the keyboard or gamepad.
+		GUIButton *m_NonMousePreviousInventoryItemsBoxButton; //!< A pointer to the last GUIButton in the InventoryItemsBox that was highlighted by the keyboard or gamepad.
+		GUIButton *m_NonMousePreviousReloadOrDropButton; //!< A pointer to whichever of the reload or drop GUIButtons was last highlighted by the keyboard or gamepad.
 
 		Vector m_GUITopLevelBoxFullSize; //!< A Vector holding the full size of the top level box for enabling/disabling animations.
 		bool m_GUIShowInformationText; //!< Whether or information text explaining how to use the menu should be showing.

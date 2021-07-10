@@ -92,7 +92,10 @@ namespace RTE {
 
 		m_GUIRepeatStartTimer.Reset();
 		m_GUIRepeatTimer.Reset();
-		m_KeyboardOrControllerHighlightedButton = nullptr;
+		m_NonMouseHighlightedButton = nullptr;
+		m_NonMousePreviousEquippedItemsBoxButton = nullptr;
+		m_NonMousePreviousInventoryItemsBoxButton = nullptr;
+		m_NonMousePreviousReloadOrDropButton = nullptr;
 
 		m_GUITopLevelBoxFullSize.Reset();
 		m_GUIShowInformationText = true;
@@ -284,6 +287,9 @@ namespace RTE {
 
 			if (m_MenuMode == MenuMode::Full || m_MenuMode == MenuMode::Transfer) {
 				ClearSelectedItem();
+				m_NonMousePreviousEquippedItemsBoxButton = nullptr;
+				m_NonMousePreviousInventoryItemsBoxButton = nullptr;
+				m_NonMousePreviousReloadOrDropButton = nullptr;
 				for (const auto &[inventoryItem, inventoryItemButton] : m_GUIInventoryItemButtons) {
 					inventoryItemButton->OnMouseLeave(0, 0, 0, 0);
 				}

@@ -905,7 +905,9 @@ bool AHuman::EquipFirearm(bool doEquip)
         pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         if (pWeapon && pWeapon->IsWeapon())
             return true;
-    }
+	} else {
+		UnequipBGArm();
+	}
 
     // Go through the inventory looking for the proper device
     for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
@@ -3314,40 +3316,29 @@ void AHuman::Update()
 		HDFirearm * pFireArm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
 		if (m_Controller.IsState(WEAPON_CHANGE_NEXT)) {
 
-			if (!m_Inventory.empty()) {
-				//Force spinning weapons to shut up
+			if (!m_Inventory.empty() || GetEquippedBGItem()) {
 				if (pFireArm) { pFireArm->StopActivationSound(); }
+				if (m_Inventory.empty()) { UnequipBGArm(); }
 
 				m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
 				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 				m_PieNeedsUpdate = true;
-			} else if (GetEquippedBGItem()) {
-				//Force spinning weapons to shut up
-				if (pFireArm) { pFireArm->StopActivationSound(); }
 
-				UnequipBGArm();
-				m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
-				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-				m_PieNeedsUpdate = true;
+				EquipShieldInBGArm();
 			}
 		}
 		if (m_Controller.IsState(WEAPON_CHANGE_PREV)) {
 
-			if (!m_Inventory.empty()) {
+			if (!m_Inventory.empty() || GetEquippedBGItem()) {
 				//Force spinning weapons to shut up
 				if (pFireArm) { pFireArm->StopActivationSound(); }
+				if (m_Inventory.empty()) { UnequipBGArm(); }
 
 				m_pFGArm->SetHeldMO(SwapPrevInventory(m_pFGArm->ReleaseHeldMO()));
 				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 				m_PieNeedsUpdate = true;
-			} else if (GetEquippedBGItem()) {
-				//Force spinning weapons to shut up
-				if (pFireArm) { pFireArm->StopActivationSound(); }
 
-				UnequipBGArm();
-				m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
-				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-				m_PieNeedsUpdate = true;
+				EquipShieldInBGArm();
 			}
         }
 
@@ -3617,8 +3608,7 @@ void AHuman::Update()
 				pMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
 				if (pMO->IsDevice()) {
 					g_MovableMan.AddItem(pMO);
-				}
-				else {
+				} else {
 					if (pMO->IsGold()) {
 						m_GoldInInventoryChunk = 0;
 						ChunkGold();

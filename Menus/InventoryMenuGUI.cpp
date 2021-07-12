@@ -1019,7 +1019,14 @@ namespace RTE {
 						m_GUIInventoryItemsScrollbar->SetValue(m_GUIInventoryItemsScrollbar->GetValue() - 1);
 						nextButtonToHighlight = m_NonMouseHighlightedButton + c_FullViewPageItemLimit - c_ItemsPerRow;
 					} else {
-						nextButtonToHighlight = m_NonMousePreviousEquippedItemsBoxButton && m_NonMousePreviousEquippedItemsBoxButton->GetVisible() ? m_NonMousePreviousEquippedItemsBoxButton : m_GUIEquippedItemButton;
+						nextButtonToHighlight = m_NonMousePreviousEquippedItemsBoxButton && m_NonMousePreviousEquippedItemsBoxButton->GetVisible() ? m_NonMousePreviousEquippedItemsBoxButton : nullptr;
+						if (!nextButtonToHighlight) {
+							if (highlightedButtonIndex >= 3) {
+								nextButtonToHighlight = m_GUIDropButton;
+							} else {
+								nextButtonToHighlight = highlightedButtonIndex == 2 && m_GUIOffhandEquippedItemButton->GetVisible() ? m_GUIOffhandEquippedItemButton : m_GUIEquippedItemButton;
+							}
+						}
 					}
 				} else {
 					nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex - c_ItemsPerRow).second;
@@ -1051,8 +1058,6 @@ namespace RTE {
 					int numberOfVisibleButtons = m_GUIShowEmptyRows ? c_FullViewPageItemLimit : c_ItemsPerRow * static_cast<int>(std::ceil(static_cast<float>(std::min(c_FullViewPageItemLimit, m_InventoryActor->GetInventorySize())) / static_cast<float>(c_ItemsPerRow)));
 					if (highlightedButtonIndex + c_ItemsPerRow < numberOfVisibleButtons) {
 						nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex + c_ItemsPerRow).second;
-					} else if (highlightedButtonIndex != numberOfVisibleButtons - 1) {
-						nextButtonToHighlight = m_GUIInventoryItemButtons.at(numberOfVisibleButtons - 1).second;
 					}
 				}
 			} catch (std::invalid_argument) {
@@ -1081,6 +1086,7 @@ namespace RTE {
 					nextButtonToHighlight = m_GUIInventoryItemButtons.at(c_ItemsPerRow - 1).second;
 				} else if (highlightedButtonIndex > 0) {
 					nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex - 1).second;
+					m_NonMousePreviousEquippedItemsBoxButton = nullptr;
 				}
 			} catch (std::invalid_argument) {
 				RTEAbort("Invalid inventory item button when pressing LEFT in InventoryMenuGUI keyboard/controller handling - " + m_NonMouseHighlightedButton->GetName());
@@ -1113,6 +1119,7 @@ namespace RTE {
 				} else {
 					int numberOfVisibleButtons = m_GUIShowEmptyRows ? c_FullViewPageItemLimit : c_ItemsPerRow * static_cast<int>(std::ceil(static_cast<float>(std::min(c_FullViewPageItemLimit, m_InventoryActor->GetInventorySize())) / static_cast<float>(c_ItemsPerRow)));
 					if (highlightedButtonIndex + 1 < numberOfVisibleButtons) { nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex + 1).second; }
+					m_NonMousePreviousEquippedItemsBoxButton = nullptr;
 				}
 			} catch (std::invalid_argument) {
 				RTEAbort("Invalid inventory item button when pressing RIGHT in InventoryMenuGUI keyboard/controller handling - " + m_NonMouseHighlightedButton->GetName());

@@ -3315,7 +3315,6 @@ void AHuman::Update()
 	if (m_pFGArm && m_Status != INACTIVE) {
 		HDFirearm * pFireArm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
 		if (m_Controller.IsState(WEAPON_CHANGE_NEXT)) {
-
 			if (!m_Inventory.empty() || GetEquippedBGItem()) {
 				if (pFireArm) { pFireArm->StopActivationSound(); }
 				if (m_Inventory.empty()) { UnequipBGArm(); }
@@ -3328,7 +3327,6 @@ void AHuman::Update()
 			}
 		}
 		if (m_Controller.IsState(WEAPON_CHANGE_PREV)) {
-
 			if (!m_Inventory.empty() || GetEquippedBGItem()) {
 				if (pFireArm) { pFireArm->StopActivationSound(); }
 				if (m_Inventory.empty()) { UnequipBGArm(); }
@@ -3599,7 +3597,6 @@ void AHuman::Update()
 	if (m_Controller.IsState(WEAPON_DROP) && m_Status != INACTIVE) {
 		if (m_pFGArm && m_pFGArm->HoldsSomething()) {
 			if (MovableObject *pMO = m_pFGArm->ReleaseHeldMO()) {
-
 				pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
 				Vector tossVec(RandomNum(3.0F, 6.0F), RandomNum(-3.0F, -1.5F));
 				tossVec.RadRotate(m_AimAngle);
@@ -3621,7 +3618,6 @@ void AHuman::Update()
 			}
 		} else if (m_pBGArm) {
 			if (MovableObject *pMO = m_pBGArm->ReleaseHeldMO()) {
-
 				pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
 				Vector tossVec(RandomNum(3.0F, 6.0F), RandomNum(-3.0F, -1.5F));
 				tossVec.RadRotate(m_AimAngle);

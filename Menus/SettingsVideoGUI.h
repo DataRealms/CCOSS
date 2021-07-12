@@ -154,7 +154,7 @@ namespace RTE {
 
 #pragma region Video Settings Handling
 		/// <summary>
-		/// Checks whether the passed in width and height values make a supported resolution setting.
+		/// Checks whether the passed in width and height values can be used as a valid resolution setting.
 		/// </summary>
 		/// <param name="width">Resolution width.</param>
 		/// <param name="height">Resolution height.</param>

@@ -352,8 +352,16 @@ namespace RTE {
 			default:
 				break;
 		}
+		HandleBackNavigation(backToMainMenu);
 
-		if ((!m_ActiveDialogBox || m_ActiveDialogBox == m_MainMenuScreens.at(MenuScreen::QuitScreen)) && (backToMainMenu || g_UInputMan.KeyPressed(KEY_ESC))) {
+		if (m_UpdateResult == MainMenuUpdateResult::ActivityStarted || m_UpdateResult == MainMenuUpdateResult::ActivityResumed) { m_MainMenuButtons.at(MenuButton::ResumeButton)->SetVisible(false); }
+		return m_UpdateResult;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void MainMenuGUI::HandleBackNavigation(bool backButtonPressed) {
+		if ((!m_ActiveDialogBox || m_ActiveDialogBox == m_MainMenuScreens.at(MenuScreen::QuitScreen)) && (backButtonPressed || g_UInputMan.KeyPressed(KEY_ESC))) {
 			if (m_ActiveMenuScreen != MenuScreen::MainScreen) {
 				if (m_ActiveMenuScreen == MenuScreen::SettingsScreen || m_ActiveMenuScreen == MenuScreen::ModManagerScreen) {
 					if (m_ActiveMenuScreen == MenuScreen::SettingsScreen) { m_SettingsMenu->RefreshActiveSettingsMenuScreen(); }
@@ -369,27 +377,6 @@ namespace RTE {
 			}
 		} else if (m_ActiveMenuScreen == MenuScreen::SettingsScreen && m_ActiveDialogBox && g_UInputMan.KeyPressed(KEY_ESC)) {
 			m_SettingsMenu->CloseActiveDialogBox();
-		}
-
-		if (m_UpdateResult == MainMenuUpdateResult::ActivityStarted || m_UpdateResult == MainMenuUpdateResult::ActivityResumed) { m_MainMenuButtons.at(MenuButton::ResumeButton)->SetVisible(false); }
-		return m_UpdateResult;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void MainMenuGUI::UpdateMainScreenHoveredButton(const GUIButton *hoveredButton) {
-		int hoveredButtonIndex = -1;
-		if (hoveredButton) {
-			hoveredButtonIndex = std::distance(m_MainMenuButtons.begin(), std::find(m_MainMenuButtons.begin(), m_MainMenuButtons.begin() + 8, hoveredButton));
-			if (hoveredButton != m_MainScreenHoveredButton) { m_MainMenuButtons.at(hoveredButtonIndex)->SetText(m_MainScreenButtonHoveredText.at(hoveredButtonIndex)); }
-			m_MainScreenHoveredButton = m_MainMenuButtons.at(hoveredButtonIndex);
-		}
-		if (!hoveredButton || hoveredButtonIndex != m_MainScreenPrevHoveredButtonIndex) { m_MainMenuButtons.at(m_MainScreenPrevHoveredButtonIndex)->SetText(m_MainScreenButtonUnhoveredText.at(m_MainScreenPrevHoveredButtonIndex)); }
-
-		if (hoveredButtonIndex >= 0) {
-			m_MainScreenPrevHoveredButtonIndex = hoveredButtonIndex;
-		} else {
-			m_MainScreenHoveredButton = nullptr;
 		}
 	}
 
@@ -507,6 +494,24 @@ namespace RTE {
 			g_GUISound.ButtonPressSound()->Play();
 		} else if (guiEventControl == m_MainMenuButtons.at(MenuButton::QuitCancelButton)) {
 			SetActiveMenuScreen(MenuScreen::MainScreen);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void MainMenuGUI::UpdateMainScreenHoveredButton(const GUIButton *hoveredButton) {
+		int hoveredButtonIndex = -1;
+		if (hoveredButton) {
+			hoveredButtonIndex = std::distance(m_MainMenuButtons.begin(), std::find(m_MainMenuButtons.begin(), m_MainMenuButtons.begin() + 8, hoveredButton));
+			if (hoveredButton != m_MainScreenHoveredButton) { m_MainMenuButtons.at(hoveredButtonIndex)->SetText(m_MainScreenButtonHoveredText.at(hoveredButtonIndex)); }
+			m_MainScreenHoveredButton = m_MainMenuButtons.at(hoveredButtonIndex);
+		}
+		if (!hoveredButton || hoveredButtonIndex != m_MainScreenPrevHoveredButtonIndex) { m_MainMenuButtons.at(m_MainScreenPrevHoveredButtonIndex)->SetText(m_MainScreenButtonUnhoveredText.at(m_MainScreenPrevHoveredButtonIndex)); }
+
+		if (hoveredButtonIndex >= 0) {
+			m_MainScreenPrevHoveredButtonIndex = hoveredButtonIndex;
+		} else {
+			m_MainScreenHoveredButton = nullptr;
 		}
 	}
 

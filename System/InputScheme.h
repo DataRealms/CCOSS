@@ -107,7 +107,7 @@ namespace RTE {
 		int GetKeyMapping(int whichInput) const { return m_InputMappings.at(whichInput).GetKey(); }
 
 		/// <summary>
-		/// Sets a keyboard key mapped to a specific input element.
+		/// Sets a keyboard key as mapped to a specific input element.
 		/// </summary>
 		/// <param name="whichInput">Which input element to map to.</param>
 		/// <param name="whichKey">The scan code of which keyboard key to map to above input element.</param>
@@ -121,7 +121,7 @@ namespace RTE {
 		int GetJoyButtonMapping(int whichInput) const { return m_InputMappings.at(whichInput).GetJoyButton(); }
 
 		/// <summary>
-		/// Sets a joystick button mapped to a specific input element.
+		/// Sets a joystick button as mapped to a specific input element.
 		/// </summary>
 		/// <param name="whichInput">Which input element to map to.</param>
 		/// <param name="whichButton">Which joystick button to map to the specified input element.</param>

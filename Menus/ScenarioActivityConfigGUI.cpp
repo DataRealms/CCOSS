@@ -144,17 +144,17 @@ namespace RTE {
 		m_StartErrorLabel->SetVisible(true);
 
 		for (int player = Players::PlayerOne; player < PlayerColumns::PlayerColumnCount; ++player) {
-			for (int team = Activity::Teams::TeamOne; team < TeamRows::TeamRowCount; ++team) {
+			if (player < Players::MaxPlayerCount) {
+				m_PlayerBoxes.at(player).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Image);
+				if (const Icon *playerDeviceIcon = g_UInputMan.GetSchemeIcon(player)) { m_PlayerBoxes.at(player).at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(playerDeviceIcon->GetBitmaps32()[0])); }
+			}
+			for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
 				m_PlayerBoxes.at(player).at(team)->SetDrawType(GUICollectionBox::Color);
 				m_PlayerBoxes.at(player).at(team)->SetDrawColor(c_GUIColorBlue);
 			}
 		}
-		// Human players start on the disabled team row.
-		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-			m_PlayerBoxes.at(player).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Image);
-			if (const Icon *playerDeviceIcon = g_UInputMan.GetSchemeIcon(player)) { m_PlayerBoxes.at(player).at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(playerDeviceIcon->GetBitmaps32()[0])); }
-		}
 
+		// CPU player either has a locked team or starts on the disabled team row.
 		int cpuInitialTeam = TeamRows::DisabledTeam;
 		m_LockedCPUTeam = m_SelectedActivity->GetCPUTeam();
 		if (m_LockedCPUTeam != Activity::Teams::NoTeam) {
@@ -164,7 +164,6 @@ namespace RTE {
 		} else {
 			m_CPULockLabel->SetVisible(false);
 		}
-		// CPU player either has a locked team or starts on the disabled team row.
 		m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(cpuInitialTeam)->SetDrawType(GUICollectionBox::Image);
 		if (const Icon *cpuIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"))) { m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(cpuInitialTeam)->SetDrawImage(new AllegroBitmap(cpuIcon->GetBitmaps32()[0])); }
 
@@ -176,19 +175,16 @@ namespace RTE {
 			if (m_SelectedActivity->TeamActive(team)) {
 				teamIcon = m_SelectedActivity->GetTeamIcon(team);
 				if (!teamIcon) { teamIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Team " + std::to_string(team + 1) + " Default")); }
-
 				m_TeamNameLabels.at(team)->SetText(m_SelectedActivity->GetTeamName(team));
-				m_TeamTechComboBoxes.at(team)->SetVisible(true);
-				m_TeamAISkillSliders.at(team)->SetVisible(true);
-				m_TeamAISkillLabels.at(team)->SetVisible(true);
 			} else {
 				teamIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Locked Team"));
 				m_TeamNameLabels.at(team)->SetText("Unavailable");
-				m_TeamTechComboBoxes.at(team)->SetVisible(false);
-				m_TeamAISkillSliders.at(team)->SetVisible(false);
-				m_TeamAISkillLabels.at(team)->SetVisible(false);
 			}
 			if (teamIcon) { m_TeamIconBoxes.at(team)->SetDrawImage(new AllegroBitmap(teamIcon->GetBitmaps32()[0])); }
+
+			m_TeamTechComboBoxes.at(team)->SetVisible(m_SelectedActivity->TeamActive(team));
+			m_TeamAISkillSliders.at(team)->SetVisible(m_SelectedActivity->TeamActive(team));
+			m_TeamAISkillLabels.at(team)->SetVisible(m_SelectedActivity->TeamActive(team));
 		}
 	}
 
@@ -205,27 +201,26 @@ namespace RTE {
 		g_SceneMan.SetSceneToLoad(m_SelectedScene, true, m_DeployUnitsCheckbox->GetCheck());
 
 		gameActivity->ClearPlayers(false);
-		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+		for (int player = Players::PlayerOne; player < PlayerColumns::PlayerColumnCount; ++player) {
 			for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
 				if (m_PlayerBoxes.at(player).at(team)->GetDrawType() == GUICollectionBox::Image) {
-					gameActivity->AddPlayer(player, true, team, 0);
+					if (player == PlayerColumns::PlayerCPU) {
+						gameActivity->SetCPUTeam(team);
+					} else {
+						gameActivity->AddPlayer(player, true, team, 0);
+					}
 					break;
 				}
 			}
 		}
-		for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
-			if (m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(team)->GetDrawType() == GUICollectionBox::Image) {
-				gameActivity->SetCPUTeam(team);
-				break;
-			}
-		}
+
 		for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
 			if (const GUIListPanel::Item *techItem = m_TeamTechComboBoxes.at(team)->GetSelectedItem()) {
 				if (techItem->m_ExtraIndex == -2) {
 					gameActivity->SetTeamTech(team, "-All-");
 				} else if (techItem->m_ExtraIndex == -1) {
 					m_TeamTechComboBoxes.at(team)->SetSelectedIndex(RandomNum<int>(2, m_TeamTechComboBoxes.at(team)->GetListPanel()->GetItemList()->size() - 1));
-					gameActivity->SetTeamTech(team, g_PresetMan.GetDataModuleName(m_TeamTechComboBoxes.at(team)->GetSelectedItem()->m_ExtraIndex));
+					gameActivity->SetTeamTech(team, g_PresetMan.GetDataModuleName(techItem->m_ExtraIndex));
 				} else {
 					gameActivity->SetTeamTech(team, g_PresetMan.GetDataModuleName(techItem->m_ExtraIndex));
 				}
@@ -405,7 +400,7 @@ namespace RTE {
 		m_GUIControlManager->Draw();
 
 		int rectPosY = 50;
-		// Apply a colored overlay on top of team rows that are not human-playable.
+		// Apply a colored overlay on top of team rows that are locked or disabled by the Activity and are not modifiable.
 		for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
 			if (!m_SelectedActivity->TeamActive(team) || m_LockedCPUTeam == team) {
 				drawing_mode(DRAW_MODE_TRANS, nullptr, 0, 0);
@@ -423,7 +418,7 @@ namespace RTE {
 			linePosY += 25;
 		}
 
-		// Redraw UI elements on top of the overlay.
+		// The colored overlay is semi-transparent and is drawn on top of GUI elements, so we need to redraw the relevant elements again so they aren't affected.
 		for (int team = Activity::Teams::MaxTeamCount - 1; team >= Activity::Teams::TeamOne; --team) {
 			if (m_TeamTechComboBoxes.at(team)->GetVisible()) {
 				m_TeamTechComboBoxes.at(team)->Draw(m_GUIControlManager->GetScreen());

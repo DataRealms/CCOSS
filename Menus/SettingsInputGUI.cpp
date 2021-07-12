@@ -50,7 +50,7 @@ namespace RTE {
 
 	void SettingsInputGUI::ResetPlayerInputSettings(int player) {
 		if (m_PlayerInputSettingsBoxes.at(player).ResetControlsButton->GetText() == "Reset") {
-			// Reset any other pending mapping reset confirmations
+			// Only one player's reset button can be pending confirmation at a time, so cancel any other pending confirmations.
 			for (int otherPlayer = Players::PlayerOne; otherPlayer < Players::MaxPlayerCount; ++otherPlayer) {
 				if (otherPlayer != player) { m_PlayerInputSettingsBoxes.at(otherPlayer).ResetControlsButton->SetText("Reset"); }
 			}
@@ -134,11 +134,17 @@ namespace RTE {
 				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetMaximum(100);
 				*/
 				break;
-			default:
+			case InputDevice::DEVICE_GAMEPAD_1:
+			case InputDevice::DEVICE_GAMEPAD_2:
+			case InputDevice::DEVICE_GAMEPAD_3:
+			case InputDevice::DEVICE_GAMEPAD_4:
 				m_PlayerInputSettingsBoxes.at(player).SensitivityLabel->SetVisible(true);
 				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetVisible(true);
 				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetMaximum(50);
 				m_PlayerInputSettingsBoxes.at(player).DeadZoneControlsBox->SetVisible(true);
+				break;
+			default:
+				RTEAbort("Invalid InputDevice passed to SettingsInputGUI::ShowOrHidePlayerInputDeviceSensitivityControls!");
 				break;
 		}
 		UpdatePlayerInputSensitivityControlValues(player);
@@ -159,7 +165,10 @@ namespace RTE {
 					}
 				}
 				break;
-			default:
+			case InputDevice::DEVICE_GAMEPAD_1:
+			case InputDevice::DEVICE_GAMEPAD_2:
+			case InputDevice::DEVICE_GAMEPAD_3:
+			case InputDevice::DEVICE_GAMEPAD_4:
 				m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->SetValue(static_cast<int>(g_UInputMan.GetControlScheme(player)->GetJoystickDeadzone() * 250));
 				m_PlayerInputSettingsBoxes.at(player).SensitivityLabel->SetText("Stick Deadzone: " + std::to_string(m_PlayerInputSettingsBoxes.at(player).SensitivitySlider->GetValue()));
 
@@ -168,6 +177,9 @@ namespace RTE {
 				} else {
 					m_PlayerInputSettingsBoxes.at(player).SquareDeadZoneRadioButton->SetCheck(true);
 				}
+				break;
+			default:
+				RTEAbort("Invalid InputDevice passed to SettingsInputGUI::UpdatePlayerInputSensitivityControlValues!");
 				break;
 		}
 	}

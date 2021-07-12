@@ -38,7 +38,6 @@ namespace RTE {
 		loadingSplash.Create(ContentFile("Base.rte/GUIs/Title/LoadingSplash.png").GetAsBitmap(COLORCONV_NONE, false), false, Vector(), true, false, Vector(1.0F, 0));
 		loadingSplash.SetOffset(Vector(static_cast<float>(((loadingSplash.GetBitmap()->w - g_FrameMan.GetResX()) / 2) + loadingSplashOffset), 0));
 
-		// Draw onto wrapped strip centered vertically on the screen
 		Box loadingSplashTargetBox(Vector(0, static_cast<float>((g_FrameMan.GetResY() - loadingSplash.GetBitmap()->h) / 2)), static_cast<float>(g_FrameMan.GetResX()), static_cast<float>(loadingSplash.GetBitmap()->h));
 		loadingSplash.Draw(g_FrameMan.GetBackBuffer32(), loadingSplashTargetBox);
 
@@ -99,9 +98,9 @@ namespace RTE {
 
 			// Clear current line.
 			rectfill(g_LoadingScreen.m_ProgressListboxBitmap, 2, g_LoadingScreen.m_ProgressListboxBitmap->h - 12, g_LoadingScreen.m_ProgressListboxBitmap->w - 3, g_LoadingScreen.m_ProgressListboxBitmap->h - 3, 54);
-			// Print new line
+			// Print new line.
 			g_FrameMan.GetSmallFont()->DrawAligned(&drawBitmap, 5, g_LoadingScreen.m_ProgressListboxBitmap->h - 12, reportString, GUIFont::Left);
-			// Lines are drawing over the right edge of the box and we can't cap the width from DrawAligned here so redraw the right edge
+			// Lines are drawing over the right edge of the box and we can't cap the width from DrawAligned here so redraw the right edge.
 			vline(g_LoadingScreen.m_ProgressListboxBitmap, g_LoadingScreen.m_ProgressListboxBitmap->w - 2, g_LoadingScreen.m_ProgressListboxBitmap->h - 12, g_LoadingScreen.m_ProgressListboxBitmap->h - 2, 33);
 			vline(g_LoadingScreen.m_ProgressListboxBitmap, g_LoadingScreen.m_ProgressListboxBitmap->w - 1, g_LoadingScreen.m_ProgressListboxBitmap->h - 12, g_LoadingScreen.m_ProgressListboxBitmap->h - 2, 33);
 

@@ -218,10 +218,10 @@ namespace RTE {
 
 #pragma region Update Breakdown
 		/// <summary>
-		/// Updates the currently hovered main screen button text to give the hovered visual and updates the previously hovered button to remove the hovered visual.
+		/// Handles returning to the main menu from one of the sub-menus if the player requested to return via the back button or the esc key. Also handles closing active dialog boxes with the esc key.
 		/// </summary>
-		/// <param name="hoveredButton">Pointer to the currently hovered main screen button, if any. Acquired by GUIControlManager::GetControlUnderPoint.</param>
-		void UpdateMainScreenHoveredButton(const GUIButton *hoveredButton);
+		/// <param name="backButtonPressed">Whether the player requested to return to the main menu from one of the sub-menus via back button.</param>
+		void HandleBackNavigation(bool backButtonPressed);
 
 		/// <summary>
 		/// Handles the player interaction with the MainMenuGUI GUI elements.
@@ -252,6 +252,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="guiEventControl">Pointer to the GUI element that the player interacted with.</param>
 		void HandleQuitScreenInputEvents(const GUIControl *guiEventControl);
+
+		/// <summary>
+		/// Updates the currently hovered main screen button text to give the hovered visual and updates the previously hovered button to remove the hovered visual.
+		/// </summary>
+		/// <param name="hoveredButton">Pointer to the currently hovered main screen button, if any. Acquired by GUIControlManager::GetControlUnderPoint.</param>
+		void UpdateMainScreenHoveredButton(const GUIButton *hoveredButton);
 #pragma endregion
 
 		/// <summary>

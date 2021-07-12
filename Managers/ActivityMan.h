@@ -141,6 +141,8 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Activity Start Handling
+		// TODO: Fix crappy naming. None of these actually start anything. Maybe "...ActivityToStart" instead of "...StartActivity".
+
 		/// <summary>
 		/// Gets the Activity that will be used in the next restart. Ownership is NOT transferred!
 		/// </summary>

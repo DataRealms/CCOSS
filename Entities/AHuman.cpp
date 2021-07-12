@@ -3330,7 +3330,6 @@ void AHuman::Update()
 		if (m_Controller.IsState(WEAPON_CHANGE_PREV)) {
 
 			if (!m_Inventory.empty() || GetEquippedBGItem()) {
-				//Force spinning weapons to shut up
 				if (pFireArm) { pFireArm->StopActivationSound(); }
 				if (m_Inventory.empty()) { UnequipBGArm(); }
 

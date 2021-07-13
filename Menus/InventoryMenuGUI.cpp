@@ -1024,7 +1024,7 @@ namespace RTE {
 							if (highlightedButtonIndex >= 4) {
 								nextButtonToHighlight = m_GUIDropButton;
 							} else {
-								nextButtonToHighlight = highlightedButtonIndex == 2 && m_GUIOffhandEquippedItemButton->GetVisible() ? m_GUIOffhandEquippedItemButton : m_GUIEquippedItemButton;
+								nextButtonToHighlight = highlightedButtonIndex >= 2 && m_GUIOffhandEquippedItemButton->GetVisible() ? m_GUIOffhandEquippedItemButton : m_GUIEquippedItemButton;
 							}
 						}
 					}

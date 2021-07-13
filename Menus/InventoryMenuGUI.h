@@ -266,6 +266,7 @@ namespace RTE {
 		Timer m_GUIRepeatStartTimer; //!< Measures the time to when to start repeating inputs when they're held down. Used in Full/Transfer MenuModes.
 		Timer m_GUIRepeatTimer; //!< Measures the interval between input repeats. Used in Full/Transfer MenuModes.
 		GUIButton *m_NonMouseHighlightedButton; //!< A pointer to the GUIButton currently highlighted by the keyboard or gamepad.
+		//TODO These previous buttons should be cleaned up when InventoryMenuGUI is refactored. Requirements were unclear so this is more complicated than it needs to be, these 3 can be consolidated into 2 or 1 variable, and the code handling them can be simplified a bit.
 		GUIButton *m_NonMousePreviousEquippedItemsBoxButton; //!< A pointer to the last GUIButton in the EquippedItemsBox that was highlighted by the keyboard or gamepad.
 		GUIButton *m_NonMousePreviousInventoryItemsBoxButton; //!< A pointer to the last GUIButton in the InventoryItemsBox that was highlighted by the keyboard or gamepad.
 		GUIButton *m_NonMousePreviousReloadOrDropButton; //!< A pointer to whichever of the reload or drop GUIButtons was last highlighted by the keyboard or gamepad.

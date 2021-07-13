@@ -1044,7 +1044,17 @@ namespace RTE {
 		GUIButton *nextButtonToHighlight = nullptr;
 
 		if (!m_InventoryActor->IsInventoryEmpty() && (m_NonMouseHighlightedButton == m_GUISwapSetButton || m_NonMouseHighlightedButton == m_GUIEquippedItemButton || m_NonMouseHighlightedButton == m_GUIOffhandEquippedItemButton || m_NonMouseHighlightedButton == m_GUIDropButton || m_NonMouseHighlightedButton == m_GUIInformationToggleButton)) {
-			nextButtonToHighlight = m_NonMousePreviousInventoryItemsBoxButton != nullptr ? m_NonMousePreviousInventoryItemsBoxButton : m_GUIInventoryItemButtons.at(0).second;
+			nextButtonToHighlight = m_NonMousePreviousInventoryItemsBoxButton;
+			if (!nextButtonToHighlight) {
+				int inventoryIndexToHighlight = 0;
+				if (m_NonMouseHighlightedButton == m_GUIOffhandEquippedItemButton) {
+					inventoryIndexToHighlight = 2;
+				} else if (m_NonMouseHighlightedButton == m_GUIDropButton) {
+					inventoryIndexToHighlight = 4;
+				}
+				inventoryIndexToHighlight = std::clamp(inventoryIndexToHighlight, 0, m_InventoryActor->GetInventorySize() - 1);
+				nextButtonToHighlight = m_GUIInventoryItemButtons.at(inventoryIndexToHighlight).second;
+			}
 		} else if (m_NonMouseHighlightedButton == m_GUIReloadButton) {
 			nextButtonToHighlight = m_GUIDropButton;
 			m_NonMousePreviousReloadOrDropButton = m_GUIDropButton;
@@ -1072,13 +1082,7 @@ namespace RTE {
 	GUIButton * InventoryMenuGUI::HandleNonMouseLeftInput() {
 		GUIButton *nextButtonToHighlight = nullptr;
 
-		if (m_NonMouseHighlightedButton == m_GUIOffhandEquippedItemButton) {
-			nextButtonToHighlight = m_GUIEquippedItemButton;
-		} else if (m_NonMouseHighlightedButton == m_GUIReloadButton || m_NonMouseHighlightedButton == m_GUIDropButton) {
-			nextButtonToHighlight = m_GUIOffhandEquippedItemButton->GetVisible() ? m_GUIOffhandEquippedItemButton : m_GUIEquippedItemButton;
-		} else if (m_NonMouseHighlightedButton == m_GUIInformationToggleButton) {
-			nextButtonToHighlight = m_NonMousePreviousReloadOrDropButton ? m_NonMousePreviousReloadOrDropButton : m_GUIReloadButton;
-		} else if (m_NonMouseHighlightedButton->GetParent() == m_GUIInventoryItemsBox) {
+		if (m_NonMouseHighlightedButton->GetParent() == m_GUIInventoryItemsBox) {
 			try {
 				int highlightedButtonIndex = std::stoi(m_NonMouseHighlightedButton->GetName());
 				if (highlightedButtonIndex == 0 && m_GUIInventoryItemsScrollbar->GetValue() > m_GUIInventoryItemsScrollbar->GetMinimum()) {
@@ -1091,6 +1095,15 @@ namespace RTE {
 			} catch (std::invalid_argument) {
 				RTEAbort("Invalid inventory item button when pressing LEFT in InventoryMenuGUI keyboard/controller handling - " + m_NonMouseHighlightedButton->GetName());
 			}
+		} else {
+			if (m_NonMouseHighlightedButton == m_GUIOffhandEquippedItemButton) {
+				nextButtonToHighlight = m_GUIEquippedItemButton;
+			} else if (m_NonMouseHighlightedButton == m_GUIReloadButton || m_NonMouseHighlightedButton == m_GUIDropButton) {
+				nextButtonToHighlight = m_GUIOffhandEquippedItemButton->GetVisible() ? m_GUIOffhandEquippedItemButton : m_GUIEquippedItemButton;
+			} else if (m_NonMouseHighlightedButton == m_GUIInformationToggleButton) {
+				nextButtonToHighlight = m_NonMousePreviousReloadOrDropButton ? m_NonMousePreviousReloadOrDropButton : m_GUIReloadButton;
+			}
+			if (nextButtonToHighlight) { m_NonMousePreviousInventoryItemsBoxButton = nullptr; }
 		}
 		return nextButtonToHighlight;
 	}
@@ -1100,17 +1113,7 @@ namespace RTE {
 	GUIButton * InventoryMenuGUI::HandleNonMouseRightInput() {
 		GUIButton *nextButtonToHighlight = nullptr;
 
-		if (m_NonMouseHighlightedButton == m_GUIEquippedItemButton) {
-			if (m_GUIOffhandEquippedItemButton->GetVisible()) {
-				nextButtonToHighlight = m_GUIOffhandEquippedItemButton;
-			} else {
-				nextButtonToHighlight = m_NonMousePreviousReloadOrDropButton ? m_NonMousePreviousReloadOrDropButton : m_GUIReloadButton;
-			}
-		} else if (m_NonMouseHighlightedButton == m_GUIOffhandEquippedItemButton) {
-			nextButtonToHighlight = nextButtonToHighlight = m_NonMousePreviousReloadOrDropButton ? m_NonMousePreviousReloadOrDropButton : m_GUIReloadButton;
-		} else if (m_NonMouseHighlightedButton == m_GUIReloadButton || m_NonMouseHighlightedButton == m_GUIDropButton) {
-			nextButtonToHighlight = m_GUIInformationToggleButton;
-		} else if (m_NonMouseHighlightedButton->GetParent() == m_GUIInventoryItemsBox) {
+		if (m_NonMouseHighlightedButton->GetParent() == m_GUIInventoryItemsBox) {
 			try {
 				int highlightedButtonIndex = std::stoi(m_NonMouseHighlightedButton->GetName());
 				if (highlightedButtonIndex == c_FullViewPageItemLimit - 1 && m_GUIInventoryItemsScrollbar->GetValue() + 1 < m_GUIInventoryItemsScrollbar->GetMaximum()) {
@@ -1124,6 +1127,19 @@ namespace RTE {
 			} catch (std::invalid_argument) {
 				RTEAbort("Invalid inventory item button when pressing RIGHT in InventoryMenuGUI keyboard/controller handling - " + m_NonMouseHighlightedButton->GetName());
 			}
+		} else {
+			if (m_NonMouseHighlightedButton == m_GUIEquippedItemButton) {
+				if (m_GUIOffhandEquippedItemButton->GetVisible()) {
+					nextButtonToHighlight = m_GUIOffhandEquippedItemButton;
+				} else {
+					nextButtonToHighlight = m_NonMousePreviousReloadOrDropButton ? m_NonMousePreviousReloadOrDropButton : m_GUIReloadButton;
+				}
+			} else if (m_NonMouseHighlightedButton == m_GUIOffhandEquippedItemButton) {
+				nextButtonToHighlight = nextButtonToHighlight = m_NonMousePreviousReloadOrDropButton ? m_NonMousePreviousReloadOrDropButton : m_GUIReloadButton;
+			} else if (m_NonMouseHighlightedButton == m_GUIReloadButton || m_NonMouseHighlightedButton == m_GUIDropButton) {
+				nextButtonToHighlight = m_GUIInformationToggleButton;
+			}
+			if (nextButtonToHighlight) { m_NonMousePreviousInventoryItemsBoxButton = nullptr; }
 		}
 		return nextButtonToHighlight;
 	}

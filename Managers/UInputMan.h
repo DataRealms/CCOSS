@@ -71,10 +71,10 @@ namespace RTE {
 
 #pragma region Control Scheme and Input Mapping Handling
 		/// <summary>
-		/// Sets the input class for use if one is available.
+		/// Sets the GUIInput instance to capture key state from. This is used for better key detection during input mapping input capture.
 		/// </summary>
-		/// <param name="inputClass">The input class to set.</param>
-		void SetInputClass(GUIInput *inputClass) const;
+		/// <param name="inputClass">Pointer to the GUIInput instance to capture key state from, or nullptr if using UInputMan input capture.</param>
+		void SetGUIInputInstanceToCaptureKeyStateFrom(GUIInput *inputClass) const;
 
 		/// <summary>
 		/// Gets the currently used input device of the specified player.
@@ -640,7 +640,7 @@ namespace RTE {
 		/// </summary>
 		enum InputState { Held, Pressed, Released, InputStateCount };
 
-		static GUIInput* s_InputClass; //!< Current input class if available.
+		static GUIInput *s_GUIInputInstanceToCaptureKeyStateFrom; //!< Pointer to the GUIInput instance to capture key state from, if any. This is used for better key detection during input mapping input capture.
 
 		static char *s_PrevKeyStates; //!< Key states as they were the previous update.
 		static char *s_ChangedKeyStates; //!< Key states that have changed.

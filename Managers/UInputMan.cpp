@@ -16,7 +16,7 @@
 
 namespace RTE {
 
-	GUIInput* UInputMan::s_InputClass = nullptr;
+	GUIInput* UInputMan::s_GUIInputInstanceToCaptureKeyStateFrom = nullptr;
 
 	char *UInputMan::s_PrevKeyStates = new char[KEY_MAX];
 	char *UInputMan::s_ChangedKeyStates = new char[KEY_MAX];
@@ -149,8 +149,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void UInputMan::SetInputClass(GUIInput *inputClass) const {
-		s_InputClass = inputClass;
+	void UInputMan::SetGUIInputInstanceToCaptureKeyStateFrom(GUIInput *inputClass) const {
+		s_GUIInputInstanceToCaptureKeyStateFrom = inputClass;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -558,7 +558,7 @@ namespace RTE {
 			case InputState::Held:
 				return s_PrevKeyStates[keyToTest];
 			case InputState::Pressed:
-				return s_InputClass ? (s_InputClass->GetScanCodeState(keyToTest) == GUIInput::Pushed) : (s_PrevKeyStates[keyToTest] && s_ChangedKeyStates[keyToTest]);
+				return s_GUIInputInstanceToCaptureKeyStateFrom ? (s_GUIInputInstanceToCaptureKeyStateFrom->GetScanCodeState(keyToTest) == GUIInput::Pushed) : (s_PrevKeyStates[keyToTest] && s_ChangedKeyStates[keyToTest]);
 			case InputState::Released:
 				return !s_PrevKeyStates[keyToTest] && s_ChangedKeyStates[keyToTest];
 			default:
@@ -712,7 +712,7 @@ namespace RTE {
 			}
 		}
 		// If InputClass is set for input capture pressing F1 will open console and hard-lock during manual input configuration, so just skip processing all special input until it's nullptr again.
-		if (s_InputClass) {
+		if (s_GUIInputInstanceToCaptureKeyStateFrom) {
 			return;
 		}
 		if (FlagCtrlState() && !FlagAltState()) {

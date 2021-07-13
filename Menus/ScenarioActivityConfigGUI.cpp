@@ -128,44 +128,40 @@ namespace RTE {
 		UpdateStartingGoldSliderAndLabel();
 		m_StartingGoldSlider->SetEnabled(m_SelectedActivity->GetGoldSwitchEnabled());
 
-		int defaultFogOfWar = m_SelectedActivity->GetDefaultFogOfWar();
-		if (defaultFogOfWar > -1) { m_FogOfWarCheckbox->SetCheck(defaultFogOfWar != 0); }
+		m_FogOfWarCheckbox->SetCheck(m_SelectedActivity->GetDefaultFogOfWar() > 0);
 		m_FogOfWarCheckbox->SetEnabled(m_SelectedActivity->GetFogOfWarSwitchEnabled());
 
-		int defaultReqClearPath = m_SelectedActivity->GetDefaultRequireClearPathToOrbit();
-		if (defaultReqClearPath > -1) { m_RequireClearPathToOrbitCheckbox->SetCheck(defaultReqClearPath != 0); }
+		m_RequireClearPathToOrbitCheckbox->SetCheck(m_SelectedActivity->GetDefaultRequireClearPathToOrbit() > 0);
 		m_RequireClearPathToOrbitCheckbox->SetEnabled(m_SelectedActivity->GetRequireClearPathToOrbitSwitchEnabled());
 
-		int defaultDeployUnits = m_SelectedActivity->GetDefaultDeployUnits();
-		if (defaultDeployUnits > -1) { m_DeployUnitsCheckbox->SetCheck(defaultDeployUnits != 0); }
+		m_DeployUnitsCheckbox->SetCheck(m_SelectedActivity->GetDefaultDeployUnits() > 0);
 		m_DeployUnitsCheckbox->SetEnabled(m_SelectedActivity->GetDeployUnitsSwitchEnabled());
 
 		m_StartGameButton->SetVisible(false);
 		m_StartErrorLabel->SetVisible(true);
 
 		for (int player = Players::PlayerOne; player < PlayerColumns::PlayerColumnCount; ++player) {
-			if (player < Players::MaxPlayerCount) {
-				m_PlayerBoxes.at(player).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Image);
-				if (const Icon *playerDeviceIcon = g_UInputMan.GetSchemeIcon(player)) { m_PlayerBoxes.at(player).at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(playerDeviceIcon->GetBitmaps32()[0])); }
-			}
-			for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
+			for (int team = Activity::Teams::TeamOne; team < TeamRows::TeamRowCount; ++team) {
 				m_PlayerBoxes.at(player).at(team)->SetDrawType(GUICollectionBox::Color);
 				m_PlayerBoxes.at(player).at(team)->SetDrawColor(c_GUIColorBlue);
 			}
+			if (player < Players::MaxPlayerCount) {
+				if (const Icon *playerDeviceIcon = g_UInputMan.GetSchemeIcon(player)) { m_PlayerBoxes.at(player).at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(playerDeviceIcon->GetBitmaps32()[0])); }
+				m_PlayerBoxes.at(player).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Image);
+			} else {
+				int cpuInitialTeam = TeamRows::DisabledTeam;
+				m_LockedCPUTeam = m_SelectedActivity->GetCPUTeam();
+				if (m_LockedCPUTeam != Activity::Teams::NoTeam) {
+					cpuInitialTeam = m_LockedCPUTeam;
+					m_CPULockLabel->SetPositionAbs(m_CPULockLabel->GetXPos(), m_TeamNameLabels.at(m_LockedCPUTeam)->GetYPos());
+					m_CPULockLabel->SetVisible(true);
+				} else {
+					m_CPULockLabel->SetVisible(false);
+				}
+				m_PlayerBoxes.at(player).at(cpuInitialTeam)->SetDrawType(GUICollectionBox::Image);
+				if (const Icon *cpuIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"))) { m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(cpuInitialTeam)->SetDrawImage(new AllegroBitmap(cpuIcon->GetBitmaps32()[0])); }
+			}
 		}
-
-		// CPU player either has a locked team or starts on the disabled team row.
-		int cpuInitialTeam = TeamRows::DisabledTeam;
-		m_LockedCPUTeam = m_SelectedActivity->GetCPUTeam();
-		if (m_LockedCPUTeam != Activity::Teams::NoTeam) {
-			m_CPULockLabel->SetVisible(true);
-			m_CPULockLabel->SetPositionAbs(m_CPULockLabel->GetXPos(), m_TeamNameLabels.at(m_LockedCPUTeam)->GetYPos());
-			cpuInitialTeam = m_LockedCPUTeam;
-		} else {
-			m_CPULockLabel->SetVisible(false);
-		}
-		m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(cpuInitialTeam)->SetDrawType(GUICollectionBox::Image);
-		if (const Icon *cpuIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"))) { m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(cpuInitialTeam)->SetDrawImage(new AllegroBitmap(cpuIcon->GetBitmaps32()[0])); }
 
 		for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
 			m_TeamTechComboBoxes.at(team)->SetSelectedIndex(0);
@@ -234,30 +230,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool ScenarioActivityConfigGUI::Update(int mouseX, int mouseY) {
-		if (const GUICollectionBox *hoveredCell = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControlUnderPoint(mouseX, mouseY, m_PlayersAndTeamsConfigBox, 1))) {
-			// Find which cell is being hovered over.
-			int hoveredPlayer = PlayerColumns::PlayerColumnCount;
-			int hoveredTeam = TeamRows::TeamRowCount;
-			for (int player = Players::PlayerOne; player < PlayerColumns::PlayerColumnCount; ++player) {
-				for (int team = Activity::Teams::TeamOne; team < TeamRows::TeamRowCount; ++team) {
-					if (m_PlayerBoxes.at(player).at(team) == hoveredCell) {
-						hoveredPlayer = player;
-						hoveredTeam = team;
-					} else if (m_PlayerBoxes.at(player).at(team)->GetDrawType() == GUICollectionBox::Color) {
-						// Un-highlight all other cells.
-						m_PlayerBoxes.at(player).at(team)->SetDrawColor(c_GUIColorBlue);
-					}
-				}
-			}
-			if ((m_SelectedActivity->TeamActive(hoveredTeam) || hoveredTeam == TeamRows::DisabledTeam) && hoveredTeam != m_LockedCPUTeam && (m_LockedCPUTeam == Activity::Teams::NoTeam || hoveredPlayer != PlayerColumns::PlayerCPU) && m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawType() != GUICollectionBox::Image) {
-				if (g_UInputMan.MenuButtonReleased(UInputMan::MENU_PRIMARY)) {
-					ClickInPlayerTeamSetup(hoveredPlayer, hoveredTeam);
-				} else if (m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawType() == GUICollectionBox::Color && m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawColor() != c_GUIColorLightBlue) {
-					m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->SetDrawColor(c_GUIColorLightBlue);
-					g_GUISound.SelectionChangeSound()->Play();
-				}
-			}
-		}
+		UpdatePlayerTeamSetupCell(mouseX, mouseY);
 
 		int teamsWithPlayers = 0;
 		bool teamWithHumans = false;
@@ -329,7 +302,34 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ScenarioActivityConfigGUI::ClickInPlayerTeamSetup(int clickedPlayer, int clickedTeam) {
+	void ScenarioActivityConfigGUI::UpdatePlayerTeamSetupCell(int mouseX, int mouseY) {
+		if (const GUICollectionBox *hoveredCell = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControlUnderPoint(mouseX, mouseY, m_PlayersAndTeamsConfigBox, 1))) {
+			int hoveredPlayer = PlayerColumns::PlayerColumnCount;
+			int hoveredTeam = TeamRows::TeamRowCount;
+			for (int player = Players::PlayerOne; player < PlayerColumns::PlayerColumnCount; ++player) {
+				for (int team = Activity::Teams::TeamOne; team < TeamRows::TeamRowCount; ++team) {
+					if (m_PlayerBoxes.at(player).at(team) == hoveredCell) {
+						hoveredPlayer = player;
+						hoveredTeam = team;
+					} else if (m_PlayerBoxes.at(player).at(team)->GetDrawType() == GUICollectionBox::Color) {
+						m_PlayerBoxes.at(player).at(team)->SetDrawColor(c_GUIColorBlue);
+					}
+				}
+			}
+			if ((m_SelectedActivity->TeamActive(hoveredTeam) || hoveredTeam == TeamRows::DisabledTeam) && hoveredTeam != m_LockedCPUTeam && (m_LockedCPUTeam == Activity::Teams::NoTeam || hoveredPlayer != PlayerColumns::PlayerCPU) && m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawType() != GUICollectionBox::Image) {
+				if (g_UInputMan.MenuButtonReleased(UInputMan::MENU_PRIMARY)) {
+					HandleClickOnPlayerTeamSetupCell(hoveredPlayer, hoveredTeam);
+				} else if (m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawType() == GUICollectionBox::Color && m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->GetDrawColor() != c_GUIColorLightBlue) {
+					m_PlayerBoxes.at(hoveredPlayer).at(hoveredTeam)->SetDrawColor(c_GUIColorLightBlue);
+					g_GUISound.SelectionChangeSound()->Play();
+				}
+			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ScenarioActivityConfigGUI::HandleClickOnPlayerTeamSetupCell(int clickedPlayer, int clickedTeam) {
 		m_PlayerBoxes.at(clickedPlayer).at(clickedTeam)->SetDrawType(GUICollectionBox::Image);
 		const Icon *playerIcon = (clickedPlayer != PlayerColumns::PlayerCPU) ? g_UInputMan.GetSchemeIcon(clickedPlayer) : dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
 		if (playerIcon) { m_PlayerBoxes.at(clickedPlayer).at(clickedTeam)->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0])); }

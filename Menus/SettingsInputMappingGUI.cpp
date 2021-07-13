@@ -114,8 +114,7 @@ namespace RTE {
 		m_InputElementCapturingInputNameLabel->SetText(m_InputMapLabel.at(inputElement)->GetText());
 		m_ConfiguringManually = true;
 
-		// Use GUIInput class for better key detection
-		g_UInputMan.SetInputClass(m_GUIControlManager->GetManager()->GetInputController());
+		g_UInputMan.SetGUIInputInstanceToCaptureKeyStateFrom(m_GUIControlManager->GetManager()->GetInputController());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -126,7 +125,7 @@ namespace RTE {
 		m_InputMappingCaptureBox->SetEnabled(false);
 		m_ConfiguringManually = false;
 
-		g_UInputMan.SetInputClass(nullptr);
+		g_UInputMan.SetGUIInputInstanceToCaptureKeyStateFrom(nullptr);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

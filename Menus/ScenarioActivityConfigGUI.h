@@ -130,11 +130,18 @@ namespace RTE {
 		void UpdateStartingGoldSliderAndLabel();
 
 		/// <summary>
-		/// Handles the player interaction with the players and teams config box.
+		/// Updates the currently hovered cell in the players and teams config box to apply the hovered visual and removes the hovered visual from any other cells. Also handles clicking on cells.
+		/// </summary>
+		/// <param name="mouseX">Mouse X position.</param>
+		/// <param name="mouseY">Mouse Y position.</param>
+		void UpdatePlayerTeamSetupCell(int mouseX, int mouseY);
+
+		/// <summary>
+		/// Handles the player interaction with a cell in the players and teams config box.
 		/// </summary>
 		/// <param name="clickedPlayer">The player box that was clicked.</param>
 		/// <param name="clickedTeam">The team box that was clicked.</param>
-		void ClickInPlayerTeamSetup(int clickedPlayer, int clickedTeam);
+		void HandleClickOnPlayerTeamSetupCell(int clickedPlayer, int clickedTeam);
 
 		/// <summary>
 		/// Handles the player interaction with the ScenarioActivityConfigGUI GUI elements.

@@ -129,7 +129,7 @@ namespace RTE {
 			m_ConfigFinished = false;
 			m_NewInputSchemeApplied = false;
 
-			g_UInputMan.SetInputClass(nullptr);
+			g_UInputMan.SetGUIInputInstanceToCaptureKeyStateFrom(nullptr);
 		}
 	}
 
@@ -185,8 +185,7 @@ namespace RTE {
 		}
 		m_WizardManualConfigScreen.ConfigDeviceTypeLabel->SetText(inputDeviceName);
 
-		// Use GUIInput class for better key detection.
-		g_UInputMan.SetInputClass(m_GUIControlManager->GetManager()->GetInputController());
+		g_UInputMan.SetGUIInputInstanceToCaptureKeyStateFrom(m_GUIControlManager->GetManager()->GetInputController());
 
 		ResetManualConfigSequence();
 		m_ConfiguringManually = true;

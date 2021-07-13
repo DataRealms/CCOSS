@@ -263,7 +263,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Main menu and sub-menus were given a facelift.
 
-- In-game settings menu was reworked to make it less useless.
+- Settings menu was reworked to make it less useless.
 
 - Esc has been disabled in server mode to not disrupt simulation for clients, use Alt+F4 or the window close button to exit.
 

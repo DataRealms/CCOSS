@@ -16,7 +16,7 @@
 
 namespace RTE {
 
-	GUIInput* UInputMan::s_GUIInputInstanceToCaptureKeyStateFrom = nullptr;
+	GUIInput *UInputMan::s_GUIInputInstanceToCaptureKeyStateFrom = nullptr;
 
 	char *UInputMan::s_PrevKeyStates = new char[KEY_MAX];
 	char *UInputMan::s_ChangedKeyStates = new char[KEY_MAX];

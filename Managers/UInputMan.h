@@ -73,8 +73,8 @@ namespace RTE {
 		/// <summary>
 		/// Sets the GUIInput instance to capture key state from. This is used for better key detection during input mapping input capture.
 		/// </summary>
-		/// <param name="inputClass">Pointer to the GUIInput instance to capture key state from, or nullptr if using UInputMan input capture.</param>
-		void SetGUIInputInstanceToCaptureKeyStateFrom(GUIInput *inputClass) const;
+		/// <param name="guiInputInstance">Pointer to the GUIInput instance to capture key state from, or nullptr if using UInputMan input capture.</param>
+		void SetGUIInputInstanceToCaptureKeyStateFrom(GUIInput *guiInputInstance) const;
 
 		/// <summary>
 		/// Gets the currently used input device of the specified player.

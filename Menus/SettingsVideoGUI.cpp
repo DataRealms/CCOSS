@@ -111,8 +111,10 @@ namespace RTE {
 		m_VideoSettingsBox->SetVisible(enable);
 		m_VideoSettingsBox->SetEnabled(enable);
 
-		if (m_CustomResolutionWidthTextBox->GetText().empty()) { m_CustomResolutionWidthTextBox->SetText(std::to_string(g_FrameMan.GetResX())); }
-		if (m_CustomResolutionHeightTextBox->GetText().empty()) { m_CustomResolutionHeightTextBox->SetText(std::to_string(g_FrameMan.GetResY())); }
+		if (enable) {
+			if (m_CustomResolutionWidthTextBox->GetText().empty()) { m_CustomResolutionWidthTextBox->SetText(std::to_string(g_FrameMan.GetResX())); }
+			if (m_CustomResolutionHeightTextBox->GetText().empty()) { m_CustomResolutionHeightTextBox->SetText(std::to_string(g_FrameMan.GetResY())); }
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

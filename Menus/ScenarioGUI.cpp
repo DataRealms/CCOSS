@@ -545,22 +545,25 @@ namespace RTE {
 	void ScenarioGUI::DrawLinesToSitePoint(BITMAP *drawBitmap) const {
 		int blendAmount = 0;
 		int drawColor = c_GUIColorWhite;
-		for (int i = 0; i < m_LineToSitePoints.size() - 1; i++) {
-			int lineStartX = m_LineToSitePoints.at(i).GetFloorIntX();
-			int lineStartY = m_LineToSitePoints.at(i).GetFloorIntY();
-			int lineEndX = m_LineToSitePoints.at(i + 1).GetFloorIntX();
-			int lineEndY = m_LineToSitePoints.at(i + 1).GetFloorIntY();
 
-			blendAmount = 195 + RandomNum(0, 30);
-			set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-			line(drawBitmap, lineStartX, lineStartY, lineEndX, lineEndY, drawColor);
+		if (!m_LineToSitePoints.empty()) {
+			for (int i = 0; i < m_LineToSitePoints.size() - 1; i++) {
+				int lineStartX = m_LineToSitePoints.at(i).GetFloorIntX();
+				int lineStartY = m_LineToSitePoints.at(i).GetFloorIntY();
+				int lineEndX = m_LineToSitePoints.at(i + 1).GetFloorIntX();
+				int lineEndY = m_LineToSitePoints.at(i + 1).GetFloorIntY();
 
-			blendAmount = 30 + RandomNum(0, 50);
-			set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
-			line(drawBitmap, lineStartX + 1, lineStartY, lineEndX + 1, lineEndY, drawColor);
-			line(drawBitmap, lineStartX - 1, lineStartY, lineEndX - 1, lineEndY, drawColor);
-			line(drawBitmap, lineStartX, lineStartY + 1, lineEndX, lineEndY + 1, drawColor);
-			line(drawBitmap, lineStartX, lineStartY - 1, lineEndX, lineEndY - 1, drawColor);
+				blendAmount = 195 + RandomNum(0, 30);
+				set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
+				line(drawBitmap, lineStartX, lineStartY, lineEndX, lineEndY, drawColor);
+
+				blendAmount = 30 + RandomNum(0, 50);
+				set_screen_blender(blendAmount, blendAmount, blendAmount, blendAmount);
+				line(drawBitmap, lineStartX + 1, lineStartY, lineEndX + 1, lineEndY, drawColor);
+				line(drawBitmap, lineStartX - 1, lineStartY, lineEndX - 1, lineEndY, drawColor);
+				line(drawBitmap, lineStartX, lineStartY + 1, lineEndX, lineEndY + 1, drawColor);
+				line(drawBitmap, lineStartX, lineStartY - 1, lineEndX, lineEndY - 1, drawColor);
+			}
 		}
 		Vector sitePos = m_PlanetCenter + m_SelectedScene->GetLocation() + m_SelectedScene->GetLocationOffset();
 		int sitePosX = sitePos.GetFloorIntX();

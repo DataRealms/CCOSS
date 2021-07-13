@@ -30,11 +30,11 @@ namespace RTE {
 				.property("DefaultActivityType", &ActivityMan::GetDefaultActivityType, &ActivityMan::SetDefaultActivityType)
 				.property("DefaultActivityName", &ActivityMan::GetDefaultActivityName, &ActivityMan::SetDefaultActivityName)
 				// Transfers ownership of the Activity to start into the ActivityMan, adopts ownership (_1 is the this ptr)
-				.def("SetStartActivity", &ActivityMan::SetStartActivity, adopt(_2))
+				.def("SetStartActivity", &ActivityMan::SetStartActivity, luabind::adopt(_2))
 				.def("GetStartActivity", &ActivityMan::GetStartActivity)
 				.def("GetActivity", &ActivityMan::GetActivity)
 				// Transfers ownership of the Activity to start into the ActivityMan, adopts ownership (_1 is the this ptr)
-				.def("StartActivity", (int (ActivityMan::*)(Activity *))&ActivityMan::StartActivity, adopt(_2))
+				.def("StartActivity", (int (ActivityMan::*)(Activity *))&ActivityMan::StartActivity, luabind::adopt(_2))
 				.def("StartActivity", (int (ActivityMan::*)(string, string))&ActivityMan::StartActivity)
 				.def("RestartActivity", &ActivityMan::RestartActivity)
 				.def("PauseActivity", &ActivityMan::PauseActivity)
@@ -60,9 +60,9 @@ namespace RTE {
 				.def("QueueMusicStream", &AudioMan::QueueMusicStream)
 				.def("QueueSilence", &AudioMan::QueueSilence)
 				.def("ClearMusicQueue", &AudioMan::ClearMusicQueue)
-				.def("PlaySound", (SoundContainer *(AudioMan:: *)(const std::string &filePath)) &AudioMan::PlaySound, adopt(result))
-				.def("PlaySound", (SoundContainer *(AudioMan:: *)(const std::string &filePath, const Vector &position)) &AudioMan::PlaySound, adopt(result))
-				.def("PlaySound", (SoundContainer *(AudioMan:: *)(const std::string &filePath, const Vector &position, int player)) &AudioMan::PlaySound, adopt(result));
+				.def("PlaySound", (SoundContainer *(AudioMan:: *)(const std::string &filePath)) &AudioMan::PlaySound, luabind::adopt(luabind::result))
+				.def("PlaySound", (SoundContainer *(AudioMan:: *)(const std::string &filePath, const Vector &position)) &AudioMan::PlaySound, luabind::adopt(luabind::result))
+				.def("PlaySound", (SoundContainer *(AudioMan:: *)(const std::string &filePath, const Vector &position, int player)) &AudioMan::PlaySound, luabind::adopt(luabind::result));
 		}
 
 		LuaBindingRegisterFunctionForType(ConsoleMan) {
@@ -97,7 +97,7 @@ namespace RTE {
 				.def("GetTeamOfPlayer", &MetaMan::GetTeamOfPlayer)
 				.def("GetPlayer", &MetaMan::GetPlayer)
 				.def("GetMetaPlayerOfInGamePlayer", &MetaMan::GetMetaPlayerOfInGamePlayer)
-				.def_readwrite("Players", &MetaMan::m_Players, return_stl_iterator);
+				.def_readwrite("Players", &MetaMan::m_Players, luabind::return_stl_iterator);
 		}
 
 		LuaBindingRegisterFunctionForType(MovableMan) {
@@ -125,10 +125,10 @@ namespace RTE {
 				.property("MaxDroppedItems", &MovableMan::GetMaxDroppedItems, &MovableMan::SetMaxDroppedItems)
 				.def("SortTeamRoster", &MovableMan::SortTeamRoster)
 				.def("ChangeActorTeam", &MovableMan::ChangeActorTeam)
-				.def("AddMO", &AddMO, adopt(_2))
-				.def("AddActor", &AddActor, adopt(_2))
-				.def("AddItem", &AddItem, adopt(_2))
-				.def("AddParticle", &AddParticle, adopt(_2))
+				.def("AddMO", &AddMO, luabind::adopt(_2))
+				.def("AddActor", &AddActor, luabind::adopt(_2))
+				.def("AddItem", &AddItem, luabind::adopt(_2))
+				.def("AddParticle", &AddParticle, luabind::adopt(_2))
 				.def("RemoveActor", &MovableMan::RemoveActor)
 				.def("RemoveItem", &MovableMan::RemoveItem)
 				.def("RemoveParticle", &MovableMan::RemoveParticle)
@@ -144,14 +144,14 @@ namespace RTE {
 				.def("IsParticleSettlingEnabled", &MovableMan::IsParticleSettlingEnabled)
 				.def("EnableParticleSettling", &MovableMan::EnableParticleSettling)
 				.def("IsMOSubtractionEnabled", &MovableMan::IsMOSubtractionEnabled)
-				.def_readwrite("Actors", &MovableMan::m_Actors, return_stl_iterator)
-				.def_readwrite("Items", &MovableMan::m_Items, return_stl_iterator)
-				.def_readwrite("Particles", &MovableMan::m_Particles, return_stl_iterator)
-				.def_readwrite("AddedActors", &MovableMan::m_AddedActors, return_stl_iterator)
-				.def_readwrite("AddedItems", &MovableMan::m_AddedItems, return_stl_iterator)
-				.def_readwrite("AddedParticles", &MovableMan::m_AddedParticles, return_stl_iterator)
-				.def_readwrite("AlarmEvents", &MovableMan::m_AlarmEvents, return_stl_iterator)
-				.def_readwrite("AddedAlarmEvents", &MovableMan::m_AddedAlarmEvents, return_stl_iterator);
+				.def_readwrite("Actors", &MovableMan::m_Actors, luabind::return_stl_iterator)
+				.def_readwrite("Items", &MovableMan::m_Items, luabind::return_stl_iterator)
+				.def_readwrite("Particles", &MovableMan::m_Particles, luabind::return_stl_iterator)
+				.def_readwrite("AddedActors", &MovableMan::m_AddedActors, luabind::return_stl_iterator)
+				.def_readwrite("AddedItems", &MovableMan::m_AddedItems, luabind::return_stl_iterator)
+				.def_readwrite("AddedParticles", &MovableMan::m_AddedParticles, luabind::return_stl_iterator)
+				.def_readwrite("AlarmEvents", &MovableMan::m_AlarmEvents, luabind::return_stl_iterator)
+				.def_readwrite("AddedAlarmEvents", &MovableMan::m_AddedAlarmEvents, luabind::return_stl_iterator);
 		}
 
 		LuaBindingRegisterFunctionForType(PostProcessMan) {
@@ -168,11 +168,11 @@ namespace RTE {
 				.def("GetTotalModuleCount", &PresetMan::GetTotalModuleCount)
 				.def("GetOfficialModuleCount", &PresetMan::GetOfficialModuleCount)
 				.def("AddPreset", &PresetMan::AddEntityPreset)
-				.def_readwrite("Modules", &PresetMan::m_pDataModules, return_stl_iterator)
+				.def_readwrite("Modules", &PresetMan::m_pDataModules, luabind::return_stl_iterator)
 				.def("GetPreset", (const Entity *(PresetMan::*)(string, string, int))&PresetMan::GetEntityPreset)
 				.def("GetPreset", (const Entity *(PresetMan::*)(string, string, string))&PresetMan::GetEntityPreset)
-				.def("GetLoadout", (Actor * (PresetMan::*)(std::string, std::string, bool))&PresetMan::GetLoadout, adopt(result))
-				.def("GetLoadout", (Actor * (PresetMan::*)(std::string, int, bool))&PresetMan::GetLoadout, adopt(result))
+				.def("GetLoadout", (Actor * (PresetMan::*)(std::string, std::string, bool))&PresetMan::GetLoadout, luabind::adopt(luabind::result))
+				.def("GetLoadout", (Actor * (PresetMan::*)(std::string, int, bool))&PresetMan::GetLoadout, luabind::adopt(luabind::result))
 				.def("GetRandomOfGroup", &PresetMan::GetRandomOfGroup)
 				.def("GetRandomOfGroupInModuleSpace", &PresetMan::GetRandomOfGroupInModuleSpace)
 				.def("GetEntityDataLocation", &PresetMan::GetEntityDataLocation)

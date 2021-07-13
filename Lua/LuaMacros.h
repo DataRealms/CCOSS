@@ -22,29 +22,29 @@
 	/// </summary>
 	#define ConcreteTypeLuaClassDefinition(TYPE, PARENTTYPE) \
 		luabind::class_<TYPE, PARENTTYPE>(#TYPE) \
-			.def("Clone", &Clone##TYPE, adopt(result)) \
+			.def("Clone", &Clone##TYPE, luabind::adopt(luabind::result)) \
 			.property("ClassName", &TYPE::GetClassName)
 
 	/// <summary>
 	/// 
 	/// </summary>
 	#define RegisterLuaBindingsOfAbstractType(OWNINGSCOPENAME, TYPE) \
-		def((std::string("To") + std::string(#TYPE)).c_str(), (TYPE *(*)(Entity *))&To##TYPE), \
-		def((std::string("To") + std::string(#TYPE)).c_str(), (const TYPE *(*)(const Entity *))&ToConst##TYPE), \
+		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (TYPE *(*)(Entity *))&To##TYPE), \
+		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (const TYPE *(*)(const Entity *))&ToConst##TYPE), \
 		OWNINGSCOPENAME##::Register##TYPE##LuaBindings()
 
 	/// <summary>
 	/// 
 	/// </summary>
 	#define RegisterLuaBindingsOfConcreteType(OWNINGSCOPENAME, TYPE) \
-		def((std::string("Create") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string, std::string))&Create##TYPE, adopt(result)), \
-		def((std::string("Create") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string))&Create##TYPE, adopt(result)), \
-		def((std::string("Random") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string, int))&Random##TYPE, adopt(result)), \
-		def((std::string("Random") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string, std::string))&Random##TYPE, adopt(result)), \
-		def((std::string("Random") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string))&Random##TYPE, adopt(result)), \
-		def((std::string("To") + std::string(#TYPE)).c_str(), (TYPE *(*)(Entity *))&To##TYPE), \
-		def((std::string("To") + std::string(#TYPE)).c_str(), (const TYPE *(*)(const Entity *))&ToConst##TYPE),	\
-		def((std::string("Is") + std::string(#TYPE)).c_str(), (bool(*)(const Entity *))&Is##TYPE),	\
+		luabind::def((std::string("Create") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string, std::string))&Create##TYPE, luabind::adopt(luabind::result)), \
+		luabind::def((std::string("Create") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string))&Create##TYPE, luabind::adopt(luabind::result)), \
+		luabind::def((std::string("Random") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string, int))&Random##TYPE, luabind::adopt(luabind::result)), \
+		luabind::def((std::string("Random") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string, std::string))&Random##TYPE, luabind::adopt(luabind::result)), \
+		luabind::def((std::string("Random") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string))&Random##TYPE, luabind::adopt(luabind::result)), \
+		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (TYPE *(*)(Entity *))&To##TYPE), \
+		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (const TYPE *(*)(const Entity *))&ToConst##TYPE),	\
+		luabind::def((std::string("Is") + std::string(#TYPE)).c_str(), (bool(*)(const Entity *))&Is##TYPE),	\
 		OWNINGSCOPENAME##::Register##TYPE##LuaBindings()
 
 

@@ -6,8 +6,6 @@
 #include "Entity.h"
 #include "MetaPlayer.h"
 
-using namespace luabind;
-
 namespace RTE {
 
 	/// <summary>
@@ -19,7 +17,7 @@ namespace RTE {
 			return luabind::class_<Entity>("Entity")
 				.def("Clone", &CloneEntity)
 				.def("Reset", &Entity::Reset)
-				.def(luabind::tostring(const_self))
+				.def(luabind::tostring(luabind::const_self))
 				.property("ClassName", &Entity::GetClassName)
 				.property("PresetName", &Entity::GetPresetName, &Entity::SetPresetName)
 				.property("Description", &Entity::GetDescription, &Entity::SetDescription)
@@ -50,54 +48,54 @@ namespace RTE {
 			return ConcreteTypeLuaClassDefinition(ACrab, Actor)
 				// These are all private/protected so they can't be bound, need to consider making them public.
 				.enum_("MovementState")[
-					value("STAND", 0 /*ACrab::MovementState::STAND*/),
-					value("WALK", 1 /*ACrab::MovementState::WALK*/),
-					value("JUMP", 2 /*ACrab::MovementState::JUMP*/),
-					value("DISLODGE", 3 /*ACrab::MovementState::DISLODGE*/),
-					value("MOVEMENTSTATECOUNT", 4 /*ACrab::MovementState::MOVEMENTSTATECOUNT*/)
+					luabind::value("STAND", 0 /*ACrab::MovementState::STAND*/),
+					luabind::value("WALK", 1 /*ACrab::MovementState::WALK*/),
+					luabind::value("JUMP", 2 /*ACrab::MovementState::JUMP*/),
+					luabind::value("DISLODGE", 3 /*ACrab::MovementState::DISLODGE*/),
+					luabind::value("MOVEMENTSTATECOUNT", 4 /*ACrab::MovementState::MOVEMENTSTATECOUNT*/)
 				]
 				.enum_("Side")[
 					// Doesn't have qualifier
-					value("LEFTSIDE", 0 /*ACrab::LEFTSIDE*/),
-					value("RIGHTSIDE", 1 /*ACrab::RIGHTSIDE*/),
-					value("SIDECOUNT", 2 /*ACrab::SIDECOUNT*/)
+					luabind::value("LEFTSIDE", 0 /*ACrab::LEFTSIDE*/),
+					luabind::value("RIGHTSIDE", 1 /*ACrab::RIGHTSIDE*/),
+					luabind::value("SIDECOUNT", 2 /*ACrab::SIDECOUNT*/)
 				]
 				.enum_("Layer")[
 				// Doesn't have qualifier
-				value("FGROUND", 0 /*ACrab::FGROUND*/),
-				value("BGROUND", 1 /*ACrab::BGROUND*/)
+				luabind::value("FGROUND", 0 /*ACrab::FGROUND*/),
+				luabind::value("BGROUND", 1 /*ACrab::BGROUND*/)
 				]
 				.enum_("DeviceHandlingState")[
-					value("STILL", 0 /*ACrab::DeviceHandlingState::STILL*/),
-					value("POINTING", 1 /*ACrab::DeviceHandlingState::POINTING*/),
-					value("SCANNING", 2 /*ACrab::DeviceHandlingState::SCANNING*/),
-					value("AIMING", 3 /*ACrab::DeviceHandlingState::AIMING*/),
-					value("FIRING", 4 /*ACrab::DeviceHandlingState::FIRING*/),
-					value("THROWING", 5 /*ACrab::DeviceHandlingState::THROWING*/),
-					value("DIGGING", 6 /*ACrab::DeviceHandlingState::DIGGING*/)
+					luabind::value("STILL", 0 /*ACrab::DeviceHandlingState::STILL*/),
+					luabind::value("POINTING", 1 /*ACrab::DeviceHandlingState::POINTING*/),
+					luabind::value("SCANNING", 2 /*ACrab::DeviceHandlingState::SCANNING*/),
+					luabind::value("AIMING", 3 /*ACrab::DeviceHandlingState::AIMING*/),
+					luabind::value("FIRING", 4 /*ACrab::DeviceHandlingState::FIRING*/),
+					luabind::value("THROWING", 5 /*ACrab::DeviceHandlingState::THROWING*/),
+					luabind::value("DIGGING", 6 /*ACrab::DeviceHandlingState::DIGGING*/)
 				]
 				.enum_("SweepState")[
-					value("NOSWEEP", 0 /*ACrab::SweepState::NOSWEEP*/),
-					value("SWEEPINGUP", 1 /*ACrab::SweepState::SWEEPINGUP*/),
-					value("SWEEPUPPAUSE", 2 /*ACrab::SweepState::SWEEPUPPAUSE*/),
-					value("SWEEPINGDOWN", 3 /*ACrab::SweepState::SWEEPINGDOWN*/),
-					value("SWEEPDOWNPAUSE", 4 /*ACrab::SweepState::SWEEPDOWNPAUSE*/)
+					luabind::value("NOSWEEP", 0 /*ACrab::SweepState::NOSWEEP*/),
+					luabind::value("SWEEPINGUP", 1 /*ACrab::SweepState::SWEEPINGUP*/),
+					luabind::value("SWEEPUPPAUSE", 2 /*ACrab::SweepState::SWEEPUPPAUSE*/),
+					luabind::value("SWEEPINGDOWN", 3 /*ACrab::SweepState::SWEEPINGDOWN*/),
+					luabind::value("SWEEPDOWNPAUSE", 4 /*ACrab::SweepState::SWEEPDOWNPAUSE*/)
 				]
 				.enum_("DigState")[
-					value("NOTDIGGING", 0 /*ACrab::DigState::NOTDIGGING*/),
-					value("PREDIG", 1 /*ACrab::DigState::PREDIG*/),
-					value("STARTDIG", 2 /*ACrab::DigState::STARTDIG*/),
-					value("TUNNELING", 3 /*ACrab::DigState::TUNNELING*/),
-					value("FINISHINGDIG", 4 /*ACrab::DigState::FINISHINGDIG*/),
-					value("PAUSEDIGGER", 5 /*ACrab::DigState::PAUSEDIGGER*/)
+					luabind::value("NOTDIGGING", 0 /*ACrab::DigState::NOTDIGGING*/),
+					luabind::value("PREDIG", 1 /*ACrab::DigState::PREDIG*/),
+					luabind::value("STARTDIG", 2 /*ACrab::DigState::STARTDIG*/),
+					luabind::value("TUNNELING", 3 /*ACrab::DigState::TUNNELING*/),
+					luabind::value("FINISHINGDIG", 4 /*ACrab::DigState::FINISHINGDIG*/),
+					luabind::value("PAUSEDIGGER", 5 /*ACrab::DigState::PAUSEDIGGER*/)
 				]
 				.enum_("JumpState")[
-					value("NOTJUMPING", 0 /*ACrab::JumpState::NOTJUMPING*/),
-					value("FORWARDJUMP", 1 /*ACrab::JumpState::FORWARDJUMP*/),
-					value("PREJUMP", 2 /*ACrab::JumpState::PREJUMP*/),
-					value("UPJUMP", 3 /*ACrab::JumpState::UPJUMP*/),
-					value("APEXJUMP", 4 /*ACrab::JumpState::APEXJUMP*/),
-					value("LANDJUMP", 5 /*ACrab::JumpState::LANDJUMP*/)
+					luabind::value("NOTJUMPING", 0 /*ACrab::JumpState::NOTJUMPING*/),
+					luabind::value("FORWARDJUMP", 1 /*ACrab::JumpState::FORWARDJUMP*/),
+					luabind::value("PREJUMP", 2 /*ACrab::JumpState::PREJUMP*/),
+					luabind::value("UPJUMP", 3 /*ACrab::JumpState::UPJUMP*/),
+					luabind::value("APEXJUMP", 4 /*ACrab::JumpState::APEXJUMP*/),
+					luabind::value("LANDJUMP", 5 /*ACrab::JumpState::LANDJUMP*/)
 				]
 				.def(luabind::constructor<>())
 				.property("Turret", &ACrab::GetTurret, &ACrabSetTurret)
@@ -129,30 +127,30 @@ namespace RTE {
 		LuaBindingRegisterFunctionForType(ACraft) {
 			return AbstractTypeLuaClassDefinition(ACraft, Actor)
 				.enum_("HatchState")[
-					value("CLOSED", ACraft::HatchState::CLOSED),
-					value("OPENING", ACraft::HatchState::OPENING),
-					value("OPEN", ACraft::HatchState::OPEN),
-					value("CLOSING", ACraft::HatchState::CLOSING),
-					value("HatchStateCount", ACraft::HatchState::HatchStateCount)
+					luabind::value("CLOSED", ACraft::HatchState::CLOSED),
+					luabind::value("OPENING", ACraft::HatchState::OPENING),
+					luabind::value("OPEN", ACraft::HatchState::OPEN),
+					luabind::value("CLOSING", ACraft::HatchState::CLOSING),
+					luabind::value("HatchStateCount", ACraft::HatchState::HatchStateCount)
 				]
 				.enum_("Side")[
 					// Doesn't have qualifier
-					value("RIGHT", ACraft::RIGHT),
-					value("LEFT", ACraft::LEFT)
+					luabind::value("RIGHT", ACraft::RIGHT),
+					luabind::value("LEFT", ACraft::LEFT)
 				]
 				// These are all private/protected so they can't be bound, need to consider making them public.
 				.enum_("CraftDeliverySequence")[
-					value("FALL", 0 /*ACraft::CraftDeliverySequence::FALL*/),
-					value("LAND", 1 /*ACraft::CraftDeliverySequence::LAND*/),
-					value("STANDBY", 2 /*ACraft::CraftDeliverySequence::STANDBY*/),
-					value("UNLOAD", 3 /*ACraft::CraftDeliverySequence::UNLOAD*/),
-					value("LAUNCH", 4 /*ACraft::CraftDeliverySequence::LAUNCH*/),
-					value("UNSTICK", 5 /*ACraft::CraftDeliverySequence::UNSTICK*/)
+					luabind::value("FALL", 0 /*ACraft::CraftDeliverySequence::FALL*/),
+					luabind::value("LAND", 1 /*ACraft::CraftDeliverySequence::LAND*/),
+					luabind::value("STANDBY", 2 /*ACraft::CraftDeliverySequence::STANDBY*/),
+					luabind::value("UNLOAD", 3 /*ACraft::CraftDeliverySequence::UNLOAD*/),
+					luabind::value("LAUNCH", 4 /*ACraft::CraftDeliverySequence::LAUNCH*/),
+					luabind::value("UNSTICK", 5 /*ACraft::CraftDeliverySequence::UNSTICK*/)
 				]
 				.enum_("AltitudeMoveState")[
-					value("HOVER", 0 /*ACraft::AltitudeMoveState::HOVER*/),
-					value("DESCEND", 1 /*ACraft::AltitudeMoveState::DESCEND*/),
-					value("ASCEND", 2 /*ACraft::AltitudeMoveState::ASCEND*/)
+					luabind::value("HOVER", 0 /*ACraft::AltitudeMoveState::HOVER*/),
+					luabind::value("DESCEND", 1 /*ACraft::AltitudeMoveState::DESCEND*/),
+					luabind::value("ASCEND", 2 /*ACraft::AltitudeMoveState::ASCEND*/)
 				]
 				.def("OpenHatch", &ACraft::OpenHatch)
 				.def("CloseHatch", &ACraft::CloseHatch)
@@ -168,11 +166,11 @@ namespace RTE {
 			return ConcreteTypeLuaClassDefinition(ACRocket, ACraft)
 				// These are all private/protected so they can't be bound, need to consider making them public.
 				.enum_("LandingGearState")[
-					value("RAISED", 0 /*ACRocket::LandingGearState::RAISED*/),
-					value("LOWERED", 1 /*ACRocket::LandingGearState::LOWERED*/),
-					value("LOWERING", 2 /*ACRocket::LandingGearState::LOWERING*/),
-					value("RAISING", 3 /*ACRocket::LandingGearState::RAISING*/),
-					value("GearStateCount", 4 /*ACRocket::LandingGearState::GearStateCount*/)
+					luabind::value("RAISED", 0 /*ACRocket::LandingGearState::RAISED*/),
+					luabind::value("LOWERED", 1 /*ACRocket::LandingGearState::LOWERED*/),
+					luabind::value("LOWERING", 2 /*ACRocket::LandingGearState::LOWERING*/),
+					luabind::value("RAISING", 3 /*ACRocket::LandingGearState::RAISING*/),
+					luabind::value("GearStateCount", 4 /*ACRocket::LandingGearState::GearStateCount*/)
 				]
 				.property("RightLeg", &ACRocket::GetRightLeg, &ACRocketSetRightLeg)
 				.property("LeftLeg", &ACRocket::GetLeftLeg, &ACRocketSetLeftLeg)
@@ -187,56 +185,56 @@ namespace RTE {
 		LuaBindingRegisterFunctionForType(Actor) {
 			return ConcreteTypeLuaClassDefinition(Actor, MOSRotating)
 				.enum_("Status")[
-					value("STABLE", Actor::Status::STABLE),
-					value("UNSTABLE", Actor::Status::UNSTABLE),
-					value("INACTIVE", Actor::Status::INACTIVE),
-					value("DYING", Actor::Status::DYING),
-					value("DEAD", Actor::Status::DEAD)
+					luabind::value("STABLE", Actor::Status::STABLE),
+					luabind::value("UNSTABLE", Actor::Status::UNSTABLE),
+					luabind::value("INACTIVE", Actor::Status::INACTIVE),
+					luabind::value("DYING", Actor::Status::DYING),
+					luabind::value("DEAD", Actor::Status::DEAD)
 				]
 				.enum_("AIMode")[
-					value("AIMODE_NONE", Actor::AIMode::AIMODE_NONE),
-					value("AIMODE_SENTRY", Actor::AIMode::AIMODE_SENTRY),
-					value("AIMODE_PATROL", Actor::AIMode::AIMODE_PATROL),
-					value("AIMODE_GOTO", Actor::AIMode::AIMODE_GOTO),
-					value("AIMODE_BRAINHUNT", Actor::AIMode::AIMODE_BRAINHUNT),
-					value("AIMODE_GOLDDIG", Actor::AIMode::AIMODE_GOLDDIG),
-					value("AIMODE_RETURN", Actor::AIMode::AIMODE_RETURN),
-					value("AIMODE_STAY", Actor::AIMode::AIMODE_STAY),
-					value("AIMODE_SCUTTLE", Actor::AIMode::AIMODE_SCUTTLE),
-					value("AIMODE_DELIVER", Actor::AIMode::AIMODE_DELIVER),
-					value("AIMODE_BOMB", Actor::AIMode::AIMODE_BOMB),
-					value("AIMODE_SQUAD", Actor::AIMode::AIMODE_SQUAD),
-					value("AIMODE_COUNT", Actor::AIMode::AIMODE_COUNT)
+					luabind::value("AIMODE_NONE", Actor::AIMode::AIMODE_NONE),
+					luabind::value("AIMODE_SENTRY", Actor::AIMode::AIMODE_SENTRY),
+					luabind::value("AIMODE_PATROL", Actor::AIMode::AIMODE_PATROL),
+					luabind::value("AIMODE_GOTO", Actor::AIMode::AIMODE_GOTO),
+					luabind::value("AIMODE_BRAINHUNT", Actor::AIMode::AIMODE_BRAINHUNT),
+					luabind::value("AIMODE_GOLDDIG", Actor::AIMode::AIMODE_GOLDDIG),
+					luabind::value("AIMODE_RETURN", Actor::AIMode::AIMODE_RETURN),
+					luabind::value("AIMODE_STAY", Actor::AIMode::AIMODE_STAY),
+					luabind::value("AIMODE_SCUTTLE", Actor::AIMode::AIMODE_SCUTTLE),
+					luabind::value("AIMODE_DELIVER", Actor::AIMode::AIMODE_DELIVER),
+					luabind::value("AIMODE_BOMB", Actor::AIMode::AIMODE_BOMB),
+					luabind::value("AIMODE_SQUAD", Actor::AIMode::AIMODE_SQUAD),
+					luabind::value("AIMODE_COUNT", Actor::AIMode::AIMODE_COUNT)
 				]
 				.enum_("ActionState")[
-					value("MOVING", Actor::ActionState::MOVING),
-					value("MOVING_FAST", Actor::ActionState::MOVING_FAST),
-					value("FIRING", Actor::ActionState::FIRING),
-					value("ActionStateCount", Actor::ActionState::ActionStateCount)
+					luabind::value("MOVING", Actor::ActionState::MOVING),
+					luabind::value("MOVING_FAST", Actor::ActionState::MOVING_FAST),
+					luabind::value("FIRING", Actor::ActionState::FIRING),
+					luabind::value("ActionStateCount", Actor::ActionState::ActionStateCount)
 				]
 				.enum_("AimState")[
-					value("AIMSTILL", Actor::AimState::AIMSTILL),
-					value("AIMUP", Actor::AimState::AIMUP),
-					value("AIMDOWN", Actor::AimState::AIMDOWN),
-					value("AimStateCount", Actor::AimState::AimStateCount)
+					luabind::value("AIMSTILL", Actor::AimState::AIMSTILL),
+					luabind::value("AIMUP", Actor::AimState::AIMUP),
+					luabind::value("AIMDOWN", Actor::AimState::AIMDOWN),
+					luabind::value("AimStateCount", Actor::AimState::AimStateCount)
 				]
 				.enum_("LateralMoveState")[
-					value("LAT_STILL", Actor::LateralMoveState::LAT_STILL),
-					value("LAT_LEFT", Actor::LateralMoveState::LAT_LEFT),
-					value("LAT_RIGHT", Actor::LateralMoveState::LAT_RIGHT)
+					luabind::value("LAT_STILL", Actor::LateralMoveState::LAT_STILL),
+					luabind::value("LAT_LEFT", Actor::LateralMoveState::LAT_LEFT),
+					luabind::value("LAT_RIGHT", Actor::LateralMoveState::LAT_RIGHT)
 				]
 				.enum_("ObstacleState")[
-					value("PROCEEDING", Actor::ObstacleState::PROCEEDING),
-					value("BACKSTEPPING", Actor::ObstacleState::BACKSTEPPING),
-					value("DIGPAUSING", Actor::ObstacleState::DIGPAUSING),
-					value("JUMPING", Actor::ObstacleState::JUMPING),
-					value("SOFTLANDING", Actor::ObstacleState::SOFTLANDING)
+					luabind::value("PROCEEDING", Actor::ObstacleState::PROCEEDING),
+					luabind::value("BACKSTEPPING", Actor::ObstacleState::BACKSTEPPING),
+					luabind::value("DIGPAUSING", Actor::ObstacleState::DIGPAUSING),
+					luabind::value("JUMPING", Actor::ObstacleState::JUMPING),
+					luabind::value("SOFTLANDING", Actor::ObstacleState::SOFTLANDING)
 				]
 				.enum_("TeamBlockState")[
-					value("NOTBLOCKED", Actor::TeamBlockState::NOTBLOCKED),
-					value("BLOCKED", Actor::TeamBlockState::BLOCKED),
-					value("IGNORINGBLOCK", Actor::TeamBlockState::IGNORINGBLOCK),
-					value("FOLLOWWAIT", Actor::TeamBlockState::FOLLOWWAIT)
+					luabind::value("NOTBLOCKED", Actor::TeamBlockState::NOTBLOCKED),
+					luabind::value("BLOCKED", Actor::TeamBlockState::BLOCKED),
+					luabind::value("IGNORINGBLOCK", Actor::TeamBlockState::IGNORINGBLOCK),
+					luabind::value("FOLLOWWAIT", Actor::TeamBlockState::FOLLOWWAIT)
 				]
 				.def(luabind::constructor<>())
 				.def("GetController", &Actor::GetController)
@@ -290,7 +288,7 @@ namespace RTE {
 				.def("RemoveMovePathEnd", &Actor::RemoveMovePathEnd)
 				.property("Perceptiveness", &Actor::GetPerceptiveness, &Actor::SetPerceptiveness)
 				.property("CanRevealUnseen", &Actor::GetCanRevealUnseen, &Actor::SetCanRevealUnseen)
-				.def("AddInventoryItem", &Actor::AddInventoryItem, adopt(_2))
+				.def("AddInventoryItem", &Actor::AddInventoryItem, luabind::adopt(_2))
 				.def("RemoveInventoryItem", &Actor::RemoveInventoryItem)
 				.def("SwapNextInventory", &Actor::SwapNextInventory)
 				.def("SwapPrevInventory", &Actor::SwapPrevInventory)
@@ -304,8 +302,8 @@ namespace RTE {
 				.def("UpdateMovePath", &Actor::UpdateMovePath)
 				.property("MovePathSize", &Actor::GetMovePathSize)
 				.def_readwrite("MOMoveTarget", &Actor::m_pMOMoveTarget)
-				.def_readwrite("MovePath", &Actor::m_MovePath, return_stl_iterator)
-				.def_readwrite("Inventory", &Actor::m_Inventory, return_stl_iterator)
+				.def_readwrite("MovePath", &Actor::m_MovePath, luabind::return_stl_iterator)
+				.def_readwrite("Inventory", &Actor::m_Inventory, luabind::return_stl_iterator)
 				.def("SetAlarmPoint", &Actor::AlarmPoint)
 				.def("GetAlarmPoint", &Actor::GetAlarmPoint)
 				.property("AimDistance", &Actor::GetAimDistance, &Actor::SetAimDistance)
@@ -315,11 +313,11 @@ namespace RTE {
 		LuaBindingRegisterFunctionForType(ADoor) {
 			return ConcreteTypeLuaClassDefinition(ADoor, Actor)
 				.enum_("DoorState")[
-					value("CLOSED", ADoor::DoorState::CLOSED),
-					value("OPENING", ADoor::DoorState::OPENING),
-					value("OPEN", ADoor::DoorState::OPEN),
-					value("CLOSING", ADoor::DoorState::CLOSING),
-					value("STOPPED", ADoor::DoorState::STOPPED)
+					luabind::value("CLOSED", ADoor::DoorState::CLOSED),
+					luabind::value("OPENING", ADoor::DoorState::OPENING),
+					luabind::value("OPEN", ADoor::DoorState::OPEN),
+					luabind::value("CLOSING", ADoor::DoorState::CLOSING),
+					luabind::value("STOPPED", ADoor::DoorState::STOPPED)
 				]
 				.property("Door", &ADoor::GetDoor, &ADoorSetDoor)
 				.def("GetDoorState", &ADoor::GetDoorState)
@@ -357,76 +355,76 @@ namespace RTE {
 				.def("TriggerBurst", &AEmitter::TriggerBurst)
 				.def("IsSetToBurst", &AEmitter::IsSetToBurst)
 				.def("CanTriggerBurst", &AEmitter::CanTriggerBurst)
-				.def_readwrite("Emissions", &AEmitter::m_EmissionList, return_stl_iterator);
+				.def_readwrite("Emissions", &AEmitter::m_EmissionList, luabind::return_stl_iterator);
 		}
 
 		LuaBindingRegisterFunctionForType(AHuman) {
 			return ConcreteTypeLuaClassDefinition(AHuman, Actor)
 				// These are all private/protected so they can't be bound, need to consider making them public.
 				.enum_("UpperBodyState")[
-					value("WEAPON_READY", 0 /*AHuman::UpperBodyState::WEAPON_READY*/),
-					value("AIMING_SHARP", 1 /*AHuman::UpperBodyState::AIMING_SHARP*/),
-					value("HOLSTERING_BACK", 2 /*AHuman::UpperBodyState::HOLSTERING_BACK*/),
-					value("HOLSTERING_BELT", 3 /*AHuman::UpperBodyState::HOLSTERING_BELT*/),
-					value("DEHOLSTERING_BACK", 4 /*AHuman::UpperBodyState::DEHOLSTERING_BACK*/),
-					value("DEHOLSTERING_BELT", 5 /*AHuman::UpperBodyState::DEHOLSTERING_BELT*/),
-					value("THROWING_PREP", 6 /*AHuman::UpperBodyState::THROWING_PREP*/),
-					value("THROWING_RELEASE", 7 /*AHuman::UpperBodyState::THROWING_RELEASE*/)
+					luabind::value("WEAPON_READY", 0 /*AHuman::UpperBodyState::WEAPON_READY*/),
+					luabind::value("AIMING_SHARP", 1 /*AHuman::UpperBodyState::AIMING_SHARP*/),
+					luabind::value("HOLSTERING_BACK", 2 /*AHuman::UpperBodyState::HOLSTERING_BACK*/),
+					luabind::value("HOLSTERING_BELT", 3 /*AHuman::UpperBodyState::HOLSTERING_BELT*/),
+					luabind::value("DEHOLSTERING_BACK", 4 /*AHuman::UpperBodyState::DEHOLSTERING_BACK*/),
+					luabind::value("DEHOLSTERING_BELT", 5 /*AHuman::UpperBodyState::DEHOLSTERING_BELT*/),
+					luabind::value("THROWING_PREP", 6 /*AHuman::UpperBodyState::THROWING_PREP*/),
+					luabind::value("THROWING_RELEASE", 7 /*AHuman::UpperBodyState::THROWING_RELEASE*/)
 				]
 				.enum_("MovementState")[
-					value("NOMOVE", 0 /*AHuman::MovementState::NOMOVE*/),
-					value("STAND", 1 /*AHuman::MovementState::STAND*/),
-					value("WALK", 2 /*AHuman::MovementState::WALK*/),
-					value("CROUCH", 3 /*AHuman::MovementState::CROUCH*/),
-					value("CRAWL", 4 /*AHuman::MovementState::CRAWL*/),
-					value("ARMCRAWL", 5 /*AHuman::MovementState::ARMCRAWL*/),
-					value("CLIMB", 6 /*AHuman::MovementState::CLIMB*/),
-					value("JUMP", 7 /*AHuman::MovementState::JUMP*/),
-					value("DISLODGE", 8 /*AHuman::MovementState::DISLODGE*/),
-					value("MOVEMENTSTATECOUNT", 9 /*AHuman::MovementState::MOVEMENTSTATECOUNT*/)
+					luabind::value("NOMOVE", 0 /*AHuman::MovementState::NOMOVE*/),
+					luabind::value("STAND", 1 /*AHuman::MovementState::STAND*/),
+					luabind::value("WALK", 2 /*AHuman::MovementState::WALK*/),
+					luabind::value("CROUCH", 3 /*AHuman::MovementState::CROUCH*/),
+					luabind::value("CRAWL", 4 /*AHuman::MovementState::CRAWL*/),
+					luabind::value("ARMCRAWL", 5 /*AHuman::MovementState::ARMCRAWL*/),
+					luabind::value("CLIMB", 6 /*AHuman::MovementState::CLIMB*/),
+					luabind::value("JUMP", 7 /*AHuman::MovementState::JUMP*/),
+					luabind::value("DISLODGE", 8 /*AHuman::MovementState::DISLODGE*/),
+					luabind::value("MOVEMENTSTATECOUNT", 9 /*AHuman::MovementState::MOVEMENTSTATECOUNT*/)
 				]
 				.enum_("ProneState")[
-					value("NOTPRONE", 0 /*AHuman::ProneState::NOTPRONE*/),
-					value("GOPRONE", 1 /*AHuman::ProneState::GOPRONE*/),
-					value("PRONE", 2 /*AHuman::ProneState::PRONE*/),
-					value("PRONESTATECOUNT", 3 /*AHuman::ProneState::PRONESTATECOUNT*/)
+					luabind::value("NOTPRONE", 0 /*AHuman::ProneState::NOTPRONE*/),
+					luabind::value("GOPRONE", 1 /*AHuman::ProneState::GOPRONE*/),
+					luabind::value("PRONE", 2 /*AHuman::ProneState::PRONE*/),
+					luabind::value("PRONESTATECOUNT", 3 /*AHuman::ProneState::PRONESTATECOUNT*/)
 				]
 				.enum_("Layer")[
 					// Doesn't have qualifier
-					value("FGROUND", 0 /*AHuman::FGROUND*/),
-					value("BGROUND", 1 /*AHuman::BGROUND*/)
+					luabind::value("FGROUND", 0 /*AHuman::FGROUND*/),
+					luabind::value("BGROUND", 1 /*AHuman::BGROUND*/)
 				]
 				.enum_("DeviceHandlingState")[
-					value("STILL", 0 /*AHuman::DeviceHandlingState::STILL*/),
-					value("POINTING", 1 /*AHuman::DeviceHandlingState::POINTING*/),
-					value("SCANNING", 2 /*AHuman::DeviceHandlingState::SCANNING*/),
-					value("AIMING", 3 /*AHuman::DeviceHandlingState::AIMING*/),
-					value("FIRING", 4 /*AHuman::DeviceHandlingState::FIRING*/),
-					value("THROWING", 5 /*AHuman::DeviceHandlingState::THROWING*/),
-					value("DIGGING", 6 /*AHuman::DeviceHandlingState::DIGGING*/)
+					luabind::value("STILL", 0 /*AHuman::DeviceHandlingState::STILL*/),
+					luabind::value("POINTING", 1 /*AHuman::DeviceHandlingState::POINTING*/),
+					luabind::value("SCANNING", 2 /*AHuman::DeviceHandlingState::SCANNING*/),
+					luabind::value("AIMING", 3 /*AHuman::DeviceHandlingState::AIMING*/),
+					luabind::value("FIRING", 4 /*AHuman::DeviceHandlingState::FIRING*/),
+					luabind::value("THROWING", 5 /*AHuman::DeviceHandlingState::THROWING*/),
+					luabind::value("DIGGING", 6 /*AHuman::DeviceHandlingState::DIGGING*/)
 				]
 				.enum_("SweepState")[
-					value("NOSWEEP", 0 /*AHuman::SweepState::NOSWEEP*/),
-					value("SWEEPINGUP", 1 /*AHuman::SweepState::SWEEPINGUP*/),
-					value("SWEEPUPPAUSE", 2 /*AHuman::SweepState::SWEEPUPPAUSE*/),
-					value("SWEEPINGDOWN", 3 /*AHuman::SweepState::SWEEPINGDOWN*/),
-					value("SWEEPDOWNPAUSE", 4 /*AHuman::SweepState::SWEEPDOWNPAUSE*/)
+					luabind::value("NOSWEEP", 0 /*AHuman::SweepState::NOSWEEP*/),
+					luabind::value("SWEEPINGUP", 1 /*AHuman::SweepState::SWEEPINGUP*/),
+					luabind::value("SWEEPUPPAUSE", 2 /*AHuman::SweepState::SWEEPUPPAUSE*/),
+					luabind::value("SWEEPINGDOWN", 3 /*AHuman::SweepState::SWEEPINGDOWN*/),
+					luabind::value("SWEEPDOWNPAUSE", 4 /*AHuman::SweepState::SWEEPDOWNPAUSE*/)
 				]
 				.enum_("DigState")[
-					value("NOTDIGGING", 0 /*AHuman::DigState::NOTDIGGING*/),
-					value("PREDIG", 1 /*AHuman::DigState::PREDIG*/),
-					value("STARTDIG", 2 /*AHuman::DigState::STARTDIG*/),
-					value("TUNNELING", 3 /*AHuman::DigState::TUNNELING*/),
-					value("FINISHINGDIG", 4 /*AHuman::DigState::FINISHINGDIG*/),
-					value("PAUSEDIGGER", 5 /*AHuman::DigState::PAUSEDIGGER*/)
+					luabind::value("NOTDIGGING", 0 /*AHuman::DigState::NOTDIGGING*/),
+					luabind::value("PREDIG", 1 /*AHuman::DigState::PREDIG*/),
+					luabind::value("STARTDIG", 2 /*AHuman::DigState::STARTDIG*/),
+					luabind::value("TUNNELING", 3 /*AHuman::DigState::TUNNELING*/),
+					luabind::value("FINISHINGDIG", 4 /*AHuman::DigState::FINISHINGDIG*/),
+					luabind::value("PAUSEDIGGER", 5 /*AHuman::DigState::PAUSEDIGGER*/)
 				]
 				.enum_("JumpState")[
-					value("NOTJUMPING", 0 /*AHuman::JumpState::NOTJUMPING*/),
-					value("FORWARDJUMP", 1 /*AHuman::JumpState::FORWARDJUMP*/),
-					value("PREJUMP", 2 /*AHuman::JumpState::PREJUMP*/),
-					value("UPJUMP", 3 /*AHuman::JumpState::UPJUMP*/),
-					value("APEXJUMP", 4 /*AHuman::JumpState::APEXJUMP*/),
-					value("LANDJUMP", 5 /*AHuman::JumpState::LANDJUMP*/)
+					luabind::value("NOTJUMPING", 0 /*AHuman::JumpState::NOTJUMPING*/),
+					luabind::value("FORWARDJUMP", 1 /*AHuman::JumpState::FORWARDJUMP*/),
+					luabind::value("PREJUMP", 2 /*AHuman::JumpState::PREJUMP*/),
+					luabind::value("UPJUMP", 3 /*AHuman::JumpState::UPJUMP*/),
+					luabind::value("APEXJUMP", 4 /*AHuman::JumpState::APEXJUMP*/),
+					luabind::value("LANDJUMP", 5 /*AHuman::JumpState::LANDJUMP*/)
 				]
 				.def(luabind::constructor<>())
 				.property("Head", &AHuman::GetHead, &AHumanSetHead)
@@ -506,8 +504,8 @@ namespace RTE {
 
 		LuaBindingRegisterFunctionForType(Deployment) {
 			return AbstractTypeLuaClassDefinition(Deployment, SceneObject)
-				.def("CreateDeployedActor", (Actor * (Deployment::*)())&Deployment::CreateDeployedActor, adopt(result))
-				.def("CreateDeployedObject", (SceneObject * (Deployment::*)())&Deployment::CreateDeployedObject, adopt(result))
+				.def("CreateDeployedActor", (Actor * (Deployment::*)())&Deployment::CreateDeployedActor, luabind::adopt(luabind::result))
+				.def("CreateDeployedObject", (SceneObject * (Deployment::*)())&Deployment::CreateDeployedObject, luabind::adopt(luabind::result))
 				.def("GetLoadoutName", &Deployment::GetLoadoutName)
 				.property("SpawnRadius", &Deployment::GetSpawnRadius)
 				.property("ID", &Deployment::GetID)
@@ -666,15 +664,15 @@ namespace RTE {
 		LuaBindingRegisterFunctionForType(MOSprite) {
 			return AbstractTypeLuaClassDefinition(MOSprite, MovableObject)
 				.enum_("SpriteAnimMode")[
-					value("NOANIM", MOSprite::SpriteAnimMode::NOANIM),
-					value("ALWAYSLOOP", MOSprite::SpriteAnimMode::ALWAYSLOOP),
-					value("ALWAYSRANDOM", MOSprite::SpriteAnimMode::ALWAYSRANDOM),
-					value("ALWAYSPINGPONG", MOSprite::SpriteAnimMode::ALWAYSPINGPONG),
-					value("LOOPWHENMOVING", MOSprite::SpriteAnimMode::LOOPWHENMOVING),
-					value("LOOPWHENOPENCLOSE", MOSprite::SpriteAnimMode::LOOPWHENOPENCLOSE),
-					value("PINGPONGOPENCLOSE", MOSprite::SpriteAnimMode::PINGPONGOPENCLOSE),
-					value("OVERLIFETIME", MOSprite::SpriteAnimMode::OVERLIFETIME),
-					value("ONCOLLIDE", MOSprite::SpriteAnimMode::ONCOLLIDE)
+					luabind::value("NOANIM", MOSprite::SpriteAnimMode::NOANIM),
+					luabind::value("ALWAYSLOOP", MOSprite::SpriteAnimMode::ALWAYSLOOP),
+					luabind::value("ALWAYSRANDOM", MOSprite::SpriteAnimMode::ALWAYSRANDOM),
+					luabind::value("ALWAYSPINGPONG", MOSprite::SpriteAnimMode::ALWAYSPINGPONG),
+					luabind::value("LOOPWHENMOVING", MOSprite::SpriteAnimMode::LOOPWHENMOVING),
+					luabind::value("LOOPWHENOPENCLOSE", MOSprite::SpriteAnimMode::LOOPWHENOPENCLOSE),
+					luabind::value("PINGPONGOPENCLOSE", MOSprite::SpriteAnimMode::PINGPONGOPENCLOSE),
+					luabind::value("OVERLIFETIME", MOSprite::SpriteAnimMode::OVERLIFETIME),
+					luabind::value("ONCOLLIDE", MOSprite::SpriteAnimMode::ONCOLLIDE)
 				]
 				.property("Diameter", &MOSprite::GetDiameter)
 				.property("BoundingBox", &MOSprite::GetBoundingBox)
@@ -729,7 +727,7 @@ namespace RTE {
 				.def("GetGibWoundLimit", (int (MOSRotating:: *)(bool positiveDamage, bool negativeDamage, bool noDamage) const) &MOSRotating::GetGibWoundLimit)
 				.def("GetWoundCount", (int (MOSRotating:: *)() const) &MOSRotating::GetWoundCount)
 				.def("GetWoundCount", (int (MOSRotating:: *)(bool positiveDamage, bool negativeDamage, bool noDamage) const) &MOSRotating::GetWoundCount)
-				.def("AddWound", &MOSRotating::AddWound, adopt(_2))
+				.def("AddWound", &MOSRotating::AddWound, luabind::adopt(_2))
 				.def("RemoveWounds", (float (MOSRotating:: *)(int numberOfWoundsToRemove)) &MOSRotating::RemoveWounds)
 				.def("RemoveWounds", (float (MOSRotating:: *)(int numberOfWoundsToRemove, bool positiveDamage, bool negativeDamage, bool noDamage)) &MOSRotating::RemoveWounds)
 				.def("IsOnScenePoint", &MOSRotating::IsOnScenePoint)
@@ -746,8 +744,8 @@ namespace RTE {
 				.def("StringValueExists", &MOSRotating::StringValueExists)
 				.def("NumberValueExists", &MOSRotating::NumberValueExists)
 				.def("ObjectValueExists", &MOSRotating::ObjectValueExists)
-				.def("AddAttachable", (void (MOSRotating::*)(Attachable *attachableToAdd))&MOSRotating::AddAttachable, adopt(_2))
-				.def("AddAttachable", (void (MOSRotating::*)(Attachable *attachableToAdd, const Vector &parentOffset))&MOSRotating::AddAttachable, adopt(_2))
+				.def("AddAttachable", (void (MOSRotating::*)(Attachable *attachableToAdd))&MOSRotating::AddAttachable, luabind::adopt(_2))
+				.def("AddAttachable", (void (MOSRotating::*)(Attachable *attachableToAdd, const Vector &parentOffset))&MOSRotating::AddAttachable, luabind::adopt(_2))
 				.def("RemoveAttachable", &RemoveAttachableLuaSafe1)
 				.def("RemoveAttachable", &RemoveAttachableLuaSafe2)
 				.def("RemoveAttachable", &RemoveAttachableLuaSafe3)
@@ -758,12 +756,12 @@ namespace RTE {
 				.def("RemoveAttachable", (bool (MOSRotating::*)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable)
 				.def("RemoveAttachable", (bool (MOSRotating:: *)(Attachable *attachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable)
 				*/
-				.def("AddEmitter", (void (MOSRotating::*)(Attachable *attachableToAdd))&MOSRotating::AddAttachable, adopt(_2))
-				.def("AddEmitter", (void (MOSRotating::*)(Attachable *attachableToAdd, const Vector &parentOffset))&MOSRotating::AddAttachable, adopt(_2))
+				.def("AddEmitter", (void (MOSRotating::*)(Attachable *attachableToAdd))&MOSRotating::AddAttachable, luabind::adopt(_2))
+				.def("AddEmitter", (void (MOSRotating::*)(Attachable *attachableToAdd, const Vector &parentOffset))&MOSRotating::AddAttachable, luabind::adopt(_2))
 				.def("RemoveEmitter", (bool (MOSRotating::*)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable)
 				.def("RemoveEmitter", (bool (MOSRotating::*)(long uniqueIDOfAttachableToRemove))&MOSRotating::RemoveAttachable)
-				.def_readonly("Attachables", &MOSRotating::m_Attachables, return_stl_iterator)
-				.def_readonly("Wounds", &MOSRotating::m_Wounds, return_stl_iterator);
+				.def_readonly("Attachables", &MOSRotating::m_Attachables, luabind::return_stl_iterator)
+				.def_readonly("Wounds", &MOSRotating::m_Wounds, luabind::return_stl_iterator);
 		}
 
 		LuaBindingRegisterFunctionForType(MovableObject) {
@@ -872,7 +870,7 @@ namespace RTE {
 				.def("TriggerBurst", &PEmitter::TriggerBurst)
 				.def("IsSetToBurst", &PEmitter::IsSetToBurst)
 				.def("CanTriggerBurst", &PEmitter::CanTriggerBurst)
-				.def_readwrite("Emissions", &PEmitter::m_EmissionList, return_stl_iterator);
+				.def_readwrite("Emissions", &PEmitter::m_EmissionList, luabind::return_stl_iterator);
 		}
 
 		LuaBindingRegisterFunctionForType(Round) {
@@ -891,10 +889,10 @@ namespace RTE {
 		LuaBindingRegisterFunctionForType(Scene) {
 			return ConcreteTypeLuaClassDefinition(Scene, Entity)
 				.enum_("PlacedObjectSets")[
-					value("PLACEONLOAD", Scene::PlacedObjectSets::PLACEONLOAD),
-					value("BLUEPRINT", Scene::PlacedObjectSets::BLUEPRINT),
-					value("AIPLAN", Scene::PlacedObjectSets::AIPLAN),
-					value("PLACEDSETSCOUNT", Scene::PlacedObjectSets::PLACEDSETSCOUNT)
+					luabind::value("PLACEONLOAD", Scene::PlacedObjectSets::PLACEONLOAD),
+					luabind::value("BLUEPRINT", Scene::PlacedObjectSets::BLUEPRINT),
+					luabind::value("AIPLAN", Scene::PlacedObjectSets::AIPLAN),
+					luabind::value("PLACEDSETSCOUNT", Scene::PlacedObjectSets::PLACEDSETSCOUNT)
 				]
 				.property("Location", &Scene::GetLocation, &Scene::SetLocation)
 				//.property("Terrain", &Scene::GetTerrain)
@@ -925,8 +923,8 @@ namespace RTE {
 				.def("UpdatePathFinding", &Scene::UpdatePathFinding)
 				.def("PathFindingUpdated", &Scene::PathFindingUpdated)
 				.def("CalculatePath", &Scene::CalculateScenePath)
-				.def_readwrite("ScenePath", &Scene::m_ScenePath, return_stl_iterator)
-				.def_readwrite("Deployments", &Scene::m_Deployments, return_stl_iterator)
+				.def_readwrite("ScenePath", &Scene::m_ScenePath, luabind::return_stl_iterator)
+				.def_readwrite("Deployments", &Scene::m_Deployments, luabind::return_stl_iterator)
 				.property("ScenePathSize", &Scene::GetScenePathSize);
 		}
 
@@ -970,9 +968,9 @@ namespace RTE {
 			return ConcreteTypeLuaClassDefinition(SoundContainer, Entity)
 				.def(luabind::constructor<>())
 				.enum_("SoundOverlapMode")[
-					value("OVERLAP", SoundContainer::SoundOverlapMode::OVERLAP),
-					value("RESTART", SoundContainer::SoundOverlapMode::RESTART),
-					value("IGNORE_PLAY", SoundContainer::SoundOverlapMode::IGNORE_PLAY)
+					luabind::value("OVERLAP", SoundContainer::SoundOverlapMode::OVERLAP),
+					luabind::value("RESTART", SoundContainer::SoundOverlapMode::RESTART),
+					luabind::value("IGNORE_PLAY", SoundContainer::SoundOverlapMode::IGNORE_PLAY)
 				]
 				.property("SoundOverlapMode", &SoundContainer::GetSoundOverlapMode, &SoundContainer::SetSoundOverlapMode)
 				.property("Immobile", &SoundContainer::IsImmobile, &SoundContainer::SetImmobile)
@@ -1001,12 +999,12 @@ namespace RTE {
 			return luabind::class_<SoundSet>("SoundSet")
 				.def(luabind::constructor<>())
 				.enum_("SoundSelectionCycleMode")[
-					value("RANDOM", SoundSet::SoundSelectionCycleMode::RANDOM),
-					value("FORWARDS", SoundSet::SoundSelectionCycleMode::FORWARDS),
-					value("ALL", SoundSet::SoundSelectionCycleMode::ALL)
+					luabind::value("RANDOM", SoundSet::SoundSelectionCycleMode::RANDOM),
+					luabind::value("FORWARDS", SoundSet::SoundSelectionCycleMode::FORWARDS),
+					luabind::value("ALL", SoundSet::SoundSelectionCycleMode::ALL)
 				]
 				.property("SoundSelectionCycleMode", &SoundSet::GetSoundSelectionCycleMode, &SoundSet::SetSoundSelectionCycleMode)
-				.def_readonly("SubSoundSets", &SoundSet::m_SubSoundSets, return_stl_iterator)
+				.def_readonly("SubSoundSets", &SoundSet::m_SubSoundSets, luabind::return_stl_iterator)
 				.def("HasAnySounds", &SoundSet::HasAnySounds)
 				.def("SelectNextSounds", &SoundSet::SelectNextSounds)
 				.def("AddSound", (void (SoundSet:: *)(std::string const &soundFilePath)) &SoundSet::AddSound)

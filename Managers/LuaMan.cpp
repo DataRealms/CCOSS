@@ -218,7 +218,7 @@ namespace RTE {
 
 			luabind::class_<LuaMan>("LuaManager")
 				.property("TempEntity", &LuaMan::GetTempEntity)
-				.def_readonly("TempEntities", &LuaMan::m_TempEntityVector, return_stl_iterator)
+				.def_readonly("TempEntities", &LuaMan::m_TempEntityVector, luabind::return_stl_iterator)
 				.def("FileOpen", &LuaMan::FileOpen)
 				.def("FileClose", &LuaMan::FileClose)
 				.def("FileReadLine", &LuaMan::FileReadLine)
@@ -226,90 +226,90 @@ namespace RTE {
 				.def("FileEOF", &LuaMan::FileEOF),
 
 			// NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
-			def("DeleteEntity", &DeleteEntity, adopt(_1)),
-			def("RangeRand", (double(*)(double, double)) &RandomNum),
-			def("PosRand", &PosRand),
-			def("NormalRand", &NormalRand),
-			def("SelectRand", (int(*)(int, int)) &RandomNum),
-			def("LERP", &LERP),
-			def("EaseIn", &EaseIn),
-			def("EaseOut", &EaseOut),
-			def("EaseInOut", &EaseInOut),
-			def("Clamp", &Limit),
-			def("GetPPM", &GetPPM),
-			def("GetMPP", &GetMPP),
-			def("GetPPL", &GetPPL),
-			def("GetLPP", &GetLPP),
-			def("RoundFloatToPrecision", &RoundFloatToPrecision),
+			luabind::def("DeleteEntity", &DeleteEntity, luabind::adopt(_1)),
+			luabind::def("RangeRand", (double(*)(double, double)) &RandomNum),
+			luabind::def("PosRand", &PosRand),
+			luabind::def("NormalRand", &NormalRand),
+			luabind::def("SelectRand", (int(*)(int, int)) &RandomNum),
+			luabind::def("LERP", &LERP),
+			luabind::def("EaseIn", &EaseIn),
+			luabind::def("EaseOut", &EaseOut),
+			luabind::def("EaseInOut", &EaseInOut),
+			luabind::def("Clamp", &Limit),
+			luabind::def("GetPPM", &GetPPM),
+			luabind::def("GetMPP", &GetMPP),
+			luabind::def("GetPPL", &GetPPL),
+			luabind::def("GetLPP", &GetLPP),
+			luabind::def("RoundFloatToPrecision", &RoundFloatToPrecision),
 
 			luabind::class_<input_device>("InputDevice")
 			.enum_("InputDevice")[
-				value("DEVICE_KEYB_ONLY", InputDevice::DEVICE_KEYB_ONLY),
-				value("DEVICE_MOUSE_KEYB", InputDevice::DEVICE_MOUSE_KEYB),
-				value("DEVICE_GAMEPAD_1", InputDevice::DEVICE_GAMEPAD_1),
-				value("DEVICE_GAMEPAD_2", InputDevice::DEVICE_GAMEPAD_2),
-				value("DEVICE_GAMEPAD_3", InputDevice::DEVICE_GAMEPAD_3),
-				value("DEVICE_GAMEPAD_4", InputDevice::DEVICE_GAMEPAD_4),
-				value("DEVICE_COUNT", InputDevice::DEVICE_COUNT)
+				luabind::value("DEVICE_KEYB_ONLY", InputDevice::DEVICE_KEYB_ONLY),
+				luabind::value("DEVICE_MOUSE_KEYB", InputDevice::DEVICE_MOUSE_KEYB),
+				luabind::value("DEVICE_GAMEPAD_1", InputDevice::DEVICE_GAMEPAD_1),
+				luabind::value("DEVICE_GAMEPAD_2", InputDevice::DEVICE_GAMEPAD_2),
+				luabind::value("DEVICE_GAMEPAD_3", InputDevice::DEVICE_GAMEPAD_3),
+				luabind::value("DEVICE_GAMEPAD_4", InputDevice::DEVICE_GAMEPAD_4),
+				luabind::value("DEVICE_COUNT", InputDevice::DEVICE_COUNT)
 			],
 
 			luabind::class_<input_elements>("InputElements")
 			.enum_("InputElements")[
-				value("INPUT_L_UP", InputElements::INPUT_L_UP),
-				value("INPUT_L_DOWN", InputElements::INPUT_L_DOWN),
-				value("INPUT_L_LEFT", InputElements::INPUT_L_LEFT),
-				value("INPUT_L_RIGHT", InputElements::INPUT_L_RIGHT),
-				value("INPUT_R_UP", InputElements::INPUT_R_UP),
-				value("INPUT_R_DOWN", InputElements::INPUT_R_DOWN),
-				value("INPUT_R_LEFT", InputElements::INPUT_R_LEFT),
-				value("INPUT_R_RIGHT", InputElements::INPUT_R_RIGHT),
-				value("INPUT_FIRE", InputElements::INPUT_FIRE),
-				value("INPUT_AIM", InputElements::INPUT_AIM),
-				value("INPUT_AIM_UP", InputElements::INPUT_AIM_UP),
-				value("INPUT_AIM_DOWN", InputElements::INPUT_AIM_DOWN),
-				value("INPUT_AIM_LEFT", InputElements::INPUT_AIM_LEFT),
-				value("INPUT_AIM_RIGHT", InputElements::INPUT_AIM_RIGHT),
-				value("INPUT_PIEMENU", InputElements::INPUT_PIEMENU),
-				value("INPUT_JUMP", InputElements::INPUT_JUMP),
-				value("INPUT_CROUCH", InputElements::INPUT_CROUCH),
-				value("INPUT_NEXT", InputElements::INPUT_NEXT),
-				value("INPUT_PREV", InputElements::INPUT_PREV),
-				value("INPUT_START", InputElements::INPUT_START),
-				value("INPUT_BACK", InputElements::INPUT_BACK),
-				value("INPUT_COUNT", InputElements::INPUT_COUNT)
+				luabind::value("INPUT_L_UP", InputElements::INPUT_L_UP),
+				luabind::value("INPUT_L_DOWN", InputElements::INPUT_L_DOWN),
+				luabind::value("INPUT_L_LEFT", InputElements::INPUT_L_LEFT),
+				luabind::value("INPUT_L_RIGHT", InputElements::INPUT_L_RIGHT),
+				luabind::value("INPUT_R_UP", InputElements::INPUT_R_UP),
+				luabind::value("INPUT_R_DOWN", InputElements::INPUT_R_DOWN),
+				luabind::value("INPUT_R_LEFT", InputElements::INPUT_R_LEFT),
+				luabind::value("INPUT_R_RIGHT", InputElements::INPUT_R_RIGHT),
+				luabind::value("INPUT_FIRE", InputElements::INPUT_FIRE),
+				luabind::value("INPUT_AIM", InputElements::INPUT_AIM),
+				luabind::value("INPUT_AIM_UP", InputElements::INPUT_AIM_UP),
+				luabind::value("INPUT_AIM_DOWN", InputElements::INPUT_AIM_DOWN),
+				luabind::value("INPUT_AIM_LEFT", InputElements::INPUT_AIM_LEFT),
+				luabind::value("INPUT_AIM_RIGHT", InputElements::INPUT_AIM_RIGHT),
+				luabind::value("INPUT_PIEMENU", InputElements::INPUT_PIEMENU),
+				luabind::value("INPUT_JUMP", InputElements::INPUT_JUMP),
+				luabind::value("INPUT_CROUCH", InputElements::INPUT_CROUCH),
+				luabind::value("INPUT_NEXT", InputElements::INPUT_NEXT),
+				luabind::value("INPUT_PREV", InputElements::INPUT_PREV),
+				luabind::value("INPUT_START", InputElements::INPUT_START),
+				luabind::value("INPUT_BACK", InputElements::INPUT_BACK),
+				luabind::value("INPUT_COUNT", InputElements::INPUT_COUNT)
 			],
 
 			luabind::class_<mouse_buttons>("MouseButtons")
 			.enum_("MouseButtons")[
-				value("MOUSE_NONE", MouseButtons::MOUSE_NONE),
-				value("MOUSE_LEFT", MouseButtons::MOUSE_LEFT),
-				value("MOUSE_RIGHT", MouseButtons::MOUSE_RIGHT),
-				value("MOUSE_MIDDLE", MouseButtons::MOUSE_MIDDLE),
-				value("MAX_MOUSE_BUTTONS", MouseButtons::MAX_MOUSE_BUTTONS)
+				luabind::value("MOUSE_NONE", MouseButtons::MOUSE_NONE),
+				luabind::value("MOUSE_LEFT", MouseButtons::MOUSE_LEFT),
+				luabind::value("MOUSE_RIGHT", MouseButtons::MOUSE_RIGHT),
+				luabind::value("MOUSE_MIDDLE", MouseButtons::MOUSE_MIDDLE),
+				luabind::value("MAX_MOUSE_BUTTONS", MouseButtons::MAX_MOUSE_BUTTONS)
 			],
 
 			luabind::class_<joy_buttons>("JoyButtons")
 			.enum_("JoyButtons")[
-				value("JOY_NONE", JoyButtons::JOY_NONE),
-				value("JOY_1", JoyButtons::JOY_1),
-				value("JOY_2", JoyButtons::JOY_2),
-				value("JOY_3", JoyButtons::JOY_3),
-				value("JOY_4", JoyButtons::JOY_4),
-				value("JOY_5", JoyButtons::JOY_5),
-				value("JOY_6", JoyButtons::JOY_6),
-				value("JOY_7", JoyButtons::JOY_7),
-				value("JOY_8", JoyButtons::JOY_8),
-				value("JOY_9", JoyButtons::JOY_9),
-				value("JOY_10", JoyButtons::JOY_10),
-				value("JOY_11", JoyButtons::JOY_11),
-				value("JOY_12", JoyButtons::JOY_12),
-				value("MAX_JOY_BUTTONS", JoyButtons::MAX_JOY_BUTTONS)
+				luabind::value("JOY_NONE", JoyButtons::JOY_NONE),
+				luabind::value("JOY_1", JoyButtons::JOY_1),
+				luabind::value("JOY_2", JoyButtons::JOY_2),
+				luabind::value("JOY_3", JoyButtons::JOY_3),
+				luabind::value("JOY_4", JoyButtons::JOY_4),
+				luabind::value("JOY_5", JoyButtons::JOY_5),
+				luabind::value("JOY_6", JoyButtons::JOY_6),
+				luabind::value("JOY_7", JoyButtons::JOY_7),
+				luabind::value("JOY_8", JoyButtons::JOY_8),
+				luabind::value("JOY_9", JoyButtons::JOY_9),
+				luabind::value("JOY_10", JoyButtons::JOY_10),
+				luabind::value("JOY_11", JoyButtons::JOY_11),
+				luabind::value("JOY_12", JoyButtons::JOY_12),
+				luabind::value("MAX_JOY_BUTTONS", JoyButtons::MAX_JOY_BUTTONS)
 			],
 
 			luabind::class_<joy_directions>("JoyDirections")
 			.enum_("JoyDirections")[
-				value("JOYDIR_ONE", JoyDirections::JOYDIR_ONE),
-				value("JOYDIR_TWO", JoyDirections::JOYDIR_TWO)
+				luabind::value("JOYDIR_ONE", JoyDirections::JOYDIR_ONE),
+				luabind::value("JOYDIR_TWO", JoyDirections::JOYDIR_TWO)
 			]
 		];
 

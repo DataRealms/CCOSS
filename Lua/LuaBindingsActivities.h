@@ -17,58 +17,58 @@ namespace RTE {
 		LuaBindingRegisterFunctionForType(Activity) {
 			return luabind::class_<Activity, Entity>("Activity")
 				.enum_("Players")[
-					value("PLAYER_NONE", Players::NoPlayer),
-					value("PLAYER_1", Players::PlayerOne),
-					value("PLAYER_2", Players::PlayerTwo),
-					value("PLAYER_3", Players::PlayerThree),
-					value("PLAYER_4", Players::PlayerFour),
-					value("MAXPLAYERCOUNT", Players::MaxPlayerCount)
+					luabind::value("PLAYER_NONE", Players::NoPlayer),
+					luabind::value("PLAYER_1", Players::PlayerOne),
+					luabind::value("PLAYER_2", Players::PlayerTwo),
+					luabind::value("PLAYER_3", Players::PlayerThree),
+					luabind::value("PLAYER_4", Players::PlayerFour),
+					luabind::value("MAXPLAYERCOUNT", Players::MaxPlayerCount)
 				]
 				.enum_("ActivityState")[
-					value("NOACTIVITY", Activity::ActivityState::NoActivity),
-					value("NOTSTARTED", Activity::ActivityState::NotStarted),
-					value("STARTING", Activity::ActivityState::Starting),
-					value("EDITING", Activity::ActivityState::Editing),
-					value("PREGAME", Activity::ActivityState::PreGame),
-					value("RUNNING", Activity::ActivityState::Running),
-					value("INERROR", Activity::ActivityState::HasError),
-					value("OVER", Activity::ActivityState::Over)
+					luabind::value("NOACTIVITY", Activity::ActivityState::NoActivity),
+					luabind::value("NOTSTARTED", Activity::ActivityState::NotStarted),
+					luabind::value("STARTING", Activity::ActivityState::Starting),
+					luabind::value("EDITING", Activity::ActivityState::Editing),
+					luabind::value("PREGAME", Activity::ActivityState::PreGame),
+					luabind::value("RUNNING", Activity::ActivityState::Running),
+					luabind::value("INERROR", Activity::ActivityState::HasError),
+					luabind::value("OVER", Activity::ActivityState::Over)
 				]
 				.enum_("Team")[
-					value("NOTEAM", Activity::Teams::NoTeam),
-					value("TEAM_1", Activity::Teams::TeamOne),
-					value("TEAM_2", Activity::Teams::TeamTwo),
-					value("TEAM_3", Activity::Teams::TeamThree),
-					value("TEAM_4", Activity::Teams::TeamFour),
-					value("MAXTEAMCOUNT", Activity::Teams::MaxTeamCount)
+					luabind::value("NOTEAM", Activity::Teams::NoTeam),
+					luabind::value("TEAM_1", Activity::Teams::TeamOne),
+					luabind::value("TEAM_2", Activity::Teams::TeamTwo),
+					luabind::value("TEAM_3", Activity::Teams::TeamThree),
+					luabind::value("TEAM_4", Activity::Teams::TeamFour),
+					luabind::value("MAXTEAMCOUNT", Activity::Teams::MaxTeamCount)
 				]
 				.enum_("ViewState")[
-					value("NORMAL", Activity::ViewState::Normal),
-					value("OBSERVE", Activity::ViewState::Observe),
-					value("DEATHWATCH", Activity::ViewState::DeathWatch),
-					value("ACTORSELECT", Activity::ViewState::ActorSelect),
-					value("AISENTRYPOINT", Activity::ViewState::AISentryPoint),
-					value("AIPATROLPOINTS", Activity::ViewState::AIPatrolPoints),
-					value("AIGOLDDIGPOINT", Activity::ViewState::AIGoldDigPoint),
-					value("AIGOTOPOINT", Activity::ViewState::AIGoToPoint),
-					value("LZSELECT", Activity::ViewState::LandingZoneSelect)
+					luabind::value("NORMAL", Activity::ViewState::Normal),
+					luabind::value("OBSERVE", Activity::ViewState::Observe),
+					luabind::value("DEATHWATCH", Activity::ViewState::DeathWatch),
+					luabind::value("ACTORSELECT", Activity::ViewState::ActorSelect),
+					luabind::value("AISENTRYPOINT", Activity::ViewState::AISentryPoint),
+					luabind::value("AIPATROLPOINTS", Activity::ViewState::AIPatrolPoints),
+					luabind::value("AIGOLDDIGPOINT", Activity::ViewState::AIGoldDigPoint),
+					luabind::value("AIGOTOPOINT", Activity::ViewState::AIGoToPoint),
+					luabind::value("LZSELECT", Activity::ViewState::LandingZoneSelect)
 				]
 				.enum_("DifficultySetting")[
-					value("MINDIFFICULTY", Activity::DifficultySetting::MinDifficulty),
-					value("CAKEDIFFICULTY", Activity::DifficultySetting::CakeDifficulty),
-					value("EASYDIFFICULTY", Activity::DifficultySetting::EasyDifficulty),
-					value("MEDIUMDIFFICULTY", Activity::DifficultySetting::MediumDifficulty),
-					value("HARDDIFFICULTY", Activity::DifficultySetting::HardDifficulty),
-					value("NUTSDIFFICULTY", Activity::DifficultySetting::NutsDifficulty),
-					value("MAXDIFFICULTY", Activity::DifficultySetting::MaxDifficulty)
+					luabind::value("MINDIFFICULTY", Activity::DifficultySetting::MinDifficulty),
+					luabind::value("CAKEDIFFICULTY", Activity::DifficultySetting::CakeDifficulty),
+					luabind::value("EASYDIFFICULTY", Activity::DifficultySetting::EasyDifficulty),
+					luabind::value("MEDIUMDIFFICULTY", Activity::DifficultySetting::MediumDifficulty),
+					luabind::value("HARDDIFFICULTY", Activity::DifficultySetting::HardDifficulty),
+					luabind::value("NUTSDIFFICULTY", Activity::DifficultySetting::NutsDifficulty),
+					luabind::value("MAXDIFFICULTY", Activity::DifficultySetting::MaxDifficulty)
 				]
 				.enum_("AISkillSetting")[
-					value("MINSKILL", Activity::AISkillSetting::MinSkill),
-					value("INFERIORSKILL", Activity::AISkillSetting::InferiorSkill),
-					value("DEFAULTSKILL", Activity::AISkillSetting::DefaultSkill),
-					value("AVERAGESKILL", Activity::AISkillSetting::AverageSkill),
-					value("GOODSKILL", Activity::AISkillSetting::GoodSkill),
-					value("UNFAIRSKILL", Activity::AISkillSetting::UnfairSkill)
+					luabind::value("MINSKILL", Activity::AISkillSetting::MinSkill),
+					luabind::value("INFERIORSKILL", Activity::AISkillSetting::InferiorSkill),
+					luabind::value("DEFAULTSKILL", Activity::AISkillSetting::DefaultSkill),
+					luabind::value("AVERAGESKILL", Activity::AISkillSetting::AverageSkill),
+					luabind::value("GOODSKILL", Activity::AISkillSetting::GoodSkill),
+					luabind::value("UNFAIRSKILL", Activity::AISkillSetting::UnfairSkill)
 				]
 				.def(luabind::constructor<>())
 				.property("ClassName", &Activity::GetClassName)
@@ -123,10 +123,10 @@ namespace RTE {
 		LuaBindingRegisterFunctionForType(GameActivity) {
 			return luabind::class_<GameActivity, Activity>("GameActivity")
 				.enum_("ObjectiveArrowDir")[
-					value("ARROWDOWN", GameActivity::ObjectiveArrowDir::ARROWDOWN),
-					value("ARROWLEFT", GameActivity::ObjectiveArrowDir::ARROWLEFT),
-					value("ARROWRIGHT", GameActivity::ObjectiveArrowDir::ARROWRIGHT),
-					value("ARROWUP", GameActivity::ObjectiveArrowDir::ARROWUP)
+					luabind::value("ARROWDOWN", GameActivity::ObjectiveArrowDir::ARROWDOWN),
+					luabind::value("ARROWLEFT", GameActivity::ObjectiveArrowDir::ARROWLEFT),
+					luabind::value("ARROWRIGHT", GameActivity::ObjectiveArrowDir::ARROWRIGHT),
+					luabind::value("ARROWUP", GameActivity::ObjectiveArrowDir::ARROWUP)
 				]
 				.def(luabind::constructor<>())
 				.def("SetObservationTarget", &GameActivity::SetObservationTarget)
@@ -183,7 +183,7 @@ namespace RTE {
 				.def("AddPieMenuSlice", &GameActivity::AddPieMenuSlice)
 				.def("AlterPieMenuSlice", &GameActivity::AlterPieMenuSlice)
 				.def("RemovePieMenuSlice", &GameActivity::RemovePieMenuSlice)
-				.def_readwrite("PieMenuSlices", &GameActivity::m_CurrentPieMenuSlices, return_stl_iterator);
+				.def_readwrite("PieMenuSlices", &GameActivity::m_CurrentPieMenuSlices, luabind::return_stl_iterator);
 		}
 	};
 }

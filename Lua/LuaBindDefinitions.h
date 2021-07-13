@@ -25,7 +25,6 @@ namespace luabind {
 	}
 }
 
-using namespace luabind;
 
 namespace RTE {
 	/// <summary>

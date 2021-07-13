@@ -18,22 +18,22 @@ namespace RTE {
 		LuaBindingRegisterFunctionForType(GUIBanner) {
 			return luabind::class_<GUIBanner>("GUIBanner")
 				.enum_("AnimMode")[
-					value("BLINKING", GUIBanner::AnimMode::BLINKING),
-					value("FLYBYLEFTWARD", GUIBanner::AnimMode::FLYBYLEFTWARD),
-					value("FLYBYRIGHTWARD", GUIBanner::AnimMode::FLYBYRIGHTWARD),
-					value("ANIMMODECOUNT", GUIBanner::AnimMode::ANIMMODECOUNT)
+					luabind::value("BLINKING", GUIBanner::AnimMode::BLINKING),
+					luabind::value("FLYBYLEFTWARD", GUIBanner::AnimMode::FLYBYLEFTWARD),
+					luabind::value("FLYBYRIGHTWARD", GUIBanner::AnimMode::FLYBYRIGHTWARD),
+					luabind::value("ANIMMODECOUNT", GUIBanner::AnimMode::ANIMMODECOUNT)
 				]
 				.enum_("AnimState")[
-					value("NOTSTARTED", GUIBanner::AnimState::NOTSTARTED),
-					value("SHOWING", GUIBanner::AnimState::SHOWING),
-					value("SHOW", GUIBanner::AnimState::SHOW),
-					value("HIDING", GUIBanner::AnimState::HIDING),
-					value("OVER", GUIBanner::AnimState::OVER),
-					value("ANIMSTATECOUNT", GUIBanner::AnimState::ANIMSTATECOUNT)
+					luabind::value("NOTSTARTED", GUIBanner::AnimState::NOTSTARTED),
+					luabind::value("SHOWING", GUIBanner::AnimState::SHOWING),
+					luabind::value("SHOW", GUIBanner::AnimState::SHOW),
+					luabind::value("HIDING", GUIBanner::AnimState::HIDING),
+					luabind::value("OVER", GUIBanner::AnimState::OVER),
+					luabind::value("ANIMSTATECOUNT", GUIBanner::AnimState::ANIMSTATECOUNT)
 				]
 				.enum_("BannerColor")[
-					value("RED", GameActivity::BannerColor::RED),
-					value("YELLOW", GameActivity::BannerColor::YELLOW)
+					luabind::value("RED", GameActivity::BannerColor::RED),
+					luabind::value("YELLOW", GameActivity::BannerColor::YELLOW)
 				]
 				.property("BannerText", &GUIBanner::GetBannerText)
 				.property("AnimState", &GUIBanner::GetAnimState)
@@ -75,17 +75,17 @@ namespace RTE {
 		LuaBindingRegisterFunctionForType(SceneEditorGUI) {
 			return luabind::class_<SceneEditorGUI>("SceneEditorGUI")
 				.enum_("EditorGUIMode")[
-					value("INACTIVE", SceneEditorGUI::EditorGUIMode::INACTIVE),
-					value("PICKINGOBJECT", SceneEditorGUI::EditorGUIMode::PICKINGOBJECT),
-					value("ADDINGOBJECT", SceneEditorGUI::EditorGUIMode::ADDINGOBJECT),
-					value("INSTALLINGBRAIN", SceneEditorGUI::EditorGUIMode::INSTALLINGBRAIN),
-					value("PLACINGOBJECT", SceneEditorGUI::EditorGUIMode::PLACINGOBJECT),
-					value("MOVINGOBJECT", SceneEditorGUI::EditorGUIMode::MOVINGOBJECT),
-					value("DELETINGOBJECT", SceneEditorGUI::EditorGUIMode::DELETINGOBJECT),
-					value("PLACEINFRONT", SceneEditorGUI::EditorGUIMode::PLACEINFRONT),
-					value("PLACEBEHIND", SceneEditorGUI::EditorGUIMode::PLACEBEHIND),
-					value("DONEEDITING", SceneEditorGUI::EditorGUIMode::DONEEDITING),
-					value("EDITORGUIMODECOUNT", SceneEditorGUI::EditorGUIMode::EDITORGUIMODECOUNT)
+					luabind::value("INACTIVE", SceneEditorGUI::EditorGUIMode::INACTIVE),
+					luabind::value("PICKINGOBJECT", SceneEditorGUI::EditorGUIMode::PICKINGOBJECT),
+					luabind::value("ADDINGOBJECT", SceneEditorGUI::EditorGUIMode::ADDINGOBJECT),
+					luabind::value("INSTALLINGBRAIN", SceneEditorGUI::EditorGUIMode::INSTALLINGBRAIN),
+					luabind::value("PLACINGOBJECT", SceneEditorGUI::EditorGUIMode::PLACINGOBJECT),
+					luabind::value("MOVINGOBJECT", SceneEditorGUI::EditorGUIMode::MOVINGOBJECT),
+					luabind::value("DELETINGOBJECT", SceneEditorGUI::EditorGUIMode::DELETINGOBJECT),
+					luabind::value("PLACEINFRONT", SceneEditorGUI::EditorGUIMode::PLACEINFRONT),
+					luabind::value("PLACEBEHIND", SceneEditorGUI::EditorGUIMode::PLACEBEHIND),
+					luabind::value("DONEEDITING", SceneEditorGUI::EditorGUIMode::DONEEDITING),
+					luabind::value("EDITORGUIMODECOUNT", SceneEditorGUI::EditorGUIMode::EDITORGUIMODECOUNT)
 				]
 				.def("SetCursorPos", &SceneEditorGUI::SetCursorPos)
 				.property("EditorMode", &SceneEditorGUI::GetEditorGUIMode, &SceneEditorGUI::SetEditorGUIMode)

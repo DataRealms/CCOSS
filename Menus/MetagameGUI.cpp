@@ -582,40 +582,6 @@ int MetagameGUI::Create(Controller *pController)
     m_apPlayerNameBox[Players::PlayerThree]->SetText("Player 3");
     m_apPlayerNameBox[Players::PlayerFour]->SetText("Player 4");
 
-    // Add a "Random" tech choice to all the combo boxes first so that's at least in there always
-    m_apPlayerTechSelect[Players::PlayerOne]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
-    m_apPlayerTechSelect[Players::PlayerTwo]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
-    m_apPlayerTechSelect[Players::PlayerThree]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
-    m_apPlayerTechSelect[Players::PlayerFour]->GetListPanel()->AddItem("-Random-", "", 0, 0, -1);
-    m_apPlayerTechSelect[Players::PlayerOne]->SetSelectedIndex(0);
-    m_apPlayerTechSelect[Players::PlayerTwo]->SetSelectedIndex(0);
-    m_apPlayerTechSelect[Players::PlayerThree]->SetSelectedIndex(0);
-    m_apPlayerTechSelect[Players::PlayerFour]->SetSelectedIndex(0);
-
-    // Populate the tech comboboxes with the available tech modules
-    const DataModule *pModule = 0;
-    string techName;
-    string techString = " Tech";
-    string::size_type techPos = string::npos;
-    for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i)  
-    {
-        pModule = g_PresetMan.GetDataModule(i);
-        techName = pModule->GetFriendlyName();
-        if (pModule && (techPos = techName.find(techString)) != string::npos)
-        {
-            techName.replace(techPos, techString.length(), "");
-            m_apPlayerTechSelect[Players::PlayerOne]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-            m_apPlayerTechSelect[Players::PlayerTwo]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-            m_apPlayerTechSelect[Players::PlayerThree]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-            m_apPlayerTechSelect[Players::PlayerFour]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-        }
-    }
-    // Make the lists be scrolled to the top when they are initially dropped
-    m_apPlayerTechSelect[Players::PlayerOne]->GetListPanel()->ScrollToTop();
-    m_apPlayerTechSelect[Players::PlayerTwo]->GetListPanel()->ScrollToTop();
-    m_apPlayerTechSelect[Players::PlayerThree]->GetListPanel()->ScrollToTop();
-    m_apPlayerTechSelect[Players::PlayerFour]->GetListPanel()->ScrollToTop();
-
     // Add the handicap options to the dropdowns
     // Prepare the brain icon
     std::snprintf(str, sizeof(str), "%c", -48);
@@ -642,31 +608,15 @@ int MetagameGUI::Create(Controller *pController)
     m_pSaveInfoLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("SavedGameStats"));
     m_pLoadInfoLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("LoadStats"));
 
-    // Fill flags from what has already been loaded into the PresetMan
-    // Get the list of all read-in team flag icons
-    list<Entity *> flagList;
-    g_PresetMan.GetAllOfGroup(flagList, "Flags", "Icon");
-    Icon *pIcon = 0;
-    for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
-    {
-        // Set up the combo boxes
-        m_apPlayerTeamSelect[player]->ClearList();
-        m_apPlayerTeamSelect[player]->SetDropHeight(70);
-        m_apPlayerTechSelect[player]->SetDropHeight(70);
-        m_apPlayerHandicap[player]->SetDropHeight(70);
-        m_apPlayerTeamSelect[player]->GetListPanel()->SetAlternateDrawMode(true);
-        m_apPlayerTeamSelect[player]->SetDropDownStyle(GUIComboBox::DropDownList);
-        // Go through the flag list and them to the combo box
-        for (list<Entity *>::iterator itr = flagList.begin(); itr != flagList.end(); ++itr)
-        {
-            pIcon = dynamic_cast<Icon *>(*itr);
-            if (pIcon)
-                m_apPlayerTeamSelect[player]->AddItem("", "", new AllegroBitmap(pIcon->GetBitmaps32()[0]), pIcon);
-        }
-        // Select the first one
-        m_apPlayerTeamSelect[player]->SetSelectedIndex(player);
-//        m_apPlayerTeamSelect[player]->get
-    }
+	for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+		m_apPlayerTeamSelect[player]->ClearList();
+		m_apPlayerTeamSelect[player]->SetDropHeight(70);
+		m_apPlayerTechSelect[player]->SetDropHeight(70);
+		m_apPlayerHandicap[player]->SetDropHeight(70);
+		m_apPlayerTeamSelect[player]->GetListPanel()->SetAlternateDrawMode(true);
+		m_apPlayerTeamSelect[player]->SetDropDownStyle(GUIComboBox::DropDownList);
+	}
+
     // Special height for the last one so it doesn't fly out of the dialog box
     m_apPlayerTeamSelect[Players::PlayerFour]->SetDropHeight(40);
     m_apPlayerTechSelect[Players::PlayerFour]->SetDropHeight(40);
@@ -874,6 +824,35 @@ void MetagameGUI::SetEnabled(bool enable)
         m_MenuEnabled = DISABLING;
         g_GUISound.ExitMenuSound()->Play();
     }
+
+	// Populate the tech comboboxes with the available tech modules
+	for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
+		m_apPlayerTechSelect[team]->GetListPanel()->AddItem("-Random-", "", nullptr, nullptr, -1);
+		m_apPlayerTechSelect[team]->SetSelectedIndex(0);
+	}
+	std::string techString = " Tech";
+	for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID) {
+		if (const DataModule *dataModule = g_PresetMan.GetDataModule(moduleID)) {
+			std::string techName = dataModule->GetFriendlyName();
+			size_t techPos = techName.find(techString);
+			if (techPos != string::npos) {
+				techName.replace(techPos, techString.length(), "");
+				for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
+					m_apPlayerTechSelect[team]->GetListPanel()->AddItem(techName, "", nullptr, nullptr, moduleID);
+					m_apPlayerTechSelect[team]->GetListPanel()->ScrollToTop();
+				}
+			}
+		}
+	}
+
+	list<Entity *> flagList;
+	g_PresetMan.GetAllOfGroup(flagList, "Flags", "Icon");
+	for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+		for (list<Entity *>::iterator itr = flagList.begin(); itr != flagList.end(); ++itr) {
+			if (const Icon *pIcon = dynamic_cast<Icon *>(*itr)) { m_apPlayerTeamSelect[player]->AddItem("", "", new AllegroBitmap(pIcon->GetBitmaps32()[0]), pIcon); }
+		}
+		m_apPlayerTeamSelect[player]->SetSelectedIndex(player);
+	}
 
     m_ScreenChange = true;
 }

@@ -37,10 +37,7 @@ namespace RTE {
 		m_DeployUnitsCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxDeployUnits"));
 
 		m_PlayersAndTeamsConfigBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxPlayersAndTeamsConfig"));
-
 		m_TeamIconBoxes.at(TeamRows::DisabledTeam) = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxDisabledTeamIcon"));
-		if (const Icon *disabledTeamIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Disabled Team"))) { m_TeamIconBoxes.at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(disabledTeamIcon->GetBitmaps32()[0])); }
-
 		m_TeamNameLabels.at(TeamRows::DisabledTeam) = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelDisabledTeam"));
 
 		GUILabel *teamTechLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelTeamTech"));
@@ -67,7 +64,7 @@ namespace RTE {
 		m_StartErrorLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelStartError"));
 		m_StartGameButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonStartGame"));
 
-		PopulateTechComboBoxes();
+		m_TechListFetched = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -90,6 +87,7 @@ namespace RTE {
 				}
 			}
 		}
+		m_TechListFetched = true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -116,7 +114,10 @@ namespace RTE {
 		for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
 			m_TeamTechComboBoxes.at(team)->SetVisible(enable);
 		}
-		if (enable && m_SelectedActivity && m_SelectedScene) { ResetActivityConfigBox(); }
+		if (enable && m_SelectedActivity && m_SelectedScene) {
+			if (!m_TechListFetched) { PopulateTechComboBoxes(); }
+			ResetActivityConfigBox();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -182,6 +183,7 @@ namespace RTE {
 			m_TeamAISkillSliders.at(team)->SetVisible(m_SelectedActivity->TeamActive(team));
 			m_TeamAISkillLabels.at(team)->SetVisible(m_SelectedActivity->TeamActive(team));
 		}
+		if (const Icon *disabledTeamIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Disabled Team"))) { m_TeamIconBoxes.at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(disabledTeamIcon->GetBitmaps32()[0])); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

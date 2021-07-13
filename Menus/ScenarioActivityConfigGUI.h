@@ -84,6 +84,8 @@ namespace RTE {
 
 		Timer m_StartGameButtonBlinkTimer; //!< Timer for blinking the start game button.
 
+		bool m_TechListFetched; //!< Whether the tech list was fetched and each team's ComboBox was populated with it, even if no valid tech modules were added.
+
 		/// <summary>
 		/// GUI elements that compose the Activity setup box.
 		/// </summary>

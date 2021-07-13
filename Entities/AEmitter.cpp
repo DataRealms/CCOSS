@@ -38,13 +38,13 @@ void AEmitter::Clear()
     m_WasEmitting = false;
     m_EmitCount = 0;
     m_EmitCountLimit = 0;
-    m_MinThrottleRange = -1;
-    m_MaxThrottleRange = 1;
+	m_MinThrottleRange = 1.0F;
+	m_MaxThrottleRange = 1.0F;
     m_Throttle = 0;
     m_EmissionsIgnoreThis = false;
-    m_BurstScale = 1.0;
+    m_BurstScale = 1.0F;
     m_BurstDamage = 0;
-	m_EmitterDamageMultiplier = 1.0;
+	m_EmitterDamageMultiplier = 1.0F;
     m_BurstTriggered = false;
     m_BurstSpacing = 0;
     // Set this to really long so an initial burst will be possible
@@ -346,18 +346,17 @@ float AEmitter::EstimateImpulse(bool burst)
 
     }
 
-    // Figure out the throttle factor
-    float throttleFactor = 1.0f;
-    if (m_Throttle < 0)         // Negative throttle, scale down according to the min throttle range
-        throttleFactor += fabs(m_MinThrottleRange) * m_Throttle;
-    else if (m_Throttle > 0)    // Positive throttle, scale up
-        throttleFactor += fabs(m_MaxThrottleRange) * m_Throttle;
-    
+	// Figure out the throttle factor
+	float throttleFactor = 1.0F;
+	if (m_Throttle < 0) {	// Negative throttle, scale down according to the min throttle range
+		throttleFactor += std::abs(m_MinThrottleRange) * m_Throttle;
+	} else if (m_Throttle > 0) {    // Positive throttle, scale up
+		throttleFactor += std::abs(m_MaxThrottleRange) * m_Throttle;
+	}
     // Apply the throttle factor to the emission rate per update
-    if (burst)
-        return m_AvgBurstImpulse * throttleFactor;
+	if (burst) { return m_AvgBurstImpulse * throttleFactor; }
     
-    return m_AvgImpulse * throttleFactor;
+	return m_AvgImpulse * throttleFactor;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -436,15 +435,12 @@ void AEmitter::Update()
 // TODO: Potentially get this once outside instead, like in attach/detach")
         MovableObject *pRootParent = GetRootParent();
 
-        // Figure out the throttle factor
-        // Negative throttle, scale down according to the min throttle range
-        float throttleFactor = 1.0f;
-        if (m_Throttle < 0)
-            throttleFactor += fabs(m_MinThrottleRange) * m_Throttle;
-        // Positive throttle, scale up
-        else if (m_Throttle > 0)
-            throttleFactor += fabs(m_MaxThrottleRange) * m_Throttle;
-
+		float throttleFactor = 1.0F;
+		if (m_Throttle < 0) {	// Negative throttle, scale down according to the min throttle range
+			throttleFactor += std::abs(m_MinThrottleRange) * m_Throttle;
+		} else if (m_Throttle > 0) {	// Positive throttle, scale up
+			throttleFactor += std::abs(m_MaxThrottleRange) * m_Throttle;
+		}
         // Check burst triggering against whether the spacing is fulfilled
         if (m_BurstTriggered && (m_BurstSpacing <= 0 || m_BurstTimer.IsPastSimMS(m_BurstSpacing)))
         {
@@ -457,7 +453,7 @@ void AEmitter::Update()
         else
             m_BurstTriggered = false;
 
-        int emissions = 0;
+		int emissionCountTotal = 0;
         float velMin, velRange, spread;
         double currentPPM, SPE;
         MovableObject *pParticle = 0;
@@ -470,9 +466,9 @@ void AEmitter::Update()
             {
                 // Apply the throttle factor to the emission rate
                 currentPPM = (*eItr)->GetRate() * throttleFactor;
-                emissions = 0;
+				int emissionCount = 0;
 
-                // Only do all this if the PPM is acutally above zero
+				// Only do all this if the PPM is actually above zero
                 if (currentPPM > 0)
                 {
                     // Calculate secs per emission
@@ -482,40 +478,43 @@ void AEmitter::Update()
                     (*eItr)->m_Accumulator += m_LastEmitTmr.GetElapsedSimTimeS();
 
                     // Now figure how many full emissions can fit in the current accumulator
-                    emissions = floor((*eItr)->m_Accumulator / SPE);
+					emissionCount = std::floor((*eItr)->m_Accumulator / SPE);
                     // Deduct the about to be emitted emissions from the accumulator
-                    (*eItr)->m_Accumulator -= emissions * SPE;
+                    (*eItr)->m_Accumulator -= emissionCount * SPE;
 
                     RTEAssert((*eItr)->m_Accumulator >= 0, "Emission accumulator negative!");
                 }
-
+				else {
+					(*eItr)->m_Accumulator = 0;
+				}
+				float scale = 1.0F;
                 // Add extra emissions if bursting.
-                if (m_BurstTriggered)
-                    emissions += (*eItr)->GetBurstSize();
-
+				if (m_BurstTriggered) {
+					emissionCount += (*eItr)->GetBurstSize() * throttleFactor;
+					scale = m_BurstScale;
+				}
+				emissionCountTotal += emissionCount;
                 pParticle = 0;
                 emitVel.Reset();
                 parentVel = pRootParent->GetVel() * (*eItr)->InheritsVelocity();
 
-                for (int i = 0; i < emissions; ++i)
+                for (int i = 0; i < emissionCount; ++i)
                 {
-                    velMin = (*eItr)->GetMinVelocity() * (m_BurstTriggered ? m_BurstScale : 1.0);
-                    velRange = (*eItr)->GetMaxVelocity() - (*eItr)->GetMinVelocity() * (m_BurstTriggered ? m_BurstScale : 1.0);
-                    spread = (*eItr)->GetSpread() * (m_BurstTriggered ? m_BurstScale : 1.0);
+                    velMin = (*eItr)->GetMinVelocity() * scale;
+                    velRange = (*eItr)->GetMaxVelocity() - (*eItr)->GetMinVelocity() * scale;
+                    spread = (*eItr)->GetSpread() * scale;
                     // Make a copy after the reference particle
                     pParticle = dynamic_cast<MovableObject *>((*eItr)->GetEmissionParticlePreset()->Clone());
                     // Set up its position and velocity according to the parameters of this.
                     // Emission point offset not set
 
-					if ((*eItr)->GetOffset().IsZero())
-					{
-						if (m_EmissionOffset.IsZero())
-							pParticle->SetPos(m_Pos/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
-						else
+					if ((*eItr)->GetOffset().IsZero()) {
+						if (m_EmissionOffset.IsZero()) {
+							pParticle->SetPos(m_Pos);
+						} else {
 							pParticle->SetPos(m_Pos + RotateOffset(m_EmissionOffset));
-					}
-					else 
-					{
+						}
+					} else {
 						pParticle->SetPos(m_Pos + RotateOffset((*eItr)->GetOffset()));
 					}
     // TODO: Optimize making the random angles!")
@@ -545,32 +544,28 @@ void AEmitter::Update()
                         pParticle->SetLifetime(pParticle->GetLifetime() * throttleFactor);
 
                     // Let particle loose into the world!
-//                    g_MovableMan.AddParticle(pParticle);
-                    // Might be an Actor...
                     g_MovableMan.AddMO(pParticle);
                     pParticle = 0;
                 }
             }
         }
-        m_LastEmitTmr.Reset();
+		m_LastEmitTmr.Reset();
 
         // Apply recoil/push effects. Joint stiffness will take effect when these are transferred to the parent.
         if (!pushImpulses.IsZero()) { AddImpulseForce(pushImpulses); }
 
         // Count the the damage caused by the emissions, and only if we're not bursting
-        if (!m_BurstTriggered)
-            m_DamageCount += (float)emissions * m_EmitDamage * m_EmitterDamageMultiplier;
-        // Count the the damage caused by the burst
-        else
-            m_DamageCount += m_BurstDamage * m_EmitterDamageMultiplier;
+		if (!m_BurstTriggered) {
+			m_DamageCount += static_cast<float>(emissionCountTotal) * m_EmitDamage * m_EmitterDamageMultiplier;
+		} else {	// Count the the damage caused by the burst
+			m_DamageCount += m_BurstDamage * m_EmitterDamageMultiplier;
+		}
 
-        // Count the total emissions since enabling, and stop emitting if beyong limit (and limit is also enabled)
-        m_EmitCount += emissions;
-        if (m_EmitCountLimit > 0 && m_EmitCount > m_EmitCountLimit)
-            EnableEmission(false);
+		// Count the total emissions since enabling, and stop emitting if beyond limit (and limit is also enabled)
+		m_EmitCount += emissionCountTotal;
+		if (m_EmitCountLimit > 0 && m_EmitCount > m_EmitCountLimit) { EnableEmission(false); }
 
-        if (m_BurstTriggered)
-            m_BurstTriggered = false;
+		if (m_BurstTriggered) { m_BurstTriggered = false; }
 
         m_WasEmitting = true;
     }
@@ -611,17 +606,16 @@ void AEmitter::Draw(BITMAP *pTargetBitmap,
         !onlyPhysical && mode == g_DrawColor && m_EmitEnabled && (!m_FlashOnlyOnBurst || m_BurstTriggered))
         m_pFlash->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-    // Set the screen flash effect to draw at the final post processing stage
-    if (m_EmitEnabled && (!m_FlashOnlyOnBurst || m_BurstTriggered) && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical)
-    {
-        // Fudge the emission pos forward a little bit so the glow aligns nicely
-        Vector emitPos(m_pFlash->GetScreenEffect()->w / 4, 0);
-        emitPos.RadRotate(m_HFlipped ? c_PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle());
-        emitPos = m_Pos + RotateOffset(m_EmissionOffset) + emitPos;
-        if(!g_SceneMan.ObscuredPoint(emitPos))
-            g_PostProcessMan.RegisterPostEffect(emitPos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55.0F + RandomNum(0.0F, 200.0F), m_pFlash->GetEffectRotAngle());
-//            g_SceneMan.RegisterPostEffect(emitPos, m_pFlash->GetScreenEffect(), 55 + (200 * RandomNum() * ((float)1 - ((float)m_AgeTimer.GetElapsedSimTimeMS() / (float)m_Lifetime))));
-    }
+	// Set the screen flash effect to draw at the final post processing stage
+	if (m_EmitEnabled && (!m_FlashOnlyOnBurst || m_BurstTriggered) && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical) {
+		// Fudge the glow pos forward a bit so it aligns nicely with the flash
+		Vector emitPos(m_pFlash->GetScreenEffect()->w * 0.3F * m_FlashScale, 0);
+		emitPos.RadRotate(m_HFlipped ? c_PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle());
+		emitPos = m_Pos + RotateOffset(m_EmissionOffset) + emitPos;
+		if (!g_SceneMan.ObscuredPoint(emitPos)) {
+			g_PostProcessMan.RegisterPostEffect(emitPos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), RandomNum(m_pFlash->GetEffectStopStrength(), m_pFlash->GetEffectStartStrength()) * std::clamp(m_FlashScale, 0.0F, 1.0F), m_pFlash->GetEffectRotAngle());
+		}
+	}
 }
 
 } // namespace RTE

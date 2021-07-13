@@ -1837,7 +1837,7 @@ void GameActivity::Update()
             {
                 if (m_InventoryMenuGUI[player]->GetMenuMode() == InventoryMenuGUI::MenuMode::Carousel || !m_InventoryMenuGUI[player]->IsVisible()) {
                     m_InventoryMenuGUI[player]->SetMenuMode(InventoryMenuGUI::MenuMode::Carousel);
-                    m_InventoryMenuGUI[player]->SetEnabled(true);
+                    m_InventoryMenuGUI[player]->EnableIfNotEmpty();
                 }
 
                 if (!m_pPieMenu[player]->IsEnabled() || m_ControlledActor[player]->PieNeedsUpdate())

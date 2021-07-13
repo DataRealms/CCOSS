@@ -1046,7 +1046,7 @@ namespace RTE {
 		if (!m_InventoryActor->IsInventoryEmpty() && (m_NonMouseHighlightedButton == m_GUISwapSetButton || m_NonMouseHighlightedButton == m_GUIEquippedItemButton || m_NonMouseHighlightedButton == m_GUIOffhandEquippedItemButton || m_NonMouseHighlightedButton == m_GUIDropButton || m_NonMouseHighlightedButton == m_GUIInformationToggleButton)) {
 			nextButtonToHighlight = m_NonMousePreviousInventoryItemsBoxButton;
 			if (!nextButtonToHighlight) {
-				int inventoryIndexToHighlight = 0;
+				int inventoryIndexToHighlight = 1;
 				if (m_NonMouseHighlightedButton == m_GUIOffhandEquippedItemButton) {
 					inventoryIndexToHighlight = 2;
 				} else if (m_NonMouseHighlightedButton == m_GUIDropButton) {

@@ -396,6 +396,12 @@ namespace RTE {
 		void RegisterMusicEvent(int player, NetworkMusicState state, const char *filepath, int loopsOrSilence = 0, float position = 0, float pitch = 1.0F);
 
 		/// <summary>
+		/// Clears the list of current Music events for the target player.
+		/// </summary>
+		/// <param name="player">Player to clear music events for. -1 clears for all players</param>
+		void ClearMusicEvents(int player);
+
+		/// <summary>
 		/// Fills the list with sound events happened for the specified network player.
 		/// </summary>
 		/// <param name="player">Player to get events for.</param>
@@ -410,6 +416,12 @@ namespace RTE {
 		/// <param name="soundContainer">A pointer to the SoundContainer this event is happening to, or a null pointer for global events.</param>
 		/// <param name="fadeOutTime">THe amount of time, in MS, to fade out over. This data isn't contained in SoundContainer, so it needs to be passed in separately.</param>
 		void RegisterSoundEvent(int player, NetworkSoundState state, const SoundContainer *soundContainer, int fadeOutTime = 0);
+
+		/// <summary>
+		/// Clears the list of current Sound events for the target player.
+		/// </summary>
+		/// <param name="player">Player to clear sound events for. -1 clears for all players.</param>
+		void ClearSoundEvents(int player);
 #pragma endregion
 
 	protected:
@@ -425,7 +437,7 @@ namespace RTE {
 		FMOD::ChannelGroup *m_ImmobileSoundChannelGroup; //!< The FMOD ChannelGroup for immobile sounds.
 
 		bool m_AudioEnabled; //!< Bool to tell whether audio is enabled or not.
-		std::vector<const Vector *> m_CurrentActivityHumanPlayerPositions; //!< The stored positions of each human player in the current activity. Only filled when there's an activity running.
+		std::vector<std::unique_ptr<const Vector>> m_CurrentActivityHumanPlayerPositions; //!< The stored positions of each human player in the current activity. Only filled when there's an activity running.
 		std::unordered_map<int, float> m_SoundChannelMinimumAudibleDistances; //!<  An unordered map of sound channel indices to floats representing each Sound Channel's minimum audible distances. This is necessary to keep safe data in case the SoundContainer is destroyed while the sound is still playing, as happens often with TDExplosives.
 
 		bool m_MuteMaster; //!< Whether all the audio is muted.

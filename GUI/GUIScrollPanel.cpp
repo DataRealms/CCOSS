@@ -35,6 +35,7 @@ GUIScrollPanel::GUIScrollPanel(GUIManager *Manager)
     m_GrabbedBackg = false;
     m_RebuildSize = true;
     m_RebuildKnob = true;
+	m_ValueResolution = 1;
 }
 
 
@@ -57,6 +58,7 @@ GUIScrollPanel::GUIScrollPanel()
     m_GrabbedBackg = false;
     m_RebuildSize = true;
     m_RebuildKnob = true;
+	m_ValueResolution = 1;
 }
 
 
@@ -80,6 +82,7 @@ void GUIScrollPanel::Create(int X, int Y, int Width, int Height)
     m_Orientation = Horizontal;
     m_GrabbedKnob = false;
     m_GrabbedBackg = false;
+	m_ValueResolution = 1;
 }
 
 
@@ -122,6 +125,7 @@ void GUIScrollPanel::LoadProps(GUIProperties *Props)
     Props->GetValue("Value", &m_Value);
     Props->GetValue("PageSize", &m_PageSize);
     Props->GetValue("SmallChange", &m_SmallChange);
+	if (!Props->GetValue("ValueResolution", &m_ValueResolution)) { m_ValueResolution = std::max((m_Maximum - m_Minimum) / 100, 1); }
 }
 
 
@@ -934,4 +938,10 @@ int GUIScrollPanel::GetOrientation(void)
 int GUIScrollPanel::GetSmallChange(void)
 {
     return m_SmallChange;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int GUIScrollPanel::GetValueResolution() const {
+	return m_ValueResolution;
 }

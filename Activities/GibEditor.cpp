@@ -44,8 +44,6 @@
 #include "GibEditorGUI.h"
 #include "GABaseDefense.h"
 
-extern bool g_ResetActivity;
-
 namespace RTE {
 
 ConcreteClassInfo(GibEditor, EditorActivity, 0)

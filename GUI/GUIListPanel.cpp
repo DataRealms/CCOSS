@@ -46,6 +46,8 @@ GUIListPanel::GUIListPanel(GUIManager *Manager)
 	m_HotTracking = false;
 	m_HorzScrollEnabled = true;
 	m_VertScrollEnabled = true;
+	m_ScrollBarThickness = 17;
+	m_ScrollBarPadding = 0;
 	m_AlternateDrawMode = false;
 	m_LoopSelectionScroll = false;
 	m_MouseScroll = false;
@@ -80,6 +82,8 @@ GUIListPanel::GUIListPanel()
 	m_HotTracking = false;
 	m_HorzScrollEnabled = true;
 	m_VertScrollEnabled = true;
+	m_ScrollBarThickness = 17;
+	m_ScrollBarPadding = 0;
 	m_AlternateDrawMode = false;
 	m_LoopSelectionScroll = false;
 	m_MouseScroll = false;
@@ -105,13 +109,13 @@ void GUIListPanel::Create(int X, int Y, int Width, int Height)
     m_VertScroll = new GUIScrollPanel(m_Manager);
     
     // Initial size & positions
-    m_HorzScroll->Create(0, Height-17, Width, 17);
+    m_HorzScroll->Create(0 + m_ScrollBarPadding, Height - m_ScrollBarThickness - m_ScrollBarPadding, Width - (m_ScrollBarPadding * 2), m_ScrollBarThickness);
     m_HorzScroll->SetOrientation(GUIScrollPanel::Horizontal);
     m_HorzScroll->_SetVisible(false);
     m_HorzScroll->SetValue(0);
     m_HorzScroll->SetSignalTarget(this);
 
-    m_VertScroll->Create(Width-17, 0, 17, Height);
+    m_VertScroll->Create(Width - m_ScrollBarThickness - m_ScrollBarPadding, 0 + m_ScrollBarPadding, m_ScrollBarThickness, Height - (m_ScrollBarPadding * 2));
     m_VertScroll->SetOrientation(GUIScrollPanel::Vertical);
     m_VertScroll->_SetVisible(false);
     m_VertScroll->SetValue(0);
@@ -909,10 +913,10 @@ void GUIListPanel::AdjustScrollbars(void)
         m_VertScroll->_SetVisible(false);
 
     // Re-adjust the scrollbar positions & sizes, just to be safe
-    m_HorzScroll->SetPositionAbs(m_X, m_Y+m_Height-17);
-    m_HorzScroll->SetSize(m_Width, 17);
-    m_VertScroll->SetPositionAbs(m_X+m_Width-17, m_Y);
-    m_VertScroll->SetSize(17, m_Height);
+    m_HorzScroll->SetPositionAbs(m_X + m_ScrollBarPadding, m_Y + m_Height - m_ScrollBarThickness - m_ScrollBarPadding);
+    m_HorzScroll->SetSize(m_Width - (m_ScrollBarPadding * 2), m_ScrollBarThickness);
+    m_VertScroll->SetPositionAbs(m_X + m_Width - m_ScrollBarThickness - m_ScrollBarPadding, m_Y + m_ScrollBarPadding);
+    m_VertScroll->SetSize(m_ScrollBarThickness, m_Height - (m_ScrollBarPadding * 2));
 
     // If there are items wider than the listpanel, make the horizontal scrollpanel visible
     int Width = m_Width-4;
@@ -971,14 +975,14 @@ void GUIListPanel::AdjustScrollbars(void)
 
     // If both scrollbars are visible, adjust the size so they don't intersect
     if (m_VertScroll->_GetVisible() && m_HorzScroll->_GetVisible()) {
-        m_VertScroll->SetSize(m_VertScroll->GetWidth(),            m_Height-m_HorzScroll->GetHeight());
-        m_HorzScroll->SetSize(m_Width-m_VertScroll->GetWidth(),    m_HorzScroll->GetHeight());
+		m_VertScroll->SetSize(m_VertScroll->GetWidth(), m_Height - m_HorzScroll->GetHeight() - (m_ScrollBarPadding * 2));
+		m_HorzScroll->SetSize(m_Width - m_VertScroll->GetWidth() - (m_ScrollBarPadding * 2), m_HorzScroll->GetHeight());
     } else {
         // Normal size
         if (m_VertScroll->_GetVisible())
-            m_VertScroll->SetSize(m_VertScroll->GetWidth(), m_Height);
+			m_VertScroll->SetSize(m_VertScroll->GetWidth(), m_Height - (m_ScrollBarPadding * 2));
         if (m_HorzScroll->_GetVisible())
-            m_HorzScroll->SetSize(m_Width, m_HorzScroll->GetHeight());
+			m_HorzScroll->SetSize(m_Width - (m_ScrollBarPadding * 2), m_HorzScroll->GetHeight());
     }
 }
 

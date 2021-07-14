@@ -158,7 +158,7 @@ public:
 // Description:     Gets the mouse position
 // Arguments:       Pointers to store the X and Y coordinates in
 
-    void GetMousePosition(int *X, int *Y);
+    void GetMousePosition(int *X, int *Y) const;
 
 
 	static void SetNetworkMouseMovement(int whichPlayer, int x, int y);
@@ -181,6 +181,12 @@ public:
 	int GetMouseWheelChange() {
 		return m_MouseWheelChange;
 	}
+
+	/// <summary>
+	/// Sets whether the keyboard and joysticks also control the mouse.
+	/// </summary>
+	/// <param name="enableKeyJoyMouseCursor">Whether the keyboard and joysticks also control the mouse or not.</param>
+	void SetKeyJoyMouseCursor(bool enableKeyJoyMouseCursor) { m_KeyJoyMouseCursor = enableKeyJoyMouseCursor; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

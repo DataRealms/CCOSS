@@ -825,13 +825,13 @@ bool ACraft::OnMOHit(MovableObject *pOtherMO)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACraft::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
-	if (g_SettingsMan.EnableCrabBombs() && !s_CrabBombInEffect) {
+	if (g_SettingsMan.CrabBombsEnabled() && !s_CrabBombInEffect) {
 		s_CrabBombInEffect = true;
 		int crabCount = 0;
 		for (const MovableObject *inventoryEntry : m_Inventory) {
 			if (inventoryEntry->GetPresetName() == "Crab") { crabCount++; }
 		}
-		if (crabCount >= g_SettingsMan.CrabBombThreshold()) {
+		if (crabCount >= g_SettingsMan.GetCrabBombThreshold()) {
 			for (int moid = 1; moid < g_MovableMan.GetMOIDCount() - 1; moid++) {
 				Actor *actor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(moid));
 				if (actor && actor != this && actor->GetClassName() != "ADoor" && !actor->IsInGroup("Brains")) { actor->GibThis(); }

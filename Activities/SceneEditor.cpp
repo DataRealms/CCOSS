@@ -42,8 +42,6 @@
 #include "SceneEditorGUI.h"
 #include "GABaseDefense.h"
 
-extern bool g_ResetActivity;
-
 namespace RTE {
 
 ConcreteClassInfo(SceneEditor, EditorActivity, 0)
@@ -377,7 +375,7 @@ void SceneEditor::Update()
 			pTestGame->SetFogOfWarEnabled(false);
             pTestGame->SetDifficulty(DifficultySetting::MediumDifficulty);
             g_ActivityMan.SetStartActivity(pTestGame);
-            g_ResetActivity = true;
+			g_ActivityMan.SetRestartActivity();
 
 
             /*GABaseDefense *pTestGame = dynamic_cast<GABaseDefense *>(g_PresetMan.GetEntityPreset("GABaseDefense", "Test Activity")->Clone());
@@ -387,7 +385,7 @@ void SceneEditor::Update()
             pTestGame->SetDifficulty(GameActivity::MaxDifficulty);
             pTestGame->Create();
             g_ActivityMan.SetStartActivity(pTestGame);
-            g_ResetActivity = true;*/
+            g_ActivityMan.SetRestartActivity();*/
         }
     }
 

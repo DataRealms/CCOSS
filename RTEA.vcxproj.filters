@@ -423,9 +423,6 @@
     <ClInclude Include="GUI\Interface.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Menus\LoadingGUI.h">
-      <Filter>Menus</Filter>
-    </ClInclude>
     <ClInclude Include="System\Constants.h">
       <Filter>System</Filter>
     </ClInclude>
@@ -482,6 +479,45 @@
     </ClInclude>
     <ClInclude Include="System\GraphicalPrimitive.h">
       <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\TitleScreen.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="Managers\MenuMan.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\LoadingScreen.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\ModManagerGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\SettingsGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\SettingsAudioGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\SettingsVideoGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\SettingsInputGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\SettingsGameplayGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\SettingsMiscGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\SettingsInputMappingGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\SettingsInputMappingWizardGUI.h">
+      <Filter>Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\ScenarioActivityConfigGUI.h">
+      <Filter>Menus</Filter>
     </ClInclude>
     <ClInclude Include="System\PieSlice.h">
       <Filter>System</Filter>
@@ -876,9 +912,6 @@
     <ClCompile Include="System\RTEError.cpp">
       <Filter>System</Filter>
     </ClCompile>
-    <ClCompile Include="Menus\LoadingGUI.cpp">
-      <Filter>Menus</Filter>
-    </ClCompile>
     <ClCompile Include="System\Controller.cpp">
       <Filter>System</Filter>
     </ClCompile>
@@ -926,6 +959,45 @@
     </ClCompile>
     <ClCompile Include="System\GraphicalPrimitive.cpp">
       <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\TitleScreen.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Managers\MenuMan.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\LoadingScreen.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\ModManagerGUI.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\SettingsGUI.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\SettingsAudioGUI.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\SettingsVideoGUI.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\SettingsInputGUI.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\SettingsGameplayGUI.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\SettingsMiscGUI.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\SettingsInputMappingGUI.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\SettingsInputMappingWizardGUI.cpp">
+      <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\ScenarioActivityConfigGUI.cpp">
+      <Filter>Menus</Filter>
     </ClCompile>
     <ClCompile Include="System\PieSlice.cpp">
       <Filter>System</Filter>

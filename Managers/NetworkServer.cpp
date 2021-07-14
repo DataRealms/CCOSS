@@ -20,9 +20,6 @@
 #include <lz4.h>
 #include <lz4hc.h>
 
-extern bool g_ResetActivity;
-extern bool g_InActivity;
-
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1510,7 +1507,7 @@ namespace RTE {
 			g_FrameMan.GetLargeFont()->DrawAligned(&guiBMP, midX, 20, "NOT CONNECTED TO NAT SERVICE", GUIFont::Centre);
 		}
 
-		if (g_InActivity) {
+		if (g_ActivityMan.IsInActivity()) {
 			const GameActivity *gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
 			if (gameActivity) {
 				std::snprintf(buf, sizeof(buf), "Activity: %s   Players: %d", gameActivity->GetPresetName().c_str(), gameActivity->GetPlayerCount());
@@ -1647,7 +1644,7 @@ namespace RTE {
 
 			// Process reset votes
 			// Only reset gameplay activities, and not server lobby
-			if (g_InActivity && g_ActivityMan.GetActivity()->GetPresetName() != "Multiplayer Lobby") {
+			if (g_ActivityMan.IsInActivity() && g_ActivityMan.GetActivity()->GetPresetName() != "Multiplayer Lobby") {
 
 				int votesNeeded = 0;
 				int endActivityVotes = 0;
@@ -1679,12 +1676,12 @@ namespace RTE {
 
 					// establish timer so restarts can only occur once per 5 seconds
 					long long currentTicks = g_TimerMan.GetRealTickCount();
-					int minRestartInterval = 5; 
+					int minRestartInterval = 5;
 
 					if (endActivityVotes >= votesNeeded) {
 						g_ActivityMan.EndActivity();
-						g_ResetActivity = true;
-						g_InActivity = false;
+						g_ActivityMan.SetRestartActivity();
+						g_ActivityMan.SetInActivity(false);
 					} else if (restartVotes >= votesNeeded && ((currentTicks - m_LatestRestartTime > (g_TimerMan.GetTicksPerSecond() * minRestartInterval) || m_LatestRestartTime == 0))) {
 						m_LatestRestartTime = currentTicks;
 						g_ActivityMan.RestartActivity();

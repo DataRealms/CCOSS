@@ -30,8 +30,6 @@
 #include "BuyMenuGUI.h"
 #include "SceneEditorGUI.h"
 
-extern bool g_ResetActivity;
-
 namespace RTE {
 
 ConcreteClassInfo(GABrainMatch, GameActivity, 0)

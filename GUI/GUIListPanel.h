@@ -524,6 +524,18 @@ public:
 	/// <param name="mouseScroll">True to enable scrolling, false to disable.</param>
 	void SetMouseScrolling(bool mouseScroll);
 
+	/// <summary>
+	/// Sets the thickness (width on vertical, height on horizontal) of the ListPanel's scroll bars and adjusts them to the new thickness.
+	/// </summary>
+	/// <param name="newThickness">The new scroll bar thickness, in pixels.</param>
+	void SetScrollBarThickness(int newThickness) { m_ScrollBarThickness = newThickness; AdjustScrollbars(); }
+
+	/// <summary>
+	/// Sets the padding around the ListPanel's scrollbars and adjusts them to the new padding. Used to better size and position scrollbars within panel bounds, allowing to not overdraw on panel borders.
+	/// </summary>
+	/// <param name="newPadding">The new scrollbar padding, in pixels.</param>
+	void SetScrollBarPadding(int newPadding) { m_ScrollBarPadding = newPadding; AdjustScrollbars(); }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -601,6 +613,8 @@ private:
     GUIScrollPanel        *m_VertScroll;
     bool                m_HorzScrollEnabled;
     bool                m_VertScrollEnabled;
+	int m_ScrollBarThickness; //!< The thickness (width on vertical, height on horizontal) of the ListPanel's scroll bars, in pixels.
+	int m_ScrollBarPadding; //!< The padding around the scrollbars, in pixels. Used to better size and position scrollbars within panel bounds, allowing to not overdraw on panel borders.
 
     bool                m_CapturedHorz;
     bool                m_CapturedVert;

@@ -204,7 +204,7 @@ namespace RTE {
 				if (peek == '\n') {
 					m_CurrentLine++;
 					// Only report every few lines
-					if (m_ReportProgress && (m_CurrentLine % g_SettingsMan.LoadingScreenReportPrecision() == 0)) {
+					if (m_ReportProgress && (m_CurrentLine % g_SettingsMan.LoadingScreenProgressReportPrecision() == 0)) {
 						m_ReportProgress(m_ReportTabs + m_FileName + " reading line " + std::to_string(m_CurrentLine), false);
 					}
 				}

@@ -34,17 +34,11 @@ AllegroInput::AllegroInput(int whichPlayer, bool keyJoyMouseCursor):
     install_mouse();
 
 #ifndef GUI_STANDALONE
-    // Set the speed of the mouse
-    float mouseDenominator = g_FrameMan.ResolutionMultiplier();
-    // If Nx fullscreen, adjust the mouse speed accordingly
-    if (mouseDenominator > 1)
-        set_mouse_speed(1, 1);
-    else
-        set_mouse_speed(2, 2);
-    set_mouse_range(0, 0, (g_FrameMan.GetResX() * mouseDenominator) - 3, (g_FrameMan.GetResY() * mouseDenominator) - 3);
+	// Set the speed of the mouse
+	int mouseDenominator = g_FrameMan.GetResMultiplier();
+	AdjustMouseMovementSpeedToGraphicsDriver(g_FrameMan.GetGraphicsDriver());
+	set_mouse_range(0, 0, (g_FrameMan.GetResX() * mouseDenominator) - 3, (g_FrameMan.GetResY() * mouseDenominator) - 3);
 #endif
-    //set_mouse_speed(1, 1);
-    //set_mouse_range(0, 0, (g_FrameMan.GetResX() * mouseDenominator) - 3, (g_FrameMan.GetResY() * mouseDenominator) - 3);
 
     memset(m_ModStates, 0, sizeof(int) * 6);
     memset(m_KeyboardBuffer, 0, sizeof(uint8_t) * KEYBOARD_BUFFER_SIZE);
@@ -73,6 +67,16 @@ AllegroInput::~AllegroInput()
 {
     delete m_pTimer; m_pTimer = 0;
     delete m_pCursorAccelTimer; m_pCursorAccelTimer = 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AllegroInput::AdjustMouseMovementSpeedToGraphicsDriver(int graphicsDriver) {
+	if (graphicsDriver == GFX_AUTODETECT_WINDOWED || graphicsDriver == GFX_DIRECTX_WIN_BORDERLESS) {
+		set_mouse_speed(2, 2);
+	} else {
+		set_mouse_speed(1, 1);
+	}
 }
 
 
@@ -310,7 +314,7 @@ void AllegroInput::Update(void)
 */
 #ifndef GUI_STANDALONE
     // Get mouse cursor movement denominator based on window size multiplication
-    float mouseDenominator = g_FrameMan.ResolutionMultiplier();
+    float mouseDenominator = g_FrameMan.GetResMultiplier();
 
     // If joysticks and keyboard can control the mouse cursor too
     if (m_KeyJoyMouseCursor)

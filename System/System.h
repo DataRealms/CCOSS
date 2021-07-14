@@ -17,6 +17,25 @@ namespace RTE {
 		static void Initialize();
 #pragma endregion
 
+#pragma region Program Termination
+		/// <summary>
+		/// Gets whether the program was set to be terminated by the user.
+		/// </summary>
+		/// <returns>Whether the program was set to be terminated by the user.</returns>
+		static bool IsSetToQuit() { return s_Quit; }
+
+		/// <summary>
+		/// Sets the program to be terminated.
+		/// </summary>
+		/// <param name="quitOrNot">Terminate or not.</param>
+		static void SetQuit(bool quitOrNot = true) { s_Quit = quitOrNot; }
+
+		/// <summary>
+		/// Sets termination when the close button (X) is pressed on the program window.
+		/// </summary>
+		static void WindowCloseButtonHandler() { SetQuit(); }
+#pragma endregion
+
 #pragma region Directories
 		/// <summary>
 		/// Gets the current working directory.
@@ -115,7 +134,7 @@ namespace RTE {
 		/// Fires up the default browser for the current OS on a specific URL.
 		/// </summary>
 		/// <param name="goToURL">A string with the URL to send the browser to.</param>
-		static void OpenBrowserToURL(const std::string &goToURL) { std::system(std::string("start ").append(goToURL).c_str()); }
+		static void OpenBrowserToURL(const std::string_view &goToURL) { std::system(std::string("start ").append(goToURL).c_str()); }
 
 		/// <summary>
 		/// Searches through an ASCII file on disk for a specific string and tells whether it was found or not.
@@ -128,6 +147,7 @@ namespace RTE {
 
 	private:
 
+		static bool s_Quit; //!< Whether the user requested program termination through GUI or the window close button.
 		static bool s_LogToCLI; //!< Bool to tell whether to print the loading log and anything specified with PrintToCLI to command-line or not.
 		static std::string s_WorkingDirectory; //!< String containing the absolute path to current working directory.
 		static std::vector<size_t> s_WorkingTree; //!< Vector of the hashes of all file paths in the working directory.

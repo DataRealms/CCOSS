@@ -40,9 +40,6 @@
 #include "SceneEditorGUI.h"
 #include "GUIBanner.h"
 
-extern bool g_ResetActivity;
-extern bool g_InActivity;
-
 #define BRAINLZWIDTHDEFAULT 640
 
 namespace RTE {
@@ -394,7 +391,7 @@ bool GameActivity::IsBuyGUIVisible(int which) const {
 // Description:     Forces the this to focus player control to a specific Actor for a
 //                  specific team. OWNERSHIP IS NOT TRANSFERRED!
 
-bool GameActivity::SwitchToActor(Actor *pActor, short player, short team)
+bool GameActivity::SwitchToActor(Actor *pActor, int player, int team)
 {
     // Computer players don't focus on any Actor
     if (!m_IsHuman[player])
@@ -418,7 +415,7 @@ bool GameActivity::SwitchToActor(Actor *pActor, short player, short team)
 // Description:     Forces the this to focus player control to the next Actor of a
 //                  specific team, other than the current one focused on.
 
-void GameActivity::SwitchToNextActor(short player, short team, Actor *pSkip)
+void GameActivity::SwitchToNextActor(int player, int team, Actor *pSkip)
 {
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
     m_pPieMenu[player]->DoDisableAnimation();
@@ -438,7 +435,7 @@ void GameActivity::SwitchToNextActor(short player, short team, Actor *pSkip)
 // Description:     Forces this to focus player control to the previous Actor of a
 //                  specific team, other than the current one focused on.
 
-void GameActivity::SwitchToPrevActor(short player, short team, Actor *pSkip)
+void GameActivity::SwitchToPrevActor(int player, int team, Actor *pSkip)
 {
     // Play the disabling animation when the actor swtiched, for easy ID of currently controlled actor
     m_pPieMenu[player]->DoDisableAnimation();
@@ -2020,7 +2017,7 @@ void GameActivity::Update()
             if (m_GameOverTimer.IsPastSimMS(55000) || g_UInputMan.AnyStartPress())
             {
                 g_ActivityMan.EndActivity();
-                g_InActivity = false;
+				g_ActivityMan.SetInActivity(false);
             }
         }
 
@@ -2364,7 +2361,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     if (pIcon)
         draw_sprite(pTargetBitmap, pIcon->GetBitmaps8()[0], MAX(2, g_SceneMan.GetScreenOcclusion(which).m_X + 2), 2);
     // Gold
-    std::snprintf(str, sizeof(str), "%c Funds: %.0f oz", TeamFundsChanged(which) ? -57 : -58, GetTeamFunds(m_Team[PoS]));
+    std::snprintf(str, sizeof(str), "%c Funds: %.10g oz", TeamFundsChanged(which) ? -57 : -58, GetTeamFunds(m_Team[PoS]));
     g_FrameMan.GetLargeFont()->DrawAligned(&pBitmapInt, MAX(16, g_SceneMan.GetScreenOcclusion(which).m_X + 16), yTextPos, str, GUIFont::Left);
 /* Not applicable anymore to the 4-team games
     // Body losses

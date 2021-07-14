@@ -288,6 +288,8 @@ namespace RTE {
 		bool MouseButtonReleased[MAX_MOUSE_BUTTONS];
 		bool MouseButtonHeld[MAX_MOUSE_BUTTONS];
 		bool ResetActivityVote;
+		bool RestartActivityVote;
+
 
 		int MouseWheelMoved;
 

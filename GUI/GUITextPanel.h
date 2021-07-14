@@ -241,6 +241,23 @@ public:
 
     bool GetLocked();
 
+	/// <summary>
+	/// Sets this text panel to accept numeric symbols only.
+	/// </summary>
+	/// <param name="numericOnly">Whether to accept numeric symbols only or not.</param>
+	void SetNumericOnly(bool numericOnly) { m_NumericOnly = numericOnly; }
+
+	/// <summary>
+	/// Sets this text panel's maximum numeric value when in numeric only mode.
+	/// </summary>
+	/// <param name="maxValue">The maximum numeric value. 0 means no maximum value.</param>
+	void SetMaxNumericValue(int maxValue) { m_MaxNumericValue = maxValue; }
+
+	/// <summary>
+	/// Sets the maximum length of the text this text panel can contain.
+	/// </summary>
+	/// <param name="maxLength">The maximum length of the text this text panel can contain.</param>
+	void SetMaxTextLength(int maxLength) { m_MaxTextLength = maxLength; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations
@@ -313,6 +330,10 @@ private:
     int                m_EndSelection;
     unsigned long            m_SelectedColorIndex;
     int                m_SelectionX, m_SelectionWidth;
+
+	int m_MaxTextLength; //!< The maximum length of the text this text panel can contain.
+	bool m_NumericOnly; //!< Whether this text panel only accepts numeric symbols.
+	int m_MaxNumericValue; //!< The maximum numeric value when in numeric only mode. 0 means no maximum value.
 
 };
 

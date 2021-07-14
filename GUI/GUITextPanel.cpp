@@ -45,6 +45,10 @@ GUITextPanel::GUITextPanel(GUIManager *Manager)
     m_Locked = false;
     m_WidthMargin = 3;
     m_HeightMargin = 0;
+
+	m_MaxTextLength = 0;
+	m_NumericOnly = false;
+	m_MaxNumericValue = 0;
 }
 
 
@@ -75,6 +79,10 @@ GUITextPanel::GUITextPanel()
     m_Locked = false;
     m_WidthMargin = 3;
     m_HeightMargin = 0;
+
+	m_MaxTextLength = 0;
+	m_NumericOnly = false;
+	m_MaxNumericValue = 0;
 }
 
 
@@ -346,12 +354,24 @@ void GUITextPanel::OnKeyPress(int KeyCode, int Modifier) {
 		return;
 	}
 
+	int minValidKeyCode = 32;
+	int maxValidKeyCode = 126;
+	if (m_NumericOnly) {
+		minValidKeyCode = 48;
+		maxValidKeyCode = 57;
+	}
 	// Add valid ASCII characters
-	if (KeyCode >= 32 && KeyCode < 128 && KeyCode != 127) {
+	if (KeyCode >= minValidKeyCode && KeyCode <= maxValidKeyCode) {
 		RemoveSelectionText();
 		char buf[2] = { static_cast<char>(KeyCode), '\0' };
+		if (m_MaxTextLength > 0 && m_Text.length() >= m_MaxTextLength) {
+			return;
+		}
 		m_Text.insert(m_CursorIndex, buf);
 		m_CursorIndex++;
+
+		if (m_NumericOnly && m_MaxNumericValue > 0 && std::stoi(m_Text) > m_MaxNumericValue) { m_Text = std::to_string(m_MaxNumericValue); }
+
 		SendSignal(Changed, 0);
 		UpdateText(true);
 		return;

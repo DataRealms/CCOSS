@@ -23,6 +23,12 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Graphics Constants
+	static constexpr int c_DefaultResX = 960; //!< Default game window width.
+	static constexpr int c_DefaultResY = 540; //!< Default game window height.
+
+	static constexpr int c_ScenePreviewWidth = 170; //< Width of the scene preview bitmap.
+	static constexpr int c_ScenePreviewHeight = 80; //< Height of the scene preview bitmap.
+
 	static constexpr unsigned short c_MaxScreenCount = 4; //!< Maximum number of player screens.
 	static constexpr unsigned short c_PaletteEntriesNumber = 256; //!< Number of indexes in the graphics palette.
 	static constexpr unsigned short c_MOIDLayerBitDepth = 16; //!< Bit depth of MOID layer bitmap.
@@ -48,6 +54,7 @@ namespace RTE {
 	#define c_GUIColorYellow makecol(255, 255, 128)
 	#define c_GUIColorRed makecol(255, 100, 100)
 	#define c_GUIColorGreen makecol(128, 255, 128)
+	#define c_GUIColorCyan makecol(127, 255, 255)
 	#define c_GUIColorLightBlue makecol(109, 117, 170)
 	#define c_GUIColorBlue makecol(59, 65, 83)
 	#define c_GUIColorDarkBlue makecol(12, 20, 39)
@@ -103,21 +110,6 @@ namespace RTE {
 	};
 
 	/// <summary>
-	/// Enumeration for different input scheme presets.
-	/// </summary>
-	enum InputPreset {
-		PRESET_P1DEFAULT = -1,
-		PRESET_P2DEFAULT = -2,
-		PRESET_P3DEFAULT = -3,
-		PRESET_P4DEFAULT = -4,
-		PRESET_NONE = 0,
-		PRESET_WASDKEYS,
-		PRESET_CURSORKEYS,
-		PRESET_XBOX360,
-		PRESET_COUNT
-	};
-
-	/// <summary>
 	/// Enumeration for different elements the input scheme is composed of.
 	/// </summary>
 	enum InputElements {
@@ -125,29 +117,58 @@ namespace RTE {
 		INPUT_L_DOWN,
 		INPUT_L_LEFT,
 		INPUT_L_RIGHT,
-		INPUT_R_UP,
-		INPUT_R_DOWN,
-		INPUT_R_LEFT,
-		INPUT_R_RIGHT,
-		INPUT_FIRE,
-		INPUT_AIM,
 		INPUT_AIM_UP,
 		INPUT_AIM_DOWN,
 		INPUT_AIM_LEFT,
 		INPUT_AIM_RIGHT,
+		INPUT_FIRE,
+		INPUT_AIM,
 		INPUT_PIEMENU,
 		INPUT_JUMP,
 		INPUT_CROUCH,
 		INPUT_NEXT,
 		INPUT_PREV,
-		INPUT_START,
-		INPUT_BACK,
 		INPUT_WEAPON_CHANGE_NEXT,
 		INPUT_WEAPON_CHANGE_PREV,
 		INPUT_WEAPON_PICKUP,
 		INPUT_WEAPON_DROP,
 		INPUT_WEAPON_RELOAD,
+		INPUT_START,
+		INPUT_BACK,
+		INPUT_R_UP,
+		INPUT_R_DOWN,
+		INPUT_R_LEFT,
+		INPUT_R_RIGHT,
 		INPUT_COUNT
+	};
+
+	static const std::array<const std::string_view, InputElements::INPUT_COUNT> c_InputElementNames = {
+		"Move Up",			// INPUT_L_UP
+		"Move Down",		// INPUT_L_DOWN
+		"Move Left",		// INPUT_L_LEFT
+		"Move Right",		// INPUT_L_RIGHT
+		"Aim Up",			// INPUT_AIM_UP
+		"Aim Down",			// INPUT_AIM_DOWN
+		"Aim Left",			// INPUT_AIM_LEFT
+		"Aim Right",		// INPUT_AIM_RIGHT
+		"Fire/Activate",	// INPUT_FIRE
+		"Sharp Aim",		// INPUT_AIM
+		"Pie Menu",			// INPUT_PIEMENU
+		"Jump",				// INPUT_JUMP
+		"Crouch",			// INPUT_CROUCH
+		"Next Body",		// INPUT_NEXT
+		"Prev. Body",		// INPUT_PREV
+		"Next Device",		// INPUT_WEAPON_CHANGE_NEXT
+		"Prev. Device",		// INPUT_WEAPON_CHANGE_PREV
+		"Pick Up Device",	// INPUT_WEAPON_PICKUP
+		"Drop Device",		// INPUT_WEAPON_DROP
+		"Reload Weapon",	// INPUT_WEAPON_RELOAD
+		"Start",			// INPUT_START
+		"Back",				// INPUT_BACK
+		"Analog Aim Up",	// INPUT_R_UP
+		"Analog Aim Down",	// INPUT_R_DOWN
+		"Analog Aim Left",	// INPUT_R_LEFT
+		"Analog Aim Right"	// INPUT_R_RIGHT
 	};
 
 	/// <summary>
@@ -206,6 +227,11 @@ namespace RTE {
 		PlayerFour,
 		MaxPlayerCount
 	};
+
+	/// <summary>
+	/// Enumeration for cardinal directions, as well as None.
+	/// </summary>
+	enum class Direction { None = -1, Up, Down, Left, Right };
 #pragma endregion
 
 #pragma region Un-Definitions

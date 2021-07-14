@@ -135,7 +135,7 @@ public:
 // Method:          Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws the GUI to the back buffer.
-// Arguments:       The GUIScreen to draw to, overriding teh one passed in on constuction
+// Arguments:       The GUIScreen to draw to, overriding the one passed in on constuction
 
     void Draw(GUIScreen *pScreen);
 
@@ -298,13 +298,20 @@ public:
     bool Load(const std::string &Filename, bool keepOld = false);
 
 
+	/// <summary>
+	/// Gets the GUIScreen that this GUIControlManager is drawing itself to.
+	/// </summary>
+	/// <returns>Pointer to the GUIScreen that this GUIControlManager is drawing itself to. Ownership is NOT transferred!</returns>
+	GUIScreen * GetScreen() const { return m_Screen; }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations
 
 private:
 
-    GUIScreen        *m_Screen;
-    GUIInput        *m_Input;
+    GUIScreen        *m_Screen; // Not owned.
+    GUIInput        *m_Input; // Not owned.
     GUISkin            *m_Skin;
     GUIManager        *m_GUIManager;
 

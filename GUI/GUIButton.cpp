@@ -257,7 +257,7 @@ void GUIButton::BuildBitmap(void)
         m_Text->SetFont(m_Font);
         m_Text->SetSize(contentMaxWidth, contentMaxHeight);
 
-        int textXPos = m_BorderSizes->left + buttonContentPadding;
+		int textXPos = m_BorderSizes->left + buttonContentPadding + 1;
         m_Text->SetPositionAbs(textXPos, textYPos);
         m_Text->Draw(m_DrawBitmap, false);
         m_Text->SetPositionAbs(textXPos, m_Height + textYPos);

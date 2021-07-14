@@ -768,21 +768,20 @@ bool AHuman::OnSink(const Vector &pos)
 
 bool AHuman::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
-    if (m_pItemInReach) {
-		PieSlice pickUpSlice(m_pFGArm ? "Pick Up " + m_pItemInReach->GetPresetName() : "NO ARM!", PieSlice::PieSliceIndex::PSI_PICKUP, PieSlice::SliceDirection::UP, m_pFGArm && m_pFGArm->IsAttached());
-		
-        pPieMenu->AddSlice(pickUpSlice);
-    } else {
-        PieSlice reloadSlice(m_pFGArm ? "Reload" : "NO ARM!", PieSlice::PieSliceIndex::PSI_RELOAD, PieSlice::SliceDirection::UP, (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull()) || (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->GetHeldDevice() && !m_pBGArm->GetHeldDevice()->IsFull()));
-        pPieMenu->AddSlice(reloadSlice);
+	if (m_pItemInReach) {
+		PieSlice pickUpSlice(m_pFGArm ? "Pick Up " + m_pItemInReach->GetPresetName() : "NO ARM!", PieSlice::PieSliceIndex::PSI_PICKUP, PieSlice::SliceDirection::UP, m_pFGArm && m_Status != INACTIVE);
+		pPieMenu->AddSlice(pickUpSlice);
+	} else {
+		PieSlice reloadSlice(GetEquippedItem() || GetEquippedBGItem() ? "Reload" : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieSlice::PieSliceIndex::PSI_RELOAD, PieSlice::SliceDirection::UP, ((m_pFGArm && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull()) || (m_pBGArm && m_pBGArm->GetHeldDevice() && !m_pBGArm->GetHeldDevice()->IsFull())) && m_Status != INACTIVE);
+		pPieMenu->AddSlice(reloadSlice);
 	}
-	
-	PieSlice dropSlice(m_pFGArm && m_pFGArm->GetHeldMO() ? "Drop " + m_pFGArm->GetHeldMO()->GetPresetName() : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieSlice::PieSliceIndex::PSI_DROP, PieSlice::SliceDirection::DOWN, m_pFGArm && m_pFGArm->GetHeldMO());
-    pPieMenu->AddSlice(dropSlice);
+	//To-do: don't oneline this?
+	PieSlice dropSlice(m_pFGArm && m_pFGArm->GetHeldMO() ? "Drop " + m_pFGArm->GetHeldMO()->GetPresetName() : m_pBGArm ? (m_pBGArm->GetHeldMO() ? "Drop " + m_pBGArm->GetHeldMO()->GetPresetName() : (!m_Inventory.empty() ? "Drop Inventory" : "Not holding anything!")) : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieSlice::PieSliceIndex::PSI_DROP, PieSlice::SliceDirection::DOWN, ((m_pFGArm && m_pFGArm->GetHeldMO()) || (m_pBGArm && (m_pBGArm->GetHeldMO() || !m_Inventory.empty()))) && m_Status != INACTIVE);
+	pPieMenu->AddSlice(dropSlice);
 
-	PieSlice nextItemSlice(m_pFGArm ? "Next Item" : "NO ARM!", PieSlice::PieSliceIndex::PSI_NEXTITEM, PieSlice::SliceDirection::RIGHT, m_pFGArm && !m_Inventory.empty());
-    pPieMenu->AddSlice(nextItemSlice);
-    PieSlice prevItemSlice(m_pFGArm ? "Prev Item" : "NO ARM!", PieSlice::PieSliceIndex::PSI_PREVITEM, PieSlice::SliceDirection::LEFT, m_pFGArm && !m_Inventory.empty());
+	PieSlice nextItemSlice(m_pFGArm ? "Next Item" : "NO ARM!", PieSlice::PieSliceIndex::PSI_NEXTITEM, PieSlice::SliceDirection::RIGHT, m_pFGArm && (!m_Inventory.empty() || GetEquippedBGItem()) && m_Status != INACTIVE);
+	pPieMenu->AddSlice(nextItemSlice);
+	PieSlice prevItemSlice(m_pFGArm ? "Prev Item" : "NO ARM!", PieSlice::PieSliceIndex::PSI_PREVITEM, PieSlice::SliceDirection::LEFT, m_pFGArm && (!m_Inventory.empty() || GetEquippedBGItem()) && m_Status != INACTIVE);
 	pPieMenu->AddSlice(prevItemSlice);
 
 	PieSlice sentryAISlice("Sentry AI Mode", PieSlice::PieSliceIndex::PSI_SENTRY, PieSlice::SliceDirection::DOWN);
@@ -803,13 +802,16 @@ bool AHuman::AddPieMenuSlices(PieMenuGUI *pPieMenu)
     PieSlice fullInventorySlice("Show Full Inventory", PieSlice::PieSliceIndex::PSI_FULLINVENTORY, PieSlice::SliceDirection::RIGHT, GetEquippedItem() || GetEquippedBGItem() || !m_Inventory.empty());
     pPieMenu->AddSlice(fullInventorySlice);
 
-    // Add any custom added slices after we've added the hardcoded ones, so they are lower priorty and don't hog the cardinal axes
-    Actor::AddPieMenuSlices(pPieMenu);
-
     // Add any custom slices from a currently held device
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsDevice())
-        m_pFGArm->GetHeldDevice()->AddPieMenuSlices(pPieMenu);
+	if (m_Status != INACTIVE) {
+		// Add any custom added slices after we've added the hardcoded ones, so they are lower priorty and don't hog the cardinal axes
+		Actor::AddPieMenuSlices(pPieMenu);
 
+		// Add any custom slices from a currently held device
+		if (m_pFGArm && m_pFGArm->HoldsDevice()) { m_pFGArm->GetHeldDevice()->AddPieMenuSlices(pPieMenu); }
+	} else {
+		m_PieNeedsUpdate = false;
+	}
     return true;
 }
 
@@ -903,7 +905,9 @@ bool AHuman::EquipFirearm(bool doEquip)
         pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
         if (pWeapon && pWeapon->IsWeapon())
             return true;
-    }
+	} else {
+		UnequipBGArm();
+	}
 
     // Go through the inventory looking for the proper device
     for (deque<MovableObject *>::iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
@@ -3305,47 +3309,39 @@ void AHuman::Update()
         m_ProneState = NOTPRONE;
 
     ////////////////////////////////////
-    // Change held MovableObjects
+    // Change and reload held MovableObjects
 
-    if (!m_Inventory.empty() && m_Controller.IsState(WEAPON_CHANGE_NEXT)) {
-        if (m_pFGArm && m_pFGArm->IsAttached()) {
-			//Force spinning weapons to shut up
-			HDFirearm * pFireArm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-			if (pFireArm)
-				pFireArm->StopActivationSound();
-
-            m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
-            m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-            // Equip shield in BG hand if applicable
-            EquipShieldInBGArm();
-            m_PieNeedsUpdate = true;
-        }
-    }
-    if (!m_Inventory.empty() && m_Controller.IsState(WEAPON_CHANGE_PREV)) {
-        if (m_pFGArm && m_pFGArm->IsAttached()) {
-			//Force spinning weapons to shut up
-			HDFirearm * pFireArm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-			if (pFireArm)
-				pFireArm->StopActivationSound();
-
-			m_pFGArm->SetHeldMO(SwapPrevInventory(m_pFGArm->ReleaseHeldMO()));
-            m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-            // Equip shield in BG hand if applicable
-            EquipShieldInBGArm();
-            m_PieNeedsUpdate = true;
-        }
-    }
-
-    ////////////////////////////////////
-    // Reload held MO, if applicable
 	bool reloadFG = false;
-    if (m_pFGArm && m_pFGArm->IsAttached())
-    {
-        HeldDevice *pDevice = m_pFGArm->GetHeldDevice();
+	if (m_pFGArm && m_Status != INACTIVE) {
+		HDFirearm * pFireArm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
+		if (m_Controller.IsState(WEAPON_CHANGE_NEXT)) {
+			if (!m_Inventory.empty() || GetEquippedBGItem()) {
+				if (pFireArm) { pFireArm->StopActivationSound(); }
+				if (m_Inventory.empty()) { UnequipBGArm(); }
 
-		// Holds device, check if we are commanded to reload, or do other related stuff
-		if (pDevice) {
-			if (pDevice->IsReloading()) {
+				m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
+				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+				m_PieNeedsUpdate = true;
+
+				EquipShieldInBGArm();
+			}
+		}
+		if (m_Controller.IsState(WEAPON_CHANGE_PREV)) {
+			if (!m_Inventory.empty() || GetEquippedBGItem()) {
+				if (pFireArm) { pFireArm->StopActivationSound(); }
+				if (m_Inventory.empty()) { UnequipBGArm(); }
+
+				m_pFGArm->SetHeldMO(SwapPrevInventory(m_pFGArm->ReleaseHeldMO()));
+				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+				m_PieNeedsUpdate = true;
+
+				EquipShieldInBGArm();
+			}
+        }
+
+		// Reload held MO, if applicable
+		if (pFireArm) {
+			if (pFireArm->IsReloading()) {
 				// Interrupt sharp aiming while reloading
 				m_SharpAimTimer.Reset();
 				m_SharpAimProgress = 0;
@@ -3353,9 +3349,9 @@ void AHuman::Update()
 				if (m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped)); }
 			}
 			// Only reload if no other pickuppable item is in reach
-			if (!pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !m_pItemInReach) {
-				if (m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(pDevice->GetMagazinePos()); }
-				pDevice->Reload();
+			if (!pFireArm->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !m_pItemInReach) {
+				if (m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(pFireArm->GetMagazinePos()); }
+				pFireArm->Reload();
 				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 				reloadFG = true;
 
@@ -3363,11 +3359,10 @@ void AHuman::Update()
 				m_SharpAimTimer.Reset();
 				m_SharpAimProgress = 0;
 			}
-
 			// Detect reloading being completed and move hand accordingly
-			if (pDevice->DoneReloading() && m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(pDevice->GetMagazinePos()); }
+			if (pFireArm->DoneReloading() && m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(pFireArm->GetMagazinePos()); }
 		}
-	}
+    }
 
     ////////////////////////////////////
     // Aiming
@@ -3599,74 +3594,92 @@ void AHuman::Update()
     ////////////////////////////////////////
     // Item dropping logic
 
-	if (m_Controller.IsState(WEAPON_DROP) && m_pFGArm && m_pFGArm->IsAttached()) {
-		if (MovableObject *pMO = m_pFGArm->ReleaseHeldMO()) {
-			pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
-			Vector tossVec(RandomNum(3.0F, 6.0F), RandomNum(-3.0F, -1.5F));
-			tossVec.RadRotate(m_AimAngle);
-			pMO->SetVel(m_Vel * 0.5F + tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
-			pMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
-			if (pMO->IsDevice()) {
-				g_MovableMan.AddItem(pMO);
-			} else {
-				if (pMO->IsGold()) {
-					m_GoldInInventoryChunk = 0;
-					ChunkGold();
+	if (m_Controller.IsState(WEAPON_DROP) && m_Status != INACTIVE) {
+		if (m_pFGArm && m_pFGArm->HoldsSomething()) {
+			if (MovableObject *pMO = m_pFGArm->ReleaseHeldMO()) {
+				pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
+				Vector tossVec(RandomNum(3.0F, 6.0F), RandomNum(-3.0F, -1.5F));
+				tossVec.RadRotate(m_AimAngle);
+				pMO->SetVel(m_Vel * 0.5F + tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
+				pMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
+				if (pMO->IsDevice()) {
+					g_MovableMan.AddItem(pMO);
+				} else {
+					if (pMO->IsGold()) {
+						m_GoldInInventoryChunk = 0;
+						ChunkGold();
+					}
+					g_MovableMan.AddParticle(pMO);
 				}
-				g_MovableMan.AddParticle(pMO);
+			}
+			if (!m_Inventory.empty()) {
+				m_pFGArm->SetHeldMO(SwapNextInventory());
+				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+			}
+		} else if (m_pBGArm) {
+			if (MovableObject *pMO = m_pBGArm->ReleaseHeldMO()) {
+				pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
+				Vector tossVec(RandomNum(3.0F, 6.0F), RandomNum(-3.0F, -1.5F));
+				tossVec.RadRotate(m_AimAngle);
+				pMO->SetVel(m_Vel * 0.5F + tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
+				pMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
+				if (pMO->IsDevice()) {
+					g_MovableMan.AddItem(pMO);
+				}
+				else {
+					if (pMO->IsGold()) {
+						m_GoldInInventoryChunk = 0;
+						ChunkGold();
+					}
+					g_MovableMan.AddParticle(pMO);
+				}
+			} else {
+				DropAllInventory();
+				m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 			}
 		}
-
-		m_pFGArm->SetHeldMO(SwapNextInventory());
-		m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 		m_PieNeedsUpdate = true;
 	}
 
     ////////////////////////////////////////
     // Item pickup logic
 
-    float reach = m_CharHeight / 3;
+	float reach = m_SpriteRadius;
+	Vector reachPoint = m_Pos;
 
-    // Try to detect a new item
-    if (!m_pItemInReach && m_Status == STABLE)
-    {
-        MOID itemMOID = g_SceneMan.CastMORay(m_Pos, Vector((m_HFlipped ? -reach : reach) * RandomNum(), RandomNum(0.0F, reach)), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
+	// Try to detect a new item
+	if (m_pFGArm && m_Status == STABLE) {
+		reach += m_pFGArm->GetMaxLength();
+		reachPoint = m_pFGArm->GetPos();
+		if (!m_pItemInReach) {
+			MOID itemMOID = g_SceneMan.CastMORay(reachPoint, Vector((m_HFlipped ? -reach : reach) * RandomNum(), RandomNum(0.0F, reach)), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
 
-        MovableObject *pItem = g_MovableMan.GetMOFromID(itemMOID);
-        if (pItem)
-        {
-            m_pItemInReach = pItem ? dynamic_cast<HeldDevice *>(pItem->GetRootParent()) : 0;
-			if (m_pItemInReach)
-				m_PieNeedsUpdate = true;
-        }
-    }
+			MovableObject *pItem = g_MovableMan.GetMOFromID(itemMOID);
+			if (pItem) {
+				m_pItemInReach = pItem ? dynamic_cast<HeldDevice *>(pItem->GetRootParent()) : 0;
+				if (m_pItemInReach) { m_PieNeedsUpdate = true; }
+			}
+		}
+	}
 
     // Item currently set to be within reach has expired or is now out of range
-    if (m_pItemInReach && (m_pItemInReach->IsUnPickupable() || (m_pItemInReach->HasPickupLimitations() && !m_pItemInReach->IsPickupableBy(this)) || !g_MovableMan.IsDevice(m_pItemInReach) || (m_pItemInReach->GetPos() - m_Pos).GetMagnitude() > reach)) {
+    if (m_pItemInReach && (m_pItemInReach->IsUnPickupable() || (m_pItemInReach->HasPickupLimitations() && !m_pItemInReach->IsPickupableBy(this)) || !g_MovableMan.IsDevice(m_pItemInReach) || g_SceneMan.ShortestDistance(reachPoint, m_pItemInReach->GetPos(), g_SceneMan.SceneWrapsX()).GetMagnitude() > reach + m_pItemInReach->GetRadius())) {
         m_pItemInReach = 0;
         m_PieNeedsUpdate = true;
     }
 
     // Pick up the designated item
-    if (m_pItemInReach && m_pFGArm && m_pFGArm->IsAttached() && m_Controller.IsState(WEAPON_PICKUP))
+    if (m_pItemInReach && m_pFGArm && m_Controller.IsState(WEAPON_PICKUP) && m_Status != INACTIVE)
     {
         // Remove the item from the scene, it's gong into the hands of this
         if (g_MovableMan.RemoveMO(m_pItemInReach))
         {
-            // If we have an arm to hold the picked up item in, replace whatever's in it (if anything) with what we are picking up
-            if (m_pFGArm && m_pFGArm->IsAttached())
-            {
-                MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
-                if (pMO)
-                    m_Inventory.push_back(pMO);
-                m_pFGArm->SetHeldMO(m_pItemInReach);
-                m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-            }
-            // No arms to hold newly picked up item with, so just put it into inventory instead
-            else
-            {
-                m_Inventory.push_back(m_pItemInReach);
-            }
+            // Replace whatever's in the FG arm (if anything) with what we are picking up
+            MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
+			if (pMO) { m_Inventory.push_back(pMO); }
+            m_pFGArm->SetHeldMO(m_pItemInReach);
+            m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+
             m_PieNeedsUpdate = true;
 			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 		}
@@ -4099,25 +4112,23 @@ void AHuman::Update()
         m_pBGLeg->SetTargetPosition(m_pBGFootGroup->GetLimbPos(m_HFlipped));
     }
 
-	if (m_pFGArm && m_pFGArm->IsAttached()) {
+	if (m_pFGArm) {
 		float affectingBodyAngle = 0.0F;
 		if (m_FGArmFlailScalar != 0 && m_SharpAimDelay != 0) {
 			float aimScalar = std::min(static_cast<float>(m_SharpAimTimer.GetElapsedSimTimeMS()) / static_cast<float>(m_SharpAimDelay), 1.0F);
 			float revertScalar = std::min(static_cast<float>(m_SharpAimRevertTimer.GetElapsedSimTimeMS()) / static_cast<float>(m_SharpAimDelay), 1.0F);
 			aimScalar = (aimScalar > revertScalar) ? aimScalar : 1.0F - revertScalar;
 
-			affectingBodyAngle = std::abs(std::sin(m_Rotation.GetRadAngle())) * m_Rotation.GetRadAngle() * m_FGArmFlailScalar * (1.0F - aimScalar);
+			affectingBodyAngle = std::abs(std::sin(rot)) * rot * m_FGArmFlailScalar * (1.0F - aimScalar);
 		}
 		m_pFGArm->SetRotAngle(affectingBodyAngle + m_AimAngle * static_cast<float>(GetFlipFactor()));
 
         if (m_Status == STABLE) {
             if (m_ArmClimbing[FGROUND]) {
-                // Can't climb with anything in the arm?
-                //UnequipBGArm();
                 m_pFGArm->ReachToward(m_pFGHandGroup->GetLimbPos(m_HFlipped));
             } else if (!m_pFGArm->IsReaching()) {
-                // This will likely make the arm idle since the target will be out of range
-                m_pFGArm->Reach(m_pFGHandGroup->GetLimbPos(m_HFlipped));
+				// Use an unreachable position to force this arm to idle, so it wont bug out where the AtomGroup was left off
+				m_pFGArm->Reach(Vector());
             }
         } else {
             // Unstable, so just drop the arm limply
@@ -4125,39 +4136,39 @@ void AHuman::Update()
         }
     }
 
-    if (m_pBGArm && m_pBGArm->IsAttached()) {
-        if (m_Status == STABLE) {
-            if (m_ArmClimbing[BGROUND]) {
-                // Can't climb with the shield
-                UnequipBGArm();
-                m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
-            } else if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice() && !m_pBGArm->HoldsHeldDevice()) {
-                // Re-equip shield in BG arm after climbing
-                EquipShieldInBGArm();
-                m_pBGArm->Reach(m_pFGArm->GetHeldDevice()->GetSupportPos());
-                //            m_pBGArm->ReachToward(m_Pos + m_WalkPaths.front()->GetCurrentPos());
+    if (m_pBGArm) {
+		m_pBGArm->SetRotAngle(std::abs(std::sin(rot)) * rot * m_BGArmFlailScalar + (m_AimAngle * static_cast<float>(GetFlipFactor())));
+        if (m_Status == STABLE) { 
+			if (m_ArmClimbing[BGROUND]) {
+				// Can't climb or crawl with the shield
+				if (m_MoveState == CLIMB || (m_MoveState == CRAWL && m_ProneState == PRONE)) { UnequipBGArm(); }
+				m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
 
-                // BGArm does reach to support the device held by FGArm.
-                if (m_pBGArm->DidReach()) {
-                    m_pFGArm->GetHeldDevice()->SetSupported(true);
-                    m_pBGArm->SetRecoil(m_pFGArm->GetHeldDevice()->GetRecoilForce(), m_pFGArm->GetHeldDevice()->GetRecoilOffset(), m_pFGArm->GetHeldDevice()->IsRecoiled());
-                } else {
-					// BGArm did not reach to support the device. Count device as supported anyway, if crouching
-					m_pFGArm->GetHeldDevice()->SetSupported(m_MoveState == CROUCH || m_ProneState == PRONE);
-                    m_pBGArm->SetRecoil(Vector(), Vector(), false);
-                }
-            } else {
-                // Re-equip shield in BG arm after climbing
-                EquipShieldInBGArm();
-                // This will likely make the arm idle since the target will be out of range
-                m_pBGArm->Reach(m_pFGHandGroup->GetLimbPos(m_HFlipped));
-                m_pBGArm->SetRotAngle(std::abs(std::sin(m_Rotation.GetRadAngle())) * m_Rotation.GetRadAngle() * m_BGArmFlailScalar + (m_AimAngle * static_cast<float>(GetFlipFactor())));
-            }
+			} else {
+				// Re-equip shield in BG arm after climbing
+				EquipShieldInBGArm();
+				if (m_pFGArm && m_pFGArm->HoldsHeldDevice() && !m_pBGArm->HoldsHeldDevice()) {
+					m_pBGArm->Reach(m_pFGArm->GetHeldDevice()->GetSupportPos());
+
+					// BGArm does reach to support the device held by FGArm.
+					if (m_pBGArm->DidReach()) {
+						m_pFGArm->GetHeldDevice()->SetSupported(true);
+						m_pBGArm->SetRecoil(m_pFGArm->GetHeldDevice()->GetRecoilForce(), m_pFGArm->GetHeldDevice()->GetRecoilOffset(), m_pFGArm->GetHeldDevice()->IsRecoiled());
+					} else {
+						// BGArm did not reach to support the device. Count device as supported anyway, if crouching
+						m_pFGArm->GetHeldDevice()->SetSupported(m_MoveState == CROUCH || m_ProneState == PRONE);
+						m_pBGArm->SetRecoil(Vector(), Vector(), false);
+					}
+				} else {
+					// Use an unreachable position to force this arm to idle, so it wont bug out where the AtomGroup was left off
+					m_pBGArm->Reach(Vector());
+				}
+			}
         } else {
             // Unstable, so just drop the arm limply
             m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
         }
-	} else if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice()) {
+	} else if (m_pFGArm && m_pFGArm->HoldsHeldDevice()) {
 		m_pFGArm->GetHeldDevice()->SetSupported(false);
     }
 

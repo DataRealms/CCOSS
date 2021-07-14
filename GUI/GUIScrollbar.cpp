@@ -173,6 +173,17 @@ void GUIScrollbar::OnMouseUp(int X, int Y, int Buttons, int Modifier)
     GUIScrollPanel::OnMouseUp(X, Y, Buttons, Modifier);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void GUIScrollbar::OnMouseWheelChange(int x, int y, int modifier, int mouseWheelChange) {
+	int oldValue = GetValue();
+	int newValue = std::clamp(oldValue - (GetValueResolution() * ((mouseWheelChange > 0) ? 1 : -1)), GetMinimum(), GetMaximum() - GetPageSize());
+	if (newValue != oldValue) {
+		SetValue(newValue);
+		AddEvent(GUIEvent::Notification, ChangeValue, 0);
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Move

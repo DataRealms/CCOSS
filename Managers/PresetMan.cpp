@@ -26,7 +26,7 @@
 //#include "Atom.h"
 
 #include "ConsoleMan.h"
-#include "LoadingGUI.h"
+#include "LoadingScreen.h"
 #include "SettingsMan.h"
 
 namespace RTE {
@@ -166,14 +166,14 @@ bool PresetMan::LoadAllDataModules() {
 	// Load all the official modules first!
 	std::array<std::string, 10> officialModules = { "Base.rte", "Coalition.rte", "Imperatus.rte", "Techion.rte", "Dummy.rte", "Ronin.rte", "Browncoats.rte", "Uzira.rte", "MuIlaak.rte", "Missions.rte" };
 	for (const std::string &officialModule : officialModules) {
-		if (!LoadDataModule(officialModule, true, &LoadingGUI::LoadingSplashProgressReport)) {
+		if (!LoadDataModule(officialModule, true, &LoadingScreen::LoadingSplashProgressReport)) {
 			return false;
 		}
 	}
 
 	// If a single module is specified, skip loading all other unofficial modules and load specified module only.
 	if (!m_SingleModuleToLoad.empty() && std::find(officialModules.begin(), officialModules.end(), m_SingleModuleToLoad) == officialModules.end()) {
-		if (!LoadDataModule(m_SingleModuleToLoad, false, &LoadingGUI::LoadingSplashProgressReport)) {
+		if (!LoadDataModule(m_SingleModuleToLoad, false, &LoadingScreen::LoadingSplashProgressReport)) {
 			g_ConsoleMan.PrintString("ERROR: Failed to load DataModule \"" + m_SingleModuleToLoad + "\"! Only official modules were loaded!");
 			return false;
 		}
@@ -185,20 +185,20 @@ bool PresetMan::LoadAllDataModules() {
 				if (!g_SettingsMan.IsModDisabled(moduleName) && (std::find(officialModules.begin(), officialModules.end(), moduleName) == officialModules.end() && moduleName != "Metagames.rte" && moduleName != "Scenes.rte")) {
 					int moduleID = GetModuleID(moduleName);
 					// NOTE: LoadDataModule can return false (especially since it may try to load already loaded modules, which is okay) and shouldn't cause stop, so we can ignore its return value here.
-					if (moduleID < 0 || moduleID >= GetOfficialModuleCount()) { LoadDataModule(moduleName, false, &LoadingGUI::LoadingSplashProgressReport); }
+					if (moduleID < 0 || moduleID >= GetOfficialModuleCount()) { LoadDataModule(moduleName, false, &LoadingScreen::LoadingSplashProgressReport); }
 				}
 			}
 		}
 		// Load scenes and MetaGames AFTER all other techs etc are loaded; might be referring to stuff in user mods.
-		if (!LoadDataModule("Scenes.rte", false, &LoadingGUI::LoadingSplashProgressReport)) {
+		if (!LoadDataModule("Scenes.rte", false, &LoadingScreen::LoadingSplashProgressReport)) {
 			return false;
 		}
-		if (!LoadDataModule("Metagames.rte", false, &LoadingGUI::LoadingSplashProgressReport)) {
+		if (!LoadDataModule("Metagames.rte", false, &LoadingScreen::LoadingSplashProgressReport)) {
 			return false;
 		}
 	}
 
-	if (g_SettingsMan.MeasureModuleLoadTime()) {
+	if (g_SettingsMan.IsMeasuringModuleLoadTime()) {
 		std::chrono::milliseconds moduleLoadElapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - moduleLoadTimerStart);
 		g_ConsoleMan.PrintString("Module load duration is: " + std::to_string(moduleLoadElapsedTime.count()) + "ms");
 	}
@@ -1076,8 +1076,8 @@ void PresetMan::FindAndExtractZippedModules() const {
 	for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::directory_iterator(System::GetWorkingDirectory())) {
 		std::string zippedModulePath = std::filesystem::path(directoryEntry).generic_string();
 		if (zippedModulePath.find(System::GetZippedModulePackageExtension()) == zippedModulePath.length() - System::GetZippedModulePackageExtension().length()) {
-			LoadingGUI::LoadingSplashProgressReport("Extracting Data Module from: " + directoryEntry.path().filename().generic_string(), true);
-			LoadingGUI::LoadingSplashProgressReport(System::ExtractZippedDataModule(zippedModulePath), true);
+			LoadingScreen::LoadingSplashProgressReport("Extracting Data Module from: " + directoryEntry.path().filename().generic_string(), true);
+			LoadingScreen::LoadingSplashProgressReport(System::ExtractZippedDataModule(zippedModulePath), true);
 		}
 	}
 }

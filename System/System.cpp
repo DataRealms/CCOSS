@@ -8,6 +8,7 @@
 
 namespace RTE {
 
+	bool System::s_Quit = false;
 	bool System::s_LogToCLI = false;
 	std::string System::s_WorkingDirectory = ".";
 	std::vector<size_t> System::s_WorkingTree;

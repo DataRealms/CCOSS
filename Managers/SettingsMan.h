@@ -28,10 +28,8 @@ namespace RTE {
 		/// Makes the SettingsMan object ready for use.
 		/// </summary>
 		/// <param name="reader">A Reader that the SettingsMan will create itself from.</param>
-		/// <param name="checkType">Whether there is a class name in the stream to check against to make sure the correct type is being read from the stream.</param>
-		/// <param name="doCreate">Whether to do any additional initialization of the object after reading in all the properties from the Reader.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Initialize(Reader &reader, bool checkType = true, bool doCreate = true);
+		int Initialize(Reader &reader);
 #pragma endregion
 
 #pragma region Destruction
@@ -47,6 +45,11 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether Settings.ini needs to be overwritten with the complete list of settings or not.</returns>
 		bool SettingsNeedOverwrite() const { return m_SettingsNeedOverwrite; }
+
+		/// <summary>
+		/// Sets Settings.ini to be overwritten during the boot sequence for overrides to be applied (e.g. resolution validation).
+		/// </summary>
+		void SetSettingsNeedOverwrite() { m_SettingsNeedOverwrite = true; }
 
 		/// <summary>
 		/// Overwrites the settings file to save changes made from within the game.
@@ -67,7 +70,13 @@ namespace RTE {
 		/// Returns true if endless MetaGame mode is enabled.
 		/// </summary>
 		/// <returns>Whether endless mode is enabled via settings.</returns>
-		bool EndlessMode() const { return m_EndlessMode; }
+		bool EndlessMetaGameMode() const { return m_EndlessMetaGameMode; }
+
+		/// <summary>
+		/// Sets whether endless MetaGame mode is enabled or not.
+		/// </summary>
+		/// <param name="enable">Whether endless MetaGame mode is enabled or not.</param>
+		void SetEndlessMetaGameMode(bool enable) { m_EndlessMetaGameMode = enable; }
 
 		/// <summary>
 		/// Whether we need to play blips when unseen layer is revealed.
@@ -112,24 +121,28 @@ namespace RTE {
 		bool EnableHats() const { return m_EnableHats; }
 
 		/// <summary>
-		/// Gets whether the crab bomb effect is enabled or not. False means releasing whatever number of crabs will do nothing except release a whatever number of crabs.
+		/// Gets whether the crab bomb effect is enabled or not.
 		/// </summary>
-		/// <returns>Whether the crab bomb effect is enabled or not.</returns>
-		bool EnableCrabBombs() const { return m_EnableCrabBombs; }
+		/// <returns>Whether the crab bomb effect is enabled or not. False means releasing whatever number of crabs will do nothing except release whatever number of crabs.</returns>
+		bool CrabBombsEnabled() const { return m_EnableCrabBombs; }
+
+		/// <summary>
+		/// Sets whether the crab bomb effect is enabled or not.
+		/// </summary>
+		/// <param name="enable">Enable the crab bomb effect or not. False means releasing whatever number of crabs will do nothing except release whatever number of crabs.</param>
+		void SetCrabBombsEnabled(bool enable) { m_EnableCrabBombs = enable; }
 
 		/// <summary>
 		/// Gets the number of crabs needed to be released at once to trigger the crab bomb effect.
 		/// </summary>
 		/// <returns>The number of crabs needed to be released at once to trigger the crab bomb effect.</returns>
-		int CrabBombThreshold() const { return m_CrabBombThreshold; }
-#pragma endregion
+		int GetCrabBombThreshold() const { return m_CrabBombThreshold; }
 
-#pragma region Default Activity Settings
 		/// <summary>
-		/// Gets whether the intro and main menu should be skipped on game start and launch directly into the set default activity instead.
+		/// Sets the number of crabs needed to be released at once to trigger the crab bomb effect.
 		/// </summary>
-		/// <returns>Whether the game is set to launch directly into the set default activity or not.</returns>
-		bool LaunchIntoActivity() const { return m_LaunchIntoActivity; }
+		/// <param name="newThreshold">The new number of crabs needed to be released at once to trigger the crab bomb effect.</param>
+		void SetCrabBombThreshold(int newThreshold) { m_CrabBombThreshold = newThreshold; }
 #pragma endregion
 
 #pragma region Network Settings
@@ -214,52 +227,32 @@ namespace RTE {
 		bool ShowMetascenes() const { return m_ShowMetaScenes; }
 #pragma endregion
 
-#pragma region Mod Manager
+#pragma region Mod and Script Management
 		/// <summary>
-		/// Returns map of mods which were disabled.
+		/// Gets the map of mods which are disabled.
 		/// </summary>
-		/// <returns>Map of mods which were disabled.</returns>
-		std::map<std::string, bool> GetDisabledModsList() const { return m_DisabledMods; }
+		/// <returns>Map of mods which are disabled.</returns>
+		std::map<std::string, bool> & GetDisabledModsMap() { return m_DisabledMods; }
 
 		/// <summary>
-		/// Adds specified mod to internal list of disabled mods.
-		/// </summary>
-		/// <param name="modModule">Mod to enable.</param>
-		void EnableMod(std::string modModule) { std::transform(modModule.begin(), modModule.end(), modModule.begin(), ::tolower); m_DisabledMods[modModule] = false; }
-
-		/// <summary>
-		/// Adds specified mod to internal list of installed workshop mods.
-		/// </summary>
-		/// <param name="modModule">Mod to disable.</param>
-		void DisableMod(std::string modModule) { std::transform(modModule.begin(), modModule.end(), modModule.begin(), ::tolower); m_DisabledMods[modModule] = true; }
-
-		/// <summary>
-		/// Returns true if specified mod is not disabled in the settings.
+		/// Gets whether the specified mod is disabled in the settings.
 		/// </summary>
 		/// <param name="modModule">Mod to check.</param>
 		/// <returns>Whether the mod is disabled via settings.</returns>
-		bool IsModDisabled(std::string modModule);
-#pragma endregion
-
-#pragma region Global Script Manager
-		/// <summary>
-		/// Adds specified mod to internal list of disabled mods.
-		/// </summary>
-		/// <param name="scriptName">Mod to enable.</param>
-		void EnableScript(std::string scriptName) { std::transform(scriptName.begin(), scriptName.end(), scriptName.begin(), ::tolower); m_EnabledScripts[scriptName] = true; }
+		bool IsModDisabled(const std::string &modModule) const { return (m_DisabledMods.find(modModule) != m_DisabledMods.end()) ? m_DisabledMods.at(modModule) : false; }
 
 		/// <summary>
-		/// Adds specified script to internal list of installed scripts.
+		/// Gets the map of global scripts which are enabled.
 		/// </summary>
-		/// <param name="scriptName">Script to disable.</param>
-		void DisableScript(std::string scriptName) { std::transform(scriptName.begin(), scriptName.end(), scriptName.begin(), ::tolower); m_EnabledScripts[scriptName] = false; }
+		/// <returns>Map of global scripts which are enabled.</returns>
+		std::map<std::string, bool> & GetEnabledGlobalScriptMap() { return m_EnabledGlobalScripts; }
 
 		/// <summary>
-		/// Returns true if specified script is enabled in the settings.
+		/// Gets whether the specified global script is enabled in the settings.
 		/// </summary>
-		/// <param name="scriptName">Mod to check.</param>
-		/// <returns>Whether the script is enabled via settings.</returns>
-		bool IsScriptEnabled(std::string scriptName);
+		/// <param name="scriptName">Global script to check.</param>
+		/// <returns>Whether the global script is enabled via settings.</returns>
+		bool IsGlobalScriptEnabled(const std::string &scriptName) const { return (m_EnabledGlobalScripts.find(scriptName) != m_EnabledGlobalScripts.end()) ? m_EnabledGlobalScripts.at(scriptName) : false; }
 #pragma endregion
 
 #pragma region Misc Settings
@@ -279,13 +272,13 @@ namespace RTE {
 		/// Gets whether tooltip display on certain UI elements is enabled or not.
 		/// </summary>
 		/// <returns>Whether tooltips are displayed or not.</returns>
-		bool ToolTips() const { return m_ToolTips; }
+		bool ShowToolTips() const { return m_ShowToolTips; }
 
 		/// <summary>
 		/// Sets whether to display tooltips on certain UI elements or not.
 		/// </summary>
 		/// <param name="showToolTips">Whether to display tooltips or not.</param>
-		void SetShowToolTips(bool showToolTips) { m_ToolTips = showToolTips; }
+		void SetShowToolTips(bool showToolTips) { m_ShowToolTips = showToolTips; }
 
 		/// <summary>
 		/// Gets whether to draw AtomGroup visualizations or not.
@@ -336,16 +329,22 @@ namespace RTE {
 		void SetPrintDebugInfo(bool printDebugInfo) { m_PrintDebugInfo = printDebugInfo; }
 
 		/// <summary>
-		/// Gets whether the reader progress report is being displayed during module loading or not.
+		/// Gets whether displaying the reader progress report during module loading is disabled or not.
 		/// </summary>
 		/// <returns>Whether the reader progress report is being displayed during module loading or not.</returns>
-		bool DisableLoadingScreen() const { return m_DisableLoadingScreen; }
+		bool GetLoadingScreenProgressReportDisabled() const { return m_DisableLoadingScreenProgressReport; }
+
+		/// <summary>
+		/// Sets whether the reader progress report should be displayed during module loading or not.
+		/// </summary>
+		/// <param name="disable">Whether to display the reader progress report during module loading or not.</param>
+		void SetLoadingScreenProgressReportDisabled(bool disable) { m_DisableLoadingScreenProgressReport = disable; }
 
 		/// <summary>
 		/// Gets how accurately the reader progress report tells what line it's reading during module loading.
 		/// </summary>
 		/// <returns>How accurately the reader progress report tells what line it's reading during module loading.</returns>
-		int LoadingScreenReportPrecision() const { return m_LoadingScreenReportPrecision; }
+		int LoadingScreenProgressReportPrecision() const { return m_LoadingScreenProgressReportPrecision; }
 
 		/// <summary>
 		/// Gets the multiplier value for the transition durations between different menus.
@@ -360,10 +359,16 @@ namespace RTE {
 		void SetMenuTransitionDurationMultiplier(float newSpeed) { m_MenuTransitionDurationMultiplier = std::max(0.0F, newSpeed); }
 
 		/// <summary>
-		/// Gets whether the duration of module loading (extraction included) should be measured or not. For benchmarking purposes.
+		/// Gets whether the duration of module loading (extraction included) is being measured or not. For benchmarking purposes.
 		/// </summary>
-		/// <returns>Whether duration should be measured or not.</returns>
-		bool MeasureModuleLoadTime() const { return m_MeasureModuleLoadTime; }
+		/// <returns>Whether duration is being measured or not.</returns>
+		bool IsMeasuringModuleLoadTime() const { return m_MeasureModuleLoadTime; }
+
+		/// <summary>
+		/// Sets whether the duration of module loading (extraction included) should be measured or not. For benchmarking purposes.
+		/// </summary>
+		/// <param name="measure">Whether duration should be measured or not.</param>
+		void MeasureModuleLoadTime(bool measure) { m_MeasureModuleLoadTime = measure; }
 #pragma endregion
 
 	protected:
@@ -373,7 +378,7 @@ namespace RTE {
 		bool m_ShowForeignItems; //!< Do not show foreign items in buy menu.
 		bool m_FlashOnBrainDamage; //!< Whether red flashes on brain damage are on or off.
 		bool m_BlipOnRevealUnseen; //!< Blip if unseen is revealed.
-		bool m_EndlessMode; //!< Endless MetaGame mode.
+		bool m_EndlessMetaGameMode; //!< Endless MetaGame mode.
 		bool m_EnableHats; //!< Whether randomized hat attachables will be attached to all AHuman actors.
 		bool m_EnableCrabBombs; //!< Whether all actors (except Brains and Doors) should be annihilated if a number exceeding the crab bomb threshold is released at once.
 		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.
@@ -389,14 +394,12 @@ namespace RTE {
 
 		int m_RecommendedMOIDCount; //!< Recommended max MOID's before removing actors from scenes.
 
-		bool m_LaunchIntoActivity; //!< Whether to skip the intro and main menu and launch directly into the set default activity instead.
-
 		bool m_SkipIntro; //!< Whether to play the intro of the game or skip directly to the main menu.
-		bool m_ToolTips; //!< Whether ToolTips are enabled or not.
-		bool m_DisableLoadingScreen; //!< Whether to display the reader progress report during module loading or not. Greatly increases loading speeds when disabled.
-		int m_LoadingScreenReportPrecision; //!< How accurately the reader progress report tells what line it's reading during module loading. Lower values equal more precision at the cost of loading speed.
+		bool m_ShowToolTips; //!< Whether ToolTips are enabled or not.
+		bool m_DisableLoadingScreenProgressReport; //!< Whether to display the reader progress report during module loading or not. Greatly increases loading speeds when disabled.
+		int m_LoadingScreenProgressReportPrecision; //!< How accurately the reader progress report tells what line it's reading during module loading. Lower values equal more precision at the cost of loading speed.
 		float m_MenuTransitionDurationMultiplier; //!< Multiplier value for the transition durations between different menus. Lower values equal faster transitions.
-		
+
 		bool m_DrawAtomGroupVisualizations; //!< Whether to draw MOSRotating AtomGroups to the Scene MO color Bitmap.
 		bool m_DrawHandAndFootGroupVisualizations; //!< Whether to draw Actor HandGroups and FootGroups to the Scene MO color Bitmap.
 		bool m_DrawLimbPathVisualizations; //!< Whether to draw Actor LimbPaths to the Scene MO color Bitmap.
@@ -404,19 +407,12 @@ namespace RTE {
 		bool m_MeasureModuleLoadTime; //!< Whether to measure the duration of data module loading (extraction included). For benchmarking purposes.
 
 		std::list<std::string> m_VisibleAssemblyGroupsList; //!< List of assemblies groups always shown in editors.
-		std::map<std::string, bool> m_DisabledMods; //!< List of the module names we disabled.
-		std::map<std::string, bool> m_EnabledScripts; //!< List of the script names we enabled.
+		std::map<std::string, bool> m_DisabledMods; //!< Map of the module names we disabled.
+		std::map<std::string, bool> m_EnabledGlobalScripts; //!< Map of the global script names we enabled.
 
 	private:
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
-
-		/// <summary>
-		/// Writes the minimal default settings needed for the game to run to an output stream. These will be overwritten with the full list of available settings as soon as the game begins loading.
-		/// </summary>
-		/// <param name="writer">A Writer that the SettingsMan will save itself with.</param>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int WriteDefaultSettings(Writer &writer);
 
 		/// <summary>
 		/// Clears all the member variables of this SettingsMan, effectively resetting the members of this abstraction level only.

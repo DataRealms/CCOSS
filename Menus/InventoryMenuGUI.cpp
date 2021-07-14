@@ -1046,10 +1046,10 @@ namespace RTE {
 		if (!m_InventoryActor->IsInventoryEmpty() && (m_NonMouseHighlightedButton == m_GUISwapSetButton || m_NonMouseHighlightedButton == m_GUIEquippedItemButton || m_NonMouseHighlightedButton == m_GUIOffhandEquippedItemButton || m_NonMouseHighlightedButton == m_GUIDropButton || m_NonMouseHighlightedButton == m_GUIInformationToggleButton)) {
 			nextButtonToHighlight = m_NonMousePreviousInventoryItemsBoxButton;
 			if (!nextButtonToHighlight) {
-				int inventoryIndexToHighlight = 1;
+				int inventoryIndexToHighlight = m_GUIOffhandEquippedItemButton->GetVisible() ? 1 : 2;
 				if (m_NonMouseHighlightedButton == m_GUIOffhandEquippedItemButton) {
 					inventoryIndexToHighlight = 2;
-				} else if (m_NonMouseHighlightedButton == m_GUIDropButton) {
+				} else if (m_NonMouseHighlightedButton == m_GUIDropButton || m_NonMouseHighlightedButton == m_GUIInformationToggleButton) {
 					inventoryIndexToHighlight = 4;
 				}
 				inventoryIndexToHighlight = std::clamp(inventoryIndexToHighlight, 0, m_InventoryActor->GetInventorySize() - 1);

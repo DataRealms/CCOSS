@@ -1,107 +1,16 @@
 #include "LuaMan.h"
 
-#define BOOST_BIND_GLOBAL_PLACEHOLDERS 1
-
-#include "lua.hpp"
-
 #include "LuaBindingsManagers.h"
 #include "LuaBindingsActivities.h"
 #include "LuaBindingsGUI.h"
 
-/// <summary>
-/// Special callback function for adding file name and line number to error messages when calling functions incorrectly.
-/// </summary>
-/// <param name="pState">The Lua master state.</param>
-/// <returns>An error signal, 1, so Lua correctly reports that there's been an error.</returns>
-int AddFileAndLineToError(lua_State *pState) {
-    lua_Debug luaDebug;
-    if (lua_getstack(pState, 2, &luaDebug) > 0) {
-        lua_getinfo(pState, "Sln", &luaDebug);
-        std::string errorString = lua_tostring(pState, -1);
-
-        if (errorString.find(".lua") != std::string::npos) {
-            lua_pushstring(pState, errorString.c_str());
-        } else {
-            std::stringstream messageStream;
-            messageStream << ((luaDebug.name == nullptr || strstr(luaDebug.name, ".rte") == nullptr) ? luaDebug.short_src : luaDebug.name);
-            messageStream << ":" << luaDebug.currentline << ": " << errorString;
-            lua_pushstring(pState, messageStream.str().c_str());
-        }
-    }
-   return 1;
-}
-
-
-
-
-
-
 namespace RTE {
-
-	/// <summary>
-	/// Explicit deletion of any Entity instance that Lua owns. It will probably be handled by the GC, but this makes it instantaneous.
-	/// </summary>
-	/// <param name="entityToDelete">The Entity to delete.</param>
-	void DeleteEntity(Entity *entityToDelete) {
-		delete entityToDelete;
-		entityToDelete = nullptr;
-	}
-
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Other misc adapters to eliminate/emulate default parameters etc
-
-	double NormalRand() { return RandomNormalNum<double>(); }
-	double PosRand() { return RandomNum<double>(); }
-	double LuaRand(double num) { return RandomNum<double>(1, num); }
-
-	/*
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Wrapper for the GAScripted so we can derive new classes from it purely in lua:
-	//
-	// "It is also possible to derive Lua classes from C++ classes, and override virtual functions with Lua functions.
-	// To do this we have to create a wrapper class for our C++ base class.
-	// This is the class that will hold the Lua object when we instantiate a Lua class"
-
-	struct GAScriptedWrapper:
-		GAScripted,
-		wrap_base
-	{
-		GAScriptedWrapper(): GAScripted() { ; }
-
-		// Passing in the path of the script file that defines, in Lua, the GAScripted-derived class
-	//    virtual int Create(const GAScripted &reference) { return call<int>("Create", reference); }
-		virtual Entity * Clone(Entity *pCloneTo = 0) const { return call<Entity *>("Clone", pCloneTo); }
-		virtual int Start() { call<int>("Start"); }
-		virtual void Pause(bool pause) { call<void>("Pause", pause); }
-		virtual void End() { call<void>("End"); }
-		virtual void Update() { call<void>("Update"); }
-
-	//    static int static_Create(GAScripted *pSelf, const GAScripted &reference) { return pSelf->GAScripted::Create(reference); }
-		static Entity * static_Clone(GAScripted *pSelf, Entity *pCloneTo = 0) { return pSelf->GAScripted::Clone(pCloneTo); }
-		static int static_Start(GAScripted *pSelf) { return pSelf->GAScripted::Start(); }
-		static void static_Pause(GAScripted *pSelf, bool pause) { return pSelf->GAScripted::Pause(pause); }
-		static void static_End(GAScripted *pSelf) { return pSelf->GAScripted::End(); }
-		static void static_Update(GAScripted *pSelf) { return pSelf->GAScripted::Update(); }
-	};
-	*/
-
-
-
-
-
-
-
-
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaMan::Clear() {
 		m_MasterState = nullptr;
 		m_LastError.clear();
-		// TODO: is this the best way to give ID's. won't ever be reset?
 		m_NextPresetID = 0;
 		m_NextObjectID = 0;
 
@@ -116,7 +25,6 @@ namespace RTE {
 
 	void LuaMan::Initialize() {
 		m_MasterState = luaL_newstate();
-		// Attach the master state to LuaBind
 		luabind::open(m_MasterState);
 
 		const luaL_Reg libsToLoad[] = {
@@ -140,8 +48,7 @@ namespace RTE {
 		if (!luaJIT_setmode(m_MasterState, 0, LUAJIT_MODE_ENGINE | LUAJIT_MODE_ON)) { RTEAbort("Failed to initialize LuaJIT!"); }
 
 		// From LuaBind documentation:
-		// As mentioned in the Lua documentation, it is possible to pass an error handler function to lua_pcall().
-		// Luabind makes use of lua_pcall() internally when calling member functions and free functions.
+		// As mentioned in the Lua documentation, it is possible to pass an error handler function to lua_pcall(). Luabind makes use of lua_pcall() internally when calling member functions and free functions.
 		// It is possible to set the error handler function that Luabind will use globally:
 		//set_pcall_callback(&AddFileAndLineToError); //NOTE: This seems to do nothing
 
@@ -225,8 +132,7 @@ namespace RTE {
 				.def("FileWriteLine", &LuaMan::FileWriteLine)
 				.def("FileEOF", &LuaMan::FileEOF),
 
-			// NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
-			luabind::def("DeleteEntity", &DeleteEntity, luabind::adopt(_1)),
+			luabind::def("DeleteEntity", &DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
 			luabind::def("RangeRand", (double(*)(double, double)) &RandomNum),
 			luabind::def("PosRand", &PosRand),
 			luabind::def("NormalRand", &NormalRand),
@@ -330,11 +236,11 @@ namespace RTE {
 		luabind::globals(m_MasterState)["SettingsMan"] = &g_SettingsMan;
 
 		luaL_dostring(m_MasterState,
-			// Override print() in the lua state to output to the console
+			// Override print() in the lua state to output to the console.
 			"print = function(toPrint) ConsoleMan:PrintString(\"PRINT: \" .. tostring(toPrint)); end;\n"
-			// Add cls() as a shortcut to ConsoleMan:Clear()
+			// Add cls() as a shortcut to ConsoleMan:Clear().
 			"cls = function() ConsoleMan:Clear(); end;"
-			// Add package path to the defaults
+			// Add package path to the defaults.
 			"package.path = package.path .. \";Base.rte/?.lua\";\n"
 		);
 	}
@@ -587,7 +493,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LuaMan::FileWriteLine(int file, std::string line) {
+	void LuaMan::FileWriteLine(int file, const std::string &line) {
 		if (file > -1 && file < c_MaxOpenFiles && m_OpenedFiles.at(file)) {
 			fputs(line.c_str(), m_OpenedFiles.at(file));
 		} else {
@@ -615,7 +521,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaMan::ClearUserModuleCache() {
-		luaL_dostring(m_MasterState, "for m, n in pairs(package.loaded) do if type(n) == \"boolean\" then package.loaded[m] = nil end end");
+		luaL_dostring(m_MasterState, "for m, n in pairs(package.loaded) do if type(n) == \"boolean\" then package.loaded[m] = nil; end end");
 	}
 
 
@@ -623,20 +529,20 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaMan::SavePointerAsGlobal(void *objectToSave, const std::string &globalName) {
-		// Push the pointer onto the Lua stack
+		// Push the pointer onto the Lua stack.
 		lua_pushlightuserdata(m_MasterState, objectToSave);
-		// Pop and assign that pointer to a global var in the Lua state
+		// Pop and assign that pointer to a global var in the Lua state.
 		lua_setglobal(m_MasterState, globalName.c_str());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool LuaMan::GlobalIsDefined(std::string globalName) {
-		// Get the var you want onto the stack so we can check it
+	bool LuaMan::GlobalIsDefined(const std::string &globalName) {
+		// Get the var you want onto the stack so we can check it.
 		lua_getglobal(m_MasterState, globalName.c_str());
-		// Now report if it is nil/null or not
+		// Now report if it is nil/null or not.
 		bool isDefined = !lua_isnil(m_MasterState, -1);
-		// Pop the var so this operation is balanced and leaves the stack as it was
+		// Pop the var so this operation is balanced and leaves the stack as it was.
 		lua_pop(m_MasterState, 1);
 
 		return isDefined;
@@ -644,21 +550,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool LuaMan::TableEntryIsDefined(std::string tableName, std::string indexName) {
-		// Push the table onto the stack, checking if it even exists
+	bool LuaMan::TableEntryIsDefined(const std::string &tableName, const std::string &indexName) {
+		// Push the table onto the stack, checking if it even exists.
 		lua_getglobal(m_MasterState, tableName.c_str());
 		if (!lua_istable(m_MasterState, -1)) {
-			//error(m_MasterState, tableName + " is not a table when checking for the " + indexName + " within it.");
-			// Clean up and report that there was nothing properly defined here
+			// Clean up and report that there was nothing properly defined here.
 			lua_pop(m_MasterState, 1);
 			return false;
 		}
-
-		// Push the value at the requested index onto the stack so we can check if it's anything
+		// Push the value at the requested index onto the stack so we can check if it's anything.
 		lua_getfield(m_MasterState, -1, indexName.c_str());
 		// Now report if it is nil/null or not
 		bool isDefined = !lua_isnil(m_MasterState, -1);
-		// Pop both the var and the table so this operation is balanced and leaves the stack as it was
+		// Pop both the var and the table so this operation is balanced and leaves the stack as it was.
 		lua_pop(m_MasterState, 2);
 
 		return isDefined;
@@ -675,40 +579,22 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::string LuaMan::GetNewPresetID() {
-		// Generate the new ID
-		char newID[64];
-		std::snprintf(newID, sizeof(newID), "Pre%05i", m_NextPresetID);
-		// Increment the ID so it will be diff for the next one (improve this primitive approach??)
-		m_NextPresetID++;
+		char newID[16];
+		std::snprintf(newID, sizeof(newID), "Pre%05li", m_NextPresetID);
 
+		m_NextPresetID++;
 		return std::string(newID);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::string LuaMan::GetNewObjectID() {
-		// Generate the new ID
-		char newID[64];
-		std::snprintf(newID, sizeof(newID), "Obj%05i", m_NextObjectID);
-		// Increment the ID so it will be diff for the next one (improve this primitive approach??)
-		m_NextObjectID++;
+		char newID[16];
+		std::snprintf(newID, sizeof(newID), "Obj%05li", m_NextObjectID);
 
+		m_NextObjectID++;
 		return std::string(newID);
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

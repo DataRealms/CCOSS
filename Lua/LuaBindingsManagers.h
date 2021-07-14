@@ -29,12 +29,10 @@ namespace RTE {
 			return luabind::class_<ActivityMan>("ActivityManager")
 				.property("DefaultActivityType", &ActivityMan::GetDefaultActivityType, &ActivityMan::SetDefaultActivityType)
 				.property("DefaultActivityName", &ActivityMan::GetDefaultActivityName, &ActivityMan::SetDefaultActivityName)
-				// Transfers ownership of the Activity to start into the ActivityMan, adopts ownership (_1 is the this ptr)
-				.def("SetStartActivity", &ActivityMan::SetStartActivity, luabind::adopt(_2))
+				.def("SetStartActivity", &ActivityMan::SetStartActivity, luabind::adopt(_2)) // Transfers ownership of the Activity to start into the ActivityMan, adopts ownership (_1 is the this ptr)
 				.def("GetStartActivity", &ActivityMan::GetStartActivity)
 				.def("GetActivity", &ActivityMan::GetActivity)
-				// Transfers ownership of the Activity to start into the ActivityMan, adopts ownership (_1 is the this ptr)
-				.def("StartActivity", (int (ActivityMan::*)(Activity *))&ActivityMan::StartActivity, luabind::adopt(_2))
+				.def("StartActivity", (int (ActivityMan::*)(Activity *))&ActivityMan::StartActivity, luabind::adopt(_2)) // Transfers ownership of the Activity to start into the ActivityMan, adopts ownership (_1 is the this ptr)
 				.def("StartActivity", (int (ActivityMan::*)(string, string))&ActivityMan::StartActivity)
 				.def("RestartActivity", &ActivityMan::RestartActivity)
 				.def("PauseActivity", &ActivityMan::PauseActivity)
@@ -303,7 +301,6 @@ namespace RTE {
 				.property("DeltaTimeTicks", &TimerMan::GetDeltaTimeTicks, &TimerMan::SetDeltaTimeTicks)
 				.property("DeltaTimeSecs", &TimerMan::GetDeltaTimeSecs, &TimerMan::SetDeltaTimeSecs)
 				.property("DeltaTimeMS", &TimerMan::GetDeltaTimeMS)
-				//.def("PauseSim", &TimerMan::PauseSim) // Forcing this during activity will kill input and your only option will be to Alt+F4. Need to rework input so it's not tied to sim time for this to work.
 				.property("OneSimUpdatePerFrame", &TimerMan::IsOneSimUpdatePerFrame, &TimerMan::SetOneSimUpdatePerFrame)
 				.def("TimeForSimUpdate", &TimerMan::TimeForSimUpdate)
 				.def("DrawnSimUpdate", &TimerMan::DrawnSimUpdate);

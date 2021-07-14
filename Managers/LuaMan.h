@@ -131,7 +131,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="file">File number.</param>
 		/// <param name="line">String to write.</param>
-		void FileWriteLine(int file, std::string line);
+		void FileWriteLine(int file, const std::string &line);
 
 		/// <summary>
 		/// Returns true if end of file was reached.
@@ -176,7 +176,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="globalName">The name of the global var in the Lua state to check.</param>
 		/// <returns>Whether that global var has been defined yet in the Lua state.</returns>
-		bool GlobalIsDefined(std::string globalName);
+		bool GlobalIsDefined(const std::string &globalName);
 
 
 		/// <summary>
@@ -185,7 +185,7 @@ namespace RTE {
 		/// <param name="tableName">The name of the table to look inside.</param>
 		/// <param name="indexName">The name of the index to check inside that table.</param>
 		/// <returns>Whether that table var has been defined yet in the Lua state.</returns>
-		bool TableEntryIsDefined(std::string tableName, std::string indexName);
+		bool TableEntryIsDefined(const std::string &tableName, const std::string &indexName);
 
 
 

@@ -44,6 +44,8 @@
 
 namespace RTE {
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	// These are expanded by the preprocessor to all the different cloning function definitions.
 	LuaEntityCreate(SoundContainer);
 	LuaEntityCreate(Attachable);
@@ -71,6 +73,7 @@ namespace RTE {
 	LuaEntityCreate(TerrainObject);
 	LuaEntityCreate(PEmitter);
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Preset clone adapters that will return the exact pre-cast types so we don't have to do:
@@ -111,6 +114,8 @@ namespace RTE {
 	LuaEntityClone(TerrainObject);
 	LuaEntityClone(PEmitter);
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	// These are expanded by the preprocessor to all the different casting function definitions named: To[Type]()
 	LuaEntityCast(Entity);
 	LuaEntityCast(SoundContainer);
@@ -147,6 +152,7 @@ namespace RTE {
 	LuaEntityCast(TerrainObject);
 	LuaEntityCast(PEmitter);
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	LuaPropertyOwnershipSafetyFaker(MOSRotating, SoundContainer, SetGibSound);
 
@@ -223,6 +229,8 @@ namespace RTE {
 	LuaPropertyOwnershipSafetyFaker(HDFirearm, SoundContainer, SetReloadStartSound);
 	LuaPropertyOwnershipSafetyFaker(HDFirearm, SoundContainer, SetReloadEndSound);
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void AddMO(MovableMan &movableMan, MovableObject *movableObject) {
 		if (movableMan.ValidMO(movableObject)) {
 			g_ConsoleMan.PrintString("ERROR: Tried to add a MovableObject that already exists in the simulation! " + movableObject->GetPresetName());
@@ -230,6 +238,8 @@ namespace RTE {
 			movableMan.AddMO(movableObject);
 		}
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void AddActor(MovableMan &movableMan, Actor *actor) {
 		if (movableMan.IsActor(actor)) {
@@ -239,6 +249,8 @@ namespace RTE {
 		}
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void AddItem(MovableMan &movableMan, MovableObject *item) {
 		if (movableMan.ValidMO(item)) {
 			g_ConsoleMan.PrintString("ERROR: Tried to add an Item that already exists in the simulation!" + item->GetPresetName());
@@ -247,6 +259,8 @@ namespace RTE {
 		}
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void AddParticle(MovableMan &movableMan, MovableObject *particle) {
 		if (movableMan.ValidMO(particle)) {
 			g_ConsoleMan.PrintString("ERROR: Tried to add a Particle that already exists in the simulation!" + particle->GetPresetName());
@@ -254,6 +268,8 @@ namespace RTE {
 			movableMan.AddParticle(particle);
 		}
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/*
 	These methods are needed to specially handling removing attachables with Lua in order to avoid memory leaks. They have silly names cause luabind otherwise makes it difficult to pass values to them properly.
@@ -296,8 +312,39 @@ namespace RTE {
 		return false;
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void GibThis(MOSRotating *pThis) {
 		pThis->GibThis();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	double NormalRand() {
+		return RandomNormalNum<double>();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	double PosRand() {
+		return RandomNum<double>();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	double LuaRand(double num) {
+		return RandomNum<double>(1, num);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/// <summary>
+	/// Explicit deletion of any Entity instance that Lua owns. It will probably be handled by the GC, but this makes it instantaneous.
+	/// </summary>
+	/// <param name="entityToDelete">The Entity to delete.</param>
+	void DeleteEntity(Entity *entityToDelete) {
+		delete entityToDelete;
+		entityToDelete = nullptr;
 	}
 }
 #endif

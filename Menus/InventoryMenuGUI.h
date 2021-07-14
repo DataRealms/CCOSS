@@ -168,13 +168,13 @@ namespace RTE {
 		/// A struct containing all information required to drawn and animate a carousel item box in Carousel MenuMode.
 		/// </summary>
 		struct CarouselItemBox {
-			MovableObject *Item;
-			bool IsForEquippedItems;
-			Vector FullSize;
-			Vector CurrentSize;
-			Vector Pos;
-			Vector IconCenterPosition;
-			std::pair<bool, bool> RoundedAndBorderedSides;
+			MovableObject *Item; //!< A pointer to the item being displayed in the CarouselItemBox.
+			bool IsForEquippedItems; //!< Whether or not this CarouselItemBox is for displaying equipped items.
+			Vector FullSize; //!< The full size for this CarouselItemBox when it's not animating.
+			Vector CurrentSize; //!< The current size of this CarouselItemBox.
+			Vector Pos; //!< The position this CarouselItemBox should be drawn at.
+			Vector IconCenterPosition; //!< The calculated position for the center of the icon this CarouselItemBox is displaying.
+			std::pair<bool, bool> RoundedAndBorderedSides; //!< Whether the left and right sides, respectively, of this CarouselItemBox should have rounded corners and a border.
 
 			/// <summary>
 			/// Fills the passed in vector of Bitmaps and float with the appropriate graphical icons and mass for the Item of this CarouselItemBox.
@@ -190,12 +190,12 @@ namespace RTE {
 		/// A struct containing all information required to describe a selected item in Full/Transfer MenuMode.
 		/// </summary>
 		struct GUISelectedItem {
-			GUIButton *Button;
-			MovableObject *Object;
-			int InventoryIndex;
-			int EquippedItemIndex;
-			bool IsBeingDragged;
-			int DragHoldCount;
+			GUIButton *Button; //!< A pointer to the button for this GUISelectedItem.
+			MovableObject *Object; //!< A pointer to the MovableObject for this GUISelectedItem. Should always match up with what the Button is displaying.
+			int InventoryIndex; //!< The index in the InventoryItemsBox that this GUISelectedItem is for. Either this or the EquippedItemIndex must have a value.
+			int EquippedItemIndex; //!< The index in the EquippedItemIndex that this GUISelectedItem is for. Either this or the InventoryIndex must have a value.
+			bool IsBeingDragged; //!< Whether or not the GUISelectedItem is currently being dragged.
+			int DragHoldCount; //!< How long dragging has been held for, used to determine if the GUISelectedItem was actually dragged or just clicked.
 
 			/// <summary>
 			/// Whether this selected item was being dragged for long enough that it matters. This helps make dragging not cause problems during instant clicks and releases.
@@ -265,7 +265,11 @@ namespace RTE {
 
 		Timer m_GUIRepeatStartTimer; //!< Measures the time to when to start repeating inputs when they're held down. Used in Full/Transfer MenuModes.
 		Timer m_GUIRepeatTimer; //!< Measures the interval between input repeats. Used in Full/Transfer MenuModes.
-		GUIButton *m_KeyboardOrControllerHighlightedButton; //!< A pointer to the GUIButton currently highlighted by the keyboard or controller.
+		GUIButton *m_NonMouseHighlightedButton; //!< A pointer to the GUIButton currently highlighted by the keyboard or gamepad.
+		//TODO These previous buttons should be cleaned up when InventoryMenuGUI is refactored. Requirements were unclear so this is more complicated than it needs to be, these 3 can be consolidated into 2 or 1 variable, and the code handling them can be simplified a bit.
+		GUIButton *m_NonMousePreviousEquippedItemsBoxButton; //!< A pointer to the last GUIButton in the EquippedItemsBox that was highlighted by the keyboard or gamepad.
+		GUIButton *m_NonMousePreviousInventoryItemsBoxButton; //!< A pointer to the last GUIButton in the InventoryItemsBox that was highlighted by the keyboard or gamepad.
+		GUIButton *m_NonMousePreviousReloadOrDropButton; //!< A pointer to whichever of the reload or drop GUIButtons was last highlighted by the keyboard or gamepad.
 
 		Vector m_GUITopLevelBoxFullSize; //!< A Vector holding the full size of the top level box for enabling/disabling animations.
 		bool m_GUIShowInformationText; //!< Whether or information text explaining how to use the menu should be showing.
@@ -381,9 +385,39 @@ namespace RTE {
 		bool HandleMouseInput();
 
 		/// <summary>
-		/// Player keyboard or controller input event handling of the GUIControls of this InventoryMenuGUI.
+		/// Player keyboard or gamepad input event handling of the GUIControls of this InventoryMenuGUI.
 		/// </summary>
 		void HandleNonMouseInput();
+
+		/// <summary>
+		/// Gets any keyboard or gamepad directional input.
+		/// </summary>
+		/// <returns>The direction of found input. Priority matches ordering of the Direction enumeration.</returns>
+		Direction GetNonMouseButtonControllerMovement();
+
+		/// <summary>
+		/// Breakdown of HandleNonMouseInput for handling pressing/holding up.
+		/// </summary>
+		/// <returns>The next button to highlight, based on input handling.</returns>
+		GUIButton * HandleNonMouseUpInput();
+
+		/// <summary>
+		/// Breakdown of HandleNonMouseInput for handling pressing/holding down.
+		/// </summary>
+		/// <returns>The next button to highlight, based on input handling.</returns>
+		GUIButton * HandleNonMouseDownInput();
+
+		/// <summary>
+		/// Breakdown of HandleNonMouseInput for handling pressing/holding left.
+		/// </summary>
+		/// <returns>The next button to highlight, based on input handling.</returns>
+		GUIButton * HandleNonMouseLeftInput();
+
+		/// <summary>
+		/// Breakdown of HandleNonMouseInput for handling pressing/holding right.
+		/// </summary>
+		/// <returns>The next button to highlight, based on input handling.</returns>
+		GUIButton * HandleNonMouseRightInput();
 
 		/// <summary>
 		/// Handles item button press command events from the GUIControls of this InventoryMenuGUI by selecting/de-selecting the corresponding item.

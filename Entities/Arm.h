@@ -182,6 +182,18 @@ ClassInfoGetters
     /// <param name="newGripStrength">The new grip strength for this Arm to use.</param>
     void SetGripStrength(float newGripStrength) { m_GripStrength = newGripStrength; }
 
+    /// <summary>
+    /// Gets the the strength with which this Arm will throw a ThrownDevice.
+    /// </summary>
+    /// <returns>The throw strength of this Arm.</returns>
+    float GetThrowStrength() const { return m_ThrowStrength; }
+
+    /// <summary>
+    /// Sets the strength with which this Arm will throw a ThrownDevice.
+    /// </summary>
+    /// <param name="newThrowStrength">The new throw strength for this Arm to use.</param>
+    void SetThrowStrength(float newThrowStrength) { m_ThrowStrength = newThrowStrength; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetMaxLength
@@ -412,6 +424,7 @@ protected:
     // Whether or not this arm is currently supporting something held in another hand
     bool m_Supporting;
     float m_GripStrength; //!< The strength with which this Arm will grip its HeldDevice. Effectively supercedes the HeldDevice's JointStrength.
+    float m_ThrowStrength; //!< The strength with which this Arm will throw a ThrownDevice. Effectively supercedes the ThrownDevice's ThrowVelocity values.
     // The file containing the hand bitmap.
     ContentFile m_HandFile;
     // The small bitmap holding the hand bitmap.

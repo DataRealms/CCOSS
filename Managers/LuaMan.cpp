@@ -1203,6 +1203,7 @@ int LuaMan::Initialize() {
 			.property("MaxLength", &Arm::GetMaxLength)
 			.property("IdleOffset", &Arm::GetIdleOffset, &Arm::SetIdleOffset)
             .property("GripStrength", &Arm::GetGripStrength, &Arm::SetGripStrength)
+            .property("ThrowStrength", &Arm::GetThrowStrength, &Arm::SetThrowStrength)
 			.property("HandPos", &Arm::GetHandPos, &Arm::SetHandPos),
 
         CONCRETELUABINDING(Leg, Attachable)

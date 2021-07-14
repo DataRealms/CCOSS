@@ -1,4 +1,5 @@
 #include "ThrownDevice.h"
+#include "PresetMan.h"
 
 namespace RTE {
 
@@ -10,10 +11,11 @@ namespace RTE {
 		m_ActivationSound.Reset();
 		m_StartThrowOffset.Reset();
 		m_EndThrowOffset.Reset();
-		m_MinThrowVel = 5;
-		m_MaxThrowVel = 15;
+		m_MinThrowVel = 0;
+		m_MaxThrowVel = 0;
 		m_TriggerDelay = 0;
 		m_ActivatesWhenReleased = false;
+		m_StrikerLever = 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -42,6 +44,7 @@ namespace RTE {
 		m_MaxThrowVel = reference.m_MaxThrowVel;
 		m_TriggerDelay = reference.m_TriggerDelay;
 		m_ActivatesWhenReleased = reference.m_ActivatesWhenReleased;
+		m_StrikerLever = reference.m_StrikerLever;
 
 		return 0;
 	}
@@ -63,6 +66,8 @@ namespace RTE {
 			reader >> m_TriggerDelay;
 		} else if (propName == "ActivatesWhenReleased") {
 			reader >> m_ActivatesWhenReleased;
+		} else if (propName == "StrikerLever") {
+			m_StrikerLever = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
 		} else {
 			return HeldDevice::ReadProperty(propName, reader);
 		}
@@ -88,6 +93,8 @@ namespace RTE {
 		writer << m_TriggerDelay;
 		writer.NewProperty("ActivatesWhenReleased");
 		writer << m_ActivatesWhenReleased;
+		writer.NewProperty("StrikerLever");
+		writer << m_StrikerLever;
 
 		return 0;
 	}
@@ -106,6 +113,21 @@ namespace RTE {
 		if (!m_Activated) {
 			m_ActivationTimer.Reset();
 			m_ActivationSound.Play(m_Pos);
+			// Launch striker lever, if there is one.
+			MovableObject *pStrikerLever = m_StrikerLever ? dynamic_cast<MovableObject *>(m_StrikerLever->Clone()) : 0;
+			if (pStrikerLever) {
+				Vector strikerLeverVel;
+				strikerLeverVel.SetXY(m_Vel.GetMagnitude() * 0.25F + 1.0F, 0);
+
+				pStrikerLever->SetVel(m_Vel * 0.5F + strikerLeverVel.RadRotate(c_PI * RandomNormalNum()));
+				pStrikerLever->SetPos(m_Pos);
+				pStrikerLever->SetRotAngle(m_Rotation.GetRadAngle());
+				pStrikerLever->SetAngularVel(m_AngularVel + pStrikerLever->GetAngularVel() * RandomNormalNum());
+				pStrikerLever->SetHFlipped(m_HFlipped);
+				pStrikerLever->SetTeam(m_Team);
+				pStrikerLever->SetIgnoresTeamHits(true);
+				g_MovableMan.AddParticle(pStrikerLever);
+			}
 			m_Activated = true;
 		}
 	}

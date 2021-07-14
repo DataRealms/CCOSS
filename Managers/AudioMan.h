@@ -351,7 +351,7 @@ namespace RTE {
 		/// Clears the list of current Music events for the target player.
 		/// </summary>
 		/// <param name="player">Player to clear music events for. -1 clears for all players</param>
-		void ClearMusicEvents(short player);
+		void ClearMusicEvents(int player);
 
 		/// <summary>
 		/// Fills the list with sound events happened for the specified network player.
@@ -373,7 +373,7 @@ namespace RTE {
 		/// Clears the list of current Sound events for the target player.
 		/// </summary>
 		/// <param name="player">Player to clear sound events for. -1 clears for all players.</param>
-		void ClearSoundEvents(short player);
+		void ClearSoundEvents(int player);
 #pragma endregion
 
 	protected:

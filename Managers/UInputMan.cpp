@@ -427,12 +427,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void UInputMan::SetMouseValueMagnitude(float magCap, short player) { 
-		if (IsInMultiplayerMode() && player != Players::NoPlayer && player >= Players::PlayerOne && player < Players::MaxPlayerCount) {
-			m_NetworkAnalogMoveData[player].CapMagnitude(m_MouseTrapRadius * magCap);
+	void UInputMan::SetMouseValueMagnitude(float magCap, int whichPlayer) {
+		if (IsInMultiplayerMode() && whichPlayer >= Players::PlayerOne && whichPlayer < Players::MaxPlayerCount) {
+			m_NetworkAnalogMoveData[whichPlayer].CapMagnitude(m_MouseTrapRadius * magCap);
 		}
 		m_AnalogMouseData.CapMagnitude(m_MouseTrapRadius * magCap);
-		
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

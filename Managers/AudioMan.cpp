@@ -102,11 +102,11 @@ namespace RTE {
 				int currentActivityHumanCount = m_IsInMultiplayerMode ? 1 : currentActivity->GetHumanCount();
 
 				if (m_CurrentActivityHumanPlayerPositions.size() != currentActivityHumanCount) { status = status == FMOD_OK ? m_AudioSystem->set3DNumListeners(currentActivityHumanCount) : status; }
-				
+
 				m_CurrentActivityHumanPlayerPositions.clear();
-				for (short player = Players::PlayerOne; player < Players::MaxPlayerCount && m_CurrentActivityHumanPlayerPositions.size() < currentActivityHumanCount; player++) {
+				for (int player = Players::PlayerOne; player < Players::MaxPlayerCount && m_CurrentActivityHumanPlayerPositions.size() < currentActivityHumanCount; player++) {
 					if (currentActivity->PlayerActive(player) && currentActivity->PlayerHuman(player)) {
-						short screen = currentActivity->ScreenOfPlayer(player);
+						int screen = currentActivity->ScreenOfPlayer(player);
 						Vector humanPlayerPosition = g_SceneMan.GetScrollTarget(screen);
 						if (IsInMultiplayerMode()) { humanPlayerPosition += (Vector(g_FrameMan.GetPlayerFrameBufferWidth(screen), g_FrameMan.GetPlayerFrameBufferHeight(screen)) / 2); }
 						m_CurrentActivityHumanPlayerPositions.push_back(std::make_unique<const RTE::Vector>(humanPlayerPosition));
@@ -397,7 +397,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AudioMan::ClearMusicEvents(short player) {
+	void AudioMan::ClearMusicEvents(int player) {
 		if (player == -1 || player >= c_MaxClients) {
 			for (int i = 0; i < c_MaxClients; i++) { ClearMusicEvents(i); }
 		} else {
@@ -480,7 +480,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AudioMan::ClearSoundEvents(short player) {
+	void AudioMan::ClearSoundEvents(int player) {
 		if (player == -1 || player >= c_MaxClients) {
 			for (int i = 0; i < c_MaxClients; i++) { ClearSoundEvents(i); }
 		} else {

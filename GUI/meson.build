@@ -22,6 +22,7 @@ sources += files(
 'GUIProperties.cpp',
 'GUIPropertyPage.cpp',
 'GUIRadioButton.cpp',
+'GUIReader.cpp',
 'GUIScrollbar.cpp',
 'GUIScrollPanel.cpp',
 'GUISkin.cpp',
@@ -30,13 +31,6 @@ sources += files(
 'GUITab.cpp',
 'GUITextBox.cpp',
 'GUITextPanel.cpp',
-'GUIUtil.cpp'
+'GUIUtil.cpp',
+'GUIWriter.cpp'
 )
-
-if build_machine.system() == 'windows'
-  sources+=files('WinUtil.cpp')
-endif
-
-if build_machine.system() == 'linux'
-  sources+=files('LinuxUtil.cpp')
-endif

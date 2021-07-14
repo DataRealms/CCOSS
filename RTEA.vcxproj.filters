@@ -204,9 +204,6 @@
     <ClInclude Include="GUI\GUIUtil.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="GUI\WinUtil.h">
-      <Filter>GUI</Filter>
-    </ClInclude>
     <ClInclude Include="Entities\ACDropShip.h">
       <Filter>Entities</Filter>
     </ClInclude>
@@ -420,9 +417,6 @@
     <ClInclude Include="System\RTEError.h">
       <Filter>System</Filter>
     </ClInclude>
-    <ClInclude Include="GUI\Interface.h">
-      <Filter>GUI</Filter>
-    </ClInclude>
     <ClInclude Include="System\Constants.h">
       <Filter>System</Filter>
     </ClInclude>
@@ -524,6 +518,15 @@
     </ClInclude>
     <ClInclude Include="Menus\InventoryMenuGUI.h">
       <Filter>Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\GUIInterface.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\GUIReader.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\GUIWriter.h">
+      <Filter>GUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -693,9 +696,6 @@
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="GUI\GUIUtil.cpp">
-      <Filter>GUI</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\WinUtil.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
     <ClCompile Include="Entities\ACDropShip.cpp">
@@ -1004,6 +1004,12 @@
     </ClCompile>
     <ClCompile Include="Menus\InventoryMenuGUI.cpp">
       <Filter>Menus</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\GUIReader.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\GUIWriter.cpp">
+      <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

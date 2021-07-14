@@ -1,43 +1,16 @@
 #ifndef _GUILISTBOX_
 #define _GUILISTBOX_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUIListBox.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUIListBox class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
 #include "GUIListPanel.h"
 
+namespace RTE {
 
-namespace RTE
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUIListBox
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A ListBox control class.
-// Parent(s):       GUIControl, GUIListPanel.
-// Class history:   1/9/2004 GUIListBox Created.
-
-class GUIListBox :
-    public GUIControl,
-    public GUIListPanel
-{
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
+/// <summary>
+/// A ListBox control class.
+/// </summary>
+class GUIListBox : public GUIControl, public GUIListPanel {
 
 public:
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GUIListBox
@@ -55,7 +28,7 @@ public:
 // Description:     Called when the control has been created.
 // Arguments:       Name, Position.
 
-    void Create(const std::string Name, int X, int Y, int Width = -1, int Height = -1) override;
+    void Create(const std::string &Name, int X, int Y, int Width = -1, int Height = -1) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -157,16 +130,8 @@ public:
 
     void ApplyProperties(GUIProperties *Props) override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
 private:
 
 };
-
-
-}; // namespace RTE
-
-
-#endif  //  _GUILISTBOX_
+};
+#endif

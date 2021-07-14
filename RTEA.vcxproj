@@ -538,8 +538,10 @@
     <ClInclude Include="Entities\PEmitter.h" />
     <ClInclude Include="Entities\Round.h" />
     <ClInclude Include="Entities\SoundSet.h" />
-    <ClInclude Include="GUI\Interface.h" />
+    <ClInclude Include="GUI\GUIInterface.h" />
+    <ClInclude Include="GUI\GUIReader.h" />
     <ClInclude Include="GUI\GUISound.h" />
+    <ClInclude Include="GUI\GUIWriter.h" />
     <ClInclude Include="Managers\MenuMan.h" />
     <ClInclude Include="Managers\NetworkClient.h" />
     <ClInclude Include="Managers\NetworkServer.h" />
@@ -631,7 +633,6 @@
     <ClInclude Include="GUI\GUITextBox.h" />
     <ClInclude Include="GUI\GUITextPanel.h" />
     <ClInclude Include="GUI\GUIUtil.h" />
-    <ClInclude Include="GUI\WinUtil.h" />
     <ClInclude Include="Entities\ACDropShip.h" />
     <ClInclude Include="Entities\ACrab.h" />
     <ClInclude Include="Entities\ACraft.h" />
@@ -706,7 +707,9 @@
     <ClCompile Include="Entities\PEmitter.cpp" />
     <ClCompile Include="Entities\Round.cpp" />
     <ClCompile Include="Entities\SoundSet.cpp" />
+    <ClCompile Include="GUI\GUIReader.cpp" />
     <ClCompile Include="GUI\GUISound.cpp" />
+    <ClCompile Include="GUI\GUIWriter.cpp" />
     <ClCompile Include="Managers\MenuMan.cpp" />
     <ClCompile Include="Managers\NetworkClient.cpp" />
     <ClCompile Include="Managers\NetworkServer.cpp" />
@@ -826,7 +829,6 @@
     <ClCompile Include="GUI\GUITextBox.cpp" />
     <ClCompile Include="GUI\GUITextPanel.cpp" />
     <ClCompile Include="GUI\GUIUtil.cpp" />
-    <ClCompile Include="GUI\WinUtil.cpp" />
     <ClCompile Include="Entities\ACDropShip.cpp" />
     <ClCompile Include="Entities\ACrab.cpp" />
     <ClCompile Include="Entities\ACraft.cpp" />

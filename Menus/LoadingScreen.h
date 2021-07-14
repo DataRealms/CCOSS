@@ -37,7 +37,8 @@ namespace RTE {
 		/// Creates the GUIListBox that the progress report will be drawn to, if not disabled through the settings file to speed up loading times.
 		/// As it turned out, a massive amount of time is spent updating the GUI control and flipping the frame buffers.
 		/// </summary>
-		void CreateProgressReportListbox();
+		/// <param name="parentControlManager">Pointer to the parent GUIControlManager which owns all the GUIControls of this LoadingScreen. Ownership is NOT transferred!</param>
+		void CreateProgressReportListbox(GUIControlManager *parentControlManager);
 #pragma endregion
 
 #pragma region Destruction
@@ -58,12 +59,6 @@ namespace RTE {
 
 	private:
 
-		/// <summary>
-		/// Custom deleter for the std::unique_ptr GUIControlManager member. Must be defined to avoid including the class header and just rely on forward declaration.
-		/// </summary>
-		struct GUIControlManagerDeleter { void operator()(GUIControlManager *ptr) const; };
-
-		std::unique_ptr<GUIControlManager, GUIControlManagerDeleter> m_GUIControlManager; //!< The GUIControlManager which owns all the GUIControls of the LoadingScreen.
 		std::unique_ptr<Writer> m_LoadingLogWriter; //!< The Writer that generates the loading log.
 
 		BITMAP *m_ProgressListboxBitmap; //!< BITMAP that the progress report will be drawn into.

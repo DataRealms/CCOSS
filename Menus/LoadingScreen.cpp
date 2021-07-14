@@ -15,7 +15,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LoadingScreen::Clear() {
-		m_GUIControlManager = nullptr;
 		m_LoadingLogWriter = nullptr;
 		m_ProgressListboxBitmap = nullptr;
 		m_ProgressListboxPosX = 0;
@@ -25,13 +24,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LoadingScreen::Create(AllegroScreen *guiScreen, AllegroInput *guiInput, bool progressReportDisabled) {
-		m_GUIControlManager.reset(new GUIControlManager());
-		RTEAssert(m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "LoadingScreenSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/LoadingScreenSkin.ini");
-		m_GUIControlManager->Load("Base.rte/GUIs/LoadingGUI.ini");
+		GUIControlManager loadingScreenManager;
+		RTEAssert(loadingScreenManager.Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "LoadingScreenSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/LoadingScreenSkin.ini");
+		loadingScreenManager.Load("Base.rte/GUIs/LoadingGUI.ini");
 
 		int loadingSplashOffset = 0;
 		if (!progressReportDisabled) {
-			CreateProgressReportListbox();
+			CreateProgressReportListbox(&loadingScreenManager);
 			loadingSplashOffset = m_ProgressListboxPosX / 4;
 		}
 		SceneLayer loadingSplash;
@@ -41,6 +40,7 @@ namespace RTE {
 		Box loadingSplashTargetBox(Vector(0, static_cast<float>((g_FrameMan.GetResY() - loadingSplash.GetBitmap()->h) / 2)), static_cast<float>(g_FrameMan.GetResX()), static_cast<float>(loadingSplash.GetBitmap()->h));
 		loadingSplash.Draw(g_FrameMan.GetBackBuffer32(), loadingSplashTargetBox);
 
+		if (!progressReportDisabled) { draw_sprite(g_FrameMan.GetBackBuffer32(), m_ProgressListboxBitmap, m_ProgressListboxPosX, m_ProgressListboxPosY); }
 		g_FrameMan.FlipFrameBuffers();
 
 		if (!m_LoadingLogWriter) {
@@ -54,9 +54,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LoadingScreen::CreateProgressReportListbox() {
-		dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
-		GUIListBox *listBox = dynamic_cast<GUIListBox *>(m_GUIControlManager->GetControl("ProgressBox"));
+	void LoadingScreen::CreateProgressReportListbox(GUIControlManager *parentControlManager) {
+		dynamic_cast<GUICollectionBox *>(parentControlManager->GetControl("root"))->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY());
+		GUIListBox *listBox = dynamic_cast<GUIListBox *>(parentControlManager->GetControl("ProgressBox"));
 
 		// Make the box a bit bigger if there's room in higher, HD resolutions.
 		if (g_FrameMan.GetResX() >= c_DefaultResX) { listBox->Resize((g_FrameMan.GetResX() / 3) - 12, listBox->GetHeight()); }
@@ -109,8 +109,4 @@ namespace RTE {
 			g_FrameMan.FlipFrameBuffers();
 		}
 	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void LoadingScreen::GUIControlManagerDeleter::operator()(GUIControlManager *ptr) const { delete ptr; }
 }

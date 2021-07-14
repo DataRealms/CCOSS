@@ -1017,7 +1017,7 @@ namespace RTE {
 				if (highlightedButtonIndex < c_ItemsPerRow) {
 					if (m_GUIInventoryItemsScrollbar->GetValue() > m_GUIInventoryItemsScrollbar->GetMinimum()) {
 						m_GUIInventoryItemsScrollbar->SetValue(m_GUIInventoryItemsScrollbar->GetValue() - 1);
-						nextButtonToHighlight = m_NonMouseHighlightedButton + c_FullViewPageItemLimit - c_ItemsPerRow;
+						nextButtonToHighlight = m_NonMouseHighlightedButton;
 					} else {
 						nextButtonToHighlight = m_NonMousePreviousEquippedItemsBoxButton && m_NonMousePreviousEquippedItemsBoxButton->GetVisible() ? m_NonMousePreviousEquippedItemsBoxButton : nullptr;
 						if (!nextButtonToHighlight) {

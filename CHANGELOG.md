@@ -153,6 +153,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `MovableObject` Lua function `EnableOrDisableAllScripts` that allows you to enable or disable all scripts on a `MovableObject` based on the passed in value.
 
+- Added option for players to vote to restart multiplayer activities by holding the backslash key, `\`. Requires all players to vote to pass.  
+	This is an alternative to the existing ability to vote to end the activity and return to the multiplayer lobby, by holding `Backspace` key.
+
 ### Changed
 
 - `AHuman` can now manually reload BG devices.
@@ -277,6 +280,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `OnCollideWithMO` now works for `MOPixels` and `MOSParticles` so you can use it to check if your bullets collide with things.
 
 - `OnCollideWithMO` and `OnCollideWithTerrain` (and other special functions) will run more reliably right after the object is spawned. E.g. `OnCollideWithTerrain` should now work even if your gun is jammed into terrain when you shoot.
+
+- Vote counts to end a multiplayer activity now display as intended. 
 
 ### Removed
 

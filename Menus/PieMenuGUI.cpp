@@ -89,7 +89,7 @@ namespace RTE {
 			m_EnabledState = enable ? EnabledState::Enabling : EnabledState::Disabling;
 			m_EnableDisableAnimationTimer.Reset();
 			if (m_MenuController->IsMouseControlled()) {
-				g_UInputMan.SetMouseValueMagnitude(0);
+				g_UInputMan.SetMouseValueMagnitude(0, m_MenuController->GetPlayer());
 				m_MenuController->m_AnalogCursor = Vector();
 			}
 			SoundContainer *soundToPlay = enable ? g_GUISound.PieMenuEnterSound() : g_GUISound.PieMenuExitSound();

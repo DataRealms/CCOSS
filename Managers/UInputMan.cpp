@@ -427,6 +427,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void UInputMan::SetMouseValueMagnitude(float magCap, int whichPlayer) {
+		if (IsInMultiplayerMode() && whichPlayer >= Players::PlayerOne && whichPlayer < Players::MaxPlayerCount) {
+			m_NetworkAnalogMoveData[whichPlayer].CapMagnitude(m_MouseTrapRadius * magCap);
+		}
+		m_AnalogMouseData.CapMagnitude(m_MouseTrapRadius * magCap);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void UInputMan::SetMousePos(Vector &newPos, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
 		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme[whichPlayer].GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {

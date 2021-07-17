@@ -11,6 +11,7 @@ namespace RTE {
 
 	void LuaMan::Clear() {
 		m_MasterState = nullptr;
+		m_DisableLuaJIT = false;
 		m_LastError.clear();
 		m_NextPresetID = 0;
 		m_NextObjectID = 0;
@@ -38,13 +39,16 @@ namespace RTE {
 		};
 
 		for (const luaL_Reg *lib = libsToLoad; lib->func; lib++) {
+			if (m_DisableLuaJIT && lib->name == LUA_JITLIBNAME) {
+				continue;
+			}
 			lua_pushcfunction(m_MasterState, lib->func);
 			lua_pushstring(m_MasterState, lib->name);
 			lua_call(m_MasterState, 1, 0);
 		}
 
-		// LuaJIT should start automatically after we load the library but we're making sure it did anyway.
-		if (!luaJIT_setmode(m_MasterState, 0, LUAJIT_MODE_ENGINE | LUAJIT_MODE_ON)) { RTEAbort("Failed to initialize LuaJIT!"); }
+		// LuaJIT should start automatically after we load the library (if we loaded it) but we're making sure it did anyway.
+		if (!m_DisableLuaJIT && !luaJIT_setmode(m_MasterState, 0, LUAJIT_MODE_ENGINE | LUAJIT_MODE_ON)) { RTEAbort("Failed to initialize LuaJIT!\nIf this error persists, please disable LuaJIT with \"Settings.ini\" property \"DisableLuaJIT\"."); }
 
 		// From LuaBind documentation:
 		// As mentioned in the Lua documentation, it is possible to pass an error handler function to lua_pcall(). LuaBind makes use of lua_pcall() internally when calling member functions and free functions.

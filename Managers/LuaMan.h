@@ -15,6 +15,7 @@ namespace RTE {
 	/// The singleton manager of the master Lua script state.
 	/// </summary>
 	class LuaMan : public Singleton<LuaMan> {
+		friend class SettingsMan;
 
 	public:
 

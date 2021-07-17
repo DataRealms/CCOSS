@@ -161,7 +161,7 @@ namespace RTE {
 				.def("ClearObjectivePoints", &GameActivity::ClearObjectivePoints)
 				.def("AddOverridePurchase", &GameActivity::AddOverridePurchase)
 				.def("SetOverridePurchaseList", (int (GameActivity::*)(const Loadout *, int))&GameActivity::SetOverridePurchaseList)
-				.def("SetOverridePurchaseList", (int (GameActivity::*)(string, int))&GameActivity::SetOverridePurchaseList)
+				.def("SetOverridePurchaseList", (int (GameActivity::*)(std::string, int))&GameActivity::SetOverridePurchaseList)
 				.def("ClearOverridePurchase", &GameActivity::ClearOverridePurchase)
 				.def("CreateDelivery", (bool (GameActivity::*)(int))&GameActivity::CreateDelivery)
 				.def("CreateDelivery", (bool (GameActivity::*)(int, int))&GameActivity::CreateDelivery)

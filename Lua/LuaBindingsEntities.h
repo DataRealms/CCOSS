@@ -26,7 +26,7 @@ namespace RTE {
 				.property("ModuleID", &Entity::GetModuleID)
 				.property("RandomWeight", &Entity::GetRandomWeight)
 				.def("AddToGroup", &Entity::AddToGroup)
-				.def("IsInGroup", (bool (Entity::*)(const string &))&Entity::IsInGroup);
+				.def("IsInGroup", (bool (Entity::*)(const std::string &))&Entity::IsInGroup);
 		}
 
 		LuaBindingRegisterFunctionForType(ACDropShip) {
@@ -931,7 +931,7 @@ namespace RTE {
 		LuaBindingRegisterFunctionForType(SceneArea) {
 			return luabind::class_<Scene::Area>("Area")
 				.def(luabind::constructor<>())
-				.def(luabind::constructor<string>())
+				.def(luabind::constructor<std::string>())
 				.def(luabind::constructor<const Scene::Area &>())
 				.def("Reset", &Scene::Area::Reset)
 				.property("ClassName", &Scene::Area::GetClassName)

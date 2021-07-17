@@ -37,6 +37,7 @@ class AEmitter;
 class AHuman:
     public Actor
 {
+	friend struct EntityLuaBindings;
 
 
 enum UpperBodyState

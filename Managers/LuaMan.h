@@ -40,6 +40,43 @@ namespace RTE {
 		/// Destroys and resets (through Clear()) the LuaMan object.
 		/// </summary>
 		void Destroy();
+
+		/// <summary>
+		/// Clears internal Lua package tables from all user-defined modules. Those must be reloaded with ReloadAllScripts().
+		/// </summary>
+		void ClearUserModuleCache();
+#pragma endregion
+
+#pragma region Getters and Setters
+		/// <summary>
+		/// Returns an ID string unique to this runtime for use by original presets that have scripts associated with them.
+		/// </summary>
+		/// <returns>Returns the unique ID as a string.</returns>
+		std::string GetNewPresetID();
+
+		/// <summary>
+		/// Returns an ID string unique to this runtime for use by individual objects that are also tracked in the Lua state and have scripts associated with them.
+		/// </summary>
+		/// <returns>Returns the unique ID as a string.</returns>
+		std::string GetNewObjectID();
+
+		/// <summary>
+		/// Gets a temporary Entity that can be accessed in the Lua state.
+		/// </summary>
+		/// <returns>The temporary entity. Ownership is NOT transferred!</returns>
+		Entity * GetTempEntity() const { return m_TempEntity; }
+
+		/// <summary>
+		/// Sets a temporary Entity that can be accessed in the Lua state.
+		/// </summary>
+		/// <param name="entity">The temporary entity. Ownership is NOT transferred!</param>
+		void SetTempEntity(Entity *entity) { m_TempEntity = entity; }
+
+		/// <summary>
+		/// Sets a temporary vector of entities that can be accessed in the Lua state.
+		/// </summary>
+		/// <param name="entityVector">The temporary vector of entities. Ownership is NOT transferred!</param>
+		void SetTempEntityVector(std::vector<Entity *> entityVector) { m_TempEntityVector = entityVector; }
 #pragma endregion
 
 #pragma region Script Execution Handling
@@ -70,14 +107,38 @@ namespace RTE {
 		/// <param name="consoleErrors">Whether to report any errors to the console immediately.</param>
 		/// <returns>Returns less than zero if any errors encountered when running this script. To get the actual error string, call GetLastError.</returns>
 		int RunScriptFile(const std::string &filePath, bool consoleErrors = true);
+#pragma endregion
 
+#pragma region
 		/// <summary>
-		/// Gets the result of an arbitrary expression in lua as evaluating to true or false.
+		/// Gets the result of an arbitrary expression in Lua as evaluating to true or false.
 		/// </summary>
 		/// <param name="expression">The string with the expression to evaluate.</param>
 		/// <param name="consoleErrors">Whether to report any errors to the console immediately.</param>
 		/// <returns>Whether the expression was true.</returns>
 		bool ExpressionIsTrue(std::string expression, bool consoleErrors);
+
+		/// <summary>
+		/// Takes a pointer to an object and saves it in the Lua state as a global of a specified variable name.
+		/// </summary>
+		/// <param name="objectToSave">The pointer to the object to save. Ownership is NOT transferred!</param>
+		/// <param name="globalName">The name of the global var in the Lua state to save the pointer to.</param>
+		void SavePointerAsGlobal(void *objectToSave, const std::string &globalName);
+
+		/// <summary>
+		/// Checks if there is anything defined on a specific global var in Lua.
+		/// </summary>
+		/// <param name="globalName">The name of the global var in the Lua state to check.</param>
+		/// <returns>Whether that global var has been defined yet in the Lua state.</returns>
+		bool GlobalIsDefined(const std::string &globalName);
+
+		/// <summary>
+		/// Checks if there is anything defined in a specific index of a table.
+		/// </summary>
+		/// <param name="tableName">The name of the table to look inside.</param>
+		/// <param name="indexName">The name of the index to check inside that table.</param>
+		/// <returns>Whether that table var has been defined yet in the Lua state.</returns>
+		bool TableEntryIsDefined(const std::string &tableName, const std::string &indexName);
 #pragma endregion
 
 #pragma region Error Handling
@@ -101,18 +162,18 @@ namespace RTE {
 
 #pragma region File I/O Handling
 		/// <summary>
-		/// Opens file. You can open files only inside .rte folders of game directory. you can open no more that c_MaxOpenFiles file simultaneously.
+		/// Opens a file. You can open files only inside .rte folders in the working directly. You can't open more that c_MaxOpenFiles file simultaneously.
 		/// </summary>
-		/// <param name="filename">Path to file. All paths are made absolute by adding current working directory to specified path.</param>
-		/// <param name="mode">File mode.</param>
-		/// <returns>File number.</returns>
-		int FileOpen(std::string filename, std::string mode);
+		/// <param name="filename">Path to the file. All paths are made absolute by adding current working directory to the specified path.</param>
+		/// <param name="mode">File access mode. See 'fopen' for list of modes.</param>
+		/// <returns>File index in the opened files array.</returns>
+		int FileOpen(const std::string &fileName, const std::string &accessMode);
 
 		/// <summary>
 		/// Closes a previously opened file.
 		/// </summary>
-		/// <param name="file">File number.</param>
-		void FileClose(int file);
+		/// <param name="fileIndex">File index in the opened files array.</param>
+		void FileClose(int fileIndex);
 
 		/// <summary>
 		/// Closes all previously opened files.
@@ -120,134 +181,50 @@ namespace RTE {
 		void FileCloseAll();
 
 		/// <summary>
-		/// Reads a line from file.
+		/// Reads a line from a file.
 		/// </summary>
-		/// <param name="file">File number.</param>
+		/// <param name="fileIndex">File index in the opened files array.</param>
 		/// <returns>Line from file, or empty string on error.</returns>
-		std::string FileReadLine(int file);
+		std::string FileReadLine(int fileIndex);
 
 		/// <summary>
-		/// Writes a text line to file.
+		/// Writes a text line to a file.
 		/// </summary>
-		/// <param name="file">File number.</param>
+		/// <param name="fileIndex">File index in the opened files array.</param>
 		/// <param name="line">String to write.</param>
-		void FileWriteLine(int file, const std::string &line);
+		void FileWriteLine(int fileIndex, const std::string &line);
 
 		/// <summary>
 		/// Returns true if end of file was reached.
 		/// </summary>
-		/// <param name="file">File number.</param>
+		/// <param name="fileIndex">File index in the opened files array.</param>
 		/// <returns>Whether or not EOF was reached.</returns>
-		bool FileEOF(int file);
+		bool FileEOF(int fileIndex);
 #pragma endregion
-
-
-
-
-
-
-
-
-
-
-
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Updates the state of this LuaMan. Supposed to be done every frame before drawing.
+		/// Updates the state of this LuaMan.
 		/// </summary>
 		void Update() const;
 #pragma endregion
 
-
-
-
-
-		/// <summary>
-		/// Takes a pointer to an object and saves it in the Lua state as a global of a specified variable name.
-		/// </summary>
-		/// <param name="objectToSave">The pointer to the object to save. Ownership is NOT transferred!</param>
-		/// <param name="globalName">The name of the global var in the Lua state to save the pointer to.</param>
-		void SavePointerAsGlobal(void *objectToSave, const std::string &globalName);
-
-
-		/// <summary>
-		/// Checks if there is anything defined on a specific global var in Lua.
-		/// </summary>
-		/// <param name="globalName">The name of the global var in the Lua state to check.</param>
-		/// <returns>Whether that global var has been defined yet in the Lua state.</returns>
-		bool GlobalIsDefined(const std::string &globalName);
-
-
-		/// <summary>
-		/// Checks if there is anything defined in a specific index of a table.
-		/// </summary>
-		/// <param name="tableName">The name of the table to look inside.</param>
-		/// <param name="indexName">The name of the index to check inside that table.</param>
-		/// <returns>Whether that table var has been defined yet in the Lua state.</returns>
-		bool TableEntryIsDefined(const std::string &tableName, const std::string &indexName);
-
-
-
-
-
-		/// <summary>
-		/// Returns an ID string unique to this runtime for use by original presets that have scripts associated with them.
-		/// </summary>
-		/// <returns>Returns the unique ID as a string.</returns>
-		std::string GetNewPresetID();
-
-		/// <summary>
-		/// Returns an ID string unique to this runtime for use by individual objects that are also tracked in the Lua state and have scripts associated with them.
-		/// </summary>
-		/// <returns>Returns the unique ID as a string.</returns>
-		std::string GetNewObjectID();
-
-
-		/// <summary>
-		/// Gets a temporary Entity that can be accessed in the Lua state.
-		/// </summary>
-		/// <returns>The temporary entity. Ownership is NOT transferred!</returns>
-		Entity * GetTempEntity() const { return m_TempEntity; }
-
-		/// <summary>
-		/// Sets a temporary Entity that can be accessed in the Lua state.
-		/// </summary>
-		/// <param name="entity">The temporary entity. Ownership is NOT transferred!</param>
-		void SetTempEntity(Entity *entity) { m_TempEntity = entity; }
-
-		/// <summary>
-		/// Sets a temporary vector of entities that can be accessed in the Lua state
-		/// </summary>
-		/// <param name="entityVector">The temporary vector of entities. Ownership is NOT transferred!</param>
-		void SetTempEntityVector(std::vector<Entity *> entityVector) { m_TempEntityVector = entityVector; }
-
-
-
-		/// <summary>
-		/// Clears internal Lua package tables from all user-defined modules. Those must be reloaded with ReloadAllScripts().
-		/// </summary>
-		void ClearUserModuleCache();
-
-
-
-
-
-
 	private:
 
-		static constexpr int c_MaxOpenFiles = 10; //!<
+		static constexpr int c_MaxOpenFiles = 10; //!< The maximum number of files that can be opened with FileOpen at runtime.
 
-		lua_State *m_MasterState; //!< The master parent script state
+		lua_State *m_MasterState; //!< The master parent script state.
 
-		std::string m_LastError; //!< Description of the last error that occurred in the script execution
+		bool m_DisableLuaJIT; //!< Whether to disable LuaJIT or not. Disabling will skip loading the JIT library entirely as just setting 'jit.off()` seems to have no visible effect.
+
+		std::string m_LastError; //!< Description of the last error that occurred in the script execution.
 
 		long m_NextPresetID; //!< The next unique preset ID to hand out to the next Preset that wants to define some functions. This gets incremented each time a new one is requested to give unique ID's to all original presets.
 		long m_NextObjectID; //!< The next unique object ID to hand out to the next scripted Entity instance that wants to run its preset's scripts. This gets incremented each time a new one is requested to give unique ID's to all scripted objects.
 		Entity *m_TempEntity; //!< Temporary holder for an Entity object that we want to pass into the Lua state without fuss. Lets you export objects to lua easily.
 		std::vector<Entity *> m_TempEntityVector; //!< Temporary holder for a vector of Entities that we want to pass into the Lua state without a fuss. Usually used to pass arguments to special Lua functions.
 
-		std::array<FILE *, c_MaxOpenFiles> m_OpenedFiles; //!< Internal list of opened files used by File* functions
+		std::array<FILE *, c_MaxOpenFiles> m_OpenedFiles; //!< Internal list of opened files used by File functions.
 
 		/// <summary>
 		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.

@@ -14,10 +14,8 @@ namespace RTE {
 		m_LastError.clear();
 		m_NextPresetID = 0;
 		m_NextObjectID = 0;
-
 		m_TempEntity = nullptr;
 		m_TempEntityVector.clear();
-		m_TempEntityVector.shrink_to_fit();
 
 		m_OpenedFiles.fill(nullptr);
 	}
@@ -49,12 +47,21 @@ namespace RTE {
 		if (!luaJIT_setmode(m_MasterState, 0, LUAJIT_MODE_ENGINE | LUAJIT_MODE_ON)) { RTEAbort("Failed to initialize LuaJIT!"); }
 
 		// From LuaBind documentation:
-		// As mentioned in the Lua documentation, it is possible to pass an error handler function to lua_pcall(). Luabind makes use of lua_pcall() internally when calling member functions and free functions.
-		// It is possible to set the error handler function that Luabind will use globally:
+		// As mentioned in the Lua documentation, it is possible to pass an error handler function to lua_pcall(). LuaBind makes use of lua_pcall() internally when calling member functions and free functions.
+		// It is possible to set the error handler function that LuaBind will use globally:
 		//set_pcall_callback(&AddFileAndLineToError); //NOTE: This seems to do nothing
 
 		// Register all relevant bindings to the master state. Note that the order of registration is important, as bindings can't derive from an unregistered type (inheritance and all that).
 		luabind::module(m_MasterState)[
+			luabind::class_<LuaMan>("LuaManager")
+				.property("TempEntity", &LuaMan::GetTempEntity)
+				.def_readonly("TempEntities", &LuaMan::m_TempEntityVector, luabind::return_stl_iterator)
+				.def("FileOpen", &LuaMan::FileOpen)
+				.def("FileClose", &LuaMan::FileClose)
+				.def("FileReadLine", &LuaMan::FileReadLine)
+				.def("FileWriteLine", &LuaMan::FileWriteLine)
+				.def("FileEOF", &LuaMan::FileEOF),
+
 			SystemLuaBindings::RegisterVectorLuaBindings(),
 			SystemLuaBindings::RegisterBoxLuaBindings(),
 			EntityLuaBindings::RegisterSceneAreaLuaBindings(),
@@ -116,15 +123,6 @@ namespace RTE {
 			ManagerLuaBindings::RegisterSettingsManLuaBindings(),
 			ManagerLuaBindings::RegisterTimerManLuaBindings(),
 			ManagerLuaBindings::RegisterUInputManLuaBindings(),
-
-			luabind::class_<LuaMan>("LuaManager")
-				.property("TempEntity", &LuaMan::GetTempEntity)
-				.def_readonly("TempEntities", &LuaMan::m_TempEntityVector, luabind::return_stl_iterator)
-				.def("FileOpen", &LuaMan::FileOpen)
-				.def("FileClose", &LuaMan::FileClose)
-				.def("FileReadLine", &LuaMan::FileReadLine)
-				.def("FileWriteLine", &LuaMan::FileWriteLine)
-				.def("FileEOF", &LuaMan::FileEOF),
 			MiscLuaBindings::RegisterAlarmEventLuaBindings(),
 			MiscLuaBindings::RegisterInputDeviceLuaBindings(),
 			MiscLuaBindings::RegisterInputElementsLuaBindings(),
@@ -188,38 +186,61 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void LuaMan::ClearUserModuleCache() {
+		luaL_dostring(m_MasterState, "for m, n in pairs(package.loaded) do if type(n) == \"boolean\" then package.loaded[m] = nil; end; end;");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::string LuaMan::GetNewPresetID() {
+		char newID[16];
+		std::snprintf(newID, sizeof(newID), "Pre%05li", m_NextPresetID);
+
+		m_NextPresetID++;
+		return std::string(newID);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::string LuaMan::GetNewObjectID() {
+		char newID[16];
+		std::snprintf(newID, sizeof(newID), "Obj%05li", m_NextObjectID);
+
+		m_NextObjectID++;
+		return std::string(newID);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int LuaMan::RunScriptedFunction(const std::string &functionName, const std::string &selfObjectName, std::vector<std::string> variablesToSafetyCheck, std::vector<Entity *> functionEntityArguments, std::vector<std::string> functionLiteralArguments) {
-		std::string scriptString = "";
+		std::stringstream scriptString;
 		if (!variablesToSafetyCheck.empty()) {
-			scriptString += "if ";
+			scriptString << "if ";
 			for (const std::string &variableToSafetyCheck : variablesToSafetyCheck) {
-				if (&variableToSafetyCheck != &variablesToSafetyCheck[0]) {
-					scriptString += " and ";
-				}
-				scriptString += variableToSafetyCheck;
+				if (&variableToSafetyCheck != &variablesToSafetyCheck[0]) { scriptString << " and "; }
+				scriptString << variableToSafetyCheck;
 			}
-			scriptString += " then ";
+			scriptString << " then ";
 		}
+		if (!functionEntityArguments.empty()) { scriptString << "local entityArguments = LuaMan.TempEntities; "; }
+
+		scriptString << functionName + "(" + selfObjectName;
 		if (!functionEntityArguments.empty()) {
-			scriptString += "local entityArguments = LuaMan.TempEntities; ";
-		}
-		scriptString += functionName + "(" + selfObjectName;
-		if (!functionEntityArguments.empty()) {
-			g_LuaMan.SetTempEntityVector(functionEntityArguments);
+			SetTempEntityVector(functionEntityArguments);
 			for (const Entity *functionEntityArgument : functionEntityArguments) {
-				scriptString += ", (To" + functionEntityArgument->GetClassName() + " and To" + functionEntityArgument->GetClassName() + "(entityArguments()) or entityArguments())";
+				scriptString << ", (To" + functionEntityArgument->GetClassName() + " and To" + functionEntityArgument->GetClassName() + "(entityArguments()) or entityArguments())";
 			}
 		}
 		if (!functionLiteralArguments.empty()) {
-			for (const std::string functionLiteralArgument : functionLiteralArguments) {
-				scriptString += ", " + functionLiteralArgument;
+			for (const std::string &functionLiteralArgument : functionLiteralArguments) {
+				scriptString << ", " + functionLiteralArgument;
 			}
 		}
-		scriptString += ");";
+		scriptString << ");";
 
-		if (!variablesToSafetyCheck.empty()) { scriptString += " end;"; }
+		if (!variablesToSafetyCheck.empty()) { scriptString << " end;"; }
 
-		return RunScriptString(scriptString);
+		return RunScriptString(scriptString.str());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -346,118 +367,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int LuaMan::FileOpen(std::string filename, std::string mode) {
-		int fl = -1;
-
-		// Find some suitable file
-		for (int i = 0; i < c_MaxOpenFiles; ++i)
-			if (m_OpenedFiles.at(i) == 0) {
-				fl = i;
-				break;
-			}
-
-		if (fl == -1) {
-			g_ConsoleMan.PrintString("Error: Can't open file, no more slots.");
-			return -1;
-		}
-
-		//Check for path back-traversing and .rte extension. Everything is allowed to read or write only inside rte's
-		std::string dotString = "..";
-		std::string rteString = ".rte";
-
-		std::string fullPath = System::GetWorkingDirectory() + filename;
-
-		// Do not open paths with '..'
-		if (fullPath.find(dotString) != std::string::npos)
-			return -1;
-
-		// Do not open paths that aren't written correctly
-		if (!System::PathExistsCaseSensitive(std::filesystem::path(filename).lexically_normal().generic_string()))
-			return -1;
-
-		// Allow to edit files only inside .rte folders
-		if (fullPath.find(rteString) == std::string::npos)
-			return -1;
-
-		// Open file and save handle
-		FILE * f = fopen(fullPath.c_str(), mode.c_str());
-		if (f) {
-			m_OpenedFiles.at(fl) = f;
-			return fl;
-		}
-
-#ifdef _DEBUG
-		g_ConsoleMan.PrintString("Error: Can't open file. " + fullPath);
-#endif
-		return -1;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void LuaMan::FileClose(int file) {
-		if (file > -1 && file < c_MaxOpenFiles && m_OpenedFiles.at(file)) {
-			fclose(m_OpenedFiles.at(file));
-			m_OpenedFiles.at(file) = nullptr;
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void LuaMan::FileCloseAll() {
-		for (int file = 0; file < c_MaxOpenFiles; ++file) {
-			FileClose(file);
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	std::string LuaMan::FileReadLine(int file) {
-		if (file > -1 && file < c_MaxOpenFiles && m_OpenedFiles.at(file)) {
-			char buf[4096];
-			fgets(buf, 4095, m_OpenedFiles.at(file));
-			return (std::string(buf));
-		}
-		g_ConsoleMan.PrintString("Error: Tried to read a closed file, or read past EOF.");
-		return "";
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void LuaMan::FileWriteLine(int file, const std::string &line) {
-		if (file > -1 && file < c_MaxOpenFiles && m_OpenedFiles.at(file)) {
-			fputs(line.c_str(), m_OpenedFiles.at(file));
-		} else {
-			g_ConsoleMan.PrintString("Error: Tried to write to a closed file.");
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool LuaMan::FileEOF(int file) {
-		if (file > -1 && file < c_MaxOpenFiles && m_OpenedFiles.at(file) && !feof(m_OpenedFiles.at(file))) {
-			return false;
-		}
-		return true;
-	}
-
-
-
-
-
-
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void LuaMan::ClearUserModuleCache() {
-		luaL_dostring(m_MasterState, "for m, n in pairs(package.loaded) do if type(n) == \"boolean\" then package.loaded[m] = nil; end end");
-	}
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void LuaMan::SavePointerAsGlobal(void *objectToSave, const std::string &globalName) {
 		// Push the pointer onto the Lua stack.
 		lua_pushlightuserdata(m_MasterState, objectToSave);
@@ -498,32 +407,90 @@ namespace RTE {
 		return isDefined;
 	}
 
-
-
-
-
-
-
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::string LuaMan::GetNewPresetID() {
-		char newID[16];
-		std::snprintf(newID, sizeof(newID), "Pre%05li", m_NextPresetID);
+	int LuaMan::FileOpen(const std::string &fileName, const std::string &accessMode) {
+		int fileIndex = -1;
+		for (int i = 0; i < c_MaxOpenFiles; ++i) {
+			if (!m_OpenedFiles.at(i)) {
+				fileIndex = i;
+				break;
+			}
+		}
+		if (fileIndex == -1) {
+			g_ConsoleMan.PrintString("Error: Can't open file, maximum number of files already open.");
+			return -1;
+		}
 
-		m_NextPresetID++;
-		return std::string(newID);
+		std::string fullPath = System::GetWorkingDirectory() + fileName;
+
+		// Do not open paths with '..'
+		if (fullPath.find("..") != std::string::npos) {
+			return -1;
+		}
+		// Do not open paths that aren't written correctly
+		if (!System::PathExistsCaseSensitive(std::filesystem::path(fileName).lexically_normal().generic_string())) {
+			return -1;
+		}
+		// Allow to edit files only inside .rte folders
+		if (fullPath.find(System::GetModulePackageExtension()) == std::string::npos) {
+			return -1;
+		}
+
+		if (FILE * file = fopen(fullPath.c_str(), accessMode.c_str())) {
+			m_OpenedFiles.at(fileIndex) = file;
+			return fileIndex;
+		}
+		g_ConsoleMan.PrintString("Error: Failed to open file " + fullPath);
+		return -1;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::string LuaMan::GetNewObjectID() {
-		char newID[16];
-		std::snprintf(newID, sizeof(newID), "Obj%05li", m_NextObjectID);
+	void LuaMan::FileClose(int fileIndex) {
+		if (fileIndex > -1 && fileIndex < c_MaxOpenFiles && m_OpenedFiles.at(fileIndex)) {
+			fclose(m_OpenedFiles.at(fileIndex));
+			m_OpenedFiles.at(fileIndex) = nullptr;
+		}
+	}
 
-		m_NextObjectID++;
-		return std::string(newID);
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaMan::FileCloseAll() {
+		for (int file = 0; file < c_MaxOpenFiles; ++file) {
+			FileClose(file);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::string LuaMan::FileReadLine(int fileIndex) {
+		if (fileIndex > -1 && fileIndex < c_MaxOpenFiles && m_OpenedFiles.at(fileIndex)) {
+			char buf[4096];
+			fgets(buf, 4095, m_OpenedFiles.at(fileIndex));
+			return (std::string(buf));
+		}
+		g_ConsoleMan.PrintString("Error: Tried to read a closed file, or read past EOF.");
+		return "";
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaMan::FileWriteLine(int fileIndex, const std::string &line) {
+		if (fileIndex > -1 && fileIndex < c_MaxOpenFiles && m_OpenedFiles.at(fileIndex)) {
+			fputs(line.c_str(), m_OpenedFiles.at(fileIndex));
+		} else {
+			g_ConsoleMan.PrintString("Error: Tried to write to a closed file.");
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool LuaMan::FileEOF(int fileIndex) {
+		if (fileIndex > -1 && fileIndex < c_MaxOpenFiles && m_OpenedFiles.at(fileIndex) && !feof(m_OpenedFiles.at(fileIndex))) {
+			return false;
+		}
+		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

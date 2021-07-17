@@ -68,7 +68,6 @@ namespace RTE {
 
 			SystemLuaBindings::RegisterVectorLuaBindings(),
 			SystemLuaBindings::RegisterBoxLuaBindings(),
-			EntityLuaBindings::RegisterSceneAreaLuaBindings(),
 			EntityLuaBindings::RegisterEntityLuaBindings(),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, SoundContainer),
 			EntityLuaBindings::RegisterSoundSetLuaBindings(),
@@ -104,6 +103,7 @@ namespace RTE {
 			SystemLuaBindings::RegisterControllerLuaBindings(),
 			SystemLuaBindings::RegisterTimerLuaBindings(),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Scene),
+			EntityLuaBindings::RegisterSceneAreaLuaBindings(),
 			RegisterLuaBindingsOfAbstractType(EntityLuaBindings, Deployment),
 			SystemLuaBindings::RegisterDataModuleLuaBindings(),
 			ActivityLuaBindings::RegisterActivityLuaBindings(),
@@ -148,7 +148,7 @@ namespace RTE {
 			luabind::def("GetMPP", &GetMPP),
 			luabind::def("GetPPL", &GetPPL),
 			luabind::def("GetLPP", &GetLPP),
-			luabind::def("RoundFloatToPrecision", &RoundFloatToPrecision),
+			luabind::def("RoundFloatToPrecision", &RoundFloatToPrecision)
 		];
 
 		// Assign the manager instances to globals in the lua master state

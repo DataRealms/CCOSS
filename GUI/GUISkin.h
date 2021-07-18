@@ -1,36 +1,12 @@
 #ifndef _GUISKIN_
 #define _GUISKIN_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUISkin.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUISkin class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
+namespace RTE {
 
-
-namespace RTE
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUISkin
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Skin class used for the controls to get skin details 
-// Parent(s):       None.
-// Class history:   1/4/2004 GUISkin Created.
-
+/// <summary>
+/// Skin class used for the controls to get skin details.
+/// </summary>
 class GUISkin {
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
-private:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
 
 public:
 
@@ -42,7 +18,7 @@ public:
 //                  memory.
 // Arguments:       GUIScreen Interface.
 
-    GUISkin(GUIScreen *Screen);
+    explicit GUISkin(GUIScreen *Screen);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -88,7 +64,7 @@ public:
 // Description:     Gets a string value
 // Arguments:       Section, Variable, String pointer
 
-    bool GetValue(const std::string Section, const std::string Variable, std::string *Value);
+    bool GetValue(const std::string &Section, const std::string &Variable, std::string *Value);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -98,7 +74,7 @@ public:
 // Arguments:       Section, Variable, Integer array, max size of array
 // Returns:         Number of elements read
 
-    int GetValue(const std::string Section, const std::string Variable, int *Array, int MaxArraySize);
+    int GetValue(const std::string &Section, const std::string &Variable, int *Array, int MaxArraySize);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +83,7 @@ public:
 // Description:     Gets a single integer value.
 // Arguments:       Section, Variable, Integer pointer
 
-    bool GetValue(const std::string Section, const std::string Variable, int *Value);
+    bool GetValue(const std::string &Section, const std::string &Variable, int *Value);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -116,7 +92,7 @@ public:
 // Description:     Gets a single unsigned integer value.
 // Arguments:       Section, Variable, Unsigned Integer pointer
 
-    bool GetValue(const std::string Section, const std::string Variable, unsigned long *Value);
+    bool GetValue(const std::string &Section, const std::string &Variable, unsigned long *Value);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -125,7 +101,7 @@ public:
 // Description:     Creates a blank bitmap.
 // Arguments:       Width, Height.
 
-    GUIBitmap *CreateBitmap(int Width, int Height);
+    GUIBitmap * CreateBitmap(int Width, int Height);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -134,7 +110,7 @@ public:
 // Description:     Creates a bitmap from a filename.
 // Arguments:       Filename.
 
-    GUIBitmap * CreateBitmap(const std::string Filename);
+    GUIBitmap * CreateBitmap(const std::string &Filename);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -143,7 +119,7 @@ public:
 // Description:     Gets a cached copy of a font. Ownership is NOT transferred!
 // Arguments:       None.
 
-    GUIFont *GetFont(std::string Name);
+    GUIFont * GetFont(const std::string &Name);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -162,8 +138,7 @@ public:
 // Arguments:       Destination bitmap, Section name, Position, Size. Whether to draw the
 //                  background and frame, a GUIRect to be filled in with the border sizes of the four sides of the built standard rect.
 
-    void BuildStandardRect(GUIBitmap *Dest, const std::string Section, int X, int Y,
-                           int Width, int Height, bool buildBG = true, bool buildFrame = true, GUIRect *borderSizes = nullptr);
+    void BuildStandardRect(GUIBitmap *Dest, const std::string &Section, int X, int Y, int Width, int Height, bool buildBG = true, bool buildFrame = true, GUIRect *borderSizes = nullptr);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -179,33 +154,23 @@ public:
     unsigned long ConvertColor(unsigned long color, int targetDepth = 0);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
 private:
 
+    std::string m_Directory;
+    GUIScreen *m_Screen;
+    GUIBitmap *m_MousePointers[3];
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          LoadMousePointer
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Loads a mouse pointer image & details
-// Arguments:       Section name.
+    std::vector<GUIProperties *> m_PropList;
+    std::vector<GUIBitmap *> m_ImageCache;
+    std::vector<GUIFont *> m_FontCache;
 
-    GUIBitmap *LoadMousePointer(const std::string Section);
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Method:          LoadMousePointer
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Description:     Loads a mouse pointer image & details
+	// Arguments:       Section name.
 
-
-// Variables
-    std::string        m_Directory;
-    GUIScreen        *m_Screen;    
-    GUIBitmap        *m_MousePointers[3];
-
-    std::vector<GUIProperties *>    m_PropList;
-    std::vector<GUIBitmap *>    m_ImageCache;
-    std::vector<GUIFont *>        m_FontCache;
+	GUIBitmap * LoadMousePointer(const std::string &Section);
 };
-
-
-}; // namespace RTE
-
-
-#endif  //  _GUISKIN_
+};
+#endif

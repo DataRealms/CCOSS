@@ -1,44 +1,17 @@
 #ifndef _GUICOMBOBOX_
 #define _GUICOMBOBOX_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUIComboBox.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUIComboBox class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
 #include "GUITextPanel.h"
 #include "GUIListPanel.h"
 
-
-namespace RTE
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Forward Declarations
+namespace RTE {
 
 class GUIComboBoxButton;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUIComboBox
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A ComboBox control class.
-// Parent(s):       GUIControl, Panel.
-// Class history:   1/22/2004 GUIComboBox Created.
-
-class GUIComboBox :
-    public GUIControl,
-    public GUIPanel
-{
+/// <summary>
+/// A ComboBox control class.
+/// </summary>
+class GUIComboBox : public GUIControl, public GUIPanel {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
@@ -74,7 +47,7 @@ public:
 // Description:     Called when the control has been created.
 // Arguments:       Name, Position.
 
-    void Create(const std::string Name, int X, int Y, int Width = -1, int Height = -1) override;
+    void Create(const std::string &Name, int X, int Y, int Width = -1, int Height = -1) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +112,7 @@ public:
 // Arguments:       None.
 // Returns:         The ListPanel component of this ComboBox.
 
-    GUIListPanel *GetListPanel() { return m_ListPanel; }
+    GUIListPanel * GetListPanel() { return m_ListPanel; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -212,7 +185,7 @@ public:
 // Description:     Add an item to the list.
 // Arguments:       Name, Extra text, bitmap to show in the list, extra entity data
 
-    void AddItem(std::string Name, std::string ExtraText = "", GUIBitmap *pBitmap = 0, const Entity *pEntity = 0);
+    void AddItem(const std::string &Name, const std::string &ExtraText = "", GUIBitmap *pBitmap = nullptr, const Entity *pEntity = nullptr);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -227,7 +200,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ClearList
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears the liost.
+// Description:     Clears the list.
 // Arguments:       None.
 
     void ClearList();
@@ -258,7 +231,7 @@ public:
 //                  made.
 // Arguments:       None.
 
-    int GetOldSelectionIndex() { return m_OldSelection; }
+    int GetOldSelectionIndex() const { return m_OldSelection; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -287,7 +260,7 @@ public:
 // Arguments:       Index.
 // Returns:         Pointer to the item structure. 0 if the index was invalid.
 
-    GUIListPanel::Item *GetItem(int Index);
+    GUIListPanel::Item * GetItem(int Index);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -297,7 +270,7 @@ public:
 // Arguments:       Index.
 // Returns:         Pointer to the item structure. 0 if nothing valid is selected.
 
-    GUIListPanel::Item *GetSelectedItem() { return GetItem(GetSelectedIndex()); }
+    GUIListPanel::Item * GetSelectedItem() { return GetItem(GetSelectedIndex()); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -333,7 +306,7 @@ public:
 // Description:     Gets the drop down style of the combo box.
 // Arguments:       None.
 
-    int GetDropDownStyle();
+    int GetDropDownStyle() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -388,7 +361,7 @@ public:
 // Description:     Sets text (only if style is DropDown).
 // Arguments:       Text.
 
-    void SetText(const std::string Text);
+    void SetText(const std::string &Text);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -409,38 +382,25 @@ public:
 
     bool IsDropped() { return m_ListPanel->_GetVisible(); }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
 private:
 
-    GUIBitmap        *m_DrawBitmap;
-    int                m_OldSelection;
-    bool            m_CreatedList;
-    
-    int                m_DropHeight;
-    int                m_DropDownStyle;
+    GUIBitmap *m_DrawBitmap;
+    int m_OldSelection;
+    bool m_CreatedList;
 
-    GUITextPanel    *m_TextPanel;
-    GUIListPanel    *m_ListPanel;
-    GUIComboBoxButton    *m_Button;
+    int m_DropHeight;
+    int m_DropDownStyle;
+
+    GUITextPanel *m_TextPanel;
+    GUIListPanel *m_ListPanel;
+    GUIComboBoxButton *m_Button;
 };
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUIComboBoxButton
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A ComboBoxButton control class.
-// Parent(s):       Panel.
-// Class history:   1/22/2004 GUIComboBoxButton Created.
-
-class GUIComboBoxButton :    
-    public GUIPanel
-{
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
+/// <summary>
+/// A ComboBoxButton control class.
+/// </summary>
+class GUIComboBoxButton : public GUIPanel {
 
 public:
 
@@ -457,7 +417,7 @@ public:
 //                  system memory.
 // Arguments:       GUIManager.
 
-    GUIComboBoxButton(GUIManager *Manager);
+    explicit GUIComboBoxButton(GUIManager *Manager);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -522,18 +482,10 @@ public:
 
     void SetPushed(bool Pushed);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
 private:
 
-    GUIBitmap        *m_DrawBitmap;
-    bool            m_Pushed;
+    GUIBitmap *m_DrawBitmap;
+    bool m_Pushed;
 };
-
-
-}; // namespace RTE
-
-
-#endif  //  _GUICOMBOBOX_
+};
+#endif

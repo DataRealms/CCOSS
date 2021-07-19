@@ -1,9 +1,8 @@
 #include "LuaMan.h"
 
-#include "LuaBindingsManagers.h"
-#include "LuaBindingsActivities.h"
-#include "LuaBindingsGUI.h"
-#include "LuaBindingsMisc.h"
+#include "LuaBindingRegisterDefinitions.h"
+#include "LuaAdapters.h"
+#include "LuaAdaptersEntities.h"
 
 namespace RTE {
 

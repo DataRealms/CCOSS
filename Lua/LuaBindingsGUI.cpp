@@ -1,23 +1,10 @@
-#ifndef _RTELUABINDGUIS_
-#define _RTELUABINDGUIS_
-
-#include "LuaMacros.h"
-
-#include "GameActivity.h"
-#include "GUIBanner.h"
-#include "BuyMenuGUI.h"
-#include "SceneEditorGUI.h"
+#include "LuaBindingRegisterDefinitions.h"
 
 namespace RTE {
 
-	/// <summary>
-	/// Struct that contains Lua binding registration functions for GUI classes.
-	/// </summary>
-	struct GUILuaBindings {
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		LuaBindingRegisterFunctionForType(GUIBanner) {
+		LuaBindingRegisterFunctionDefinitionForType(GUILuaBindings, GUIBanner) {
 			return luabind::class_<GUIBanner>("GUIBanner")
 
 			.property("BannerText", &GUIBanner::GetBannerText)
@@ -51,7 +38,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		LuaBindingRegisterFunctionForType(BuyMenuGUI) {
+		LuaBindingRegisterFunctionDefinitionForType(GUILuaBindings, BuyMenuGUI) {
 			return luabind::class_<BuyMenuGUI>("BuyMenuGUI")
 
 			.property("ShowOnlyOwnedItems", &BuyMenuGUI::GetOnlyShowOwnedItems, &BuyMenuGUI::SetOnlyShowOwnedItems)
@@ -83,7 +70,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		LuaBindingRegisterFunctionForType(SceneEditorGUI) {
+		LuaBindingRegisterFunctionDefinitionForType(GUILuaBindings, SceneEditorGUI) {
 			return luabind::class_<SceneEditorGUI>("SceneEditorGUI")
 
 			.property("EditorMode", &SceneEditorGUI::GetEditorGUIMode, &SceneEditorGUI::SetEditorGUIMode)
@@ -110,6 +97,4 @@ namespace RTE {
 				luabind::value("EDITORGUIMODECOUNT", SceneEditorGUI::EditorGUIMode::EDITORGUIMODECOUNT)
 			];
 		}
-	};
 }
-#endif

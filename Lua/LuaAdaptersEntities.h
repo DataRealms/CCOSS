@@ -1,7 +1,5 @@
-#ifndef _RTELUAENTITYADAPTERS_
-#define _RTELUAENTITYADAPTERS_
-
-#include "LuaMacros.h"
+#ifndef _RTELUAADAPTERSENTITIES_
+#define _RTELUAADAPTERSENTITIES_
 
 #include "ConsoleMan.h"
 #include "PresetMan.h"
@@ -44,9 +42,137 @@
 
 namespace RTE {
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma region Entity Lua Adapter Macros
+	/// <summary>
+	/// Preset clone adapters that will return the exact pre-cast types so we don't have to do:
+	/// myNewActor = ToActor(PresetMan:GetPreset("AHuman", "Soldier Light", "All")):Clone()
+	/// but can instead do:
+	/// myNewActor = CreateActor("Soldier Light", "All");
+	/// or even:
+	/// myNewActor = CreateActor("Soldier Light");
+	/// or for a randomly selected Preset within a group:
+	/// myNewActor = RandomActor("Light Troops");
+	/// </summary>
+	#define LuaEntityCreate(TYPE) \
+		static TYPE * Create##TYPE(std::string preseName, std::string moduleName) { \
+			const Entity *entityPreset = g_PresetMan.GetEntityPreset(#TYPE, preseName, moduleName); \
+			if (!entityPreset) { \
+				g_ConsoleMan.PrintString(std::string("ERROR: There is no ") + std::string(#TYPE) + std::string(" of the Preset name \"") + preseName + std::string("\" defined in the \"") + moduleName + std::string("\" Data Module!")); \
+				return nullptr; \
+			} \
+			return dynamic_cast<TYPE *>(entityPreset->Clone()); \
+		} \
+		static TYPE * Create##TYPE(std::string preset) { \
+			return Create##TYPE(preset, "All"); \
+		} \
+		static TYPE * Random##TYPE(std::string groupName, int moduleSpaceID) { \
+			const Entity *entityPreset = g_PresetMan.GetRandomBuyableOfGroupFromTech(groupName, #TYPE, moduleSpaceID); \
+			if (!entityPreset) { entityPreset = g_PresetMan.GetRandomBuyableOfGroupFromTech(groupName, #TYPE, g_PresetMan.GetModuleID("Base.rte")); } \
+			if (!entityPreset) { entityPreset = g_PresetMan.GetRandomBuyableOfGroupFromTech("Any", #TYPE, moduleSpaceID); } \
+			if (!entityPreset) { \
+				g_ConsoleMan.PrintString(std::string("ERROR: Could not find any ") + std::string(#TYPE) + std::string(" defined in a Group called \"") + groupName + std::string("\" in module ") + g_PresetMan.GetDataModuleName(moduleSpaceID) + "!");	\
+				return nullptr; \
+			} \
+			return dynamic_cast<TYPE *>(entityPreset->Clone()); \
+		} \
+		static TYPE * Random##TYPE(std::string groupName, std::string dataModuleName) { \
+			int moduleSpaceID = g_PresetMan.GetModuleID(dataModuleName); \
+			const Entity *entityPreset = g_PresetMan.GetRandomBuyableOfGroupFromTech(groupName, #TYPE, moduleSpaceID); \
+			if (!entityPreset) { entityPreset = g_PresetMan.GetRandomBuyableOfGroupFromTech(groupName, #TYPE, g_PresetMan.GetModuleID("Base.rte")); } \
+			if (!entityPreset) { entityPreset = g_PresetMan.GetRandomBuyableOfGroupFromTech("Any", #TYPE, moduleSpaceID); } \
+			if (!entityPreset) { \
+				g_ConsoleMan.PrintString(std::string("ERROR: Could not find any ") + std::string(#TYPE) + std::string(" defined in a Group called \"") + groupName + std::string("\" in module ") + dataModuleName + "!"); \
+				return nullptr; \
+			} \
+			return dynamic_cast<TYPE *>(entityPreset->Clone()); \
+		} \
+		static TYPE * Random##TYPE(std::string groupName) { \
+			return Random##TYPE(groupName, "All"); \
+		}
 
-	// These are expanded by the preprocessor to all the different cloning function definitions.
+	/// <summary>
+	/// 
+	/// </summary>
+	#define LuaEntityClone(TYPE) \
+		static TYPE * Clone##TYPE(const TYPE *thisEntity) { \
+			if (thisEntity) { \
+				return dynamic_cast<TYPE *>(thisEntity->Clone()); \
+			} \
+			g_ConsoleMan.PrintString(std::string("ERROR: Tried to clone a ") + std::string(#TYPE) + std::string(" reference that is nil!")); \
+			return nullptr; \
+		}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	#define LuaEntityCast(TYPE) \
+		static TYPE * To##TYPE(Entity *entity) { \
+			TYPE *targetType = dynamic_cast<TYPE *>(entity); \
+			if (!targetType) { g_ConsoleMan.PrintString(std::string("ERROR: Tried to convert a non-") + std::string(#TYPE) + std::string(" Entity reference to an ") + std::string(#TYPE) + std::string(" reference!")); } \
+			return targetType; \
+		} \
+		static const TYPE * ToConst##TYPE(const Entity *entity) { \
+			const TYPE *targetType = dynamic_cast<const TYPE *>(entity); \
+			if (!targetType) { g_ConsoleMan.PrintString(std::string("ERROR: Tried to convert a non-") + std::string(#TYPE) + std::string(" Entity reference to an ") + std::string(#TYPE) + std::string(" reference!")); } \
+			return targetType; \
+		} \
+		static bool Is##TYPE(Entity *entity) { \
+			return dynamic_cast<TYPE *>(entity) ? true : false; \
+		}
+
+	/// <summary>
+	/// Special handling for passing ownership through properties. If you try to pass null to this normally, LuaJIT crashes.
+	/// This handling avoids that, and is a bit safer since there's no actual ownership transfer from Lua to C++.
+	/// </summary>
+	#define LuaPropertyOwnershipSafetyFaker(OBJECTTYPE, PROPERTYTYPE, SETTERFUNCTION) \
+		static void OBJECTTYPE##SETTERFUNCTION(OBJECTTYPE *luaSelfObject, PROPERTYTYPE *objectToSet) { \
+			luaSelfObject->SETTERFUNCTION(objectToSet ? dynamic_cast<PROPERTYTYPE *>(objectToSet->Clone()) : nullptr); \
+		}
+#pragma endregion
+
+#pragma region Entity Lua Adapters
+	// These methods are needed to specially handling removing attachables with Lua in order to avoid memory leaks. They have silly names cause luabind otherwise makes it difficult to pass values to them properly.
+	// Eventually RemoveAttachable should return the removed attachable, making this whole thing no longer unsafe and these methods unnecessary (there's a TODO in MOSRotating.h for it).
+	static bool RemoveAttachableLuaSafe4(MOSRotating *luaSelfObject, Attachable *attachable, bool addToMovableMan, bool addBreakWounds) {
+		if (!addToMovableMan && !attachable->IsSetToDelete()) {
+			attachable->SetToDelete();
+		}
+		return luaSelfObject->RemoveAttachable(attachable, addToMovableMan, addBreakWounds);
+	}
+
+	static bool RemoveAttachableLuaSafe3(MOSRotating *luaSelfObject, Attachable *attachable) {
+		return RemoveAttachableLuaSafe4(luaSelfObject, attachable, false, false);
+	}
+
+	static bool RemoveAttachableLuaSafe2(MOSRotating *luaSelfObject, long attachableUniqueID, bool addToMovableMan, bool addBreakWounds) {
+		if (MovableObject *attachableAsMovableObject = g_MovableMan.FindObjectByUniqueID(attachableUniqueID)) {
+			return RemoveAttachableLuaSafe4(luaSelfObject, dynamic_cast<Attachable *>(attachableAsMovableObject), addToMovableMan, addBreakWounds);
+		}
+		return false;
+	}
+
+	static bool RemoveAttachableLuaSafe1(MOSRotating *luaSelfObject, long attachableUniqueID) {
+		return RemoveAttachableLuaSafe2(luaSelfObject, attachableUniqueID, false, false);
+	}
+
+	static bool RemoveAttachableFromParentLuaSafe1(Attachable *luaSelfObject) {
+		if (luaSelfObject->IsAttached()) {
+			return RemoveAttachableLuaSafe4(luaSelfObject->GetParent(), luaSelfObject, false, false);
+		}
+		return false;
+	}
+
+	static bool RemoveAttachableFromParentLuaSafe2(Attachable *luaSelfObject, bool addToMovableMan, bool addBreakWounds) {
+		if (luaSelfObject->IsAttached()) {
+			return RemoveAttachableLuaSafe4(luaSelfObject->GetParent(), luaSelfObject, addToMovableMan, addBreakWounds);
+		}
+		return false;
+	}
+
+	static void GibThis(MOSRotating *luaSelfObject) {
+		luaSelfObject->GibThis();
+	}
+
 	LuaEntityCreate(SoundContainer);
 	LuaEntityCreate(Attachable);
 	LuaEntityCreate(Arm);
@@ -73,17 +199,6 @@ namespace RTE {
 	LuaEntityCreate(TerrainObject);
 	LuaEntityCreate(PEmitter);
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////////////////////////////////////////////
-	// Preset clone adapters that will return the exact pre-cast types so we don't have to do:
-	// myNewActor = ToActor(PresetMan:GetPreset("AHuman", "Soldier Light", "All")):Clone()
-	// but can instead do:
-	// myNewActor = CreateActor("Soldier Light", "All");
-	// or even:
-	// myNewActor = CreateActor("Soldier Light");
-	// or for a randomly selected Preset within a group:
-	// myNewActor = RandomActor("Light Troops");
 	LuaEntityClone(Entity);
 	LuaEntityClone(SoundContainer);
 	LuaEntityClone(SceneObject);
@@ -114,9 +229,6 @@ namespace RTE {
 	LuaEntityClone(TerrainObject);
 	LuaEntityClone(PEmitter);
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	// These are expanded by the preprocessor to all the different casting function definitions named: To[Type]()
 	LuaEntityCast(Entity);
 	LuaEntityCast(SoundContainer);
 	LuaEntityCast(SceneObject);
@@ -152,33 +264,24 @@ namespace RTE {
 	LuaEntityCast(TerrainObject);
 	LuaEntityCast(PEmitter);
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	LuaPropertyOwnershipSafetyFaker(MOSRotating, SoundContainer, SetGibSound);
-
 	LuaPropertyOwnershipSafetyFaker(Attachable, AEmitter, SetBreakWound);
 	LuaPropertyOwnershipSafetyFaker(Attachable, AEmitter, SetParentBreakWound);
-
 	LuaPropertyOwnershipSafetyFaker(AEmitter, Attachable, SetFlash);
 	LuaPropertyOwnershipSafetyFaker(AEmitter, SoundContainer, SetEmissionSound);
 	LuaPropertyOwnershipSafetyFaker(AEmitter, SoundContainer, SetBurstSound);
 	LuaPropertyOwnershipSafetyFaker(AEmitter, SoundContainer, SetEndSound);
-
 	LuaPropertyOwnershipSafetyFaker(ADoor, Attachable, SetDoor);
-
 	LuaPropertyOwnershipSafetyFaker(Leg, Attachable, SetFoot);
-
 	LuaPropertyOwnershipSafetyFaker(Actor, SoundContainer, SetBodyHitSound);
 	LuaPropertyOwnershipSafetyFaker(Actor, SoundContainer, SetAlarmSound);
 	LuaPropertyOwnershipSafetyFaker(Actor, SoundContainer, SetPainSound);
 	LuaPropertyOwnershipSafetyFaker(Actor, SoundContainer, SetDeathSound);
 	LuaPropertyOwnershipSafetyFaker(Actor, SoundContainer, SetDeviceSwitchSound);
-
 	LuaPropertyOwnershipSafetyFaker(ADoor, SoundContainer, SetDoorMoveStartSound);
 	LuaPropertyOwnershipSafetyFaker(ADoor, SoundContainer, SetDoorMoveSound);
 	LuaPropertyOwnershipSafetyFaker(ADoor, SoundContainer, SetDoorDirectionChangeSound);
 	LuaPropertyOwnershipSafetyFaker(ADoor, SoundContainer, SetDoorMoveEndSound);
-
 	LuaPropertyOwnershipSafetyFaker(AHuman, Attachable, SetHead);
 	LuaPropertyOwnershipSafetyFaker(AHuman, AEmitter, SetJetpack);
 	LuaPropertyOwnershipSafetyFaker(AHuman, Arm, SetFGArm);
@@ -188,7 +291,6 @@ namespace RTE {
 	LuaPropertyOwnershipSafetyFaker(AHuman, Attachable, SetFGFoot);
 	LuaPropertyOwnershipSafetyFaker(AHuman, Attachable, SetBGFoot);
 	LuaPropertyOwnershipSafetyFaker(AHuman, SoundContainer, SetStrideSound);
-
 	LuaPropertyOwnershipSafetyFaker(ACrab, Turret, SetTurret);
 	LuaPropertyOwnershipSafetyFaker(ACrab, AEmitter, SetJetpack);
 	LuaPropertyOwnershipSafetyFaker(ACrab, Leg, SetLeftFGLeg);
@@ -196,20 +298,16 @@ namespace RTE {
 	LuaPropertyOwnershipSafetyFaker(ACrab, Leg, SetRightFGLeg);
 	LuaPropertyOwnershipSafetyFaker(ACrab, Leg, SetRightBGLeg);
 	LuaPropertyOwnershipSafetyFaker(ACrab, SoundContainer, SetStrideSound);
-
 	LuaPropertyOwnershipSafetyFaker(Turret, HeldDevice, SetMountedDevice);
-
 	LuaPropertyOwnershipSafetyFaker(ACraft, SoundContainer, SetHatchOpenSound);
 	LuaPropertyOwnershipSafetyFaker(ACraft, SoundContainer, SetHatchCloseSound);
 	LuaPropertyOwnershipSafetyFaker(ACraft, SoundContainer, SetCrashSound);
-
 	LuaPropertyOwnershipSafetyFaker(ACDropShip, AEmitter, SetRightThruster);
 	LuaPropertyOwnershipSafetyFaker(ACDropShip, AEmitter, SetLeftThruster);
 	LuaPropertyOwnershipSafetyFaker(ACDropShip, AEmitter, SetURightThruster);
 	LuaPropertyOwnershipSafetyFaker(ACDropShip, AEmitter, SetULeftThruster);
 	LuaPropertyOwnershipSafetyFaker(ACDropShip, Attachable, SetRightHatch);
 	LuaPropertyOwnershipSafetyFaker(ACDropShip, Attachable, SetLeftHatch);
-
 	LuaPropertyOwnershipSafetyFaker(ACRocket, Leg, SetRightLeg);
 	LuaPropertyOwnershipSafetyFaker(ACRocket, Leg, SetLeftLeg);
 	LuaPropertyOwnershipSafetyFaker(ACRocket, AEmitter, SetMainThruster);
@@ -217,7 +315,6 @@ namespace RTE {
 	LuaPropertyOwnershipSafetyFaker(ACRocket, AEmitter, SetRightThruster);
 	LuaPropertyOwnershipSafetyFaker(ACRocket, AEmitter, SetULeftThruster);
 	LuaPropertyOwnershipSafetyFaker(ACRocket, AEmitter, SetURightThruster);
-
 	LuaPropertyOwnershipSafetyFaker(HDFirearm, Magazine, SetMagazine);
 	LuaPropertyOwnershipSafetyFaker(HDFirearm, Attachable, SetFlash);
 	LuaPropertyOwnershipSafetyFaker(HDFirearm, SoundContainer, SetPreFireSound);
@@ -228,123 +325,6 @@ namespace RTE {
 	LuaPropertyOwnershipSafetyFaker(HDFirearm, SoundContainer, SetEmptySound);
 	LuaPropertyOwnershipSafetyFaker(HDFirearm, SoundContainer, SetReloadStartSound);
 	LuaPropertyOwnershipSafetyFaker(HDFirearm, SoundContainer, SetReloadEndSound);
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void AddMO(MovableMan &movableMan, MovableObject *movableObject) {
-		if (movableMan.ValidMO(movableObject)) {
-			g_ConsoleMan.PrintString("ERROR: Tried to add a MovableObject that already exists in the simulation! " + movableObject->GetPresetName());
-		} else {
-			movableMan.AddMO(movableObject);
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void AddActor(MovableMan &movableMan, Actor *actor) {
-		if (movableMan.IsActor(actor)) {
-			g_ConsoleMan.PrintString("ERROR: Tried to add an Actor that already exists in the simulation!" + actor->GetPresetName());
-		} else {
-			movableMan.AddActor(actor);
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void AddItem(MovableMan &movableMan, MovableObject *item) {
-		if (movableMan.ValidMO(item)) {
-			g_ConsoleMan.PrintString("ERROR: Tried to add an Item that already exists in the simulation!" + item->GetPresetName());
-		} else {
-			movableMan.AddItem(item);
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void AddParticle(MovableMan &movableMan, MovableObject *particle) {
-		if (movableMan.ValidMO(particle)) {
-			g_ConsoleMan.PrintString("ERROR: Tried to add a Particle that already exists in the simulation!" + particle->GetPresetName());
-		} else {
-			movableMan.AddParticle(particle);
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/*
-	These methods are needed to specially handling removing attachables with Lua in order to avoid memory leaks. They have silly names cause luabind otherwise makes it difficult to pass values to them properly.
-	Eventually RemoveAttachable should return the removed attachable, making this whole thing no longer unsafe and these methods unnecessary (there's a TODO in MOSRotating.h for it).
-	*/
-	bool RemoveAttachableLuaSafe4(MOSRotating *luaSelfObject, Attachable *attachable, bool addToMovableMan, bool addBreakWounds) {
-		if (!addToMovableMan && !attachable->IsSetToDelete()) {
-			attachable->SetToDelete();
-		}
-		return luaSelfObject->RemoveAttachable(attachable, addToMovableMan, addBreakWounds);
-	}
-
-	bool RemoveAttachableLuaSafe3(MOSRotating *luaSelfObject, Attachable *attachable) {
-		return RemoveAttachableLuaSafe4(luaSelfObject, attachable, false, false);
-	}
-
-	bool RemoveAttachableLuaSafe2(MOSRotating *luaSelfObject, long attachableUniqueID, bool addToMovableMan, bool addBreakWounds) {
-		MovableObject *attachableAsMovableObject = g_MovableMan.FindObjectByUniqueID(attachableUniqueID);
-		if (attachableAsMovableObject) {
-			return RemoveAttachableLuaSafe4(luaSelfObject, dynamic_cast<Attachable *>(attachableAsMovableObject), addToMovableMan, addBreakWounds);
-		}
-		return false;
-	}
-
-	bool RemoveAttachableLuaSafe1(MOSRotating *luaSelfObject, long attachableUniqueID) {
-		return RemoveAttachableLuaSafe2(luaSelfObject, attachableUniqueID, false, false);
-	}
-
-	bool RemoveAttachableFromParentLuaSafe1(Attachable *luaSelfObject) {
-		if (luaSelfObject->IsAttached()) {
-			return RemoveAttachableLuaSafe4(luaSelfObject->GetParent(), luaSelfObject, false, false);
-		}
-		return false;
-	}
-
-	bool RemoveAttachableFromParentLuaSafe2(Attachable *luaSelfObject, bool addToMovableMan, bool addBreakWounds) {
-		if (luaSelfObject->IsAttached()) {
-			return RemoveAttachableLuaSafe4(luaSelfObject->GetParent(), luaSelfObject, addToMovableMan, addBreakWounds);
-		}
-		return false;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void GibThis(MOSRotating *pThis) {
-		pThis->GibThis();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	double NormalRand() {
-		return RandomNormalNum<double>();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	double PosRand() {
-		return RandomNum<double>();
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	double LuaRand(double num) {
-		return RandomNum<double>(1, num);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/// <summary>
-	/// Explicit deletion of any Entity instance that Lua owns. It will probably be handled by the GC, but this makes it instantaneous.
-	/// </summary>
-	/// <param name="entityToDelete">The Entity to delete.</param>
-	void DeleteEntity(Entity *entityToDelete) {
-		delete entityToDelete;
-		entityToDelete = nullptr;
-	}
+#pragma endregion
 }
 #endif

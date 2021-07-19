@@ -522,32 +522,12 @@
     <ClInclude Include="Menus\InventoryMenuGUI.h">
       <Filter>Menus</Filter>
     </ClInclude>
-    <ClInclude Include="Lua\LuaMacros.h">
-      <Filter>Lua</Filter>
-    </ClInclude>
-    <ClInclude Include="Lua\LuaBindingsSystem.h">
-      <Filter>Lua</Filter>
-    </ClInclude>
-    <ClInclude Include="Lua\LuaBindingsEntities.h">
-      <Filter>Lua</Filter>
-    </ClInclude>
-    <ClInclude Include="Lua\LuaEntityAdapters.h">
-      <Filter>Lua</Filter>
-    </ClInclude>
-    <ClInclude Include="Lua\LuaBindingsManagers.h">
-      <Filter>Lua</Filter>
-    </ClInclude>
-    <ClInclude Include="Lua\LuaBindingsGUI.h">
-      <Filter>Lua</Filter>
-    </ClInclude>
-    <ClInclude Include="Lua\LuaBindingsActivities.h">
-      <Filter>Lua</Filter>
-    </ClInclude>
     <ClInclude Include="Lua\LuaBindDefinitions.h">
       <Filter>Lua</Filter>
     </ClInclude>
-    <ClInclude Include="Lua\LuaBindingsMisc.h">
+    <ClInclude Include="Lua\LuaBindingRegisterDefinitions.h">
       <Filter>Lua</Filter>
+    </ClInclude>
     <ClInclude Include="GUI\GUIInterface.h">
       <Filter>GUI</Filter>
     </ClInclude>
@@ -556,6 +536,13 @@
     </ClInclude>
     <ClInclude Include="GUI\GUIWriter.h">
       <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Lua\LuaMacros.h" />
+    <ClInclude Include="Lua\LuaAdaptersEntities.h">
+      <Filter>Lua</Filter>
+    </ClInclude>
+    <ClInclude Include="Lua\LuaAdapters.h">
+      <Filter>Lua</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1039,6 +1026,24 @@
     </ClCompile>
     <ClCompile Include="GUI\GUIWriter.cpp">
       <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsMisc.cpp">
+      <Filter>Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsActivities.cpp">
+      <Filter>Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsEntities.cpp">
+      <Filter>Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsGUI.cpp">
+      <Filter>Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsManagers.cpp">
+      <Filter>Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsSystem.cpp">
+      <Filter>Lua</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,5 @@
-#ifndef _RTELUABINDDEFS_
-#define _RTELUABINDDEFS_
+#ifndef _RTELUABINDDEFINITIONS_
+#define _RTELUABINDDEFINITIONS_
 
 #define BOOST_BIND_GLOBAL_PLACEHOLDERS 1
 
@@ -45,7 +45,7 @@ namespace RTE {
 	/// </summary>
 	/// <param name="luaState">The Lua master state.</param>
 	/// <returns>An error signal, 1, so Lua correctly reports that there's been an error.</returns>
-	int AddFileAndLineToError(lua_State *luaState) {
+	static int AddFileAndLineToError(lua_State *luaState) {
 		lua_Debug luaDebug;
 		if (lua_getstack(luaState, 2, &luaDebug) > 0) {
 			lua_getinfo(luaState, "Sln", &luaDebug);

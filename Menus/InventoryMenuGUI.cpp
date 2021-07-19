@@ -290,6 +290,7 @@ namespace RTE {
 				m_NonMousePreviousEquippedItemsBoxButton = nullptr;
 				m_NonMousePreviousInventoryItemsBoxButton = nullptr;
 				m_NonMousePreviousReloadOrDropButton = nullptr;
+				if (m_NonMouseHighlightedButton) { m_NonMouseHighlightedButton->OnMouseLeave(0, 0, 0, 0); }
 				for (const auto &[inventoryItem, inventoryItemButton] : m_GUIInventoryItemButtons) {
 					inventoryItemButton->OnMouseLeave(0, 0, 0, 0);
 				}

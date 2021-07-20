@@ -239,7 +239,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::AnyKeyOrJoyInput() const {
-		bool input = keypressed();
+		bool input = AnyKeyPress();
 		if (!input) { input = AnyJoyInput(); }
 		return input;
 	}

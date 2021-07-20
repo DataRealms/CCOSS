@@ -412,7 +412,7 @@ namespace RTE {
 			writer.NewLineString("// Enabled Global Scripts", false);
 			writer.NewLine(false);
 			for (const auto &[scriptPresetName, scriptEnabled] : m_EnabledGlobalScripts) {
-				if (scriptEnabled) { writer.NewPropertyWithValue("EnableScript", scriptPresetName); }
+				if (scriptEnabled) { writer.NewPropertyWithValue("EnableGlobalScript", scriptPresetName); }
 			}
 		}
 

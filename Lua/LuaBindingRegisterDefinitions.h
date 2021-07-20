@@ -43,7 +43,7 @@ namespace RTE {
 	/// Convenience macro for defining a binding register function.
 	/// </summary>
 	#define LuaBindingRegisterFunctionDefinitionForType(OWNINGSCOPE, TYPE) \
-		luabind::scope OWNINGSCOPE##::Register##TYPE##LuaBindings()
+		luabind::scope OWNINGSCOPE::Register##TYPE##LuaBindings()
 
 	/// <summary>
 	/// Convenience macro for a LuaBind scope definition of an abstract type.
@@ -64,7 +64,7 @@ namespace RTE {
 	/// Convenience macro for calling a register function of a type.
 	/// </summary>
 	#define RegisterLuaBindingsOfType(OWNINGSCOPE, TYPE) \
-		OWNINGSCOPE##::Register##TYPE##LuaBindings()
+		OWNINGSCOPE::Register##TYPE##LuaBindings()
 
 	/// <summary>
 	/// Convenience macro for calling a register function of an abstract type, along with registering global bindings for adapters relevant to the type.
@@ -72,7 +72,7 @@ namespace RTE {
 	#define RegisterLuaBindingsOfAbstractType(OWNINGSCOPE, TYPE)															\
 		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (TYPE *(*)(Entity *))&To##TYPE),						\
 		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (const TYPE *(*)(const Entity *))&ToConst##TYPE),	\
-		OWNINGSCOPE##::Register##TYPE##LuaBindings()
+		OWNINGSCOPE::Register##TYPE##LuaBindings()
 
 	/// <summary>
 	/// Convenience macro for calling a register function of a concrete type, along with registering global bindings for adapters relevant to the type.
@@ -86,7 +86,7 @@ namespace RTE {
 		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (TYPE *(*)(Entity *))&To##TYPE),																\
 		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (const TYPE *(*)(const Entity *))&ToConst##TYPE),											\
 		luabind::def((std::string("Is") + std::string(#TYPE)).c_str(), (bool(*)(const Entity *))&Is##TYPE),															\
-		OWNINGSCOPE##::Register##TYPE##LuaBindings()
+		OWNINGSCOPE::Register##TYPE##LuaBindings()
 #pragma endregion
 
 	/// <summary>

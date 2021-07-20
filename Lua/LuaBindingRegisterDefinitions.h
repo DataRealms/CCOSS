@@ -66,6 +66,12 @@ namespace RTE {
 	/// <summary>
 	/// 
 	/// </summary>
+	#define RegisterLuaBindingsOfType(OWNINGSCOPE, TYPE) \
+		OWNINGSCOPE##::Register##TYPE##LuaBindings()
+
+	/// <summary>
+	/// 
+	/// </summary>
 	#define RegisterLuaBindingsOfAbstractType(OWNINGSCOPE, TYPE)															\
 		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (TYPE *(*)(Entity *))&To##TYPE),						\
 		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (const TYPE *(*)(const Entity *))&ToConst##TYPE),	\

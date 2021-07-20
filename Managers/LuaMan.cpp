@@ -255,27 +255,17 @@ namespace RTE {
 		int error = 0;
 
 		lua_pushcfunction(m_MasterState, &AddFileAndLineToError);
-		try {
-			// Load the script string onto the stack and then execute it with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
-			if (luaL_loadstring(m_MasterState, scriptString.c_str()) || lua_pcall(m_MasterState, 0, LUA_MULTRET, -2)) {
-				// Retrieve the error message then pop it off the stack to clean it up
-				m_LastError = lua_tostring(m_MasterState, -1);
-				lua_pop(m_MasterState, 1);
-				if (consoleErrors) {
-					g_ConsoleMan.PrintString("ERROR: " + m_LastError);
-					ClearErrors();
-				}
-				error = -1;
-			}
-		} catch (const std::exception &e) {
-			m_LastError = e.what();
+		// Load the script string onto the stack and then execute it with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
+		if (luaL_loadstring(m_MasterState, scriptString.c_str()) || lua_pcall(m_MasterState, 0, LUA_MULTRET, -2)) {
+			// Retrieve the error message then pop it off the stack to clean it up
+			m_LastError = lua_tostring(m_MasterState, -1);
+			lua_pop(m_MasterState, 1);
 			if (consoleErrors) {
 				g_ConsoleMan.PrintString("ERROR: " + m_LastError);
 				ClearErrors();
 			}
 			error = -1;
 		}
-
 		// Pop the file and line error handler off the stack to clean it up
 		lua_pop(m_MasterState, 1);
 
@@ -302,27 +292,17 @@ namespace RTE {
 		int error = 0;
 
 		lua_pushcfunction(m_MasterState, &AddFileAndLineToError);
-		try {
-			// Load the script file's contents onto the stack and then execute it with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
-			if (luaL_loadfile(m_MasterState, filePath.c_str()) || lua_pcall(m_MasterState, 0, LUA_MULTRET, -2)) {
-				// Retrieve the error message then pop it off the stack
-				m_LastError = lua_tostring(m_MasterState, -1);
-				lua_pop(m_MasterState, 1);
-				if (consoleErrors) {
-					g_ConsoleMan.PrintString("ERROR: " + m_LastError);
-					ClearErrors();
-				}
-				error = -1;
-			}
-		} catch (const std::exception &e) {
-			m_LastError = e.what();
+		// Load the script file's contents onto the stack and then execute it with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
+		if (luaL_loadfile(m_MasterState, filePath.c_str()) || lua_pcall(m_MasterState, 0, LUA_MULTRET, -2)) {
+			// Retrieve the error message then pop it off the stack
+			m_LastError = lua_tostring(m_MasterState, -1);
+			lua_pop(m_MasterState, 1);
 			if (consoleErrors) {
 				g_ConsoleMan.PrintString("ERROR: " + m_LastError);
 				ClearErrors();
 			}
 			error = -1;
 		}
-
 		// Pop the file and line error handler off the stack to clean it up
 		lua_pop(m_MasterState, 1);
 
@@ -331,27 +311,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool LuaMan::ExpressionIsTrue(std::string expression, bool consoleErrors) {
+	bool LuaMan::ExpressionIsTrue(const std::string &expression, bool consoleErrors) {
 		if (expression.empty()) {
 			return false;
 		}
 		bool result = false;
 
-		try {
-			// Push the script string onto the stack so we can execute it, and then actually try to run it
-			// Assign the result to a dedicated temp global variable
-			if (luaL_dostring(m_MasterState, (string("ExpressionResult = ") + expression + string(";")).c_str())) {
-				// Retrieve and pop the error message off the stack
-				m_LastError = string("When evaluating Lua expression: ") + lua_tostring(m_MasterState, -1);
-				lua_pop(m_MasterState, 1);
-				if (consoleErrors) {
-					g_ConsoleMan.PrintString("ERROR: " + m_LastError);
-					ClearErrors();
-				}
-				return false;
-			}
-		} catch (const std::exception &e) {
-			m_LastError = string("When evaluating Lua expression: ") + e.what();
+		// Push the script string onto the stack so we can execute it, and then actually try to run it. Assign the result to a dedicated temp global variable.
+		if (luaL_dostring(m_MasterState, (std::string("ExpressionResult = ") + expression + std::string(";")).c_str())) {
+			// Retrieve and pop the error message off the stack
+			m_LastError = std::string("When evaluating Lua expression: ") + lua_tostring(m_MasterState, -1);
+			lua_pop(m_MasterState, 1);
 			if (consoleErrors) {
 				g_ConsoleMan.PrintString("ERROR: " + m_LastError);
 				ClearErrors();

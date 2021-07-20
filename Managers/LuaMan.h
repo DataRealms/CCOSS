@@ -117,7 +117,7 @@ namespace RTE {
 		/// <param name="expression">The string with the expression to evaluate.</param>
 		/// <param name="consoleErrors">Whether to report any errors to the console immediately.</param>
 		/// <returns>Whether the expression was true.</returns>
-		bool ExpressionIsTrue(std::string expression, bool consoleErrors);
+		bool ExpressionIsTrue(const std::string &expression, bool consoleErrors);
 
 		/// <summary>
 		/// Takes a pointer to an object and saves it in the Lua state as a global of a specified variable name.

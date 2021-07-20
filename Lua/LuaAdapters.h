@@ -38,6 +38,14 @@ namespace RTE {
 			movableMan.AddParticle(particle);
 		}
 	}
+
+	/// <summary>
+	/// Gets the number of ticks per second. Lua can't handle int64 (or long long apparently) so we'll expose this specialized function.
+	/// </summary>
+	/// <returns>The number of ticks per second.</returns>
+	static double GetTicksPerSecond(const TimerMan &timerMan) {
+		return static_cast<double>(timerMan.GetTicksPerSecond());
+	}
 #pragma endregion
 
 #pragma region Misc Lua Adapters

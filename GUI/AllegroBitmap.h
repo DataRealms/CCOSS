@@ -1,279 +1,197 @@
 #ifndef _ALLEGROBITMAP_
 #define _ALLEGROBITMAP_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            AllegroBitmap.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     AllegroBitmap class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
-
-#include "GUI/Interface.h"
+#include "GUIInterface.h"
 #include "ContentFile.h"
-#include "allegro.h"
 
-namespace RTE
-{
-
-class ContentFile;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           AllegroBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A bitmap interface using the CDX Library bitmap
-// Parent(s):       GUIBitmap
-// Class history:   12/30/2003 CDXSurfaceInterface Created.
-//                  11/09/2005 Renamed to AllegroBitmap and ported to use Allegro instead of CDX.
-
-class AllegroBitmap :
-    public GUIBitmap
-{
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
-
-public:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     AllegroBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Constructor method used to instantiate a AllegroBitmap object in 
-//                  system memory.
-
-    AllegroBitmap();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     AllegroBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Constructor method used to instantiate a AllegroBitmap object in 
-//                  system memory.
-// Arguments:       BITMAP, ownership is NOT transferred!
-
-    AllegroBitmap(BITMAP *pBitmap);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Destructor:      ~AllegroBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destructor method used to clean up a AllegroBitmap object before deletion
-//                  from system memory.
-// Arguments:       None.
-
-	~AllegroBitmap() override { Destroy(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a blank bitmap
-// Arguments:       Width & Height and color depth (8 or 32)
-
-    bool Create(int Width, int Height, int Depth = 8);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates the bitmap from a filename
-// Arguments:       CDXScreen, Filename
-
-    bool Create(const std::string Filename);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and frees the bitmap
-// Arguments:       None.
-
-	void Destroy() override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draw a section of this bitmap onto another bitmap
-// Arguments:       Destination Bitmap, Position, Size
-
-    void Draw(GUIBitmap *pDestBitmap, int X, int Y, GUIRect *pRect);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DrawTrans
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draw a section of this bitmap onto another bitmap ignoring 
-//                  color-keyed pixels
-// Arguments:       Destination Bitmap, Position, Size
-
-    void DrawTrans(GUIBitmap *pDestBitmap, int X, int Y, GUIRect *pRect);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  DrawTransScaled
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draw this bitmap scaled onto another bitmap ignoring color-keyed pixels.
-// Arguments:       Destination Bitmap, Position, Size
-
-	void DrawTransScaled(GUIBitmap *pDestBitmap, int X, int Y, int width, int height) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  DrawLine
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws a line.
-// Arguments:       Start Position, End Position, Color.
-
-	void DrawLine(int x1, int y1, int x2, int y2, unsigned long Color) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DrawRectangle
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws a rectangle.
-// Arguments:       Position, Size, Color, Filled.
-
-    void DrawRectangle(int X, int Y, int Width, int Height, unsigned long Color, bool Filled) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the colour of a pixel at a specific point.
-// Arguments:       Point.
-
-    unsigned long GetPixel(int X, int Y) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the color of a pixel at a specific point.
-// Arguments:       Point, Color.
-
-    void SetPixel(int X, int Y, unsigned long Color) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetWidth
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the Width of the bitmap.
-// Arguments:       None.
-
-    int GetWidth() override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHeight
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the Height of the bitmap.
-// Arguments:       None.
-
-    int GetHeight() override;
-
-/* NA, color key is always 0 with allegro
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetColorKey
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the color key of the bitmap.
-// Arguments:       ColorKey.
-
-    void SetColorKey(unsigned long Key);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  GetColorKey
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the color key of the bitmap to teh color of the pixel in teh
-//                  upper right corner of the bitmap.
-// Arguments:       ColorKey.
-
-    void GetColorKey();
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  GetColorDepth
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the number of bits per pixel color depth of this bitmap.
-// Returns:         8, 16, 32 etc
-
-	int GetColorDepth() override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  GetClipRect
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the clipping rectangle of the bitmap.
-// Arguments:       Pointer to GUIRect struct to fill out.
-
-	void GetClipRect(GUIRect *Rect) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetClipRect
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the clipping rectangle of the bitmap.
-// Arguments:       Rectangle pointer. 0 for no clipping.
-
-	void SetClipRect(GUIRect *pRect) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  AddClipRect
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the clipping rectangle of the specified bitmap as the
-//                  intersection of its current clipping rectangle and the rectangle
-//                  described by the passed-in rect. 
-// Arguments:       Rectangle pointer.
-
-	void AddClipRect(GUIRect *Rect) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetDataPath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the path to the datafile object this GUIBitmap uses.
-// Arguments:       None.
-
-	std::string GetDataPath() override;
-
-
-    /// <summary>
-    /// Gets the underlying BITMAP of this AllegroBitmap.
-    /// </summary>
-    /// <returns>The underlying BITMAP of this AllegroBitmap.</returns>
-    BITMAP * GetBitmap() override { return m_pBitmap; }
-
-    /// <summary>
-    /// Indicates whether this AllegroBitmap even contains loaded bitmap data.
-    /// </summary>
-    /// <returns>Whether this contains bitmap data or not.</returns>
-	bool HasBitmap() override { return m_pBitmap != 0; }
-
-    /// <summary>
-    /// Sets the underlying Bitmap for this AllegroBitmap. Ownership is NOT transferred.
-    /// </summary>
-    /// <param name="newBitmap">A pointer to the new Bitmap for this AllegroBitmap.</param>
-    void SetBitmap(BITMAP *newBitmap) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
-private:
-
-    ContentFile     m_BitmapFile;
-    // This is not owned, unless m_SelfCreated is true
-    BITMAP          *m_pBitmap;
-    bool            m_SelfCreated;
-
+namespace RTE {
+
+	/// <summary>
+	/// Wrapper class to convert raw Allegro BITMAPs to GUI library bitmaps.
+	/// </summary>
+	class AllegroBitmap : public GUIBitmap {
+
+	public:
+
+#pragma region Creation
+		/// <summary>
+		/// Constructor method used to instantiate an AllegroBitmap object in system memory.
+		/// </summary>
+		AllegroBitmap() { Clear(); }
+
+		/// <summary>
+		/// Constructor method used to instantiate an AllegroBitmap object in system memory and make it ready for use.
+		/// </summary>
+		/// <param name="bitmap">The underlaying BITMAP of this AllegroBitmap. Ownership is NOT transferred!</param>
+		explicit AllegroBitmap(BITMAP *bitmap) { Clear(); m_Bitmap = bitmap; }
+
+		/// <summary>
+		/// Creates an AllegroBitmap from a file.
+		/// </summary>
+		/// <param name="fileName">File name to get the underlaying BITMAP from. Ownership is NOT transferred!</param>
+		void Create(const std::string &fileName);
+
+		/// <summary>
+		/// Creates an empty BITMAP that is owned by this AllegroBitmap.
+		/// </summary>
+		/// <param name="width">Bitmap width.</param>
+		/// <param name="height">Bitmap height.</param>
+		/// <param name="colorDepth">Bitmap color depth (8 or 32).</param>
+		void Create(int width, int height, int colorDepth = 8);
+#pragma endregion
+
+#pragma region Destruction
+		/// <summary>
+		/// Destructor method used to clean up a AllegroBitmap object before deletion from system memory.
+		/// </summary>
+		~AllegroBitmap() override { Destroy(); }
+
+		/// <summary>
+		/// Destroys and resets (through Clear()) the AllegroBitmap object.
+		/// </summary>
+		void Destroy() override;
+#pragma endregion
+
+#pragma region Getters and Setters
+		/// <summary>
+		/// Gets the path to the data file this AllegroBitmap uses.
+		/// </summary>
+		/// <returns>Path to the data file this AllegroBitmap uses.</returns>
+		std::string GetDataPath() const override { return m_BitmapFile.GetDataPath(); }
+
+		/// <summary>
+		/// Gets the underlying BITMAP of this AllegroBitmap.
+		/// </summary>
+		/// <returns>The underlying BITMAP of this AllegroBitmap.</returns>
+		BITMAP * GetBitmap() const override { return m_Bitmap; }
+
+		/// <summary>
+		/// Sets the underlying BITMAP for this AllegroBitmap. Ownership is NOT transferred.
+		/// </summary>
+		/// <param name="newBitmap">A pointer to the new BITMAP for this AllegroBitmap.</param>
+		void SetBitmap(BITMAP *newBitmap) override { Destroy(); m_Bitmap = newBitmap; }
+
+		/// <summary>
+		/// Gets the width of the bitmap.
+		/// </summary>
+		/// <returns>The width of the bitmap.</returns>
+		int GetWidth() const override;
+
+		/// <summary>
+		/// Gets the height of the bitmap.
+		/// </summary>
+		/// <returns>The height of the bitmap.</returns>
+		int GetHeight() const override;
+
+		/// <summary>
+		/// Gets the number of bits per pixel color depth of the bitmap.
+		/// </summary>
+		/// <returns>The color depth of the bitmap.</returns>
+		int GetColorDepth() const override;
+
+		/// <summary>
+		/// Gets the color of a pixel at a specific point on the bitmap.
+		/// </summary>
+		/// <param name="posX">X position on bitmap.</param>
+		/// <param name="posY">Y position on bitmap.</param>
+		/// <returns>The color of the pixel at the specified point.</returns>
+		unsigned long GetPixel(int posX, int posY) const override;
+
+		/// <summary>
+		/// Sets the color of a pixel at a specific point on the bitmap.
+		/// </summary>
+		/// <param name="posX">X position on bitmap.</param>
+		/// <param name="posY">Y position on bitmap.</param>
+		/// <param name="pixelColor">The color to set the pixel to.</param>
+		void SetPixel(int posX, int posY, unsigned long pixelColor) override;
+#pragma endregion
+
+#pragma region Clipping
+		/// <summary>
+		/// Gets the clipping rectangle of the bitmap.
+		/// </summary>
+		/// <param name="clippingRect">Pointer to a GUIRect to fill out.</param>
+		void GetClipRect(GUIRect *clippingRect) const override;
+
+		/// <summary>
+		/// Sets the clipping rectangle of the bitmap.
+		/// </summary>
+		/// <param name="clippingRect">Pointer to a GUIRect to use as the clipping rectangle, or nullptr for no clipping.</param>
+		void SetClipRect(GUIRect *clippingRect) override;
+
+		/// <summary>
+		/// Sets the clipping rectangle of the bitmap as the intersection of its current clipping rectangle and the passed-in rectangle.
+		/// </summary>
+		/// <param name="clippingRect">Pointer to a GUIRect to add to the existing clipping rectangle.</param>
+		void AddClipRect(GUIRect *clippingRect) override;
+#pragma endregion
+
+#pragma region Drawing
+		/// <summary>
+		/// Draw a section of this bitmap onto another bitmap
+		/// </summary>
+		/// <param name="destBitmap">Bitmap to draw onto.</param>
+		/// <param name="destX">Destination X position.</param>
+		/// <param name="destY">Destination Y position.</param>
+		/// <param name="srcPosAndSizeRect">Source bitmap position and size rectangle.</param>
+		void Draw(GUIBitmap *destBitmap, int destX, int destY, GUIRect *srcPosAndSizeRect) override;
+
+		/// <summary>
+		/// Draw a section of this bitmap onto another bitmap ignoring color-keyed pixels.
+		/// </summary>
+		/// <param name="destBitmap">Bitmap to draw onto.</param>
+		/// <param name="destX">Destination X position.</param>
+		/// <param name="destY">Destination Y position.</param>
+		/// <param name="srcPosAndSizeRect">Source bitmap position and size rectangle.</param>
+		void DrawTrans(GUIBitmap *destBitmap, int destX, int destY, GUIRect *srcPosAndSizeRect) override;
+
+		/// <summary>
+		/// Draw this bitmap scaled onto another bitmap ignoring color-keyed pixels.
+		/// </summary>
+		/// <param name="destBitmap">Bitmap to draw onto.</param>
+		/// <param name="destX">Destination X position.</param>
+		/// <param name="destY">Destination Y position.</param>
+		/// <param name="width">Target width of the bitmap.</param>
+		/// <param name="height">Target height of the bitmap.</param>
+		void DrawTransScaled(GUIBitmap *destBitmap, int destX, int destY, int width, int height) override;
+#pragma endregion
+
+#pragma region Primitive Drawing
+		/// <summary>
+		/// Draws a line on this bitmap.
+		/// </summary>
+		/// <param name="x1">Start position on X axis.</param>
+		/// <param name="y1">Start position on Y axis.</param>
+		/// <param name="x2">End position on X axis.</param>
+		/// <param name="y2">End position on Y axis.</param>
+		/// <param name="color">Color to draw this line with.</param>
+		void DrawLine(int x1, int y1, int x2, int y2, unsigned long color) override;
+
+		/// <summary>
+		/// Draws a rectangle on this bitmap.
+		/// </summary>
+		/// <param name="posX">Position on X axis.</param>
+		/// <param name="posY">Position on Y axis.</param>
+		/// <param name="width">Width of rectangle.</param>
+		/// <param name="height">Height of rectangle.</param>
+		/// <param name="color">Color to draw this rectangle with.</param>
+		/// <param name="filled">Whether to fill the rectangle with the set color or not.</param>
+		void DrawRectangle(int posX, int posY, int width, int height, unsigned long color, bool filled) override;
+#pragma endregion
+
+	private:
+
+		BITMAP *m_Bitmap; //!< The underlaying BITMAP.
+		ContentFile m_BitmapFile; //!< The ContentFile the underlaying BITMAP was created from, if created from a file.
+		bool m_SelfCreated; //!< Whether the underlaying BITMAP was created by this and is owned.
+
+		/// <summary>
+		/// Clears all the member variables of this AllegroBitmap, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
+
+		// Disallow the use of some implicit methods.
+		AllegroBitmap & operator=(const AllegroBitmap &rhs) = delete;
+	};
 };
-
-
-}; // namespace RTE
-
-
-#endif  // File
+#endif

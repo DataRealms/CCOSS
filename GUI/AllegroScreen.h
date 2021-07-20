@@ -1,140 +1,96 @@
 #ifndef _ALLEGROSCREEN_
 #define _ALLEGROSCREEN_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            AllegroScreen.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     AllegroScreen class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
+#include "AllegroBitmap.h"
 
+namespace RTE {
 
-struct BITMAP;
+	/// <summary>
+	/// Wrapper class to convert raw Allegro BITMAPs to GUI library backbuffer bitmaps.
+	/// </summary>
+	class AllegroScreen : public GUIScreen {
 
-namespace RTE
-{
+	public:
 
-class AllegroBitmap;
+#pragma region Creation
+		/// <summary>
+		/// Constructor method used to instantiate an AllegroScreen object in system memory and make it ready for use.
+		/// </summary>
+		/// <param name="backBuffer">A bitmap that represents the back buffer. Ownership is NOT transferred!</param>
+		explicit AllegroScreen(BITMAP *backBuffer) { m_BackBufferBitmap = std::make_unique<AllegroBitmap>(backBuffer); }
 
+		/// <summary>
+		/// Creates a bitmap from a file.
+		/// </summary>
+		/// <param name="fileName">File name to create bitmap from.</param>
+		/// <returns>Pointer to the created bitmap. Ownership IS transferred!</returns>
+		GUIBitmap * CreateBitmap(const std::string &fileName) override;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           AllegroScreen
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A screen interface using the CDX Library screen
-// Parent(s):       GUIScreen
-// Class history:   1/01/2004 AllegroScreen Created.
+		/// <summary>
+		/// Creates an empty bitmap.
+		/// </summary>
+		/// <param name="width">Bitmap width.</param>
+		/// <param name="height">Bitmap height.</param>
+		/// <returns>Pointer to the created bitmap. Ownership IS transferred!</returns>
+		GUIBitmap * CreateBitmap(int width, int height) override;
+#pragma endregion
 
-class AllegroScreen :
-    public GUIScreen
-{
+#pragma region Destruction
+		/// <summary>
+		/// Destructor method used to clean up a AllegroScreen object before deletion from system memory.
+		/// </summary>
+		~AllegroScreen() override { Destroy(); }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
+		/// <summary>
+		/// Destroys the AllegroScreen object.
+		/// </summary>
+		void Destroy() override { m_BackBufferBitmap.reset(); }
+#pragma endregion
 
-public:
+#pragma region Getters
+		/// <summary>
+		/// Gets the bitmap representing the screen.
+		/// </summary>
+		/// <returns>Pointer to the bitmap representing the screen. Ownership is NOT transferred!</returns>
+		GUIBitmap * GetBitmap() const override { return m_BackBufferBitmap.get(); }
+#pragma endregion
 
+#pragma region Drawing
+		/// <summary>
+		/// Draws a bitmap onto the back buffer.
+		/// </summary>
+		/// <param name="guiBitmap">The bitmap to draw to this AllegroScreen.</param>
+		/// <param name="destX">Destination X position</param>
+		/// <param name="destY">Destination Y position</param>
+		/// <param name="srcPosAndSizeRect">Source bitmap position and size rectangle.</param>
+		void DrawBitmap(GUIBitmap *guiBitmap, int destX, int destY, GUIRect *srcPosAndSizeRect) override;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     AllegroScreen
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Constructor method used to instantiate a ScreenInterface object in 
-//                  system memory.
-// Arguments:       A bitmp that represents the back buffer. Ownership IS NOT transferred!
+		/// <summary>
+		/// Draws a bitmap onto the back buffer ignoring color-keyed pixels.
+		/// </summary>
+		/// <param name="guiBitmap">The bitmap to draw to this AllegroScreen.</param>
+		/// <param name="destX">Destination X position</param>
+		/// <param name="destY">Destination Y position</param>
+		/// <param name="srcPosAndSizeRect">Source bitmap position and size rectangle.</param>
+		void DrawBitmapTrans(GUIBitmap *guiBitmap, int destX, int destY, GUIRect *srcPosAndSizeRect) override;
+#pragma endregion
 
-    AllegroScreen(BITMAP *pBackBuffer);
+#pragma region Virtual Override Methods
+		/// <summary>
+		/// Converts an 8bit palette index to a valid pixel format color.
+		/// </summary>
+		/// <param name="color">Color value in any bit depth. Will be converted to the format specified.</param>
+		/// <param name="targetColorDepth">An optional target color depth that will determine what format the color should be converted to. If this is 0, then the current video color depth will be used as target.</param>
+		/// <returns>The converted color.</returns>
+		unsigned long ConvertColor(unsigned long color, int targetColorDepth = 0) override;
+#pragma endregion
 
+	private:
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Destructor:      ~AllegroScreen
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destructor method used to clean up a AllegroScreen object before deletion
-//                  from system memory.
-// Arguments:       None.
+		std::unique_ptr<AllegroBitmap> m_BackBufferBitmap; //!< The AllegroBitmap that makes this AllegroScreen.
 
-	~AllegroScreen() override { Destroy(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroy the screen
-// Arguments:       None.
-
-	void Destroy() override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CreateBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a bitmap from a file
-// Arguments:       Filename
-
-    GUIBitmap * CreateBitmap(const std::string Filename) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CreateBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates an empty bitmap
-// Arguments:       Width and Height
-
-    GUIBitmap * CreateBitmap(int Width, int Height) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DrawBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws a bitmap onto the back buffer
-// Arguments:       Bitmap, destination position, source rectangle
-
-    void DrawBitmap(GUIBitmap *pGUIBitmap, int X, int Y, GUIRect *pRect);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          DrawBitmapTrans
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws a bitmap onto the back buffer using the colorkey.
-// Arguments:       Bitmap, destination position, source rectangle
-
-    void DrawBitmapTrans(GUIBitmap *pGUIBitmap, int X, int Y, GUIRect *pRect);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a bitmap representing the screen.
-// Arguments:       None.
-
-    GUIBitmap *GetBitmap();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ConvertColor
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Converts an 8bit palette index to a valid pixel format.
-//                  Primarily used for development in windowed mode.
-// Arguments:       Color value in any bit depth. Will be converted to the format specified.
-//                  An optional target color depth that will determine what format the color
-//                  should be converted to. If this is 0, then the current video color depth
-//                  will be used as target.
-
-    unsigned long ConvertColor(unsigned long color, int targetDepth = 0) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
-private:
-
-
-    AllegroBitmap   *m_pBackBitmap;
-
+		// Disallow the use of some implicit methods.
+		AllegroScreen & operator=(const AllegroScreen &rhs) = delete;
+	};
 };
-
-
-}; // namespace RTE
-
-
-#endif  //  _CDXSCREENINTERFACE_
+#endif

@@ -254,6 +254,7 @@ namespace RTE {
 		msg.InputElementReleased = 0;
 
 		msg.ResetActivityVote = g_UInputMan.KeyHeld(KEY_BACKSPACE) ? true : false;
+		msg.RestartActivityVote = g_UInputMan.KeyHeld(KEY_BACKSLASH) ? true : false;
 
 		unsigned int bitMask = 0x1;
 

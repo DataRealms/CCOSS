@@ -16,6 +16,22 @@ namespace RTE {
 		SerializableClassNameGetter
 		SerializableOverrideMethods
 
+		/// <summary>
+		/// Enumeration for different input scheme presets.
+		/// </summary>
+		enum InputPreset {
+			NoPreset,
+			PresetArrowKeys,
+			PresetWASDKeys,
+			PresetMouseWASDKeys,
+			PresetGenericDPad,
+			PresetGenericDualAnalog,
+			PresetGamepadSNES,
+			PresetGamepadDS4,
+			PresetGamepadXbox360,
+			InputPresetCount
+		};
+
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate an InputScheme object in system memory. Create() should be called before using the object.
@@ -35,6 +51,12 @@ namespace RTE {
 		/// Resets the entire InputScheme, including its inherited members, to their default settings or values.
 		/// </summary>
 		void Reset() override { Clear(); }
+
+		/// <summary>
+		/// Resets this InputScheme to the specified player's default input device and mappings.
+		/// </summary>
+		/// <param name="player">The preset player defaults this InputScheme should reset to.</param>
+		void ResetToPlayerDefaults(Players player);
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -60,13 +82,50 @@ namespace RTE {
 		/// Sets up a specific preset scheme that is sensible and recommended.
 		/// </summary>
 		/// <param name="schemePreset">The preset number to set the scheme to match. See InputPreset enumeration.</param>
-		void SetPreset(InputPreset schemePreset = InputPreset::PRESET_NONE);
+		void SetPreset(InputPreset schemePreset = InputPreset::NoPreset);
 
 		/// <summary>
 		/// Gets the InputMappings for this.
 		/// </summary>
 		/// <returns>The input mappings array, which is INPUT_COUNT large.</returns>
-		InputMapping * GetInputMappings() { return m_InputMappings.data(); }
+		std::array<InputMapping, InputElements::INPUT_COUNT> * GetInputMappings() { return &m_InputMappings; }
+#pragma endregion
+
+#pragma region Input Mapping Getters and Setters
+		/// <summary>
+		/// Gets the name of the key/mouse/joystick button/direction that a particular input element is mapped to.
+		/// </summary>
+		/// <param name="whichElement">Which input element to look up.</param>
+		/// <returns>A string with the appropriate clear text description of the mapped thing.</returns>
+		std::string GetMappingName(int whichElement) const;
+
+		/// <summary>
+		/// Gets which keyboard key is mapped to a specific input element.
+		/// </summary>
+		/// <param name="whichInput">Which input element to look up.</param>
+		/// <returns>Which keyboard key is mapped to the specified element.</returns>
+		int GetKeyMapping(int whichInput) const { return m_InputMappings.at(whichInput).GetKey(); }
+
+		/// <summary>
+		/// Sets a keyboard key as mapped to a specific input element.
+		/// </summary>
+		/// <param name="whichInput">Which input element to map to.</param>
+		/// <param name="whichKey">The scan code of which keyboard key to map to above input element.</param>
+		void SetKeyMapping(int whichInput, int whichKey) { m_InputMappings.at(whichInput).SetKey(whichKey); }
+
+		/// <summary>
+		/// Gets which joystick button is mapped to a specific input element.
+		/// </summary>
+		/// <param name="whichInput">Which input element to look up.</param>
+		/// <returns>Which joystick button is mapped to the specified element.</returns>
+		int GetJoyButtonMapping(int whichInput) const { return m_InputMappings.at(whichInput).GetJoyButton(); }
+
+		/// <summary>
+		/// Sets a joystick button as mapped to a specific input element.
+		/// </summary>
+		/// <param name="whichInput">Which input element to map to.</param>
+		/// <param name="whichButton">Which joystick button to map to the specified input element.</param>
+		void SetJoyButtonMapping(int whichInput, int whichButton) { m_InputMappings.at(whichInput).SetJoyButton(whichButton); }
 
 		/// <summary>
 		/// Get the deadzone value for this control scheme.
@@ -93,11 +152,27 @@ namespace RTE {
 		void SetJoystickDeadzoneType(DeadZoneType deadzoneType) { m_JoystickDeadzoneType = deadzoneType; }
 #pragma endregion
 
-#pragma region Concrete Methods
+#pragma region Input Mapping Capture Handling
 		/// <summary>
-		/// Sets some sensible default bindings for this.
+		/// Clears all mappings for a specific input element.
 		/// </summary>
-		//void SetupDefaults();
+		/// <param name="whichInput">Which input element to clear all mappings of.</param>
+		void ClearMapping(int whichInput) { m_InputMappings.at(whichInput).Reset(); }
+
+		/// <summary>
+		/// Checks for any key press this frame and creates an input mapping accordingly.
+		/// </summary>
+		/// <param name="whichInput">Which input element to map for.</param>
+		/// <returns>Whether there were any key presses this frame and therefore whether a mapping was successfully captured or not.</returns>
+		bool CaptureKeyMapping(int whichInput);
+
+		/// <summary>
+		/// Checks for any button or direction press this frame and creates an input mapping accordingly.
+		/// </summary>
+		/// <param name="whichJoy">Which joystick to scan for button and stick presses.</param>
+		/// <param name="whichInput">Which input element to map for.</param>
+		/// <returns>Whether there were any button or stick presses this frame and therefore whether a mapping was successfully captured or not.</returns>
+		bool CaptureJoystickMapping(int whichJoy, int whichInput);
 #pragma endregion
 
 	protected:

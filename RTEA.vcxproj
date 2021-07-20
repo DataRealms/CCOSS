@@ -42,8 +42,9 @@
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset Condition="'$(VisualStudioVersion)'=='15.0'">v141</PlatformToolset>
     <PlatformToolset Condition="'$(VisualStudioVersion)'=='16.0'">v142</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)'=='17.0'">v143</PlatformToolset>
     <WindowsTargetPlatformVersion Condition="'$(VisualStudioVersion)'=='15.0'">10.0.17763.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformVersion Condition="'$(VisualStudioVersion)'=='16.0'">10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(VisualStudioVersion)'!='15.0'">10.0</WindowsTargetPlatformVersion>
     <IntDir>_Bin\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>..\Cortex-Command-Community-Project-Data\</OutDir>
     <GenerateManifest>true</GenerateManifest>
@@ -538,14 +539,28 @@
     <ClInclude Include="Entities\PEmitter.h" />
     <ClInclude Include="Entities\Round.h" />
     <ClInclude Include="Entities\SoundSet.h" />
-    <ClInclude Include="GUI\Interface.h" />
+    <ClInclude Include="GUI\GUIInterface.h" />
+    <ClInclude Include="GUI\GUIReader.h" />
     <ClInclude Include="GUI\GUISound.h" />
+    <ClInclude Include="GUI\GUIWriter.h" />
+    <ClInclude Include="Managers\MenuMan.h" />
     <ClInclude Include="Managers\NetworkClient.h" />
     <ClInclude Include="Managers\NetworkServer.h" />
     <ClInclude Include="Managers\PerformanceMan.h" />
     <ClInclude Include="Managers\PostProcessMan.h" />
     <ClInclude Include="Managers\PrimitiveMan.h" />
-    <ClInclude Include="Menus\LoadingGUI.h" />
+    <ClInclude Include="Menus\LoadingScreen.h" />
+    <ClInclude Include="Menus\ModManagerGUI.h" />
+    <ClInclude Include="Menus\ScenarioActivityConfigGUI.h" />
+    <ClInclude Include="Menus\SettingsAudioGUI.h" />
+    <ClInclude Include="Menus\SettingsGameplayGUI.h" />
+    <ClInclude Include="Menus\SettingsGUI.h" />
+    <ClInclude Include="Menus\SettingsInputGUI.h" />
+    <ClInclude Include="Menus\SettingsInputMappingGUI.h" />
+    <ClInclude Include="Menus\SettingsInputMappingWizardGUI.h" />
+    <ClInclude Include="Menus\SettingsMiscGUI.h" />
+    <ClInclude Include="Menus\SettingsVideoGUI.h" />
+    <ClInclude Include="Menus\TitleScreen.h" />
     <ClInclude Include="Resources\resource.h" />
     <ClInclude Include="System\Atom.h" />
     <ClInclude Include="System\Constants.h" />
@@ -619,7 +634,6 @@
     <ClInclude Include="GUI\GUITextBox.h" />
     <ClInclude Include="GUI\GUITextPanel.h" />
     <ClInclude Include="GUI\GUIUtil.h" />
-    <ClInclude Include="GUI\WinUtil.h" />
     <ClInclude Include="Entities\ACDropShip.h" />
     <ClInclude Include="Entities\ACrab.h" />
     <ClInclude Include="Entities\ACraft.h" />
@@ -694,13 +708,27 @@
     <ClCompile Include="Entities\PEmitter.cpp" />
     <ClCompile Include="Entities\Round.cpp" />
     <ClCompile Include="Entities\SoundSet.cpp" />
+    <ClCompile Include="GUI\GUIReader.cpp" />
     <ClCompile Include="GUI\GUISound.cpp" />
+    <ClCompile Include="GUI\GUIWriter.cpp" />
+    <ClCompile Include="Managers\MenuMan.cpp" />
     <ClCompile Include="Managers\NetworkClient.cpp" />
     <ClCompile Include="Managers\NetworkServer.cpp" />
     <ClCompile Include="Managers\PerformanceMan.cpp" />
     <ClCompile Include="Managers\PostProcessMan.cpp" />
     <ClCompile Include="Managers\PrimitiveMan.cpp" />
-    <ClCompile Include="Menus\LoadingGUI.cpp" />
+    <ClCompile Include="Menus\LoadingScreen.cpp" />
+    <ClCompile Include="Menus\ModManagerGUI.cpp" />
+    <ClCompile Include="Menus\ScenarioActivityConfigGUI.cpp" />
+    <ClCompile Include="Menus\SettingsAudioGUI.cpp" />
+    <ClCompile Include="Menus\SettingsGameplayGUI.cpp" />
+    <ClCompile Include="Menus\SettingsGUI.cpp" />
+    <ClCompile Include="Menus\SettingsInputGUI.cpp" />
+    <ClCompile Include="Menus\SettingsInputMappingGUI.cpp" />
+    <ClCompile Include="Menus\SettingsInputMappingWizardGUI.cpp" />
+    <ClCompile Include="Menus\SettingsMiscGUI.cpp" />
+    <ClCompile Include="Menus\SettingsVideoGUI.cpp" />
+    <ClCompile Include="Menus\TitleScreen.cpp" />
     <ClCompile Include="System\PieSlice.cpp" />
     <ClCompile Include="Menus\InventoryMenuGUI.cpp" />
     <ClCompile Include="System\Atom.cpp" />
@@ -802,7 +830,6 @@
     <ClCompile Include="GUI\GUITextBox.cpp" />
     <ClCompile Include="GUI\GUITextPanel.cpp" />
     <ClCompile Include="GUI\GUIUtil.cpp" />
-    <ClCompile Include="GUI\WinUtil.cpp" />
     <ClCompile Include="Entities\ACDropShip.cpp" />
     <ClCompile Include="Entities\ACrab.cpp" />
     <ClCompile Include="Entities\ACraft.cpp" />

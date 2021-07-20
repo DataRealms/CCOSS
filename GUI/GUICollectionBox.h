@@ -1,34 +1,12 @@
 #ifndef _GUICOLLECTIONBOX_
 #define _GUICOLLECTIONBOX_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUICollectionBox.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUICollectionBox class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
+namespace RTE {
 
-
-namespace RTE
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUICollectionBox
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A collection box control class that contains child controls.
-// Parent(s):       GUIControl, Panel.
-// Class history:   1/15/2004 GUICollectionBox Created.
-
-class GUICollectionBox :
-    public GUIControl,
-    public GUIPanel
-{
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
+/// <summary>
+/// A collection box control class that contains child controls.
+/// </summary>
+class GUICollectionBox : public GUIControl, public GUIPanel {
 
 public:
 
@@ -71,7 +49,7 @@ public:
 // Description:     Called when the control has been created.
 // Arguments:       Name, Position.
 
-    void Create(const std::string Name, int X, int Y, int Width = -1, int Height = -1) override;
+    void Create(const std::string &Name, int X, int Y, int Width = -1, int Height = -1) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -265,11 +243,14 @@ public:
     void ApplyProperties(GUIProperties *Props) override;
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
 private:
 
+	GUIBitmap *m_Background;
+
+	bool m_DrawBackground;
+	int m_DrawType;
+	unsigned long m_DrawColor;
+	GUIBitmap *m_DrawBitmap;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          BuildBitmap
@@ -278,22 +259,6 @@ private:
 // Arguments:       None.
 
     void BuildBitmap();
-
-
-// Member data
-
-    GUIBitmap        *m_Background;
-
-    bool            m_DrawBackground;
-    int                m_DrawType;
-    unsigned long            m_DrawColor;
-    GUIBitmap        *m_DrawBitmap;
-
-
 };
-
-
-}; // namespace RTE
-
-
-#endif  //  _GUICOLLECTIONBOX_
+};
+#endif

@@ -225,5 +225,21 @@ namespace RTE {
 	/// <returns>A string of the float, rounded and displayed to chosen precision.</returns>
 	std::string RoundFloatToPrecision(float input, int precision, int roundingMode = 0);
 #pragma endregion
+
+#pragma region Misc
+	/// <summary>
+	/// Convenience method that takes in a double pointer array and returns a std::vector with its contents, because pointers-to-pointers are the devil. The passed in array is deleted in the process so no need to delete it manually.
+	/// </summary>
+	/// <param name="arrayOfType">The double pointer to convert to a std::vector.</param>
+	/// <param name="arraySize">The size of the double pointer array.</param>
+	template <typename Type> std::vector<Type *> ConvertDoublePointerToVectorOfPointers(Type **arrayOfType, size_t arraySize) {
+		std::unique_ptr<Type *[]> doublePointerArray = std::unique_ptr<Type *[]>(arrayOfType);
+		std::vector<Type *> outputVector;
+		for (size_t i = 0; i < arraySize; ++i) {
+			outputVector.emplace_back(doublePointerArray[i]);
+		}
+		return outputVector;
+	}
+#pragma endregion
 }
 #endif

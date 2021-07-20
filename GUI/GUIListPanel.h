@@ -1,42 +1,18 @@
 #ifndef _GUILISTPANEL_
 #define _GUILISTPANEL_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUIListPanel.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUIListPanel class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
 #include "GUIScrollPanel.h"
-#include "GUI/Interface.h"
+#include "GUIInterface.h"
 
 
-namespace RTE
-{
+namespace RTE {
 
 class Entity;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUIListPanel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A listbox panel class used for controls requiring a listbox.
-// Parent(s):       Panel.
-// Class history:   1/9/2004 GUIListPanel Created.
-
-class GUIListPanel :
-    public GUIPanel
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
+/// <summary>
+/// A listbox panel class used for controls requiring a listbox.
+/// </summary>
+class GUIListPanel : public GUIPanel {
 
 public:
 
@@ -124,15 +100,15 @@ public:
 //                  a Bitmap object pointer alternatively pointing to a bitmap to display
 //                  in the list. Ownership IS transferred!
 //                  An Extra menu-specific index that this item may be associated with.
-//                  Object isntance associated with the item. Ownership is NOT TRANSFERRED!
+//                  Object instance associated with the item. Ownership is NOT TRANSFERRED!
 
-    void AddItem(std::string Name, std::string rightText = "", GUIBitmap *pBitmap = 0, const Entity *pEntity = 0, const int extraIndex = -1);
+    void AddItem(const std::string &Name, const std::string &rightText = "", GUIBitmap *pBitmap = nullptr, const Entity *pEntity = 0, const int extraIndex = -1);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ClearList
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears the liost.
+// Description:     Clears the list.
 // Arguments:       None.
 
     void ClearList();
@@ -310,7 +286,7 @@ public:
 // Description:     Gets the multi-selection value.
 // Arguments:       None.
 
-    bool GetMultiSelect();
+    bool GetMultiSelect() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -328,7 +304,7 @@ public:
 // Description:     Gets the selected (or first in the selected list) item.
 // Arguments:       None.
 
-    Item *GetSelected();
+    Item * GetSelected();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -337,7 +313,7 @@ public:
 // Description:     Gets the item list.
 // Arguments:       None.
 
-    std::vector<Item *> *GetItemList();
+    std::vector<Item *> * GetItemList();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -346,7 +322,7 @@ public:
 // Description:     Gets an item at the index.
 // Arguments:       Index.
 
-    Item *GetItem(int Index);
+    Item * GetItem(int Index);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -355,14 +331,14 @@ public:
 // Description:     Gets an item at a specific absolute screen coordinate, if any.
 // Arguments:       The absolute screen coordinates to get the item from.
 
-    Item *GetItem(int X, int Y);
+    Item * GetItem(int X, int Y);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetItemHeight
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the drawing height of the item passed in.
-// Arguments:       Pointer to the Item to get the height of. Ownership is NOT xferred!
+// Arguments:       Pointer to the Item to get the height of. Ownership is NOT transferred!
 
     int GetItemHeight(Item *pItem);
 
@@ -375,10 +351,10 @@ public:
 //                  If the second one is specified, the height of the first is returned.
 //                  If the third is specified, the sum of the first and second items' heights
 //                  is returned. If 0 is passed, the entire stack's height is returned.
-// Arguments:       Pointer to the Item to get the height up to. Ownership is NOT xferred!
-//                  If 0 is passed, the entire stack's height is returned. 
+// Arguments:       Pointer to the Item to get the height up to. Ownership is NOT transferred!
+//                  If 0 is passed, the entire stack's height is returned.
 
-    int GetStackHeight(Item *pItem = 0);
+    int GetStackHeight(Item *pItem = nullptr);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -435,7 +411,7 @@ public:
 // Description:     Gets the selection list.
 // Arguments:       None.
 
-    std::vector<Item *>    *GetSelectionList();
+    std::vector<Item *> * GetSelectionList();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -524,12 +500,19 @@ public:
 	/// <param name="mouseScroll">True to enable scrolling, false to disable.</param>
 	void SetMouseScrolling(bool mouseScroll);
 
+	/// <summary>
+	/// Sets the thickness (width on vertical, height on horizontal) of the ListPanel's scroll bars and adjusts them to the new thickness.
+	/// </summary>
+	/// <param name="newThickness">The new scroll bar thickness, in pixels.</param>
+	void SetScrollBarThickness(int newThickness) { m_ScrollBarThickness = newThickness; AdjustScrollbars(); }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
+	/// <summary>
+	/// Sets the padding around the ListPanel's scrollbars and adjusts them to the new padding. Used to better size and position scrollbars within panel bounds, allowing to not overdraw on panel borders.
+	/// </summary>
+	/// <param name="newPadding">The new scrollbar padding, in pixels.</param>
+	void SetScrollBarPadding(int newPadding) { m_ScrollBarPadding = newPadding; AdjustScrollbars(); }
 
-protected:
-
+	protected:
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          BuildBitmap
@@ -537,14 +520,41 @@ protected:
 // Description:     Build the bitmap.
 // Arguments:       UpdateBase, UpdateText.
 
-    void BuildBitmap(bool UpdateBase, bool UpdateText);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
+	void BuildBitmap(bool UpdateBase, bool UpdateText);
 
 private:
 
+	GUISkin *m_Skin;
+	GUIBitmap *m_BaseBitmap;
+	GUIBitmap *m_DrawBitmap;
+	GUIBitmap *m_FrameBitmap;
+	unsigned long m_FontSelectColor;
+
+	bool m_UpdateLocked;
+
+	GUIScrollPanel *m_HorzScroll;
+	GUIScrollPanel *m_VertScroll;
+	bool m_HorzScrollEnabled;
+	bool m_VertScrollEnabled;
+	int m_ScrollBarThickness; //!< The thickness (width on vertical, height on horizontal) of the ListPanel's scroll bars, in pixels.
+	int m_ScrollBarPadding; //!< The padding around the scrollbars, in pixels. Used to better size and position scrollbars within panel bounds, allowing to not overdraw on panel borders.
+
+	bool m_CapturedHorz;
+	bool m_CapturedVert;
+	bool m_ExternalCapture;
+
+	int m_LargestWidth;
+	bool m_MultiSelect;
+	bool m_HotTracking;
+	int m_LastSelected;
+	bool m_LoopSelectionScroll; //!< Whether the list panel scrolls in a loop or not, while scrolling the selection list (as opposed to the scrollbar).
+	bool m_MouseScroll; //!< Whether the list panel enables scrolling with the mouse scroll wheel.
+
+	bool m_AlternateDrawMode; // This draws items differently, not with boxes etc.
+
+	std::vector<Item *> m_Items;
+	std::vector<Item *> m_SelectedList;
+	unsigned long m_SelectedColorIndex;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          BuildDrawBitmap
@@ -585,44 +595,6 @@ private:
 	/// </summary>
 	/// <param name="MouseWheelChange">Amount and direction of scrolling. Positive to scroll up, negative to scroll down.</param>
 	void SelectionListScrolling(int mouseWheelChange);
-
-
-// Members    
-
-    GUISkin                *m_Skin;
-    GUIBitmap            *m_BaseBitmap;
-    GUIBitmap            *m_DrawBitmap;
-    GUIBitmap            *m_FrameBitmap;
-    unsigned long                m_FontSelectColor;
-
-    bool                m_UpdateLocked;
-
-    GUIScrollPanel        *m_HorzScroll;
-    GUIScrollPanel        *m_VertScroll;
-    bool                m_HorzScrollEnabled;
-    bool                m_VertScrollEnabled;
-
-    bool                m_CapturedHorz;
-    bool                m_CapturedVert;
-    bool                m_ExternalCapture;
-
-    int                    m_LargestWidth;
-    bool                m_MultiSelect;
-    bool                m_HotTracking;
-    int                    m_LastSelected;
-	bool				m_LoopSelectionScroll; //!< Whether the list panel scrolls in a loop or not, while scrolling the selection list (as opposed to the scrollbar).
-	bool				m_MouseScroll; //!< Whether the list panel enables scrolling with the mouse scroll wheel.
-    
-    // This draws items differently, not with boxes etc.
-    bool                m_AlternateDrawMode;
-
-    std::vector<Item *>    m_Items;
-    std::vector<Item *>    m_SelectedList;
-    unsigned long                m_SelectedColorIndex;
 };
-
-
-}; // namespace RTE
-
-
-#endif  //  _GUILISTPANEL_
+};
+#endif

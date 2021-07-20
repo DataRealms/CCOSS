@@ -20,14 +20,12 @@
 #include <lz4.h>
 #include <lz4hc.h>
 
-extern bool g_ResetActivity;
-extern bool g_InActivity;
-
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkServer::BackgroundSendThreadFunction(NetworkServer *server, short player) {
+		const int sleepTime = 1000000 / server->m_EncodingFps;
 		while (server->IsServerModeEnabled() && server->IsPlayerConnected(player)) {
 			if (server->NeedToSendSceneSetupData(player) && server->IsSceneAvailable(player)) {
 				server->SendSceneSetupData(player);
@@ -37,19 +35,13 @@ namespace RTE {
 				server->SendSceneData(player);
 			}
 			if (server->SendFrameData(player)) {
-				int ret = server->SendFrame(player);
-				server->SetMSecsToSleep(player, ret / 1000);
-				if (ret > 0) { std::this_thread::sleep_for(std::chrono::microseconds(ret)); }
+				server->SendFrame(player);
+				std::this_thread::sleep_for(std::chrono::microseconds(sleepTime));
 			}
 			server->UpdateStats(player);
 		}
 		server->SetThreadExitReason(player, NetworkServer::THREAD_FINISH);
-/*
-#ifdef DEBUG_BUILD
-		// Not thread safe at all to do this, just for debugging purposes
-		g_ConsoleMan.PrintString("Thread exited " + player);
-#endif
-*/
+
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -91,7 +83,8 @@ namespace RTE {
 			m_SceneAvailable[i] = false;
 			m_SendFrameData[i] = false;
 
-			m_ResetActivityVotes[i] = false;
+			m_EndActivityVotes[i] = false;
+			m_RestartActivityVotes[i] = false;
 
 			m_FrameNumbers[i] = 0;
 
@@ -467,6 +460,7 @@ namespace RTE {
 				msg.MouseButtonHeld[i] = m->MouseButtonHeld[i];
 			}
 			msg.ResetActivityVote = m->ResetActivityVote;
+			msg.RestartActivityVote = m->RestartActivityVote;
 
 			msg.MouseWheelMoved = m->MouseWheelMoved;
 
@@ -488,6 +482,7 @@ namespace RTE {
 					if (msg.MouseButtonHeld[i] != lastmsg.MouseButtonHeld[i]) { skip = false; }
 				}
 				if (msg.ResetActivityVote != lastmsg.ResetActivityVote) { skip = false; }
+				if (msg.RestartActivityVote != lastmsg.RestartActivityVote) { skip = false; }
 
 				if (msg.MouseWheelMoved != lastmsg.MouseWheelMoved) { skip = false; }
 
@@ -542,7 +537,8 @@ namespace RTE {
 				bitMask <<= 1;
 			}
 
-			m_ResetActivityVotes[player] = msg.ResetActivityVote;
+			m_EndActivityVotes[player] = msg.ResetActivityVote;
+			m_RestartActivityVotes[player] = msg.RestartActivityVote;
 
 			// We need to replace mouse input obtained from the allegro with mouse input obtained from network clients
 			GUIInput::SetNetworkMouseMovement(player, msg.MouseX, msg.MouseY);
@@ -1158,45 +1154,13 @@ namespace RTE {
 		double fps = static_cast<double>(m_EncodingFps);
 		double secsPerFrame = 1.0 / fps;
 		double secsSinceLastFrame = static_cast<double>(currentTicks - m_LastFrameSentTime[player]) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
-		int microSeconds = 1000000;
 
 		// Fix for an overflow which may happen if server lags for a few seconds when loading activities
 		if (secsSinceLastFrame < 0) { secsSinceLastFrame = secsPerFrame; }
 
-		// Is it time to send frame?
-		// Return time to sleep till next frame in microseconds
-		m_MSecsSinceLastUpdate[player] = static_cast<long>(secsSinceLastFrame * 1000.0);
-
-		if (secsSinceLastFrame < secsPerFrame) {
-			SetThreadExitReason(player, NetworkServer::TOO_EARLY_TO_SEND);
-			return static_cast<int>((secsPerFrame - secsSinceLastFrame) * microSeconds);
-		}
-
-		// Accumulate delayed frames counter for stats
-		if (secsSinceLastFrame > secsPerFrame * 1.5) { m_DelayedFrames[player]++; }
-
 		m_MsecPerFrame[player] = static_cast<int>(secsSinceLastFrame * 1000.0);
 
 		m_LastFrameSentTime[player] = g_TimerMan.GetRealTickCount();
-
-		// Check for congestion
-		RakNet::RakNetStatistics rns;
-
-		m_Server->GetStatistics(m_ClientConnections[player].ClientId, &rns);
-
-		m_SendBufferBytes[player] = (int)rns.bytesInSendBuffer[MEDIUM_PRIORITY] + (int)rns.bytesInSendBuffer[HIGH_PRIORITY];
-		m_SendBufferMessages[player] = (int)rns.messageInSendBuffer[MEDIUM_PRIORITY] + (int)rns.messageInSendBuffer[HIGH_PRIORITY];
-
-		if (rns.isLimitedByCongestionControl) {
-			SetThreadExitReason(player, NetworkServer::SEND_BUFFER_IS_LIMITED_BY_CONGESTION);
-			m_FramesSkipped[player]++;
-			return static_cast<int>((1.0 / fps) * microSeconds);
-		}
-		if (rns.messageInSendBuffer[MEDIUM_PRIORITY] > 1000) {
-			SetThreadExitReason(player, NetworkServer::SEND_BUFFER_IS_FULL);
-			m_FramesSkipped[player]++;
-			return 0;
-		}
 
 		// Wait till FrameMan releases bitmap
 		SetThreadExitReason(player, NetworkServer::LOCKED);
@@ -1543,7 +1507,7 @@ namespace RTE {
 			g_FrameMan.GetLargeFont()->DrawAligned(&guiBMP, midX, 20, "NOT CONNECTED TO NAT SERVICE", GUIFont::Centre);
 		}
 
-		if (g_InActivity) {
+		if (g_ActivityMan.IsInActivity()) {
 			const GameActivity *gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
 			if (gameActivity) {
 				std::snprintf(buf, sizeof(buf), "Activity: %s   Players: %d", gameActivity->GetPresetName().c_str(), gameActivity->GetPlayerCount());
@@ -1679,32 +1643,54 @@ namespace RTE {
 			}
 
 			// Process reset votes
-			int votesNeeded = 0;
-			int votes = 0;
-			for (short player = 0; player < c_MaxClients; player++) {
-				if (IsPlayerConnected(player)) {
-					votesNeeded++;
-					if (m_ResetActivityVotes[player]) { votes++; }
-				}
-			}
-			if (votes > 0) {
-				char buf[128];
+			// Only reset gameplay activities, and not server lobby
+			if (g_ActivityMan.IsInActivity() && g_ActivityMan.GetActivity()->GetPresetName() != "Multiplayer Lobby") {
 
-				std::snprintf(buf, sizeof(buf), "Voting to end activity %d of %d", votes, votesNeeded);
-				for (short i = 0; i < c_MaxClients; i++) {
-					g_FrameMan.SetScreenText(buf, i, 0, -1, false);
-				}
+				int votesNeeded = 0;
+				int endActivityVotes = 0;
+				int restartVotes = 0;
 
-			}
-			if (votes == votesNeeded && votesNeeded > 0) {
 				for (short player = 0; player < c_MaxClients; player++) {
-					m_ResetActivityVotes[player] = false;
+					if (IsPlayerConnected(player)) {
+						votesNeeded++;
+						if (m_EndActivityVotes[player]) { endActivityVotes++; }
+						if (m_RestartActivityVotes[player]) { restartVotes++; }
+					}
 				}
-				// Only reset gameplay activities, and not server lobby
-				if (g_InActivity && g_ActivityMan.GetActivity()->GetPresetName() != "Multiplayer Lobby") {
-					g_ActivityMan.EndActivity();
-					g_ResetActivity = true;
-					g_InActivity = false;
+
+				std::string displayMsg = "";
+
+				if (endActivityVotes > 0) {
+					displayMsg = "Voting to end activity: " + std::to_string(endActivityVotes) + " of " + std::to_string(votesNeeded);
+				}
+				if (restartVotes > 0) {
+					if (!displayMsg.empty()) { displayMsg += "\n"; }
+					displayMsg += "Voting to restart activity: " + std::to_string(restartVotes) + " of " + std::to_string(votesNeeded);
+				}
+
+				if (votesNeeded > 0 && (endActivityVotes > 0 || restartVotes > 0)) {
+					for (short i = 0; i < c_MaxClients; i++) {
+						g_FrameMan.SetScreenText(displayMsg, g_ActivityMan.GetActivity()->ScreenOfPlayer(i), 0, 500);
+						g_ActivityMan.GetActivity()->ResetMessageTimer(i);
+					}
+
+					// establish timer so restarts can only occur once per 5 seconds
+					long long currentTicks = g_TimerMan.GetRealTickCount();
+					int minRestartInterval = 5;
+
+					if (endActivityVotes >= votesNeeded) {
+						g_ActivityMan.EndActivity();
+						g_ActivityMan.SetRestartActivity();
+						g_ActivityMan.SetInActivity(false);
+					} else if (restartVotes >= votesNeeded && ((currentTicks - m_LatestRestartTime > (g_TimerMan.GetTicksPerSecond() * minRestartInterval) || m_LatestRestartTime == 0))) {
+						m_LatestRestartTime = currentTicks;
+						g_ActivityMan.RestartActivity();
+					}
+
+					for (short player = 0; player < c_MaxClients; player++) {
+						m_EndActivityVotes[player] = false;
+						m_RestartActivityVotes[player] = false;
+					}
 				}
 			}
 		}
@@ -1712,13 +1698,10 @@ namespace RTE {
 		DrawStatisticsData();
 
 		// Clear sound events for unconnected players because AudioMan does not know about their state and stores broadcast sounds to their event lists
-		std::list<AudioMan::NetworkSoundData> soundList;
-		std::list<AudioMan::NetworkMusicData> musicList;
-
 		for (short player = 0; player < c_MaxClients; player++) {
 			if (!IsPlayerConnected(player)) {
-				g_AudioMan.GetSoundEvents(player, soundList);
-				g_AudioMan.GetMusicEvents(player, musicList);
+				g_AudioMan.ClearSoundEvents(player);
+				g_AudioMan.ClearMusicEvents(player);
 			}
 		}
 
@@ -1804,27 +1787,6 @@ namespace RTE {
 				case ID_NAT_PUNCHTHROUGH_SUCCEEDED:
 					g_ConsoleMan.PrintString("SERVER: ID_NAT_PUNCHTHROUGH_SUCCEEDED");
 					break;
-				/*
-				case ID_UNCONNECTED_PONG:
-				case ID_CONNECTED_PONG:
-				{
-					g_ConsoleMan.PrintString("PONG");
-					int player = -1;
-					for (int index = 0; index < c_MaxClients; index++) {
-						if (m_ClientConnections[index].ClientId == packet->systemAddress) { player = index; }
-					}			
-					if (player > -1 && player < c_MaxClients) {
-						unsigned int dataLength;
-						RakNet::TimeMS time;
-						RakNet::BitStream bsIn(packet->data, packet->length, false);
-						bsIn.IgnoreBytes(1);
-						bsIn.Read(time);
-						dataLength = packet->length - sizeof(unsigned char) - sizeof(RakNet::TimeMS);
-						m_Ping[player] = (unsigned int)(RakNet::GetTimeMS() - time);
-					}
-					break;
-				}
-				*/
 				default:
 					break;
 			}

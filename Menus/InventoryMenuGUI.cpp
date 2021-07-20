@@ -92,7 +92,10 @@ namespace RTE {
 
 		m_GUIRepeatStartTimer.Reset();
 		m_GUIRepeatTimer.Reset();
-		m_KeyboardOrControllerHighlightedButton = nullptr;
+		m_NonMouseHighlightedButton = nullptr;
+		m_NonMousePreviousEquippedItemsBoxButton = nullptr;
+		m_NonMousePreviousInventoryItemsBoxButton = nullptr;
+		m_NonMousePreviousReloadOrDropButton = nullptr;
 
 		m_GUITopLevelBoxFullSize.Reset();
 		m_GUIShowInformationText = true;
@@ -189,11 +192,11 @@ namespace RTE {
 		if (!m_GUIControlManager) { m_GUIControlManager = std::make_unique<GUIControlManager>(); }
 		if (!m_GUIScreen) { m_GUIScreen = std::make_unique<AllegroScreen>(g_FrameMan.GetBackBuffer8()); }
 		if (!m_GUIInput) { m_GUIInput = std::make_unique<AllegroInput>(m_MenuController->GetPlayer()); }
-		RTEAssert(m_GUIControlManager->Create(m_GUIScreen.get(), m_GUIInput.get(), "Base.rte/GUIs/Skins/Base", "InventoryMenuGUISkin.ini"), "Failed to create InventoryMenuGUI GUIControlManager and load it from Base.rte/GUIs/Skins/Base.");
+		RTEAssert(m_GUIControlManager->Create(m_GUIScreen.get(), m_GUIInput.get(), "Base.rte/GUIs/Skins", "InventoryMenuSkin.ini"), "Failed to create InventoryMenuGUI GUIControlManager and load it from Base.rte/GUIs/Skins/Menus/InventoryMenuSkin.ini");
 
 		//TODO When this is split into 2 classes, full mode should use the fonts from its gui control manager while transfer mode, will need to get its fonts from FrameMan. May be good for the ingame menu base class to have these font pointers, even if some subclasses set em up in different ways.
-		//if (!m_SmallFont) { m_SmallFont = m_GUIControlManager->GetSkin()->GetFont("smallfont.png"); }
-		//if (!m_LargeFont) { m_LargeFont = m_GUIControlManager->GetSkin()->GetFont("fatfont.png"); }
+		//if (!m_SmallFont) { m_SmallFont = m_GUIControlManager->GetSkin()->GetFont("FontSmall.png"); }
+		//if (!m_LargeFont) { m_LargeFont = m_GUIControlManager->GetSkin()->GetFont("FontLarge.png"); }
 
 		m_GUIControlManager->Load("Base.rte/GUIs/InventoryMenuGUI.ini");
 		m_GUIControlManager->EnableMouse(m_MenuController->IsMouseControlled());
@@ -284,6 +287,10 @@ namespace RTE {
 
 			if (m_MenuMode == MenuMode::Full || m_MenuMode == MenuMode::Transfer) {
 				ClearSelectedItem();
+				m_NonMousePreviousEquippedItemsBoxButton = nullptr;
+				m_NonMousePreviousInventoryItemsBoxButton = nullptr;
+				m_NonMousePreviousReloadOrDropButton = nullptr;
+				if (m_NonMouseHighlightedButton) { m_NonMouseHighlightedButton->OnMouseLeave(0, 0, 0, 0); }
 				for (const auto &[inventoryItem, inventoryItemButton] : m_GUIInventoryItemButtons) {
 					inventoryItemButton->OnMouseLeave(0, 0, 0, 0);
 				}
@@ -915,20 +922,56 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void InventoryMenuGUI::HandleNonMouseInput() {
-		if (!m_KeyboardOrControllerHighlightedButton || !m_KeyboardOrControllerHighlightedButton->GetVisible() || (!m_GUIShowEmptyRows && m_KeyboardOrControllerHighlightedButton->GetParent() == m_GUIInventoryItemsBox && m_InventoryActor->IsInventoryEmpty())) { m_KeyboardOrControllerHighlightedButton = m_GUIEquippedItemButton; }
-		if (!m_KeyboardOrControllerHighlightedButton->IsMousedOver()) { m_KeyboardOrControllerHighlightedButton->OnMouseEnter(0, 0, 0, 0); }
+		if (!m_NonMouseHighlightedButton || !m_NonMouseHighlightedButton->GetVisible() || (!m_GUIShowEmptyRows && m_NonMouseHighlightedButton->GetParent() == m_GUIInventoryItemsBox && m_InventoryActor->IsInventoryEmpty())) { m_NonMouseHighlightedButton = m_GUIEquippedItemButton; }
+		if (!m_NonMouseHighlightedButton->IsMousedOver()) { m_NonMouseHighlightedButton->OnMouseEnter(0, 0, 0, 0); }
 
 		if (m_MenuController->IsState(ControlState::PRESS_PRIMARY)) {
-			if (m_KeyboardOrControllerHighlightedButton->IsEnabled()) {
-				m_KeyboardOrControllerHighlightedButton->SetCaptureState(true);
-				m_KeyboardOrControllerHighlightedButton->OnMouseUp(m_KeyboardOrControllerHighlightedButton->GetXPos(), m_KeyboardOrControllerHighlightedButton->GetYPos(), GUIInput::Released, 0);
-				m_KeyboardOrControllerHighlightedButton->SetCaptureState(false);
+			if (m_NonMouseHighlightedButton->IsEnabled()) {
+				m_NonMouseHighlightedButton->SetCaptureState(true);
+				m_NonMouseHighlightedButton->OnMouseUp(m_NonMouseHighlightedButton->GetXPos(), m_NonMouseHighlightedButton->GetYPos(), GUIInput::Released, 0);
+				m_NonMouseHighlightedButton->SetCaptureState(false);
 				return;
 			} else {
 				g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
 			}
 		}
 
+		GUIButton *nextButtonToHighlight = nullptr;
+		Direction pressedDirection = GetNonMouseButtonControllerMovement();
+		switch (pressedDirection) {
+			case Direction::Up:
+				nextButtonToHighlight = HandleNonMouseUpInput();
+				break;
+			case Direction::Down:
+				nextButtonToHighlight = HandleNonMouseDownInput();
+				break;
+			case Direction::Left:
+				nextButtonToHighlight = HandleNonMouseLeftInput();
+				break;
+			case Direction::Right:
+				nextButtonToHighlight = HandleNonMouseRightInput();
+				break;
+			default:
+				break;
+		}
+
+		if (nextButtonToHighlight && m_NonMouseHighlightedButton != nextButtonToHighlight && !nextButtonToHighlight->IsMousedOver()) {
+			if (m_NonMouseHighlightedButton->GetParent() == m_GUIEquippedItemsBox) {
+				m_NonMousePreviousEquippedItemsBoxButton = m_NonMouseHighlightedButton;
+			} else if (m_NonMouseHighlightedButton->GetParent() == m_GUIInventoryItemsBox) {
+				m_NonMousePreviousInventoryItemsBoxButton = m_NonMouseHighlightedButton;
+			}
+			m_NonMouseHighlightedButton->OnMouseLeave(0, 0, 0, 0);
+			m_NonMouseHighlightedButton = nextButtonToHighlight;
+			m_NonMouseHighlightedButton->OnMouseEnter(0, 0, 0, 0);
+		} else if (!nextButtonToHighlight && pressedDirection != Direction::None) {
+			g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	Direction InventoryMenuGUI::GetNonMouseButtonControllerMovement() {
 		bool pressUp = m_MenuController->IsState(ControlState::PRESS_UP) || m_MenuController->IsState(ControlState::SCROLL_UP);
 		bool pressDown = m_MenuController->IsState(ControlState::PRESS_DOWN) || m_MenuController->IsState(ControlState::SCROLL_DOWN);
 		bool pressLeft = m_MenuController->IsState(ControlState::PRESS_LEFT);
@@ -949,109 +992,157 @@ namespace RTE {
 			}
 			m_GUIRepeatTimer.Reset();
 		}
-
-		GUIButton *nextButtonToHighlight = nullptr;
 		if (pressUp) {
-			if (m_KeyboardOrControllerHighlightedButton == m_GUIDropButton) {
-				nextButtonToHighlight = m_GUIReloadButton;
-			} else if (m_KeyboardOrControllerHighlightedButton->GetParent() == m_GUIInventoryItemsBox) {
-				try {
-					int highlightedButtonIndex = std::stoi(m_KeyboardOrControllerHighlightedButton->GetName());
-					if (highlightedButtonIndex < c_ItemsPerRow) {
-						if (m_GUIInventoryItemsScrollbar->GetValue() > m_GUIInventoryItemsScrollbar->GetMinimum()) {
-							m_GUIInventoryItemsScrollbar->SetValue(m_GUIInventoryItemsScrollbar->GetValue() - 1);
-							nextButtonToHighlight = m_KeyboardOrControllerHighlightedButton + c_FullViewPageItemLimit - c_ItemsPerRow;
-						} else if (highlightedButtonIndex >= 3) {
-							nextButtonToHighlight = m_GUIDropButton;
-						} else {
-							nextButtonToHighlight = highlightedButtonIndex == 2 && m_GUIOffhandEquippedItemButton->GetVisible() ? m_GUIOffhandEquippedItemButton : m_GUIEquippedItemButton;
-						}
-					} else {
-						nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex - c_ItemsPerRow).second;
-					}
-				} catch (std::invalid_argument) {
-					RTEAbort("Invalid inventory item button when pressing UP in InventoryMenuGUI keyboard/controller handling - " + m_KeyboardOrControllerHighlightedButton->GetName());
-				}
-			}
+			return Direction::Up;
 		} else if (pressDown) {
-			if (!m_InventoryActor->IsInventoryEmpty() && (m_KeyboardOrControllerHighlightedButton == m_GUIEquippedItemButton || m_KeyboardOrControllerHighlightedButton == m_GUIOffhandEquippedItemButton || m_KeyboardOrControllerHighlightedButton == m_GUIDropButton || m_KeyboardOrControllerHighlightedButton == m_GUIInformationToggleButton)) {
-				int inventoryIndexToHighlight = 0;
-				if (m_KeyboardOrControllerHighlightedButton == m_GUIOffhandEquippedItemButton) {
+			return Direction::Down;
+		} else if (pressLeft) {
+			return Direction::Left;
+		} else if (pressRight) {
+			return Direction::Right;
+		}
+		return Direction::None;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	GUIButton * InventoryMenuGUI::HandleNonMouseUpInput() {
+		GUIButton *nextButtonToHighlight = nullptr;
+
+		if (m_NonMouseHighlightedButton == m_GUIDropButton) {
+			nextButtonToHighlight = m_GUIReloadButton;
+			m_NonMousePreviousReloadOrDropButton = m_GUIReloadButton;
+		} else if (m_NonMouseHighlightedButton->GetParent() == m_GUIInventoryItemsBox) {
+			try {
+				int highlightedButtonIndex = std::stoi(m_NonMouseHighlightedButton->GetName());
+				if (highlightedButtonIndex < c_ItemsPerRow) {
+					if (m_GUIInventoryItemsScrollbar->GetValue() > m_GUIInventoryItemsScrollbar->GetMinimum()) {
+						m_GUIInventoryItemsScrollbar->SetValue(m_GUIInventoryItemsScrollbar->GetValue() - 1);
+						nextButtonToHighlight = m_NonMouseHighlightedButton;
+					} else {
+						nextButtonToHighlight = m_NonMousePreviousEquippedItemsBoxButton && m_NonMousePreviousEquippedItemsBoxButton->GetVisible() ? m_NonMousePreviousEquippedItemsBoxButton : nullptr;
+						if (!nextButtonToHighlight) {
+							if (highlightedButtonIndex >= 4) {
+								nextButtonToHighlight = m_GUIDropButton;
+							} else {
+								nextButtonToHighlight = highlightedButtonIndex >= 2 && m_GUIOffhandEquippedItemButton->GetVisible() ? m_GUIOffhandEquippedItemButton : m_GUIEquippedItemButton;
+							}
+						}
+					}
+				} else {
+					nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex - c_ItemsPerRow).second;
+				}
+			} catch (std::invalid_argument) {
+				RTEAbort("Invalid inventory item button when pressing UP in InventoryMenuGUI keyboard/controller handling - " + m_NonMouseHighlightedButton->GetName());
+			}
+		}
+		return nextButtonToHighlight;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	GUIButton * InventoryMenuGUI::HandleNonMouseDownInput() {
+		GUIButton *nextButtonToHighlight = nullptr;
+
+		if (!m_InventoryActor->IsInventoryEmpty() && (m_NonMouseHighlightedButton == m_GUISwapSetButton || m_NonMouseHighlightedButton == m_GUIEquippedItemButton || m_NonMouseHighlightedButton == m_GUIOffhandEquippedItemButton || m_NonMouseHighlightedButton == m_GUIDropButton || m_NonMouseHighlightedButton == m_GUIInformationToggleButton)) {
+			nextButtonToHighlight = m_NonMousePreviousInventoryItemsBoxButton;
+			if (!nextButtonToHighlight) {
+				int inventoryIndexToHighlight = m_GUIOffhandEquippedItemButton->GetVisible() ? 1 : 2;
+				if (m_NonMouseHighlightedButton == m_GUIOffhandEquippedItemButton) {
 					inventoryIndexToHighlight = 2;
-				} else if (m_KeyboardOrControllerHighlightedButton == m_GUIDropButton) {
-					inventoryIndexToHighlight = 3;
+				} else if (m_NonMouseHighlightedButton == m_GUIDropButton || m_NonMouseHighlightedButton == m_GUIInformationToggleButton) {
+					inventoryIndexToHighlight = 4;
 				}
 				inventoryIndexToHighlight = std::clamp(inventoryIndexToHighlight, 0, m_InventoryActor->GetInventorySize() - 1);
 				nextButtonToHighlight = m_GUIInventoryItemButtons.at(inventoryIndexToHighlight).second;
-			} else if (m_KeyboardOrControllerHighlightedButton == m_GUIReloadButton) {
-				nextButtonToHighlight = m_GUIDropButton;
-			} else if (m_KeyboardOrControllerHighlightedButton->GetParent() == m_GUIInventoryItemsBox) {
-				try {
-					int highlightedButtonIndex = std::stoi(m_KeyboardOrControllerHighlightedButton->GetName());
-					if (highlightedButtonIndex + c_ItemsPerRow >= c_FullViewPageItemLimit && m_GUIInventoryItemsScrollbar->GetValue() + 1 < m_GUIInventoryItemsScrollbar->GetMaximum()) {
-						m_GUIInventoryItemsScrollbar->SetValue(m_GUIInventoryItemsScrollbar->GetValue() + 1);
-						nextButtonToHighlight = m_KeyboardOrControllerHighlightedButton;
-					} else {
-						int numberOfVisibleButtons = m_GUIShowEmptyRows ? c_FullViewPageItemLimit : c_ItemsPerRow * static_cast<int>(std::ceil(static_cast<float>(std::min(c_FullViewPageItemLimit, m_InventoryActor->GetInventorySize())) / static_cast<float>(c_ItemsPerRow)));
-						if (highlightedButtonIndex + c_ItemsPerRow < numberOfVisibleButtons) {
-							nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex + c_ItemsPerRow).second;
-						} else if (highlightedButtonIndex != numberOfVisibleButtons - 1) {
-							nextButtonToHighlight = m_GUIInventoryItemButtons.at(numberOfVisibleButtons - 1).second;
-						}
-					}
-				} catch (std::invalid_argument) {
-					RTEAbort("Invalid inventory item button when pressing DOWN in InventoryMenuGUI keyboard/controller handling - " + m_KeyboardOrControllerHighlightedButton->GetName());
-				}
 			}
-		} else if (pressLeft) {
-			if (m_KeyboardOrControllerHighlightedButton == m_GUIOffhandEquippedItemButton) {
+		} else if (m_NonMouseHighlightedButton == m_GUIReloadButton) {
+			nextButtonToHighlight = m_GUIDropButton;
+			m_NonMousePreviousReloadOrDropButton = m_GUIDropButton;
+		} else if (m_NonMouseHighlightedButton->GetParent() == m_GUIInventoryItemsBox) {
+			try {
+				int highlightedButtonIndex = std::stoi(m_NonMouseHighlightedButton->GetName());
+				if (highlightedButtonIndex + c_ItemsPerRow >= c_FullViewPageItemLimit && m_GUIInventoryItemsScrollbar->GetValue() + 1 < m_GUIInventoryItemsScrollbar->GetMaximum()) {
+					m_GUIInventoryItemsScrollbar->SetValue(m_GUIInventoryItemsScrollbar->GetValue() + 1);
+					nextButtonToHighlight = m_NonMouseHighlightedButton;
+				} else {
+					int numberOfVisibleButtons = m_GUIShowEmptyRows ? c_FullViewPageItemLimit : c_ItemsPerRow * static_cast<int>(std::ceil(static_cast<float>(std::min(c_FullViewPageItemLimit, m_InventoryActor->GetInventorySize())) / static_cast<float>(c_ItemsPerRow)));
+					if (highlightedButtonIndex + c_ItemsPerRow < numberOfVisibleButtons) {
+						nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex + c_ItemsPerRow).second;
+					}
+				}
+			} catch (std::invalid_argument) {
+				RTEAbort("Invalid inventory item button when pressing DOWN in InventoryMenuGUI keyboard/controller handling - " + m_NonMouseHighlightedButton->GetName());
+			}
+		}
+		return nextButtonToHighlight;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	GUIButton * InventoryMenuGUI::HandleNonMouseLeftInput() {
+		GUIButton *nextButtonToHighlight = nullptr;
+
+		if (m_NonMouseHighlightedButton->GetParent() == m_GUIInventoryItemsBox) {
+			try {
+				int highlightedButtonIndex = std::stoi(m_NonMouseHighlightedButton->GetName());
+				if (highlightedButtonIndex == 0 && m_GUIInventoryItemsScrollbar->GetValue() > m_GUIInventoryItemsScrollbar->GetMinimum()) {
+					m_GUIInventoryItemsScrollbar->SetValue(m_GUIInventoryItemsScrollbar->GetValue() - 1);
+					nextButtonToHighlight = m_GUIInventoryItemButtons.at(c_ItemsPerRow - 1).second;
+				} else if (highlightedButtonIndex > 0) {
+					nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex - 1).second;
+					m_NonMousePreviousEquippedItemsBoxButton = nullptr;
+				}
+			} catch (std::invalid_argument) {
+				RTEAbort("Invalid inventory item button when pressing LEFT in InventoryMenuGUI keyboard/controller handling - " + m_NonMouseHighlightedButton->GetName());
+			}
+		} else {
+			if (m_NonMouseHighlightedButton == m_GUIOffhandEquippedItemButton) {
 				nextButtonToHighlight = m_GUIEquippedItemButton;
-			} else if (m_KeyboardOrControllerHighlightedButton == m_GUIReloadButton || m_KeyboardOrControllerHighlightedButton == m_GUIDropButton) {
+			} else if (m_NonMouseHighlightedButton == m_GUIReloadButton || m_NonMouseHighlightedButton == m_GUIDropButton) {
 				nextButtonToHighlight = m_GUIOffhandEquippedItemButton->GetVisible() ? m_GUIOffhandEquippedItemButton : m_GUIEquippedItemButton;
-			} else if (m_KeyboardOrControllerHighlightedButton == m_GUIInformationToggleButton) {
-				nextButtonToHighlight = m_GUIReloadButton;
-			} else if (m_KeyboardOrControllerHighlightedButton->GetParent() == m_GUIInventoryItemsBox) {
-				try {
-					int highlightedButtonIndex = std::stoi(m_KeyboardOrControllerHighlightedButton->GetName());
-					if (highlightedButtonIndex == 0 && m_GUIInventoryItemsScrollbar->GetValue() > m_GUIInventoryItemsScrollbar->GetMinimum()) {
-						m_GUIInventoryItemsScrollbar->SetValue(m_GUIInventoryItemsScrollbar->GetValue() - 1);
-						nextButtonToHighlight = m_GUIInventoryItemButtons.at(c_ItemsPerRow - 1).second;
-					} else if (highlightedButtonIndex > 0) {
-						nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex - 1).second;
-					}
-				} catch (std::invalid_argument) {
-					RTEAbort("Invalid inventory item button when pressing LEFT in InventoryMenuGUI keyboard/controller handling - " + m_KeyboardOrControllerHighlightedButton->GetName());
-				}
+			} else if (m_NonMouseHighlightedButton == m_GUIInformationToggleButton) {
+				nextButtonToHighlight = m_NonMousePreviousReloadOrDropButton ? m_NonMousePreviousReloadOrDropButton : m_GUIReloadButton;
 			}
-		} else if (pressRight) {
-			if (m_KeyboardOrControllerHighlightedButton == m_GUIEquippedItemButton) {
-				nextButtonToHighlight = m_GUIOffhandEquippedItemButton->GetVisible() ? m_GUIOffhandEquippedItemButton : m_GUIReloadButton;
-			} else if (m_KeyboardOrControllerHighlightedButton == m_GUIOffhandEquippedItemButton) {
-				nextButtonToHighlight = m_GUIReloadButton;
-			} else if (m_KeyboardOrControllerHighlightedButton == m_GUIReloadButton || m_KeyboardOrControllerHighlightedButton == m_GUIDropButton) {
+			if (nextButtonToHighlight) { m_NonMousePreviousInventoryItemsBoxButton = nullptr; }
+		}
+		return nextButtonToHighlight;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	GUIButton * InventoryMenuGUI::HandleNonMouseRightInput() {
+		GUIButton *nextButtonToHighlight = nullptr;
+
+		if (m_NonMouseHighlightedButton->GetParent() == m_GUIInventoryItemsBox) {
+			try {
+				int highlightedButtonIndex = std::stoi(m_NonMouseHighlightedButton->GetName());
+				if (highlightedButtonIndex == c_FullViewPageItemLimit - 1 && m_GUIInventoryItemsScrollbar->GetValue() + 1 < m_GUIInventoryItemsScrollbar->GetMaximum()) {
+					m_GUIInventoryItemsScrollbar->SetValue(m_GUIInventoryItemsScrollbar->GetValue() + 1);
+					nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex - c_ItemsPerRow + 1).second;
+				} else {
+					int numberOfVisibleButtons = m_GUIShowEmptyRows ? c_FullViewPageItemLimit : c_ItemsPerRow * static_cast<int>(std::ceil(static_cast<float>(std::min(c_FullViewPageItemLimit, m_InventoryActor->GetInventorySize())) / static_cast<float>(c_ItemsPerRow)));
+					if (highlightedButtonIndex + 1 < numberOfVisibleButtons) { nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex + 1).second; }
+					m_NonMousePreviousEquippedItemsBoxButton = nullptr;
+				}
+			} catch (std::invalid_argument) {
+				RTEAbort("Invalid inventory item button when pressing RIGHT in InventoryMenuGUI keyboard/controller handling - " + m_NonMouseHighlightedButton->GetName());
+			}
+		} else {
+			if (m_NonMouseHighlightedButton == m_GUIEquippedItemButton) {
+				if (m_GUIOffhandEquippedItemButton->GetVisible()) {
+					nextButtonToHighlight = m_GUIOffhandEquippedItemButton;
+				} else {
+					nextButtonToHighlight = m_NonMousePreviousReloadOrDropButton ? m_NonMousePreviousReloadOrDropButton : m_GUIReloadButton;
+				}
+			} else if (m_NonMouseHighlightedButton == m_GUIOffhandEquippedItemButton) {
+				nextButtonToHighlight = nextButtonToHighlight = m_NonMousePreviousReloadOrDropButton ? m_NonMousePreviousReloadOrDropButton : m_GUIReloadButton;
+			} else if (m_NonMouseHighlightedButton == m_GUIReloadButton || m_NonMouseHighlightedButton == m_GUIDropButton) {
 				nextButtonToHighlight = m_GUIInformationToggleButton;
-			} else if (m_KeyboardOrControllerHighlightedButton->GetParent() == m_GUIInventoryItemsBox) {
-				try {
-					int highlightedButtonIndex = std::stoi(m_KeyboardOrControllerHighlightedButton->GetName());
-					if (highlightedButtonIndex == c_FullViewPageItemLimit - 1 && m_GUIInventoryItemsScrollbar->GetValue() + 1 < m_GUIInventoryItemsScrollbar->GetMaximum()) {
-						m_GUIInventoryItemsScrollbar->SetValue(m_GUIInventoryItemsScrollbar->GetValue() + 1);
-						nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex - c_ItemsPerRow + 1).second;
-					} else {
-						int numberOfVisibleButtons = m_GUIShowEmptyRows ? c_FullViewPageItemLimit : c_ItemsPerRow * static_cast<int>(std::ceil(static_cast<float>(std::min(c_FullViewPageItemLimit, m_InventoryActor->GetInventorySize())) / static_cast<float>(c_ItemsPerRow)));
-						if (highlightedButtonIndex + 1 < numberOfVisibleButtons) { nextButtonToHighlight = m_GUIInventoryItemButtons.at(highlightedButtonIndex + 1).second; }
-					}
-				} catch (std::invalid_argument) {
-					RTEAbort("Invalid inventory item button when pressing RIGHT in InventoryMenuGUI keyboard/controller handling - " + m_KeyboardOrControllerHighlightedButton->GetName());
-				}
 			}
+			if (nextButtonToHighlight) { m_NonMousePreviousInventoryItemsBoxButton = nullptr; }
 		}
-		if (nextButtonToHighlight && m_KeyboardOrControllerHighlightedButton != nextButtonToHighlight && !nextButtonToHighlight->IsMousedOver()) {
-			m_KeyboardOrControllerHighlightedButton->OnMouseLeave(0, 0, 0, 0);
-			m_KeyboardOrControllerHighlightedButton = nextButtonToHighlight;
-			m_KeyboardOrControllerHighlightedButton->OnMouseEnter(0, 0, 0, 0);
-		} else if (!nextButtonToHighlight && (pressUp || pressDown || pressLeft || pressRight)) {
-			g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
-		}
+		return nextButtonToHighlight;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

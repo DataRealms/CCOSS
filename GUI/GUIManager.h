@@ -1,33 +1,14 @@
 #ifndef _GUIMANAGER_
 #define _GUIMANAGER_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUIManager.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUIManager class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
-
-
-namespace RTE
-{
+namespace RTE {
 
 class Timer;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUIManager
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     The main manager that handles all the panels and inputs
-// Parent(s):       None.
-// Class history:   12/28/2003 GUIManager Created.
-
+/// <summary>
+/// The main manager that handles all the panels and inputs.
+/// </summary>
 class GUIManager {
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
 
 public:
 
@@ -39,7 +20,7 @@ public:
 //                  memory.
 // Arguments:       Input Interface
 
-    GUIManager(GUIInput *input);
+    explicit GUIManager(GUIInput *input);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -150,11 +131,32 @@ public:
     void SetFocus(GUIPanel *Pan);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
 private:
 
+	std::vector<GUIPanel *> m_PanelList;
+	GUIPanel *m_CapturedPanel;
+	GUIPanel *m_FocusPanel;
+	GUIPanel *m_MouseOverPanel;
+
+	GUIInput *m_Input;
+	bool m_MouseEnabled;
+	int m_OldMouseX;
+	int m_OldMouseY;
+
+	int m_DoubleClickTime;
+	int m_DoubleClickSize;
+	int m_DoubleClickButtons;
+	float m_LastMouseDown[3];
+	GUIRect m_DoubleClickRect;
+
+	bool m_HoverTrack;
+	GUIPanel *m_HoverPanel;
+	float m_HoverTime;
+
+	bool m_UseValidation;
+	int m_UniqueIDCount;
+
+	Timer *m_pTimer;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          FindBottomPanel
@@ -175,24 +177,6 @@ private:
 
     GUIPanel *FindTopPanel(int X, int Y);
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CreateTimer
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates the timer.
-// Arguments:       None.
-
-    bool CreateTimer();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetCurrentTime
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the current time since the timer was created.
-// Arguments:       None.
-
-    float GetTime();
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          MouseInRect
@@ -200,41 +184,8 @@ private:
 // Description:     Checks if the mouse point is inside a rectangle.
 // Arguments:       Rectangle, Mouse position.
 
-    bool MouseInRect(GUIRect *Rect, int X, int Y);
+    bool MouseInRect(const GUIRect *Rect, int X, int Y);
 
-
-// Members
-
-    std::vector<GUIPanel *> m_PanelList;
-    GUIPanel                *m_CapturedPanel;
-    GUIPanel                *m_FocusPanel;
-    GUIPanel                *m_MouseOverPanel;
-
-    // Input
-    GUIInput                *m_Input;
-    bool                    m_MouseEnabled;
-    int                     m_OldMouseX, m_OldMouseY;
-
-    // Double click
-    int                     m_DoubleClickTime;
-    int                     m_DoubleClickSize;
-    int                     m_DoubleClickButtons;
-    float                   m_LastMouseDown[3];
-    GUIRect                    m_DoubleClickRect;
-
-    // Hover tracking
-    bool                    m_HoverTrack;
-    GUIPanel                *m_HoverPanel;
-    float                   m_HoverTime;
-
-    bool                    m_UseValidation;
-    int                     m_UniqueIDCount;
-
-    // Timer
-    Timer                   *m_pTimer;
 };
-
-
-}; // namespace RTE
-
-#endif  //  _GUIMANAGER_
+};
+#endif

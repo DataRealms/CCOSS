@@ -62,6 +62,31 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether the client is connected and registered to a server.</returns>
 		bool IsConnectedAndRegistered() const { return m_IsConnected && m_IsRegistered; }
+		
+		/// <summary>
+		/// Gets scene width for network client.
+		/// </summary>
+		/// <returns>Current scene width.</returns>
+		int GetSceneWidth() const { return m_SceneWidth; }
+
+		/// <summary>
+		/// Gets scene height for network client.
+		/// </summary>
+		/// <returns>Current scene height.</returns>
+		int GetSceneHeight() const { return m_SceneHeight; }
+		
+		/// <summary>
+		/// Indicates whether the scene wraps its scrolling around the X axis for network client.
+		/// </summary>
+		/// <returns>Whether the scene wraps around the X axis or not.</returns>
+		bool SceneWrapsX() const { return m_SceneWrapsX; }
+
+		/// <summary>
+		/// Get the coordinates of the centre of the current frame.
+		/// </summary>
+		/// <returns>A vector containing the X/Y coordinates of the frame target.</returns>
+		const Vector & GetFrameTarget()const { return m_TargetPos[m_CurrentFrame]; }
+
 #pragma endregion
 
 #pragma region Concrete Methods

@@ -132,8 +132,9 @@ int BuyMenuGUI::Create(Controller *pController)
         m_pGUIInput = new AllegroInput(pController->GetPlayer()); 
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
-    if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Base"))
-        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
+	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
+		RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/DefaultSkin.ini");
+	}
     m_pGUIController->Load("Base.rte/GUIs/BuyMenuGUI.ini");
     m_pGUIController->EnableMouse(pController->IsMouseControlled());
 
@@ -187,7 +188,7 @@ int BuyMenuGUI::Create(Controller *pController)
         m_pPopupBox->SetEnabled(false);
         m_pPopupBox->SetVisible(false);
         // Set the font
-        m_pPopupText->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
+        m_pPopupText->SetFont(m_pGUIController->GetSkin()->GetFont("FontSmall.png"));
     }
 
     m_pCategoryTabs[CRAFT] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("CraftTab"));
@@ -263,7 +264,9 @@ int BuyMenuGUI::Create(Controller *pController)
 //    m_pCartList->SetHotTracking(true);
     m_pCraftBox->SetLocked(true);
     m_pShopList->EnableScrollbars(false, true);
+	m_pShopList->SetScrollBarThickness(13);
     m_pCartList->EnableScrollbars(false, true);
+	m_pCartList->SetScrollBarThickness(13);
 
     // Load the loadouts initially.. this might be done again later as well by Activity scripts after they set metaplayer etc
     LoadAllLoadoutsFromFile();

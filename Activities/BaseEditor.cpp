@@ -46,8 +46,6 @@
 #include "SceneEditorGUI.h"
 #include "GABaseDefense.h"
 
-extern bool g_ResetActivity;
-
 namespace RTE {
 
 ConcreteClassInfo(BaseEditor, Activity, 0)

@@ -537,7 +537,6 @@
     <ClInclude Include="GUI\GUIWriter.h">
       <Filter>GUI</Filter>
     </ClInclude>
-    <ClInclude Include="Lua\LuaMacros.h" />
     <ClInclude Include="Lua\LuaAdaptersEntities.h">
       <Filter>Lua</Filter>
     </ClInclude>

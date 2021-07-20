@@ -546,7 +546,6 @@
     <ClInclude Include="Lua\LuaBindDefinitions.h" />
     <ClInclude Include="Lua\LuaBindingRegisterDefinitions.h" />
     <ClInclude Include="Lua\LuaAdaptersEntities.h" />
-    <ClInclude Include="Lua\LuaMacros.h" />
     <ClInclude Include="GUI\GUIWriter.h" />
     <ClInclude Include="Managers\MenuMan.h" />
     <ClInclude Include="Managers\NetworkClient.h" />

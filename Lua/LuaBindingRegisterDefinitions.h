@@ -3,9 +3,6 @@
 
 #include "LuaBindDefinitions.h"
 
-#include "Entity.h"
-
-#include "Activity.h"
 #include "GameActivity.h"
 #include "MetaPlayer.h"
 #include "SLTerrain.h"
@@ -37,26 +34,26 @@ namespace RTE {
 
 #pragma region Lua Binding Registration Macros
 	/// <summary>
-	/// 
+	/// Convenience macro for declaring a binding register function.
 	/// </summary>
 	#define LuaBindingRegisterFunctionDeclarationForType(TYPE) \
 		static luabind::scope Register##TYPE##LuaBindings()
 
 	/// <summary>
-	/// 
+	/// Convenience macro for defining a binding register function.
 	/// </summary>
 	#define LuaBindingRegisterFunctionDefinitionForType(OWNINGSCOPE, TYPE) \
 		luabind::scope OWNINGSCOPE##::Register##TYPE##LuaBindings()
 
 	/// <summary>
-	/// 
+	/// Convenience macro for a LuaBind scope definition of an abstract type.
 	/// </summary>
 	#define AbstractTypeLuaClassDefinition(TYPE, PARENTTYPE)	\
 		luabind::class_<TYPE, PARENTTYPE>(#TYPE)				\
 			.property("ClassName", &TYPE::GetClassName)
 
 	/// <summary>
-	/// 
+	/// Convenience macro for a LuaBind scope definition of a concrete type.
 	/// </summary>
 	#define ConcreteTypeLuaClassDefinition(TYPE, PARENTTYPE)				\
 		luabind::class_<TYPE, PARENTTYPE>(#TYPE)							\
@@ -64,13 +61,13 @@ namespace RTE {
 			.property("ClassName", &TYPE::GetClassName)
 
 	/// <summary>
-	/// 
+	/// Convenience macro for calling a register function of a type.
 	/// </summary>
 	#define RegisterLuaBindingsOfType(OWNINGSCOPE, TYPE) \
 		OWNINGSCOPE##::Register##TYPE##LuaBindings()
 
 	/// <summary>
-	/// 
+	/// Convenience macro for calling a register function of an abstract type, along with registering global bindings for adapters relevant to the type.
 	/// </summary>
 	#define RegisterLuaBindingsOfAbstractType(OWNINGSCOPE, TYPE)															\
 		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (TYPE *(*)(Entity *))&To##TYPE),						\
@@ -78,7 +75,7 @@ namespace RTE {
 		OWNINGSCOPE##::Register##TYPE##LuaBindings()
 
 	/// <summary>
-	/// 
+	/// Convenience macro for calling a register function of a concrete type, along with registering global bindings for adapters relevant to the type.
 	/// </summary>
 	#define RegisterLuaBindingsOfConcreteType(OWNINGSCOPE, TYPE)																									\
 		luabind::def((std::string("Create") + std::string(#TYPE)).c_str(), (TYPE *(*)(std::string, std::string))&Create##TYPE, luabind::adopt(luabind::result)),	\

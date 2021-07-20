@@ -52,7 +52,7 @@ namespace RTE {
 		// From LuaBind documentation:
 		// As mentioned in the Lua documentation, it is possible to pass an error handler function to lua_pcall(). LuaBind makes use of lua_pcall() internally when calling member functions and free functions.
 		// It is possible to set the error handler function that LuaBind will use globally:
-		//set_pcall_callback(&AddFileAndLineToError); //NOTE: This seems to do nothing
+		//set_pcall_callback(&AddFileAndLineToError); // NOTE: this seems to do nothing because retrieving the error from the lua stack wasn't done correctly. The current error handling works just fine but might look into doing this properly sometime later.
 
 		// Register all relevant bindings to the master state. Note that the order of registration is important, as bindings can't derive from an unregistered type (inheritance and all that).
 		luabind::module(m_MasterState)[
@@ -64,6 +64,22 @@ namespace RTE {
 				.def("FileReadLine", &LuaMan::FileReadLine)
 				.def("FileWriteLine", &LuaMan::FileWriteLine)
 				.def("FileEOF", &LuaMan::FileEOF),
+
+			luabind::def("DeleteEntity", &DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
+			luabind::def("RangeRand", (double(*)(double, double)) &RandomNum),
+			luabind::def("PosRand", &PosRand),
+			luabind::def("NormalRand", &NormalRand),
+			luabind::def("SelectRand", (int(*)(int, int)) &RandomNum),
+			luabind::def("LERP", &LERP),
+			luabind::def("EaseIn", &EaseIn),
+			luabind::def("EaseOut", &EaseOut),
+			luabind::def("EaseInOut", &EaseInOut),
+			luabind::def("Clamp", &Limit),
+			luabind::def("GetPPM", &GetPPM),
+			luabind::def("GetMPP", &GetMPP),
+			luabind::def("GetPPL", &GetPPL),
+			luabind::def("GetLPP", &GetLPP),
+			luabind::def("RoundFloatToPrecision", &RoundFloatToPrecision),
 
 			RegisterLuaBindingsOfType(SystemLuaBindings, Vector),
 			RegisterLuaBindingsOfType(SystemLuaBindings, Box),
@@ -131,23 +147,7 @@ namespace RTE {
 			RegisterLuaBindingsOfType(MiscLuaBindings, InputElements),
 			RegisterLuaBindingsOfType(MiscLuaBindings, JoyButtons),
 			RegisterLuaBindingsOfType(MiscLuaBindings, JoyDirections),
-			RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons),
-
-			luabind::def("DeleteEntity", &DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
-			luabind::def("RangeRand", (double(*)(double, double)) &RandomNum),
-			luabind::def("PosRand", &PosRand),
-			luabind::def("NormalRand", &NormalRand),
-			luabind::def("SelectRand", (int(*)(int, int)) &RandomNum),
-			luabind::def("LERP", &LERP),
-			luabind::def("EaseIn", &EaseIn),
-			luabind::def("EaseOut", &EaseOut),
-			luabind::def("EaseInOut", &EaseInOut),
-			luabind::def("Clamp", &Limit),
-			luabind::def("GetPPM", &GetPPM),
-			luabind::def("GetMPP", &GetMPP),
-			luabind::def("GetPPL", &GetPPL),
-			luabind::def("GetLPP", &GetLPP),
-			luabind::def("RoundFloatToPrecision", &RoundFloatToPrecision)
+			RegisterLuaBindingsOfType(MiscLuaBindings, MouseButtons)
 		];
 
 		// Assign the manager instances to globals in the lua master state

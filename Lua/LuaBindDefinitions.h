@@ -30,7 +30,7 @@ namespace luabind {
 
 namespace RTE {
 	/// <summary>
-	/// Nested structs for each enum because we can't register enum_wrapper multiple times under a different name.
+	/// Derived structs for each of the input enums because we can't register enum_wrapper multiple times under a different name.
 	/// We're doing this so we can access each enum separately by name rather than having all of them accessed from a shared name.
 	/// If this proves to be a hassle then we can easily revert to the shared name access by registering everything under enum_wrapper.
 	/// </summary>

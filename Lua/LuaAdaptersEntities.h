@@ -44,14 +44,10 @@ namespace RTE {
 
 #pragma region Entity Lua Adapter Macros
 	/// <summary>
-	/// Preset clone adapters that will return the exact pre-cast types so we don't have to do:
-	/// myNewActor = ToActor(PresetMan:GetPreset("AHuman", "Soldier Light", "All")):Clone()
-	/// but can instead do:
-	/// myNewActor = CreateActor("Soldier Light", "All");
-	/// or even:
-	/// myNewActor = CreateActor("Soldier Light");
-	/// or for a randomly selected Preset within a group:
-	/// myNewActor = RandomActor("Light Troops");
+	/// Convenience macro to generate preset clone-create adapter functions that will return the exact pre-cast types, so we don't have to do: myNewActor = ToActor(PresetMan:GetPreset("AHuman", "Soldier Light", "All")):Clone()
+	/// But can instead do: myNewActor = CreateActor("Soldier Light", "All");
+	/// Or even: myNewActor = CreateActor("Soldier Light");
+	/// Or for a randomly selected Preset within a group: myNewActor = RandomActor("Light Troops");
 	/// </summary>
 	#define LuaEntityCreate(TYPE) \
 		static TYPE * Create##TYPE(std::string preseName, std::string moduleName) { \
@@ -91,7 +87,7 @@ namespace RTE {
 		}
 
 	/// <summary>
-	/// 
+	/// Convenience macro to generate a preset clone adapter function for a type.
 	/// </summary>
 	#define LuaEntityClone(TYPE) \
 		static TYPE * Clone##TYPE(const TYPE *thisEntity) { \
@@ -103,7 +99,7 @@ namespace RTE {
 		}
 
 	/// <summary>
-	/// 
+	/// Convenience macro to generate type casting adapter functions for a type.
 	/// </summary>
 	#define LuaEntityCast(TYPE) \
 		static TYPE * To##TYPE(Entity *entity) { \

@@ -208,11 +208,11 @@ int MovableObject::Create(const MovableObject &reference)
     m_MissionCritical = reference.m_MissionCritical;
     m_CanBeSquished = reference.m_CanBeSquished;
     m_HUDVisible = reference.m_HUDVisible;
-    
-    for (const std::pair<std::string, bool> &referenceScriptEntry : reference.m_AllLoadedScripts) {
-        m_AllLoadedScripts.push_back({referenceScriptEntry.first, referenceScriptEntry.second});
+
+    m_ScriptPresetName = reference.m_ScriptPresetName;
+    for (auto &[scriptPath, scriptEnabled] : reference.m_AllLoadedScripts) {
+        LoadScript(scriptPath, scriptEnabled);
     }
-    ReloadScripts(false);
 
     if (reference.m_pScreenEffect)
     {

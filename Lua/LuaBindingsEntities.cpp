@@ -902,7 +902,7 @@ namespace RTE {
 		.def("GetParent", (const MOSRotating * (MovableObject::*)() const)&MovableObject::GetParent)
 		.def("GetRootParent", (MovableObject * (MovableObject::*)())&MovableObject::GetRootParent)
 		.def("GetRootParent", (const MovableObject * (MovableObject::*)() const)&MovableObject::GetRootParent)
-		.def("ReloadScripts", (int (MovableObject:: *)()) &MovableObject::ReloadScripts)
+		.def("ReloadScripts", &MovableObject::ReloadScripts)
 		.def("HasScript", &MovableObject::HasScript)
 		.def("AddScript", &MovableObject::AddScript)
 		.def("ScriptEnabled", &MovableObject::ScriptEnabled)

@@ -170,14 +170,7 @@ enum MOType
     /// Reloads the all of the scripts on this object. This will also reload scripts for the original preset in PresetMan so future objects spawned will use the new scripts.
     /// </summary>
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-    int ReloadScripts() override { return ReloadScripts(true); }
-
-    /// <summary>
-    /// Reloads the all of the scripts on this object. This will also optionally reload scripts for the original preset in PresetMan so future objects spawned will use the new scripts.
-    /// </summary>
-    /// <param name="alsoReloadPresetScripts">Whether to reload scripts on the PresetMan preset as well as those on the object instance. Irrelevant if the object instance is the preset.</param>
-    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-	int ReloadScripts(bool alsoReloadPresetScripts);
+	int ReloadScripts();
 
     /// <summary>
     /// Convenience method to get the script at the given path if it's on this MO. Like standard find, returns m_AllLoadedScripts.end() if it's not.

@@ -129,6 +129,8 @@ int MovableObject::Create()
 	m_TerrainMatHit = g_MaterialAir;
 	m_ParticleUniqueIDHit = 0;
 
+    g_MovableMan.RegisterObject(this);
+
     return 0;
 }
 
@@ -208,11 +210,11 @@ int MovableObject::Create(const MovableObject &reference)
     m_MissionCritical = reference.m_MissionCritical;
     m_CanBeSquished = reference.m_CanBeSquished;
     m_HUDVisible = reference.m_HUDVisible;
-    
-    for (const std::pair<std::string, bool> &referenceScriptEntry : reference.m_AllLoadedScripts) {
-        m_AllLoadedScripts.push_back({referenceScriptEntry.first, referenceScriptEntry.second});
+
+    m_ScriptPresetName = reference.m_ScriptPresetName;
+    for (auto &[scriptPath, scriptEnabled] : reference.m_AllLoadedScripts) {
+        LoadScript(scriptPath, scriptEnabled);
     }
-    ReloadScripts(false);
 
     if (reference.m_pScreenEffect)
     {
@@ -541,7 +543,7 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::ReloadScripts(bool alsoReloadPresetScripts) {
+int MovableObject::ReloadScripts() {
     if (m_AllLoadedScripts.empty()) {
         return 0;
     }
@@ -559,7 +561,7 @@ int MovableObject::ReloadScripts(bool alsoReloadPresetScripts) {
             object->m_ScriptObjectName.clear();
         }
 
-        int status = 0; 
+        int status = 0;
         for (const std::pair<std::string, bool> &scriptEntry : loadedScriptsCopy) {
             status = object->LoadScript(scriptEntry.first, scriptEntry.second);
             if (status < 0) {
@@ -573,7 +575,7 @@ int MovableObject::ReloadScripts(bool alsoReloadPresetScripts) {
     MovableObject *pPreset = const_cast<MovableObject *>(dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(GetClassName(), GetPresetName(), GetModuleID())));
 
     int status = clearScriptConfigurationAndLoadPreexistingScripts(this, pPreset == this);
-    if (alsoReloadPresetScripts && status <= 0 && pPreset && pPreset != this) {
+    if (status <= 0 && pPreset && pPreset != this) {
         status = clearScriptConfigurationAndLoadPreexistingScripts(pPreset, true);
     }
 

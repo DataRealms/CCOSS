@@ -129,6 +129,8 @@ int MovableObject::Create()
 	m_TerrainMatHit = g_MaterialAir;
 	m_ParticleUniqueIDHit = 0;
 
+    g_MovableMan.RegisterObject(this);
+
     return 0;
 }
 

@@ -436,8 +436,11 @@ Vector SceneMan::GetSceneDim() const
 
 int SceneMan::GetSceneWidth() const
 {
-//    RTEAssert(m_pCurrentScene, "Trying to get terrain info before there is a scene or terrain!");
-    if (m_pCurrentScene)
+	if (g_NetworkClient.IsConnectedAndRegistered()) {
+		return g_NetworkClient.GetSceneWidth();
+	}
+
+	if (m_pCurrentScene)
         return m_pCurrentScene->GetWidth();
     return 0;
 }
@@ -464,7 +467,11 @@ int SceneMan::GetSceneHeight() const
 
 bool SceneMan::SceneWrapsX() const
 {
-    if (m_pCurrentScene)
+	if (g_NetworkClient.IsConnectedAndRegistered()) {
+		return g_NetworkClient.SceneWrapsX();
+	}
+
+	if (m_pCurrentScene)
         return m_pCurrentScene->WrapsX();
     return false;
 }
@@ -713,6 +720,13 @@ void SceneMan::SetScrollTarget(const Vector &targetCenter,
     m_ScrollSpeed[screen] = speed;
     // Don't override a set wrapping, it will be reset to false upon a drawn frame
     m_TargetWrapped[screen] = m_TargetWrapped[screen] || targetWrapped;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const Vector & SceneMan::GetScrollTarget(int screen) const {
+	 const Vector & offsetTarget = (g_NetworkClient.IsConnectedAndRegistered()) ? g_NetworkClient.GetFrameTarget() : m_ScrollTarget[screen];
+	 return offsetTarget;
 }
 
 

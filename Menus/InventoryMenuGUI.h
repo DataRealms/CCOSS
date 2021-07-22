@@ -1,7 +1,6 @@
 #ifndef _RTEINVENTORYMENUGUI_
 #define _RTEINVENTORYMENUGUI_
 
-#include "StandardIncludes.h"
 #include "Timer.h"
 #include "Vector.h"
 
@@ -123,6 +122,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="enable">Whether to enable or disable the menu.</param>
 		void SetEnabled(bool enable);
+
+		/// <summary>
+		/// Enables or disables the InventoryMenuGUI based on whether or not it's empty (i.e. its actor has equipped or inventory items).
+		/// </summary>
+		/// <returns>Whether it tried to enable InventoryMenuGUI (true) or disable it (false).</returns>
+		bool EnableIfNotEmpty();
 #pragma endregion
 
 #pragma region Full And Transfer Mode Getters and Setters
@@ -163,13 +168,13 @@ namespace RTE {
 		/// A struct containing all information required to drawn and animate a carousel item box in Carousel MenuMode.
 		/// </summary>
 		struct CarouselItemBox {
-			MovableObject *Item;
-			bool IsForEquippedItems;
-			Vector FullSize;
-			Vector CurrentSize;
-			Vector Pos;
-			Vector IconCenterPosition;
-			std::pair<bool, bool> RoundedAndBorderedSides;
+			MovableObject *Item; //!< A pointer to the item being displayed in the CarouselItemBox.
+			bool IsForEquippedItems; //!< Whether or not this CarouselItemBox is for displaying equipped items.
+			Vector FullSize; //!< The full size for this CarouselItemBox when it's not animating.
+			Vector CurrentSize; //!< The current size of this CarouselItemBox.
+			Vector Pos; //!< The position this CarouselItemBox should be drawn at.
+			Vector IconCenterPosition; //!< The calculated position for the center of the icon this CarouselItemBox is displaying.
+			std::pair<bool, bool> RoundedAndBorderedSides; //!< Whether the left and right sides, respectively, of this CarouselItemBox should have rounded corners and a border.
 
 			/// <summary>
 			/// Fills the passed in vector of Bitmaps and float with the appropriate graphical icons and mass for the Item of this CarouselItemBox.
@@ -177,20 +182,20 @@ namespace RTE {
 			/// </summary>
 			/// <param name="itemIcons">A vector of Bitmaps to be filled in with the icon(s) for this CarouselItemBox's item(s).</param>
 			/// <param name="totalItemMass">A float to be filled in with the total mass of this CarouselItemBox's item(s).</param>
-			/// <param name="equippedItems">A pointer to the vector of equipped items to be used if the CarouselItemBox IsForEquippedItem.</param>
-			void GetIconsAndMass(std::vector<BITMAP *> &itemIcons, float &totalItemMass, const std::vector<MovableObject *> *equippedItems) const;
+			/// <param name="equippedItems">A pointer to the vector of sets of equipped items to be used if the CarouselItemBox IsForEquippedItem.</param>
+			void GetIconsAndMass(std::vector<BITMAP *> &itemIcons, float &totalItemMass, const std::vector<std::pair<MovableObject *, MovableObject *>> *equippedItems) const;
 		};
 
 		/// <summary>
 		/// A struct containing all information required to describe a selected item in Full/Transfer MenuMode.
 		/// </summary>
 		struct GUISelectedItem {
-			GUIButton *Button;
-			MovableObject *Object;
-			int InventoryIndex;
-			int EquippedItemIndex;
-			bool IsBeingDragged;
-			int DragHoldCount;
+			GUIButton *Button; //!< A pointer to the button for this GUISelectedItem.
+			MovableObject *Object; //!< A pointer to the MovableObject for this GUISelectedItem. Should always match up with what the Button is displaying.
+			int InventoryIndex; //!< The index in the InventoryItemsBox that this GUISelectedItem is for. Either this or the EquippedItemIndex must have a value.
+			int EquippedItemIndex; //!< The index in the EquippedItemIndex that this GUISelectedItem is for. Either this or the InventoryIndex must have a value.
+			bool IsBeingDragged; //!< Whether or not the GUISelectedItem is currently being dragged.
+			int DragHoldCount; //!< How long dragging has been held for, used to determine if the GUISelectedItem was actually dragged or just clicked.
 
 			/// <summary>
 			/// Whether this selected item was being dragged for long enough that it matters. This helps make dragging not cause problems during instant clicks and releases.
@@ -209,18 +214,18 @@ namespace RTE {
 		/// </summary>
 		enum class CarouselAnimationDirection { Left = -1, None, Right};
 
-		static const int c_ItemsPerRow = 5; //!< The number of items per row of the inventory display. MUST be an odd number. Used in all MenuModes.
-		static const int c_MinimumItemPadding = 1; //!< The padding between item icons and their containing boxes. Items will have at least this much padding on all sides. Used in all MenuModes.
+		static constexpr int c_ItemsPerRow = 5; //!< The number of items per row of the inventory display. MUST be an odd number. Used in all MenuModes.
+		static constexpr int c_MinimumItemPadding = 1; //!< The padding between item icons and their containing boxes. Items will have at least this much padding on all sides. Used in all MenuModes.
 
-		static const int c_CarouselMenuVerticalOffset = 85; //!< How high above its target the carousel will be. Used in Carousel MenuModes.
+		static constexpr int c_CarouselMenuVerticalOffset = 85; //!< How high above its target the carousel will be. Used in Carousel MenuModes.
 		static const Vector c_CarouselBoxMaxSize; //!< The size of the largest item box in the carousel, i.e. the one in the middle. Used in Carousel MenuMode.
 		static const Vector c_CarouselBoxMinSize; //!< The size of the smallest item box in the carousel, i.e. the ones at the ends, excluding the exiting box, which is actually one size step smaller. Used in Carousel MenuMode.
 		static const Vector c_CarouselBoxSizeStep; //!< The size step between each item box in the carousel. Used in Carousel MenuMode.
 		static const int c_CarouselBoxCornerRadius; //!< The radius of the circles used to make rounded corners for carousel boxes. Calculated automatically based on max and min size. Used in Carousel MenuMode.
-		static const int c_MultipleItemInBoxOffset = 3; //!< How many pixels up and right items should be offset if there are more than one in a item box. Used in Carousel MenuMode.
+		static constexpr int c_MultipleItemInBoxOffset = 3; //!< How many pixels up and right items should be offset if there are more than one in a item box. Used in Carousel MenuMode.
 
-		static const int c_FullViewPageItemLimit = c_ItemsPerRow * 3; //!< The default number of rows in the full inventory display. Used in Full/Transfer MenuModes.
-		static const int c_FullMenuVerticalOffset = 35; //!< How high above its target the full GUI will be. Used in Full/Transfer MenuModes.
+		static constexpr int c_FullViewPageItemLimit = c_ItemsPerRow * 3; //!< The default number of rows in the full inventory display. Used in Full/Transfer MenuModes.
+		static constexpr int c_FullMenuVerticalOffset = 50; //!< How high above its target the full GUI will be. Used in Full/Transfer MenuModes.
 
 		static BITMAP *s_CursorBitmap; //!< The cursor image shared by all GUIs.
 
@@ -236,7 +241,7 @@ namespace RTE {
 		Timer m_EnableDisableAnimationTimer; //!< Timer for progressing enabling/disabling animations.
 
 		bool m_InventoryActorIsHuman; //!< Whether the Actor whose inventory this GUI will display is an AHuman.
-		std::vector<MovableObject *> m_InventoryActorEquippedItems; //!< A vector of pointers to the equipped items of the Actor whose inventory this GUI will display, if applicable.
+		std::vector<std::pair<MovableObject *, MovableObject *>> m_InventoryActorEquippedItems; //!< A vector of pairs of pointers to the equipped item and equipped offhand item of the Actor whose inventory this GUI will display, if applicable. Pointers are NOT owned.
 
 		bool m_CarouselDrawEmptyBoxes; //!< Whether or not the carousel should draw empty item boxes. Used in Carousel MenuMode.
 		bool m_CarouselBackgroundTransparent; //!< Whether or not the carousel's background should be drawn transparently. Used in Carousel MenuMode.
@@ -255,11 +260,16 @@ namespace RTE {
 		bool m_GUIShowEmptyRows; //!< Whether this GUI should show empty rows, up to the FullPageViewItemLimit.
 		Vector m_GUICursorPos; //!< Screen position of the cursor. Used in Full/Transfer MenuModes.
 		Vector m_PreviousGUICursorPos; //!< The previous screen position of the cursor. Used in Full/Transfer MenuModes.
+		int m_GUIInventoryActorCurrentEquipmentSetIndex; //!< An int describing the index in InventoryActorEquippedItems which is currently being shown by the gui. Used in Full/Transfer MenuModes.
 		std::unique_ptr<GUISelectedItem> m_GUISelectedItem; //!< The selected item for this InventoryMenuGUI. Used in Full/Transfer MenuModes.
 
 		Timer m_GUIRepeatStartTimer; //!< Measures the time to when to start repeating inputs when they're held down. Used in Full/Transfer MenuModes.
 		Timer m_GUIRepeatTimer; //!< Measures the interval between input repeats. Used in Full/Transfer MenuModes.
-		GUIButton *m_KeyboardOrControllerHighlightedButton; //!< A pointer to the GUIButton currently highlighted by the keyboard or controller.
+		GUIButton *m_NonMouseHighlightedButton; //!< A pointer to the GUIButton currently highlighted by the keyboard or gamepad.
+		//TODO These previous buttons should be cleaned up when InventoryMenuGUI is refactored. Requirements were unclear so this is more complicated than it needs to be, these 3 can be consolidated into 2 or 1 variable, and the code handling them can be simplified a bit.
+		GUIButton *m_NonMousePreviousEquippedItemsBoxButton; //!< A pointer to the last GUIButton in the EquippedItemsBox that was highlighted by the keyboard or gamepad.
+		GUIButton *m_NonMousePreviousInventoryItemsBoxButton; //!< A pointer to the last GUIButton in the InventoryItemsBox that was highlighted by the keyboard or gamepad.
+		GUIButton *m_NonMousePreviousReloadOrDropButton; //!< A pointer to whichever of the reload or drop GUIButtons was last highlighted by the keyboard or gamepad.
 
 		Vector m_GUITopLevelBoxFullSize; //!< A Vector holding the full size of the top level box for enabling/disabling animations.
 		bool m_GUIShowInformationText; //!< Whether or information text explaining how to use the menu should be showing.
@@ -352,9 +362,9 @@ namespace RTE {
 		void UpdateFullModeInformationText(const std::deque<MovableObject *> *inventory);
 
 		/// <summary>
-		/// Handles updating icons for non-item buttons in Full MenuMode.
+		/// Handles updating icons and widths to support higlighting, for non-item buttons in Full MenuMode.
 		/// </summary>
-		void UpdateFullModeNonItemButtonIcons();
+		void UpdateFullModeNonItemButtonIconsAndHighlightWidths();
 
 		/// <summary>
 		/// Handles MenuMode specific updating for when the InventoryMenuGUI is in Transfer MenuMode.
@@ -375,9 +385,39 @@ namespace RTE {
 		bool HandleMouseInput();
 
 		/// <summary>
-		/// Player keyboard or controller input event handling of the GUIControls of this InventoryMenuGUI.
+		/// Player keyboard or gamepad input event handling of the GUIControls of this InventoryMenuGUI.
 		/// </summary>
 		void HandleNonMouseInput();
+
+		/// <summary>
+		/// Gets any keyboard or gamepad directional input.
+		/// </summary>
+		/// <returns>The direction of found input. Priority matches ordering of the Direction enumeration.</returns>
+		Direction GetNonMouseButtonControllerMovement();
+
+		/// <summary>
+		/// Breakdown of HandleNonMouseInput for handling pressing/holding up.
+		/// </summary>
+		/// <returns>The next button to highlight, based on input handling.</returns>
+		GUIButton * HandleNonMouseUpInput();
+
+		/// <summary>
+		/// Breakdown of HandleNonMouseInput for handling pressing/holding down.
+		/// </summary>
+		/// <returns>The next button to highlight, based on input handling.</returns>
+		GUIButton * HandleNonMouseDownInput();
+
+		/// <summary>
+		/// Breakdown of HandleNonMouseInput for handling pressing/holding left.
+		/// </summary>
+		/// <returns>The next button to highlight, based on input handling.</returns>
+		GUIButton * HandleNonMouseLeftInput();
+
+		/// <summary>
+		/// Breakdown of HandleNonMouseInput for handling pressing/holding right.
+		/// </summary>
+		/// <returns>The next button to highlight, based on input handling.</returns>
+		GUIButton * HandleNonMouseRightInput();
 
 		/// <summary>
 		/// Handles item button press command events from the GUIControls of this InventoryMenuGUI by selecting/de-selecting the corresponding item.

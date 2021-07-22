@@ -1,34 +1,12 @@
 #ifndef _GUIPROGRESSBAR_
 #define _GUIPROGRESSBAR_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUIProgressBar.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUIProgressBar class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
+namespace RTE {
 
-
-namespace RTE
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUIProgressBar
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A progressbar control class.
-// Parent(s):       GUIControl, Panel.
-// Class history:   1/15/2004 GUIProgressBar Created.
-
-class GUIProgressBar :
-    public GUIControl,
-    public GUIPanel
-{
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
+/// <summary>
+/// A progressbar control class.
+/// </summary>
+class GUIProgressBar : public GUIControl, public GUIPanel {
 
 public:
 
@@ -55,7 +33,7 @@ public:
 // Description:     Called when the control has been created.
 // Arguments:       Name, Position.
 
-    void Create(const std::string Name, int X, int Y, int Width = -1, int Height = -1) override;
+    void Create(const std::string &Name, int X, int Y, int Width = -1, int Height = -1) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -191,7 +169,7 @@ public:
 // Description:     Gets the value.
 // Arguments:       None.
 
-    int GetValue();
+    int GetValue() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -209,7 +187,7 @@ public:
 // Description:     Gets the minimum.
 // Arguments:       None.
 
-    int GetMinimum();
+    int GetMinimum() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -227,7 +205,7 @@ public:
 // Description:     Gets the maximum.
 // Arguments:       None.
 
-    int GetMaximum();
+    int GetMaximum() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -238,12 +216,15 @@ public:
 
     void ApplyProperties(GUIProperties *Props) override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
 private:
 
+    GUIBitmap *m_DrawBitmap;
+    GUIBitmap *m_IndicatorImage;
+
+    int m_Minimum;
+    int m_Maximum;
+    int m_Value;
+    int m_Spacing;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          BuildBitmap
@@ -251,23 +232,7 @@ private:
 // Description:     Create the progressbar bitmap to draw.
 // Arguments:       None.
 
-    void BuildBitmap();
-
-
-// Members
-
-    GUIBitmap        *m_DrawBitmap;
-    GUIBitmap        *m_IndicatorImage;
-
-    int                m_Minimum;
-    int                m_Maximum;
-    int                m_Value;
-    int                m_Spacing;
-
+	void BuildBitmap();
 };
-
-
-}; // namespace RTE
-
-
-#endif  //  _GUIPROGRESSBAR_
+};
+#endif

@@ -5,6 +5,7 @@ sources += files(
 'ConsoleMan.cpp',
 'FrameMan.cpp',
 'LuaMan.cpp',
+'MenuMan.cpp',
 'MetaMan.cpp',
 'MovableMan.cpp',
 'NetworkClient.cpp',

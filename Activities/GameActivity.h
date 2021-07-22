@@ -263,7 +263,7 @@ public:
 //                  be added to MovableMan already.
 // Return value:    Whether the focus switch was successful or not.
 
-	bool SwitchToActor(Actor *pActor, short player = 0, short team = 0) override;
+	bool SwitchToActor(Actor *pActor, int player = 0, int team = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -275,7 +275,7 @@ public:
 //                  An actor pointer to skip in the sequence.
 // Return value:    None.
 
-	void SwitchToNextActor(short player, short team, Actor *pSkip = 0) override;
+	void SwitchToNextActor(int player, int team, Actor *pSkip = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -287,7 +287,7 @@ public:
 //                  An actor pointer to skip in the sequence.
 // Return value:    None.
 
-	void SwitchToPrevActor(short player, short team, Actor *pSkip = 0) override;
+	void SwitchToPrevActor(int player, int team, Actor *pSkip = 0) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

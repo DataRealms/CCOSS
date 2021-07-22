@@ -1054,11 +1054,11 @@ int Scene::SavePreview(const std::string &bitmapPath) {
 		return -1;
 	}
 
-	if (m_pPreviewBitmap && (m_pPreviewBitmap->w != PREVIEW_WIDTH || m_pPreviewBitmap->h != PREVIEW_HEIGHT)) {
+	if (m_pPreviewBitmap && (m_pPreviewBitmap->w != c_ScenePreviewWidth || m_pPreviewBitmap->h != c_ScenePreviewHeight)) {
 		destroy_bitmap(m_pPreviewBitmap);
 		m_pPreviewBitmap = nullptr;
 	}
-	if (!m_pPreviewBitmap) { m_pPreviewBitmap = create_bitmap_ex(8, PREVIEW_WIDTH, PREVIEW_HEIGHT); }
+	if (!m_pPreviewBitmap) { m_pPreviewBitmap = create_bitmap_ex(8, c_ScenePreviewWidth, c_ScenePreviewHeight); }
 
 	ContentFile scenePreviewGradient("Base.rte/GUIs/PreviewSkyGradient.png");
 	draw_sprite(m_pPreviewBitmap, scenePreviewGradient.GetAsBitmap(COLORCONV_NONE, true), 0, 0);

@@ -131,6 +131,8 @@ int MovableObject::Create()
 	m_TerrainMatHit = g_MaterialAir;
 	m_ParticleUniqueIDHit = 0;
 
+    g_MovableMan.RegisterObject(this);
+
     return 0;
 }
 
@@ -210,11 +212,11 @@ int MovableObject::Create(const MovableObject &reference)
     m_MissionCritical = reference.m_MissionCritical;
     m_CanBeSquished = reference.m_CanBeSquished;
     m_HUDVisible = reference.m_HUDVisible;
-    
-    for (const std::pair<std::string, bool> &referenceScriptEntry : reference.m_AllLoadedScripts) {
-        m_AllLoadedScripts.push_back({referenceScriptEntry.first, referenceScriptEntry.second});
+
+    m_ScriptPresetName = reference.m_ScriptPresetName;
+    for (auto &[scriptPath, scriptEnabled] : reference.m_AllLoadedScripts) {
+        LoadScript(scriptPath, scriptEnabled);
     }
-    ReloadScripts(false);
 
     if (reference.m_pScreenEffect)
     {
@@ -493,7 +495,7 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
     } else if (HasScript(scriptPath)) {
         return -3;
     }
-    m_AllLoadedScripts.push_back({scriptPath, loadAsEnabledScript});
+    m_AllLoadedScripts.insert({scriptPath, loadAsEnabledScript});
 
     // Clear the temporary variable names that will hold the functions read in from the file
     for (const std::string &functionName : GetSupportedScriptFunctionNames()) {
@@ -526,10 +528,10 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
     // Assign the different functions read in from the script to their permanent locations in the preset's table
     for (const std::string &functionName : GetSupportedScriptFunctionNames()) {
         if (m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end()) {
-            m_FunctionsAndScripts.insert({functionName, std::vector<std::pair<std::string, bool> *>()});
+            m_FunctionsAndScripts.insert({functionName, std::vector<std::string>()});
         }
         if (g_LuaMan.GlobalIsDefined(functionName)) {
-            m_FunctionsAndScripts.find(functionName)->second.push_back(&m_AllLoadedScripts.back());
+            m_FunctionsAndScripts.find(functionName)->second.emplace_back(scriptPath);
             int error = g_LuaMan.RunScriptString(
                 m_ScriptPresetName + "." + functionName + " = " + m_ScriptPresetName + "." + functionName + " or {}; " +
                 m_ScriptPresetName + "." + functionName + "[\"" + scriptPath + "\"] = " + functionName + ";"
@@ -545,7 +547,7 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::ReloadScripts(bool alsoReloadPresetScripts) {
+int MovableObject::ReloadScripts() {
     if (m_AllLoadedScripts.empty()) {
         return 0;
     }
@@ -554,7 +556,7 @@ int MovableObject::ReloadScripts(bool alsoReloadPresetScripts) {
     /// Internal lambda function to clear a given object's script configurations, and then load them all again in order to reset them.
     /// </summary>
     auto clearScriptConfigurationAndLoadPreexistingScripts = [](MovableObject *object, bool shouldClearScriptPresetName) {
-        std::vector<std::pair<std::string, bool>> loadedScriptsCopy = object->m_AllLoadedScripts;
+        std::map<std::string, bool> loadedScriptsCopy = object->m_AllLoadedScripts;
         object->m_AllLoadedScripts.clear();
         object->m_FunctionsAndScripts.clear();
         if (shouldClearScriptPresetName) {
@@ -577,7 +579,7 @@ int MovableObject::ReloadScripts(bool alsoReloadPresetScripts) {
     MovableObject *pPreset = const_cast<MovableObject *>(dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(GetClassName(), GetPresetName(), GetModuleID())));
 
     int status = clearScriptConfigurationAndLoadPreexistingScripts(this, pPreset == this);
-    if (alsoReloadPresetScripts && status <= 0 && pPreset && pPreset != this) {
+    if (status <= 0 && pPreset && pPreset != this) {
         status = clearScriptConfigurationAndLoadPreexistingScripts(pPreset, true);
     }
 
@@ -624,7 +626,7 @@ bool MovableObject::EnableScript(const std::string &scriptPath) {
         return false;
     }
 
-    std::vector<std::pair<std::string, bool>>::iterator scriptEntryIterator = FindScript(scriptPath);
+    std::map<std::string, bool>::iterator scriptEntryIterator = m_AllLoadedScripts.find(scriptPath);
     if (scriptEntryIterator != m_AllLoadedScripts.end() && scriptEntryIterator->second == false) {
         if (ObjectScriptsInitialized() && RunScriptedFunction(scriptPath, "OnScriptEnable") < 0) {
             return false;
@@ -642,7 +644,7 @@ bool MovableObject::DisableScript(const std::string &scriptPath) {
         return false;
     }
 
-    std::vector<std::pair<std::string, bool>>::iterator scriptEntryIterator = FindScript(scriptPath);
+    std::map<std::string, bool>::iterator scriptEntryIterator = m_AllLoadedScripts.find(scriptPath);
     if (scriptEntryIterator != m_AllLoadedScripts.end() && scriptEntryIterator->second == true) {
         if (ObjectScriptsInitialized() && RunScriptedFunction(scriptPath, "OnScriptDisable") < 0) {
             return false;
@@ -674,7 +676,7 @@ int MovableObject::RunScriptedFunction(const std::string &scriptPath, const std:
 
     std::string presetAndFunctionName = m_ScriptPresetName + "." + functionName;
     std::string fullFunctionName = presetAndFunctionName + "[\"" + scriptPath + "\"]";
-    
+
     int status = g_LuaMan.RunScriptedFunction(fullFunctionName, m_ScriptObjectName, {presetAndFunctionName, m_ScriptObjectName, fullFunctionName}, functionEntityArguments, functionLiteralArguments);
     if (status < 0 && m_AllLoadedScripts.size() > 1) {
         g_ConsoleMan.PrintString("ERROR: An error occured while trying to run the " + functionName + " function for script at path " + scriptPath);
@@ -695,9 +697,9 @@ int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &fu
     }
 
     if (status >= 0) {
-        for (const std::pair<std::string, bool> *scriptEntry : m_FunctionsAndScripts.at(functionName)) {
-            if (runOnDisabledScripts || scriptEntry->second == true) {
-                status = RunScriptedFunction(scriptEntry->first, functionName, functionEntityArguments, functionLiteralArguments);
+        for (const std::string &scriptPath : m_FunctionsAndScripts.at(functionName)) {
+            if (runOnDisabledScripts || m_AllLoadedScripts.at(scriptPath) == true) {
+                status = RunScriptedFunction(scriptPath, functionName, functionEntityArguments, functionLiteralArguments);
                 if (status < 0 && stopOnError) {
                     return status;
                 }

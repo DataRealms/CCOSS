@@ -1,33 +1,12 @@
 #ifndef _GUITEXTPANEL_
 #define _GUITEXTPANEL_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUITextPanel.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUITextPanel class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
+namespace RTE {
 
-
-namespace RTE
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUITextPanel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A text panel class.
-// Parent(s):       Panel.
-// Class history:   1/20/2004 GUITextPanel Created.
-
-class GUITextPanel :
-    public GUIPanel
-{
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
+/// <summary>
+/// A text panel class.
+/// </summary>
+class GUITextPanel : public GUIPanel {
 
 public:
 
@@ -47,7 +26,7 @@ public:
 //                  system memory.
 // Arguments:       GUIManager.
 
-    GUITextPanel(GUIManager *Manager);
+    explicit GUITextPanel(GUIManager *Manager);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -129,7 +108,7 @@ public:
 // Description:     Sets the text in the textpanel.
 // Arguments:       Text.
 
-    void SetText(const std::string Text);
+    void SetText(const std::string &Text);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -138,7 +117,7 @@ public:
 // Description:     Sets the extra text which appears right-justified in the textpanel.
 // Arguments:       Text.
 
-    void SetRightText(const std::string rightText);
+    void SetRightText(const std::string &rightText);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -147,7 +126,7 @@ public:
 // Description:     Gets the text in the textpanel.
 // Arguments:       None.
 
-    std::string GetText() { return m_Text; }
+    std::string GetText() const { return m_Text; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -156,7 +135,7 @@ public:
 // Description:     Gets the extra text which appears right-justified in the textpanel.
 // Arguments:       None.
 
-    std::string GetRightText() { return m_RightText; }
+    std::string GetRightText() const { return m_RightText; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -175,7 +154,7 @@ public:
 // Arguments:       None.
 // Returns:         Index of the start of the selection. -1 if no selection
 
-    int GetSelectionStart();
+    int GetSelectionStart() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -185,7 +164,7 @@ public:
 // Arguments:       None.
 // Returns:         Index of the end of the selection. -1 if no selection
 
-    int GetSelectionEnd();
+    int GetSelectionEnd() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -203,7 +182,7 @@ public:
 // Description:     Gets the selection text.
 // Arguments:       None.
 
-    std::string GetSelectionText();
+    std::string GetSelectionText() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -239,14 +218,60 @@ public:
 // Description:     Gets the locked state on the textbox.
 // Arguments:       None.
 
-    bool GetLocked();
+    bool GetLocked() const;
 
+	/// <summary>
+	/// Sets this text panel to accept numeric symbols only.
+	/// </summary>
+	/// <param name="numericOnly">Whether to accept numeric symbols only or not.</param>
+	void SetNumericOnly(bool numericOnly) { m_NumericOnly = numericOnly; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
+	/// <summary>
+	/// Sets this text panel's maximum numeric value when in numeric only mode.
+	/// </summary>
+	/// <param name="maxValue">The maximum numeric value. 0 means no maximum value.</param>
+	void SetMaxNumericValue(int maxValue) { m_MaxNumericValue = maxValue; }
+
+	/// <summary>
+	/// Sets the maximum length of the text this text panel can contain.
+	/// </summary>
+	/// <param name="maxLength">The maximum length of the text this text panel can contain.</param>
+	void SetMaxTextLength(int maxLength) { m_MaxTextLength = maxLength; }
+
 
 private:
 
+	unsigned long m_FontSelectColor;
+
+	std::string m_Text;
+	std::string m_RightText; // Appears right-justified in the text field
+	bool m_Focus;
+	bool m_Locked;
+
+	// The distance from the side and top of the text box, to the side and top of the first line of text
+	int m_WidthMargin;
+	int m_HeightMargin;
+
+	// Cursor
+	int m_CursorX;
+	int m_CursorY;
+	int m_CursorIndex;
+	unsigned long m_CursorColor;
+	int m_CursorBlinkCount; // Hacky way to make cursor blink without a timer
+
+	int m_StartIndex;
+
+	// Selection
+	bool m_GotSelection;
+	int m_StartSelection;
+	int m_EndSelection;
+	unsigned long m_SelectedColorIndex;
+	int m_SelectionX;
+	int m_SelectionWidth;
+
+	int m_MaxTextLength; //!< The maximum length of the text this text panel can contain.
+	bool m_NumericOnly; //!< Whether this text panel only accepts numeric symbols.
+	int m_MaxNumericValue; //!< The maximum numeric value when in numeric only mode. 0 means no maximum value.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          UpdateText
@@ -267,7 +292,7 @@ private:
 
     /// <summary>
     /// Gets the index of the start of the next contiguous group of letters or special characters in the given string, or the end of the string if there is none.
-    /// Generally used to deal with ctrl + arrows style behaviour.
+    /// Generally used to deal with ctrl + arrows style behavior.
     /// </summary>
     /// <param name="stringToCheck">A string_view of the string to look for the next word in.</param>
     /// <param name="currentIndex">The index in the string to start looking from.</param>
@@ -276,48 +301,12 @@ private:
 
     /// <summary>
     /// Gets the index of the start of the previous contiguous group of letters or special characters in the given string, or the end of the string if there is none.
-    /// Generally used to deal with ctrl + arrows style behaviour.
+    /// Generally used to deal with ctrl + arrows style behavior.
     /// </summary>
     /// <param name="stringToCheck">A string_view of the string to look for the next word in.</param>
     /// <param name="currentIndex">The index in the string to start looking from.</param>
     /// <returns>The index of the start of the previous contiguous group of letters or special characters in the given string, or the end of the string if there is none.</returns>
     int GetStartOfPreviousCharacterGroup(const std::string_view &stringToCheck, int currentIndex) const;
-
-
-// Members
-
-    // Font
-    unsigned long            m_FontSelectColor;
-
-    std::string        m_Text;
-    // Appears right-justified in the text field
-    std::string        m_RightText;
-    bool            m_Focus;
-    bool            m_Locked;
-    // The distance from the side and top of the text box, to the side and top of the first line of text
-    int            m_WidthMargin;
-    int            m_HeightMargin;
-
-    // Cursor
-    int                m_CursorX, m_CursorY;
-    int                m_CursorIndex;
-    unsigned long            m_CursorColor;
-    // Hacky way to make cursor blink without a timer
-    int                 m_CursorBlinkCount;
-
-    int                m_StartIndex;
-
-    // Selection
-    bool            m_GotSelection;
-    int                m_StartSelection;
-    int                m_EndSelection;
-    unsigned long            m_SelectedColorIndex;
-    int                m_SelectionX, m_SelectionWidth;
-
 };
-
-
-}; // namespace RTE
-
-
-#endif  //  _GUITEXTPANEL_
+};
+#endif

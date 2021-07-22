@@ -455,12 +455,13 @@ int MOSRotating::GetWoundCount(bool includePositiveDamageAttachables, bool inclu
 
 void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet, bool checkGibWoundLimit) {
     if (woundToAdd) {
-        if (checkGibWoundLimit && !ToDelete() && m_GibWoundLimit && m_Wounds.size() + 1 > m_GibWoundLimit) {
+        if (checkGibWoundLimit && !ToDelete() && m_GibWoundLimit > 0 && m_Wounds.size() + 1 > m_GibWoundLimit) {
             // Indicate blast in opposite direction of emission
             // TODO: don't hardcode here, get some data from the emitter
             Vector blast(-5, 0);
             blast.RadRotate(woundToAdd->GetEmitAngle());
             GibThis(blast);
+            delete woundToAdd;
             return;
         } else {
             woundToAdd->SetCollidesWithTerrainWhileAttached(false);
@@ -997,7 +998,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
         }
         Vector rotatedGibOffset = RotateOffset(gibSettingsObject.GetOffset());
         for (int i = 0; i < gibSettingsObject.GetCount(); i++) {
-            gibParticleClone = dynamic_cast<MovableObject *>(gibSettingsObject.GetParticlePreset()->Clone());
+            if (i > 0) { gibParticleClone = dynamic_cast<MovableObject *>(gibSettingsObject.GetParticlePreset()->Clone()); }
 
             if (gibParticleClone->GetLifetime() != 0) {
                 gibParticleClone->SetLifetime(static_cast<int>(static_cast<float>(gibParticleClone->GetLifetime()) * (1.0F + (gibSettingsObject.GetLifeVariation() * RandomNormalNum()))));

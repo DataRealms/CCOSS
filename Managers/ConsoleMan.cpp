@@ -31,6 +31,8 @@ namespace RTE {
 		m_LastInputString.clear();
 		m_LastLogMove = 0;
 		m_ConsoleTextBackup.clear();
+
+		m_ConsoleUseMonospaceFont = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,8 +42,8 @@ namespace RTE {
 		if (!m_GUIInput) { m_GUIInput = new AllegroInput(-1); }
 		if (!m_GUIControlManager) { m_GUIControlManager = new GUIControlManager(); }
 
-		if (!m_GUIControlManager->Create(m_GUIScreen, m_GUIInput, "Base.rte/GUIs/Skins/MainMenu", "ConsoleSkin.ini")) {
-			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/MainMenu/ConsoleSkin.ini");
+		if (!m_GUIControlManager->Create(m_GUIScreen, m_GUIInput, "Base.rte/GUIs/Skins/Menus", m_ConsoleUseMonospaceFont ? "ConsoleMonospaceSkin.ini" : "ConsoleSkin.ini")) {
+			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/ConsoleSkin.ini");
 		}
 
 		m_GUIControlManager->Load("Base.rte/GUIs/ConsoleGUI.ini");
@@ -136,6 +138,13 @@ namespace RTE {
 		m_ConsoleText->SetSize(m_ParentBox->GetWidth() - 4, m_ParentBox->GetHeight() - m_InputTextBox->GetHeight() - 2);
 		m_InputTextBox->SetPositionRel(m_InputTextBox->GetRelXPos(), m_ConsoleText->GetHeight());
 		m_InputTextBox->Resize(m_ParentBox->GetWidth() - 3, m_InputTextBox->GetHeight());
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ConsoleMan::SetConsoleUseMonospaceFont(bool useFont) {
+		m_ConsoleUseMonospaceFont = useFont;
+		if (m_GUIControlManager) { m_GUIControlManager->ChangeSkin("Base.rte/GUIs/Skins/Menus", m_ConsoleUseMonospaceFont ? "ConsoleMonospaceSkin.ini" : "ConsoleSkin.ini"); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

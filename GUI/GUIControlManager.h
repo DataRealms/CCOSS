@@ -1,41 +1,16 @@
 #ifndef _GUICONTROLMANAGER_
 #define _GUICONTROLMANAGER_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUIControlManager.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUIControlManager class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
+#include "GUIWriter.h"
+#include "GUIReader.h"
 
+namespace RTE {
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
-#include "Writer.h"
-#include "Reader.h"
-
-
-namespace RTE
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUIControlManager
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A class used to manage the the GUI as a whole and provide the 
-//                  interface between the GUI and the rest of the system.
-// Parent(s):       None.
-// Class history:   1/6/2004 GUIControlManager Created.
-
+/// <summary>
+/// A class used to manage the GUI as a whole and provide the interface between the GUI and the rest of the system.
+/// </summary>
 class GUIControlManager {
-
-friend class GUIControl;
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
+	friend class GUIControl;
 
 public:
 
@@ -73,7 +48,7 @@ public:
 // Description:     Creates the data for the control manager
 // Arguments:       Screen and Input Interfaces, Skin directory
 
-    bool Create(GUIScreen *Screen, GUIInput *Input, const std::string SkinDir, const std::string SkinFilename = "skin.ini");
+    bool Create(GUIScreen *Screen, GUIInput *Input, const std::string &SkinDir, const std::string &SkinFilename = "skin.ini");
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -100,7 +75,7 @@ public:
 // Description:     Changes the skin of the controls.
 // Arguments:       Skin directory.
 
-    void ChangeSkin(const std::string SkinDir, const std::string SkinFilename = "skin.ini");
+    void ChangeSkin(const std::string &SkinDir, const std::string &SkinFilename = "skin.ini");
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -135,7 +110,7 @@ public:
 // Method:          Draw
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws the GUI to the back buffer.
-// Arguments:       The GUIScreen to draw to, overriding teh one passed in on constuction
+// Arguments:       The GUIScreen to draw to, overriding the one passed in on construction
 
     void Draw(GUIScreen *pScreen);
 
@@ -177,7 +152,7 @@ public:
 // Arguments:       Name.
 // Returns:         The manager, ownership is NOT transferred!
 
-    GUIManager *GetManager() { return m_GUIManager; }
+    GUIManager * GetManager() { return m_GUIManager; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -187,9 +162,7 @@ public:
 // Arguments:       Name, Type, Position, Size, Parent.
 // Returns:         GUIControl class created. 0 if not created.
 
-    GUIControl *AddControl(const std::string Name, const std::string Type, 
-                           GUIControl *Parent, int X, int Y, 
-                           int Width, int Height);
+    GUIControl * AddControl(const std::string &Name, const std::string &Type, GUIControl *Parent, int X, int Y, int Width, int Height);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -199,7 +172,7 @@ public:
 // Arguments:       Properties.
 // Returns:         GUIControl class created. 0 if not created.
 
-    GUIControl *AddControl(GUIProperties *Property);
+    GUIControl * AddControl(GUIProperties *Property);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -209,7 +182,7 @@ public:
 // Arguments:       Name.
 // Returns:         GUIControl class, or 0 if not found.
 
-    GUIControl *GetControl(const std::string& Name);
+    GUIControl * GetControl(const std::string &Name);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -219,7 +192,7 @@ public:
 // Arguments:       None.
 // Returns:         vector<GUIControl *> Pointer.
 
-    std::vector<GUIControl *> *GetControlList();
+    std::vector<GUIControl *> * GetControlList();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -232,7 +205,7 @@ public:
 //                  goes as far as it can.
 // Returns:			GUIControl. NULL if no control under the point
 
-    GUIControl *GetControlUnderPoint(int pointX, int pointY, GUIControl *pParent = 0, int depth = -1);
+    GUIControl * GetControlUnderPoint(int pointX, int pointY, GUIControl *pParent = nullptr, int depth = -1);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -242,7 +215,7 @@ public:
 // Arguments:       Name, RemoveFromParent.
 // Returns:         None.
 
-    void RemoveControl(const std::string Name, bool RemoveFromParent);
+    void RemoveControl(const std::string &Name, bool RemoveFromParent);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -271,9 +244,9 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Saves the layout to a file.
 // Arguments:       Filename.
-// Returns:         True if sucessful.
+// Returns:         True if successful.
 
-    bool Save(const std::string Filename);
+    bool Save(const std::string &Filename);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -281,9 +254,9 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Saves the layout to a Writer class.
 // Arguments:       Writer class.
-// Returns:         True if sucessful.
+// Returns:         True if successful.
 
-    bool Save(Writer *W);
+    bool Save(GUIWriter *W);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -293,32 +266,28 @@ public:
 // Arguments:       Filename.
 //                  Whether to NOT clear out the manager, but just add the controls loaded
 //                  to the existing layout.
-// Returns:         True if sucessful.
+// Returns:         True if successful.
 
     bool Load(const std::string &Filename, bool keepOld = false);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
+	/// <summary>
+	/// Gets the GUIScreen that this GUIControlManager is drawing itself to.
+	/// </summary>
+	/// <returns>Pointer to the GUIScreen that this GUIControlManager is drawing itself to.</returns>
+	GUIScreen * GetScreen() const { return m_Screen; }
 
 private:
 
-    GUIScreen        *m_Screen;
-    GUIInput        *m_Input;
-    GUISkin            *m_Skin;
-    GUIManager        *m_GUIManager;
+	GUIScreen *m_Screen; // Not owned.
+	GUIInput *m_Input; // Not owned.
+	GUISkin *m_Skin;
+	GUIManager *m_GUIManager;
 
-    std::vector<GUIControl *>    m_ControlList;
-    std::vector<GUIEvent *>        m_EventQueue;
+	std::vector<GUIControl *> m_ControlList;
+	std::vector<GUIEvent *> m_EventQueue;
 
-    int                m_CursorType;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
-
-protected:
-
+	int m_CursorType;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          AddEvent
@@ -326,12 +295,7 @@ protected:
 // Description:     Add a new event to the queue.
 // Arguments:       Event point.
 
-    void AddEvent(GUIEvent *Event);
-
+	void AddEvent(GUIEvent *Event);
 };
-
-
-}; // namespace RTE
-
-
+};
 #endif  //  _GUICONTROLMANAGER_

@@ -1,41 +1,16 @@
 #ifndef _GUICONTROL_
 #define _GUICONTROL_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUIControl.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUIControl class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
+#include "GUIWriter.h"
 
+namespace RTE {
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
-#include "Writer.h"
-
-
-namespace RTE
-{
-
-
-// Forward Declarations
 class GUIControlManager;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUIControl
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A base class inherited by all controls.
-// Parent(s):       None.
-// Class history:   1/4/2004 GUIControl Created.
-
+/// <summary>
+/// A base class inherited by all controls.
+/// </summary>
 class GUIControl {
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
 
 public:
 
@@ -64,7 +39,7 @@ public:
 // Description:     Called when the control has been created.
 // Arguments:       Name, Position, Size
 
-    virtual void Create(const std::string Name, int X, int Y, int Width = -1, int Height = -1);
+    virtual void Create(const std::string &Name, int X, int Y, int Width = -1, int Height = -1);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -127,7 +102,7 @@ public:
 // Description:     Sets the control's tooltip string.
 // Arguments:       The new ToolTip for this.
 
-    void SetToolTip(std::string tip) { m_Properties.SetValue("ToolTip", tip); }
+    void SetToolTip(const std::string &tip) { m_Properties.SetValue("ToolTip", tip); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -145,7 +120,7 @@ public:
 // Description:     Returns a string representing the control's ID
 // Arguments:       None.
 
-    std::string GetID();
+    std::string GetID() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -172,7 +147,7 @@ public:
 // Description:     Gets the children lst
 // Arguments:       None.
 
-    std::vector<GUIControl *> *GetChildren();
+    std::vector<GUIControl *> * GetChildren();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -192,7 +167,7 @@ public:
 // Arguments:       Writer.
 // Returns:         True if sucessful
 
-    bool Save(Writer *W);
+    bool Save(GUIWriter *W);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -273,7 +248,7 @@ public:
 // Description:     Gets the parent of this control.
 // Arguments:       None.
 
-    GUIControl *GetParent();
+    GUIControl * GetParent();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -282,7 +257,7 @@ public:
 // Description:     Gets the control properties.
 // Arguments:       None.
 
-    GUIProperties *GetProperties();
+    GUIProperties * GetProperties();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -320,32 +295,25 @@ public:
 
     void RemoveChildren();
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
 protected:
 
-    GUISkin            *m_Skin;
-    int             m_SkinPreset;
-    GUIProperties    m_Properties;
-    GUIControl        *m_ControlParent;
-    std::vector<GUIControl *>        m_ControlChildren;
+    GUISkin *m_Skin;
+    int m_SkinPreset;
+    GUIProperties m_Properties;
+    GUIControl *m_ControlParent;
+    std::vector<GUIControl *> m_ControlChildren;
 
-    std::string        m_ControlID;
+    std::string m_ControlID;
 
-    bool            m_IsContainer;
+    bool m_IsContainer;
 
     // For the GUI editor
-    int                m_MinWidth, m_MinHeight;
-    int                m_DefWidth, m_DefHeight;
+	int m_MinWidth;
+	int m_MinHeight;
+	int m_DefWidth;
+	int m_DefHeight;
 
-    GUIControlManager    *m_ControlManager;
-
+    GUIControlManager *m_ControlManager;
 };
-
-
-};  // namespace RTE
-
-
-#endif  //  _GUICONTROL_
+};
+#endif

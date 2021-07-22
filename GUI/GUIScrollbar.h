@@ -1,40 +1,14 @@
 #ifndef _GUISCROLLBAR_
 #define _GUISCROLLBAR_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUIScrollbar.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUIScrollbar class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
 #include "GUIScrollPanel.h"
 
+namespace RTE {
 
-namespace RTE
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUIScrollbar
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A Scrollbar control class.
-// Parent(s):       GUIControl, GUIScrollPanel.
-// Class history:   1/22/2004 GUIScrollbar Created.
-
-class GUIScrollbar :
-    public GUIControl,
-    public GUIScrollPanel
-{
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
+/// <summary>
+/// A Scrollbar control class.
+/// </summary>
+class GUIScrollbar : public GUIControl, public GUIScrollPanel {
 
 public:
 
@@ -61,7 +35,7 @@ public:
 // Description:     Called when the control has been created.
 // Arguments:       Name, Position.
 
-    void Create(const std::string Name, int X, int Y, int Width = -1, int Height = -1) override;
+    void Create(const std::string &Name, int X, int Y, int Width = -1, int Height = -1) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -107,6 +81,15 @@ public:
 // Arguments:       Mouse Position, Mouse Buttons, Modifier.
 
     void OnMouseUp(int X, int Y, int Buttons, int Modifier) override;
+
+	/// <summary>
+	/// Called when the mouse scroll wheel is moved.
+	/// </summary>
+	/// <param name="x">Mouse X position.</param>
+	/// <param name="y">Mouse Y position.</param>
+	/// <param name="modifier">Activated modifier buttons.</param>
+	/// <param name="mouseWheelChange">The amount of wheel movement. Positive is scroll up, negative is scroll down.</param>
+	void OnMouseWheelChange(int x, int y, int modifier, int mouseWheelChange) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -181,16 +164,8 @@ public:
 
     void ApplyProperties(GUIProperties *Props) override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
 private:
 
 };
-
-
-}; // namespace RTE
-
-
-#endif  //  _GUISCROLLBAR_
+};
+#endif

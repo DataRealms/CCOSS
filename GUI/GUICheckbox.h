@@ -1,34 +1,12 @@
 #ifndef _GUICHECKBOX_
 #define _GUICHECKBOX_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUICheckbox.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUICheckbox class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
+namespace RTE {
 
-
-namespace RTE
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUICheckbox
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A checkbox control class.
-// Parent(s):       GUIControl, Panel.
-// Class history:   1/13/2004 GUICheckbox Created.
-
-class GUICheckbox :
-    public GUIControl,
-    public GUIPanel
-{
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
+/// <summary>
+/// A checkbox control class.
+/// </summary>
+class GUICheckbox : public GUIControl, public GUIPanel {
 
 public:
 
@@ -62,7 +40,7 @@ public:
 // Description:     Called when the control has been created.
 // Arguments:       Name, Position.
 
-    void Create(const std::string Name, int X, int Y, int Width = -1, int Height = -1) override;
+    void Create(const std::string &Name, int X, int Y, int Width = -1, int Height = -1) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -198,7 +176,7 @@ public:
 // Description:     Sets the text.
 // Arguments:       Text.
 
-    void SetText(const std::string Text);
+    void SetText(const std::string &Text);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -207,7 +185,7 @@ public:
 // Description:     Gets the text.
 // Arguments:       None.
 
-    std::string GetText();
+    std::string GetText() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -225,7 +203,7 @@ public:
 // Description:     Gets the check state.
 // Arguments:       None.
 
-    int GetCheck();
+    int GetCheck() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -236,12 +214,14 @@ public:
 
     void ApplyProperties(GUIProperties *Props) override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
 private:
 
+	GUIBitmap *m_Image;
+	GUIRect m_ImageRects[4];
+
+	int m_Check;
+	std::string m_Text;
+	int m_Mouseover;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          BuildBitmap
@@ -250,21 +230,6 @@ private:
 // Arguments:       None.
 
     void BuildBitmap();
-
-
-// Members
-    
-    GUIBitmap        *m_Image;
-    GUIRect            m_ImageRects[4];
-
-    int                m_Check;
-    std::string        m_Text;
-    int                m_Mouseover;
-
 };
-
-
-}; // namespace RTE
-
-
-#endif  //  _GUICHECKBOX_
+};
+#endif

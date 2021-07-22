@@ -202,6 +202,8 @@ namespace RTE
 		// The editor GUI
 		//MultiplayerGameGUI *m_pEditorGUI;
 
+		GUIButton *m_BackToMainButton; //!< Button to return to main menu.
+
 		// 
 		GUITextBox *m_pServerNameTextBox;
 

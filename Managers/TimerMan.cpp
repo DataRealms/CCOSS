@@ -27,7 +27,6 @@ namespace RTE {
 		m_DrawnSimUpdate = false;
 		m_SimSpeed = 1.0F;
 		m_TimeScale = 1.0F;
-		m_AveragingEnabled = false;
 		m_SimPaused = false;
 		// This gets dynamically turned on for short periods when sim gets heavy (explosions) and slow-mo effect is appropriate
 		m_OneSimUpdatePerFrame = false;

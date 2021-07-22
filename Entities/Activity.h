@@ -166,13 +166,13 @@ namespace RTE {
 		/// Gets the max number of players supported by this Activity.
 		/// </summary>
 		/// <returns>The max number of players supported by this Activity.</returns>
-		short GetMaxPlayerSupport() const { return m_MaxPlayerSupport; }
+		int GetMaxPlayerSupport() const { return m_MaxPlayerSupport; }
 
 		/// <summary>
 		/// Gets the minimum number of teams with players that this Activity requires.
 		/// </summary>
 		/// <returns>The minimum number of Teams this Activity requires to run.</returns>
-		short GetMinTeamsRequired() const { return m_MinTeamsRequired; }
+		int GetMinTeamsRequired() const { return m_MinTeamsRequired; }
 
 		/// <summary>
 		/// Tells if a particular Scene supports this specific Activity on it. Usually that means certain Areas need to be defined in the Scene.
@@ -180,19 +180,19 @@ namespace RTE {
 		/// <param name="scene">The Scene to check if it supports this Activity. Ownership IS NOT TRANSFERRED!</param>
 		/// <param name="teams">How many teams we're checking for. Some scenes may support and Activity but only for a limited number of teams. If -1, not applicable.</param>
 		/// <returns>Whether the Scene has the right stuff.</returns>
-		virtual bool SceneIsCompatible(Scene *scene, short teams = -1) { return scene && teams <= m_MinTeamsRequired; }
+		virtual bool SceneIsCompatible(Scene *scene, int teams = -1) { return scene && teams <= m_MinTeamsRequired; }
 
 		/// <summary>
 		/// Shows in which stage of the Campaign this appears.
 		/// </summary>
 		/// <returns>The stage number in the campaign. -1 means it's not in the campaign.</returns>
-		short GetInCampaignStage() const { return m_InCampaignStage; }
+		int GetInCampaignStage() const { return m_InCampaignStage; }
 
 		/// <summary>
 		/// Sets in which stage of the Campaign this appears.
 		/// </summary>
 		/// <param name="newStage">The new stage to set. -1 means it doesn't appear in the campaign.</param>
-		void SetInCampaignStage(short newStage) { m_InCampaignStage = newStage; }
+		void SetInCampaignStage(int newStage) { m_InCampaignStage = newStage; }
 
 		/// <summary>
 		/// Gets the name of the current scene.
@@ -251,7 +251,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Which player index to check.</param>
 		/// <returns>Whether the player is active in the current Activity.</returns>
-		bool PlayerActive(short player) const { return m_IsActive[player]; }
+		bool PlayerActive(int player) const { return m_IsActive[player]; }
 
 		/// <summary>
 		/// Turns off a player if they were active. Should only be done if brain etc are already taken care of and disposed of properly.
@@ -259,7 +259,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="playerToDeactivate">Which player index to deactivate.</param>
 		/// <returns>Whether the player was active before trying to deactivate.</returns>
-		bool DeactivatePlayer(short playerToDeactivate);
+		bool DeactivatePlayer(int playerToDeactivate);
 
 		/// <summary>
 		/// Sets up a specific player for this Activity, AI or Human.
@@ -270,7 +270,7 @@ namespace RTE {
 		/// <param name="funds">How many funds this player contributes to its Team's total funds.</param>
 		/// <param name="teamIcon">The team flag icon of this player - OWNERSHIP IS NOT TRANSFERRED.</param>
 		/// <returns>The new total number of active players in the current game.</returns>
-		short AddPlayer(short playerToAdd, bool isHuman, short team, float funds, const Icon *teamIcon = 0);
+		int AddPlayer(int playerToAdd, bool isHuman, int team, float funds, const Icon *teamIcon = 0);
 
 		/// <summary>
 		/// Sets all players as not active in the current Activity.
@@ -282,68 +282,68 @@ namespace RTE {
 		/// Gets the total number of active players in the current Activity, AI or Human.
 		/// </summary>
 		/// <returns>The total number of players in the current Activity.</returns>
-		short GetPlayerCount() const { return m_PlayerCount; }
+		int GetPlayerCount() const { return m_PlayerCount; }
 
 		/// <summary>
 		/// Gets the total number of human players in the current Activity.
 		/// </summary>
 		/// <returns>The total number of players in the current Activity.</returns>
-		short GetHumanCount() const;
+		int GetHumanCount() const;
 
 		/// <summary>
 		/// Indicates whether a specific player is human in the current game, ie not an AI player and has a screen etc.
 		/// </summary>
 		/// <param name="player">Which player index to check.</param>
 		/// <returns>Whether the player is active as a Human in the current Activity.</returns>
-		bool PlayerHuman(short player) const { return m_IsHuman[player]; }
+		bool PlayerHuman(int player) const { return m_IsHuman[player]; }
 
 		/// <summary>
 		/// Gets the current team a specific player belongs to.
 		/// </summary>
 		/// <param name="player">The player to get the team info on.</param>
 		/// <returns>The team number of the specified player.</returns>
-		short GetTeamOfPlayer(short player) const { return m_Team[player]; }
+		int GetTeamOfPlayer(int player) const { return m_Team[player]; }
 
 		/// <summary>
 		/// Sets the current team a specific player belongs to.
 		/// </summary>
 		/// <param name="player">The player to set the team for.</param>
 		/// <param name="team">The team number to set the player to.</param>
-		void SetTeamOfPlayer(short player, short team);
+		void SetTeamOfPlayer(int player, int team);
 
 		/// <summary>
 		/// Converts a player index into a screen index, and only if that player is human.
 		/// </summary>
 		/// <param name="player">Which player index to convert.</param>
 		/// <returns>The screen index, or -1 if non-human player or no players.</returns>
-		short ScreenOfPlayer(short player) const { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_PlayerScreen[player] : -1; }
+		int ScreenOfPlayer(int player) const { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_PlayerScreen[player] : -1; }
 
 		/// <summary>
 		/// Converts a screen index into a player index, if that screen exists.
 		/// </summary>
 		/// <param name="screen">Which screen index to convert.</param>
 		/// <returns>The player index, or -1 if that screen is not in use.</returns>
-		short PlayerOfScreen(short screen) const;
+		int PlayerOfScreen(int screen) const;
 
 		/// <summary>
 		/// Gets the current viewing state for a specific player. See the ViewState enumeration for values.
 		/// </summary>
 		/// <param name="whichPlayer">Which player to get the view state for.</param>
 		/// <returns>The current viewing state of the player.</returns>
-		ViewState GetViewState(short whichPlayer = 0) const { return m_ViewState[whichPlayer]; }
+		ViewState GetViewState(int whichPlayer = 0) const { return m_ViewState[whichPlayer]; }
 
 		/// <summary>
 		/// Sets the current viewing state for a specific player. See the ViewState enumeration for values.
 		/// </summary>
 		/// <param name="whichViewState">The state to set to.</param>
 		/// <param name="whichPlayer">Which player to set the view state for.</param>
-		void SetViewState(ViewState whichViewState, short whichPlayer = 0) { m_ViewState[whichPlayer] = whichViewState; }
+		void SetViewState(ViewState whichViewState, int whichPlayer = 0) { m_ViewState[whichPlayer] = whichViewState; }
 
 		/// <summary>
 		/// Resets the message timer for one player.
 		/// </summary>
 		/// <param name="player">The player to reset the message timer for.</param>
-		void ResetMessageTimer(short player = 0) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_MessageTimer[player].Reset(); } }
+		void ResetMessageTimer(int player = 0) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_MessageTimer[player].Reset(); } }
 #pragma endregion
 
 #pragma region Team Handling
@@ -351,63 +351,63 @@ namespace RTE {
 		/// Gets the total number of teams in the current Activity.
 		/// </summary>
 		/// <returns>The total number of teams in the current Activity.</returns>
-		short GetTeamCount() const { return m_TeamCount; }
+		int GetTeamCount() const { return m_TeamCount; }
 
 		/// <summary>
 		/// Gets the name of a specific team.
 		/// </summary>
 		/// <param name="whichTeam">Which team to get the name of. 0 = first team.</param>
 		/// <returns>The current name of that team.</returns>
-		std::string GetTeamName(short whichTeam = 0) const;
+		std::string GetTeamName(int whichTeam = 0) const;
 
 		/// <summary>
 		/// Sets the name of a specific team.
 		/// </summary>
 		/// <param name="whichTeam">Which team to set the name of. 0 = first team.</param>
 		/// <param name="newName">The name to set it to.</param>
-		void SetTeamName(short whichTeam, const std::string &newName) { if (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) { m_TeamNames[whichTeam] = newName; } }
+		void SetTeamName(int whichTeam, const std::string &newName) { if (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) { m_TeamNames[whichTeam] = newName; } }
 
 		/// <summary>
 		/// Gets the Icon of a specific team.
 		/// </summary>
 		/// <param name="whichTeam">Which team to get the Icon of. 0 = first team.</param>
 		/// <returns>The current Icon of that team.</returns>
-		const Icon * GetTeamIcon(short whichTeam = 0) const { return (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) ? &m_TeamIcons[whichTeam] : nullptr; }
+		const Icon * GetTeamIcon(int whichTeam = 0) const { return (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) ? &m_TeamIcons[whichTeam] : nullptr; }
 
 		/// <summary>
 		/// Sets the Icon of a specific team.
 		/// </summary>
 		/// <param name="whichTeam">Which team to set the Icon of. 0 = first team.</param>
 		/// <param name="newIcon">The Icon to set it to.</param>
-		void SetTeamIcon(short whichTeam, const Icon &newIcon) { if (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) { m_TeamIcons[whichTeam] = newIcon; } }
+		void SetTeamIcon(int whichTeam, const Icon &newIcon) { if (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) { m_TeamIcons[whichTeam] = newIcon; } }
 
 		/// <summary>
 		/// Indicates whether a specific team is active in the current game.
 		/// </summary>
 		/// <param name="team">Which team index to check.</param>
 		/// <returns>Whether the team is active in the current Activity.</returns>
-		bool TeamActive(short team) const { return (team >= Teams::TeamOne && team < Teams::MaxTeamCount) ? m_TeamActive[team] : false; }
+		bool TeamActive(int team) const { return (team >= Teams::TeamOne && team < Teams::MaxTeamCount) ? m_TeamActive[team] : false; }
 
 		/// <summary>
 		/// Indicates whether a team is player controlled or not.
 		/// </summary>
 		/// <param name="team">The team number to check.</param>
 		/// <returns>Whether  team is player controlled or not.</returns>
-		bool IsHumanTeam(short team) const;
+		bool IsHumanTeam(int team) const;
 
 		/// <summary>
 		/// Gets the current number of players in a specific team.
 		/// </summary>
 		/// <param name="team">Which team to get the player count for.</param>
 		/// <returns>The player count in the specified team.</returns>
-		short PlayersInTeamCount(short team) const;
+		int PlayersInTeamCount(int team) const;
 
 		/// <summary>
 		/// Gets the number of deaths on a specific team so far on the current Activity.
 		/// </summary>
 		/// <param name="whichTeam">Which team to get the death tally of. 0 = first team.</param>
 		/// <returns>The current death count.</returns>
-		int GetTeamDeathCount(short whichTeam = 0) const { return (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) ? m_TeamDeaths[whichTeam] : 0; }
+		int GetTeamDeathCount(int whichTeam = 0) const { return (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) ? m_TeamDeaths[whichTeam] : 0; }
 
 		/// <summary>
 		/// Increments the tally of a death of an actor on a specific team.
@@ -415,7 +415,7 @@ namespace RTE {
 		/// <param name="whichTeam">Which team to increase the death count of. 0 = first team.</param>
 		/// <param name="howMany">The new death count.</param>
 		/// <returns>The updated death count of the team.</returns>
-		int ReportDeath(short whichTeam = 0, int howMany = 1) { return (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) ? m_TeamDeaths[whichTeam] += howMany : 0; }
+		int ReportDeath(int whichTeam = 0, int howMany = 1) { return (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) ? m_TeamDeaths[whichTeam] += howMany : 0; }
 #pragma endregion
 
 #pragma region Funds Handling
@@ -424,35 +424,35 @@ namespace RTE {
 		/// </summary>
 		/// <param name="whichTeam">Which team to get the fund count from. 0 = first team.</param>
 		/// <returns>A float with the funds tally for the requested team.</returns>
-		float GetTeamFunds(short whichTeam = 0) const { return (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) ? m_TeamFunds[whichTeam] : 0; }
+		float GetTeamFunds(int whichTeam = 0) const { return (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) ? m_TeamFunds[whichTeam] : 0; }
 
 		/// <summary>
 		/// Sets the amount of funds a specific team currently has in the Activity.
 		/// </summary>
 		/// <param name="newFunds">Which team to set the fund count for. 0 = first team.</param>
 		/// <param name="which">A float with the funds tally for the requested team.</param>
-		void SetTeamFunds(float newFunds, short whichTeam = 0) { if (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) { m_TeamFunds[whichTeam] = newFunds; } }
+		void SetTeamFunds(float newFunds, int whichTeam = 0) { if (whichTeam >= Teams::TeamOne && whichTeam < Teams::MaxTeamCount) { m_TeamFunds[whichTeam] = newFunds; } }
 
 		/// <summary>
 		/// Changes a team's funds level by a certain amount.
 		/// </summary>
 		/// <param name="howMuch">The amount with which to change the funds balance.</param>
 		/// <param name="whichTeam">Which team to alter the funds of. 0 = first team.</param>
-		void ChangeTeamFunds(float howMuch, short whichTeam = 0);
+		void ChangeTeamFunds(float howMuch, int whichTeam = 0);
 
 		/// <summary>
 		/// Checks whether the team funds changed since last time this was called. This also resets the state, so calling this again on the same team will yield false unless it's been changed again.
 		/// </summary>
 		/// <param name="whichTeam">Which team's funds to check.</param>
 		/// <returns>Whether funds amount changed for this team since last time this was called.</returns>
-		bool TeamFundsChanged(short whichTeam = 0);
+		bool TeamFundsChanged(int whichTeam = 0);
 
 		/// <summary>
 		/// Gets the amount of funds a specific player originally added to his team's collective stash.
 		/// </summary>
 		/// <param name="player">Which player to check for.</param>
 		/// <returns>A float with the funds originally deposited by this player.</returns>
-		float GetPlayerFundsContribution(short player) const { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_FundsContribution[player] : 0; }
+		float GetPlayerFundsContribution(int player) const { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_FundsContribution[player] : 0; }
 
 		/// <summary>
 		/// Sets a new amount of starting funds for a player, after he has already been added.
@@ -460,14 +460,14 @@ namespace RTE {
 		/// <param name="player">Which player slot to update - has to already be active.</param>
 		/// <param name="newFunds">Updated value of how many funds this player contributes to its Team's total funds.</param>
 		/// <returns>Whether the update was successful.</returns>
-		bool UpdatePlayerFundsContribution(short player, float newFunds);
+		bool UpdatePlayerFundsContribution(int player, float newFunds);
 
 		/// <summary>
 		/// Gets the share of funds a specific PLAYER currently has in the game, calculated from his original contribution to his team's collective funds.
 		/// </summary>
 		/// <param name="player">Which player to get the fund count from.</param>
 		/// <returns>A float with the funds tally for the requested player.</returns>
-		float GetPlayerFundsShare(short player = 0) const;
+		float GetPlayerFundsShare(int player = 0) const;
 #pragma endregion
 
 #pragma region Brain Handling
@@ -475,55 +475,55 @@ namespace RTE {
 		/// Shows how many human controlled brains are left in this Activity.
 		/// </summary>
 		/// <returns>How many human controlled brains are left in this Activity.</returns>
-		short HumanBrainCount() const { return GetBrainCount(true); }
+		int HumanBrainCount() const { return GetBrainCount(true); }
 
 		/// <summary>
 		/// Shows how many AI controlled brains are left in this Activity.
 		/// </summary>
 		/// <returns>how many AI controlled brains are left in this Activity.</returns>
-		short AIBrainCount() const { return GetBrainCount(false); }
+		int AIBrainCount() const { return GetBrainCount(false); }
 
 		/// <summary>
 		/// Gets the current Brain actor for a specific player. 
 		/// </summary>
 		/// <param name="player">Which player to get the brain actor for.</param>
 		/// <returns>A pointer to the Brain Actor. Ownership is NOT transferred!</returns>
-		Actor * GetPlayerBrain(short player = 0) const { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_Brain[player] : nullptr; }
+		Actor * GetPlayerBrain(int player = 0) const { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_Brain[player] : nullptr; }
 
 		/// <summary>
 		/// Sets the current Brain actor for a specific player.
 		/// </summary>
 		/// <param name="newBrain">A pointer to the new brain Actor. Ownership is NOT transferred!</param>
 		/// <param name="player"> Which team to set the brain actor for.</param>
-		void SetPlayerBrain(Actor *newBrain, short player = 0);
+		void SetPlayerBrain(Actor *newBrain, int player = 0);
 
 		/// <summary>
 		/// Shows whether a specific player ever had a Brain yet.
 		/// </summary>
 		/// <param name="player">Which player to check whether they ever had a Brain.</param>
 		/// <returns>Whether this player ever had a Brain.</returns>
-		bool PlayerHadBrain(short player = 0) const { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_HadBrain[player] : false; }
+		bool PlayerHadBrain(int player = 0) const { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_HadBrain[player] : false; }
 
 		/// <summary>
 		/// Sets to indicate that the player had a Brain at some point. This is to simulate that in automated battle cases.
 		/// </summary>
 		/// <param name="player">Which player to set whether he had a Brain or not.</param>
 		/// <param name="hadBrain">Whether he should be flagged as having had a Brain.</param>
-		void SetPlayerHadBrain(short player, bool hadBrain = true) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) m_HadBrain[player] = hadBrain; }
+		void SetPlayerHadBrain(int player, bool hadBrain = true) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) m_HadBrain[player] = hadBrain; }
 
 		/// <summary>
 		/// Shows whether a specific player's Brain was evacuated into orbit so far.
 		/// </summary>
 		/// <param name="player">Which player to check whether their Brain was evacuated.</param>
 		/// <returns>Whether this player had a Brain that was evacuated.</returns>
-		bool BrainWasEvacuated(short player = 0) const { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_BrainEvacuated[player] : false; }
+		bool BrainWasEvacuated(int player = 0) const { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_BrainEvacuated[player] : false; }
 
 		/// <summary>
 		/// Sets whether a player's Brain was evacuated during the Activity.
 		/// </summary>
 		/// <param name="player">Which player to check whether their Brain was evacuated.</param>
 		/// <param name="evacuated">Whether it was evacuated yet.</param>
-		void SetBrainEvacuated(short player = 0, bool evacuated = true) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_BrainEvacuated[player] = evacuated; } }
+		void SetBrainEvacuated(int player = 0, bool evacuated = true) { if (player >= Players::PlayerOne && player < Players::MaxPlayerCount) { m_BrainEvacuated[player] = evacuated; } }
 
 		/// <summary>
 		/// Shows whether ANY player evacuated their Brain.
@@ -543,7 +543,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="actor">Which Actor to check for player braininess.</param>
 		/// <returns>Which player has this assigned as a Brain, if any.</returns>
-		short IsBrainOfWhichPlayer(Actor *actor) const;
+		int IsBrainOfWhichPlayer(Actor *actor) const;
 
 		/// <summary>
 		/// Shows whether the passed in actor is the Brain of any other player.
@@ -551,7 +551,7 @@ namespace RTE {
 		/// <param name="actor">Which Actor to check for other player braininess.</param>
 		/// <param name="player">From which player's perspective to check.</param>
 		/// <returns>Whether other player's Brain or not.</returns>
-		bool IsOtherPlayerBrain(Actor *actor, short player) const;
+		bool IsOtherPlayerBrain(Actor *actor, int player) const;
 #pragma endregion
 
 #pragma region Difficulty Handling
@@ -560,19 +560,19 @@ namespace RTE {
 		/// </summary>
 		/// <param name="difficulty">Difficulty setting</param>
 		/// <returns>Corresponding difficulty string.</returns>
-		static std::string GetDifficultyString(short difficulty);
+		static std::string GetDifficultyString(int difficulty);
 
 		/// <summary>
 		/// Gets the current difficulty setting.
 		/// </summary>
 		/// <returns>The current setting.</returns>
-		short GetDifficulty() const { return m_Difficulty; }
+		int GetDifficulty() const { return m_Difficulty; }
 
 		/// <summary>
 		/// Sets the current difficulty setting.
 		/// </summary>
 		/// <param name="newDifficulty">The new difficulty setting.</param>
-		void SetDifficulty(short newDifficulty) { m_Difficulty = Limit(newDifficulty, DifficultySetting::MaxDifficulty, DifficultySetting::MinDifficulty); }
+		void SetDifficulty(int newDifficulty) { m_Difficulty = Limit(newDifficulty, DifficultySetting::MaxDifficulty, DifficultySetting::MinDifficulty); }
 #pragma endregion
 
 #pragma region AI Handling
@@ -581,21 +581,21 @@ namespace RTE {
 		/// </summary>
 		/// <param name="skill">AI skill setting.</param>
 		/// <returns>Corresponding AI skill string.</returns>
-		static std::string GetAISkillString(short skill);
+		static std::string GetAISkillString(int skill);
 
 		/// <summary>
 		/// Returns skill level for specified team. If team is less than 0 or greater than 3 an average of all teams is returned.
 		/// </summary>
 		/// <param name="team">Team to get skill level for.</param>
 		/// <returns>Team skill level.</returns>
-		short GetTeamAISkill(short team) const;
+		int GetTeamAISkill(int team) const;
 
 		/// <summary>
 		/// Sets AI skill level for specified team.
 		/// </summary>
 		/// <param name="team">The team to set for.</param>
 		/// <param name="skill">AI skill level, 1-100.</param>
-		void SetTeamAISkill(short team, short skill) { if (team >= Teams::TeamOne && team < Teams::MaxTeamCount) { m_TeamAISkillLevels[team] = Limit(skill, AISkillSetting::UnfairSkill, AISkillSetting::MinSkill); } }
+		void SetTeamAISkill(int team, int skill) { if (team >= Teams::TeamOne && team < Teams::MaxTeamCount) { m_TeamAISkillLevels[team] = Limit(skill, AISkillSetting::UnfairSkill, AISkillSetting::MinSkill); } }
 #pragma endregion
 
 #pragma region Actor Handling
@@ -604,14 +604,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="player">Which player to get the controlled actor of.</param>
 		/// <returns>A pointer to the controlled Actor. Ownership is NOT transferred! 0 If no actor is currently controlled by this player.</returns>
-		Actor * GetControlledActor(short player = 0) { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_ControlledActor[player] : 0; }
+		Actor * GetControlledActor(int player = 0) { return (player >= Players::PlayerOne && player < Players::MaxPlayerCount) ? m_ControlledActor[player] : 0; }
 
 		/// <summary>
 		/// Makes the player's ControlledActor the leader of any squad it is a member of.
 		/// </summary>
 		/// <param name="player">Player to reassign for.</param>
 		/// <param name="team">Team of the player.</param>
-		void ReassignSquadLeader(const short player, const short team);
+		void ReassignSquadLeader(const int player, const int team);
 
 		/// <summary>
 		/// Forces the ActivityMan to focus player control to a specific Actor for a specific team. OWNERSHIP IS NOT TRANSFERRED!
@@ -620,7 +620,7 @@ namespace RTE {
 		/// <param name="player">Player to force for.</param>
 		/// <param name="team">Which team to switch to next actor on.</param>
 		/// <returns>Whether the focus switch was successful or not.</returns>
-		virtual bool SwitchToActor(Actor *actor, short player = 0, short team = 0);
+		virtual bool SwitchToActor(Actor *actor, int player = 0, int team = 0);
 
 		/// <summary>
 		/// Forces the Activity to focus player control to the previous Actor of a specific team, other than the current one focused on.
@@ -628,7 +628,7 @@ namespace RTE {
 		/// <param name="player">Player to force for.</param>
 		/// <param name="team">Which team to switch to next Actor on.</param>
 		/// <param name="actorToSkip">An Actor pointer to skip in the sequence.</param>
-		virtual void SwitchToPrevActor(short player, short team, Actor *actorToSkip = 0) { SwitchToPrevOrNextActor(false, player, team, actorToSkip); }
+		virtual void SwitchToPrevActor(int player, int team, Actor *actorToSkip = 0) { SwitchToPrevOrNextActor(false, player, team, actorToSkip); }
 
 		/// <summary>
 		/// Forces the Activity to focus player control to the next Actor of a specific team, other than the current one focused on.
@@ -636,7 +636,7 @@ namespace RTE {
 		/// <param name="player">Player to force for.</param>
 		/// <param name="team">Which team to switch to next Actor on.</param>
 		/// <param name="actorToSkip">An Actor pointer to skip in the sequence.</param>
-		virtual void SwitchToNextActor(short player, short team, Actor *actorToSkip = 0) { SwitchToPrevOrNextActor(true, player, team, actorToSkip); }
+		virtual void SwitchToNextActor(int player, int team, Actor *actorToSkip = 0) { SwitchToPrevOrNextActor(true, player, team, actorToSkip); }
 
 		/// <summary>
 		/// Indicates an Actor as having left the game scene and entered orbit.  OWNERSHIP IS NOT transferred, as the Actor's inventory is just 'unloaded'.
@@ -667,28 +667,28 @@ namespace RTE {
 		std::string m_Description; //!< User-friendly description of what this Activity is all about.
 		std::string m_SceneName; //!< The name of the Scene in which this Activity takes place.
 
-		short m_MaxPlayerSupport; //!< How many separate players this Activity can support at the same time.
-		short m_MinTeamsRequired; //!< How many separate teams this Activity can support at the same time.
+		int m_MaxPlayerSupport; //!< How many separate players this Activity can support at the same time.
+		int m_MinTeamsRequired; //!< How many separate teams this Activity can support at the same time.
 
-		short m_Difficulty; //!< Current difficulty setting of this Activity.
+		int m_Difficulty; //!< Current difficulty setting of this Activity.
 		bool m_CraftOrbitAtTheEdge; //!< If true then on non-wrapping maps craft beyond the edge of the map are considered orbited.
-		short m_InCampaignStage; //!< Which stage of the campaign this Activity appears in, if any (-1 means it's not in the campaign).
+		int m_InCampaignStage; //!< Which stage of the campaign this Activity appears in, if any (-1 means it's not in the campaign).
 
-		short m_PlayerCount; //!< The number of total players in the current Activity, AI and Human.
+		int m_PlayerCount; //!< The number of total players in the current Activity, AI and Human.
 		bool m_IsActive[Players::MaxPlayerCount]; //!< Whether a specific player is at all active and playing this Activity.
 		bool m_IsHuman[Players::MaxPlayerCount]; //!< Whether a specific player is Human or not, and needs a screen etc.
 
-		short m_PlayerScreen[Players::MaxPlayerCount]; //!< The screen index of each player - only applicable to human players. -1 if AI or other.
+		int m_PlayerScreen[Players::MaxPlayerCount]; //!< The screen index of each player - only applicable to human players. -1 if AI or other.
 		ViewState m_ViewState[Players::MaxPlayerCount]; //!< What to be viewing for each player.
 
 		std::string m_TeamNames[Teams::MaxTeamCount]; //!< Names for each team.
 		Icon m_TeamIcons[Teams::MaxTeamCount]; //!< Icons for each team.
 
-		short m_TeamCount; //!< The number of teams in the current Activity.
+		int m_TeamCount; //!< The number of teams in the current Activity.
 		bool m_TeamActive[Teams::MaxTeamCount]; //!< Whether a specific team is active or not in this Activity.
-		short m_Team[Players::MaxPlayerCount]; //!< The designated team of each player.	
+		int m_Team[Players::MaxPlayerCount]; //!< The designated team of each player.	
 		int m_TeamDeaths[Teams::MaxTeamCount]; //!< The count of how many actors have died on this team.
-		short m_TeamAISkillLevels[Teams::MaxTeamCount]; //!< AI skill levels for teams.
+		int m_TeamAISkillLevels[Teams::MaxTeamCount]; //!< AI skill levels for teams.
 
 		float m_TeamFunds[Teams::MaxTeamCount]; //!< Gold counter for each team.
 		float m_TeamFundsShare[Players::MaxPlayerCount]; //!< The ratio of how much this player contributed to his team's funds at the start of the Activity.
@@ -711,7 +711,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="getForHuman">Whether to get brain count for Human or for AI. True for Human.</param>
 		/// <returns>How many human or AI controlled brains are left in this Activity.</returns>
-		short GetBrainCount(bool getForHuman) const;
+		int GetBrainCount(bool getForHuman) const;
 
 		/// <summary>
 		/// Shared method to force the Activity to focus player control to the previous or next Actor of a specific team, other than the current one focused on.
@@ -720,7 +720,7 @@ namespace RTE {
 		/// <param name="player">Player to force for.</param>
 		/// <param name="team">Which team to switch to next Actor on.</param>
 		/// <param name="skip">An Actor pointer to skip in the sequence.</param>
-		void SwitchToPrevOrNextActor(bool nextActor, short player, short team, const Actor *skip = 0);
+		void SwitchToPrevOrNextActor(bool nextActor, int player, int team, const Actor *skip = 0);
 
 		/// <summary>
 		/// Clears all the member variables of this Activity, effectively resetting the members of this abstraction level only.

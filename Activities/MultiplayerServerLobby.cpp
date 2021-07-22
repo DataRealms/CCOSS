@@ -43,9 +43,6 @@
 
 #include "NetworkServer.h"
 
-
-extern bool g_ResetActivity;
-
 namespace RTE {
 
 	ConcreteClassInfo(MultiplayerServerLobby, Activity, 0)
@@ -228,8 +225,9 @@ namespace RTE {
 			m_pGUIInput = new AllegroInput(-1, true);
 		if (!m_pGUIController)
 			m_pGUIController = new GUIControlManager();
-		if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Base"))
-			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
+		if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
+			RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/DefaultSkin.ini");
+		}
 
 		m_pGUIController->Load("Base.rte/GUIs/MultiplayerServerLobbyGUI.ini");
 		m_pGUIController->EnableMouse(true);
@@ -245,8 +243,8 @@ namespace RTE {
 		m_pDifficultyLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("DifficultyLabel"));
 		m_pDifficultySlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("DifficultySlider"));
 		//m_pActivitySelect->SetDropHeight(64);
-		//    m_pActivitySelect->GetListPanel()->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
-		//m_pActivityLabel->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
+		//    m_pActivitySelect->GetListPanel()->SetFont(m_pGUIController->GetSkin()->GetFont("FontSmall.png"));
+		//m_pActivityLabel->SetFont(m_pGUIController->GetSkin()->GetFont("FontSmall.png"));
 
 		// Player team assignment box
 		char str[128];
@@ -339,9 +337,11 @@ namespace RTE {
 
 		m_pStartScenarioButton = dynamic_cast<GUIButton *>(m_pGUIController->GetControl("StartButton"));
 
-		m_pScenePreviewBitmap = create_bitmap_ex(8, Scene::PREVIEW_WIDTH, Scene::PREVIEW_HEIGHT);
+		// TODO: Use old dimensions because don't feel like redesigning this whole GUI. Deal with this eventually.
+		m_pScenePreviewBitmap = create_bitmap_ex(8, 140, 55);
+		//m_pScenePreviewBitmap = create_bitmap_ex(8, c_ScenePreviewWidth, c_ScenePreviewHeight);
 
-		ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview.png");
+		ContentFile defaultPreview("Base.rte/GUIs/DefaultPreview000.png");
 		m_pDefaultPreviewBitmap = defaultPreview.GetAsBitmap(COLORCONV_NONE, false);
 
 		clear_to_color(m_pScenePreviewBitmap, g_MaskColor);
@@ -1007,7 +1007,7 @@ namespace RTE {
 		g_AudioMan.ClearMusicQueue();
 		g_AudioMan.StopMusic();
 
-		g_ResetActivity = true;
+		g_ActivityMan.SetRestartActivity();
 		g_ActivityMan.SetStartActivity(pActivity);
 
 		// Kill any Campaign games currently running
@@ -1335,13 +1335,17 @@ namespace RTE {
 				{
 					int xOffset = 0;
 					int yOffset = 0;
-					blit(preview, m_pScenePreviewBitmap, xOffset, yOffset, 0, 0, m_pScenePreviewBitmap->w, m_pScenePreviewBitmap->h);
+					// TODO: Scale down the previews to old dimensions so they fit. Deal with this when redesigning GUI one day.
+					stretch_blit(preview, m_pScenePreviewBitmap, xOffset, yOffset, c_ScenePreviewWidth, c_ScenePreviewHeight, 0, 0, 140, 55 );
+					//blit(preview, m_pScenePreviewBitmap, xOffset, yOffset, 0, 0, m_pScenePreviewBitmap->w, m_pScenePreviewBitmap->h);
 				}
 				else 
 				{
 					int xOffset = 0;
 					int yOffset = 0;
-					blit(m_pDefaultPreviewBitmap, m_pScenePreviewBitmap, xOffset, yOffset, 0, 0, m_pScenePreviewBitmap->w, m_pScenePreviewBitmap->h);
+					// TODO: Scale down the previews to old dimensions so they fit. Deal with this when redesigning GUI one day.
+					stretch_blit(m_pDefaultPreviewBitmap, m_pScenePreviewBitmap, xOffset, yOffset, c_ScenePreviewWidth, c_ScenePreviewHeight, 0, 0, 140, 55);
+					//blit(m_pDefaultPreviewBitmap, m_pScenePreviewBitmap, xOffset, yOffset, 0, 0, m_pScenePreviewBitmap->w, m_pScenePreviewBitmap->h);
 				}
 				draw_sprite(drawBitmap, m_pScenePreviewBitmap,  419, 57);
 			}

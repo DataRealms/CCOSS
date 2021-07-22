@@ -677,7 +677,8 @@ public:
 // Arguments:       Which screen to get the target for.
 // Return value:    Current target vector in *scene coordinates*.
 
-    const Vector & GetScrollTarget(int screen = 0) const { return m_ScrollTarget[screen]; }
+	const Vector & GetScrollTarget(int screen = 0) const;
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

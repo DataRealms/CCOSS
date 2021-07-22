@@ -1,40 +1,14 @@
 #ifndef _GUITEXTBOX_
 #define _GUITEXTBOX_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUITextBox.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUITextBox class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
 #include "GUITextPanel.h"
 
+namespace RTE {
 
-namespace RTE
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUITextBox
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A TextBox control class.
-// Parent(s):       GUIControl, GUITextPanel.
-// Class history:   1/20/2004 GUITextBox Created.
-
-class GUITextBox :
-    public GUIControl,
-    public GUITextPanel
-{
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
+/// <summary>
+/// A TextBox control class.
+/// </summary>
+class GUITextBox : public GUIControl, public GUITextPanel {
 
 public:
 
@@ -62,7 +36,7 @@ public:
 // Description:     Called when the control has been created.
 // Arguments:       Name, Position.
 
-    void Create(const std::string Name, int X, int Y, int Width = -1, int Height = -1) override;
+    void Create(const std::string &Name, int X, int Y, int Width = -1, int Height = -1) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -80,7 +54,7 @@ public:
 // Description:     Called when the control has been destroyed.
 // Arguments:       None.
 
-    void Destroy() override; 
+    void Destroy() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -117,7 +91,7 @@ public:
 // Description:     Returns a string representing the control's ID
 // Arguments:       None.
 
-    static std::string GetControlID()    { return "TEXTBOX"; };
+    static std::string GetControlID() { return "TEXTBOX"; };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -164,20 +138,11 @@ public:
 
     void ApplyProperties(GUIProperties *Props) override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
 private:
 
-    GUIBitmap        *m_DrawBitmap;
-    int              m_HAlignment;
-    int              m_VAlignment;
-
+    GUIBitmap *m_DrawBitmap;
+    int m_HAlignment;
+    int m_VAlignment;
 };
-
-
-}; // namespace RTE
-
-
-#endif  //  _GUITEXTBOX_
+};
+#endif

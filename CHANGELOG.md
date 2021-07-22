@@ -17,7 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Color/TrailColor = Color
 		Index = 0-255 // Corresponds with index in palette.bmp
 	```
-	
+
 - New `Settings.ini` property `ForceDedicatedFullScreenGfxDriver` to force the game to run in previously removed dedicated fullscreen mode, allowing using lower resolutions (and 1366x768) while still maintaining fullscreen.
 
 - New INI and Lua (R/W) property for Attachables:  
@@ -144,7 +144,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`DrawLimbPathVisualizations` - any  `AHumans` or `ACrabs` will draw some of their `LimbPaths` to the standard view.  
 	`DrawRayCastVisualizations` - any rays cast by `SceneMan` will be drawn to the standard view.  
 	`DrawPixelCheckVisualizations ` - any pixel checks made by `SceneMan:GetTerrMatter` or `SceneMan:GetMOIDPixel` will be drawn to the standard view.
-	
+
 - Added a fully featured inventory view for managing `AHuman` inventories (to be expanded to other things in future).
 
 - New `Settings.ini` property `CaseSensitiveFilePaths = 0/1` to enable/disable file path case sensitivity in INIs. Enabled by default.  
@@ -155,6 +155,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 - Added `AEmitter` Lua properties `MinThrottleRangeTODOFIXNAMEHERE` and `MaxThrottleRangeTODOFIXNAMEHERE` that allow you to 4zK PLEASE FILL IN
+
+- Added option for players to vote to restart multiplayer activities by holding the backslash key, `\`. Requires all players to vote to pass.  
+	This is an alternative to the existing ability to vote to end the activity and return to the multiplayer lobby, by holding `Backspace` key.
+
+- New `Settings.ini` properties `MuteMaster = 0/1`, `MuteMusic = 0/1` and `MuteSound = 0/1` to control muting of master/music/sound channels without changing the volume property values.	
+
+- New `Settings.ini` property `TwoPlayerSplitscreenVertSplit = 0/1` to force two player splitscreen into a vertical split mode (horizontal by default).
+
+- Controller hot-plugging is now supported (Windows only).
+
+- Console text can be set to use a monospace font through `Settings.ini` property `ConsoleUseMonospaceFont = 0/1` or through the in-game settings.
 
 ### Changed
 
@@ -247,6 +258,21 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 
 - `AHuman:ReloadFirearm` Lua function has been changed to `AHuman:ReloadFirearms` and will now reload offhand weapons as well, if appropriate.
 
+- `Settings.ini` property `MenuTransitionDuration` renamed to `MenuTransitionDurationMultiplier`.
+
+- `Settings.ini` property `DisableLoadingScreen` renamed to `DisableLoadingScreenProgressReport`.
+
+- Scenario scene markers are now color coded to help distinguish them visually:  
+	`Base.rte` scenes are yellow as always.  
+	`Missions.rte` scenes are now green.  
+	`Scenes.rte` or any other mod/user scenes are now cyan.
+
+- Main menu and sub-menus were given a facelift.
+
+- Settings menu was reworked to make it less useless.
+
+- Esc has been disabled in server mode to not disrupt simulation for clients, use Alt+F4 or the window close button to exit.
+
 ### Fixed
 
 - `HFlipped` is now properly assigned to emissions, gibs and particles that are shot from a `HDFirearm`'s `Round` when the source object is also flipped.
@@ -281,6 +307,10 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 
 - `OnCollideWithMO` and `OnCollideWithTerrain` (and other special functions) will run more reliably right after the object is spawned. E.g. `OnCollideWithTerrain` should now work even if your gun is jammed into terrain when you shoot.
 
+- Vote counts to end a multiplayer activity now display as intended. 
+
+- Fixed bug where choosing `-Random-` as a player's tech and pressing start game had a 1 in (number of techs + 1) chance to crash the game.
+
 ### Removed
 
 - Removed obsolete graphics drivers and their `Settings.ini` properties `ForceOverlayedWindowGfxDriver` and `ForceNonOverlayedWindowGfxDriver`.
@@ -306,6 +336,10 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 - Removed hardcoded INI constraint that forced `Mass` of `MovableObjects` to not be 0. Previously, anytime a `Mass` of 0 was read in from INI, it was changed to 0.0001.
 
 - Removed the ability to set `HDFirearms'` `Magazine` or `Flash`, or `AEmitters'` `Flash` to None in INI. This was a necessary result of some core changes, and may be undone in future if it's possible. If you want no `Magazine` or `Flash` just don't set one, or use a Null one like is done for limbs and other hardcoded `Attachables`.
+
+- Removed the quit-confirmation dialog from the scenarios screen. Now pressing escape will lead back to the main menu.
+
+- Removed `Settings.ini` properties `HSplitScreen` and `VSplitScreen`. Superseded by `TwoPlayerSplitscreenVertSplit`.
 
 ***
 

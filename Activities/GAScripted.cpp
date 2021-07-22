@@ -33,8 +33,6 @@
 #include "BuyMenuGUI.h"
 #include "SceneEditorGUI.h"
 
-extern bool g_ResetActivity;
-
 namespace RTE {
 
 ConcreteClassInfo(GAScripted, GameActivity, 0)
@@ -202,7 +200,7 @@ int GAScripted::ReloadScripts()
 // Description:     Tells if a particular Scene supports this specific Activity on it.
 //                  Usually that means certain Area:s need to be defined in the Scene.
 
-bool GAScripted::SceneIsCompatible(Scene *pScene, short teams)
+bool GAScripted::SceneIsCompatible(Scene *pScene, int teams)
 {
     if (!GameActivity::SceneIsCompatible(pScene, teams))
         return false;
@@ -307,7 +305,7 @@ int GAScripted::Start()
 	for (std::list<Entity *>::iterator sItr = globalScripts.begin(); sItr != globalScripts.end(); ++sItr )
 	{
 		GlobalScript * script = dynamic_cast<GlobalScript *>(*sItr);
-		if (script && g_SettingsMan.IsScriptEnabled(script->GetModuleAndPresetName()))
+		if (script && g_SettingsMan.IsGlobalScriptEnabled(script->GetModuleAndPresetName()))
 			m_GlobalScriptsList.push_back(dynamic_cast<GlobalScript *>(script->Clone()));
 	}
 

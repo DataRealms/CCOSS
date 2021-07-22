@@ -77,6 +77,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="screenRatio">The ratio of the screen to cover. 0 - 1.0.</param>
 		void SetConsoleScreenSize(float screenRatio = 0.3F);
+
+		/// <summary>
+		/// Gets whether the console text is using the monospace font or the regular proportional one.
+		/// </summary>
+		/// <returns>Whether the console text is using the monospace font or the regular proportional one.</returns>
+		bool GetConsoleUseMonospaceFont() const { return m_ConsoleUseMonospaceFont; }
+
+		/// <summary>
+		/// Sets whether the console text is using the monospace font and changes to the appropriate skin to apply the setting.
+		/// </summary>
+		/// <param name="useFont">Whether to use the monospace font or not.</param>
+		void SetConsoleUseMonospaceFont(bool useFont);
 #pragma endregion
 
 #pragma region Logging
@@ -170,6 +182,8 @@ namespace RTE {
 		std::string m_ConsoleTextBackup; //!< A copy of the whole console text at the time of destruction. Used to restore console text when ConsoleMan is re-created after a resolution change.
 
 	private:
+
+		bool m_ConsoleUseMonospaceFont; //!< Whether the console text is using the monospace font.
 
 		/// <summary>
 		/// Sets the console to read-only mode and enables it.

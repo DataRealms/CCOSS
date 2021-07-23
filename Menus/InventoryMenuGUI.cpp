@@ -34,11 +34,11 @@ namespace RTE {
 		if (IsForEquippedItems) {
 			itemIcons.reserve(equippedItems->size());
 			for (const auto &[equippedItem, offhandEquippedItem] : *equippedItems) {
-				if (equippedItem) {
+				if (equippedItem && equippedItem->GetUniqueID() != 0) {
 					itemIcons.emplace_back(equippedItem->GetGraphicalIcon());
 					totalItemMass += equippedItem->GetMass();
 				}
-				if (offhandEquippedItem) {
+				if (offhandEquippedItem && offhandEquippedItem->GetUniqueID() != 0) {
 					itemIcons.emplace_back(offhandEquippedItem->GetGraphicalIcon());
 					totalItemMass += offhandEquippedItem->GetMass();
 				}

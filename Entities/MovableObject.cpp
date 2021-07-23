@@ -90,6 +90,9 @@ void MovableObject::Clear()
     m_EffectStartStrength = 128;
     m_EffectStopStrength = 128;
     m_EffectAlwaysShows = false;
+
+    m_UniqueID = 0;
+
 	m_RemoveOrphanTerrainRadius = 0;
 	m_RemoveOrphanTerrainMaxArea = 0;
 	m_RemoveOrphanTerrainRate = 0.0;

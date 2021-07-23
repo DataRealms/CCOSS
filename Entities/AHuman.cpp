@@ -3510,26 +3510,26 @@ void AHuman::Update()
 					m_pFGArm->ReachToward(m_Pos + (m_pFGArm->GetParentOffset() + pThrown->GetStartThrowOffset().RadRotate(m_AimAngle + m_AngularVel * g_TimerMan.GetDeltaTimeSecs())).GetXFlipped(m_HFlipped) * m_Rotation);
 				} else if (m_ArmsState == THROWING_PREP) {
 					m_ArmsState = THROWING_RELEASE;
-					//To-do: figure out how to properly use EndThrowOffset, since it doesn't play much a role for just one frame
+					//TODO: figure out how to properly use EndThrowOffset, since it doesn't play much a role for just one frame
 					m_pFGArm->SetHandPos(m_Pos + (m_pFGArm->GetParentOffset() + pThrown->GetEndThrowOffset().RadRotate(m_AimAngle * GetFlipFactor())).GetXFlipped(m_HFlipped) * m_Rotation);
 
 					MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
 
 					if (pMO) {
-						pMO->SetPos(m_Pos + (m_pFGArm->GetParentOffset() + Vector(m_pFGArm->GetMaxLength(), -6.0F)).GetXFlipped(m_HFlipped).RadRotate(m_AimAngle * GetFlipFactor()) * m_Rotation);
+						pMO->SetPos(m_Pos + (m_pFGArm->GetParentOffset() + Vector(m_pFGArm->GetMaxLength(), -m_pFGArm->GetMaxLength() * 0.5F)).GetXFlipped(m_HFlipped).RadRotate(m_AimAngle * GetFlipFactor()) * m_Rotation);
 						float throwScalar = static_cast<float>(std::min(m_ThrowTmr.GetElapsedSimTimeMS(), static_cast<double>(m_ThrowPrepTime)) / m_ThrowPrepTime);
 						float maxThrowVel = pThrown->GetMaxThrowVel();
 						float minThrowVel = pThrown->GetMinThrowVel();
 						if (maxThrowVel == 0) {
-							// If throw velocity is decided by the arm and not by the device, then the mass of the device and angular velocity of the actor will be taken to account
-							maxThrowVel = (m_pFGArm->GetThrowStrength() + std::abs(m_AngularVel * 0.5F) * std::cos(rot)) / std::sqrt(std::abs(pMO->GetMass()) + 1.0F);
+							// If throw velocity is decided by the arm and not by the device, then the mass of the device and angular velocity of the actor will be taken into account.
+							maxThrowVel = (m_pFGArm->GetThrowStrength() + std::abs(m_AngularVel * 0.5F)) / std::sqrt(std::abs(pMO->GetMass()) + 1.0F);
 							minThrowVel = maxThrowVel * 0.2F;
 						}
 						Vector tossVec(minThrowVel + (maxThrowVel - minThrowVel) * throwScalar, 0.5F * RandomNormalNum());
 						tossVec.RadRotate(m_AimAngle);
 						pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
 						pMO->SetAngularVel(m_AngularVel + RandomNum(-5.0F, 2.5F) * GetFlipFactor());
-						pMO->SetRotAngle(m_HFlipped ? -m_AimAngle : m_AimAngle);
+						pMO->SetRotAngle(m_AimAngle * GetFlipFactor());
 
 						if (pMO->IsHeldDevice()) {
 							pMO->SetTeam(m_Team);

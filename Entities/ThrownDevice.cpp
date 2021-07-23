@@ -15,7 +15,7 @@ namespace RTE {
 		m_MaxThrowVel = 0;
 		m_TriggerDelay = 0;
 		m_ActivatesWhenReleased = false;
-		m_StrikerLever = 0;
+		m_StrikerLever = nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -113,20 +113,18 @@ namespace RTE {
 		if (!m_Activated) {
 			m_ActivationTimer.Reset();
 			m_ActivationSound.Play(m_Pos);
-			// Launch striker lever, if there is one.
-			MovableObject *pStrikerLever = m_StrikerLever ? dynamic_cast<MovableObject *>(m_StrikerLever->Clone()) : 0;
-			if (pStrikerLever) {
-				Vector strikerLeverVel;
-				strikerLeverVel.SetXY(m_Vel.GetMagnitude() * 0.25F + 1.0F, 0);
+			MovableObject *strikerLever = m_StrikerLever ? dynamic_cast<MovableObject *>(m_StrikerLever->Clone()) : nullptr;
+			if (strikerLever) {
+				Vector randomVel(m_Vel.GetMagnitude() * 0.25F + 1.0F, 0);
 
-				pStrikerLever->SetVel(m_Vel * 0.5F + strikerLeverVel.RadRotate(c_PI * RandomNormalNum()));
-				pStrikerLever->SetPos(m_Pos);
-				pStrikerLever->SetRotAngle(m_Rotation.GetRadAngle());
-				pStrikerLever->SetAngularVel(m_AngularVel + pStrikerLever->GetAngularVel() * RandomNormalNum());
-				pStrikerLever->SetHFlipped(m_HFlipped);
-				pStrikerLever->SetTeam(m_Team);
-				pStrikerLever->SetIgnoresTeamHits(true);
-				g_MovableMan.AddParticle(pStrikerLever);
+				strikerLever->SetVel(m_Vel * 0.5F + randomVel.RadRotate(c_PI * RandomNormalNum()));
+				strikerLever->SetPos(m_Pos);
+				strikerLever->SetRotAngle(m_Rotation.GetRadAngle());
+				strikerLever->SetAngularVel(m_AngularVel + strikerLever->GetAngularVel() * RandomNormalNum());
+				strikerLever->SetHFlipped(m_HFlipped);
+				strikerLever->SetTeam(m_Team);
+				strikerLever->SetIgnoresTeamHits(true);
+				g_MovableMan.AddParticle(strikerLever);
 			}
 			m_Activated = true;
 		}

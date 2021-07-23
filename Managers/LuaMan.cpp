@@ -774,7 +774,7 @@ int LuaMan::Initialize() {
 			.def("GetRootParent", (MovableObject * (MovableObject::*)())&MovableObject::GetRootParent)
 			.def("GetRootParent", (const MovableObject * (MovableObject::*)() const)&MovableObject::GetRootParent)
 			.property("Material", &MovableObject::GetMaterial)
-            .def("ReloadScripts", (int (MovableObject:: *)()) &MovableObject::ReloadScripts)
+            .def("ReloadScripts", &MovableObject::ReloadScripts)
             .def("HasScript", &MovableObject::HasScript)
             .def("AddScript", &MovableObject::AddScript)
             .def("ScriptEnabled", &MovableObject::ScriptEnabled)

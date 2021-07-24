@@ -755,8 +755,8 @@ MovableObject * ACrab::GetEquippedItem() const
 
 bool ACrab::FirearmIsReady() const {
     if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice()) {
-        for (const std::unique_ptr<HeldDevice> &mountedDevice : m_pTurret->GetMountedDevices()) {
-            if (const HDFirearm *mountedFirearm = dynamic_cast<HDFirearm *>(mountedDevice.get()); mountedFirearm && mountedFirearm->GetRoundInMagCount() != 0) {
+        for (const HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
+            if (const HDFirearm *mountedFirearm = dynamic_cast<const HDFirearm *>(mountedDevice); mountedFirearm && mountedFirearm->GetRoundInMagCount() != 0) {
                 return true;
             }
         }
@@ -783,8 +783,8 @@ bool ACrab::FirearmIsEmpty() const {
 
 bool ACrab::FirearmNeedsReload() const {
     if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice()) {
-        for (const std::unique_ptr<HeldDevice> &mountedDevice : m_pTurret->GetMountedDevices()) {
-            if (const HDFirearm *mountedFirearm = dynamic_cast<HDFirearm *>(mountedDevice.get()); mountedFirearm && mountedFirearm->NeedsReloading()) {
+        for (const HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
+            if (const HDFirearm *mountedFirearm = dynamic_cast<const HDFirearm *>(mountedDevice); mountedFirearm && mountedFirearm->NeedsReloading()) {
                 return true;
             }
         }
@@ -819,8 +819,8 @@ bool ACrab::FirearmIsSemiAuto() const
 
 void ACrab::ReloadFirearms() {
     if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice()) {
-        for (const std::unique_ptr<HeldDevice> &mountedDevice : m_pTurret->GetMountedDevices()) {
-            if (HDFirearm *mountedFirearm = dynamic_cast<HDFirearm *>(mountedDevice.get())) {
+        for (HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
+            if (HDFirearm *mountedFirearm = dynamic_cast<HDFirearm *>(mountedDevice)) {
                 mountedFirearm->Reload();
             }
         }
@@ -2359,7 +2359,7 @@ void ACrab::Update()
     // Fire/Activate held devices
 
     if (m_pTurret && m_pTurret->IsAttached()) {
-        for (const std::unique_ptr<HeldDevice> &mountedDevice : m_pTurret->GetMountedDevices()) {
+        for (HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
             mountedDevice->SetSharpAim(m_SharpAimProgress);
             if (m_Controller.IsState(WEAPON_FIRE)) {
                 mountedDevice->Activate();
@@ -2928,8 +2928,8 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
         // Held-related GUI stuff
         else if (m_pTurret && m_pTurret->IsAttached()) {
             std::string textString;
-            for (const std::unique_ptr<HeldDevice> &mountedDevice : m_pTurret->GetMountedDevices()) {
-                if (const HDFirearm *mountedFirearm = dynamic_cast<HDFirearm *>(mountedDevice.get())) {
+            for (const HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
+                if (const HDFirearm *mountedFirearm = dynamic_cast<const HDFirearm *>(mountedDevice)) {
                     if (!textString.empty()) { textString += " | "; }
                     if (mountedFirearm->IsReloading()) {
                         textString += "Reloading";

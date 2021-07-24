@@ -11,7 +11,6 @@ namespace RTE {
 
 	void Turret::Clear() {
 		m_MountedDevices.clear();
-		m_MountedDevicesForLua.clear();
 		m_MountedDeviceRotationOffset = 0;
 	}
 
@@ -19,7 +18,7 @@ namespace RTE {
 
 	int Turret::Create(const Turret &reference) {
 		if (!reference.m_MountedDevices.empty()) {
-			for (const std::unique_ptr<HeldDevice> &referenceMountedDevice : reference.m_MountedDevices) {
+			for (const HeldDevice *referenceMountedDevice : reference.m_MountedDevices) {
 				m_ReferenceHardcodedAttachableUniqueIDs.insert(referenceMountedDevice->GetUniqueID());
 				AddMountedDevice(dynamic_cast<HeldDevice *>(referenceMountedDevice->Clone()));
 			}
@@ -52,9 +51,9 @@ namespace RTE {
 	int Turret::Save(Writer &writer) const {
 		Attachable::Save(writer);
 
-		for (const std::unique_ptr<HeldDevice> &mountedDevice : m_MountedDevices) {
+		for (const HeldDevice *mountedDevice : m_MountedDevices) {
 			writer.NewProperty("AddMountedDevice");
-			writer << mountedDevice.get();
+			writer << mountedDevice;
 		}
 		writer.NewProperty("MountedDeviceRotationOffset");
 		writer << m_MountedDeviceRotationOffset;
@@ -65,9 +64,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Turret::SetFirstMountedDevice(HeldDevice *newMountedDevice) {
-		if (HasMountedDevice()) { RemoveAndDeleteAttachable(m_MountedDevices.at(0).get()); }
+		if (HasMountedDevice()) { RemoveAndDeleteAttachable(m_MountedDevices.at(0)); }
 		if (newMountedDevice != nullptr) {
-			m_MountedDevices.emplace(m_MountedDevices.begin(), std::unique_ptr<HeldDevice>(newMountedDevice));
+			m_MountedDevices.emplace(m_MountedDevices.begin(), newMountedDevice);
 			AddAttachable(newMountedDevice);
 
 			m_HardcodedAttachableUniqueIDsAndRemovers.insert({newMountedDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
@@ -85,16 +84,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::vector<HeldDevice *> & Turret::GetMountedDevicesLua() {
-		m_MountedDevicesForLua.clear();
-		for (const std::unique_ptr<HeldDevice> &mountedDevice : m_MountedDevices) { m_MountedDevicesForLua.emplace_back(mountedDevice.get()); }
-		return m_MountedDevicesForLua;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void Turret::AddMountedDevice(HeldDevice *newMountedDevice) {
-		m_MountedDevices.emplace_back(std::unique_ptr<HeldDevice>(newMountedDevice));
+		m_MountedDevices.emplace_back(newMountedDevice);
 		AddAttachable(newMountedDevice);
 
 		m_HardcodedAttachableUniqueIDsAndRemovers.insert({newMountedDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
@@ -112,7 +103,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Turret::Update() {
-		for (const std::unique_ptr<HeldDevice> &mountedDevice : m_MountedDevices) {
+		for (HeldDevice *mountedDevice : m_MountedDevices) {
 			mountedDevice->SetRotAngle(m_Rotation.GetRadAngle() + m_MountedDeviceRotationOffset);
 		}
 		Attachable::Update();
@@ -123,7 +114,7 @@ namespace RTE {
 	void Turret::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
 		Attachable::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 		//TODO replace this with a relative draw order property or something that lets you organize attachable drawing so it doesn't need special hardcoding crap. Use this for ahuman limbs and arm held mo if possible.
-		for (const std::unique_ptr<HeldDevice> &mountedDevice : m_MountedDevices) {
+		for (HeldDevice *mountedDevice : m_MountedDevices) {
 			if (mountedDevice->IsDrawnAfterParent()) { mountedDevice->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
 		}
 	}
@@ -131,10 +122,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Turret::RemoveMountedDevice(const HeldDevice *mountedDeviceToRemove) {
-		std::vector<std::unique_ptr<HeldDevice>>::iterator mountedDeviceIterator = std::find_if(m_MountedDevices.begin(), m_MountedDevices.end(), [&mountedDeviceToRemove](const std::unique_ptr<HeldDevice> &mountedDevice) {
-			return mountedDevice.get() == mountedDeviceToRemove;
+		std::vector<HeldDevice *>::iterator mountedDeviceIterator = std::find_if(m_MountedDevices.begin(), m_MountedDevices.end(), [&mountedDeviceToRemove](const HeldDevice *mountedDevice) {
+			return mountedDevice == mountedDeviceToRemove;
 		});
-		(*mountedDeviceIterator).release();
 		m_MountedDevices.erase(mountedDeviceIterator);
 	}
 }

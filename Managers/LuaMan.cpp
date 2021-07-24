@@ -1381,7 +1381,7 @@ int LuaMan::Initialize() {
         CONCRETELUABINDING(Turret, Attachable)
 			.property("MountedDevice", &Turret::GetFirstMountedDevice, &TurretSetFirstMountedDevice)
             .property("MountedDeviceRotationOffset", &Turret::GetMountedDeviceRotationOffset, &Turret::SetMountedDeviceRotationOffset)
-            .def("GetMountedDevices", &Turret::GetMountedDevicesLua, return_stl_iterator)
+            .def("GetMountedDevices", &Turret::GetMountedDevices, return_stl_iterator)
             .def("AddMountedDevice", &Turret::AddMountedDevice, adopt(_2))
             .def("AddMountedDevice", &TurretAddMountedFirearm, adopt(_2)),
 

@@ -61,7 +61,7 @@ namespace RTE {
 		/// Gets the first mounted HeldDevice of this Turret, mostly here for Lua convenience.
 		/// </summary>
 		/// <returns>A pointer to mounted HeldDevice of this Turret. Ownership is NOT transferred!</returns>
-		HeldDevice * GetFirstMountedDevice() const { return m_MountedDevices.at(0).get(); }
+		HeldDevice * GetFirstMountedDevice() const { return m_MountedDevices.at(0); }
 
 		/// <summary>
 		/// Sets the first mounted HeldDevice for this Turret, mostly here for Lua convenience. Ownership IS transferred!
@@ -74,13 +74,7 @@ namespace RTE {
 		/// Gets the vector of mounted HeldDevices for this Turret.
 		/// </summary>
 		/// <returns>The vector of mounted HeldDevices for this Turret.</returns>
-		const std::vector<std::unique_ptr<HeldDevice>> & GetMountedDevices() const { return m_MountedDevices; }
-
-		/// <summary>
-		/// Gets a vector of pointers to the mounted HeldDevices for this Turret.
-		/// </summary>
-		/// <returns>A vector of pointers to the mounted HeldDevices for this Turret.</returns>
-		std::vector<HeldDevice *> & GetMountedDevicesLua();
+		const std::vector<HeldDevice *> & GetMountedDevices() const { return m_MountedDevices; }
 
 		/// <summary>
 		/// Adds a HeldDevice to be mounted on this Turret. Ownership IS transferred!
@@ -125,8 +119,7 @@ namespace RTE {
 	private:
 
 		//TODO I think things would be cleaner if this (and all hardcoded attachable pointers) used weak_ptrs. It would solve some weird ownership stuff, particularly with this. However, for that to be possible, m_Attachables has to be shared_ptrs though.
-		std::vector<std::unique_ptr<HeldDevice>> m_MountedDevices; //!< Vector of unique_ptrs to the mounted HeldDevices of this Turret, if any.
-		std::vector<HeldDevice *> m_MountedDevicesForLua; //!< A vector of HeldDevice pointers to be filled in when lua tries to get the mounted devices for this Turret. Should not be considered valid except when accessed through the appropriate getter.
+		std::vector<HeldDevice *> m_MountedDevices; //!< Vector of unique_ptrs to the mounted HeldDevices of this Turret, if any. Owned here.
 		float m_MountedDeviceRotationOffset; //!< The relative offset angle (in radians) of the mounted HeldDevice from this Turret's rotation.
 
 		/// <summary>

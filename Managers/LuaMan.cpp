@@ -1382,7 +1382,7 @@ int LuaMan::Initialize() {
             .property("MountedDeviceRotationOffset", &Turret::GetMountedDeviceRotationOffset, &Turret::SetMountedDeviceRotationOffset)
             .def("GetMountedDevices", &Turret::GetMountedDevicesLua, return_stl_iterator)
             .def("AddMountedDevice", &Turret::AddMountedDevice, adopt(_2))
-            .def("AddMountedDevice", TurretAddMountedFirearm, adopt(_2)),
+            .def("AddMountedDevice", &TurretAddMountedFirearm, adopt(_2)),
 
 		ABSTRACTLUABINDING(ACraft, Actor)
 			.enum_("HatchState")[

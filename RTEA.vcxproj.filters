@@ -1005,6 +1005,9 @@
     <ClCompile Include="Menus\InventoryMenuGUI.cpp">
       <Filter>Menus</Filter>
     </ClCompile>
+    <ClCompile Include="System\Serializable.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
     <ClCompile Include="GUI\GUIReader.cpp">
       <Filter>GUI</Filter>
     </ClCompile>

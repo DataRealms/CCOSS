@@ -168,9 +168,7 @@ int AEmitter::ReadProperty(const std::string_view &propName, Reader &reader) {
     } else if (propName == "EmissionDamage") {
         reader >> m_EmitDamage;
     } else if (propName == "Flash") {
-        Attachable iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetFlash(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
+        SetFlash(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "FlashScale") {
         reader >> m_FlashScale;
     } else if (propName == "FlashOnlyOnBurst") {
@@ -362,14 +360,13 @@ float AEmitter::EstimateImpulse(bool burst)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AEmitter::SetFlash(Attachable *newFlash) {
+    if (m_pFlash && m_pFlash->IsAttached()) { RemoveAndDeleteAttachable(m_pFlash); }
     if (newFlash == nullptr) {
-        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
         m_pFlash = nullptr;
     } else {
         // Note - this is done here because setting mass on attached Attachables causes values to be updated on the parent (and its parent, and so on), which isn't ideal. Better to do it before the new flash is attached, so there are fewer calculations.
         newFlash->SetMass(0.0F);
 
-        if (m_pFlash && m_pFlash->IsAttached()) { RemoveAttachable(m_pFlash); }
         m_pFlash = newFlash;
         AddAttachable(newFlash);
 
@@ -396,13 +393,13 @@ void AEmitter::Update()
 {
     Attachable::PreUpdate();
 
-// TODO: Really hardcode this?
-    // Set animation to loop if emitting
-    if (m_FrameCount > 1)
-    {
-        m_SpriteAnimMode = m_EmitEnabled ? ALWAYSLOOP : NOANIM;
-        if (!m_EmitEnabled)
+    if (m_FrameCount > 1) {
+        if (m_EmitEnabled && m_SpriteAnimMode == NOANIM) {
+            m_SpriteAnimMode = ALWAYSLOOP;
+        } else if (!m_EmitEnabled) {
+            m_SpriteAnimMode = NOANIM;
             m_Frame = 0;
+        }
     }
 
     // Update and show flash if there is one

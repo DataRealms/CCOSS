@@ -21,4 +21,5 @@ sources += files(
 'Timer.cpp',
 'RTEError.cpp',
 'Matrix.cpp',
+'Serializable.cpp',
 )

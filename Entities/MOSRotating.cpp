@@ -65,6 +65,7 @@ void MOSRotating::Clear()
     m_Attachables.clear();
     m_ReferenceHardcodedAttachableUniqueIDs.clear();
     m_HardcodedAttachableUniqueIDsAndSetters.clear();
+    m_HardcodedAttachableUniqueIDsAndRemovers.clear();
     m_RadiusAffectingAttachable = nullptr;
     m_FarthestAttachableDistanceAndRadius = 0.0F;
     m_AttachableAndWoundMass = 0.0F;
@@ -543,10 +544,12 @@ void MOSRotating::Destroy(bool notInherited)
     delete m_pAtomGroup;
     delete m_pDeepGroup;
 
-    for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
-        delete (*itr);
-    for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr)
-        delete (*aItr);
+    for (list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) { delete (*itr); }
+    for (list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr) {
+        if (m_HardcodedAttachableUniqueIDsAndRemovers.find((*aItr)->GetUniqueID()) == m_HardcodedAttachableUniqueIDsAndRemovers.end()) {
+            delete (*aItr);
+        }
+    }
 
     destroy_bitmap(m_pFlipBitmap);
     destroy_bitmap(m_pFlipBitmapS);
@@ -1547,20 +1550,19 @@ void MOSRotating::AddAttachable(Attachable *attachable, const Vector& parentOffs
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool MOSRotating::RemoveAttachable(long attachableUniqueID, bool addToMovableMan, bool addBreakWounds) {
-    MovableObject *attachableAsMovableObject = g_MovableMan.FindObjectByUniqueID(attachableUniqueID);
-    if (attachableAsMovableObject) {
+Attachable * MOSRotating::RemoveAttachable(long attachableUniqueID, bool addToMovableMan, bool addBreakWounds) {
+    if (MovableObject *attachableAsMovableObject = g_MovableMan.FindObjectByUniqueID(attachableUniqueID)) {
         return RemoveAttachable(dynamic_cast<Attachable *>(attachableAsMovableObject), addToMovableMan, addBreakWounds);
     }
-    return false;
+    return nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds) {
+Attachable * MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds) {
     if (!attachable || !attachable->IsAttached()) {
-        return false;
+        return attachable;
     }
     RTEAssert(attachable->IsAttachedTo(this), "Tried to remove Attachable " + attachable->GetPresetNameAndUniqueID() + " from presumed parent " + GetPresetNameAndUniqueID() + ", but it had a different parent (" + (attachable->GetParent() ? attachable->GetParent()->GetPresetNameAndUniqueID() : "ERROR") + "). This should never happen!");
 
@@ -1573,7 +1575,14 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
         hardcodedAttachableMapEntry->second(this, nullptr);
         m_HardcodedAttachableUniqueIDsAndSetters.erase(hardcodedAttachableMapEntry);
     }
-    
+
+    // Note, this version handles cases where you can't pass null to a setter cause you're calling a remover function, i.e. when dealing with hardcoded Attachable lists.
+    hardcodedAttachableMapEntry = m_HardcodedAttachableUniqueIDsAndRemovers.find(attachable->GetUniqueID());
+    if (hardcodedAttachableMapEntry != m_HardcodedAttachableUniqueIDsAndRemovers.end()) {
+        hardcodedAttachableMapEntry->second(this, attachable);
+        m_HardcodedAttachableUniqueIDsAndRemovers.erase(hardcodedAttachableMapEntry);
+    }
+
     if (addBreakWounds) {
         if (!m_ToDelete && attachable->GetParentBreakWound()) {
             AEmitter *parentBreakWound = dynamic_cast<AEmitter *>(attachable->GetParentBreakWound()->Clone());
@@ -1592,8 +1601,6 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
             }
         }
     }
-    if (attachable->GetDeleteWhenRemovedFromParent()) { attachable->SetToDelete(); }
-    if (addToMovableMan || attachable->IsSetToDelete()) { g_MovableMan.AddMO(attachable); }
 
     if (attachable == m_RadiusAffectingAttachable) {
         m_RadiusAffectingAttachable = nullptr;
@@ -1606,7 +1613,20 @@ bool MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMovableMan,
         }
     }
 
-    return true;
+    if (attachable->GetDeleteWhenRemovedFromParent()) { attachable->SetToDelete(); }
+    if (addToMovableMan || attachable->IsSetToDelete()) {
+        g_MovableMan.AddMO(attachable);
+        return nullptr;
+    }
+
+    return attachable;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MOSRotating::RemoveAndDeleteAttachable(Attachable *attachable) {
+    attachable->SetToDelete();
+    RemoveAttachable(attachable);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1619,9 +1639,9 @@ void MOSRotating::RemoveOrDestroyAllAttachables(bool destroy) {
         ++attachableIterator;
 
         if (destroy) {
-            delete attachable;
+            RemoveAndDeleteAttachable(attachable);
         } else {
-            RemoveAttachable(attachable);
+            RemoveAttachable(attachable, true, true);
         }
     }
 	m_Attachables.clear();

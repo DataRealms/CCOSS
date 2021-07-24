@@ -1095,21 +1095,25 @@ bool Actor::CollideAtPoint(HitData &hd)
 //                  MO. Appropriate effects will be determined and applied ONLY IF there
 //                  was penetration! If not, nothing will be affected.
 
-bool Actor::ParticlePenetration(HitData &hd)
-{
+bool Actor::ParticlePenetration(HitData &hd) {
     bool penetrated = MOSRotating::ParticlePenetration(hd);
 
-    // If penetrated, be alarmed (if not completely unperceptive, that is)!
-    if (penetrated && m_Perceptiveness > 0)
-    {
-        // Move the alarm point out a bit from the Body so the reaction is better
-//        Vector extruded(g_SceneMan.ShortestDistance(m_Pos, hd.HitPoint));
+    MovableObject *hitor = hd.Body[HITOR];
+    float damageToAdd = hitor->DamageOnCollision();
+    damageToAdd += penetrated ? hitor->DamageOnPenetration() : 0;
+    if (hitor->GetApplyWoundDamageOnCollision()) { damageToAdd += m_pEntryWound->GetEmitDamage() * hitor->WoundDamageMultiplier(); }
+    if (hitor->GetApplyWoundBurstDamageOnCollision()) { damageToAdd += m_pEntryWound->GetBurstDamage() * hitor->WoundDamageMultiplier(); }
 
-        Vector extruded(hd.HitVel[HITOR]);
-        extruded.SetMagnitude(m_CharHeight);
-        extruded = m_Pos - extruded;
-        g_SceneMan.WrapPosition(extruded);
-        AlarmPoint(extruded);
+    if (damageToAdd != 0) {
+        m_Health = std::min(m_Health - damageToAdd * m_DamageMultiplier, m_MaxHealth);
+
+        if (m_Perceptiveness > 0) {
+            Vector extruded(hd.HitVel[HITOR]);
+            extruded.SetMagnitude(m_CharHeight);
+            extruded = m_Pos - extruded;
+            g_SceneMan.WrapPosition(extruded);
+            AlarmPoint(extruded);
+        }
     }
 
     return penetrated;

@@ -100,12 +100,7 @@ int Arm::Create(const Arm &reference) {
 
 int Arm::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "HeldDevice") {
-        //TODO turn this on when Arm is cleaned up and only supports HeldDevices. The reader operator will need to actually account for polymorphism for this to work.
-        //HeldDevice iniDefinedObject;
-        //reader >> &iniDefinedObject;
-        //SetHeldMO(dynamic_cast<HeldDevice *>(iniDefinedObject.Clone()));
-        const Entity *heldEntity = g_PresetMan.GetEntityPreset(reader);
-        if (heldEntity) { SetHeldMO(dynamic_cast<MovableObject *>(heldEntity->Clone())); }
+        SetHeldMO(dynamic_cast<MovableObject *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "GripStrength") {
         reader >> m_GripStrength;
     } else if (propName == "Hand") {
@@ -197,30 +192,22 @@ HeldDevice * Arm::GetHeldDevice() const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Replaces the MovableObject currently held by this Arm with a new
 //                  one. Ownership IS transferred. The currently held MovableObject
-//                  (if there is one) will be dropped and become a detached MovableObject,
+//                  (if there is one) will be deleted.
 
 void Arm::SetHeldMO(MovableObject *newHeldMO) {
+    Attachable *oldHeldMOAsAttachable = dynamic_cast<Attachable *>(m_pHeldMO);
+    if (oldHeldMOAsAttachable && oldHeldMOAsAttachable->IsAttached()) { RemoveAndDeleteAttachable(oldHeldMOAsAttachable); }
     if (newHeldMO == nullptr) {
-        Attachable *heldMOAsAttachable = dynamic_cast<Attachable *>(m_pHeldMO);
-        if (heldMOAsAttachable && heldMOAsAttachable->IsAttached()) { RemoveAttachable(heldMOAsAttachable); }
         m_pHeldMO = nullptr;
     } else {
-        //TODO All this needs cleaning up, this should do the basics, some other method should be responsible for replacing held things
-        if (m_pHeldMO && m_pHeldMO->IsHeldDevice() && dynamic_cast<HeldDevice *>(m_pHeldMO)->IsAttached()) {
-            RemoveAttachable(dynamic_cast<HeldDevice *>(m_pHeldMO), true, false);
-            m_pHeldMO = nullptr;
-        }
+        m_pHeldMO = newHeldMO;
+        if (Attachable *heldMOAsAttachable = dynamic_cast<Attachable *>(newHeldMO)) {
+            AddAttachable(heldMOAsAttachable);
 
-        if (newHeldMO->IsHeldDevice()) {
-            Attachable *newHeldDevice = dynamic_cast<Attachable *>(newHeldMO);
-            if (newHeldDevice->IsAttached()) { newHeldDevice->GetParent()->RemoveAttachable(newHeldDevice); }
-            AddAttachable(newHeldDevice);
-
-            m_HardcodedAttachableUniqueIDsAndSetters.insert({newHeldDevice->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            m_HardcodedAttachableUniqueIDsAndSetters.insert({heldMOAsAttachable->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
                 dynamic_cast<Arm *>(parent)->SetHeldMO(attachable);
             }});
         }
-        m_pHeldMO = newHeldMO;
     }
 }
 
@@ -435,10 +422,8 @@ void Arm::UpdateCurrentHandOffset() {
 void Arm::UpdateArmFrame() {
     if (IsAttached()) {
         float halfMax = m_MaxLength / 2.0F;
-        //TODO this should be replaced with floor I think. If I remember right, casting float to int always rounds to 0, which should function the same but is harder to remember than clearly flooring it.
-        int newFrame = static_cast<int>(((m_HandOffset.GetMagnitude() - halfMax) / halfMax) * static_cast<float>(m_FrameCount));
-        RTEAssert(newFrame <= m_FrameCount, "Arm frame is out of bounds for " + GetClassName() + ": " + GetPresetName() + ".");
-        m_Frame = std::clamp(static_cast<unsigned int>(newFrame), 0U, m_FrameCount - 1);
+        unsigned int newFrame = static_cast<unsigned int>(std::floor(((m_HandOffset.GetMagnitude() - halfMax) / halfMax) * static_cast<float>(m_FrameCount)));
+        m_Frame = std::clamp(newFrame, 0U, m_FrameCount - 1);
     }
 }
 

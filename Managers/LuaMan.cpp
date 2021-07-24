@@ -407,7 +407,7 @@ PROPERTYOWNERSHIPSAFETYFAKER(ACrab, Leg, SetRightFGLeg);
 PROPERTYOWNERSHIPSAFETYFAKER(ACrab, Leg, SetRightBGLeg);
 PROPERTYOWNERSHIPSAFETYFAKER(ACrab, SoundContainer, SetStrideSound);
 
-PROPERTYOWNERSHIPSAFETYFAKER(Turret, HeldDevice, SetMountedDevice);
+PROPERTYOWNERSHIPSAFETYFAKER(Turret, HeldDevice, SetFirstMountedDevice);
 
 PROPERTYOWNERSHIPSAFETYFAKER(ACraft, SoundContainer, SetHatchOpenSound);
 PROPERTYOWNERSHIPSAFETYFAKER(ACraft, SoundContainer, SetHatchCloseSound);
@@ -443,6 +443,8 @@ PROPERTYOWNERSHIPSAFETYFAKER(HDFirearm, SoundContainer, SetReloadEndSound);
 //////////////////////////////////////////////////////////////////////////////////////////
 // Other misc adapters to eliminate/emulate default parameters etc
 
+//TODO this is a temporary fix for lua PresetName setting causing scripts to have to rerun. It should be replaced with a DisplayName property someday.
+void SetPresetName(Entity *selfObject, const std::string &presetName) { selfObject->SetPresetName(presetName, true); }
 void GibThis(MOSRotating *pThis) { pThis->GibThis(); }
 void AddMO(MovableMan &This, MovableObject *pMO)
 {
@@ -475,41 +477,21 @@ void AddParticle(MovableMan &This, MovableObject *pParticle)
 double NormalRand() { return RandomNormalNum<double>(); }
 double PosRand() { return RandomNum<double>(); }
 
-/*
-These methods are needed to specially handling removing attachables with Lua in order to avoid memory leaks. They have silly names cause luabind otherwise makes it difficult to pass values to them properly.
-Eventually RemoveAttachable should return the removed attachable, making this whole thing no longer unsafe and these methods unnecessary (there's a TODO in MOSRotating.h for it).
-*/
-bool RemoveAttachableLuaSafe4(MOSRotating *luaSelfObject, Attachable *attachable, bool addToMovableMan, bool addBreakWounds) {
-    if (!addToMovableMan && !attachable->IsSetToDelete()) {
-        attachable->SetToDelete();
+Attachable * RemoveAttachableFromParentLuaSafe1(Attachable *luaSelfObject) {
+    if (luaSelfObject->IsAttached()) {
+        return luaSelfObject->GetParent()->RemoveAttachable(luaSelfObject);
     }
-    return luaSelfObject->RemoveAttachable(attachable, addToMovableMan, addBreakWounds);
+    return luaSelfObject;
 }
-bool RemoveAttachableLuaSafe3(MOSRotating *luaSelfObject, Attachable *attachable) {
-    return RemoveAttachableLuaSafe4(luaSelfObject, attachable, false, false);
-}
-bool RemoveAttachableLuaSafe2(MOSRotating *luaSelfObject, long attachableUniqueID, bool addToMovableMan, bool addBreakWounds) {
-    MovableObject *attachableAsMovableObject = g_MovableMan.FindObjectByUniqueID(attachableUniqueID);
-    if (attachableAsMovableObject) {
-        return RemoveAttachableLuaSafe4(luaSelfObject, dynamic_cast<Attachable *>(attachableAsMovableObject), addToMovableMan, addBreakWounds);
+Attachable * RemoveAttachableFromParentLuaSafe2(Attachable *luaSelfObject, bool addToMovableMan, bool addBreakWounds) {
+    if (luaSelfObject->IsAttached()) {
+        return luaSelfObject->GetParent()->RemoveAttachable(luaSelfObject, addToMovableMan, addBreakWounds);
     }
-    return false;
-}
-bool RemoveAttachableLuaSafe1(MOSRotating *luaSelfObject, long attachableUniqueID) {
-    return RemoveAttachableLuaSafe2(luaSelfObject, attachableUniqueID, false, false);
+    return luaSelfObject;
 }
 
-bool RemoveAttachableFromParentLuaSafe1(Attachable *luaSelfObject) {
-    if (luaSelfObject->IsAttached()) {
-        return RemoveAttachableLuaSafe4(luaSelfObject->GetParent(), luaSelfObject, false, false);
-    }
-    return false;
-}
-bool RemoveAttachableFromParentLuaSafe2(Attachable *luaSelfObject, bool addToMovableMan, bool addBreakWounds) {
-    if (luaSelfObject->IsAttached()) {
-        return RemoveAttachableLuaSafe4(luaSelfObject->GetParent(), luaSelfObject, addToMovableMan, addBreakWounds);
-    }
-    return false;
+void TurretAddMountedFirearm(Turret *luaSelfObject, HDFirearm *newMountedDevice) {
+    luaSelfObject->AddMountedDevice(newMountedDevice);
 }
 
 /*
@@ -695,7 +677,7 @@ int LuaMan::Initialize() {
             .def("Reset", &Entity::Reset)
             .def(tostring(const_self))
             .property("ClassName", &Entity::GetClassName)
-            .property("PresetName", &Entity::GetPresetName, &Entity::SetPresetName)
+            .property("PresetName", &Entity::GetPresetName, &SetPresetName)
             .property("Description", &Entity::GetDescription, &Entity::SetDescription)
             .def("GetModuleAndPresetName", &Entity::GetModuleAndPresetName)
             .property("IsOriginalPreset", &Entity::IsOriginalPreset)
@@ -850,6 +832,8 @@ int LuaMan::Initialize() {
 			.property("DamageOnCollision", &MovableObject::DamageOnCollision, &MovableObject::SetDamageOnCollision)
 			.property("DamageOnPenetration", &MovableObject::DamageOnPenetration, &MovableObject::SetDamageOnPenetration)
 			.property("WoundDamageMultiplier", &MovableObject::WoundDamageMultiplier, &MovableObject::SetWoundDamageMultiplier)
+            .property("ApplyWoundDamageOnCollision", &MovableObject::GetApplyWoundDamageOnCollision, &MovableObject::SetApplyWoundDamageOnCollision)
+            .property("ApplyWoundBurstDamageOnCollision", &MovableObject::GetApplyWoundBurstDamageOnCollision, &MovableObject::SetApplyWoundBurstDamageOnCollision)
 			.property("HitWhatMOID", &MovableObject::HitWhatMOID)
 			.property("HitWhatTerrMaterial", &MovableObject::HitWhatTerrMaterial)
 			.property("ProvidesPieMenuContext", &MovableObject::ProvidesPieMenuContext, &MovableObject::SetProvidesPieMenuContext)
@@ -962,30 +946,26 @@ int LuaMan::Initialize() {
             .def("ObjectValueExists", &MOSRotating::ObjectValueExists)
             .def("AddAttachable", (void (MOSRotating::*)(Attachable *attachableToAdd))&MOSRotating::AddAttachable, adopt(_2))
             .def("AddAttachable", (void (MOSRotating::*)(Attachable *attachableToAdd, const Vector &parentOffset))&MOSRotating::AddAttachable, adopt(_2))
-            .def("RemoveAttachable", &RemoveAttachableLuaSafe1)
-            .def("RemoveAttachable", &RemoveAttachableLuaSafe2)
-            .def("RemoveAttachable", &RemoveAttachableLuaSafe3)
-            .def("RemoveAttachable", &RemoveAttachableLuaSafe4)
-            /*
-            .def("RemoveAttachable", (bool (MOSRotating:: *)(long uniqueIDOfAttachableToRemove)) &MOSRotating::RemoveAttachable)
-            .def("RemoveAttachable", (bool (MOSRotating:: *)(long uniqueIDOfAttachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable)
-            .def("RemoveAttachable", (bool (MOSRotating::*)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable)
-            .def("RemoveAttachable", (bool (MOSRotating:: *)(Attachable *attachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable)
-            */
+            .def("RemoveAttachable", (Attachable *(MOSRotating:: *)(long uniqueIDOfAttachableToRemove)) &MOSRotating::RemoveAttachable, adopt(return_value))
+            .def("RemoveAttachable", (Attachable *(MOSRotating:: *)(long uniqueIDOfAttachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable, adopt(return_value))
+            .def("RemoveAttachable", (Attachable *(MOSRotating:: *)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable, adopt(return_value))
+            .def("RemoveAttachable", (Attachable *(MOSRotating:: *)(Attachable *attachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable)
 			.def("AddEmitter", (void (MOSRotating::*)(Attachable *attachableToAdd))&MOSRotating::AddAttachable, adopt(_2))
 			.def("AddEmitter", (void (MOSRotating::*)(Attachable *attachableToAdd, const Vector &parentOffset))&MOSRotating::AddAttachable, adopt(_2))
-			.def("RemoveEmitter", (bool (MOSRotating::*)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable)
-			.def("RemoveEmitter", (bool (MOSRotating::*)(long uniqueIDOfAttachableToRemove))&MOSRotating::RemoveAttachable)
+            .def("RemoveEmitter", (Attachable *(MOSRotating:: *)(long uniqueIDOfAttachableToRemove)) &MOSRotating::RemoveAttachable, adopt(return_value))
+            .def("RemoveEmitter", (Attachable *(MOSRotating:: *)(long uniqueIDOfAttachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable, adopt(return_value))
+            .def("RemoveEmitter", (Attachable *(MOSRotating:: *)(Attachable *attachableToRemove)) &MOSRotating::RemoveAttachable, adopt(return_value))
+            .def("RemoveEmitter", (Attachable *(MOSRotating:: *)(Attachable *attachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable, adopt(return_value))
 			.def_readonly("Attachables", &MOSRotating::m_Attachables, return_stl_iterator)
 			.def_readonly("Wounds", &MOSRotating::m_Wounds, return_stl_iterator),
 
         CONCRETELUABINDING(Attachable, MOSRotating)
             .def("IsAttached", &Attachable::IsAttached)
             .def("IsAttachedTo", &Attachable::IsAttachedTo)
-            .def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe1)
-            .def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe2)
+            .def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe1, adopt(return_value))
+            .def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe2, adopt(return_value))
 			.property("ParentOffset", &Attachable::GetParentOffset, &Attachable::SetParentOffset)
-            .def("IsDrawnAfterParent", &Attachable::IsDrawnAfterParent)
+            .property("DrawnAfterParent", &Attachable::IsDrawnAfterParent, &Attachable::SetDrawnAfterParent)
             .property("JointStrength", &Attachable::GetJointStrength, &Attachable::SetJointStrength)
             .property("JointStiffness", &Attachable::GetJointStiffness, &Attachable::SetJointStiffness)
             .property("JointOffset", &Attachable::GetJointOffset, &Attachable::SetJointOffset)
@@ -995,6 +975,7 @@ int LuaMan::Initialize() {
             .property("InheritsHFlipped", &Attachable::InheritsHFlipped, &Attachable::SetInheritsHFlipped)
 			.property("InheritsRotAngle", &Attachable::InheritsRotAngle, &Attachable::SetInheritsRotAngle)
             .property("InheritedRotAngleOffset", &Attachable::GetInheritedRotAngleOffset, &Attachable::SetInheritedRotAngleOffset)
+            .property("InheritsFrame", &Attachable::InheritsFrame, &Attachable::SetInheritsFrame)
             .property("AtomSubgroupID", &Attachable::GetAtomSubgroupID)
 			.property("CollidesWithTerrainWhileAttached", &Attachable::GetCollidesWithTerrainWhileAttached, &Attachable::SetCollidesWithTerrainWhileAttached)
             .property("CanCollideWithTerrain", &Attachable::CanCollideWithTerrain),
@@ -1387,7 +1368,7 @@ int LuaMan::Initialize() {
             .property("FirearmNeedsReload", &ACrab::FirearmNeedsReload)
             .property("FirearmIsSemiAuto", &ACrab::FirearmIsSemiAuto)
             .property("FirearmActivationDelay", &ACrab::FirearmActivationDelay)
-            .def("ReloadFirearm", &ACrab::ReloadFirearm)
+            .def("ReloadFirearms", &ACrab::ReloadFirearms)
             .def("IsWithinRange", &ACrab::IsWithinRange)
             .def("Look", &ACrab::Look)
             .def("LookForMOs", &ACrab::LookForMOs)
@@ -1398,7 +1379,11 @@ int LuaMan::Initialize() {
 			.def("SetLimbPathSpeed", &ACrab::SetLimbPathSpeed),
 
         CONCRETELUABINDING(Turret, Attachable)
-			.property("MountedDevice", &Turret::GetMountedDevice, &TurretSetMountedDevice),
+			.property("MountedDevice", &Turret::GetFirstMountedDevice, &TurretSetFirstMountedDevice)
+            .property("MountedDeviceRotationOffset", &Turret::GetMountedDeviceRotationOffset, &Turret::SetMountedDeviceRotationOffset)
+            .def("GetMountedDevices", &Turret::GetMountedDevices, return_stl_iterator)
+            .def("AddMountedDevice", &Turret::AddMountedDevice, adopt(_2))
+            .def("AddMountedDevice", &TurretAddMountedFirearm, adopt(_2)),
 
 		ABSTRACTLUABINDING(ACraft, Actor)
 			.enum_("HatchState")[

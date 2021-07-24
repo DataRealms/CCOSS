@@ -23,7 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New INI and Lua (R/W) property for Attachables:  
 	`ParentBreakWound = AEmitter...`. Use this to define a `BreakWound` that will be applied to the `Attachable`'s parent when the `Attachable` is removed.  
 	`BreakWound` is also now R/W accessible to Lua.
-	
+
 - Added Lua (R/W) properties for all hardcoded `Attachables`. You can now set them on the fly to be created objects of the relevant type. Note that trying to set things inappropriately (e.g. setting an `HDFirearm` as something's `Leg`) will probably crash the game; that's your problem to deal with.  
 	You can read and write the following properties:  
 	**`AHuman`** - `Head`, `Jetpack`, `FGArm`, `BGArm`, `FGLeg`, `BGLeg`, `FGFoot`, `BGFoot`  
@@ -134,9 +134,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The Lua console (and all text boxes) now support using `Ctrl` to move the cursor around and select or delete text.
 
-- Added `mosRotating:RemoveAttachable(attachableOrUniqueID, addToMovableMan, addBreakWounds)` method that allows you to remove an `Attachable` and specify whether it should be added to `MovableMan` or not, and whether breakwounds should be added (if defined) to the `Attachable` and parent `MOSRotating`.
+- Added `mosRotating:RemoveAttachable(attachableOrUniqueID, addToMovableMan, addBreakWounds)` method that allows you to remove an `Attachable` and specify whether it should be added to `MovableMan` or not, and whether breakwounds should be added (if defined) to the `Attachable` and parent `MOSRotating`. This method returns the removed `Attachable`, see the `Changed` section for important details on that.
 
-- Added `attachable:RemoveFromParent()` and `attachable:RemoveFromParent(addToMovableMan, addBreakWounds)` that allow you to remove `Attachables` from their parents without having to use `GetParent` first.
+- Added `mosRotating:RemoveEmitter(attachableOrUniqueID, addToMovableMan, addBreakWounds)` method that is identical to the `RemoveAttachable` function mentioned above.  
+
+- Added `attachable:RemoveFromParent()` and `attachable:RemoveFromParent(addToMovableMan, addBreakWounds)` that allow you to remove `Attachables` from their parents without having to use `GetParent` first. Their return value is the same as `RemoveAttachable` above.
 
 - Added `Settings.ini` debug properties to allow modders to turn on some potentially useful information visualizations.  
 	`DrawAtomGroupVisualizations` - any `MOSRotating` will draw its `AtomGroup` to the standard view.  
@@ -152,6 +154,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Only disable this if for some reason case sensitivity increases the loading times on your system (which it generally should not). Loading times can be benchmarked using the `Settings.ini` property `MeasureModuleLoadTime`. The result will be printed to the console.
 
 - Added `MovableObject` Lua function `EnableOrDisableAllScripts` that allows you to enable or disable all scripts on a `MovableObject` based on the passed in value.
+
+- Added `Attachable` Lua function and INI property `InheritsFrame` which lets `Attachables` inherit their parent's frame. It is set to false by default.
+
+- Added `MovableObject` Lua (R/W) and INI properties `ApplyWoundDamageOnCollision` and `ApplyWoundBurstDamageOnCollision` which allow `MovableObject`s to apply the `EntryWound` damage/burst damage that would occur when they penetrate another object, without actually creating a wound.
+
+- `Turret`s can now support an unlimited number of mounted `HeldDevice`s. Properties have been added to Lua and INI to support this:  
+	`AddMountedDevice = ...` (INI) and `turret:AddMountedDevice` (Lua) - this adds the specified `HeldDevice` or `HDFirearm` as a mounted device on the `Turret`.  
+	`turret:GetMountedDevices` (Lua) - this gives you access to all the mounted `HeldDevice`s on the `Turret`. You can loop through them with a for loop, and remove or modify them as needed.  
+	Note that `MountedDevice = ...` (INI) and `turret.MountedDevice` (Lua R/W) now deal with the first mounted `HeldDevice`, which is treated as the primary one for things like sharp-aiming.
+	
+- Added `Turret` Lua (R/W) and INI property `MountedDeviceRotationOffset` that lets you specify a standard rotation offset for all mounted `HeldDevices` on a turret.
 
 - Added option for players to vote to restart multiplayer activities by holding the backslash key, `\`. Requires all players to vote to pass.  
 	This is an alternative to the existing ability to vote to end the activity and return to the multiplayer lobby, by holding `Backspace` key.
@@ -255,6 +268,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `AHuman:ReloadFirearm` Lua function has been changed to `AHuman:ReloadFirearms` and will now reload offhand weapons as well, if appropriate.
 
+- `ACrab:ReloadFirearm` Lua function has been changed to `ACrab:ReloadFirearms` and will now reload all of the `ACrab`'s weapons.
+
+- When using the Settings.ini flag `LaunchIntoActivity`, you will start with some default amount of gold; either the `Activity`'s medium difficulty gold amount, or its funds for Team 1, which default to 2000 when not set.
+
+- `AEmitter`s will now obey `SpriteAnimMode` set in Lua while they're emitting. When they stop emitting this will reset to `NOANIM`.
+
+- `Attachable` Lua method `IsDrawnAfterParent` has been changed to the property `DrawnAfterParent`, and is now R/W.
+
+- All `mosRotating:RemoveAttachable`, `mosRotating:RemoveEmitter` and `attachable:RemoveFromParent` functions will return the removed `Attachable` if it hasn't been added to `MovableMan`, or nil if it has. If the `Attachable` is returned, it will belong to Lua like it would if it were newly Created. You could then, for example, add it to MovableMan or to an inventory.
+
 - `Settings.ini` property `MenuTransitionDuration` renamed to `MenuTransitionDurationMultiplier`.
 
 - `Settings.ini` property `DisableLoadingScreen` renamed to `DisableLoadingScreenProgressReport`.
@@ -303,6 +326,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `OnCollideWithMO` now works for `MOPixels` and `MOSParticles` so you can use it to check if your bullets collide with things.
 
 - `OnCollideWithMO` and `OnCollideWithTerrain` (and other special functions) will run more reliably right after the object is spawned. E.g. `OnCollideWithTerrain` should now work even if your gun is jammed into terrain when you shoot.
+
+- You can now sharpaim through friendlies when playing as any team, instead of just as red team.
+
+- The reload hotkey now works even if there's an object to pick up.
+
+- Improved LZ behaviour on wrapping maps, so your buy cursor will no longer annoyingly wrap around the LZ area.
+
+- Fixed a bug with metagame saves that caused Player numbers to be off by 1.
 
 - Vote counts to end a multiplayer activity now display as intended. 
 

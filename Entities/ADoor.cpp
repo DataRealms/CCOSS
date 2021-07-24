@@ -3,6 +3,7 @@
 #include "Attachable.h"
 #include "Matrix.h"
 #include "SLTerrain.h"
+#include "PresetMan.h"
 
 namespace RTE {
 
@@ -40,6 +41,9 @@ namespace RTE {
 		m_DoorMoveSound = nullptr;
 		m_DoorDirectionChangeSound = nullptr;
 		m_DoorMoveEndSound = nullptr;
+
+		// NOTE: This special override of a parent class member variable avoids needing an extra variable to avoid overwriting INI values.
+		m_CanBeSquished = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -85,9 +89,7 @@ namespace RTE {
 
 	int ADoor::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Door") {
-			Attachable iniDefinedObject;
-			reader >> &iniDefinedObject;
-			SetDoor(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
+			SetDoor(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
 		} else if (propName == "OpenOffset") {
 			reader >> m_OpenOffset;
 		} else if (propName == "ClosedOffset") {
@@ -211,11 +213,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::SetDoor(Attachable *newDoor) {
+		if (m_Door && m_Door->IsAttached()) { RemoveAndDeleteAttachable(m_Door); }
 		if (newDoor == nullptr) {
-			if (m_Door && m_Door->IsAttached()) { RemoveAttachable(m_Door); }
 			m_Door = nullptr;
 		} else {
-			if (m_Door && m_Door->IsAttached()) { RemoveAttachable(m_Door); }
 			m_Door = newDoor;
 			AddAttachable(newDoor);
 

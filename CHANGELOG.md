@@ -159,7 +159,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `MovableObject` Lua (R/W) and INI properties `ApplyWoundDamageOnCollision` and `ApplyWoundBurstDamageOnCollision` which allow `MovableObject`s to apply the `EntryWound` damage/burst damage that would occur when they penetrate another object, without actually creating a wound.
 
-- `Turret`s can now support an unlimited number of mounted `HeldDevice`s. Properties have been added to Lua and INI to support this:
+- `Turret`s can now support an unlimited number of mounted `HeldDevice`s. Properties have been added to Lua and INI to support this:  
 	`AddMountedDevice = ...` (INI) and `turret:AddMountedDevice` (Lua) - this adds the specified `HeldDevice` or `HDFirearm` as a mounted device on the `Turret`.  
 	`turret:GetMountedDevices` (Lua) - this gives you access to all the mounted `HeldDevice`s on the `Turret`. You can loop through them with a for loop, and remove or modify them as needed.  
 	Note that `MountedDevice = ...` (INI) and `turret.MountedDevice` (Lua R/W) now deal with the first mounted `HeldDevice`, which is treated as the primary one for things like sharp-aiming.

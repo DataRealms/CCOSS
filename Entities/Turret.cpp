@@ -112,7 +112,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Turret::Update() {
-		for (const std::unique_ptr<HeldDevice> &mountedDevice : m_MountedDevices) { mountedDevice->SetRotAngle(m_Rotation.GetRadAngle() + m_MountedDeviceRotationOffset); }
+		for (const std::unique_ptr<HeldDevice> &mountedDevice : m_MountedDevices) {
+			mountedDevice->SetRotAngle(m_Rotation.GetRadAngle() + m_MountedDeviceRotationOffset);
+		}
 		Attachable::Update();
 	}
 

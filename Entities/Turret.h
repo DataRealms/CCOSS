@@ -130,10 +130,9 @@ namespace RTE {
 		float m_MountedDeviceRotationOffset; //!< The relative offset angle (in radians) of the mounted HeldDevice from this Turret's rotation.
 
 		/// <summary>
-		/// Removes the HeldDevice from this turret's vector of mounted devices if it's in there.
-		/// This releases the unique_ptr for it, leaving the caller to take care of it.
+		/// Removes the HeldDevice from this turret's vector of mounted devices if it's in there. This releases the unique_ptr for it, leaving the caller to take care of it.
 		/// </summary>
-		/// <param name="mountedDeviceToRemove">A pointer to the mounted device to remove</param>
+		/// <param name="mountedDeviceToRemove">A pointer to the mounted device to remove.</param>
 		void RemoveMountedDevice(const HeldDevice *mountedDeviceToRemove);
 
 		/// <summary>

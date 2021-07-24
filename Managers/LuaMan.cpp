@@ -676,7 +676,7 @@ int LuaMan::Initialize() {
             .def("Reset", &Entity::Reset)
             .def(tostring(const_self))
             .property("ClassName", &Entity::GetClassName)
-            .property("PresetName", &Entity::GetPresetName, SetPresetName)
+            .property("PresetName", &Entity::GetPresetName, &Entity::SetPresetName)
             .property("Description", &Entity::GetDescription, &Entity::SetDescription)
             .def("GetModuleAndPresetName", &Entity::GetModuleAndPresetName)
             .property("IsOriginalPreset", &Entity::IsOriginalPreset)

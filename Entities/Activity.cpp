@@ -244,7 +244,7 @@ void Activity::Clear() {
 		}
 
 		for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; team++) {
-			std::string teamNum = std::to_string(team);
+			std::string teamNum = std::to_string(team + 1);
 			if (m_TeamActive[team]) {
 				writer.NewProperty("Team" + teamNum + "Funds");
 				writer << m_TeamFunds[team];

@@ -252,7 +252,7 @@ enum MOType
     /// Override SetPresetName so it also resets script preset name and then reloads scripts to safely allow for multiple scripts.
     /// </summary>
     /// <param name="newName">A string reference with the instance name of this Entity.</param>
-    /// /// <param name="calledFromLua">Whether this method was called from Lua, in which case this change is cosmetic only and shouldn't affect scripts.</param>
+    /// <param name="calledFromLua">Whether this method was called from Lua, in which case this change is cosmetic only and shouldn't affect scripts.</param>
     void SetPresetName(const std::string &newName, bool calledFromLua = false) override { Entity::SetPresetName(newName); if (!calledFromLua) { m_ScriptPresetName.clear(); ReloadScripts(); } }
 
 

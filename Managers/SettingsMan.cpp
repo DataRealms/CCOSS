@@ -243,6 +243,7 @@ namespace RTE {
 			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 				std::string playerNum = std::to_string(player + 1);
 				if (propName == "Player" + playerNum + "Scheme") {
+					g_UInputMan.m_ControlScheme.at(player).Reset();
 					reader >> g_UInputMan.m_ControlScheme.at(player);
 					break;
 				}

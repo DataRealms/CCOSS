@@ -339,6 +339,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Fixed bug where choosing `-Random-` as a player's tech and pressing start game had a 1 in (number of techs + 1) chance to crash the game.
 
+- Console error spam will no longer cripple performance over time.
+
 ### Removed
 
 - Removed obsolete graphics drivers and their `Settings.ini` properties `ForceOverlayedWindowGfxDriver` and `ForceNonOverlayedWindowGfxDriver`.

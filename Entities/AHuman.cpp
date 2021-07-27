@@ -96,8 +96,6 @@ void AHuman::Clear()
     m_SweepTimer.Reset();
     m_PatrolTimer.Reset();
     m_JumpTimer.Reset();
-
-	m_GotHat = false;
 }
 
 
@@ -3105,30 +3103,6 @@ int AHuman::OnPieMenu(Actor *pieMenuActor) {
 
 void AHuman::Update()
 {
-	if (g_SettingsMan.EnableHats() && !m_GotHat && m_pHead)
-	{
-		m_GotHat = true;
-
-		if (RandomNum() > 0.8F)
-		{
-			int hat = RandomNum(1, 20);
-
-            std::stringstream hatName;
-            hatName << "Random Hat " << hat;
-			const Entity *preset = g_PresetMan.GetEntityPreset("Attachable", hatName.str());
-
-			if (preset)
-			{
-                Attachable *pNewHat = dynamic_cast<Attachable *>(preset->Clone());
-                if (pNewHat)
-                {
-			        m_pHead->RemoveOrDestroyAllAttachables(true);
-			        m_pHead->AddAttachable(pNewHat, pNewHat->GetParentOffset());
-                }
-			}
-		}
-	}
-
 	float deltaTime = g_TimerMan.GetDeltaTimeSecs();
 	// Get the rotation in radians.
 	float rot = m_Rotation.GetRadAngle();

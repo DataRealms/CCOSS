@@ -1075,9 +1075,6 @@ protected:
     // Timer for how long to be firing the jetpack in a direction
     Timer m_JumpTimer;
 
-	// April 1 prank
-	bool m_GotHat;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

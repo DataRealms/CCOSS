@@ -75,7 +75,6 @@ void MovableObject::Clear()
     m_ToDelete = false;
     m_HUDVisible = true;
     m_AllLoadedScripts.clear();
-	m_AllLoadedScripts.reserve(10);
     m_FunctionsAndScripts.clear();
     m_ScriptPresetName.clear();
     m_ScriptObjectName.clear();

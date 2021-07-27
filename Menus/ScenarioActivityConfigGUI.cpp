@@ -388,7 +388,7 @@ namespace RTE {
 					UpdateStartingGoldSliderAndLabel();
 				} else if (guiEvent.GetMsg() == GUISlider::Changed) {
 					for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; team++) {
-						if (guiEvent.GetControl() == m_TeamAISkillLabels.at(team)) { m_TeamAISkillLabels.at(team)->SetText(Activity::GetAISkillString(m_TeamAISkillSliders.at(team)->GetValue())); }
+						if (guiEvent.GetControl() == m_TeamAISkillSliders.at(team)) { m_TeamAISkillLabels.at(team)->SetText(Activity::GetAISkillString(m_TeamAISkillSliders.at(team)->GetValue())); }
 					}
 				}
 			}

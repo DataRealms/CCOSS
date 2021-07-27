@@ -33,10 +33,12 @@ namespace RTE {
 		m_BackToMainButton->SetPositionAbs((rootBox->GetWidth() - m_BackToMainButton->GetWidth()) / 2, modManagerMenuBox->GetYPos() + modManagerMenuBox->GetHeight() + 10);
 
 		m_ModsListBox = dynamic_cast<GUIListBox *>(m_GUIControlManager->GetControl("ListBoxMods"));
+		m_ModsListBox->SetMouseScrolling(true);
 		m_ModsListBox->SetScrollBarThickness(15);
 		m_ModsListBox->SetScrollBarPadding(2);
 
 		m_ScriptsListBox = dynamic_cast<GUIListBox *>(m_GUIControlManager->GetControl("ListBoxScripts"));
+		m_ScriptsListBox->SetMouseScrolling(true);
 		m_ScriptsListBox->SetScrollBarThickness(15);
 		m_ScriptsListBox->SetScrollBarPadding(2);
 

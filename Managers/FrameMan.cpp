@@ -453,6 +453,8 @@ namespace RTE {
 
 #ifdef __unix__
 		m_GfxDriver = (m_ResX * newMultiplier == m_MaxResX && m_ResY * newMultiplier == m_MaxResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
+#elif _WIN32
+		m_GfxDriver = (m_ResX * newMultiplier == m_MaxResX && m_ResY * newMultiplier == m_MaxResY) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_AUTODETECT_WINDOWED;
 #endif
 
 		// Set the GFX_TEXT driver to hack around Allegro's window resizing limitations (specifically reducing window size) when switching from 2X mode to 1X mode.

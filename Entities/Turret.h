@@ -1,14 +1,14 @@
 #ifndef _RTETURRET_
 #define _RTETURRET_
 
-#include "HeldDevice.h"
+#include "Attachable.h"
 
 namespace RTE {
 
 	class HeldDevice;
 
 	/// <summary>
-	/// A detachable turret pod that can hold HeldDevices.
+	/// An Attachable Turret pod that can hold HeldDevices.
 	/// </summary>
 	class Turret : public Attachable {
 
@@ -55,32 +55,45 @@ namespace RTE {
 		/// Indicates whether a HeldDevice is mounted or not.
 		/// </summary>
 		/// <returns>Whether or not a HeldDevice is mounted on this Turret.</returns>
-		bool HasMountedDevice() const { return m_MountedDevice != nullptr; }
+		bool HasMountedDevice() const { return !m_MountedDevices.empty(); }
 
 		/// <summary>
-		/// Gets the mounted HeldDevice of this Turret.
+		/// Gets the first mounted HeldDevice of this Turret, mostly here for Lua convenience.
 		/// </summary>
 		/// <returns>A pointer to mounted HeldDevice of this Turret. Ownership is NOT transferred!</returns>
-		HeldDevice * GetMountedDevice() const { return m_MountedDevice; }
+		HeldDevice * GetFirstMountedDevice() const { return m_MountedDevices.at(0); }
 
 		/// <summary>
-		/// Sets the mounted HeldDevice for this Turret. Ownership IS transferred!
-		/// The currently mounted HeldDevice (if there is one) will be dropped and added to MovableMan.
+		/// Sets the first mounted HeldDevice for this Turret, mostly here for Lua convenience. Ownership IS transferred!
+		/// The current first mounted HeldDevice (if there is one) will be dropped and added to MovableMan.
 		/// </summary>
 		/// <param name="newMountedDevice">The new HeldDevice to use.</param>
-		void SetMountedDevice(HeldDevice *newMountedDevice);
+		void SetFirstMountedDevice(HeldDevice *newMountedDevice);
 
 		/// <summary>
-		/// Indicates whether a ThrownDevice is mounted or not.
+		/// Gets the vector of mounted HeldDevices for this Turret.
 		/// </summary>
-		/// <returns>Whether or not a ThrownDevice is mounted on this Turret.</returns>
-		bool IsThrownDeviceMounted() const { return m_MountedDevice && m_MountedDevice->IsThrownDevice(); }
+		/// <returns>The vector of mounted HeldDevices for this Turret.</returns>
+		const std::vector<HeldDevice *> & GetMountedDevices() const { return m_MountedDevices; }
+
+		/// <summary>
+		/// Adds a HeldDevice to be mounted on this Turret. Ownership IS transferred!
+		/// Will not remove any other HeldDevices mounted on this Turret.
+		/// </summary>
+		/// <param name="newMountedDevice">The new HeldDevice to be mounted on this Turret.</param>
+		void AddMountedDevice(HeldDevice *newMountedDevice);
+
+		/// <summary>
+		/// Gets the current rotational offset of the mounted HeldDevice from the rest of the Turret.
+		/// </summary>
+		/// <returns>The current rotational offset of the mounted HeldDevice from the rest of the Turret.</returns>
+		float GetMountedDeviceRotationOffset() const { return m_MountedDeviceRotationOffset; }
 
 		/// <summary>
 		/// Sets the current rotational offset of the mounted HeldDevice from the rest of the Turret.
 		/// </summary>
-		/// <param name="newOffsetAngle">The new offset angle in radians, relative from the rest of the turret.</param>
-		void SetMountedDeviceRotOffset(float newOffsetAngle) { m_MountedDeviceRotOffset = newOffsetAngle; }
+		/// <param name="newOffsetAngle">The new offset angle in radians, relative from the rest of the Turret.</param>
+		void SetMountedDeviceRotationOffset(float newOffsetAngle) { m_MountedDeviceRotationOffset = newOffsetAngle; }
 #pragma endregion
 
 #pragma region Override Methods
@@ -103,10 +116,17 @@ namespace RTE {
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		HeldDevice *m_MountedDevice; //!< Pointer to the mounted HeldDevice of this Turret, if any.
-		float m_MountedDeviceRotOffset; //!< The relative offset angle (in radians) of the mounted HeldDevice from this Turret's rotation.
-
 	private:
+
+		//TODO I think things would be cleaner if this (and all hardcoded attachable pointers) used weak_ptrs. It would solve some weird ownership stuff, particularly with this. However, for that to be possible, m_Attachables has to be shared_ptrs though.
+		std::vector<HeldDevice *> m_MountedDevices; //!< Vector of unique_ptrs to the mounted HeldDevices of this Turret, if any. Owned here.
+		float m_MountedDeviceRotationOffset; //!< The relative offset angle (in radians) of the mounted HeldDevice from this Turret's rotation.
+
+		/// <summary>
+		/// Removes the HeldDevice from this turret's vector of mounted devices if it's in there. This releases the unique_ptr for it, leaving the caller to take care of it.
+		/// </summary>
+		/// <param name="mountedDeviceToRemove">A pointer to the mounted device to remove.</param>
+		void RemoveMountedDevice(const HeldDevice *mountedDeviceToRemove);
 
 		/// <summary>
 		/// Clears all the member variables of this Turret, effectively resetting the members of this abstraction level only.

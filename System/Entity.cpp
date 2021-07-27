@@ -286,6 +286,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool Entity::ClassInfo::IsClassOrChildClassOf(const ClassInfo *classInfoToCheck) const {
+		if (GetName() == classInfoToCheck->GetName()) {
+			return true;
+		} else if (m_ParentInfo) {
+			return m_ParentInfo->IsClassOrChildClassOf(classInfoToCheck);
+		}
+		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void * Entity::ClassInfo::GetPoolMemory() {
 		RTEAssert(IsConcrete(), "Trying to get pool memory of an abstract Entity class!");
 

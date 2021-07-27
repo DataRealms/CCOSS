@@ -1731,10 +1731,8 @@ void GameActivity::Update()
                     }
                 }
 */
-                // Figure out the direction the player is moving the cursor, so we can jump it in the right direction if needed
-                int direction = m_LandingZone[player].m_X - prevLZX;
-                // Move the actual LZ cursor to within the valid LZ Area
-                totalLZ.MovePointInsideX(m_LandingZone[player].m_X, direction);
+                // Move the actual LZ cursor to within the valid LZ Area. We pass in 0 for direction so it doesn't try to wrap around on wrapping maps.
+                totalLZ.MovePointInsideX(m_LandingZone[player].m_X, 0);
             }
 
             // Interface for the craft AI post-delivery mode

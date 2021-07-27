@@ -849,6 +849,7 @@
     <ClCompile Include="System\InputMapping.cpp" />
     <ClCompile Include="System\InputScheme.cpp" />
     <ClCompile Include="System\GraphicalPrimitive.cpp" />
+    <ClCompile Include="System\Serializable.cpp" />
     <ClCompile Include="System\StandardIncludes.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">Create</PrecompiledHeader>

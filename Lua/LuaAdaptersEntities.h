@@ -127,42 +127,28 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Entity Lua Adapters
-	// These methods are needed to specially handling removing attachables with Lua in order to avoid memory leaks. They have silly names cause luabind otherwise makes it difficult to pass values to them properly.
+	// TODO this is a temporary fix for lua PresetName setting causing scripts to have to rerun. It should be replaced with a DisplayName property someday.
+	static void SetPresetName(Entity *selfObject, const std::string &presetName) {
+		selfObject->SetPresetName(presetName, true);
+	}
+
+	// These methods are needed to specially handling removing attachables with Lua in order to avoid memory leaks. They have silly names cause LuaBind otherwise makes it difficult to pass values to them properly.
 	// Eventually RemoveAttachable should return the removed attachable, making this whole thing no longer unsafe and these methods unnecessary (there's a TODO in MOSRotating.h for it).
-	static bool RemoveAttachableLuaSafe4(MOSRotating *luaSelfObject, Attachable *attachable, bool addToMovableMan, bool addBreakWounds) {
-		if (!addToMovableMan && !attachable->IsSetToDelete()) {
-			attachable->SetToDelete();
-		}
-		return luaSelfObject->RemoveAttachable(attachable, addToMovableMan, addBreakWounds);
-	}
-
-	static bool RemoveAttachableLuaSafe3(MOSRotating *luaSelfObject, Attachable *attachable) {
-		return RemoveAttachableLuaSafe4(luaSelfObject, attachable, false, false);
-	}
-
-	static bool RemoveAttachableLuaSafe2(MOSRotating *luaSelfObject, long attachableUniqueID, bool addToMovableMan, bool addBreakWounds) {
-		if (MovableObject *attachableAsMovableObject = g_MovableMan.FindObjectByUniqueID(attachableUniqueID)) {
-			return RemoveAttachableLuaSafe4(luaSelfObject, dynamic_cast<Attachable *>(attachableAsMovableObject), addToMovableMan, addBreakWounds);
-		}
-		return false;
-	}
-
-	static bool RemoveAttachableLuaSafe1(MOSRotating *luaSelfObject, long attachableUniqueID) {
-		return RemoveAttachableLuaSafe2(luaSelfObject, attachableUniqueID, false, false);
-	}
-
-	static bool RemoveAttachableFromParentLuaSafe1(Attachable *luaSelfObject) {
+	static Attachable * RemoveAttachableFromParentLuaSafe1(Attachable *luaSelfObject) {
 		if (luaSelfObject->IsAttached()) {
-			return RemoveAttachableLuaSafe4(luaSelfObject->GetParent(), luaSelfObject, false, false);
+			return luaSelfObject->GetParent()->RemoveAttachable(luaSelfObject);
 		}
-		return false;
+		return luaSelfObject;
+	}
+	static Attachable * RemoveAttachableFromParentLuaSafe2(Attachable *luaSelfObject, bool addToMovableMan, bool addBreakWounds) {
+		if (luaSelfObject->IsAttached()) {
+			return luaSelfObject->GetParent()->RemoveAttachable(luaSelfObject, addToMovableMan, addBreakWounds);
+		}
+		return luaSelfObject;
 	}
 
-	static bool RemoveAttachableFromParentLuaSafe2(Attachable *luaSelfObject, bool addToMovableMan, bool addBreakWounds) {
-		if (luaSelfObject->IsAttached()) {
-			return RemoveAttachableLuaSafe4(luaSelfObject->GetParent(), luaSelfObject, addToMovableMan, addBreakWounds);
-		}
-		return false;
+	static void TurretAddMountedFirearm(Turret *luaSelfObject, HDFirearm *newMountedDevice) {
+		luaSelfObject->AddMountedDevice(newMountedDevice);
 	}
 
 	static void GibThis(MOSRotating *luaSelfObject) {
@@ -294,7 +280,7 @@ namespace RTE {
 	LuaPropertyOwnershipSafetyFaker(ACrab, Leg, SetRightFGLeg);
 	LuaPropertyOwnershipSafetyFaker(ACrab, Leg, SetRightBGLeg);
 	LuaPropertyOwnershipSafetyFaker(ACrab, SoundContainer, SetStrideSound);
-	LuaPropertyOwnershipSafetyFaker(Turret, HeldDevice, SetMountedDevice);
+	LuaPropertyOwnershipSafetyFaker(Turret, HeldDevice, SetFirstMountedDevice);
 	LuaPropertyOwnershipSafetyFaker(ACraft, SoundContainer, SetHatchOpenSound);
 	LuaPropertyOwnershipSafetyFaker(ACraft, SoundContainer, SetHatchCloseSound);
 	LuaPropertyOwnershipSafetyFaker(ACraft, SoundContainer, SetCrashSound);

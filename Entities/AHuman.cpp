@@ -96,8 +96,6 @@ void AHuman::Clear()
     m_SweepTimer.Reset();
     m_PatrolTimer.Reset();
     m_JumpTimer.Reset();
-
-	m_GotHat = false;
 }
 
 
@@ -244,15 +242,11 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "ThrowPrepTime") {
         reader >> m_ThrowPrepTime;
     } else if (propName == "Head") {
-        Attachable iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetHead(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
+        SetHead(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
 	} else if (propName == "LookToAimRatio") {
 		reader >> m_LookToAimRatio;
     } else if (propName == "Jetpack") {
-        AEmitter iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetJetpack(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+        SetJetpack(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "JumpTime") {
         reader >> m_JetTimeTotal;
         // Convert to ms
@@ -264,21 +258,13 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
 	} else if (propName == "BGArmFlailScalar") {
 		reader >> m_BGArmFlailScalar;
     } else if (propName == "FGArm") {
-        Arm iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetFGArm(dynamic_cast<Arm *>(iniDefinedObject.Clone()));
+        SetFGArm(dynamic_cast<Arm *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "BGArm") {
-        Arm iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetBGArm(dynamic_cast<Arm *>(iniDefinedObject.Clone()));
+        SetBGArm(dynamic_cast<Arm *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "FGLeg") {
-        Leg iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetFGLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
+        SetFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "BGLeg") {
-        Leg iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetBGLeg(dynamic_cast<Leg *>(iniDefinedObject.Clone()));
+        SetBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "HandGroup") {
         delete m_pFGHandGroup;
         delete m_pBGHandGroup;
@@ -516,11 +502,10 @@ Vector AHuman::GetEyePos() const
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetHead(Attachable *newHead) {
+    if (m_pHead && m_pHead->IsAttached()) { RemoveAndDeleteAttachable(m_pHead); }
     if (newHead == nullptr) {
-        if (m_pHead && m_pHead->IsAttached()) { RemoveAttachable(m_pHead); }
         m_pHead = nullptr;
     } else {
-        if (m_pHead && m_pHead->IsAttached()) { RemoveAttachable(m_pHead); }
         m_pHead = newHead;
         AddAttachable(newHead);
 
@@ -537,11 +522,10 @@ void AHuman::SetHead(Attachable *newHead) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetJetpack(AEmitter *newJetpack) {
+    if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAndDeleteAttachable(m_pJetpack); }
     if (newJetpack == nullptr) {
-        if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
         m_pJetpack = nullptr;
     } else {
-        if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAttachable(m_pJetpack); }
         m_pJetpack = newJetpack;
         AddAttachable(newJetpack);
 
@@ -559,11 +543,10 @@ void AHuman::SetJetpack(AEmitter *newJetpack) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetFGArm(Arm *newArm) {
+    if (m_pFGArm && m_pFGArm->IsAttached()) { RemoveAndDeleteAttachable(m_pFGArm); }
     if (newArm == nullptr) {
-        if (m_pFGArm && m_pFGArm->IsAttached()) { RemoveAttachable(m_pFGArm); }
         m_pFGArm = nullptr;
     } else {
-        if (m_pFGArm && m_pFGArm->IsAttached()) { RemoveAttachable(m_pFGArm); }
         m_pFGArm = newArm;
         AddAttachable(newArm);
 
@@ -582,11 +565,10 @@ void AHuman::SetFGArm(Arm *newArm) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetBGArm(Arm *newArm) {
+    if (m_pBGArm && m_pBGArm->IsAttached()) { RemoveAndDeleteAttachable(m_pBGArm); }
     if (newArm == nullptr) {
-        if (m_pBGArm && m_pBGArm->IsAttached()) { RemoveAttachable(m_pBGArm); }
         m_pBGArm = nullptr;
     } else {
-        if (m_pBGArm && m_pBGArm->IsAttached()) { RemoveAttachable(m_pBGArm); }
         m_pBGArm = newArm;
         AddAttachable(newArm);
 
@@ -604,11 +586,10 @@ void AHuman::SetBGArm(Arm *newArm) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetFGLeg(Leg *newLeg) {
+    if (m_pFGLeg && m_pFGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pFGLeg); }
     if (newLeg == nullptr) {
-        if (m_pFGLeg && m_pFGLeg->IsAttached()) { RemoveAttachable(m_pFGLeg); }
         m_pFGLeg = nullptr;
     } else {
-        if (m_pFGLeg && m_pFGLeg->IsAttached()) { RemoveAttachable(m_pFGLeg); }
         m_pFGLeg = newLeg;
         AddAttachable(newLeg);
 
@@ -625,11 +606,10 @@ void AHuman::SetFGLeg(Leg *newLeg) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void AHuman::SetBGLeg(Leg *newLeg) {
+    if (m_pBGLeg && m_pBGLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pBGLeg); }
     if (newLeg == nullptr) {
-        if (m_pBGLeg && m_pBGLeg->IsAttached()) { RemoveAttachable(m_pBGLeg); }
         m_pBGLeg = nullptr;
     } else {
-        if (m_pBGLeg && m_pBGLeg->IsAttached()) { RemoveAttachable(m_pBGLeg); }
         m_pBGLeg = newLeg;
         AddAttachable(newLeg);
 
@@ -988,7 +968,11 @@ bool AHuman::EquipDeviceInGroup(string group, bool doEquip)
                 if (m_pFGArm->HoldsSomething())
                 {
                     m_pFGArm->GetHeldDevice()->Deactivate();
-                    m_Inventory.push_back(m_pFGArm->ReleaseHeldMO());
+                    MovableObject *previouslyHeldItem = m_pFGArm->ReleaseHeldMO();
+                    // Note - This is a fix to deal with an edge case bug when this method is called by a global script.
+                    // Because the global script runs before everything has finished traveling, the removed item needs to undraw itself from the MO layer, otherwise it can result in ghost collisions and crashes.
+                    if (previouslyHeldItem->GetsHitByMOs()) { previouslyHeldItem->Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawNoMOID, true); }
+                    m_Inventory.emplace_back(previouslyHeldItem);
                 }
 
                 // Now put the device we were looking for and found into the hand
@@ -3119,30 +3103,6 @@ int AHuman::OnPieMenu(Actor *pieMenuActor) {
 
 void AHuman::Update()
 {
-	if (g_SettingsMan.EnableHats() && !m_GotHat && m_pHead)
-	{
-		m_GotHat = true;
-
-		if (RandomNum() > 0.8F)
-		{
-			int hat = RandomNum(1, 20);
-
-            std::stringstream hatName;
-            hatName << "Random Hat " << hat;
-			const Entity *preset = g_PresetMan.GetEntityPreset("Attachable", hatName.str());
-
-			if (preset)
-			{
-                Attachable *pNewHat = dynamic_cast<Attachable *>(preset->Clone());
-                if (pNewHat)
-                {
-			        m_pHead->RemoveOrDestroyAllAttachables(true);
-			        m_pHead->AddAttachable(pNewHat, pNewHat->GetParentOffset());
-                }
-			}
-		}
-	}
-
 	float deltaTime = g_TimerMan.GetDeltaTimeSecs();
 	// Get the rotation in radians.
 	float rot = m_Rotation.GetRadAngle();
@@ -3348,8 +3308,7 @@ void AHuman::Update()
 				// Move BG hand accordingly
 				if (m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped)); }
 			}
-			// Only reload if no other pickuppable item is in reach
-			if (!pFireArm->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !m_pItemInReach) {
+			if (!pFireArm->IsFull() && m_Controller.IsState(WEAPON_RELOAD)) {
 				if (m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(pFireArm->GetMagazinePos()); }
 				pFireArm->Reload();
 				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
@@ -4208,7 +4167,7 @@ void AHuman::Update()
 
             // See how far along the sharp aim vector there is opaque air
 //            float result = g_SceneMan.CastNotMaterialRay(m_pFGArm->GetHeldDevice()->GetMuzzlePos(), sharpAimVector, g_MaterialAir, 5);
-            float result = g_SceneMan.CastObstacleRay(m_pFGArm->GetHeldDevice()->GetMuzzlePos(), sharpAimVector, notUsed, notUsed, GetRootID(), g_MaterialAir, 5);
+            float result = g_SceneMan.CastObstacleRay(m_pFGArm->GetHeldDevice()->GetMuzzlePos(), sharpAimVector, notUsed, notUsed, GetRootID(), IgnoresWhichTeam(), g_MaterialAir, 5);
             // If we didn't find anything but air before the sharpdistance, then don't alter the sharp distance
             if (result >= 0 && result < (maxLength * m_SharpAimProgress))
             {

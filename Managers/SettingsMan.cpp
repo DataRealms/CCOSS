@@ -21,7 +21,6 @@ namespace RTE {
 		m_FlashOnBrainDamage = true;
 		m_BlipOnRevealUnseen = true;
 		m_EndlessMetaGameMode = false;
-		m_EnableHats = false;
 		m_EnableCrabBombs = false;
 		m_CrabBombThreshold = 42;
 
@@ -135,8 +134,6 @@ namespace RTE {
 			reader >> g_MovableMan.m_SloMoDuration;
 		} else if (propName == "EndlessMode") {
 			reader >> m_EndlessMetaGameMode;
-		} else if (propName == "EnableHats") {
-			reader >> m_EnableHats;
 		} else if (propName == "EnableCrabBombs") {
 			reader >> m_EnableCrabBombs;
 		} else if (propName == "CrabBombThreshold") {
@@ -245,6 +242,7 @@ namespace RTE {
 			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 				std::string playerNum = std::to_string(player + 1);
 				if (propName == "Player" + playerNum + "Scheme") {
+					g_UInputMan.m_ControlScheme.at(player).Reset();
 					reader >> g_UInputMan.m_ControlScheme.at(player);
 					break;
 				}
@@ -301,7 +299,6 @@ namespace RTE {
 		writer.NewPropertyWithValue("SloMoThreshold", g_MovableMan.m_SloMoThreshold);
 		writer.NewPropertyWithValue("SloMoDurationMS", g_MovableMan.m_SloMoDuration);
 		writer.NewPropertyWithValue("EndlessMetaGameMode", m_EndlessMetaGameMode);
-		writer.NewPropertyWithValue("EnableHats", m_EnableHats);
 		writer.NewPropertyWithValue("EnableCrabBombs", m_EnableCrabBombs);
 		writer.NewPropertyWithValue("CrabBombThreshold", m_CrabBombThreshold);
 

@@ -706,7 +706,7 @@ void GUIListPanel::SelectionListScrolling(int scrollDir) {
 		if (m_LoopSelectionScroll) {
 			newItemIndex = (newItemIndex + itemListSize) % itemListSize;
 		} else {
-			newItemIndex = std::clamp(newItemIndex, static_cast<int>(itemListSize - 1), 0);
+			newItemIndex = std::clamp(newItemIndex, 0, static_cast<int>(itemListSize - 1));
 			if (oldItemIndex == newItemIndex) {
 				SendSignal(EdgeHit, (newItemIndex < 0) ? 0 : 1);
 				return;

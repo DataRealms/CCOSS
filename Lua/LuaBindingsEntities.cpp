@@ -11,7 +11,7 @@ namespace RTE {
 		.def(luabind::tostring(luabind::const_self))
 
 		.property("ClassName", &Entity::GetClassName)
-		.property("PresetName", &Entity::GetPresetName, &Entity::SetPresetName)
+		.property("PresetName", &Entity::GetPresetName, &SetPresetName)
 		.property("Description", &Entity::GetDescription, &Entity::SetDescription)
 		.property("IsOriginalPreset", &Entity::IsOriginalPreset)
 		.property("ModuleID", &Entity::GetModuleID)
@@ -67,7 +67,7 @@ namespace RTE {
 		.property("FirearmActivationDelay", &ACrab::FirearmActivationDelay)
 		.property("LimbPathPushForce", &ACrab::GetLimbPathPushForce, &ACrab::SetLimbPathPushForce)
 
-		.def("ReloadFirearm", &ACrab::ReloadFirearm)
+		.def("ReloadFirearms", &ACrab::ReloadFirearms)
 		.def("IsWithinRange", &ACrab::IsWithinRange)
 		.def("Look", &ACrab::Look)
 		.def("LookForMOs", &ACrab::LookForMOs)
@@ -531,12 +531,13 @@ namespace RTE {
 		.property("AtomSubgroupID", &Attachable::GetAtomSubgroupID)
 		.property("CollidesWithTerrainWhileAttached", &Attachable::GetCollidesWithTerrainWhileAttached, &Attachable::SetCollidesWithTerrainWhileAttached)
 		.property("CanCollideWithTerrain", &Attachable::CanCollideWithTerrain)
+		.property("DrawnAfterParent", &Attachable::IsDrawnAfterParent, &Attachable::SetDrawnAfterParent)
+		.property("InheritsFrame", &Attachable::InheritsFrame, &Attachable::SetInheritsFrame)
 
 		.def("IsAttached", &Attachable::IsAttached)
 		.def("IsAttachedTo", &Attachable::IsAttachedTo)
-		.def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe1)
-		.def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe2)
-		.def("IsDrawnAfterParent", &Attachable::IsDrawnAfterParent);
+		.def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe1, luabind::adopt(luabind::return_value))
+		.def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe2, luabind::adopt(luabind::return_value));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -835,21 +836,17 @@ namespace RTE {
 		.def("ObjectValueExists", &MOSRotating::ObjectValueExists)
 		.def("AddAttachable", (void (MOSRotating::*)(Attachable *attachableToAdd))&MOSRotating::AddAttachable, luabind::adopt(_2))
 		.def("AddAttachable", (void (MOSRotating::*)(Attachable *attachableToAdd, const Vector &parentOffset))&MOSRotating::AddAttachable, luabind::adopt(_2))
-		/*
-		.def("RemoveAttachable", (bool (MOSRotating:: *)(long uniqueIDOfAttachableToRemove)) &MOSRotating::RemoveAttachable)
-		.def("RemoveAttachable", (bool (MOSRotating:: *)(long uniqueIDOfAttachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable)
-		.def("RemoveAttachable", (bool (MOSRotating::*)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable)
-		.def("RemoveAttachable", (bool (MOSRotating:: *)(Attachable *attachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable)
-		*/
+		.def("RemoveAttachable", (Attachable *(MOSRotating:: *)(long uniqueIDOfAttachableToRemove)) &MOSRotating::RemoveAttachable, luabind::adopt(luabind::return_value))
+		.def("RemoveAttachable", (Attachable *(MOSRotating:: *)(long uniqueIDOfAttachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable, luabind::adopt(luabind::return_value))
+		.def("RemoveAttachable", (Attachable *(MOSRotating:: *)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable, luabind::adopt(luabind::return_value))
+		.def("RemoveAttachable", (Attachable *(MOSRotating:: *)(Attachable *attachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable)
 		.def("AddEmitter", (void (MOSRotating::*)(Attachable *attachableToAdd))&MOSRotating::AddAttachable, luabind::adopt(_2))
 		.def("AddEmitter", (void (MOSRotating::*)(Attachable *attachableToAdd, const Vector &parentOffset))&MOSRotating::AddAttachable, luabind::adopt(_2))
-		.def("RemoveEmitter", (bool (MOSRotating::*)(Attachable *attachableToRemove))&MOSRotating::RemoveAttachable)
-		.def("RemoveEmitter", (bool (MOSRotating::*)(long uniqueIDOfAttachableToRemove))&MOSRotating::RemoveAttachable)
+		.def("RemoveEmitter", (Attachable *(MOSRotating:: *)(long uniqueIDOfAttachableToRemove)) &MOSRotating::RemoveAttachable, luabind::adopt(luabind::return_value))
+		.def("RemoveEmitter", (Attachable *(MOSRotating:: *)(long uniqueIDOfAttachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable, luabind::adopt(luabind::return_value))
+		.def("RemoveEmitter", (Attachable *(MOSRotating:: *)(Attachable *attachableToRemove)) &MOSRotating::RemoveAttachable, luabind::adopt(luabind::return_value))
+		.def("RemoveEmitter", (Attachable *(MOSRotating:: *)(Attachable *attachableToRemove, bool addToMovableMan, bool addBreakWounds)) &MOSRotating::RemoveAttachable, luabind::adopt(luabind::return_value))
 
-		.def("RemoveAttachable", &RemoveAttachableLuaSafe1)
-		.def("RemoveAttachable", &RemoveAttachableLuaSafe2)
-		.def("RemoveAttachable", &RemoveAttachableLuaSafe3)
-		.def("RemoveAttachable", &RemoveAttachableLuaSafe4)
 		.def("GibThis", &GibThis); // Free function bound as member function to emulate default variables
 	}
 
@@ -897,6 +894,8 @@ namespace RTE {
 		.property("HitWhatTerrMaterial", &MovableObject::HitWhatTerrMaterial)
 		.property("ProvidesPieMenuContext", &MovableObject::ProvidesPieMenuContext, &MovableObject::SetProvidesPieMenuContext)
 		.property("HitWhatParticleUniqueID", &MovableObject::HitWhatParticleUniqueID)
+		.property("ApplyWoundDamageOnCollision", &MovableObject::GetApplyWoundDamageOnCollision, &MovableObject::SetApplyWoundDamageOnCollision)
+		.property("ApplyWoundBurstDamageOnCollision", &MovableObject::GetApplyWoundBurstDamageOnCollision, &MovableObject::SetApplyWoundBurstDamageOnCollision)
 
 		.def("GetParent", (MOSRotating * (MovableObject::*)())&MovableObject::GetParent)
 		.def("GetParent", (const MOSRotating * (MovableObject::*)() const)&MovableObject::GetParent)
@@ -1172,6 +1171,11 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, Turret) {
 		return ConcreteTypeLuaClassDefinition(Turret, Attachable)
 
-		.property("MountedDevice", &Turret::GetMountedDevice, &TurretSetMountedDevice);
+		.property("MountedDevice", &Turret::GetFirstMountedDevice, &TurretSetFirstMountedDevice)
+		.property("MountedDeviceRotationOffset", &Turret::GetMountedDeviceRotationOffset, &Turret::SetMountedDeviceRotationOffset)
+
+		.def("GetMountedDevices", &Turret::GetMountedDevices, luabind::return_stl_iterator)
+		.def("AddMountedDevice", &Turret::AddMountedDevice, luabind::adopt(_2))
+		.def("AddMountedDevice", &TurretAddMountedFirearm, luabind::adopt(_2));
 	}
 }

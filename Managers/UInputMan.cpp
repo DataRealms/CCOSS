@@ -1,6 +1,7 @@
 #include "UInputMan.h"
 #include "SceneMan.h"
 #include "ActivityMan.h"
+#include "MetaMan.h"
 #include "FrameMan.h"
 #include "ConsoleMan.h"
 #include "PresetMan.h"
@@ -715,7 +716,7 @@ namespace RTE {
 				return;
 			}
 			// Ctrl+R or Back button for controllers to reset activity.
-			if (!g_ActivityMan.ActivitySetToRestart()) { g_ActivityMan.SetRestartActivity(FlagCtrlState() && KeyPressed(KEY_R) || AnyBackPress()); }
+			if (!g_MetaMan.GameInProgress() && !g_ActivityMan.ActivitySetToRestart()) { g_ActivityMan.SetRestartActivity(FlagCtrlState() && KeyPressed(KEY_R) || AnyBackPress()); }
 			if (g_ActivityMan.ActivitySetToRestart()) {
 				return;
 			}

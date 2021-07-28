@@ -113,8 +113,7 @@ namespace RTE {
 		if (!m_Activated) {
 			m_ActivationTimer.Reset();
 			m_ActivationSound.Play(m_Pos);
-			MovableObject *strikerLever = m_StrikerLever ? dynamic_cast<MovableObject *>(m_StrikerLever->Clone()) : nullptr;
-			if (strikerLever) {
+			if (MovableObject *strikerLever = m_StrikerLever ? dynamic_cast<MovableObject *>(m_StrikerLever->Clone()) : nullptr) {
 				Vector randomVel(m_Vel.GetMagnitude() * 0.25F + 1.0F, 0);
 
 				strikerLever->SetVel(m_Vel * 0.5F + randomVel.RadRotate(c_PI * RandomNormalNum()));

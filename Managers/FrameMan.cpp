@@ -163,6 +163,8 @@ namespace RTE {
 			resX = m_MaxResX / resMultiplier;
 			resY = m_MaxResY / resMultiplier;
 			ShowMessageBox("Resolution too high to fit display, overriding to fit!");
+
+#ifndef __unix__
 		} else if (!m_ForceDedicatedFullScreenGfxDriver && resX * resMultiplier == 1366 && resY * resMultiplier == 768) {
 			settingsNeedOverwrite = true;
 			resX = 1360 / resMultiplier;
@@ -180,6 +182,8 @@ namespace RTE {
 				"To enable the use of this resolution, please force the dedicated fullscreen driver through \"Settings.ini\" or through the in-game custom resolution settings."
 			};
 			ShowMessageBox(invalidResolutionMessage);
+#endif
+
 		}
 
 		if (m_NumScreens == 1) {
@@ -453,6 +457,8 @@ namespace RTE {
 
 #ifdef __unix__
 		m_GfxDriver = (m_ResX * newMultiplier == m_MaxResX && m_ResY * newMultiplier == m_MaxResY) ? GFX_AUTODETECT_FULLSCREEN : GFX_AUTODETECT_WINDOWED;
+#elif _WIN32
+		m_GfxDriver = (m_ResX * newMultiplier == m_MaxResX && m_ResY * newMultiplier == m_MaxResY) ? GFX_DIRECTX_WIN_BORDERLESS : GFX_AUTODETECT_WINDOWED;
 #endif
 
 		// Set the GFX_TEXT driver to hack around Allegro's window resizing limitations (specifically reducing window size) when switching from 2X mode to 1X mode.

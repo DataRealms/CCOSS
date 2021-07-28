@@ -36,6 +36,7 @@ namespace RTE {
 		m_InheritsHFlipped = 1;
 		m_InheritsRotAngle = true;
 		m_InheritedRotAngleOffset = 0.0F;
+		m_InheritsFrame = false;
 
 		m_AtomSubgroupID = -1L;
 		m_CollidesWithTerrainWhileAttached = true;
@@ -81,6 +82,7 @@ namespace RTE {
 		m_InheritsHFlipped = reference.m_InheritsHFlipped;
 		m_InheritsRotAngle = reference.m_InheritsRotAngle;
 		m_InheritedRotAngleOffset = reference.m_InheritedRotAngleOffset;
+		m_InheritsFrame = reference.m_InheritsFrame;
 
 		m_AtomSubgroupID = GetUniqueID();
 		m_CollidesWithTerrainWhileAttached = reference.m_CollidesWithTerrainWhileAttached;
@@ -124,6 +126,8 @@ namespace RTE {
 			reader >> m_InheritedRotAngleOffset;
 		} else if (propName == "InheritedRotAngleDegOffset") {
 			m_InheritedRotAngleOffset = DegreesToRadians(std::stof(reader.ReadPropValue()));
+		} else if (propName == "InheritsFrame") {
+			reader >> m_InheritsFrame;
 		} else if (propName == "CollidesWithTerrainWhileAttached") {
 			reader >> m_CollidesWithTerrainWhileAttached;
 		} else {
@@ -183,8 +187,8 @@ namespace RTE {
 		}
 
 		Vector totalForce;
-		for (const std::pair<Vector, Vector> &force : m_Forces) {
-			totalForce += force.first;
+		for (const auto &[force, forceOffset] : m_Forces) {
+			totalForce += force;
 		}
 
 		jointForces += totalForce;
@@ -207,8 +211,8 @@ namespace RTE {
 		if (gibImpulseLimitValueToUse > 0) { gibImpulseLimitValueToUse = std::max(gibImpulseLimitValueToUse, jointStrengthValueToUse); }
 
 		Vector totalImpulseForce;
-		for (const std::pair<Vector, Vector> &impulseForce : m_ImpulseForces) {
-			totalImpulseForce += impulseForce.first;
+		for (const auto &[impulseForce, impulseForceOffset] : m_ImpulseForces) {
+			totalImpulseForce += impulseForce;
 		}
 		totalImpulseForce *= jointStiffnessValueToUse;
 
@@ -228,9 +232,9 @@ namespace RTE {
 		// The first part is getting the Dot/Scalar product of the perpendicular of the offset vector for the force onto the force vector itself (dot product is the amount two vectors are pointing in the same direction).
 		// The second part is dividing that Dot product by the moment of inertia, i.e. the torque needed to make it turn. All of this is multiplied by 1 - JointStiffness, because max stiffness joints transfer all force to parents and min stiffness transfer none.
 		if (!m_InheritsRotAngle) {
-			for (const std::pair<Vector, Vector> &impulseForce : m_ImpulseForces) {
-				if (!impulseForce.second.IsZero()) {
-					m_AngularVel += (impulseForce.second.GetPerpendicular().Dot(impulseForce.first) / m_pAtomGroup->GetMomentOfInertia()) * (1.0F - jointStiffnessValueToUse);
+			for (const auto &[impulseForce, impulseForceOffset] : m_ImpulseForces) {
+				if (!impulseForceOffset.IsZero()) {
+					m_AngularVel += (impulseForceOffset.GetPerpendicular().Dot(impulseForce) / m_pAtomGroup->GetMomentOfInertia()) * (1.0F - jointStiffnessValueToUse);
 				}
 			}
 		}
@@ -274,8 +278,7 @@ namespace RTE {
 
 	bool Attachable::CanCollideWithTerrain() const {
 		if (m_CollidesWithTerrainWhileAttached && IsAttached() && GetParent() != GetRootParent()) {
-			const Attachable *parentAsAttachable = dynamic_cast<const Attachable *>(GetParent());
-			if (parentAsAttachable) { return parentAsAttachable->CanCollideWithTerrain(); }
+			if (const Attachable *parentAsAttachable = dynamic_cast<const Attachable *>(GetParent())) { return parentAsAttachable->CanCollideWithTerrain(); }
 		}
 		return m_CollidesWithTerrainWhileAttached;
 	}
@@ -285,19 +288,23 @@ namespace RTE {
 	bool Attachable::ParticlePenetration(HitData &hd) {
 		bool penetrated = MOSRotating::ParticlePenetration(hd);
 
-		if (hd.Body[HITOR]->DamageOnCollision() != 0) { AddDamage(hd.Body[HITOR]->DamageOnCollision()); }
+		if (m_Parent) {
+			MovableObject *hitor = hd.Body[HITOR];
+			float damageToAdd = hitor->DamageOnCollision();
+			damageToAdd += penetrated ? hitor->DamageOnPenetration() : 0;
+			if (hitor->GetApplyWoundDamageOnCollision()) { damageToAdd += m_pEntryWound->GetEmitDamage() * hitor->WoundDamageMultiplier(); }
+			if (hitor->GetApplyWoundBurstDamageOnCollision()) { damageToAdd += m_pEntryWound->GetBurstDamage() * hitor->WoundDamageMultiplier(); }
 
-		if (penetrated && m_Parent) {
-			if (hd.Body[HITOR]->DamageOnPenetration() != 0) { AddDamage(hd.Body[HITOR]->DamageOnPenetration()); }
+			if (damageToAdd != 0) {
+				AddDamage(damageToAdd);
 
-			// If the parent is an actor, generate an alarm point for them, moving it slightly away from the body (in the direction they got hit from) to get a good reaction.
-			Actor *parentAsActor = dynamic_cast<Actor *>(GetRootParent());
-			if (parentAsActor) {
-				Vector extruded(hd.HitVel[HITOR]);
-				extruded.SetMagnitude(parentAsActor->GetHeight());
-				extruded = m_Pos - extruded;
-				g_SceneMan.WrapPosition(extruded);
-				parentAsActor->AlarmPoint(extruded);
+				if (Actor *parentAsActor = dynamic_cast<Actor *>(GetRootParent()); parentAsActor && parentAsActor->GetPerceptiveness() > 0) {
+					Vector extruded(hd.HitVel[HITOR]);
+					extruded.SetMagnitude(parentAsActor->GetHeight());
+					extruded = m_Pos - extruded;
+					g_SceneMan.WrapPosition(extruded);
+					parentAsActor->AlarmPoint(extruded);
+				}
 			}
 		}
 
@@ -307,8 +314,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Attachable::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
-		MOSRotating::GibThis(impactImpulse, movableObjectToIgnore);
 		if (m_Parent) { m_Parent->RemoveAttachable(this, true, true); }
+		MOSRotating::GibThis(impactImpulse, movableObjectToIgnore);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -340,7 +347,7 @@ namespace RTE {
 				if (std::abs(currentRotAngleOffset - m_PrevRotAngleOffset) > 0.01745F) { // Update for 1 degree differences
 					Matrix atomRotationForSubgroup(rootParentAsMOSR->FacingAngle(GetRotAngle()) - rootParentAsMOSR->FacingAngle(rootParentAsMOSR->GetRotAngle()));
 					Vector atomOffsetForSubgroup(g_SceneMan.ShortestDistance(rootParentAsMOSR->GetPos(), m_Pos, g_SceneMan.SceneWrapsX()).FlipX(rootParentAsMOSR->IsHFlipped()));
-					Matrix rootParentAngleToUse(rootParentAsMOSR->GetRotAngle() * rootParentAsMOSR->GetFlipFactor());
+					Matrix rootParentAngleToUse(rootParentAsMOSR->GetRotAngle() * static_cast<float>(rootParentAsMOSR->GetFlipFactor()));
 					atomOffsetForSubgroup /= rootParentAngleToUse;
 					rootParentAsMOSR->GetAtomGroup()->UpdateSubAtoms(GetAtomSubgroupID(), atomOffsetForSubgroup, atomRotationForSubgroup);
 				}
@@ -353,8 +360,10 @@ namespace RTE {
 
 		MOSRotating::Update();
 
+		if (m_Parent && m_InheritsFrame) { SetFrame(m_Parent->GetFrame()); }
+
 		// If we're attached to something, MovableMan doesn't own us, and therefore isn't calling our UpdateScripts method (and neither is our parent), so we should here.
-		if (m_Parent != nullptr && GetRootParent()->HasEverBeenAddedToMovableMan()) { UpdateScripts(); }
+		if (m_Parent && GetRootParent()->HasEverBeenAddedToMovableMan()) { UpdateScripts(); }
 
 		m_PrevPos = m_Pos;
 		m_PrevVel = m_Vel;
@@ -407,11 +416,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool Attachable::RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds) {
+	Attachable * Attachable::RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds) {
 		float previousMassForUpdatingParent = m_Parent ? GetMass() : 0.0F;
-		bool result = MOSRotating::RemoveAttachable(attachable, addToMovableMan, addBreakWounds);
+		Attachable *removedAttachable = MOSRotating::RemoveAttachable(attachable, addToMovableMan, addBreakWounds);
 		if (m_Parent) { m_Parent->UpdateAttachableAndWoundMass(previousMassForUpdatingParent, GetMass()); }
-		return result;
+		return removedAttachable;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -460,8 +469,7 @@ namespace RTE {
 			m_Team = -1;
 			m_IsWound = false;
 
-			MovableObject *rootParent = GetRootParent();
-			if (rootParent) {
+			if (MovableObject *rootParent = GetRootParent()) {
 				const MovableObject *whichMOToNotHit = GetWhichMOToNotHit();
 				const MovableObject *rootParentMOToNotHit = rootParent->GetWhichMOToNotHit();
 				if ((whichMOToNotHit && whichMOToNotHit != rootParent) || (rootParentMOToNotHit && rootParentMOToNotHit != this)) {

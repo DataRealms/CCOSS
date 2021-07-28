@@ -2088,24 +2088,17 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
 void MetagameGUI::UpdateInput()
 {
     // If esc pressed, show campaign dialog if applicable
-    if (g_UInputMan.KeyPressed(KEY_ESC))
-    {
-        // Just quit if the dialog is already up
-        /*if (m_pConfirmationBox->GetVisible() && m_pConfirmationButton->GetText() == "Quit")
-            System::SetQuit();
-        else
-        {
-            HideAllScreens();
-            g_MetaMan.SetSuspend(true);
-            m_pConfirmationLabel->SetText("Sure you want to quit to OS?\nAny unsaved progress\nwill be lost!");
-            m_pConfirmationButton->SetText("Quit");
-            m_pConfirmationBox->SetVisible(true);
-        }*/
-        
-		HideAllScreens();
-        g_MetaMan.SetSuspend(true);
-        SwitchToScreen(MENUDIALOG);
-    }
+	if (g_UInputMan.KeyPressed(KEY_ESC)) {
+		if (m_MenuScreen == MENUDIALOG) {
+			g_MetaMan.SetSuspend(false);
+			SwitchToScreen(ROOTBOX);
+		} else {
+			HideAllScreens();
+			g_MetaMan.SetSuspend(true);
+			SwitchToScreen(MENUDIALOG);
+		}
+		return;
+	}
 
     ///////////////////////////////////////////////////////////
     // Mouse handling

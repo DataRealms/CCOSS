@@ -106,7 +106,7 @@ namespace RTE {
 
 			FMOD_RESULT status = FMOD_OK;
 
-			if (g_ActivityMan.ActivityRunning()) {
+			if (!g_ActivityMan.ActivityPaused()) {
 				const Activity *currentActivity = g_ActivityMan.GetActivity();
 				int currentActivityHumanCount = m_IsInMultiplayerMode ? 1 : currentActivity->GetHumanCount();
 

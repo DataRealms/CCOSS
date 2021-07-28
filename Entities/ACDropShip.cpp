@@ -16,6 +16,7 @@
 #include "Controller.h"
 #include "Matrix.h"
 #include "AEmitter.h"
+#include "PresetMan.h"
 
 namespace RTE {
 
@@ -123,29 +124,17 @@ int ACDropShip::Create(const ACDropShip &reference) {
 
 int ACDropShip::ReadProperty(const std::string_view &propName, Reader &reader) {
     if (propName == "RThruster" || propName == "RightThruster" || propName == "RightEngine") {
-        AEmitter iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetRightThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+        SetRightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "LThruster" || propName == "LeftThruster" || propName == "LeftEngine") {
-        AEmitter iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetLeftThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+        SetLeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "URThruster" || propName == "UpRightThruster") {
-        AEmitter iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetURightThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+        SetURightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "ULThruster" || propName == "UpLeftThruster") {
-        AEmitter iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetULeftThruster(dynamic_cast<AEmitter *>(iniDefinedObject.Clone()));
+        SetULeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "RHatchDoor" || propName == "RightHatchDoor") {
-        Attachable iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetRightHatch(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
+        SetRightHatch(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "LHatchDoor" || propName == "LeftHatchDoor") {
-        Attachable iniDefinedObject;
-        reader >> &iniDefinedObject;
-        SetLeftHatch(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
+        SetLeftHatch(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "HatchDoorSwingRange") {
         reader >> m_HatchSwingRange;
     } else if (propName == "AutoStabilize") {
@@ -762,11 +751,10 @@ void ACDropShip::Update()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetRightThruster(AEmitter *newThruster) {
+    if (m_pRThruster && m_pRThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pRThruster); }
     if (newThruster == nullptr) {
-        if (m_pRThruster && m_pRThruster->IsAttached()) { RemoveAttachable(m_pRThruster); }
         m_pRThruster = nullptr;
     } else {
-        if (m_pRThruster && m_pRThruster->IsAttached()) { RemoveAttachable(m_pRThruster); }
         m_pRThruster = newThruster;
         AddAttachable(newThruster);
 
@@ -784,11 +772,10 @@ void ACDropShip::SetRightThruster(AEmitter *newThruster) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetLeftThruster(AEmitter *newThruster) {
+    if (m_pLThruster && m_pLThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pLThruster); }
     if (newThruster == nullptr) {
-        if (m_pLThruster && m_pLThruster->IsAttached()) { RemoveAttachable(m_pLThruster); }
         m_pLThruster = nullptr;
     } else {
-        if (m_pLThruster && m_pLThruster->IsAttached()) { RemoveAttachable(m_pLThruster); }
         m_pLThruster = newThruster;
         AddAttachable(newThruster);
 
@@ -806,11 +793,10 @@ void ACDropShip::SetLeftThruster(AEmitter *newThruster) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetURightThruster(AEmitter *newThruster) {
+    if (m_pURThruster && m_pURThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pURThruster); }
     if (newThruster == nullptr) {
-        if (m_pURThruster && m_pURThruster->IsAttached()) { RemoveAttachable(m_pURThruster); }
         m_pURThruster = nullptr;
     } else {
-        if (m_pURThruster && m_pURThruster->IsAttached()) { RemoveAttachable(m_pURThruster); }
         m_pURThruster = newThruster;
         AddAttachable(newThruster);
 
@@ -827,11 +813,10 @@ void ACDropShip::SetURightThruster(AEmitter *newThruster) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetULeftThruster(AEmitter *newThruster) {
+    if (m_pULThruster && m_pULThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pULThruster); }
     if (newThruster == nullptr) {
-        if (m_pULThruster && m_pULThruster->IsAttached()) { RemoveAttachable(m_pULThruster); }
         m_pULThruster = nullptr;
     } else {
-        if (m_pULThruster && m_pULThruster->IsAttached()) { RemoveAttachable(m_pULThruster); }
         m_pULThruster = newThruster;
         AddAttachable(newThruster);
 
@@ -848,11 +833,10 @@ void ACDropShip::SetULeftThruster(AEmitter *newThruster) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetRightHatch(Attachable *newHatch) {
+    if (m_pRHatch && m_pRHatch->IsAttached()) { RemoveAndDeleteAttachable(m_pRHatch); }
     if (newHatch == nullptr) {
-        if (m_pRHatch && m_pRHatch->IsAttached()) { RemoveAttachable(m_pRHatch); }
         m_pRHatch = nullptr;
     } else {
-        if (m_pRHatch && m_pRHatch->IsAttached()) { RemoveAttachable(m_pRHatch); }
         m_pRHatch = newHatch;
         AddAttachable(newHatch);
 
@@ -868,11 +852,10 @@ void ACDropShip::SetRightHatch(Attachable *newHatch) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void ACDropShip::SetLeftHatch(Attachable *newHatch) {
+    if (m_pLHatch && m_pLHatch->IsAttached()) { RemoveAndDeleteAttachable(m_pLHatch); }
     if (newHatch == nullptr) {
-        if (m_pLHatch && m_pLHatch->IsAttached()) { RemoveAttachable(m_pLHatch); }
         m_pLHatch = nullptr;
     } else {
-        if (m_pLHatch && m_pLHatch->IsAttached()) { RemoveAttachable(m_pLHatch); }
         m_pLHatch = newHatch;
         AddAttachable(newHatch);
 

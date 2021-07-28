@@ -115,12 +115,6 @@ namespace RTE {
 		void SetShowForeignItems(bool newValue) { m_ShowForeignItems = newValue; }
 
 		/// <summary>
-		/// Whether randomized hat attachables will be attached to all AHuman actors.
-		/// </summary>
-		/// <returns>Whether random hats are enabled or not.</returns>
-		bool EnableHats() const { return m_EnableHats; }
-
-		/// <summary>
 		/// Gets whether the crab bomb effect is enabled or not.
 		/// </summary>
 		/// <returns>Whether the crab bomb effect is enabled or not. False means releasing whatever number of crabs will do nothing except release whatever number of crabs.</returns>
@@ -379,7 +373,6 @@ namespace RTE {
 		bool m_FlashOnBrainDamage; //!< Whether red flashes on brain damage are on or off.
 		bool m_BlipOnRevealUnseen; //!< Blip if unseen is revealed.
 		bool m_EndlessMetaGameMode; //!< Endless MetaGame mode.
-		bool m_EnableHats; //!< Whether randomized hat attachables will be attached to all AHuman actors.
 		bool m_EnableCrabBombs; //!< Whether all actors (except Brains and Doors) should be annihilated if a number exceeding the crab bomb threshold is released at once.
 		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.
 

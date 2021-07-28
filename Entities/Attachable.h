@@ -339,6 +339,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="inheritedRotAngleOffset">Thee new rotation angle offset for this Attachable.</param>
 		void SetInheritedRotAngleOffset(float inheritedRotAngleOffset) { m_InheritedRotAngleOffset = inheritedRotAngleOffset; }
+
+		/// <summary>
+		/// Gets whether or not this Attachable inherits its Frame from its parent, if attached.
+		/// </summary>
+		/// <returns>Whether or not this Attachable inherits its parent's Frame.</returns>
+		bool InheritsFrame() const { return m_InheritsFrame; }
+
+		/// <summary>
+		/// Sets whether or not this Attachable inherits its Frame from its parent, if attached.
+		/// </summary>
+		/// <param name="inheritsFrame">Whether or not to inherit its parent's Frame.</param>
+		void SetInheritsFrame(bool inheritsFrame) { m_InheritsFrame = inheritsFrame; }
 #pragma endregion
 
 #pragma region Collision Management
@@ -444,8 +456,8 @@ namespace RTE {
 		/// Removes the Attachable corresponding to the passed in UniqueID and sets its parent to nullptr. Does not add it to MovableMan or add break wounds.
 		/// </summary>
 		/// <param name="attachableUniqueID">The UniqueID of the Attachable to remove.</param>
-		/// <returns>False if the Attachable is invalid, otherwise true.</returns>
-		bool RemoveAttachable(long attachableUniqueID) final { return MOSRotating::RemoveAttachable(attachableUniqueID); }
+		/// <returns>A pointer to the removed Attachable. Ownership IS transferred!</returns>
+		Attachable * RemoveAttachable(long attachableUniqueID) final { return MOSRotating::RemoveAttachable(attachableUniqueID); }
 
 		/// <summary>
 		/// Removes the Attachable corresponding to the passed in UniqueID and sets its parent to nullptr. Optionally adds it to MovableMan and/or adds break wounds.
@@ -454,15 +466,15 @@ namespace RTE {
 		/// <param name="attachableUniqueID">The UniqueID of the Attachable to remove.</param>
 		/// <param name="addToMovableMan">Whether or not to add the Attachable to MovableMan once it has been removed.</param>
 		/// <param name="addBreakWounds">Whether or not to add break wounds to the removed Attachable and this Attachable.</param>
-		/// <returns>False if the Attachable is invalid, otherwise true.</returns>
-		bool RemoveAttachable(long attachableUniqueID, bool addToMovableMan, bool addBreakWounds) final { return MOSRotating::RemoveAttachable(attachableUniqueID, addToMovableMan, addBreakWounds); }
+		/// <returns>A pointer to the removed Attachable, if it wasn't added to MovableMan or nullptr if it was. Ownership IS transferred!</returns>
+		Attachable * RemoveAttachable(long attachableUniqueID, bool addToMovableMan, bool addBreakWounds) final { return MOSRotating::RemoveAttachable(attachableUniqueID, addToMovableMan, addBreakWounds); }
 
 		/// <summary>
 		/// Removes the passed in Attachable and sets its parent to nullptr. Does not add it to MovableMan or add break wounds.
 		/// </summary>
 		/// <param name="attachable">The Attachable to remove.</param>
-		/// <returns>False if the Attachable is invalid, otherwise true.</returns>
-		bool RemoveAttachable(Attachable *attachable) final { return MOSRotating::RemoveAttachable(attachable); }
+		/// <returns>A pointer to the removed Attachable. Ownership IS transferred!</returns>
+		Attachable * RemoveAttachable(Attachable *attachable) final { return MOSRotating::RemoveAttachable(attachable); }
 
 		/// <summary>
 		/// Removes the passed in Attachable and sets its parent to nullptr. Optionally adds it to MovableMan and/or adds break wounds.
@@ -471,8 +483,8 @@ namespace RTE {
 		/// <param name="attachable">The Attachable to remove.</param>
 		/// <param name="addToMovableMan">Whether or not to add the Attachable to MovableMan once it has been removed.</param>
 		/// <param name="addBreakWounds">Whether or not to add break wounds to the removed Attachable and this Attachable.</param>
-		/// <returns>False if the Attachable is invalid, otherwise true.</returns>
-		bool RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds) final;
+		/// <returns>A pointer to the removed Attachable, if it wasn't added to MovableMan or nullptr if it was. Ownership IS transferred!</returns>
+		Attachable * RemoveAttachable(Attachable *attachable, bool addToMovableMan, bool addBreakWounds) final;
 
 		/// <summary>
 		/// Adds the passed in wound AEmitter to the list of wounds and changes its parent offset to the passed in Vector.
@@ -531,6 +543,7 @@ namespace RTE {
 		int m_InheritsHFlipped; //!< Whether this Attachable should inherit its parent's HFlipped. Defaults to 1 (normal inheritance).
 		bool m_InheritsRotAngle; //!< Whether this Attachable should inherit its parent's RotAngle. Defaults to true.
 		float m_InheritedRotAngleOffset; //!< The offset by which this Attachable should be rotated when it's set to inherit its parent's rotation angle. Defaults to 0.
+		bool m_InheritsFrame; //!< Whether this Attachable should inherit its parent's Frame. Defaults to false.
 
 		long m_AtomSubgroupID; //!< The Atom IDs this' atoms will have when attached and added to a parent's AtomGroup.
 		bool m_CollidesWithTerrainWhileAttached; //!< Whether this attachable currently has terrain collisions enabled while it's attached to a parent.

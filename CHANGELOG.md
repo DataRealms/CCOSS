@@ -183,6 +183,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Wound limit gibbing logic has changed for `MOSRotating` (and all its subclasses), where objects will now gib when they reach their `GibWoundLimit` rather than when they surpass it. This allows for one-wound gibbing, which was previously infeasible.
+
 - `TDExplosive`s will no longer default to a looping animation when activated. Instead, they change to the second frame (i.e 001), similarly to `HDFirearm`. Set `SpriteAnimMode` to `4` if you wish to enable the looping active animation.
 
 - `AHuman` can now manually reload BG devices.

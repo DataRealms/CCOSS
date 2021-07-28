@@ -177,7 +177,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Console text can be set to use a monospace font through `Settings.ini` property `ConsoleUseMonospaceFont = 0/1` or through the in-game settings.
 
+- New `ThrownDevice` INI property `StrikerLever`, which is the same as `Shell` for `Round` in `HDFirearm`, but for grenades. Represents the lever/pin coming off when activated.
+
+- New `Arm` INI and Lua (R/W) property `ThrowStrength` which now calculates how far `ThrownDevice`s are thrown, which also takes to account the weight of the device. `ThrownDevice`s can still be defined `MaxThrowVel` and `MinThrowVel` to override this.
+
 ### Changed
+
+- `TDExplosive`s will no longer default to a looping animation when activated. Instead, they change to the second frame (i.e 001), similarly to `HDFirearm`. Set `SpriteAnimMode` to `4` if you wish to enable the looping active animation.
 
 - `AHuman` can now manually reload BG devices.
 

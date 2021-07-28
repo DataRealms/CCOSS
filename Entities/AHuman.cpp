@@ -3461,34 +3461,36 @@ void AHuman::Update()
 			pThrown = dynamic_cast<ThrownDevice *>(m_pFGArm->GetHeldMO());
 			if (pThrown) {
 				if (m_Controller.IsState(WEAPON_FIRE)) {
-					if (m_ArmsState != THROWING_PREP/* || m_ThrowTmr.GetElapsedSimTimeMS() > m_ThrowPrepTime*/) {
+					if (m_ArmsState != THROWING_PREP) {
 						m_ThrowTmr.Reset();
-						if (!pThrown->ActivatesWhenReleased()) {
-							pThrown->Activate();
-						}
+						if (!pThrown->ActivatesWhenReleased()) { pThrown->Activate(); }
 					}
 					m_ArmsState = THROWING_PREP;
-					m_pFGArm->ReachToward(m_Pos + pThrown->GetStartThrowOffset().GetXFlipped(m_HFlipped));
+					m_pFGArm->ReachToward(m_Pos + (m_pFGArm->GetParentOffset() + pThrown->GetStartThrowOffset().RadRotate(m_AimAngle + m_AngularVel * g_TimerMan.GetDeltaTimeSecs())).GetXFlipped(m_HFlipped) * m_Rotation);
 				} else if (m_ArmsState == THROWING_PREP) {
 					m_ArmsState = THROWING_RELEASE;
-
-					m_pFGArm->SetHandPos(m_Pos + pThrown->GetEndThrowOffset().GetXFlipped(m_HFlipped));
+					//TODO: figure out how to properly use EndThrowOffset, since it doesn't play much a role for just one frame
+					m_pFGArm->SetHandPos(m_Pos + (m_pFGArm->GetParentOffset() + pThrown->GetEndThrowOffset().RadRotate(m_AimAngle * GetFlipFactor())).GetXFlipped(m_HFlipped) * m_Rotation);
 
 					MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
 
-					if (pThrown->ActivatesWhenReleased()) {
-						pThrown->Activate();
-					}
 					if (pMO) {
-						pMO->SetPos(m_Pos + m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped) + Vector(m_HFlipped ? -15 : 15, -8));
+						pMO->SetPos(m_Pos + (m_pFGArm->GetParentOffset() + Vector(m_pFGArm->GetMaxLength(), -m_pFGArm->GetMaxLength() * 0.5F)).GetXFlipped(m_HFlipped).RadRotate(m_AimAngle * GetFlipFactor()) * m_Rotation);
 						float throwScalar = static_cast<float>(std::min(m_ThrowTmr.GetElapsedSimTimeMS(), static_cast<double>(m_ThrowPrepTime)) / m_ThrowPrepTime);
-						Vector tossVec(pThrown->GetMinThrowVel() + ((pThrown->GetMaxThrowVel() - pThrown->GetMinThrowVel()) * throwScalar), 0.5F * RandomNormalNum());
+						float maxThrowVel = pThrown->GetMaxThrowVel();
+						float minThrowVel = pThrown->GetMinThrowVel();
+						if (maxThrowVel == 0) {
+							// If throw velocity is decided by the arm and not by the device, then the mass of the device and angular velocity of the actor will be taken into account.
+							maxThrowVel = (m_pFGArm->GetThrowStrength() + std::abs(m_AngularVel * 0.5F)) / std::sqrt(std::abs(pMO->GetMass()) + 1.0F);
+							minThrowVel = maxThrowVel * 0.2F;
+						}
+						Vector tossVec(minThrowVel + (maxThrowVel - minThrowVel) * throwScalar, 0.5F * RandomNormalNum());
 						tossVec.RadRotate(m_AimAngle);
 						pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
-						pMO->SetAngularVel(5.0F * RandomNormalNum());
+						pMO->SetAngularVel(m_AngularVel + RandomNum(-5.0F, 2.5F) * GetFlipFactor());
+						pMO->SetRotAngle(m_AimAngle * GetFlipFactor());
 
 						if (pMO->IsHeldDevice()) {
-							// Set the grenade or whatever to ignore hits with same team
 							pMO->SetTeam(m_Team);
 							pMO->SetIgnoresTeamHits(true);
 							g_MovableMan.AddItem(pMO);
@@ -3501,6 +3503,7 @@ void AHuman::Update()
 						}
 						pMO = 0;
 					}
+					if (pThrown->ActivatesWhenReleased()) { pThrown->Activate(); }
 					m_ThrowTmr.Reset();
 				}
 			}

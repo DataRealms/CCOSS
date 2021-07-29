@@ -21,7 +21,7 @@ namespace RTE {
 		.def("Reset", &Entity::Reset)
 		.def("GetModuleAndPresetName", &Entity::GetModuleAndPresetName)
 		.def("AddToGroup", &Entity::AddToGroup)
-		.def("IsInGroup", (bool (Entity::*)(const std::string &))&Entity::IsInGroup);
+		.def("IsInGroup", &Entity::IsInGroup);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -536,6 +536,7 @@ namespace RTE {
 
 		.def("IsAttached", &Attachable::IsAttached)
 		.def("IsAttachedTo", &Attachable::IsAttachedTo)
+
 		.def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe1, luabind::adopt(luabind::return_value))
 		.def("RemoveFromParent", &RemoveAttachableFromParentLuaSafe2, luabind::adopt(luabind::return_value));
 	}

@@ -318,7 +318,7 @@ namespace RTE {
 		bool result = false;
 
 		// Push the script string onto the stack so we can execute it, and then actually try to run it. Assign the result to a dedicated temp global variable.
-		if (luaL_dostring(m_MasterState, (std::string("ExpressionResult = ") + expression + std::string(";")).c_str())) {
+		if (luaL_dostring(m_MasterState, std::string("ExpressionResult = " + expression + ";").c_str())) {
 			// Retrieve and pop the error message off the stack
 			m_LastError = std::string("When evaluating Lua expression: ") + lua_tostring(m_MasterState, -1);
 			lua_pop(m_MasterState, 1);

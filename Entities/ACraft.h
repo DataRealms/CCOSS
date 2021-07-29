@@ -462,6 +462,18 @@ enum
 
 	void DropAllInventory() override;
 
+	/// <summary>
+	/// Gets the mass of this ACraft's "New" inventory into which abducted objects get added into, before the hatches are closed.
+	/// </summary>
+	/// <returns>The mass of this ACraft's soon-to-become inventory.</returns>
+	float GetNewInventoryMass() const;
+
+	/// <summary>
+	/// Gets the mass of this ACraft, including the mass of its Attachables, wounds and inventory.
+	/// </summary>
+	/// <returns>The mass of this ACraft, its inventory and all its Attachables and wounds in Kilograms (kg).</returns>
+	float GetMass() const override { return Actor::GetMass() + GetNewInventoryMass(); }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          HasDelivered

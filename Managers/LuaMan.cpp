@@ -294,7 +294,6 @@ namespace RTE {
 		lua_pushcfunction(m_MasterState, &AddFileAndLineToError);
 		// Load the script file's contents onto the stack and then execute it with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
 		if (luaL_loadfile(m_MasterState, filePath.c_str()) || lua_pcall(m_MasterState, 0, LUA_MULTRET, -2)) {
-			// Retrieve the error message then pop it off the stack
 			m_LastError = lua_tostring(m_MasterState, -1);
 			lua_pop(m_MasterState, 1);
 			if (consoleErrors) {
@@ -319,7 +318,6 @@ namespace RTE {
 
 		// Push the script string onto the stack so we can execute it, and then actually try to run it. Assign the result to a dedicated temp global variable.
 		if (luaL_dostring(m_MasterState, std::string("ExpressionResult = " + expression + ";").c_str())) {
-			// Retrieve and pop the error message off the stack
 			m_LastError = std::string("When evaluating Lua expression: ") + lua_tostring(m_MasterState, -1);
 			lua_pop(m_MasterState, 1);
 			if (consoleErrors) {

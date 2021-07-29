@@ -527,7 +527,7 @@ bool Actor::IsPlayerControlled() const
 
 float Actor::GetTotalValue(int nativeModule, float foreignMult, float nativeMult) const
 {
-	float totalValue = (GetGoldValue(nativeModule, foreignMult, nativeMult) / 2) + ((GetGoldValue(nativeModule, foreignMult, nativeMult) / 2) * ((float)GetHealth() / (float)GetMaxHealth()));
+	float totalValue = (GetGoldValue(nativeModule, foreignMult, nativeMult) / 2) + ((GetGoldValue(nativeModule, foreignMult, nativeMult) / 2) * (GetHealth() / GetMaxHealth()));
     totalValue += GetGoldCarried();
 
     MOSprite *pItem = 0;

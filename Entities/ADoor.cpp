@@ -410,8 +410,12 @@ namespace RTE {
 			foundActor = sensor.SenseActor(m_Pos, m_Rotation, m_HFlipped, m_MOID);
 			if (foundActor && foundActor->IsControllable()) {
 				anySensorInput = true;
+
+				if (m_Team == Activity::NoTeam) {
+					OpenDoor();
+					break;
 				// If a sensor has found an enemy Actor, close the door and break so we don't accidentally open it for a friendly Actor.
-				if (foundActor->GetTeam() != m_Team) {
+				} else if (foundActor->GetTeam() != m_Team) {
 					CloseDoor();
 					break;
 				} else if (foundActor->GetTeam() == m_Team) {					

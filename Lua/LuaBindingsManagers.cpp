@@ -349,12 +349,9 @@ namespace RTE {
 		.def("KeyReleased", &UInputMan::KeyReleased)
 		.def("KeyHeld", &UInputMan::KeyHeld)
 		.def("WhichKeyHeld", &UInputMan::WhichKeyHeld)
-		.def("MouseButtonPressed", (bool (UInputMan::*)(int, int) const)&UInputMan::MouseButtonPressed)
-		.def("MouseButtonPressed", (bool (UInputMan::*)(int) const)&UInputMan::MouseButtonPressed)
-		.def("MouseButtonReleased", (bool (UInputMan::*)(int, int) const)&UInputMan::MouseButtonReleased)
-		.def("MouseButtonReleased", (bool (UInputMan::*)(int) const)&UInputMan::MouseButtonReleased)
-		.def("MouseButtonHeld", (bool (UInputMan::*)(int, int) const)&UInputMan::MouseButtonHeld)
-		.def("MouseButtonHeld", (bool (UInputMan::*)(int) const)&UInputMan::MouseButtonHeld)
+		.def("MouseButtonPressed", &UInputMan::MouseButtonPressed)
+		.def("MouseButtonReleased", &UInputMan::MouseButtonReleased)
+		.def("MouseButtonHeld", &UInputMan::MouseButtonHeld)
 		.def("MouseWheelMoved", &UInputMan::MouseWheelMoved)
 		.def("JoyButtonPressed", &UInputMan::JoyButtonPressed)
 		.def("JoyButtonReleased", &UInputMan::JoyButtonReleased)
@@ -380,6 +377,10 @@ namespace RTE {
 		.def("AnyJoyButtonPress", &UInputMan::AnyJoyButtonPress)
 		.def("AnyInput", &UInputMan::AnyKeyOrJoyInput)
 		.def("AnyPress", &UInputMan::AnyPress)
-		.def("AnyStartPress", &UInputMan::AnyStartPress);
+		.def("AnyStartPress", &UInputMan::AnyStartPress)
+
+		.def("MouseButtonPressed", &MouseButtonPressed)
+		.def("MouseButtonReleased", &MouseButtonReleased)
+		.def("MouseButtonHeld", &MouseButtonHeld);
 	}
 }

@@ -46,6 +46,27 @@ namespace RTE {
 	static double GetTicksPerSecond(const TimerMan &timerMan) {
 		return static_cast<double>(timerMan.GetTicksPerSecond());
 	}
+
+	/// <summary>
+	/// Gets whether a mouse button is being held down right now.
+	/// </summary>
+	/// <param name="whichButton">Which button to check for.</param>
+	/// <returns>Whether the mouse button is held or not.</returns>
+	static bool MouseButtonHeld(const UInputMan &uinputMan, int whichButton) { return uinputMan.MouseButtonHeld(Players::PlayerOne, whichButton); }
+
+	/// <summary>
+	/// Gets whether a mouse button was pressed between the last update and the one previous to it.
+	/// </summary>
+	/// <param name="whichButton">Which button to check for.</param>
+	/// <returns>Whether the mouse button is pressed or not.</returns>
+	static bool MouseButtonPressed(const UInputMan &uinputMan, int whichButton) { return uinputMan.MouseButtonPressed(Players::PlayerOne, whichButton); }
+
+	/// <summary>
+	/// Gets whether a mouse button was released between the last update and the one previous to it.
+	/// </summary>
+	/// <param name="whichButton">Which button to check for.</param>
+	/// <returns>Whether the mouse button is released or not.</returns>
+	static bool MouseButtonReleased(const UInputMan &uinputMan, int whichButton) { return uinputMan.MouseButtonReleased(Players::PlayerOne, whichButton); }
 #pragma endregion
 
 #pragma region Misc Lua Adapters

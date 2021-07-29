@@ -2336,7 +2336,8 @@ int LuaMan::Initialize() {
 
         class_<SettingsMan>("SettingsManager")
             .property("PrintDebugInfo", &SettingsMan::PrintDebugInfo, &SettingsMan::SetPrintDebugInfo)
-			.property("RecommendedMOIDCount", &SettingsMan::RecommendedMOIDCount),
+			.property("RecommendedMOIDCount", &SettingsMan::RecommendedMOIDCount)
+			.property("ShowEnemyHUD", &SettingsMan::ShowEnemyHUD),
 
         // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
         def("DeleteEntity", &DeleteEntity, adopt(_1)),

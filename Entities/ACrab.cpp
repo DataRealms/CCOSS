@@ -2162,19 +2162,16 @@ void ACrab::Update()
 			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * 2.0F, m_JetTimeTotal);
         }
 
-        // Direct the jetpack nozzle according to movement stick if analog input is present
-        if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1F)
-        {
-			//To-do: test whether this works properly
-			float jetAngle = (m_Controller.GetAnalogMove().GetAbsRadAngle() - c_PI);
-			if (jetAngle > c_PI) { jetAngle -= c_TwoPI; }
-			m_pJetpack->SetEmitAngle(FacingAngle(jetAngle * m_JetAngleRange));
-        }
-        // Or just use the aim angle if we're getting digital input
-        else {
+		float maxAngle = c_HalfPI * m_JetAngleRange;
+		// Direct the jetpack nozzle according to movement stick if analog input is present.
+		if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1F) {
+			float jetAngle = std::clamp(m_Controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, -maxAngle, maxAngle);
+			m_pJetpack->SetEmitAngle(FacingAngle(jetAngle - c_HalfPI));
+		// Use the aim angle if we're getting digital input.
+		} else {
 			// Halve the jet angle when looking downwards so the actor isn't forced to go sideways (To-do: don't hardcode this value?)
 			float jetAngle = m_AimAngle > 0 ? m_AimAngle * m_JetAngleRange : -m_AimAngle * m_JetAngleRange * 0.5F;
-			jetAngle -= (c_HalfPI * m_JetAngleRange + c_HalfPI);
+			jetAngle -= (maxAngle + c_HalfPI);
             // Don't need to use FacingAngle on this becuase it's already applied to the AimAngle since last update.
             m_pJetpack->SetEmitAngle(jetAngle);
         }

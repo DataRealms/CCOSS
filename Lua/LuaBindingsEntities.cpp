@@ -1077,6 +1077,7 @@ namespace RTE {
 		.def("SetGoldValue", &SceneObject::SetGoldValue)
 		.def("GetGoldValueString", &SceneObject::GetGoldValueString)
 		.def("GetTotalValue", &SceneObject::GetTotalValue)
+
 		.def("GetTotalValue", &GetTotalValue);
 	}
 

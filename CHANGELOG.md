@@ -181,6 +181,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Arm` INI and Lua (R/W) property `ThrowStrength` which now calculates how far `ThrownDevice`s are thrown, which also takes to account the weight of the device. `ThrownDevice`s can still be defined `MaxThrowVel` and `MinThrowVel` to override this.
 
+- New `Settings.ini` property `DisableLuaJIT = 0/1` to disable LuaJIT (MoonJIT) to (potentially) improve performance on machines that seem to struggle with it.
+
 ### Changed
 
 - Wound limit gibbing logic has changed for `MOSRotating` (and all its subclasses), where objects will now gib when they reach their `GibWoundLimit` rather than when they surpass it. This allows for one-wound gibbing, which was previously infeasible.

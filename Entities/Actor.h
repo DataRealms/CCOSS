@@ -36,7 +36,7 @@ class PieMenuGUI;
 class Actor:
     public MOSRotating
 {
-    friend class LuaMan;
+    friend struct EntityLuaBindings;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
@@ -279,13 +279,6 @@ ClassInfoGetters
 // Return value:    The current value of this Actor and all his carried assets.
 
 	float GetTotalValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const override;
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTotalValueOld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     DOES THE SAME THING AS GetTotalValue, USED ONLY TO PRESERVE LUA COMPATIBILITY
-
-	float GetTotalValueOld(int nativeModule = 0, float foreignMult = 1.0) const override { return GetTotalValue(nativeModule, foreignMult, 1.0); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

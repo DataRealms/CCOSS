@@ -139,12 +139,6 @@ namespace RTE {
 		long long GetTicksPerSecond() const { return m_TicksPerSecond; }
 
 		/// <summary>
-		/// Gets the number of ticks per second. Lua can't handle int64 (or long long apparently) so we'll expose this specialized function.
-		/// </summary>
-		/// <returns>The number of ticks per second.</returns>
-		double GetTicksPerSecondInLua() const { return static_cast<double>(m_TicksPerSecond); }
-
-		/// <summary>
 		/// Gets a current global real time measured in ticks from the start of the simulation up to the last Update of this TimerMan. Use TickFrequency to determine how many ticks go in a second.
 		/// </summary>
 		/// <returns>The number of ticks passed since the simulation started.</returns>

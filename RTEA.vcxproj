@@ -116,7 +116,7 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_BUILD;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -164,7 +164,7 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_BUILD;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -211,7 +211,7 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -259,7 +259,7 @@
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUGMODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -309,7 +309,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -367,7 +367,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -425,7 +425,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -481,7 +481,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\RakNet;$(ProjectDir)external\include\LZ4;$(ProjectDir)external\include\fmod;$(ProjectDir)external\include\luabind</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -542,6 +542,10 @@
     <ClInclude Include="GUI\GUIInterface.h" />
     <ClInclude Include="GUI\GUIReader.h" />
     <ClInclude Include="GUI\GUISound.h" />
+    <ClInclude Include="Lua\LuaAdapters.h" />
+    <ClInclude Include="Lua\LuaBindDefinitions.h" />
+    <ClInclude Include="Lua\LuaBindingRegisterDefinitions.h" />
+    <ClInclude Include="Lua\LuaAdaptersEntities.h" />
     <ClInclude Include="GUI\GUIWriter.h" />
     <ClInclude Include="Managers\MenuMan.h" />
     <ClInclude Include="Managers\NetworkClient.h" />
@@ -711,6 +715,114 @@
     <ClCompile Include="GUI\GUIReader.cpp" />
     <ClCompile Include="GUI\GUISound.cpp" />
     <ClCompile Include="GUI\GUIWriter.cpp" />
+    <ClCompile Include="Lua\LuaBindingsActivities.cpp">
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">false</ConformanceMode>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsEntities.cpp">
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">false</ConformanceMode>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsGUI.cpp">
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">false</ConformanceMode>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsManagers.cpp">
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">false</ConformanceMode>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsMisc.cpp">
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">false</ConformanceMode>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsSystem.cpp">
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Final|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">false</ConformanceMode>
+      <ConformanceMode Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">false</ConformanceMode>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Managers\MenuMan.cpp" />
     <ClCompile Include="Managers\NetworkClient.cpp" />
     <ClCompile Include="Managers\NetworkServer.cpp" />

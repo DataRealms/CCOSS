@@ -11,7 +11,7 @@ namespace RTE {
 	/// A set of sounds, and their selection data.
 	/// </summary>
 	class SoundSet : public Serializable {
-		friend class LuaMan;
+		friend struct EntityLuaBindings;
 
 	public:
 

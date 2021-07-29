@@ -146,6 +146,8 @@ namespace RTE {
 			reader >> g_ActivityMan.m_DefaultActivityName;
 		} else if (propName == "DefaultSceneName") {
 			reader >> g_SceneMan.m_DefaultSceneName;
+		} else if (propName == "DisableLuaJIT") {
+			reader >> g_LuaMan.m_DisableLuaJIT;
 		} else if (propName == "RecommendedMOIDCount") {
 			reader >> m_RecommendedMOIDCount;
 		} else if (propName == "EnableParticleSettling") {
@@ -313,6 +315,7 @@ namespace RTE {
 		writer.NewDivider(false);
 		writer.NewLineString("// Engine Settings", false);
 		writer.NewLine(false);
+		writer.NewPropertyWithValue("DisableLuaJIT", g_LuaMan.m_DisableLuaJIT);
 		writer.NewPropertyWithValue("RecommendedMOIDCount", m_RecommendedMOIDCount);
 		writer.NewPropertyWithValue("EnableParticleSettling", g_MovableMan.m_SettlingEnabled);
 		writer.NewPropertyWithValue("EnableMOSubtraction", g_MovableMan.m_MOSubtractionEnabled);

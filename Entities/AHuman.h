@@ -37,6 +37,7 @@ class AEmitter;
 class AHuman:
     public Actor
 {
+	friend struct EntityLuaBindings;
 
 
 enum UpperBodyState
@@ -179,12 +180,6 @@ ClassInfoGetters
 
 	float GetTotalValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const override;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTotalValueOld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     DOES THE SAME THING AS GetTotalValue, USED ONLY TO PRESERVE LUA COMPATIBILITY
-
-	float GetTotalValueOld(int nativeModule = 0, float foreignMult = 1.0) const override { return GetTotalValue(nativeModule, foreignMult, 1.0); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          HasObject

@@ -155,6 +155,10 @@ namespace RTE {
 		luaSelfObject->GibThis();
 	}
 
+	static float GetTotalValue(const SceneObject *luaSelfObject, int nativeModule, float foreignMult) {
+		return luaSelfObject->GetTotalValue(nativeModule, foreignMult, 1.0F);
+	}
+
 	LuaEntityCreate(SoundContainer);
 	LuaEntityCreate(Attachable);
 	LuaEntityCreate(Arm);

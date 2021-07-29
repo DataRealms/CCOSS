@@ -1069,13 +1069,14 @@ namespace RTE {
 		.property("PlacedByPlayer", &SceneObject::GetPlacedByPlayer, &SceneObject::SetPlacedByPlayer)
 		.property("IsBuyable", &SceneObject::IsBuyable)
 
+		.def("IsOnScenePoint", &SceneObject::IsOnScenePoint)
 		.def("GetGoldValue", &SceneObject::GetGoldValueOld)
 		.def("GetGoldValue", &SceneObject::GetGoldValue)
 		.def("SetGoldValue", &SceneObject::SetGoldValue)
 		.def("GetGoldValueString", &SceneObject::GetGoldValueString)
-		.def("GetTotalValue", &SceneObject::GetTotalValueOld)
 		.def("GetTotalValue", &SceneObject::GetTotalValue)
-		.def("IsOnScenePoint", &SceneObject::IsOnScenePoint);
+
+		.def("GetTotalValue", &GetTotalValue);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

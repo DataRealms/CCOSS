@@ -25,6 +25,9 @@
     <Filter Include="Activities">
       <UniqueIdentifier>{4d361173-4982-4e1b-8967-8ab53105dc7f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lua">
+      <UniqueIdentifier>{ac503e37-087b-40b8-b1b8-427ab55a4f9e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="System\Box.h">
@@ -519,6 +522,12 @@
     <ClInclude Include="Menus\InventoryMenuGUI.h">
       <Filter>Menus</Filter>
     </ClInclude>
+    <ClInclude Include="Lua\LuaBindDefinitions.h">
+      <Filter>Lua</Filter>
+    </ClInclude>
+    <ClInclude Include="Lua\LuaBindingRegisterDefinitions.h">
+      <Filter>Lua</Filter>
+    </ClInclude>
     <ClInclude Include="GUI\GUIInterface.h">
       <Filter>GUI</Filter>
     </ClInclude>
@@ -527,6 +536,12 @@
     </ClInclude>
     <ClInclude Include="GUI\GUIWriter.h">
       <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Lua\LuaAdaptersEntities.h">
+      <Filter>Lua</Filter>
+    </ClInclude>
+    <ClInclude Include="Lua\LuaAdapters.h">
+      <Filter>Lua</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1013,6 +1028,24 @@
     </ClCompile>
     <ClCompile Include="GUI\GUIWriter.cpp">
       <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsMisc.cpp">
+      <Filter>Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsActivities.cpp">
+      <Filter>Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsEntities.cpp">
+      <Filter>Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsGUI.cpp">
+      <Filter>Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsManagers.cpp">
+      <Filter>Lua</Filter>
+    </ClCompile>
+    <ClCompile Include="Lua\LuaBindingsSystem.cpp">
+      <Filter>Lua</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

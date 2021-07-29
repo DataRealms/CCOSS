@@ -38,6 +38,7 @@ class Leg;
 class ACRocket:
     public ACraft
 {
+	friend struct EntityLuaBindings;
 
 enum LandingGearState
 {

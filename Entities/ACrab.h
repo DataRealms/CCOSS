@@ -36,6 +36,7 @@ class AEmitter;
 
 class ACrab :
 	public Actor {
+	friend struct EntityLuaBindings;
 
 
 	enum MovementState {

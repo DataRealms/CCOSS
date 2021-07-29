@@ -96,6 +96,7 @@ source_inc_dirs = include_directories(
   'Activities',
   'Entities',
   'GUI',
+  'Lua',
   'Managers',
   'Menus',
   'System')
@@ -103,6 +104,7 @@ source_inc_dirs = include_directories(
 subdir('Activities')
 subdir('Entities')
 subdir('GUI')
+subdir('Lua')
 subdir('Managers')
 subdir('Menus')
 subdir('System')

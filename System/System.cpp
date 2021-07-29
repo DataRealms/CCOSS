@@ -61,7 +61,6 @@ namespace RTE {
 			}
 			return false;
 		}
-
 		return std::filesystem::exists(pathToCheck);
 	}
 

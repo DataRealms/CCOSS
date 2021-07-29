@@ -54,7 +54,7 @@ class MetaMan:
     public Singleton<MetaMan>,
     public Serializable
 {
-    friend class LuaMan;
+    friend struct ManagerLuaBindings;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

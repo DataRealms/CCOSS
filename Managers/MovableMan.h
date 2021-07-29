@@ -62,7 +62,7 @@ struct AlarmEvent
 
 class MovableMan : public Singleton<MovableMan>, public Serializable {
 	friend class SettingsMan;
-    friend class LuaMan;
+    friend struct ManagerLuaBindings;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

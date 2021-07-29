@@ -39,7 +39,7 @@ class Scene:
     public Entity
 {
 
-	friend class LuaMan;
+	friend struct EntityLuaBindings;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations

@@ -328,11 +328,9 @@ namespace RTE {
 			}
 			return false;
 		}
-		// Get the result var onto the stack so we can check it
+		// Put the result of the expression on the lua stack and check its value. Need to pop it off the stack afterwards so it leaves the stack unchanged.
 		lua_getglobal(m_MasterState, "ExpressionResult");
-		// Now report if it is nil/null or not
 		result = lua_toboolean(m_MasterState, -1);
-		// Pop the result var so this operation is balanced and leaves the stack as it was
 		lua_pop(m_MasterState, 1);
 
 		return result;

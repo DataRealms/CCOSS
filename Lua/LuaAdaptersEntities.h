@@ -132,7 +132,7 @@ namespace RTE {
 		selfObject->SetPresetName(presetName, true);
 	}
 
-	// These methods are needed to specially handling removing attachables with Lua in order to avoid memory leaks. They have silly names cause LuaBind otherwise makes it difficult to pass values to them properly.
+	// These methods are needed to specially handle removing attachables with Lua in order to avoid memory leaks. They have silly names cause LuaBind otherwise makes it difficult to pass values to them properly.
 	// Eventually RemoveAttachable should return the removed attachable, making this whole thing no longer unsafe and these methods unnecessary (there's a TODO in MOSRotating.h for it).
 	static Attachable * RemoveAttachableFromParentLuaSafe1(Attachable *luaSelfObject) {
 		if (luaSelfObject->IsAttached()) {

@@ -21,7 +21,7 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a LuaMan object in system memory. Create() should be called before using the object.
+		/// Constructor method used to instantiate a LuaMan object in system memory. Initialize() should be called before using the object.
 		/// </summary>
 		LuaMan() { Clear(); }
 
@@ -112,7 +112,7 @@ namespace RTE {
 
 #pragma region
 		/// <summary>
-		/// Gets the result of an arbitrary expression in Lua as evaluating to true or false.
+		/// Gets whether the given Lua expression evaluates to true or false.
 		/// </summary>
 		/// <param name="expression">The string with the expression to evaluate.</param>
 		/// <param name="consoleErrors">Whether to report any errors to the console immediately.</param>
@@ -156,7 +156,7 @@ namespace RTE {
 		std::string GetLastError() const { return m_LastError; }
 
 		/// <summary>
-		/// Clears out all the error string to "". Will cause ErrorExists to return true again until RunScriptString is called.
+		/// Clears the last error message, so the Lua state will not be considered to have any errors until the next time there's a script error.
 		/// </summary>
 		void ClearErrors() { m_LastError.clear(); }
 #pragma endregion
@@ -216,7 +216,7 @@ namespace RTE {
 
 		lua_State *m_MasterState; //!< The master parent script state.
 
-		bool m_DisableLuaJIT; //!< Whether to disable LuaJIT or not. Disabling will skip loading the JIT library entirely as just setting 'jit.off()` seems to have no visible effect.
+		bool m_DisableLuaJIT; //!< Whether to disable LuaJIT or not. Disabling will skip loading the JIT library entirely as just setting 'jit.off()' seems to have no visible effect.
 
 		std::string m_LastError; //!< Description of the last error that occurred in the script execution.
 

@@ -391,30 +391,18 @@ namespace RTE {
 			}
 		}
 		if (fileIndex == -1) {
-			g_ConsoleMan.PrintString("Error: Can't open file, maximum number of files already open.");
+			g_ConsoleMan.PrintString("ERROR: Can't open file, maximum number of files already open.");
 			return -1;
 		}
 
 		std::string fullPath = System::GetWorkingDirectory() + fileName;
-
-		// Do not open paths with '..'
-		if (fullPath.find("..") != std::string::npos) {
-			return -1;
+		if ((fullPath.find("..") == std::string::npos) && (System::PathExistsCaseSensitive(std::filesystem::path(fileName).lexically_normal().generic_string())) && (fullPath.find(System::GetModulePackageExtension()) != std::string::npos)) {
+			if (FILE *file = fopen(fullPath.c_str(), accessMode.c_str())) {
+				m_OpenedFiles.at(fileIndex) = file;
+				return fileIndex;
+			}
 		}
-		// Do not open paths that aren't written correctly
-		if (!System::PathExistsCaseSensitive(std::filesystem::path(fileName).lexically_normal().generic_string())) {
-			return -1;
-		}
-		// Allow to edit files only inside .rte folders
-		if (fullPath.find(System::GetModulePackageExtension()) == std::string::npos) {
-			return -1;
-		}
-
-		if (FILE * file = fopen(fullPath.c_str(), accessMode.c_str())) {
-			m_OpenedFiles.at(fileIndex) = file;
-			return fileIndex;
-		}
-		g_ConsoleMan.PrintString("Error: Failed to open file " + fullPath);
+		g_ConsoleMan.PrintString("ERROR: Failed to open file " + fullPath);
 		return -1;
 	}
 
@@ -440,10 +428,13 @@ namespace RTE {
 	std::string LuaMan::FileReadLine(int fileIndex) {
 		if (fileIndex > -1 && fileIndex < c_MaxOpenFiles && m_OpenedFiles.at(fileIndex)) {
 			char buf[4096];
-			fgets(buf, 4095, m_OpenedFiles.at(fileIndex));
-			return (std::string(buf));
+			if (fgets(buf, sizeof(buf), m_OpenedFiles.at(fileIndex)) != nullptr) {
+				return buf;
+			}
+			g_ConsoleMan.PrintString("ERROR: " + std::string(FileEOF(fileIndex) ? "Tried to read past EOF." : "Failed to read from file."));
+		} else {
+			g_ConsoleMan.PrintString("ERROR: Tried to read an invalid or closed file.");
 		}
-		g_ConsoleMan.PrintString("Error: Tried to read a closed file, or read past EOF.");
 		return "";
 	}
 
@@ -451,19 +442,22 @@ namespace RTE {
 
 	void LuaMan::FileWriteLine(int fileIndex, const std::string &line) {
 		if (fileIndex > -1 && fileIndex < c_MaxOpenFiles && m_OpenedFiles.at(fileIndex)) {
-			fputs(line.c_str(), m_OpenedFiles.at(fileIndex));
+			if (fputs(line.c_str(), m_OpenedFiles.at(fileIndex)) == EOF) {
+				g_ConsoleMan.PrintString("ERROR: Failed to write to file. File might have been opened without writing permissions or is corrupt.");
+			}
 		} else {
-			g_ConsoleMan.PrintString("Error: Tried to write to a closed file.");
+			g_ConsoleMan.PrintString("ERROR: Tried to write to an invalid or closed file.");
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LuaMan::FileEOF(int fileIndex) {
-		if (fileIndex > -1 && fileIndex < c_MaxOpenFiles && m_OpenedFiles.at(fileIndex) && !feof(m_OpenedFiles.at(fileIndex))) {
-			return false;
+		if (fileIndex > -1 && fileIndex < c_MaxOpenFiles && m_OpenedFiles.at(fileIndex)) {
+			return feof(m_OpenedFiles.at(fileIndex));
 		}
-		return true;
+		g_ConsoleMan.PrintString("ERROR: Tried to check EOF for an invalid or closed file.");
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

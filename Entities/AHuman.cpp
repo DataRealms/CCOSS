@@ -3559,7 +3559,7 @@ void AHuman::Update()
 	if (m_Controller.IsState(WEAPON_DROP) && m_Status != INACTIVE) {
 		if (m_pFGArm && m_pFGArm->HoldsSomething()) {
 			if (MovableObject *pMO = m_pFGArm->ReleaseHeldMO()) {
-				pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
+				pMO->SetPos(m_Pos + Vector(10.0F * GetFlipFactor(), -8.0F));
 				Vector tossVec(RandomNum(3.0F, 6.0F), RandomNum(-3.0F, -1.5F));
 				tossVec.RadRotate(m_AimAngle);
 				pMO->SetVel(m_Vel * 0.5F + tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
@@ -3580,7 +3580,7 @@ void AHuman::Update()
 			}
 		} else if (m_pBGArm) {
 			if (MovableObject *pMO = m_pBGArm->ReleaseHeldMO()) {
-				pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
+				pMO->SetPos(m_Pos + Vector(10.0F * GetFlipFactor(), -8.0F));
 				Vector tossVec(RandomNum(3.0F, 6.0F), RandomNum(-3.0F, -1.5F));
 				tossVec.RadRotate(m_AimAngle);
 				pMO->SetVel(m_Vel * 0.5F + tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
@@ -4044,9 +4044,8 @@ void AHuman::Update()
     if (m_pHead && m_pHead->IsAttached()) {
         float toRotate = 0;
         // Only rotate the head to match the aim angle if body is stable and upright
-        if (m_Status == STABLE && std::fabs(m_Rotation.GetRadAngle()) < (c_HalfPI + c_QuarterPI)) {
-            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((m_AimAngle * static_cast<float>(GetFlipFactor())) * m_LookToAimRatio + m_Rotation.GetRadAngle() * (0.9F - m_LookToAimRatio));
-            toRotate *= 0.15F;
+        if (m_Status == STABLE && std::abs(rot) < (c_HalfPI + c_QuarterPI)) {
+            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((m_AimAngle * GetFlipFactor()) * m_LookToAimRatio + rot * (0.9F - m_LookToAimRatio)) * 0.15F;
         }
         // If dying upright, make head slump forward or back depending on body lean
 // TODO: Doesn't work too well, but probably could
@@ -4083,7 +4082,7 @@ void AHuman::Update()
 
 			affectingBodyAngle = std::abs(std::sin(rot)) * rot * m_FGArmFlailScalar * (1.0F - aimScalar);
 		}
-		m_pFGArm->SetRotAngle(affectingBodyAngle + m_AimAngle * static_cast<float>(GetFlipFactor()));
+		m_pFGArm->SetRotAngle(affectingBodyAngle + m_AimAngle * GetFlipFactor());
 
         if (m_Status == STABLE) {
             if (m_ArmClimbing[FGROUND]) {
@@ -4099,7 +4098,7 @@ void AHuman::Update()
     }
 
     if (m_pBGArm) {
-		m_pBGArm->SetRotAngle(std::abs(std::sin(rot)) * rot * m_BGArmFlailScalar + (m_AimAngle * static_cast<float>(GetFlipFactor())));
+		m_pBGArm->SetRotAngle(std::abs(std::sin(rot)) * rot * m_BGArmFlailScalar + (m_AimAngle * GetFlipFactor()));
         if (m_Status == STABLE) { 
 			if (m_ArmClimbing[BGROUND]) {
 				// Can't climb or crawl with the shield
@@ -4289,8 +4288,8 @@ void AHuman::Update()
             }
 		} else {
 			// Upright body posture
-			float rotDiff = rot - (GetRotAngleTarget(m_MoveState) * (m_AimAngle > 0 ? 1 - (m_AimAngle / c_HalfPI) : 1) * static_cast<float>(GetFlipFactor()));
-			m_AngularVel = m_AngularVel * (0.98F - 0.08F * (m_Health / m_MaxHealth)) - (rotDiff * 0.5F);
+			float rotDiff = rot - (GetRotAngleTarget(m_MoveState) * (m_AimAngle > 0 ? 1.0F - (m_AimAngle / c_HalfPI) : 1.0F) * GetFlipFactor());
+			m_AngularVel = m_AngularVel * (0.98F - 0.06F * (m_Health / m_MaxHealth)) - (rotDiff * 0.5F);
 		}
     }
     // Keel over
@@ -4371,16 +4370,14 @@ void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos
 		//colors[index].SetRGB(255 - index * 3, 225 - index * 20, index);
 	}
 
-    Vector outOffset(m_HFlipped ? -15 : 15, -4);
-//    Matrix aimMatrix(m_AimAngle);
-//    aimMatrix.SetXFlipped(m_HFlipped);
+    Vector outOffset(15.0F * GetFlipFactor(), -5.0F);
 
     acquire_bitmap(pTargetBitmap);
 
     for (int i = 0; i < pointCount * amount; ++i) {
         points[i].FlipX(m_HFlipped);
         points[i] += outOffset;
-        points[i].RadRotate(m_HFlipped ? -m_AimAngle : m_AimAngle);
+        points[i].RadRotate((m_AimAngle * GetFlipFactor()) + m_Rotation.GetRadAngle());
         points[i] += m_Pos;
         if (m_pFGArm && m_pFGArm->IsAttached())
             points[i] += m_pFGArm->GetParentOffset();

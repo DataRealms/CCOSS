@@ -451,7 +451,7 @@ namespace RTE {
 
 		if (m_DoorState == OPEN || m_DoorState == CLOSED) {
 			m_Door->SetParentOffset(endOffset);
-			m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * static_cast<float>(GetFlipFactor())));
+			m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * GetFlipFactor()));
 		} else if (m_DoorState == OPENING || m_DoorState == CLOSING) {
 			if (m_DoorMoveSound && !m_DoorMoveSound->IsBeingPlayed()) { m_DoorMoveSound->Play(m_Pos); }
 
@@ -459,7 +459,7 @@ namespace RTE {
 				m_ResetToDefaultStateTimer.Reset();
 
 				m_Door->SetParentOffset(endOffset);
-				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * static_cast<float>(GetFlipFactor())));
+				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * GetFlipFactor()));
 
 				if (m_DoorMoveSound) { m_DoorMoveSound->Stop(); }
 				if (m_DoorMoveEndSound) { m_DoorMoveEndSound->Play(m_Pos); }

@@ -203,7 +203,7 @@ namespace RTE {
 			// This is negative because it's a correction, the bitmap needs to rotate back to align the ankle with where it's supposed to be in the sprite.
 			extraRotation -= (m_ExtendedOffset.GetAbsRadAngle() - m_ContractedOffset.GetAbsRadAngle()) * extraRotationRatio;
 
-			m_Rotation.SetRadAngle(m_Rotation.GetRadAngle() + extraRotation * static_cast<float>(GetFlipFactor()));
+			m_Rotation.SetRadAngle(m_Rotation.GetRadAngle() + extraRotation * GetFlipFactor());
 			m_AngularVel = 0.0F;
 		}
 	}

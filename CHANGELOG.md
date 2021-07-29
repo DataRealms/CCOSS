@@ -177,9 +177,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Console text can be set to use a monospace font through `Settings.ini` property `ConsoleUseMonospaceFont = 0/1` or through the in-game settings.
 
+- New `ThrownDevice` INI property `StrikerLever`, which is the same as `Shell` for `Round` in `HDFirearm`, but for grenades. Represents the lever/pin coming off when activated.
+
+- New `Arm` INI and Lua (R/W) property `ThrowStrength` which now calculates how far `ThrownDevice`s are thrown, which also takes to account the weight of the device. `ThrownDevice`s can still be defined `MaxThrowVel` and `MinThrowVel` to override this.
+
 - New `Settings.ini` property `DisableLuaJIT = 0/1` to disable LuaJIT (MoonJIT) to (potentially) improve performance on machines that seem to struggle with it.
 
 ### Changed
+
+- Wound limit gibbing logic has changed for `MOSRotating` (and all its subclasses), where objects will now gib when they reach their `GibWoundLimit` rather than when they surpass it. This allows for one-wound gibbing, which was previously infeasible.
+
+- `TDExplosive`s will no longer default to a looping animation when activated. Instead, they change to the second frame (i.e 001), similarly to `HDFirearm`. Set `SpriteAnimMode` to `4` if you wish to enable the looping active animation.
 
 - `AHuman` can now manually reload BG devices.
 
@@ -340,6 +348,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Vote counts to end a multiplayer activity now display as intended. 
 
 - Fixed bug where choosing `-Random-` as a player's tech and pressing start game had a 1 in (number of techs + 1) chance to crash the game.
+
+- Console error spam will no longer cripple performance over time.
 
 ### Removed
 

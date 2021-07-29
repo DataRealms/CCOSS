@@ -133,6 +133,7 @@ namespace RTE {
 		float m_MaxThrowVel; //!< The maximum throw velocity this gets when thrown.
 		long m_TriggerDelay; //!< Time in millisecs from the time of being thrown to triggering whatever it is that this ThrownDevice does.
 		bool m_ActivatesWhenReleased; //!< Whether this activates when its throw is started, or waits until it is released from the arm that is throwing it.
+		const MovableObject *m_StrikerLever; //!< Striker lever particle MovableObject preset instance.
 
 	private:
 

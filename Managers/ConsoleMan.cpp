@@ -26,11 +26,12 @@ namespace RTE {
 		m_ParentBox = nullptr;
 		m_ConsoleText = nullptr;
 		m_InputTextBox = nullptr;
+		m_ConsoleTextMaxNumLines = 10;
+		m_OutputLog.clear();
 		m_InputLog.clear();
 		m_InputLogPosition = m_InputLog.begin();
 		m_LastInputString.clear();
 		m_LastLogMove = 0;
-		m_ConsoleTextBackup.clear();
 
 		m_ConsoleUseMonospaceFont = false;
 	}
@@ -65,15 +66,7 @@ namespace RTE {
 		m_ParentBox->SetEnabled(false);
 		m_ParentBox->SetVisible(false);
 
-		if (!g_FrameMan.ResolutionChanged()) {
-			m_ConsoleText->SetText("- RTE Lua Console -\nSee the Data Realms Wiki for commands: http://www.datarealms.com/wiki/\nPress F1 for a list of helpful shortcuts\n-------------------------------------");
-
-			m_InputLogPosition = m_InputLog.begin();
-			m_LastLogMove = 0;
-		} else {
-			m_ConsoleText->SetText(m_ConsoleTextBackup);
-			m_ConsoleTextBackup.clear();
-		}
+		if (!g_FrameMan.ResolutionChanged()) { m_OutputLog.emplace_back("- RTE Lua Console -\nSee the Data Realms Wiki for commands: http://www.datarealms.com/wiki/\nPress F1 for a list of helpful shortcuts\n-------------------------------------"); }
 
 		return 0;
 	}
@@ -81,11 +74,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ConsoleMan::Destroy() {
-		if (g_FrameMan.ResolutionChanged()) {
-			m_ConsoleTextBackup = m_ConsoleText->GetText();
-		} else {
-			SaveAllText("LogConsole.txt");
-		}
+		if (!g_FrameMan.ResolutionChanged()) { SaveAllText("LogConsole.txt"); }
 
 		delete m_GUIControlManager;
 		delete m_GUIInput;
@@ -136,6 +125,7 @@ namespace RTE {
 
 		m_ParentBox->SetSize(g_FrameMan.GetResX(), g_FrameMan.GetResY() * m_ConsoleScreenRatio);
 		m_ConsoleText->SetSize(m_ParentBox->GetWidth() - 4, m_ParentBox->GetHeight() - m_InputTextBox->GetHeight() - 2);
+		m_ConsoleTextMaxNumLines = 5 + (m_ConsoleText->GetHeight() / m_GUIControlManager->GetSkin()->GetFont("FontSmall.png")->GetFontHeight());
 		m_InputTextBox->SetPositionRel(m_InputTextBox->GetRelXPos(), m_ConsoleText->GetHeight());
 		m_InputTextBox->Resize(m_ParentBox->GetWidth() - 3, m_InputTextBox->GetHeight());
 	}
@@ -158,7 +148,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::SaveLoadWarningLog(const std::string &filePath) const {
+	void ConsoleMan::SaveLoadWarningLog(const std::string &filePath) {
 		Writer logWriter(filePath.c_str());
 		if (logWriter.WriterOK()) {
 			logWriter << "// Warnings produced during loading:";
@@ -187,10 +177,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::SaveAllText(const std::string &filePath) const {
+	void ConsoleMan::SaveAllText(const std::string &filePath) {
 		Writer logWriter(filePath.c_str());
 		if (logWriter.WriterOK()) {
-			logWriter << m_ConsoleText->GetText();
+			for (const std::string &loggedString : m_OutputLog) {
+				logWriter << loggedString;
+			}
 			PrintString("SYSTEM: Entire console contents saved to " + filePath);
 		}
 	}
@@ -200,13 +192,13 @@ namespace RTE {
 	void ConsoleMan::ClearLog() {
 		m_InputLog.clear();
 		m_InputLogPosition = m_InputLog.begin();
-		m_ConsoleText->SetText("");
+		m_OutputLog.clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::PrintString(const std::string &stringToPrint) const {
-		m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + stringToPrint);
+	void ConsoleMan::PrintString(const std::string &stringToPrint) {
+		m_OutputLog.emplace_back("\n" + stringToPrint);
 		if (System::IsLoggingToCLI()) { System::PrintToCLI(stringToPrint); }
 	}
 
@@ -262,6 +254,12 @@ namespace RTE {
 
 		if (m_ConsoleState != ConsoleState::Enabled && m_ConsoleState != ConsoleState::Disabled) { ConsoleOpenClose(); }
 
+		std::stringstream consoleText;
+		for (std::deque<std::string>::iterator logIterator = (m_OutputLog.size() < m_ConsoleTextMaxNumLines) ? m_OutputLog.begin() : m_OutputLog.end() - m_ConsoleTextMaxNumLines; logIterator != m_OutputLog.end(); ++logIterator) {
+			consoleText << *logIterator;
+		}
+		m_ConsoleText->SetText(consoleText.str());
+
 		if (m_ConsoleState != ConsoleState::Enabled) {
 			return;
 		}
@@ -296,13 +294,6 @@ namespace RTE {
 		if ((g_UInputMan.KeyPressed(KEY_ENTER) || g_UInputMan.KeyPressed(KEY_ENTER_PAD)) || (m_InputTextBox->GetText().find_last_of('\n') != std::string::npos)) {
 			FeedString(m_InputTextBox->GetText().empty() ? true : false);
 		}
-
-		// TODO: Get this working and see if it actually makes any difference.
-		/*
-		// Cut off the text in the text label at a reasonable height so it doesn't get really slow to draw
-		if (m_ConsoleText->GetTextHeight() > g_FrameMan.GetResY() {
-		}
-		*/
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -352,17 +343,17 @@ namespace RTE {
 			if (!feedEmptyString) {
 				if (!line.empty() && line != "\r") {
 					g_LuaMan.ClearErrors();
-					m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + line);
+					m_OutputLog.emplace_back("\n" + line);
 					g_LuaMan.RunScriptString(line, false);
 
-					if (g_LuaMan.ErrorExists()) { m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n" + "ERROR: " + g_LuaMan.GetLastError()); }
+					if (g_LuaMan.ErrorExists()) { m_OutputLog.emplace_back("\nERROR: " + g_LuaMan.GetLastError()); }
 					if (m_InputLog.empty() || m_InputLog.front() != line) { m_InputLog.push_front(line); }
 
 					m_InputLogPosition = m_InputLog.begin();
 					m_LastLogMove = 0;
 				}
 			} else {
-				m_ConsoleText->SetText(m_ConsoleText->GetText() + "\n");
+				m_OutputLog.emplace_back("\n");
 				break;
 			}
 		}

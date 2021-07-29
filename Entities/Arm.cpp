@@ -31,6 +31,7 @@ void Arm::Clear()
 {
     m_pHeldMO = nullptr;
     m_GripStrength = 0;
+    m_ThrowStrength = 25.0F;
     m_HandFile.Reset();
     m_pHand = nullptr;
     m_MaxLength = 0;
@@ -76,6 +77,7 @@ int Arm::Create(const Arm &reference) {
     Attachable::Create(reference);
 
     m_GripStrength = reference.m_GripStrength;
+    m_ThrowStrength = reference.m_ThrowStrength;
     m_HandFile = reference.m_HandFile;
     m_pHand = m_HandFile.GetAsBitmap();
     RTEAssert(m_pHand, "Failed to load hand bitmap in Arm::Create")
@@ -103,6 +105,8 @@ int Arm::ReadProperty(const std::string_view &propName, Reader &reader) {
         SetHeldMO(dynamic_cast<MovableObject *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "GripStrength") {
         reader >> m_GripStrength;
+    } else if (propName == "ThrowStrength") {
+        reader >> m_ThrowStrength;
     } else if (propName == "Hand") {
         reader >> m_HandFile;
         m_pHand = m_HandFile.GetAsBitmap();
@@ -136,6 +140,8 @@ int Arm::Save(Writer &writer) const
     writer << m_pHeldMO;
     writer.NewProperty("GripStrength");
     writer << m_GripStrength;
+    writer.NewProperty("ThrowStrength");
+    writer << m_ThrowStrength;
     writer.NewProperty("HandGroup");
     writer << m_HandFile;
     writer.NewProperty("MaxLength");

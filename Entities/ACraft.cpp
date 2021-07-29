@@ -994,22 +994,21 @@ void ACraft::Update()
 // Description:     Draws this Actor's current graphical HUD overlay representation to a
 //                  BITMAP of choice.
 
-void ACraft::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled)
-{
+void ACraft::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
+	m_HUDStack = -m_CharHeight / 2;
+
     if (!m_HUDVisible)
         return;
 
     // Only do HUD if on a team
     if (m_Team < 0)
         return;
-
-    // Only draw if the team viewing this is on the same team OR has seen the space where this is located
-    int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam)
-    {
-        if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
-            return;
-    }
+	
+	// Only draw if the team viewing this is on the same team OR has seen the space where this is located.
+	int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
+	if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam && (!g_SettingsMan.ShowEnemyHUD() || g_SceneMan.IsUnseen(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), viewingTeam))) {
+		return;
+	}
 
     Actor::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 

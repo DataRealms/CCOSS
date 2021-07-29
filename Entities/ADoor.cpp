@@ -4,6 +4,7 @@
 #include "Matrix.h"
 #include "SLTerrain.h"
 #include "PresetMan.h"
+#include "SettingsMan.h"
 
 namespace RTE {
 
@@ -492,12 +493,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::DrawHUD(BITMAP *targetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
+		m_HUDStack = -m_CharHeight / 2;
+
 		if (!m_HUDVisible) {
 			return;
 		}
-		// Only draw if the team viewing this is on the same team OR has seen the space where this is located
+		// Only draw if the team viewing this is on the same team OR has seen the space where this is located.
 		int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-		if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam && g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam)) {
+		if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam && (!g_SettingsMan.ShowEnemyHUD() || g_SceneMan.IsUnseen(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), viewingTeam))) {
 			return;
 		}
 	}

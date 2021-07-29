@@ -1532,7 +1532,7 @@ void Actor::Update()
     ////////////////////////////////
     // Death logic
 
-	if (m_Status != DYING && m_Status != DEAD && std::floor(m_Health + 0.5F) <= 0) {
+	if (m_Status != DYING && m_Status != DEAD && std::round(m_Health) <= 0) {
 		if (m_DeathSound) { m_DeathSound->Play(m_Pos); }
 		m_Controller.SetDisabled(true);
         DropAllInventory();

@@ -1369,10 +1369,10 @@ int MovableMan::KillAllEnemyActors(int exceptTeam)
     {
         if ((*aIt)->GetTeam() != exceptTeam)
         {
-            // Blow up the heads of humanoids, for effect.
-			AHuman *pHuman = dynamic_cast<AHuman *>(*aIt);
-			if (pHuman && pHuman->GetHead()) {
-				pHuman->GetHead()->GibThis();
+			// Blow up the heads of humanoids, for effect.
+			AHuman *human = dynamic_cast<AHuman *>(*aIt);
+			if (human && human->GetHead()) {
+				human->GetHead()->GibThis();
 			} else {
 				(*aIt)->GibThis();
 			}
@@ -1385,10 +1385,10 @@ int MovableMan::KillAllEnemyActors(int exceptTeam)
     {
         if ((*aIt)->GetTeam() != exceptTeam)
         {
-            // Blow up the heads of humanoids, for effect.
-			AHuman *pHuman = dynamic_cast<AHuman *>(*aIt);
-			if (pHuman && pHuman->GetHead()) {
-				pHuman->GetHead()->GibThis();
+			// Blow up the heads of humanoids, for effect.
+			AHuman *human = dynamic_cast<AHuman *>(*aIt);
+			if (human && human->GetHead()) {
+				human->GetHead()->GibThis();
 			} else {
 				(*aIt)->GibThis();
 			}

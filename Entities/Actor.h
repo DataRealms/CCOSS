@@ -203,19 +203,19 @@ ClassInfoGetters
 	/// <summary>
 	/// Gets this Actor's health value.
 	/// </summary>
-	/// <returns>A const float describing this Actor's health.</returns>
+	/// <returns>A float describing this Actor's health.</returns>
 	float GetHealth() const { return m_Health; }
 
 	/// <summary>
 	/// Gets this Actor's previous health value, prior to this frame.
 	/// </summary>
-	/// <returns>A const float describing this Actor's previous health.</returns>
+	/// <returns>A float describing this Actor's previous health.</returns>
 	float GetPrevHealth() const { return m_PrevHealth; }
 
 	/// <summary>
 	/// Gets this Actor's maximum health value.
 	/// </summary>
-	/// <returns>A const float describing this Actor's max health.</returns>
+	/// <returns>A float describing this Actor's max health.</returns>
 	float GetMaxHealth() const { return m_MaxHealth; }
 
 
@@ -569,21 +569,17 @@ ClassInfoGetters
     void RestDetection() override;
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddHealth
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds health points to this Actor's current health value.
-// Arguments:       An int specifying the value to add.
-// Return value:    The resulting total health of this Actor.
-
-    const float AddHealth(const float addedHealth) { return m_Health += addedHealth; }
-
+	/// <summary>
+	/// Adds health points to this Actor's current health value.
+	/// </summary>
+	/// <param name="setHealth">A float specifying the value to add.</param>
+	/// <returns>The resulting total health of this Actor.</returns>
+	const float AddHealth(const float addedHealth) { return m_Health += addedHealth; }
 
 	/// <summary>
 	/// Sets this Actor's current health value.
 	/// </summary>
 	/// <param name="setHealth">A float specifying the value to set to.</param>
-	/// <returns>The resulting total health of this Actor.</returns>
 	void SetHealth(const float setHealth) { m_Health = setHealth; }
 
 

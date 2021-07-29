@@ -67,7 +67,7 @@ void Actor::Clear() {
     m_DeathSound = nullptr;
     m_DeviceSwitchSound = nullptr;
     m_Status = STABLE;
-    m_Health = m_PrevHealth = m_MaxHealth = 100;
+    m_Health = m_PrevHealth = m_MaxHealth = 100.0F;
 	m_pTeamIcon = nullptr;
 	m_pControllerIcon = nullptr;
     m_LastSecondTimer.Reset();
@@ -1532,8 +1532,7 @@ void Actor::Update()
     ////////////////////////////////
     // Death logic
 
-    if (m_Status != DYING && m_Status != DEAD && std::floor(m_Health) <= 0)
-    {
+	if (m_Status != DYING && m_Status != DEAD && std::floor(m_Health + 0.5F) <= 0) {
 		if (m_DeathSound) { m_DeathSound->Play(m_Pos); }
 		m_Controller.SetDisabled(true);
         DropAllInventory();

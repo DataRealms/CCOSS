@@ -4334,12 +4334,11 @@ void AHuman::Update()
     ///////////////////////////////////////////////////
     // Death detection and handling
 
-    // Losing head should kill
-    if (!m_pHead && m_Status != DYING && m_Status != DEAD)
-        m_Health -= m_MaxHealth + 1;
-    // Losing all limbs should kill... eventually
-    else if (!m_pFGArm && !m_pBGArm && !m_pFGLeg && !m_pBGLeg && m_Status != DYING && m_Status != DEAD)
-        m_Health -= 0.1;
+	if (!m_pHead && m_Status != DYING && m_Status != DEAD) {
+		m_Health -= m_MaxHealth + 1.0F;
+	} else if (!m_pFGArm && !m_pBGArm && !m_pFGLeg && !m_pBGLeg && m_Status != DYING && m_Status != DEAD) {
+		m_Health -= 0.1F;
+	}
 
     if (m_Status == DYING)
     {

@@ -118,9 +118,9 @@ namespace RTE {
 		.property("FriendlyName", &DataModule::GetFriendlyName)
 		.property("Author", &DataModule::GetAuthor)
 		.property("Description", &DataModule::GetDescription)
-		.property("Version", &DataModule::GetVersionNumber);
+		.property("Version", &DataModule::GetVersionNumber)
 
-		//.def_readwrite("Presets", &DataModule::m_EntityList, return_stl_iterator);
+		.def_readwrite("Presets", &DataModule::m_EntityList, luabind::return_stl_iterator);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

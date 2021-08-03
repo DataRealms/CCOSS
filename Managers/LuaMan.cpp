@@ -16,6 +16,7 @@ namespace RTE {
 		m_NextObjectID = 0;
 		m_TempEntity = nullptr;
 		m_TempEntityVector.clear();
+
 		m_OpenedFiles.fill(nullptr);
 	}
 

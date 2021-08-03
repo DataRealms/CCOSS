@@ -133,16 +133,22 @@ namespace RTE {
 		int GetCrabBombThreshold() const { return m_CrabBombThreshold; }
 
 		/// <summary>
-		/// Gets whether the HUD of enemy actors is set to be visible to the player or not.
-		/// </summary>
-		/// <returns>Whether the HUD of enemy actors is visible to the player.</returns>
-		bool ShowEnemyHUD() const { return m_ShowEnemyHUD; }
-
-		/// <summary>
 		/// Sets the number of crabs needed to be released at once to trigger the crab bomb effect.
 		/// </summary>
 		/// <param name="newThreshold">The new number of crabs needed to be released at once to trigger the crab bomb effect.</param>
 		void SetCrabBombThreshold(int newThreshold) { m_CrabBombThreshold = newThreshold; }
+
+		/// <summary>
+		/// Gets whether the HUD of enemy Actors is set to be visible to the player or not.
+		/// </summary>
+		/// <returns>Whether the HUD of enemy Actors is visible to the player.</returns>
+		bool ShowEnemyHUD() const { return m_ShowEnemyHUD; }
+
+		/// <summary>
+		/// Sets whether the HUD of enemy Actors should to be visible to the player or not.
+		/// </summary>
+		/// <param name="showHUD">Whether the HUD of enemy Actors should be visible to the player or not.</param>
+		void SetShowEnemyHUD(bool showHUD) { m_ShowEnemyHUD = showHUD; }
 #pragma endregion
 
 #pragma region Network Settings

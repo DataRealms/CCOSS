@@ -103,8 +103,8 @@ void GameActivity::Clear()
     {
         m_Deliveries[team].clear();
         m_LandingZoneArea[team].Reset();
-		m_aLZCursor[team] = 0;
-		m_aObjCursor[team] = 0;
+		m_aLZCursor[team].clear();
+		m_aObjCursor[team].clear();
     }
 
     m_Objectives.clear();
@@ -1019,7 +1019,7 @@ int GameActivity::Start()
     // Start the game timer
     m_GameTimer.Reset();
 
-    if (!(m_aLZCursor[0]))
+    if (m_aLZCursor[0].empty())
     {
         ContentFile cursorFile("Base.rte/GUIs/Indicators/LZArrowRedL.png");
         m_aLZCursor[0] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
@@ -1031,7 +1031,7 @@ int GameActivity::Start()
 		m_aLZCursor[3] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
     }
 
-    if (!(m_aObjCursor[0]))
+    if (m_aObjCursor[0].empty())
     {
         ContentFile cursorFile("Base.rte/GUIs/Indicators/ObjArrowRed.png");
         m_aObjCursor[0] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);

@@ -9,7 +9,7 @@ namespace RTE {
 
 	void TerrainDebris::Clear() {
 		m_DebrisFile.Reset();
-		m_Bitmaps = 0;
+		m_Bitmaps.clear();
 		m_BitmapCount = 0;
 		m_Material.Reset();
 		m_TargetMaterial.Reset();
@@ -27,7 +27,7 @@ namespace RTE {
 			return -1;
 		}
 		m_Bitmaps = m_DebrisFile.GetAsAnimation(m_BitmapCount);
-		RTEAssert(m_Bitmaps && m_Bitmaps[0], "Failed to load debris bitmaps!");
+		RTEAssert(!m_Bitmaps.empty() && m_Bitmaps.at(0), "Failed to load debris bitmaps!");
 
 		return 0;
 	}
@@ -58,6 +58,7 @@ namespace RTE {
 			reader >> m_DebrisFile;
 		} else if (propName == "DebrisPieceCount") {
 			reader >> m_BitmapCount;
+			m_Bitmaps.reserve(m_BitmapCount);
 		} else if (propName == "DebrisMaterial") {
 			reader >> m_Material;
 		} else if (propName == "TargetMaterial") {
@@ -108,7 +109,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TerrainDebris::ApplyDebris(SLTerrain *terrain) {
-		RTEAssert(m_Bitmaps && m_BitmapCount > 0, "No bitmaps loaded for terrain debris!");
+		RTEAssert(!m_Bitmaps.empty() && m_BitmapCount > 0, "No bitmaps loaded for terrain debris!");
 
 		BITMAP *terrBitmap = terrain->GetFGColorBitmap();
 		BITMAP *matBitmap = terrain->GetMaterialBitmap();

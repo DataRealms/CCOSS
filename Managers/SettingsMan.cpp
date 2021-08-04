@@ -23,6 +23,7 @@ namespace RTE {
 		m_EndlessMetaGameMode = false;
 		m_EnableCrabBombs = false;
 		m_CrabBombThreshold = 42;
+		m_ShowEnemyHUD = true;
 
 		m_NetworkServerAddress = "127.0.0.1:8000";
 		m_PlayerNetworkName = "Dummy";
@@ -138,6 +139,8 @@ namespace RTE {
 			reader >> m_EnableCrabBombs;
 		} else if (propName == "CrabBombThreshold") {
 			reader >> m_CrabBombThreshold;
+		} else if (propName == "ShowEnemyHUD") {
+			reader >> m_ShowEnemyHUD;
 		} else if (propName == "LaunchIntoActivity") {
 			reader >> g_ActivityMan.m_LaunchIntoActivity;
 		} else if (propName == "DefaultActivityType") {
@@ -301,6 +304,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("EndlessMetaGameMode", m_EndlessMetaGameMode);
 		writer.NewPropertyWithValue("EnableCrabBombs", m_EnableCrabBombs);
 		writer.NewPropertyWithValue("CrabBombThreshold", m_CrabBombThreshold);
+		writer.NewPropertyWithValue("ShowEnemyHUD", m_ShowEnemyHUD);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

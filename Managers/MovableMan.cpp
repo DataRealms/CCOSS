@@ -1356,25 +1356,26 @@ bool MovableMan::RemoveMO(MovableObject *pMOToRem)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          KillAllActors
+// Method:          KillAllEnemyActors
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Kills and destroys all actors of a specific team.
+// Description:     Kills and destroys all enemies of a specific team.
 
-int MovableMan::KillAllActors(int exceptTeam)
+int MovableMan::KillAllEnemyActors(int exceptTeam)
 {
     int killCount = 0;
-    AHuman *pHuman = 0;
 
     // Kill all regular Actors
     for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
     {
         if ((*aIt)->GetTeam() != exceptTeam)
         {
-            // Blow up the head of humanoids, for effect
-            if (pHuman = dynamic_cast<AHuman *>(*aIt))
-                pHuman->GetHead()->GibThis();
-            else
-                (*aIt)->GibThis();
+			// Blow up the heads of humanoids, for effect.
+			AHuman *human = dynamic_cast<AHuman *>(*aIt);
+			if (human && human->GetHead()) {
+				human->GetHead()->GibThis();
+			} else {
+				(*aIt)->GibThis();
+			}
             killCount++;
         }
     }
@@ -1384,11 +1385,13 @@ int MovableMan::KillAllActors(int exceptTeam)
     {
         if ((*aIt)->GetTeam() != exceptTeam)
         {
-            // Blow up the head of humanoids, for effect
-            if (pHuman = dynamic_cast<AHuman *>(*aIt))
-                pHuman->GetHead()->GibThis();
-            else
-                (*aIt)->GibThis();
+			// Blow up the heads of humanoids, for effect.
+			AHuman *human = dynamic_cast<AHuman *>(*aIt);
+			if (human && human->GetHead()) {
+				human->GetHead()->GibThis();
+			} else {
+				(*aIt)->GibThis();
+			}
             killCount++;
         }
     }

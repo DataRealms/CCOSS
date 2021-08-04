@@ -148,6 +148,8 @@ namespace RTE {
 
 		UpdateCurrentAnkleOffset();
 
+		UpdateLegRotation();
+
 		if (m_Foot) {
 			// In order to keep the foot in the right place, we need to convert its offset (the ankle offset) to work as the ParentOffset for the foot.
 			// The foot will then use this to set its JointPos when it's updated. Unfortunately UnRotateOffset doesn't work for this, since it's Vector/Matrix division, which isn't commutative.
@@ -157,8 +159,6 @@ namespace RTE {
 		}
 
 		Attachable::Update();
-
-		UpdateLegRotation();
 
 		if (m_FrameCount == 1) {
 			m_Frame = 0;
@@ -174,7 +174,6 @@ namespace RTE {
 
 	void Leg::UpdateCurrentAnkleOffset() {
 		if (IsAttached()) {
-			//TODO When flipping, the target position gets set very far from where the leg currently is, so the leg ends up drawing at a weird spot for one frame. This happened in older versions and it's probably better to wait til legs are redone to use IK than to try to fix it.
 			Vector targetOffset = g_SceneMan.ShortestDistance(m_JointPos, m_TargetPosition, g_SceneMan.SceneWrapsX());
 			if (m_WillIdle && targetOffset.m_Y < -3) { targetOffset = m_IdleOffset.GetXFlipped(m_HFlipped); }
 
@@ -203,7 +202,7 @@ namespace RTE {
 			// This is negative because it's a correction, the bitmap needs to rotate back to align the ankle with where it's supposed to be in the sprite.
 			extraRotation -= (m_ExtendedOffset.GetAbsRadAngle() - m_ContractedOffset.GetAbsRadAngle()) * extraRotationRatio;
 
-			m_Rotation.SetRadAngle(m_Rotation.GetRadAngle() + extraRotation * static_cast<float>(GetFlipFactor()));
+			m_Rotation.SetRadAngle(m_Rotation.GetRadAngle() + extraRotation * GetFlipFactor());
 			m_AngularVel = 0.0F;
 		}
 	}
@@ -212,20 +211,20 @@ namespace RTE {
 
 	void Leg::UpdateFootFrameAndRotation() {
 		if (m_Foot) {
-			if (IsAttached()) {
+			if (IsAttached() && m_AnkleOffset.GetY() > std::abs(m_AnkleOffset.GetX() * 0.3F)) {
 				float ankleOffsetHorizontalDistanceAccountingForFlipping = m_AnkleOffset.GetXFlipped(m_HFlipped).GetX();
-				if (ankleOffsetHorizontalDistanceAccountingForFlipping < -10) {
+				if (ankleOffsetHorizontalDistanceAccountingForFlipping < -m_MaxExtension * 0.6F) {
 					m_Foot->SetFrame(3);
-				} else if (ankleOffsetHorizontalDistanceAccountingForFlipping < -6) {
+				} else if (ankleOffsetHorizontalDistanceAccountingForFlipping < -m_MaxExtension * 0.4F) {
 					m_Foot->SetFrame(2);
-				} else if (ankleOffsetHorizontalDistanceAccountingForFlipping > 6) {
+				} else if (ankleOffsetHorizontalDistanceAccountingForFlipping > m_MaxExtension * 0.4F) {
 					m_Foot->SetFrame(1);
 				} else {
 					m_Foot->SetFrame(0);
 				}
 				m_Foot->SetRotAngle(0.0F);
 			} else {
-				m_Foot->SetRotAngle(m_Rotation.GetRadAngle() + c_PI / 2);
+				m_Foot->SetRotAngle(m_Rotation.GetRadAngle() + c_HalfPI * GetFlipFactor());
 			}
 		}
 	}

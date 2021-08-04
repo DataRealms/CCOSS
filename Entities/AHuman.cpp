@@ -3163,26 +3163,22 @@ void AHuman::Update()
 			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * 2.0F, m_JetTimeTotal);
 		}
 
-		// If pie menu is on, keep the angle to what it was before
-		if (m_Controller.IsState(PIE_MENU_ACTIVE))
-		{
-			// Don't change anything
-		}
-		// Direct the jetpack nozzle according to movement stick if analog input is present
-		else if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1F)
-		{
-			//To-do: test whether this works properly
-			float jetAngle = (m_Controller.GetAnalogMove().GetAbsRadAngle() - c_PI);
-			if (jetAngle > c_PI) { jetAngle -= c_TwoPI; }
-			m_pJetpack->SetEmitAngle(FacingAngle(jetAngle * m_JetAngleRange));
-		}
-		// Or just use the aim angle if we're getting digital input
-		else {
-			// Halve the jet angle when looking downwards so the actor isn't forced to go sideways (To-do: don't hardcode this value?)
-			float jetAngle = m_AimAngle > 0 ? m_AimAngle * m_JetAngleRange : -m_AimAngle * m_JetAngleRange * 0.5F;
-			jetAngle -= (c_HalfPI * m_JetAngleRange + c_HalfPI);
-			// Don't need to use FacingAngle on this because it's already applied to the AimAngle since last update.
-			m_pJetpack->SetEmitAngle(jetAngle);
+		float maxAngle = c_HalfPI * m_JetAngleRange;
+		// If pie menu is on, keep the angle to what it was before.
+		if (!m_Controller.IsState(PIE_MENU_ACTIVE)) {
+			// Direct the jetpack nozzle according to movement stick if analog input is present.
+			if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1F) {
+				float jetAngle = std::clamp(m_Controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, -maxAngle, maxAngle);
+				m_pJetpack->SetEmitAngle(FacingAngle(jetAngle - c_HalfPI));
+			// Use the aim angle if we're getting digital input.
+			} else {
+				// Halve the jet angle when looking downwards so the actor isn't forced to go sideways
+				// TODO: don't hardcode this value?
+				float jetAngle = m_AimAngle > 0 ? m_AimAngle * m_JetAngleRange : -m_AimAngle * m_JetAngleRange * 0.5F;
+				jetAngle -= (maxAngle + c_HalfPI);
+				// Don't need to use FacingAngle on this because it's already applied to the AimAngle since last update.
+				m_pJetpack->SetEmitAngle(jetAngle);
+			}
 		}
 	}
 
@@ -3559,7 +3555,7 @@ void AHuman::Update()
 	if (m_Controller.IsState(WEAPON_DROP) && m_Status != INACTIVE) {
 		if (m_pFGArm && m_pFGArm->HoldsSomething()) {
 			if (MovableObject *pMO = m_pFGArm->ReleaseHeldMO()) {
-				pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
+				pMO->SetPos(m_Pos + Vector(10.0F * GetFlipFactor(), -8.0F));
 				Vector tossVec(RandomNum(3.0F, 6.0F), RandomNum(-3.0F, -1.5F));
 				tossVec.RadRotate(m_AimAngle);
 				pMO->SetVel(m_Vel * 0.5F + tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
@@ -3580,7 +3576,7 @@ void AHuman::Update()
 			}
 		} else if (m_pBGArm) {
 			if (MovableObject *pMO = m_pBGArm->ReleaseHeldMO()) {
-				pMO->SetPos(m_Pos + Vector(m_HFlipped ? -10 : 10, -8));
+				pMO->SetPos(m_Pos + Vector(10.0F * GetFlipFactor(), -8.0F));
 				Vector tossVec(RandomNum(3.0F, 6.0F), RandomNum(-3.0F, -1.5F));
 				tossVec.RadRotate(m_AimAngle);
 				pMO->SetVel(m_Vel * 0.5F + tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
@@ -4044,9 +4040,8 @@ void AHuman::Update()
     if (m_pHead && m_pHead->IsAttached()) {
         float toRotate = 0;
         // Only rotate the head to match the aim angle if body is stable and upright
-        if (m_Status == STABLE && std::fabs(m_Rotation.GetRadAngle()) < (c_HalfPI + c_QuarterPI)) {
-            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((m_AimAngle * static_cast<float>(GetFlipFactor())) * m_LookToAimRatio + m_Rotation.GetRadAngle() * (0.9F - m_LookToAimRatio));
-            toRotate *= 0.15F;
+        if (m_Status == STABLE && std::abs(rot) < (c_HalfPI + c_QuarterPI)) {
+            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((m_AimAngle * GetFlipFactor()) * m_LookToAimRatio + rot * (0.9F - m_LookToAimRatio)) * 0.15F;
         }
         // If dying upright, make head slump forward or back depending on body lean
 // TODO: Doesn't work too well, but probably could
@@ -4083,7 +4078,7 @@ void AHuman::Update()
 
 			affectingBodyAngle = std::abs(std::sin(rot)) * rot * m_FGArmFlailScalar * (1.0F - aimScalar);
 		}
-		m_pFGArm->SetRotAngle(affectingBodyAngle + m_AimAngle * static_cast<float>(GetFlipFactor()));
+		m_pFGArm->SetRotAngle(affectingBodyAngle + m_AimAngle * GetFlipFactor());
 
         if (m_Status == STABLE) {
             if (m_ArmClimbing[FGROUND]) {
@@ -4099,7 +4094,7 @@ void AHuman::Update()
     }
 
     if (m_pBGArm) {
-		m_pBGArm->SetRotAngle(std::abs(std::sin(rot)) * rot * m_BGArmFlailScalar + (m_AimAngle * static_cast<float>(GetFlipFactor())));
+		m_pBGArm->SetRotAngle(std::abs(std::sin(rot)) * rot * m_BGArmFlailScalar + (m_AimAngle * GetFlipFactor()));
         if (m_Status == STABLE) { 
 			if (m_ArmClimbing[BGROUND]) {
 				// Can't climb or crawl with the shield
@@ -4289,8 +4284,8 @@ void AHuman::Update()
             }
 		} else {
 			// Upright body posture
-			float rotDiff = rot - (GetRotAngleTarget(m_MoveState) * (m_AimAngle > 0 ? 1 - (m_AimAngle / c_HalfPI) : 1) * static_cast<float>(GetFlipFactor()));
-			m_AngularVel = m_AngularVel * (0.98F - 0.08F * (m_Health / m_MaxHealth)) - (rotDiff * 0.5F);
+			float rotDiff = rot - (GetRotAngleTarget(m_MoveState) * (m_AimAngle > 0 ? 1.0F - (m_AimAngle / c_HalfPI) : 1.0F) * GetFlipFactor());
+			m_AngularVel = m_AngularVel * (0.98F - 0.06F * (m_Health / m_MaxHealth)) - (rotDiff * 0.5F);
 		}
     }
     // Keel over
@@ -4334,12 +4329,11 @@ void AHuman::Update()
     ///////////////////////////////////////////////////
     // Death detection and handling
 
-    // Losing head should kill
-    if (!m_pHead && m_Status != DYING && m_Status != DEAD)
-        m_Health -= m_MaxHealth + 1;
-    // Losing all limbs should kill... eventually
-    else if (!m_pFGArm && !m_pBGArm && !m_pFGLeg && !m_pBGLeg && m_Status != DYING && m_Status != DEAD)
-        m_Health -= 0.1;
+	if (!m_pHead && m_Status != DYING && m_Status != DEAD) {
+		m_Health -= m_MaxHealth + 1.0F;
+	} else if (!m_pFGArm && !m_pBGArm && !m_pFGLeg && !m_pBGLeg && m_Status != DYING && m_Status != DEAD) {
+		m_Health -= 0.1F;
+	}
 
     if (m_Status == DYING)
     {
@@ -4372,16 +4366,14 @@ void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos
 		//colors[index].SetRGB(255 - index * 3, 225 - index * 20, index);
 	}
 
-    Vector outOffset(m_HFlipped ? -15 : 15, -4);
-//    Matrix aimMatrix(m_AimAngle);
-//    aimMatrix.SetXFlipped(m_HFlipped);
+    Vector outOffset(15.0F * GetFlipFactor(), -5.0F);
 
     acquire_bitmap(pTargetBitmap);
 
     for (int i = 0; i < pointCount * amount; ++i) {
         points[i].FlipX(m_HFlipped);
         points[i] += outOffset;
-        points[i].RadRotate(m_HFlipped ? -m_AimAngle : m_AimAngle);
+        points[i].RadRotate((m_AimAngle * GetFlipFactor()) + m_Rotation.GetRadAngle());
         points[i] += m_Pos;
         if (m_pFGArm && m_pFGArm->IsAttached())
             points[i] += m_pFGArm->GetParentOffset();
@@ -4438,6 +4430,8 @@ void AHuman::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode,
 //                  BITMAP of choice.
 
 void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
+	m_HUDStack = -m_CharHeight / 2;
+
     if (!m_HUDVisible)
         return;
 
@@ -4445,11 +4439,11 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     if (m_Team < 0)
         return;
 
-    // Only draw if the team viewing this is on the same team OR has seen the space where this is located
-    int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam && g_SceneMan.IsUnseen(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), viewingTeam)) {
+	// Only draw if the team viewing this is on the same team OR has seen the space where this is located.
+	int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
+    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam && (!g_SettingsMan.ShowEnemyHUD() || g_SceneMan.IsUnseen(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), viewingTeam))) {
 		return;
-    }
+	}
 
     Actor::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 

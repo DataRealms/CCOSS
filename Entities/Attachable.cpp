@@ -339,7 +339,7 @@ namespace RTE {
 			m_Team = m_Parent->GetTeam();
 
 			MOSRotating *rootParentAsMOSR = dynamic_cast<MOSRotating *>(GetRootParent());
-			float currentRotAngleOffset = (GetRotAngle() * static_cast<float>(GetFlipFactor())) - rootParentAsMOSR->GetRotAngle();
+			float currentRotAngleOffset = (GetRotAngle() * GetFlipFactor()) - rootParentAsMOSR->GetRotAngle();
 			if (rootParentAsMOSR && CanCollideWithTerrain()) {
 				// Note: This safety check exists to ensure the parent's AtomGroup contains this Attachable's Atoms in a subgroup. Hardcoded Attachables need this in order to work, since they're cloned before their parent's AtomGroup exists.
 				if (!rootParentAsMOSR->GetAtomGroup()->ContainsSubGroup(m_AtomSubgroupID)) { AddOrRemoveAtomsFromRootParentAtomGroup(true, false); }
@@ -379,7 +379,7 @@ namespace RTE {
 			if (m_Parent) {
 				if (InheritsHFlipped() != 0) { m_HFlipped = m_InheritsHFlipped == 1 ? m_Parent->IsHFlipped() : !m_Parent->IsHFlipped(); }
 				if (InheritsRotAngle()) {
-					SetRotAngle(m_Parent->GetRotAngle() + m_InheritedRotAngleOffset * static_cast<float>(m_Parent->GetFlipFactor()));
+					SetRotAngle(m_Parent->GetRotAngle() + m_InheritedRotAngleOffset * m_Parent->GetFlipFactor());
 					m_AngularVel = 0.0F;
 				}
 			}

@@ -200,31 +200,24 @@ ClassInfoGetters
     int GetStatus() const { return m_Status; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHealth
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets this Actor's health value.
-// Arguments:       None.
-// Return value:    A const int describing this Actor's health.
-
-    int GetHealth() const { return m_Health; }
-
+	/// <summary>
+	/// Gets this Actor's health value.
+	/// </summary>
+	/// <returns>A float describing this Actor's health.</returns>
+	float GetHealth() const { return m_Health; }
 
 	/// <summary>
 	/// Gets this Actor's previous health value, prior to this frame.
 	/// </summary>
-	/// <returns>A const int describing this Actor's previous health.</returns>
-	int GetPrevHealth() const { return m_PrevHealth; }
+	/// <returns>A float describing this Actor's previous health.</returns>
+	float GetPrevHealth() const { return m_PrevHealth; }
 
+	/// <summary>
+	/// Gets this Actor's maximum health value.
+	/// </summary>
+	/// <returns>A float describing this Actor's max health.</returns>
+	float GetMaxHealth() const { return m_MaxHealth; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMaxHealth
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets this Actor's maximum health value.
-// Arguments:       None.
-// Return value:    A const int describing this Actor's max health.
-
-    int GetMaxHealth() const { return m_MaxHealth; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetMaxHealth
@@ -569,24 +562,18 @@ ClassInfoGetters
     void RestDetection() override;
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddHealth
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds health points to this Actor's current health value.
-// Arguments:       An int specifying the value to add.
-// Return value:    The resulting total health of this Actor.
+	/// <summary>
+	/// Adds health points to this Actor's current health value.
+	/// </summary>
+	/// <param name="setHealth">A float specifying the value to add.</param>
+	/// <returns>The resulting total health of this Actor.</returns>
+	const float AddHealth(const float addedHealth) { return m_Health += addedHealth; }
 
-    const int AddHealth(const int addedHealth) { return m_Health += addedHealth; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetHealth
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets this Actor's current health value.
-// Arguments:       An int specifying the value to set to.
-// Return value:    The resulting total health of this Actor.
-
-    void SetHealth(const int setHealth) { m_Health = setHealth; }
+	/// <summary>
+	/// Sets this Actor's current health value.
+	/// </summary>
+	/// <param name="setHealth">A float specifying the value to set to.</param>
+	void SetHealth(const float setHealth) { m_Health = setHealth; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

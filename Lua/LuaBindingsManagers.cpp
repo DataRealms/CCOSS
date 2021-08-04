@@ -144,7 +144,7 @@ namespace RTE {
 		.def("IsOfActor", &MovableMan::IsOfActor)
 		.def("GetRootMOID", &MovableMan::GetRootMOID)
 		.def("RemoveMO", &MovableMan::RemoveMO)
-		.def("KillAllActors", &MovableMan::KillAllActors)
+		.def("KillAllEnemyActors", &MovableMan::KillAllEnemyActors)
 		.def("OpenAllDoors", &MovableMan::OpenAllDoors)
 		.def("IsParticleSettlingEnabled", &MovableMan::IsParticleSettlingEnabled)
 		.def("EnableParticleSettling", &MovableMan::EnableParticleSettling)
@@ -311,7 +311,8 @@ namespace RTE {
 		return luabind::class_<SettingsMan>("SettingsManager")
 
 		.property("PrintDebugInfo", &SettingsMan::PrintDebugInfo, &SettingsMan::SetPrintDebugInfo)
-		.property("RecommendedMOIDCount", &SettingsMan::RecommendedMOIDCount);
+		.property("RecommendedMOIDCount", &SettingsMan::RecommendedMOIDCount)
+		.property("ShowEnemyHUD", &SettingsMan::ShowEnemyHUD);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

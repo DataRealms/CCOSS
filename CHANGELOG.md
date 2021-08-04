@@ -183,7 +183,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `DisableLuaJIT = 0/1` to disable LuaJIT (MoonJIT) to (potentially) improve performance on machines that seem to struggle with it.
 
+- New `Settings.ini` property `ShowEnemyHUD` which allows disabling of enemy actor HUD in its entirety.
+
 ### Changed
+
+- Doors in `Team = -1` will now open up for all actors.
+
+- `MovableMan` function `KillAllActors` (commonly found in activities) has been appropriately renamed `KillAllEnemyActors`.
 
 - Wound limit gibbing logic has changed for `MOSRotating` (and all its subclasses), where objects will now gib when they reach their `GibWoundLimit` rather than when they surpass it. This allows for one-wound gibbing, which was previously infeasible.
 
@@ -304,6 +310,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Esc has been disabled in server mode to not disrupt simulation for clients, use Alt+F4 or the window close button to exit.
 
 ### Fixed
+
+- Fixed legs going bonkers for one frame when turning around.
 
 - `HFlipped` is now properly assigned to emissions, gibs and particles that are shot from a `HDFirearm`'s `Round` when the source object is also flipped.
 

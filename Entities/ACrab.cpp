@@ -2162,22 +2162,23 @@ void ACrab::Update()
 			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * 2.0F, m_JetTimeTotal);
         }
 
-        // Direct the jetpack nozzle according to movement stick if analog input is present
-        if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1F)
-        {
-			//To-do: test whether this works properly
-			float jetAngle = (m_Controller.GetAnalogMove().GetAbsRadAngle() - c_PI);
-			if (jetAngle > c_PI) { jetAngle -= c_TwoPI; }
-			m_pJetpack->SetEmitAngle(FacingAngle(jetAngle * m_JetAngleRange));
-        }
-        // Or just use the aim angle if we're getting digital input
-        else {
-			// Halve the jet angle when looking downwards so the actor isn't forced to go sideways (To-do: don't hardcode this value?)
-			float jetAngle = m_AimAngle > 0 ? m_AimAngle * m_JetAngleRange : -m_AimAngle * m_JetAngleRange * 0.5F;
-			jetAngle -= (c_HalfPI * m_JetAngleRange + c_HalfPI);
-            // Don't need to use FacingAngle on this becuase it's already applied to the AimAngle since last update.
-            m_pJetpack->SetEmitAngle(jetAngle);
-        }
+		float maxAngle = c_HalfPI * m_JetAngleRange;
+		// If pie menu is on, keep the angle to what it was before.
+		if (!m_Controller.IsState(PIE_MENU_ACTIVE)) {
+			// Direct the jetpack nozzle according to movement stick if analog input is present.
+			if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1F) {
+				float jetAngle = std::clamp(m_Controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, -maxAngle, maxAngle);
+				m_pJetpack->SetEmitAngle(FacingAngle(jetAngle - c_HalfPI));
+			// Use the aim angle if we're getting digital input.
+			} else {
+				// Halve the jet angle when looking downwards so the actor isn't forced to go sideways
+				// TODO: don't hardcode this value?
+				float jetAngle = m_AimAngle > 0 ? m_AimAngle * m_JetAngleRange : -m_AimAngle * m_JetAngleRange * 0.5F;
+				jetAngle -= (maxAngle + c_HalfPI);
+				// Don't need to use FacingAngle on this because it's already applied to the AimAngle since last update.
+				m_pJetpack->SetEmitAngle(jetAngle);
+			}
+		}
     }
 
     ////////////////////////////////////
@@ -2625,7 +2626,7 @@ void ACrab::Update()
     /////////////////////////////////
     // Manage Attachable:s
     if (m_pTurret && m_pTurret->IsAttached()) {
-        m_pTurret->SetMountedDeviceRotationOffset((m_AimAngle * static_cast<float>(GetFlipFactor())) - m_Rotation.GetRadAngle());
+        m_pTurret->SetMountedDeviceRotationOffset((m_AimAngle * GetFlipFactor()) - m_Rotation.GetRadAngle());
     }
 
     if (m_pLFGLeg && m_pLFGLeg->IsAttached()) {
@@ -2814,8 +2815,9 @@ void ACrab::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, 
 // Description:     Draws this Actor's current graphical HUD overlay representation to a
 //                  BITMAP of choice.
 
-void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled)
-{
+void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
+	m_HUDStack = -m_CharHeight / 2;
+
     if (!m_HUDVisible)
         return;
 
@@ -2823,13 +2825,11 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     if (m_Team < 0)
         return;
 
-    // Only draw if the team viewing this is on the same team OR has seen the space where this is located
-    int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam)
-    {
-        if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
-            return;
-    }
+	// Only draw if the team viewing this is on the same team OR has seen the space where this is located.
+	int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
+	if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam && (!g_SettingsMan.ShowEnemyHUD() || g_SceneMan.IsUnseen(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), viewingTeam))) {
+		return;
+	}
 
     Actor::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 /*

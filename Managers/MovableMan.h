@@ -635,14 +635,12 @@ public:
     bool RemoveMO(MovableObject *pMOToRem);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          KillAllActors
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Kills and destroys all actors of a specific team.
-// Arguments:       The team to NOT annihilate, if NoTeam, then ALL actors die.
-// Return value:    How many Actors were killed.
-
-    int KillAllActors(int exceptTeam = -1);
+	/// <summary>
+	/// Kills and destroys all enemy actors of a specific team.
+	/// </summary>
+	/// <param name="exceptTeam">The team to NOT annihilate. If NoTeam is passed in, then ALL actors die.</param>
+	/// <returns>How many Actors were killed.</returns>
+	int KillAllEnemyActors(int exceptTeam = Activity::NoTeam);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

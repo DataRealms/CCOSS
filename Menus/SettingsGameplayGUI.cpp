@@ -29,6 +29,9 @@ namespace RTE {
 		m_EndlessMetaGameCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxEndlessMetaGame"));
 		m_EndlessMetaGameCheckbox->SetCheck(g_SettingsMan.EndlessMetaGameMode());
 
+		m_ShowEnemyHUDCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxEnemyHUD"));
+		m_ShowEnemyHUDCheckbox->SetCheck(g_SettingsMan.ShowEnemyHUD());
+
 		m_MaxUnheldItemsTextbox = dynamic_cast<GUITextBox *>(m_GUIControlManager->GetControl("TextboxMaxUnheldItems"));
 		m_MaxUnheldItemsTextbox->SetText(std::to_string(g_MovableMan.GetMaxDroppedItems()));
 		m_MaxUnheldItemsTextbox->SetNumericOnly(true);
@@ -83,6 +86,8 @@ namespace RTE {
 				g_SettingsMan.SetCrabBombsEnabled(m_EnableCrabBombsCheckbox->GetCheck());
 			} else if (guiEvent.GetControl() == m_EndlessMetaGameCheckbox) {
 				g_SettingsMan.SetEndlessMetaGameMode(m_EndlessMetaGameCheckbox->GetCheck());
+			} else if (guiEvent.GetControl() == m_ShowEnemyHUDCheckbox) {
+				g_SettingsMan.SetShowEnemyHUD(m_ShowEnemyHUDCheckbox->GetCheck());
 			} else if (guiEvent.GetControl() == m_MaxUnheldItemsTextbox && guiEvent.GetMsg() == GUITextBox::Enter) {
 				UpdateMaxUnheldItemsTextbox();
 			} else if (guiEvent.GetControl() == m_CrabBombThresholdTextbox && guiEvent.GetMsg() == GUITextBox::Enter) {

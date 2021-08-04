@@ -67,7 +67,7 @@ void Actor::Clear() {
     m_DeathSound = nullptr;
     m_DeviceSwitchSound = nullptr;
     m_Status = STABLE;
-    m_Health = m_PrevHealth = m_MaxHealth = 100;
+    m_Health = m_PrevHealth = m_MaxHealth = 100.0F;
 	m_pTeamIcon = nullptr;
 	m_pControllerIcon = nullptr;
     m_LastSecondTimer.Reset();
@@ -527,7 +527,7 @@ bool Actor::IsPlayerControlled() const
 
 float Actor::GetTotalValue(int nativeModule, float foreignMult, float nativeMult) const
 {
-	float totalValue = (GetGoldValue(nativeModule, foreignMult, nativeMult) / 2) + ((GetGoldValue(nativeModule, foreignMult, nativeMult) / 2) * ((float)GetHealth() / (float)GetMaxHealth()));
+	float totalValue = (GetGoldValue(nativeModule, foreignMult, nativeMult) / 2) + ((GetGoldValue(nativeModule, foreignMult, nativeMult) / 2) * (GetHealth() / GetMaxHealth()));
     totalValue += GetGoldCarried();
 
     MOSprite *pItem = 0;
@@ -1532,8 +1532,7 @@ void Actor::Update()
     ////////////////////////////////
     // Death logic
 
-    if (m_Status != DYING && m_Status != DEAD && std::floor(m_Health) <= 0)
-    {
+	if (m_Status != DYING && m_Status != DEAD && std::round(m_Health) <= 0) {
 		if (m_DeathSound) { m_DeathSound->Play(m_Pos); }
 		m_Controller.SetDisabled(true);
         DropAllInventory();
@@ -1668,13 +1667,11 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     if (m_Team < 0)
         return;
 
-    // Only draw if the team viewing this is on the same team OR has seen the space where this is located
-    int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-    if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam)
-    {
-        if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
-            return;
-    }
+	// Only draw if the team viewing this is on the same team OR has seen the space where this is located.
+	int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
+	if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam && (!g_SettingsMan.ShowEnemyHUD() || g_SceneMan.IsUnseen(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), viewingTeam))) {
+		return;
+	}
 
     // Draw stat info HUD
     char str[64];

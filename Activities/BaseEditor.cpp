@@ -207,7 +207,7 @@ int BaseEditor::Start()
 //    }
 
     // Kill off any actors not of this player's team.. they're not supposed to be here
-    g_MovableMan.KillAllActors(GetTeamOfPlayer(editingPlayer));
+    g_MovableMan.KillAllEnemyActors(GetTeamOfPlayer(editingPlayer));
 
     //////////////////////////////////////////////
     // Allocate and (re)create the Editor GUI

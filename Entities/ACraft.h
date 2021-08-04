@@ -456,6 +456,18 @@ enum
 
 	void DropAllInventory() override;
 
+	/// <summary>
+	/// Gets the mass of this ACraft's inventory of newly collected items.
+	/// </summary>
+	/// <returns>The mass of this ACraft's newly collected inventory.</returns>
+	float GetCollectedInventoryMass() const;
+
+	/// <summary>
+	/// Gets the mass of this ACraft, including the mass of its Attachables, wounds and inventory.
+	/// </summary>
+	/// <returns>The mass of this ACraft, its inventory and all its Attachables and wounds in Kilograms (kg).</returns>
+	float GetMass() const override { return Actor::GetMass() + GetCollectedInventoryMass(); }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          HasDelivered
@@ -622,9 +634,7 @@ protected:
     SoundContainer *m_HatchOpenSound;
 	// Sound for closing the hatch
 	SoundContainer *m_HatchCloseSound;
-    // The new intermediate inventory of things that have been thrown into the craft while the doors are open,
-    // but they shouldn't be ejected until the doors are closed and then opened again.
-    std::deque<MovableObject *> m_NewInventory;
+    std::deque<MovableObject *> m_CollectedInventory;	//!< A separate inventory to temporarily store newly collected items, so that they don't get immediately ejected from the main inventory while the hatch is still open.
     // All the possible exits for when ejecting stuff out of this.
     std::list<Exit> m_Exits;
     // Last used exit so we can alternate/cycle

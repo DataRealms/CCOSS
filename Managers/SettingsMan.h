@@ -137,6 +137,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newThreshold">The new number of crabs needed to be released at once to trigger the crab bomb effect.</param>
 		void SetCrabBombThreshold(int newThreshold) { m_CrabBombThreshold = newThreshold; }
+
+		/// <summary>
+		/// Gets whether the HUD of enemy Actors is set to be visible to the player or not.
+		/// </summary>
+		/// <returns>Whether the HUD of enemy Actors is visible to the player.</returns>
+		bool ShowEnemyHUD() const { return m_ShowEnemyHUD; }
+
+		/// <summary>
+		/// Sets whether the HUD of enemy Actors should to be visible to the player or not.
+		/// </summary>
+		/// <param name="showHUD">Whether the HUD of enemy Actors should be visible to the player or not.</param>
+		void SetShowEnemyHUD(bool showHUD) { m_ShowEnemyHUD = showHUD; }
 #pragma endregion
 
 #pragma region Network Settings
@@ -375,6 +387,7 @@ namespace RTE {
 		bool m_EndlessMetaGameMode; //!< Endless MetaGame mode.
 		bool m_EnableCrabBombs; //!< Whether all actors (except Brains and Doors) should be annihilated if a number exceeding the crab bomb threshold is released at once.
 		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.
+		bool m_ShowEnemyHUD; //!< Whether the HUD of enemy actors should be visible to the player.
 
 		std::string m_PlayerNetworkName; //!< Player name used in network multiplayer matches.
 		std::string m_NetworkServerAddress; //!< LAN server address to connect to.

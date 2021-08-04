@@ -331,7 +331,7 @@ int SLTerrain::LoadData()
     // Get the background texture
     BITMAP *m_pBGTexture = m_BGTextureFile.GetAsBitmap();
     // Get the material palette for quicker access
-    Material **apMaterials = g_SceneMan.GetMaterialPalette();
+	const std::array<Material *, c_PaletteEntriesNumber> &apMaterials = g_SceneMan.GetMaterialPalette();
     // Get the Material palette ID mappings local to the DataModule this SLTerrain is loaded from
     const unsigned char *materialMappings = g_PresetMan.GetDataModule(m_BitmapFile.GetDataModuleID())->GetAllMaterialMappings();
     Material *pMaterial = 0;
@@ -359,10 +359,10 @@ int SLTerrain::LoadData()
             }
 
             // Validate the material, or default to default material
-            if (matIndex >= 0 && matIndex < c_PaletteEntriesNumber && apMaterials[matIndex])
-                pMaterial = apMaterials[matIndex];
+            if (matIndex >= 0 && matIndex < c_PaletteEntriesNumber && apMaterials.at(matIndex))
+                pMaterial = apMaterials.at(matIndex);
             else
-                pMaterial = apMaterials[g_MaterialDefault];
+                pMaterial = apMaterials.at(g_MaterialDefault);
 
             // If haven't read a pixel of this material before, then get its texture so we can quickly access it
             if (!apTexBitmaps[matIndex])

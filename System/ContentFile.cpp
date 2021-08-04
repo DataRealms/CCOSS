@@ -3,6 +3,9 @@
 #include "PresetMan.h"
 #include "ConsoleMan.h"
 
+#include "fmod/fmod.hpp"
+#include "fmod/fmod_errors.h"
+
 namespace RTE {
 
 	const std::string ContentFile::c_ClassName = "ContentFile";
@@ -46,8 +49,8 @@ namespace RTE {
 
 	void ContentFile::FreeAllLoaded() {
 		for (int depth = BitDepths::Eight; depth < BitDepths::BitDepthCount; ++depth) {
-			for (const std::pair<std::string, BITMAP *> &bitmap : s_LoadedBitmaps.at(depth)) {
-				destroy_bitmap(bitmap.second);
+			for (const auto &[bitmapPath, bitmapPtr] : s_LoadedBitmaps.at(depth)) {
+				destroy_bitmap(bitmapPtr);
 			}
 		}
 	}
@@ -128,7 +131,7 @@ namespace RTE {
 			returnBitmap = LoadAndReleaseBitmap(conversionMode, dataPathToLoad); // NOTE: This takes ownership of the bitmap file
 
 			// Insert the bitmap into the map, PASSING OVER OWNERSHIP OF THE LOADED DATAFILE
-			if (storeBitmap) { s_LoadedBitmaps.at(bitDepth).insert({ dataPathToLoad, returnBitmap }); }
+			if (storeBitmap) { s_LoadedBitmaps.at(bitDepth).try_emplace(dataPathToLoad, returnBitmap); }
 		}
 		return returnBitmap;
 	}
@@ -202,7 +205,7 @@ namespace RTE {
 			returnSample = LoadAndReleaseSound(abortGameForInvalidSound, asyncLoading); //NOTE: This takes ownership of the sample file
 
 			// Insert the Sound object into the map, PASSING OVER OWNERSHIP OF THE LOADED FILE
-			s_LoadedSamples.insert({ m_DataPath, returnSample });
+			s_LoadedSamples.try_emplace(m_DataPath, returnSample);
 		}
 		return returnSample;
 	}
@@ -232,7 +235,7 @@ namespace RTE {
 			}
 		}
 		if (std::filesystem::file_size(m_DataPath) == 0) {
-			const std::string errorMessage = "Failed to create sound because because the file was empty. The path and name were: ";
+			const std::string errorMessage = "Failed to create sound because the file was empty. The path and name were: ";
 			RTEAssert(!abortGameForInvalidSound, errorMessage + "\n\n" + m_DataPathAndReaderPosition);
 			g_ConsoleMan.PrintString("ERROR: " + errorMessage + m_DataPath);
 			return nullptr;

@@ -66,7 +66,7 @@ namespace RTE {
 		/// Gets the number of frames in this Icon's animation.
 		/// </summary>
 		/// <returns>The number of frames in the animation.</returns>
-		unsigned short GetFrameCount() const { return m_FrameCount; }
+		unsigned int GetFrameCount() const { return m_FrameCount; }
 
 		/// <summary>
 		/// Gets the array of 8-bit bitmaps of this Icon, as many as GetFrameCount says. Neither the array nor the BITMAPs are transferred ownership!
@@ -94,8 +94,8 @@ namespace RTE {
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		ContentFile m_BitmapFile; //!< ContentFile containing the bitmap file of this Icon.		
-		unsigned short m_FrameCount; //!< Number of frames in this Icon's animation.
+		ContentFile m_BitmapFile; //!< ContentFile containing the bitmap file of this Icon.
+		unsigned int m_FrameCount; //!< Number of frames in this Icon's animation.
 
 		std::vector<BITMAP *> m_BitmapsIndexed; //!< Vector containing the 8bpp BITMAPs of this Icon. BITMAPs are NOT owned!
 		std::vector<BITMAP *> m_BitmapsTrueColor; //!< Vector containing the 32bpp BITMAPs of this Icon. BITMAPs are NOT owned!

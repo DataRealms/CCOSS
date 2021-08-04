@@ -630,7 +630,7 @@ float Deployment::GetTotalValue(int nativeModule, float foreignMult, float nativ
 
 bool Deployment::IsOnScenePoint(Vector &scenePoint) const
 {
-    if (!m_Icon.GetBitmaps8() || !(m_Icon.GetBitmaps8()[0]))
+    if (m_Icon.GetBitmaps8().empty() || !(m_Icon.GetBitmaps8().at(0)))
         return false;
 // TODO: TAKE CARE OF WRAPPING
 /*
@@ -677,7 +677,7 @@ bool Deployment::IsOnScenePoint(Vector &scenePoint) const
         }
     }
 */
-    BITMAP *pBitmap = m_Icon.GetBitmaps8()[0];
+    BITMAP *pBitmap = m_Icon.GetBitmaps8().at(0);
     Vector bitmapPos = m_Pos - Vector(pBitmap->w / 2, pBitmap->h / 2);
     if (WithinBox(scenePoint, bitmapPos, pBitmap->w, pBitmap->h))
     {
@@ -706,7 +706,7 @@ void Deployment::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode m
 		RTEAbort("Deployment's Arrow bitmaps are null when drawing!");
 
 	{
-		BITMAP *pBitmap = m_Icon.GetBitmaps8()[0];
+		BITMAP *pBitmap = m_Icon.GetBitmaps8().at(0);
 
 		// Take care of wrapping situations
 		Vector aDrawPos[4];

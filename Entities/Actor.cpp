@@ -1751,7 +1751,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 					{
 						std::vector<BITMAP *> apControllerBitmaps = m_pControllerIcon->GetBitmaps8();
 
-						masked_blit(apControllerBitmaps[0], pTargetBitmap, 0, 0, drawPos.m_X - apControllerBitmaps[0]->w - 2 + 10, drawPos.m_Y + m_HUDStack - (apControllerBitmaps[0]->h / 2) + 8, apControllerBitmaps[0]->w, apControllerBitmaps[0]->h);
+						masked_blit(apControllerBitmaps.at(0), pTargetBitmap, 0, 0, drawPos.m_X - apControllerBitmaps.at(0)->w - 2 + 10, drawPos.m_Y + m_HUDStack - (apControllerBitmaps.at(0)->h / 2) + 8, apControllerBitmaps.at(0)->w, apControllerBitmaps.at(0)->h);
 					}
 				}
 
@@ -1770,7 +1770,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                     // Make team icon blink faster as the health goes down
                     int f = m_HeartBeat.AlternateReal(200 + 800 * (m_Health / 100)) ? 0 : 1;
                     f = MIN(f, m_pTeamIcon ? m_pTeamIcon->GetFrameCount() - 1 : 1);
-                    masked_blit(apIconBitmaps[f], pTargetBitmap, 0, 0, drawPos.m_X - apIconBitmaps[f]->w - 2, drawPos.m_Y + m_HUDStack - (apIconBitmaps[f]->h / 2) + 8, apIconBitmaps[f]->w, apIconBitmaps[f]->h);
+                    masked_blit(apIconBitmaps.at(f), pTargetBitmap, 0, 0, drawPos.m_X - apIconBitmaps.at(f)->w - 2, drawPos.m_Y + m_HUDStack - (apIconBitmaps.at(f)->h / 2) + 8, apIconBitmaps.at(f)->w, apIconBitmaps.at(f)->h);
                 }
             }
             // Draw death icon

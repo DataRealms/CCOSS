@@ -67,15 +67,12 @@ int MOSprite::Create()
     if (!m_aSprite.empty() && m_aSprite.at(0))
     {
         // Set default sprite offset
-        if (m_SpriteOffset.IsZero())
-        {
-            m_SpriteOffset.m_X = -m_aSprite[0]->w / 2;
-            m_SpriteOffset.m_Y = -m_aSprite[0]->h / 2;
-        }
+        if (m_SpriteOffset.IsZero()) { m_SpriteOffset.SetXY(static_cast<float>(-m_aSprite.at(0)->w) / 2.0F, static_cast<float>(-m_aSprite.at(0)->h) / 2.0F); }
+
         // Calc maximum dimensions from the Pos, based on the sprite
-        float maxX = MAX(fabs(m_SpriteOffset.m_X), fabs(m_aSprite[0]->w + m_SpriteOffset.m_X));
-        float maxY = MAX(fabs(m_SpriteOffset.m_Y), fabs(m_aSprite[0]->h + m_SpriteOffset.m_Y));
-        m_SpriteRadius = sqrt((float)(maxX * maxX) + (maxY * maxY));
+        float maxX = std::max(std::fabs(m_SpriteOffset.GetX()), std::fabs(static_cast<float>(m_aSprite.at(0)->w) + m_SpriteOffset.GetX()));
+        float maxY = std::max(std::fabs(m_SpriteOffset.GetY()), std::fabs(static_cast<float>(m_aSprite.at(0)->h) + m_SpriteOffset.GetY()));
+        m_SpriteRadius = std::sqrt((maxX * maxX) + (maxY * maxY));
         m_SpriteDiameter = m_SpriteRadius * 2.0F;
     }
     else
@@ -102,14 +99,14 @@ int MOSprite::Create(ContentFile spriteFile,
     m_SpriteFile = spriteFile;
     m_FrameCount = frameCount;
     m_aSprite = m_SpriteFile.GetAsAnimation(m_FrameCount);
-    m_SpriteOffset = Vector(-m_aSprite[0]->w / 2, -m_aSprite[0]->h / 2);
+    m_SpriteOffset.SetXY(static_cast<float>(-m_aSprite.at(0)->w) / 2.0F, static_cast<float>(-m_aSprite.at(0)->h) / 2.0F);
 
     m_HFlipped = false;
 
     // Calc maximum dimensions from the Pos, based on the sprite
-    float maxX = MAX(fabs(m_SpriteOffset.m_X), fabs(m_aSprite[0]->w + m_SpriteOffset.m_X));
-    float maxY = MAX(fabs(m_SpriteOffset.m_Y), fabs(m_aSprite[0]->h + m_SpriteOffset.m_Y));
-    m_SpriteRadius = sqrt((float)(maxX * maxX) + (maxY * maxY));
+    float maxX = std::max(std::fabs(m_SpriteOffset.GetX()), std::fabs(static_cast<float>(m_aSprite.at(0)->w) + m_SpriteOffset.GetX()));
+    float maxY = std::max(std::fabs(m_SpriteOffset.GetY()), std::fabs(static_cast<float>(m_aSprite.at(0)->h) + m_SpriteOffset.GetY()));
+    m_SpriteRadius = std::sqrt((maxX * maxX) + (maxY * maxY));
     m_SpriteDiameter = m_SpriteRadius * 2.0F;
 
     return 0;

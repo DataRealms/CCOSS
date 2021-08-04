@@ -126,13 +126,13 @@ namespace RTE {
 		BITMAP * GetAsBitmap(int conversionMode = 0, bool storeBitmap = true, const std::string &dataPathToSpecificFrame = "");
 
 		/// <summary>
-		/// Gets the data represented by this ContentFile object as an array of Allegro BITMAPs, each representing a frame in the animation.
-		/// It loads the BITMAPs into the static maps if they're not already loaded. Ownership of the BITMAPs is NOT transferred, but the array itself IS!
+		/// Gets the data represented by this ContentFile object as a vector of Allegro BITMAPs, each representing a frame in the animation.
+		/// It loads the BITMAPs into the static maps if they're not already loaded. Ownership of the BITMAPs is NOT transferred!
 		/// </summary>
-		/// <param name="frameCount">The number of frames to attempt to load, more than 1 frame will mean 00# is appended to datapath to handle naming conventions.</param>
+		/// <param name="frameCount">The number of frames to attempt to load, more than 1 frame will mean 00# is appended to DataPath to handle naming conventions.</param>
 		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap.</param>
-		/// <returns>Pointer to the beginning of the array of BITMAP pointers loaded from the disk, the length of which is specified with the FrameCount argument.</returns>
-		BITMAP ** GetAsAnimation(int frameCount = 1, int conversionMode = 0);
+		/// <returns>Vector of BITMAP pointers loaded from the disk.</returns>
+		std::vector<BITMAP *> GetAsAnimation(int frameCount = 1, int conversionMode = 0);
 
 		/// <summary>
 		/// Gets the data represented by this ContentFile object as an FMOD FSOUND_SAMPLE, loading it into the static maps if it's not already loaded. Ownership of the FSOUND_SAMPLE is NOT transferred!

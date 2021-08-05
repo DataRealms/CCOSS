@@ -633,30 +633,15 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
     list<Entity *> entityList;
     list<Entity *> tempList;
 
-
-    string techString = " Tech";
-    string techName;
-    string::size_type techPos = string::npos;
-
-    // All modules
-    if (whichModule < 0)
-    {
-        // Get from all modules
-        for (int i = 0; i < m_pDataModules.size(); ++i)
-		{
-			// Select from tech-only modules
-			techName = m_pDataModules[i]->GetFriendlyName();
-			if (techName.find(techString) != string::npos)
-				// Send the list to each module, let them add
-				foundAny = m_pDataModules[i]->GetAllOfGroup(tempList, group, type) || foundAny;
+	// All modules
+	if (whichModule < 0) {
+		for (DataModule *dataModule : m_pDataModules) {
+			if (dataModule->IsFaction()) { foundAny = dataModule->GetAllOfGroup(tempList, group, type) || foundAny; }
 		}
-    }
-    // Specific one
-    else
-    {
-        RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
-        foundAny = m_pDataModules[whichModule]->GetAllOfGroup(tempList, group, type);
-    }
+	} else {
+		RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
+		foundAny = m_pDataModules[whichModule]->GetAllOfGroup(tempList, group, type);
+	}
 
 	//Filter found entities, we need only buyables
 	if (foundAny)

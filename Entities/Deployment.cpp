@@ -240,22 +240,14 @@ Actor * Deployment::CreateDeployedActor(int player, float &costTally)
 			//m_Team = activity->GetTeamOfPlayer(player);
 			nativeModule = g_PresetMan.GetModuleID(activity->GetTeamTech(m_Team));
 			// Select some random module if player selected all or something else
-			if (nativeModule < 0)
-			{
-			    const DataModule *pModule = 0;
-				vector<string> moduleList;
-				string techName;
-				string techString = " Tech";
-				string::size_type techPos = string::npos;
-				
-				for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i)  
-				{
-					pModule = g_PresetMan.GetDataModule(i);
-					techName = pModule->GetFriendlyName();
-					if (pModule && (techPos = techName.find(techString)) != string::npos)
-						moduleList.push_back(pModule->GetFileName());
-				}
+			if (nativeModule < 0) {
+				std::vector<std::string> moduleList;
 
+				for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID) {
+					if (const DataModule *dataModule = g_PresetMan.GetDataModule(moduleID)) {
+						if (dataModule->IsFaction()) { moduleList.emplace_back(dataModule->GetFileName()); }
+					}
+				}
 				int selection = RandomNum<int>(1, moduleList.size() - 1);
 				nativeModule = g_PresetMan.GetModuleID(moduleList.at(selection));
 			}
@@ -331,25 +323,14 @@ SceneObject * Deployment::CreateDeployedObject(int player, float &costTally)
 			//m_Team = activity->GetTeamOfPlayer(player);
 			nativeModule = g_PresetMan.GetModuleID(activity->GetTeamTech(m_Team));
 			// Select some random module if player selected all or something else
-			if (nativeModule < 0)
-			{
-			    const DataModule *pModule = 0;
-				vector<string> moduleList;
-				string techName;
-				string techString = " Tech";
-				string::size_type techPos = string::npos;
-				
-				for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i)  
-				{
-					pModule = g_PresetMan.GetDataModule(i);
-					if (pModule)
-					{
-						techName = pModule->GetFriendlyName();
-						if (techPos = techName.find(techString) != string::npos)
-							moduleList.push_back(pModule->GetFileName());
+			if (nativeModule < 0) {
+				std::vector<std::string> moduleList;
+
+				for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID) {
+					if (const DataModule *dataModule = g_PresetMan.GetDataModule(moduleID)) {
+						if (dataModule->IsFaction()) { moduleList.emplace_back(dataModule->GetFileName()); }
 					}
 				}
-
 				int selection = RandomNum<int>(1, moduleList.size() - 1);
 				nativeModule = g_PresetMan.GetModuleID(moduleList.at(selection));
 			}

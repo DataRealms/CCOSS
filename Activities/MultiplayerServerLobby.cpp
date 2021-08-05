@@ -303,31 +303,16 @@ namespace RTE {
 		m_pCPULockLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("CPULockLabel"));
 
 		// Populate the tech comboboxes with the available tech modules
-		const DataModule *pModule = 0;
-		string techName;
-		string techString = " Tech";
-		string::size_type techPos = string::npos;
-		for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i)
-		{
-			pModule = g_PresetMan.GetDataModule(i);
-			if (pModule)
-			{
-				techName = pModule->GetFriendlyName();
-				if ((techPos = techName.find(techString)) != string::npos)
-				{
-					techName.replace(techPos, techString.length(), "");
-					m_apTeamTechSelect[Teams::TeamOne]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-					m_apTeamTechSelect[Teams::TeamTwo]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-					m_apTeamTechSelect[Teams::TeamThree]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-					m_apTeamTechSelect[Teams::TeamFour]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+		for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID) {
+			if (const DataModule *dataModule = g_PresetMan.GetDataModule(moduleID)) {
+				if (dataModule->IsFaction()) {
+					for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
+						m_apTeamTechSelect[team]->GetListPanel()->AddItem(dataModule->GetFriendlyName(), "", nullptr, nullptr, moduleID);
+						m_apTeamTechSelect[team]->GetListPanel()->ScrollToTop();
+					}
 				}
 			}
 		}
-		// Make the lists be scrolled to the top when they are initially dropped
-		m_apTeamTechSelect[Teams::TeamOne]->GetListPanel()->ScrollToTop();
-		m_apTeamTechSelect[Teams::TeamTwo]->GetListPanel()->ScrollToTop();
-		m_apTeamTechSelect[Teams::TeamThree]->GetListPanel()->ScrollToTop();
-		m_apTeamTechSelect[Teams::TeamFour]->GetListPanel()->ScrollToTop();
 
 		m_pGoldLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("GoldLabel"));
 		m_pGoldSlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("GoldSlider"));

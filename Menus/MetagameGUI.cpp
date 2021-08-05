@@ -830,15 +830,11 @@ void MetagameGUI::SetEnabled(bool enable)
 		m_apPlayerTechSelect[team]->GetListPanel()->AddItem("-Random-", "", nullptr, nullptr, -1);
 		m_apPlayerTechSelect[team]->SetSelectedIndex(0);
 	}
-	std::string techString = " Tech";
 	for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID) {
 		if (const DataModule *dataModule = g_PresetMan.GetDataModule(moduleID)) {
-			std::string techName = dataModule->GetFriendlyName();
-			size_t techPos = techName.find(techString);
-			if (techPos != string::npos) {
-				techName.replace(techPos, techString.length(), "");
+			if (dataModule->IsFaction()) {
 				for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
-					m_apPlayerTechSelect[team]->GetListPanel()->AddItem(techName, "", nullptr, nullptr, moduleID);
+					m_apPlayerTechSelect[team]->GetListPanel()->AddItem(dataModule->GetFriendlyName(), "", nullptr, nullptr, moduleID);
 					m_apPlayerTechSelect[team]->GetListPanel()->ScrollToTop();
 				}
 			}

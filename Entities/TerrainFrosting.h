@@ -6,6 +6,8 @@
 
 namespace RTE {
 
+	class SLTerrain;
+
 	/// <summary>
 	/// Specifies a 'frosting' layer of material on top of another material in the terrain. Gets applied upon loading the scene.
 	/// </summary>
@@ -67,6 +69,14 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether only appears in air particles.</returns>
 		bool InAirOnly() const { return m_InAirOnly; }
+#pragma endregion
+
+#pragma region Concrete Methods
+		/// <summary>
+		/// Applies the frosting to an SLTerrain as its read parameters specify.
+		/// </summary>
+		/// <param name="terrain">Pointer to the terrain to place the frosting on. Ownership is NOT transferred!</param>
+		void ApplyFrosting(SLTerrain *terrain) const;
 #pragma endregion
 
 	protected:

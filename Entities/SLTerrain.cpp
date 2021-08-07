@@ -304,71 +304,11 @@ int SLTerrain::LoadData()
         }
     }
 
-    ///////////////////////////////////////
-    // Material frostings application!
 
-    bool targetFound = false, applyingFrosting = false;
-    int targetId, frostingId, thickness, thicknessGoal;
-    BITMAP *pFrostingTex = 0;
-    for (list<TerrainFrosting>::iterator tfItr = m_TerrainFrostings.begin(); tfItr != m_TerrainFrostings.end(); ++tfItr)
-    {
-        targetId = (*tfItr).GetTargetMaterial().GetIndex();
-        frostingId = (*tfItr).GetFrostingMaterial().GetIndex();
-        // Try to get the color texture of the frosting material. If fail, we'll use the color isntead
-        pFrostingTex = (*tfItr).GetFrostingMaterial().GetTexture();
-        if (pFrostingTex)
-            acquire_bitmap(pFrostingTex);
 
-        // Loop through all columns
-        for (xPos = 0; xPos < m_pMainBitmap->w; ++xPos)
-        {
-            // Get the thickness for this column
-            thicknessGoal = (*tfItr).GetThicknessSample();
 
-            // Work upward from the bottom of each column
-            for (yPos = m_pMainBitmap->h - 1; yPos >= 0; --yPos)
-            {
-                // Read which material the current pixel represents
-                matIndex = _getpixel(m_pMainBitmap, xPos, yPos);
 
-                // We've encountered the target material! Prepare to apply frosting as soon as it ends!
-                if (!targetFound && matIndex == targetId)
-                {
-                    targetFound = true;
-                    thickness = 0;
-                }
-                // Target material has ended! See if we shuold start putting on the frosting
-                else if (targetFound && matIndex != targetId && thickness <= thicknessGoal)
-                {
-                    applyingFrosting = true;
-                    targetFound = false;
-                }
 
-                // If time to put down frosting pixels, then do so IF there is air, OR we're set to ignore what we're overwriting
-                if (applyingFrosting && (matIndex == g_MaterialAir || !(*tfItr).InAirOnly()) && thickness <= thicknessGoal)
-                {
-                    // Get the color either from the frosting material's texture or the solid color
-                    if (pFrostingTex)
-                        pixelColor = _getpixel(pFrostingTex, xPos % pFrostingTex->w, yPos % pFrostingTex->h);
-                    else
-                        pixelColor = (*tfItr).GetFrostingMaterial().GetColor().GetIndex();
-
-                    // Put the frosting pixel color on the FG color layer
-                    _putpixel(pFGBitmap, xPos, yPos, pixelColor);
-                    // Put the material ID pixel on the material layer
-                    _putpixel(m_pMainBitmap, xPos, yPos, frostingId);
-
-                    // Keep track of the applied thickness
-                    thickness++;
-                }
-                else
-                    applyingFrosting = false;
-            }
-        }
-
-        if (pFrostingTex)
-            release_bitmap(pFrostingTex);
-    }
 
     // Release all involved bitmaps
     release_bitmap(m_pMainBitmap);

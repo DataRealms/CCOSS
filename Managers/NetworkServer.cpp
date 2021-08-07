@@ -683,7 +683,7 @@ namespace RTE {
 
 		for (SceneLayer * &layer : sceneLayers) {
 			// Recalculate layers internal values for this player
-			layer->UpdateScrollRatiosForNetworkPlayer(player);
+			layer->InitScrollRatios(true, player);
 			msgSceneSetup.BackgroundLayers[index].BitmapHash = layer->GetBitmapHash();
 
 			msgSceneSetup.BackgroundLayers[index].DrawTrans = layer->m_DrawTrans;

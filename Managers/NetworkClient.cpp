@@ -13,16 +13,6 @@
 
 namespace RTE {
 
-	// Data structure for constructing the draw boxes we'll need to use for drawing SceneLayers.
-	struct SLDrawBox {
-		int sourceX;
-		int sourceY;
-		int sourceW;
-		int sourceH;
-		int destX;
-		int destY;
-	};
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void NetworkClient::Clear() {
@@ -713,7 +703,6 @@ namespace RTE {
 				int sourceH = 0;
 				int destX = 0;
 				int destY = 0;
-				std::list<SLDrawBox> drawList;
 
 				int offsetX;
 				int offsetY;

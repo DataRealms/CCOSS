@@ -1,5 +1,6 @@
 #include "TerrainDebris.h"
 #include "SLTerrain.h"
+#include "SceneMan.h"
 
 namespace RTE {
 

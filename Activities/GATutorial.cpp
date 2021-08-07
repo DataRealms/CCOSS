@@ -46,8 +46,7 @@ GATutorial::TutStep::TutStep(string text, int stepDuration, string screensPath, 
 
     if (!screensPath.empty())
     {
-        ContentFile screenFile(screensPath.c_str());
-		m_pScreens = screenFile.GetAsAnimation(frameCount);
+        ContentFile(screensPath.c_str()).GetAsAnimation(m_pScreens, frameCount);
     }
 }
 
@@ -340,9 +339,7 @@ int GATutorial::Start()
     // SET UP TUTORIAL
 
     // COMMON SCREENS
-    ContentFile screenFile;
-    screenFile.SetDataPath("Missions.rte/Objects/Tutorial/ScreenStatic.png");
-    std::vector<BITMAP *> apScreens = screenFile.GetAsAnimation(3);
+    std::vector<BITMAP *> apScreens = ContentFile("Missions.rte/Objects/Tutorial/ScreenStatic.png").GetAsAnimation(3);
     m_apCommonScreens[SCREENOFF] = apScreens.at(0);
     m_apCommonScreens[STATICLITTLE] = apScreens.at(1);
     m_apCommonScreens[STATICLARGE] = apScreens.at(2);

@@ -26,7 +26,7 @@ namespace RTE {
 		if (Entity::Create() < 0) {
 			return -1;
 		}
-		m_Bitmaps = m_DebrisFile.GetAsAnimation(m_BitmapCount);
+		m_DebrisFile.GetAsAnimation(m_Bitmaps, m_BitmapCount);
 		RTEAssert(!m_Bitmaps.empty() && m_Bitmaps.at(0), "Failed to load debris bitmaps!");
 
 		return 0;

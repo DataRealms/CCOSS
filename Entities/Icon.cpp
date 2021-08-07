@@ -19,8 +19,8 @@ namespace RTE {
 		if (m_BitmapsIndexed.empty() || m_BitmapsTrueColor.empty()) {
 			if (m_BitmapFile.GetDataPath().empty()) { m_BitmapFile.SetDataPath("Base.rte/GUIs/DefaultIcon.png"); }
 
-			m_BitmapsIndexed = m_BitmapFile.GetAsAnimation(m_FrameCount, COLORCONV_REDUCE_TO_256);
-			m_BitmapsTrueColor = m_BitmapFile.GetAsAnimation(m_FrameCount, COLORCONV_8_TO_32);
+			m_BitmapFile.GetAsAnimation(m_BitmapsIndexed, m_FrameCount, COLORCONV_REDUCE_TO_256);
+			m_BitmapFile.GetAsAnimation(m_BitmapsTrueColor, m_FrameCount, COLORCONV_8_TO_32);
 		}
 		return 0;
 	}

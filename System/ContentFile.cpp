@@ -138,12 +138,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::vector<BITMAP *> ContentFile::GetAsAnimation(int frameCount, int conversionMode) {
-		std::vector<BITMAP *> returnBitmaps;
+	void ContentFile::GetAsAnimation(std::vector<BITMAP *> &vectorToFill, int frameCount, int conversionMode) {
 		if (m_DataPath.empty() || frameCount < 1) {
-			return returnBitmaps;
+			return;
 		}
-		returnBitmaps.reserve(frameCount);
+		vectorToFill.reserve(frameCount);
 		SetFormattedReaderPosition(GetFormattedReaderPosition());
 
 		if (frameCount == 1) {
@@ -158,15 +157,14 @@ namespace RTE {
 					SetDataPath(m_DataPathWithoutExtension + "000" + altFileExtension);
 				}
 			}
-			returnBitmaps.emplace_back(GetAsBitmap(conversionMode));
+			vectorToFill.emplace_back(GetAsBitmap(conversionMode));
 		} else {
 			char framePath[1024];
 			for (int frameNum = 0; frameNum < frameCount; ++frameNum) {
 				std::snprintf(framePath, sizeof(framePath), "%s%03i%s", m_DataPathWithoutExtension.c_str(), frameNum, m_DataPathExtension.c_str());
-				returnBitmaps.emplace_back(GetAsBitmap(conversionMode, true, framePath));
+				vectorToFill.emplace_back(GetAsBitmap(conversionMode, true, framePath));
 			}
 		}
-		return returnBitmaps;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

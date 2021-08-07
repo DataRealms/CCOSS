@@ -539,6 +539,7 @@
     <ClInclude Include="Entities\PEmitter.h" />
     <ClInclude Include="Entities\Round.h" />
     <ClInclude Include="Entities\SoundSet.h" />
+    <ClInclude Include="Entities\TerrainFrosting.h" />
     <ClInclude Include="GUI\GUIInterface.h" />
     <ClInclude Include="GUI\GUIReader.h" />
     <ClInclude Include="GUI\GUISound.h" />
@@ -712,6 +713,7 @@
     <ClCompile Include="Entities\PEmitter.cpp" />
     <ClCompile Include="Entities\Round.cpp" />
     <ClCompile Include="Entities\SoundSet.cpp" />
+    <ClCompile Include="Entities\TerrainFrosting.cpp" />
     <ClCompile Include="GUI\GUIReader.cpp" />
     <ClCompile Include="GUI\GUISound.cpp" />
     <ClCompile Include="GUI\GUIWriter.cpp" />

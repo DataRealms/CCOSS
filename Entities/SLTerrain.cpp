@@ -25,7 +25,6 @@ namespace RTE {
 
 ConcreteClassInfo(SLTerrain, SceneLayer, 0)
 
-const string SLTerrain::TerrainFrosting::c_ClassName = "TerrainFrosting";
 BITMAP * SLTerrain::m_spTempBitmap16 = 0;
 BITMAP * SLTerrain::m_spTempBitmap32 = 0;
 BITMAP * SLTerrain::m_spTempBitmap64 = 0;
@@ -33,104 +32,6 @@ BITMAP * SLTerrain::m_spTempBitmap128 = 0;
 BITMAP * SLTerrain::m_spTempBitmap256 = 0;
 BITMAP * SLTerrain::m_spTempBitmap512 = 0;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this TerrainFrosting, effectively
-//                  resetting the members of this abstraction level only.
-
-void SLTerrain::TerrainFrosting::Clear()
-{
-    m_TargetMaterial.Reset();
-    m_FrostingMaterial.Reset();
-    m_MinThickness = 5;
-    m_MaxThickness = 5;
-    m_InAirOnly = true;
-}
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the TerrainFrosting object ready for use.
-
-int SLTerrain::TerrainFrosting::Create()
-{
-    if (Serializable::Create() < 0)
-        return -1;
-
-    return 0;
-}
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a TerrainFrosting to be identical to another, by deep copy.
-
-int SLTerrain::TerrainFrosting::Create(const TerrainFrosting &reference)
-{
-    m_TargetMaterial = reference.m_TargetMaterial;
-    m_FrostingMaterial = reference.m_FrostingMaterial;
-    m_MinThickness = reference.m_MinThickness;
-    m_MaxThickness = reference.m_MaxThickness;
-    m_InAirOnly = reference.m_InAirOnly;
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ReadProperty
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reads a property value from a reader stream. If the name isn't
-//                  recognized by this class, then ReadProperty of the parent class
-//                  is called. If the property isn't recognized by any of the base classes,
-//                  false is returned, and the reader's position is untouched.
-
-int SLTerrain::TerrainFrosting::ReadProperty(const std::string_view &propName, Reader &reader)
-{
-    if (propName == "TargetMaterial")
-        reader >> m_TargetMaterial;
-    else if (propName == "FrostingMaterial")
-        reader >> m_FrostingMaterial;
-    else if (propName == "MinThickness")
-        reader >> m_MinThickness;
-    else if (propName == "MaxThickness")
-        reader >> m_MaxThickness;
-    else if (propName == "InAirOnly")
-        reader >> m_InAirOnly;
-    else
-        return Serializable::ReadProperty(propName, reader);
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Save
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves the complete state of this TerrainFrosting with a Writer for
-//                  later recreation with Create(Reader &reader);
-
-int SLTerrain::TerrainFrosting::Save(Writer &writer) const
-{
-    Serializable::Save(writer);
-
-    writer.NewProperty("TargetMaterial");
-    writer << m_TargetMaterial;
-    writer.NewProperty("FrostingMaterial");
-    writer << m_FrostingMaterial;
-    writer.NewProperty("MinThickness");
-    writer << m_MinThickness;
-    writer.NewProperty("MaxThickness");
-    writer << m_MaxThickness;
-    writer.NewProperty("InAirOnly");
-    writer << m_InAirOnly;
-
-    return 0;
-}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

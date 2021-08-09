@@ -201,7 +201,7 @@ namespace RTE {
 		/// <summary>
 		/// Takes a BITMAP and scans through the pixels on this terrain for pixels which overlap with it. Erases them from the terrain and can optionally generate MOPixel:s based on the erased or 'dislodged' terrain pixels.
 		/// </summary>
-		/// <param name="pSprite">A pointer to the source BITMAP whose rotozoomed silhouette will be used as a cookie-cutter on the terrain.</param>
+		/// <param name="sprite">A pointer to the source BITMAP whose rotozoomed silhouette will be used as a cookie-cutter on the terrain.</param>
 		/// <param name="pos">The position coordinates of the sprite.</param>
 		/// <param name="pivot"></param>
 		/// <param name="rotation">The sprite's current rotation in radians.</param>
@@ -210,7 +210,7 @@ namespace RTE {
 		/// <param name="skipMOP">How many pixels to skip making MOPixels from, between each that gets made. 0 means every pixel turns into an MOPixel.</param>
 		/// <param name="maxMOPs">The max number of MOPixels to make, if they are to be made.</param>
 		/// <returns>A deque filled with the MOPixels of the terrain that are now dislodged. This will be empty if makeMOPs is false. Note that ownership of all the MOPixels in the deque IS transferred! </returns>
-		std::deque<MOPixel *> EraseSilhouette(BITMAP *pSprite, Vector pos, Vector pivot, Matrix rotation, float scale, bool makeMOPs = true, int skipMOP = 2, int maxMOPs = 150);
+		std::deque<MOPixel *> EraseSilhouette(BITMAP *sprite, Vector pos, Vector pivot, Matrix rotation, float scale, bool makeMOPs = true, int skipMOP = 2, int maxMOPs = 150);
 
 		/// <summary>
 		/// Draws a passed in Object's graphical and material representations to this Terrain's respective layers.

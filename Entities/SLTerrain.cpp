@@ -194,10 +194,10 @@ namespace RTE {
 		const std::array<unsigned char, c_PaletteEntriesNumber> &materialMappings = g_PresetMan.GetDataModule(m_BitmapFile.GetDataModuleID())->GetAllMaterialMappings();
 
 		// Lock all involved bitmaps
-		acquire_bitmap(m_MainBitmap);
-		acquire_bitmap(fgColorBitmap);
-		acquire_bitmap(bgColorBitmap);
-		acquire_bitmap(bgLayerTexture);
+		//acquire_bitmap(m_MainBitmap);
+		//acquire_bitmap(fgColorBitmap);
+		//acquire_bitmap(bgColorBitmap);
+		//acquire_bitmap(bgLayerTexture);
 
 		// Go through each pixel on the main bitmap, which contains all the material pixels loaded from the bitmap
 		// Place texture pixels on the FG layer corresponding to the materials on the main material bitmap
@@ -245,11 +245,10 @@ namespace RTE {
 			}
 		}
 
-		release_bitmap(m_MainBitmap);
-		release_bitmap(fgColorBitmap);
-		release_bitmap(bgColorBitmap);
-		release_bitmap(bgLayerTexture);
-
+		//release_bitmap(m_MainBitmap);
+		//release_bitmap(fgColorBitmap);
+		//release_bitmap(bgColorBitmap);
+		//release_bitmap(bgLayerTexture);
 		/*
 		for (BITMAP *textureBitmap : materialTextures) {
 			release_bitmap(textureBitmap);
@@ -264,62 +263,41 @@ namespace RTE {
 		if (SceneLayer::LoadData()) {
 			return -1;
 		}
-
 		RTEAssert(m_FGColorLayer.get(), "Terrain's foreground layer not instantiated before trying to load its data!");
 		RTEAssert(m_BGColorLayer.get(), "Terrain's background layer not instantiated before trying to load its data!");
 
-		// Check if our color layers' BITMAP data is also to be loaded from disk, and not be generated from the material bitmap!
 		if (m_FGColorLayer->IsFileData() && m_BGColorLayer->IsFileData()) {
-			if (m_FGColorLayer->LoadData() < 0) {
-				RTEAbort("Could not load the Foreground Color SceneLayer data from file, when a path was specified for it!");
-				return -1;
+			RTEAssert(m_FGColorLayer->LoadData() == 0, "Could not load the Foreground Color SceneLayer data from file, when a path was specified for it!");
+			RTEAssert(m_BGColorLayer->LoadData() == 0, "Could not load the Background Color SceneLayer data from file, when a path was specified for it!");
+		} else {
+			m_FGColorLayer->Destroy();
+			m_FGColorLayer->Create(create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h), true, m_Offset, m_WrapX, m_WrapY, m_ScrollRatio);
+
+			m_BGColorLayer->Destroy();
+			m_BGColorLayer->Create(create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h), true, m_Offset, m_WrapX, m_WrapY, m_ScrollRatio);
+
+			/*
+			// Structural integrity calc buffer bitmap
+			destroy_bitmap(m_StructuralBitmap);
+			m_StructuralBitmap = create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h);
+			RTEAssert(m_StructuralBitmap, "Failed to allocate BITMAP in Terrain::Create");
+			clear_bitmap(m_StructuralBitmap);
+			*/
+
+			TexturizeTerrain();
+
+			for (const TerrainFrosting *terrainFrosting : m_TerrainFrostings) {
+				terrainFrosting->ApplyFrosting(this);
 			}
-			if (m_BGColorLayer->LoadData() < 0) {
-				RTEAbort("Could not load the Background Color SceneLayer data from file, when a path was specified for it!");
-				return -1;
+			for (TerrainDebris *terrainDebris : m_TerrainDebris) {
+				terrainDebris->ApplyDebris(this);
 			}
-			// Ok, we have now loaded the layers in from files, don't need to generate them from the material layer
-			InitScrollRatios();
-			return 0;
+			for (TerrainObject *terrainObject : m_TerrainObjects) {
+				ApplyTerrainObject(terrainObject);
+			}
+			CleanAir();
 		}
-
-		// Create blank foreground layer
-		m_FGColorLayer->Destroy();
-		BITMAP *pFGBitmap = create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h);
-		if (!pFGBitmap || m_FGColorLayer->Create(pFGBitmap, true, m_Offset, m_WrapX, m_WrapY, m_ScrollRatio)) {
-			RTEAbort("Failed to create terrain's foreground layer's bitmap!");
-			return -1;
-		}
-
-		// Create blank background layer
-		m_BGColorLayer->Destroy();
-		BITMAP *pBGBitmap = create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h);
-		if (!pBGBitmap || m_BGColorLayer->Create(pBGBitmap, true, m_Offset, m_WrapX, m_WrapY, m_ScrollRatio)) {
-			RTEAbort("Failed to create terrain's background layer's bitmap!");
-			return -1;
-		}
-
-		// Structural integrity calc buffer bitmap
-		destroy_bitmap(m_StructuralBitmap);
-		m_StructuralBitmap = create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h);
-		RTEAssert(m_StructuralBitmap, "Failed to allocate BITMAP in Terrain::Create");
-		clear_bitmap(m_StructuralBitmap);
-
-		TexturizeTerrain();
-
-		for (const TerrainFrosting *terrainFrosting : m_TerrainFrostings) {
-			terrainFrosting->ApplyFrosting(this);
-		}
-		for (TerrainDebris *terrainDebris : m_TerrainDebris) {
-			terrainDebris->ApplyDebris(this);
-		}
-		for (TerrainObject *terrainObject : m_TerrainObjects) {
-			ApplyTerrainObject(terrainObject);
-		}
-		CleanAir();
-
 		InitScrollRatios();
-
 		return 0;
 	}
 
@@ -329,42 +307,20 @@ namespace RTE {
 		if (pathBase.empty()) {
 			return -1;
 		}
-
-		// Save the bitmap of the material bitmap
-		if (SceneLayer::SaveData(pathBase + " Mat.bmp") < 0) {
-			RTEAbort("Failed to write the material bitmap data saving an SLTerrain!");
-			return -1;
-		}
-		if (m_FGColorLayer->SaveData(pathBase + " FG.bmp") < 0) {
-			RTEAbort("Failed to write the FG color bitmap data saving an SLTerrain!");
-			return -1;
-		}
-		if (m_BGColorLayer->SaveData(pathBase + " BG.bmp") < 0) {
-			RTEAbort("Failed to write the BG color bitmap data saving an SLTerrain!");
-			return -1;
-		}
+		RTEAssert(SceneLayer::SaveData(pathBase + " Mat.bmp") == 0, "Failed to write the material bitmap data saving an SLTerrain!");
+		RTEAssert(m_FGColorLayer->SaveData(pathBase + " FG.bmp") == 0,"Failed to write the FG color bitmap data saving an SLTerrain!");
+		RTEAssert(m_BGColorLayer->SaveData(pathBase + " BG.bmp") == 0,"Failed to write the BG color bitmap data saving an SLTerrain!");
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SLTerrain::ClearData() {
-		// Clear the material layer.
-		if (SceneLayer::ClearData() < 0) {
-			RTEAbort("Failed to clear material bitmap data of an SLTerrain!");
-			return -1;
-		}
-		if (m_FGColorLayer && m_FGColorLayer->ClearData() < 0) {
-			RTEAbort("Failed to clear the foreground color bitmap data of an SLTerrain!");
-			return -1;
-		}
-		if (m_BGColorLayer && m_BGColorLayer->ClearData() < 0) {
-			RTEAbort("Failed to clear the background color bitmap data of an SLTerrain!");
-			return -1;
-		}
+		RTEAssert(SceneLayer::ClearData() == 0, "Failed to clear material bitmap data of an SLTerrain!");
+		RTEAssert(m_FGColorLayer && m_FGColorLayer->ClearData() == 0, "Failed to clear the foreground color bitmap data of an SLTerrain!");
+		RTEAssert(m_BGColorLayer && m_BGColorLayer->ClearData() == 0, "Failed to clear the background color bitmap data of an SLTerrain!");
 		return 0;
 	}
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -572,124 +528,118 @@ namespace RTE {
 		}
 
 		// Determine whether a sprite or just a pixel-based MO. If sprite, try to integrate it into the terrain, with terrain on top.
-		if (const MOSprite *pMOSprite = dynamic_cast<MOSprite *>(movableObject)) {
-			std::deque<MOPixel *> MOPDeque;
-
-			const BITMAP *pSprite = pMOSprite->GetSpriteFrame();
-
-			float diameter = pMOSprite->GetDiameter();
-
-			BITMAP *pTempBitmap = GetTempBitmap(static_cast<int>(diameter));
+		if (const MOSprite *moSprite = dynamic_cast<MOSprite *>(movableObject)) {
+			BITMAP *tempBitmap = GetTempBitmap(static_cast<int>(moSprite->GetDiameter()));
 
 			// The position of the upper left corner of the temporary bitmap in the scene
-			Vector bitmapScroll = pMOSprite->GetPos().GetFloored() - Vector(static_cast<float>(pTempBitmap->w / 2), static_cast<float>(pTempBitmap->w / 2));
+			Vector bitmapScroll = moSprite->GetPos().GetFloored() - Vector(static_cast<float>(tempBitmap->w / 2), static_cast<float>(tempBitmap->w / 2));
 
 			Box notUsed;
 
 			// COLOR
 			// Clear and draw the source sprite onto the temp bitmap
-			clear_to_color(pTempBitmap, ColorKeys::g_MaskColor);
+			clear_to_color(tempBitmap, ColorKeys::g_MaskColor);
 			// Draw the actor and then the scene foreground to temp bitmap
-			pMOSprite->Draw(pTempBitmap, bitmapScroll, g_DrawColor, true);
-			m_FGColorLayer->Draw(pTempBitmap, notUsed, bitmapScroll);
+			moSprite->Draw(tempBitmap, bitmapScroll, DrawMode::g_DrawColor, true);
+			m_FGColorLayer->Draw(tempBitmap, notUsed, bitmapScroll);
 			// Finally draw temporary bitmap to the Scene
-			masked_blit(pTempBitmap, GetFGColorBitmap(), 0, 0, bitmapScroll.GetFloorIntX(), bitmapScroll.GetFloorIntY(), pTempBitmap->w, pTempBitmap->h);
+			masked_blit(tempBitmap, GetFGColorBitmap(), 0, 0, bitmapScroll.GetFloorIntX(), bitmapScroll.GetFloorIntY(), tempBitmap->w, tempBitmap->h);
 
 			// Register terrain change
-			g_SceneMan.RegisterTerrainChange(bitmapScroll.GetFloorIntX(), bitmapScroll.GetFloorIntY(), pTempBitmap->w, pTempBitmap->h, ColorKeys::g_MaskColor, false);
+			g_SceneMan.RegisterTerrainChange(bitmapScroll.GetFloorIntX(), bitmapScroll.GetFloorIntY(), tempBitmap->w, tempBitmap->h, ColorKeys::g_MaskColor, false);
 
 			// TODO: centralize seam drawing!
 			// Draw over seams
 			if (g_SceneMan.SceneWrapsX()) {
 				if (bitmapScroll.GetFloorIntX() < 0) {
-					masked_blit(pTempBitmap, GetFGColorBitmap(), 0, 0, bitmapScroll.GetFloorIntX() + g_SceneMan.GetSceneWidth(), bitmapScroll.GetFloorIntY(), pTempBitmap->w, pTempBitmap->h);
-				} else if (bitmapScroll.GetFloorIntX() + pTempBitmap->w > g_SceneMan.GetSceneWidth()) {
-					masked_blit(pTempBitmap, GetFGColorBitmap(), 0, 0, bitmapScroll.GetFloorIntX() - g_SceneMan.GetSceneWidth(), bitmapScroll.GetFloorIntY(), pTempBitmap->w, pTempBitmap->h);
+					masked_blit(tempBitmap, GetFGColorBitmap(), 0, 0, bitmapScroll.GetFloorIntX() + g_SceneMan.GetSceneWidth(), bitmapScroll.GetFloorIntY(), tempBitmap->w, tempBitmap->h);
+				} else if (bitmapScroll.GetFloorIntX() + tempBitmap->w > g_SceneMan.GetSceneWidth()) {
+					masked_blit(tempBitmap, GetFGColorBitmap(), 0, 0, bitmapScroll.GetFloorIntX() - g_SceneMan.GetSceneWidth(), bitmapScroll.GetFloorIntY(), tempBitmap->w, tempBitmap->h);
 				}
 			}
 			if (g_SceneMan.SceneWrapsY()) {
 				if (bitmapScroll.GetFloorIntY() < 0) {
-					masked_blit(pTempBitmap, GetFGColorBitmap(), 0, 0, bitmapScroll.GetFloorIntX(), bitmapScroll.GetFloorIntY() + g_SceneMan.GetSceneHeight(), pTempBitmap->w, pTempBitmap->h);
-				} else if (bitmapScroll.GetFloorIntY() + pTempBitmap->h > g_SceneMan.GetSceneHeight()) {
-					masked_blit(pTempBitmap, GetFGColorBitmap(), 0, 0, bitmapScroll.GetFloorIntX(), bitmapScroll.GetFloorIntY() - g_SceneMan.GetSceneHeight(), pTempBitmap->w, pTempBitmap->h);
+					masked_blit(tempBitmap, GetFGColorBitmap(), 0, 0, bitmapScroll.GetFloorIntX(), bitmapScroll.GetFloorIntY() + g_SceneMan.GetSceneHeight(), tempBitmap->w, tempBitmap->h);
+				} else if (bitmapScroll.GetFloorIntY() + tempBitmap->h > g_SceneMan.GetSceneHeight()) {
+					masked_blit(tempBitmap, GetFGColorBitmap(), 0, 0, bitmapScroll.GetFloorIntX(), bitmapScroll.GetFloorIntY() - g_SceneMan.GetSceneHeight(), tempBitmap->w, tempBitmap->h);
 				}
 			}
 
 			// Material
-			clear_to_color(pTempBitmap, g_MaterialAir);
+			clear_to_color(tempBitmap, g_MaterialAir);
 			// Draw the actor and then the scene material layer to temp bitmap
-			pMOSprite->Draw(pTempBitmap, bitmapScroll, g_DrawMaterial, true);
-			SceneLayer::Draw(pTempBitmap, notUsed, bitmapScroll);
+			moSprite->Draw(tempBitmap, bitmapScroll, DrawMode::g_DrawMaterial, true);
+			SceneLayer::Draw(tempBitmap, notUsed, bitmapScroll);
 			// Finally draw temporary bitmap to the Scene
-			masked_blit(pTempBitmap, GetMaterialBitmap(), 0, 0, bitmapScroll.GetFloorIntX(), bitmapScroll.GetFloorIntY(), pTempBitmap->w, pTempBitmap->h);
+			masked_blit(tempBitmap, GetMaterialBitmap(), 0, 0, bitmapScroll.GetFloorIntX(), bitmapScroll.GetFloorIntY(), tempBitmap->w, tempBitmap->h);
 			// Add a box to the updated areas list to show there's been change to the materials layer
-			m_UpdatedMateralAreas.emplace_back(Box(bitmapScroll, static_cast<float>(pTempBitmap->w), static_cast<float>(pTempBitmap->h)));
+			m_UpdatedMateralAreas.emplace_back(Box(bitmapScroll, static_cast<float>(tempBitmap->w), static_cast<float>(tempBitmap->h)));
 			// TODO: centralize seam drawing!
 			// Draw over seams
 			if (g_SceneMan.SceneWrapsX()) {
 				if (bitmapScroll.GetFloorIntX() < 0) {
-					masked_blit(pTempBitmap, GetMaterialBitmap(), 0, 0, bitmapScroll.GetFloorIntX() + g_SceneMan.GetSceneWidth(), bitmapScroll.GetFloorIntY(), pTempBitmap->w, pTempBitmap->h);
-				} else if (bitmapScroll.GetFloorIntX() + pTempBitmap->w > g_SceneMan.GetSceneWidth()) {
-					masked_blit(pTempBitmap, GetMaterialBitmap(), 0, 0, bitmapScroll.GetFloorIntX() - g_SceneMan.GetSceneWidth(), bitmapScroll.GetFloorIntY(), pTempBitmap->w, pTempBitmap->h);
+					masked_blit(tempBitmap, GetMaterialBitmap(), 0, 0, bitmapScroll.GetFloorIntX() + g_SceneMan.GetSceneWidth(), bitmapScroll.GetFloorIntY(), tempBitmap->w, tempBitmap->h);
+				} else if (bitmapScroll.GetFloorIntX() + tempBitmap->w > g_SceneMan.GetSceneWidth()) {
+					masked_blit(tempBitmap, GetMaterialBitmap(), 0, 0, bitmapScroll.GetFloorIntX() - g_SceneMan.GetSceneWidth(), bitmapScroll.GetFloorIntY(), tempBitmap->w, tempBitmap->h);
 				}
 			}
 			if (g_SceneMan.SceneWrapsY()) {
 				if (bitmapScroll.GetFloorIntY() < 0) {
-					masked_blit(pTempBitmap, GetMaterialBitmap(), 0, 0, bitmapScroll.GetFloorIntX(), bitmapScroll.GetFloorIntY() + g_SceneMan.GetSceneHeight(), pTempBitmap->w, pTempBitmap->h);
-				} else if (bitmapScroll.GetFloorIntY() + pTempBitmap->h > g_SceneMan.GetSceneHeight()) {
-					masked_blit(pTempBitmap, GetMaterialBitmap(), 0, 0, bitmapScroll.GetFloorIntX(), bitmapScroll.GetFloorIntY() - g_SceneMan.GetSceneHeight(), pTempBitmap->w, pTempBitmap->h);
+					masked_blit(tempBitmap, GetMaterialBitmap(), 0, 0, bitmapScroll.GetFloorIntX(), bitmapScroll.GetFloorIntY() + g_SceneMan.GetSceneHeight(), tempBitmap->w, tempBitmap->h);
+				} else if (bitmapScroll.GetFloorIntY() + tempBitmap->h > g_SceneMan.GetSceneHeight()) {
+					masked_blit(tempBitmap, GetMaterialBitmap(), 0, 0, bitmapScroll.GetFloorIntX(), bitmapScroll.GetFloorIntY() - g_SceneMan.GetSceneHeight(), tempBitmap->w, tempBitmap->h);
 				}
 			}
 		} else {
 			// Not a big sprite, so just draw the representations
-			movableObject->Draw(GetFGColorBitmap(), Vector(), g_DrawColor, true);
+			movableObject->Draw(GetFGColorBitmap(), Vector(), DrawMode::g_DrawColor, true);
 			// Register terrain change
-			g_SceneMan.RegisterTerrainChange(movableObject->GetPos().GetFloorIntX(), movableObject->GetPos().GetFloorIntY(), 1, 1, g_DrawColor, false);
+			g_SceneMan.RegisterTerrainChange(movableObject->GetPos().GetFloorIntX(), movableObject->GetPos().GetFloorIntY(), 1, 1, DrawMode::g_DrawColor, false);
 
-			movableObject->Draw(GetMaterialBitmap(), Vector(), g_DrawMaterial, true);
+			movableObject->Draw(GetMaterialBitmap(), Vector(), DrawMode::g_DrawMaterial, true);
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SLTerrain::ApplyTerrainObject(TerrainObject *pTObject) {
-		if (!pTObject) {
+	void SLTerrain::ApplyTerrainObject(TerrainObject *terrainObject) {
+		if (!terrainObject) {
 			return;
 		}
-		Vector loc = pTObject->GetPos() + pTObject->GetBitmapOffset();
+		Vector pos = terrainObject->GetPos() + terrainObject->GetBitmapOffset();
 
 		// Do duplicate drawing if the terrain object straddles a wrapping border
-		if (loc.GetFloorIntX() < 0) {
-			draw_sprite(m_MainBitmap, pTObject->GetMaterialBitmap(), loc.GetFloorIntX() + m_MainBitmap->w, loc.GetFloorIntY());
-			draw_sprite(m_FGColorLayer->GetBitmap(), pTObject->GetFGColorBitmap(), loc.GetFloorIntX() + m_FGColorLayer->GetBitmap()->w, loc.GetFloorIntY());
-			if (pTObject->HasBGColor()) { draw_sprite(m_BGColorLayer->GetBitmap(), pTObject->GetBGColorBitmap(), loc.GetFloorIntX() + m_BGColorLayer->GetBitmap()->w, loc.GetFloorIntY()); }
-		} else if (loc.GetFloorIntX() >= m_MainBitmap->w - pTObject->GetFGColorBitmap()->w) {
-			draw_sprite(m_MainBitmap, pTObject->GetMaterialBitmap(), loc.GetFloorIntX() - m_MainBitmap->w, loc.GetFloorIntY());
-			draw_sprite(m_FGColorLayer->GetBitmap(), pTObject->GetFGColorBitmap(), loc.GetFloorIntX() - m_FGColorLayer->GetBitmap()->w, loc.GetFloorIntY());
-			if (pTObject->HasBGColor()) { draw_sprite(m_BGColorLayer->GetBitmap(), pTObject->GetBGColorBitmap(), loc.GetFloorIntX() - m_BGColorLayer->GetBitmap()->w, loc.GetFloorIntY()); }
+		if (pos.GetFloorIntX() < 0) {
+			draw_sprite(m_MainBitmap, terrainObject->GetMaterialBitmap(), pos.GetFloorIntX() + m_MainBitmap->w, pos.GetFloorIntY());
+			draw_sprite(m_FGColorLayer->GetBitmap(), terrainObject->GetFGColorBitmap(), pos.GetFloorIntX() + m_FGColorLayer->GetBitmap()->w, pos.GetFloorIntY());
+			if (terrainObject->HasBGColor()) { draw_sprite(m_BGColorLayer->GetBitmap(), terrainObject->GetBGColorBitmap(), pos.GetFloorIntX() + m_BGColorLayer->GetBitmap()->w, pos.GetFloorIntY()); }
+		} else if (pos.GetFloorIntX() >= m_MainBitmap->w - terrainObject->GetFGColorBitmap()->w) {
+			draw_sprite(m_MainBitmap, terrainObject->GetMaterialBitmap(), pos.GetFloorIntX() - m_MainBitmap->w, pos.GetFloorIntY());
+			draw_sprite(m_FGColorLayer->GetBitmap(), terrainObject->GetFGColorBitmap(), pos.GetFloorIntX() - m_FGColorLayer->GetBitmap()->w, pos.GetFloorIntY());
+			if (terrainObject->HasBGColor()) { draw_sprite(m_BGColorLayer->GetBitmap(), terrainObject->GetBGColorBitmap(), pos.GetFloorIntX() - m_BGColorLayer->GetBitmap()->w, pos.GetFloorIntY()); }
 		}
 
 		// Regular drawing
-		draw_sprite(m_MainBitmap, pTObject->GetMaterialBitmap(), loc.GetFloorIntX(), loc.GetFloorIntY());
-		draw_sprite(m_FGColorLayer->GetBitmap(), pTObject->GetFGColorBitmap(), loc.GetFloorIntX(), loc.GetFloorIntY());
-		if (pTObject->HasBGColor()) {
-			draw_sprite(m_BGColorLayer->GetBitmap(), pTObject->GetBGColorBitmap(), loc.GetFloorIntX(), loc.GetFloorIntY());
-			g_SceneMan.RegisterTerrainChange(loc.GetFloorIntX(), loc.GetFloorIntY(), pTObject->GetBitmapWidth(), pTObject->GetBitmapHeight(), ColorKeys::g_MaskColor, true);
+		draw_sprite(m_MainBitmap, terrainObject->GetMaterialBitmap(), pos.GetFloorIntX(), pos.GetFloorIntY());
+		draw_sprite(m_FGColorLayer->GetBitmap(), terrainObject->GetFGColorBitmap(), pos.GetFloorIntX(), pos.GetFloorIntY());
+		if (terrainObject->HasBGColor()) {
+			draw_sprite(m_BGColorLayer->GetBitmap(), terrainObject->GetBGColorBitmap(), pos.GetFloorIntX(), pos.GetFloorIntY());
+			g_SceneMan.RegisterTerrainChange(pos.GetFloorIntX(), pos.GetFloorIntY(), terrainObject->GetBitmapWidth(), terrainObject->GetBitmapHeight(), ColorKeys::g_MaskColor, true);
 		}
 
 		// Register terrain change
-		g_SceneMan.RegisterTerrainChange(loc.GetFloorIntX(), loc.GetFloorIntY(), pTObject->GetBitmapWidth(), pTObject->GetBitmapHeight(), ColorKeys::g_MaskColor, false);
+		g_SceneMan.RegisterTerrainChange(pos.GetFloorIntX(), pos.GetFloorIntY(), terrainObject->GetBitmapWidth(), terrainObject->GetBitmapHeight(), ColorKeys::g_MaskColor, false);
 
 		// Add a box to the updated areas list to show there's been change to the materials layer
-		m_UpdatedMateralAreas.emplace_back(Box(loc, static_cast<float>(pTObject->GetMaterialBitmap()->w), static_cast<float>(pTObject->GetMaterialBitmap()->h)));
+		m_UpdatedMateralAreas.emplace_back(Box(pos, static_cast<float>(terrainObject->GetMaterialBitmap()->w), static_cast<float>(terrainObject->GetMaterialBitmap()->h)));
 
 		// Apply all the child objects of the TO, and first reapply the team so all its children are guaranteed to be on the same team!
-		pTObject->SetTeam(pTObject->GetTeam());
+		terrainObject->SetTeam(terrainObject->GetTeam());
 
-		for (const SceneObject::SOPlacer &childObject : pTObject->GetChildObjects()) {
+		for (const SceneObject::SOPlacer &childObject : terrainObject->GetChildObjects()) {
 			// TODO: check if we're placing a brain, and have it replace the resident brain of the scene!
 			// Copy and apply, transferring ownership of the new copy into the application
-			g_SceneMan.AddSceneObject(childObject.GetPlacedCopy(pTObject));
+			g_SceneMan.AddSceneObject(childObject.GetPlacedCopy(terrainObject));
 		}
 	}
 
@@ -713,8 +663,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLTerrain::CleanAir() {
-		acquire_bitmap(m_MainBitmap);
-		acquire_bitmap(m_FGColorLayer->GetBitmap());
+		//acquire_bitmap(m_MainBitmap);
+		//acquire_bitmap(m_FGColorLayer->GetBitmap());
 
 		int width = m_MainBitmap->w;
 		int height = m_MainBitmap->h;
@@ -730,15 +680,15 @@ namespace RTE {
 			}
 		}
 
-		release_bitmap(m_MainBitmap);
-		release_bitmap(m_FGColorLayer->GetBitmap());
+		//release_bitmap(m_MainBitmap);
+		//release_bitmap(m_FGColorLayer->GetBitmap());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLTerrain::CleanAirBox(const Box &box, bool wrapsX, bool wrapsY) {
-		acquire_bitmap(m_MainBitmap);
-		acquire_bitmap(m_FGColorLayer->GetBitmap());
+		//acquire_bitmap(m_MainBitmap);
+		//acquire_bitmap(m_FGColorLayer->GetBitmap());
 
 		int width = m_MainBitmap->w;
 		int height = m_MainBitmap->h;
@@ -756,7 +706,6 @@ namespace RTE {
 					if (wrapY < 0) { wrapY += height; }
 					if (wrapY >= height) { wrapY -= height; }
 				}
-
 				if (wrapX >= 0 && wrapX < width && wrapY >= 0 && wrapY < height) {
 					int matPixel = _getpixel(m_MainBitmap, wrapX, wrapY);
 					if (matPixel == g_MaterialCavity) {
@@ -767,8 +716,8 @@ namespace RTE {
 				}
 			}
 		}
-		release_bitmap(m_MainBitmap);
-		release_bitmap(m_FGColorLayer->GetBitmap());
+		//release_bitmap(m_MainBitmap);
+		//release_bitmap(m_FGColorLayer->GetBitmap());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

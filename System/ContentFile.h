@@ -3,9 +3,7 @@
 
 #include "Serializable.h"
 
-#include "fmod/fmod.hpp"
-#include "fmod/fmod_errors.h"
-
+namespace FMOD { class Sound; }
 struct BITMAP;
 
 namespace RTE {
@@ -30,13 +28,13 @@ namespace RTE {
 		/// Constructor method used to instantiate a ContentFile object in system memory, and also do a Create() in the same line.
 		/// </summary>
 		/// <param name="filePath">A string defining the path to where the content file itself is located.</param>
-		ContentFile(const char *filePath) { Clear(); Create(filePath); }
+		explicit ContentFile(const char *filePath) { Clear(); Create(filePath); }
 
 		/// <summary>
 		/// Constructor method used to instantiate a ContentFile object in system memory from a hash value of the file path, and also do a Create() in the same line.
 		/// </summary>
 		/// <param name="hash">A hash value containing the path to where the content file itself is located.</param>
-		ContentFile(size_t hash) { Clear(); Create(GetPathFromHash(hash).c_str()); }
+		explicit ContentFile(size_t hash) { Clear(); Create(GetPathFromHash(hash).c_str()); }
 
 		/// <summary>
 		/// Makes the ContentFile object ready for use.
@@ -57,17 +55,12 @@ namespace RTE {
 		/// <summary>
 		/// Destructor method used to clean up a ContentFile object before deletion from system memory.
 		/// </summary>
-		~ContentFile() { Destroy(); }
-
-		/// <summary>
-		/// Destroys and resets (through Clear()) the ContentFile object.
-		/// </summary>
-		void Destroy() { Clear(); }
+		~ContentFile() override = default;
 
 		/// <summary>
 		/// Resets the entire ContentFile, including its inherited members, to their default settings or values.
 		/// </summary>
-		void Reset() { Clear(); }
+		void Reset() override { Clear(); }
 
 		/// <summary>
 		/// Frees all loaded data used by all ContentFile instances. This should ONLY be done when quitting the app, or after everything else is completely destroyed.
@@ -120,19 +113,28 @@ namespace RTE {
 		/// Gets the data represented by this ContentFile object as an Allegro BITMAP, loading it into the static maps if it's not already loaded. Note that ownership of the BITMAP is NOT transferred!
 		/// </summary>
 		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap.</param>
-		/// <param name="storeBitmap">Whether to store the BITMAP in the relevant static map after loading it or not.</param>
+		/// <param name="storeBitmap">Whether to store the BITMAP in the relevant static map after loading it or not. If this is false, ownership of the BITMAP IS transferred!</param>
 		/// <param name="dataPathToSpecificFrame">Path to a specific frame when loading an animation to avoid overwriting the original preset DataPath when loading each frame.</param>
 		/// <returns>Pointer to the BITMAP loaded from disk.</returns>
 		BITMAP * GetAsBitmap(int conversionMode = 0, bool storeBitmap = true, const std::string &dataPathToSpecificFrame = "");
 
 		/// <summary>
-		/// Gets the data represented by this ContentFile object as an array of Allegro BITMAPs, each representing a frame in the animation.
-		/// It loads the BITMAPs into the static maps if they're not already loaded. Ownership of the BITMAPs is NOT transferred, but the array itself IS!
+		/// Fills an existing vector of Allegro BITMAPs representing each frame in the animation with the data represented by this ContentFile object.
+		/// It loads the BITMAPs into the static maps if they're not already loaded. Ownership of the BITMAPs is NOT transferred!
 		/// </summary>
-		/// <param name="frameCount">The number of frames to attempt to load, more than 1 frame will mean 00# is appended to datapath to handle naming conventions.</param>
+		/// <param name="vectorToFill">The existing vector of Allegro BITMAPs to fill.</param>
+		/// <param name="frameCount">The number of frames to attempt to load, more than 1 frame will mean 00# is appended to DataPath to handle naming conventions.</param>
 		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap.</param>
-		/// <returns>Pointer to the beginning of the array of BITMAP pointers loaded from the disk, the length of which is specified with the FrameCount argument.</returns>
-		BITMAP ** GetAsAnimation(int frameCount = 1, int conversionMode = 0);
+		void GetAsAnimation(std::vector<BITMAP *> &vectorToFill, int frameCount = 1, int conversionMode = 0);
+
+		/// <summary>
+		/// Gets the data represented by this ContentFile object as a vector of Allegro BITMAPs, each representing a frame in the animation.
+		/// It loads the BITMAPs into the static maps if they're not already loaded. Ownership of the BITMAPs is NOT transferred!
+		/// </summary>
+		/// <param name="frameCount">The number of frames to attempt to load, more than 1 frame will mean 00# is appended to DataPath to handle naming conventions.</param>
+		/// <param name="conversionMode">The Allegro color conversion mode to use when loading this bitmap.</param>
+		/// <returns>A vector of BITMAP pointers loaded from the disk.</returns>
+		std::vector<BITMAP *> GetAsAnimation(int frameCount = 1, int conversionMode = 0) { std::vector<BITMAP *> returnBitmaps; GetAsAnimation(returnBitmaps, frameCount, conversionMode); return returnBitmaps; }
 
 		/// <summary>
 		/// Gets the data represented by this ContentFile object as an FMOD FSOUND_SAMPLE, loading it into the static maps if it's not already loaded. Ownership of the FSOUND_SAMPLE is NOT transferred!

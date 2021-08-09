@@ -185,6 +185,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `ShowEnemyHUD` which allows disabling of enemy actor HUD in its entirety.
 
+- New `DataModule` property `IsFaction = 0/1` which determines if a module is a playable faction (in MetaGame, etc.). This replaces the need to put "Tech" in the module name. Defaults to false (0).
+
 ### Changed
 
 - Doors in `Team = -1` will now open up for all actors.
@@ -308,6 +310,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Settings menu was reworked to make it less useless.
 
 - Esc has been disabled in server mode to not disrupt simulation for clients, use Alt+F4 or the window close button to exit.
+
+- Placing "Tech" in a `DataModule`'s `ModuleName` no longer makes the module a playable faction (in MetaGame, etc.). The `IsFaction` property should be used instead.  
+	The word "Tech" will also not be omitted from the module name when displayed in any faction selection dropdown list.
 
 ### Fixed
 

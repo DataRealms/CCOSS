@@ -322,10 +322,9 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets access to the whole material palette array of 256 entries.
 // Arguments:       None.
-// Return value:    A pointer to the first Material in the palette. Index into it up to
-//                  255 to access the other Material:s in it.
+// Return value:    A const reference to the material palette array.
 
-    Material ** GetMaterialPalette() { return m_apMatPalette; }
+	const std::array<Material *, c_PaletteEntriesNumber> & GetMaterialPalette() const { return m_apMatPalette; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1698,7 +1697,7 @@ public:
     // Material palette stuff
     std::map<std::string, unsigned char> m_MatNameMap;
     // This gets filled with holes, not contigous from 0 onward, but whatever the ini specifies. The Material objects are owned here
-    Material *m_apMatPalette[c_PaletteEntriesNumber];
+	std::array<Material *, c_PaletteEntriesNumber> m_apMatPalette;
     // The total number of added materials so far
     int m_MaterialCount;
 

@@ -462,11 +462,9 @@ void MovableObject::Destroy(bool notInherited) {
         RunScriptedFunctionInAppropriateScripts("Destroy");
         g_LuaMan.RunScriptString(m_ScriptObjectName + " = nil;");
     }
-
+	g_MovableMan.UnregisterObject(this);
     if (!notInherited) { SceneObject::Destroy(); }
     Clear();
-
-	g_MovableMan.UnregisterObject(this);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

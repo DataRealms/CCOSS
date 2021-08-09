@@ -103,8 +103,8 @@ void GameActivity::Clear()
     {
         m_Deliveries[team].clear();
         m_LandingZoneArea[team].Reset();
-		m_aLZCursor[team] = 0;
-		m_aObjCursor[team] = 0;
+		m_aLZCursor[team].clear();
+		m_aObjCursor[team].clear();
     }
 
     m_Objectives.clear();
@@ -1019,28 +1019,28 @@ int GameActivity::Start()
     // Start the game timer
     m_GameTimer.Reset();
 
-    if (!(m_aLZCursor[0]))
+    if (m_aLZCursor[0].empty())
     {
         ContentFile cursorFile("Base.rte/GUIs/Indicators/LZArrowRedL.png");
-        m_aLZCursor[0] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
+        cursorFile.GetAsAnimation(m_aLZCursor[0], LZCURSORFRAMECOUNT);
         cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowGreenL.png");
-        m_aLZCursor[1] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
+        cursorFile.GetAsAnimation(m_aLZCursor[1], LZCURSORFRAMECOUNT);
 		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowBlueL.png");
-		m_aLZCursor[2] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
+		cursorFile.GetAsAnimation(m_aLZCursor[2], LZCURSORFRAMECOUNT);
 		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowYellowL.png");
-		m_aLZCursor[3] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
+		cursorFile.GetAsAnimation(m_aLZCursor[3], LZCURSORFRAMECOUNT);
     }
 
-    if (!(m_aObjCursor[0]))
+    if (m_aObjCursor[0].empty())
     {
         ContentFile cursorFile("Base.rte/GUIs/Indicators/ObjArrowRed.png");
-        m_aObjCursor[0] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
+        cursorFile.GetAsAnimation(m_aObjCursor[0], OBJARROWFRAMECOUNT);
         cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowGreen.png");
-        m_aObjCursor[1] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
+        cursorFile.GetAsAnimation(m_aObjCursor[1], OBJARROWFRAMECOUNT);
 		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowBlue.png");
-		m_aObjCursor[2] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
+		cursorFile.GetAsAnimation(m_aObjCursor[2], OBJARROWFRAMECOUNT);
 		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowYellow.png");
-		m_aObjCursor[3] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
+		cursorFile.GetAsAnimation(m_aObjCursor[3], OBJARROWFRAMECOUNT);
     }
 
     // Start the in-game music

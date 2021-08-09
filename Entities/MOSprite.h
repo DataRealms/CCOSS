@@ -567,8 +567,8 @@ protected:
     float m_AngularVel; // The angular velocity by which this MovableObject rotates, in radians per second (r/s).
     float m_PrevAngVel; // Previous frame's angular velocity.
     ContentFile m_SpriteFile;
-    // Array of pointers to BITMAP:s representing the multiple frames of this sprite
-    BITMAP **m_aSprite;
+    // Vector of pointers to BITMAPs representing the multiple frames of this sprite.
+    std::vector<BITMAP *> m_aSprite;
     // Number of frames, or elements in the m_aSprite array.
     unsigned int m_FrameCount;
     Vector m_SpriteOffset;

@@ -189,9 +189,9 @@ namespace RTE {
 		// Get the background texture
 		BITMAP *bgLayerTexture = m_BGTextureFile.GetAsBitmap();
 		// Get the material palette for quicker access
-		Material **apMaterials = g_SceneMan.GetMaterialPalette();
+		const std::array<Material *, c_PaletteEntriesNumber> &apMaterials = g_SceneMan.GetMaterialPalette();
 		// Get the Material palette ID mappings local to the DataModule this SLTerrain is loaded from
-		const unsigned char *materialMappings = g_PresetMan.GetDataModule(m_BitmapFile.GetDataModuleID())->GetAllMaterialMappings();
+		const std::array<unsigned char, c_PaletteEntriesNumber> &materialMappings = g_PresetMan.GetDataModule(m_BitmapFile.GetDataModuleID())->GetAllMaterialMappings();
 
 		// Lock all involved bitmaps
 		acquire_bitmap(m_MainBitmap);
@@ -206,14 +206,14 @@ namespace RTE {
 				// Read which material the current pixel represents
 				int matIndex = _getpixel(m_MainBitmap, xPos, yPos);
 				// Map any materials defined in this data module but initially collided with other material ID's and thus were displaced to other ID's
-				if (materialMappings[matIndex] != 0) {
+				if (materialMappings.at(matIndex) != 0) {
 					// Assign the mapping and put it onto the material bitmap too
-					matIndex = materialMappings[matIndex];
+					matIndex = materialMappings.at(matIndex);
 					_putpixel(m_MainBitmap, xPos, yPos, matIndex);
 				}
 
 				// Validate the material, or default to default material
-				const Material *material = (matIndex >= 0 && matIndex < c_PaletteEntriesNumber && apMaterials[matIndex]) ? apMaterials[matIndex] : apMaterials[g_MaterialDefault];
+				const Material *material = (matIndex >= 0 && matIndex < c_PaletteEntriesNumber && apMaterials.at(matIndex)) ? apMaterials.at(matIndex) : apMaterials.at(g_MaterialDefault);
 
 				// If haven't read a pixel of this material before, then get its texture so we can quickly access it
 				if (!materialTextures.at(matIndex) && material->GetTexture()) {

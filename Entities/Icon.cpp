@@ -9,18 +9,18 @@ namespace RTE {
 	void Icon::Clear() {
 		m_BitmapFile.Reset();
 		m_FrameCount = 0;
-		m_BitmapsIndexed = 0;
-		m_BitmapsTrueColor = 0;
+		m_BitmapsIndexed.clear();
+		m_BitmapsTrueColor.clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Icon::Create() {
-		if (!m_BitmapsIndexed || !m_BitmapsTrueColor) {
+		if (m_BitmapsIndexed.empty() || m_BitmapsTrueColor.empty()) {
 			if (m_BitmapFile.GetDataPath().empty()) { m_BitmapFile.SetDataPath("Base.rte/GUIs/DefaultIcon.png"); }
 
-			m_BitmapsIndexed = m_BitmapFile.GetAsAnimation(m_FrameCount, COLORCONV_REDUCE_TO_256);
-			m_BitmapsTrueColor = m_BitmapFile.GetAsAnimation(m_FrameCount, COLORCONV_8_TO_32);
+			m_BitmapFile.GetAsAnimation(m_BitmapsIndexed, m_FrameCount, COLORCONV_REDUCE_TO_256);
+			m_BitmapFile.GetAsAnimation(m_BitmapsTrueColor, m_FrameCount, COLORCONV_8_TO_32);
 		}
 		return 0;
 	}
@@ -32,16 +32,9 @@ namespace RTE {
 
 		m_BitmapFile = reference.m_BitmapFile;
 		m_FrameCount = reference.m_FrameCount;
+		m_BitmapsIndexed = reference.m_BitmapsIndexed;
+		m_BitmapsTrueColor = reference.m_BitmapsTrueColor;
 
-		if (reference.m_BitmapsIndexed && reference.m_BitmapsTrueColor) {
-			m_BitmapsIndexed = new BITMAP *[m_FrameCount];
-			m_BitmapsTrueColor = new BITMAP *[m_FrameCount];
-
-			for (unsigned short frame = 0; frame < m_FrameCount; ++frame) {
-				m_BitmapsIndexed[frame] = reference.m_BitmapsIndexed[frame];
-				m_BitmapsTrueColor[frame] = reference.m_BitmapsTrueColor[frame];
-			}
-		}
 		return 0;
 	}
 
@@ -73,9 +66,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Icon::Destroy(bool notInherited) {
-		delete[] m_BitmapsIndexed;
-		delete[] m_BitmapsTrueColor;
-
 		if (!notInherited) { Entity::Destroy(); }
 		Clear();
 	}

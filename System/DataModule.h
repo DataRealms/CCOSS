@@ -215,8 +215,8 @@ namespace RTE {
 		/// <summary>
 		/// Gets the entire Material mapping array local to this DataModule.
 		/// </summary>
-		/// <returns>A pointer to the entire local mapping array, 256 unsigned chars. Ownership is NOT transferred!</returns>
-		const unsigned char * GetAllMaterialMappings() const { return m_MaterialMappings.data(); }
+		/// <returns>A const reference to the entire local mapping array, 256 unsigned chars. Ownership is NOT transferred!</returns>
+		const std::array<unsigned char, c_PaletteEntriesNumber> & GetAllMaterialMappings() const { return m_MaterialMappings; }
 
 		/// <summary>
 		/// Adds a Material mapping local to a DataModule.

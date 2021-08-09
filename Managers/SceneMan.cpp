@@ -86,8 +86,7 @@ void SceneMan::Clear()
     m_LayerDrawMode = g_LayerNormal;
 
     m_MatNameMap.clear();
-    for (int i = 0; i < c_PaletteEntriesNumber; ++i)
-        m_apMatPalette[i] = 0;
+	m_apMatPalette.fill(nullptr);
     m_MaterialCount = 0;
 
 	m_MaterialCopiesVector.clear();
@@ -337,7 +336,7 @@ int SceneMan::ReadProperty(const std::string_view &propName, Reader &reader)
         for (int tryId = pNewMat->GetIndex(); tryId < c_PaletteEntriesNumber; ++tryId)
         {
             // We found an empty slot in the Material palette!
-            if (m_apMatPalette[tryId] == 0)
+            if (m_apMatPalette.at(tryId) == nullptr)
             {
                 // If the final ID isn't the same as the one originally requested by the data file, then make the mapping so
                 // subsequent ID references to this within the same data module can be translated to the actual ID of this material
@@ -346,7 +345,7 @@ int SceneMan::ReadProperty(const std::string_view &propName, Reader &reader)
 
                 // Assign the final ID to the material and register it in the palette
                 pNewMat->SetIndex(tryId);
-                m_apMatPalette[tryId] = pNewMat;
+                m_apMatPalette.at(tryId) = pNewMat;
                 m_MatNameMap.insert(pair<string, unsigned char>(string(pNewMat->GetPresetName()), pNewMat->GetIndex()));
                 // Now add the instance, when ID has been registered!
                 g_PresetMan.AddEntityPreset(pNewMat, reader.GetReadModuleID(), reader.GetPresetOverwriting(), objectFilePath);
@@ -384,7 +383,7 @@ int SceneMan::Save(Writer &writer) const {
 	Serializable::Save(writer);
 
 	for (int i = 0; i < m_MaterialCount; ++i) {
-		writer.NewPropertyWithValue("AddMaterial", *(m_apMatPalette[i]));
+		writer.NewPropertyWithValue("AddMaterial", *(m_apMatPalette.at(i)));
 	}
 
 	return 0;
@@ -631,7 +630,7 @@ Material const * SceneMan::GetMaterial(const std::string &matName)
         return 0;
     }
     else
-        return m_apMatPalette[(*itr).second];
+        return m_apMatPalette.at((*itr).second);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -2848,7 +2847,6 @@ void SceneMan::StructuralCalc(unsigned long calcTime) {
     BITMAP *pColBitmap = pTerrain->GetFGColorBitmap();
     BITMAP *pMatBitmap = pTerrain->GetMaterialBitmap();
     BITMAP *pStructBitmap = pTerrain->GetStructuralBitmap();
-    Material **pMatPalette = GetMaterialPalette();
     int posX, posY, height = pColBitmap->h, width = pColBitmap->w;
 
     // Lock all bitmaps involved, outside the loop.

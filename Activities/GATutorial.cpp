@@ -46,13 +46,7 @@ GATutorial::TutStep::TutStep(string text, int stepDuration, string screensPath, 
 
     if (!screensPath.empty())
     {
-        ContentFile screenFile(screensPath.c_str());
-        BITMAP **apScreens = screenFile.GetAsAnimation(frameCount);
-        for (int frame = 0; frame < frameCount; ++frame)
-            m_pScreens.push_back(apScreens[frame]);
-        // Delete only the array of pointers, not the BITMAPs themselves
-        delete[] apScreens;
-        apScreens = 0;
+        ContentFile(screensPath.c_str()).GetAsAnimation(m_pScreens, frameCount);
     }
 }
 
@@ -345,20 +339,13 @@ int GATutorial::Start()
     // SET UP TUTORIAL
 
     // COMMON SCREENS
-    ContentFile screenFile;
-    BITMAP **apScreens;
-    screenFile.SetDataPath("Missions.rte/Objects/Tutorial/ScreenStatic.png");
-    apScreens = screenFile.GetAsAnimation(3);
-    m_apCommonScreens[SCREENOFF] = apScreens[0];
-    m_apCommonScreens[STATICLITTLE] = apScreens[1];
-    m_apCommonScreens[STATICLARGE] = apScreens[2];
-    // Delete only the array of pointers, not the BITMAPs themselves
-    delete[] apScreens;
-    apScreens = 0;
+    std::vector<BITMAP *> apScreens = ContentFile("Missions.rte/Objects/Tutorial/ScreenStatic.png").GetAsAnimation(3);
+    m_apCommonScreens[SCREENOFF] = apScreens.at(0);
+    m_apCommonScreens[STATICLITTLE] = apScreens.at(1);
+    m_apCommonScreens[STATICLARGE] = apScreens.at(2);
 
     // ROOM SIGNS
     ContentFile signFile;
-    BITMAP **apSigns;
     for (int room = 0; room < ROOMCOUNT; ++room)
     {
         if (room == ROOM0)
@@ -369,12 +356,9 @@ int GATutorial::Start()
             signFile.SetDataPath("Missions.rte/Objects/Tutorial/TutEntryC.png");
         else if (room == ROOM3)
             signFile.SetDataPath("Missions.rte/Objects/Tutorial/TutEntryD.png");
-        apSigns = signFile.GetAsAnimation(2);
-        m_aapRoomSigns[room][UNLIT] = apSigns[0];
-        m_aapRoomSigns[room][LIT] = apSigns[1];
-        // Delete only the array of pointers, not the BITMAPs themselves
-        delete[] apSigns;
-        apSigns = 0;
+		std::vector<BITMAP *> apSigns = signFile.GetAsAnimation(2);
+        m_aapRoomSigns[room][UNLIT] = apSigns.at(0);
+        m_aapRoomSigns[room][LIT] = apSigns.at(1);
     }
 
     m_RoomSignPositions[ROOM0].SetXY(744, 695);

@@ -9,7 +9,7 @@ namespace RTE {
 
 	void TerrainDebris::Clear() {
 		m_DebrisFile.Reset();
-		m_Bitmaps = 0;
+		m_Bitmaps.clear();
 		m_BitmapCount = 0;
 		m_Material.Reset();
 		m_TargetMaterial.Reset();
@@ -26,8 +26,8 @@ namespace RTE {
 		if (Entity::Create() < 0) {
 			return -1;
 		}
-		m_Bitmaps = m_DebrisFile.GetAsAnimation(m_BitmapCount);
-		RTEAssert(m_Bitmaps && m_Bitmaps[0], "Failed to load debris bitmaps!");
+		m_DebrisFile.GetAsAnimation(m_Bitmaps, m_BitmapCount);
+		RTEAssert(!m_Bitmaps.empty() && m_Bitmaps.at(0), "Failed to load debris bitmaps!");
 
 		return 0;
 	}
@@ -58,6 +58,7 @@ namespace RTE {
 			reader >> m_DebrisFile;
 		} else if (propName == "DebrisPieceCount") {
 			reader >> m_BitmapCount;
+			m_Bitmaps.reserve(m_BitmapCount);
 		} else if (propName == "DebrisMaterial") {
 			reader >> m_Material;
 		} else if (propName == "TargetMaterial") {
@@ -108,20 +109,20 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TerrainDebris::ApplyDebris(SLTerrain *terrain) {
-		RTEAssert(m_Bitmaps && m_BitmapCount > 0, "No bitmaps loaded for terrain debris!");
+		RTEAssert(!m_Bitmaps.empty() && m_BitmapCount > 0, "No bitmaps loaded for terrain debris!");
 
 		BITMAP *terrBitmap = terrain->GetFGColorBitmap();
 		BITMAP *matBitmap = terrain->GetMaterialBitmap();
 
 		// How many pieces of debris we're spreading out.
-		unsigned int terrainWidth = terrBitmap->w;	
-		unsigned int pieceCount = (terrainWidth * c_MPP) * m_Density;
+		unsigned int terrainWidth = terrBitmap->w;
+		unsigned int pieceCount = static_cast<int>((static_cast<float>(terrainWidth) * c_MPP) * m_Density);
 
 		// First is index in the bitmap array, Second is blit location
 		std::list<std::pair<int, Vector>> piecesToPlace;
 		Vector location;
 		Box pieceBox;
-		
+
 		unsigned char checkPixel;
 
 		acquire_bitmap(terrBitmap);
@@ -129,11 +130,11 @@ namespace RTE {
 
 		for (unsigned int piece = 0; piece < pieceCount; ++piece) {
 			bool place = false;
-			unsigned short currentBitmap = RandomNum<unsigned short>(0, m_BitmapCount - 1);
+			unsigned int currentBitmap = RandomNum<int>(0, m_BitmapCount - 1);
 			RTEAssert(currentBitmap >= 0 && currentBitmap < m_BitmapCount, "Bitmap index is out of bounds!");
 
-			pieceBox.SetWidth(m_Bitmaps[currentBitmap]->w);
-			pieceBox.SetHeight(m_Bitmaps[currentBitmap]->h);
+			pieceBox.SetWidth(static_cast<float>(m_Bitmaps.at(currentBitmap)->w));
+			pieceBox.SetHeight(static_cast<float>(m_Bitmaps.at(currentBitmap)->h));
 
 			int x = RandomNum<int>(0, terrainWidth);
 			int y = 0;
@@ -160,27 +161,27 @@ namespace RTE {
 				}
 				// The target locations are on the center of the objects; if supposed to be buried, move down so it is
 				y += depth + static_cast<int>(m_OnlyBuried ? pieceBox.GetHeight() * 0.6F : 0);
-				pieceBox.SetCenter(Vector(x, y));
+				pieceBox.SetCenter(Vector(static_cast<float>(x), static_cast<float>(y)));
 
 				// Make sure we're not trying to place something into a cave or other air pocket
 				if (!g_SceneMan.GetTerrain()->IsAirPixel(x, y) && (!m_OnlyBuried || g_SceneMan.GetTerrain()->IsBoxBuried(pieceBox))) {
 					// Do delayed drawing so that we don't end up placing things on top of each other
-					piecesToPlace.push_back(std::pair<int, Vector>(currentBitmap, pieceBox.GetCorner()));
+					piecesToPlace.emplace_back(currentBitmap, pieceBox.GetCorner());
 					break;
 				}
 			}
 		}
 
-		for (const std::pair<int, Vector> &pieceListEntry : piecesToPlace) {
+		for (const auto &[pieceFrameNum, piecePos] : piecesToPlace) {
 			// Draw the color sprite onto the terrain color layer.
-			draw_sprite(terrBitmap, m_Bitmaps[pieceListEntry.first], pieceListEntry.second.m_X, pieceListEntry.second.m_Y);
+			draw_sprite(terrBitmap, m_Bitmaps.at(pieceFrameNum), piecePos.GetFloorIntX(), piecePos.GetFloorIntY());
 			// Draw the material representation onto the terrain's material layer
-			draw_character_ex(matBitmap, m_Bitmaps[pieceListEntry.first], pieceListEntry.second.m_X, pieceListEntry.second.m_Y, m_Material.GetIndex(), -1);
+			draw_character_ex(matBitmap, m_Bitmaps.at(pieceFrameNum), piecePos.GetFloorIntX(), piecePos.GetFloorIntY(), m_Material.GetIndex(), -1);
 		}
 
 		release_bitmap(terrBitmap);
 		release_bitmap(matBitmap);
-		terrBitmap = 0;
-		matBitmap = 0;
+		terrBitmap = nullptr;
+		matBitmap = nullptr;
 	}
 }

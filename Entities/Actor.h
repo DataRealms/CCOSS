@@ -1475,13 +1475,13 @@ protected:
          FOLLOWWAIT
     };
     // Unknown team icon
-    static BITMAP **m_apNoTeamIcon;
+    static std::vector<BITMAP *> m_apNoTeamIcon;
     // The AI mode icons
     static BITMAP *m_apAIIcons[AIMODE_COUNT];
     // Selection arrow
-    static BITMAP **m_apSelectArrow;
+    static std::vector<BITMAP *> m_apSelectArrow;
     // Selection arrow
-    static BITMAP **m_apAlarmExclamation;
+    static std::vector<BITMAP *> m_apAlarmExclamation;
     // Whether the static icons have been loaded yet or not
     static bool m_sIconsLoaded;
     // Whether a Lua update AI function was provided in this' script file

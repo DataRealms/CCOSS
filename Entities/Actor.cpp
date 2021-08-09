@@ -37,10 +37,10 @@ namespace RTE {
 
 ConcreteClassInfo(Actor, MOSRotating, 20);
 
-BITMAP **Actor::m_apNoTeamIcon;
+std::vector<BITMAP *> Actor::m_apNoTeamIcon;
 BITMAP *Actor::m_apAIIcons[AIMODE_COUNT];
-BITMAP **Actor::m_apSelectArrow;
-BITMAP **Actor::m_apAlarmExclamation;
+std::vector<BITMAP *> Actor::m_apSelectArrow;
+std::vector<BITMAP *> Actor::m_apAlarmExclamation;
 bool Actor::m_sIconsLoaded = false;
 
 #define ARROWTIME 1000
@@ -234,8 +234,7 @@ int Actor::Create(const Actor &reference)
     // Only load the static AI mode icons once
     if (!m_sIconsLoaded)
     {
-        ContentFile noTeamFile("Base.rte/GUIs/TeamIcons/NoTeam.png");
-        m_apNoTeamIcon = noTeamFile.GetAsAnimation(2);
+        ContentFile("Base.rte/GUIs/TeamIcons/NoTeam.png").GetAsAnimation(m_apNoTeamIcon, 2);
 
         ContentFile iconFile("Base.rte/GUIs/PieIcons/Blank000.png");
         m_apAIIcons[AIMODE_NONE] = iconFile.GetAsBitmap();
@@ -261,10 +260,8 @@ int Actor::Create(const Actor &reference)
         iconFile.SetDataPath("Base.rte/GUIs/PieIcons/Follow000.png");
         m_apAIIcons[AIMODE_SQUAD] = iconFile.GetAsBitmap();
 
-        ContentFile arrowFile("Base.rte/GUIs/Indicators/SelectArrow.png");
-        m_apSelectArrow = arrowFile.GetAsAnimation(4);
-        ContentFile alarmFile("Base.rte/GUIs/Indicators/AlarmExclamation.png");
-        m_apAlarmExclamation = alarmFile.GetAsAnimation(2);
+        ContentFile("Base.rte/GUIs/Indicators/SelectArrow.png").GetAsAnimation(m_apSelectArrow, 4);
+        ContentFile("Base.rte/GUIs/Indicators/AlarmExclamation.png").GetAsAnimation(m_apAlarmExclamation, 2);
 
         m_sIconsLoaded = true;
     }
@@ -1749,29 +1746,28 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 						m_pControllerIcon = g_UInputMan.GetDeviceIcon(DEVICE_GAMEPAD_4);
 					if (m_pControllerIcon)
 					{
-						BITMAP **apControllerBitmaps = 0;
-						apControllerBitmaps = m_pControllerIcon->GetBitmaps8();
+						std::vector<BITMAP *> apControllerBitmaps = m_pControllerIcon->GetBitmaps8();
 
-						masked_blit(apControllerBitmaps[0], pTargetBitmap, 0, 0, drawPos.m_X - apControllerBitmaps[0]->w - 2 + 10, drawPos.m_Y + m_HUDStack - (apControllerBitmaps[0]->h / 2) + 8, apControllerBitmaps[0]->w, apControllerBitmaps[0]->h);
+						masked_blit(apControllerBitmaps.at(0), pTargetBitmap, 0, 0, drawPos.m_X - apControllerBitmaps.at(0)->w - 2 + 10, drawPos.m_Y + m_HUDStack - (apControllerBitmaps.at(0)->h / 2) + 8, apControllerBitmaps.at(0)->w, apControllerBitmaps.at(0)->h);
 					}
 				}
 
                 // Get the Icon bitmaps of this Actor's team, if any
-                BITMAP **apIconBitmaps = 0;
+                std::vector<BITMAP *> apIconBitmaps;
                 if (m_pTeamIcon)
                     apIconBitmaps = m_pTeamIcon->GetBitmaps8();
 
                 // Team Icon could not be found, or of no team, so use the static noteam Icon instead
-                if (!apIconBitmaps)
+                if (apIconBitmaps.empty())
                     apIconBitmaps = m_apNoTeamIcon;
 
                 // Now draw the Icon if we can
-                if (apIconBitmaps && m_pTeamIcon && m_pTeamIcon->GetFrameCount() > 0)
+                if (!apIconBitmaps.empty() && m_pTeamIcon && m_pTeamIcon->GetFrameCount() > 0)
                 {
                     // Make team icon blink faster as the health goes down
                     int f = m_HeartBeat.AlternateReal(200 + 800 * (m_Health / 100)) ? 0 : 1;
                     f = MIN(f, m_pTeamIcon ? m_pTeamIcon->GetFrameCount() - 1 : 1);
-                    masked_blit(apIconBitmaps[f], pTargetBitmap, 0, 0, drawPos.m_X - apIconBitmaps[f]->w - 2, drawPos.m_Y + m_HUDStack - (apIconBitmaps[f]->h / 2) + 8, apIconBitmaps[f]->w, apIconBitmaps[f]->h);
+                    masked_blit(apIconBitmaps.at(f), pTargetBitmap, 0, 0, drawPos.m_X - apIconBitmaps.at(f)->w - 2, drawPos.m_Y + m_HUDStack - (apIconBitmaps.at(f)->h / 2) + 8, apIconBitmaps.at(f)->w, apIconBitmaps.at(f)->h);
                 }
             }
             // Draw death icon

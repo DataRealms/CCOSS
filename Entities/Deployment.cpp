@@ -27,8 +27,8 @@ namespace RTE {
 ConcreteClassInfo(Deployment, SceneObject, 0)
 
 
-BITMAP **Deployment::m_apArrowLeftBitmap = 0;
-BITMAP **Deployment::m_apArrowRightBitmap = 0;
+std::vector<BITMAP *> Deployment::m_apArrowLeftBitmap;
+std::vector<BITMAP *> Deployment::m_apArrowRightBitmap;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -58,15 +58,13 @@ int Deployment::Create()
     if (SceneObject::Create() < 0)
         return -1;
 
-	if (!m_apArrowLeftBitmap)
+	if (m_apArrowLeftBitmap.empty())
 	{
-		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowLeft.png");
-		m_apArrowLeftBitmap = arrowFile.GetAsAnimation(1);
+		ContentFile("Base.rte/GUIs/DeploymentIcons/ArrowLeft.png").GetAsAnimation(m_apArrowLeftBitmap, 1);
 	}
-	if (!m_apArrowRightBitmap)
+	if (m_apArrowRightBitmap.empty())
 	{
-		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowRight.png");
-		m_apArrowRightBitmap = arrowFile.GetAsAnimation(1);
+		ContentFile("Base.rte/GUIs/DeploymentIcons/ArrowRight.png").GetAsAnimation(m_apArrowRightBitmap, 1);
 	}
 
 	return 0;
@@ -87,15 +85,13 @@ int Deployment::Create(string loadoutName, const Icon &icon, float spawnRadius)
 	m_ID = 0;
 	m_HFlipped = false;
 
-	if (!m_apArrowLeftBitmap)
+	if (m_apArrowLeftBitmap.empty())
 	{
-		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowLeft.png");
-		m_apArrowLeftBitmap = arrowFile.GetAsAnimation(1);
+		ContentFile("Base.rte/GUIs/DeploymentIcons/ArrowLeft.png").GetAsAnimation(m_apArrowLeftBitmap, 1);
 	}
-	if (!m_apArrowRightBitmap)
+	if (m_apArrowRightBitmap.empty())
 	{
-		ContentFile arrowFile("Base.rte/GUIs/DeploymentIcons/ArrowRight.png");
-		m_apArrowRightBitmap = arrowFile.GetAsAnimation(1);
+		ContentFile("Base.rte/GUIs/DeploymentIcons/ArrowRight.png").GetAsAnimation(m_apArrowRightBitmap, 1);
 	}
 
     return 0;
@@ -611,7 +607,7 @@ float Deployment::GetTotalValue(int nativeModule, float foreignMult, float nativ
 
 bool Deployment::IsOnScenePoint(Vector &scenePoint) const
 {
-    if (!m_Icon.GetBitmaps8() || !(m_Icon.GetBitmaps8()[0]))
+    if (m_Icon.GetBitmaps8().empty() || !(m_Icon.GetBitmaps8().at(0)))
         return false;
 // TODO: TAKE CARE OF WRAPPING
 /*
@@ -658,7 +654,7 @@ bool Deployment::IsOnScenePoint(Vector &scenePoint) const
         }
     }
 */
-    BITMAP *pBitmap = m_Icon.GetBitmaps8()[0];
+    BITMAP *pBitmap = m_Icon.GetBitmaps8().at(0);
     Vector bitmapPos = m_Pos - Vector(pBitmap->w / 2, pBitmap->h / 2);
     if (WithinBox(scenePoint, bitmapPos, pBitmap->w, pBitmap->h))
     {
@@ -680,14 +676,14 @@ bool Deployment::IsOnScenePoint(Vector &scenePoint) const
 
 void Deployment::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const
 {
-    if (!m_Icon.GetBitmaps8() || !(m_Icon.GetBitmaps8()[0]))
+    if (m_Icon.GetBitmaps8().empty() || !(m_Icon.GetBitmaps8().at(0)))
         RTEAbort("Deployment's Icon bitmaps are null when drawing!");
 
-	if (!m_apArrowLeftBitmap || !m_apArrowRightBitmap)
+	if (m_apArrowLeftBitmap.empty() || m_apArrowRightBitmap.empty())
 		RTEAbort("Deployment's Arrow bitmaps are null when drawing!");
 
 	{
-		BITMAP *pBitmap = m_Icon.GetBitmaps8()[0];
+		BITMAP *pBitmap = m_Icon.GetBitmaps8().at(0);
 
 		// Take care of wrapping situations
 		Vector aDrawPos[4];

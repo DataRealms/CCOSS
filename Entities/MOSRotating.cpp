@@ -1676,7 +1676,7 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap,
                        DrawMode mode,
                        bool onlyPhysical) const
 {
-    RTEAssert(m_aSprite, "No sprite bitmaps loaded to draw!");
+    RTEAssert(!m_aSprite.empty(), "No sprite bitmaps loaded to draw!");
     RTEAssert(m_Frame >= 0 && m_Frame < m_FrameCount, "Frame is out of bounds!");
     
     // Only draw MOID if this gets hit by MO's and it has a valid MOID assigned to it

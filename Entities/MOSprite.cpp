@@ -62,6 +62,7 @@ int MOSprite::Create()
         return -1;
 
     // Post-process reading
+	m_aSprite.clear();
     m_SpriteFile.GetAsAnimation(m_aSprite, m_FrameCount);
 
     if (!m_aSprite.empty() && m_aSprite.at(0))
@@ -98,6 +99,7 @@ int MOSprite::Create(ContentFile spriteFile,
 
     m_SpriteFile = spriteFile;
     m_FrameCount = frameCount;
+	m_aSprite.clear();
     m_SpriteFile.GetAsAnimation(m_aSprite, m_FrameCount);
     m_SpriteOffset.SetXY(static_cast<float>(-m_aSprite.at(0)->w) / 2.0F, static_cast<float>(-m_aSprite.at(0)->h) / 2.0F);
 

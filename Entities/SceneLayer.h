@@ -84,11 +84,6 @@ namespace RTE {
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
 		void Destroy(bool notInherited = false) override;
-
-		/// <summary>
-		/// Resets the entire SLTerrain, including its inherited members, to their default settings or values.
-		/// </summary>
-		void Reset() override { Clear(); Entity::Reset(); }
 #pragma endregion
 
 #pragma region 
@@ -190,8 +185,8 @@ namespace RTE {
 		/// </summary>
 		/// <param name="pixelX">The X coordinates of which pixel to get.</param>
 		/// <param name="pixelY">The Y coordinates of which pixel to get.</param>
-		/// <returns>An unsigned char specifying the requested pixel's value.</returns>
-		unsigned char GetPixel(const int pixelX, const int pixelY);
+		/// <returns>An int specifying the requested pixel's value.</returns>
+		int GetPixel(const int pixelX, const int pixelY);
 
 		/// <summary>
 		/// Sets a specific pixel on the main bitmap of this SceneLayer to a specific value. LockBitmaps() must be called before using this method.
@@ -199,7 +194,7 @@ namespace RTE {
 		/// <param name="pixelX">The X coordinates of which pixel to set.</param>
 		/// <param name="pixelY">The Y coordinates of which pixel to set.</param>
 		/// <param name="value">The value to set the pixel to.</param>
-		void SetPixel(const int pixelX, const int pixelY, const unsigned char value);
+		void SetPixel(const int pixelX, const int pixelY, const int value);
 
 		/// <summary>
 		/// Returns whether the integer coordinates passed in are within the bounds of this SceneLayer.

@@ -251,13 +251,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	unsigned char SceneLayer::GetPixel(const int pixelX, const int pixelY) {
-		return (pixelX < 0 || pixelX >= m_MainBitmap->w || pixelY < 0 || pixelY >= m_MainBitmap->h) ? 0 : static_cast<unsigned char>(_getpixel(m_MainBitmap, pixelX, pixelY));
+	int SceneLayer::GetPixel(const int pixelX, const int pixelY) {
+		return (pixelX < 0 || pixelX >= m_MainBitmap->w || pixelY < 0 || pixelY >= m_MainBitmap->h) ? 0 : _getpixel(m_MainBitmap, pixelX, pixelY);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SceneLayer::SetPixel(const int pixelX, const int pixelY, const unsigned char value) {
+	void SceneLayer::SetPixel(const int pixelX, const int pixelY, const int value) {
 		RTEAssert(m_MainBitmapOwned, "Trying to set a pixel of a SceneLayer's bitmap which isn't owned!");
 
 		if (pixelX < 0 || pixelX >= m_MainBitmap->w || pixelY < 0 || pixelY >= m_MainBitmap->h) {

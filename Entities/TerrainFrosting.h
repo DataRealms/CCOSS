@@ -49,14 +49,14 @@ namespace RTE {
 		/// <summary>
 		/// Gets the target Material that this TerrainFrosting will appear on top of.
 		/// </summary>
-		/// <returns>A copy of the target Material.</returns>
-		Material & GetTargetMaterial() { return m_TargetMaterial; }
+		/// <returns>A reference to the target Material.</returns>
+		const Material & GetTargetMaterial() const { return m_TargetMaterial; }
 
 		/// <summary>
 		/// Gets the Material of this TerrainFrosting.
 		/// </summary>
-		/// <returns>A copy of the Material.</returns>
-		Material & GetFrostingMaterial() { return m_FrostingMaterial; }
+		/// <returns>A reference to the frosting Material.</returns>
+		const Material & GetFrostingMaterial() const { return m_FrostingMaterial; }
 
 		/// <summary>
 		/// Returns a random thickness sample between the min and max possible thicknesses of this TerrainFrosting.

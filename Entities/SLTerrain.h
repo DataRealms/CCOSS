@@ -1,617 +1,355 @@
 #ifndef _RTESLTERRAIN_
 #define _RTESLTERRAIN_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            SLTerrain.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Header file for the SLTerrain class.
-// Project:         Retro Terrain Engine
-// Author(s):       Daniel Tabar
-//                  data@datarealms.com
-//                  http://www.datarealms.com
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Inclusions of header files
-
 #include "SceneLayer.h"
 #include "Matrix.h"
 #include "Box.h"
-#include "Material.h"
 
-namespace RTE
-{
+namespace RTE {
 
-class MOPixel;
-class TerrainDebris;
+	class MOPixel;
+	class MovableObject;
+	class TerrainFrosting;
+	class TerrainObject;
+	class TerrainDebris;
 
+	/// <summary>
+	/// The terrain of the RTE scene.
+	/// </summary>
+	class SLTerrain : public SceneLayer {
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           SLTerrain
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     The terrain of the RTE scene.
-// Parent(s):       SceneLayer
-// Class history:   01/08/2002 SLTerrain created.
+	public:
 
-class SLTerrain:
-    public SceneLayer
-{
-
-
-
+		EntityAllocation(SLTerrain)
 		SerializableOverrideMethods
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
-
-public:
-
-
-// Concrete allocation and cloning definitions
-EntityAllocation(SLTerrain)
-SerializableOverrideMethods
-ClassInfoGetters
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Constructor:     SLTerrain
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Constructor method used to instantiate a SLTerrain object in system
-//                  memory. Create() should be called before using the object.
-// Arguments:       None.
-
-    SLTerrain() { Clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Destructor:      ~SLTerrain
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destructor method used to clean up a SLTerrain object before deletion
-//                  from system memory.
-// Arguments:       None.
-
-	~SLTerrain() override { Destroy(true); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the SLTerrain object ready for use.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-   int Create() override;
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the SLTerrain object ready for use.
-// Arguments:       The path of the bitmap file to load as this SLTerrain's graphical
-//                  representation.
-//                  Whether to draw transperently using a color key specified by the pixel
-//                  in the upper left corner of the loaded bitmap.
-//                  The initial scroll offset.
-//                  Two bools that define whether the layer should wrap around or stop when
-//                  scrolling beyond its bitmap's boundries.
-//                  A vector whose components defines two different things, depending on
-//                  wrapX/Y arguments. If a wrap argument is set to false, the
-//                  corresponding component here will be interpreted as the width (X) or
-//                  height (Y) (in pixels) of the total bitmap area that this layer is
-//                  allowed to scroll across before stopping at an edge. If wrapping is
-//                  set to true, the value in scrollInfo is simply the ratio of offset at
-//                  which any scroll operations will be done in. A special command is if
-//                  wrap is false and the corresponding component is -1.0, that signals
-//                  that the own width or height should be used as scrollInfo input.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-// TODO: streamline interface")
-	int Create(char *filename,
-                       bool drawTrans,
-                       Vector offset,
-                       bool wrapX,
-                       bool wrapY,
-                       Vector scrollInfo);
-*/
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Creates a SLTerrain to be identical to another, by deep copy.
-// Arguments:       A reference to the SLTerrain to deep copy.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-    int Create(const SLTerrain &reference);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LoadData
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Actually loads previously specified/created data into memory. Has
-//                  to be done before using this SceneLayer.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-	int LoadData() override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SaveData
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Saves data currently in memory to disk.
-// Arguments:       The filepath base to the where to save the Bitmap data. This means
-//                  everything up to the extension. "FG" and "Mat" etc will be added.
-// Return value:    An error return value signaling success or any particular failure.
-//                  Anything below 0 is an error signal.
-
-	int SaveData(std::string pathBase) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ClearData
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears out any previously loaded bitmap data from memory.
-// Arguments:       None.
-// Return value:    An error return value signaling success or any particular failure.
-//                  Anything below 0 is an error signal.
-
-	int ClearData() override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsFileData
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Whether this' bitmap data is loaded from a file or was generated.
-// Arguments:       None.
-// Return value:    Whether the data in this' bitmap was loaded from a datafile, or generated.
-
-	bool IsFileData() const override { return m_pFGColor && m_pFGColor->IsFileData() && m_pBGColor && m_pBGColor->IsFileData(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Reset
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets the entire SLTerrain, including its inherited members, to their
-//                  default settings or values.
-// Arguments:       None.
-// Return value:    None.
-
-    void Reset() override { Clear(); SceneLayer::Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Destroy
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Destroys and resets (through Clear()) the SLTerrain object.
-// Arguments:       Whether to only destroy the members defined in this derived class, or
-//                  to destroy all inherited members also.
-// Return value:    None.
-
-    void Destroy(bool notInherited = false) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  LockBitmaps
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Lock the internal bitmaps so it can be accessed by GetColorPixel() etc.
-//                  Doing it in a separate method like this is more efficient because
-//                  many bitmap accesses can be performed between a lock and unlock.
-//                  UnlockBitmaps() should always be called after accesses are completed.
-// Arguments:       None.
-// Return value:    None.
-
-	void LockBitmaps() override { SceneLayer::LockBitmaps(); acquire_bitmap(m_pMainBitmap); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UnlockBitmaps
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Unlocks the internal bitmaps and prevents access to display memory.
-//                  Doing it in a separate method like this is more efficient because
-//                  many bitmap accesses can be performed between a lock and an unlock.
-//                  UnlockBitmaps() should only be called after LockBitmaps().
-// Arguments:       None.
-// Return value:    None.
-
-	void UnlockBitmaps() override { SceneLayer::UnlockBitmaps(); release_bitmap(m_pMainBitmap); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetFGColorBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the foreground color bitmap of this SLTerrain.
-// Arguments:       None.
-// Return value:    A pointer to the foreground color bitmap.
-
-    BITMAP * GetFGColorBitmap() { return m_pFGColor->GetBitmap(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetBGColorBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the background color bitmap of this SLTerrain.
-// Arguments:       None.
-// Return value:    A pointer to the foreground color bitmap.
-
-    BITMAP * GetBGColorBitmap() { return m_pBGColor->GetBitmap(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMaterialBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the material bitmap of this SLTerrain.
-// Arguments:       None.
-// Return value:    A pointer to the material bitmap.
-
-    BITMAP * GetMaterialBitmap() { return m_pMainBitmap; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetFGColorPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a specific pixel from the foreground color bitmap of this.
-//                  LockBitmaps() must be called before using this method.
-// Arguments:       The X and Y coordinates of which pixel to get.
-// Return value:    An unsigned char specifying the requested pixel's BG Color.
-
-    unsigned char GetFGColorPixel(const int pixelX, const int pixelY) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetBGColorPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a specific pixel from the background color bitmap of this.
-//                  LockBitmaps() must be called before using this method.
-// Arguments:       The X and Y coordinates of which pixel to get.
-// Return value:    An unsigned char specifying the requested pixel's BG Color.
-
-    unsigned char GetBGColorPixel(const int pixelX, const int pixelY) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetMaterialPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a specific pixel from the material bitmap of this SceneLayer.
-//                  LockBitmaps() must be called before using this method.
-// Arguments:       The X and Y coordinates of which pixel to get.
-// Return value:    An unsigned char specifying the requested pixel's material index.
-
-    unsigned char GetMaterialPixel(const int pixelX, const int pixelY) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsAirPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether a terrain pixel is of air or cavity material.
-// Arguments:       The X and Y coordinates of which pixel to check for airness.
-// Return value:    A bool with the answer.
-
-    bool IsAirPixel(const int pixelX, const int pixelY) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetFGColorPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets a specific pixel on the FG Color bitmap of this SLTerrain to a
-//                  specific color. LockBitmaps() must be called before using this
-//                  method.
-// Arguments:       The X and Y coordinates of which pixel to set.
-//                  The color index to set the pixel to.
-// Return value:    None.
-
-    void SetFGColorPixel(const int pixelX, const int pixelY, const int color);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetBGColorPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets a specific pixel on the BG Color bitmap of this SLTerrain to a
-//                  specific color. LockBitmaps() must be called before using this
-//                  method.
-// Arguments:       The X and Y coordinates of which pixel to set.
-//                  The color index to set the pixel to.
-// Return value:    None.
-
-    void SetBGColorPixel(const int pixelX, const int pixelY, const int color);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetMaterialPixel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets a specific pixel on the material bitmap of this SLTerrain to a
-//                  specific material. LockMaterialBitmap() must be called before using this
-//                  method.
-// Arguments:       The X and Y coordinates of which pixel to set.
-//                  The material index to set the pixel to.
-// Return value:    None.
-
-    void SetMaterialPixel(const int pixelX, const int pixelY, const unsigned char material);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetStructuralBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the structural bitmap of this Terrain.
-// Arguments:       None.
-// Return value:    A pointer to the material bitmap.
-
-    BITMAP * GetStructuralBitmap() { return m_pStructural; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetToDrawMaterial
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets whether drawing the material layer instead of the normal color
-//                  layer when drawing this SLTerrain.
-// Arguments:       The setting, whether to draw the material later instead of the color
-//                  layer or not.
-// Return value:    None.
-
-    bool GetToDrawMaterial() { return m_DrawMaterial; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EraseSilhouette
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Takes a BITMAP and scans through the pixels on this terrain for pixels
-//                  which overlap with it. Erases them from the terrain and can optionally
-//                  generate MOPixel:s based on the erased or 'dislodged' terrain pixels.
-// Arguments:       A pointer to the source BITMAP whose rotozoomed silhouette will be used
-//                  as a cookie-cutter on the terrain.
-//                  The position coordinates of the sprite.
-//                  The sprite's current rotation in radians.
-//                  The sprite's current scale coefficient
-//                  Whether to generate any MOPixel:s from the erased terrain pixels.
-//                  How many pixels to skip making MOPixels from, between each that gets
-//                  made. 0 means every pixel turns into an MOPixel.
-//                  The max number of MOPixels to make, if they are to be made.
-// Return value:    A deque filled with the MOPixel:s of the terrain that are now dislodged.
-//                  Note that ownership of all the MOPixel:s in the deque ARE transferred!
-//                  This will be empty if makeMOPs is false.
-
-    std::deque<MOPixel *> EraseSilhouette(BITMAP *pSprite,
-                                          Vector pos,
-                                          Vector pivot,
-                                          Matrix rotation,
-                                          float scale,
-                                          bool makeMOPs = true,
-                                          int skipMOP = 2,
-                                          int maxMOPs = 150);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetToDrawMaterial
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets whether to draw the material layer instead of the normal color
-//                  layer when drawing this SLTerrain.
-// Arguments:       The setting, whether to draw the material later instead of the color
-//                  layer or not.
-// Return value:    None.
-
-    void SetToDrawMaterial(bool drawMaterial) { m_DrawMaterial = drawMaterial; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ApplyObject
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws a passed in Object's graphical and material representations to
-//                  this Terrain's respective layers.
-// Arguments:       The Object to apply to this Terrain. Ownership is NOT xferred!
-// Return value:    Whether successful or not.
-
-	bool ApplyObject(Entity *pEntity);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ApplyMovableObject
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws a passed in MovableObject's graphical and material
-//                  representations to this Terrain's respective layers.
-// Arguments:       The MovableObject to apply to this Terrain. Ownership is NOT xferred!
-// Return value:    None.
-
-	void ApplyMovableObject(MovableObject *pMObject);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ApplyTerrainObject
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws a passed in TerrainObject's graphical and material
-//                  representations to this Terrain's respective layers.
-// Arguments:       The TerrainObject to apply to this Terrain. Ownership is NOT xferred!
-// Return value:    None.
-
-	void ApplyTerrainObject(TerrainObject *pTObject);
-
-
-	void RegisterTerrainChange(TerrainObject *pTObject);
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddUpdatedMaterialArea
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds a notification that an area of the material terrain has been
-//                  updated.
-// Arguments:       The Box defining the newly updated material area that can be unwrapped
-//                  and may be out of bounds of the scene.
-// Return value:    None.
-
-    void AddUpdatedMaterialArea(const Box &newArea) { m_UpdatedMateralAreas.push_back(newArea); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetUpdatedMaterialAreas
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a list of unwrapped boxes which show the areas where the material
-//                  layer has had objects applied to it since last call to ClearUpdatedAreas().
-// Arguments:       None.
-// Return value:    Reference to the list that has been filled with Box:es which are
-//                  unwrapped and may be out of bounds of the scene!
-
-    std::list<Box> & GetUpdatedMaterialAreas() { return m_UpdatedMateralAreas; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          IsBoxBuried
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks whether a bounding box is completely buried in the terrain.
-// Arguments:       The box to check.
-// Return value:    Whether the box is completely buried., ie no corner sticks out in the
-//                  air.
-
-    bool IsBoxBuried(const Box &checkBox) const;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearUpdatedAreas
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears the list of updated areas in the material layer.
-// Arguments:       None.
-// Return value:    None.
-
-    void ClearUpdatedAreas() { m_UpdatedMateralAreas.clear(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CleanAirBox
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes any color pixel in the color layer of this SLTerrain wherever
-//                  there is an air material pixel in the material layer inside the specified box.
-// Arguments:       Box to clean. Whether the scene is X-wrapped or Y-wrapped.
-// Return value:    None.
-
-    void CleanAirBox(Box box, bool wrapsX, bool wrapsY);
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          CleanAir
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes any color pixel in the color layer of this SLTerrain wherever
-//                  there is an air material pixel in the material layer.
-// Arguments:       None.
-// Return value:    None.
-
-    void CleanAir();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ClearAllMaterial
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes any FG and material pixels completely form teh terrain.
-//                  For the editor mostly.
-// Arguments:       None.
-// Return value:    None.
-
-    void ClearAllMaterial();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the state of this SLTerrain. Supposed to be done every frame.
-// Arguments:       None.
-// Return value:    None.
-
-	void Update();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  DrawDrawBackground
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this SLTerrain's background layer's current scrolled position
-//                  to a bitmap.
-// Arguments:       The bitmap to draw to.
-//                  The box on the target bitmap to limit drawing to, with the corner of
-//                  box being where the scroll position lines up.
-//                  If a non-{-1,-1} vector is passed, the internal scroll offset of this
-//                  is overridder with it. It becomes the new source coordinates.
-// Return value:    None.
-
-	void DrawBackground(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrollOverride = Vector(-1, -1));
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this SLTerrain's foreground's current scrolled position to a bitmap.
-// Arguments:       The bitmap to draw to.
-//                  The box on the target bitmap to limit drawing to, with the corner of
-//                  box being where the scroll position lines up.
-//                  If a non-{-1,-1} vector is passed, the internal scroll offset of this
-//                  is overridder with it. It becomes the new source coordinates.
-// Return value:    None.
-
-	void Draw(BITMAP *pTargetBitmap, Box& targetBox, const Vector &scrollOverride = Vector(-1, -1)) const override;
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
-
-protected:
-
-    // Member variables
-    static Entity::ClassInfo m_sClass;
-
-    SceneLayer *m_pFGColor;
-    SceneLayer *m_pBGColor;
-    BITMAP *m_pStructural;
-    ContentFile m_BGTextureFile;
-
-    std::list<TerrainFrosting> m_TerrainFrostings;
-    std::list<TerrainDebris *> m_TerrainDebris;
-    std::list<TerrainObject *> m_TerrainObjects;
-
-    // List of areas of the material layer which have been affected by the updating of new objects copied to it
-    // These boxes are NOT wrapped, and can be out of bounds!
-    std::list<Box> m_UpdatedMateralAreas;
-
-    // Draw the material layer instead of the color layer.
-    bool m_DrawMaterial;
-
-    // Intermediate test layers, deffernt sizes for efficiency
-    static BITMAP *m_spTempBitmap16;
-    static BITMAP *m_spTempBitmap32;
-    static BITMAP *m_spTempBitmap64;
-    static BITMAP *m_spTempBitmap128;
-    static BITMAP *m_spTempBitmap256;
-    static BITMAP *m_spTempBitmap512;
-
-	// Indicates, that before processing frostings-related properties for this terrain
-	// derived list with frostings must be cleared to avoid duplication when loading scenes
-	bool m_NeedToClearFrostings;
-	// Indicates, that before processing debris-related properties for this terrain
-	// derived list with debris must be cleared to avoid duplication when loading scenes
-	bool m_NeedToClearDebris;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
-private:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this SLTerrain, effectively
-//                  resetting the members of this abstraction level only.
-// Arguments:       None.
-// Return value:    None.
-
-    void Clear();
-
-
-    // Disallow the use of some implicit methods.
-	SLTerrain(const SLTerrain &reference) = delete;
-	SLTerrain & operator=(const SLTerrain &rhs) = delete;
-
-};
-
-} // namespace RTE
-
-#endif // File
+		ClassInfoGetters
+
+#pragma region Creation
+		/// <summary>
+		/// Constructor method used to instantiate a SLTerrain object in system memory. Create() should be called before using the object.
+		/// </summary>
+		SLTerrain() { Clear(); }
+
+		/// <summary>
+		/// Makes the SLTerrain object ready for use.
+		/// </summary>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create() override;
+
+		/// <summary>
+		/// Creates a SLTerrain to be identical to another, by deep copy.
+		/// </summary>
+		/// <param name="reference">A reference to the SLTerrain to deep copy.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create(const SLTerrain &reference);
+#pragma endregion
+
+#pragma region Destruction
+		/// <summary>
+		/// Destructor method used to clean up a SLTerrain object before deletion from system memory.
+		/// </summary>
+		~SLTerrain() override { Destroy(true); }
+
+		/// <summary>
+		/// Destroys and resets (through Clear()) the SLTerrain object.
+		/// </summary>
+		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
+		void Destroy(bool notInherited = false) override;
+#pragma endregion
+
+#pragma region 
+		/// <summary>
+		/// Whether this' bitmap data is loaded from a file or was generated.
+		/// </summary>
+		/// <returns>Whether the data in this' bitmap was loaded from a datafile, or generated.</returns>
+		bool IsFileData() const override { return m_FGColorLayer && m_FGColorLayer->IsFileData() && m_BGColorLayer && m_BGColorLayer->IsFileData(); }
+
+		/// <summary>
+		/// Actually loads previously specified/created data into memory. Has to be done before using this SceneLayer.
+		/// </summary>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int LoadData() override;
+
+		/// <summary>
+		/// Saves data currently in memory to disk.
+		/// </summary>
+		/// <param name="pathBase">The filepath base to the where to save the Bitmap data. This means everything up to the extension. "FG" and "Mat" etc will be added.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int SaveData(const std::string &pathBase) override;
+
+		/// <summary>
+		/// Clears out any previously loaded bitmap data from memory.
+		/// </summary>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int ClearData() override;
+#pragma endregion
+
+#pragma region Getters and Setters
+		/// <summary>
+		/// Gets the foreground color bitmap of this SLTerrain.
+		/// </summary>
+		/// <returns>A pointer to the foreground color bitmap.</returns>
+		BITMAP * GetFGColorBitmap() { return m_FGColorLayer->GetBitmap(); }
+
+		/// <summary>
+		/// Gets the background color bitmap of this SLTerrain.
+		/// </summary>
+		/// <returns>A pointer to the background color bitmap.</returns>
+		BITMAP * GetBGColorBitmap() { return m_BGColorLayer->GetBitmap(); }
+
+		/// <summary>
+		/// Gets the material bitmap of this SLTerrain.
+		/// </summary>
+		/// <returns>A pointer to the material bitmap.</returns>
+		BITMAP * GetMaterialBitmap() { return m_MainBitmap; }
+
+		/// <summary>
+		/// Gets the structural bitmap of this Terrain.
+		/// </summary>
+		/// <returns>A pointer to the material bitmap. Ownership is NOT transferred!</returns>
+		BITMAP * GetStructuralBitmap() { return m_StructuralBitmap; }
+
+		/// <summary>
+		/// Gets a specific pixel from the foreground color bitmap of this. LockBitmaps() must be called before using this method.
+		/// </summary>
+		/// <param name="pixelX">The X coordinates of which pixel to get.</param>
+		/// <param name="pixelY">The Y coordinates of which pixel to get.</param>
+		/// <returns>An int specifying the requested pixel's foreground Color.</returns>
+		int GetFGColorPixel(const int pixelX, const int pixelY) const { return GetPixelFromLayer(LayerType::ForegroundLayer, pixelX, pixelY); }
+
+		/// <summary>
+		/// Sets a specific pixel on the foreground color bitmap of this SLTerrain to a specific color. LockBitmaps() must be called before using this method.
+		/// </summary>
+		/// <param name="pixelX">The X coordinates of which pixel to set.</param>
+		/// <param name="pixelY">The Y coordinates of which pixel to set.</param>
+		/// <param name="color">The color index to set the pixel to.</param>
+		void SetFGColorPixel(const int pixelX, const int pixelY, const int color) const { SetPixelOnLayer(LayerType::ForegroundLayer, pixelX, pixelY, color); }
+
+		/// <summary>
+		/// Gets a specific pixel from the background color bitmap of this. LockBitmaps() must be called before using this method.
+		/// </summary>
+		/// <param name="pixelX">The X coordinates of which pixel to get.</param>
+		/// <param name="pixelY">The Y coordinates of which pixel to get.</param>
+		/// <returns>An int specifying the requested pixel's background color.</returns>
+		int GetBGColorPixel(const int pixelX, const int pixelY) const { return GetPixelFromLayer(LayerType::BackgroundLayer, pixelX, pixelY); }
+
+		/// <summary>
+		/// Sets a specific pixel on the background color bitmap of this SLTerrain to a specific color. LockBitmaps() must be called before using this method.
+		/// </summary>
+		/// <param name="pixelX">The X coordinates of which pixel to set.</param>
+		/// <param name="pixelY">The Y coordinates of which pixel to set.</param>
+		/// <param name="color">The color index to set the pixel to.</param>
+		void SetBGColorPixel(const int pixelX, const int pixelY, const int color) const { SetPixelOnLayer(LayerType::BackgroundLayer, pixelX, pixelY, color); }
+
+		/// <summary>
+		/// Gets a specific pixel from the material bitmap of this SceneLayer. LockBitmaps() must be called before using this method.
+		/// </summary>
+		/// <param name="pixelX">The X coordinates of which pixel to get.</param>
+		/// <param name="pixelY">The Y coordinates of which pixel to get.</param>
+		/// <returns>An int specifying the requested pixel's material index.</returns>
+		int GetMaterialPixel(const int pixelX, const int pixelY) const { return GetPixelFromLayer(LayerType::MaterialLayer, pixelX, pixelY); }
+
+		/// <summary>
+		/// Sets a specific pixel on the material bitmap of this SLTerrain to a specific material. LockMaterialBitmap() must be called before using this method.
+		/// </summary>
+		/// <param name="pixelX">The X coordinates of which pixel to set.</param>
+		/// <param name="pixelY">The Y coordinates of which pixel to set.</param>
+		/// <param name="materialID">The material index to set the pixel to.</param>
+		void SetMaterialPixel(const int pixelX, const int pixelY, const int materialID) const { SetPixelOnLayer(LayerType::MaterialLayer, pixelX, pixelY, materialID); }
+
+		/// <summary>
+		/// Gets whether drawing the material layer instead of the normal color layer when drawing this SLTerrain.
+		/// </summary>
+		/// <returns></returns>
+		bool GetToDrawMaterial() const { return m_DrawMaterial; }
+
+		/// <summary>
+		/// Sets whether to draw the material layer instead of the normal color layer when drawing this SLTerrain.
+		/// </summary>
+		/// <param name="drawMaterial">The setting, whether to draw the material later instead of the color layer or not.</param>
+		void SetToDrawMaterial(bool drawMaterial) { m_DrawMaterial = drawMaterial; }
+
+		/// <summary>
+		/// Indicates whether a terrain pixel is of air or cavity material.
+		/// </summary>
+		/// <param name="pixelX">The X coordinates of which pixel to check for airness.</param>
+		/// <param name="pixelY">The Y coordinates of which pixel to check for airness.</param>
+		/// <returns>A bool with the answer.</returns>
+		bool IsAirPixel(const int pixelX, const int pixelY) const;
+
+		/// <summary>
+		/// Checks whether a bounding box is completely buried in the terrain.
+		/// </summary>
+		/// <param name="checkBox">The box to check.</param>
+		/// <returns>Whether the box is completely buried., ie no corner sticks out in the air.</returns>
+		bool IsBoxBuried(const Box &checkBox) const;
+#pragma endregion
+
+#pragma region
+		/// <summary>
+		/// Gets a list of unwrapped boxes which show the areas where the material layer has had objects applied to it since last call to ClearUpdatedAreas().
+		/// </summary>
+		/// <returns>Reference to the list that has been filled with Box:es which are unwrapped and may be out of bounds of the scene!</returns>
+		std::list<Box> & GetUpdatedMaterialAreas() { return m_UpdatedMateralAreas; }
+
+		/// <summary>
+		/// Adds a notification that an area of the material terrain has been updated.
+		/// </summary>
+		/// <param name="newArea">The Box defining the newly updated material area that can be unwrapped and may be out of bounds of the scene.</param>
+		void AddUpdatedMaterialArea(const Box &newArea) { m_UpdatedMateralAreas.push_back(newArea); }
+
+		/// <summary>
+		/// Takes a BITMAP and scans through the pixels on this terrain for pixels which overlap with it. Erases them from the terrain and can optionally generate MOPixel:s based on the erased or 'dislodged' terrain pixels.
+		/// </summary>
+		/// <param name="pSprite">A pointer to the source BITMAP whose rotozoomed silhouette will be used as a cookie-cutter on the terrain.</param>
+		/// <param name="pos">The position coordinates of the sprite.</param>
+		/// <param name="pivot"></param>
+		/// <param name="rotation">The sprite's current rotation in radians.</param>
+		/// <param name="scale">The sprite's current scale coefficient</param>
+		/// <param name="makeMOPs">Whether to generate any MOPixel:s from the erased terrain pixels.</param>
+		/// <param name="skipMOP">How many pixels to skip making MOPixels from, between each that gets made. 0 means every pixel turns into an MOPixel.</param>
+		/// <param name="maxMOPs">The max number of MOPixels to make, if they are to be made.</param>
+		/// <returns>A deque filled with the MOPixels of the terrain that are now dislodged. This will be empty if makeMOPs is false. Note that ownership of all the MOPixels in the deque IS transferred! </returns>
+		std::deque<MOPixel *> EraseSilhouette(BITMAP *pSprite, Vector pos, Vector pivot, Matrix rotation, float scale, bool makeMOPs = true, int skipMOP = 2, int maxMOPs = 150);
+
+		/// <summary>
+		/// Draws a passed in Object's graphical and material representations to this Terrain's respective layers.
+		/// </summary>
+		/// <param name="entity">The Object to apply to this Terrain. Ownership is NOT transferred!</param>
+		/// <returns>Whether successful or not.</returns>
+		bool ApplyObject(Entity *entity);
+
+		/// <summary>
+		/// Draws a passed in MovableObject's graphical and material representations to this Terrain's respective layers.
+		/// </summary>
+		/// <param name="movableObject">The MovableObject to apply to this Terrain. Ownership is NOT transferred!</param>
+		void ApplyMovableObject(MovableObject *movableObject);
+
+		/// <summary>
+		/// Draws a passed in TerrainObject's graphical and material representations to this Terrain's respective layers.
+		/// </summary>
+		/// <param name="terrainObject">The TerrainObject to apply to this Terrain. Ownership is NOT transferred!</param>
+		void ApplyTerrainObject(TerrainObject *terrainObject);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="terrainObject"></param>
+		void RegisterTerrainChange(const TerrainObject *terrainObject) const;
+#pragma endregion
+
+#pragma region Concrete Methods
+		/// <summary>
+		/// Removes any FG and material pixels completely form the terrain. For the editor mostly.
+		/// </summary>
+		void ClearAllMaterial();
+
+		/// <summary>
+		/// Removes any color pixel in the color layer of this SLTerrain wherever there is an air material pixel in the material layer.
+		/// </summary>
+		void CleanAir();
+
+		/// <summary>
+		/// Removes any color pixel in the color layer of this SLTerrain wherever there is an air material pixel in the material layer inside the specified box.
+		/// </summary>
+		/// <param name="box">Box to clean.</param>
+		/// <param name="wrapsX">Whether the scene is X-wrapped.</param>
+		/// <param name="wrapsY">Whether the scene is Y-wrapped.</param>
+		void CleanAirBox(const Box &box, bool wrapsX, bool wrapsY);
+
+		/// <summary>
+		/// Clears the list of updated areas in the material layer.
+		/// </summary>
+		void ClearUpdatedAreas() { m_UpdatedMateralAreas.clear(); }
+
+		/// <summary>
+		/// Draws this SLTerrain's background layer's current scrolled position to a bitmap.
+		/// </summary>
+		/// <param name="targetBitmap">The bitmap to draw to.</param>
+		/// <param name="targetBox">The box on the target bitmap to limit drawing to, with the corner of box being where the scroll position lines up.</param>
+		/// <param name="scrollOverride">If a non-{-1,-1} vector is passed, the internal scroll offset of this is overridden with it. It becomes the new source coordinates.</param>
+		void DrawBackground(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride = Vector(-1, -1)) const;
+#pragma endregion
+
+#pragma region Virtual Override Methods
+		/// <summary>
+		/// Updates the state of this SLTerrain. Supposed to be done every frame.
+		/// </summary>
+		void Update() override;
+
+		/// <summary>
+		/// Draws this SLTerrain's foreground's current scrolled position to a bitmap.
+		/// </summary>
+		/// <param name="targetBitmap">The bitmap to draw to.</param>
+		/// <param name="targetBox">The box on the target bitmap to limit drawing to, with the corner of box being where the scroll position lines up.</param>
+		/// <param name="scrollOverride">If a non-{-1,-1} vector is passed, the internal scroll offset of this is overridden with it. It becomes the new source coordinates.</param>
+		void Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride = Vector(-1, -1)) const override;
+#pragma endregion
+
+	protected:
+
+		enum class LayerType { ForegroundLayer, BackgroundLayer, MaterialLayer };
+
+		static std::unordered_map<int, BITMAP *> m_TempBitmaps; //!< Intermediate test layers, different sizes for efficiency.
+
+		static Entity::ClassInfo m_sClass;
+
+		std::unique_ptr<SceneLayer> m_FGColorLayer;
+		std::unique_ptr<SceneLayer> m_BGColorLayer;
+		BITMAP *m_StructuralBitmap;
+		ContentFile m_BGTextureFile;
+
+		std::vector<TerrainFrosting *> m_TerrainFrostings;
+		std::vector<TerrainDebris *> m_TerrainDebris;
+		std::vector<TerrainObject *> m_TerrainObjects;
+
+		std::list<Box> m_UpdatedMateralAreas; //!< List of areas of the material layer which have been affected by the updating of new objects copied to it. These boxes are NOT wrapped, and can be out of bounds!
+
+		bool m_DrawMaterial; //!< Draw the material layer instead of the color layer.
+
+		bool m_NeedToClearFrostings; //!< Indicates, that before processing frostings-related properties for this terrain derived list with frostings must be cleared to avoid duplication when loading scenes.
+		bool m_NeedToClearDebris; //!< Indicates, that before processing debris-related properties for this terrain derived list with debris must be cleared to avoid duplication when loading scenes
+
+	private:
+
+		/// <summary>
+		/// Load and texturize the FG color bitmap, based on the materials defined in the recently loaded (main) material layer!
+		/// </summary>
+		void TexturizeTerrain();
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="layerType"></param>
+		/// <param name="pixelX"></param>
+		/// <param name="pixelY"></param>
+		/// <returns></returns>
+		int GetPixelFromLayer(LayerType layerType, int pixelX, int pixelY) const;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="layerType"></param>
+		/// <param name="pixelX"></param>
+		/// <param name="pixelY"></param>
+		/// <param name="color"></param>
+		void SetPixelOnLayer(LayerType layerType, int pixelX, int pixelY, int color) const;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="diameter"></param>
+		/// <returns></returns>
+		BITMAP * GetTempBitmap(int diameter) const;
+
+		/// <summary>
+		/// Clears all the member variables of this SLTerrain, effectively resetting the members of this abstraction level only.
+		/// </summary>
+		void Clear();
+
+		// Disallow the use of some implicit methods.
+		SLTerrain(const SLTerrain &reference) = delete;
+		SLTerrain & operator=(const SLTerrain &rhs) = delete;
+	};
+}
+#endif

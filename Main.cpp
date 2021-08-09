@@ -64,6 +64,7 @@ namespace RTE {
 
 		g_UInputMan.Initialize();
 		g_ConsoleMan.Initialize();
+		g_SceneMan.Initialize();
 		g_MovableMan.Initialize();
 		g_MetaMan.Initialize();
 		g_MenuMan.Initialize();

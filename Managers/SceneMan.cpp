@@ -40,7 +40,7 @@ namespace RTE
 #define COMPACTINGHEIGHT 25
 
 const std::string SceneMan::c_ClassName = "SceneMan";
-
+std::unordered_map<int, BITMAP *> SceneMan::m_TempBitmaps;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IntersectionCut
@@ -116,6 +116,23 @@ void SceneMan::Clear()
 		destroy_bitmap(m_pOrphanSearchBitmap);
 	m_pOrphanSearchBitmap = create_bitmap_ex(8, MAXORPHANRADIUS , MAXORPHANRADIUS);
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void SceneMan::Initialize() const {
+	// Can't create these earlier in the static declaration because allegro_init needs to be called before create_bitmap
+	if (m_TempBitmaps.empty()) {
+		m_TempBitmaps = {
+			{16, create_bitmap_ex(8, 16, 16)},
+			{32, create_bitmap_ex(8, 32, 32)},
+			{64, create_bitmap_ex(8, 64, 64)},
+			{128, create_bitmap_ex(8, 128, 128)},
+			{256, create_bitmap_ex(8, 256, 256)},
+			{512, create_bitmap_ex(8, 512, 512)}
+		};
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
@@ -408,6 +425,10 @@ void SceneMan::Destroy()
 
 	destroy_bitmap(m_pOrphanSearchBitmap);
 	m_pOrphanSearchBitmap = 0;
+
+	for (const auto &[bitmapSize, bitmapPtr] : m_TempBitmaps) {
+		destroy_bitmap(bitmapPtr);
+	}
 
     Clear();
 }
@@ -3591,6 +3612,19 @@ void SceneMan::ClearSeenPixels()
 
 void SceneMan::ClearCurrentScene() {
     m_pCurrentScene = nullptr;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+BITMAP * SceneMan::GetTempBitmap(int bitmapSize) const {
+	// Get the largest dimension of the bitmap and convert it to a multiple of 16, i.e. 16, 32, etc
+	int bitmapSizeNeeded = static_cast<int>(std::ceil(static_cast<float>(bitmapSize) / 16.0F)) * 16;
+	std::unordered_map<int, BITMAP *>::const_iterator correspondingBitmapSizeEntry = m_TempBitmaps.find(bitmapSizeNeeded);
+
+	// If we didn't find a match then the bitmap size is greater than 512 but that's the biggest we've got, so return it
+	if (correspondingBitmapSizeEntry == m_TempBitmaps.end()) { correspondingBitmapSizeEntry = m_TempBitmaps.find(512); }
+
+	return correspondingBitmapSizeEntry->second;
 }
 
 } // namespace RTE

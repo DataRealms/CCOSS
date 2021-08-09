@@ -135,6 +135,12 @@ public:
 	~SceneMan() { Destroy(); }
 
 
+	/// <summary>
+	/// Makes the SceneMan object ready for use.
+	/// </summary>
+	void Initialize() const;
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1647,6 +1653,13 @@ public:
 	void RegisterTerrainChange(int x, int y, int w, int h, unsigned char color, bool back);
 
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="bitmapSize"></param>
+	/// <returns></returns>
+	BITMAP * GetTempBitmap(int bitmapSize) const;
+
 	//	Struct to register terrain change events
 	struct TerrainChange
 	{
@@ -1668,6 +1681,7 @@ public:
 
   protected:
 
+	  static std::unordered_map<int, BITMAP *> m_TempBitmaps; //!< Intermediate test layers, different sizes for efficiency.
 
     // Default Scene name to load if nothing else is specified
     std::string m_DefaultSceneName;

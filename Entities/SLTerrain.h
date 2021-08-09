@@ -290,8 +290,6 @@ namespace RTE {
 
 		enum class LayerType { ForegroundLayer, BackgroundLayer, MaterialLayer };
 
-		static std::unordered_map<int, BITMAP *> m_TempBitmaps; //!< Intermediate test layers, different sizes for efficiency.
-
 		static Entity::ClassInfo m_sClass;
 
 		std::unique_ptr<SceneLayer> m_FGColorLayer;
@@ -334,13 +332,6 @@ namespace RTE {
 		/// <param name="pixelY"></param>
 		/// <param name="color"></param>
 		void SetPixelOnLayer(LayerType layerType, int pixelX, int pixelY, int color) const;
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="diameter"></param>
-		/// <returns></returns>
-		BITMAP * GetTempBitmap(int diameter) const;
 
 		/// <summary>
 		/// Clears all the member variables of this SLTerrain, effectively resetting the members of this abstraction level only.

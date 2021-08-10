@@ -46,8 +46,21 @@ namespace RTE {
 		g_NoMOID = 255
 	};
 
-	enum DotGlowColor { NoDot = 0, YellowDot, RedDot, BlueDot };
-	enum TransparencyPreset { LessTrans = 0, HalfTrans, MoreTrans };
+	enum DotGlowColor { NoDot, YellowDot, RedDot, BlueDot };
+	enum TransparencyPreset { LessTrans, HalfTrans, MoreTrans };
+
+	enum SpriteAnimMode {
+		NOANIM,
+		ALWAYSLOOP,
+		ALWAYSRANDOM,
+		ALWAYSPINGPONG,
+		LOOPWHENMOVING,
+		LOOPWHENOPENCLOSE,
+		PINGPONGOPENCLOSE,
+		OVERLIFETIME,
+		ONCOLLIDE,
+		SpriteAnimModeCount
+	};
 
 	// GUI colors
 	#define c_GUIColorWhite makecol(255, 255, 255)

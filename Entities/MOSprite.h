@@ -44,20 +44,6 @@ public:
 	SerializableOverrideMethods
 	ClassInfoGetters
 
-    enum SpriteAnimMode
-    {
-        NOANIM = 0,
-        ALWAYSLOOP,
-        ALWAYSRANDOM,
-        ALWAYSPINGPONG,
-        LOOPWHENMOVING,
-        LOOPWHENOPENCLOSE,
-        PINGPONGOPENCLOSE,
-		OVERLIFETIME,
-		ONCOLLIDE,
-        SpriteAnimModeCount
-    };
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     MOSprite

@@ -538,6 +538,7 @@
     <ClInclude Include="Entities\MetaSave.h" />
     <ClInclude Include="Entities\PEmitter.h" />
     <ClInclude Include="Entities\Round.h" />
+    <ClInclude Include="Entities\SLBackground.h" />
     <ClInclude Include="Entities\SoundSet.h" />
     <ClInclude Include="Entities\TerrainFrosting.h" />
     <ClInclude Include="GUI\GUIInterface.h" />
@@ -712,6 +713,7 @@
     <ClCompile Include="Entities\MetaSave.cpp" />
     <ClCompile Include="Entities\PEmitter.cpp" />
     <ClCompile Include="Entities\Round.cpp" />
+    <ClCompile Include="Entities\SLBackground.cpp" />
     <ClCompile Include="Entities\SoundSet.cpp" />
     <ClCompile Include="Entities\TerrainFrosting.cpp" />
     <ClCompile Include="GUI\GUIReader.cpp" />

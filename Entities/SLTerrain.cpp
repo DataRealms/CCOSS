@@ -51,17 +51,14 @@ namespace RTE {
 		m_BGColorLayer.reset(dynamic_cast<SceneLayer *>(reference.m_BGColorLayer->Clone()));
 		m_BGTextureFile = reference.m_BGTextureFile;
 
-
 		m_TerrainFrostings.clear();
 		for (TerrainFrosting *terrainFrosting : reference.m_TerrainFrostings) {
 			m_TerrainFrostings.emplace_back(terrainFrosting);
 		}
-
 		m_TerrainDebris.clear();
 		for (TerrainDebris *terrainDebris : reference.m_TerrainDebris) {
 			m_TerrainDebris.emplace_back(terrainDebris);
 		}
-
 		m_TerrainObjects.clear();
 		for (TerrainObject *terrainObject : reference.m_TerrainObjects) {
 			m_TerrainObjects.emplace_back(terrainObject);
@@ -92,22 +89,22 @@ namespace RTE {
 				m_NeedToClearFrostings = false;
 				m_TerrainFrostings.clear();
 			}
-			TerrainFrosting *frosting = new TerrainFrosting;
-			reader >> frosting;
-			m_TerrainFrostings.emplace_back(frosting);
+			std::unique_ptr<TerrainFrosting> terrainFrosting = std::make_unique<TerrainFrosting>();
+			reader >> terrainFrosting.get();
+			m_TerrainFrostings.emplace_back(terrainFrosting.release());
 		} else if (propName == "AddTerrainDebris") {
 			// Clear debris if we derived them from some other SLTerrain object and then read another set from explicit terrain definition
 			if (m_NeedToClearDebris) {
 				m_NeedToClearDebris = false;
 				m_TerrainDebris.clear();
 			}
-			TerrainDebris *pTerrainDebris = new TerrainDebris;
-			reader >> pTerrainDebris;
-			m_TerrainDebris.emplace_back(pTerrainDebris);
+			std::unique_ptr<TerrainDebris> terrainDebris = std::make_unique<TerrainDebris>();
+			reader >> terrainDebris.get();
+			m_TerrainDebris.emplace_back(terrainDebris.release());
 		} else if (propName == "AddTerrainObject" || propName == "PlaceTerrainObject") {
-			TerrainObject *pTerrainObject = new TerrainObject;
-			reader >> pTerrainObject;
-			m_TerrainObjects.emplace_back(pTerrainObject);
+			std::unique_ptr<TerrainObject> terrainObject = std::make_unique<TerrainObject>();
+			reader >> terrainObject.get();
+			m_TerrainObjects.emplace_back(terrainObject.release());
 		} else {
 			return SceneLayer::ReadProperty(propName, reader);
 		}
@@ -152,8 +149,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLTerrain::Destroy(bool notInherited) {
-		destroy_bitmap(m_StructuralBitmap);
-
+		//destroy_bitmap(m_StructuralBitmap);
 		if (!notInherited) { SceneLayer::Destroy(); }
 		Clear();
 	}
@@ -163,22 +159,16 @@ namespace RTE {
 	void SLTerrain::TexturizeTerrain() {
 		BITMAP *fgColorBitmap = m_FGColorLayer->GetBitmap();
 		BITMAP *bgColorBitmap = m_BGColorLayer->GetBitmap();
+		BITMAP *bgLayerTexture = m_BGTextureFile.GetAsBitmap();
 
-		// Temporary references for all the materials' textures and colors, since we'll access them a lot
+		const std::array<Material *, c_PaletteEntriesNumber> &materialPalette = g_SceneMan.GetMaterialPalette();
+		const std::array<unsigned char, c_PaletteEntriesNumber> &materialMappings = g_PresetMan.GetDataModule(m_BitmapFile.GetDataModuleID())->GetAllMaterialMappings();
+
 		std::array<BITMAP *, c_PaletteEntriesNumber> materialTextures;
 		materialTextures.fill(nullptr);
-
 		std::array<int, c_PaletteEntriesNumber> materialColors;
 		materialColors.fill(0);
 
-		// Get the background texture
-		BITMAP *bgLayerTexture = m_BGTextureFile.GetAsBitmap();
-		// Get the material palette for quicker access
-		const std::array<Material *, c_PaletteEntriesNumber> &apMaterials = g_SceneMan.GetMaterialPalette();
-		// Get the Material palette ID mappings local to the DataModule this SLTerrain is loaded from
-		const std::array<unsigned char, c_PaletteEntriesNumber> &materialMappings = g_PresetMan.GetDataModule(m_BitmapFile.GetDataModuleID())->GetAllMaterialMappings();
-
-		// Lock all involved bitmaps
 		//acquire_bitmap(m_MainBitmap);
 		//acquire_bitmap(fgColorBitmap);
 		//acquire_bitmap(bgColorBitmap);
@@ -198,7 +188,7 @@ namespace RTE {
 				}
 
 				// Validate the material, or default to default material
-				const Material *material = (matIndex >= 0 && matIndex < c_PaletteEntriesNumber && apMaterials.at(matIndex)) ? apMaterials.at(matIndex) : apMaterials.at(g_MaterialDefault);
+				const Material *material = (matIndex >= 0 && matIndex < c_PaletteEntriesNumber && materialPalette.at(matIndex)) ? materialPalette.at(matIndex) : materialPalette.at(g_MaterialDefault);
 
 				// If haven't read a pixel of this material before, then get its texture so we can quickly access it
 				if (!materialTextures.at(matIndex) && material->GetTexture()) {
@@ -207,7 +197,6 @@ namespace RTE {
 				}
 
 				int pixelColor = 0;
-
 				// If actually no texture for the material, then use the material's solid color instead
 				if (!materialTextures.at(matIndex)) {
 					if (materialColors.at(matIndex) == 0) { materialColors.at(matIndex) = material->GetColor().GetIndex(); }
@@ -215,8 +204,6 @@ namespace RTE {
 				} else {
 					pixelColor = _getpixel(materialTextures.at(matIndex), xPos % materialTextures.at(matIndex)->w, yPos % materialTextures.at(matIndex)->h);
 				}
-
-				// Draw the correct color pixel on the foreground
 				_putpixel(fgColorBitmap, xPos, yPos, pixelColor);
 
 				// Draw background texture on the background where this is stuff on the foreground
@@ -224,12 +211,10 @@ namespace RTE {
 					pixelColor = _getpixel(bgLayerTexture, xPos % bgLayerTexture->w, yPos % bgLayerTexture->h);
 					_putpixel(bgColorBitmap, xPos, yPos, pixelColor);
 				} else {
-					// Put a key color pixel in the background otherwise
 					_putpixel(bgColorBitmap, xPos, yPos, ColorKeys::g_MaskColor);
 				}
 			}
 		}
-
 		//release_bitmap(m_MainBitmap);
 		//release_bitmap(fgColorBitmap);
 		//release_bitmap(bgColorBitmap);
@@ -358,7 +343,6 @@ namespace RTE {
 		int posY = pixelY;
 		WrapPosition(posX, posY);
 
-		// If it's still below or to the sides out of bounds after wrapping what is supposed to be wrapped, shit is out of bounds.
 		if (posX < 0 || posX >= m_MainBitmap->w || posY < 0 || posY >= m_MainBitmap->h) {
 			return;
 		}
@@ -372,7 +356,6 @@ namespace RTE {
 		int posY = pixelY;
 		WrapPosition(posX, posY);
 
-		// If it's still below or to the sides out of bounds after wrapping what is supposed to be wrapped, shit is out of bounds.
 		if (posX < 0 || posX >= m_MainBitmap->w || posY < 0 || posY >= m_MainBitmap->h) {
 			return true;
 		}
@@ -394,31 +377,27 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// TODO: OPTIMIZE THIS, IT'S A TIME HOG. MAYBE JSUT STAMP THE OUTLINE AND SAMPLE SOME RANDOM PARTICLES?
-	std::deque<MOPixel *> SLTerrain::EraseSilhouette(BITMAP *pSprite, Vector pos, Vector pivot, Matrix rotation, float scale, bool makeMOPs, int skipMOP, int maxMOPs) {
-		RTEAssert(pSprite, "Null BITMAP passed to SLTerrain::EraseSilhouette");
+	std::deque<MOPixel *> SLTerrain::EraseSilhouette(BITMAP *sprite, Vector pos, Vector pivot, Matrix rotation, float scale, bool makeMOPs, int skipMOP, int maxMOPs) {
+		RTEAssert(sprite, "Null BITMAP passed to SLTerrain::EraseSilhouette");
 
 		std::deque<MOPixel *> MOPDeque;
 
 		// Find the maximum possible sized bitmap that the passed-in sprite will need
-		int maxWidth = static_cast<int>(static_cast<float>(pSprite->w + std::abs(pivot.GetFloorIntX() - (pSprite->w / 2))) * scale);
-		int maxHeight = static_cast<int>(static_cast<float>(pSprite->h + std::abs(pivot.GetFloorIntY() - (pSprite->h / 2))) * scale);
+		int maxWidth = static_cast<int>(static_cast<float>(sprite->w + std::abs(pivot.GetFloorIntX() - (sprite->w / 2))) * scale);
+		int maxHeight = static_cast<int>(static_cast<float>(sprite->h + std::abs(pivot.GetFloorIntY() - (sprite->h / 2))) * scale);
 		int maxDiameter = static_cast<int>(std::sqrt(static_cast<float>(maxWidth * maxWidth + maxHeight * maxHeight)) * 2.0F);
 		int skipCount = skipMOP;
 
 		BITMAP *tempBitmap = g_SceneMan.GetTempBitmap(maxDiameter);
-		int halfWidth = tempBitmap->w / 2;
-		int halfHeight = tempBitmap->h / 2;
-
 		clear_bitmap(tempBitmap);
-		pivot_scaled_sprite(tempBitmap, pSprite, halfWidth, halfHeight, pivot.GetFloorIntX(), pivot.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()), ftofix(scale));
-
+		pivot_scaled_sprite(tempBitmap, sprite, tempBitmap->w / 2, tempBitmap->h / 2, pivot.GetFloorIntX(), pivot.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()), ftofix(scale));
 
 		// Do the test of intersection between color pixels of the test bitmap and non-air pixels of the terrain
 		// Generate and collect MOPixels that represent the terrain overlap and clear the same pixels out of the terrain
 		for (int testY = 0; testY < tempBitmap->h; ++testY) {
 			for (int testX = 0; testX < tempBitmap->w; ++testX) {
-				int terrX = pos.GetFloorIntX() - halfWidth + testX;
-				int terrY = pos.GetFloorIntY() - halfHeight + testY;
+				int terrX = pos.GetFloorIntX() - (tempBitmap->w / 2) + testX;
+				int terrY = pos.GetFloorIntY() - (tempBitmap->h / 2) + testY;
 
 				// Make sure we're checking within bounds
 				if (terrX < 0) {
@@ -454,22 +433,19 @@ namespace RTE {
 					}
 				}
 
-				int testPixel = getpixel(tempBitmap, testX, testY);
 				int matPixel = getpixel(m_MainBitmap, terrX, terrY);
 				int colorPixel = getpixel(m_FGColorLayer->GetBitmap(), terrX, terrY);
 
-				if (testPixel != ColorKeys::g_MaskColor) {
+				if (getpixel(tempBitmap, testX, testY) != ColorKeys::g_MaskColor) {
 					// Only add PixelMO if we're not due to skip any
 					if (makeMOPs && matPixel != g_MaterialAir && colorPixel != ColorKeys::g_MaskColor && ++skipCount > skipMOP && MOPDeque.size() < maxMOPs) {
 						skipCount = 0;
 						const Material *sceneMat = g_SceneMan.GetMaterialFromID(matPixel);
 						const Material *spawnMat = sceneMat->GetSpawnMaterial() ? g_SceneMan.GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
 						// Create the MOPixel based off the Terrain data.
-						MOPixel *pPixel = new MOPixel(colorPixel, spawnMat->GetPixelDensity(), Vector(terrX, terrY), Vector(), new Atom(Vector(), spawnMat->GetIndex(), 0, colorPixel, 2), 0);
-
-						pPixel->SetToHitMOs(false);
-						MOPDeque.emplace_back(pPixel);
-						pPixel = nullptr;
+						std::unique_ptr<MOPixel> terrainPixel = std::make_unique<MOPixel>(colorPixel, spawnMat->GetPixelDensity(), Vector(terrX, terrY), Vector(), new Atom(Vector(), spawnMat->GetIndex(), 0, colorPixel, 2), 0);
+						terrainPixel->SetToHitMOs(false);
+						MOPDeque.emplace_back(terrainPixel.release());
 					}
 
 					// Clear the terrain pixels
@@ -492,15 +468,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool SLTerrain::ApplyObject(Entity *entity) {
-		if (!entity) {
-			return false;
-		}
-		if (MovableObject *entityAsMovableObject = dynamic_cast<MovableObject *>(entity)) {
-			ApplyMovableObject(entityAsMovableObject);
-			return true;
-		} else if (TerrainObject *entityAsTerrainObject = dynamic_cast<TerrainObject *>(entity)) {
-			ApplyTerrainObject(entityAsTerrainObject);
-			return true;
+		if (entity) {
+			if (MovableObject *entityAsMovableObject = dynamic_cast<MovableObject *>(entity)) {
+				ApplyMovableObject(entityAsMovableObject);
+				return true;
+			} else if (TerrainObject *entityAsTerrainObject = dynamic_cast<TerrainObject *>(entity)) {
+				ApplyTerrainObject(entityAsTerrainObject);
+				return true;
+			}
 		}
 		return false;
 	}

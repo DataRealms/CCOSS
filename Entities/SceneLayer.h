@@ -313,6 +313,46 @@ namespace RTE {
 
 	private:
 
+#pragma region Drawing
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="targetBitmap"></param>
+		/// <param name="targetBox"></param>
+		/// <param name="offsetX"></param>
+		/// <param name="offsetY"></param>
+		void DrawWrapped(BITMAP *targetBitmap, const Box &targetBox, int offsetX, int offsetY) const;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="targetBitmap"></param>
+		/// <param name="targetBox"></param>
+		/// <param name="offsetX"></param>
+		/// <param name="offsetY"></param>
+		void DrawWrappedScaled(BITMAP *targetBitmap, const Box &targetBox, int offsetX, int offsetY) const;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="targetBitmap"></param>
+		/// <param name="targetBox"></param>
+		/// <param name="scrollOverridden"></param>
+		/// <param name="offsetX"></param>
+		/// <param name="offsetY"></param>
+		void DrawTiled(BITMAP *targetBitmap, const Box &targetBox, bool scrollOverridden, int offsetX, int offsetY) const;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="targetBitmap"></param>
+		/// <param name="targetBox"></param>
+		/// <param name="scrollOverridden"></param>
+		/// <param name="offsetX"></param>
+		/// <param name="offsetY"></param>
+		void DrawTiledScaled(BITMAP *targetBitmap, const Box &targetBox, bool scrollOverridden, int offsetX, int offsetY) const;
+#pragma endregion
+
 		/// <summary>
 		/// 
 		/// </summary>

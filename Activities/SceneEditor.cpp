@@ -24,6 +24,7 @@
 #include "HeldDevice.h"
 #include "Scene.h"
 #include "DataModule.h"
+#include "SLBackground.h"
 
 #include "GUI/GUI.h"
 #include "GUI/GUIFont.h"
@@ -428,21 +429,21 @@ void SceneEditor::Update()
                     pItem = m_pNewBG1Combo->GetItem(m_pNewBG1Combo->GetSelectedIndex());
                     if (pItem && !pItem->m_Name.empty())
                     {
-                        SceneLayer *pNewLayer = dynamic_cast<SceneLayer *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
+						SLBackground *pNewLayer = dynamic_cast<SLBackground *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
                         RTEAssert(pNewLayer, "No SceneLayer of the name set as BG1 is defined!");
                         pNewScene->GetBackLayers().push_back(pNewLayer);
                     }
                     pItem = m_pNewBG2Combo->GetItem(m_pNewBG2Combo->GetSelectedIndex());
                     if (pItem && !pItem->m_Name.empty())
                     {
-                        SceneLayer *pNewLayer = dynamic_cast<SceneLayer *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
+						SLBackground *pNewLayer = dynamic_cast<SLBackground *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
                         RTEAssert(pNewLayer, "No SceneLayer of the name set as BG2 is defined!");
                         pNewScene->GetBackLayers().push_back(pNewLayer);
                     }
                     pItem = m_pNewBG3Combo->GetItem(m_pNewBG3Combo->GetSelectedIndex());
                     if (pItem && !pItem->m_Name.empty())
                     {
-                        SceneLayer *pNewLayer = dynamic_cast<SceneLayer *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
+						SLBackground *pNewLayer = dynamic_cast<SLBackground *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
                         RTEAssert(pNewLayer, "No SceneLayer of the name set as BG3 is defined!");
                         pNewScene->GetBackLayers().push_back(pNewLayer);
                     }

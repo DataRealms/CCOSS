@@ -22,6 +22,7 @@
 #include "SettingsMan.h"
 #include "Scene.h"
 #include "SLTerrain.h"
+#include "SLBackground.h"
 #include "TerrainObject.h"
 #include "MovableObject.h"
 #include "ContentFile.h"
@@ -3467,7 +3468,7 @@ void SceneMan::Update(int screen)
     offsetUnwrapped.m_X += pTerrain->GetBitmap()->w * m_SeamCrossCount[screen][X];
     offsetUnwrapped.m_Y += pTerrain->GetBitmap()->h * m_SeamCrossCount[screen][Y];
 
-    for (list<SceneLayer *>::iterator itr = m_pCurrentScene->GetBackLayers().begin(); itr != m_pCurrentScene->GetBackLayers().end(); ++itr)
+    for (list<SLBackground *>::iterator itr = m_pCurrentScene->GetBackLayers().begin(); itr != m_pCurrentScene->GetBackLayers().end(); ++itr)
         (*itr)->SetOffset(offsetUnwrapped);
 
     // Calculate delta offset.
@@ -3535,7 +3536,7 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
 			else
 			{
 				// Background Layers
-				for (list<SceneLayer *>::reverse_iterator itr = m_pCurrentScene->GetBackLayers().rbegin(); itr != m_pCurrentScene->GetBackLayers().rend(); ++itr)
+				for (list<SLBackground *>::reverse_iterator itr = m_pCurrentScene->GetBackLayers().rbegin(); itr != m_pCurrentScene->GetBackLayers().rend(); ++itr)
 					(*itr)->Draw(pTargetBitmap, targetBox);
 			}
 

@@ -27,6 +27,7 @@
 #include "Actor.h"
 #include "BunkerAssemblyScheme.h"
 #include "BunkerAssembly.h"
+#include "SLBackground.h"
 
 #include "ADoor.h"
 #include "AHuman.h"
@@ -520,8 +521,8 @@ int Scene::Create(const Scene &reference)
             m_PlacedObjects[set].push_back(dynamic_cast<SceneObject *>((*oItr)->Clone()));
     }
 
-    for (list<SceneLayer *>::const_iterator lItr = reference.m_BackLayerList.begin(); lItr != reference.m_BackLayerList.end(); ++lItr)
-        m_BackLayerList.push_back(dynamic_cast<SceneLayer *>((*lItr)->Clone()));
+    for (list<SLBackground *>::const_iterator lItr = reference.m_BackLayerList.begin(); lItr != reference.m_BackLayerList.end(); ++lItr)
+        m_BackLayerList.push_back(dynamic_cast<SLBackground *>((*lItr)->Clone()));
 
     for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
     {
@@ -904,7 +905,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
         m_pPathFinder->RecalculateAllCosts();
 
         // Load Background layers' data
-        for (list<SceneLayer *>::iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
+        for (list<SLBackground *>::iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
         {
             RTEAssert((*slItr), "Background layer not instantiated before trying to load its data!");
             if ((*slItr)->LoadData() < 0)
@@ -1131,7 +1132,7 @@ int Scene::ClearData()
     }
 
     // Clear Background layers' data
-    for (list<SceneLayer *>::iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
+    for (list<SLBackground *>::iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
     {
         RTEAssert((*slItr), "Background layer not instantiated before trying to clear its data!");
         if ((*slItr)->ClearData() < 0)
@@ -1243,7 +1244,7 @@ int Scene::ReadProperty(const std::string_view &propName, Reader &reader)
     }
     else if (propName == "AddBackgroundLayer")
     {
-        SceneLayer *pLayer = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader));
+		SLBackground *pLayer = dynamic_cast<SLBackground *>(g_PresetMan.ReadReflectedPreset(reader));
         RTEAssert(pLayer, "Something went wrong with reading SceneLayer");
         if (pLayer)
             m_BackLayerList.push_back(pLayer);
@@ -1532,7 +1533,7 @@ int Scene::Save(Writer &writer) const
         }
     }
 
-    for (list<SceneLayer *>::const_iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
+    for (list<SLBackground *>::const_iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
     {
         writer.NewProperty("AddBackgroundLayer");
         (*slItr)->SavePresetCopy(writer);
@@ -1635,7 +1636,7 @@ void Scene::Destroy(bool notInherited)
         }
     }
 
-    for (list<SceneLayer *>::iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
+    for (list<SLBackground *>::iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
     {
         delete (*slItr);
         *slItr = 0;

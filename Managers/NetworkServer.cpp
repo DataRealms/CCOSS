@@ -6,6 +6,7 @@
 
 #include "Scene.h"
 #include "SLTerrain.h"
+#include "SLBackground.h"
 #include "GameActivity.h"
 
 #include "SettingsMan.h"
@@ -678,10 +679,10 @@ namespace RTE {
 
 		Scene *scene = g_SceneMan.GetScene();
 
-		std::list<SceneLayer *> sceneLayers = scene->GetBackLayers();
+		std::list<SLBackground *> sceneLayers = scene->GetBackLayers();
 		short index = 0;
 
-		for (SceneLayer * &layer : sceneLayers) {
+		for (SLBackground * &layer : sceneLayers) {
 			// Recalculate layers internal values for this player
 			layer->InitScrollRatios(true, player);
 			msgSceneSetup.BackgroundLayers[index].BitmapHash = layer->GetBitmapHash();

@@ -8,6 +8,7 @@
 #include "UInputMan.h"
 
 #include "SLTerrain.h"
+#include "SLBackground.h"
 #include "Scene.h"
 
 #include "GUI/GUI.h"

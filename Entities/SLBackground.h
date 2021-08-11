@@ -57,6 +57,29 @@ namespace RTE {
 		/// <returns></returns>
 		bool IsAutoScrolling() const { return (m_WrapX && m_AutoScrollX) || (m_WrapY && m_AutoScrollY); }
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		bool GetAutoScrollX() const { return m_AutoScrollX; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="autoScroll"></param>
+		void SetAutoScrollX(bool autoScroll) { m_AutoScrollX = autoScroll; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		bool GetAutoScrollY() const { return m_AutoScrollY; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="autoScroll"></param>
+		void SetAutoScrollY(bool autoScroll) { m_AutoScrollY = autoScroll; }
 #pragma endregion
 
 #pragma region Concrete Methods

@@ -1007,6 +1007,8 @@ namespace RTE {
 		.def_readwrite("ScenePath", &Scene::m_ScenePath, luabind::return_stl_iterator)
 		.def_readwrite("Deployments", &Scene::m_Deployments, luabind::return_stl_iterator)
 
+		.def_readonly("BackgroundLayers", &Scene::m_BackLayerList, luabind::return_stl_iterator)
+
 		.def("GetBuildBudget", &Scene::GetBuildBudget)
 		.def("SetBuildBudget", &Scene::SetBuildBudget)
 		.def("IsScanScheduled", &Scene::IsScanScheduled)
@@ -1061,6 +1063,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, SceneLayer) {
+		return luabind::class_<SceneLayer, Entity>("SceneLayer");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, SceneObject) {
 		return AbstractTypeLuaClassDefinition(SceneObject, Entity)
 
@@ -1079,6 +1087,17 @@ namespace RTE {
 		.def("GetTotalValue", &SceneObject::GetTotalValue)
 
 		.def("GetTotalValue", &GetTotalValue);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, SLBackground) {
+		return luabind::class_<SLBackground, SceneLayer>("SLBackground")
+
+		.property("AutoScrollX", &SLBackground::GetAutoScrollX, &SLBackground::SetAutoScrollX)
+		.property("AutoScrollY", &SLBackground::GetAutoScrollY, &SLBackground::SetAutoScrollY)
+
+		.def("IsAutoScrolling", &SLBackground::IsAutoScrolling);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

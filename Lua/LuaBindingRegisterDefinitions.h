@@ -154,7 +154,9 @@ namespace RTE {
 		LuaBindingRegisterFunctionDeclarationForType(Round);
 		LuaBindingRegisterFunctionDeclarationForType(Scene);
 		LuaBindingRegisterFunctionDeclarationForType(SceneArea);
+		LuaBindingRegisterFunctionDeclarationForType(SceneLayer);
 		LuaBindingRegisterFunctionDeclarationForType(SceneObject);
+		LuaBindingRegisterFunctionDeclarationForType(SLBackground);
 		LuaBindingRegisterFunctionDeclarationForType(SoundContainer);
 		LuaBindingRegisterFunctionDeclarationForType(SoundSet);
 		LuaBindingRegisterFunctionDeclarationForType(TDExplosive);

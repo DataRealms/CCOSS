@@ -29,6 +29,7 @@
 #include "MOSRotating.h"
 #include "Scene.h"
 #include "SLTerrain.h"
+#include "SLBackground.h"
 #include "TerrainObject.h"
 #include "SoundContainer.h"
 #include "TDExplosive.h"

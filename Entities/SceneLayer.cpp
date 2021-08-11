@@ -57,12 +57,6 @@ namespace RTE {
 
 		InitScrollRatios();
 
-		// Sampled color at the edges of the layer that can be used to fill gap if the layer isn't large enough to cover a target bitmap
-		m_FillLeftColor = m_WrapX ? ColorKeys::g_MaskColor : _getpixel(m_MainBitmap, 0, m_MainBitmap->h / 2);
-		m_FillRightColor = m_WrapX ? ColorKeys::g_MaskColor : _getpixel(m_MainBitmap, m_MainBitmap->w - 1, m_MainBitmap->h / 2);
-		m_FillUpColor = m_WrapY ? ColorKeys::g_MaskColor : _getpixel(m_MainBitmap, m_MainBitmap->w / 2, 0);
-		m_FillDownColor = m_WrapY ? ColorKeys::g_MaskColor : _getpixel(m_MainBitmap, m_MainBitmap->w / 2, m_MainBitmap->h - 1);
-
 		return 0;
 	}
 
@@ -361,7 +355,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SceneLayer::Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride) const {
+	void SceneLayer::Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride) {
 		RTEAssert(m_MainBitmap, "Data of this SceneLayer has not been loaded before trying to draw!");
 
 		int offsetX = 0;
@@ -466,7 +460,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SceneLayer::DrawScaled(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride) const {
+	void SceneLayer::DrawScaled(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride) {
 		if (m_ScaleFactor.GetX() == 1.0F && m_ScaleFactor.GetY() == 1.0F) {
 			Draw(targetBitmap, targetBox, scrollOverride);
 			return;

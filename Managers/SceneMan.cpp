@@ -3468,8 +3468,9 @@ void SceneMan::Update(int screen)
     offsetUnwrapped.m_X += pTerrain->GetBitmap()->w * m_SeamCrossCount[screen][X];
     offsetUnwrapped.m_Y += pTerrain->GetBitmap()->h * m_SeamCrossCount[screen][Y];
 
-    for (list<SLBackground *>::iterator itr = m_pCurrentScene->GetBackLayers().begin(); itr != m_pCurrentScene->GetBackLayers().end(); ++itr)
-        (*itr)->SetOffset(offsetUnwrapped);
+	for (SLBackground *backgroundLayer : m_pCurrentScene->GetBackLayers()) {
+		backgroundLayer->SetOffset(offsetUnwrapped);
+	}
 
     // Calculate delta offset.
     m_DeltaOffset[screen] = m_Offset[screen] - oldOffset;
@@ -3529,15 +3530,12 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
             break;
         // Draw normally
         default:
-			if (skipSkybox)
-			{
-
-			} 
-			else
-			{
-				// Background Layers
-				for (list<SLBackground *>::reverse_iterator itr = m_pCurrentScene->GetBackLayers().rbegin(); itr != m_pCurrentScene->GetBackLayers().rend(); ++itr)
-					(*itr)->Draw(pTargetBitmap, targetBox);
+			if (skipSkybox) {
+				;
+			} else {
+				for (std::list<SLBackground *>::reverse_iterator backgroundLayer = m_pCurrentScene->GetBackLayers().rbegin(); backgroundLayer != m_pCurrentScene->GetBackLayers().rend(); ++backgroundLayer) {
+					(*backgroundLayer)->Draw(pTargetBitmap, targetBox);
+				}
 			}
 
 			if (!skipTerrain)

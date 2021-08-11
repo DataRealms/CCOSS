@@ -2,6 +2,7 @@
 #define _RTESLBACKGROUND_
 
 #include "SceneLayer.h"
+#include "Timer.h"
 
 namespace RTE {
 
@@ -78,6 +79,14 @@ namespace RTE {
 
 		std::vector<BITMAP *> m_Bitmaps;
 		int m_FrameCount;
+		int m_Frame;
+		Timer m_SpriteAnimTimer;
+
+		// Keep track of animation direction (mainly for ALWAYSPINGPONG), true is decreasing frame, false is increasing frame
+		bool m_SpriteAnimIsReversingFrames;
+
+		int m_SpriteAnimDuration;
+		int m_SpriteAnimMode;
 	private:
 
 		/// <summary>

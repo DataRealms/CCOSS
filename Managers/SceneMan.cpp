@@ -3470,6 +3470,7 @@ void SceneMan::Update(int screen)
 
 	for (SLBackground *backgroundLayer : m_pCurrentScene->GetBackLayers()) {
 		backgroundLayer->SetOffset(offsetUnwrapped);
+		backgroundLayer->Update();
 	}
 
     // Calculate delta offset.

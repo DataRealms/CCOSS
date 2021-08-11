@@ -9,6 +9,11 @@ namespace RTE {
 	void SLBackground::Clear() {
 		m_Bitmaps.clear();
 		m_FrameCount = 1;
+		m_Frame = 0;
+		m_SpriteAnimDuration = 0;
+		m_SpriteAnimMode = SpriteAnimMode::NOANIM;
+		m_SpriteAnimTimer.Reset();
+		m_SpriteAnimIsReversingFrames = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -39,13 +44,30 @@ namespace RTE {
 		m_MainBitmap = m_Bitmaps.at(0);
 
 		m_FrameCount = reference.m_FrameCount;
+		m_SpriteAnimMode = reference.m_SpriteAnimMode;
+		m_SpriteAnimDuration = reference.m_SpriteAnimDuration;
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SLBackground::ReadProperty(const std::string_view &propName, Reader &reader) {
+		if (propName == "FrameCount") {
+			reader >> m_FrameCount;
+		} else if (propName == "SpriteAnimMode") {
+			reader >> m_SpriteAnimMode;
+			if (m_FrameCount > 1) {
+				// If animation mode is set to something other than ALWAYSLOOP but only has 2 frames, override it because it's pointless
+				if ((m_SpriteAnimMode == SpriteAnimMode::ALWAYSRANDOM || m_SpriteAnimMode == SpriteAnimMode::ALWAYSPINGPONG) && m_FrameCount == 2) { m_SpriteAnimMode = ALWAYSLOOP; }
+			} else {
+				m_SpriteAnimMode = SpriteAnimMode::NOANIM;
+			}
+		} else if (propName == "SpriteAnimDuration") {
+			reader >> m_SpriteAnimDuration;
+		} else {
 			return SceneLayer::ReadProperty(propName, reader);
+		}
+		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -53,18 +75,51 @@ namespace RTE {
 	int SLBackground::Save(Writer &writer) const {
 		SceneLayer::Save(writer);
 
+		writer.NewPropertyWithValue("FrameCount", m_FrameCount);
+		writer.NewPropertyWithValue("SpriteAnimMode", m_SpriteAnimMode);
+		writer.NewPropertyWithValue("SpriteAnimDuration", m_SpriteAnimDuration);
 		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLBackground::Update() {
+		if (m_SpriteAnimMode != SpriteAnimMode::NOANIM) {
+			int frameTime = m_SpriteAnimDuration / m_FrameCount;
+			int prevFrame = m_Frame;
 
+			if (m_SpriteAnimTimer.GetElapsedSimTimeMS() > frameTime) {
+				switch (m_SpriteAnimMode) {
+					case SpriteAnimMode::ALWAYSLOOP:
+						m_Frame = ((m_Frame + 1) % m_FrameCount);
+						m_SpriteAnimTimer.Reset();
+						break;
+					case SpriteAnimMode::ALWAYSRANDOM:
+						while (m_Frame == prevFrame) {
+							m_Frame = RandomNum<int>(0, m_FrameCount - 1);
+						}
+						m_SpriteAnimTimer.Reset();
+						break;
+					case SpriteAnimMode::ALWAYSPINGPONG:
+						if (m_Frame == m_FrameCount - 1) {
+							m_SpriteAnimIsReversingFrames = true;
+						} else if (m_Frame == 0) {
+							m_SpriteAnimIsReversingFrames = false;
+						}
+						m_SpriteAnimIsReversingFrames ? m_Frame-- : m_Frame++;
+						m_SpriteAnimTimer.Reset();
+						break;
+					default:
+						break;
+				}
+			}
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLBackground::Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride) {
+		m_MainBitmap = m_Bitmaps.at(m_Frame);
 
 		SceneLayer::Draw(targetBitmap, targetBox, scrollOverride);
 	}

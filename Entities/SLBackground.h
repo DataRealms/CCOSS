@@ -51,6 +51,11 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Getters and Setters
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		bool IsAutoScrolling() const { return (m_WrapX && m_AutoScrollX) || (m_WrapY && m_AutoScrollY); }
 
 #pragma endregion
 
@@ -77,6 +82,12 @@ namespace RTE {
 
 		static Entity::ClassInfo m_sClass;
 
+		bool m_AutoScrollX;
+		bool m_AutoScrollY;
+		Vector m_AutoScrollStep;
+		int m_AutoScrollStepInterval;
+		Timer m_AutoScrollStepTimer;
+
 		std::vector<BITMAP *> m_Bitmaps;
 		int m_FrameCount;
 		int m_Frame;
@@ -87,6 +98,9 @@ namespace RTE {
 
 		int m_SpriteAnimDuration;
 		int m_SpriteAnimMode;
+
+		Vector m_AutoScrollOffset;
+
 	private:
 
 		/// <summary>

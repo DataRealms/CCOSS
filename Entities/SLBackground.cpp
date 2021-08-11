@@ -7,13 +7,19 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLBackground::Clear() {
+		m_AutoScrollX = false;
+		m_AutoScrollY = false;
+		m_AutoScrollStep.Reset();
 		m_Bitmaps.clear();
 		m_FrameCount = 1;
 		m_Frame = 0;
 		m_SpriteAnimDuration = 0;
 		m_SpriteAnimMode = SpriteAnimMode::NOANIM;
+		m_AutoScrollStepTimer.Reset();
+		m_AutoScrollStepInterval = 0;
 		m_SpriteAnimTimer.Reset();
 		m_SpriteAnimIsReversingFrames = false;
+		m_AutoScrollOffset.Reset();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -46,6 +52,12 @@ namespace RTE {
 		m_FrameCount = reference.m_FrameCount;
 		m_SpriteAnimMode = reference.m_SpriteAnimMode;
 		m_SpriteAnimDuration = reference.m_SpriteAnimDuration;
+
+		m_AutoScrollX = reference.m_AutoScrollX;
+		m_AutoScrollY = reference.m_AutoScrollY;
+		m_AutoScrollStep = reference.m_AutoScrollStep;
+		m_AutoScrollStepInterval = reference.m_AutoScrollStepInterval;
+
 		return 0;
 	}
 
@@ -64,6 +76,14 @@ namespace RTE {
 			}
 		} else if (propName == "SpriteAnimDuration") {
 			reader >> m_SpriteAnimDuration;
+		} else if (propName == "AutoScrollX") {
+			reader >> m_AutoScrollX;
+		} else if (propName == "AutoScrollY") {
+			reader >> m_AutoScrollY;
+		} else if (propName == "AutoScrollStepInterval") {
+			reader >> m_AutoScrollStepInterval;
+		} else if (propName == "AutoScrollStep") {
+			reader >> m_AutoScrollStep;
 		} else {
 			return SceneLayer::ReadProperty(propName, reader);
 		}
@@ -78,6 +98,11 @@ namespace RTE {
 		writer.NewPropertyWithValue("FrameCount", m_FrameCount);
 		writer.NewPropertyWithValue("SpriteAnimMode", m_SpriteAnimMode);
 		writer.NewPropertyWithValue("SpriteAnimDuration", m_SpriteAnimDuration);
+		writer.NewPropertyWithValue("AutoScrollX", m_AutoScrollX);
+		writer.NewPropertyWithValue("AutoScrollY", m_AutoScrollY);
+		writer.NewPropertyWithValue("AutoScrollStepInterval", m_AutoScrollStepInterval);
+		writer.NewPropertyWithValue("AutoScrollStep", m_AutoScrollStep);
+
 		return 0;
 	}
 
@@ -114,6 +139,11 @@ namespace RTE {
 				}
 			}
 		}
+		if (IsAutoScrolling() && m_AutoScrollStepTimer.GetElapsedSimTimeMS() > m_AutoScrollStepInterval) {
+			m_AutoScrollOffset.SetXY(m_AutoScrollOffset.GetX() + m_AutoScrollStep.GetX(), m_AutoScrollOffset.GetY() + m_AutoScrollStep.GetY());
+			WrapPosition(m_AutoScrollOffset);
+			m_AutoScrollStepTimer.Reset();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -121,6 +151,14 @@ namespace RTE {
 	void SLBackground::Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride) {
 		m_MainBitmap = m_Bitmaps.at(m_Frame);
 
-		SceneLayer::Draw(targetBitmap, targetBox, scrollOverride);
+		Vector ratioAdjustedAutoScrolledOffset = m_Offset;
+		bool scrollNeedsOverride = false;
+
+		if (IsAutoScrolling()) {
+			ratioAdjustedAutoScrolledOffset.SetXY(std::floor((m_Offset.GetX() * m_ScrollRatio.GetX()) + m_AutoScrollOffset.GetX()), std::floor((m_Offset.GetY() * m_ScrollRatio.GetY()) + m_AutoScrollOffset.GetY()));
+			WrapPosition(ratioAdjustedAutoScrolledOffset);
+			scrollNeedsOverride = true;
+		}
+		SceneLayer::Draw(targetBitmap, targetBox, scrollNeedsOverride ? ratioAdjustedAutoScrolledOffset : scrollOverride);
 	}
 }

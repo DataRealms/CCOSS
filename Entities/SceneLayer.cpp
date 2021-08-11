@@ -449,12 +449,12 @@ namespace RTE {
 
 		// Detect if non-wrapping layer dimensions can't cover the whole target area with its main bitmap. If so, fill in the gap with appropriate solid color sampled from the hanging edge
 		if (!m_WrapX && !screenLargerThanSceneX && m_ScrollRatio.GetX() < 0) {
-			if (m_FillLeftColor != g_MaskColor && offsetX != 0) { rectfill(targetBitmap, targetBox.GetCorner().GetFloorIntX(), targetBox.GetCorner().GetFloorIntY(), targetBox.GetCorner().GetFloorIntX() - offsetX, static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()), m_FillLeftColor); }
-			if (m_FillRightColor != g_MaskColor) { rectfill(targetBitmap, (targetBox.GetCorner().GetFloorIntX() - offsetX) + m_MainBitmap->w, targetBox.GetCorner().GetFloorIntY(), static_cast<int>(targetBox.GetCorner().GetX() + targetBox.GetWidth()), static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()), m_FillRightColor); }
+			if (m_FillLeftColor != ColorKeys::g_MaskColor && offsetX != 0) { rectfill(targetBitmap, targetBox.GetCorner().GetFloorIntX(), targetBox.GetCorner().GetFloorIntY(), targetBox.GetCorner().GetFloorIntX() - offsetX, static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()), m_FillLeftColor); }
+			if (m_FillRightColor != ColorKeys::g_MaskColor) { rectfill(targetBitmap, (targetBox.GetCorner().GetFloorIntX() - offsetX) + m_MainBitmap->w, targetBox.GetCorner().GetFloorIntY(), static_cast<int>(targetBox.GetCorner().GetX() + targetBox.GetWidth()), static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()), m_FillRightColor); }
 		}
 		if (!m_WrapY && !screenLargerThanSceneY && m_ScrollRatio.GetY() < 0) {
-			if (m_FillUpColor != g_MaskColor && offsetY != 0) { rectfill(targetBitmap, targetBox.GetCorner().GetFloorIntX(), targetBox.GetCorner().GetFloorIntY(), static_cast<int>(targetBox.GetCorner().GetX() + targetBox.GetWidth()), targetBox.GetCorner().GetFloorIntY() - offsetY, m_FillUpColor); }
-			if (m_FillDownColor != g_MaskColor) { rectfill(targetBitmap, targetBox.GetCorner().GetFloorIntX(), (targetBox.GetCorner().GetFloorIntY() - offsetY) + m_MainBitmap->h, static_cast<int>(targetBox.GetCorner().GetX() + targetBox.GetWidth()), static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()), m_FillDownColor); }
+			if (m_FillUpColor != ColorKeys::g_MaskColor && offsetY != 0) { rectfill(targetBitmap, targetBox.GetCorner().GetFloorIntX(), targetBox.GetCorner().GetFloorIntY(), static_cast<int>(targetBox.GetCorner().GetX() + targetBox.GetWidth()), targetBox.GetCorner().GetFloorIntY() - offsetY, m_FillUpColor); }
+			if (m_FillDownColor != ColorKeys::g_MaskColor) { rectfill(targetBitmap, targetBox.GetCorner().GetFloorIntX(), (targetBox.GetCorner().GetFloorIntY() - offsetY) + m_MainBitmap->h, static_cast<int>(targetBox.GetCorner().GetX() + targetBox.GetWidth()), static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()), m_FillDownColor); }
 		}
 	}
 

@@ -235,7 +235,7 @@ namespace RTE {
 		/// <param name="pos">The vector coordinates of the position to wrap, if needed.</param>
 		/// <param name="scaled">Whether the coordinates above are of this' scale factor, or in its native pixels.</param>
 		/// <returns>Whether wrapping was performed or not.</returns>
-		bool WrapPosition(Vector &pos, bool scaled = true) const { ForceBoundsOrWrapPosition(pos, scaled, false); }
+		bool WrapPosition(Vector &pos, bool scaled = true) const { return ForceBoundsOrWrapPosition(pos, scaled, false); }
 
 		/// <summary>
 		/// Wraps or bounds a position coordinate if it is off bounds of the SceneLayer, depending on the wrap settings of this SceneLayer.
@@ -252,7 +252,7 @@ namespace RTE {
 		/// <param name="pos">The Vector coordinates of the position to wrap, if needed.</param>
 		/// <param name="scaled">Whether the coordinates above are of this' scale factor, or in its native pixels.</param>
 		/// <returns>Whether wrapping was performed or not. Does not report on bounding.</returns>
-		bool ForceBounds(Vector &pos, bool scaled = true) const { ForceBoundsOrWrapPosition(pos, scaled, true); }
+		bool ForceBounds(Vector &pos, bool scaled = true) const { return ForceBoundsOrWrapPosition(pos, scaled, true); }
 
 		/// <summary>
 		/// Draws this SceneLayer's current scrolled position to a bitmap, but also scaled according to what has been set with SetScaleFactor.
@@ -313,6 +313,15 @@ namespace RTE {
 
 	private:
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="pos"></param>
+		/// <param name="scaled"></param>
+		/// <param name="forceBounds"></param>
+		/// <returns></returns>
+		bool ForceBoundsOrWrapPosition(Vector &pos, bool scaled, bool forceBounds) const;
+
 #pragma region Drawing
 		/// <summary>
 		/// 
@@ -352,15 +361,6 @@ namespace RTE {
 		/// <param name="offsetY"></param>
 		void DrawTiledScaled(BITMAP *targetBitmap, const Box &targetBox, bool scrollOverridden, int offsetX, int offsetY) const;
 #pragma endregion
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="pos"></param>
-		/// <param name="scaled"></param>
-		/// <param name="forceBounds"></param>
-		/// <returns></returns>
-		bool ForceBoundsOrWrapPosition(Vector &pos, bool scaled, bool forceBounds) const;
 
 		/// <summary>
 		/// Clears all the member variables of this SceneLayer, effectively resetting the members of this abstraction level only.

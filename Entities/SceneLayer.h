@@ -318,40 +318,24 @@ namespace RTE {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="targetBitmap"></param>
-		/// <param name="targetBox"></param>
+		/// <param name="targetBitmap">The bitmap to draw to.</param>
+		/// <param name="targetBox">The box on the target bitmap to limit drawing to, with the corner of box being where the scroll position lines up.</param>
+		/// <param name="drawScaled"></param>
 		/// <param name="offsetX"></param>
 		/// <param name="offsetY"></param>
-		void DrawWrapped(BITMAP *targetBitmap, const Box &targetBox, int offsetX, int offsetY) const;
+		void DrawWrapped(BITMAP *targetBitmap, const Box &targetBox, bool drawScaled, int offsetX, int offsetY) const;
 
 		/// <summary>
-		/// 
+		/// Target bitmap is larger in some dimension, so need to draw this tiled as many times as necessary to cover the whole target.
 		/// </summary>
-		/// <param name="targetBitmap"></param>
-		/// <param name="targetBox"></param>
+		/// <param name="targetBitmap">The bitmap to draw to.</param>
+		/// <param name="targetBox">The box on the target bitmap to limit drawing to, with the corner of box being where the scroll position lines up.</param>
+		/// <param name="drawScaled"></param>
 		/// <param name="offsetX"></param>
 		/// <param name="offsetY"></param>
-		void DrawWrappedScaled(BITMAP *targetBitmap, const Box &targetBox, int offsetX, int offsetY) const;
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="targetBitmap"></param>
-		/// <param name="targetBox"></param>
-		/// <param name="scrollOverridden"></param>
-		/// <param name="offsetX"></param>
-		/// <param name="offsetY"></param>
-		void DrawTiled(BITMAP *targetBitmap, const Box &targetBox, bool scrollOverridden, int offsetX, int offsetY) const;
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="targetBitmap"></param>
-		/// <param name="targetBox"></param>
-		/// <param name="scrollOverridden"></param>
-		/// <param name="offsetX"></param>
-		/// <param name="offsetY"></param>
-		void DrawTiledScaled(BITMAP *targetBitmap, const Box &targetBox, bool scrollOverridden, int offsetX, int offsetY) const;
+		/// <param name="targetBitmapLargerThanSceneX"></param>
+		/// <param name="targetBitmapLargerThanSceneY"></param>
+		void DrawTiled(BITMAP *targetBitmap, const Box &targetBox, bool drawScaled, int offsetX, int offsetY, bool targetBitmapLargerThanSceneX, bool targetBitmapLargerThanSceneY) const;
 #pragma endregion
 
 		/// <summary>

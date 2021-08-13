@@ -344,9 +344,10 @@ namespace RTE {
 	void SceneLayer::Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride) {
 		RTEAssert(m_MainBitmap, "Data of this SceneLayer has not been loaded before trying to draw!");
 
+		bool drawScaled = !(m_ScaleFactor.GetX() == 1.0F && m_ScaleFactor.GetY() == 1.0F);
+		bool scrollOverridden = !(scrollOverride.GetX() == -1.0F && scrollOverride.GetY() == -1.0F);
 		int offsetX = 0;
 		int offsetY = 0;
-		bool scrollOverridden = !(scrollOverride.GetX() == -1.0F && scrollOverride.GetY() == -1.0F);
 
 		if (scrollOverridden) {
 			offsetX = scrollOverride.GetFloorIntX();
@@ -357,28 +358,19 @@ namespace RTE {
 			// Only force bounds when doing regular scroll offset because the override is used to do terrain object application tricks and sometimes needs the offsets to be < 0.
 			WrapPosition(offsetX, offsetY);
 		}
+
 		if (targetBox.IsEmpty()) {
 			targetBox.SetCorner(Vector(0, 0));
 			targetBox.SetWidth(static_cast<float>(targetBitmap->w));
 			targetBox.SetHeight(static_cast<float>(targetBitmap->h));
 		}
-
-		// Set the clipping rectangle of the target bitmap to match the specified target box.
 		set_clip_rect(targetBitmap, targetBox.GetCorner().GetFloorIntX(), targetBox.GetCorner().GetFloorIntY(), static_cast<int>(targetBox.GetCorner().GetX() + targetBox.GetWidth()) - 1, static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()) - 1);
 
 		// If this SceneLayer is wider AND higher than the target bitmap, use simple wrapping logic - otherwise need to tile.
 		if (m_MainBitmap->w >= targetBitmap->w && m_MainBitmap->h >= targetBitmap->h) {
-			if (m_ScaleFactor.GetX() == 1.0F && m_ScaleFactor.GetY() == 1.0F) {
-				DrawWrapped(targetBitmap, targetBox, offsetX, offsetY);
-			} else {
-				DrawWrappedScaled(targetBitmap, targetBox, offsetX, offsetY);
-			}
+			DrawWrapped(targetBitmap, targetBox, drawScaled, offsetX, offsetY);
 		} else {
-			if (m_ScaleFactor.GetX() == 1.0F && m_ScaleFactor.GetY() == 1.0F) {
-				DrawTiled(targetBitmap, targetBox, scrollOverridden, offsetX, offsetY);
-			} else {
-				DrawTiledScaled(targetBitmap, targetBox, scrollOverridden, offsetX, offsetY);
-			}
+			DrawTiled(targetBitmap, targetBox, drawScaled, offsetX, offsetY, (!scrollOverridden) ? targetBitmap->w > g_SceneMan.GetSceneWidth() : false, (!scrollOverridden) ? targetBitmap->h > g_SceneMan.GetSceneHeight() : false);
 		}
 		// Reset the clip rect back to the entire target bitmap.
 		set_clip_rect(targetBitmap, 0, 0, targetBitmap->w - 1, targetBitmap->h - 1);
@@ -386,20 +378,37 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SceneLayer::DrawWrapped(BITMAP *targetBitmap, const Box &targetBox, int offsetX, int offsetY) const {
-		std::array<int, 2> sourcePosX = { offsetX, 0 };
-		std::array<int, 2> sourcePosY = { offsetY, 0 };
-		std::array<int, 2> sourceWidth = { m_MainBitmap->w - offsetX, offsetX };
-		std::array<int, 2> sourceHeight = { m_MainBitmap->h - offsetY, offsetY };
-		std::array<int, 2> destPosX = { targetBox.GetCorner().GetFloorIntX(), targetBox.GetCorner().GetFloorIntX() + m_MainBitmap->w - offsetX };
-		std::array<int, 2> destPosY = { targetBox.GetCorner().GetFloorIntY(), targetBox.GetCorner().GetFloorIntY() + m_MainBitmap->h - offsetY };
+	void SceneLayer::DrawWrapped(BITMAP *targetBitmap, const Box &targetBox, bool drawScaled, int offsetX, int offsetY) const {
+		if (!drawScaled) {
+			std::array<int, 2> sourcePosX = { offsetX, 0 };
+			std::array<int, 2> sourcePosY = { offsetY, 0 };
+			std::array<int, 2> sourceWidth = { m_MainBitmap->w - offsetX, offsetX };
+			std::array<int, 2> sourceHeight = { m_MainBitmap->h - offsetY, offsetY };
+			std::array<int, 2> destPosX = { targetBox.GetCorner().GetFloorIntX(), targetBox.GetCorner().GetFloorIntX() + m_MainBitmap->w - offsetX };
+			std::array<int, 2> destPosY = { targetBox.GetCorner().GetFloorIntY(), targetBox.GetCorner().GetFloorIntY() + m_MainBitmap->h - offsetY };
 
-		for (int i = 0; i < 2; ++i) {
-			for (int j = 0; j < 2; ++j) {
-				if (m_DrawTrans) {
-					masked_blit(m_MainBitmap, targetBitmap, sourcePosX.at(j), sourcePosY.at(i), destPosX.at(j), destPosY.at(i), sourceWidth.at(j), sourceHeight.at(i));
-				} else {
-					blit(m_MainBitmap, targetBitmap, sourcePosX.at(j), sourcePosY.at(i), destPosX.at(j), destPosY.at(i), sourceWidth.at(j), sourceHeight.at(i));
+			for (int i = 0; i < 2; ++i) {
+				for (int j = 0; j < 2; ++j) {
+					if (m_DrawTrans) {
+						masked_blit(m_MainBitmap, targetBitmap, sourcePosX.at(j), sourcePosY.at(i), destPosX.at(j), destPosY.at(i), sourceWidth.at(j), sourceHeight.at(i));
+					} else {
+						blit(m_MainBitmap, targetBitmap, sourcePosX.at(j), sourcePosY.at(i), destPosX.at(j), destPosY.at(i), sourceWidth.at(j), sourceHeight.at(i));
+					}
+				}
+			}
+		} else {
+			std::array<int, 2> sourceWidth = { m_MainBitmap->w, offsetX * m_ScaleInverse.GetFloorIntX() };
+			std::array<int, 2> sourceHeight = { m_MainBitmap->h, offsetY * m_ScaleInverse.GetFloorIntY() };
+			std::array<int, 2> destPosX = { targetBox.GetCorner().GetFloorIntX() - offsetX, targetBox.GetCorner().GetFloorIntX() + m_ScaledDimensions.GetFloorIntX() - offsetX };
+			std::array<int, 2> destPosY = { targetBox.GetCorner().GetFloorIntY() - offsetY, targetBox.GetCorner().GetFloorIntY() + m_ScaledDimensions.GetFloorIntY() - offsetY };
+
+			for (int i = 0; i < 2; ++i) {
+				for (int j = 0; j < 2; ++j) {
+					if (m_DrawTrans) {
+						masked_stretch_blit(m_MainBitmap, targetBitmap, 0, 0, sourceWidth.at(j), sourceHeight.at(i), destPosX.at(j), destPosY.at(i), sourceWidth.at(j) * m_ScaleFactor.GetFloorIntX() + 1, sourceHeight.at(i) * m_ScaleFactor.GetFloorIntY() + 1);
+					} else {
+						stretch_blit(m_MainBitmap, targetBitmap, 0, 0, sourceWidth.at(j), sourceHeight.at(i), destPosX.at(j), destPosY.at(i), sourceWidth.at(j) * m_ScaleFactor.GetFloorIntX() + 1, sourceHeight.at(i) * m_ScaleFactor.GetFloorIntY() + 1);
+					}
 				}
 			}
 		}
@@ -407,104 +416,48 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SceneLayer::DrawWrappedScaled(BITMAP *targetBitmap, const Box &targetBox, int offsetX, int offsetY) const {
-		Vector scaledSourceOffset(static_cast<float>(offsetX) * m_ScaleInverse.GetX(), static_cast<float>(offsetY) * m_ScaleInverse.GetY());
+	void SceneLayer::DrawTiled(BITMAP *targetBitmap, const Box &targetBox, bool drawScaled, int offsetX, int offsetY, bool targetBitmapLargerThanSceneX, bool targetBitmapLargerThanSceneY) const {
+		int bitmapWidth = drawScaled ? m_ScaledDimensions.GetFloorIntX() : m_MainBitmap->w;
+		int bitmapHeight = drawScaled ? m_ScaledDimensions.GetFloorIntY() : m_MainBitmap->h;
+		int areaToCoverX = offsetX + targetBox.GetCorner().GetFloorIntX() + std::min(targetBitmap->w, static_cast<int>(targetBox.GetWidth()));
+		int areaToCoverY = offsetY + targetBox.GetCorner().GetFloorIntY() + std::min(targetBitmap->h, static_cast<int>(targetBox.GetHeight()));
 
-		std::array<int, 2> sourceWidth = { m_MainBitmap->w, scaledSourceOffset.GetFloorIntX() };
-		std::array<int, 2> sourceHeight = { m_MainBitmap->h, scaledSourceOffset.GetFloorIntY() };
-		std::array<int, 2> destPosX = { targetBox.GetCorner().GetFloorIntX() - offsetX, targetBox.GetCorner().GetFloorIntX() + m_ScaledDimensions.GetFloorIntX() - offsetX };
-		std::array<int, 2> destPosY = { targetBox.GetCorner().GetFloorIntY() - offsetY, targetBox.GetCorner().GetFloorIntY() + m_ScaledDimensions.GetFloorIntY() - offsetY };
-
-		for (int i = 0; i < 2; ++i) {
-			for (int j = 0; j < 2; ++j) {
-				if (m_DrawTrans) {
-					masked_stretch_blit(m_MainBitmap, targetBitmap, 0, 0, sourceWidth.at(j), sourceHeight.at(i), destPosX.at(j), destPosY.at(i), sourceWidth.at(j) * m_ScaleFactor.GetFloorIntX() + 1, sourceHeight.at(i) * m_ScaleFactor.GetFloorIntY() + 1);
-				} else {
-					stretch_blit(m_MainBitmap, targetBitmap, 0, 0, sourceWidth.at(j), sourceHeight.at(i), destPosX.at(j), destPosY.at(i), sourceWidth.at(j) * m_ScaleFactor.GetFloorIntX() + 1, sourceHeight.at(i) * m_ScaleFactor.GetFloorIntY() + 1);
-				}
-			}
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SceneLayer::DrawTiled(BITMAP *targetBitmap, const Box &targetBox, bool scrollOverridden, int offsetX, int offsetY) const {
-		// Target bitmap is larger in some dimension, so need to draw this tiled as many times as necessary to cover the whole target.
 		int tiledOffsetX = 0;
 		int tiledOffsetY = 0;
-		// Use the dimensions of the target box, if it has any area at all.
-		int toCoverX = offsetX + targetBox.GetCorner().GetFloorIntX() + std::min(targetBitmap->w, static_cast<int>(targetBox.GetWidth()));
-		int toCoverY = offsetY + targetBox.GetCorner().GetFloorIntY() + std::min(targetBitmap->h, static_cast<int>(targetBox.GetHeight()));
-
-		// Check for special case adjustment when the screen is larger than the scene.
-		bool screenLargerThanSceneX = false;
-		bool screenLargerThanSceneY = false;
-		if (!scrollOverridden && g_SceneMan.GetSceneWidth() > 0) {
-			screenLargerThanSceneX = targetBitmap->w > g_SceneMan.GetSceneWidth();
-			screenLargerThanSceneY = targetBitmap->h > g_SceneMan.GetSceneHeight();
-		}
 
 		do {
 			do {
 				// If the unwrapped and untiled direction can't cover the target area, place it in the middle of the target bitmap, and leave the excess perimeter on each side untouched.
-				int destX = (!m_WrapX && screenLargerThanSceneX) ? ((targetBitmap->w / 2) - (m_MainBitmap->w / 2)) : (targetBox.GetCorner().GetFloorIntX() + tiledOffsetX - offsetX);
-				int destY = (!m_WrapY && screenLargerThanSceneY) ? ((targetBitmap->h / 2) - (m_MainBitmap->h / 2)) : (targetBox.GetCorner().GetFloorIntY() + tiledOffsetY - offsetY);
-				if (m_DrawTrans) {
-					masked_blit(m_MainBitmap, targetBitmap, 0, 0, destX, destY, m_MainBitmap->w, m_MainBitmap->h);
-				} else {
-					blit(m_MainBitmap, targetBitmap, 0, 0, destX, destY, m_MainBitmap->w, m_MainBitmap->h);
-				}
-				tiledOffsetX += m_MainBitmap->w;
-			} while (m_WrapX && toCoverX > tiledOffsetX);
+				int destX = (!m_WrapX && targetBitmapLargerThanSceneX) ? ((targetBitmap->w / 2) - (bitmapWidth / 2)) : (targetBox.GetCorner().GetFloorIntX() + tiledOffsetX - offsetX);
+				int destY = (!m_WrapY && targetBitmapLargerThanSceneY) ? ((targetBitmap->h / 2) - (bitmapHeight / 2)) : (targetBox.GetCorner().GetFloorIntY() + tiledOffsetY - offsetY);
 
-			tiledOffsetY += m_MainBitmap->h;
-		} while (m_WrapY && toCoverY > tiledOffsetY);
+				if (!drawScaled) {
+					if (m_DrawTrans) {
+						masked_blit(m_MainBitmap, targetBitmap, 0, 0, destX, destY, bitmapWidth, bitmapHeight);
+					} else {
+						blit(m_MainBitmap, targetBitmap, 0, 0, destX, destY, bitmapWidth, bitmapHeight);
+					}
+				} else {
+					if (m_DrawTrans) {
+						masked_stretch_blit(m_MainBitmap, targetBitmap, 0, 0, m_MainBitmap->w, m_MainBitmap->h, destX, destY, bitmapWidth, bitmapHeight);
+					} else {
+						stretch_blit(m_MainBitmap, targetBitmap, 0, 0, m_MainBitmap->w, m_MainBitmap->h, destX, destY, bitmapWidth, bitmapHeight);
+					}
+				}
+				tiledOffsetX += bitmapWidth;
+			} while (m_WrapX && areaToCoverX > tiledOffsetX);
+
+			tiledOffsetY += bitmapHeight;
+		} while (m_WrapY && areaToCoverY > tiledOffsetY);
 
 		// Detect if non-wrapping layer dimensions can't cover the whole target area with its main bitmap. If so, fill in the gap with appropriate solid color sampled from the hanging edge.
-		if (!m_WrapX && !screenLargerThanSceneX && m_ScrollRatio.GetX() < 0) {
+		if (!m_WrapX && !targetBitmapLargerThanSceneX && m_ScrollRatio.GetX() < 0) {
 			if (m_FillLeftColor != ColorKeys::g_MaskColor && offsetX != 0) { rectfill(targetBitmap, targetBox.GetCorner().GetFloorIntX(), targetBox.GetCorner().GetFloorIntY(), targetBox.GetCorner().GetFloorIntX() - offsetX, static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()), m_FillLeftColor); }
-			if (m_FillRightColor != ColorKeys::g_MaskColor) { rectfill(targetBitmap, (targetBox.GetCorner().GetFloorIntX() - offsetX) + m_MainBitmap->w, targetBox.GetCorner().GetFloorIntY(), static_cast<int>(targetBox.GetCorner().GetX() + targetBox.GetWidth()), static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()), m_FillRightColor); }
+			if (m_FillRightColor != ColorKeys::g_MaskColor) { rectfill(targetBitmap, targetBox.GetCorner().GetFloorIntX() - offsetX + bitmapWidth, targetBox.GetCorner().GetFloorIntY(), static_cast<int>(targetBox.GetCorner().GetX() + targetBox.GetWidth()), static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()), m_FillRightColor); }
 		}
-		if (!m_WrapY && !screenLargerThanSceneY && m_ScrollRatio.GetY() < 0) {
+		if (!m_WrapY && !targetBitmapLargerThanSceneY && m_ScrollRatio.GetY() < 0) {
 			if (m_FillUpColor != ColorKeys::g_MaskColor && offsetY != 0) { rectfill(targetBitmap, targetBox.GetCorner().GetFloorIntX(), targetBox.GetCorner().GetFloorIntY(), static_cast<int>(targetBox.GetCorner().GetX() + targetBox.GetWidth()), targetBox.GetCorner().GetFloorIntY() - offsetY, m_FillUpColor); }
-			if (m_FillDownColor != ColorKeys::g_MaskColor) { rectfill(targetBitmap, targetBox.GetCorner().GetFloorIntX(), (targetBox.GetCorner().GetFloorIntY() - offsetY) + m_MainBitmap->h, static_cast<int>(targetBox.GetCorner().GetX() + targetBox.GetWidth()), static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()), m_FillDownColor); }
+			if (m_FillDownColor != ColorKeys::g_MaskColor) { rectfill(targetBitmap, targetBox.GetCorner().GetFloorIntX(), targetBox.GetCorner().GetFloorIntY() - offsetY + bitmapHeight, static_cast<int>(targetBox.GetCorner().GetX() + targetBox.GetWidth()), static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()), m_FillDownColor); }
 		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SceneLayer::DrawTiledScaled(BITMAP *targetBitmap, const Box &targetBox, bool scrollOverridden, int offsetX, int offsetY) const {
-		// Target bitmap is larger in some dimension, so need to draw this tiled as many times as necessary to cover the whole target.
-		int tiledOffsetX = 0;
-		int tiledOffsetY = 0;
-		// Use the dimensions of the target box, if it has any area at all.
-		int toCoverX = offsetX + targetBox.GetCorner().GetFloorIntX() + std::min(targetBitmap->w, static_cast<int>(targetBox.GetWidth()));
-		int toCoverY = offsetY + targetBox.GetCorner().GetFloorIntY() + std::min(targetBitmap->h, static_cast<int>(targetBox.GetHeight()));
-
-		// Check for special case adjustment when the screen is larger than the scene.
-		bool screenLargerThanSceneX = false;
-		bool screenLargerThanSceneY = false;
-		if (!scrollOverridden && g_SceneMan.GetSceneWidth() > 0) {
-			screenLargerThanSceneX = targetBitmap->w > g_SceneMan.GetSceneWidth();
-			screenLargerThanSceneY = targetBitmap->h > g_SceneMan.GetSceneHeight();
-		}
-
-		do {
-			do {
-				// If the unwrapped and untiled direction can't cover the target area, place it in the middle of the target bitmap, and leave the excess perimeter on each side untouched.
-				int destX = (!m_WrapX && screenLargerThanSceneX) ? ((targetBitmap->w / 2) - (m_ScaledDimensions.GetFloorIntX() / 2)) : (targetBox.GetCorner().GetFloorIntX() + tiledOffsetX - offsetX);
-				int destY = (!m_WrapY && screenLargerThanSceneY) ? ((targetBitmap->h / 2) - (m_ScaledDimensions.GetFloorIntY() / 2)) : (targetBox.GetCorner().GetFloorIntY() + tiledOffsetY - offsetY);
-				if (m_DrawTrans) {
-					masked_stretch_blit(m_MainBitmap, targetBitmap, 0, 0, m_MainBitmap->w, m_MainBitmap->h, destX, destY, m_ScaledDimensions.GetFloorIntX(), m_ScaledDimensions.GetFloorIntY());
-				} else {
-					stretch_blit(m_MainBitmap, targetBitmap, 0, 0, m_MainBitmap->w, m_MainBitmap->h, destX, destY, m_ScaledDimensions.GetFloorIntX(), m_ScaledDimensions.GetFloorIntY());
-				}
-				tiledOffsetX += m_ScaledDimensions.GetFloorIntX();
-			}
-			while (m_WrapX && toCoverX > tiledOffsetX);
-
-			tiledOffsetY += m_ScaledDimensions.GetFloorIntY();
-		}
-		while (m_WrapY && toCoverY > tiledOffsetY);
 	}
 }

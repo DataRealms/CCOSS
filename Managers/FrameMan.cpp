@@ -986,6 +986,10 @@ namespace RTE {
 				drawScreen = m_NetworkBackBufferIntermediate8[m_NetworkFrameCurrent][playerScreen];
 				drawScreenGUI = m_NetworkBackBufferIntermediateGUI8[m_NetworkFrameCurrent][playerScreen];
 			}
+			// Need to clear the backbuffers because Scene background layers can be too small to fill the whole backbuffer or drawn masked resulting in artifacts from the previous frame.
+			clear_to_color(drawScreenGUI, ColorKeys::g_MaskColor);
+			clear_to_color(drawScreen, m_BlackColor);
+
 			AllegroBitmap playerGUIBitmap(drawScreenGUI);
 
 			// Update the scene view to line up with a specific screen and then draw it onto the intermediate screen
@@ -1018,8 +1022,6 @@ namespace RTE {
 			if (!IsInMultiplayerMode()) {
 				g_SceneMan.Draw(drawScreen, drawScreenGUI, targetPos);
 			} else {
-				clear_to_color(drawScreen, g_MaskColor);
-				clear_to_color(drawScreenGUI, g_MaskColor);
 				g_SceneMan.Draw(drawScreen, drawScreenGUI, targetPos, true, true);
 			}
 

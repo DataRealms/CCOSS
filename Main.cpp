@@ -197,9 +197,6 @@ namespace RTE {
 		if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) { g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn); }
 
 		while (!System::IsSetToQuit()) {
-			// Need to clear this out; sometimes background layers don't cover the whole back.
-			g_FrameMan.ClearBackBuffer8();
-
 			g_TimerMan.Update();
 
 			bool serverUpdated = false;

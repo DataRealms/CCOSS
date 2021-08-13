@@ -3553,7 +3553,7 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
             if (pUnseenLayer && !g_FrameMan.IsInMultiplayerMode())
             {
                 // Draw the unseen obstruction layer so it obscures the team's view
-                pUnseenLayer->DrawScaled(pTargetBitmap, targetBox);
+                pUnseenLayer->Draw(pTargetBitmap, targetBox);
             }
 
             // Actor and gameplay HUDs and GUIs

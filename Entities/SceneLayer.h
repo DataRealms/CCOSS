@@ -2,8 +2,8 @@
 #define _RTESCENELAYER_
 
 #include "Entity.h"
-#include "Box.h"
 #include "ContentFile.h"
+#include "Box.h"
 
 namespace RTE {
 
@@ -29,7 +29,7 @@ namespace RTE {
 		/// Makes the SceneLayer object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create() override { return (Entity::Create() < 0) ? -1 : 0; }
+		int Create() override { return Entity::Create(); }
 
 		/// <summary>
 		/// Makes the SceneLayer object ready for use.
@@ -212,13 +212,13 @@ namespace RTE {
 		/// Lock the internal bitmap so it can be accessed by GetPixel() etc. UnlockBitmaps() should always be called after accesses are completed.
 		/// Doing it in a separate method like this is more efficient because many bitmap accesses can be performed between a lock and unlock.
 		/// </summary>
-		void LockBitmaps() { acquire_bitmap(m_MainBitmap); }
+		void LockBitmaps() { /*acquire_bitmap(m_MainBitmap);*/ }
 
 		/// <summary>
 		/// Unlocks the internal bitmaps and prevents access to display memory. UnlockBitmaps() should only be called after LockBitmaps().
 		/// Doing it in a separate method like this is more efficient because many bitmap accesses can be performed between a lock and an unlock.
 		/// </summary>
-		void UnlockBitmaps() { release_bitmap(m_MainBitmap); }
+		void UnlockBitmaps() { /*release_bitmap(m_MainBitmap);*/ }
 
 		/// <summary>
 		/// Only wraps a position coordinate if it is off bounds of the SceneLayer and wrapping in the corresponding axes are turned on.
@@ -253,14 +253,6 @@ namespace RTE {
 		/// <param name="scaled">Whether the coordinates above are of this' scale factor, or in its native pixels.</param>
 		/// <returns>Whether wrapping was performed or not. Does not report on bounding.</returns>
 		bool ForceBounds(Vector &pos, bool scaled = true) const { return ForceBoundsOrWrapPosition(pos, scaled, true); }
-
-		/// <summary>
-		/// Draws this SceneLayer's current scrolled position to a bitmap, but also scaled according to what has been set with SetScaleFactor.
-		/// </summary>
-		/// <param name="targetBitmap">The bitmap to draw to.</param>
-		/// <param name="targetBox">The box on the target bitmap to limit drawing to, with the corner of box being where the scroll position lines up.</param>
-		/// <param name="scrollOverride">If a non-{-1,-1} vector is passed, the internal scroll offset of this is overridden with it. It becomes the new source coordinates.</param>
-		void DrawScaled(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride = Vector(-1, -1));
 #pragma endregion
 
 #pragma region Virtual Override Methods
@@ -280,29 +272,29 @@ namespace RTE {
 
 	protected:
 
-		// Member variables
-		static Entity::ClassInfo m_sClass;
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		ContentFile m_BitmapFile;
+		ContentFile m_BitmapFile; //!< 
+		BITMAP *m_MainBitmap; //!< 
+		bool m_MainBitmapOwned; //!< Whether the main bitmap is owned by this.
+		bool m_DrawTrans; //!< Whether pixels marked as transparent (index 0, magenta) are skipped when drawing or not (masked drawing).
 
-		BITMAP *m_MainBitmap;
-		// Whether main bitmap is owned by this
-		bool m_MainBitmapOwned;
-		bool m_DrawTrans;
-		Vector m_Offset;
+		bool m_WrapX; //!< Whether wrapping is enabled on the X axis.
+		bool m_WrapY; //!< Whether wrapping is enable on the Y axis.
+
+		Vector m_Offset; //!< 
+
 		// The original ScrollInfo with special encoded info that is then made into the actual scroll ratios
-		Vector m_ScrollInfo;
-		Vector m_ScrollRatio;
-		Vector m_ScaleFactor;
-		Vector m_ScaleInverse;
-		Vector m_ScaledDimensions;
+		Vector m_ScrollInfo; //!< 
+		Vector m_ScrollRatio; //!< 
+		Vector m_ScaleFactor; //!< 
+		Vector m_ScaleInverse; //!< 
+		Vector m_ScaledDimensions; //!< 
 
-		bool m_WrapX;
-		bool m_WrapY;
-		int m_FillLeftColor;
-		int m_FillRightColor;
-		int m_FillUpColor;
-		int m_FillDownColor;
+		int m_FillLeftColor; //!< 
+		int m_FillRightColor; //!< 
+		int m_FillUpColor; //!< 
+		int m_FillDownColor; //!< 
 
 		/// <summary>
 		/// Initialize the scroll ratios from the encoded scroll info. Must be done after the bitmap has been created in the derived concrete classes.
@@ -322,7 +314,7 @@ namespace RTE {
 		/// <returns></returns>
 		bool ForceBoundsOrWrapPosition(Vector &pos, bool scaled, bool forceBounds) const;
 
-#pragma region Drawing
+#pragma region Draw Breakdown
 		/// <summary>
 		/// 
 		/// </summary>

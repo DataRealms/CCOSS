@@ -9,36 +9,42 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLBackground::Clear() {
-		m_AutoScrollX = false;
-		m_AutoScrollY = false;
-		m_AutoScrollStep.Reset();
 		m_Bitmaps.clear();
 		m_FrameCount = 1;
 		m_Frame = 0;
-		m_SpriteAnimDuration = 0;
 		m_SpriteAnimMode = SpriteAnimMode::NOANIM;
-		m_AutoScrollStepTimer.Reset();
-		m_AutoScrollStepInterval = 0;
-		m_SpriteAnimTimer.Reset();
+		m_SpriteAnimDuration = 1000;
 		m_SpriteAnimIsReversingFrames = false;
+		m_SpriteAnimTimer.Reset();
+		m_AutoScrollX = false;
+		m_AutoScrollY = false;
+		m_AutoScrollStep.Reset();
+		m_AutoScrollStepInterval = 0;
+		m_AutoScrollStepTimer.Reset();
 		m_AutoScrollOffset.Reset();
+
 		m_LayerScaleFactors = { Vector(1.0F, 1.0F), Vector(), Vector(2.0F, 2.0F) };
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SLBackground::Create() {
+		SceneLayer::Create();
+
 		m_BitmapFile.GetAsAnimation(m_Bitmaps, m_FrameCount);
 		m_MainBitmap = m_Bitmaps.at(0);
 
 		InitScaleFactors();
 
 		// Sampled color at the edges of the layer that can be used to fill gap if the layer isn't large enough to cover a target bitmap.
-		m_FillLeftColor = m_WrapX ? ColorKeys::g_MaskColor : _getpixel(m_MainBitmap, 0, m_MainBitmap->h / 2);
-		m_FillRightColor = m_WrapX ? ColorKeys::g_MaskColor : _getpixel(m_MainBitmap, m_MainBitmap->w - 1, m_MainBitmap->h / 2);
-		m_FillUpColor = m_WrapY ? ColorKeys::g_MaskColor : _getpixel(m_MainBitmap, m_MainBitmap->w / 2, 0);
-		m_FillDownColor = m_WrapY ? ColorKeys::g_MaskColor : _getpixel(m_MainBitmap, m_MainBitmap->w / 2, m_MainBitmap->h - 1);
-
+		if (!m_WrapX) {
+			m_FillLeftColor = _getpixel(m_MainBitmap, 0, m_MainBitmap->h / 2);
+			m_FillRightColor = _getpixel(m_MainBitmap, m_MainBitmap->w - 1, m_MainBitmap->h / 2);
+		}
+		if (!m_WrapY) {
+			m_FillUpColor = _getpixel(m_MainBitmap, m_MainBitmap->w / 2, 0);
+			m_FillDownColor = _getpixel(m_MainBitmap, m_MainBitmap->w / 2, m_MainBitmap->h - 1);
+		}
 		return 0;
 	}
 
@@ -54,6 +60,11 @@ namespace RTE {
 		m_Bitmaps.clear();
 		m_Bitmaps = reference.m_Bitmaps;
 		m_MainBitmap = m_Bitmaps.at(0);
+
+		m_FillLeftColor = reference.m_FillLeftColor;
+		m_FillRightColor = reference.m_FillRightColor;
+		m_FillUpColor = reference.m_FillUpColor;
+		m_FillDownColor = reference.m_FillDownColor;
 
 		m_FrameCount = reference.m_FrameCount;
 		m_SpriteAnimMode = reference.m_SpriteAnimMode;
@@ -74,6 +85,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLBackground::InitScaleFactors() {
+		m_LayerScaleFactors.at(LayerAutoScaleMode::AutoScaleOff) = m_ScaleFactor;
+
 		float fitScreenScaleFactor = std::clamp(static_cast<float>(g_FrameMan.GetBackBuffer8()->h) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
 		m_LayerScaleFactors.at(LayerAutoScaleMode::FitScreen).SetXY(fitScreenScaleFactor, fitScreenScaleFactor);
 
@@ -99,7 +112,7 @@ namespace RTE {
 			reader >> m_SpriteAnimMode;
 			if (m_FrameCount > 1) {
 				// If animation mode is set to something other than ALWAYSLOOP but only has 2 frames, override it because it's pointless
-				if ((m_SpriteAnimMode == SpriteAnimMode::ALWAYSRANDOM || m_SpriteAnimMode == SpriteAnimMode::ALWAYSPINGPONG) && m_FrameCount == 2) { m_SpriteAnimMode = ALWAYSLOOP; }
+				if ((m_SpriteAnimMode == SpriteAnimMode::ALWAYSRANDOM || m_SpriteAnimMode == SpriteAnimMode::ALWAYSPINGPONG) && m_FrameCount == 2) { m_SpriteAnimMode = SpriteAnimMode::ALWAYSLOOP; }
 			} else {
 				m_SpriteAnimMode = SpriteAnimMode::NOANIM;
 			}
@@ -178,16 +191,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLBackground::Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride) {
-		m_MainBitmap = m_Bitmaps.at(m_Frame);
-
-		Vector ratioAdjustedAutoScrolledOffset = m_Offset;
-		bool scrollNeedsOverride = false;
-
+		Vector ratioAdjustedAutoScrolledOffset;
 		if (IsAutoScrolling()) {
 			ratioAdjustedAutoScrolledOffset.SetXY(std::floor((m_Offset.GetX() * m_ScrollRatio.GetX()) + m_AutoScrollOffset.GetX()), std::floor((m_Offset.GetY() * m_ScrollRatio.GetY()) + m_AutoScrollOffset.GetY()));
 			WrapPosition(ratioAdjustedAutoScrolledOffset);
-			scrollNeedsOverride = true;
 		}
-		SceneLayer::Draw(targetBitmap, targetBox, scrollNeedsOverride ? ratioAdjustedAutoScrolledOffset : scrollOverride);
+		m_MainBitmap = m_Bitmaps.at(m_Frame);
+		SceneLayer::Draw(targetBitmap, targetBox, !ratioAdjustedAutoScrolledOffset.IsZero() ? ratioAdjustedAutoScrolledOffset : scrollOverride);
 	}
 }

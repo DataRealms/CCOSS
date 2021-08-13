@@ -155,7 +155,7 @@ namespace RTE {
 		} else if (propName == "RecommendedMOIDCount") {
 			reader >> m_RecommendedMOIDCount;
 		} else if (propName == "SceneBackgroundAutoScaleMode") {
-			reader >> m_SceneBackgroundAutoScaleMode;
+			SetSceneBackgroundAutoScaleMode(std::stoi(reader.ReadPropValue()));
 		} else if (propName == "EnableParticleSettling") {
 			reader >> g_MovableMan.m_SettlingEnabled;
 		} else if (propName == "EnableMOSubtraction") {

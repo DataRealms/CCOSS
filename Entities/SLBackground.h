@@ -7,7 +7,7 @@
 namespace RTE {
 
 	/// <summary>
-	/// 
+	/// A scrolling background layer of the Scene.
 	/// </summary>
 	class SLBackground : public SceneLayer {
 
@@ -19,14 +19,14 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// 
+		/// Constructor method used to instantiate a SLBackground object in system memory. Create() should be called before using the object.
 		/// </summary>
 		SLBackground() { Clear(); }
 
 		/// <summary>
-		/// 
+		/// Makes the SLBackground object ready for use.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create() override;
 
 		/// <summary>
@@ -39,22 +39,22 @@ namespace RTE {
 
 #pragma region Destruction
 		/// <summary>
-		/// 
+		/// Destructor method used to clean up a SLBackground object before deletion from system memory.
 		/// </summary>
 		~SLBackground() override { Destroy(true); }
 
 		/// <summary>
-		/// 
+		/// Destroys and resets (through Clear()) the SLBackground object.
 		/// </summary>
-		/// <param name="notInherited"></param>
+		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
 		void Destroy(bool notInherited = false) override { if (!notInherited) { SceneLayer::Destroy(); } Clear(); }
 #pragma endregion
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// 
+		/// Gets whether this has auto-scrolling enabled and meets the requirements to actually auto-scroll.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether this has auto-scrolling enabled and meets the requirements to actually auto-scroll.</returns>
 		bool IsAutoScrolling() const { return (m_WrapX && m_AutoScrollX) || (m_WrapY && m_AutoScrollY); }
 
 		/// <summary>
@@ -80,9 +80,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="autoScroll"></param>
 		void SetAutoScrollY(bool autoScroll) { m_AutoScrollY = autoScroll; }
-#pragma endregion
 
-#pragma region Concrete Methods
 
 #pragma endregion
 
@@ -103,32 +101,32 @@ namespace RTE {
 
 	protected:
 
-		static Entity::ClassInfo m_sClass;
+		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		bool m_AutoScrollX;
-		bool m_AutoScrollY;
-		Vector m_AutoScrollStep;
-		int m_AutoScrollStepInterval;
-		Timer m_AutoScrollStepTimer;
+		std::vector<BITMAP *> m_Bitmaps; //!< 
+		int m_FrameCount; //!< 
+		int m_Frame; //!< 
 
-		std::vector<BITMAP *> m_Bitmaps;
-		int m_FrameCount;
-		int m_Frame;
-		Timer m_SpriteAnimTimer;
+		int m_SpriteAnimMode; //!< 
+		int m_SpriteAnimDuration; //!< The duration it takes to complete a full animation cycle, in milliseconds.
+		bool m_SpriteAnimIsReversingFrames; //!< Keeps track of animation direction (mainly for ALWAYSPINGPONG), true is decreasing frame, false is increasing frame.
+		Timer m_SpriteAnimTimer; //!< Timer to keep track of animation.
 
-		// Keep track of animation direction (mainly for ALWAYSPINGPONG), true is decreasing frame, false is increasing frame
-		bool m_SpriteAnimIsReversingFrames;
-
-		int m_SpriteAnimDuration;
-		int m_SpriteAnimMode;
-
-		Vector m_AutoScrollOffset;
+		bool m_AutoScrollX; //!< Whether auto-scrolling is enabled on the X axis.
+		bool m_AutoScrollY; //!< Whether auto-scrolling is enabled on the Y axis.
+		Vector m_AutoScrollStep; //!< 
+		int m_AutoScrollStepInterval; //!< The duration between auto-scroll steps, in milliseconds.
+		Timer m_AutoScrollStepTimer; //!< Timer to keep track of auto-scrolling steps.
+		Vector m_AutoScrollOffset; //!< 
 
 	private:
 
+		/// <summary>
+		/// Enumeration for the different modes of SLBackground auto-scaling.
+		/// </summary>
 		enum LayerAutoScaleMode { AutoScaleOff, FitScreen, AlwaysUpscaled, LayerAutoScaleModeCount };
 
-		std::array<Vector, LayerAutoScaleMode::LayerAutoScaleModeCount> m_LayerScaleFactors;
+		std::array<Vector, LayerAutoScaleMode::LayerAutoScaleModeCount> m_LayerScaleFactors; //!< 
 
 		/// <summary>
 		/// 

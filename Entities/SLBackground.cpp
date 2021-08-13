@@ -24,6 +24,7 @@ namespace RTE {
 		m_AutoScrollOffset.Reset();
 
 		m_LayerScaleFactors = { Vector(1.0F, 1.0F), Vector(), Vector(2.0F, 2.0F) };
+		m_IgnoreAutoScale = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -76,6 +77,7 @@ namespace RTE {
 		m_AutoScrollStepInterval = reference.m_AutoScrollStepInterval;
 
 		m_LayerScaleFactors = reference.m_LayerScaleFactors;
+		m_IgnoreAutoScale = reference.m_IgnoreAutoScale;
 
 		InitScaleFactors();
 
@@ -90,16 +92,18 @@ namespace RTE {
 		float fitScreenScaleFactor = std::clamp(static_cast<float>(g_FrameMan.GetBackBuffer8()->h) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
 		m_LayerScaleFactors.at(LayerAutoScaleMode::FitScreen).SetXY(fitScreenScaleFactor, fitScreenScaleFactor);
 
-		switch (g_SettingsMan.GetSceneBackgroundAutoScaleMode()) {
-			case LayerAutoScaleMode::FitScreen:
-				SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::FitScreen));
-				break;
-			case LayerAutoScaleMode::AlwaysUpscaled:
-				SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::AlwaysUpscaled));
-				break;
-			default:
-				SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::AutoScaleOff));
-				break;
+		if (!m_IgnoreAutoScale) {
+			switch (g_SettingsMan.GetSceneBackgroundAutoScaleMode()) {
+				case LayerAutoScaleMode::FitScreen:
+					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::FitScreen));
+					break;
+				case LayerAutoScaleMode::AlwaysUpscaled:
+					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::AlwaysUpscaled));
+					break;
+				default:
+					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::AutoScaleOff));
+					break;
+			}
 		}
 	}
 
@@ -126,6 +130,8 @@ namespace RTE {
 			reader >> m_AutoScrollStepInterval;
 		} else if (propName == "AutoScrollStep") {
 			reader >> m_AutoScrollStep;
+		} else if (propName == "IgnoreAutoScaling") {
+			reader >> m_IgnoreAutoScale;
 		} else {
 			return SceneLayer::ReadProperty(propName, reader);
 		}
@@ -144,6 +150,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("AutoScrollY", m_AutoScrollY);
 		writer.NewPropertyWithValue("AutoScrollStepInterval", m_AutoScrollStepInterval);
 		writer.NewPropertyWithValue("AutoScrollStep", m_AutoScrollStep);
+		writer.NewPropertyWithValue("IgnoreAutoScaling", m_IgnoreAutoScale);
 
 		return 0;
 	}

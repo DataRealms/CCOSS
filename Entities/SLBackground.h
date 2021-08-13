@@ -174,6 +174,8 @@ namespace RTE {
 
 		std::array<Vector, LayerAutoScaleMode::LayerAutoScaleModeCount> m_LayerScaleFactors; //!< Array of Vectors containing scale factors for each auto-scale mode.
 
+		bool m_IgnoreAutoScale;
+
 		/// <summary>
 		/// 
 		/// </summary>

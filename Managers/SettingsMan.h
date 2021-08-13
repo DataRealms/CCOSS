@@ -63,6 +63,18 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Recommended MOID count.</returns>
 		int RecommendedMOIDCount() const { return m_RecommendedMOIDCount; }
+
+		/// <summary>
+		/// Gets the Scene background layer auto scaling mode.
+		/// </summary>
+		/// <returns>The Scene background layer auto scaling mode. 0 for off, 1 for fit screen dimensions and 2 for always upscaled to x2.</returns>
+		int GetSceneBackgroundAutoScaleMode() const { return m_SceneBackgroundAutoScaleMode; }
+
+		/// <summary>
+		/// Sets the Scene background layer auto scaling mode.
+		/// </summary>
+		/// <param name="newMode">The new Scene background layer auto scaling mode. 0 for off, 1 for fit screen dimensions and 2 for always upscaled to x2.</param>
+		void SetSceneBackgroundAutoScaleMode(int newMode) { m_SceneBackgroundAutoScaleMode = (newMode > 2) ? 0 : newMode; }
 #pragma endregion
 
 #pragma region Gameplay Settings
@@ -399,6 +411,7 @@ namespace RTE {
 		bool m_ShowMetaScenes; //!< Show MetaScenes in editors and activities.
 
 		int m_RecommendedMOIDCount; //!< Recommended max MOID's before removing actors from scenes.
+		int m_SceneBackgroundAutoScaleMode; //!< Scene background layer auto scaling mode. 0 for off, 1 for fit screen dimensions and 2 for always upscaled to x2.
 
 		bool m_SkipIntro; //!< Whether to play the intro of the game or skip directly to the main menu.
 		bool m_ShowToolTips; //!< Whether ToolTips are enabled or not.

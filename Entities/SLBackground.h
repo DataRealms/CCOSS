@@ -126,6 +126,15 @@ namespace RTE {
 
 	private:
 
+		enum LayerAutoScaleMode { AutoScaleOff, FitScreen, AlwaysUpscaled, LayerAutoScaleModeCount };
+
+		std::array<Vector, LayerAutoScaleMode::LayerAutoScaleModeCount> m_LayerScaleFactors;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		void InitScaleFactors();
+
 		/// <summary>
 		/// Clears all the member variables of this SLBackground, effectively resetting the members of this abstraction level only.
 		/// </summary>

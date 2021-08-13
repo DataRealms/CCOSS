@@ -356,6 +356,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SceneLayer::Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride) {
+		if (m_ScaleFactor.GetX() > 1.0F && m_ScaleFactor.GetY() > 1.0F) {
+			DrawScaled(targetBitmap, targetBox, scrollOverride);
+			return;
+		}
 		RTEAssert(m_MainBitmap, "Data of this SceneLayer has not been loaded before trying to draw!");
 
 		int offsetX = 0;

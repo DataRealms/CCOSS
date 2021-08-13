@@ -1,4 +1,6 @@
 #include "SLBackground.h"
+#include "FrameMan.h"
+#include "SettingsMan.h"
 
 namespace RTE {
 
@@ -20,6 +22,7 @@ namespace RTE {
 		m_SpriteAnimTimer.Reset();
 		m_SpriteAnimIsReversingFrames = false;
 		m_AutoScrollOffset.Reset();
+		m_LayerScaleFactors = { Vector(1.0F, 1.0F), Vector(), Vector(2.0F, 2.0F) };
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -27,6 +30,9 @@ namespace RTE {
 	int SLBackground::Create() {
 		m_BitmapFile.GetAsAnimation(m_Bitmaps, m_FrameCount);
 		m_MainBitmap = m_Bitmaps.at(0);
+
+		InitScaleFactors();
+
 		// Sampled color at the edges of the layer that can be used to fill gap if the layer isn't large enough to cover a target bitmap.
 		m_FillLeftColor = m_WrapX ? ColorKeys::g_MaskColor : _getpixel(m_MainBitmap, 0, m_MainBitmap->h / 2);
 		m_FillRightColor = m_WrapX ? ColorKeys::g_MaskColor : _getpixel(m_MainBitmap, m_MainBitmap->w - 1, m_MainBitmap->h / 2);
@@ -58,7 +64,30 @@ namespace RTE {
 		m_AutoScrollStep = reference.m_AutoScrollStep;
 		m_AutoScrollStepInterval = reference.m_AutoScrollStepInterval;
 
+		m_LayerScaleFactors = reference.m_LayerScaleFactors;
+
+		InitScaleFactors();
+
 		return 0;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SLBackground::InitScaleFactors() {
+		float fitScreenScaleFactor = std::clamp(static_cast<float>(g_FrameMan.GetBackBuffer8()->h) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
+		m_LayerScaleFactors.at(LayerAutoScaleMode::FitScreen).SetXY(fitScreenScaleFactor, fitScreenScaleFactor);
+
+		switch (g_SettingsMan.GetSceneBackgroundAutoScaleMode()) {
+			case LayerAutoScaleMode::FitScreen:
+				SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::FitScreen));
+				break;
+			case LayerAutoScaleMode::AlwaysUpscaled:
+				SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::AlwaysUpscaled));
+				break;
+			default:
+				SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::AutoScaleOff));
+				break;
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

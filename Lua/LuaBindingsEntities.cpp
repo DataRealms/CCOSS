@@ -1096,6 +1096,10 @@ namespace RTE {
 
 		.property("AutoScrollX", &SLBackground::GetAutoScrollX, &SLBackground::SetAutoScrollX)
 		.property("AutoScrollY", &SLBackground::GetAutoScrollY, &SLBackground::SetAutoScrollY)
+		.property("AutoScrollInterval", &SLBackground::GetAutoScrollStepInterval, &SLBackground::SetAutoScrollStepInterval)
+		.property("AutoScrollStep", &SLBackground::GetAutoScrollStep, &SLBackground::SetAutoScrollStep)
+		.property("AutoScrollStepX", &SLBackground::GetAutoScrollStepX, &SLBackground::SetAutoScrollStepX)
+		.property("AutoScrollStepY", &SLBackground::GetAutoScrollStepY, &SLBackground::SetAutoScrollStepY)
 
 		.def("IsAutoScrolling", &SLBackground::IsAutoScrolling);
 	}

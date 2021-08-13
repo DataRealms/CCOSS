@@ -58,30 +58,76 @@ namespace RTE {
 		bool IsAutoScrolling() const { return (m_WrapX && m_AutoScrollX) || (m_WrapY && m_AutoScrollY); }
 
 		/// <summary>
-		/// 
+		/// Gets whether auto-scrolling is enabled on the X axis.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether auto-scrolling is enabled on the X axis.</returns>
 		bool GetAutoScrollX() const { return m_AutoScrollX; }
 
 		/// <summary>
-		/// 
+		/// Sets whether auto-scrolling is enabled on the X axis.
 		/// </summary>
-		/// <param name="autoScroll"></param>
+		/// <param name="autoScroll">Whether auto-scrolling is enabled on the X axis or not.</param>
 		void SetAutoScrollX(bool autoScroll) { m_AutoScrollX = autoScroll; }
 
 		/// <summary>
-		/// 
+		/// Gets whether auto-scrolling is enabled on the Y axis.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>Whether auto-scrolling is enabled on the Y axis.</returns>
 		bool GetAutoScrollY() const { return m_AutoScrollY; }
 
 		/// <summary>
-		/// 
+		/// Sets whether auto-scrolling is enabled on the Y axis.
 		/// </summary>
-		/// <param name="autoScroll"></param>
+		/// <param name="autoScroll">Whether auto-scrolling is enabled on the Y axis or not.</param>
 		void SetAutoScrollY(bool autoScroll) { m_AutoScrollY = autoScroll; }
 
+		/// <summary>
+		/// Gets the duration between auto-scroll steps.
+		/// </summary>
+		/// <returns>The duration between auto-scroll steps, in milliseconds.</returns>
+		int GetAutoScrollStepInterval() const { return m_AutoScrollStepInterval; }
 
+		/// <summary>
+		/// Sets the duration between auto-scroll steps.
+		/// </summary>
+		/// <param name="newStepInterval">The new duration between auto-scroll steps, in milliseconds.</param>
+		void SetAutoScrollStepInterval(int newStepInterval) { m_AutoScrollStepInterval = newStepInterval; }
+
+		/// <summary>
+		/// Gets the auto-scroll step (pixels to advance per interval) values.
+		/// </summary>
+		/// <returns>A Vector with the auto-scroll step values.</returns>
+		Vector GetAutoScrollStep() const { return m_AutoScrollStep; }
+
+		/// <summary>
+		/// Sets the auto-scroll step (pixels to advance per interval) values.
+		/// </summary>
+		/// <param name="newStep">A Vector with the new auto-scroll step values.</param>
+		void SetAutoScrollStep(const Vector &newStep) { m_AutoScrollStep = newStep; }
+
+		/// <summary>
+		/// Gets the auto-scroll step (pixels to advance per interval) value on the X axis.
+		/// </summary>
+		/// <returns>The auto-scroll step value on the X axis.</returns>
+		int GetAutoScrollStepX() const { return m_AutoScrollStep.GetFloorIntX(); }
+
+		/// <summary>
+		/// Sets the auto-scroll step (pixels to advance per interval) value on the X axis.
+		/// </summary>
+		/// <param name="newStepX">The new auto-scroll step value on the X axis.</param>
+		void SetAutoScrollStepX(int newStepX) { m_AutoScrollStep.SetX(static_cast<float>(newStepX)); }
+
+		/// <summary>
+		/// Gets the auto-scroll step (pixels to advance per interval) value on the Y axis.
+		/// </summary>
+		/// <returns>The auto-scroll step value on the Y axis.</returns>
+		int GetAutoScrollStepY() const { return m_AutoScrollStep.GetFloorIntY(); }
+
+		/// <summary>
+		/// Sets the auto-scroll step (pixels to advance per interval) value on the Y axis.
+		/// </summary>
+		/// <param name="newStepY">The new auto-scroll step value on the Y axis.</param>
+		void SetAutoScrollStepY(int newStepY) { m_AutoScrollStep.SetY(static_cast<float>(newStepY)); }
 #pragma endregion
 
 #pragma region Virtual Override Methods
@@ -114,10 +160,10 @@ namespace RTE {
 
 		bool m_AutoScrollX; //!< Whether auto-scrolling is enabled on the X axis.
 		bool m_AutoScrollY; //!< Whether auto-scrolling is enabled on the Y axis.
-		Vector m_AutoScrollStep; //!< 
+		Vector m_AutoScrollStep; //!< Vector with the number of pixels to advance per interval when auto-scrolling.
 		int m_AutoScrollStepInterval; //!< The duration between auto-scroll steps, in milliseconds.
 		Timer m_AutoScrollStepTimer; //!< Timer to keep track of auto-scrolling steps.
-		Vector m_AutoScrollOffset; //!< 
+		Vector m_AutoScrollOffset; //!< The offset to adjust the this' main offset with when auto-scrolling to actually get the auto-scrolling effect, adjusted for wrapping.
 
 	private:
 
@@ -126,7 +172,7 @@ namespace RTE {
 		/// </summary>
 		enum LayerAutoScaleMode { AutoScaleOff, FitScreen, AlwaysUpscaled, LayerAutoScaleModeCount };
 
-		std::array<Vector, LayerAutoScaleMode::LayerAutoScaleModeCount> m_LayerScaleFactors; //!< 
+		std::array<Vector, LayerAutoScaleMode::LayerAutoScaleModeCount> m_LayerScaleFactors; //!< Array of Vectors containing scale factors for each auto-scale mode.
 
 		/// <summary>
 		/// 

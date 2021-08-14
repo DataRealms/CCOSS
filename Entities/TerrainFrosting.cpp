@@ -8,8 +8,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TerrainFrosting::Clear() {
-		m_TargetMaterial.Reset();
 		m_FrostingMaterial.Reset();
+		m_TargetMaterial.Reset();
 		m_MinThickness = 5;
 		m_MaxThickness = 5;
 		m_InAirOnly = true;
@@ -18,8 +18,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int TerrainFrosting::Create(const TerrainFrosting &reference) {
-		m_TargetMaterial = reference.m_TargetMaterial;
 		m_FrostingMaterial = reference.m_FrostingMaterial;
+		m_TargetMaterial = reference.m_TargetMaterial;
 		m_MinThickness = reference.m_MinThickness;
 		m_MaxThickness = reference.m_MaxThickness;
 		m_InAirOnly = reference.m_InAirOnly;
@@ -30,10 +30,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int TerrainFrosting::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "TargetMaterial") {
-			reader >> m_TargetMaterial;
-		} else if (propName == "FrostingMaterial") {
+		if (propName == "FrostingMaterial") {
 			reader >> m_FrostingMaterial;
+		} else if (propName == "TargetMaterial") {
+			reader >> m_TargetMaterial;
 		} else if (propName == "MinThickness") {
 			reader >> m_MinThickness;
 		} else if (propName == "MaxThickness") {
@@ -51,8 +51,8 @@ namespace RTE {
 	int TerrainFrosting::Save(Writer &writer) const {
 		Serializable::Save(writer);
 
-		writer.NewPropertyWithValue("TargetMaterial", m_TargetMaterial);
 		writer.NewPropertyWithValue("FrostingMaterial", m_FrostingMaterial);
+		writer.NewPropertyWithValue("TargetMaterial", m_TargetMaterial);
 		writer.NewPropertyWithValue("MinThickness", m_MinThickness);
 		writer.NewPropertyWithValue("MaxThickness", m_MaxThickness);
 		writer.NewPropertyWithValue("InAirOnly", m_InAirOnly);
@@ -63,59 +63,47 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void TerrainFrosting::ApplyFrosting(SLTerrain *terrain) const {
-		BITMAP *matBitmap = terrain->GetBitmap();
-		BITMAP *fgColorBitmap = terrain->GetFGColorBitmap();
-
-		int targetId = m_TargetMaterial.GetIndex();
-		bool targetFound = false;
-		bool applyingFrosting = false;
-		int thickness = 0;
-
-		// Try to get the color texture of the frosting material. If fail, we'll use the color instead
+		// Try to get the texture of the frosting material. If there is none, the color index will be used instead.
 		BITMAP *frostingTexture = m_FrostingMaterial.GetTexture();
-		if (frostingTexture) { acquire_bitmap(frostingTexture); }
+		BITMAP *fgColorBitmap = terrain->GetFGColorBitmap();
+		BITMAP *matBitmap = terrain->GetBitmap();
 
-		acquire_bitmap(matBitmap);
-		acquire_bitmap(fgColorBitmap);
+		bool targetMatFound = false;
+		bool applyingFrosting = false;
+		int appliedThickness = 0;
+
+		// Reference. Do not remove.
+		//acquire_bitmap(matBitmap);
+		//acquire_bitmap(fgColorBitmap);
+		//if (frostingTexture) { acquire_bitmap(frostingTexture); }
 
 		for (int xPos = 0; xPos < matBitmap->w; ++xPos) {
-			int thicknessGoal = GetThicknessSample();
+			int thicknessGoal = m_MinThickness + RandomNum(0, m_MaxThickness - m_MinThickness);
 
-			// Work upward from the bottom of each column
+			// Work upward from the bottom of each column.
 			for (int yPos = matBitmap->h - 1; yPos >= 0; --yPos) {
-				// Read which material the current pixel represents
 				int matIndex = _getpixel(matBitmap, xPos, yPos);
 
-				// We've encountered the target material! Prepare to apply frosting as soon as it ends!
-				if (!targetFound && matIndex == targetId) {
-					targetFound = true;
-					thickness = 0;
-				} else if (targetFound && matIndex != targetId && thickness <= thicknessGoal) {
-					// Target material has ended! See if we should start putting on the frosting
+				if (!targetMatFound && matIndex == m_TargetMaterial.GetIndex()) {
+					targetMatFound = true;
+					appliedThickness = 0;
+				} else if (targetMatFound && matIndex != m_TargetMaterial.GetIndex() && appliedThickness <= thicknessGoal) {
+					// Target material has ended! See if we should start putting on the frosting.
+					targetMatFound = false;
 					applyingFrosting = true;
-					targetFound = false;
 				}
-
-				// If time to put down frosting pixels, then do so IF there is air, OR we're set to ignore what we're overwriting
-				if (applyingFrosting && (matIndex == g_MaterialAir || !m_InAirOnly) && thickness <= thicknessGoal) {
-					// Get the color either from the frosting material's texture or the solid color
-					int pixelColor = frostingTexture ? _getpixel(frostingTexture, xPos % frostingTexture->w, yPos % frostingTexture->h) : m_FrostingMaterial.GetColor().GetIndex();
-
-					// Put the frosting pixel color on the FG color layer
-					_putpixel(fgColorBitmap, xPos, yPos, pixelColor);
-					// Put the material ID pixel on the material layer
+				if (applyingFrosting && (matIndex == MaterialColorKeys::g_MaterialAir || !m_InAirOnly) && appliedThickness <= thicknessGoal) {
+					_putpixel(fgColorBitmap, xPos, yPos, frostingTexture ? _getpixel(frostingTexture, xPos % frostingTexture->w, yPos % frostingTexture->h) : m_FrostingMaterial.GetColor().GetIndex());
 					_putpixel(matBitmap, xPos, yPos, m_FrostingMaterial.GetIndex());
-
-					// Keep track of the applied thickness
-					thickness++;
+					appliedThickness++;
 				} else {
 					applyingFrosting = false;
 				}
 			}
 		}
-		if (frostingTexture) { release_bitmap(frostingTexture); }
-
-		release_bitmap(matBitmap);
-		release_bitmap(fgColorBitmap);
+		// Reference. Do not remove.
+		//if (frostingTexture) { release_bitmap(frostingTexture); }
+		//release_bitmap(fgColorBitmap);
+		//release_bitmap(matBitmap);
 	}
 }

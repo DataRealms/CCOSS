@@ -2,7 +2,6 @@
 #define _RTETERRAINFROSTING_
 
 #include "Material.h"
-#include "RTETools.h"
 
 namespace RTE {
 
@@ -27,31 +26,25 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a TerrainFrosting object identical to another in system memory, by deep copy.
 		/// </summary>
-		/// <param name="reference"> A reference to the TerrainFrosting to deep copy.</param>
+		/// <param name="reference">A reference to the TerrainFrosting to deep copy.</param>
 		TerrainFrosting(const TerrainFrosting &reference) { Clear(); Create(reference); }
 
 		/// <summary>
 		/// Creates a TerrainFrosting to be identical to another, by deep copy.
 		/// </summary>
-		/// <param name="reference"> A reference to the TerrainFrosting to deep copy.</param>
+		/// <param name="reference">A reference to the TerrainFrosting to deep copy.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(const TerrainFrosting &reference);
 #pragma endregion
 
 #pragma region Destruction
 		/// <summary>
-		/// Resets the entire Serializable, including its inherited members, to their default settings or values.
+		/// Resets the entire TerrainFrosting, including its inherited members, to their default settings or values.
 		/// </summary>
 		void Reset() override { Clear(); }
 #pragma endregion
 
 #pragma region Getters
-		/// <summary>
-		/// Gets the target Material that this TerrainFrosting will appear on top of.
-		/// </summary>
-		/// <returns>A reference to the target Material.</returns>
-		const Material & GetTargetMaterial() const { return m_TargetMaterial; }
-
 		/// <summary>
 		/// Gets the Material of this TerrainFrosting.
 		/// </summary>
@@ -59,10 +52,10 @@ namespace RTE {
 		const Material & GetFrostingMaterial() const { return m_FrostingMaterial; }
 
 		/// <summary>
-		/// Returns a random thickness sample between the min and max possible thicknesses of this TerrainFrosting.
+		/// Gets the target Material that this TerrainFrosting will appear on top of.
 		/// </summary>
-		/// <returns>The thickness sample.</returns>
-		int GetThicknessSample() const { return m_MinThickness + RandomNum(0, m_MaxThickness - m_MinThickness); }
+		/// <returns>A reference to the target Material.</returns>
+		const Material & GetTargetMaterial() const { return m_TargetMaterial; }
 
 		/// <summary>
 		/// Indicates whether the frosting only appears where there is air in the terrain.
@@ -73,7 +66,7 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Applies the frosting to an SLTerrain as its read parameters specify.
+		/// Applies the frosting to a SLTerrain as its read parameters specify.
 		/// </summary>
 		/// <param name="terrain">Pointer to the terrain to place the frosting on. Ownership is NOT transferred!</param>
 		void ApplyFrosting(SLTerrain *terrain) const;
@@ -81,11 +74,11 @@ namespace RTE {
 
 	protected:
 
-		Material m_TargetMaterial; //!< The material this frosting will sit on top in the terrain.
 		Material m_FrostingMaterial; //!< Material of this frosting that will be piled on top of the target.
+		Material m_TargetMaterial; //!< The material this frosting will sit on top in the terrain.
 		int m_MinThickness; //!< The minimum height in pixels above the target material.
-		int m_MaxThickness; //!< The max thickness.
-		bool m_InAirOnly; //!< Whether the frosting only appears where there is air.
+		int m_MaxThickness; //!< The maximum height in pixels above the target material.
+		bool m_InAirOnly; //!< Whether the frosting only appears where there is air (i.e. does not appear where the terrain background layer is showing).
 
 	private:
 

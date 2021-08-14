@@ -46,6 +46,16 @@ namespace RTE {
 		g_NoMOID = 255
 	};
 
+	enum MaterialColorKeys {
+		g_MaterialAir = 0,
+		g_MaterialOutOfBounds = 1,
+		g_MaterialCavity = 1,
+		g_MaterialGold = 2,
+		g_MaterialSand = 8,
+		g_MaterialGrass = 128,
+		g_MaterialDoor = 181
+	};
+
 	enum DotGlowColor { NoDot, YellowDot, RedDot, BlueDot };
 	enum TransparencyPreset { LessTrans, HalfTrans, MoreTrans };
 

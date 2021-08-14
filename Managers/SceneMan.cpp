@@ -605,7 +605,6 @@ unsigned char SceneMan::GetTerrMatter(int pixelX, int pixelY)
     // If it's still below or to the sides out of bounds after
     // what is supposed to be wrapped, shit is out of bounds.
     if (pixelX < 0 || pixelX >= pTMatBitmap->w || pixelY >= pTMatBitmap->h)
-//        return g_MaterialOutOfBounds;
         return g_MaterialAir;
 
     // If above terrain bitmap, return air material.

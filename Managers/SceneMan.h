@@ -44,20 +44,6 @@ enum LayerDrawMode
     g_LayerMOID
 };
 
-enum
-{
-    REGULAR_MAT_OFFSET = 8,
-    g_MaterialAir = 0,
-    g_MaterialDefault = 1,
-    g_MaterialOutOfBounds = 1,
-    g_MaterialCavity = 1,
-    g_MaterialGold = 2,
-    g_MaterialGrass = 128,
-    g_MaterialFlesh = 145,
-    g_MaterialSand = 8,
-    g_MaterialDoor = 181
-};
-
 #define SCENEGRIDSIZE 24
 #define SCENESNAPSIZE 12
 #define MAXORPHANRADIUS 11

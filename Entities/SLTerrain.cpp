@@ -187,7 +187,7 @@ namespace RTE {
 				}
 
 				// Validate the material, or default to default material
-				const Material *material = (matIndex >= 0 && matIndex < c_PaletteEntriesNumber && materialPalette.at(matIndex)) ? materialPalette.at(matIndex) : materialPalette.at(g_MaterialDefault);
+				const Material *material = (matIndex >= 0 && matIndex < c_PaletteEntriesNumber && materialPalette.at(matIndex)) ? materialPalette.at(matIndex) : materialPalette.at(MaterialColorKeys::g_MaterialOutOfBounds);
 
 				// If haven't read a pixel of this material before, then get its texture so we can quickly access it
 				if (!materialTextures.at(matIndex) && material->GetTexture()) {
@@ -315,7 +315,7 @@ namespace RTE {
 
 		// If it's still below or to the sides out of bounds after wrapping what is supposed to be wrapped, shit is out of bounds.
 		if (posX < 0 || posX >= m_MainBitmap->w || posY < 0 || posY >= m_MainBitmap->h) {
-			return (layerType == LayerType::MaterialLayer) ? g_MaterialAir : ColorKeys::g_MaskColor;
+			return (layerType == LayerType::MaterialLayer) ? MaterialColorKeys::g_MaterialAir : ColorKeys::g_MaskColor;
 		}
 		return _getpixel(terrainLayer, posX, posY);
 	}
@@ -359,7 +359,7 @@ namespace RTE {
 			return true;
 		}
 		int checkPixel = _getpixel(m_MainBitmap, posX, posY);
-		return checkPixel == g_MaterialAir || checkPixel == g_MaterialCavity;
+		return checkPixel == MaterialColorKeys::g_MaterialAir || checkPixel == MaterialColorKeys::g_MaterialCavity;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -437,7 +437,7 @@ namespace RTE {
 
 				if (getpixel(tempBitmap, testX, testY) != ColorKeys::g_MaskColor) {
 					// Only add PixelMO if we're not due to skip any
-					if (makeMOPs && matPixel != g_MaterialAir && colorPixel != ColorKeys::g_MaskColor && ++skipCount > skipMOP && MOPDeque.size() < maxMOPs) {
+					if (makeMOPs && matPixel != MaterialColorKeys::g_MaterialAir && colorPixel != ColorKeys::g_MaskColor && ++skipCount > skipMOP && MOPDeque.size() < maxMOPs) {
 						skipCount = 0;
 						const Material *sceneMat = g_SceneMan.GetMaterialFromID(matPixel);
 						const Material *spawnMat = sceneMat->GetSpawnMaterial() ? g_SceneMan.GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
@@ -448,7 +448,7 @@ namespace RTE {
 					}
 
 					// Clear the terrain pixels
-					if (matPixel != g_MaterialAir) { putpixel(m_MainBitmap, terrX, terrY, g_MaterialAir); }
+					if (matPixel != MaterialColorKeys::g_MaterialAir) { putpixel(m_MainBitmap, terrX, terrY, MaterialColorKeys::g_MaterialAir); }
 					if (colorPixel != ColorKeys::g_MaskColor) {
 						putpixel(m_FGColorLayer->GetBitmap(), terrX, terrY, ColorKeys::g_MaskColor);
 						g_SceneMan.RegisterTerrainChange(terrX, terrY, 1, 1, ColorKeys::g_MaskColor, false);
@@ -525,7 +525,7 @@ namespace RTE {
 			}
 
 			// Material
-			clear_to_color(tempBitmap, g_MaterialAir);
+			clear_to_color(tempBitmap, MaterialColorKeys::g_MaterialAir);
 			// Draw the actor and then the scene material layer to temp bitmap
 			moSprite->Draw(tempBitmap, bitmapScroll, DrawMode::g_DrawMaterial, true);
 			SceneLayer::Draw(tempBitmap, notUsed, bitmapScroll);
@@ -616,7 +616,7 @@ namespace RTE {
 
 	void SLTerrain::ClearAllMaterial() {
 		clear_to_color(m_MainBitmap, ColorKeys::g_MaskColor);
-		clear_to_color(m_FGColorLayer->GetBitmap(), g_MaterialAir);
+		clear_to_color(m_FGColorLayer->GetBitmap(), MaterialColorKeys::g_MaterialAir);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -631,11 +631,11 @@ namespace RTE {
 		for (int y = 0; y < height; ++y) {
 			for (int x = 0; x < width; ++x) {
 				int matPixel = _getpixel(m_MainBitmap, x, y);
-				if (matPixel == g_MaterialCavity) {
-					_putpixel(m_MainBitmap, x, y, g_MaterialAir);
-					matPixel = g_MaterialAir;
+				if (matPixel == MaterialColorKeys::g_MaterialCavity) {
+					_putpixel(m_MainBitmap, x, y, MaterialColorKeys::g_MaterialAir);
+					matPixel = MaterialColorKeys::g_MaterialAir;
 				}
-				if (matPixel == g_MaterialAir) { _putpixel(m_FGColorLayer->GetBitmap(), x, y, ColorKeys::g_MaskColor); }
+				if (matPixel == MaterialColorKeys::g_MaterialAir) { _putpixel(m_FGColorLayer->GetBitmap(), x, y, ColorKeys::g_MaskColor); }
 			}
 		}
 
@@ -667,11 +667,11 @@ namespace RTE {
 				}
 				if (wrapX >= 0 && wrapX < width && wrapY >= 0 && wrapY < height) {
 					int matPixel = _getpixel(m_MainBitmap, wrapX, wrapY);
-					if (matPixel == g_MaterialCavity) {
-						_putpixel(m_MainBitmap, wrapX, wrapY, g_MaterialAir);
-						matPixel = g_MaterialAir;
+					if (matPixel == MaterialColorKeys::g_MaterialCavity) {
+						_putpixel(m_MainBitmap, wrapX, wrapY, MaterialColorKeys::g_MaterialAir);
+						matPixel = MaterialColorKeys::g_MaterialAir;
 					}
-					if (matPixel == g_MaterialAir) { _putpixel(m_FGColorLayer->GetBitmap(), wrapX, wrapY, ColorKeys::g_MaskColor); }
+					if (matPixel == MaterialColorKeys::g_MaterialAir) { _putpixel(m_FGColorLayer->GetBitmap(), wrapX, wrapY, ColorKeys::g_MaskColor); }
 				}
 			}
 		}

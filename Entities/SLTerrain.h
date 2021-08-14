@@ -3,7 +3,6 @@
 
 #include "SceneLayer.h"
 #include "Matrix.h"
-#include "Box.h"
 
 namespace RTE {
 

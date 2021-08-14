@@ -15,8 +15,6 @@
 // Inclusions of header files
 
 #include "Entity.h"
-#include "SceneMan.h"
-#include "ActivityMan.h"
 #include "Box.h"
 #include "BunkerAssembly.h"
 

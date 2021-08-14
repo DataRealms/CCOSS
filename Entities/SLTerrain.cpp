@@ -2,12 +2,12 @@
 #include "TerrainFrosting.h"
 #include "TerrainDebris.h"
 #include "TerrainObject.h"
-#include "PresetMan.h"
-#include "DataModule.h"
 #include "SceneObject.h"
-#include "MOPixel.h"
 #include "MOSprite.h"
+#include "MOPixel.h"
 #include "Atom.h"
+#include "DataModule.h"
+#include "PresetMan.h"
 
 namespace RTE {
 

@@ -1,6 +1,5 @@
 #include "TerrainDebris.h"
 #include "SLTerrain.h"
-#include "SceneMan.h"
 
 namespace RTE {
 
@@ -165,7 +164,7 @@ namespace RTE {
 				pieceBox.SetCenter(Vector(static_cast<float>(x), static_cast<float>(y)));
 
 				// Make sure we're not trying to place something into a cave or other air pocket
-				if (!g_SceneMan.GetTerrain()->IsAirPixel(x, y) && (!m_OnlyBuried || g_SceneMan.GetTerrain()->IsBoxBuried(pieceBox))) {
+				if (!terrain->IsAirPixel(x, y) && (!m_OnlyBuried || terrain->IsBoxBuried(pieceBox))) {
 					// Do delayed drawing so that we don't end up placing things on top of each other
 					piecesToPlace.emplace_back(currentBitmap, pieceBox.GetCorner());
 					break;

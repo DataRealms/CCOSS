@@ -12,8 +12,7 @@
 // Inclusions of header files
 
 #include "TerrainObject.h"
-#include "PresetMan.h"
-#include "ContentFile.h"
+#include "SceneMan.h"
 
 namespace RTE {
 

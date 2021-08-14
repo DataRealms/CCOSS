@@ -189,7 +189,7 @@ namespace RTE {
 			}
 		}
 		if (IsAutoScrolling() && m_AutoScrollStepTimer.GetElapsedSimTimeMS() > m_AutoScrollStepInterval) {
-			m_AutoScrollOffset.SetXY(m_AutoScrollOffset.GetX() + m_AutoScrollStep.GetX(), m_AutoScrollOffset.GetY() + m_AutoScrollStep.GetY());
+			m_AutoScrollOffset += m_AutoScrollStep;
 			WrapPosition(m_AutoScrollOffset);
 			m_AutoScrollStepTimer.Reset();
 		}
@@ -204,6 +204,6 @@ namespace RTE {
 			WrapPosition(ratioAdjustedAutoScrolledOffset);
 		}
 		m_MainBitmap = m_Bitmaps.at(m_Frame);
-		SceneLayer::Draw(targetBitmap, targetBox, !ratioAdjustedAutoScrolledOffset.IsZero() ? ratioAdjustedAutoScrolledOffset : scrollOverride);
+		SceneLayer::Draw(targetBitmap, targetBox, IsAutoScrolling() ? ratioAdjustedAutoScrolledOffset : scrollOverride);
 	}
 }

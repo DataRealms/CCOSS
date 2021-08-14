@@ -1120,17 +1120,6 @@ int Scene::ClearData()
         return -1;
     }
 
-    // Clear Background layers' data
-    for (list<SLBackground *>::iterator slItr = m_BackLayerList.begin(); slItr != m_BackLayerList.end(); ++slItr)
-    {
-        RTEAssert((*slItr), "Background layer not instantiated before trying to clear its data!");
-        if ((*slItr)->ClearData() < 0)
-        {
-            g_ConsoleMan.PrintString("ERROR: Clearing background layer " + (*slItr)->GetPresetName() + "\'s data failed!");
-            return -1;
-        }
-    }
-
     // Clear unseen layers' data
     for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
     {

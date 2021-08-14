@@ -20,10 +20,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `ForceDedicatedFullScreenGfxDriver` to force the game to run in previously removed dedicated fullscreen mode, allowing using lower resolutions (and 1366x768) while still maintaining fullscreen.
 
-- New INI and Lua (R/W) property for Attachables:  
-	`ParentBreakWound = AEmitter...`. Use this to define a `BreakWound` that will be applied to the `Attachable`'s parent when the `Attachable` is removed.  
-	`BreakWound` is also now R/W accessible to Lua.
-
 - Added Lua (R/W) properties for all hardcoded `Attachables`. You can now set them on the fly to be created objects of the relevant type. Note that trying to set things inappropriately (e.g. setting an `HDFirearm` as something's `Leg`) will probably crash the game; that's your problem to deal with.  
 	You can read and write the following properties:  
 	**`AHuman`** - `Head`, `Jetpack`, `FGArm`, `BGArm`, `FGLeg`, `BGLeg`, `FGFoot`, `BGFoot`  
@@ -41,14 +37,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Added `MOSRotating` `GibBlastStrength` INI and Lua (R/W) property. This lets you define how much force created `Gibs` and any `Attachables` will get launched when the `MOSRotating` gibs.
 
 - New INI and Lua (R/W) properties for `Attachables`:  
-	`ParentBreakWound = AEmitter...` allows you to optionally define different `BreakWounds` for the `Attachable` and its parent. By default it matches `BreakWound` for ease of use.  	
-	`InheritsHFlipped = -1/0/1` allows you to define whether the `Attachable` will inherit its parent's HFlipped value or not.  
+	`ParentBreakWound = AEmitter...` - allows you to optionally define different `BreakWounds` for the `Attachable` and its parent. By default it matches `BreakWound` for ease of use. `BreakWound` is also now R/W accessible to Lua.  
+	`InheritsHFlipped = -1/0/1` - allows you to define whether the `Attachable` will inherit its parent's HFlipped value or not.  
 	-1 means reversed inheritance (i.e. if the parent's HFlipped value is true, this `Attachable`'s HFlipped value will be false), 0 means no inheritance, 1 means normal inheritance. Defaults to 1 to preserve normal behavior.  
-	`InheritedRotAngleRadOffset = angle` and `InheritedRotAngleDegOffset = angle` allow you specify an offset to keep an `Attachable`'s rotation at when `InheritsRotAngle` is set to true.  
-	In Lua there's only `InheritedRotAngleOffset` which takes/returns radians, to avoid confusion. For example, `InheritedRotAngleDegOffset = 90` would make the `Attachable` always face perpendicular to its parent.  
-	Does nothing if the `Attachable`'s `InheritsRotAngle` is set to false or the `Attachable` has no parent.  
-	`GibWithParentChance = 0 - 1` allows you to specify whether this `Attachable` should be gibbed when its parent does and what the chance of that happening is. 0 means never, 1 means always.  
-	`ParentGibBlastStrengthMultiplier = number` allows you to specify a multiplier for how strongly this `Attachable` will apply its parent's gib blast strength to itself when the parent gibs. Usually this would be a positive number, but it doesn't have to be.
+	`InheritedRotAngleRadOffset = angle` - and `InheritedRotAngleDegOffset = angle` allow you specify an offset to keep an `Attachable`'s rotation at when `InheritsRotAngle` is set to true. For example, `InheritedRotAngleDegOffset = 90` would make the `Attachable` always face perpendicular to its parent. In Lua there's only `InheritedRotAngleOffset`, which takes/returns radians to avoid confusion. Note that this property does nothing if the `Attachable`'s `InheritsRotAngle` is set to false or the `Attachable` has no parent.  
+	`GibWithParentChance = 0 - 1` - allows you to specify whether this `Attachable` should be gibbed when its parent does and what the chance of that happening is. 0 means never, 1 means always.  
+	`ParentGibBlastStrengthMultiplier = number` - allows you to specify a multiplier for how strongly this `Attachable` will apply its parent's gib blast strength to itself when the parent gibs. Usually this would be a positive number, but it doesn't have to be.
 
 - New INI and Lua (R/W) `Arm` property `GripStrength`. This effectively replaces the `JointStrength` of the held `HeldDevice`, allowing `Arms` to control how tightly equipment is held.
 
@@ -121,13 +115,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Exposed `Arm` property `MaxLength` to Lua (R).
 
 - Exposed broad range of sounds to Lua (R/W) through their relevant SoundContainers. For each class, these include:  
-	**Actor**: `BodyHitSound`, `PainSound`, `DeathSound`, `DeviceSwitchSound`, `AlarmSound`  
-	**AHuman & ACrab**: `StrideSound`  
-	**HDFirearm**: `FireSound`, `FireEchoSound`, `EmptySound`, `ReloadStartSound`, `ReloadEndSound`, `ActiveSound`, `DeactivationSound`, `PreFireSound`  
-	**AEmitter**: `EmissionSound`, `BurstSound`, `EndSound`  
-	**ACraft**: `HatchOpenSound`, `HatchCloseSound`, `CrashSound`  
-	**MOSRotating**: `GibSound`  
-	**ADoor**: `DoorMoveStartSound`, `DoorMoveSound`, `DoorDirectionChangeSound`, `DoorMoveEndSound`
+	**`Actor`** - `BodyHitSound`, `PainSound`, `DeathSound`, `DeviceSwitchSound`, `AlarmSound`  
+	**`AHuman & ACrab`** - `StrideSound`  
+	**`HDFirearm`** - `FireSound`, `FireEchoSound`, `EmptySound`, `ReloadStartSound`, `ReloadEndSound`, `ActiveSound`, `DeactivationSound`, `PreFireSound`  
+	**`AEmitter`** - `EmissionSound`, `BurstSound`, `EndSound`  
+	**`ACraft`** - `HatchOpenSound`, `HatchCloseSound`, `CrashSound`  
+	**`MOSRotating`** - `GibSound`  
+	**`ADoor`** - `DoorMoveStartSound`, `DoorMoveSound`, `DoorDirectionChangeSound`, `DoorMoveEndSound`
   
 - Added Lua function `RoundFloatToPrecision`. Utility function to round and format floating point numbers for display in strings.  
 `RoundFloatToPrecision(floatValue, digitsPastDecimal, roundingMode) -- Rounding mode 0 for system default, 1 for floored remainder, 2 for ceiled remainder.`
@@ -142,7 +136,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `Settings.ini` debug properties to allow modders to turn on some potentially useful information visualizations.  
 	`DrawAtomGroupVisualizations` - any `MOSRotating` will draw its `AtomGroup` to the standard view.  
-	`DrawHandAndFootGroupVisualizations` - any `Actor` subclasses with  will draw its `AtomGroup` to the standard view.  
+	`DrawHandAndFootGroupVisualizations` - any `Actor` subclasses with  will draw its hand and foot `AtomGroup`s to the standard view.  
 	`DrawLimbPathVisualizations` - any  `AHumans` or `ACrabs` will draw some of their `LimbPaths` to the standard view.  
 	`DrawRayCastVisualizations` - any rays cast by `SceneMan` will be drawn to the standard view.  
 	`DrawPixelCheckVisualizations ` - any pixel checks made by `SceneMan:GetTerrMatter` or `SceneMan:GetMOIDPixel` will be drawn to the standard view.
@@ -162,7 +156,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `Turret`s can now support an unlimited number of mounted `HeldDevice`s. Properties have been added to Lua and INI to support this:  
 	`AddMountedDevice = ...` (INI) and `turret:AddMountedDevice` (Lua) - this adds the specified `HeldDevice` or `HDFirearm` as a mounted device on the `Turret`.  
 	`turret:GetMountedDevices` (Lua) - this gives you access to all the mounted `HeldDevice`s on the `Turret`. You can loop through them with a for loop, and remove or modify them as needed.  
-	Note that `MountedDevice = ...` (INI) and `turret.MountedDevice` (Lua R/W) now deal with the first mounted `HeldDevice`, which is treated as the primary one for things like sharp-aiming.
+	Note that `MountedDevice = ...` (INI) and `turret.MountedDevice` (Lua R/W) deals with the first mounted `HeldDevice`, which is treated as the primary one for things like sharp-aiming.
 	
 - Added `Turret` Lua (R/W) and INI property `MountedDeviceRotationOffset` that lets you specify a standard rotation offset for all mounted `HeldDevices` on a turret.
 
@@ -179,7 +173,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `ThrownDevice` INI property `StrikerLever`, which is the same as `Shell` for `Round` in `HDFirearm`, but for grenades. Represents the lever/pin coming off when activated.
 
-- New `Arm` INI and Lua (R/W) property `ThrowStrength` which now calculates how far `ThrownDevice`s are thrown, which also takes to account the weight of the device. `ThrownDevice`s can still be defined `MaxThrowVel` and `MinThrowVel` to override this.
+- New `Arm` INI and Lua (R/W) property `ThrowStrength` which now calculates how far `ThrownDevice`s are thrown, which also takes to account the weight of the device. `ThrownDevice`s can still define `MaxThrowVel` and `MinThrowVel` to override this.
 
 - New `Settings.ini` property `DisableLuaJIT = 0/1` to disable LuaJIT (MoonJIT) to (potentially) improve performance on machines that seem to struggle with it.
 
@@ -193,7 +187,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `MovableMan` function `KillAllActors` (commonly found in activities) has been appropriately renamed `KillAllEnemyActors`.
 
-- Wound limit gibbing logic has changed for `MOSRotating` (and all its subclasses), where objects will now gib when they reach their `GibWoundLimit` rather than when they surpass it. This allows for one-wound gibbing, which was previously infeasible.
+- Wound limit gibbing logic has changed for `MOSRotating` (and all its subclasses), where objects will now gib when they reach their `GibWoundLimit` rather than when they surpass it. This allows for one-wound gibbing, which was previously infeasible. For objects with low `GibWoundLimit`s, you may want to adjust limits to account for this change.
 
 - `TDExplosive`s will no longer default to a looping animation when activated. Instead, they change to the second frame (i.e 001), similarly to `HDFirearm`. Set `SpriteAnimMode` to `4` if you wish to enable the looping active animation.
 
@@ -205,7 +199,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Craft will now automatically scuttle when opening doors at a 90° angle rather than 45°.
 
-- `AHuman` can now aim while walking, however not while reloading.
+- `AHuman` can now aim slightly while walking, however not while reloading.
 
 - Recoil when firing weapons now affects sharp aim.
 
@@ -236,9 +230,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Reworked wound management:  
 	Wound management is now always done with `MOSRotating` functions, instead of requiring different ones for `Actors`. This means TotalWoundCount and RemoveAnyRandomWounds no longer exist.  
 	You can get all wounds with `GetWounds`, get the wound count with `GetWoundCount` (or using the pre-existing WoundCount property), get the gib wound limit with `GetGibWoundLimit` (or using the pre-existing GibWoundLimit property), and remove wounds with `RemoveWounds`.  
-	All of these functions have two variants, one lets you just specify any normal arguments (e.g. number of wounds to remove), the other lets you also specify whether you want to include `Attachables` with a positive `DamageMultiplier` (i.e. `Attachables` that damage their parent), `Attachables` with a negative `DamageMultiplier` (i.e. `Attachables` that heal their parent) or `Attachables` with no `DamageMultiplier` (i.e. `Attachables` that don't affect their parent).  
+	All of these functions have two variants, one lets you just specify any normal arguments (e.g. number of wounds to remove), the other lets you also specify whether you want to include any of the following, in order: `Attachables` with a positive `DamageMultiplier` (i.e. `Attachables` that damage their parent), `Attachables` with a negative `DamageMultiplier` (i.e. `Attachables` that heal their parent) or `Attachables` with no `DamageMultiplier` (i.e. `Attachables` that don't affect their parent).  
 	Without any arguments, `GetWoundCount` and `RemoveWounds` will only include `Attachables` with a positive `DamageMultiplier` in their counting calculations, and `GetGibWoundLimit` will not include any `Attachables` in its counting calculations. The property variants (e.g. `mosr.WoundCount`) behave the same way as the no-argument versions.  
-	Note that this process is recursive, so if an `Attachable` that satisfies the conditions has `Attachables` that also satisfy the conditions, their wounds will be included in the results.
+	Note that this process is recursive, so if an `Attachable` that satisfies the conditions has `Attachable`s that also satisfy the conditions, their wounds will be included in the results.
 
 - Renamed `Turret` INI property `MountedMO` to `MountedDevice` to better match the new reality that `Turrets` can only mount `HeldDevices` and their child classes.
 
@@ -254,13 +248,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Changed and cleaned up how gibbing works and how it affects `Attachables`. In particular, limbs will better inherit velocity during gibbing and things are more customizable. See `Attachable` properties for more details.  
 	As an added bonus,  `Attachables` on `ACDropShips` and `ACRockets` can now be shot down when the craft gibs; fight back against the baleful dropship engines!
 	
-- Improved native recoil handling! Guns transfer recoil to arms/turrets, which transfer it to AHumans/ACrabs, all of it properly accounts for joint strengths (or grip strengths) and offsets at every step. ([Issue #7](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/7) and [Issue #8](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/8)).
+- Improved native recoil handling! Guns transfer recoil to arms/turrets, which transfer it to AHumans/ACrabs, all of it properly accounts for joint strengths (or grip strengths) and offsets at every step. Future work will be done on this to improve it. ([Issue #7](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/7) and [Issue #8](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/8)).
 
 - `Attachables` now use their `GibImpulseLimit` as well as their `JointStrength` when determining whether they should be detached by strong forces. To maintain backwards compatibility, if the `GibImpulseLimit` is less than the `JointStrength`, the `JointStrength` will be used instead for this purpose.
 
 - The `FacingAngle` function has been moved from `Actor` to `MOSprite` so it can be used more widely.
 
-- Lifetime and ToDelete now work on wounds, giving modders more control over them.
+- `Lifetime` and `ToDelete` now work on wounds, giving modders more control over them.
 
 - Some functionality has been moved from `AudioMan` to `SoundContainer` for consistency. As such, the following `AudioMan` Lua bindings have been replaced:  
 	`AudioMan:FadeOutSound(fadeOutTime);` has been replaced with `soundContainer:FadeOut(fadeOutTime);`  
@@ -268,10 +262,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - Pressing escape when a buy menu is open now closes it instead of pausing the game.
 
-- `GetParent` will now return an `MOSRotating` instead of a `MovableObject` so it doesn't need to be casted. Additionally, it will always return null for objects with no parents, instead of returning the self object for things that weren't `Attachables`.  
+- `GetParent` will now return an `MOSRotating` instead of a `MovableObject` so it doesn't need to be casted with `ToMOSRotating`. Additionally, it will always return null for objects with no parents, instead of returning the self object for things that weren't `Attachables`.  
 	This makes things more consistent and reasonable throughout and will rarely, if ever, cause Lua problems.
 
-- Previews generated by the `SceneEditor` are now the same as `ScenePreviewDumps`, also both are now saved as PNGs.
+- Previews generated by the `SceneEditor` are now the same as `ScenePreviewDumps`. Also, both are now saved as PNGs.
 
 - `Attachable` terrain collisions will now propagate to any child `Attachables` on them. This means that `Attachables` will not collide with terrain, even if set to, if they're attached to a parent that doesn't collide with terrain.  
 	This means that the `attachable.CollidesWithTerrainWhileAttached` value may not represent the true state of things, you should instead use `attachable.CanCollideWithTerrain` to determine whether a given `Attachable` can collide with terrain.
@@ -294,7 +288,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `Attachable` Lua method `IsDrawnAfterParent` has been changed to the property `DrawnAfterParent`, and is now R/W.
 
-- All `mosRotating:RemoveAttachable`, `mosRotating:RemoveEmitter` and `attachable:RemoveFromParent` functions will return the removed `Attachable` if it hasn't been added to `MovableMan`, or nil if it has. If the `Attachable` is returned, it will belong to Lua like it would if it were newly Created. You could then, for example, add it to MovableMan or to an inventory.
+- All `mosRotating:RemoveAttachable`, `mosRotating:RemoveEmitter` and `attachable:RemoveFromParent` functions will return the removed `Attachable` if it hasn't been added to `MovableMan`, or nil if it has. If the `Attachable` is returned, it will belong to Lua like it would if it were newly Created. You could then, for example, add it to MovableMan, an inventory, or attach it to something else.
 
 - `Settings.ini` property `MenuTransitionDuration` renamed to `MenuTransitionDurationMultiplier`.
 
@@ -305,7 +299,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`Missions.rte` scenes are now green.  
 	`Scenes.rte` or any other mod/user scenes are now cyan.
 
-- Main menu and sub-menus were given a facelift.
+- Main menu and sub-menus were given a major facelift.
 
 - Settings menu was reworked to make it less useless.
 
@@ -324,7 +318,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Craft sucking up objects now works properly again.
 
-- Getting the `Mass` of a `MOSRotating` has now been made more efficient. Additionally, `Attachables` of `Attachables` will now be included in Mass, so some things have gotten a lot heavier (e.g. Dummy Dreadnought).
+- Getting the `Mass` of a `MOSRotating` has now been made more efficient. Additionally, `Attachables` of `Attachables` will now be properly included in Mass, so some things have gotten a lot heavier (e.g. Dummy Dreadnought).
 
 - The moment of inertia of `AtomGroups` now updates when the mass or Atoms change, meaning losing `Attachables` or changing mass will properly affect how rotational forces apply to MOSRotatings.
 
@@ -344,23 +338,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Renamed `Attachable` INI property `CollidesWithTerrainWhenAttached` to more correct, consistent `CollidesWithTerrainWhileAttached`.
 
-- You can now modify `Foot`, `Magazine` and `Flash` (both `HDFirearm` and `AEmitter`) `CopyOfs` in your `Leg`/`HDFirearm``AEmitter` definition without setting a new `PresetName`.
+- You can now modify all hardcoded `Attachable` `CopyOf` INI definitions without setting a new `PresetName`. This means you could, for example, `CopyOf` a predefined `Leg` and change it, without having to set a new `PresetName`. This is optional, and comes with the obvious limitation of not being able to find that modified copy in-game with Lua.
 
 - `OnCollideWithMO` now works for `MOPixels` and `MOSParticles` so you can use it to check if your bullets collide with things.
 
-- `OnCollideWithMO` and `OnCollideWithTerrain` (and other special functions) will run more reliably right after the object is spawned. E.g. `OnCollideWithTerrain` should now work even if your gun is jammed into terrain when you shoot.
+- `OnCollideWithMO` and `OnCollideWithTerrain` (and other special functions) will run more reliably right after the object is spawned. E.g. `OnCollideWithTerrain` on a bullet should now work even if your gun is jammed into terrain when you shoot.
 
-- You can now sharpaim through friendlies when playing as any team, instead of just as red team.
+- You can now sharp-aim through friendlies when playing as any team, instead of just as red team.
 
-- The reload hotkey now works even if there's an object to pick up.
+- The reload hotkey now works even if you're on top of a pickupable object.
 
 - Improved LZ behaviour on wrapping maps, so your buy cursor will no longer annoyingly wrap around the LZ area.
 
-- Fixed a bug with metagame saves that caused Player numbers to be off by 1.
+- Fixed a bug with metagame saves that caused `Player` and `Team` numbers to be off by 1.
 
 - Vote counts to end a multiplayer activity now display as intended. 
 
-- Fixed bug where choosing `-Random-` as a player's tech and pressing start game had a 1 in (number of techs + 1) chance to crash the game.
+- Fixed a bug where choosing `-Random-` as a player's tech and pressing start game had a 1 in (number of techs + 1) chance to crash the game.
 
 - Console error spam will no longer cripple performance over time.
 
@@ -368,7 +362,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Removed obsolete graphics drivers and their `Settings.ini` properties `ForceOverlayedWindowGfxDriver` and `ForceNonOverlayedWindowGfxDriver`.
 
-- Removed `Attachable` Lua write capability for `AtomSubGroupID` as changing this can cause all kinds of problems, and `RotTarget` as this didn't actually work.
+- Removed `Attachable` Lua write capability for `AtomSubGroupID` as changing this can cause all kinds of problems.
 
 - Removed `MaxLength` property from `Leg`, since it was a mostly unused leftover caused by Leg being originally copied from Arm, and was actually a fake setting that just set other properties. To replace it, set the following:  
 	```
@@ -386,11 +380,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Removed `MOSRotating:ApplyForces` and `MOSRotating:ApplyImpulses` Lua functions. These are both internal functions that should never have been exposed to Lua.
 
-- Removed hardcoded INI constraint that forced `Mass` of `MovableObjects` to not be 0. Previously, anytime a `Mass` of 0 was read in from INI, it was changed to 0.0001.
+- Removed hardcoded INI constraint that forced `Mass` of `MovableObjects` to not be 0. Previously, anytime a `Mass` of 0 was read in from INI, it was changed to 0.0001, now 0 `Mass` is allowed and supported.
 
-- Removed the ability to set `HDFirearms'` `Magazine` or `Flash`, or `AEmitters'` `Flash` to None in INI. This was a necessary result of some core changes, and may be undone in future if it's possible. If you want no `Magazine` or `Flash` just don't set one, or use a Null one like is done for limbs and other hardcoded `Attachables`.
-
-- Removed the quit-confirmation dialog from the scenarios screen. Now pressing escape will lead back to the main menu.
+- Removed the quit confirmation dialog from the scenarios screen. Now pressing escape will return you to the main menu.
 
 - Removed `Settings.ini` properties `HSplitScreen` and `VSplitScreen`. Superseded by `TwoPlayerSplitscreenVertSplit`.
 

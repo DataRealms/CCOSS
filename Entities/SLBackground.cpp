@@ -89,7 +89,7 @@ namespace RTE {
 	void SLBackground::InitScaleFactors() {
 		m_LayerScaleFactors.at(LayerAutoScaleMode::AutoScaleOff) = m_ScaleFactor;
 
-		float fitScreenScaleFactor = std::clamp(static_cast<float>(g_FrameMan.GetBackBuffer8()->h) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
+		float fitScreenScaleFactor = std::clamp(static_cast<float>(g_FrameMan.GetPlayerScreenHeight()) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
 		m_LayerScaleFactors.at(LayerAutoScaleMode::FitScreen).SetXY(fitScreenScaleFactor, fitScreenScaleFactor);
 
 		if (!m_IgnoreAutoScale) {

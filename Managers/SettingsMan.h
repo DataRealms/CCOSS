@@ -420,6 +420,8 @@ namespace RTE {
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 
+		std::string m_SettingsPath; //!< String containing the Path to the Settings.ini file.
+
 		/// <summary>
 		/// Clears all the member variables of this SettingsMan, effectively resetting the members of this abstraction level only.
 		/// </summary>

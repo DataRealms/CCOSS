@@ -9,6 +9,10 @@
 #include "NetworkClient.h"
 #include "NetworkServer.h"
 
+#ifdef __unix__
+#include "System/Config.h"
+#endif
+
 namespace RTE {
 
 	const std::string SettingsMan::c_ClassName = "SettingsMan";
@@ -16,6 +20,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsMan::Clear() {
+#if !LINUX_PORTABLE
+		m_SettingsPath = "Settings.ini";
+#else
+		m_SettingsPath = "Base.rte/Settings.ini";
+#endif
+
 		m_SettingsNeedOverwrite = false;
 
 		m_FlashOnBrainDamage = true;
@@ -57,7 +67,7 @@ namespace RTE {
 
 	int SettingsMan::Initialize(Reader &reader) {
 		if (!reader.ReaderOK()) {
-			Writer settingsWriter("Base.rte/Settings.ini");
+			Writer settingsWriter(m_SettingsPath);
 			RTEAssert(settingsWriter.WriterOK(), "After failing to open the Base.rte/Settings.ini, could not then even create a new one to save settings to!\nAre you trying to run the game from a read-only disk?\nYou need to install the game to a writable area before running it!");
 
 			// Settings file doesn't need to be populated with anything right now besides this manager's ClassName for serialization. It will be overwritten with the full list of settings with default values from all the managers before modules start loading.
@@ -66,7 +76,7 @@ namespace RTE {
 
 			m_SettingsNeedOverwrite = true;
 
-			Reader settingsReader("Base.rte/Settings.ini");
+			Reader settingsReader(m_SettingsPath);
 			return Serializable::Create(settingsReader);
 		}
 		return Serializable::Create(reader);
@@ -75,7 +85,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsMan::UpdateSettingsFile() const {
-		Writer settingsWriter("Base.rte/Settings.ini");
+		Writer settingsWriter(m_SettingsPath);
 		g_SettingsMan.Save(settingsWriter);
 	}
 

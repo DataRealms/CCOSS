@@ -57,6 +57,9 @@ jobs:
         uses: BSFishy/meson-build@v1.0.2
         with:
           # The action to run
+          setup-options: --buildtype=debug -Ddebug_type=full
+          meson-version: 0.55.3
+          ninja-version: 1.10.0
           action: build
 
 

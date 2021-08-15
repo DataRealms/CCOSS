@@ -125,6 +125,8 @@ external_objects = []
 external_libs = []
 subdir('external')
 
+install_rpath = get_option('fmod_dir') + ':$ORIGIN'
+
 #### Target Definitions ####
 cccpelf = executable(
   elfname, ['Main.cpp', sources], include_directories:[source_inc_dirs, external_inc_dirs], cpp_pch:pch, # Sources options
@@ -133,7 +135,7 @@ cccpelf = executable(
   name_suffix:suffix,   # Executable name options
   build_by_default:true, # Meson options
   gui_app:true,
-  install: true
+  install: true, install_rpath: install_rpath
 )
 
 #### Installing #####

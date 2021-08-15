@@ -4,6 +4,8 @@
 #ifdef __unix__
 #include <unistd.h>
 #include <sys/stat.h>
+#include <pwd.h>
+#include "Config.h"
 #endif
 
 namespace RTE {
@@ -20,9 +22,23 @@ namespace RTE {
 	const std::string System::s_ZippedModulePackageExtension = ".rte.zip";
 	const std::unordered_set<std::string> System::s_SupportedExtensions = { ".ini", ".txt", ".lua", ".cfg", ".bmp", ".png", ".jpg", ".jpeg", ".wav", ".ogg", ".mp3", ".flac" };
 
+#ifdef __unix__
+	const std::filesystem::path System::s_BaseDataDirectory{BASEDATAPATH};
+	std::filesystem::path System::s_TempDirectory{};
+#endif
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void System::Initialize() {
+
+#if defined(__unix__) && !LINUX_PORTABLE
+		char dirTemplate[]{"/tmp/CCCP.XXXXXX"};
+		s_TempDirectory = std::filesystem::path(mkdtemp(dirTemplate));
+		SetupBaseGameFolders(s_TempDirectory);
+		SetupUserFolders(s_TempDirectory);
+		std::filesystem::current_path(s_TempDirectory);
+#endif
+
 		s_WorkingDirectory = std::filesystem::current_path().generic_string();
 		if (s_WorkingDirectory.back() != '/') { s_WorkingDirectory.append("/"); }
 
@@ -34,7 +50,88 @@ namespace RTE {
 #endif
 	}
 
+	void System::Destroy() {
+#if defined(__unix__) && !LINUX_PORTABLE
+		std::filesystem::remove_all(s_TempDirectory);
+#endif
+	}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#if defined(__unix__) && !LINUX_PORTABLE
+	std::filesystem::path System::GetXdgDataHome() {
+		char *envXdgDataHome = std::getenv("XDG_DATA_HOME");
+
+		if (envXdgDataHome) {
+			return std::filesystem::path(envXdgDataHome) / std::filesystem::path("Cortex Command");
+		} else {
+			char *envUserHome = std::getenv("HOME");
+			if (!envUserHome) {
+				struct passwd *pw = getpwuid(getuid());
+				envUserHome = pw->pw_dir;
+			}
+			return envUserHome / std::filesystem::path(".local/share/Cortex Command/");
+		}
+	}
+
+	void System::SetupBaseGameFolders(const std::filesystem::path &tempDirectory) {
+		auto baseDirIt{std::filesystem::directory_iterator(s_BaseDataDirectory)};
+
+		std::array<::string, 2> skipRtes {"Scenes.rte", "Metagames.rte"};
+
+		for (auto &dir_entry: baseDirIt) {
+			if (dir_entry.is_directory()) {
+				auto rteName = std::filesystem::relative(dir_entry.path(), dir_entry.path().parent_path());
+				if (rteName.generic_string().find(".rte") != std::string::npos && std::find(skipRtes.begin(), skipRtes.end(), rteName) == skipRtes.end()) {
+					std::filesystem::create_directory_symlink(dir_entry, tempDirectory / rteName);
+				}
+			}
+		}
+
+		std::filesystem::create_symlink(s_BaseDataDirectory / "Credits.txt", tempDirectory / "Credits.txt");
+	}
+
+	void System::SetupUserFolders(const std::filesystem::path &tempDirectory) {
+		auto userDirectory{GetXdgDataHome()};
+
+		if (!std::filesystem::exists(userDirectory)) {
+			MakeDirectory(userDirectory);
+		}
+
+		if (!std::filesystem::exists(userDirectory / "Scenes.rte")) {
+			MakeDirectory(userDirectory / "Scenes.rte");
+			std::filesystem::copy_file(s_BaseDataDirectory / "Scenes.rte/Index.ini", tempDirectory / "Scenes.rte/Index.ini");
+		}
+		if (!std::filesystem::exists(userDirectory / "Metagames.rte")) {
+			MakeDirectory(userDirectory / "Metagames.rte");
+			std::filesystem::copy_file(s_BaseDataDirectory / "Metagames.rte/Index.ini", userDirectory / "Metagames.rte/Index.ini");
+		}
+		if (!std::filesystem::exists(userDirectory / s_ScreenshotDirectory)) {
+			MakeDirectory(userDirectory / s_ScreenshotDirectory);
+		}
+
+		auto modsDirIt{std::filesystem::directory_iterator(userDirectory)};
+
+		for (auto &dir_entry: modsDirIt) {
+			if (dir_entry.is_directory()) {
+				auto rteName = std::filesystem::relative(dir_entry.path(), dir_entry.path().parent_path());
+				if (rteName.generic_string().find(".rte") != std::string::npos) {
+					std::filesystem::create_directory_symlink(dir_entry, tempDirectory / rteName);
+				}
+			}
+		}
+
+		std::filesystem::create_directory_symlink(userDirectory / s_ScreenshotDirectory, tempDirectory / s_ScreenshotDirectory);
+
+		std::filesystem::create_symlink(userDirectory / "Settings.ini", tempDirectory / "Settings.ini");
+
+		std::filesystem::create_symlink(userDirectory / "LogLoadingWarnings.txt", tempDirectory / "LogLoadingWarning.txt");
+		std::filesystem::create_symlink(userDirectory / "LogLoading.txt", tempDirectory / "LogLoading.txt");
+		std::filesystem::create_symlink(userDirectory / "LogConsole.txt", tempDirectory / "LogConsole.txt");
+		std::filesystem::create_symlink(userDirectory / "AbortScreen.bmp", tempDirectory / "AbortScreen.bmp");
+	}
+#endif
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool System::MakeDirectory(const std::string &pathToMake) {
 		bool createResult = std::filesystem::create_directory(pathToMake);

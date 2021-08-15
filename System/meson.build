@@ -23,3 +23,5 @@ sources += files(
 'Matrix.cpp',
 'Serializable.cpp',
 )
+
+configure_file(input:'Config.h.in', output:'Config.h', configuration: conf_data)

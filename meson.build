@@ -1,4 +1,5 @@
-project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++17', 'buildtype=release'], version:'0.1.0-Pre-3.1', meson_version:'>=0.49')
+
+project('CCOSS-community', ['cpp','c'], default_options:['cpp_std=c++17', 'buildtype=release'], version:'0.1.0-Pre-3.1', meson_version:'>=0.55')
 
 #### Build environment Setup ####
 
@@ -20,7 +21,7 @@ if host_machine.system() in ['linux','osx']
   endif
 endif
 
-elfname = 'CCCP'
+elfname = 'CortexCommand'
 compiler = meson.get_compiler('cpp')
 build_rpath = ''
 link_args=[]
@@ -33,7 +34,9 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   message('gcc detected')
 
   build_rpath = '$ORIGIN:$ORIGIN/../external/lib/linux/x86_64' # Set RUNPATH so that CCCP can find libfmod.so without needing to set LD_LIBRARY_PATH
-  suffix = 'x86_64'
+  if get_option('no_install')
+    suffix = 'x86_64'
+  endif
   link_args += ['-Wl,--enable-new-dtags'] # Set RUNPATH instead of RPATH
 
   # Set preprocessor flags and cpp arguments according to build options
@@ -89,6 +92,13 @@ else
   error('Using unknown compiler, please use gcc or msvc compatible compilers')
 endif
 
+#### Configuration ####
+conf_data = configuration_data()
+prefix = get_option('prefix')
+
+conf_data.set10('LINUX_PORTABLE', get_option('no_install'))
+conf_data.set_quoted('BASEDATAPATH', prefix/get_option('data_install_dir'), strip_directory:true)
+
 #### Sources Setup ####
 pch = 'System/StandardIncludes.h'
 sources = []
@@ -116,30 +126,19 @@ external_libs = []
 subdir('external')
 
 #### Target Definitions ####
-executable(
+cccpelf = executable(
   elfname, ['Main.cpp', sources], include_directories:[source_inc_dirs, external_inc_dirs], cpp_pch:pch, # Sources options
   link_with:external_libs, objects:[external_objects], dependencies:deps,                                # Link options
   cpp_args:[extra_args, preprocessor_flags], link_args:link_args, build_rpath:build_rpath,               # Compiler setup
   name_suffix:suffix,   # Executable name options
   build_by_default:true, # Meson options
   gui_app:true,
+  install: true
 )
 
-# disable appimage target unless option appimage_enabbled is set
-appimage_disable = get_option('enable_appimage') or disabler()
-
-if appimage_disable
-  #AppImage
-  wget = find_program('wget')
-
-  linuxdeploy_url = 'https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage'
-
-  linuxdeploy = custom_target('linuxdeploy', build_by_default:false, output:'linuxdeploy-x86_64.AppImage',
-		command:[find_program('env'), wget, '-O', '@OUTPUT@', linuxdeploy_url,
-		find_program('chmod'), '+x', '@OUTPUT@'])
-  outname = 'cccp-x86_64.AppImage'
-
-  custom_target('appimage', depends:[release, linuxdeploy], output:outname,
-		command:[find_program('env'), 'OUTPUT='+outname, linuxdeploy.full_path(),
-		'--appdir=@PRIVATE_DIR@', '-e', release, '-l', fmod_so[0], '-d', desktop_file, '-i', icon_file, '-oappimage'])
-endif
+#### Installing #####
+install_subdir(get_option('cccpdatadir'),
+               exclude_directories:['Metagames.rte', 'Scenes.rte'],
+               exclude_files:[''],
+               install_dir:get_option('data_install_dir'),
+               strip_directory:true)

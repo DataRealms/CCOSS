@@ -187,7 +187,7 @@ namespace RTE {
 		static bool s_Quit; //!< Whether the user requested program termination through GUI or the window close button.
 		static bool s_LogToCLI; //!< Bool to tell whether to print the loading log and anything specified with PrintToCLI to command-line or not.
 		static std::string s_WorkingDirectory; //!< String containing the absolute path to current working directory.
-#if defined(__unix__)
+#ifdef __unix__
 		static const std::filesystem::path s_BaseDataDirectory; //!< Path to the base game data.
 		static std::filesystem::path s_TempDirectory; //!< Temporary directory used as the working directory while running the game.
 #endif

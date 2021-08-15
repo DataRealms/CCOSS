@@ -30,7 +30,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void System::Initialize() {
-
 #if defined(__unix__) && !LINUX_PORTABLE
 		char dirTemplate[]{"/tmp/CCCP.XXXXXX"};
 		s_TempDirectory = std::filesystem::path(mkdtemp(dirTemplate));
@@ -57,7 +56,7 @@ namespace RTE {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#if defined(__unix__) && !LINUX_PORTABLE
+#ifdef __unix__
 	std::filesystem::path System::GetXdgDataHome() {
 		char *envXdgDataHome = std::getenv("XDG_DATA_HOME");
 

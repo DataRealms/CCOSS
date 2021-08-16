@@ -189,7 +189,8 @@ namespace RTE {
 			}
 		}
 		if (IsAutoScrolling() && m_AutoScrollStepTimer.GetElapsedSimTimeMS() > m_AutoScrollStepInterval) {
-			m_AutoScrollOffset += m_AutoScrollStep;
+			if (m_WrapX && m_AutoScrollX) { m_AutoScrollOffset.SetX(m_AutoScrollOffset.GetX() + m_AutoScrollStep.GetX()); }
+			if (m_WrapY && m_AutoScrollY) { m_AutoScrollOffset.SetY(m_AutoScrollOffset.GetY() + m_AutoScrollStep.GetY()); }
 			WrapPosition(m_AutoScrollOffset);
 			m_AutoScrollStepTimer.Reset();
 		}

@@ -2142,10 +2142,7 @@ void ACrab::Update()
 			m_pJetpack->EnableEmission(true);
 			// Quadruple this for the burst
 			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * 10.0F, 0.0F);
-		}
-        // Jetpack is burning
-        else if (m_Controller.IsState(BODY_JUMP) && m_JetTimeLeft > 0)
-        {
+		} else if (m_Controller.IsState(BODY_JUMP) && m_JetTimeLeft > 0 && m_Status != INACTIVE) {
             m_pJetpack->EnableEmission(true);
             // Jetpacks are noisy!
             m_pJetpack->AlarmOnEmit(m_Team);
@@ -2184,8 +2181,7 @@ void ACrab::Update()
     ////////////////////////////////////
     // Movement direction
 
-    if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP)
-    {
+	if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP && m_Status != INACTIVE) {
         if (m_MoveState != JUMP)
         {
             // Restart the stride if we're just starting to walk or crawl
@@ -2233,7 +2229,7 @@ void ACrab::Update()
     ////////////////////////////////////
     // Reload held MO, if applicable
 
-    if (m_Controller.IsState(WEAPON_RELOAD) && FirearmNeedsReload()) {
+	if (m_Controller.IsState(WEAPON_RELOAD) && FirearmNeedsReload() && m_Status != INACTIVE) {
         ReloadFirearms();
 
         if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
@@ -2342,7 +2338,7 @@ void ACrab::Update()
     ////////////////////////////////////
     // Fire/Activate held devices
 
-    if (m_pTurret && m_pTurret->IsAttached()) {
+    if (m_pTurret && m_pTurret->IsAttached() && m_Status != INACTIVE) {
         for (HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
             mountedDevice->SetSharpAim(m_SharpAimProgress);
             if (m_Controller.IsState(WEAPON_FIRE)) {

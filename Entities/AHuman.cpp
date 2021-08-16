@@ -3130,10 +3130,8 @@ void AHuman::Update()
 			m_pJetpack->EnableEmission(true);
 			// Quadruple this for the burst
 			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * 10.0F, 0.0F);
-		}
 		// Jetpack is ordered to be burning, or the pie menu is on and was burning before it went on
-		else if ((m_Controller.IsState(BODY_JUMP) || (m_MoveState == JUMP && m_Controller.IsState(PIE_MENU_ACTIVE))) && m_JetTimeLeft > 0)
-		{
+		} else if ((m_Controller.IsState(BODY_JUMP) || (m_MoveState == JUMP && m_Controller.IsState(PIE_MENU_ACTIVE))) && m_JetTimeLeft > 0 && m_Status != INACTIVE) {
 			m_pJetpack->EnableEmission(true);
 			// Jetpacks are noisy!
 			m_pJetpack->AlarmOnEmit(m_Team);
@@ -3353,20 +3351,8 @@ void AHuman::Update()
 
 // TODO: make the delay data driven by both the actor and the device!
     // 
-    if (m_Controller.IsState(AIM_SHARP) && (m_MoveState == STAND || m_MoveState == CROUCH || m_MoveState == NOMOVE || m_MoveState == WALK) && m_Vel.GetMagnitude() < 5.0F) {
-/*
-        float halfDelay = m_SharpAimDelay / 2;
-        // Accelerate for first half
-        if (!m_SharpAimTimer.IsPastSimMS(halfDelay))
-            m_SharpAimProgress = (float)m_SharpAimTimer.GetElapsedSimTimeMS() / (float)m_SharpAimDelay;
-        // Decelerate for second half
-        else if (!m_SharpAimTimer.IsPastSimMS(m_SharpAimDelay)
-            m_SharpAimProgress
-        // At max
-        else
-            m_SharpAimProgress = 1.0;
-*/
-        float aimMag = m_Controller.GetAnalogAim().GetMagnitude();
+	if (m_Controller.IsState(AIM_SHARP) && m_Status == STABLE && (m_MoveState == STAND || m_MoveState == CROUCH || m_MoveState == NOMOVE || m_MoveState == WALK) && m_Vel.GetMagnitude() < 5.0F && GetEquippedItem()) {
+        float aimMag = analogAim.GetMagnitude();
 
 		// If aim sharp is being done digitally, then translate to full analog aim mag
 		if (aimMag < 0.1F) { aimMag = 1.0F; }
@@ -3397,8 +3383,8 @@ void AHuman::Update()
     // Fire/Activate held devices
 
 	ThrownDevice *pThrown = nullptr;
-	if (m_pFGArm && m_pFGArm->IsAttached()) {
-		// DOn't reach toward anything
+	if (m_pFGArm && m_Status != INACTIVE) {
+		// Force arm to idle by reaching toward a virtually inaccessible point.
 		m_pFGArm->ReachToward(Vector());
 
 		// Activate held device, if it's not a thrown device.
@@ -3474,7 +3460,7 @@ void AHuman::Update()
 		m_ArmsState = WEAPON_READY;
 	}
 
-	if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->HoldsHeldDevice()) {
+    if (m_pBGArm && m_pBGArm->HoldsHeldDevice() && m_Status != INACTIVE) {
 		HeldDevice *pDevice = m_pBGArm->GetHeldDevice();
 
 		if (pDevice->IsReloading()) {
@@ -3584,21 +3570,15 @@ void AHuman::Update()
         m_PieNeedsUpdate = true;
     }
 
-    // Pick up the designated item
-    if (m_pItemInReach && m_pFGArm && m_Controller.IsState(WEAPON_PICKUP) && m_Status != INACTIVE)
-    {
-        // Remove the item from the scene, it's gong into the hands of this
-        if (g_MovableMan.RemoveMO(m_pItemInReach))
-        {
-            // Replace whatever's in the FG arm (if anything) with what we are picking up
-            MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
-			if (pMO) { m_Inventory.push_back(pMO); }
-            m_pFGArm->SetHeldMO(m_pItemInReach);
-            m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+	if (m_pItemInReach && m_pFGArm && m_Controller.IsState(WEAPON_PICKUP) && m_Status != INACTIVE && g_MovableMan.RemoveMO(m_pItemInReach)) {
+        MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
+		if (pMO) { m_Inventory.push_back(pMO); }
+        m_pFGArm->SetHeldMO(m_pItemInReach);
+        m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
-            m_PieNeedsUpdate = true;
-			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
-		}
+		m_SharpAimProgress = 0;
+        m_PieNeedsUpdate = true;
+		if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
     }
 
     ///////////////////////////////////////////////////
@@ -4494,7 +4474,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         }
 
         // Weight and jetpack energy
-        if (m_pJetpack && m_pJetpack->IsAttached() && m_Controller.IsState(BODY_JUMP))
+        if (m_pJetpack && m_Controller.IsState(BODY_JUMP) && m_Status != INACTIVE)
         {
             // Draw empty fuel indicator
             if (m_JetTimeLeft < 100)

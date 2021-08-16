@@ -421,13 +421,10 @@ namespace RTE {
 		int areaToCoverX = offsetX + targetBox.GetCorner().GetFloorIntX() + std::min(targetBitmap->w, static_cast<int>(targetBox.GetWidth()));
 		int areaToCoverY = offsetY + targetBox.GetCorner().GetFloorIntY() + std::min(targetBitmap->h, static_cast<int>(targetBox.GetHeight()));
 
-		int tiledOffsetX = 0;
-		int tiledOffsetY = 0;
+		for (int tiledOffsetX = 0; tiledOffsetX < areaToCoverX;) {
+			int destX = (!m_WrapX && targetBitmapLargerThanSceneX) ? ((targetBitmap->w / 2) - (bitmapWidth / 2)) : (targetBox.GetCorner().GetFloorIntX() + tiledOffsetX - offsetX);
 
-		do {
-			do {
-				// If the unwrapped and untiled direction can't cover the target area, place it in the middle of the target bitmap, and leave the excess perimeter on each side untouched.
-				int destX = (!m_WrapX && targetBitmapLargerThanSceneX) ? ((targetBitmap->w / 2) - (bitmapWidth / 2)) : (targetBox.GetCorner().GetFloorIntX() + tiledOffsetX - offsetX);
+			for (int tiledOffsetY = 0; tiledOffsetY < areaToCoverY;) {
 				int destY = (!m_WrapY && targetBitmapLargerThanSceneY) ? ((targetBitmap->h / 2) - (bitmapHeight / 2)) : (targetBox.GetCorner().GetFloorIntY() + tiledOffsetY - offsetY);
 
 				if (!drawScaled) {
@@ -443,12 +440,16 @@ namespace RTE {
 						stretch_blit(m_MainBitmap, targetBitmap, 0, 0, m_MainBitmap->w, m_MainBitmap->h, destX, destY, bitmapWidth, bitmapHeight);
 					}
 				}
-				tiledOffsetX += bitmapWidth;
-			} while (m_WrapX && areaToCoverX > tiledOffsetX);
-
-			tiledOffsetY += bitmapHeight;
-		} while (m_WrapY && areaToCoverY > tiledOffsetY);
-
+				if (!m_WrapY) {
+					break;
+				}
+				tiledOffsetY += bitmapHeight;
+			}
+			if (!m_WrapX) {
+				break;
+			}
+			tiledOffsetX += bitmapWidth;
+		}
 		// Detect if non-wrapping layer dimensions can't cover the whole target area with its main bitmap. If so, fill in the gap with appropriate solid color sampled from the hanging edge.
 		if (!m_WrapX && !targetBitmapLargerThanSceneX && m_ScrollRatio.GetX() < 0) {
 			if (m_FillLeftColor != ColorKeys::g_MaskColor && offsetX != 0) { rectfill(targetBitmap, targetBox.GetCorner().GetFloorIntX(), targetBox.GetCorner().GetFloorIntY(), targetBox.GetCorner().GetFloorIntX() - offsetX, static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()), m_FillLeftColor); }

@@ -1112,14 +1112,13 @@ void ACrab::UpdateAI()
         }
         else
         {
-            // Stop and then turn around after a period of time, or if bumped into another actor (like a rocket)
-            if (m_PatrolTimer.IsPastSimMS(8000) ||
-                /*g_SceneMan.CastNotMaterialRay(m_Pos, Vector(m_CharHeight / 4, 0), g_MaterialAir, Vector(), 4, false)*/
-                g_SceneMan.CastMORay(m_Pos, Vector((m_LateralMoveState == LAT_RIGHT ? m_CharHeight : -m_CharHeight) / 3, 0), m_MOID, IgnoresWhichTeam(), g_MaterialGrass, false, 4) != g_NoMOID)
-            {
-                m_PatrolTimer.Reset();
-                m_LateralMoveState = LAT_STILL;
-            }
+			Vector hitPos;
+			Vector trace((m_LateralMoveState == LAT_RIGHT ? GetRadius() : -GetRadius()) * 0.5F, 0);
+			// Stop and turn around after a period of time, or if bumped into another actor (like a rocket), or if walking off a ledge.
+			if (m_PatrolTimer.IsPastSimMS(8000) || g_SceneMan.CastMORay(m_Pos, trace, m_MOID, IgnoresWhichTeam(), g_MaterialGrass, false, 5) != g_NoMOID || !g_SceneMan.CastStrengthRay(m_Pos + trace, Vector(0, GetRadius()), 5.0F, hitPos, 5, g_MaterialGrass)) {
+				m_PatrolTimer.Reset();
+				m_LateralMoveState = LAT_STILL;
+			}
         }
     }
     // Going to a goal, potentially through a set of waypoints

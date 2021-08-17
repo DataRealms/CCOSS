@@ -989,44 +989,87 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
         }
         MovableObject *gibParticleClone = dynamic_cast<MovableObject *>(gibSettingsObject.GetParticlePreset()->Clone());
 
+		int count = gibSettingsObject.GetCount();
+		float lifeVariation = gibSettingsObject.GetLifeVariation();
+		float spread = gibSettingsObject.GetSpread();
+		float minVelocity = gibSettingsObject.GetMinVelocity();
+		float maxVelocity = gibSettingsObject.GetMaxVelocity();
+
 		float mass = (gibParticleClone->GetMass() != 0 ? gibParticleClone->GetMass() : 0.0001F);
-        float minVelocity = gibSettingsObject.GetMinVelocity();
-        float velocityRange = gibSettingsObject.GetMaxVelocity() - gibSettingsObject.GetMinVelocity();
-        if (gibSettingsObject.GetMinVelocity() == 0 && gibSettingsObject.GetMaxVelocity() == 0) {
+		int lifetime = gibParticleClone->GetLifetime();
+
+        if (minVelocity == 0 && maxVelocity == 0) {
             minVelocity = m_GibBlastStrength / mass;
-            velocityRange = 10.0F;
+            maxVelocity = minVelocity + 10.0F;
         }
+		float velocityRange = maxVelocity - minVelocity;
         Vector rotatedGibOffset = RotateOffset(gibSettingsObject.GetOffset());
-        for (int i = 0; i < gibSettingsObject.GetCount(); i++) {
-            if (i > 0) { gibParticleClone = dynamic_cast<MovableObject *>(gibSettingsObject.GetParticlePreset()->Clone()); }
 
-            if (gibParticleClone->GetLifetime() != 0) {
-                gibParticleClone->SetLifetime(static_cast<int>(static_cast<float>(gibParticleClone->GetLifetime()) * (1.0F + (gibSettingsObject.GetLifeVariation() * RandomNormalNum()))));
-            }
+		// The "Spiral" spread mode uses the fermat spiral as means to determine the velocity of the gib particles, resulting in a evenly spaced out circle (or ring) of particles.
+		if (gibSettingsObject.GetSpreadMode() == Gib::SPREAD_SPIRAL) {
+			float maxRadius = std::sqrt(static_cast<float>(count));
+			float scale = velocityRange / maxRadius;
+			float randAngle = c_PI * RandomNormalNum();
 
-            gibParticleClone->SetRotAngle(GetRotAngle() + gibParticleClone->GetRotAngle());
-            gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.35F) + (gibParticleClone->GetAngularVel() * 0.65F / mass) * RandomNum());
-            if (rotatedGibOffset.GetRoundIntX() > m_aSprite[0]->w / 3) {
-                float offCenterRatio = rotatedGibOffset.m_X / (static_cast<float>(m_aSprite[0]->w) / 2.0F);
-                float angularVel = fabs(gibParticleClone->GetAngularVel() * 0.5F) + std::fabs(gibParticleClone->GetAngularVel() * 0.5F * offCenterRatio);
-                gibParticleClone->SetAngularVel(angularVel * (rotatedGibOffset.m_X > 0 ? -1 : 1));
-            } else {
-                gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.5F + (gibParticleClone->GetAngularVel() * RandomNum())) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
-            }
+			for (int i = 1; i <= count; i++) {
+				if (i > 1) { gibParticleClone = dynamic_cast<MovableObject *>(gibSettingsObject.GetParticlePreset()->Clone()); }
 
-            gibParticleClone->SetPos(m_Pos + rotatedGibOffset);
-			gibParticleClone->SetHFlipped(m_HFlipped);
-            Vector gibVelocity = rotatedGibOffset.IsZero() ? Vector(minVelocity + RandomNum(0.0F, velocityRange), 0.0F) : rotatedGibOffset.SetMagnitude(minVelocity + RandomNum(0.0F, velocityRange));
-			// TODO: Figure out how much the magnitude of an offset should affect spread
-			float gibSpread = (rotatedGibOffset.IsZero() && gibSettingsObject.GetSpread() == 0.1F) ? c_PI : gibSettingsObject.GetSpread();
-            gibVelocity.RadRotate(impactImpulse.GetAbsRadAngle() + (gibSpread * RandomNormalNum()));
-            gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? m_Vel : Vector()));
-            if (movableObjectToIgnore) { gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore); }
-			gibParticleClone->SetTeam(m_Team);
-			gibParticleClone->SetIgnoresTeamHits(gibSettingsObject.IgnoresTeamHits());
+				float radius = std::sqrt(static_cast<float>(count - i));
+				gibParticleClone->SetPos(m_Pos + rotatedGibOffset);
+				gibParticleClone->SetHFlipped(m_HFlipped);
+				Vector gibVelocity(radius * scale + minVelocity, 0);
+				gibParticleClone->SetVel(gibVelocity.RadRotate(randAngle + RandomNum(0.0F, spread) + static_cast<float>(i) * 2.39996F));
+				if (lifetime != 0) {
+					gibParticleClone->SetLifetime(static_cast<int>(std::max(static_cast<float>(lifetime) * (1.0F - lifeVariation * ((radius / maxRadius) * 0.75F + RandomNormalNum() * 0.25F)), 1.0F)));
+				}
+				gibParticleClone->SetRotAngle(gibVelocity.GetAbsRadAngle() + (m_HFlipped ? c_PI : 0));
+				gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.35F) + (gibParticleClone->GetAngularVel() * 0.65F / mass) * RandomNum());
+				gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? (m_PrevVel + m_Vel) / 2 : Vector()));
+				if (movableObjectToIgnore) { gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore); }
+				gibParticleClone->SetTeam(m_Team);
+				gibParticleClone->SetIgnoresTeamHits(gibSettingsObject.IgnoresTeamHits());
 
-            g_MovableMan.AddParticle(gibParticleClone);
-        }
+				g_MovableMan.AddParticle(gibParticleClone);
+			}
+		} else {
+			for (int i = 0; i < count; i++) {
+				if (i > 0) { gibParticleClone = dynamic_cast<MovableObject *>(gibSettingsObject.GetParticlePreset()->Clone()); }
+
+				if (gibParticleClone->GetLifetime() != 0) {
+					gibParticleClone->SetLifetime(static_cast<int>(static_cast<float>(gibParticleClone->GetLifetime()) * (1.0F + (lifeVariation * RandomNormalNum()))));
+				}
+
+				gibParticleClone->SetRotAngle(GetRotAngle() + gibParticleClone->GetRotAngle());
+				gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.35F) + (gibParticleClone->GetAngularVel() * 0.65F / mass) * RandomNum());
+				if (rotatedGibOffset.GetRoundIntX() > m_aSprite[0]->w / 3) {
+					float offCenterRatio = rotatedGibOffset.m_X / (static_cast<float>(m_aSprite[0]->w) / 2.0F);
+					float angularVel = std::abs(gibParticleClone->GetAngularVel() * 0.5F) + std::abs(gibParticleClone->GetAngularVel() * 0.5F * offCenterRatio);
+					gibParticleClone->SetAngularVel(angularVel * (rotatedGibOffset.m_X > 0 ? -1 : 1));
+				} else {
+					gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.5F + (gibParticleClone->GetAngularVel() * RandomNum())) * (RandomNormalNum() > 0.0F ? 1.0F : -1.0F));
+				}
+
+				gibParticleClone->SetPos(m_Pos + rotatedGibOffset);
+				gibParticleClone->SetHFlipped(m_HFlipped);
+				Vector gibVelocity = rotatedGibOffset.IsZero() ? Vector(minVelocity + RandomNum(0.0F, velocityRange), 0.0F) : rotatedGibOffset.SetMagnitude(minVelocity + RandomNum(0.0F, velocityRange));
+				// TODO: Figure out how much the magnitude of an offset should affect spread
+				float gibSpread = (rotatedGibOffset.IsZero() && spread == 0.1F) ? c_PI : spread;
+
+				gibVelocity.RadRotate(gibSettingsObject.InheritsVelocity() ? impactImpulse.GetAbsRadAngle() : m_Rotation.GetRadAngle() + (m_HFlipped ? c_PI : 0));
+				// The "Even" spread will spread all gib particles evenly in an arc, while maintaining a randomized velocity magnitude.
+				if (gibSettingsObject.GetSpreadMode() == Gib::SPREAD_EVEN) {
+					gibVelocity.RadRotate(gibSpread * 0.5F - gibSpread * i / count);
+				} else {
+					gibVelocity.RadRotate(gibSpread * RandomNormalNum());
+				}
+				gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? (m_PrevVel + m_Vel) / 2 : Vector()));
+				if (movableObjectToIgnore) { gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore); }
+				gibParticleClone->SetTeam(m_Team);
+				gibParticleClone->SetIgnoresTeamHits(gibSettingsObject.IgnoresTeamHits());
+
+				g_MovableMan.AddParticle(gibParticleClone);
+			}
+		}
     }
 }
 

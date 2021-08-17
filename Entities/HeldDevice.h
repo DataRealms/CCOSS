@@ -529,7 +529,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Whetehr magazine is full or not.
 
-    virtual bool IsFull() const { return false; }
+    virtual bool IsFull() const { return true; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

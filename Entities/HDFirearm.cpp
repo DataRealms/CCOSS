@@ -173,7 +173,7 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
 	} else if (propName == "DeactivationSound") {
 		m_DeactivationSound = new SoundContainer;
         reader >> m_DeactivationSound;
-        m_DeactivationSound->SetSoundOverlapMode(SoundContainer::SoundOverlapMode::IGNORE_PLAY);
+        m_DeactivationSound->SetSoundOverlapMode(SoundContainer::SoundOverlapMode::RESTART);
     } else if (propName == "EmptySound") {
 		m_EmptySound = new SoundContainer;
 		reader >> m_EmptySound;
@@ -672,12 +672,11 @@ void HDFirearm::Reload()
 
         // Stop any activation
         m_Activated = false;
-        if (m_FireSound && m_FireSound->GetLoopSetting() == -1 && m_FireSound->IsBeingPlayed())
-            m_FireSound->Stop();
-
+		if (m_FireSound && m_FireSound->GetLoopSetting() == -1 && m_FireSound->IsBeingPlayed()) { m_FireSound->Stop(); }
 		if (m_ReloadStartSound) { m_ReloadStartSound->Play(m_Pos); }
-        m_ReloadTmr.Reset();
-        m_Reloading = true;
+
+		m_ReloadTmr.Reset();
+		m_Reloading = true;
     }
 }
 
@@ -914,18 +913,14 @@ void HDFirearm::Update()
             }
             pRound = 0;
         }
-    }
-
-    // No or empty magazine, so just click.
-    else if (((m_pMagazine && m_pMagazine->IsEmpty()) || !m_pMagazine) && m_Activated && !m_AlreadyClicked )
-    {
+	} else if (m_Activated && !m_AlreadyClicked) {
         // Play empty pin click sound.
 		if (m_EmptySound) { m_EmptySound->Play(m_Pos); }
         // Indicate that we have clicked once during the current activation. 
         m_AlreadyClicked = true;
 
         // Auto-reload
-        Reload();
+		if (m_Parent) { Reload(); }
     }
 
     // No magazine, have started to reload, so put new mag in when done
@@ -977,11 +972,7 @@ void HDFirearm::Update()
         AddImpulseForce(m_RecoilForce, m_RecoilOffset);
 
         // Display gun animation
-		if (!m_IsAnimatedManually)
-		{
-			if (m_FrameCount > 1)
-				m_Frame = 1;
-		}
+		if (!m_IsAnimatedManually && m_FrameCount > 1) { m_Frame = 1; }
 
         // Display gun flame frame.
         if (m_pFlash) {
@@ -1033,8 +1024,7 @@ void HDFirearm::Update()
 					StopActivationSound();
 				}
             } else {
-				if (!m_IsAnimatedManually)
-					m_Frame = 0;
+				if (!m_IsAnimatedManually) { m_Frame = 0; }
 				StopActivationSound();
             }
         }
@@ -1083,13 +1073,15 @@ void HDFirearm::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mo
         m_pFlash->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
     }
 
-    // Fudge the muzzle pos forward a little bit so the glow aligns nicely
-    Vector muzzlePos = m_MuzzleOff;
-    muzzlePos.m_X += 4;
-    muzzlePos = m_Pos + RotateOffset(muzzlePos);
     // Set the screen flash effect to draw at the final post processing stage
-    if (m_FireFrame && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical && !g_SceneMan.ObscuredPoint(muzzlePos)) {
-        g_PostProcessMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55.0F + RandomNum(0.0F, 200.0F), m_pFlash->GetEffectRotAngle());
+    if (m_FireFrame && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical) {
+		// Fudge the muzzle pos forward a little bit so the glow aligns nicely
+		Vector muzzlePos = m_MuzzleOff;
+		muzzlePos.m_X += m_pFlash->GetSpriteWidth() * 0.3F;
+		muzzlePos = m_Pos + RotateOffset(muzzlePos);
+		if (!g_SceneMan.ObscuredPoint(muzzlePos)) {
+			g_PostProcessMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), RandomNum(m_pFlash->GetEffectStopStrength(), m_pFlash->GetEffectStartStrength()), m_pFlash->GetEffectRotAngle());
+		}
     }
 }
 

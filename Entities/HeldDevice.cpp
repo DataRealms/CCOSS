@@ -467,6 +467,7 @@ void HeldDevice::Update()
 
     if (m_FrameCount > 1)
     {
+		// TODO: Rename SpriteAnimMode LOOPWHENMOVING to something like LOOPWHENACTIVE which is more descriptive and fits both moving Actors and active HeldDevices.
         if (m_SpriteAnimMode == LOOPWHENMOVING && m_Activated)
         {
             float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % m_SpriteAnimDuration;

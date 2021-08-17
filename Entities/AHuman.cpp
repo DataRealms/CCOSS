@@ -80,6 +80,7 @@ void AHuman::Clear()
 	m_SharpAimRevertTimer.Reset();
 	m_FGArmFlailScalar = 0.0F;
 	m_BGArmFlailScalar = 0.7F;
+	m_DeviceEquipTimer.Reset();
 
     m_DeviceState = SCANNING;
     m_SweepState = NOSWEEP;
@@ -1411,6 +1412,19 @@ bool AHuman::EquipShieldInBGArm()
     return false;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+bool AHuman::UnequipFGArm() {
+	if (!m_pFGArm || !m_pFGArm->IsAttached()) {
+		return false;
+	}
+	if (m_pFGArm->HoldsSomething()) {
+		m_pFGArm->GetHeldDevice()->Deactivate();
+		m_Inventory.push_back(m_pFGArm->ReleaseHeldMO());
+		return true;
+	}
+	return false;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  UnequipBGArm
@@ -3234,28 +3248,39 @@ void AHuman::Update()
 	bool reloadFG = false;
 	if (m_pFGArm && m_Status != INACTIVE) {
 		HDFirearm * pFireArm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-		if (m_Controller.IsState(WEAPON_CHANGE_NEXT)) {
-			if (!m_Inventory.empty() || GetEquippedBGItem()) {
-				if (pFireArm) { pFireArm->StopActivationSound(); }
-				if (m_Inventory.empty()) { UnequipBGArm(); }
+		if (m_Controller.IsState(WEAPON_CHANGE_NEXT) && m_Controller.IsState(WEAPON_CHANGE_PREV)) {
+			UnequipFGArm();
+			UnequipBGArm();
+			m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+		} else {
+			if (m_Controller.IsState(WEAPON_CHANGE_NEXT)) {
+				m_DeviceEquipTimer.Reset();
+				if (!m_Inventory.empty() || GetEquippedBGItem()) {
+					if (pFireArm) { pFireArm->StopActivationSound(); }
+					if (m_Inventory.empty()) { UnequipBGArm(); }
 
-				m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
-				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-				m_PieNeedsUpdate = true;
+					m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
+					m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+					m_PieNeedsUpdate = true;
 
-				EquipShieldInBGArm();
+					EquipShieldInBGArm();
+					m_SharpAimProgress = 0;
+				}
 			}
-		}
-		if (m_Controller.IsState(WEAPON_CHANGE_PREV)) {
-			if (!m_Inventory.empty() || GetEquippedBGItem()) {
-				if (pFireArm) { pFireArm->StopActivationSound(); }
-				if (m_Inventory.empty()) { UnequipBGArm(); }
+			if (m_Controller.IsState(WEAPON_CHANGE_PREV)) {
+				m_DeviceEquipTimer.Reset();
+				if (!m_Inventory.empty() || GetEquippedBGItem()) {
+					if (pFireArm) { pFireArm->StopActivationSound(); }
+					if (m_Inventory.empty()) { UnequipBGArm(); }
 
-				m_pFGArm->SetHeldMO(SwapPrevInventory(m_pFGArm->ReleaseHeldMO()));
-				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-				m_PieNeedsUpdate = true;
+					m_pFGArm->SetHeldMO(SwapPrevInventory(m_pFGArm->ReleaseHeldMO()));
+					m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+					m_PieNeedsUpdate = true;
 
-				EquipShieldInBGArm();
+					EquipShieldInBGArm();
+					m_SharpAimProgress = 0;
+				}
 			}
         }
 
@@ -3540,7 +3565,9 @@ void AHuman::Update()
 				m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 			}
 		}
+		EquipShieldInBGArm();
 		m_PieNeedsUpdate = true;
+		m_DeviceEquipTimer.Reset();
 	}
 
     ////////////////////////////////////////
@@ -3576,9 +3603,12 @@ void AHuman::Update()
         m_pFGArm->SetHeldMO(m_pItemInReach);
         m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
+		EquipShieldInBGArm();
 		m_SharpAimProgress = 0;
         m_PieNeedsUpdate = true;
 		if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+
+		m_DeviceEquipTimer.Reset();
     }
 
     ///////////////////////////////////////////////////
@@ -4040,19 +4070,17 @@ void AHuman::Update()
 				m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
 
 			} else {
-				// Re-equip shield in BG arm after climbing
-				EquipShieldInBGArm();
 				if (m_pFGArm && m_pFGArm->HoldsHeldDevice() && !m_pBGArm->HoldsHeldDevice()) {
-					m_pBGArm->Reach(m_pFGArm->GetHeldDevice()->GetSupportPos());
-
-					// BGArm does reach to support the device held by FGArm.
-					if (m_pBGArm->DidReach()) {
-						m_pFGArm->GetHeldDevice()->SetSupported(true);
-						m_pBGArm->SetRecoil(m_pFGArm->GetHeldDevice()->GetRecoilForce(), m_pFGArm->GetHeldDevice()->GetRecoilOffset(), m_pFGArm->GetHeldDevice()->IsRecoiled());
-					} else {
-						// BGArm did not reach to support the device. Count device as supported anyway, if crouching
-						m_pFGArm->GetHeldDevice()->SetSupported(m_MoveState == CROUCH || m_ProneState == PRONE);
-						m_pBGArm->SetRecoil(Vector(), Vector(), false);
+					if (!EquipShieldInBGArm()) {
+						m_pBGArm->Reach(m_pFGArm->GetHeldDevice()->GetSupportPos());
+						if (m_pBGArm->DidReach()) {
+							m_pFGArm->GetHeldDevice()->SetSupported(true);
+							m_pBGArm->SetRecoil(m_pFGArm->GetHeldDevice()->GetRecoilForce(), m_pFGArm->GetHeldDevice()->GetRecoilOffset(), m_pFGArm->GetHeldDevice()->IsRecoiled());
+						} else {
+							// BGArm did not reach to support the device. Count device as supported anyway, if crouching.
+							m_pFGArm->GetHeldDevice()->SetSupported(m_MoveState == CROUCH || m_ProneState == PRONE);
+							m_pBGArm->SetRecoil(Vector(), Vector(), false);
+						}
 					}
 				} else {
 					// Use an unreachable position to force this arm to idle, so it wont bug out where the AtomGroup was left off
@@ -4493,21 +4521,25 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
             }
             // null-terminate
             str[1] = 0;
-            pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 11, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
+			pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 9, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
 
             float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
-// TODO: Don't hardcode this shit
-            int gaugeColor = jetTimeRatio > 0.6F ? 149 : (jetTimeRatio > 0.3F ? 77 : 13);
-            rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + (16 * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
-//                    rect(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack - 2, drawPos.m_X + 24, drawPos.m_Y + m_HUDStack - 4, 238);
-//                    std::snprintf(str, sizeof(str), "%.0f Kg", mass);
-//                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
+			int gaugeColor = jetTimeRatio > 0.6F ? 149 : (jetTimeRatio > 0.3F ? 77 : 13);
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 16, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
 
-            m_HUDStack += -10;
-        }
+			m_HUDStack += -10;
+			if (m_pFGArm && !m_DeviceEquipTimer.IsPastRealMS(500)) {
+				if (m_pFGArm->HoldsSomething()) {
+					pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, m_pFGArm->GetHeldMO()->GetPresetName().c_str(), GUIFont::Centre);
+				} else {
+					pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, "EMPTY", GUIFont::Centre);
+				}
+				m_HUDStack += -9;
+			}
+		}
         // Held-related GUI stuff
-        else if (m_pFGArm && m_pFGArm->IsAttached())
-        {
+        else if (m_pFGArm) {
             HDFirearm *pHeldFirearm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldDevice());
 
             // Ammo
@@ -4518,24 +4550,37 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 
                 str[0] = -56; str[1] = 0;
                 pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 10, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
-                std::string fgWeaponString = pHeldFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(pHeldFirearm->GetRoundInMagCount());
-                fgWeaponString = pHeldFirearm->IsReloading() ? "Reloading" : fgWeaponString;
+				std::string fgWeaponString;
+
+				if (pHeldFirearm->IsReloading()) {
+					fgWeaponString = "Reloading";
+					rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 13, drawPos.GetFloorIntX() + 29, drawPos.GetFloorIntY() + m_HUDStack + 14, 245);
+					rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 12, drawPos.GetFloorIntX() + static_cast<int>(28.0F * pHeldFirearm->GetReloadProgress() + 0.5F), drawPos.GetFloorIntY() + m_HUDStack + 13, 77);
+				} else {
+					fgWeaponString = pHeldFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(pHeldFirearm->GetRoundInMagCount());
+				}
 
                 if (bgHeldItem && bgHeldFirearm) {
-                    std::string bgWeaponString = bgHeldFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(bgHeldFirearm->GetRoundInMagCount());
-                    bgWeaponString = bgHeldFirearm->IsReloading() ? "Reloading" : bgWeaponString;
-                    std::snprintf(str, sizeof(str), "%s | %s", fgWeaponString.c_str(), bgWeaponString.c_str());
+					std::string bgWeaponString;
+
+					if (bgHeldFirearm->IsReloading()) {
+						bgWeaponString = "Reloading";
+						int textWidth = pSmallFont->CalculateWidth(fgWeaponString) + 6;
+						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1 + textWidth, drawPos.GetFloorIntY() + m_HUDStack + 13, drawPos.GetFloorIntX() + 29 + textWidth, drawPos.GetFloorIntY() + m_HUDStack + 14, 245);
+						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + textWidth, drawPos.GetFloorIntY() + m_HUDStack + 12, drawPos.GetFloorIntX() + static_cast<int>(28.0F * bgHeldFirearm->GetReloadProgress() + 0.5F) + textWidth, drawPos.GetFloorIntY() + m_HUDStack + 13, 77);
+					} else {
+						bgWeaponString = bgHeldFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(bgHeldFirearm->GetRoundInMagCount());
+					}
+					std::snprintf(str, sizeof(str), "%s | %s", fgWeaponString.c_str(), bgWeaponString.c_str());
                 } else {
                     std::snprintf(str, sizeof(str), "%s", fgWeaponString.c_str());
                 }
-                pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
+                pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Left);
 
                 m_HUDStack += -10;
             }
 
-            // Device changing GUI
-            if (m_Controller.IsState(PIE_MENU_ACTIVE))
-            {
+			if (m_Controller.IsState(PIE_MENU_ACTIVE) || !m_DeviceEquipTimer.IsPastRealMS(700)) {
 /*
                 // Display Gold tally if gold chunk is in hand
                 if (m_pFGArm->HoldsSomething() && m_pFGArm->GetHeldMO()->IsGold() && GetGoldCarried() > 0)
@@ -4548,23 +4593,12 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
                     m_HUDStack += -11;
                 }
 */
-                if (m_pFGArm->HoldsSomething())
-                {
-/*
-                    std::snprintf(str, sizeof(str), " Œ Drop");
-                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 12, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
-                    m_HUDStack += -9;
-*/
-//                    std::snprintf(str, sizeof(str), "   %s", m_pFGArm->GetHeldMO()->GetPresetName().c_str());
-                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack + 3, m_pFGArm->GetHeldMO()->GetPresetName().c_str(), GUIFont::Centre);
-                    m_HUDStack += -9;
-                }
-                else
-                {
-//                    std::snprintf(str, sizeof(str), "æ  EMPTY  ø");
-                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack + 3, "EMPTY", GUIFont::Centre);
-                    m_HUDStack += -9;
-                }
+				if (m_pFGArm->HoldsSomething()) {
+					pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, m_pFGArm->GetHeldMO()->GetPresetName().c_str(), GUIFont::Centre);
+				} else {
+					pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, "EMPTY", GUIFont::Centre);
+				}
+				m_HUDStack += -9;
 /*
                 // Reload GUI, only show when there's nothing to pick up
                 if (!m_pItemInReach && m_pFGArm->HoldsSomething() && pHeldFirearm && !pHeldFirearm->IsFull())

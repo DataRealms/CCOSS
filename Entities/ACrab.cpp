@@ -2894,13 +2894,10 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 			str[1] = 0;
             pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Centre);
 
-            float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
-// TODO: Don't hardcode this shit
-            char gaugeColor = jetTimeRatio > 0.6 ? 149 : (jetTimeRatio > 0.3 ? 77 : 13);
-            rectfill(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack + 6, drawPos.m_X + (16 * jetTimeRatio), drawPos.m_Y + m_HUDStack + 7, gaugeColor);
-//                    rect(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack - 2, drawPos.m_X + 24, drawPos.m_Y + m_HUDStack - 4, 238);
-//                    std::snprintf(str, sizeof(str), "%.0f Kg", mass);
-//                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
+			float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
+			int gaugeColor = jetTimeRatio > 0.6F ? 149 : (jetTimeRatio > 0.3F ? 77 : 13);
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 16, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
 
             m_HUDStack += -10;
         }
@@ -2912,8 +2909,10 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                     if (!textString.empty()) { textString += " | "; }
                     if (mountedFirearm->IsReloading()) {
                         textString += "Reloading";
+						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 13, drawPos.GetFloorIntX() + 29, drawPos.GetFloorIntY() + m_HUDStack + 14, 245);
+						rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 12, drawPos.GetFloorIntX() + static_cast<int>(28.0F * mountedFirearm->GetReloadProgress() + 0.5F), drawPos.GetFloorIntY() + m_HUDStack + 13, 77);
                     } else {
-                        textString += mountedFirearm->GetRoundInMagCount() > 0 ? std::to_string(mountedFirearm->GetRoundInMagCount()) : "Infinite";
+						textString += mountedFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(mountedFirearm->GetRoundInMagCount());
                     }
                 }
             }

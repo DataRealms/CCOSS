@@ -181,7 +181,44 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `DataModule` property `IsFaction = 0/1` which determines if a module is a playable faction (in MetaGame, etc.). This replaces the need to put "Tech" in the module name. Defaults to false (0).
 
+- New `MOSRotating` INI and Lua (R) property `WoundCountAffectsImpulseLimitRatio` which can be used to make objects more prone to gibbing from impulse when they have also received wounds.
+
+- New `Gib` INI property `SpreadMode` which sports two new spread logic variants which alter the way velocity is applied to the `GibParticle`s when they spawn. This can be used to create richer explosion effects.
+	`SpreadMode = 0` is the default, fully randomized spread according to `MinVelocity`, `MaxVelocity` and `Spread` values. Think: a piece of grenade fragment, launching out in an arbitrary direction.
+	`SpreadMode = 1` is the same as the default, but with evenly spaced out angles. Think: an air blast shockwave, dispersing evenly outward from the explosion.
+	`SpreadMode = 2` has an entirely different behavior of its own, which utilizes the fermat spiral as means to evenly disperse the particles in a circular area, according to `MaxVelocity` and `MinVelocity`. Since this mode will always result in a full, 360-degree spread, the `Spread` property can be used to add randomization to the gib particles. Think: a cloud of smoke.
+
+- New `Actor` INI and Lua (R/W) property `StableRecoverDelay` which determines how long it takes for an actor to regain `STABLE` status after being rendered `UNSTABLE`.
+
+- New `AHuman` Lua (R) property `ThrowProgress` which returns the current throw chargeup progress as a scalar from 0 to 1.
+
+- New `Round` INI property `ShellVelocityVariation` which can be used to randomize the magnitude at which shells are ejected.
+
+- New `HDFirearm` Lua (R) property `ReloadProgress` which returns the current reload progress as a scalar from 0 to 1.
+
+- New `HDFirearm` INI and Lua (R/W) property `Reloadable` which can be used to disable the ability to reload said device.
+
+- New `HDFirearm` Lua (R) property `RoundInMagCapacity` which returns the maximum capacity of the `Magazine`, or its entity reference (from which new magazines are cloned from), which means that the property will always return the maximum ammo capacity of the device, even when reloading.
+
+- New `Entity` Lua (R) property `ModuleName` which returns the filename of the data module from which the entity originates from.
+
+- New gameplay setting `MAX_INSERT_NAME_HERE` that hides the HUD of stranded items at a set distance.
+
+- `Arm`s will now react to the recoil of held devices. (This effect can be disabled via `RecoilTransmission` the same way as recoil itself)
+
+- `HDFirearm` reload progress now shows up as a HUD element.
+
 ### Changed
+
+- Exposed `ThrownDevice` specific offsets to Lua (R/W).
+
+- Class `HeldDevice` objects can now show up under "Tools" and "Weapons" rather than just "Shields".
+
+- Keyboard-only controlled `AHuman` and `ACrab` actors can now strafe while sharp aiming.
+
+- Lowered the default `AHuman` Head damage multiplier from 5 to 4.
+
+- "Fixed" grenades and other fast-moving objects bouncing violently off of doors and other stationary objects.
 
 - Doors in `Team = -1` will now open up for all actors.
 
@@ -199,7 +236,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Craft will now automatically scuttle when opening doors at a 90° angle rather than 45°.
 
-- `AHuman` can now aim slightly while walking, however not while reloading.
+- `AHuman` can now sharp-aim slightly while walking, however not while reloading.
 
 - Recoil when firing weapons now affects sharp aim.
 

@@ -1172,7 +1172,9 @@ namespace RTE {
 		return ConcreteTypeLuaClassDefinition(ThrownDevice, HeldDevice)
 
 		.property("MinThrowVel", &ThrownDevice::GetMinThrowVel, &ThrownDevice::SetMinThrowVel)
-		.property("MaxThrowVel", &ThrownDevice::GetMaxThrowVel, &ThrownDevice::SetMaxThrowVel);
+		.property("MaxThrowVel", &ThrownDevice::GetMaxThrowVel, &ThrownDevice::SetMaxThrowVel)
+		.property("StartThrowOffset", &ThrownDevice::GetStartThrowOffset, &ThrownDevice::SetStartThrowOffset)
+		.property("EndThrowOffset", &ThrownDevice::GetEndThrowOffset, &ThrownDevice::SetEndThrowOffset);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

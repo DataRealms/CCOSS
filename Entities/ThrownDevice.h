@@ -62,10 +62,22 @@ namespace RTE {
 		Vector GetStartThrowOffset() const { return m_StartThrowOffset; }
 
 		/// <summary>
+		/// Sets the Start throw offset for this ThrownDevice.
+		/// </summary>
+		/// <param name="startOffset">The new start throw offset.</param>
+		void SetStartThrowOffset(Vector startOffset) { m_StartThrowOffset = startOffset; }
+
+		/// <summary>
 		/// Gets the End throw offset of this ThrownDevice's joint relative from the parent Actor's position, if attached.
 		/// </summary>
 		/// <returns>A const reference to the current end throw parent offset.</returns>
 		Vector GetEndThrowOffset() const { return m_EndThrowOffset; }
+
+		/// <summary>
+		/// Sets the End throw offset for this ThrownDevice.
+		/// </summary>
+		/// <param name="endOffset">The new end throw offset.</param>
+		void SetEndThrowOffset(Vector endOffset) { m_EndThrowOffset = endOffset; }
 
 		/// <summary>
 		/// Gets the minimum throw velocity of this when thrown.

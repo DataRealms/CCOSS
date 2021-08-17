@@ -204,6 +204,7 @@ namespace RTE {
 		.property("DeathSound", &Actor::GetDeathSound, &ActorSetDeathSound)
 		.property("DeviceSwitchSound", &Actor::GetDeviceSwitchSound, &ActorSetDeviceSwitchSound)
 		.property("ImpulseDamageThreshold", &Actor::GetTravelImpulseDamage, &Actor::SetTravelImpulseDamage)
+		.property("StableRecoveryDelay", &Actor::GetStableRecoverDelay, &Actor::SetStableRecoverDelay)
 		.property("Status", &Actor::GetStatus, &Actor::SetStatus)
 		.property("Health", &Actor::GetHealth, &Actor::SetHealth)
 		.property("PrevHealth", &Actor::GetPrevHealth)

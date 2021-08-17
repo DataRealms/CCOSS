@@ -73,22 +73,23 @@ void Actor::Clear() {
     m_LastSecondTimer.Reset();
     m_LastSecondPos.Reset();
     m_RecentMovement.Reset();
-	m_RecentMovementMag = 0.0F;
-    m_TravelImpulseDamage = 750;
-    m_StableVel.SetXY(15, 25);
+	m_RecentMovementMag = 0;
+    m_TravelImpulseDamage = 750.0F;
+    m_StableVel.SetXY(15.0F, 25.0F);
+	m_StableRecoverDelay = 1000;
     m_HeartBeat.Reset();
     m_NewControlTmr.Reset();
     m_DeathTmr.Reset();
-	m_GoldCarried = 0.0F;
+	m_GoldCarried = 0;
     m_GoldPicked = false;
     m_AimState = AIMSTILL;
-	m_AimAngle = 0.0F;
+	m_AimAngle = 0;
     m_AimRange = c_HalfPI;
-	m_AimDistance = 0.0F;
+	m_AimDistance = 0;
     m_AimTmr.Reset();
     m_SharpAimTimer.Reset();
     m_SharpAimDelay = 250;
-	m_SharpAimProgress = 0.0F;
+	m_SharpAimProgress = 0;
     m_SharpAimMaxedOut = false;
     m_PointingTarget.Reset();
     m_SeenTargetPos.Reset();
@@ -96,8 +97,8 @@ void Actor::Clear() {
     m_AlarmTimer.SetSimTimeLimitMS(3000);
     m_AlarmTimer.SetElapsedSimTimeMS(4000);
     m_LastAlarmPos.Reset();
-    m_SightDistance = 450;
-    m_Perceptiveness = 0.5;
+    m_SightDistance = 450.0F;
+    m_Perceptiveness = 0.5F;
 	m_CanRevealUnseen = true;
     m_CharHeight = 0;
     m_HolsterOffset.Reset();
@@ -123,17 +124,17 @@ void Actor::Clear() {
     m_MoveVector.Reset();
     m_MovePath.clear();
     m_UpdateMovePath = true;
-    m_MoveProximityLimit = 100;
+    m_MoveProximityLimit = 100.0F;
     m_LateralMoveState = LAT_STILL;
     m_MoveOvershootTimer.Reset();
     m_ObstacleState = PROCEEDING;
     m_TeamBlockState = NOTBLOCKED;
     m_BlockTimer.Reset();
-    m_BestTargetProximity = 10000.0f;
+    m_BestTargetProximity = 10000.0F;
     m_ProgressTimer.Reset();
     m_StuckTimer.Reset();
     m_FallTimer.Reset();
-    m_DigStrength = 1;
+    m_DigStrength = 1.0F;
 
     m_DamageMultiplier = 1.0F;
 }
@@ -206,6 +207,7 @@ int Actor::Create(const Actor &reference)
     m_LastSecondPos = reference.m_LastSecondPos;
     m_TravelImpulseDamage = reference.m_TravelImpulseDamage;
     m_StableVel = reference.m_StableVel;
+    m_StableRecoverDelay = reference.m_StableRecoverDelay;
     m_GoldCarried = reference.m_GoldCarried;
     m_AimState = reference.m_AimState;
     m_AimRange = reference.m_AimRange;
@@ -339,6 +341,8 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_TravelImpulseDamage;
     else if (propName == "StableVelocityThreshold")
         reader >> m_StableVel;
+    else if (propName == "StableRecoveryDelay")
+        reader >> m_StableRecoverDelay;
     else if (propName == "AimAngle")
         reader >> m_AimAngle;
     else if (propName == "AimRange")
@@ -420,6 +424,8 @@ int Actor::Save(Writer &writer) const
     writer << m_TravelImpulseDamage;
     writer.NewProperty("StableVelocityThreshold");
     writer << m_StableVel;
+    writer.NewProperty("StableRecoveryDelay");
+    writer << m_StableRecoverDelay;
     writer.NewProperty("AimAngle");
     writer << m_AimAngle;
     writer.NewProperty("AimRange");
@@ -885,7 +891,7 @@ void Actor::DropAllInventory()
 {
     MovableObject *pObject = 0;
     Actor *pPassenger = 0;
-    float velMin, velRange, angularVel;
+    float velMin, velMax, angularVel;
     Vector gibROffset, gibVel;
     for (deque<MovableObject *>::iterator gItr = m_Inventory.begin(); gItr != m_Inventory.end(); ++gItr)
     {
@@ -895,12 +901,12 @@ void Actor::DropAllInventory()
 		{
 			// Generate the velocities procedurally
 			velMin = 3.0F;
-			velRange = 10.0F;
+			velMax = velMin + std::sqrt(m_SpriteRadius);
 
 			// Randomize the offset from center to be within the original object
 			gibROffset.SetXY(m_SpriteRadius * 0.35F * RandomNormalNum(), m_SpriteRadius * 0.35F * RandomNormalNum());
 			// Set up its position and velocity according to the parameters of this AEmitter.
-			pObject->SetPos(m_Pos + gibROffset/*Vector(m_Pos.m_X + 5 * NormalRand(), m_Pos.m_Y + 5 * NormalRand())*/);
+			pObject->SetPos(m_Pos + gibROffset);
 			pObject->SetRotAngle(m_Rotation.GetRadAngle() + pObject->GetRotMatrix().GetRadAngle());
 			// Rotational angle
 			pObject->SetAngularVel((pObject->GetAngularVel() * 0.35F) + (pObject->GetAngularVel() * 0.65F / (pObject->GetMass() != 0 ? pObject->GetMass() : 0.0001F)) * RandomNum());
@@ -909,8 +915,8 @@ void Actor::DropAllInventory()
 			if (gibROffset.m_X > m_aSprite[0]->w / 3)
 			{
 				float offCenterRatio = gibROffset.m_X / (m_aSprite[0]->w / 2);
-				angularVel = fabs(pObject->GetAngularVel() * 0.5F);
-				angularVel += fabs(pObject->GetAngularVel() * 0.5F * offCenterRatio);
+				angularVel = std::abs(pObject->GetAngularVel() * 0.5F);
+				angularVel += std::abs(pObject->GetAngularVel() * 0.5F * offCenterRatio);
 				pObject->SetAngularVel(angularVel * (gibROffset.m_X > 0.0F ? -1 : 1));
 			}
 			// Gib is too close to center to always make it rotate in one direction, so give it a baseline rotation and then randomize
@@ -921,10 +927,11 @@ void Actor::DropAllInventory()
 
 			// TODO: Optimize making the random angles!")
 			gibVel = gibROffset;
-			if (gibVel.IsZero())
-				gibVel.SetXY(velMin + RandomNum(0.0F, velRange), 0.0F);
-			else
-				gibVel.SetMagnitude(velMin + RandomNum(0.0F, velRange));
+			if (gibVel.IsZero()) {
+				gibVel.SetXY(RandomNum(velMin, velMax), 0.0F);
+			} else {
+				gibVel.SetMagnitude(RandomNum(velMin, velMax));
+			}
 			// Don't! the offset was already rotated!
 			//            gibVel = RotateOffset(gibVel);
 			// Distribute any impact implse out over all the gibs
@@ -1456,47 +1463,41 @@ void Actor::Update()
     /////////////////////////////////////////////
     // Take damage from large hits during travel
 
-    if (m_BodyHitSound && m_TravelImpulse.GetMagnitude() > m_TravelImpulseDamage / 2) {
-        m_BodyHitSound->Play(m_Pos);
-    }
+    if (m_TravelImpulse.GetMagnitude() > m_TravelImpulseDamage * 0.5F) {
+		if (m_BodyHitSound) { m_BodyHitSound->Play(m_Pos); }
 
-    if (m_TravelImpulse.GetMagnitude() > m_TravelImpulseDamage)
-	{
-		if (m_PainSound) { m_PainSound->Play(m_Pos); }
-		const float impulse = m_TravelImpulse.GetMagnitude() - m_TravelImpulseDamage;
-		const float damage = impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth;
-		if (damage > 0)
-			m_Health -= damage;
-		if (m_Status != DYING && m_Status != DEAD)
-			m_Status = UNSTABLE;
-        m_ForceDeepCheck = true;
+		if (m_TravelImpulse.GetMagnitude() > m_TravelImpulseDamage) {
+			const float impulse = m_TravelImpulse.GetMagnitude() - m_TravelImpulseDamage;
+			const float damage = impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth;
+			if (damage > 0) {
+				m_Health -= damage;
+				if (m_Health > 0) {
+					if (m_PainSound) { m_PainSound->Play(m_Pos); }
+				}
+			}
+			if (m_Status != DYING && m_Status != DEAD) { m_Status = UNSTABLE; }
+			m_ForceDeepCheck = true;
+		}
     }
 
     /////////////////////////////
     // Stability logic
 
-    if (m_Status == STABLE)
-    {
+    if (m_Status == STABLE) {
         // If moving really fast, we're not able to be stable
-// TODO don't hardcode this threshold!
-        if (fabs(m_Vel.m_X) > fabs(m_StableVel.m_X) || fabs(m_Vel.m_Y) > fabs(m_StableVel.m_Y))
-            m_Status = UNSTABLE;
+		if (std::abs(m_Vel.m_X) > std::abs(m_StableVel.m_X) || std::abs(m_Vel.m_Y) > std::abs(m_StableVel.m_Y)) { m_Status = UNSTABLE; }
 
         m_StableRecoverTimer.Reset();
     }
-    else if (m_Status == UNSTABLE)
-    {
+    else if (m_Status == UNSTABLE) {
         // Only regain stability if we're not moving too fast and it's been a while since we lost it
-        if (m_StableRecoverTimer.IsPastSimMS(1000) && !(fabs(m_Vel.m_X) > fabs(m_StableVel.m_X) || fabs(m_Vel.m_Y) > fabs(m_StableVel.m_Y)))
-            m_Status = STABLE;
+		if (m_StableRecoverTimer.IsPastSimMS(m_StableRecoverDelay) && !(std::abs(m_Vel.m_X) > std::abs(m_StableVel.m_X) || std::abs(m_Vel.m_Y) > std::abs(m_StableVel.m_Y))) { m_Status = STABLE; }
     }
     
     // Spread the carried items and gold around before death.
-    if (m_Status == DYING || m_Status == DEAD)
-    {
+    if (m_Status == DYING || m_Status == DEAD) {
 		// Actor may die for a long time, no need to call this more than once
-		if (m_Inventory.size() > 0)
-	        DropAllInventory();
+		if (m_Inventory.size() > 0) { DropAllInventory(); }
 
         Material const * AuMat = g_SceneMan.GetMaterial(std::string("Gold"));
         int goldCount = m_GoldCarried/*std::floor(GetGoldCarried())*/;
@@ -1538,13 +1539,9 @@ void Actor::Update()
 	}
 
 	// Prevent dead actors from rotating like mad
-	if (m_Status == DYING || m_Status == DEAD)
-	{
-		m_AngularVel = m_AngularVel * 0.98;
-	}
+	if (m_Status == DYING || m_Status == DEAD) { m_AngularVel = m_AngularVel * 0.98F; }
 
-    if (m_Status == DYING && m_DeathTmr.GetElapsedSimTimeMS() > 1000)
-        m_Status = DEAD; 
+	if (m_Status == DYING && m_DeathTmr.GetElapsedSimTimeMS() > 1000) { m_Status = DEAD; }
 
     //////////////////////////////////////////////////////
     // Save previous second's position so we can detect larger movement
@@ -1796,7 +1793,6 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             }
 */
             std::snprintf(str, sizeof(str), "%.0f", m_Health);
-//            pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y - 35, str, GUIFont::Left);
             pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
 
             m_HUDStack += -12;

@@ -971,7 +971,7 @@ void HDFirearm::Update()
 
             // Set up the recoil shake offset
             m_RecoilOffset = m_RecoilForce;
-            m_RecoilOffset.SetMagnitude(1.25);
+			m_RecoilOffset.SetMagnitude(std::min(m_RecoilOffset.GetMagnitude(), 1.2F));
         }
 
         AddImpulseForce(m_RecoilForce, m_RecoilOffset);
@@ -997,11 +997,11 @@ void HDFirearm::Update()
             }
 			if (m_FireEchoSound) { m_FireEchoSound->Play(m_Pos); }
         }
-    }
-    else {
+    } else {
         m_Recoiled = false;
-		if (!m_IsAnimatedManually)
-	        m_Frame = 0;
+		// TODO: don't use arbitrary numbers? (see Arm.cpp)
+		m_RecoilForce *= 0.6F;
+		if (!m_IsAnimatedManually) { m_Frame = 0; }
     }
 
     // Display and override gun animation if there's a special one

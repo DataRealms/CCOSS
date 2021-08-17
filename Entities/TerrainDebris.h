@@ -26,12 +26,6 @@ namespace RTE {
 		TerrainDebris() { Clear(); }
 
 		/// <summary>
-		/// Copy constructor method used to instantiate a TerrainDebris object identical to an already existing one.
-		/// </summary>
-		/// <param name="reference">A TerrainDebris object which is passed in by reference.</param>
-		TerrainDebris(const TerrainDebris &reference) { Clear(); Create(reference); }
-
-		/// <summary>
 		/// Makes the TerrainDebris object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
@@ -80,9 +74,9 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Applies the debris to an SLTerrain as its read parameters specify.
+		/// Applies the debris to a SLTerrain as its read parameters specify.
 		/// </summary>
-		/// <param name="pTerrain">Pointer to the terrain to place the debris on. Ownership is NOT transferred!</param>
+		/// <param name="terrain">Pointer to the SLTerrain to place the debris on. Ownership is NOT transferred!</param>
 		void ApplyDebris(SLTerrain *terrain);
 #pragma endregion
 
@@ -90,18 +84,18 @@ namespace RTE {
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		ContentFile m_DebrisFile; //!< Shows where the bitmaps are.
-		std::vector<BITMAP *> m_Bitmaps; //!< All the different bitmaps for each chunk of debris. Not owned.
-		int m_BitmapCount; //!< How many bitmaps we have loaded.
+		ContentFile m_DebrisFile; //!< ContentFile containing the path to the debris sprites.
+		std::vector<BITMAP *> m_Bitmaps; //!< All the different bitmaps of this debris. Not owned.
+		int m_BitmapCount; //!< How many bitmaps this debris has.
 
-		Material m_Material; //!< The material of all this debris.
-		Material m_TargetMaterial; //!< The target material in which this debris should only exist in.
+		Material m_Material; //!< The material of the debris.
+		Material m_TargetMaterial; //!< The target material in which this debris should exist in.
 
 		bool m_OnlyOnSurface; //!< Whether to only place if the target material is exposed on the surface of the terrain. If false, checking will continue to penetrate down into non-air materials to try to find the target material.
 		bool m_OnlyBuried; //!< Whether to only place a piece of this if we find a spot for it to fit completely buried in the terrain.
 
 		int m_MinDepth; //!< Minimum depth into the terrain contour. This can be negative for debris placed above ground.
-		int m_MaxDepth; //!< Max depth into the terrain contour. This can be negative for debris placed above ground.
+		int m_MaxDepth; //!< Maximum depth into the terrain contour. This can be negative for debris placed above ground.
 
 		float m_Density; //!< Approximate Density count per meter.
 
@@ -111,6 +105,10 @@ namespace RTE {
 		/// Clears all the member variables of this TerrainDebris, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear();
+
+		// Disallow the use of some implicit methods.
+		TerrainDebris(const TerrainDebris &reference) = delete;
+		void operator=(const TerrainDebris &rhs) = delete;
 	};
 }
 #endif

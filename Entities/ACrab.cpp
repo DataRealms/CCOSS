@@ -659,7 +659,7 @@ bool ACrab::OnSink(const Vector &pos)
 
 bool ACrab::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
-	PieSlice reloadSlice("Reload", PieSlice::PieSliceIndex::PSI_RELOAD, PieSlice::SliceDirection::UP);
+	PieSlice reloadSlice("Reload", PieSlice::PieSliceIndex::PSI_RELOAD, PieSlice::SliceDirection::UP, !FirearmIsFull() && m_Status != INACTIVE);
     pPieMenu->AddSlice(reloadSlice);
 
 	PieSlice sentryAISlice("Sentry AI Mode", PieSlice::PieSliceIndex::PSI_SENTRY, PieSlice::SliceDirection::DOWN);
@@ -780,6 +780,19 @@ bool ACrab::FirearmIsEmpty() const {
 // Virtual Method:  FirearmNeedsReload
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the currently held HDFirearm's is almost out of ammo.
+
+bool ACrab::FirearmIsFull() const {
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice()) {
+        for (const HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
+            if (const HDFirearm *mountedFirearm = dynamic_cast<const HDFirearm *>(mountedDevice); mountedFirearm && !mountedFirearm->IsFull()) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 bool ACrab::FirearmNeedsReload() const {
     if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice()) {
@@ -2229,7 +2242,7 @@ void ACrab::Update()
     ////////////////////////////////////
     // Reload held MO, if applicable
 
-	if (m_Controller.IsState(WEAPON_RELOAD) && FirearmNeedsReload() && m_Status != INACTIVE) {
+	if (m_Controller.IsState(WEAPON_RELOAD) && !FirearmIsFull() && m_Status != INACTIVE) {
         ReloadFirearms();
 
         if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }

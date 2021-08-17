@@ -51,6 +51,7 @@ void HDFirearm::Clear()
     m_ReloadTime = 0;
     m_FullAuto = false;
     m_FireIgnoresThis = true;
+	m_Reloadable = true;
     m_ShakeRange = 0;
     m_SharpShakeRange = 0;
     m_NoSupportFactor = 0;
@@ -125,6 +126,7 @@ int HDFirearm::Create(const HDFirearm &reference) {
     m_ReloadTime = reference.m_ReloadTime;
     m_FullAuto = reference.m_FullAuto;
     m_FireIgnoresThis = reference.m_FireIgnoresThis;
+    m_Reloadable = reference.m_Reloadable;
     m_ShakeRange = reference.m_ShakeRange;
     m_SharpShakeRange = reference.m_SharpShakeRange;
     m_NoSupportFactor = reference.m_NoSupportFactor;
@@ -193,6 +195,8 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
         reader >> m_FullAuto;
     } else if (propName == "FireIgnoresThis") {
         reader >> m_FireIgnoresThis;
+    } else if (propName == "Reloadable") {
+        reader >> m_Reloadable;
     } else if (propName == "RecoilTransmission") {
         reader >> m_JointStiffness;
     } else if (propName == "IsAnimatedManually") {
@@ -270,6 +274,8 @@ int HDFirearm::Save(Writer &writer) const
     writer << m_FullAuto;
     writer.NewProperty("FireIgnoresThis");
     writer << m_FireIgnoresThis;
+    writer.NewProperty("Reloadable");
+    writer << m_Reloadable;
     writer.NewProperty("RecoilTransmission");
     writer << m_JointStiffness;
 	writer.NewProperty("IsAnimatedManually");
@@ -413,6 +419,12 @@ bool HDFirearm::SetNextMagazineName(string magName)
 int HDFirearm::GetRoundInMagCount() const
 {
     return m_pMagazine ? m_pMagazine->GetRoundCount() : 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int HDFirearm::GetRoundInMagCapacity() const {
+	return m_pMagazine ? m_pMagazine->GetCapacity() : (m_pMagazineReference ? m_pMagazineReference->GetCapacity() : 0);
 }
 
 
@@ -645,8 +657,7 @@ void HDFirearm::StopActivationSound()
 
 void HDFirearm::Reload()
 {
-    if (!m_Reloading)
-    {
+	if (!m_Reloading && m_Reloadable) {
         if (m_pMagazine)
         {
 			Vector constrainedMagazineOffset = g_SceneMan.ShortestDistance(m_Pos, m_pMagazine->GetPos(), g_SceneMan.SceneWrapsX()).SetMagnitude(2.0F);
@@ -678,8 +689,7 @@ void HDFirearm::Reload()
 
 bool HDFirearm::NeedsReloading() const
 {
-    if (!m_Reloading)
-    {
+	if (!m_Reloading && m_Reloadable) {
         if (m_pMagazine)
         {
             // If we've used over half the rounds, we can profitably go ahead and reload
@@ -700,8 +710,7 @@ bool HDFirearm::NeedsReloading() const
 
 bool HDFirearm::IsFull() const
 {
-    if (!m_Reloading)
-    {
+	if (!m_Reloading && m_Reloadable) {
         if (m_pMagazine)
         {
             // If we've used over half the rounds, we can profitably go ahead and reload

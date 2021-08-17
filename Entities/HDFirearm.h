@@ -178,6 +178,12 @@ ClassInfoGetters
 
     int GetRoundInMagCount() const;
 
+	/// <summary>
+	/// Gets the maximum number of rounds the magazine or magazine reference of this HDFirearm can hold.
+	/// </summary>
+	/// <returns>An int with the maximum number of rounds the magazine or magazine reference of this HDFirearm can hold.</returns>
+	int GetRoundInMagCapacity() const;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetActivationDelay
@@ -534,6 +540,11 @@ ClassInfoGetters
 
     void ResetAllTimers() override { HeldDevice::ResetAllTimers(); m_LastFireTmr.Reset(); m_ReloadTmr.Reset(); }
 
+	/// <summary>
+	/// Gets this HDFirearm's reload progress as a scalar from 0 to 1.
+	/// </summary>
+	/// <returns>The reload progress as a scalar from 0 to 1.</returns>
+	float GetReloadProgress() const { return IsReloading() && m_ReloadTime > 0 ? std::min(static_cast<float>(m_ReloadTmr.GetElapsedSimTimeMS() / m_ReloadTime), 1.0F) : 1.0F; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RestDetection
@@ -639,6 +650,18 @@ ClassInfoGetters
 // Return value:    Whether the player can hold down fire and this will fire repeatedly.
 
 	bool IsFullAuto() const { return m_FullAuto; }
+
+	/// <summary>
+	/// Gets whether this HDFirearm is set to be reloadable or not.
+	/// </summary>
+	/// <returns>Whether this HDFirearm is reloadable.</returns>
+	bool IsReloadable() const { return m_Reloadable; }
+
+	/// <summary>
+	/// Sets whether this HDFirearm is reloadable or not.
+	/// </summary>
+	/// <param name="isReloadable">Whether this HDFirearm is reloadable.</param>
+	void SetReloadable(bool isReloadable) { m_Reloadable = isReloadable; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -803,6 +826,7 @@ protected:
     // Whether particles fired from this HDFirearm will ignore hits with itself,
     // and the root parent of this HDFirearm, regardless if they are set to hit MOs.
     bool m_FireIgnoresThis;
+	bool m_Reloadable; //!< Whether this HDFirearm is reloadable by normal means.
 
     // Timer for timing how long ago the last round was fired.
     Timer m_LastFireTmr;

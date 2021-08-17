@@ -885,7 +885,7 @@ void HDFirearm::Update()
                     pShell->SetPos(m_Pos + tempEject);
 
                     // ##@#@@$ TEMP
-                    shellVel.SetXY(pRound->GetShellVel(), 0);
+                    shellVel.SetXY(pRound->GetShellVel() * (1.0F - pRound->GetShellVelVariation() * RandomNum()), 0);
                     shellVel.DegRotate(degAimAngle + m_ShellEjectAngle * (m_HFlipped ? -1 : 1) + shellSpread);
                     pShell->SetVel(m_Vel + shellVel);
                     pShell->SetRotAngle(m_Rotation.GetRadAngle());

@@ -15,6 +15,7 @@ namespace RTE {
 		m_Separation = 0;
 		m_Shell = 0;
 		m_ShellVel = 0;
+		m_ShellVelVariation = 0.1F;
 		m_FireSound.Reset();
 		m_AILifeTime = 0;
 		m_AIFireVel = -1;
@@ -53,6 +54,7 @@ namespace RTE {
 		m_Separation = reference.m_Separation;
 		m_Shell = reference.m_Shell;
 		m_ShellVel = reference.m_ShellVel;
+		m_ShellVelVariation = reference.m_ShellVelVariation;
 		m_FireSound = reference.m_FireSound;
 		m_AILifeTime = reference.m_AILifeTime;
 		m_AIFireVel = reference.m_AIFireVel;
@@ -77,6 +79,8 @@ namespace RTE {
 			m_Shell = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
 		} else if (propName == "ShellVelocity") {
 			reader >> m_ShellVel;
+		} else if (propName == "ShellVelocityVariation") {
+			reader >> m_ShellVelVariation;
 		} else if (propName == "FireSound") {
 			reader >> m_FireSound;
 		} else if (propName == "AILifeTime") {
@@ -108,6 +112,8 @@ namespace RTE {
 		writer << m_Shell;
 		writer.NewProperty("ShellVelocity");
 		writer << m_ShellVel;
+		writer.NewProperty("ShellVelocityVariation");
+		writer << m_ShellVelVariation;
 		writer.NewProperty("FireSound");
 		writer << m_FireSound;
 		writer.NewProperty("AILifeTime");

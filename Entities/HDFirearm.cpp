@@ -1114,90 +1114,32 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
 
     HeldDevice::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 
-    // Don't bother if the aim distance is really short, or not held
-    if (!m_Parent || m_SharpAim < 0.15)
-        return;
+	if (!m_Parent || IsReloading() || m_MaxSharpLength == 0) { return; }
 
-    float sharpLength = m_MaxSharpLength * m_SharpAim;
+	float sharpLength = std::max(m_MaxSharpLength * m_SharpAim, 20.0F);
+	int glow, pointCount;
+	if (playerControlled && sharpLength > 20.0F) {
+		pointCount = m_SharpAim > 0.5F ? 4 : 3;
+		glow = RandomNum(127, 255);
+	} else {
+		pointCount = 2;
+		glow = RandomNum(63, 127);
+	}
+	int pointSpacing = 10 - pointCount;
+	sharpLength -= static_cast<float>(pointSpacing * pointCount) * 0.5F;
+	Vector muzzleOffset(std::max(m_MuzzleOff.m_X, m_SpriteRadius), m_MuzzleOff.m_Y);
 
-    if (playerControlled)
-    {
-        Vector aimPoint1(sharpLength - 9, 0);
-        Vector aimPoint2(sharpLength - 3, 0);
-        Vector aimPoint3(sharpLength + 3, 0);
-        Vector aimPoint4(sharpLength + 9, 0);
-        aimPoint1 += m_MuzzleOff;
-        aimPoint2 += m_MuzzleOff;
-        aimPoint3 += m_MuzzleOff;
-        aimPoint4 += m_MuzzleOff;
-        Matrix aimMatrix(m_Rotation);
-        aimMatrix.SetXFlipped(m_HFlipped);
-        aimPoint1 *= aimMatrix;
-        aimPoint2 *= aimMatrix;
-        aimPoint3 *= aimMatrix;
-        aimPoint4 *= aimMatrix;
-        aimPoint1 += m_Pos;
-        aimPoint2 += m_Pos;
-        aimPoint3 += m_Pos;
-        aimPoint4 += m_Pos;
+	acquire_bitmap(pTargetBitmap);
+	for (int i = 0; i < pointCount; ++i) {
+		Vector aimPoint(sharpLength + static_cast<float>(pointSpacing * i), 0);
+		aimPoint = RotateOffset(aimPoint + muzzleOffset) + m_Pos;
 
-        // Put the flickering glows on the reticule dots, in absolute scene coordinates
-		int glow = (155 + RandomNum(0, 100));
-		g_PostProcessMan.RegisterGlowDotEffect(aimPoint1, YellowDot, glow);
-		g_PostProcessMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
-		g_PostProcessMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
-		g_PostProcessMan.RegisterGlowDotEffect(aimPoint4, YellowDot, glow);
-
-        // Make into target frame coordinates
-        aimPoint1 -= targetPos;
-        aimPoint2 -= targetPos;
-        aimPoint3 -= targetPos;
-        aimPoint4 -= targetPos;
-
-        // Wrap the points
-        g_SceneMan.WrapPosition(aimPoint1);
-        g_SceneMan.WrapPosition(aimPoint2);
-        g_SceneMan.WrapPosition(aimPoint3);
-        g_SceneMan.WrapPosition(aimPoint4);
-
-        acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, aimPoint1.m_X, aimPoint1.m_Y, g_YellowGlowColor);
-        putpixel(pTargetBitmap, aimPoint2.m_X, aimPoint2.m_Y, g_YellowGlowColor);
-        putpixel(pTargetBitmap, aimPoint3.m_X, aimPoint3.m_Y, g_YellowGlowColor);
-        putpixel(pTargetBitmap, aimPoint4.m_X, aimPoint4.m_Y, g_YellowGlowColor);
-        release_bitmap(pTargetBitmap);
-    }
-    else
-    {
-        Vector aimPoint2(sharpLength - 3, 0);
-        Vector aimPoint3(sharpLength + 3, 0);
-        aimPoint2 += m_MuzzleOff;
-        aimPoint3 += m_MuzzleOff;
-        Matrix aimMatrix(m_Rotation);
-        aimMatrix.SetXFlipped(m_HFlipped);
-        aimPoint2 *= aimMatrix;
-        aimPoint3 *= aimMatrix;
-        aimPoint2 += m_Pos;
-        aimPoint3 += m_Pos;
-
-        // Put the flickering glows on the reticule dots, in absolute scene coordinates
-        int glow = (55 + RandomNum(0, 100));
-		g_PostProcessMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
-		g_PostProcessMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
-
-        // Make into target frame coordinates
-        aimPoint2 -= targetPos;
-        aimPoint3 -= targetPos;
-
-        // Wrap the points
-        g_SceneMan.WrapPosition(aimPoint2);
-        g_SceneMan.WrapPosition(aimPoint3);
-
-        acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, aimPoint2.m_X, aimPoint2.m_Y, g_YellowGlowColor);
-        putpixel(pTargetBitmap, aimPoint3.m_X, aimPoint3.m_Y, g_YellowGlowColor);
-        release_bitmap(pTargetBitmap);
-    }
+		g_PostProcessMan.RegisterGlowDotEffect(aimPoint, YellowDot, glow);
+		aimPoint -= targetPos;
+		g_SceneMan.WrapPosition(aimPoint);
+		putpixel(pTargetBitmap, aimPoint.GetFloorIntX(), aimPoint.GetFloorIntY(), g_YellowGlowColor);
+	}
+	release_bitmap(pTargetBitmap);
 }
 
 } // namespace RTE

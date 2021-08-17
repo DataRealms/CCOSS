@@ -3441,7 +3441,6 @@ void AHuman::Update()
 
 					if (pMO) {
 						pMO->SetPos(m_Pos + (m_pFGArm->GetParentOffset() + Vector(m_pFGArm->GetMaxLength(), -m_pFGArm->GetMaxLength() * 0.5F)).GetXFlipped(m_HFlipped).RadRotate(m_AimAngle * GetFlipFactor()) * m_Rotation);
-						float throwScalar = static_cast<float>(std::min(m_ThrowTmr.GetElapsedSimTimeMS(), static_cast<double>(m_ThrowPrepTime)) / m_ThrowPrepTime);
 						float maxThrowVel = pThrown->GetMaxThrowVel();
 						float minThrowVel = pThrown->GetMinThrowVel();
 						if (maxThrowVel == 0) {
@@ -3449,7 +3448,7 @@ void AHuman::Update()
 							maxThrowVel = (m_pFGArm->GetThrowStrength() + std::abs(m_AngularVel * 0.5F)) / std::sqrt(std::abs(pMO->GetMass()) + 1.0F);
 							minThrowVel = maxThrowVel * 0.2F;
 						}
-						Vector tossVec(minThrowVel + (maxThrowVel - minThrowVel) * throwScalar, 0.5F * RandomNormalNum());
+						Vector tossVec(minThrowVel + (maxThrowVel - minThrowVel) * GetThrowProgress(), 0.5F * RandomNormalNum());
 						tossVec.RadRotate(m_AimAngle);
 						pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
 						pMO->SetAngularVel(m_AngularVel + RandomNum(-5.0F, 2.5F) * GetFlipFactor());
@@ -4321,8 +4320,7 @@ void AHuman::Update()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Draws an aiming aid in front of this HeldDevice for throwing.
 
-void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos, double amount) const
-{
+void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos, float progressScalar) const {
     const int pointCount = 9;
     Vector points[pointCount];
     //Color colors[pointCount];
@@ -4336,12 +4334,12 @@ void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos
 
     acquire_bitmap(pTargetBitmap);
 
-    for (int i = 0; i < pointCount * amount; ++i) {
+    for (int i = 0; i < pointCount * progressScalar; ++i) {
         points[i].FlipX(m_HFlipped);
         points[i] += outOffset;
         points[i].RadRotate((m_AimAngle * GetFlipFactor()) + m_Rotation.GetRadAngle());
         points[i] += m_Pos;
-        if (m_pFGArm && m_pFGArm->IsAttached())
+        if (m_pFGArm)
             points[i] += m_pFGArm->GetParentOffset();
 
         // Put the flickering glows on the reticule dots, in absolute scene coordinates
@@ -4448,15 +4446,13 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 
     // Player AI drawing
 
-    // Device aiming reticule
-	if (m_Controller.IsState(AIM_SHARP) && m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice()) {
-		m_pFGArm->GetHeldDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen, m_Controller.IsPlayerControlled());
-	}
-        
-
-    // Throwing reticule
-	if (m_ArmsState == THROWING_PREP) {
-		DrawThrowingReticule(pTargetBitmap, targetPos, std::min(m_ThrowTmr.GetElapsedSimTimeMS() / m_ThrowPrepTime, 1.0));
+	if (m_pFGArm && m_pFGArm->HoldsHeldDevice()) {
+		// Draw the aiming dots for the currently held device.
+		if (m_ArmsState == THROWING_PREP) {
+			DrawThrowingReticule(pTargetBitmap, targetPos, GetThrowProgress());
+		} else if (m_Controller.IsState(AIM_SHARP) || (m_Controller.IsPlayerControlled() && !m_Controller.IsState(PIE_MENU_ACTIVE))) {
+			m_pFGArm->GetHeldDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen, m_Controller.IsState(AIM_SHARP) && m_Controller.IsPlayerControlled());
+		}
 	}
 
     //////////////////////////////////////

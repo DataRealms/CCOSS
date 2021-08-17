@@ -404,6 +404,7 @@ namespace RTE {
 		.property("JetTimeLeft", &AHuman::GetJetTimeLeft, &AHuman::SetJetTimeLeft)
 		.property("JetAngleRange", &AHuman::GetJetAngleRange, &AHuman::SetJetAngleRange)
 		.property("ThrowPrepTime", &AHuman::GetThrowPrepTime, &AHuman::SetThrowPrepTime)
+		.property("ThrowProgress", &AHuman::GetThrowProgress)
 		.property("EquippedItem", &AHuman::GetEquippedItem)
 		.property("EquippedBGItem", &AHuman::GetEquippedBGItem)
 		.property("FirearmIsReady", &AHuman::FirearmIsReady)

@@ -564,6 +564,12 @@ ClassInfoGetters
 //	bool EquipDualWieldableInBGArm();
 
 	/// <summary>
+	/// Gets the throw chargeup progress of this AHuman.
+	/// </summary>
+	/// <returns>The throw chargeup progress, as a scalar from 0 to 1.</returns>
+	float GetThrowProgress() const { return m_ThrowPrepTime > 0 ? static_cast<float>(std::min(m_ThrowTmr.GetElapsedSimTimeMS() / static_cast<double>(m_ThrowPrepTime), 1.0)) : 1.0F; }
+
+	/// <summary>
 	/// Unequips whatever is in the FG arm and puts it into the inventory.
 	/// </summary>
 	/// <returns>Whether there was anything to unequip.</returns>
@@ -931,7 +937,7 @@ protected:
 //                  reticule should be drawn, to indicate force in the throw.
 // Return value:    None.
 
-	void DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), double amount = 1.0) const;
+	void DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), float progressScalar = 1.0F) const;
 
 
     // Member variables

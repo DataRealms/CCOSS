@@ -514,7 +514,7 @@ void AHuman::SetHead(Attachable *newHead) {
             dynamic_cast<AHuman *>(parent)->SetHead(attachable);
         }});
 
-        if (m_pHead->HasNoSetDamageMultiplier()) { m_pHead->SetDamageMultiplier(5.0F); }
+        if (m_pHead->HasNoSetDamageMultiplier()) { m_pHead->SetDamageMultiplier(4.0F); }
         if (m_pHead->IsDrawnAfterParent()) { m_pHead->SetDrawnNormallyByParent(false); }
         m_pHead->SetInheritsRotAngle(false);
     }
@@ -756,7 +756,6 @@ bool AHuman::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 		PieSlice reloadSlice(GetEquippedItem() || GetEquippedBGItem() ? "Reload" : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieSlice::PieSliceIndex::PSI_RELOAD, PieSlice::SliceDirection::UP, ((m_pFGArm && m_pFGArm->GetHeldDevice() && !m_pFGArm->GetHeldDevice()->IsFull()) || (m_pBGArm && m_pBGArm->GetHeldDevice() && !m_pBGArm->GetHeldDevice()->IsFull())) && m_Status != INACTIVE);
 		pPieMenu->AddSlice(reloadSlice);
 	}
-	//To-do: don't oneline this?
 	PieSlice dropSlice(m_pFGArm && m_pFGArm->GetHeldMO() ? "Drop " + m_pFGArm->GetHeldMO()->GetPresetName() : m_pBGArm ? (m_pBGArm->GetHeldMO() ? "Drop " + m_pBGArm->GetHeldMO()->GetPresetName() : (!m_Inventory.empty() ? "Drop Inventory" : "Not holding anything!")) : (m_pFGArm ? "Not holding anything!" : "NO ARM!"), PieSlice::PieSliceIndex::PSI_DROP, PieSlice::SliceDirection::DOWN, ((m_pFGArm && m_pFGArm->GetHeldMO()) || (m_pBGArm && (m_pBGArm->GetHeldMO() || !m_Inventory.empty()))) && m_Status != INACTIVE);
 	pPieMenu->AddSlice(dropSlice);
 
@@ -1399,11 +1398,7 @@ bool AHuman::EquipShieldInBGArm()
             // Move the hand to a poisition so it looks like the new device was drawn from inventory
             m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 
-            // Play the device switching sound only if activity is running
-			if (g_ActivityMan.ActivityRunning())
-			{
-				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
-			}
+			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 
             return true;
         }
@@ -3431,10 +3426,10 @@ void AHuman::Update()
 						if (!pThrown->ActivatesWhenReleased()) { pThrown->Activate(); }
 					}
 					m_ArmsState = THROWING_PREP;
-					m_pFGArm->ReachToward(m_Pos + (m_pFGArm->GetParentOffset() + pThrown->GetStartThrowOffset().RadRotate(m_AimAngle + m_AngularVel * g_TimerMan.GetDeltaTimeSecs())).GetXFlipped(m_HFlipped) * m_Rotation);
+					m_pFGArm->ReachToward(m_Pos + (m_pFGArm->GetParentOffset() + pThrown->GetStartThrowOffset().RadRotate(m_AimAngle + m_AngularVel * deltaTime)).GetXFlipped(m_HFlipped) * m_Rotation);
 				} else if (m_ArmsState == THROWING_PREP) {
 					m_ArmsState = THROWING_RELEASE;
-					//TODO: figure out how to properly use EndThrowOffset, since it doesn't play much a role for just one frame
+					// TODO: figure out how to properly use EndThrowOffset, since it doesn't play much a role for just one frame!
 					m_pFGArm->SetHandPos(m_Pos + (m_pFGArm->GetParentOffset() + pThrown->GetEndThrowOffset().RadRotate(m_AimAngle * GetFlipFactor())).GetXFlipped(m_HFlipped) * m_Rotation);
 
 					MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
@@ -3486,18 +3481,18 @@ void AHuman::Update()
 
     if (m_pBGArm && m_pBGArm->HoldsHeldDevice() && m_Status != INACTIVE) {
 		HeldDevice *pDevice = m_pBGArm->GetHeldDevice();
-
 		if (pDevice->IsReloading()) {
 			m_SharpAimTimer.Reset();
 			m_SharpAimProgress = 0;
-			if (m_pFGArm && m_pFGArm->IsAttached() && !GetEquippedItem()) { m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped)); }
+			if (m_pFGArm && !m_pFGArm->HoldsSomething()) { m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped)); }
 		}
-		if (reloadFG == false && !pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !m_pItemInReach) {
-			if (m_pFGArm && m_pFGArm->IsAttached() && !GetEquippedItem()) { m_pFGArm->SetHandPos(pDevice->GetMagazinePos()); }
+		if (reloadFG == false && !pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD)) {
+			if (m_pFGArm && !m_pFGArm->HoldsSomething()) { m_pFGArm->SetHandPos(pDevice->GetMagazinePos()); }
 			pDevice->Reload();
 			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 		}
-		if (pDevice->DoneReloading() && m_pFGArm && m_pFGArm->IsAttached() && !GetEquippedItem()) { m_pFGArm->SetHandPos(pDevice->GetMagazinePos()); }
+		if (pDevice->DoneReloading() && m_pFGArm && !m_pFGArm->HoldsSomething()) { m_pFGArm->SetHandPos(pDevice->GetMagazinePos()); }
+
 		pDevice->SetSharpAim(m_SharpAimProgress);
 		if (m_Controller.IsState(WEAPON_FIRE)) {
 			pDevice->Activate();
@@ -3559,12 +3554,13 @@ void AHuman::Update()
 					}
 					g_MovableMan.AddParticle(pMO);
 				}
-			} else {
+			} else if (!m_Inventory.empty()) {
 				DropAllInventory();
 				m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 			}
 		}
 		EquipShieldInBGArm();
+		m_SharpAimProgress = 0;
 		m_PieNeedsUpdate = true;
 		m_DeviceEquipTimer.Reset();
 	}
@@ -3578,21 +3574,21 @@ void AHuman::Update()
 	// Try to detect a new item
 	if (m_pFGArm && m_Status == STABLE) {
 		reach += m_pFGArm->GetMaxLength();
-		reachPoint = m_pFGArm->GetPos();
+		reachPoint = m_pFGArm->GetPos() + m_pFGArm->GetJointOffset().GetXFlipped(m_HFlipped).RadRotate(m_pFGArm->GetRotAngle());
 		if (!m_pItemInReach) {
-			MOID itemMOID = g_SceneMan.CastMORay(reachPoint, Vector((m_HFlipped ? -reach : reach) * RandomNum(), RandomNum(0.0F, reach)), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
+			MOID itemMOID = g_SceneMan.CastMORay(reachPoint, Vector(reach * RandomNum(), 0).RadRotate(GetAimAngle(true) + RandomNum(-c_HalfPI, 0.0F) * GetFlipFactor()), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
 
 			MovableObject *pItem = g_MovableMan.GetMOFromID(itemMOID);
 			if (pItem) {
-				m_pItemInReach = pItem ? dynamic_cast<HeldDevice *>(pItem->GetRootParent()) : 0;
+				m_pItemInReach = pItem ? dynamic_cast<HeldDevice *>(pItem->GetRootParent()) : nullptr;
 				if (m_pItemInReach) { m_PieNeedsUpdate = true; }
 			}
 		}
 	}
 
     // Item currently set to be within reach has expired or is now out of range
-    if (m_pItemInReach && (m_pItemInReach->IsUnPickupable() || (m_pItemInReach->HasPickupLimitations() && !m_pItemInReach->IsPickupableBy(this)) || !g_MovableMan.IsDevice(m_pItemInReach) || g_SceneMan.ShortestDistance(reachPoint, m_pItemInReach->GetPos(), g_SceneMan.SceneWrapsX()).GetMagnitude() > reach + m_pItemInReach->GetRadius())) {
-        m_pItemInReach = 0;
+    if (m_pItemInReach && (!m_pFGArm || m_pItemInReach->IsUnPickupable() || (m_pItemInReach->HasPickupLimitations() && !m_pItemInReach->IsPickupableBy(this)) || !g_MovableMan.IsDevice(m_pItemInReach) || g_SceneMan.ShortestDistance(reachPoint, m_pItemInReach->GetPos(), g_SceneMan.SceneWrapsX()).GetMagnitude() > reach + m_pItemInReach->GetRadius())) {
+        m_pItemInReach = nullptr;
         m_PieNeedsUpdate = true;
     }
 
@@ -4004,34 +4000,25 @@ void AHuman::Update()
 
     /////////////////////////////////
     // Manage Attachable:s
-    if (m_pHead && m_pHead->IsAttached()) {
+    if (m_pHead) {
         float toRotate = 0;
         // Only rotate the head to match the aim angle if body is stable and upright
         if (m_Status == STABLE && std::abs(rot) < (c_HalfPI + c_QuarterPI)) {
             toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((m_AimAngle * GetFlipFactor()) * m_LookToAimRatio + rot * (0.9F - m_LookToAimRatio)) * 0.15F;
-        }
-        // If dying upright, make head slump forward or back depending on body lean
-// TODO: Doesn't work too well, but probably could
-//        else if ((m_Status == DEAD || m_Status == DYING) && fabs(m_Rotation.GetRadAngle()) < c_QuarterPI)
-//        {
-//            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(m_Rotation.GetRadAngle() + ((m_HFlipped && m_Rotation.GetRadAngle() > 0) || (!m_HFlipped && m_Rotation.GetRadAngle() > 0) ? c_PI : -c_PI) * 0.6);
-//            toRotate *= 0.10;
-//        }
-        // Make head just keep rotating loosely with the body if unstable or upside down
-        else {
-            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(m_Rotation.GetRadAngle());
-            toRotate *= 0.10F;
+		} else {
+			// Rotate the head loosely along with the body if upside down, unstable or dying.
+            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(rot) * m_pHead->GetJointStiffness() * (std::abs(toRotate) + c_QuarterPI);
         }
         // Now actually rotate by the amount calculated above
         m_pHead->SetRotAngle(m_pHead->GetRotAngle() + toRotate);
     }
 
-    if (m_pFGLeg && m_pFGLeg->IsAttached()) {
+    if (m_pFGLeg) {
         m_pFGLeg->EnableIdle(m_ProneState == NOTPRONE && m_Status != UNSTABLE);
         m_pFGLeg->SetTargetPosition(m_pFGFootGroup->GetLimbPos(m_HFlipped));
     }
 
-    if (m_pBGLeg && m_pBGLeg->IsAttached()) {
+    if (m_pBGLeg) {
         m_pBGLeg->EnableIdle(m_ProneState == NOTPRONE && m_Status != UNSTABLE);
         m_pBGLeg->SetTargetPosition(m_pBGFootGroup->GetLimbPos(m_HFlipped));
     }
@@ -4109,9 +4096,9 @@ void AHuman::Update()
     // Reset this each frame
     m_SharpAimMaxedOut = false;
 
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
-    {
-        float maxLength = m_pFGArm->GetHeldDevice()->GetSharpLength();
+	if (m_pFGArm && m_pFGArm->HoldsHeldDevice()) {
+		HeldDevice *heldDevice = m_pFGArm->GetHeldDevice();
+		float maxLength = heldDevice->GetSharpLength();
 		if (maxLength == 0) {
 			m_SharpAimProgress = 0;
 			m_SharpAimMaxedOut = true;
@@ -4120,17 +4107,27 @@ void AHuman::Update()
 		}
 		// Use a non-terrain check ray to cap the magnitude, so we can't see into objects etc
 		if (m_SharpAimProgress > 0) {
-			if (m_pFGArm->GetHeldDevice()->IsRecoiled()) {
-				float totalGripStrength = m_pFGArm->GetGripStrength() + (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->HoldsHeldDevice() ? m_pBGArm->GetGripStrength() : 0);
-				m_SharpAimProgress *= 1 - std::min(m_pFGArm->GetHeldDevice()->GetRecoilForce().GetMagnitude() / std::max(totalGripStrength * m_pFGArm->GetHeldDevice()->GetGripStrengthMultiplier(), 1.0F), 1.0F);
+			// TODO: make an uniform function to get the total GripStrength of an AHuman?
+			float totalGripStrength = m_pFGArm->GetGripStrength();
+			if (m_pBGArm) {
+				if (m_pBGArm->HoldsHeldDevice()) {
+					HeldDevice *heldBGDevice = m_pBGArm->GetHeldDevice();
+					if (heldBGDevice->IsRecoiled()) {
+						m_SharpAimProgress *= 1.0F - std::min(heldBGDevice->GetRecoilForce().GetMagnitude() / std::max(m_pBGArm->GetGripStrength() * heldBGDevice->GetGripStrengthMultiplier(), 1.0F), 1.0F);
+					}
+				} else if (heldDevice->GetSupported()) {
+					totalGripStrength += m_pBGArm->GetGripStrength();
+				}
+			}
+			if (heldDevice->IsRecoiled()) {
+				m_SharpAimProgress *= 1.0F - std::min(heldDevice->GetRecoilForce().GetMagnitude() / std::max(totalGripStrength * heldDevice->GetGripStrengthMultiplier(), 1.0F), 1.0F);
 			}
 			Vector notUsed;
             Vector sharpAimVector(maxLength, 0);
             sharpAimVector *= aimMatrix;
 
             // See how far along the sharp aim vector there is opaque air
-//            float result = g_SceneMan.CastNotMaterialRay(m_pFGArm->GetHeldDevice()->GetMuzzlePos(), sharpAimVector, g_MaterialAir, 5);
-            float result = g_SceneMan.CastObstacleRay(m_pFGArm->GetHeldDevice()->GetMuzzlePos(), sharpAimVector, notUsed, notUsed, GetRootID(), IgnoresWhichTeam(), g_MaterialAir, 5);
+            float result = g_SceneMan.CastObstacleRay(heldDevice->GetMuzzlePos(), sharpAimVector, notUsed, notUsed, GetRootID(), IgnoresWhichTeam(), g_MaterialAir, 5);
             // If we didn't find anything but air before the sharpdistance, then don't alter the sharp distance
             if (result >= 0 && result < (maxLength * m_SharpAimProgress))
             {
@@ -4138,11 +4135,7 @@ void AHuman::Update()
                 m_SharpAimMaxedOut = true;
             }
         }
-        // Indicate maxed outedness if we really are, too
-        if (m_SharpAimProgress > 0.9)
-            m_SharpAimMaxedOut = true;
-
-//        sharpDistance *= m_Controller.GetAnalogAim().GetMagnitude();
+		if (m_SharpAimProgress > 0.9F) { m_SharpAimMaxedOut = true; }
         aimSight.m_X += maxLength * m_SharpAimProgress;
     }
 
@@ -4193,16 +4186,14 @@ void AHuman::Update()
     // Balance stuff
 
     // Eliminate full rotations
-    while (fabs(rot) > c_TwoPI) {
+    while (std::abs(rot) > c_TwoPI) {
         rot -= rot > 0 ? c_TwoPI : -c_TwoPI;
     }
     // Eliminate rotations over half a turn
-    if (fabs(rot) > c_PI)
-    {
+    if (std::abs(rot) > c_PI) {
         rot = (rot > 0 ? -c_PI : c_PI) + (rot - (rot > 0 ? c_PI : -c_PI));
         // If we're upside down, we're unstable damnit
-		if (m_Status != DYING && m_Status != DEAD)
-			m_Status = UNSTABLE;
+		if (m_Status != DYING && m_Status != DEAD) { m_Status = UNSTABLE; }
         m_StableRecoverTimer.Reset();
     }
 
@@ -4215,80 +4206,57 @@ void AHuman::Update()
             float rotTarget = m_HFlipped ? c_HalfPI : -c_HalfPI;
             float rotDiff = rotTarget - rot;
 
-            if (m_ProneState == GOPRONE)
-            {
-                if (!m_ProneTimer.IsPastSimMS(333))
-                {
-                    if (fabs(rotDiff) > 0.1 && fabs(rotDiff) < c_PI)
-                    {
-                        m_AngularVel += rotDiff * 0.45;// * fabs(rotDiff);
-                        m_Vel.m_X += (m_HFlipped ? -fabs(rotDiff) : fabs(rotDiff)) * 0.25;
-                    }
+			if (m_ProneState == GOPRONE) {
+				if (!m_ProneTimer.IsPastSimMS(333)) {
+					if (std::abs(rotDiff) > 0.1F && std::abs(rotDiff) < c_PI) {
+						m_AngularVel += rotDiff * 0.4F;
+						m_Vel.m_X += (m_HFlipped ? -std::abs(rotDiff) : std::abs(rotDiff)) / std::max(m_Vel.GetMagnitude(), 4.0F);
+					}
+                } else {
+					// Done going down, now stay down without spring.
+                    m_AngularVel *= 0.5F;
+					m_ProneState = PRONE;
                 }
-                // Done going down, now stay down without spring
-                else
-                {
-                    m_AngularVel *= 0.5;
-                    m_ProneState = PRONE;
-                }
-/*
-                // Break the spring if close to target angle.
-                if (-c_HalfPI + fabs(rot) > 0.1)
-                    m_AngularVel -= rot * fabs(rot);
-                else if (fabs(m_AngularVel) > 0.1)
-                    m_AngularVel *= 0.5;
-*/
-            }
-            // If down, try to keep flat against the ground
-            else if (m_ProneState == PRONE)
-            {
-                if (fabs(rotDiff) > c_SixteenthPI && fabs(rotDiff) < c_HalfPI)
-                    m_AngularVel += rotDiff * 0.65;// * fabs(rotDiff);
-                else if (fabs(m_AngularVel) > 0.3)
-                    m_AngularVel *= 0.85;
-            }
+			} else if (m_ProneState == PRONE) {
+				// If down, try to keep flat against the ground.
+				if (std::abs(rotDiff) > c_SixteenthPI && std::abs(rotDiff) < c_HalfPI) {
+					m_AngularVel += rotDiff * 0.65F;
+				} else if (std::abs(m_AngularVel) > 0.3F) {
+					m_AngularVel *= 0.85F;
+				}
+			}
 		} else {
 			// Upright body posture
 			float rotDiff = rot - (GetRotAngleTarget(m_MoveState) * (m_AimAngle > 0 ? 1.0F - (m_AimAngle / c_HalfPI) : 1.0F) * GetFlipFactor());
 			m_AngularVel = m_AngularVel * (0.98F - 0.06F * (m_Health / m_MaxHealth)) - (rotDiff * 0.5F);
 		}
     }
-    // Keel over
-    else if (m_Status == UNSTABLE && fabs(m_AngularVel) < 5)
-    {
-        float rotTarget = 0;
-        // If traveling at speed, then always start falling forward
-        if (fabs(m_Vel.m_X) > 1.0)
-            rotTarget = m_HFlipped ? c_HalfPI : -c_HalfPI;
-        // Go whichever way we're already rotated
-        else
-            rotTarget = rot > 0 ? c_HalfPI : -c_HalfPI;
+	else if (m_Status == UNSTABLE) {
+		float rotTarget = 0;
+		// If traveling at speed, always start falling forward.
+		if (std::abs(m_Vel.m_X) > 1.0F) {
+			rotTarget = m_HFlipped ? c_HalfPI : -c_HalfPI;
+		} else {
+			// Otherwise, go whichever way we're already rotated.
+			rotTarget = rot > 0 ? c_HalfPI : -c_HalfPI;
+		}
 
-        float rotDiff = rotTarget - rot;
-        if (fabs(rotDiff) > 0.1 && fabs(rotDiff) < c_PI)
-        {
-            m_AngularVel += rotDiff * 0.05;
-//            m_Vel.m_X += (rotTarget > 0 ? -fabs(rotDiff) : fabs(rotDiff)) * 0.35;
-        }
-    }
-    // While dying, pull body quickly toward down toward horizontal
-    else if (m_Status == DYING)
-    {
-        float rotTarget = rot > 0 ? c_HalfPI : -c_HalfPI;
-//        float rotTarget = m_HFlipped ? c_HalfPI : -c_HalfPI;
-        float rotDiff = rotTarget - rot;
-        if (!m_DeathTmr.IsPastSimMS(125) && fabs(rotDiff) > 0.1 && fabs(rotDiff) < c_PI)
-        {
-            m_AngularVel += rotDiff * 0.5;//fabs(rotDiff);
-//            m_Vel.m_X += (m_HFlipped ? -fabs(rotDiff) : fabs(rotDiff)) * 0.35;
-            m_Vel.m_X += (rotTarget > 0 ? -fabs(rotDiff) : fabs(rotDiff)) * 0.35;
-        }
-        else
-            m_Status = DEAD;
-
-//        else if (fabs(m_AngularVel) > 0.1)
-//            m_AngularVel *= 0.5;
-    }
+		float rotDiff = rotTarget - rot;
+		if (std::abs(rotDiff) > 0.1F && std::abs(rotDiff) < c_PI) {
+			m_AngularVel += rotDiff * 0.05F;
+		}
+	} else if (m_Status == DYING) {
+		float rotTarget = m_Vel.m_X - (rot + m_AngularVel) > 0 ? -c_HalfPI : c_HalfPI;
+		float rotDiff = rotTarget - rot;
+		if (!m_DeathTmr.IsPastSimMS(125) && std::abs(rotDiff) > 0.1F && std::abs(rotDiff) < c_PI) {
+			// TODO: finetune this for situations like low gravity!
+			float velScalar = 0.5F; //* (g_SceneMan.GetGlobalAcc().GetY * m_GlobalAccScalar) / GetPPM();
+			m_AngularVel += rotDiff * velScalar;
+			m_Vel.m_X += (rotTarget > 0 ? -std::abs(rotDiff) : std::abs(rotDiff)) * velScalar * 0.5F;
+		} else {
+			m_Status = DEAD;
+		}
+	}
     m_Rotation.SetRadAngle(rot);
 
     ///////////////////////////////////////////////////
@@ -4300,12 +4268,9 @@ void AHuman::Update()
 		m_Health -= 0.1F;
 	}
 
-    if (m_Status == DYING)
-    {
-        if (m_pFGArm && m_pFGArm->IsAttached())
-            m_pFGArm->DropEverything();
-        if (m_pBGArm && m_pBGArm->IsAttached())
-            m_pBGArm->DropEverything();
+    if (m_Status == DYING) {
+		if (m_pFGArm) { m_pFGArm->DropEverything(); }
+		if (m_pBGArm) { m_pBGArm->DropEverything(); }
     }
 
     /////////////////////////////////////////
@@ -4613,15 +4578,9 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         }
 
         // Pickup GUI
-        if (!m_Controller.IsState(PIE_MENU_ACTIVE))
-        {
-            if (m_pItemInReach && g_MovableMan.IsDevice(m_pItemInReach) && m_pFGArm && m_pFGArm->IsAttached())
-            {
-                std::snprintf(str, sizeof(str), " %c %s", -49, m_pItemInReach->GetPresetName().c_str());
-                pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 12, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
-            }
-            else
-                m_pItemInReach = 0;
+        if (!m_Controller.IsState(PIE_MENU_ACTIVE) && m_pItemInReach) {
+            std::snprintf(str, sizeof(str), " %c %s", -49, m_pItemInReach->GetPresetName().c_str());
+            pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 12, drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Left);
         }
 /*
         // AI Mode select GUI HUD

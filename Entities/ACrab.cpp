@@ -59,7 +59,7 @@ void ACrab::Clear()
     m_pJetpack = 0;
     m_JetTimeTotal = 0.0;
     m_JetTimeLeft = 0.0;
-	m_JetAngleRange = 0.25;
+	m_JetAngleRange = 0.25F;
     m_MoveState = STAND;
     for (int side = 0; side < SIDECOUNT; ++side)
     {
@@ -2296,44 +2296,26 @@ void ACrab::Update()
     //////////////////////////////
     // Sharp aim calculation
 
-// TODO: make the delay data driven by both the actor and the device!
-    // 
-    if (m_Controller.IsState(AIM_SHARP) && m_MoveState == STAND && m_Vel.GetMagnitude() < 5.0)
-    {
-/*
-        float halfDelay = m_SharpAimDelay / 2;
-        // Accelerate for first half
-        if (!m_SharpAimTimer.IsPastSimMS(halfDelay))
-            m_SharpAimProgress = (float)m_SharpAimTimer.GetElapsedSimTimeMS() / (float)m_SharpAimDelay;
-        // Decelerate for second half
-        else if (!m_SharpAimTimer.IsPastSimMS(m_SharpAimDelay)
-            m_SharpAimProgress
-        // At max
-        else
-            m_SharpAimProgress = 1.0;
-*/
-        float aimMag = m_Controller.GetAnalogAim().GetMagnitude();
+	if (m_Controller.IsState(AIM_SHARP) && m_Status == STABLE && m_Vel.GetMagnitude() < 5.0F) {
+        float aimMag = analogAim.GetMagnitude();
 
-        // If aim sharp is being done digitally, then translate to full analog aim mag
-        if (aimMag < 0.1)
-            aimMag = 1.0;
+		// If aim sharp is being done digitally, then translate to full magnitude.
+		if (aimMag < 0.1F) { aimMag = 1.0F; }
+		if (m_MoveState == WALK) { aimMag *= 0.3F; }
 
-        if (m_SharpAimTimer.IsPastSimMS(m_SharpAimDelay))
-        {
-            // Only go slower outward
-            if (m_SharpAimProgress < aimMag)
-                m_SharpAimProgress += (aimMag - m_SharpAimProgress) * 0.035;
-            else
-                m_SharpAimProgress = aimMag;
-        }
-        else
-            m_SharpAimProgress = 0;
-    }
-    else
-    {
-        m_SharpAimProgress = 0;
-        m_SharpAimTimer.Reset();
-    }
+		if (m_SharpAimTimer.IsPastSimMS(m_SharpAimDelay)) {
+			// Only go slower outward.
+			if (m_SharpAimProgress < aimMag) {
+				m_SharpAimProgress += (aimMag - m_SharpAimProgress) * 0.035F;
+			} else {
+				m_SharpAimProgress = aimMag;
+			}
+		} else {
+			m_SharpAimProgress *= 0.95F;
+		}
+	} else {
+		m_SharpAimProgress = std::max(m_SharpAimProgress * 0.95F - 0.1F, 0.0F);
+	}
 
     ////////////////////////////////////
     // Fire/Activate held devices

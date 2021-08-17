@@ -1062,7 +1062,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 				gibVelocity.RadRotate(gibSettingsObject.InheritsVelocity() ? impactImpulse.GetAbsRadAngle() : m_Rotation.GetRadAngle() + (m_HFlipped ? c_PI : 0));
 				// The "Even" spread will spread all gib particles evenly in an arc, while maintaining a randomized velocity magnitude.
 				if (gibSettingsObject.GetSpreadMode() == Gib::SPREAD_EVEN) {
-					gibVelocity.RadRotate(gibSpread * 0.5F - gibSpread * i / count);
+					gibVelocity.RadRotate(gibSpread - gibSpread * 2.0F * static_cast<float>(i) / static_cast<float>(count));
 				} else {
 					gibVelocity.RadRotate(gibSpread * RandomNormalNum());
 				}

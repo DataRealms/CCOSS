@@ -73,6 +73,7 @@ void MOSRotating::Clear()
     m_GibImpulseLimit = 0;
     m_GibWoundLimit = 0;
     m_GibBlastStrength = 10.0F;
+	m_WoundCountAffectsImpulseLimitRatio = 0.25F;
     m_GibSound = nullptr;
     m_EffectOnGib = true;
     m_pFlipBitmap = 0;
@@ -254,6 +255,7 @@ int MOSRotating::Create(const MOSRotating &reference) {
     m_GibImpulseLimit = reference.m_GibImpulseLimit;
     m_GibWoundLimit = reference.m_GibWoundLimit;
     m_GibBlastStrength = reference.m_GibBlastStrength;
+	m_WoundCountAffectsImpulseLimitRatio = reference.m_WoundCountAffectsImpulseLimitRatio;
 	if (reference.m_GibSound) { m_GibSound = dynamic_cast<SoundContainer*>(reference.m_GibSound->Clone()); }
 	m_EffectOnGib = reference.m_EffectOnGib;
     m_LoudnessOnGib = reference.m_LoudnessOnGib;
@@ -324,8 +326,10 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_GibImpulseLimit;
     else if (propName == "GibWoundLimit" || propName == "WoundLimit")
         reader >> m_GibWoundLimit;
-    else if (propName == "GibBlastStrength") {
-        reader >> m_GibBlastStrength;
+	else if (propName == "GibBlastStrength") {
+		reader >> m_GibBlastStrength;
+	} else if (propName == "WoundCountAffectsImpulseLimitRatio") {
+        reader >> m_WoundCountAffectsImpulseLimitRatio;
 	} else if (propName == "GibSound") {
 		if (!m_GibSound) { m_GibSound = new SoundContainer; }
 		reader >> m_GibSound;
@@ -1166,9 +1170,13 @@ void MOSRotating::ApplyImpulses()
         totalImpulse += (*iItr).first;
     }
     // If impulse gibbing threshold is enabled for this, see if it's below the total impulse force
-    if (m_GibImpulseLimit > 0 && totalImpulse.GetMagnitude() > m_GibImpulseLimit)
-        GibThis(totalImpulse);
-
+	if (m_GibImpulseLimit > 0) {
+		float impulseLimit = m_GibImpulseLimit;
+		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) {
+			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
+		}
+		if (totalImpulse.GetMagnitude() > impulseLimit) { GibThis(totalImpulse); }
+	}
     MOSprite::ApplyImpulses();
 }
 
@@ -1438,9 +1446,13 @@ void MOSRotating::PostTravel()
     MOSprite::PostTravel();
 
     // Check if travel hits created enough impulse forces to gib this
-    if (m_GibImpulseLimit > 0 && m_TravelImpulse.GetMagnitude() > m_GibImpulseLimit)
-        GibThis();
-
+	if (m_GibImpulseLimit > 0) {
+		float impulseLimit = m_GibImpulseLimit;
+		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) {
+			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
+		}
+		if (m_TravelImpulse.GetMagnitude() > impulseLimit) { GibThis(); }
+	}
     // Reset
     m_DeepHardness = 0;
 

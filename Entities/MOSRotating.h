@@ -645,6 +645,12 @@ ClassInfoGetters
     /// <param name="newLimit">The new gib wound limit to use.</param>
     void SetGibWoundLimit(int newGibWoundLimit) { m_GibWoundLimit = newGibWoundLimit; }
 
+	/// <summary>
+	/// Gets the rate at which wound count should diminish the gib impulse limit of this MOSRotating.
+	/// </summary>
+	/// <returns>The rate at which wound count affects the impulse limit.</returns>
+	float GetWoundCountAffectsImpulseLimitRatio() const { return m_WoundCountAffectsImpulseLimitRatio; }
+
     /// <summary>
     /// Gets the gib blast strength this MOSRotating, i.e. the strength with which Gibs and Attachables will be launched when this MOSRotating is gibbed.
     /// </summary>
@@ -962,6 +968,7 @@ protected:
     // The number of wound emitters allowed before this gets gibbed. 0 means this can't get gibbed
     int m_GibWoundLimit;
     float m_GibBlastStrength; //!< The strength with which Gibs and Attachables will get launched when this MOSRotating is gibbed.
+	float m_WoundCountAffectsImpulseLimitRatio; //!< At what rate should wound count diminish the gib impulse limit of this MOSRotating.
     // Gib sound effect
     SoundContainer *m_GibSound;
     // Whether to flash effect on gib

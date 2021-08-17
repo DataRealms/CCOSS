@@ -806,6 +806,7 @@ namespace RTE {
 		.property("GibWoundLimit", (int (MOSRotating:: *)() const) &MOSRotating::GetGibWoundLimit, &MOSRotating::SetGibWoundLimit)
 		.property("GibSound", &MOSRotating::GetGibSound, &MOSRotatingSetGibSound)
 		.property("GibImpulseLimit", &MOSRotating::GetGibImpulseLimit, &MOSRotating::SetGibImpulseLimit)
+		.property("WoundCountAffectsImpulseLimitRatio", &MOSRotating::GetWoundCountAffectsImpulseLimitRatio)
 		.property("DamageMultiplier", &MOSRotating::GetDamageMultiplier, &MOSRotating::SetDamageMultiplier)
 		.property("WoundCount", (int (MOSRotating:: *)() const) &MOSRotating::GetWoundCount)
 		.property("OrientToVel", &MOSRotating::GetOrientToVel, &MOSRotating::SetOrientToVel)

@@ -3831,172 +3831,63 @@ void AHuman::Update()
                 m_Paths[FGROUND][CRAWL].Terminate();
                 m_Paths[BGROUND][CRAWL].Terminate();
             }
-        }
-        // JUMPING
-        else if ((m_pFGLeg || m_pBGLeg) && m_MoveState == JUMP) {
-            //TODO 4zK Uncomment this section to keep the limb held static
-            /*
-            if (m_pFGLeg) {
-                m_pFGFootGroup->SetLimbPos(m_Pos + RotateOffset(m_Paths[FGROUND][STAND].GetStartOffset()));
-            }
-            if (m_pBGLeg) {
-                m_pBGFootGroup->SetLimbPos(m_Pos + RotateOffset(m_Paths[BGROUND][STAND].GetStartOffset()));
-            }
-            */
+		} else if (m_pFGLeg || m_pBGLeg) {
+			if (m_MoveState == JUMP) {
+				// TODO: Utilize jump paths in an intuitive way!
+				if (m_pFGLeg && (!m_Paths[FGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal)) {
+					m_pFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pFGLeg->GetParentOffset()), m_pFGLeg->GetMaxLength(), g_SceneMan.GetGlobalAcc() * deltaTime, m_AngularVel, m_pFGLeg->GetMass(), deltaTime);
+				}
+				if (m_pBGLeg && (!m_Paths[BGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal)) {
+					m_pBGFootGroup->FlailAsLimb( m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), g_SceneMan.GetGlobalAcc() * deltaTime, m_AngularVel, m_pBGLeg->GetMass(), deltaTime);
+				}
+				if (m_JetTimeLeft <= 0) {
+					m_MoveState = STAND;
+					m_Paths[FGROUND][JUMP].Terminate();
+					m_Paths[BGROUND][JUMP].Terminate();
+					m_Paths[FGROUND][STAND].Terminate();
+					m_Paths[BGROUND][STAND].Terminate();
+					m_Paths[FGROUND][WALK].Terminate();
+					m_Paths[BGROUND][WALK].Terminate();
+				}
+			} else if (m_MoveState == CROUCH) {
+				m_Paths[FGROUND][WALK].Terminate();
+				m_Paths[BGROUND][WALK].Terminate();
+				m_Paths[FGROUND][CRAWL].Terminate();
+				m_Paths[BGROUND][CRAWL].Terminate();
 
-            //TODO 4zK Uncomment this section to make the limb follow its jump path. I believe this was data's original intention but
-            // 1. The existing standard jump limbpath is awful, the actor spends all its time squatting
-            // 2. I'm not sure of the details, but this push as limb doesn't seem to be advancing the jump limbpath, so it doesn't work very well, even with my efforts to properly reset it
-            /*
-            if (m_pFGLeg && (!m_Paths[FGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal)) {
-                m_pFGFootGroup->PushAsLimb(
-                    m_Pos + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                    m_Vel,
-                    Matrix(),
-                    m_Paths[FGROUND][m_MoveState],
-                    deltaTime);
-            }
-            if (m_pBGLeg && (!m_Paths[BGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal)) {
-                m_pBGFootGroup->PushAsLimb(
-                    m_Pos + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                    m_Vel,
-                    Matrix(),
-                    m_Paths[BGROUND][m_MoveState],
-                    deltaTime);
-            }
-            */
-            if (m_pFGLeg && (!m_Paths[FGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal)) {
-                m_pFGFootGroup->FlailAsLimb(
-                    m_Pos,
-                    m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
-                    m_pFGLeg->GetMaxLength(),
-                    g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
-                    m_AngularVel,
-                    m_pFGLeg->GetMass(),
-                    g_TimerMan.GetDeltaTimeSecs());
-            }
-            if (m_pBGLeg && (!m_Paths[BGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal)) {
-                m_pBGFootGroup->FlailAsLimb(
-                    m_Pos,
-                    m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) *m_Rotation,
-                    m_pBGLeg->GetMaxLength(),
-                    g_SceneMan.GetGlobalAcc() *g_TimerMan.GetDeltaTimeSecs(),
-                    m_AngularVel,
-                    m_pBGLeg->GetMass(),
-                    g_TimerMan.GetDeltaTimeSecs());
-            }
+				if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[FGROUND][CROUCH], deltaTime); }
 
-            if (m_JetTimeLeft <= 0) {
-                m_MoveState = STAND;
-                m_Paths[FGROUND][JUMP].Terminate();
-                m_Paths[BGROUND][JUMP].Terminate();
-                m_Paths[FGROUND][STAND].Terminate();
-                m_Paths[BGROUND][STAND].Terminate();
-                m_Paths[FGROUND][WALK].Terminate();
-                m_Paths[BGROUND][WALK].Terminate();
-            }
-        }
-        // CROUCHING
-        else if ((m_pFGLeg || m_pBGLeg) && m_MoveState == CROUCH)
-        {
-            m_Paths[FGROUND][WALK].Terminate();
-            m_Paths[BGROUND][WALK].Terminate();
-            m_Paths[FGROUND][CRAWL].Terminate();
-            m_Paths[BGROUND][CRAWL].Terminate();
+				if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[BGROUND][CROUCH], deltaTime); }
 
-            if (m_pFGLeg)
-                m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                           m_Vel,
-                                           Matrix(),
-                                           m_Paths[FGROUND][CROUCH],
-                                           deltaTime);
+			} else {
+				m_Paths[FGROUND][WALK].Terminate();
+				m_Paths[BGROUND][WALK].Terminate();
+				m_Paths[FGROUND][CRAWL].Terminate();
+				m_Paths[BGROUND][CRAWL].Terminate();
+				m_Paths[FGROUND][ARMCRAWL].Terminate();
+				m_Paths[BGROUND][ARMCRAWL].Terminate();
 
-            if (m_pBGLeg)
-                m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                           m_Vel,
-                                           Matrix(),
-                                           m_Paths[BGROUND][CROUCH],
-                                           deltaTime);
-        }
-        // STANDING
-        else if (m_pFGLeg || m_pBGLeg)
-        {
-            m_Paths[FGROUND][WALK].Terminate();
-            m_Paths[BGROUND][WALK].Terminate();
-            m_Paths[FGROUND][CRAWL].Terminate();
-            m_Paths[BGROUND][CRAWL].Terminate();
+				if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[FGROUND][STAND], deltaTime, 0, false); }
 
-            if (m_pFGLeg)
-                m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                      m_Vel,
-                                      Matrix(),
-                                      m_Paths[FGROUND][STAND],
-                                      deltaTime,
-                                      0,
-                                      false);
-
-            if (m_pBGLeg)
-                m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                      m_Vel,
-                                      Matrix(),
-                                      m_Paths[BGROUND][STAND],
-                                      deltaTime,
-                                      0,
-                                      false);
-        }
-    }
-    // Not stable/standing, so make sure the end of limbs are moving around limply in a ragdoll fashion
-    else
-    {
-
-// TODO: Make the limb atom groups fly around and react to terrain, without getting stuck etc
-        bool wrapped = false;
-        Vector limbPos;
-        if (m_pFGArm)
-        {
-//            m_pFGHandGroup->SetLimbPos(m_pFGArm->GetHandPos(), m_HFlipped);
-            m_pFGHandGroup->FlailAsLimb(m_Pos,
-                                        m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
-                                        m_pFGArm->GetMaxLength(),
-                                        g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
-                                        m_AngularVel,
-                                        m_pFGArm->GetMass(),
-                                        g_TimerMan.GetDeltaTimeSecs());
-        }
-        if (m_pBGArm)
-        {
-//            m_pBGHandGroup->SetLimbPos(m_pBGArm->GetHandPos(), m_HFlipped);
-            m_pBGHandGroup->FlailAsLimb(m_Pos,
-                                        m_pBGArm->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
-                                        m_pBGArm->GetMaxLength(),
-                                        g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
-                                        m_AngularVel,
-                                        m_pBGArm->GetMass(),
-                                        g_TimerMan.GetDeltaTimeSecs());
-        }
-        if (m_pFGLeg)
-        {
-//            m_pFGFootGroup->SetLimbPos(m_pFGLeg->GetAnklePos(), m_HFlipped);
-            m_pFGFootGroup->FlailAsLimb(m_Pos,
-                                        m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
-                                        m_pFGLeg->GetMaxLength(),
-                                        g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
-                                        m_AngularVel,
-                                        m_pFGLeg->GetMass(),
-                                        g_TimerMan.GetDeltaTimeSecs());
-        }
-        if (m_pBGLeg)
-        {
-//            m_pBGFootGroup->SetLimbPos(m_pBGLeg->GetAnklePos(), m_HFlipped);
-            m_pBGFootGroup->FlailAsLimb(m_Pos,
-                                        m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
-                                        m_pBGLeg->GetMaxLength(),
-                                        g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
-                                        m_AngularVel,
-                                        m_pBGLeg->GetMass(),
-                                        g_TimerMan.GetDeltaTimeSecs());
-        }
-    }
+				if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[BGROUND][STAND], deltaTime, 0, false); }
+			}
+		}
+	} else {
+		// Not stable/standing, so make sure the end of limbs are moving around limply in a ragdoll fashion.
+		// TODO: Make the limb atom groups fly around and react to terrain, without getting stuck etc.
+		if (m_pFGArm) {
+			m_pFGHandGroup->FlailAsLimb(m_Pos, RotateOffset(m_pFGArm->GetParentOffset()), m_pFGArm->GetMaxLength(), (g_SceneMan.GetGlobalAcc() * deltaTime).RadRotate(m_AngularVel * deltaTime), m_AngularVel, m_pFGArm->GetMass(), deltaTime);
+		}
+		if (m_pBGArm) {
+            m_pBGHandGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGArm->GetParentOffset()), m_pBGArm->GetMaxLength(), (g_SceneMan.GetGlobalAcc() * deltaTime).RadRotate(m_AngularVel * deltaTime), m_AngularVel, m_pBGArm->GetMass(), deltaTime);
+		}
+		if (m_pFGLeg) {
+            m_pFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pFGLeg->GetParentOffset()), m_pFGLeg->GetMaxLength(), (g_SceneMan.GetGlobalAcc() * deltaTime).RadRotate(m_AngularVel * deltaTime), m_AngularVel, m_pFGLeg->GetMass(), deltaTime);
+		}
+        if (m_pBGLeg) {
+            m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), (g_SceneMan.GetGlobalAcc() * deltaTime).RadRotate(m_AngularVel * deltaTime), m_AngularVel, m_pBGLeg->GetMass(), deltaTime);
+		}
+	}
 
     /////////////////////////////////
     // Manage Attachable:s

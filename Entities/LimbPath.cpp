@@ -300,11 +300,12 @@ Vector LimbPath::GetCurrentVel(const Vector &limbPos)
 {
     Vector returnVel;
     Vector distVect = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget());
+	float adjustedTravelSpeed = m_TravelSpeed[m_WhichSpeed] / (1.0F + m_JointVel.GetMagnitude() * 0.1F);
 
     if (IsStaticPoint())
     {
         returnVel = distVect * c_MPP / 0.020/* + m_JointVel*/;
-        returnVel.CapMagnitude(m_TravelSpeed[m_WhichSpeed]);
+        returnVel.CapMagnitude(adjustedTravelSpeed);
         returnVel += m_JointVel;
 
 //        if (distVect.GetMagnitude() < 0.5)
@@ -312,7 +313,7 @@ Vector LimbPath::GetCurrentVel(const Vector &limbPos)
     }
     else
     {
-        returnVel.SetXY(m_TravelSpeed[m_WhichSpeed], 0);
+        returnVel.SetXY(adjustedTravelSpeed, 0);
 
         if (!distVect.IsZero())
             returnVel.AbsRotateTo(distVect);

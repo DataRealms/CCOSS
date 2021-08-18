@@ -158,20 +158,22 @@ namespace RTE {
 	void SLTerrain::TexturizeTerrain() {
 		BITMAP *fgColorBitmap = m_FGColorLayer->GetBitmap();
 		BITMAP *bgColorBitmap = m_BGColorLayer->GetBitmap();
-		BITMAP *bgLayerTexture = m_BGTextureFile.GetAsBitmap();
+		BITMAP *defaultBGLayerTexture = m_BGTextureFile.GetAsBitmap();
 
 		const std::array<Material *, c_PaletteEntriesNumber> &materialPalette = g_SceneMan.GetMaterialPalette();
 		const std::array<unsigned char, c_PaletteEntriesNumber> &materialMappings = g_PresetMan.GetDataModule(m_BitmapFile.GetDataModuleID())->GetAllMaterialMappings();
 
-		std::array<BITMAP *, c_PaletteEntriesNumber> materialTextures;
-		materialTextures.fill(nullptr);
+		std::array<BITMAP *, c_PaletteEntriesNumber> materialFGTextures;
+		std::array<BITMAP *, c_PaletteEntriesNumber> materialBGTextures;
+		materialFGTextures.fill(nullptr);
+		materialBGTextures.fill(nullptr);
 		std::array<int, c_PaletteEntriesNumber> materialColors;
 		materialColors.fill(0);
 
 		//acquire_bitmap(m_MainBitmap);
 		//acquire_bitmap(fgColorBitmap);
 		//acquire_bitmap(bgColorBitmap);
-		//acquire_bitmap(bgLayerTexture);
+		//acquire_bitmap(defaultBGLayerTexture);
 
 		// Go through each pixel on the main bitmap, which contains all the material pixels loaded from the bitmap
 		// Place texture pixels on the FG layer corresponding to the materials on the main material bitmap
@@ -190,37 +192,48 @@ namespace RTE {
 				const Material *material = (matIndex >= 0 && matIndex < c_PaletteEntriesNumber && materialPalette.at(matIndex)) ? materialPalette.at(matIndex) : materialPalette.at(MaterialColorKeys::g_MaterialOutOfBounds);
 
 				// If haven't read a pixel of this material before, then get its texture so we can quickly access it
-				if (!materialTextures.at(matIndex) && material->GetTexture()) {
-					materialTextures.at(matIndex) = material->GetTexture();
-					//acquire_bitmap(materialTextures.at(matIndex));
+				if (!materialFGTextures.at(matIndex) && material->GetFGTexture()) {
+					materialFGTextures.at(matIndex) = material->GetFGTexture();
+					//acquire_bitmap(materialFGTextures.at(matIndex));
+				}
+				if (!materialBGTextures.at(matIndex) && material->GetBGTexture()) {
+					materialBGTextures.at(matIndex) = material->GetBGTexture();
+					//acquire_bitmap(materialBGTextures.at(matIndex));
 				}
 
-				int pixelColor = 0;
+				int fgPixelColor = 0;
 				// If actually no texture for the material, then use the material's solid color instead
-				if (!materialTextures.at(matIndex)) {
+				if (!materialFGTextures.at(matIndex)) {
 					if (materialColors.at(matIndex) == 0) { materialColors.at(matIndex) = material->GetColor().GetIndex(); }
-					pixelColor = materialColors.at(matIndex);
+					fgPixelColor = materialColors.at(matIndex);
 				} else {
-					pixelColor = _getpixel(materialTextures.at(matIndex), xPos % materialTextures.at(matIndex)->w, yPos % materialTextures.at(matIndex)->h);
+					fgPixelColor = _getpixel(materialFGTextures.at(matIndex), xPos % materialFGTextures.at(matIndex)->w, yPos % materialFGTextures.at(matIndex)->h);
 				}
-				_putpixel(fgColorBitmap, xPos, yPos, pixelColor);
+				_putpixel(fgColorBitmap, xPos, yPos, fgPixelColor);
 
-				// Draw background texture on the background where this is stuff on the foreground
-				if (bgLayerTexture && pixelColor != ColorKeys::g_MaskColor) {
-					pixelColor = _getpixel(bgLayerTexture, xPos % bgLayerTexture->w, yPos % bgLayerTexture->h);
-					_putpixel(bgColorBitmap, xPos, yPos, pixelColor);
+				int bgPixelColor = 0;
+				if (matIndex == 0) {
+					bgPixelColor = ColorKeys::g_MaskColor;
 				} else {
-					_putpixel(bgColorBitmap, xPos, yPos, ColorKeys::g_MaskColor);
+					if (!materialBGTextures.at(matIndex)) {
+						bgPixelColor = _getpixel(defaultBGLayerTexture, xPos % defaultBGLayerTexture->w, yPos % defaultBGLayerTexture->h);
+					} else {
+						bgPixelColor = _getpixel(materialBGTextures.at(matIndex), xPos % materialBGTextures.at(matIndex)->w, yPos % materialBGTextures.at(matIndex)->h);
+					}
 				}
+				_putpixel(bgColorBitmap, xPos, yPos, bgPixelColor);
 			}
 		}
 		//release_bitmap(m_MainBitmap);
 		//release_bitmap(fgColorBitmap);
 		//release_bitmap(bgColorBitmap);
-		//release_bitmap(bgLayerTexture);
+		//release_bitmap(defaultBGLayerTexture);
 		/*
-		for (BITMAP *textureBitmap : materialTextures) {
-			release_bitmap(textureBitmap);
+		for (BITMAP *fgTextureBitmap : materialFGTextures) {
+			release_bitmap(fgTextureBitmap);
+		}
+		for (BITMAP *bgTextureBitmap : materialBGTextures) {
+			release_bitmap(bgTextureBitmap);
 		}
 		*/
 	}

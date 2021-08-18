@@ -64,7 +64,7 @@ namespace RTE {
 
 	void TerrainFrosting::ApplyFrosting(SLTerrain *terrain) const {
 		// Try to get the texture of the frosting material. If there is none, the color index will be used instead.
-		BITMAP *frostingTexture = m_FrostingMaterial.GetTexture();
+		BITMAP *frostingTexture = m_FrostingMaterial.GetFGTexture();
 		BITMAP *fgColorBitmap = terrain->GetFGColorBitmap();
 		BITMAP *matBitmap = terrain->GetBitmap();
 

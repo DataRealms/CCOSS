@@ -6,6 +6,7 @@
 
 namespace RTE {
 
+	class Box;
 	class SLTerrain;
 
 	/// <summary>
@@ -80,7 +81,20 @@ namespace RTE {
 		void ApplyDebris(SLTerrain *terrain);
 #pragma endregion
 
-	protected:
+	private:
+
+		/// <summary>
+		/// Enumeration for the different debris placement modes.
+		/// </summary>
+		enum DebrisPlacementModes {
+			NoPlacementRestrictions,
+			OnSurfaceOnly,
+			OnCavitySurfaceOnly,
+			OnSurfaceAndCavitySurface,
+			OnOverhangOnly,
+			OnCavityOverhangOnly,
+			OnOverhangAndCavityOverhang
+		};
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
@@ -91,7 +105,7 @@ namespace RTE {
 		Material m_Material; //!< The material of the debris.
 		Material m_TargetMaterial; //!< The target material in which this debris should exist in.
 
-		bool m_OnlyOnSurface; //!< Whether to only place if the target material is exposed on the surface of the terrain. If false, checking will continue to penetrate down into non-air materials to try to find the target material.
+		DebrisPlacementModes m_DebrisPlacementMode; //!< This will determine how target material checking and debris applying should behave. If set to NoPlacementRestrictions, checking will continue to penetrate down into non-air materials to try to find the target material.
 		bool m_OnlyBuried; //!< Whether to only place a piece of this if we find a spot for it to fit completely buried in the terrain.
 
 		int m_MinDepth; //!< Minimum depth into the terrain contour. This can be negative for debris placed above ground.
@@ -99,7 +113,23 @@ namespace RTE {
 
 		float m_Density; //!< Approximate Density count per meter.
 
-	private:
+#pragma region Debris Application
+		/// <summary>
+		/// Checks if conditions apply for a debris piece to be placed to the terrain. The actual position is returned via the passed in Box's center position.
+		/// </summary>
+		/// <param name="terrain">Pointer to the SLTerrain to check debris placement on. Ownership is NOT transferred!</param>
+		/// <param name="buriedCheckBox">A Box that holds the debris piece's dimensions for checking. The center of the Box will be modified during checking.</param>
+		/// <returns>True if a valid placement position was found, which means the passed in Box's center or corner positions are good to be used as the piece's actual position.</returns>
+		bool GetPiecePlacementPosition(SLTerrain *terrain, Box &buriedCheckBox) const;
+
+		/// <summary>
+		/// Checks whether the passed in pixel color value is of target material, and if extra conditions apply for it to be valid for placement, depending on this' DebrisPlacementMode.
+		/// </summary>
+		/// <param name="materialCheckPixel">The pixel color value to check.</param>
+		/// <param name="prevMaterialCheckPixel">The previously checked pixel color value to check extra conditions with. Does not apply when DebrisPlacementMode is NoPlacementRestrictions.</param>
+		/// <returns>Whether the passed in pixel color value is valid for debris placement.</returns>
+		bool MaterialPixelIsValidTarget(int materialCheckPixel, int prevMaterialCheckPixel) const;
+#pragma endregion
 
 		/// <summary>
 		/// Clears all the member variables of this TerrainDebris, effectively resetting the members of this abstraction level only.

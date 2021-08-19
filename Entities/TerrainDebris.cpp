@@ -17,6 +17,11 @@ namespace RTE {
 		m_OnlyBuried = false;
 		m_MinDepth = 0;
 		m_MaxDepth = 10;
+		m_MinRotation = 0;
+		m_MaxRotation = 0;
+		m_CanHFlip = false;
+		m_CanVFlip = false;
+		m_FlipChance = 0.5F;
 		m_Density = 0.01F;
 	}
 
@@ -46,6 +51,11 @@ namespace RTE {
 		m_OnlyBuried = reference.m_OnlyBuried;
 		m_MinDepth = reference.m_MinDepth;
 		m_MaxDepth = reference.m_MaxDepth;
+		m_MinRotation = reference.m_MinRotation;
+		m_MaxRotation = reference.m_MaxRotation;
+		m_CanHFlip = reference.m_CanHFlip;
+		m_CanVFlip = reference.m_CanVFlip;
+		m_FlipChance = reference.m_FlipChance;
 		m_Density = reference.m_Density;
 
 		return 0;
@@ -65,13 +75,23 @@ namespace RTE {
 			reader >> m_TargetMaterial;
 		} else if (propName == "DebrisPlacementMode") {
 			m_DebrisPlacementMode = static_cast<DebrisPlacementModes>(std::stoi(reader.ReadPropValue()));
-			if (m_DebrisPlacementMode < DebrisPlacementModes::NoPlacementRestrictions || m_DebrisPlacementMode > DebrisPlacementModes::OnOverhangAndCavityOverhang) { reader.ReportError("Invalid "); }
+			if (m_DebrisPlacementMode < DebrisPlacementModes::NoPlacementRestrictions || m_DebrisPlacementMode > DebrisPlacementModes::OnOverhangAndCavityOverhang) { reader.ReportError("Invalid TerrainDebris placement mode!"); }
 		} else if (propName == "OnlyBuried") {
 			reader >> m_OnlyBuried;
 		} else if (propName == "MinDepth") {
 			reader >> m_MinDepth;
 		} else if (propName == "MaxDepth") {
 			reader >> m_MaxDepth;
+		} else if (propName == "MinRotation") {
+			reader >> m_MinRotation;
+		} else if (propName == "MaxRotation") {
+			reader >> m_MaxRotation;
+		} else if (propName == "CanHFlip") {
+			reader >> m_CanHFlip;
+		} else if (propName == "CanVFlip") {
+			reader >> m_CanVFlip;
+		} else if (propName == "FlipChance") {
+			reader >> m_FlipChance;
 		} else if (propName == "DensityPerMeter") {
 			reader >> m_Density;
 		} else {
@@ -85,24 +105,20 @@ namespace RTE {
 	int TerrainDebris::Save(Writer &writer) const {
 		Entity::Save(writer);
 
-		writer.NewProperty("DebrisFile");
-		writer << m_DebrisFile;
-		writer.NewProperty("DebrisPieceCount");
-		writer << m_BitmapCount;
-		writer.NewProperty("DebrisMaterial");
-		writer << m_Material;
-		writer.NewProperty("TargetMaterial");
-		writer << m_TargetMaterial;
-		writer.NewProperty("DebrisPlacementMode");
-		writer << m_DebrisPlacementMode;
-		writer.NewProperty("OnlyBuried");
-		writer << m_OnlyBuried;
-		writer.NewProperty("MinDepth");
-		writer << m_MinDepth;
-		writer.NewProperty("MaxDepth");
-		writer << m_MaxDepth;
-		writer.NewProperty("DensityPerMeter");
-		writer << m_Density;
+		writer.NewPropertyWithValue("DebrisFile", m_DebrisFile);
+		writer.NewPropertyWithValue("DebrisPieceCount", m_BitmapCount);
+		writer.NewPropertyWithValue("DebrisMaterial", m_Material);
+		writer.NewPropertyWithValue("TargetMaterial", m_TargetMaterial);
+		writer.NewPropertyWithValue("DebrisPlacementMode", m_DebrisPlacementMode);
+		writer.NewPropertyWithValue("OnlyBuried", m_OnlyBuried);
+		writer.NewPropertyWithValue("MinDepth", m_MinDepth);
+		writer.NewPropertyWithValue("MaxDepth", m_MaxDepth);
+		writer.NewPropertyWithValue("MinRotation", m_MinRotation);
+		writer.NewPropertyWithValue("MaxRotation", m_MaxRotation);
+		writer.NewPropertyWithValue("CanHFlip", m_CanHFlip);
+		writer.NewPropertyWithValue("CanVFlip", m_CanVFlip);
+		writer.NewPropertyWithValue("FlipChance", m_FlipChance);
+		writer.NewPropertyWithValue("DensityPerMeter", m_Density);
 
 		return 0;
 	}
@@ -174,30 +190,63 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void TerrainDebris::DrawDebrisPieceOnTerrain(SLTerrain *terrain, BITMAP *bitmapToDraw, const Vector &position) const {
+		// Create a square temp bitmap that is larger than the original to avoid clipping if rotating.
+		int dimensions = 10 + ((bitmapToDraw->w <= bitmapToDraw->h) ? bitmapToDraw->h : bitmapToDraw->w);
+		BITMAP *tempDrawBitmap = create_bitmap_ex(8, dimensions, dimensions);
+		clear_bitmap(tempDrawBitmap);
+
+		// Offset the original bitmap on the temp bitmap so it's centered, otherwise can clip if rotated or flipped.
+		int offsetX = (bitmapToDraw->w < dimensions) ? (dimensions - bitmapToDraw->w) / 2 : 0;
+		int offsetY = (bitmapToDraw->h < dimensions) ? (dimensions - bitmapToDraw->h) / 2 : 0;
+		blit(bitmapToDraw, tempDrawBitmap, 0, 0, offsetX, offsetY, bitmapToDraw->w, bitmapToDraw->h);
+
+		BITMAP *tempFlipAndRotBitmap = nullptr;
+		if (m_CanHFlip || m_CanVFlip || m_MinRotation != 0 || m_MaxRotation != 0) {
+			tempFlipAndRotBitmap = create_bitmap_ex(8, dimensions, dimensions);
+
+			if (m_CanHFlip && m_FlipChance >= RandomNum()) {
+				clear_bitmap(tempFlipAndRotBitmap);
+				draw_sprite_h_flip(tempFlipAndRotBitmap, tempDrawBitmap, 0, 0);
+				blit(tempFlipAndRotBitmap, tempDrawBitmap, 0, 0, 0, 0, dimensions, dimensions);
+			}
+			if (m_CanVFlip && m_FlipChance >= RandomNum()) {
+				clear_bitmap(tempFlipAndRotBitmap);
+				draw_sprite_v_flip(tempFlipAndRotBitmap, tempDrawBitmap, 0, 0);
+				blit(tempFlipAndRotBitmap, tempDrawBitmap, 0, 0, 0, 0, dimensions, dimensions);
+			}
+			if (m_MinRotation != 0 || m_MaxRotation != 0) {
+				clear_bitmap(tempFlipAndRotBitmap);
+				rotate_sprite(tempFlipAndRotBitmap, tempDrawBitmap, 0, 0, ftofix(GetAllegroAngle(static_cast<float>(RandomNum(m_MinRotation, m_MaxRotation)))));
+				blit(tempFlipAndRotBitmap, tempDrawBitmap, 0, 0, 0, 0, dimensions, dimensions);
+			}
+		}
+		draw_sprite(terrain->GetFGColorBitmap(), tempDrawBitmap, position.GetFloorIntX() - offsetX, position.GetFloorIntY() - offsetY);
+		draw_character_ex(terrain->GetMaterialBitmap(), tempDrawBitmap, position.GetFloorIntX() - offsetX, position.GetFloorIntY() - offsetY, m_Material.GetIndex(), -1);
+
+		if (tempFlipAndRotBitmap) { destroy_bitmap(tempFlipAndRotBitmap); }
+		destroy_bitmap(tempDrawBitmap);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void TerrainDebris::ApplyDebris(SLTerrain *terrain) {
 		RTEAssert(!m_Bitmaps.empty() && m_BitmapCount > 0, "No bitmaps loaded for terrain debris during TerrainDebris::ApplyDebris!");
 
-		int possiblePieceToPlaceCount = static_cast<int>((static_cast<float>(terrain->GetMaterialBitmap()->w) * c_MPP) * m_Density);
-		std::vector<std::pair<int, Vector>> piecesToPlace;
-		piecesToPlace.reserve(possiblePieceToPlaceCount);
-
 		// Reference. Do not remove.
-		//acquire_bitmap(fgColorBitmap);
-		//acquire_bitmap(matBitmap);
+		//acquire_bitmap(terrain->GetFGColorBitmap());
+		//acquire_bitmap(terrain->GetMaterialBitmap());
 
+		int possiblePieceToPlaceCount = static_cast<int>((static_cast<float>(terrain->GetMaterialBitmap()->w) * c_MPP) * m_Density);
 		for (int piece = 0; piece < possiblePieceToPlaceCount; ++piece) {
 			int pieceBitmapIndex = RandomNum(0, m_BitmapCount - 1);
 			RTEAssert(pieceBitmapIndex >= 0 && pieceBitmapIndex < m_BitmapCount, "Bitmap index was out of bounds during TerrainDebris::ApplyDebris!");
 			Box buriedCheckBox(Vector(), static_cast<float>(m_Bitmaps.at(pieceBitmapIndex)->w), static_cast<float>(m_Bitmaps.at(pieceBitmapIndex)->h));
-			if (GetPiecePlacementPosition(terrain, buriedCheckBox)) { piecesToPlace.emplace_back(pieceBitmapIndex, buriedCheckBox.GetCorner()); }
-		}
-		for (const auto &[bitmapIndex, position] : piecesToPlace) {
-			draw_sprite(terrain->GetFGColorBitmap(), m_Bitmaps.at(bitmapIndex), position.GetFloorIntX(), position.GetFloorIntY());
-			draw_character_ex(terrain->GetMaterialBitmap(), m_Bitmaps.at(bitmapIndex), position.GetFloorIntX(), position.GetFloorIntY(), m_Material.GetIndex(), -1);
+			if (GetPiecePlacementPosition(terrain, buriedCheckBox)) { DrawDebrisPieceOnTerrain(terrain, m_Bitmaps.at(pieceBitmapIndex), buriedCheckBox.GetCorner()); }
 		}
 
 		// Reference. Do not remove.
-		//release_bitmap(fgColorBitmap);
-		//release_bitmap(matBitmap);
+		//release_bitmap(terrain->GetMaterialBitmap());
+		//release_bitmap(terrain->GetFGColorBitmap());
 	}
 }

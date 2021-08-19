@@ -6,6 +6,7 @@
 
 namespace RTE {
 
+	class Vector;
 	class Box;
 	class SLTerrain;
 
@@ -108,12 +109,19 @@ namespace RTE {
 		DebrisPlacementModes m_DebrisPlacementMode; //!< This will determine how target material checking and debris applying should behave. If set to NoPlacementRestrictions, checking will continue to penetrate down into non-air materials to try to find the target material.
 		bool m_OnlyBuried; //!< Whether to only place a piece of this if we find a spot for it to fit completely buried in the terrain.
 
-		int m_MinDepth; //!< Minimum depth into the terrain contour. This can be negative for debris placed above ground.
-		int m_MaxDepth; //!< Maximum depth into the terrain contour. This can be negative for debris placed above ground.
+		int m_MinDepth; //!< Minimum depth debris can be placed into the terrain contour. This can be negative for debris placed above ground.
+		int m_MaxDepth; //!< Maximum depth debris can be placed into the terrain contour. This can be negative for debris placed above ground.
+
+		int m_MinRotation; //!< Minimum rotation debris can be rotated, in degrees. Positive values are clockwise.
+		int m_MaxRotation; //!< Maximum rotation debris can be rotated, in degrees. Positive values are clockwise.
+
+		bool m_CanHFlip; //!< Whether debris can be flipped horizontally.
+		bool m_CanVFlip; //!< Whether debris can be flipped vertically.
+		float m_FlipChance; //!< The chance debris will be flipped on either axis.
 
 		float m_Density; //!< Approximate Density count per meter.
 
-#pragma region Debris Application
+#pragma region Debris Application Breakdown
 		/// <summary>
 		/// Checks if conditions apply for a debris piece to be placed to the terrain. The actual position is returned via the passed in Box's center position.
 		/// </summary>
@@ -129,6 +137,14 @@ namespace RTE {
 		/// <param name="prevMaterialCheckPixel">The previously checked pixel color value to check extra conditions with. Does not apply when DebrisPlacementMode is NoPlacementRestrictions.</param>
 		/// <returns>Whether the passed in pixel color value is valid for debris placement.</returns>
 		bool MaterialPixelIsValidTarget(int materialCheckPixel, int prevMaterialCheckPixel) const;
+
+		/// <summary>
+		/// Draws the debris piece bitmap on the terrain at the specified position. Performs flipping and rotating if necessary.
+		/// </summary>
+		/// <param name="terrain">Pointer to the SLTerrain to draw the debris piece on. Ownership is NOT transferred!</param>
+		/// <param name="bitmapToDraw">The BITMAP to draw. Ownership is NOT transferred!</param>
+		/// <param name="position">The position to draw the debris piece on the terrain.</param>
+		void DrawDebrisPieceOnTerrain(SLTerrain *terrain, BITMAP *bitmapToDraw, const Vector &position) const;
 #pragma endregion
 
 		/// <summary>

@@ -130,6 +130,13 @@ namespace RTE {
 		void SetAutoScrollStepY(int newStepY) { m_AutoScrollStep.SetY(static_cast<float>(newStepY)); }
 #pragma endregion
 
+#pragma region Concrete Methods
+		/// <summary>
+		/// 
+		/// </summary>
+		void InitScaleFactors();
+#pragma endregion
+
 #pragma region Virtual Override Methods
 		/// <summary>
 		/// Updates the state of this SLTerrain. Supposed to be done every frame.
@@ -175,11 +182,6 @@ namespace RTE {
 		std::array<Vector, LayerAutoScaleMode::LayerAutoScaleModeCount> m_LayerScaleFactors; //!< Array of Vectors containing scale factors for each auto-scale mode.
 
 		bool m_IgnoreAutoScale;
-
-		/// <summary>
-		/// 
-		/// </summary>
-		void InitScaleFactors();
 
 		/// <summary>
 		/// Clears all the member variables of this SLBackground, effectively resetting the members of this abstraction level only.

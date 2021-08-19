@@ -578,7 +578,10 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
         RTEAbort("Loading Terrain " + m_pTerrain->GetPresetName() + "\'s data failed!");
         return -1;
     }
-    
+	for (SLBackground *backgroundLayer : m_BackLayerList) {
+		backgroundLayer->InitScaleFactors();
+	}
+
     ///////////////////////////////////
     // Load Unseen layers before applying objects to the scene,
     // so we can reveal around stuff that is getting placed for the appropriate team

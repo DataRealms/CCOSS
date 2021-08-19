@@ -1,5 +1,6 @@
 #include "SLBackground.h"
 #include "FrameMan.h"
+#include "SceneMan.h"
 #include "SettingsMan.h"
 
 namespace RTE {
@@ -23,7 +24,7 @@ namespace RTE {
 		m_AutoScrollStepTimer.Reset();
 		m_AutoScrollOffset.Reset();
 
-		m_LayerScaleFactors = { Vector(1.0F, 1.0F), Vector(), Vector(2.0F, 2.0F) };
+		m_LayerScaleFactors = { Vector(1.0F, 1.0F), Vector(1.0F, 1.0F), Vector(2.0F, 2.0F) };
 		m_IgnoreAutoScale = false;
 	}
 
@@ -34,8 +35,6 @@ namespace RTE {
 
 		m_BitmapFile.GetAsAnimation(m_Bitmaps, m_FrameCount);
 		m_MainBitmap = m_Bitmaps.at(0);
-
-		InitScaleFactors();
 
 		// Sampled color at the edges of the layer that can be used to fill gap if the layer isn't large enough to cover a target bitmap.
 		if (!m_WrapX) {
@@ -79,32 +78,7 @@ namespace RTE {
 		m_LayerScaleFactors = reference.m_LayerScaleFactors;
 		m_IgnoreAutoScale = reference.m_IgnoreAutoScale;
 
-		InitScaleFactors();
-
 		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SLBackground::InitScaleFactors() {
-		m_LayerScaleFactors.at(LayerAutoScaleMode::AutoScaleOff) = m_ScaleFactor;
-
-		float fitScreenScaleFactor = std::clamp(static_cast<float>(g_FrameMan.GetPlayerScreenHeight()) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
-		m_LayerScaleFactors.at(LayerAutoScaleMode::FitScreen).SetXY(fitScreenScaleFactor, fitScreenScaleFactor);
-
-		if (!m_IgnoreAutoScale) {
-			switch (g_SettingsMan.GetSceneBackgroundAutoScaleMode()) {
-				case LayerAutoScaleMode::FitScreen:
-					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::FitScreen));
-					break;
-				case LayerAutoScaleMode::AlwaysUpscaled:
-					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::AlwaysUpscaled));
-					break;
-				default:
-					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::AutoScaleOff));
-					break;
-			}
-		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -193,6 +167,34 @@ namespace RTE {
 			if (m_WrapY && m_AutoScrollY) { m_AutoScrollOffset.SetY(m_AutoScrollOffset.GetY() + m_AutoScrollStep.GetY()); }
 			WrapPosition(m_AutoScrollOffset);
 			m_AutoScrollStepTimer.Reset();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SLBackground::InitScaleFactors() {
+		if (!m_IgnoreAutoScale) {
+			m_LayerScaleFactors.at(LayerAutoScaleMode::AutoScaleOff) = m_ScaleFactor;
+
+			float fitScreenScaleFactor = 1;
+			if (g_SceneMan.GetSceneHeight() > g_FrameMan.GetPlayerScreenHeight()) {
+				fitScreenScaleFactor = std::clamp(static_cast<float>(g_FrameMan.GetPlayerScreenHeight()) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
+			} else if (g_SceneMan.GetSceneHeight() > m_MainBitmap->h) {
+				fitScreenScaleFactor = std::clamp(static_cast<float>(g_SceneMan.GetSceneHeight()) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
+			}
+			m_LayerScaleFactors.at(LayerAutoScaleMode::FitScreen).SetXY(fitScreenScaleFactor, fitScreenScaleFactor);
+
+			switch (g_SettingsMan.GetSceneBackgroundAutoScaleMode()) {
+				case LayerAutoScaleMode::FitScreen:
+					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::FitScreen));
+					break;
+				case LayerAutoScaleMode::AlwaysUpscaled:
+					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::AlwaysUpscaled));
+					break;
+				default:
+					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::AutoScaleOff));
+					break;
+			}
 		}
 	}
 

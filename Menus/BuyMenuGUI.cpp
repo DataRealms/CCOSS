@@ -1858,7 +1858,7 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
     }
     else if (m_MenuCategory == GUNS)
     {
-        AddObjectsToItemList(catalogList, "HeldDevice", "Weapons");
+        AddObjectsToItemList(catalogList, "HDFirearm", "Weapons");
     }
     else if (m_MenuCategory == BOMBS)
     {

@@ -4471,7 +4471,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         // Pickup GUI
         if (!m_Controller.IsState(PIE_MENU_ACTIVE) && m_pItemInReach) {
             std::snprintf(str, sizeof(str), " %c %s", -49, m_pItemInReach->GetPresetName().c_str());
-            pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 12, drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Left);
+            pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Centre);
         }
 /*
         // AI Mode select GUI HUD

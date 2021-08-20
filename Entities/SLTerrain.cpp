@@ -16,6 +16,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLTerrain::Clear() {
+		m_LayerToDraw = LayerType::ForegroundLayer;
 		m_FGColorLayer = nullptr;
 		m_BGColorLayer = nullptr;
 		m_StructuralBitmap = nullptr;
@@ -24,7 +25,6 @@ namespace RTE {
 		m_TerrainDebris.clear();
 		m_TerrainObjects.clear();
 		m_UpdatedMateralAreas.clear();
-		m_DrawMaterial = false;
 		m_NeedToClearFrostings = false;
 		m_NeedToClearDebris = false;
 	}
@@ -62,9 +62,6 @@ namespace RTE {
 		for (TerrainObject *terrainObject : reference.m_TerrainObjects) {
 			m_TerrainObjects.emplace_back(terrainObject);
 		}
-
-		m_DrawMaterial = reference.m_DrawMaterial;
-
 		m_NeedToClearFrostings = true;
 		m_NeedToClearDebris = true;
 
@@ -703,16 +700,19 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLTerrain::Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride) {
-		if (m_DrawMaterial) {
-			SceneLayer::Draw(targetBitmap, targetBox, scrollOverride);
-		} else {
-			m_FGColorLayer->Draw(targetBitmap, targetBox, scrollOverride);
+		switch (m_LayerToDraw) {
+			case LayerType::MaterialLayer:
+				SceneLayer::Draw(targetBitmap, targetBox, scrollOverride);
+				break;
+			case LayerType::ForegroundLayer:
+				m_FGColorLayer->Draw(targetBitmap, targetBox, scrollOverride);
+				break;
+			case LayerType::BackgroundLayer:
+				m_BGColorLayer->Draw(targetBitmap, targetBox, scrollOverride);
+				break;
+			default:
+				RTEAbort("Invalid LayerType was set to draw in SLTerrain::Draw!");
+				break;
 		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SLTerrain::DrawBackground(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride) const {
-		m_BGColorLayer->Draw(targetBitmap, targetBox, scrollOverride);
 	}
 }

@@ -3493,78 +3493,61 @@ void SceneMan::Update(int screen)
 // Description:     Draws this SceneMan's current graphical representation to a
 //                  BITMAP of choice.
 
-void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vector &targetPos, bool skipSkybox, bool skipTerrain)
-{
-    if (m_pCurrentScene == nullptr) {
-        return;
-    }
-    // Handy
-    SLTerrain *pTerrain = m_pCurrentScene->GetTerrain();
+void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector &targetPos, bool skipBackgroundLayers, bool skipTerrain) {
+	if (!m_pCurrentScene) {
+		return;
+	}
+	SLTerrain *terrain = m_pCurrentScene->GetTerrain();
+	// Set up the target box to draw to on the target bitmap, if it is larger than the scene in either dimension.
+	Box targetBox(Vector(), static_cast<float>(targetBitmap->w), static_cast<float>(targetBitmap->h));
 
-    // Learn about the unseen layer, if any
-    int team = m_ScreenTeam[m_LastUpdatedScreen];
-    SceneLayer *pUnseenLayer = team != Activity::NoTeam ? m_pCurrentScene->GetUnseenLayer(team) : 0;
+	if (!terrain->WrapsX() && targetBitmap->w > GetSceneWidth()) {
+		targetBox.SetCorner(Vector(static_cast<float>((targetBitmap->w - GetSceneWidth()) / 2), targetBox.GetCorner().GetY()));
+		targetBox.SetWidth(static_cast<float>(GetSceneWidth()));
+	}
+	if (!terrain->WrapsY() && targetBitmap->h > GetSceneHeight()) {
+		targetBox.SetCorner(Vector(targetBox.GetCorner().GetX(), static_cast<float>((targetBitmap->h - GetSceneHeight()) / 2)));
+		targetBox.SetHeight(static_cast<float>(GetSceneHeight()));
+	}
 
-    // Set up the target box to draw to on the target bitmap, if it is larger than the scene in either dimension
-    Box targetBox(Vector(0, 0), pTargetBitmap->w, pTargetBitmap->h);
-
-    if (!pTerrain->WrapsX() && pTargetBitmap->w > GetSceneWidth())
-    {
-        targetBox.m_Corner.m_X = (pTargetBitmap->w - GetSceneWidth()) / 2;
-        targetBox.m_Width = GetSceneWidth();
-    }
-    if (!pTerrain->WrapsY() && pTargetBitmap->h > GetSceneHeight())
-    {
-        targetBox.m_Corner.m_Y = (pTargetBitmap->h - GetSceneHeight()) / 2;
-        targetBox.m_Height = GetSceneHeight();
-    }
-
-    switch (m_LayerDrawMode)
-    {
-        case g_LayerTerrainMatter:
-            pTerrain->SetToDrawMaterial(true);
-            pTerrain->Draw(pTargetBitmap, targetBox);
-            break;
-        case g_LayerMOID:
-            m_pMOIDLayer->Draw(pTargetBitmap, targetBox);
-            break;
-        // Draw normally
-        default:
-			if (skipSkybox) {
-				;
-			} else {
+	switch (m_LayerDrawMode) {
+		case LayerDrawMode::g_LayerTerrainMatter:
+			terrain->SetLayerToDraw(SLTerrain::LayerType::MaterialLayer);
+			terrain->Draw(targetBitmap, targetBox);
+			break;
+		case LayerDrawMode::g_LayerMOID:
+			m_pMOIDLayer->Draw(targetBitmap, targetBox);
+			break;
+		default:
+			if (!skipBackgroundLayers) {
 				for (std::list<SLBackground *>::reverse_iterator backgroundLayer = m_pCurrentScene->GetBackLayers().rbegin(); backgroundLayer != m_pCurrentScene->GetBackLayers().rend(); ++backgroundLayer) {
-					(*backgroundLayer)->Draw(pTargetBitmap, targetBox);
+					(*backgroundLayer)->Draw(targetBitmap, targetBox);
 				}
 			}
+			if (!skipTerrain) {
+				terrain->SetLayerToDraw(SLTerrain::LayerType::BackgroundLayer);
+				terrain->Draw(targetBitmap, targetBox);
+			}
+			m_pMOColorLayer->Draw(targetBitmap, targetBox);
 
-			if (!skipTerrain)
-				// Terrain background
-				pTerrain->DrawBackground(pTargetBitmap, targetBox);
-            // Movables' color layer
-            m_pMOColorLayer->Draw(pTargetBitmap, targetBox);
-            // Terrain foreground
-            pTerrain->SetToDrawMaterial(false);
-			if (!skipTerrain)
-				pTerrain->Draw(pTargetBitmap, targetBox);
+			if (!skipTerrain) {
+				terrain->SetLayerToDraw(SLTerrain::LayerType::ForegroundLayer);
+				terrain->Draw(targetBitmap, targetBox);
+			}
+			// Draw the unseen obstruction layer so it obscures the team's view.
+			if (!g_FrameMan.IsInMultiplayerMode()) {
+				int team = m_ScreenTeam[m_LastUpdatedScreen];
+				if (SceneLayer *unseenLayer = (team != Activity::NoTeam) ? m_pCurrentScene->GetUnseenLayer(team) : nullptr) { unseenLayer->Draw(targetBitmap, targetBox); }
+			}
 
-            // Obscure unexplored/unseen areas
-            if (pUnseenLayer && !g_FrameMan.IsInMultiplayerMode())
-            {
-                // Draw the unseen obstruction layer so it obscures the team's view
-                pUnseenLayer->Draw(pTargetBitmap, targetBox);
-            }
+			g_MovableMan.DrawHUD(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
+			g_PrimitiveMan.DrawPrimitives(m_LastUpdatedScreen, targetGUIBitmap, targetPos);
+			g_ActivityMan.GetActivity()->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 
-            // Actor and gameplay HUDs and GUIs
-            g_MovableMan.DrawHUD(pTargetGUIBitmap, targetPos, m_LastUpdatedScreen);
-			g_PrimitiveMan.DrawPrimitives(m_LastUpdatedScreen, pTargetGUIBitmap, targetPos);
-//            g_ActivityMan.GetActivity()->Draw(pTargetBitmap, targetPos, m_LastUpdatedScreen);
-            g_ActivityMan.GetActivity()->DrawGUI(pTargetGUIBitmap, targetPos, m_LastUpdatedScreen);
+			if (m_pDebugLayer) { m_pDebugLayer->Draw(targetBitmap, targetBox); }
 
-//            std::snprintf(str, sizeof(str), "Normal Layer Draw Mode\nHit M to cycle modes");
-
-            if (m_pDebugLayer) { m_pDebugLayer->Draw(pTargetBitmap, targetBox); }
-    }
+			break;
+	}
 }
 
 

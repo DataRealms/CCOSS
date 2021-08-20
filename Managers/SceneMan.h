@@ -1583,7 +1583,7 @@ public:
 //                  is located.
 // Return value:    None.
 
-    void Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap,  const Vector &targetPos = Vector(), bool skipSkybox = false, bool skipTerrain = false);
+	void Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap,  const Vector &targetPos = Vector(), bool skipBackgroundLayers = false, bool skipTerrain = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

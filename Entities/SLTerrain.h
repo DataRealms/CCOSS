@@ -23,6 +23,11 @@ namespace RTE {
 		SerializableOverrideMethods
 		ClassInfoGetters
 
+		/// <summary>
+		/// Enumeration for the different type of layers in the SLTerrain.
+		/// </summary>
+		enum class LayerType { ForegroundLayer, BackgroundLayer, MaterialLayer };
+
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a SLTerrain object in system memory. Create() should be called before using the object.
@@ -84,6 +89,12 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Getters and Setters
+		/// <summary>
+		/// Sets the layer of this SLTerrain that should be drawn to the screen when Draw() is called.
+		/// </summary>
+		/// <param name="layerToDraw">The layer that should be drawn. See LayerType enumeration.</param>
+		void SetLayerToDraw(LayerType layerToDraw) { m_LayerToDraw = layerToDraw; }
+
 		/// <summary>
 		/// Gets the foreground color bitmap of this SLTerrain.
 		/// </summary>
@@ -155,18 +166,6 @@ namespace RTE {
 		/// <param name="pixelY">The Y coordinates of which pixel to set.</param>
 		/// <param name="materialID">The material index to set the pixel to.</param>
 		void SetMaterialPixel(const int pixelX, const int pixelY, const int materialID) const { SetPixelOnLayer(LayerType::MaterialLayer, pixelX, pixelY, materialID); }
-
-		/// <summary>
-		/// Gets whether drawing the material layer instead of the normal color layer when drawing this SLTerrain.
-		/// </summary>
-		/// <returns></returns>
-		bool GetToDrawMaterial() const { return m_DrawMaterial; }
-
-		/// <summary>
-		/// Sets whether to draw the material layer instead of the normal color layer when drawing this SLTerrain.
-		/// </summary>
-		/// <param name="drawMaterial">The setting, whether to draw the material later instead of the color layer or not.</param>
-		void SetToDrawMaterial(bool drawMaterial) { m_DrawMaterial = drawMaterial; }
 
 		/// <summary>
 		/// Indicates whether a terrain pixel is of air or cavity material.
@@ -260,14 +259,6 @@ namespace RTE {
 		/// Clears the list of updated areas in the material layer.
 		/// </summary>
 		void ClearUpdatedAreas() { m_UpdatedMateralAreas.clear(); }
-
-		/// <summary>
-		/// Draws this SLTerrain's background layer's current scrolled position to a bitmap.
-		/// </summary>
-		/// <param name="targetBitmap">The bitmap to draw to.</param>
-		/// <param name="targetBox">The box on the target bitmap to limit drawing to, with the corner of box being where the scroll position lines up.</param>
-		/// <param name="scrollOverride">If a non-{-1,-1} vector is passed, the internal scroll offset of this is overridden with it. It becomes the new source coordinates.</param>
-		void DrawBackground(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride = Vector(-1, -1)) const;
 #pragma endregion
 
 #pragma region Virtual Override Methods
@@ -287,9 +278,9 @@ namespace RTE {
 
 	protected:
 
-		enum class LayerType { ForegroundLayer, BackgroundLayer, MaterialLayer };
-
 		static Entity::ClassInfo m_sClass;
+
+		LayerType m_LayerToDraw; //!< The layer of this SLTerrain that should be drawn to the screen when Draw() is called. See LayerType enumeration.
 
 		std::unique_ptr<SceneLayer> m_FGColorLayer;
 		std::unique_ptr<SceneLayer> m_BGColorLayer;
@@ -301,8 +292,6 @@ namespace RTE {
 		std::vector<TerrainObject *> m_TerrainObjects;
 
 		std::list<Box> m_UpdatedMateralAreas; //!< List of areas of the material layer which have been affected by the updating of new objects copied to it. These boxes are NOT wrapped, and can be out of bounds!
-
-		bool m_DrawMaterial; //!< Draw the material layer instead of the color layer.
 
 		bool m_NeedToClearFrostings; //!< Indicates, that before processing frostings-related properties for this terrain derived list with frostings must be cleared to avoid duplication when loading scenes.
 		bool m_NeedToClearDebris; //!< Indicates, that before processing debris-related properties for this terrain derived list with debris must be cleared to avoid duplication when loading scenes

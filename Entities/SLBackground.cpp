@@ -195,6 +195,8 @@ namespace RTE {
 					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::AutoScaleOff));
 					break;
 			}
+			m_ScrollInfo *= m_ScaleFactor;
+			InitScrollRatios();
 		}
 	}
 

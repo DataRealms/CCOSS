@@ -242,15 +242,14 @@ namespace RTE {
 
 	int SLTerrain::LoadData() {
 		// Load the materials bitmap into the main bitmap
-		if (SceneLayer::LoadData()) {
-			return -1;
-		}
+		SceneLayer::LoadData();
+
 		RTEAssert(m_FGColorLayer.get(), "Terrain's foreground layer not instantiated before trying to load its data!");
 		RTEAssert(m_BGColorLayer.get(), "Terrain's background layer not instantiated before trying to load its data!");
 
 		if (m_FGColorLayer->IsFileData() && m_BGColorLayer->IsFileData()) {
-			RTEAssert(m_FGColorLayer->LoadData() == 0, "Could not load the Foreground Color SceneLayer data from file, when a path was specified for it!");
-			RTEAssert(m_BGColorLayer->LoadData() == 0, "Could not load the Background Color SceneLayer data from file, when a path was specified for it!");
+			m_FGColorLayer->LoadData();
+			m_BGColorLayer->LoadData();
 		} else {
 			m_FGColorLayer->Destroy();
 			m_FGColorLayer->Create(create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h), true, m_Offset, m_WrapX, m_WrapY, m_ScrollRatio);

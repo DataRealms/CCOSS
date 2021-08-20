@@ -55,13 +55,13 @@ namespace RTE {
 		/// Gets whether this has auto-scrolling enabled and meets the requirements to actually auto-scroll.
 		/// </summary>
 		/// <returns>Whether this has auto-scrolling enabled and meets the requirements to actually auto-scroll.</returns>
-		bool IsAutoScrolling() const { return (m_WrapX && m_AutoScrollX) || (m_WrapY && m_AutoScrollY); }
+		bool IsAutoScrolling() const { return GetAutoScrollX() || GetAutoScrollY(); }
 
 		/// <summary>
 		/// Gets whether auto-scrolling is enabled on the X axis.
 		/// </summary>
 		/// <returns>Whether auto-scrolling is enabled on the X axis.</returns>
-		bool GetAutoScrollX() const { return m_AutoScrollX; }
+		bool GetAutoScrollX() const { return m_WrapX && m_AutoScrollX; }
 
 		/// <summary>
 		/// Sets whether auto-scrolling is enabled on the X axis.
@@ -73,7 +73,7 @@ namespace RTE {
 		/// Gets whether auto-scrolling is enabled on the Y axis.
 		/// </summary>
 		/// <returns>Whether auto-scrolling is enabled on the Y axis.</returns>
-		bool GetAutoScrollY() const { return m_AutoScrollY; }
+		bool GetAutoScrollY() const { return m_WrapY && m_AutoScrollY; }
 
 		/// <summary>
 		/// Sets whether auto-scrolling is enabled on the Y axis.

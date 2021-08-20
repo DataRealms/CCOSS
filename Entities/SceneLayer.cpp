@@ -97,43 +97,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SceneLayer::InitScrollRatios(bool initForNetworkPlayer, int player) {
-		float mainBitmapWidth = static_cast<float>(m_MainBitmap->w);
-		float mainBitmapHeight = static_cast<float>(m_MainBitmap->h);
-		float playerScreenWidth = static_cast<float>(initForNetworkPlayer ? g_FrameMan.GetPlayerFrameBufferWidth(player) : g_FrameMan.GetPlayerScreenWidth());
-		float playerScreenHeight = static_cast<float>(initForNetworkPlayer ? g_FrameMan.GetPlayerFrameBufferHeight(player) : g_FrameMan.GetPlayerScreenHeight());
-
-		if (m_WrapX) {
-			m_ScrollRatio.SetX(m_ScrollInfo.GetX());
-		} else {
-			if (m_ScrollInfo.GetX() == -1.0F || m_ScrollInfo.GetX() == 1.0F) {
-				m_ScrollRatio.SetX(1.0F);
-			} else if (m_ScrollInfo.GetX() == playerScreenWidth) {
-				m_ScrollRatio.SetX(mainBitmapWidth - playerScreenWidth);
-			} else if (mainBitmapWidth == playerScreenWidth) {
-				m_ScrollRatio.SetX(1.0F / (m_ScrollInfo.GetX() - playerScreenWidth));
-			} else {
-				m_ScrollRatio.SetX((mainBitmapWidth - playerScreenWidth) / (m_ScrollInfo.GetX() - playerScreenWidth));
-			}
-		}
-		if (m_WrapY) {
-			m_ScrollRatio.SetY(m_ScrollInfo.GetY());
-		} else {
-			if (m_ScrollInfo.GetY() == -1.0F || m_ScrollInfo.GetY() == 1.0) {
-				m_ScrollRatio.SetY(1.0F);
-			} else if (m_ScrollInfo.GetY() == playerScreenHeight) {
-				m_ScrollRatio.SetY(mainBitmapHeight - playerScreenHeight);
-			} else if (mainBitmapHeight == playerScreenHeight) {
-				m_ScrollRatio.SetY(1.0F / (m_ScrollInfo.GetY() - playerScreenHeight));
-			} else {
-				m_ScrollRatio.SetY((mainBitmapHeight - playerScreenHeight) / (m_ScrollInfo.GetY() - playerScreenHeight));
-			}
-		}
-		m_ScaledDimensions.SetXY(mainBitmapWidth * m_ScaleFactor.GetX(), mainBitmapHeight * m_ScaleFactor.GetY());
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	int SceneLayer::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "BitmapFile") {
 			reader >> m_BitmapFile;
@@ -179,6 +142,43 @@ namespace RTE {
 		if (m_MainBitmapOwned) { destroy_bitmap(m_MainBitmap); }
 		if (!notInherited) { Entity::Destroy(); }
 		Clear();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SceneLayer::InitScrollRatios(bool initForNetworkPlayer, int player) {
+		float mainBitmapWidth = static_cast<float>(m_MainBitmap->w);
+		float mainBitmapHeight = static_cast<float>(m_MainBitmap->h);
+		float playerScreenWidth = static_cast<float>(initForNetworkPlayer ? g_FrameMan.GetPlayerFrameBufferWidth(player) : g_FrameMan.GetPlayerScreenWidth());
+		float playerScreenHeight = static_cast<float>(initForNetworkPlayer ? g_FrameMan.GetPlayerFrameBufferHeight(player) : g_FrameMan.GetPlayerScreenHeight());
+
+		if (m_WrapX) {
+			m_ScrollRatio.SetX(m_ScrollInfo.GetX());
+		} else {
+			if (m_ScrollInfo.GetX() == -1.0F || m_ScrollInfo.GetX() == 1.0F) {
+				m_ScrollRatio.SetX(1.0F);
+			} else if (m_ScrollInfo.GetX() == playerScreenWidth) {
+				m_ScrollRatio.SetX(mainBitmapWidth - playerScreenWidth);
+			} else if (mainBitmapWidth == playerScreenWidth) {
+				m_ScrollRatio.SetX(1.0F / (m_ScrollInfo.GetX() - playerScreenWidth));
+			} else {
+				m_ScrollRatio.SetX((mainBitmapWidth - playerScreenWidth) / (m_ScrollInfo.GetX() - playerScreenWidth));
+			}
+		}
+		if (m_WrapY) {
+			m_ScrollRatio.SetY(m_ScrollInfo.GetY());
+		} else {
+			if (m_ScrollInfo.GetY() == -1.0F || m_ScrollInfo.GetY() == 1.0) {
+				m_ScrollRatio.SetY(1.0F);
+			} else if (m_ScrollInfo.GetY() == playerScreenHeight) {
+				m_ScrollRatio.SetY(mainBitmapHeight - playerScreenHeight);
+			} else if (mainBitmapHeight == playerScreenHeight) {
+				m_ScrollRatio.SetY(1.0F / (m_ScrollInfo.GetY() - playerScreenHeight));
+			} else {
+				m_ScrollRatio.SetY((mainBitmapHeight - playerScreenHeight) / (m_ScrollInfo.GetY() - playerScreenHeight));
+			}
+		}
+		m_ScaledDimensions.SetXY(mainBitmapWidth * m_ScaleFactor.GetX(), mainBitmapHeight * m_ScaleFactor.GetY());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

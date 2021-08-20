@@ -56,7 +56,7 @@ namespace RTE {
 		void Destroy(bool notInherited = false) override;
 #pragma endregion
 
-#pragma region 
+#pragma region Data Handling
 		/// <summary>
 		/// Whether this' bitmap data is loaded from a file or was generated.
 		/// </summary>

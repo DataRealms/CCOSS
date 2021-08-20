@@ -3597,6 +3597,7 @@ void AHuman::Update()
 		if (pMO) { m_Inventory.push_back(pMO); }
         m_pFGArm->SetHeldMO(m_pItemInReach);
         m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+		m_pItemInReach = nullptr;
 
 		EquipShieldInBGArm();
 		m_SharpAimProgress = 0;

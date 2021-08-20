@@ -23,6 +23,10 @@ namespace RTE {
 		m_AutoScrollStepInterval = 0;
 		m_AutoScrollStepTimer.Reset();
 		m_AutoScrollOffset.Reset();
+		m_FillLeftColor = ColorKeys::g_MaskColor;
+		m_FillRightColor = ColorKeys::g_MaskColor;
+		m_FillUpColor = ColorKeys::g_MaskColor;
+		m_FillDownColor = ColorKeys::g_MaskColor;
 
 		m_LayerScaleFactors = { Vector(1.0F, 1.0F), Vector(1.0F, 1.0F), Vector(2.0F, 2.0F) };
 		m_IgnoreAutoScale = false;
@@ -210,5 +214,26 @@ namespace RTE {
 		}
 		m_MainBitmap = m_Bitmaps.at(m_Frame);
 		SceneLayer::Draw(targetBitmap, targetBox, IsAutoScrolling() ? ratioAdjustedAutoScrolledOffset : scrollOverride);
+
+		int bitmapWidth = m_ScaledDimensions.GetFloorIntX();
+		int bitmapHeight = m_ScaledDimensions.GetFloorIntY();
+		int targetBoxCornerX = targetBox.GetCorner().GetFloorIntX();
+		int targetBoxCornerY = targetBox.GetCorner().GetFloorIntY();
+		int targetBoxWidth = static_cast<int>(targetBox.GetWidth());
+		int targetBoxHeight = static_cast<int>(targetBox.GetHeight());
+
+		set_clip_rect(targetBitmap, targetBoxCornerX, targetBoxCornerY, targetBoxCornerX + targetBoxWidth - 1, targetBoxCornerY + targetBoxHeight - 1);
+
+		// Detect if non-wrapping layer dimensions can't cover the whole target area with its main bitmap. If so, fill in the gap with appropriate solid color sampled from the hanging edge.
+		if (!m_WrapX && bitmapWidth <= targetBoxWidth) {
+			if (m_FillLeftColor != ColorKeys::g_MaskColor && m_Offset.GetFloorIntX() != 0) { rectfill(targetBitmap, targetBoxCornerX, targetBoxCornerY, targetBoxCornerX - m_Offset.GetFloorIntX(), targetBoxCornerY + targetBoxHeight, m_FillLeftColor); }
+			if (m_FillRightColor != ColorKeys::g_MaskColor) { rectfill(targetBitmap, targetBoxCornerX + bitmapWidth - m_Offset.GetFloorIntX(), targetBoxCornerY, targetBoxCornerX + targetBoxWidth, targetBoxCornerY + targetBoxHeight, m_FillRightColor); }
+		}
+		if (!m_WrapY && bitmapHeight <= targetBoxHeight) {
+			if (m_FillUpColor != ColorKeys::g_MaskColor && m_Offset.GetFloorIntY() != 0) { rectfill(targetBitmap, targetBoxCornerX, targetBoxCornerY, targetBoxCornerX + targetBoxWidth, targetBoxCornerY - m_Offset.GetFloorIntY(), m_FillUpColor); }
+			if (m_FillDownColor != ColorKeys::g_MaskColor) { rectfill(targetBitmap, targetBoxCornerX, targetBoxCornerY + bitmapHeight - m_Offset.GetFloorIntY(), targetBoxCornerX + targetBoxWidth, targetBoxCornerY + targetBoxHeight, m_FillDownColor); }
+		}
+		// Reset the clip rect back to the entire target bitmap.
+		set_clip_rect(targetBitmap, 0, 0, targetBitmap->w - 1, targetBitmap->h - 1);
 	}
 }

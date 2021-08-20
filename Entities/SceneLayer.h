@@ -291,11 +291,6 @@ namespace RTE {
 		Vector m_ScaleInverse; //!< 
 		Vector m_ScaledDimensions; //!< 
 
-		int m_FillLeftColor; //!< 
-		int m_FillRightColor; //!< 
-		int m_FillUpColor; //!< 
-		int m_FillDownColor; //!< 
-
 		/// <summary>
 		/// Initialize the scroll ratios from the encoded scroll info. Must be done after the bitmap has been created in the derived concrete classes.
 		/// </summary>

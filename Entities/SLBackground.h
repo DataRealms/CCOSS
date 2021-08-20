@@ -172,6 +172,11 @@ namespace RTE {
 		Timer m_AutoScrollStepTimer; //!< Timer to keep track of auto-scrolling steps.
 		Vector m_AutoScrollOffset; //!< The offset to adjust the this' main offset with when auto-scrolling to actually get the auto-scrolling effect, adjusted for wrapping.
 
+		int m_FillLeftColor; //!< 
+		int m_FillRightColor; //!< 
+		int m_FillUpColor; //!< 
+		int m_FillDownColor; //!< 
+
 	private:
 
 		/// <summary>

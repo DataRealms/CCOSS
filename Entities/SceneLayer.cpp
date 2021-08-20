@@ -23,10 +23,6 @@ namespace RTE {
 		m_ScaleFactor.SetXY(1.0F, 1.0F);
 		m_ScaleInverse.SetXY(1.0F, 1.0F);
 		m_ScaledDimensions.SetXY(1.0F, 1.0F);
-		m_FillLeftColor = ColorKeys::g_MaskColor;
-		m_FillRightColor = ColorKeys::g_MaskColor;
-		m_FillUpColor = ColorKeys::g_MaskColor;
-		m_FillDownColor = ColorKeys::g_MaskColor;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -449,15 +445,6 @@ namespace RTE {
 				break;
 			}
 			tiledOffsetX += bitmapWidth;
-		}
-		// Detect if non-wrapping layer dimensions can't cover the whole target area with its main bitmap. If so, fill in the gap with appropriate solid color sampled from the hanging edge.
-		if (!m_WrapX && !targetBitmapLargerThanSceneX && m_ScrollRatio.GetX() < 0) {
-			if (m_FillLeftColor != ColorKeys::g_MaskColor && offsetX != 0) { rectfill(targetBitmap, targetBox.GetCorner().GetFloorIntX(), targetBox.GetCorner().GetFloorIntY(), targetBox.GetCorner().GetFloorIntX() - offsetX, static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()), m_FillLeftColor); }
-			if (m_FillRightColor != ColorKeys::g_MaskColor) { rectfill(targetBitmap, targetBox.GetCorner().GetFloorIntX() - offsetX + bitmapWidth, targetBox.GetCorner().GetFloorIntY(), static_cast<int>(targetBox.GetCorner().GetX() + targetBox.GetWidth()), static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()), m_FillRightColor); }
-		}
-		if (!m_WrapY && !targetBitmapLargerThanSceneY && m_ScrollRatio.GetY() < 0) {
-			if (m_FillUpColor != ColorKeys::g_MaskColor && offsetY != 0) { rectfill(targetBitmap, targetBox.GetCorner().GetFloorIntX(), targetBox.GetCorner().GetFloorIntY(), static_cast<int>(targetBox.GetCorner().GetX() + targetBox.GetWidth()), targetBox.GetCorner().GetFloorIntY() - offsetY, m_FillUpColor); }
-			if (m_FillDownColor != ColorKeys::g_MaskColor) { rectfill(targetBitmap, targetBox.GetCorner().GetFloorIntX(), targetBox.GetCorner().GetFloorIntY() - offsetY + bitmapHeight, static_cast<int>(targetBox.GetCorner().GetX() + targetBox.GetWidth()), static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()), m_FillDownColor); }
 		}
 	}
 }

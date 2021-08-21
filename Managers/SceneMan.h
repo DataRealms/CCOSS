@@ -1640,11 +1640,11 @@ public:
 
 
 	/// <summary>
-	/// 
+	/// Gets an intermediate bitmap that is used for drawing a settled MovableObject into the terrain.
 	/// </summary>
-	/// <param name="bitmapSize"></param>
-	/// <returns></returns>
-	BITMAP * GetTempBitmap(int bitmapSize) const;
+	/// <param name="moDiameter">The diameter of the MovableObject to calculate the required bitmap size.</param>
+	/// <returns>Pointer to the temp BITMAP of the appropriate size. Ownership is NOT transferred!</returns>
+	BITMAP * GetIntermediateBitmapForSettlingIntoTerrain(int moDiameter) const;
 
 	//	Struct to register terrain change events
 	struct TerrainChange
@@ -1667,7 +1667,7 @@ public:
 
   protected:
 
-	  static std::unordered_map<int, BITMAP *> m_TempBitmaps; //!< Intermediate test layers, different sizes for efficiency.
+	static std::vector<std::pair<int, BITMAP *>> m_IntermediateSettlingBitmaps; //!< Intermediate bitmaps of different sizes that are used to draw settled MovableObjects into the terrain.
 
     // Default Scene name to load if nothing else is specified
     std::string m_DefaultSceneName;

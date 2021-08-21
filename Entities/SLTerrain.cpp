@@ -396,7 +396,7 @@ namespace RTE {
 		int maxDiameter = static_cast<int>(std::sqrt(static_cast<float>(maxWidth * maxWidth + maxHeight * maxHeight)) * 2.0F);
 		int skipCount = skipMOP;
 
-		BITMAP *tempBitmap = g_SceneMan.GetTempBitmap(maxDiameter);
+		BITMAP *tempBitmap = g_SceneMan.GetIntermediateBitmapForSettlingIntoTerrain(maxDiameter);
 		clear_bitmap(tempBitmap);
 		pivot_scaled_sprite(tempBitmap, sprite, tempBitmap->w / 2, tempBitmap->h / 2, pivot.GetFloorIntX(), pivot.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()), ftofix(scale));
 
@@ -497,7 +497,7 @@ namespace RTE {
 
 		// Determine whether a sprite or just a pixel-based MO. If sprite, try to integrate it into the terrain, with terrain on top.
 		if (const MOSprite *moSprite = dynamic_cast<MOSprite *>(movableObject)) {
-			BITMAP *tempBitmap = g_SceneMan.GetTempBitmap(static_cast<int>(moSprite->GetDiameter()));
+			BITMAP *tempBitmap = g_SceneMan.GetIntermediateBitmapForSettlingIntoTerrain(static_cast<int>(moSprite->GetDiameter()));
 
 			// The position of the upper left corner of the temporary bitmap in the scene
 			Vector bitmapScroll = moSprite->GetPos().GetFloored() - Vector(static_cast<float>(tempBitmap->w / 2), static_cast<float>(tempBitmap->w / 2));

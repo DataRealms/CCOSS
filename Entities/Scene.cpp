@@ -1761,7 +1761,7 @@ bool Scene::CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom,
         return false;
 
     // Do any necessary wrapping
-    m_apUnseenLayer[team]->WrapPosition(posX, posY, false);
+    m_apUnseenLayer[team]->WrapPosition(posX, posY);
 
     // First check the actual position of the checked pixel, it may already been seen.
     if (getpixel(m_apUnseenLayer[team]->GetBitmap(), posX, posY) == g_MaskColor)
@@ -1774,56 +1774,56 @@ bool Scene::CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom,
     {
         testPosX = posX + 1;
         testPosY = posY;
-        m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY, false);
+        m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY);
         support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_MaskColor ? 1 : 0;
     }
     if (checkingFrom != W)
     {
         testPosX = posX - 1;
         testPosY = posY;
-        m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY, false);
+        m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY);
         support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_MaskColor ? 1 : 0;
     }
     if (checkingFrom != S)
     {
         testPosX = posX;
         testPosY = posY + 1;
-        m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY, false);
+        m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY);
         support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_MaskColor ? 1 : 0;
     }
     if (checkingFrom != N)
     {
         testPosX = posX;
         testPosY = posY - 1;
-        m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY, false);
+        m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY);
         support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_MaskColor ? 1 : 0;
     }
     if (checkingFrom != SE)
     {
         testPosX = posX + 1;
         testPosY = posY + 1;
-        m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY, false);
+        m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY);
         support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_MaskColor ? 0.5f : 0;
     }
     if (checkingFrom != SW)
     {
         testPosX = posX - 1;
         testPosY = posY + 1;
-        m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY, false);
+        m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY);
         support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_MaskColor ? 0.5f : 0;
     }
     if (checkingFrom != NW)
     {
         testPosX = posX - 1;
         testPosY = posY - 1;
-        m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY, false);
+        m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY);
         support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_MaskColor ? 0.5f : 0;
     }
     if (checkingFrom != NE)
     {
         testPosX = posX + 1;
         testPosY = posY - 1;
-        m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY, false);
+        m_apUnseenLayer[team]->WrapPosition(testPosX, testPosY);
         support += getpixel(m_apUnseenLayer[team]->GetBitmap(), testPosX, testPosY) != g_MaskColor ? 0.5f : 0;
     }
 

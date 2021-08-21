@@ -223,36 +223,32 @@ namespace RTE {
 		/// <summary>
 		/// Only wraps a position coordinate if it is off bounds of the SceneLayer and wrapping in the corresponding axes are turned on.
 		/// </summary>
-		/// <param name="posX">The X coordinates of the position to wrap, if needed.</param>
-		/// <param name="posY">The Y coordinates of the position to wrap, if needed.</param>
-		/// <param name="scaled">Whether the coordinates above are of this' scale factor, or in its native pixels.</param>
+		/// <param name="posX">The X coordinates of the position to wrap.</param>
+		/// <param name="posY">The Y coordinates of the position to wrap.</param>
 		/// <returns>Whether wrapping was performed or not.</returns>
-		bool WrapPosition(int &posX, int &posY, bool scaled = true) const;
+		bool WrapPosition(int &posX, int &posY) const;
 
 		/// <summary>
 		/// Only wraps a position coordinate if it is off bounds of the SceneLayer and wrapping in the corresponding axes are turned on.
 		/// </summary>
-		/// <param name="pos">The vector coordinates of the position to wrap, if needed.</param>
-		/// <param name="scaled">Whether the coordinates above are of this' scale factor, or in its native pixels.</param>
+		/// <param name="pos">The vector coordinates of the position to wrap.</param>
 		/// <returns>Whether wrapping was performed or not.</returns>
-		bool WrapPosition(Vector &pos, bool scaled = true) const { return ForceBoundsOrWrapPosition(pos, scaled, false); }
+		bool WrapPosition(Vector &pos) const { return ForceBoundsOrWrapPosition(pos, false); }
 
 		/// <summary>
 		/// Wraps or bounds a position coordinate if it is off bounds of the SceneLayer, depending on the wrap settings of this SceneLayer.
 		/// </summary>
-		/// <param name="posX">The X coordinates of the position to wrap, if needed.</param>
-		/// <param name="posY">The Y coordinates of the position to wrap, if needed.</param>
-		/// <param name="scaled">Whether the coordinates above are of this' scale factor, or in its native pixels.</param>
+		/// <param name="posX">The X coordinates of the position to wrap.</param>
+		/// <param name="posY">The Y coordinates of the position to wrap.</param>
 		/// <returns>Whether wrapping was performed or not. Does not report on bounding.</returns>
-		bool ForceBounds(int &posX, int &posY, bool scaled = true) const;
+		bool ForceBounds(int &posX, int &posY) const;
 
 		/// <summary>
 		/// Wraps or bounds a position coordinate if it is off bounds of the SceneLayer, depending on the wrap settings of this SceneLayer.
 		/// </summary>
-		/// <param name="pos">The Vector coordinates of the position to wrap, if needed.</param>
-		/// <param name="scaled">Whether the coordinates above are of this' scale factor, or in its native pixels.</param>
+		/// <param name="pos">The Vector coordinates of the position to wrap.</param>
 		/// <returns>Whether wrapping was performed or not. Does not report on bounding.</returns>
-		bool ForceBounds(Vector &pos, bool scaled = true) const { return ForceBoundsOrWrapPosition(pos, scaled, true); }
+		bool ForceBounds(Vector &pos) const { return ForceBoundsOrWrapPosition(pos, true); }
 #pragma endregion
 
 #pragma region Virtual Override Methods
@@ -266,8 +262,9 @@ namespace RTE {
 		/// </summary>
 		/// <param name="targetBitmap">The bitmap to draw to.</param>
 		/// <param name="targetBox">The box on the target bitmap to limit drawing to, with the corner of box being where the scroll position lines up.</param>
-		/// <param name="scrollOverride">If a non-{-1,-1} vector is passed, the internal scroll offset of this is overridden with it. It becomes the new source coordinates.</param>
-		virtual void Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride = Vector(-1, -1));
+		/// <param name="scrollOverride">Vector that overrides the internal scroll offset of this SceneLayer. It becomes the new source coordinates.</param>
+		/// <param name="offsetNeedsScrollRatioAdjustment">Whether the offset of this SceneLayer or the passed in offset override need to be adjusted to scroll ratio.</param>
+		virtual void Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride = Vector(-1, -1), bool offsetNeedsScrollRatioAdjustment = false);
 #pragma endregion
 
 	protected:
@@ -301,36 +298,29 @@ namespace RTE {
 	private:
 
 		/// <summary>
-		/// 
+		/// Wraps or bounds a position coordinate if it is off bounds of the SceneLayer, depending on the wrap settings of this SceneLayer.
 		/// </summary>
-		/// <param name="pos"></param>
-		/// <param name="scaled"></param>
-		/// <param name="forceBounds"></param>
-		/// <returns></returns>
-		bool ForceBoundsOrWrapPosition(Vector &pos, bool scaled, bool forceBounds) const;
+		/// <param name="pos">The Vector coordinates of the position to wrap.</param>
+		/// <param name="forceBounds">Whether to attempt bounding or wrapping, or just wrapping.</param>
+		/// <returns>Whether wrapping was performed or not. Does not report on bounding.</returns>
+		bool ForceBoundsOrWrapPosition(Vector &pos, bool forceBounds) const;
 
 #pragma region Draw Breakdown
 		/// <summary>
-		/// 
+		/// Performs wrapped drawing of this SceneLayer's bitmap to the screen in cases where it is both wider and taller than the target bitmap.
 		/// </summary>
 		/// <param name="targetBitmap">The bitmap to draw to.</param>
 		/// <param name="targetBox">The box on the target bitmap to limit drawing to, with the corner of box being where the scroll position lines up.</param>
-		/// <param name="drawScaled"></param>
-		/// <param name="offsetX"></param>
-		/// <param name="offsetY"></param>
-		void DrawWrapped(BITMAP *targetBitmap, const Box &targetBox, bool drawScaled, int offsetX, int offsetY) const;
+		/// <param name="drawScaled">Whether to use scaled drawing routines or not.</param>
+		void DrawWrapped(BITMAP *targetBitmap, const Box &targetBox, bool drawScaled) const;
 
 		/// <summary>
-		/// Target bitmap is larger in some dimension, so need to draw this tiled as many times as necessary to cover the whole target.
+		/// Performs tiled drawing of this SceneLayer's bitmap to the screen in cases where the target bitmap is larger in some dimension.
 		/// </summary>
 		/// <param name="targetBitmap">The bitmap to draw to.</param>
 		/// <param name="targetBox">The box on the target bitmap to limit drawing to, with the corner of box being where the scroll position lines up.</param>
-		/// <param name="drawScaled"></param>
-		/// <param name="offsetX"></param>
-		/// <param name="offsetY"></param>
-		/// <param name="targetBitmapLargerThanSceneX"></param>
-		/// <param name="targetBitmapLargerThanSceneY"></param>
-		void DrawTiled(BITMAP *targetBitmap, const Box &targetBox, bool drawScaled, int offsetX, int offsetY, bool targetBitmapLargerThanSceneX, bool targetBitmapLargerThanSceneY) const;
+		/// <param name="drawScaled">Whether to use scaled drawing routines or not.</param>
+		void DrawTiled(BITMAP *targetBitmap, const Box &targetBox, bool drawScaled) const;
 #pragma endregion
 
 		/// <summary>

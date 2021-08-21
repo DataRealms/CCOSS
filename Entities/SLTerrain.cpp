@@ -682,7 +682,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SLTerrain::Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride) {
+	void SLTerrain::Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride, bool offsetNeedsScrollRatioAdjustment) {
 		switch (m_LayerToDraw) {
 			case LayerType::MaterialLayer:
 				SceneLayer::Draw(targetBitmap, targetBox, scrollOverride);

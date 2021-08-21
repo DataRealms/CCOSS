@@ -3463,14 +3463,10 @@ void SceneMan::Update(int screen)
         pUnseenLayer->SetOffset(m_Offset[screen]);
     }
 
-    // Background layers may scroll in fractions of the real offset, and need special care to avoid jumping after having traversed wrapped edges
-    // Reconstruct and give them the total offset, not taking any wrappings into account
-    Vector offsetUnwrapped = m_Offset[screen];
-    offsetUnwrapped.m_X += pTerrain->GetBitmap()->w * m_SeamCrossCount[screen][X];
-    offsetUnwrapped.m_Y += pTerrain->GetBitmap()->h * m_SeamCrossCount[screen][Y];
-
+    // Background layers may scroll in fractions of the real offset and need special care to avoid jumping after having traversed wrapped edges, so they need the total offset without taking wrapping into account.
+	Vector unwrappedOffset(m_Offset[screen].GetX() + static_cast<float>(pTerrain->GetBitmap()->w * m_SeamCrossCount[screen][X]), m_Offset[screen].GetY() + static_cast<float>(pTerrain->GetBitmap()->h * m_SeamCrossCount[screen][Y]));
 	for (SLBackground *backgroundLayer : m_pCurrentScene->GetBackLayers()) {
-		backgroundLayer->SetOffset(offsetUnwrapped);
+		backgroundLayer->SetOffset(unwrappedOffset);
 		backgroundLayer->Update();
 	}
 

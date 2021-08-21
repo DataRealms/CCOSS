@@ -166,11 +166,17 @@ namespace RTE {
 				}
 			}
 		}
-		if (IsAutoScrolling() && m_AutoScrollStepTimer.GetElapsedSimTimeMS() > m_AutoScrollStepInterval) {
-			if (m_WrapX && m_AutoScrollX) { m_AutoScrollOffset.SetX(m_AutoScrollOffset.GetX() + m_AutoScrollStep.GetX()); }
-			if (m_WrapY && m_AutoScrollY) { m_AutoScrollOffset.SetY(m_AutoScrollOffset.GetY() + m_AutoScrollStep.GetY()); }
-			WrapPosition(m_AutoScrollOffset);
-			m_AutoScrollStepTimer.Reset();
+		m_MainBitmap = m_Bitmaps.at(m_Frame);
+
+		if (IsAutoScrolling()) {
+			if (m_AutoScrollStepTimer.GetElapsedSimTimeMS() > m_AutoScrollStepInterval) {
+				if (m_WrapX && m_AutoScrollX) { m_AutoScrollOffset.SetX(m_AutoScrollOffset.GetX() + m_AutoScrollStep.GetX()); }
+				if (m_WrapY && m_AutoScrollY) { m_AutoScrollOffset.SetY(m_AutoScrollOffset.GetY() + m_AutoScrollStep.GetY()); }
+				WrapPosition(m_AutoScrollOffset);
+				m_AutoScrollStepTimer.Reset();
+			}
+			m_Offset.SetXY(std::floor((m_Offset.GetX() * m_ScrollRatio.GetX()) + m_AutoScrollOffset.GetX()), std::floor((m_Offset.GetY() * m_ScrollRatio.GetY()) + m_AutoScrollOffset.GetY()));
+			WrapPosition(m_Offset);
 		}
 	}
 
@@ -206,14 +212,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SLBackground::Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride) {
-		Vector ratioAdjustedAutoScrolledOffset;
-		if (IsAutoScrolling()) {
-			ratioAdjustedAutoScrolledOffset.SetXY(std::floor((m_Offset.GetX() * m_ScrollRatio.GetX()) + m_AutoScrollOffset.GetX()), std::floor((m_Offset.GetY() * m_ScrollRatio.GetY()) + m_AutoScrollOffset.GetY()));
-			WrapPosition(ratioAdjustedAutoScrolledOffset);
-		}
-		m_MainBitmap = m_Bitmaps.at(m_Frame);
-		SceneLayer::Draw(targetBitmap, targetBox, IsAutoScrolling() ? ratioAdjustedAutoScrolledOffset : scrollOverride);
+	void SLBackground::Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride, bool offsetNeedsScrollRatioAdjustment) {
+		SceneLayer::Draw(targetBitmap, targetBox, scrollOverride, !IsAutoScrolling());
 
 		int bitmapWidth = m_ScaledDimensions.GetFloorIntX();
 		int bitmapHeight = m_ScaledDimensions.GetFloorIntY();

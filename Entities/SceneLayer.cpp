@@ -98,8 +98,6 @@ namespace RTE {
 			reader >> m_BitmapFile;
 		} else if (propName == "DrawTransparent") {
 			reader >> m_DrawTrans;
-		} else if (propName == "Offset") {
-			reader >> m_Offset;
 		} else if (propName == "WrapX") {
 			reader >> m_WrapX;
 		} else if (propName == "WrapY") {
@@ -123,7 +121,6 @@ namespace RTE {
 
 		writer.NewPropertyWithValue("BitmapFile", m_BitmapFile);
 		writer.NewPropertyWithValue("DrawTransparent", m_DrawTrans);
-		writer.NewPropertyWithValue("Offset", m_Offset);
 		writer.NewPropertyWithValue("WrapX", m_WrapX);
 		writer.NewPropertyWithValue("WrapY", m_WrapY);
 		writer.NewPropertyWithValue("ScrollRatio", m_ScrollInfo);

@@ -279,6 +279,7 @@ namespace RTE {
 		bool m_WrapX; //!< Whether wrapping is enabled on the X axis.
 		bool m_WrapY; //!< Whether wrapping is enable on the Y axis.
 
+		Vector m_OriginOffset; //!< 
 		Vector m_Offset; //!< 
 
 		// The original ScrollInfo with special encoded info that is then made into the actual scroll ratios

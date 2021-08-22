@@ -100,6 +100,8 @@ namespace RTE {
 			}
 		} else if (propName == "SpriteAnimDuration") {
 			reader >> m_SpriteAnimDuration;
+		} else if (propName == "OriginPointOffset") {
+			reader >> m_OriginOffset;
 		} else if (propName == "AutoScrollX") {
 			reader >> m_AutoScrollX;
 		} else if (propName == "AutoScrollY") {
@@ -124,6 +126,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("FrameCount", m_FrameCount);
 		writer.NewPropertyWithValue("SpriteAnimMode", m_SpriteAnimMode);
 		writer.NewPropertyWithValue("SpriteAnimDuration", m_SpriteAnimDuration);
+		writer.NewPropertyWithValue("OriginPointOffset", m_OriginOffset);
 		writer.NewPropertyWithValue("AutoScrollX", m_AutoScrollX);
 		writer.NewPropertyWithValue("AutoScrollY", m_AutoScrollY);
 		writer.NewPropertyWithValue("AutoScrollStepInterval", m_AutoScrollStepInterval);

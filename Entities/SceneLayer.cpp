@@ -17,6 +17,7 @@ namespace RTE {
 		m_DrawTrans = true;
 		m_WrapX = true;
 		m_WrapY = true;
+		m_OriginOffset.Reset();
 		m_Offset.Reset();
 		m_ScrollInfo.SetXY(1.0F, 1.0F);
 		m_ScrollRatio.SetXY(1.0F, 1.0F);
@@ -64,7 +65,7 @@ namespace RTE {
 		m_DrawTrans = reference.m_DrawTrans;
 		m_WrapX = reference.m_WrapX;
 		m_WrapY = reference.m_WrapY;
-		m_Offset = reference.m_Offset;
+		m_OriginOffset = reference.m_OriginOffset;
 		m_ScrollInfo = reference.m_ScrollInfo;
 		// The ratios need to be calculated from the ScrollInfo with InitScrollRatios later in LoadData.
 		m_ScrollRatio = reference.m_ScrollRatio;
@@ -343,6 +344,7 @@ namespace RTE {
 		if (!scrollOverridden) {
 			if (!m_WrapX && static_cast<float>(targetBitmap->w) > targetBox.GetWidth()) { m_Offset.SetX(0); }
 			if (!m_WrapY && static_cast<float>(targetBitmap->h) > targetBox.GetHeight()) { m_Offset.SetY(0); }
+			m_Offset -= m_OriginOffset;
 			// Only force bounds when doing regular scroll offset because the override is used to do terrain object application tricks and sometimes needs the offsets to be < 0.
 			WrapPosition(m_Offset);
 		}

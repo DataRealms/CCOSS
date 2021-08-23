@@ -98,7 +98,7 @@ namespace RTE {
 			std::unique_ptr<TerrainDebris> terrainDebris = std::make_unique<TerrainDebris>();
 			reader >> terrainDebris.get();
 			m_TerrainDebris.emplace_back(terrainDebris.release());
-		} else if (propName == "AddTerrainObject" || propName == "PlaceTerrainObject") {
+		} else if (propName == "PlaceTerrainObject") {
 			std::unique_ptr<TerrainObject> terrainObject = std::make_unique<TerrainObject>();
 			reader >> terrainObject.get();
 			m_TerrainObjects.emplace_back(terrainObject.release());

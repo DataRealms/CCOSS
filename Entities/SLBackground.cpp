@@ -38,6 +38,7 @@ namespace RTE {
 	int SLBackground::Create() {
 		SceneLayer::Create();
 
+		m_Bitmaps.clear();
 		m_BitmapFile.GetAsAnimation(m_Bitmaps, m_FrameCount);
 		m_MainBitmap = m_Bitmaps.at(0);
 

@@ -154,7 +154,12 @@ namespace RTE {
 		void Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride = Vector(-1, -1), bool offsetNeedsScrollRatioAdjustment = true) override;
 #pragma endregion
 
-	protected:
+	private:
+
+		/// <summary>
+		/// Enumeration for the different modes of SLBackground auto-scaling.
+		/// </summary>
+		enum LayerAutoScaleMode { AutoScaleOff, FitScreen, AlwaysUpscaled, LayerAutoScaleModeCount };
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
@@ -174,21 +179,13 @@ namespace RTE {
 		Timer m_AutoScrollStepTimer; //!< Timer to keep track of auto-scrolling steps.
 		Vector m_AutoScrollOffset; //!< The offset to adjust the this' main offset with when auto-scrolling to actually get the auto-scrolling effect, adjusted for wrapping.
 
-		int m_FillLeftColor; //!< 
-		int m_FillRightColor; //!< 
-		int m_FillUpColor; //!< 
-		int m_FillDownColor; //!< 
-
-	private:
-
-		/// <summary>
-		/// Enumeration for the different modes of SLBackground auto-scaling.
-		/// </summary>
-		enum LayerAutoScaleMode { AutoScaleOff, FitScreen, AlwaysUpscaled, LayerAutoScaleModeCount };
+		int m_FillColorLeft; //!< Palette index to use for filling the gap between the left edge of the bitmap and the left edge of the screen/scene box in cases where the bitmap doesn't cover the whole target area.
+		int m_FillColorRight; //!< Palette index to use for filling the gap between the right edge of the bitmap and the right edge of the screen/scene box in cases where the bitmap doesn't cover the whole target area.
+		int m_FillColorUp; //!< Palette index to use for filling the gap between the upper edge of the bitmap and the upper edge of the screen/scene box in cases where the bitmap doesn't cover the whole target area.
+		int m_FillColorDown; //!< Palette index to use for filling the gap between the lower edge of the bitmap and the lower edge of the screen/scene box in cases where the bitmap doesn't cover the whole target area.
 
 		std::array<Vector, LayerAutoScaleMode::LayerAutoScaleModeCount> m_LayerScaleFactors; //!< Array of Vectors containing scale factors for each auto-scale mode.
-
-		bool m_IgnoreAutoScale;
+		bool m_IgnoreAutoScale; //!< Whether auto-scaling settings are ignored and the read-in scale factor is used instead.
 
 		/// <summary>
 		/// Clears all the member variables of this SLBackground, effectively resetting the members of this abstraction level only.

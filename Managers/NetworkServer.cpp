@@ -705,10 +705,10 @@ namespace RTE {
 			msgSceneSetup.BackgroundLayers[index].WrapX = layer->m_WrapX;
 			msgSceneSetup.BackgroundLayers[index].WrapY = layer->m_WrapY;
 
-			msgSceneSetup.BackgroundLayers[index].FillLeftColor = layer->m_FillLeftColor;
-			msgSceneSetup.BackgroundLayers[index].FillRightColor = layer->m_FillRightColor;
-			msgSceneSetup.BackgroundLayers[index].FillUpColor = layer->m_FillUpColor;
-			msgSceneSetup.BackgroundLayers[index].FillDownColor = layer->m_FillDownColor;
+			msgSceneSetup.BackgroundLayers[index].FillLeftColor = layer->m_FillColorLeft;
+			msgSceneSetup.BackgroundLayers[index].FillRightColor = layer->m_FillColorRight;
+			msgSceneSetup.BackgroundLayers[index].FillUpColor = layer->m_FillColorUp;
+			msgSceneSetup.BackgroundLayers[index].FillDownColor = layer->m_FillColorDown;
 
 			index++;
 			// Set everything back to what it was just in case

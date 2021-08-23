@@ -113,18 +113,18 @@ namespace RTE {
 	int SLTerrain::Save(Writer &writer) const {
 		SceneLayer::Save(writer);
 
-		// Only write the background texture info if the background itself is not saved out as a file already
+		// Only write the background texture info if the background itself is not saved out as a file already.
 		if (m_BGColorLayer->IsFileData()) {
 			writer.NewPropertyWithValue("BGColorLayer", m_BGColorLayer.get());
 		} else {
 			writer.NewPropertyWithValue("BackgroundTexture", m_BGTextureFile);
 		}
 
-		// Only if we haven't saved out the FG as a done and altered bitmap file should we save the procedural params here
+		// Only if we haven't saved out the FG as a done and altered bitmap file should we save the procedural params here.
 		if (m_FGColorLayer->IsFileData()) {
 			writer.NewPropertyWithValue("FGColorLayer", m_FGColorLayer.get());
 		} else {
-			// Layer data is not saved into a bitmap file yet, so just write out the procedural params to build the terrain
+			// Layer data is not saved into a bitmap file yet, so just write out the procedural params to build the terrain.
 			for (const TerrainFrosting *terrainFrosting : m_TerrainFrostings) {
 				writer.NewPropertyWithValue("AddTerrainFrosting", terrainFrosting);
 			}
@@ -168,28 +168,29 @@ namespace RTE {
 		std::array<int, c_PaletteEntriesNumber> materialColors;
 		materialColors.fill(0);
 
+		// Reference. Do not remove.
 		//acquire_bitmap(m_MainBitmap);
 		//acquire_bitmap(fgColorBitmap);
 		//acquire_bitmap(bgColorBitmap);
 		//acquire_bitmap(defaultBGLayerTexture);
 
-		// Go through each pixel on the main bitmap, which contains all the material pixels loaded from the bitmap
-		// Place texture pixels on the FG layer corresponding to the materials on the main material bitmap
+		// Go through each pixel on the main bitmap, which contains all the material pixels loaded from the bitmap.
+		// Place texture pixels on the FG layer corresponding to the materials on the main material bitmap.
 		for (int xPos = 0; xPos < m_MainBitmap->w; ++xPos) {
 			for (int yPos = 0; yPos < m_MainBitmap->h; ++yPos) {
 				// Read which material the current pixel represents
 				int matIndex = _getpixel(m_MainBitmap, xPos, yPos);
-				// Map any materials defined in this data module but initially collided with other material ID's and thus were displaced to other ID's
+				// Map any materials defined in this data module but initially collided with other material ID's and thus were displaced to other ID's.
 				if (materialMappings.at(matIndex) != 0) {
-					// Assign the mapping and put it onto the material bitmap too
+					// Assign the mapping and put it onto the material bitmap too.
 					matIndex = materialMappings.at(matIndex);
 					_putpixel(m_MainBitmap, xPos, yPos, matIndex);
 				}
 
-				// Validate the material, or default to default material
+				// Validate the material, or default to default material.
 				const Material *material = (matIndex >= 0 && matIndex < c_PaletteEntriesNumber && materialPalette.at(matIndex)) ? materialPalette.at(matIndex) : materialPalette.at(MaterialColorKeys::g_MaterialOutOfBounds);
 
-				// If haven't read a pixel of this material before, then get its texture so we can quickly access it
+				// If haven't read a pixel of this material before, then get its texture so we can quickly access it.
 				if (!materialFGTextures.at(matIndex) && material->GetFGTexture()) {
 					materialFGTextures.at(matIndex) = material->GetFGTexture();
 					//acquire_bitmap(materialFGTextures.at(matIndex));
@@ -200,7 +201,7 @@ namespace RTE {
 				}
 
 				int fgPixelColor = 0;
-				// If actually no texture for the material, then use the material's solid color instead
+				// If actually no texture for the material, then use the material's solid color instead.
 				if (!materialFGTextures.at(matIndex)) {
 					if (materialColors.at(matIndex) == 0) { materialColors.at(matIndex) = material->GetColor().GetIndex(); }
 					fgPixelColor = materialColors.at(matIndex);
@@ -222,6 +223,8 @@ namespace RTE {
 				_putpixel(bgColorBitmap, xPos, yPos, bgPixelColor);
 			}
 		}
+
+		// Reference. Do not remove.
 		//release_bitmap(m_MainBitmap);
 		//release_bitmap(fgColorBitmap);
 		//release_bitmap(bgColorBitmap);
@@ -250,13 +253,13 @@ namespace RTE {
 			m_BGColorLayer->LoadData();
 		} else {
 			m_FGColorLayer->Destroy();
-			m_FGColorLayer->Create(create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h), true, m_Offset, m_WrapX, m_WrapY, m_ScrollRatio);
+			m_FGColorLayer->Create(create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h), true, m_Offset, m_WrapX, m_WrapY, m_ScrollInfo);
 
 			m_BGColorLayer->Destroy();
-			m_BGColorLayer->Create(create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h), true, m_Offset, m_WrapX, m_WrapY, m_ScrollRatio);
+			m_BGColorLayer->Create(create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h), true, m_Offset, m_WrapX, m_WrapY, m_ScrollInfo);
 
 			/*
-			// Structural integrity calc buffer bitmap
+			// Structural integrity calc buffer bitmap.
 			destroy_bitmap(m_StructuralBitmap);
 			m_StructuralBitmap = create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h);
 			RTEAssert(m_StructuralBitmap, "Failed to allocate BITMAP in Terrain::Create");
@@ -276,7 +279,6 @@ namespace RTE {
 			}
 			CleanAir();
 		}
-		InitScrollRatios();
 		return 0;
 	}
 
@@ -446,7 +448,7 @@ namespace RTE {
 				int colorPixel = getpixel(m_FGColorLayer->GetBitmap(), terrX, terrY);
 
 				if (getpixel(tempBitmap, testX, testY) != ColorKeys::g_MaskColor) {
-					// Only add PixelMO if we're not due to skip any
+					// Only add PixelMO if we're not due to skip any.
 					if (makeMOPs && matPixel != MaterialColorKeys::g_MaterialAir && colorPixel != ColorKeys::g_MaskColor && ++skipCount > skipMOP && MOPDeque.size() < maxMOPs) {
 						skipCount = 0;
 						const Material *sceneMat = g_SceneMan.GetMaterialFromID(matPixel);
@@ -457,7 +459,7 @@ namespace RTE {
 						MOPDeque.emplace_back(terrainPixel.release());
 					}
 
-					// Clear the terrain pixels
+					// Clear the terrain pixels.
 					if (matPixel != MaterialColorKeys::g_MaterialAir) { putpixel(m_MainBitmap, terrX, terrY, MaterialColorKeys::g_MaterialAir); }
 					if (colorPixel != ColorKeys::g_MaskColor) {
 						putpixel(m_FGColorLayer->GetBitmap(), terrX, terrY, ColorKeys::g_MaskColor);
@@ -467,8 +469,8 @@ namespace RTE {
 			}
 		}
 
-		// Add a box to the updated areas list to show there's been change to the materials layer
-		// TODO: improve fit/tightness of box here
+		// Add a box to the updated areas list to show there's been change to the materials layer.
+		// TODO: improve fit/tightness of box here.
 		m_UpdatedMateralAreas.emplace_back(Box(pos - pivot, static_cast<float>(maxWidth), static_cast<float>(maxHeight)));
 
 		return MOPDeque;
@@ -560,7 +562,7 @@ namespace RTE {
 		}
 		Vector pos = terrainObject->GetPos() + terrainObject->GetBitmapOffset();
 
-		// Do duplicate drawing if the terrain object straddles a wrapping border
+		// Do duplicate drawing if the terrain object straddles a wrapping border.
 		if (pos.GetFloorIntX() < 0) {
 			draw_sprite(m_MainBitmap, terrainObject->GetMaterialBitmap(), pos.GetFloorIntX() + m_MainBitmap->w, pos.GetFloorIntY());
 			draw_sprite(m_FGColorLayer->GetBitmap(), terrainObject->GetFGColorBitmap(), pos.GetFloorIntX() + m_FGColorLayer->GetBitmap()->w, pos.GetFloorIntY());
@@ -571,7 +573,7 @@ namespace RTE {
 			if (terrainObject->HasBGColor()) { draw_sprite(m_BGColorLayer->GetBitmap(), terrainObject->GetBGColorBitmap(), pos.GetFloorIntX() - m_BGColorLayer->GetBitmap()->w, pos.GetFloorIntY()); }
 		}
 
-		// Regular drawing
+		// Regular drawing.
 		draw_sprite(m_MainBitmap, terrainObject->GetMaterialBitmap(), pos.GetFloorIntX(), pos.GetFloorIntY());
 		draw_sprite(m_FGColorLayer->GetBitmap(), terrainObject->GetFGColorBitmap(), pos.GetFloorIntX(), pos.GetFloorIntY());
 		if (terrainObject->HasBGColor()) {
@@ -579,10 +581,10 @@ namespace RTE {
 			g_SceneMan.RegisterTerrainChange(pos.GetFloorIntX(), pos.GetFloorIntY(), terrainObject->GetBitmapWidth(), terrainObject->GetBitmapHeight(), ColorKeys::g_MaskColor, true);
 		}
 
-		// Register terrain change
+		// Register terrain change.
 		g_SceneMan.RegisterTerrainChange(pos.GetFloorIntX(), pos.GetFloorIntY(), terrainObject->GetBitmapWidth(), terrainObject->GetBitmapHeight(), ColorKeys::g_MaskColor, false);
 
-		// Add a box to the updated areas list to show there's been change to the materials layer
+		// Add a box to the updated areas list to show there's been change to the materials layer.
 		m_UpdatedMateralAreas.emplace_back(Box(pos, static_cast<float>(terrainObject->GetMaterialBitmap()->w), static_cast<float>(terrainObject->GetMaterialBitmap()->h)));
 
 		// Apply all the child objects of the TO, and first reapply the team so all its children are guaranteed to be on the same team!
@@ -615,6 +617,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLTerrain::CleanAir() {
+		// Reference. Do not remove.
 		//acquire_bitmap(m_MainBitmap);
 		//acquire_bitmap(m_FGColorLayer->GetBitmap());
 
@@ -631,7 +634,7 @@ namespace RTE {
 				if (matPixel == MaterialColorKeys::g_MaterialAir) { _putpixel(m_FGColorLayer->GetBitmap(), x, y, ColorKeys::g_MaskColor); }
 			}
 		}
-
+		// Reference. Do not remove.
 		//release_bitmap(m_MainBitmap);
 		//release_bitmap(m_FGColorLayer->GetBitmap());
 	}
@@ -639,6 +642,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLTerrain::CleanAirBox(const Box &box, bool wrapsX, bool wrapsY) {
+		// Reference. Do not remove.
 		//acquire_bitmap(m_MainBitmap);
 		//acquire_bitmap(m_FGColorLayer->GetBitmap());
 
@@ -668,6 +672,7 @@ namespace RTE {
 				}
 			}
 		}
+		// Reference. Do not remove.
 		//release_bitmap(m_MainBitmap);
 		//release_bitmap(m_FGColorLayer->GetBitmap());
 	}

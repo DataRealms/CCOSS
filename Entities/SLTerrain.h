@@ -194,7 +194,7 @@ namespace RTE {
 		/// Adds a notification that an area of the material terrain has been updated.
 		/// </summary>
 		/// <param name="newArea">The Box defining the newly updated material area that can be unwrapped and may be out of bounds of the scene.</param>
-		void AddUpdatedMaterialArea(const Box &newArea) { m_UpdatedMateralAreas.push_back(newArea); }
+		void AddUpdatedMaterialArea(const Box &newArea) { m_UpdatedMateralAreas.emplace_back(newArea); }
 
 		/// <summary>
 		/// Takes a BITMAP and scans through the pixels on this terrain for pixels which overlap with it. Erases them from the terrain and can optionally generate MOPixel:s based on the erased or 'dislodged' terrain pixels.

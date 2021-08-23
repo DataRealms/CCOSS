@@ -53,11 +53,6 @@ namespace RTE {
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
 		/// <remarks>Don't delete bitmaps since they are owned in the CoententFile static maps.</remarks>
 		void Destroy(bool notInherited = false) override { if (!notInherited) { Entity::Destroy(); } Clear(); }
-
-		/// <summary>
-		/// Resets the entire TerrainDebris, including its inherited members, to their default settings or values.
-		/// </summary>
-		void Reset() override { Clear(); Entity::Reset(); }
 #pragma endregion
 
 #pragma region Concrete Methods

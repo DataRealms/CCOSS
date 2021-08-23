@@ -66,21 +66,21 @@ namespace RTE {
 		//if (frostingTexture) { acquire_bitmap(frostingTexture); }
 
 		for (int xPos = 0; xPos < matBitmap->w; ++xPos) {
-			int thicknessGoal = m_MinThickness + RandomNum(0, m_MaxThickness - m_MinThickness);
+			int thicknessGoal = RandomNum(m_MinThickness, m_MaxThickness);
 
 			// Work upward from the bottom of each column.
 			for (int yPos = matBitmap->h - 1; yPos >= 0; --yPos) {
-				int matIndex = _getpixel(matBitmap, xPos, yPos);
+				int materialCheckPixel = _getpixel(matBitmap, xPos, yPos);
 
-				if (!targetMatFound && matIndex == m_TargetMaterial.GetIndex()) {
+				if (!targetMatFound && materialCheckPixel == m_TargetMaterial.GetIndex()) {
 					targetMatFound = true;
 					appliedThickness = 0;
-				} else if (targetMatFound && matIndex != m_TargetMaterial.GetIndex() && appliedThickness <= thicknessGoal) {
+				} else if (targetMatFound && materialCheckPixel != m_TargetMaterial.GetIndex() && appliedThickness <= thicknessGoal) {
 					// Target material has ended! See if we should start putting on the frosting.
 					targetMatFound = false;
 					applyingFrosting = true;
 				}
-				if (applyingFrosting && (matIndex == MaterialColorKeys::g_MaterialAir || !m_InAirOnly) && appliedThickness <= thicknessGoal) {
+				if (applyingFrosting && (materialCheckPixel == MaterialColorKeys::g_MaterialAir || !m_InAirOnly) && appliedThickness <= thicknessGoal) {
 					_putpixel(fgColorBitmap, xPos, yPos, frostingTexture ? _getpixel(frostingTexture, xPos % frostingTexture->w, yPos % frostingTexture->h) : m_FrostingMaterial.GetColor().GetIndex());
 					_putpixel(matBitmap, xPos, yPos, m_FrostingMaterial.GetIndex());
 					appliedThickness++;

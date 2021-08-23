@@ -23,10 +23,10 @@ namespace RTE {
 		m_AutoScrollStepInterval = 0;
 		m_AutoScrollStepTimer.Reset();
 		m_AutoScrollOffset.Reset();
-		m_FillLeftColor = ColorKeys::g_MaskColor;
-		m_FillRightColor = ColorKeys::g_MaskColor;
-		m_FillUpColor = ColorKeys::g_MaskColor;
-		m_FillDownColor = ColorKeys::g_MaskColor;
+		m_FillColorLeft = ColorKeys::g_MaskColor;
+		m_FillColorRight = ColorKeys::g_MaskColor;
+		m_FillColorUp = ColorKeys::g_MaskColor;
+		m_FillColorDown = ColorKeys::g_MaskColor;
 
 		m_LayerScaleFactors = { Vector(1.0F, 1.0F), Vector(1.0F, 1.0F), Vector(2.0F, 2.0F) };
 		m_IgnoreAutoScale = false;
@@ -42,12 +42,12 @@ namespace RTE {
 
 		// Sampled color at the edges of the layer that can be used to fill gap if the layer isn't large enough to cover a target bitmap.
 		if (!m_WrapX) {
-			m_FillLeftColor = _getpixel(m_MainBitmap, 0, m_MainBitmap->h / 2);
-			m_FillRightColor = _getpixel(m_MainBitmap, m_MainBitmap->w - 1, m_MainBitmap->h / 2);
+			m_FillColorLeft = _getpixel(m_MainBitmap, 0, m_MainBitmap->h / 2);
+			m_FillColorRight = _getpixel(m_MainBitmap, m_MainBitmap->w - 1, m_MainBitmap->h / 2);
 		}
 		if (!m_WrapY) {
-			m_FillUpColor = _getpixel(m_MainBitmap, m_MainBitmap->w / 2, 0);
-			m_FillDownColor = _getpixel(m_MainBitmap, m_MainBitmap->w / 2, m_MainBitmap->h - 1);
+			m_FillColorUp = _getpixel(m_MainBitmap, m_MainBitmap->w / 2, 0);
+			m_FillColorDown = _getpixel(m_MainBitmap, m_MainBitmap->w / 2, m_MainBitmap->h - 1);
 		}
 		return 0;
 	}
@@ -65,10 +65,10 @@ namespace RTE {
 		m_Bitmaps = reference.m_Bitmaps;
 		m_MainBitmap = m_Bitmaps.at(0);
 
-		m_FillLeftColor = reference.m_FillLeftColor;
-		m_FillRightColor = reference.m_FillRightColor;
-		m_FillUpColor = reference.m_FillUpColor;
-		m_FillDownColor = reference.m_FillDownColor;
+		m_FillColorLeft = reference.m_FillColorLeft;
+		m_FillColorRight = reference.m_FillColorRight;
+		m_FillColorUp = reference.m_FillColorUp;
+		m_FillColorDown = reference.m_FillColorDown;
 
 		m_FrameCount = reference.m_FrameCount;
 		m_SpriteAnimMode = reference.m_SpriteAnimMode;
@@ -138,6 +138,36 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void SLBackground::InitScaleFactors() {
+		if (!m_IgnoreAutoScale) {
+			m_LayerScaleFactors.at(LayerAutoScaleMode::AutoScaleOff) = m_ScaleFactor;
+
+			float fitScreenScaleFactor = 1;
+			if (g_SceneMan.GetSceneHeight() > g_FrameMan.GetPlayerScreenHeight()) {
+				fitScreenScaleFactor = std::clamp(static_cast<float>(g_FrameMan.GetPlayerScreenHeight()) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
+			} else if (g_SceneMan.GetSceneHeight() > m_MainBitmap->h) {
+				fitScreenScaleFactor = std::clamp(static_cast<float>(g_SceneMan.GetSceneHeight()) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
+			}
+			m_LayerScaleFactors.at(LayerAutoScaleMode::FitScreen).SetXY(fitScreenScaleFactor, fitScreenScaleFactor);
+
+			switch (g_SettingsMan.GetSceneBackgroundAutoScaleMode()) {
+				case LayerAutoScaleMode::FitScreen:
+					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::FitScreen));
+					break;
+				case LayerAutoScaleMode::AlwaysUpscaled:
+					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::AlwaysUpscaled));
+					break;
+				default:
+					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::AutoScaleOff));
+					break;
+			}
+			m_ScrollInfo *= m_ScaleFactor;
+			InitScrollRatios();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void SLBackground::Update() {
 		if (m_SpriteAnimMode != SpriteAnimMode::NOANIM) {
 			int frameTime = m_SpriteAnimDuration / m_FrameCount;
@@ -185,36 +215,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SLBackground::InitScaleFactors() {
-		if (!m_IgnoreAutoScale) {
-			m_LayerScaleFactors.at(LayerAutoScaleMode::AutoScaleOff) = m_ScaleFactor;
-
-			float fitScreenScaleFactor = 1;
-			if (g_SceneMan.GetSceneHeight() > g_FrameMan.GetPlayerScreenHeight()) {
-				fitScreenScaleFactor = std::clamp(static_cast<float>(g_FrameMan.GetPlayerScreenHeight()) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
-			} else if (g_SceneMan.GetSceneHeight() > m_MainBitmap->h) {
-				fitScreenScaleFactor = std::clamp(static_cast<float>(g_SceneMan.GetSceneHeight()) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
-			}
-			m_LayerScaleFactors.at(LayerAutoScaleMode::FitScreen).SetXY(fitScreenScaleFactor, fitScreenScaleFactor);
-
-			switch (g_SettingsMan.GetSceneBackgroundAutoScaleMode()) {
-				case LayerAutoScaleMode::FitScreen:
-					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::FitScreen));
-					break;
-				case LayerAutoScaleMode::AlwaysUpscaled:
-					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::AlwaysUpscaled));
-					break;
-				default:
-					SetScaleFactor(m_LayerScaleFactors.at(LayerAutoScaleMode::AutoScaleOff));
-					break;
-			}
-			m_ScrollInfo *= m_ScaleFactor;
-			InitScrollRatios();
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void SLBackground::Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride, bool offsetNeedsScrollRatioAdjustment) {
 		SceneLayer::Draw(targetBitmap, targetBox, scrollOverride, !IsAutoScrolling());
 
@@ -229,12 +229,12 @@ namespace RTE {
 
 		// Detect if non-wrapping layer dimensions can't cover the whole target area with its main bitmap. If so, fill in the gap with appropriate solid color sampled from the hanging edge.
 		if (!m_WrapX && bitmapWidth <= targetBoxWidth) {
-			if (m_FillLeftColor != ColorKeys::g_MaskColor && m_Offset.GetFloorIntX() != 0) { rectfill(targetBitmap, targetBoxCornerX, targetBoxCornerY, targetBoxCornerX - m_Offset.GetFloorIntX(), targetBoxCornerY + targetBoxHeight, m_FillLeftColor); }
-			if (m_FillRightColor != ColorKeys::g_MaskColor) { rectfill(targetBitmap, targetBoxCornerX + bitmapWidth - m_Offset.GetFloorIntX(), targetBoxCornerY, targetBoxCornerX + targetBoxWidth, targetBoxCornerY + targetBoxHeight, m_FillRightColor); }
+			if (m_FillColorLeft != ColorKeys::g_MaskColor && m_Offset.GetFloorIntX() != 0) { rectfill(targetBitmap, targetBoxCornerX, targetBoxCornerY, targetBoxCornerX - m_Offset.GetFloorIntX(), targetBoxCornerY + targetBoxHeight, m_FillColorLeft); }
+			if (m_FillColorRight != ColorKeys::g_MaskColor) { rectfill(targetBitmap, targetBoxCornerX + bitmapWidth - m_Offset.GetFloorIntX(), targetBoxCornerY, targetBoxCornerX + targetBoxWidth, targetBoxCornerY + targetBoxHeight, m_FillColorRight); }
 		}
 		if (!m_WrapY && bitmapHeight <= targetBoxHeight) {
-			if (m_FillUpColor != ColorKeys::g_MaskColor && m_Offset.GetFloorIntY() != 0) { rectfill(targetBitmap, targetBoxCornerX, targetBoxCornerY, targetBoxCornerX + targetBoxWidth, targetBoxCornerY - m_Offset.GetFloorIntY(), m_FillUpColor); }
-			if (m_FillDownColor != ColorKeys::g_MaskColor) { rectfill(targetBitmap, targetBoxCornerX, targetBoxCornerY + bitmapHeight - m_Offset.GetFloorIntY(), targetBoxCornerX + targetBoxWidth, targetBoxCornerY + targetBoxHeight, m_FillDownColor); }
+			if (m_FillColorUp != ColorKeys::g_MaskColor && m_Offset.GetFloorIntY() != 0) { rectfill(targetBitmap, targetBoxCornerX, targetBoxCornerY, targetBoxCornerX + targetBoxWidth, targetBoxCornerY - m_Offset.GetFloorIntY(), m_FillColorUp); }
+			if (m_FillColorDown != ColorKeys::g_MaskColor) { rectfill(targetBitmap, targetBoxCornerX, targetBoxCornerY + bitmapHeight - m_Offset.GetFloorIntY(), targetBoxCornerX + targetBoxWidth, targetBoxCornerY + targetBoxHeight, m_FillColorDown); }
 		}
 		// Reset the clip rect back to the entire target bitmap.
 		set_clip_rect(targetBitmap, 0, 0, targetBitmap->w - 1, targetBitmap->h - 1);

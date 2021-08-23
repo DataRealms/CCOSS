@@ -94,20 +94,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SceneLayer::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "BitmapFile") {
-			reader >> m_BitmapFile;
-		} else if (propName == "DrawTransparent") {
-			reader >> m_DrawTrans;
-		} else if (propName == "WrapX") {
+		if (propName == "WrapX") {
 			reader >> m_WrapX;
 		} else if (propName == "WrapY") {
 			reader >> m_WrapY;
-		} else if (propName == "ScrollRatio") {
-			// Actually read the ScrollInfo, not the ratio. The ratios will be initialized later.
-			reader >> m_ScrollInfo;
-		} else if (propName == "ScaleFactor") {
-			reader >> m_ScaleFactor;
-			SetScaleFactor(m_ScaleFactor);
+		} else if (propName == "BitmapFile") {
+			reader >> m_BitmapFile;
 		} else {
 			return Entity::ReadProperty(propName, reader);
 		}
@@ -119,12 +111,9 @@ namespace RTE {
 	int SceneLayer::Save(Writer &writer) const {
 		Entity::Save(writer);
 
-		writer.NewPropertyWithValue("BitmapFile", m_BitmapFile);
-		writer.NewPropertyWithValue("DrawTransparent", m_DrawTrans);
 		writer.NewPropertyWithValue("WrapX", m_WrapX);
 		writer.NewPropertyWithValue("WrapY", m_WrapY);
-		writer.NewPropertyWithValue("ScrollRatio", m_ScrollInfo);
-		writer.NewPropertyWithValue("ScaleFactor", m_ScaleFactor);
+		writer.NewPropertyWithValue("BitmapFile", m_BitmapFile);
 
 		return 0;
 	}

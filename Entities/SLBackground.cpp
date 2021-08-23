@@ -100,6 +100,16 @@ namespace RTE {
 			}
 		} else if (propName == "SpriteAnimDuration") {
 			reader >> m_SpriteAnimDuration;
+		} else if (propName == "DrawTransparent") {
+			reader >> m_DrawTrans;
+		} else if (propName == "ScrollRatio") {
+			// Actually read the ScrollInfo, not the ratio. The ratios will be initialized later.
+			reader >> m_ScrollInfo;
+		} else if (propName == "ScaleFactor") {
+			reader >> m_ScaleFactor;
+			SetScaleFactor(m_ScaleFactor);
+		} else if (propName == "IgnoreAutoScaling") {
+			reader >> m_IgnoreAutoScale;
 		} else if (propName == "OriginPointOffset") {
 			reader >> m_OriginOffset;
 		} else if (propName == "AutoScrollX") {
@@ -110,8 +120,6 @@ namespace RTE {
 			reader >> m_AutoScrollStepInterval;
 		} else if (propName == "AutoScrollStep") {
 			reader >> m_AutoScrollStep;
-		} else if (propName == "IgnoreAutoScaling") {
-			reader >> m_IgnoreAutoScale;
 		} else {
 			return SceneLayer::ReadProperty(propName, reader);
 		}
@@ -126,12 +134,15 @@ namespace RTE {
 		writer.NewPropertyWithValue("FrameCount", m_FrameCount);
 		writer.NewPropertyWithValue("SpriteAnimMode", m_SpriteAnimMode);
 		writer.NewPropertyWithValue("SpriteAnimDuration", m_SpriteAnimDuration);
+		writer.NewPropertyWithValue("DrawTransparent", m_DrawTrans);
+		writer.NewPropertyWithValue("ScrollRatio", m_ScrollInfo);
+		writer.NewPropertyWithValue("ScaleFactor", m_ScaleFactor);
+		writer.NewPropertyWithValue("IgnoreAutoScaling", m_IgnoreAutoScale);
 		writer.NewPropertyWithValue("OriginPointOffset", m_OriginOffset);
 		writer.NewPropertyWithValue("AutoScrollX", m_AutoScrollX);
 		writer.NewPropertyWithValue("AutoScrollY", m_AutoScrollY);
 		writer.NewPropertyWithValue("AutoScrollStepInterval", m_AutoScrollStepInterval);
 		writer.NewPropertyWithValue("AutoScrollStep", m_AutoScrollStep);
-		writer.NewPropertyWithValue("IgnoreAutoScaling", m_IgnoreAutoScale);
 
 		return 0;
 	}

@@ -35,12 +35,12 @@ namespace RTE {
 		/// Makes the SceneLayer object ready for use.
 		/// </summary>
 		/// <param name="bitmapFile">The ContentFile representing the bitmap file to load as this SceneLayer's graphical representation.</param>
-		/// <param name="drawTrans">Whether to draw transparently using a color key specified by the pixel in the upper left corner of the loaded bitmap.</param>
+		/// <param name="drawTrans">Whether to draw masked (transparent) or not.</param>
 		/// <param name="offset">The initial scroll offset.</param>
 		/// <param name="wrapX">Whether the layer should wrap around or stop when scrolling beyond its bitmap's boundaries on the X axis.</param>
 		/// <param name="wrapY">Whether the layer should wrap around or stop when scrolling beyond its bitmap's boundaries on the Y axis.</param>
 		/// <param name="scrollInfo">
-		/// A vector whose components define two different things, depending on wrapX/Y arguments.
+		/// A vector whose components define two different things, depending on wrap arguments.
 		/// If a wrap argument is set to false, the corresponding component here will be interpreted as the width (X) or height (Y) (in pixels) of the total bitmap area that this layer is allowed to scroll across before stopping at an edge.
 		/// If wrapping is set to true, the value in scrollInfo is simply the ratio of offset at which any scroll operations will be done in.
 		/// A special command is if wrap is false and the corresponding component is -1.0, that signals that the own width or height should be used as scrollInfo input.
@@ -52,12 +52,12 @@ namespace RTE {
 		/// Makes the SceneLayer object ready for use.
 		/// </summary>
 		/// <param name="bitmap">The prepared BITMAP to use as for this SceneLayer. Ownership IS transferred!</param>
-		/// <param name="drawTrans">Whether to draw transparently using a color key specified by the pixel in the upper left corner of the loaded bitmap.</param>
+		/// <param name="drawTrans">Whether to draw masked (transparent) or not.</param>
 		/// <param name="offset">The initial scroll offset.</param>
 		/// <param name="wrapX">Whether the layer should wrap around or stop when scrolling beyond its bitmap's boundaries on the X axis.</param>
 		/// <param name="wrapY">Whether the layer should wrap around or stop when scrolling beyond its bitmap's boundaries on the Y axis.</param>
 		/// <param name="scrollInfo">
-		/// A vector whose components define two different things, depending on wrapX/Y arguments.
+		/// A vector whose components define two different things, depending on wrap arguments.
 		/// If a wrap argument is set to false, the corresponding component here will be interpreted as the width (X) or height (Y) (in pixels) of the total bitmap area that this layer is allowed to scroll across before stopping at an edge.
 		/// If wrapping is set to true, the value in scrollInfo is simply the ratio of offset at which any scroll operations will be done in.
 		/// A special command is if wrap is false and the corresponding component is -1.0, that signals that the own width or height should be used as scrollInfo input.
@@ -86,15 +86,15 @@ namespace RTE {
 		void Destroy(bool notInherited = false) override;
 #pragma endregion
 
-#pragma region 
+#pragma region Data Handling
 		/// <summary>
-		/// Whether this' bitmap data is loaded from a file or was generated.
+		/// Whether this SceneLayer's bitmap data is loaded from a file or was generated at runtime.
 		/// </summary>
-		/// <returns>Whether the data in this' bitmap was loaded from a datafile, or generated.</returns>
+		/// <returns>Whether this SceneLayer's bitmap data was loaded from a file or not.</returns>
 		virtual bool IsFileData() const { return !m_BitmapFile.GetDataPath().empty(); }
 
 		/// <summary>
-		/// Actually loads previously specified/created data into memory. Has to be done before using this SceneLayer.
+		/// Loads previously specified/created data into memory. Has to be done before using this SceneLayer if the bitmap was not generated at runtime.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		virtual int LoadData();

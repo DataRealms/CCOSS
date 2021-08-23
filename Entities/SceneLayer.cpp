@@ -67,14 +67,13 @@ namespace RTE {
 		m_WrapY = reference.m_WrapY;
 		m_OriginOffset = reference.m_OriginOffset;
 		m_ScrollInfo = reference.m_ScrollInfo;
-		// The ratios need to be calculated from the ScrollInfo with InitScrollRatios later in LoadData.
 		m_ScrollRatio = reference.m_ScrollRatio;
 		m_ScaleFactor = reference.m_ScaleFactor;
 		m_ScaleInverse = reference.m_ScaleInverse;
 		m_ScaledDimensions = reference.m_ScaledDimensions;
 
 		if (reference.m_MainBitmap) {
-			// Copy the bitmap from the ContentFile, because we're going to be changing it!
+			// Make a copy of the bitmap because it can be modified in some use cases.
 			BITMAP *bitmapToCopy = reference.m_MainBitmap;
 			RTEAssert(bitmapToCopy, "Couldn't load the bitmap file specified for SceneLayer!");
 
@@ -86,7 +85,7 @@ namespace RTE {
 
 			m_MainBitmapOwned = true;
 		} else {
-			// If no bitmap to copy, has to load it with LoadData to create this in the copied SL.
+			// If no bitmap to copy, then it has to be loaded with LoadData.
 			m_MainBitmapOwned = false;
 		}
 		return 0;

@@ -17,18 +17,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int TerrainFrosting::Create(const TerrainFrosting &reference) {
-		m_FrostingMaterial = reference.m_FrostingMaterial;
-		m_TargetMaterial = reference.m_TargetMaterial;
-		m_MinThickness = reference.m_MinThickness;
-		m_MaxThickness = reference.m_MaxThickness;
-		m_InAirOnly = reference.m_InAirOnly;
-
-		return 0;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	int TerrainFrosting::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "FrostingMaterial") {
 			reader >> m_FrostingMaterial;

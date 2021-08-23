@@ -60,20 +60,6 @@ namespace RTE {
 		void Reset() override { Clear(); Entity::Reset(); }
 #pragma endregion
 
-#pragma region Getters
-		/// <summary>
-		/// Gets all the bitmaps of this collection of debris.
-		/// </summary>
-		/// <returns>A vector of pointers to BITMAPs. Ownership is NOT transferred.</returns>
-		std::vector<BITMAP *> GetBitmaps() const { return m_Bitmaps; }
-
-		/// <summary>
-		/// Gets the current number of BITMAPs that describe all the different pieces of debris.
-		/// </summary>
-		/// <returns>The number of BITMAPs this TerrainDebris has.</returns>
-		int GetBitmapCount() const { return m_BitmapCount; }
-#pragma endregion
-
 #pragma region Concrete Methods
 		/// <summary>
 		/// Applies the debris to a SLTerrain as its read parameters specify.

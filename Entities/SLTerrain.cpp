@@ -45,9 +45,10 @@ namespace RTE {
 	int SLTerrain::Create(const SLTerrain &reference) {
 		SceneLayer::Create(reference);
 
-		// Leave these because they are loaded late by LoadData
+		// Don't copy the layers because they are loaded later by LoadData.
 		m_FGColorLayer.reset(dynamic_cast<SceneLayer *>(reference.m_FGColorLayer->Clone()));
 		m_BGColorLayer.reset(dynamic_cast<SceneLayer *>(reference.m_BGColorLayer->Clone()));
+
 		m_BGTextureFile = reference.m_BGTextureFile;
 
 		m_TerrainFrostings.clear();
@@ -80,7 +81,7 @@ namespace RTE {
 			m_BGColorLayer = std::make_unique<SceneLayer>();
 			reader >> m_BGColorLayer.get();
 		} else if (propName == "AddTerrainFrosting") {
-			// Clear frostings if we derived them from some other SLTerrain object and then read another set from explicit terrain definition
+			// Clear frostings if we derived them from some other SLTerrain object and then read another set from explicit terrain definition.
 			if (m_NeedToClearFrostings) {
 				m_NeedToClearFrostings = false;
 				m_TerrainFrostings.clear();
@@ -89,7 +90,7 @@ namespace RTE {
 			reader >> terrainFrosting.get();
 			m_TerrainFrostings.emplace_back(terrainFrosting.release());
 		} else if (propName == "AddTerrainDebris") {
-			// Clear debris if we derived them from some other SLTerrain object and then read another set from explicit terrain definition
+			// Clear debris if we derived them from some other SLTerrain object and then read another set from explicit terrain definition.
 			if (m_NeedToClearDebris) {
 				m_NeedToClearDebris = false;
 				m_TerrainDebris.clear();
@@ -238,7 +239,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SLTerrain::LoadData() {
-		// Load the materials bitmap into the main bitmap
+		// Load the materials bitmap into the main bitmap.
 		SceneLayer::LoadData();
 
 		RTEAssert(m_FGColorLayer.get(), "Terrain's foreground layer not instantiated before trying to load its data!");

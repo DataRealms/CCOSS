@@ -13,7 +13,7 @@ namespace RTE {
 	class TerrainDebris;
 
 	/// <summary>
-	/// The terrain of the RTE scene.
+	/// A scrolling terrain layer of the Scene, composed of several scrolling layers.
 	/// </summary>
 	class SLTerrain : public SceneLayer {
 
@@ -63,13 +63,13 @@ namespace RTE {
 
 #pragma region Data Handling
 		/// <summary>
-		/// Whether this' bitmap data is loaded from a file or was generated.
+		/// Whether this SLTerrain's bitmap data is loaded from a file or was generated at runtime.
 		/// </summary>
 		/// <returns>Whether the data in this' bitmap was loaded from a datafile, or generated.</returns>
 		bool IsFileData() const override { return m_FGColorLayer && m_FGColorLayer->IsFileData() && m_BGColorLayer && m_BGColorLayer->IsFileData(); }
 
 		/// <summary>
-		/// Actually loads previously specified/created data into memory. Has to be done before using this SceneLayer.
+		/// Loads previously specified/created data into memory. Has to be done before using this SLTerrain if the bitmap was not generated at runtime.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int LoadData() override;

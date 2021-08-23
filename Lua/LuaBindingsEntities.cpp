@@ -1094,6 +1094,10 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, SLBackground) {
 		return luabind::class_<SLBackground, SceneLayer>("SLBackground")
 
+		.property("Frame", &SLBackground::GetFrame, &SLBackground::SetFrame)
+		.property("SpriteAnimMode", &SLBackground::GetSpriteAnimMode, &SLBackground::SetSpriteAnimMode)
+		.property("SpriteAnimDuration", &SLBackground::GetSpriteAnimDuration, &SLBackground::SetSpriteAnimDuration)
+		.property("IsAnimatedManually", &SLBackground::IsAnimatedManually, &SLBackground::SetAnimatedManually)
 		.property("AutoScrollX", &SLBackground::GetAutoScrollX, &SLBackground::SetAutoScrollX)
 		.property("AutoScrollY", &SLBackground::GetAutoScrollY, &SLBackground::SetAutoScrollY)
 		.property("AutoScrollInterval", &SLBackground::GetAutoScrollStepInterval, &SLBackground::SetAutoScrollStepInterval)

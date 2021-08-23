@@ -17,6 +17,7 @@ namespace RTE {
 		m_SpriteAnimDuration = 1000;
 		m_SpriteAnimIsReversingFrames = false;
 		m_SpriteAnimTimer.Reset();
+		m_IsAnimatedManually = false;
 		m_AutoScrollX = false;
 		m_AutoScrollY = false;
 		m_AutoScrollStep.Reset();
@@ -91,7 +92,8 @@ namespace RTE {
 		if (propName == "FrameCount") {
 			reader >> m_FrameCount;
 		} else if (propName == "SpriteAnimMode") {
-			reader >> m_SpriteAnimMode;
+			m_SpriteAnimMode = static_cast<SpriteAnimMode>(std::stoi(reader.ReadPropValue()));
+			if (m_SpriteAnimMode < SpriteAnimMode::NOANIM || m_SpriteAnimMode > SpriteAnimMode::ALWAYSPINGPONG) { reader.ReportError("Invalid SLBackground sprite animation mode!"); }
 			if (m_FrameCount > 1) {
 				// If animation mode is set to something other than ALWAYSLOOP but only has 2 frames, override it because it's pointless
 				if ((m_SpriteAnimMode == SpriteAnimMode::ALWAYSRANDOM || m_SpriteAnimMode == SpriteAnimMode::ALWAYSPINGPONG) && m_FrameCount == 2) { m_SpriteAnimMode = SpriteAnimMode::ALWAYSLOOP; }
@@ -100,6 +102,8 @@ namespace RTE {
 			}
 		} else if (propName == "SpriteAnimDuration") {
 			reader >> m_SpriteAnimDuration;
+		} else if (propName == "IsAnimatedManually") {
+			reader >> m_IsAnimatedManually;
 		} else if (propName == "DrawTransparent") {
 			reader >> m_DrawTrans;
 		} else if (propName == "ScrollRatio") {
@@ -134,6 +138,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("FrameCount", m_FrameCount);
 		writer.NewPropertyWithValue("SpriteAnimMode", m_SpriteAnimMode);
 		writer.NewPropertyWithValue("SpriteAnimDuration", m_SpriteAnimDuration);
+		writer.NewPropertyWithValue("IsAnimatedManually", m_IsAnimatedManually);
 		writer.NewPropertyWithValue("DrawTransparent", m_DrawTrans);
 		writer.NewPropertyWithValue("ScrollRatio", m_ScrollInfo);
 		writer.NewPropertyWithValue("ScaleFactor", m_ScaleFactor);
@@ -180,7 +185,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLBackground::Update() {
-		if (m_SpriteAnimMode != SpriteAnimMode::NOANIM) {
+		if (!m_IsAnimatedManually && m_SpriteAnimMode != SpriteAnimMode::NOANIM) {
 			int frameTime = m_SpriteAnimDuration / m_FrameCount;
 			int prevFrame = m_Frame;
 

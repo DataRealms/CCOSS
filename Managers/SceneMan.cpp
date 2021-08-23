@@ -3353,134 +3353,84 @@ bool SceneMan::AddSceneObject(SceneObject *pObject)
 // Description:     Updates the state of this SceneMan. Supposed to be done every frame
 //                  before drawing.
 
-void SceneMan::Update(int screen)
-{
-    if (m_pCurrentScene == nullptr) {
-        return;
-    }
-
-    // Record screen was the last updated screen
-    m_LastUpdatedScreen = screen;
-
-    // Update the scene, only if doing the first screen, since it only needs done once per update
-    if (screen == 0)
-        m_pCurrentScene->Update();
-
-    // Handy
-    SLTerrain *pTerrain = m_pCurrentScene->GetTerrain();
-
-    // Learn about the unseen layer, if any
-    int team = m_ScreenTeam[screen];
-    SceneLayer *pUnseenLayer = team != Activity::NoTeam ? m_pCurrentScene->GetUnseenLayer(team) : 0;
-
-    ////////////////////////////////
-    // Scrolling interpolation
-
-    // Only adjust wrapping if this is the frame to be drawn
-    if (g_TimerMan.DrawnSimUpdate())
-    {
-        // Adjust for wrapping, if the scrolltarget jumped a seam this frame, as reported by
-        // whatever client set it (the scrolltarget) this frame. This is to avoid big,
-        // scene-wide jumps in scrolling when traversing the seam.
-        if (m_TargetWrapped[screen])
-        {
-            if (pTerrain->WrapsX())
-            {
-                if (m_ScrollTarget[screen].m_X < (pTerrain->GetBitmap()->w / 2))
-                {
-                    m_Offset[screen].m_X -= pTerrain->GetBitmap()->w;
-                    m_SeamCrossCount[screen][X] += 1;
-                }
-                else
-                {
-                    m_Offset[screen].m_X += pTerrain->GetBitmap()->w;
-                    m_SeamCrossCount[screen][X] -= 1;
-                }
-            }
-
-            if (pTerrain->WrapsY())
-            {
-                if (m_ScrollTarget[screen].m_Y < (pTerrain->GetBitmap()->h / 2))
-                {
-                    m_Offset[screen].m_Y -= pTerrain->GetBitmap()->h;
-                    m_SeamCrossCount[screen][Y] += 1;
-                }
-                else
-                {
-                    m_Offset[screen].m_Y += pTerrain->GetBitmap()->h;
-                    m_SeamCrossCount[screen][Y] -= 1;
-                }
-            }
-        }
-        m_TargetWrapped[screen] = false;
-    }
-
-    Vector oldOffset(m_Offset[screen]);
-
-    // Get the offset target, since the scroll target is centered on the target in scene units.
-    Vector offsetTarget;
-	if (g_FrameMan.IsInMultiplayerMode())
-	{
-		offsetTarget.m_X = m_ScrollTarget[screen].m_X - (g_FrameMan.GetPlayerFrameBufferWidth(screen) / 2);
-		offsetTarget.m_Y = m_ScrollTarget[screen].m_Y - (g_FrameMan.GetPlayerFrameBufferHeight(screen) / 2);
+void SceneMan::Update(int screen) {
+	if (!m_pCurrentScene) {
+		return;
 	}
-	else 
-	{
-		offsetTarget.m_X = m_ScrollTarget[screen].m_X - (g_FrameMan.GetResX() / (g_FrameMan.GetVSplit() ? 4 : 2));
-		offsetTarget.m_Y = m_ScrollTarget[screen].m_Y - (g_FrameMan.GetResY() / (g_FrameMan.GetHSplit() ? 4 : 2));
+	m_LastUpdatedScreen = screen;
+
+	// Update the scene, only if doing the first screen, since it only needs done once per update.
+	if (screen == 0) { m_pCurrentScene->Update(); }
+
+	SLTerrain *terrain = m_pCurrentScene->GetTerrain();
+
+	if (g_TimerMan.DrawnSimUpdate()) {
+		// Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.
+		if (m_TargetWrapped[screen]) {
+			if (terrain->WrapsX()) {
+				if (m_ScrollTarget[screen].GetFloorIntX() < (terrain->GetBitmap()->w / 2)) {
+					m_Offset[screen].SetX(m_Offset[screen].GetX() - static_cast<float>(terrain->GetBitmap()->w));
+					m_SeamCrossCount[screen][X] += 1;
+				} else {
+					m_Offset[screen].SetX(m_Offset[screen].GetX() + static_cast<float>(terrain->GetBitmap()->w));
+					m_SeamCrossCount[screen][X] -= 1;
+				}
+			}
+			if (terrain->WrapsY()) {
+				if (m_ScrollTarget[screen].GetFloorIntY() < (terrain->GetBitmap()->h / 2)) {
+					m_Offset[screen].SetY(m_Offset[screen].GetY() - static_cast<float>(terrain->GetBitmap()->h));
+					m_SeamCrossCount[screen][Y] += 1;
+				} else {
+					m_Offset[screen].SetY(m_Offset[screen].GetY() + static_cast<float>(terrain->GetBitmap()->h));
+					m_SeamCrossCount[screen][Y] -= 1;
+				}
+			}
+		}
+		m_TargetWrapped[screen] = false;
+	}
+	Vector oldOffset(m_Offset[screen]);
+	Vector offsetTarget;
+
+	if (g_FrameMan.IsInMultiplayerMode()) {
+		offsetTarget.SetX(m_ScrollTarget[screen].GetX() - static_cast<float>(g_FrameMan.GetPlayerFrameBufferWidth(screen) / 2));
+		offsetTarget.SetY(m_ScrollTarget[screen].GetY() - static_cast<float>(g_FrameMan.GetPlayerFrameBufferHeight(screen) / 2));
+	} else {
+		offsetTarget.SetX(m_ScrollTarget[screen].GetX() - static_cast<float>(g_FrameMan.GetResX() / (g_FrameMan.GetVSplit() ? 4 : 2)));
+		offsetTarget.SetY(m_ScrollTarget[screen].GetY() - static_cast<float>(g_FrameMan.GetResY() / (g_FrameMan.GetHSplit() ? 4 : 2)));
+	}
+	// Take the occlusion of the screens into account so that the scroll target is still centered on the terrain-visible portion of the screen.
+	offsetTarget -= (m_ScreenOcclusion[screen] / 2);
+
+	if (offsetTarget.GetFloored() != m_Offset[screen].GetFloored()) {
+		Vector scrollVec(offsetTarget - m_Offset[screen]);
+		// Figure out the scroll progress this frame, and cap it at 1.0.
+		float scrollProgress = static_cast<float>(m_ScrollSpeed[screen] * m_ScrollTimer[screen].GetElapsedRealTimeMS() * 0.05F);
+		if (scrollProgress > 1.0F) { scrollProgress = 1.0F; }
+		SetOffset(m_Offset[screen] + (scrollVec * scrollProgress), screen);
 	}
 
-    // Take the occlusion of the screens into account,
-    // so that the scrolltarget is still centered on the terrain-visible portion of the screen.
-    offsetTarget -= m_ScreenOcclusion[screen] / 2;
+	m_pMOColorLayer->SetOffset(m_Offset[screen]);
+	m_pMOIDLayer->SetOffset(m_Offset[screen]);
+	if (m_pDebugLayer) { m_pDebugLayer->SetOffset(m_Offset[screen]); }
 
-    if (offsetTarget.GetFloored() != m_Offset[screen].GetFloored())
-    {
-        Vector scrollVec(offsetTarget - m_Offset[screen]);
-        // Figure out the scroll progress this frame, and cap it at 1.0
-        float scrollProgress = m_ScrollSpeed[screen] * m_ScrollTimer[screen].GetElapsedRealTimeMS() * 0.05;
-        if (scrollProgress > 1.0)
-            scrollProgress = 1.0;
-        SetOffset(m_Offset[screen] + (scrollVec * scrollProgress), screen);
-    }
+	terrain->SetOffset(m_Offset[screen]);
+	terrain->Update();
 
-    /////////////////////////////////
-    // Apply offsets to SceneLayer:s
-
-    m_pMOColorLayer->SetOffset(m_Offset[screen]);
-    m_pMOIDLayer->SetOffset(m_Offset[screen]);
-
-    if (m_pDebugLayer) { m_pDebugLayer->SetOffset(m_Offset[screen]); }
-
-    pTerrain->SetOffset(m_Offset[screen]);
-    pTerrain->Update();
-
-    // Scroll the unexplored/unseen layer, if there is one
-    if (pUnseenLayer)
-    {
-        // Update the unseen obstruction layer for this team's screen view
-        pUnseenLayer->SetOffset(m_Offset[screen]);
-    }
-
-    // Background layers may scroll in fractions of the real offset and need special care to avoid jumping after having traversed wrapped edges, so they need the total offset without taking wrapping into account.
-	Vector unwrappedOffset(m_Offset[screen].GetX() + static_cast<float>(pTerrain->GetBitmap()->w * m_SeamCrossCount[screen][X]), m_Offset[screen].GetY() + static_cast<float>(pTerrain->GetBitmap()->h * m_SeamCrossCount[screen][Y]));
+	// Background layers may scroll in fractions of the real offset and need special care to avoid jumping after having traversed wrapped edges, so they need the total offset without taking wrapping into account.
+	Vector unwrappedOffset(m_Offset[screen].GetX() + static_cast<float>(terrain->GetBitmap()->w * m_SeamCrossCount[screen][X]), m_Offset[screen].GetY() + static_cast<float>(terrain->GetBitmap()->h * m_SeamCrossCount[screen][Y]));
 	for (SLBackground *backgroundLayer : m_pCurrentScene->GetBackLayers()) {
 		backgroundLayer->SetOffset(unwrappedOffset);
 		backgroundLayer->Update();
 	}
+	// Update the unseen obstruction layer for this team's screen view, if there is one.
+	if (SceneLayer *unseenLayer = (m_ScreenTeam[screen] != Activity::NoTeam) ? m_pCurrentScene->GetUnseenLayer(m_ScreenTeam[screen]) : nullptr) { unseenLayer->SetOffset(m_Offset[screen]); }
 
-    // Calculate delta offset.
-    m_DeltaOffset[screen] = m_Offset[screen] - oldOffset;
-
-    // Reset the timer so we can know the real time diff next frame
-    m_ScrollTimer[screen].Reset();
-
-    // Clean the color layer of the Terrain
-    if (m_CleanTimer.GetElapsedSimTimeMS() > CLEANAIRINTERVAL)
-    {
-        pTerrain->CleanAir();
-        m_CleanTimer.Reset();
-    }
+	if (m_CleanTimer.GetElapsedSimTimeMS() > CLEANAIRINTERVAL) {
+		terrain->CleanAir();
+		m_CleanTimer.Reset();
+	}
+	m_DeltaOffset[screen] = m_Offset[screen] - oldOffset;
+	m_ScrollTimer[screen].Reset();
 }
 
 

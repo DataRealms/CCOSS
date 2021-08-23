@@ -3441,8 +3441,7 @@ void SceneMan::Update(int screen)
         float scrollProgress = m_ScrollSpeed[screen] * m_ScrollTimer[screen].GetElapsedRealTimeMS() * 0.05;
         if (scrollProgress > 1.0)
             scrollProgress = 1.0;
-// TODO: Check if rounding is appropriate?
-        SetOffset(m_Offset[screen] + (scrollVec * scrollProgress).GetRounded(), screen);
+        SetOffset(m_Offset[screen] + (scrollVec * scrollProgress), screen);
     }
 
     /////////////////////////////////

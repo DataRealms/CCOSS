@@ -322,20 +322,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SceneLayer::Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride, bool offsetNeedsScrollRatioAdjustment) {
+	void SceneLayer::Draw(BITMAP *targetBitmap, Box &targetBox, bool offsetNeedsScrollRatioAdjustment) {
 		RTEAssert(m_MainBitmap, "Data of this SceneLayer has not been loaded before trying to draw!");
 
-		bool scrollOverridden = scrollOverride.GetX() != -1.0F && scrollOverride.GetY() != -1.0F;
-		if (scrollOverridden) { m_Offset = scrollOverride; }
 		if (offsetNeedsScrollRatioAdjustment) { m_Offset.SetXY(std::floor(m_Offset.GetX() * m_ScrollRatio.GetX()), std::floor(m_Offset.GetY() * m_ScrollRatio.GetY())); }
 		if (targetBox.IsEmpty()) { targetBox = Box(Vector(), static_cast<float>(targetBitmap->w), static_cast<float>(targetBitmap->h)); }
-		if (!scrollOverridden) {
-			if (!m_WrapX && static_cast<float>(targetBitmap->w) > targetBox.GetWidth()) { m_Offset.SetX(0); }
-			if (!m_WrapY && static_cast<float>(targetBitmap->h) > targetBox.GetHeight()) { m_Offset.SetY(0); }
-			m_Offset -= m_OriginOffset;
-			// Only force bounds when doing regular scroll offset because the override is used to do terrain object application tricks and sometimes needs the offsets to be < 0.
-			WrapPosition(m_Offset);
-		}
+		if (!m_WrapX && static_cast<float>(targetBitmap->w) > targetBox.GetWidth()) { m_Offset.SetX(0); }
+		if (!m_WrapY && static_cast<float>(targetBitmap->h) > targetBox.GetHeight()) { m_Offset.SetY(0); }
+
+		m_Offset -= m_OriginOffset;
+		WrapPosition(m_Offset);
+
 		set_clip_rect(targetBitmap, targetBox.GetCorner().GetFloorIntX(), targetBox.GetCorner().GetFloorIntY(), static_cast<int>(targetBox.GetCorner().GetX() + targetBox.GetWidth()) - 1, static_cast<int>(targetBox.GetCorner().GetY() + targetBox.GetHeight()) - 1);
 		bool drawScaled = m_ScaleFactor.GetX() > 1.0F || m_ScaleFactor.GetY() > 1.0F;
 

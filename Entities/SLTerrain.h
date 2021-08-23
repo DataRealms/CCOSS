@@ -272,9 +272,8 @@ namespace RTE {
 		/// </summary>
 		/// <param name="targetBitmap">The bitmap to draw to.</param>
 		/// <param name="targetBox">The box on the target bitmap to limit drawing to, with the corner of box being where the scroll position lines up.</param>
-		/// <param name="scrollOverride">Vector that overrides the internal scroll offset of this SceneLayer. It becomes the new source coordinates.</param>
 		/// <param name="offsetNeedsScrollRatioAdjustment">Whether the offset of this SceneLayer or the passed in offset override need to be adjusted to scroll ratio.</param>
-		void Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride = Vector(-1, -1), bool offsetNeedsScrollRatioAdjustment = true) override;
+		void Draw(BITMAP *targetBitmap, Box &targetBox, bool offsetNeedsScrollRatioAdjustment = false) override;
 #pragma endregion
 
 	protected:

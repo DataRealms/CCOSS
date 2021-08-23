@@ -225,14 +225,13 @@ namespace RTE {
 				m_AutoScrollStepTimer.Reset();
 			}
 			m_Offset.SetXY(std::floor((m_Offset.GetX() * m_ScrollRatio.GetX()) + m_AutoScrollOffset.GetX()), std::floor((m_Offset.GetY() * m_ScrollRatio.GetY()) + m_AutoScrollOffset.GetY()));
-			WrapPosition(m_Offset);
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SLBackground::Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride, bool offsetNeedsScrollRatioAdjustment) {
-		SceneLayer::Draw(targetBitmap, targetBox, scrollOverride, !IsAutoScrolling());
+	void SLBackground::Draw(BITMAP *targetBitmap, Box &targetBox, bool offsetNeedsScrollRatioAdjustment) {
+		SceneLayer::Draw(targetBitmap, targetBox, !IsAutoScrolling());
 
 		int bitmapWidth = m_ScaledDimensions.GetFloorIntX();
 		int bitmapHeight = m_ScaledDimensions.GetFloorIntY();

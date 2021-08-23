@@ -688,16 +688,16 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SLTerrain::Draw(BITMAP *targetBitmap, Box &targetBox, const Vector &scrollOverride, bool offsetNeedsScrollRatioAdjustment) {
+	void SLTerrain::Draw(BITMAP *targetBitmap, Box &targetBox, bool offsetNeedsScrollRatioAdjustment) {
 		switch (m_LayerToDraw) {
 			case LayerType::MaterialLayer:
-				SceneLayer::Draw(targetBitmap, targetBox, scrollOverride);
+				SceneLayer::Draw(targetBitmap, targetBox);
 				break;
 			case LayerType::ForegroundLayer:
-				m_FGColorLayer->Draw(targetBitmap, targetBox, scrollOverride);
+				m_FGColorLayer->Draw(targetBitmap, targetBox);
 				break;
 			case LayerType::BackgroundLayer:
-				m_BGColorLayer->Draw(targetBitmap, targetBox, scrollOverride);
+				m_BGColorLayer->Draw(targetBitmap, targetBox);
 				break;
 			default:
 				RTEAbort("Invalid LayerType was set to draw in SLTerrain::Draw!");

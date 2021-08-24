@@ -180,7 +180,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PathFinder::RecalculateAreaCosts(const std::list<Box> &boxList) {
+	void PathFinder::RecalculateAreaCosts(const std::deque<Box> &boxList) {
 		Box box;
 		// Go through all the boxes and see if any of the node centers are inside each
 		for (const Box &boxListEntry : boxList) {

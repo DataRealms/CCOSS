@@ -110,10 +110,10 @@ namespace RTE {
 		void RecalculateAllCosts();
 
 		/// <summary>
-		/// Recalculates the costs between all the nodes touching a list of specific rectangular areas (which will be wrapped). Also resets the pather itself.
+		/// Recalculates the costs between all the nodes touching a deque of specific rectangular areas (which will be wrapped). Also resets the pather itself.
 		/// </summary>
-		/// <param name="boxList">The list of Boxes representing the updated areas.</param>
-		void RecalculateAreaCosts(const std::list<Box> &boxList);
+		/// <param name="boxList">The deque of Boxes representing the updated areas.</param>
+		void RecalculateAreaCosts(const std::deque<Box> &boxList);
 
 		/// <summary>
 		/// Implementation of the abstract interface of Graph.

@@ -1,6 +1,6 @@
 option('debug_type', type: 'combo', choices: ['full','minimal','release'], value:'minimal', description: 'Enable certain Debug features, that might slow down the game')
 option('cccpdatadir', type:'string', value:'../Cortex-Command-Community-Data', description: 'Path to the Cortex Command Data')
 option('data_install_dir', type:'string', value:'share/cccp', description: 'Where to install the data files relative to prefix directory')
-option('no_install', type:'boolean', value:false, description: 'Configure for portable build. This makes it such that CCCP can run from within the data directory')
+option('no_install', type:'boolean', value:true, description: 'Configure for portable build. This makes it such that CCCP can run from within the data directory')
 option('install_fmod', type:'boolean', value:false, description: 'Wether to install the fmod library. (default: false)')
 option('fmod_dir', type:'string', value:'lib', description: 'Where to install the fmod library.')

@@ -60,11 +60,13 @@ The Linux build uses the meson build system, and builds against system libraries
 * `lz4>=1.9.0`
 * `libpng`
 * `libX11`
-* `meson>=0.49` (If your distro doesn't have a recent version of meson, use the pip version instead)
+* `meson>=0.55` (If your distro doesn't have a recent version of meson, use the pip version instead)
 * `boost>=1.55`
 * `xorg-misc-fonts` (probably ArchLinux only)
 
 ## Building:
+
+If you want to install the game to system directories go to the [installing](#installing) section.
 
 1. Install Dependencies (see [below](#installing-dependencies) for some distro-specific instructions).
 
@@ -78,8 +80,17 @@ The Linux build uses the meson build system, and builds against system libraries
 
 6. `ninja`
 
-If you want to change the buildtype aftwerwards, you can use `meson configure --buildtype {release or debug}` in the build directory or create a secondary build directory as in Step 4
+If you want to change the buildtype aftwerwards, you can use `meson configure --buildtype {release or debug}` in the build directory or create a secondary build directory as in Step 4. There are also additional build options documented in the [wiki](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Meson-build-options) as well as through running `meson configure` in the build directory.
 
+## Installing:
+
+Follow steps 1-3 in the [building](#building) section.  
+
+4. `meson -Dno_install=False -Dinstall_fmod=True build`
+
+5. `sudo meson install -C build`
+
+This will install Cortex Command to your system. To uninstall run `sudo meson uninstall -Cbuild` from the source repository.
 
 ## Running:
 

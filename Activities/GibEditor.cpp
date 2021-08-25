@@ -46,7 +46,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(GibEditor, EditorActivity, 0)
+ConcreteClassInfo(GibEditor, EditorActivity, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

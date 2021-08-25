@@ -46,7 +46,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(AssemblyEditor, EditorActivity, 0)
+ConcreteClassInfo(AssemblyEditor, EditorActivity, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

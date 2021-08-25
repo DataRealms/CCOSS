@@ -34,9 +34,9 @@ class Emission :
 public:
 
 	// Concrete allocation and cloning definitions
-	EntityAllocation(Emission)
-	SerializableOverrideMethods
-	ClassInfoGetters
+	EntityAllocation(Emission);
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Constructor:     Emission

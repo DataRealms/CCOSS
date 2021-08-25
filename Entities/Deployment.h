@@ -46,9 +46,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(Deployment)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(Deployment);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     Deployment

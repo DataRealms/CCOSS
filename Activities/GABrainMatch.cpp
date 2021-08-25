@@ -32,7 +32,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(GABrainMatch, GameActivity, 0)
+ConcreteClassInfo(GABrainMatch, GameActivity, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

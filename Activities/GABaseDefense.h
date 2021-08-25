@@ -40,9 +40,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(GABaseDefense)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(GABaseDefense);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GABaseDefense

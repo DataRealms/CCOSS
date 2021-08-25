@@ -32,7 +32,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(GABaseDefense, GameActivity, 0)
+ConcreteClassInfo(GABaseDefense, GameActivity, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -45,7 +45,7 @@
 
 namespace RTE {
 
-	ConcreteClassInfo(MultiplayerGame, Activity, 0)
+	ConcreteClassInfo(MultiplayerGame, Activity, 0);
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Method:          Clear

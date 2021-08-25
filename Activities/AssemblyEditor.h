@@ -53,9 +53,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(AssemblyEditor)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(AssemblyEditor);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     AssemblyEditor

@@ -53,9 +53,9 @@ namespace RTE
 	public:
 
 		// Concrete allocation and cloning definitions
-		EntityAllocation(MultiplayerServerLobby)
-		SerializableOverrideMethods
-		ClassInfoGetters
+		EntityAllocation(MultiplayerServerLobby);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 		// Constructor:     MultiplayerServerLobby

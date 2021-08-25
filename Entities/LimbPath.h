@@ -52,9 +52,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(LimbPath)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(LimbPath);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     LimbPath

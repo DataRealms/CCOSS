@@ -35,7 +35,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(GATutorial, GameActivity, 0)
+ConcreteClassInfo(GATutorial, GameActivity, 0);
 
 
 GATutorial::TutStep::TutStep(string text, int stepDuration, string screensPath, int frameCount, int frameDuration)

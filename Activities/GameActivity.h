@@ -70,8 +70,8 @@ class GameActivity:
 
 public:
 
-	SerializableOverrideMethods
-	ClassInfoGetters
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
     enum ObjectiveArrowDir
     {

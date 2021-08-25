@@ -41,7 +41,7 @@
 
 namespace RTE {
 
-AbstractClassInfo(EditorActivity, Activity)
+AbstractClassInfo(EditorActivity, Activity);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

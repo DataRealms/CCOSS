@@ -29,7 +29,7 @@
 
 namespace RTE {
 
-AbstractClassInfo(ACraft, Actor)
+AbstractClassInfo(ACraft, Actor);
 const string ACraft::Exit::c_ClassName = "Exit";
 
 bool ACraft::s_CrabBombInEffect = false;

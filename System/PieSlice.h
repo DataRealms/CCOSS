@@ -13,8 +13,8 @@ namespace RTE {
 
 	public:
 
-		SerializableOverrideMethods
-		SerializableClassNameGetter
+		SerializableOverrideMethods;
+		SerializableClassNameGetter;
 
 		/// <summary>
 		/// Enumeration for the types of PieSlices.

@@ -13,9 +13,10 @@ namespace RTE {
 	class Leg : public Attachable {
 
 	public:
-		EntityAllocation(Leg)
-		SerializableOverrideMethods
-		ClassInfoGetters
+
+		EntityAllocation(Leg);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 #pragma region Creation
 		/// <summary>

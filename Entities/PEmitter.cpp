@@ -19,7 +19,7 @@
 
 namespace RTE {
 
-	ConcreteClassInfo(PEmitter, MOSParticle, 100)
+	ConcreteClassInfo(PEmitter, MOSParticle, 100);
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 		// Method:          Clear

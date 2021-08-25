@@ -44,7 +44,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(SceneEditor, EditorActivity, 0)
+ConcreteClassInfo(SceneEditor, EditorActivity, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

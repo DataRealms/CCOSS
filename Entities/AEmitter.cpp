@@ -18,7 +18,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(AEmitter, Attachable, 100)
+ConcreteClassInfo(AEmitter, Attachable, 100);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

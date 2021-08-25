@@ -35,7 +35,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(GAScripted, GameActivity, 0)
+ConcreteClassInfo(GAScripted, GameActivity, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

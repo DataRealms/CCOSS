@@ -51,9 +51,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(AreaEditor)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(AreaEditor);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     AreaEditor

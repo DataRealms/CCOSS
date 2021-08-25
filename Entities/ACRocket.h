@@ -57,9 +57,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(ACRocket)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(ACRocket);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     ACRocket

@@ -38,9 +38,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(GABrainMatch)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(GABrainMatch);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GABrainMatch

@@ -42,7 +42,6 @@
 #include "GUIComboBox.h"
 
 #include "GibEditorGUI.h"
-#include "GABaseDefense.h"
 
 namespace RTE {
 

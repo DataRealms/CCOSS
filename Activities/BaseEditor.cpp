@@ -44,7 +44,6 @@
 #include "GUIComboBox.h"
 
 #include "SceneEditorGUI.h"
-#include "GABaseDefense.h"
 
 namespace RTE {
 

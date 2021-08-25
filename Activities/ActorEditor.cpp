@@ -43,7 +43,6 @@
 
 #include "ObjectPickerGUI.h"
 #include "PieMenuGUI.h"
-#include "GABaseDefense.h"
 
 namespace RTE {
 

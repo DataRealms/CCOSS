@@ -43,8 +43,6 @@
 #include "MOSprite.h"
 #include "HeldDevice.h"
 #include "AHuman.h"
-#include "GABrainMatch.h"
-#include "GABaseDefense.h"
 #include "GATutorial.h"
 #include "GAScripted.h"
 #include "BaseEditor.h"

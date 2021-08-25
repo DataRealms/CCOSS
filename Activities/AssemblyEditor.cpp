@@ -40,7 +40,6 @@
 #include "GUIComboBox.h"
 
 #include "AssemblyEditorGUI.h"
-#include "GABaseDefense.h"
 #include "BunkerAssembly.h"
 #include "BunkerAssemblyScheme.h"
 

@@ -336,12 +336,6 @@
     <ClInclude Include="Activities\EditorActivity.h">
       <Filter>Activities</Filter>
     </ClInclude>
-    <ClInclude Include="Activities\GABaseDefense.h">
-      <Filter>Activities</Filter>
-    </ClInclude>
-    <ClInclude Include="Activities\GABrainMatch.h">
-      <Filter>Activities</Filter>
-    </ClInclude>
     <ClInclude Include="Activities\GameActivity.h">
       <Filter>Activities</Filter>
     </ClInclude>
@@ -840,12 +834,6 @@
       <Filter>Activities</Filter>
     </ClCompile>
     <ClCompile Include="Activities\EditorActivity.cpp">
-      <Filter>Activities</Filter>
-    </ClCompile>
-    <ClCompile Include="Activities\GABaseDefense.cpp">
-      <Filter>Activities</Filter>
-    </ClCompile>
-    <ClCompile Include="Activities\GABrainMatch.cpp">
       <Filter>Activities</Filter>
     </ClCompile>
     <ClCompile Include="Activities\GameActivity.cpp">

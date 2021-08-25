@@ -41,9 +41,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(TerrainObject)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(TerrainObject);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

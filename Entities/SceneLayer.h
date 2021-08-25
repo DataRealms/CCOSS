@@ -15,9 +15,9 @@ namespace RTE {
 
 	public:
 
-		EntityAllocation(SceneLayer)
-		SerializableOverrideMethods
-		ClassInfoGetters
+		EntityAllocation(SceneLayer);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 #pragma region Creation
 		/// <summary>

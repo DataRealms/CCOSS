@@ -13,8 +13,8 @@ namespace RTE {
 
 	public:
 
-		SerializableClassNameGetter
-		SerializableOverrideMethods
+		SerializableClassNameGetter;
+		SerializableOverrideMethods;
 
 		/// <summary>
 		/// Enumeration for different input scheme presets.

@@ -11,9 +11,9 @@
 #include "SLBackground.h"
 #include "Scene.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroScreen.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
+#include "AllegroScreen.h"
 
 #ifdef _WIN32
 #include "winalleg.h"

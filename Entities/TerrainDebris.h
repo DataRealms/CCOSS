@@ -17,9 +17,9 @@ namespace RTE {
 
 	public:
 
-		EntityAllocation(TerrainDebris)
-		SerializableOverrideMethods
-		ClassInfoGetters
+		EntityAllocation(TerrainDebris);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 #pragma region Creation
 		/// <summary>

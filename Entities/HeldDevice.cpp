@@ -17,13 +17,13 @@
 #include "Arm.h"
 #include "AHuman.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
 
 
 namespace RTE {
 
-ConcreteClassInfo(HeldDevice, Attachable, 50)
+ConcreteClassInfo(HeldDevice, Attachable, 50);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

@@ -15,12 +15,12 @@
 #include "PresetMan.h"
 #include "FrameMan.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
 
 namespace RTE {
 
-ConcreteClassInfo(BunkerAssemblyScheme, SceneObject, 0)
+ConcreteClassInfo(BunkerAssemblyScheme, SceneObject, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

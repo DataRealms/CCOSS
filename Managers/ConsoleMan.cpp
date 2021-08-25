@@ -4,13 +4,13 @@
 #include "UInputMan.h"
 #include "FrameMan.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroScreen.h"
-#include "GUI/AllegroInput.h"
-#include "GUI/GUICollectionBox.h"
-#include "GUI/GUITextBox.h"
-#include "GUI/GUILabel.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
+#include "AllegroScreen.h"
+#include "AllegroInput.h"
+#include "GUICollectionBox.h"
+#include "GUITextBox.h"
+#include "GUILabel.h"
 
 namespace RTE {
 

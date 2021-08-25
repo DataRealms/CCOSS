@@ -7,15 +7,15 @@
 #include "loadpng.h"
 
 #ifdef _WIN32
-#define DebuggerBreak __debugbreak();
+#define DebuggerBreak __debugbreak()
 #else
-#define DebuggerBreak std::exit(EXIT_FAILURE);
+#define DebuggerBreak std::exit(EXIT_FAILURE)
 #endif
 
 #ifndef RELEASE_BUILD
 #define AbortAction DebuggerBreak
 #else
-#define AbortAction std::exit(EXIT_FAILURE);
+#define AbortAction std::exit(EXIT_FAILURE)
 #endif
 
 namespace RTE {
@@ -36,7 +36,7 @@ namespace RTE {
 	extern bool RTEAbortFunc(const std::string &description, const std::string &file, int line);
 
 	#define RTEAbort(description) {											\
-		if (RTEAbortFunc(description, __FILE__, __LINE__)) { AbortAction }	\
+		if (RTEAbortFunc(description, __FILE__, __LINE__)) { AbortAction; }	\
 	}
 
 	/// <summary>
@@ -59,7 +59,7 @@ namespace RTE {
 	#define RTEAssert(expression, description) {															\
 		static bool alwaysIgnore = false;																	\
 		if (!alwaysIgnore) {																				\
-			if (RTEAssertFunc(expression, description, __FILE__, __LINE__, alwaysIgnore)) { AbortAction }	\
+			if (RTEAssertFunc(expression, description, __FILE__, __LINE__, alwaysIgnore)) { AbortAction; }	\
 		}																									\
 	}
 }

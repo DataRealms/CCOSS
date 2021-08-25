@@ -65,8 +65,8 @@ public:
 friend class MetagameGUI;
 friend class MetaSave;
 
-	SerializableClassNameGetter
-	SerializableOverrideMethods
+	SerializableClassNameGetter;
+	SerializableOverrideMethods;
 
     enum MetagameState
     {

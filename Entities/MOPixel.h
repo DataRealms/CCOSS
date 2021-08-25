@@ -14,9 +14,9 @@ namespace RTE {
 
 	public:
 
-		EntityAllocation(MOPixel)
-		ClassInfoGetters
-		SerializableOverrideMethods
+		EntityAllocation(MOPixel);
+		ClassInfoGetters;
+		SerializableOverrideMethods;
 
 #pragma region Creation
 		/// <summary>

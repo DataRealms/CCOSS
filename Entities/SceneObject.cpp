@@ -19,7 +19,7 @@
 
 namespace RTE {
 
-AbstractClassInfo(SceneObject, Entity)
+AbstractClassInfo(SceneObject, Entity);
 const string SceneObject::SOPlacer::c_ClassName = "SOPlacer";
 
 

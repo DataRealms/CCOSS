@@ -15,7 +15,7 @@ namespace RTE {
 
 	public:
 
-		SerializableOverrideMethods
+		SerializableOverrideMethods;
 
 		/// <summary>
 		/// How the SoundSet should choose the next sound or SoundSet to play when SelectNextSound is called.

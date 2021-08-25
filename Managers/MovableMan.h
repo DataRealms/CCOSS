@@ -70,8 +70,8 @@ class MovableMan : public Singleton<MovableMan>, public Serializable {
 
 public:
 
-	SerializableClassNameGetter
-	SerializableOverrideMethods
+	SerializableClassNameGetter;
+	SerializableOverrideMethods;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

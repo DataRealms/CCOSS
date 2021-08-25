@@ -60,7 +60,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	PickupableBy = None
 	```
 	The Lua properties and functions are as follows:  
-	```
+	```lua
 	heldDevice.HasPickupLimitations; --(R) Whether or not this HeldDevice has any limitations affecting whether it can be picked up.
 	heldDevice.UnPickupable --(R/W) Whether this HeldDevice is/should be pickupable.
 	heldDevice:IsPickupableBy(actor) -- Whether or not a given Actor can pick up this HeldDevice.
@@ -479,7 +479,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Original bindings with no flip arguments are untouched and can be called as they were.
 
 - Added new primitive drawing functions to `PrimitiveMan`:  
-	```
+	```lua
 	-- Arc
 	PrimitiveMan:DrawArcPrimitive(Vector pos, startAngle, endAngle, radius, color)
 	PrimitiveMan:DrawArcPrimitive(player, Vector pos, startAngle, endAngle, radius, color)
@@ -575,13 +575,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	In some cases a cast to the appropriate type (`ToWhateverType`, e.g `ToMOSRotating`) will be needed when attempting to manipulate the object returned, because it will be returned as `MovableObject` if it is the root parent.  
 	In cases where you need to iterate over a parent's attachable list the parent must be cast to the appropriate type that actually has an attachable list to iterate over.  
 	For example:  
-	```
+	```lua
 	for attachable in ToMOSRotating(self:GetParent()).Attachables do
 		...
 	end
 	```
 	Or
-	```
+	```lua
 	local parent = ToMOSRotating(self:GetParent());
 	for attachable in parent.Attachables do
 		...
@@ -775,60 +775,60 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	NOTE: Here is a link to [FMOD's Inverse Rolloff Model.](https://fmod.com/resources/documentation-api?version=2.0&page=white-papers-3d-sounds.html#inverse)
 
 - `SoundContainer` Lua controls have been overhauled, allowing for more control in playing and replaying them. The following Lua bindings are available:
+	```lua
+	soundContainer:HasAnySounds() -- Returns whether or not the SoundContainer has any sounds in it. Returns True or false.
 	```
-	soundContainer:HasAnySounds() - Returns whether or not the SoundContainer has any sounds in it. Returns True or false.
+	```lua
+	soundContainer:IsBeingPlayed() -- Returns whether or not any sounds in the SoundContainer are currently being played. Returns True or False.
 	```
+	```lua
+	soundContainer:Play(optionalPosition, optionalPlayer) -- Plays the sounds belonging to the SoundContainer's currently selected SoundSet. The sound will play at the position and for the player specified, or at (0, 0) for all players if parameters aren't specified.
 	```
-	soundContainer:IsBeingPlayed() - Returns whether or not any sounds in the SoundContainer are currently being played. Returns True or False.
+	```lua
+	soundContainer:Stop(optionalPlayer) -- Stops any playing sounds belonging to the SoundContainer, optionally only stopping them for a specified player.
 	```
+	```lua
+	soundContainer:AddSound(filePath, optional soundSetToAddSoundTo, optionalSoundOffset, optionalAttenuationStartDistance, optionalAbortGameIfSoundIsInvalid) -- Adds the sound at the given filepath to the SoundContainer. If a SoundSet index is specified it'll add it to that SoundSet. If an offset or attenuation start distance are specified they'll be set, as mentioned in the INI section above. If set to abort for invalid sounds, the game will error out if it can't load the sound, otherwise it'll show a console error.
 	```
-	soundContainer:Play(optionalPosition, optionalPlayer) - Plays the sounds belonging to the SoundContainer's currently selected SoundSet. The sound will play at the position and for the player specified, or at (0, 0) for all players if parameters aren't specified.
+	```lua
+	soundContainer:SetPosition(position) -- Sets the position at which the SoundContainer's sounds will play.
 	```
+	```lua
+	soundContainer:SelectNextSoundSet() -- Selects the next SoundSet to play when soundContainer:Play(...) is called, according to the INI defined CycleMode.
 	```
-	soundContainer:Stop(optionalPlayer) - Stops any playing sounds belonging to the SoundContainer, optionally only stopping them for a specified player.
+	```lua
+	soundContainer.Loops -- Set or get the number of loops for the SoundContainer, as mentioned in the INI section above.
 	```
+	```lua
+	soundContainer.Priority -- Set or get the priority of the SoundContainer, as mentioned in the INI section above.
 	```
-	soundContainer:AddSound(filePath, optional soundSetToAddSoundTo, optionalSoundOffset, optionalAttenuationStartDistance, optionalAbortGameIfSoundIsInvalid) - Adds the sound at the given filepath to the SoundContainer. If a SoundSet index is specified it'll add it to that SoundSet. If an offset or attenuation start distance are specified they'll be set, as mentioned in the INI section above. If set to abort for invalid sounds, the game will error out if it can't load the sound, otherwise it'll show a console error.
-	```
-	```
-	soundContainer:SetPosition(position) - Sets the position at which the SoundContainer's sounds will play.
-	```
-	```
-	soundContainer:SelectNextSoundSet() - Selects the next SoundSet to play when soundContainer:Play(...) is called, according to the INI defined CycleMode.
-	```
-	```
-	soundContainer.Loops - Set or get the number of loops for the SoundContainer, as mentioned in the INI section above.
-	```
-	```
-	soundContainer.Priority - Set or get the priority of the SoundContainer, as mentioned in the INI section above.
-	```
-	```
-	soundContainer.AffectedByGlobalPitch - Set or get whether the SoundContainer is affected by global pitch, as mentioned in the INI section above.
+	```lua
+	soundContainer.AffectedByGlobalPitch -- Set or get whether the SoundContainer is affected by global pitch, as mentioned in the INI section above.
 	```
 - `MovableObjects` can now run multiple scripts by putting multiple `AddScript = FilePath.lua` lines in the INI definition. ([Issue #109](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/pull/109))  
 	Scripts will have their appropriate functions run in the order they were added. Note that all scripts share the same `self`, so care must be taken when naming self variables.  
 	Scripts can be checked for with `movableObject:HasScript(filePath);` and added and removed with `movableObject:AddScript(filePath);` and `movableObject:RemoveScript(filePath);`. They can also be enabled and disabled in Lua (preserving their ordering) with `movableObject:EnableScript(filePath);` and `movableObject:DisableScript(filePath);`.
 
 - Scripts on `MovableObjects` and anything that extends them (i.e. most things) now support the following new functions (in addition to `Create`, `Update`, `Destroy` and `OnPieMenu`). They are added in the same way as the aforementioned scripts:  
+	```lua
+	OnScriptRemoveOrDisable(self, scriptWasRemoved) -- This is run when the script is removed or disabled. The scriptWasRemoved parameter will be True if the script was removed and False if it was disabled.
 	```
-	OnScriptRemoveOrDisable(self, scriptWasRemoved) - This is run when the script is removed or disabled. The scriptWasRemoved parameter will be True if the script was removed and False if it was disabled.
+	```lua
+	OnScriptEnable(self) -- This is run when the script was disabled and has been enabled.
 	```
+	```lua
+	OnCollideWithTerrain(self, terrainMaterial) -- This is run when the MovableObject this script on is in contact with terrain. The terrainMaterial parameter gives you the material ID for the terrain collided with. It is suggested to disable this script when not needed to save on overhead, as it will be run a lot!
 	```
-	OnScriptEnable(self) - This is run when the script was disabled and has been enabled.
-	```
-	```
-	OnCollideWithTerrain(self, terrainMaterial) - This is run when the MovableObject this script on is in contact with terrain. The terrainMaterial parameter gives you the material ID for the terrain collided with. It is suggested to disable this script when not needed to save on overhead, as it will be run a lot!
-	```
-	```
-	OnCollideWithMO(self, collidedMO, collidedRootMO) - This is run when the MovableObject this script is on is in contact with another MovableObject. The collidedMO parameter gives you the MovableObject that was collided with, and the collidedRootMO parameter gives you the root MovableObject of that MovableObject (note that they may be the same). Collisions with MovableObjects that share the same root MovableObject will not call this function.
+	```lua
+	OnCollideWithMO(self, collidedMO, collidedRootMO) -- This is run when the MovableObject this script is on is in contact with another MovableObject. The collidedMO parameter gives you the MovableObject that was collided with, and the collidedRootMO parameter gives you the root MovableObject of that MovableObject (note that they may be the same). Collisions with MovableObjects that share the same root MovableObject will not call this function.
 	```
 
 - Scripts on `Attachables` now support the following new functions:  
+	```lua
+	OnAttach(self, newParent) -- This is run when the Attachable this script is on is attached to a new parent object. The newParent parameter gives you the object the Attachable is now attached to.
 	```
-	OnAttach(self, newParent) - This is run when the Attachable this script is on is attached to a new parent object. The newParent parameter gives you the object the Attachable is now attached to.
-	```
-	```
-	OnDetach(self, exParent) - This is run when the Attachable this script is on is detached from an object. The exParent gives you the object the Attachable was attached to.
+	```lua
+	OnDetach(self, exParent) -- This is run when the Attachable this script is on is detached from an object. The exParent gives you the object the Attachable was attached to.
 	```
 
 ### Changed

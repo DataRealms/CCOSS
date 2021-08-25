@@ -40,9 +40,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(Magazine)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(Magazine);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     Magazine

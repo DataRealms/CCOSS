@@ -51,9 +51,9 @@ friend struct EntityLuaBindings;
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(MOSRotating)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(MOSRotating);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

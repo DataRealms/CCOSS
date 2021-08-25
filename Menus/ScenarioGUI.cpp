@@ -281,6 +281,13 @@ namespace RTE {
 						float overlapMagnitude = overlap.GetMagnitude();
 						if (overlapMagnitude < requiredDistance) {
 							foundOverlap = true;
+							float overlapX = overlap.GetX();
+							float xDirMult = 0;
+							if (overlapX > 0 && pos1.GetX() > 0) {
+								xDirMult = -1.0F;
+							} else if (overlapX < 0 && pos1.GetX() < 0) {
+								xDirMult = 1.0F;
+							}
 							float overlapY = overlap.GetY();
 							float yDirMult = 0;
 							if (overlapY > 0 && pos1.GetY() > 0) {
@@ -289,11 +296,11 @@ namespace RTE {
 								yDirMult = 1.0F;
 							}
 							if (yDirMult != 0) {
-								sceneListEntry1->SetLocationOffset(sceneListEntry1->GetLocationOffset() + Vector(0, -overlapY + (requiredDistance * yDirMult)));
+								sceneListEntry1->SetLocationOffset(sceneListEntry1->GetLocationOffset() + Vector(-overlapX + (requiredDistance * xDirMult), -overlapY + (requiredDistance * yDirMult)));
 							} else if (overlapMagnitude == 0.0F) {
-								sceneListEntry1->SetLocationOffset(sceneListEntry1->GetLocationOffset() + Vector(0, (pos1.GetY() > 0) ? -requiredDistance : requiredDistance));
+								sceneListEntry1->SetLocationOffset(sceneListEntry1->GetLocationOffset() + Vector((pos1.GetX() > 0) ? -requiredDistance : requiredDistance, (pos1.GetY() > 0) ? -requiredDistance : requiredDistance));
 							} else {
-								sceneListEntry1->SetLocationOffset(sceneListEntry1->GetLocationOffset() + Vector(0, overlapY));
+								sceneListEntry1->SetLocationOffset(sceneListEntry1->GetLocationOffset() + Vector(overlapX, overlapY));
 							}
 						}
 					}

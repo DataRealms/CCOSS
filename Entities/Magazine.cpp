@@ -17,7 +17,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(Magazine, Attachable, 50)
+ConcreteClassInfo(Magazine, Attachable, 50);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

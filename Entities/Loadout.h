@@ -45,9 +45,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(Loadout)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(Loadout);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -67,18 +67,18 @@ public:
 
 
 // Concrete allocation and cloning definitions
-	EntityAllocation(ACrab)
-		SerializableOverrideMethods
-		ClassInfoGetters
+	EntityAllocation(ACrab);
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Constructor:     ACrab
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Description:     Constructor method used to instantiate a ACrab object in system
-		//                  memory. Create() should be called before using the object.
-		// Arguments:       None.
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Constructor:     ACrab
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Description:     Constructor method used to instantiate a ACrab object in system
+	//                  memory. Create() should be called before using the object.
+	// Arguments:       None.
 
-		ACrab() { Clear(); }
+	ACrab() { Clear(); }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////

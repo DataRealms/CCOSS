@@ -1410,10 +1410,7 @@ bool AHuman::EquipShieldInBGArm()
 //////////////////////////////////////////////////////////////////////////////////////////
 
 bool AHuman::UnequipFGArm() {
-	if (!m_pFGArm || !m_pFGArm->IsAttached()) {
-		return false;
-	}
-	if (m_pFGArm->HoldsSomething()) {
+	if (m_pFGArm && m_pFGArm->HoldsSomething()) {
 		m_pFGArm->GetHeldDevice()->Deactivate();
 		m_Inventory.push_back(m_pFGArm->ReleaseHeldMO());
 		return true;
@@ -1422,28 +1419,15 @@ bool AHuman::UnequipFGArm() {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  UnequipBGArm
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Unequips whatever is in the BG arm and puts it into the inventory.
-// Arguments:       None.
-// Return value:    Whether there was anything to unequip.
 
-bool AHuman::UnequipBGArm()
-{
-    if (!(m_pBGArm && m_pBGArm->IsAttached()))
-        return false;
-
-    // Put back into the inventory what we had in our hand, if anything
-    if (m_pBGArm->HoldsSomething())
-    {
-        m_pBGArm->GetHeldDevice()->Deactivate();
-        m_Inventory.push_back(m_pBGArm->ReleaseHeldMO());
-        return true;
-    }
-
-    return false;
+bool AHuman::UnequipBGArm() {
+	if (m_pBGArm && m_pBGArm->HoldsSomething()) {
+		m_pBGArm->GetHeldDevice()->Deactivate();
+		m_Inventory.push_back(m_pBGArm->ReleaseHeldMO());
+		return true;
+	}
+	return false;
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  GetEquippedItem
@@ -3182,7 +3166,7 @@ void AHuman::Update()
 
 	// If the pie menu is on, try to preserve whatever move state we had before it going into effect.
 	if (!m_Controller.IsState(PIE_MENU_ACTIVE)) {
-		if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP && m_Status != INACTIVE) {
+		if ((m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP) && m_Status != INACTIVE) {
 			for (int i = WALK; i < MOVEMENTSTATECOUNT; ++i) {
 				m_Paths[FGROUND][i].SetHFlip(m_HFlipped);
 				m_Paths[BGROUND][i].SetHFlip(m_HFlipped);
@@ -3242,41 +3226,26 @@ void AHuman::Update()
 
 	bool reloadFG = false;
 	if (m_pFGArm && m_Status != INACTIVE) {
+		bool changeNext = m_Controller.IsState(WEAPON_CHANGE_NEXT);
+		bool changePrev = m_Controller.IsState(WEAPON_CHANGE_PREV);
 		HDFirearm * pFireArm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-		if (m_Controller.IsState(WEAPON_CHANGE_NEXT) && m_Controller.IsState(WEAPON_CHANGE_PREV)) {
-			UnequipFGArm();
-			UnequipBGArm();
+		if ((changeNext || changePrev) && (!m_Inventory.empty() || UnequipBGArm())) {
+			if (changeNext && changePrev) {
+				UnequipFGArm();
+			} else {
+				if (pFireArm) { pFireArm->StopActivationSound(); }
+				if (changeNext) {
+					m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
+				} else {
+					m_pFGArm->SetHeldMO(SwapPrevInventory(m_pFGArm->ReleaseHeldMO()));
+				}
+				EquipShieldInBGArm();
+			}
+			m_DeviceEquipTimer.Reset();
 			m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
-		} else {
-			if (m_Controller.IsState(WEAPON_CHANGE_NEXT)) {
-				m_DeviceEquipTimer.Reset();
-				if (!m_Inventory.empty() || GetEquippedBGItem()) {
-					if (pFireArm) { pFireArm->StopActivationSound(); }
-					if (m_Inventory.empty()) { UnequipBGArm(); }
-
-					m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
-					m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-					m_PieNeedsUpdate = true;
-
-					EquipShieldInBGArm();
-					m_SharpAimProgress = 0;
-				}
-			}
-			if (m_Controller.IsState(WEAPON_CHANGE_PREV)) {
-				m_DeviceEquipTimer.Reset();
-				if (!m_Inventory.empty() || GetEquippedBGItem()) {
-					if (pFireArm) { pFireArm->StopActivationSound(); }
-					if (m_Inventory.empty()) { UnequipBGArm(); }
-
-					m_pFGArm->SetHeldMO(SwapPrevInventory(m_pFGArm->ReleaseHeldMO()));
-					m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-					m_PieNeedsUpdate = true;
-
-					EquipShieldInBGArm();
-					m_SharpAimProgress = 0;
-				}
-			}
+			m_PieNeedsUpdate = true;
+			m_SharpAimProgress = 0;
         }
 
 		// Reload held MO, if applicable
@@ -3839,7 +3808,7 @@ void AHuman::Update()
 					m_pFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pFGLeg->GetParentOffset()), m_pFGLeg->GetMaxLength(), g_SceneMan.GetGlobalAcc() * deltaTime, m_AngularVel, m_pFGLeg->GetMass(), deltaTime);
 				}
 				if (m_pBGLeg && (!m_Paths[BGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal)) {
-					m_pBGFootGroup->FlailAsLimb( m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), g_SceneMan.GetGlobalAcc() * deltaTime, m_AngularVel, m_pBGLeg->GetMass(), deltaTime);
+					m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), g_SceneMan.GetGlobalAcc() * deltaTime, m_AngularVel, m_pBGLeg->GetMass(), deltaTime);
 				}
 				if (m_JetTimeLeft <= 0) {
 					m_MoveState = STAND;
@@ -4381,14 +4350,14 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 16, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
 			rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
 
-			m_HUDStack += -10;
+			m_HUDStack -= 10;
 			if (m_pFGArm && !m_DeviceEquipTimer.IsPastRealMS(500)) {
 				if (m_pFGArm->HoldsSomething()) {
 					pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, m_pFGArm->GetHeldMO()->GetPresetName().c_str(), GUIFont::Centre);
 				} else {
 					pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, "EMPTY", GUIFont::Centre);
 				}
-				m_HUDStack += -9;
+				m_HUDStack -= 9;
 			}
 		}
         // Held-related GUI stuff
@@ -4430,7 +4399,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
                 }
                 pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Left);
 
-                m_HUDStack += -10;
+                m_HUDStack -= 10;
             }
 
 			if (m_Controller.IsState(PIE_MENU_ACTIVE) || !m_DeviceEquipTimer.IsPastRealMS(700)) {
@@ -4443,7 +4412,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
                     std::snprintf(str, sizeof(str), "%.0f oz", GetGoldCarried());
                     pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 2, str, GUIFont::Left);
 
-                    m_HUDStack += -11;
+                    m_HUDStack -= 11;
                 }
 */
 				if (m_pFGArm->HoldsSomething()) {
@@ -4451,7 +4420,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 				} else {
 					pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, "EMPTY", GUIFont::Centre);
 				}
-				m_HUDStack += -9;
+				m_HUDStack -= 9;
 /*
                 // Reload GUI, only show when there's nothing to pick up
                 if (!m_pItemInReach && m_pFGArm->HoldsSomething() && pHeldFirearm && !pHeldFirearm->IsFull())
@@ -4466,7 +4435,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
         {
             std::snprintf(str, sizeof(str), "NO ARM!");
             pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
-            m_HUDStack += -9;
+            m_HUDStack -= 9;
         }
 
         // Pickup GUI

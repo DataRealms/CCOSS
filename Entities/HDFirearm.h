@@ -179,9 +179,10 @@ ClassInfoGetters
     int GetRoundInMagCount() const;
 
 	/// <summary>
-	/// Gets the maximum number of rounds the magazine or magazine reference of this HDFirearm can hold.
+	/// Gets the maximum RoundCount a Magazine of this HDFirearm can hold.
+	/// If there is no Magazine, it gets the RoundCount of the reference Magazine.
 	/// </summary>
-	/// <returns>An int with the maximum number of rounds the magazine or magazine reference of this HDFirearm can hold.</returns>
+	/// <returns>An int with the maximum RoundCount the magazine or magazine reference of this HDFirearm can hold.</returns>
 	int GetRoundInMagCapacity() const;
 
 
@@ -658,10 +659,10 @@ ClassInfoGetters
 	bool IsReloadable() const { return m_Reloadable; }
 
 	/// <summary>
-	/// Sets whether this HDFirearm is reloadable or not.
+	/// Sets whether this HDFirearm is reloadable or not and halts the reloading process.
 	/// </summary>
 	/// <param name="isReloadable">Whether this HDFirearm is reloadable.</param>
-	void SetReloadable(bool isReloadable) { m_Reloadable = isReloadable; }
+	void SetReloadable(bool isReloadable) { m_Reloadable = isReloadable; m_Reloading = m_Reloading && m_Reloadable; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

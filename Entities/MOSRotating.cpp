@@ -1015,14 +1015,14 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 			float scale = velocityRange / maxRadius;
 			float randAngle = c_PI * RandomNormalNum();
 
-			for (int i = 1; i <= count; i++) {
+			for (int i = 0; i <= count; i++) {
 				if (i > 1) { gibParticleClone = dynamic_cast<MovableObject *>(gibSettingsObject.GetParticlePreset()->Clone()); }
 
 				float radius = std::sqrt(static_cast<float>(count - i));
 				gibParticleClone->SetPos(m_Pos + rotatedGibOffset);
 				gibParticleClone->SetHFlipped(m_HFlipped);
 				Vector gibVelocity(radius * scale + minVelocity, 0);
-				gibParticleClone->SetVel(gibVelocity.RadRotate(randAngle + RandomNum(0.0F, spread) + static_cast<float>(i) * 2.39996F));
+				gibVelocity.RadRotate(randAngle + RandomNum(0.0F, spread) + static_cast<float>(i) * 2.39996F);
 				if (lifetime != 0) {
 					gibParticleClone->SetLifetime(static_cast<int>(std::max(static_cast<float>(lifetime) * (1.0F - lifeVariation * ((radius / maxRadius) * 0.75F + RandomNormalNum() * 0.25F)), 1.0F)));
 				}
@@ -1062,7 +1062,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 				gibVelocity.RadRotate(gibSettingsObject.InheritsVelocity() ? impactImpulse.GetAbsRadAngle() : m_Rotation.GetRadAngle() + (m_HFlipped ? c_PI : 0));
 				// The "Even" spread will spread all gib particles evenly in an arc, while maintaining a randomized velocity magnitude.
 				if (gibSettingsObject.GetSpreadMode() == Gib::SPREAD_EVEN) {
-					gibVelocity.RadRotate(gibSpread - gibSpread * 2.0F * static_cast<float>(i) / static_cast<float>(count));
+					gibVelocity.RadRotate(gibSpread - (gibSpread * 2.0F * static_cast<float>(i) / static_cast<float>(count)));
 				} else {
 					gibVelocity.RadRotate(gibSpread * RandomNormalNum());
 				}

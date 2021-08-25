@@ -884,7 +884,7 @@ void HDFirearm::Update()
                     pShell->SetPos(m_Pos + tempEject);
 
                     // ##@#@@$ TEMP
-                    shellVel.SetXY(pRound->GetShellVel() * (1.0F - pRound->GetShellVelVariation() * RandomNum()), 0);
+                    shellVel.SetXY(pRound->GetShellVel() * (1.0F - RandomNum(0.0F, pRound->GetShellVelVariation())), 0);
                     shellVel.DegRotate(degAimAngle + m_ShellEjectAngle * (m_HFlipped ? -1 : 1) + shellSpread);
                     pShell->SetVel(m_Vel + shellVel);
                     pShell->SetRotAngle(m_Rotation.GetRadAngle());
@@ -923,21 +923,17 @@ void HDFirearm::Update()
 		if (m_Parent) { Reload(); }
     }
 
-	if (m_Reloading) {
-		if (!m_Reloadable) {
-			m_Reloading = false;
-		} else if (!m_pMagazine && m_pMagazineReference && m_ReloadTmr.IsPastSimMS(m_ReloadTime)) {
-			SetMagazine(dynamic_cast<Magazine *>(m_pMagazineReference->Clone()));
-			if (m_ReloadEndSound) { m_ReloadEndSound->Play(m_Pos); }
+	if (m_Reloading && !m_pMagazine && m_pMagazineReference && m_ReloadTmr.IsPastSimMS(m_ReloadTime)) {
+		SetMagazine(dynamic_cast<Magazine *>(m_pMagazineReference->Clone()));
+		if (m_ReloadEndSound) { m_ReloadEndSound->Play(m_Pos); }
 
-			m_ActivationTimer.Reset();
-			m_LastFireTmr.Reset();
+		m_ActivationTimer.Reset();
+		m_LastFireTmr.Reset();
 
-			if (m_PreFireSound && m_Activated) { m_PreFireSound->Play(); }
+		if (m_PreFireSound && m_Activated) { m_PreFireSound->Play(); }
 
-			m_Reloading = false;
-			m_DoneReloading = true;
-		}
+		m_Reloading = false;
+		m_DoneReloading = true;
 	}
 
     // Do stuff to deactivate after being activated
@@ -1078,10 +1074,7 @@ void HDFirearm::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mo
 
     // Set the screen flash effect to draw at the final post processing stage
     if (m_FireFrame && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical) {
-		// Fudge the muzzle pos forward a little bit so the glow aligns nicely
-		Vector muzzlePos = m_MuzzleOff;
-		muzzlePos.m_X += m_pFlash->GetSpriteWidth() * 0.3F;
-		muzzlePos = m_Pos + RotateOffset(muzzlePos);
+		Vector muzzlePos = m_Pos + RotateOffset(m_MuzzleOff + Vector(m_pFlash->GetSpriteWidth() * 0.3F, 0));
 		if (!g_SceneMan.ObscuredPoint(muzzlePos)) {
 			g_PostProcessMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), RandomNum(m_pFlash->GetEffectStopStrength(), m_pFlash->GetEffectStartStrength()), m_pFlash->GetEffectRotAngle());
 		}
@@ -1112,13 +1105,14 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
 	if (!m_Parent || IsReloading() || m_MaxSharpLength == 0) { return; }
 
 	float sharpLength = std::max(m_MaxSharpLength * m_SharpAim, 20.0F);
-	int glow, pointCount;
+	int glowStrength;
+	int pointCount;
 	if (playerControlled && sharpLength > 20.0F) {
 		pointCount = m_SharpAim > 0.5F ? 4 : 3;
-		glow = RandomNum(127, 255);
+		glowStrength = RandomNum(127, 255);
 	} else {
 		pointCount = 2;
-		glow = RandomNum(63, 127);
+		glowStrength = RandomNum(63, 127);
 	}
 	int pointSpacing = 10 - pointCount;
 	sharpLength -= static_cast<float>(pointSpacing * pointCount) * 0.5F;
@@ -1129,7 +1123,7 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
 		Vector aimPoint(sharpLength + static_cast<float>(pointSpacing * i), 0);
 		aimPoint = RotateOffset(aimPoint + muzzleOffset) + m_Pos;
 
-		g_PostProcessMan.RegisterGlowDotEffect(aimPoint, YellowDot, glow);
+		g_PostProcessMan.RegisterGlowDotEffect(aimPoint, YellowDot, glowStrength);
 		aimPoint -= targetPos;
 		g_SceneMan.WrapPosition(aimPoint);
 		putpixel(pTargetBitmap, aimPoint.GetFloorIntX(), aimPoint.GetFloorIntY(), g_YellowGlowColor);

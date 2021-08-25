@@ -183,9 +183,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `MOSRotating` INI and Lua (R) property `WoundCountAffectsImpulseLimitRatio` which can be used to make objects more prone to gibbing from impulse when they have also received wounds.
 
-- New `Gib` INI property `SpreadMode` which sports two new spread logic variants which alter the way velocity is applied to the `GibParticle`s when they spawn. This can be used to create richer explosion effects.
-	`SpreadMode = 0` is the default, fully randomized spread according to `MinVelocity`, `MaxVelocity` and `Spread` values. Think: a piece of grenade fragment, launching out in an arbitrary direction.
-	`SpreadMode = 1` is the same as the default, but with evenly spaced out angles. Think: an air blast shockwave, dispersing evenly outward from the explosion.
+- New `Gib` INI property `SpreadMode` which sports two new spread logic variants which alter the way velocity is applied to the `GibParticle`s when they spawn. This can be used to create richer explosion effects.  
+	`SpreadMode = 0` is the default, fully randomized spread according to `MinVelocity`, `MaxVelocity` and `Spread` values. Think: a piece of grenade fragment, launching out in an arbitrary direction.  
+	`SpreadMode = 1` is the same as the default, but with evenly spaced out angles. Think: an air blast shockwave, dispersing evenly outward from the explosion.  
 	`SpreadMode = 2` has an entirely different behavior of its own, which utilizes the fermat spiral as means to evenly disperse the particles in a circular area, according to `MaxVelocity` and `MinVelocity`. Since this mode will always result in a full, 360-degree spread, the `Spread` property can be used to add randomization to the gib particles. Think: a cloud of smoke.
 
 - New `Actor` INI and Lua (R/W) property `StableRecoverDelay` which determines how long it takes for an actor to regain `STABLE` status after being rendered `UNSTABLE`.
@@ -198,23 +198,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `HDFirearm` INI and Lua (R/W) property `Reloadable` which can be used to disable the ability to reload said device.
 
-- New `HDFirearm` Lua (R) property `RoundInMagCapacity` which returns the maximum capacity of the `Magazine`, or its entity reference (from which new magazines are cloned from), which means that the property will always return the maximum ammo capacity of the device, even when reloading.
+- New `HDFirearm` Lua (R) property `RoundInMagCapacity` which returns the maximum capacity of the `Magazine` or, if there's not currently a `Magazine`, the maximum capacity of the next `Magazine`. This means that the property will always return the maximum ammo capacity of the device, even when reloading.
 
 - New `Entity` Lua (R) property `ModuleName` which returns the filename of the data module from which the entity originates from.
 
 - New gameplay setting `MAX_INSERT_NAME_HERE` that hides the HUD of stranded items at a set distance.
 
-- `Arm`s will now react to the recoil of held devices. (This effect can be disabled via `RecoilTransmission` the same way as recoil itself)
+- `Arm`s will now react to the recoil of `HeldDevice`s. This is affected by the `Arm`'s `GripStrength` and the `HeldDevice`'s `RecoilTransmission`, in the same way as recoil itself.
 
 - `HDFirearm` reload progress now shows up as a HUD element.
 
 ### Changed
 
-- Exposed `ThrownDevice` specific offsets to Lua (R/W).
+- Exposed `ThrownDevice` properties `StartThrowOffset` and `EndThrowOffset` to Lua (R/W).
 
-- Class `HeldDevice` objects can now show up under "Tools" and "Weapons" rather than just "Shields".
+- `HeldDevice`s can now show up as "Tools" in the buy menu, rather than just as "Shields".
 
-- Keyboard-only controlled `AHuman` and `ACrab` actors can now strafe while sharp aiming.
+- Keyboard-only controlled `AHuman`s and `ACrab`s can now strafe while sharp-aiming.
 
 - Lowered the default `AHuman` Head damage multiplier from 5 to 4.
 
@@ -236,7 +236,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Craft will now automatically scuttle when opening doors at a 90° angle rather than 45°.
 
-- `AHuman` can now sharp-aim slightly while walking, however not while reloading.
+- `AHuman`s can now sharp-aim slightly while walking, however not while reloading.
 
 - Recoil when firing weapons now affects sharp aim.
 

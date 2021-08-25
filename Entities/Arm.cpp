@@ -390,7 +390,7 @@ void Arm::UpdateCurrentHandOffset() {
         if (m_pHeldMO && !dynamic_cast<ThrownDevice *>(m_pHeldMO)) {
             m_DidReach = false;
 			HeldDevice *heldDevice = dynamic_cast<HeldDevice *>(m_pHeldMO);
-			// TODO: calculate total grip strength from both arms? (also: fine-tune this shit)
+			// TODO: calculate total grip strength from both arms? (also: fine-tune this shit, and move it elsewhere)
 			float totalGripStrength = (m_GripStrength || heldDevice->GetJointStrength()) * (heldDevice->GetSupported() ? 2.0F : 1.0F);
 			targetOffset = heldDevice->GetStanceOffset();
 			// Diminish recoil effect when body is horizontal so that the device doesn't get pushed into terrain when prone.

@@ -15,15 +15,17 @@ namespace RTE {
 
 	public:
 
-		enum SpreadMode
-		{
+		SerializableClassNameGetter
+		SerializableOverrideMethods
+
+		/// <summary>
+		/// Different types of logic for the Gib to use when applying velocity to its GibParticles.
+		/// </summary>
+		enum SpreadMode {
 			SPREAD_RANDOM = 0,
 			SPREAD_EVEN,
 			SPREAD_SPIRAL
 		};
-
-		SerializableClassNameGetter
-		SerializableOverrideMethods
 
 #pragma region Creation
 		/// <summary>

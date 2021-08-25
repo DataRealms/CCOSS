@@ -24,8 +24,8 @@
 #include "Scene.h"
 #include "SettingsMan.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
 
 namespace RTE {
 

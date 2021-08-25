@@ -18,9 +18,9 @@
 #include "ConsoleMan.h"
 #include "ActivityMan.h"
 
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "GUI/AllegroBitmap.h"
+#include "GUI.h"
+#include "GUIFont.h"
+#include "AllegroBitmap.h"
 
 #include "MetagameGUI.h"
 #include "Scene.h"

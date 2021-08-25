@@ -31,9 +31,9 @@
 #include "HeldDevice.h"
 #include "Loadout.h"
 
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "GUI/AllegroBitmap.h"
+#include "GUI.h"
+#include "GUIFont.h"
+#include "AllegroBitmap.h"
 #include "PieMenuGUI.h"
 #include "InventoryMenuGUI.h"
 #include "BuyMenuGUI.h"

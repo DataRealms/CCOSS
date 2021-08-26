@@ -114,12 +114,6 @@ namespace RTE {
 		BITMAP * GetMaterialBitmap() { return m_MainBitmap; }
 
 		/// <summary>
-		/// Gets the structural bitmap of this Terrain.
-		/// </summary>
-		/// <returns>A pointer to the material bitmap. Ownership is NOT transferred!</returns>
-		BITMAP * GetStructuralBitmap() { return nullptr /*m_StructuralBitmap*/; }
-
-		/// <summary>
 		/// Gets a specific pixel from the foreground color bitmap of this. LockBitmaps() must be called before using this method.
 		/// </summary>
 		/// <param name="pixelX">The X coordinate of the pixel to get.</param>
@@ -288,8 +282,6 @@ namespace RTE {
 		std::vector<TerrainObject *> m_TerrainObjects; //!< The TerrainObjects that need to be placed on this SLTerrain.
 
 		std::deque<Box> m_UpdatedMateralAreas; //!< List of areas of the material layer (main bitmap) which have been affected by the updating of new objects copied to it. These boxes are NOT wrapped, and can be out of bounds!
-
-		//BITMAP *m_StructuralBitmap;
 
 	private:
 

@@ -24,8 +24,6 @@ namespace RTE {
 		m_TerrainDebris.clear();
 		m_TerrainObjects.clear();
 		m_UpdatedMateralAreas.clear();
-
-		//m_StructuralBitmap = nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -133,7 +131,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLTerrain::Destroy(bool notInherited) {
-		//destroy_bitmap(m_StructuralBitmap);
 		if (!notInherited) { SceneLayer::Destroy(); }
 		Clear();
 	}
@@ -242,14 +239,6 @@ namespace RTE {
 
 			m_BGColorLayer->Destroy();
 			m_BGColorLayer->Create(create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h), true, m_Offset, m_WrapX, m_WrapY, m_ScrollInfo);
-
-			/*
-			// Structural integrity calc buffer bitmap.
-			destroy_bitmap(m_StructuralBitmap);
-			m_StructuralBitmap = create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h);
-			RTEAssert(m_StructuralBitmap, "Failed to allocate BITMAP in Terrain::Create");
-			clear_bitmap(m_StructuralBitmap);
-			*/
 
 			TexturizeTerrain();
 

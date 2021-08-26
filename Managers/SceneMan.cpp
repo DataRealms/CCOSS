@@ -2849,55 +2849,6 @@ Vector SceneMan::MovePointToGround(const Vector &from, int maxAltitude, int accu
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          StructuralCalc
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Calculates the structural integrity of the Terrain during a set time
-//                  and turns structurally unsound areas into MovableObject:s.
-
-void SceneMan::StructuralCalc(unsigned long calcTime) {
-
-// TODO: Develop this!")
-    return;
-
-
-    if (calcTime <= 0)
-        return;
-    // Pad the time a little for FPS smoothness.
-    calcTime -= 1;
-    m_CalcTimer.Reset();
-
-    SLTerrain *pTerrain = g_SceneMan.GetTerrain();
-    BITMAP *pColBitmap = pTerrain->GetFGColorBitmap();
-    BITMAP *pMatBitmap = pTerrain->GetMaterialBitmap();
-    BITMAP *pStructBitmap = pTerrain->GetStructuralBitmap();
-    int posX, posY, height = pColBitmap->h, width = pColBitmap->w;
-
-    // Lock all bitmaps involved, outside the loop.
-    acquire_bitmap(pColBitmap);
-    acquire_bitmap(pMatBitmap);
-    acquire_bitmap(pStructBitmap);
-
-    // Preprocess bottom row to have full support.
-    for (posX = width - 1; posX >= 0; --posX)
-        putpixel(pStructBitmap, posX, height - 1, 255);
-
-    // Start on the second row from bottom.
-    for (posY = height - 2; posY >= 0 && !m_CalcTimer.IsPastSimMS(calcTime); --posY) {
-        for (posX = width - 1; posX >= 0; --posX) {
-            getpixel(pColBitmap, posX, posY);
-            getpixel(pMatBitmap, posX, posY);
-            getpixel(pStructBitmap, posX, posY);
-        }
-    }
-
-    // Unlock all bitmaps involved.
-    release_bitmap(pColBitmap);
-    release_bitmap(pMatBitmap);
-    release_bitmap(pStructBitmap);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsWithinBounds
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Returns whether the integer coordinates passed in are within the

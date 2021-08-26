@@ -1000,7 +1000,7 @@ protected:
 	Timer m_SharpAimRevertTimer; //!< For timing the transition from sharp aim back to regular aim.
 	float m_FGArmFlailScalar; //!< The rate at which this AHuman's FG Arm follows the the bodily rotation. Best to keep this at 0 so it doesn't complicate aiming.
 	float m_BGArmFlailScalar; //!< The rate at which this AHuman's BG Arm follows the the bodily rotation. Set to a negative value for a "counterweight" effect.
-	Timer m_DeviceEquipTimer; //!< Timer for showing the name of any newly equipped Device.
+	Timer m_EquipHUDTimer; //!< Timer for showing the name of any newly equipped Device.
 
     ////////////////
     // AI States

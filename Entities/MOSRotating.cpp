@@ -1014,15 +1014,16 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 			float maxRadius = std::sqrt(static_cast<float>(count));
 			float scale = velocityRange / maxRadius;
 			float randAngle = c_PI * RandomNormalNum();
+			float goldenAngle = 2.39996F;
 
-			for (int i = 0; i <= count; i++) {
-				if (i > 1) { gibParticleClone = dynamic_cast<MovableObject *>(gibSettingsObject.GetParticlePreset()->Clone()); }
+			for (int i = 0; i < count; i++) {
+				if (i > 0) { gibParticleClone = dynamic_cast<MovableObject *>(gibSettingsObject.GetParticlePreset()->Clone()); }
 
 				float radius = std::sqrt(static_cast<float>(count - i));
 				gibParticleClone->SetPos(m_Pos + rotatedGibOffset);
 				gibParticleClone->SetHFlipped(m_HFlipped);
 				Vector gibVelocity(radius * scale + minVelocity, 0);
-				gibVelocity.RadRotate(randAngle + RandomNum(0.0F, spread) + static_cast<float>(i) * 2.39996F);
+				gibVelocity.RadRotate(randAngle + RandomNum(0.0F, spread) + static_cast<float>(i) * goldenAngle);
 				if (lifetime != 0) {
 					gibParticleClone->SetLifetime(static_cast<int>(std::max(static_cast<float>(lifetime) * (1.0F - lifeVariation * ((radius / maxRadius) * 0.75F + RandomNormalNum() * 0.25F)), 1.0F)));
 				}

@@ -80,7 +80,7 @@ void AHuman::Clear()
 	m_SharpAimRevertTimer.Reset();
 	m_FGArmFlailScalar = 0.0F;
 	m_BGArmFlailScalar = 0.7F;
-	m_DeviceEquipTimer.Reset();
+	m_EquipHUDTimer.Reset();
 
     m_DeviceState = SCANNING;
     m_SweepState = NOSWEEP;
@@ -3241,7 +3241,7 @@ void AHuman::Update()
 				}
 				EquipShieldInBGArm();
 			}
-			m_DeviceEquipTimer.Reset();
+			m_EquipHUDTimer.Reset();
 			m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 			m_PieNeedsUpdate = true;
@@ -3531,7 +3531,7 @@ void AHuman::Update()
 		EquipShieldInBGArm();
 		m_SharpAimProgress = 0;
 		m_PieNeedsUpdate = true;
-		m_DeviceEquipTimer.Reset();
+		m_EquipHUDTimer.Reset();
 	}
 
     ////////////////////////////////////////
@@ -3573,7 +3573,7 @@ void AHuman::Update()
         m_PieNeedsUpdate = true;
 		if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 
-		m_DeviceEquipTimer.Reset();
+		m_EquipHUDTimer.Reset();
     }
 
     ///////////////////////////////////////////////////
@@ -4351,7 +4351,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 			rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
 
 			m_HUDStack -= 10;
-			if (m_pFGArm && !m_DeviceEquipTimer.IsPastRealMS(500)) {
+			if (m_pFGArm && !m_EquipHUDTimer.IsPastRealMS(500)) {
 				if (m_pFGArm->HoldsSomething()) {
 					pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, m_pFGArm->GetHeldMO()->GetPresetName().c_str(), GUIFont::Centre);
 				} else {
@@ -4402,7 +4402,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
                 m_HUDStack -= 10;
             }
 
-			if (m_Controller.IsState(PIE_MENU_ACTIVE) || !m_DeviceEquipTimer.IsPastRealMS(700)) {
+			if (m_Controller.IsState(PIE_MENU_ACTIVE) || !m_EquipHUDTimer.IsPastRealMS(700)) {
 /*
                 // Display Gold tally if gold chunk is in hand
                 if (m_pFGArm->HoldsSomething() && m_pFGArm->GetHeldMO()->IsGold() && GetGoldCarried() > 0)

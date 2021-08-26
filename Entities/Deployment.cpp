@@ -24,7 +24,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(Deployment, SceneObject, 0)
+ConcreteClassInfo(Deployment, SceneObject, 0);
 
 
 std::vector<BITMAP *> Deployment::m_apArrowLeftBitmap;

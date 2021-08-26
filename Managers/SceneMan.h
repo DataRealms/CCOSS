@@ -111,8 +111,8 @@ class SceneMan : public Singleton<SceneMan>, public Serializable {
 
 public:
 
-	SerializableClassNameGetter
-	SerializableOverrideMethods
+	SerializableClassNameGetter;
+	SerializableOverrideMethods;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

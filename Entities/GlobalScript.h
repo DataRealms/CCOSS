@@ -39,9 +39,9 @@ friend struct EntityLuaBindings;
 
 public:
 
-EntityAllocation(GlobalScript)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(GlobalScript);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GlobalScript

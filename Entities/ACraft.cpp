@@ -24,12 +24,12 @@
 #include "Scene.h"
 #include "SettingsMan.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
 
 namespace RTE {
 
-AbstractClassInfo(ACraft, Actor)
+AbstractClassInfo(ACraft, Actor);
 const string ACraft::Exit::c_ClassName = "Exit";
 
 bool ACraft::s_CrabBombInEffect = false;

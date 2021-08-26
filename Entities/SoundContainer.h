@@ -15,9 +15,9 @@ namespace RTE {
 		
 	public:
 
-		EntityAllocation(SoundContainer)
-		SerializableOverrideMethods
-		ClassInfoGetters
+		EntityAllocation(SoundContainer);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 		/// <summary>
 		/// How the SoundContainer should behave when it tries to play again while already playing.

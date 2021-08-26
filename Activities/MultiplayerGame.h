@@ -49,9 +49,9 @@ namespace RTE
 	public:
 
 		// Concrete allocation and cloning definitions
-		EntityAllocation(MultiplayerGame)
-		SerializableOverrideMethods
-		ClassInfoGetters
+		EntityAllocation(MultiplayerGame);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 
 		enum MultiplayerGameMode

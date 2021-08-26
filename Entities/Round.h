@@ -14,9 +14,9 @@ namespace RTE {
 
 	public:
 
-		EntityAllocation(Round)
-		SerializableOverrideMethods
-		ClassInfoGetters
+		EntityAllocation(Round);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 #pragma region Creation
 		/// <summary>

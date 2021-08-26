@@ -12,9 +12,9 @@ namespace RTE {
 
 	public:
 
-		EntityAllocation(ThrownDevice)
-		SerializableOverrideMethods
-		ClassInfoGetters
+		EntityAllocation(ThrownDevice);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 #pragma region Creation
 		/// <summary>

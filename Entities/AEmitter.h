@@ -41,9 +41,9 @@ public:
 	friend struct EntityLuaBindings;
 
 // Concrete allocation and cloning definitions
-EntityAllocation(AEmitter)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(AEmitter);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     AEmitter

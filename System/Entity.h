@@ -76,7 +76,7 @@ namespace RTE {
 
 	public:
 
-		SerializableOverrideMethods
+		SerializableOverrideMethods;
 
 #pragma region ClassInfo
 		/// <summary>

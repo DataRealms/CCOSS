@@ -45,9 +45,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(GAScripted)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(GAScripted);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GAScripted

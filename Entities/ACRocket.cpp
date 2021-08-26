@@ -22,12 +22,12 @@
 #include "SettingsMan.h"
 #include "PresetMan.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
 
 namespace RTE {
 
-ConcreteClassInfo(ACRocket, ACraft, 10)
+ConcreteClassInfo(ACRocket, ACraft, 10);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

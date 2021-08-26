@@ -148,6 +148,7 @@
       <ShowProgress>LinkVerbose</ShowProgress>
       <AdditionalOptions>/ignore:4099 /ignore:4098 %(AdditionalOptions)</AdditionalOptions>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
       <OutputManifestFile>$(IntDir)$(TargetName).manifest</OutputManifestFile>
@@ -195,6 +196,7 @@
       <ShowProgress>LinkVerbose</ShowProgress>
       <AdditionalOptions>/ignore:4099 /ignore:4098 %(AdditionalOptions)</AdditionalOptions>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
       <OutputManifestFile>$(IntDir)$(TargetName).manifest</OutputManifestFile>
@@ -243,6 +245,7 @@
       <ShowProgress>LinkVerbose</ShowProgress>
       <AdditionalOptions>/ignore:4099 /ignore:4098 %(AdditionalOptions)</AdditionalOptions>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
       <OutputManifestFile>$(IntDir)$(TargetName).manifest</OutputManifestFile>
@@ -290,6 +293,7 @@
       <ShowProgress>LinkVerbose</ShowProgress>
       <AdditionalOptions>/ignore:4099 /ignore:4098 %(AdditionalOptions)</AdditionalOptions>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
       <OutputManifestFile>$(IntDir)$(TargetName).manifest</OutputManifestFile>
@@ -682,8 +686,6 @@
     <ClInclude Include="Activities\AssemblyEditor.h" />
     <ClInclude Include="Activities\BaseEditor.h" />
     <ClInclude Include="Activities\EditorActivity.h" />
-    <ClInclude Include="Activities\GABaseDefense.h" />
-    <ClInclude Include="Activities\GABrainMatch.h" />
     <ClInclude Include="Activities\GameActivity.h" />
     <ClInclude Include="Activities\GAScripted.h" />
     <ClInclude Include="Activities\GATutorial.h" />
@@ -987,8 +989,6 @@
     <ClCompile Include="Activities\AssemblyEditor.cpp" />
     <ClCompile Include="Activities\BaseEditor.cpp" />
     <ClCompile Include="Activities\EditorActivity.cpp" />
-    <ClCompile Include="Activities\GABaseDefense.cpp" />
-    <ClCompile Include="Activities\GABrainMatch.cpp" />
     <ClCompile Include="Activities\GameActivity.cpp" />
     <ClCompile Include="Activities\GAScripted.cpp" />
     <ClCompile Include="Activities\GATutorial.cpp" />

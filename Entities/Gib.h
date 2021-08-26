@@ -15,8 +15,8 @@ namespace RTE {
 
 	public:
 
-		SerializableClassNameGetter
-		SerializableOverrideMethods
+		SerializableClassNameGetter;
+		SerializableOverrideMethods;
 
 		/// <summary>
 		/// Different types of logic for the Gib to use when applying velocity to its GibParticles.

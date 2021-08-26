@@ -46,8 +46,8 @@ class Scene:
 
 public:
 
-	SerializableOverrideMethods
-	ClassInfoGetters
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
 	//Available placed objects sets
 	enum PlacedObjectSets
@@ -78,8 +78,8 @@ public:
 
     public:
 
-		SerializableClassNameGetter
-		SerializableOverrideMethods
+		SerializableClassNameGetter;
+		SerializableOverrideMethods;
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Constructor:     Area

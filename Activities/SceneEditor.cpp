@@ -25,26 +25,26 @@
 #include "Scene.h"
 #include "DataModule.h"
 
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "GUI/AllegroScreen.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroInput.h"
-#include "GUI/GUIControlManager.h"
-#include "GUI/GUICollectionBox.h"
-#include "GUI/GUITab.h"
-#include "GUI/GUIListBox.h"
-#include "GUI/GUITextBox.h"
-#include "GUI/GUIButton.h"
-#include "GUI/GUILabel.h"
-#include "GUI/GUIComboBox.h"
+#include "GUI.h"
+#include "GUIFont.h"
+#include "AllegroScreen.h"
+#include "AllegroBitmap.h"
+#include "AllegroInput.h"
+#include "GUIControlManager.h"
+#include "GUICollectionBox.h"
+#include "GUITab.h"
+#include "GUIListBox.h"
+#include "GUITextBox.h"
+#include "GUIButton.h"
+#include "GUILabel.h"
+#include "GUIComboBox.h"
 
 #include "SceneEditorGUI.h"
-#include "GABaseDefense.h"
+#include "GameActivity.h"
 
 namespace RTE {
 
-ConcreteClassInfo(SceneEditor, EditorActivity, 0)
+ConcreteClassInfo(SceneEditor, EditorActivity, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -339,7 +339,7 @@ void SceneEditor::Update()
         m_EditorMode = EditorActivity::SAVEDIALOG;
         m_ModeChange = true;
     }
-    // Test the scene by starting a GABaseDefense with it, after saving
+    // Test the scene by starting a Skirmish Defense with it, after saving
     else if (m_pEditorGUI->GetActivatedPieSlice() == PieSlice::PieSliceIndex::PSI_DONE || m_EditorMode == TESTINGOBJECT)
     {
         m_pEditorGUI->SetEditorGUIMode(SceneEditorGUI::INACTIVE);
@@ -364,7 +364,6 @@ void SceneEditor::Update()
         {
 			g_SceneMan.SetSceneToLoad(g_SceneMan.GetScene()->GetPresetName(), Scene::PLACEONLOAD);
 
-			//Start a scripted 'Skirmish Defense' activity instead of obsolete GABaseDefense because it simply don't work
 			const Activity *pActivityPreset = dynamic_cast<const Activity *>(g_PresetMan.GetEntityPreset("GAScripted", "Skirmish Defense"));
 			Activity * pActivity = dynamic_cast<Activity *>(pActivityPreset->Clone());
 			GameActivity *pTestGame = dynamic_cast<GameActivity *>(pActivity);
@@ -376,16 +375,6 @@ void SceneEditor::Update()
             pTestGame->SetDifficulty(DifficultySetting::MediumDifficulty);
             g_ActivityMan.SetStartActivity(pTestGame);
 			g_ActivityMan.SetRestartActivity();
-
-
-            /*GABaseDefense *pTestGame = dynamic_cast<GABaseDefense *>(g_PresetMan.GetEntityPreset("GABaseDefense", "Test Activity")->Clone());
-            RTEAssert(pTestGame, "Couldn't find the \"Skirmish Defense\" GABaseDefense Activity! Has it been defined?");
-            pTestGame->SetTeamOfPlayer(0, 0);
-            pTestGame->SetCPUTeam(1);
-            pTestGame->SetDifficulty(GameActivity::MaxDifficulty);
-            pTestGame->Create();
-            g_ActivityMan.SetStartActivity(pTestGame);
-            g_ActivityMan.SetRestartActivity();*/
         }
     }
 

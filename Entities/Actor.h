@@ -71,10 +71,10 @@ public:
     };
 
 // Concrete allocation and cloning definitions
-EntityAllocation(Actor)
-AddScriptFunctionNames(MOSRotating, "UpdateAI")
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(Actor);
+AddScriptFunctionNames(MOSRotating, "UpdateAI");
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     Actor

@@ -15,10 +15,10 @@ namespace RTE {
 
 	public:
 
-		EntityAllocation(Attachable)
-		AddScriptFunctionNames(MOSRotating, "OnAttach", "OnDetach")
-		SerializableOverrideMethods
-		ClassInfoGetters
+		EntityAllocation(Attachable);
+		AddScriptFunctionNames(MOSRotating, "OnAttach", "OnDetach");
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 #pragma region Creation
 		/// <summary>

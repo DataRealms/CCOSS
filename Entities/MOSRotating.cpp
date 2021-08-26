@@ -25,7 +25,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(MOSRotating, MOSprite, 500)
+ConcreteClassInfo(MOSRotating, MOSprite, 500);
 
 BITMAP * MOSRotating::m_spTempBitmap16 = 0;
 BITMAP * MOSRotating::m_spTempBitmap32 = 0;

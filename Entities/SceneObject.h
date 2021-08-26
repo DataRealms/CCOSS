@@ -40,8 +40,8 @@ class SceneObject:
 
 public:
 
-	SerializableOverrideMethods
-	ClassInfoGetters
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -62,8 +62,8 @@ public:
 
     public:
 
-		SerializableClassNameGetter
-		SerializableOverrideMethods
+		SerializableClassNameGetter;
+		SerializableOverrideMethods;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////

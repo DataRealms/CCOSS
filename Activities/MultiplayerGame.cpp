@@ -24,19 +24,19 @@
 #include "DataModule.h"
 #include "AudioMan.h"
 
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "GUI/AllegroScreen.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroInput.h"
-#include "GUI/GUIControlManager.h"
-#include "GUI/GUICollectionBox.h"
-#include "GUI/GUITab.h"
-#include "GUI/GUIListBox.h"
-#include "GUI/GUITextBox.h"
-#include "GUI/GUIButton.h"
-#include "GUI/GUILabel.h"
-#include "GUI/GUIComboBox.h"
+#include "GUI.h"
+#include "GUIFont.h"
+#include "AllegroScreen.h"
+#include "AllegroBitmap.h"
+#include "AllegroInput.h"
+#include "GUIControlManager.h"
+#include "GUICollectionBox.h"
+#include "GUITab.h"
+#include "GUIListBox.h"
+#include "GUITextBox.h"
+#include "GUIButton.h"
+#include "GUILabel.h"
+#include "GUIComboBox.h"
 
 #include "MultiplayerGameGUI.h"
 #include "PieMenuGUI.h"
@@ -45,7 +45,7 @@
 
 namespace RTE {
 
-	ConcreteClassInfo(MultiplayerGame, Activity, 0)
+	ConcreteClassInfo(MultiplayerGame, Activity, 0);
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Method:          Clear

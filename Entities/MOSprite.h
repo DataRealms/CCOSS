@@ -41,8 +41,8 @@ class MOSprite:
 
 public:
 
-	SerializableOverrideMethods
-	ClassInfoGetters
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
     enum SpriteAnimMode
     {

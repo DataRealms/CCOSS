@@ -41,9 +41,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(Arm)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(Arm);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     Arm

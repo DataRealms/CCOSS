@@ -46,8 +46,8 @@ class ACraft:
 
 public:
 
-	SerializableOverrideMethods
-	ClassInfoGetters
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
 
 enum HatchState
@@ -84,8 +84,8 @@ enum
 
     public:
 
-		SerializableClassNameGetter
-		SerializableOverrideMethods
+		SerializableClassNameGetter;
+		SerializableOverrideMethods;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////

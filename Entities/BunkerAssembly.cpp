@@ -37,9 +37,9 @@ void BunkerAssembly::Clear()
     m_FGColorFile.Reset();
     m_MaterialFile.Reset();
     m_BGColorFile.Reset();
-    m_pFGColor = 0;
-    m_pMaterial = 0;
-    m_pBGColor = 0;
+    m_FGColorBitmap = 0;
+    m_MaterialBitmap = 0;
+    m_BGColorBitmap = 0;
     m_BitmapOffset.Reset();
     m_OffsetDefined = false;
     m_ChildObjects.clear();
@@ -89,20 +89,20 @@ void BunkerAssembly::AddPlacedObject(SceneObject * pSO)
 		Vector loc = pTObject->GetPos() + pTObject->GetBitmapOffset();
 
 		// Regular drawing
-		draw_sprite(m_pMaterial, pTObject->GetMaterialBitmap(), loc.m_X, loc.m_Y);
+		draw_sprite(m_MaterialBitmap, pTObject->GetMaterialBitmap(), loc.m_X, loc.m_Y);
 		if (pTObject->HasBGColor())
 		{
-			draw_sprite(m_pBGColor, pTObject->GetBGColorBitmap(), loc.m_X, loc.m_Y);
+			draw_sprite(m_BGColorBitmap, pTObject->GetBGColorBitmap(), loc.m_X, loc.m_Y);
 			draw_sprite(m_pPresentationBitmap, pTObject->GetBGColorBitmap(), loc.m_X, loc.m_Y);
 		}
-		draw_sprite(m_pFGColor, pTObject->GetFGColorBitmap(), loc.m_X, loc.m_Y);
+		draw_sprite(m_FGColorBitmap, pTObject->GetFGColorBitmap(), loc.m_X, loc.m_Y);
 		draw_sprite(m_pPresentationBitmap, pTObject->GetFGColorBitmap(), loc.m_X, loc.m_Y);
 
 		// Read and add all child objects
 		pTObject->SetTeam(GetTeam());
-		for (list<SceneObject::SOPlacer>::const_iterator itr = pTObject->GetChildObjects().begin(); itr != pTObject->GetChildObjects().end() ; ++itr)
-		{
-			SOPlacer newPlacer = (*itr);
+
+		for (const SceneObject::SOPlacer &childObject : pTObject->GetChildObjects()) {
+			SOPlacer newPlacer = childObject;
 			newPlacer.SetTeam(pTObject->GetTeam());
 			// Explicitly set child object's offset, because it will be a part of a bigger 'terrain object'
 			newPlacer.SetOffset(newPlacer.GetOffset() + pTObject->GetPos() + m_BitmapOffset);
@@ -124,14 +124,14 @@ int BunkerAssembly::Create(BunkerAssemblyScheme * pScheme)
 	m_pPresentationBitmap = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
 	clear_to_color(m_pPresentationBitmap, g_MaskColor);
 
-	m_pFGColor = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-	clear_to_color(m_pFGColor, g_MaskColor);
+	m_FGColorBitmap = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
+	clear_to_color(m_FGColorBitmap, g_MaskColor);
 
-	m_pMaterial = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-	clear_to_color(m_pMaterial, g_MaskColor);
+	m_MaterialBitmap = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
+	clear_to_color(m_MaterialBitmap, g_MaskColor);
 
-	m_pBGColor = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-	clear_to_color(m_pBGColor, g_MaskColor);
+	m_BGColorBitmap = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
+	clear_to_color(m_BGColorBitmap, g_MaskColor);
 
 	m_BitmapOffset = pScheme->GetBitmapOffset();
 	m_ParentAssemblyScheme = pScheme->GetPresetName();
@@ -233,17 +233,17 @@ int BunkerAssembly::ReadProperty(const std::string_view &propName, Reader &reade
 			m_pPresentationBitmap = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
 			clear_to_color(m_pPresentationBitmap, g_MaskColor);
 
-			delete m_pFGColor;
-			m_pFGColor = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-			clear_to_color(m_pFGColor, g_MaskColor);
+			delete m_FGColorBitmap;
+			m_FGColorBitmap = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
+			clear_to_color(m_FGColorBitmap, g_MaskColor);
 
-			delete m_pMaterial;
-			m_pMaterial = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-			clear_to_color(m_pMaterial, g_MaskColor);
+			delete m_MaterialBitmap;
+			m_MaterialBitmap = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
+			clear_to_color(m_MaterialBitmap, g_MaskColor);
 
-			delete m_pBGColor;
-			m_pBGColor = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
-			clear_to_color(m_pBGColor, g_MaskColor);
+			delete m_BGColorBitmap;
+			m_BGColorBitmap = create_bitmap_ex(8, pScheme->GetBitmapWidth() , pScheme->GetBitmapHeight());
+			clear_to_color(m_BGColorBitmap, g_MaskColor);
 
 			m_ParentAssemblyScheme = parentScheme;
 			m_BitmapOffset = pScheme->GetBitmapOffset();
@@ -369,14 +369,14 @@ void BunkerAssembly::Destroy(bool notInherited)
 	//delete m_pPresentationBitmap;
 	//m_pPresentationBitmap = 0;
 	
-	//delete m_pFGColor;
-    //m_pFGColor = 0;
+	//delete m_FGColorBitmap;
+    //m_FGColorBitmap = 0;
 	
-	//delete m_pMaterial;
-    //m_pMaterial = 0;
+	//delete m_MaterialBitmap;
+    //m_MaterialBitmap = 0;
     
-	//delete m_pBGColor;
-	//m_pBGColor = 0;
+	//delete m_BGColorBitmap;
+	//m_BGColorBitmap = 0;
 
     if (!notInherited)
         SceneObject::Destroy();
@@ -478,7 +478,7 @@ void BunkerAssembly::SetTeam(int team)
 
 void BunkerAssembly::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const
 {
-    if (!m_pFGColor)
+    if (!m_FGColorBitmap)
         RTEAbort("TerrainObject's bitmaps are null when drawing!");
 
     // Take care of wrapping situations
@@ -489,13 +489,13 @@ void BunkerAssembly::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMo
     // See if need to double draw this across the scene seam if we're being drawn onto a scenewide bitmap
 	if (targetPos.IsZero() && g_SceneMan.GetSceneWidth() <= pTargetBitmap->w)
     {
-        if (aDrawPos[0].m_X < m_pFGColor->w)
+        if (aDrawPos[0].m_X < m_FGColorBitmap->w)
         {
             aDrawPos[passes] = aDrawPos[0];
             aDrawPos[passes].m_X += pTargetBitmap->w;
             passes++;
         }
-        else if (aDrawPos[0].m_X > pTargetBitmap->w - m_pFGColor->w)
+        else if (aDrawPos[0].m_X > pTargetBitmap->w - m_FGColorBitmap->w)
         {
             aDrawPos[passes] = aDrawPos[0];
             aDrawPos[passes].m_X -= pTargetBitmap->w;
@@ -528,15 +528,15 @@ void BunkerAssembly::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMo
     {
         if (mode == g_DrawColor)
         {
-            masked_blit(m_pPresentationBitmap, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_pBGColor->w, m_pBGColor->h);
+            masked_blit(m_pPresentationBitmap, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_BGColorBitmap->w, m_BGColorBitmap->h);
         }
         else if (mode == g_DrawMaterial)
         {
-            masked_blit(m_pMaterial, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_pMaterial->w, m_pMaterial->h);
+            masked_blit(m_MaterialBitmap, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_MaterialBitmap->w, m_MaterialBitmap->h);
         }
         else if (mode == g_DrawLess)
         {
-            masked_blit(m_pPresentationBitmap, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_pFGColor->w, m_pFGColor->h);
+            masked_blit(m_pPresentationBitmap, pTargetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_FGColorBitmap->w, m_FGColorBitmap->h);
         }
         else if (mode == g_DrawTrans)
         {

@@ -1562,8 +1562,7 @@ void GameActivity::Update()
             m_ControlledActor[player]->GetController()->SetDisabled(true);
 
             // Player is done setting waypoints
-            if (m_PlayerController[player].IsState(PRESS_SECONDARY))
-            {
+			if (m_PlayerController[player].IsState(PRESS_SECONDARY) || m_PlayerController[player].IsState(ACTOR_NEXT_PREP) || m_PlayerController[player].IsState(ACTOR_PREV_PREP)) {
                 // Stop drawing the waypoints
 //                m_ControlledActor[player]->DrawWaypoints(false);
                 // Update the player's move path now to the first waypoint set
@@ -1629,8 +1628,7 @@ void GameActivity::Update()
             m_ControlledActor[player]->GetController()->SetDisabled(true);
 
             // Player is done setting waypoints
-            if (m_PlayerController[player].IsState(PRESS_SECONDARY))
-            {
+			if (m_PlayerController[player].IsState(PRESS_SECONDARY) || m_PlayerController[player].IsState(ACTOR_NEXT_PREP) || m_PlayerController[player].IsState(ACTOR_PREV_PREP)) {
                 // Give player control back to actor
                 m_ControlledActor[player]->GetController()->SetDisabled(false);
                 // Switch back to normal view

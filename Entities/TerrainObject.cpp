@@ -163,7 +163,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool TerrainObject::ApplyTerrainObject(SLTerrain *terrain) {
+	bool TerrainObject::DrawToTerrain(SLTerrain *terrain) {
 		if (!terrain) {
 			return false;
 		}

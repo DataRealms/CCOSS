@@ -1808,11 +1808,11 @@ enum MOType
 	void SetProvidesPieMenuContext(bool value) { m_ProvidesPieMenuContext = value; }
 
 	/// <summary>
-	/// Draws this MovableObject's graphical and material representations to the specified Terrain's respective layers.
+	/// Draws this MovableObject's graphical and material representations to the specified SLTerrain's respective layers.
 	/// </summary>
-	/// <param name="movableObject">The SLTerrain to apply this MovableObject to. Ownership is NOT transferred!</param>
-	/// <returns>Whether the object was successfully applied to the terrain.</returns>
-	bool ApplyMovableObject(SLTerrain *terrain);
+	/// <param name="terrain">The SLTerrain to draw this MovableObject to. Ownership is NOT transferred!</param>
+	/// <returns>Whether the object was successfully drawn to the terrain.</returns>
+	bool DrawToTerrain(SLTerrain *terrain);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

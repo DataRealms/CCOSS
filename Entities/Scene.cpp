@@ -854,7 +854,7 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
                             }
                         }
                         // Now actually stamp the terrain object onto the terrain's scene layers
-						pTO->ApplyTerrainObject(m_pTerrain);
+						pTO->DrawToTerrain(m_pTerrain);
                         //delete pTO;
                         //pTO = 0;
                     }

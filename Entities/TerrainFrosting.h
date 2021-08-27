@@ -33,10 +33,11 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Applies the frosting to a SLTerrain as its read parameters specify.
+		/// Draws this TerrainFrosting's graphical and material representations to the specified SLTerrain's respective layers.
 		/// </summary>
-		/// <param name="terrain">Pointer to the terrain to place the frosting on. Ownership is NOT transferred!</param>
-		void ApplyFrosting(SLTerrain *terrain) const;
+		/// <param name="terrain">The SLTerrain to draw this TerrainFrosting to. Ownership is NOT transferred!</param>
+		/// <returns>Whether the object was successfully drawn to the terrain.</returns>
+		void DrawToTerrain(SLTerrain *terrain) const;
 #pragma endregion
 
 	private:

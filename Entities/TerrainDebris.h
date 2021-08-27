@@ -57,10 +57,11 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Applies the debris to a SLTerrain as its read parameters specify.
+		/// Draws this TerrainDebris's graphical and material representations to the specified SLTerrain's respective layers.
 		/// </summary>
-		/// <param name="terrain">Pointer to the SLTerrain to place the debris on. Ownership is NOT transferred!</param>
-		void ApplyDebris(SLTerrain *terrain);
+		/// <param name="terrain">The SLTerrain to draw this TerrainDebris to. Ownership is NOT transferred!</param>
+		/// <returns>Whether the object was successfully drawn to the terrain.</returns>
+		void DrawToTerrain(SLTerrain *terrain);
 #pragma endregion
 
 	private:

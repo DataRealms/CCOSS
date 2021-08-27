@@ -243,13 +243,13 @@ namespace RTE {
 			TexturizeTerrain();
 
 			for (const TerrainFrosting *terrainFrosting : m_TerrainFrostings) {
-				terrainFrosting->ApplyFrosting(this);
+				terrainFrosting->DrawToTerrain(this);
 			}
 			for (TerrainDebris *terrainDebris : m_TerrainDebris) {
-				terrainDebris->ApplyDebris(this);
+				terrainDebris->DrawToTerrain(this);
 			}
 			for (TerrainObject *terrainObject : m_TerrainObjects) {
-				terrainObject->ApplyTerrainObject(this);
+				terrainObject->DrawToTerrain(this);
 			}
 			CleanAir();
 		}
@@ -364,9 +364,9 @@ namespace RTE {
 	bool SLTerrain::ApplyObject(Entity *entity) {
 		if (entity) {
 			if (MovableObject *entityAsMovableObject = dynamic_cast<MovableObject *>(entity)) {
-				return entityAsMovableObject->ApplyMovableObject(this);
+				return entityAsMovableObject->DrawToTerrain(this);
 			} else if (TerrainObject *entityAsTerrainObject = dynamic_cast<TerrainObject *>(entity)) {
-				return entityAsTerrainObject->ApplyTerrainObject(this);
+				return entityAsTerrainObject->DrawToTerrain(this);
 			}
 		}
 		return false;

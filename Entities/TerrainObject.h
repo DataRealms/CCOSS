@@ -128,11 +128,11 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Draws a passed in TerrainObject's graphical and material representations to this Terrain's respective layers.
+		/// Draws this TerrainObject's graphical and material representations to the specified SLTerrain's respective layers.
 		/// </summary>
-		/// <param name="terrainObject">The TerrainObject to apply to this Terrain. Ownership is NOT transferred!</param>
-		/// <returns>Whether the object was successfully applied to the terrain.</returns>
-		bool ApplyTerrainObject(SLTerrain *terrain);
+		/// <param name="terrain">The SLTerrain to draw this TerrainObject to. Ownership is NOT transferred!</param>
+		/// <returns>Whether the object was successfully drawn to the terrain.</returns>
+		bool DrawToTerrain(SLTerrain *terrain);
 #pragma endregion
 
 #pragma region Virtual Override Methods

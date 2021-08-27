@@ -1056,7 +1056,7 @@ void MovableObject::RegMOID(vector<MovableObject *> &MOIDIndex, MOID rootMOID, b
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool MovableObject::ApplyMovableObject(SLTerrain *terrain) {
+bool MovableObject::DrawToTerrain(SLTerrain *terrain) {
 	if (!terrain) {
 		return false;
 	}

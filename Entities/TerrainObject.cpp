@@ -184,6 +184,15 @@ namespace RTE {
 				if (HasFGColorBitmap()) { draw_sprite(terrainFGBitmap, m_FGColorBitmap, posOnScene.GetFloorIntX() - terrainFGBitmap->w, posOnScene.GetFloorIntY()); }
 			}
 		}
+		if (terrain->WrapsY()) {
+			if (posOnScene.GetFloorIntY() < 0) {
+				if (HasMaterialBitmap()) { draw_sprite(terrainMatBitmap, m_MaterialBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY() + terrainMatBitmap->h); }
+				if (HasBGColorBitmap()) { draw_sprite(terrainBGBitmap, m_BGColorBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY() + terrainBGBitmap->h); }
+				if (HasFGColorBitmap()) { draw_sprite(terrainFGBitmap, m_FGColorBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY() + terrainFGBitmap->h); }
+			} else if (posOnScene.GetFloorIntY() >= terrainMatBitmap->h - GetBitmapHeight()) {
+				if (HasMaterialBitmap()) { draw_sprite(terrainMatBitmap, m_MaterialBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY() - terrainMatBitmap->h); }
+				if (HasBGColorBitmap()) { draw_sprite(terrainBGBitmap, m_BGColorBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY() - terrainBGBitmap->h); }
+				if (HasFGColorBitmap()) { draw_sprite(terrainFGBitmap, m_FGColorBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY() - terrainFGBitmap->h); }
 			}
 		}
 		if (HasMaterialBitmap()) {

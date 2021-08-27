@@ -256,15 +256,15 @@ namespace RTE {
 		// Draw all the passes needed
 		for (int i = 0; i < passes; ++i) {
 			if (mode == g_DrawColor) {
-				masked_blit(m_BGColorBitmap, targetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_BGColorBitmap->w, m_BGColorBitmap->h);
-				masked_blit(m_FGColorBitmap, targetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_FGColorBitmap->w, m_FGColorBitmap->h);
+				if (HasBGColorBitmap()) { masked_blit(m_BGColorBitmap, targetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_BGColorBitmap->w, m_BGColorBitmap->h); }
+				if (HasFGColorBitmap()) { masked_blit(m_FGColorBitmap, targetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_FGColorBitmap->w, m_FGColorBitmap->h); }
 			} else if (mode == g_DrawMaterial) {
-				masked_blit(m_MaterialBitmap, targetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_MaterialBitmap->w, m_MaterialBitmap->h);
+				if (HasMaterialBitmap()) { masked_blit(m_MaterialBitmap, targetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_MaterialBitmap->w, m_MaterialBitmap->h); }
 			} else if (mode == g_DrawLess) {
-				masked_blit(m_FGColorBitmap, targetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_FGColorBitmap->w, m_FGColorBitmap->h);
+				if (HasFGColorBitmap()) { masked_blit(m_FGColorBitmap, targetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_FGColorBitmap->w, m_FGColorBitmap->h); }
 			} else if (mode == g_DrawTrans) {
-				draw_trans_sprite(targetBitmap, m_FGColorBitmap, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY());
-				draw_trans_sprite(targetBitmap, m_BGColorBitmap, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY());
+				if (HasFGColorBitmap()) { draw_trans_sprite(targetBitmap, m_FGColorBitmap, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY()); }
+				if (HasBGColorBitmap()) { draw_trans_sprite(targetBitmap, m_BGColorBitmap, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY()); }
 			}
 		}
 	}

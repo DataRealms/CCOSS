@@ -86,17 +86,18 @@ void BunkerAssembly::AddPlacedObject(SceneObject * pSO)
 	TerrainObject * pTObject = dynamic_cast<TerrainObject *>(pSO);
 	if (pTObject)
 	{
-		Vector loc = pTObject->GetPos() + pTObject->GetBitmapOffset();
+		Vector objectPos = pTObject->GetPos() + pTObject->GetBitmapOffset();
 
 		// Regular drawing
-		draw_sprite(m_MaterialBitmap, pTObject->GetMaterialBitmap(), loc.m_X, loc.m_Y);
-		if (pTObject->HasBGColorBitmap())
-		{
-			draw_sprite(m_BGColorBitmap, pTObject->GetBGColorBitmap(), loc.m_X, loc.m_Y);
-			draw_sprite(m_pPresentationBitmap, pTObject->GetBGColorBitmap(), loc.m_X, loc.m_Y);
+		if (pTObject->HasMaterialBitmap()) { draw_sprite(m_MaterialBitmap, pTObject->GetMaterialBitmap(), objectPos.GetFloorIntX(), objectPos.GetFloorIntY()); }
+		if (pTObject->HasBGColorBitmap()) {
+			draw_sprite(m_BGColorBitmap, pTObject->GetBGColorBitmap(), objectPos.GetFloorIntX(), objectPos.GetFloorIntY());
+			draw_sprite(m_pPresentationBitmap, pTObject->GetBGColorBitmap(), objectPos.GetFloorIntX(), objectPos.GetFloorIntY());
 		}
-		draw_sprite(m_FGColorBitmap, pTObject->GetFGColorBitmap(), loc.m_X, loc.m_Y);
-		draw_sprite(m_pPresentationBitmap, pTObject->GetFGColorBitmap(), loc.m_X, loc.m_Y);
+		if (pTObject->HasFGColorBitmap()) {
+			draw_sprite(m_FGColorBitmap, pTObject->GetFGColorBitmap(), objectPos.GetFloorIntX(), objectPos.GetFloorIntY());
+			draw_sprite(m_pPresentationBitmap, pTObject->GetFGColorBitmap(), objectPos.GetFloorIntX(), objectPos.GetFloorIntY());
+		}
 
 		// Read and add all child objects
 		pTObject->SetTeam(GetTeam());

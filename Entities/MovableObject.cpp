@@ -19,6 +19,7 @@
 #include "LuaMan.h"
 #include "Atom.h"
 #include "Actor.h"
+#include "SLTerrain.h"
 
 namespace RTE {
 
@@ -1051,6 +1052,70 @@ void MovableObject::RegMOID(vector<MovableObject *> &MOIDIndex, MOID rootMOID, b
     }
 
     m_RootMOID = rootMOID == g_NoMOID ? m_MOID : rootMOID;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool MovableObject::ApplyMovableObject(SLTerrain *terrain) {
+	if (!terrain) {
+		return false;
+	}
+	if (dynamic_cast<MOSprite *>(this)) {
+		auto wrappedMaskedBlit = [](BITMAP *sourceBitmap, BITMAP *destinationBitmap, const Vector &bitmapPos, bool swapSourceWithDestination) {
+			std::array<BITMAP *, 2> bitmaps = { sourceBitmap, destinationBitmap };
+			std::array<Vector, 5> srcPos = {
+				Vector(bitmapPos.GetX(), bitmapPos.GetY()),
+				Vector(bitmapPos.GetX() + static_cast<float>(g_SceneMan.GetSceneWidth()), bitmapPos.GetY()),
+				Vector(bitmapPos.GetX() - static_cast<float>(g_SceneMan.GetSceneWidth()), bitmapPos.GetY()),
+				Vector(bitmapPos.GetX(), bitmapPos.GetY() + static_cast<float>(g_SceneMan.GetSceneHeight())),
+				Vector(bitmapPos.GetX(), bitmapPos.GetY() - static_cast<float>(g_SceneMan.GetSceneHeight()))
+			};
+			std::array<Vector, 5> destPos;
+			destPos.fill(Vector());
+
+			if (swapSourceWithDestination) {
+				std::swap(bitmaps.at(0), bitmaps.at(1));
+				std::swap(srcPos, destPos);
+			}
+			masked_blit(bitmaps.at(0), bitmaps.at(1), srcPos.at(0).GetFloorIntX(), srcPos.at(0).GetFloorIntY(), destPos.at(0).GetFloorIntX(), destPos.at(0).GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
+			if (g_SceneMan.SceneWrapsX()) {
+				if (bitmapPos.GetFloorIntX() < 0) {
+					masked_blit(bitmaps.at(0), bitmaps.at(1), srcPos.at(1).GetFloorIntX(), srcPos.at(1).GetFloorIntY(), destPos.at(1).GetFloorIntX(), destPos.at(1).GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
+				} else if (bitmapPos.GetFloorIntX() + destinationBitmap->w > g_SceneMan.GetSceneWidth()) {
+					masked_blit(bitmaps.at(0), bitmaps.at(1), srcPos.at(2).GetFloorIntX(), srcPos.at(2).GetFloorIntY(), destPos.at(2).GetFloorIntX(), destPos.at(2).GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
+				}
+			}
+			if (g_SceneMan.SceneWrapsY()) {
+				if (bitmapPos.GetFloorIntY() < 0) {
+					masked_blit(bitmaps.at(0), bitmaps.at(1), srcPos.at(3).GetFloorIntX(), srcPos.at(3).GetFloorIntY(), destPos.at(3).GetFloorIntX(), destPos.at(3).GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
+				} else if (bitmapPos.GetFloorIntY() + destinationBitmap->h > g_SceneMan.GetSceneHeight()) {
+					masked_blit(bitmaps.at(0), bitmaps.at(1), srcPos.at(4).GetFloorIntX(), srcPos.at(4).GetFloorIntY(), destPos.at(4).GetFloorIntX(), destPos.at(4).GetFloorIntY(), destinationBitmap->w, destinationBitmap->h);
+				}
+			}
+		};
+		BITMAP *tempBitmap = g_SceneMan.GetIntermediateBitmapForSettlingIntoTerrain(static_cast<int>(GetDiameter()));
+		Vector tempBitmapPos = m_Pos.GetFloored() - Vector(static_cast<float>(tempBitmap->w / 2), static_cast<float>(tempBitmap->w / 2));
+
+		clear_bitmap(tempBitmap);
+		// Draw the object to the temp bitmap, then draw the foreground layer on top of it, then draw it to the foreground layer.
+		Draw(tempBitmap, tempBitmapPos, DrawMode::g_DrawColor, true);
+		wrappedMaskedBlit(terrain->GetFGColorBitmap(), tempBitmap, tempBitmapPos, false);
+		wrappedMaskedBlit(terrain->GetFGColorBitmap(), tempBitmap, tempBitmapPos, true);
+
+		clear_bitmap(tempBitmap);
+		// Draw the object to the temp bitmap, then draw the material layer on top of it, then draw it to the material layer.
+		Draw(tempBitmap, tempBitmapPos, DrawMode::g_DrawMaterial, true);
+		wrappedMaskedBlit(terrain->GetMaterialBitmap(), tempBitmap, tempBitmapPos, false);
+		wrappedMaskedBlit(terrain->GetMaterialBitmap(), tempBitmap, tempBitmapPos, true);
+
+		terrain->GetUpdatedMaterialAreas().emplace_back(Box(tempBitmapPos, static_cast<float>(tempBitmap->w), static_cast<float>(tempBitmap->h)));
+		g_SceneMan.RegisterTerrainChange(tempBitmapPos.GetFloorIntX(), tempBitmapPos.GetFloorIntY(), tempBitmap->w, tempBitmap->h, ColorKeys::g_MaskColor, false);
+	} else {
+		Draw(terrain->GetFGColorBitmap(), Vector(), DrawMode::g_DrawColor, true);
+		Draw(terrain->GetMaterialBitmap(), Vector(), DrawMode::g_DrawMaterial, true);
+		g_SceneMan.RegisterTerrainChange(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), 1, 1, DrawMode::g_DrawColor, false);
+	}
+	return true;
 }
 
 } // namespace RTE

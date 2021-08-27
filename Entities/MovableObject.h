@@ -43,6 +43,7 @@ namespace RTE
 struct HitData;
 
 class MOSRotating;
+class SLTerrain;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Abstract class:  MovableObject
@@ -1806,6 +1807,12 @@ enum MOType
 
 	void SetProvidesPieMenuContext(bool value) { m_ProvidesPieMenuContext = value; }
 
+	/// <summary>
+	/// Draws this MovableObject's graphical and material representations to the specified Terrain's respective layers.
+	/// </summary>
+	/// <param name="movableObject">The SLTerrain to apply this MovableObject to. Ownership is NOT transferred!</param>
+	/// <returns>Whether the object was successfully applied to the terrain.</returns>
+	bool ApplyMovableObject(SLTerrain *terrain);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

@@ -885,7 +885,7 @@ namespace RTE {
 						if (m_Material->GetStickiness() >= RandomNum() && velocity.GetLargest() > 0.5F) {
 							// SPLAT, so update position, apply to terrain and delete, and stop traveling
 							m_OwnerMO->SetPos(Vector(intPos[X], intPos[Y]));
-							g_SceneMan.GetTerrain()->ApplyMovableObject(m_OwnerMO);
+							m_OwnerMO->ApplyMovableObject(g_SceneMan.GetTerrain());
 							m_OwnerMO->SetToDelete(true);
 							m_LastHit.Terminate[HITOR] = hit[dom] = hit[sub] = true;
 							break;

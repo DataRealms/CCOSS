@@ -249,7 +249,7 @@ namespace RTE {
 				terrainDebris->ApplyDebris(this);
 			}
 			for (TerrainObject *terrainObject : m_TerrainObjects) {
-				ApplyTerrainObject(terrainObject);
+				terrainObject->ApplyTerrainObject(this);
 			}
 			CleanAir();
 		}
@@ -366,7 +366,7 @@ namespace RTE {
 			if (MovableObject *entityAsMovableObject = dynamic_cast<MovableObject *>(entity)) {
 				return ApplyMovableObject(entityAsMovableObject);
 			} else if (TerrainObject *entityAsTerrainObject = dynamic_cast<TerrainObject *>(entity)) {
-				return ApplyTerrainObject(entityAsTerrainObject);
+				return entityAsTerrainObject->ApplyTerrainObject(this);
 			}
 		}
 		return false;
@@ -432,50 +432,6 @@ namespace RTE {
 			movableObject->Draw(GetFGColorBitmap(), Vector(), DrawMode::g_DrawColor, true);
 			movableObject->Draw(GetMaterialBitmap(), Vector(), DrawMode::g_DrawMaterial, true);
 			g_SceneMan.RegisterTerrainChange(movableObject->GetPos().GetFloorIntX(), movableObject->GetPos().GetFloorIntY(), 1, 1, DrawMode::g_DrawColor, false);
-		}
-		return true;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	bool SLTerrain::ApplyTerrainObject(TerrainObject *terrainObject) {
-		if (!terrainObject) {
-			return false;
-		}
-		Vector pos = terrainObject->GetPos() + terrainObject->GetBitmapOffset();
-
-		// Do duplicate drawing if the terrain object straddles a wrapping border.
-		if (pos.GetFloorIntX() < 0) {
-			draw_sprite(m_MainBitmap, terrainObject->GetMaterialBitmap(), pos.GetFloorIntX() + m_MainBitmap->w, pos.GetFloorIntY());
-			draw_sprite(m_FGColorLayer->GetBitmap(), terrainObject->GetFGColorBitmap(), pos.GetFloorIntX() + m_FGColorLayer->GetBitmap()->w, pos.GetFloorIntY());
-			if (terrainObject->HasBGColor()) { draw_sprite(m_BGColorLayer->GetBitmap(), terrainObject->GetBGColorBitmap(), pos.GetFloorIntX() + m_BGColorLayer->GetBitmap()->w, pos.GetFloorIntY()); }
-		} else if (pos.GetFloorIntX() >= m_MainBitmap->w - terrainObject->GetFGColorBitmap()->w) {
-			draw_sprite(m_MainBitmap, terrainObject->GetMaterialBitmap(), pos.GetFloorIntX() - m_MainBitmap->w, pos.GetFloorIntY());
-			draw_sprite(m_FGColorLayer->GetBitmap(), terrainObject->GetFGColorBitmap(), pos.GetFloorIntX() - m_FGColorLayer->GetBitmap()->w, pos.GetFloorIntY());
-			if (terrainObject->HasBGColor()) { draw_sprite(m_BGColorLayer->GetBitmap(), terrainObject->GetBGColorBitmap(), pos.GetFloorIntX() - m_BGColorLayer->GetBitmap()->w, pos.GetFloorIntY()); }
-		}
-
-		// Regular drawing.
-		draw_sprite(m_MainBitmap, terrainObject->GetMaterialBitmap(), pos.GetFloorIntX(), pos.GetFloorIntY());
-		draw_sprite(m_FGColorLayer->GetBitmap(), terrainObject->GetFGColorBitmap(), pos.GetFloorIntX(), pos.GetFloorIntY());
-		if (terrainObject->HasBGColor()) {
-			draw_sprite(m_BGColorLayer->GetBitmap(), terrainObject->GetBGColorBitmap(), pos.GetFloorIntX(), pos.GetFloorIntY());
-			g_SceneMan.RegisterTerrainChange(pos.GetFloorIntX(), pos.GetFloorIntY(), terrainObject->GetBitmapWidth(), terrainObject->GetBitmapHeight(), ColorKeys::g_MaskColor, true);
-		}
-
-		// Register terrain change.
-		g_SceneMan.RegisterTerrainChange(pos.GetFloorIntX(), pos.GetFloorIntY(), terrainObject->GetBitmapWidth(), terrainObject->GetBitmapHeight(), ColorKeys::g_MaskColor, false);
-
-		// Add a box to the updated areas list to show there's been change to the materials layer.
-		m_UpdatedMateralAreas.emplace_back(Box(pos, static_cast<float>(terrainObject->GetMaterialBitmap()->w), static_cast<float>(terrainObject->GetMaterialBitmap()->h)));
-
-		// Apply all the child objects of the TO, and first reapply the team so all its children are guaranteed to be on the same team!
-		terrainObject->SetTeam(terrainObject->GetTeam());
-
-		for (const SceneObject::SOPlacer &childObject : terrainObject->GetChildObjects()) {
-			// TODO: check if we're placing a brain, and have it replace the resident brain of the scene!
-			// Copy and apply, transferring ownership of the new copy into the application
-			g_SceneMan.AddSceneObject(childObject.GetPlacedCopy(terrainObject));
 		}
 		return true;
 	}

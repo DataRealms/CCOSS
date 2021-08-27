@@ -197,13 +197,6 @@ namespace RTE {
 		/// <param name="movableObject">The MovableObject to apply to this Terrain. Ownership is NOT transferred!</param>
 		/// <returns>Whether the object was successfully applied to the terrain.</returns>
 		bool ApplyMovableObject(MovableObject *movableObject);
-
-		/// <summary>
-		/// Draws a passed in TerrainObject's graphical and material representations to this Terrain's respective layers.
-		/// </summary>
-		/// <param name="terrainObject">The TerrainObject to apply to this Terrain. Ownership is NOT transferred!</param>
-		/// <returns>Whether the object was successfully applied to the terrain.</returns>
-		bool ApplyTerrainObject(TerrainObject *terrainObject);
 #pragma endregion
 
 #pragma region Concrete Methods

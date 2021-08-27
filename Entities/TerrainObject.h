@@ -6,6 +6,8 @@
 
 namespace RTE {
 
+	class SLTerrain;
+
 	/// <summary>
 	/// A feature of the terrain, which includes foreground color layer, material layer and optional background layer.
 	/// </summary>
@@ -122,9 +124,15 @@ namespace RTE {
 		/// </summary>
 		/// <param name="team">The assigned team number.</param>
 		void SetTeam(int team) override;
+#pragma endregion
 
+#pragma region Concrete Methods
 		/// <summary>
+		/// Draws a passed in TerrainObject's graphical and material representations to this Terrain's respective layers.
 		/// </summary>
+		/// <param name="terrainObject">The TerrainObject to apply to this Terrain. Ownership is NOT transferred!</param>
+		/// <returns>Whether the object was successfully applied to the terrain.</returns>
+		bool ApplyTerrainObject(SLTerrain *terrain);
 #pragma endregion
 
 #pragma region Virtual Override Methods

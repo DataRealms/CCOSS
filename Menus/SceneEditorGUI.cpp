@@ -1036,7 +1036,7 @@ void SceneEditorGUI::Update()
                             // Deduct the cost from team funds
                             g_ActivityMan.GetActivity()->ChangeTeamFunds(-m_pCurrentObject->GetTotalValue(m_NativeTechModule, m_ForeignCostMult), m_pController->GetTeam());
 
-							g_SceneMan.GetTerrain()->ApplyTerrainObject(pTO);
+							pTO->ApplyTerrainObject(g_SceneMan.GetTerrain());
 							g_SceneMan.GetTerrain()->CleanAir();
 
 							Vector terrainObjectPos = pTO->GetPos() + pTO->GetBitmapOffset();

@@ -1,4 +1,5 @@
 #include "TerrainObject.h"
+#include "SLTerrain.h"
 #include "SceneMan.h"
 
 namespace RTE {
@@ -160,11 +161,52 @@ namespace RTE {
 		return false;
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool TerrainObject::ApplyTerrainObject(SLTerrain *terrain) {
+		if (!terrain) {
+			return false;
+		}
+		BITMAP *terrainMatBitmap = terrain->GetMaterialBitmap();
+		BITMAP *terrainBGBitmap = terrain->GetBGColorBitmap();
+		BITMAP *terrainFGBitmap = terrain->GetFGColorBitmap();
+
+		Vector posOnScene = m_Pos + m_BitmapOffset;
+
+		if (terrain->WrapsX()) {
+			if (posOnScene.GetFloorIntX() < 0) {
+				if (HasMaterialBitmap()) { draw_sprite(terrainMatBitmap, m_MaterialBitmap, posOnScene.GetFloorIntX() + terrainMatBitmap->w, posOnScene.GetFloorIntY()); }
+				if (HasBGColorBitmap()) { draw_sprite(terrainBGBitmap, m_BGColorBitmap, posOnScene.GetFloorIntX() + terrainBGBitmap->w, posOnScene.GetFloorIntY()); }
+				if (HasFGColorBitmap()) { draw_sprite(terrainFGBitmap, m_FGColorBitmap, posOnScene.GetFloorIntX() + terrainFGBitmap->w, posOnScene.GetFloorIntY()); }
+			} else if (posOnScene.GetFloorIntX() >= terrainMatBitmap->w - GetBitmapWidth()) {
+				if (HasMaterialBitmap()) { draw_sprite(terrainMatBitmap, m_MaterialBitmap, posOnScene.GetFloorIntX() - terrainMatBitmap->w, posOnScene.GetFloorIntY()); }
+				if (HasBGColorBitmap()) { draw_sprite(terrainBGBitmap, m_BGColorBitmap, posOnScene.GetFloorIntX() - terrainBGBitmap->w, posOnScene.GetFloorIntY()); }
+				if (HasFGColorBitmap()) { draw_sprite(terrainFGBitmap, m_FGColorBitmap, posOnScene.GetFloorIntX() - terrainFGBitmap->w, posOnScene.GetFloorIntY()); }
 			}
 		}
 			}
 		}
+		if (HasMaterialBitmap()) {
+			draw_sprite(terrainMatBitmap, m_MaterialBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY());
+			terrain->GetUpdatedMaterialAreas().emplace_back(Box(posOnScene, static_cast<float>(m_MaterialBitmap->w), static_cast<float>(m_MaterialBitmap->h)));
+		}
+		if (HasBGColorBitmap()) {
+			draw_sprite(terrainBGBitmap, m_BGColorBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY());
+			g_SceneMan.RegisterTerrainChange(posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY(), m_BGColorBitmap->w, m_BGColorBitmap->h, ColorKeys::g_MaskColor, true);
+		}
+		if (HasFGColorBitmap()) {
+			draw_sprite(terrainFGBitmap, m_FGColorBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY());
+			g_SceneMan.RegisterTerrainChange(posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY(), m_FGColorBitmap->w, m_FGColorBitmap->h, ColorKeys::g_MaskColor, false);
+		}
+		// Reapply the team so all children are guaranteed to be on the same team.
+		SetTeam(GetTeam());
+
+		for (const SceneObject::SOPlacer &childObject : GetChildObjects()) {
+			// TODO: check if we're placing a brain, and have it replace the resident brain of the scene!
+			// Copy and apply, transferring ownership of the new copy to SceneMan.
+			g_SceneMan.AddSceneObject(childObject.GetPlacedCopy(this));
+		}
+		return true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -118,7 +118,7 @@ namespace RTE {
 			}
 			for (const TerrainObject *terrainObject : m_TerrainObjects) {
 				// Write out only what is needed to place a copy of this in the Terrain
-				writer.NewProperty("AddTerrainObject");
+				writer.NewProperty("PlaceTerrainObject");
 				writer.ObjectStart(terrainObject->GetClassName());
 				writer.NewPropertyWithValue("CopyOf", terrainObject->GetModuleAndPresetName());
 				writer.NewPropertyWithValue("Position", terrainObject->GetPos());
@@ -299,11 +299,7 @@ namespace RTE {
 		int posY = pixelY;
 		WrapPosition(posX, posY);
 
-		// If it's still below or to the sides out of bounds after wrapping what is supposed to be wrapped, shit is out of bounds.
-		if (posX < 0 || posX >= m_MainBitmap->w || posY < 0 || posY >= m_MainBitmap->h) {
-			return (layerType == LayerType::MaterialLayer) ? MaterialColorKeys::g_MaterialAir : ColorKeys::g_MaskColor;
-		}
-		return _getpixel(terrainLayer, posX, posY);
+		return (posX < 0 || posX >= m_MainBitmap->w || posY < 0 || posY >= m_MainBitmap->h) ? MaterialColorKeys::g_MaterialAir : _getpixel(terrainLayer, posX, posY);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

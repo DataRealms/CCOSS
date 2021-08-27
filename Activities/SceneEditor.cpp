@@ -418,22 +418,22 @@ void SceneEditor::Update()
                     pItem = m_pNewBG1Combo->GetItem(m_pNewBG1Combo->GetSelectedIndex());
                     if (pItem && !pItem->m_Name.empty())
                     {
-						SLBackground *pNewLayer = dynamic_cast<SLBackground *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
-                        RTEAssert(pNewLayer, "No SceneLayer of the name set as BG1 is defined!");
+						SLBackground *pNewLayer = dynamic_cast<SLBackground *>(g_PresetMan.GetEntityPreset("SLBackground", pItem->m_Name, m_ModuleSpaceID)->Clone());
+                        RTEAssert(pNewLayer, "No SLBackground of the name set as BG1 is defined!");
                         pNewScene->GetBackLayers().push_back(pNewLayer);
                     }
                     pItem = m_pNewBG2Combo->GetItem(m_pNewBG2Combo->GetSelectedIndex());
                     if (pItem && !pItem->m_Name.empty())
                     {
-						SLBackground *pNewLayer = dynamic_cast<SLBackground *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
-                        RTEAssert(pNewLayer, "No SceneLayer of the name set as BG2 is defined!");
+						SLBackground *pNewLayer = dynamic_cast<SLBackground *>(g_PresetMan.GetEntityPreset("SLBackground", pItem->m_Name, m_ModuleSpaceID)->Clone());
+                        RTEAssert(pNewLayer, "No SLBackground of the name set as BG2 is defined!");
                         pNewScene->GetBackLayers().push_back(pNewLayer);
                     }
                     pItem = m_pNewBG3Combo->GetItem(m_pNewBG3Combo->GetSelectedIndex());
                     if (pItem && !pItem->m_Name.empty())
                     {
-						SLBackground *pNewLayer = dynamic_cast<SLBackground *>(g_PresetMan.GetEntityPreset("SceneLayer", pItem->m_Name, m_ModuleSpaceID)->Clone());
-                        RTEAssert(pNewLayer, "No SceneLayer of the name set as BG3 is defined!");
+						SLBackground *pNewLayer = dynamic_cast<SLBackground *>(g_PresetMan.GetEntityPreset("SLBackground", pItem->m_Name, m_ModuleSpaceID)->Clone());
+                        RTEAssert(pNewLayer, "No SLBackground of the name set as BG3 is defined!");
                         pNewScene->GetBackLayers().push_back(pNewLayer);
                     }
 
@@ -796,21 +796,21 @@ void SceneEditor::UpdateNewDialog()
 
     // Get the list of all read in NEAR background layers
     list<Entity *> bgList;
-    g_PresetMan.GetAllOfGroupInModuleSpace(bgList, "Near Backdrops", "SceneLayer", selectedModuleID);
+    g_PresetMan.GetAllOfGroupInModuleSpace(bgList, "Near Backdrops", "SLBackground", selectedModuleID);
     // Go through the list and add their names to the combo box
     for (list<Entity *>::iterator itr = bgList.begin(); itr != bgList.end(); ++itr)
         m_pNewBG1Combo->AddItem((*itr)->GetPresetName());
 
     // Get the list of all read in MID background layers
     bgList.clear();
-    g_PresetMan.GetAllOfGroupInModuleSpace(bgList, "Mid Backdrops", "SceneLayer", selectedModuleID);
+    g_PresetMan.GetAllOfGroupInModuleSpace(bgList, "Mid Backdrops", "SLBackground", selectedModuleID);
     // Go through the list and add their names to the combo box
     for (list<Entity *>::iterator itr = bgList.begin(); itr != bgList.end(); ++itr)
         m_pNewBG2Combo->AddItem((*itr)->GetPresetName());
 
     // Get the list of all read in FAR background layers
     bgList.clear();
-    g_PresetMan.GetAllOfGroupInModuleSpace(bgList, "Far Backdrops", "SceneLayer", selectedModuleID);
+    g_PresetMan.GetAllOfGroupInModuleSpace(bgList, "Far Backdrops", "SLBackground", selectedModuleID);
     // Go through the list and add their names to the combo box
     for (list<Entity *>::iterator itr = bgList.begin(); itr != bgList.end(); ++itr)
         m_pNewBG3Combo->AddItem((*itr)->GetPresetName());

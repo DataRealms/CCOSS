@@ -52,6 +52,42 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
+		/// Returns whether this TerrainObject has any foreground color data.
+		/// </summary>
+		/// <returns>Whether this TerrainOBject has any foreground color data.</returns>
+		bool HasFGColorBitmap() const { return m_FGColorBitmap != nullptr; }
+
+		/// <summary>
+		/// Gets the BITMAP object that this TerrainObject uses for its foreground color representation.
+		/// </summary>
+		/// <returns>A pointer to the foreground color BITMAP object. Ownership is NOT transferred!</returns>
+		BITMAP * GetFGColorBitmap() const { return m_FGColorBitmap; }
+
+		/// <summary>
+		/// Returns whether this TerrainObject has any background color data.
+		/// </summary>
+		/// <returns>Whether this TerrainOBject has any background color data.</returns>
+		bool HasBGColorBitmap() const { return m_BGColorBitmap != nullptr; }
+
+		/// <summary>
+		/// Gets the BITMAP object that this TerrainObject uses for its background color representation, if any.
+		/// </summary>
+		/// <returns>A pointer to the background color BITMAP object. This may be nullptr if there is no BG bitmap. Ownership is NOT transferred!</returns>
+		BITMAP * GetBGColorBitmap() const { return m_BGColorBitmap; }
+
+		/// <summary>
+		/// Returns whether this TerrainObject has any material data.
+		/// </summary>
+		/// <returns>Whether this TerrainOBject has any material data.</returns>
+		bool HasMaterialBitmap() const { return m_MaterialBitmap != nullptr; }
+
+		/// <summary>
+		/// Gets the BITMAP object that this TerrainObject uses for its material representation.
+		/// </summary>
+		/// <returns>A pointer to the material BITMAP object. Ownership is NOT transferred!</returns>
+		BITMAP * GetMaterialBitmap() const { return m_MaterialBitmap; }
+
+		/// <summary>
 		/// Gets the offset from the position to the upper left corner of this' bitmaps.
 		/// </summary>
 		/// <returns>A Vector describing the bitmap offset, in pixels.</returns>
@@ -61,19 +97,19 @@ namespace RTE {
 		/// Gets the width this' material bitmap.
 		/// </summary>
 		/// <returns>Width of 'material' bitmap.</returns>
-		int GetBitmapWidth() const { return m_MaterialBitmap->w; }
+		int GetBitmapWidth() const;
 
 		/// <summary>
 		/// Gets the height this' material bitmap.
 		/// </summary>
 		/// <returns>Height of 'material' bitmap.</returns>
-		int GetBitmapHeight() const { return m_MaterialBitmap->h; }
+		int GetBitmapHeight() const;
 
 		/// <summary>
-		/// Returns whether this TerrainObject has any background color data.
+		/// Gets the list of child objects that should be placed when this is placed.
 		/// </summary>
-		/// <returns>Whether this TerrainOBject has any background color data.</returns>
-		bool HasBGColor() const { return m_BGColorBitmap != nullptr; }
+		/// <returns>A reference to the list of child objects. Ownership of the list is NOT transferred!</returns>
+		const std::vector<SceneObject::SOPlacer> & GetChildObjects() const { return m_ChildObjects; }
 
 		/// <summary>
 		/// Gets a bitmap showing a good identifiable icon of this, for use in GUI lists etc.
@@ -82,34 +118,13 @@ namespace RTE {
 		BITMAP * GetGraphicalIcon() const override;
 
 		/// <summary>
-		/// Gets the BITMAP object that this TerrainObject uses for its foreground color representation.
-		/// </summary>
-		/// <returns>A pointer to the foreground color BITMAP object. Ownership is NOT transferred!</returns>
-		BITMAP * GetFGColorBitmap() const { return m_FGColorBitmap; }
-
-		/// <summary>
-		/// Gets the BITMAP object that this TerrainObject uses for its background color representation, if any.
-		/// </summary>
-		/// <returns>A pointer to the background color BITMAP object. This may be nullptr if there is no BG bitmap. Ownership is NOT transferred!</returns>
-		BITMAP * GetBGColorBitmap() const { return m_BGColorBitmap; }
-
-		/// <summary>
-		/// Gets the BITMAP object that this TerrainObject uses for its material representation.
-		/// </summary>
-		/// <returns>A pointer to the material BITMAP object. Ownership is NOT transferred!</returns>
-		BITMAP * GetMaterialBitmap() const { return m_MaterialBitmap; }
-
-		/// <summary>
 		/// Sets which team this belongs to.
 		/// </summary>
 		/// <param name="team">The assigned team number.</param>
 		void SetTeam(int team) override;
 
 		/// <summary>
-		/// Gets the list of child objects that should be placed when this is placed.
 		/// </summary>
-		/// <returns>A reference to the list of child objects. Ownership of the list is NOT transferred!</returns>
-		const std::vector<SceneObject::SOPlacer> & GetChildObjects() const { return m_ChildObjects; }
 #pragma endregion
 
 #pragma region Virtual Override Methods

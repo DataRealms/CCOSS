@@ -90,7 +90,7 @@ void BunkerAssembly::AddPlacedObject(SceneObject * pSO)
 
 		// Regular drawing
 		draw_sprite(m_MaterialBitmap, pTObject->GetMaterialBitmap(), loc.m_X, loc.m_Y);
-		if (pTObject->HasBGColor())
+		if (pTObject->HasBGColorBitmap())
 		{
 			draw_sprite(m_BGColorBitmap, pTObject->GetBGColorBitmap(), loc.m_X, loc.m_Y);
 			draw_sprite(m_pPresentationBitmap, pTObject->GetBGColorBitmap(), loc.m_X, loc.m_Y);

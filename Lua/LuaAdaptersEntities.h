@@ -37,6 +37,7 @@
 #include "Turret.h"
 #include "PEmitter.h"
 #include "GlobalScript.h"
+#include "Deployment.h"
 
 #include "GameActivity.h"
 #include "GAScripted.h"

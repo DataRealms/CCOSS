@@ -17,6 +17,7 @@
 #include "PresetMan.h"
 #include "ActivityMan.h"
 #include "UInputMan.h"
+#include "SceneMan.h"
 
 #include "GUI.h"
 #include "AllegroBitmap.h"

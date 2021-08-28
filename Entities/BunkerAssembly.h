@@ -14,18 +14,13 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "RTETools.h"
 #include "TerrainObject.h"
-#include "Vector.h"
-#include "SceneMan.h"
-#include "BunkerAssemblyScheme.h"
-#include "Deployment.h"
-//#include "MovableMan.h"
 
 namespace RTE
 {
 
-class ContentFile;
+class BunkerAssemblyScheme;
+class Deployment;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -16,7 +16,7 @@
 
 #include "Entity.h"
 #include "Box.h"
-#include "BunkerAssembly.h"
+#include "Activity.h"
 
 namespace RTE
 {
@@ -25,6 +25,11 @@ class ContentFile;
 class MovableObject;
 class PathFinder;
 class SLBackground;
+class SLTerrain;
+class SceneLayer;
+class BunkerAssembly;
+class SceneObject;
+class Deployment;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

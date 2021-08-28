@@ -6,6 +6,7 @@
 #include "GameActivity.h"
 #include "MetaPlayer.h"
 #include "SLTerrain.h"
+#include "TerrainObject.h"
 
 #include "GUIBanner.h"
 #include "BuyMenuGUI.h"

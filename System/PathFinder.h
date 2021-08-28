@@ -2,12 +2,13 @@
 #define _RTEPATHFINDER_
 
 #include "Box.h"
-#include "Scene.h"
 #include "System/MicroPather/micropather.h"
 
 using namespace micropather;
 
 namespace RTE {
+
+	class Scene;
 
 	/// <summary>
 	/// Contains everything related to a node on the path grid used by PathFinder.
@@ -164,7 +165,7 @@ namespace RTE {
 		/// <param name="start">Origin point.</param>
 		/// <param name="end">Destination point.</param>
 		/// <returns>The cost value.</returns>
-		float CostAlongLine(const Vector &start, const Vector &end) { return g_SceneMan.CastMaxStrengthRay(start, end, 0); }
+		float CostAlongLine(const Vector &start, const Vector &end);
 
 		/// <summary>
 		/// Helper function for updating all the values of cost edges going out from a specific node.

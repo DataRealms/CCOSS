@@ -1,4 +1,6 @@
 #include "PathFinder.h"
+#include "Scene.h"
+#include "SceneMan.h"
 
 namespace RTE {
 
@@ -291,6 +293,12 @@ namespace RTE {
 			adjCost.state = static_cast<void *>(node->LeftUp);
 			adjacentList->push_back(adjCost);
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	float PathFinder::CostAlongLine(const Vector &start, const Vector &end) {
+		return g_SceneMan.CastMaxStrengthRay(start, end, 0);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

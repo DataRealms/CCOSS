@@ -222,8 +222,6 @@ namespace RTE {
 				if (HasFGColorBitmap()) { masked_blit(m_FGColorBitmap, targetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_FGColorBitmap->w, m_FGColorBitmap->h); }
 			} else if (mode == g_DrawMaterial) {
 				if (HasMaterialBitmap()) { masked_blit(m_MaterialBitmap, targetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_MaterialBitmap->w, m_MaterialBitmap->h); }
-			} else if (mode == g_DrawLess) {
-				if (HasFGColorBitmap()) { masked_blit(m_FGColorBitmap, targetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_FGColorBitmap->w, m_FGColorBitmap->h); }
 			} else if (mode == g_DrawTrans) {
 				if (HasFGColorBitmap()) { draw_trans_sprite(targetBitmap, m_FGColorBitmap, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY()); }
 				if (HasBGColorBitmap()) { draw_trans_sprite(targetBitmap, m_BGColorBitmap, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY()); }

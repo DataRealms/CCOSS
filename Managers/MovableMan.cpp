@@ -1968,9 +1968,6 @@ void MovableMan::Update()
                     }
                     (*parIt)->SetPos(parPos);
                 }
-
-//                (*parIt)->Draw(g_SceneMan.GetTerrain()->GetFGColorBitmap(), Vector(), g_DrawColor, true);
-//                (*parIt)->Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), Vector(), g_DrawMaterial, true);
 				(*parIt)->DrawToTerrain(g_SceneMan.GetTerrain());
             }
             delete *(parIt++);

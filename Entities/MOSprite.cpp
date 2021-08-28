@@ -569,10 +569,6 @@ void MOSprite::Draw(BITMAP *pTargetBitmap,
         if (mode == g_DrawMaterial) {
             RTEAbort("Ordered to draw an MOSprite in its material, which is not possible!");
         }
-        else if (mode == g_DrawAir)
-            draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), g_MaterialAir, -1);
-        else if (mode == g_DrawMask)
-            draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), g_MaskColor, -1);
         else if (mode == g_DrawWhite)
             draw_character_ex(pTargetBitmap, m_aSprite[m_Frame], aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), g_WhiteColor, -1);
         else if (mode == g_DrawMOID)

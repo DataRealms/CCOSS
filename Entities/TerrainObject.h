@@ -128,11 +128,11 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Draws this TerrainObject's graphical and material representations to the specified SLTerrain's respective layers.
+		/// Places this TerrainObject and all its children on the specified SLTerrain.
 		/// </summary>
-		/// <param name="terrain">The SLTerrain to draw this TerrainObject to. Ownership is NOT transferred!</param>
-		/// <returns>Whether the object was successfully drawn to the terrain.</returns>
-		bool DrawToTerrain(SLTerrain *terrain);
+		/// <param name="terrain">The SLTerrain to place this TerrainObject on. Ownership is NOT transferred!</param>
+		/// <returns>Whether the object was successfully placed on the terrain.</returns>
+		bool PlaceOnTerrain(SLTerrain *terrain);
 #pragma endregion
 
 #pragma region Virtual Override Methods
@@ -172,6 +172,12 @@ namespace RTE {
 		std::vector<SceneObject::SOPlacer> m_ChildObjects; //!< The objects that are placed along with this on the Scene.
 
 	private:
+
+		/// <summary>
+		/// Draws this TerrainObject's graphical and material representations to the specified SLTerrain's respective layers.
+		/// </summary>
+		/// <param name="terrain">The SLTerrain to draw this TerrainObject to. Ownership is NOT transferred!</param>
+		void DrawToTerrain(SLTerrain *terrain);
 
 		/// <summary>
 		/// Clears all the member variables of this TerrainObject, effectively resetting the members of this abstraction level only.

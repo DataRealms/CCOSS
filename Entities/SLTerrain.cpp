@@ -246,10 +246,10 @@ namespace RTE {
 				terrainFrosting->DrawToTerrain(this);
 			}
 			for (TerrainDebris *terrainDebris : m_TerrainDebris) {
-				terrainDebris->DrawToTerrain(this);
+				terrainDebris->PlaceOnTerrain(this);
 			}
 			for (TerrainObject *terrainObject : m_TerrainObjects) {
-				terrainObject->DrawToTerrain(this);
+				terrainObject->PlaceOnTerrain(this);
 			}
 			CleanAir();
 		}
@@ -357,12 +357,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool SLTerrain::ApplyObject(Entity *entity) {
+	bool SLTerrain::PlaceObjectOnTerrain(Entity *entity) {
 		if (entity) {
 			if (MovableObject *entityAsMovableObject = dynamic_cast<MovableObject *>(entity)) {
 				return entityAsMovableObject->DrawToTerrain(this);
 			} else if (TerrainObject *entityAsTerrainObject = dynamic_cast<TerrainObject *>(entity)) {
-				return entityAsTerrainObject->DrawToTerrain(this);
+				return entityAsTerrainObject->PlaceOnTerrain(this);
 			}
 		}
 		return false;

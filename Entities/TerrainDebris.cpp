@@ -190,7 +190,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void TerrainDebris::DrawDebrisPieceOnTerrain(SLTerrain *terrain, BITMAP *bitmapToDraw, const Vector &position) const {
+	void TerrainDebris::DrawToTerrain(SLTerrain *terrain, BITMAP *bitmapToDraw, const Vector &position) const {
 		// Create a square temp bitmap that is larger than the original to avoid clipping if rotating.
 		int dimensions = 10 + ((bitmapToDraw->w <= bitmapToDraw->h) ? bitmapToDraw->h : bitmapToDraw->w);
 		BITMAP *tempDrawBitmap = create_bitmap_ex(8, dimensions, dimensions);
@@ -230,8 +230,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void TerrainDebris::DrawToTerrain(SLTerrain *terrain) {
-		RTEAssert(!m_Bitmaps.empty() && m_BitmapCount > 0, "No bitmaps loaded for terrain debris during TerrainDebris::DrawToTerrain!");
+	void TerrainDebris::PlaceOnTerrain(SLTerrain *terrain) {
+		RTEAssert(!m_Bitmaps.empty() && m_BitmapCount > 0, "No bitmaps loaded for terrain debris during TerrainDebris::PlaceOnTerrain!");
 
 		// Reference. Do not remove.
 		//acquire_bitmap(terrain->GetFGColorBitmap());
@@ -240,9 +240,9 @@ namespace RTE {
 		int possiblePieceToPlaceCount = static_cast<int>((static_cast<float>(terrain->GetMaterialBitmap()->w) * c_MPP) * m_Density);
 		for (int piece = 0; piece < possiblePieceToPlaceCount; ++piece) {
 			int pieceBitmapIndex = RandomNum(0, m_BitmapCount - 1);
-			RTEAssert(pieceBitmapIndex >= 0 && pieceBitmapIndex < m_BitmapCount, "Bitmap index was out of bounds during TerrainDebris::DrawToTerrain!");
+			RTEAssert(pieceBitmapIndex >= 0 && pieceBitmapIndex < m_BitmapCount, "Bitmap index was out of bounds during TerrainDebris::PlaceOnTerrain!");
 			Box buriedCheckBox(Vector(), static_cast<float>(m_Bitmaps.at(pieceBitmapIndex)->w), static_cast<float>(m_Bitmaps.at(pieceBitmapIndex)->h));
-			if (GetPiecePlacementPosition(terrain, buriedCheckBox)) { DrawDebrisPieceOnTerrain(terrain, m_Bitmaps.at(pieceBitmapIndex), buriedCheckBox.GetCorner()); }
+			if (GetPiecePlacementPosition(terrain, buriedCheckBox)) { DrawToTerrain(terrain, m_Bitmaps.at(pieceBitmapIndex), buriedCheckBox.GetCorner()); }
 		}
 
 		// Reference. Do not remove.

@@ -3254,7 +3254,7 @@ bool SceneMan::AddTerrainObject(TerrainObject *pObject)
     if (!pObject)
         return false;
 
-    bool result =  m_pCurrentScene->GetTerrain()->ApplyObject(pObject);
+    bool result =  m_pCurrentScene->GetTerrain()->PlaceObjectOnTerrain(pObject);
 	if (result)
 	{
 		Vector corner = pObject->GetPos() + pObject->GetBitmapOffset();
@@ -3285,8 +3285,8 @@ bool SceneMan::AddSceneObject(SceneObject *pObject)
     }
     else if (TerrainObject *pTO = dynamic_cast<TerrainObject *>(pObject))
     {
-        bool result = m_pCurrentScene->GetTerrain()->ApplyObject(pTO);
-        // Have to clean up the added object here, since ApplyObject doesn't take ownership
+        bool result = m_pCurrentScene->GetTerrain()->PlaceObjectOnTerrain(pTO);
+        // Have to clean up the added object here, since PlaceObjectOnTerrain doesn't take ownership
         delete pTO;
         pObject = pTO = 0;
         return result;

@@ -61,7 +61,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="terrain">The SLTerrain to draw this TerrainDebris to. Ownership is NOT transferred!</param>
 		/// <returns>Whether the object was successfully drawn to the terrain.</returns>
-		void DrawToTerrain(SLTerrain *terrain);
+		void PlaceOnTerrain(SLTerrain *terrain);
 #pragma endregion
 
 	private:
@@ -126,7 +126,7 @@ namespace RTE {
 		/// <param name="terrain">Pointer to the SLTerrain to draw the debris piece on. Ownership is NOT transferred!</param>
 		/// <param name="bitmapToDraw">The BITMAP to draw. Ownership is NOT transferred!</param>
 		/// <param name="position">The position to draw the debris piece on the terrain.</param>
-		void DrawDebrisPieceOnTerrain(SLTerrain *terrain, BITMAP *bitmapToDraw, const Vector &position) const;
+		void DrawToTerrain(SLTerrain *terrain, BITMAP *bitmapToDraw, const Vector &position) const;
 #pragma endregion
 
 		/// <summary>

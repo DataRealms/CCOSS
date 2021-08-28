@@ -189,7 +189,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="entity">The Object to apply to this Terrain. Ownership is NOT transferred!</param>
 		/// <returns>Whether the object was successfully applied to the terrain.</returns>
-		bool ApplyObject(Entity *entity);
+		bool PlaceObjectOnTerrain(Entity *entity);
 #pragma endregion
 
 #pragma region Concrete Methods

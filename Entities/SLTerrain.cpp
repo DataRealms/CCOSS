@@ -279,59 +279,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SLTerrain::GetPixelFromLayer(LayerType layerType, int pixelX, int pixelY) const {
-		BITMAP *terrainLayer = nullptr;
-		switch (layerType) {
-			case LayerType::ForegroundLayer:
-				terrainLayer = m_FGColorLayer->GetBitmap();
-				break;
-			case LayerType::BackgroundLayer:
-				terrainLayer = m_BGColorLayer->GetBitmap();
-				break;
-			case LayerType::MaterialLayer:
-				terrainLayer = m_MainBitmap;
-				break;
-			default:
-				RTEAbort("Invalid LayerType passed into SLTerrain::GetPixelFromLayer!");
-				break;
-		}
-		int posX = pixelX;
-		int posY = pixelY;
-		WrapPosition(posX, posY);
-
-		return (posX < 0 || posX >= m_MainBitmap->w || posY < 0 || posY >= m_MainBitmap->h) ? MaterialColorKeys::g_MaterialAir : _getpixel(terrainLayer, posX, posY);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SLTerrain::SetPixelOnLayer(LayerType layerType, int pixelX, int pixelY, int color) const {
-		BITMAP *terrainLayer = nullptr;
-		switch (layerType) {
-			case LayerType::ForegroundLayer:
-				terrainLayer = m_FGColorLayer->GetBitmap();
-				break;
-			case LayerType::BackgroundLayer:
-				terrainLayer = m_BGColorLayer->GetBitmap();
-				break;
-			case LayerType::MaterialLayer:
-				terrainLayer = m_MainBitmap;
-				break;
-			default:
-				RTEAbort("Invalid LayerType passed into SLTerrain::SetPixelOnLayer!");
-				break;
-		}
-		int posX = pixelX;
-		int posY = pixelY;
-		WrapPosition(posX, posY);
-
-		if (posX < 0 || posX >= m_MainBitmap->w || posY < 0 || posY >= m_MainBitmap->h) {
-			return;
-		}
-		_putpixel(terrainLayer, posX, posY, color);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	bool SLTerrain::IsAirPixel(const int pixelX, const int pixelY) const {
 		int posX = pixelX;
 		int posY = pixelY;

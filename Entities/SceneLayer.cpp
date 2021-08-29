@@ -210,19 +210,26 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SceneLayer::GetPixel(const int pixelX, const int pixelY) {
-		return (pixelX < 0 || pixelX >= m_MainBitmap->w || pixelY < 0 || pixelY >= m_MainBitmap->h) ? 0 : _getpixel(m_MainBitmap, pixelX, pixelY);
+	int SceneLayer::GetPixel(const int pixelX, const int pixelY) const {
+		int posX = pixelX;
+		int posY = pixelY;
+		WrapPosition(posX, posY);
+		return (posX < 0 || posX >= m_MainBitmap->w || posY < 0 || posY >= m_MainBitmap->h) ? MaterialColorKeys::g_MaterialAir : _getpixel(m_MainBitmap, posX, posY);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SceneLayer::SetPixel(const int pixelX, const int pixelY, const int value) {
+	void SceneLayer::SetPixel(const int pixelX, const int pixelY, const int materialID) const {
 		RTEAssert(m_MainBitmapOwned, "Trying to set a pixel of a SceneLayer's bitmap which isn't owned!");
 
-		if (pixelX < 0 || pixelX >= m_MainBitmap->w || pixelY < 0 || pixelY >= m_MainBitmap->h) {
+		int posX = pixelX;
+		int posY = pixelY;
+		WrapPosition(posX, posY);
+
+		if (posX < 0 || posX >= m_MainBitmap->w || posY < 0 || posY >= m_MainBitmap->h) {
 			return;
 		}
-		putpixel(m_MainBitmap, pixelX, pixelY, value);
+		_putpixel(m_MainBitmap, posX, posY, materialID);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -118,15 +118,15 @@ namespace RTE {
 		/// <param name="pixelX">The X coordinate of the pixel to get.</param>
 		/// <param name="pixelY">The Y coordinate of the pixel to get.</param>
 		/// <returns>An int specifying the requested pixel's foreground color index.</returns>
-		int GetFGColorPixel(const int pixelX, const int pixelY) const { return GetPixelFromLayer(LayerType::ForegroundLayer, pixelX, pixelY); }
+		int GetFGColorPixel(int pixelX, int pixelY) const { return m_FGColorLayer->GetPixel(pixelX, pixelY); }
 
 		/// <summary>
 		/// Sets a specific pixel on the foreground color bitmap of this SLTerrain to a specific color. LockBitmaps() must be called before using this method.
 		/// </summary>
 		/// <param name="pixelX">The X coordinate of the pixel to set.</param>
 		/// <param name="pixelY">The Y coordinate of the pixel to set.</param>
-		void SetFGColorPixel(const int pixelX, const int pixelY, const int color) const { SetPixelOnLayer(LayerType::ForegroundLayer, pixelX, pixelY, color); }
 		/// <param name="materialID">The color index to set the pixel to.</param>
+		void SetFGColorPixel(int pixelX, int pixelY, const int materialID) const { m_FGColorLayer->SetPixel(pixelX, pixelY, materialID); }
 
 		/// <summary>
 		/// Gets a specific pixel from the background color bitmap of this. LockBitmaps() must be called before using this method.
@@ -134,15 +134,15 @@ namespace RTE {
 		/// <param name="pixelX">The X coordinate of the pixel to get.</param>
 		/// <param name="pixelY">The Y coordinate of the pixel to get.</param>
 		/// <returns>An int specifying the requested pixel's background color index.</returns>
-		int GetBGColorPixel(const int pixelX, const int pixelY) const { return GetPixelFromLayer(LayerType::BackgroundLayer, pixelX, pixelY); }
+		int GetBGColorPixel(int pixelX, int pixelY) const { return m_BGColorLayer->GetPixel(pixelX, pixelY); }
 
 		/// <summary>
 		/// Sets a specific pixel on the background color bitmap of this SLTerrain to a specific color. LockBitmaps() must be called before using this method.
 		/// </summary>
 		/// <param name="pixelX">The X coordinate of the pixel to set.</param>
 		/// <param name="pixelY">The Y coordinate of the pixel to set.</param>
-		void SetBGColorPixel(const int pixelX, const int pixelY, const int color) const { SetPixelOnLayer(LayerType::BackgroundLayer, pixelX, pixelY, color); }
 		/// <param name="materialID">The color index to set the pixel to.</param>
+		void SetBGColorPixel(int pixelX, int pixelY, int materialID) const { m_BGColorLayer->SetPixel(pixelX, pixelY, materialID); }
 
 		/// <summary>
 		/// Gets a specific pixel from the material bitmap of this SceneLayer. LockBitmaps() must be called before using this method.
@@ -150,7 +150,7 @@ namespace RTE {
 		/// <param name="pixelX">The X coordinate of the pixel to get.</param>
 		/// <param name="pixelY">The Y coordinate of the pixel to get.</param>
 		/// <returns>An int specifying the requested pixel's material index.</returns>
-		int GetMaterialPixel(const int pixelX, const int pixelY) const { return GetPixelFromLayer(LayerType::MaterialLayer, pixelX, pixelY); }
+		int GetMaterialPixel(int pixelX, int pixelY) const { return GetPixel(pixelX, pixelY); }
 
 		/// <summary>
 		/// Sets a specific pixel on the material bitmap of this SLTerrain to a specific material. LockMaterialBitmap() must be called before using this method.
@@ -158,7 +158,7 @@ namespace RTE {
 		/// <param name="pixelX">The X coordinate of the pixel to set.</param>
 		/// <param name="pixelY">The Y coordinate of the pixel to set.</param>
 		/// <param name="materialID">The material index to set the pixel to.</param>
-		void SetMaterialPixel(const int pixelX, const int pixelY, const int materialID) const { SetPixelOnLayer(LayerType::MaterialLayer, pixelX, pixelY, materialID); }
+		void SetMaterialPixel(int pixelX, int pixelY, int materialID) const { SetPixel(pixelX, pixelY, materialID); }
 
 		/// <summary>
 		/// Indicates whether a terrain pixel is of Air or Cavity material.
@@ -274,24 +274,6 @@ namespace RTE {
 		/// Applies Material textures to the foreground and background color layers, based on the loaded material layer (main bitmap).
 		/// </summary>
 		void TexturizeTerrain();
-
-		/// <summary>
-		/// Shared method for getting a specific pixel from a layer bitmap of this.
-		/// </summary>
-		/// <param name="layerType">The layer to get the pixel from. See LayerType enumeration.</param>
-		/// <param name="pixelX">The X coordinate of the pixel to get.</param>
-		/// <param name="pixelY">The Y coordinate of the pixel to get.</param>
-		/// <returns>An int specifying the requested pixel's color index.</returns>
-		int GetPixelFromLayer(LayerType layerType, int pixelX, int pixelY) const;
-
-		/// <summary>
-		/// Shared method for setting a specific pixel on a layer bitmap of this.
-		/// </summary>
-		/// <param name="layerType">The layer to set the pixel on. See LayerType enumeration.</param>
-		/// <param name="pixelX">The X coordinate of the pixel to get.</param>
-		/// <param name="pixelY">The Y coordinate of the pixel to get.</param>
-		/// <param name="color">The color index to set the pixel to.</param>
-		void SetPixelOnLayer(LayerType layerType, int pixelX, int pixelY, int color) const;
 
 		/// <summary>
 		/// Clears all the member variables of this SLTerrain, effectively resetting the members of this abstraction level only.

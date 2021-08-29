@@ -27,7 +27,7 @@ namespace RTE {
 	std::filesystem::path System::s_TempDirectory{};
 #endif
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void System::Initialize() {
 #if defined(__unix__) && !LINUX_PORTABLE
@@ -73,15 +73,15 @@ namespace RTE {
 	}
 
 	void System::SetupBaseGameFolders(const std::filesystem::path &tempDirectory) {
-		auto baseDirIt{std::filesystem::directory_iterator(s_BaseDataDirectory)};
+		std::filesystem::directory_iterator baseDirIt(s_BaseDataDirectory);
 
-		std::array<::string, 2> skipRtes {"Scenes.rte", "Metagames.rte"};
+		std::array<::string, 2> skipRtes{"Scenes.rte", "Metagames.rte"};
 
-		for (auto &dir_entry: baseDirIt) {
-			if (dir_entry.is_directory()) {
-				auto rteName = std::filesystem::relative(dir_entry.path(), dir_entry.path().parent_path());
+		for (auto &dirEntry: baseDirIt) {
+			if (dirEntry.is_directory()) {
+				auto rteName = std::filesystem::relative(dirEntry.path(), dirEntry.path().parent_path());
 				if (rteName.generic_string().find(".rte") != std::string::npos && std::find(skipRtes.begin(), skipRtes.end(), rteName) == skipRtes.end()) {
-					std::filesystem::create_directory_symlink(dir_entry, tempDirectory / rteName);
+					std::filesystem::create_directory_symlink(dirEntry, tempDirectory / rteName);
 				}
 			}
 		}
@@ -90,7 +90,7 @@ namespace RTE {
 	}
 
 	void System::SetupUserFolders(const std::filesystem::path &tempDirectory) {
-		auto userDirectory{GetXdgDataHome()};
+		std::filesystem::path userDirectory{GetXdgDataHome()};
 
 		if (!std::filesystem::exists(userDirectory)) {
 			MakeDirectory(userDirectory);
@@ -108,25 +108,24 @@ namespace RTE {
 			MakeDirectory(userDirectory / s_ScreenshotDirectory);
 		}
 
-		auto modsDirIt{std::filesystem::directory_iterator(userDirectory)};
+		std::filesystem::directory_iterator modsDirIt(userDirectory);
 
-		for (auto &dir_entry: modsDirIt) {
-			if (dir_entry.is_directory()) {
-				auto rteName = std::filesystem::relative(dir_entry.path(), dir_entry.path().parent_path());
+		for (auto &dirEntry: modsDirIt) {
+			if (dirEntry.is_directory()) {
+				auto rteName = std::filesystem::relative(dirEntry.path(), dirEntry.path().parent_path());
 				if (rteName.generic_string().find(".rte") != std::string::npos) {
-					std::filesystem::create_directory_symlink(dir_entry, tempDirectory / rteName);
+					std::filesystem::create_directory_symlink(dirEntry, tempDirectory / rteName);
 				}
 			}
 		}
 
+		std::array<std::string, 5> userFiles{"Settins.ini", "LogLoadingWarnings.txt", "LogLoading.txt", "LogConsole.txt", "AbortScreen.bmp"};
+
+		for (auto &file: userFiles) {
+			std::filesystem::create_symlink(userDirectory / file, tempDirectory / file);
+		}
+
 		std::filesystem::create_directory_symlink(userDirectory / s_ScreenshotDirectory, tempDirectory / s_ScreenshotDirectory);
-
-		std::filesystem::create_symlink(userDirectory / "Settings.ini", tempDirectory / "Settings.ini");
-
-		std::filesystem::create_symlink(userDirectory / "LogLoadingWarnings.txt", tempDirectory / "LogLoadingWarning.txt");
-		std::filesystem::create_symlink(userDirectory / "LogLoading.txt", tempDirectory / "LogLoading.txt");
-		std::filesystem::create_symlink(userDirectory / "LogConsole.txt", tempDirectory / "LogConsole.txt");
-		std::filesystem::create_symlink(userDirectory / "AbortScreen.bmp", tempDirectory / "AbortScreen.bmp");
 	}
 #endif
 

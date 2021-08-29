@@ -338,7 +338,7 @@ namespace RTE {
 		std::string GetModuleAndPresetName() const;
 
 		/// <summary>
-		/// Gets the name of this Entity's Data Module it was defined in, or the Base module if somehow none was found.
+		/// Gets the name of this Entity's Data Module it was defined in.
 		/// </summary>
 		/// <returns>A string with the module of this Entity.</returns>
 		std::string GetModuleName() const;

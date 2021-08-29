@@ -1464,18 +1464,17 @@ void Actor::Update()
     // Take damage from large hits during travel
 
 	float travelImpulseMagnitude = m_TravelImpulse.GetMagnitude();
-    if (travelImpulseMagnitude > m_TravelImpulseDamage * 0.5F) {
-		if (m_BodyHitSound) { m_BodyHitSound->Play(m_Pos); }
 
-		if (travelImpulseMagnitude > m_TravelImpulseDamage) {
-			const float impulse = travelImpulseMagnitude - m_TravelImpulseDamage;
-			const float damage = std::max(impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth, 0.0F);
-			m_Health -= damage;
-			if (damage > 0 && m_Health > 0 && m_PainSound) { m_PainSound->Play(m_Pos); }
-			if (m_Status != DYING && m_Status != DEAD) { m_Status = UNSTABLE; }
-			m_ForceDeepCheck = true;
-		}
-    }
+	if (m_BodyHitSound && travelImpulseMagnitude > m_TravelImpulseDamage * 0.5F) { m_BodyHitSound->Play(m_Pos); }
+
+	if (travelImpulseMagnitude > m_TravelImpulseDamage) {
+		const float impulse = travelImpulseMagnitude - m_TravelImpulseDamage;
+		const float damage = std::max(impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth, 0.0F);
+		m_Health -= damage;
+		if (damage > 0 && m_Health > 0 && m_PainSound) { m_PainSound->Play(m_Pos); }
+		if (m_Status != DYING && m_Status != DEAD) { m_Status = UNSTABLE; }
+		m_ForceDeepCheck = true;
+	}
 
     /////////////////////////////
     // Stability logic
@@ -1556,7 +1555,7 @@ void Actor::Update()
 
     if (m_FrameCount > 1)
     {
-        if (m_SpriteAnimMode == LOOPWHENMOVING)
+        if (m_SpriteAnimMode == LOOPWHENACTIVE)
         {
             if (m_Controller.IsState(MOVE_LEFT) || m_Controller.IsState(MOVE_RIGHT) || m_Controller.GetAnalogMove().GetLargest() > 0.1)
             {

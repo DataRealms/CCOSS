@@ -59,6 +59,7 @@ void HDFirearm::Clear()
 	m_ShellEjectAngle = 150;
     m_ShellSpreadRange = 0;
     m_ShellAngVelRange = 0;
+	m_ShellVelVariation = 0.1F;
     m_AIFireVel = -1;
     m_AIBulletLifeTime = 0;
     m_AIBulletAccScalar = -1;
@@ -134,6 +135,7 @@ int HDFirearm::Create(const HDFirearm &reference) {
 	m_ShellEjectAngle = reference.m_ShellEjectAngle;
     m_ShellSpreadRange = reference.m_ShellSpreadRange;
     m_ShellAngVelRange = reference.m_ShellAngVelRange;
+	m_ShellVelVariation = reference.m_ShellVelVariation;
     m_MuzzleOff = reference.m_MuzzleOff;
     m_EjectOff = reference.m_EjectOff;
     m_MagOff = reference.m_MagOff;
@@ -220,6 +222,8 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
     } else if (propName == "ShellAngVelRange") {
         reader >> m_ShellAngVelRange;
         m_ShellAngVelRange /= 2;
+	} else if (propName == "ShellVelVariation") {
+		reader >> m_ShellVelVariation;
     } else if (propName == "MuzzleOffset") {
         reader >> m_MuzzleOff;
     } else if (propName == "EjectionOffset") {
@@ -294,6 +298,8 @@ int HDFirearm::Save(Writer &writer) const
     writer << m_ShellSpreadRange * 2;
     writer.NewProperty("ShellAngVelRange");
     writer << m_ShellAngVelRange * 2;
+	writer.NewProperty("ShellVelocityVariation");
+	writer << m_ShellVelVariation;
     writer.NewProperty("MuzzleOffset");
     writer << m_MuzzleOff;
     writer.NewProperty("EjectionOffset");
@@ -884,7 +890,7 @@ void HDFirearm::Update()
                     pShell->SetPos(m_Pos + tempEject);
 
                     // ##@#@@$ TEMP
-                    shellVel.SetXY(pRound->GetShellVel() * (1.0F - RandomNum(0.0F, pRound->GetShellVelVariation())), 0);
+                    shellVel.SetXY(pRound->GetShellVel() * (1.0F - RandomNum(0.0F, m_ShellVelVariation)), 0);
                     shellVel.DegRotate(degAimAngle + m_ShellEjectAngle * (m_HFlipped ? -1 : 1) + shellSpread);
                     pShell->SetVel(m_Vel + shellVel);
                     pShell->SetRotAngle(m_Rotation.GetRadAngle());
@@ -997,7 +1003,7 @@ void HDFirearm::Update()
     // Display and override gun animation if there's a special one
     if (m_FrameCount > 1)
     {
-        if (m_SpriteAnimMode == LOOPWHENMOVING)
+        if (m_SpriteAnimMode == LOOPWHENACTIVE)
         {
             if (m_Activated || m_LastFireTmr.GetElapsedSimTimeMS() < m_DeactivationDelay) {
                 // Max rate of the animation when fully activated and firing

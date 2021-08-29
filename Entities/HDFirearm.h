@@ -327,6 +327,17 @@ ClassInfoGetters;
 
     void SetParticleSpreadRange(float range) { m_ParticleSpreadRange = range; };
 
+	/// <summary>
+	/// Gets the random velocity variation scalar at which this HDFirearm's shell is to be ejected.
+	/// </summary>
+	/// <returns>A float with the scalar value.</returns>
+	float GetShellVelVariation() const { return m_ShellVelVariation; }
+
+	/// <summary>
+	/// Sets the random velocity variation scalar at which this HDFirearm's shell is to be ejected.
+	/// </summary>
+	/// <param name = newValue>The new velocity variation scalar.</param>
+	void SetShellVelVariation(float newValue) { m_ShellVelVariation = newValue; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetAIFireVel
@@ -854,6 +865,7 @@ protected:
     float m_ShellSpreadRange;
     // Range of spread in ang vel of ejected shells, in one direction
     float m_ShellAngVelRange;
+	float m_ShellVelVariation; //!< The velocity variation scalar of ejected shells.
     // The muzzle velocity the AI use when aiming this weapon
     float m_AIFireVel;
     // The bullet life time the AI use when aiming this weapon

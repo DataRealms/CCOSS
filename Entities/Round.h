@@ -106,12 +106,6 @@ namespace RTE {
 		float GetShellVel() const { return m_ShellVel; }
 
 		/// <summary>
-		/// Gets the random velocity variation scalar at which this round's shell is to be ejected.
-		/// </summary>
-		/// <returns>A float with the scalar value.</returns>
-		float GetShellVelVariation() const { return m_ShellVelVariation; }
-
-		/// <summary>
 		/// Shows whether this Round has an extra sound sample to play when fired.
 		/// </summary>
 		/// <returns>Whether the firing Sound of this has been loaded, or the firing Device will make the noise alone.</returns>
@@ -155,7 +149,6 @@ namespace RTE {
 
 		const MovableObject *m_Shell; //!< Shell particle MovableObject preset instance.
 		float m_ShellVel; //!< The maximum velocity with which this Round's shell/casing is launched.
-		float m_ShellVelVariation; //!< The velocity variation scalar for this Round's shell/casing.
 
 		SoundContainer m_FireSound; //!< The extra firing audio of this Round being fired.
 

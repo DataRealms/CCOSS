@@ -337,7 +337,7 @@ ClassInfoGetters;
 	/// Sets the random velocity variation scalar at which this HDFirearm's shell is to be ejected.
 	/// </summary>
 	/// <param name = newValue>The new velocity variation scalar.</param>
-	void SetShellVelVariation(float newValue) { m_ShellVelVariation = newValue; }
+	void SetShellVelVariation(float newVariation) { m_ShellVelVariation = newVariation; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetAIFireVel

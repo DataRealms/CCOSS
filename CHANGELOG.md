@@ -192,7 +192,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `AHuman` Lua (R) property `ThrowProgress` which returns the current throw chargeup progress as a scalar from 0 to 1.
 
-- New `Round` INI property `ShellVelocityVariation` which can be used to randomize the magnitude at which shells are ejected.
+- New `HDFirearm` INI and Lua (R/W) property `ShellVelVariation` which can be used to randomize the magnitude at which shells are ejected.
 
 - New `HDFirearm` Lua (R) property `ReloadProgress` which returns the current reload progress as a scalar from 0 to 1.
 
@@ -209,6 +209,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `HDFirearm` reload progress now shows up as a HUD element.
 
 ### Changed
+
+- Changed `MOSprite` property `SpriteAnimMode` `Enum` `LOOPWHENMOVING` to `LOOPWHENACTIVE` as it also describes active devices.
+
+- Changed `Activity` Lua (R) properties `Running`, `Paused` and `ActivityOver` to `IsRunning`, `IsPaused` and `IsOver` respectively.  (NOTE: corresponding `ActivityMan` functions remain unchanged)
 
 - Exposed `ThrownDevice` properties `StartThrowOffset` and `EndThrowOffset` to Lua (R/W).
 

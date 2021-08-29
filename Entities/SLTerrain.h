@@ -7,13 +7,12 @@
 namespace RTE {
 
 	class MOPixel;
-	class MovableObject;
 	class TerrainFrosting;
 	class TerrainObject;
 	class TerrainDebris;
 
 	/// <summary>
-	/// A scrolling terrain layer of the Scene, composed of several scrolling layers.
+	/// Several scrolling layers of the Scene that compose the terrain.
 	/// </summary>
 	class SLTerrain : public SceneLayer {
 
@@ -65,8 +64,8 @@ namespace RTE {
 		/// <summary>
 		/// Whether this SLTerrain's bitmap data is loaded from a file or was generated at runtime.
 		/// </summary>
-		/// <returns>Whether the data in this' bitmap was loaded from a datafile, or generated.</returns>
-		bool IsFileData() const override { return m_FGColorLayer && m_FGColorLayer->IsFileData() && m_BGColorLayer && m_BGColorLayer->IsFileData(); }
+		/// <returns>Whether this SLTerrain's bitmap data was loaded from a file or was generated at runtime.</returns>
+		bool IsLoadedFromDisk() const override { return (m_FGColorLayer && m_FGColorLayer->IsLoadedFromDisk()) && (m_BGColorLayer && m_BGColorLayer->IsLoadedFromDisk()); }
 
 		/// <summary>
 		/// Loads previously specified/created data into memory. Has to be done before using this SLTerrain if the bitmap was not generated at runtime.
@@ -126,8 +125,8 @@ namespace RTE {
 		/// </summary>
 		/// <param name="pixelX">The X coordinate of the pixel to set.</param>
 		/// <param name="pixelY">The Y coordinate of the pixel to set.</param>
-		/// <param name="color">The color index to set the pixel to.</param>
 		void SetFGColorPixel(const int pixelX, const int pixelY, const int color) const { SetPixelOnLayer(LayerType::ForegroundLayer, pixelX, pixelY, color); }
+		/// <param name="materialID">The color index to set the pixel to.</param>
 
 		/// <summary>
 		/// Gets a specific pixel from the background color bitmap of this. LockBitmaps() must be called before using this method.
@@ -142,8 +141,8 @@ namespace RTE {
 		/// </summary>
 		/// <param name="pixelX">The X coordinate of the pixel to set.</param>
 		/// <param name="pixelY">The Y coordinate of the pixel to set.</param>
-		/// <param name="color">The color index to set the pixel to.</param>
 		void SetBGColorPixel(const int pixelX, const int pixelY, const int color) const { SetPixelOnLayer(LayerType::BackgroundLayer, pixelX, pixelY, color); }
+		/// <param name="materialID">The color index to set the pixel to.</param>
 
 		/// <summary>
 		/// Gets a specific pixel from the material bitmap of this SceneLayer. LockBitmaps() must be called before using this method.
@@ -173,11 +172,13 @@ namespace RTE {
 		/// Checks whether a bounding box is completely buried in the terrain.
 		/// </summary>
 		/// <param name="checkBox">The box to check.</param>
-		/// <returns>Whether the box is completely buried., i.e. no corner sticks out in the air or cavity.</returns>
+		/// <returns>Whether the box is completely buried, i.e. no corner sticks out in the Air or Cavity.</returns>
 		bool IsBoxBuried(const Box &checkBox) const;
+#pragma endregion
 
+#pragma region Concrete Methods
 		/// <summary>
-		/// Gets a deque of unwrapped boxes which show the areas where the material layer has had objects applied to it since last call to ClearUpdatedAreas().
+		/// Gets a deque of unwrapped boxes which show the areas where the material layer has had objects applied to it since last call to ClearUpdatedMaterialAreas().
 		/// </summary>
 		/// <returns>Reference to the deque that has been filled with Boxes which are unwrapped and may be out of bounds of the scene!</returns>
 		std::deque<Box> & GetUpdatedMaterialAreas() { return m_UpdatedMateralAreas; }
@@ -237,12 +238,12 @@ namespace RTE {
 
 #pragma region Virtual Override Methods
 		/// <summary>
-		/// Updates the state of this SLTerrain. Supposed to be done every frame.
+		/// Updates the state of this SLTerrain.
 		/// </summary>
 		void Update() override;
 
 		/// <summary>
-		/// Draws this SLTerrain's foreground's current scrolled position to a bitmap.
+		/// Draws this SLTerrain's current scrolled position to a bitmap.
 		/// </summary>
 		/// <param name="targetBitmap">The bitmap to draw to.</param>
 		/// <param name="targetBox">The box on the target bitmap to limit drawing to, with the corner of box being where the scroll position lines up.</param>

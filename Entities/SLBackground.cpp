@@ -106,7 +106,7 @@ namespace RTE {
 		} else if (propName == "IsAnimatedManually") {
 			reader >> m_IsAnimatedManually;
 		} else if (propName == "DrawTransparent") {
-			reader >> m_DrawTrans;
+			reader >> m_DrawMasked;
 		} else if (propName == "ScrollRatio") {
 			// Actually read the ScrollInfo, not the ratio. The ratios will be initialized later.
 			reader >> m_ScrollInfo;
@@ -140,7 +140,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("SpriteAnimMode", m_SpriteAnimMode);
 		writer.NewPropertyWithValue("SpriteAnimDuration", m_SpriteAnimDuration);
 		writer.NewPropertyWithValue("IsAnimatedManually", m_IsAnimatedManually);
-		writer.NewPropertyWithValue("DrawTransparent", m_DrawTrans);
+		writer.NewPropertyWithValue("DrawTransparent", m_DrawMasked);
 		writer.NewPropertyWithValue("ScrollRatio", m_ScrollInfo);
 		writer.NewPropertyWithValue("ScaleFactor", m_ScaleFactor);
 		writer.NewPropertyWithValue("IgnoreAutoScaling", m_IgnoreAutoScale);

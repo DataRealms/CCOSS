@@ -34,8 +34,8 @@ namespace RTE {
 		/// <summary>
 		/// Makes the SceneLayer object ready for use.
 		/// </summary>
-		/// <param name="bitmapFile">The ContentFile representing the bitmap file to load as this SceneLayer's graphical representation.</param>
-		/// <param name="drawTrans">Whether to draw masked (transparent) or not.</param>
+		/// <param name="bitmapFile">The ContentFile to load as this SceneLayer's graphical representation.</param>
+		/// <param name="drawMasked">Whether to draw masked (transparent) or not.</param>
 		/// <param name="offset">The initial scroll offset.</param>
 		/// <param name="wrapX">Whether the layer should wrap around or stop when scrolling beyond its bitmap's boundaries on the X axis.</param>
 		/// <param name="wrapY">Whether the layer should wrap around or stop when scrolling beyond its bitmap's boundaries on the Y axis.</param>
@@ -46,13 +46,13 @@ namespace RTE {
 		/// A special command is if wrap is false and the corresponding component is -1.0, that signals that the own width or height should be used as scrollInfo input.
 		/// </param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(const ContentFile &bitmapFile, bool drawTrans, const Vector &offset, bool wrapX, bool wrapY, const Vector &scrollInfo);
+		int Create(const ContentFile &bitmapFile, bool drawMasked, const Vector &offset, bool wrapX, bool wrapY, const Vector &scrollInfo);
 
 		/// <summary>
 		/// Makes the SceneLayer object ready for use.
 		/// </summary>
-		/// <param name="bitmap">The prepared BITMAP to use as for this SceneLayer. Ownership IS transferred!</param>
-		/// <param name="drawTrans">Whether to draw masked (transparent) or not.</param>
+		/// <param name="bitmap">The BITMAP to use for this SceneLayer. Ownership IS transferred!</param>
+		/// <param name="drawMasked">Whether to draw masked (transparent) or not.</param>
 		/// <param name="offset">The initial scroll offset.</param>
 		/// <param name="wrapX">Whether the layer should wrap around or stop when scrolling beyond its bitmap's boundaries on the X axis.</param>
 		/// <param name="wrapY">Whether the layer should wrap around or stop when scrolling beyond its bitmap's boundaries on the Y axis.</param>
@@ -63,7 +63,7 @@ namespace RTE {
 		/// A special command is if wrap is false and the corresponding component is -1.0, that signals that the own width or height should be used as scrollInfo input.
 		/// </param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(BITMAP *bitmap, bool drawTrans, const Vector &offset, bool wrapX, bool wrapY, const Vector &scrollInfo);
+		int Create(BITMAP *bitmap, bool drawMasked, const Vector &offset, bool wrapX, bool wrapY, const Vector &scrollInfo);
 
 		/// <summary>
 		/// Creates a SceneLayer to be identical to another, by deep copy.
@@ -91,7 +91,7 @@ namespace RTE {
 		/// Whether this SceneLayer's bitmap data is loaded from a file or was generated at runtime.
 		/// </summary>
 		/// <returns>Whether this SceneLayer's bitmap data was loaded from a file or not.</returns>
-		virtual bool IsFileData() const { return !m_BitmapFile.GetDataPath().empty(); }
+		virtual bool IsLoadedFromDisk() const { return !m_BitmapFile.GetDataPath().empty(); }
 
 		/// <summary>
 		/// Loads previously specified/created data into memory. Has to be done before using this SceneLayer if the bitmap was not generated at runtime.
@@ -115,26 +115,21 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// Gets the BITMAP object that this SceneLayer uses.
+		/// Gets the BITMAP that this SceneLayer uses.
 		/// </summary>
-		/// <returns>A pointer to the BITMAP object. Ownership is NOT transferred!</returns>
+		/// <returns>A pointer to the BITMAP of this SceneLayer. Ownership is NOT transferred!</returns>
 		BITMAP * GetBitmap() const { return m_MainBitmap; }
 
 		/// <summary>
-		/// 
+		/// Gets the scroll offset of this SceneLayer.
 		/// </summary>
-		/// <returns></returns>
-
-		/// <summary>
-		/// Gets the scroll offset.
-		/// </summary>
-		/// <returns>A copy of the offset.</returns>
+		/// <returns>A Vector with the scroll offset.</returns>
 		Vector GetOffset() const { return m_Offset; }
 
 		/// <summary>
-		/// Sets the offset of this SceneLayer. Observe that this offset will be modified by the scroll ratio before applied.
+		/// Sets the scroll offset of this SceneLayer. Observe that this offset will be modified by the scroll ratio before applied.
 		/// </summary>
-		/// <param name="newOffset">The new offset vector.</param>
+		/// <param name="newOffset">The new offset Vector.</param>
 		void SetOffset(const Vector &newOffset) { m_Offset = newOffset; }
 
 		/// <summary>
@@ -180,20 +175,20 @@ namespace RTE {
 		bool WrapsY() const { return m_WrapY; }
 
 		/// <summary>
-		/// Gets a specific pixel from the main bitmap of this SceneLayer. LockBitmaps() must be called before using this method.
+		/// Gets a specific pixel from the bitmap of this SceneLayer. LockBitmaps() must be called before using this method.
 		/// </summary>
-		/// <param name="pixelX">The X coordinates of which pixel to get.</param>
-		/// <param name="pixelY">The Y coordinates of which pixel to get.</param>
-		/// <returns>An int specifying the requested pixel's value.</returns>
-		int GetPixel(const int pixelX, const int pixelY);
+		/// <param name="pixelX">The X coordinate of the pixel to get.</param>
+		/// <param name="pixelY">The Y coordinate of the pixel to get.</param>
+		/// <returns>An int specifying the requested pixel's color index.</returns>
+		int GetPixel(int pixelX, int pixelY) const;
 
 		/// <summary>
-		/// Sets a specific pixel on the main bitmap of this SceneLayer to a specific value. LockBitmaps() must be called before using this method.
+		/// Sets a specific pixel on the bitmap of this SceneLayer to a specific value. LockBitmaps() must be called before using this method.
 		/// </summary>
-		/// <param name="pixelX">The X coordinates of which pixel to set.</param>
-		/// <param name="pixelY">The Y coordinates of which pixel to set.</param>
-		/// <param name="value">The value to set the pixel to.</param>
-		void SetPixel(const int pixelX, const int pixelY, const int value);
+		/// <param name="pixelX">The X coordinate of the pixel to set.</param>
+		/// <param name="pixelY">The Y coordinate of the pixel to set.</param>
+		/// <param name="materialID">The color index to set the pixel to.</param>
+		void SetPixel(int pixelX, int pixelY, int materialID) const;
 
 		/// <summary>
 		/// Returns whether the integer coordinates passed in are within the bounds of this SceneLayer.
@@ -203,7 +198,7 @@ namespace RTE {
 		/// <param name="margin"></param>
 		/// <returns>Whether within bounds or not.</returns>
 		// TODO: This doesn't take Y wrapping into account!$@#$
-		bool IsWithinBounds(const int pixelX, const int pixelY, const int margin = 0) const;
+		bool IsWithinBounds(int pixelX, int pixelY, int margin = 0) const;
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -250,9 +245,9 @@ namespace RTE {
 		bool ForceBounds(Vector &pos) const { return ForceBoundsOrWrapPosition(pos, true); }
 #pragma endregion
 
-#pragma region Virtual Override Methods
+#pragma region Virtual Methods
 		/// <summary>
-		/// Updates the state of this SceneLayer. Supposed to be done every frame.
+		/// Updates the state of this SceneLayer.
 		/// </summary>
 		virtual void Update() {}
 
@@ -272,7 +267,7 @@ namespace RTE {
 		ContentFile m_BitmapFile; //!< 
 		BITMAP *m_MainBitmap; //!< 
 		bool m_MainBitmapOwned; //!< Whether the main bitmap is owned by this.
-		bool m_DrawTrans; //!< Whether pixels marked as transparent (index 0, magenta) are skipped when drawing or not (masked drawing).
+		bool m_DrawMasked; //!< Whether pixels marked as transparent (index 0, magenta) are skipped when drawing or not (masked drawing).
 
 		bool m_WrapX; //!< Whether wrapping is enabled on the X axis.
 		bool m_WrapY; //!< Whether wrapping is enable on the Y axis.
@@ -288,7 +283,7 @@ namespace RTE {
 		Vector m_ScaledDimensions; //!< 
 
 		/// <summary>
-		/// Initialize the scroll ratios from the encoded scroll info. Must be done after the bitmap has been created in the derived concrete classes.
+		/// Initialize the scroll ratios from the scroll info. Must be done after the bitmap has been created.
 		/// </summary>
 		/// <param name="initForNetworkPlayer"></param>
 		/// <param name="player"></param>

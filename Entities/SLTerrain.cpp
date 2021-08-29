@@ -99,14 +99,14 @@ namespace RTE {
 		SceneLayer::Save(writer);
 
 		// Only write the background texture info if the background itself is not saved out as a file already.
-		if (m_BGColorLayer->IsFileData()) {
+		if (m_BGColorLayer->IsLoadedFromDisk()) {
 			writer.NewPropertyWithValue("BGColorLayer", m_BGColorLayer.get());
 		} else {
 			writer.NewPropertyWithValue("BackgroundTexture", m_DefaultBGTextureFile);
 		}
 
 		// Only if we haven't saved out the FG as a done and altered bitmap file should we save the procedural params here.
-		if (m_FGColorLayer->IsFileData()) {
+		if (m_FGColorLayer->IsLoadedFromDisk()) {
 			writer.NewPropertyWithValue("FGColorLayer", m_FGColorLayer.get());
 		} else {
 			// Layer data is not saved into a bitmap file yet, so just write out the procedural params to build the terrain.
@@ -230,7 +230,7 @@ namespace RTE {
 		RTEAssert(m_FGColorLayer.get(), "Terrain's foreground layer not instantiated before trying to load its data!");
 		RTEAssert(m_BGColorLayer.get(), "Terrain's background layer not instantiated before trying to load its data!");
 
-		if (m_FGColorLayer->IsFileData() && m_BGColorLayer->IsFileData()) {
+		if (m_FGColorLayer->IsLoadedFromDisk() && m_BGColorLayer->IsLoadedFromDisk()) {
 			m_FGColorLayer->LoadData();
 			m_BGColorLayer->LoadData();
 		} else {
@@ -243,10 +243,10 @@ namespace RTE {
 			TexturizeTerrain();
 
 			for (const TerrainFrosting *terrainFrosting : m_TerrainFrostings) {
-				terrainFrosting->DrawToTerrain(this);
+				terrainFrosting->FrostTerrain(this);
 			}
 			for (TerrainDebris *terrainDebris : m_TerrainDebris) {
-				terrainDebris->PlaceOnTerrain(this);
+				terrainDebris->ScatterOnTerrain(this);
 			}
 			for (TerrainObject *terrainObject : m_TerrainObjects) {
 				terrainObject->PlaceOnTerrain(this);
@@ -393,7 +393,6 @@ namespace RTE {
 				int terrX = pos.GetFloorIntX() - (tempBitmap->w / 2) + testX;
 				int terrY = pos.GetFloorIntY() - (tempBitmap->h / 2) + testY;
 
-				// Make sure we're checking within bounds
 				if (terrX < 0) {
 					if (m_WrapX) {
 						while (terrX < 0) {

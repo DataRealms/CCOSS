@@ -14,7 +14,7 @@ namespace RTE {
 		m_BitmapFile.Reset();
 		m_MainBitmap = nullptr;
 		m_MainBitmapOwned = false;
-		m_DrawTrans = true;
+		m_DrawMasked = true;
 		m_WrapX = true;
 		m_WrapY = true;
 		m_OriginOffset.Reset();
@@ -28,10 +28,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SceneLayer::Create(const ContentFile &bitmapFile, bool drawTrans, const Vector &offset, bool wrapX, bool wrapY, const Vector &scrollInfo) {
+	int SceneLayer::Create(const ContentFile &bitmapFile, bool drawMasked, const Vector &offset, bool wrapX, bool wrapY, const Vector &scrollInfo) {
 		m_BitmapFile = bitmapFile;
 		m_MainBitmap = m_BitmapFile.GetAsBitmap();
-		Create(m_MainBitmap, drawTrans, offset, wrapX, wrapY, scrollInfo);
+		Create(m_MainBitmap, drawMasked, offset, wrapX, wrapY, scrollInfo);
 		m_MainBitmapOwned = false;
 
 		return 0;
@@ -39,13 +39,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SceneLayer::Create(BITMAP *bitmap, bool drawTrans, const Vector &offset, bool wrapX, bool wrapY, const Vector &scrollInfo) {
+	int SceneLayer::Create(BITMAP *bitmap, bool drawMasked, const Vector &offset, bool wrapX, bool wrapY, const Vector &scrollInfo) {
 		m_MainBitmap = bitmap;
 		RTEAssert(m_MainBitmap, "Null bitmap passed in when creating SceneLayer");
 
 		m_MainBitmapOwned = true;
 
-		m_DrawTrans = drawTrans;
+		m_DrawMasked = drawMasked;
 		m_Offset = offset;
 		m_WrapX = wrapX;
 		m_WrapY = wrapY;
@@ -62,7 +62,7 @@ namespace RTE {
 		Entity::Create(reference);
 
 		m_BitmapFile = reference.m_BitmapFile;
-		m_DrawTrans = reference.m_DrawTrans;
+		m_DrawMasked = reference.m_DrawMasked;
 		m_WrapX = reference.m_WrapX;
 		m_WrapY = reference.m_WrapY;
 		m_OriginOffset = reference.m_OriginOffset;
@@ -166,7 +166,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SceneLayer::LoadData() {
-		// Re-load directly from disk each time; don't do any caching of these bitmaps.
+		// Load from disk and take ownership. Don't cache because the bitmap will be modified.
 		m_MainBitmap = m_BitmapFile.GetAsBitmap(COLORCONV_NONE, false);
 		m_MainBitmapOwned = true;
 		InitScrollRatios();
@@ -359,7 +359,7 @@ namespace RTE {
 
 			for (int i = 0; i < 2; ++i) {
 				for (int j = 0; j < 2; ++j) {
-					if (m_DrawTrans) {
+					if (m_DrawMasked) {
 						masked_blit(m_MainBitmap, targetBitmap, sourcePosX.at(j), sourcePosY.at(i), destPosX.at(j), destPosY.at(i), sourceWidth.at(j), sourceHeight.at(i));
 					} else {
 						blit(m_MainBitmap, targetBitmap, sourcePosX.at(j), sourcePosY.at(i), destPosX.at(j), destPosY.at(i), sourceWidth.at(j), sourceHeight.at(i));
@@ -374,7 +374,7 @@ namespace RTE {
 
 			for (int i = 0; i < 2; ++i) {
 				for (int j = 0; j < 2; ++j) {
-					if (m_DrawTrans) {
+					if (m_DrawMasked) {
 						masked_stretch_blit(m_MainBitmap, targetBitmap, 0, 0, sourceWidth.at(j), sourceHeight.at(i), destPosX.at(j), destPosY.at(i), sourceWidth.at(j) * m_ScaleFactor.GetFloorIntX() + 1, sourceHeight.at(i) * m_ScaleFactor.GetFloorIntY() + 1);
 					} else {
 						stretch_blit(m_MainBitmap, targetBitmap, 0, 0, sourceWidth.at(j), sourceHeight.at(i), destPosX.at(j), destPosY.at(i), sourceWidth.at(j) * m_ScaleFactor.GetFloorIntX() + 1, sourceHeight.at(i) * m_ScaleFactor.GetFloorIntY() + 1);
@@ -399,13 +399,13 @@ namespace RTE {
 				int destY = targetBox.GetCorner().GetFloorIntY() + tiledOffsetY - m_Offset.GetFloorIntY();
 
 				if (!drawScaled) {
-					if (m_DrawTrans) {
+					if (m_DrawMasked) {
 						masked_blit(m_MainBitmap, targetBitmap, 0, 0, destX, destY, bitmapWidth, bitmapHeight);
 					} else {
 						blit(m_MainBitmap, targetBitmap, 0, 0, destX, destY, bitmapWidth, bitmapHeight);
 					}
 				} else {
-					if (m_DrawTrans) {
+					if (m_DrawMasked) {
 						masked_stretch_blit(m_MainBitmap, targetBitmap, 0, 0, m_MainBitmap->w, m_MainBitmap->h, destX, destY, bitmapWidth, bitmapHeight);
 					} else {
 						stretch_blit(m_MainBitmap, targetBitmap, 0, 0, m_MainBitmap->w, m_MainBitmap->h, destX, destY, bitmapWidth, bitmapHeight);

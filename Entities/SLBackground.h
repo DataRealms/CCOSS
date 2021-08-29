@@ -53,27 +53,27 @@ namespace RTE {
 
 #pragma region Getters and Setters
 		/// <summary>
-		/// If true, then the frame will not be changed automatically during update
+		/// Gets whether this SLBackground's animation is handled manually/externally.
 		/// </summary>
-		/// <returns>Whether or not the SLBackground's Frame will change automatically during update.</returns>
+		/// <returns>Whether this SLBackground's animation is handled manually/externally. If true, animation will not be handled during Update().</returns>
 		bool IsAnimatedManually() const { return m_IsAnimatedManually; }
 
 		/// <summary>
-		/// Sets whether this SLBackground is animated manually.
+		/// Sets whether this SLBackground is animated manually/externally.
 		/// </summary>
-		/// <param name="isAnimatedManually">Whether or not to animate manually.</param>
+		/// <param name="isAnimatedManually">Whether this SLBackground is animated manually/externally and should skip animation handling during Update().</param>
 		void SetAnimatedManually(bool isAnimatedManually) { m_IsAnimatedManually = isAnimatedManually; }
 
 		/// <summary>
-		/// Gets the current frame this SLBackground is showing.
+		/// Gets the frame number of this SLBackground that is currently set to be drawn.
 		/// </summary>
-		/// <returns>The frame that is currently showing.</returns>
+		/// <returns>The frame number that is currently set to be drawn.</returns>
 		int GetFrame() const { return m_Frame; }
 
 		/// <summary>
-		/// Sets frame this SLBackground is supposed to show.
+		/// Sets frame number that this SLBackground will draw.
 		/// </summary>
-		/// <param name="newFrame">The frame that is supposed to be shown.</param>
+		/// <param name="newFrame">The frame number that is supposed to be drawn.</param>
 		void SetFrame(int newFrame) { m_Frame = std::clamp(newFrame, 0, m_FrameCount - 1); }
 
 		/// <summary>
@@ -89,19 +89,19 @@ namespace RTE {
 		void SetSpriteAnimMode(SpriteAnimMode newAnimMode = SpriteAnimMode::NOANIM) { m_SpriteAnimMode = std::clamp(newAnimMode, SpriteAnimMode::NOANIM, SpriteAnimMode::ALWAYSPINGPONG); }
 
 		/// <summary>
-		/// Gets animation duration of this SLBackground.
+		/// Gets the time it takes to complete a full animation cycle of this SLBackground.
 		/// </summary>
-		/// <returns>The current animation duration, in milliseconds.</returns>
+		/// <returns>The animation cycle duration, in milliseconds.</returns>
 		int GetSpriteAnimDuration() const { return m_SpriteAnimDuration; }
 
 		/// <summary>
-		/// Sets animation duration of this SLBackground.
+		/// Sets the time it takes to complete a full animation cycle of this SLBackground.
 		/// </summary>
-		/// <param name="newDuration">The new animation duration, in milliseconds.</param>
+		/// <param name="newDuration">The new animation cycle duration, in milliseconds.</param>
 		void SetSpriteAnimDuration(int newDuration) { m_SpriteAnimDuration = newDuration; }
 
 		/// <summary>
-		/// Gets whether this has auto-scrolling enabled and meets the requirements to actually auto-scroll.
+		/// Gets whether this SLBackground has auto-scrolling enabled and meets the requirements to actually auto-scroll.
 		/// </summary>
 		/// <returns>Whether this has auto-scrolling enabled and meets the requirements to actually auto-scroll.</returns>
 		bool IsAutoScrolling() const { return (m_WrapX && m_AutoScrollX) || (m_WrapY && m_AutoScrollY); }
@@ -109,25 +109,25 @@ namespace RTE {
 		/// <summary>
 		/// Gets whether auto-scrolling is enabled on the X axis.
 		/// </summary>
-		/// <returns>Whether auto-scrolling is enabled on the X axis.</returns>
+		/// <returns>Whether auto-scrolling is enabled on the X axis. This may be true even if auto-scrolling isn't actually happening due to not meeting requirements.</returns>
 		bool GetAutoScrollX() const { return m_AutoScrollX; }
 
 		/// <summary>
 		/// Sets whether auto-scrolling is enabled on the X axis.
 		/// </summary>
-		/// <param name="autoScroll">Whether auto-scrolling is enabled on the X axis or not.</param>
+		/// <param name="autoScroll">Whether auto-scrolling is enabled on the X axis or not. If requirements aren't met, this will not auto-scroll even if set true.</param>
 		void SetAutoScrollX(bool autoScroll) { m_AutoScrollX = autoScroll; }
 
 		/// <summary>
 		/// Gets whether auto-scrolling is enabled on the Y axis.
 		/// </summary>
-		/// <returns>Whether auto-scrolling is enabled on the Y axis.</returns>
+		/// <returns>Whether auto-scrolling is enabled on the Y axis. This may be true even if auto-scrolling isn't actually happening due to not meeting requirements.</returns>
 		bool GetAutoScrollY() const { return m_AutoScrollY; }
 
 		/// <summary>
 		/// Sets whether auto-scrolling is enabled on the Y axis.
 		/// </summary>
-		/// <param name="autoScroll">Whether auto-scrolling is enabled on the Y axis or not.</param>
+		/// <param name="autoScroll">Whether auto-scrolling is enabled on the Y axis or not. If requirements aren't met, this will not auto-scroll even if set true.</param>
 		void SetAutoScrollY(bool autoScroll) { m_AutoScrollY = autoScroll; }
 
 		/// <summary>
@@ -181,19 +181,20 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// 
+		/// Initializes the scale factors for all auto-scaling modes for this SLBackground, then sets the appropriate factor according to the auto-scaling setting.
+		/// Has to be done during Scene loading to correctly adjust the factors in cases the Scene does not vertically cover the player's whole screen.
 		/// </summary>
 		void InitScaleFactors();
 #pragma endregion
 
 #pragma region Virtual Override Methods
 		/// <summary>
-		/// Updates the state of this SLTerrain. Supposed to be done every frame.
+		/// Updates the state of this SLBackground.
 		/// </summary>
 		void Update() override;
 
 		/// <summary>
-		/// Draws this SLTerrain's foreground's current scrolled position to a bitmap.
+		/// Draws this SLBackground's current scrolled position to a bitmap.
 		/// </summary>
 		/// <param name="targetBitmap">The bitmap to draw to.</param>
 		/// <param name="targetBox">The box on the target bitmap to limit drawing to, with the corner of box being where the scroll position lines up.</param>
@@ -216,24 +217,24 @@ namespace RTE {
 
 		SpriteAnimMode m_SpriteAnimMode; //!< The mode in which this SLBackground is animating. See SpriteAnimMode enumeration.
 		int m_SpriteAnimDuration; //!< The duration it takes to complete a full animation cycle, in milliseconds.
-		bool m_SpriteAnimIsReversingFrames; //!< Keeps track of animation direction (mainly for ALWAYSPINGPONG), true is decreasing frame, false is increasing frame.
+		bool m_SpriteAnimIsReversingFrames; //!< Keeps track of animation direction (mainly for ALWAYSPINGPONG). True is decreasing frame, false is increasing frame.
 		Timer m_SpriteAnimTimer; //!< Timer to keep track of animation.
 
 		bool m_IsAnimatedManually; //!< Whether this SLBackground's animation is handled manually/externally and should not be handled during Update().
 
-		bool m_AutoScrollX; //!< Whether auto-scrolling is enabled on the X axis.
-		bool m_AutoScrollY; //!< Whether auto-scrolling is enabled on the Y axis.
-		Vector m_AutoScrollStep; //!< Vector with the number of pixels to advance per interval when auto-scrolling.
+		bool m_AutoScrollX; //!< Whether auto-scrolling is enabled on the X axis, but not whether auto-scrolling actually happens on this axis.
+		bool m_AutoScrollY; //!< Whether auto-scrolling is enabled on the Y axis, but not whether auto-scrolling actually happens on this axis.
+		Vector m_AutoScrollStep; //!< Vector with the number of pixels on each axis to advance per interval when auto-scrolling. Can be fractions of a pixel, but will not be visible until AutoScrollOffset adds up to a full pixel step.
 		int m_AutoScrollStepInterval; //!< The duration between auto-scroll steps, in milliseconds.
 		Timer m_AutoScrollStepTimer; //!< Timer to keep track of auto-scrolling steps.
-		Vector m_AutoScrollOffset; //!< The offset to adjust the this' main offset with when auto-scrolling to actually get the auto-scrolling effect, adjusted for wrapping.
+		Vector m_AutoScrollOffset; //!< The offset to adjust the main offset with when auto-scrolling to actually get the auto-scrolling effect, adjusted for wrapping.
 
 		int m_FillColorLeft; //!< Palette index to use for filling the gap between the left edge of the bitmap and the left edge of the screen/scene box in cases where the bitmap doesn't cover the whole target area.
 		int m_FillColorRight; //!< Palette index to use for filling the gap between the right edge of the bitmap and the right edge of the screen/scene box in cases where the bitmap doesn't cover the whole target area.
 		int m_FillColorUp; //!< Palette index to use for filling the gap between the upper edge of the bitmap and the upper edge of the screen/scene box in cases where the bitmap doesn't cover the whole target area.
 		int m_FillColorDown; //!< Palette index to use for filling the gap between the lower edge of the bitmap and the lower edge of the screen/scene box in cases where the bitmap doesn't cover the whole target area.
 
-		std::array<Vector, LayerAutoScaleMode::LayerAutoScaleModeCount> m_LayerScaleFactors; //!< Array of Vectors containing scale factors for each auto-scale mode.
+		std::array<Vector, LayerAutoScaleMode::LayerAutoScaleModeCount> m_LayerScaleFactors; //!< Array of Vectors containing scale factors for each auto-scaling mode.
 		bool m_IgnoreAutoScale; //!< Whether auto-scaling settings are ignored and the read-in scale factor is used instead.
 
 		/// <summary>

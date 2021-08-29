@@ -230,8 +230,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void TerrainDebris::PlaceOnTerrain(SLTerrain *terrain) {
-		RTEAssert(!m_Bitmaps.empty() && m_BitmapCount > 0, "No bitmaps loaded for terrain debris during TerrainDebris::PlaceOnTerrain!");
+	void TerrainDebris::ScatterOnTerrain(SLTerrain *terrain) {
+		RTEAssert(!m_Bitmaps.empty() && m_BitmapCount > 0, "No bitmaps loaded for terrain debris during TerrainDebris::ScatterOnTerrain!");
 
 		// Reference. Do not remove.
 		//acquire_bitmap(terrain->GetFGColorBitmap());

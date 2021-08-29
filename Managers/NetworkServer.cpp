@@ -687,7 +687,7 @@ namespace RTE {
 			layer->InitScrollRatios(true, player);
 			msgSceneSetup.BackgroundLayers[index].BitmapHash = layer->m_BitmapFile.GetHash();
 
-			msgSceneSetup.BackgroundLayers[index].DrawTrans = layer->m_DrawTrans;
+			msgSceneSetup.BackgroundLayers[index].DrawTrans = layer->m_DrawMasked;
 			msgSceneSetup.BackgroundLayers[index].OffsetX = layer->m_Offset.m_X;
 			msgSceneSetup.BackgroundLayers[index].OffsetY = layer->m_Offset.m_Y;
 

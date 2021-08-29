@@ -8,7 +8,7 @@ namespace RTE {
 	class SLTerrain;
 
 	/// <summary>
-	/// Specifies a 'frosting' layer of material on top of another material in the terrain. Gets applied upon loading the scene.
+	/// A layer of material on top of another material on the terrain.
 	/// </summary>
 	class TerrainFrosting : public Serializable {
 
@@ -19,7 +19,7 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a TerrainFrosting object in system memory. Create() should be called before using the object.
+		/// Constructor method used to instantiate a TerrainFrosting object in system memory and make it ready for use.
 		/// </summary>
 		TerrainFrosting() { Clear(); }
 #pragma endregion
@@ -33,11 +33,10 @@ namespace RTE {
 
 #pragma region Concrete Methods
 		/// <summary>
-		/// Draws this TerrainFrosting's graphical and material representations to the specified SLTerrain's respective layers.
+		/// Draws the frosting layer to the specified SLTerrain according to the read-in parameters.
 		/// </summary>
-		/// <param name="terrain">The SLTerrain to draw this TerrainFrosting to. Ownership is NOT transferred!</param>
-		/// <returns>Whether the object was successfully drawn to the terrain.</returns>
-		void DrawToTerrain(SLTerrain *terrain) const;
+		/// <param name="terrain">The SLTerrain to frost. Ownership is NOT transferred!</param>
+		void FrostTerrain(SLTerrain *terrain) const;
 #pragma endregion
 
 	private:

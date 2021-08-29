@@ -353,7 +353,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
-- Fixed `LifeVariation` logic rounding down to zero and giving particles infinite lifetime.
+- Fixed the logic for `Gib` and `Emission` property `LifeVariation` where it would round down to zero, giving particles infinite lifetime.
 
 - Fixed legs going bonkers for one frame when turning around.
 

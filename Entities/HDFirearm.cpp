@@ -827,6 +827,8 @@ void HDFirearm::Update()
 
                 Vector particlePos;
                 Vector particleVel;
+				int particleCountMax = pRound->ParticleCount();
+				float lifeVariation = pRound->GetLifeVariation();
 
                 // Launch all particles in round
                 MovableObject *pParticle = 0;
@@ -844,6 +846,9 @@ void HDFirearm::Update()
                     pParticle->SetVel(m_Vel + particleVel);
                     pParticle->SetRotAngle(particleVel.GetAbsRadAngle() + (m_HFlipped ? -c_PI : 0));
 					pParticle->SetHFlipped(m_HFlipped);
+					if (lifeVariation != 0 && pParticle->GetLifetime() != 0) {
+						pParticle->SetLifetime(std::max(static_cast<int>(pParticle->GetLifetime() * (1.0F + (particleCountMax > 1 ? lifeVariation - (lifeVariation * 2.0F * (pRound->ParticleCount() / particleCountMax)) : lifeVariation * RandomNormalNum()))), 1));
+					}
                     // F = m * a
                     totalFireForce += pParticle->GetMass() * pParticle->GetVel().GetMagnitude();
 

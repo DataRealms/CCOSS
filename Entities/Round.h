@@ -94,6 +94,12 @@ namespace RTE {
 		float GetSeparation() const { return m_Separation; }
 
 		/// <summary>
+		/// Gets the variation in lifetime of the fired particles in this Round.
+		/// </summary>
+		/// <returns>A float with the life variation scalar.</returns>
+		float GetLifeVariation() const { return m_LifeVariation; }
+
+		/// <summary>
 		/// Gets the shell casing preset of this Round. Ownership IS NOT transferred!
 		/// </summary>
 		/// <returns>A pointer to the shell casing preset, or 0 if this Round has no shell.</returns>
@@ -146,6 +152,7 @@ namespace RTE {
 		int m_ParticleCount; //!< How many particle copies there are in this Round.
 		float m_FireVel; //!< The velocity with which this Round is fired.
 		float m_Separation; //!< The range of separation between particles in this Round, in pixels.
+		float m_LifeVariation; //!< The random variation in life time of each fired particle, in percentage of their life time.
 
 		const MovableObject *m_Shell; //!< Shell particle MovableObject preset instance.
 		float m_ShellVel; //!< The maximum velocity with which this Round's shell/casing is launched.

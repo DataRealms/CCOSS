@@ -1025,7 +1025,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 				Vector gibVelocity(radius * scale + minVelocity, 0);
 				gibVelocity.RadRotate(randAngle + RandomNum(0.0F, spread) + static_cast<float>(i) * goldenAngle);
 				if (lifetime != 0) {
-					gibParticleClone->SetLifetime(static_cast<int>(std::max(static_cast<float>(lifetime) * (1.0F - lifeVariation * ((radius / maxRadius) * 0.75F + RandomNormalNum() * 0.25F)), 1.0F)));
+					gibParticleClone->SetLifetime(std::max(static_cast<int>(static_cast<float>(lifetime) * (1.0F - lifeVariation * ((radius / maxRadius) * 0.75F + RandomNormalNum() * 0.25F))), 1));
 				}
 				gibParticleClone->SetRotAngle(gibVelocity.GetAbsRadAngle() + (m_HFlipped ? c_PI : 0));
 				gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.35F) + (gibParticleClone->GetAngularVel() * 0.65F / mass) * RandomNum());
@@ -1041,7 +1041,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 				if (i > 0) { gibParticleClone = dynamic_cast<MovableObject *>(gibSettingsObject.GetParticlePreset()->Clone()); }
 
 				if (gibParticleClone->GetLifetime() != 0) {
-					gibParticleClone->SetLifetime(static_cast<int>(static_cast<float>(gibParticleClone->GetLifetime()) * (1.0F + (lifeVariation * RandomNormalNum()))));
+					gibParticleClone->SetLifetime(std::max(static_cast<int>(static_cast<float>(gibParticleClone->GetLifetime()) * (1.0F + (lifeVariation * RandomNormalNum()))), 1));
 				}
 
 				gibParticleClone->SetRotAngle(GetRotAngle() + gibParticleClone->GetRotAngle());

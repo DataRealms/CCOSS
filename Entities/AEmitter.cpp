@@ -522,8 +522,7 @@ void AEmitter::Update()
 					pParticle->SetRotAngle(emitVel.GetAbsRadAngle() + (m_HFlipped ? -c_PI : 0));
 					pParticle->SetHFlipped(m_HFlipped);
 
-                    if (pParticle->GetLifetime() != 0)
-                        pParticle->SetLifetime(pParticle->GetLifetime() * (1.0F + ((*eItr)->GetLifeVariation() * RandomNormalNum())));
+					if (pParticle->GetLifetime() != 0) { pParticle->SetLifetime(std::max(static_cast<int>(pParticle->GetLifetime() * (1.0F + ((*eItr)->GetLifeVariation() * RandomNormalNum()))), 1)); }
                     pParticle->SetTeam(m_Team);
                     pParticle->SetIgnoresTeamHits(true);
 

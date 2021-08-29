@@ -208,6 +208,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `HDFirearm` reload progress now shows up as a HUD element.
 
+- New `Round` INI property `LifeVariation` which can be used to randomize the `Lifetime` of shot particles.
+
 ### Changed
 
 - Changed `MOSprite` property `SpriteAnimMode` `Enum` `LOOPWHENMOVING` to `LOOPWHENACTIVE` as it also describes active devices.

@@ -29,10 +29,8 @@ namespace RTE {
 
 	int TerrainDebris::Create() {
 		Entity::Create();
-
 		m_DebrisFile.GetAsAnimation(m_Bitmaps, m_BitmapCount);
 		RTEAssert(!m_Bitmaps.empty() && m_Bitmaps.at(0), "Failed to load debris bitmaps during TerrainDebris::Create!");
-
 		return 0;
 	}
 
@@ -125,11 +123,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool TerrainDebris::GetPiecePlacementPosition(SLTerrain *terrain, Box &buriedCheckBox) const {
+	bool TerrainDebris::GetPiecePlacementPosition(SLTerrain *terrain, Box &positionCheckBox) const {
 		BITMAP *matBitmap = terrain->GetMaterialBitmap();
 		int posX = RandomNum(0, matBitmap->w);
 		int depth = RandomNum(m_MinDepth, m_MaxDepth);
-		int buriedDepthOffset = m_OnlyBuried ? static_cast<int>(buriedCheckBox.GetHeight() * 0.6F) : 0;
+		int buriedDepthOffset = m_OnlyBuried ? static_cast<int>(positionCheckBox.GetHeight() * 0.6F) : 0;
 		int prevMaterialCheckPixel = -1;
 
 		bool scanForOverhang = m_DebrisPlacementMode == DebrisPlacementModes::OnOverhangOnly || m_DebrisPlacementMode == DebrisPlacementModes::OnCavityOverhangOnly || m_DebrisPlacementMode == DebrisPlacementModes::OnOverhangAndCavityOverhang;
@@ -147,8 +145,8 @@ namespace RTE {
 					if (MaterialPixelIsValidTarget(materialCheckPixel, prevMaterialCheckPixel)) {
 						surfacePosY += (depth + buriedDepthOffset);
 						overhangPosY -= (depth + buriedDepthOffset);
-						buriedCheckBox.SetCenter(Vector(static_cast<float>(posX), static_cast<float>(scanForOverhang ? overhangPosY : surfacePosY)));
-						if (!m_OnlyBuried || terrain->IsBoxBuried(buriedCheckBox)) {
+						positionCheckBox.SetCenter(Vector(static_cast<float>(posX), static_cast<float>(scanForOverhang ? overhangPosY : surfacePosY)));
+						if (!m_OnlyBuried || terrain->IsBoxBuried(positionCheckBox)) {
 							return true;
 						}
 					}
@@ -196,7 +194,7 @@ namespace RTE {
 		BITMAP *tempDrawBitmap = create_bitmap_ex(8, dimensions, dimensions);
 		clear_bitmap(tempDrawBitmap);
 
-		// Offset the original bitmap on the temp bitmap so it's centered, otherwise can clip if rotated or flipped.
+		// Offset the original bitmap on the temp bitmap so it's centered, otherwise will be positioned incorrectly and can clip if rotated or flipped.
 		int offsetX = (bitmapToDraw->w < dimensions) ? (dimensions - bitmapToDraw->w) / 2 : 0;
 		int offsetY = (bitmapToDraw->h < dimensions) ? (dimensions - bitmapToDraw->h) / 2 : 0;
 		blit(bitmapToDraw, tempDrawBitmap, 0, 0, offsetX, offsetY, bitmapToDraw->w, bitmapToDraw->h);
@@ -240,11 +238,10 @@ namespace RTE {
 		int possiblePieceToPlaceCount = static_cast<int>((static_cast<float>(terrain->GetMaterialBitmap()->w) * c_MPP) * m_Density);
 		for (int piece = 0; piece < possiblePieceToPlaceCount; ++piece) {
 			int pieceBitmapIndex = RandomNum(0, m_BitmapCount - 1);
-			RTEAssert(pieceBitmapIndex >= 0 && pieceBitmapIndex < m_BitmapCount, "Bitmap index was out of bounds during TerrainDebris::PlaceOnTerrain!");
-			Box buriedCheckBox(Vector(), static_cast<float>(m_Bitmaps.at(pieceBitmapIndex)->w), static_cast<float>(m_Bitmaps.at(pieceBitmapIndex)->h));
-			if (GetPiecePlacementPosition(terrain, buriedCheckBox)) { DrawToTerrain(terrain, m_Bitmaps.at(pieceBitmapIndex), buriedCheckBox.GetCorner()); }
+			RTEAssert(pieceBitmapIndex >= 0 && pieceBitmapIndex < m_BitmapCount, "Bitmap index was out of bounds during TerrainDebris::ScatterOnTerrain!");
+			Box positionCheckBox(Vector(), static_cast<float>(m_Bitmaps.at(pieceBitmapIndex)->w), static_cast<float>(m_Bitmaps.at(pieceBitmapIndex)->h));
+			if (GetPiecePlacementPosition(terrain, positionCheckBox)) { DrawToTerrain(terrain, m_Bitmaps.at(pieceBitmapIndex), positionCheckBox.GetCorner()); }
 		}
-
 		// Reference. Do not remove.
 		//release_bitmap(terrain->GetMaterialBitmap());
 		//release_bitmap(terrain->GetFGColorBitmap());

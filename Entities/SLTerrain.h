@@ -166,7 +166,7 @@ namespace RTE {
 		/// <param name="pixelX">The X coordinate of the pixel to check.</param>
 		/// <param name="pixelY">The Y coordinate of the pixel to check.</param>
 		/// <returns>Whether the terrain pixel is of Air or Cavity material.</returns>
-		bool IsAirPixel(const int pixelX, const int pixelY) const;
+		bool IsAirPixel(int pixelX, int pixelY) const;
 
 		/// <summary>
 		/// Checks whether a bounding box is completely buried in the terrain.
@@ -181,19 +181,8 @@ namespace RTE {
 		/// Gets a deque of unwrapped boxes which show the areas where the material layer has had objects applied to it since last call to ClearUpdatedMaterialAreas().
 		/// </summary>
 		/// <returns>Reference to the deque that has been filled with Boxes which are unwrapped and may be out of bounds of the scene!</returns>
-		std::deque<Box> & GetUpdatedMaterialAreas() { return m_UpdatedMateralAreas; }
-#pragma endregion
+		const std::deque<Box> & GetUpdatedMaterialAreas() const { return m_UpdatedMateralAreas; }
 
-#pragma region Object Placement Handling
-		/// <summary>
-		/// Draws a passed in Object's graphical and material representations to this Terrain's respective layers.
-		/// </summary>
-		/// <param name="entity">The Object to apply to this Terrain. Ownership is NOT transferred!</param>
-		/// <returns>Whether the object was successfully applied to the terrain.</returns>
-		bool PlaceObjectOnTerrain(Entity *entity);
-#pragma endregion
-
-#pragma region Concrete Methods
 		/// <summary>
 		/// Adds a notification that an area of the material terrain has been updated.
 		/// </summary>
@@ -201,21 +190,9 @@ namespace RTE {
 		void AddUpdatedMaterialArea(const Box &newArea) { m_UpdatedMateralAreas.emplace_back(newArea); }
 
 		/// <summary>
-		/// Takes a BITMAP and scans through the pixels on this terrain for pixels which overlap with it. Erases them from the terrain and can optionally generate MOPixels based on the erased or 'dislodged' terrain pixels.
+		/// Clears the list of updated areas in the material layer (main bitmap).
 		/// </summary>
-		/// <param name="sprite">A pointer to the source BITMAP whose silhouette will be used as a cookie-cutter on the terrain.</param>
-		/// <param name="pos">The position coordinates of the sprite.</param>
-		/// <param name="pivot">The pivot coordinate of the sprite.</param>
-		/// <param name="rotation">The sprite's current rotation in radians.</param>
-		/// <param name="scale">The sprite's current scale coefficient.</param>
-		/// <param name="makeMOPs">Whether to generate any MOPixels from the erased terrain pixels.</param>
-		/// <param name="skipMOP">How many pixels to skip making MOPixels from, between each that gets made. 0 means every pixel turns into an MOPixel.</param>
-		/// <param name="maxMOPs">The max number of MOPixels to make, if they are to be made.</param>
-		/// <returns>A deque filled with the MOPixels of the terrain that are now dislodged. This will be empty if makeMOPs is false. Note that ownership of all the MOPixels in the deque IS transferred! </returns>
-		std::deque<MOPixel *> EraseSilhouette(BITMAP *sprite, const Vector &pos, const Vector &pivot, const Matrix &rotation, float scale, bool makeMOPs = true, int skipMOP = 2, int maxMOPs = 150);
-
-		/// <summary>
-		/// </summary>
+		void ClearUpdatedMaterialAreas() { m_UpdatedMateralAreas.clear(); }
 
 		/// <summary>
 		/// Removes any color pixel in the color layer of this SLTerrain wherever there is an air material pixel in the material layer.
@@ -231,9 +208,18 @@ namespace RTE {
 		void CleanAirBox(const Box &box, bool wrapsX, bool wrapsY);
 
 		/// <summary>
-		/// Clears the list of updated areas in the material layer (main bitmap).
+		/// Takes a BITMAP and scans through the pixels on this terrain for pixels which overlap with it. Erases them from the terrain and can optionally generate MOPixels based on the erased or 'dislodged' terrain pixels.
 		/// </summary>
-		void ClearUpdatedAreas() { m_UpdatedMateralAreas.clear(); }
+		/// <param name="sprite">A pointer to the source BITMAP whose silhouette will be used as a cookie-cutter on the terrain.</param>
+		/// <param name="pos">The position coordinates of the sprite.</param>
+		/// <param name="pivot">The pivot coordinate of the sprite.</param>
+		/// <param name="rotation">The sprite's current rotation in radians.</param>
+		/// <param name="scale">The sprite's current scale coefficient.</param>
+		/// <param name="makeMOPs">Whether to generate any MOPixels from the erased terrain pixels.</param>
+		/// <param name="skipMOP">How many pixels to skip making MOPixels from, between each that gets made. 0 means every pixel turns into an MOPixel.</param>
+		/// <param name="maxMOPs">The max number of MOPixels to make, if they are to be made.</param>
+		/// <returns>A deque filled with the MOPixels of the terrain that are now dislodged. This will be empty if makeMOPs is false. Note that ownership of all the MOPixels in the deque IS transferred! </returns>
+		std::deque<MOPixel *> EraseSilhouette(BITMAP *sprite, const Vector &pos, const Vector &pivot, const Matrix &rotation, float scale, bool makeMOPs = true, int skipMOP = 2, int maxMOPs = 150);
 #pragma endregion
 
 #pragma region Virtual Override Methods
@@ -251,14 +237,14 @@ namespace RTE {
 		void Draw(BITMAP *targetBitmap, Box &targetBox, bool offsetNeedsScrollRatioAdjustment = false) override;
 #pragma endregion
 
-	protected:
+	private:
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		LayerType m_LayerToDraw; //!< The layer of this SLTerrain that should be drawn to the screen when Draw() is called. See LayerType enumeration.
-
 		std::unique_ptr<SceneLayer> m_FGColorLayer; //!< The foreground color layer of this SLTerrain.
 		std::unique_ptr<SceneLayer> m_BGColorLayer; //!< The background color layer of this SLTerrain.
+
+		LayerType m_LayerToDraw; //!< The layer of this SLTerrain that should be drawn to the screen when Draw() is called. See LayerType enumeration.
 
 		ContentFile m_DefaultBGTextureFile; //!< The background texture file that will be used to texturize Materials that have no defined background texture.
 
@@ -266,9 +252,7 @@ namespace RTE {
 		std::vector<TerrainDebris *> m_TerrainDebris; //!< The TerrainDebris that need to be  placed on this SLTerrain.
 		std::vector<TerrainObject *> m_TerrainObjects; //!< The TerrainObjects that need to be placed on this SLTerrain.
 
-		std::deque<Box> m_UpdatedMateralAreas; //!< List of areas of the material layer (main bitmap) which have been affected by the updating of new objects copied to it. These boxes are NOT wrapped, and can be out of bounds!
-
-	private:
+		std::deque<Box> m_UpdatedMateralAreas; //!< List of areas of the material layer (main bitmap) which have been affected by new objects copied to it. These boxes are NOT wrapped, and can be out of bounds!
 
 		/// <summary>
 		/// Applies Material textures to the foreground and background color layers, based on the loaded material layer (main bitmap).

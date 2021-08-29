@@ -210,7 +210,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SceneLayer::GetPixel(const int pixelX, const int pixelY) const {
+	int SceneLayer::GetPixel(int pixelX, int pixelY) const {
 		int posX = pixelX;
 		int posY = pixelY;
 		WrapPosition(posX, posY);
@@ -219,7 +219,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SceneLayer::SetPixel(const int pixelX, const int pixelY, const int materialID) const {
+	void SceneLayer::SetPixel(int pixelX, int pixelY, int materialID) const {
 		RTEAssert(m_MainBitmapOwned, "Trying to set a pixel of a SceneLayer's bitmap which isn't owned!");
 
 		int posX = pixelX;

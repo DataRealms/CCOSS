@@ -310,110 +310,6 @@ namespace RTE {
 				return entityAsMovableObject->DrawToTerrain(this);
 			} else if (TerrainObject *entityAsTerrainObject = dynamic_cast<TerrainObject *>(entity)) {
 				return entityAsTerrainObject->PlaceOnTerrain(this);
-			}
-		}
-		return false;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	// TODO: OPTIMIZE THIS, IT'S A TIME HOG. MAYBE JSUT STAMP THE OUTLINE AND SAMPLE SOME RANDOM PARTICLES?
-	std::deque<MOPixel *> SLTerrain::EraseSilhouette(BITMAP *sprite, const Vector &pos, const Vector &pivot, const Matrix &rotation, float scale, bool makeMOPs, int skipMOP, int maxMOPs) {
-		RTEAssert(sprite, "Null BITMAP passed to SLTerrain::EraseSilhouette");
-
-		std::deque<MOPixel *> MOPDeque;
-
-		// Find the maximum possible sized bitmap that the passed-in sprite will need
-		int maxWidth = static_cast<int>(static_cast<float>(sprite->w + std::abs(pivot.GetFloorIntX() - (sprite->w / 2))) * scale);
-		int maxHeight = static_cast<int>(static_cast<float>(sprite->h + std::abs(pivot.GetFloorIntY() - (sprite->h / 2))) * scale);
-		int maxDiameter = static_cast<int>(std::sqrt(static_cast<float>(maxWidth * maxWidth + maxHeight * maxHeight)) * 2.0F);
-		int skipCount = skipMOP;
-
-		BITMAP *tempBitmap = g_SceneMan.GetIntermediateBitmapForSettlingIntoTerrain(maxDiameter);
-		clear_bitmap(tempBitmap);
-		pivot_scaled_sprite(tempBitmap, sprite, tempBitmap->w / 2, tempBitmap->h / 2, pivot.GetFloorIntX(), pivot.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()), ftofix(scale));
-
-		// Do the test of intersection between color pixels of the test bitmap and non-air pixels of the terrain
-		// Generate and collect MOPixels that represent the terrain overlap and clear the same pixels out of the terrain
-		for (int testY = 0; testY < tempBitmap->h; ++testY) {
-			for (int testX = 0; testX < tempBitmap->w; ++testX) {
-				int terrX = pos.GetFloorIntX() - (tempBitmap->w / 2) + testX;
-				int terrY = pos.GetFloorIntY() - (tempBitmap->h / 2) + testY;
-
-				if (terrX < 0) {
-					if (m_WrapX) {
-						while (terrX < 0) {
-							terrX += m_MainBitmap->w;
-						}
-					} else {
-						continue;
-					}
-				}
-				if (terrY < 0) {
-					if (m_WrapY) {
-						while (terrY < 0) {
-							terrY += m_MainBitmap->h;
-						}
-					} else {
-						continue;
-					}
-				}
-				if (terrX >= m_MainBitmap->w) {
-					if (m_WrapX) {
-						terrX %= m_MainBitmap->w;
-					} else {
-						continue;
-					}
-				}
-				if (terrY >= m_MainBitmap->h) {
-					if (m_WrapY) {
-						terrY %= m_MainBitmap->h;
-					} else {
-						continue;
-					}
-				}
-
-				int matPixel = getpixel(m_MainBitmap, terrX, terrY);
-				int colorPixel = getpixel(m_FGColorLayer->GetBitmap(), terrX, terrY);
-
-				if (getpixel(tempBitmap, testX, testY) != ColorKeys::g_MaskColor) {
-					// Only add PixelMO if we're not due to skip any.
-					if (makeMOPs && matPixel != MaterialColorKeys::g_MaterialAir && colorPixel != ColorKeys::g_MaskColor && ++skipCount > skipMOP && MOPDeque.size() < maxMOPs) {
-						skipCount = 0;
-						const Material *sceneMat = g_SceneMan.GetMaterialFromID(matPixel);
-						const Material *spawnMat = sceneMat->GetSpawnMaterial() ? g_SceneMan.GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
-						// Create the MOPixel based off the Terrain data.
-						std::unique_ptr<MOPixel> terrainPixel = std::make_unique<MOPixel>(colorPixel, spawnMat->GetPixelDensity(), Vector(terrX, terrY), Vector(), new Atom(Vector(), spawnMat->GetIndex(), 0, colorPixel, 2), 0);
-						terrainPixel->SetToHitMOs(false);
-						MOPDeque.emplace_back(terrainPixel.release());
-					}
-
-					// Clear the terrain pixels.
-					if (matPixel != MaterialColorKeys::g_MaterialAir) { putpixel(m_MainBitmap, terrX, terrY, MaterialColorKeys::g_MaterialAir); }
-					if (colorPixel != ColorKeys::g_MaskColor) {
-						putpixel(m_FGColorLayer->GetBitmap(), terrX, terrY, ColorKeys::g_MaskColor);
-						g_SceneMan.RegisterTerrainChange(terrX, terrY, 1, 1, ColorKeys::g_MaskColor, false);
-					}
-				}
-			}
-		}
-
-		// Add a box to the updated areas list to show there's been change to the materials layer.
-		// TODO: improve fit/tightness of box here.
-		m_UpdatedMateralAreas.emplace_back(Box(pos - pivot, static_cast<float>(maxWidth), static_cast<float>(maxHeight)));
-
-		return MOPDeque;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void SLTerrain::ClearAllMaterial() {
-		clear_to_color(m_MainBitmap, ColorKeys::g_MaskColor);
-		clear_to_color(m_FGColorLayer->GetBitmap(), MaterialColorKeys::g_MaterialAir);
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void SLTerrain::CleanAir() {
 		// Reference. Do not remove.
 		//acquire_bitmap(m_MainBitmap);
@@ -470,9 +366,97 @@ namespace RTE {
 				}
 			}
 		}
+		return false;
 		// Reference. Do not remove.
 		//release_bitmap(m_MainBitmap);
 		//release_bitmap(m_FGColorLayer->GetBitmap());
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// TODO: OPTIMIZE THIS, IT'S A TIME HOG. MAYBE JSUT STAMP THE OUTLINE AND SAMPLE SOME RANDOM PARTICLES?
+	std::deque<MOPixel *> SLTerrain::EraseSilhouette(BITMAP *sprite, const Vector &pos, const Vector &pivot, const Matrix &rotation, float scale, bool makeMOPs, int skipMOP, int maxMOPs) {
+		RTEAssert(sprite, "Null BITMAP passed to SLTerrain::EraseSilhouette");
+
+		int maxWidth = static_cast<int>(static_cast<float>(sprite->w + std::abs(pivot.GetFloorIntX() - (sprite->w / 2))) * scale);
+		int maxHeight = static_cast<int>(static_cast<float>(sprite->h + std::abs(pivot.GetFloorIntY() - (sprite->h / 2))) * scale);
+		int maxDiameter = static_cast<int>(std::sqrt(static_cast<float>(maxWidth * maxWidth + maxHeight * maxHeight)) * 2.0F);
+		int skipCount = skipMOP;
+
+		BITMAP *tempBitmap = g_SceneMan.GetIntermediateBitmapForSettlingIntoTerrain(maxDiameter);
+		clear_bitmap(tempBitmap);
+		pivot_scaled_sprite(tempBitmap, sprite, tempBitmap->w / 2, tempBitmap->h / 2, pivot.GetFloorIntX(), pivot.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()), ftofix(scale));
+
+		std::deque<MOPixel *> dislodgedMOPixels;
+
+		// Test intersection between color pixels of the test bitmap and non-air pixels of the terrain, then generate and collect MOPixels that represent the terrain overlap and clear the same pixels out of the terrain.
+		for (int testY = 0; testY < tempBitmap->h; ++testY) {
+			for (int testX = 0; testX < tempBitmap->w; ++testX) {
+				int terrX = pos.GetFloorIntX() - (tempBitmap->w / 2) + testX;
+				int terrY = pos.GetFloorIntY() - (tempBitmap->h / 2) + testY;
+
+				if (terrX < 0) {
+					if (m_WrapX) {
+						while (terrX < 0) {
+							terrX += m_MainBitmap->w;
+						}
+					} else {
+						continue;
+					}
+				}
+				if (terrY < 0) {
+					if (m_WrapY) {
+						while (terrY < 0) {
+							terrY += m_MainBitmap->h;
+						}
+					} else {
+						continue;
+					}
+				}
+				if (terrX >= m_MainBitmap->w) {
+					if (m_WrapX) {
+						terrX %= m_MainBitmap->w;
+					} else {
+						continue;
+					}
+				}
+				if (terrY >= m_MainBitmap->h) {
+					if (m_WrapY) {
+						terrY %= m_MainBitmap->h;
+					} else {
+						continue;
+					}
+				}
+				int matPixel = getpixel(m_MainBitmap, terrX, terrY);
+				int colorPixel = getpixel(m_FGColorLayer->GetBitmap(), terrX, terrY);
+
+				if (getpixel(tempBitmap, testX, testY) != ColorKeys::g_MaskColor) {
+					// Only add PixelMO if we're not due to skip any.
+					if (makeMOPs && matPixel != MaterialColorKeys::g_MaterialAir && colorPixel != ColorKeys::g_MaskColor && ++skipCount > skipMOP && dislodgedMOPixels.size() < maxMOPs) {
+						skipCount = 0;
+						const Material *sceneMat = g_SceneMan.GetMaterialFromID(matPixel);
+						const Material *spawnMat = sceneMat->GetSpawnMaterial() ? g_SceneMan.GetMaterialFromID(sceneMat->GetSpawnMaterial()) : sceneMat;
+						// Create the MOPixel based off the Terrain data.
+						std::unique_ptr<Atom> terrainPixelAtom = std::make_unique<Atom>(Vector(), spawnMat->GetIndex(), nullptr, colorPixel, 2);
+						std::unique_ptr<MOPixel> terrainPixel = std::make_unique<MOPixel>(colorPixel, spawnMat->GetPixelDensity(), Vector(static_cast<float>(terrX), static_cast<float>(terrY)), Vector(), terrainPixelAtom.release(), 0);
+						terrainPixel->SetToHitMOs(false);
+						dislodgedMOPixels.emplace_back(terrainPixel.release());
+					}
+
+					// Clear the terrain pixels.
+					if (matPixel != MaterialColorKeys::g_MaterialAir) { putpixel(m_MainBitmap, terrX, terrY, MaterialColorKeys::g_MaterialAir); }
+					if (colorPixel != ColorKeys::g_MaskColor) {
+						putpixel(m_FGColorLayer->GetBitmap(), terrX, terrY, ColorKeys::g_MaskColor);
+						g_SceneMan.RegisterTerrainChange(terrX, terrY, 1, 1, ColorKeys::g_MaskColor, false);
+					}
+				}
+			}
+		}
+		// Add a box to the updated areas list to show there's been change to the materials layer.
+		// TODO: improve fit/tightness of box here.
+		m_UpdatedMateralAreas.emplace_back(Box(pos - pivot, static_cast<float>(maxWidth), static_cast<float>(maxHeight)));
+
+		return dislodgedMOPixels;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

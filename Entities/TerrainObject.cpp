@@ -25,10 +25,6 @@ namespace RTE {
 	int TerrainObject::Create() {
 		SceneObject::Create();
 
-		m_FGColorBitmap = m_FGColorFile.GetAsBitmap();
-		m_BGColorBitmap = m_BGColorFile.GetAsBitmap();
-		m_MaterialBitmap = m_MaterialFile.GetAsBitmap();
-
 		if (!m_OffsetDefined) {
 			int bitmapWidth = GetBitmapWidth();
 			int bitmapHeight = GetBitmapHeight();
@@ -64,10 +60,13 @@ namespace RTE {
 	int TerrainObject::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "FGColorFile") {
 			reader >> m_FGColorFile;
+			m_FGColorBitmap = m_FGColorFile.GetAsBitmap();
 		} else if (propName == "BGColorFile") {
 			reader >> m_BGColorFile;
+			m_BGColorBitmap = m_BGColorFile.GetAsBitmap();
 		} else if (propName == "MaterialFile") {
 			reader >> m_MaterialFile;
+			m_MaterialBitmap = m_MaterialFile.GetAsBitmap();
 		} else if (propName == "BitmapOffset") {
 			reader >> m_BitmapOffset;
 			m_OffsetDefined = true;
@@ -262,7 +261,7 @@ namespace RTE {
 		}
 		if (HasMaterialBitmap()) {
 			draw_sprite(terrainMatBitmap, m_MaterialBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY());
-			terrain->GetUpdatedMaterialAreas().emplace_back(Box(posOnScene, static_cast<float>(m_MaterialBitmap->w), static_cast<float>(m_MaterialBitmap->h)));
+			terrain->AddUpdatedMaterialArea(Box(posOnScene, static_cast<float>(m_MaterialBitmap->w), static_cast<float>(m_MaterialBitmap->h)));
 		}
 		if (HasBGColorBitmap()) {
 			draw_sprite(terrainBGBitmap, m_BGColorBitmap, posOnScene.GetFloorIntX(), posOnScene.GetFloorIntY());

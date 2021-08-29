@@ -42,6 +42,12 @@ namespace RTE {
 		m_BitmapFile.GetAsAnimation(m_Bitmaps, m_FrameCount);
 		m_MainBitmap = m_Bitmaps.at(0);
 
+		if (m_FrameCount > 1) {
+			// If animation mode is set to something other than ALWAYSLOOP but only has 2 frames, override it because it's pointless
+			if (m_FrameCount == 2 && m_SpriteAnimMode >= SpriteAnimMode::ALWAYSRANDOM) { m_SpriteAnimMode = SpriteAnimMode::ALWAYSLOOP; }
+		} else {
+			m_SpriteAnimMode = SpriteAnimMode::NOANIM;
+		}
 		// Sampled color at the edges of the layer that can be used to fill gap if the layer isn't large enough to cover a target bitmap.
 		if (!m_WrapX) {
 			m_FillColorLeft = _getpixel(m_MainBitmap, 0, m_MainBitmap->h / 2);
@@ -95,12 +101,6 @@ namespace RTE {
 		} else if (propName == "SpriteAnimMode") {
 			m_SpriteAnimMode = static_cast<SpriteAnimMode>(std::stoi(reader.ReadPropValue()));
 			if (m_SpriteAnimMode < SpriteAnimMode::NOANIM || m_SpriteAnimMode > SpriteAnimMode::ALWAYSPINGPONG) { reader.ReportError("Invalid SLBackground sprite animation mode!"); }
-			if (m_FrameCount > 1) {
-				// If animation mode is set to something other than ALWAYSLOOP but only has 2 frames, override it because it's pointless
-				if ((m_SpriteAnimMode == SpriteAnimMode::ALWAYSRANDOM || m_SpriteAnimMode == SpriteAnimMode::ALWAYSPINGPONG) && m_FrameCount == 2) { m_SpriteAnimMode = SpriteAnimMode::ALWAYSLOOP; }
-			} else {
-				m_SpriteAnimMode = SpriteAnimMode::NOANIM;
-			}
 		} else if (propName == "SpriteAnimDuration") {
 			reader >> m_SpriteAnimDuration;
 		} else if (propName == "IsAnimatedManually") {
@@ -159,7 +159,7 @@ namespace RTE {
 		if (!m_IgnoreAutoScale) {
 			m_LayerScaleFactors.at(LayerAutoScaleMode::AutoScaleOff) = m_ScaleFactor;
 
-			float fitScreenScaleFactor = 1;
+			float fitScreenScaleFactor = 1.0F;
 			if (g_SceneMan.GetSceneHeight() > g_FrameMan.GetPlayerScreenHeight()) {
 				fitScreenScaleFactor = std::clamp(static_cast<float>(g_FrameMan.GetPlayerScreenHeight()) / static_cast<float>(m_MainBitmap->h), 1.0F, 2.0F);
 			} else if (g_SceneMan.GetSceneHeight() > m_MainBitmap->h) {
@@ -187,20 +187,17 @@ namespace RTE {
 
 	void SLBackground::Update() {
 		if (!m_IsAnimatedManually && m_SpriteAnimMode != SpriteAnimMode::NOANIM) {
-			int frameTime = m_SpriteAnimDuration / m_FrameCount;
 			int prevFrame = m_Frame;
 
-			if (m_SpriteAnimTimer.GetElapsedSimTimeMS() > frameTime) {
+			if (m_SpriteAnimTimer.GetElapsedSimTimeMS() > (m_SpriteAnimDuration / m_FrameCount)) {
 				switch (m_SpriteAnimMode) {
 					case SpriteAnimMode::ALWAYSLOOP:
-						m_Frame = ((m_Frame + 1) % m_FrameCount);
-						m_SpriteAnimTimer.Reset();
+						m_Frame = (m_Frame + 1) % m_FrameCount;
 						break;
 					case SpriteAnimMode::ALWAYSRANDOM:
 						while (m_Frame == prevFrame) {
-							m_Frame = RandomNum<int>(0, m_FrameCount - 1);
+							m_Frame = RandomNum(0, m_FrameCount - 1);
 						}
-						m_SpriteAnimTimer.Reset();
 						break;
 					case SpriteAnimMode::ALWAYSPINGPONG:
 						if (m_Frame == m_FrameCount - 1) {
@@ -209,11 +206,11 @@ namespace RTE {
 							m_SpriteAnimIsReversingFrames = false;
 						}
 						m_SpriteAnimIsReversingFrames ? m_Frame-- : m_Frame++;
-						m_SpriteAnimTimer.Reset();
 						break;
 					default:
 						break;
 				}
+				m_SpriteAnimTimer.Reset();
 			}
 		}
 		m_MainBitmap = m_Bitmaps.at(m_Frame);

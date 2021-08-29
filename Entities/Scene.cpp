@@ -2878,7 +2878,7 @@ void Scene::ResetPathFinding()
 void Scene::UpdatePathFinding()
 {
     m_pPathFinder->RecalculateAreaCosts(m_pTerrain->GetUpdatedMaterialAreas());
-    m_pTerrain->ClearUpdatedAreas();
+    m_pTerrain->ClearUpdatedMaterialAreas();
     m_PartialPathUpdateTimer.Reset();
     m_PathfindingUpdated = true;
 }

@@ -158,25 +158,25 @@ namespace RTE {
 		/// Gets the auto-scroll step (pixels to advance per interval) value on the X axis.
 		/// </summary>
 		/// <returns>The auto-scroll step value on the X axis.</returns>
-		int GetAutoScrollStepX() const { return m_AutoScrollStep.GetFloorIntX(); }
+		float GetAutoScrollStepX() const { return m_AutoScrollStep.GetX(); }
 
 		/// <summary>
 		/// Sets the auto-scroll step (pixels to advance per interval) value on the X axis.
 		/// </summary>
 		/// <param name="newStepX">The new auto-scroll step value on the X axis.</param>
-		void SetAutoScrollStepX(int newStepX) { m_AutoScrollStep.SetX(static_cast<float>(newStepX)); }
+		void SetAutoScrollStepX(float newStepX) { m_AutoScrollStep.SetX(newStepX); }
 
 		/// <summary>
 		/// Gets the auto-scroll step (pixels to advance per interval) value on the Y axis.
 		/// </summary>
 		/// <returns>The auto-scroll step value on the Y axis.</returns>
-		int GetAutoScrollStepY() const { return m_AutoScrollStep.GetFloorIntY(); }
+		float GetAutoScrollStepY() const { return m_AutoScrollStep.GetY(); }
 
 		/// <summary>
 		/// Sets the auto-scroll step (pixels to advance per interval) value on the Y axis.
 		/// </summary>
 		/// <param name="newStepY">The new auto-scroll step value on the Y axis.</param>
-		void SetAutoScrollStepY(int newStepY) { m_AutoScrollStep.SetY(static_cast<float>(newStepY)); }
+		void SetAutoScrollStepY(float newStepY) { m_AutoScrollStep.SetY(newStepY); }
 #pragma endregion
 
 #pragma region Concrete Methods

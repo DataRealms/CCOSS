@@ -24,13 +24,6 @@ namespace RTE {
 		TerrainFrosting() { Clear(); }
 #pragma endregion
 
-#pragma region Destruction
-		/// <summary>
-		/// Resets the entire TerrainFrosting, including its inherited members, to their default settings or values.
-		/// </summary>
-		void Reset() override { Clear(); }
-#pragma endregion
-
 #pragma region Concrete Methods
 		/// <summary>
 		/// Draws the frosting layer to the specified SLTerrain according to the read-in parameters.

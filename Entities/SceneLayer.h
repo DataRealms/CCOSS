@@ -124,7 +124,6 @@ namespace RTE {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		size_t GetBitmapHash() const { return m_BitmapFile.GetHash(); }
 
 		/// <summary>
 		/// Gets the scroll offset.

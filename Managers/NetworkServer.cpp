@@ -685,7 +685,7 @@ namespace RTE {
 		for (SLBackground * &layer : sceneLayers) {
 			// Recalculate layers internal values for this player
 			layer->InitScrollRatios(true, player);
-			msgSceneSetup.BackgroundLayers[index].BitmapHash = layer->GetBitmapHash();
+			msgSceneSetup.BackgroundLayers[index].BitmapHash = layer->m_BitmapFile.GetHash();
 
 			msgSceneSetup.BackgroundLayers[index].DrawTrans = layer->m_DrawTrans;
 			msgSceneSetup.BackgroundLayers[index].OffsetX = layer->m_Offset.m_X;

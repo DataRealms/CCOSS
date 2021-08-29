@@ -214,9 +214,7 @@ namespace RTE {
 		std::deque<MOPixel *> EraseSilhouette(BITMAP *sprite, const Vector &pos, const Vector &pivot, const Matrix &rotation, float scale, bool makeMOPs = true, int skipMOP = 2, int maxMOPs = 150);
 
 		/// <summary>
-		/// Removes any FG and material pixels completely form the terrain. For the editor mostly.
 		/// </summary>
-		void ClearAllMaterial();
 
 		/// <summary>
 		/// Removes any color pixel in the color layer of this SLTerrain wherever there is an air material pixel in the material layer.

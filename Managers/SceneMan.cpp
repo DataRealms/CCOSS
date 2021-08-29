@@ -334,15 +334,7 @@ int SceneMan::LoadScene(std::string sceneName, bool placeObjects, bool placeUnit
 
 int SceneMan::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "AddScene")
-        g_PresetMan.GetEntityPreset(reader);
-    else if (propName == "AddTerrain")
-        g_PresetMan.GetEntityPreset(reader);
-    else if (propName == "AddTerrainDebris")
-        g_PresetMan.GetEntityPreset(reader);
-    else if (propName == "AddTerrainObject")
-        g_PresetMan.GetEntityPreset(reader);
-    else if (propName == "AddMaterial")
+    if (propName == "AddMaterial")
     {
         // Get this before reading Object, since if it's the last one in its datafile, the stream will show the parent file instead
         string objectFilePath = reader.GetCurrentFilePath();

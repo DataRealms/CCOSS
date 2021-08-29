@@ -3243,7 +3243,6 @@ void AHuman::Update()
 			}
 			m_EquipHUDTimer.Reset();
 			m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
-			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 			m_PieNeedsUpdate = true;
 			m_SharpAimProgress = 0;
         }

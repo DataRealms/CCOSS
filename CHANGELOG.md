@@ -353,6 +353,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
+- Fixed `LifeVariation` logic rounding down to zero and giving particles infinite lifetime.
+
 - Fixed legs going bonkers for one frame when turning around.
 
 - `HFlipped` is now properly assigned to emissions, gibs and particles that are shot from a `HDFirearm`'s `Round` when the source object is also flipped.

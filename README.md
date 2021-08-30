@@ -62,7 +62,6 @@ The Linux build uses the meson build system, and builds against system libraries
 * `libX11`
 * `meson>=0.55` (If your distro doesn't have a recent version of meson, use the pip version instead)
 * `boost>=1.55`
-* `xorg-misc-fonts` (probably ArchLinux only)
 
 ## Building:
 
@@ -80,7 +79,7 @@ If you want to install the game to system directories go to the [installing](#in
 
 6. `ninja`
 
-If you want to change the buildtype aftwerwards, you can use `meson configure --buildtype {release or debug}` in the build directory or create a secondary build directory as in Step 4. There are also additional build options documented in the [wiki](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Meson-build-options) as well as through running `meson configure` in the build directory.
+If you want to change the buildtype afterwards, you can use `meson configure --buildtype {release or debug}` in the build directory or create a secondary build directory as in Step 4. There are also additional build options documented in the [wiki](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Meson-build-options) as well as through running `meson configure` in the build directory.
 
 ## Installing:
 
@@ -105,7 +104,7 @@ This will install Cortex Command to your system. To uninstall run `sudo meson un
 ## Installing Dependencies
 
 **Arch Linux:**  
-`# pacman -S allegro4 boost flac luajit minizip lz4 libpng libx11 meson ninja xorg-fonts-misc base-devel`
+`# pacman -S allegro4 boost flac luajit minizip lz4 libpng libx11 meson ninja base-devel`
 
 **Ubuntu >=20.04:**  
 `# apt-get install build-essential libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  

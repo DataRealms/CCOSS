@@ -304,12 +304,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool SLTerrain::PlaceObjectOnTerrain(Entity *entity) {
-		if (entity) {
-			if (MovableObject *entityAsMovableObject = dynamic_cast<MovableObject *>(entity)) {
-				return entityAsMovableObject->DrawToTerrain(this);
-			} else if (TerrainObject *entityAsTerrainObject = dynamic_cast<TerrainObject *>(entity)) {
-				return entityAsTerrainObject->PlaceOnTerrain(this);
 	void SLTerrain::CleanAir() {
 		// Reference. Do not remove.
 		//acquire_bitmap(m_MainBitmap);
@@ -366,7 +360,6 @@ namespace RTE {
 				}
 			}
 		}
-		return false;
 		// Reference. Do not remove.
 		//release_bitmap(m_MainBitmap);
 		//release_bitmap(m_FGColorLayer->GetBitmap());

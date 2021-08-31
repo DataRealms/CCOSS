@@ -3234,61 +3234,25 @@ int SceneMan::WrapBox(const Box &wrapBox, list<Box> &outputList)
     return addedTimes;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddTerrainObject
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Takes TerrainObject and applies it to the terrain
-//					OWNERSHIP NOT TRANSFERED!
-
-bool SceneMan::AddTerrainObject(TerrainObject *pObject)
-{
-    if (!pObject)
-        return false;
-
-    bool result =  m_pCurrentScene->GetTerrain()->PlaceObjectOnTerrain(pObject);
-	if (result)
-	{
-		Vector corner = pObject->GetPos() + pObject->GetBitmapOffset();
-		Box box = Box(corner, pObject->GetBitmapWidth(), pObject->GetBitmapHeight());
-		
-		m_pCurrentScene->GetTerrain()->CleanAirBox(box, GetScene()->WrapsX(), GetScene()->WrapsY());
+bool SceneMan::AddSceneObject(SceneObject *sceneObject) {
+	bool result = false;
+	if (sceneObject) {
+		if (MovableObject *sceneObjectAsMovableObject = dynamic_cast<MovableObject *>(sceneObject)) {
+			return g_MovableMan.AddMO(sceneObjectAsMovableObject);
+		} else if (TerrainObject *sceneObjectAsTerrainObject = dynamic_cast<TerrainObject *>(sceneObject)) {
+			bool result = sceneObjectAsTerrainObject->PlaceOnTerrain(m_pCurrentScene->GetTerrain());
+			if (result) {
+				Box airBox(sceneObjectAsTerrainObject->GetPos() + sceneObjectAsTerrainObject->GetBitmapOffset(), static_cast<float>(sceneObjectAsTerrainObject->GetBitmapWidth()), static_cast<float>(sceneObjectAsTerrainObject->GetBitmapHeight()));
+				m_pCurrentScene->GetTerrain()->CleanAirBox(airBox, GetScene()->WrapsX(), GetScene()->WrapsY());
+			}
+		}
 	}
+	delete sceneObject;
+	sceneObject = nullptr;
 	return result;
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          AddSceneObject
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Takes any scene object and adds it to the scene in the appropriate way.
-//                  If it's a TerrainObject, then it gets applied to the terrain, if it's
-//                  an MO, it gets added to the correct type group in MovableMan.
-
-bool SceneMan::AddSceneObject(SceneObject *pObject)
-{
-    if (!pObject)
-        return false;
-
-    // Find out what kind it is and apply accordingly
-    if (MovableObject *pMO = dynamic_cast<MovableObject *>(pObject))
-    {
-        // No need to clean up here, AddMO takes ownership and takes care of it in either case
-        return g_MovableMan.AddMO(pMO);
-    }
-    else if (TerrainObject *pTO = dynamic_cast<TerrainObject *>(pObject))
-    {
-        bool result = m_pCurrentScene->GetTerrain()->PlaceObjectOnTerrain(pTO);
-        // Have to clean up the added object here, since PlaceObjectOnTerrain doesn't take ownership
-        delete pTO;
-        pObject = pTO = 0;
-        return result;
-    }
-
-    delete pObject;
-    pObject = 0;
-    return false;
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update

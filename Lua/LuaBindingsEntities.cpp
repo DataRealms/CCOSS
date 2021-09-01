@@ -762,6 +762,7 @@ namespace RTE {
 		.property("HFlipped", &MOSprite::IsHFlipped, &MOSprite::SetHFlipped)
 		.property("FlipFactor", &MOSprite::GetFlipFactor)
 		.property("RotAngle", &MOSprite::GetRotAngle, &MOSprite::SetRotAngle)
+		.property("PrevRotAngle", &MOSprite::GetPrevRotAngle)
 		.property("AngularVel", &MOSprite::GetAngularVel, &MOSprite::SetAngularVel)
 		.property("Frame", &MOSprite::GetFrame, &MOSprite::SetFrame)
 		.property("SpriteAnimMode", &MOSprite::GetSpriteAnimMode, &MOSprite::SetSpriteAnimMode)

@@ -210,6 +210,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Round` INI property `LifeVariation` which can be used to randomize the `Lifetime` of shot particles.
 
+- Exposed `MOSprite` property `PrevRotAngle` to Lua (R).
+
 ### Changed
 
 - Changed `MOSprite` property `SpriteAnimMode` `Enum` `LOOPWHENMOVING` to `LOOPWHENACTIVE` as it also describes active devices.

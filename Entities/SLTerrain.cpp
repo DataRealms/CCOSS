@@ -261,9 +261,9 @@ namespace RTE {
 		if (pathBase.empty()) {
 			return -1;
 		}
-		RTEAssert(SceneLayer::SaveData(pathBase + " Mat.bmp") == 0, "Failed to write the material bitmap data saving an SLTerrain!");
-		RTEAssert(m_FGColorLayer->SaveData(pathBase + " FG.bmp") == 0,"Failed to write the FG color bitmap data saving an SLTerrain!");
-		RTEAssert(m_BGColorLayer->SaveData(pathBase + " BG.bmp") == 0,"Failed to write the BG color bitmap data saving an SLTerrain!");
+		SceneLayer::SaveData(pathBase + " Mat.png");
+		m_FGColorLayer->SaveData(pathBase + " FG.png");
+		m_BGColorLayer->SaveData(pathBase + " BG.png");
 		return 0;
 	}
 

@@ -180,13 +180,24 @@ namespace RTE {
 			return -1;
 		}
 		if (m_MainBitmap) {
-			PALETTE palette;
-			get_palette(palette);
-			if (save_png(bitmapPath.c_str(), m_MainBitmap, palette) != 0) {
-				return -1;
-			}
-			// Set the new path to point to the new file location - only if there was a successful save of the bitmap.
+			// Make a copy of the bitmap to pass to the thread because the bitmap may be offloaded mid thread and everything will be on fire.
+			BITMAP *outputBitmap = create_bitmap_ex(8, m_MainBitmap->w, m_MainBitmap->h);
+			blit(m_MainBitmap, outputBitmap, 0, 0, 0, 0, m_MainBitmap->w, m_MainBitmap->h);
+
+			auto saveLayerBitmap = [bitmapPath](BITMAP *bitmapToSave) {
+				PALETTE palette;
+				get_palette(palette);
+				if (save_png(bitmapPath.c_str(), bitmapToSave, palette) != 0) {
+					// TODO: This will not kill the main thread. Figure this out!
+					RTEAbort(std::string("Failed to save SceneLayer bitmap to path and name: " + bitmapPath));
+				}
+				destroy_bitmap(bitmapToSave);
+			};
+			std::thread saveThread(saveLayerBitmap, outputBitmap);
+			// Set the new path to point to the new file location.
 			m_BitmapFile.SetDataPath(bitmapPath);
+			// TODO: Move this into some global thread container or a ThreadMan™ instead of detaching.
+			saveThread.detach();
 		}
 		return 0;
 	}

@@ -235,6 +235,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool SceneLayer::IsWithinBounds(const int pixelX, const int pixelY, const int margin) const {
+		// TODO: This doesn't take Y wrapping into account!
 		return (m_WrapX || (pixelX >= -margin) && pixelX < (m_MainBitmap->w + margin)) && (pixelY >= -1000) && (pixelY < (m_MainBitmap->h + margin));
 	}
 

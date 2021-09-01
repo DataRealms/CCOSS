@@ -144,8 +144,8 @@ namespace RTE {
 		const std::array<unsigned char, c_PaletteEntriesNumber> &materialMappings = g_PresetMan.GetDataModule(m_BitmapFile.GetDataModuleID())->GetAllMaterialMappings();
 
 		std::array<BITMAP *, c_PaletteEntriesNumber> materialFGTextures;
-		std::array<BITMAP *, c_PaletteEntriesNumber> materialBGTextures;
 		materialFGTextures.fill(nullptr);
+		std::array<BITMAP *, c_PaletteEntriesNumber> materialBGTextures;
 		materialBGTextures.fill(nullptr);
 		std::array<int, c_PaletteEntriesNumber> materialColors;
 		materialColors.fill(0);
@@ -160,8 +160,8 @@ namespace RTE {
 		// Place texture pixels on the FG layer corresponding to the materials on the main material bitmap.
 		for (int xPos = 0; xPos < m_MainBitmap->w; ++xPos) {
 			for (int yPos = 0; yPos < m_MainBitmap->h; ++yPos) {
-				// Read which material the current pixel represents
 				int matIndex = _getpixel(m_MainBitmap, xPos, yPos);
+
 				// Map any materials defined in this data module but initially collided with other material ID's and thus were displaced to other ID's.
 				if (materialMappings.at(matIndex) != 0) {
 					// Assign the mapping and put it onto the material bitmap too.
@@ -205,7 +205,6 @@ namespace RTE {
 				_putpixel(m_BGColorLayer->GetBitmap(), xPos, yPos, bgPixelColor);
 			}
 		}
-
 		// Reference. Do not remove.
 		//release_bitmap(m_MainBitmap);
 		//release_bitmap(m_FGColorLayer->GetBitmap());
@@ -280,14 +279,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool SLTerrain::IsAirPixel(const int pixelX, const int pixelY) const {
-		int posX = pixelX;
-		int posY = pixelY;
-		WrapPosition(posX, posY);
-
-		if (posX < 0 || posX >= m_MainBitmap->w || posY < 0 || posY >= m_MainBitmap->h) {
-			return true;
-		}
-		int checkPixel = _getpixel(m_MainBitmap, posX, posY);
+		int checkPixel = GetPixel(pixelX, pixelY);
 		return checkPixel == MaterialColorKeys::g_MaterialAir || checkPixel == MaterialColorKeys::g_MaterialCavity;
 	}
 

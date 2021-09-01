@@ -3242,7 +3242,7 @@ bool SceneMan::AddSceneObject(SceneObject *sceneObject) {
 		if (MovableObject *sceneObjectAsMovableObject = dynamic_cast<MovableObject *>(sceneObject)) {
 			return g_MovableMan.AddMO(sceneObjectAsMovableObject);
 		} else if (TerrainObject *sceneObjectAsTerrainObject = dynamic_cast<TerrainObject *>(sceneObject)) {
-			bool result = sceneObjectAsTerrainObject->PlaceOnTerrain(m_pCurrentScene->GetTerrain());
+			result = sceneObjectAsTerrainObject->PlaceOnTerrain(m_pCurrentScene->GetTerrain());
 			if (result) {
 				Box airBox(sceneObjectAsTerrainObject->GetPos() + sceneObjectAsTerrainObject->GetBitmapOffset(), static_cast<float>(sceneObjectAsTerrainObject->GetBitmapWidth()), static_cast<float>(sceneObjectAsTerrainObject->GetBitmapHeight()));
 				m_pCurrentScene->GetTerrain()->CleanAirBox(airBox, GetScene()->WrapsX(), GetScene()->WrapsY());
@@ -3250,7 +3250,6 @@ bool SceneMan::AddSceneObject(SceneObject *sceneObject) {
 		}
 	}
 	delete sceneObject;
-	sceneObject = nullptr;
 	return result;
 }
 

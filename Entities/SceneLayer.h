@@ -102,7 +102,7 @@ namespace RTE {
 		/// <summary>
 		/// Saves data currently in memory to disk.
 		/// </summary>
-		/// <param name="bitmapPath">The filepath to the where to save the Bitmap data.</param>
+		/// <param name="bitmapPath">The filepath to the where to save the bitmap data.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		virtual int SaveData(const std::string &bitmapPath);
 
@@ -197,7 +197,6 @@ namespace RTE {
 		/// <param name="pixelY">The Y coordinates of the pixel.</param>
 		/// <param name="margin"></param>
 		/// <returns>Whether within bounds or not.</returns>
-		// TODO: This doesn't take Y wrapping into account!$@#$
 		bool IsWithinBounds(int pixelX, int pixelY, int margin = 0) const;
 #pragma endregion
 

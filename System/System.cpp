@@ -121,7 +121,7 @@ namespace RTE {
 			}
 		}
 
-		std::array<std::string, 5> userFiles{"Settins.ini", "LogLoadingWarnings.txt", "LogLoading.txt", "LogConsole.txt", "AbortScreen.bmp"};
+		std::array<std::string, 5> userFiles{"Settings.ini", "LogLoadingWarnings.txt", "LogLoading.txt", "LogConsole.txt", "AbortScreen.bmp"};
 
 		for (auto &file: userFiles) {
 			std::filesystem::create_symlink(userDirectory / file, file);

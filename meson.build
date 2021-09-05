@@ -140,8 +140,21 @@ cccpelf = executable(
 )
 
 #### Installing #####
+base_exclude_files = [
+	'Base.rte/Settings.ini',
+	'Launch Actor Editor.bat',
+	'Launch Area Editor.bat',
+	'Launch Assembly Editor.bat',
+	'Launch Gib Editor.bat',
+	'Launch Scene Editor.bat',
+	'LogConsole.txt',
+	'LogLoading.txt',
+	'LogLoadingWarnings.txt',
+	'Start Dedicated Server.bat'
+]
+
 install_subdir(get_option('cccpdatadir'),
-               exclude_directories:['Metagames.rte', 'Scenes.rte'],
-               exclude_files:[''],
+               exclude_directories:['.git', '.github', 'Metagames.rte', 'Scenes.rte'],
+               exclude_files:base_exclude_files,
                install_dir:get_option('data_install_dir'),
                strip_directory:true)

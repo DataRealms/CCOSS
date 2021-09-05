@@ -77,10 +77,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void System::SetupBaseGameFolders() {
+
+		std::array<::string, 2> skipRtes = {"Scenes.rte", "Metagames.rte"};
+
 		std::filesystem::directory_iterator baseDirIt(s_BaseDataDirectory);
-
-		std::array<::string, 2> skipRtes{"Scenes.rte", "Metagames.rte"};
-
 		for (const std::filesystem::directory_entry &dirEntry : baseDirIt) {
 			if (dirEntry.is_directory()) {
 				std::filesystem::path rteName = std::filesystem::relative(dirEntry.path(), dirEntry.path().parent_path());

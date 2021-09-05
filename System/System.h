@@ -58,19 +58,13 @@ namespace RTE {
 		/// <summary>
 		/// Creates symlinks for all base game folders in the temporary working directory.
 		/// </summary>
-		/// <param name="tempDirectory">
-		/// The path to the temporary working directory.
-		/// </param>
-		static void SetupBaseGameFolders(const std::filesystem::path &tempDirectory);
+		static void SetupBaseGameFolders();
 
 		/// <summary>
 		/// Creates symlinks for all mods in the user directory as well as all user readable files.
 		/// Also creates all missing folders on first launch.
 		/// </summary>
-		/// <param name="tempDirectory">
-		/// The path to the temporary working directory.
-		/// </param>
-		static void SetupUserFolders(const std::filesystem::path &tempDirectory);
+		static void SetupUserFolders();
 #endif
 
 

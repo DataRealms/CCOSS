@@ -23,8 +23,7 @@ namespace RTE {
 	const std::unordered_set<std::string> System::s_SupportedExtensions = { ".ini", ".txt", ".lua", ".cfg", ".bmp", ".png", ".jpg", ".jpeg", ".wav", ".ogg", ".mp3", ".flac" };
 
 #ifdef __unix__
-	const std::filesystem::path System::s_BaseDataDirectory{BASEDATAPATH};
-	std::filesystem::path System::s_TempDirectory{};
+	const std::filesystem::path System::s_BaseDataDirectory(BASEDATAPATH);
 #endif
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -32,10 +31,10 @@ namespace RTE {
 	void System::Initialize() {
 #if defined(__unix__) && !LINUX_PORTABLE
 		char dirTemplate[]{"/tmp/CCCP.XXXXXX"};
-		s_TempDirectory = std::filesystem::path(mkdtemp(dirTemplate));
-		SetupBaseGameFolders(s_TempDirectory);
-		SetupUserFolders(s_TempDirectory);
-		std::filesystem::current_path(s_TempDirectory);
+		std::filesystem::path tempDir(mkdtemp(dirTemplate));
+		std::filesystem::current_path(tempDir);
+		SetupBaseGameFolders();
+		SetupUserFolders();
 #endif
 
 		s_WorkingDirectory = std::filesystem::current_path().generic_string();
@@ -49,9 +48,10 @@ namespace RTE {
 #endif
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	void System::Destroy() {
 #if defined(__unix__) && !LINUX_PORTABLE
-		std::filesystem::remove_all(s_TempDirectory);
+		std::filesystem::remove_all(".");
 #endif
 	}
 
@@ -72,7 +72,8 @@ namespace RTE {
 		}
 	}
 
-	void System::SetupBaseGameFolders(const std::filesystem::path &tempDirectory) {
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	void System::SetupBaseGameFolders() {
 		std::filesystem::directory_iterator baseDirIt(s_BaseDataDirectory);
 
 		std::array<::string, 2> skipRtes{"Scenes.rte", "Metagames.rte"};
@@ -80,17 +81,18 @@ namespace RTE {
 		for (auto &dirEntry: baseDirIt) {
 			if (dirEntry.is_directory()) {
 				auto rteName = std::filesystem::relative(dirEntry.path(), dirEntry.path().parent_path());
-				if (rteName.generic_string().find(".rte") != std::string::npos && std::find(skipRtes.begin(), skipRtes.end(), rteName) == skipRtes.end()) {
-					std::filesystem::create_directory_symlink(dirEntry, tempDirectory / rteName);
+				if (rteName.generic_string().find(s_ModulePackageExtension) != std::string::npos && std::find(skipRtes.begin(), skipRtes.end(), rteName) == skipRtes.end()) {
+					std::filesystem::create_directory_symlink(dirEntry, "." / rteName);
 				}
 			}
 		}
 
-		std::filesystem::create_symlink(s_BaseDataDirectory / "Credits.txt", tempDirectory / "Credits.txt");
+		std::filesystem::create_symlink(s_BaseDataDirectory / "Credits.txt", "Credits.txt");
 	}
 
-	void System::SetupUserFolders(const std::filesystem::path &tempDirectory) {
-		std::filesystem::path userDirectory{GetXdgDataHome()};
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	void System::SetupUserFolders() {
+		std::filesystem::path userDirectory(GetXdgDataHome());
 
 		if (!std::filesystem::exists(userDirectory)) {
 			MakeDirectory(userDirectory);
@@ -98,7 +100,7 @@ namespace RTE {
 
 		if (!std::filesystem::exists(userDirectory / "Scenes.rte")) {
 			MakeDirectory(userDirectory / "Scenes.rte");
-			std::filesystem::copy_file(s_BaseDataDirectory / "Scenes.rte/Index.ini", tempDirectory / "Scenes.rte/Index.ini");
+			std::filesystem::copy_file(s_BaseDataDirectory / "Scenes.rte/Index.ini", "Scenes.rte/Index.ini");
 		}
 		if (!std::filesystem::exists(userDirectory / "Metagames.rte")) {
 			MakeDirectory(userDirectory / "Metagames.rte");
@@ -114,7 +116,7 @@ namespace RTE {
 			if (dirEntry.is_directory()) {
 				auto rteName = std::filesystem::relative(dirEntry.path(), dirEntry.path().parent_path());
 				if (rteName.generic_string().find(".rte") != std::string::npos) {
-					std::filesystem::create_directory_symlink(dirEntry, tempDirectory / rteName);
+					std::filesystem::create_directory_symlink(dirEntry, "." / rteName);
 				}
 			}
 		}
@@ -122,14 +124,14 @@ namespace RTE {
 		std::array<std::string, 5> userFiles{"Settins.ini", "LogLoadingWarnings.txt", "LogLoading.txt", "LogConsole.txt", "AbortScreen.bmp"};
 
 		for (auto &file: userFiles) {
-			std::filesystem::create_symlink(userDirectory / file, tempDirectory / file);
+			std::filesystem::create_symlink(userDirectory / file, file);
 		}
 
-		std::filesystem::create_directory_symlink(userDirectory / s_ScreenshotDirectory, tempDirectory / s_ScreenshotDirectory);
+		std::filesystem::create_directory_symlink(userDirectory / s_ScreenshotDirectory, s_ScreenshotDirectory);
 	}
 #endif
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool System::MakeDirectory(const std::string &pathToMake) {
 		bool createResult = std::filesystem::create_directory(pathToMake);

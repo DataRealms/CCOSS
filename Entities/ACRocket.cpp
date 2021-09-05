@@ -50,7 +50,6 @@ void ACRocket::Clear()
     m_pURThruster = 0;
     m_pULThruster = 0;
     m_GearState = RAISED;
-    m_ScuttleIfFlippedTime = 4000;
     for (int i = 0; i < GearStateCount; ++i) {
         m_Paths[RIGHT][i].Reset();
         m_Paths[LEFT][i].Reset();
@@ -146,8 +145,6 @@ int ACRocket::Create(const ACRocket &reference) {
         m_Paths[LEFT][i].Create(reference.m_Paths[LEFT][i]);
     }
 
-    m_ScuttleIfFlippedTime = reference.m_ScuttleIfFlippedTime;
-
     return 0;
 }
 
@@ -193,8 +190,6 @@ int ACRocket::ReadProperty(const std::string_view &propName, Reader &reader) {
         reader >> m_Paths[RIGHT][LOWERING];
     } else if (propName == "RaisingGearLimbPath") {
         reader >> m_Paths[RIGHT][RAISING];
-    } else if (propName == "ScuttleIfFlippedTime") {
-        reader >> m_ScuttleIfFlippedTime;
     } else {
         return ACraft::ReadProperty(propName, reader);
     }
@@ -239,8 +234,6 @@ int ACRocket::Save(Writer &writer) const
     writer << m_Paths[RIGHT][LOWERING];
     writer.NewProperty("RaisingGearLimbPath");
     writer << m_Paths[RIGHT][RAISING];
-    writer.NewProperty("ScuttleIfFlippedTime");
-    writer << m_ScuttleIfFlippedTime;
 
     return 0;
 }
@@ -717,68 +710,6 @@ void ACRocket::Update()
     /////////////////////////////////////////////////
     // Update MovableObject, adds on the forces etc, updated viewpoint
     ACraft::Update();
-
-    ///////////////////////////////////
-    // Explosion logic
-
-    if (m_Status == DEAD)
-        GibThis();
-
-    ////////////////////////////////////////
-    // Balance stuff
-
-    // Get the rotation in radians.
-    float rot = m_Rotation.GetRadAngle();
-
-	// Eliminate rotations over half a turn
-	if (std::fabs(rot) > c_PI) {
-		rot += (rot > 0) ? -c_TwoPI : c_TwoPI;
-		m_Rotation.SetRadAngle(rot);
-	}
-    // If tipped too far for too long, die
-    if (rot < c_HalfPI && rot > -c_HalfPI)
-	{
-        m_FlippedTimer.Reset();
-	}
-    // Start death process if tipped over for too long
-    else if (m_ScuttleIfFlippedTime >= 0 && m_FlippedTimer.IsPastSimMS(m_ScuttleIfFlippedTime) && m_Status != DYING)
-	{
-        m_Status = DYING;
-        m_DeathTmr.Reset();
-	}
-
-    // Flash if dying, warning of impending explosion
-    if (m_Status == DYING)
-    {
-        if (m_DeathTmr.IsPastSimMS(500) && m_DeathTmr.AlternateSim(100))
-            FlashWhite(10);
-    }
-/*
-//        rot = fabs(rot) < c_QuarterPI ? rot : (rot > 0 ? c_QuarterPI : -c_QuarterPI);
-
-    // Rotational balancing spring calc
-    if (m_Status == STABLE) {
-        // Break the spring if close to target angle.
-        if (fabs(rot) > 0.1)
-            m_AngularVel -= rot * fabs(rot);
-        else if (fabs(m_AngularVel) > 0.1)
-            m_AngularVel *= 0.5;
-    }
-    // Unstable, or without balance
-    else if (m_Status == DYING) {
-//        float rotTarget = rot > 0 ? c_HalfPI : -c_HalfPI;
-        float rotTarget = c_HalfPI;
-        float rotDiff = rotTarget - rot;
-        if (fabs(rotDiff) > 0.1)
-            m_AngularVel += rotDiff * rotDiff;
-        else
-            m_Status = DEAD;
-
-//        else if (fabs(m_AngularVel) > 0.1)
-//            m_AngularVel *= 0.5;
-    }
-    m_Rotation.SetRadAngle(rot);
-*/
 
     ////////////////////////////////////////
     // Hatch Operation

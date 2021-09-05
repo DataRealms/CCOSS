@@ -138,6 +138,7 @@ namespace RTE {
 		.property("CrashSound", &ACraft::GetCrashSound, &ACraftSetCrashSound)
 		.property("MaxPassengers", &ACraft::GetMaxPassengers)
 		.property("DeliveryDelayMultiplier", &ACraft::GetDeliveryDelayMultiplier)
+		.property("ScuttleOnDeath", &ACraft::GetScuttleOnDeath, &ACraft::SetScuttleOnDeath)
 
 		.def("OpenHatch", &ACraft::OpenHatch)
 		.def("CloseHatch", &ACraft::CloseHatch)

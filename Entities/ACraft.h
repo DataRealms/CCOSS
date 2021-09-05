@@ -573,6 +573,18 @@ enum
 
 
 	/// <summary>
+	/// Gets whether this ACraft will scuttle automatically on death.
+	/// </summary>
+	/// <returns>Whether this ACraft will scuttle automatically on death.</returns>
+	bool GetScuttleOnDeath() const { return m_ScuttleOnDeath; }
+
+	/// <summary>
+	/// Sets whether this ACraft will scuttle automatically on death.
+	/// </summary>
+	/// <param name="scuttleOnDeath">Whether this ACraft will scuttle automatically on death.</param>
+	void SetScuttleOnDeath(bool scuttleOnDeath) { m_ScuttleOnDeath = scuttleOnDeath; }
+
+	/// <summary>
 	/// Destroys this ACraft and creates its specified Gibs in its place with appropriate velocities. Any Attachables are removed and also given appropriate velocities.
 	/// </summary>
 	/// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen.</param>
@@ -657,6 +669,8 @@ protected:
     SoundContainer *m_CrashSound;
     // The maximum number of actors that fit in the inventory
     int m_MaxPassengers;
+	int m_ScuttleIfFlippedTime; //!< The time after which the craft will scuttle automatically, if tipped over.
+	bool m_ScuttleOnDeath; //!< Whether the craft will self-destruct at zero health.
 
 	static bool s_CrabBombInEffect; //!< Flag to determine if a craft is triggering the Crab Bomb effect.
 

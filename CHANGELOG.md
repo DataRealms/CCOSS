@@ -212,6 +212,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Exposed `MOSprite` property `PrevRotAngle` to Lua (R).
 
+- New `ACraft` INI and Lua (R/W) property `ScuttleOnDeath` which can be used to disable the automatic self-destruct sequence when the craft's health drops down to zero.
+
 ### Changed
 
 - Changed `MOSprite` property `SpriteAnimMode` `Enum` `LOOPWHENMOVING` to `LOOPWHENACTIVE` as it also describes active devices.

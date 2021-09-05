@@ -77,7 +77,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void System::SetupBaseGameFolders() {
-
 		std::array<::string, 2> skipRtes = {"Scenes.rte", "Metagames.rte"};
 
 		std::filesystem::directory_iterator baseDirIt(s_BaseDataDirectory);

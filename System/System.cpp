@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <pwd.h>
-#include "Config.h"
+#include "Resources/Config.h"
 #endif
 
 namespace RTE {

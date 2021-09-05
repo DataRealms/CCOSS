@@ -10,7 +10,7 @@
 #include "NetworkServer.h"
 
 #ifdef __unix__
-#include "System/Config.h"
+#include "Resources/Config.h"
 #endif
 
 namespace RTE {

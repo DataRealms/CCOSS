@@ -109,6 +109,7 @@ source_inc_dirs = include_directories(
   'Lua',
   'Managers',
   'Menus',
+	'Resources',
   'System')
 
 subdir('Activities')

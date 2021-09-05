@@ -79,8 +79,7 @@ namespace RTE {
 	void System::SetupBaseGameFolders() {
 		std::array<::string, 2> skipRtes = {"Scenes.rte", "Metagames.rte"};
 
-		std::filesystem::directory_iterator baseDirIt(s_BaseDataDirectory);
-		for (const std::filesystem::directory_entry &dirEntry : baseDirIt) {
+		for (const std::filesystem::directory_entry &dirEntry : std::filesystem::directory_iterator(s_BaseDataDirectory)) {
 			if (dirEntry.is_directory()) {
 				std::filesystem::path rteName = std::filesystem::relative(dirEntry.path(), dirEntry.path().parent_path());
 				if (rteName.generic_string().find(s_ModulePackageExtension) != std::string::npos && std::find(skipRtes.begin(), skipRtes.end(), rteName) == skipRtes.end()) {
@@ -100,7 +99,6 @@ namespace RTE {
 		if (!std::filesystem::exists(userDirectory)) {
 			MakeDirectory(userDirectory);
 		}
-
 		if (!std::filesystem::exists(userDirectory / "Scenes.rte")) {
 			MakeDirectory(userDirectory / "Scenes.rte");
 			std::filesystem::copy_file(s_BaseDataDirectory / "Scenes.rte/Index.ini", "Scenes.rte/Index.ini");
@@ -113,9 +111,7 @@ namespace RTE {
 			MakeDirectory(userDirectory / s_ScreenshotDirectory);
 		}
 
-		std::filesystem::directory_iterator modsDirIt(userDirectory);
-
-		for (const std::filesystem::directory_entry &dirEntry : modsDirIt) {
+		for (const std::filesystem::directory_entry &dirEntry : std::filesystem::directory_iterator(userDirectory)) {
 			if (dirEntry.is_directory()) {
 				std::filesystem::path rteName = std::filesystem::relative(dirEntry.path(), dirEntry.path().parent_path());
 				if (rteName.generic_string().find(".rte") != std::string::npos) {
@@ -129,7 +125,6 @@ namespace RTE {
 		for (const std::string &file : userFiles) {
 			std::filesystem::create_symlink(userDirectory / file, file);
 		}
-
 		std::filesystem::create_directory_symlink(userDirectory / s_ScreenshotDirectory, s_ScreenshotDirectory);
 	}
 #endif

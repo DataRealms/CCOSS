@@ -20,7 +20,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsMan::Clear() {
-#ifdef LINUX_PORTABLE
+#ifndef LINUX_PORTABLE
 		m_SettingsPath = "Settings.ini";
 #else
 		m_SettingsPath = "Base.rte/Settings.ini";
@@ -68,7 +68,7 @@ namespace RTE {
 	int SettingsMan::Initialize(Reader &reader) {
 		if (!reader.ReaderOK()) {
 			Writer settingsWriter(m_SettingsPath);
-			RTEAssert(settingsWriter.WriterOK(), "After failing to open the Base.rte/Settings.ini, could not then even create a new one to save settings to!\nAre you trying to run the game from a read-only disk?\nYou need to install the game to a writable area before running it!");
+			RTEAssert(settingsWriter.WriterOK(), "After failing to open the " + m_SettingsPath + ", could not then even create a new one to save settings to!\nAre you trying to run the game from a read-only disk?\nYou need to install the game to a writable area before running it!");
 
 			// Settings file doesn't need to be populated with anything right now besides this manager's ClassName for serialization. It will be overwritten with the full list of settings with default values from all the managers before modules start loading.
 			settingsWriter.ObjectStart(GetClassName());

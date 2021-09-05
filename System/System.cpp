@@ -30,7 +30,7 @@ namespace RTE {
 
 	void System::Initialize() {
 #if defined(__unix__) && !LINUX_PORTABLE
-		char dirTemplate[]{"/tmp/CCCP.XXXXXX"};
+		char dirTemplate[] = "/tmp/CCCP.XXXXXX";
 		std::filesystem::path tempDir(mkdtemp(dirTemplate));
 		std::filesystem::current_path(tempDir);
 		SetupBaseGameFolders();

@@ -29,7 +29,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void System::Initialize() {
-#if defined(__unix__) && !LINUX_PORTABLE
+#if defined(__unix__) && !defined(LINUX_PORTABLE)
 		char dirTemplate[] = "/tmp/CCCP.XXXXXX";
 		std::filesystem::path tempDir(mkdtemp(dirTemplate));
 		std::filesystem::current_path(tempDir);
@@ -51,7 +51,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void System::Destroy() {
-#if defined(__unix__) && !LINUX_PORTABLE
+#if defined(__unix__) && !defined(LINUX_PORTABLE)
 		std::filesystem::remove_all(".");
 #endif
 	}

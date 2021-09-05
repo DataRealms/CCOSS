@@ -20,7 +20,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsMan::Clear() {
-#if !LINUX_PORTABLE
+#ifdef LINUX_PORTABLE
 		m_SettingsPath = "Settings.ini";
 #else
 		m_SettingsPath = "Base.rte/Settings.ini";

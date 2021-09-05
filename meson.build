@@ -96,7 +96,7 @@ endif
 conf_data = configuration_data()
 prefix = get_option('prefix')
 
-conf_data.set10('LINUX_PORTABLE', get_option('no_install'))
+conf_data.set('LINUX_PORTABLE', get_option('no_install'))
 conf_data.set_quoted('BASEDATAPATH', prefix/get_option('data_install_dir'), strip_directory:true)
 
 #### Sources Setup ####

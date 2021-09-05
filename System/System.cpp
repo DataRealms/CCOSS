@@ -78,9 +78,9 @@ namespace RTE {
 
 		std::array<::string, 2> skipRtes{"Scenes.rte", "Metagames.rte"};
 
-		for (auto &dirEntry: baseDirIt) {
+		for (const std::filesystem::directory_entry &dirEntry : baseDirIt) {
 			if (dirEntry.is_directory()) {
-				auto rteName = std::filesystem::relative(dirEntry.path(), dirEntry.path().parent_path());
+				std::filesystem::path rteName = std::filesystem::relative(dirEntry.path(), dirEntry.path().parent_path());
 				if (rteName.generic_string().find(s_ModulePackageExtension) != std::string::npos && std::find(skipRtes.begin(), skipRtes.end(), rteName) == skipRtes.end()) {
 					std::filesystem::create_directory_symlink(dirEntry, "." / rteName);
 				}
@@ -112,18 +112,18 @@ namespace RTE {
 
 		std::filesystem::directory_iterator modsDirIt(userDirectory);
 
-		for (auto &dirEntry: modsDirIt) {
+		for (const std::filesystem::directory_entry &dirEntry : modsDirIt) {
 			if (dirEntry.is_directory()) {
-				auto rteName = std::filesystem::relative(dirEntry.path(), dirEntry.path().parent_path());
+				std::filesystem::path rteName = std::filesystem::relative(dirEntry.path(), dirEntry.path().parent_path());
 				if (rteName.generic_string().find(".rte") != std::string::npos) {
-					std::filesystem::create_directory_symlink(dirEntry, "." / rteName);
+					std::filesystem::create_directory_symlink(dirEntry, rteName);
 				}
 			}
 		}
 
-		std::array<std::string, 5> userFiles{"Settings.ini", "LogLoadingWarnings.txt", "LogLoading.txt", "LogConsole.txt", "AbortScreen.bmp"};
+		std::array<std::string, 5> userFiles = {"Settings.ini", "LogLoadingWarnings.txt", "LogLoading.txt", "LogConsole.txt", "AbortScreen.bmp"};
 
-		for (auto &file: userFiles) {
+		for (const std::string &file : userFiles) {
 			std::filesystem::create_symlink(userDirectory / file, file);
 		}
 

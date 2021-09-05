@@ -52,7 +52,7 @@ namespace RTE {
 
 	void System::Destroy() {
 #if defined(__unix__) && !defined(LINUX_PORTABLE)
-		std::filesystem::remove_all(".");
+		std::filesystem::remove_all(s_WorkingDirectory);
 #endif
 	}
 
@@ -101,7 +101,7 @@ namespace RTE {
 		}
 		if (!std::filesystem::exists(userDirectory / "Scenes.rte")) {
 			MakeDirectory(userDirectory / "Scenes.rte");
-			std::filesystem::copy_file(s_BaseDataDirectory / "Scenes.rte/Index.ini", "Scenes.rte/Index.ini");
+			std::filesystem::copy_file(s_BaseDataDirectory / "Scenes.rte/Index.ini", userDirectory / "Scenes.rte/Index.ini");
 		}
 		if (!std::filesystem::exists(userDirectory / "Metagames.rte")) {
 			MakeDirectory(userDirectory / "Metagames.rte");

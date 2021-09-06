@@ -1207,62 +1207,28 @@ void BuyMenuGUI::Update()
     /////////////////////////////////////////
     // CATEGORIES focus
 
-    else if (m_MenuFocus == CATEGORIES)
-    {
-        if (m_FocusChange)
-        {
+    else if (m_MenuFocus == CATEGORIES) {
+        if (m_FocusChange) {
             m_pCategoryTabs[m_MenuCategory]->SetFocus();
             m_FocusChange = 0;
         }
 
-        if (pressDown)
-        {
+        if (pressDown) {
             m_MenuCategory++;
-            if (m_SelectingEquipment && m_MenuCategory > m_LastEquipmentTab)
-            {
-                m_MenuCategory = m_LastEquipmentTab;
-                // Go to the preset buttons if hit down on the last one
+            if (m_MenuCategory >= CATEGORYCOUNT) {
+                m_MenuCategory = CATEGORYCOUNT - 1;
                 m_MenuFocus = SETBUTTONS;
                 m_FocusChange = -1;
-//                g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
-            }
-            else if (!m_SelectingEquipment && m_MenuCategory > m_LastMainTab)
-            {
-                m_MenuCategory = m_LastMainTab;
-                m_MenuFocus = SETBUTTONS;
-                m_FocusChange = -1;
-            }
-/*
-            // Loop Around
-            if (m_MenuCategory >= CATEGORYCOUNT)
-                m_MenuCategory = 0;
-*/
-            else
-            {
+            } else {
                 CategoryChange();
                 g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
             }
-        }
-        else if (pressUp)
-        {
+        } else if (pressUp) {
             m_MenuCategory--;
-            if (m_SelectingEquipment && m_MenuCategory < m_FirstEquipmentTab)
-            {
-                m_MenuCategory = m_FirstEquipmentTab;
+            if (m_MenuCategory < 0) {
+                m_MenuCategory = 0;
                 g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
-            }
-            else if (!m_SelectingEquipment && m_MenuCategory < m_FirstMainTab)
-            {
-                m_MenuCategory = m_FirstMainTab;
-                g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
-            }
-/*
-            // Loop around
-            if (m_MenuCategory < 0)
-                m_MenuCategory = CATEGORYCOUNT - 1;
-*/
-            else
-            {
+            } else {
                 CategoryChange();
                 g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
             }

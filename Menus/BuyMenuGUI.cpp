@@ -204,14 +204,13 @@ int BuyMenuGUI::Create(Controller *pController)
     m_pCategoryTabs[BOMBS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("BombsTab"));
     m_pCategoryTabs[SHIELDS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("ShieldsTab"));
     m_pCategoryTabs[SETS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("SetsTab"));
-
-    m_pCategoryTabs[CRAFT]->SetVisible(true);
-    m_pCategoryTabs[BODIES]->SetVisible(true);
-    m_pCategoryTabs[TOOLS]->SetVisible(false);
-    m_pCategoryTabs[GUNS]->SetVisible(false);
-    m_pCategoryTabs[BOMBS]->SetVisible(false);
-    m_pCategoryTabs[SHIELDS]->SetVisible(false);
-    m_pCategoryTabs[SETS]->SetVisible(true);
+    m_pCategoryTabs[CRAFT]->SetEnabled(!m_SelectingEquipment);
+    m_pCategoryTabs[BODIES]->SetEnabled(!m_SelectingEquipment);
+    m_pCategoryTabs[TOOLS]->SetEnabled(m_SelectingEquipment);
+    m_pCategoryTabs[GUNS]->SetEnabled(m_SelectingEquipment);
+    m_pCategoryTabs[BOMBS]->SetEnabled(m_SelectingEquipment);
+    m_pCategoryTabs[SHIELDS]->SetEnabled(m_SelectingEquipment);
+    m_pCategoryTabs[SETS]->SetEnabled(!m_SelectingEquipment);
 
     m_pShopList = dynamic_cast<GUIListBox *>(m_pGUIController->GetControl("CatalogLB"));
     m_pCartList = dynamic_cast<GUIListBox *>(m_pGUIController->GetControl("OrderLB"));
@@ -581,15 +580,8 @@ void BuyMenuGUI::SetEnabled(bool enable)
 		UpdateTotalMassLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftMassLabel);
 
         g_GUISound.EnterMenuSound()->Play(m_pController->GetPlayer());
-    }
-    else if (!enable && m_MenuEnabled != DISABLED && m_MenuEnabled != DISABLING)
-    {
-        // Disable equipment selection mode if it's enabled
-        if (m_SelectingEquipment)
-        {
-            EnableEquipmentSelection(false);
-        }
-
+    } else if (!enable && m_MenuEnabled != DISABLED && m_MenuEnabled != DISABLING) {
+        EnableEquipmentSelection(false);
         m_MenuEnabled = DISABLING;
         // Trap the mouse cursor again
         g_UInputMan.TrapMousePos(true, m_pController->GetPlayer());
@@ -825,56 +817,36 @@ int BuyMenuGUI::GetTotalOrderPassengers() const {
 	return passengers;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EnableEquipmentSelection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Enable or disable the buy menu equipment selection mode.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void BuyMenuGUI::EnableEquipmentSelection(bool enabled)
-{
-    g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
-    if (enabled == true)
-    {
-        // Save the last tab and scroll position
-        MenuCategory auxCategory = static_cast<MenuCategory>(m_MenuCategory);
-        m_LastMainScrollPosition = m_pShopList->GetScrollVerticalValue();
+void BuyMenuGUI::EnableEquipmentSelection(bool enabled) {
+    if (enabled != m_SelectingEquipment) {
+        m_SelectingEquipment = enabled;
+        m_pCategoryTabs[CRAFT]->SetEnabled(!m_SelectingEquipment);
+        m_pCategoryTabs[BODIES]->SetEnabled(!m_SelectingEquipment);
+        m_pCategoryTabs[TOOLS]->SetEnabled(m_SelectingEquipment);
+        m_pCategoryTabs[GUNS]->SetEnabled(m_SelectingEquipment);
+        m_pCategoryTabs[BOMBS]->SetEnabled(m_SelectingEquipment);
+        m_pCategoryTabs[SHIELDS]->SetEnabled(m_SelectingEquipment);
+        m_pCategoryTabs[SETS]->SetEnabled(!m_SelectingEquipment);
 
-        m_SelectingEquipment = true;
-        m_pCategoryTabs[CRAFT]->SetVisible(false);
-        m_pCategoryTabs[BODIES]->SetVisible(false);
-        m_pCategoryTabs[TOOLS]->SetVisible(true);
-        m_pCategoryTabs[GUNS]->SetVisible(true);
-        m_pCategoryTabs[BOMBS]->SetVisible(true);
-        m_pCategoryTabs[SHIELDS]->SetVisible(true);
-        m_pCategoryTabs[SETS]->SetVisible(false);
-
-        m_MenuCategory = m_LastVisitedEquipmentTab;
-        m_LastVisitedMainTab = auxCategory;
+        if (m_SelectingEquipment) {
+            m_LastVisitedMainTab = static_cast<MenuCategory>(m_MenuCategory);
+            m_LastMainScrollPosition = m_pShopList->GetScrollVerticalValue();
+            m_MenuCategory = m_LastVisitedEquipmentTab;
+        } else {
+            m_LastVisitedEquipmentTab = static_cast<MenuCategory>(m_MenuCategory);
+            m_LastEquipmentScrollPosition = m_pShopList->GetScrollVerticalValue();
+            m_MenuCategory = m_LastVisitedMainTab;
+        }
+        
         CategoryChange();
-        m_pShopList->ScrollTo(m_LastEquipmentScrollPosition);
-    }
-    else
-    {
-        // Save the last tab and scroll position
-        MenuCategory auxCategory = static_cast<MenuCategory>(m_MenuCategory);
-        m_LastEquipmentScrollPosition = m_pShopList->GetScrollVerticalValue();
+        m_pShopList->ScrollTo(m_SelectingEquipment ? m_LastEquipmentScrollPosition : m_LastMainScrollPosition);
 
-        m_SelectingEquipment = false;
-        m_pCategoryTabs[CRAFT]->SetVisible(true);
-        m_pCategoryTabs[BODIES]->SetVisible(true);
-        m_pCategoryTabs[TOOLS]->SetVisible(false);
-        m_pCategoryTabs[GUNS]->SetVisible(false);
-        m_pCategoryTabs[BOMBS]->SetVisible(false);
-        m_pCategoryTabs[SHIELDS]->SetVisible(false);
-        m_pCategoryTabs[SETS]->SetVisible(true);
-
-        m_MenuCategory = m_LastVisitedMainTab;
-        m_LastVisitedEquipmentTab = auxCategory;
-        CategoryChange();
-        m_pShopList->ScrollTo(m_LastMainScrollPosition);
+        m_MenuFocus = ITEMS;
+        m_FocusChange = 1;
+        g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
     }
-    m_MenuFocus = ITEMS;
-    m_FocusChange = 1;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

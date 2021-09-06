@@ -25,29 +25,26 @@
 #include "Scene.h"
 #include "DataModule.h"
 
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "GUI/AllegroScreen.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroInput.h"
-#include "GUI/GUIControlManager.h"
-#include "GUI/GUICollectionBox.h"
-#include "GUI/GUITab.h"
-#include "GUI/GUIListBox.h"
-#include "GUI/GUITextBox.h"
-#include "GUI/GUIButton.h"
-#include "GUI/GUILabel.h"
-#include "GUI/GUIComboBox.h"
+#include "GUI.h"
+#include "GUIFont.h"
+#include "AllegroScreen.h"
+#include "AllegroBitmap.h"
+#include "AllegroInput.h"
+#include "GUIControlManager.h"
+#include "GUICollectionBox.h"
+#include "GUITab.h"
+#include "GUIListBox.h"
+#include "GUITextBox.h"
+#include "GUIButton.h"
+#include "GUILabel.h"
+#include "GUIComboBox.h"
 
 #include "AreaEditorGUI.h"
-#include "PieMenuGUI.h"
-#include "GABaseDefense.h"
-
-extern bool g_ResetActivity;
+#include "GameActivity.h"
 
 namespace RTE {
 
-ConcreteClassInfo(AreaEditor, EditorActivity, 0)
+ConcreteClassInfo(AreaEditor, EditorActivity, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -103,7 +100,7 @@ int AreaEditor::Create(const AreaEditor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int AreaEditor::ReadProperty(std::string propName, Reader &reader)
+int AreaEditor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "CPUTeam")
@@ -126,18 +123,9 @@ int AreaEditor::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this AreaEditor with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int AreaEditor::Save(Writer &writer) const
-{
-    EditorActivity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int AreaEditor::Save(Writer &writer) const {
+	EditorActivity::Save(writer);
+	return 0;
 }
 
 
@@ -330,7 +318,7 @@ void AreaEditor::Update()
     m_NeedSave = m_pEditorGUI->EditMade() || m_NeedSave;
 
     // Get any mode change commands that the user gave the Editor GUI
-    if (m_pEditorGUI->GetActivatedPieSlice() == PieMenuGUI::PSI_NEW && m_EditorMode != NEWDIALOG)
+    if (m_pEditorGUI->GetActivatedPieSlice() == PieSlice::PieSliceIndex::PSI_NEW && m_EditorMode != NEWDIALOG)
     {
         m_pEditorGUI->SetEditorGUIMode(AreaEditorGUI::INACTIVE);
         m_EditorMode = EditorActivity::NEWDIALOG;
@@ -339,20 +327,20 @@ void AreaEditor::Update()
         // Will turn on dirtyness immediately as New button is pressed below
         m_NeedSave = false;
     }
-    else if (m_pEditorGUI->GetActivatedPieSlice() == PieMenuGUI::PSI_LOAD && m_EditorMode != LOADDIALOG)
+    else if (m_pEditorGUI->GetActivatedPieSlice() == PieSlice::PieSliceIndex::PSI_LOAD && m_EditorMode != LOADDIALOG)
     {
         m_pEditorGUI->SetEditorGUIMode(AreaEditorGUI::INACTIVE);
         m_EditorMode = EditorActivity::LOADDIALOG;
         m_ModeChange = true;
     }
-    else if (m_pEditorGUI->GetActivatedPieSlice() == PieMenuGUI::PSI_SAVE && m_EditorMode != SAVEDIALOG)
+    else if (m_pEditorGUI->GetActivatedPieSlice() == PieSlice::PieSliceIndex::PSI_SAVE && m_EditorMode != SAVEDIALOG)
     {
         m_pEditorGUI->SetEditorGUIMode(AreaEditorGUI::INACTIVE);
         m_EditorMode = EditorActivity::SAVEDIALOG;
         m_ModeChange = true;
     }
-    // Test the scene by starting a GABaseDefense with it, after saving
-    else if (m_pEditorGUI->GetActivatedPieSlice() == PieMenuGUI::PSI_DONE || m_EditorMode == TESTINGOBJECT)
+    // Test the scene by starting a Skirmish Defense with it, after saving
+    else if (m_pEditorGUI->GetActivatedPieSlice() == PieSlice::PieSliceIndex::PSI_DONE || m_EditorMode == TESTINGOBJECT)
     {
         m_pEditorGUI->SetEditorGUIMode(AreaEditorGUI::INACTIVE);
 
@@ -376,7 +364,6 @@ void AreaEditor::Update()
         {
             g_SceneMan.SetSceneToLoad(pCurrentScene->GetPresetName());
 
-			//Start a scripted 'Skirmish Defense' activity instead of obsolete GABaseDefense because it simply don't work
 			const Activity *pActivityPreset = dynamic_cast<const Activity *>(g_PresetMan.GetEntityPreset("GAScripted", "Skirmish Defense"));
 			Activity * pActivity = dynamic_cast<Activity *>(pActivityPreset->Clone());
 			GameActivity *pTestGame = dynamic_cast<GameActivity *>(pActivity);
@@ -387,7 +374,7 @@ void AreaEditor::Update()
 			pTestGame->SetFogOfWarEnabled(false);
             pTestGame->SetDifficulty(DifficultySetting::MediumDifficulty);
             g_ActivityMan.SetStartActivity(pTestGame);
-            g_ResetActivity = true;
+			g_ActivityMan.SetRestartActivity();
         }
     }
 

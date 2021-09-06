@@ -10,7 +10,7 @@
 compile_commands.json
 /.ccls-cache
 
-/build
+/build*
 
 /_Bin
 /NATPunchServer/Server/NATCompleteServer/Debug

@@ -1,0 +1,2 @@
+option('debug_type', type: 'combo', choices: ['full','minimal','release'], value:'minimal', description: 'Enable certain Debug features, that might slow down the game')
+option('enable_appimage', type: 'boolean', value: false, description: 'Enable the AppImage target')

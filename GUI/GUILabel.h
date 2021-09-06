@@ -1,34 +1,16 @@
 #ifndef _GUILABEL_
 #define _GUILABEL_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUILabel.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUILabel class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
+#ifdef GUI_STANDALONE
+#include "Timer.h"
+#endif
 
+namespace RTE {
 
-namespace RTE
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUILabel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A label control class.
-// Parent(s):       GUIControl, Panel.
-// Class history:   1/22/2004 GUILabel Created.
-
-class GUILabel :
-    public GUIControl,
-    public GUIPanel
-{
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
+/// <summary>
+/// A label control class.
+/// </summary>
+class GUILabel : public GUIControl, public GUIPanel {
 
 public:
 
@@ -36,6 +18,13 @@ public:
     enum {
         Clicked = 0,
     } Notification;
+
+    enum class OverflowScrollState {
+        Deactivated = 0,
+        WaitAtStart,
+        Scrolling,
+        WaitAtEnd
+    };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -54,7 +43,7 @@ public:
 // Description:     Called when the control has been created.
 // Arguments:       Name, Position.
 
-    void Create(const std::string Name, int X, int Y, int Width = -1, int Height = -1) override;
+    void Create(const std::string &Name, int X, int Y, int Width = -1, int Height = -1) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -82,6 +71,13 @@ public:
 // Arguments:       Screen class
 
     void Draw(GUIScreen *Screen) override;
+
+    /// <summary>
+    /// Draws the Label to the given GUIBitmap.
+    /// </summary>
+    /// <param name="Bitmap">The GUIBitmap to draw the label to.</param>
+    /// <param name="overwiteFontColorAndKerning">Whether to overwrite the font's color and kerning with the stored values. Defaults to true, which is usually what you want.</param>
+    void Draw(GUIBitmap *Bitmap, bool overwiteFontColorAndKerning = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -163,9 +159,9 @@ public:
 // Method:          SetText
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the text of the label.
-// Arguments:       Text.
+// Arguments:       text.
 
-    void SetText(const std::string Text);
+    void SetText(const std::string_view &text) { m_Text = text; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -174,7 +170,7 @@ public:
 // Description:     Gets the text of the label.
 // Arguments:       None.
 
-    std::string GetText();
+    const std::string & GetText() const { return m_Text; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -191,7 +187,7 @@ public:
 // Method:          SetHAlignment
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the horizontal alignment of the text of this label.
-// Arguments:       The desired alignement.
+// Arguments:       The desired alignment.
 
     void SetHAlignment(int HAlignment = GUIFont::Left) { m_HAlignment = HAlignment; }
 
@@ -200,7 +196,7 @@ public:
 // Method:          SetVAlignment
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets the vertical alignment of the text of this label.
-// Arguments:       The desired alignement.
+// Arguments:       The desired alignment.
 
     void SetVAlignment(int VAlignment = GUIFont::Top) { m_VAlignment = VAlignment; }
 
@@ -211,16 +207,58 @@ public:
 // Description:     Gets the horizontal alignment of the text of this label.
 // Arguments:       None.
 
-    int GetHAlignment() { return m_HAlignment; }
+    int GetHAlignment() const { return m_HAlignment; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetVAlignment
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the vertical alignment of the text of this label.
-// Arguments:       The desired alignement.
+// Arguments:       The desired alignment.
 
-    int GetVAlignment() { return m_VAlignment; }
+    int GetVAlignment() const { return m_VAlignment; }
+
+    /// <summary>
+    /// Gets whether or not this GUILabel should scroll horizontally (right) when it overflows.
+    /// </summary>
+    /// <returns>Whether or not this GUILabel should scroll horizontally when it overflows.</returns>
+    bool GetHorizontalOverflowScroll() const { return m_HorizontalOverflowScroll; }
+
+    /// <summary>
+    /// Sets whether or not this GUILabel should scroll horizontally (right) when it overflows. Mutually exclusive with horizontal overflow scrolling.
+    /// </summary>
+    /// <param name="newOverflowScroll">Whether or not this GUILabel should scroll horizontally when it overflows.</param>
+    void SetHorizontalOverflowScroll(bool newOverflowScroll);
+
+    /// <summary>
+    /// Gets whether or not this GUILabel should scroll vertically (down) when it overflows.
+    /// </summary>
+    /// <returns>Whether or not this GUILabel should scroll vertically when it overflows.</returns>
+    bool GetVerticalOverflowScroll() const { return m_VerticalOverflowScroll; }
+
+    /// <summary>
+    /// Sets whether or not this GUILabel should scroll vertically (down) when it overflows. Mutually exclusive with horizontal overflow scrolling.
+    /// </summary>
+    /// <param name="newOverflowScroll">Whether or not this GUILabel should scroll vertically when it overflows.</param>
+    void SetVerticalOverflowScroll(bool newOverflowScroll);
+
+    /// <summary>
+    /// Gets whether or not horizontal or vertical overflow scrolling is turned on.
+    /// </summary>
+    /// <returns>Whether or not horizontal or vertical overflow scrolling is turned on.</returns>
+    bool OverflowScrollIsEnabled() const { return m_HorizontalOverflowScroll || m_VerticalOverflowScroll; }
+
+    /// <summary>
+    /// Gets whether or not horizontal/vertical scrolling is happening.
+    /// </summary>
+    /// <returns>Whether or not horizontal/vertical scrolling is happening.</returns>
+    bool OverflowScrollIsActivated() const { return OverflowScrollIsEnabled() && m_OverflowScrollState != OverflowScrollState::Deactivated; }
+
+    /// <summary>
+    /// Sets whether or not horizontal/vertical scrolling should be happening. When it's deactivated, text will instantly go back to un-scrolled.
+    /// </summary>
+    /// <param name="activateScroll">Whether the overflow scrolling should activate (true) or deactivate (false).</param>
+    void ActivateDeactivateOverflowScroll(bool activateScroll);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -240,19 +278,15 @@ public:
 
     void ApplyProperties(GUIProperties *Props) override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
 private:
-    
-    std::string        m_Text;
-    int                m_HAlignment;
-    int                m_VAlignment;
+
+    std::string m_Text;
+    int m_HAlignment;
+    int m_VAlignment;
+    bool m_HorizontalOverflowScroll; //!< Note that horizontal overflow scrolling means text will always be on one line.
+    bool m_VerticalOverflowScroll;
+    OverflowScrollState m_OverflowScrollState;
+    Timer m_OverflowScrollTimer;
 };
-
-
-}; // namespace RTE
-
-
-#endif  //  _GUILABEL_
+};
+#endif

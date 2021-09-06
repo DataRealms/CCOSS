@@ -40,8 +40,8 @@ class SceneObject:
 
 public:
 
-	SerializableOverrideMethods
-	ClassInfoGetters
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -62,7 +62,8 @@ public:
 
     public:
 
-		SerializableOverrideMethods
+		SerializableClassNameGetter;
+		SerializableOverrideMethods;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -95,16 +96,6 @@ public:
     // Return value:    None.
 
 		void Reset() override { Clear(); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetClassName
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the class name of this Entity.
-    // Arguments:       None.
-    // Return value:    A string with the friendly-formatted type name of this object.
-
-		const std::string & GetClassName() const override { return m_sClassName; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -195,8 +186,6 @@ public:
 
     protected:
 
-        // Member variables
-        static const std::string m_sClassName;
         // The pointer to the preset instance, that copies of which will be placed. Not Owned!
         const SceneObject *m_pObjectReference;
         // Offset placement position from owner/parent's position/origin.
@@ -213,6 +202,8 @@ public:
     // Private member variable and method declarations
 
     private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Method:          Clear
@@ -462,14 +453,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTotalValueOld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     DOES THE SAME THING AS GetTotalValue, USED ONLY TO PRESERVE LUA COMPATIBILITY
-
-    virtual float GetTotalValueOld(int nativeModule = 0, float foreignMult = 1.0) const { return GetGoldValue(nativeModule, foreignMult, 1.0); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          IsBuyable
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Shows whether this should appear in teh buy menus at all.
@@ -488,7 +471,7 @@ public:
 // Return value:    A good identifyable graphical representation of this in a BITMAP, if
 //                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
 
-    virtual BITMAP * GetGraphicalIcon() { return 0; }
+    virtual BITMAP * GetGraphicalIcon() const { return nullptr; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

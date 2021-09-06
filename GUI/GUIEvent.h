@@ -1,31 +1,12 @@
 #ifndef _GUIEVENT_
 #define _GUIEVENT_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUIEvent.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUIEvent class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
+namespace RTE {
 
-
-namespace RTE
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUIEvent
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A class to hold event information
-// Parent(s):       None.
-// Class history:   1/7/2004 GUIEvent Created.
-
+/// <summary>
+/// A class to hold event information.
+/// </summary>
 class GUIEvent {
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
 
 public:
 
@@ -62,7 +43,7 @@ public:
 // Description:     Gets the event type
 // Arguments:       None.
 
-    int GetType();
+    int GetType() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -71,7 +52,7 @@ public:
 // Description:     Gets the msg.
 // Arguments:       None.
 
-    int GetMsg();
+    int GetMsg() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -80,7 +61,7 @@ public:
 // Description:     Gets the data.
 // Arguments:       None.
 
-    int GetData();
+    int GetData() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -89,23 +70,15 @@ public:
 // Description:     Gets the event control.
 // Arguments:       None.
 
-    GUIControl *GetControl();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
+    GUIControl * GetControl();
 
 private:
 
-    GUIControl        *m_Control;
-    int                m_Type;
-    int                m_Msg;
-    int                m_Data;
+    GUIControl *m_Control;
+    int m_Type;
+    int m_Msg;
+    int m_Data;
 
 };
-
-
-}; // namespace RTE
-
-
-#endif  // _GUIEVENT_
+};
+#endif

@@ -15,7 +15,8 @@ namespace RTE {
 
 	public:
 
-		SerializableOverrideMethods
+		SerializableClassNameGetter;
+		SerializableOverrideMethods;
 
 		float m_X = 0.0F; //!< X value of this vector.
 		float m_Y = 0.0F; //!< Y value of this vector.
@@ -162,6 +163,14 @@ namespace RTE {
 		/// <param name="capMag">A float value that the magnitude will be capped by.</param>
 		/// <returns>Vector reference to this after the operation.</returns>
 		Vector & CapMagnitude(const float capMag);
+
+		/// <summary>
+		/// Clamps the magnitude of this Vector between the upper and lower limits, and keeps its angle intact.
+		/// </summary>
+		/// <param name="upperMagnitudeLimit">A float value that defines the upper limit for the magnitude.</param>
+		/// <param name="lowerMagnitudeLimit">A float value that defines the lower limit for the magnitude.</param>
+		/// <returns>A reference to this after the change.</returns>
+		Vector & ClampMagnitude(float upperMagnitudeLimit, float lowerMagnitudeLimit);
 
 		/// <summary>
 		/// Returns a Vector that has the same direction as this but with a magnitude of 1.0.
@@ -487,14 +496,6 @@ namespace RTE {
 		/// <param name="rhs">An int index indicating which element is requested (X = 0, Y = 1).</param>
 		/// <returns>The requested element.</returns>
 		float & operator[](const int &rhs) { return (rhs == 0) ? m_X : m_Y; }
-#pragma endregion
-
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this Vector.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this Vector.</returns>
-		const std::string & GetClassName() const override { return c_ClassName; }
 #pragma endregion
 
 	private:

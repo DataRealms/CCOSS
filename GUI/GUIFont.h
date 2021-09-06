@@ -1,31 +1,12 @@
 #ifndef _GUIFONT_
 #define _GUIFONT_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUIFont.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUIFont class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
+namespace RTE {
 
-
-namespace RTE
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUIFont
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A class to handle the drawing of text
-// Parent(s):       None.
-// Class history:   1/7/2004 GUIFont Created.
-
+/// <summary>
+/// A class to handle the drawing of text.
+/// </summary>
 class GUIFont {
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
 
 public:
 
@@ -64,7 +45,7 @@ public:
 //                  memory.
 // Arguments:       None.
 
-    GUIFont(std::string Name);
+    explicit GUIFont(const std::string &Name);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +54,7 @@ public:
 // Description:     Loads the font from an image file.
 // Arguments:       Screen class, Filename of image.
 
-    bool Load(GUIScreen *Screen, const std::string Filename);
+    bool Load(GUIScreen *Screen, const std::string &Filename);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -91,7 +72,7 @@ public:
 // Description:     Finds a font color structure from the cache.
 // Arguments:       Color.
 
-    FontColor *GetFontColor(unsigned long Color);
+    FontColor * GetFontColor(unsigned long Color);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -100,7 +81,7 @@ public:
 // Description:     Draws text to a bitmap.
 // Arguments:       Bitmap, Position, Text, Color, Drop-shadow, 0 = none.
 
-    void Draw(GUIBitmap *Bitmap, int X, int Y, const std::string Text, unsigned long Shadow = 0);
+    void Draw(GUIBitmap *Bitmap, int X, int Y, const std::string &Text, unsigned long Shadow = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -109,7 +90,7 @@ public:
 // Description:     Draws text to a bitmap aligned.
 // Arguments:       Bitmap, Position, Text.
 
-    void DrawAligned(GUIBitmap *Bitmap, int X, int Y, const std::string Text, int HAlign, int VAlign = Top, int maxWidth = 0, unsigned long Shadow = 0);
+    void DrawAligned(GUIBitmap *Bitmap, int X, int Y, const std::string &Text, int HAlign, int VAlign = Top, int maxWidth = 0, unsigned long Shadow = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -127,7 +108,7 @@ public:
 // Description:     Calculates the width of a piece of text.
 // Arguments:       Text.
 
-    int CalculateWidth(const std::string Text);
+    int CalculateWidth(const std::string &Text);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -146,7 +127,7 @@ public:
 //                  max width.
 // Arguments:       Text, and the max width. If 0, no wrapping is done.
 
-    int CalculateHeight(const std::string Text, int MaxWidth = 0);
+    int CalculateHeight(const std::string &Text, int MaxWidth = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -155,7 +136,7 @@ public:
 // Description:     Gets the font height.
 // Arguments:       None.
 
-    int GetFontHeight();
+    int GetFontHeight() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +145,7 @@ public:
 // Description:     Gets the name of the font
 // Arguments:       None.
 
-    std::string GetName();
+    std::string GetName() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -182,7 +163,7 @@ public:
 // Description:     Get the character kerning (spacing)
 // Arguments:       None.
 
-    int GetKerning();
+    int GetKerning() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -194,31 +175,23 @@ public:
 
     void SetKerning(int newKerning = 1) { m_Kerning = newKerning; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
 private:
 
-    GUIBitmap        *m_Font;
-    GUIScreen        *m_Screen;
-    std::vector<FontColor >    m_ColorCache;
+    GUIBitmap *m_Font;
+    GUIScreen *m_Screen;
+    std::vector<FontColor > m_ColorCache;
 
-    int                m_FontHeight;
-    unsigned long            m_MainColor;
-    unsigned long            m_CurrentColor;
-    GUIBitmap        *m_CurrentBitmap;
-    std::string        m_Name;
-    Character        m_Characters[256];
-    // The highest index of valid characters that was read in from the file
-    int                m_CharIndexCap;
+    int m_FontHeight;
+    unsigned long m_MainColor;
+    unsigned long m_CurrentColor;
+    GUIBitmap *m_CurrentBitmap;
+    std::string m_Name;
+    Character m_Characters[256];
 
-    int                m_Kerning;            // Spacing between characters
-    int                m_Leading;            // Spacing between lines
+    int m_CharIndexCap; // The highest index of valid characters that was read in from the file
+
+    int m_Kerning; // Spacing between characters
+    int m_Leading; // Spacing between lines
 };
-
-
-}; // namespace RTE
-
-
-#endif  //  _GUIFONT_
+};
+#endif

@@ -49,9 +49,9 @@ namespace RTE
 	public:
 
 		// Concrete allocation and cloning definitions
-		EntityAllocation(MultiplayerGame)
-		SerializableOverrideMethods
-		ClassInfoGetters
+		EntityAllocation(MultiplayerGame);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 
 		enum MultiplayerGameMode
@@ -201,6 +201,8 @@ namespace RTE
 
 		// The editor GUI
 		//MultiplayerGameGUI *m_pEditorGUI;
+
+		GUIButton *m_BackToMainButton; //!< Button to return to main menu.
 
 		// 
 		GUITextBox *m_pServerNameTextBox;

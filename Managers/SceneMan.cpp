@@ -39,7 +39,7 @@ namespace RTE
 #define CLEANAIRINTERVAL 200000
 #define COMPACTINGHEIGHT 25
 
-const std::string SceneMan::m_ClassName = "SceneMan";
+const std::string SceneMan::c_ClassName = "SceneMan";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -80,14 +80,13 @@ void SceneMan::Clear()
     m_pMOColorLayer = 0;
     m_pMOIDLayer = 0;
     m_MOIDDrawings.clear();
-    m_pDebugLayer = 0;
+    m_pDebugLayer = nullptr;
     m_LastRayHitPos.Reset();
 
     m_LayerDrawMode = g_LayerNormal;
 
     m_MatNameMap.clear();
-    for (int i = 0; i < c_PaletteEntriesNumber; ++i)
-        m_apMatPalette[i] = 0;
+	m_apMatPalette.fill(nullptr);
     m_MaterialCount = 0;
 
 	m_MaterialCopiesVector.clear();
@@ -106,6 +105,8 @@ void SceneMan::Clear()
     }
 
     m_pUnseenRevealSound = 0;
+    m_DrawRayCastVisualizations = false;
+    m_DrawPixelCheckVisualizations = false;
     m_LastUpdatedScreen = 0;
     m_SecondStructPass = false;
 //    m_CalcTimer.Reset();
@@ -115,21 +116,6 @@ void SceneMan::Clear()
 		destroy_bitmap(m_pOrphanSearchBitmap);
 	m_pOrphanSearchBitmap = create_bitmap_ex(8, MAXORPHANRADIUS , MAXORPHANRADIUS);
 }
-
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Create
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes the SceneMan object ready for use.
-
-int SceneMan::Create()
-{
-    if (Serializable::Create() < 0)
-        return -1;
-
-    return 0;
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Create
@@ -232,15 +218,15 @@ int SceneMan::LoadScene(Scene *pNewScene, bool placeObjects, bool placeUnits) {
     m_pMOIDLayer->Create(pBitmap, false, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
     pBitmap = 0;
 
-#ifdef DEBUG_BUILD
     // Create the Debug SceneLayer
-    delete m_pDebugLayer;
-    pBitmap = create_bitmap_ex(8, GetSceneWidth(), GetSceneHeight());
-    clear_to_color(pBitmap, g_MaskColor);
-    m_pDebugLayer = new SceneLayer();
-    m_pDebugLayer->Create(pBitmap, true, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
-    pBitmap = 0;
-#endif
+    if (m_DrawRayCastVisualizations || m_DrawPixelCheckVisualizations) {
+        delete m_pDebugLayer;
+        pBitmap = create_bitmap_ex(8, GetSceneWidth(), GetSceneHeight());
+        clear_to_color(pBitmap, g_MaskColor);
+        m_pDebugLayer = new SceneLayer();
+        m_pDebugLayer->Create(pBitmap, true, Vector(), m_pCurrentScene->WrapsX(), m_pCurrentScene->WrapsY(), Vector(1.0, 1.0));
+        pBitmap = nullptr;
+    }
 
     // Finally draw the ID:s of the MO:s to the MOID layers for the first time
     g_MovableMan.UpdateDrawMOIDs(m_pMOIDLayer->GetBitmap());
@@ -290,7 +276,7 @@ int SceneMan::LoadScene()
             SetSceneToLoad(g_ActivityMan.GetActivity()->GetSceneName());
 
         // If that failed, then resort to the default scene name
-        if (SetSceneToLoad(g_SceneMan.GetDefaultSceneName()) < 0)
+        if (SetSceneToLoad(m_DefaultSceneName) < 0)
         {
             g_ConsoleMan.PrintString("ERROR: Couldn't start because no Scene has been specified to load!");
             return -1;
@@ -326,7 +312,7 @@ int SceneMan::LoadScene(std::string sceneName, bool placeObjects, bool placeUnit
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int SceneMan::ReadProperty(std::string propName, Reader &reader)
+int SceneMan::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "AddScene")
         g_PresetMan.GetEntityPreset(reader);
@@ -350,7 +336,7 @@ int SceneMan::ReadProperty(std::string propName, Reader &reader)
         for (int tryId = pNewMat->GetIndex(); tryId < c_PaletteEntriesNumber; ++tryId)
         {
             // We found an empty slot in the Material palette!
-            if (m_apMatPalette[tryId] == 0)
+            if (m_apMatPalette.at(tryId) == nullptr)
             {
                 // If the final ID isn't the same as the one originally requested by the data file, then make the mapping so
                 // subsequent ID references to this within the same data module can be translated to the actual ID of this material
@@ -359,7 +345,7 @@ int SceneMan::ReadProperty(std::string propName, Reader &reader)
 
                 // Assign the final ID to the material and register it in the palette
                 pNewMat->SetIndex(tryId);
-                m_apMatPalette[tryId] = pNewMat;
+                m_apMatPalette.at(tryId) = pNewMat;
                 m_MatNameMap.insert(pair<string, unsigned char>(string(pNewMat->GetPresetName()), pNewMat->GetIndex()));
                 // Now add the instance, when ID has been registered!
                 g_PresetMan.AddEntityPreset(pNewMat, reader.GetReadModuleID(), reader.GetPresetOverwriting(), objectFilePath);
@@ -391,19 +377,16 @@ int SceneMan::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this SceneMan with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int SceneMan::Save(Writer &writer) const
-{
-    g_ConsoleMan.PrintString("ERROR: Tried to save SceneMan, screen does not make sense");
+int SceneMan::Save(Writer &writer) const {
+	g_ConsoleMan.PrintString("ERROR: Tried to save SceneMan, screen does not make sense");
 
-    Serializable::Save(writer);
+	Serializable::Save(writer);
 
-    for (int i = 0; i < m_MaterialCount; ++i)
-    {
-        writer.NewProperty("AddMaterial");
-        writer << *(m_apMatPalette[i]);
-    }
+	for (int i = 0; i < m_MaterialCount; ++i) {
+		writer.NewPropertyWithValue("AddMaterial", *(m_apMatPalette.at(i)));
+	}
 
-    return 0;
+	return 0;
 }
 
 
@@ -452,8 +435,11 @@ Vector SceneMan::GetSceneDim() const
 
 int SceneMan::GetSceneWidth() const
 {
-//    RTEAssert(m_pCurrentScene, "Trying to get terrain info before there is a scene or terrain!");
-    if (m_pCurrentScene)
+	if (g_NetworkClient.IsConnectedAndRegistered()) {
+		return g_NetworkClient.GetSceneWidth();
+	}
+
+	if (m_pCurrentScene)
         return m_pCurrentScene->GetWidth();
     return 0;
 }
@@ -480,7 +466,11 @@ int SceneMan::GetSceneHeight() const
 
 bool SceneMan::SceneWrapsX() const
 {
-    if (m_pCurrentScene)
+	if (g_NetworkClient.IsConnectedAndRegistered()) {
+		return g_NetworkClient.SceneWrapsX();
+	}
+
+	if (m_pCurrentScene)
         return m_pCurrentScene->WrapsX();
     return false;
 }
@@ -530,7 +520,10 @@ BITMAP * SceneMan::GetMOColorBitmap() const { return m_pMOColorLayer->GetBitmap(
 // Description:     Gets the bitmap of the SceneLayer that debug graphics is drawn onto.
 //                  Will only return valid BITMAP if building with DEBUG_BUILD.
 
-BITMAP * SceneMan::GetDebugBitmap() const { return m_pDebugLayer->GetBitmap(); }
+BITMAP *SceneMan::GetDebugBitmap() const {
+    RTEAssert(m_pDebugLayer, "Tried to get debug bitmap but debug layer doesn't exist. Note that the debug layer is only created under certain circumstances.");
+    return m_pDebugLayer->GetBitmap();
+}
 
 
 
@@ -560,8 +553,8 @@ bool SceneMan::MOIDClearCheck()
         {
             if ((badMOID = _getpixel(pMOIDMap, x, y)) != g_NoMOID)
             {
-                g_FrameMan.SaveBitmapToBMP(pMOIDMap, "MOIDCheck");
-                g_FrameMan.SaveBitmapToBMP(m_pMOColorLayer->GetBitmap(), "MOIDCheck");
+                g_FrameMan.SaveBitmapToPNG(pMOIDMap, "MOIDCheck");
+                g_FrameMan.SaveBitmapToPNG(m_pMOColorLayer->GetBitmap(), "MOIDCheck");
                 RTEAbort("Bad MOID of MO detected: " + g_MovableMan.GetMOFromID(badMOID)->GetPresetName());
                 return false;
             }
@@ -582,6 +575,8 @@ unsigned char SceneMan::GetTerrMatter(int pixelX, int pixelY)
     RTEAssert(m_pCurrentScene, "Trying to get terrain matter before there is a scene or terrain!");
 
     WrapPosition(pixelX, pixelY);
+
+    if (m_pDebugLayer && m_DrawPixelCheckVisualizations) { m_pDebugLayer->SetPixel(pixelX, pixelY, 5); }
 
     BITMAP *pTMatBitmap = m_pCurrentScene->GetTerrain()->GetMaterialBitmap();
 
@@ -609,6 +604,8 @@ MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY)
 {
     WrapPosition(pixelX, pixelY);
 
+    if (m_pDebugLayer && m_DrawPixelCheckVisualizations) { m_pDebugLayer->SetPixel(pixelX, pixelY, 5); }
+
     if (pixelX < 0 ||
        pixelX >= m_pMOIDLayer->GetBitmap()->w ||
        pixelY < 0 ||
@@ -633,7 +630,7 @@ Material const * SceneMan::GetMaterial(const std::string &matName)
         return 0;
     }
     else
-        return m_apMatPalette[(*itr).second];
+        return m_apMatPalette.at((*itr).second);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -722,6 +719,13 @@ void SceneMan::SetScrollTarget(const Vector &targetCenter,
     m_ScrollSpeed[screen] = speed;
     // Don't override a set wrapping, it will be reset to false upon a drawn frame
     m_TargetWrapped[screen] = m_TargetWrapped[screen] || targetWrapped;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const Vector & SceneMan::GetScrollTarget(int screen) const {
+	 const Vector & offsetTarget = (g_NetworkClient.IsConnectedAndRegistered()) ? g_NetworkClient.GetFrameTarget() : m_ScrollTarget[screen];
+	 return offsetTarget;
 }
 
 
@@ -1619,13 +1623,9 @@ void SceneMan::RestoreUnseenBox(const int posX, const int posY, const int width,
 //                  as long as the accumulated material strengths traced through the terrain
 //                  don't exceed a specific value.
 
+//TODO Every raycast should use some shared line drawing method (or maybe something more efficient if it exists, that needs looking into) instead of having a ton of duplicated code.
 bool SceneMan::CastUnseenRay(int team, const Vector &start, const Vector &ray, Vector &endPos, int strengthLimit, int skip, bool reveal)
 {
-#ifdef DEBUG_BUILD
-    if (m_pDebugLayer)
-        m_pDebugLayer->LockBitmaps();
-#endif
-
     if (!m_pCurrentScene->GetUnseenLayer(team))
         return false;
 
@@ -1720,18 +1720,9 @@ bool SceneMan::CastUnseenRay(int team, const Vector &start, const Vector &ray, V
             }
             // Reset skip counter
             skipped = 0;
-#ifdef DEBUG_BUILD
-            // Draw debug graphics, if applicable
-            if (m_pDebugLayer)
-                m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 13);
-#endif
+            if (m_pDebugLayer && m_DrawRayCastVisualizations) { m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 13); }
         }
     }
-
-#ifdef DEBUG_BUILD
-    if (m_pDebugLayer)
-        m_pDebugLayer->UnlockBitmaps();
-#endif
 
     return affectedAny;
 }
@@ -1770,10 +1761,6 @@ bool SceneMan::CastUnseeRay(int team, const Vector &start, const Vector &ray, Ve
 
 bool SceneMan::CastMaterialRay(const Vector &start, const Vector &ray, unsigned char material, Vector &result, int skip, bool wrap)
 {
-#ifdef DEBUG_BUILD
-    if (m_pDebugLayer)
-        m_pDebugLayer->LockBitmaps();
-#endif
 
     int hitCount = 0, error, dom, sub, domSteps, skipped = skip;
     int intPos[2], delta[2], delta2[2], increment[2];
@@ -1855,18 +1842,9 @@ bool SceneMan::CastMaterialRay(const Vector &start, const Vector &ray, unsigned 
 
             skipped = 0;
 
-#ifdef DEBUG_BUILD
-            // Draw debug graphics, if applicable
-            if (m_pDebugLayer)
-                m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 13);
-#endif
+            if (m_pDebugLayer && m_DrawRayCastVisualizations) { m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 13); }
         }
     }
-
-#ifdef DEBUG_BUILD
-    if (m_pDebugLayer)
-        m_pDebugLayer->UnlockBitmaps();
-#endif
 
     return foundPixel;
 }
@@ -1901,11 +1879,6 @@ float SceneMan::CastMaterialRay(const Vector &start, const Vector &ray, unsigned
 
 bool SceneMan::CastNotMaterialRay(const Vector &start, const Vector &ray, unsigned char material, Vector &result, int skip, bool checkMOs)
 {
-#ifdef DEBUG_BUILD
-    if (m_pDebugLayer)
-        m_pDebugLayer->LockBitmaps();
-#endif
-
     int hitCount = 0, error, dom, sub, domSteps, skipped = skip;
     int intPos[2], delta[2], delta2[2], increment[2];
     bool foundPixel = false;
@@ -1986,18 +1959,9 @@ bool SceneMan::CastNotMaterialRay(const Vector &start, const Vector &ray, unsign
             }
 
             skipped = 0;
-#ifdef DEBUG_BUILD
-            // Draw debug graphics, if applicable
-            if (m_pDebugLayer)
-                m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 13);
-#endif
+            if (m_pDebugLayer && m_DrawRayCastVisualizations) { m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 13); }
         }
     }
-
-#ifdef DEBUG_BUILD
-    if (m_pDebugLayer)
-        m_pDebugLayer->UnlockBitmaps();
-#endif
 
     return foundPixel;
 }
@@ -2110,6 +2074,8 @@ float SceneMan::CastStrengthSumRay(const Vector &start, const Vector &end, int s
                 strengthSum += GetMaterialFromID(materialID)->GetIntegrity();
 
             skipped = 0;
+
+            if (m_pDebugLayer && m_DrawRayCastVisualizations) { m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 13); }
         }
     }
 
@@ -2204,6 +2170,8 @@ float SceneMan::CastMaxStrengthRay(const Vector &start, const Vector &end, int s
                 maxStrength = std::max(maxStrength, GetMaterialFromID(materialID)->GetIntegrity());
 
             skipped = 0;
+
+            if (m_pDebugLayer && m_DrawRayCastVisualizations) { m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 13); }
         }
     }
     
@@ -2221,11 +2189,6 @@ float SceneMan::CastMaxStrengthRay(const Vector &start, const Vector &end, int s
 
 bool SceneMan::CastStrengthRay(const Vector &start, const Vector &ray, float strength, Vector &result, int skip, unsigned char ignoreMaterial, bool wrap)
 {
-#ifdef DEBUG_BUILD
-    if (m_pDebugLayer)
-        m_pDebugLayer->LockBitmaps();
-#endif
-
     int hitCount = 0, error, dom, sub, domSteps, skipped = skip;
     int intPos[2], delta[2], delta2[2], increment[2];
     bool foundPixel = false;
@@ -2315,18 +2278,9 @@ bool SceneMan::CastStrengthRay(const Vector &start, const Vector &ray, float str
             }
             skipped = 0;
 
-#ifdef DEBUG_BUILD
-            // Draw debug graphics, if applicable
-            if (m_pDebugLayer)
-                m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 13);
-#endif
+            if (m_pDebugLayer && m_DrawRayCastVisualizations) { m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 13); }
         }
     }
-
-#ifdef DEBUG_BUILD
-    if (m_pDebugLayer)
-        m_pDebugLayer->UnlockBitmaps();
-#endif
 
     // If no pixel of sufficient strength was found, set the result to the final tried position
     if (!foundPixel)
@@ -2345,11 +2299,6 @@ bool SceneMan::CastStrengthRay(const Vector &start, const Vector &ray, float str
 
 bool SceneMan::CastWeaknessRay(const Vector &start, const Vector &ray, float strength, Vector &result, int skip, bool wrap)
 {
-#ifdef DEBUG_BUILD
-    if (m_pDebugLayer)
-        m_pDebugLayer->LockBitmaps();
-#endif
-
     int hitCount = 0, error, dom, sub, domSteps, skipped = skip;
     int intPos[2], delta[2], delta2[2], increment[2];
     bool foundPixel = false;
@@ -2435,18 +2384,9 @@ bool SceneMan::CastWeaknessRay(const Vector &start, const Vector &ray, float str
 
             skipped = 0;
 
-#ifdef DEBUG_BUILD
-            // Draw debug graphics, if applicable
-            if (m_pDebugLayer)
-                m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 13);
-#endif
+            if (m_pDebugLayer && m_DrawRayCastVisualizations) { m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 13); }
         }
     }
-
-#ifdef DEBUG_BUILD
-    if (m_pDebugLayer)
-        m_pDebugLayer->UnlockBitmaps();
-#endif
 
     // If no pixel of sufficient strength was found, set the result to the final tried position
     if (!foundPixel)
@@ -2465,11 +2405,6 @@ bool SceneMan::CastWeaknessRay(const Vector &start, const Vector &ray, float str
 
 MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID, int ignoreTeam, unsigned char ignoreMaterial, bool ignoreAllTerrain, int skip)
 {
-#ifdef DEBUG_BUILD
-    if (m_pDebugLayer)
-        m_pDebugLayer->LockBitmaps();
-#endif
-
     int hitCount = 0, error, dom, sub, domSteps, skipped = skip;
     int intPos[2], delta[2], delta2[2], increment[2];
     MOID hitMOID = g_NoMOID;
@@ -2582,18 +2517,9 @@ MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID
 
             skipped = 0;
 
-#ifdef DEBUG_BUILD
-            // Draw debug graphics, if applicable
-            if (m_pDebugLayer)
-                m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 120);
-#endif
+            if (m_pDebugLayer && m_DrawRayCastVisualizations) { m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 13); }
         }
     }
-
-#ifdef DEBUG_BUILD
-    if (m_pDebugLayer)
-        m_pDebugLayer->UnlockBitmaps();
-#endif
 
     // Didn't hit anything but air
     return g_NoMOID;
@@ -2607,12 +2533,7 @@ MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID
 
 bool SceneMan::CastFindMORay(const Vector &start, const Vector &ray, MOID targetMOID, Vector &resultPos, unsigned char ignoreMaterial, bool ignoreAllTerrain, int skip)
 {
-#ifdef DEBUG_BUILD
-    if (m_pDebugLayer)
-        m_pDebugLayer->LockBitmaps();
-#endif
-
-    int hitCount = 0, error, dom, sub, domSteps, skipped = skip;;
+    int hitCount = 0, error, dom, sub, domSteps, skipped = skip;
     int intPos[2], delta[2], delta2[2], increment[2];
     MOID hitMOID = g_NoMOID;
     unsigned char hitTerrain = 0;
@@ -2704,18 +2625,9 @@ bool SceneMan::CastFindMORay(const Vector &start, const Vector &ray, MOID target
 
             skipped = 0;
 
-#ifdef DEBUG_BUILD
-            // Draw debug graphics, if applicable
-            if (m_pDebugLayer)
-                m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 120);
-#endif
+            if (m_pDebugLayer && m_DrawRayCastVisualizations) { m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 13); }
         }
     }
-
-#ifdef DEBUG_BUILD
-    if (m_pDebugLayer)
-        m_pDebugLayer->UnlockBitmaps();
-#endif
 
     // Didn't hit the target
     return false;
@@ -2730,11 +2642,6 @@ bool SceneMan::CastFindMORay(const Vector &start, const Vector &ray, MOID target
 
 float SceneMan::CastObstacleRay(const Vector &start, const Vector &ray, Vector &obstaclePos, Vector &freePos, MOID ignoreMOID, int ignoreTeam, unsigned char ignoreMaterial, int skip)
 {
-#ifdef DEBUG_BUILD
-    if (m_pDebugLayer)
-        m_pDebugLayer->LockBitmaps();
-#endif
-
     int hitCount = 0, error, dom, sub, domSteps, skipped = skip;
     int intPos[2], delta[2], delta2[2], increment[2];
     bool hitObstacle = false;
@@ -2839,20 +2746,11 @@ float SceneMan::CastObstacleRay(const Vector &start, const Vector &ray, Vector &
 
             skipped = 0;
 
-#ifdef DEBUG_BUILD
-            // Draw debug graphics, if applicable
-            if (m_pDebugLayer)
-                m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 13);
-#endif
+            if (m_pDebugLayer && m_DrawRayCastVisualizations) { m_pDebugLayer->SetPixel(intPos[X], intPos[Y], 13); }
         }
         else
             freePos.SetXY(intPos[X], intPos[Y]);
     }
-
-#ifdef DEBUG_BUILD
-    if (m_pDebugLayer)
-        m_pDebugLayer->UnlockBitmaps();
-#endif
 
     // Add the pixel fraction to the free position if there were any free pixels
     if (domSteps != 0)
@@ -2949,7 +2847,6 @@ void SceneMan::StructuralCalc(unsigned long calcTime) {
     BITMAP *pColBitmap = pTerrain->GetFGColorBitmap();
     BITMAP *pMatBitmap = pTerrain->GetMaterialBitmap();
     BITMAP *pStructBitmap = pTerrain->GetStructuralBitmap();
-    Material **pMatPalette = GetMaterialPalette();
     int posX, posY, height = pColBitmap->h, width = pColBitmap->w;
 
     // Lock all bitmaps involved, outside the loop.
@@ -3531,9 +3428,7 @@ void SceneMan::Update(int screen)
     m_pMOColorLayer->SetOffset(m_Offset[screen]);
     m_pMOIDLayer->SetOffset(m_Offset[screen]);
 
-#ifdef DEBUG_BUILD
-    m_pDebugLayer->SetOffset(m_Offset[screen]);
-#endif
+    if (m_pDebugLayer) { m_pDebugLayer->SetOffset(m_Offset[screen]); }
 
     pTerrain->SetOffset(m_Offset[screen]);
     pTerrain->Update();
@@ -3648,9 +3543,7 @@ void SceneMan::Draw(BITMAP *pTargetBitmap, BITMAP *pTargetGUIBitmap, const Vecto
 
 //            std::snprintf(str, sizeof(str), "Normal Layer Draw Mode\nHit M to cycle modes");
 
-#ifdef DEBUG_BUILD
-            m_pDebugLayer->Draw(pTargetBitmap, Box());
-#endif
+            if (m_pDebugLayer) { m_pDebugLayer->Draw(pTargetBitmap, targetBox); }
     }
 }
 
@@ -3664,9 +3557,7 @@ void SceneMan::ClearMOColorLayer()
 {
     clear_to_color(m_pMOColorLayer->GetBitmap(), g_MaskColor);
 
-#ifdef DEBUG_BUILD
-    clear_to_color(m_pDebugLayer->GetBitmap(), g_MaskColor);
-#endif
+    if (m_pDebugLayer) { clear_to_color(m_pDebugLayer->GetBitmap(), g_MaskColor); }
 }
 
 

@@ -12,15 +12,21 @@ namespace RTE {
 
 	public:
 
-		EntityAllocation(TDExplosive)
-		SerializableOverrideMethods
-		ClassInfoGetters
+		EntityAllocation(TDExplosive);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 #pragma region Creation
 		/// <summary>
 		/// Constructor method used to instantiate a TDExplosive object in system memory. Create() should be called before using the object.
 		/// </summary>
 		TDExplosive() { Clear(); }
+
+		/// <summary>
+		/// Makes the TDExplosive object ready for use.
+		/// </summary>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create() override;
 
 		/// <summary>
 		/// Creates a TDExplosive to be identical to another, by deep copy.

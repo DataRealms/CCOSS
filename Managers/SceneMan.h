@@ -103,18 +103,16 @@ struct IntRect
 // Parent(s):       Singleton, Serializable.
 // Class history:   12/25/2001 SceneMan created.
 
-class SceneMan:
-    public Singleton<SceneMan>,
-    public Serializable
-{
-
+class SceneMan : public Singleton<SceneMan>, public Serializable {
+	friend class SettingsMan;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
 
 public:
 
-	SerializableOverrideMethods
+	SerializableClassNameGetter;
+	SerializableOverrideMethods;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -280,16 +278,6 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-	const std::string & GetClassName() const override { return m_ClassName; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetScene
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the currently loaded scene, if any.
@@ -334,10 +322,9 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets access to the whole material palette array of 256 entries.
 // Arguments:       None.
-// Return value:    A pointer to the first Material in the palette. Index into it up to
-//                  255 to access the other Material:s in it.
+// Return value:    A const reference to the material palette array.
 
-    Material ** GetMaterialPalette() { return m_apMatPalette; }
+	const std::array<Material *, c_PaletteEntriesNumber> & GetMaterialPalette() const { return m_apMatPalette; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -689,7 +676,8 @@ public:
 // Arguments:       Which screen to get the target for.
 // Return value:    Current target vector in *scene coordinates*.
 
-    const Vector & GetScrollTarget(int screen = 0) const { return m_ScrollTarget[screen]; }
+	const Vector & GetScrollTarget(int screen = 0) const;
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1670,18 +1658,16 @@ public:
 		bool back;
 	};
 
-    /// <summary>
-    /// Sets the current scene pointer to null
-    /// </summary>
-    void SceneMan::ClearCurrentScene();
+	/// <summary>
+	/// Sets the current scene pointer to null
+	/// </summary>
+	void ClearCurrentScene();
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Protected member variable and method declarations
 
-protected:
+  protected:
 
-    // Member variables
-    static const std::string m_ClassName;
 
     // Default Scene name to load if nothing else is specified
     std::string m_DefaultSceneName;
@@ -1711,7 +1697,7 @@ protected:
     // Material palette stuff
     std::map<std::string, unsigned char> m_MatNameMap;
     // This gets filled with holes, not contigous from 0 onward, but whatever the ini specifies. The Material objects are owned here
-    Material *m_apMatPalette[c_PaletteEntriesNumber];
+	std::array<Material *, c_PaletteEntriesNumber> m_apMatPalette;
     // The total number of added materials so far
     int m_MaterialCount;
 
@@ -1743,6 +1729,9 @@ protected:
     // Sound of an unseen pixel on an unseen layer being revealed.
     SoundContainer *m_pUnseenRevealSound;
 
+    bool m_DrawRayCastVisualizations; //!< Whether to visibly draw RayCasts to the Scene debug Bitmap.
+    bool m_DrawPixelCheckVisualizations; //!< Whether to visibly draw pixel checks (GetTerrMatter and GetMOIDPixel) to the Scene debug Bitmap.
+
     // The last screen everything has been updated to
     int m_LastUpdatedScreen;
     // Whether we're in second pass of the structural computations.
@@ -1764,6 +1753,8 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+	static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

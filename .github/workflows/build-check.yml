@@ -1,0 +1,86 @@
+name: Compile check
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the development branch
+  push:
+    branches: [ master, development ]
+  pull_request:
+    types: [opened, ready_for_review]
+    branches: [ master, development ]
+
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update -yq
+          sudo apt-get install --no-install-recommends liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev libboost-dev
+
+      - name: Cache
+        uses: actions/cache@v2.1.4
+        with:
+          # A list of files, directories, and wildcard patterns to cache and restore
+          path: |
+            ~/.cache
+            ~/.ccache
+          # An explicit key for restoring and saving the cache
+          key: ${{runner.os}}-build
+
+      - name: Install Clang
+        # You may pin to the exact commit or the version.
+        # uses: egor-tensin/setup-clang@d16e36d5f8a7eb00aa6627c1a536d94dfc4a913d
+        uses: egor-tensin/setup-clang@v1
+        with:
+          # Set up cc/c++ executables
+          cc: 1 # optional, default is 1
+
+      - name: Setup ccache
+        # You may pin to the exact commit or the version.
+        # uses: alexjurkiewicz/setup-ccache@411d41a94dc67522f8aea0dbb5362240aaf31523
+        uses: alexjurkiewicz/setup-ccache@v1.0.0
+
+      - name: Build
+        # You may pin to the exact commit or the version.
+        # uses: BSFishy/meson-build@6f1930d878fd3eed3853c1c91285ec604c37f3a5
+        uses: BSFishy/meson-build@v1.0.2
+        with:
+          # The action to run
+          action: build
+
+
+  build-windows:
+    env:
+      # Path to the solution file relative to the root of the project.
+      SOLUTION_FILE_PATH: RTEA.sln
+
+      # Configuration type to build.
+      # You can convert this to a build matrix if you need coverage of multiple configuration types.
+      # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+      BUILD_CONFIGURATION: "Final"
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1
+
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: msbuild /m /p:Configuration="${{env.BUILD_CONFIGURATION}}" ${{env.SOLUTION_FILE_PATH}}

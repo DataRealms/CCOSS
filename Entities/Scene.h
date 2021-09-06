@@ -39,15 +39,15 @@ class Scene:
     public Entity
 {
 
-	friend class LuaMan;
+	friend struct EntityLuaBindings;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
 
 public:
 
-	SerializableOverrideMethods
-	ClassInfoGetters
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
 	//Available placed objects sets
 	enum PlacedObjectSets
@@ -57,9 +57,6 @@ public:
 		AIPLAN,
 		PLACEDSETSCOUNT
 	};
-
-	const static int PREVIEW_WIDTH = 140;
-	const static int PREVIEW_HEIGHT = 55;
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Nested class:    Area
@@ -81,7 +78,8 @@ public:
 
     public:
 
-		SerializableOverrideMethods
+		SerializableClassNameGetter;
+		SerializableOverrideMethods;
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Constructor:     Area
@@ -126,16 +124,6 @@ public:
     // Return value:    None.
 
         void Reset() override { Clear(); }
-
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Virtual method:  GetClassName
-    //////////////////////////////////////////////////////////////////////////////////////////
-    // Description:     Gets the class name of this Entity.
-    // Arguments:       None.
-    // Return value:    A string with the friendly-formatted type name of this object.
-
-		const std::string & GetClassName() const override { return m_sClassName; }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -261,8 +249,6 @@ public:
 
     protected:
 
-        // Member variables
-        static const std::string m_sClassName;
         // The list of Box:es defining the Area in the owner Scene
         std::vector<Box> m_BoxList;
         // The name tag of this Area
@@ -273,6 +259,8 @@ public:
     // Private member variable and method declarations
 
     private:
+
+		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Method:          Clear
@@ -399,17 +387,7 @@ EntityAllocation(Scene)
 // Arguments:       The full filepath the where to save the Bitmap data.
 // Return value:    None.
 
-	int SavePreview(string bitmapPath);
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  DrawPlacedObjectsPreview
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draw placed objects onto specified preview bitmap with scaling
-// Arguments:       Bitmap to draw on. Set of scene objects to draw. Width and height of scaled scene layer, 
-//					scaled map offset, scale.
-// Return value:    None.
-
-	void DrawPlacedObjectsPreview(BITMAP * pBitmap, int set, int width, int height, int xOffset, int yOffset, float scale);
+	int SavePreview(const std::string &bitmapPath);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

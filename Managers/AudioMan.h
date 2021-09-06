@@ -20,6 +20,7 @@ namespace RTE {
 	/// The singleton manager of sound effect and music playback.
 	/// </summary>
 	class AudioMan : public Singleton<AudioMan> {
+		friend class SettingsMan;
 		friend class SoundContainer;
 
 	public:
@@ -95,8 +96,8 @@ namespace RTE {
 		/// <summary>
 		/// Makes the AudioMan object ready for use.
 		/// </summary>
-		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create();
+		/// <returns>Whether the audio system was initialized successfully. If not, no audio will be available.</returns>
+		bool Initialize();
 #pragma endregion
 
 #pragma region Destruction
@@ -152,6 +153,30 @@ namespace RTE {
 		int GetTotalRealChannelCount() const { int channelCount; return m_AudioSystem->getSoftwareChannels(&channelCount) == FMOD_OK ? channelCount : 0; }
 
 		/// <summary>
+		/// Gets whether all audio is muted or not.
+		/// </summary>
+		/// <returns>Whether all the audio is muted or not.</returns>
+		bool GetMasterMuted() const { return m_MuteMaster; }
+
+		/// <summary>
+		/// Mutes or unmutes all audio.
+		/// </summary>
+		/// <param name="muteOrUnmute">Whether to mute or unmute all the audio.</param>
+		void SetMasterMuted(bool muteOrUnmute = true) { m_MuteMaster = muteOrUnmute; if (m_AudioEnabled) { m_MasterChannelGroup->setMute(m_MuteMaster); } }
+
+		/// <summary>
+		/// Gets the volume of all audio. Does not get music or sounds individual volumes.
+		/// </summary>
+		/// <returns>Current volume scalar value. 0.0-1.0.</returns>
+		float GetMasterVolume() const { return m_MasterVolume; }
+
+		/// <summary>
+		/// Sets all the audio to a specific volume. Does not affect music or sounds individual volumes.
+		/// </summary>
+		/// <param name="volume">The desired volume scalar. 0.0-1.0.</param>
+		void SetMasterVolume(float volume = 1.0F) { m_MasterVolume = std::clamp(volume, 0.0F, 1.0F); if (m_AudioEnabled) { m_MasterChannelGroup->setVolume(m_MasterVolume); } }
+
+		/// <summary>
 		/// Gets the global pitch scalar value for all sounds and music.
 		/// </summary>
 		/// <returns>The current pitch scalar. Will be > 0.</returns>
@@ -164,6 +189,12 @@ namespace RTE {
 		/// <param name="includeImmobileSounds">Whether to include immobile sounds (normally used for GUI and so on) in global pitch modification. Defaults to false.</param>
 		/// <param name="includeMusic">Whether to include the music in global pitch modification. Defaults to false.</param>
 		void SetGlobalPitch(float pitch = 1.0F, bool includeImmobileSounds = false, bool includeMusic = false);
+
+		/// <summary>
+		/// The strength of the sound panning effect.
+		/// </summary>
+		/// <returns>0 - 1, where 0 is no panning and 1 is fully panned.</returns>
+		float GetSoundPanningEffectStrength() const { return m_SoundPanningEffectStrength; }
 #pragma endregion
 
 #pragma region Music Getters and Setters
@@ -172,6 +203,18 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether any music stream is currently playing.</returns>
 		bool IsMusicPlaying() const { bool isPlayingMusic; return m_AudioEnabled && m_MusicChannelGroup->isPlaying(&isPlayingMusic) == FMOD_OK ? isPlayingMusic : false; }
+
+		/// <summary>
+		/// Gets whether the music channel is muted or not.
+		/// </summary>
+		/// <returns>Whether the music channel is muted or not.</returns>
+		bool GetMusicMuted() const { return m_MuteMusic; }
+
+		/// <summary>
+		/// Mutes or unmutes the music channel.
+		/// </summary>
+		/// <param name="muteOrUnmute">Whether to mute or unmute the music channel.</param>
+		void SetMusicMuted(bool muteOrUnmute = true) { m_MuteMusic = muteOrUnmute; if (m_AudioEnabled) { m_MusicChannelGroup->setMute(m_MuteMusic); } }
 
 		/// <summary>
 		/// Gets the volume of music. Does not get volume of sounds.
@@ -218,6 +261,18 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Overall Sound Getters and Setters
+		/// <summary>
+		/// Gets whether all the sound effects channels are muted or not.
+		/// </summary>
+		/// <returns>Whether all the sound effects channels are muted or not.</returns>
+		bool GetSoundsMuted() const { return m_MuteSounds; }
+
+		/// <summary>
+		/// Mutes or unmutes all the sound effects channels.
+		/// </summary>
+		/// <param name="muteOrUnmute">Whether to mute or unmute all the sound effects channels.</param>
+		void SetSoundsMuted(bool muteOrUnmute = true) { m_MuteSounds = muteOrUnmute; if (m_AudioEnabled) { m_SoundChannelGroup->setMute(m_MuteSounds); } }
+
 		/// <summary>
 		/// Gets the volume of all sounds. Does not get volume of music.
 		/// </summary>
@@ -341,6 +396,12 @@ namespace RTE {
 		void RegisterMusicEvent(int player, NetworkMusicState state, const char *filepath, int loopsOrSilence = 0, float position = 0, float pitch = 1.0F);
 
 		/// <summary>
+		/// Clears the list of current Music events for the target player.
+		/// </summary>
+		/// <param name="player">Player to clear music events for. -1 clears for all players</param>
+		void ClearMusicEvents(int player);
+
+		/// <summary>
 		/// Fills the list with sound events happened for the specified network player.
 		/// </summary>
 		/// <param name="player">Player to get events for.</param>
@@ -355,19 +416,15 @@ namespace RTE {
 		/// <param name="soundContainer">A pointer to the SoundContainer this event is happening to, or a null pointer for global events.</param>
 		/// <param name="fadeOutTime">THe amount of time, in MS, to fade out over. This data isn't contained in SoundContainer, so it needs to be passed in separately.</param>
 		void RegisterSoundEvent(int player, NetworkSoundState state, const SoundContainer *soundContainer, int fadeOutTime = 0);
-#pragma endregion
 
-#pragma region Class Info
 		/// <summary>
-		/// Gets the class name of this object.
+		/// Clears the list of current Sound events for the target player.
 		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
+		/// <param name="player">Player to clear sound events for. -1 clears for all players.</param>
+		void ClearSoundEvents(int player);
 #pragma endregion
 
 	protected:
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
 
 		const FMOD_VECTOR c_FMODForward = FMOD_VECTOR{0, 0, 1}; //!< An FMOD_VECTOR defining the Forwards direction. Necessary for 3D Sounds.
 		const FMOD_VECTOR c_FMODUp = FMOD_VECTOR{0, 1, 0}; //!< An FMOD_VECTOR defining the Up direction. Necessary for 3D Sounds.
@@ -378,14 +435,26 @@ namespace RTE {
 		FMOD::ChannelGroup *m_SoundChannelGroup; //!< The FMOD ChannelGroup for sounds.
 		FMOD::ChannelGroup *m_MobileSoundChannelGroup; //!< The FMOD ChannelGroup for mobile sounds.
 		FMOD::ChannelGroup *m_ImmobileSoundChannelGroup; //!< The FMOD ChannelGroup for immobile sounds.
-		
+
 		bool m_AudioEnabled; //!< Bool to tell whether audio is enabled or not.
-		std::vector<const Vector *> m_CurrentActivityHumanPlayerPositions; //!< The stored positions of each human player in the current activity. Only filled when there's an activity running.
+		std::vector<std::unique_ptr<const Vector>> m_CurrentActivityHumanPlayerPositions; //!< The stored positions of each human player in the current activity. Only filled when there's an activity running.
 		std::unordered_map<int, float> m_SoundChannelMinimumAudibleDistances; //!<  An unordered map of sound channel indices to floats representing each Sound Channel's minimum audible distances. This is necessary to keep safe data in case the SoundContainer is destroyed while the sound is still playing, as happens often with TDExplosives.
 
+		bool m_MuteMaster; //!< Whether all the audio is muted.
+		bool m_MuteMusic; //!< Whether the music channel is muted.
+		bool m_MuteSounds; //!< Whether all the sound effects channels are muted.
+		float m_MasterVolume; //!< Global volume of all audio.
 		float m_MusicVolume; //!< Global music volume.
 		float m_SoundsVolume; //!< Global sounds effects volume.
 		float m_GlobalPitch; //!< Global pitch multiplier.
+
+		float m_SoundPanningEffectStrength; //!< The strength of the sound panning effect, 0 (no panning) - 1 (full panning).
+
+		//////////////////////////////////////////////////
+		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
+		float m_ListenerZOffset;
+		float m_MinimumDistanceForPanning;
+		//////////////////////////////////////////////////
 
 		std::string m_MusicPath; //!< The path to the last played music stream.
 		std::list<std::string> m_MusicPlayList; //!< Playlist of paths to music to play after the current non looping one is done.

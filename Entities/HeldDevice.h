@@ -15,6 +15,7 @@
 // Inclusions of header files
 
 #include "Attachable.h"
+#include "Actor.h"
 #include "PieMenuGUI.h"
 
 namespace RTE
@@ -48,9 +49,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(HeldDevice)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(HeldDevice);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -251,6 +252,13 @@ ClassInfoGetters
     void SetSharpLength(float newLength) { m_MaxSharpLength = newLength; }
 
 
+	/// <summary>
+	/// Gets whether this HeldDevice is currently supported by a second hand.
+	/// </summary>
+	/// <returns>Whether the device is supported or not.</returns>
+	bool GetSupported() { return m_Supported; }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetSupported
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -280,6 +288,56 @@ ClassInfoGetters
 // Return value:    None.
 
 	void SetSupportOffset(Vector newOffset) { m_SupportOffset = newOffset; }
+
+    /// <summary>
+    /// Gets whether this HeldDevice has any limitations on what can pick it up.
+    /// </summary>
+    /// <returns>Whether this HeldDevice has any limitations on what can pick it up.</returns>
+    bool HasPickupLimitations() const { return IsUnPickupable() || !m_PickupableByPresetNames.empty(); }
+
+    /// <summary>
+    /// Gets whether this HeldDevice cannot be picked up at all.
+    /// </summary>
+    /// <returns>Whether this HeldDevice cannot be picked up at all.</returns>
+    bool IsUnPickupable() const { return m_IsUnPickupable; }
+
+    /// <summary>
+    /// Sets whether this HeldDevice cannot be picked up at all.
+    /// </summary>
+    /// <param name="shouldBeUnPickupable">Whether this HeldDevice cannot be picked up at all. True means it cannot, false means any other limitations will apply normally.</param>
+    void SetUnPickupable(bool shouldBeUnPickupable) { m_IsUnPickupable = shouldBeUnPickupable; }
+
+    /// <summary>
+    /// Checks whether the given Actor can pick up this HeldDevice.
+    /// </summary>
+    /// <param name="actor">The Actor to check. Ownership is NOT transferred.</param>
+    /// <returns>Whether the given Actor can pick up this HeldDevice.</returns>
+    bool IsPickupableBy(const Actor *actor) const { return !HasPickupLimitations() || m_PickupableByPresetNames.find(actor->GetPresetName()) != m_PickupableByPresetNames.end(); }
+
+    /// <summary>
+    /// Specify that objects with the given PresetName can pick up this HeldDevice.
+    /// </summary>
+    /// <param name="presetName">The PresetName of an object that should be able to pick up this HeldDevice.</param>
+    void AddPickupableByPresetName(const std::string &presetName) { SetUnPickupable(false); m_PickupableByPresetNames.insert(presetName); }
+
+    /// <summary>
+    /// Remove allowance for objects with the given PresetName to pick up this HeldDevice.
+    /// Note that if the last allowance is removed, the HeldDevice will no longer have pickup limitations, rather than setting itself as unpickupable.
+    /// </summary>
+    /// <param name="actorPresetName">The PresetName of an object that should no longer be able to pick up this HeldDevice.</param>
+    void RemovePickupableByPresetName(const std::string &actorPresetName);
+
+    /// <summary>
+    /// Gets the multiplier for how well this HeldDevice can be gripped by Arms.
+    /// </summary>
+    /// <returns>The grip strength multiplier for this HeldDevice.</returns>
+    float GetGripStrengthMultiplier() const { return m_GripStrengthMultiplier; }
+
+    /// <summary>
+    /// Sets the multiplier for how well this HeldDevice can be gripped by Arms.
+    /// </summary>
+    /// <param name="gripStrengthMultiplier">The new grip strength multiplier for this HeldDevice.</param>
+    void SetGripStrengthMultiplier(float gripStrengthMultiplier) { m_GripStrengthMultiplier = gripStrengthMultiplier; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -351,7 +409,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    One handed device or not.
 
-    bool IsOneHanded() { return m_OneHanded; }
+    bool IsOneHanded() const { return m_OneHanded; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -471,7 +529,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Whetehr magazine is full or not.
 
-    virtual bool IsFull() { return false; }
+    virtual bool IsFull() const { return false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -530,6 +588,20 @@ ClassInfoGetters
 	/// </summary>
 	void ResetAllTimers() override { Attachable::ResetAllTimers(); m_ActivationTimer.Reset(); }
 
+#pragma region Force Transferral
+    /// <summary>
+    /// Bundles up all the accumulated impulse forces of this HeldDevice and calculates how they transfer to the joint, and therefore to the parent.
+    /// If the accumulated impulse forces exceed the joint strength or gib impulse limit of this HeldDevice, the jointImpulses Vector will be filled up to that limit and false will be returned.
+    /// Additionally, in this case, the HeldDevice will remove itself from its parent, destabilizing said parent if it's an Actor, and gib itself if appropriate.
+    /// </summary>
+    /// <param name="jointImpulses">A vector that will have the impulse forces affecting the joint ADDED to it.</param>
+    /// <param name="jointStiffnessValueToUse">An optional override for the HeldDevice's joint stiffness for this function call. Primarily used to allow subclasses to perform special behavior.</param>
+    /// <param name="jointStrengthValueToUse">An optional override for the HeldDevice's joint strength for this function call. Primarily used to allow subclasses to perform special behavior.</param>
+    /// <param name="gibImpulseLimitValueToUse">An optional override for the HeldDevice's gib impulse limit for this function call. Primarily used to allow subclasses to perform special behavior.</param>
+    /// <returns>False if the HeldDevice has no parent or its accumulated forces are greater than its joint strength or gib impulse limit, otherwise true.</returns>
+    bool TransferJointImpulses(Vector &jointImpulses, float jointStiffnessValueToUse = -1, float jointStrengthValueToUse = -1, float gibImpulseLimitValueToUse = -1) override;
+#pragma endregion
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -562,13 +634,16 @@ protected:
     float m_MaxSharpLength;
     // If this HeldDevice is currently being supported by a second hand.
     bool m_Supported;
+    bool m_IsUnPickupable; //!< Whether or not this HeldDevice should be able to be picked up at all.
+    std::unordered_set<std::string> m_PickupableByPresetNames; //!< The unordered set of PresetNames that can pick up this HeldDevice if it's dropped. An empty set means there are no PresetName limitations.
+    float m_GripStrengthMultiplier; //!< The multiplier for how well this HeldDevice can be gripped by Arms.
     // Blink timer for the icon
     Timer m_BlinkTimer;
     // Extra pie menu options that this should add to any actor who holds this device
-    std::list<PieMenuGUI::Slice> m_PieSlices;
+    std::list<PieSlice> m_PieSlices;
     // How loud this device is when activated. 0 means perfectly quiet 0.5 means half of normal (normal equals audiable from ~half a screen)
     float m_Loudness;
-    // If this weapon belongs to the "Explosive Weapons" grroup or not
+    // If this weapon belongs to the "Explosive Weapons" group or not
     bool m_IsExplosiveWeapon;
 
 

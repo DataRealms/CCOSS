@@ -14,15 +14,16 @@
 #include "HeldDevice.h"
 #include "MovableMan.h"
 #include "AtomGroup.h"
+#include "Arm.h"
+#include "AHuman.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
 
 
 namespace RTE {
 
-ConcreteClassInfo(HeldDevice, Attachable, 50)
-
+ConcreteClassInfo(HeldDevice, Attachable, 50);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -40,13 +41,19 @@ void HeldDevice::Clear()
 	m_DualWieldable = false;
     m_StanceOffset.Reset();
     m_SharpStanceOffset.Reset();
-    m_SharpAim = 0.0f;
+    m_SharpAim = 0.0F;
     m_MaxSharpLength = 0;
     m_Supported = false;
     m_SupportOffset.Reset();
+    m_IsUnPickupable = false;
+    m_PickupableByPresetNames.clear();
+    m_GripStrengthMultiplier = 1.0F;
     m_BlinkTimer.Reset();
     m_PieSlices.clear();
     m_Loudness = -1;
+
+    // NOTE: This special override of a parent class member variable avoids needing an extra variable to avoid overwriting INI values.
+    m_CollidesWithTerrainWhileAttached = false;
 }
 
 
@@ -92,6 +99,12 @@ int HeldDevice::Create()
         else
             m_Loudness = 1.0;
     }
+
+    // Make it so held devices are dropped gently when their parent gibs
+    m_ParentGibBlastStrengthMultiplier = 0.0F;
+
+    // Make it so users can't accidentally set this to true for HeldDevices, since it'll cause crashes when swapping inventory items around.
+    m_DeleteWhenRemovedFromParent = false;
     
     // All HeldDevice:s by default avoid hitting and getting physically hit by AtomGoups when they are at rest
     m_IgnoresAGHitsWhenSlowerThan = 1.0;
@@ -125,13 +138,18 @@ int HeldDevice::Create(const HeldDevice &reference)
     m_StanceOffset = reference.m_StanceOffset;
     m_SharpStanceOffset = reference.m_SharpStanceOffset;
     m_SupportOffset = reference.m_SupportOffset;
+    m_IsUnPickupable = reference.m_IsUnPickupable;
+    for (std::string referenceActorWhoCanPickThisUp : reference.m_PickupableByPresetNames) {
+        m_PickupableByPresetNames.insert(referenceActorWhoCanPickThisUp);
+    }
+    m_GripStrengthMultiplier = reference.m_GripStrengthMultiplier;
 
     m_SharpAim = reference.m_SharpAim;
     m_MaxSharpLength = reference.m_MaxSharpLength;
     m_Supported = reference.m_Supported;
     m_Loudness = reference.m_Loudness;
 
-    for (list<PieMenuGUI::Slice>::const_iterator itr = reference.m_PieSlices.begin(); itr != reference.m_PieSlices.end(); ++itr)
+    for (list<PieSlice>::const_iterator itr = reference.m_PieSlices.begin(); itr != reference.m_PieSlices.end(); ++itr)
         m_PieSlices.push_back(*itr);
 
     return 0;
@@ -146,7 +164,7 @@ int HeldDevice::Create(const HeldDevice &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int HeldDevice::ReadProperty(std::string propName, Reader &reader)
+int HeldDevice::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "HeldDeviceType")
         reader >> m_HeldDeviceType;
@@ -160,16 +178,38 @@ int HeldDevice::ReadProperty(std::string propName, Reader &reader)
         reader >> m_SharpStanceOffset;
     else if (propName == "SupportOffset")
         reader >> m_SupportOffset;
-    else if (propName == "SharpLength")
+    else if (propName == "PickupableBy") {
+        std::string pickupableByValue = reader.ReadPropValue();
+        if (pickupableByValue == "PickupableByEntries") {
+            while (reader.NextProperty()) {
+                std::string pickupableByEntryType = reader.ReadPropName();
+                if (pickupableByEntryType == "AddPresetNameEntry") {
+                    m_PickupableByPresetNames.insert(reader.ReadPropValue());
+                } else if (pickupableByEntryType == "AddClassNameEntry ") {
+                    reader.ReportError("AddClassNameEntry is not yet supported.");
+                } else if (pickupableByEntryType == "AddGroupEntry") {
+                    reader.ReportError("AddGroupEntry is not yet supported.");
+                } else if (pickupableByEntryType == "AddDataModuleEntry ") {
+                    reader.ReportError("AddDataModuleEntry is not yet supported.");
+                } else {
+                    break;
+                }
+            }
+        } else if (pickupableByValue == "None") {
+            SetUnPickupable(true);
+        }
+    } else if (propName == "GripStrengthMultiplier") {
+        reader >> m_GripStrengthMultiplier;
+    } else if (propName == "SharpLength")
         reader >> m_MaxSharpLength;
     else if (propName == "Loudness")
         reader >> m_Loudness;
     else if (propName == "AddPieSlice")
     {
-        PieMenuGUI::Slice newSlice;
+        PieSlice newSlice;
         reader >> newSlice;
         m_PieSlices.push_back(newSlice);
-		PieMenuGUI::AddAvailableSlice(newSlice);
+		PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
     }
     else
         return Attachable::ReadProperty(propName, reader);
@@ -201,11 +241,13 @@ int HeldDevice::Save(Writer &writer) const
     writer << m_SharpStanceOffset;
     writer.NewProperty("SupportOffset");
     writer << m_SupportOffset;
+    writer.NewProperty("GripStrengthMultiplier");
+    writer << m_GripStrengthMultiplier;
     writer.NewProperty("SharpLength");
     writer << m_MaxSharpLength;
     writer.NewProperty("Loudness");
     writer << m_Loudness;
-    for (list<PieMenuGUI::Slice>::const_iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
+    for (list<PieSlice>::const_iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
     {
         writer.NewProperty("AddPieSlice");
         writer << *itr;
@@ -239,8 +281,11 @@ void HeldDevice::Destroy(bool notInherited)
 
 Vector HeldDevice::GetStanceOffset() const
 {
-    if (m_SharpAim > 0)
-        return m_SharpStanceOffset.GetXFlipped(m_HFlipped);
+	if (m_SharpAim > 0) {
+		float rotAngleScalar = std::abs(std::sin(GetRootParent()->GetRotAngle()));
+		// Deviate the vertical axis towards regular StanceOffset based on the user's rotation so that sharp aiming doesn't look awkward when prone
+		return Vector(m_SharpStanceOffset.GetX(), m_SharpStanceOffset.GetY() * (1.0F - rotAngleScalar) + m_StanceOffset.GetY() * rotAngleScalar).GetXFlipped(m_HFlipped);
+	}
     else
         return m_StanceOffset.GetXFlipped(m_HFlipped);
 }
@@ -274,6 +319,14 @@ Vector HeldDevice::GetMagazinePos() const
     return m_Pos;    
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void HeldDevice::RemovePickupableByPresetName(const std::string &actorPresetName) {
+    std::unordered_set<std::string>::iterator pickupableByPresetNameEntry = m_PickupableByPresetNames.find(actorPresetName);
+    if (pickupableByPresetNameEntry != m_PickupableByPresetNames.end()) { m_PickupableByPresetNames.erase(pickupableByPresetNameEntry); }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  AddPieMenuSlices
@@ -283,7 +336,7 @@ Vector HeldDevice::GetMagazinePos() const
 bool HeldDevice::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
     // Add the custom scripted options of this specific device
-    for (list<PieMenuGUI::Slice>::iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
+    for (list<PieSlice>::iterator itr = m_PieSlices.begin(); itr != m_PieSlices.end(); ++itr)
         pPieMenu->AddSlice(*itr);
 
     return false;
@@ -347,6 +400,35 @@ bool HeldDevice::OnMOHit(MovableObject *pOtherMO)
     return false;
 }
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool HeldDevice::TransferJointImpulses(Vector &jointImpulses, float jointStiffnessValueToUse, float jointStrengthValueToUse, float gibImpulseLimitValueToUse) {
+    MovableObject *parent = m_Parent;
+    if (!parent) {
+        return false;
+    }
+    if (m_ImpulseForces.empty()) {
+        return true;
+    }
+    const Arm *parentAsArm = dynamic_cast<Arm *>(parent);
+    if (parentAsArm && parentAsArm->GetGripStrength() > 0 && jointStrengthValueToUse < 0) {
+        jointStrengthValueToUse = parentAsArm->GetGripStrength() * m_GripStrengthMultiplier;
+        if (m_Supported) {
+            const AHuman *rootParentAsAHuman = dynamic_cast<AHuman *>(GetRootParent());
+            if (rootParentAsAHuman != nullptr) { jointStrengthValueToUse += rootParentAsAHuman->GetBGArm() ? rootParentAsAHuman->GetBGArm()->GetGripStrength() * m_GripStrengthMultiplier : 0.0F; }
+        }
+    }
+    bool intact = Attachable::TransferJointImpulses(jointImpulses, jointStiffnessValueToUse, jointStrengthValueToUse, gibImpulseLimitValueToUse);
+    if (!intact) {
+        Actor *rootParentAsActor = dynamic_cast<Actor *>(parent->GetRootParent());
+        if (rootParentAsActor && rootParentAsActor->GetStatus() == Actor::STABLE) { rootParentAsActor->SetStatus(Actor::UNSTABLE); }
+    }
+    return intact;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Travel
@@ -371,7 +453,7 @@ void HeldDevice::Update()
     Attachable::Update();
 
     // Remove loose items that have completely disappeared into the terrain, unless they're pinned
-    if (!m_pParent && m_PinStrength <= 0 && m_RestTimer.IsPastSimMS(20000) && m_CanBeSquished && m_pAtomGroup->RatioInTerrain() > 0.9)
+    if (!m_Parent && m_PinStrength <= 0 && m_RestTimer.IsPastSimMS(20000) && m_CanBeSquished && m_pAtomGroup->RatioInTerrain() > 0.9)
         GibThis();
 
     if (m_Activated)
@@ -389,7 +471,7 @@ void HeldDevice::Update()
         }
     }
 
-    if (!m_pParent) {
+    if (!m_Parent) {
 
     }
     else {
@@ -457,7 +539,7 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 
     Attachable::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 
-    if (!m_pParent)
+    if (!m_Parent && !IsUnPickupable())
     {
         // Only draw if the team viewing this has seen the space where this is located
         int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));

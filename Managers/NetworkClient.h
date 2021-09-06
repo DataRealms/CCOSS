@@ -4,10 +4,14 @@
 #include "Singleton.h"
 #include "SoundContainer.h"
 
-#include "RakPeerInterface.h"
 #include "NetworkMessages.h"
 
+// TODO: Figure out how to deal with anything that is defined by these and include them in implementation only to remove Windows.h macro pollution from our headers.
+#include "RakPeerInterface.h"
 #include "NatPunchthroughClient.h"
+
+// RakNet includes Windows.h so we need to undefine macros that conflict with our method names.
+#undef GetClassName
 
 #define g_NetworkClient NetworkClient::Instance()
 
@@ -23,6 +27,7 @@ namespace RTE {
 	/// The centralized singleton manager of the network multiplayer client.
 	/// </summary>
 	class NetworkClient : public Singleton<NetworkClient> {
+		friend class SettingsMan;
 
 	public:
 
@@ -30,13 +35,13 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a NetworkClient object in system memory. Create() should be called before using the object.
 		/// </summary>
-		NetworkClient() { Clear(); Create(); }
+		NetworkClient() { Clear(); Initialize(); }
 
 		/// <summary>
 		/// Makes the NetworkClient object ready for use.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create();
+		int Initialize();
 #pragma endregion
 
 #pragma region Destruction
@@ -57,6 +62,31 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Whether the client is connected and registered to a server.</returns>
 		bool IsConnectedAndRegistered() const { return m_IsConnected && m_IsRegistered; }
+		
+		/// <summary>
+		/// Gets scene width for network client.
+		/// </summary>
+		/// <returns>Current scene width.</returns>
+		int GetSceneWidth() const { return m_SceneWidth; }
+
+		/// <summary>
+		/// Gets scene height for network client.
+		/// </summary>
+		/// <returns>Current scene height.</returns>
+		int GetSceneHeight() const { return m_SceneHeight; }
+		
+		/// <summary>
+		/// Indicates whether the scene wraps its scrolling around the X axis for network client.
+		/// </summary>
+		/// <returns>Whether the scene wraps around the X axis or not.</returns>
+		bool SceneWrapsX() const { return m_SceneWrapsX; }
+
+		/// <summary>
+		/// Get the coordinates of the centre of the current frame.
+		/// </summary>
+		/// <returns>A vector containing the X/Y coordinates of the frame target.</returns>
+		const Vector & GetFrameTarget()const { return m_TargetPos[m_CurrentFrame]; }
+
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -107,17 +137,7 @@ namespace RTE {
 		RakNet::SystemAddress ConnectBlocking(RakNet::RakPeerInterface *rakPeer, const char *address, unsigned short port);
 #pragma endregion
 
-#pragma region Class Info
-		/// <summary>
-		/// Gets the class name of this object.
-		/// </summary>
-		/// <returns>A string with the friendly-formatted type name of this object.</returns>
-		const std::string & GetClassName() const { return c_ClassName; }
-#pragma endregion
-
 	protected:
-
-		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 		static constexpr unsigned short c_PlayerNameCharLimit = 15; //!< Maximum length of the player name.
 		std::string m_PlayerName; //!< The player name the will be used by the client in network games.

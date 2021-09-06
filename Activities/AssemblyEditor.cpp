@@ -23,34 +23,29 @@
 #include "ACRocket.h"
 #include "HeldDevice.h"
 #include "Scene.h"
-#include "System.h"
 #include "DataModule.h"
 
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "GUI/AllegroScreen.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroInput.h"
-#include "GUI/GUIControlManager.h"
-#include "GUI/GUICollectionBox.h"
-#include "GUI/GUITab.h"
-#include "GUI/GUIListBox.h"
-#include "GUI/GUITextBox.h"
-#include "GUI/GUIButton.h"
-#include "GUI/GUILabel.h"
-#include "GUI/GUIComboBox.h"
+#include "GUI.h"
+#include "GUIFont.h"
+#include "AllegroScreen.h"
+#include "AllegroBitmap.h"
+#include "AllegroInput.h"
+#include "GUIControlManager.h"
+#include "GUICollectionBox.h"
+#include "GUITab.h"
+#include "GUIListBox.h"
+#include "GUITextBox.h"
+#include "GUIButton.h"
+#include "GUILabel.h"
+#include "GUIComboBox.h"
 
 #include "AssemblyEditorGUI.h"
-#include "PieMenuGUI.h"
-#include "GABaseDefense.h"
 #include "BunkerAssembly.h"
 #include "BunkerAssemblyScheme.h"
 
-extern bool g_ResetActivity;
-
 namespace RTE {
 
-ConcreteClassInfo(AssemblyEditor, EditorActivity, 0)
+ConcreteClassInfo(AssemblyEditor, EditorActivity, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -106,7 +101,7 @@ int AssemblyEditor::Create(const AssemblyEditor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int AssemblyEditor::ReadProperty(std::string propName, Reader &reader)
+int AssemblyEditor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "CPUTeam")
@@ -129,18 +124,9 @@ int AssemblyEditor::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this AssemblyEditor with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int AssemblyEditor::Save(Writer &writer) const
-{
-    EditorActivity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int AssemblyEditor::Save(Writer &writer) const {
+	EditorActivity::Save(writer);
+	return 0;
 }
 
 
@@ -309,19 +295,19 @@ void AssemblyEditor::Update()
     m_NeedSave = m_pEditorGUI->EditMade() || m_NeedSave;
 
     // Get any mode change commands that the user gave the Editor GUI
-    if (m_pEditorGUI->GetActivatedPieSlice() == PieMenuGUI::PSI_NEW && m_EditorMode != NEWDIALOG)
+    if (m_pEditorGUI->GetActivatedPieSlice() == PieSlice::PieSliceIndex::PSI_NEW && m_EditorMode != NEWDIALOG)
     {
         m_pEditorGUI->SetEditorGUIMode(AssemblyEditorGUI::INACTIVE);
         m_EditorMode = EditorActivity::NEWDIALOG;
         m_ModeChange = true;
     }
-    else if (m_pEditorGUI->GetActivatedPieSlice() == PieMenuGUI::PSI_LOAD && m_EditorMode != LOADDIALOG)
+    else if (m_pEditorGUI->GetActivatedPieSlice() == PieSlice::PieSliceIndex::PSI_LOAD && m_EditorMode != LOADDIALOG)
     {
         m_pEditorGUI->SetEditorGUIMode(AssemblyEditorGUI::INACTIVE);
         m_EditorMode = EditorActivity::LOADDIALOG;
         m_ModeChange = true;
     }
-    else if (m_pEditorGUI->GetActivatedPieSlice() == PieMenuGUI::PSI_SAVE && m_EditorMode != SAVEDIALOG)
+    else if (m_pEditorGUI->GetActivatedPieSlice() == PieSlice::PieSliceIndex::PSI_SAVE && m_EditorMode != SAVEDIALOG)
     {
         m_pEditorGUI->SetEditorGUIMode(AssemblyEditorGUI::INACTIVE);
         m_EditorMode = EditorActivity::SAVEDIALOG;
@@ -670,7 +656,7 @@ bool AssemblyEditor::SaveAssembly(string saveAsName, bool forceOverwrite)
 		else
 		{
 			sceneFilePath = g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/BunkerAssemblies/" + saveAsName + ".ini";
-			g_System.MakeDirectory((g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/BunkerAssemblies").c_str());
+			System::MakeDirectory((g_PresetMan.GetDataModule(m_ModuleSpaceID)->GetFileName() + "/BunkerAssemblies").c_str());
 		}
 
 		if (g_PresetMan.AddEntityPreset(pBA, m_ModuleSpaceID, forceOverwrite, sceneFilePath))

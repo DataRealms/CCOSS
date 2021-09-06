@@ -13,9 +13,9 @@ namespace RTE {
 
 	public:
 
-		EntityAllocation(MetaPlayer)
-		SerializableOverrideMethods
-		ClassInfoGetters
+		EntityAllocation(MetaPlayer);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 #pragma region Creation
 		/// <summary>

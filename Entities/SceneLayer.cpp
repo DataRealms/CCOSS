@@ -16,7 +16,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(SceneLayer, Entity, 0)
+ConcreteClassInfo(SceneLayer, Entity, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -291,7 +291,7 @@ int SceneLayer::ClearData()
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int SceneLayer::ReadProperty(std::string propName, Reader &reader)
+int SceneLayer::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "BitmapFile")
         reader >> m_BitmapFile;

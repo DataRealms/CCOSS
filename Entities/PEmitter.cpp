@@ -19,7 +19,7 @@
 
 namespace RTE {
 
-	ConcreteClassInfo(PEmitter, MOSParticle, 100)
+	ConcreteClassInfo(PEmitter, MOSParticle, 100);
 
 		//////////////////////////////////////////////////////////////////////////////////////////
 		// Method:          Clear
@@ -115,7 +115,7 @@ namespace RTE {
 	//                  is called. If the property isn't recognized by any of the base classes,
 	//                  false is returned, and the reader's position is untouched.
 
-	int PEmitter::ReadProperty(std::string propName, Reader &reader)
+	int PEmitter::ReadProperty(const std::string_view &propName, Reader &reader)
 	{
 		if (propName == "AddEmission")
 		{

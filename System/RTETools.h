@@ -17,25 +17,25 @@ namespace RTE {
 	/// Gets the ratio between the physics engine's meters and on-screen pixels.
 	/// </summary>
 	/// <returns>A float describing the current MPP ratio.</returns>
-	float GetMPP();
+	inline float GetMPP() { return c_MPP; }
 
 	/// <summary>
 	/// Gets the ratio between on-screen pixels and the physics engine's meters.
 	/// </summary>
 	/// <returns>A float describing the current PPM ratio.</returns>
-	float GetPPM();
+	inline float GetPPM() { return c_PPM; }
 
 	/// <summary>
 	/// Gets the ratio between the physics engine's Liters and on-screen pixels.
 	/// </summary>
 	/// <returns>A float describing the current LPP ratio.</returns>
-	float GetLPP();
+	inline float GetLPP() { return c_LPP; }
 
 	/// <summary>
 	/// Gets the ratio between the on-screen pixels and the physics engine's Liters.
 	/// </summary>
 	/// <returns>A float describing the current PPL ratio.</returns>
-	float GetPPL();
+	inline float GetPPL() { return c_PPL; }
 #pragma endregion
 
 #pragma region Random Numbers
@@ -48,7 +48,7 @@ namespace RTE {
 	/// Seed the mt19937 random number generator. mt19937 is the standard mersenne_twister_engine.
 	/// </summary>
 	/// <param name="seed">Seed for the random number generator.</param>
-	void SeedRNG(unsigned int seed);
+	inline void SeedRNG(unsigned int seed) { g_RNG.seed(seed); }
 
 	/// <summary>
 	/// Function template which returns a uniformly distributed random number in the range [-1, 1].
@@ -114,13 +114,13 @@ namespace RTE {
 #pragma region Interpolation
 	/// <summary>
 	/// Simple Linear Interpolation, with an added bonus: scaleStart and scaleEnd let you define your scale, where 0 and 1 would be standard scale.
-	/// This scale is used to normalize your progressScalar value and lerp accordingly.
+	/// This scale is used to normalize your progressScalar value and LERP accordingly.
 	/// </summary>
-	/// <param name="scaleStart">The start of the scale to lerp along.</param>
-	/// <param name="scaleEnd">The end of the scale to lerp along.</param>
-	/// <param name="startValue">The start value of your lerp.</param>
-	/// <param name="endValue">The end value of your lerp.</param>
-	/// <param name="progressScalar">How far your lerp has progressed. Automatically normalized through use of scaleStart and scaleEnd.</param>
+	/// <param name="scaleStart">The start of the scale to LERP along.</param>
+	/// <param name="scaleEnd">The end of the scale to LERP along.</param>
+	/// <param name="startValue">The start value of your LERP.</param>
+	/// <param name="endValue">The end value of your LERP.</param>
+	/// <param name="progressScalar">How far your LERP has progressed. Automatically normalized through use of scaleStart and scaleEnd.</param>
 	/// <returns>Interpolated value.</returns>
 	float LERP(float scaleStart, float scaleEnd, float startValue, float endValue, float progressScalar);
 
@@ -201,23 +201,45 @@ namespace RTE {
 	/// </summary>
 	/// <param name="angleDegrees">The angle value to correct. In degrees.</param>
 	/// <returns>A float with the represented angle as full rotations being 256.</returns>
-	float GetAllegroAngle(float angleDegrees);
+	inline float GetAllegroAngle(float angleDegrees) { return (angleDegrees / 360) * 256; }
+
+	/// <summary>
+	/// Returns the given angle converted from degrees to radians.
+	/// </summary>
+	/// <param name="angleDegrees">The angle in degrees to be converted.</param>
+	/// <returns>The converted angle in radians.</returns>
+	inline float DegreesToRadians(float angleDegrees) { return angleDegrees / 180.0F * c_PI; }
+
+	/// <summary>
+	/// Returns the given angle converted from radians to degrees.
+	/// </summary>
+	/// <param name="angleRadians">The angle in radians to be converted.</param>
+	/// <returns>The converted angle in degrees.</returns>
+	inline float RadiansToDegrees(float angleRadians) { return angleRadians / c_PI * 180.0F; }
+
+	/// <summary>
+	/// Rounds a float to a set fixed point precision (digits after decimal point) with option to always ceil or always floor the remainder.
+	/// </summary>
+	/// <param name="inputFloat">The input float to round.</param>
+	/// <param name="roundingMode">Method of rounding to use. 0 for system default, 1 for floored remainder, 2 for ceiled remainder.</param>
+	/// <returns>A string of the float, rounded and displayed to chosen precision.</returns>
+	std::string RoundFloatToPrecision(float input, int precision, int roundingMode = 0);
 #pragma endregion
 
 #pragma region Misc
 	/// <summary>
-	/// Fires up the default browser for the current OS on a specific URL.
+	/// Convenience method that takes in a double pointer array and returns a std::vector with its contents, because pointers-to-pointers are the devil. The passed in array is deleted in the process so no need to delete it manually.
 	/// </summary>
-	/// <param name="goToURL">A string with the URL to send the browser to.</param>
-	void OpenBrowserToURL(std::string goToURL);
-
-	/// <summary>
-	/// Searches through an ASCII file on disk for a specific string and tells whether it was found or not.
-	/// </summary>
-	/// <param name="">The path to the ASCII file to search.</param>
-	/// <param name="">The exact string to look for. Case sensitive!</param>
-	/// <returns>Whether the file was found AND that string was found in that file.</returns>
-	bool ASCIIFileContainsString(std::string filePath, std::string findString);
+	/// <param name="arrayOfType">The double pointer to convert to a std::vector.</param>
+	/// <param name="arraySize">The size of the double pointer array.</param>
+	template <typename Type> std::vector<Type *> ConvertDoublePointerToVectorOfPointers(Type **arrayOfType, size_t arraySize) {
+		std::unique_ptr<Type *[]> doublePointerArray = std::unique_ptr<Type *[]>(arrayOfType);
+		std::vector<Type *> outputVector;
+		for (size_t i = 0; i < arraySize; ++i) {
+			outputVector.emplace_back(doublePointerArray[i]);
+		}
+		return outputVector;
+	}
 #pragma endregion
 }
 #endif

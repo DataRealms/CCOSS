@@ -1,34 +1,12 @@
 #ifndef _GUISCROLLPANEL_
 #define _GUISCROLLPANEL_
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// File:            GUIScrollPanel.h
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     GUIScrollPanel class
-// Project:         GUI Library
-// Author(s):       Jason Boettcher
-//                  jackal@shplorb.com
-//                  www.shplorb.com/~jackal
+namespace RTE {
 
-
-namespace RTE
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Class:           GUIScrollPanel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     A scrollbar panel class used for controls requiring a scrollbar.
-// Parent(s):       Panel.
-// Class history:   1/12/2004 GUIScrollPanel Created.
-
-class GUIScrollPanel :
-    public GUIPanel
-{
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Public member variable, method and friend function declarations
+/// <summary>
+/// A scrollbar panel class used for controls requiring a scrollbar.
+/// </summary>
+class GUIScrollPanel : public GUIPanel {
 
 public:
 
@@ -60,7 +38,7 @@ public:
 //                  system memory.
 // Arguments:       GUIManager.
 
-    GUIScrollPanel(GUIManager *Manager);
+    explicit GUIScrollPanel(GUIManager *Manager);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -169,7 +147,7 @@ public:
 // Description:     Gets the minimum value for the scrollpanel
 // Arguments:       None.
 
-    int GetMinimum();
+    int GetMinimum() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -187,7 +165,7 @@ public:
 // Description:     Gets the maximum value for the scrollpanel
 // Arguments:       None.
 
-    int GetMaximum();
+    int GetMaximum() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -205,7 +183,7 @@ public:
 // Description:     Gets the current value of the scrollpanel.
 // Arguments:       None.
 
-    int GetValue();
+    int GetValue() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -223,7 +201,7 @@ public:
 // Description:     Gets the size of the page.
 // Arguments:       None.
 
-    int GetPageSize();
+    int GetPageSize() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -241,7 +219,7 @@ public:
 // Description:     Gets the orientation of the scrollpanel.
 // Arguments:       None.
 
-    int GetOrientation();
+    int GetOrientation() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -259,14 +237,15 @@ public:
 // Description:     Gets the small change value.
 // Arguments:       None.
 
-    int GetSmallChange();
+    int GetSmallChange() const;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
+	/// <summary>
+	/// Gets the value resolution for this scroll panel.
+	/// </summary>
+	/// <returns>The value resolution</returns>
+	int GetValueResolution() const;
 
 protected:
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          LoadProps
@@ -283,13 +262,7 @@ protected:
 // Description:     Save values to a property class.
 // Arguments:       Properties.
 
-    void SaveProps(GUIProperties *Props);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
-
-protected:
+    void SaveProps(GUIProperties *Props) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -300,12 +273,32 @@ protected:
 
     void BuildBitmap(bool UpdateSize, bool UpdateKnob);
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Private member variable and method declarations
-
 private:
 
+	GUISkin *m_Skin;
+	GUIBitmap *m_DrawBitmap[3];
+
+	// User attributes
+	int m_Orientation;
+	int m_Minimum;
+	int m_Maximum;
+	int m_Value;
+	int m_PageSize;
+	int m_SmallChange;
+
+	// Internal attributes
+	bool m_RebuildSize;
+	bool m_RebuildKnob;
+	int m_ButtonSize;
+	int m_MinimumKnobSize;
+	int m_KnobPosition;
+	int m_KnobLength;
+	bool m_ButtonPushed[2];
+	bool m_GrabbedKnob;
+	bool m_GrabbedBackg;
+	int m_GrabbedPos;
+	int m_GrabbedSide;
+	int m_ValueResolution; //!< How much the value increases/decreases on each mouse wheel change when scrolling.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          BuildButton
@@ -313,7 +306,7 @@ private:
 // Description:     Build a button.
 // Arguments:       ArrowName, Width, Height.
 
-    void BuildButton(const std::string ArrowName, int Y, int Width, int Height);
+    void BuildButton(const std::string &ArrowName, int Y, int Width, int Height);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -331,7 +324,7 @@ private:
 // Description:     Build the knob.
 // Arguments:       None.
 
-    void BuildKnob(const std::string Section, int X, int Y, int Width, int Height);
+    void BuildKnob(const std::string &Section, int X, int Y, int Width, int Height);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -350,37 +343,6 @@ private:
 // Arguments:       Delta movement.
 
     void AdjustValue(int Delta);
-
-
-// Members
-    
-    GUISkin                *m_Skin;
-    GUIBitmap            *m_DrawBitmap[3];
-    
-    // User attributes
-    int                    m_Orientation;
-    int                    m_Minimum;
-    int                    m_Maximum;
-    int                    m_Value;
-    int                    m_PageSize;
-    int                    m_SmallChange;
-
-    // Internal attributes
-    bool                m_RebuildSize;
-    bool                m_RebuildKnob;
-    int                    m_ButtonSize;
-    int                    m_MinimumKnobSize;
-    int                    m_KnobPosition;
-    int                    m_KnobLength;
-    bool                m_ButtonPushed[2];
-    bool                m_GrabbedKnob;
-    bool                m_GrabbedBackg;
-    int                    m_GrabbedPos;
-    int                    m_GrabbedSide;
 };
-
-
-}; // namespace RTE
-
-
-#endif  //  _GUILISTPANEL_
+};
+#endif

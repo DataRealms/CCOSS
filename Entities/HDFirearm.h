@@ -41,9 +41,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(HDFirearm)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(HDFirearm);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     HDFirearm
@@ -110,17 +110,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this HDFirearm, including the mass of Magazine
-//                  may have inserted.
-// Arguments:       None.
-// Return value:    A float describing the mass value in Kilograms (kg).
-
-    float GetMass() const override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetRateOfFire
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the rate of fire of this. This applies even if semi-auto. it
@@ -142,14 +131,29 @@ ClassInfoGetters
 	void SetRateOfFire(int newRate) { m_RateOfFire = newRate; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetMagazine
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the currently attached Magazine, if any.
-// Arguments:       None.
-// Return value:    The Magazine, if any is attached.
+    /// <summary>
+    /// Gets the Magazine of this HDFirearm.
+    /// </summary>
+    /// <returns>A pointer to Magazine of this HDFirearm. Ownership is NOT transferred!</returns>
+    Magazine * GetMagazine() const { return m_pMagazine; }
 
-	Magazine * GetMagazine() const { return m_pMagazine; }
+    /// <summary>
+    /// Sets the Magazine for this HDFirearm. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newMagazine">The new Magazine to use.</param>
+    void SetMagazine(Magazine *newMagazine);
+
+    /// <summary>
+    /// Gets the flash of this HDFirearm.
+    /// </summary>
+    /// <returns>A pointer to flash of this HDFirearm. Ownership is NOT transferred!</returns>
+    Attachable * GetFlash() const { return m_pFlash; }
+
+    /// <summary>
+    /// Sets the flash for this HDFirearm. Ownership IS transferred!
+    /// </summary>
+    /// <param name="newTurret">The new flash to use.</param>
+    void SetFlash(Attachable *newFlash);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -423,37 +427,101 @@ ClassInfoGetters
 
 	void SetMuzzleOffset(Vector newOffset) override { m_MuzzleOff = newOffset; }
 
+	/// <summary>
+	/// Gets this HDFirearm's pre fire sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this HDFirearm's pre fire sound.</returns>
+	SoundContainer * GetPreFireSound() const { return m_PreFireSound; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-// Arguments:       An moid specifying the MOID that this MovableObject is
-//                  assigned for this frame.
-// Return value:    None.
+	/// <summary>
+	/// Sets this HDFirearm's pre fire sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this HDFirearm's pre fire sound.</param>
+	void SetPreFireSound(SoundContainer *newSound) { m_PreFireSound = newSound; }
 
-    void SetID(const MOID newID) override;
-    
+	/// <summary>
+	/// Gets this HDFirearm's fire sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this HDFirearm's fire sound.</returns>
+	SoundContainer * GetFireSound() const { return m_FireSound; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Attach
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Attaches this Attachable to a host MOSprite
-// Arguments:       Pointer to the MOSprite to attach to. Ownership is NOT transferred!
-// Return value:    None.
+	/// <summary>
+	/// Sets this HDFirearm's fire sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this HDFirearm's fire sound.</param>
+	void SetFireSound(SoundContainer *newSound) { m_FireSound = newSound; }
 
-	void Attach(MOSRotating *pParent) override { HeldDevice::Attach(pParent); m_Reloading = false; m_ReloadTmr.Reset(); }
+	/// <summary>
+	/// Gets this HDFirearm's fire echo sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this HDFirearm's fire echo sound.</returns>
+	SoundContainer * GetFireEchoSound() const { return m_FireEchoSound; }
 
+	/// <summary>
+	/// Sets this HDFirearm's fire echo sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this HDFirearm's fire echo sound.</param>
+	void SetFireEchoSound(SoundContainer *newSound) { m_FireEchoSound = newSound; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Detach
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Detaches this Attachable from its host MOSprite
-// Arguments:       None.
-// Return value:    None.
+	/// <summary>
+	/// Gets this HDFirearm's active sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this HDFirearm's active sound.</returns>
+	SoundContainer * GetActiveSound() const { return m_ActiveSound; }
 
-	void Detach() override { HeldDevice::Detach(); m_Activated = m_Reloading = false; m_ReloadTmr.Reset(); }
+	/// <summary>
+	/// Sets this HDFirearm's active sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this HDFirearm's active sound.</param>
+	void SetActiveSound(SoundContainer *newSound) { m_ActiveSound = newSound; }
 
+	/// <summary>
+	/// Gets this HDFirearm's deactivation sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this HDFirearm's deactivation sound.</returns>
+	SoundContainer * GetDeactivationSound() const { return m_DeactivationSound; }
+
+	/// <summary>
+	/// Sets this HDFirearm's deactivation sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this HDFirearm's deactivation sound.</param>
+	void SetDeactivationSound(SoundContainer *newSound) { m_DeactivationSound = newSound; }
+
+	/// <summary>
+	/// Gets this HDFirearm's empty sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this HDFirearm's empty sound.</returns>
+	SoundContainer * GetEmptySound() const { return m_EmptySound; }
+
+	/// <summary>
+	/// Sets this HDFirearm's empty sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this HDFirearm's empty sound.</param>
+	void SetEmptySound(SoundContainer *newSound) { m_EmptySound = newSound; }
+
+	/// <summary>
+	/// Gets this HDFirearm's reload start sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this HDFirearm's reload start sound.</returns>
+	SoundContainer * GetReloadStartSound() const { return m_ReloadStartSound; }
+
+	/// <summary>
+	/// Sets this HDFirearm's reload start sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this HDFirearm's reload start sound.</param>
+	void SetReloadStartSound(SoundContainer *newSound) { m_ReloadStartSound = newSound; }
+
+	/// <summary>
+	/// Gets this HDFirearm's reload end sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this HDFirearm's reload end sound.</returns>
+	SoundContainer * GetReloadEndSound() const { return m_ReloadEndSound; }
+
+	/// <summary>
+	/// Sets this HDFirearm's reload end sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this HDFirearm's reload end sound.</param>
+	void SetReloadEndSound(SoundContainer *newSound) { m_ReloadEndSound = newSound; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ResetAllTimers
@@ -560,7 +628,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    Whetehr magazine is full or not.
 
-	bool IsFull() override;
+	bool IsFull() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -681,54 +749,16 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:  SetRecoilTransmission
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the calar of how much of the fire recoil force is transmitted to 
-//					who/whatever is holding this weapon
-// Arguments:       New transmission value.
-// Return value:    None.
-
-	void SetRecoilTransmission(float recoilTransmission) { m_RecoilTransmission = recoilTransmission; }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetRecoilTransmission
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the calar of how much of the fire recoil force is transmitted to 
-//					who/whatever is holding this weapon
-// Arguments:       None.
-// Return value:    Transmission value.
-
-	float GetRecoilTransmission() const { return m_RecoilTransmission; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
 protected:
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-// Arguments:       The MOID index to register itself and its children in.
-//                  The MOID of the root MO of this MO, ie the highest parent of this MO.
-//                  0 means that this MO is the root, ie it is owned by MovableMan.
-//                  Whether this MO should make a new MOID to use for itself, or to use
-//                  the same as the last one in the index (presumably its parent),
-// Return value:    None.
-
-    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
+    /// <summary>
+    /// Sets this Attachable's parent MOSRotating, and also sets its Team based on its parent and, if the Attachable is set to collide, adds/removes Atoms to its new/old parent.
+    /// Additionally, sets this HDFirearm as not firing or reloading, and resets its reload timer.
+    /// </summary>
+    /// <param name="newParent">A pointer to the MOSRotating to set as the new parent. Ownership is NOT transferred!</param>
+    void SetParent(MOSRotating *newParent) override { HeldDevice::SetParent(newParent); Deactivate(); m_Reloading = false; m_ReloadTmr.Reset(); }
 
     // Member variables.
     static Entity::ClassInfo m_sClass;
@@ -741,19 +771,19 @@ protected:
     // Muzzle Flash Attachable. Owned
     Attachable *m_pFlash;
 
-    SoundContainer m_PreFireSound; //!< The sound this HDFirearm should play before it starts firing. Distinct from activation sound in that it will play exactly once per trigger pull and not pitch up.
+    SoundContainer *m_PreFireSound; //!< The sound this HDFirearm should play before it starts firing. Distinct from activation sound in that it will play exactly once per trigger pull and not pitch up.
     // The audio of this FireArm being fired.
-    SoundContainer m_FireSound;
-    SoundContainer m_FireEchoSound; //!< The audio that is played as the echo for the gun. Each shot will restart this sound, so it doesn't ever overlap.
+    SoundContainer *m_FireSound;
+    SoundContainer *m_FireEchoSound; //!< The audio that is played as the echo for the gun. Each shot will restart this sound, so it doesn't ever overlap.
     // The audio that is played immediately upon activation, but perhaps before actual first firing, if there's a pre-delay
-    SoundContainer m_ActiveSound;
+    SoundContainer *m_ActiveSound;
     // The audio that is played immediately upon cease of activation
-    SoundContainer m_DeactivationSound;
+    SoundContainer *m_DeactivationSound;
     // The audio of this FireArm being fired empty.
-    SoundContainer m_EmptySound;
+    SoundContainer *m_EmptySound;
     // The audio of this FireArm being reloaded.
-    SoundContainer m_ReloadStartSound;
-    SoundContainer m_ReloadEndSound;
+    SoundContainer *m_ReloadStartSound;
+    SoundContainer *m_ReloadEndSound;
 
     // Rate of fire, in rounds per min.
     // If 0, firearm is semi-automatic (ie only one discharge per activation).
@@ -773,8 +803,6 @@ protected:
     // Whether particles fired from this HDFirearm will ignore hits with itself,
     // and the root parent of this HDFirearm, regardless if they are set to hit MOs.
     bool m_FireIgnoresThis;
-    // Scalar of how much of the fire recoil force is transmitted to who/whatever is holding this weapon
-    float m_RecoilTransmission;
 
     // Timer for timing how long ago the last round was fired.
     Timer m_LastFireTmr;
@@ -795,6 +823,8 @@ protected:
     float m_NoSupportFactor;
     // Range of spread angle of fired particles, in one direction
     float m_ParticleSpreadRange;
+	// Angle in which shells are ejected relative to this weapon
+	float m_ShellEjectAngle;
     // Range of spread angle of ejected shells, in one direction
     float m_ShellSpreadRange;
     // Range of spread in ang vel of ejected shells, in one direction

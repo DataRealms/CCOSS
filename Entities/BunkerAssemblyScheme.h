@@ -66,9 +66,9 @@ public:
 	const static int SchemeWidth = 2;
 
 // Concrete allocation and cloning definitions
-EntityAllocation(BunkerAssemblyScheme)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(BunkerAssemblyScheme);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     BunkerAssemblyScheme
@@ -194,7 +194,7 @@ ClassInfoGetters
 // Return value:    A good identifyable graphical representation of this in a BITMAP, if
 //                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
 
-    BITMAP * GetGraphicalIcon() override;
+    BITMAP * GetGraphicalIcon() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -20,17 +20,17 @@
 #include "MetaMan.h"
 #include "SettingsMan.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroScreen.h"
-#include "GUI/AllegroInput.h"
-#include "GUI/GUIControlManager.h"
-#include "GUI/GUICollectionBox.h"
-#include "GUI/GUITab.h"
-#include "GUI/GUIListBox.h"
-#include "GUI/GUITextBox.h"
-#include "GUI/GUIButton.h"
-#include "GUI/GUILabel.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
+#include "AllegroScreen.h"
+#include "AllegroInput.h"
+#include "GUIControlManager.h"
+#include "GUICollectionBox.h"
+#include "GUITab.h"
+#include "GUIListBox.h"
+#include "GUITextBox.h"
+#include "GUIButton.h"
+#include "GUILabel.h"
 
 #include "DataModule.h"
 #include "Controller.h"
@@ -138,8 +138,9 @@ int BuyMenuGUI::Create(Controller *pController)
         m_pGUIInput = new AllegroInput(pController->GetPlayer()); 
     if (!m_pGUIController)
         m_pGUIController = new GUIControlManager();
-    if(!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins/Base"))
-        RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Base");
+	if (!m_pGUIController->Create(m_pGUIScreen, m_pGUIInput, "Base.rte/GUIs/Skins", "DefaultSkin.ini")) {
+		RTEAbort("Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/DefaultSkin.ini");
+	}
     m_pGUIController->Load("Base.rte/GUIs/BuyMenuGUI.ini");
     m_pGUIController->EnableMouse(pController->IsMouseControlled());
 
@@ -193,7 +194,7 @@ int BuyMenuGUI::Create(Controller *pController)
         m_pPopupBox->SetEnabled(false);
         m_pPopupBox->SetVisible(false);
         // Set the font
-        m_pPopupText->SetFont(m_pGUIController->GetSkin()->GetFont("smallfont.png"));
+        m_pPopupText->SetFont(m_pGUIController->GetSkin()->GetFont("FontSmall.png"));
     }
 
     m_pCategoryTabs[CRAFT] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("CraftTab"));
@@ -277,7 +278,9 @@ int BuyMenuGUI::Create(Controller *pController)
 //    m_pCartList->SetHotTracking(true);
     m_pCraftBox->SetLocked(true);
     m_pShopList->EnableScrollbars(false, true);
+	m_pShopList->SetScrollBarThickness(13);
     m_pCartList->EnableScrollbars(false, true);
+	m_pCartList->SetScrollBarThickness(13);
 
     // Load the loadouts initially.. this might be done again later as well by Activity scripts after they set metaplayer etc
     LoadAllLoadoutsFromFile();
@@ -397,7 +400,7 @@ bool BuyMenuGUI::LoadAllLoadoutsFromFile()
     Reader loadoutFile(loadoutPath, false, 0, true);
 
     // Read any and all loadout presets from file
-    while (loadoutFile.IsOK() && loadoutFile.NextProperty())
+    while (loadoutFile.ReaderOK() && loadoutFile.NextProperty())
     {
         Loadout newLoad;
         loadoutFile >> newLoad;
@@ -501,16 +504,11 @@ bool BuyMenuGUI::SaveAllLoadoutsToFile()
     // Open the file
     Writer loadoutFile(loadoutPath, false);
 
-    // Write out all the loadouts that are custom, user made. The preset ones will later be read from the presetman instead
-    for (vector<Loadout>::iterator itr = m_Loadouts.begin(); itr != m_Loadouts.end(); ++itr)
-    {
-        // Don't write out and preset references.. tehy'll be read first from presetman on load anyway
-        if ((*itr).GetPresetName() == "None")
-        {
-            loadoutFile.NewProperty("AddLoadout");
-            loadoutFile << (*itr);
-        }
-    }
+	// Write out all the loadouts that are user made.
+	for (const Loadout &loadoutEntry : m_Loadouts) {
+		// Don't write out preset references, they'll be read first from PresetMan on load anyway
+		if (loadoutEntry.GetPresetName() == "None") { loadoutFile.NewPropertyWithValue("AddLoadout", loadoutEntry); }
+	}
 
     return true;
 }
@@ -774,30 +772,28 @@ float BuyMenuGUI::GetTotalOrderCost()
     return totalCost;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTotalOrderMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return teh total mass of everything listed in the order box.
 
-float BuyMenuGUI::GetTotalOrderMass()
-{
-	float totalMass = 0;
-	for (vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
-		totalMass += dynamic_cast<const MOSprite *>((*itr)->m_pEntity)->GetMass();
+float BuyMenuGUI::GetTotalOrderMass() const {
+	float totalMass = 0.0F;
 
-	totalMass += GetCraftMass();
+	for (const GUIListPanel::Item *cartItem : *m_pCartList->GetItemList()) {
+		const MovableObject *itemAsMO = dynamic_cast<const MovableObject*>(cartItem->m_pEntity);
+		if (itemAsMO) {
+			totalMass += itemAsMO->GetMass();
+		} else {
+			RTEAbort("Found a non-MO object in the cart and tried to add it's mass to order total!");
+		}
+	}
 
 	return totalMass;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetCraftMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return mass of craft used in the order box.
 
-float BuyMenuGUI::GetCraftMass()
-{
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+float BuyMenuGUI::GetCraftMass() {
 	float totalMass = 0;
 
 	// Add the delivery craft's mass
@@ -815,8 +811,7 @@ float BuyMenuGUI::GetCraftMass()
 // Arguments:       None.
 // Return value:    The total number of passengers.
 
-int BuyMenuGUI::GetTotalOrderPassengers()
-{
+int BuyMenuGUI::GetTotalOrderPassengers() const {
 	int passengers = 0;
 	for (vector<GUIListPanel::Item *>::iterator itr = m_pCartList->GetItemList()->begin(); itr != m_pCartList->GetItemList()->end(); ++itr)
 	{
@@ -1365,23 +1360,46 @@ void BuyMenuGUI::Update()
 
         // Get handle to the currently selected item, if any
         GUIListPanel::Item *pItem = m_pShopList->GetItem(m_ListItemIndex);
+        std::string description = "";
 
-        // Show popup info box next to selected item, but only if it has a description
-        string description = "";
-        // Get it from the regular Entitiy preset
-        if (pItem && pItem->m_pEntity && !pItem->m_pEntity->GetDescription().empty())
-            description = pItem->m_pEntity->GetDescription();
-        // Show popup info box next to selected module item, but only if it has a description
-        else if (pItem && pItem->m_ExtraIndex >= 0)
-        {
+        if (pItem && pItem->m_pEntity) {
+			description = ((pItem->m_pEntity->GetDescription().empty()) ? "-No Information Found-": pItem->m_pEntity->GetDescription()) + "\n";
+            const Entity *currentItem = pItem->m_pEntity;
+            const ACraft *itemAsCraft = dynamic_cast<const ACraft *>(currentItem);
+            if (itemAsCraft) {
+                int craftMaxPassengers = itemAsCraft->GetMaxPassengers();
+                float craftMaxMass = itemAsCraft->GetMaxInventoryMass();
+                if (craftMaxMass == 0) {
+                    description += "\nNO CARGO SPACE!";
+                } else if (craftMaxMass > 0) {
+                    description += "\nMax Mass: " + RoundFloatToPrecision(craftMaxMass, 1) + " kg";
+                }
+                if (craftMaxPassengers >= 0 && craftMaxMass != 0) { description += (craftMaxPassengers == 0) ? "\nNO PASSENGER SPACE!" : "\nMax Passengers: " + std::to_string(craftMaxPassengers); }
+            } else {
+				// Items in the BuyMenu always have any remainder rounded up in their masses.
+                const Actor *itemAsActor = dynamic_cast<const Actor *>(currentItem);
+                if (itemAsActor) {
+                    description += "\nMass: " + RoundFloatToPrecision(itemAsActor->GetMass(), 1, 2) + " kg";
+                    int passengerSlotsTaken = itemAsActor->GetPassengerSlots();
+                    if (passengerSlotsTaken > 1) {
+                        description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
+                    }
+                } else {
+                    const MovableObject *itemAsMO = dynamic_cast<const MovableObject *>(currentItem);
+                    if (itemAsMO) {
+                        description += "\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass(), 1, 2) + " kg";
+                    }
+                }
+            }
+        } else if (pItem && pItem->m_ExtraIndex >= 0) {
             const DataModule *pModule = g_PresetMan.GetDataModule(pItem->m_ExtraIndex);
-            if (pModule && !pModule->GetDescription().empty())
+            if (pModule && !pModule->GetDescription().empty()) {
                 description = pModule->GetDescription();
+            }
         }
 
-        // Now show the description, if we have any
-        if (!description.empty())
-        {
+        // Show popup info box next to selected item if it has a description or tooltip.
+        if (!description.empty()) {
             // Show the popup box with the hovered item's description
             m_pPopupBox->SetVisible(true);
             // Need to add an offset to make it look better and not have the cursor obscure text
@@ -1397,25 +1415,23 @@ void BuyMenuGUI::Update()
         }
 
         // User selected to add an item to cart list!
-        if (m_pController->IsState(PRESS_FACEBUTTON))
-        {
+        if (m_pController->IsState(PRESS_FACEBUTTON)) {
             // User pressed on a module group item; toggle its expansion!
-            if (pItem && pItem->m_ExtraIndex >= 0)
-            {
-                // Make appropriate sound
-                if (!m_aExpandedModules[pItem->m_ExtraIndex])
-                    g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
-                // Different, maybe?
-                else
-                    g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
-                // Toggle the expansion of the module group item's items below
-                m_aExpandedModules[pItem->m_ExtraIndex] = !m_aExpandedModules[pItem->m_ExtraIndex];
-                // Re-populate the item list with the new module expansion configuation
-                CategoryChange(false);
-            }
+			if (pItem && pItem->m_ExtraIndex >= 0) {
+				// Make appropriate sound
+				if (!m_aExpandedModules[pItem->m_ExtraIndex]) {
+					g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
+				} else {
+					// Different, maybe?
+					g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
+				}
+				// Toggle the expansion of the module group item's items below
+				m_aExpandedModules[pItem->m_ExtraIndex] = !m_aExpandedModules[pItem->m_ExtraIndex];
+				// Re-populate the item list with the new module expansion configuation
+				CategoryChange(false);
+			}
             // User pressed on a loadout set, so load it into the menu
-            else if (pItem && m_MenuCategory == SETS)
-            {
+            else if (pItem && m_MenuCategory == SETS) {
                 // Beep if there's an error
                 if (!DeployLoadout(m_ListItemIndex))
                     g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
@@ -1462,17 +1478,14 @@ void BuyMenuGUI::Update()
     /////////////////////////////////////////
     // CART/ORDER LIST focus
 
-    else if (m_MenuFocus == ORDER)
-    {
+    else if (m_MenuFocus == ORDER) {
         // Changed to the list, so select the top one in the item list
-        if (m_FocusChange)
-        {
+        if (m_FocusChange) {
             m_pCartList->SetFocus();
-            if (!m_pCartList->GetItemList()->empty() && m_pCartList->GetSelectedIndex() < 0)
+            if (!m_pCartList->GetItemList()->empty() && m_pCartList->GetSelectedIndex() < 0) {
                 m_pCartList->SetSelectedIndex(m_ListItemIndex = 0);
-            // Synch our index with the one already selected in the list
-            else
-            {
+                // Synch our index with the one already selected in the list
+            } else {
                 m_ListItemIndex = m_pCartList->GetSelectedIndex();
                 m_pCartList->ScrollToSelected();
             }
@@ -1481,34 +1494,25 @@ void BuyMenuGUI::Update()
         }
 
         int listSize = m_pCartList->GetItemList()->size();
-        if (pressDown)
-        {
+        if (pressDown) {
             m_ListItemIndex++;
-            if (m_ListItemIndex >= listSize)
-            {
+            if (m_ListItemIndex >= listSize) {
                 m_ListItemIndex = listSize - 1;
                 // If at the end of the list and the player presses down, then switch focus to the BUY button
                 m_FocusChange = 1;
                 m_MenuFocus = OK;
-            }
-            // Only do list change logic if we actually did change
-            else
-            {
+            } else {
+                // Only do list change logic if we actually did change
                 m_pCartList->SetSelectedIndex(m_ListItemIndex);
                 g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
             }
-        }
-        else if (pressUp)
-        {
+        } else if (pressUp) {
             m_ListItemIndex--;
-            if (m_ListItemIndex < 0)
-            {
+            if (m_ListItemIndex < 0) {
                 m_ListItemIndex = 0;
                 g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
-            }
-            // Only do list change logic if we actually did change
-            else
-            {
+            } else {
+                // Only do list change logic if we actually did change
                 m_pCartList->SetSelectedIndex(m_ListItemIndex);
                 g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
             }
@@ -1516,10 +1520,28 @@ void BuyMenuGUI::Update()
 
         // Get handle to the currently selected item, if any
         GUIListPanel::Item *pItem = m_pCartList->GetItem(m_ListItemIndex);
+        std::string description = "";
 
-        // Show popup info box next to selected item, but only if it has a description
-        if (pItem && pItem->m_pEntity && !pItem->m_pEntity->GetDescription().empty())
-        {
+        if (pItem && pItem->m_pEntity) {
+			description = ((pItem->m_pEntity->GetDescription().empty()) ? "-No Information Found-" : pItem->m_pEntity->GetDescription()) + "\n";
+            const Entity *currentItem = pItem->m_pEntity;
+            const Actor *itemAsActor = dynamic_cast<const Actor *>(currentItem);
+            if (itemAsActor) {
+                description += "\nMass: " + RoundFloatToPrecision(itemAsActor->GetMass(), 1, 2) + " kg";
+
+                int passengerSlotsTaken = itemAsActor->GetPassengerSlots();
+                if (passengerSlotsTaken > 1) {
+                    description += "\nPassenger Slots: " + std::to_string(passengerSlotsTaken);
+                }
+            } else {
+                const MovableObject *itemAsMO = dynamic_cast<const MovableObject *>(currentItem);
+                if (itemAsMO) {
+                    description += "\nMass: " + RoundFloatToPrecision(itemAsMO->GetMass(), 1, 2) + " kg";
+                }
+            }
+        }
+
+        if (!description.empty()) {
             // Show the popup box with the hovered item's description
             m_pPopupBox->SetVisible(true);
             // Need to add an offset to make it look better and not have the cursor obscure text
@@ -1528,7 +1550,7 @@ void BuyMenuGUI::Update()
             if (m_pPopupBox->GetYPos() + m_pPopupBox->GetHeight() > m_pParentBox->GetHeight())
                 m_pPopupBox->SetPositionAbs(m_pPopupBox->GetXPos(), m_pParentBox->GetHeight() - m_pPopupBox->GetHeight());
             m_pPopupText->SetHAlignment(GUIFont::Right);
-            m_pPopupText->SetText(pItem->m_pEntity->GetDescription());
+            m_pPopupText->SetText(description);
             // Resize the box height to fit the text
             int newHeight = m_pPopupText->ResizeHeightToFit();
             m_pPopupBox->Resize(m_pPopupBox->GetWidth(), newHeight + 10);
@@ -2454,24 +2476,57 @@ void BuyMenuGUI::AddPresetsToItemList()
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateTotalCostLabel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updated the text of the total cost label to reflect the total cost of
-//                  all the items in the order box.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void BuyMenuGUI::UpdateTotalCostLabel(int whichTeam)
-{
-    char newText[512];
-    std::snprintf(newText, sizeof(newText), "Cost: %.0f/%.0f", GetTotalOrderCost(), g_ActivityMan.GetActivity()->GetTeamFunds(whichTeam));
-    m_pCostLabel->SetText(newText);
+void BuyMenuGUI::UpdateTotalCostLabel(int whichTeam) {
+	std::string display = "Cost: " + RoundFloatToPrecision(GetTotalOrderCost(), 0, 2) + "/" + RoundFloatToPrecision(g_ActivityMan.GetActivity()->GetTeamFunds(whichTeam), 0);
+	m_pCostLabel->SetText(display);
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  TryPurchase
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Attempts to make a purchase with everything set up.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void BuyMenuGUI::UpdateTotalMassLabel(const ACraft* pCraft, GUILabel* pLabel) const {
+	if (!pLabel) {
+		return;
+	}
+
+	std::string display;
+	if (pCraft && pCraft->GetMaxInventoryMass() != 0) {
+		display = RoundFloatToPrecision(GetTotalOrderMass(), 1, 2);
+		if (pCraft->GetMaxInventoryMass() > 0) {
+			display += " / " + RoundFloatToPrecision(pCraft->GetMaxInventoryMass(), 1);
+		}
+	} else {
+		display = "NO CARGO SPACE";
+	}
+
+	pLabel->SetText(display);
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void BuyMenuGUI::UpdateTotalPassengersLabel(const ACraft* pCraft, GUILabel* pLabel) const {
+	if (!pLabel) {
+		return;
+	}
+
+	std::string display;
+	if (pCraft && pCraft->GetMaxInventoryMass() != 0 && pCraft->GetMaxPassengers() != 0) {
+		display = std::to_string(GetTotalOrderPassengers());
+		if (pCraft->GetMaxPassengers() > 0) {
+			display += " / " + std::to_string(pCraft->GetMaxPassengers());
+		}
+	} else {
+		display = "NO SPACE";
+	}
+
+	pLabel->SetText(display);
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BuyMenuGUI::TryPurchase()
 {
@@ -2496,21 +2551,12 @@ void BuyMenuGUI::TryPurchase()
         m_BlinkMode = NOFUNDS;
         m_BlinkTimer.Reset();
 		return;
-	}
-	else
-	{
-        // Disable equipment selection mode if it's enabled
-        if (m_SelectingEquipment)
-        {
-            EnableEquipmentSelection(false);
-        }
-
+	} else {
+        if (m_SelectingEquipment) { EnableEquipmentSelection(false); }
 		const ACraft * pCraft = dynamic_cast<const ACraft *>(m_pSelectedCraft);
-		if (pCraft)
-		{
+		if (pCraft) {
 			// Enforce max mass
-			if (pCraft->GetMaxMass() > 0 && GetTotalOrderMass() > pCraft->GetMaxMass() && m_EnforceMaxMassConstraint)
-			{
+			if (m_EnforceMaxMassConstraint && pCraft->GetMaxInventoryMass() >= 0 && GetTotalOrderMass() > pCraft->GetMaxInventoryMass()) {
 				g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
 				// Set the notification blinker
 				m_BlinkMode = MAXMASS;
@@ -2531,70 +2577,9 @@ void BuyMenuGUI::TryPurchase()
 	}
 
 	// Only allow purchase if there is a delivery craft and enough funds
-	if (m_pSelectedCraft && std::floor(GetTotalOrderCost()) <= std::floor(g_ActivityMan.GetActivity()->GetTeamFunds(m_pController->GetTeam())))
-	{
-		//            m_pBuyButton->OnKeyPress(0, 0);
+	if (m_pSelectedCraft && std::floor(GetTotalOrderCost()) <= std::floor(g_ActivityMan.GetActivity()->GetTeamFunds(m_pController->GetTeam()))) {
 		m_PurchaseMade = true;
 		g_GUISound.PurchaseMadeSound()->Play(m_pController->GetPlayer());
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateTotalMassLabel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the text of the specified label to reflect the total mass of
-//                  all the items in teh order box.
-
-void BuyMenuGUI::UpdateTotalMassLabel(const ACraft * pCraft, GUILabel * pLabel)
-{
-	if (!pLabel)
-		return;
-
-	char buf[64];
-
-	if (pCraft && pCraft->GetMaxMass() != 0)
-	{
-		if (pCraft->GetMaxMass() > 0)
-			std::snprintf(buf, sizeof(buf), "%d / %d", (int)GetTotalOrderMass() - (int)GetCraftMass(), (int)pCraft->GetMaxMass() - (int)GetCraftMass());
-		else
-#ifdef _WIN32
-			strcpy_s(buf, sizeof(buf), "NO CARGO SPACE");
-#else
-			strcpy(buf, "NO CARGO SPACE");
-#endif
-	}
-	else
-		std::snprintf(buf, sizeof(buf), "%d", (int)GetTotalOrderMass());
-
-	pLabel->SetText(buf);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateTotalPassengersLabel
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the text of the specified label to reflect the total passenger count of
-//                  all the items in teh order box.
-
-void BuyMenuGUI::UpdateTotalPassengersLabel(const ACraft * pCraft, GUILabel * pLabel)
-{
-	if (!pLabel)
-		return;
-
-	char buf[64];
-
-	if (pCraft && pCraft->GetMaxPassengers() != 0)
-	{
-		if (pCraft->GetMaxPassengers() > 0)
-			std::snprintf(buf, sizeof(buf), "%d / %d", GetTotalOrderPassengers(), pCraft->GetMaxPassengers());
-		else 
-			std::snprintf(buf, sizeof(buf), "%d", GetTotalOrderPassengers());
-	}
-	else
-#ifdef _WIN32
-		strcpy_s(buf, sizeof(buf), "NO ROOM");
-#else
-		strcpy(buf, "NO ROOM");
-#endif
-
-	pLabel->SetText(buf);
-}

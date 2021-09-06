@@ -40,9 +40,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(Magazine)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(Magazine);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     Magazine
@@ -94,7 +94,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-    void Reset() override { Clear(); Attachable::Reset(); }
+    void Reset() override { Clear(); Attachable::Reset(); m_CollidesWithTerrainWhileAttached = false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

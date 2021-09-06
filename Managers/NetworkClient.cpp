@@ -13,8 +13,6 @@
 
 namespace RTE {
 
-	const std::string NetworkClient::c_ClassName = "NetworkClient";
-
 	// Data structure for constructing the draw boxes we'll need to use for drawing SceneLayers.
 	struct SLDrawBox {
 		int sourceX;
@@ -66,11 +64,10 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int NetworkClient::Create() {
+	int NetworkClient::Initialize() {
 		// Record the first client that connects to us so we can pass it to the ping function
 		m_ClientID = RakNet::UNASSIGNED_SYSTEM_ADDRESS;
 		m_Client = RakNet::RakPeerInterface::GetInstance();
-		m_ClientInputFps = g_SettingsMan.GetClientInputFps();
 
 		return 0;
 	}
@@ -257,6 +254,7 @@ namespace RTE {
 		msg.InputElementReleased = 0;
 
 		msg.ResetActivityVote = g_UInputMan.KeyHeld(KEY_BACKSPACE) ? true : false;
+		msg.RestartActivityVote = g_UInputMan.KeyHeld(KEY_BACKSLASH) ? true : false;
 
 		unsigned int bitMask = 0x1;
 

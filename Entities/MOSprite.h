@@ -41,8 +41,8 @@ class MOSprite:
 
 public:
 
-	SerializableOverrideMethods
-	ClassInfoGetters
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
     enum SpriteAnimMode
     {
@@ -147,7 +147,7 @@ public:
 // Arguments:       None.
 // Return value:    The radius from its center to the edge of its graphical representation.
 
-	float GetRadius() const override { return m_MaxRadius; }
+	float GetRadius() const override { return m_SpriteRadius; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -157,7 +157,7 @@ public:
 // Arguments:       None.
 // Return value:    The largest diameter across its graphical representation.
 
-	float GetDiameter() const override { return m_MaxDiameter; }
+    float GetDiameter() const override { return m_SpriteDiameter; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -167,7 +167,7 @@ public:
 // Arguments:       None.
 // Return value:    A Vector with the absolute position of this' HUD stack top point.
 
-	Vector GetAboveHUDPos() const override { return m_Pos + Vector(0, -m_MaxRadius); }
+	Vector GetAboveHUDPos() const override { return m_Pos + Vector(0, -GetRadius()); }
 
 // TODO: Improve this one! Really crappy fit
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -180,7 +180,7 @@ public:
 // Return value:    A Box which is guaranteed to contain this. Does nto take wrapping into
 //                  account, and parts of this box may be out of bounds!
 
-	Box GetBoundingBox() const { return Box(m_Pos + Vector(-m_MaxRadius, -m_MaxRadius), m_MaxDiameter, m_MaxDiameter); }
+	Box GetBoundingBox() const { return Box(m_Pos + Vector(-GetRadius(), -GetRadius()), GetDiameter(), GetDiameter()); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -393,7 +393,7 @@ public:
 // Return value:    A good identifyable graphical representation of this in a BITMAP, if
 //                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
 
-    BITMAP * GetGraphicalIcon() override { return m_aSprite[0]; }
+    BITMAP * GetGraphicalIcon() const override { return m_aSprite[0]; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -404,7 +404,7 @@ public:
 // Arguments:       None.
 // Return value:    Whether this is either moving or rotating too fast.
 
-	bool IsTooFast() const override { return m_Vel.GetLargest() > 500.0f || fabs(m_AngularVel) > (2000.0f / (m_MaxRadius + 1.0f)); }
+	bool IsTooFast() const override { return m_Vel.GetLargest() > 500.0f || fabs(m_AngularVel) > (2000.0f / (GetRadius() + 1.0f)); }
     //bool IsTooFast() const override { return m_Vel.GetLargest() > 500 || fabs(m_AngularVel) > 100.0f; }
 
 
@@ -452,6 +452,13 @@ public:
 // Return value:    The resulting vector whihch has been flipped and rotated as appropriate.
 
 	Vector UnRotateOffset(const Vector &offset) const;
+
+    /// <summary>
+    /// Adjusts an absolute angle based on wether this MOSprite is flipped.
+    /// </summary>
+    /// <param name="angle">The input angle in radians.</param>
+    /// <returns>The output angle in radians, which will be unaltered if this MOSprite is not flipped.</returns>
+    float FacingAngle(float angle) const { return (m_HFlipped ? c_PI : 0) + (angle * GetFlipFactor()); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -544,7 +551,7 @@ public:
 // Arguments:       None.
 // Return value:    1 for not flipped, -1 for flipped.
 
-	int GetFlipFactor() const { return m_HFlipped ? -1 : 1; }
+	float GetFlipFactor() const { return m_HFlipped ? -1.0F : 1.0F; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -560,8 +567,8 @@ protected:
     float m_AngularVel; // The angular velocity by which this MovableObject rotates, in radians per second (r/s).
     float m_PrevAngVel; // Previous frame's angular velocity.
     ContentFile m_SpriteFile;
-    // Array of pointers to BITMAP:s representing the multiple frames of this sprite
-    BITMAP **m_aSprite;
+    // Vector of pointers to BITMAPs representing the multiple frames of this sprite.
+    std::vector<BITMAP *> m_aSprite;
     // Number of frames, or elements in the m_aSprite array.
     unsigned int m_FrameCount;
     Vector m_SpriteOffset;
@@ -578,8 +585,8 @@ protected:
     // Whether flipped horizontally or not.
     bool m_HFlipped;
     // The precalculated maximum possible radius and diameter of this, in pixels
-    float m_MaxRadius;
-    float m_MaxDiameter;
+    float m_SpriteRadius;
+    float m_SpriteDiameter;
     // A counter to count the oscillations in rotation, in order to detect settling.
     int m_AngOscillations;
     // Whether to disable the settle material ID when this gets drawn as material

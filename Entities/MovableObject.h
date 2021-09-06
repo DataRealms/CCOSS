@@ -42,6 +42,7 @@ namespace RTE
 
 struct HitData;
 
+class MOSRotating;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Abstract class:  MovableObject
@@ -54,16 +55,17 @@ class MovableObject:
     public SceneObject
 {
 
-friend class LuaMan;
+friend class Atom;
+friend struct EntityLuaBindings;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
 
 public:
 
-	ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO")
-	SerializableOverrideMethods
-	ClassInfoGetters
+	ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO");
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
 enum MOType
 {
@@ -73,7 +75,6 @@ enum MOType
     TypeThrownDevice
 };
 
-friend class Atom;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -169,41 +170,20 @@ friend class Atom;
     /// Reloads the all of the scripts on this object. This will also reload scripts for the original preset in PresetMan so future objects spawned will use the new scripts.
     /// </summary>
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-    int ReloadScripts() override { return ReloadScripts(true); }
-
-    /// <summary>
-    /// Reloads the all of the scripts on this object. This will also optionally reload scripts for the original preset in PresetMan so future objects spawned will use the new scripts.
-    /// </summary>
-    /// <param name="alsoReloadPresetScripts">Whether to reload scripts on the PresetMan preset as well as those on the object instance. Irrelevant if the object instance is the preset.</param>
-    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-	int ReloadScripts(bool alsoReloadPresetScripts);
-
-    /// <summary>
-    /// Convenience method to get the script at the given path if it's on this MO. Like standard find, returns m_AllLoadedScripts.end() if it's not.
-    /// </summary>
-    /// <param name="scriptPath">The path to the script to find.</param>
-    /// <returns>The iterator pointing to the vector entry for the script or the end of the vector if the script was not found.</returns>
-	std::vector<std::pair<std::string, bool>>::iterator const FindScript(std::string const &scriptPath) { return std::find_if(m_AllLoadedScripts.begin(), m_AllLoadedScripts.end(), [&scriptPath](auto element) { return element.first == scriptPath; }); }
-
-    /// <summary>
-    /// Convenience method to get the script at the given path if it's on this MO. Like standard find, returns m_AllLoadedScripts.cend() if it's not.
-    /// </summary>
-    /// <param name="scriptPath">The path to the script to find.</param>
-    /// <returns>The iterator pointing to the vector entry for the script or the end of the vector if the script was not found.</returns>
-	std::vector<std::pair<std::string, bool>>::const_iterator const FindScript(std::string const &scriptPath) const { return std::find_if(m_AllLoadedScripts.cbegin(), m_AllLoadedScripts.cend(), [&scriptPath](auto element) { return element.first == scriptPath; }); }
+	int ReloadScripts();
 
     /// <summary>
     /// Checks if this MO has any scripts on it.
     /// </summary>
     /// <returns>Whether or not this MO has any scripts on it.</returns>
-	bool const HasAnyScripts() const { return !m_AllLoadedScripts.empty(); }
+	bool HasAnyScripts() const { return !m_AllLoadedScripts.empty(); }
 
     /// <summary>
     /// Checks if the script at the given path is one of the scripts on this MO.
     /// </summary>
     /// <param name="scriptPath">The path to the script to check.</param>
     /// <returns>Whether or not the script is on this MO.</returns>
-	bool const HasScript(const std::string &scriptPath) const { return FindScript(scriptPath) != m_AllLoadedScripts.end(); }
+	bool HasScript(const std::string &scriptPath) const { return m_AllLoadedScripts.find(scriptPath) != m_AllLoadedScripts.end(); }
 
     /// <summary>
     /// Adds the script at the given path as one of the scripts on this MO.
@@ -217,7 +197,7 @@ friend class Atom;
     /// </summary>
     /// <param name="scriptPath">The path to the script to check.</param>
     /// <returns>Whether or not the script is enabled on this MO.</returns>
-	bool const ScriptEnabled(const std::string &scriptPath) const { auto scriptIterator = FindScript(scriptPath); return scriptIterator != m_AllLoadedScripts.end() && scriptIterator->second == true; }
+    bool ScriptEnabled(const std::string &scriptPath) const { std::map<std::string, bool>::const_iterator scriptPathIterator = m_AllLoadedScripts.find(scriptPath); return scriptPathIterator != m_AllLoadedScripts.end() && scriptPathIterator->second == true; }
 
     /// <summary>
     /// Enable the script at the given path on this MO.
@@ -234,6 +214,12 @@ friend class Atom;
 	bool DisableScript(const std::string &scriptPath);
 
     /// <summary>
+    /// Enables or disables all scripts on this MovableObject.
+    /// </summary>
+    /// <param name="enableScripts">Whether to enable (true) or disable (false) all scripts on this MovableObject.</param>
+    void EnableOrDisableAllScripts(bool enableScripts);
+
+    /// <summary>
     /// Runs the given function for the given script, with the given arguments. The first argument to the function will always be 'self'.
     /// If either argument list is not empty, its entries will be passed into the Lua function in order, with entity arguments first.
     /// </summary>
@@ -242,7 +228,7 @@ friend class Atom;
     /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
     /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-    int RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
+    int RunScriptedFunction(const std::string &scriptPath, const std::string &functionName, const std::vector<Entity *> &functionEntityArguments = std::vector<Entity *>(), const std::vector<std::string> &functionLiteralArguments = std::vector<std::string>()) const;
 
     /// <summary>
     /// Runs the given function in all scripts that have it, with the given arguments, with the ability to not run on disabled scripts and to cease running if there's an error.
@@ -254,7 +240,7 @@ friend class Atom;
     /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
     /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-    int RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, std::vector<Entity *> functionEntityArguments = std::vector<Entity *>(), std::vector<std::string> functionLiteralArguments = std::vector<std::string>());
+    int RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, const std::vector<Entity *> &functionEntityArguments = std::vector<Entity *>(), const std::vector<std::string> &functionLiteralArguments = std::vector<std::string>());
 
     /// <summary>
     /// Gets whether or not the object has a script name, and there were no errors when initializing its Lua scripts. If there were, the object would need to be reloaded.
@@ -266,7 +252,8 @@ friend class Atom;
     /// Override SetPresetName so it also resets script preset name and then reloads scripts to safely allow for multiple scripts.
     /// </summary>
     /// <param name="newName">A string reference with the instance name of this Entity.</param>
-    void SetPresetName(const std::string &newName) override { Entity::SetPresetName(newName); m_ScriptPresetName.clear(); ReloadScripts(); }
+    /// <param name="calledFromLua">Whether this method was called from Lua, in which case this change is cosmetic only and shouldn't affect scripts.</param>
+    void SetPresetName(const std::string &newName, bool calledFromLua = false) override { Entity::SetPresetName(newName); if (!calledFromLua) { m_ScriptPresetName.clear(); ReloadScripts(); } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -289,6 +276,13 @@ friend class Atom;
     virtual float GetMass() const { return m_Mass; }
 
 
+	/// <summary>
+	/// Gets the previous position vector of this MovableObject, prior to this frame.
+	/// </summary>
+	/// <returns>A Vector describing the previous position vector.</returns>
+	const Vector & GetPrevPos() const { return m_PrevPos; }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetVel
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -297,6 +291,13 @@ friend class Atom;
 // Return value:    A Vector describing the current velocity vector.
 
     const Vector & GetVel() const { return m_Vel; }
+
+
+	/// <summary>
+	/// Gets the previous velocity vector of this MovableObject, prior to this frame.
+	/// </summary>
+	/// <returns>A Vector describing the previous velocity vector.</returns>
+	const Vector & GetPrevVel() const { return m_PrevVel; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -327,7 +328,7 @@ friend class Atom;
 // Arguments:       None.
 // Return value:    The largest diameter across its graphical representation.
 
-    virtual float GetDiameter() const { return 2.0f; }
+    virtual float GetDiameter() const { return 2.0F; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -480,16 +481,16 @@ friend class Atom;
 
 
 	/// <summary>
-	/// Gets the MO which is the parent of this Attachable.
+	/// Placeholder method to allow for ease of use with Attachables. Returns nullptr for classes that aren't derived from Attachable.
 	/// </summary>
-	/// <returns>A pointer to the parent of this Attachable.</returns>
-	virtual MovableObject * GetParent() { return this; }
+	/// <returns>Nothing.</returns>
+	virtual MOSRotating * GetParent() { return nullptr; }
 
-	/// <summary>
-	/// Gets the MO which is the parent of this Attachable. 
-	/// </summary>
-	/// <returns>A pointer to the parent of this Attachable.</returns>
-	virtual const MovableObject * GetParent() const { return this; }
+    /// <summary>
+    /// Placeholder method to allow for ease of use with Attachables. Returns nullptr for classes that aren't derived from Attachable.
+    /// </summary>
+    /// <returns>Nothing.</returns>
+	virtual const MOSRotating * GetParent() const { return nullptr; }
 
 	/// <summary>
 	/// Returns a pointer to this MO, this is to enable Attachables to get their root nodes.
@@ -731,11 +732,23 @@ friend class Atom;
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetEffectRotAngle
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the current absolute angle of rotation of this MovableObject's effect.
+// Description:     Gets the current absolute angle of rotation of this MovableObject's effect.
 // Arguments:       None.
 // Return value:    The absolute angle in radians.
 
 	float GetEffectRotAngle() const { return m_EffectRotAngle; }
+
+	/// <summary>
+	/// Gets the starting strength of this MovableObject's effect.
+	/// </summary>
+	/// <returns>The starting strength of the effect, 0-255.</returns>
+	int GetEffectStartStrength() const { return m_EffectStartStrength; }
+
+	/// <summary>
+	/// Gets the stopping strength of this MovableObject's effect.
+	/// </summary>
+	/// <returns>The stopping strength of the effect, 0-255.</returns>
+	int GetEffectStopStrength() const { return m_EffectStopStrength; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetAngularVel
@@ -778,15 +791,10 @@ friend class Atom;
     void SetAge(double newAge = 0) { m_AgeTimer.SetElapsedSimTimeMS(newAge); }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-// Arguments:       An int specifying the MOID that this MovableObject is
-//                  assigned for this frame.
-// Return value:    None.
-
-    virtual void SetID(const MOID newID) { m_MOID = newID; }
+    /// <summary>
+    /// Sets the MOID of this MovableObject to be g_NoMOID (255) for this frame.
+    /// </summary>
+    virtual void SetAsNoID() { m_MOID = g_NoMOID; }
 
     /// <summary>
     /// Sets this object as having been added to MovableMan. Should only really be done in MovableMan::AddObject.
@@ -827,17 +835,18 @@ friend class Atom;
     void SetToGetHitByMOs(bool getHitByMOs = true) { m_GetsHitByMOs = getHitByMOs; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetWhichMOToNotHit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets this MO to not hit a specific other MO and all its children even
-//                  though MO hitting is enabled on this MovableObject
-// Arguments:       A pointer to the MO to not be hitting. 0 means don't ignore anyhting.
-//                  Ownership is not transferred!
-//                  For how long, in S, to ignore the above. Negative number means forever.
-// Return value:    None.
+    /// <summary>
+    /// Gets the MO this MO is set not to hit even when MO hitting is enabled on this MO.
+    /// </summary>
+    /// <returns>The MO this MO is set not to hit.</returns>
+    const MovableObject * GetWhichMOToNotHit() const { return m_pMOToNotHit; }
 
-    void SetWhichMOToNotHit(MovableObject *moToNotHit = 0, float forHowLong = -1) { m_pMOToNotHit = moToNotHit; m_MOIgnoreTimer.Reset(); m_MOIgnoreTimer.SetSimTimeLimitS(forHowLong); }
+    /// <summary>
+    /// Sets this MO to not hit a specific other MO and all its children even when MO hitting is enabled on this MO.
+    /// </summary>
+    /// <param name="moToNotHit">A pointer to the MO to not be hitting. Null pointer means don't ignore anyhting. Ownership is NOT transferred!</param>
+    /// <param name="forHowLong">How long, in seconds, to ignore the specified MO. A negative number means forever.</param>
+    virtual void SetWhichMOToNotHit(MovableObject *moToNotHit = nullptr, float forHowLong = -1) { m_pMOToNotHit = moToNotHit; m_MOIgnoreTimer.Reset(); m_MOIgnoreTimer.SetSimTimeLimitS(forHowLong); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1099,7 +1108,7 @@ friend class Atom;
 		RTEAssert(offset.GetLargest() < 5000, "HUEG IMPULSE FORCE OFFSET");
 #endif
 
-		m_ImpulseForces.push_back(std::make_pair(impulse, offset));
+        m_ImpulseForces.push_back({impulse, offset});
 	}
 
 
@@ -1305,7 +1314,7 @@ friend class Atom;
 // Return value:    Wheter the MovableObject should immediately halt any travel going on
 //                  after this hit.
 
-    virtual bool OnMOHit(MovableObject *pOtherMO) { return false; }
+    virtual bool OnMOHit(MovableObject *pOtherMO);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1431,6 +1440,11 @@ friend class Atom;
 
 	void SetForceOffset(int n, Vector v) { if (n > 0 && n < m_Forces.size()) m_Forces[n].second = v; }
 
+    /// <summary>
+    /// Gets the pairs of impulse forces and their offsets that have to be applied.
+    /// </summary>
+    /// <returns>A constant reference to the deque of impulses for this MovableObject.</returns>
+    const std::deque <std::pair<Vector, Vector>> &GetImpulses() { return m_ImpulseForces; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetImpulsesCount()
@@ -1616,6 +1630,12 @@ friend class Atom;
 
 	unsigned long int const GetUniqueID() const { return m_UniqueID; }
 
+    /// <summary>
+    /// Gets the preset name and unique ID of this MO, often useful for error messages.
+    /// </summary>
+    /// <returns>A string containing the unique ID and preset name of this MO.</returns>
+    std::string GetPresetNameAndUniqueID() const { return m_PresetName + ", UID: " + std::to_string(m_UniqueID); }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  DamageOnCollision
@@ -1679,6 +1699,30 @@ friend class Atom;
 // Return value:    None.
 
 	void SetWoundDamageMultiplier(float value) { m_WoundDamageMultiplier = value; }
+
+    /// <summary>
+    /// Gets whether or not this MovableObject should apply wound damage when it collides with another MovableObject.
+    /// </summary>
+    /// <returns>Whether or not this MovableObject should apply wound damage when it collides with another MovableObject.</returns>
+    bool GetApplyWoundDamageOnCollision() const { return m_ApplyWoundDamageOnCollision; }
+
+    /// <summary>
+    /// Sets whether or not this MovableObject should apply wound damage when it collides with another MovableObject.
+    /// </summary>
+    /// <param name="applyWoundDamageOnCollision">Whether or not this MovableObject should apply wound damage on collision.</param>
+    void SetApplyWoundDamageOnCollision(bool applyWoundDamageOnCollision) { m_ApplyWoundDamageOnCollision = applyWoundDamageOnCollision; }
+
+    /// <summary>
+    /// Gets whether or not this MovableObject should apply burst wound damage when it collides with another MovableObject.
+    /// </summary>
+    /// <returns>Whether or not this MovableObject should apply burst wound damage when it collides with another MovableObject.</returns>
+    bool GetApplyWoundBurstDamageOnCollision() const { return m_ApplyWoundBurstDamageOnCollision; }
+
+    /// <summary>
+    /// Sets whether or not this MovableObject should apply burst wound damage when it collides with another MovableObject.
+    /// </summary>
+    /// <param name="applyWoundDamageOnCollision">Whether or not this MovableObject should apply burst wound damage on collision.</param>
+    void SetApplyWoundBurstDamageOnCollision(bool applyWoundBurstDamageOnCollision) { m_ApplyWoundBurstDamageOnCollision = applyWoundBurstDamageOnCollision; }
 
 
 
@@ -1894,10 +1938,8 @@ protected:
     // To draw this guy's HUD or not
     bool m_HUDVisible;
 
-    // A vector of scripts have been loaded onto this. Contains a pair with the script path and whether or not the script is enabled.
-    std::vector<std::pair<std::string, bool>> m_AllLoadedScripts;
-    // A map of function name strings to vectors of scripts for each function name. Said vectors contain pointers to pairs with the script path and whether or not the script is enabled. Used to efficiently avoid extra Lua calls.
-    std::unordered_map<std::string, std::vector<std::pair<std::string, bool> *>> m_FunctionsAndScripts;
+    std::map<std::string, bool> m_AllLoadedScripts; //!< A map of script paths to the enabled state of the given script.
+    std::unordered_map<std::string, std::vector<std::string>> m_FunctionsAndScripts; //!< A map of function names to vectors of scripts paths. Used to maintain script execution order and avoid extraneous Lua calls.
 
     // The ID name unique to this' preset and its defined scripted functions in the lua state.
     std::string m_ScriptPresetName;
@@ -1945,6 +1987,8 @@ protected:
 	float m_DamageOnPenetration;
 	// Damage multiplier transferred to wound inflicted by this object on penetration
 	float m_WoundDamageMultiplier;
+    bool m_ApplyWoundDamageOnCollision; //!< Whether or not this should apply wound damage on collision, respecting WoundDamageMultiplier and without creating a wound.
+    bool m_ApplyWoundBurstDamageOnCollision; //!< Whether or not this should apply wound burst damage on collision, respecting WoundDamageMultiplier and without creating a wound.
 	//Whether this MO should ignore terrain when traveling
 	bool m_IgnoreTerrain;
 	// MOID hit during last Travel

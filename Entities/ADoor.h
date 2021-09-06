@@ -15,9 +15,9 @@ namespace RTE {
 
 	public:
 
-		EntityAllocation(ADoor)
-		SerializableOverrideMethods
-		ClassInfoGetters
+		EntityAllocation(ADoor);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 		enum DoorState {
 			CLOSED = 0,
@@ -74,28 +74,16 @@ namespace RTE {
 		Attachable * GetDoor() const { return m_Door; }
 
 		/// <summary>
+		/// Sets the moving door Attachable for this ADoor.
+		/// </summary>
+		/// <param name="newDoor">The new moving door attachable to use.</param>
+		void SetDoor(Attachable *newDoor);
+
+		/// <summary>
 		/// Gets the current state of the door.
 		/// </summary>
 		/// <returns>The current state of this ADoor. See the DoorState enum.</returns>
 		DoorState GetDoorState() const { return m_DoorState; }
-
-		/// <summary>
-		/// Gets the mass value of this ADoor, including the mass of its currently attached parts.
-		/// </summary>
-		/// <returns>A float describing the mass value in Kilograms (kg).</returns>
-		float GetMass() const override;
-
-		/// <summary>
-		/// Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector to store MOIDs.
-		/// </summary>
-		/// <param name="MOIDs"></param>
-		void GetMOIDs(std::vector<MOID> &MOIDs) const override;
-
-		/// <summary>
-		/// Sets the MOID of this ADoor for this frame.
-		/// </summary>
-		/// <param name="newID">A MOID specifying the MOID that this ADoor is assigned for this frame.</param>
-		void SetID(const MOID newID) override;
 
 		/// <summary>
 		/// Sets whether this ADoor closes (or opens) after a while by default.
@@ -110,11 +98,52 @@ namespace RTE {
 		bool IsControllable() const override { return false; }
 
 		/// <summary>
-		/// Indicates whether this' current graphical representation overlaps a point in absolute scene coordinates.
+		/// Gets this ADoor's door move start sound. Ownership is NOT transferred!
 		/// </summary>
-		/// <param name="scenePoint">The point in absolute scene coordinates.</param>
-		/// <returns>Whether this' graphical representation overlaps the scene point.</returns>
-		bool IsOnScenePoint(Vector &scenePoint) const override;
+		/// <returns>The SoundContainer for this ADoor's door move start sound.</returns>
+		SoundContainer * GetDoorMoveStartSound() const { return m_DoorMoveStartSound; }
+
+		/// <summary>
+		/// Sets this ADoor's door move start sound. Ownership IS transferred!
+		/// </summary>
+		/// <param name="newSound">The new SoundContainer for this ADoor's door move start sound.</param>
+		void SetDoorMoveStartSound(SoundContainer *newSound) { m_DoorMoveStartSound = newSound; }
+
+		/// <summary>
+		/// Gets this ADoor's door move sound. Ownership is NOT transferred!
+		/// </summary>
+		/// <returns>The SoundContainer for this ADoor's door move sound.</returns>
+		SoundContainer * GetDoorMoveSound() const { return m_DoorMoveSound; }
+
+		/// <summary>
+		/// Sets this ADoor's door move sound. Ownership IS transferred!
+		/// </summary>
+		/// <param name="newSound">The new SoundContainer for this ADoor's door move sound.</param>
+		void SetDoorMoveSound(SoundContainer *newSound) { m_DoorMoveSound = newSound; }
+
+		/// <summary>
+		/// Gets this ADoor's door direction change sound. Ownership is NOT transferred!
+		/// </summary>
+		/// <returns>The SoundContainer for this ADoor's door direction change sound.</returns>
+		SoundContainer * GetDoorDirectionChangeSound() const { return m_DoorDirectionChangeSound; }
+
+		/// <summary>
+		/// Sets this ADoor's door direction change sound. Ownership IS transferred!
+		/// </summary>
+		/// <param name="newSound">The new SoundContainer for this ADoor's door direction change sound.</param>
+		void SetDoorDirectionChangeSound(SoundContainer *newSound) { m_DoorDirectionChangeSound = newSound; }
+
+		/// <summary>
+		/// Gets this ADoor's door move end sound. Ownership is NOT transferred!
+		/// </summary>
+		/// <returns>The SoundContainer for this ADoor's door move end sound.</returns>
+		SoundContainer * GetDoorMoveEndSound() const { return m_DoorMoveEndSound; }
+
+		/// <summary>
+		/// Sets this ADoor's door move end sound. Ownership IS transferred!
+		/// </summary>
+		/// <param name="newSound">The new SoundContainer for this ADoor's door move end sound.</param>
+		void SetDoorMoveEndSound(SoundContainer *newSound) { m_DoorMoveEndSound = newSound; }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -142,33 +171,17 @@ namespace RTE {
 
 #pragma region Virtual Override Methods
 		/// <summary>
-		/// Removes a specified amount of wounds from the actor and all standard attachables.
-		/// </summary>
-		/// <param name="amount">Amount of wounds to remove.</param>
-		/// <returns>Damage taken from removed wounds.</returns>
-		int RemoveAnyRandomWounds(int amount) override;
-
-		/// <summary>
-		/// Gibs this, effectively destroying it and creating multiple gibs or pieces in its place.
+		/// Destroys this ADoor and creates its specified Gibs in its place with appropriate velocities.
+		/// Any Attachables are removed and also given appropriate velocities.
 		/// </summary>
 		/// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen.</param>
-		/// <param name="internalBlast">The internal blast impulse which will push the gibs away from the center.</param>
-		/// <param name="pIgnoreMO">A pointer to an MO which the gibs should not be colliding with!</param>
-		void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *ignoreMO = 0) override;
+		/// <param name="movableObjectToIgnore">A pointer to an MO which the Gibs and Attachables should not be colliding with.</param>
+		void GibThis(const Vector &impactImpulse = Vector(), MovableObject *movableObjectToIgnore = nullptr) override;
 
 		/// <summary>
 		/// Updates this ADoor. Supposed to be done every frame.
 		/// </summary>
 		void Update() override;
-
-		/// <summary>
-		/// Draws this ADoor's current graphical representation to a BITMAP of choice.
-		/// </summary>
-		/// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
-		/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
-		/// <param name="mode">Which mode to draw in. See the DrawMode enumeration for the modes.</param>
-		/// <param name="onlyPhysical">Whether to not draw any extra 'ghost' items of this ADoor, indicator arrows or hovering HUD text and so on.</param>
-		void Draw(BITMAP *targetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 		/// <summary>
 		/// Draws this ADoor's current graphical HUD overlay representation to a BITMAP of choice.
@@ -221,10 +234,10 @@ namespace RTE {
 		bool m_DoorMaterialTempErased; //!< Whether the drawing override is enabled and the door material is erased to allow better pathfinding.
 		Vector m_LastDoorMaterialPos; //!< The position the door attachable had when its material was drawn to the material bitmap. This is used to erase the previous material representation.
 
-		SoundContainer m_DoorMoveStartSound; //!< Sound played when the door starts moving from fully open/closed position towards the opposite end.
-		SoundContainer m_DoorMoveSound; //!< Sound played while the door is moving between open/closed position.
-		SoundContainer m_DoorDirectionChangeSound; //!< Sound played when the door is interrupted while moving and changes directions. 
-		SoundContainer m_DoorMoveEndSound; //!< Sound played when the door stops moving and is at fully open/closed position.
+		SoundContainer *m_DoorMoveStartSound; //!< Sound played when the door starts moving from fully open/closed position towards the opposite end.
+		SoundContainer *m_DoorMoveSound; //!< Sound played while the door is moving between open/closed position.
+		SoundContainer *m_DoorDirectionChangeSound; //!< Sound played when the door is interrupted while moving and changes directions. 
+		SoundContainer *m_DoorMoveEndSound; //!< Sound played when the door stops moving and is at fully open/closed position.
 
 	private:
 
@@ -237,21 +250,13 @@ namespace RTE {
 		/// <summary>
 		/// Updates the door attachable position and movement based on the current state of this ADoor. This is called from Update().
 		/// </summary>
-		void UpdateDoorAttachable();
+		void UpdateDoorAttachableActions();
 #pragma endregion
 
 		/// <summary>
 		/// Shared method for the door opening/closing sequence. This is called from OpenDoor() and CloseDoor().
 		/// </summary>
 		void SharedDoorControls();
-
-		/// <summary>
-		/// Makes this MO register itself and all its attached children in the MOID register and get IDs for itself and its children for this frame.
-		/// </summary>
-		/// <param name="MOIDIndex">The MOID index to register itself and its children in.</param>
-		/// <param name="rootMOID">The MOID of the root MO of this MO, ie the highest parent of this MO. 0 means that this MO is the root, ie it is owned by MovableMan.</param>
-		/// <param name="makeNewMOID">Whether this MO should make a new MOID to use for itself, or to use the same as the last one in the index (presumably its parent),</param>
-		void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 		/// <summary>
 		/// Draws the material under the position of the door attachable, to create terrain collision detection for the doors.

@@ -15,6 +15,7 @@
 // Inclusions of header files
 
 #include "Actor.h"
+#include "Arm.h"
 #include "Leg.h"
 #include "LimbPath.h"
 
@@ -23,11 +24,7 @@ struct BITMAP;
 namespace RTE
 {
 
-class Attachable;
-class Arm;
-class Leg;
 class AEmitter;
-//class LimbPath;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -40,6 +37,7 @@ class AEmitter;
 class AHuman:
     public Actor
 {
+	friend struct EntityLuaBindings;
 
 
 enum UpperBodyState
@@ -76,7 +74,7 @@ enum ProneState
     PRONESTATECOUNT
 };
 
-enum
+enum Layer
 {
     FGROUND = 0,
     BGROUND
@@ -90,9 +88,10 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(AHuman)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(AHuman);
+AddScriptFunctionNames(Actor, "OnStride");
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     AHuman
@@ -159,17 +158,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this AHuman, including the mass of its
-//                  currently attached body parts and inventory.
-// Arguments:       None.
-// Return value:    A float describing the mass value in Kilograms (kg).
-
-    float GetMass() const override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetGoldCarried
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets how many ounces of gold this Actor is carrying.
@@ -192,12 +180,6 @@ ClassInfoGetters
 
 	float GetTotalValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const override;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTotalValueOld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     DOES THE SAME THING AS GetTotalValue, USED ONLY TO PRESERVE LUA COMPATIBILITY
-
-	float GetTotalValueOld(int nativeModule = 0, float foreignMult = 1.0) const override { return GetTotalValue(nativeModule, foreignMult, 1.0); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          HasObject
@@ -244,78 +226,101 @@ ClassInfoGetters
     Vector GetEyePos() const override;
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHead
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the head Attachable
-// Arguments:       None.
-// Return value:    A pointer to the head Attachable of this. Ownership is NOT transferred!
-
+    /// <summary>
+    /// Gets the head of this AHuman.
+    /// </summary>
+    /// <returns>A pointer to the head of this AHuman. Ownership is NOT transferred.</returns>
     Attachable * GetHead() const { return m_pHead; }
 
+    /// <summary>
+    /// Sets the head for this AHuman.
+    /// </summary>
+    /// <param name="newHead">The new head to use.</param>
+    void SetHead(Attachable *newHead);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetFGArm
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the FG Arm as an Attachable. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to the FG Arm Attachable of this. Ownership is NOT transferred!
+    /// <summary>
+    /// Gets the jetpack of this AHuman.
+    /// </summary>
+    /// <returns>A pointer to the jetpack of this AHuman. Ownership is NOT transferred.</returns>
+    AEmitter * GetJetpack() const { return m_pJetpack; }
 
-    Attachable * GetFGArm() const { return (Attachable *)m_pFGArm; }
+    /// <summary>
+    /// Sets the jetpack for this AHuman.
+    /// </summary>
+    /// <param name="newJetpack">The new jetpack to use.</param>
+    void SetJetpack(AEmitter *newJetpack);
 
+    /// <summary>
+    /// Gets the foreground Arm of this AHuman.
+    /// </summary>
+    /// <returns>A pointer to the foreground Arm of this AHuman. Ownership is NOT transferred.</returns>
+    Arm * GetFGArm() const { return m_pFGArm; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetBGArm
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the BG Arm as an Attachable. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to the BG Arm Attachable of this. Ownership is NOT transferred!
+    /// <summary>
+    /// Sets the foreground Arm for this AHuman.
+    /// </summary>
+    /// <param name="newArm">The new Arm to use.</param>
+    void SetFGArm(Arm *newArm);
 
-    Attachable * GetBGArm() const { return (Attachable *)m_pBGArm; }
+    /// <summary>
+    /// Gets the background arm of this AHuman.
+    /// </summary>
+    /// <returns>A pointer to the background arm of this AHuman. Ownership is NOT transferred.</returns>
+    Arm * GetBGArm() const { return m_pBGArm; }
 
+    /// <summary>
+    /// Sets the background Arm for this AHuman.
+    /// </summary>
+    /// <param name="newArm">The new Arm to use.</param>
+    void SetBGArm(Arm *newArm);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetFGLeg
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the FG Leg as an Attachable. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to the FG Leg Attachable of this. Ownership is NOT transferred!
+    /// <summary>
+    /// Gets the foreground Leg of this AHuman.
+    /// </summary>
+    /// <returns>A pointer to the foreground Leg of this AHuman. Ownership is NOT transferred.</returns>
+    Leg * GetFGLeg() const { return m_pFGLeg; }
 
-    Attachable * GetFGLeg() const { return (Attachable *)m_pFGLeg; }
+    /// <summary>
+    /// Sets the foreground Leg for this AHuman.
+    /// </summary>
+    /// <param name="newLeg">The new Leg to use.</param>
+    void SetFGLeg(Leg *newLeg);
 
+    /// <summary>
+    /// Gets the background Leg of this AHuman.
+    /// </summary>
+    /// <returns>A pointer to the background Leg of this AHuman. Ownership is NOT transferred.</returns>
+    Leg * GetBGLeg() const { return m_pBGLeg; }
+
+    /// <summary>
+    /// Sets the background Leg for this AHuman.
+    /// </summary>
+    /// <param name="newLeg">The new Leg to use.</param>
+    void SetBGLeg(Leg *newLeg);
 
 	/// <summary>
-	/// Gets the FG foot attachable of this.
+	/// Gets the foot Attachable of this AHuman's foreground Leg.
 	/// </summary>
-	/// <returns>A pointer to the FG foot attachable of this. Ownership is NOT transferred!</returns>
-	Attachable * GetFGFoot() const { if (m_pFGLeg) { return m_pFGLeg->GetFoot(); } else { return nullptr; } }
+	/// <returns>A pointer to the foot Attachable of this AHuman's foreground Leg. Ownership is NOT transferred!</returns>
+    Attachable * GetFGFoot() const { return m_pFGLeg ? m_pFGLeg->GetFoot() : nullptr; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetBGLeg
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the BG Leg as an Attachable. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to the BG Leg Attachable of this. Ownership is NOT transferred!
-
-    Attachable * GetBGLeg() const { return (Attachable *)m_pBGLeg; }
-
+    /// <summary>
+    /// Sets the foot Attachable of this AHuman's foreground Leg.
+    /// </summary>
+    /// <param name="newFoot">The new foot for this AHuman's foreground Leg to use.</param>
+    void SetFGFoot(Attachable *newFoot) { if (m_pFGLeg && m_pFGLeg->IsAttached()) { m_pFGLeg->SetFoot(newFoot); } }
 
 	/// <summary>
-	/// Gets the BG foot attachable of this.
+    /// Gets the foot Attachable of this AHuman's background Leg.
 	/// </summary>
-	/// <returns>A pointer to the BG foot attachable of this. Ownership is NOT transferred!</returns>
-	Attachable * GetBGFoot() const { if (m_pBGLeg) { return m_pBGLeg->GetFoot(); } else { return nullptr; } }
+    /// <returns>A pointer to the foot Attachable of this AHuman's background Leg. Ownership is NOT transferred!</returns>
+	Attachable * GetBGFoot() const { return m_pBGLeg ? m_pBGLeg->GetFoot() : nullptr; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetJetpack
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the jetpack as an emitter. This is for Lua binding mostly.
-// Arguments:       None.
-// Return value:    A pointer to jetpack emitter. Ownership is NOT transferred!
-
-    AEmitter * GetJetpack() const { return (AEmitter *)m_pJetpack; }
+    /// <summary>
+    /// Sets the foot Attachable of this AHuman's background Leg.
+    /// </summary>
+    /// <param name="newFoot">The new foot for this AHuman's background Leg to use.</param>
+    void SetBGFoot(Attachable *newFoot) { if (m_pBGLeg && m_pBGLeg->IsAttached()) { m_pBGLeg->SetFoot(newFoot); } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -326,7 +331,7 @@ ClassInfoGetters
 // Return value:    A pointer to the bitmap of with the head of this. Ownership is NOT
 //                  transferred!
 
-    BITMAP * GetHeadBitmap() const;
+    BITMAP *GetHeadBitmap() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -369,15 +374,18 @@ ClassInfoGetters
 	void SetJetTimeLeft(float newValue) { m_JetTimeLeft = newValue < m_JetTimeTotal ? newValue : m_JetTimeTotal; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-// Arguments:       A moid specifying the MOID that this MovableObject is
-//                  assigned for this frame.
-// Return value:    None.
+	/// <summary>
+	/// Gets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
+	/// </summary>
+	/// <returns>The ratio at which this jetpack follows the aim angle of the user.</returns>
+	float GetJetAngleRange() const { return m_JetAngleRange; }
 
-    void SetID(const MOID newID) override;
+
+	/// <summary>
+	/// Sets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
+	/// </summary>
+	/// <param name="newValue">The ratio at which this jetpack follows the aim angle of the user.</param>
+	void SetJetAngleRange(float newValue) { m_JetAngleRange = newValue; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -413,7 +421,7 @@ ClassInfoGetters
 // Return value:    Whetehr any slice was handled. False if no matching slice handler was
 //                  found, or there was no slice currently activated by the pie menu.
 
-    bool HandlePieCommand(int pieSliceIndex) override;
+    bool HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -655,7 +663,7 @@ ClassInfoGetters
 // Arguments:       None.
 // Return value:    None.
 
-	void ReloadFirearm() const;
+	void ReloadFirearms() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -712,19 +720,6 @@ ClassInfoGetters
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-// Arguments:       The impulse (kg * m/s) of the impact causing the gibbing to happen.
-//					The internal blast impulse which will push the gibs away from the center.
-//                  A pointer to an MO which the gibs shuold not be colliding with!
-// Return value:    None.
-
-    void GibThis(Vector impactImpulse = Vector(), float internalBlast = 10, MovableObject *pIgnoreMO = 0) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetGraphicalIcon
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets a bitmap showing a good identifyable icon of this, for use in
@@ -733,46 +728,8 @@ ClassInfoGetters
 // Return value:    A good identifyable graphical representation of this in a BITMAP, if
 //                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
 
-    BITMAP * GetGraphicalIcon() override { return GetHeadBitmap(); }
+    BITMAP * GetGraphicalIcon() const override { return GetHeadBitmap(); }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  IsOnScenePoint
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates whether this' current graphical representation overlaps
-//                  a point in absolute scene coordinates.
-// Arguments:       The point in absolute scene coordinates.
-// Return value:    Whether this' graphical rep overlaps the scene point.
-
-	bool IsOnScenePoint(Vector &scenePoint) const override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAnyRandomWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds from the actor and all standard attachables.
-// Arguments:       Amount of wounds to remove.
-// Return value:    Damage taken from removed wounds.
-
-	int RemoveAnyRandomWounds(int amount) override;
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound count of this actor and all vital attachables.
-// Arguments:       None.
-// Return value:    Returns total number of wounds of this actor.
-
-	int GetTotalWoundCount() const override; 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound limit of this actor and all vital attachables.
-// Arguments:       None.
-// Return value:    Returns total wound limit of this actor.
-
-	int GetTotalWoundLimit() const override; 
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ResetAllTimers
@@ -853,14 +810,13 @@ ClassInfoGetters
     void DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), int whichScreen = 0, bool playerControlled = false) override;
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
-
-	void GetMOIDs(std::vector<MOID> &MOIDs) const override;
+    /// <summary>
+    /// Gets the LimbPath corresponding to the passed in Layer and MovementState values.
+    /// </summary>
+    /// <param name="layer">Whether to get foreground or background LimbPath.</param>
+    /// <param name="movementState">Which movement state to get the LimbPath for.</param>
+    /// <returns>The LimbPath corresponding to the passed in Layer and MovementState values.</returns>
+    LimbPath * GetLimbPath(Layer layer, MovementState movementState) { return &m_Paths[layer][movementState]; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -904,6 +860,20 @@ ClassInfoGetters
 
 	void SetLimbPathPushForce(float force);
 
+    /// <summary>
+    /// Gets the target rot angle for the given MovementState.
+    /// </summary>
+    /// <param name="movementState">The MovementState to get the rot angle target for.</param>
+    /// <returns>The target rot angle for the given MovementState.</returns>
+    float GetRotAngleTarget(MovementState movementState) { return m_RotAngleTargets.at(movementState); }
+
+    /// <summary>
+    /// Sets the target rot angle for the given MovementState.
+    /// </summary>
+    /// <param name="movementState">The MovementState to get the rot angle target for.</param>
+    /// <param name="newRotAngleTarget">The new rot angle target to use.</param>
+    void SetRotAngleTarget(MovementState movementState, float newRotAngleTarget) { m_RotAngleTargets.at(movementState) = newRotAngleTarget; }
+
 	/// <summary>
 	/// Gets the duration it takes this AHuman to fully charge a throw.
 	/// </summary>
@@ -916,25 +886,22 @@ ClassInfoGetters
 	/// <param name="newPrepTime">New duration to fully charge a throw in MS.</param>
 	void SetThrowPrepTime(long newPrepTime) { m_ThrowPrepTime = newPrepTime; }
 
+	/// <summary>
+	/// Gets this AHuman's stride sound. Ownership is NOT transferred!
+	/// </summary>
+	/// <returns>The SoundContainer for this AHuman's stride sound.</returns>
+	SoundContainer * GetStrideSound() const { return m_StrideSound; }
+
+	/// <summary>
+	/// Sets this AHuman's stride sound. Ownership IS transferred!
+	/// </summary>
+	/// <param name="newSound">The new SoundContainer for this AHuman's stride sound.</param>
+	void SetStrideSound(SoundContainer *newSound) { m_StrideSound = newSound; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
 protected:
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
-// Arguments:       The MOID index to register itself and its children in.
-//                  The MOID of the root MO of this MO, ie the highest parent of this MO.
-//                  0 means that this MO is the root, ie it is owned by MovableMan.
-//                  Whether this MO should make a new MOID to use for itself, or to use
-//                  the same as the last one in the index (presumably its parent),
-// Return value:    None.
-
-    void UpdateChildMOIDs(std::vector<MovableObject *> &MOIDIndex, MOID rootMOID = g_NoMOID, bool makeNewMOID = true) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -965,6 +932,8 @@ protected:
     static Entity::ClassInfo m_sClass;
     // Articulated head.
     Attachable *m_pHead;
+	// Ratio at which the head's rotation follows the aim angle
+	float m_LookToAimRatio;
     // Foreground arm.
     Arm *m_pFGArm;
     // Background arm.
@@ -977,15 +946,19 @@ protected:
     AtomGroup *m_pFGHandGroup;
     AtomGroup *m_pBGHandGroup;
     AtomGroup *m_pFGFootGroup;
+    AtomGroup *m_BackupFGFootGroup;
     AtomGroup *m_pBGFootGroup;
+    AtomGroup *m_BackupBGFootGroup;
     // The sound of the actor taking a step (think robot servo)
-    SoundContainer m_StrideSound;
+    SoundContainer *m_StrideSound;
     // Jetpack booster.
     AEmitter *m_pJetpack;
     // The max total time, in ms, that the jetpack can be used without pause
     float m_JetTimeTotal;
     // How much time left the jetpack can go, in ms
     float m_JetTimeLeft;
+	// Ratio at which the jetpack angle follows aim angle
+	float m_JetAngleRange;
     // Blink timer
     Timer m_IconBlinkTimer;
     // Current upper body state.
@@ -1001,6 +974,7 @@ protected:
     // Limb paths for different movement states.
     // [0] is for the foreground limbs, and [1] is for BG.
     LimbPath m_Paths[2][MOVEMENTSTATECOUNT];
+    std::array<float, MOVEMENTSTATECOUNT> m_RotAngleTargets; //!< An array of rot angle targets for different movement states.
     // Whether was aiming during the last frame too.
     bool m_Aiming;
     // Whether the BG Arm is helping with locomotion or not.
@@ -1013,8 +987,14 @@ protected:
     int m_GoldInInventoryChunk;
     // For timing throws
     Timer m_ThrowTmr;
-    
-    long m_ThrowPrepTime; //!< The duration it takes this AHuman to fully charge a throw.
+	// The duration it takes this AHuman to fully charge a throw.
+    long m_ThrowPrepTime;
+	// For timing the transition from sharp aim back to regular aim
+	Timer m_SharpAimRevertTimer;
+    // The rate at which this AHuman's FG Arm follows the the bodily rotation. Best to keep this at 0 so it doesn't complicate aiming.
+	float m_FGArmFlailScalar;
+    // The rate at which this AHuman's BG Arm follows the the bodily rotation. Set to a negative value for a "counterweight" effect.
+	float m_BGArmFlailScalar;
 
     ////////////////
     // AI States
@@ -1089,9 +1069,6 @@ protected:
     Timer m_PatrolTimer;
     // Timer for how long to be firing the jetpack in a direction
     Timer m_JumpTimer;
-
-	// April 1 prank
-	bool m_GotHat;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

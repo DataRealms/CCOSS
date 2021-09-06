@@ -6,7 +6,7 @@
 
 namespace RTE {
 
-	ConcreteClassInfo(AtomGroup, Entity, 500)
+	ConcreteClassInfo(AtomGroup, Entity, 500);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -103,7 +103,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int AtomGroup::ReadProperty(std::string propName, Reader &reader) {
+	int AtomGroup::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Material") {
 			Material mat;
 			mat.Reset();
@@ -202,10 +202,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float AtomGroup::GetMomentOfInertia() {
-		if (m_MomentOfInertia == 0.0F) {
+		float currentOwnerMass = (m_OwnerMOSR->GetMass() != 0 ? m_OwnerMOSR->GetMass() : 0.0001F);
+		if (m_MomentOfInertia == 0.0F || std::abs(m_StoredOwnerMass - currentOwnerMass) >= (m_StoredOwnerMass / 10.0F)) {
 			RTEAssert(m_OwnerMOSR, "Tried to calculate moment of inertia for an AtomGroup with no parent!");
 
-			float distMass = m_OwnerMOSR->GetMass() / static_cast<float>(m_Atoms.size());
+			m_StoredOwnerMass = currentOwnerMass;
+			float distMass = m_StoredOwnerMass / static_cast<float>(m_Atoms.size());
 			float radius = 0.0F;
 			for (const Atom *atom : m_Atoms) {
 				radius = atom->GetOffset().GetMagnitude() * c_MPP;
@@ -229,9 +231,11 @@ namespace RTE {
 			atomToAdd->SetSubID(subgroupID);
 			atomToAdd->SetOffset(offset + (atomToAdd->GetOriginalOffset() * offsetRotation));
 			atomToAdd->SetOwner(m_OwnerMOSR);
+			atomToAdd->SetIgnoreMOIDsByGroup(&m_IgnoreMOIDs);
 			m_Atoms.push_back(atomToAdd);
 			m_SubGroups.at(subgroupID).push_back(atomToAdd);
 		}
+		if (!atomList.empty()) { m_MomentOfInertia = 0.0F; }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -253,6 +257,7 @@ namespace RTE {
 			}
 		}
 		m_SubGroups.erase(removeID);
+		if (removedAny) { m_MomentOfInertia = 0.0F; }
 
 		return removedAny;
 	}
@@ -735,7 +740,7 @@ namespace RTE {
 		int stepCount = 0;
 		int hitCount = 0;
 		float timeLeft = travelTime;
-		float mass = m_OwnerMOSR->GetMass();
+		float mass = (m_OwnerMOSR->GetMass() != 0 ? m_OwnerMOSR->GetMass() : 0.0001F);
 		float retardation;
 		bool halted = false;
 
@@ -1251,11 +1256,6 @@ namespace RTE {
 				penetrates = true;
 				break;
 			}
-#ifdef DEBUG_BUILD
-			// TODO: Remove this once AtomGroup drawing in Material layer draw mode is implemented.
-			// Draw a dot for each Atom for visual reference.
-			putpixel(g_SceneMan.GetDebugBitmap(), atomPos.GetFloorIntX(), atomPos.GetFloorIntY(), 112);
-#endif
 		}
 
 		//if (g_SceneMan.SceneIsLocked()) { g_SceneMan.UnlockScene(); }
@@ -1356,7 +1356,7 @@ namespace RTE {
 		}
 
 		// If the exit vector is too large, then avoid the jarring jump and report that we didn't make it out
-		if (totalExitVector.GetMagnitude() > m_OwnerMOSR->GetRadius()) {
+		if (totalExitVector.GetMagnitude() > m_OwnerMOSR->GetIndividualRadius()) {
 			return false;
 		}
 
@@ -1466,8 +1466,8 @@ namespace RTE {
 		if (intersectedMO->GetPinStrength() > 0.0F) {
 			thisExit = totalExitVector;
 		} else {
-			float massA = m_OwnerMOSR->GetMass();
-			float massB = intersectedMO->GetMass();
+			float massA = (m_OwnerMOSR->GetMass() != 0 ? m_OwnerMOSR->GetMass() : 0.0001F);
+			float massB = (intersectedMO->GetMass() != 0 ? intersectedMO->GetMass() : 0.0001F);
 			float invMassA = 1.0F / massA;
 			float invMassB = 1.0F / massB;
 			float normMassA = invMassA / (invMassA + invMassB);
@@ -1484,7 +1484,7 @@ namespace RTE {
 		}
 
 		// Now actually apply the exit vectors to both, but only if the jump isn't too jarring
-		if (thisExit.GetMagnitude() < m_OwnerMOSR->GetRadius()) { position += thisExit; }
+		if (thisExit.GetMagnitude() < m_OwnerMOSR->GetIndividualRadius()) { position += thisExit; }
 		if (!intersectedExit.IsZero() && intersectedExit.GetMagnitude() < intersectedMO->GetRadius()) { intersectedMO->SetPos(intersectedMO->GetPos() + intersectedExit); }
 
 		if (m_OwnerMOSR->CanBeSquished() && RatioInTerrain() > 0.75F) /* && totalExitVector.GetMagnitude() > m_OwnerMOSR->GetDiameter()) */ {

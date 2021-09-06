@@ -52,9 +52,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(SceneEditor)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(SceneEditor);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     SceneEditor

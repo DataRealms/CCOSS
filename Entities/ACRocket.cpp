@@ -19,13 +19,15 @@
 #include "Controller.h"
 #include "Matrix.h"
 #include "AEmitter.h"
+#include "SettingsMan.h"
+#include "PresetMan.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
 
 namespace RTE {
 
-ConcreteClassInfo(ACRocket, ACraft, 10)
+ConcreteClassInfo(ACRocket, ACraft, 10);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -91,19 +93,37 @@ int ACRocket::Create()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Creates a ACRocket to be identical to another, by deep copy.
 
-int ACRocket::Create(const ACRocket &reference)
-{
-    ACraft::Create(reference);
-
+int ACRocket::Create(const ACRocket &reference) {
     if (reference.m_pRLeg) {
-        m_pRLeg = dynamic_cast<Leg *>(reference.m_pRLeg->Clone());
-        AddAttachable(m_pRLeg, true);
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRLeg->GetUniqueID());
+        SetRightLeg(dynamic_cast<Leg *>(reference.m_pRLeg->Clone()));
+    }
+    if (reference.m_pLLeg) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLLeg->GetUniqueID());
+        SetLeftLeg(dynamic_cast<Leg *>(reference.m_pLLeg->Clone()));
+    }
+    if (reference.m_pMThruster) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pMThruster->GetUniqueID());
+        SetMainThruster(dynamic_cast<AEmitter *>(reference.m_pMThruster->Clone()));
+    }
+    if (reference.m_pRThruster) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRThruster->GetUniqueID());
+        SetRightThruster(dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone()));
+    }
+    if (reference.m_pLThruster) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLThruster->GetUniqueID());
+        SetLeftThruster(dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone()));
+    }
+    if (reference.m_pURThruster) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pURThruster->GetUniqueID());
+        SetURightThruster(dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone()));
+    }
+    if (reference.m_pULThruster) {
+        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pULThruster->GetUniqueID());
+        SetULeftThruster(dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone()));
     }
 
-    if (reference.m_pLLeg) {
-        m_pLLeg = dynamic_cast<Leg *>(reference.m_pLLeg->Clone());
-        AddAttachable(m_pLLeg, true);
-    }
+    ACraft::Create(reference);
 
     m_pBodyAG = dynamic_cast<AtomGroup *>(reference.m_pBodyAG->Clone());
     m_pBodyAG->SetOwner(this);
@@ -117,32 +137,6 @@ int ACRocket::Create(const ACRocket &reference)
     {
         m_pLFootGroup = dynamic_cast<AtomGroup *>(reference.m_pLFootGroup->Clone());
         m_pLFootGroup->SetOwner(this);
-    }
-
-    if (reference.m_pMThruster)
-    {
-        m_pMThruster = dynamic_cast<AEmitter *>(reference.m_pMThruster->Clone());
-        AddAttachable(m_pMThruster, true);
-    }
-    if (reference.m_pRThruster)
-    {
-        m_pRThruster = dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone());
-        AddAttachable(m_pRThruster, true);
-    }
-    if (reference.m_pLThruster)
-    {
-        m_pLThruster = dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone());
-        AddAttachable(m_pLThruster, true);
-    }
-    if (reference.m_pURThruster)
-    {
-        m_pURThruster = dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone());
-        AddAttachable(m_pURThruster, true);
-    }
-    if (reference.m_pULThruster)
-    {
-        m_pULThruster = dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone());
-        AddAttachable(m_pULThruster, true);
     }
 
     m_GearState = reference.m_GearState;
@@ -166,77 +160,44 @@ int ACRocket::Create(const ACRocket &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int ACRocket::ReadProperty(std::string propName, Reader &reader)
-{
-    if (propName == "RLeg")
-    {
-        delete m_pRLeg;
-        m_pRLeg = new Leg;
-        reader >> m_pRLeg;
-    }
-    else if (propName == "LLeg")
-    {
-        delete m_pLLeg;
-        m_pLLeg = new Leg;
-        reader >> m_pLLeg;
-        m_pLLeg->SetHFlipped(true);
-    }
-    else if (propName == "RFootGroup")
-    {
+int ACRocket::ReadProperty(const std::string_view &propName, Reader &reader) {
+    if (propName == "RLeg" || propName == "RightLeg") {
+        SetRightLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "LLeg" || propName == "LeftLeg") {
+        SetLeftLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "RFootGroup" || propName == "RightFootGroup") {
         delete m_pRFootGroup;
         m_pRFootGroup = new AtomGroup();
         reader >> m_pRFootGroup;
         m_pRFootGroup->SetOwner(this);
-    }
-    else if (propName == "LFootGroup")
-    {
+    } else if (propName == "LFootGroup" || propName == "LeftFootGroup") {
         delete m_pLFootGroup;
         m_pLFootGroup = new AtomGroup();
         reader >> m_pLFootGroup;
         m_pLFootGroup->SetOwner(this);
-    }
-    else if (propName == "MThruster")
-    {   
-        delete m_pMThruster;
-        m_pMThruster = new AEmitter;
-        reader >> m_pMThruster;
-    }
-    else if (propName == "RThruster")
-    {
-        delete m_pRThruster;
-        m_pRThruster = new AEmitter;
-        reader >> m_pRThruster;
-    }
-    else if (propName == "LThruster")
-    {
-        delete m_pLThruster;
-        m_pLThruster = new AEmitter;
-        reader >> m_pLThruster;
-    }
-    else if (propName == "URThruster")
-    {
-        delete m_pURThruster;
-        m_pURThruster = new AEmitter;
-        reader >> m_pURThruster;
-    }
-    else if (propName == "ULThruster")
-    {
-        delete m_pULThruster;
-        m_pULThruster = new AEmitter;
-        reader >> m_pULThruster;
-    }
-    else if (propName == "RaisedGearLimbPath")
+    } else if (propName == "MThruster" || propName == "MainThruster") {
+        SetMainThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "RThruster" || propName == "RightThruster") {
+        SetRightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "LThruster" || propName == "LeftThruster") {
+        SetLeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "URThruster" || propName == "UpRightThruster") {
+        SetURightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "ULThruster" || propName == "UpLeftThruster") {
+        SetULeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
+    } else if (propName == "RaisedGearLimbPath") {
         reader >> m_Paths[RIGHT][RAISED];
-    else if (propName == "LoweredGearLimbPath")
+    } else if (propName == "LoweredGearLimbPath") {
         reader >> m_Paths[RIGHT][LOWERED];
-    else if (propName == "LoweringGearLimbPath")
+    } else if (propName == "LoweringGearLimbPath") {
         reader >> m_Paths[RIGHT][LOWERING];
-    else if (propName == "RaisingGearLimbPath")
+    } else if (propName == "RaisingGearLimbPath") {
         reader >> m_Paths[RIGHT][RAISING];
-    else if (propName == "ScuttleIfFlippedTime")
+    } else if (propName == "ScuttleIfFlippedTime") {
         reader >> m_ScuttleIfFlippedTime;
-    else
+    } else {
         return ACraft::ReadProperty(propName, reader);
+    }
 
     return 0;
 }
@@ -292,17 +253,9 @@ int ACRocket::Save(Writer &writer) const
 
 void ACRocket::Destroy(bool notInherited)
 {
-    delete m_pRLeg;
-    delete m_pLLeg;
     delete m_pBodyAG;
     delete m_pRFootGroup;
     delete m_pLFootGroup;
-
-    delete m_pMThruster;
-    delete m_pRThruster;
-    delete m_pLThruster;
-    delete m_pURThruster;
-    delete m_pULThruster;
     
 //    for (deque<LimbPath *>::iterator itr = m_WalkPaths.begin();
 //         itr != m_WalkPaths.end(); ++itr)
@@ -311,27 +264,6 @@ void ACRocket::Destroy(bool notInherited)
     if (!notInherited)
         ACraft::Destroy();
     Clear();
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMass
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the mass value of this ACRocket, including the mass of its
-//                  currently attached body parts and inventory.
-
-float ACRocket::GetMass() const
-{
-    float totalMass = ACraft::GetMass();
-//    if (m_pCapsule)
-//        totalMass += m_pCapsule->GetMass();
-    if (m_pRLeg)
-        totalMass += m_pRLeg->GetMass();
-    if (m_pLLeg)
-        totalMass += m_pLLeg->GetMass();
-    if (m_pMThruster)
-        totalMass += m_pMThruster->GetMass();
-    return totalMass;
 }
 
 
@@ -351,25 +283,6 @@ float ACRocket::GetAltitude(int max, int accuracy)
         pos = m_Pos;
 
     return g_SceneMan.FindAltitude(pos, max, accuracy);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetID
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the MOID of this MovableObject for this frame.
-
-void ACRocket::SetID(const MOID newID)
-{
-    MovableObject::SetID(newID);
-//    if (m_pCapsule)
-//        m_pCapsule->SetID(newID);
-    if (m_pRLeg)
-        m_pRLeg->SetID(newID);
-    if (m_pLLeg)
-        m_pLLeg->SetID(newID);
-    if (m_pMThruster)
-        m_pMThruster->SetID(newID);
 }
 
 /*
@@ -398,75 +311,6 @@ bool ACRocket::OnSink(const Vector &pos)
     return false;
 }
 */
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GibThis
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gibs this, effectively destroying it and creating multiple gibs or
-//                  pieces in its place.
-
-void ACRocket::GibThis(Vector impactImpulse, float internalBlast, MovableObject *pIgnoreMO)
-{
-    // TODO: maybe make hardcoded attachables gib if their gib list isn't empty
-    // Detach all limbs and let loose
-    if (m_pRLeg && m_pRLeg->IsAttached())
-    {
-        RemoveAttachable(m_pRLeg);
-        SetAttachableVelocitiesForGibbing(m_pRLeg, impactImpulse, internalBlast);
-        m_pRLeg->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pRLeg);
-        m_pRLeg = 0;
-    }
-    if (m_pLLeg && m_pLLeg->IsAttached())
-    {
-        RemoveAttachable(m_pLLeg);
-        SetAttachableVelocitiesForGibbing(m_pLLeg, impactImpulse, internalBlast);
-        m_pLLeg->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pLLeg);
-        m_pLLeg = 0;
-    }
-    if (m_pMThruster && m_pMThruster->IsAttached())
-    {
-        RemoveAttachable(m_pMThruster);
-        SetAttachableVelocitiesForGibbing(m_pMThruster, impactImpulse, internalBlast);
-        m_pMThruster->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pMThruster);
-        m_pMThruster = 0;
-    }
-    if (m_pRThruster && m_pRThruster->IsAttached())
-    {
-        RemoveAttachable(m_pRThruster);
-        SetAttachableVelocitiesForGibbing(m_pRThruster, impactImpulse, internalBlast);
-        m_pRThruster->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pRThruster);
-        m_pRThruster = 0;
-    }
-    if (m_pLThruster && m_pLThruster->IsAttached())
-    {
-        RemoveAttachable(m_pLThruster);
-        SetAttachableVelocitiesForGibbing(m_pLThruster, impactImpulse, internalBlast);
-        m_pLThruster->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pLThruster);
-        m_pLThruster = 0;
-    }
-    if (m_pURThruster && m_pURThruster->IsAttached())
-    {
-        RemoveAttachable(m_pURThruster);
-        SetAttachableVelocitiesForGibbing(m_pURThruster, impactImpulse, internalBlast);
-        m_pURThruster->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pURThruster);
-        m_pURThruster = 0;
-    }
-    if (m_pULThruster && m_pULThruster->IsAttached())
-    {
-        RemoveAttachable(m_pULThruster);
-        SetAttachableVelocitiesForGibbing(m_pULThruster, impactImpulse, internalBlast);
-        m_pULThruster->SetToGetHitByMOs(false);
-        g_MovableMan.AddParticle(m_pULThruster);
-        m_pULThruster = 0;
-    }
-
-    Actor::GibThis(impactImpulse, internalBlast, pIgnoreMO);
-}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -647,7 +491,6 @@ void ACRocket::UpdateAI()
 
 void ACRocket::Update()
 {
-    float mass = GetMass();
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
 
     // Look/aim update, make the scanner point aftward if the rocket is falling
@@ -860,106 +703,26 @@ void ACRocket::Update()
         m_GearState = LOWERED;
     }
 
-    /////////////////////////////////////////////////
-    // Update MovableObject, adds on the forces etc, updated viewpoint
-
-    ACraft::Update();
-
 
     /////////////////////////////////
-    // Update Attachable:s
-/*
-    if (m_pCapsule && m_pCapsule->IsAttached())
-    {
-        m_pCapsule->SetJointPos(m_Pos + m_pCapsule->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-        m_pCapsule->SetRotAngle(m_Rotation);
-        m_pCapsule->Update();
-        m_Health -= m_pCapsule->CollectDamage();
-    }
-*/
-    if (m_pRLeg && m_pRLeg->IsAttached())
-    {
-        m_pRLeg->SetJointPos(m_Pos + m_pRLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-/* Obsolete
-        if (!m_pMThruster->IsEmitting())
-            m_pRLeg->ReachToward(m_Pos + Vector(18, 40) * m_Rotation);
-        else
-            m_pRLeg->ReachToward(m_Pos + Vector(13, 40) * m_Rotation);
-*/
-        m_pRLeg->ReachToward(m_pRFootGroup->GetLimbPos(m_HFlipped));
-        m_pRLeg->Update();
-        m_Health -= m_pRLeg->CollectDamage();
+    // Manage Attachable:s
+    if (m_pRLeg && m_pRLeg->IsAttached()) {
+        m_pRLeg->SetTargetPosition(m_pRFootGroup->GetLimbPos(m_HFlipped));
     }
 
-    if (m_pLLeg && m_pLLeg->IsAttached())
-    {
-        m_pLLeg->SetJointPos(m_Pos + m_pLLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation);
-/* Obsolete
-        if (!m_pMThruster->IsEmitting())
-            m_pLLeg->ReachToward(m_Pos + Vector(-18, 40) * m_Rotation);
-        else
-            m_pLLeg->ReachToward(m_Pos + Vector(-13, 40) * m_Rotation);
-*/
-        m_pLLeg->ReachToward(m_pLFootGroup->GetLimbPos(!m_HFlipped));
-        m_pLLeg->Update();
-        m_Health -= m_pLLeg->CollectDamage();
+    if (m_pLLeg && m_pLLeg->IsAttached()) {
+        m_pLLeg->SetTargetPosition(m_pLFootGroup->GetLimbPos(!m_HFlipped));
     }
 
-    // Apply forces transferred from the attachables and
-    // add detachment wounds to this if applicable
-
-//    if (!ApplyAttachableForces(m_pCapsule))
-//        m_pCapsule = 0;
-    if (!ApplyAttachableForces(m_pRLeg))
-        m_pRLeg = 0;
-    if (!ApplyAttachableForces(m_pLLeg))
-        m_pLLeg = 0;
-
-    if (m_pMThruster) {
-        m_pMThruster->SetJointPos(m_Pos + RotateOffset(m_pMThruster->GetParentOffset()));
-//        m_pMThruster->SetVel(m_Vel);
-        m_pMThruster->SetRotAngle(m_Rotation.GetRadAngle() - c_HalfPI);
-//        m_pMThruster->SetEmitAngle(m_Rotation - c_HalfPI);
-        m_pMThruster->Update();
-    }
-
-    if (m_pRThruster) {
-        m_pRThruster->SetJointPos(m_Pos + RotateOffset(m_pRThruster->GetParentOffset()));
-        m_pRThruster->SetVel(m_Vel);
-        m_pRThruster->SetRotAngle(m_Rotation.GetRadAngle() + c_EighthPI);
-//        m_pRThruster->SetEmitAngle(m_Rotation);
-        m_pRThruster->Update();
-    }
-
-    if (m_pLThruster) {
-        m_pLThruster->SetJointPos(m_Pos + RotateOffset(m_pLThruster->GetParentOffset()));
-        m_pLThruster->SetVel(m_Vel);
-        m_pLThruster->SetRotAngle(m_Rotation.GetRadAngle() + c_PI - c_EighthPI);
-//        m_pLThruster->SetEmitAngle(m_Rotation + c_PI);
-        m_pLThruster->Update();
-    }
-
-    if (m_pURThruster) {
-        m_pURThruster->SetJointPos(m_Pos + RotateOffset(m_pURThruster->GetParentOffset()));
-        m_pURThruster->SetVel(m_Vel);
-        m_pURThruster->SetRotAngle(m_Rotation.GetRadAngle() + c_HalfPI - c_QuarterPI / 2);
-//        m_pURThruster->SetEmitAngle(-c_QuarterPI / 2);
-        m_pURThruster->Update();
-    }
-
-    if (m_pULThruster) {
-        m_pULThruster->SetJointPos(m_Pos + RotateOffset(m_pULThruster->GetParentOffset()));
-        m_pULThruster->SetVel(m_Vel);
-        m_pULThruster->SetRotAngle(m_Rotation.GetRadAngle() + c_HalfPI + c_QuarterPI / 2);
-//        m_pULThruster->SetEmitAngle(c_QuarterPI / 2);
-        m_pULThruster->Update();
-    }
+    /////////////////////////////////////////////////
+    // Update MovableObject, adds on the forces etc, updated viewpoint
+    ACraft::Update();
 
     ///////////////////////////////////
     // Explosion logic
 
     if (m_Status == DEAD)
-        GibThis(Vector(), 50);
+        GibThis();
 
     ////////////////////////////////////////
     // Balance stuff
@@ -967,14 +730,11 @@ void ACRocket::Update()
     // Get the rotation in radians.
     float rot = m_Rotation.GetRadAngle();
 
-    // Eliminate full rotations
-    while (fabs(rot) > c_TwoPI)
-        rot -= rot > 0 ? c_TwoPI : -c_TwoPI;
-
-    // Eliminate rotations over half a turn
-    if (fabs(rot) > c_PI)
-        rot = (rot > 0 ? -c_PI : c_PI) + (rot - (rot > 0 ? c_PI : -c_PI));
-
+	// Eliminate rotations over half a turn
+	if (std::fabs(rot) > c_PI) {
+		rot += (rot > 0) ? -c_TwoPI : c_TwoPI;
+		m_Rotation.SetRadAngle(rot);
+	}
     // If tipped too far for too long, die
     if (rot < c_HalfPI && rot > -c_HalfPI)
 	{
@@ -1046,42 +806,153 @@ void ACRocket::Update()
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateChildMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Makes this MO register itself and all its attached children in the
-//                  MOID register and get ID:s for itself and its children for this frame.
+void ACRocket::SetRightLeg(Leg *newLeg) {
+    if (m_pRLeg && m_pRLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pRLeg); }
+    if (newLeg == nullptr) {
+        m_pRLeg = nullptr;
+    } else {
+        m_pRLeg = newLeg;
+        AddAttachable(newLeg);
 
-void ACRocket::UpdateChildMOIDs(vector<MovableObject *> &MOIDIndex,
-                                MOID rootMOID,
-                                bool makeNewMOID)
-{
-    if (m_pRLeg)
-        m_pRLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
-    if (m_pLLeg)
-        m_pLLeg->UpdateMOID(MOIDIndex, m_RootMOID, makeNewMOID);
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetRightLeg");
+            dynamic_cast<ACRocket *>(parent)->SetRightLeg(castedAttachable);
+        }});
 
-    ACraft::UpdateChildMOIDs(MOIDIndex, m_RootMOID, makeNewMOID);
+        if (m_pRLeg->HasNoSetDamageMultiplier()) { m_pRLeg->SetDamageMultiplier(1.0F); }
+    }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetMOIDs
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Puts all MOIDs associated with this MO and all it's descendants into MOIDs vector
-// Arguments:       Vector to store MOIDs
-// Return value:    None.
+void ACRocket::SetLeftLeg(Leg *newLeg) {
+    if (m_pLLeg && m_pLLeg->IsAttached()) { RemoveAndDeleteAttachable(m_pLLeg); }
+    if (newLeg == nullptr) {
+        m_pLLeg = nullptr;
+    } else {
+        m_pLLeg = newLeg;
+        AddAttachable(newLeg);
 
-void ACRocket::GetMOIDs(std::vector<MOID> &MOIDs) const
-{
-	if (m_pRLeg)
-		m_pRLeg->GetMOIDs(MOIDs);
-	if (m_pLLeg)
-		m_pLLeg->GetMOIDs(MOIDs);
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newLeg->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            Leg *castedAttachable = dynamic_cast<Leg *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetLeftLeg");
+            dynamic_cast<ACRocket *>(parent)->SetLeftLeg(castedAttachable);
+        }});
 
-	ACraft::GetMOIDs(MOIDs);
+        if (m_pLLeg->HasNoSetDamageMultiplier()) { m_pLLeg->SetDamageMultiplier(1.0F); }
+        m_pLLeg->SetInheritsHFlipped(-1);
+    }
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACRocket::SetMainThruster(AEmitter *newThruster) {
+    if (m_pMThruster && m_pMThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pMThruster); }
+    if (newThruster == nullptr) {
+        m_pMThruster = nullptr;
+    } else {
+        m_pMThruster = newThruster;
+        AddAttachable(newThruster);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            AEmitter *castedAttachable = dynamic_cast<AEmitter *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetMainThruster");
+            dynamic_cast<ACRocket *>(parent)->SetMainThruster(castedAttachable);
+        }});
+
+        if (m_pMThruster->HasNoSetDamageMultiplier()) { m_pMThruster->SetDamageMultiplier(1.0F); }
+        m_pMThruster->SetInheritedRotAngleOffset(-c_HalfPI);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACRocket::SetRightThruster(AEmitter *newThruster) {
+    if (m_pRThruster && m_pRThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pRThruster); }
+    if (newThruster == nullptr) {
+        m_pRThruster = nullptr;
+    } else {
+        m_pRThruster = newThruster;
+        AddAttachable(newThruster);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            AEmitter *castedAttachable = dynamic_cast<AEmitter *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetRightThruster");
+            dynamic_cast<ACRocket *>(parent)->SetRightThruster(castedAttachable);
+        }});
+
+        if (m_pRThruster->HasNoSetDamageMultiplier()) { m_pRThruster->SetDamageMultiplier(1.0F); }
+        m_pRThruster->SetInheritedRotAngleOffset(c_EighthPI);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACRocket::SetLeftThruster(AEmitter *newThruster) {
+    if (m_pLThruster && m_pLThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pLThruster); }
+    if (newThruster == nullptr) {
+        m_pLThruster = nullptr;
+    } else {
+        m_pLThruster = newThruster;
+        AddAttachable(newThruster);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            AEmitter *castedAttachable = dynamic_cast<AEmitter *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetLeftThruster");
+            dynamic_cast<ACRocket *>(parent)->SetLeftThruster(castedAttachable);
+        }});
+
+        if (m_pLThruster->HasNoSetDamageMultiplier()) { m_pLThruster->SetDamageMultiplier(1.0F); }
+        m_pLThruster->SetInheritedRotAngleOffset(c_PI - c_EighthPI);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACRocket::SetURightThruster(AEmitter *newThruster) {
+    if (m_pURThruster && m_pURThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pURThruster); }
+    if (newThruster == nullptr) {
+        m_pURThruster = nullptr;
+    } else {
+        m_pURThruster = newThruster;
+        AddAttachable(newThruster);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            AEmitter *castedAttachable = dynamic_cast<AEmitter *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetURightThruster");
+            dynamic_cast<ACRocket *>(parent)->SetURightThruster(castedAttachable);
+        }});
+
+        if (m_pURThruster->HasNoSetDamageMultiplier()) { m_pURThruster->SetDamageMultiplier(1.0F); }
+        m_pURThruster->SetInheritedRotAngleOffset(c_HalfPI - c_EighthPI);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACRocket::SetULeftThruster(AEmitter *newThruster) {
+    if (m_pULThruster && m_pULThruster->IsAttached()) { RemoveAndDeleteAttachable(m_pULThruster); }
+    if (newThruster == nullptr) {
+        m_pULThruster = nullptr;
+    } else {
+        m_pULThruster = newThruster;
+        AddAttachable(newThruster);
+
+        m_HardcodedAttachableUniqueIDsAndSetters.insert({newThruster->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
+            AEmitter *castedAttachable = dynamic_cast<AEmitter *>(attachable);
+            RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetULeftThruster");
+            dynamic_cast<ACRocket *>(parent)->SetULeftThruster(castedAttachable);
+        }});
+
+        if (m_pULThruster->HasNoSetDamageMultiplier()) { m_pULThruster->SetDamageMultiplier(1.0F); }
+        m_pULThruster->SetInheritedRotAngleOffset(c_HalfPI + c_EighthPI);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1108,157 +979,14 @@ void ACRocket::ResetEmissionTimers()
         m_pULThruster->ResetEmissionTimers();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveAnyRandomWounds
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a specified amount of wounds from the actor and all standard attachables.
-
-int ACRocket::RemoveAnyRandomWounds(int amount)
-{
-	float damage = 0;
-
-	for (int i = 0; i < amount; i++)
-	{
-		// Fill the list of damaged bodyparts
-		std::vector<MOSRotating *> bodyParts;
-		if (GetWoundCount() > 0)
-			bodyParts.push_back(this);
-
-		if (m_pRLeg && m_pRLeg->GetWoundCount())
-			bodyParts.push_back(m_pRLeg);
-		if (m_pLLeg && m_pLLeg->GetWoundCount())
-			bodyParts.push_back(m_pLLeg);
-
-		// Stop removing wounds if there are not any left
-		if (bodyParts.size() == 0)
-			break;
-
-		int partIndex = RandomNum<int>(0, bodyParts.size() - 1);
-		MOSRotating * part = bodyParts[partIndex];
-		damage += part->RemoveWounds(1);
-	}
-
-	return damage;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundCount
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound count of this actor and all vital attachables.
-
-int ACRocket::GetTotalWoundCount() const
-{
-	int count = ACraft::GetWoundCount();
-
-//    if (m_pMThruster)
-//        count += m_pMThruster->GetWoundCount();
-    if (m_pRLeg)
-        count += m_pRLeg->GetWoundCount();
-    if (m_pLLeg)
-        count += m_pLLeg->GetWoundCount();
-//    if (m_pCapsule)
-//        count += m_pCapsule->GetWoundCount();
-
-	return count;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetTotalWoundLimit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:		Returns total wound limit of this actor and all vital attachables.
-
-int ACRocket::GetTotalWoundLimit() const
-{ 
-	int count = ACraft::GetGibWoundLimit();
-
-//    if (m_pMThruster)
-//        count += m_pMThruster->GetGibWoundLimit();
-    if (m_pRLeg)
-        count += m_pRLeg->GetGibWoundLimit();
-    if (m_pLLeg)
-        count += m_pLLeg->GetGibWoundLimit();
-//    if (m_pCapsule)
-//        count += m_pCapsule->GetGibWoundLimit();
-
-	return count;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this ACRocket's current graphical representation to a
-//                  BITMAP of choice.
-
-void ACRocket::Draw(BITMAP *pTargetBitmap,
-                   const Vector &targetPos,
-                   DrawMode mode,
-                   bool onlyPhysical) const
-{
-    if (m_pMThruster && !m_pMThruster->IsDrawnAfterParent() && (mode == g_DrawColor || mode == g_DrawMaterial))
-        m_pMThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (m_pRLeg && !m_pRLeg->IsDrawnAfterParent())
-        m_pRLeg->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);    
-    if (m_pLLeg && !m_pLLeg->IsDrawnAfterParent())
-        m_pLLeg->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (mode == g_DrawColor || mode == g_DrawMaterial) {
-        if (m_pRThruster && !m_pRThruster->IsDrawnAfterParent())
-            m_pRThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-        if (m_pLThruster && !m_pLThruster->IsDrawnAfterParent())
-            m_pLThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-        if (m_pURThruster && !m_pURThruster->IsDrawnAfterParent())
-            m_pURThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-        if (m_pULThruster && !m_pULThruster->IsDrawnAfterParent())
-            m_pULThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-    }
-
+void ACRocket::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     ACraft::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-    if (m_pMThruster && m_pMThruster->IsDrawnAfterParent() && (mode == g_DrawColor || mode == g_DrawMaterial))
-        m_pMThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (m_pRLeg && m_pRLeg->IsDrawnAfterParent())
-        m_pRLeg->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-    if (m_pLLeg && m_pLLeg->IsDrawnAfterParent())
-        m_pLLeg->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-    if (mode == g_DrawColor || mode == g_DrawMaterial) {
-        if (m_pRThruster && m_pRThruster->IsDrawnAfterParent())
-            m_pRThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-        if (m_pLThruster && m_pLThruster->IsDrawnAfterParent())
-            m_pLThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-        if (m_pURThruster && m_pURThruster->IsDrawnAfterParent())
-            m_pURThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-        if (m_pULThruster && m_pULThruster->IsDrawnAfterParent())
-            m_pULThruster->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-    }
-/*
-    if (m_pCapsule)
-        m_pCapsule->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-*/
-    if (mode == g_DrawColor) {
-#ifdef DEBUG_BUILD
-        acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
-                              std::floor(m_Pos.m_Y),
-                              64);
-        putpixel(pTargetBitmap, std::floor(m_Pos.m_X),
-                              std::floor(m_Pos.m_Y),
-                              64);
-        release_bitmap(pTargetBitmap);
-
+    if (mode == g_DrawColor && !onlyPhysical && g_SettingsMan.DrawHandAndFootGroupVisualizations()) {
         m_pRFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
         m_pLFootGroup->Draw(pTargetBitmap, targetPos, true, 13);
-//        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false, 122);
-//        m_pDeepGroup->Draw(pTargetBitmap, targetPos, false, 13);
-#endif
-//        m_pAtomGroup->Draw(pTargetBitmap, targetPos, false);
-//        m_pFGFootGroup->Draw(pTargetBitmap, targetPos, true);
-//        m_pBGFootGroup->Draw(pTargetBitmap, targetPos, true);
-//        m_pBGHandGroup->Draw(pTargetBitmap, targetPos, true);
     }
 }
 

@@ -5,7 +5,7 @@
 
 namespace RTE {
 
-	ConcreteClassInfo(MetaSave, Entity, 0)
+	ConcreteClassInfo(MetaSave, Entity, 0);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -53,7 +53,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int MetaSave::ReadProperty(std::string propName, Reader &reader) {
+	int MetaSave::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "SavePath") {
 			reader >> m_SavePath;
 		} else if (propName == "PlayerCount") {

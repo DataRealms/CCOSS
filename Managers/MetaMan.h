@@ -54,7 +54,7 @@ class MetaMan:
     public Singleton<MetaMan>,
     public Serializable
 {
-    friend class LuaMan;
+    friend struct ManagerLuaBindings;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -65,7 +65,8 @@ public:
 friend class MetagameGUI;
 friend class MetaSave;
 
-	SerializableOverrideMethods
+	SerializableClassNameGetter;
+	SerializableOverrideMethods;
 
     enum MetagameState
     {
@@ -113,7 +114,7 @@ friend class MetaSave;
 // Return value:    An error return value signaling sucess or any particular failure.
 //                  Anything below 0 is an error signal.
 
-	int Create() override;
+	int Initialize();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -205,16 +206,6 @@ friend class MetaSave;
 // Return value:    None.
 
     void Destroy();
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    const std::string & GetClassName() const override { return m_ClassName; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -591,8 +582,6 @@ friend class MetaSave;
 
 protected:
 
-    // Member variables
-    static const std::string m_ClassName;
     // GUI controller, owned
     MetagameGUI *m_pMetaGUI;
 
@@ -641,6 +630,8 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+	static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this object.
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

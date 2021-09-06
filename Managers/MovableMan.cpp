@@ -17,7 +17,7 @@
 #include "PresetMan.h"
 #include "AHuman.h"
 #include "MOPixel.h"
-#include "Attachable.h"
+#include "HeldDevice.h"
 #include "SLTerrain.h"
 #include "Controller.h"
 #include "AtomGroup.h"
@@ -27,7 +27,7 @@
 
 namespace RTE {
 
-const string MovableMan::m_ClassName = "MovableMan";
+const string MovableMan::c_ClassName = "MovableMan";
 
 
 // Comparison functor for sorting movable objects by their X position using STL's sort
@@ -77,7 +77,7 @@ void MovableMan::Clear()
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes the MovableMan object ready for use.
 
-int MovableMan::Create()
+int MovableMan::Initialize()
 {
 // TODO: Increase this number, or maybe only for certain classes?
     Entity::ClassInfo::FillAllPools();
@@ -98,7 +98,7 @@ int MovableMan::Create()
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int MovableMan::ReadProperty(std::string propName, Reader &reader)
+int MovableMan::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     if (propName == "AddEffect")
         g_PresetMan.GetEntityPreset(reader);
@@ -110,16 +110,6 @@ int MovableMan::ReadProperty(std::string propName, Reader &reader)
         g_PresetMan.GetEntityPreset(reader);
     else if (propName == "SplashRatio")
         reader >> m_SplashRatio;
-    else if (propName == "MaxUnheldItems")
-        reader >> m_MaxDroppedItems;
-    else if (propName == "SloMoThreshold")
-        reader >> m_SloMoThreshold;
-    else if (propName == "SloMoDurationMS")
-        reader >> m_SloMoDuration;
-    else if (propName == "EnableParticleSettling")
-        reader >> m_SettlingEnabled;
-    else if (propName == "EnableMOSubtraction")
-        reader >> m_MOSubtractionEnabled;
     else
         return Serializable::ReadProperty(propName, reader);
 
@@ -604,7 +594,7 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
 
 Actor * MovableMan::GetClosestEnemyActor(int team, const Vector &scenePoint, int maxRadius, Vector &getDistance)
 {
-    if (team < Activity::NoTeam || team >= Activity::MaxTeamCount || m_Actors.empty() ||  m_ActorRoster[team].empty())
+    if (team < Activity::NoTeam || team >= Activity::MaxTeamCount || m_Actors.empty())
         return 0;
     
     Activity *pActivity = g_ActivityMan.GetActivity();
@@ -641,7 +631,7 @@ Actor * MovableMan::GetClosestEnemyActor(int team, const Vector &scenePoint, int
 // Description:     Get a pointer to an Actor in the internal Actor list that is closest
 //                  to a specific scene point.
 
-Actor * MovableMan::GetClosestActor(Vector &scenePoint, int maxRadius, float &getDistance, const Actor *pExcludeThis)
+Actor * MovableMan::GetClosestActor(const Vector &scenePoint, int maxRadius, Vector &getDistance, const Actor *pExcludeThis)
 {
     if (m_Actors.empty())
         return 0;
@@ -666,10 +656,10 @@ Actor * MovableMan::GetClosestActor(Vector &scenePoint, int maxRadius, float &ge
         {
             shortestDistance = distance;
             pClosestActor = *aIt;
+			getDistance.SetXY(distanceVec.GetX(), distanceVec.GetY());
         }
     }
 
-    getDistance = shortestDistance;
     return pClosestActor;
 }
 
@@ -781,21 +771,21 @@ Actor * MovableMan::GetUnassignedBrain(int team) const
 //                  best way to add it is. E.g. if it's an Actor, it will be added as such.
 //                  Ownership IS transferred!
 
-bool MovableMan::AddMO(MovableObject *pMOToAdd)
-{
-    if (!pMOToAdd)
+bool MovableMan::AddMO(MovableObject *pMOToAdd) {
+    if (!pMOToAdd) {
         return false;
+    }
 
     pMOToAdd->SetAsAddedToMovableMan();
 
     // Find out what kind it is and apply accordingly
-    if (Actor *pActor = dynamic_cast<Actor *>(pMOToAdd))
-    {
+    if (Actor *pActor = dynamic_cast<Actor *>(pMOToAdd)) {
         AddActor(pActor);
         return true;
-    }
-    else
-    {
+    } else if (HeldDevice *pHeldDevice = dynamic_cast<HeldDevice *>(pMOToAdd)) {
+        AddItem(pHeldDevice);
+        return true;
+    } else {
         AddParticle(pMOToAdd);
         return true;
     }
@@ -880,7 +870,7 @@ void MovableMan::AddItem(MovableObject *pItemToAdd)
 // Don't delete; buried stuff is cool, also causes problems becuase it thinks hollowed out material is not air and therefore  makes objects inside bunkers disappear!
 //        if (!pItemToAdd->MoveOutOfTerrain(g_MaterialGrass))
 //            pItemToAdd->SetToDelete();
-            pItemToAdd->MoveOutOfTerrain(g_MaterialGrass);
+            if (!pItemToAdd->IsSetToDelete()) { pItemToAdd->MoveOutOfTerrain(g_MaterialGrass); }
 
             pItemToAdd->NotResting();
             pItemToAdd->NewFrame();
@@ -1366,25 +1356,26 @@ bool MovableMan::RemoveMO(MovableObject *pMOToRem)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          KillAllActors
+// Method:          KillAllEnemyActors
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Kills and destroys all actors of a specific team.
+// Description:     Kills and destroys all enemies of a specific team.
 
-int MovableMan::KillAllActors(int exceptTeam)
+int MovableMan::KillAllEnemyActors(int exceptTeam)
 {
     int killCount = 0;
-    AHuman *pHuman = 0;
 
     // Kill all regular Actors
     for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
     {
         if ((*aIt)->GetTeam() != exceptTeam)
         {
-            // Blow up the head of humanoids, for effect
-            if (pHuman = dynamic_cast<AHuman *>(*aIt))
-                pHuman->GetHead()->GibThis();
-            else
-                (*aIt)->GibThis();
+			// Blow up the heads of humanoids, for effect.
+			AHuman *human = dynamic_cast<AHuman *>(*aIt);
+			if (human && human->GetHead()) {
+				human->GetHead()->GibThis();
+			} else {
+				(*aIt)->GibThis();
+			}
             killCount++;
         }
     }
@@ -1394,11 +1385,13 @@ int MovableMan::KillAllActors(int exceptTeam)
     {
         if ((*aIt)->GetTeam() != exceptTeam)
         {
-            // Blow up the head of humanoids, for effect
-            if (pHuman = dynamic_cast<AHuman *>(*aIt))
-                pHuman->GetHead()->GibThis();
-            else
-                (*aIt)->GibThis();
+			// Blow up the heads of humanoids, for effect.
+			AHuman *human = dynamic_cast<AHuman *>(*aIt);
+			if (human && human->GetHead()) {
+				human->GetHead()->GibThis();
+			} else {
+				(*aIt)->GibThis();
+			}
             killCount++;
         }
     }
@@ -1674,7 +1667,7 @@ void MovableMan::Update()
 
     {
         // Travel Actors
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS1);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsTravel);
         {
             for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
             {
@@ -1696,7 +1689,7 @@ void MovableMan::Update()
                 (*aIt)->NewFrame();
             }
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS1);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsTravel);
 
         // Travel items
         {
@@ -1714,7 +1707,7 @@ void MovableMan::Update()
         }
 
         // Travel particles
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS1);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesTravel);
         {
             for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
             {
@@ -1728,7 +1721,7 @@ void MovableMan::Update()
                 (*parIt)->NewFrame();
             }
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS1);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesTravel);
 
         g_SceneMan.UnlockScene();
     }
@@ -1740,7 +1733,7 @@ void MovableMan::Update()
         g_SceneMan.LockScene();
 
         // Actors
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS2);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
         {
             for (aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
             {
@@ -1749,7 +1742,7 @@ void MovableMan::Update()
                 (*aIt)->ApplyImpulses();
             }
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_ACTORS_PASS2);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsUpdate);
 
         // Items
         {
@@ -1768,7 +1761,7 @@ void MovableMan::Update()
         }
 
         // Particles
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS2);
+		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
         {
             for (parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
             {
@@ -1784,7 +1777,7 @@ void MovableMan::Update()
                 }
             }
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::PERF_PARTICLES_PASS2);
+		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
     }
 
     ///////////////////////////////////////////////////
@@ -2116,7 +2109,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
             currentMOID = m_MOIDIndex.size();
         }
         else
-            m_Actors[i]->SetID(g_NoMOID);
+            m_Actors[i]->SetAsNoID();
     }
     for (i = 0; i < iCount; ++i)
     {
@@ -2127,7 +2120,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
             currentMOID = m_MOIDIndex.size();
         }
         else
-            m_Items[i]->SetID(g_NoMOID);
+            m_Items[i]->SetAsNoID();
     }
     for (i = 0; i < parCount; ++i)
     {
@@ -2138,7 +2131,7 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
             currentMOID = m_MOIDIndex.size();
         }
         else
-            m_Particles[i]->SetID(g_NoMOID);
+            m_Particles[i]->SetAsNoID();
     }
 }
 

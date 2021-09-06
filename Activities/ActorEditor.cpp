@@ -27,29 +27,26 @@
 #include "Scene.h"
 #include "DataModule.h"
 
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "GUI/AllegroScreen.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroInput.h"
-#include "GUI/GUIControlManager.h"
-#include "GUI/GUICollectionBox.h"
-#include "GUI/GUITab.h"
-#include "GUI/GUIListBox.h"
-#include "GUI/GUITextBox.h"
-#include "GUI/GUIButton.h"
-#include "GUI/GUILabel.h"
-#include "GUI/GUIComboBox.h"
+#include "GUI.h"
+#include "GUIFont.h"
+#include "AllegroScreen.h"
+#include "AllegroBitmap.h"
+#include "AllegroInput.h"
+#include "GUIControlManager.h"
+#include "GUICollectionBox.h"
+#include "GUITab.h"
+#include "GUIListBox.h"
+#include "GUITextBox.h"
+#include "GUIButton.h"
+#include "GUILabel.h"
+#include "GUIComboBox.h"
 
 #include "ObjectPickerGUI.h"
 #include "PieMenuGUI.h"
-#include "GABaseDefense.h"
-
-extern bool g_ResetActivity;
 
 namespace RTE {
 
-ConcreteClassInfo(ActorEditor, EditorActivity, 0)
+ConcreteClassInfo(ActorEditor, EditorActivity, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +104,7 @@ int ActorEditor::Create(const ActorEditor &reference)
 //                  is called. If the property isn't recognized by any of the base classes,
 //                  false is returned, and the reader's position is untouched.
 
-int ActorEditor::ReadProperty(std::string propName, Reader &reader)
+int ActorEditor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
 /*
     if (propName == "CPUTeam")
@@ -130,18 +127,9 @@ int ActorEditor::ReadProperty(std::string propName, Reader &reader)
 // Description:     Saves the complete state of this ActorEditor with a Writer for
 //                  later recreation with Create(Reader &reader);
 
-int ActorEditor::Save(Writer &writer) const
-{
-    EditorActivity::Save(writer);
-/*
-    writer.NewProperty("CPUTeam");
-    writer << m_CPUTeam;
-    writer.NewProperty("Difficulty");
-    writer << m_Difficulty;
-    writer.NewProperty("DeliveryDelay");
-    writer << m_DeliveryDelay;
-*/
-    return 0;
+int ActorEditor::Save(Writer &writer) const {
+	EditorActivity::Save(writer);
+	return 0;
 }
 
 
@@ -175,7 +163,7 @@ int ActorEditor::Start()
     // Allocate and (re)create the picker GUI
 
     if (m_pPicker)
-        m_pPicker->Destroy();
+        m_pPicker->Reset();
     else
         m_pPicker = new ObjectPickerGUI;
     m_pPicker->Create(&(m_PlayerController[0]), -1, "Actor");
@@ -307,15 +295,12 @@ void ActorEditor::Update()
         m_pPieMenu->SetEnabled(false);
 
     // Handle what user does with the pie menu
-    const PieMenuGUI::Slice *pSlice = m_pPieMenu->SliceActivated();
-    if (pSlice)
-    {
+    if (m_pPieMenu->GetPieCommand() != PieSlice::PieSliceIndex::PSI_NONE) {
         // User chose to reload the Actor's data
-        if (pSlice->m_SliceType == PieMenuGUI::PSI_LOAD)
+        if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_LOAD) {
             ReloadActorData();
         // User chose to pick a new Actor to edit
-        else if (pSlice->m_SliceType == PieMenuGUI::PSI_PICK)
-        {
+        } else if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_PICK) {
             m_EditorMode = EditorActivity::LOADDIALOG;
             m_ModeChange = true;
         }
@@ -381,9 +366,9 @@ bool ActorEditor::LoadActor(const Entity *pActorToLoad)
         // Set up the pie menu with the actor's own slices
         m_pPieMenu->ResetSlices();
         // Add the reload data slice
-		PieMenuGUI::Slice reloadSlice("Reload Actor's Data", PieMenuGUI::PSI_LOAD, PieMenuGUI::Slice::UP, true);
+		PieSlice reloadSlice("Reload Actor's Data", PieSlice::PieSliceIndex::PSI_LOAD, PieSlice::SliceDirection::UP, true);
         m_pPieMenu->AddSlice(reloadSlice);
-        PieMenuGUI::Slice chooseSlice("Choose a different Actor", PieMenuGUI::PSI_PICK, PieMenuGUI::Slice::RIGHT, true);
+        PieSlice chooseSlice("Choose a different Actor", PieSlice::PieSliceIndex::PSI_PICK, PieSlice::SliceDirection::RIGHT, true);
 		m_pPieMenu->AddSlice(chooseSlice);
         // Add the Actor's slices
         m_pEditedActor->AddPieMenuSlices(m_pPieMenu);

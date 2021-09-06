@@ -332,7 +332,7 @@ public:
 // Arguments:       Enabled flag.
 // Return value:    None.
 
-    void BuyMenuGUI::EnableEquipmentSelection(bool enabled);
+    void EnableEquipmentSelection(bool enabled);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

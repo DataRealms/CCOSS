@@ -521,17 +521,13 @@ public:
 	/// <param name="newThickness">The new scroll bar thickness, in pixels.</param>
 	void SetScrollBarThickness(int newThickness) { m_ScrollBarThickness = newThickness; AdjustScrollbars(); }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Protected member variable and method declarations
-
-protected:
 	/// <summary>
 	/// Sets the padding around the ListPanel's scrollbars and adjusts them to the new padding. Used to better size and position scrollbars within panel bounds, allowing to not overdraw on panel borders.
 	/// </summary>
 	/// <param name="newPadding">The new scrollbar padding, in pixels.</param>
 	void SetScrollBarPadding(int newPadding) { m_ScrollBarPadding = newPadding; AdjustScrollbars(); }
 
-	protected:
+protected:
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          BuildBitmap

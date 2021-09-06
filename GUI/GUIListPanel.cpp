@@ -644,12 +644,13 @@ void GUIListPanel::ScrollUp() {
 
 void GUIListPanel::ScrollDown() {
 	if (m_VertScroll->_GetVisible()) {
-		int valueToAdd = 20;
+		int scrollValueToAdd = 20;
 		if (!m_Items.empty()) {
 			RTE::GUIListPanel::Item *item = m_Items.back();
-			valueToAdd += GetStackHeight(item) + GetItemHeight(item);
+			int maximumScrollDistance = GetStackHeight(item) + GetItemHeight(item) - (m_VertScroll->GetPageSize() + m_VertScroll->GetValue());
+			scrollValueToAdd = std::clamp(maximumScrollDistance, 0, scrollValueToAdd);
 		}
-		m_VertScroll->SetValue(m_VertScroll->GetValue() + valueToAdd);
+		m_VertScroll->SetValue(m_VertScroll->GetValue() + scrollValueToAdd);
 	}
     BuildBitmap(false, true);
 }

@@ -1624,23 +1624,21 @@ void BuyMenuGUI::Update()
             g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
     }
 
-    // If mouse clicked outside the buy menu, the user is considered havin g tried to buy
-    // Pressing the reload button also confirms the purchase
-    if (m_MenuEnabled == ENABLED && ((m_pController->IsMouseControlled() && m_pController->IsState(PRESS_PRIMARY) && m_CursorPos.m_X > m_pParentBox->GetWidth()) || m_pController->IsState(WEAPON_RELOAD)))
-        TryPurchase();
-
-    // ESC, Right click, or pie menu press close the menu
-    if (m_pController->IsState(PRESS_SECONDARY) || g_UInputMan.AnyStartPress(false))
-    {
-        // If equipment selection mode is enabled, return to the main buy menu
-        // Otherwise, close the buy menu
-        if (m_SelectingEquipment)
-        {
-            EnableEquipmentSelection(false);
-        }
-        else
-        {
-            SetEnabled(false);
+    if (m_MenuEnabled == ENABLED) {
+        if (m_pController->IsState(WEAPON_RELOAD)) {
+            TryPurchase();
+        } else if (m_pController->IsMouseControlled() && (m_pController->IsState(PRESS_PRIMARY) || m_pController->IsState(PRESS_SECONDARY)) && m_CursorPos.m_X > m_pParentBox->GetWidth()) {
+            if (m_pController->IsState(PRESS_PRIMARY)) {
+                TryPurchase();
+            } else {
+                SetEnabled(false);
+            }
+        } else if (m_pController->IsState(PRESS_SECONDARY) || g_UInputMan.AnyStartPress(false)) {
+            if (m_SelectingEquipment) {
+                EnableEquipmentSelection(false);
+            } else {
+                SetEnabled(false);
+            }
         }
     }
 

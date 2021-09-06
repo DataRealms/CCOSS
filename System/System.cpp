@@ -58,79 +58,6 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef __unix__
-	std::filesystem::path System::GetXdgDataHome() {
-		char *envXdgDataHome = std::getenv("XDG_DATA_HOME");
-
-		if (envXdgDataHome) {
-			return std::filesystem::path(envXdgDataHome) / std::filesystem::path("Cortex Command");
-		} else {
-			char *envUserHome = std::getenv("HOME");
-			if (!envUserHome) {
-				struct passwd *pw = getpwuid(getuid());
-				envUserHome = pw->pw_dir;
-			}
-			return envUserHome / std::filesystem::path(".local/share/Cortex Command/");
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void System::SetupBaseGameFolders() {
-		std::array<::string, 2> skipRtes = {"Scenes.rte", "Metagames.rte"};
-
-		for (const std::filesystem::directory_entry &dirEntry : std::filesystem::directory_iterator(s_BaseDataDirectory)) {
-			if (dirEntry.is_directory()) {
-				std::filesystem::path rteName = std::filesystem::relative(dirEntry.path(), dirEntry.path().parent_path());
-				if (rteName.generic_string().find(s_ModulePackageExtension) != std::string::npos && std::find(skipRtes.begin(), skipRtes.end(), rteName) == skipRtes.end()) {
-					std::filesystem::create_directory_symlink(dirEntry, "." / rteName);
-				}
-			}
-		}
-
-		std::filesystem::create_symlink(s_BaseDataDirectory / "Credits.txt", "Credits.txt");
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void System::SetupUserFolders() {
-		std::filesystem::path userDirectory(GetXdgDataHome());
-
-		if (!std::filesystem::exists(userDirectory)) {
-			MakeDirectory(userDirectory);
-		}
-		if (!std::filesystem::exists(userDirectory / "Scenes.rte")) {
-			MakeDirectory(userDirectory / "Scenes.rte");
-			std::filesystem::copy_file(s_BaseDataDirectory / "Scenes.rte/Index.ini", userDirectory / "Scenes.rte/Index.ini");
-		}
-		if (!std::filesystem::exists(userDirectory / "Metagames.rte")) {
-			MakeDirectory(userDirectory / "Metagames.rte");
-			std::filesystem::copy_file(s_BaseDataDirectory / "Metagames.rte/Index.ini", userDirectory / "Metagames.rte/Index.ini");
-		}
-		if (!std::filesystem::exists(userDirectory / s_ScreenshotDirectory)) {
-			MakeDirectory(userDirectory / s_ScreenshotDirectory);
-		}
-
-		for (const std::filesystem::directory_entry &dirEntry : std::filesystem::directory_iterator(userDirectory)) {
-			if (dirEntry.is_directory()) {
-				std::filesystem::path rteName = std::filesystem::relative(dirEntry.path(), dirEntry.path().parent_path());
-				if (rteName.generic_string().find(".rte") != std::string::npos) {
-					std::filesystem::create_directory_symlink(dirEntry, rteName);
-				}
-			}
-		}
-
-		std::array<std::string, 5> userFiles = {"Settings.ini", "LogLoadingWarnings.txt", "LogLoading.txt", "LogConsole.txt", "AbortScreen.bmp"};
-
-		for (const std::string &file : userFiles) {
-			std::filesystem::create_symlink(userDirectory / file, file);
-		}
-		std::filesystem::create_directory_symlink(userDirectory / s_ScreenshotDirectory, s_ScreenshotDirectory);
-	}
-#endif
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	bool System::MakeDirectory(const std::string &pathToMake) {
 		bool createResult = std::filesystem::create_directory(pathToMake);
 		if (createResult) {
@@ -387,4 +314,69 @@ namespace RTE {
 			return (std::search(rawData.begin(), rawData.end(), findString.begin(), findString.end()) != rawData.end()) ? 0 : 1;
 		}
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifdef __unix__
+	std::filesystem::path System::GetXdgDataHome() {
+		char *envXdgDataHome = std::getenv("XDG_DATA_HOME");
+		if (envXdgDataHome) {
+			return std::filesystem::path(envXdgDataHome) / std::filesystem::path("Cortex Command");
+		} else {
+			char *envUserHome = std::getenv("HOME");
+			if (!envUserHome) {
+				struct passwd *pw = getpwuid(getuid());
+				envUserHome = pw->pw_dir;
+			}
+			return envUserHome / std::filesystem::path(".local/share/Cortex Command/");
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void System::SetupBaseGameFolders() {
+		std::array<std::string, 2> skipRtes = { "Scenes.rte", "Metagames.rte" };
+
+		for (const std::filesystem::directory_entry &dirEntry : std::filesystem::directory_iterator(s_BaseDataDirectory)) {
+			if (dirEntry.is_directory()) {
+				std::filesystem::path rteName = std::filesystem::relative(dirEntry.path(), dirEntry.path().parent_path());
+				if (rteName.generic_string().find(s_ModulePackageExtension) != std::string::npos && std::find(skipRtes.begin(), skipRtes.end(), rteName) == skipRtes.end()) {
+					std::filesystem::create_directory_symlink(dirEntry, "." / rteName);
+				}
+			}
+		}
+		std::filesystem::create_symlink(s_BaseDataDirectory / "Credits.txt", "Credits.txt");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void System::SetupUserFolders() {
+		std::filesystem::path userDirectory(GetXdgDataHome());
+
+		if (!std::filesystem::exists(userDirectory)) { MakeDirectory(userDirectory.generic_string()); }
+
+		if (!std::filesystem::exists(userDirectory / "Scenes.rte")) {
+			MakeDirectory((userDirectory / "Scenes.rte").generic_string());
+			std::filesystem::copy_file(s_BaseDataDirectory / "Scenes.rte/Index.ini", userDirectory / "Scenes.rte/Index.ini");
+		}
+		if (!std::filesystem::exists(userDirectory / "Metagames.rte")) {
+			MakeDirectory((userDirectory / "Metagames.rte").generic_string());
+			std::filesystem::copy_file(s_BaseDataDirectory / "Metagames.rte/Index.ini", userDirectory / "Metagames.rte/Index.ini");
+		}
+		if (!std::filesystem::exists(userDirectory / s_ScreenshotDirectory)) { MakeDirectory((userDirectory / s_ScreenshotDirectory).generic_string()); }
+
+		for (const std::filesystem::directory_entry &dirEntry : std::filesystem::directory_iterator(userDirectory)) {
+			if (dirEntry.is_directory()) {
+				std::filesystem::path rteName = std::filesystem::relative(dirEntry.path(), dirEntry.path().parent_path());
+				if (rteName.generic_string().find(s_ModulePackageExtension) != std::string::npos) { std::filesystem::create_directory_symlink(dirEntry, rteName); }
+			}
+		}
+		std::array<std::filesystem::path, 5> userFiles = { "Settings.ini", "LogLoadingWarnings.txt", "LogLoading.txt", "LogConsole.txt", "AbortScreen.bmp" };
+
+		for (const std::filesystem::path &file : userFiles) {
+			std::filesystem::create_symlink(userDirectory / file, file);
+		}
+		std::filesystem::create_directory_symlink(userDirectory / s_ScreenshotDirectory, s_ScreenshotDirectory);
+	}
+#endif
 }

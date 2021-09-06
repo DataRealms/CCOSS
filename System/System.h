@@ -44,30 +44,6 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Directories
-
-#ifdef __unix__
-
-		/// <summary>
-		/// Get the Cortex Command folder in the users home directory or XDG_DATA_HOME if set.
-		/// </summary>
-		/// <returns>
-		/// ´$HOME/.local/share/Cortex Command´ or ´$XDG_DATA_HOME/Cortex Command´ if XDG_DATA_HOME is set.
-		/// </returns>
-		static std::filesystem::path GetXdgDataHome();
-
-		/// <summary>
-		/// Creates symlinks for all base game folders in the temporary working directory.
-		/// </summary>
-		static void SetupBaseGameFolders();
-
-		/// <summary>
-		/// Creates symlinks for all mods in the user directory as well as all user readable files.
-		/// Also creates all missing folders on first launch.
-		/// </summary>
-		static void SetupUserFolders();
-#endif
-
-
 		/// <summary>
 		/// Gets the current working directory.
 		/// </summary>
@@ -181,10 +157,11 @@ namespace RTE {
 		static bool s_Quit; //!< Whether the user requested program termination through GUI or the window close button.
 		static bool s_LogToCLI; //!< Bool to tell whether to print the loading log and anything specified with PrintToCLI to command-line or not.
 		static std::string s_WorkingDirectory; //!< String containing the absolute path to current working directory.
+
 #ifdef __unix__
 		static const std::filesystem::path s_BaseDataDirectory; //!< Path to the base game data.
-		static std::filesystem::path s_TempDirectory; //!< Temporary directory used as the working directory while running the game.
 #endif
+
 		static std::vector<size_t> s_WorkingTree; //!< Vector of the hashes of all file paths in the working directory.
 		static std::filesystem::file_time_type s_ProgramStartTime; //!< Low precision time point of program start for checking if a file was created after starting.
 
@@ -198,6 +175,26 @@ namespace RTE {
 		static constexpr int s_MaxFileName = 512; //!< Maximum length of output file directory + name string.
 		static constexpr int s_FileBufferSize = 8192; //!< Buffer to hold data read from the zip file.
 		static constexpr int s_MaxUnzippedFileSize = 104857600; //!< Maximum size of single file being extracted from zip archive (100MiB).
+
+#pragma region Linux Directories
+#ifdef __unix__
+		/// <summary>
+		/// Get the Cortex Command folder in the users home directory or XDG_DATA_HOME if set.
+		/// </summary>
+		/// <returns>"$HOME/.local/share/Cortex Command" or "$XDG_DATA_HOME/Cortex Command" if XDG_DATA_HOME is set.</returns>
+		static std::filesystem::path GetXdgDataHome();
+
+		/// <summary>
+		/// Creates symlinks for all base game folders in the temporary working directory.
+		/// </summary>
+		static void SetupBaseGameFolders();
+
+		/// <summary>
+		/// Creates symlinks for all mods in the user directory as well as all user readable files. Also creates all missing folders on first launch.
+		/// </summary>
+		static void SetupUserFolders();
+#endif
+#pragma endregion
 	};
 }
 #endif

@@ -1149,6 +1149,18 @@ void BuyMenuGUI::Update()
         m_pShopList->ScrollDown();
     }
 
+    //Special handling to allow user to click on disabled tab buttons with mouse.
+    if (m_pController->IsState(PRESS_PRIMARY)) {
+        for (int category = 0; category < CATEGORYCOUNT; ++category) {
+            if (!m_pCategoryTabs[category]->IsEnabled() && m_pCategoryTabs[category]->PointInside(m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY())) {
+                m_MenuCategory = category;
+                m_pCategoryTabs[m_MenuCategory]->SetFocus();
+                CategoryChange();
+                g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
+            }
+        }
+    }
+
     /////////////////////////////////////////
     // SETS BUTTONS focus
 

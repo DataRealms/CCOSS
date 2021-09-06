@@ -119,6 +119,10 @@ void BuyMenuGUI::Clear()
     m_LastVisitedMainTab = BODIES;
     m_LastEquipmentScrollPosition = -1;
     m_LastMainScrollPosition = -1;
+    m_FirstMainTab = CRAFT;
+    m_LastMainTab = SETS;
+    m_FirstEquipmentTab = TOOLS;
+    m_LastEquipmentTab = SHIELDS;
 }
 
 
@@ -286,17 +290,8 @@ int BuyMenuGUI::Create(Controller *pController)
 
     // Set initial focus, category list, and label settings
     m_MenuFocus = OK;
-    m_SelectingEquipment = false;
-    m_LastVisitedEquipmentTab = GUNS;
-    m_LastVisitedMainTab = BODIES;
-    m_LastEquipmentScrollPosition = -1;
-    m_LastMainScrollPosition = -1;
-    m_FirstMainTab = CRAFT;
-    m_LastMainTab = SETS;
-    m_FirstEquipmentTab = TOOLS;
-    m_LastEquipmentTab = SHIELDS;
     m_FocusChange = true;
-    m_MenuCategory = SETS;
+    m_MenuCategory = CRAFT;
     CategoryChange();
     UpdateTotalCostLabel(m_pController->GetTeam());
 

@@ -1134,49 +1134,28 @@ void BuyMenuGUI::Update()
     /////////////////////////////////////////
     // Change Category directly
 
-    if (pressNextActor)
-    {
-        m_MenuCategory++;
-        if (m_SelectingEquipment && m_MenuCategory > m_LastEquipmentTab)
-        {
-            m_MenuCategory = m_LastEquipmentTab;
-            g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
+    if (pressNextActor || pressPrevActor) {
+        if (pressNextActor) {
+            m_MenuCategory++;
+            if (m_SelectingEquipment && m_MenuCategory > m_LastEquipmentTab) {
+                m_MenuCategory = m_FirstEquipmentTab;
+            } else if (!m_SelectingEquipment && m_MenuCategory > m_LastMainTab) {
+                m_MenuCategory = m_FirstMainTab;
+            }
+        } else if (pressPrevActor) {
+            m_MenuCategory--;
+            if (m_SelectingEquipment && m_MenuCategory < m_FirstEquipmentTab) {
+                m_MenuCategory = m_LastEquipmentTab;
+            } else if (!m_SelectingEquipment && m_MenuCategory < m_FirstMainTab) {
+                m_MenuCategory = m_LastMainTab;
+            }
         }
-        else if (!m_SelectingEquipment && m_MenuCategory > m_LastMainTab)
-        {
-            m_MenuCategory = m_LastMainTab;
-            g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
-        }
-        else
-        {
-            CategoryChange();
-            g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
 
-            m_MenuFocus = ITEMS;
-            m_FocusChange = 1;
-        }
-    }
-    else if (pressPrevActor)
-    {
-        m_MenuCategory--;
-        if (m_SelectingEquipment && m_MenuCategory < m_FirstEquipmentTab)
-        {
-            m_MenuCategory = m_FirstEquipmentTab;
-            g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
-        }
-        else if (!m_SelectingEquipment && m_MenuCategory < m_FirstMainTab)
-        {
-            m_MenuCategory = m_FirstMainTab;
-            g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
-        }
-        else
-        {
-            CategoryChange();
-            g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
+        CategoryChange();
+        g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
 
-            m_MenuFocus = ITEMS;
-            m_FocusChange = 1;
-        }
+        m_MenuFocus = ITEMS;
+        m_FocusChange = 1;
     }
 
     /////////////////////////////////////////

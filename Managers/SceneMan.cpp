@@ -612,7 +612,13 @@ MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY)
        pixelY >= m_pMOIDLayer->GetBitmap()->h)
         return g_NoMOID;
 
-    return getpixel(m_pMOIDLayer->GetBitmap(), pixelX, pixelY);
+    MOID moid = getpixel(m_pMOIDLayer->GetBitmap(), pixelX, pixelY);
+    if (moid != g_NoMOID && moid != g_MOIDMaskColor) {
+        MOSprite* mo = dynamic_cast<MOSprite*>(g_MovableMan.GetMOFromID(moid));
+        return (mo && !mo->GetRootParent()->m_tempDisableGettingHit) ? moid : g_NoMOID;
+    } else {
+        return g_NoMOID;
+    }
 }
 
 

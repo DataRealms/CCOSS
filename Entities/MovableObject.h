@@ -1806,8 +1806,7 @@ enum MOType
 
 	void SetProvidesPieMenuContext(bool value) { m_ProvidesPieMenuContext = value; }
 
-// Set to true while travelling; prevents self-intersection
-bool m_tempDisableGettingHit;
+    bool GetTraveling() const { return GetRootParent()->m_tempDisableGettingHit; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -1939,6 +1938,8 @@ protected:
     bool m_ToDelete;
     // To draw this guy's HUD or not
     bool m_HUDVisible;
+    // Set to true while travelling; prevents self-intersection
+    bool m_tempDisableGettingHit;
 
     std::map<std::string, bool> m_AllLoadedScripts; //!< A map of script paths to the enabled state of the given script.
     std::unordered_map<std::string, std::vector<std::string>> m_FunctionsAndScripts; //!< A map of function names to vectors of scripts paths. Used to maintain script execution order and avoid extraneous Lua calls.

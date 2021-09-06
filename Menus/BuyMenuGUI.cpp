@@ -1015,20 +1015,22 @@ void BuyMenuGUI::Update()
     }
 
     // Check if any direction has been held for the starting amount of time to get into repeat mode
-    if (m_RepeatStartTimer.IsPastRealMS(200))
-    {
+    if (m_RepeatStartTimer.IsPastRealMS(200)) {
         // Check for the repeat interval
-        if (m_RepeatTimer.IsPastRealMS(75))
-        {
-            if (m_pController->IsState(MOVE_RIGHT))
+        if (m_RepeatTimer.IsPastRealMS(75)) {
+            if (m_pController->IsState(MOVE_RIGHT)) {
                 pressRight = true;
-            else if (m_pController->IsState(MOVE_LEFT))
+            } else if (m_pController->IsState(MOVE_LEFT)) {
                 pressLeft = true;
-            else if (m_pController->IsState(MOVE_UP))
+            } else if (m_pController->IsState(MOVE_UP)) {
                 pressUp = true;
-            else if (m_pController->IsState(MOVE_DOWN))
+            } else if (m_pController->IsState(MOVE_DOWN)) {
                 pressDown = true;
-
+            } else if (m_pController->IsState(ACTOR_NEXT)) {
+                pressNextActor = true;
+            } else if (m_pController->IsState(ACTOR_PREV)) {
+                pressPrevActor = true;
+            }
             m_RepeatTimer.Reset();
         }
     }
@@ -1141,12 +1143,9 @@ void BuyMenuGUI::Update()
     /////////////////////////////////////////
     // Scroll buy menu
 
-    if (pressScrollUp)
-    {
+    if (pressScrollUp) {
         m_pShopList->ScrollUp();
-    }
-    else if (pressScrollDown)
-    {
+    } else if (pressScrollDown) {
         m_pShopList->ScrollDown();
     }
 

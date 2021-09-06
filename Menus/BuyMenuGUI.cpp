@@ -1139,15 +1139,23 @@ void BuyMenuGUI::Update()
             m_MenuCategory++;
             if (m_SelectingEquipment && m_MenuCategory > m_LastEquipmentTab) {
                 m_MenuCategory = m_FirstEquipmentTab;
-            } else if (!m_SelectingEquipment && m_MenuCategory > m_LastMainTab) {
-                m_MenuCategory = m_FirstMainTab;
+            } else if (!m_SelectingEquipment) {
+                if (m_MenuCategory > m_LastMainTab) {
+                    m_MenuCategory = m_FirstMainTab;
+                } else if (m_MenuCategory == m_FirstEquipmentTab) {
+                    m_MenuCategory = m_LastMainTab;
+                }
             }
         } else if (pressPrevActor) {
             m_MenuCategory--;
             if (m_SelectingEquipment && m_MenuCategory < m_FirstEquipmentTab) {
                 m_MenuCategory = m_LastEquipmentTab;
-            } else if (!m_SelectingEquipment && m_MenuCategory < m_FirstMainTab) {
-                m_MenuCategory = m_LastMainTab;
+            } else if (!m_SelectingEquipment) {
+                if (m_MenuCategory < m_FirstMainTab) {
+                    m_MenuCategory = m_LastMainTab;
+                } else if (m_MenuCategory == m_LastEquipmentTab) {
+                    m_MenuCategory = m_FirstEquipmentTab - 1;
+                }
             }
         }
 

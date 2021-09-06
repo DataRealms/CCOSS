@@ -715,11 +715,11 @@ protected:
     {
         CRAFT = 0,
         BODIES,
-        SETS,
         TOOLS,
         GUNS,
         BOMBS,
         SHIELDS,
+        SETS,
         CATEGORYCOUNT
     };
 

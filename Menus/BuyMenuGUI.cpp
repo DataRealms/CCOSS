@@ -208,13 +208,7 @@ int BuyMenuGUI::Create(Controller *pController)
     m_pCategoryTabs[BOMBS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("BombsTab"));
     m_pCategoryTabs[SHIELDS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("ShieldsTab"));
     m_pCategoryTabs[SETS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("SetsTab"));
-    m_pCategoryTabs[CRAFT]->SetEnabled(!m_SelectingEquipment);
-    m_pCategoryTabs[BODIES]->SetEnabled(!m_SelectingEquipment);
-    m_pCategoryTabs[TOOLS]->SetEnabled(m_SelectingEquipment);
-    m_pCategoryTabs[GUNS]->SetEnabled(m_SelectingEquipment);
-    m_pCategoryTabs[BOMBS]->SetEnabled(m_SelectingEquipment);
-    m_pCategoryTabs[SHIELDS]->SetEnabled(m_SelectingEquipment);
-    m_pCategoryTabs[SETS]->SetEnabled(!m_SelectingEquipment);
+    RefreshTabDisabledStates();
 
     m_pShopList = dynamic_cast<GUIListBox *>(m_pGUIController->GetControl("CatalogLB"));
     m_pCartList = dynamic_cast<GUIListBox *>(m_pGUIController->GetControl("OrderLB"));
@@ -817,13 +811,7 @@ int BuyMenuGUI::GetTotalOrderPassengers() const {
 void BuyMenuGUI::EnableEquipmentSelection(bool enabled) {
     if (enabled != m_SelectingEquipment) {
         m_SelectingEquipment = enabled;
-        m_pCategoryTabs[CRAFT]->SetEnabled(!m_SelectingEquipment);
-        m_pCategoryTabs[BODIES]->SetEnabled(!m_SelectingEquipment);
-        m_pCategoryTabs[TOOLS]->SetEnabled(m_SelectingEquipment);
-        m_pCategoryTabs[GUNS]->SetEnabled(m_SelectingEquipment);
-        m_pCategoryTabs[BOMBS]->SetEnabled(m_SelectingEquipment);
-        m_pCategoryTabs[SHIELDS]->SetEnabled(m_SelectingEquipment);
-        m_pCategoryTabs[SETS]->SetEnabled(!m_SelectingEquipment);
+        RefreshTabDisabledStates();
 
         if (m_SelectingEquipment) {
             m_LastVisitedMainTab = static_cast<MenuCategory>(m_MenuCategory);
@@ -843,6 +831,20 @@ void BuyMenuGUI::EnableEquipmentSelection(bool enabled) {
         g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
     }
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void BuyMenuGUI::RefreshTabDisabledStates() {
+    m_pCategoryTabs[CRAFT]->SetEnabled(!m_SelectingEquipment);
+    m_pCategoryTabs[BODIES]->SetEnabled(!m_SelectingEquipment);
+    m_pCategoryTabs[TOOLS]->SetEnabled(m_SelectingEquipment);
+    m_pCategoryTabs[GUNS]->SetEnabled(m_SelectingEquipment);
+    m_pCategoryTabs[BOMBS]->SetEnabled(m_SelectingEquipment);
+    m_pCategoryTabs[SHIELDS]->SetEnabled(m_SelectingEquipment);
+    m_pCategoryTabs[SETS]->SetEnabled(!m_SelectingEquipment);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
@@ -1145,13 +1147,21 @@ void BuyMenuGUI::Update()
     }
 
     //Special handling to allow user to click on disabled tab buttons with mouse.
-    if (m_pController->IsState(PRESS_PRIMARY)) {
-        for (int category = 0; category < CATEGORYCOUNT; ++category) {
-            if (!m_pCategoryTabs[category]->IsEnabled() && m_pCategoryTabs[category]->PointInside(m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY())) {
-                m_MenuCategory = category;
-                m_pCategoryTabs[m_MenuCategory]->SetFocus();
-                CategoryChange();
-                g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
+    RefreshTabDisabledStates();
+    for (int category = 0; category < CATEGORYCOUNT; ++category) {
+        if (!m_pCategoryTabs[category]->IsEnabled()) {
+            if (m_MenuCategory == category) { m_pCategoryTabs[m_MenuCategory]->SetEnabled(true); }
+            if (m_pCategoryTabs[category]->PointInside(m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY())) {
+                if (m_pController->IsState(PRESS_PRIMARY)) {
+                    m_MenuCategory = category;
+                    m_pCategoryTabs[m_MenuCategory]->SetFocus();
+                    m_pCategoryTabs[m_MenuCategory]->SetEnabled(true);
+                    CategoryChange();
+                    g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
+                }
+                else if (!m_pCategoryTabs[category]->HasFocus()) {
+                    m_pCategoryTabs[category]->SetFocus();
+                }
             }
         }
     }

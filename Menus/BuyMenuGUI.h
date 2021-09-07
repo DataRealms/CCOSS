@@ -325,13 +325,10 @@ public:
 
 	int GetTotalOrderPassengers() const;
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          EnableEquipmentSelection
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Enable or disable the buy menu equipment selection mode.
-// Arguments:       Enabled flag.
-// Return value:    None.
-
+    /// <summary>
+    /// Enable or disable the equipment selection mode for this BuyMenuGUI.
+    /// </summary>
+	/// <param name="enabled">Whether or not equipment selection mode should be enabled.</param>
     void EnableEquipmentSelection(bool enabled);
 
 
@@ -870,6 +867,11 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+    /// <summary>
+    /// Refresh tab disabled states, so tabs get properly enabled/disabled based on whether or not equipment selection mode is enabled.
+    /// </summary>
+    void RefreshTabDisabledStates();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

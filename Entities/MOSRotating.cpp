@@ -1010,7 +1010,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
         Vector rotatedGibOffset = RotateOffset(gibSettingsObject.GetOffset());
 
 		// The "Spiral" spread mode uses the fermat spiral as means to determine the velocity of the gib particles, resulting in a evenly spaced out circle (or ring) of particles.
-		if (gibSettingsObject.GetSpreadMode() == Gib::SPREAD_SPIRAL) {
+		if (gibSettingsObject.GetSpreadMode() == Gib::SpreadMode::SpreadSpiral) {
 			float maxRadius = std::sqrt(static_cast<float>(count));
 			float scale = velocityRange / maxRadius;
 			float randAngle = c_PI * RandomNormalNum();
@@ -1062,7 +1062,7 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 
 				gibVelocity.RadRotate(gibSettingsObject.InheritsVelocity() ? impactImpulse.GetAbsRadAngle() : m_Rotation.GetRadAngle() + (m_HFlipped ? c_PI : 0));
 				// The "Even" spread will spread all gib particles evenly in an arc, while maintaining a randomized velocity magnitude.
-				if (gibSettingsObject.GetSpreadMode() == Gib::SPREAD_EVEN) {
+				if (gibSettingsObject.GetSpreadMode() == Gib::SpreadMode::SpreadEven) {
 					gibVelocity.RadRotate(gibSpread - (gibSpread * 2.0F * static_cast<float>(i) / static_cast<float>(count)));
 				} else {
 					gibVelocity.RadRotate(gibSpread * RandomNormalNum());

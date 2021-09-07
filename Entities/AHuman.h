@@ -923,17 +923,13 @@ protected:
     void ChunkGold();
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  DrawThrowingReticule
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws an aiming aid in front of this HeldDevice for throwing.
-// Arguments:       A pointer to a BITMAP to draw on.
-//                  The absolute position of the target bitmap's upper left corner in the Scene.
-//                  A normalized scalar that determines how much of the magnitude of the
-//                  reticule should be drawn, to indicate force in the throw.
-// Return value:    None.
-
-	void DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), float progressScalar = 1.0F) const;
+	/// <summary>
+	/// Draws an aiming aid in front of this AHuman for throwing.
+	/// </summary>
+	/// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
+	/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
+	/// <param name="progressScalar">A normalized scalar that determines the magnitude of the reticle, to indicate force in the throw.</param>
+	void DrawThrowingReticle(BITMAP *targetBitmap, const Vector &targetPos = Vector(), float progressScalar = 1.0F) const;
 
 
     // Member variables

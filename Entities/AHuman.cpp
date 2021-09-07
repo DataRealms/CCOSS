@@ -4141,11 +4141,8 @@ void AHuman::Update()
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  DrawThrowingReticule
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws an aiming aid in front of this HeldDevice for throwing.
 
-void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos, float progressScalar) const {
+void AHuman::DrawThrowingReticle(BITMAP *targetBitmap, const Vector &targetPos, float progressScalar) const {
     const int pointCount = 9;
     Vector points[pointCount];
     //Color colors[pointCount];
@@ -4157,7 +4154,7 @@ void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos
 
     Vector outOffset(15.0F * GetFlipFactor(), -5.0F);
 
-    acquire_bitmap(pTargetBitmap);
+    acquire_bitmap(targetBitmap);
 
     for (int i = 0; i < pointCount * progressScalar; ++i) {
         points[i].FlipX(m_HFlipped);
@@ -4167,13 +4164,13 @@ void AHuman::DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos
         if (m_pFGArm)
             points[i] += m_pFGArm->GetParentOffset();
 
-        // Put the flickering glows on the reticule dots, in absolute scene coordinates
+        // Put the flickering glows on the reticle dots, in absolute scene coordinates
 		g_PostProcessMan.RegisterGlowDotEffect(points[i], YellowDot, 55 + RandomNum(0, 100));
 
-        putpixel(pTargetBitmap, points[i].GetFloorIntX() - targetPos.GetFloorIntX(), points[i].GetFloorIntY() - targetPos.GetFloorIntY(), g_YellowGlowColor);
+        putpixel(targetBitmap, points[i].GetFloorIntX() - targetPos.GetFloorIntX(), points[i].GetFloorIntY() - targetPos.GetFloorIntY(), g_YellowGlowColor);
     }
 
-    release_bitmap(pTargetBitmap);
+    release_bitmap(targetBitmap);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -4274,7 +4271,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 	if (m_pFGArm && m_pFGArm->HoldsHeldDevice()) {
 		// Draw the aiming dots for the currently held device.
 		if (m_ArmsState == THROWING_PREP) {
-			DrawThrowingReticule(pTargetBitmap, targetPos, GetThrowProgress());
+			DrawThrowingReticle(pTargetBitmap, targetPos, GetThrowProgress());
 		} else if (m_Controller.IsState(AIM_SHARP) || (m_Controller.IsPlayerControlled() && !m_Controller.IsState(PIE_MENU_ACTIVE))) {
 			m_pFGArm->GetHeldDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen, m_Controller.IsState(AIM_SHARP) && m_Controller.IsPlayerControlled());
 		}
@@ -4292,7 +4289,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     {
         AllegroBitmap allegroBitmap(pTargetBitmap);
 /*
-        // Device aiming reticule
+        // Device aiming reticle
         if (m_Controller.IsState(AIM_SHARP) &&
             m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
             m_pFGArm->GetHeldDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen);*/

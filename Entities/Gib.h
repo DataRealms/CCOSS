@@ -21,11 +21,7 @@ namespace RTE {
 		/// <summary>
 		/// Different types of logic for the Gib to use when applying velocity to its GibParticles.
 		/// </summary>
-		enum SpreadMode {
-			SPREAD_RANDOM = 0,
-			SPREAD_EVEN,
-			SPREAD_SPIRAL
-		};
+		enum SpreadMode { SpreadRandom, SpreadEven, SpreadSpiral };
 
 #pragma region Creation
 		/// <summary>
@@ -114,7 +110,7 @@ namespace RTE {
 		/// Gets this Gib's spread mode, which determines how velocity angles are applied to the GibParticles. 
 		/// </summary>
 		/// <returns>The spread mode of this Gib.</returns>
-		int GetSpreadMode() const { return m_SpreadMode; }
+		SpreadMode GetSpreadMode() const { return m_SpreadMode; }
 #pragma endregion
 
 	protected:
@@ -128,7 +124,7 @@ namespace RTE {
 		float m_LifeVariation; //!< The per-Gib variation in Lifetime, in percentage of the existing Lifetime of the gib.
 		bool m_InheritsVel; //!< Whether this Gib should inherit the velocity of the exploding parent or not.
 		bool m_IgnoresTeamHits; //!< Whether this Gib should ignore hits with the team of the exploding parent or not.
-		int m_SpreadMode; //!< Determines what kind of logic is used when applying velocity to the GibParticle objects.
+		SpreadMode m_SpreadMode; //!< Determines what kind of logic is used when applying velocity to the GibParticle objects.
 
 	private:
 

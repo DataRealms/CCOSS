@@ -45,9 +45,7 @@ void HeldDevice::Clear()
     m_MaxSharpLength = 0;
     m_Supported = false;
     m_SupportOffset.Reset();
-	for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
-		m_SeenByPlayer[player] = false;
-	}
+	m_SeenByPlayer.fill(false);
     m_IsUnPickupable = false;
     m_PickupableByPresetNames.clear();
     m_GripStrengthMultiplier = 1.0F;
@@ -599,9 +597,9 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 				float dist;
 				// TODO: @MaximDude replace radius with settings property!
 				float radius = 100.0F; //static_cast<float>(g_SettingsMan.GetPickupHUDRadius());
-				m_SeenByPlayer[viewingPlayer] = radius < 0 || g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < radius;
+				m_SeenByPlayer.at(viewingPlayer) = radius < 0 || g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < radius;
 			}
-			if (m_SeenByPlayer[viewingPlayer]) {
+			if (m_SeenByPlayer.at(viewingPlayer)) {
 				AllegroBitmap pBitmapInt(pTargetBitmap);
 				pSymbolFont->DrawAligned(&pBitmapInt, drawPos.GetFloorIntX() - 1, drawPos.GetFloorIntY() - 20, str, GUIFont::Centre);
 				std::snprintf(str, sizeof(str), "%s", m_PresetName.c_str());

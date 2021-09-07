@@ -352,7 +352,7 @@ public:
 	/// Indicates whether all of the MountedDevices are at full capacity.
 	/// </summary>
 	/// <returns>Whether all of the MountedDevices are at full capacity.</returns>
-	bool FirearmIsFull() const;
+	bool FirearmsAreFull() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

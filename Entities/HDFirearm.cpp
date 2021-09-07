@@ -430,7 +430,12 @@ int HDFirearm::GetRoundInMagCount() const
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int HDFirearm::GetRoundInMagCapacity() const {
-	return m_pMagazine ? m_pMagazine->GetCapacity() : (m_pMagazineReference ? m_pMagazineReference->GetCapacity() : 0);
+	if (m_pMagazine) {
+		return m_pMagazine->GetCapacity();
+	} else if (m_pMagazineReference) {
+		return m_pMagazineReference->GetCapacity();
+	}
+	return 0;
 }
 
 
@@ -1113,7 +1118,9 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
 
     HeldDevice::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 
-	if (!m_Parent || IsReloading() || m_MaxSharpLength == 0) { return; }
+	if (!m_Parent || IsReloading() || m_MaxSharpLength == 0) {
+		return;
+	}
 
 	float sharpLength = std::max(m_MaxSharpLength * m_SharpAim, 20.0F);
 	int glowStrength;
@@ -1139,7 +1146,7 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
 		g_SceneMan.WrapPosition(aimPoint);
 		putpixel(pTargetBitmap, aimPoint.GetFloorIntX(), aimPoint.GetFloorIntY(), g_YellowGlowColor);
 	}
-	release_bitmap(pTargetBitmap);
+	//release_bitmap(pTargetBitmap);
 }
 
 } // namespace RTE

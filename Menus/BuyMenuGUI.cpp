@@ -1003,7 +1003,7 @@ void BuyMenuGUI::Update()
     bool pressPrevActor = m_pController->IsState(ACTOR_PREV);
 
     // If no direciton is held down, then cancel the repeating
-    if (!(m_pController->IsState(MOVE_RIGHT) || m_pController->IsState(MOVE_LEFT) || m_pController->IsState(MOVE_UP) || m_pController->IsState(MOVE_DOWN)))
+    if (!(m_pController->IsState(MOVE_RIGHT) || m_pController->IsState(MOVE_LEFT) || m_pController->IsState(MOVE_UP) || m_pController->IsState(MOVE_DOWN) || m_pController->IsState(ACTOR_NEXT_PREP) || m_pController->IsState(ACTOR_PREV_PREP)))
     {
         m_RepeatStartTimer.Reset();
         m_RepeatTimer.Reset();
@@ -1021,9 +1021,9 @@ void BuyMenuGUI::Update()
                 pressUp = true;
             } else if (m_pController->IsState(MOVE_DOWN)) {
                 pressDown = true;
-            } else if (m_pController->IsState(ACTOR_NEXT)) {
+            } else if (m_pController->IsState(ACTOR_NEXT_PREP)) {
                 pressNextActor = true;
-            } else if (m_pController->IsState(ACTOR_PREV)) {
+            } else if (m_pController->IsState(ACTOR_PREV_PREP)) {
                 pressPrevActor = true;
             }
             m_RepeatTimer.Reset();

@@ -773,24 +773,16 @@ protected:
     // Measures the interval between input repeats
     Timer m_RepeatTimer;
 
-    // If the player has selected an actor and is now selecting equipment
-    bool m_SelectingEquipment;
-    // Last tab visited while equipment selection was enabled
-    MenuCategory m_LastVisitedEquipmentTab;
-    // Last tab visited while equipment selection was disabled
-    MenuCategory m_LastVisitedMainTab;
-    // Last scroll position while equipment selection was enabled
-    int m_LastEquipmentScrollPosition;
-    // Last scroll position while equipment selection was disabled
-    int m_LastMainScrollPosition;
-    // First tab when equipment selection is disabled
-    MenuCategory m_FirstMainTab;
-    // Last tab when equipment selection is disabled
-    MenuCategory m_LastMainTab;
-    // First tab when equipment selection is enabled
-    MenuCategory m_FirstEquipmentTab;
-    // Last tab when equipment selection is enabled
-    MenuCategory m_LastEquipmentTab;
+    bool m_MAXIMTODONAMEHERE; //!< Whether or not swapping to equipment mode and back should change active tabs.
+    bool m_SelectingEquipment; //!< Whether or not the menu is in equipment mode.
+    MenuCategory m_LastVisitedEquipmentTab; //!< The last tab visited while in equipment mode.
+    MenuCategory m_LastVisitedMainTab; //!< The last tab visited while not in equipment mode.
+    int m_LastEquipmentScrollPosition; //!< The last scroll position while in equipment mode.
+    int m_LastMainScrollPosition; //!< The last scroll position while not in equipment mode.
+    MenuCategory m_FirstMainTab; //!< The first enabled tab when not in equipment mode.
+    MenuCategory m_LastMainTab; //!< The last enabled tab when not in equipment mode.
+    MenuCategory m_FirstEquipmentTab; //!< The first enabled tab when in equipment mode.
+    MenuCategory m_LastEquipmentTab; //!< The last enabled tab when in equipment mode.
 
     // Collection box of the buy GUIs
     GUICollectionBox *m_pParentBox;

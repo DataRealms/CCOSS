@@ -114,6 +114,7 @@ void BuyMenuGUI::Clear()
 	m_AlwaysAllowedItems.clear();
 	m_OwnedItems.clear();
 
+    m_MAXIMTODONAMEHERE = false;
     m_SelectingEquipment = false;
     m_LastVisitedEquipmentTab = GUNS;
     m_LastVisitedMainTab = BODIES;
@@ -813,14 +814,16 @@ void BuyMenuGUI::EnableEquipmentSelection(bool enabled) {
         m_SelectingEquipment = enabled;
         RefreshTabDisabledStates();
 
-        if (m_SelectingEquipment) {
-            m_LastVisitedMainTab = static_cast<MenuCategory>(m_MenuCategory);
-            m_LastMainScrollPosition = m_pShopList->GetScrollVerticalValue();
-            m_MenuCategory = m_LastVisitedEquipmentTab;
-        } else {
-            m_LastVisitedEquipmentTab = static_cast<MenuCategory>(m_MenuCategory);
-            m_LastEquipmentScrollPosition = m_pShopList->GetScrollVerticalValue();
-            m_MenuCategory = m_LastVisitedMainTab;
+        if (m_MAXIMTODONAMEHERE) {
+            if (m_SelectingEquipment) {
+                m_LastVisitedMainTab = static_cast<MenuCategory>(m_MenuCategory);
+                m_LastMainScrollPosition = m_pShopList->GetScrollVerticalValue();
+                m_MenuCategory = m_LastVisitedEquipmentTab;
+            } else {
+                m_LastVisitedEquipmentTab = static_cast<MenuCategory>(m_MenuCategory);
+                m_LastEquipmentScrollPosition = m_pShopList->GetScrollVerticalValue();
+                m_MenuCategory = m_LastVisitedMainTab;
+            }
         }
         
         CategoryChange();

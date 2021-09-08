@@ -2159,40 +2159,39 @@ void MetagameGUI::UpdateInput()
     // Update the ToolTip popup
 
     // Show the ToolTip popup, if we are hovering over anything that has one to show
-    string toolTip = "";
-    GUIControl *pCurrentHover = m_pGUIController->GetControlUnderPoint(mouseX, mouseY);
-    if (g_SettingsMan.ShowToolTips() && pCurrentHover && !(toolTip = pCurrentHover->GetToolTip()).empty())
-    {
-        // Restart timer if there's a new thing we're hovering over
-        if (pCurrentHover != m_pHoveredControl)
-            m_ToolTipTimer.Reset();
+	std::string toolTip = "";
+	GUIControl *pCurrentHover = m_pGUIController->GetControlUnderPoint(mouseX, mouseY);
+	if (pCurrentHover) {
+		toolTip = pCurrentHover->GetToolTip();
+		// The control's tooltip can end up being "True" for reasons unknown to man, so just clear it.
+		if (toolTip == "None" || toolTip == "True") { toolTip.clear(); }
+	}
+	if (g_SettingsMan.ShowToolTips() && pCurrentHover && !toolTip.empty()) {
+		// Restart timer if there's a new thing we're hovering over
+		if (pCurrentHover != m_pHoveredControl) { m_ToolTipTimer.Reset(); }
 
-        // If we've been hovering over the same thing for enough time, then show the tooltip
-        if (m_ToolTipTimer.IsPastRealMS(500))
-        {
-            // Show the popup box with the hovered item's description
-            m_pToolTipBox->SetVisible(true);
-            // Need to add an offset to make it look better and not have the cursor obscure text
-            m_pToolTipBox->SetPositionAbs(mouseX + 6, mouseY + 6);
-            m_pToolTipText->SetHAlignment(GUIFont::Left);
-            m_pToolTipText->SetText(toolTip);
-            // Resize the box height to fit the text
-            int newHeight = m_pToolTipText->ResizeHeightToFit();
-            m_pToolTipBox->Resize(m_pToolTipBox->GetWidth(), newHeight + 10);
-            // Make sure the popup box doesn't drop out of sight
-            KeepBoxOnScreen(m_pToolTipBox, -1);
-        }
-
-        // Save the control we're currently hovering over so we can compare next frame
-        m_pHoveredControl = pCurrentHover;
-    }
-    else
-    {
-        m_pToolTipBox->SetVisible(false);
-        m_pToolTipText->SetText("");
-        m_ToolTipTimer.Reset();
-        m_pHoveredControl = 0;
-    }
+		// If we've been hovering over the same thing for enough time, then show the tooltip
+		if (m_ToolTipTimer.IsPastRealMS(500)) {
+			// Show the popup box with the hovered item's description
+			m_pToolTipBox->SetVisible(true);
+			// Need to add an offset to make it look better and not have the cursor obscure text
+			m_pToolTipBox->SetPositionAbs(mouseX + 6, mouseY + 6);
+			m_pToolTipText->SetHAlignment(GUIFont::Left);
+			m_pToolTipText->SetText(toolTip);
+			// Resize the box height to fit the text
+			int newHeight = m_pToolTipText->ResizeHeightToFit();
+			m_pToolTipBox->Resize(m_pToolTipBox->GetWidth(), newHeight + 10);
+			// Make sure the popup box doesn't drop out of sight
+			KeepBoxOnScreen(m_pToolTipBox, -1);
+		}
+		// Save the control we're currently hovering over so we can compare next frame
+		m_pHoveredControl = pCurrentHover;
+	} else {
+		m_pToolTipBox->SetVisible(false);
+		m_pToolTipText->SetText("");
+		m_ToolTipTimer.Reset();
+		m_pHoveredControl = nullptr;
+	}
 
 
     ///////////////////////////////////////

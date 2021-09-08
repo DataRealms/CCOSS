@@ -1151,15 +1151,14 @@ void BuyMenuGUI::Update()
     for (int category = 0; category < CATEGORYCOUNT; ++category) {
         if (!m_pCategoryTabs[category]->IsEnabled()) {
             if (m_MenuCategory == category) { m_pCategoryTabs[m_MenuCategory]->SetEnabled(true); }
-            if (m_pCategoryTabs[category]->PointInside(m_CursorPos.GetFloorIntX(), m_CursorPos.GetFloorIntY())) {
+            if (m_pCategoryTabs[category]->PointInside(m_CursorPos.GetFloorIntX() + 3, m_CursorPos.GetFloorIntY())) {
                 if (m_pController->IsState(PRESS_PRIMARY)) {
                     m_MenuCategory = category;
                     m_pCategoryTabs[m_MenuCategory]->SetFocus();
                     m_pCategoryTabs[m_MenuCategory]->SetEnabled(true);
                     CategoryChange();
                     g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
-                }
-                else if (!m_pCategoryTabs[category]->HasFocus()) {
+                } else if (!m_pCategoryTabs[category]->IsEnabled() && !m_pCategoryTabs[category]->HasFocus()) {
                     m_pCategoryTabs[category]->SetFocus();
                 }
             }
@@ -1639,7 +1638,7 @@ void BuyMenuGUI::Update()
                     {
                         // Just give focus to the categories column
                         m_MenuFocus = CATEGORIES;
-                        m_pCategoryTabs[m_MenuCategory]->SetFocus();
+                        m_pCategoryTabs[cat]->SetFocus();
                     }
                     // Regular click
                     if(anEvent.GetMsg() == GUITab::Pushed)

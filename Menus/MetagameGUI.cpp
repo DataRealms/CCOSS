@@ -845,8 +845,8 @@ void MetagameGUI::SetEnabled(bool enable)
 		for (list<Entity *>::iterator itr = flagList.begin(); itr != flagList.end(); ++itr) {
 			if (const Icon *pIcon = dynamic_cast<Icon *>(*itr)) { m_apPlayerTeamSelect[player]->AddItem("", "", new AllegroBitmap(pIcon->GetBitmaps32()[0]), pIcon); }
 		}
-		m_apPlayerTeamSelect[player]->SetSelectedIndex(player);
 	}
+	if (m_apPlayerTeamSelect[Players::PlayerOne]->GetSelectedIndex() < 0) { m_apPlayerTeamSelect[Players::PlayerOne]->SetSelectedIndex(0); }
 
     m_ScreenChange = true;
 }

@@ -49,7 +49,8 @@ namespace RTE {
 	/// Initializes all the essential managers.
 	/// </summary>
 	void InitializeManagers() {
-		Reader settingsReader("Base.rte/Settings.ini", false, nullptr, true);
+		const std::string settingsPath = std::getenv("CCCP_SETTINGSPATH");
+		Reader settingsReader(settingsPath.empty() ? "Base.rte/Settings.ini" : settingsPath, false, nullptr, true);
 		g_SettingsMan.Initialize(settingsReader);
 
 		g_LuaMan.Initialize();

@@ -20,11 +20,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsMan::Clear() {
-#ifndef LINUX_PORTABLE
-		m_SettingsPath = "Settings.ini";
-#else
-		m_SettingsPath = "Base.rte/Settings.ini";
-#endif
+		const std::string settingsPath = std::getenv("CCCP_SETTINGSPATH");
+		m_SettingsPath = settingsPath.empty() ? "Base.rte/Settings.ini" : settingsPath;
 
 		m_SettingsNeedOverwrite = false;
 

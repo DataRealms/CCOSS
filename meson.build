@@ -95,7 +95,7 @@ conf_data = configuration_data()
 prefix = get_option('prefix')
 
 conf_data.set_quoted('BASEDATAPATH', prefix/get_option('data_install_dir'), strip_directory:true)
-if suffix=''
+if suffix==''
 	suffix=[]
 	conf_data.set('EXENAME', elfname)
 else

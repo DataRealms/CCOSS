@@ -9,7 +9,7 @@ link_base_files() {
 }
 
 link_user_files() {
-	local user_files=("LogConsole.txt" "LogLoading.txt" "LogLoadingWarnings.txt" "AbortScreen.bmp" "AbortScreen.png" "Settings.ini")
+	local user_files=("LogConsole.txt" "LogLoading.txt" "LogLoadingWarning.txt" "AbortScreen.bmp" "AbortScreen.png" "Settings.ini")
 	local user_directories=("Metagames.rte" "Scenes.rte" "_ScreenShots")
 
 	if [[ ! -d "${user_data}" ]]; then

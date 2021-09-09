@@ -27,16 +27,14 @@ build_rpath = ''
 link_args=[]
 extra_args=[]
 preprocessor_flags = []
-suffix=[]
+suffix=''
 
 if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   # Build against system libraries on linux
   message('gcc detected')
 
   build_rpath = '$ORIGIN:$ORIGIN/../external/lib/linux/x86_64' # Set RUNPATH so that CCCP can find libfmod.so without needing to set LD_LIBRARY_PATH
-  if get_option('no_install')
-    suffix = 'x86_64'
-  endif
+	suffix = 'x86_64'
   link_args += ['-Wl,--enable-new-dtags'] # Set RUNPATH instead of RPATH
 
   # Set preprocessor flags and cpp arguments according to build options
@@ -96,8 +94,14 @@ endif
 conf_data = configuration_data()
 prefix = get_option('prefix')
 
-conf_data.set('LINUX_PORTABLE', get_option('no_install'))
 conf_data.set_quoted('BASEDATAPATH', prefix/get_option('data_install_dir'), strip_directory:true)
+if suffix=''
+	suffix=[]
+	conf_data.set('EXENAME', elfname)
+else
+	conf_data.set('EXENAME', elfname + '.' + suffix)
+endif
+
 
 #### Sources Setup ####
 pch = 'System/StandardIncludes.h'

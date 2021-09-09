@@ -284,13 +284,12 @@ namespace RTE {
 /// Implementation of the main function.
 /// </summary>
 int main(int argc, char **argv) {
-	System::Initialize();
-
 	set_config_file("Base.rte/AllegroConfig.txt");
 	allegro_init();
 	loadpng_init();
 	set_close_button_callback(System::WindowCloseButtonHandler);
 
+	System::Initialize();
 	SeedRNG();
 
 	InitializeManagers();
@@ -315,7 +314,6 @@ int main(int argc, char **argv) {
 	RunGameLoop();
 
 	DestroyManagers();
-	System::Destroy();
 	return 0;
 }
 

@@ -65,8 +65,6 @@ The Linux build uses the meson build system, and builds against system libraries
 
 ## Building:
 
-If you want to install the game to system directories go to the [installing](#installing) section.
-
 1. Install Dependencies (see [below](#installing-dependencies) for some distro-specific instructions).
 
 2. Clone this Source Repository and the [Data Respository](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data).

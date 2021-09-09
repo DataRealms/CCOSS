@@ -75,12 +75,12 @@ The Linux build uses the meson build system, and builds against system libraries
 
 5. `ninja -C build`
 
-6. (optional) `sudo ninja install -C build` (to uninstall later keep the build directory intact, the game can then be uninstalled by `sudo ninja uninstall -C build`
+6. (optional) `sudo ninja install -C build` (To uninstall later, keep the build directory intact. The game can then be uninstalled by `sudo ninja uninstall -C build`)
 
 If you want to change the buildtype afterwards, you can use `meson configure --buildtype {release or debug}` in the build directory or create a secondary build directory as in Step 4. There are also additional build options documented in the [wiki](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Meson-build-options) as well as through running `meson configure` in the build directory.
 
 ## Running:
-(If you installed the game in step 6 above it should show up with your regular applications and will just run)
+(If you installed the game in step 6 above, it should appear with your regular applications and will just run)
 
 1. Copy (or link, might be preferable for testing builds) `builddir/CortexCommand.x86_64` or `builddir/CortexCommand_debug.x86_64` (depending on if you made a debug build) into the **Data Repository**.
 

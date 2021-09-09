@@ -33,7 +33,7 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   message('gcc detected')
 
   build_rpath = '$ORIGIN:$ORIGIN/../external/lib/linux/x86_64' # Set RUNPATH so that CCCP can find libfmod.so without needing to set LD_LIBRARY_PATH
-	suffix = 'x86_64'
+  suffix = 'x86_64'
   link_args += ['-Wl,--enable-new-dtags'] # Set RUNPATH instead of RPATH
 
   # Set preprocessor flags and cpp arguments according to build options

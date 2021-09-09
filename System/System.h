@@ -150,7 +150,6 @@ namespace RTE {
 		static bool s_Quit; //!< Whether the user requested program termination through GUI or the window close button.
 		static bool s_LogToCLI; //!< Bool to tell whether to print the loading log and anything specified with PrintToCLI to command-line or not.
 		static std::string s_WorkingDirectory; //!< String containing the absolute path to current working directory.
-
 		static std::vector<size_t> s_WorkingTree; //!< Vector of the hashes of all file paths in the working directory.
 		static std::filesystem::file_time_type s_ProgramStartTime; //!< Low precision time point of program start for checking if a file was created after starting.
 
@@ -164,7 +163,6 @@ namespace RTE {
 		static constexpr int s_MaxFileName = 512; //!< Maximum length of output file directory + name string.
 		static constexpr int s_FileBufferSize = 8192; //!< Buffer to hold data read from the zip file.
 		static constexpr int s_MaxUnzippedFileSize = 104857600; //!< Maximum size of single file being extracted from zip archive (100MiB).
-
 	};
 }
 #endif

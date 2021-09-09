@@ -60,7 +60,7 @@ The Linux build uses the meson build system, and builds against system libraries
 * `lz4>=1.9.0`
 * `libpng`
 * `libX11`
-* `meson>=0.55` (If your distro doesn't have a recent version of meson, use the pip version instead)
+* [`meson`](https://www.mesonbuild.com)`>= 0.53` (If your distro doesn't have a recent version of meson, use the pip version instead)
 * `boost>=1.55`
 
 ## Building:
@@ -73,25 +73,16 @@ If you want to install the game to system directories go to the [installing](#in
 
 3. Open a terminal in the Source Repository.
 
-4. `meson build` or `meson --buildtype debug build` for debug build (default is release build)
+4. `meson build` or `meson --buildtype=debug build` for debug build (default is release build)
 
-5. `cd build`
+5. `ninja -C build`
 
-6. `ninja`
+6. (optional) `sudo ninja install -C build` (to uninstall later keep the build directory intact, the game can then be uninstalled by `sudo ninja uninstall -C build`
 
 If you want to change the buildtype afterwards, you can use `meson configure --buildtype {release or debug}` in the build directory or create a secondary build directory as in Step 4. There are also additional build options documented in the [wiki](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Meson-build-options) as well as through running `meson configure` in the build directory.
 
-## Installing:
-
-Follow steps 1-3 in the [building](#building) section.  
-
-4. `meson -Dno_install=False -Dinstall_fmod=True build`
-
-5. `sudo meson install -C build`
-
-This will install Cortex Command to your system. To uninstall run `sudo meson uninstall -Cbuild` from the source repository.
-
 ## Running:
+(If you installed the game in step 6 above it should show up with your regular applications and will just run)
 
 1. Copy (or link, might be preferable for testing builds) `builddir/CCCP_debug.x86_64` or `builddir/CCCP.x86_64` (depending on if you made a release build) into the **Data Repository**.
 

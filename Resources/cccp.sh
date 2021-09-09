@@ -40,7 +40,7 @@ link_user_files() {
 
 tmp_dir=$(mktemp -d "/tmp/CCCP.XXXXXXXXX")
 base_data_path=@BASEDATAPATH@
-user_local_home=${XG_DATA_HOME:-~/".local/share"}
+user_local_home=${XDG_DATA_HOME:-~/".local/share"}
 user_data="${user_local_home}/Cortex Commad"
 
 link_base_files

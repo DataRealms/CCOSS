@@ -19,6 +19,7 @@
 #include "LuaMan.h"
 #include "Atom.h"
 #include "Actor.h"
+#include "UInputMan.h"
 
 namespace RTE {
 
@@ -897,7 +898,7 @@ void MovableObject::ApplyImpulses()
 void MovableObject::PreTravel()
 {
 	// Temporarily remove the representation of this from the scene MO sampler
-	if (m_GetsHitByMOs) { m_isTraveling = true; }
+	if (m_GetsHitByMOs) { if (g_UInputMan.KeyHeld(KEY_N)) { m_isTraveling = true; } else { Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawNoMOID, true); } }
 
     // Save previous position and velocities before moving
     m_PrevPos = m_Pos;
@@ -933,7 +934,7 @@ void MovableObject::PostTravel()
         m_IgnoresAtomGroupHits = m_Vel.GetLargest() < m_IgnoresAGHitsWhenSlowerThan;
 
 	if (m_GetsHitByMOs) {
-        if (!GetParent()) { m_isTraveling = false; }
+        if (!GetParent()) { if (g_UInputMan.KeyHeld(KEY_N)) { m_isTraveling = false; } else { Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true); } }
 		m_AlreadyHitBy.clear();
 	}
 	m_IsUpdated = true;

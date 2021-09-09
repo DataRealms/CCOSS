@@ -613,11 +613,15 @@ MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY)
         return g_NoMOID;
 
     MOID moid = getpixel(m_pMOIDLayer->GetBitmap(), pixelX, pixelY);
-    if (moid != g_NoMOID && moid != g_MOIDMaskColor) {
-        MOSprite* mo = dynamic_cast<MOSprite*>(g_MovableMan.GetMOFromID(moid));
-        return (mo && !mo->GetTraveling()) ? moid : g_NoMOID;
+    if (g_UInputMan.KeyHeld(KEY_N)) {
+        if (moid != g_NoMOID && moid != g_MOIDMaskColor) {
+            MOSprite* mo = dynamic_cast<MOSprite*>(g_MovableMan.GetMOFromID(moid));
+            return (mo && !mo->GetTraveling()) ? moid : g_NoMOID;
+        } else {
+            return g_NoMOID;
+        }
     } else {
-        return g_NoMOID;
+        return moid;
     }
 }
 

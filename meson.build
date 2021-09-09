@@ -152,7 +152,7 @@ base_exclude_files = [
 	'Launch Scene Editor.bat',
 	'LogConsole.txt',
 	'LogLoading.txt',
-	'LogLoadingWarnings.txt',
+	'LogLoadingWarning.txt',
 	'Start Dedicated Server.bat'
 ]
 

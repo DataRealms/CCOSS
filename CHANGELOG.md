@@ -6,11 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-### Added
+<details><summary>Added</summary>
 
 - Executable can be compiled as 64bit.
 
-- New `Settings.ini` property `MeasureModuleLoadTime = 0/1` to measure the duration of module loading (archived module extraction included). For benchmarking purpuses.
+- New `Settings.ini` property `MeasureModuleLoadTime = 0/1` to measure the duration of module loading (archived module extraction included). For benchmarking purposes.
 
 - `Color` object's RGB values can now be set with index number.  
 	```
@@ -34,7 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `Vector:ClampMagnitude(upperLimit, lowerLimit)` Lua function that lets you limit a Vector's upper and lower magnitude.
 
-- Added `MOSRotating` `GibBlastStrength` INI and Lua (R/W) property. This lets you define how much force created `Gibs` and any `Attachables` will get launched when the `MOSRotating` gibs.
+- Added `MOSRotating` `GibBlastStrength` INI and Lua (R/W) property. This lets you define how much force created `Gibs` and any `Attachables` will get launched with when the `MOSRotating` gibs.
 
 - New INI and Lua (R/W) properties for `Attachables`:  
 	`ParentBreakWound = AEmitter...` - allows you to optionally define different `BreakWounds` for the `Attachable` and its parent. By default it matches `BreakWound` for ease of use. `BreakWound` is also now R/W accessible to Lua.  
@@ -139,7 +139,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`DrawHandAndFootGroupVisualizations` - any `Actor` subclasses with  will draw its hand and foot `AtomGroup`s to the standard view.  
 	`DrawLimbPathVisualizations` - any  `AHumans` or `ACrabs` will draw some of their `LimbPaths` to the standard view.  
 	`DrawRayCastVisualizations` - any rays cast by `SceneMan` will be drawn to the standard view.  
-	`DrawPixelCheckVisualizations ` - any pixel checks made by `SceneMan:GetTerrMatter` or `SceneMan:GetMOIDPixel` will be drawn to the standard view.
+	`DrawPixelCheckVisualizations` - any pixel checks made by `SceneMan:GetTerrMatter` or `SceneMan:GetMOIDPixel` will be drawn to the standard view.
 
 - Added a fully featured inventory view for managing `AHuman` inventories (to be expanded to other things in future).
 
@@ -181,7 +181,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `DataModule` property `IsFaction = 0/1` which determines if a module is a playable faction (in MetaGame, etc.). This replaces the need to put "Tech" in the module name. Defaults to false (0).
 
-### Changed
+</details>
+
+
+<details><summary>Changed</summary>
 
 - Doors in `Team = -1` will now open up for all actors.
 
@@ -308,7 +311,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Placing "Tech" in a `DataModule`'s `ModuleName` no longer makes the module a playable faction (in MetaGame, etc.). The `IsFaction` property should be used instead.  
 	The word "Tech" will also not be omitted from the module name when displayed in any faction selection dropdown list.
 
-### Fixed
+</details>
+
+
+<details><summary>Fixed</summary>
 
 - Fixed legs going bonkers for one frame when turning around.
 
@@ -358,7 +364,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Console error spam will no longer cripple performance over time.
 
-### Removed
+</details>
+
+
+<details><summary>Removed</summary>
 
 - Removed obsolete graphics drivers and their `Settings.ini` properties `ForceOverlayedWindowGfxDriver` and `ForceNonOverlayedWindowGfxDriver`.
 
@@ -386,11 +395,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Removed `Settings.ini` properties `HSplitScreen` and `VSplitScreen`. Superseded by `TwoPlayerSplitscreenVertSplit`.
 
+</details>
+
 ***
 
 ## [0.1.0 pre-release 3.0][0.1.0-pre3.0] - 2020/12/25
 
-### Added
+<details><summary>Added</summary>
 
 - Implemented Lua Just-In-Time compilation (MoonJIT 2.2.0).
 
@@ -553,7 +564,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - You can get the top level `SoundSet` of a `SoundContainer` with `soundContainer:GetTopLevelSoundSet` and manipulate it as described above. This allows you full interaction with all levels of `SoundSets` in a `SoundContainer`.
 
-### Changed
+</details>
+
+
+<details><summary>Changed</summary>
 
 - Codebase now uses the C++17 standard.
 
@@ -659,7 +673,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Pressing escape at the options, mod manager, game editors and credits screens no longer quits the game.
 
-### Fixed
+</details>
+
+
+<details><summary>Fixed</summary>
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.
 
@@ -687,7 +704,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Sound panning should now work properly around scene seams. Additionally, sounds should be less stuttery (e.g. distant jetpacks) and generally sound better.
 
-### Removed
+</details>
+
+
+<details><summary>Removed</summary>
 
 - Removed the ability to remove scripts from objects with Lua. This is no longer needed cause of code efficiency increases.
 
@@ -709,11 +729,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	The lengthy `PlaySound` function should be replaced by making a `SoundContainer` in your `Create` function and setting properties appropriately.  
 	This can be done by creating one defined INI with `soundContainer = CreateSoundContainer(...)`, or by making an empty one with `soundContainer = SoundContainer()`.
 
+</details>
+
 ***
 
 ## [0.1.0 pre-release 2][0.1.0-pre2] - 2020/05/08
 
-### Added
+<details><summary>Added</summary>
 
 - Lua binding for `Box::IntersectsBox(otherBox)`, that returns true if 2 boxes intersect.
 
@@ -831,7 +853,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	OnDetach(self, exParent) -- This is run when the Attachable this script is on is detached from an object. The exParent gives you the object the Attachable was attached to.
 	```
 
-### Changed
+</details>
+
+
+<details><summary>Changed</summary>
 
 - Codebase now uses the C++14 standard.
 
@@ -885,7 +910,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `PieMenuActor` and `OrbitedCraft` have now been removed. They are instead replaced with parameters in their respective functions, i.e. `OnPieMenu(pieMenuActor);` and `CraftEnteredOrbit(orbitedCraft);`. Their use is otherwise unchanged.
 
-### Fixed
+</details>
+
+
+<details><summary>Fixed</summary>
 
 - Fixed LuaBind being all sorts of messed up. All lua bindings now work properly like they were before updating to the v141 toolset.
 
@@ -905,7 +933,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Scripts on attached attachables will only run if their parent exists in MovableMan. ([Issue #83](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/83))
 
-### Removed
+</details>
+
+
+<details><summary>Removed</summary>
 
 - Removed all Gorilla Audio and SDL Mixer related code and files.
 
@@ -926,11 +957,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	**Post-processing:** `TrueColorMode`, `PostProcessing`, `PostPixelGlow`.   
 	**Native fullscreen mode:** `Fullscreen`, `NxWindowed`, `NxFullscreen`, `ForceSoftwareGfxDriver`, `ForceSafeGfxDriver`.
 
+</details>
+
 ***
 
 ## [0.1.0 pre-release 1][0.1.0-pre1] - 2020/01/27
 
-### Added
+<details><summary>Added</summary>
 
 - You can now run the game with command line parameters, including `-h` to see help and `-c` to send ingame console input to cout.
 
@@ -957,7 +990,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added minimal debug configuration for quicker debug builds without visualization.
 
-### Changed
+</details>
+
+<details><summary>Changed</summary>
 
 - `ACrab` aim limits now adjust to crab body rotation.
 
@@ -979,7 +1014,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Built-in Actor angular velocity reduction on death has been lessened.
 
-### Fixed
+</details>
+
+
+<details><summary>Fixed</summary>
 
 - SFX slider now works properly.
 
@@ -995,7 +1033,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Various minor other things that have gotten lost in the shuffle.
 
-### Removed
+</details>
+
+
+<details><summary>Removed</summary>
 
 - All licensing-related code has been removed since it's no longer needed.
 
@@ -1004,6 +1045,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - All usage of the outdated Slick Profiler has been removed.
 
 - `TDExplosive.ParticleNumberToAdd` property has been removed.
+
+</details>
 
 ***
 
@@ -1014,4 +1057,3 @@ Note: For a log of changes made prior to the commencement of the open source com
 [0.1.0-pre1]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/releases/tag/v0.1.0-pre1
 [0.1.0-pre2]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/releases/tag/v0.1.0-pre2
 [0.1.0-pre3.0]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/releases/tag/v0.1.0-pre3.0
-

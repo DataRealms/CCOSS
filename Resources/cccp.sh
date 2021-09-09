@@ -20,9 +20,19 @@ link_user_files() {
 		ln -s "${user_data}/$file" $tmp_dir
 	done
 
+	if [[ ! -e "${user_data}/Metagames.rte" ]]; then
+		mkdir -p "${user_data}/Metagames.rte"
+		echo -e "DataModule\n\tModuleName = Metagame Saves" > "${user_data}/Metagames.rte"
+	fi
+
+	if [[ ! -e "${user_data}/Scenes.rte" ]]; then
+		mkdir -p "${user_data/Scenes.rte}"
+		echo -e "DataModule\n\tModuleName = Saves"
+	fi
+
 	for directory in $user_directories; do
 		if [[ ! -e "${user_data}/${directory}" ]]; then
-			cp -r "${base_data_path}/${directory}" "${user_data}/"
+			mkdir "${user_data}/"
 		fi
 		ln -sf "${user_data}/${directory}" "${tmp_dir}/"
 	done
@@ -40,6 +50,10 @@ cd "${tmp_dir}"
 
 export CCCP_SETTINGSPATH="Settings.ini"
 
-@EXENAME@
+@EXENAME@ $@
+
+exit_code=$?
 
 rm -r "${tmp_dir}"
+
+exit $exit_code

@@ -91,6 +91,18 @@ namespace RTE {
 		void SetBlipOnRevealUnseen(bool newValue) { m_BlipOnRevealUnseen = newValue; }
 
 		/// <summary>
+		/// Gets the range in which devices on Scene will show the pick-up HUD.
+		/// </summary>
+		/// <returns>The range in which devices on Scene will show the pick-up HUD, in pixels. -1 means HUDs are hidden, 0 means unlimited range.</returns>
+		float GetUnheldItemsHUDDisplayRange() const { return m_UnheldItemsHUDDisplayRange; }
+
+		/// <summary>
+		/// Sets the range in which devices on Scene will show the pick-up HUD.
+		/// </summary>
+		/// <param name="newRadius">The new range in which devices on Scene will show the pick-up HUD, in pixels. -1 means HUDs are hidden, 0 means unlimited range.</param>
+		void SetUnheldItemsHUDDisplayRange(float newRadius) { m_UnheldItemsHUDDisplayRange = std::floor(newRadius); }
+
+		/// <summary>
 		/// Whether red and white flashes appear when brain is damaged.
 		/// </summary>
 		/// <returns>Whether red and white flashes appear when brain is damaged.</returns>
@@ -384,6 +396,7 @@ namespace RTE {
 		bool m_ShowForeignItems; //!< Do not show foreign items in buy menu.
 		bool m_FlashOnBrainDamage; //!< Whether red flashes on brain damage are on or off.
 		bool m_BlipOnRevealUnseen; //!< Blip if unseen is revealed.
+		float m_UnheldItemsHUDDisplayRange; //!< Range in which devices on Scene will show the pick-up HUD, in pixels. -1 means HUDs are hidden, 0 means unlimited range.
 		bool m_EndlessMetaGameMode; //!< Endless MetaGame mode.
 		bool m_EnableCrabBombs; //!< Whether all actors (except Brains and Doors) should be annihilated if a number exceeding the crab bomb threshold is released at once.
 		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.

@@ -6,6 +6,8 @@
 #include "GUICollectionBox.h"
 #include "GUICheckbox.h"
 #include "GUITextBox.h"
+#include "GUISlider.h"
+#include "GUILabel.h"
 
 namespace RTE {
 
@@ -41,6 +43,18 @@ namespace RTE {
 		m_CrabBombThresholdTextbox->SetText(std::to_string(g_SettingsMan.GetCrabBombThreshold()));
 		m_CrabBombThresholdTextbox->SetNumericOnly(true);
 		m_CrabBombThresholdTextbox->SetMaxTextLength(3);
+
+		m_UnheldItemsHUDDisplayRangeSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderUnheldItemsHUDRange"));
+		int unheldItemsHUDDisplayRangeValue = static_cast<int>(g_SettingsMan.GetUnheldItemsHUDDisplayRange());
+		if (unheldItemsHUDDisplayRangeValue <= -1) {
+			m_UnheldItemsHUDDisplayRangeSlider->SetValue(m_UnheldItemsHUDDisplayRangeSlider->GetMinimum());
+		} else if (unheldItemsHUDDisplayRangeValue == 0) {
+			m_UnheldItemsHUDDisplayRangeSlider->SetValue(m_UnheldItemsHUDDisplayRangeSlider->GetMaximum());
+		} else {
+			m_UnheldItemsHUDDisplayRangeSlider->SetValue(static_cast<int>(g_SettingsMan.GetUnheldItemsHUDDisplayRange() / c_PPM));
+		}
+		m_UnheldItemsHUDDisplayRangeLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelUnheldItemsHUDRangeValue"));
+		UpdateUnheldItemsHUDDisplayRange();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -74,6 +88,22 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void SettingsGameplayGUI::UpdateUnheldItemsHUDDisplayRange() {
+		int newValue = m_UnheldItemsHUDDisplayRangeSlider->GetValue();
+		if (newValue < 3) {
+			m_UnheldItemsHUDDisplayRangeLabel->SetText("Hidden");
+			g_SettingsMan.SetUnheldItemsHUDDisplayRange(-1.0F);
+		} else if (newValue > 50) {
+			m_UnheldItemsHUDDisplayRangeLabel->SetText("Unlimited");
+			g_SettingsMan.SetUnheldItemsHUDDisplayRange(0);
+		} else {
+			m_UnheldItemsHUDDisplayRangeLabel->SetText("Up to " + std::to_string(newValue) + " meters");
+			g_SettingsMan.SetUnheldItemsHUDDisplayRange(static_cast<float>(newValue) * c_PPM);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void SettingsGameplayGUI::HandleInputEvents(GUIEvent &guiEvent) {
 		if (guiEvent.GetType() == GUIEvent::Notification) {
 			if (guiEvent.GetControl() == m_FlashOnBrainDamageCheckbox) {
@@ -92,6 +122,8 @@ namespace RTE {
 				UpdateMaxUnheldItemsTextbox();
 			} else if (guiEvent.GetControl() == m_CrabBombThresholdTextbox && guiEvent.GetMsg() == GUITextBox::Enter) {
 				UpdateCrabBombThresholdTextbox();
+			} else if (guiEvent.GetControl() == m_UnheldItemsHUDDisplayRangeSlider) {
+				UpdateUnheldItemsHUDDisplayRange();
 			// Update both textboxes when clicking the main CollectionBox, otherwise clicking off focused textboxes does not remove their focus or update the setting values and they will still capture keyboard input.
 			} else if (guiEvent.GetControl() == m_GameplaySettingsBox && guiEvent.GetMsg() == GUICollectionBox::Clicked && !m_GameplaySettingsBox->HasFocus()) {
 				UpdateMaxUnheldItemsTextbox();

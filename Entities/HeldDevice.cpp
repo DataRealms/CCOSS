@@ -20,6 +20,7 @@
 #include "GUI.h"
 #include "AllegroBitmap.h"
 
+#include "SettingsMan.h"
 
 namespace RTE {
 
@@ -594,10 +595,8 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 			} else {
 				m_BlinkTimer.Reset();
 				// Check for nearby actors that will toggle this pickup HUD
-				float dist;
-				// TODO: @MaximDude replace radius with settings property!
-				float radius = 100.0F; //static_cast<float>(g_SettingsMan.GetPickupHUDRadius());
-				m_SeenByPlayer.at(viewingPlayer) = radius < 0 || g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < radius;
+				float range = g_SettingsMan.GetUnheldItemsHUDDisplayRange();
+				m_SeenByPlayer.at(viewingPlayer) = range > -1 && (range == 0 || g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < range);
 			}
 			if (m_SeenByPlayer.at(viewingPlayer)) {
 				AllegroBitmap pBitmapInt(pTargetBitmap);

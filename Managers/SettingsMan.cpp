@@ -9,10 +9,6 @@
 #include "NetworkClient.h"
 #include "NetworkServer.h"
 
-#ifdef __unix__
-#include "Resources/Config.h"
-#endif
-
 namespace RTE {
 
 	const std::string SettingsMan::c_ClassName = "SettingsMan";
@@ -20,8 +16,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsMan::Clear() {
-		const std::string settingsPath = std::getenv("CCCP_SETTINGSPATH");
-		m_SettingsPath = settingsPath.empty() ? "Base.rte/Settings.ini" : settingsPath;
+		const char *settingsPath = std::getenv("CCCP_SETTINGSPATH");
+		m_SettingsPath = settingsPath == NULL ? "Base.rte/Settings.ini" : std::string(settingsPath);
 
 		m_SettingsNeedOverwrite = false;
 

@@ -95,10 +95,10 @@ prefix = get_option('prefix')
 
 conf_data.set_quoted('BASEDATAPATH', prefix/get_option('data_install_dir'), strip_directory:true)
 if suffix==''
-	suffix=[]
-	conf_data.set('EXENAME', elfname)
+  suffix=[]
+  conf_data.set('EXENAME', elfname)
 else
-	conf_data.set('EXENAME', elfname + '.' + suffix)
+  conf_data.set('EXENAME', elfname + '.' + suffix)
 endif
 
 
@@ -112,7 +112,7 @@ source_inc_dirs = include_directories(
   'Lua',
   'Managers',
   'Menus',
-	'Resources',
+  'Resources',
   'System')
 
 subdir('Activities')

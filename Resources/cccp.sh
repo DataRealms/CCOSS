@@ -12,7 +12,7 @@ link_user_files() {
 	local user_files=("LogConsole.txt" "LogLoading.txt" "LogLoadingWarning.txt" "AbortScreen.bmp" "AbortScreen.png" "Settings.ini")
 	local user_directories=("Metagames.rte" "Scenes.rte" "_ScreenShots")
 
-	if [[ ! -d "${user_data}" ]]; then
+	if ! [[ -d "${user_data}" ]]; then
 		mkdir -p "${user_data}"
 	fi
 
@@ -20,14 +20,14 @@ link_user_files() {
 		ln -s "${user_data}/$file" $tmp_dir
 	done
 
-	if [[ ! -e "${user_data}/Metagames.rte" ]]; then
+	if ! [[ -e "${user_data}/Metagames.rte" ]]; then
 		mkdir -p "${user_data}/Metagames.rte"
-		echo -e "DataModule\n\tModuleName = Metagame Saves" > "${user_data}/Metagames.rte"
+		echo -e "DataModule\n\tModuleName = Metagame Saves" > "${user_data}/Metagames.rte/Index.ini"
 	fi
 
-	if [[ ! -e "${user_data}/Scenes.rte" ]]; then
-		mkdir -p "${user_data/Scenes.rte}"
-		echo -e "DataModule\n\tModuleName = Saves"
+	if ! [[ -e "${user_data}/Scenes.rte" ]]; then
+		mkdir -p "${user_data}/Scenes.rte"
+		echo -e "DataModule\n\tModuleName = Saves" > "${user_data}/Scenes.rte/Index.ini"
 	fi
 
 	for directory in $user_directories; do

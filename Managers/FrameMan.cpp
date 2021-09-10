@@ -29,7 +29,7 @@ namespace RTE {
 
 #ifdef __unix__
 		// In fullscreen regrab focus because the window is lost otherwise. Only applies to X11 since XWayland handles this differently.
-		if (_xwin.fs_window && std::strcmp("x11", std::getenv("XDG_SESSION_TYPE")) == 0) { XSetInputFocus(_xwin.display, _xwin.window, RevertToPointerRoot, CurrentTime); }
+		if (_xwin.fs_window) { XSetInputFocus(_xwin.display, _xwin.window, RevertToPointerRoot, CurrentTime); }
 #endif
 	}
 

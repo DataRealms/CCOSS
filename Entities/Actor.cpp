@@ -866,16 +866,17 @@ bool Actor::SwapInventoryItemsByIndex(int inventoryIndex1, int inventoryIndex2) 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 MovableObject * Actor::SetInventoryItemAtIndex(MovableObject *newInventoryItem, int inventoryIndex) {
-    if (newInventoryItem) {
-        if (inventoryIndex < 0 || inventoryIndex >= m_Inventory.size()) {
-            m_Inventory.emplace_back(newInventoryItem);
-            return nullptr;
-        }
-        MovableObject *currentInventoryItemAtIndex = m_Inventory.at(inventoryIndex);
-        m_Inventory.at(inventoryIndex) = newInventoryItem;
-        return currentInventoryItemAtIndex;
+    if (!newInventoryItem) {
+        return RemoveInventoryItemAtIndex(inventoryIndex);
     }
-    return nullptr;
+
+    if (inventoryIndex < 0 || inventoryIndex >= m_Inventory.size()) {
+        m_Inventory.emplace_back(newInventoryItem);
+        return nullptr;
+    }
+    MovableObject *currentInventoryItemAtIndex = m_Inventory.at(inventoryIndex);
+    m_Inventory.at(inventoryIndex) = newInventoryItem;
+    return currentInventoryItemAtIndex;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

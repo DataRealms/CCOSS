@@ -201,7 +201,7 @@ namespace RTE {
 			/// Whether this selected item was being dragged for long enough that it matters. This helps make dragging not cause problems during instant clicks and releases.
 			/// </summary>
 			/// <returns>Whether this selected item was being dragged for long enough that it matters.</returns>
-			bool DragWasHeldForLongEnough() const { return IsBeingDragged && DragHoldCount > 5; }
+			bool DragWasHeldForLongEnough() const { return IsBeingDragged && DragHoldCount > 10; }
 		};
 
 		/// <summary>

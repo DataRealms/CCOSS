@@ -594,22 +594,22 @@ namespace RTE {
 
 		m_GUIEquippedItemButton->SetEnabled(equippedItem);
 		if (m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough()) {
-			if (m_GUIEquippedItemButton->HasIcon()) { m_GUIEquippedItemButton->SetIconAndText(nullptr, ">>>"); }
+			m_GUIEquippedItemButton->SetIconAndText(nullptr, ">>>");
 		} else if (equippedItem) {
 			m_GUIEquippedItemButton->SetIconAndText(equippedItem->GetGraphicalIcon(), equippedItem->GetPresetName());
 		} else {
 			m_GUIEquippedItemButton->SetEnabled(m_GUISelectedItem != nullptr);
-			if (m_GUIEquippedItemButton->HasIcon()) { m_GUIEquippedItemButton->SetIconAndText(nullptr, "> <"); }
+			m_GUIEquippedItemButton->SetIconAndText(nullptr, "> <");
 		}
 
 		m_GUIOffhandEquippedItemButton->SetEnabled(offhandEquippedItem);
 		if (m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIOffhandEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough()) {
-			if (m_GUIOffhandEquippedItemButton->HasIcon()) { m_GUIOffhandEquippedItemButton->SetIconAndText(nullptr, ">>>"); }
+			m_GUIOffhandEquippedItemButton->SetIconAndText(nullptr, ">>>");
 		} else if (offhandEquippedItem) {
 			m_GUIOffhandEquippedItemButton->SetIconAndText(offhandEquippedItem->GetGraphicalIcon(), offhandEquippedItem->GetPresetName());
 		} else {
 			m_GUIOffhandEquippedItemButton->SetEnabled(m_GUISelectedItem != nullptr);
-			if (m_GUIOffhandEquippedItemButton->HasIcon()) { m_GUIOffhandEquippedItemButton->SetIconAndText(nullptr, "> <"); }
+			m_GUIOffhandEquippedItemButton->SetIconAndText(nullptr, "> <");
 		}
 
 		bool showOffhandButton = offhandEquippedItem || (dynamic_cast<const HeldDevice *>(equippedItem) && dynamic_cast<const HeldDevice *>(equippedItem)->IsOneHanded());
@@ -665,7 +665,7 @@ namespace RTE {
 				itemButton->SetEnabled(true);
 				m_GUIInventoryItemButtons.at(i - startIndex).first = inventoryItem;
 				if (m_GUISelectedItem && m_GUISelectedItem->Button == itemButton && m_GUISelectedItem->DragWasHeldForLongEnough()) {
-					if (itemButton->HasIcon()) { itemButton->SetIconAndText(nullptr, ">>>"); }
+					itemButton->SetIconAndText(nullptr, ">>>");
 				} else {
 					itemButton->SetIconAndText(inventoryItem->GetGraphicalIcon(), inventoryItem->GetPresetName());
 				}
@@ -673,7 +673,7 @@ namespace RTE {
 				if (!m_GUIShowEmptyRows && inventory->size() < c_FullViewPageItemLimit && ((i - startIndex) >= (inventory->size() + c_ItemsPerRow - (inventory->size() % c_ItemsPerRow)))) {
 					break;
 				}
-				if (itemButton->HasIcon()) {
+				if (m_GUIInventoryItemButtons.at(i - startIndex).first) {
 					m_GUIInventoryItemButtons.at(i - startIndex).first = nullptr;
 					itemButton->SetIconAndText(nullptr, "> <");
 				}

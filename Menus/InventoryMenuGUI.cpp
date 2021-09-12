@@ -593,8 +593,8 @@ namespace RTE {
 		const MovableObject *offhandEquippedItem = m_GUIInventoryActorCurrentEquipmentSetIndex < m_InventoryActorEquippedItems.size() ? m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).second : nullptr;
 
 		m_GUIEquippedItemButton->SetEnabled(equippedItem);
-		if (m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough() && m_GUIEquippedItemButton->HasIcon()) {
-			m_GUIEquippedItemButton->SetIconAndText(nullptr, ">>>");
+		if (m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough()) {
+			if (m_GUIEquippedItemButton->HasIcon()) { m_GUIEquippedItemButton->SetIconAndText(nullptr, ">>>"); }
 		} else if (equippedItem) {
 			m_GUIEquippedItemButton->SetIconAndText(equippedItem->GetGraphicalIcon(), equippedItem->GetPresetName());
 		} else {
@@ -603,8 +603,8 @@ namespace RTE {
 		}
 
 		m_GUIOffhandEquippedItemButton->SetEnabled(offhandEquippedItem);
-		if (m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIOffhandEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough() && m_GUIOffhandEquippedItemButton->HasIcon()) {
-			m_GUIOffhandEquippedItemButton->SetIconAndText(nullptr, ">>>");
+		if (m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIOffhandEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough()) {
+			if (m_GUIOffhandEquippedItemButton->HasIcon()) { m_GUIOffhandEquippedItemButton->SetIconAndText(nullptr, ">>>"); }
 		} else if (offhandEquippedItem) {
 			m_GUIOffhandEquippedItemButton->SetIconAndText(offhandEquippedItem->GetGraphicalIcon(), offhandEquippedItem->GetPresetName());
 		} else {
@@ -664,8 +664,8 @@ namespace RTE {
 				inventoryItem = inventory->at(i);
 				itemButton->SetEnabled(true);
 				m_GUIInventoryItemButtons.at(i - startIndex).first = inventoryItem;
-				if (m_GUISelectedItem && m_GUISelectedItem->Button == itemButton && m_GUISelectedItem->DragWasHeldForLongEnough() && itemButton->HasIcon()) {
-					itemButton->SetIconAndText(nullptr, ">>>");
+				if (m_GUISelectedItem && m_GUISelectedItem->Button == itemButton && m_GUISelectedItem->DragWasHeldForLongEnough()) {
+					if (itemButton->HasIcon()) { itemButton->SetIconAndText(nullptr, ">>>"); }
 				} else {
 					itemButton->SetIconAndText(inventoryItem->GetGraphicalIcon(), inventoryItem->GetPresetName());
 				}

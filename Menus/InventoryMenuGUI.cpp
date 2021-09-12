@@ -158,7 +158,7 @@ namespace RTE {
 			carouselItemBox = std::make_unique<CarouselItemBox>();
 			carouselItemBox->IsForEquippedItems = false;
 		}
-		std::size_t equippedItemIndex = c_ItemsPerRow / 2;
+		int equippedItemIndex = c_ItemsPerRow / 2;
 		Vector currentBoxSize = c_CarouselBoxMaxSize;
 		int carouselBitmapWidth = 0;
 		for (int i = equippedItemIndex; i >= 0; i--) {
@@ -655,7 +655,7 @@ namespace RTE {
 
 	void InventoryMenuGUI::UpdateFullModeInventoryItemButtons(const std::deque<MovableObject *> *inventory) {
 		int startIndex = m_GUIInventoryItemsScrollbar->GetValue() * c_ItemsPerRow;
-		int lastPopulatedIndex = inventory->size() - 1;
+		int lastPopulatedIndex = static_cast<int>(inventory->size() - 1);
 		GUIButton *itemButton;
 		MovableObject *inventoryItem;
 		for (int i = startIndex; (i - startIndex) < c_FullViewPageItemLimit; i++) {
@@ -816,8 +816,7 @@ namespace RTE {
 		m_GUICursorPos.SetXY(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
 		if (m_GUIInventoryItemsScrollbar->GetVisible()) {
-			int mouseWheelChange = -m_GUIInput->GetMouseWheelChange();
-			mouseWheelChange = m_MenuController->IsState(ControlState::SCROLL_UP) ? -1 : (m_MenuController->IsState(ControlState::SCROLL_DOWN) ? 1 : 0);
+			int mouseWheelChange = m_MenuController->IsState(ControlState::SCROLL_UP) ? -1 : (m_MenuController->IsState(ControlState::SCROLL_DOWN) ? 1 : 0);
 			if (mouseWheelChange != 0) { m_GUIInventoryItemsScrollbar->SetValue(std::clamp(m_GUIInventoryItemsScrollbar->GetValue() + mouseWheelChange, m_GUIInventoryItemsScrollbar->GetMinimum(), m_GUIInventoryItemsScrollbar->GetMaximum())); }
 		}
 
@@ -1136,7 +1135,7 @@ namespace RTE {
 					nextButtonToHighlight = m_NonMousePreviousReloadOrDropButton ? m_NonMousePreviousReloadOrDropButton : m_GUIReloadButton;
 				}
 			} else if (m_NonMouseHighlightedButton == m_GUIOffhandEquippedItemButton) {
-				nextButtonToHighlight = nextButtonToHighlight = m_NonMousePreviousReloadOrDropButton ? m_NonMousePreviousReloadOrDropButton : m_GUIReloadButton;
+				nextButtonToHighlight = m_NonMousePreviousReloadOrDropButton ? m_NonMousePreviousReloadOrDropButton : m_GUIReloadButton;
 			} else if (m_NonMouseHighlightedButton == m_GUIReloadButton || m_NonMouseHighlightedButton == m_GUIDropButton) {
 				nextButtonToHighlight = m_GUIInformationToggleButton;
 			}
@@ -1381,7 +1380,7 @@ namespace RTE {
 		if (itemBoxToDraw.RoundedAndBorderedSides.second) { iconMaxSize.SetX(iconMaxSize.GetX() - m_CarouselBackgroundBoxBorderSize.GetX()); }
 		std::for_each(itemIcons.crbegin(), itemIcons.crend(), [this, &itemBoxToDraw, &multiItemDrawOffset, &iconMaxSize](BITMAP *iconToDraw) {
 			float stretchRatio = std::max(static_cast<float>(iconToDraw->w - 1 + (multiItemDrawOffset.GetFloorIntX() / 2)) / iconMaxSize.GetX(), static_cast<float>(iconToDraw->h - 1 + (multiItemDrawOffset.GetFloorIntY() / 2)) / iconMaxSize.GetY());
-			if (stretchRatio > 1) {
+			if (stretchRatio > 1.0F) {
 				float stretchedWidth = static_cast<float>(iconToDraw->w) / stretchRatio;
 				float stretchedHeight = static_cast<float>(iconToDraw->h) / stretchRatio;
 				stretch_sprite(m_CarouselBitmap.get(), iconToDraw,

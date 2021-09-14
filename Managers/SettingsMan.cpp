@@ -16,9 +16,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsMan::Clear() {
-		const char *settingsPath = std::getenv("CCCP_SETTINGSPATH");
-		m_SettingsPath = settingsPath == NULL ? "Base.rte/Settings.ini" : std::string(settingsPath);
-
+		m_SettingsPath = "Base.rte/Settings.ini";
 		m_SettingsNeedOverwrite = false;
 
 		m_FlashOnBrainDamage = true;
@@ -58,8 +56,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SettingsMan::Initialize(Reader &reader) {
-		if (!reader.ReaderOK()) {
+	int SettingsMan::Initialize() {
+		if (const char *settingsTempPath = std::getenv("CCCP_SETTINGSPATH")) { m_SettingsPath = std::string(settingsTempPath); }
+
+		Reader settingsReader(m_SettingsPath, false, nullptr, true);
+
+		if (!settingsReader.ReaderOK()) {
 			Writer settingsWriter(m_SettingsPath);
 			RTEAssert(settingsWriter.WriterOK(), "After failing to open the " + m_SettingsPath + ", could not then even create a new one to save settings to!\nAre you trying to run the game from a read-only disk?\nYou need to install the game to a writable area before running it!");
 
@@ -69,10 +71,10 @@ namespace RTE {
 
 			m_SettingsNeedOverwrite = true;
 
-			Reader settingsReader(m_SettingsPath);
-			return Serializable::Create(settingsReader);
+			Reader newSettingsReader(m_SettingsPath);
+			return Serializable::Create(newSettingsReader);
 		}
-		return Serializable::Create(reader);
+		return Serializable::Create(settingsReader);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -364,6 +364,8 @@ namespace RTE {
 		.property("EmitAngle", &AEmitter::GetEmitAngle, &AEmitter::SetEmitAngle)
 		.property("GetThrottle", &AEmitter::GetThrottle, &AEmitter::SetThrottle)
 		.property("Throttle", &AEmitter::GetThrottle, &AEmitter::SetThrottle)
+		.property("MinThrottleRangeTODORENAME", &AEmitter::GetMinThrottleRange, &AEmitter::SetMinThrottleRange)
+		.property("MaxThrottleRangeTODORENAME", &AEmitter::GetMaxThrottleRange, &AEmitter::SetMaxThrottleRange)
 		.property("BurstSpacing", &AEmitter::GetBurstSpacing, &AEmitter::SetBurstSpacing)
 		.property("BurstDamage", &AEmitter::GetBurstDamage, &AEmitter::SetBurstDamage)
 		.property("EmitterDamageMultiplier", &AEmitter::GetEmitterDamageMultiplier, &AEmitter::SetEmitterDamageMultiplier)

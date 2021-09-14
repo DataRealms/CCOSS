@@ -39,15 +39,15 @@ class Scene:
     public Entity
 {
 
-	friend class LuaMan;
+	friend struct EntityLuaBindings;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
 
 public:
 
-	SerializableOverrideMethods
-	ClassInfoGetters
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
 	//Available placed objects sets
 	enum PlacedObjectSets
@@ -78,8 +78,8 @@ public:
 
     public:
 
-		SerializableClassNameGetter
-		SerializableOverrideMethods
+		SerializableClassNameGetter;
+		SerializableOverrideMethods;
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Constructor:     Area

@@ -1,7 +1,7 @@
 #include "NetworkServer.h"
 
-#include "GUI/GUI.h"
-#include "GUI/GUIInput.h"
+#include "GUI.h"
+#include "GUIInput.h"
 #include "AllegroBitmap.h"
 
 #include "Scene.h"

@@ -15,9 +15,9 @@ namespace RTE {
 
 	public:
 
-		EntityAllocation(ADoor)
-		SerializableOverrideMethods
-		ClassInfoGetters
+		EntityAllocation(ADoor);
+		SerializableOverrideMethods;
+		ClassInfoGetters;
 
 		enum DoorState {
 			CLOSED = 0,

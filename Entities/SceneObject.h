@@ -40,8 +40,8 @@ class SceneObject:
 
 public:
 
-	SerializableOverrideMethods
-	ClassInfoGetters
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -62,8 +62,8 @@ public:
 
     public:
 
-		SerializableClassNameGetter
-		SerializableOverrideMethods
+		SerializableClassNameGetter;
+		SerializableOverrideMethods;
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -450,14 +450,6 @@ public:
 // Return value:    The current value of this and all contained assets.
 
     virtual float GetTotalValue(int nativeModule = 0, float foreignMult = 1.0, float nativeMult = 1.0) const { return GetGoldValue(nativeModule, foreignMult, nativeMult); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetTotalValueOld
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     DOES THE SAME THING AS GetTotalValue, USED ONLY TO PRESERVE LUA COMPATIBILITY
-
-    virtual float GetTotalValueOld(int nativeModule = 0, float foreignMult = 1.0) const { return GetGoldValue(nativeModule, foreignMult, 1.0); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

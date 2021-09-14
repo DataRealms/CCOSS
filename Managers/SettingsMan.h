@@ -15,21 +15,20 @@ namespace RTE {
 
 	public:
 
-		SerializableClassNameGetter
-		SerializableOverrideMethods
+		SerializableClassNameGetter;
+		SerializableOverrideMethods;
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a SettingsMan object in system memory. Create() should be called before using the object.
+		/// Constructor method used to instantiate a SettingsMan object in system memory. Initialize() should be called before using the object.
 		/// </summary>
 		SettingsMan() { Clear(); }
 
 		/// <summary>
 		/// Makes the SettingsMan object ready for use.
 		/// </summary>
-		/// <param name="reader">A Reader that the SettingsMan will create itself from.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Initialize(Reader &reader);
+		int Initialize();
 #pragma endregion
 
 #pragma region Destruction
@@ -115,12 +114,6 @@ namespace RTE {
 		void SetShowForeignItems(bool newValue) { m_ShowForeignItems = newValue; }
 
 		/// <summary>
-		/// Whether randomized hat attachables will be attached to all AHuman actors.
-		/// </summary>
-		/// <returns>Whether random hats are enabled or not.</returns>
-		bool EnableHats() const { return m_EnableHats; }
-
-		/// <summary>
 		/// Gets whether the crab bomb effect is enabled or not.
 		/// </summary>
 		/// <returns>Whether the crab bomb effect is enabled or not. False means releasing whatever number of crabs will do nothing except release whatever number of crabs.</returns>
@@ -143,6 +136,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newThreshold">The new number of crabs needed to be released at once to trigger the crab bomb effect.</param>
 		void SetCrabBombThreshold(int newThreshold) { m_CrabBombThreshold = newThreshold; }
+
+		/// <summary>
+		/// Gets whether the HUD of enemy Actors is set to be visible to the player or not.
+		/// </summary>
+		/// <returns>Whether the HUD of enemy Actors is visible to the player.</returns>
+		bool ShowEnemyHUD() const { return m_ShowEnemyHUD; }
+
+		/// <summary>
+		/// Sets whether the HUD of enemy Actors should to be visible to the player or not.
+		/// </summary>
+		/// <param name="showHUD">Whether the HUD of enemy Actors should be visible to the player or not.</param>
+		void SetShowEnemyHUD(bool showHUD) { m_ShowEnemyHUD = showHUD; }
 #pragma endregion
 
 #pragma region Network Settings
@@ -379,9 +384,9 @@ namespace RTE {
 		bool m_FlashOnBrainDamage; //!< Whether red flashes on brain damage are on or off.
 		bool m_BlipOnRevealUnseen; //!< Blip if unseen is revealed.
 		bool m_EndlessMetaGameMode; //!< Endless MetaGame mode.
-		bool m_EnableHats; //!< Whether randomized hat attachables will be attached to all AHuman actors.
 		bool m_EnableCrabBombs; //!< Whether all actors (except Brains and Doors) should be annihilated if a number exceeding the crab bomb threshold is released at once.
 		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.
+		bool m_ShowEnemyHUD; //!< Whether the HUD of enemy actors should be visible to the player.
 
 		std::string m_PlayerNetworkName; //!< Player name used in network multiplayer matches.
 		std::string m_NetworkServerAddress; //!< LAN server address to connect to.
@@ -413,6 +418,8 @@ namespace RTE {
 	private:
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
+
+		std::string m_SettingsPath; //!< String containing the Path to the Settings.ini file.
 
 		/// <summary>
 		/// Clears all the member variables of this SettingsMan, effectively resetting the members of this abstraction level only.

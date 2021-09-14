@@ -23,28 +23,26 @@
 #include "MetaMan.h"
 #include "MetaSave.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroScreen.h"
-#include "GUI/AllegroInput.h"
-#include "GUI/GUIControlManager.h"
-#include "GUI/GUICollectionBox.h"
-#include "GUI/GUIComboBox.h"
-#include "GUI/GUICheckbox.h"
-#include "GUI/GUITab.h"
-#include "GUI/GUIListBox.h"
-#include "GUI/GUITextBox.h"
-#include "GUI/GUIButton.h"
-#include "GUI/GUILabel.h"
-#include "GUI/GUISlider.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
+#include "AllegroScreen.h"
+#include "AllegroInput.h"
+#include "GUIControlManager.h"
+#include "GUICollectionBox.h"
+#include "GUIComboBox.h"
+#include "GUICheckbox.h"
+#include "GUITab.h"
+#include "GUIListBox.h"
+#include "GUITextBox.h"
+#include "GUIButton.h"
+#include "GUILabel.h"
+#include "GUISlider.h"
 
 #include "Controller.h"
 #include "Entity.h"
 #include "MOSprite.h"
 #include "HeldDevice.h"
 #include "AHuman.h"
-#include "GABrainMatch.h"
-#include "GABaseDefense.h"
 #include "GATutorial.h"
 #include "GAScripted.h"
 #include "BaseEditor.h"
@@ -830,15 +828,11 @@ void MetagameGUI::SetEnabled(bool enable)
 		m_apPlayerTechSelect[team]->GetListPanel()->AddItem("-Random-", "", nullptr, nullptr, -1);
 		m_apPlayerTechSelect[team]->SetSelectedIndex(0);
 	}
-	std::string techString = " Tech";
 	for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID) {
 		if (const DataModule *dataModule = g_PresetMan.GetDataModule(moduleID)) {
-			std::string techName = dataModule->GetFriendlyName();
-			size_t techPos = techName.find(techString);
-			if (techPos != string::npos) {
-				techName.replace(techPos, techString.length(), "");
+			if (dataModule->IsFaction()) {
 				for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
-					m_apPlayerTechSelect[team]->GetListPanel()->AddItem(techName, "", nullptr, nullptr, moduleID);
+					m_apPlayerTechSelect[team]->GetListPanel()->AddItem(dataModule->GetFriendlyName(), "", nullptr, nullptr, moduleID);
 					m_apPlayerTechSelect[team]->GetListPanel()->ScrollToTop();
 				}
 			}
@@ -851,8 +845,8 @@ void MetagameGUI::SetEnabled(bool enable)
 		for (list<Entity *>::iterator itr = flagList.begin(); itr != flagList.end(); ++itr) {
 			if (const Icon *pIcon = dynamic_cast<Icon *>(*itr)) { m_apPlayerTeamSelect[player]->AddItem("", "", new AllegroBitmap(pIcon->GetBitmaps32()[0]), pIcon); }
 		}
-		m_apPlayerTeamSelect[player]->SetSelectedIndex(player);
 	}
+	if (m_apPlayerTeamSelect[Players::PlayerOne]->GetSelectedIndex() < 0) { m_apPlayerTeamSelect[Players::PlayerOne]->SetSelectedIndex(0); }
 
     m_ScreenChange = true;
 }
@@ -2088,24 +2082,17 @@ void MetagameGUI::Draw(BITMAP *drawBitmap)
 void MetagameGUI::UpdateInput()
 {
     // If esc pressed, show campaign dialog if applicable
-    if (g_UInputMan.KeyPressed(KEY_ESC))
-    {
-        // Just quit if the dialog is already up
-        /*if (m_pConfirmationBox->GetVisible() && m_pConfirmationButton->GetText() == "Quit")
-            System::SetQuit();
-        else
-        {
-            HideAllScreens();
-            g_MetaMan.SetSuspend(true);
-            m_pConfirmationLabel->SetText("Sure you want to quit to OS?\nAny unsaved progress\nwill be lost!");
-            m_pConfirmationButton->SetText("Quit");
-            m_pConfirmationBox->SetVisible(true);
-        }*/
-        
-		HideAllScreens();
-        g_MetaMan.SetSuspend(true);
-        SwitchToScreen(MENUDIALOG);
-    }
+	if (g_UInputMan.KeyPressed(KEY_ESC)) {
+		if (m_MenuScreen == MENUDIALOG) {
+			g_MetaMan.SetSuspend(false);
+			SwitchToScreen(ROOTBOX);
+		} else {
+			HideAllScreens();
+			g_MetaMan.SetSuspend(true);
+			SwitchToScreen(MENUDIALOG);
+		}
+		return;
+	}
 
     ///////////////////////////////////////////////////////////
     // Mouse handling
@@ -2172,40 +2159,39 @@ void MetagameGUI::UpdateInput()
     // Update the ToolTip popup
 
     // Show the ToolTip popup, if we are hovering over anything that has one to show
-    string toolTip = "";
-    GUIControl *pCurrentHover = m_pGUIController->GetControlUnderPoint(mouseX, mouseY);
-    if (g_SettingsMan.ShowToolTips() && pCurrentHover && !(toolTip = pCurrentHover->GetToolTip()).empty())
-    {
-        // Restart timer if there's a new thing we're hovering over
-        if (pCurrentHover != m_pHoveredControl)
-            m_ToolTipTimer.Reset();
+	std::string toolTip = "";
+	GUIControl *pCurrentHover = m_pGUIController->GetControlUnderPoint(mouseX, mouseY);
+	if (pCurrentHover) {
+		toolTip = pCurrentHover->GetToolTip();
+		// The control's tooltip can end up being "True" for reasons unknown to man, so just clear it.
+		if (toolTip == "None" || toolTip == "True") { toolTip.clear(); }
+	}
+	if (g_SettingsMan.ShowToolTips() && pCurrentHover && !toolTip.empty()) {
+		// Restart timer if there's a new thing we're hovering over
+		if (pCurrentHover != m_pHoveredControl) { m_ToolTipTimer.Reset(); }
 
-        // If we've been hovering over the same thing for enough time, then show the tooltip
-        if (m_ToolTipTimer.IsPastRealMS(500))
-        {
-            // Show the popup box with the hovered item's description
-            m_pToolTipBox->SetVisible(true);
-            // Need to add an offset to make it look better and not have the cursor obscure text
-            m_pToolTipBox->SetPositionAbs(mouseX + 6, mouseY + 6);
-            m_pToolTipText->SetHAlignment(GUIFont::Left);
-            m_pToolTipText->SetText(toolTip);
-            // Resize the box height to fit the text
-            int newHeight = m_pToolTipText->ResizeHeightToFit();
-            m_pToolTipBox->Resize(m_pToolTipBox->GetWidth(), newHeight + 10);
-            // Make sure the popup box doesn't drop out of sight
-            KeepBoxOnScreen(m_pToolTipBox, -1);
-        }
-
-        // Save the control we're currently hovering over so we can compare next frame
-        m_pHoveredControl = pCurrentHover;
-    }
-    else
-    {
-        m_pToolTipBox->SetVisible(false);
-        m_pToolTipText->SetText("");
-        m_ToolTipTimer.Reset();
-        m_pHoveredControl = 0;
-    }
+		// If we've been hovering over the same thing for enough time, then show the tooltip
+		if (m_ToolTipTimer.IsPastRealMS(500)) {
+			// Show the popup box with the hovered item's description
+			m_pToolTipBox->SetVisible(true);
+			// Need to add an offset to make it look better and not have the cursor obscure text
+			m_pToolTipBox->SetPositionAbs(mouseX + 6, mouseY + 6);
+			m_pToolTipText->SetHAlignment(GUIFont::Left);
+			m_pToolTipText->SetText(toolTip);
+			// Resize the box height to fit the text
+			int newHeight = m_pToolTipText->ResizeHeightToFit();
+			m_pToolTipBox->Resize(m_pToolTipBox->GetWidth(), newHeight + 10);
+			// Make sure the popup box doesn't drop out of sight
+			KeepBoxOnScreen(m_pToolTipBox, -1);
+		}
+		// Save the control we're currently hovering over so we can compare next frame
+		m_pHoveredControl = pCurrentHover;
+	} else {
+		m_pToolTipBox->SetVisible(false);
+		m_pToolTipText->SetText("");
+		m_ToolTipTimer.Reset();
+		m_pHoveredControl = nullptr;
+	}
 
 
     ///////////////////////////////////////
@@ -2995,11 +2981,6 @@ void MetagameGUI::CompletedActivity()
 
             // Update the Scene info box since the scene might have changed
             UpdateScenesBox(true);
-
-            // Clear out the Lua state completely so it's not running some BS in the background
-            g_LuaMan.Destroy();
-            g_LuaMan.Initialize();
-            g_PresetMan.ReloadAllScripts();
 
             // Play some nice ambient music
             g_AudioMan.PlayMusic("Base.rte/Music/Hubnester/ccmenu.ogg", -1, 0.4);
@@ -6213,7 +6194,9 @@ void MetagameGUI::UpdateGameSizeLabels()
 // TODO: Hook these constants up to settings!!
 	// How many scenes are there total
 	const int totalCount = g_MetaMan.TotalScenePresets();
-	const int minCount = std::clamp((playerCount * 3 / 2), 3, totalCount);
+	int minCount = std::max((playerCount * 3 / 2), 3);
+	minCount = std::min(minCount, totalCount);
+
 	m_pSizeSlider->SetMinimum(minCount);
 	m_pSizeSlider->SetMaximum(std::max(totalCount * 7 / 10, minCount));
 	m_pSizeSlider->SetValueResolution(1);

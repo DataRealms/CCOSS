@@ -56,16 +56,16 @@ class MovableObject:
 {
 
 friend class Atom;
-friend class LuaMan;
+friend struct EntityLuaBindings;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
 
 public:
 
-	ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO")
-	SerializableOverrideMethods
-	ClassInfoGetters
+	ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptDisable", "OnScriptEnable", "OnPieMenu", "OnCollideWithTerrain", "OnCollideWithMO");
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
 enum MOType
 {
@@ -252,7 +252,8 @@ enum MOType
     /// Override SetPresetName so it also resets script preset name and then reloads scripts to safely allow for multiple scripts.
     /// </summary>
     /// <param name="newName">A string reference with the instance name of this Entity.</param>
-    void SetPresetName(const std::string &newName) override { Entity::SetPresetName(newName); m_ScriptPresetName.clear(); ReloadScripts(); }
+    /// <param name="calledFromLua">Whether this method was called from Lua, in which case this change is cosmetic only and shouldn't affect scripts.</param>
+    void SetPresetName(const std::string &newName, bool calledFromLua = false) override { Entity::SetPresetName(newName); if (!calledFromLua) { m_ScriptPresetName.clear(); ReloadScripts(); } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1699,6 +1700,30 @@ enum MOType
 
 	void SetWoundDamageMultiplier(float value) { m_WoundDamageMultiplier = value; }
 
+    /// <summary>
+    /// Gets whether or not this MovableObject should apply wound damage when it collides with another MovableObject.
+    /// </summary>
+    /// <returns>Whether or not this MovableObject should apply wound damage when it collides with another MovableObject.</returns>
+    bool GetApplyWoundDamageOnCollision() const { return m_ApplyWoundDamageOnCollision; }
+
+    /// <summary>
+    /// Sets whether or not this MovableObject should apply wound damage when it collides with another MovableObject.
+    /// </summary>
+    /// <param name="applyWoundDamageOnCollision">Whether or not this MovableObject should apply wound damage on collision.</param>
+    void SetApplyWoundDamageOnCollision(bool applyWoundDamageOnCollision) { m_ApplyWoundDamageOnCollision = applyWoundDamageOnCollision; }
+
+    /// <summary>
+    /// Gets whether or not this MovableObject should apply burst wound damage when it collides with another MovableObject.
+    /// </summary>
+    /// <returns>Whether or not this MovableObject should apply burst wound damage when it collides with another MovableObject.</returns>
+    bool GetApplyWoundBurstDamageOnCollision() const { return m_ApplyWoundBurstDamageOnCollision; }
+
+    /// <summary>
+    /// Sets whether or not this MovableObject should apply burst wound damage when it collides with another MovableObject.
+    /// </summary>
+    /// <param name="applyWoundDamageOnCollision">Whether or not this MovableObject should apply burst wound damage on collision.</param>
+    void SetApplyWoundBurstDamageOnCollision(bool applyWoundBurstDamageOnCollision) { m_ApplyWoundBurstDamageOnCollision = applyWoundBurstDamageOnCollision; }
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1962,6 +1987,8 @@ protected:
 	float m_DamageOnPenetration;
 	// Damage multiplier transferred to wound inflicted by this object on penetration
 	float m_WoundDamageMultiplier;
+    bool m_ApplyWoundDamageOnCollision; //!< Whether or not this should apply wound damage on collision, respecting WoundDamageMultiplier and without creating a wound.
+    bool m_ApplyWoundBurstDamageOnCollision; //!< Whether or not this should apply wound burst damage on collision, respecting WoundDamageMultiplier and without creating a wound.
 	//Whether this MO should ignore terrain when traveling
 	bool m_IgnoreTerrain;
 	// MOID hit during last Travel

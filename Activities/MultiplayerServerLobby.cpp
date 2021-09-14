@@ -25,27 +25,27 @@
 #include "MetaMan.h"
 #include "AudioMan.h"
 
-#include "GUI/GUI.h"
-#include "GUI/AllegroBitmap.h"
-#include "GUI/AllegroScreen.h"
-#include "GUI/AllegroInput.h"
-#include "GUI/GUIControlManager.h"
-#include "GUI/GUICollectionBox.h"
-#include "GUI/GUIComboBox.h"
-#include "GUI/GUICheckbox.h"
-#include "GUI/GUITab.h"
-#include "GUI/GUIListBox.h"
-#include "GUI/GUITextBox.h"
-#include "GUI/GUIButton.h"
-#include "GUI/GUILabel.h"
-#include "GUI/GUISlider.h"
+#include "GUI.h"
+#include "AllegroBitmap.h"
+#include "AllegroScreen.h"
+#include "AllegroInput.h"
+#include "GUIControlManager.h"
+#include "GUICollectionBox.h"
+#include "GUIComboBox.h"
+#include "GUICheckbox.h"
+#include "GUITab.h"
+#include "GUIListBox.h"
+#include "GUITextBox.h"
+#include "GUIButton.h"
+#include "GUILabel.h"
+#include "GUISlider.h"
 #include "PieMenuGUI.h"
 
 #include "NetworkServer.h"
 
 namespace RTE {
 
-	ConcreteClassInfo(MultiplayerServerLobby, Activity, 0)
+	ConcreteClassInfo(MultiplayerServerLobby, Activity, 0);
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Method:          Clear
@@ -303,31 +303,16 @@ namespace RTE {
 		m_pCPULockLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("CPULockLabel"));
 
 		// Populate the tech comboboxes with the available tech modules
-		const DataModule *pModule = 0;
-		string techName;
-		string techString = " Tech";
-		string::size_type techPos = string::npos;
-		for (int i = 0; i < g_PresetMan.GetTotalModuleCount(); ++i)
-		{
-			pModule = g_PresetMan.GetDataModule(i);
-			if (pModule)
-			{
-				techName = pModule->GetFriendlyName();
-				if ((techPos = techName.find(techString)) != string::npos)
-				{
-					techName.replace(techPos, techString.length(), "");
-					m_apTeamTechSelect[Teams::TeamOne]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-					m_apTeamTechSelect[Teams::TeamTwo]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-					m_apTeamTechSelect[Teams::TeamThree]->GetListPanel()->AddItem(techName, "", 0, 0, i);
-					m_apTeamTechSelect[Teams::TeamFour]->GetListPanel()->AddItem(techName, "", 0, 0, i);
+		for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID) {
+			if (const DataModule *dataModule = g_PresetMan.GetDataModule(moduleID)) {
+				if (dataModule->IsFaction()) {
+					for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
+						m_apTeamTechSelect[team]->GetListPanel()->AddItem(dataModule->GetFriendlyName(), "", nullptr, nullptr, moduleID);
+						m_apTeamTechSelect[team]->GetListPanel()->ScrollToTop();
+					}
 				}
 			}
 		}
-		// Make the lists be scrolled to the top when they are initially dropped
-		m_apTeamTechSelect[Teams::TeamOne]->GetListPanel()->ScrollToTop();
-		m_apTeamTechSelect[Teams::TeamTwo]->GetListPanel()->ScrollToTop();
-		m_apTeamTechSelect[Teams::TeamThree]->GetListPanel()->ScrollToTop();
-		m_apTeamTechSelect[Teams::TeamFour]->GetListPanel()->ScrollToTop();
 
 		m_pGoldLabel = dynamic_cast<GUILabel *>(m_pGUIController->GetControl("GoldLabel"));
 		m_pGoldSlider = dynamic_cast<GUISlider *>(m_pGUIController->GetControl("GoldSlider"));

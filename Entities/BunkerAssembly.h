@@ -47,9 +47,9 @@ class BunkerAssembly:
 public:
 
 // Concrete allocation and cloning definitions
-EntityAllocation(BunkerAssembly)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(BunkerAssembly);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     BunkerAssembly

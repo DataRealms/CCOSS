@@ -26,6 +26,7 @@ namespace RTE {
 		m_IgnoreMissingItems = false;
 		m_CrabToHumanSpawnRatio = 0;
 		m_ScriptPath.clear();
+		m_IsFaction = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,6 +97,8 @@ namespace RTE {
 			reader >> m_Author;
 		} else if (propName == "Description") {
 			reader >> m_Description;
+		} else if (propName == "IsFaction") {
+			reader >> m_IsFaction;
 		} else if (propName == "Version") {
 			reader >> m_Version;
 		} else if (propName == "ScanFolderContents") {
@@ -134,6 +137,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("ModuleName", m_FriendlyName);
 		writer.NewPropertyWithValue("Author", m_Author);
 		writer.NewPropertyWithValue("Description", m_Description);
+		writer.NewPropertyWithValue("IsFaction", m_IsFaction);
 		writer.NewPropertyWithValue("Version", m_Version);
 		writer.NewPropertyWithValue("IconFile", m_IconFile);
 

@@ -54,7 +54,7 @@ class MetaMan:
     public Singleton<MetaMan>,
     public Serializable
 {
-    friend class LuaMan;
+    friend struct ManagerLuaBindings;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -65,8 +65,8 @@ public:
 friend class MetagameGUI;
 friend class MetaSave;
 
-	SerializableClassNameGetter
-	SerializableOverrideMethods
+	SerializableClassNameGetter;
+	SerializableOverrideMethods;
 
     enum MetagameState
     {

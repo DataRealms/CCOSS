@@ -63,7 +63,8 @@ namespace RTE {
 		ThrownDevice::Update();
 
 		if (m_Activated) {
-			m_SpriteAnimMode = !m_IsAnimatedManually ? ALWAYSLOOP : NOANIM;
+			// Display active frame if no animation mode has been defined
+			if (!m_IsAnimatedManually && m_SpriteAnimMode == NOANIM && m_FrameCount > 1) { m_Frame = 1; }
 			m_RestTimer.Reset();
 			m_ToSettle = false;
 		}

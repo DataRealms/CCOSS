@@ -111,13 +111,13 @@ namespace RTE {
 		draw_trans_sprite(m_Moon.GetSpriteFrame(0), ContentFile("Base.rte/GUIs/Title/MoonAlpha.png").GetAsBitmap(), 0, 0);
 
 		int starSmallBitmapCount = 4;
-		std::vector<BITMAP *> starSmallBitmaps = ConvertDoublePointerToVectorOfPointers(ContentFile("Base.rte/GUIs/Title/Stars/StarSmall.png").GetAsAnimation(starSmallBitmapCount), starSmallBitmapCount);
+		std::vector<BITMAP *> starSmallBitmaps = ContentFile("Base.rte/GUIs/Title/Stars/StarSmall.png").GetAsAnimation(starSmallBitmapCount);
 
 		int starLargeBitmapCount = 1;
-		std::vector<BITMAP *> starLargeBitmaps = ConvertDoublePointerToVectorOfPointers(ContentFile("Base.rte/GUIs/Title/Stars/StarLarge.png").GetAsAnimation(starLargeBitmapCount), starLargeBitmapCount);
+		std::vector<BITMAP *> starLargeBitmaps = ContentFile("Base.rte/GUIs/Title/Stars/StarLarge.png").GetAsAnimation(starLargeBitmapCount);
 
 		int starHugeBitmapCount = 2;
-		std::vector<BITMAP *> starHugeBitmaps = ConvertDoublePointerToVectorOfPointers(ContentFile("Base.rte/GUIs/Title/Stars/StarHuge.png").GetAsAnimation(starHugeBitmapCount), starHugeBitmapCount);
+		std::vector<BITMAP *> starHugeBitmaps = ContentFile("Base.rte/GUIs/Title/Stars/StarHuge.png").GetAsAnimation(starHugeBitmapCount);
 
 		int starCount = (g_FrameMan.GetResX() * m_Nebula.GetBitmap()->h) / 1000;
 		for (int i = 0; i < starCount; ++i) {

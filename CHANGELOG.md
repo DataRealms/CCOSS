@@ -6,11 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-### Added
+<details><summary>Added</summary>
 
 - Executable can be compiled as 64bit.
 
-- New `Settings.ini` property `MeasureModuleLoadTime = 0/1` to measure the duration of module loading (archived module extraction included). For benchmarking purpuses.
+- New `Settings.ini` property `MeasureModuleLoadTime = 0/1` to measure the duration of module loading (archived module extraction included). For benchmarking purposes.
 
 - `Color` object's RGB values can now be set with index number.  
 	```
@@ -20,10 +20,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `ForceDedicatedFullScreenGfxDriver` to force the game to run in previously removed dedicated fullscreen mode, allowing using lower resolutions (and 1366x768) while still maintaining fullscreen.
 
-- New INI and Lua (R/W) property for Attachables:  
-	`ParentBreakWound = AEmitter...`. Use this to define a `BreakWound` that will be applied to the `Attachable`'s parent when the `Attachable` is removed.  
-	`BreakWound` is also now R/W accessible to Lua.
-	
 - Added Lua (R/W) properties for all hardcoded `Attachables`. You can now set them on the fly to be created objects of the relevant type. Note that trying to set things inappropriately (e.g. setting an `HDFirearm` as something's `Leg`) will probably crash the game; that's your problem to deal with.  
 	You can read and write the following properties:  
 	**`AHuman`** - `Head`, `Jetpack`, `FGArm`, `BGArm`, `FGLeg`, `BGLeg`, `FGFoot`, `BGFoot`  
@@ -38,17 +34,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `Vector:ClampMagnitude(upperLimit, lowerLimit)` Lua function that lets you limit a Vector's upper and lower magnitude.
 
-- Added `MOSRotating` `GibBlastStrength` INI and Lua (R/W) property. This lets you define how much force created `Gibs` and any `Attachables` will get launched when the `MOSRotating` gibs.
+- Added `MOSRotating` `GibBlastStrength` INI and Lua (R/W) property. This lets you define how much force created `Gibs` and any `Attachables` will get launched with when the `MOSRotating` gibs.
 
 - New INI and Lua (R/W) properties for `Attachables`:  
-	`ParentBreakWound = AEmitter...` allows you to optionally define different `BreakWounds` for the `Attachable` and its parent. By default it matches `BreakWound` for ease of use.  	
-	`InheritsHFlipped = -1/0/1` allows you to define whether the `Attachable` will inherit its parent's HFlipped value or not.  
+	`ParentBreakWound = AEmitter...` - allows you to optionally define different `BreakWounds` for the `Attachable` and its parent. By default it matches `BreakWound` for ease of use. `BreakWound` is also now R/W accessible to Lua.  
+	`InheritsHFlipped = -1/0/1` - allows you to define whether the `Attachable` will inherit its parent's HFlipped value or not.  
 	-1 means reversed inheritance (i.e. if the parent's HFlipped value is true, this `Attachable`'s HFlipped value will be false), 0 means no inheritance, 1 means normal inheritance. Defaults to 1 to preserve normal behavior.  
-	`InheritedRotAngleRadOffset = angle` and `InheritedRotAngleDegOffset = angle` allow you specify an offset to keep an `Attachable`'s rotation at when `InheritsRotAngle` is set to true.  
-	In Lua there's only `InheritedRotAngleOffset` which takes/returns radians, to avoid confusion. For example, `InheritedRotAngleDegOffset = 90` would make the `Attachable` always face perpendicular to its parent.  
-	Does nothing if the `Attachable`'s `InheritsRotAngle` is set to false or the `Attachable` has no parent.  
-	`GibWithParentChance = 0 - 1` allows you to specify whether this `Attachable` should be gibbed when its parent does and what the chance of that happening is. 0 means never, 1 means always.  
-	`ParentGibBlastStrengthMultiplier = number` allows you to specify a multiplier for how strongly this `Attachable` will apply its parent's gib blast strength to itself when the parent gibs. Usually this would be a positive number, but it doesn't have to be.
+	`InheritedRotAngleRadOffset = angle` - and `InheritedRotAngleDegOffset = angle` allow you specify an offset to keep an `Attachable`'s rotation at when `InheritsRotAngle` is set to true. For example, `InheritedRotAngleDegOffset = 90` would make the `Attachable` always face perpendicular to its parent. In Lua there's only `InheritedRotAngleOffset`, which takes/returns radians to avoid confusion. Note that this property does nothing if the `Attachable`'s `InheritsRotAngle` is set to false or the `Attachable` has no parent.  
+	`GibWithParentChance = 0 - 1` - allows you to specify whether this `Attachable` should be gibbed when its parent does and what the chance of that happening is. 0 means never, 1 means always.  
+	`ParentGibBlastStrengthMultiplier = number` - allows you to specify a multiplier for how strongly this `Attachable` will apply its parent's gib blast strength to itself when the parent gibs. Usually this would be a positive number, but it doesn't have to be.
 
 - New INI and Lua (R/W) `Arm` property `GripStrength`. This effectively replaces the `JointStrength` of the held `HeldDevice`, allowing `Arms` to control how tightly equipment is held.
 
@@ -66,7 +60,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	PickupableBy = None
 	```
 	The Lua properties and functions are as follows:  
-	```
+	```lua
 	heldDevice.HasPickupLimitations; --(R) Whether or not this HeldDevice has any limitations affecting whether it can be picked up.
 	heldDevice.UnPickupable --(R/W) Whether this HeldDevice is/should be pickupable.
 	heldDevice:IsPickupableBy(actor) -- Whether or not a given Actor can pick up this HeldDevice.
@@ -121,29 +115,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Exposed `Arm` property `MaxLength` to Lua (R).
 
 - Exposed broad range of sounds to Lua (R/W) through their relevant SoundContainers. For each class, these include:  
-	**Actor**: `BodyHitSound`, `PainSound`, `DeathSound`, `DeviceSwitchSound`, `AlarmSound`  
-	**AHuman & ACrab**: `StrideSound`  
-	**HDFirearm**: `FireSound`, `FireEchoSound`, `EmptySound`, `ReloadStartSound`, `ReloadEndSound`, `ActiveSound`, `DeactivationSound`, `PreFireSound`  
-	**AEmitter**: `EmissionSound`, `BurstSound`, `EndSound`  
-	**ACraft**: `HatchOpenSound`, `HatchCloseSound`, `CrashSound`  
-	**MOSRotating**: `GibSound`  
-	**ADoor**: `DoorMoveStartSound`, `DoorMoveSound`, `DoorDirectionChangeSound`, `DoorMoveEndSound`
+	**`Actor`** - `BodyHitSound`, `PainSound`, `DeathSound`, `DeviceSwitchSound`, `AlarmSound`  
+	**`AHuman & ACrab`** - `StrideSound`  
+	**`HDFirearm`** - `FireSound`, `FireEchoSound`, `EmptySound`, `ReloadStartSound`, `ReloadEndSound`, `ActiveSound`, `DeactivationSound`, `PreFireSound`  
+	**`AEmitter`** - `EmissionSound`, `BurstSound`, `EndSound`  
+	**`ACraft`** - `HatchOpenSound`, `HatchCloseSound`, `CrashSound`  
+	**`MOSRotating`** - `GibSound`  
+	**`ADoor`** - `DoorMoveStartSound`, `DoorMoveSound`, `DoorDirectionChangeSound`, `DoorMoveEndSound`
   
 - Added Lua function `RoundFloatToPrecision`. Utility function to round and format floating point numbers for display in strings.  
 `RoundFloatToPrecision(floatValue, digitsPastDecimal, roundingMode) -- Rounding mode 0 for system default, 1 for floored remainder, 2 for ceiled remainder.`
 
 - The Lua console (and all text boxes) now support using `Ctrl` to move the cursor around and select or delete text.
 
-- Added `mosRotating:RemoveAttachable(attachableOrUniqueID, addToMovableMan, addBreakWounds)` method that allows you to remove an `Attachable` and specify whether it should be added to `MovableMan` or not, and whether breakwounds should be added (if defined) to the `Attachable` and parent `MOSRotating`.
+- Added `mosRotating:RemoveAttachable(attachableOrUniqueID, addToMovableMan, addBreakWounds)` method that allows you to remove an `Attachable` and specify whether it should be added to `MovableMan` or not, and whether breakwounds should be added (if defined) to the `Attachable` and parent `MOSRotating`. This method returns the removed `Attachable`, see the `Changed` section for important details on that.
 
-- Added `attachable:RemoveFromParent()` and `attachable:RemoveFromParent(addToMovableMan, addBreakWounds)` that allow you to remove `Attachables` from their parents without having to use `GetParent` first.
+- Added `mosRotating:RemoveEmitter(attachableOrUniqueID, addToMovableMan, addBreakWounds)` method that is identical to the `RemoveAttachable` function mentioned above.  
+
+- Added `attachable:RemoveFromParent()` and `attachable:RemoveFromParent(addToMovableMan, addBreakWounds)` that allow you to remove `Attachables` from their parents without having to use `GetParent` first. Their return value is the same as `RemoveAttachable` above.
 
 - Added `Settings.ini` debug properties to allow modders to turn on some potentially useful information visualizations.  
 	`DrawAtomGroupVisualizations` - any `MOSRotating` will draw its `AtomGroup` to the standard view.  
-	`DrawHandAndFootGroupVisualizations` - any `Actor` subclasses with  will draw its `AtomGroup` to the standard view.  
+	`DrawHandAndFootGroupVisualizations` - any `Actor` subclasses with  will draw its hand and foot `AtomGroup`s to the standard view.  
 	`DrawLimbPathVisualizations` - any  `AHumans` or `ACrabs` will draw some of their `LimbPaths` to the standard view.  
 	`DrawRayCastVisualizations` - any rays cast by `SceneMan` will be drawn to the standard view.  
-	`DrawPixelCheckVisualizations ` - any pixel checks made by `SceneMan:GetTerrMatter` or `SceneMan:GetMOIDPixel` will be drawn to the standard view.
+	`DrawPixelCheckVisualizations` - any pixel checks made by `SceneMan:GetTerrMatter` or `SceneMan:GetMOIDPixel` will be drawn to the standard view.
 
 - Added a fully featured inventory view for managing `AHuman` inventories (to be expanded to other things in future).
 
@@ -156,6 +152,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 - Added `AEmitter` Lua properties `MinThrottleRangeTODOFIXNAMEHERE` and `MaxThrottleRangeTODOFIXNAMEHERE` that allow you to 4zK PLEASE FILL IN
 
+- Added `Attachable` Lua function and INI property `InheritsFrame` which lets `Attachables` inherit their parent's frame. It is set to false by default.
+
+- Added `MovableObject` Lua (R/W) and INI properties `ApplyWoundDamageOnCollision` and `ApplyWoundBurstDamageOnCollision` which allow `MovableObject`s to apply the `EntryWound` damage/burst damage that would occur when they penetrate another object, without actually creating a wound.
+
+- `Turret`s can now support an unlimited number of mounted `HeldDevice`s. Properties have been added to Lua and INI to support this:  
+	`AddMountedDevice = ...` (INI) and `turret:AddMountedDevice` (Lua) - this adds the specified `HeldDevice` or `HDFirearm` as a mounted device on the `Turret`.  
+	`turret:GetMountedDevices` (Lua) - this gives you access to all the mounted `HeldDevice`s on the `Turret`. You can loop through them with a for loop, and remove or modify them as needed.  
+	Note that `MountedDevice = ...` (INI) and `turret.MountedDevice` (Lua R/W) deals with the first mounted `HeldDevice`, which is treated as the primary one for things like sharp-aiming.
+	
+- Added `Turret` Lua (R/W) and INI property `MountedDeviceRotationOffset` that lets you specify a standard rotation offset for all mounted `HeldDevices` on a turret.
+
 - Added option for players to vote to restart multiplayer activities by holding the backslash key, `\`. Requires all players to vote to pass.  
 	This is an alternative to the existing ability to vote to end the activity and return to the multiplayer lobby, by holding `Backspace` key.
 
@@ -167,7 +174,28 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 
 - Console text can be set to use a monospace font through `Settings.ini` property `ConsoleUseMonospaceFont = 0/1` or through the in-game settings.
 
-### Changed
+- New `ThrownDevice` INI property `StrikerLever`, which is the same as `Shell` for `Round` in `HDFirearm`, but for grenades. Represents the lever/pin coming off when activated.
+
+- New `Arm` INI and Lua (R/W) property `ThrowStrength` which now calculates how far `ThrownDevice`s are thrown, which also takes to account the weight of the device. `ThrownDevice`s can still define `MaxThrowVel` and `MinThrowVel` to override this.
+
+- New `Settings.ini` property `DisableLuaJIT = 0/1` to disable LuaJIT (MoonJIT) to (potentially) improve performance on machines that seem to struggle with it.
+
+- New `Settings.ini` property `ShowEnemyHUD` which allows disabling of enemy actor HUD in its entirety.
+
+- New `DataModule` property `IsFaction = 0/1` which determines if a module is a playable faction (in MetaGame, etc.). This replaces the need to put "Tech" in the module name. Defaults to false (0).
+
+</details>
+
+
+<details><summary>Changed</summary>
+
+- Doors in `Team = -1` will now open up for all actors.
+
+- `MovableMan` function `KillAllActors` (commonly found in activities) has been appropriately renamed `KillAllEnemyActors`.
+
+- Wound limit gibbing logic has changed for `MOSRotating` (and all its subclasses), where objects will now gib when they reach their `GibWoundLimit` rather than when they surpass it. This allows for one-wound gibbing, which was previously infeasible. For objects with low `GibWoundLimit`s, you may want to adjust limits to account for this change.
+
+- `TDExplosive`s will no longer default to a looping animation when activated. Instead, they change to the second frame (i.e 001), similarly to `HDFirearm`. Set `SpriteAnimMode` to `4` if you wish to enable the looping active animation.
 
 - `AHuman` can now manually reload BG devices.
 
@@ -177,7 +205,7 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 
 - Craft will now automatically scuttle when opening doors at a 90° angle rather than 45°.
 
-- `AHuman` can now aim while walking, however not while reloading.
+- `AHuman` can now aim slightly while walking, however not while reloading.
 
 - Recoil when firing weapons now affects sharp aim.
 
@@ -208,9 +236,9 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 - Reworked wound management:  
 	Wound management is now always done with `MOSRotating` functions, instead of requiring different ones for `Actors`. This means TotalWoundCount and RemoveAnyRandomWounds no longer exist.  
 	You can get all wounds with `GetWounds`, get the wound count with `GetWoundCount` (or using the pre-existing WoundCount property), get the gib wound limit with `GetGibWoundLimit` (or using the pre-existing GibWoundLimit property), and remove wounds with `RemoveWounds`.  
-	All of these functions have two variants, one lets you just specify any normal arguments (e.g. number of wounds to remove), the other lets you also specify whether you want to include `Attachables` with a positive `DamageMultiplier` (i.e. `Attachables` that damage their parent), `Attachables` with a negative `DamageMultiplier` (i.e. `Attachables` that heal their parent) or `Attachables` with no `DamageMultiplier` (i.e. `Attachables` that don't affect their parent).  
+	All of these functions have two variants, one lets you just specify any normal arguments (e.g. number of wounds to remove), the other lets you also specify whether you want to include any of the following, in order: `Attachables` with a positive `DamageMultiplier` (i.e. `Attachables` that damage their parent), `Attachables` with a negative `DamageMultiplier` (i.e. `Attachables` that heal their parent) or `Attachables` with no `DamageMultiplier` (i.e. `Attachables` that don't affect their parent).  
 	Without any arguments, `GetWoundCount` and `RemoveWounds` will only include `Attachables` with a positive `DamageMultiplier` in their counting calculations, and `GetGibWoundLimit` will not include any `Attachables` in its counting calculations. The property variants (e.g. `mosr.WoundCount`) behave the same way as the no-argument versions.  
-	Note that this process is recursive, so if an `Attachable` that satisfies the conditions has `Attachables` that also satisfy the conditions, their wounds will be included in the results.
+	Note that this process is recursive, so if an `Attachable` that satisfies the conditions has `Attachable`s that also satisfy the conditions, their wounds will be included in the results.
 
 - Renamed `Turret` INI property `MountedMO` to `MountedDevice` to better match the new reality that `Turrets` can only mount `HeldDevices` and their child classes.
 
@@ -226,13 +254,13 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 - Changed and cleaned up how gibbing works and how it affects `Attachables`. In particular, limbs will better inherit velocity during gibbing and things are more customizable. See `Attachable` properties for more details.  
 	As an added bonus,  `Attachables` on `ACDropShips` and `ACRockets` can now be shot down when the craft gibs; fight back against the baleful dropship engines!
 	
-- Improved native recoil handling! Guns transfer recoil to arms/turrets, which transfer it to AHumans/ACrabs, all of it properly accounts for joint strengths (or grip strengths) and offsets at every step. ([Issue #7](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/7) and [Issue #8](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/8)).
+- Improved native recoil handling! Guns transfer recoil to arms/turrets, which transfer it to AHumans/ACrabs, all of it properly accounts for joint strengths (or grip strengths) and offsets at every step. Future work will be done on this to improve it. ([Issue #7](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/7) and [Issue #8](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/8)).
 
 - `Attachables` now use their `GibImpulseLimit` as well as their `JointStrength` when determining whether they should be detached by strong forces. To maintain backwards compatibility, if the `GibImpulseLimit` is less than the `JointStrength`, the `JointStrength` will be used instead for this purpose.
 
 - The `FacingAngle` function has been moved from `Actor` to `MOSprite` so it can be used more widely.
 
-- Lifetime and ToDelete now work on wounds, giving modders more control over them.
+- `Lifetime` and `ToDelete` now work on wounds, giving modders more control over them.
 
 - Some functionality has been moved from `AudioMan` to `SoundContainer` for consistency. As such, the following `AudioMan` Lua bindings have been replaced:  
 	`AudioMan:FadeOutSound(fadeOutTime);` has been replaced with `soundContainer:FadeOut(fadeOutTime);`  
@@ -240,10 +268,10 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 	
 - Pressing escape when a buy menu is open now closes it instead of pausing the game.
 
-- `GetParent` will now return an `MOSRotating` instead of a `MovableObject` so it doesn't need to be casted. Additionally, it will always return null for objects with no parents, instead of returning the self object for things that weren't `Attachables`.  
+- `GetParent` will now return an `MOSRotating` instead of a `MovableObject` so it doesn't need to be casted with `ToMOSRotating`. Additionally, it will always return null for objects with no parents, instead of returning the self object for things that weren't `Attachables`.  
 	This makes things more consistent and reasonable throughout and will rarely, if ever, cause Lua problems.
 
-- Previews generated by the `SceneEditor` are now the same as `ScenePreviewDumps`, also both are now saved as PNGs.
+- Previews generated by the `SceneEditor` are now the same as `ScenePreviewDumps`. Also, both are now saved as PNGs.
 
 - `Attachable` terrain collisions will now propagate to any child `Attachables` on them. This means that `Attachables` will not collide with terrain, even if set to, if they're attached to a parent that doesn't collide with terrain.  
 	This means that the `attachable.CollidesWithTerrainWhileAttached` value may not represent the true state of things, you should instead use `attachable.CanCollideWithTerrain` to determine whether a given `Attachable` can collide with terrain.
@@ -258,6 +286,16 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 
 - `AHuman:ReloadFirearm` Lua function has been changed to `AHuman:ReloadFirearms` and will now reload offhand weapons as well, if appropriate.
 
+- `ACrab:ReloadFirearm` Lua function has been changed to `ACrab:ReloadFirearms` and will now reload all of the `ACrab`'s weapons.
+
+- When using the Settings.ini flag `LaunchIntoActivity`, you will start with some default amount of gold; either the `Activity`'s medium difficulty gold amount, or its funds for Team 1, which default to 2000 when not set.
+
+- `AEmitter`s will now obey `SpriteAnimMode` set in Lua while they're emitting. When they stop emitting this will reset to `NOANIM`.
+
+- `Attachable` Lua method `IsDrawnAfterParent` has been changed to the property `DrawnAfterParent`, and is now R/W.
+
+- All `mosRotating:RemoveAttachable`, `mosRotating:RemoveEmitter` and `attachable:RemoveFromParent` functions will return the removed `Attachable` if it hasn't been added to `MovableMan`, or nil if it has. If the `Attachable` is returned, it will belong to Lua like it would if it were newly Created. You could then, for example, add it to MovableMan, an inventory, or attach it to something else.
+
 - `Settings.ini` property `MenuTransitionDuration` renamed to `MenuTransitionDurationMultiplier`.
 
 - `Settings.ini` property `DisableLoadingScreen` renamed to `DisableLoadingScreenProgressReport`.
@@ -267,13 +305,21 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 	`Missions.rte` scenes are now green.  
 	`Scenes.rte` or any other mod/user scenes are now cyan.
 
-- Main menu and sub-menus were given a facelift.
+- Main menu and sub-menus were given a major facelift.
 
 - Settings menu was reworked to make it less useless.
 
 - Esc has been disabled in server mode to not disrupt simulation for clients, use Alt+F4 or the window close button to exit.
 
-### Fixed
+- Placing "Tech" in a `DataModule`'s `ModuleName` no longer makes the module a playable faction (in MetaGame, etc.). The `IsFaction` property should be used instead.  
+	The word "Tech" will also not be omitted from the module name when displayed in any faction selection dropdown list.
+
+</details>
+
+
+<details><summary>Fixed</summary>
+
+- Fixed legs going bonkers for one frame when turning around.
 
 - `HFlipped` is now properly assigned to emissions, gibs and particles that are shot from a `HDFirearm`'s `Round` when the source object is also flipped.
 
@@ -281,7 +327,7 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 
 - Craft sucking up objects now works properly again.
 
-- Getting the `Mass` of a `MOSRotating` has now been made more efficient. Additionally, `Attachables` of `Attachables` will now be included in Mass, so some things have gotten a lot heavier (e.g. Dummy Dreadnought).
+- Getting the `Mass` of a `MOSRotating` has now been made more efficient. Additionally, `Attachables` of `Attachables` will now be properly included in Mass, so some things have gotten a lot heavier (e.g. Dummy Dreadnought).
 
 - The moment of inertia of `AtomGroups` now updates when the mass or Atoms change, meaning losing `Attachables` or changing mass will properly affect how rotational forces apply to MOSRotatings.
 
@@ -301,21 +347,34 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 
 - Renamed `Attachable` INI property `CollidesWithTerrainWhenAttached` to more correct, consistent `CollidesWithTerrainWhileAttached`.
 
-- You can now modify `Foot`, `Magazine` and `Flash` (both `HDFirearm` and `AEmitter`) `CopyOfs` in your `Leg`/`HDFirearm``AEmitter` definition without setting a new `PresetName`.
+- You can now modify all hardcoded `Attachable` `CopyOf` INI definitions without setting a new `PresetName`. This means you could, for example, `CopyOf` a predefined `Leg` and change it, without having to set a new `PresetName`. This is optional, and comes with the obvious limitation of not being able to find that modified copy in-game with Lua.
 
 - `OnCollideWithMO` now works for `MOPixels` and `MOSParticles` so you can use it to check if your bullets collide with things.
 
-- `OnCollideWithMO` and `OnCollideWithTerrain` (and other special functions) will run more reliably right after the object is spawned. E.g. `OnCollideWithTerrain` should now work even if your gun is jammed into terrain when you shoot.
+- `OnCollideWithMO` and `OnCollideWithTerrain` (and other special functions) will run more reliably right after the object is spawned. E.g. `OnCollideWithTerrain` on a bullet should now work even if your gun is jammed into terrain when you shoot.
+
+- You can now sharp-aim through friendlies when playing as any team, instead of just as red team.
+
+- The reload hotkey now works even if you're on top of a pickupable object.
+
+- Improved LZ behaviour on wrapping maps, so your buy cursor will no longer annoyingly wrap around the LZ area.
+
+- Fixed a bug with metagame saves that caused `Player` and `Team` numbers to be off by 1.
 
 - Vote counts to end a multiplayer activity now display as intended. 
 
-- Fixed bug where choosing `-Random-` as a player's tech and pressing start game had a 1 in (number of techs + 1) chance to crash the game.
+- Fixed a bug where choosing `-Random-` as a player's tech and pressing start game had a 1 in (number of techs + 1) chance to crash the game.
 
-### Removed
+- Console error spam will no longer cripple performance over time.
+
+</details>
+
+
+<details><summary>Removed</summary>
 
 - Removed obsolete graphics drivers and their `Settings.ini` properties `ForceOverlayedWindowGfxDriver` and `ForceNonOverlayedWindowGfxDriver`.
 
-- Removed `Attachable` Lua write capability for `AtomSubGroupID` as changing this can cause all kinds of problems, and `RotTarget` as this didn't actually work.
+- Removed `Attachable` Lua write capability for `AtomSubGroupID` as changing this can cause all kinds of problems.
 
 - Removed `MaxLength` property from `Leg`, since it was a mostly unused leftover caused by Leg being originally copied from Arm, and was actually a fake setting that just set other properties. To replace it, set the following:  
 	```
@@ -333,19 +392,19 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 
 - Removed `MOSRotating:ApplyForces` and `MOSRotating:ApplyImpulses` Lua functions. These are both internal functions that should never have been exposed to Lua.
 
-- Removed hardcoded INI constraint that forced `Mass` of `MovableObjects` to not be 0. Previously, anytime a `Mass` of 0 was read in from INI, it was changed to 0.0001.
+- Removed hardcoded INI constraint that forced `Mass` of `MovableObjects` to not be 0. Previously, anytime a `Mass` of 0 was read in from INI, it was changed to 0.0001, now 0 `Mass` is allowed and supported.
 
-- Removed the ability to set `HDFirearms'` `Magazine` or `Flash`, or `AEmitters'` `Flash` to None in INI. This was a necessary result of some core changes, and may be undone in future if it's possible. If you want no `Magazine` or `Flash` just don't set one, or use a Null one like is done for limbs and other hardcoded `Attachables`.
-
-- Removed the quit-confirmation dialog from the scenarios screen. Now pressing escape will lead back to the main menu.
+- Removed the quit confirmation dialog from the scenarios screen. Now pressing escape will return you to the main menu.
 
 - Removed `Settings.ini` properties `HSplitScreen` and `VSplitScreen`. Superseded by `TwoPlayerSplitscreenVertSplit`.
+
+</details>
 
 ***
 
 ## [0.1.0 pre-release 3.0][0.1.0-pre3.0] - 2020/12/25
 
-### Added
+<details><summary>Added</summary>
 
 - Implemented Lua Just-In-Time compilation (MoonJIT 2.2.0).
 
@@ -434,7 +493,7 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 	Original bindings with no flip arguments are untouched and can be called as they were.
 
 - Added new primitive drawing functions to `PrimitiveMan`:  
-	```
+	```lua
 	-- Arc
 	PrimitiveMan:DrawArcPrimitive(Vector pos, startAngle, endAngle, radius, color)
 	PrimitiveMan:DrawArcPrimitive(player, Vector pos, startAngle, endAngle, radius, color)
@@ -508,7 +567,10 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 
 - You can get the top level `SoundSet` of a `SoundContainer` with `soundContainer:GetTopLevelSoundSet` and manipulate it as described above. This allows you full interaction with all levels of `SoundSets` in a `SoundContainer`.
 
-### Changed
+</details>
+
+
+<details><summary>Changed</summary>
 
 - Codebase now uses the C++17 standard.
 
@@ -530,13 +592,13 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 	In some cases a cast to the appropriate type (`ToWhateverType`, e.g `ToMOSRotating`) will be needed when attempting to manipulate the object returned, because it will be returned as `MovableObject` if it is the root parent.  
 	In cases where you need to iterate over a parent's attachable list the parent must be cast to the appropriate type that actually has an attachable list to iterate over.  
 	For example:  
-	```
+	```lua
 	for attachable in ToMOSRotating(self:GetParent()).Attachables do
 		...
 	end
 	```
 	Or
-	```
+	```lua
 	local parent = ToMOSRotating(self:GetParent());
 	for attachable in parent.Attachables do
 		...
@@ -614,7 +676,10 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 
 - Pressing escape at the options, mod manager, game editors and credits screens no longer quits the game.
 
-### Fixed
+</details>
+
+
+<details><summary>Fixed</summary>
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.
 
@@ -642,7 +707,10 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 
 - Sound panning should now work properly around scene seams. Additionally, sounds should be less stuttery (e.g. distant jetpacks) and generally sound better.
 
-### Removed
+</details>
+
+
+<details><summary>Removed</summary>
 
 - Removed the ability to remove scripts from objects with Lua. This is no longer needed cause of code efficiency increases.
 
@@ -664,11 +732,13 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 	The lengthy `PlaySound` function should be replaced by making a `SoundContainer` in your `Create` function and setting properties appropriately.  
 	This can be done by creating one defined INI with `soundContainer = CreateSoundContainer(...)`, or by making an empty one with `soundContainer = SoundContainer()`.
 
+</details>
+
 ***
 
 ## [0.1.0 pre-release 2][0.1.0-pre2] - 2020/05/08
 
-### Added
+<details><summary>Added</summary>
 
 - Lua binding for `Box::IntersectsBox(otherBox)`, that returns true if 2 boxes intersect.
 
@@ -730,63 +800,66 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 	NOTE: Here is a link to [FMOD's Inverse Rolloff Model.](https://fmod.com/resources/documentation-api?version=2.0&page=white-papers-3d-sounds.html#inverse)
 
 - `SoundContainer` Lua controls have been overhauled, allowing for more control in playing and replaying them. The following Lua bindings are available:
+	```lua
+	soundContainer:HasAnySounds() -- Returns whether or not the SoundContainer has any sounds in it. Returns True or false.
 	```
-	soundContainer:HasAnySounds() - Returns whether or not the SoundContainer has any sounds in it. Returns True or false.
+	```lua
+	soundContainer:IsBeingPlayed() -- Returns whether or not any sounds in the SoundContainer are currently being played. Returns True or False.
 	```
+	```lua
+	soundContainer:Play(optionalPosition, optionalPlayer) -- Plays the sounds belonging to the SoundContainer's currently selected SoundSet. The sound will play at the position and for the player specified, or at (0, 0) for all players if parameters aren't specified.
 	```
-	soundContainer:IsBeingPlayed() - Returns whether or not any sounds in the SoundContainer are currently being played. Returns True or False.
+	```lua
+	soundContainer:Stop(optionalPlayer) -- Stops any playing sounds belonging to the SoundContainer, optionally only stopping them for a specified player.
 	```
+	```lua
+	soundContainer:AddSound(filePath, optional soundSetToAddSoundTo, optionalSoundOffset, optionalAttenuationStartDistance, optionalAbortGameIfSoundIsInvalid) -- Adds the sound at the given filepath to the SoundContainer. If a SoundSet index is specified it'll add it to that SoundSet. If an offset or attenuation start distance are specified they'll be set, as mentioned in the INI section above. If set to abort for invalid sounds, the game will error out if it can't load the sound, otherwise it'll show a console error.
 	```
-	soundContainer:Play(optionalPosition, optionalPlayer) - Plays the sounds belonging to the SoundContainer's currently selected SoundSet. The sound will play at the position and for the player specified, or at (0, 0) for all players if parameters aren't specified.
+	```lua
+	soundContainer:SetPosition(position) -- Sets the position at which the SoundContainer's sounds will play.
 	```
+	```lua
+	soundContainer:SelectNextSoundSet() -- Selects the next SoundSet to play when soundContainer:Play(...) is called, according to the INI defined CycleMode.
 	```
-	soundContainer:Stop(optionalPlayer) - Stops any playing sounds belonging to the SoundContainer, optionally only stopping them for a specified player.
+	```lua
+	soundContainer.Loops -- Set or get the number of loops for the SoundContainer, as mentioned in the INI section above.
 	```
+	```lua
+	soundContainer.Priority -- Set or get the priority of the SoundContainer, as mentioned in the INI section above.
 	```
-	soundContainer:AddSound(filePath, optional soundSetToAddSoundTo, optionalSoundOffset, optionalAttenuationStartDistance, optionalAbortGameIfSoundIsInvalid) - Adds the sound at the given filepath to the SoundContainer. If a SoundSet index is specified it'll add it to that SoundSet. If an offset or attenuation start distance are specified they'll be set, as mentioned in the INI section above. If set to abort for invalid sounds, the game will error out if it can't load the sound, otherwise it'll show a console error.
-	```
-	```
-	soundContainer:SetPosition(position) - Sets the position at which the SoundContainer's sounds will play.
-	```
-	```
-	soundContainer:SelectNextSoundSet() - Selects the next SoundSet to play when soundContainer:Play(...) is called, according to the INI defined CycleMode.
-	```
-	```
-	soundContainer.Loops - Set or get the number of loops for the SoundContainer, as mentioned in the INI section above.
-	```
-	```
-	soundContainer.Priority - Set or get the priority of the SoundContainer, as mentioned in the INI section above.
-	```
-	```
-	soundContainer.AffectedByGlobalPitch - Set or get whether the SoundContainer is affected by global pitch, as mentioned in the INI section above.
+	```lua
+	soundContainer.AffectedByGlobalPitch -- Set or get whether the SoundContainer is affected by global pitch, as mentioned in the INI section above.
 	```
 - `MovableObjects` can now run multiple scripts by putting multiple `AddScript = FilePath.lua` lines in the INI definition. ([Issue #109](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/pull/109))  
 	Scripts will have their appropriate functions run in the order they were added. Note that all scripts share the same `self`, so care must be taken when naming self variables.  
 	Scripts can be checked for with `movableObject:HasScript(filePath);` and added and removed with `movableObject:AddScript(filePath);` and `movableObject:RemoveScript(filePath);`. They can also be enabled and disabled in Lua (preserving their ordering) with `movableObject:EnableScript(filePath);` and `movableObject:DisableScript(filePath);`.
 
 - Scripts on `MovableObjects` and anything that extends them (i.e. most things) now support the following new functions (in addition to `Create`, `Update`, `Destroy` and `OnPieMenu`). They are added in the same way as the aforementioned scripts:  
+	```lua
+	OnScriptRemoveOrDisable(self, scriptWasRemoved) -- This is run when the script is removed or disabled. The scriptWasRemoved parameter will be True if the script was removed and False if it was disabled.
 	```
-	OnScriptRemoveOrDisable(self, scriptWasRemoved) - This is run when the script is removed or disabled. The scriptWasRemoved parameter will be True if the script was removed and False if it was disabled.
+	```lua
+	OnScriptEnable(self) -- This is run when the script was disabled and has been enabled.
 	```
+	```lua
+	OnCollideWithTerrain(self, terrainMaterial) -- This is run when the MovableObject this script on is in contact with terrain. The terrainMaterial parameter gives you the material ID for the terrain collided with. It is suggested to disable this script when not needed to save on overhead, as it will be run a lot!
 	```
-	OnScriptEnable(self) - This is run when the script was disabled and has been enabled.
-	```
-	```
-	OnCollideWithTerrain(self, terrainMaterial) - This is run when the MovableObject this script on is in contact with terrain. The terrainMaterial parameter gives you the material ID for the terrain collided with. It is suggested to disable this script when not needed to save on overhead, as it will be run a lot!
-	```
-	```
-	OnCollideWithMO(self, collidedMO, collidedRootMO) - This is run when the MovableObject this script is on is in contact with another MovableObject. The collidedMO parameter gives you the MovableObject that was collided with, and the collidedRootMO parameter gives you the root MovableObject of that MovableObject (note that they may be the same). Collisions with MovableObjects that share the same root MovableObject will not call this function.
+	```lua
+	OnCollideWithMO(self, collidedMO, collidedRootMO) -- This is run when the MovableObject this script is on is in contact with another MovableObject. The collidedMO parameter gives you the MovableObject that was collided with, and the collidedRootMO parameter gives you the root MovableObject of that MovableObject (note that they may be the same). Collisions with MovableObjects that share the same root MovableObject will not call this function.
 	```
 
 - Scripts on `Attachables` now support the following new functions:  
+	```lua
+	OnAttach(self, newParent) -- This is run when the Attachable this script is on is attached to a new parent object. The newParent parameter gives you the object the Attachable is now attached to.
 	```
-	OnAttach(self, newParent) - This is run when the Attachable this script is on is attached to a new parent object. The newParent parameter gives you the object the Attachable is now attached to.
-	```
-	```
-	OnDetach(self, exParent) - This is run when the Attachable this script is on is detached from an object. The exParent gives you the object the Attachable was attached to.
+	```lua
+	OnDetach(self, exParent) -- This is run when the Attachable this script is on is detached from an object. The exParent gives you the object the Attachable was attached to.
 	```
 
-### Changed
+</details>
+
+
+<details><summary>Changed</summary>
 
 - Codebase now uses the C++14 standard.
 
@@ -840,7 +913,10 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 
 - `PieMenuActor` and `OrbitedCraft` have now been removed. They are instead replaced with parameters in their respective functions, i.e. `OnPieMenu(pieMenuActor);` and `CraftEnteredOrbit(orbitedCraft);`. Their use is otherwise unchanged.
 
-### Fixed
+</details>
+
+
+<details><summary>Fixed</summary>
 
 - Fixed LuaBind being all sorts of messed up. All lua bindings now work properly like they were before updating to the v141 toolset.
 
@@ -860,7 +936,10 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 
 - Scripts on attached attachables will only run if their parent exists in MovableMan. ([Issue #83](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/83))
 
-### Removed
+</details>
+
+
+<details><summary>Removed</summary>
 
 - Removed all Gorilla Audio and SDL Mixer related code and files.
 
@@ -881,11 +960,13 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 	**Post-processing:** `TrueColorMode`, `PostProcessing`, `PostPixelGlow`.   
 	**Native fullscreen mode:** `Fullscreen`, `NxWindowed`, `NxFullscreen`, `ForceSoftwareGfxDriver`, `ForceSafeGfxDriver`.
 
+</details>
+
 ***
 
 ## [0.1.0 pre-release 1][0.1.0-pre1] - 2020/01/27
 
-### Added
+<details><summary>Added</summary>
 
 - You can now run the game with command line parameters, including `-h` to see help and `-c` to send ingame console input to cout.
 
@@ -912,7 +993,9 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 
 - Added minimal debug configuration for quicker debug builds without visualization.
 
-### Changed
+</details>
+
+<details><summary>Changed</summary>
 
 - `ACrab` aim limits now adjust to crab body rotation.
 
@@ -934,7 +1017,10 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 
 - Built-in Actor angular velocity reduction on death has been lessened.
 
-### Fixed
+</details>
+
+
+<details><summary>Fixed</summary>
 
 - SFX slider now works properly.
 
@@ -950,7 +1036,10 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 
 - Various minor other things that have gotten lost in the shuffle.
 
-### Removed
+</details>
+
+
+<details><summary>Removed</summary>
 
 - All licensing-related code has been removed since it's no longer needed.
 
@@ -959,6 +1048,8 @@ WARNING FIX THIS LINE BEFORE MERGING PR!!!!!!!!!!!!
 - All usage of the outdated Slick Profiler has been removed.
 
 - `TDExplosive.ParticleNumberToAdd` property has been removed.
+
+</details>
 
 ***
 
@@ -969,4 +1060,3 @@ Note: For a log of changes made prior to the commencement of the open source com
 [0.1.0-pre1]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/releases/tag/v0.1.0-pre1
 [0.1.0-pre2]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Data/releases/tag/v0.1.0-pre2
 [0.1.0-pre3.0]: https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/releases/tag/v0.1.0-pre3.0
-

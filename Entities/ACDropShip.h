@@ -42,9 +42,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(ACDropShip)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(ACDropShip);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     ACDropShip

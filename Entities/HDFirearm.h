@@ -41,9 +41,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(HDFirearm)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(HDFirearm);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     HDFirearm

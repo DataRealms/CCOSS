@@ -47,7 +47,7 @@ class GameActivity:
     public Activity
 {
 
-    friend class LuaMan;
+    friend struct ActivityLuaBindings;
 
     // Keeps track of everything about a delivery in transit after purchase has been made with the menu
     struct Delivery
@@ -70,8 +70,8 @@ class GameActivity:
 
 public:
 
-	SerializableOverrideMethods
-	ClassInfoGetters
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
     enum ObjectiveArrowDir
     {
@@ -1116,9 +1116,9 @@ protected:
 	bool m_BuyMenuEnabled;
 
     // The cursor animations for the LZ indicators
-    BITMAP **m_aLZCursor[4];
+    std::vector<BITMAP *> m_aLZCursor[4];
     // The cursor animations for the objective indications
-    BITMAP **m_aObjCursor[4];
+    std::vector<BITMAP *> m_aObjCursor[4];
 
     // Time it takes for a delivery to be made, in ms
     long m_DeliveryDelay;

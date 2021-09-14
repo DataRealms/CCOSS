@@ -42,9 +42,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(GATutorial)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(GATutorial);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GATutorial

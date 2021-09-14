@@ -36,6 +36,7 @@ class AEmitter;
 
 class ACrab :
 	public Actor {
+	friend struct EntityLuaBindings;
 
 
 	enum MovementState {
@@ -66,18 +67,18 @@ public:
 
 
 // Concrete allocation and cloning definitions
-	EntityAllocation(ACrab)
-		SerializableOverrideMethods
-		ClassInfoGetters
+	EntityAllocation(ACrab);
+	SerializableOverrideMethods;
+	ClassInfoGetters;
 
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Constructor:     ACrab
-		//////////////////////////////////////////////////////////////////////////////////////////
-		// Description:     Constructor method used to instantiate a ACrab object in system
-		//                  memory. Create() should be called before using the object.
-		// Arguments:       None.
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Constructor:     ACrab
+	//////////////////////////////////////////////////////////////////////////////////////////
+	// Description:     Constructor method used to instantiate a ACrab object in system
+	//                  memory. Create() should be called before using the object.
+	// Arguments:       None.
 
-		ACrab() { Clear(); }
+	ACrab() { Clear(); }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -370,13 +371,13 @@ int FirearmActivationDelay() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:  ReloadFirearm
+// Method:  ReloadFirearms
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reloads the currently held firearm, if any.
+// Description:     Reloads the currently held firearms, if any.
 // Arguments:       None.
 // Return value:    None.
 
-	void ReloadFirearm();
+	void ReloadFirearms();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

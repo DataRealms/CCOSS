@@ -315,14 +315,7 @@ namespace RTE {
 		/// <param name="whichButton">Which button to check for.</param>
 		/// <param name="whichPlayer">Which player to check for.</param>
 		/// <returns>Whether the mouse button is held or not.</returns>
-		bool MouseButtonHeld(int whichButton, int whichPlayer) const { return GetMouseButtonState(whichPlayer, whichButton, InputState::Held); }
-
-		/// <summary>
-		/// (ONLY FOR LUA BACKWARD COMPATIBILITY) Gets whether a mouse button is being held down right now.
-		/// </summary>
-		/// <param name="whichButton">Which button to check for.</param>
-		/// <returns>Whether the mouse button is held or not.</returns>
-		bool MouseButtonHeld(int whichButton) const { return GetMouseButtonState(Players::PlayerOne, whichButton, InputState::Held); }
+		bool MouseButtonHeld(int whichButton, int whichPlayer = Players::PlayerOne) const { return GetMouseButtonState(whichPlayer, whichButton, InputState::Held); }
 
 		/// <summary>
 		/// Gets whether a mouse button was pressed between the last update and the one previous to it.
@@ -330,14 +323,7 @@ namespace RTE {
 		/// <param name="whichButton">Which button to check for.</param>
 		/// <param name="whichPlayer">Which player to check for.</param>
 		/// <returns>Whether the mouse button is pressed or not.</returns>
-		bool MouseButtonPressed(int whichButton, int whichPlayer) const { return GetMouseButtonState(whichPlayer, whichButton, InputState::Pressed); }
-
-		/// <summary>
-		/// (ONLY FOR LUA BACKWARD COMPATIBILITY) Gets whether a mouse button was pressed between the last update and the one previous to it.
-		/// </summary>
-		/// <param name="whichButton">Which button to check for.</param>
-		/// <returns>Whether the mouse button is pressed or not.</returns>
-		bool MouseButtonPressed(int whichButton) const { return GetMouseButtonState(Players::PlayerOne, whichButton, InputState::Pressed); }
+		bool MouseButtonPressed(int whichButton, int whichPlayer = Players::PlayerOne) const { return GetMouseButtonState(whichPlayer, whichButton, InputState::Pressed); }
 
 		/// <summary>
 		/// Gets whether a mouse button was released between the last update and the one previous to it.
@@ -345,14 +331,7 @@ namespace RTE {
 		/// <param name="whichButton">Which button to check for.</param>
 		/// <param name="whichPlayer">Which player to check for.</param>
 		/// <returns>Whether the mouse button is released or not.</returns>
-		bool MouseButtonReleased(int whichButton, int whichPlayer) const { return GetMouseButtonState(whichPlayer, whichButton, InputState::Released); }
-
-		/// <summary>
-		/// (ONLY FOR LUA BACKWARD COMPATIBILITY) Gets whether a mouse button was released between the last update and the one previous to it.
-		/// </summary>
-		/// <param name="whichButton">Which button to check for.</param>
-		/// <returns>Whether the mouse button is released or not.</returns>
-		bool MouseButtonReleased(int whichButton) const { return GetMouseButtonState(Players::PlayerOne, whichButton, InputState::Released); }
+		bool MouseButtonReleased(int whichButton, int whichPlayer = Players::PlayerOne) const { return GetMouseButtonState(whichPlayer, whichButton, InputState::Released); }
 
 		/// <summary>
 		/// Gets whether the mouse wheel has been moved past the threshold limit in either direction this frame.

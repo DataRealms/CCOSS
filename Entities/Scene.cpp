@@ -35,7 +35,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(Scene, Entity, 0)
+ConcreteClassInfo(Scene, Entity, 0);
 const string Scene::Area::c_ClassName = "Area";
 
 
@@ -1864,7 +1864,7 @@ bool Scene::CleanOrphanPixel(int posX, int posY, NeighborDirection checkingFrom,
 
 Vector Scene::GetDimensions() const
 {
-    return m_pTerrain ? Vector(m_pTerrain->GetBitmap()->w, m_pTerrain->GetBitmap()->h) : Vector();
+    return (m_pTerrain && m_pTerrain->GetBitmap()) ? Vector(m_pTerrain->GetBitmap()->w, m_pTerrain->GetBitmap()->h) : Vector();
 }
 
 
@@ -1873,7 +1873,7 @@ Vector Scene::GetDimensions() const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the total width of the scene, in pixels.
 
-int Scene::GetWidth() const { return m_pTerrain ? m_pTerrain->GetBitmap()->w : 0; }
+int Scene::GetWidth() const { return (m_pTerrain && m_pTerrain->GetBitmap()) ? m_pTerrain->GetBitmap()->w : 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1881,7 +1881,7 @@ int Scene::GetWidth() const { return m_pTerrain ? m_pTerrain->GetBitmap()->w : 0
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets the total height of the scene, in pixels.
 
-int Scene::GetHeight() const { return m_pTerrain ? m_pTerrain->GetBitmap()->h : 0; }
+int Scene::GetHeight() const { return (m_pTerrain && m_pTerrain->GetBitmap()) ? m_pTerrain->GetBitmap()->h : 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

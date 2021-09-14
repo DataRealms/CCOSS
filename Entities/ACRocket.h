@@ -38,6 +38,7 @@ class Leg;
 class ACRocket:
     public ACraft
 {
+	friend struct EntityLuaBindings;
 
 enum LandingGearState
 {
@@ -56,9 +57,9 @@ public:
 
 
 // Concrete allocation and cloning definitions
-EntityAllocation(ACRocket)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(ACRocket);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     ACRocket

@@ -32,16 +32,16 @@ class GlobalScript:
     public Entity
 {
 
-friend class LuaMan;
+friend struct EntityLuaBindings;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations
 
 public:
 
-EntityAllocation(GlobalScript)
-SerializableOverrideMethods
-ClassInfoGetters
+EntityAllocation(GlobalScript);
+SerializableOverrideMethods;
+ClassInfoGetters;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     GlobalScript

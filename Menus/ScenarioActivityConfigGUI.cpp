@@ -74,15 +74,12 @@ namespace RTE {
 			m_TeamTechComboBoxes.at(team)->GetListPanel()->AddItem("-All-", "", nullptr, nullptr, -2);
 			m_TeamTechComboBoxes.at(team)->GetListPanel()->AddItem("-Random-", "", nullptr, nullptr, -1);
 		}
-		std::string techString = " Tech";
 		for (int moduleID = 0; moduleID < g_PresetMan.GetTotalModuleCount(); ++moduleID) {
 			if (const DataModule *dataModule = g_PresetMan.GetDataModule(moduleID)) {
-				std::string techName = dataModule->GetFriendlyName();
-				size_t techPos = techName.find(techString);
-				if (techPos != string::npos) {
-					techName.replace(techPos, techString.length(), "");
+				if (dataModule->IsFaction()) {
 					for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
-						m_TeamTechComboBoxes.at(team)->GetListPanel()->AddItem(techName, "", nullptr, nullptr, moduleID);
+						m_TeamTechComboBoxes.at(team)->GetListPanel()->AddItem(dataModule->GetFriendlyName(), "", nullptr, nullptr, moduleID);
+						m_TeamTechComboBoxes.at(team)->GetListPanel()->ScrollToTop();
 					}
 				}
 			}
@@ -388,7 +385,7 @@ namespace RTE {
 					UpdateStartingGoldSliderAndLabel();
 				} else if (guiEvent.GetMsg() == GUISlider::Changed) {
 					for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; team++) {
-						if (guiEvent.GetControl() == m_TeamAISkillLabels.at(team)) { m_TeamAISkillLabels.at(team)->SetText(Activity::GetAISkillString(m_TeamAISkillSliders.at(team)->GetValue())); }
+						if (guiEvent.GetControl() == m_TeamAISkillSliders.at(team)) { m_TeamAISkillLabels.at(team)->SetText(Activity::GetAISkillString(m_TeamAISkillSliders.at(team)->GetValue())); }
 					}
 				}
 			}

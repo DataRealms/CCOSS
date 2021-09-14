@@ -3,10 +3,12 @@
 #include "Attachable.h"
 #include "Matrix.h"
 #include "SLTerrain.h"
+#include "PresetMan.h"
+#include "SettingsMan.h"
 
 namespace RTE {
 
-	ConcreteClassInfo(ADoor, Actor, 20)
+	ConcreteClassInfo(ADoor, Actor, 20);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -40,6 +42,9 @@ namespace RTE {
 		m_DoorMoveSound = nullptr;
 		m_DoorDirectionChangeSound = nullptr;
 		m_DoorMoveEndSound = nullptr;
+
+		// NOTE: This special override of a parent class member variable avoids needing an extra variable to avoid overwriting INI values.
+		m_CanBeSquished = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -85,9 +90,7 @@ namespace RTE {
 
 	int ADoor::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Door") {
-			Attachable iniDefinedObject;
-			reader >> &iniDefinedObject;
-			SetDoor(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
+			SetDoor(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
 		} else if (propName == "OpenOffset") {
 			reader >> m_OpenOffset;
 		} else if (propName == "ClosedOffset") {
@@ -211,11 +214,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::SetDoor(Attachable *newDoor) {
+		if (m_Door && m_Door->IsAttached()) { RemoveAndDeleteAttachable(m_Door); }
 		if (newDoor == nullptr) {
-			if (m_Door && m_Door->IsAttached()) { RemoveAttachable(m_Door); }
 			m_Door = nullptr;
 		} else {
-			if (m_Door && m_Door->IsAttached()) { RemoveAttachable(m_Door); }
 			m_Door = newDoor;
 			AddAttachable(newDoor);
 
@@ -409,8 +411,12 @@ namespace RTE {
 			foundActor = sensor.SenseActor(m_Pos, m_Rotation, m_HFlipped, m_MOID);
 			if (foundActor && foundActor->IsControllable()) {
 				anySensorInput = true;
+
+				if (m_Team == Activity::NoTeam) {
+					OpenDoor();
+					break;
 				// If a sensor has found an enemy Actor, close the door and break so we don't accidentally open it for a friendly Actor.
-				if (foundActor->GetTeam() != m_Team) {
+				} else if (foundActor->GetTeam() != m_Team) {
 					CloseDoor();
 					break;
 				} else if (foundActor->GetTeam() == m_Team) {					
@@ -450,7 +456,7 @@ namespace RTE {
 
 		if (m_DoorState == OPEN || m_DoorState == CLOSED) {
 			m_Door->SetParentOffset(endOffset);
-			m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * static_cast<float>(GetFlipFactor())));
+			m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * GetFlipFactor()));
 		} else if (m_DoorState == OPENING || m_DoorState == CLOSING) {
 			if (m_DoorMoveSound && !m_DoorMoveSound->IsBeingPlayed()) { m_DoorMoveSound->Play(m_Pos); }
 
@@ -458,7 +464,7 @@ namespace RTE {
 				m_ResetToDefaultStateTimer.Reset();
 
 				m_Door->SetParentOffset(endOffset);
-				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * static_cast<float>(GetFlipFactor())));
+				m_Door->SetRotAngle(m_Rotation.GetRadAngle() + (endAngle * GetFlipFactor()));
 
 				if (m_DoorMoveSound) { m_DoorMoveSound->Stop(); }
 				if (m_DoorMoveEndSound) { m_DoorMoveEndSound->Play(m_Pos); }
@@ -487,12 +493,14 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::DrawHUD(BITMAP *targetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
+		m_HUDStack = -m_CharHeight / 2;
+
 		if (!m_HUDVisible) {
 			return;
 		}
-		// Only draw if the team viewing this is on the same team OR has seen the space where this is located
+		// Only draw if the team viewing this is on the same team OR has seen the space where this is located.
 		int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
-		if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam && g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam)) {
+		if (viewingTeam != m_Team && viewingTeam != Activity::NoTeam && (!g_SettingsMan.ShowEnemyHUD() || g_SceneMan.IsUnseen(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), viewingTeam))) {
 			return;
 		}
 	}

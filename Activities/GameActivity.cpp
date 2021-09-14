@@ -31,9 +31,9 @@
 #include "HeldDevice.h"
 #include "Loadout.h"
 
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "GUI/AllegroBitmap.h"
+#include "GUI.h"
+#include "GUIFont.h"
+#include "AllegroBitmap.h"
 #include "PieMenuGUI.h"
 #include "InventoryMenuGUI.h"
 #include "BuyMenuGUI.h"
@@ -44,7 +44,7 @@
 
 namespace RTE {
 
-AbstractClassInfo(GameActivity, Activity)
+AbstractClassInfo(GameActivity, Activity);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -103,8 +103,8 @@ void GameActivity::Clear()
     {
         m_Deliveries[team].clear();
         m_LandingZoneArea[team].Reset();
-		m_aLZCursor[team] = 0;
-		m_aObjCursor[team] = 0;
+		m_aLZCursor[team].clear();
+		m_aObjCursor[team].clear();
     }
 
     m_Objectives.clear();
@@ -1019,28 +1019,28 @@ int GameActivity::Start()
     // Start the game timer
     m_GameTimer.Reset();
 
-    if (!(m_aLZCursor[0]))
+    if (m_aLZCursor[0].empty())
     {
         ContentFile cursorFile("Base.rte/GUIs/Indicators/LZArrowRedL.png");
-        m_aLZCursor[0] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
+        cursorFile.GetAsAnimation(m_aLZCursor[0], LZCURSORFRAMECOUNT);
         cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowGreenL.png");
-        m_aLZCursor[1] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
+        cursorFile.GetAsAnimation(m_aLZCursor[1], LZCURSORFRAMECOUNT);
 		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowBlueL.png");
-		m_aLZCursor[2] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
+		cursorFile.GetAsAnimation(m_aLZCursor[2], LZCURSORFRAMECOUNT);
 		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/LZArrowYellowL.png");
-		m_aLZCursor[3] = cursorFile.GetAsAnimation(LZCURSORFRAMECOUNT);
+		cursorFile.GetAsAnimation(m_aLZCursor[3], LZCURSORFRAMECOUNT);
     }
 
-    if (!(m_aObjCursor[0]))
+    if (m_aObjCursor[0].empty())
     {
         ContentFile cursorFile("Base.rte/GUIs/Indicators/ObjArrowRed.png");
-        m_aObjCursor[0] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
+        cursorFile.GetAsAnimation(m_aObjCursor[0], OBJARROWFRAMECOUNT);
         cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowGreen.png");
-        m_aObjCursor[1] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
+        cursorFile.GetAsAnimation(m_aObjCursor[1], OBJARROWFRAMECOUNT);
 		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowBlue.png");
-		m_aObjCursor[2] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
+		cursorFile.GetAsAnimation(m_aObjCursor[2], OBJARROWFRAMECOUNT);
 		cursorFile.SetDataPath("Base.rte/GUIs/Indicators/ObjArrowYellow.png");
-		m_aObjCursor[3] = cursorFile.GetAsAnimation(OBJARROWFRAMECOUNT);
+		cursorFile.GetAsAnimation(m_aObjCursor[3], OBJARROWFRAMECOUNT);
     }
 
     // Start the in-game music
@@ -1731,10 +1731,8 @@ void GameActivity::Update()
                     }
                 }
 */
-                // Figure out the direction the player is moving the cursor, so we can jump it in the right direction if needed
-                int direction = m_LandingZone[player].m_X - prevLZX;
-                // Move the actual LZ cursor to within the valid LZ Area
-                totalLZ.MovePointInsideX(m_LandingZone[player].m_X, direction);
+                // Move the actual LZ cursor to within the valid LZ Area. We pass in 0 for direction so it doesn't try to wrap around on wrapping maps.
+                totalLZ.MovePointInsideX(m_LandingZone[player].m_X, 0);
             }
 
             // Interface for the craft AI post-delivery mode
@@ -2361,7 +2359,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
     if (pIcon)
         draw_sprite(pTargetBitmap, pIcon->GetBitmaps8()[0], MAX(2, g_SceneMan.GetScreenOcclusion(which).m_X + 2), 2);
     // Gold
-    std::snprintf(str, sizeof(str), "%c Funds: %.10g oz", TeamFundsChanged(which) ? -57 : -58, GetTeamFunds(m_Team[PoS]));
+    std::snprintf(str, sizeof(str), "%c Funds: %.10g oz", TeamFundsChanged(which) ? -57 : -58, std::floor(GetTeamFunds(m_Team[PoS])));
     g_FrameMan.GetLargeFont()->DrawAligned(&pBitmapInt, MAX(16, g_SceneMan.GetScreenOcclusion(which).m_X + 16), yTextPos, str, GUIFont::Left);
 /* Not applicable anymore to the 4-team games
     // Body losses

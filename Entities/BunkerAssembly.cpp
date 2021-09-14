@@ -23,7 +23,7 @@
 
 namespace RTE {
 
-ConcreteClassInfo(BunkerAssembly, SceneObject, 0)
+ConcreteClassInfo(BunkerAssembly, SceneObject, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

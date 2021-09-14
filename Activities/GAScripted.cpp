@@ -26,16 +26,16 @@
 #include "Scene.h"
 #include "Actor.h"
 
-#include "GUI/GUI.h"
-#include "GUI/GUIFont.h"
-#include "GUI/AllegroBitmap.h"
+#include "GUI.h"
+#include "GUIFont.h"
+#include "AllegroBitmap.h"
 
 #include "BuyMenuGUI.h"
 #include "SceneEditorGUI.h"
 
 namespace RTE {
 
-ConcreteClassInfo(GAScripted, GameActivity, 0)
+ConcreteClassInfo(GAScripted, GameActivity, 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

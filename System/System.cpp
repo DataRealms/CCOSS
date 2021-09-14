@@ -28,10 +28,6 @@ namespace RTE {
 
 		if (!std::filesystem::exists(s_WorkingDirectory + s_ScreenshotDirectory)) { MakeDirectory(s_WorkingDirectory + s_ScreenshotDirectory); }
 		//if (!std::filesystem::exists(s_WorkingDirectory + s_ModDirectory)) { MakeDirectory(s_WorkingDirectory + s_ModDirectory); }
-
-#ifdef __unix__
-		EnableLoggingToCLI();
-#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -20,16 +20,15 @@ namespace RTE {
 
 #pragma region Creation
 		/// <summary>
-		/// Constructor method used to instantiate a SettingsMan object in system memory. Create() should be called before using the object.
+		/// Constructor method used to instantiate a SettingsMan object in system memory. Initialize() should be called before using the object.
 		/// </summary>
 		SettingsMan() { Clear(); }
 
 		/// <summary>
 		/// Makes the SettingsMan object ready for use.
 		/// </summary>
-		/// <param name="reader">A Reader that the SettingsMan will create itself from.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Initialize(Reader &reader);
+		int Initialize();
 #pragma endregion
 
 #pragma region Destruction
@@ -419,6 +418,8 @@ namespace RTE {
 	private:
 
 		static const std::string c_ClassName; //!< A string with the friendly-formatted type name of this.
+
+		std::string m_SettingsPath; //!< String containing the Path to the Settings.ini file.
 
 		/// <summary>
 		/// Clears all the member variables of this SettingsMan, effectively resetting the members of this abstraction level only.

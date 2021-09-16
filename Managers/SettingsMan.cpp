@@ -25,7 +25,7 @@ namespace RTE {
 		m_EnableCrabBombs = false;
 		m_CrabBombThreshold = 42;
 		m_ShowEnemyHUD = true;
-		m_EnableSmartBuyMenuNavigation = false;
+		m_EnableSmartBuyMenuNavigation = true;
 
 		m_NetworkServerAddress = "127.0.0.1:8000";
 		m_PlayerNetworkName = "Dummy";

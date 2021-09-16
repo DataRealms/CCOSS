@@ -837,13 +837,14 @@ void BuyMenuGUI::EnableEquipmentSelection(bool enabled) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BuyMenuGUI::RefreshTabDisabledStates() {
-    m_pCategoryTabs[CRAFT]->SetEnabled(!m_SelectingEquipment);
-    m_pCategoryTabs[BODIES]->SetEnabled(!m_SelectingEquipment);
-    m_pCategoryTabs[TOOLS]->SetEnabled(m_SelectingEquipment);
-    m_pCategoryTabs[GUNS]->SetEnabled(m_SelectingEquipment);
-    m_pCategoryTabs[BOMBS]->SetEnabled(m_SelectingEquipment);
-    m_pCategoryTabs[SHIELDS]->SetEnabled(m_SelectingEquipment);
-    m_pCategoryTabs[SETS]->SetEnabled(!m_SelectingEquipment);
+    bool smartBuyMenuNavigationDisabled = !g_SettingsMan.SmartBuyMenuNavigationEnabled();
+    m_pCategoryTabs[CRAFT]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
+    m_pCategoryTabs[BODIES]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
+    m_pCategoryTabs[TOOLS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+    m_pCategoryTabs[GUNS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+    m_pCategoryTabs[BOMBS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+    m_pCategoryTabs[SHIELDS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+    m_pCategoryTabs[SETS]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1108,9 +1109,12 @@ void BuyMenuGUI::Update()
     // Change Category directly
 
     if (pressNextActor || pressPrevActor) {
+        bool smartBuyMenuNavigationEnabled = g_SettingsMan.SmartBuyMenuNavigationEnabled();
         if (pressNextActor) {
             m_MenuCategory++;
-            if (m_SelectingEquipment && m_MenuCategory > m_LastEquipmentTab) {
+            if (!smartBuyMenuNavigationEnabled) {
+                m_MenuCategory = m_MenuCategory >= MenuCategory::CATEGORYCOUNT ? 0 : m_MenuCategory;
+            } else if (m_SelectingEquipment && m_MenuCategory > m_LastEquipmentTab) {
                 m_MenuCategory = m_FirstEquipmentTab;
             } else if (!m_SelectingEquipment) {
                 if (m_MenuCategory > m_LastMainTab) {
@@ -1121,7 +1125,9 @@ void BuyMenuGUI::Update()
             }
         } else if (pressPrevActor) {
             m_MenuCategory--;
-            if (m_SelectingEquipment && m_MenuCategory < m_FirstEquipmentTab) {
+            if (!smartBuyMenuNavigationEnabled) {
+                m_MenuCategory = m_MenuCategory < 0 ? MenuCategory::CATEGORYCOUNT : m_MenuCategory;
+            } else if (m_SelectingEquipment && m_MenuCategory < m_FirstEquipmentTab) {
                 m_MenuCategory = m_LastEquipmentTab;
             } else if (!m_SelectingEquipment) {
                 if (m_MenuCategory < m_FirstMainTab) {

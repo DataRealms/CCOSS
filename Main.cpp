@@ -49,8 +49,7 @@ namespace RTE {
 	/// Initializes all the essential managers.
 	/// </summary>
 	void InitializeManagers() {
-		Reader settingsReader("Base.rte/Settings.ini", false, nullptr, true);
-		g_SettingsMan.Initialize(settingsReader);
+		g_SettingsMan.Initialize();
 
 		g_LuaMan.Initialize();
 		g_NetworkServer.Initialize();

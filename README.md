@@ -60,9 +60,8 @@ The Linux build uses the meson build system, and builds against system libraries
 * `lz4>=1.9.0`
 * `libpng`
 * `libX11`
-* `meson>=0.49` (If your distro doesn't have a recent version of meson, use the pip version instead)
+* [`meson`](https://www.mesonbuild.com)`>= 0.53` (If your distro doesn't have a recent version of meson, use the pip version instead)
 * `boost>=1.55`
-* `xorg-misc-fonts` (probably ArchLinux only)
 
 ## Building:
 
@@ -72,29 +71,29 @@ The Linux build uses the meson build system, and builds against system libraries
 
 3. Open a terminal in the Source Repository.
 
-4. `meson build` or `meson --buildtype debug build` for debug build (default is release build)
+4. `meson build` or `meson --buildtype=debug build` for debug build (default is release build)
 
-5. `cd build`
+5. `ninja -C build`
 
-6. `ninja`
+6. (optional) `sudo ninja install -C build` (To uninstall later, keep the build directory intact. The game can then be uninstalled by `sudo ninja uninstall -C build`)
 
-If you want to change the buildtype aftwerwards, you can use `meson configure --buildtype {release or debug}` in the build directory or create a secondary build directory as in Step 4
-
+If you want to change the buildtype afterwards, you can use `meson configure --buildtype {release or debug}` in the build directory or create a secondary build directory as in Step 4. There are also additional build options documented in the [wiki](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Meson-build-options) as well as through running `meson configure` in the build directory.
 
 ## Running:
+(If you installed the game in step 6 above, it should appear with your regular applications and will just run)
 
-1. Copy (or link, might be preferable for testing builds) `builddir/CCCP_debug.x86_64` or `builddir/CCCP.x86_64` (depending on if you made a release build) into the **Data Repository**.
+1. Copy (or link, might be preferable for testing builds) `builddir/CortexCommand.x86_64` or `builddir/CortexCommand_debug.x86_64` (depending on if you made a debug build) into the **Data Repository**.
 
 2. Copy all `libfmod` files from `external/lib/linux/x86_64` into the **Data Repository**.
 
 3. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into **Data Repository**.
 
-4. Run `./CCCP.x86_64` or `./CCCP_debug.x86_64` in the **Data Repository**.
+4. Run `./CortexCommand.x86_64` or `./CortexCommand_debug.x86_64` in the **Data Repository**.
 
 ## Installing Dependencies
 
 **Arch Linux:**  
-`# pacman -S allegro4 boost flac luajit minizip lz4 libpng libx11 meson ninja xorg-fonts-misc base-devel`
+`# pacman -S allegro4 boost flac luajit minizip lz4 libpng libx11 meson ninja base-devel`
 
 **Ubuntu >=20.04:**  
 `# apt-get install build-essential libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  

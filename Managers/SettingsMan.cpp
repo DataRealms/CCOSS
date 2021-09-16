@@ -16,6 +16,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsMan::Clear() {
+		m_SettingsPath = "Base.rte/Settings.ini";
 		m_SettingsNeedOverwrite = false;
 
 		m_FlashOnBrainDamage = true;
@@ -55,10 +56,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SettingsMan::Initialize(Reader &reader) {
-		if (!reader.ReaderOK()) {
-			Writer settingsWriter("Base.rte/Settings.ini");
-			RTEAssert(settingsWriter.WriterOK(), "After failing to open the Base.rte/Settings.ini, could not then even create a new one to save settings to!\nAre you trying to run the game from a read-only disk?\nYou need to install the game to a writable area before running it!");
+	int SettingsMan::Initialize() {
+		if (const char *settingsTempPath = std::getenv("CCCP_SETTINGSPATH")) { m_SettingsPath = std::string(settingsTempPath); }
+
+		Reader settingsReader(m_SettingsPath, false, nullptr, true);
+
+		if (!settingsReader.ReaderOK()) {
+			Writer settingsWriter(m_SettingsPath);
+			RTEAssert(settingsWriter.WriterOK(), "After failing to open the " + m_SettingsPath + ", could not then even create a new one to save settings to!\nAre you trying to run the game from a read-only disk?\nYou need to install the game to a writable area before running it!");
 
 			// Settings file doesn't need to be populated with anything right now besides this manager's ClassName for serialization. It will be overwritten with the full list of settings with default values from all the managers before modules start loading.
 			settingsWriter.ObjectStart(GetClassName());
@@ -66,16 +71,16 @@ namespace RTE {
 
 			m_SettingsNeedOverwrite = true;
 
-			Reader settingsReader("Base.rte/Settings.ini");
-			return Serializable::Create(settingsReader);
+			Reader newSettingsReader(m_SettingsPath);
+			return Serializable::Create(newSettingsReader);
 		}
-		return Serializable::Create(reader);
+		return Serializable::Create(settingsReader);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsMan::UpdateSettingsFile() const {
-		Writer settingsWriter("Base.rte/Settings.ini");
+		Writer settingsWriter(m_SettingsPath);
 		g_SettingsMan.Save(settingsWriter);
 	}
 

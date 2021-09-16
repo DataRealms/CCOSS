@@ -148,6 +148,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="showHUD">Whether the HUD of enemy Actors should be visible to the player or not.</param>
 		void SetShowEnemyHUD(bool showHUD) { m_ShowEnemyHUD = showHUD; }
+
+		/// <summary>
+		/// Gets whether smart BuyMenu navigation is enabled, meaning swapping to equipment mode and back will change active tabs in the BuyMenu.
+		/// </summary>
+		/// <returns>Whether smart BuyMenu navigation is enabled or not.</returns>
+		bool SmartBuyMenuNavigationEnabled() const { return m_EnableSmartBuyMenuNavigation; }
+
+		/// <summary>
+		/// Sets whether smart BuyMenu navigation is enabled, meaning swapping to equipment mode and back will change active tabs in the BuyMenu.
+		/// </summary>
+		/// <param name="enable">Whether to enable smart BuyMenu navigation or not.</param>
+		void SetSmartBuyMenuNavigation(bool enable) { m_EnableSmartBuyMenuNavigation = enable; }
 #pragma endregion
 
 #pragma region Network Settings
@@ -387,6 +399,7 @@ namespace RTE {
 		bool m_EnableCrabBombs; //!< Whether all actors (except Brains and Doors) should be annihilated if a number exceeding the crab bomb threshold is released at once.
 		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.
 		bool m_ShowEnemyHUD; //!< Whether the HUD of enemy actors should be visible to the player.
+		bool m_EnableSmartBuyMenuNavigation; //!< Whether swapping to equipment mode and back should change active tabs in the BuyMenu.
 
 		std::string m_PlayerNetworkName; //!< Player name used in network multiplayer matches.
 		std::string m_NetworkServerAddress; //!< LAN server address to connect to.

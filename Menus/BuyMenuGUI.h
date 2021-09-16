@@ -773,7 +773,6 @@ protected:
     // Measures the interval between input repeats
     Timer m_RepeatTimer;
 
-    bool m_MAXIMTODONAMEHERE; //!< Whether or not swapping to equipment mode and back should change active tabs.
     bool m_SelectingEquipment; //!< Whether or not the menu is in equipment mode.
     MenuCategory m_LastVisitedEquipmentTab; //!< The last tab visited while in equipment mode.
     MenuCategory m_LastVisitedMainTab; //!< The last tab visited while not in equipment mode.

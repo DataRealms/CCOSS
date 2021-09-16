@@ -181,6 +181,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `DataModule` property `IsFaction = 0/1` which determines if a module is a playable faction (in MetaGame, etc.). This replaces the need to put "Tech" in the module name. Defaults to false (0).
 
+- New `Settings.ini` property `SmartBuyMenuNavigation = 0/1` to GACYR EXPLAIN WHAT THE WHOLE THING DOES AND HOW TO USE. 
+
 </details>
 
 

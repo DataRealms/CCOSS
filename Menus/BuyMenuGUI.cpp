@@ -114,7 +114,6 @@ void BuyMenuGUI::Clear()
 	m_AlwaysAllowedItems.clear();
 	m_OwnedItems.clear();
 
-    m_MAXIMTODONAMEHERE = false;
     m_SelectingEquipment = false;
     m_LastVisitedEquipmentTab = GUNS;
     m_LastVisitedMainTab = BODIES;
@@ -814,7 +813,7 @@ void BuyMenuGUI::EnableEquipmentSelection(bool enabled) {
         m_SelectingEquipment = enabled;
         RefreshTabDisabledStates();
 
-        if (m_MAXIMTODONAMEHERE) {
+        if (g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
             if (m_SelectingEquipment) {
                 m_LastVisitedMainTab = static_cast<MenuCategory>(m_MenuCategory);
                 m_LastMainScrollPosition = m_pShopList->GetScrollVerticalValue();

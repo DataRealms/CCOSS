@@ -636,8 +636,8 @@ void GUIListPanel::ScrollToItem(Item *pItem) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void GUIListPanel::ScrollUp() {
-    if (m_VertScroll->_GetVisible()) { m_VertScroll->SetValue(m_VertScroll->GetValue() - 20); }
-    BuildBitmap(false, true);
+	if (m_VertScroll->_GetVisible()) { m_VertScroll->SetValue(m_VertScroll->GetValue() - 20); }
+	BuildBitmap(false, true);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -652,23 +652,23 @@ void GUIListPanel::ScrollDown() {
 		}
 		m_VertScroll->SetValue(m_VertScroll->GetValue() + scrollValueToAdd);
 	}
-    BuildBitmap(false, true);
+	BuildBitmap(false, true);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void GUIListPanel::ScrollTo(int position) {
-    if (m_VertScroll->_GetVisible()) {
+	if (m_VertScroll->_GetVisible()) {
 		m_VertScroll->SetValue(position);
 
 		//TODO this was copied from MaxShadow's work. I'm not quite sure of the point of it tbh.
-        if (!m_Items.empty()) {
-            RTE::GUIListPanel::Item *item = m_Items.back();
+		if (!m_Items.empty()) {
+			RTE::GUIListPanel::Item *item = m_Items.back();
 			int allItemsHeight = GetStackHeight(item) + GetItemHeight(item);
-            if (position + m_VertScroll->GetPageSize() > allItemsHeight) { m_VertScroll->SetValue(allItemsHeight - m_VertScroll->GetPageSize()); }
-        }
-    }
-    BuildBitmap(false, true);
+			if (position + m_VertScroll->GetPageSize() > allItemsHeight) { m_VertScroll->SetValue(allItemsHeight - m_VertScroll->GetPageSize()); }
+		}
+	}
+	BuildBitmap(false, true);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

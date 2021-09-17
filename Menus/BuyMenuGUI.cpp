@@ -1126,7 +1126,7 @@ void BuyMenuGUI::Update()
         } else if (pressPrevActor) {
             m_MenuCategory--;
             if (!smartBuyMenuNavigationEnabled) {
-                m_MenuCategory = m_MenuCategory < 0 ? MenuCategory::CATEGORYCOUNT : m_MenuCategory;
+                m_MenuCategory = m_MenuCategory < 0 ? MenuCategory::CATEGORYCOUNT - 1 : m_MenuCategory;
             } else if (m_SelectingEquipment && m_MenuCategory < m_FirstEquipmentTab) {
                 m_MenuCategory = m_LastEquipmentTab;
             } else if (!m_SelectingEquipment) {

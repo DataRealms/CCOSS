@@ -181,6 +181,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `DataModule` property `IsFaction = 0/1` which determines if a module is a playable faction (in MetaGame, etc.). This replaces the need to put "Tech" in the module name. Defaults to false (0).
 
+- Various improvements to the Buy Menu. You can now navigate tabs with the actor swap buttons, and the menu will smartly navigate when you add an `Actor` to your shop list, so you can quickly select weapons, etc..  
+	There is also a new `Settings.ini` property, `SmartBuyMenuNavigation = 0/1`, which allows you to turn off this smart buy menu navigation, in case you prefer not to have it. 
+
 </details>
 
 

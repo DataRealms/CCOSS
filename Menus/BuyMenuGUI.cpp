@@ -113,6 +113,16 @@ void BuyMenuGUI::Clear()
 	m_AllowedItems.clear();
 	m_AlwaysAllowedItems.clear();
 	m_OwnedItems.clear();
+
+    m_SelectingEquipment = false;
+    m_LastVisitedEquipmentTab = GUNS;
+    m_LastVisitedMainTab = BODIES;
+    m_LastEquipmentScrollPosition = -1;
+    m_LastMainScrollPosition = -1;
+    m_FirstMainTab = CRAFT;
+    m_LastMainTab = SETS;
+    m_FirstEquipmentTab = TOOLS;
+    m_LastEquipmentTab = SHIELDS;
 }
 
 
@@ -198,6 +208,7 @@ int BuyMenuGUI::Create(Controller *pController)
     m_pCategoryTabs[BOMBS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("BombsTab"));
     m_pCategoryTabs[SHIELDS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("ShieldsTab"));
     m_pCategoryTabs[SETS] = dynamic_cast<GUITab *>(m_pGUIController->GetControl("SetsTab"));
+    RefreshTabDisabledStates();
 
     m_pShopList = dynamic_cast<GUIListBox *>(m_pGUIController->GetControl("CatalogLB"));
     m_pCartList = dynamic_cast<GUIListBox *>(m_pGUIController->GetControl("OrderLB"));
@@ -274,7 +285,7 @@ int BuyMenuGUI::Create(Controller *pController)
     // Set initial focus, category list, and label settings
     m_MenuFocus = OK;
     m_FocusChange = true;
-    m_MenuCategory = SETS;
+    m_MenuCategory = CRAFT;
     CategoryChange();
     UpdateTotalCostLabel(m_pController->GetTeam());
 
@@ -558,9 +569,8 @@ void BuyMenuGUI::SetEnabled(bool enable)
 		UpdateTotalMassLabel(dynamic_cast<const ACraft *>(m_pSelectedCraft), m_pCraftMassLabel);
 
         g_GUISound.EnterMenuSound()->Play(m_pController->GetPlayer());
-    }
-    else if (!enable && m_MenuEnabled != DISABLED && m_MenuEnabled != DISABLING)
-    {
+    } else if (!enable && m_MenuEnabled != DISABLED && m_MenuEnabled != DISABLING) {
+        EnableEquipmentSelection(false);
         m_MenuEnabled = DISABLING;
         // Trap the mouse cursor again
         g_UInputMan.TrapMousePos(true, m_pController->GetPlayer());
@@ -796,6 +806,49 @@ int BuyMenuGUI::GetTotalOrderPassengers() const {
 	return passengers;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void BuyMenuGUI::EnableEquipmentSelection(bool enabled) {
+    if (enabled != m_SelectingEquipment) {
+        m_SelectingEquipment = enabled;
+        RefreshTabDisabledStates();
+
+        if (g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
+            if (m_SelectingEquipment) {
+                m_LastVisitedMainTab = static_cast<MenuCategory>(m_MenuCategory);
+                m_LastMainScrollPosition = m_pShopList->GetScrollVerticalValue();
+                m_MenuCategory = m_LastVisitedEquipmentTab;
+            } else {
+                m_LastVisitedEquipmentTab = static_cast<MenuCategory>(m_MenuCategory);
+                m_LastEquipmentScrollPosition = m_pShopList->GetScrollVerticalValue();
+                m_MenuCategory = m_LastVisitedMainTab;
+            }
+        }
+        
+        CategoryChange();
+        m_pShopList->ScrollTo(m_SelectingEquipment ? m_LastEquipmentScrollPosition : m_LastMainScrollPosition);
+
+        m_MenuFocus = ITEMS;
+        m_FocusChange = 1;
+        g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void BuyMenuGUI::RefreshTabDisabledStates() {
+    bool smartBuyMenuNavigationDisabled = !g_SettingsMan.SmartBuyMenuNavigationEnabled();
+    m_pCategoryTabs[CRAFT]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
+    m_pCategoryTabs[BODIES]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
+    m_pCategoryTabs[TOOLS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+    m_pCategoryTabs[GUNS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+    m_pCategoryTabs[BOMBS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+    m_pCategoryTabs[SHIELDS]->SetEnabled(smartBuyMenuNavigationDisabled || m_SelectingEquipment);
+    m_pCategoryTabs[SETS]->SetEnabled(smartBuyMenuNavigationDisabled || !m_SelectingEquipment);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -946,31 +999,38 @@ void BuyMenuGUI::Update()
 
     bool pressLeft = m_pController->IsState(PRESS_LEFT);
     bool pressRight = m_pController->IsState(PRESS_RIGHT);
-    bool pressUp = m_pController->IsState(PRESS_UP) || m_pController->IsState(SCROLL_UP);
-    bool pressDown = m_pController->IsState(PRESS_DOWN) || m_pController->IsState(SCROLL_DOWN);
+    bool pressUp = m_pController->IsState(PRESS_UP);
+    bool pressDown = m_pController->IsState(PRESS_DOWN);
+    bool pressScrollUp = m_pController->IsState(SCROLL_UP);
+    bool pressScrollDown = m_pController->IsState(SCROLL_DOWN);
+
+    bool pressNextActor = m_pController->IsState(ACTOR_NEXT);
+    bool pressPrevActor = m_pController->IsState(ACTOR_PREV);
 
     // If no direciton is held down, then cancel the repeating
-    if (!(m_pController->IsState(MOVE_RIGHT) || m_pController->IsState(MOVE_LEFT) || m_pController->IsState(MOVE_UP) || m_pController->IsState(MOVE_DOWN)))
+    if (!(m_pController->IsState(MOVE_RIGHT) || m_pController->IsState(MOVE_LEFT) || m_pController->IsState(MOVE_UP) || m_pController->IsState(MOVE_DOWN) || m_pController->IsState(ACTOR_NEXT_PREP) || m_pController->IsState(ACTOR_PREV_PREP)))
     {
         m_RepeatStartTimer.Reset();
         m_RepeatTimer.Reset();
     }
 
     // Check if any direction has been held for the starting amount of time to get into repeat mode
-    if (m_RepeatStartTimer.IsPastRealMS(200))
-    {
+    if (m_RepeatStartTimer.IsPastRealMS(200)) {
         // Check for the repeat interval
-        if (m_RepeatTimer.IsPastRealMS(75))
-        {
-            if (m_pController->IsState(MOVE_RIGHT))
+        if (m_RepeatTimer.IsPastRealMS(75)) {
+            if (m_pController->IsState(MOVE_RIGHT)) {
                 pressRight = true;
-            else if (m_pController->IsState(MOVE_LEFT))
+            } else if (m_pController->IsState(MOVE_LEFT)) {
                 pressLeft = true;
-            else if (m_pController->IsState(MOVE_UP))
+            } else if (m_pController->IsState(MOVE_UP)) {
                 pressUp = true;
-            else if (m_pController->IsState(MOVE_DOWN))
+            } else if (m_pController->IsState(MOVE_DOWN)) {
                 pressDown = true;
-
+            } else if (m_pController->IsState(ACTOR_NEXT_PREP)) {
+                pressNextActor = true;
+            } else if (m_pController->IsState(ACTOR_PREV_PREP)) {
+                pressPrevActor = true;
+            }
             m_RepeatTimer.Reset();
         }
     }
@@ -1036,14 +1096,82 @@ void BuyMenuGUI::Update()
     // Play focus change sound, if applicable
     if (m_FocusChange && m_MenuEnabled != ENABLING)
         g_GUISound.FocusChangeSound()->Play(m_pController->GetPlayer());
-/* Blah, should control whatever is currently focused
-    // Mouse wheel only controls the categories, so switch to it and make the category go up or down
-    if (m_pController->IsState(SCROLL_UP) || m_pController->IsState(SCROLL_DOWN))
-    {
-        m_FocusChange = CATEGORIES - m_MenuFocus;
-        m_MenuFocus = CATEGORIES;
+    /* Blah, should control whatever is currently focused
+        // Mouse wheel only controls the categories, so switch to it and make the category go up or down
+        if (m_pController->IsState(SCROLL_UP) || m_pController->IsState(SCROLL_DOWN))
+        {
+            m_FocusChange = CATEGORIES - m_MenuFocus;
+            m_MenuFocus = CATEGORIES;
+        }
+    */
+
+    /////////////////////////////////////////
+    // Change Category directly
+
+    if (pressNextActor || pressPrevActor) {
+        bool smartBuyMenuNavigationEnabled = g_SettingsMan.SmartBuyMenuNavigationEnabled();
+        if (pressNextActor) {
+            m_MenuCategory++;
+            if (!smartBuyMenuNavigationEnabled) {
+                m_MenuCategory = m_MenuCategory >= MenuCategory::CATEGORYCOUNT ? 0 : m_MenuCategory;
+            } else if (m_SelectingEquipment && m_MenuCategory > m_LastEquipmentTab) {
+                m_MenuCategory = m_FirstEquipmentTab;
+            } else if (!m_SelectingEquipment) {
+                if (m_MenuCategory > m_LastMainTab) {
+                    m_MenuCategory = m_FirstMainTab;
+                } else if (m_MenuCategory == m_FirstEquipmentTab) {
+                    m_MenuCategory = m_LastMainTab;
+                }
+            }
+        } else if (pressPrevActor) {
+            m_MenuCategory--;
+            if (!smartBuyMenuNavigationEnabled) {
+                m_MenuCategory = m_MenuCategory < 0 ? MenuCategory::CATEGORYCOUNT - 1 : m_MenuCategory;
+            } else if (m_SelectingEquipment && m_MenuCategory < m_FirstEquipmentTab) {
+                m_MenuCategory = m_LastEquipmentTab;
+            } else if (!m_SelectingEquipment) {
+                if (m_MenuCategory < m_FirstMainTab) {
+                    m_MenuCategory = m_LastMainTab;
+                } else if (m_MenuCategory == m_LastEquipmentTab) {
+                    m_MenuCategory = m_FirstEquipmentTab - 1;
+                }
+            }
+        }
+
+        CategoryChange();
+        g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
+
+        m_MenuFocus = ITEMS;
+        m_FocusChange = 1;
     }
-*/
+
+    /////////////////////////////////////////
+    // Scroll buy menu
+
+    if (pressScrollUp) {
+        m_pShopList->ScrollUp();
+    } else if (pressScrollDown) {
+        m_pShopList->ScrollDown();
+    }
+
+    //Special handling to allow user to click on disabled tab buttons with mouse.
+    RefreshTabDisabledStates();
+    for (int category = 0; category < CATEGORYCOUNT; ++category) {
+        if (!m_pCategoryTabs[category]->IsEnabled()) {
+            if (m_MenuCategory == category) { m_pCategoryTabs[m_MenuCategory]->SetEnabled(true); }
+            if (m_pCategoryTabs[category]->PointInside(m_CursorPos.GetFloorIntX() + 3, m_CursorPos.GetFloorIntY())) {
+                if (m_pController->IsState(PRESS_PRIMARY)) {
+                    m_MenuCategory = category;
+                    m_pCategoryTabs[m_MenuCategory]->SetFocus();
+                    m_pCategoryTabs[m_MenuCategory]->SetEnabled(true);
+                    CategoryChange();
+                    g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
+                } else if (!m_pCategoryTabs[category]->IsEnabled() && !m_pCategoryTabs[category]->HasFocus()) {
+                    m_pCategoryTabs[category]->SetFocus();
+                }
+            }
+        }
+    }
 
     /////////////////////////////////////////
     // SETS BUTTONS focus
@@ -1103,51 +1231,28 @@ void BuyMenuGUI::Update()
     /////////////////////////////////////////
     // CATEGORIES focus
 
-    else if (m_MenuFocus == CATEGORIES)
-    {
-        if (m_FocusChange)
-        {
+    else if (m_MenuFocus == CATEGORIES) {
+        if (m_FocusChange) {
             m_pCategoryTabs[m_MenuCategory]->SetFocus();
             m_FocusChange = 0;
         }
 
-        if (pressDown)
-        {
+        if (pressDown) {
             m_MenuCategory++;
-            if (m_MenuCategory >= CATEGORYCOUNT)
-            {
+            if (m_MenuCategory >= CATEGORYCOUNT) {
                 m_MenuCategory = CATEGORYCOUNT - 1;
-                // Go to the preset buttons if hit down on the last one
                 m_MenuFocus = SETBUTTONS;
                 m_FocusChange = -1;
-//                g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
-            }
-/*
-            // Loop Around
-            if (m_MenuCategory >= CATEGORYCOUNT)
-                m_MenuCategory = 0;
-*/
-            else
-            {
+            } else {
                 CategoryChange();
                 g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
             }
-        }
-        else if (pressUp)
-        {
+        } else if (pressUp) {
             m_MenuCategory--;
-            if (m_MenuCategory < 0)
-            {
+            if (m_MenuCategory < 0) {
                 m_MenuCategory = 0;
                 g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
-            }
-/*
-            // Loop around
-            if (m_MenuCategory < 0)
-                m_MenuCategory = CATEGORYCOUNT - 1;
-*/
-            else
-            {
+            } else {
                 CategoryChange();
                 g_GUISound.SelectionChangeSound()->Play(m_pController->GetPlayer());
             }
@@ -1302,6 +1407,11 @@ void BuyMenuGUI::Update()
                     // Gotto make a copy of the bitmap to pass it to the next list
                     GUIBitmap *pItemBitmap = new AllegroBitmap(dynamic_cast<AllegroBitmap *>(pItem->m_pBitmap)->GetBitmap());
                     m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
+                    // If I just selected an AHuman, enable equipment selection mode
+                    if (m_MenuCategory == BODIES && pItem->m_pEntity->GetClassName() == "AHuman")
+                    {
+                        EnableEquipmentSelection(true);
+                    }
                 }
                 g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
             }
@@ -1394,9 +1504,20 @@ void BuyMenuGUI::Update()
             m_pPopupBox->Resize(m_pPopupBox->GetWidth(), newHeight + 10);
         }
 
-        // Fire button removes items from the order list
-        if (m_pController->IsState(PRESS_FACEBUTTON))
-        {
+        // Fire button removes items from the order list, including equipment on AHumans
+        if (m_pController->IsState(PRESS_FACEBUTTON)) {
+            if (pItem && pItem->m_pEntity && pItem->m_pEntity->GetClassName() == "AHuman") {
+                int lastItemToDelete = m_pCartList->GetItemList()->size() - 1;
+                for (int i = m_ListItemIndex + 1; i != m_pCartList->GetItemList()->size(); i++) {
+                    GUIListPanel::Item *cartItem = m_pCartList->GetItem(i);
+                    if (dynamic_cast<const Actor *>(cartItem->m_pEntity)) {
+                        lastItemToDelete = i - 1;
+                        break;
+                    }
+                } for (int i = lastItemToDelete; i > m_ListItemIndex; i--) {
+                    m_pCartList->DeleteItem(i);
+                }
+            }
             m_pCartList->DeleteItem(m_ListItemIndex);
             // If we're not at the bottom, then select the item in the same place as the one just deleted
             if (m_pCartList->GetItemList()->size() > m_ListItemIndex)
@@ -1444,13 +1565,23 @@ void BuyMenuGUI::Update()
             g_GUISound.UserErrorSound()->Play(m_pController->GetPlayer());
     }
 
-    // If mouse clicked outside the buy menu, the user is considered havin g tried to buy
-    if (m_pController->IsMouseControlled() && m_MenuEnabled == ENABLED && m_pController->IsState(PRESS_PRIMARY) && m_CursorPos.m_X > m_pParentBox->GetWidth())
-        TryPurchase();
-
-    // ESC, Right click, or pie menu press close the menu
-    if (m_pController->IsState(PRESS_SECONDARY) || m_pController->IsState(PIE_MENU_ACTIVE) || g_UInputMan.AnyStartPress(false))
-        SetEnabled(false);
+    if (m_MenuEnabled == ENABLED) {
+        if (m_pController->IsState(WEAPON_RELOAD)) {
+            TryPurchase();
+        } else if (m_pController->IsMouseControlled() && (m_pController->IsState(PRESS_PRIMARY) || m_pController->IsState(PRESS_SECONDARY)) && m_CursorPos.m_X > m_pParentBox->GetWidth()) {
+            if (m_pController->IsState(PRESS_PRIMARY)) {
+                TryPurchase();
+            } else {
+                SetEnabled(false);
+            }
+        } else if (m_pController->IsState(PRESS_SECONDARY) || g_UInputMan.AnyStartPress(false)) {
+            if (m_SelectingEquipment) {
+                EnableEquipmentSelection(false);
+            } else {
+                SetEnabled(false);
+            }
+        }
+    }
 
     //////////////////////////////////////////
 	// Update the ControlManager
@@ -1515,7 +1646,7 @@ void BuyMenuGUI::Update()
                     {
                         // Just give focus to the categories column
                         m_MenuFocus = CATEGORIES;
-                        m_pCategoryTabs[m_MenuCategory]->SetFocus();
+                        m_pCategoryTabs[cat]->SetFocus();
                     }
                     // Regular click
                     if(anEvent.GetMsg() == GUITab::Pushed)
@@ -1620,6 +1751,12 @@ void BuyMenuGUI::Update()
 							{
 								m_pCartList->AddItem(pItem->m_Name, pItem->m_RightText, pItemBitmap, pItem->m_pEntity);
 							}
+                            
+                            // If I just selected an AHuman, enable equipment selection mode
+                            if (m_MenuCategory == BODIES && pItem->m_pEntity->GetClassName() == "AHuman")
+                            {
+                                EnableEquipmentSelection(true);
+                            }
                         }
                         g_GUISound.ItemChangeSound()->Play(m_pController->GetPlayer());
                     }
@@ -1684,6 +1821,18 @@ void BuyMenuGUI::Update()
                         m_ListItemIndex = m_pCartList->GetSelectedIndex();
                         m_pCartList->ScrollToSelected();
 
+                        if (pItem && pItem->m_pEntity && pItem->m_pEntity->GetClassName() == "AHuman") {
+                            int lastItemToDelete = m_pCartList->GetItemList()->size() - 1;
+                            for (int i = m_ListItemIndex + 1; i != m_pCartList->GetItemList()->size(); i++) {
+                                GUIListPanel::Item *cartItem = m_pCartList->GetItem(i);
+                                if (dynamic_cast<const Actor *>(cartItem->m_pEntity)) {
+                                    lastItemToDelete = i - 1;
+                                    break;
+                                }
+                            } for (int i = lastItemToDelete; i > m_ListItemIndex; i--) {
+                                m_pCartList->DeleteItem(i);
+                            }
+                        }
                         m_pCartList->DeleteItem(m_ListItemIndex);
                         // If we're not at the bottom, then select the item in the same place as the one just deleted
                         if (m_pCartList->GetItemList()->size() > m_ListItemIndex)
@@ -2336,6 +2485,7 @@ void BuyMenuGUI::TryPurchase()
         m_BlinkTimer.Reset();
 		return;
 	} else {
+        if (m_SelectingEquipment) { EnableEquipmentSelection(false); }
 		const ACraft * pCraft = dynamic_cast<const ACraft *>(m_pSelectedCraft);
 		if (pCraft) {
 			// Enforce max mass

@@ -2111,6 +2111,7 @@ void GameActivity::Update()
                 m_MessageTimer[player].Reset();
 
                 pDeliveryCraft->ResetEmissionTimers();  // Reset the engine timers so they don't emit a massive burst after being added to the world
+				pDeliveryCraft->ResetAllTimers();
                 pDeliveryCraft->Update();
 
                 // Add the delivery craft to the world, TRANSFERRING OWNERSHIP

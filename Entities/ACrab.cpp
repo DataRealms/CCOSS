@@ -2830,10 +2830,9 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
     // Player AI drawing
 
-    // Device aiming reticle
-    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
-        m_pTurret->GetFirstMountedDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen, m_Controller.IsPlayerControlled());
-
+	if ((m_Controller.IsState(AIM_SHARP) || (m_Controller.IsPlayerControlled() && !m_Controller.IsState(PIE_MENU_ACTIVE))) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice()) {
+		m_pTurret->GetFirstMountedDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen, m_Controller.IsState(AIM_SHARP) && m_Controller.IsPlayerControlled());
+	}
     //////////////////////////////////////
     // Draw stat info HUD
     char str[64];

@@ -54,6 +54,7 @@ namespace RTE {
 		GUICheckbox *m_EnableCrabBombsCheckbox;
 		GUICheckbox *m_EndlessMetaGameCheckbox;
 		GUICheckbox *m_ShowEnemyHUDCheckbox;
+		GUICheckbox *m_EnableSmartBuyMenuNavigationCheckbox;
 		GUITextBox *m_MaxUnheldItemsTextbox;
 		GUITextBox *m_CrabBombThresholdTextbox;
 		GUISlider *m_UnheldItemsHUDDisplayRangeSlider;

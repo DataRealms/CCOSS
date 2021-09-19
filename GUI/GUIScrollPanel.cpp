@@ -271,10 +271,7 @@ void GUIScrollPanel::SetMaximum(int Max) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void GUIScrollPanel::SetValue(int Value) {
-	m_Value = Value;
-	m_Value = std::max(Value, m_Minimum);
-	m_Value = std::min(Value, m_Maximum);
-
+	m_Value = std::clamp(Value, m_Minimum, m_Maximum);
 	CalculateKnob();
 }
 

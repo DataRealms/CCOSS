@@ -486,6 +486,21 @@ public:
 
     void ScrollToBottom();
 
+	/// <summary>
+	/// Scrolls the GUIListPanel up.
+	/// </summary>
+	void ScrollUp();
+
+	/// <summary>
+	/// Scrolls the GUIListPanel down.
+	/// </summary>
+	void ScrollDown();
+
+	/// <summary>
+	/// Scrolls the the GUIListPanel to a specific position
+	/// </summary>
+	/// <param name="position">The position to scroll to.</param>
+	void ScrollTo(int position);
 
 	/// <summary>
 	/// Sets whether the scroll panel scrolls in a loop or not.
@@ -512,7 +527,7 @@ public:
 	/// <param name="newPadding">The new scrollbar padding, in pixels.</param>
 	void SetScrollBarPadding(int newPadding) { m_ScrollBarPadding = newPadding; AdjustScrollbars(); }
 
-	protected:
+protected:
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          BuildBitmap

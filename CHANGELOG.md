@@ -218,6 +218,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	Value of 0 means there is no range limit and all items on Scene will display the pick-up HUD.
 	Valid range values are 1-1000, anything above will be considered as no range limit.
 
+- Various improvements to the Buy Menu. You can now navigate tabs with the actor swap buttons, and the menu will smartly navigate when you add an `Actor` to your shop list, so you can quickly select weapons, etc..  
+	There is also a new `Settings.ini` property, `SmartBuyMenuNavigation = 0/1`, which allows you to turn off this smart buy menu navigation, in case you prefer not to have it. 
+
 </details>
 
 <details><summary>**Changed**</summary>

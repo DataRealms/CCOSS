@@ -441,6 +441,7 @@ void AEmitter::Update()
 		} else if (m_Throttle > 0) {
 			throttleFactor = throttleFactor * (1 - absThrottle) + (m_PositiveThrottleMultiplier * absThrottle);
 		}
+		m_FlashScale = throttleFactor;
         // Check burst triggering against whether the spacing is fulfilled
         if (m_BurstTriggered && (m_BurstSpacing <= 0 || m_BurstTimer.IsPastSimMS(m_BurstSpacing)))
         {

@@ -2143,8 +2143,6 @@ void ACrab::Update()
 			// Jetpack throttle depletes relative to jet time, but only if throttle range values have been defined
 			float jetTimeRatio = std::max(m_JetTimeLeft / m_JetTimeTotal, 0.0F);
 			m_pJetpack->SetThrottle(jetTimeRatio * 2.0F - 1.0F);
-			float minScale = 1.0F - m_pJetpack->GetMinThrottle();
-			m_pJetpack->SetFlashScale(minScale + (1.0F + m_pJetpack->GetMaxThrottle() - minScale) * jetTimeRatio);
 		}
 		// Start Jetpack burn
 		if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0 && m_Status != INACTIVE)

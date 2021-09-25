@@ -37,8 +37,8 @@ namespace RTE {
 		m_WasEmitting = false;
 		m_EmitCount = 0;
 		m_EmitCountLimit = 0;
-		m_NegativeThrottleMultiplier = 1.0F;
-		m_PositiveThrottleMultiplier = 1.0F;
+		m_MinThrottleRange = -1;
+		m_MaxThrottleRange = 1;
 		m_Throttle = 0;
 		m_EmissionsIgnoreThis = false;
 		m_BurstScale = 1.0;
@@ -90,8 +90,8 @@ namespace RTE {
 		m_EmitEnabled = reference.m_EmitEnabled;
 		m_EmitCount = reference.m_EmitCount;
 		m_EmitCountLimit = reference.m_EmitCountLimit;
-		m_NegativeThrottleMultiplier = reference.m_NegativeThrottleMultiplier;
-		m_PositiveThrottleMultiplier = reference.m_PositiveThrottleMultiplier;
+		m_MinThrottleRange = reference.m_MinThrottleRange;
+		m_MaxThrottleRange = reference.m_MaxThrottleRange;
 		m_Throttle = reference.m_Throttle;
 		m_EmissionsIgnoreThis = reference.m_EmissionsIgnoreThis;
 		m_BurstScale = reference.m_BurstScale;
@@ -143,10 +143,10 @@ namespace RTE {
 			for (list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
 				(*eItr).m_PPM = ppm / m_EmissionList.size();
 		}
-		else if (propName == "NegativeThrottleMultiplier")
-			reader >> m_NegativeThrottleMultiplier;
-		else if (propName == "PositiveThrottleMultiplier")
-			reader >> m_PositiveThrottleMultiplier;
+		else if (propName == "MinThrottleRange")
+			reader >> m_MinThrottleRange;
+		else if (propName == "MaxThrottleRange")
+			reader >> m_MaxThrottleRange;
 		else if (propName == "Throttle")
 			reader >> m_Throttle;
 		else if (propName == "EmissionsIgnoreThis")
@@ -213,10 +213,10 @@ namespace RTE {
 		writer << m_EmitCountLimit;
 		writer.NewProperty("EmissionsIgnoreThis");
 		writer << m_EmissionsIgnoreThis;
-		writer.NewProperty("NegativeThrottleMultiplier");
-		writer << m_NegativeThrottleMultiplier;
-		writer.NewProperty("PositiveThrottleMultiplier");
-		writer << m_PositiveThrottleMultiplier;
+		writer.NewProperty("MinThrottleRange");
+		writer << m_MinThrottleRange;
+		writer.NewProperty("MaxThrottleRange");
+		writer << m_MaxThrottleRange;
 		writer.NewProperty("Throttle");
 		writer << m_Throttle;
 		writer.NewProperty("BurstScale");
@@ -339,14 +339,13 @@ namespace RTE {
 
 		}
 
-		// Scale the emission rate up or down according to the appropriate throttle multiplier.
-		float throttleFactor = 1.0F;
-		float absThrottle = std::abs(m_Throttle);
-		if (m_Throttle < 0) {
-			throttleFactor = throttleFactor * (1 - absThrottle) + (m_NegativeThrottleMultiplier * absThrottle);
-		} else if (m_Throttle > 0) {
-			throttleFactor = throttleFactor * (1 - absThrottle) + (m_PositiveThrottleMultiplier * absThrottle);
-		}
+		// Figure out the throttle factor
+		float throttleFactor = 1.0f;
+		if (m_Throttle < 0)         // Negative throttle, scale down according to the min throttle range
+			throttleFactor += fabs(m_MinThrottleRange) * m_Throttle;
+		else if (m_Throttle > 0)    // Positive throttle, scale up
+			throttleFactor += fabs(m_MaxThrottleRange) * m_Throttle;
+
 		// Apply the throttle factor to the emission rate per update
 		if (burst)
 			return m_AvgBurstImpulse * throttleFactor;
@@ -398,15 +397,15 @@ namespace RTE {
 			// TODO: Potentially get this once outside instead, like in attach/detach")
 			MovableObject *pRootParent = GetRootParent();
 
-			// Scale the emission rate up or down according to the appropriate throttle multiplier.
-			float throttleFactor = 1.0F;
-			float absThrottle = std::abs(m_Throttle);
-			if (m_Throttle < 0) {
-				throttleFactor = throttleFactor * (1 - absThrottle) + (m_NegativeThrottleMultiplier * absThrottle);
-			} else if (m_Throttle > 0) {
-				throttleFactor = throttleFactor * (1 - absThrottle) + (m_PositiveThrottleMultiplier * absThrottle);
-			}
-			m_FlashScale = throttleFactor;
+			// Figure out the throttle factor
+			// Negative throttle, scale down according to the min throttle range
+			float throttleFactor = 1.0f;
+			if (m_Throttle < 0)
+				throttleFactor += fabs(m_MinThrottleRange) * m_Throttle;
+			// Positive throttle, scale up
+			else if (m_Throttle > 0)
+				throttleFactor += fabs(m_MaxThrottleRange) * m_Throttle;
+
 			// Check burst triggering against whether the spacing is fulfilled
 			if (m_BurstTriggered && (m_BurstSpacing <= 0 || m_BurstTimer.IsPastSimMS(m_BurstSpacing)))
 			{

@@ -506,9 +506,10 @@ protected:
 	long m_EmitCount;
 	// The max number of emissions to emit per emit being enabled
 	long m_EmitCountLimit;
-	// TODO: explain this property more clearly
-	float m_NegativeThrottleMultiplier; //!< The multiplier applied to emission rate relative to negative throttle. 1.0 means no change in rate, 0 means negative throttle will scale down to zero.
-	float m_PositiveThrottleMultiplier; //!< DESCRIPTION PENDING
+	// The range negative throttle has on emission rate. 1.0 means the rate can be throttled down to 0%, 0 means negative throttle has no effect
+	double m_MinThrottleRange;
+	// The range positive throttle has on emission rate. 1.0 means the rate can be throttled up to 200%, 0 means negative throttle has no effect
+	double m_MaxThrottleRange;
 	// The normalized throttle which controls the MSPE between 1.0 * m_MSPERange and -1.0 * m_MSPERange. 0 means emit the regular m_PPM amount.
 	float m_Throttle;
 	// Whether or not this' emissions ignore hits with itself, even if they are set to hit other MOs.

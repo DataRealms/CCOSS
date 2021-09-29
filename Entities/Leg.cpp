@@ -78,9 +78,7 @@ namespace RTE {
 
 	int Leg::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Foot") {
-			Attachable iniDefinedObject;
-			reader >> &iniDefinedObject;
-			SetFoot(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
+			SetFoot(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
 		} else if (propName == "ContractedOffset") {
 			reader >> m_ContractedOffset;
 			m_MinExtension = m_ContractedOffset.GetMagnitude();

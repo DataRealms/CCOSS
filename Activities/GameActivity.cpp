@@ -2110,7 +2110,6 @@ void GameActivity::Update()
                 g_FrameMan.SetScreenText("Your order has arrived!", ScreenOfPlayer(player), 333);
                 m_MessageTimer[player].Reset();
 
-                pDeliveryCraft->ResetEmissionTimers();  // Reset the engine timers so they don't emit a massive burst after being added to the world
 				pDeliveryCraft->ResetAllTimers();
                 pDeliveryCraft->Update();
 

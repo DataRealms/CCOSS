@@ -799,27 +799,4 @@ void ACDropShip::SetLeftHatch(Attachable *newHatch) {
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ResetEmissionTimers
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reset the timers of all emissions so they will start/stop at the 
-//                  correct relative offsets from now.
-
-void ACDropShip::ResetEmissionTimers()
-{
-    if (m_pRThruster && m_pRThruster->IsAttached())
-        m_pRThruster->ResetEmissionTimers();
-
-    if (m_pLThruster && m_pLThruster->IsAttached())
-        m_pLThruster->ResetEmissionTimers();
-
-    if (m_pURThruster && m_pURThruster->IsAttached())
-        m_pURThruster->ResetEmissionTimers();
-
-    if (m_pULThruster && m_pULThruster->IsAttached())
-        m_pULThruster->ResetEmissionTimers();
-}
 } // namespace RTE

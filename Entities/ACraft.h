@@ -478,17 +478,10 @@ enum
 
     bool HasDelivered() { return m_HasDelivered; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ResetEmissionTimers
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reset the timers of all emissions so they will start/stop at the 
-//                  correct relative offsets from now.
-// Arguments:       None.
-// Return value:    None.
-
-	virtual void ResetEmissionTimers() {}
-
+	/// <summary>
+	/// Resets all the timers related to this, including the scuttle timer.
+	/// </summary>
+	void ResetAllTimers() override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  OnMOHit

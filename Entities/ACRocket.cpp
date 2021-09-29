@@ -885,33 +885,6 @@ void ACRocket::SetULeftThruster(AEmitter *newThruster) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ResetEmissionTimers
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reset the timers of all emissions so they will start/stop at the 
-//                  correct relative offsets from now.
-
-void ACRocket::ResetEmissionTimers()
-{
-    if (m_pMThruster && m_pMThruster->IsAttached())
-        m_pMThruster->ResetEmissionTimers();
-
-    if (m_pRThruster && m_pRThruster->IsAttached())
-        m_pRThruster->ResetEmissionTimers();
-
-    if (m_pLThruster && m_pLThruster->IsAttached())
-        m_pLThruster->ResetEmissionTimers();
-
-    if (m_pURThruster && m_pURThruster->IsAttached())
-        m_pURThruster->ResetEmissionTimers();
-
-    if (m_pULThruster && m_pULThruster->IsAttached())
-        m_pULThruster->ResetEmissionTimers();
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void ACRocket::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     ACraft::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 

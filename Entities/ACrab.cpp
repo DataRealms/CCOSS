@@ -492,11 +492,6 @@ void ACrab::SetJetpack(AEmitter *newJetpack) {
         if (m_pJetpack->HasNoSetDamageMultiplier()) { m_pJetpack->SetDamageMultiplier(0.0F); }
         m_pJetpack->SetApplyTransferredForcesAtOffset(false);
         m_pJetpack->SetDeleteWhenRemovedFromParent(true);
-
-        if (!m_pJetpack->GetThrottleRangeRedefined()) {
-            m_pJetpack->SetMinThrottleRange(0);
-            m_pJetpack->SetMaxThrottleRange(0);
-        }
     }
 }
 

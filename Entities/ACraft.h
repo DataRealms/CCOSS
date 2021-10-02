@@ -578,6 +578,18 @@ enum
 	void SetScuttleOnDeath(bool scuttleOnDeath) { m_ScuttleOnDeath = scuttleOnDeath; }
 
 	/// <summary>
+	/// Gets the hatch opening/closing delay of this ACraft.
+	/// </summary>
+	/// <returns>The hatch delay of this ACraft.</returns>
+	int GetHatchDelay() const { return m_HatchDelay; }
+
+	/// <summary>
+	/// Sets the hatch opening/closing delay of this ACraft.
+	/// </summary>
+	/// <param name="newDelay">The new hatch delay of this ACraft.</param>
+	void SetHatchDelay(int newDelay) { m_HatchDelay = newDelay; }
+
+	/// <summary>
 	/// Destroys this ACraft and creates its specified Gibs in its place with appropriate velocities. Any Attachables are removed and also given appropriate velocities.
 	/// </summary>
 	/// <param name="impactImpulse">The impulse (kg * m/s) of the impact causing the gibbing to happen.</param>

@@ -139,6 +139,7 @@ namespace RTE {
 		.property("MaxPassengers", &ACraft::GetMaxPassengers)
 		.property("DeliveryDelayMultiplier", &ACraft::GetDeliveryDelayMultiplier)
 		.property("ScuttleOnDeath", &ACraft::GetScuttleOnDeath, &ACraft::SetScuttleOnDeath)
+		.property("HatchDelay", &ACraft::GetHatchDelay, &ACraft::SetHatchDelay)
 
 		.def("OpenHatch", &ACraft::OpenHatch)
 		.def("CloseHatch", &ACraft::CloseHatch)

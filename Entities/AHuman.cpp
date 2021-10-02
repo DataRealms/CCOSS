@@ -3800,12 +3800,10 @@ void AHuman::Update()
 		} else if (m_pFGLeg || m_pBGLeg) {
 			if (m_MoveState == JUMP) {
 				// TODO: Utilize jump paths in an intuitive way!
-				if (m_pFGLeg && (!m_Paths[FGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal)) {
-					m_pFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pFGLeg->GetParentOffset()), m_pFGLeg->GetMaxLength(), g_SceneMan.GetGlobalAcc() * deltaTime, m_AngularVel, m_pFGLeg->GetMass(), deltaTime);
-				}
-				if (m_pBGLeg && (!m_Paths[BGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal)) {
-					m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), g_SceneMan.GetGlobalAcc() * deltaTime, m_AngularVel, m_pBGLeg->GetMass(), deltaTime);
-				}
+				if (m_pFGLeg) { m_pFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pFGLeg->GetParentOffset()), m_pFGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pFGLeg->GetMass(), deltaTime); }
+
+				if (m_pBGLeg) { m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pBGLeg->GetMass(), deltaTime); }
+
 				if (m_JetTimeLeft <= 0) {
 					m_MoveState = STAND;
 					m_Paths[FGROUND][JUMP].Terminate();
@@ -3841,18 +3839,13 @@ void AHuman::Update()
 	} else {
 		// Not stable/standing, so make sure the end of limbs are moving around limply in a ragdoll fashion.
 		// TODO: Make the limb atom groups fly around and react to terrain, without getting stuck etc.
-		if (m_pFGArm) {
-			m_pFGHandGroup->FlailAsLimb(m_Pos, RotateOffset(m_pFGArm->GetParentOffset()), m_pFGArm->GetMaxLength(), (g_SceneMan.GetGlobalAcc() * deltaTime).RadRotate(m_AngularVel * deltaTime), m_AngularVel, m_pFGArm->GetMass(), deltaTime);
-		}
-		if (m_pBGArm) {
-            m_pBGHandGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGArm->GetParentOffset()), m_pBGArm->GetMaxLength(), (g_SceneMan.GetGlobalAcc() * deltaTime).RadRotate(m_AngularVel * deltaTime), m_AngularVel, m_pBGArm->GetMass(), deltaTime);
-		}
-		if (m_pFGLeg) {
-            m_pFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pFGLeg->GetParentOffset()), m_pFGLeg->GetMaxLength(), (g_SceneMan.GetGlobalAcc() * deltaTime).RadRotate(m_AngularVel * deltaTime), m_AngularVel, m_pFGLeg->GetMass(), deltaTime);
-		}
-        if (m_pBGLeg) {
-            m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), (g_SceneMan.GetGlobalAcc() * deltaTime).RadRotate(m_AngularVel * deltaTime), m_AngularVel, m_pBGLeg->GetMass(), deltaTime);
-		}
+		if (m_pFGArm) { m_pFGHandGroup->FlailAsLimb(m_Pos, RotateOffset(m_pFGArm->GetParentOffset()), m_pFGArm->GetMaxLength(), m_PrevVel * m_pFGArm->GetJointStiffness(), m_AngularVel, m_pFGArm->GetMass(), deltaTime); }
+
+		if (m_pBGArm) { m_pBGHandGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGArm->GetParentOffset()), m_pBGArm->GetMaxLength(), m_PrevVel * m_pBGArm->GetJointStiffness(), m_AngularVel, m_pBGArm->GetMass(), deltaTime); }
+
+		if (m_pFGLeg) { m_pFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pFGLeg->GetParentOffset()), m_pFGLeg->GetMaxLength(), m_PrevVel * m_pFGLeg->GetJointStiffness(), m_AngularVel, m_pFGLeg->GetMass(), deltaTime); }
+
+        if (m_pBGLeg) { m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), m_PrevVel * m_pBGLeg->GetJointStiffness(), m_AngularVel, m_pBGLeg->GetMass(), deltaTime); }
 	}
 
     /////////////////////////////////

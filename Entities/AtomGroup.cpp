@@ -1195,10 +1195,12 @@ namespace RTE {
 		limbPath.SetRotation(rotation);
 		limbPath.SetFrameTime(travelTime);
 
-		const Vector limbDist = g_SceneMan.ShortestDistance(jointPos, m_LimbPos);
+		Vector limbDist = g_SceneMan.ShortestDistance(jointPos, m_LimbPos, g_SceneMan.SceneWrapsX());
 
-		// Restart the path if the limb strayed off the path.
-		if (limbDist.GetMagnitude() > m_OwnerMOSR->GetDiameter()) { limbPath.Terminate(); }
+		// Pull back the limb if it strayed off the path.
+		if (limbDist.GetMagnitude() > m_OwnerMOSR->GetRadius()) {
+			m_LimbPos = jointPos + limbDist.SetMagnitude(m_OwnerMOSR->GetRadius());
+		}
 
 		// TODO: Change this to a regular while loop if possible.
 		do {
@@ -1226,9 +1228,11 @@ namespace RTE {
 
 		bool didWrap = false;
 		Vector jointPos = ownerPos + jointOffset;
-		Vector centrifugalVel = jointOffset * std::fabs(angularVel);
+		Vector totalVel = velocity;
+		totalVel.RadRotate(angularVel * travelTime);
+		totalVel += jointOffset * std::abs(angularVel);
 
-		Vector pushImpulse = PushTravel(m_LimbPos, velocity + centrifugalVel, 100, didWrap, travelTime, false, false, false);
+		Vector pushImpulse = PushTravel(m_LimbPos, totalVel, 100, didWrap, travelTime, false, false, false);
 
 		Vector limbRange = m_LimbPos - jointPos;
 

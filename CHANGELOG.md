@@ -221,9 +221,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Various improvements to the Buy Menu. You can now navigate tabs with the actor swap buttons, and the menu will smartly navigate when you add an `Actor` to your shop list, so you can quickly select weapons, etc..  
 	There is also a new `Settings.ini` property, `SmartBuyMenuNavigation = 0/1`, which allows you to turn off this smart buy menu navigation, in case you prefer not to have it. 
 
+- Exposed `ACraft` property `HatchDelay` to Lua (R/W).
+
 </details>
 
 <details><summary>**Changed**</summary>
+
+- `ACRocket`s can now function without a full set of thrusters. This also means that "Null Emitter" thrusters are no longer required for rockets.
 
 - Changed `MOSprite` property `SpriteAnimMode` `Enum` `LOOPWHENMOVING` to `LOOPWHENACTIVE` as it also describes active devices.
 

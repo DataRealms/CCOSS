@@ -149,6 +149,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `MovableObject` Lua function `EnableOrDisableAllScripts` that allows you to enable or disable all scripts on a `MovableObject` based on the passed in value.
 
+- Added `AEmitter` and `PEmitter` Lua (R/W) properties `NegativeThrottleMultiplier` and `PositiveThrottleMultiplier` that affect the emission rate relative to throttle.
+
 - Added `Attachable` Lua function and INI property `InheritsFrame` which lets `Attachables` inherit their parent's frame. It is set to false by default.
 
 - Added `MovableObject` Lua (R/W) and INI properties `ApplyWoundDamageOnCollision` and `ApplyWoundBurstDamageOnCollision` which allow `MovableObject`s to apply the `EntryWound` damage/burst damage that would occur when they penetrate another object, without actually creating a wound.
@@ -242,6 +244,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Lowered the default `AHuman` Head damage multiplier from 5 to 4.
 
 - "Fixed" grenades and other fast-moving objects bouncing violently off of doors and other stationary objects.
+
+- `AEmitter` and `PEmitter` throttle logic has changed:  
+	The properties `MinThrottleRange` and `MaxThrottleRange` have been changed to `NegativeThrottleMultiplier` and `PositiveThrottleMultiplier` respectively.  
+	The new logic uses the multipliers to multiply the emission rate relative to the absolute throttle value. `NegativeThrottleMultiplier` is used when throttle is negative, and vice versa.
 
 - Doors in `Team = -1` will now open up for all actors.
 

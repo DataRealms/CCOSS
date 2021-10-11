@@ -1198,9 +1198,7 @@ namespace RTE {
 		Vector limbDist = g_SceneMan.ShortestDistance(jointPos, m_LimbPos, g_SceneMan.SceneWrapsX());
 
 		// Pull back the limb if it strayed off the path.
-		if (limbDist.GetMagnitude() > m_OwnerMOSR->GetRadius()) {
-			m_LimbPos = jointPos + limbDist.SetMagnitude(m_OwnerMOSR->GetRadius());
-		}
+		if (limbDist.GetMagnitude() > m_OwnerMOSR->GetRadius()) { m_LimbPos = jointPos + limbDist.SetMagnitude(m_OwnerMOSR->GetRadius()); }
 
 		// TODO: Change this to a regular while loop if possible.
 		do {

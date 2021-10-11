@@ -179,7 +179,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `ShowEnemyHUD` which allows disabling of enemy actor HUD in its entirety.
 
-- New `DataModule` property `IsFaction = 0/1` which determines if a module is a playable faction (in MetaGame, etc.). This replaces the need to put "Tech" in the module name. Defaults to false (0).
+- New `DataModule` INI and Lua (R) property `IsFaction` which determines whether a module is a playable faction (in MetaGame, etc.). This replaces the need to put "Tech" in the module name. Defaults to false (0).
 
 - New `MOSRotating` INI and Lua (R) property `WoundCountAffectsImpulseLimitRatio` which can be used to make objects more prone to gibbing from impulse when they have also received wounds.
 

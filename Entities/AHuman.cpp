@@ -3162,7 +3162,7 @@ void AHuman::Update()
 	////////////////////////////////////
 	// Movement direction
 
-	bool still = m_Vel.GetMagnitude() + m_PrevVel.GetMagnitude() < 1.0F;
+	bool isStill = m_Vel.GetMagnitude() + m_PrevVel.GetMagnitude() < 1.0F;
 
 	// If the pie menu is on, try to preserve whatever move state we had before it going into effect.
 	if (!m_Controller.IsState(PIE_MENU_ACTIVE)) {
@@ -3172,7 +3172,7 @@ void AHuman::Update()
 				m_Paths[BGROUND][i].SetHFlip(m_HFlipped);
 			}
 			// Only if not jumping, OR if jumping, and apparently stuck on something - then help out with the limbs.
-			if (m_MoveState != JUMP || still) {
+			if (m_MoveState != JUMP || isStill) {
 				// Restart the stride if we're just starting to walk or crawl.
 				if ((m_MoveState != WALK && !m_Controller.IsState(BODY_CROUCH)) || (m_MoveState != CRAWL && m_Controller.IsState(BODY_CROUCH))) {
 					m_StrideStart = true;
@@ -3591,7 +3591,7 @@ void AHuman::Update()
         }
 
         // WALKING, OR WE ARE JETPACKING AND STUCK
-        if (m_MoveState == WALK || (m_MoveState == JUMP && still)) {
+        if (m_MoveState == WALK || (m_MoveState == JUMP && isStill)) {
             m_Paths[FGROUND][STAND].Terminate();
             m_Paths[BGROUND][STAND].Terminate();
 
@@ -3603,7 +3603,7 @@ void AHuman::Update()
             bool playStride = false;
 
 			// Make sure we are starting a stride if we're basically stopped.
-			if (still) { m_StrideStart = true; }
+			if (isStill) { m_StrideStart = true; }
 
             if (m_pFGLeg && (!m_pBGLeg || (!(m_Paths[FGROUND][WALK].PathEnded() && BGLegProg < 0.5) || m_StrideStart)))
             {
@@ -3702,7 +3702,7 @@ void AHuman::Update()
             }
 
             // Restart the climbing stroke if the current one seems to be taking too long with no movement.
-            if ((m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND]) && still && m_StrideTimer.IsPastSimMS(static_cast<double>(m_Paths[BGROUND][CLIMB].GetTotalPathTime() * 0.5F))) {
+            if ((m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND]) && isStill && m_StrideTimer.IsPastSimMS(static_cast<double>(m_Paths[BGROUND][CLIMB].GetTotalPathTime() * 0.5F))) {
                 m_StrideStart = true;
                 m_Paths[FGROUND][CLIMB].Terminate();
                 m_Paths[BGROUND][CLIMB].Terminate();

@@ -86,7 +86,7 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 
    `cd $DATA_REPOSITORY; ln -s ../Cortex-Command-Community-Project-Source/build/CortexCommand.x86_64 . `
 
-2. Copy all `libfmod` files from `external/lib/linux/x86_64` into the **Data Repository**'.
+2. Copy all `libfmod` files from `external/lib/linux/x86_64` into the **Data Repository**.
 
    `cd $DATA_REPOSITORY; ln -s ../Cortex-Command-Community-Project-Source/external/lib/linux/x86_64/libfmod.so* .`
 

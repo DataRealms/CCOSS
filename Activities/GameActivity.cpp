@@ -353,12 +353,10 @@ void GameActivity::Destroy(bool notInherited)
 
 void GameActivity::SetCPUTeam(int team)
 {
-    // Set the legacy var
-	if (team >= Teams::TeamOne && team < Teams::MaxTeamCount)
-	{
+	if (team >= Teams::TeamOne && team < Teams::MaxTeamCount) {
+        // Set the legacy var
 	    m_CPUTeam = team;
 
-		// Activate the CPU team
 		m_TeamActive[team] = true;
 		m_TeamIsCPU[team] = true;
 	}
@@ -808,19 +806,18 @@ void GameActivity::SetupPlayers()
     Activity::SetupPlayers();
 
     // Add the locked cpu team that can't have any players
-    if (m_CPUTeam != Teams::NoTeam)
-    {
-        if (!m_TeamActive[m_CPUTeam])
-            m_TeamCount++;
+    if (m_CPUTeam != Teams::NoTeam && !m_TeamActive[m_CPUTeam]) {
+        m_TeamCount++;
         // Also activate the CPU team
         m_TeamActive[m_CPUTeam] = true;
     }
 
     // Don't clear a CPU team's active status though
-    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
-	{
-		if (m_TeamIsCPU[team])
-			m_TeamActive[team] = true;
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team) {
+        if (m_TeamIsCPU[team] && !m_TeamActive[team]) {
+             m_TeamCount++;
+            m_TeamActive[team] = true;
+        }
 	}
 }
 

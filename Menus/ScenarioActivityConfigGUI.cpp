@@ -203,8 +203,8 @@ namespace RTE {
 						gameActivity->SetCPUTeam(team);
 					} else {
 						gameActivity->AddPlayer(player, true, team, 0);
+						break;
 					}
-					break;
 				}
 			}
 		}

@@ -173,7 +173,7 @@ namespace RTE {
 	void Leg::UpdateCurrentAnkleOffset() {
 		if (IsAttached()) {
 			Vector targetOffset = g_SceneMan.ShortestDistance(m_JointPos, m_TargetPosition, g_SceneMan.SceneWrapsX());
-			Vector rotatedTargetOffset = Vector(targetOffset.m_X, targetOffset.m_Y).RadRotate(m_Parent->GetRotAngle());
+			Vector rotatedTargetOffset = targetOffset.GetRadRotatedCopy(m_Parent->GetRotAngle());
 			if (m_WillIdle && rotatedTargetOffset.m_Y < -std::abs(rotatedTargetOffset.m_X)) { targetOffset = RotateOffset(m_IdleOffset); }
 
 			Vector distanceFromTargetOffsetToAnkleOffset(targetOffset - m_AnkleOffset);

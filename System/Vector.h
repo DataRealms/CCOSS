@@ -199,32 +199,32 @@ namespace RTE {
 		float GetAbsDegAngle() const { return GetAbsRadAngle() / c_PI * 180.0F; }
 
 		/// <summary>
-		/// Returns a Vector rotated relatively by an angle in radians.
+		/// Returns a copy of this Vector, rotated relatively by an angle in radians.
 		/// </summary>
 		/// <param name="angle">The angle in radians to rotate by. Positive angles rotate counter-clockwise, and negative angles clockwise.</param>
-		/// <returns>a Vector rotated relatively to this Vector .</returns>
-		Vector GetRadRotated(const float angle);
+		/// <returns>A rotated copy of this Vector.</returns>
+		Vector GetRadRotatedCopy(const float angle);
 
 		/// <summary>
 		/// Rotate this Vector relatively by an angle in radians.
 		/// </summary>
 		/// <param name="angle">The angle in radians to rotate by. Positive angles rotate counter-clockwise, and negative angles clockwise.</param>
 		/// <returns>Vector reference to this after the operation.</returns>
-		Vector & RadRotate(const float angle) { *this = GetRadRotated(angle); return *this; }
+		Vector & RadRotate(const float angle) { *this = GetRadRotatedCopy(angle); return *this; }
 
 		/// <summary>
-		/// Returns a Vector rotated relatively by an angle in degrees.
+		/// Returns a copy of this Vector, rotated relatively by an angle in degrees.
 		/// </summary>
 		/// <param name="angle">The angle in degrees to rotate by. Positive angles rotate counter-clockwise, and negative angles clockwise.</param>
-		/// <returns>a Vector rotated relatively to this Vector .</returns>
-		Vector GetDegRotated(const float angle) { return GetRadRotated(angle * c_PI / 180.0F); };
+		/// <returns>A rotated copy of this Vector.</returns>
+		Vector GetDegRotatedCopy(const float angle) { return GetRadRotatedCopy(angle * c_PI / 180.0F); };
 
 		/// <summary>
 		/// Rotate this Vector relatively by an angle in degrees.
 		/// </summary>
 		/// <param name="angle">The angle in degrees to rotate by. Positive angles rotate counter-clockwise, and negative angles clockwise.</param>
 		/// <returns>Vector reference to this after the operation.</returns>
-		Vector & DegRotate(const float angle) { *this = GetDegRotated(angle); return *this; }
+		Vector & DegRotate(const float angle) { *this = GetDegRotatedCopy(angle); return *this; }
 
 		/// <summary>
 		/// Set this Vector to an absolute rotation based on the absolute rotation of another Vector.

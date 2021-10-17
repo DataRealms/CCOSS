@@ -272,8 +272,8 @@ namespace RTE {
 		.def("Reset", &Vector::Reset)
 		.def("RadRotate", &Vector::RadRotate)
 		.def("DegRotate", &Vector::DegRotate)
-		.def("GetRadRotated", &Vector::GetRadRotated)
-		.def("GetDegRotated", &Vector::GetDegRotated)
+		.def("GetRadRotatedCopy", &Vector::GetRadRotatedCopy)
+		.def("GetDegRotatedCopy", &Vector::GetDegRotatedCopy)
 		.def("AbsRotateTo", &Vector::AbsRotateTo)
 		.def("SetXY", &Vector::SetXY);
 	}

@@ -560,25 +560,13 @@ void ACRocket::Update()
     // Travel the landing gear AtomGroup:s
 
 	if (m_pMThruster) {
-		if (m_pMThruster->IsEmitting()) {
-			m_Paths[RIGHT][RAISED].SetHFlip(m_HFlipped);
-			m_Paths[LEFT][RAISED].SetHFlip(!m_HFlipped);
+        m_GearState = m_pMThruster->IsEmitting() ? LandingGearState::RAISED : LandingGearState::LOWERED;
 
-			if (m_pRLeg) { m_pRFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pRLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[RIGHT][RAISED], deltaTime, 0, true); }
-
-			if (m_pLLeg) { m_pLFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pLLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[LEFT][RAISED], deltaTime, 0, true); }
-
-			m_GearState = RAISED;
-		} else {
-			m_Paths[RIGHT][LOWERED].SetHFlip(m_HFlipped);
-			m_Paths[LEFT][LOWERED].SetHFlip(!m_HFlipped);
-
-			if (m_pRLeg) { m_pRFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pRLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[RIGHT][LOWERED], deltaTime, 0, true); }
-
-			if (m_pLLeg) { m_pLFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pLLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[LEFT][LOWERED], deltaTime, 0, true); }
-
-			m_GearState = LOWERED;
-		}
+        m_Paths[RIGHT][m_GearState].SetHFlip(m_HFlipped);
+        m_Paths[LEFT][m_GearState].SetHFlip(!m_HFlipped);
+        
+        if (m_pRLeg) { m_pRFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pRLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[RIGHT][m_GearState], deltaTime, nullptr, true); }
+        if (m_pLLeg) { m_pLFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pLLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[LEFT][m_GearState], deltaTime, nullptr, true); }
 	}
 
     /////////////////////////////////

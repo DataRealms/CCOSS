@@ -1643,6 +1643,7 @@ Attachable * MOSRotating::RemoveAttachable(Attachable *attachable, bool addToMov
         if (!m_ToDelete && attachable->GetParentBreakWound()) {
             AEmitter *parentBreakWound = dynamic_cast<AEmitter *>(attachable->GetParentBreakWound()->Clone());
             if (parentBreakWound) {
+				parentBreakWound->SetDrawnAfterParent(attachable->IsDrawnAfterParent());
                 parentBreakWound->SetEmitAngle((attachable->GetParentOffset() * m_Rotation).GetAbsRadAngle());
                 AddWound(parentBreakWound, attachable->GetParentOffset(), false);
                 parentBreakWound = nullptr;

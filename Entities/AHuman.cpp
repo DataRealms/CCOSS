@@ -3292,39 +3292,32 @@ void AHuman::Update()
                       std::min(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
 		if (m_AimAngle < -m_AimRange) { m_AimAngle = -m_AimRange; }
 
-    } else if (analogAim.GetMagnitude() > 0.1F && m_Status != INACTIVE) {
-        // Hack to avoid the GetAbsRadAngle to mangle an aim angle straight down
+	} else if (analogAim.GetMagnitude() > 0 && m_Status != INACTIVE) {
+		// Hack to avoid the GetAbsRadAngle from mangling an aim angle straight down.
 		if (analogAim.m_X == 0) { analogAim.m_X += 0.01F * GetFlipFactor(); }
-        m_AimAngle = analogAim.GetAbsRadAngle();
+		m_AimAngle = analogAim.GetAbsRadAngle();
 
-        // Check for flip change
-        if ((analogAim.m_X > 0 && m_HFlipped) || (analogAim.m_X < 0 && !m_HFlipped)) {
-            m_HFlipped = !m_HFlipped;
-            m_CheckTerrIntersection = true;
-            if (m_ProneState == NOTPRONE)
-                MoveOutOfTerrain(g_MaterialGrass);
-            m_Paths[FGROUND][WALK].Terminate();
-            m_Paths[BGROUND][WALK].Terminate();
-            m_Paths[FGROUND][CLIMB].Terminate();
-            m_Paths[BGROUND][CLIMB].Terminate();
-            m_Paths[FGROUND][CRAWL].Terminate();
-            m_Paths[BGROUND][CRAWL].Terminate();
-            m_Paths[FGROUND][ARMCRAWL].Terminate();
-            m_Paths[BGROUND][ARMCRAWL].Terminate();
-            m_Paths[FGROUND][STAND].Terminate();
-            m_Paths[BGROUND][STAND].Terminate();
-            m_StrideStart = true;
-            // Stop the going prone spring
-            if (m_ProneState == GOPRONE)
-                m_ProneState = PRONE;
-        }
-        // Correct angle based on flip
-        m_AimAngle = FacingAngle(m_AimAngle);
-        // Clamp so it's within the range
-        Clamp(m_AimAngle, m_AimRange, -m_AimRange);
-    }
-    else
-        m_AimState = AIMSTILL;
+		if ((analogAim.m_X > 0 && m_HFlipped) || (analogAim.m_X < 0 && !m_HFlipped)) {
+			m_HFlipped = !m_HFlipped;
+			m_CheckTerrIntersection = true;
+			if (m_ProneState == NOTPRONE) { MoveOutOfTerrain(g_MaterialGrass); }
+			for (int i = STAND; i < CLIMB; ++i) {
+				m_Paths[FGROUND][i].SetHFlip(m_HFlipped);
+				m_Paths[BGROUND][i].SetHFlip(m_HFlipped);
+				m_Paths[FGROUND][i].Terminate();
+				m_Paths[BGROUND][i].Terminate();
+			}
+			m_StrideStart = true;
+			// Stop the going prone spring.
+			if (m_ProneState == GOPRONE) { m_ProneState = PRONE; }
+		}
+		// Correct angle based on flip.
+		m_AimAngle = FacingAngle(m_AimAngle);
+		// Clamp so it's within the range.
+		Clamp(m_AimAngle, m_AimRange, -m_AimRange);
+	} else {
+		m_AimState = AIMSTILL;
+	}
 	float adjustedAimAngle = m_AimAngle * GetFlipFactor();
 
     //////////////////////////////

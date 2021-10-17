@@ -160,9 +160,7 @@ namespace RTE {
 
 		Attachable::Update();
 
-		if (m_FrameCount == 1) {
-			m_Frame = 0;
-		} else {
+		if (m_FrameCount != 1) {
 			m_NormalizedExtension = std::clamp((m_AnkleOffset.GetMagnitude() - m_MinExtension) / (m_MaxExtension - m_MinExtension), 0.0F, 1.0F);
 			m_Frame = std::min(m_FrameCount - 1, static_cast<unsigned int>(std::floor(m_NormalizedExtension * static_cast<float>(m_FrameCount))));
 		}

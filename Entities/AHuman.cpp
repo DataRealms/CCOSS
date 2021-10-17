@@ -3105,49 +3105,37 @@ void AHuman::Update()
 	////////////////////////////////////
 	// Jetpack activation and blast direction
 
-	if (m_pJetpack)
-	{
+	if (m_pJetpack) {
 		if (m_JetTimeTotal > 0) {
 			// Jetpack throttle depletes relative to jet time, but only if throttle range values have been defined
 			float jetTimeRatio = std::max(m_JetTimeLeft / m_JetTimeTotal, 0.0F);
 			m_pJetpack->SetThrottle(jetTimeRatio * 2.0F - 1.0F);
 		}
-		// Start Jetpack burn
-		if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0 && m_Status != INACTIVE)
-		{
+		if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0 && m_Status != INACTIVE) {
 			m_pJetpack->TriggerBurst();
-			// This is to make sure se get loose from being stuck
 			m_ForceDeepCheck = true;
 			m_pJetpack->EnableEmission(true);
-			// Quadruple this for the burst
 			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * 10.0F, 0.0F);
-		// Jetpack is ordered to be burning, or the pie menu is on and was burning before it went on
 		} else if ((m_Controller.IsState(BODY_JUMP) || (m_MoveState == JUMP && m_Controller.IsState(PIE_MENU_ACTIVE))) && m_JetTimeLeft > 0 && m_Status != INACTIVE) {
 			m_pJetpack->EnableEmission(true);
-			// Jetpacks are noisy!
 			m_pJetpack->AlarmOnEmit(m_Team);
-			// Deduct from the jetpack time
 			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS(), 0.0F);
 			m_MoveState = JUMP;
 			m_Paths[FGROUND][JUMP].Restart();
 			m_Paths[BGROUND][JUMP].Restart();
-		}
-		// Jetpack is off/turning off
-		else {
+		} else {
 			m_pJetpack->EnableEmission(false);
 			if (m_MoveState == JUMP) { m_MoveState = STAND; }
-			// Replenish the jetpack time, twice as fast
 			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * 2.0F, m_JetTimeTotal);
 		}
 
 		float maxAngle = c_HalfPI * m_JetAngleRange;
 		// If pie menu is on, keep the angle to what it was before.
 		if (!m_Controller.IsState(PIE_MENU_ACTIVE)) {
-			// Direct the jetpack nozzle according to movement stick if analog input is present.
+			// Direct the jetpack nozzle according to either analog stick input or aim angle.
 			if (m_Controller.GetAnalogMove().GetMagnitude() > 0.1F) {
 				float jetAngle = std::clamp(m_Controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, -maxAngle, maxAngle);
 				m_pJetpack->SetEmitAngle(FacingAngle(jetAngle - c_HalfPI));
-			// Use the aim angle if we're getting digital input.
 			} else {
 				// Halve the jet angle when looking downwards so the actor isn't forced to go sideways
 				// TODO: don't hardcode this value?
@@ -3166,6 +3154,7 @@ void AHuman::Update()
 
 	// If the pie menu is on, try to preserve whatever move state we had before it going into effect.
 	if (!m_Controller.IsState(PIE_MENU_ACTIVE)) {
+		bool crouching = m_Controller.IsState(BODY_CROUCH);
 		if ((m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP) && m_Status != INACTIVE) {
 			for (int i = WALK; i < MOVEMENTSTATECOUNT; ++i) {
 				m_Paths[FGROUND][i].SetHFlip(m_HFlipped);
@@ -3174,12 +3163,12 @@ void AHuman::Update()
 			// Only if not jumping, OR if jumping, and apparently stuck on something - then help out with the limbs.
 			if (m_MoveState != JUMP || still) {
 				// Restart the stride if we're just starting to walk or crawl.
-				if ((m_MoveState != WALK && !m_Controller.IsState(BODY_CROUCH)) || (m_MoveState != CRAWL && m_Controller.IsState(BODY_CROUCH))) {
+				if ((m_MoveState != WALK && !crouching) || (m_MoveState != CRAWL && crouching)) {
 					m_StrideStart = true;
 					MoveOutOfTerrain(g_MaterialGrass);
 				}
 
-				m_MoveState = m_Controller.IsState(BODY_CROUCH) ? CRAWL : WALK;
+				m_MoveState = crouching ? CRAWL : WALK;
 
 				// Engage prone state, this makes the body's rotational spring pull it horizontal instead of upright.
 				if (m_MoveState == CRAWL && m_ProneState == NOTPRONE) {
@@ -3210,15 +3199,18 @@ void AHuman::Update()
 				// Stop the going prone spring.
 				if (m_ProneState == GOPRONE) { m_ProneState = PRONE; }
 			}
-		// Not moving, so check if we need to be crouched or not.
-		} else if (m_Controller.IsState(BODY_CROUCH)) {
-			// Don't go back to crouching if we're already prone, the player has to let go of the crouch button first. If already laying down, just stay put.
-			m_MoveState = m_ProneState == NOTPRONE ? CROUCH : NOMOVE;
 		} else {
-			m_MoveState = STAND;
+			m_ArmClimbing[FGROUND] = false;
+			m_ArmClimbing[BGROUND] = false;
+			if (crouching) {
+				// Don't go back to crouching if we're already prone, the player has to let go of the crouch button first. If already laying down, just stay put.
+				m_MoveState = m_ProneState == NOTPRONE ? CROUCH : NOMOVE;
+			} else {
+				m_MoveState = STAND;
+			}
 		}
 		// Disengage the prone state as soon as crouch is released.
-		if (!m_Controller.IsState(BODY_CROUCH)) { m_ProneState = NOTPRONE; }
+		if (!crouching) { m_ProneState = NOTPRONE; }
 	}
 
     ////////////////////////////////////
@@ -3333,6 +3325,7 @@ void AHuman::Update()
     }
     else
         m_AimState = AIMSTILL;
+	float adjustedAimAngle = m_AimAngle * GetFlipFactor();
 
     //////////////////////////////
     // Sharp aim calculation
@@ -3398,12 +3391,12 @@ void AHuman::Update()
 				} else if (m_ArmsState == THROWING_PREP) {
 					m_ArmsState = THROWING_RELEASE;
 					// TODO: figure out how to properly use EndThrowOffset, since it doesn't play much a role for just one frame!
-					m_pFGArm->SetHandPos(m_Pos + (m_pFGArm->GetParentOffset() + pThrown->GetEndThrowOffset().RadRotate(m_AimAngle * GetFlipFactor())).GetXFlipped(m_HFlipped) * m_Rotation);
+					m_pFGArm->SetHandPos(m_Pos + (m_pFGArm->GetParentOffset() + pThrown->GetEndThrowOffset().RadRotate(adjustedAimAngle)).GetXFlipped(m_HFlipped) * m_Rotation);
 
 					MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
 
 					if (pMO) {
-						pMO->SetPos(m_Pos + (m_pFGArm->GetParentOffset() + Vector(m_pFGArm->GetMaxLength(), -m_pFGArm->GetMaxLength() * 0.5F)).GetXFlipped(m_HFlipped).RadRotate(m_AimAngle * GetFlipFactor()) * m_Rotation);
+						pMO->SetPos(m_Pos + (m_pFGArm->GetParentOffset() + Vector(m_pFGArm->GetMaxLength(), -m_pFGArm->GetMaxLength() * 0.5F)).GetXFlipped(m_HFlipped).RadRotate(adjustedAimAngle) * m_Rotation);
 						float maxThrowVel = pThrown->GetMaxThrowVel();
 						float minThrowVel = pThrown->GetMinThrowVel();
 						if (maxThrowVel == 0) {
@@ -3415,7 +3408,7 @@ void AHuman::Update()
 						tossVec.RadRotate(m_AimAngle);
 						pMO->SetVel(tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
 						pMO->SetAngularVel(m_AngularVel + RandomNum(-5.0F, 2.5F) * GetFlipFactor());
-						pMO->SetRotAngle(m_AimAngle * GetFlipFactor());
+						pMO->SetRotAngle(adjustedAimAngle);
 
 						if (pMO->IsHeldDevice()) {
 							pMO->SetTeam(m_Team);
@@ -3813,27 +3806,31 @@ void AHuman::Update()
 					m_Paths[FGROUND][WALK].Terminate();
 					m_Paths[BGROUND][WALK].Terminate();
 				}
-			} else if (m_MoveState == CROUCH) {
-				m_Paths[FGROUND][WALK].Terminate();
-				m_Paths[BGROUND][WALK].Terminate();
-				m_Paths[FGROUND][CRAWL].Terminate();
-				m_Paths[BGROUND][CRAWL].Terminate();
-
-				if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[FGROUND][CROUCH], deltaTime); }
-
-				if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[BGROUND][CROUCH], deltaTime); }
-
 			} else {
-				m_Paths[FGROUND][WALK].Terminate();
-				m_Paths[BGROUND][WALK].Terminate();
-				m_Paths[FGROUND][CRAWL].Terminate();
-				m_Paths[BGROUND][CRAWL].Terminate();
-				m_Paths[FGROUND][ARMCRAWL].Terminate();
-				m_Paths[BGROUND][ARMCRAWL].Terminate();
+				m_Paths[FGROUND][JUMP].Terminate();
+				m_Paths[BGROUND][JUMP].Terminate();
+				if (m_MoveState == CROUCH) {
+					m_Paths[FGROUND][WALK].Terminate();
+					m_Paths[BGROUND][WALK].Terminate();
+					m_Paths[FGROUND][CRAWL].Terminate();
+					m_Paths[BGROUND][CRAWL].Terminate();
 
-				if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[FGROUND][STAND], deltaTime, 0, false); }
+					if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, limbPathRotation, m_Paths[FGROUND][CROUCH], deltaTime); }
 
-				if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[BGROUND][STAND], deltaTime, 0, false); }
+					if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, limbPathRotation, m_Paths[BGROUND][CROUCH], deltaTime); }
+
+				} else {
+					m_Paths[FGROUND][WALK].Terminate();
+					m_Paths[BGROUND][WALK].Terminate();
+					m_Paths[FGROUND][CRAWL].Terminate();
+					m_Paths[BGROUND][CRAWL].Terminate();
+					m_Paths[FGROUND][ARMCRAWL].Terminate();
+					m_Paths[BGROUND][ARMCRAWL].Terminate();
+
+					if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, limbPathRotation, m_Paths[FGROUND][STAND], deltaTime, 0, !m_pBGLeg); }
+
+					if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, limbPathRotation, m_Paths[BGROUND][STAND], deltaTime, 0, !m_pFGLeg); }
+				}
 			}
 		}
 	} else {
@@ -3854,7 +3851,7 @@ void AHuman::Update()
         float toRotate = 0;
         // Only rotate the head to match the aim angle if body is stable and upright
         if (m_Status == STABLE && std::abs(rot) < (c_HalfPI + c_QuarterPI)) {
-            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((m_AimAngle * GetFlipFactor()) * m_LookToAimRatio + rot * (0.9F - m_LookToAimRatio)) * 0.15F;
+            toRotate = m_pHead->GetRotMatrix().GetRadAngleTo((adjustedAimAngle) * m_LookToAimRatio + rot * (0.9F - m_LookToAimRatio)) * 0.15F;
 		} else {
 			// Rotate the head loosely along with the body if upside down, unstable or dying.
             toRotate = m_pHead->GetRotMatrix().GetRadAngleTo(rot) * m_pHead->GetJointStiffness() * (std::abs(toRotate) + c_QuarterPI);
@@ -3882,7 +3879,7 @@ void AHuman::Update()
 
 			affectingBodyAngle = std::abs(std::sin(rot)) * rot * m_FGArmFlailScalar * (1.0F - aimScalar);
 		}
-		m_pFGArm->SetRotAngle(affectingBodyAngle + m_AimAngle * GetFlipFactor());
+		m_pFGArm->SetRotAngle(affectingBodyAngle + adjustedAimAngle);
 
         if (m_Status == STABLE) {
             if (m_ArmClimbing[FGROUND]) {
@@ -3898,7 +3895,7 @@ void AHuman::Update()
     }
 
     if (m_pBGArm) {
-		m_pBGArm->SetRotAngle(std::abs(std::sin(rot)) * rot * m_BGArmFlailScalar + (m_AimAngle * GetFlipFactor()));
+		m_pBGArm->SetRotAngle(std::abs(std::sin(rot)) * rot * m_BGArmFlailScalar + (adjustedAimAngle));
         if (m_Status == STABLE) { 
 			if (m_ArmClimbing[BGROUND]) {
 				// Can't climb or crawl with the shield

@@ -178,6 +178,13 @@ ClassInfoGetters;
 
     int GetRoundInMagCount() const;
 
+	/// <summary>
+	/// Gets the maximum RoundCount a Magazine of this HDFirearm can hold.
+	/// If there is no Magazine, it gets the RoundCount of the reference Magazine.
+	/// </summary>
+	/// <returns>An int with the maximum RoundCount the magazine or magazine reference of this HDFirearm can hold.</returns>
+	int GetRoundInMagCapacity() const;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetActivationDelay
@@ -320,6 +327,17 @@ ClassInfoGetters;
 
     void SetParticleSpreadRange(float range) { m_ParticleSpreadRange = range; };
 
+	/// <summary>
+	/// Gets the random velocity variation scalar at which this HDFirearm's shell is to be ejected.
+	/// </summary>
+	/// <returns>A float with the scalar value.</returns>
+	float GetShellVelVariation() const { return m_ShellVelVariation; }
+
+	/// <summary>
+	/// Sets the random velocity variation scalar at which this HDFirearm's shell is to be ejected.
+	/// </summary>
+	/// <param name = newValue>The new velocity variation scalar.</param>
+	void SetShellVelVariation(float newVariation) { m_ShellVelVariation = newVariation; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetAIFireVel
@@ -534,6 +552,11 @@ ClassInfoGetters;
 
     void ResetAllTimers() override { HeldDevice::ResetAllTimers(); m_LastFireTmr.Reset(); m_ReloadTmr.Reset(); }
 
+	/// <summary>
+	/// Gets this HDFirearm's reload progress as a scalar from 0 to 1.
+	/// </summary>
+	/// <returns>The reload progress as a scalar from 0 to 1.</returns>
+	float GetReloadProgress() const { return IsReloading() && m_ReloadTime > 0 ? std::min(static_cast<float>(m_ReloadTmr.GetElapsedSimTimeMS() / m_ReloadTime), 1.0F) : 1.0F; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RestDetection
@@ -639,6 +662,18 @@ ClassInfoGetters;
 // Return value:    Whether the player can hold down fire and this will fire repeatedly.
 
 	bool IsFullAuto() const { return m_FullAuto; }
+
+	/// <summary>
+	/// Gets whether this HDFirearm is set to be reloadable or not.
+	/// </summary>
+	/// <returns>Whether this HDFirearm is reloadable.</returns>
+	bool IsReloadable() const { return m_Reloadable; }
+
+	/// <summary>
+	/// Sets whether this HDFirearm is reloadable or not and halts the reloading process.
+	/// </summary>
+	/// <param name="isReloadable">Whether this HDFirearm is reloadable.</param>
+	void SetReloadable(bool isReloadable) { m_Reloadable = isReloadable; m_Reloading = m_Reloading && m_Reloadable; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -803,6 +838,7 @@ protected:
     // Whether particles fired from this HDFirearm will ignore hits with itself,
     // and the root parent of this HDFirearm, regardless if they are set to hit MOs.
     bool m_FireIgnoresThis;
+	bool m_Reloadable; //!< Whether this HDFirearm is reloadable by normal means.
 
     // Timer for timing how long ago the last round was fired.
     Timer m_LastFireTmr;
@@ -829,6 +865,7 @@ protected:
     float m_ShellSpreadRange;
     // Range of spread in ang vel of ejected shells, in one direction
     float m_ShellAngVelRange;
+	float m_ShellVelVariation; //!< The velocity variation scalar of ejected shells.
     // The muzzle velocity the AI use when aiming this weapon
     float m_AIFireVel;
     // The bullet life time the AI use when aiming this weapon

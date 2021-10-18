@@ -43,7 +43,6 @@ void ACDropShip::Clear()
     m_LateralControl = 0;
 	m_LateralControlSpeed = 6.0f;
 	m_AutoStabilize = 1;
-    m_ScuttleIfFlippedTime = 4000;
 	m_MaxEngineAngle = 20.0f;
 }
 
@@ -106,7 +105,6 @@ int ACDropShip::Create(const ACDropShip &reference) {
     m_LateralControl = reference.m_LateralControl;
     m_LateralControlSpeed = reference.m_LateralControlSpeed;
     m_AutoStabilize = reference.m_AutoStabilize;
-    m_ScuttleIfFlippedTime = reference.m_ScuttleIfFlippedTime;
 
 	m_MaxEngineAngle = reference.m_MaxEngineAngle;
 
@@ -139,8 +137,6 @@ int ACDropShip::ReadProperty(const std::string_view &propName, Reader &reader) {
         reader >> m_HatchSwingRange;
     } else if (propName == "AutoStabilize") {
         reader >> m_AutoStabilize;
-    } else if (propName == "ScuttleIfFlippedTime") {
-        reader >> m_ScuttleIfFlippedTime;
     } else if (propName == "MaxEngineAngle") {
         reader >> m_MaxEngineAngle;
     } else if (propName == "LateralControlSpeed") {
@@ -179,8 +175,6 @@ int ACDropShip::Save(Writer &writer) const
     writer << m_HatchSwingRange;
     writer.NewProperty("AutoStabilize");
     writer << m_AutoStabilize;
-    writer.NewProperty("ScuttleIfFlippedTime");
-    writer << m_ScuttleIfFlippedTime;
 	writer.NewProperty("MaxEngineAngle");
 	writer << m_MaxEngineAngle;
 	writer.NewProperty("LateralControlSpeed");
@@ -683,69 +677,6 @@ void ACDropShip::Update()
 	/////////////////////////////////////////////////
 	// Update MovableObject, adds on the forces etc, updated viewpoint
 	ACraft::Update();
-
-    ///////////////////////////////////
-    // Explosion logic
-
-    if (m_Status == DEAD)
-        GibThis();
-
-    ////////////////////////////////////////
-    // Balance stuff
-
-    // Get the rotation in radians.
-    float rot = m_Rotation.GetRadAngle();
-
-	// Eliminate rotations over half a turn
-	if (std::fabs(rot) > c_PI) {
-		rot += (rot > 0) ? -c_TwoPI : c_TwoPI;
-		m_Rotation.SetRadAngle(rot);
-	}
-    // If tipped too far for too long, die
-    if (rot < c_HalfPI && rot > -c_HalfPI)
-    {
-        m_FlippedTimer.Reset();
-    }
-    // Start death process if tipped over for too long
-    else if (m_ScuttleIfFlippedTime >= 0 && m_FlippedTimer.IsPastSimMS(m_ScuttleIfFlippedTime) && m_Status != DYING) // defult is 4s
-    {
-        m_Status = DYING;
-        m_DeathTmr.Reset();
-    }
-
-    // Flash if dying, warning of impending explosion
-    if (m_Status == DYING)
-    {
-        if (m_DeathTmr.IsPastSimMS(500) && m_DeathTmr.AlternateSim(100))
-            FlashWhite(10);
-    }
-
-/*
-//        rot = fabs(rot) < c_QuarterPI ? rot : (rot > 0 ? c_QuarterPI : -c_QuarterPI);
-
-    // Rotational balancing spring calc
-    if (m_Status == STABLE) {
-        // Break the spring if close to target angle.
-        if (fabs(rot) > 0.1)
-            m_AngularVel -= rot * fabs(rot);
-        else if (fabs(m_AngularVel) > 0.1)
-            m_AngularVel *= 0.5;
-    }
-    // Unstable, or without balance
-    else if (m_Status == DYING) {
-//        float rotTarget = rot > 0 ? c_HalfPI : -c_HalfPI;
-        float rotTarget = c_HalfPI;
-        float rotDiff = rotTarget - rot;
-        if (fabs(rotDiff) > 0.1)
-            m_AngularVel += rotDiff * rotDiff;
-        else
-            m_Status = DEAD;
-
-//        else if (fabs(m_AngularVel) > 0.1)
-//            m_AngularVel *= 0.5;
-    }
-    m_Rotation.SetRadAngle(rot);
-*/
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -868,27 +799,4 @@ void ACDropShip::SetLeftHatch(Attachable *newHatch) {
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          ResetEmissionTimers
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reset the timers of all emissions so they will start/stop at the 
-//                  correct relative offsets from now.
-
-void ACDropShip::ResetEmissionTimers()
-{
-    if (m_pRThruster && m_pRThruster->IsAttached())
-        m_pRThruster->ResetEmissionTimers();
-
-    if (m_pLThruster && m_pLThruster->IsAttached())
-        m_pLThruster->ResetEmissionTimers();
-
-    if (m_pURThruster && m_pURThruster->IsAttached())
-        m_pURThruster->ResetEmissionTimers();
-
-    if (m_pULThruster && m_pULThruster->IsAttached())
-        m_pULThruster->ResetEmissionTimers();
-}
 } // namespace RTE

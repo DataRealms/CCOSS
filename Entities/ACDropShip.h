@@ -250,17 +250,6 @@ ClassInfoGetters;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ResetEmissionTimers
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reset the timers of all emissions so they will start/stop at the 
-//                  correct relative offsets from now.
-// Arguments:       None.
-// Return value:    None.
-
-    void ResetEmissionTimers() override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetMaxEngineAngle
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Get max engine rotation angle in degrees.
@@ -342,8 +331,6 @@ protected:
 
     // Automatically stabilize the craft with the upper thrusters? Defaults to yes.
     int m_AutoStabilize;
-    // The craft explodes if it has been on its side for more than this many MS (default 4000). Disable by setting to -1.
-    float m_ScuttleIfFlippedTime;
 
 	// Maximum engine rotation in degrees
 	float m_MaxEngineAngle;

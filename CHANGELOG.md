@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-<details><summary>Added</summary>
+<details><summary>**Added**</summary>
 
 - Executable can be compiled as 64bit.
 
@@ -149,6 +149,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `MovableObject` Lua function `EnableOrDisableAllScripts` that allows you to enable or disable all scripts on a `MovableObject` based on the passed in value.
 
+- Added `AEmitter` and `PEmitter` Lua (R/W) properties `NegativeThrottleMultiplier` and `PositiveThrottleMultiplier` that affect the emission rate relative to throttle.
+
 - Added `Attachable` Lua function and INI property `InheritsFrame` which lets `Attachables` inherit their parent's frame. It is set to false by default.
 
 - Added `MovableObject` Lua (R/W) and INI properties `ApplyWoundDamageOnCollision` and `ApplyWoundBurstDamageOnCollision` which allow `MovableObject`s to apply the `EntryWound` damage/burst damage that would occur when they penetrate another object, without actually creating a wound.
@@ -179,15 +181,73 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `ShowEnemyHUD` which allows disabling of enemy actor HUD in its entirety.
 
-- New `DataModule` property `IsFaction = 0/1` which determines if a module is a playable faction (in MetaGame, etc.). This replaces the need to put "Tech" in the module name. Defaults to false (0).
+- New `DataModule` INI and Lua (R) property `IsFaction` which determines whether a module is a playable faction (in MetaGame, etc.). This replaces the need to put "Tech" in the module name. Defaults to false (0).
+
+- New `MOSRotating` INI and Lua (R) property `WoundCountAffectsImpulseLimitRatio` which can be used to make objects more prone to gibbing from impulse when they have also received wounds.
+
+- New `Gib` INI property `SpreadMode` which sports two new spread logic variants which alter the way velocity is applied to the `GibParticle`s when they spawn. This can be used to create richer explosion effects.  
+	`SpreadMode = 0` is the default, fully randomized spread according to `MinVelocity`, `MaxVelocity` and `Spread` values. Think: a piece of grenade fragment, launching out in an arbitrary direction.  
+	`SpreadMode = 1` is the same as the default, but with evenly spaced out angles. Think: an air blast shockwave, dispersing evenly outward from the explosion.  
+	`SpreadMode = 2` has an entirely different behavior of its own, which utilizes the fermat spiral as means to evenly disperse the particles in a circular area, according to `MaxVelocity` and `MinVelocity`. Since this mode will always result in a full, 360-degree spread, the `Spread` property can be used to add randomization to the gib particles. Think: a cloud of smoke.
+
+- New `Actor` INI and Lua (R/W) property `StableRecoverDelay` which determines how long it takes for an actor to regain `STABLE` status after being rendered `UNSTABLE`.
+
+- New `AHuman` Lua (R) property `ThrowProgress` which returns the current throw chargeup progress as a scalar from 0 to 1.
+
+- New `HDFirearm` INI and Lua (R/W) property `ShellVelVariation` which can be used to randomize the magnitude at which shells are ejected.
+
+- New `HDFirearm` Lua (R) property `ReloadProgress` which returns the current reload progress as a scalar from 0 to 1.
+
+- New `HDFirearm` INI and Lua (R/W) property `Reloadable` which can be used to disable the ability to reload said device.
+
+- New `HDFirearm` Lua (R) property `RoundInMagCapacity` which returns the maximum capacity of the `Magazine` or, if there's not currently a `Magazine`, the maximum capacity of the next `Magazine`.  
+	This means that the property will always return the maximum ammo capacity of the device, even when reloading.
+
+- New `Entity` Lua (R) property `ModuleName` which returns the filename of the data module from which the entity originates from.
+
+- `Arm`s will now react to the recoil of `HeldDevice`s. This is affected by the `Arm`'s `GripStrength` and the `HeldDevice`'s `RecoilTransmission`, in the same way as recoil itself.
+
+- `HDFirearm` reload progress now shows up as a HUD element.
+
+- New `Round` INI property `LifeVariation` which can be used to randomize the `Lifetime` of shot particles.
+
+- Exposed `MOSprite` property `PrevRotAngle` to Lua (R).
+
+- New `ACraft` INI and Lua (R/W) property `ScuttleOnDeath` which can be used to disable the automatic self-destruct sequence when the craft's health drops down to zero.
+
+- New `Settings.ini` property `UnheldItemsHUDDisplayRange = numPixels` that hides the HUD of stranded items at a set distance. Default is 500 (25 meters).
+	Value of -1 or anything below means all HUDs will be hidden and the only indication an item can be picked up will be on the Actor's HUD when standing on top of it.
+	Value of 0 means there is no range limit and all items on Scene will display the pick-up HUD.
+	Valid range values are 1-1000, anything above will be considered as no range limit.
 
 - Various improvements to the Buy Menu. You can now navigate tabs with the actor swap buttons, and the menu will smartly navigate when you add an `Actor` to your shop list, so you can quickly select weapons, etc..  
 	There is also a new `Settings.ini` property, `SmartBuyMenuNavigation = 0/1`, which allows you to turn off this smart buy menu navigation, in case you prefer not to have it. 
 
+- Exposed `ACraft` property `HatchDelay` to Lua (R/W).
+
 </details>
 
+<details><summary>**Changed**</summary>
 
-<details><summary>Changed</summary>
+- `ACRocket`s can now function without a full set of thrusters. This also means that "Null Emitter" thrusters are no longer required for rockets.
+
+- Changed `MOSprite` property `SpriteAnimMode` `Enum` `LOOPWHENMOVING` to `LOOPWHENACTIVE` as it also describes active devices.
+
+- Changed `Activity` Lua (R) properties `Running`, `Paused` and `ActivityOver` to `IsRunning`, `IsPaused` and `IsOver` respectively.  (NOTE: corresponding `ActivityMan` functions remain unchanged)
+
+- Exposed `ThrownDevice` properties `StartThrowOffset` and `EndThrowOffset` to Lua (R/W).
+
+- `HeldDevice`s can now show up as "Tools" in the buy menu, rather than just as "Shields".
+
+- Keyboard-only controlled `AHuman`s and `ACrab`s can now strafe while sharp-aiming.
+
+- Lowered the default `AHuman` Head damage multiplier from 5 to 4.
+
+- "Fixed" grenades and other fast-moving objects bouncing violently off of doors and other stationary objects.
+
+- `AEmitter` and `PEmitter` throttle logic has changed:  
+	The properties `MinThrottleRange` and `MaxThrottleRange` have been changed to `NegativeThrottleMultiplier` and `PositiveThrottleMultiplier` respectively.  
+	The new logic uses the multipliers to multiply the emission rate relative to the absolute throttle value. `NegativeThrottleMultiplier` is used when throttle is negative, and vice versa.
 
 - Doors in `Team = -1` will now open up for all actors.
 
@@ -205,7 +265,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Craft will now automatically scuttle when opening doors at a 90° angle rather than 45°.
 
-- `AHuman` can now aim slightly while walking, however not while reloading.
+- `AHuman`s can now sharp-aim slightly while walking, however not while reloading.
 
 - Recoil when firing weapons now affects sharp aim.
 
@@ -313,11 +373,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Placing "Tech" in a `DataModule`'s `ModuleName` no longer makes the module a playable faction (in MetaGame, etc.). The `IsFaction` property should be used instead.  
 	The word "Tech" will also not be omitted from the module name when displayed in any faction selection dropdown list.
+	
+- Renamed Lua methods `GetRadRotated` and `GetDegRotated` to `GetRadRotatedCopy` and `GetDegRotatedCopy` for clarity.
 
 </details>
 
 
-<details><summary>Fixed</summary>
+<details><summary>**Fixed**</summary>
+
+- Fixed the logic for `Gib` and `Emission` property `LifeVariation` where it would round down to zero, giving particles infinite lifetime.
 
 - Fixed legs going bonkers for one frame when turning around.
 
@@ -370,7 +434,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>Removed</summary>
+<details><summary>**Removed**</summary>
 
 - Removed obsolete graphics drivers and their `Settings.ini` properties `ForceOverlayedWindowGfxDriver` and `ForceNonOverlayedWindowGfxDriver`.
 
@@ -404,7 +468,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [0.1.0 pre-release 3.0][0.1.0-pre3.0] - 2020/12/25
 
-<details><summary>Added</summary>
+<details><summary>**Added**</summary>
 
 - Implemented Lua Just-In-Time compilation (MoonJIT 2.2.0).
 
@@ -570,7 +634,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>Changed</summary>
+<details><summary>**Changed**</summary>
 
 - Codebase now uses the C++17 standard.
 
@@ -679,7 +743,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>Fixed</summary>
+<details><summary>**Fixed**</summary>
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.
 
@@ -710,7 +774,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>Removed</summary>
+<details><summary>**Removed**</summary>
 
 - Removed the ability to remove scripts from objects with Lua. This is no longer needed cause of code efficiency increases.
 
@@ -738,7 +802,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [0.1.0 pre-release 2][0.1.0-pre2] - 2020/05/08
 
-<details><summary>Added</summary>
+<details><summary>**Added**</summary>
 
 - Lua binding for `Box::IntersectsBox(otherBox)`, that returns true if 2 boxes intersect.
 
@@ -859,7 +923,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>Changed</summary>
+<details><summary>**Changed**</summary>
 
 - Codebase now uses the C++14 standard.
 
@@ -916,7 +980,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>Fixed</summary>
+<details><summary>**Fixed**</summary>
 
 - Fixed LuaBind being all sorts of messed up. All lua bindings now work properly like they were before updating to the v141 toolset.
 
@@ -939,7 +1003,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>Removed</summary>
+<details><summary>**Removed**</summary>
 
 - Removed all Gorilla Audio and SDL Mixer related code and files.
 
@@ -966,7 +1030,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [0.1.0 pre-release 1][0.1.0-pre1] - 2020/01/27
 
-<details><summary>Added</summary>
+<details><summary>**Added**</summary>
 
 - You can now run the game with command line parameters, including `-h` to see help and `-c` to send ingame console input to cout.
 
@@ -995,7 +1059,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 </details>
 
-<details><summary>Changed</summary>
+<details><summary>**Changed**</summary>
 
 - `ACrab` aim limits now adjust to crab body rotation.
 
@@ -1020,7 +1084,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>Fixed</summary>
+<details><summary>**Fixed**</summary>
 
 - SFX slider now works properly.
 
@@ -1039,7 +1103,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>Removed</summary>
+<details><summary>**Removed**</summary>
 
 - All licensing-related code has been removed since it's no longer needed.
 

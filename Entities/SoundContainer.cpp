@@ -173,7 +173,7 @@ namespace RTE {
 		if (HasAnySounds()) {
 			if (IsBeingPlayed()) {
 				if (m_SoundOverlapMode == SoundOverlapMode::RESTART) {
-					Restart(player);
+					return Restart(player);
 				} else if (m_SoundOverlapMode == SoundOverlapMode::IGNORE_PLAY) {
 					return false;
 				}

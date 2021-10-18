@@ -18,6 +18,7 @@ namespace RTE {
 		m_LifeVariation = 0.1F;
 		m_InheritsVel = true;
 		m_IgnoresTeamHits = false;
+		m_SpreadMode = SpreadMode::SpreadRandom;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -32,6 +33,7 @@ namespace RTE {
 		m_LifeVariation = reference.m_LifeVariation;
 		m_InheritsVel = reference.m_InheritsVel;
 		m_IgnoresTeamHits = reference.m_IgnoresTeamHits;
+		m_SpreadMode = reference.m_SpreadMode;
 
 		return 0;
 	}
@@ -58,6 +60,8 @@ namespace RTE {
 			reader >> m_InheritsVel;
 		} else if (propName == "IgnoresTeamHits") {
 			reader >> m_IgnoresTeamHits;
+		} else if (propName == "SpreadMode") {
+			m_SpreadMode = static_cast<SpreadMode>(std::stoi(reader.ReadPropValue()));
 		} else {
 			return Serializable::ReadProperty(propName, reader);
 		}

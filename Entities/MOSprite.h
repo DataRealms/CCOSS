@@ -50,7 +50,7 @@ public:
         ALWAYSLOOP,
         ALWAYSRANDOM,
         ALWAYSPINGPONG,
-        LOOPWHENMOVING,
+        LOOPWHENACTIVE,
         LOOPWHENOPENCLOSE,
         PINGPONGOPENCLOSE,
 		OVERLIFETIME,
@@ -266,6 +266,11 @@ public:
 
 	float GetRotAngle() const override { return m_Rotation.GetRadAngle(); }
 
+	/// <summary>
+	/// Gets the previous rotational angle of this MOSprite, prior to this frame.
+	/// </summary>
+	/// <returns>The previous rotational angle in radians.</returns>
+	float GetPrevRotAngle() const { return m_PrevRotation.GetRadAngle(); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetAngularVel

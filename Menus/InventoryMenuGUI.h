@@ -437,11 +437,12 @@ namespace RTE {
 		//void SwapEquippedItemSet() {}
 
 		/// <summary>
-		/// Swaps an equipped item with one in the inventory Actor's inventory.
+		/// Swaps the equipped item at the given equipped item index with one in the inventory Actor's inventory at the given inventory item index.
+		/// Accounts for either index pointing to empty buttons and any other potential complications.
 		/// </summary>
-		/// <param name="equippedItem">A pointer to the equipped item being swapped out.</param>
+		/// <param name="equippedItemIndex">The index of the equipped item being swapped out.</param>
 		/// <param name="inventoryItemIndex">The index in the inventory of the item being swapped in.</param>
-		void SwapEquippedItemAndInventoryItem(MovableObject *equippedItemToSwapOut, int inventoryItemIndexToSwapIn);
+		void SwapEquippedItemAndInventoryItem(int equippedItemIndex, int inventoryItemIndex);
 
 		/// <summary>
 		/// Reloads the selected item if it is equipped, or swaps to it and then reloads it if it isn't.

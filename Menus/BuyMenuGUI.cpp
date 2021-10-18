@@ -2003,7 +2003,7 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
     }
     else if (m_MenuCategory == TOOLS)
     {
-        AddObjectsToItemList(catalogList, "HDFirearm", "Tools");
+		AddObjectsToItemList(catalogList, "HeldDevice", "Tools");
     }
     else if (m_MenuCategory == GUNS)
     {
@@ -2033,9 +2033,10 @@ void BuyMenuGUI::CategoryChange(bool focusOnCategoryTabs)
             for (list<Entity *>::iterator oItr = catalogList[moduleID].begin(); oItr != catalogList[moduleID].end(); ++oItr)
             {
                 pSObject = dynamic_cast<SceneObject *>(*oItr);
-                // Buyable and not brain?
-                if (pSObject && pSObject->IsBuyable() && !pSObject->IsInGroup("Brains"))
-                    tempList.push_back(pSObject);
+                // Only add buyable and non-brain items, unless they are explicitly set to be available.
+				if ((pSObject && pSObject->IsBuyable() && !pSObject->IsInGroup("Brains")) || GetOwnedItemsAmount((pSObject)->GetModuleAndPresetName()) > 0 || m_AlwaysAllowedItems.find((pSObject)->GetModuleAndPresetName()) != m_AlwaysAllowedItems.end()) {
+					tempList.push_back(pSObject);
+				}
             }
 
             // Don't add anyhting to the real buy item list if the current module didn't yield any valid items

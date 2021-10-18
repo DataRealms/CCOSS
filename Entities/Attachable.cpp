@@ -347,7 +347,7 @@ namespace RTE {
 				if (std::abs(currentRotAngleOffset - m_PrevRotAngleOffset) > 0.01745F) { // Update for 1 degree differences
 					Matrix atomRotationForSubgroup(rootParentAsMOSR->FacingAngle(GetRotAngle()) - rootParentAsMOSR->FacingAngle(rootParentAsMOSR->GetRotAngle()));
 					Vector atomOffsetForSubgroup(g_SceneMan.ShortestDistance(rootParentAsMOSR->GetPos(), m_Pos, g_SceneMan.SceneWrapsX()).FlipX(rootParentAsMOSR->IsHFlipped()));
-					Matrix rootParentAngleToUse(rootParentAsMOSR->GetRotAngle() * static_cast<float>(rootParentAsMOSR->GetFlipFactor()));
+					Matrix rootParentAngleToUse(rootParentAsMOSR->GetRotAngle() * rootParentAsMOSR->GetFlipFactor());
 					atomOffsetForSubgroup /= rootParentAngleToUse;
 					rootParentAsMOSR->GetAtomGroup()->UpdateSubAtoms(GetAtomSubgroupID(), atomOffsetForSubgroup, atomRotationForSubgroup);
 				}
@@ -458,7 +458,7 @@ namespace RTE {
 			m_Team = newParent->GetTeam();
 			if (InheritsHFlipped() != 0) { m_HFlipped = m_InheritsHFlipped == 1 ? m_Parent->IsHFlipped() : !m_Parent->IsHFlipped(); }
 			if (InheritsRotAngle()) {
-				SetRotAngle(m_Parent->GetRotAngle() + m_InheritedRotAngleOffset * static_cast<float>(m_Parent->GetFlipFactor()));
+				SetRotAngle(m_Parent->GetRotAngle() + m_InheritedRotAngleOffset * m_Parent->GetFlipFactor());
 				m_AngularVel = 0.0F;
 			}
 			UpdatePositionAndJointPositionBasedOnOffsets();

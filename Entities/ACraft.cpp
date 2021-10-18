@@ -283,6 +283,8 @@ void ACraft::Clear()
     m_MaxPassengers = -1;
 
 	m_DeliveryDelayMultiplier = 1.0;
+	m_ScuttleIfFlippedTime = 4000;
+	m_ScuttleOnDeath = true;
 }
 
 
@@ -337,6 +339,8 @@ int ACraft::Create(const ACraft &reference)
     m_MaxPassengers = reference.m_MaxPassengers;
 
 	m_DeliveryDelayMultiplier = reference.m_DeliveryDelayMultiplier;
+	m_ScuttleIfFlippedTime = reference.m_ScuttleIfFlippedTime;
+	m_ScuttleOnDeath = reference.m_ScuttleOnDeath;
 
     return 0;
 }
@@ -377,6 +381,10 @@ int ACraft::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_LandingCraft;
     else if (propName == "MaxPassengers")
         reader >> m_MaxPassengers;
+	else if (propName == "ScuttleIfFlippedTime")
+		reader >> m_ScuttleIfFlippedTime;
+	else if (propName == "ScuttleOnDeath")
+		reader >> m_ScuttleOnDeath;
     else
         return Actor::ReadProperty(propName, reader);
 
@@ -417,6 +425,10 @@ int ACraft::Save(Writer &writer) const
 
     writer.NewProperty("MaxPassengers");
     writer << m_MaxPassengers;
+	writer.NewProperty("ScuttleIfFlippedTime");
+	writer << m_ScuttleIfFlippedTime;
+	writer.NewProperty("ScuttleOnDeath");
+	writer << m_ScuttleOnDeath;
 
     return 0;
 }
@@ -853,6 +865,13 @@ void ACraft::GibThis(const Vector &impactImpulse, MovableObject *movableObjectTo
 	Actor::GibThis(impactImpulse, movableObjectToIgnore);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ACraft::ResetAllTimers() {
+	MOSRotating::ResetAllTimers();
+
+	m_FlippedTimer.Reset();
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -888,18 +907,6 @@ void ACraft::Update()
             m_CrashTimer.Reset();
         }
     }
-
-    // Check for death
-    if (m_Health <= 0 && m_Status != DYING && m_Status != DEAD)
-    {
-        m_Status = DYING;
-        m_DeathTmr.Reset();
-        DropAllInventory();
-    }
-/*
-    if (m_Status == DYING && m_DeathTmr.GetElapsedSimTimeMS() > m_HatchDelay * 2)
-        m_Status = DEAD;
-*/
 
     ///////////////////////////////////////////////////
     // Doors open logic
@@ -973,13 +980,27 @@ void ACraft::Update()
 		}
 	}
 
+	if (m_Status == DEAD) {
+		if (m_ScuttleOnDeath || m_AIMode == AIMODE_SCUTTLE) { GibThis(); }
+	} else if (m_Status == DYING) {
+		if ((m_ScuttleOnDeath || m_AIMode == AIMODE_SCUTTLE) && m_DeathTmr.IsPastSimMS(500) && m_DeathTmr.AlternateSim(100)) { FlashWhite(10); }
+	}  else if (m_Health <= 0 || m_AIMode == AIMODE_SCUTTLE || (m_ScuttleIfFlippedTime >= 0 && m_FlippedTimer.IsPastSimMS(m_ScuttleIfFlippedTime))) {
+		m_Status = DYING;
+		m_DeathTmr.Reset();
+		DropAllInventory();
+	}
 
-    // Only make the death happen after the user lets go tf the AI menu
-    if (m_Status != DEAD && m_AIMode == AIMODE_SCUTTLE)
-    {
-        DropAllInventory();
-        m_Status = DYING;
-    }
+	// Get the rotation in radians.
+	float rot = m_Rotation.GetRadAngle();
+
+	// Eliminate rotations over half a turn.
+	if (std::abs(rot) > c_PI) {
+		rot += (rot > 0) ? -c_TwoPI : c_TwoPI;
+		m_Rotation.SetRadAngle(rot);
+	}
+	if (rot < c_HalfPI && rot > -c_HalfPI) {
+		m_FlippedTimer.Reset();
+	}
 
     /////////////////////////////////////////
     // Misc.

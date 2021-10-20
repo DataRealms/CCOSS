@@ -3808,9 +3808,9 @@ void AHuman::Update()
 					m_Paths[FGROUND][CRAWL].Terminate();
 					m_Paths[BGROUND][CRAWL].Terminate();
 
-					if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, limbPathRotation, m_Paths[FGROUND][CROUCH], deltaTime); }
+					if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[FGROUND][CROUCH], deltaTime); }
 
-					if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, limbPathRotation, m_Paths[BGROUND][CROUCH], deltaTime); }
+					if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[BGROUND][CROUCH], deltaTime); }
 
 				} else {
 					m_Paths[FGROUND][WALK].Terminate();
@@ -3820,9 +3820,9 @@ void AHuman::Update()
 					m_Paths[FGROUND][ARMCRAWL].Terminate();
 					m_Paths[BGROUND][ARMCRAWL].Terminate();
 
-					if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, limbPathRotation, m_Paths[FGROUND][STAND], deltaTime, 0, !m_pBGLeg); }
+					if (m_pFGLeg) { m_pFGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[FGROUND][STAND], deltaTime, 0, !m_pBGLeg); }
 
-					if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, limbPathRotation, m_Paths[BGROUND][STAND], deltaTime, 0, !m_pFGLeg); }
+					if (m_pBGLeg) { m_pBGFootGroup->PushAsLimb(m_Pos.GetFloored() + m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped), m_Vel, Matrix(), m_Paths[BGROUND][STAND], deltaTime, 0, !m_pFGLeg); }
 				}
 			}
 		}

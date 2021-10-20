@@ -35,7 +35,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
-          key: build-check-${{runner.os}}
+          key: build-check-${{runner.os}}-regressed
           max-size: 5G
 
       - name: Build

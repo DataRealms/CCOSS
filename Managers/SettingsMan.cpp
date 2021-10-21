@@ -16,14 +16,17 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsMan::Clear() {
+		m_SettingsPath = "Base.rte/Settings.ini";
 		m_SettingsNeedOverwrite = false;
 
 		m_FlashOnBrainDamage = true;
 		m_BlipOnRevealUnseen = true;
+		m_UnheldItemsHUDDisplayRange = 25;
 		m_EndlessMetaGameMode = false;
 		m_EnableCrabBombs = false;
 		m_CrabBombThreshold = 42;
 		m_ShowEnemyHUD = true;
+		m_EnableSmartBuyMenuNavigation = true;
 
 		m_NetworkServerAddress = "127.0.0.1:8000";
 		m_PlayerNetworkName = "Dummy";
@@ -55,10 +58,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SettingsMan::Initialize(Reader &reader) {
-		if (!reader.ReaderOK()) {
-			Writer settingsWriter("Base.rte/Settings.ini");
-			RTEAssert(settingsWriter.WriterOK(), "After failing to open the Base.rte/Settings.ini, could not then even create a new one to save settings to!\nAre you trying to run the game from a read-only disk?\nYou need to install the game to a writable area before running it!");
+	int SettingsMan::Initialize() {
+		if (const char *settingsTempPath = std::getenv("CCCP_SETTINGSPATH")) { m_SettingsPath = std::string(settingsTempPath); }
+
+		Reader settingsReader(m_SettingsPath, false, nullptr, true);
+
+		if (!settingsReader.ReaderOK()) {
+			Writer settingsWriter(m_SettingsPath);
+			RTEAssert(settingsWriter.WriterOK(), "After failing to open the " + m_SettingsPath + ", could not then even create a new one to save settings to!\nAre you trying to run the game from a read-only disk?\nYou need to install the game to a writable area before running it!");
 
 			// Settings file doesn't need to be populated with anything right now besides this manager's ClassName for serialization. It will be overwritten with the full list of settings with default values from all the managers before modules start loading.
 			settingsWriter.ObjectStart(GetClassName());
@@ -66,16 +73,16 @@ namespace RTE {
 
 			m_SettingsNeedOverwrite = true;
 
-			Reader settingsReader("Base.rte/Settings.ini");
-			return Serializable::Create(settingsReader);
+			Reader newSettingsReader(m_SettingsPath);
+			return Serializable::Create(newSettingsReader);
 		}
-		return Serializable::Create(reader);
+		return Serializable::Create(settingsReader);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsMan::UpdateSettingsFile() const {
-		Writer settingsWriter("Base.rte/Settings.ini");
+		Writer settingsWriter(m_SettingsPath);
 		g_SettingsMan.Save(settingsWriter);
 	}
 
@@ -129,6 +136,8 @@ namespace RTE {
 			reader >> m_BlipOnRevealUnseen;
 		} else if (propName == "MaxUnheldItems") {
 			reader >> g_MovableMan.m_MaxDroppedItems;
+		} else if (propName == "UnheldItemsHUDDisplayRange") {
+			SetUnheldItemsHUDDisplayRange(std::stof(reader.ReadPropValue()));
 		} else if (propName == "SloMoThreshold") {
 			reader >> g_MovableMan.m_SloMoThreshold;
 		} else if (propName == "SloMoDurationMS") {
@@ -141,6 +150,8 @@ namespace RTE {
 			reader >> m_CrabBombThreshold;
 		} else if (propName == "ShowEnemyHUD") {
 			reader >> m_ShowEnemyHUD;
+		} else if (propName == "SmartBuyMenuNavigation") {
+			reader >> m_EnableSmartBuyMenuNavigation;
 		} else if (propName == "LaunchIntoActivity") {
 			reader >> g_ActivityMan.m_LaunchIntoActivity;
 		} else if (propName == "DefaultActivityType") {
@@ -299,12 +310,14 @@ namespace RTE {
 		writer.NewPropertyWithValue("FlashOnBrainDamage", m_FlashOnBrainDamage);
 		writer.NewPropertyWithValue("BlipOnRevealUnseen", m_BlipOnRevealUnseen);
 		writer.NewPropertyWithValue("MaxUnheldItems", g_MovableMan.m_MaxDroppedItems);
+		writer.NewPropertyWithValue("UnheldItemsHUDDisplayRange", m_UnheldItemsHUDDisplayRange);
 		writer.NewPropertyWithValue("SloMoThreshold", g_MovableMan.m_SloMoThreshold);
 		writer.NewPropertyWithValue("SloMoDurationMS", g_MovableMan.m_SloMoDuration);
 		writer.NewPropertyWithValue("EndlessMetaGameMode", m_EndlessMetaGameMode);
 		writer.NewPropertyWithValue("EnableCrabBombs", m_EnableCrabBombs);
 		writer.NewPropertyWithValue("CrabBombThreshold", m_CrabBombThreshold);
 		writer.NewPropertyWithValue("ShowEnemyHUD", m_ShowEnemyHUD);
+		writer.NewPropertyWithValue("SmartBuyMenuNavigation", m_EnableSmartBuyMenuNavigation);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

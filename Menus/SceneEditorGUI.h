@@ -179,7 +179,7 @@ public:
 // Arguments:       None.
 // Return value:    The enum'd int of any slice activated. See the PieSliceIndex enum.
 
-    PieSlice::PieSliceIndex GetActivatedPieSlice();
+    PieSlice::PieSliceIndex GetActivatedPieSlice() { return m_ActivatedPieSliceType; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -357,6 +357,7 @@ protected:
 
     // The pie menu
     PieMenuGUI *m_pPieMenu;
+    PieSlice::PieSliceIndex m_ActivatedPieSliceType; //!< The activated PieSliceType, reset every frame.
     // The object picker
     ObjectPickerGUI *m_pPicker;
     // The ID of the DataModule that contains the native Tech of the Player using this menu

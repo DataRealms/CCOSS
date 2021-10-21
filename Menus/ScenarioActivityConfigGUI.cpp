@@ -203,8 +203,8 @@ namespace RTE {
 						gameActivity->SetCPUTeam(team);
 					} else {
 						gameActivity->AddPlayer(player, true, team, 0);
+						break;
 					}
-					break;
 				}
 			}
 		}
@@ -333,10 +333,15 @@ namespace RTE {
 		const Icon *playerIcon = (clickedPlayer != PlayerColumns::PlayerCPU) ? g_UInputMan.GetSchemeIcon(clickedPlayer) : dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
 		if (playerIcon) { m_PlayerBoxes.at(clickedPlayer).at(clickedTeam)->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0])); }
 
-		for (int nonHoveredTeam = Activity::Teams::TeamOne; nonHoveredTeam < TeamRows::TeamRowCount; ++nonHoveredTeam) {
-			if (nonHoveredTeam != clickedTeam) {
-				m_PlayerBoxes.at(clickedPlayer).at(nonHoveredTeam)->SetDrawType(GUICollectionBox::Color);
-				m_PlayerBoxes.at(clickedPlayer).at(nonHoveredTeam)->SetDrawColor(c_GUIColorBlue);
+		if (clickedPlayer == PlayerColumns::PlayerCPU) {
+			m_PlayerBoxes.at(clickedPlayer).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Color);
+			m_PlayerBoxes.at(clickedPlayer).at(TeamRows::DisabledTeam)->SetDrawColor(c_GUIColorBlue);
+		} else {
+			for (int nonHoveredTeam = Activity::Teams::TeamOne; nonHoveredTeam < TeamRows::TeamRowCount; ++nonHoveredTeam) {
+				if (nonHoveredTeam != clickedTeam) {
+					m_PlayerBoxes.at(clickedPlayer).at(nonHoveredTeam)->SetDrawType(GUICollectionBox::Color);
+					m_PlayerBoxes.at(clickedPlayer).at(nonHoveredTeam)->SetDrawColor(c_GUIColorBlue);
+				}
 			}
 		}
 
@@ -354,9 +359,16 @@ namespace RTE {
 		} else if (clickedPlayer != PlayerColumns::PlayerCPU && clickedTeam != TeamRows::DisabledTeam && m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(clickedTeam)->GetDrawType() == GUICollectionBox::Image) {
 			m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(clickedTeam)->SetDrawType(GUICollectionBox::Color);
 			m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(clickedTeam)->SetDrawColor(c_GUIColorBlue);
-			m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Image);
-			playerIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
-			if (playerIcon) { m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0])); }
+
+			int cpuTeamCount = 0;
+			for (int teamToCount = Activity::Teams::TeamOne; teamToCount < TeamRows::DisabledTeam; ++teamToCount) {
+				if (m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(teamToCount)->GetDrawType() == GUICollectionBox::Image) { cpuTeamCount++; }
+			}
+			if (cpuTeamCount == 0) {
+				m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(TeamRows::DisabledTeam)->SetDrawType(GUICollectionBox::Image);
+				playerIcon = dynamic_cast<const Icon *>(g_PresetMan.GetEntityPreset("Icon", "Device CPU"));
+				if (playerIcon) { m_PlayerBoxes.at(PlayerColumns::PlayerCPU).at(TeamRows::DisabledTeam)->SetDrawImage(new AllegroBitmap(playerIcon->GetBitmaps32()[0])); }
+			}
 		}
 		g_GUISound.FocusChangeSound()->Play();
 	}

@@ -158,7 +158,7 @@ namespace RTE {
 			carouselItemBox = std::make_unique<CarouselItemBox>();
 			carouselItemBox->IsForEquippedItems = false;
 		}
-		std::size_t equippedItemIndex = c_ItemsPerRow / 2;
+		int equippedItemIndex = c_ItemsPerRow / 2;
 		Vector currentBoxSize = c_CarouselBoxMaxSize;
 		int carouselBitmapWidth = 0;
 		for (int i = equippedItemIndex; i >= 0; i--) {
@@ -593,23 +593,23 @@ namespace RTE {
 		const MovableObject *offhandEquippedItem = m_GUIInventoryActorCurrentEquipmentSetIndex < m_InventoryActorEquippedItems.size() ? m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).second : nullptr;
 
 		m_GUIEquippedItemButton->SetEnabled(equippedItem);
-		if (m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough() && m_GUIEquippedItemButton->HasIcon()) {
+		if (m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough()) {
 			m_GUIEquippedItemButton->SetIconAndText(nullptr, ">>>");
 		} else if (equippedItem) {
 			m_GUIEquippedItemButton->SetIconAndText(equippedItem->GetGraphicalIcon(), equippedItem->GetPresetName());
 		} else {
 			m_GUIEquippedItemButton->SetEnabled(m_GUISelectedItem != nullptr);
-			if (m_GUIEquippedItemButton->HasIcon()) { m_GUIEquippedItemButton->SetIconAndText(nullptr, "> <"); }
+			m_GUIEquippedItemButton->SetIconAndText(nullptr, "> <");
 		}
 
 		m_GUIOffhandEquippedItemButton->SetEnabled(offhandEquippedItem);
-		if (m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIOffhandEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough() && m_GUIOffhandEquippedItemButton->HasIcon()) {
+		if (m_GUISelectedItem && m_GUISelectedItem->Button == m_GUIOffhandEquippedItemButton && m_GUISelectedItem->DragWasHeldForLongEnough()) {
 			m_GUIOffhandEquippedItemButton->SetIconAndText(nullptr, ">>>");
 		} else if (offhandEquippedItem) {
 			m_GUIOffhandEquippedItemButton->SetIconAndText(offhandEquippedItem->GetGraphicalIcon(), offhandEquippedItem->GetPresetName());
 		} else {
 			m_GUIOffhandEquippedItemButton->SetEnabled(m_GUISelectedItem != nullptr);
-			if (m_GUIOffhandEquippedItemButton->HasIcon()) { m_GUIOffhandEquippedItemButton->SetIconAndText(nullptr, "> <"); }
+			m_GUIOffhandEquippedItemButton->SetIconAndText(nullptr, "> <");
 		}
 
 		bool showOffhandButton = offhandEquippedItem || (dynamic_cast<const HeldDevice *>(equippedItem) && dynamic_cast<const HeldDevice *>(equippedItem)->IsOneHanded());
@@ -655,7 +655,7 @@ namespace RTE {
 
 	void InventoryMenuGUI::UpdateFullModeInventoryItemButtons(const std::deque<MovableObject *> *inventory) {
 		int startIndex = m_GUIInventoryItemsScrollbar->GetValue() * c_ItemsPerRow;
-		int lastPopulatedIndex = inventory->size() - 1;
+		int lastPopulatedIndex = static_cast<int>(inventory->size() - 1);
 		GUIButton *itemButton;
 		MovableObject *inventoryItem;
 		for (int i = startIndex; (i - startIndex) < c_FullViewPageItemLimit; i++) {
@@ -664,7 +664,7 @@ namespace RTE {
 				inventoryItem = inventory->at(i);
 				itemButton->SetEnabled(true);
 				m_GUIInventoryItemButtons.at(i - startIndex).first = inventoryItem;
-				if (m_GUISelectedItem && m_GUISelectedItem->Button == itemButton && m_GUISelectedItem->DragWasHeldForLongEnough() && itemButton->HasIcon()) {
+				if (m_GUISelectedItem && m_GUISelectedItem->Button == itemButton && m_GUISelectedItem->DragWasHeldForLongEnough()) {
 					itemButton->SetIconAndText(nullptr, ">>>");
 				} else {
 					itemButton->SetIconAndText(inventoryItem->GetGraphicalIcon(), inventoryItem->GetPresetName());
@@ -673,7 +673,7 @@ namespace RTE {
 				if (!m_GUIShowEmptyRows && inventory->size() < c_FullViewPageItemLimit && ((i - startIndex) >= (inventory->size() + c_ItemsPerRow - (inventory->size() % c_ItemsPerRow)))) {
 					break;
 				}
-				if (itemButton->HasIcon()) {
+				if (m_GUIInventoryItemButtons.at(i - startIndex).first) {
 					m_GUIInventoryItemButtons.at(i - startIndex).first = nullptr;
 					itemButton->SetIconAndText(nullptr, "> <");
 				}
@@ -781,18 +781,10 @@ namespace RTE {
 					g_GUISound.ItemChangeSound()->Play(m_MenuController->GetPlayer());
 					m_GUIInformationToggleButton->OnLoseFocus();
 				} else if (guiControl == m_GUIEquippedItemButton) {
-					if (m_InventoryActorEquippedItems.empty()) {
-						if (!buttonHeld) { g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer()); }
-					} else {
-						HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first, 0, buttonHeld);
-					}
+					HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.empty() ? nullptr : m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first, 0, buttonHeld);
 				} else if (guiControl == m_GUIOffhandEquippedItemButton) {
-					if (m_InventoryActorEquippedItems.empty()) {
-						if (!buttonHeld) { g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer()); }
-					} else {
-						HandleItemButtonPressOrHold(m_GUIOffhandEquippedItemButton, m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).second, 1, buttonHeld);
-						m_GUIOffhandEquippedItemButton->OnMouseLeave(0, 0, 0, 0);
-					}
+					HandleItemButtonPressOrHold(m_GUIOffhandEquippedItemButton, m_InventoryActorEquippedItems.empty() ? nullptr : m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).second, 1, buttonHeld);
+					m_GUIOffhandEquippedItemButton->OnMouseLeave(0, 0, 0, 0);
 				} else if (!buttonHeld && guiControl == m_GUIReloadButton) {
 					ReloadSelectedItem();
 				} else if (!buttonHeld && guiControl == m_GUIDropButton) {
@@ -816,8 +808,7 @@ namespace RTE {
 		m_GUICursorPos.SetXY(static_cast<float>(mouseX), static_cast<float>(mouseY));
 
 		if (m_GUIInventoryItemsScrollbar->GetVisible()) {
-			int mouseWheelChange = -m_GUIInput->GetMouseWheelChange();
-			mouseWheelChange = m_MenuController->IsState(ControlState::SCROLL_UP) ? -1 : (m_MenuController->IsState(ControlState::SCROLL_DOWN) ? 1 : 0);
+			int mouseWheelChange = m_MenuController->IsState(ControlState::SCROLL_UP) ? -1 : (m_MenuController->IsState(ControlState::SCROLL_DOWN) ? 1 : 0);
 			if (mouseWheelChange != 0) { m_GUIInventoryItemsScrollbar->SetValue(std::clamp(m_GUIInventoryItemsScrollbar->GetValue() + mouseWheelChange, m_GUIInventoryItemsScrollbar->GetMinimum(), m_GUIInventoryItemsScrollbar->GetMaximum())); }
 		}
 
@@ -1136,7 +1127,7 @@ namespace RTE {
 					nextButtonToHighlight = m_NonMousePreviousReloadOrDropButton ? m_NonMousePreviousReloadOrDropButton : m_GUIReloadButton;
 				}
 			} else if (m_NonMouseHighlightedButton == m_GUIOffhandEquippedItemButton) {
-				nextButtonToHighlight = nextButtonToHighlight = m_NonMousePreviousReloadOrDropButton ? m_NonMousePreviousReloadOrDropButton : m_GUIReloadButton;
+				nextButtonToHighlight = m_NonMousePreviousReloadOrDropButton ? m_NonMousePreviousReloadOrDropButton : m_GUIReloadButton;
 			} else if (m_NonMouseHighlightedButton == m_GUIReloadButton || m_NonMouseHighlightedButton == m_GUIDropButton) {
 				nextButtonToHighlight = m_GUIInformationToggleButton;
 			}
@@ -1186,11 +1177,11 @@ namespace RTE {
 						g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
 					}
 				} else {
-					SwapEquippedItemAndInventoryItem(m_GUISelectedItem->Object, pressedButtonItemIndex);
+					SwapEquippedItemAndInventoryItem(m_GUISelectedItem->EquippedItemIndex, pressedButtonItemIndex);
 				}
 			} else {
 				if (buttonEquippedItemIndex > -1) {
-					SwapEquippedItemAndInventoryItem(buttonObject, m_GUISelectedItem->InventoryIndex);
+					SwapEquippedItemAndInventoryItem(pressedButtonItemIndex, m_GUISelectedItem->InventoryIndex);
 				} else {
 					if (pressedButtonItemIndex >= m_InventoryActor->GetInventorySize()) {
 						m_InventoryActor->AddInventoryItem(m_InventoryActor->RemoveInventoryItemAtIndex(m_GUISelectedItem->InventoryIndex));
@@ -1207,32 +1198,35 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void InventoryMenuGUI::SwapEquippedItemAndInventoryItem(MovableObject *equippedItemToSwapOut, int inventoryItemIndexToSwapIn) {
-		MovableObject *equippedItem = m_GUIInventoryActorCurrentEquipmentSetIndex < m_InventoryActorEquippedItems.size() ? m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first : nullptr;
-		MovableObject *offhandEquippedItem = m_GUIInventoryActorCurrentEquipmentSetIndex < m_InventoryActorEquippedItems.size() ? m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).second : nullptr;
-		bool addOffhandItemToInventory = false;
-
-		if (offhandEquippedItem && inventoryItemIndexToSwapIn >= 0 && inventoryItemIndexToSwapIn < m_InventoryActor->GetInventorySize()) {
-			const HeldDevice *inventoryItemToSwapIn = dynamic_cast<const HeldDevice *>(m_InventoryActor->GetInventory()->at(inventoryItemIndexToSwapIn));
-			if (!inventoryItemToSwapIn->IsOneHanded() && !inventoryItemToSwapIn->HasObjectInGroup("Shields")) {
-				if (equippedItem) {
-					equippedItemToSwapOut = equippedItem;
-					addOffhandItemToInventory = true;
-				} else if (m_InventoryActorIsHuman && !dynamic_cast<AHuman *>(m_InventoryActor)->GetFGArm()) {
-					equippedItemToSwapOut = nullptr;
-				}
-			}
-		}
-
-		if (equippedItemToSwapOut) {
-			Arm *equippedItemArm = dynamic_cast<Arm *>(equippedItemToSwapOut->GetParent());
-			equippedItemArm->SetHeldMO(m_InventoryActor->SetInventoryItemAtIndex(equippedItemArm->ReleaseHeldMO(), inventoryItemIndexToSwapIn));
-			equippedItemArm->SetHandPos(m_InventoryActor->GetPos() + m_InventoryActor->GetHolsterOffset().GetXFlipped(m_InventoryActor->IsHFlipped()));
-			if (addOffhandItemToInventory) { m_InventoryActor->AddInventoryItem(dynamic_cast<Arm *>(offhandEquippedItem->GetParent())->ReleaseHeldMO()); }
-			m_InventoryActor->GetDeviceSwitchSound()->Play(m_MenuController->GetPlayer());
-		} else {
+	void InventoryMenuGUI::SwapEquippedItemAndInventoryItem(int equippedItemIndex, int inventoryItemIndex) {
+		if (!m_InventoryActorIsHuman) {
 			g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
+			return;
 		}
+
+		AHuman *inventoryActorAsAHuman = dynamic_cast<AHuman *>(m_InventoryActor);
+		MovableObject *equippedItem = m_GUIInventoryActorCurrentEquipmentSetIndex < m_InventoryActorEquippedItems.size() && !m_InventoryActorEquippedItems.empty() ? m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first : nullptr;
+		MovableObject *offhandEquippedItem = m_GUIInventoryActorCurrentEquipmentSetIndex < m_InventoryActorEquippedItems.size() && !m_InventoryActorEquippedItems.empty() ? m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).second : nullptr;
+		
+		const HeldDevice *inventoryItemToSwapIn = inventoryItemIndex < m_InventoryActor->GetInventorySize() ? dynamic_cast<const HeldDevice *>(m_InventoryActor->GetInventory()->at(inventoryItemIndex)) : nullptr;
+		bool inventoryItemCanGoInOffhand = !inventoryItemToSwapIn || inventoryItemToSwapIn->IsOneHanded() || inventoryItemToSwapIn->HasObjectInGroup("Shields");
+		
+		equippedItemIndex = !inventoryItemCanGoInOffhand || !inventoryActorAsAHuman->GetBGArm() ? 0 : equippedItemIndex;
+		MovableObject *equippedItemToSwapOut = equippedItemIndex == 0 ? equippedItem : offhandEquippedItem;
+		
+		if (equippedItemIndex == 0 && !inventoryActorAsAHuman->GetFGArm()) {
+			g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
+			return;
+		}
+
+		Arm *equippedItemArm = equippedItemIndex == 0 ? inventoryActorAsAHuman->GetFGArm() : inventoryActorAsAHuman->GetBGArm();
+		equippedItemArm->SetHeldMO(m_InventoryActor->SetInventoryItemAtIndex(equippedItemArm->ReleaseHeldMO(), inventoryItemIndex));
+		equippedItemArm->SetHandPos(m_InventoryActor->GetPos() + m_InventoryActor->GetHolsterOffset().GetXFlipped(m_InventoryActor->IsHFlipped()));
+		if (!inventoryItemCanGoInOffhand && offhandEquippedItem) {
+			m_InventoryActor->AddInventoryItem(inventoryActorAsAHuman->GetBGArm()->ReleaseHeldMO());
+			inventoryActorAsAHuman->GetBGArm()->SetHandPos(m_InventoryActor->GetPos() + m_InventoryActor->GetHolsterOffset().GetXFlipped(m_InventoryActor->IsHFlipped()));
+		}
+		m_InventoryActor->GetDeviceSwitchSound()->Play(m_MenuController->GetPlayer());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1247,7 +1241,7 @@ namespace RTE {
 		} else if (HDFirearm *selectedItemObjectAsFirearm = dynamic_cast<HDFirearm *>(m_GUISelectedItem->Object)) {
 			if (m_GUISelectedItem->InventoryIndex > -1) {
 				if (!m_InventoryActorEquippedItems.empty() && m_GUIInventoryActorCurrentEquipmentSetIndex < m_InventoryActorEquippedItems.size()) {
-					SwapEquippedItemAndInventoryItem(m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first, m_GUISelectedItem->InventoryIndex);
+					SwapEquippedItemAndInventoryItem(0, m_GUISelectedItem->InventoryIndex);
 				} else if (inventoryActorAsAHuman->GetFGArm() || inventoryActorAsAHuman->GetBGArm()) {
 					Arm *armToUse = inventoryActorAsAHuman->GetFGArm() ? inventoryActorAsAHuman->GetFGArm() : inventoryActorAsAHuman->GetBGArm();
 					armToUse->SetHeldMO(m_InventoryActor->RemoveInventoryItemAtIndex(m_GUISelectedItem->InventoryIndex));
@@ -1381,7 +1375,7 @@ namespace RTE {
 		if (itemBoxToDraw.RoundedAndBorderedSides.second) { iconMaxSize.SetX(iconMaxSize.GetX() - m_CarouselBackgroundBoxBorderSize.GetX()); }
 		std::for_each(itemIcons.crbegin(), itemIcons.crend(), [this, &itemBoxToDraw, &multiItemDrawOffset, &iconMaxSize](BITMAP *iconToDraw) {
 			float stretchRatio = std::max(static_cast<float>(iconToDraw->w - 1 + (multiItemDrawOffset.GetFloorIntX() / 2)) / iconMaxSize.GetX(), static_cast<float>(iconToDraw->h - 1 + (multiItemDrawOffset.GetFloorIntY() / 2)) / iconMaxSize.GetY());
-			if (stretchRatio > 1) {
+			if (stretchRatio > 1.0F) {
 				float stretchedWidth = static_cast<float>(iconToDraw->w) / stretchRatio;
 				float stretchedHeight = static_cast<float>(iconToDraw->h) / stretchRatio;
 				stretch_sprite(m_CarouselBitmap.get(), iconToDraw,

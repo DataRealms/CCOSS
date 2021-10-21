@@ -15,6 +15,7 @@ namespace RTE {
 		.property("Description", &Entity::GetDescription, &Entity::SetDescription)
 		.property("IsOriginalPreset", &Entity::IsOriginalPreset)
 		.property("ModuleID", &Entity::GetModuleID)
+		.property("ModuleName", &Entity::GetModuleName)
 		.property("RandomWeight", &Entity::GetRandomWeight)
 
 		.def("Clone", &CloneEntity)
@@ -137,6 +138,8 @@ namespace RTE {
 		.property("CrashSound", &ACraft::GetCrashSound, &ACraftSetCrashSound)
 		.property("MaxPassengers", &ACraft::GetMaxPassengers)
 		.property("DeliveryDelayMultiplier", &ACraft::GetDeliveryDelayMultiplier)
+		.property("ScuttleOnDeath", &ACraft::GetScuttleOnDeath, &ACraft::SetScuttleOnDeath)
+		.property("HatchDelay", &ACraft::GetHatchDelay, &ACraft::SetHatchDelay)
 
 		.def("OpenHatch", &ACraft::OpenHatch)
 		.def("CloseHatch", &ACraft::CloseHatch)
@@ -204,6 +207,7 @@ namespace RTE {
 		.property("DeathSound", &Actor::GetDeathSound, &ActorSetDeathSound)
 		.property("DeviceSwitchSound", &Actor::GetDeviceSwitchSound, &ActorSetDeviceSwitchSound)
 		.property("ImpulseDamageThreshold", &Actor::GetTravelImpulseDamage, &Actor::SetTravelImpulseDamage)
+		.property("StableRecoveryDelay", &Actor::GetStableRecoverDelay, &Actor::SetStableRecoverDelay)
 		.property("Status", &Actor::GetStatus, &Actor::SetStatus)
 		.property("Health", &Actor::GetHealth, &Actor::SetHealth)
 		.property("PrevHealth", &Actor::GetPrevHealth)
@@ -364,6 +368,8 @@ namespace RTE {
 		.property("EmitAngle", &AEmitter::GetEmitAngle, &AEmitter::SetEmitAngle)
 		.property("GetThrottle", &AEmitter::GetThrottle, &AEmitter::SetThrottle)
 		.property("Throttle", &AEmitter::GetThrottle, &AEmitter::SetThrottle)
+		.property("NegativeThrottleMultiplier", &AEmitter::GetNegativeThrottleMultiplier, &AEmitter::SetNegativeThrottleMultiplier)
+		.property("PositiveThrottleMultiplier", &AEmitter::GetPositiveThrottleMultiplier, &AEmitter::SetPositiveThrottleMultiplier)
 		.property("BurstSpacing", &AEmitter::GetBurstSpacing, &AEmitter::SetBurstSpacing)
 		.property("BurstDamage", &AEmitter::GetBurstDamage, &AEmitter::SetBurstDamage)
 		.property("EmitterDamageMultiplier", &AEmitter::GetEmitterDamageMultiplier, &AEmitter::SetEmitterDamageMultiplier)
@@ -404,6 +410,7 @@ namespace RTE {
 		.property("JetTimeLeft", &AHuman::GetJetTimeLeft, &AHuman::SetJetTimeLeft)
 		.property("JetAngleRange", &AHuman::GetJetAngleRange, &AHuman::SetJetAngleRange)
 		.property("ThrowPrepTime", &AHuman::GetThrowPrepTime, &AHuman::SetThrowPrepTime)
+		.property("ThrowProgress", &AHuman::GetThrowProgress)
 		.property("EquippedItem", &AHuman::GetEquippedItem)
 		.property("EquippedBGItem", &AHuman::GetEquippedBGItem)
 		.property("FirearmIsReady", &AHuman::FirearmIsReady)
@@ -588,7 +595,9 @@ namespace RTE {
 
 		.property("RateOfFire", &HDFirearm::GetRateOfFire, &HDFirearm::SetRateOfFire)
 		.property("FullAuto", &HDFirearm::IsFullAuto, &HDFirearm::SetFullAuto)
+		.property("Reloadable", &HDFirearm::IsReloadable, &HDFirearm::SetReloadable)
 		.property("RoundInMagCount", &HDFirearm::GetRoundInMagCount)
+		.property("RoundInMagCapacity", &HDFirearm::GetRoundInMagCapacity)
 		.property("Magazine", &HDFirearm::GetMagazine, &HDFirearmSetMagazine)
 		.property("Flash", &HDFirearm::GetFlash, &HDFirearmSetFlash)
 		.property("PreFireSound", &HDFirearm::GetPreFireSound, &HDFirearmSetPreFireSound)
@@ -602,10 +611,12 @@ namespace RTE {
 		.property("ActivationDelay", &HDFirearm::GetActivationDelay, &HDFirearm::SetActivationDelay)
 		.property("DeactivationDelay", &HDFirearm::GetDeactivationDelay, &HDFirearm::SetDeactivationDelay)
 		.property("ReloadTime", &HDFirearm::GetReloadTime, &HDFirearm::SetReloadTime)
+		.property("ReloadProgress", &HDFirearm::GetReloadProgress)
 		.property("ShakeRange", &HDFirearm::GetShakeRange, &HDFirearm::SetShakeRange)
 		.property("SharpShakeRange", &HDFirearm::GetSharpShakeRange, &HDFirearm::SetSharpShakeRange)
 		.property("NoSupportFactor", &HDFirearm::GetNoSupportFactor, &HDFirearm::SetNoSupportFactor)
 		.property("ParticleSpreadRange", &HDFirearm::GetParticleSpreadRange, &HDFirearm::SetParticleSpreadRange)
+		.property("ShellVelVariation", &HDFirearm::GetShellVelVariation, &HDFirearm::SetShellVelVariation)
 		.property("FiredOnce", &HDFirearm::FiredOnce)
 		.property("FiredFrame", &HDFirearm::FiredFrame)
 		.property("RoundsFired", &HDFirearm::RoundsFired)
@@ -755,6 +766,7 @@ namespace RTE {
 		.property("HFlipped", &MOSprite::IsHFlipped, &MOSprite::SetHFlipped)
 		.property("FlipFactor", &MOSprite::GetFlipFactor)
 		.property("RotAngle", &MOSprite::GetRotAngle, &MOSprite::SetRotAngle)
+		.property("PrevRotAngle", &MOSprite::GetPrevRotAngle)
 		.property("AngularVel", &MOSprite::GetAngularVel, &MOSprite::SetAngularVel)
 		.property("Frame", &MOSprite::GetFrame, &MOSprite::SetFrame)
 		.property("SpriteAnimMode", &MOSprite::GetSpriteAnimMode, &MOSprite::SetSpriteAnimMode)
@@ -778,7 +790,7 @@ namespace RTE {
 			luabind::value("ALWAYSLOOP", MOSprite::SpriteAnimMode::ALWAYSLOOP),
 			luabind::value("ALWAYSRANDOM", MOSprite::SpriteAnimMode::ALWAYSRANDOM),
 			luabind::value("ALWAYSPINGPONG", MOSprite::SpriteAnimMode::ALWAYSPINGPONG),
-			luabind::value("LOOPWHENMOVING", MOSprite::SpriteAnimMode::LOOPWHENMOVING),
+			luabind::value("LOOPWHENACTIVE", MOSprite::SpriteAnimMode::LOOPWHENACTIVE),
 			luabind::value("LOOPWHENOPENCLOSE", MOSprite::SpriteAnimMode::LOOPWHENOPENCLOSE),
 			luabind::value("PINGPONGOPENCLOSE", MOSprite::SpriteAnimMode::PINGPONGOPENCLOSE),
 			luabind::value("OVERLIFETIME", MOSprite::SpriteAnimMode::OVERLIFETIME),
@@ -801,6 +813,7 @@ namespace RTE {
 		.property("GibWoundLimit", (int (MOSRotating:: *)() const) &MOSRotating::GetGibWoundLimit, &MOSRotating::SetGibWoundLimit)
 		.property("GibSound", &MOSRotating::GetGibSound, &MOSRotatingSetGibSound)
 		.property("GibImpulseLimit", &MOSRotating::GetGibImpulseLimit, &MOSRotating::SetGibImpulseLimit)
+		.property("WoundCountAffectsImpulseLimitRatio", &MOSRotating::GetWoundCountAffectsImpulseLimitRatio)
 		.property("DamageMultiplier", &MOSRotating::GetDamageMultiplier, &MOSRotating::SetDamageMultiplier)
 		.property("WoundCount", (int (MOSRotating:: *)() const) &MOSRotating::GetWoundCount)
 		.property("OrientToVel", &MOSRotating::GetOrientToVel, &MOSRotating::SetOrientToVel)
@@ -1166,7 +1179,9 @@ namespace RTE {
 		return ConcreteTypeLuaClassDefinition(ThrownDevice, HeldDevice)
 
 		.property("MinThrowVel", &ThrownDevice::GetMinThrowVel, &ThrownDevice::SetMinThrowVel)
-		.property("MaxThrowVel", &ThrownDevice::GetMaxThrowVel, &ThrownDevice::SetMaxThrowVel);
+		.property("MaxThrowVel", &ThrownDevice::GetMaxThrowVel, &ThrownDevice::SetMaxThrowVel)
+		.property("StartThrowOffset", &ThrownDevice::GetStartThrowOffset, &ThrownDevice::SetStartThrowOffset)
+		.property("EndThrowOffset", &ThrownDevice::GetEndThrowOffset, &ThrownDevice::SetEndThrowOffset);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -353,12 +353,10 @@ void GameActivity::Destroy(bool notInherited)
 
 void GameActivity::SetCPUTeam(int team)
 {
-    // Set the legacy var
-	if (team >= Teams::TeamOne && team < Teams::MaxTeamCount)
-	{
+	if (team >= Teams::TeamOne && team < Teams::MaxTeamCount) {
+        // Set the legacy var
 	    m_CPUTeam = team;
 
-		// Activate the CPU team
 		m_TeamActive[team] = true;
 		m_TeamIsCPU[team] = true;
 	}
@@ -808,19 +806,18 @@ void GameActivity::SetupPlayers()
     Activity::SetupPlayers();
 
     // Add the locked cpu team that can't have any players
-    if (m_CPUTeam != Teams::NoTeam)
-    {
-        if (!m_TeamActive[m_CPUTeam])
-            m_TeamCount++;
+    if (m_CPUTeam != Teams::NoTeam && !m_TeamActive[m_CPUTeam]) {
+        m_TeamCount++;
         // Also activate the CPU team
         m_TeamActive[m_CPUTeam] = true;
     }
 
     // Don't clear a CPU team's active status though
-    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
-	{
-		if (m_TeamIsCPU[team])
-			m_TeamActive[team] = true;
+    for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team) {
+        if (m_TeamIsCPU[team] && !m_TeamActive[team]) {
+             m_TeamCount++;
+            m_TeamActive[team] = true;
+        }
 	}
 }
 
@@ -1401,15 +1398,15 @@ void GameActivity::Update()
             SwitchToActor(m_Brain[player], player, team);
             m_ViewState[player] = ViewState::Normal;
         }
-        // Switch to next actor if the player wants to
-        else if (m_PlayerController[player].IsState(ACTOR_NEXT) && m_ViewState[player] != ViewState::ActorSelect)
+        // Switch to next actor if the player wants to. Don't do it while the buy menu is open
+        else if (m_PlayerController[player].IsState(ACTOR_NEXT) && m_ViewState[player] != ViewState::ActorSelect && !m_pBuyGUI[player]->IsVisible())
         {
             SwitchToNextActor(player, team);
             m_ViewState[player] = ViewState::Normal;
             g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
         }
-        // Switch to prev actor if the player wants to
-        else if (m_PlayerController[player].IsState(ACTOR_PREV) && m_ViewState[player] != ViewState::ActorSelect)
+        // Switch to prev actor if the player wants to. Don't do it while the buy menu is open
+        else if (m_PlayerController[player].IsState(ACTOR_PREV) && m_ViewState[player] != ViewState::ActorSelect && !m_pBuyGUI[player]->IsVisible())
         {
             SwitchToPrevActor(player, team);
             m_ViewState[player] = ViewState::Normal;
@@ -1562,8 +1559,7 @@ void GameActivity::Update()
             m_ControlledActor[player]->GetController()->SetDisabled(true);
 
             // Player is done setting waypoints
-            if (m_PlayerController[player].IsState(PRESS_SECONDARY))
-            {
+			if (m_PlayerController[player].IsState(PRESS_SECONDARY) || m_PlayerController[player].IsState(ACTOR_NEXT_PREP) || m_PlayerController[player].IsState(ACTOR_PREV_PREP)) {
                 // Stop drawing the waypoints
 //                m_ControlledActor[player]->DrawWaypoints(false);
                 // Update the player's move path now to the first waypoint set
@@ -1629,8 +1625,7 @@ void GameActivity::Update()
             m_ControlledActor[player]->GetController()->SetDisabled(true);
 
             // Player is done setting waypoints
-            if (m_PlayerController[player].IsState(PRESS_SECONDARY))
-            {
+			if (m_PlayerController[player].IsState(PRESS_SECONDARY) || m_PlayerController[player].IsState(ACTOR_NEXT_PREP) || m_PlayerController[player].IsState(ACTOR_PREV_PREP)) {
                 // Give player control back to actor
                 m_ControlledActor[player]->GetController()->SetDisabled(false);
                 // Switch back to normal view
@@ -1838,7 +1833,8 @@ void GameActivity::Update()
                     m_InventoryMenuGUI[player]->EnableIfNotEmpty();
                 }
 
-                if (!m_pPieMenu[player]->IsEnabled() || m_ControlledActor[player]->PieNeedsUpdate())
+                // Don't open the pie menu if the buy menu is visible
+                if ((!m_pPieMenu[player]->IsEnabled() || m_ControlledActor[player]->PieNeedsUpdate()) && !m_pBuyGUI[player]->IsVisible())
                 {
                     // Remove all previous slices
                     m_pPieMenu[player]->ResetSlices();
@@ -2111,7 +2107,7 @@ void GameActivity::Update()
                 g_FrameMan.SetScreenText("Your order has arrived!", ScreenOfPlayer(player), 333);
                 m_MessageTimer[player].Reset();
 
-                pDeliveryCraft->ResetEmissionTimers();  // Reset the engine timers so they don't emit a massive burst after being added to the world
+				pDeliveryCraft->ResetAllTimers();
                 pDeliveryCraft->Update();
 
                 // Add the delivery craft to the world, TRANSFERRING OWNERSHIP

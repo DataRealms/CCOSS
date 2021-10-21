@@ -7,6 +7,8 @@ namespace RTE {
 	class GUICollectionBox;
 	class GUICheckbox;
 	class GUITextBox;
+	class GUISlider;
+	class GUILabel;
 	class GUIEvent;
 
 	/// <summary>
@@ -52,8 +54,11 @@ namespace RTE {
 		GUICheckbox *m_EnableCrabBombsCheckbox;
 		GUICheckbox *m_EndlessMetaGameCheckbox;
 		GUICheckbox *m_ShowEnemyHUDCheckbox;
+		GUICheckbox *m_EnableSmartBuyMenuNavigationCheckbox;
 		GUITextBox *m_MaxUnheldItemsTextbox;
 		GUITextBox *m_CrabBombThresholdTextbox;
+		GUISlider *m_UnheldItemsHUDDisplayRangeSlider;
+		GUILabel *m_UnheldItemsHUDDisplayRangeLabel;
 
 #pragma region Gameplay Settings Handling
 		/// <summary>
@@ -65,6 +70,11 @@ namespace RTE {
 		/// Updates the CrabBombThreshold textbox to override any invalid input, applies the setting value and removes its focus.
 		/// </summary>
 		void UpdateCrabBombThresholdTextbox();
+
+		/// <summary>
+		/// Updates the UnheldItemsHUDDisplayRange setting and label according to the slider value.
+		/// </summary>
+		void UpdateUnheldItemsHUDDisplayRange();
 #pragma endregion
 
 		// Disallow the use of some implicit methods.

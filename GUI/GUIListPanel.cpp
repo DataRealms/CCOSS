@@ -635,6 +635,44 @@ void GUIListPanel::ScrollToItem(Item *pItem) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void GUIListPanel::ScrollUp() {
+	if (m_VertScroll->_GetVisible()) { m_VertScroll->SetValue(m_VertScroll->GetValue() - 20); }
+	BuildBitmap(false, true);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void GUIListPanel::ScrollDown() {
+	if (m_VertScroll->_GetVisible()) {
+		int scrollValueToAdd = 20;
+		if (!m_Items.empty()) {
+			RTE::GUIListPanel::Item *item = m_Items.back();
+			int maximumScrollDistance = GetStackHeight(item) + GetItemHeight(item) - (m_VertScroll->GetPageSize() + m_VertScroll->GetValue());
+			scrollValueToAdd = std::clamp(maximumScrollDistance, 0, scrollValueToAdd);
+		}
+		m_VertScroll->SetValue(m_VertScroll->GetValue() + scrollValueToAdd);
+	}
+	BuildBitmap(false, true);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void GUIListPanel::ScrollTo(int position) {
+	if (m_VertScroll->_GetVisible()) {
+		m_VertScroll->SetValue(position);
+
+		//TODO this was copied from MaxShadow's work. I'm not quite sure of the point of it tbh.
+		if (!m_Items.empty()) {
+			RTE::GUIListPanel::Item *item = m_Items.back();
+			int allItemsHeight = GetStackHeight(item) + GetItemHeight(item);
+			if (position + m_VertScroll->GetPageSize() > allItemsHeight) { m_VertScroll->SetValue(allItemsHeight - m_VertScroll->GetPageSize()); }
+		}
+	}
+	BuildBitmap(false, true);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void GUIListPanel::ScrollToSelected() {
 	if (!m_SelectedList.empty()) {
 		ScrollToItem(*(m_SelectedList.begin()));

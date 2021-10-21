@@ -338,6 +338,12 @@ namespace RTE {
 		std::string GetModuleAndPresetName() const;
 
 		/// <summary>
+		/// Gets the name of this Entity's Data Module it was defined in.
+		/// </summary>
+		/// <returns>A string with the module of this Entity.</returns>
+		std::string GetModuleName() const;
+
+		/// <summary>
 		/// Indicates whether this Entity was explicitly given a new instance name upon creation, or if it was just copied/inherited implicitly.
 		/// </summary>
 		/// <returns>Whether this Entity was given a new Preset Name upon creation.</returns>

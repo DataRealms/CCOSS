@@ -49,6 +49,7 @@ void AreaEditorGUI::Clear()
     m_RepeatStartTimer.Reset();
     m_RepeatTimer.Reset();
     m_pPieMenu = 0;
+    m_ActivatedPieSliceType = PieSlice::PieSliceIndex::PSI_NONE;
     m_pPicker = 0;
     m_GridSnapping = true;
     m_CursorPos.Reset();
@@ -142,17 +143,6 @@ void AreaEditorGUI::SetController(Controller *pController)
 void AreaEditorGUI::SetPosOnScreen(int newPosX, int newPosY)
 {
     m_pPicker->SetPosOnScreen(newPosX, newPosY);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetActivatedPieSlice
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets any Pie menu slice command activated last update.
-
-PieSlice::PieSliceIndex AreaEditorGUI::GetActivatedPieSlice()
-{
-    return m_pPieMenu->GetPieCommand();
 }
 
 
@@ -300,6 +290,7 @@ void AreaEditorGUI::Update()
     ///////////////////////////////////////
     // Handle pie menu selections
 
+    m_ActivatedPieSliceType = m_pPieMenu->GetPieCommand();
     if (m_pPieMenu->GetPieCommand() != PieSlice::PieSliceIndex::PSI_NONE)
     {
         if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_PICK)

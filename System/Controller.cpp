@@ -331,7 +331,7 @@ namespace RTE {
 		if (m_AnalogAim.GetMagnitude() > 0.1F && !m_ControlStates.at(PIE_MENU_ACTIVE)) { m_ControlStates.at(AIM_SHARP) = true; }
 
 		// Disable sharp aim while moving - this also helps with keyboard vs mouse fighting when moving and aiming in opposite directions
-		if (m_ControlStates.at(PRESS_RIGHT) || m_ControlStates.at(PRESS_LEFT) || m_ControlStates.at(BODY_JUMPSTART) || (m_ControlStates.at(PIE_MENU_ACTIVE) && !m_ControlStates.at(SECONDARY_ACTION))) {
+		if (m_ControlStates.at(BODY_JUMP) || (m_ControlStates.at(PIE_MENU_ACTIVE) && !m_ControlStates.at(SECONDARY_ACTION))) {
 			if (IsMouseControlled()) { g_UInputMan.SetMouseValueMagnitude(0.05F); }
 			m_ControlStates.at(AIM_SHARP) = false;
 		}

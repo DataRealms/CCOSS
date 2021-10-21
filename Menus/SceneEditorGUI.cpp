@@ -67,6 +67,7 @@ void SceneEditorGUI::Clear()
     m_RevealTimer.Reset();
     m_RevealIndex = 0;
     m_pPieMenu = 0;
+    m_ActivatedPieSliceType = PieSlice::PieSliceIndex::PSI_NONE;
     m_pPicker = 0;
     m_NativeTechModule = 0;
     m_ForeignCostMult = 4.0;
@@ -236,17 +237,6 @@ bool SceneEditorGUI::SetCurrentObject(SceneObject *pNewObject)
 
 
     return true;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetActivatedPieSlice
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets any Pie menu slice command activated last update.
-
-PieSlice::PieSliceIndex SceneEditorGUI::GetActivatedPieSlice()
-{
-    return m_pPieMenu->GetPieCommand();
 }
 
 
@@ -460,6 +450,7 @@ void SceneEditorGUI::Update()
     ///////////////////////////////////////
     // Handle pie menu selections
 
+    m_ActivatedPieSliceType = m_pPieMenu->GetPieCommand();
     if (m_pPieMenu->GetPieCommand() != PieSlice::PieSliceIndex::PSI_NONE)
     {
         if (m_pPieMenu->GetPieCommand() == PieSlice::PieSliceIndex::PSI_PICK)

@@ -6,6 +6,8 @@
 #include "GUICollectionBox.h"
 #include "GUICheckbox.h"
 #include "GUITextBox.h"
+#include "GUISlider.h"
+#include "GUILabel.h"
 
 namespace RTE {
 
@@ -32,6 +34,9 @@ namespace RTE {
 		m_ShowEnemyHUDCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxEnemyHUD"));
 		m_ShowEnemyHUDCheckbox->SetCheck(g_SettingsMan.ShowEnemyHUD());
 
+		m_EnableSmartBuyMenuNavigationCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxSmartBuyMenuNavigation"));
+		m_EnableSmartBuyMenuNavigationCheckbox->SetCheck(g_SettingsMan.SmartBuyMenuNavigationEnabled());
+
 		m_MaxUnheldItemsTextbox = dynamic_cast<GUITextBox *>(m_GUIControlManager->GetControl("TextboxMaxUnheldItems"));
 		m_MaxUnheldItemsTextbox->SetText(std::to_string(g_MovableMan.GetMaxDroppedItems()));
 		m_MaxUnheldItemsTextbox->SetNumericOnly(true);
@@ -41,6 +46,18 @@ namespace RTE {
 		m_CrabBombThresholdTextbox->SetText(std::to_string(g_SettingsMan.GetCrabBombThreshold()));
 		m_CrabBombThresholdTextbox->SetNumericOnly(true);
 		m_CrabBombThresholdTextbox->SetMaxTextLength(3);
+
+		m_UnheldItemsHUDDisplayRangeSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderUnheldItemsHUDRange"));
+		int unheldItemsHUDDisplayRangeValue = static_cast<int>(g_SettingsMan.GetUnheldItemsHUDDisplayRange());
+		if (unheldItemsHUDDisplayRangeValue <= -1) {
+			m_UnheldItemsHUDDisplayRangeSlider->SetValue(m_UnheldItemsHUDDisplayRangeSlider->GetMinimum());
+		} else if (unheldItemsHUDDisplayRangeValue == 0) {
+			m_UnheldItemsHUDDisplayRangeSlider->SetValue(m_UnheldItemsHUDDisplayRangeSlider->GetMaximum());
+		} else {
+			m_UnheldItemsHUDDisplayRangeSlider->SetValue(static_cast<int>(g_SettingsMan.GetUnheldItemsHUDDisplayRange() / c_PPM));
+		}
+		m_UnheldItemsHUDDisplayRangeLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("LabelUnheldItemsHUDRangeValue"));
+		UpdateUnheldItemsHUDDisplayRange();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -74,6 +91,22 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void SettingsGameplayGUI::UpdateUnheldItemsHUDDisplayRange() {
+		int newValue = m_UnheldItemsHUDDisplayRangeSlider->GetValue();
+		if (newValue < 3) {
+			m_UnheldItemsHUDDisplayRangeLabel->SetText("Hidden");
+			g_SettingsMan.SetUnheldItemsHUDDisplayRange(-1.0F);
+		} else if (newValue > 50) {
+			m_UnheldItemsHUDDisplayRangeLabel->SetText("Unlimited");
+			g_SettingsMan.SetUnheldItemsHUDDisplayRange(0);
+		} else {
+			m_UnheldItemsHUDDisplayRangeLabel->SetText("Up to " + std::to_string(newValue) + " meters");
+			g_SettingsMan.SetUnheldItemsHUDDisplayRange(static_cast<float>(newValue) * c_PPM);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void SettingsGameplayGUI::HandleInputEvents(GUIEvent &guiEvent) {
 		if (guiEvent.GetType() == GUIEvent::Notification) {
 			if (guiEvent.GetControl() == m_FlashOnBrainDamageCheckbox) {
@@ -88,10 +121,14 @@ namespace RTE {
 				g_SettingsMan.SetEndlessMetaGameMode(m_EndlessMetaGameCheckbox->GetCheck());
 			} else if (guiEvent.GetControl() == m_ShowEnemyHUDCheckbox) {
 				g_SettingsMan.SetShowEnemyHUD(m_ShowEnemyHUDCheckbox->GetCheck());
+			} else if (guiEvent.GetControl() == m_EnableSmartBuyMenuNavigationCheckbox) {
+				g_SettingsMan.SetSmartBuyMenuNavigation(m_EnableSmartBuyMenuNavigationCheckbox->GetCheck());
 			} else if (guiEvent.GetControl() == m_MaxUnheldItemsTextbox && guiEvent.GetMsg() == GUITextBox::Enter) {
 				UpdateMaxUnheldItemsTextbox();
 			} else if (guiEvent.GetControl() == m_CrabBombThresholdTextbox && guiEvent.GetMsg() == GUITextBox::Enter) {
 				UpdateCrabBombThresholdTextbox();
+			} else if (guiEvent.GetControl() == m_UnheldItemsHUDDisplayRangeSlider) {
+				UpdateUnheldItemsHUDDisplayRange();
 			// Update both textboxes when clicking the main CollectionBox, otherwise clicking off focused textboxes does not remove their focus or update the setting values and they will still capture keyboard input.
 			} else if (guiEvent.GetControl() == m_GameplaySettingsBox && guiEvent.GetMsg() == GUICollectionBox::Clicked && !m_GameplaySettingsBox->HasFocus()) {
 				UpdateMaxUnheldItemsTextbox();

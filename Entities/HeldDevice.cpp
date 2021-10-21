@@ -20,6 +20,7 @@
 #include "GUI.h"
 #include "AllegroBitmap.h"
 
+#include "SettingsMan.h"
 
 namespace RTE {
 
@@ -45,6 +46,7 @@ void HeldDevice::Clear()
     m_MaxSharpLength = 0;
     m_Supported = false;
     m_SupportOffset.Reset();
+	m_SeenByPlayer.fill(false);
     m_IsUnPickupable = false;
     m_PickupableByPresetNames.clear();
     m_GripStrengthMultiplier = 1.0F;
@@ -464,7 +466,7 @@ void HeldDevice::Update()
 
     if (m_FrameCount > 1)
     {
-        if (m_SpriteAnimMode == LOOPWHENMOVING && m_Activated)
+        if (m_SpriteAnimMode == LOOPWHENACTIVE && m_Activated)
         {
             float cycleTime = ((long)m_SpriteAnimTimer.GetElapsedSimTimeMS()) % m_SpriteAnimDuration;
             m_Frame = std::floor((cycleTime / (float)m_SpriteAnimDuration) * (float)m_FrameCount);
@@ -542,7 +544,8 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
     if (!m_Parent && !IsUnPickupable())
     {
         // Only draw if the team viewing this has seen the space where this is located
-        int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen));
+		int viewingPlayer = g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen);
+        int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(viewingPlayer);
         if (viewingTeam != Activity::NoTeam)
         {
             if (g_SceneMan.IsUnseen(m_Pos.m_X, m_Pos.m_Y, viewingTeam))
@@ -578,28 +581,29 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
         GUIFont *pSymbolFont = g_FrameMan.GetLargeFont();
         GUIFont *pTextFont = g_FrameMan.GetSmallFont();
         if (pSymbolFont && pTextFont) {
-            AllegroBitmap pBitmapInt(pTargetBitmap);
-            if (m_BlinkTimer.GetElapsedSimTimeMS() < 300) {
-                str[0] = -42;
+            if (m_BlinkTimer.GetElapsedSimTimeMS() < 250) {
+				str[0] = 0;
+            } else if (m_BlinkTimer.GetElapsedSimTimeMS() < 500) {
+				str[0] = -42;
                 str[1] = 0;
-            }
-            else if (m_BlinkTimer.GetElapsedSimTimeMS() < 600) {
-                str[0] = -41;
+            } else if (m_BlinkTimer.GetElapsedSimTimeMS() < 750) {
+				str[0] = -41;
                 str[1] = 0;
-            }
-            else if (m_BlinkTimer.GetElapsedSimTimeMS() < 900) {
-                str[0] = -40;
-                str[1] = 0;
-            }
-            else if (m_BlinkTimer.GetElapsedSimTimeMS() < 1200) {
-                str[0] = 0;
-            }
-            else
-                m_BlinkTimer.Reset();
-
-            pSymbolFont->DrawAligned(&pBitmapInt, drawPos.m_X - 1, drawPos.m_Y - 20, str, GUIFont::Centre);
-            std::snprintf(str, sizeof(str), "%s", m_PresetName.c_str());
-            pTextFont->DrawAligned(&pBitmapInt, drawPos.m_X + 0, drawPos.m_Y - 29, str, GUIFont::Centre);
+            } else if (m_BlinkTimer.GetElapsedSimTimeMS() < 1000) {
+				str[0] = -40;
+				str[1] = 0;
+			} else {
+				m_BlinkTimer.Reset();
+				// Check for nearby actors that will toggle this pickup HUD
+				float range = g_SettingsMan.GetUnheldItemsHUDDisplayRange();
+				m_SeenByPlayer.at(viewingPlayer) = range > -1 && (range == 0 || g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < range);
+			}
+			if (m_SeenByPlayer.at(viewingPlayer)) {
+				AllegroBitmap pBitmapInt(pTargetBitmap);
+				pSymbolFont->DrawAligned(&pBitmapInt, drawPos.GetFloorIntX() - 1, drawPos.GetFloorIntY() - 20, str, GUIFont::Centre);
+				std::snprintf(str, sizeof(str), "%s", m_PresetName.c_str());
+				pTextFont->DrawAligned(&pBitmapInt, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() - 29, str, GUIFont::Centre);
+			}
         }
     }
 }

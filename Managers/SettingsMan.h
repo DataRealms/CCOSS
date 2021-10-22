@@ -62,6 +62,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>Recommended MOID count.</returns>
 		int RecommendedMOIDCount() const { return m_RecommendedMOIDCount; }
+
+		/// <summary>
+		/// Gets whether simplified collision detection (reduced MOID layer sampling) is enabled.
+		/// </summary>
+		/// <returns>Whether simplified collision detection is enabled or not.</returns>
+		bool SimplifiedCollisionDetection() const { return m_SimplifiedCollisionDetection; }
 #pragma endregion
 
 #pragma region Gameplay Settings
@@ -424,6 +430,7 @@ namespace RTE {
 		bool m_ShowMetaScenes; //!< Show MetaScenes in editors and activities.
 
 		int m_RecommendedMOIDCount; //!< Recommended max MOID's before removing actors from scenes.
+		bool m_SimplifiedCollisionDetection; //!< Whether simplified collision detection (reduced MOID layer sampling) is enabled.
 
 		bool m_SkipIntro; //!< Whether to play the intro of the game or skip directly to the main menu.
 		bool m_ShowToolTips; //!< Whether ToolTips are enabled or not.

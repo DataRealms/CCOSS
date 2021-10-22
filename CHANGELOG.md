@@ -225,6 +225,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Exposed `ACraft` property `HatchDelay` to Lua (R/W).
 
+- New `Settings.ini` property `SimplifiedCollisionDetection = 0/1` to enable more performant but less accurate MO collision detection (previously `PreciseCollisions = 0`). Disabled by default.
+
 </details>
 
 <details><summary>**Changed**</summary>

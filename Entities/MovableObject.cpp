@@ -19,7 +19,6 @@
 #include "LuaMan.h"
 #include "Atom.h"
 #include "Actor.h"
-#include "UInputMan.h"
 
 namespace RTE {
 
@@ -899,7 +898,7 @@ void MovableObject::PreTravel()
 {
 	// Temporarily remove the representation of this from the scene MO sampler
 	if (m_GetsHitByMOs) {
-		if (!g_UInputMan.KeyHeld(KEY_N)) {
+		if (g_SettingsMan.SimplifiedCollisionDetection()) {
 			m_IsTraveling = true;
 		} else {
 			Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawNoMOID, true);
@@ -941,7 +940,7 @@ void MovableObject::PostTravel()
 
 	if (m_GetsHitByMOs) {
         if (!GetParent()) {
-			if (!g_UInputMan.KeyHeld(KEY_N)) {
+			if (g_SettingsMan.SimplifiedCollisionDetection()) {
 				m_IsTraveling = false;
 			} else {
 				Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawMOID, true);

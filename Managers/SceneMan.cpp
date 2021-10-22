@@ -613,7 +613,7 @@ MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY)
         return g_NoMOID;
 
 	MOID moid = getpixel(m_pMOIDLayer->GetBitmap(), pixelX, pixelY);
-	if (!g_UInputMan.KeyHeld(KEY_N)) {
+	if (g_SettingsMan.SimplifiedCollisionDetection()) {
 		if (moid != ColorKeys::g_NoMOID && moid != ColorKeys::g_MOIDMaskColor) {
 			const MOSprite *mo = dynamic_cast<MOSprite *>(g_MovableMan.GetMOFromID(moid));
 			return (mo && !mo->GetTraveling()) ? moid : ColorKeys::g_NoMOID;

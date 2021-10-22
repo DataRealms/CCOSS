@@ -17,6 +17,8 @@
 #include "Arm.h"
 #include "AHuman.h"
 
+#include "GameActivity.h"
+
 #include "GUI.h"
 #include "AllegroBitmap.h"
 
@@ -596,7 +598,13 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 				m_BlinkTimer.Reset();
 				// Check for nearby actors that will toggle this pickup HUD
 				float range = g_SettingsMan.GetUnheldItemsHUDDisplayRange();
-				m_SeenByPlayer.at(viewingPlayer) = range > -1 && (range == 0 || g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < range);
+                if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::ActivityState::Running) { range = -1.0F; }
+                if (const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(g_ActivityMan.GetActivity())) {
+                    if (gameActivity->GetViewState(viewingPlayer) == GameActivity::ViewState::ActorSelect) {
+                        range = -1.0F;
+                    }
+                }
+				m_SeenByPlayer.at(viewingPlayer) = range < 0 || (range > 0 && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < range);
 			}
 			if (m_SeenByPlayer.at(viewingPlayer)) {
 				AllegroBitmap pBitmapInt(pTargetBitmap);

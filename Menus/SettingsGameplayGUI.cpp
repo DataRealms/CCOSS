@@ -95,10 +95,10 @@ namespace RTE {
 		int newValue = m_UnheldItemsHUDDisplayRangeSlider->GetValue();
 		if (newValue < 3) {
 			m_UnheldItemsHUDDisplayRangeLabel->SetText("Hidden");
-			g_SettingsMan.SetUnheldItemsHUDDisplayRange(-1.0F);
+			g_SettingsMan.SetUnheldItemsHUDDisplayRange(0);
 		} else if (newValue > 50) {
 			m_UnheldItemsHUDDisplayRangeLabel->SetText("Unlimited");
-			g_SettingsMan.SetUnheldItemsHUDDisplayRange(0);
+			g_SettingsMan.SetUnheldItemsHUDDisplayRange(-1.0F);
 		} else {
 			m_UnheldItemsHUDDisplayRangeLabel->SetText("Up to " + std::to_string(newValue) + " meters");
 			g_SettingsMan.SetUnheldItemsHUDDisplayRange(static_cast<float>(newValue) * c_PPM);

@@ -449,15 +449,6 @@ ClassInfoGetters;
     void SetHFlip(bool hflipped)
     {
         m_HFlipped = hflipped;
-/*
-        if (m_HFlipped != hflipped) {
-            // Gotta flip before restart.
-            m_HFlipped = hflipped;
-            Restart();
-        }
-        else
-            m_HFlipped = hflipped;
-*/
         m_Rotation.SetXFlipped(m_HFlipped);
     }
 

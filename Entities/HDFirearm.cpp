@@ -51,6 +51,7 @@ void HDFirearm::Clear()
     m_ReloadTime = 0;
     m_FullAuto = false;
     m_FireIgnoresThis = true;
+	m_Reloadable = true;
     m_ShakeRange = 0;
     m_SharpShakeRange = 0;
     m_NoSupportFactor = 0;
@@ -58,6 +59,7 @@ void HDFirearm::Clear()
 	m_ShellEjectAngle = 150;
     m_ShellSpreadRange = 0;
     m_ShellAngVelRange = 0;
+	m_ShellVelVariation = 0.1F;
     m_AIFireVel = -1;
     m_AIBulletLifeTime = 0;
     m_AIBulletAccScalar = -1;
@@ -125,6 +127,7 @@ int HDFirearm::Create(const HDFirearm &reference) {
     m_ReloadTime = reference.m_ReloadTime;
     m_FullAuto = reference.m_FullAuto;
     m_FireIgnoresThis = reference.m_FireIgnoresThis;
+    m_Reloadable = reference.m_Reloadable;
     m_ShakeRange = reference.m_ShakeRange;
     m_SharpShakeRange = reference.m_SharpShakeRange;
     m_NoSupportFactor = reference.m_NoSupportFactor;
@@ -132,6 +135,7 @@ int HDFirearm::Create(const HDFirearm &reference) {
 	m_ShellEjectAngle = reference.m_ShellEjectAngle;
     m_ShellSpreadRange = reference.m_ShellSpreadRange;
     m_ShellAngVelRange = reference.m_ShellAngVelRange;
+	m_ShellVelVariation = reference.m_ShellVelVariation;
     m_MuzzleOff = reference.m_MuzzleOff;
     m_EjectOff = reference.m_EjectOff;
     m_MagOff = reference.m_MagOff;
@@ -171,7 +175,7 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
 	} else if (propName == "DeactivationSound") {
 		m_DeactivationSound = new SoundContainer;
         reader >> m_DeactivationSound;
-        m_DeactivationSound->SetSoundOverlapMode(SoundContainer::SoundOverlapMode::IGNORE_PLAY);
+        m_DeactivationSound->SetSoundOverlapMode(SoundContainer::SoundOverlapMode::RESTART);
     } else if (propName == "EmptySound") {
 		m_EmptySound = new SoundContainer;
 		reader >> m_EmptySound;
@@ -193,6 +197,8 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
         reader >> m_FullAuto;
     } else if (propName == "FireIgnoresThis") {
         reader >> m_FireIgnoresThis;
+    } else if (propName == "Reloadable") {
+        reader >> m_Reloadable;
     } else if (propName == "RecoilTransmission") {
         reader >> m_JointStiffness;
     } else if (propName == "IsAnimatedManually") {
@@ -216,6 +222,8 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
     } else if (propName == "ShellAngVelRange") {
         reader >> m_ShellAngVelRange;
         m_ShellAngVelRange /= 2;
+	} else if (propName == "ShellVelVariation") {
+		reader >> m_ShellVelVariation;
     } else if (propName == "MuzzleOffset") {
         reader >> m_MuzzleOff;
     } else if (propName == "EjectionOffset") {
@@ -270,6 +278,8 @@ int HDFirearm::Save(Writer &writer) const
     writer << m_FullAuto;
     writer.NewProperty("FireIgnoresThis");
     writer << m_FireIgnoresThis;
+    writer.NewProperty("Reloadable");
+    writer << m_Reloadable;
     writer.NewProperty("RecoilTransmission");
     writer << m_JointStiffness;
 	writer.NewProperty("IsAnimatedManually");
@@ -288,6 +298,8 @@ int HDFirearm::Save(Writer &writer) const
     writer << m_ShellSpreadRange * 2;
     writer.NewProperty("ShellAngVelRange");
     writer << m_ShellAngVelRange * 2;
+	writer.NewProperty("ShellVelocityVariation");
+	writer << m_ShellVelVariation;
     writer.NewProperty("MuzzleOffset");
     writer << m_MuzzleOff;
     writer.NewProperty("EjectionOffset");
@@ -413,6 +425,17 @@ bool HDFirearm::SetNextMagazineName(string magName)
 int HDFirearm::GetRoundInMagCount() const
 {
     return m_pMagazine ? m_pMagazine->GetRoundCount() : 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int HDFirearm::GetRoundInMagCapacity() const {
+	if (m_pMagazine) {
+		return m_pMagazine->GetCapacity();
+	} else if (m_pMagazineReference) {
+		return m_pMagazineReference->GetCapacity();
+	}
+	return 0;
 }
 
 
@@ -645,8 +668,7 @@ void HDFirearm::StopActivationSound()
 
 void HDFirearm::Reload()
 {
-    if (!m_Reloading)
-    {
+	if (!m_Reloading && m_Reloadable) {
         if (m_pMagazine)
         {
 			Vector constrainedMagazineOffset = g_SceneMan.ShortestDistance(m_Pos, m_pMagazine->GetPos(), g_SceneMan.SceneWrapsX()).SetMagnitude(2.0F);
@@ -661,12 +683,11 @@ void HDFirearm::Reload()
 
         // Stop any activation
         m_Activated = false;
-        if (m_FireSound && m_FireSound->GetLoopSetting() == -1 && m_FireSound->IsBeingPlayed())
-            m_FireSound->Stop();
-
+		if (m_FireSound && m_FireSound->GetLoopSetting() == -1 && m_FireSound->IsBeingPlayed()) { m_FireSound->Stop(); }
 		if (m_ReloadStartSound) { m_ReloadStartSound->Play(m_Pos); }
-        m_ReloadTmr.Reset();
-        m_Reloading = true;
+
+		m_ReloadTmr.Reset();
+		m_Reloading = true;
     }
 }
 
@@ -678,8 +699,7 @@ void HDFirearm::Reload()
 
 bool HDFirearm::NeedsReloading() const
 {
-    if (!m_Reloading)
-    {
+	if (!m_Reloading && m_Reloadable) {
         if (m_pMagazine)
         {
             // If we've used over half the rounds, we can profitably go ahead and reload
@@ -700,8 +720,7 @@ bool HDFirearm::NeedsReloading() const
 
 bool HDFirearm::IsFull() const
 {
-    if (!m_Reloading)
-    {
+	if (!m_Reloading && m_Reloadable) {
         if (m_pMagazine)
         {
             // If we've used over half the rounds, we can profitably go ahead and reload
@@ -813,6 +832,8 @@ void HDFirearm::Update()
 
                 Vector particlePos;
                 Vector particleVel;
+				int particleCountMax = pRound->ParticleCount();
+				float lifeVariation = pRound->GetLifeVariation();
 
                 // Launch all particles in round
                 MovableObject *pParticle = 0;
@@ -830,6 +851,9 @@ void HDFirearm::Update()
                     pParticle->SetVel(m_Vel + particleVel);
                     pParticle->SetRotAngle(particleVel.GetAbsRadAngle() + (m_HFlipped ? -c_PI : 0));
 					pParticle->SetHFlipped(m_HFlipped);
+					if (lifeVariation != 0 && pParticle->GetLifetime() != 0) {
+						pParticle->SetLifetime(std::max(static_cast<int>(pParticle->GetLifetime() * (1.0F + (particleCountMax > 1 ? lifeVariation - (lifeVariation * 2.0F * (static_cast<float>(pRound->ParticleCount()) / static_cast<float>(particleCountMax - 1))) : lifeVariation * RandomNormalNum()))), 1));
+					}
                     // F = m * a
                     totalFireForce += pParticle->GetMass() * pParticle->GetVel().GetMagnitude();
 
@@ -876,7 +900,7 @@ void HDFirearm::Update()
                     pShell->SetPos(m_Pos + tempEject);
 
                     // ##@#@@$ TEMP
-                    shellVel.SetXY(pRound->GetShellVel(), 0);
+                    shellVel.SetXY(pRound->GetShellVel() * (1.0F - RandomNum(0.0F, m_ShellVelVariation)), 0);
                     shellVel.DegRotate(degAimAngle + m_ShellEjectAngle * (m_HFlipped ? -1 : 1) + shellSpread);
                     pShell->SetVel(m_Vel + shellVel);
                     pShell->SetRotAngle(m_Rotation.GetRadAngle());
@@ -905,33 +929,28 @@ void HDFirearm::Update()
             }
             pRound = 0;
         }
-    }
-
-    // No or empty magazine, so just click.
-    else if (((m_pMagazine && m_pMagazine->IsEmpty()) || !m_pMagazine) && m_Activated && !m_AlreadyClicked )
-    {
+	} else if (m_Activated && !m_AlreadyClicked) {
         // Play empty pin click sound.
 		if (m_EmptySound) { m_EmptySound->Play(m_Pos); }
         // Indicate that we have clicked once during the current activation. 
         m_AlreadyClicked = true;
 
         // Auto-reload
-        Reload();
+		if (m_Parent) { Reload(); }
     }
 
-    // No magazine, have started to reload, so put new mag in when done
-    if (m_Reloading && !m_pMagazine && m_pMagazineReference && m_ReloadTmr.IsPastSimMS(m_ReloadTime)) {
-        SetMagazine(dynamic_cast<Magazine *>(m_pMagazineReference->Clone()));
+	if (m_Reloading && !m_pMagazine && m_pMagazineReference && m_ReloadTmr.IsPastSimMS(m_ReloadTime)) {
+		SetMagazine(dynamic_cast<Magazine *>(m_pMagazineReference->Clone()));
 		if (m_ReloadEndSound) { m_ReloadEndSound->Play(m_Pos); }
 
-        m_ActivationTimer.Reset();
-        m_LastFireTmr.Reset();
+		m_ActivationTimer.Reset();
+		m_LastFireTmr.Reset();
 
-        if (m_PreFireSound && m_Activated) { m_PreFireSound->Play(); }
+		if (m_PreFireSound && m_Activated) { m_PreFireSound->Play(); }
 
-        m_Reloading = false;
-        m_DoneReloading = true;
-    }
+		m_Reloading = false;
+		m_DoneReloading = true;
+	}
 
     // Do stuff to deactivate after being activated
     if (!m_Activated)
@@ -962,17 +981,13 @@ void HDFirearm::Update()
 
             // Set up the recoil shake offset
             m_RecoilOffset = m_RecoilForce;
-            m_RecoilOffset.SetMagnitude(1.25);
+			m_RecoilOffset.SetMagnitude(std::min(m_RecoilOffset.GetMagnitude(), 1.2F));
         }
 
         AddImpulseForce(m_RecoilForce, m_RecoilOffset);
 
         // Display gun animation
-		if (!m_IsAnimatedManually)
-		{
-			if (m_FrameCount > 1)
-				m_Frame = 1;
-		}
+		if (!m_IsAnimatedManually && m_FrameCount > 1) { m_Frame = 1; }
 
         // Display gun flame frame.
         if (m_pFlash) {
@@ -988,17 +1003,17 @@ void HDFirearm::Update()
             }
 			if (m_FireEchoSound) { m_FireEchoSound->Play(m_Pos); }
         }
-    }
-    else {
+    } else {
         m_Recoiled = false;
-		if (!m_IsAnimatedManually)
-	        m_Frame = 0;
+		// TODO: don't use arbitrary numbers? (see Arm.cpp)
+		m_RecoilForce *= 0.6F;
+		if (!m_IsAnimatedManually) { m_Frame = 0; }
     }
 
     // Display and override gun animation if there's a special one
     if (m_FrameCount > 1)
     {
-        if (m_SpriteAnimMode == LOOPWHENMOVING)
+        if (m_SpriteAnimMode == LOOPWHENACTIVE)
         {
             if (m_Activated || m_LastFireTmr.GetElapsedSimTimeMS() < m_DeactivationDelay) {
                 // Max rate of the animation when fully activated and firing
@@ -1024,8 +1039,7 @@ void HDFirearm::Update()
 					StopActivationSound();
 				}
             } else {
-				if (!m_IsAnimatedManually)
-					m_Frame = 0;
+				if (!m_IsAnimatedManually) { m_Frame = 0; }
 				StopActivationSound();
             }
         }
@@ -1074,13 +1088,12 @@ void HDFirearm::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mo
         m_pFlash->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
     }
 
-    // Fudge the muzzle pos forward a little bit so the glow aligns nicely
-    Vector muzzlePos = m_MuzzleOff;
-    muzzlePos.m_X += 4;
-    muzzlePos = m_Pos + RotateOffset(muzzlePos);
     // Set the screen flash effect to draw at the final post processing stage
-    if (m_FireFrame && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical && !g_SceneMan.ObscuredPoint(muzzlePos)) {
-        g_PostProcessMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), 55.0F + RandomNum(0.0F, 200.0F), m_pFlash->GetEffectRotAngle());
+    if (m_FireFrame && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical) {
+		Vector muzzlePos = m_Pos + RotateOffset(m_MuzzleOff + Vector(m_pFlash->GetSpriteWidth() * 0.3F, 0));
+		if (!g_SceneMan.ObscuredPoint(muzzlePos)) {
+			g_PostProcessMan.RegisterPostEffect(muzzlePos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), RandomNum(m_pFlash->GetEffectStopStrength(), m_pFlash->GetEffectStartStrength()), m_pFlash->GetEffectRotAngle());
+		}
     }
 }
 
@@ -1105,90 +1118,35 @@ void HDFirearm::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whic
 
     HeldDevice::DrawHUD(pTargetBitmap, targetPos, whichScreen);
 
-    // Don't bother if the aim distance is really short, or not held
-    if (!m_Parent || m_SharpAim < 0.15)
-        return;
+	if (!m_Parent || IsReloading() || m_MaxSharpLength == 0) {
+		return;
+	}
 
-    float sharpLength = m_MaxSharpLength * m_SharpAim;
+	float sharpLength = std::max(m_MaxSharpLength * m_SharpAim, 20.0F);
+	int glowStrength;
+	int pointCount;
+	if (playerControlled && sharpLength > 20.0F) {
+		pointCount = m_SharpAim > 0.5F ? 4 : 3;
+		glowStrength = RandomNum(127, 255);
+	} else {
+		pointCount = 2;
+		glowStrength = RandomNum(63, 127);
+	}
+	int pointSpacing = 10 - pointCount;
+	sharpLength -= static_cast<float>(pointSpacing * pointCount) * 0.5F;
+	Vector muzzleOffset(std::max(m_MuzzleOff.m_X, m_SpriteRadius), m_MuzzleOff.m_Y);
 
-    if (playerControlled)
-    {
-        Vector aimPoint1(sharpLength - 9, 0);
-        Vector aimPoint2(sharpLength - 3, 0);
-        Vector aimPoint3(sharpLength + 3, 0);
-        Vector aimPoint4(sharpLength + 9, 0);
-        aimPoint1 += m_MuzzleOff;
-        aimPoint2 += m_MuzzleOff;
-        aimPoint3 += m_MuzzleOff;
-        aimPoint4 += m_MuzzleOff;
-        Matrix aimMatrix(m_Rotation);
-        aimMatrix.SetXFlipped(m_HFlipped);
-        aimPoint1 *= aimMatrix;
-        aimPoint2 *= aimMatrix;
-        aimPoint3 *= aimMatrix;
-        aimPoint4 *= aimMatrix;
-        aimPoint1 += m_Pos;
-        aimPoint2 += m_Pos;
-        aimPoint3 += m_Pos;
-        aimPoint4 += m_Pos;
+	//acquire_bitmap(pTargetBitmap);
+	for (int i = 0; i < pointCount; ++i) {
+		Vector aimPoint(sharpLength + static_cast<float>(pointSpacing * i), 0);
+		aimPoint = RotateOffset(aimPoint + muzzleOffset) + m_Pos;
 
-        // Put the flickering glows on the reticule dots, in absolute scene coordinates
-		int glow = (155 + RandomNum(0, 100));
-		g_PostProcessMan.RegisterGlowDotEffect(aimPoint1, YellowDot, glow);
-		g_PostProcessMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
-		g_PostProcessMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
-		g_PostProcessMan.RegisterGlowDotEffect(aimPoint4, YellowDot, glow);
-
-        // Make into target frame coordinates
-        aimPoint1 -= targetPos;
-        aimPoint2 -= targetPos;
-        aimPoint3 -= targetPos;
-        aimPoint4 -= targetPos;
-
-        // Wrap the points
-        g_SceneMan.WrapPosition(aimPoint1);
-        g_SceneMan.WrapPosition(aimPoint2);
-        g_SceneMan.WrapPosition(aimPoint3);
-        g_SceneMan.WrapPosition(aimPoint4);
-
-        acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, aimPoint1.m_X, aimPoint1.m_Y, g_YellowGlowColor);
-        putpixel(pTargetBitmap, aimPoint2.m_X, aimPoint2.m_Y, g_YellowGlowColor);
-        putpixel(pTargetBitmap, aimPoint3.m_X, aimPoint3.m_Y, g_YellowGlowColor);
-        putpixel(pTargetBitmap, aimPoint4.m_X, aimPoint4.m_Y, g_YellowGlowColor);
-        release_bitmap(pTargetBitmap);
-    }
-    else
-    {
-        Vector aimPoint2(sharpLength - 3, 0);
-        Vector aimPoint3(sharpLength + 3, 0);
-        aimPoint2 += m_MuzzleOff;
-        aimPoint3 += m_MuzzleOff;
-        Matrix aimMatrix(m_Rotation);
-        aimMatrix.SetXFlipped(m_HFlipped);
-        aimPoint2 *= aimMatrix;
-        aimPoint3 *= aimMatrix;
-        aimPoint2 += m_Pos;
-        aimPoint3 += m_Pos;
-
-        // Put the flickering glows on the reticule dots, in absolute scene coordinates
-        int glow = (55 + RandomNum(0, 100));
-		g_PostProcessMan.RegisterGlowDotEffect(aimPoint2, YellowDot, glow);
-		g_PostProcessMan.RegisterGlowDotEffect(aimPoint3, YellowDot, glow);
-
-        // Make into target frame coordinates
-        aimPoint2 -= targetPos;
-        aimPoint3 -= targetPos;
-
-        // Wrap the points
-        g_SceneMan.WrapPosition(aimPoint2);
-        g_SceneMan.WrapPosition(aimPoint3);
-
-        acquire_bitmap(pTargetBitmap);
-        putpixel(pTargetBitmap, aimPoint2.m_X, aimPoint2.m_Y, g_YellowGlowColor);
-        putpixel(pTargetBitmap, aimPoint3.m_X, aimPoint3.m_Y, g_YellowGlowColor);
-        release_bitmap(pTargetBitmap);
-    }
+		g_PostProcessMan.RegisterGlowDotEffect(aimPoint, YellowDot, glowStrength);
+		aimPoint -= targetPos;
+		g_SceneMan.WrapPosition(aimPoint);
+		putpixel(pTargetBitmap, aimPoint.GetFloorIntX(), aimPoint.GetFloorIntY(), g_YellowGlowColor);
+	}
+	//release_bitmap(pTargetBitmap);
 }
 
 } // namespace RTE

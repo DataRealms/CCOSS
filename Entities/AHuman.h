@@ -563,14 +563,22 @@ ClassInfoGetters;
 
 //	bool EquipDualWieldableInBGArm();
 
+	/// <summary>
+	/// Gets the throw chargeup progress of this AHuman.
+	/// </summary>
+	/// <returns>The throw chargeup progress, as a scalar from 0 to 1.</returns>
+	float GetThrowProgress() const { return m_ThrowPrepTime > 0 ? static_cast<float>(std::min(m_ThrowTmr.GetElapsedSimTimeMS() / static_cast<double>(m_ThrowPrepTime), 1.0)) : 1.0F; }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual Method:  UnequipBGArm
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Unequips whatever is in the BG arm and puts it into the inventory.
-// Arguments:       None.
-// Return value:    Whether there was anything to unequip.
+	/// <summary>
+	/// Unequips whatever is in the FG arm and puts it into the inventory.
+	/// </summary>
+	/// <returns>Whether there was anything to unequip.</returns>
+	bool UnequipFGArm();
 
+	/// <summary>
+	/// Unequips whatever is in the BG arm and puts it into the inventory.
+	/// </summary>
+	/// <returns>Whether there was anything to unequip.</returns>
 	bool UnequipBGArm();
 
 
@@ -915,17 +923,13 @@ protected:
     void ChunkGold();
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  DrawThrowingReticule
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws an aiming aid in front of this HeldDevice for throwing.
-// Arguments:       A pointer to a BITMAP to draw on.
-//                  The absolute position of the target bitmap's upper left corner in the Scene.
-//                  A normalized scalar that determines how much of the magnitude of the
-//                  reticule should be drawn, to indicate force in the throw.
-// Return value:    None.
-
-	void DrawThrowingReticule(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), double amount = 1.0) const;
+	/// <summary>
+	/// Draws an aiming aid in front of this AHuman for throwing.
+	/// </summary>
+	/// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>
+	/// <param name="targetPos">The absolute position of the target bitmap's upper left corner in the Scene.</param>
+	/// <param name="progressScalar">A normalized scalar that determines the magnitude of the reticle, to indicate force in the throw.</param>
+	void DrawThrowingReticle(BITMAP *targetBitmap, const Vector &targetPos = Vector(), float progressScalar = 1.0F) const;
 
 
     // Member variables
@@ -989,12 +993,10 @@ protected:
     Timer m_ThrowTmr;
 	// The duration it takes this AHuman to fully charge a throw.
     long m_ThrowPrepTime;
-	// For timing the transition from sharp aim back to regular aim
-	Timer m_SharpAimRevertTimer;
-    // The rate at which this AHuman's FG Arm follows the the bodily rotation. Best to keep this at 0 so it doesn't complicate aiming.
-	float m_FGArmFlailScalar;
-    // The rate at which this AHuman's BG Arm follows the the bodily rotation. Set to a negative value for a "counterweight" effect.
-	float m_BGArmFlailScalar;
+	Timer m_SharpAimRevertTimer; //!< For timing the transition from sharp aim back to regular aim.
+	float m_FGArmFlailScalar; //!< The rate at which this AHuman's FG Arm follows the the bodily rotation. Best to keep this at 0 so it doesn't complicate aiming.
+	float m_BGArmFlailScalar; //!< The rate at which this AHuman's BG Arm follows the the bodily rotation. Set to a negative value for a "counterweight" effect.
+	Timer m_EquipHUDTimer; //!< Timer for showing the name of any newly equipped Device.
 
     ////////////////
     // AI States

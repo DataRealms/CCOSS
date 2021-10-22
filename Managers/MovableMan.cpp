@@ -870,7 +870,7 @@ void MovableMan::AddItem(MovableObject *pItemToAdd)
 // Don't delete; buried stuff is cool, also causes problems becuase it thinks hollowed out material is not air and therefore  makes objects inside bunkers disappear!
 //        if (!pItemToAdd->MoveOutOfTerrain(g_MaterialGrass))
 //            pItemToAdd->SetToDelete();
-            pItemToAdd->MoveOutOfTerrain(g_MaterialGrass);
+            if (!pItemToAdd->IsSetToDelete()) { pItemToAdd->MoveOutOfTerrain(g_MaterialGrass); }
 
             pItemToAdd->NotResting();
             pItemToAdd->NewFrame();

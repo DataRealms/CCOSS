@@ -78,9 +78,7 @@ namespace RTE {
 
 	int Leg::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "Foot") {
-			Attachable iniDefinedObject;
-			reader >> &iniDefinedObject;
-			SetFoot(dynamic_cast<Attachable *>(iniDefinedObject.Clone()));
+			SetFoot(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
 		} else if (propName == "ContractedOffset") {
 			reader >> m_ContractedOffset;
 			m_MinExtension = m_ContractedOffset.GetMagnitude();
@@ -160,9 +158,7 @@ namespace RTE {
 
 		Attachable::Update();
 
-		if (m_FrameCount == 1) {
-			m_Frame = 0;
-		} else {
+		if (m_FrameCount != 1) {
 			m_NormalizedExtension = std::clamp((m_AnkleOffset.GetMagnitude() - m_MinExtension) / (m_MaxExtension - m_MinExtension), 0.0F, 1.0F);
 			m_Frame = std::min(m_FrameCount - 1, static_cast<unsigned int>(std::floor(m_NormalizedExtension * static_cast<float>(m_FrameCount))));
 		}
@@ -175,7 +171,8 @@ namespace RTE {
 	void Leg::UpdateCurrentAnkleOffset() {
 		if (IsAttached()) {
 			Vector targetOffset = g_SceneMan.ShortestDistance(m_JointPos, m_TargetPosition, g_SceneMan.SceneWrapsX());
-			if (m_WillIdle && targetOffset.m_Y < -3) { targetOffset = m_IdleOffset.GetXFlipped(m_HFlipped); }
+			Vector rotatedTargetOffset = targetOffset.GetRadRotatedCopy(m_Parent->GetRotAngle());
+			if (m_WillIdle && rotatedTargetOffset.m_Y < -std::abs(rotatedTargetOffset.m_X)) { targetOffset = m_Parent->RotateOffset(m_IdleOffset); }
 
 			Vector distanceFromTargetOffsetToAnkleOffset(targetOffset - m_AnkleOffset);
 			m_AnkleOffset += distanceFromTargetOffsetToAnkleOffset * m_MoveSpeed;

@@ -431,8 +431,10 @@ namespace RTE {
 		if (m_Controller->IsMouseControlled()) { objectPickedOrPickerClosed = HandleMouseEvents(); }
 
 		if (!objectPickedOrPickerClosed && !m_Controller->IsState(ControlState::PRESS_SECONDARY)) {
-			bool pressUp = m_Controller->IsState(ControlState::PRESS_UP) || m_Controller->IsState(ControlState::SCROLL_UP);
-			bool pressDown = m_Controller->IsState(ControlState::PRESS_DOWN) || m_Controller->IsState(ControlState::SCROLL_DOWN);
+			bool pressUp = m_Controller->IsState(ControlState::PRESS_UP);
+			bool pressDown = m_Controller->IsState(ControlState::PRESS_DOWN);
+			bool pressScrollUp = m_Controller->IsState(SCROLL_UP);
+			bool pressScrollDown = m_Controller->IsState(SCROLL_DOWN);
 
 			if (!(m_Controller->IsState(ControlState::MOVE_UP) || m_Controller->IsState(ControlState::MOVE_DOWN))) {
 				m_RepeatStartTimer.Reset();
@@ -452,9 +454,9 @@ namespace RTE {
 			}
 
 			if (m_PickerFocus == PickerFocus::GroupList) {
-				if (pressDown) {
+				if (pressDown || pressScrollDown) {
 					SelectNextOrPrevGroup(false);
-				} else if (pressUp) {
+				} else if (pressUp || pressScrollUp) {
 					SelectNextOrPrevGroup(true);
 				} else if (m_Controller->IsState(ControlState::PRESS_FACEBUTTON) && m_GroupsList->GetItem(m_SelectedGroupIndex)) {
 					SetListFocus(PickerFocus::ObjectList);
@@ -466,6 +468,10 @@ namespace RTE {
 				} else if (pressUp) {
 					SelectNextOrPrevObject(true);
 					m_PickedObject = GetSelectedObject();
+				} else if (pressScrollUp) {
+					m_ObjectsList->ScrollUp();
+				} else if (pressScrollDown) {
+					m_ObjectsList->ScrollDown();
 				} else if (m_Controller->IsState(ControlState::PRESS_FACEBUTTON)) {
 					if (const GUIListPanel::Item *objectListItem = m_ObjectsList->GetSelected()) {
 						if (objectListItem->m_ExtraIndex >= 0) {

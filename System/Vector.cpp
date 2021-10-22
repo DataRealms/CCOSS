@@ -72,7 +72,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Vector Vector::GetRadRotated(const float angle) {
+	Vector Vector::GetRadRotatedCopy(const float angle) {
 		Vector returnVector = *this;
 		const float adjustedAngle = -angle;
 		returnVector.m_X = m_X * std::cos(adjustedAngle) - m_Y * std::sin(adjustedAngle);

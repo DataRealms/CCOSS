@@ -59,7 +59,7 @@ void ACrab::Clear()
     m_pJetpack = 0;
     m_JetTimeTotal = 0.0;
     m_JetTimeLeft = 0.0;
-	m_JetAngleRange = 0.25;
+	m_JetAngleRange = 0.25F;
     m_MoveState = STAND;
     for (int side = 0; side < SIDECOUNT; ++side)
     {
@@ -659,7 +659,7 @@ bool ACrab::OnSink(const Vector &pos)
 
 bool ACrab::AddPieMenuSlices(PieMenuGUI *pPieMenu)
 {
-	PieSlice reloadSlice("Reload", PieSlice::PieSliceIndex::PSI_RELOAD, PieSlice::SliceDirection::UP);
+	PieSlice reloadSlice("Reload", PieSlice::PieSliceIndex::PSI_RELOAD, PieSlice::SliceDirection::UP, !FirearmsAreFull() && m_Status != INACTIVE);
     pPieMenu->AddSlice(reloadSlice);
 
 	PieSlice sentryAISlice("Sentry AI Mode", PieSlice::PieSliceIndex::PSI_SENTRY, PieSlice::SliceDirection::DOWN);
@@ -780,6 +780,19 @@ bool ACrab::FirearmIsEmpty() const {
 // Virtual Method:  FirearmNeedsReload
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the currently held HDFirearm's is almost out of ammo.
+
+bool ACrab::FirearmsAreFull() const {
+    if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice()) {
+        for (const HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
+            if (const HDFirearm *mountedFirearm = dynamic_cast<const HDFirearm *>(mountedDevice); mountedFirearm && !mountedFirearm->IsFull()) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 bool ACrab::FirearmNeedsReload() const {
     if (m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice()) {
@@ -1112,14 +1125,13 @@ void ACrab::UpdateAI()
         }
         else
         {
-            // Stop and then turn around after a period of time, or if bumped into another actor (like a rocket)
-            if (m_PatrolTimer.IsPastSimMS(8000) ||
-                /*g_SceneMan.CastNotMaterialRay(m_Pos, Vector(m_CharHeight / 4, 0), g_MaterialAir, Vector(), 4, false)*/
-                g_SceneMan.CastMORay(m_Pos, Vector((m_LateralMoveState == LAT_RIGHT ? m_CharHeight : -m_CharHeight) / 3, 0), m_MOID, IgnoresWhichTeam(), g_MaterialGrass, false, 4) != g_NoMOID)
-            {
-                m_PatrolTimer.Reset();
-                m_LateralMoveState = LAT_STILL;
-            }
+			Vector hitPos;
+			Vector trace((m_LateralMoveState == LAT_RIGHT ? GetRadius() : -GetRadius()) * 0.5F, 0);
+			// Stop and turn around after a period of time, or if bumped into another actor (like a rocket), or if walking off a ledge.
+			if (m_PatrolTimer.IsPastSimMS(8000) || g_SceneMan.CastMORay(m_Pos, trace, m_MOID, IgnoresWhichTeam(), g_MaterialGrass, false, 5) != g_NoMOID || !g_SceneMan.CastStrengthRay(m_Pos + trace, Vector(0, GetRadius()), 5.0F, hitPos, 5, g_MaterialGrass)) {
+				m_PatrolTimer.Reset();
+				m_LateralMoveState = LAT_STILL;
+			}
         }
     }
     // Going to a goal, potentially through a set of waypoints
@@ -2110,6 +2122,7 @@ void ACrab::Update()
 {
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
     float mass = GetMass();
+	Vector analogAim = m_Controller.GetAnalogAim();
 
     // Set Default direction of all the paths!
     for (int side = 0; side < SIDECOUNT; ++side)
@@ -2130,8 +2143,6 @@ void ACrab::Update()
 			// Jetpack throttle depletes relative to jet time, but only if throttle range values have been defined
 			float jetTimeRatio = std::max(m_JetTimeLeft / m_JetTimeTotal, 0.0F);
 			m_pJetpack->SetThrottle(jetTimeRatio * 2.0F - 1.0F);
-			float minScale = 1.0F - m_pJetpack->GetMinThrottle();
-			m_pJetpack->SetFlashScale(minScale + (1.0F + m_pJetpack->GetMaxThrottle() - minScale) * jetTimeRatio);
 		}
 		// Start Jetpack burn
 		if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0 && m_Status != INACTIVE)
@@ -2142,10 +2153,7 @@ void ACrab::Update()
 			m_pJetpack->EnableEmission(true);
 			// Quadruple this for the burst
 			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * 10.0F, 0.0F);
-		}
-        // Jetpack is burning
-        else if (m_Controller.IsState(BODY_JUMP) && m_JetTimeLeft > 0)
-        {
+		} else if (m_Controller.IsState(BODY_JUMP) && m_JetTimeLeft > 0 && m_Status != INACTIVE) {
             m_pJetpack->EnableEmission(true);
             // Jetpacks are noisy!
             m_pJetpack->AlarmOnEmit(m_Team);
@@ -2184,8 +2192,7 @@ void ACrab::Update()
     ////////////////////////////////////
     // Movement direction
 
-    if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP)
-    {
+	if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP && m_Status != INACTIVE) {
         if (m_MoveState != JUMP)
         {
             // Restart the stride if we're just starting to walk or crawl
@@ -2205,22 +2212,14 @@ void ACrab::Update()
             }
         }
 
-        // Walk backwards if the aiming is done in the opposite direction of travel
-        if (fabs(m_Controller.GetAnalogAim().m_X) > 0.1)
-        {
-            // Walk backwards if necessary
-            for (int side = 0; side < SIDECOUNT; ++side)
-            {
+		// Walk backwards if the aiming is already focused in the opposite direction of travel.
+		if (std::abs(analogAim.m_X) > 0 || m_Controller.IsState(AIM_SHARP)) {
+			for (int side = 0; side < SIDECOUNT; ++side) {
                 m_Paths[side][FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
                 m_Paths[side][BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
             }
-        }
-        // Flip if we're moving in the opposite direction
-        else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped))
-        {
+		} else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped)) {
             m_HFlipped = !m_HFlipped;
-//                // Instead of simply carving out a silhouette of the now flipped actor, isntead disable any atoms which are embedded int eh terrain until they emerge again
-//                m_ForceDeepCheck = true;
             m_CheckTerrIntersection = true;
             MoveOutOfTerrain(g_MaterialGrass);
             for (int side = 0; side < SIDECOUNT; ++side)
@@ -2241,7 +2240,7 @@ void ACrab::Update()
     ////////////////////////////////////
     // Reload held MO, if applicable
 
-    if (m_Controller.IsState(WEAPON_RELOAD) && FirearmNeedsReload()) {
+	if (m_Controller.IsState(WEAPON_RELOAD) && !FirearmsAreFull() && m_Status != INACTIVE) {
         ReloadFirearms();
 
         if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
@@ -2261,34 +2260,25 @@ void ACrab::Update()
     float adjustedAimRangeUpperLimit = (m_HFlipped) ? m_AimRangeUpperLimit - rotAngle : m_AimRangeUpperLimit + rotAngle;
     float adjustedAimRangeLowerLimit = (m_HFlipped) ? -m_AimRangeLowerLimit - rotAngle : -m_AimRangeLowerLimit + rotAngle;
 
-    if (m_Controller.IsState(AIM_UP))
-    {
+	if (m_Controller.IsState(AIM_UP) && m_Status != INACTIVE) {
         // Set the timer to some base number so we don't get a sluggish feeling at start of aim
         if (m_AimState != AIMUP)
             m_AimTmr.SetElapsedSimTimeMS(150);
         m_AimState = AIMUP;
         m_AimAngle += m_Controller.IsState(AIM_SHARP) ? MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) : MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
-    }
-    else if (m_Controller.IsState(AIM_DOWN))
-    {
+	} else if (m_Controller.IsState(AIM_DOWN) && m_Status != INACTIVE) {
         // Set the timer to some base number so we don't get a sluggish feeling at start of aim
         if (m_AimState != AIMDOWN)
             m_AimTmr.SetElapsedSimTimeMS(150);
         m_AimState = AIMDOWN;
         m_AimAngle -= m_Controller.IsState(AIM_SHARP) ? MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) : MIN(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
-    }
-    // Analog aim
-    else if (m_Controller.GetAnalogAim().GetMagnitude() > 0.1)
-    {
-        Vector aim = m_Controller.GetAnalogAim();
+	} else if (analogAim.GetMagnitude() > 0.1F && m_Status != INACTIVE) {
         // Hack to avoid the GetAbsRadAngle to mangle an aim angle straight down
-        if (aim.m_X == 0)
-            aim.m_X += m_HFlipped ? -0.01 : 0.01;
-        m_AimAngle = aim.GetAbsRadAngle();
+		if (analogAim.m_X == 0) { analogAim.m_X += 0.01F * GetFlipFactor(); }
+        m_AimAngle = analogAim.GetAbsRadAngle();
 
         // Check for flip change
-        if ((aim.m_X > 0 && m_HFlipped) || (aim.m_X < 0 && !m_HFlipped))
-        {
+		if ((analogAim.m_X > 0 && m_HFlipped) || (analogAim.m_X < 0 && !m_HFlipped)) {
             m_HFlipped = !m_HFlipped;
             // Instead of simply carving out a silhouette of the now flipped actor, isntead disable any atoms which are embedded int eh terrain until they emerge again
             //m_ForceDeepCheck = true;
@@ -2317,49 +2307,31 @@ void ACrab::Update()
     //////////////////////////////
     // Sharp aim calculation
 
-// TODO: make the delay data driven by both the actor and the device!
-    // 
-    if (m_Controller.IsState(AIM_SHARP) && m_MoveState == STAND && m_Vel.GetMagnitude() < 5.0)
-    {
-/*
-        float halfDelay = m_SharpAimDelay / 2;
-        // Accelerate for first half
-        if (!m_SharpAimTimer.IsPastSimMS(halfDelay))
-            m_SharpAimProgress = (float)m_SharpAimTimer.GetElapsedSimTimeMS() / (float)m_SharpAimDelay;
-        // Decelerate for second half
-        else if (!m_SharpAimTimer.IsPastSimMS(m_SharpAimDelay)
-            m_SharpAimProgress
-        // At max
-        else
-            m_SharpAimProgress = 1.0;
-*/
-        float aimMag = m_Controller.GetAnalogAim().GetMagnitude();
+	if (m_Controller.IsState(AIM_SHARP) && m_Status == STABLE && m_Vel.GetMagnitude() < 5.0F) {
+        float aimMag = analogAim.GetMagnitude();
 
-        // If aim sharp is being done digitally, then translate to full analog aim mag
-        if (aimMag < 0.1)
-            aimMag = 1.0;
+		// If aim sharp is being done digitally, then translate to full magnitude.
+		if (aimMag < 0.1F) { aimMag = 1.0F; }
+		if (m_MoveState == WALK) { aimMag *= 0.3F; }
 
-        if (m_SharpAimTimer.IsPastSimMS(m_SharpAimDelay))
-        {
-            // Only go slower outward
-            if (m_SharpAimProgress < aimMag)
-                m_SharpAimProgress += (aimMag - m_SharpAimProgress) * 0.035;
-            else
-                m_SharpAimProgress = aimMag;
-        }
-        else
-            m_SharpAimProgress = 0;
-    }
-    else
-    {
-        m_SharpAimProgress = 0;
-        m_SharpAimTimer.Reset();
-    }
+		if (m_SharpAimTimer.IsPastSimMS(m_SharpAimDelay)) {
+			// Only go slower outward.
+			if (m_SharpAimProgress < aimMag) {
+				m_SharpAimProgress += (aimMag - m_SharpAimProgress) * 0.035F;
+			} else {
+				m_SharpAimProgress = aimMag;
+			}
+		} else {
+			m_SharpAimProgress *= 0.95F;
+		}
+	} else {
+		m_SharpAimProgress = std::max(m_SharpAimProgress * 0.95F - 0.1F, 0.0F);
+	}
 
     ////////////////////////////////////
     // Fire/Activate held devices
 
-    if (m_pTurret && m_pTurret->IsAttached()) {
+    if (m_pTurret && m_pTurret->IsAttached() && m_Status != INACTIVE) {
         for (HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
             mountedDevice->SetSharpAim(m_SharpAimProgress);
             if (m_Controller.IsState(WEAPON_FIRE)) {
@@ -2858,10 +2830,9 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 
     // Player AI drawing
 
-    // Device aiming reticule
-    if (m_Controller.IsState(AIM_SHARP) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice())
-        m_pTurret->GetFirstMountedDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen, m_Controller.IsPlayerControlled());
-
+	if ((m_Controller.IsState(AIM_SHARP) || (m_Controller.IsPlayerControlled() && !m_Controller.IsState(PIE_MENU_ACTIVE))) && m_pTurret && m_pTurret->IsAttached() && m_pTurret->HasMountedDevice()) {
+		m_pTurret->GetFirstMountedDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen, m_Controller.IsState(AIM_SHARP) && m_Controller.IsPlayerControlled());
+	}
     //////////////////////////////////////
     // Draw stat info HUD
     char str[64];
@@ -2915,13 +2886,10 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 			str[1] = 0;
             pSymbolFont->DrawAligned(&allegroBitmap, drawPos.m_X - 11, drawPos.m_Y + m_HUDStack, str, GUIFont::Centre);
 
-            float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
-// TODO: Don't hardcode this shit
-            char gaugeColor = jetTimeRatio > 0.6 ? 149 : (jetTimeRatio > 0.3 ? 77 : 13);
-            rectfill(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack + 6, drawPos.m_X + (16 * jetTimeRatio), drawPos.m_Y + m_HUDStack + 7, gaugeColor);
-//                    rect(pTargetBitmap, drawPos.m_X, drawPos.m_Y + m_HUDStack - 2, drawPos.m_X + 24, drawPos.m_Y + m_HUDStack - 4, 238);
-//                    std::snprintf(str, sizeof(str), "%.0f Kg", mass);
-//                    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Left);
+			float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
+			int gaugeColor = jetTimeRatio > 0.6F ? 149 : (jetTimeRatio > 0.3F ? 77 : 13);
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 16, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
 
             m_HUDStack += -10;
         }
@@ -2933,8 +2901,10 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                     if (!textString.empty()) { textString += " | "; }
                     if (mountedFirearm->IsReloading()) {
                         textString += "Reloading";
+						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 13, drawPos.GetFloorIntX() + 29, drawPos.GetFloorIntY() + m_HUDStack + 14, 245);
+						rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 12, drawPos.GetFloorIntX() + static_cast<int>(28.0F * mountedFirearm->GetReloadProgress() + 0.5F), drawPos.GetFloorIntY() + m_HUDStack + 13, 77);
                     } else {
-                        textString += mountedFirearm->GetRoundInMagCount() > 0 ? std::to_string(mountedFirearm->GetRoundInMagCount()) : "Infinite";
+						textString += mountedFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(mountedFirearm->GetRoundInMagCount());
                     }
                 }
             }

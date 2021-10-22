@@ -478,17 +478,10 @@ enum
 
     bool HasDelivered() { return m_HasDelivered; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ResetEmissionTimers
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Reset the timers of all emissions so they will start/stop at the 
-//                  correct relative offsets from now.
-// Arguments:       None.
-// Return value:    None.
-
-	virtual void ResetEmissionTimers() {}
-
+	/// <summary>
+	/// Resets all the timers related to this, including the scuttle timer.
+	/// </summary>
+	void ResetAllTimers() override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  OnMOHit
@@ -571,6 +564,30 @@ enum
 
 	void SetDeliveryDelayMultiplier(float newValue) { m_DeliveryDelayMultiplier = newValue; }
 
+
+	/// <summary>
+	/// Gets whether this ACraft will scuttle automatically on death.
+	/// </summary>
+	/// <returns>Whether this ACraft will scuttle automatically on death.</returns>
+	bool GetScuttleOnDeath() const { return m_ScuttleOnDeath; }
+
+	/// <summary>
+	/// Sets whether this ACraft will scuttle automatically on death.
+	/// </summary>
+	/// <param name="scuttleOnDeath">Whether this ACraft will scuttle automatically on death.</param>
+	void SetScuttleOnDeath(bool scuttleOnDeath) { m_ScuttleOnDeath = scuttleOnDeath; }
+
+	/// <summary>
+	/// Gets the hatch opening/closing delay of this ACraft.
+	/// </summary>
+	/// <returns>The hatch delay of this ACraft.</returns>
+	int GetHatchDelay() const { return m_HatchDelay; }
+
+	/// <summary>
+	/// Sets the hatch opening/closing delay of this ACraft.
+	/// </summary>
+	/// <param name="newDelay">The new hatch delay of this ACraft.</param>
+	void SetHatchDelay(int newDelay) { m_HatchDelay = newDelay; }
 
 	/// <summary>
 	/// Destroys this ACraft and creates its specified Gibs in its place with appropriate velocities. Any Attachables are removed and also given appropriate velocities.
@@ -657,6 +674,8 @@ protected:
     SoundContainer *m_CrashSound;
     // The maximum number of actors that fit in the inventory
     int m_MaxPassengers;
+	int m_ScuttleIfFlippedTime; //!< The time after which the craft will scuttle automatically, if tipped over.
+	bool m_ScuttleOnDeath; //!< Whether the craft will self-destruct at zero health.
 
 	static bool s_CrabBombInEffect; //!< Flag to determine if a craft is triggering the Crab Bomb effect.
 

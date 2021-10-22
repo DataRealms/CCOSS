@@ -119,6 +119,7 @@ namespace RTE {
 		.property("Author", &DataModule::GetAuthor)
 		.property("Description", &DataModule::GetDescription)
 		.property("Version", &DataModule::GetVersionNumber)
+		.property("IsFaction", &DataModule::IsFaction)
 
 		.def_readwrite("Presets", &DataModule::m_EntityList, luabind::return_stl_iterator);
 	}
@@ -271,8 +272,8 @@ namespace RTE {
 		.def("Reset", &Vector::Reset)
 		.def("RadRotate", &Vector::RadRotate)
 		.def("DegRotate", &Vector::DegRotate)
-		.def("GetRadRotated", &Vector::GetRadRotated)
-		.def("GetDegRotated", &Vector::GetDegRotated)
+		.def("GetRadRotatedCopy", &Vector::GetRadRotatedCopy)
+		.def("GetDegRotatedCopy", &Vector::GetDegRotatedCopy)
 		.def("AbsRotateTo", &Vector::AbsRotateTo)
 		.def("SetXY", &Vector::SetXY);
 	}

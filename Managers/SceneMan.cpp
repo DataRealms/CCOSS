@@ -612,7 +612,17 @@ MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY)
        pixelY >= m_pMOIDLayer->GetBitmap()->h)
         return g_NoMOID;
 
-    return getpixel(m_pMOIDLayer->GetBitmap(), pixelX, pixelY);
+	MOID moid = getpixel(m_pMOIDLayer->GetBitmap(), pixelX, pixelY);
+	if (g_SettingsMan.SimplifiedCollisionDetection()) {
+		if (moid != ColorKeys::g_NoMOID && moid != ColorKeys::g_MOIDMaskColor) {
+			const MOSprite *mo = dynamic_cast<MOSprite *>(g_MovableMan.GetMOFromID(moid));
+			return (mo && !mo->GetTraveling()) ? moid : ColorKeys::g_NoMOID;
+		} else {
+			return ColorKeys::g_NoMOID;
+		}
+	} else {
+		return moid;
+	}
 }
 
 

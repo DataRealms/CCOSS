@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-<details><summary>**Added**</summary>
+<details><summary><b>Added</b></summary>
 
 - Executable can be compiled as 64bit.
 
@@ -229,7 +229,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 </details>
 
-<details><summary>**Changed**</summary>
+<details><summary><b>Changed</b></summary>
 
 - `ACRocket`s can now function without a full set of thrusters. This also means that "Null Emitter" thrusters are no longer required for rockets.
 
@@ -381,7 +381,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>**Fixed**</summary>
+<details><summary><b>Fixed</b></summary>
 
 - Fixed the logic for `Gib` and `Emission` property `LifeVariation` where it would round down to zero, giving particles infinite lifetime.
 
@@ -436,7 +436,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>**Removed**</summary>
+<details><summary><b>Removed</b></summary>
 
 - Removed obsolete graphics drivers and their `Settings.ini` properties `ForceOverlayedWindowGfxDriver` and `ForceNonOverlayedWindowGfxDriver`.
 
@@ -470,7 +470,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [0.1.0 pre-release 3.0][0.1.0-pre3.0] - 2020/12/25
 
-<details><summary>**Added**</summary>
+<details><summary><b>Added</b></summary>
 
 - Implemented Lua Just-In-Time compilation (MoonJIT 2.2.0).
 
@@ -636,7 +636,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>**Changed**</summary>
+<details><summary><b>Changed</b></summary>
 
 - Codebase now uses the C++17 standard.
 
@@ -745,7 +745,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>**Fixed**</summary>
+<details><summary><b>Fixed</b></summary>
 
 - Fix crash when returning to `MetaGame` scenario screen after activity end.
 
@@ -776,7 +776,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>**Removed**</summary>
+<details><summary><b>Removed</b></summary>
 
 - Removed the ability to remove scripts from objects with Lua. This is no longer needed cause of code efficiency increases.
 
@@ -804,7 +804,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [0.1.0 pre-release 2][0.1.0-pre2] - 2020/05/08
 
-<details><summary>**Added**</summary>
+<details><summary><b>Added</b></summary>
 
 - Lua binding for `Box::IntersectsBox(otherBox)`, that returns true if 2 boxes intersect.
 
@@ -925,7 +925,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>**Changed**</summary>
+<details><summary><b>Changed</b></summary>
 
 - Codebase now uses the C++14 standard.
 
@@ -982,7 +982,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>**Fixed**</summary>
+<details><summary><b>Fixed</b></summary>
 
 - Fixed LuaBind being all sorts of messed up. All lua bindings now work properly like they were before updating to the v141 toolset.
 
@@ -1005,7 +1005,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>**Removed**</summary>
+<details><summary><b>Removed</b></summary>
 
 - Removed all Gorilla Audio and SDL Mixer related code and files.
 
@@ -1032,7 +1032,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [0.1.0 pre-release 1][0.1.0-pre1] - 2020/01/27
 
-<details><summary>**Added**</summary>
+<details><summary><b>Added</b></summary>
 
 - You can now run the game with command line parameters, including `-h` to see help and `-c` to send ingame console input to cout.
 
@@ -1061,7 +1061,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 </details>
 
-<details><summary>**Changed**</summary>
+<details><summary><b>Changed</b></summary>
 
 - `ACrab` aim limits now adjust to crab body rotation.
 
@@ -1086,7 +1086,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>**Fixed**</summary>
+<details><summary><b>Fixed</b></summary>
 
 - SFX slider now works properly.
 
@@ -1105,7 +1105,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 
-<details><summary>**Removed**</summary>
+<details><summary><b>Removed</b></summary>
 
 - All licensing-related code has been removed since it's no longer needed.
 

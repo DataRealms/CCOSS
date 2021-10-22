@@ -898,7 +898,13 @@ void MovableObject::ApplyImpulses()
 void MovableObject::PreTravel()
 {
 	// Temporarily remove the representation of this from the scene MO sampler
-	if (m_GetsHitByMOs) { if (!g_UInputMan.KeyHeld(KEY_N)) { m_isTraveling = true; } else { Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawNoMOID, true); } }
+	if (m_GetsHitByMOs) {
+		if (!g_UInputMan.KeyHeld(KEY_N)) {
+			m_IsTraveling = true;
+		} else {
+			Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawNoMOID, true);
+		}
+	}
 
     // Save previous position and velocities before moving
     m_PrevPos = m_Pos;
@@ -934,7 +940,13 @@ void MovableObject::PostTravel()
         m_IgnoresAtomGroupHits = m_Vel.GetLargest() < m_IgnoresAGHitsWhenSlowerThan;
 
 	if (m_GetsHitByMOs) {
-        if (!GetParent()) { if (!g_UInputMan.KeyHeld(KEY_N)) { m_isTraveling = false; } else { Draw(g_SceneMan.GetMOIDBitmap(), Vector(), g_DrawMOID, true); } }
+        if (!GetParent()) {
+			if (!g_UInputMan.KeyHeld(KEY_N)) {
+				m_IsTraveling = false;
+			} else {
+				Draw(g_SceneMan.GetMOIDBitmap(), Vector(), DrawMode::g_DrawMOID, true);
+			}
+		}
 		m_AlreadyHitBy.clear();
 	}
 	m_IsUpdated = true;

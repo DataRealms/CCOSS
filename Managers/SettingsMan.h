@@ -64,6 +64,12 @@ namespace RTE {
 		int RecommendedMOIDCount() const { return m_RecommendedMOIDCount; }
 
 		/// <summary>
+		/// Gets whether simplified collision detection (reduced MOID layer sampling) is enabled.
+		/// </summary>
+		/// <returns>Whether simplified collision detection is enabled or not.</returns>
+		bool SimplifiedCollisionDetection() const { return m_SimplifiedCollisionDetection; }
+
+		/// <summary>
 		/// Gets the Scene background layer auto-scaling mode.
 		/// </summary>
 		/// <returns>The Scene background layer auto-scaling mode. 0 for off, 1 for fit screen dimensions and 2 for always upscaled to x2.</returns>
@@ -104,13 +110,13 @@ namespace RTE {
 		/// <summary>
 		/// Gets the range in which devices on Scene will show the pick-up HUD.
 		/// </summary>
-		/// <returns>The range in which devices on Scene will show the pick-up HUD, in pixels. -1 means HUDs are hidden, 0 means unlimited range.</returns>
+		/// <returns>The range in which devices on Scene will show the pick-up HUD, in pixels. 0 means HUDs are hidden, -1 means unlimited range.</returns>
 		float GetUnheldItemsHUDDisplayRange() const { return m_UnheldItemsHUDDisplayRange; }
 
 		/// <summary>
 		/// Sets the range in which devices on Scene will show the pick-up HUD.
 		/// </summary>
-		/// <param name="newRadius">The new range in which devices on Scene will show the pick-up HUD, in pixels. -1 means HUDs are hidden, 0 means unlimited range.</param>
+		/// <param name="newRadius">The new range in which devices on Scene will show the pick-up HUD, in pixels. 0 means HUDs are hidden, -1 means unlimited range.</param>
 		void SetUnheldItemsHUDDisplayRange(float newRadius) { m_UnheldItemsHUDDisplayRange = std::floor(newRadius); }
 
 		/// <summary>
@@ -419,7 +425,7 @@ namespace RTE {
 		bool m_ShowForeignItems; //!< Do not show foreign items in buy menu.
 		bool m_FlashOnBrainDamage; //!< Whether red flashes on brain damage are on or off.
 		bool m_BlipOnRevealUnseen; //!< Blip if unseen is revealed.
-		float m_UnheldItemsHUDDisplayRange; //!< Range in which devices on Scene will show the pick-up HUD, in pixels. -1 means HUDs are hidden, 0 means unlimited range.
+		float m_UnheldItemsHUDDisplayRange; //!< Range in which devices on Scene will show the pick-up HUD, in pixels. 0 means HUDs are hidden, -1 means unlimited range.
 		bool m_EndlessMetaGameMode; //!< Endless MetaGame mode.
 		bool m_EnableCrabBombs; //!< Whether all actors (except Brains and Doors) should be annihilated if a number exceeding the crab bomb threshold is released at once.
 		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.
@@ -436,6 +442,7 @@ namespace RTE {
 		bool m_ShowMetaScenes; //!< Show MetaScenes in editors and activities.
 
 		int m_RecommendedMOIDCount; //!< Recommended max MOID's before removing actors from scenes.
+		bool m_SimplifiedCollisionDetection; //!< Whether simplified collision detection (reduced MOID layer sampling) is enabled.
 		int m_SceneBackgroundAutoScaleMode; //!< Scene background layer auto-scaling mode. 0 for off, 1 for fit screen dimensions and 2 for always upscaled to x2.
 
 		bool m_SkipIntro; //!< Whether to play the intro of the game or skip directly to the main menu.

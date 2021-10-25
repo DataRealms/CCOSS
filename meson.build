@@ -33,7 +33,7 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   message('gcc detected')
 
   build_rpath = '$ORIGIN:$ORIGIN/../external/lib/linux/x86_64' # Set RUNPATH so that CCCP can find libfmod.so without needing to set LD_LIBRARY_PATH
-  suffix = 'x86_64'
+  #suffix = 'x86_64'
   link_args += ['-Wl,--enable-new-dtags'] # Set RUNPATH instead of RPATH
 
   # Set preprocessor flags and cpp arguments according to build options
@@ -101,6 +101,11 @@ else
   conf_data.set('EXENAME', elfname + '.' + suffix)
 endif
 
+if get_option('install_runner')
+  conf_data.set('EXERUNNER', 'CortexCommand')
+else
+  conf_data.set('EXERUNNER', conf_data.get('EXENAME'))
+endif
 
 #### Sources Setup ####
 pch = 'System/StandardIncludes.h'
@@ -156,8 +161,10 @@ base_exclude_files = [
 	'Start Dedicated Server.bat'
 ]
 
+if get_option('install_data')
 install_subdir(get_option('cccpdatadir'),
                exclude_directories:['.git', '.github', 'Metagames.rte', 'Scenes.rte'],
                exclude_files:base_exclude_files,
                install_dir:get_option('data_install_dir'),
                strip_directory:true)
+endif

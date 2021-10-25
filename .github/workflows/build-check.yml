@@ -4,6 +4,9 @@ name: Compile check
 on:
   # Triggers the workflow on push or pull request events but only for the development branch
   push:
+    branches: [master,development]
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
 
   workflow_dispatch:
 

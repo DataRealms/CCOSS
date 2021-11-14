@@ -354,11 +354,14 @@ void MOSRotating::ReadCustomValueProperty(Reader &reader) {
     std::string customKey = reader.ReadPropName();
     std::string customValue = reader.ReadPropValue();
     if (customValueType == "NumberValue") {
+		const char* lcale = std::setlocale(LC_ALL, nullptr);
+		std::setlocale(LC_ALL, "C");
         try {
             SetNumberValue(customKey, std::stod(customValue));
         } catch (const std::invalid_argument) {
             reader.ReportError("Tried to read a non-number value for SetNumberValue.");
         }
+		std::setlocale(LC_ALL, lcale);
     } else if (customValueType == "StringValue") {
         SetStringValue(customKey, customValue);
     } else {

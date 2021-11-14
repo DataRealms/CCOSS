@@ -46,8 +46,8 @@ jobs:
         # uses: BSFishy/meson-build@6f1930d878fd3eed3853c1c91285ec604c37f3a5
         uses: BSFishy/meson-build@v1.0.3
         env:
-          CC: "ccache clang"
-          CXX: "ccache clang++"
+          CC: "clang"
+          CXX: "clang++"
           CCACHE_SLOPPINESS: pch_defines,time_macros,include_file_mtime,include_file_ctime
         with:
           # The action to run

@@ -49,9 +49,9 @@ namespace RTE {
 
 		m_UnheldItemsHUDDisplayRangeSlider = dynamic_cast<GUISlider *>(m_GUIControlManager->GetControl("SliderUnheldItemsHUDRange"));
 		int unheldItemsHUDDisplayRangeValue = static_cast<int>(g_SettingsMan.GetUnheldItemsHUDDisplayRange());
-		if (unheldItemsHUDDisplayRangeValue <= -1) {
+		if (unheldItemsHUDDisplayRangeValue == 0) {
 			m_UnheldItemsHUDDisplayRangeSlider->SetValue(m_UnheldItemsHUDDisplayRangeSlider->GetMinimum());
-		} else if (unheldItemsHUDDisplayRangeValue == 0) {
+		} else if (unheldItemsHUDDisplayRangeValue <= -1) {
 			m_UnheldItemsHUDDisplayRangeSlider->SetValue(m_UnheldItemsHUDDisplayRangeSlider->GetMaximum());
 		} else {
 			m_UnheldItemsHUDDisplayRangeSlider->SetValue(static_cast<int>(g_SettingsMan.GetUnheldItemsHUDDisplayRange() / c_PPM));

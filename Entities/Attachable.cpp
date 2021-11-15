@@ -125,10 +125,9 @@ namespace RTE {
 		} else if (propName == "InheritedRotAngleRadOffset" || propName == "InheritedRotAngleOffset") {
 			reader >> m_InheritedRotAngleOffset;
 		} else if (propName == "InheritedRotAngleDegOffset") {
-			const char* locale = std::setlocale(LC_ALL, nullptr);
 			std::setlocale(LC_ALL, "C");
 			m_InheritedRotAngleOffset = DegreesToRadians(std::stof(reader.ReadPropValue()));
-			std::setlocale(LC_ALL, locale);
+			std::setlocale(LC_ALL, "");
 		} else if (propName == "InheritsFrame") {
 			reader >> m_InheritsFrame;
 		} else if (propName == "CollidesWithTerrainWhileAttached") {

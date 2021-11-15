@@ -61,10 +61,9 @@ namespace RTE {
 
 	int Matrix::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "AngleDegrees") {
-			const char* locale = std::setlocale(LC_ALL, nullptr);
 			std::setlocale(LC_ALL, "C");
 			SetDegAngle(std::stof(reader.ReadPropValue()));
-			std::setlocale(LC_ALL, locale);
+			std::setlocale(LC_ALL, "");
 		} else if (propName == "AngleRadians") {
 			reader >> m_Rotation;
 		} else {

@@ -100,6 +100,7 @@ namespace RTE {
 
 	int UInputMan::Initialize() {
 		if (install_keyboard() != 0) { RTEAbort("Failed to initialize keyboard!"); }
+		std::setlocale(LC_ALL, "C");
 
 #ifdef _WIN32
 		// JOY_TYPE_AUTODETECT is failing to select the correct joystick driver, so a dual analog ends up with a non-functional right stick and the triggers being treated as one instead.

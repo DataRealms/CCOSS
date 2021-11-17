@@ -3139,7 +3139,8 @@ void AHuman::Update()
 			} else {
 				// Thrust in the opposite direction when strafing.
 				float flip = ((m_HFlipped && m_Controller.IsState(MOVE_RIGHT)) || (!m_HFlipped && m_Controller.IsState(MOVE_LEFT))) ? -1.0F : 1.0F;
-				// Halve the jet angle when looking downwards so the actor isn't forced to go sideways (TODO: don't hardcode this ratio?)
+				// Halve the jet angle when looking downwards so the actor isn't forced to go sideways
+                // TODO: don't hardcode this ratio?
 				float jetAngle = (m_AimAngle > 0 ? m_AimAngle * m_JetAngleRange : -m_AimAngle * m_JetAngleRange * 0.5F) - maxAngle;
 				// FacingAngle isn't needed because it's already been applied to AimAngle since last update.
 				m_pJetpack->SetEmitAngle(jetAngle * flip - c_HalfPI);

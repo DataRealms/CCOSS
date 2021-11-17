@@ -215,7 +215,7 @@ namespace RTE {
 			}
 		}
 		// Avoid zero (if radius is nonexistent, for example), will cause divide by zero problems otherwise.
-		if (m_MomentOfInertia == 0.0F) { m_MomentOfInertia = 0.000001F; }
+		if (m_MomentOfInertia == 0.0F) { m_MomentOfInertia = 1.0F; }
 
 		return m_MomentOfInertia;
 	}

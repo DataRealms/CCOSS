@@ -110,7 +110,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool Controller::IsMouseControlled() const {
-		return g_UInputMan.IsInMultiplayerMode() ? DEVICE_MOUSE_KEYB : g_UInputMan.GetControlScheme(m_Player)->GetDevice() == DEVICE_MOUSE_KEYB;
+		return m_Player != Players::NoPlayer && g_UInputMan.GetControlScheme(m_Player)->GetDevice() == DEVICE_MOUSE_KEYB;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -311,9 +311,10 @@ namespace RTE {
 		// ANALOG joystick values
 		Vector move = g_UInputMan.AnalogMoveValues(m_Player);
 		Vector aim = g_UInputMan.AnalogAimValues(m_Player);
+		bool pieMenuActive = m_ControlStates.at(PIE_MENU_ACTIVE);
 
 		// Only change aim and move if not holding actor switch buttons - don't want to mess up AI's aim
-		if (!m_ControlStates.at(PIE_MENU_ACTIVE) && !m_ControlStates.at(ACTOR_PREV_PREP) && !m_ControlStates.at(ACTOR_NEXT_PREP) && m_ReleaseTimer.IsPastRealMS(m_ReleaseDelay)) {
+		if (!pieMenuActive && !m_ControlStates.at(ACTOR_PREV_PREP) && !m_ControlStates.at(ACTOR_NEXT_PREP) && m_ReleaseTimer.IsPastRealMS(m_ReleaseDelay)) {
 			m_AnalogMove = move;
 			m_AnalogAim = aim;
 		} else {
@@ -331,8 +332,8 @@ namespace RTE {
 		if (m_AnalogAim.GetMagnitude() > 0.1F && !m_ControlStates.at(PIE_MENU_ACTIVE)) { m_ControlStates.at(AIM_SHARP) = true; }
 
 		// Disable sharp aim while moving - this also helps with keyboard vs mouse fighting when moving and aiming in opposite directions
-		if (m_ControlStates.at(BODY_JUMP) || (m_ControlStates.at(PIE_MENU_ACTIVE) && !m_ControlStates.at(SECONDARY_ACTION))) {
-			if (IsMouseControlled()) { g_UInputMan.SetMouseValueMagnitude(0.05F); }
+		if (m_ControlStates.at(BODY_JUMP) || (pieMenuActive && !m_ControlStates.at(SECONDARY_ACTION))) {
+			if (IsMouseControlled()) { g_UInputMan.SetMouseValueMagnitude(0.1F); }
 			m_ControlStates.at(AIM_SHARP) = false;
 		}
 

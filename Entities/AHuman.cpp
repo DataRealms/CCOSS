@@ -3137,12 +3137,12 @@ void AHuman::Update()
 				float jetAngle = std::clamp(m_Controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, -maxAngle, maxAngle);
 				m_pJetpack->SetEmitAngle(FacingAngle(jetAngle - c_HalfPI));
 			} else {
-				// Halve the jet angle when looking downwards so the actor isn't forced to go sideways
-				// TODO: don't hardcode this value?
-				float jetAngle = m_AimAngle > 0 ? m_AimAngle * m_JetAngleRange : -m_AimAngle * m_JetAngleRange * 0.5F;
-				jetAngle -= (maxAngle + c_HalfPI);
-				// Don't need to use FacingAngle on this because it's already applied to the AimAngle since last update.
-				m_pJetpack->SetEmitAngle(jetAngle);
+				// Thrust in the opposite direction when strafing.
+				float flip = ((m_HFlipped && m_Controller.IsState(MOVE_RIGHT)) || (!m_HFlipped && m_Controller.IsState(MOVE_LEFT))) ? -1.0F : 1.0F;
+				// Halve the jet angle when looking downwards so the actor isn't forced to go sideways (TODO: don't hardcode this ratio?)
+				float jetAngle = (m_AimAngle > 0 ? m_AimAngle * m_JetAngleRange : -m_AimAngle * m_JetAngleRange * 0.5F) - maxAngle;
+				// FacingAngle isn't needed because it's already been applied to AimAngle since last update.
+				m_pJetpack->SetEmitAngle(jetAngle * flip - c_HalfPI);
 			}
 		}
 	}
@@ -3181,7 +3181,7 @@ void AHuman::Update()
 			}
 
 			// Walk backwards if the aiming is already focused in the opposite direction of travel.
-			if (std::abs(analogAim.m_X) > 0 || m_Controller.IsState(AIM_SHARP)) {
+			if (analogAim.GetMagnitude() != 0 || m_Controller.IsState(AIM_SHARP)) {
 				m_Paths[FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
 				m_Paths[BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
 			} else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped)) {
@@ -3292,7 +3292,7 @@ void AHuman::Update()
                       std::min(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
 		if (m_AimAngle < -m_AimRange) { m_AimAngle = -m_AimRange; }
 
-	} else if (analogAim.GetMagnitude() > 0 && m_Status != INACTIVE) {
+	} else if (analogAim.GetMagnitude() != 0 && m_Status != INACTIVE) {
 		// Hack to avoid the GetAbsRadAngle from mangling an aim angle straight down.
 		if (analogAim.m_X == 0) { analogAim.m_X += 0.01F * GetFlipFactor(); }
 		m_AimAngle = analogAim.GetAbsRadAngle();

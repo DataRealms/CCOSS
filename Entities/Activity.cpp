@@ -548,7 +548,7 @@ void Activity::Clear() {
 
 	void Activity::SetPlayerBrain(Actor *newBrain, int player) {
 		if ((player >= Players::PlayerOne || player < Players::MaxPlayerCount) && newBrain) {
-			newBrain->SetTeam(m_Team[player]);
+			if (newBrain->GetTeam() != m_Team[player]) { newBrain->SetTeam(m_Team[player]); }
 			m_HadBrain[player] = true;
 		}
 		m_Brain[player] = newBrain;

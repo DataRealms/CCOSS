@@ -90,6 +90,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SettingsMan::ReadProperty(const std::string_view &propName, Reader &reader) {
+		const char* locale = std::setlocale(LC_ALL, nullptr);
 		std::setlocale(LC_ALL, "C");
 		if (propName == "PaletteFile") {
 			reader >> g_FrameMan.m_PaletteFile;
@@ -266,10 +267,10 @@ namespace RTE {
 				}
 			}
 		} else {
-			std::setlocale(LC_ALL, "");
+			std::setlocale(LC_ALL, locale);
 			return Serializable::ReadProperty(propName, reader);
 		}
-		std::setlocale(LC_ALL, "");
+		std::setlocale(LC_ALL, locale);
 		return 0;
 	}
 

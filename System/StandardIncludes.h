@@ -48,7 +48,6 @@
 #include <cstdarg>
 #include <cstddef>
 #include <chrono>
-#include <clocale>
 #include <functional>
 #include <thread>
 #include <mutex>

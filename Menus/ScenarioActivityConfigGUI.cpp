@@ -80,6 +80,7 @@ namespace RTE {
 					for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
 						m_TeamTechComboBoxes.at(team)->GetListPanel()->AddItem(dataModule->GetFriendlyName(), "", nullptr, nullptr, moduleID);
 						m_TeamTechComboBoxes.at(team)->GetListPanel()->ScrollToTop();
+						m_TeamTechComboBoxes.at(team)->SetSelectedIndex(0);
 					}
 				}
 			}
@@ -162,9 +163,6 @@ namespace RTE {
 		}
 
 		for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; ++team) {
-			m_TeamTechComboBoxes.at(team)->SetSelectedIndex(0);
-			m_TeamAISkillSliders.at(team)->SetValue(Activity::AISkillSetting::DefaultSkill);
-
 			const Icon *teamIcon = nullptr;
 			if (m_SelectedActivity->TeamActive(team)) {
 				teamIcon = m_SelectedActivity->GetTeamIcon(team);

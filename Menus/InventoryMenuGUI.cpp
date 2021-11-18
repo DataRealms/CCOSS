@@ -845,10 +845,8 @@ namespace RTE {
 					if (mouseHeld && !m_GUIEquippedItemButton->IsPushed()) {
 						m_GUIEquippedItemButton->SetPushed(true);
 						g_GUISound.SelectionChangeSound()->Play(m_MenuController->GetPlayer());
-					} else if (mouseReleased && m_InventoryActorEquippedItems.empty()) {
-						g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
 					} else if (mouseReleased) {
-						HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first, 0);
+						HandleItemButtonPressOrHold(m_GUIEquippedItemButton, m_InventoryActorEquippedItems.empty() ? nullptr : m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).first, 0);
 						m_GUIEquippedItemButton->SetPushed(false);
 						if (!m_GUISelectedItem) {
 							return true;
@@ -858,10 +856,8 @@ namespace RTE {
 					if (mouseHeld && !m_GUIOffhandEquippedItemButton->IsPushed()) {
 						m_GUIOffhandEquippedItemButton->SetPushed(true);
 						g_GUISound.SelectionChangeSound()->Play(m_MenuController->GetPlayer());
-					} else if (mouseReleased && m_InventoryActorEquippedItems.empty()) {
-						g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
 					} else if (mouseReleased) {
-						HandleItemButtonPressOrHold(m_GUIOffhandEquippedItemButton, m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).second, 1);
+						HandleItemButtonPressOrHold(m_GUIOffhandEquippedItemButton, m_InventoryActorEquippedItems.empty() ? nullptr : m_InventoryActorEquippedItems.at(m_GUIInventoryActorCurrentEquipmentSetIndex).second, 1);
 						m_GUIOffhandEquippedItemButton->SetPushed(false);
 						if (!m_GUISelectedItem) {
 							return true;

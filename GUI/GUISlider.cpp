@@ -306,8 +306,9 @@ void GUISlider::OnMouseDown(int X, int Y, int Buttons, int Modifier) {
 	m_Value = std::clamp(m_Value, m_Minimum, m_Maximum);
 
 	// If the value has changed, add the "Changed" notification
-	if (m_Value != m_OldValue)
-		AddEvent(GUIEvent::Notification, Changed, 0);
+	if (m_Value != m_OldValue) { AddEvent(GUIEvent::Notification, Changed, 0); }
+
+	AddEvent(GUIEvent::Notification, Clicked, 0);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -319,6 +320,8 @@ void GUISlider::OnMouseUp(int X, int Y, int Buttons, int Modifier) {
 
 	// If the value has changed, add the "Changed" notification
 	if (m_Value != m_OldValue) { AddEvent(GUIEvent::Notification, Changed, 0); }
+
+	AddEvent(GUIEvent::Notification, Clicked, 0);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

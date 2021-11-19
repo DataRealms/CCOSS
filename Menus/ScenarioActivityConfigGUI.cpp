@@ -391,7 +391,7 @@ namespace RTE {
 					m_ActivityDifficultyLabel->SetText(" " + Activity::GetDifficultyString(m_ActivityDifficultySlider->GetValue()));
 					if (!m_StartingGoldAdjustedManually) { UpdateStartingGoldSliderAndLabel(); }
 				} else if (guiEvent.GetControl() == m_StartingGoldSlider) {
-					if (m_StartingGoldSlider->HasFocus()) { m_StartingGoldAdjustedManually = true; }
+					if (guiEvent.GetMsg() == GUISlider::Clicked) { m_StartingGoldAdjustedManually = true; }
 					UpdateStartingGoldSliderAndLabel();
 				} else if (guiEvent.GetMsg() == GUISlider::Changed) {
 					for (int team = Activity::Teams::TeamOne; team < Activity::Teams::MaxTeamCount; team++) {

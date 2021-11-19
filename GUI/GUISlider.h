@@ -25,6 +25,7 @@ public:
     // Slider Notifications
     enum {
         Changed = 0,
+		Clicked
     } Notification;
 
 

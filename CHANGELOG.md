@@ -227,6 +227,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `SimplifiedCollisionDetection = 0/1` to enable more performant but less accurate MO collision detection (previously `PreciseCollisions = 0`). Disabled by default.
 
+- New INI property `BuyableMode` to specify in which buy lists a `Buyable = 1` item should appear in.  
+	`BuyableMode = 0 // No restrictions` - item will appear in both lists as usual. Default value, does not need to be explicitly specified.
+	`BuyableMode = 1 // BuyMenu only` - item will not appear in any group in the object picker during the editing phase, but will be available to purchase from the buy menu.  
+	`BuyableMode = 2 // ObjectPicker only` - item will not appear in any tab in the buy menu when making an order, but will be available for placement from the object picker during editing phase.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

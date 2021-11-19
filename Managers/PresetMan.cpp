@@ -663,7 +663,7 @@ Entity * PresetMan::GetRandomBuyableOfGroupFromTech(string group, string type, i
 			{
 				SceneObject * pSObject = dynamic_cast<SceneObject *>(*oItr);
 				// Buyable and not brain?
-				if (pSObject && pSObject->IsBuyable() && !pSObject->IsInGroup("Brains"))
+				if (pSObject && pSObject->IsBuyable() && !pSObject->IsBuyableInObjectPickerOnly() && !pSObject->IsInGroup("Brains"))
 				{
 					entityList.push_back(*oItr);
 					foundAny = true;

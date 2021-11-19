@@ -200,6 +200,7 @@ void SceneObject::Clear()
     m_Pos.Reset();
     m_OzValue = 0;
     m_Buyable = true;
+	m_BuyableMode = BuyableMode::NoRestrictions;
     m_Team = Activity::NoTeam;
     m_PlacedByPlayer = Players::NoPlayer;
 }
@@ -243,6 +244,7 @@ int SceneObject::Create(const SceneObject &reference)
     m_Pos = reference.m_Pos;
     m_OzValue = reference.m_OzValue;
     m_Buyable = reference.m_Buyable;
+	m_BuyableMode = reference.m_BuyableMode;
     m_Team = reference.m_Team;
     m_PlacedByPlayer = reference.m_PlacedByPlayer;
 
@@ -266,6 +268,9 @@ int SceneObject::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_OzValue;
     else if (propName == "Buyable")
         reader >> m_Buyable;
+	else if (propName == "BuyableMode") {
+		m_BuyableMode = static_cast<BuyableMode>(std::stoi(reader.ReadPropValue()));
+	}
     else if (propName == "Team")
     {
         reader >> m_Team;
@@ -301,6 +306,8 @@ int SceneObject::Save(Writer &writer) const
     writer << m_OzValue;
     writer.NewProperty("Buyable");
     writer << m_Buyable;
+	writer.NewProperty("BuyableMode");
+	writer << m_BuyableMode;
     writer.NewProperty("Team");
     writer << m_Team;
     writer.NewProperty("PlacedByPlayer");

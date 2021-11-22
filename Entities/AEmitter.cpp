@@ -69,11 +69,11 @@ void AEmitter::Clear()
 // Description:     Creates a AEmitter to be identical to another, by deep copy.
 
 int AEmitter::Create(const AEmitter &reference) {
-    if (reference.m_pFlash) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFlash->GetUniqueID());
-        SetFlash(dynamic_cast<Attachable *>(reference.m_pFlash->Clone()));
-    }
+    if (reference.m_pFlash) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFlash->GetUniqueID()); }
+
     Attachable::Create(reference);
+
+    if (reference.m_pFlash) { SetFlash(dynamic_cast<Attachable *>(reference.m_pFlash->Clone())); }
 
     for (const Emission *referenceEmission : reference.m_EmissionList) {
         m_EmissionList.push_back(dynamic_cast<Emission *>(referenceEmission->Clone()));

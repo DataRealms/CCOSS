@@ -100,15 +100,13 @@ int HDFirearm::Create()
 // Description:     Creates a HDFirearm to be identical to another, by deep copy.
 
 int HDFirearm::Create(const HDFirearm &reference) {
-    if (reference.m_pMagazine) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pMagazine->GetUniqueID());
-        SetMagazine(dynamic_cast<Magazine *>(reference.m_pMagazine->Clone()));
-    }
-    if (reference.m_pFlash) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFlash->GetUniqueID());
-        SetFlash(dynamic_cast<Attachable *>(reference.m_pFlash->Clone()));
-    }
+    if (reference.m_pMagazine) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pMagazine->GetUniqueID()); }
+    if (reference.m_pFlash) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFlash->GetUniqueID()); }
+
     HeldDevice::Create(reference);
+
+    if (reference.m_pMagazine) { SetMagazine(dynamic_cast<Magazine *>(reference.m_pMagazine->Clone())); }
+    if (reference.m_pFlash) { SetFlash(dynamic_cast<Attachable *>(reference.m_pFlash->Clone())); }
 
     m_pMagazineReference = reference.m_pMagazineReference;
 	if (reference.m_PreFireSound) { m_PreFireSound = dynamic_cast<SoundContainer *>(reference.m_PreFireSound->Clone()); }

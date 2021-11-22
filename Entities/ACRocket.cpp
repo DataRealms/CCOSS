@@ -93,36 +93,23 @@ int ACRocket::Create()
 // Description:     Creates a ACRocket to be identical to another, by deep copy.
 
 int ACRocket::Create(const ACRocket &reference) {
-    if (reference.m_pRLeg) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRLeg->GetUniqueID());
-        SetRightLeg(dynamic_cast<Leg *>(reference.m_pRLeg->Clone()));
-    }
-    if (reference.m_pLLeg) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLLeg->GetUniqueID());
-        SetLeftLeg(dynamic_cast<Leg *>(reference.m_pLLeg->Clone()));
-    }
-    if (reference.m_pMThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pMThruster->GetUniqueID());
-        SetMainThruster(dynamic_cast<AEmitter *>(reference.m_pMThruster->Clone()));
-    }
-    if (reference.m_pRThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRThruster->GetUniqueID());
-        SetRightThruster(dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone()));
-    }
-    if (reference.m_pLThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLThruster->GetUniqueID());
-        SetLeftThruster(dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone()));
-    }
-    if (reference.m_pURThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pURThruster->GetUniqueID());
-        SetURightThruster(dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone()));
-    }
-    if (reference.m_pULThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pULThruster->GetUniqueID());
-        SetULeftThruster(dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone()));
-    }
+    if (reference.m_pRLeg) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRLeg->GetUniqueID()); }
+    if (reference.m_pLLeg) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLLeg->GetUniqueID()); }
+    if (reference.m_pMThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pMThruster->GetUniqueID()); }
+    if (reference.m_pRThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRThruster->GetUniqueID()); }
+    if (reference.m_pLThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLThruster->GetUniqueID()); }
+    if (reference.m_pURThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pURThruster->GetUniqueID()); }
+    if (reference.m_pULThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pULThruster->GetUniqueID()); }
 
     ACraft::Create(reference);
+
+    if (reference.m_pRLeg) { SetRightLeg(dynamic_cast<Leg *>(reference.m_pRLeg->Clone())); }
+    if (reference.m_pLLeg) { SetLeftLeg(dynamic_cast<Leg *>(reference.m_pLLeg->Clone())); }
+    if (reference.m_pMThruster) { SetMainThruster(dynamic_cast<AEmitter *>(reference.m_pMThruster->Clone())); }
+    if (reference.m_pRThruster) { SetRightThruster(dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone())); }
+    if (reference.m_pLThruster) { SetLeftThruster(dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone())); }
+    if (reference.m_pURThruster) { SetURightThruster(dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone())); }
+    if (reference.m_pULThruster) { SetULeftThruster(dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone())); }
 
     m_pBodyAG = dynamic_cast<AtomGroup *>(reference.m_pBodyAG->Clone());
     m_pBodyAG->SetOwner(this);

@@ -50,12 +50,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ADoor::Create(const ADoor &reference) {
-		if (reference.m_Door) {
-			m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_Door->GetUniqueID());
-			SetDoor(dynamic_cast<Attachable *>(reference.m_Door->Clone()));
-		}
+		if (reference.m_Door) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_Door->GetUniqueID()); }
 
 		Actor::Create(reference);
+
+		if (reference.m_Door) { SetDoor(dynamic_cast<Attachable *>(reference.m_Door->Clone())); }
 
 		m_InitialSpriteAnimDuration = reference.m_SpriteAnimDuration;
 

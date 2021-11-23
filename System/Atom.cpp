@@ -549,7 +549,7 @@ namespace RTE {
 				}
 				return hitStep;
 			}
-			RTEAssert(0, "Atom shouldn't be taking steps beyond the trajectory!");
+			RTEAssert(0, "Atom shouldn't be taking steps beyond the trajectory!" + (m_OwnerMO ? " Owner is " + m_OwnerMO->GetPresetName() + "." : ""));
 			m_OwnerMO->SetToDelete();
 		}
 		m_StepWasTaken = false;

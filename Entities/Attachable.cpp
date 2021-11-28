@@ -335,7 +335,7 @@ namespace RTE {
 		if (m_Parent) {
 			UpdatePositionAndJointPositionBasedOnOffsets();
 			if (m_ParentOffset != m_PrevParentOffset || m_JointOffset != m_PrevJointOffset) { m_Parent->HandlePotentialRadiusAffectingAttachable(this); }
-			m_Vel = m_Parent->GetVel();
+			SetVel(m_Parent->GetVel());
 			m_Team = m_Parent->GetTeam();
 
 			MOSRotating *rootParentAsMOSR = dynamic_cast<MOSRotating *>(GetRootParent());

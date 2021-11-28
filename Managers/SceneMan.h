@@ -864,8 +864,8 @@ public:
 //                  If the pixel location specified happens to be of the air material (0)
 //                  false will be returned here.
 
-    bool TryPenetrate(const int posX,
-                      const int posY,
+    bool TryPenetrate(int posX,
+                      int posY,
                       const Vector &impulse,
                       const Vector &velocity,
                       float &retardation,

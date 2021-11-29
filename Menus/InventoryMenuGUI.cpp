@@ -62,7 +62,7 @@ namespace RTE {
 
 		m_EnabledState = EnabledState::Disabled;
 		m_EnableDisableAnimationTimer.Reset();
-		m_EnableDisableAnimationTimer.SetRealTimeLimitMS(300);
+		m_EnableDisableAnimationTimer.SetRealTimeLimitMS(100);
 
 		m_InventoryActorIsHuman = false;
 		m_InventoryActorEquippedItems.clear();

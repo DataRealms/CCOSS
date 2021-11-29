@@ -532,8 +532,7 @@ void AEmitter::Update()
 
                     // Add to accumulative recoil impulse generated, F = m * a
                     // If enabled, that is
-                    if ((*eItr)->PushesEmitter())
-                        pushImpulses -= emitVel * pParticle->GetMass();
+                    if ((*eItr)->PushesEmitter() && (GetParent() || GetMass() > 0)) { pushImpulses -= emitVel * pParticle->GetMass(); }
 
                     // Set the emitted particle to not hit this emitter's parent, if applicable
                     if (m_EmissionsIgnoreThis)

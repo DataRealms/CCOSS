@@ -135,21 +135,21 @@ namespace RTE {
 			}
 		}
 #elif defined(__linux__)
-		int numJoysticks = 0;
+		int numDetectedJoysticks = 0;
 		std::string devName = "/dev/input/jsX";
 		std::string devNameFallback = "/dev/jsX";
 		// Allegro only checks until the first missing joystick so no point in checking any more than that
-		for (numJoysticks = 0; numJoysticks < MAX_JOYSTICKS; ++numJoysticks) {
-			devName[devName.length() - 1] = '0' + numJoysticks;
-			devNameFallback[devNameFallback.length() - 1] = '0' + numJoysticks;
-			if (!std::filesystem::exists(devName))
+		for (numDetectedJoysticks = 0; numDetectedJoysticks < MAX_JOYSTICKS; ++numDetectedJoysticks) {
+			devName[devName.length() - 1] = '0' + numDetectedJoysticks;
+			devNameFallback[devNameFallback.length() - 1] = '0' + numDetectedJoysticks;
+			if (!std::filesystem::exists(devName) && !std::filesystem::exists(devNameFallback))
 				break;
 		}
 
-		if (numJoysticks != num_joysticks) {
-			if (numJoysticks > 0) {
+		if (numDetectedJoysticks != num_joysticks) {
+			if (numDetectedJoysticks > 0) {
 				// Check if joysticks are ready
-				for (int i = 0; i < numJoysticks; ++i) {
+				for (int i = 0; i < numDetectedJoysticks; ++i) {
 					devName[devName.length() - 1] = '0' + i;
 					devNameFallback[devNameFallback.length() - 1] = '0' + i;
 					int joystick = open(devName.c_str(), O_RDONLY | O_NONBLOCK);
@@ -162,7 +162,7 @@ namespace RTE {
 				}
 			}
 			remove_joystick();
-			if (numJoysticks > 0 && install_joystick(JOY_TYPE_LINUX_ANALOGUE) != 0) {
+			if (numDetectedJoysticks > 0 && install_joystick(JOY_TYPE_LINUX_ANALOGUE) != 0) {
 				RTEAbort("Failed to initialize joysticks!");
 			}
 			return true;

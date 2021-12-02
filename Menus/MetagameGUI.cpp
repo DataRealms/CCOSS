@@ -2484,8 +2484,6 @@ void MetagameGUI::UpdateInput()
             {
                 int metaPlayer = g_MetaMan.GetPlayerTurn();
                 int team = g_MetaMan.m_Players[metaPlayer].GetTeam();
-                // Show the cost change the funds meter
-                FundsChangeIndication(metaPlayer, -SCANCOST, Vector(m_apPlayerBarLabel[metaPlayer]->GetXPos() + m_apPlayerBarLabel[metaPlayer]->GetWidth(), m_apPlayerBarLabel[metaPlayer]->GetYPos()), 2000);
                 // Actually change the player's funds
                 g_MetaMan.m_Players[metaPlayer].m_Funds -= SCANCOST;
                 // Set up and start the scripted activity for scanning the site for this' team

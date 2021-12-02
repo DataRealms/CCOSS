@@ -1354,50 +1354,51 @@ bool MovableMan::RemoveMO(MovableObject *pMOToRem)
     return false;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          KillAllEnemyActors
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Kills and destroys all enemies of a specific team.
-
-int MovableMan::KillAllEnemyActors(int exceptTeam)
-{
+int MovableMan::KillAllTeamActors(int teamToKill) const {
     int killCount = 0;
 
-    // Kill all regular Actors
-    for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
-    {
-        if ((*aIt)->GetTeam() != exceptTeam)
-        {
-			// Blow up the heads of humanoids, for effect.
-			AHuman *human = dynamic_cast<AHuman *>(*aIt);
-			if (human && human->GetHead()) {
-				human->GetHead()->GibThis();
-			} else {
-				(*aIt)->GibThis();
-			}
-            killCount++;
-        }
-    }
-
-    // Kill all Actors added this frame
-    for (deque<Actor *>::iterator aIt = m_AddedActors.begin(); aIt != m_AddedActors.end(); ++aIt)
-    {
-        if ((*aIt)->GetTeam() != exceptTeam)
-        {
-			// Blow up the heads of humanoids, for effect.
-			AHuman *human = dynamic_cast<AHuman *>(*aIt);
-			if (human && human->GetHead()) {
-				human->GetHead()->GibThis();
-			} else {
-				(*aIt)->GibThis();
-			}
-            killCount++;
+    for (std::deque<Actor *> actorList : { m_Actors, m_AddedActors }) {
+        for (Actor *actor : actorList) {
+            if (actor->GetTeam() == teamToKill) {
+                const AHuman *actorAsHuman = dynamic_cast<AHuman *>(actor);
+                if (actorAsHuman && actorAsHuman->GetHead()) {
+                    actorAsHuman->GetHead()->GibThis();
+                } else {
+                    actor->GibThis();
+                }
+                killCount++;
+            }
         }
     }
 
     return killCount;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int MovableMan::KillAllEnemyActors(int teamNotToKill) const {
+    int killCount = 0;
+
+    for (std::deque<Actor *> actorList : { m_Actors, m_AddedActors }) {
+        for (Actor *actor : actorList) {
+            if (actor->GetTeam() != teamNotToKill) {
+                const AHuman *actorAsHuman = dynamic_cast<AHuman *>(actor);
+                if (actorAsHuman && actorAsHuman->GetHead()) {
+                    actorAsHuman->GetHead()->GibThis();
+                } else {
+                    actor->GibThis();
+                }
+                killCount++;
+            }
+        }
+    }
+
+    return killCount;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

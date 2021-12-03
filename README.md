@@ -82,9 +82,9 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 ## Running:
 (If you installed the game in step 6 above, it should appear with your regular applications and will just run)
 
-1. Copy (or link, might be preferable for testing builds) `build/CortexCommand.x86_64` or `build/CortexCommand_debug.x86_64` (depending on if you made a debug build) into the **Data Repository**.
+1. Copy (or link, might be preferable for testing builds) `build/CortexCommand` or `build/CortexCommand_debug` (depending on if you made a debug build) into the **Data Repository**.
 
-   `cd $DATA_REPOSITORY; ln -s ../Cortex-Command-Community-Project-Source/build/CortexCommand.x86_64 . `
+   `cd $DATA_REPOSITORY; ln -s ../Cortex-Command-Community-Project-Source/build/CortexCommand . `
 
 2. Copy all `libfmod` files from `external/lib/linux/x86_64` into the **Data Repository**.
 
@@ -92,7 +92,7 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 
 3. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into **Data Repository**.
 
-4. Run `./CortexCommand.x86_64` or `./CortexCommand_debug.x86_64` in the **Data Repository**.
+4. Run `./CortexCommand` or `./CortexCommand_debug` in the **Data Repository**.
 
 ## Installing Dependencies
 

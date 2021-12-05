@@ -1779,7 +1779,7 @@ void MetagameGUI::Update()
         if (g_MetaMan.NoBrainsLeftInAnyPool())
             m_pGameMessageLabel->SetText("All players' brains have been deployed, and so the team with the most\nowned sites (and if tied, the most gold) won the mining contract for this planet!");
         else
-            m_pGameMessageLabel->SetText("Only the team which is already in the lead (in owned sites - or gold, if tied)\nhas any brains left to deploy, so they won the mining contract for this planet!");
+            m_pGameMessageLabel->SetText("The team that is in the lead (in owned sites - or gold, if tied)\nand has brains left to deploy has won the mining contract for this planet!");
     }
 
     // Update site change animations independent of the phase/mode.. they can happen here and there

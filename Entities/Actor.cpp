@@ -1109,16 +1109,15 @@ bool Actor::ParticlePenetration(HitData &hd) {
     if (hitor->GetApplyWoundDamageOnCollision()) { damageToAdd += m_pEntryWound->GetEmitDamage() * hitor->WoundDamageMultiplier(); }
     if (hitor->GetApplyWoundBurstDamageOnCollision()) { damageToAdd += m_pEntryWound->GetBurstDamage() * hitor->WoundDamageMultiplier(); }
 
-    if (damageToAdd != 0) {
-        m_Health = std::min(m_Health - damageToAdd * m_DamageMultiplier, m_MaxHealth);
-
-        if (m_Perceptiveness > 0) {
-            Vector extruded(hd.HitVel[HITOR]);
-            extruded.SetMagnitude(m_CharHeight);
-            extruded = m_Pos - extruded;
-            g_SceneMan.WrapPosition(extruded);
-            AlarmPoint(extruded);
-        }
+	if (damageToAdd != 0) {
+		m_Health = std::min(m_Health - damageToAdd * m_DamageMultiplier, m_MaxHealth);
+	}
+    if ((penetrated || damageToAdd != 0) && m_Perceptiveness > 0) {
+        Vector extruded(hd.HitVel[HITOR]);
+        extruded.SetMagnitude(m_CharHeight);
+        extruded = m_Pos - extruded;
+        g_SceneMan.WrapPosition(extruded);
+        AlarmPoint(extruded);
     }
 
     return penetrated;

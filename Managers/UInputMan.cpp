@@ -14,6 +14,9 @@
 #ifdef _WIN32
 #include "joystickapi.h"
 #endif
+#ifdef __unix__
+#include <fcntl.h>
+#endif
 
 namespace RTE {
 
@@ -133,14 +136,17 @@ namespace RTE {
 				return true;
 			}
 		}
-#elif defined __unix__
+#elif defined(__unix__)
 		int numDetectedJoysticks = 0;
 		std::string devName = "/dev/input/jsX";
+		constexpr size_t deviceIdPosition = 13;
 		std::string devNameFallback = "/dev/jsX";
+		constexpr size_t fallbackDeviceIdPosition = 7;
 		for (numDetectedJoysticks = 0; numDetectedJoysticks < MAX_JOYSTICKS; ++numDetectedJoysticks) {
-			devName.at(devName.length() - 1) = '0' + numDetectedJoysticks;
-			devNameFallback.at(devNameFallback.length() - 1) = '0' + numDetectedJoysticks;
-
+			devName.erase(deviceIdPosition, std::string::npos);
+			devName.append(std::to_string(numDetectedJoysticks));
+			devNameFallback.erase(fallbackDeviceIdPosition, std::string::npos);
+			devNameFallback.append(std::to_string(numDetectedJoysticks));
 			// Note - Allegro only checks until the first missing joystick, so there's no point in checking any more than that.
 			if (!std::filesystem::exists(devName) && !std::filesystem::exists(devNameFallback)) {
 				break;
@@ -150,8 +156,10 @@ namespace RTE {
 		if (numDetectedJoysticks != num_joysticks) {
 			if (numDetectedJoysticks > 0) {
 				for (int i = 0; i < numDetectedJoysticks; ++i) {
-					devName.at(devName.length() - 1) = '0' + i;
-					devNameFallback.at(devNameFallback.length() - 1) = '0' + i;
+					devName.erase(deviceIdPosition, std::string::npos);
+					devName.append(std::to_string(i));
+					devNameFallback.erase(fallbackDeviceIdPosition, std::string::npos);
+					devNameFallback.append(std::to_string(i));
 
 					int joystickDescriptor = open(devName.c_str(), O_RDONLY | O_NONBLOCK);
 					joystickDescriptor = joystickDescriptor == -1 ? open(devNameFallback.c_str(), O_RDONLY | O_NONBLOCK) : joystickDescriptor;

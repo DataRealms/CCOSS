@@ -133,7 +133,7 @@ namespace RTE {
 				return true;
 			}
 		}
-#elif defined(__linux__)
+#elif defined __unix__
 		int numDetectedJoysticks = 0;
 		std::string devName = "/dev/input/jsX";
 		std::string devNameFallback = "/dev/jsX";

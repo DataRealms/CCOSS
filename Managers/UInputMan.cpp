@@ -118,7 +118,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::DetectJoystickHotPlug() const {
-		// TODO: Add Linux implementation.
 #ifdef _WIN32
 		int numDevices = joyGetNumDevs();
 		if (numDevices > 0) {
@@ -138,33 +137,33 @@ namespace RTE {
 		int numDetectedJoysticks = 0;
 		std::string devName = "/dev/input/jsX";
 		std::string devNameFallback = "/dev/jsX";
-		// Allegro only checks until the first missing joystick so no point in checking any more than that
 		for (numDetectedJoysticks = 0; numDetectedJoysticks < MAX_JOYSTICKS; ++numDetectedJoysticks) {
-			devName[devName.length() - 1] = '0' + numDetectedJoysticks;
-			devNameFallback[devNameFallback.length() - 1] = '0' + numDetectedJoysticks;
-			if (!std::filesystem::exists(devName) && !std::filesystem::exists(devNameFallback))
+			devName.at(devName.length() - 1) = '0' + numDetectedJoysticks;
+			devNameFallback.at(devNameFallback.length() - 1) = '0' + numDetectedJoysticks;
+
+			// Note - Allegro only checks until the first missing joystick, so there's no point in checking any more than that.
+			if (!std::filesystem::exists(devName) && !std::filesystem::exists(devNameFallback)) {
 				break;
+			}
 		}
 
 		if (numDetectedJoysticks != num_joysticks) {
 			if (numDetectedJoysticks > 0) {
-				// Check if joysticks are ready
 				for (int i = 0; i < numDetectedJoysticks; ++i) {
-					devName[devName.length() - 1] = '0' + i;
-					devNameFallback[devNameFallback.length() - 1] = '0' + i;
-					int joystick = open(devName.c_str(), O_RDONLY | O_NONBLOCK);
-					if (joystick == -1) {
-						joystick = open(devNameFallback.c_str(), O_RDONLY | O_NONBLOCK);
-						if (joystick == -1)
-							return false;
+					devName.at(devName.length() - 1) = '0' + i;
+					devNameFallback.at(devNameFallback.length() - 1) = '0' + i;
+
+					int joystickDescriptor = open(devName.c_str(), O_RDONLY | O_NONBLOCK);
+					joystickDescriptor = joystickDescriptor == -1 ? open(devNameFallback.c_str(), O_RDONLY | O_NONBLOCK) : joystickDescriptor;
+					if (joystickDescriptor == -1) {
+						return false;
 					}
-					close(joystick);
+					close(joystickDescriptor);
 				}
 			}
+
 			remove_joystick();
-			if (numDetectedJoysticks > 0 && install_joystick(JOY_TYPE_LINUX_ANALOGUE) != 0) {
-				RTEAbort("Failed to initialize joysticks!");
-			}
+			if (numDetectedJoysticks > 0 && install_joystick(JOY_TYPE_LINUX_ANALOGUE) != 0) { RTEAbort("Failed to initialize joysticks!"); }
 			return true;
 		}
 #endif

@@ -14,6 +14,9 @@
 #ifdef _WIN32
 #include "joystickapi.h"
 #endif
+#ifdef __unix__
+#include <fcntl.h>
+#endif
 
 namespace RTE {
 
@@ -118,7 +121,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool UInputMan::DetectJoystickHotPlug() const {
-		// TODO: Add Linux implementation.
 #ifdef _WIN32
 		int numDevices = joyGetNumDevs();
 		if (numDevices > 0) {
@@ -133,6 +135,37 @@ namespace RTE {
 				if (numDetectedJoysticks > 0 && install_joystick(JOY_TYPE_AUTODETECT) != 0) { RTEAbort("Failed to initialize joysticks!"); }
 				return true;
 			}
+		}
+#elif defined(__unix__)
+		int numDetectedJoysticks = 0;
+		for (numDetectedJoysticks = 0; numDetectedJoysticks < MAX_JOYSTICKS; ++numDetectedJoysticks) {
+			std::string devName = "/dev/input/js" + std::to_string(numDetectedJoysticks);
+			std::string devNameFallback = "/dev/js" + std::to_string(numDetectedJoysticks);
+
+			// Note - Allegro only checks until the first missing joystick, so there's no point in checking any more than that.
+			if (!std::filesystem::exists(devName) && !std::filesystem::exists(devNameFallback)) {
+				break;
+			}
+		}
+
+		if (numDetectedJoysticks != num_joysticks) {
+			if (numDetectedJoysticks > 0) {
+				for (int i = 0; i < numDetectedJoysticks; ++i) {
+					std::string devName = "/dev/input/js" + std::to_string(i);
+					std::string devNameFallback = "/dev/js" + std::to_string(i);
+
+					int joystickDescriptor = open(devName.c_str(), O_RDONLY | O_NONBLOCK);
+					joystickDescriptor = joystickDescriptor == -1 ? open(devNameFallback.c_str(), O_RDONLY | O_NONBLOCK) : joystickDescriptor;
+					if (joystickDescriptor == -1) {
+						return false;
+					}
+					close(joystickDescriptor);
+				}
+			}
+
+			remove_joystick();
+			if (numDetectedJoysticks > 0 && install_joystick(JOY_TYPE_LINUX_ANALOGUE) != 0) { RTEAbort("Failed to initialize joysticks!"); }
+			return true;
 		}
 #endif
 		return false;

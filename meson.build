@@ -100,11 +100,12 @@ if suffix==''
 else
   conf_data.set('EXENAME', elfname + '.' + suffix)
 endif
-
 if get_option('install_runner')
   conf_data.set('EXERUNNER', 'CortexCommand')
+  conf_data.set('EXEPATH', prefix/get_option('libdir')/'CortexCommand')
 else
   conf_data.set('EXERUNNER', conf_data.get('EXENAME'))
+  conf_data.set('EXEPATH', prefix/get_option('bindir'))
 endif
 
 #### Sources Setup ####
@@ -134,7 +135,7 @@ external_objects = []
 external_libs = []
 subdir('external')
 
-install_rpath = get_option('fmod_dir') + ':$ORIGIN'
+install_rpath = prefix/get_option('fmod_dir')
 
 #### Target Definitions ####
 cccpelf = executable(
@@ -144,7 +145,7 @@ cccpelf = executable(
   name_suffix:suffix,   # Executable name options
   build_by_default:true, # Meson options
   gui_app:true,
-  install: true, install_rpath: install_rpath
+  install: true, install_rpath: install_rpath, install_dir: get_option('install_runner') ? get_option('libdir')/'CortexCommand' : get_option('bindir')
 )
 
 #### Installing #####

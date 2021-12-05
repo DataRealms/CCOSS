@@ -297,7 +297,8 @@ namespace RTE {
 
 			if (damageToAdd != 0) {
 				AddDamage(damageToAdd);
-
+			}
+			if (penetrated || damageToAdd != 0) {
 				if (Actor *parentAsActor = dynamic_cast<Actor *>(GetRootParent()); parentAsActor && parentAsActor->GetPerceptiveness() > 0) {
 					Vector extruded(hd.HitVel[HITOR]);
 					extruded.SetMagnitude(parentAsActor->GetHeight());

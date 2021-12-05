@@ -49,7 +49,7 @@ If you want to use an IDE other than Visual Studio, you will have to build using
 # Linux Build Instructions
 The Linux build uses the meson build system, and builds against system libraries.
 
-## Dependencies:
+## Dependencies
 
 * `g++>=8.1` (needs to support c++17 filesystem)
 * `allegro4`
@@ -63,7 +63,7 @@ The Linux build uses the meson build system, and builds against system libraries
 * [`meson`](https://www.mesonbuild.com)`>= 0.53` (If your distro doesn't have a recent version of meson, use the pip version instead)
 * `boost>=1.55`
 
-## Building:
+## Building
 
 1. Install Dependencies (see [below](#installing-dependencies) for some distro-specific instructions).
 
@@ -79,7 +79,7 @@ The Linux build uses the meson build system, and builds against system libraries
 
 If you want to change the buildtype afterwards, you can use `meson configure --buildtype {release or debug}` in the build directory or create a secondary build directory as in Step 4. There are also additional build options documented in the [wiki](https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/wiki/Meson-build-options) as well as through running `meson configure` in the build directory.
 
-## Running:
+## Running
 (If you installed the game in step 6 above, it should appear with your regular applications and will just run)
 
 1. Copy (or link, might be preferable for testing builds) `build/CortexCommand` or `build/CortexCommand_debug` (depending on if you made a debug build) into the **Data Repository**.
@@ -101,6 +101,11 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 
 **Ubuntu >=20.04:**  
 `# apt-get install build-essential libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  
+## Troubleshooting
+
+On some distros some keyboards and mice are recognized as controllers, to fix this follow these instructions: [https://github.com/denilsonsa/udev-joystick-blacklist](https://github.com/denilsonsa/udev-joystick-blacklist)
+
+***
 
 **Windows 10 (64-bit) without Visual Studio**  
 - [Windows SDK](https://developer.microsoft.com/de-de/windows/downloads/windows-10-sdk/)

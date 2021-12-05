@@ -295,9 +295,7 @@ namespace RTE {
 			if (hitor->GetApplyWoundDamageOnCollision()) { damageToAdd += m_pEntryWound->GetEmitDamage() * hitor->WoundDamageMultiplier(); }
 			if (hitor->GetApplyWoundBurstDamageOnCollision()) { damageToAdd += m_pEntryWound->GetBurstDamage() * hitor->WoundDamageMultiplier(); }
 
-			if (damageToAdd != 0) {
-				AddDamage(damageToAdd);
-			}
+			if (damageToAdd != 0) { AddDamage(damageToAdd); }
 			if (penetrated || damageToAdd != 0) {
 				if (Actor *parentAsActor = dynamic_cast<Actor *>(GetRootParent()); parentAsActor && parentAsActor->GetPerceptiveness() > 0) {
 					Vector extruded(hd.HitVel[HITOR]);

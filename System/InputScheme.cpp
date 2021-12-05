@@ -158,15 +158,15 @@ namespace RTE {
 				break;
 			case Players::PlayerThree:
 				m_ActiveDevice = InputDevice::DEVICE_GAMEPAD_1;
-				#ifndef __unix__
+#ifndef __unix__
 				SetPreset(InputPreset::PresetGenericDualAnalog);
-				#endif
+#endif
 				break;
 			case Players::PlayerFour:
 				m_ActiveDevice = InputDevice::DEVICE_GAMEPAD_2;
-				#ifndef __unix__
+#ifndef __unix__
 				SetPreset(InputPreset::PresetGenericDualAnalog);
-				#endif
+#endif
 				break;
 			default:
 				RTEAbort("Invalid Player passed into InputScheme::ResetToDefault!");

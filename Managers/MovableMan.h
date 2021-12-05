@@ -634,13 +634,19 @@ public:
 
     bool RemoveMO(MovableObject *pMOToRem);
 
+    /// <summary>
+    /// Kills and destroys all Actors of a specific Team.
+    /// </summary>
+    /// <param name="teamToKill">The team to annihilate. If NoTeam is passed in, then NO Actors die.</param>
+    /// <returns>How many Actors were killed.</returns>
+    int KillAllTeamActors(int teamToKill) const;
 
 	/// <summary>
-	/// Kills and destroys all enemy actors of a specific team.
+	/// Kills and destroys all enemy Actors of a specific Team.
 	/// </summary>
-	/// <param name="exceptTeam">The team to NOT annihilate. If NoTeam is passed in, then ALL actors die.</param>
+	/// <param name="teamNotToKill">The team to NOT annihilate. If NoTeam is passed in, then ALL Actors die.</param>
 	/// <returns>How many Actors were killed.</returns>
-	int KillAllEnemyActors(int exceptTeam = Activity::NoTeam);
+	int KillAllEnemyActors(int teamNotToKill = Activity::NoTeam) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

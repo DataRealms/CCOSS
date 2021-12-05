@@ -809,22 +809,20 @@ int BuyMenuGUI::GetTotalOrderPassengers() const {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BuyMenuGUI::EnableEquipmentSelection(bool enabled) {
-    if (enabled != m_SelectingEquipment) {
+    if (enabled != m_SelectingEquipment && g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
         m_SelectingEquipment = enabled;
         RefreshTabDisabledStates();
 
-        if (g_SettingsMan.SmartBuyMenuNavigationEnabled()) {
-            if (m_SelectingEquipment) {
-                m_LastVisitedMainTab = static_cast<MenuCategory>(m_MenuCategory);
-                m_LastMainScrollPosition = m_pShopList->GetScrollVerticalValue();
-                m_MenuCategory = m_LastVisitedEquipmentTab;
-            } else {
-                m_LastVisitedEquipmentTab = static_cast<MenuCategory>(m_MenuCategory);
-                m_LastEquipmentScrollPosition = m_pShopList->GetScrollVerticalValue();
-                m_MenuCategory = m_LastVisitedMainTab;
-            }
+        if (m_SelectingEquipment) {
+            m_LastVisitedMainTab = static_cast<MenuCategory>(m_MenuCategory);
+            m_LastMainScrollPosition = m_pShopList->GetScrollVerticalValue();
+            m_MenuCategory = m_LastVisitedEquipmentTab;
+        } else {
+            m_LastVisitedEquipmentTab = static_cast<MenuCategory>(m_MenuCategory);
+            m_LastEquipmentScrollPosition = m_pShopList->GetScrollVerticalValue();
+            m_MenuCategory = m_LastVisitedMainTab;
         }
-        
+
         CategoryChange();
         m_pShopList->ScrollTo(m_SelectingEquipment ? m_LastEquipmentScrollPosition : m_LastMainScrollPosition);
 

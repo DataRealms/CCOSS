@@ -144,6 +144,7 @@ namespace RTE {
 		.def("IsOfActor", &MovableMan::IsOfActor)
 		.def("GetRootMOID", &MovableMan::GetRootMOID)
 		.def("RemoveMO", &MovableMan::RemoveMO)
+		.def("KillAllTeamActors", &MovableMan::KillAllTeamActors)
 		.def("KillAllEnemyActors", &MovableMan::KillAllEnemyActors)
 		.def("OpenAllDoors", &MovableMan::OpenAllDoors)
 		.def("IsParticleSettlingEnabled", &MovableMan::IsParticleSettlingEnabled)

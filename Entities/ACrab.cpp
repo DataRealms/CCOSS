@@ -169,32 +169,22 @@ int ACrab::Create(BITMAP *pSprite,
 // Description:     Creates a ACrab to be identical to another, by deep copy.
 
 int ACrab::Create(const ACrab &reference) {
-    //Note - hardcoded attachable copying is organized based on desired draw order here.
-    if (reference.m_pLBGLeg) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLBGLeg->GetUniqueID());
-        SetLeftBGLeg(dynamic_cast<Leg *>(reference.m_pLBGLeg->Clone()));
-    }
-    if (reference.m_pRBGLeg) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRBGLeg->GetUniqueID());
-        SetRightBGLeg(dynamic_cast<Leg *>(reference.m_pRBGLeg->Clone()));
-    }
-    if (reference.m_pJetpack) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pJetpack->GetUniqueID());
-        SetJetpack(dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone()));
-    }
-    if (reference.m_pTurret) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pTurret->GetUniqueID());
-        SetTurret(dynamic_cast<Turret *>(reference.m_pTurret->Clone()));
-    }
-    if (reference.m_pLFGLeg) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLFGLeg->GetUniqueID());
-        SetLeftFGLeg(dynamic_cast<Leg *>(reference.m_pLFGLeg->Clone()));
-    }
-    if (reference.m_pRFGLeg) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRFGLeg->GetUniqueID());
-        SetRightFGLeg(dynamic_cast<Leg *>(reference.m_pRFGLeg->Clone()));
-    }
+    if (reference.m_pLBGLeg) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLBGLeg->GetUniqueID()); }
+    if (reference.m_pRBGLeg) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRBGLeg->GetUniqueID()); }
+    if (reference.m_pJetpack) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pJetpack->GetUniqueID()); }
+    if (reference.m_pTurret) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pTurret->GetUniqueID()); }
+    if (reference.m_pLFGLeg) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLFGLeg->GetUniqueID()); }
+    if (reference.m_pRFGLeg) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRFGLeg->GetUniqueID()); }
+
     Actor::Create(reference);
+
+    //Note - hardcoded attachable copying is organized based on desired draw order here.
+    if (reference.m_pLBGLeg) { SetLeftBGLeg(dynamic_cast<Leg *>(reference.m_pLBGLeg->Clone())); }
+    if (reference.m_pRBGLeg) { SetRightBGLeg(dynamic_cast<Leg *>(reference.m_pRBGLeg->Clone())); }
+    if (reference.m_pJetpack) { SetJetpack(dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone())); }
+    if (reference.m_pTurret) { SetTurret(dynamic_cast<Turret *>(reference.m_pTurret->Clone())); }
+    if (reference.m_pLFGLeg) { SetLeftFGLeg(dynamic_cast<Leg *>(reference.m_pLFGLeg->Clone())); }
+    if (reference.m_pRFGLeg) { SetRightFGLeg(dynamic_cast<Leg *>(reference.m_pRFGLeg->Clone())); }
 
     m_JetTimeTotal = reference.m_JetTimeTotal;
     m_JetTimeLeft = reference.m_JetTimeLeft;

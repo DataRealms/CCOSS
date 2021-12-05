@@ -151,32 +151,22 @@ int AHuman::Create()
 // Description:     Creates a AHuman to be identical to another, by deep copy.
 
 int AHuman::Create(const AHuman &reference) {
-    //Note - hardcoded attachable copying is organized based on desired draw order here.
-    if (reference.m_pBGArm) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pBGArm->GetUniqueID());
-        SetBGArm(dynamic_cast<Arm *>(reference.m_pBGArm->Clone()));
-    }
-    if (reference.m_pBGLeg) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pBGLeg->GetUniqueID());
-        SetBGLeg(dynamic_cast<Leg *>(reference.m_pBGLeg->Clone()));
-    }
-    if (reference.m_pJetpack) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pJetpack->GetUniqueID());
-        SetJetpack(dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone()));
-    }
-    if (reference.m_pHead) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pHead->GetUniqueID());
-        SetHead(dynamic_cast<Attachable *>(reference.m_pHead->Clone()));
-    }
-    if (reference.m_pFGLeg) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFGLeg->GetUniqueID());
-        SetFGLeg(dynamic_cast<Leg *>(reference.m_pFGLeg->Clone()));
-    }
-    if (reference.m_pFGArm) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFGArm->GetUniqueID());
-        SetFGArm(dynamic_cast<Arm *>(reference.m_pFGArm->Clone()));
-    }
+    if (reference.m_pBGArm) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pBGArm->GetUniqueID()); }
+    if (reference.m_pBGLeg) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pBGLeg->GetUniqueID()); }
+    if (reference.m_pJetpack) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pJetpack->GetUniqueID()); }
+    if (reference.m_pHead) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pHead->GetUniqueID()); }
+    if (reference.m_pFGLeg) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFGLeg->GetUniqueID()); }
+    if (reference.m_pFGArm) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFGArm->GetUniqueID()); }
+
     Actor::Create(reference);
+
+    //Note - hardcoded attachable copying is organized based on desired draw order here.
+    if (reference.m_pBGArm) { SetBGArm(dynamic_cast<Arm *>(reference.m_pBGArm->Clone())); }
+    if (reference.m_pBGLeg) { SetBGLeg(dynamic_cast<Leg *>(reference.m_pBGLeg->Clone())); }
+    if (reference.m_pJetpack) { SetJetpack(dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone())); }
+    if (reference.m_pHead) { SetHead(dynamic_cast<Attachable *>(reference.m_pHead->Clone())); }
+    if (reference.m_pFGLeg) { SetFGLeg(dynamic_cast<Leg *>(reference.m_pFGLeg->Clone())); }
+    if (reference.m_pFGArm) { SetFGArm(dynamic_cast<Arm *>(reference.m_pFGArm->Clone())); }
 
 	m_LookToAimRatio = reference.m_LookToAimRatio;
 

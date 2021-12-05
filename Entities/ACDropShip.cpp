@@ -71,31 +71,21 @@ int ACDropShip::Create()
 // Description:     Creates a ACDropShip to be identical to another, by deep copy.
 
 int ACDropShip::Create(const ACDropShip &reference) {
-    if (reference.m_pRThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRThruster->GetUniqueID());
-        SetRightThruster(dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone()));
-    }
-    if (reference.m_pLThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLThruster->GetUniqueID());
-        SetLeftThruster(dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone()));
-    }
-    if (reference.m_pURThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pURThruster->GetUniqueID());
-        SetURightThruster(dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone()));
-    }
-    if (reference.m_pULThruster) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pULThruster->GetUniqueID());
-        SetULeftThruster(dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone()));
-    }
-    if (reference.m_pRHatch) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRHatch->GetUniqueID());
-        SetRightHatch(dynamic_cast<Attachable *>(reference.m_pRHatch->Clone()));
-    }
-    if (reference.m_pLHatch) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLHatch->GetUniqueID());
-        SetLeftHatch(dynamic_cast<Attachable *>(reference.m_pLHatch->Clone()));
-    }
+    if (reference.m_pRThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRThruster->GetUniqueID()); }
+    if (reference.m_pLThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLThruster->GetUniqueID()); }
+    if (reference.m_pURThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pURThruster->GetUniqueID()); }
+    if (reference.m_pULThruster) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pULThruster->GetUniqueID()); }
+    if (reference.m_pRHatch) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pRHatch->GetUniqueID()); }
+    if (reference.m_pLHatch) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pLHatch->GetUniqueID()); }
+
     ACraft::Create(reference);
+
+    if (reference.m_pRThruster) { SetRightThruster(dynamic_cast<AEmitter *>(reference.m_pRThruster->Clone())); }
+    if (reference.m_pLThruster) { SetLeftThruster(dynamic_cast<AEmitter *>(reference.m_pLThruster->Clone())); }
+    if (reference.m_pURThruster) { SetURightThruster(dynamic_cast<AEmitter *>(reference.m_pURThruster->Clone())); }
+    if (reference.m_pULThruster) { SetULeftThruster(dynamic_cast<AEmitter *>(reference.m_pULThruster->Clone())); }
+    if (reference.m_pRHatch) { SetRightHatch(dynamic_cast<Attachable *>(reference.m_pRHatch->Clone())); }
+    if (reference.m_pLHatch) { SetLeftHatch(dynamic_cast<Attachable *>(reference.m_pLHatch->Clone())); }
 
     m_pBodyAG = dynamic_cast<AtomGroup *>(reference.m_pBodyAG->Clone());
     m_pBodyAG->SetOwner(this);

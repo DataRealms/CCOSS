@@ -216,7 +216,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New `ACraft` INI and Lua (R/W) property `ScuttleOnDeath` which can be used to disable the automatic self-destruct sequence when the craft's health drops down to zero.
 
 - New `Settings.ini` property `UnheldItemsHUDDisplayRange = numPixels` that hides the HUD of stranded items at a set distance. Default is 500 (25 meters).
-	Value of -1 or anything below means all HUDs will be hidden and the only indication an item can be picked up will be on the Actor's HUD when standing on top of it.
+	Value of -1 or anything below means all HUDs will be hidden and the only indication an item can be picked up will be on the `Actor`'s HUD when standing on top of it.
 	Value of 0 means there is no range limit and all items on Scene will display the pick-up HUD.
 	Valid range values are 1-1000, anything above will be considered as no range limit.
 
@@ -231,6 +231,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`BuyableMode = 0 // No restrictions` - item will appear in both lists as usual. Default value, does not need to be explicitly specified.
 	`BuyableMode = 1 // BuyMenu only` - item will not appear in any group in the object picker during the editing phase, but will be available to purchase from the buy menu.  
 	`BuyableMode = 2 // ObjectPicker only` - item will not appear in any tab in the buy menu when making an order, but will be available for placement from the object picker during editing phase.
+
+- New `MovableMan` Lua function, `KillAllTeamActors`, which kills all `Actor`s on the given `Team`.
 
 </details>
 

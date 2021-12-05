@@ -181,7 +181,7 @@ bool PresetMan::LoadAllDataModules() {
 		std::vector<std::filesystem::directory_entry> workingDirectoryFolders;
 		std::copy_if(std::filesystem::directory_iterator(System::GetWorkingDirectory()), std::filesystem::directory_iterator(), std::back_inserter(workingDirectoryFolders),
 			[](auto dirEntry){ return std::filesystem::is_directory(dirEntry); }
-        );
+		);
 		std::sort(workingDirectoryFolders.begin(), workingDirectoryFolders.end());
 
 		for (const std::filesystem::directory_entry &directoryEntry : workingDirectoryFolders) {

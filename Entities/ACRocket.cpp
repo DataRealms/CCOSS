@@ -56,6 +56,7 @@ void ACRocket::Clear()
         m_Paths[RIGHT][i].Terminate();
         m_Paths[LEFT][i].Terminate();
     }
+	m_MaxGimbalAngle = 0;
 }
 
 
@@ -132,6 +133,8 @@ int ACRocket::Create(const ACRocket &reference) {
         m_Paths[LEFT][i].Create(reference.m_Paths[LEFT][i]);
     }
 
+	m_MaxGimbalAngle = reference.m_MaxGimbalAngle;
+
     return 0;
 }
 
@@ -177,6 +180,9 @@ int ACRocket::ReadProperty(const std::string_view &propName, Reader &reader) {
         reader >> m_Paths[RIGHT][LOWERING];
     } else if (propName == "RaisingGearLimbPath") {
         reader >> m_Paths[RIGHT][RAISING];
+    } else if (propName == "MaxGimbalAngle") {
+        reader >> m_MaxGimbalAngle;
+       m_MaxGimbalAngle *= (c_PI / 180.0F);
     } else {
         return ACraft::ReadProperty(propName, reader);
     }
@@ -221,6 +227,8 @@ int ACRocket::Save(Writer &writer) const
     writer << m_Paths[RIGHT][LOWERING];
     writer.NewProperty("RaisingGearLimbPath");
     writer << m_Paths[RIGHT][RAISING];
+    writer.NewProperty("MaxGimbalAngle");
+	writer << m_MaxGimbalAngle / (c_PI / 180.0F);
 
     return 0;
 }
@@ -481,6 +489,9 @@ void ACRocket::Update()
 
     if ((m_Status == STABLE || m_Status == UNSTABLE) && !m_Controller.IsDisabled()) {
 		if (m_pMThruster) { 
+			// Gimbal system: Stabilize the rocket automatically with a tilting thruster.
+			if (m_MaxGimbalAngle) { m_pMThruster->SetInheritedRotAngleOffset(std::sin(m_Rotation.GetRadAngle()) * m_MaxGimbalAngle - c_HalfPI); }
+
 			if (m_Controller.IsState(MOVE_UP) || m_Controller.IsState(AIM_UP)) {
 				if (!m_pMThruster->IsEmitting()) {
 					m_pMThruster->TriggerBurst();

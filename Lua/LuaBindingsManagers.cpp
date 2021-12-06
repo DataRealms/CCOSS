@@ -301,8 +301,8 @@ namespace RTE {
 		.def("ShortestDistance", &SceneMan::ShortestDistance)
 		.def("ObscuredPoint", (bool (SceneMan::*)(Vector &, int))&SceneMan::ObscuredPoint)//, out_value(_2))
 		.def("ObscuredPoint", (bool (SceneMan::*)(int, int, int))&SceneMan::ObscuredPoint)
-		.def("AddSceneObject", &SceneMan::AddSceneObject)
-		.def("AddTerrainObject", &SceneMan::AddTerrainObject)
+		.def("AddSceneObject", &SceneMan::AddSceneObject, luabind::adopt(_2))
+		.def("AddTerrainObject", &SceneMan::AddTerrainObject, luabind::adopt(_2))
 		.def("CheckAndRemoveOrphans", (int (SceneMan::*)(int, int, int, int, bool))&SceneMan::RemoveOrphans);
 	}
 

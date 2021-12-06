@@ -73,6 +73,8 @@ public:
     friend class AreaEditorGUI;
     friend class AreaPickerGUI;
 
+	friend struct EntityLuaBindings;
+
     //////////////////////////////////////////////////////////////////////////////////////////
     // Public member variable, method and friend function declarations
 
@@ -134,6 +136,13 @@ public:
     // Return value:    Whether the Box was successfully added or not.
 
 		bool AddBox(const Box &newBox);
+
+        /// <summary>
+        /// Removes the first Box in the Area that has the same Corner, Width and Height of the passed-in Box.
+        /// </summary>
+        /// <param name="boxToRemove">A Box whose values are used to determine what Box to remove.</param>
+        /// <returns>Whether or not a Box was removed.</returns>
+        bool RemoveBox(const Box &boxToRemove);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////

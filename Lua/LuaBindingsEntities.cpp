@@ -1030,6 +1030,7 @@ namespace RTE {
 		.def("RetrieveResidentBrains", &Scene::RetrieveResidentBrains)
 		.def("GetResidentBrain", &Scene::GetResidentBrain)
 		.def("SetResidentBrain", &Scene::SetResidentBrain)
+		.def_readwrite("Areas", &Scene::m_AreaList, luabind::return_stl_iterator)
 		.def("SetArea", &Scene::SetArea)
 		.def("HasArea", &Scene::HasArea)
 		.def("GetArea", &Scene::GetArea)
@@ -1061,7 +1062,9 @@ namespace RTE {
 		.property("Name", &Scene::Area::GetName)
 
 		.def("Reset", &Scene::Area::Reset)
+		.def_readwrite("Boxes", &Scene::Area::m_BoxList, luabind::return_stl_iterator)
 		.def("AddBox", &Scene::Area::AddBox)
+		.def("RemoveBox", &Scene::Area::RemoveBox)
 		.def("HasNoArea", &Scene::Area::HasNoArea)
 		.def("IsInside", &Scene::Area::IsInside)
 		.def("IsInsideX", &Scene::Area::IsInsideX)

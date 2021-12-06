@@ -232,9 +232,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`BuyableMode = 1 // BuyMenu only` - item will not appear in any group in the object picker during the editing phase, but will be available to purchase from the buy menu.  
 	`BuyableMode = 2 // ObjectPicker only` - item will not appear in any tab in the buy menu when making an order, but will be available for placement from the object picker during editing phase.
 
-- New `MovableMan` Lua function, `KillAllTeamActors`, which kills all `Actor`s on the given `Team`.
+- New `MovableMan` Lua function `KillAllTeamActors`, which kills all `Actor`s on the given `Team`.
 
 - New `ACRocket` INI property `MaxGimbalAngle`, which enables automatic stabilization via tilting of the main engine.
+
+- Added Lua bindings for `scene.Areas` and `area.Boxes` that you can iterate through to get all the `Areas` in a `Scene` and all the `Boxes` in an `Area`.
+
+- Added `Area` Lua function `area:RemoveBox(boxToRemove)` which removes the given `Box` from the `Area`. Note that this removal is done by comparing the `Box`'s `Corner`, `Width` and `Height`, so you're actually removing the first `Box` that matches the passed-in boxToRemove.
 
 </details>
 

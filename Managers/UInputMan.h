@@ -795,6 +795,10 @@ namespace RTE {
 		// Disallow the use of some implicit methods.
 		UInputMan(const UInputMan &reference) = delete;
 		UInputMan & operator=(const UInputMan &rhs) = delete;
+
+#ifdef __unix__
+		static void HandleAllegroMouseInput(void);
+#endif
 	};
 }
 #endif

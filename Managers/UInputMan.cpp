@@ -16,6 +16,9 @@
 #endif
 #ifdef __unix__
 #include <fcntl.h>
+#include "allegro/internal/aintern.h"
+#include "allegro/platform/aintunix.h"
+#include "xalleg.h"
 #endif
 
 namespace RTE {
@@ -31,6 +34,7 @@ namespace RTE {
 
 	JOYSTICK_INFO UInputMan::s_PrevJoystickStates[Players::MaxPlayerCount];
 	JOYSTICK_INFO UInputMan::s_ChangedJoystickStates[Players::MaxPlayerCount];
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -114,6 +118,9 @@ namespace RTE {
 
 		if (install_joystick(JOY_TYPE_AUTODETECT) != 0) { RTEAbort("Failed to initialize joysticks!"); }
 		poll_joystick();
+
+		_xwin_input_handler = HandleAllegroMouseInput;
+		_xwin.hw_cursor_ok = TRUE;
 
 		return 0;
 	}
@@ -730,6 +737,7 @@ namespace RTE {
 		HandleSpecialInput();
 		StoreInputEventsForNextUpdate();
 
+
 		return 0;
 	}
 
@@ -981,4 +989,51 @@ namespace RTE {
 			}
 		}
 	}
+
+#ifdef __unix__
+	void UInputMan::HandleAllegroMouseInput() {
+		if (_xwin.display == 0)
+			return;
+
+		int nEvents = XPending(_xwin.display);
+		std::vector<XEvent> events;
+		events.reserve(nEvents + 10);
+		for (int i = 0; i < XPending(_xwin.display); ++i) {
+			XEvent e;
+			XNextEvent(_xwin.display, &e);
+			events.push_back(e);
+		}
+		static int mousePrevX = 0;
+		static int mousePrevY = 0;
+		int dx = 0;
+		int dy = 0;
+		int n = 0;
+		for (auto event = events.rbegin(); event < events.rend(); ++event) {
+			switch (event->type) {
+				case MotionNotify: {
+					dx = event->xmotion.x - mousePrevX;
+					dy = event->xmotion.y - mousePrevY;
+					_xwin_mouse_interrupt(dx, dy, 0, 0, mouse_b);
+					_mouse_x = mousePrevX = !g_UInputMan.m_TrapMousePos ? event->xmotion.x : _xwin.window_width / 2;
+					_mouse_y = mousePrevY = !g_UInputMan.m_TrapMousePos ? event->xmotion.y : _xwin.window_height / 2;
+					_xwin.mouse_warped = 1;
+
+					if (g_UInputMan.m_TrapMousePos) {
+						XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, _xwin.window_width / 2, _xwin.window_height / 2);
+					}
+					++n;
+				} break;
+
+				default:
+					XPutBackEvent(_xwin.display, &(*event));
+					break;
+			}
+		}
+		XFlush(_xwin.display);
+		_xwin.mouse_warped = 0;
+		_xwin_private_handle_input();
+		_mouse_x = mouse_x;
+		_mouse_y = mouse_y;
+	}
+#endif
 }

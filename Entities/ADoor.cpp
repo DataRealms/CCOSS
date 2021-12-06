@@ -232,11 +232,11 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ADoor::DrawDoorMaterial() {
+	void ADoor::DrawDoorMaterial(bool disallowErasingMaterialBeforeDrawing) {
 		if (!m_Door || m_DoorMaterialTempErased || !g_SceneMan.GetTerrain() || !g_SceneMan.GetTerrain()->GetMaterialBitmap()) {
 			return;
 		}
-		if (m_DoorMaterialDrawn) { EraseDoorMaterial(false); }
+		if (!disallowErasingMaterialBeforeDrawing && m_DoorMaterialDrawn) { EraseDoorMaterial(false); }
 
 		m_Door->Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), Vector(), g_DrawDoor, true);
 		m_LastDoorMaterialPos = m_Door->GetPos();
@@ -257,6 +257,7 @@ namespace RTE {
 		int fillX = m_LastDoorMaterialPos.GetFloorIntX();
 		int fillY = m_LastDoorMaterialPos.GetFloorIntY();
 
+		DrawDoorMaterial(true);
 		if (g_SceneMan.GetTerrMatter(fillX, fillY) != g_MaterialAir) {
 			floodfill(g_SceneMan.GetTerrain()->GetMaterialBitmap(), fillX, fillY, g_MaterialAir);
 			if (m_Door && updateMaterialArea) { g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(m_Door->GetBoundingBox()); }

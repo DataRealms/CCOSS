@@ -242,6 +242,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newPitch">The new pitch sounds in this SoundContainer should be played at. Limited between 0.125 and 8 (8 octaves up or down).</param>
 		void SetPitch(float newPitch) { m_Pitch = std::clamp(newPitch, 0.125F, 8.0F); if (IsBeingPlayed()) { g_AudioMan.ChangeSoundContainerPlayingChannelsPitch(this); } }
+
+		/// <summary>
+		/// Gets the pitch variation the sounds in this SoundContainer are played at.
+		/// </summary>
+		/// <returns>The pitch variation the sounds in this SoundContainer are played at.</returns>
+		float GetPitchVariation() const { return m_PitchVariation; }
 #pragma endregion
 
 #pragma region Playback Controls
@@ -335,6 +341,7 @@ namespace RTE {
 		
 		Vector m_Pos; //!< The current position of this SoundContainer's sounds.
 		float m_Pitch; //!< The current natural pitch of this SoundContainer's sounds.
+		float m_PitchVariation; //!< The randomized pitch variation of this SoundContainer's sounds. 1 means the sound will vary a full octave both ways.
 		float m_Volume; //!< The current natural volume of this SoundContainer's sounds.
 
 		/// <summary>

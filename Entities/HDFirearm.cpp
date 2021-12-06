@@ -1001,6 +1001,8 @@ void HDFirearm::Update()
             }
 			if (m_FireEchoSound) { m_FireEchoSound->Play(m_Pos); }
         }
+
+		if (m_Loudness > 0) { g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, m_Loudness)); }
     } else {
         m_Recoiled = false;
 		// TODO: don't use arbitrary numbers? (see Arm.cpp)

@@ -373,7 +373,6 @@ void HeldDevice::Activate()
         m_ActivationTimer.Reset();
         // Register alarming event!
         if (m_Loudness > 0)
-            g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, m_Loudness));
     }
     m_Activated = true;
 }

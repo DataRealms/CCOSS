@@ -1110,13 +1110,13 @@ bool Actor::ParticlePenetration(HitData &hd) {
     if (hitor->GetApplyWoundBurstDamageOnCollision()) { damageToAdd += m_pEntryWound->GetBurstDamage() * hitor->WoundDamageMultiplier(); }
 
 	if (damageToAdd != 0) { m_Health = std::min(m_Health - (damageToAdd * m_DamageMultiplier), m_MaxHealth); }
-    if ((penetrated || damageToAdd != 0) && m_Perceptiveness > 0) {
-        Vector extruded(hd.HitVel[HITOR]);
-        extruded.SetMagnitude(m_CharHeight);
-        extruded = m_Pos - extruded;
-        g_SceneMan.WrapPosition(extruded);
-        AlarmPoint(extruded);
-    }
+	if ((penetrated || damageToAdd != 0) && m_Perceptiveness > 0 && m_Health > 0) {
+		Vector extruded(hd.HitVel[HITOR]);
+		extruded.SetMagnitude(m_CharHeight);
+		extruded = m_Pos - extruded;
+		g_SceneMan.WrapPosition(extruded);
+		AlarmPoint(extruded);
+	}
 
     return penetrated;
 }
@@ -1582,22 +1582,17 @@ void Actor::Update()
             m_FlashWhiteMS = 0;
     }
 
-    // If this is the actual brain of any player, flash that player's screen when he's hurt and dead
-	if (g_SettingsMan.FlashOnBrainDamage())
-	{
-		int brainOfPlayer = g_ActivityMan.GetActivity()->IsBrainOfWhichPlayer(this);
-		if (brainOfPlayer != Players::NoPlayer && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer))
-		{
-			// Got Hurt
-			if (m_PrevHealth - m_Health > 1.5)
+	int brainOfPlayer = g_ActivityMan.GetActivity()->IsBrainOfWhichPlayer(this);
+	if (brainOfPlayer != Players::NoPlayer && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer)) {
+		if (m_PrevHealth - m_Health > 1.5F) {
+			// If this is a brain that's under attack, broadcast an alarm event so that the enemy AI won't dawdle in trying to kill it.
+			g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, 0.5F));
+			if (g_SettingsMan.FlashOnBrainDamage()) {
 				g_FrameMan.FlashScreen(g_ActivityMan.GetActivity()->ScreenOfPlayer(brainOfPlayer), g_RedColor, 10);
-
-			// Croaked.. flash for a longer period
-			if (m_ToDelete || m_Status == DEAD)
-				g_FrameMan.FlashScreen(g_ActivityMan.GetActivity()->ScreenOfPlayer(brainOfPlayer), g_WhiteColor, 500);
-
-			// If this is a brain, broadcast alarm message that enemy AI will pick up on so they don't dawdle in trying to kill it
-			g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, 0.5));
+			}
+		}
+		if ((m_ToDelete || m_Status == DEAD) && g_SettingsMan.FlashOnBrainDamage()) {
+			g_FrameMan.FlashScreen(g_ActivityMan.GetActivity()->ScreenOfPlayer(brainOfPlayer), g_WhiteColor, 500);
 		}
 	}
 

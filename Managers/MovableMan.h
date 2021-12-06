@@ -16,6 +16,7 @@
 
 #include "Serializable.h"
 #include "Entity.h"
+#include "FrameMan.h"
 #include "SceneMan.h"
 #include "LuaMan.h"
 #include "Singleton.h"
@@ -39,11 +40,11 @@ class SceneLayer;
 // Parent(s):       None.
 // Class history:   10/3/2008  AlarmEvent created.
 
-struct AlarmEvent
-{
-    AlarmEvent() { m_ScenePos.Reset(); m_Team = Activity::NoTeam; m_Range = 1; }
-    AlarmEvent(const Vector &pos, int team = Activity::NoTeam, float range = 1) { m_ScenePos = pos; m_Team = (Activity::Teams)team; m_Range = range; }
-    
+struct AlarmEvent {
+	AlarmEvent() { m_ScenePos.Reset(); m_Team = Activity::NoTeam; m_Range = 1.0F; }
+	// TODO: Stop relying on screen width for this shit!
+	AlarmEvent(const Vector &pos, int team = Activity::NoTeam, float range = 1.0F) { m_ScenePos = pos; m_Team = (Activity::Teams)team; m_Range = range * g_FrameMan.GetPlayerScreenWidth() * 0.51F; }
+
     // Absolute position in the scene where this occurred
     Vector m_ScenePos;
     // The team of whatever object that caused this event

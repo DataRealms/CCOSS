@@ -797,6 +797,9 @@ namespace RTE {
 		UInputMan & operator=(const UInputMan &rhs) = delete;
 
 #ifdef __unix__
+		/// <summary>
+		/// Mouse input handler to circumvent the input drops that allegro does regularly.
+		/// </summary>
 		static void HandleAllegroMouseInput(void);
 #endif
 	};

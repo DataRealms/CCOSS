@@ -368,12 +368,7 @@ bool HeldDevice::CollideAtPoint(HitData &hd)
 
 void HeldDevice::Activate()
 {
-    if (!m_Activated)
-    {
-        m_ActivationTimer.Reset();
-        // Register alarming event!
-        if (m_Loudness > 0)
-    }
+    if (!m_Activated) { m_ActivationTimer.Reset(); }
     m_Activated = true;
 }
 

@@ -118,7 +118,9 @@ namespace RTE {
 		if (install_joystick(JOY_TYPE_AUTODETECT) != 0) { RTEAbort("Failed to initialize joysticks!"); }
 		poll_joystick();
 
+#ifdef __unix__
 		_xwin_input_handler = HandleAllegroMouseInput;
+#endif
 
 		return 0;
 	}

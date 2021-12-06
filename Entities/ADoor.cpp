@@ -36,6 +36,8 @@ namespace RTE {
 		m_DrawMaterialLayerWhenClosed = true;
 		m_DoorMaterialID = g_MaterialDoor;
 		m_DoorMaterialDrawn = false;
+		m_DoorMaterialRedrawTimer.Reset();
+		m_DoorMaterialRedrawTimer.SetSimTimeLimitMS(10000);
 		m_DoorMaterialTempErased = false;
 		m_LastDoorMaterialPos.Reset();
 		m_DoorMoveStartSound = nullptr;
@@ -369,9 +371,14 @@ namespace RTE {
 
 	void ADoor::Update() {
 
-		if (m_Door && m_Door->IsAttached()) {
+		if (m_Door) {
 			if (m_DoorState != STOPPED && m_SensorTimer.IsPastSimMS(m_SensorInterval)) { UpdateSensors(); }
 			UpdateDoorAttachableActions();
+
+			if (((m_DrawMaterialLayerWhenOpen && m_DoorState == OPEN) || (m_DrawMaterialLayerWhenClosed && m_DoorState == CLOSED) || ((m_DrawMaterialLayerWhenOpen || m_DrawMaterialLayerWhenClosed) && m_DoorState == STOPPED)) && m_DoorMaterialRedrawTimer.IsPastSimTimeLimit()) {
+				DrawDoorMaterial(true);
+				m_DoorMaterialRedrawTimer.Reset();
+			}
 		}
 
 		Actor::Update();

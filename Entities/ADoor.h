@@ -231,6 +231,7 @@ namespace RTE {
 
 		unsigned char m_DoorMaterialID; //!< The ID of the door material drawn to the terrain.
 		bool m_DoorMaterialDrawn; //!< Whether the door material is currently drawn onto the material layer.
+		Timer m_DoorMaterialRedrawTimer; //!< Timer for redrawing the door material layer from time-to-time.
 		bool m_DoorMaterialTempErased; //!< Whether the drawing override is enabled and the door material is erased to allow better pathfinding.
 		Vector m_LastDoorMaterialPos; //!< The position the door attachable had when its material was drawn to the material bitmap. This is used to erase the previous material representation.
 

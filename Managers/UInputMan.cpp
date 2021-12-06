@@ -1002,11 +1002,12 @@ namespace RTE {
 			XNextEvent(_xwin.display, &e);
 			events.push_back(e);
 		}
+
 		static int mousePrevX = 0;
 		static int mousePrevY = 0;
 		int dx = 0;
 		int dy = 0;
-		int n = 0;
+
 		for (auto event = events.rbegin(); event < events.rend(); ++event) {
 			switch (event->type) {
 				case MotionNotify: {
@@ -1020,7 +1021,6 @@ namespace RTE {
 					if (g_UInputMan.m_TrapMousePos) {
 						XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, _xwin.window_width / 2, _xwin.window_height / 2);
 					}
-					++n;
 				} break;
 
 				default:
@@ -1028,9 +1028,12 @@ namespace RTE {
 					break;
 			}
 		}
+
 		XFlush(_xwin.display);
+
 		_xwin.mouse_warped = 0;
 		_xwin_private_handle_input();
+
 		_mouse_x = mouse_x;
 		_mouse_y = mouse_y;
 	}

@@ -662,6 +662,7 @@ namespace RTE {
 
 			delta[X] = std::floor(position.m_X + segTraj.m_X) - intPos[X];
 			delta[Y] = std::floor(position.m_Y + segTraj.m_Y) - intPos[Y];
+			RTEAssert(std::abs(delta[X]) < 2500 && std::abs(delta[Y] < 2500), "Extremely long difference trajectory found during Atom::Travel. Owner is " + m_OwnerMO->GetPresetName() + ", with Vel (" + std::to_string(velocity.GetX()) + ", " + std::to_string(velocity.GetY()) + ").");
 
 			//segProgress = 0.0F;
 			//delta2[X] = 0;

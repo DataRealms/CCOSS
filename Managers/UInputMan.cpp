@@ -35,7 +35,6 @@ namespace RTE {
 	JOYSTICK_INFO UInputMan::s_PrevJoystickStates[Players::MaxPlayerCount];
 	JOYSTICK_INFO UInputMan::s_ChangedJoystickStates[Players::MaxPlayerCount];
 
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::Clear() {
@@ -120,7 +119,6 @@ namespace RTE {
 		poll_joystick();
 
 		_xwin_input_handler = HandleAllegroMouseInput;
-		_xwin.hw_cursor_ok = TRUE;
 
 		return 0;
 	}
@@ -737,7 +735,6 @@ namespace RTE {
 		HandleSpecialInput();
 		StoreInputEventsForNextUpdate();
 
-
 		return 0;
 	}
 
@@ -989,6 +986,8 @@ namespace RTE {
 			}
 		}
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #ifdef __unix__
 	void UInputMan::HandleAllegroMouseInput() {

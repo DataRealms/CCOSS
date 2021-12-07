@@ -801,7 +801,7 @@ namespace RTE {
 		/// Mouse input handler to circumvent the input drops that allegro does regularly, by replacing and disabling the default warping behaviour.
 		/// Motion events that are generated while the handler is working are offset such that the allegro driver doesn't mess up the mickeys.
 		/// This also handles the centering warp for relative mouse motion.
-		/// Should be applied to _xwin_input_handler.
+		/// Should be applied to _xwin_input_handler. Might not run in the main thread, depending on how allegro was built.
 		/// </summary>
 		static void HandleAllegroMouseInput(void);
 

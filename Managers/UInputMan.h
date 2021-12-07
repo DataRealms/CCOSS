@@ -801,6 +801,17 @@ namespace RTE {
 		/// Mouse input handler to circumvent the input drops that allegro does regularly.
 		/// </summary>
 		static void HandleAllegroMouseInput(void);
+
+		/// <summary>
+		/// Position the mouse on the screen in window coordinates. Correctly generates MouseMotion events. Replaces position_mouse.
+		/// </summary>
+		/// <param name="x">
+		/// The x coordinate to warp to.
+		/// </param>
+		/// <param name="y">
+		/// The y coordinate to warp to.
+		/// </param>
+		void WarpMouse(int x, int y) const;
 #endif
 	};
 }

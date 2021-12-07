@@ -384,7 +384,11 @@ namespace RTE {
 	void UInputMan::SetMousePos(Vector &newPos, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
 		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
+#ifndef __unix__
 			position_mouse(static_cast<int>(newPos.GetX()), static_cast<int>(newPos.GetY()));
+#else
+			WarpMouse(newPos.m_X, newPos.m_Y);
+#endif
 		}
 	}
 
@@ -413,7 +417,11 @@ namespace RTE {
 	void UInputMan::ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
 		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
+#ifndef __unix__
 			position_mouse(Limit(mouse_x, x + width * g_FrameMan.GetResMultiplier(), x), Limit(mouse_y, y + height * g_FrameMan.GetResMultiplier(), y));
+#else
+			WarpMouse(Limit(mouse_x, x + width * g_FrameMan.GetResMultiplier(), x), Limit(mouse_y, y + height * g_FrameMan.GetResMultiplier(), y));
+#endif
 		}
 	}
 
@@ -1010,6 +1018,8 @@ namespace RTE {
 
 		static int mousePrevX = 0;
 		static int mousePrevY = 0;
+		mousePrevX = mouse_x;
+		mousePrevY = mouse_y;
 		int dx = 0;
 		int dy = 0;
 
@@ -1021,7 +1031,6 @@ namespace RTE {
 					_xwin_mouse_interrupt(dx, dy, 0, 0, mouse_b);
 					_mouse_x = mousePrevX = !g_UInputMan.m_TrapMousePos ? event->xmotion.x : _xwin.window_width / 2;
 					_mouse_y = mousePrevY = !g_UInputMan.m_TrapMousePos ? event->xmotion.y : _xwin.window_height / 2;
-					_xwin.mouse_warped = 1;
 
 					if (g_UInputMan.m_TrapMousePos) {
 						XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, _xwin.window_width / 2, _xwin.window_height / 2);
@@ -1046,6 +1055,13 @@ namespace RTE {
 
 		_mouse_x = mouse_x;
 		_mouse_y = mouse_y;
+	}
+
+	void UInputMan::WarpMouse(int x, int y) const {
+		_mouse_x = mouse_x = x;
+		_mouse_y = mouse_y = y;
+
+		XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, x, y);
 	}
 #endif
 }

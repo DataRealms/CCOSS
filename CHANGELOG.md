@@ -240,6 +240,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `Area` Lua function `area:RemoveBox(boxToRemove)` which removes the given `Box` from the `Area`. Note that this removal is done by comparing the `Box`'s `Corner`, `Width` and `Height`, so you're actually removing the first `Box` that matches the passed-in boxToRemove.
 
+- Added Lua binding for `AudioMan:StopMusic()`, which stops all playing music. `AudioMan:StopAll()` used to do this, but now it actually stops all sounds and music.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -445,6 +447,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed a bug where choosing `-Random-` as a player's tech and pressing start game had a 1 in (number of techs + 1) chance to crash the game.
 
 - Console error spam will no longer cripple performance over time.
+
+- `AudioMan:StopAll()` now actually stops all sounds, instead of just stopping music.
 
 </details>
 

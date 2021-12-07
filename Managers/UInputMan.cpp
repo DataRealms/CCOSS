@@ -720,19 +720,6 @@ namespace RTE {
 		int mickeyX;
 		int mickeyY;
 		get_mouse_mickeys(&mickeyX, &mickeyY);
-		static std::vector<std::pair<std::pair<int, int>,std::pair<int,int>>> mickeys(10);
-		static int nMickeys = 0;
-		mickeys[nMickeys] = {{mouse_x, mouse_y},{mickeyX, mickeyY}};
-		++nMickeys;
-		nMickeys %= 10;
-		if(mickeyX > 100 && mickeyY > 100) {
-			for (auto &mickey : mickeys){
-				std::cout << mickey.first.first << " : " << mickey.second.first << " | " << mickey.first.second << " : " << mickey.second.second << std::endl;
-			}
-
-			std::cout << "(" << mickeyX << " : " << mouse_x << " : " << _mouse_x << " | " << \
-				mickeyY << " : " << mouse_y << " : " << _mouse_y << ") hw: " << _xwin.hw_cursor_ok << " t: " << m_TrapMousePos << std::endl;
-		}
 
 		m_RawMouseMovement.SetXY(mickeyX, mickeyY);
 

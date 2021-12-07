@@ -1039,14 +1039,13 @@ namespace RTE {
 		_xwin.mouse_warped = 0;
 		_xwin_private_handle_input();
 
-		if(g_UInputMan.m_TrapMousePos){
+		if (g_UInputMan.m_TrapMousePos) {
 			mouse_x = _xwin.window_width / 2;
 			mouse_y = _xwin.window_height / 2;
 		}
 
 		_mouse_x = mouse_x;
 		_mouse_y = mouse_y;
-
 	}
 #endif
 }

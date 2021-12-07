@@ -798,13 +798,16 @@ namespace RTE {
 
 #ifdef __unix__
 		/// <summary>
-		/// Mouse input handler to circumvent the input drops that allegro does regularly. Should be applied to _xwin_input_handler.
+		/// Mouse input handler to circumvent the input drops that allegro does regularly, by replacing and disabling the default warping behaviour.
+		/// Motion events that are generated while the handler is working are offset such that the allegro driver doesn't mess up the mickeys.
+		/// This also handles the centering warp for relative mouse motion.
+		/// Should be applied to _xwin_input_handler.
 		/// </summary>
 		static void HandleAllegroMouseInput(void);
 
 		/// <summary>
 		/// Position the mouse on the screen in window coordinates. Generates MouseMotion events iff the requested position is different from the actual mouse position.
-		/// Replaces position_mouse.
+		/// Replaces position_mouse and sets the allegro internal mouse position to the requested x,y.
 		/// </summary>
 		/// <param name="x">
 		/// The x coordinate to warp to.

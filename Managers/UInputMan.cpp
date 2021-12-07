@@ -1065,7 +1065,6 @@ namespace RTE {
 		}
 		_mouse_x = mouse_x = x;
 		_mouse_y = mouse_y = y;
-
 	}
 #endif
 }

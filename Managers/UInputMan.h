@@ -803,7 +803,7 @@ namespace RTE {
 		static void HandleAllegroMouseInput(void);
 
 		/// <summary>
-		/// Position the mouse on the screen in window coordinates. Correctly generates MouseMotion events. Replaces position_mouse.
+		/// Position the mouse on the screen in window coordinates. Generates MouseMotion events iff the requested position is different from the actual mouse position. Replaces position_mouse.
 		/// </summary>
 		/// <param name="x">
 		/// The x coordinate to warp to.

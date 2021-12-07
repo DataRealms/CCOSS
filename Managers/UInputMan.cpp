@@ -1023,17 +1023,19 @@ namespace RTE {
 		int dx = 0;
 		int dy = 0;
 
+		int halfResX = _xwin.window_width / 2;
+		int halfResY = _xwin.window_height / 2;
 		for (auto event = events.rbegin(); event < events.rend(); ++event) {
 			switch (event->type) {
 				case MotionNotify: {
 					dx = event->xmotion.x - mousePrevX;
 					dy = event->xmotion.y - mousePrevY;
 					_xwin_mouse_interrupt(dx, dy, 0, 0, mouse_b);
-					_mouse_x = mousePrevX = !g_UInputMan.m_TrapMousePos ? event->xmotion.x : _xwin.window_width / 2;
-					_mouse_y = mousePrevY = !g_UInputMan.m_TrapMousePos ? event->xmotion.y : _xwin.window_height / 2;
+					_mouse_x = mousePrevX = !g_UInputMan.m_TrapMousePos ? event->xmotion.x : halfResX;
+					_mouse_y = mousePrevY = !g_UInputMan.m_TrapMousePos ? event->xmotion.y : halfResY;
 
-					if (g_UInputMan.m_TrapMousePos) {
-						XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, _xwin.window_width / 2, _xwin.window_height / 2);
+					if (g_UInputMan.m_TrapMousePos && (dx != 0 || dy != 0)) {
+						XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, halfResX, halfResY);
 					}
 				} break;
 
@@ -1058,10 +1060,12 @@ namespace RTE {
 	}
 
 	void UInputMan::WarpMouse(int x, int y) const {
+		if (mouse_x != x || mouse_y != y) {
+			XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, x, y);
+		}
 		_mouse_x = mouse_x = x;
 		_mouse_y = mouse_y = y;
 
-		XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, x, y);
 	}
 #endif
 }

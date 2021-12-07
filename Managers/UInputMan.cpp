@@ -720,6 +720,20 @@ namespace RTE {
 		int mickeyX;
 		int mickeyY;
 		get_mouse_mickeys(&mickeyX, &mickeyY);
+		static std::vector<std::pair<std::pair<int, int>,std::pair<int,int>>> mickeys(10);
+		static int nMickeys = 0;
+		mickeys[nMickeys] = {{mouse_x, mouse_y},{mickeyX, mickeyY}};
+		++nMickeys;
+		nMickeys %= 10;
+		if(mickeyX > 100 && mickeyY > 100) {
+			for (auto &mickey : mickeys){
+				std::cout << mickey.first.first << " : " << mickey.second.first << " | " << mickey.first.second << " : " << mickey.second.second << std::endl;
+			}
+
+			std::cout << "(" << mickeyX << " : " << mouse_x << " : " << _mouse_x << " | " << \
+				mickeyY << " : " << mouse_y << " : " << _mouse_y << ") hw: " << _xwin.hw_cursor_ok << " t: " << m_TrapMousePos << std::endl;
+		}
+
 		m_RawMouseMovement.SetXY(mickeyX, mickeyY);
 
 		// TODO: Add sensitivity slider to settings menu
@@ -875,7 +889,7 @@ namespace RTE {
 			if (!m_DisableMouseMoving && !IsInMultiplayerMode()) {
 				if (m_TrapMousePos) {
 					// Trap the (invisible) mouse cursor in the middle of the screen, so it doesn't fly out in windowed mode and some other window gets clicked
-					position_mouse(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
+					//position_mouse(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
 				} else if (g_ActivityMan.IsInActivity()) {
 					// The mouse cursor is visible and can move about the screen/window, but it should still be contained within the mouse player's part of the window
 					ForceMouseWithinPlayerScreen(mousePlayer);
@@ -1023,6 +1037,7 @@ namespace RTE {
 					if (g_UInputMan.m_TrapMousePos) {
 						XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, _xwin.window_width / 2, _xwin.window_height / 2);
 					}
+
 				} break;
 
 				default:

@@ -1059,6 +1059,8 @@ namespace RTE {
 		_mouse_y = mouse_y;
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void UInputMan::WarpMouse(int x, int y) const {
 		if (mouse_x != x || mouse_y != y) {
 			XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, x, y);

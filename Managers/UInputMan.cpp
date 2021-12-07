@@ -889,7 +889,7 @@ namespace RTE {
 			if (!m_DisableMouseMoving && !IsInMultiplayerMode()) {
 				if (m_TrapMousePos) {
 					// Trap the (invisible) mouse cursor in the middle of the screen, so it doesn't fly out in windowed mode and some other window gets clicked
-					//position_mouse(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
+					position_mouse(_xwin.window_width / 2, _xwin.window_height / 2);
 				} else if (g_ActivityMan.IsInActivity()) {
 					// The mouse cursor is visible and can move about the screen/window, but it should still be contained within the mouse player's part of the window
 					ForceMouseWithinPlayerScreen(mousePlayer);

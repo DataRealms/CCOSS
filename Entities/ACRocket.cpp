@@ -181,8 +181,8 @@ int ACRocket::ReadProperty(const std::string_view &propName, Reader &reader) {
     } else if (propName == "RaisingGearLimbPath") {
         reader >> m_Paths[RIGHT][RAISING];
     } else if (propName == "MaxGimbalAngle") {
-        reader >> m_MaxGimbalAngle;
-       m_MaxGimbalAngle *= (c_PI / 180.0F);
+		reader >> m_MaxGimbalAngle;
+		m_MaxGimbalAngle *= (c_PI / 180.0F);
     } else {
         return ACraft::ReadProperty(propName, reader);
     }

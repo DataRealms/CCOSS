@@ -220,6 +220,7 @@ namespace RTE {
 		.property("HolsterOffset", &Actor::GetHolsterOffset, &Actor::SetHolsterOffset)
 		.property("ViewPoint", &Actor::GetViewPoint, &Actor::SetViewPoint)
 		.property("ItemInReach", &Actor::GetItemInReach, &Actor::SetItemInReach)
+		.property("SharpAimProgress", &Actor::GetSharpAimProgress)
 		.property("Height", &Actor::GetHeight)
 		.property("AIMode", &Actor::GetAIMode, &Actor::SetAIMode)
 		.property("DeploymentID", &Actor::GetDeploymentID)
@@ -649,6 +650,7 @@ namespace RTE {
 		.property("HasPickupLimitations", &HeldDevice::HasPickupLimitations)
 		.property("UnPickupable", &HeldDevice::IsUnPickupable, &HeldDevice::SetUnPickupable)
 		.property("GripStrengthMultiplier", &HeldDevice::GetGripStrengthMultiplier, &HeldDevice::SetGripStrengthMultiplier)
+		.property("Supported", &HeldDevice::GetSupported, &HeldDevice::SetSupported)
 
 		.def("IsWeapon", &HeldDevice::IsWeapon)
 		.def("IsTool", &HeldDevice::IsTool)
@@ -667,8 +669,7 @@ namespace RTE {
 		.def("IsFull", &HeldDevice::IsFull)
 		.def("IsPickupableBy", &HeldDevice::IsPickupableBy)
 		.def("AddPickupableByPresetName", &HeldDevice::AddPickupableByPresetName)
-		.def("RemovePickupableByPresetName", &HeldDevice::RemovePickupableByPresetName)
-		.def("SetSupported", &HeldDevice::SetSupported);
+		.def("RemovePickupableByPresetName", &HeldDevice::RemovePickupableByPresetName);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

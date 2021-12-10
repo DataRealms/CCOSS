@@ -256,7 +256,7 @@ ClassInfoGetters;
 	/// Gets whether this HeldDevice is currently supported by a second hand.
 	/// </summary>
 	/// <returns>Whether the device is supported or not.</returns>
-	bool GetSupported() { return m_Supported; }
+	bool GetSupported() const { return m_Supported; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

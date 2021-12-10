@@ -667,6 +667,7 @@ namespace RTE {
 		.def("DoneReloading", &HeldDevice::DoneReloading)
 		.def("NeedsReloading", &HeldDevice::NeedsReloading)
 		.def("IsFull", &HeldDevice::IsFull)
+		.def("IsEmpty", &HeldDevice::IsEmpty)
 		.def("IsPickupableBy", &HeldDevice::IsPickupableBy)
 		.def("AddPickupableByPresetName", &HeldDevice::AddPickupableByPresetName)
 		.def("RemovePickupableByPresetName", &HeldDevice::RemovePickupableByPresetName);

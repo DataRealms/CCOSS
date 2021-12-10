@@ -529,7 +529,13 @@ ClassInfoGetters;
 // Arguments:       None.
 // Return value:    Whetehr magazine is full or not.
 
-    virtual bool IsFull() const { return true; }
+	virtual bool IsFull() const { return true; }
+
+	/// <summary>
+	/// Tells whether this HeldDevice is currently empty of ammo.
+	/// </summary>
+	/// <returns>Whether this HeldDevice is empty.</returns>
+	virtual bool IsEmpty() const { return false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

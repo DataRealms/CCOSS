@@ -109,6 +109,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	float Controller::GetDigitalAimSpeed() const {
+		return m_Player != Players::NoPlayer ? g_UInputMan.GetControlScheme(m_Player)->GetDigitalAimSpeed() : 1.0F;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool Controller::IsMouseControlled() const {
 		return m_Player != Players::NoPlayer && g_UInputMan.GetControlScheme(m_Player)->GetDevice() == DEVICE_MOUSE_KEYB;
 	}

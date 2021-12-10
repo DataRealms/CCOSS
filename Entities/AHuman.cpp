@@ -3257,30 +3257,18 @@ void AHuman::Update()
     ////////////////////////////////////
     // Aiming
 
-    if (m_Controller.IsState(AIM_UP) && m_Status != INACTIVE)
-    {
-// TODO: Improve these!")
-        // Set the timer to some base number so we don't
-        // get a sluggish feeling at start of aim
-        if (m_AimState != AIMUP)
-            m_AimTmr.SetElapsedSimTimeMS(150);
-        m_AimState = AIMUP; 
-        m_AimAngle += m_Controller.IsState(AIM_SHARP) ?
-                      std::min(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
-                      std::min(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
-        if (m_AimAngle > m_AimRange)
-            m_AimAngle = m_AimRange;
-    }
-    else if (m_Controller.IsState(AIM_DOWN) && m_Status != INACTIVE)
-    {
-        // Set the timer to some base number so we don't
-        // get a sluggish feeling at start of aim
-        if (m_AimState != AIMDOWN)
-            m_AimTmr.SetElapsedSimTimeMS(150);
-        m_AimState = AIMDOWN;
-        m_AimAngle -= m_Controller.IsState(AIM_SHARP) ?
-                      std::min(m_AimTmr.GetElapsedSimTimeMS() * 0.00005, 0.05) :
-                      std::min(m_AimTmr.GetElapsedSimTimeMS() * 0.00015, 0.1);
+	if (m_Controller.IsState(AIM_UP) && m_Status != INACTIVE) {
+        // Set the timer to a base number so we don't get a sluggish feeling at start.
+		if (m_AimState != AIMUP) { m_AimTmr.SetElapsedSimTimeMS(m_AimState == AIMSTILL ? 150 : 300); }
+		m_AimState = AIMUP; 
+		m_AimAngle += m_Controller.IsState(AIM_SHARP) ? std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00005F, 0.05F) : std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00015F, 0.15F) * m_Controller.GetDigitalAimSpeed();
+		if (m_AimAngle > m_AimRange) { m_AimAngle = m_AimRange; }
+
+	} else if (m_Controller.IsState(AIM_DOWN) && m_Status != INACTIVE) {
+        // Set the timer to a base number so we don't get a sluggish feeling at start.
+		if (m_AimState != AIMDOWN) {m_AimTmr.SetElapsedSimTimeMS(m_AimState == AIMSTILL ? 150 : 300); }
+		m_AimState = AIMDOWN;
+		m_AimAngle -= m_Controller.IsState(AIM_SHARP) ? std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00005F, 0.05F) : std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00015F, 0.15F) * m_Controller.GetDigitalAimSpeed();
 		if (m_AimAngle < -m_AimRange) { m_AimAngle = -m_AimRange; }
 
 	} else if (analogAim.GetMagnitude() != 0 && m_Status != INACTIVE) {

@@ -242,6 +242,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added Lua binding for `AudioMan:StopMusic()`, which stops all playing music. `AudioMan:StopAll()` used to do this, but now it actually stops all sounds and music.
 
+- New `Actor` Lua (R) property `SharpAimProgress`, which returns the current sharp-aiming progress as a scalar from 0 to 1.
+
+- New `HeldDevice` Lua (R/W) property `Supported`, which indicates whether or not the device is currently being supported by a background hand.
+
+- New `HeldDevice` Lua function `IsEmpty`, which indicates whether the device is devoid of ammo. Can be used to skip an extra step to check for a `Magazine`. Will always return `false` for non-`HDFirearm` devices.
+
+- New `SoundContainer` INI and Lua (R/W) property `PitchVariation`, which can be used to randomize the pitch of the sounds being played.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

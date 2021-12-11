@@ -248,6 +248,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>The pitch variation the sounds in this SoundContainer are played at.</returns>
 		float GetPitchVariation() const { return m_PitchVariation; }
+
+		/// <summary>
+		/// Sets the pitch variation the sounds in this SoundContainer are played at.
+		/// </summary>
+		/// <param name="newValue">The pitch variation the sounds in this SoundContainer are played at.</param>
+		void SetPitchVariation(float newValue) { m_PitchVariation = newValue; }
 #pragma endregion
 
 #pragma region Playback Controls

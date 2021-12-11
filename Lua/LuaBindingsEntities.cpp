@@ -1115,6 +1115,7 @@ namespace RTE {
 		.property("Pos", &SoundContainer::GetPosition, &SoundContainer::SetPosition)
 		.property("Volume", &SoundContainer::GetVolume, &SoundContainer::SetVolume)
 		.property("Pitch", &SoundContainer::GetPitch, &SoundContainer::SetPitch)
+		.property("PitchVariation", &SoundContainer::GetPitchVariation, &SoundContainer::SetPitchVariation)
 
 		.def("HasAnySounds", &SoundContainer::HasAnySounds)
 		.def("GetTopLevelSoundSet", &SoundContainer::GetTopLevelSoundSet)

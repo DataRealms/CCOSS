@@ -761,6 +761,21 @@ ClassInfoGetters;
 	bool UpdateMovePath() override;
 
 
+	/// <summary>
+	/// Detects slopes in terrain and updates the walk path rotation for the corresponding Layer accordingly.
+	/// </summary>
+	/// <param name="whichLayer">The Layer in question.</param>
+	void UpdateWalkAngle(AHuman::Layer whichLayer);
+
+
+	/// <summary>
+	/// Sets the walk path rotation for the specified Layer.
+	/// </summary>
+	/// <param name="whichLayer">The Layer in question.</param>
+	/// <param name="angle">The angle to set.</param>
+	void SetWalkAngle(AHuman::Layer whichLayer, float angle) { m_WalkAngle[whichLayer] = Matrix(angle); }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateAI
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -997,6 +1012,7 @@ protected:
 	float m_FGArmFlailScalar; //!< The rate at which this AHuman's FG Arm follows the the bodily rotation. Best to keep this at 0 so it doesn't complicate aiming.
 	float m_BGArmFlailScalar; //!< The rate at which this AHuman's BG Arm follows the the bodily rotation. Set to a negative value for a "counterweight" effect.
 	Timer m_EquipHUDTimer; //!< Timer for showing the name of any newly equipped Device.
+	std::array<Matrix, 2> m_WalkAngle; //!< An array of rot angle targets for different movement states.
 
     ////////////////
     // AI States

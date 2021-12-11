@@ -442,6 +442,7 @@ namespace RTE {
 		.def("SetLimbPathSpeed", &AHuman::SetLimbPathSpeed)
 		.def("GetRotAngleTarget", &AHuman::GetRotAngleTarget)
 		.def("SetRotAngleTarget", &AHuman::SetRotAngleTarget)
+		.def("SetWalkAngle", &AHuman::SetWalkAngle)
 
 		.enum_("UpperBodyState")[
 			luabind::value("WEAPON_READY", AHuman::UpperBodyState::WEAPON_READY),

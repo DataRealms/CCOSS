@@ -1802,7 +1802,7 @@ bool AHuman::UpdateMovePath()
 void AHuman::UpdateWalkAngle(AHuman::Layer whichLayer) {
 	if (m_Controller.IsState(BODY_JUMP)) {
 		m_WalkAngle[whichLayer] = Matrix(c_QuarterPI * GetFlipFactor());
-	} else if (m_MaintainUpright) {
+	} else {
 		// Cast rays to calculate the approximate shape of terrain.
 		int rayCount = 4;
 		float rayLength = 10.0F;
@@ -1828,8 +1828,6 @@ void AHuman::UpdateWalkAngle(AHuman::Layer whichLayer) {
 			trace.RadRotate(traceRotation);
 		}
 		m_WalkAngle[whichLayer] = Matrix((terrainVector * GetFlipFactor()).GetAbsRadAngle() + c_HalfPI * GetFlipFactor());
-	} else {
-		m_WalkAngle[whichLayer] = m_Rotation;
 	}
 }
 

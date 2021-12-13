@@ -407,14 +407,19 @@ namespace RTE {
 
 	void UInputMan::TrapMousePos(bool trap, int whichPlayer) {
 		if (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
+#ifdef __unix__
+			bool prevTrapStatus = m_TrapMousePos;
+#endif
 			m_TrapMousePos = trap;
 #ifdef __unix__
-			WarpMouse(_xwin.window_width / 2, _xwin.window_height / 2);
-			int discard;
-			get_mouse_mickeys(&discard, &discard);
-			get_mouse_mickeys(&discard, &discard);
-			get_mouse_mickeys(&discard, &discard);
-			WarpMouse(_xwin.window_width / 2, _xwin.window_height / 2);
+			if (m_TrapMousePos != prevTrapStatus) {
+				WarpMouse(_xwin.window_width / 2, _xwin.window_height / 2);
+				int discard;
+				get_mouse_mickeys(&discard, &discard);
+				get_mouse_mickeys(&discard, &discard);
+				get_mouse_mickeys(&discard, &discard);
+				WarpMouse(_xwin.window_width / 2, _xwin.window_height / 2);
+			}
 #endif
 		}
 		m_TrapMousePosPerPlayer[whichPlayer] = trap;

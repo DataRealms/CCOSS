@@ -123,7 +123,7 @@ jobs:
           CCACHE_SLOPPINESS: pch_defines,time_macros,include_file_mtime,include_file_ctime
         with:
           # The action to run
-          setup-options: --buildtype=debug -Dinstall_data=false -Dinstall_runner=false -Dfmod_dir=/usr/lib/ --prefix=/usr/ -Ddebug_type=release --optimization=2
+          setup-options: --buildtype=debugoptimized -Dinstall_data=false -Dinstall_runner=false -Dfmod_dir=/usr/lib/ --prefix=/usr/ -Ddebug_type=release
           meson-version: 0.55.3
           ninja-version: 1.10.0
           action: build

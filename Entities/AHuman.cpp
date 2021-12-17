@@ -3875,8 +3875,10 @@ void AHuman::Update()
 				m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
 
 			} else {
-				if (m_pFGArm && m_pFGArm->HoldsHeldDevice() && !m_pBGArm->HoldsHeldDevice()) {
-					if (!EquipShieldInBGArm()) {
+				if (HeldDevice * heldDevice = dynamic_cast<HeldDevice *>(GetEquippedItem())) {
+					if (GetEquippedBGItem() && !heldDevice->IsOneHanded()) {
+						UnequipBGArm();
+					} else {
 						m_pBGArm->Reach(m_pFGArm->GetHeldDevice()->GetSupportPos());
 						if (m_pBGArm->DidReach()) {
 							m_pFGArm->GetHeldDevice()->SetSupported(true);

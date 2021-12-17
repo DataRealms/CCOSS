@@ -259,6 +259,20 @@ public:
 
 
 	/// <summary>
+	/// Gets the rate at which this ACrab's jetpack is replenished during downtime.
+	/// </summary>
+	/// <returns>The rate at which the jetpack is replenished.</returns>
+	float GetJetReplenishRate() const { return m_JetReplenishRate; }
+
+
+	/// <summary>
+	/// Sets the rate at which this ACrab's jetpack is replenished during downtime.
+	/// </summary>
+	/// <param name="newValue">The rate at which the jetpack is replenished.</param>
+	void SetJetReplenishRate(float newValue) { m_JetReplenishRate = newValue; }
+
+
+	/// <summary>
 	/// Gets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
 	/// </summary>
 	/// <returns>The ratio at which this jetpack follows the aim angle of the user.</returns>
@@ -585,6 +599,7 @@ protected:
 	float m_JetTimeTotal;
 	// How much time left the jetpack can go, in ms
 	float m_JetTimeLeft;
+	float m_JetReplenishRate; //!< How fast the jetpack fuel will replenish when not in use.
 	// Ratio at which the jetpack angle follows aim angle
 	float m_JetAngleRange;
 	// Blink timer

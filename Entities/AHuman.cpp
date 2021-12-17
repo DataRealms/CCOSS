@@ -73,6 +73,7 @@ void AHuman::Clear()
     m_StrideStart = false;
     m_JetTimeTotal = 0.0;
     m_JetTimeLeft = 0.0;
+	m_JetReplenishRate = 1.75F;
 	m_JetAngleRange = 0.25F;
     m_GoldInInventoryChunk = 0;
     m_ThrowTmr.Reset();
@@ -174,6 +175,7 @@ int AHuman::Create(const AHuman &reference) {
 	m_ThrowPrepTime = reference.m_ThrowPrepTime;
     m_JetTimeTotal = reference.m_JetTimeTotal;
     m_JetTimeLeft = reference.m_JetTimeLeft;
+    m_JetReplenishRate = reference.m_JetReplenishRate;
 	m_JetAngleRange = reference.m_JetAngleRange;
 	m_FGArmFlailScalar = reference.m_FGArmFlailScalar;
 	m_BGArmFlailScalar = reference.m_BGArmFlailScalar;
@@ -243,6 +245,8 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
         reader >> m_JetTimeTotal;
         // Convert to ms
         m_JetTimeTotal *= 1000;
+	} else if (propName == "JumpReplenishRate") {
+		reader >> m_JetReplenishRate;
 	} else if (propName == "JumpAngleRange") {
 		reader >> m_JetAngleRange;
 	} else if (propName == "FGArmFlailScalar") {
@@ -340,6 +344,8 @@ int AHuman::Save(Writer &writer) const
     writer.NewProperty("JumpTime");
     // Convert to seconds
     writer << m_JetTimeTotal / 1000;
+	writer.NewProperty("JumpReplenishRate");
+	writer << m_JetReplenishRate;
 	writer.NewProperty("JumpAngleRange");
 	writer << m_JetAngleRange;
 	writer.NewProperty("FGArmFlailScalar");
@@ -3150,7 +3156,7 @@ void AHuman::Update()
 		} else {
 			m_pJetpack->EnableEmission(false);
 			if (m_MoveState == JUMP) { m_MoveState = STAND; }
-			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * 2.0F, m_JetTimeTotal);
+			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * m_JetReplenishRate, m_JetTimeTotal);
 		}
 
 		float maxAngle = c_HalfPI * m_JetAngleRange;

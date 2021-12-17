@@ -250,6 +250,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `SoundContainer` INI and Lua (R/W) property `PitchVariation`, which can be used to randomize the pitch of the sounds being played.
 
+- New `AHuman` and `ACrab` INI and Lua (R/W) property `JetReplenishRate`, which determines how fast jump time (i.e. jetpack fuel) is replenished during downtime.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

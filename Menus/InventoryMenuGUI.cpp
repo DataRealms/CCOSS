@@ -1163,6 +1163,10 @@ namespace RTE {
 				if (buttonEquippedItemIndex > -1) {
 					Arm *selectedItemArm = dynamic_cast<Arm *>(m_GUISelectedItem->Object->GetParent());
 					Arm *buttonObjectArm = selectedItemArm && buttonObject ? dynamic_cast<Arm *>(buttonObject->GetParent()) : nullptr;
+					if (!buttonObject) {
+						const AHuman *inventoryActorAsAHuman = dynamic_cast<const AHuman *>(m_InventoryActor);
+						buttonObjectArm = buttonEquippedItemIndex == 0 ? inventoryActorAsAHuman->GetFGArm() : inventoryActorAsAHuman->GetBGArm();
+					}
 					if (selectedItemArm && buttonObjectArm) {
 						selectedItemArm->ReleaseHeldMO();
 						buttonObjectArm->ReleaseHeldMO();

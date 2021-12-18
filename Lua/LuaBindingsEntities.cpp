@@ -22,6 +22,7 @@ namespace RTE {
 		.def("Reset", &Entity::Reset)
 		.def("GetModuleAndPresetName", &Entity::GetModuleAndPresetName)
 		.def("AddToGroup", &Entity::AddToGroup)
+		.def("RemoveFromGroup", &Entity::RemoveFromGroup)
 		.def("IsInGroup", &Entity::IsInGroup);
 	}
 

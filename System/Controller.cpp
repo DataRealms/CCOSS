@@ -162,7 +162,7 @@ namespace RTE {
 			}
 
 			// Update the AI state of the Actor we're controlling and to use any scripted AI defined for this Actor.
-			if (m_ControlledActor && !m_ControlledActor->UpdateAIScripted()) {
+			if (m_ControlledActor && m_ControlledActor->ObjectScriptsInitialized() && !m_ControlledActor->UpdateAIScripted()) {
 				// If we can't, fall back on the legacy C++ implementation
 				m_ControlledActor->UpdateAI();
 			}

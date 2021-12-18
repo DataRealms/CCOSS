@@ -250,6 +250,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `SoundContainer` INI and Lua (R/W) property `PitchVariation`, which can be used to randomize the pitch of the sounds being played.
 
+- Added `Entity` Lua function `entity:RemoveFromGroup(groupToRemoveFrom)` which removes the given group from the `Entity`. The reverse of `AddToGroup`.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

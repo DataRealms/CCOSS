@@ -235,7 +235,10 @@ namespace RTE {
 			m_Atoms.push_back(atomToAdd);
 			m_SubGroups.at(subgroupID).push_back(atomToAdd);
 		}
-		if (!atomList.empty()) { m_MomentOfInertia = 0.0F; }
+		if (!atomList.empty()) {
+			m_MomentOfInertia = 0.0F;
+			if (m_OwnerMOSR) { GetMomentOfInertia(); }
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -257,7 +260,10 @@ namespace RTE {
 			}
 		}
 		m_SubGroups.erase(removeID);
-		if (removedAny) { m_MomentOfInertia = 0.0F; }
+		if (removedAny) {
+			m_MomentOfInertia = 0.0F;
+			if (m_OwnerMOSR) { GetMomentOfInertia(); }
+		}
 
 		return removedAny;
 	}

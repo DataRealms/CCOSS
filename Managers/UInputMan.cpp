@@ -126,7 +126,7 @@ namespace RTE {
 		poll_joystick();
 
 #ifdef __unix__
-		_xwin_input_handler = HandleAllegroMouseInput;
+		_xwin_input_handler = XWinInputHandlerOverride;
 #endif
 
 		return 0;
@@ -1034,8 +1034,8 @@ namespace RTE {
 			events.push_back(e);
 		}
 
-		g_UInputMan.m_AllegroMousePreviousX = mouse_x;
-		g_UInputMan.m_AllegroMousePreviousY = mouse_y;
+		m_AllegroMousePreviousX = mouse_x;
+		m_AllegroMousePreviousY = mouse_y;
 		int mouseDeltaX = 0;
 		int mouseDeltaY = 0;
 
@@ -1044,13 +1044,13 @@ namespace RTE {
 		for (std::vector<XEvent>::reverse_iterator event = events.rbegin(); event < events.rend(); ++event) {
 			switch (event->type) {
 				case MotionNotify: {
-					mouseDeltaX = event->xmotion.x - g_UInputMan.m_AllegroMousePreviousX;
-					mouseDeltaY = event->xmotion.y - g_UInputMan.m_AllegroMousePreviousY;
+					mouseDeltaX = event->xmotion.x - m_AllegroMousePreviousX;
+					mouseDeltaY = event->xmotion.y - m_AllegroMousePreviousY;
 					_xwin_mouse_interrupt(mouseDeltaX, mouseDeltaY, 0, 0, mouse_b);
-					_mouse_x = g_UInputMan.m_AllegroMousePreviousX = !g_UInputMan.m_TrapMousePos ? event->xmotion.x : halfResX;
-					_mouse_y = g_UInputMan.m_AllegroMousePreviousY = !g_UInputMan.m_TrapMousePos ? event->xmotion.y : halfResY;
+					_mouse_x = m_AllegroMousePreviousX = !m_TrapMousePos ? event->xmotion.x : halfResX;
+					_mouse_y = m_AllegroMousePreviousY = !m_TrapMousePos ? event->xmotion.y : halfResY;
 
-					if (g_UInputMan.m_TrapMousePos && (mouseDeltaX != 0 || mouseDeltaY != 0)) {
+					if (m_TrapMousePos && (mouseDeltaX != 0 || mouseDeltaY != 0)) {
 						XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, halfResX, halfResY);
 					}
 					break;
@@ -1067,7 +1067,7 @@ namespace RTE {
 		_xwin.mouse_warped = 0;
 		_xwin_private_handle_input();
 
-		if (g_UInputMan.m_TrapMousePos) {
+		if (m_TrapMousePos) {
 			mouse_x = _xwin.window_width / 2;
 			mouse_y = _xwin.window_height / 2;
 		}

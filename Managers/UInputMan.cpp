@@ -394,7 +394,7 @@ namespace RTE {
 #ifndef __unix__
 			position_mouse(static_cast<int>(newPos.GetX()), static_cast<int>(newPos.GetY()));
 #else
-			WarpMouse(newPos.m_X, newPos.m_Y);
+			WarpMouse(newPos.m_X * g_FrameMan.GetResMultiplier(), newPos.m_Y * g_FrameMan.GetResMultiplier());
 #endif
 		}
 	}

@@ -797,6 +797,11 @@ namespace RTE {
 		UInputMan & operator=(const UInputMan &rhs) = delete;
 
 #ifdef __unix__
+	private:
+
+		int m_AllegroMousePreviousX; //!< Stored mouse x position for the allegro event handler.
+		int m_AllegroMousePreviousY; //!< Stored mouse y position for the allegro event handler.
+
 		/// <summary>
 		/// Mouse input handler to circumvent the input drops that allegro does regularly, by replacing and disabling the default warping behaviour.
 		/// Motion events that are generated while the handler is working are offset such that the allegro driver doesn't mess up the mickeys.
@@ -806,15 +811,11 @@ namespace RTE {
 		static void HandleAllegroMouseInput(void);
 
 		/// <summary>
-		/// Position the mouse on the screen in window coordinates. Generates MouseMotion events iff the requested position is different from the actual mouse position.
+		/// Position the mouse on the screen in window coordinates. Generates MouseMotion events if the requested position is different from the actual mouse position.
 		/// Replaces position_mouse and sets the allegro internal mouse position to the requested x,y.
 		/// </summary>
-		/// <param name="x">
-		/// The x coordinate to warp to.
-		/// </param>
-		/// <param name="y">
-		/// The y coordinate to warp to.
-		/// </param>
+		/// <param name="x"> The x coordinate to warp to. </param>
+		/// <param name="y"> The y coordinate to warp to. </param>
 		void WarpMouse(int x, int y) const;
 #endif
 	};

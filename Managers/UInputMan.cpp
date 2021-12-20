@@ -100,6 +100,13 @@ namespace RTE {
 				m_NetworkAccumulatedElementState[element][inputState] = false;
 			}
 		}
+
+
+#ifdef __unix__
+		m_AllegroMousePreviousX = 0;
+		m_AllegroMousePreviousY = 0;
+#endif
+
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1017,40 +1024,39 @@ namespace RTE {
 
 #ifdef __unix__
 	void UInputMan::HandleAllegroMouseInput() {
-		if (_xwin.display == 0)
+		if (_xwin.display == 0) {
 			return;
+		}
 
-		int nEvents = XPending(_xwin.display);
 		std::vector<XEvent> events;
-		events.reserve(nEvents + 10);
-		for (int i = 0; i < XPending(_xwin.display); ++i) {
+		events.reserve(XPending(_xwin.display) + 10);
+		while(XPending(_xwin.display) > 0) {
 			XEvent e;
 			XNextEvent(_xwin.display, &e);
 			events.push_back(e);
 		}
 
-		static int mousePrevX = 0;
-		static int mousePrevY = 0;
-		mousePrevX = mouse_x;
-		mousePrevY = mouse_y;
-		int dx = 0;
-		int dy = 0;
+		g_UInputMan.m_AllegroMousePreviousX = mouse_x;
+		g_UInputMan.m_AllegroMousePreviousY = mouse_y;
+		int mouseDeltaX = 0;
+		int mouseDeltaY = 0;
 
 		int halfResX = _xwin.window_width / 2;
 		int halfResY = _xwin.window_height / 2;
-		for (auto event = events.rbegin(); event < events.rend(); ++event) {
+		for (std::vector<XEvent>::reverse_iterator event = events.rbegin(); event < events.rend(); ++event) {
 			switch (event->type) {
 				case MotionNotify: {
-					dx = event->xmotion.x - mousePrevX;
-					dy = event->xmotion.y - mousePrevY;
-					_xwin_mouse_interrupt(dx, dy, 0, 0, mouse_b);
-					_mouse_x = mousePrevX = !g_UInputMan.m_TrapMousePos ? event->xmotion.x : halfResX;
-					_mouse_y = mousePrevY = !g_UInputMan.m_TrapMousePos ? event->xmotion.y : halfResY;
+					mouseDeltaX = event->xmotion.x - g_UInputMan.m_AllegroMousePreviousX;
+					mouseDeltaY = event->xmotion.y - g_UInputMan.m_AllegroMousePreviousY;
+					_xwin_mouse_interrupt(mouseDeltaX, mouseDeltaY, 0, 0, mouse_b);
+					_mouse_x = g_UInputMan.m_AllegroMousePreviousX = !g_UInputMan.m_TrapMousePos ? event->xmotion.x : halfResX;
+					_mouse_y = g_UInputMan.m_AllegroMousePreviousY = !g_UInputMan.m_TrapMousePos ? event->xmotion.y : halfResY;
 
-					if (g_UInputMan.m_TrapMousePos && (dx != 0 || dy != 0)) {
+					if (g_UInputMan.m_TrapMousePos && (mouseDeltaX != 0 || mouseDeltaY != 0)) {
 						XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, halfResX, halfResY);
 					}
-				} break;
+					break;
+				}
 
 				default:
 					XPutBackEvent(_xwin.display, &(*event));

@@ -216,11 +216,12 @@ namespace RTE {
 		}
 		totalImpulseForce *= jointStiffnessValueToUse;
 
-		if (gibImpulseLimitValueToUse > 0 && totalImpulseForce.GetMagnitude() > gibImpulseLimitValueToUse) {
+		float totalImpulseForceMagnitude = totalImpulseForce.GetMagnitude();
+		if (gibImpulseLimitValueToUse > 0 && totalImpulseForceMagnitude > gibImpulseLimitValueToUse) {
 			jointImpulses += totalImpulseForce.SetMagnitude(gibImpulseLimitValueToUse);
 			GibThis();
 			return false;
-		} else if (jointStrengthValueToUse > 0 && totalImpulseForce.GetMagnitude() > jointStrengthValueToUse) {
+		} else if (jointStrengthValueToUse > 0 && totalImpulseForceMagnitude > jointStrengthValueToUse) {
 			jointImpulses += totalImpulseForce.SetMagnitude(jointStrengthValueToUse);
 			m_Parent->RemoveAttachable(this, true, true);
 			return false;

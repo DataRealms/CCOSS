@@ -421,6 +421,7 @@ namespace RTE {
 #ifdef __unix__
 			if (m_TrapMousePos != prevTrapStatus) {
 				WarpMouse(_xwin.window_width / 2, _xwin.window_height / 2);
+				// Note - Discard mickeys after this warp otherwise mouse will probably jump.
 				int discard;
 				get_mouse_mickeys(&discard, &discard);
 				WarpMouse(_xwin.window_width / 2, _xwin.window_height / 2);

@@ -423,8 +423,6 @@ namespace RTE {
 				WarpMouse(_xwin.window_width / 2, _xwin.window_height / 2);
 				int discard;
 				get_mouse_mickeys(&discard, &discard);
-				get_mouse_mickeys(&discard, &discard);
-				get_mouse_mickeys(&discard, &discard);
 				WarpMouse(_xwin.window_width / 2, _xwin.window_height / 2);
 			}
 #endif

@@ -106,7 +106,7 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 
 * On some distros some keyboards and mice are recognized as controllers, to fix this follow these instructions: [https://github.com/denilsonsa/udev-joystick-blacklist](https://github.com/denilsonsa/udev-joystick-blacklist)
 
-* `pipewire(-alsa)` and fmod don't work well together, so the game might [not close or have no sound or crash](https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/1514). Workaround by `ln -s /bin/true /usr/bin/pulseaudio`
+* `pipewire(-alsa)` and fmod don't work well together, so the game might [not close, have no sound or crash](https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/1514). Workaround by `ln -s /bin/true /usr/bin/pulseaudio`
 
 * Gamepad triggers may be inverted, to work around that: Hold down the trigger, select the input you want it assigned to and release to assign it, then it will be correct in use.
 

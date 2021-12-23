@@ -264,13 +264,11 @@ public:
 	/// <returns>The rate at which the jetpack is replenished.</returns>
 	float GetJetReplenishRate() const { return m_JetReplenishRate; }
 
-
 	/// <summary>
 	/// Sets the rate at which this ACrab's jetpack is replenished during downtime.
 	/// </summary>
 	/// <param name="newValue">The rate at which the jetpack is replenished.</param>
 	void SetJetReplenishRate(float newValue) { m_JetReplenishRate = newValue; }
-
 
 	/// <summary>
 	/// Gets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.

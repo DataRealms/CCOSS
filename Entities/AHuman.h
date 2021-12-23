@@ -779,7 +779,6 @@ ClassInfoGetters;
 	/// <param name="whichLayer">The Layer in question.</param>
 	void UpdateWalkAngle(AHuman::Layer whichLayer);
 
-
 	/// <summary>
 	/// Sets the walk path rotation for the specified Layer.
 	/// </summary>

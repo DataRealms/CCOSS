@@ -1809,7 +1809,6 @@ void AHuman::UpdateWalkAngle(AHuman::Layer whichLayer) {
 	if (m_Controller.IsState(BODY_JUMP)) {
 		m_WalkAngle[whichLayer] = Matrix(c_QuarterPI * GetFlipFactor());
 	} else {
-		// Cast rays to calculate the approximate shape of terrain.
 		int rayCount = 4;
 		float rayLength = 10.0F;
 		Vector hipPos = m_Pos;
@@ -1820,7 +1819,7 @@ void AHuman::UpdateWalkAngle(AHuman::Layer whichLayer) {
 			rayLength += m_pBGLeg->GetMaxLength();
 			hipPos += RotateOffset(m_pBGLeg->GetParentOffset());
 		}
-		float traceRotation = rayCount > 1 ? c_HalfPI / static_cast<float>(rayCount - 1) * GetFlipFactor() : 0;
+		float traceRotation = c_HalfPI / static_cast<float>(rayCount - 1) * GetFlipFactor();
 		Vector hitPos;
 		Vector terrainVector(0, rayLength);
 		Vector trace(0, rayLength);
@@ -1828,7 +1827,7 @@ void AHuman::UpdateWalkAngle(AHuman::Layer whichLayer) {
 			if (g_SceneMan.CastStrengthRay(hipPos, trace, 10.0F, hitPos, 4, g_MaterialGrass)) {
 				terrainVector += trace - g_SceneMan.ShortestDistance(hipPos, hitPos, g_SceneMan.SceneWrapsX());
 			} else {
-				// Reinforce focus on previously assumed terrain.
+				// Since no terrain was found, reinforce the existing terrain direction Vector, so any terrain found in future affects it less.
 				terrainVector *= 1.5F;
 			}
 			trace.RadRotate(traceRotation);
@@ -3630,7 +3629,7 @@ void AHuman::Update()
 			}
 			bool climbing = m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND];
 
-            if (restarted) {
+			if (restarted) {
 				if (!climbing) {
 					if (m_StrideSound) { m_StrideSound->Play(m_Pos); }
 					RunScriptedFunctionInAppropriateScripts("OnStride");
@@ -3638,7 +3637,7 @@ void AHuman::Update()
 					m_WalkAngle[FGROUND] = Matrix();
 					m_WalkAngle[BGROUND] = Matrix();
 				}
-            }
+			}
 
             ////////////////////////////////////////
             // Arm Climbing if the leg paths failed to find clear spot to restart

@@ -445,6 +445,7 @@ namespace RTE {
 		.def("SetLimbPathSpeed", &AHuman::SetLimbPathSpeed)
 		.def("GetRotAngleTarget", &AHuman::GetRotAngleTarget)
 		.def("SetRotAngleTarget", &AHuman::SetRotAngleTarget)
+		.def("GetWalkAngle", &AHuman::GetWalkAngle)
 		.def("SetWalkAngle", &AHuman::SetWalkAngle)
 
 		.enum_("UpperBodyState")[

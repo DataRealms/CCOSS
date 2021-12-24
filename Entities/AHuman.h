@@ -780,6 +780,13 @@ ClassInfoGetters;
 	void UpdateWalkAngle(AHuman::Layer whichLayer);
 
 	/// <summary>
+	/// Gets the walk path rotation for the specified Layer.
+	/// </summary>
+	/// <param name="whichLayer">The Layer in question.</param>
+	/// <returns>The walk angle in radians.</returns>
+	float GetWalkAngle(AHuman::Layer whichLayer) const { return m_WalkAngle[whichLayer].GetRadAngle(); }
+
+	/// <summary>
 	/// Sets the walk path rotation for the specified Layer.
 	/// </summary>
 	/// <param name="whichLayer">The Layer in question.</param>
@@ -987,7 +994,7 @@ protected:
     float m_JetTimeTotal;
     // How much time left the jetpack can go, in ms
     float m_JetTimeLeft;
-	float m_JetReplenishRate; //!< How fast the jetpack fuel will replenish when not in use.
+	float m_JetReplenishRate; //!< How fast the jetpack fuel will replenish when not in use, in relation to the legacy value.
 	// Ratio at which the jetpack angle follows aim angle
 	float m_JetAngleRange;
     // Blink timer

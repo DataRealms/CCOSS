@@ -59,7 +59,7 @@ void ACrab::Clear()
     m_pJetpack = 0;
     m_JetTimeTotal = 0.0;
     m_JetTimeLeft = 0.0;
-	m_JetReplenishRate = 1.75F;
+	m_JetReplenishRate = 1.0F;
 	m_JetAngleRange = 0.25F;
     m_MoveState = STAND;
     for (int side = 0; side < SIDECOUNT; ++side)
@@ -2162,7 +2162,7 @@ void ACrab::Update()
             m_pJetpack->EnableEmission(false);
 			if (m_MoveState == JUMP) { m_MoveState = STAND; }
 
-			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * m_JetReplenishRate, m_JetTimeTotal);
+			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * 2.0F * m_JetReplenishRate, m_JetTimeTotal);
         }
 
 		float maxAngle = c_HalfPI * m_JetAngleRange;

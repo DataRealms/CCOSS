@@ -254,6 +254,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added `Entity` Lua function `entity:RemoveFromGroup(groupToRemoveFrom)` which removes the given group from the `Entity`. The reverse of `AddToGroup`.
 
+- New `AHuman` Lua functions `GetWalkAngle(layer)` and `SetWalkAngle(layer)`, which can be used to read and override walk path rotation of both Legs/Layers respectively. The walk path rotation is automatically updated on each step to match the curvature of the terrain.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

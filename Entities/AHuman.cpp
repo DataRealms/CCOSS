@@ -4308,9 +4308,8 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 		}
         // Held-related GUI stuff
         else if (m_pFGArm || m_pBGArm) {
-            HDFirearm *fgHeldFirearm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldDevice());
-			MovableObject *bgHeldItem = GetEquippedBGItem();
-			const HDFirearm *bgHeldFirearm = dynamic_cast<HDFirearm *>(bgHeldItem);
+            HDFirearm *fgHeldFirearm = dynamic_cast<HDFirearm *>(GetEquippedItem());
+			HDFirearm *bgHeldFirearm = dynamic_cast<HDFirearm *>(GetEquippedBGItem());
 
             if (fgHeldFirearm || bgHeldFirearm) {
                 str[0] = -56; str[1] = 0;
@@ -4327,7 +4326,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 					}
 				}
 
-                if (bgHeldItem && bgHeldFirearm) {
+                if (bgHeldFirearm) {
 					std::string bgWeaponString;
 					if (bgHeldFirearm->IsReloading()) {
 						bgWeaponString = "Reloading";
@@ -4359,7 +4358,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
                     m_HUDStack -= 11;
                 }
 */
-				std::string equippedItemsString = (m_pFGArm->HoldsSomething() ? m_pFGArm->GetHeldMO()->GetPresetName() : "EMPTY") + (m_pBGArm->HoldsSomething() ? " | " + m_pBGArm->GetHeldMO()->GetPresetName() : "");
+				std::string equippedItemsString = (m_pFGArm && m_pFGArm->HoldsSomething() ? m_pFGArm->GetHeldMO()->GetPresetName() : "EMPTY") + (m_pBGArm && m_pBGArm->HoldsSomething() ? " | " + m_pBGArm->GetHeldMO()->GetPresetName() : "");
 				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
 				m_HUDStack -= 9;
 /*

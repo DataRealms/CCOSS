@@ -82,6 +82,7 @@ namespace RTE {
 			.def("SetNativeTechModule", &SceneEditorGUI::SetNativeTechModule)
 			.def("SetForeignCostMultiplier", &SceneEditorGUI::SetForeignCostMultiplier)
 			.def("TestBrainResidence", &SceneEditorGUI::TestBrainResidence)
+			.def("Update", &SceneEditorGUI::Update) //Gacyr Note: I hate this being here but it's necessary for some metagame bullshit.
 
 			.enum_("EditorGUIMode")[
 				luabind::value("INACTIVE", SceneEditorGUI::EditorGUIMode::INACTIVE),

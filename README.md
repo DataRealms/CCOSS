@@ -62,6 +62,7 @@ The Linux build uses the meson build system, and builds against system libraries
 * `libX11`
 * [`meson`](https://www.mesonbuild.com)`>= 0.53` (If your distro doesn't have a recent version of meson, use the pip version instead)
 * `boost>=1.55`
+* (optional) `xmessage`
 
 ## Building
 
@@ -97,13 +98,17 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 ## Installing Dependencies
 
 **Arch Linux:**  
-`# pacman -S allegro4 boost flac luajit minizip lz4 libpng libx11 meson ninja base-devel`
+`# pacman -S allegro4 boost flac luajit minizip lz4 libpng libx11 xorg-xmessage meson ninja base-devel`
 
 **Ubuntu >=20.04:**  
 `# apt-get install build-essential libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  
 ## Troubleshooting
 
-On some distros some keyboards and mice are recognized as controllers, to fix this follow these instructions: [https://github.com/denilsonsa/udev-joystick-blacklist](https://github.com/denilsonsa/udev-joystick-blacklist)
+* On some distros some keyboards and mice are recognized as controllers, to fix this follow these instructions: [https://github.com/denilsonsa/udev-joystick-blacklist](https://github.com/denilsonsa/udev-joystick-blacklist)
+
+* `pipewire(-alsa)` and fmod don't work well together, so the game might [not close, have no sound or crash](https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/1514). Workaround by `ln -s /bin/true /usr/bin/pulseaudio`
+
+* Gamepad triggers may be inverted, to work around that: Hold down the trigger, select the input you want it assigned to and release to assign it, then it will be correct in use.
 
 ***
 

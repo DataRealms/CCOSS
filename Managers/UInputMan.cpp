@@ -13,9 +13,11 @@
 
 #ifdef _WIN32
 #include "joystickapi.h"
-#endif
-#ifdef __unix__
+#elif __unix__
 #include <fcntl.h>
+#include "allegro/internal/aintern.h"
+#include "allegro/platform/aintunix.h"
+#include "xalleg.h"
 #endif
 
 namespace RTE {
@@ -97,6 +99,11 @@ namespace RTE {
 				m_NetworkAccumulatedElementState[element][inputState] = false;
 			}
 		}
+
+#ifdef __unix__
+		m_AllegroMousePreviousX = 0;
+		m_AllegroMousePreviousY = 0;
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -114,6 +121,10 @@ namespace RTE {
 
 		if (install_joystick(JOY_TYPE_AUTODETECT) != 0) { RTEAbort("Failed to initialize joysticks!"); }
 		poll_joystick();
+
+#ifdef __unix__
+		_xwin_input_handler = XWinInputHandlerOverride;
+#endif
 
 		return 0;
 	}
@@ -377,7 +388,11 @@ namespace RTE {
 	void UInputMan::SetMousePos(Vector &newPos, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
 		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
+#ifndef __unix__
 			position_mouse(static_cast<int>(newPos.GetX()), static_cast<int>(newPos.GetY()));
+#else
+			WarpMouse(newPos.m_X * g_FrameMan.GetResMultiplier(), newPos.m_Y * g_FrameMan.GetResMultiplier());
+#endif
 		}
 	}
 
@@ -396,7 +411,19 @@ namespace RTE {
 
 	void UInputMan::TrapMousePos(bool trap, int whichPlayer) {
 		if (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB) {
+#ifdef __unix__
+			bool prevTrapStatus = m_TrapMousePos;
+#endif
 			m_TrapMousePos = trap;
+#ifdef __unix__
+			if (m_TrapMousePos != prevTrapStatus) {
+				WarpMouse(_xwin.window_width / 2, _xwin.window_height / 2);
+				// Note - Discard mickeys after this warp otherwise mouse will probably jump.
+				int discard;
+				get_mouse_mickeys(&discard, &discard);
+				WarpMouse(_xwin.window_width / 2, _xwin.window_height / 2);
+			}
+#endif
 		}
 		m_TrapMousePosPerPlayer[whichPlayer] = trap;
 	}
@@ -406,7 +433,11 @@ namespace RTE {
 	void UInputMan::ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
 		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
+#ifndef __unix__
 			position_mouse(Limit(mouse_x, x + width * g_FrameMan.GetResMultiplier(), x), Limit(mouse_y, y + height * g_FrameMan.GetResMultiplier(), y));
+#else
+			WarpMouse(Limit(mouse_x, x + width * g_FrameMan.GetResMultiplier(), x), Limit(mouse_y, y + height * g_FrameMan.GetResMultiplier(), y));
+#endif
 		}
 	}
 
@@ -868,7 +899,10 @@ namespace RTE {
 			if (!m_DisableMouseMoving && !IsInMultiplayerMode()) {
 				if (m_TrapMousePos) {
 					// Trap the (invisible) mouse cursor in the middle of the screen, so it doesn't fly out in windowed mode and some other window gets clicked
+					// Note - on linux the centering is done in the event loop.
+#ifndef __unix__
 					position_mouse(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2);
+#endif
 				} else if (g_ActivityMan.IsInActivity()) {
 					// The mouse cursor is visible and can move about the screen/window, but it should still be contained within the mouse player's part of the window
 					ForceMouseWithinPlayerScreen(mousePlayer);
@@ -981,4 +1015,68 @@ namespace RTE {
 			}
 		}
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifdef __unix__
+	void UInputMan::HandleAllegroMouseInput() {
+		if (_xwin.display == 0) {
+			return;
+		}
+
+		std::vector<XEvent> events;
+		events.reserve(XPending(_xwin.display) + 10);
+		while(XPending(_xwin.display) > 0) {
+			XEvent e;
+			XNextEvent(_xwin.display, &e);
+			events.push_back(e);
+		}
+
+		m_AllegroMousePreviousX = mouse_x;
+		m_AllegroMousePreviousY = mouse_y;
+		int mouseDeltaX = 0;
+		int mouseDeltaY = 0;
+
+		int halfResX = _xwin.window_width / 2;
+		int halfResY = _xwin.window_height / 2;
+		for (std::vector<XEvent>::reverse_iterator event = events.rbegin(); event < events.rend(); ++event) {
+			switch (event->type) {
+				case MotionNotify: {
+					mouseDeltaX = event->xmotion.x - m_AllegroMousePreviousX;
+					mouseDeltaY = event->xmotion.y - m_AllegroMousePreviousY;
+					_xwin_mouse_interrupt(mouseDeltaX, mouseDeltaY, 0, 0, mouse_b);
+					_mouse_x = m_AllegroMousePreviousX = !m_TrapMousePos ? event->xmotion.x : halfResX;
+					_mouse_y = m_AllegroMousePreviousY = !m_TrapMousePos ? event->xmotion.y : halfResY;
+
+					if (m_TrapMousePos && (mouseDeltaX != 0 || mouseDeltaY != 0)) {
+						XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, halfResX, halfResY);
+					}
+					break;
+				}
+				default:
+					XPutBackEvent(_xwin.display, &(*event));
+					break;
+			}
+		}
+		XFlush(_xwin.display);
+
+		_xwin.mouse_warped = 0;
+		_xwin_private_handle_input();
+
+		if (m_TrapMousePos) {
+			mouse_x = _xwin.window_width / 2;
+			mouse_y = _xwin.window_height / 2;
+		}
+		_mouse_x = mouse_x;
+		_mouse_y = mouse_y;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void UInputMan::WarpMouse(int x, int y) const {
+		if (mouse_x != x || mouse_y != y) { XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, x, y); }
+		_mouse_x = mouse_x = x;
+		_mouse_y = mouse_y = y;
+	}
+#endif
 }

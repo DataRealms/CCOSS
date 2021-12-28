@@ -180,8 +180,8 @@ namespace RTE {
 
 		ContentFile m_FGTextureFile; //!< The file pointing to the terrain foreground texture of this Material.
 		ContentFile m_BGTextureFile; //!< The file pointing to the terrain background texture of this Material.
-		BITMAP *m_TerrainFGTexture; //!< The foreground texture of this material, used when building an SLTerrain. Not owned.
-		BITMAP *m_TerrainBGTexture; //!< The background texture of this material, used when building an SLTerrain. Not owned.
+		BITMAP *m_TerrainFGTexture; //!< The foreground texture of this Material, used when building an SLTerrain. Not owned.
+		BITMAP *m_TerrainBGTexture; //!< The background texture of this Material, used when building an SLTerrain. Not owned.
 
 	private:
 

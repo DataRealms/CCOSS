@@ -697,8 +697,6 @@ namespace RTE {
 			msgSceneSetup.BackgroundLayers[index].ScrollRatioY = layer->m_ScrollRatio.m_Y;
 			msgSceneSetup.BackgroundLayers[index].ScaleFactorX = layer->m_ScaleFactor.m_X;
 			msgSceneSetup.BackgroundLayers[index].ScaleFactorY = layer->m_ScaleFactor.m_Y;
-			msgSceneSetup.BackgroundLayers[index].ScaleInverseX = layer->m_ScaleInverse.m_X;
-			msgSceneSetup.BackgroundLayers[index].ScaleInverseY = layer->m_ScaleInverse.m_Y;
 			msgSceneSetup.BackgroundLayers[index].ScaledDimensionsX = layer->m_ScaledDimensions.m_X;
 			msgSceneSetup.BackgroundLayers[index].ScaledDimensionsY = layer->m_ScaledDimensions.m_Y;
 

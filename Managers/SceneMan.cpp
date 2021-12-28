@@ -1499,9 +1499,9 @@ bool SceneMan::IsUnseen(const int posX, const int posY, const int team)
     if (pUnseenLayer)
     {
         // Translate to the scaled unseen layer's coordinates
-        Vector scale = pUnseenLayer->GetScaleInverse();
-        int scaledX = posX * scale.m_X;
-        int scaledY = posY * scale.m_Y;
+        Vector scale = pUnseenLayer->GetScaleFactor();
+        int scaledX = posX / scale.m_X;
+        int scaledY = posY / scale.m_Y;
         return getpixel(pUnseenLayer->GetBitmap(), scaledX, scaledY) != g_MaskColor;
     }
 
@@ -1524,9 +1524,9 @@ bool SceneMan::RevealUnseen(const int posX, const int posY, const int team)
     if (pUnseenLayer)
     {
         // Translate to the scaled unseen layer's coordinates
-        Vector scale = pUnseenLayer->GetScaleInverse();
-        int scaledX = posX * scale.m_X;
-        int scaledY = posY * scale.m_Y;
+        Vector scale = pUnseenLayer->GetScaleFactor();
+        int scaledX = posX / scale.m_X;
+        int scaledY = posY / scale.m_Y;
 
         // Make sure we're actually revealing an unseen pixel that is ON the bitmap!
         int pixel = getpixel(pUnseenLayer->GetBitmap(), scaledX, scaledY);
@@ -1563,9 +1563,9 @@ bool SceneMan::RestoreUnseen(const int posX, const int posY, const int team)
     if (pUnseenLayer)
     {
         // Translate to the scaled unseen layer's coordinates
-        Vector scale = pUnseenLayer->GetScaleInverse();
-        int scaledX = posX * scale.m_X;
-        int scaledY = posY * scale.m_Y;
+        Vector scale = pUnseenLayer->GetScaleFactor();
+        int scaledX = posX / scale.m_X;
+        int scaledY = posY / scale.m_Y;
 
         // Make sure we're actually revealing an unseen pixel that is ON the bitmap!
         int pixel = getpixel(pUnseenLayer->GetBitmap(), scaledX, scaledY);
@@ -1602,11 +1602,11 @@ void SceneMan::RevealUnseenBox(const int posX, const int posY, const int width, 
     if (pUnseenLayer)
     {
         // Translate to the scaled unseen layer's coordinates
-        Vector scale = pUnseenLayer->GetScaleInverse();
-        int scaledX = posX * scale.m_X;
-        int scaledY = posY * scale.m_Y;
-        int scaledW = width * scale.m_X;
-        int scaledH = height * scale.m_Y;
+        Vector scale = pUnseenLayer->GetScaleFactor();
+        int scaledX = posX / scale.m_X;
+        int scaledY = posY / scale.m_Y;
+        int scaledW = width / scale.m_X;
+        int scaledH = height / scale.m_Y;
 
         // Fill the box
         rectfill(pUnseenLayer->GetBitmap(), scaledX, scaledY, scaledX + scaledW, scaledY + scaledH, g_MaskColor);
@@ -1629,11 +1629,11 @@ void SceneMan::RestoreUnseenBox(const int posX, const int posY, const int width,
     if (pUnseenLayer)
     {
         // Translate to the scaled unseen layer's coordinates
-        Vector scale = pUnseenLayer->GetScaleInverse();
-        int scaledX = posX * scale.m_X;
-        int scaledY = posY * scale.m_Y;
-        int scaledW = width * scale.m_X;
-        int scaledH = height * scale.m_Y;
+        Vector scale = pUnseenLayer->GetScaleFactor();
+        int scaledX = posX / scale.m_X;
+        int scaledY = posY / scale.m_Y;
+        int scaledW = width / scale.m_X;
+        int scaledH = height / scale.m_Y;
 
         // Fill the box
         rectfill(pUnseenLayer->GetBitmap(), scaledX, scaledY, scaledX + scaledW, scaledY + scaledH, g_BlackColor);

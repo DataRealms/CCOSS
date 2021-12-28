@@ -60,7 +60,7 @@ namespace RTE {
 		bool HasFGColorBitmap() const { return m_FGColorBitmap != nullptr; }
 
 		/// <summary>
-		/// Gets the BITMAP object that this TerrainObject uses for its foreground color representation.
+		/// Gets the BITMAP that this TerrainObject uses for its foreground color representation.
 		/// </summary>
 		/// <returns>A pointer to the foreground color BITMAP object. Ownership is NOT transferred!</returns>
 		BITMAP * GetFGColorBitmap() const { return m_FGColorBitmap; }
@@ -72,7 +72,7 @@ namespace RTE {
 		bool HasBGColorBitmap() const { return m_BGColorBitmap != nullptr; }
 
 		/// <summary>
-		/// Gets the BITMAP object that this TerrainObject uses for its background color representation, if any.
+		/// Gets the BITMAP that this TerrainObject uses for its background color representation, if any.
 		/// </summary>
 		/// <returns>A pointer to the background color BITMAP object. This may be nullptr if there is no BG bitmap. Ownership is NOT transferred!</returns>
 		BITMAP * GetBGColorBitmap() const { return m_BGColorBitmap; }
@@ -84,43 +84,43 @@ namespace RTE {
 		bool HasMaterialBitmap() const { return m_MaterialBitmap != nullptr; }
 
 		/// <summary>
-		/// Gets the BITMAP object that this TerrainObject uses for its material representation.
+		/// Gets the BITMAP that this TerrainObject uses for its material representation, if any.
 		/// </summary>
 		/// <returns>A pointer to the material BITMAP object. Ownership is NOT transferred!</returns>
 		BITMAP * GetMaterialBitmap() const { return m_MaterialBitmap; }
 
 		/// <summary>
-		/// Gets the offset from the position to the upper left corner of this' bitmaps.
+		/// Gets the offset from the position to the upper left corner of this TerrainObject's BITMAPs.
 		/// </summary>
 		/// <returns>A Vector describing the bitmap offset, in pixels.</returns>
 		const Vector & GetBitmapOffset() const { return m_BitmapOffset; }
 
 		/// <summary>
-		/// Gets the width this' material bitmap.
+		/// Gets the width of this TerrainObject's BITMAP. All layers of the TerrainObject are checked for cases where one or two of the layers are not defined.
 		/// </summary>
-		/// <returns>Width of 'material' bitmap.</returns>
+		/// <returns>The width of this TerrainObject.</returns>
 		int GetBitmapWidth() const;
 
 		/// <summary>
-		/// Gets the height this' material bitmap.
+		/// Gets the height of this TerrainObject. All layers of the TerrainObject are checked for cases where one or two of the layers are not defined.
 		/// </summary>
-		/// <returns>Height of 'material' bitmap.</returns>
+		/// <returns>The height of this TerrainObject.</returns>
 		int GetBitmapHeight() const;
 
 		/// <summary>
-		/// Gets the list of child objects that should be placed when this is placed.
+		/// Gets the list of child objects that should be placed when this TerrainObject is placed.
 		/// </summary>
 		/// <returns>A reference to the list of child objects. Ownership of the list is NOT transferred!</returns>
 		const std::vector<SceneObject::SOPlacer> & GetChildObjects() const { return m_ChildObjects; }
 
 		/// <summary>
-		/// Gets a bitmap showing a good identifiable icon of this, for use in GUI lists etc.
+		/// Gets a BITMAP showing a good identifiable icon of this, for use in GUI lists.
 		/// </summary>
 		/// <returns>A good identifiable graphical representation of this in a BITMAP, if available. If not, nullptr is returned. Ownership is NOT transferred!</returns>
 		BITMAP * GetGraphicalIcon() const override;
 
 		/// <summary>
-		/// Sets which team this belongs to.
+		/// Sets which team this TerrainObject belongs to.
 		/// </summary>
 		/// <param name="team">The assigned team number.</param>
 		void SetTeam(int team) override;
@@ -137,7 +137,7 @@ namespace RTE {
 
 #pragma region Virtual Override Methods
 		/// <summary>
-		/// Indicates whether this' current graphical representation overlaps a point in absolute scene coordinates.
+		/// Indicates whether this TerrainObject's current graphical representation overlaps a point in absolute scene coordinates.
 		/// </summary>
 		/// <param name="scenePoint">The point in absolute scene coordinates.</param>
 		/// <returns>Whether this' graphical rep overlaps the scene point.</returns>
@@ -157,19 +157,19 @@ namespace RTE {
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		ContentFile m_FGColorFile; //!<
-		BITMAP *m_FGColorBitmap; //!<
+		ContentFile m_FGColorFile; //!< ContentFile containing the path to this TerrainObject's foreground color layer representation.
+		BITMAP *m_FGColorBitmap; //!< Foreground color BITMAP of this TerrainObject.
 
-		ContentFile m_BGColorFile; //!<
-		BITMAP *m_BGColorBitmap; //!<
+		ContentFile m_BGColorFile; //!<ContentFile containing the path to this TerrainObject's background color layer representation.
+		BITMAP *m_BGColorBitmap; //!< Background color BITMAP of this TerrainObject.
 
-		ContentFile m_MaterialFile; //!<
-		BITMAP *m_MaterialBitmap; //!<
+		ContentFile m_MaterialFile; //!< ContentFile containing the path to this TerrainObject's Material layer representation.
+		BITMAP *m_MaterialBitmap; //!< Material BITMAP of this TerrainObject.
 
 		Vector m_BitmapOffset; //!< Offset from the position of this to the top left corner of the bitmap. The inversion of this should point to a corner or pattern in the bitmaps which will snap well with a 24px grid.
-		bool m_OffsetDefined; //!< Whether the offset has been defined and shouldn't be automatically set
+		bool m_OffsetDefined; //!< Whether the offset has been defined and shouldn't be automatically set.
 
-		std::vector<SceneObject::SOPlacer> m_ChildObjects; //!< The objects that are placed along with this on the Scene.
+		std::vector<SceneObject::SOPlacer> m_ChildObjects; //!< The objects that are placed along with this TerrainObject on the Scene.
 
 	private:
 

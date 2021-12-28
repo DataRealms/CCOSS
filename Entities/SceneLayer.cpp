@@ -22,7 +22,6 @@ namespace RTE {
 		m_ScrollInfo.SetXY(1.0F, 1.0F);
 		m_ScrollRatio.SetXY(1.0F, 1.0F);
 		m_ScaleFactor.SetXY(1.0F, 1.0F);
-		m_ScaleInverse.SetXY(1.0F, 1.0F);
 		m_ScaledDimensions.SetXY(1.0F, 1.0F);
 	}
 
@@ -69,7 +68,6 @@ namespace RTE {
 		m_ScrollInfo = reference.m_ScrollInfo;
 		m_ScrollRatio = reference.m_ScrollRatio;
 		m_ScaleFactor = reference.m_ScaleFactor;
-		m_ScaleInverse = reference.m_ScaleInverse;
 		m_ScaledDimensions = reference.m_ScaledDimensions;
 
 		if (reference.m_MainBitmap) {
@@ -194,7 +192,7 @@ namespace RTE {
 				destroy_bitmap(bitmapToSave);
 			};
 			std::thread saveThread(saveLayerBitmap, outputBitmap);
-			// Set the new path to point to the new file location.
+			// Set the path to point to the new file location.
 			m_BitmapFile.SetDataPath(bitmapPath);
 			// TODO: Move this into some global thread container or a ThreadMan™ instead of detaching.
 			saveThread.detach();
@@ -215,7 +213,6 @@ namespace RTE {
 
 	void SceneLayer::SetScaleFactor(const Vector &newScale) {
 		m_ScaleFactor = newScale;
-		m_ScaleInverse.SetXY(1.0F / newScale.GetX(), 1.0F / newScale.GetY());
 		if (m_MainBitmap) { m_ScaledDimensions.SetXY(static_cast<float>(m_MainBitmap->w) * newScale.GetX(), static_cast<float>(m_MainBitmap->h) * newScale.GetY()); }
 	}
 
@@ -386,8 +383,8 @@ namespace RTE {
 				}
 			}
 		} else {
-			std::array<int, 2> sourceWidth = { m_MainBitmap->w, m_Offset.GetFloorIntX() * m_ScaleInverse.GetFloorIntX() };
-			std::array<int, 2> sourceHeight = { m_MainBitmap->h, m_Offset.GetFloorIntY() * m_ScaleInverse.GetFloorIntY() };
+			std::array<int, 2> sourceWidth = { m_MainBitmap->w, m_Offset.GetFloorIntX() / m_ScaleFactor.GetFloorIntX() };
+			std::array<int, 2> sourceHeight = { m_MainBitmap->h, m_Offset.GetFloorIntY() / m_ScaleFactor.GetFloorIntY() };
 			std::array<int, 2> destPosX = { targetBox.GetCorner().GetFloorIntX() - m_Offset.GetFloorIntX(), targetBox.GetCorner().GetFloorIntX() + m_ScaledDimensions.GetFloorIntX() - m_Offset.GetFloorIntX() };
 			std::array<int, 2> destPosY = { targetBox.GetCorner().GetFloorIntY() - m_Offset.GetFloorIntY(), targetBox.GetCorner().GetFloorIntY() + m_ScaledDimensions.GetFloorIntY() - m_Offset.GetFloorIntY() };
 

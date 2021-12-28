@@ -157,12 +157,6 @@ namespace RTE {
 		void SetScaleFactor(const Vector &newScale);
 
 		/// <summary>
-		/// Gets the inverse scale factor that this is drawn in.
-		/// </summary>
-		/// <returns>The scale factor of this to the target it is drawn to. (1/2x if this is half the res, etc.)</returns>
-		Vector GetScaleInverse() const { return m_ScaleInverse; }
-
-		/// <summary>
 		/// Indicates whether the layer is set to wrap around the X axis when scrolled out of bounds.
 		/// </summary>
 		/// <returns>Whether this SceneLayer wraps on the X axis or not.</returns>
@@ -263,23 +257,21 @@ namespace RTE {
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		ContentFile m_BitmapFile; //!< 
-		BITMAP *m_MainBitmap; //!< 
+		ContentFile m_BitmapFile; //!< ContentFile containing the path to this SceneLayer's sprite file.
+		BITMAP *m_MainBitmap; //!< The BITMAP of this SceneLayer.
 		bool m_MainBitmapOwned; //!< Whether the main bitmap is owned by this.
 		bool m_DrawMasked; //!< Whether pixels marked as transparent (index 0, magenta) are skipped when drawing or not (masked drawing).
 
 		bool m_WrapX; //!< Whether wrapping is enabled on the X axis.
 		bool m_WrapY; //!< Whether wrapping is enable on the Y axis.
 
-		Vector m_OriginOffset; //!< 
-		Vector m_Offset; //!< 
+		Vector m_OriginOffset; //!< Offset of this SceneLayer off the top left edge of the screen.
+		Vector m_Offset; //!< The current scrolled offset of this SceneLayer, before being adjusted with the origin offset.
 
-		// The original ScrollInfo with special encoded info that is then made into the actual scroll ratios
-		Vector m_ScrollInfo; //!< 
-		Vector m_ScrollRatio; //!< 
-		Vector m_ScaleFactor; //!< 
-		Vector m_ScaleInverse; //!< 
-		Vector m_ScaledDimensions; //!< 
+		Vector m_ScrollInfo; //!< The initial scrolling ratio of this SceneLayer as set in INI. Used to calculate the actual scrolling ratios.
+		Vector m_ScrollRatio; //!< The scrolling ratios of this SceneLayer, adjusted to the Scene, player screen dimensions and scaling factor as necessary.
+		Vector m_ScaleFactor; //!< The scaling factor of this SceneLayer. Used for scaled drawing and adjusting scrolling ratios.
+		Vector m_ScaledDimensions; //!< The dimensions of this SceneLayer adjusted to the scaling factor.
 
 		/// <summary>
 		/// Initialize the scroll ratios from the scroll info. Must be done after the bitmap has been created.

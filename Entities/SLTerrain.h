@@ -12,7 +12,7 @@ namespace RTE {
 	class TerrainDebris;
 
 	/// <summary>
-	/// Several scrolling layers of the Scene that compose the terrain.
+	/// Collection of scrolling layers that compose the terrain of the Scene.
 	/// </summary>
 	class SLTerrain : public SceneLayer {
 
@@ -68,13 +68,13 @@ namespace RTE {
 		bool IsLoadedFromDisk() const override { return (m_FGColorLayer && m_FGColorLayer->IsLoadedFromDisk()) && (m_BGColorLayer && m_BGColorLayer->IsLoadedFromDisk()); }
 
 		/// <summary>
-		/// Loads previously specified/created data into memory. Has to be done before using this SLTerrain if the bitmap was not generated at runtime.
+		/// Loads previously specified/created bitmap data into memory. Has to be done before using this SLTerrain if the bitmap was not generated at runtime.
 		/// </summary>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int LoadData() override;
 
 		/// <summary>
-		/// Saves data currently in memory to disk.
+		/// Saves bitmap data currently in memory to disk.
 		/// </summary>
 		/// <param name="pathBase">The filepath base to the where to save the Bitmap data. This means everything up to the extension. "FG" and "Mat" etc will be added.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>

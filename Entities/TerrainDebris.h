@@ -67,7 +67,7 @@ namespace RTE {
 		/// <summary>
 		/// Enumeration for the different debris placement modes.
 		/// </summary>
-		enum DebrisPlacementModes {
+		enum DebrisPlacementMode {
 			NoPlacementRestrictions,
 			OnSurfaceOnly,
 			OnCavitySurfaceOnly,
@@ -83,14 +83,14 @@ namespace RTE {
 		std::vector<BITMAP *> m_Bitmaps; //!< All the different bitmaps of this debris. Not owned.
 		int m_BitmapCount; //!< How many individual pieces this debris has.
 
-		Material m_Material; //!< The material of the debris.
-		Material m_TargetMaterial; //!< The material which pieces of this debris should be placed on.
+		Material m_Material; //!< The Material of the debris.
+		Material m_TargetMaterial; //!< The Material which pieces of this debris should be placed on in the terrain.
 
-		DebrisPlacementModes m_DebrisPlacementMode; //!< This will determine how target material checking and debris applying should behave. If set to NoPlacementRestrictions, checking will continue to penetrate down into non-air materials to try to find the target material.
+		DebrisPlacementMode m_DebrisPlacementMode; //!< This will determine how target Material checking and debris applying should behave. If set to NoPlacementRestrictions, checking will continue to penetrate down into non-air Materials to try to find the target Material.
 		bool m_OnlyBuried; //!< Whether to place a piece of this only if a spot where it fits completely buried in the terrain is found.
 
-		int m_MinDepth; //!< Minimum depth debris pieces can be placed into the terrain contour. This can be negative for debris placed above ground.
-		int m_MaxDepth; //!< Maximum depth debris pieces can be placed into the terrain contour. This can be negative for debris placed above ground.
+		int m_MinDepth; //!< Minimum depth debris pieces can be placed into the terrain contour, in pixels. This can be negative for debris placed above ground.
+		int m_MaxDepth; //!< Maximum depth debris pieces can be placed into the terrain contour, in pixels. This can be negative for debris placed above ground.
 
 		int m_MinRotation; //!< Minimum rotation debris pieces can be rotated, in degrees. Positive values are clockwise.
 		int m_MaxRotation; //!< Maximum rotation debris pieces can be rotated, in degrees. Positive values are clockwise.
@@ -111,7 +111,7 @@ namespace RTE {
 		bool GetPiecePlacementPosition(SLTerrain *terrain, Box &positionCheckBox) const;
 
 		/// <summary>
-		/// Checks whether the passed in pixel color value is of target material, and if extra conditions apply for it to be valid for placement, depending on DebrisPlacementMode.
+		/// Checks whether the passed in pixel color value is of target Material, and if extra conditions apply for it to be valid for placement, depending on DebrisPlacementMode.
 		/// </summary>
 		/// <param name="materialCheckPixel">The pixel color value to check.</param>
 		/// <param name="prevMaterialCheckPixel">The previously checked pixel color value to check extra conditions with. Does not apply when DebrisPlacementMode is NoPlacementRestrictions.</param>

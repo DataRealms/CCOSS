@@ -7,7 +7,7 @@
 namespace RTE {
 
 	/// <summary>
-	/// A scrolling background layer of the Scene.
+	/// A scrolling background layer of the Scene, placed behind the terrain.
 	/// </summary>
 	class SLBackground : public SceneLayer {
 		friend class NetworkServer;

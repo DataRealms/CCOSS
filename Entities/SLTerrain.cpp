@@ -105,7 +105,7 @@ namespace RTE {
 			writer.NewPropertyWithValue("BackgroundTexture", m_DefaultBGTextureFile);
 		}
 
-		// Only if we haven't saved out the FG as a done and altered bitmap file should we save the procedural params here.
+		// Only write the procedural params if the foreground itself is not saved out as a file already.
 		if (m_FGColorLayer->IsLoadedFromDisk()) {
 			writer.NewPropertyWithValue("FGColorLayer", m_FGColorLayer.get());
 		} else {
@@ -169,7 +169,7 @@ namespace RTE {
 					_putpixel(m_MainBitmap, xPos, yPos, matIndex);
 				}
 
-				// Validate the material, or default to default material.
+				// Validate the material, or fallback to default material.
 				const Material *material = (matIndex >= 0 && matIndex < c_PaletteEntriesNumber && materialPalette.at(matIndex)) ? materialPalette.at(matIndex) : materialPalette.at(MaterialColorKeys::g_MaterialOutOfBounds);
 
 				// If haven't read a pixel of this material before, then get its texture so we can quickly access it.

@@ -13,7 +13,7 @@ namespace RTE {
 		m_BitmapCount = 0;
 		m_Material.Reset();
 		m_TargetMaterial.Reset();
-		m_DebrisPlacementMode = DebrisPlacementModes::NoPlacementRestrictions;
+		m_DebrisPlacementMode = DebrisPlacementMode::NoPlacementRestrictions;
 		m_OnlyBuried = false;
 		m_MinDepth = 0;
 		m_MaxDepth = 10;
@@ -72,8 +72,8 @@ namespace RTE {
 		} else if (propName == "TargetMaterial") {
 			reader >> m_TargetMaterial;
 		} else if (propName == "DebrisPlacementMode") {
-			m_DebrisPlacementMode = static_cast<DebrisPlacementModes>(std::stoi(reader.ReadPropValue()));
-			if (m_DebrisPlacementMode < DebrisPlacementModes::NoPlacementRestrictions || m_DebrisPlacementMode > DebrisPlacementModes::OnOverhangAndCavityOverhang) { reader.ReportError("Invalid TerrainDebris placement mode!"); }
+			m_DebrisPlacementMode = static_cast<DebrisPlacementMode>(std::stoi(reader.ReadPropValue()));
+			if (m_DebrisPlacementMode < DebrisPlacementMode::NoPlacementRestrictions || m_DebrisPlacementMode > DebrisPlacementMode::OnOverhangAndCavityOverhang) { reader.ReportError("Invalid TerrainDebris placement mode!"); }
 		} else if (propName == "OnlyBuried") {
 			reader >> m_OnlyBuried;
 		} else if (propName == "MinDepth") {
@@ -130,7 +130,7 @@ namespace RTE {
 		int buriedDepthOffset = m_OnlyBuried ? static_cast<int>(positionCheckBox.GetHeight() * 0.6F) : 0;
 		int prevMaterialCheckPixel = -1;
 
-		bool scanForOverhang = m_DebrisPlacementMode == DebrisPlacementModes::OnOverhangOnly || m_DebrisPlacementMode == DebrisPlacementModes::OnCavityOverhangOnly || m_DebrisPlacementMode == DebrisPlacementModes::OnOverhangAndCavityOverhang;
+		bool scanForOverhang = m_DebrisPlacementMode == DebrisPlacementMode::OnOverhangOnly || m_DebrisPlacementMode == DebrisPlacementMode::OnCavityOverhangOnly || m_DebrisPlacementMode == DebrisPlacementMode::OnOverhangAndCavityOverhang;
 
 		// For overhangs scan from the bottom so it's easier to detect.
 		for (int surfacePosY = 0, overhangPosY = matBitmap->h - 1; surfacePosY < matBitmap->h && overhangPosY > 0; surfacePosY++, overhangPosY--) {
@@ -166,16 +166,16 @@ namespace RTE {
 			checkResult = false;
 		} else {
 			switch (m_DebrisPlacementMode) {
-				case DebrisPlacementModes::OnSurfaceOnly:
-				case DebrisPlacementModes::OnOverhangOnly:
+				case DebrisPlacementMode::OnSurfaceOnly:
+				case DebrisPlacementMode::OnOverhangOnly:
 					if (prevMaterialCheckPixel != MaterialColorKeys::g_MaterialAir) { checkResult = false; }
 					break;
-				case DebrisPlacementModes::OnCavitySurfaceOnly:
-				case DebrisPlacementModes::OnCavityOverhangOnly:
+				case DebrisPlacementMode::OnCavitySurfaceOnly:
+				case DebrisPlacementMode::OnCavityOverhangOnly:
 					if (prevMaterialCheckPixel != MaterialColorKeys::g_MaterialCavity) { checkResult = false; }
 					break;
-				case DebrisPlacementModes::OnSurfaceAndCavitySurface:
-				case DebrisPlacementModes::OnOverhangAndCavityOverhang:
+				case DebrisPlacementMode::OnSurfaceAndCavitySurface:
+				case DebrisPlacementMode::OnOverhangAndCavityOverhang:
 					if (prevMaterialCheckPixel != MaterialColorKeys::g_MaterialAir && prevMaterialCheckPixel != MaterialColorKeys::g_MaterialCavity) { checkResult = false; }
 					break;
 				default:

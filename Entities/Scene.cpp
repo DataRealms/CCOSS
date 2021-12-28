@@ -835,11 +835,11 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
                             if (ownerTeam != Activity::NoTeam && m_apUnseenLayer[ownerTeam] && m_apUnseenLayer[ownerTeam]->GetBitmap())
                             {
                                 // Translate to the scaled unseen layer's coordinates
-                                Vector scale = m_apUnseenLayer[ownerTeam]->GetScaleInverse();
-                                int scaledX = std::floor((pTO->GetPos().m_X - (float)(terrainObjectBitmap->w / 2)) * scale.m_X);
-                                int scaledY = std::floor((pTO->GetPos().m_Y - (float)(terrainObjectBitmap->h / 2)) * scale.m_Y);
-                                int scaledW = std::ceil(terrainObjectBitmap->w * scale.m_X);
-                                int scaledH = std::ceil(terrainObjectBitmap->h * scale.m_Y);
+                                Vector scale = m_apUnseenLayer[ownerTeam]->GetScaleFactor();
+                                int scaledX = std::floor((pTO->GetPos().m_X - (float)(terrainObjectBitmap->w / 2)) / scale.m_X);
+                                int scaledY = std::floor((pTO->GetPos().m_Y - (float)(terrainObjectBitmap->h / 2)) / scale.m_Y);
+                                int scaledW = std::ceil(terrainObjectBitmap->w / scale.m_X);
+                                int scaledH = std::ceil(terrainObjectBitmap->h / scale.m_Y);
                                 // Fill the box with key color for the owner ownerTeam, revealing the area that this thing is on
                                 rectfill(m_apUnseenLayer[ownerTeam]->GetBitmap(), scaledX, scaledY, scaledX + scaledW, scaledY + scaledH, g_MaskColor);
                                 // Expand the box a little so the whole placed object is going to be hidden

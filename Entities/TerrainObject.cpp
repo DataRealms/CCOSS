@@ -151,7 +151,7 @@ namespace RTE {
 		}
 		// TODO: TAKE CARE OF WRAPPING
 		Vector bitmapPos = m_Pos + m_BitmapOffset;
-		if (WithinBox(scenePoint, bitmapPos, static_cast<float>(bitmapToCheck->w), static_cast<float>(bitmapToCheck->h))) {
+		if (WithinBox(scenePoint, bitmapPos, static_cast<float>(GetBitmapWidth()), static_cast<float>(GetBitmapHeight()))) {
 			Vector bitmapPoint = scenePoint - bitmapPos;
 			if (getpixel(bitmapToCheck, bitmapPoint.GetFloorIntX(), bitmapPoint.GetFloorIntY()) != MaterialColorKeys::g_MaterialAir) {
 				return true;
@@ -183,47 +183,46 @@ namespace RTE {
 
 	void TerrainObject::Draw(BITMAP *targetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
 		// Take care of wrapping situations
-		Vector aDrawPos[4];
-		aDrawPos[0] = m_Pos + m_BitmapOffset - targetPos;
+		std::array<Vector, 4> drawPos;
+		drawPos.at(0) = m_Pos + m_BitmapOffset - targetPos;
 		int passes = 1;
 
-		// See if need to double draw this across the scene seam if we're being drawn onto a scenewide bitmap
+		// See if need to double draw this across the scene seam if we're being drawn onto a scenewide bitmap.
 		if (targetPos.IsZero() && g_SceneMan.GetSceneWidth() <= targetBitmap->w) {
-			if (aDrawPos[0].GetFloorIntX() < m_FGColorBitmap->w) {
-				aDrawPos[passes] = aDrawPos[0];
-				aDrawPos[passes].m_X += targetBitmap->w;
+			if (drawPos.at(0).GetFloorIntX() < m_FGColorBitmap->w) {
+				drawPos.at(passes) = drawPos.at(0);
+				drawPos.at(passes).m_X += static_cast<float>(targetBitmap->w);
 				passes++;
-			} else if (aDrawPos[0].GetFloorIntX() > targetBitmap->w - m_FGColorBitmap->w) {
-				aDrawPos[passes] = aDrawPos[0];
-				aDrawPos[passes].m_X -= targetBitmap->w;
+			} else if (drawPos.at(0).GetFloorIntX() > targetBitmap->w - m_FGColorBitmap->w) {
+				drawPos.at(passes) = drawPos.at(0);
+				drawPos.at(passes).m_X -= static_cast<float>(targetBitmap->w);
 				passes++;
 			}
 		} else {
-			// Only screenwide target bitmap, so double draw within the screen if the screen is straddling a scene seam
+			// Only screenwide target bitmap, so double draw within the screen if the screen is straddling a scene seam.
 			if (g_SceneMan.SceneWrapsX()) {
-				int sceneWidth = g_SceneMan.GetSceneWidth();
+				float sceneWidth = static_cast<float>(g_SceneMan.GetSceneWidth());
 				if (targetPos.m_X < 0) {
-					aDrawPos[passes] = aDrawPos[0];
-					aDrawPos[passes].m_X -= sceneWidth;
+					drawPos.at(passes) = drawPos.at(0);
+					drawPos.at(passes).m_X -= sceneWidth;
 					passes++;
 				}
-				if (targetPos.m_X + targetBitmap->w > sceneWidth) {
-					aDrawPos[passes] = aDrawPos[0];
-					aDrawPos[passes].m_X += sceneWidth;
+				if (targetPos.m_X + static_cast<float>(targetBitmap->w) > sceneWidth) {
+					drawPos.at(passes) = drawPos.at(0);
+					drawPos.at(passes).m_X += sceneWidth;
 					passes++;
 				}
 			}
 		}
-		// Draw all the passes needed
 		for (int i = 0; i < passes; ++i) {
 			if (mode == g_DrawColor) {
-				if (HasBGColorBitmap()) { masked_blit(m_BGColorBitmap, targetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_BGColorBitmap->w, m_BGColorBitmap->h); }
-				if (HasFGColorBitmap()) { masked_blit(m_FGColorBitmap, targetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_FGColorBitmap->w, m_FGColorBitmap->h); }
+				if (HasBGColorBitmap()) { masked_blit(m_BGColorBitmap, targetBitmap, 0, 0, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY(), m_BGColorBitmap->w, m_BGColorBitmap->h); }
+				if (HasFGColorBitmap()) { masked_blit(m_FGColorBitmap, targetBitmap, 0, 0, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY(), m_FGColorBitmap->w, m_FGColorBitmap->h); }
 			} else if (mode == g_DrawMaterial) {
-				if (HasMaterialBitmap()) { masked_blit(m_MaterialBitmap, targetBitmap, 0, 0, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY(), m_MaterialBitmap->w, m_MaterialBitmap->h); }
+				if (HasMaterialBitmap()) { masked_blit(m_MaterialBitmap, targetBitmap, 0, 0, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY(), m_MaterialBitmap->w, m_MaterialBitmap->h); }
 			} else if (mode == g_DrawTrans) {
-				if (HasFGColorBitmap()) { draw_trans_sprite(targetBitmap, m_FGColorBitmap, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY()); }
-				if (HasBGColorBitmap()) { draw_trans_sprite(targetBitmap, m_BGColorBitmap, aDrawPos[i].GetFloorIntX(), aDrawPos[i].GetFloorIntY()); }
+				if (HasFGColorBitmap()) { draw_trans_sprite(targetBitmap, m_FGColorBitmap, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY()); }
+				if (HasBGColorBitmap()) { draw_trans_sprite(targetBitmap, m_BGColorBitmap, drawPos.at(i).GetFloorIntX(), drawPos.at(i).GetFloorIntY()); }
 			}
 		}
 	}

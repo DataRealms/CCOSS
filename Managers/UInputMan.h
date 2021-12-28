@@ -806,15 +806,15 @@ namespace RTE {
 		static void XWinInputHandlerOverride() { g_UInputMan.HandleAllegroMouseInput(); }
 
 		/// <summary>
-		/// Mouse input handler to circumvent the input drops that allegro does regularly, by replacing and disabling the default warping behaviour.
-		/// Motion events that are generated while the handler is working are offset such that the allegro driver doesn't mess up the mickeys.
-		/// This also handles the centering warp for relative mouse motion. Might not run in the main thread, depending on how allegro was built.
+		/// Mouse input handler to circumvent the input drops that Allegro does regularly, by replacing and disabling the default warping behavior.
+		/// Motion events that are generated while the handler is working are offset such that the Allegro driver doesn't mess up the mickeys.
+		/// This also handles the centering warp for relative mouse motion. Might not run in the main thread, depending on how Allegro was built.
 		/// </summary>
 		void HandleAllegroMouseInput();
 
 		/// <summary>
 		/// Position the mouse on the screen in window coordinates. Generates MouseMotion events if the requested position is different from the actual mouse position.
-		/// Replaces position_mouse and sets the allegro internal mouse position to the requested x,y.
+		/// Replaces position_mouse and sets the Allegro internal mouse position to the requested coordinates.
 		/// </summary>
 		/// <param name="x"> The x coordinate to warp to. </param>
 		/// <param name="y"> The y coordinate to warp to. </param>

@@ -13,8 +13,7 @@
 
 #ifdef _WIN32
 #include "joystickapi.h"
-#endif
-#ifdef __unix__
+#elif __unix__
 #include <fcntl.h>
 #include "allegro/internal/aintern.h"
 #include "allegro/platform/aintunix.h"
@@ -101,12 +100,10 @@ namespace RTE {
 			}
 		}
 
-
 #ifdef __unix__
 		m_AllegroMousePreviousX = 0;
 		m_AllegroMousePreviousY = 0;
 #endif
-
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1056,13 +1053,11 @@ namespace RTE {
 					}
 					break;
 				}
-
 				default:
 					XPutBackEvent(_xwin.display, &(*event));
 					break;
 			}
 		}
-
 		XFlush(_xwin.display);
 
 		_xwin.mouse_warped = 0;
@@ -1072,7 +1067,6 @@ namespace RTE {
 			mouse_x = _xwin.window_width / 2;
 			mouse_y = _xwin.window_height / 2;
 		}
-
 		_mouse_x = mouse_x;
 		_mouse_y = mouse_y;
 	}
@@ -1080,9 +1074,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::WarpMouse(int x, int y) const {
-		if (mouse_x != x || mouse_y != y) {
-			XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, x, y);
-		}
+		if (mouse_x != x || mouse_y != y) { XWarpPointer(_xwin.display, _xwin.window, _xwin.window, 0, 0, 0, 0, x, y); }
 		_mouse_x = mouse_x = x;
 		_mouse_y = mouse_y = y;
 	}

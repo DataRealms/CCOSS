@@ -300,7 +300,7 @@ Vector LimbPath::GetCurrentVel(const Vector &limbPos)
 {
     Vector returnVel;
     Vector distVect = g_SceneMan.ShortestDistance(limbPos, GetCurrentSegTarget());
-	float adjustedTravelSpeed = m_TravelSpeed[m_WhichSpeed] / std::max((std::abs(m_JointVel.GetY()) - std::abs(m_JointVel.GetX())) * 0.5F, 1.0F);
+	float adjustedTravelSpeed = m_TravelSpeed[m_WhichSpeed] / (1.0F + std::abs(m_JointVel.GetY()) * 0.1F);
 
     if (IsStaticPoint())
     {

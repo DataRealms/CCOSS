@@ -241,13 +241,13 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
 		reader >> m_LookToAimRatio;
     } else if (propName == "Jetpack") {
         SetJetpack(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "JumpTime") {
+	} else if (propName == "JumpTime" || propName == "JetTime") {
         reader >> m_JetTimeTotal;
         // Convert to ms
         m_JetTimeTotal *= 1000;
-	} else if (propName == "JumpReplenishRate") {
+	} else if (propName == "JumpReplenishRate" || propName == "JetReplenishRate") {
 		reader >> m_JetReplenishRate;
-	} else if (propName == "JumpAngleRange") {
+	} else if (propName == "JumpAngleRange" || propName == "JetAngleRange") {
 		reader >> m_JetAngleRange;
 	} else if (propName == "FGArmFlailScalar") {
 		reader >> m_FGArmFlailScalar;

@@ -256,12 +256,12 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
         SetTurret(dynamic_cast<Turret *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "Jetpack") {
         SetJetpack(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "JumpTime") {
+	} else if (propName == "JumpTime" || propName == "JetTime") {
         reader >> m_JetTimeTotal;
         m_JetTimeTotal *= 1000;
-	} else if (propName == "JumpReplenishRate") {
+	} else if (propName == "JumpReplenishRate" || propName == "JetReplenishRate") {
 		reader >> m_JetReplenishRate;
-	} else if (propName == "JumpAngleRange") {
+	} else if (propName == "JumpAngleRange" || propName == "JetAngleRange") {
 		reader >> m_JetAngleRange;
     } else if (propName == "LFGLeg" || propName == "LeftFGLeg") {
         SetLeftFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));

@@ -597,7 +597,7 @@ protected:
 	float m_JetTimeTotal;
 	// How much time left the jetpack can go, in ms
 	float m_JetTimeLeft;
-	float m_JetReplenishRate; //!< How fast the jetpack fuel will replenish when not in use, in relation to the legacy value.
+	float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
 	// Ratio at which the jetpack angle follows aim angle
 	float m_JetAngleRange;
 	// Blink timer

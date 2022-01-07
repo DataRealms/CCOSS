@@ -108,6 +108,18 @@ namespace RTE {
 		void SetUnheldItemsHUDDisplayRange(float newRadius) { m_UnheldItemsHUDDisplayRange = std::floor(newRadius); }
 
 		/// <summary>
+		/// Gets whether or not devices on Scene should always show their pick-up HUD when the player is in strategic mode.
+		/// </summary>
+		/// <returns>Whether or not devices on Scene should always show their pick-up HUD when the player is in strategic mode.</returns>
+		bool AlwaysDisplayUnheldItemsInStrategicMode() const { return m_AlwaysDisplayUnheldItemsInStrategicMode; }
+
+		/// <summary>
+		/// Sets whether or not devices on Scene should always show their pick-up HUD when the player is in strategic mode.
+		/// </summary>
+		/// <param name="shouldShowUnheldItemsInStrategicMode">Whether or not devices on Scene should always show their pick-up HUD when the player is in strategic mode.</param>
+		void SetAlwaysDisplayUnheldItemsInStrategicMode(bool shouldShowUnheldItemsInStrategicMode) { m_AlwaysDisplayUnheldItemsInStrategicMode = shouldShowUnheldItemsInStrategicMode; }
+
+		/// <summary>
 		/// Whether red and white flashes appear when brain is damaged.
 		/// </summary>
 		/// <returns>Whether red and white flashes appear when brain is damaged.</returns>
@@ -414,6 +426,7 @@ namespace RTE {
 		bool m_FlashOnBrainDamage; //!< Whether red flashes on brain damage are on or off.
 		bool m_BlipOnRevealUnseen; //!< Blip if unseen is revealed.
 		float m_UnheldItemsHUDDisplayRange; //!< Range in which devices on Scene will show the pick-up HUD, in pixels. 0 means HUDs are hidden, -1 means unlimited range.
+		bool m_AlwaysDisplayUnheldItemsInStrategicMode; //!< Whether or not devices on Scene should always show their pick-up HUD when when the player is in strategic mode.
 		bool m_EndlessMetaGameMode; //!< Endless MetaGame mode.
 		bool m_EnableCrabBombs; //!< Whether all actors (except Brains and Doors) should be annihilated if a number exceeding the crab bomb threshold is released at once.
 		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.

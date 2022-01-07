@@ -578,7 +578,12 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 			if (pSymbolFont && pTextFont) {
 				const Activity *activity = g_ActivityMan.GetActivity();
 				float unheldItemDisplayRange = activity->GetActivityState() == Activity::ActivityState::Running ? g_SettingsMan.GetUnheldItemsHUDDisplayRange() : -1.0F;
+				if (g_SettingsMan.AlwaysDisplayUnheldItemsInStrategicMode()) {
+					const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(activity);
+					if (gameActivity && gameActivity->GetViewState(viewingPlayer) == GameActivity::ViewState::ActorSelect) { unheldItemDisplayRange = -1.0F; }
 				}
+				// Note - to avoid item HUDs flickering in and out, we need to add a little leeway when hiding them if they're already displayed.
+				if (m_SeenByPlayer.at(viewingPlayer) && unheldItemDisplayRange > 0) { unheldItemDisplayRange += 3.0F; }
 				m_SeenByPlayer.at(viewingPlayer) = unheldItemDisplayRange < 0 || (unheldItemDisplayRange > 0 && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < unheldItemDisplayRange);
 
 				if (m_SeenByPlayer.at(viewingPlayer)) {

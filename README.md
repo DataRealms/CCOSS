@@ -30,8 +30,6 @@ You may also want to check out the list of recommended Visual Studio plugins [he
 * `fmod.dll`
 * `fmodL.dll`
 
-4. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into the **Data Repository**.
-
 Now you're ready to build and launch the game.  
 Simply open `RTEA.sln` with Visual Studio, choose your target platform (x86 or x64) and configuration, and run the project.
 
@@ -89,8 +87,6 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 2. Copy all `libfmod` files from `external/lib/linux/x86_64` into the **Data Repository**.
 
    `cd $DATA_REPOSITORY; ln -s ../Cortex-Command-Community-Project-Source/external/lib/linux/x86_64/libfmod.so* .`
-
-3. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into **Data Repository**.
 
 4. Run `./CortexCommand.x86_64` or `./CortexCommand_debug.x86_64` in the **Data Repository**.
 

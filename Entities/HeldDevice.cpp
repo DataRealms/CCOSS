@@ -548,7 +548,7 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 			// Only draw if the team viewing this has seen the space where this is located.
 			int viewingPlayer = g_ActivityMan.GetActivity()->PlayerOfScreen(whichScreen);
 			int viewingTeam = g_ActivityMan.GetActivity()->GetTeamOfPlayer(viewingPlayer);
-			if (viewingTeam != Activity::NoTeam && g_SceneMan.IsUnseen(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), viewingTeam)) {
+			if (viewingTeam == Activity::NoTeam || g_SceneMan.IsUnseen(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), viewingTeam)) {
 				return;
 			}
 
@@ -573,39 +573,33 @@ void HeldDevice::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 				}
 			}
 
-			char str[64];
-			str[0] = 0;
 			GUIFont *pSymbolFont = g_FrameMan.GetLargeFont();
 			GUIFont *pTextFont = g_FrameMan.GetSmallFont();
 			if (pSymbolFont && pTextFont) {
-				if (m_BlinkTimer.GetElapsedSimTimeMS() > 750) {
-					str[0] = -40;
-					str[1] = 0;
-				} else if (m_BlinkTimer.GetElapsedSimTimeMS() > 500) {
-					str[0] = -41;
-					str[1] = 0;
-				} else if (m_BlinkTimer.GetElapsedSimTimeMS() > 250) {
-					str[0] = -42;
-					str[1] = 0;
-				} else if (m_BlinkTimer.GetElapsedSimTimeMS() > 0) {
-					str[0] = 0;
-				} else {
-					// Check for nearby cursors that will toggle this pickup HUD.
-					float range = g_SettingsMan.GetUnheldItemsHUDDisplayRange();
-					if (g_ActivityMan.GetActivity()->GetActivityState() != Activity::ActivityState::Running) {
-						range = -1.0F;
-					} else if (const GameActivity *gameActivity = dynamic_cast<const GameActivity *>(g_ActivityMan.GetActivity())) {
-						if (gameActivity->GetViewState(viewingPlayer) == GameActivity::ViewState::ActorSelect) {
-							range = -1.0F;
-						}
-					}
-					m_SeenByPlayer.at(viewingPlayer) = range < 0 || (range > 0 && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < range);
+				const Activity *activity = g_ActivityMan.GetActivity();
+				float unheldItemDisplayRange = activity->GetActivityState() == Activity::ActivityState::Running ? g_SettingsMan.GetUnheldItemsHUDDisplayRange() : -1.0F;
 				}
+				m_SeenByPlayer.at(viewingPlayer) = unheldItemDisplayRange < 0 || (unheldItemDisplayRange > 0 && g_SceneMan.ShortestDistance(m_Pos, g_SceneMan.GetScrollTarget(whichScreen), g_SceneMan.SceneWrapsX()).GetMagnitude() < unheldItemDisplayRange);
+
 				if (m_SeenByPlayer.at(viewingPlayer)) {
-					AllegroBitmap pBitmapInt(pTargetBitmap);
-					pSymbolFont->DrawAligned(&pBitmapInt, drawPos.GetFloorIntX() - 1, drawPos.GetFloorIntY() - 20, str, GUIFont::Centre);
-					std::snprintf(str, sizeof(str), "%s", m_PresetName.c_str());
-					pTextFont->DrawAligned(&pBitmapInt, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() - 29, str, GUIFont::Centre);
+					char pickupArrowString[64];
+					pickupArrowString[0] = 0;
+					if (m_BlinkTimer.GetElapsedSimTimeMS() < 250) {
+						pickupArrowString[0] = 0;
+					} else if (m_BlinkTimer.GetElapsedSimTimeMS() < 500) {
+						pickupArrowString[0] = -42;
+						pickupArrowString[1] = 0;
+					} else if (m_BlinkTimer.GetElapsedSimTimeMS() < 750) {
+						pickupArrowString[0] = -41;
+						pickupArrowString[1] = 0;
+					} else if (m_BlinkTimer.GetElapsedSimTimeMS() < 1000) {
+						pickupArrowString[0] = -40;
+						pickupArrowString[1] = 0;
+					}
+
+					AllegroBitmap targetAllegroBitmap(pTargetBitmap);
+					pSymbolFont->DrawAligned(&targetAllegroBitmap, drawPos.GetFloorIntX() - 1, drawPos.GetFloorIntY() - 20, pickupArrowString, GUIFont::Centre);
+					pTextFont->DrawAligned(&targetAllegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() - 29, m_PresetName, GUIFont::Centre);
 				}
 			}
 		}

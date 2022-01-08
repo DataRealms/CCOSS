@@ -729,6 +729,8 @@ namespace RTE {
 		m_DataUncompressedTotal[player] += payloadSize;
 
 		m_SendSceneSetupData[player] = false;
+		m_SendSceneData[player] = false;
+		m_SendFrameData[player] = false;
 
 		// While we're on the same thread with freshly connected player, send current music being played
 		if (g_AudioMan.IsMusicPlaying()) {

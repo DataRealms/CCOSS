@@ -59,6 +59,7 @@ namespace RTE {
 		GUITextBox *m_CrabBombThresholdTextbox;
 		GUISlider *m_UnheldItemsHUDDisplayRangeSlider;
 		GUILabel *m_UnheldItemsHUDDisplayRangeLabel;
+		GUICheckbox *m_AlwaysDisplayUnheldItemsInStrategicModeCheckbox;
 
 #pragma region Gameplay Settings Handling
 		/// <summary>

@@ -22,6 +22,7 @@ namespace RTE {
 		m_FlashOnBrainDamage = true;
 		m_BlipOnRevealUnseen = true;
 		m_UnheldItemsHUDDisplayRange = 25;
+		m_AlwaysDisplayUnheldItemsInStrategicMode = true;
 		m_EndlessMetaGameMode = false;
 		m_EnableCrabBombs = false;
 		m_CrabBombThreshold = 42;
@@ -139,6 +140,8 @@ namespace RTE {
 			reader >> g_MovableMan.m_MaxDroppedItems;
 		} else if (propName == "UnheldItemsHUDDisplayRange") {
 			SetUnheldItemsHUDDisplayRange(std::stof(reader.ReadPropValue()));
+		} else if (propName == "AlwaysDisplayUnheldItemsInStrategicMode") {
+			reader >> m_AlwaysDisplayUnheldItemsInStrategicMode;
 		} else if (propName == "SloMoThreshold") {
 			reader >> g_MovableMan.m_SloMoThreshold;
 		} else if (propName == "SloMoDurationMS") {
@@ -314,6 +317,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("BlipOnRevealUnseen", m_BlipOnRevealUnseen);
 		writer.NewPropertyWithValue("MaxUnheldItems", g_MovableMan.m_MaxDroppedItems);
 		writer.NewPropertyWithValue("UnheldItemsHUDDisplayRange", m_UnheldItemsHUDDisplayRange);
+		writer.NewPropertyWithValue("AlwaysDisplayUnheldItemsInStrategicMode", m_AlwaysDisplayUnheldItemsInStrategicMode);
 		writer.NewPropertyWithValue("SloMoThreshold", g_MovableMan.m_SloMoThreshold);
 		writer.NewPropertyWithValue("SloMoDurationMS", g_MovableMan.m_SloMoDuration);
 		writer.NewPropertyWithValue("EndlessMetaGameMode", m_EndlessMetaGameMode);

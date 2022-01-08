@@ -1655,8 +1655,14 @@ namespace RTE {
 				for (short player = 0; player < c_MaxClients; player++) {
 					if (IsPlayerConnected(player)) {
 						votesNeeded++;
-						if (m_EndActivityVotes[player]) { endActivityVotes++; }
-						if (m_RestartActivityVotes[player]) { restartVotes++; }
+						if (m_EndActivityVotes[player]) {
+							endActivityVotes++;
+							m_EndActivityVotes[player] = false;
+						}
+						if (m_RestartActivityVotes[player]) {
+							restartVotes++;
+							m_RestartActivityVotes[player] = false;
+						}
 					}
 				}
 
@@ -1676,22 +1682,22 @@ namespace RTE {
 						g_ActivityMan.GetActivity()->ResetMessageTimer(i);
 					}
 
-					// establish timer so restarts can only occur once per 5 seconds
+					// establish timer so restarts can only occur once per 3 seconds
 					long long currentTicks = g_TimerMan.GetRealTickCount();
-					int minRestartInterval = 5;
+					int minRestartInterval = 3;
 
-					if (endActivityVotes >= votesNeeded) {
-						g_ActivityMan.EndActivity();
-						g_ActivityMan.SetRestartActivity();
-						g_ActivityMan.SetInActivity(false);
-					} else if (restartVotes >= votesNeeded && ((currentTicks - m_LatestRestartTime > (g_TimerMan.GetTicksPerSecond() * minRestartInterval) || m_LatestRestartTime == 0))) {
-						m_LatestRestartTime = currentTicks;
-						g_ActivityMan.RestartActivity();
-					}
-
-					for (short player = 0; player < c_MaxClients; player++) {
-						m_EndActivityVotes[player] = false;
-						m_RestartActivityVotes[player] = false;
+					if ((currentTicks - m_LatestRestartTime > (g_TimerMan.GetTicksPerSecond() * minRestartInterval)) || m_LatestRestartTime == 0) {
+						if (endActivityVotes >= votesNeeded) {
+							m_LatestRestartTime = currentTicks;
+							g_ActivityMan.EndActivity();
+							g_ActivityMan.SetRestartActivity();
+							g_ActivityMan.SetInActivity(false);
+							for (short player = 0; player < c_MaxClients; player++) { ClearInputMessages(player); }
+						} else if (restartVotes >= votesNeeded) {
+							m_LatestRestartTime = currentTicks;
+							g_ActivityMan.RestartActivity();
+							for (short player = 0; player < c_MaxClients; player++) { ClearInputMessages(player); }
+						}
 					}
 				}
 			}

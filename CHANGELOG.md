@@ -250,7 +250,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `SoundContainer` INI and Lua (R/W) property `PitchVariation`, which can be used to randomize the pitch of the sounds being played.
 
+- New `AHuman` and `ACrab` INI and Lua (R/W) property `JetReplenishRate`, which determines how fast jump time (i.e. jetpack fuel) is replenished during downtime.
+
 - Added `Entity` Lua function `entity:RemoveFromGroup(groupToRemoveFrom)` which removes the given group from the `Entity`. The reverse of `AddToGroup`.
+
+- New `AHuman` Lua functions `GetWalkAngle(layer)` and `SetWalkAngle(layer, angle)`, which can be used to read and override walk path rotation of both Legs/Layers respectively. Note that the walk path rotation is automatically updated on each step to match the curvature of the terrain, so this value resets every update.
 
 </details>
 

@@ -73,6 +73,7 @@ void AHuman::Clear()
     m_StrideStart = false;
     m_JetTimeTotal = 0.0;
     m_JetTimeLeft = 0.0;
+	m_JetReplenishRate = 1.0F;
 	m_JetAngleRange = 0.25F;
     m_GoldInInventoryChunk = 0;
     m_ThrowTmr.Reset();
@@ -81,6 +82,7 @@ void AHuman::Clear()
 	m_FGArmFlailScalar = 0.0F;
 	m_BGArmFlailScalar = 0.7F;
 	m_EquipHUDTimer.Reset();
+	m_WalkAngle.fill(Matrix());
 
     m_DeviceState = SCANNING;
     m_SweepState = NOSWEEP;
@@ -173,6 +175,7 @@ int AHuman::Create(const AHuman &reference) {
 	m_ThrowPrepTime = reference.m_ThrowPrepTime;
     m_JetTimeTotal = reference.m_JetTimeTotal;
     m_JetTimeLeft = reference.m_JetTimeLeft;
+    m_JetReplenishRate = reference.m_JetReplenishRate;
 	m_JetAngleRange = reference.m_JetAngleRange;
 	m_FGArmFlailScalar = reference.m_FGArmFlailScalar;
 	m_BGArmFlailScalar = reference.m_BGArmFlailScalar;
@@ -238,11 +241,13 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
 		reader >> m_LookToAimRatio;
     } else if (propName == "Jetpack") {
         SetJetpack(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "JumpTime") {
+	} else if (propName == "JumpTime" || propName == "JetTime") {
         reader >> m_JetTimeTotal;
         // Convert to ms
         m_JetTimeTotal *= 1000;
-	} else if (propName == "JumpAngleRange") {
+	} else if (propName == "JumpReplenishRate" || propName == "JetReplenishRate") {
+		reader >> m_JetReplenishRate;
+	} else if (propName == "JumpAngleRange" || propName == "JetAngleRange") {
 		reader >> m_JetAngleRange;
 	} else if (propName == "FGArmFlailScalar") {
 		reader >> m_FGArmFlailScalar;
@@ -339,6 +344,8 @@ int AHuman::Save(Writer &writer) const
     writer.NewProperty("JumpTime");
     // Convert to seconds
     writer << m_JetTimeTotal / 1000;
+	writer.NewProperty("JumpReplenishRate");
+	writer << m_JetReplenishRate;
 	writer.NewProperty("JumpAngleRange");
 	writer << m_JetAngleRange;
 	writer.NewProperty("FGArmFlailScalar");
@@ -1796,6 +1803,38 @@ bool AHuman::UpdateMovePath()
     return true;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void AHuman::UpdateWalkAngle(AHuman::Layer whichLayer) {
+	if (m_Controller.IsState(BODY_JUMP)) {
+		m_WalkAngle[whichLayer] = Matrix(c_QuarterPI * GetFlipFactor());
+	} else {
+		int rayCount = 4;
+		float rayLength = 10.0F;
+		Vector hipPos = m_Pos;
+		if (whichLayer == AHuman::Layer::FGROUND && m_pFGLeg) {
+			rayLength += m_pFGLeg->GetMaxLength();
+			hipPos += RotateOffset(m_pFGLeg->GetParentOffset());
+		} else if (m_pBGLeg) {
+			rayLength += m_pBGLeg->GetMaxLength();
+			hipPos += RotateOffset(m_pBGLeg->GetParentOffset());
+		}
+		float traceRotation = c_HalfPI / static_cast<float>(rayCount - 1) * GetFlipFactor();
+		Vector hitPos;
+		Vector terrainVector(0, rayLength);
+		Vector trace(0, rayLength);
+		for (int i = 0; i < rayCount; i++) {
+			if (g_SceneMan.CastStrengthRay(hipPos, trace, 10.0F, hitPos, 4, g_MaterialGrass)) {
+				terrainVector += trace - g_SceneMan.ShortestDistance(hipPos, hitPos, g_SceneMan.SceneWrapsX());
+			} else {
+				// Since no terrain was found, reinforce the existing terrain direction Vector, so any terrain found in future affects it less.
+				terrainVector *= 1.5F;
+			}
+			trace.RadRotate(traceRotation);
+		}
+		m_WalkAngle[whichLayer] = Matrix((terrainVector * GetFlipFactor()).GetAbsRadAngle() + c_HalfPI * GetFlipFactor());
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateAI
@@ -3116,7 +3155,7 @@ void AHuman::Update()
 		} else {
 			m_pJetpack->EnableEmission(false);
 			if (m_MoveState == JUMP) { m_MoveState = STAND; }
-			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * 2.0F, m_JetTimeTotal);
+			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * 2.0F * m_JetReplenishRate, m_JetTimeTotal);
 		}
 
 		float maxAngle = c_HalfPI * m_JetAngleRange;
@@ -3565,52 +3604,40 @@ void AHuman::Update()
             float FGLegProg = m_Paths[FGROUND][WALK].GetRegularProgress();
             float BGLegProg = m_Paths[BGROUND][WALK].GetRegularProgress();
 
-            bool playStride = false;
+            bool restarted = false;
 
 			// Make sure we are starting a stride if we're basically stopped.
 			if (isStill) { m_StrideStart = true; }
 
-            if (m_pFGLeg && (!m_pBGLeg || (!(m_Paths[FGROUND][WALK].PathEnded() && BGLegProg < 0.5) || m_StrideStart)))
-            {
-//                m_StrideStart = false;
-                // Reset the stride timer if the path is about to restart
-                if (m_Paths[FGROUND][WALK].PathEnded() || m_Paths[FGROUND][WALK].PathIsAtStart())
-                    m_StrideTimer.Reset();
-                m_ArmClimbing[BGROUND] = !m_pFGFootGroup->PushAsLimb(m_Pos +
-                                                                     m_pFGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                                                     m_Vel,
-                                                                     Matrix(),
-                                                                     m_Paths[FGROUND][WALK],
-                                                                     deltaTime,
-                                                                     &playStride,
-                                                                     false);
-            }
-            else
-                m_ArmClimbing[BGROUND] = false;
+			if (m_pFGLeg && (!m_pBGLeg || !(m_Paths[FGROUND][WALK].PathEnded() && BGLegProg < 0.5F) || m_StrideStart)) {
+				// Reset the stride timer if the path is about to restart.
+				if (m_Paths[FGROUND][WALK].PathEnded() || m_Paths[FGROUND][WALK].PathIsAtStart()) { m_StrideTimer.Reset(); }
+				m_ArmClimbing[BGROUND] = !(m_pFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pFGLeg->GetParentOffset()), m_Vel, m_WalkAngle[FGROUND], m_Paths[FGROUND][WALK], deltaTime, &restarted, false));
+				if (restarted) { UpdateWalkAngle(FGROUND); }
+			} else {
+				m_ArmClimbing[BGROUND] = false;
+			}
+			if (m_pBGLeg && (!m_pFGLeg || !(m_Paths[BGROUND][WALK].PathEnded() && FGLegProg < 0.5F))) {
+				m_StrideStart = false;
+				// Reset the stride timer if the path is about to restart.
+				if (m_Paths[BGROUND][WALK].PathEnded() || m_Paths[BGROUND][WALK].PathIsAtStart()) { m_StrideTimer.Reset(); }
+				m_ArmClimbing[FGROUND] = !m_pBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pBGLeg->GetParentOffset()), m_Vel, m_WalkAngle[BGROUND], m_Paths[BGROUND][WALK], deltaTime, &restarted, false);
+				if (restarted) { UpdateWalkAngle(BGROUND); }
+			} else {
+				if (m_pBGLeg) { m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pBGLeg->GetMass(), deltaTime); }
+				m_ArmClimbing[FGROUND] = false;
+			}
+			bool climbing = m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND];
 
-            if (m_pBGLeg && (!m_pFGLeg || !(m_Paths[BGROUND][WALK].PathEnded() && FGLegProg < 0.5)))
-            {
-                m_StrideStart = false;
-                // Reset the stride timer if the path is about to restart
-                if (m_Paths[BGROUND][WALK].PathEnded() || m_Paths[BGROUND][WALK].PathIsAtStart())
-                    m_StrideTimer.Reset();
-                m_ArmClimbing[FGROUND] = !m_pBGFootGroup->PushAsLimb(m_Pos +
-                                                                     m_pBGLeg->GetParentOffset().GetXFlipped(m_HFlipped),
-                                                                     m_Vel,
-                                                                     Matrix(),
-                                                                     m_Paths[BGROUND][WALK],
-                                                                     deltaTime,
-                                                                     &playStride,
-                                                                     false);
-            }
-            else
-                m_ArmClimbing[FGROUND] = false;
-
-            // Play the stride sound, if applicable
-            if (playStride && !m_ArmClimbing[FGROUND] && !m_ArmClimbing[BGROUND]) {
-				if (m_StrideSound) { m_StrideSound->Play(m_Pos); }
-                RunScriptedFunctionInAppropriateScripts("OnStride");
-            }
+			if (restarted) {
+				if (!climbing) {
+					if (m_StrideSound) { m_StrideSound->Play(m_Pos); }
+					RunScriptedFunctionInAppropriateScripts("OnStride");
+				} else {
+					m_WalkAngle[FGROUND] = Matrix();
+					m_WalkAngle[BGROUND] = Matrix();
+				}
+			}
 
             ////////////////////////////////////////
             // Arm Climbing if the leg paths failed to find clear spot to restart
@@ -3620,61 +3647,41 @@ void AHuman::Update()
             float FGArmProg = m_Paths[FGROUND][CLIMB].GetRegularProgress();
             float BGArmProg = m_Paths[BGROUND][CLIMB].GetRegularProgress();
 
+			// TODO: Figure out what this comment means, and then rephrase it better!
             // Slightly negative BGArmProg makes sense because any progress on the starting segments are reported as negative,
             // and there's many starting segments on properly formed climbing paths
-            if (m_pFGArm && (m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND]) && (!m_pBGArm || !m_pFGLeg || BGArmProg > 0.1))
-            {
-                m_ArmClimbing[FGROUND] = true;
-                m_Paths[FGROUND][WALK].Terminate();
-    //            m_Paths[BGROUND][WALK].Terminate();
-                m_StrideStart = true;
-                // Reset the stride timer if the path is about to restart
-                if (m_Paths[FGROUND][CLIMB].PathEnded() || m_Paths[FGROUND][CLIMB].PathIsAtStart())
-                    m_StrideTimer.Reset();
-                m_pFGHandGroup->PushAsLimb(m_Pos +
-                                           m_pFGArm->GetParentOffset().GetXFlipped(m_HFlipped),
-                                           m_Vel,
-                                           m_Rotation,
-                                           m_Paths[FGROUND][CLIMB],
-                                           deltaTime);
-            }
-            else
-            {
-                m_ArmClimbing[FGROUND] = false;
-                m_Paths[FGROUND][CLIMB].Terminate();
-            }
+			if (climbing) {
+				if (m_pFGArm && !(m_Paths[FGROUND][CLIMB].PathEnded() && BGArmProg > 0.1F)) {	// < 0.5F
+					m_ArmClimbing[FGROUND] = true;
+					m_Paths[FGROUND][WALK].Terminate();
+					m_StrideStart = true;
+					// Reset the stride timer if the path is about to restart.
+					if (m_Paths[FGROUND][CLIMB].PathEnded() || m_Paths[FGROUND][CLIMB].PathIsAtStart()) { m_StrideTimer.Reset(); }
+					m_pFGHandGroup->PushAsLimb(m_Pos + Vector(0, m_pFGArm->GetParentOffset().m_Y).RadRotate(-rot), m_Vel, Matrix(), m_Paths[FGROUND][CLIMB], deltaTime, 0, false);
+				} else {
+					m_ArmClimbing[FGROUND] = false;
+					m_Paths[FGROUND][CLIMB].Terminate();
+				}
+				if (m_pBGArm) {
+					m_ArmClimbing[BGROUND] = true;
+					m_Paths[BGROUND][WALK].Terminate();
+					m_StrideStart = true;
+					// Reset the stride timer if the path is about to restart.
+					if (m_Paths[BGROUND][CLIMB].PathEnded() || m_Paths[BGROUND][CLIMB].PathIsAtStart()) { m_StrideTimer.Reset(); }
+					m_pBGHandGroup->PushAsLimb(m_Pos + Vector(0, m_pBGArm->GetParentOffset().m_Y).RadRotate(-rot), m_Vel, Matrix(), m_Paths[BGROUND][CLIMB], deltaTime, 0, false);
+				} else {
+					m_ArmClimbing[BGROUND] = false;
+					m_Paths[BGROUND][CLIMB].Terminate();
+				}
+			}
 
-            if (m_pBGArm && (m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND]))
-            {
-                m_ArmClimbing[BGROUND] = true;
-    //            m_Paths[FGROUND][WALK].Terminate();
-                m_Paths[BGROUND][WALK].Terminate();
-                m_StrideStart = true;
-                // Reset the stride timer if the path is about to restart
-                if (m_Paths[BGROUND][CLIMB].PathEnded() || m_Paths[BGROUND][CLIMB].PathIsAtStart())
-                    m_StrideTimer.Reset();
-                m_pBGHandGroup->PushAsLimb(m_Pos +
-                                           m_pBGArm->GetParentOffset().GetXFlipped(m_HFlipped),
-                                           m_Vel,
-                                           m_Rotation,
-                                           m_Paths[BGROUND][CLIMB],
-                                           deltaTime);
-            }
-            else
-            {
-                m_ArmClimbing[BGROUND] = false;
-                m_Paths[BGROUND][CLIMB].Terminate();
-            }
-
-            // Restart the climbing stroke if the current one seems to be taking too long with no movement.
-            if ((m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND]) && isStill && m_StrideTimer.IsPastSimMS(static_cast<double>(m_Paths[BGROUND][CLIMB].GetTotalPathTime() * 0.5F))) {
+			// Restart the climbing stroke if the current one seems to be taking too long with no movement.
+			if (climbing && isStill && m_StrideTimer.IsPastSimMS(static_cast<double>(m_Paths[BGROUND][CLIMB].GetTotalPathTime() * 0.5F))) {
                 m_StrideStart = true;
                 m_Paths[FGROUND][CLIMB].Terminate();
                 m_Paths[BGROUND][CLIMB].Terminate();
-            }
-            // Reset the walking stride if it's taking too long
-            else if (m_StrideTimer.IsPastSimMS(m_Paths[FGROUND][WALK].GetTotalPathTime()))
-            {
+			} else if (m_StrideTimer.IsPastSimMS(static_cast<double>(m_Paths[FGROUND][WALK].GetTotalPathTime() * 1.1F))) {
+				// Reset the walking stride if it's taking longer than it should.
                 m_StrideStart = true;
                 m_Paths[FGROUND][WALK].Terminate();
                 m_Paths[BGROUND][WALK].Terminate();
@@ -3692,15 +3699,8 @@ void AHuman::Update()
             {
 //                m_StrideStart = false;
                 // Reset the stride timer if the path is about to restart
-                if (m_Paths[FGROUND][CRAWL].PathEnded() || m_Paths[FGROUND][CRAWL].PathIsAtStart())
-                    m_StrideTimer.Reset();
-                m_pFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pFGLeg->GetParentOffset()),
-                                                                   m_Vel,
-                                                                   m_Rotation,
-                                                                   m_Paths[FGROUND][CRAWL],
-                                                                   deltaTime,
-                                                                   0,
-                                                                   true);
+				if (m_Paths[FGROUND][CRAWL].PathEnded() || m_Paths[FGROUND][CRAWL].PathIsAtStart()) { m_StrideTimer.Reset(); }
+				m_pFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pFGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[FGROUND][CRAWL], deltaTime);
             }
             else
                 m_Paths[FGROUND][CRAWL].Terminate();
@@ -3710,16 +3710,8 @@ void AHuman::Update()
             {
                 m_StrideStart = false;
                 // Reset the stride timer if the path is about to restart
-                if (m_Paths[BGROUND][CRAWL].PathEnded() || m_Paths[BGROUND][CRAWL].PathIsAtStart())
-                    m_StrideTimer.Reset();
-                // If both legs can't find free resrtart, ti's time to use the arm!
-                m_pBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pBGLeg->GetParentOffset()),
-                                                                   m_Vel,
-                                                                   m_Rotation,
-                                                                   m_Paths[BGROUND][CRAWL],
-                                                                   deltaTime,
-                                                                   0,
-                                                                   true);
+				if (m_Paths[BGROUND][CRAWL].PathEnded() || m_Paths[BGROUND][CRAWL].PathIsAtStart()) { m_StrideTimer.Reset(); }
+				m_pBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pBGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[BGROUND][CRAWL], deltaTime);
             }
             else
                 m_Paths[BGROUND][CRAWL].Terminate();

@@ -374,6 +374,20 @@ ClassInfoGetters;
 	void SetJetTimeLeft(float newValue) { m_JetTimeLeft = newValue < m_JetTimeTotal ? newValue : m_JetTimeTotal; }
 
 	/// <summary>
+	/// Gets the rate at which this AHuman's jetpack is replenished during downtime.
+	/// </summary>
+	/// <returns>The rate at which the jetpack is replenished.</returns>
+	float GetJetReplenishRate() const { return m_JetReplenishRate; }
+
+
+	/// <summary>
+	/// Sets the rate at which this AHuman's jetpack is replenished during downtime.
+	/// </summary>
+	/// <param name="newValue">The rate at which the jetpack is replenished.</param>
+	void SetJetReplenishRate(float newValue) { m_JetReplenishRate = newValue; }
+
+
+	/// <summary>
 	/// Gets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
 	/// </summary>
 	/// <returns>The ratio at which this jetpack follows the aim angle of the user.</returns>
@@ -759,6 +773,27 @@ ClassInfoGetters;
 	bool UpdateMovePath() override;
 
 
+	/// <summary>
+	/// Detects slopes in terrain and updates the walk path rotation for the corresponding Layer accordingly.
+	/// </summary>
+	/// <param name="whichLayer">The Layer in question.</param>
+	void UpdateWalkAngle(AHuman::Layer whichLayer);
+
+	/// <summary>
+	/// Gets the walk path rotation for the specified Layer.
+	/// </summary>
+	/// <param name="whichLayer">The Layer in question.</param>
+	/// <returns>The walk angle in radians.</returns>
+	float GetWalkAngle(AHuman::Layer whichLayer) const { return m_WalkAngle[whichLayer].GetRadAngle(); }
+
+	/// <summary>
+	/// Sets the walk path rotation for the specified Layer.
+	/// </summary>
+	/// <param name="whichLayer">The Layer in question.</param>
+	/// <param name="angle">The angle to set.</param>
+	void SetWalkAngle(AHuman::Layer whichLayer, float angle) { m_WalkAngle[whichLayer] = Matrix(angle); }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateAI
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -959,6 +994,7 @@ protected:
     float m_JetTimeTotal;
     // How much time left the jetpack can go, in ms
     float m_JetTimeLeft;
+	float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
 	// Ratio at which the jetpack angle follows aim angle
 	float m_JetAngleRange;
     // Blink timer
@@ -995,6 +1031,7 @@ protected:
 	float m_FGArmFlailScalar; //!< The rate at which this AHuman's FG Arm follows the the bodily rotation. Best to keep this at 0 so it doesn't complicate aiming.
 	float m_BGArmFlailScalar; //!< The rate at which this AHuman's BG Arm follows the the bodily rotation. Set to a negative value for a "counterweight" effect.
 	Timer m_EquipHUDTimer; //!< Timer for showing the name of any newly equipped Device.
+	std::array<Matrix, 2> m_WalkAngle; //!< An array of rot angle targets for different movement states.
 
     ////////////////
     // AI States

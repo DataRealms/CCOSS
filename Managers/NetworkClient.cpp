@@ -246,8 +246,12 @@ namespace RTE {
 			m_MouseButtonPressedState[i] = -1;
 			m_MouseButtonReleasedState[i] = -1;
 		}
-
-		msg.MouseWheelMoved = g_UInputMan.MouseWheelMoved();
+		if (m_MouseWheelMoved != 0) {
+			msg.MouseWheelMoved = m_MouseWheelMoved;
+			m_MouseWheelMoved = 0;
+		} else {
+			msg.MouseWheelMoved = 0;
+		}
 
 		msg.InputElementHeld = 0;
 		msg.InputElementPressed = 0;
@@ -983,6 +987,10 @@ namespace RTE {
 		if (m_MouseButtonReleasedState[MOUSE_LEFT] < 1) { m_MouseButtonReleasedState[MOUSE_LEFT] = g_UInputMan.MouseButtonReleased(MOUSE_LEFT, -1) ? 1 : 0; }
 		if (m_MouseButtonReleasedState[MOUSE_RIGHT] < 1) { m_MouseButtonReleasedState[MOUSE_RIGHT] = g_UInputMan.MouseButtonReleased(MOUSE_RIGHT, -1) ? 1 : 0; }
 		if (m_MouseButtonReleasedState[MOUSE_MIDDLE] < 1) { m_MouseButtonReleasedState[MOUSE_MIDDLE] = g_UInputMan.MouseButtonReleased(MOUSE_MIDDLE, -1) ? 1 : 0; }
+
+		if (g_UInputMan.MouseWheelMoved() != 0) {
+			m_MouseWheelMoved = g_UInputMan.MouseWheelMoved();
+		}
 
 		// Input is sent at whatever settings are set in inputs per second
 		float inputSend = m_ClientInputFps;

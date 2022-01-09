@@ -34,7 +34,7 @@ namespace RTE {
 		m_NATServiceAddress = "127.0.0.1:61111";
 		m_NATServerName = "DefaultServerName";
 		m_NATServerPassword = "DefaultServerPassword";
-		m_UseExperimentalMultiplayerSpeedboosts = true;
+		m_UseExperimentalMultiplayerSpeedBoosts = true;
 
 		m_AllowSavingToBase = false;
 		m_ShowForeignItems = true;
@@ -227,8 +227,8 @@ namespace RTE {
 			reader >> m_NATServerName;
 		} else if (propName == "NATServerPassword") {
 			reader >> m_NATServerPassword;
-		} else if (propName == "UseExperimentalMultiplayerSpeedboosts") {
-			reader >> m_UseExperimentalMultiplayerSpeedboosts;
+		} else if (propName == "UseExperimentalMultiplayerSpeedBoosts") {
+			reader >> m_UseExperimentalMultiplayerSpeedBoosts;
 		} else if (propName == "ClientInputFps") {
 			reader >> g_NetworkClient.m_ClientInputFps;
 		} else if (propName == "ServerTransmitAsBoxes") {
@@ -393,7 +393,7 @@ namespace RTE {
 		writer.NewPropertyWithValue("NATServiceAddress", m_NATServiceAddress);
 		writer.NewPropertyWithValue("NATServerName", m_NATServerName);
 		writer.NewPropertyWithValue("NATServerPassword", m_NATServerPassword);
-		writer.NewPropertyWithValue("UseExperimentalMultiplayerSpeedboosts", m_UseExperimentalMultiplayerSpeedboosts);
+		writer.NewPropertyWithValue("UseExperimentalMultiplayerSpeedBoosts", m_UseExperimentalMultiplayerSpeedBoosts);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

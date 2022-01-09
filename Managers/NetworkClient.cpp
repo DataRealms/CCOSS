@@ -283,7 +283,7 @@ namespace RTE {
 			return;
 		}
 
-		if (!g_SettingsMan.UseExperimentalMultiplayerSpeedboosts()) { DrawFrame(); }
+		if (!g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) { DrawFrame(); }
 
 		m_PostEffects[m_CurrentFrame].clear();
 		m_CurrentFrame = frameData->FrameNumber;
@@ -1006,7 +1006,7 @@ namespace RTE {
 		if (static_cast<double>((currentTicks - m_LastInputSentTime)) / static_cast<double>(g_TimerMan.GetTicksPerSecond()) > 1.0 / inputSend) {
 			m_LastInputSentTime = g_TimerMan.GetRealTickCount();
 			if (IsConnectedAndRegistered()) {
-				if (g_SettingsMan.UseExperimentalMultiplayerSpeedboosts()) { DrawFrame(); }
+				if (g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) { DrawFrame(); }
 				SendInputMsg();
 			}
 		}

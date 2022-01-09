@@ -1154,7 +1154,7 @@ namespace RTE {
 	int NetworkServer::SendFrame(short player) {
 		long long currentTicks = g_TimerMan.GetRealTickCount();
 		double fps = static_cast<double>(m_EncodingFps);
-		if (g_SettingsMan.UseExperimentalMultiplayerSpeedboosts()) {
+		if (g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) {
 			RakSleep(1000 / fps);
 		} else {
 			double secsPerFrame = 1.0 / fps;
@@ -1452,7 +1452,7 @@ namespace RTE {
 		}
 		ProcessTerrainChanges(player);
 
-		if (!g_SettingsMan.UseExperimentalMultiplayerSpeedboosts()) {
+		if (!g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) {
 			double secsSinceSendStart = static_cast<double>(g_TimerMan.GetRealTickCount() - currentTicks) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
 			m_MsecPerSendCall[player] = static_cast<int>(secsSinceSendStart * 1000.0);
 		}

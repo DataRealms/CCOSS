@@ -257,13 +257,13 @@ namespace RTE {
 		/// Gets whether or not experimental multiplayer speedboosts should be used.
 		/// </summary>
 		/// <returns>Whether or not experimental multiplayer speedboosts should be used.</returns>
-		bool UseExperimentalMultiplayerSpeedboosts() const { return m_UseExperimentalMultiplayerSpeedboosts; }
+		bool UseExperimentalMultiplayerSpeedBoosts() const { return m_UseExperimentalMultiplayerSpeedBoosts; }
 
 		/// <summary>
 		/// Sets whether or not experimental multiplayer speedboosts should be used.
 		/// </summary>
 		/// <param name="newValue">Whether or not experimental multiplayer speedboosts should be used.</param>
-		void SetUseExperimentalMultiplayerSpeedboosts(bool newValue) { m_UseExperimentalMultiplayerSpeedboosts = newValue; }
+		void SetUseExperimentalMultiplayerSpeedBoosts(bool newValue) { m_UseExperimentalMultiplayerSpeedBoosts = newValue; }
 #pragma endregion
 
 #pragma region Editor Settings
@@ -450,7 +450,7 @@ namespace RTE {
 		std::string m_NATServiceAddress; //!< NAT punch-through server address.
 		std::string m_NATServerName; //!< Server name to use when connecting via NAT punch-through service.
 		std::string m_NATServerPassword; //!< Server password to use when connecting via NAT punch-through service.
-		bool m_UseExperimentalMultiplayerSpeedboosts; //!< Turns on/off code changes from topkek that may speed up multiplayer.
+		bool m_UseExperimentalMultiplayerSpeedBoosts; //!< Turns on/off code changes from topkek that may speed up multiplayer.
 
 		bool m_AllowSavingToBase; //!< Whether editors will allow to select Base.rte as a module to save in.
 		bool m_ShowMetaScenes; //!< Show MetaScenes in editors and activities.

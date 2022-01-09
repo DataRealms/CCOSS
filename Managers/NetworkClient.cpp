@@ -31,7 +31,7 @@ namespace RTE {
 		m_CompressedData = 0;
 		m_IsConnected = false;
 		m_IsRegistered = false;
-		m_ClientInputFps = 30;
+		m_ClientInputFps = 120;
 		m_SceneBackgroundBitmap = 0;
 		m_SceneForegroundBitmap = 0;
 		m_CurrentSceneLayerReceived = -1;

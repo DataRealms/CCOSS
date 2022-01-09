@@ -126,14 +126,14 @@ namespace RTE {
 		m_UseHighCompression = true;
 		m_UseFastCompression = false;
 		m_HighCompressionLevel = LZ4HC_CLEVEL_OPT_MIN;
-		m_FastAccelerationFactor = 1;
+		m_FastAccelerationFactor = 10;
 		m_UseInterlacing = false;
-		m_EncodingFps = 30;
+		m_EncodingFps = 60;
 		m_ShowInput = false;
 		m_ShowStats = false;
 		m_TransmitAsBoxes = true;
-		m_BoxWidth = 32;
-		m_BoxHeight = 44;
+		m_BoxWidth = 64;
+		m_BoxHeight = 88;
 		m_UseNATService = false;
 		m_NatServerConnected = false;
 		m_LastPackedReceived.Reset();

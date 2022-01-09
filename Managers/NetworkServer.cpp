@@ -1154,15 +1154,19 @@ namespace RTE {
 	int NetworkServer::SendFrame(short player) {
 		long long currentTicks = g_TimerMan.GetRealTickCount();
 		double fps = static_cast<double>(m_EncodingFps);
-		double secsPerFrame = 1.0 / fps;
-		double secsSinceLastFrame = static_cast<double>(currentTicks - m_LastFrameSentTime[player]) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
+		if (g_SettingsMan.UseExperimentalMultiplayerSpeedboosts()) {
+			RakSleep(1000 / fps);
+		} else {
+			double secsPerFrame = 1.0 / fps;
+			double secsSinceLastFrame = static_cast<double>(currentTicks - m_LastFrameSentTime[player]) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
 
-		// Fix for an overflow which may happen if server lags for a few seconds when loading activities
-		if (secsSinceLastFrame < 0) { secsSinceLastFrame = secsPerFrame; }
+			// Fix for an overflow which may happen if server lags for a few seconds when loading activities
+			if (secsSinceLastFrame < 0) { secsSinceLastFrame = secsPerFrame; }
 
-		m_MsecPerFrame[player] = static_cast<int>(secsSinceLastFrame * 1000.0);
+			m_MsecPerFrame[player] = static_cast<int>(secsSinceLastFrame * 1000.0);
 
-		m_LastFrameSentTime[player] = g_TimerMan.GetRealTickCount();
+			m_LastFrameSentTime[player] = g_TimerMan.GetRealTickCount();
+		}
 
 		// Wait till FrameMan releases bitmap
 		SetThreadExitReason(player, NetworkServer::LOCKED);
@@ -1448,8 +1452,10 @@ namespace RTE {
 		}
 		ProcessTerrainChanges(player);
 
-		double secsSinceSendStart = static_cast<double>(g_TimerMan.GetRealTickCount() - currentTicks) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
-		m_MsecPerSendCall[player] = static_cast<int>(secsSinceSendStart * 1000.0);
+		if (!g_SettingsMan.UseExperimentalMultiplayerSpeedboosts()) {
+			double secsSinceSendStart = static_cast<double>(g_TimerMan.GetRealTickCount() - currentTicks) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
+			m_MsecPerSendCall[player] = static_cast<int>(secsSinceSendStart * 1000.0);
+		}
 
 		SetThreadExitReason(player, NetworkServer::NORMAL);
 		return 0;

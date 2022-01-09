@@ -283,7 +283,7 @@ namespace RTE {
 			return;
 		}
 
-		DrawFrame();
+		if (!g_SettingsMan.UseExperimentalMultiplayerSpeedboosts()) { DrawFrame(); }
 
 		m_PostEffects[m_CurrentFrame].clear();
 		m_CurrentFrame = frameData->FrameNumber;
@@ -1005,7 +1005,10 @@ namespace RTE {
 
 		if (static_cast<double>((currentTicks - m_LastInputSentTime)) / static_cast<double>(g_TimerMan.GetTicksPerSecond()) > 1.0 / inputSend) {
 			m_LastInputSentTime = g_TimerMan.GetRealTickCount();
-			if (IsConnectedAndRegistered()) { SendInputMsg(); }
+			if (IsConnectedAndRegistered()) {
+				if (g_SettingsMan.UseExperimentalMultiplayerSpeedboosts()) { DrawFrame(); }
+				SendInputMsg();
+			}
 		}
 	}
 

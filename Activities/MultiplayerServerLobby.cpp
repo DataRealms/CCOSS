@@ -354,7 +354,7 @@ namespace RTE {
 		UpdateActivityBox();
 
 		// This allow to reduce looby bandwidth by 50% while still somewhat descent looking
-		g_NetworkServer.SetInterlacingMode(true);
+		//g_NetworkServer.SetInterlacingMode(true);
 
 		return error;
 	}

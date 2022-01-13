@@ -59,7 +59,7 @@ enum HatchState
     HatchStateCount
 };
 
-enum
+enum Side
 {
     RIGHT = 0,
     LEFT

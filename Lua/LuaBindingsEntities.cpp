@@ -85,13 +85,13 @@ namespace RTE {
 			luabind::value("MOVEMENTSTATECOUNT", ACrab::MovementState::MOVEMENTSTATECOUNT)
 		]
 		.enum_("Side")[
-			luabind::value("LEFTSIDE", ACrab::LEFTSIDE), // Doesn't have qualifier
-			luabind::value("RIGHTSIDE", ACrab::RIGHTSIDE), // Doesn't have qualifier
-			luabind::value("SIDECOUNT", ACrab::SIDECOUNT) // Doesn't have qualifier
+			luabind::value("LEFTSIDE", ACrab::Side::LEFTSIDE),
+			luabind::value("RIGHTSIDE", ACrab::Side::RIGHTSIDE),
+			luabind::value("SIDECOUNT", ACrab::Side::SIDECOUNT)
 		]
 		.enum_("Layer")[
-			luabind::value("FGROUND", ACrab::FGROUND), // Doesn't have qualifier
-			luabind::value("BGROUND", ACrab::BGROUND) // Doesn't have qualifier
+			luabind::value("FGROUND", ACrab::Layer::FGROUND),
+			luabind::value("BGROUND", ACrab::Layer::BGROUND)
 		]
 		.enum_("DeviceHandlingState")[
 			luabind::value("STILL", ACrab::DeviceHandlingState::STILL),
@@ -152,8 +152,8 @@ namespace RTE {
 			luabind::value("HatchStateCount", ACraft::HatchState::HatchStateCount)
 		]
 		.enum_("Side")[
-			luabind::value("RIGHT", ACraft::RIGHT), // Doesn't have qualifier
-			luabind::value("LEFT", ACraft::LEFT) // Doesn't have qualifier
+			luabind::value("RIGHT", ACraft::Side::RIGHT),
+			luabind::value("LEFT", ACraft::Side::LEFT)
 		]
 
 		.enum_("CraftDeliverySequence")[
@@ -471,8 +471,8 @@ namespace RTE {
 			luabind::value("PRONESTATECOUNT", AHuman::ProneState::PRONESTATECOUNT)
 		]
 		.enum_("Layer")[
-			luabind::value("FGROUND", AHuman::FGROUND), // Doesn't have qualifier
-			luabind::value("BGROUND", AHuman::BGROUND) // Doesn't have qualifier
+			luabind::value("FGROUND", AHuman::Layer::FGROUND),
+			luabind::value("BGROUND", AHuman::Layer::BGROUND)
 		]
 		.enum_("DeviceHandlingState")[
 			luabind::value("STILL", AHuman::DeviceHandlingState::STILL),

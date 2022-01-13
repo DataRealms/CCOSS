@@ -1145,8 +1145,10 @@ namespace RTE {
 
 		.def("HasAnySounds", &SoundSet::HasAnySounds)
 		.def("SelectNextSounds", &SoundSet::SelectNextSounds)
-		.def("AddSound", (void (SoundSet:: *)(std::string const &soundFilePath)) &SoundSet::AddSound)
-		.def("AddSound", (void (SoundSet:: *)(std::string const &soundFilePath, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance)) &SoundSet::AddSound)
+		.def("AddSound", (void (SoundSet:: *)(const std::string &soundFilePath)) &SoundSet::AddSound)
+		.def("AddSound", (void (SoundSet:: *)(const std::string &soundFilePath, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance)) &SoundSet::AddSound)
+		.def("RemoveSound", (bool (SoundSet:: *)(const std::string &soundFilePath)) &SoundSet::RemoveSound)
+		.def("RemoveSound", (bool (SoundSet:: *)(const std::string &soundFilePath, bool removeFromSubSoundSets)) &SoundSet::RemoveSound)
 		.def("AddSoundSet", &SoundSet::AddSoundSet)
 
 		.enum_("SoundSelectionCycleMode")[

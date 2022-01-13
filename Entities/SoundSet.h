@@ -121,10 +121,25 @@ namespace RTE {
 		void AddSound(const std::string &soundFilePath, const Vector &offset, float minimumAudibleDistance, float attenuationStartDistance, bool abortGameForInvalidSound);
 
 		/// <summary>
+		/// Removes all instances of the sound with the given filepath from this SoundSet. Does not remove it from any sub-SoundSets.
+		/// </summary>
+		/// <param name="soundFilePath">The path to the sound to be removed from this SoundSet.</param>
+		/// <returns>Whether or not a sound with the given filepath was found in this SoundSet.</returns>
+		bool RemoveSound(const std::string &soundFilePath) { return RemoveSound(soundFilePath, false); }
+
+		/// <summary>
+		/// Removes all instances of the sound with the given filepath from this SoundSet, optionally removing it from all sub-SoundSets as well.
+		/// </summary>
+		/// <param name="soundFilePath">The path to the sound to be removed from this SoundSet.</param>
+		/// <param name="removeFromSubSoundSets">Whether or not to remove the sound from any sub-SoundSets as well as this SoundSet.</param>
+		/// <returns>Whether or not a sound with the given filepath was found in this SoundSet or, if set to remove from sub-SoundSets, any of its sub-SoundSets.</returns>
+		bool RemoveSound(const std::string &soundFilePath, bool removeFromSubSoundSets);
+
+		/// <summary>
 		/// Adds a copy of the given SoundData to this SoundSet.
 		/// </summary>
 		/// <param name="soundDataToAdd">The SoundData to copy to this SoundSet.</param>
-		void AddSoundData(SoundData soundDataToAdd) { m_SoundData.push_back(soundDataToAdd); }
+		void AddSoundData(const SoundData &soundDataToAdd) { m_SoundData.push_back(soundDataToAdd); }
 
 		/// <summary>
 		/// Adds a copy of the passed in SoundSet as a sub SoundSet of this SoundSet. Ownership IS transferred!

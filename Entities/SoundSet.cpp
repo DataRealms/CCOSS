@@ -177,6 +177,18 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool SoundSet::RemoveSound(const std::string &soundFilePath, bool removeFromSubSoundSets) {
+		auto soundsToRemove = std::remove_if(m_SoundData.begin(), m_SoundData.end(), [&soundFilePath](const SoundSet::SoundData &soundData) { return soundData.SoundFile.GetDataPath() == soundFilePath; });
+		bool anySoundsToRemove = soundsToRemove != m_SoundData.end();
+		if (anySoundsToRemove) { m_SoundData.erase(soundsToRemove, m_SoundData.end()); }
+		if (removeFromSubSoundSets) {
+			for (SoundSet subSoundSet : m_SubSoundSets) { anySoundsToRemove |= RemoveSound(soundFilePath, removeFromSubSoundSets); }
+		}
+		return anySoundsToRemove;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool SoundSet::HasAnySounds(bool includeSubSoundSets) const {
 		bool hasAnySounds = !m_SoundData.empty();
 		if (!hasAnySounds && includeSubSoundSets) {

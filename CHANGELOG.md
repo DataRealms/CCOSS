@@ -625,9 +625,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`soundSet.SubSoundSets` (Lua R) - An iterator over the sub `SoundSets` of this `SoundSet`, allowing you to manipulate them as you would any `SoundSet`.  
 	`soundSet:HasAnySounds(includeSubSoundSets)` (Lua) - Whether or not this `SoundSet` has any sounds, optionally including its sub `SoundSets`.  
 	`soundSet:SelectNextSounds()` (Lua) - Selects the next sounds for this `SoundSet`. Note that playing a `SoundContainer` will always also do this, so this is only really useful to allow you to skip sounds when `SoundSelectionCycleMode` is set to `FORWARDS`.  
-	`soundSet:AddSound("Path/to/sound")` (Lua) - Adds the sound at the given path with no offset, 0 minimum audible distance, and default attenuation start distance.  
-	`soundSet:AddSound("Path/to/sound", offset, minimumAudibleDistance, attenuationStartDistance)` (Lua) - Adds the sound at the given path with the given parameters.  
+	`soundSet:AddSound("Path/to/sound.flac")` (Lua) - Adds the sound at the given path with no offset, 0 minimum audible distance, and default attenuation start distance.  
+	`soundSet:AddSound("Path/to/sound.flac", offset, minimumAudibleDistance, attenuationStartDistance)` (Lua) - Adds the sound at the given path with the given parameters.  
 	`soundSet:AddSoundSet(soundSetToAdd)` (Lua) - Adds the given `SoundSet` as a sub `SoundSet` of this `SoundSet`.  
+	`soundSet:RemoveSound("Path/to/sound.flac")` (Lua) - Removes any sounds with the given filepath from the `SoundSet`, returning whether or not any where removed. Does not remove sounds from sub-`SoundSet`s.  
+	`soundSet:RemoveSound("Path/to/sound.flac", removeFromSubSoundSets)` (Lua) - Removes any sounds with the given filepath from the `SoundSet`, returning whether or not any where removed. Optionally removes matching sounds from any sub-`SoundSet`s and their sub-`SoundSet`s and so on.  
 	
 	Additionally, `AddSound` and `AddSoundSet` INI properties work for `SoundSets`. They are exactly the same as they are for `SoundContainers`.
 

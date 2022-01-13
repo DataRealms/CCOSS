@@ -89,6 +89,12 @@ namespace RTE {
 		SoundSet & GetTopLevelSoundSet() { return m_TopLevelSoundSet; }
 
 		/// <summary>
+		/// Copies the passed in SoundSet reference into the top level SoundSet of this SoundContainer, effectively making that the new top level SoundSet.
+		/// </summary>
+		/// <param name="newTopLevelSoundSet">A reference to the new top level SoundSet for this SoundContainer.</param>
+		void SetTopLevelSoundSet(SoundSet &newTopLevelSoundSet) { m_TopLevelSoundSet = newTopLevelSoundSet; }
+
+		/// <summary>
 		/// Gets a vector of hashes of the sounds selected to be played next in this SoundContainer.
 		/// </summary>
 		/// <returns>The currently playing sounds hashes.</returns>

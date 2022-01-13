@@ -631,7 +631,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 	Additionally, `AddSound` and `AddSoundSet` INI properties work for `SoundSets`. They are exactly the same as they are for `SoundContainers`.
 
-- You can get the top level `SoundSet` of a `SoundContainer` with `soundContainer:GetTopLevelSoundSet` and manipulate it as described above. This allows you full interaction with all levels of `SoundSets` in a `SoundContainer`.
+- You can get the top level `SoundSet` of a `SoundContainer` with `soundContainer:GetTopLevelSoundSet` and manipulate it as described above. You can also set it to fully overwrite it with `soundContainer:SetTopLevelSoundSet`. This allows you full interaction with all levels of `SoundSets` in a `SoundContainer`.
 
 </details>
 

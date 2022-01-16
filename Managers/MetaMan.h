@@ -50,10 +50,7 @@ class Scene;
 // Parent(s):       Singleton, serializable
 // Class history:   10/10/2009 MetaMan created.
 
-class MetaMan:
-    public Singleton<MetaMan>,
-    public Serializable
-{
+class MetaMan : public Singleton<MetaMan>, public Serializable {
     friend struct ManagerLuaBindings;
 
 

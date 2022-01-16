@@ -42,9 +42,7 @@ class GUIComboBox;
 // Parent(s):       Activity.
 // Class history:   9/17/2007 EditorActivity created.
 
-class EditorActivity:
-    public Activity
-{
+class EditorActivity : public Activity {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Public member variable, method and friend function declarations

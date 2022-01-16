@@ -29,9 +29,7 @@ class Magazine;
 // Parent(s):       HeldDevice.
 // Class history:   07/1/2002 HDFirearm created.
 
-class HDFirearm:
-    public HeldDevice
-{
+class HDFirearm : public HeldDevice {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

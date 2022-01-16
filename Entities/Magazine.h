@@ -28,9 +28,7 @@ namespace RTE {
 // Parent(s):       Attachable.
 // Class history:   07/03/2002 Magazine created.
 
-class Magazine:
-    public Attachable
-{
+class Magazine : public Attachable {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

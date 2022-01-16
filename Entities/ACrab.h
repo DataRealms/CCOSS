@@ -34,8 +34,7 @@ class AEmitter;
 // Parent(s):       Actor.
 // Class history:   10/24/2007 ACrab created.
 
-class ACrab :
-	public Actor {
+class ACrab : public Actor {
 	friend struct EntityLuaBindings;
 
 

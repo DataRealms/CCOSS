@@ -34,9 +34,7 @@ class ContentFile;
 // Parent(s):       SceneObject.
 // Class history:   08/23/2002 TerrainObject created.
 
-class TerrainObject:
-    public SceneObject
-{
+class TerrainObject : public SceneObject {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

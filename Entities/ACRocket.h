@@ -35,9 +35,7 @@ class Leg;
 // Class history:   09/02/2004 ARocket created.
 //                  12/13/2006 ARocket changed names to ACRocket, parent changed to ACraft
 
-class ACRocket:
-    public ACraft
-{
+class ACRocket : public ACraft {
 	friend struct EntityLuaBindings;
 
 enum LandingGearState

@@ -34,9 +34,7 @@ class AEmitter;
 // Parent(s):       Actor.
 // Class history:   05/24/2001 AHuman created.
 
-class AHuman:
-    public Actor
-{
+class AHuman : public Actor {
 	friend struct EntityLuaBindings;
 
 

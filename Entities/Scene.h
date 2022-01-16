@@ -35,9 +35,7 @@ class PathFinder;
 // Parent(s):       Entity.
 // Class history:   08/02/2006 Scene created.
 
-class Scene:
-    public Entity
-{
+class Scene : public Entity {
 
 	friend struct EntityLuaBindings;
 

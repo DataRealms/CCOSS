@@ -35,9 +35,7 @@ class Leg;
 // Parent(s):       Actor.
 // Class history:   12/13/2006 ACraft created.
 
-class ACraft:
-    public Actor
-{
+class ACraft : public Actor {
 	friend struct EntityLuaBindings;
 
 

@@ -28,9 +28,7 @@ namespace RTE
 // Parent(s):       Attachable.
 // Class history:   02/29/2004 AEmitter created.
 
-class AEmitter:
-    public Attachable
-{
+class AEmitter : public Attachable {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

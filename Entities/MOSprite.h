@@ -31,9 +31,7 @@ class AEmitter;
 // Parent(s):       MovableObject.
 // Class history:   03/18/2001 MOSprite created.
 
-class MOSprite:
-    public MovableObject
-{
+class MOSprite : public MovableObject {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

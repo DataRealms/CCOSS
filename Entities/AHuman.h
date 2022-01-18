@@ -928,6 +928,18 @@ ClassInfoGetters;
 	void SetThrowPrepTime(long newPrepTime) { m_ThrowPrepTime = newPrepTime; }
 
 	/// <summary>
+	/// Gets whether this AHuman is set to flail its arms while walking, overriding the arms' idle behavior.
+	/// </summary>
+	/// <returns>Whether this AHuman is set to flail its arms.</returns>
+	float GetFlailArms() const { return m_FlailArms; }
+
+	/// <summary>
+	/// Sets whether this AHuman is set to flail its arms while walking.
+	/// </summary>
+	/// <param name="newValue">Whether this AHuman should flail its arms.</param>
+	void SetFlailArms(float newValue) { m_FlailArms = newValue; }
+
+	/// <summary>
 	/// Gets this AHuman's stride sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this AHuman's stride sound.</returns>
@@ -1032,6 +1044,7 @@ protected:
 	float m_BGArmFlailScalar; //!< The rate at which this AHuman's BG Arm follows the the bodily rotation. Set to a negative value for a "counterweight" effect.
 	Timer m_EquipHUDTimer; //!< Timer for showing the name of any newly equipped Device.
 	std::array<Matrix, 2> m_WalkAngle; //!< An array of rot angle targets for different movement states.
+	float m_FlailArms; //!< Toggles the arm sway when walking.
 
     ////////////////
     // AI States

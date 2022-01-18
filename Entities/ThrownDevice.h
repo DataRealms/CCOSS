@@ -112,12 +112,6 @@ namespace RTE {
 
 #pragma region Virtual Override Methods
 		/// <summary>
-		/// Gets the current position offset of this ThrownDevice's joint relative from the parent Actor's position, if attached.
-		/// </summary>
-		/// <returns>A const reference to the current stance parent offset.</returns>
-		Vector GetStanceOffset() const override { return m_StanceOffset.GetXFlipped(m_HFlipped); }
-
-		/// <summary>
 		/// Resets all the timers used by this (e.g. emitters, etc). This is to prevent backed up emissions from coming out all at once while this has been held dormant in an inventory.
 		/// </summary>
 		void ResetAllTimers() override;

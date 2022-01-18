@@ -77,6 +77,7 @@ namespace RTE {
 
 			m_MountedDevices.at(0)->SetInheritsRotAngle(false);
 			m_MountedDevices.at(0)->SetUnPickupable(true);
+			m_MountedDevices.at(0)->SetGibWithParentChance(1.0F);
 			//Force weapons mounted on turrets to never be removed due to forces. This doesn't affect them gibbing from hitting their impulse limits though.
 			m_MountedDevices.at(0)->SetJointStrength(0.0F);
 		}
@@ -96,6 +97,7 @@ namespace RTE {
 
 		newMountedDevice->SetInheritsRotAngle(false);
 		newMountedDevice->SetUnPickupable(true);
+		newMountedDevice->SetGibWithParentChance(1.0F);
 		//Force weapons mounted on turrets to never be removed due to forces. This doesn't affect them gibbing from hitting their impulse limits though.
 		newMountedDevice->SetJointStrength(0.0F);
 	}

@@ -4301,7 +4301,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 
 			m_HUDStack -= 10;
 			if (m_pFGArm && !m_EquipHUDTimer.IsPastRealMS(500)) {
-				std::string equippedItemsString = (m_pFGArm->HoldsSomething() ? m_pFGArm->GetHeldMO()->GetPresetName() : "EMPTY") + (m_pBGArm->HoldsSomething() ? " | " + m_pBGArm->GetHeldMO()->GetPresetName() : "");
+				std::string equippedItemsString = (m_pFGArm->HoldsSomething() ? m_pFGArm->GetHeldMO()->GetPresetName() : "EMPTY") + (m_pBGArm && m_pBGArm->HoldsSomething() ? " | " + m_pBGArm->GetHeldMO()->GetPresetName() : "");
 				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
 				m_HUDStack -= 9;
 			}

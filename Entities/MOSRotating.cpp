@@ -1031,8 +1031,10 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 				gibParticleClone->SetAngularVel((gibParticleClone->GetAngularVel() * 0.35F) + (gibParticleClone->GetAngularVel() * 0.65F / mass) * RandomNum());
 				gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? (m_PrevVel + m_Vel) / 2 : Vector()));
 				if (movableObjectToIgnore) { gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore); }
-				gibParticleClone->SetTeam(m_Team);
-				gibParticleClone->SetIgnoresTeamHits(gibSettingsObject.IgnoresTeamHits());
+				if (gibSettingsObject.IgnoresTeamHits()) {
+					gibParticleClone->SetTeam(m_Team);
+					gibParticleClone->SetIgnoresTeamHits(true);
+				}
 
 				g_MovableMan.AddParticle(gibParticleClone);
 			}
@@ -1069,8 +1071,10 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 				}
 				gibParticleClone->SetVel(gibVelocity + (gibSettingsObject.InheritsVelocity() ? (m_PrevVel + m_Vel) / 2 : Vector()));
 				if (movableObjectToIgnore) { gibParticleClone->SetWhichMOToNotHit(movableObjectToIgnore); }
-				gibParticleClone->SetTeam(m_Team);
-				gibParticleClone->SetIgnoresTeamHits(gibSettingsObject.IgnoresTeamHits());
+				if (gibSettingsObject.IgnoresTeamHits()) {
+					gibParticleClone->SetTeam(m_Team);
+					gibParticleClone->SetIgnoresTeamHits(true);
+				}
 
 				g_MovableMan.AddParticle(gibParticleClone);
 			}

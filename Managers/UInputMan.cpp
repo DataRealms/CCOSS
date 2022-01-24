@@ -372,42 +372,43 @@ namespace RTE {
 	void UInputMan::ForceMouseWithinBox(int x, int y, int width, int height, int whichPlayer) const {
 		// Only mess with the mouse if the original mouse position is not above the screen and may be grabbing the title bar of the game window
 		if (!m_DisableMouseMoving && !m_TrapMousePos && (whichPlayer == Players::NoPlayer || m_ControlScheme.at(whichPlayer).GetDevice() == InputDevice::DEVICE_MOUSE_KEYB)) {
-			position_mouse(Limit(mouse_x, x + width * g_FrameMan.GetResMultiplier(), x), Limit(mouse_y, y + height * g_FrameMan.GetResMultiplier(), y));
+			position_mouse(Limit(mouse_x, x + width, x), Limit(mouse_y, y + height, y));
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::ForceMouseWithinPlayerScreen(int whichPlayer) const {
-		if (whichPlayer < Players::PlayerOne || whichPlayer >= Players::PlayerFour) {
-			return;
-		}
-		unsigned int screenWidth = g_FrameMan.GetPlayerFrameBufferWidth(whichPlayer);
-		unsigned int screenHeight = g_FrameMan.GetPlayerFrameBufferHeight(whichPlayer);
+		if (whichPlayer >= Players::PlayerOne && whichPlayer < Players::MaxPlayerCount) {
+			int screenWidth = g_FrameMan.GetPlayerFrameBufferWidth(whichPlayer) * g_FrameMan.GetResMultiplier();
+			int screenHeight = g_FrameMan.GetPlayerFrameBufferHeight(whichPlayer) * g_FrameMan.GetResMultiplier();
+			int screenCount = g_FrameMan.GetScreenCount();
 
-		if (g_FrameMan.GetScreenCount() > 1) {
-			switch (whichPlayer) {
-				case Players::PlayerOne:
-					ForceMouseWithinBox(0, 0, screenWidth, screenHeight, whichPlayer);
-					break;
-				case Players::PlayerTwo:
-					if ((g_FrameMan.GetVSplit() && !g_FrameMan.GetHSplit()) || (g_FrameMan.GetVSplit() && g_FrameMan.GetHSplit())) {
-						ForceMouseWithinBox(g_FrameMan.GetResX() / 2, 0, screenWidth, screenHeight, whichPlayer);
-					} else {
-						ForceMouseWithinBox(0, g_FrameMan.GetResY() / 2, screenWidth, screenHeight, whichPlayer);
-					}
-					break;
-				case Players::PlayerThree:
-					ForceMouseWithinBox(0, g_FrameMan.GetResY() / 2, screenWidth, screenHeight, whichPlayer);
-					break;
-				case Players::PlayerFour:
-					ForceMouseWithinBox(g_FrameMan.GetResX() / 2, g_FrameMan.GetResY() / 2, screenWidth, screenHeight, whichPlayer);
-					break;
-				default:
-					RTEAbort("Undefined player value passed in. See Players enumeration for defined values.")
+			if (screenCount > 1) {
+				switch (g_ActivityMan.GetActivity()->ScreenOfPlayer(whichPlayer)) {
+					case 0:
+						ForceMouseWithinBox(0, 0, screenWidth, screenHeight, whichPlayer);
+						break;
+					case 1:
+						if (screenCount >= 2 && g_FrameMan.GetVSplit()) {
+							ForceMouseWithinBox(screenWidth, 0, screenWidth, screenHeight, whichPlayer);
+						} else {
+							ForceMouseWithinBox(0, screenHeight, screenWidth, screenHeight, whichPlayer);
+						}
+						break;
+					case 2:
+						ForceMouseWithinBox(0, screenHeight, screenWidth, screenHeight, whichPlayer);
+						break;
+					case 3:
+						ForceMouseWithinBox(screenWidth, screenHeight, screenWidth, screenHeight, whichPlayer);
+						break;
+					default:
+						// ScreenOfPlayer will return -1 for inactive player so do nothing.
+						break;
+				}
+			} else {
+				ForceMouseWithinBox(0, 0, screenWidth, screenHeight, whichPlayer);
 			}
-		} else {
-			ForceMouseWithinBox(0, 0, screenWidth, screenHeight, whichPlayer);
 		}
 	}
 

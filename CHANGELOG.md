@@ -433,6 +433,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Console error spam will no longer cripple performance over time.
 
+- Fixed incorrect mouse bounds during splitscreen when the mouse player was not Player 1.
+
 </details>
 
 

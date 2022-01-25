@@ -382,32 +382,27 @@ namespace RTE {
 		if (whichPlayer >= Players::PlayerOne && whichPlayer < Players::MaxPlayerCount) {
 			int screenWidth = g_FrameMan.GetPlayerFrameBufferWidth(whichPlayer) * g_FrameMan.GetResMultiplier();
 			int screenHeight = g_FrameMan.GetPlayerFrameBufferHeight(whichPlayer) * g_FrameMan.GetResMultiplier();
-			int screenCount = g_FrameMan.GetScreenCount();
 
-			if (screenCount > 1) {
-				switch (g_ActivityMan.GetActivity()->ScreenOfPlayer(whichPlayer)) {
-					case 0:
-						ForceMouseWithinBox(0, 0, screenWidth, screenHeight, whichPlayer);
-						break;
-					case 1:
-						if (screenCount >= 2 && g_FrameMan.GetVSplit()) {
-							ForceMouseWithinBox(screenWidth, 0, screenWidth, screenHeight, whichPlayer);
-						} else {
-							ForceMouseWithinBox(0, screenHeight, screenWidth, screenHeight, whichPlayer);
-						}
-						break;
-					case 2:
+			switch (g_ActivityMan.GetActivity()->ScreenOfPlayer(whichPlayer)) {
+				case 0:
+					ForceMouseWithinBox(0, 0, screenWidth, screenHeight, whichPlayer);
+					break;
+				case 1:
+					if (g_FrameMan.GetVSplit()) {
+						ForceMouseWithinBox(screenWidth, 0, screenWidth, screenHeight, whichPlayer);
+					} else {
 						ForceMouseWithinBox(0, screenHeight, screenWidth, screenHeight, whichPlayer);
-						break;
-					case 3:
-						ForceMouseWithinBox(screenWidth, screenHeight, screenWidth, screenHeight, whichPlayer);
-						break;
-					default:
-						// ScreenOfPlayer will return -1 for inactive player so do nothing.
-						break;
-				}
-			} else {
-				ForceMouseWithinBox(0, 0, screenWidth, screenHeight, whichPlayer);
+					}
+					break;
+				case 2:
+					ForceMouseWithinBox(0, screenHeight, screenWidth, screenHeight, whichPlayer);
+					break;
+				case 3:
+					ForceMouseWithinBox(screenWidth, screenHeight, screenWidth, screenHeight, whichPlayer);
+					break;
+				default:
+					// ScreenOfPlayer will return -1 for inactive player so do nothing.
+					break;
 			}
 		}
 	}

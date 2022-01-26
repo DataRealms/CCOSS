@@ -871,39 +871,6 @@ public:
 
     virtual void OnPieMenu(Actor *actor) { /* Does nothing, kept here for program control flow. Method is not pure virtual to avoid a bunch of junk implementations in non-scritped activities. */};
 
-	void AddPieMenuSlice(std::string description, std::string functionName, PieSlice::SliceDirection direction, bool isEnabled)
-	{ 
-		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
-			m_pPieMenu[m_CurrentPieMenuPlayer]->AddPieSliceLua(description, functionName, direction, isEnabled);
-	};
-
-	void AlterPieMenuSlice(std::string description, std::string functionName, PieSlice::SliceDirection direction, bool isEnabled)
-	{
-		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
-			m_pPieMenu[m_CurrentPieMenuPlayer]->AlterPieSliceLua(description, functionName, direction, isEnabled);
-	};
-
-    PieSlice RemovePieMenuSlice(std::string description, std::string functionName)
-	{
-		if (m_CurrentPieMenuPlayer >= Players::PlayerOne && m_CurrentPieMenuPlayer < Players::MaxPlayerCount)
-			return m_pPieMenu[m_CurrentPieMenuPlayer]->RemovePieSliceLua(description, functionName);
-		return PieSlice("", PieSlice::PieSliceIndex::PSI_NONE, PieSlice::SliceDirection::NONE, false);
-	};
-
-	std::vector<PieSlice *> GetCurrentPieMenuSlices(int player) const
-	{ 
-		//if (player >= Players::PlayerOne && player < Players::MaxPlayerCount)
-			return m_pPieMenu[player]->GetCurrentSlices();
-		//return 0;
-	}
-
-	/*std::vector<PieSlice> * GetAvailablePieMenuSlices(int player) const 
-	{ 
-		if (player >= Players::PlayerOne && player < Players::MaxPlayerCount)
-			return &m_pPieMenu[player]->GetAvailableSlices();
-		return 0;
-	}*/
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -1058,8 +1025,7 @@ protected:
     Vector m_LandingZone[Players::MaxPlayerCount];
     // Whether the last craft was set to return or not after delivering
     bool m_AIReturnCraft[Players::MaxPlayerCount];
-    // The pie menus for each player
-    PieMenuGUI *m_pPieMenu[Players::MaxPlayerCount];
+    std::array<std::unique_ptr<PieMenuGUI>, Players::MaxPlayerCount> m_StrategicModePieMenu; //!< The strategic mode PieMenus for each Player.
     // The inventory menu gui for each player
     InventoryMenuGUI *m_InventoryMenuGUI[Players::MaxPlayerCount];
     // The in-game buy GUIs for each player
@@ -1132,10 +1098,6 @@ protected:
     long m_GameOverPeriod;
     // The winning team number, when the game is over
     int m_WinnerTeam;
-
-	std::vector<PieSlice *> m_CurrentPieMenuSlices;
-
-	int m_CurrentPieMenuPlayer;
 
 	std::string m_NetworkPlayerNames[Players::MaxPlayerCount];
 

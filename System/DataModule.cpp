@@ -96,7 +96,18 @@ namespace RTE {
 		} else if (propName == "Author") {
 			reader >> m_Author;
 		} else if (propName == "Description") {
-			reader >> m_Description;
+			std::string descriptionValue = reader.ReadPropValue();
+			if (descriptionValue == "MultiLineText") {
+				m_Description.clear();
+				while (reader.NextProperty() && reader.ReadPropName() == "AddLine") {
+					m_Description += reader.ReadPropValue() + "\n\n";
+				}
+				if (!m_Description.empty()) {
+					m_Description.resize(m_Description.size() - 2);
+				}
+			} else {
+				m_Description = descriptionValue;
+			}
 		} else if (propName == "IsFaction") {
 			reader >> m_IsFaction;
 		} else if (propName == "Version") {

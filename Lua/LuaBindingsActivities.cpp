@@ -131,7 +131,6 @@ namespace RTE {
 		.def_readwrite("GameTimer", &GameActivity::m_GameTimer)
 		.def_readwrite("GameOverTimer", &GameActivity::m_GameOverTimer)
 		.def_readwrite("GameOverPeriod", &GameActivity::m_GameOverPeriod)
-		.def_readwrite("PieMenuSlices", &GameActivity::m_CurrentPieMenuSlices, luabind::return_stl_iterator)
 
 		.def("SetObservationTarget", &GameActivity::SetObservationTarget)
 		.def("SetDeathViewTarget", &GameActivity::SetDeathViewTarget)
@@ -173,9 +172,6 @@ namespace RTE {
 		.def("UpdateEditing", &GameActivity::UpdateEditing)
 		.def("DisableAIs", &GameActivity::DisableAIs)
 		.def("InitAIs", &GameActivity::InitAIs)
-		.def("AddPieMenuSlice", &GameActivity::AddPieMenuSlice)
-		.def("AlterPieMenuSlice", &GameActivity::AlterPieMenuSlice)
-		.def("RemovePieMenuSlice", &GameActivity::RemovePieMenuSlice)
 
 		.enum_("ObjectiveArrowDir")[
 			luabind::value("ARROWDOWN", GameActivity::ObjectiveArrowDir::ARROWDOWN),

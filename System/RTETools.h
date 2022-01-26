@@ -172,6 +172,15 @@ namespace RTE {
 	float Limit(float value, float upperLimit, float lowerLimit);
 #pragma endregion
 
+#pragma region Angle Helpers
+	/// <summary>
+	/// Returns a copy of the angle normalized so it's between 0 and 2Pi.
+	/// </summary>
+	/// <param name="angle">The angle to normalize.</param>
+	/// <returns></returns>
+	float NormalizeAngleBetween0And2PI(float angle);
+#pragma endregion
+
 #pragma region Detection
 	/// <summary>
 	/// Tells whether a point is within a specified box.

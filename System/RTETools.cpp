@@ -98,6 +98,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	float NormalizeAngleBetween0And2PI(float angle) {
+		while (angle < 0) { angle += c_TwoPI; }
+		return fmodf((angle + c_TwoPI), c_TwoPI);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool WithinBox(Vector &point, float left, float top, float right, float bottom) {
 		return point.m_X >= left && point.m_X < right && point.m_Y >= top && point.m_Y < bottom;
 	}

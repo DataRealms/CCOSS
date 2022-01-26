@@ -535,65 +535,31 @@ void ACraft::SetTeam(int team)
     }
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AddPieMenuSlices
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds all slices this needs on a pie menu.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ACraft::AddPieMenuSlices(PieMenuGUI *pPieMenu)
-{
-	PieSlice deliverSlice("Deliver Cargo", PieSlice::PieSliceIndex::PSI_DELIVER, PieSlice::SliceDirection::RIGHT);
-    pPieMenu->AddSlice(deliverSlice);
-    PieSlice returnSlice("Return", PieSlice::PieSliceIndex::PSI_RETURN, PieSlice::SliceDirection::UP);
-	pPieMenu->AddSlice(returnSlice);
-	
-	PieSlice staySlice("Stay", PieSlice::PieSliceIndex::PSI_STAY, PieSlice::SliceDirection::DOWN);
-    pPieMenu->AddSlice(staySlice);
-    PieSlice scuttleSlice("Scuttle!", PieSlice::PieSliceIndex::PSI_SCUTTLE, PieSlice::SliceDirection::LEFT);
-	pPieMenu->AddSlice(scuttleSlice);
-
-    Actor::AddPieMenuSlices(pPieMenu);
-
-    return false;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HandlePieCommand
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Handles and does whatever a specific activated Pie Menu slice does to
-//                  this.
-
-bool ACraft::HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex)
-{
-    if (pieSliceIndex != PieSlice::PieSliceIndex::PSI_NONE)
-    {
-        if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_DELIVER)
-        {
+bool ACraft::HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex) {
+    if (pieSliceIndex != PieSlice::PieSliceIndex::PSI_NONE) {
+        if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_DELIVER) {
             m_AIMode = AIMODE_DELIVER;
             m_DeliveryState = FALL;
             m_HasDelivered = false;
-        }
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_RETURN)
-        {
+        } else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_RETURN) {
             m_AIMode = AIMODE_RETURN;
             m_DeliveryState = LAUNCH;
-        }
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_STAY)
-        {
+        } else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_STAY) {
             m_AIMode = AIMODE_STAY;
             m_DeliveryState = FALL;
-        }
-        else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_SCUTTLE)
+        } else if (pieSliceIndex == PieSlice::PieSliceIndex::PSI_SCUTTLE) {
             m_AIMode = AIMODE_SCUTTLE;
-        else
+        } else {
             return Actor::HandlePieCommand(pieSliceIndex);
-
+        }
         m_StuckTimer.Reset();
     }
-
     return false;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

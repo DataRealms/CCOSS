@@ -41,6 +41,7 @@ public:
 
 	SerializableOverrideMethods;
 	ClassInfoGetters;
+	DefaultPieMenuName("Default Craft Pie Menu");
 
 
 enum HatchState
@@ -372,28 +373,12 @@ enum Side
 
 	void SetTeam(int team) override;
 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AddPieMenuSlices
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds all slices this needs on a pie menu.
-// Arguments:       The pie menu to add slices to. Ownership is NOT transferred!
-// Return value:    Whether any slices were added.
-
-   bool AddPieMenuSlices(PieMenuGUI *pPieMenu) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  HandlePieCommand
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Handles and does whatever a specific activated Pie Menu slice does to
-//                  this.
-// Arguments:       The pie menu command to handle. See the PieSliceIndex enum.
-// Return value:    Whetehr any slice was handled. False if no matching slice handler was
-//                  found, or there was no slice currently activated by the pie menu.
-
-    bool HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex) override;
+    /// <summary>
+    /// Tries to handle the activated PieSlice in this object's PieMenuGUI, if there is one, based on its Type.
+    /// </summary>
+    /// <param name="pieSliceType">The Type of the PieSlice being handled.</param>
+    /// <returns>Whether or not the activated PieSlice Type was able to be handled.</returns>
+    bool HandlePieCommand(PieSlice::PieSliceIndex pieSliceType) override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

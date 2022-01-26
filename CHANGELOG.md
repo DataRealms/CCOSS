@@ -838,7 +838,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	AddSoundContainer = SoundContainer // Note that SoundContainers replace Sounds, so this can be used for things like FireSound = SoundContainer
 		PresetName = Preset Name Here
 
-		CycleMode = MODE_RANDOM (default) | MODE_FORWARDS // How the SoundContainer will cycle through its `SoundSets` whenever it's told to select a new one. The former is prior behaviour, the latter cycles through SoundSets in the order they were added.
+		SoundSelectionCycleMode = RANDOM (default) | FORWARDS | ALL // How the SoundContainer will cycle through its `SoundSets` whenever it's told to select a new one. The first is prior behaviour of picking sounds at random, the second cycles through SoundSets in the order they were added, and the third plays all SoundSets at once.
 
 		LoopSetting = -1 | 0 (default) | 1+ // How the SoundContainer loops its sounds. -1 means it loops forever, 0 means it plays once, any number > 0 means it plays once and loops that many times.
 

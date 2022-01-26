@@ -378,6 +378,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - Renamed Lua methods `GetRadRotated` and `GetDegRotated` to `GetRadRotatedCopy` and `GetDegRotatedCopy` for clarity.
 
+- Added support for multiple lines in DataModule descriptions in their Index.inis. See earlier entry on multiple lines in descriptions for details on how to use this.
+
 </details>
 
 

@@ -136,13 +136,6 @@ namespace RTE {
 		.property("Type", &PieSlice::GetType)
 		.property("Direction", &PieSlice::GetDirection)
 
-		.enum_("Direction")[
-			luabind::value("NONE", PieSlice::SliceDirection::NONE),
-			luabind::value("UP", PieSlice::SliceDirection::UP),
-			luabind::value("RIGHT", PieSlice::SliceDirection::RIGHT),
-			luabind::value("DOWN", PieSlice::SliceDirection::DOWN),
-			luabind::value("LEFT", PieSlice::SliceDirection::LEFT)
-		]
 		.enum_("PieSliceIndex")[
 			luabind::value("PSI_NONE", PieSlice::PieSliceIndex::PSI_NONE),
 			luabind::value("PSI_PICKUP", PieSlice::PieSliceIndex::PSI_PICKUP),
@@ -152,7 +145,7 @@ namespace RTE {
 			luabind::value("PSI_RELOAD", PieSlice::PieSliceIndex::PSI_RELOAD),
 			luabind::value("PSI_BUYMENU", PieSlice::PieSliceIndex::PSI_BUYMENU),
 			luabind::value("PSI_STATS", PieSlice::PieSliceIndex::PSI_STATS),
-			luabind::value("PSI_MINIMAP", PieSlice::PieSliceIndex::PSI_MINIMAP),
+			luabind::value("PSI_MAP", PieSlice::PieSliceIndex::PSI_MAP),
 			luabind::value("PSI_FORMSQUAD", PieSlice::PieSliceIndex::PSI_FORMSQUAD),
 			luabind::value("PSI_CEASEFIRE", PieSlice::PieSliceIndex::PSI_CEASEFIRE),
 			luabind::value("PSI_SENTRY", PieSlice::PieSliceIndex::PSI_SENTRY),
@@ -179,7 +172,6 @@ namespace RTE {
 			luabind::value("PSI_TEAM2", PieSlice::PieSliceIndex::PSI_TEAM2),
 			luabind::value("PSI_TEAM3", PieSlice::PieSliceIndex::PSI_TEAM3),
 			luabind::value("PSI_TEAM4", PieSlice::PieSliceIndex::PSI_TEAM4),
-			luabind::value("PSI_SCRIPTED", PieSlice::PieSliceIndex::PSI_SCRIPTED),
 			luabind::value("PSI_COUNT", PieSlice::PieSliceIndex::PSI_COUNT)
 		];
 	}

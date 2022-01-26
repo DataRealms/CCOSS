@@ -249,16 +249,6 @@ public:
 protected:
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdatePieMenu
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the PieMenu config based ont eh current editor state.
-// Arguments:       None.
-// Return value:    None.
-
-    void UpdatePieMenu();
-
-
     enum BlinkMode
     {
         NOBLINK = 0,
@@ -286,9 +276,7 @@ protected:
     // Measures the interval between input repeats
     Timer m_RepeatTimer;
 
-    // The pie menu
-    PieMenuGUI *m_pPieMenu;
-    PieSlice::PieSliceIndex m_ActivatedPieSliceType; //!< The activated PieSliceType, reset every frame.
+	std::unique_ptr<PieMenuGUI> m_PieMenu; //!< The PieMenuGUI for this AreaEditorGUI.
     // The Area picker
     AreaPickerGUI *m_pPicker;
     // Grid snapping enabled

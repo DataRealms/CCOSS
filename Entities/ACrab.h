@@ -348,9 +348,9 @@ public:
 	bool FirearmNeedsReload() const;
 
 	/// <summary>
-	/// Indicates whether all of the MountedDevices are at full capacity.
+	/// Gets whether or not all of this ACrab's Turret's HDFirearms are full.
 	/// </summary>
-	/// <returns>Whether all of the MountedDevices are at full capacity.</returns>
+	/// <returns>Whether or not all of this ACrab's Turret's HDFirearms are full. Will return true if there is no Turret or no HDFirearms.</returns>
 	bool FirearmsAreFull() const;
 
 

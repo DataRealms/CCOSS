@@ -28,9 +28,7 @@ namespace RTE
 // Parent(s):       Entity.
 // Class history:   8/6/2007 GlobalScript created.
 
-class GlobalScript:
-    public Entity
-{
+class GlobalScript : public Entity {
 
 friend struct EntityLuaBindings;
 

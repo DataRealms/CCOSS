@@ -30,9 +30,7 @@ class Attachable;
 // Parent(s):       ACraft.
 // Class history:   12/13/2006 ACDropShip created.
 
-class ACDropShip:
-    public ACraft
-{
+class ACDropShip : public ACraft {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -34,9 +34,7 @@ class Attachable;
 // Parent(s):       MOSprite.
 // Class history:   05/30/2002 MOSRotating created.
 
-class MOSRotating:
-    public MOSprite
-{
+class MOSRotating : public MOSprite {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -22,9 +22,7 @@ namespace RTE
 // Description:     Something to bundle the properties of an emission together.
 // Parent(s):       Entity.
 
-class Emission :
-	public Entity
-{
+class Emission : public Entity {
 	friend class AEmitter;
 	friend class PEmitter;
 

@@ -31,9 +31,7 @@ class Actor;
 // Parent(s):       GameActivity.
 // Class history:   07/03/2008 GAScripted created.
 
-class GAScripted:
-    public GameActivity
-{
+class GAScripted : public GameActivity {
 
     friend class LuaMan;
     friend class ActivityMan;

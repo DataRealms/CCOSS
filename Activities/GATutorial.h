@@ -30,9 +30,7 @@ class Actor;
 // Parent(s):       GameActivity.
 // Class history:   10/13/2007 GATutorial created.
 
-class GATutorial:
-    public GameActivity
-{
+class GATutorial : public GameActivity {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

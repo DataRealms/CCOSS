@@ -35,13 +35,16 @@ namespace RTE {
 
 		m_InheritsHFlipped = 1;
 		m_InheritsRotAngle = true;
-		m_InheritedRotAngleOffset = 0.0F;
+		m_InheritedRotAngleOffset = 0;
 		m_InheritsFrame = false;
 
 		m_AtomSubgroupID = -1L;
 		m_CollidesWithTerrainWhileAttached = true;
 
-		m_PrevRotAngleOffset = 0.0F;
+		m_PrevParentOffset.Reset();
+		m_PrevJointOffset.Reset();
+		m_PrevRotAngleOffset = 0;
+		m_PreUpdateHasRunThisFrame = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -142,36 +145,23 @@ namespace RTE {
 	int Attachable::Save(Writer &writer) const {
 		MOSRotating::Save(writer);
 
-		writer.NewProperty("ParentOffset");
-		writer << m_ParentOffset;
-		writer.NewProperty("DrawAfterParent");
-		writer << m_DrawAfterParent;
-		writer.NewProperty("DeleteWhenRemovedFromParent");
-		writer << m_DeleteWhenRemovedFromParent;
-		writer.NewProperty("ApplyTransferredForcesAtOffset");
-		writer << m_ApplyTransferredForcesAtOffset;
+		writer.NewPropertyWithValue("ParentOffset", m_ParentOffset);
+		writer.NewPropertyWithValue("DrawAfterParent", m_DrawAfterParent);
+		writer.NewPropertyWithValue("DeleteWhenRemovedFromParent", m_DeleteWhenRemovedFromParent);
+		writer.NewPropertyWithValue("ApplyTransferredForcesAtOffset", m_ApplyTransferredForcesAtOffset);
 
-		writer.NewProperty("JointStrength");
-		writer << m_JointStrength;
-		writer.NewProperty("JointStiffness");
-		writer << m_JointStiffness;
-		writer.NewProperty("JointOffset");
-		writer << m_JointOffset;
+		writer.NewPropertyWithValue("JointStrength", m_JointStrength);
+		writer.NewPropertyWithValue("JointStiffness", m_JointStiffness);
+		writer.NewPropertyWithValue("JointOffset", m_JointOffset);
 
-		writer.NewProperty("BreakWound");
-		writer << m_BreakWound;
-		writer.NewProperty("ParentBreakWound");
-		writer << m_ParentBreakWound;
+		writer.NewPropertyWithValue("BreakWound", m_BreakWound);
+		writer.NewPropertyWithValue("ParentBreakWound", m_ParentBreakWound);
 
-		writer.NewProperty("InheritsHFlipped");
-		writer << ((m_InheritsHFlipped == 0 || m_InheritsHFlipped == 1) ? m_InheritsHFlipped : 2);
-		writer.NewProperty("InheritsRotAngle");
-		writer << m_InheritsRotAngle;
-		writer.NewProperty("InheritedRotAngleOffset");
-		writer << m_InheritedRotAngleOffset;
+		writer.NewPropertyWithValue("InheritsHFlipped", ((m_InheritsHFlipped == 0 || m_InheritsHFlipped == 1) ? m_InheritsHFlipped : 2));
+		writer.NewPropertyWithValue("InheritsRotAngle", m_InheritsRotAngle);
+		writer.NewPropertyWithValue("InheritedRotAngleOffset", m_InheritedRotAngleOffset);
 
-		writer.NewProperty("CollidesWithTerrainWhileAttached");
-		writer << m_CollidesWithTerrainWhileAttached;
+		writer.NewPropertyWithValue("CollidesWithTerrainWhileAttached", m_CollidesWithTerrainWhileAttached);
 
 		return 0;
 	}
@@ -452,7 +442,7 @@ namespace RTE {
 		//TODO Get rid of the need for calling ResetAllTimers, if something like inventory swapping needs timers reset it should do it itself! This blanket handling probably has side-effects.
 		// Timers are reset here as a precaution, so that if something was sitting in an inventory, it doesn't cause backed up emissions.
 		ResetAllTimers();
-		
+
 		if (newParent) {
 			m_Parent = newParent;
 			m_Team = newParent->GetTeam();

@@ -33,9 +33,7 @@ class PieMenuGUI;
 // Parent(s):       MOSRotating.
 // Class history:   04/13/2001 Actor created.
 
-class Actor:
-    public MOSRotating
-{
+class Actor : public MOSRotating {
     friend struct EntityLuaBindings;
 
 //////////////////////////////////////////////////////////////////////////////////////////

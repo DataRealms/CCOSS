@@ -34,9 +34,7 @@ class ContentFile;
 // Parent(s):       SceneObject.
 // Class history:   08/23/2002 BunkerAssemblyScheme created.
 
-class BunkerAssemblyScheme:
-    public SceneObject
-{
+class BunkerAssemblyScheme : public SceneObject {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

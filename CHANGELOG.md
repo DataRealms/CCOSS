@@ -407,6 +407,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - Renamed Lua methods `GetRadRotated` and `GetDegRotated` to `GetRadRotatedCopy` and `GetDegRotatedCopy` for clarity.
 
+- Added support for multiple lines in DataModule descriptions in their Index.inis. See earlier entry on multiple lines in descriptions for details on how to use this.
+
 </details>
 
 
@@ -463,6 +465,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Console error spam will no longer cripple performance over time.
 
 - `AudioMan:StopAll()` now actually stops all sounds, instead of just stopping music.
+
+- Fixed incorrect mouse bounds during splitscreen when the mouse player was not Player 1.
 
 </details>
 
@@ -656,13 +660,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`soundSet.SubSoundSets` (Lua R) - An iterator over the sub `SoundSets` of this `SoundSet`, allowing you to manipulate them as you would any `SoundSet`.  
 	`soundSet:HasAnySounds(includeSubSoundSets)` (Lua) - Whether or not this `SoundSet` has any sounds, optionally including its sub `SoundSets`.  
 	`soundSet:SelectNextSounds()` (Lua) - Selects the next sounds for this `SoundSet`. Note that playing a `SoundContainer` will always also do this, so this is only really useful to allow you to skip sounds when `SoundSelectionCycleMode` is set to `FORWARDS`.  
-	`soundSet:AddSound("Path/to/sound")` (Lua) - Adds the sound at the given path with no offset, 0 minimum audible distance, and default attenuation start distance.  
-	`soundSet:AddSound("Path/to/sound", offset, minimumAudibleDistance, attenuationStartDistance)` (Lua) - Adds the sound at the given path with the given parameters.  
+	`soundSet:AddSound("Path/to/sound.flac")` (Lua) - Adds the sound at the given path with no offset, 0 minimum audible distance, and default attenuation start distance.  
+	`soundSet:AddSound("Path/to/sound.flac", offset, minimumAudibleDistance, attenuationStartDistance)` (Lua) - Adds the sound at the given path with the given parameters.  
 	`soundSet:AddSoundSet(soundSetToAdd)` (Lua) - Adds the given `SoundSet` as a sub `SoundSet` of this `SoundSet`.  
+	`soundSet:RemoveSound("Path/to/sound.flac")` (Lua) - Removes any sounds with the given filepath from the `SoundSet`, returning whether or not any where removed. Does not remove sounds from sub-`SoundSet`s.  
+	`soundSet:RemoveSound("Path/to/sound.flac", removeFromSubSoundSets)` (Lua) - Removes any sounds with the given filepath from the `SoundSet`, returning whether or not any where removed. Optionally removes matching sounds from any sub-`SoundSet`s and their sub-`SoundSet`s and so on.  
 	
 	Additionally, `AddSound` and `AddSoundSet` INI properties work for `SoundSets`. They are exactly the same as they are for `SoundContainers`.
 
-- You can get the top level `SoundSet` of a `SoundContainer` with `soundContainer:GetTopLevelSoundSet` and manipulate it as described above. This allows you full interaction with all levels of `SoundSets` in a `SoundContainer`.
+- You can get the top level `SoundSet` of a `SoundContainer` with `soundContainer:GetTopLevelSoundSet` and manipulate it as described above. You can also set it to fully overwrite it with `soundContainer:SetTopLevelSoundSet`. This allows you full interaction with all levels of `SoundSets` in a `SoundContainer`.
 
 </details>
 
@@ -865,7 +871,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	AddSoundContainer = SoundContainer // Note that SoundContainers replace Sounds, so this can be used for things like FireSound = SoundContainer
 		PresetName = Preset Name Here
 
-		CycleMode = MODE_RANDOM (default) | MODE_FORWARDS // How the SoundContainer will cycle through its `SoundSets` whenever it's told to select a new one. The former is prior behaviour, the latter cycles through SoundSets in the order they were added.
+		SoundSelectionCycleMode = RANDOM (default) | FORWARDS | ALL // How the SoundContainer will cycle through its `SoundSets` whenever it's told to select a new one. The first is prior behaviour of picking sounds at random, the second cycles through SoundSets in the order they were added, and the third plays all SoundSets at once.
 
 		LoopSetting = -1 | 0 (default) | 1+ // How the SoundContainer loops its sounds. -1 means it loops forever, 0 means it plays once, any number > 0 means it plays once and loops that many times.
 

@@ -303,7 +303,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool InventoryMenuGUI::EnableIfNotEmpty() {
-		bool shouldEnable = !m_InventoryActorEquippedItems.empty() || !m_InventoryActor->IsInventoryEmpty();
+		bool shouldEnable = !m_InventoryActorEquippedItems.empty() || (m_InventoryActor && !m_InventoryActor->IsInventoryEmpty());
 		SetEnabled(shouldEnable);
 		return shouldEnable;
 	}
@@ -725,10 +725,12 @@ namespace RTE {
 		};
 
 		for (const auto &[button, icon] : buttonsToCheckIconsFor) {
-			if (button->IsEnabled()) {
-				button->SetIcon((button->HasFocus() || button->IsMousedOver() || button->IsPushed()) ? icon->GetBitmaps8()[1] : icon->GetBitmaps8()[0]);
-			} else {
-				button->SetIcon(icon->GetBitmaps8()[2]);
+			if (icon) {
+				if (button->IsEnabled()) {
+					button->SetIcon((button->HasFocus() || button->IsMousedOver() || button->IsPushed()) ? icon->GetBitmaps8()[1] : icon->GetBitmaps8()[0]);
+				} else {
+					button->SetIcon(icon->GetBitmaps8()[2]);
+				}
 			}
 
 			if (!button->IsEnabled() && button->GetWidth() == 15 && (button->HasFocus() || button->IsMousedOver() || button->IsPushed())) {

@@ -113,7 +113,7 @@ int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader)
 	{
 		PieSlice newSlice;
 		reader >> newSlice;
-		PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
+		//PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
 	}
 	else
         return GameActivity::ReadProperty(propName, reader);

@@ -332,7 +332,7 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 	{
 		PieSlice newSlice;
 		reader >> newSlice;
-		PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
+		//PieMenuGUI::StoreCustomLuaPieSlice(newSlice);
 	}
 	else if (propName == "ScriptPath") {
 		std::string scriptPath = CorrectBackslashesInPath(reader.ReadPropValue());

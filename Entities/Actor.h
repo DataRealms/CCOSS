@@ -20,9 +20,17 @@
 namespace RTE
 {
 
+
+#pragma region Global Macro Definitions
+#define DefaultPieMenuNameVirtual(DEFAULTPIEMENUNAME) \
+        virtual std::string GetDefaultPieMenuName() const { return DEFAULTPIEMENUNAME; }
+
+#define DefaultPieMenuName(DEFAULTPIEMENUNAME) \
+        std::string GetDefaultPieMenuName() const override { return DEFAULTPIEMENUNAME; }
+#pragma endregion
+
 class AtomGroup;
 class HeldDevice;
-class PieMenuGUI;
 
 #define AILINEDOTSPACING 16
 
@@ -70,9 +78,10 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(Actor);
-AddScriptFunctionNames(MOSRotating, "UpdateAI");
+AddScriptFunctionNames(MOSRotating, "UpdateAI", "OnPieMenuOpen", "OnPieMenuClose");
 SerializableOverrideMethods;
 ClassInfoGetters;
+DefaultPieMenuNameVirtual("Empty Pie Menu");
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Constructor:     Actor
@@ -593,33 +602,12 @@ ClassInfoGetters;
 
     bool IsDead() const { return m_Status == DEAD; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  PieNeedsUpdate
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Indicates that the pie menu associated with this Actor needs updating.
-// Arguments:       None.
-// Return value:    Whether the pie menu needs updating.
-
-    bool PieNeedsUpdate() { return m_PieNeedsUpdate; };
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  AddPieMenuSlices
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Adds all slices this needs on a pie menu.
-// Arguments:       The pie menu to add slices to. Ownership is NOT transferred!
-// Return value:    Whether any slices were added.
-
-	virtual bool AddPieMenuSlices(PieMenuGUI *pPieMenu);
-
-
     /// <summary>
-    /// Handles and does whatever a specific activated Pie Menu slice does to this.
+    /// Tries to handle the activated PieSlice in this object's PieMenuGUI, if there is one, based on its Type.
     /// </summary>
-    /// <param name="pieSliceIndex">The pie menu command to handle. See the enum in PieSlice.</param>
-    /// <returns>Whether any slice was handled. False if no matching slice handler was found, or there was no slice currently activated by the pie menu.</returns>
-    virtual bool HandlePieCommand(PieSlice::PieSliceIndex pieSliceIndex) { return false; }
+    /// <param name="pieSliceType">The Type of the PieSlice being handled.</param>
+    /// <returns>Whether or not the activated PieSlice Type was able to be handled.</returns>
+    virtual bool HandlePieCommand(PieSlice::PieSliceIndex pieSliceType) { return false; }
 
 /*
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1323,6 +1311,18 @@ ClassInfoGetters;
 	/// <param name="newRecoverDelay">The recovery delay, in MS.</param>
 	void SetStableRecoverDelay(int newRecoverDelay) { m_StableRecoverDelay = newRecoverDelay; }
 
+    /// <summary>
+    /// Gets a pointer to the PieMenuGUI for this Actor. Ownership is NOT transferred.
+    /// </summary>
+    /// <returns>The PieMenuGUI for this Actor.</returns>
+    PieMenuGUI * GetPieMenu() const { return m_PieMenu.get(); }
+
+	/// <summary>
+	/// Sets the PieMenuGUI for this Actor. Ownership IS transferred.
+	/// </summary>
+	/// <param name="newPieMenu">The new PieMenuGUI for this Actor.</param>
+	void SetPieMenu(PieMenuGUI *newPieMenu) { m_PieMenu = std::unique_ptr<PieMenuGUI>(newPieMenu); m_PieMenu->Create(this); }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -1440,16 +1440,12 @@ protected:
     float m_MaxInventoryMass; //!< The mass limit for this Actor's inventory. -1 means there's no limit.
     // The device that can/will be picked up
     HeldDevice *m_pItemInReach;
-    // Whether the pie menu associated with this needs updating
-    bool m_PieNeedsUpdate;
     // HUD positioning aid
     int m_HUDStack;
     // For how much longer to draw this as white. 0 means don't draw as white
     int m_FlashWhiteMS;
     // The timer that measures and deducts past time from the remaining white flash time
     Timer m_WhiteFlashTimer;
-    // Extra pie menu options that this should add to any Pie Menu that focuses on this
-    std::list<PieSlice> m_PieSlices;
     // What material strength this actor is capable of digging trough.
     float m_DigStrength;
 	// ID of deployment which spawned this actor
@@ -1537,10 +1533,24 @@ protected:
     // Timer for measuring interval between height checks
     Timer m_FallTimer;
 
+#pragma region Event Handling
+	/// <summary>
+	/// Event listener for when this Actor's PieMenuGUI is opened.
+	/// </summary>
+	virtual void PieMenuOpenListener() { RunScriptedFunctionInAppropriateScripts("OnPieMenuOpen"); }
+
+	/// <summary>
+	/// Event listener for when this Actor's PieMenuGUI is closed.
+	/// </summary>
+	virtual void PieMenuCloseListener() { RunScriptedFunctionInAppropriateScripts("OnPieMenuClose"); }
+#pragma endregion
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations
 
 private:
+
+    std::unique_ptr<PieMenuGUI> m_PieMenu;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear

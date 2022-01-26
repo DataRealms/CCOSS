@@ -41,6 +41,8 @@ namespace RTE {
 		m_AtomSubgroupID = -1L;
 		m_CollidesWithTerrainWhileAttached = true;
 
+		m_PieSlices.clear();
+
 		m_PrevParentOffset.Reset();
 		m_PrevJointOffset.Reset();
 		m_PrevRotAngleOffset = 0;
@@ -90,6 +92,10 @@ namespace RTE {
 		m_AtomSubgroupID = GetUniqueID();
 		m_CollidesWithTerrainWhileAttached = reference.m_CollidesWithTerrainWhileAttached;
 
+		for (const std::unique_ptr<PieSlice> &pieSlice : reference.m_PieSlices) {
+			m_PieSlices.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(pieSlice->Clone())));
+		}
+
 		m_PrevRotAngleOffset = reference.m_PrevRotAngleOffset;
 
 		return 0;
@@ -134,6 +140,8 @@ namespace RTE {
 			reader >> m_InheritsFrame;
 		} else if (propName == "CollidesWithTerrainWhileAttached") {
 			reader >> m_CollidesWithTerrainWhileAttached;
+		} else if (propName == "AddPieSlice") {
+			m_PieSlices.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader))));
 		} else {
 			return MOSRotating::ReadProperty(propName, reader);
 		}
@@ -163,6 +171,10 @@ namespace RTE {
 		writer.NewPropertyWithValue("InheritedRotAngleOffset", m_InheritedRotAngleOffset);
 
 		writer.NewPropertyWithValue("CollidesWithTerrainWhileAttached", m_CollidesWithTerrainWhileAttached);
+
+		for (const std::unique_ptr<PieSlice> &pieSlice : m_PieSlices) {
+			writer.NewPropertyWithValue("AddPieSlice", pieSlice.get());
+		}
 
 		return 0;
 	}
@@ -454,6 +466,10 @@ namespace RTE {
 			}
 			UpdatePositionAndJointPositionBasedOnOffsets();
 			if (CanCollideWithTerrain()) { AddOrRemoveAtomsFromRootParentAtomGroup(true, true); }
+
+			if (const Actor *rootParentAsActor = dynamic_cast<const Actor *>(GetRootParent())) {
+				for (const std::unique_ptr<PieSlice> &pieSlice : m_PieSlices) { rootParentAsActor->GetPieMenu()->AddPieSlice(dynamic_cast<PieSlice *>(pieSlice.get()->Clone()), this, true); }
+			}
 		} else {
 			m_RootMOID = m_MOID;
 			m_RestTimer.Reset();
@@ -469,9 +485,12 @@ namespace RTE {
 					m_pMOToNotHit = rootParent;
 					rootParent->SetWhichMOToNotHit(this);
 				}
+
+				if (const Actor *rootParentAsActor = dynamic_cast<const Actor *>(rootParent)) { rootParentAsActor->GetPieMenu()->RemovePieSlicesByOriginalSource(this); }
 			}
 
 			if (CanCollideWithTerrain()) { AddOrRemoveAtomsFromRootParentAtomGroup(false, true); }
+
 			m_Parent = newParent;
 			for (Attachable *attachable : m_Attachables) {
 				if (attachable->m_CollidesWithTerrainWhileAttached) { attachable->AddOrRemoveAtomsFromRootParentAtomGroup(true, true); }

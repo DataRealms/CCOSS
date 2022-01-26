@@ -3,6 +3,8 @@
 
 #include "MOSRotating.h"
 
+#include "PieMenuGUI.h"
+
 namespace RTE {
 
 	class AEmitter;
@@ -553,6 +555,8 @@ namespace RTE {
 
 		long m_AtomSubgroupID; //!< The Atom IDs this' atoms will have when attached and added to a parent's AtomGroup.
 		bool m_CollidesWithTerrainWhileAttached; //!< Whether this attachable currently has terrain collisions enabled while it's attached to a parent.
+
+		std::vector<std::unique_ptr<PieSlice>> m_PieSlices; //!< The vector of PieSlices belonging to this Attachable. Added to and removed from the RootParent as appropriate, when a parent is set.
 
 		Vector m_PrevParentOffset; //!< The previous frame's parent offset.
 		Vector m_PrevJointOffset; //!< The previous frame's joint offset.

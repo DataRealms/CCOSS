@@ -22,11 +22,6 @@ struct BITMAP;
 namespace RTE
 {
 
-class Attachable;
-class Arm;
-class Leg;
-//class LimbPath;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Class:           ACraft

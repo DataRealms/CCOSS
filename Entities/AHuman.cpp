@@ -3717,35 +3717,13 @@ void AHuman::Update()
                 m_Paths[BGROUND][CRAWL].Terminate();
 
             // ARMS using rotated path to help crawl
-            if (m_pBGArm)
-            {
-                m_ArmClimbing[BGROUND] = true;
-                // Reset the stride timer if the path is about to restart
-//                if (m_Paths[BGROUND][ARMCRAWL].PathEnded() || m_Paths[BGROUND][ARMCRAWL].PathIsAtStart())
-//                    m_StrideStart = true;
-                m_pBGHandGroup->PushAsLimb(m_Pos + RotateOffset(m_pBGArm->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[BGROUND][ARMCRAWL],
-                                            deltaTime,
-                                            0,
-                                            true);
-            }
-/*
-            if (m_pFGArm)
-            {
-                m_ArmClimbing[FGROUND] = true;
-//                m_StrideStart = true;
-                m_pFGHandGroup->PushAsLimb(m_Pos + RotateOffset(m_pFGArm->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[FGROUND][ARMCRAWL],
-            //                              mass,
-                                            deltaTime,
-                                            0,
-                                            true);
-            }
-*/
+			if (m_pBGArm) {
+				m_ArmClimbing[BGROUND] = true;
+				m_pBGHandGroup->PushAsLimb(m_Pos + RotateOffset(Vector(0, m_pBGArm->GetParentOffset().m_Y)), m_Vel, m_Rotation, m_Paths[BGROUND][ARMCRAWL], deltaTime);
+			} else if (m_pFGArm && !m_pFGArm->HoldsSomething()) {
+				m_ArmClimbing[FGROUND] = true;
+				m_pFGHandGroup->PushAsLimb(m_Pos + RotateOffset(Vector(0, m_pFGArm->GetParentOffset().m_Y)), m_Vel, m_Rotation, m_Paths[FGROUND][ARMCRAWL], deltaTime);
+			}
 
             // Restart the stride if the current one seems to be taking too long
             if (m_StrideTimer.IsPastSimMS(m_Paths[FGROUND][CRAWL].GetTotalPathTime()))

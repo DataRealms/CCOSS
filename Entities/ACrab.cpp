@@ -2538,58 +2538,17 @@ void ACrab::Update()
                                             deltaTime);
 
         }
-    }
-    // Not stable/standing, so make sure the end of limbs are moving around limply in a ragdoll fashion
-    else
-    {
-// TODO: Make the limb atom groups fly around and react to terrain, without getting stuck etc
-        bool wrapped = false;
-        Vector limbPos;
-        if (m_pLFGLeg)
-        {
-//            m_pLFGFootGroup->SetLimbPos(m_pLFGLeg->GetAnklePos(), m_HFlipped);
-            m_pLFGFootGroup->FlailAsLimb(m_Pos,
-                                         m_pLFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
-                                         m_pLFGLeg->GetMaxLength(),
-                                         g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
-                                         m_AngularVel,
-                                         m_pLFGLeg->GetMass(),
-                                         g_TimerMan.GetDeltaTimeSecs());
-        }
-        if (m_pLBGLeg)
-        {
-//            m_pLBGFootGroup->SetLimbPos(m_pLBGLeg->GetAnklePos(), m_HFlipped);
-            m_pLBGFootGroup->FlailAsLimb(m_Pos,
-                                         m_pLBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
-                                         m_pLBGLeg->GetMaxLength(),
-                                         g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
-                                         m_AngularVel,
-                                         m_pLBGLeg->GetMass(),
-                                         g_TimerMan.GetDeltaTimeSecs());
-        }
-        if (m_pRFGLeg)
-        {
-//            m_pRFGFootGroup->SetLimbPos(m_pRFGLeg->GetAnklePos(), m_HFlipped);
-            m_pRFGFootGroup->FlailAsLimb(m_Pos,
-                                         m_pRFGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
-                                         m_pRFGLeg->GetMaxLength(),
-                                         g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
-                                         m_AngularVel,
-                                         m_pRFGLeg->GetMass(),
-                                         g_TimerMan.GetDeltaTimeSecs());
-        }
-        if (m_pRBGLeg)
-        {
-//            m_pRBGFootGroup->SetLimbPos(m_pRBGLeg->GetAnklePos(), m_HFlipped);
-            m_pRBGFootGroup->FlailAsLimb(m_Pos,
-                                         m_pRBGLeg->GetParentOffset().GetXFlipped(m_HFlipped) * m_Rotation,
-                                         m_pRBGLeg->GetMaxLength(),
-                                         g_SceneMan.GetGlobalAcc() * g_TimerMan.GetDeltaTimeSecs(),
-                                         m_AngularVel,
-                                         m_pRBGLeg->GetMass(),
-                                         g_TimerMan.GetDeltaTimeSecs());
-        }
-    }
+	} else {
+		// Not stable/standing, so make sure the end of limbs are moving around limply in a ragdoll fashion.
+		// TODO: Make the limb atom groups fly around and react to terrain, without getting stuck etc.
+		if (m_pLFGLeg) { m_pLFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pLFGLeg->GetParentOffset()), m_pLFGLeg->GetMaxLength(), m_PrevVel * m_pLFGLeg->GetJointStiffness(), m_AngularVel, m_pLFGLeg->GetMass(), deltaTime); }
+
+		if (m_pLBGLeg) { m_pLBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pLBGLeg->GetParentOffset()), m_pLBGLeg->GetMaxLength(), m_PrevVel * m_pLBGLeg->GetJointStiffness(), m_AngularVel, m_pLBGLeg->GetMass(), deltaTime); }
+
+		if (m_pRFGLeg) { m_pRFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pRFGLeg->GetParentOffset()), m_pRFGLeg->GetMaxLength(), m_PrevVel * m_pRFGLeg->GetJointStiffness(), m_AngularVel, m_pRFGLeg->GetMass(), deltaTime); }
+
+		if (m_pRBGLeg) { m_pRBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pRBGLeg->GetParentOffset()), m_pRBGLeg->GetMaxLength(), m_PrevVel * m_pRBGLeg->GetJointStiffness(), m_AngularVel, m_pRBGLeg->GetMass(), deltaTime); }
+	}
 
     /////////////////////////////////
     // Manage Attachable:s

@@ -37,9 +37,7 @@ enum HeldDeviceType
 // Class history:   06/2/2002 HeldDevice created.
 //                  01/31/2007 Made concrete so Shields can be jsut HeldDevice:s
 
-class HeldDevice:
-    public Attachable
-{
+class HeldDevice : public Attachable {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

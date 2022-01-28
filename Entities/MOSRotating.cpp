@@ -1416,6 +1416,8 @@ void MOSRotating::Travel()
     // Reset the travel impulse for this frame
     m_TravelImpulse.Reset();
 
+	RTEAssert(m_pAtomGroup, "No AtomGroup defined for MOSRotating " + GetPresetName() + " in Travel!");
+
     // Set the atom to ignore a certain MO, if set and applicable.
     if (m_HitsMOs && m_pMOToNotHit && g_MovableMan.ValidMO(m_pMOToNotHit) && !m_MOIgnoreTimer.IsPastSimTimeLimit()) {
         std::vector<MOID> MOIDsNotToHit;

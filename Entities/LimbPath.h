@@ -40,9 +40,7 @@ enum Speed
 // Parent(s):       Entity.
 // Class history:   05/25/2001 LimbPath created.
 
-class LimbPath:
-    public Entity
-{
+class LimbPath : public Entity {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

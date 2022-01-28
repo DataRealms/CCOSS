@@ -50,9 +50,7 @@ class GAScripted;
 // Parent(s):       Serializable.
 // Class history:   8/22/2008 MetagameGUI Created.
 
-class MetagameGUI:
-    public Serializable
-{
+class MetagameGUI : public Serializable {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

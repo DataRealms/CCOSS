@@ -109,9 +109,9 @@ void AHuman::Clear()
 
 int AHuman::Create()
 {
-    // Read all the properties
-    if (Actor::Create() < 0)
-        return -1;
+	if (Actor::Create() < 0) {
+		return -1;
+	}
 
     // Cheat to make sure the FG Arm is always at the end of the Attachables list so it draws last.
     if (m_pFGArm) {

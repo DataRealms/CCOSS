@@ -33,9 +33,7 @@ class TerrainDebris;
 // Parent(s):       SceneLayer
 // Class history:   01/08/2002 SLTerrain created.
 
-class SLTerrain:
-    public SceneLayer
-{
+class SLTerrain : public SceneLayer {
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Nested class:    TerrainFrosting

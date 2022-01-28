@@ -909,6 +909,7 @@ namespace RTE {
 		.property("MissionCritical", &MovableObject::IsMissionCritical, &MovableObject::SetMissionCritical)
 		.property("HUDVisible", &MovableObject::GetHUDVisible, &MovableObject::SetHUDVisible)
 		.property("PinStrength", &MovableObject::GetPinStrength, &MovableObject::SetPinStrength)
+		.property("RestThreshold", &MovableObject::GetRestThreshold, &MovableObject::SetRestThreshold)
 		.property("DamageOnCollision", &MovableObject::DamageOnCollision, &MovableObject::SetDamageOnCollision)
 		.property("DamageOnPenetration", &MovableObject::DamageOnPenetration, &MovableObject::SetDamageOnPenetration)
 		.property("WoundDamageMultiplier", &MovableObject::WoundDamageMultiplier, &MovableObject::SetWoundDamageMultiplier)

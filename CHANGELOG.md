@@ -300,7 +300,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Recoil when firing weapons now affects sharp aim.
 
-- The third argument for `distance` to be filled out in `MovableMan:GetClosestActor()` is now a `Vector` rather than `float`.
+- The distance arguments for `MovableMan` functions `GetClosestActor` and `GetClosestTeamActor` are now of type `Vector` rather than `float`.
 
 - File paths in INIs are now case sensitive.
 

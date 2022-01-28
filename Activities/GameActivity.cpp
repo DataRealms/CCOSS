@@ -1459,7 +1459,7 @@ void GameActivity::Update()
             m_PlayerController[player].RelativeCursorMovement(m_ActorCursor[player]);
 
             // Find the actor closest to the cursor, if any within the radius
-            float markedDistance = -1;
+			Vector markedDistance;
             Actor *pMarkedActor = g_MovableMan.GetClosestTeamActor(team, player, m_ActorCursor[player], g_SceneMan.GetSceneWidth(), markedDistance);
 //            Actor *pMarkedActor = g_MovableMan.GetClosestTeamActor(team, player, m_ActorCursor[player], g_FrameMan.GetPlayerScreenWidth() / 4);
 
@@ -1509,7 +1509,7 @@ void GameActivity::Update()
                     // Show the pie menu switching animation over the highlighted Actor
                     m_pPieMenu[player]->SetPos(pMarkedActor->GetPos());
 
-                    if (markedDistance > g_FrameMan.GetPlayerFrameBufferWidth(player) / 4)
+                    if (markedDistance.GetMagnitude() > g_FrameMan.GetPlayerFrameBufferWidth(player) / 4)
                         m_pPieMenu[player]->Wobble();
                     else
                         m_pPieMenu[player]->FreezeAtRadius(30);

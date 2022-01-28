@@ -255,7 +255,7 @@ public:
 //                  point, but not outside the max radius. If no Actor other than the
 //                  excluded one was found within the radius of the point, 0 is returned.
 
-    Actor * GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, float &getDistance, const Actor *pExcludeThis = 0);
+    Actor * GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, const Actor *pExcludeThis = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -285,7 +285,7 @@ public:
 // Return value:    An Actor pointer to the first one of the requested team. If no Actor
 //                  is in that team, 0 is returned.
 
-    Actor * GetFirstTeamActor(int team, int player) { float temp; return GetClosestTeamActor(team, player, Vector(), 10000000, temp); }
+	Actor * GetFirstTeamActor(int team, int player) { Vector temp; return GetClosestTeamActor(team, player, Vector(), 10000000, temp); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

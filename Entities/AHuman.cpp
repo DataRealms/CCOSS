@@ -110,9 +110,9 @@ void AHuman::Clear()
 
 int AHuman::Create()
 {
-    // Read all the properties
-    if (Actor::Create() < 0)
-        return -1;
+	if (Actor::Create() < 0) {
+		return -1;
+	}
 
     // Cheat to make sure the FG Arm is always at the end of the Attachables list so it draws last.
     if (m_pFGArm) {
@@ -3734,35 +3734,13 @@ void AHuman::Update()
                 m_Paths[BGROUND][CRAWL].Terminate();
 
             // ARMS using rotated path to help crawl
-            if (m_pBGArm)
-            {
-                m_ArmClimbing[BGROUND] = true;
-                // Reset the stride timer if the path is about to restart
-//                if (m_Paths[BGROUND][ARMCRAWL].PathEnded() || m_Paths[BGROUND][ARMCRAWL].PathIsAtStart())
-//                    m_StrideStart = true;
-                m_pBGHandGroup->PushAsLimb(m_Pos + RotateOffset(m_pBGArm->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[BGROUND][ARMCRAWL],
-                                            deltaTime,
-                                            0,
-                                            true);
-            }
-/*
-            if (m_pFGArm)
-            {
-                m_ArmClimbing[FGROUND] = true;
-//                m_StrideStart = true;
-                m_pFGHandGroup->PushAsLimb(m_Pos + RotateOffset(m_pFGArm->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[FGROUND][ARMCRAWL],
-            //                              mass,
-                                            deltaTime,
-                                            0,
-                                            true);
-            }
-*/
+			if (m_pBGArm) {
+				m_ArmClimbing[BGROUND] = true;
+				m_pBGHandGroup->PushAsLimb(m_Pos + RotateOffset(Vector(0, m_pBGArm->GetParentOffset().m_Y)), m_Vel, m_Rotation, m_Paths[BGROUND][ARMCRAWL], deltaTime);
+			} else if (m_pFGArm && !m_pFGArm->HoldsSomething()) {
+				m_ArmClimbing[FGROUND] = true;
+				m_pFGHandGroup->PushAsLimb(m_Pos + RotateOffset(Vector(0, m_pFGArm->GetParentOffset().m_Y)), m_Vel, m_Rotation, m_Paths[FGROUND][ARMCRAWL], deltaTime);
+			}
 
             // Restart the stride if the current one seems to be taking too long
             if (m_StrideTimer.IsPastSimMS(m_Paths[FGROUND][CRAWL].GetTotalPathTime()))
@@ -4031,7 +4009,7 @@ void AHuman::Update()
     if (std::abs(rot) > c_PI) {
         rot = (rot > 0 ? -c_PI : c_PI) + (rot - (rot > 0 ? c_PI : -c_PI));
         // If we're upside down, we're unstable damnit
-		if (m_Status != DYING && m_Status != DEAD) { m_Status = UNSTABLE; }
+		if (m_Status == STABLE) { m_Status = UNSTABLE; }
         m_StableRecoverTimer.Reset();
     }
 
@@ -4319,7 +4297,7 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 
 			m_HUDStack -= 10;
 			if (m_pFGArm && !m_EquipHUDTimer.IsPastRealMS(500)) {
-				std::string equippedItemsString = (m_pFGArm->HoldsSomething() ? m_pFGArm->GetHeldMO()->GetPresetName() : "EMPTY") + (m_pBGArm->HoldsSomething() ? " | " + m_pBGArm->GetHeldMO()->GetPresetName() : "");
+				std::string equippedItemsString = (m_pFGArm->HoldsSomething() ? m_pFGArm->GetHeldMO()->GetPresetName() : "EMPTY") + (m_pBGArm && m_pBGArm->HoldsSomething() ? " | " + m_pBGArm->GetHeldMO()->GetPresetName() : "");
 				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
 				m_HUDStack -= 9;
 			}

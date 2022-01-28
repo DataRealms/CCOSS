@@ -530,9 +530,9 @@ Actor * MovableMan::GetPrevTeamActor(int team, Actor *pBeforeThis)
 // Description:     Get a pointer to an Actor in the internal Actor list that is of a
 //                  specifc team and closest to a specific scene point.
 
-Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, float &getDistance, const Actor *pExcludeThis)
+Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, const Actor *pExcludeThis)
 {
-    if (team < Activity::NoTeam || team >= Activity::MaxTeamCount || m_Actors.empty() ||  m_ActorRoster[team].empty())
+    if (team < Activity::NoTeam || team >= Activity::MaxTeamCount || m_Actors.empty() || m_ActorRoster[team].empty())
         return 0;
 
     Activity *pActivity = g_ActivityMan.GetActivity();
@@ -566,9 +566,9 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
     {
         for (list<Actor *>::iterator aIt = m_ActorRoster[team].begin(); aIt != m_ActorRoster[team].end(); ++aIt)
         {
-            if ((*aIt) == pExcludeThis || (*aIt)->GetController()->IsPlayerControlled(player) || (pActivity && pActivity->IsOtherPlayerBrain(*aIt, player)))
-                continue;
-
+			if ((*aIt) == pExcludeThis || (player != NoPlayer && ((*aIt)->GetController()->IsPlayerControlled(player) || (pActivity && pActivity->IsOtherPlayerBrain(*aIt, player))))) {
+				continue;
+			}
             distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
             distance = distanceVec.GetMagnitude();
 
@@ -577,11 +577,11 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
             {
                 shortestDistance = distance;
                 pClosestActor = *aIt;
+				getDistance.SetXY(distanceVec.GetX(), distanceVec.GetY());
             }
         }
     }
 
-    getDistance = shortestDistance;
     return pClosestActor;
 }
 

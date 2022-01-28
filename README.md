@@ -30,8 +30,6 @@ You may also want to check out the list of recommended Visual Studio plugins [he
 * `fmod.dll`
 * `fmodL.dll`
 
-4. Copy `Scenes.rte` and `Metagames.rte` from your purchased copy of Cortex Command into the **Data Repository**.
-
 Now you're ready to build and launch the game.  
 Simply open `RTEA.sln` with Visual Studio, choose your target platform (x86 or x64) and configuration, and run the project.
 

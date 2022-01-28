@@ -43,9 +43,7 @@ class Loadout;
 // Parent(s):       Activity.
 // Class history:   8/7/2007 GameActivity created.
 
-class GameActivity:
-    public Activity
-{
+class GameActivity : public Activity {
 
     friend struct ActivityLuaBindings;
 

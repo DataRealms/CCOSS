@@ -1101,7 +1101,7 @@ void SceneEditorGUI::Update()
 								// If we have a friendly actor or brain nearby then give him an item instead of placing it
 								bool toPlace = true;
 
-								float distanceToActor = 0;
+								Vector distanceToActor;
 								Actor *pNearestActor = g_MovableMan.GetClosestTeamActor(m_pController->GetTeam(), m_pController->GetPlayer(), pPlacedClone->GetPos(), 20, distanceToActor);
 
 								// If we could not find an ordinary actor, then look for brain actor

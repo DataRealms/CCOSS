@@ -36,9 +36,7 @@ class ContentFile;
 // Parent(s):       SceneObject.
 // Class history:   08/23/2002 BunkerAssembly created.
 
-class BunkerAssembly:
-    public TerrainObject
-{
+class BunkerAssembly : public TerrainObject {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -303,7 +303,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool InventoryMenuGUI::EnableIfNotEmpty() {
-		bool shouldEnable = !m_InventoryActorEquippedItems.empty() || !m_InventoryActor->IsInventoryEmpty();
+		bool shouldEnable = !m_InventoryActorEquippedItems.empty() || (m_InventoryActor && !m_InventoryActor->IsInventoryEmpty());
 		SetEnabled(shouldEnable);
 		return shouldEnable;
 	}
@@ -725,10 +725,12 @@ namespace RTE {
 		};
 
 		for (const auto &[button, icon] : buttonsToCheckIconsFor) {
-			if (button->IsEnabled()) {
-				button->SetIcon((button->HasFocus() || button->IsMousedOver() || button->IsPushed()) ? icon->GetBitmaps8()[1] : icon->GetBitmaps8()[0]);
-			} else {
-				button->SetIcon(icon->GetBitmaps8()[2]);
+			if (icon) {
+				if (button->IsEnabled()) {
+					button->SetIcon((button->HasFocus() || button->IsMousedOver() || button->IsPushed()) ? icon->GetBitmaps8()[1] : icon->GetBitmaps8()[0]);
+				} else {
+					button->SetIcon(icon->GetBitmaps8()[2]);
+				}
 			}
 
 			if (!button->IsEnabled() && button->GetWidth() == 15 && (button->HasFocus() || button->IsMousedOver() || button->IsPushed())) {
@@ -924,18 +926,18 @@ namespace RTE {
 		}
 
 		GUIButton *nextButtonToHighlight = nullptr;
-		Direction pressedDirection = GetNonMouseButtonControllerMovement();
+		Directions pressedDirection = GetNonMouseButtonControllerMovement();
 		switch (pressedDirection) {
-			case Direction::Up:
+			case Directions::Up:
 				nextButtonToHighlight = HandleNonMouseUpInput();
 				break;
-			case Direction::Down:
+			case Directions::Down:
 				nextButtonToHighlight = HandleNonMouseDownInput();
 				break;
-			case Direction::Left:
+			case Directions::Left:
 				nextButtonToHighlight = HandleNonMouseLeftInput();
 				break;
-			case Direction::Right:
+			case Directions::Right:
 				nextButtonToHighlight = HandleNonMouseRightInput();
 				break;
 			default:
@@ -951,14 +953,14 @@ namespace RTE {
 			m_NonMouseHighlightedButton->OnMouseLeave(0, 0, 0, 0);
 			m_NonMouseHighlightedButton = nextButtonToHighlight;
 			m_NonMouseHighlightedButton->OnMouseEnter(0, 0, 0, 0);
-		} else if (!nextButtonToHighlight && pressedDirection != Direction::None) {
+		} else if (!nextButtonToHighlight && pressedDirection != Directions::None) {
 			g_GUISound.UserErrorSound()->Play(m_MenuController->GetPlayer());
 		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Direction InventoryMenuGUI::GetNonMouseButtonControllerMovement() {
+	Directions InventoryMenuGUI::GetNonMouseButtonControllerMovement() {
 		bool pressUp = m_MenuController->IsState(ControlState::PRESS_UP) || m_MenuController->IsState(ControlState::SCROLL_UP);
 		bool pressDown = m_MenuController->IsState(ControlState::PRESS_DOWN) || m_MenuController->IsState(ControlState::SCROLL_DOWN);
 		bool pressLeft = m_MenuController->IsState(ControlState::PRESS_LEFT);
@@ -980,15 +982,15 @@ namespace RTE {
 			m_GUIRepeatTimer.Reset();
 		}
 		if (pressUp) {
-			return Direction::Up;
+			return Directions::Up;
 		} else if (pressDown) {
-			return Direction::Down;
+			return Directions::Down;
 		} else if (pressLeft) {
-			return Direction::Left;
+			return Directions::Left;
 		} else if (pressRight) {
-			return Direction::Right;
+			return Directions::Right;
 		}
-		return Direction::None;
+		return Directions::None;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

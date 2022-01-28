@@ -69,8 +69,7 @@ namespace RTE {
 		//		m_HoverChangeSound.Create("Base.rte/Sounds/GUIs/SelectionChange.flac", true, false);
 		m_HoverChangeSound = m_SelectionChangeSound;
 
-		//		m_HoverDisabledSound.Create("Base.rte/Sounds/GUIs/PlacementBlip.flac", true, false);
-		m_HoverDisabledSound = m_PlacementBlip;
+		m_HoverDisabledSound.Create("Base.rte/Sounds/GUIs/PlacementBlip.flac", true, false);
 
 		m_SlicePickedSound.Create("Base.rte/Sounds/GUIs/SlicePicked.flac", true, false);
 

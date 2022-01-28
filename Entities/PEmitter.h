@@ -29,9 +29,7 @@ namespace RTE
 // Parent(s):       MOSParticle.
 // Class history:   02/29/2004 PEmitter created.
 
-class PEmitter :
-	public MOSParticle
-{
+class PEmitter : public MOSParticle {
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////

@@ -8,9 +8,9 @@ namespace RTE {
 	const std::string SoundSet::m_sClassName = "SoundSet";
 
 	const std::unordered_map<std::string, SoundSet::SoundSelectionCycleMode> SoundSet::c_SoundSelectionCycleModeMap = {
-		{"Random", SoundSelectionCycleMode::RANDOM},
-		{"Forwards", SoundSelectionCycleMode::FORWARDS},
-		{"All", SoundSelectionCycleMode::ALL}
+		{"random", SoundSelectionCycleMode::RANDOM},
+		{"forwards", SoundSelectionCycleMode::FORWARDS},
+		{"all", SoundSelectionCycleMode::ALL}
 	};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -103,6 +103,8 @@ namespace RTE {
 	SoundSet::SoundSelectionCycleMode SoundSet::ReadSoundSelectionCycleMode(Reader &reader) {
 		SoundSelectionCycleMode soundSelectionCycleModeToReturn;
 		std::string soundSelectionCycleModeString = reader.ReadPropValue();
+		std::locale locale;
+		for (char &character : soundSelectionCycleModeString) { character = std::tolower(character, locale); }
 
 		std::unordered_map<std::string, SoundSelectionCycleMode>::const_iterator soundSelectionCycleMode = c_SoundSelectionCycleModeMap.find(soundSelectionCycleModeString);
 		if (soundSelectionCycleMode != c_SoundSelectionCycleModeMap.end()) {
@@ -173,6 +175,18 @@ namespace RTE {
 		}
 
 		m_SoundData.push_back({soundFile, soundObject, offset, minimumAudibleDistance, attenuationStartDistance});
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool SoundSet::RemoveSound(const std::string &soundFilePath, bool removeFromSubSoundSets) {
+		auto soundsToRemove = std::remove_if(m_SoundData.begin(), m_SoundData.end(), [&soundFilePath](const SoundSet::SoundData &soundData) { return soundData.SoundFile.GetDataPath() == soundFilePath; });
+		bool anySoundsToRemove = soundsToRemove != m_SoundData.end();
+		if (anySoundsToRemove) { m_SoundData.erase(soundsToRemove, m_SoundData.end()); }
+		if (removeFromSubSoundSets) {
+			for (SoundSet subSoundSet : m_SubSoundSets) { anySoundsToRemove |= RemoveSound(soundFilePath, removeFromSubSoundSets); }
+		}
+		return anySoundsToRemove;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -285,7 +299,7 @@ namespace RTE {
 						selectSoundForwards();
 						break;
 					default:
-						RTEAbort("Invalid sound selection sound cycle mode.");
+						RTEAbort("Invalid sound selection sound cycle mode. " + m_SoundSelectionCycleMode);
 						break;
 				}
 				RTEAssert(m_CurrentSelection.second >= 0 && m_CurrentSelection.second < selectedVectorSize, "Failed to select next sound, either none was selected or the selected sound was invalid.");

@@ -4006,7 +4006,7 @@ void AHuman::Update()
     if (std::abs(rot) > c_PI) {
         rot = (rot > 0 ? -c_PI : c_PI) + (rot - (rot > 0 ? c_PI : -c_PI));
         // If we're upside down, we're unstable damnit
-		if (m_Status != DYING && m_Status != DEAD) { m_Status = UNSTABLE; }
+		if (m_Status == STABLE) { m_Status = UNSTABLE; }
         m_StableRecoverTimer.Reset();
     }
 

@@ -30,6 +30,7 @@ namespace RTE {
 		m_Pos = Vector();
 		m_Volume = 1.0F;
 		m_Pitch = 1.0F;
+		m_PitchVariation = 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -52,6 +53,7 @@ namespace RTE {
 		m_Pos = reference.m_Pos;
 		m_Volume = reference.m_Volume;
 		m_Pitch = reference.m_Pitch;
+		m_PitchVariation = reference.m_PitchVariation;
 
 		return 0;
 	}
@@ -95,6 +97,8 @@ namespace RTE {
 			reader >> m_Volume;
 		} else if (propName == "Pitch") {
 			reader >> m_Pitch;
+		} else if (propName == "PitchVariation") {
+			reader >> m_PitchVariation;
 		} else {
 			return Entity::ReadProperty(propName, reader);
 		}
@@ -138,6 +142,8 @@ namespace RTE {
 		writer << m_Volume;
 		writer.NewProperty("Pitch");
 		writer << m_Pitch;
+		writer.NewProperty("PitchVariation");
+		writer << m_PitchVariation;
 
 		return 0;
 	}

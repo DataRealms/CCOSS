@@ -530,7 +530,7 @@ namespace RTE {
 		int channelIndex;
 		std::vector<const SoundSet::SoundData *> selectedSoundData;
 		soundContainer->GetTopLevelSoundSet().GetFlattenedSoundData(selectedSoundData, true);
-		float pitchVariationFactor = 1.0F + std::abs(soundContainer->GetPitchVariation());
+		float pitchVariation = std::abs(soundContainer->GetPitchVariation());
 		for (const SoundSet::SoundData *soundData : selectedSoundData) {
 			result = (result == FMOD_OK) ? m_AudioSystem->playSound(soundData->SoundObject, channelGroupToPlayIn, true, &channel) : result;
 			result = (result == FMOD_OK) ? channel->getIndex(&channelIndex) : result;
@@ -538,8 +538,7 @@ namespace RTE {
 			result = (result == FMOD_OK) ? channel->setUserData(soundContainer) : result;
 			result = (result == FMOD_OK) ? channel->setCallback(SoundChannelEndedCallback) : result;
 			result = (result == FMOD_OK) ? channel->setPriority(soundContainer->GetPriority()) : result;
-			float pitchVariationMultiplier = pitchVariationFactor == 1.0F ? 1.0F : RandomNum(1.0F / pitchVariationFactor, 1.0F * pitchVariationFactor);
-			result = (result == FMOD_OK) ? channel->setPitch(soundContainer->GetPitch() * pitchVariationMultiplier) : result;
+			result = (result == FMOD_OK) ? channel->setPitch(soundContainer->GetPitch() + RandomNum(-pitchVariation, pitchVariation)) : result;
 			if (soundContainer->IsImmobile()) {
 				result = (result == FMOD_OK) ? channel->set3DLevel(0.0F) : result;
 				result = (result == FMOD_OK) ? channel->setVolume(soundContainer->GetVolume()) : result;

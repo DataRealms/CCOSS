@@ -248,7 +248,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `HeldDevice` Lua function `IsEmpty`, which indicates whether the device is devoid of ammo. Can be used to skip an extra step to check for a `Magazine`. Will always return `false` for non-`HDFirearm` devices.
 
-- New `SoundContainer` INI and Lua (R/W) property `PitchVariation`, which can be used to randomize the pitch of the sounds being played.
+- New `SoundContainer` INI and Lua (R/W) property `PitchVariation`, which can be used to add randomness to the pitch of the sounds being played. Note that this randomness can raise or lower the sounds' pitch.
 
 - New `AHuman` and `ACrab` INI and Lua (R/W) property `JetReplenishRate`, which determines how fast jump time (i.e. jetpack fuel) is replenished during downtime.
 

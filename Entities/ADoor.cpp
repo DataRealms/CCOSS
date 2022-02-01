@@ -384,7 +384,6 @@ namespace RTE {
 		Actor::Update();
 
 		if (!m_Door) {
-			EraseDoorMaterial();
 			// Start the spinning out of control animation for the motor, start it slow
 			m_SpriteAnimDuration *= 4;
 		}

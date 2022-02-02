@@ -118,6 +118,7 @@ namespace RTE {
 			reader >> m_JointOffset;
 		} else if (propName == "BreakWound") {
 			m_BreakWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader));
+			if (!m_ParentBreakWound) { m_ParentBreakWound = m_BreakWound; }
 		} else if (propName == "ParentBreakWound") {
 			m_ParentBreakWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader));
 		} else if (propName == "InheritsHFlipped") {

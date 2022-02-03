@@ -3703,52 +3703,44 @@ void AHuman::Update()
                 m_Paths[FGROUND][WALK].Terminate();
                 m_Paths[BGROUND][WALK].Terminate();
             }
-        }
-        // CRAWLING
-        else if (m_MoveState == CRAWL)
-        {
-            // LEG Crawls
-            float FGLegProg = m_Paths[FGROUND][CRAWL].GetRegularProgress();
-            float BGLegProg = m_Paths[BGROUND][CRAWL].GetRegularProgress();
+		} else if (m_MoveState == CRAWL) {
+			// Start crawling only once we are fully prone.
+			if (m_ProneState == PRONE) {
 
-            // FG Leg crawl
-            if (m_pFGLeg && (!m_pBGLeg || (!(m_Paths[FGROUND][CRAWL].PathEnded() && BGLegProg < 0.5) || m_StrideStart)))
-            {
-//                m_StrideStart = false;
-                // Reset the stride timer if the path is about to restart
-				if (m_Paths[FGROUND][CRAWL].PathEnded() || m_Paths[FGROUND][CRAWL].PathIsAtStart()) { m_StrideTimer.Reset(); }
-				m_pFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pFGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[FGROUND][CRAWL], deltaTime);
-            }
-            else
-                m_Paths[FGROUND][CRAWL].Terminate();
+				float FGLegProg = m_Paths[FGROUND][CRAWL].GetRegularProgress();
+				float BGLegProg = m_Paths[BGROUND][CRAWL].GetRegularProgress();
 
-            // BG Leg crawl
-            if (m_pBGLeg && (!m_pFGLeg || !(m_Paths[BGROUND][CRAWL].PathEnded() && FGLegProg < 0.5)))
-            {
-                m_StrideStart = false;
-                // Reset the stride timer if the path is about to restart
-				if (m_Paths[BGROUND][CRAWL].PathEnded() || m_Paths[BGROUND][CRAWL].PathIsAtStart()) { m_StrideTimer.Reset(); }
-				m_pBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pBGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[BGROUND][CRAWL], deltaTime);
-            }
-            else
-                m_Paths[BGROUND][CRAWL].Terminate();
+				if (m_pFGLeg && (!m_pBGLeg || (!(m_Paths[FGROUND][CRAWL].PathEnded() && BGLegProg < 0.5F) || m_StrideStart))) {
+					if (m_Paths[FGROUND][CRAWL].PathEnded() || m_Paths[FGROUND][CRAWL].PathIsAtStart()) { m_StrideTimer.Reset(); }
+					m_pFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pFGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[FGROUND][CRAWL], deltaTime);
+				} else {
+					m_Paths[FGROUND][CRAWL].Terminate();
+				}
+				if (m_pBGLeg && (!m_pFGLeg || !(m_Paths[BGROUND][CRAWL].PathEnded() && FGLegProg < 0.5F))) {
+					m_StrideStart = false;
+					if (m_Paths[BGROUND][CRAWL].PathEnded() || m_Paths[BGROUND][CRAWL].PathIsAtStart()) { m_StrideTimer.Reset(); }
+					m_pBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pBGLeg->GetParentOffset()), m_Vel, m_Rotation, m_Paths[BGROUND][CRAWL], deltaTime);
+				} else {
+					m_Paths[BGROUND][CRAWL].Terminate();
+				}
+				if (m_pBGArm) {
+					m_ArmClimbing[BGROUND] = true;
+					m_pBGHandGroup->PushAsLimb(m_Pos + RotateOffset(Vector(0, m_pBGArm->GetParentOffset().m_Y)), m_Vel, m_Rotation, m_Paths[BGROUND][ARMCRAWL], deltaTime);
+				} else if (m_pFGArm && !m_pFGArm->HoldsSomething()) {
+					m_ArmClimbing[FGROUND] = true;
+					m_pFGHandGroup->PushAsLimb(m_Pos + RotateOffset(Vector(0, m_pFGArm->GetParentOffset().m_Y)), m_Vel, m_Rotation, m_Paths[FGROUND][ARMCRAWL], deltaTime);
+				}
+				// Restart the stride if the current one seems to be taking too long.
+				if (m_StrideTimer.IsPastSimMS(m_Paths[FGROUND][CRAWL].GetTotalPathTime())) {
+					m_StrideStart = true;
+					m_Paths[FGROUND][CRAWL].Terminate();
+					m_Paths[BGROUND][CRAWL].Terminate();
+				}
+			} else {
+				if (m_pFGLeg) { m_pFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pFGLeg->GetParentOffset()), m_pFGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pFGLeg->GetMass(), deltaTime); }
 
-            // ARMS using rotated path to help crawl
-			if (m_pBGArm) {
-				m_ArmClimbing[BGROUND] = true;
-				m_pBGHandGroup->PushAsLimb(m_Pos + RotateOffset(Vector(0, m_pBGArm->GetParentOffset().m_Y)), m_Vel, m_Rotation, m_Paths[BGROUND][ARMCRAWL], deltaTime);
-			} else if (m_pFGArm && !m_pFGArm->HoldsSomething()) {
-				m_ArmClimbing[FGROUND] = true;
-				m_pFGHandGroup->PushAsLimb(m_Pos + RotateOffset(Vector(0, m_pFGArm->GetParentOffset().m_Y)), m_Vel, m_Rotation, m_Paths[FGROUND][ARMCRAWL], deltaTime);
+				if (m_pBGLeg) { m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pBGLeg->GetMass(), deltaTime); }
 			}
-
-            // Restart the stride if the current one seems to be taking too long
-            if (m_StrideTimer.IsPastSimMS(m_Paths[FGROUND][CRAWL].GetTotalPathTime()))
-            {
-                m_StrideStart = true;
-                m_Paths[FGROUND][CRAWL].Terminate();
-                m_Paths[BGROUND][CRAWL].Terminate();
-            }
 		} else if (m_pFGLeg || m_pBGLeg) {
 			if (m_MoveState == JUMP) {
 				// TODO: Utilize jump paths in an intuitive way!

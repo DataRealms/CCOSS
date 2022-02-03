@@ -66,7 +66,7 @@ namespace RTE {
 			if (!entityPreset) { entityPreset = g_PresetMan.GetRandomBuyableOfGroupFromTech(groupName, #TYPE, g_PresetMan.GetModuleID("Base.rte")); } \
 			if (!entityPreset) { entityPreset = g_PresetMan.GetRandomBuyableOfGroupFromTech("Any", #TYPE, moduleSpaceID); } \
 			if (!entityPreset) { \
-				g_ConsoleMan.PrintString(std::string("ERROR: Could not find any ") + std::string(#TYPE) + std::string(" defined in a Group called \"") + groupName + std::string("\" in module ") + g_PresetMan.GetDataModuleName(moduleSpaceID) + "!");	\
+				g_ConsoleMan.PrintString(std::string("WARNING: Could not find any ") + std::string(#TYPE) + std::string(" defined in a Group called \"") + groupName + std::string("\" in module ") + g_PresetMan.GetDataModuleName(moduleSpaceID) + "!");	\
 				return nullptr; \
 			} \
 			return dynamic_cast<TYPE *>(entityPreset->Clone()); \
@@ -77,7 +77,7 @@ namespace RTE {
 			if (!entityPreset) { entityPreset = g_PresetMan.GetRandomBuyableOfGroupFromTech(groupName, #TYPE, g_PresetMan.GetModuleID("Base.rte")); } \
 			if (!entityPreset) { entityPreset = g_PresetMan.GetRandomBuyableOfGroupFromTech("Any", #TYPE, moduleSpaceID); } \
 			if (!entityPreset) { \
-				g_ConsoleMan.PrintString(std::string("ERROR: Could not find any ") + std::string(#TYPE) + std::string(" defined in a Group called \"") + groupName + std::string("\" in module ") + dataModuleName + "!"); \
+				g_ConsoleMan.PrintString(std::string("WARNING: Could not find any ") + std::string(#TYPE) + std::string(" defined in a Group called \"") + groupName + std::string("\" in module ") + dataModuleName + "!"); \
 				return nullptr; \
 			} \
 			return dynamic_cast<TYPE *>(entityPreset->Clone()); \

@@ -2228,6 +2228,7 @@ void MetagameGUI::UpdateInput()
 				// weegee SwitchToScreen(NEWDIALOG);
                 // Hide all screens, the appropriate screen will reappear on next update
                 HideAllScreens();
+				if (g_MetaMan.m_GameState == MetaMan::GAMEOVER && g_ActivityMan.GetActivity()) { g_PostProcessMan.ClearScreenPostEffects(); }
                 // Signal that we want to go back to main menu
                 m_BackToMain = true;
                 g_GUISound.BackButtonPressSound()->Play();

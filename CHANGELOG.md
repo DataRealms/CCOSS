@@ -260,6 +260,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 <details><summary><b>Changed</b></summary>
 
+- Exposed `MovableObject` property `RestThreshold` to Lua (R/W).
+
 - `ACRocket`s can now function without a full set of thrusters. This also means that "Null Emitter" thrusters are no longer required for rockets.
 
 - Changed `MOSprite` property `SpriteAnimMode` `Enum` `LOOPWHENMOVING` to `LOOPWHENACTIVE` as it also describes active devices.

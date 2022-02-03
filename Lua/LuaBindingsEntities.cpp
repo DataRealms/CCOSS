@@ -1043,7 +1043,7 @@ namespace RTE {
 		.def_readwrite("Areas", &Scene::m_AreaList, luabind::return_stl_iterator)
 		.def("SetArea", &Scene::SetArea)
 		.def("HasArea", &Scene::HasArea)
-		.def("GetArea", &Scene::GetArea)
+		.def("GetArea", (Scene::Area * (Scene:: *)(const std::string &areaName)) &Scene::GetArea)
 		.def("GetOptionalArea", &Scene::GetOptionalArea)
 		.def("WithinArea", &Scene::WithinArea)
 		.def("ResetPathFinding", &Scene::ResetPathFinding)

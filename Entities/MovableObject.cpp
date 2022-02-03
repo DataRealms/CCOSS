@@ -352,7 +352,7 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
                 reader.ReportError("Failed to do necessary setup to add scripts while attempting to add the script with path " + scriptPath + ". This has nothing to do with your script, please report it to a developer.");
                 break;
             case -5:
-                reader.ReportError("The file with script path " + scriptPath + " could not be run. Please check that this is a valid Lua file.");
+                // Error in lua file, this'll pop up in the console so no need to report an error through the reader.
                 break;
             default:
                 RTEAbort("Reached default case while adding script in INI. This should never happen!");

@@ -193,8 +193,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	FMOD_RESULT SoundContainer::UpdateSoundProperties() {
-		if (!m_Immobile) { m_Volume = 0.0F; }
-
 		FMOD_RESULT result = FMOD_OK;
 
 		std::vector<SoundSet::SoundData *> flattenedSoundData;

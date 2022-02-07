@@ -424,7 +424,7 @@ namespace RTE {
 		.property("FirearmIsSemiAuto", &AHuman::FirearmIsSemiAuto)
 		.property("FirearmActivationDelay", &AHuman::FirearmActivationDelay)
 		.property("LimbPathPushForce", &AHuman::GetLimbPathPushForce, &AHuman::SetLimbPathPushForce)
-		.property("FlailArms", &AHuman::GetFlailArms, &AHuman::SetFlailArms)
+		.property("ArmSwingRate", &AHuman::GetArmSwingRate, &AHuman::SetArmSwingRate)
 
 		.def("EquipFirearm", &AHuman::EquipFirearm)
 		.def("EquipThrowable", &AHuman::EquipThrowable)

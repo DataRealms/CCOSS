@@ -242,7 +242,7 @@ namespace RTE {
 		/// Gets the absolute position of the joint that the parent of this Attachable sets upon Update().
 		/// </summary>
 		/// <returns>A Vector describing the current absolute position of the joint.</returns>
-		Vector GetJointPos() const { return m_JointPos; }
+		const Vector & GetJointPos() const { return m_JointPos; }
 #pragma endregion
 
 #pragma region Force Transferral

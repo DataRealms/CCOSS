@@ -83,7 +83,7 @@ void AHuman::Clear()
 	m_BGArmFlailScalar = 0.7F;
 	m_EquipHUDTimer.Reset();
 	m_WalkAngle.fill(Matrix());
-	m_FlailArms = 1.0F;
+	m_ArmSwingRate = 1.0F;
 
     m_DeviceState = SCANNING;
     m_SweepState = NOSWEEP;
@@ -180,7 +180,7 @@ int AHuman::Create(const AHuman &reference) {
 	m_JetAngleRange = reference.m_JetAngleRange;
 	m_FGArmFlailScalar = reference.m_FGArmFlailScalar;
 	m_BGArmFlailScalar = reference.m_BGArmFlailScalar;
-	m_FlailArms = reference.m_FlailArms;
+	m_ArmSwingRate = reference.m_ArmSwingRate;
 
     m_pFGHandGroup = dynamic_cast<AtomGroup *>(reference.m_pFGHandGroup->Clone());
     m_pFGHandGroup->SetOwner(this);
@@ -255,8 +255,8 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
 		reader >> m_FGArmFlailScalar;
 	} else if (propName == "BGArmFlailScalar") {
 		reader >> m_BGArmFlailScalar;
-	} else if (propName == "FlailArms") {
-		reader >> m_FlailArms;
+	} else if (propName == "ArmSwingRate") {
+		reader >> m_ArmSwingRate;
     } else if (propName == "FGArm") {
         SetFGArm(dynamic_cast<Arm *>(g_PresetMan.ReadReflectedPreset(reader)));
     } else if (propName == "BGArm") {
@@ -356,8 +356,8 @@ int AHuman::Save(Writer &writer) const
 	writer << m_FGArmFlailScalar;
 	writer.NewProperty("BGArmFlailScalar");
 	writer << m_BGArmFlailScalar;
-	writer.NewProperty("FlailArms");
-	writer << m_FlailArms;
+	writer.NewProperty("ArmSwingRate");
+	writer << m_ArmSwingRate;
     writer.NewProperty("FGArm");
     writer << m_pFGArm;
     writer.NewProperty("BGArm");
@@ -3186,8 +3186,8 @@ void AHuman::Update()
 	////////////////////////////////////
 	// Movement direction
 
-	bool isStill = m_Vel.GetMagnitude() + m_PrevVel.GetMagnitude() < 1.0F;
-	bool aiming = m_Controller.IsState(AIM_SHARP);
+	bool isStill = (m_Vel + m_PrevVel).GetMagnitude() < 1.0F;
+	bool isSharpAiming = m_Controller.IsState(AIM_SHARP);
 
 	// If the pie menu is on, try to preserve whatever move state we had before it going into effect.
 	if (!m_Controller.IsState(PIE_MENU_ACTIVE)) {
@@ -3218,7 +3218,7 @@ void AHuman::Update()
 			}
 
 			// Walk backwards if the aiming is already focused in the opposite direction of travel.
-			if (analogAim.GetMagnitude() != 0 || aiming) {
+			if (analogAim.GetMagnitude() != 0 || isSharpAiming) {
 				m_Paths[FGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
 				m_Paths[BGROUND][m_MoveState].SetHFlip(m_Controller.IsState(MOVE_LEFT));
 			} else if ((m_Controller.IsState(MOVE_RIGHT) && m_HFlipped) || (m_Controller.IsState(MOVE_LEFT) && !m_HFlipped)) {
@@ -3307,14 +3307,14 @@ void AHuman::Update()
         // Set the timer to a base number so we don't get a sluggish feeling at start.
 		if (m_AimState != AIMUP) { m_AimTmr.SetElapsedSimTimeMS(m_AimState == AIMSTILL ? 150 : 300); }
 		m_AimState = AIMUP; 
-		m_AimAngle += aiming ? std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00005F, 0.05F) : std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00015F, 0.15F) * m_Controller.GetDigitalAimSpeed();
+		m_AimAngle += isSharpAiming ? std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00005F, 0.05F) : std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00015F, 0.15F) * m_Controller.GetDigitalAimSpeed();
 		if (m_AimAngle > m_AimRange) { m_AimAngle = m_AimRange; }
 
 	} else if (m_Controller.IsState(AIM_DOWN) && m_Status != INACTIVE) {
         // Set the timer to a base number so we don't get a sluggish feeling at start.
 		if (m_AimState != AIMDOWN) {m_AimTmr.SetElapsedSimTimeMS(m_AimState == AIMSTILL ? 150 : 300); }
 		m_AimState = AIMDOWN;
-		m_AimAngle -= aiming ? std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00005F, 0.05F) : std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00015F, 0.15F) * m_Controller.GetDigitalAimSpeed();
+		m_AimAngle -= isSharpAiming ? std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00005F, 0.05F) : std::min(static_cast<float>(m_AimTmr.GetElapsedSimTimeMS()) * 0.00015F, 0.15F) * m_Controller.GetDigitalAimSpeed();
 		if (m_AimAngle < -m_AimRange) { m_AimAngle = -m_AimRange; }
 
 	} else if (analogAim.GetMagnitude() != 0 && m_Status != INACTIVE) {
@@ -3350,7 +3350,7 @@ void AHuman::Update()
 
 // TODO: make the delay data driven by both the actor and the device!
     // 
-	if (aiming && m_Status == STABLE && (m_MoveState == STAND || m_MoveState == CROUCH || m_MoveState == NOMOVE || m_MoveState == WALK) && m_Vel.GetMagnitude() < 5.0F && GetEquippedItem()) {
+	if (isSharpAiming && m_Status == STABLE && (m_MoveState == STAND || m_MoveState == CROUCH || m_MoveState == NOMOVE || m_MoveState == WALK) && m_Vel.GetMagnitude() < 5.0F && GetEquippedItem()) {
         float aimMag = analogAim.GetMagnitude();
 
 		// If aim sharp is being done digitally, then translate to full analog aim mag
@@ -3383,10 +3383,10 @@ void AHuman::Update()
 
 	ThrownDevice *pThrown = nullptr;
 	if (m_pFGArm && m_Status != INACTIVE) {
-		if (m_pBGLeg && m_MoveState == WALK && m_FlailArms > 0) {
-			m_pFGArm->ReachToward(m_pFGArm->GetJointPos() + m_pFGArm->GetIdleOffset().GetXFlipped(m_HFlipped).RadRotate(std::sin(m_pBGLeg->GetRotAngle() + c_HalfPI * GetFlipFactor()) * m_FlailArms));
-		} else if (m_pFGLeg && m_FlailArms > 0) {
-			m_pFGArm->ReachToward(m_pFGArm->GetJointPos() + m_pFGArm->GetIdleOffset().GetXFlipped(m_HFlipped).RadRotate(std::sin(m_pFGLeg->GetRotAngle() + c_HalfPI * GetFlipFactor()) * m_FlailArms));
+		if (m_pBGLeg && m_MoveState == WALK && m_ArmSwingRate > 0) {
+			m_pFGArm->ReachToward(m_pFGArm->GetJointPos() + m_pFGArm->GetIdleOffset().GetXFlipped(m_HFlipped).RadRotate(std::sin(m_pBGLeg->GetRotAngle() + c_HalfPI * GetFlipFactor()) * m_ArmSwingRate));
+		} else if (m_pFGLeg && m_ArmSwingRate > 0) {
+			m_pFGArm->ReachToward(m_pFGArm->GetJointPos() + m_pFGArm->GetIdleOffset().GetXFlipped(m_HFlipped).RadRotate(std::sin(m_pFGLeg->GetRotAngle() + c_HalfPI * GetFlipFactor()) * m_ArmSwingRate));
 		} else {
 			// Force arm to idle by reaching toward a virtually inaccessible point.
 			m_pFGArm->ReachToward(Vector());
@@ -3405,7 +3405,7 @@ void AHuman::Update()
 		else if (m_pFGArm->GetHeldMO()) {
 			pThrown = dynamic_cast<ThrownDevice *>(m_pFGArm->GetHeldMO());
 			if (pThrown) {
-				pThrown->SetSharpAim(aiming ? 1.0F : 0);
+				pThrown->SetSharpAim(isSharpAiming ? 1.0F : 0);
 				if (m_Controller.IsState(WEAPON_FIRE)) {
 					if (m_ArmsState != THROWING_PREP) {
 						m_ThrowTmr.Reset();
@@ -3430,8 +3430,7 @@ void AHuman::Update()
 							minThrowVel = maxThrowVel * 0.2F;
 						}
 						Vector tossVec(minThrowVel + (maxThrowVel - minThrowVel) * GetThrowProgress(), 0.5F * RandomNormalNum());
-						tossVec.RadRotate(m_AimAngle + m_AngularVel * deltaTime);
-						pMO->SetVel(tossVec.GetXFlipped(m_HFlipped));
+						pMO->SetVel(m_Vel * 0.5F + tossVec.RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
 						pMO->SetAngularVel(m_AngularVel + RandomNum(-5.0F, 2.5F) * GetFlipFactor());
 						pMO->SetRotAngle(adjustedAimAngle);
 
@@ -3854,9 +3853,9 @@ void AHuman::Update()
 				m_pBGArm->ReachToward(m_pBGHandGroup->GetLimbPos(m_HFlipped));
 
 			} else {
-				HeldDevice * heldDevice = dynamic_cast<HeldDevice *>(GetEquippedItem());
-				ThrownDevice * thrownDevice = dynamic_cast<ThrownDevice *>(heldDevice);
-				if (thrownDevice && (m_ArmsState == THROWING_PREP || aiming)) {
+				HeldDevice *heldDevice = dynamic_cast<HeldDevice *>(GetEquippedItem());
+				ThrownDevice *thrownDevice = dynamic_cast<ThrownDevice *>(heldDevice);
+				if (thrownDevice && (m_ArmsState == THROWING_PREP || isSharpAiming)) {
 					m_pBGArm->ReachToward(m_pBGArm->GetJointPos() + thrownDevice->GetEndThrowOffset().RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
 				} else if (heldDevice) {
 					if (GetEquippedBGItem() && !heldDevice->IsOneHanded()) {
@@ -3872,10 +3871,10 @@ void AHuman::Update()
 							m_pBGArm->SetRecoil(Vector(), Vector(), false);
 						}
 					}
-				} else if (m_pFGLeg && m_MoveState == WALK && m_FlailArms > 0) {
-					m_pBGArm->ReachToward(m_pBGArm->GetJointPos() + m_pBGArm->GetIdleOffset().GetXFlipped(m_HFlipped).RadRotate(std::sin(m_pFGLeg->GetRotAngle() + c_HalfPI * GetFlipFactor()) * m_FlailArms));
-				} else if (m_pBGLeg && m_FlailArms > 0) {
-					m_pBGArm->ReachToward(m_pBGArm->GetJointPos() + m_pBGArm->GetIdleOffset().GetXFlipped(m_HFlipped).RadRotate(std::sin(m_pBGLeg->GetRotAngle() + c_HalfPI * GetFlipFactor()) * m_FlailArms));
+				} else if (m_pFGLeg && m_MoveState == WALK && m_ArmSwingRate > 0) {
+					m_pBGArm->ReachToward(m_pBGArm->GetJointPos() + m_pBGArm->GetIdleOffset().GetXFlipped(m_HFlipped).RadRotate(std::sin(m_pFGLeg->GetRotAngle() + c_HalfPI * GetFlipFactor()) * m_ArmSwingRate));
+				} else if (m_pBGLeg && m_ArmSwingRate > 0) {
+					m_pBGArm->ReachToward(m_pBGArm->GetJointPos() + m_pBGArm->GetIdleOffset().GetXFlipped(m_HFlipped).RadRotate(std::sin(m_pBGLeg->GetRotAngle() + c_HalfPI * GetFlipFactor()) * m_ArmSwingRate));
 				} else {
 					// Force arm to idle by reaching toward a virtually inaccessible point.
 					m_pBGArm->ReachToward(Vector());
@@ -4098,13 +4097,14 @@ void AHuman::DrawThrowingReticle(BITMAP *targetBitmap, const Vector &targetPos, 
 		points[index].SetXY(static_cast<float>(index * 4), 0.0F);
 	}
 	Vector outOffset(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F);
+	float adjustedAimAngle = m_AimAngle * GetFlipFactor();
 
 	acquire_bitmap(targetBitmap);
 
 	for (int i = 0; i < pointCount * progressScalar; ++i) {
 		points[i].FlipX(m_HFlipped);
 		points[i] += outOffset;
-		points[i].RadRotate(m_AimAngle * GetFlipFactor() + m_AngularVel * g_TimerMan.GetDeltaTimeSecs());
+		points[i].RadRotate(adjustedAimAngle);
 		points[i] += m_pFGArm->GetJointPos();
 
 		g_PostProcessMan.RegisterGlowDotEffect(points[i], YellowDot, RandomNum(63, 127));

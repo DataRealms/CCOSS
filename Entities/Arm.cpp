@@ -354,8 +354,6 @@ void Arm::Update() {
         m_AngularVel = 0.0F;
     }
 
-    UpdateCurrentHandOffset();
-
     HeldDevice *heldDevice = m_pHeldMO ? dynamic_cast<HeldDevice *>(m_pHeldMO) : nullptr;
     const ThrownDevice *thrownDevice = heldDevice ? dynamic_cast<ThrownDevice *>(heldDevice) : nullptr;
 
@@ -371,6 +369,8 @@ void Arm::Update() {
     }
 
     Attachable::Update();
+
+	UpdateCurrentHandOffset();
 
     m_Recoiled = heldDevice && heldDevice->IsRecoiled();
 
@@ -446,7 +446,8 @@ void Arm::UpdateArmFrame() {
 void Arm::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     Attachable::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-    if (!onlyPhysical && (mode == g_DrawColor || mode == g_DrawWhite || mode == g_DrawTrans) && (!m_Parent || m_pHeldMO || (!m_pHeldMO && !m_DidReach))) {
+    //if (!onlyPhysical && (mode == g_DrawColor || mode == g_DrawWhite || mode == g_DrawTrans) && (!m_Parent || m_pHeldMO || (!m_pHeldMO && !m_DidReach))) {
+    if (!onlyPhysical && (mode == g_DrawColor || mode == g_DrawWhite || mode == g_DrawTrans)) {
         DrawHand(pTargetBitmap, targetPos, mode);
         if (m_pHeldMO && m_pHeldMO->IsDrawnAfterParent()) { m_pHeldMO->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
     }

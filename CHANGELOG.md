@@ -256,9 +256,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `AHuman` Lua functions `GetWalkAngle(layer)` and `SetWalkAngle(layer, angle)`, which can be used to read and override walk path rotation of both Legs/Layers respectively. Note that the walk path rotation is automatically updated on each step to match the curvature of the terrain, so this value resets every update.
 
+- New `AHuman` INI and Lua (R/W) property `ArmSwingRate`, which now controls the arms' walking animation, according to each arm's `IdleOffset`. `1` is the default value, `0` means that the arms stay still.
+
+- New `Attachable` Lua (R) property `JointPos`, which gets the position of the object's joint in scene coordinates.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- `ThrownDevice`s will now use `StanceOffset`, `SharpStanceOffset` and `SupportOffset` in the same way as any other `HeldDevice`. In addition, `EndThrowOffset` will be used to set the BG hand position while sharp aiming or throwing.
+
+- `AHuman` throwing angle will no longer be affected by the rotation of the body.
 
 - Exposed `MovableObject` property `RestThreshold` to Lua (R/W).
 

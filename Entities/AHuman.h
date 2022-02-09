@@ -926,6 +926,18 @@ ClassInfoGetters;
 	void SetThrowPrepTime(long newPrepTime) { m_ThrowPrepTime = newPrepTime; }
 
 	/// <summary>
+	/// Gets the rate at which this AHuman is set to swing its arms while walking.
+	/// </summary>
+	/// <returns>The arm swing rate of this AHuman.</returns>
+	float GetArmSwingRate() const { return m_ArmSwingRate; }
+
+	/// <summary>
+	/// Sets the rate at which this AHuman is set to swing its arms while walking.
+	/// </summary>
+	/// <param name="newValue">The new arm swing rate for this AHuman.</param>
+	void SetArmSwingRate(float newValue) { m_ArmSwingRate = newValue; }
+
+	/// <summary>
 	/// Gets this AHuman's stride sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this AHuman's stride sound.</returns>
@@ -1030,6 +1042,7 @@ protected:
 	float m_BGArmFlailScalar; //!< The rate at which this AHuman's BG Arm follows the the bodily rotation. Set to a negative value for a "counterweight" effect.
 	Timer m_EquipHUDTimer; //!< Timer for showing the name of any newly equipped Device.
 	std::array<Matrix, 2> m_WalkAngle; //!< An array of rot angle targets for different movement states.
+	float m_ArmSwingRate; //!< Controls the rate at which this AHuman's arms follow the movement of its legs.
 
     ////////////////
     // AI States

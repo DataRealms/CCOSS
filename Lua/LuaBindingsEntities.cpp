@@ -424,6 +424,7 @@ namespace RTE {
 		.property("FirearmIsSemiAuto", &AHuman::FirearmIsSemiAuto)
 		.property("FirearmActivationDelay", &AHuman::FirearmActivationDelay)
 		.property("LimbPathPushForce", &AHuman::GetLimbPathPushForce, &AHuman::SetLimbPathPushForce)
+		.property("ArmSwingRate", &AHuman::GetArmSwingRate, &AHuman::SetArmSwingRate)
 
 		.def("EquipFirearm", &AHuman::EquipFirearm)
 		.def("EquipThrowable", &AHuman::EquipThrowable)
@@ -536,6 +537,7 @@ namespace RTE {
 		.property("JointStrength", &Attachable::GetJointStrength, &Attachable::SetJointStrength)
 		.property("JointStiffness", &Attachable::GetJointStiffness, &Attachable::SetJointStiffness)
 		.property("JointOffset", &Attachable::GetJointOffset, &Attachable::SetJointOffset)
+		.property("JointPos", &Attachable::GetJointPos)
 		.property("ApplyTransferredForcesAtOffset", &Attachable::GetApplyTransferredForcesAtOffset, &Attachable::SetApplyTransferredForcesAtOffset)
 		.property("BreakWound", &Attachable::GetBreakWound, &AttachableSetBreakWound)
 		.property("ParentBreakWound", &Attachable::GetParentBreakWound, &AttachableSetParentBreakWound)

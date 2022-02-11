@@ -3504,46 +3504,45 @@ void AHuman::Update()
 
 	if (m_Controller.IsState(WEAPON_DROP) && m_Status != INACTIVE) {
 		if (m_pFGArm && m_pFGArm->HoldsSomething()) {
-			if (MovableObject *pMO = m_pFGArm->ReleaseHeldMO()) {
-				pMO->SetPos(m_Pos + Vector(10.0F * GetFlipFactor(), -8.0F));
-				Vector tossVec(RandomNum(3.0F, 6.0F), RandomNum(-3.0F, -1.5F));
-				tossVec.RadRotate(m_AimAngle);
-				pMO->SetVel(m_Vel * 0.5F + tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
-				pMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
-				if (pMO->IsDevice()) {
-					g_MovableMan.AddItem(pMO);
+			if (MovableObject *heldMO = m_pFGArm->ReleaseHeldMO()) {
+				heldMO->SetPos(m_pFGArm->GetJointPos() + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), 0).RadRotate(adjustedAimAngle));
+				m_pFGArm->SetHandPos(heldMO->GetPos());
+				Vector tossVec(1.0F + std::sqrt(std::abs(m_pFGArm->GetThrowStrength()) / std::sqrt(std::abs(heldMO->GetMass()) + 1.0F)), RandomNormalNum());
+				heldMO->SetVel(m_Vel * 0.5F + tossVec.RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
+				heldMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
+				if (heldMO->IsDevice()) {
+					g_MovableMan.AddItem(heldMO);
 				} else {
-					if (pMO->IsGold()) {
+					if (heldMO->IsGold()) {
 						m_GoldInInventoryChunk = 0;
 						ChunkGold();
 					}
-					g_MovableMan.AddParticle(pMO);
+					g_MovableMan.AddParticle(heldMO);
 				}
 			}
 			if (!m_Inventory.empty()) {
 				m_pFGArm->SetHeldMO(SwapNextInventory());
-				m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+				m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
 			}
 		} else if (m_pBGArm) {
-			if (MovableObject *pMO = m_pBGArm->ReleaseHeldMO()) {
-				pMO->SetPos(m_Pos + Vector(10.0F * GetFlipFactor(), -8.0F));
-				Vector tossVec(RandomNum(3.0F, 6.0F), RandomNum(-3.0F, -1.5F));
-				tossVec.RadRotate(m_AimAngle);
-				pMO->SetVel(m_Vel * 0.5F + tossVec.GetXFlipped(m_HFlipped) * m_Rotation);
-				pMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
-				if (pMO->IsDevice()) {
-					g_MovableMan.AddItem(pMO);
-				}
-				else {
-					if (pMO->IsGold()) {
+			if (MovableObject *heldMO = m_pBGArm->ReleaseHeldMO()) {
+				heldMO->SetPos(m_pBGArm->GetJointPos() + Vector(m_pBGArm->GetMaxLength() * GetFlipFactor(), 0).RadRotate(adjustedAimAngle));
+				m_pBGArm->SetHandPos(heldMO->GetPos());
+				Vector tossVec(1.0F + std::sqrt(std::abs(m_pBGArm->GetThrowStrength()) / std::sqrt(std::abs(heldMO->GetMass()) + 1.0F)), RandomNormalNum());
+				heldMO->SetVel(m_Vel * 0.5F + tossVec.RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
+				heldMO->SetAngularVel(m_AngularVel * 0.5F + 3.0F * RandomNormalNum());
+				if (heldMO->IsDevice()) {
+					g_MovableMan.AddItem(heldMO);
+				} else {
+					if (heldMO->IsGold()) {
 						m_GoldInInventoryChunk = 0;
 						ChunkGold();
 					}
-					g_MovableMan.AddParticle(pMO);
+					g_MovableMan.AddParticle(heldMO);
 				}
 			} else if (!m_Inventory.empty()) {
 				DropAllInventory();
-				m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+				m_pBGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
 			}
 		}
 		EquipShieldInBGArm();

@@ -1954,26 +1954,21 @@ void MovableMan::Update()
         {
             Vector parPos((*parIt)->GetPos().GetFloored());
             Material const * terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.m_X, parPos.m_Y));
-            if ((*parIt)->GetDrawPriority() >= terrMat->GetPriority())
-            {
-                // Gold particle special case to avoid compacting of gold
-                if ((*parIt)->GetMaterial()->GetIndex() == c_GoldMaterialID)
-                {
-                    for (int s = 0; terrMat->GetIndex() == c_GoldMaterialID; ++s)
-                    {
-                        if (s % 2 == 0)
-                            parPos.m_Y -= 1.0;
-                        else
-                            parPos.m_X += (RandomNum() >= 0.5F ? 1.0F : -1.0F);
-                        terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.m_X, parPos.m_Y));
-                    }
-                    (*parIt)->SetPos(parPos);
-                }
-
-//                (*parIt)->Draw(g_SceneMan.GetTerrain()->GetFGColorBitmap(), Vector(), g_DrawColor, true);
-//                (*parIt)->Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), Vector(), g_DrawMaterial, true);
-                g_SceneMan.GetTerrain()->ApplyMovableObject(*parIt);
-            }
+			if ((*parIt)->GetDrawPriority() >= terrMat->GetPriority()) {
+				int piling = (*parIt)->GetMaterial()->GetPiling();
+				if (piling >= 0) {
+					for (int s = 0; terrMat->GetIndex() == (*parIt)->GetMaterial()->GetIndex() && s < piling; ++s) {
+						if (s % 2 == 0) {
+							parPos.m_Y -= 1.0F;
+						} else {
+							parPos.m_X += (RandomNum() >= 0.5F ? 1.0F : -1.0F);
+						}
+						terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.m_X, parPos.m_Y));
+					}
+					(*parIt)->SetPos(parPos);
+				}
+				g_SceneMan.GetTerrain()->ApplyMovableObject(*parIt);
+			}
             delete *(parIt++);
         }
         m_Particles.erase(midIt, m_Particles.end());

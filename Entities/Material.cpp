@@ -10,6 +10,7 @@ namespace RTE {
 	void Material::Clear() {
 		m_Index = 0;
 		m_Priority = 0;
+		m_Piling = 0;
 		m_Integrity = 0.0F;
 		m_Restitution = 0.0F;
 		m_Friction = 0.0F;
@@ -34,6 +35,7 @@ namespace RTE {
 
 		m_Index = reference.m_Index;
 		m_Priority = reference.m_Priority;
+		m_Piling = reference.m_Piling;
 		m_Integrity = reference.m_Integrity;
 		m_Restitution = reference.m_Restitution;
 		m_Friction = reference.m_Friction;
@@ -61,6 +63,8 @@ namespace RTE {
 			reader >> m_Index;	
 		} else if (propName == "Priority") {
 			reader >> m_Priority;
+		} else if (propName == "Piling") {
+			reader >> m_Piling;
 		} else if (propName == "Integrity" || propName == "StructuralIntegrity") {
 			reader >> m_Integrity;
 		} else if (propName == "Restitution" || propName == "Bounce") {
@@ -108,6 +112,8 @@ namespace RTE {
 		if (m_IsOriginalPreset) {
 			writer.NewProperty("Priority");
 			writer << m_Priority;
+			writer.NewProperty("Piling");
+			writer << m_Piling;
 			writer.NewProperty("StructuralIntegrity");
 			writer << m_Integrity;
 			writer.NewProperty("Restitution");

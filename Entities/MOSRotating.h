@@ -963,8 +963,7 @@ protected:
     std::list<Gib> m_Gibs;
     // The amount of impulse force required to gib this, in kg * (m/s). 0 means no limit
     float m_GibImpulseLimit;
-    // The number of wound emitters allowed before this gets gibbed. 0 means this can't get gibbed
-    int m_GibWoundLimit;
+	int m_GibWoundLimit; //!< The number of wounds that will gib this MOSRotating. 0 means that it can't be gibbed via wounds.
     float m_GibBlastStrength; //!< The strength with which Gibs and Attachables will get launched when this MOSRotating is gibbed.
 	float m_WoundCountAffectsImpulseLimitRatio; //!< The rate at which this MOSRotating's wound count will diminish the impulse limit.
     // Gib sound effect

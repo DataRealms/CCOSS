@@ -3564,13 +3564,13 @@ void AHuman::Update()
 	if (m_pFGArm && m_Status == STABLE) {
 		reach += m_pFGArm->GetMaxLength();
 		reachPoint = m_pFGArm->GetJointPos();
-		if (!m_pItemInReach) {
-			MOID itemMOID = g_SceneMan.CastMORay(reachPoint, Vector(reach * RandomNum(), 0).RadRotate(GetAimAngle(true) + RandomNum(-c_HalfPI, 0.0F) * GetFlipFactor()), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
 
-			MovableObject *pItem = g_MovableMan.GetMOFromID(itemMOID);
-			if (pItem) {
-				m_pItemInReach = pItem ? dynamic_cast<HeldDevice *>(pItem->GetRootParent()) : nullptr;
-				if (m_pItemInReach) { m_PieNeedsUpdate = true; }
+		MOID itemMOID = g_SceneMan.CastMORay(reachPoint, Vector(reach * RandomNum(), 0).RadRotate(GetAimAngle(true) + (!m_pItemInReach ? RandomNum(-c_HalfPI, 0.0F) * GetFlipFactor() : 0)), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
+
+		if (MovableObject *foundMO = g_MovableMan.GetMOFromID(itemMOID)) {
+			if (HeldDevice *foundDevice = dynamic_cast<HeldDevice *>(foundMO->GetRootParent())) {
+				m_pItemInReach = foundDevice;
+				m_PieNeedsUpdate = true;
 			}
 		}
 	}

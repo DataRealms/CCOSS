@@ -939,9 +939,6 @@ void HDFirearm::Update()
 		if (m_EmptySound) { m_EmptySound->Play(m_Pos); }
         // Indicate that we have clicked once during the current activation. 
         m_AlreadyClicked = true;
-
-        // Auto-reload
-		if (m_Parent) { Reload(); }
     }
 
 	if (m_Reloading && !m_pMagazine && m_pMagazineReference && m_ReloadTmr.IsPastSimMS(m_ReloadTime)) {

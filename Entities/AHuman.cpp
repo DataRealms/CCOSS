@@ -3251,15 +3251,16 @@ void AHuman::Update()
     // Change and reload held MovableObjects
 
 	bool reloadFG = false;
+	bool reloadBG = false;
 	if (m_pFGArm && m_Status != INACTIVE) {
 		bool changeNext = m_Controller.IsState(WEAPON_CHANGE_NEXT);
 		bool changePrev = m_Controller.IsState(WEAPON_CHANGE_PREV);
-		HDFirearm * pFireArm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
+		HDFirearm *firearm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
 		if (changeNext || changePrev) {
 			if (changeNext && changePrev) {
 				UnequipArms();
 			} else if (!m_Inventory.empty() || UnequipBGArm()) {
-				if (pFireArm) { pFireArm->StopActivationSound(); }
+				if (firearm) { firearm->StopActivationSound(); }
 				if (changeNext) {
 					m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
 				} else {
@@ -3271,31 +3272,24 @@ void AHuman::Update()
 			m_EquipHUDTimer.Reset();
 			m_PieNeedsUpdate = true;
 			m_SharpAimProgress = 0;
-        }
-
-		// Reload held MO, if applicable
-		if (pFireArm) {
-			if (pFireArm->IsReloading()) {
-				// Interrupt sharp aiming while reloading
-				m_SharpAimTimer.Reset();
-				m_SharpAimProgress = 0;
-				// Move BG hand accordingly
-				if (m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped)); }
-			}
-			if (!pFireArm->IsFull() && m_Controller.IsState(WEAPON_RELOAD)) {
-				if (m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(pFireArm->GetMagazinePos()); }
-				pFireArm->Reload();
-				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
-				reloadFG = true;
-
-				// Interrupt sharp aiming
-				m_SharpAimTimer.Reset();
-				m_SharpAimProgress = 0;
-			}
-			// Detect reloading being completed and move hand accordingly
-			if (pFireArm->DoneReloading() && m_pBGArm && m_pBGArm->IsAttached() && !GetEquippedBGItem()) { m_pBGArm->SetHandPos(pFireArm->GetMagazinePos()); }
 		}
-    }
+
+		if (firearm) {
+			if (HDFirearm *bgFirearm = dynamic_cast<HDFirearm *>(GetEquippedBGItem())) { reloadBG = bgFirearm->IsReloading(); }
+			if (!firearm->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !reloadBG) {
+				if (m_pBGArm && !m_pBGArm->HoldsSomething()) { m_pBGArm->SetHandPos(firearm->GetMagazinePos()); }
+				firearm->Reload();
+				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+			}
+			if (firearm->IsReloading()) {
+				reloadFG = true;
+				m_SharpAimTimer.Reset();
+				m_SharpAimProgress = 0;
+				if (m_pBGArm && !m_pBGArm->HoldsSomething()) { m_pBGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset)); }
+			}
+			if (firearm->DoneReloading() && m_pBGArm && !m_pBGArm->HoldsSomething()) { m_pBGArm->SetHandPos(firearm->GetMagazinePos()); }
+		}
+	}
 
     ////////////////////////////////////
     // Aiming
@@ -3391,9 +3385,16 @@ void AHuman::Update()
 
 		// Activate held device, if it's not a thrown device.
 		if (m_pFGArm->HoldsHeldDevice() && !m_pFGArm->HoldsThrownDevice()) {
-			m_pFGArm->GetHeldDevice()->SetSharpAim(m_SharpAimProgress);
+			//TODO: This entire section is in need of some cleanup!
+			HeldDevice *device = m_pFGArm->GetHeldDevice();
+			
+			device->SetSharpAim(m_SharpAimProgress);
 			if (m_Controller.IsState(WEAPON_FIRE)) {
-				m_pFGArm->GetHeldDevice()->Activate();
+				device->Activate();
+				if (device->IsEmpty() && !reloadBG) { 
+					device->Reload();
+					reloadFG = true;
+				}
 			} else {
 				m_pFGArm->GetHeldDevice()->Deactivate();
 			}
@@ -3464,25 +3465,26 @@ void AHuman::Update()
 		m_ArmsState = WEAPON_READY;
 	}
 
-    if (m_pBGArm && m_pBGArm->HoldsHeldDevice() && m_Status != INACTIVE) {
-		HeldDevice *pDevice = m_pBGArm->GetHeldDevice();
-		if (pDevice->IsReloading()) {
+	if (m_pBGArm && m_pBGArm->HoldsHeldDevice() && m_Status != INACTIVE) {
+		HeldDevice *device = m_pBGArm->GetHeldDevice();
+		if (device->IsReloading()) {
 			m_SharpAimTimer.Reset();
 			m_SharpAimProgress = 0;
-			if (m_pFGArm && !m_pFGArm->HoldsSomething()) { m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped)); }
+			if (m_pFGArm && !m_pFGArm->HoldsSomething()) { m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset)); }
 		}
-		if (reloadFG == false && !pDevice->IsFull() && m_Controller.IsState(WEAPON_RELOAD)) {
-			if (m_pFGArm && !m_pFGArm->HoldsSomething()) { m_pFGArm->SetHandPos(pDevice->GetMagazinePos()); }
-			pDevice->Reload();
+		if (!reloadFG && !device->IsFull() && m_Controller.IsState(WEAPON_RELOAD)) {
+			if (m_pFGArm && !m_pFGArm->HoldsSomething()) { m_pFGArm->SetHandPos(device->GetMagazinePos()); }
+			device->Reload();
 			if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
 		}
-		if (pDevice->DoneReloading() && m_pFGArm && !m_pFGArm->HoldsSomething()) { m_pFGArm->SetHandPos(pDevice->GetMagazinePos()); }
+		if (device->DoneReloading() && m_pFGArm && !m_pFGArm->HoldsSomething()) { m_pFGArm->SetHandPos(device->GetMagazinePos()); }
 
-		pDevice->SetSharpAim(m_SharpAimProgress);
+		device->SetSharpAim(m_SharpAimProgress);
 		if (m_Controller.IsState(WEAPON_FIRE)) {
-			pDevice->Activate();
+			device->Activate();
+			if (device->IsEmpty() && !reloadFG) { device->Reload(); }
 		} else {
-			pDevice->Deactivate();
+			device->Deactivate();
 		}
 	}
 

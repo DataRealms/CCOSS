@@ -264,6 +264,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `AHuman` Lua functions `UnequipFGArm()` and `UnequipArms()` which unequip the currently held item(s) and put them into the actor's inventory.
 
+- You can now execute multiple copies of your delivery order by holding UP or DOWN while choosing the landing zone.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

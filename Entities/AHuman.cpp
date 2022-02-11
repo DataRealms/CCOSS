@@ -3409,16 +3409,15 @@ void AHuman::Update()
 						m_ThrowTmr.Reset();
 						if (!pThrown->ActivatesWhenReleased()) { pThrown->Activate(); }
 					}
+					float throwProgress = GetThrowProgress();
 					m_ArmsState = THROWING_PREP;
-					m_pFGArm->ReachToward(m_pFGArm->GetJointPos() + pThrown->GetStartThrowOffset().RadRotate(m_AimAngle + m_AngularVel * deltaTime).GetXFlipped(m_HFlipped));
+					m_pFGArm->ReachToward(m_pFGArm->GetJointPos() + (pThrown->GetStartThrowOffset().GetXFlipped(m_HFlipped) * throwProgress + pThrown->GetStanceOffset() * (1.0F - throwProgress)).RadRotate(adjustedAimAngle));
 				} else if (m_ArmsState == THROWING_PREP) {
 					m_ArmsState = THROWING_RELEASE;
 					// TODO: figure out how to properly use EndThrowOffset, since it doesn't play much a role for just one frame!
 					m_pFGArm->SetHandPos(m_pFGArm->GetJointPos() + pThrown->GetEndThrowOffset().RadRotate(adjustedAimAngle).GetXFlipped(m_HFlipped));
 
-					MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
-
-					if (pMO) {
+					if (MovableObject *pMO = m_pFGArm->ReleaseHeldMO()) {
 						pMO->SetPos(m_pFGArm->GetJointPos() + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F).RadRotate(adjustedAimAngle));
 						float maxThrowVel = pThrown->GetMaxThrowVel();
 						float minThrowVel = pThrown->GetMinThrowVel();
@@ -3561,13 +3560,13 @@ void AHuman::Update()
 	if (m_pFGArm && m_Status == STABLE) {
 		reach += m_pFGArm->GetMaxLength();
 		reachPoint = m_pFGArm->GetJointPos();
-		if (!m_pItemInReach) {
-			MOID itemMOID = g_SceneMan.CastMORay(reachPoint, Vector(reach * RandomNum(), 0).RadRotate(GetAimAngle(true) + RandomNum(-c_HalfPI, 0.0F) * GetFlipFactor()), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
 
-			MovableObject *pItem = g_MovableMan.GetMOFromID(itemMOID);
-			if (pItem) {
-				m_pItemInReach = pItem ? dynamic_cast<HeldDevice *>(pItem->GetRootParent()) : nullptr;
-				if (m_pItemInReach) { m_PieNeedsUpdate = true; }
+		MOID itemMOID = g_SceneMan.CastMORay(reachPoint, Vector(reach * RandomNum(), 0).RadRotate(GetAimAngle(true) + (!m_pItemInReach ? RandomNum(-c_HalfPI, 0.0F) * GetFlipFactor() : 0)), m_MOID, Activity::NoTeam, g_MaterialGrass, true, 2);
+
+		if (MovableObject *foundMO = g_MovableMan.GetMOFromID(itemMOID)) {
+			if (HeldDevice *foundDevice = dynamic_cast<HeldDevice *>(foundMO->GetRootParent())) {
+				m_pItemInReach = foundDevice;
+				m_PieNeedsUpdate = true;
 			}
 		}
 	}
@@ -3854,7 +3853,8 @@ void AHuman::Update()
 				HeldDevice *heldDevice = dynamic_cast<HeldDevice *>(GetEquippedItem());
 				ThrownDevice *thrownDevice = dynamic_cast<ThrownDevice *>(heldDevice);
 				if (thrownDevice && (m_ArmsState == THROWING_PREP || isSharpAiming)) {
-					m_pBGArm->ReachToward(m_pBGArm->GetJointPos() + thrownDevice->GetEndThrowOffset().RadRotate(m_AimAngle).GetXFlipped(m_HFlipped));
+					float throwProgress = isSharpAiming ? 1.0F : GetThrowProgress();
+					m_pBGArm->ReachToward(m_pBGArm->GetJointPos() + (thrownDevice->GetEndThrowOffset().GetXFlipped(m_HFlipped) * throwProgress + (thrownDevice->GetStanceOffset() + thrownDevice->GetSupportOffset().GetXFlipped(m_HFlipped)) * (1.0F - throwProgress)).RadRotate(adjustedAimAngle));
 				} else if (heldDevice) {
 					if (GetEquippedBGItem() && !heldDevice->IsOneHanded()) {
 						UnequipBGArm();

@@ -1684,8 +1684,7 @@ void GameActivity::Update()
 
         else if (m_ViewState[player] == ViewState::LandingZoneSelect)
         {
-            // Continuously display LZ message
-            g_FrameMan.SetScreenText("Choose your landing zone...", ScreenOfPlayer(player));
+			g_FrameMan.SetScreenText("Choose your landing zone... Hold UP or DOWN to place multiple orders", ScreenOfPlayer(player));
 
             // Save the x pos so we can see which direction the user is moving it
             float prevLZX = m_LandingZone[player].m_X;
@@ -1731,24 +1730,15 @@ void GameActivity::Update()
             }
 
             // Interface for the craft AI post-delivery mode
-            if (m_PlayerController[player].IsState(PRESS_DOWN))// || m_PlayerController[player].IsState(PRESS_SECONDARY))
-            {
-                if (m_AIReturnCraft[player])
-                    g_GUISound.SelectionChangeSound()->Play(player);
-                else
-                    g_GUISound.UserErrorSound()->Play(player);
+			if (m_PlayerController[player].IsState(PRESS_DOWN)) {
+				if (m_AIReturnCraft[player]) { g_GUISound.SelectionChangeSound()->Play(player); }
 
-                m_AIReturnCraft[player] = false;
-            }
-            else if (m_PlayerController[player].IsState(PRESS_UP))// || m_PlayerController[player].IsState(PRESS_SECONDARY))
-            {
-                if (!m_AIReturnCraft[player])
-                    g_GUISound.SelectionChangeSound()->Play(player);
-                else
-                    g_GUISound.UserErrorSound()->Play(player);
+				m_AIReturnCraft[player] = false;
+			} else if (m_PlayerController[player].IsState(PRESS_UP)) {
+				if (!m_AIReturnCraft[player]) { g_GUISound.SelectionChangeSound()->Play(player); }
 
-                m_AIReturnCraft[player] = true;
-            }
+				m_AIReturnCraft[player] = true;
+			}
 
             // Player canceled the order while selecting LZ - can't be done in pregame
             if (m_PlayerController[player].IsState(PRESS_SECONDARY) && m_ActivityState != ActivityState::PreGame)
@@ -1761,29 +1751,29 @@ void GameActivity::Update()
                 g_GUISound.UserErrorSound()->Play(player);
                 // Flash the same actor, jsut to show the control went back to him
                 m_pPieMenu[player]->DoDisableAnimation();
-            }
-            // Player is done selecting LZ,
-            else if (m_PlayerController[player].IsState(PRESS_FACEBUTTON) || m_PlayerController[player].IsState(PRESS_PRIMARY))
-            {
-                // Set the LZ cursor to be just over terran, to avoid getting stuck at halfway interpolating there
-                m_LandingZone[player].m_Y = 0;
-                m_LandingZone[player].m_Y = g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10);
-                // Complete the purchase by getting the order from the BuyGUI, build it, and stuff it into a delivery
-                CreateDelivery(player);
-                // If there are no other Actors on this team, just view the LZ we have selected
-                if (!g_MovableMan.GetNextTeamActor(team))
-                {
-                    m_ObservationTarget[player] = m_LandingZone[player];
-                    m_ViewState[player] = ViewState::Observe;
-                }
-                // If there are other guys around, switch back to normal view
-                else
-                    m_ViewState[player] = ViewState::Normal;
-                // Stop displaying the LZ message
-                g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
-                // Flash the same actor, jsut to show the control went back to him
-                m_pPieMenu[player]->DoDisableAnimation();
-            }
+			} else if (m_PlayerController[player].IsState(PRESS_FACEBUTTON) || m_PlayerController[player].IsState(PRESS_PRIMARY)) {
+				m_LandingZone[player].m_Y = 0;
+				float lzOffsetY = 0;
+				// Holding up or down will allow the player to make multiple orders without exiting the delivery phase. TODO: this should probably have a cooldown?
+				if (!m_PlayerController[player].IsState(MOVE_UP) && !m_PlayerController[player].IsState(MOVE_DOWN)) {
+					m_LandingZone[player].m_Y = g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10);
+					if (!g_MovableMan.GetNextTeamActor(team)) {
+						m_ObservationTarget[player] = m_LandingZone[player];
+						m_ViewState[player] = ViewState::Observe;
+					} else {
+						m_ViewState[player] = ViewState::Normal;
+					}
+					g_FrameMan.ClearScreenText(ScreenOfPlayer(player));
+					m_pPieMenu[player]->DoDisableAnimation();
+				} else {
+					// Place the new marker above the cursor so that they don't intersect with each other.
+					lzOffsetY += m_AIReturnCraft[player] ? -32.0F : 32.0F;
+				}
+				m_LandingZone[player].m_Y = g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10) + lzOffsetY;
+				CreateDelivery(player);
+				// Revert the Y offset so that the cursor doesn't flinch.
+				m_LandingZone[player].m_Y -= lzOffsetY;
+			}
 
             bool wrapped = g_SceneMan.ForceBounds(m_LandingZone[player]);
 

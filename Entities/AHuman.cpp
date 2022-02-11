@@ -1416,6 +1416,7 @@ bool AHuman::UnequipFGArm() {
 	if (m_pFGArm && m_pFGArm->HoldsSomething()) {
 		m_pFGArm->GetHeldDevice()->Deactivate();
 		m_Inventory.push_back(m_pFGArm->ReleaseHeldMO());
+		m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
 		return true;
 	}
 	return false;
@@ -1427,6 +1428,7 @@ bool AHuman::UnequipBGArm() {
 	if (m_pBGArm && m_pBGArm->HoldsSomething()) {
 		m_pBGArm->GetHeldDevice()->Deactivate();
 		m_Inventory.push_back(m_pBGArm->ReleaseHeldMO());
+		m_pBGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
 		return true;
 	}
 	return false;
@@ -3258,10 +3260,10 @@ void AHuman::Update()
 		bool changeNext = m_Controller.IsState(WEAPON_CHANGE_NEXT);
 		bool changePrev = m_Controller.IsState(WEAPON_CHANGE_PREV);
 		HDFirearm * pFireArm = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-		if ((changeNext || changePrev) && (!m_Inventory.empty() || UnequipBGArm())) {
+		if (changeNext || changePrev) {
 			if (changeNext && changePrev) {
-				UnequipFGArm();
-			} else {
+				UnequipArms();
+			} else if (!m_Inventory.empty() || UnequipBGArm()) {
 				if (pFireArm) { pFireArm->StopActivationSound(); }
 				if (changeNext) {
 					m_pFGArm->SetHeldMO(SwapNextInventory(m_pFGArm->ReleaseHeldMO()));
@@ -3269,9 +3271,9 @@ void AHuman::Update()
 					m_pFGArm->SetHeldMO(SwapPrevInventory(m_pFGArm->ReleaseHeldMO()));
 				}
 				EquipShieldInBGArm();
+				m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
 			}
 			m_EquipHUDTimer.Reset();
-			m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
 			m_PieNeedsUpdate = true;
 			m_SharpAimProgress = 0;
         }

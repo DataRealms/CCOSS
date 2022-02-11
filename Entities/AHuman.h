@@ -591,6 +591,11 @@ ClassInfoGetters;
 	/// <returns>Whether there was anything to unequip.</returns>
 	bool UnequipBGArm();
 
+	/// <summary>
+	/// Unequips whatever is in either of the arms and puts them into the inventory.
+	/// </summary>
+	void UnequipArms() { UnequipFGArm(); UnequipBGArm(); }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetEquippedItem
@@ -790,6 +795,12 @@ ClassInfoGetters;
 	/// <param name="whichLayer">The Layer in question.</param>
 	/// <param name="angle">The angle to set.</param>
 	void SetWalkAngle(AHuman::Layer whichLayer, float angle) { m_WalkAngle[whichLayer] = Matrix(angle); }
+
+	/// <summary>
+	/// Gets whether this AHuman is currently attempting to climb something, using arms.
+	/// </summary>
+	/// <returns>Whether this AHuman is currently climbing or not.</returns>
+	bool IsClimbing() const { return m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND]; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

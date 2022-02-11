@@ -424,6 +424,7 @@ namespace RTE {
 		.property("FirearmIsSemiAuto", &AHuman::FirearmIsSemiAuto)
 		.property("FirearmActivationDelay", &AHuman::FirearmActivationDelay)
 		.property("LimbPathPushForce", &AHuman::GetLimbPathPushForce, &AHuman::SetLimbPathPushForce)
+		.property("IsClimbing", &AHuman::IsClimbing)
 		.property("ArmSwingRate", &AHuman::GetArmSwingRate, &AHuman::SetArmSwingRate)
 
 		.def("EquipFirearm", &AHuman::EquipFirearm)
@@ -434,7 +435,9 @@ namespace RTE {
 		.def("EquipDeviceInGroup", &AHuman::EquipDeviceInGroup)
 		.def("EquipNamedDevice", &AHuman::EquipNamedDevice)
 		.def("EquipLoadedFirearmInGroup", &AHuman::EquipLoadedFirearmInGroup)
+		.def("UnequipFGArm", &AHuman::UnequipFGArm)
 		.def("UnequipBGArm", &AHuman::UnequipBGArm)
+		.def("UnequipArms", &AHuman::UnequipArms)
 		.def("ReloadFirearms", &AHuman::ReloadFirearms)
 		.def("IsWithinRange", &AHuman::IsWithinRange)
 		.def("Look", &AHuman::Look)

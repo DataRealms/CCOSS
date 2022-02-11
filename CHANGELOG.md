@@ -260,6 +260,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Attachable` Lua (R) property `JointPos`, which gets the position of the object's joint in scene coordinates.
 
+- New `AHuman` Lua (R) Property `IsClimbing`, which indicates whether the actor is currently climbing using either of the arms.
+
+- New `AHuman` Lua functions `UnequipFGArm()` and `UnequipArms()` which unequip the currently held item(s) and put them into the actor's inventory.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

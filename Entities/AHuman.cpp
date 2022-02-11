@@ -1526,16 +1526,17 @@ bool AHuman::FirearmIsEmpty() const
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the currently held HDFirearm's is almost out of ammo.
 
-bool AHuman::FirearmNeedsReload() const
-{
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
-    {
-        const HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-        if (pWeapon && pWeapon->NeedsReloading())
-            return true;
-    }
-
-    return false;
+bool AHuman::FirearmNeedsReload() const {
+	HDFirearm *weapon = dynamic_cast<HDFirearm *>(GetEquippedItem());
+	if (weapon && !weapon->NeedsReloading()) {
+		return true;
+	} else {
+		weapon = dynamic_cast<HDFirearm *>(GetEquippedBGItem());
+		if (weapon && !weapon->NeedsReloading()) {
+			return true;
+		}
+	}
+	return false;
 }
 
 
@@ -1562,22 +1563,16 @@ bool AHuman::FirearmIsSemiAuto() const
 // Arguments:       None.
 // Return value:    None.
 
-void AHuman::ReloadFirearms() const
-{
-    if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
-    {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pFGArm->GetHeldMO());
-		if (pWeapon) {
-			pWeapon->Reload();
+void AHuman::ReloadFirearms() const {
+	HDFirearm *weapon = dynamic_cast<HDFirearm *>(GetEquippedItem());
+	if (weapon && !weapon->IsFull()) {
+		weapon->Reload();
+	} else {
+		weapon = dynamic_cast<HDFirearm *>(GetEquippedBGItem());
+		if (weapon && !weapon->IsFull()) {
+			weapon->Reload();
 		}
-    }
-    if (m_pBGArm && m_pBGArm->IsAttached() && m_pBGArm->HoldsHeldDevice())
-    {
-        HDFirearm *pWeapon = dynamic_cast<HDFirearm *>(m_pBGArm->GetHeldMO());
-        if (pWeapon) {
-            pWeapon->Reload();
-        }
-    }
+	}
 }
 
 

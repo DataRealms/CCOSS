@@ -619,7 +619,7 @@ void HDFirearm::Activate() {
     if (!IsReloading()) {
         if (m_ActiveSound && !m_ActiveSound->IsBeingPlayed()) { m_ActiveSound->Play(this->m_Pos); }
         if (m_PreFireSound && !wasActivated && !m_PreFireSound->IsBeingPlayed()) { m_PreFireSound->Play(this->m_Pos); }
-		if (IsEmpty() && m_FireSound && m_FireSound->GetLoopSetting() == -1 && m_FireSound->IsBeingPlayed()) { m_FireSound->Stop(); }
+		if (IsEmpty()) { Deactivate(); }
     }
 }
 
@@ -680,9 +680,7 @@ void HDFirearm::Reload()
             m_pMagazine = 0;
         }
 
-        // Stop any activation
-        m_Activated = false;
-		if (m_FireSound && m_FireSound->GetLoopSetting() == -1 && m_FireSound->IsBeingPlayed()) { m_FireSound->Stop(); }
+		Deactivate();
 		if (m_ReloadStartSound) { m_ReloadStartSound->Play(m_Pos); }
 
 		m_ReloadTmr.Reset();

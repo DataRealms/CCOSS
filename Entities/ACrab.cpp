@@ -2768,10 +2768,11 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             for (const HeldDevice *mountedDevice : m_pTurret->GetMountedDevices()) {
                 if (const HDFirearm *mountedFirearm = dynamic_cast<const HDFirearm *>(mountedDevice)) {
                     if (!textString.empty()) { textString += " | "; }
+					int totalTextWidth = pSmallFont->CalculateWidth(textString);
                     if (mountedFirearm->IsReloading()) {
                         textString += "Reloading";
-						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 13, drawPos.GetFloorIntX() + 29, drawPos.GetFloorIntY() + m_HUDStack + 14, 245);
-						rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 12, drawPos.GetFloorIntX() + static_cast<int>(28.0F * mountedFirearm->GetReloadProgress() + 0.5F), drawPos.GetFloorIntY() + m_HUDStack + 13, 77);
+						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1 + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 13, drawPos.GetFloorIntX() + 29 + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 14, 245);
+						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 12, drawPos.GetFloorIntX() + static_cast<int>(28.0F * mountedFirearm->GetReloadProgress() + 0.5F) + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 13, 77);
                     } else {
 						textString += mountedFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(mountedFirearm->GetRoundInMagCount());
                     }

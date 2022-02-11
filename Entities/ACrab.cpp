@@ -2188,6 +2188,8 @@ void ACrab::Update()
     ////////////////////////////////////
     // Movement direction
 
+	bool isStill = (m_Vel + m_PrevVel).GetMagnitude() < 1.0F;
+
 	if (m_Controller.IsState(MOVE_RIGHT) || m_Controller.IsState(MOVE_LEFT) || m_MoveState == JUMP && m_Status != INACTIVE) {
         if (m_MoveState != JUMP)
         {
@@ -2385,159 +2387,72 @@ void ACrab::Update()
             float RFGLegProg = m_Paths[RIGHTSIDE][FGROUND][WALK].GetRegularProgress();
             float RBGLegProg = m_Paths[RIGHTSIDE][BGROUND][WALK].GetRegularProgress();
 
-            bool playStride = false;
+            bool restarted = false;
 
-            // Make sure we are starting a stride if we're basically stopped
-            if (fabs(m_Vel.GetLargest()) < 0.25)
-                m_StrideStart[LEFTSIDE] = true;
+			// Make sure we are starting a stride if we're basically stopped.
+			if (isStill) { m_StrideStart[LEFTSIDE] = true; }
 
             //////////////////
             // LEFT LEGS
 
-            if (m_pLFGLeg && (!m_pLBGLeg || (!(m_Paths[LEFTSIDE][FGROUND][WALK].PathEnded() && LBGLegProg < 0.5) || m_StrideStart[LEFTSIDE])))
-            {
-//                m_StrideStart[LEFTSIDE] = false;
-                m_StrideTimer[LEFTSIDE].Reset();
-                m_pLFGFootGroup->PushAsLimb(m_Pos +
-                                            RotateOffset(m_pLFGLeg->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[LEFTSIDE][FGROUND][WALK],
-//                                            mass,
-                                            deltaTime,
-                                            &playStride);
-            }
+			if (m_pLFGLeg && (!m_pLBGLeg || (!(m_Paths[LEFTSIDE][FGROUND][WALK].PathEnded() && LBGLegProg < 0.5F) || m_StrideStart[LEFTSIDE]))) {
+				m_StrideTimer[LEFTSIDE].Reset();
+				m_pLFGFootGroup->PushAsLimb(m_pLFGLeg->GetJointPos(), m_Vel, m_Rotation, m_Paths[LEFTSIDE][FGROUND][WALK], deltaTime, &restarted);
+			}
 
-            if (m_pLBGLeg && (!m_pLFGLeg || !(m_Paths[LEFTSIDE][BGROUND][WALK].PathEnded() && LFGLegProg < 0.5)))
-            {
-                m_StrideStart[LEFTSIDE] = false;
-                m_StrideTimer[LEFTSIDE].Reset();
-                m_pLBGFootGroup->PushAsLimb(m_Pos +
-                                            RotateOffset(m_pLBGLeg->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[LEFTSIDE][BGROUND][WALK],
-//                                            mass,
-                                            deltaTime);
-            }
+			if (m_pLBGLeg) {
+				if (!m_pLFGLeg || !(m_Paths[LEFTSIDE][BGROUND][WALK].PathEnded() && LFGLegProg < 0.5F)) {
+					m_StrideStart[LEFTSIDE] = false;
+					m_StrideTimer[LEFTSIDE].Reset();
+					m_pLBGFootGroup->PushAsLimb(m_pLBGLeg->GetJointPos(), m_Vel, m_Rotation, m_Paths[LEFTSIDE][BGROUND][WALK], deltaTime);
+				} else {
+					m_pLBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pLBGLeg->GetParentOffset()), m_pLBGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pLBGLeg->GetMass(), deltaTime);
+				}
+			}
 
-            // Restart the left stride if the current one seems to be taking too long
-            if (m_StrideTimer[LEFTSIDE].IsPastSimMS(m_Paths[LEFTSIDE][FGROUND][WALK].GetTotalPathTime()))
-                m_StrideStart[LEFTSIDE] = true;
+			// Reset the left-side walking stride if it's taking longer than it should.
+			if (m_StrideTimer[LEFTSIDE].IsPastSimMS(static_cast<double>(m_Paths[LEFTSIDE][FGROUND][WALK].GetTotalPathTime() * 1.1F))) { m_StrideStart[LEFTSIDE] = true; }
 
             ///////////////////
             // RIGHT LEGS
 
-            if (m_pRFGLeg && (!m_pRBGLeg || !(m_Paths[RIGHTSIDE][FGROUND][WALK].PathEnded() && RBGLegProg < 0.5)))
-            {
-                m_StrideStart[RIGHTSIDE] = false;
-                m_StrideTimer[RIGHTSIDE].Reset();
-                m_pRFGFootGroup->PushAsLimb(m_Pos +
-                                            RotateOffset(m_pRFGLeg->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[RIGHTSIDE][FGROUND][WALK],
-//                                            mass,
-                                            deltaTime,
-                                            &playStride);
-            }
+			if (m_pRFGLeg) { 
+				if (!m_pRBGLeg || !(m_Paths[RIGHTSIDE][FGROUND][WALK].PathEnded() && RBGLegProg < 0.5F)) {
+					m_StrideStart[RIGHTSIDE] = false;
+					m_StrideTimer[RIGHTSIDE].Reset();
+					m_pRFGFootGroup->PushAsLimb(m_pRFGLeg->GetJointPos(), m_Vel, m_Rotation, m_Paths[RIGHTSIDE][FGROUND][WALK], deltaTime, &restarted);
+				} else {
+					m_pRFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pRFGLeg->GetParentOffset()), m_pRFGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pRFGLeg->GetMass(), deltaTime);
+				}
+			}
 
-            if (m_pRBGLeg && (!m_pRFGLeg || (!(m_Paths[RIGHTSIDE][BGROUND][WALK].PathEnded() && RFGLegProg < 0.5) || m_StrideStart[RIGHTSIDE])))
-            {
-//                m_StrideStart[RIGHTSIDE] = false;
-                m_StrideTimer[RIGHTSIDE].Reset();
-                m_pRBGFootGroup->PushAsLimb(m_Pos +
-                                            RotateOffset(m_pRBGLeg->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[RIGHTSIDE][BGROUND][WALK],
-//                                            mass,
-                                            deltaTime);
-            }
+			if (m_pRBGLeg && (!m_pRFGLeg || (!(m_Paths[RIGHTSIDE][BGROUND][WALK].PathEnded() && RFGLegProg < 0.5F) || m_StrideStart[RIGHTSIDE]))) {
+				m_StrideTimer[RIGHTSIDE].Reset();
+				m_pRBGFootGroup->PushAsLimb(m_pRBGLeg->GetJointPos(), m_Vel, m_Rotation, m_Paths[RIGHTSIDE][BGROUND][WALK], deltaTime);
+			}
 
-            // Restart the right stride if the current one seems to be taking too long
-            if (m_StrideTimer[RIGHTSIDE].IsPastSimMS(m_Paths[RIGHTSIDE][FGROUND][WALK].GetTotalPathTime()))
-                m_StrideStart[RIGHTSIDE] = true;
+			// Reset the right-side walking stride if it's taking longer than it should.
+			if (m_StrideTimer[RIGHTSIDE].IsPastSimMS(static_cast<double>(m_Paths[RIGHTSIDE][FGROUND][WALK].GetTotalPathTime() * 1.1F))) { m_StrideStart[RIGHTSIDE] = true; }
 
-            // Play the stride sound, if applicable
-            if (playStride)
-				if (m_StrideSound) { m_StrideSound->Play(m_Pos); }
-        }
-        // JUMPING
-        else if ((m_pRFGLeg || m_pRBGLeg) && m_MoveState == JUMP)
-        {
-/*
-            if (m_pRFGLeg && (!m_Paths[FGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal))
-            {
-                m_pRFGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pRFGLeg->GetParentOffset()),
-                                      m_Vel,
-                                      m_Rotation,
-                                      m_Paths[FGROUND][m_MoveState],
-    //                                  mass / 2,
-                                      deltaTime);
-            }
-            if (m_pRBGLeg && (!m_Paths[BGROUND][m_MoveState].PathEnded() || m_JetTimeLeft == m_JetTimeTotal))
-            {
-                m_pRBGFootGroup->PushAsLimb(m_Pos + RotateOffset(m_pRBGLeg->GetParentOffset()),
-                                      m_Vel,
-                                      m_Rotation,
-                                      m_Paths[BGROUND][m_MoveState],
-    //                                mass / 2,
-                                      deltaTime);
-            }
+			if (restarted && m_StrideSound) { m_StrideSound->Play(m_Pos); }
+		} else if (m_pLFGLeg || m_pLBGLeg || m_pRFGLeg || m_pRBGLeg) {
+			if (m_MoveState == JUMP) {
+				// TODO: Utilize jump paths in an intuitive way?
+			} else {
+				for (int side = 0; side < SIDECOUNT; ++side) {
+					for (int layer = 0; layer < LAYERCOUNT; ++layer) {
+						m_Paths[side][layer][WALK].Terminate();
+					}
+				}
+				if (m_pLFGLeg) { m_pLFGFootGroup->PushAsLimb(m_pLFGLeg->GetJointPos(), m_Vel, m_Rotation, m_Paths[LEFTSIDE][FGROUND][STAND], deltaTime); }
 
-            if (m_JetTimeLeft <= 0)
-            {
-                m_MoveState = STAND;
-                m_Paths[FGROUND][JUMP].Terminate();
-                m_Paths[BGROUND][JUMP].Terminate();
-                m_Paths[FGROUND][STAND].Terminate();
-                m_Paths[BGROUND][STAND].Terminate();
-                m_Paths[FGROUND][WALK].Terminate();
-                m_Paths[BGROUND][WALK].Terminate();
-            }
-*/
-        }
-        // STANDING
-        else if (m_pLFGLeg || m_pLBGLeg || m_pRFGLeg || m_pRBGLeg)
-        {
-            for (int side = 0; side < SIDECOUNT; ++side)
-                for (int layer = 0; layer < LAYERCOUNT; ++layer)
-                    m_Paths[side][layer][WALK].Terminate();
+				if (m_pLBGLeg) { m_pLBGFootGroup->PushAsLimb(m_pLBGLeg->GetJointPos(), m_Vel, m_Rotation, m_Paths[LEFTSIDE][BGROUND][STAND], deltaTime); }
 
-            if (m_pLFGLeg)
-                m_pLFGFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pLFGLeg->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[LEFTSIDE][FGROUND][STAND],
-//                                            mass / 2,
-                                            deltaTime);
+				if (m_pRFGLeg) { m_pRFGFootGroup->PushAsLimb(m_pRFGLeg->GetJointPos(), m_Vel, m_Rotation, m_Paths[RIGHTSIDE][FGROUND][STAND], deltaTime); }
 
-            if (m_pLBGLeg)
-                m_pLBGFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pLBGLeg->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[LEFTSIDE][BGROUND][STAND],
-//                                            mass / 2,
-                                            deltaTime);
-
-            if (m_pRFGLeg)
-                m_pRFGFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pRFGLeg->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[RIGHTSIDE][FGROUND][STAND],
-//                                            mass / 2,
-                                            deltaTime);
-
-            if (m_pRBGLeg)
-                m_pRBGFootGroup->PushAsLimb(m_Pos.GetFloored() + RotateOffset(m_pRBGLeg->GetParentOffset()),
-                                            m_Vel,
-                                            m_Rotation,
-                                            m_Paths[RIGHTSIDE][BGROUND][STAND],
-//                                            mass / 2,
-                                            deltaTime);
-
-        }
+				if (m_pRBGLeg) { m_pRBGFootGroup->PushAsLimb(m_pRBGLeg->GetJointPos(), m_Vel, m_Rotation, m_Paths[RIGHTSIDE][BGROUND][STAND], deltaTime); }
+			}
+		}
 	} else {
 		// Not stable/standing, so make sure the end of limbs are moving around limply in a ragdoll fashion.
 		// TODO: Make the limb atom groups fly around and react to terrain, without getting stuck etc.

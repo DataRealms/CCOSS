@@ -57,7 +57,7 @@ namespace RTE {
 				if (className == "AtomGroup" || className == "Attachable" || className == "AEmitter") {
 					reader.ReportError("The PresetName to be copied was not found in data modules.");
 				}
-				reader.ReportError("ERROR: Couldn't find the preset '" + refName + "' accessed in " + reader.GetCurrentFilePath() + " at line " + reader.GetCurrentFileLine());
+				reader.ReportError("Couldn't find the preset '" + refName + " when trying to do CopyOf.");
 			}
 		} else if (propName == "PresetName" || propName == "InstanceName") {
 			SetPresetName(reader.ReadPropValue());

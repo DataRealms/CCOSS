@@ -57,15 +57,12 @@ namespace RTE {
 				if (className == "AtomGroup" || className == "Attachable" || className == "AEmitter") {
 					reader.ReportError("The PresetName to be copied was not found in data modules.");
 				}
+				std::string err = "ERROR: Couldn't find the preset '" + refName + "' accessed in " + reader.GetCurrentFilePath() + " at line " + reader.GetCurrentFileLine();
 				// If we couldn't find the preset to copy from, read it as an original but report the problem in the console
-				g_ConsoleMan.PrintString("ERROR: Couldn't find the preset '" + refName + "' accessed in " + reader.GetCurrentFilePath() + " at line " + reader.GetCurrentFileLine());
-				// Preset name might have "[ModuleName]/" preceding it, detect it here and select proper module!
-				int slashPos = refName.find_first_of('/');
-				m_PresetName = (slashPos != std::string::npos) ? refName.substr(slashPos + 1) : refName;
-				// Mark this so that the derived class knows it should be added to the PresetMan when it's done reading all properties.
-				m_IsOriginalPreset = true;
-				// Indicate where this was read from
-				m_DefinedInModule = reader.GetReadModuleID();
+				g_ConsoleMan.PrintString(err);
+				g_ConsoleMan.Destroy();
+				// Abort the game with same error message
+				RTEAssert(false, err);
 			}
 		} else if (propName == "PresetName" || propName == "InstanceName") {
 			SetPresetName(reader.ReadPropValue());

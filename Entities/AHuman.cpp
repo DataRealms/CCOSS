@@ -3275,7 +3275,10 @@ void AHuman::Update()
 		}
 
 		if (firearm) {
-			if (HDFirearm *bgFirearm = dynamic_cast<HDFirearm *>(GetEquippedBGItem())) { reloadBG = bgFirearm->IsReloading(); }
+			if (HDFirearm *bgFirearm = dynamic_cast<HDFirearm *>(GetEquippedBGItem())) { 
+				reloadBG = bgFirearm->IsReloading();
+				if (bgFirearm->IsEmpty() && firearm->DoneReloading()) {	bgFirearm->Reload(); }
+			}
 			if (!firearm->IsFull() && m_Controller.IsState(WEAPON_RELOAD) && !reloadBG) {
 				if (m_pBGArm && !m_pBGArm->HoldsSomething()) { m_pBGArm->SetHandPos(firearm->GetMagazinePos()); }
 				firearm->Reload();

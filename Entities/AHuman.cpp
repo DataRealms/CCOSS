@@ -3455,11 +3455,11 @@ void AHuman::Update()
 			}
 		} else if (m_ArmsState == THROWING_RELEASE && m_ThrowTmr.GetElapsedSimTimeMS() > 100) {
 			m_pFGArm->SetHeldMO(SwapNextInventory());
-			m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+			m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
 			EquipShieldInBGArm();
 			m_ArmsState = WEAPON_READY;
 		} else if (m_ArmsState == THROWING_RELEASE) {
-			m_pFGArm->SetHandPos(m_Pos + (m_HolsterOffset + Vector(15, -15)).GetXFlipped(m_HFlipped));
+			m_pFGArm->SetHandPos(m_Pos + Vector(m_pFGArm->GetMaxLength() * GetFlipFactor(), -m_pFGArm->GetMaxLength() * 0.5F).RadRotate(adjustedAimAngle));
 		}
 	}
 
@@ -3584,7 +3584,7 @@ void AHuman::Update()
         MovableObject *pMO = m_pFGArm->ReleaseHeldMO();
 		if (pMO) { m_Inventory.push_back(pMO); }
         m_pFGArm->SetHeldMO(m_pItemInReach);
-        m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
+		m_pFGArm->SetHandPos(m_Pos + RotateOffset(m_HolsterOffset));
 		m_pItemInReach = nullptr;
 
 		EquipShieldInBGArm();

@@ -74,6 +74,7 @@ void MOSRotating::Clear()
     m_GibWoundLimit = 0;
     m_GibBlastStrength = 10.0F;
 	m_WoundCountAffectsImpulseLimitRatio = 0.25F;
+	m_DetachAttachablesBeforeGibbing = true;
     m_GibSound = nullptr;
     m_EffectOnGib = true;
     m_pFlipBitmap = 0;
@@ -256,6 +257,7 @@ int MOSRotating::Create(const MOSRotating &reference) {
     m_GibWoundLimit = reference.m_GibWoundLimit;
     m_GibBlastStrength = reference.m_GibBlastStrength;
 	m_WoundCountAffectsImpulseLimitRatio = reference.m_WoundCountAffectsImpulseLimitRatio;
+	m_DetachAttachablesBeforeGibbing = reference.m_DetachAttachablesBeforeGibbing;
 	if (reference.m_GibSound) { m_GibSound = dynamic_cast<SoundContainer*>(reference.m_GibSound->Clone()); }
 	m_EffectOnGib = reference.m_EffectOnGib;
     m_LoudnessOnGib = reference.m_LoudnessOnGib;
@@ -330,6 +332,8 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
 		reader >> m_GibBlastStrength;
 	} else if (propName == "WoundCountAffectsImpulseLimitRatio") {
         reader >> m_WoundCountAffectsImpulseLimitRatio;
+	} else if (propName == "DetachAttachablesBeforeGibbing") {
+		reader >> m_DetachAttachablesBeforeGibbing;
 	} else if (propName == "GibSound") {
 		if (!m_GibSound) { m_GibSound = new SoundContainer; }
 		reader >> m_GibSound;
@@ -457,26 +461,47 @@ int MOSRotating::GetWoundCount(bool includePositiveDamageAttachables, bool inclu
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+Attachable * MOSRotating::GetNearestAttachableToOffset(Vector offset) {
+	if (!m_DetachAttachablesBeforeGibbing) {
+		return nullptr;
+	}
+	Attachable *nearestAttachable = nullptr;
+	float closestRadius = -1.0F;
+	for (Attachable *attachable : m_Attachables) {
+		if (attachable->GetsHitByMOs() && attachable->GetJointStrength() > 0 && attachable->GetDamageMultiplier() > 0) {
+			float radius = (offset - attachable->GetParentOffset()).GetMagnitude();
+			if (closestRadius < 0 || radius < closestRadius) {
+				closestRadius = radius;
+				nearestAttachable = attachable;
+			}
+		}
+	}
+	return nearestAttachable;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet, bool checkGibWoundLimit) {
-    if (woundToAdd) {
-        if (checkGibWoundLimit && !ToDelete() && m_GibWoundLimit > 0 && m_Wounds.size() + 1 >= m_GibWoundLimit) {
-            // Indicate blast in opposite direction of emission
-            // TODO: don't hardcode here, get some data from the emitter
-            Vector blast(-5, 0);
-            blast.RadRotate(woundToAdd->GetEmitAngle());
-            GibThis(blast);
-            delete woundToAdd;
-            return;
-        } else {
-            woundToAdd->SetCollidesWithTerrainWhileAttached(false);
-            woundToAdd->SetParentOffset(parentOffsetToSet);
-            woundToAdd->SetInheritsHFlipped(false);
-            woundToAdd->SetParent(this);
-            woundToAdd->SetIsWound(true);
-            if (woundToAdd->HasNoSetDamageMultiplier()) { woundToAdd->SetDamageMultiplier(1.0F); }
-            m_AttachableAndWoundMass += woundToAdd->GetMass();
-            m_Wounds.push_back(woundToAdd);
+    if (woundToAdd && !ToDelete()) {
+		if (checkGibWoundLimit && m_GibWoundLimit > 0 && m_Wounds.size() + 1 >= m_GibWoundLimit) {
+			// Find and detach an attachable near the new wound before gibbing the object itself.
+			if (Attachable *attachableToDetach = GetNearestAttachableToOffset(parentOffsetToSet)) {
+				RemoveAttachable(attachableToDetach, true, true);
+			} else {
+				// TODO: Don't hardcode the blast strength!
+				GibThis(Vector(-5.0F, 0).RadRotate(woundToAdd->GetEmitAngle()));
+				delete woundToAdd;
+				return;
+			}
         }
+        woundToAdd->SetCollidesWithTerrainWhileAttached(false);
+        woundToAdd->SetParentOffset(parentOffsetToSet);
+        woundToAdd->SetInheritsHFlipped(false);
+        woundToAdd->SetParent(this);
+        woundToAdd->SetIsWound(true);
+        if (woundToAdd->HasNoSetDamageMultiplier()) { woundToAdd->SetDamageMultiplier(1.0F); }
+        m_AttachableAndWoundMass += woundToAdd->GetMass();
+        m_Wounds.push_back(woundToAdd);
     }
 }
 
@@ -1180,7 +1205,18 @@ void MOSRotating::ApplyImpulses()
 		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) {
 			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
 		}
-		if (totalImpulse.GetMagnitude() > impulseLimit) { GibThis(totalImpulse); }
+		if (totalImpulse.GetMagnitude() > impulseLimit) {
+			// Find and detach an attachable near the direction of the impulse before gibbing the object itself.
+			if (Attachable *attachableToDetach = GetNearestAttachableToOffset(Vector(totalImpulse.GetX(), totalImpulse.GetY()).SetMagnitude(-GetRadius()) * -m_Rotation)) {
+				if (totalImpulse.GetMagnitude() > attachableToDetach->GetGibImpulseLimit()) {
+					attachableToDetach->GibThis(totalImpulse);
+				} else {
+					RemoveAttachable(attachableToDetach, true, true);
+				}
+			} else {
+				GibThis(totalImpulse);
+			}
+		}
 	}
     MOSprite::ApplyImpulses();
 }
@@ -1458,7 +1494,18 @@ void MOSRotating::PostTravel()
 		if (m_WoundCountAffectsImpulseLimitRatio != 0 && m_GibWoundLimit > 0) {
 			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
 		}
-		if (m_TravelImpulse.GetMagnitude() > impulseLimit) { GibThis(); }
+		if (m_TravelImpulse.GetMagnitude() > impulseLimit) {
+			// Find and detach an attachable near the direction of the impulse before gibbing the object itself.
+			if (Attachable *attachableToDetach = GetNearestAttachableToOffset(Vector(m_TravelImpulse.GetX(), m_TravelImpulse.GetY()).SetMagnitude(-GetRadius()) * -m_Rotation)) {
+				if (m_TravelImpulse.GetMagnitude() > attachableToDetach->GetGibImpulseLimit()) {
+					attachableToDetach->GibThis();
+				} else {
+					RemoveAttachable(attachableToDetach, true, true);
+				}
+			} else {
+				GibThis();
+			}
+		}
 	}
     // Reset
     m_DeepHardness = 0;

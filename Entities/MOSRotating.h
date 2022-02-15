@@ -483,6 +483,13 @@ ClassInfoGetters;
     /// <param name="destroy">Whether to remove or delete the Attachables. Setting this to true deletes them, setting it to false removes them.</param>
 	void RemoveOrDestroyAllAttachables(bool destroy);
 
+	/// <summary>
+	/// Gets the Attachable nearest to the passed in offset, but only if DetachAttachablesBeforeGibbing is set to true.
+	/// </summary>
+	/// <param name="offset">The offset that will be compared to each Attachable's ParentOffset.</param>
+	/// <returns>The nearest damage-transferring Attachable, or nullptr if none was found.</returns>
+	virtual Attachable * GetNearestAttachableToOffset(Vector offset);
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  ResetAllTimers
@@ -966,6 +973,7 @@ protected:
 	int m_GibWoundLimit; //!< The number of wounds that will gib this MOSRotating. 0 means that it can't be gibbed via wounds.
     float m_GibBlastStrength; //!< The strength with which Gibs and Attachables will get launched when this MOSRotating is gibbed.
 	float m_WoundCountAffectsImpulseLimitRatio; //!< The rate at which this MOSRotating's wound count will diminish the impulse limit.
+	bool m_DetachAttachablesBeforeGibbing; //!< Whether to detach any Attachables of this MOSRotating when gibbing conditions are met, instead of gibbing the MOSRotating itself.
     // Gib sound effect
     SoundContainer *m_GibSound;
     // Whether to flash effect on gib

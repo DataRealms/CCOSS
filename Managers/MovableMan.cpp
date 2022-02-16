@@ -1945,34 +1945,30 @@ void MovableMan::Update()
 
     // SETTLE PARTICLES //////////////////////////////////////////////////
     // Only settle after all updates and deletions are done
-    if (m_SettlingEnabled)
-    {
-        parIt = partition(m_Particles.begin(), m_Particles.end(), std::not_fn(std::mem_fn(&MovableObject::ToSettle)));
-        midIt = parIt;
+	if (m_SettlingEnabled) {
+		parIt = partition(m_Particles.begin(), m_Particles.end(), std::not_fn(std::mem_fn(&MovableObject::ToSettle)));
+		midIt = parIt;
 
-        while (parIt != m_Particles.end())
-        {
-            Vector parPos((*parIt)->GetPos().GetFloored());
-            Material const * terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.m_X, parPos.m_Y));
-			if ((*parIt)->GetDrawPriority() >= terrMat->GetPriority()) {
-				int piling = (*parIt)->GetMaterial()->GetPiling();
-				if (piling >= 0) {
-					for (int s = 0; terrMat->GetIndex() == (*parIt)->GetMaterial()->GetIndex() && s < piling; ++s) {
-						if (s % 2 == 0) {
-							parPos.m_Y -= 1.0F;
-						} else {
-							parPos.m_X += (RandomNum() >= 0.5F ? 1.0F : -1.0F);
-						}
-						terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.m_X, parPos.m_Y));
+		while (parIt != m_Particles.end()) {
+			Vector parPos((*parIt)->GetPos());
+			Material const * terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.GetFloorIntX(), parPos.GetFloorIntY()));
+			int piling = (*parIt)->GetMaterial()->GetPiling();
+			if (piling > 0) {
+				for (int s = 0; terrMat->GetIndex() == (*parIt)->GetMaterial()->GetIndex() && s < piling; ++s) {
+					if ((piling - s) % 2 == 0) {
+						parPos.m_Y -= 1.0F;
+					} else {
+						parPos.m_X += (RandomNum() >= 0.5F ? 1.0F : -1.0F);
 					}
-					(*parIt)->SetPos(parPos);
+					terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.GetFloorIntX(), parPos.GetFloorIntY()));
 				}
-				g_SceneMan.GetTerrain()->ApplyMovableObject(*parIt);
+				(*parIt)->SetPos(parPos.GetFloored());
 			}
-            delete *(parIt++);
-        }
-        m_Particles.erase(midIt, m_Particles.end());
-    }
+			if ((*parIt)->GetDrawPriority() >= terrMat->GetPriority()) { g_SceneMan.GetTerrain()->ApplyMovableObject(*parIt); }
+			delete *(parIt++);
+		}
+		m_Particles.erase(midIt, m_Particles.end());
+	}
 
     release_bitmap(g_SceneMan.GetTerrain()->GetMaterialBitmap());
 

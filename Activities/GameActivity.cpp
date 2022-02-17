@@ -1770,7 +1770,13 @@ void GameActivity::Update()
 					lzOffsetY += m_AIReturnCraft[player] ? -32.0F : 32.0F;
 				}
 				m_LandingZone[player].m_Y = g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10) + lzOffsetY;
-				CreateDelivery(player);
+
+				if (m_pBuyGUI[player]->GetTotalOrderCost() > GetTeamFunds(team)) {
+					g_GUISound.UserErrorSound()->Play(player);
+					m_FundsChanged[team] = true;
+				} else {
+					CreateDelivery(player);
+				}
 				// Revert the Y offset so that the cursor doesn't flinch.
 				m_LandingZone[player].m_Y -= lzOffsetY;
 			}

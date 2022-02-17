@@ -435,6 +435,13 @@ int FirearmActivationDelay() const;
 	MovableObject * LookForMOs(float FOVSpread = 45, unsigned char ignoreMaterial = 0, bool ignoreAllTerrain = false);
 
 
+	/// <summary>
+	/// Gets the BITMAP representation of this ACrab's Turret, or its body if no Turret has been defined.
+	/// </summary>
+	/// <returns>The Turret or body of this ACrab as a BITMAP.</returns>
+	BITMAP *GetGraphicalIcon() const override;
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateMovePath
 //////////////////////////////////////////////////////////////////////////////////////////

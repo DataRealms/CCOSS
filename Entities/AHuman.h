@@ -321,16 +321,6 @@ ClassInfoGetters;
     void SetBGFoot(Attachable *newFoot) { if (m_pBGLeg && m_pBGLeg->IsAttached()) { m_pBGLeg->SetFoot(newFoot); } }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHeadBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the sprite representing the head of this.
-// Arguments:       None.
-// Return value:    A pointer to the bitmap of with the head of this. Ownership is NOT
-//                  transferred!
-
-    BITMAP *GetHeadBitmap() const;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetJetTimeTotal
@@ -742,16 +732,11 @@ ClassInfoGetters;
 	MovableObject * LookForMOs(float FOVSpread = 45, unsigned char ignoreMaterial = 0, bool ignoreAllTerrain = false);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetGraphicalIcon
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a bitmap showing a good identifyable icon of this, for use in
-//                  GUI lists etc.
-// Arguments:       None.
-// Return value:    A good identifyable graphical representation of this in a BITMAP, if
-//                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
-
-    BITMAP * GetGraphicalIcon() const override { return GetHeadBitmap(); }
+	/// <summary>
+	/// Gets the BITMAP representation of this AHuman's Head, or its body if no Head has been defined.
+	/// </summary>
+	/// <returns>The Head or body of this AHuman as a BITMAP.</returns>
+	BITMAP *GetGraphicalIcon() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

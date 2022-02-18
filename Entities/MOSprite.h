@@ -393,6 +393,17 @@ public:
 	/// <returns>The graphical representation of this MOSprite as a BITMAP.</returns>
 	BITMAP *GetGraphicalIcon() const override { return m_GraphicalIcon != nullptr ? m_GraphicalIcon : m_aSprite[0]; }
 
+	/// <summary>
+	/// Gets the width of this MOSprite's GUI icon.
+	/// </summary>
+	/// <returns>The width of the GUI icon bitmap.</returns>
+	int GetIconWidth() const { return GetGraphicalIcon()->w; }
+
+	/// <summary>
+	/// Gets the height of this MOSprite's GUI icon.
+	/// </summary>
+	/// <returns>The height of the GUI icon bitmap.</returns>
+	int GetIconHeight() const { return GetGraphicalIcon()->h; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -266,9 +266,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - You can now execute multiple copies of your delivery order by holding UP or DOWN while choosing the landing zone.
 
+- New `MOSprite` INI property `IconFile`, which can be used to define a separate sprite to be displayed in GUI elements, such as the Buy Menu.  
+	Defined similarly to `SpriteFile`, i.e. `IconFile = ContentFile` followed up by a `FilePath` to the sprite.
+	
+- New `MOSprite` Lua functions `GetIconWidth()` and `GetIconHeight()` which return the dimensions of its GUI representation.
+
+- New `PrimitiveMan` Lua functions `DrawIconPrimitive(player, pos, entity)` and `DrawIconPrimitive(pos, entity)` which can be used to draw the GUI representation of the passed in entity.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- `ACrab` actors will now default to showing their `Turret` sprite as their GUI icon. If no turret is defined, the `ACrab`'s own sprite will be used.  
+	In a similar fashion, `AHuman` will now default to its torso sprite as its GUI representation if no `Head` has somehow been defined.
 
 - `ThrownDevice`s will now use `StanceOffset`, `SharpStanceOffset` and `SupportOffset` in the same way as any other `HeldDevice`. In addition, `EndThrowOffset` will be used to set the BG hand position while sharp aiming or throwing.
 

@@ -792,6 +792,8 @@ namespace RTE {
 		.def("FacingAngle", &MOSprite::FacingAngle)
 		.def("GetSpriteWidth", &MOSprite::GetSpriteWidth)
 		.def("GetSpriteHeight", &MOSprite::GetSpriteHeight)
+		.def("GetIconWidth", &MOSprite::GetIconWidth)
+		.def("GetIconHeight", &MOSprite::GetIconHeight)
 		.def("SetEntryWound", &MOSprite::SetEntryWound)
 		.def("SetExitWound", &MOSprite::SetExitWound)
 		.def("GetEntryWoundPresetName", &MOSprite::GetEntryWoundPresetName)

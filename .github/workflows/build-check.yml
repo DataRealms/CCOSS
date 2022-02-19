@@ -25,7 +25,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update -yq
-          sudo apt-get install --no-install-recommends liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev libboost-dev
+          sudo apt-get install --no-install-recommends liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev libboost-dev
 
       - name: Install Clang
         # You may pin to the exact commit or the version.

@@ -8,13 +8,17 @@ if host_machine.system() in ['linux','osx']
     dependency('allegro'),
     dependency('loadpng'),
     dependency('flac'),
-    dependency('luajit'),
     dependency('minizip'),
     dependency('threads'),
     dependency('liblz4'),
     dependency('libpng'),
     dependency('boost'), #needed for luabind
   ]
+  luajit = dependency('luajit')
+  deps += luajit
+  if luajit.version() >= '2.1'
+    deps += dependency('lua52')
+  endif
   if host_machine.system() == 'linux'
     deps += dependency('x11')
   endif

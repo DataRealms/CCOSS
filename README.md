@@ -54,6 +54,7 @@ The Linux build uses the meson build system, and builds against system libraries
 * `loadpng`
 * `flac`
 * `luajit`
+  * `lua5.2` (if luajit >=2.1)
 * `minizip`
 * `lz4>=1.9.0`
 * `libpng`
@@ -96,7 +97,7 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 ## Installing Dependencies
 
 **Arch Linux:**  
-`# pacman -S allegro4 boost flac luajit minizip lz4 libpng libx11 xorg-xmessage meson ninja base-devel`
+`# pacman -S allegro4 boost flac luajit lua52 minizip lz4 libpng libx11 xorg-xmessage meson ninja base-devel`
 
 **Ubuntu >=20.04:**  
 `# apt-get install build-essential libboost-dev liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev ninja-build meson`  

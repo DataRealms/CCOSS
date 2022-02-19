@@ -54,7 +54,7 @@ The Linux build uses the meson build system, and builds against system libraries
 * `loadpng`
 * `flac`
 * `luajit`
-  * `lua5.2` (if luajit >=2.1)
+* `lua5.2`
 * `minizip`
 * `lz4>=1.9.0`
 * `libpng`

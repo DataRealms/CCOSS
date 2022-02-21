@@ -391,7 +391,7 @@ public:
 	/// Gets the GUI representation of this MOSprite, either based on the first frame of its sprite or separately defined icon file.
 	/// </summary>
 	/// <returns>The graphical representation of this MOSprite as a BITMAP.</returns>
-	BITMAP *GetGraphicalIcon() const override { return m_GraphicalIcon != nullptr ? m_GraphicalIcon : m_aSprite[0]; }
+	BITMAP * GetGraphicalIcon() const override { return m_GraphicalIcon != nullptr ? m_GraphicalIcon : m_aSprite[0]; }
 
 	/// <summary>
 	/// Gets the width of this MOSprite's GUI icon.

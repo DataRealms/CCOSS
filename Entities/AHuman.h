@@ -736,7 +736,7 @@ ClassInfoGetters;
 	/// Gets the GUI representation of this AHuman, only defaulting to its Head or body if no GraphicalIcon has been defined.
 	/// </summary>
 	/// <returns>The graphical representation of this AHuman as a BITMAP.</returns>
-	BITMAP *GetGraphicalIcon() const override;
+	BITMAP * GetGraphicalIcon() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

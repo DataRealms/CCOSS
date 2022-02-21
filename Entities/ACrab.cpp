@@ -575,7 +575,7 @@ void ACrab::SetRightBGLeg(Leg *newLeg) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-BITMAP *ACrab::GetGraphicalIcon() const {
+BITMAP * ACrab::GetGraphicalIcon() const {
 	return m_GraphicalIcon ? m_GraphicalIcon : (m_pTurret ? m_pTurret->GetSpriteFrame(0) : GetSpriteFrame(0));
 }
 

@@ -246,6 +246,13 @@ public:
     bool PurchaseMade() const { return m_PurchaseMade; }
 
 
+	/// <summary>
+	/// Gets the width of the current delivery craft.
+	/// </summary>
+	/// <returns>The width of the delivery craft, in pixels.</returns>
+	int GetDeliveryWidth() const { return m_DeliveryWidth; }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetOrderList
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -832,6 +839,7 @@ protected:
     std::vector<Loadout> m_Loadouts;
     // Purchase has been made
     bool m_PurchaseMade;
+	int m_DeliveryWidth; //!< The width of the currently selected delivery craft, which will determine the width of the LZ marker.
     // The cursor image shared by all buy menus
     static BITMAP *s_pCursor;
     // Screen position of the cursor

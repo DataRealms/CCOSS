@@ -173,7 +173,6 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
 	} else if (propName == "DeactivationSound") {
 		m_DeactivationSound = new SoundContainer;
         reader >> m_DeactivationSound;
-        m_DeactivationSound->SetSoundOverlapMode(SoundContainer::SoundOverlapMode::RESTART);
     } else if (propName == "EmptySound") {
 		m_EmptySound = new SoundContainer;
 		reader >> m_EmptySound;
@@ -617,6 +616,7 @@ void HDFirearm::Activate() {
     HeldDevice::Activate();
 
     if (!IsReloading()) {
+		if (m_DeactivationSound && m_DeactivationSound->IsBeingPlayed()) { m_DeactivationSound->FadeOut(); }
         if (m_ActiveSound && !m_ActiveSound->IsBeingPlayed()) { m_ActiveSound->Play(this->m_Pos); }
         if (m_PreFireSound && !wasActivated && !m_PreFireSound->IsBeingPlayed()) { m_PreFireSound->Play(this->m_Pos); }
 		if (IsEmpty()) { Reload(); }
@@ -635,9 +635,9 @@ void HDFirearm::Deactivate() {
     HeldDevice::Deactivate();
     m_FiredOnce = false;
 
-	if (m_PreFireSound) { m_PreFireSound->Stop(); }
+	if (m_PreFireSound) { m_PreFireSound->FadeOut(); }
     if (m_FireSound && m_FireSound->GetLoopSetting() == -1) { m_FireSound->Stop(); }
-    if (m_DeactivationSound && wasActivated && m_pMagazine && !m_pMagazine->IsEmpty()) { m_DeactivationSound->Play(m_Pos); }
+    if (m_DeactivationSound && wasActivated && m_FiredLastFrame) { m_DeactivationSound->Play(m_Pos); }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -960,11 +960,9 @@ void HDFirearm::Update()
     // Do stuff to deactivate after being activated
     if (!m_Activated)
     {
-		if (m_AlreadyClicked && m_FiredLastFrame && m_DeactivationSound) { m_DeactivationSound->Play(m_Pos); }
         // Reset the click indicator.
         m_AlreadyClicked = false;
 
-		if (m_PreFireSound) { m_PreFireSound->Stop(); }
         // Stop any looping activation sounds
         if (m_FireSound && m_FireSound->GetLoopSetting() == -1)// && m_FireSound->IsBeingPlayed())
             m_FireSound->Stop();

@@ -210,7 +210,7 @@ namespace RTE {
 		static const std::unordered_map<std::string, SoundSet::SoundSelectionCycleMode> c_SoundSelectionCycleModeMap; //!< A map of strings to SoundSelectionCycleModes to support string parsing for the SoundCycleMode enum. Populated in the implementing cpp file.
 
 		SoundSelectionCycleMode m_SoundSelectionCycleMode; //!< The SoundSelectionCycleMode for this SoundSet.
-		std::pair<bool, int> m_CurrentSelection; //!< Whether the currently selection is in the SoundData (false) or SoundSet (true) vector, and its index in the appropriate vector.
+		std::pair<bool, int> m_CurrentSelection; //!< Whether the current selection is in the SoundData (false) or SoundSet (true) vector, and its index in the appropriate vector.
 
 		std::vector<SoundData> m_SoundData; //!< The SoundData available for selection in this SoundSet.
 		std::vector<SoundSet> m_SubSoundSets; //!< The sub SoundSets available for selection in this SoundSet.

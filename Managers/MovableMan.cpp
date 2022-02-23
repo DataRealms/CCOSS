@@ -1954,7 +1954,7 @@ void MovableMan::Update()
 			Material const * terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.GetFloorIntX(), parPos.GetFloorIntY()));
 			int piling = (*parIt)->GetMaterial()->GetPiling();
 			if (piling > 0) {
-				for (int s = 0; terrMat->GetIndex() == (*parIt)->GetMaterial()->GetIndex() && s < piling; ++s) {
+				for (int s = 0; s < piling && (terrMat->GetIndex() == (*parIt)->GetMaterial()->GetIndex() || terrMat->GetIndex() == (*parIt)->GetMaterial()->GetSettleMaterial()); ++s) {
 					if ((piling - s) % 2 == 0) {
 						parPos.m_Y -= 1.0F;
 					} else {

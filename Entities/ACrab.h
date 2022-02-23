@@ -439,7 +439,7 @@ int FirearmActivationDelay() const;
 	/// Gets the GUI representation of this ACrab, only defaulting to its Turret or body if no GraphicalIcon has been defined.
 	/// </summary>
 	/// <returns>The graphical representation of this ACrab as a BITMAP.</returns>
-	BITMAP *GetGraphicalIcon() const override;
+	BITMAP * GetGraphicalIcon() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

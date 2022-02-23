@@ -17,7 +17,7 @@ namespace RTE {
 
 	void SoundSet::Clear() {
 		m_SoundSelectionCycleMode = SoundSelectionCycleMode::RANDOM;
-		m_CurrentSelection = {false, 0};
+		m_CurrentSelection = {false, -1};
 
 		m_SoundData.clear();
 		m_SubSoundSets.clear();
@@ -286,9 +286,7 @@ namespace RTE {
 			case 0:
 				return false;
 			case 1:
-				break;
-			case 2:
-				selectSoundForwards();
+				m_CurrentSelection.second = 0;
 				break;
 			default:
 				switch (m_SoundSelectionCycleMode) {

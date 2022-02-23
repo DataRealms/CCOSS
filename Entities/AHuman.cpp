@@ -630,7 +630,7 @@ void AHuman::SetBGLeg(Leg *newLeg) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-BITMAP *AHuman::GetGraphicalIcon() const {
+BITMAP * AHuman::GetGraphicalIcon() const {
 	return m_GraphicalIcon ? m_GraphicalIcon : (m_pHead ? m_pHead->GetSpriteFrame(0) : GetSpriteFrame(0));
 }
 

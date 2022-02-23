@@ -613,16 +613,20 @@ namespace RTE {
 									soundContainerToHandle->Stop();
 									soundContainerToHandle->Reset();
 								}
-								soundContainerToHandle->GetTopLevelSoundSet().AddSound(ContentFile::GetPathFromHash(soundDataPointer->SoundFileHash), false);
-								soundContainerToHandle->SetImmobile(soundDataPointer->Immobile);
-								soundContainerToHandle->SetAttenuationStartDistance(soundDataPointer->AttenuationStartDistance);
-								soundContainerToHandle->SetLoopSetting(soundDataPointer->Loops);
-								soundContainerToHandle->SetPriority(soundDataPointer->Priority);
-								soundContainerToHandle->SetAffectedByGlobalPitch(soundDataPointer->AffectedByGlobalPitch);
-								soundContainerToHandle->SetPosition(Vector(soundDataPointer->Position[0], soundDataPointer->Position[1]));
-								soundContainerToHandle->SetVolume(soundDataPointer->Volume);
-								soundContainerToHandle->SetPitch(soundDataPointer->Pitch);
-								soundContainerToHandle->Play();
+								if (std::string filePathFromHash = ContentFile::GetPathFromHash(soundDataPointer->SoundFileHash); !filePathFromHash.empty()) {
+									soundContainerToHandle->GetTopLevelSoundSet().AddSound(filePathFromHash, false);
+									soundContainerToHandle->SetImmobile(soundDataPointer->Immobile);
+									soundContainerToHandle->SetAttenuationStartDistance(soundDataPointer->AttenuationStartDistance);
+									soundContainerToHandle->SetLoopSetting(soundDataPointer->Loops);
+									soundContainerToHandle->SetPriority(soundDataPointer->Priority);
+									soundContainerToHandle->SetAffectedByGlobalPitch(soundDataPointer->AffectedByGlobalPitch);
+									soundContainerToHandle->SetPosition(Vector(soundDataPointer->Position[0], soundDataPointer->Position[1]));
+									soundContainerToHandle->SetVolume(soundDataPointer->Volume);
+									soundContainerToHandle->SetPitch(soundDataPointer->Pitch);
+									soundContainerToHandle->Play();
+								} else {
+									g_ConsoleMan.PrintString("WARNING: Failed to play sound received from server. Hashed path was invalid for this client.");
+								}
 								break;
 							case AudioMan::SOUND_STOP:
 								soundContainerToHandle->Stop();

@@ -1777,7 +1777,7 @@ void GameActivity::Update()
 					m_FundsChanged[team] = true;
 				} else {
 					CreateDelivery(player);
-					m_Deliveries->rbegin()->multiOrderYOffset = lzOffsetY;
+					m_Deliveries[team].rbegin()->multiOrderYOffset = lzOffsetY;
 				}
 				// Revert the Y offset so that the cursor doesn't flinch.
 				m_LandingZone[player].m_Y -= lzOffsetY;

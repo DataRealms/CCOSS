@@ -770,6 +770,7 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
         newDelivery.pCraft = pDeliveryCraft;
         newDelivery.orderedByPlayer = player;
         newDelivery.landingZone = m_LandingZone[player];
+		newDelivery.multiOrderYOffset = 0;
         newDelivery.delay = m_DeliveryDelay * pDeliveryCraft->GetDeliveryDelayMultiplier();
         newDelivery.timer.Reset();
 
@@ -1769,14 +1770,15 @@ void GameActivity::Update()
 				} else {
 					// Place the new marker above the cursor so that they don't intersect with each other.
 					lzOffsetY += m_AIReturnCraft[player] ? -32.0F : 32.0F;
+					m_LandingZone[player].m_Y = g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10) + lzOffsetY;
 				}
-				m_LandingZone[player].m_Y = g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10) + lzOffsetY;
 
 				if (m_pBuyGUI[player]->GetTotalOrderCost() > GetTeamFunds(team)) {
 					g_GUISound.UserErrorSound()->Play(player);
 					m_FundsChanged[team] = true;
 				} else {
 					CreateDelivery(player);
+					m_Deliveries[team].rbegin()->multiOrderYOffset = lzOffsetY;
 				}
 				// Revert the Y offset so that the cursor doesn't flinch.
 				m_LandingZone[player].m_Y -= lzOffsetY;
@@ -2225,6 +2227,14 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
         {
             int halfWidth = 24;
             landZone = itr->landingZone - targetPos;
+			bool anyPlayerOnTeamIsInLandingZoneSelectViewState = false;
+			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+				if (GetTeamOfPlayer(player) == team && m_ViewState[player] == ViewState::LandingZoneSelect) {
+					anyPlayerOnTeamIsInLandingZoneSelectViewState = true;
+					break;
+				}
+			}
+			if (!anyPlayerOnTeamIsInLandingZoneSelectViewState) { landZone.m_Y -= itr->multiOrderYOffset; }
             // Cursor
             draw_sprite(pTargetBitmap, m_aLZCursor[cursor][frame], landZone.m_X - halfWidth, landZone.m_Y - 48);
             draw_sprite_h_flip(pTargetBitmap, m_aLZCursor[cursor][frame], landZone.m_X + halfWidth - m_aLZCursor[cursor][frame]->w, landZone.m_Y - 48);

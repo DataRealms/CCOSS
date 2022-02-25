@@ -42,7 +42,7 @@ namespace RTE {
 		/// Destroys and resets (through Clear()) the Turret object.
 		/// </summary>
 		/// <param name="notInherited">Whether to only destroy the members defined in this derived class, or to destroy all inherited members also.</param>
-		void Destroy(bool notInherited = false) override { if (!notInherited) { Attachable::Destroy(); } Clear(); }
+		void Destroy(bool notInherited = false) override;
 
 		/// <summary>
 		/// Resets the entire Turret, including its inherited members, to their default settings or values.
@@ -114,12 +114,19 @@ namespace RTE {
 
 	protected:
 
+		/// <summary>
+		/// Sets this Attachable's parent MOSRotating, and also sets its Team based on its parent and, if the Attachable is set to collide, adds/removes Atoms to its new/old parent.
+		/// Additionally, deactivates all MountedDevices.
+		/// </summary>
+		/// <param name="newParent">A pointer to the MOSRotating to set as the new parent. Ownership is NOT transferred!</param>
+		void SetParent(MOSRotating *newParent) override;
+
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
 	private:
 
 		//TODO I think things would be cleaner if this (and all hardcoded attachable pointers) used weak_ptrs. It would solve some weird ownership stuff, particularly with this. However, for that to be possible, m_Attachables has to be shared_ptrs though.
-		std::vector<HeldDevice *> m_MountedDevices; //!< Vector of unique_ptrs to the mounted HeldDevices of this Turret, if any. Owned here.
+		std::vector<HeldDevice *> m_MountedDevices; //!< Vector of pointers to the mounted HeldDevices of this Turret, if any. Owned here.
 		float m_MountedDeviceRotationOffset; //!< The relative offset angle (in radians) of the mounted HeldDevice from this Turret's rotation.
 
 		/// <summary>

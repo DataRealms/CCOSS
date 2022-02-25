@@ -32,6 +32,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void Turret::Destroy(bool notInherited) {
+		if (!notInherited) { Attachable::Destroy(); }
+		for (const HeldDevice *mountedDevice : m_MountedDevices) { m_HardcodedAttachableUniqueIDsAndRemovers.erase(mountedDevice->GetUniqueID()); }
+		Clear();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int Turret::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "MountedDevice") {
 			SetFirstMountedDevice(dynamic_cast<HeldDevice *>(g_PresetMan.ReadReflectedPreset(reader)));
@@ -118,6 +126,15 @@ namespace RTE {
 		//TODO replace this with a relative draw order property or something that lets you organize attachable drawing so it doesn't need special hardcoding crap. Use this for ahuman limbs and arm held mo if possible.
 		for (HeldDevice *mountedDevice : m_MountedDevices) {
 			if (mountedDevice->IsDrawnAfterParent()) { mountedDevice->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void Turret::SetParent(MOSRotating *newParent) {
+		Attachable::SetParent(newParent);
+		for (HeldDevice *mountedDevice : m_MountedDevices) {
+			mountedDevice->Deactivate(); //mountedDevice->Reloading = false; m_ReloadTmr.Reset();
 		}
 	}
 

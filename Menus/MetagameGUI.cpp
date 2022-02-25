@@ -1096,36 +1096,25 @@ bool MetagameGUI::StartNewGame()
                 g_MetaMan.m_TeamCount++;
             }
 
-            // Get the tech selection and apply it to the metaplayer
-            GUIListPanel::Item *pTechItem = m_apPlayerTechSelect[player]->GetSelectedItem();
-            if (pTechItem)
-            {
-                // If the "random" selection, choose one from the list of loaded techs
-                if (m_apPlayerTechSelect[player]->GetSelectedIndex() <= 0)//pTechItem->m_ExtraIndex < 0)
-                {
-                    int selection = RandomNum<int>(1, m_apPlayerTechSelect[player]->GetListPanel()->GetItemList()->size() - 1);
-					
-					// Don't let the game to chose the same faction twice
+			if (const GUIListPanel::Item *selectedTech = m_apPlayerTechSelect[player]->GetSelectedItem()) {
+				// If the "random" selection, choose one from the list of loaded techs.
+				if (m_apPlayerTechSelect[player]->GetSelectedIndex() <= 0) {
+					int randomSelection = 0;
+
+					// Don't let the game to chose the same faction twice.
 					bool ok = false;
-					while (!ok)
-					{
+					while (!ok) {
+						randomSelection = RandomNum<int>(1, m_apPlayerTechSelect[player]->GetListPanel()->GetItemList()->size() - 1);
 						ok = true;
-						selection = RandomNum<int>(1, m_apPlayerTechSelect[player]->GetListPanel()->GetItemList()->size() - 1);
-
-						for (int p = 0; p < player; p++)
-							if (selection == m_apPlayerTechSelect[p]->GetSelectedIndex())
-								ok = false;
+						for (int p = 0; p < player; p++) {
+							if (randomSelection == m_apPlayerTechSelect[p]->GetSelectedIndex()) { ok = false; }
+						}
 					}
+					selectedTech = m_apPlayerTechSelect[player]->GetItem(randomSelection);
+				}
+				if (selectedTech) { newPlayer.m_NativeTechModule = selectedTech->m_ExtraIndex; }
+			}
 
-                    m_apPlayerTechSelect[player]->SetSelectedIndex(selection);
-                    pTechItem = m_apPlayerTechSelect[player]->GetSelectedItem();
-                }
-
-                // Now set the selected tech's module index as what the metaplayer is going to use
-                if (pTechItem)
-                    newPlayer.m_NativeTechModule = pTechItem->m_ExtraIndex;
-            }
-            
             // Set the starting brains for this player
             // Start with the baseline setting
             newPlayer.m_BrainPool = m_pLengthSlider->GetValue();

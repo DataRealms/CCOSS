@@ -3159,17 +3159,20 @@ void AHuman::Update()
 		if (m_JetTimeTotal > 0) {
 			// Jetpack throttle depletes relative to jet time, but only if throttle range values have been defined
 			float jetTimeRatio = std::max(m_JetTimeLeft / m_JetTimeTotal, 0.0F);
-			m_pJetpack->SetThrottle(jetTimeRatio * 2.0F - 1.0F);
+			float carriedMass = GetInventoryMass() + GetEquippedMass();
+			m_pJetpack->SetThrottle(jetTimeRatio * (1.0F + carriedMass / std::max(GetMass() - carriedMass, 1.0F)) - 1.0F);
 		}
-		if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0 && m_Status != INACTIVE) {
+		float thrustCost = g_TimerMan.GetDeltaTimeMS() * m_pJetpack->GetThrottleFactor();
+		float burstCost = thrustCost * 10.0F;
+		if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft >= burstCost && m_Status != INACTIVE) {
 			m_pJetpack->TriggerBurst();
 			m_ForceDeepCheck = true;
 			m_pJetpack->EnableEmission(true);
-			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * 10.0F, 0.0F);
-		} else if ((m_Controller.IsState(BODY_JUMP) || (m_MoveState == JUMP && m_Controller.IsState(PIE_MENU_ACTIVE))) && m_JetTimeLeft > 0 && m_Status != INACTIVE) {
+			m_JetTimeLeft -= burstCost;
+		} else if ((m_Controller.IsState(BODY_JUMP) || (m_MoveState == JUMP && m_Controller.IsState(PIE_MENU_ACTIVE))) && m_JetTimeLeft >= thrustCost && m_Status != INACTIVE) {
 			m_pJetpack->EnableEmission(true);
 			m_pJetpack->AlarmOnEmit(m_Team);
-			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS(), 0.0F);
+			m_JetTimeLeft -= thrustCost;
 			m_MoveState = JUMP;
 			m_Paths[FGROUND][JUMP].Restart();
 			m_Paths[BGROUND][JUMP].Restart();

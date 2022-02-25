@@ -1465,6 +1465,19 @@ MovableObject * AHuman::GetEquippedBGItem() const
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
+
+float AHuman::GetEquippedMass() const {
+	float equippedMass = 0;
+	if (MovableObject *fgDevice = GetEquippedItem()) {
+		equippedMass += fgDevice->GetMass();
+	}
+	if (MovableObject *bgDevice = GetEquippedBGItem()) {
+		equippedMass += bgDevice->GetMass();
+	}
+	return equippedMass;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  FirearmIsReady
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Indicates whether the currently held device's current mag is empty on

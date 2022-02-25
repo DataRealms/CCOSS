@@ -275,6 +275,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `AEmitter` and `PEmitter` Lua (R) property `ThrottleFactor`, which gets the throttle strength as a multiplier value that factors in either the positive or negative throttle multiplier according to throttle.
 
+- New `AHuman` Lua (R) property `EquippedMass`, which returns the total mass of any `HeldDevice`s currently equipped by the actor.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

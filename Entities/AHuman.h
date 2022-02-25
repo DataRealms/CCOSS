@@ -607,6 +607,13 @@ ClassInfoGetters;
 	MovableObject * GetEquippedBGItem() const;
 
 
+	/// <summary>
+	/// Gets the total mass of this AHuman's currently equipped devices.
+	/// </summary>
+	/// <returns>The mass of this AHuman's equipped devices.</returns>
+	float GetEquippedMass() const;
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual Method:  FirearmIsReady
 //////////////////////////////////////////////////////////////////////////////////////////

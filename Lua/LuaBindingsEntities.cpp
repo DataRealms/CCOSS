@@ -418,6 +418,7 @@ namespace RTE {
 		.property("ThrowProgress", &AHuman::GetThrowProgress)
 		.property("EquippedItem", &AHuman::GetEquippedItem)
 		.property("EquippedBGItem", &AHuman::GetEquippedBGItem)
+		.property("EquippedMass", &AHuman::GetEquippedMass)
 		.property("FirearmIsReady", &AHuman::FirearmIsReady)
 		.property("ThrowableIsReady", &AHuman::ThrowableIsReady)
 		.property("FirearmIsEmpty", &AHuman::FirearmIsEmpty)

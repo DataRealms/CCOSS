@@ -340,13 +340,7 @@ namespace RTE {
 		}
 
 		// Scale the emission rate up or down according to the appropriate throttle multiplier.
-		float throttleFactor = 1.0F;
-		float absThrottle = std::abs(m_Throttle);
-		if (m_Throttle < 0) {
-			throttleFactor = throttleFactor * (1 - absThrottle) + (m_NegativeThrottleMultiplier * absThrottle);
-		} else if (m_Throttle > 0) {
-			throttleFactor = throttleFactor * (1 - absThrottle) + (m_PositiveThrottleMultiplier * absThrottle);
-		}
+		float throttleFactor = GetThrottleFactor();
 		// Apply the throttle factor to the emission rate per update
 		if (burst)
 			return m_AvgBurstImpulse * throttleFactor;
@@ -399,13 +393,7 @@ namespace RTE {
 			MovableObject *pRootParent = GetRootParent();
 
 			// Scale the emission rate up or down according to the appropriate throttle multiplier.
-			float throttleFactor = 1.0F;
-			float absThrottle = std::abs(m_Throttle);
-			if (m_Throttle < 0) {
-				throttleFactor = throttleFactor * (1 - absThrottle) + (m_NegativeThrottleMultiplier * absThrottle);
-			} else if (m_Throttle > 0) {
-				throttleFactor = throttleFactor * (1 - absThrottle) + (m_PositiveThrottleMultiplier * absThrottle);
-			}
+			float throttleFactor = GetThrottleFactor();
 			m_FlashScale = throttleFactor;
 			// Check burst triggering against whether the spacing is fulfilled
 			if (m_BurstTriggered && (m_BurstSpacing <= 0 || m_BurstTimer.IsPastSimMS(m_BurstSpacing)))

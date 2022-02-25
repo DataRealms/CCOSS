@@ -212,8 +212,7 @@ namespace RTE {
 				if (techItem->m_ExtraIndex == -2) {
 					gameActivity->SetTeamTech(team, "-All-");
 				} else if (techItem->m_ExtraIndex == -1) {
-					m_TeamTechComboBoxes.at(team)->SetSelectedIndex(RandomNum<int>(2, m_TeamTechComboBoxes.at(team)->GetListPanel()->GetItemList()->size() - 1));
-					gameActivity->SetTeamTech(team, g_PresetMan.GetDataModuleName(m_TeamTechComboBoxes.at(team)->GetSelectedItem()->m_ExtraIndex));
+					gameActivity->SetTeamTech(team, g_PresetMan.GetDataModuleName(m_TeamTechComboBoxes.at(team)->GetItem(RandomNum<int>(2, m_TeamTechComboBoxes.at(team)->GetListPanel()->GetItemList()->size() - 1))->m_ExtraIndex));
 				} else {
 					gameActivity->SetTeamTech(team, g_PresetMan.GetDataModuleName(techItem->m_ExtraIndex));
 				}

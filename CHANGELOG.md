@@ -281,8 +281,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 <details><summary><b>Changed</b></summary>
 
-- `AHuman`'s jetpack will now boost its throttle according to its throttle multipliers and the actor's inventory weight. This results in proportionally faster depletion of jetpack fuel.
-
 - `ACrab` actors will now default to showing their `Turret` sprite as their GUI icon. If no turret is defined, the `ACrab`'s own sprite will be used.  
 	In a similar fashion, `AHuman` will now default to its torso sprite as its GUI representation if no `Head` has somehow been defined.
 

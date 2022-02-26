@@ -933,7 +933,9 @@ void HDFirearm::Update()
                 delete pRound;
             }
             pRound = 0;
-        }
+		} else {
+			m_ActivationTimer.Reset();
+		}
 	} else if (m_Activated && !m_AlreadyClicked) {
         // Play empty pin click sound.
 		if (m_EmptySound) { m_EmptySound->Play(m_Pos); }

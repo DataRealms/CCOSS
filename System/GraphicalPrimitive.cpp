@@ -3,6 +3,11 @@
 #include "FrameMan.h"
 #include "SceneMan.h"
 
+//debug 
+#include "ConsoleMan.h"
+#include "string"
+//debug
+
 #include "GUI.h"
 #include "AllegroBitmap.h"
 
@@ -33,11 +38,41 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	static void lineWithThickness(BITMAP *drawScreen, const Vector &startPos, const Vector &endPos, unsigned char color, const int &thickness) {
+		int x_delta = startPos.GetFloorIntX() - endPos.GetFloorIntX(),
+			y_delta = startPos.GetFloorIntY() - endPos.GetFloorIntY();
+		Vector n(-y_delta, x_delta);
+
+		int startIdx = 0;
+		if (thickness % 2) { // If odd draw the center line first
+			line(drawScreen, startPos.GetFloorIntX(), startPos.GetFloorIntY(), endPos.GetFloorIntX(), endPos.GetFloorIntY(), color);
+			startIdx = 1;
+		}
+		int i = startIdx;
+		for (; i < thickness / 2; ++i) {
+			float n_len_factor = i / n.GetMagnitude();
+			Vector n_unit(n.GetFloorIntX() * n_len_factor, n.GetFloorIntY() * n_len_factor);
+			line(drawScreen, startPos.GetFloorIntX() + n_unit.GetX(), startPos.GetFloorIntY() + n_unit.GetY(), endPos.GetFloorIntX() + n_unit.GetX(), endPos.GetFloorIntY() + n_unit.GetY(), color);
+		}
+		i = -startIdx;
+		for (; i > -(thickness / 2); --i) {
+			float n_len_factor = abs(i) / n.GetMagnitude();
+			Vector n_unit(n.GetFloorIntX() * n_len_factor, n.GetFloorIntY() * n_len_factor);
+			line(drawScreen, startPos.GetFloorIntX() - n_unit.GetX(), startPos.GetFloorIntY() - n_unit.GetY(), endPos.GetFloorIntX() - n_unit.GetX(), endPos.GetFloorIntY() - n_unit.GetY(), color);
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void LinePrimitive::Draw(BITMAP *drawScreen, const Vector &targetPos) {
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
 			Vector drawStart = m_StartPos - targetPos;
 			Vector drawEnd = m_EndPos - targetPos;
-			line(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), drawEnd.GetFloorIntX(), drawEnd.GetFloorIntY(), m_Color);
+			if (m_Thickness > 1) {
+				lineWithThickness(drawScreen, drawStart, drawEnd, m_Color, m_Thickness);
+			} else {
+				line(drawScreen, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), drawEnd.GetFloorIntX(), drawEnd.GetFloorIntY(), m_Color);
+			}
 		} else {
 			Vector drawStartLeft;
 			Vector drawEndLeft;
@@ -47,8 +82,13 @@ namespace RTE {
 			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
 			TranslateCoordinates(targetPos, m_EndPos, drawEndLeft, drawEndRight);
 
-			line(drawScreen, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), drawEndLeft.GetFloorIntX(), drawEndLeft.GetFloorIntY(), m_Color);
-			line(drawScreen, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), drawEndRight.GetFloorIntX(), drawEndRight.GetFloorIntY(), m_Color);
+			if (m_Thickness > 1) {
+				lineWithThickness(drawScreen, drawStartLeft, drawEndLeft, m_Color, m_Thickness);
+				lineWithThickness(drawScreen, drawStartRight, drawEndRight, m_Color, m_Thickness);
+			} else {
+				line(drawScreen, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), drawEndLeft.GetFloorIntX(), drawEndLeft.GetFloorIntY(), m_Color);
+				line(drawScreen, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), drawEndRight.GetFloorIntX(), drawEndRight.GetFloorIntY(), m_Color);
+			}
 		}
 	}
 

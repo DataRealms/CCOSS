@@ -58,6 +58,8 @@ namespace RTE {
 
 	public:
 
+		int m_Thickness; //!< Thickness of the line primitive in pixels.
+
 		/// <summary>
 		/// Constructor method for LinePrimitive object.
 		/// </summary>
@@ -65,11 +67,12 @@ namespace RTE {
 		/// <param name="startPos">Start position of the primitive.</param>
 		/// <param name="end">End position of the primitive.</param>
 		/// <param name="color">Color to draw this primitive with.</param>
-		LinePrimitive(int player, const Vector &startPos, const Vector &endPos, unsigned char color) {
+		LinePrimitive(int player, const Vector &startPos, const Vector &endPos, unsigned char color, int thickness = 0) {
 			m_StartPos = startPos;
 			m_EndPos = endPos;
 			m_Color = color;
 			m_Player = player;
+			m_Thickness = thickness;
 		}
 
 		/// <summary>

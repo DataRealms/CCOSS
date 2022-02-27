@@ -3,11 +3,6 @@
 #include "FrameMan.h"
 #include "SceneMan.h"
 
-//debug 
-#include "ConsoleMan.h"
-#include "string"
-//debug
-
 #include "GUI.h"
 #include "AllegroBitmap.h"
 

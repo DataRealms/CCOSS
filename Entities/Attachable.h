@@ -237,6 +237,12 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newJointOffset">A Vector describing the offset of the joint relative to the this Attachable's origin/center of mass position.</param>
 		void SetJointOffset(const Vector &newJointOffset) { m_JointOffset = newJointOffset; }
+
+		/// <summary>
+		/// Gets the absolute position of the joint that the parent of this Attachable sets upon Update().
+		/// </summary>
+		/// <returns>A Vector describing the current absolute position of the joint.</returns>
+		const Vector & GetJointPos() const { return m_JointPos; }
 #pragma endregion
 
 #pragma region Force Transferral

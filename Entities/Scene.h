@@ -71,6 +71,8 @@ public:
     friend class AreaEditorGUI;
     friend class AreaPickerGUI;
 
+	friend struct EntityLuaBindings;
+
     //////////////////////////////////////////////////////////////////////////////////////////
     // Public member variable, method and friend function declarations
 
@@ -132,6 +134,13 @@ public:
     // Return value:    Whether the Box was successfully added or not.
 
 		bool AddBox(const Box &newBox);
+
+        /// <summary>
+        /// Removes the first Box in the Area that has the same Corner, Width and Height of the passed-in Box.
+        /// </summary>
+        /// <param name="boxToRemove">A Box whose values are used to determine what Box to remove.</param>
+        /// <returns>Whether or not a Box was removed.</returns>
+        bool RemoveBox(const Box &boxToRemove);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -913,26 +922,28 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 
     bool HasArea(std::string areaName);
 
+	/// <summary>
+	/// Gets a specified Area identified by name. Ownership is NOT transferred!
+	/// </summary>
+	/// <param name="areaName">The name of the Area to try to get.</param>
+	/// <param name="luaWarnNotError">Whether to warn or error in the Lua console. True is warn, false is error.</param>
+	/// <returns>A pointer to the Area asked for, or nullptr if no Area of that name was found.</returns>
+	Area * GetArea(const std::string_view &areaName, bool luaWarnNotError);
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetArea
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a specific Area identified by a name. Ownership is NOT transferred!
-// Arguments:       The name of the Area to try to get.
-// Return value:    A pointer to the Area asked for. 0 if no Area of that name was found.
+	/// <summary>
+	/// Gets a specified Area identified by name, showing a Lua error if it's not found. Ownership is NOT transferred!
+	/// </summary>
+	/// <param name="areaName">The name of the Area to try to get.</param>
+	/// <returns>A pointer to the Area asked for, or nullptr if no Area of that name was found.</returns>
+	Area * GetArea(const std::string &areaName) { return GetArea(areaName, false); }
 
-    Area * GetArea(std::string areaName);
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetNonRequiredArea
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a specific Area identified by a name. Ownership is NOT transferred!
-//					Using this function will not add the area to the list of required areas
-//					which Scenario GUI uses to show compatible areas.
-// Arguments:       The name of the Area to try to get.
-// Return value:    A pointer to the Area asked for. 0 if no Area of that name was found.
-
-	Area * GetOptionalArea(std::string areaName) { return GetArea(areaName); };
+	/// <summary>
+	/// Gets a specified Area identified by name, showing a Lua warning if it's not found. Ownership is NOT transferred!
+	/// Using this function will not add the area to the list of required areas which Scenario GUI uses to show compatible areas.
+	/// </summary>
+	/// <param name="areaName">The name of the Area to try to get.</param>
+	/// <returns>A pointer to the Area asked for, or nullptr if no Area of that name was found.</returns>
+	Area * GetOptionalArea(const std::string &areaName) { return GetArea(areaName, true); };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -32,6 +32,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void Turret::Destroy(bool notInherited) {
+		if (!notInherited) { Attachable::Destroy(); }
+		for (const HeldDevice *mountedDevice : m_MountedDevices) { m_HardcodedAttachableUniqueIDsAndRemovers.erase(mountedDevice->GetUniqueID()); }
+		Clear();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int Turret::ReadProperty(const std::string_view &propName, Reader &reader) {
 		if (propName == "MountedDevice") {
 			SetFirstMountedDevice(dynamic_cast<HeldDevice *>(g_PresetMan.ReadReflectedPreset(reader)));
@@ -77,6 +85,7 @@ namespace RTE {
 
 			m_MountedDevices.at(0)->SetInheritsRotAngle(false);
 			m_MountedDevices.at(0)->SetUnPickupable(true);
+			m_MountedDevices.at(0)->SetGibWithParentChance(1.0F);
 			//Force weapons mounted on turrets to never be removed due to forces. This doesn't affect them gibbing from hitting their impulse limits though.
 			m_MountedDevices.at(0)->SetJointStrength(0.0F);
 		}
@@ -96,6 +105,7 @@ namespace RTE {
 
 		newMountedDevice->SetInheritsRotAngle(false);
 		newMountedDevice->SetUnPickupable(true);
+		newMountedDevice->SetGibWithParentChance(1.0F);
 		//Force weapons mounted on turrets to never be removed due to forces. This doesn't affect them gibbing from hitting their impulse limits though.
 		newMountedDevice->SetJointStrength(0.0F);
 	}
@@ -116,6 +126,15 @@ namespace RTE {
 		//TODO replace this with a relative draw order property or something that lets you organize attachable drawing so it doesn't need special hardcoding crap. Use this for ahuman limbs and arm held mo if possible.
 		for (HeldDevice *mountedDevice : m_MountedDevices) {
 			if (mountedDevice->IsDrawnAfterParent()) { mountedDevice->Draw(pTargetBitmap, targetPos, mode, onlyPhysical); }
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void Turret::SetParent(MOSRotating *newParent) {
+		Attachable::SetParent(newParent);
+		for (HeldDevice *mountedDevice : m_MountedDevices) {
+			mountedDevice->Deactivate();
 		}
 	}
 

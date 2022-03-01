@@ -12,6 +12,7 @@ namespace RTE {
 		m_SchemePreset = InputPreset::NoPreset;
 		m_JoystickDeadzoneType = DeadZoneType::CIRCLE;
 		m_JoystickDeadzone = 0.01F;
+		m_DigitalAimSpeed = 1.0F;
 
 		for (InputMapping &inputMapping : m_InputMappings) {
 			inputMapping.Reset();
@@ -25,6 +26,7 @@ namespace RTE {
 		m_SchemePreset = reference.m_SchemePreset;
 		m_JoystickDeadzoneType = reference.m_JoystickDeadzoneType;
 		m_JoystickDeadzone = reference.m_JoystickDeadzone;
+		m_DigitalAimSpeed = reference.m_DigitalAimSpeed;
 
 		for (int inputMapping = 0; inputMapping < InputElements::INPUT_COUNT; ++inputMapping) {
 			m_InputMappings.at(inputMapping).Create(reference.m_InputMappings.at(inputMapping));
@@ -95,6 +97,8 @@ namespace RTE {
 			SetJoystickDeadzoneType(static_cast<DeadZoneType>(std::stoi(reader.ReadPropValue())));
 		} else if (propName == "JoystickDeadzone") {
 			reader >> m_JoystickDeadzone;
+		} else if (propName == "DigitalAimSpeed") {
+			reader >> m_DigitalAimSpeed;
 		} else {
 			return Serializable::ReadProperty(propName, reader);
 		}
@@ -140,6 +144,7 @@ namespace RTE {
 
 		writer.NewPropertyWithValue("JoystickDeadzoneType", m_JoystickDeadzoneType);
 		writer.NewPropertyWithValue("JoystickDeadzone", m_JoystickDeadzone);
+		writer.NewPropertyWithValue("DigitalAimSpeed", m_DigitalAimSpeed);
 
 		return 0;
 	}
@@ -158,11 +163,15 @@ namespace RTE {
 				break;
 			case Players::PlayerThree:
 				m_ActiveDevice = InputDevice::DEVICE_GAMEPAD_1;
+#ifndef __unix__
 				SetPreset(InputPreset::PresetGenericDualAnalog);
+#endif
 				break;
 			case Players::PlayerFour:
 				m_ActiveDevice = InputDevice::DEVICE_GAMEPAD_2;
+#ifndef __unix__
 				SetPreset(InputPreset::PresetGenericDualAnalog);
+#endif
 				break;
 			default:
 				RTEAbort("Invalid Player passed into InputScheme::ResetToDefault!");
@@ -170,6 +179,7 @@ namespace RTE {
 		}
 		m_JoystickDeadzoneType = DeadZoneType::CIRCLE;
 		m_JoystickDeadzone = 0.01F;
+		m_DigitalAimSpeed = 1.0F;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

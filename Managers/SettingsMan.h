@@ -108,6 +108,18 @@ namespace RTE {
 		void SetUnheldItemsHUDDisplayRange(float newRadius) { m_UnheldItemsHUDDisplayRange = std::floor(newRadius); }
 
 		/// <summary>
+		/// Gets whether or not devices on Scene should always show their pick-up HUD when the player is in strategic mode.
+		/// </summary>
+		/// <returns>Whether or not devices on Scene should always show their pick-up HUD when the player is in strategic mode.</returns>
+		bool AlwaysDisplayUnheldItemsInStrategicMode() const { return m_AlwaysDisplayUnheldItemsInStrategicMode; }
+
+		/// <summary>
+		/// Sets whether or not devices on Scene should always show their pick-up HUD when the player is in strategic mode.
+		/// </summary>
+		/// <param name="shouldShowUnheldItemsInStrategicMode">Whether or not devices on Scene should always show their pick-up HUD when the player is in strategic mode.</param>
+		void SetAlwaysDisplayUnheldItemsInStrategicMode(bool shouldShowUnheldItemsInStrategicMode) { m_AlwaysDisplayUnheldItemsInStrategicMode = shouldShowUnheldItemsInStrategicMode; }
+
+		/// <summary>
 		/// Whether red and white flashes appear when brain is damaged.
 		/// </summary>
 		/// <returns>Whether red and white flashes appear when brain is damaged.</returns>
@@ -240,6 +252,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="newValue">New password to use when connecting via NAT punch-through service.</param>
 		void SetNATServerPassword(const std::string &newValue) { m_NATServerPassword = newValue.empty() ? "DefaultServerPassword" : newValue; }
+
+		/// <summary>
+		/// Gets whether or not experimental multiplayer speedboosts should be used.
+		/// </summary>
+		/// <returns>Whether or not experimental multiplayer speedboosts should be used.</returns>
+		bool UseExperimentalMultiplayerSpeedBoosts() const { return m_UseExperimentalMultiplayerSpeedBoosts; }
+
+		/// <summary>
+		/// Sets whether or not experimental multiplayer speedboosts should be used.
+		/// </summary>
+		/// <param name="newValue">Whether or not experimental multiplayer speedboosts should be used.</param>
+		void SetUseExperimentalMultiplayerSpeedBoosts(bool newValue) { m_UseExperimentalMultiplayerSpeedBoosts = newValue; }
 #pragma endregion
 
 #pragma region Editor Settings
@@ -414,6 +438,7 @@ namespace RTE {
 		bool m_FlashOnBrainDamage; //!< Whether red flashes on brain damage are on or off.
 		bool m_BlipOnRevealUnseen; //!< Blip if unseen is revealed.
 		float m_UnheldItemsHUDDisplayRange; //!< Range in which devices on Scene will show the pick-up HUD, in pixels. 0 means HUDs are hidden, -1 means unlimited range.
+		bool m_AlwaysDisplayUnheldItemsInStrategicMode; //!< Whether or not devices on Scene should always show their pick-up HUD when when the player is in strategic mode.
 		bool m_EndlessMetaGameMode; //!< Endless MetaGame mode.
 		bool m_EnableCrabBombs; //!< Whether all actors (except Brains and Doors) should be annihilated if a number exceeding the crab bomb threshold is released at once.
 		int m_CrabBombThreshold; //!< The number of crabs needed to be released at once to trigger the crab bomb effect.
@@ -425,6 +450,7 @@ namespace RTE {
 		std::string m_NATServiceAddress; //!< NAT punch-through server address.
 		std::string m_NATServerName; //!< Server name to use when connecting via NAT punch-through service.
 		std::string m_NATServerPassword; //!< Server password to use when connecting via NAT punch-through service.
+		bool m_UseExperimentalMultiplayerSpeedBoosts; //!< Turns on/off code changes from topkek that may speed up multiplayer.
 
 		bool m_AllowSavingToBase; //!< Whether editors will allow to select Base.rte as a module to save in.
 		bool m_ShowMetaScenes; //!< Show MetaScenes in editors and activities.

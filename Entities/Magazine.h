@@ -155,7 +155,7 @@ ClassInfoGetters;
 // Arguments:       None.
 // Return value:    Whether this Magazine is out of rounds or not.
 
-	bool IsEmpty() const { return m_FullCapacity == 0 || m_RoundCount == 0; }
+	bool IsEmpty() const { return m_FullCapacity >= 0 && m_RoundCount == 0; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

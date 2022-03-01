@@ -321,16 +321,6 @@ ClassInfoGetters;
     void SetBGFoot(Attachable *newFoot) { if (m_pBGLeg && m_pBGLeg->IsAttached()) { m_pBGLeg->SetFoot(newFoot); } }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetHeadBitmap
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the sprite representing the head of this.
-// Arguments:       None.
-// Return value:    A pointer to the bitmap of with the head of this. Ownership is NOT
-//                  transferred!
-
-    BITMAP *GetHeadBitmap() const;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetJetTimeTotal
@@ -371,13 +361,25 @@ ClassInfoGetters;
 
 	void SetJetTimeLeft(float newValue) { m_JetTimeLeft = newValue < m_JetTimeTotal ? newValue : m_JetTimeTotal; }
 
+	/// <summary>
+	/// Gets the rate at which this AHuman's jetpack is replenished during downtime.
+	/// </summary>
+	/// <returns>The rate at which the jetpack is replenished.</returns>
+	float GetJetReplenishRate() const { return m_JetReplenishRate; }
+
+
+	/// <summary>
+	/// Sets the rate at which this AHuman's jetpack is replenished during downtime.
+	/// </summary>
+	/// <param name="newValue">The rate at which the jetpack is replenished.</param>
+	void SetJetReplenishRate(float newValue) { m_JetReplenishRate = newValue; }
+
 
 	/// <summary>
 	/// Gets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
 	/// </summary>
 	/// <returns>The ratio at which this jetpack follows the aim angle of the user.</returns>
 	float GetJetAngleRange() const { return m_JetAngleRange; }
-
 
 	/// <summary>
 	/// Sets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
@@ -579,6 +581,11 @@ ClassInfoGetters;
 	/// <returns>Whether there was anything to unequip.</returns>
 	bool UnequipBGArm();
 
+	/// <summary>
+	/// Unequips whatever is in either of the arms and puts them into the inventory.
+	/// </summary>
+	void UnequipArms() { UnequipFGArm(); UnequipBGArm(); }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetEquippedItem
@@ -598,6 +605,13 @@ ClassInfoGetters;
 // Return value:    The currently equipped item, if any.
 
 	MovableObject * GetEquippedBGItem() const;
+
+
+	/// <summary>
+	/// Gets the total mass of this AHuman's currently equipped devices.
+	/// </summary>
+	/// <returns>The mass of this AHuman's equipped devices.</returns>
+	float GetEquippedMass() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -725,16 +739,11 @@ ClassInfoGetters;
 	MovableObject * LookForMOs(float FOVSpread = 45, unsigned char ignoreMaterial = 0, bool ignoreAllTerrain = false);
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetGraphicalIcon
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a bitmap showing a good identifyable icon of this, for use in
-//                  GUI lists etc.
-// Arguments:       None.
-// Return value:    A good identifyable graphical representation of this in a BITMAP, if
-//                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
-
-    BITMAP * GetGraphicalIcon() const override { return GetHeadBitmap(); }
+	/// <summary>
+	/// Gets the GUI representation of this AHuman, only defaulting to its Head or body if no GraphicalIcon has been defined.
+	/// </summary>
+	/// <returns>The graphical representation of this AHuman as a BITMAP.</returns>
+	BITMAP * GetGraphicalIcon() const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -757,6 +766,33 @@ ClassInfoGetters;
 // Return value:    None.
 
 	bool UpdateMovePath() override;
+
+
+	/// <summary>
+	/// Detects slopes in terrain and updates the walk path rotation for the corresponding Layer accordingly.
+	/// </summary>
+	/// <param name="whichLayer">The Layer in question.</param>
+	void UpdateWalkAngle(AHuman::Layer whichLayer);
+
+	/// <summary>
+	/// Gets the walk path rotation for the specified Layer.
+	/// </summary>
+	/// <param name="whichLayer">The Layer in question.</param>
+	/// <returns>The walk angle in radians.</returns>
+	float GetWalkAngle(AHuman::Layer whichLayer) const { return m_WalkAngle[whichLayer].GetRadAngle(); }
+
+	/// <summary>
+	/// Sets the walk path rotation for the specified Layer.
+	/// </summary>
+	/// <param name="whichLayer">The Layer in question.</param>
+	/// <param name="angle">The angle to set.</param>
+	void SetWalkAngle(AHuman::Layer whichLayer, float angle) { m_WalkAngle[whichLayer] = Matrix(angle); }
+
+	/// <summary>
+	/// Gets whether this AHuman is currently attempting to climb something, using arms.
+	/// </summary>
+	/// <returns>Whether this AHuman is currently climbing or not.</returns>
+	bool IsClimbing() const { return m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND]; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -893,6 +929,18 @@ ClassInfoGetters;
 	void SetThrowPrepTime(long newPrepTime) { m_ThrowPrepTime = newPrepTime; }
 
 	/// <summary>
+	/// Gets the rate at which this AHuman is set to swing its arms while walking.
+	/// </summary>
+	/// <returns>The arm swing rate of this AHuman.</returns>
+	float GetArmSwingRate() const { return m_ArmSwingRate; }
+
+	/// <summary>
+	/// Sets the rate at which this AHuman is set to swing its arms while walking.
+	/// </summary>
+	/// <param name="newValue">The new arm swing rate for this AHuman.</param>
+	void SetArmSwingRate(float newValue) { m_ArmSwingRate = newValue; }
+
+	/// <summary>
 	/// Gets this AHuman's stride sound. Ownership is NOT transferred!
 	/// </summary>
 	/// <returns>The SoundContainer for this AHuman's stride sound.</returns>
@@ -959,6 +1007,7 @@ protected:
     float m_JetTimeTotal;
     // How much time left the jetpack can go, in ms
     float m_JetTimeLeft;
+	float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
 	// Ratio at which the jetpack angle follows aim angle
 	float m_JetAngleRange;
     // Blink timer
@@ -995,6 +1044,8 @@ protected:
 	float m_FGArmFlailScalar; //!< The rate at which this AHuman's FG Arm follows the the bodily rotation. Best to keep this at 0 so it doesn't complicate aiming.
 	float m_BGArmFlailScalar; //!< The rate at which this AHuman's BG Arm follows the the bodily rotation. Set to a negative value for a "counterweight" effect.
 	Timer m_EquipHUDTimer; //!< Timer for showing the name of any newly equipped Device.
+	std::array<Matrix, 2> m_WalkAngle; //!< An array of rot angle targets for different movement states.
+	float m_ArmSwingRate; //!< Controls the rate at which this AHuman's arms follow the movement of its legs.
 
     ////////////////
     // AI States

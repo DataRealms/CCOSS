@@ -71,6 +71,12 @@ namespace RTE {
 		int GetPriority() const { return m_Priority; }
 
 		/// <summary>
+		/// Gets the amount of times a dislodged pixel of this Material will attempt to relocate to an open position.
+		/// </summary>
+		/// <returns>The amount of attempts at relocating.</returns>
+		int GetPiling() const { return m_Piling; }
+
+		/// <summary>
 		/// The impulse force that a particle needs to knock loose a terrain pixel of this material. In kg * m/s.
 		/// </summary>
 		/// <returns>The impulse force that a particle needs to knock loose a terrain pixel of this material.</returns>
@@ -152,6 +158,7 @@ namespace RTE {
 
 		unsigned char m_Index; //!< Index of this in the material palette. 0 - 255.
 		int m_Priority; //!< The priority that a pixel of this material has to be displayed. The higher the number, the higher chances that a pixel of this material will be drawn on top of others.
+		int m_Piling; //! The amount of times a dislodged pixel of this Material will attempt to relocate upwards, when intersecting a terrain pixel of the same Material. TODO: Better property name?
 
 		float m_Integrity; //!< The impulse force that a particle needs to knock loose a terrain pixel of this material. In kg * m/s.
 		float m_Restitution; //!< A scalar value that defines the restitution (elasticity). 1.0 = no kinetic energy is lost in a collision, 0.0 = all energy is lost (plastic).

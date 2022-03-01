@@ -31,7 +31,7 @@ namespace RTE {
 		m_CompressedData = 0;
 		m_IsConnected = false;
 		m_IsRegistered = false;
-		m_ClientInputFps = 30;
+		m_ClientInputFps = 120;
 		m_SceneBackgroundBitmap = 0;
 		m_SceneForegroundBitmap = 0;
 		m_CurrentSceneLayerReceived = -1;
@@ -246,8 +246,12 @@ namespace RTE {
 			m_MouseButtonPressedState[i] = -1;
 			m_MouseButtonReleasedState[i] = -1;
 		}
-
-		msg.MouseWheelMoved = g_UInputMan.MouseWheelMoved();
+		if (m_MouseWheelMoved != 0) {
+			msg.MouseWheelMoved = m_MouseWheelMoved;
+			m_MouseWheelMoved = 0;
+		} else {
+			msg.MouseWheelMoved = 0;
+		}
 
 		msg.InputElementHeld = 0;
 		msg.InputElementPressed = 0;
@@ -279,7 +283,7 @@ namespace RTE {
 			return;
 		}
 
-		DrawFrame();
+		if (!g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) { DrawFrame(); }
 
 		m_PostEffects[m_CurrentFrame].clear();
 		m_CurrentFrame = frameData->FrameNumber;
@@ -609,16 +613,20 @@ namespace RTE {
 									soundContainerToHandle->Stop();
 									soundContainerToHandle->Reset();
 								}
-								soundContainerToHandle->GetTopLevelSoundSet().AddSound(ContentFile::GetPathFromHash(soundDataPointer->SoundFileHash), false);
-								soundContainerToHandle->SetImmobile(soundDataPointer->Immobile);
-								soundContainerToHandle->SetAttenuationStartDistance(soundDataPointer->AttenuationStartDistance);
-								soundContainerToHandle->SetLoopSetting(soundDataPointer->Loops);
-								soundContainerToHandle->SetPriority(soundDataPointer->Priority);
-								soundContainerToHandle->SetAffectedByGlobalPitch(soundDataPointer->AffectedByGlobalPitch);
-								soundContainerToHandle->SetPosition(Vector(soundDataPointer->Position[0], soundDataPointer->Position[1]));
-								soundContainerToHandle->SetVolume(soundDataPointer->Volume);
-								soundContainerToHandle->SetPitch(soundDataPointer->Pitch);
-								soundContainerToHandle->Play();
+								if (std::string filePathFromHash = ContentFile::GetPathFromHash(soundDataPointer->SoundFileHash); !filePathFromHash.empty()) {
+									soundContainerToHandle->GetTopLevelSoundSet().AddSound(filePathFromHash, false);
+									soundContainerToHandle->SetImmobile(soundDataPointer->Immobile);
+									soundContainerToHandle->SetAttenuationStartDistance(soundDataPointer->AttenuationStartDistance);
+									soundContainerToHandle->SetLoopSetting(soundDataPointer->Loops);
+									soundContainerToHandle->SetPriority(soundDataPointer->Priority);
+									soundContainerToHandle->SetAffectedByGlobalPitch(soundDataPointer->AffectedByGlobalPitch);
+									soundContainerToHandle->SetPosition(Vector(soundDataPointer->Position[0], soundDataPointer->Position[1]));
+									soundContainerToHandle->SetVolume(soundDataPointer->Volume);
+									soundContainerToHandle->SetPitch(soundDataPointer->Pitch);
+									soundContainerToHandle->Play();
+								} else {
+									g_ConsoleMan.PrintString("WARNING: Failed to play sound received from server. Hashed path was invalid for this client.");
+								}
 								break;
 							case AudioMan::SOUND_STOP:
 								soundContainerToHandle->Stop();
@@ -984,6 +992,10 @@ namespace RTE {
 		if (m_MouseButtonReleasedState[MOUSE_RIGHT] < 1) { m_MouseButtonReleasedState[MOUSE_RIGHT] = g_UInputMan.MouseButtonReleased(MOUSE_RIGHT, -1) ? 1 : 0; }
 		if (m_MouseButtonReleasedState[MOUSE_MIDDLE] < 1) { m_MouseButtonReleasedState[MOUSE_MIDDLE] = g_UInputMan.MouseButtonReleased(MOUSE_MIDDLE, -1) ? 1 : 0; }
 
+		if (g_UInputMan.MouseWheelMoved() != 0) {
+			m_MouseWheelMoved = g_UInputMan.MouseWheelMoved();
+		}
+
 		// Input is sent at whatever settings are set in inputs per second
 		float inputSend = m_ClientInputFps;
 
@@ -997,7 +1009,10 @@ namespace RTE {
 
 		if (static_cast<double>((currentTicks - m_LastInputSentTime)) / static_cast<double>(g_TimerMan.GetTicksPerSecond()) > 1.0 / inputSend) {
 			m_LastInputSentTime = g_TimerMan.GetRealTickCount();
-			if (IsConnectedAndRegistered()) { SendInputMsg(); }
+			if (IsConnectedAndRegistered()) {
+				if (g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) { DrawFrame(); }
+				SendInputMsg();
+			}
 		}
 	}
 

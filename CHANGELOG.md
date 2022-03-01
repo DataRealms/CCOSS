@@ -216,7 +216,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New `ACraft` INI and Lua (R/W) property `ScuttleOnDeath` which can be used to disable the automatic self-destruct sequence when the craft's health drops down to zero.
 
 - New `Settings.ini` property `UnheldItemsHUDDisplayRange = numPixels` that hides the HUD of stranded items at a set distance. Default is 500 (25 meters).
-	Value of -1 or anything below means all HUDs will be hidden and the only indication an item can be picked up will be on the Actor's HUD when standing on top of it.
+	Value of -1 or anything below means all HUDs will be hidden and the only indication an item can be picked up will be on the `Actor`'s HUD when standing on top of it.
 	Value of 0 means there is no range limit and all items on Scene will display the pick-up HUD.
 	Valid range values are 1-1000, anything above will be considered as no range limit.
 
@@ -227,9 +227,70 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Settings.ini` property `SimplifiedCollisionDetection = 0/1` to enable more performant but less accurate MO collision detection (previously `PreciseCollisions = 0`). Disabled by default.
 
+- New INI property `BuyableMode` to specify in which buy lists a `Buyable = 1` item should appear in.  
+	`BuyableMode = 0 // No restrictions` - item will appear in both lists as usual. Default value, does not need to be explicitly specified.
+	`BuyableMode = 1 // BuyMenu only` - item will not appear in any group in the object picker during the editing phase, but will be available to purchase from the buy menu.  
+	`BuyableMode = 2 // ObjectPicker only` - item will not appear in any tab in the buy menu when making an order, but will be available for placement from the object picker during editing phase.
+
+- New `MovableMan` Lua function `KillAllTeamActors`, which kills all `Actor`s on the given `Team`.
+
+- New `ACRocket` INI property `MaxGimbalAngle`, which enables automatic stabilization via tilting of the main engine.
+
+- Added Lua bindings for `scene.Areas` and `area.Boxes` that you can iterate through to get all the `Areas` in a `Scene` and all the `Boxes` in an `Area`.
+
+- Added `Area` Lua function `area:RemoveBox(boxToRemove)` which removes the given `Box` from the `Area`. Note that this removal is done by comparing the `Box`'s `Corner`, `Width` and `Height`, so you're actually removing the first `Box` that matches the passed-in boxToRemove.
+
+- Added Lua binding for `AudioMan:StopMusic()`, which stops all playing music. `AudioMan:StopAll()` used to do this, but now it actually stops all sounds and music.
+
+- New `Actor` Lua (R) property `SharpAimProgress`, which returns the current sharp-aiming progress as a scalar from 0 to 1.
+
+- New `HeldDevice` Lua (R/W) property `Supported`, which indicates whether or not the device is currently being supported by a background hand.
+
+- New `HeldDevice` Lua function `IsEmpty`, which indicates whether the device is devoid of ammo. Can be used to skip an extra step to check for a `Magazine`. Will always return `false` for non-`HDFirearm` devices.
+
+- New `SoundContainer` INI and Lua (R/W) property `PitchVariation`, which can be used to randomize the pitch of the sounds being played.
+
+- New `AHuman` and `ACrab` INI and Lua (R/W) property `JetReplenishRate`, which determines how fast jump time (i.e. jetpack fuel) is replenished during downtime.
+
+- Added `Entity` Lua function `entity:RemoveFromGroup(groupToRemoveFrom)` which removes the given group from the `Entity`. The reverse of `AddToGroup`.
+
+- New `AHuman` Lua functions `GetWalkAngle(layer)` and `SetWalkAngle(layer, angle)`, which can be used to read and override walk path rotation of both Legs/Layers respectively. Note that the walk path rotation is automatically updated on each step to match the curvature of the terrain, so this value resets every update.
+
+- New `AHuman` INI and Lua (R/W) property `ArmSwingRate`, which now controls the arms' walking animation, according to each arm's `IdleOffset`. `1` is the default value, `0` means that the arms stay still.
+
+- New `Attachable` Lua (R) property `JointPos`, which gets the position of the object's joint in scene coordinates.
+
+- New `AHuman` Lua (R) property `IsClimbing`, which indicates whether the actor is currently climbing using either of the arms.
+
+- New `AHuman` Lua functions `UnequipFGArm()` and `UnequipArms()` which unequip the currently held item(s) and put them into the actor's inventory.
+
+- You can now execute multiple copies of your delivery order by holding UP or DOWN while choosing the landing zone.
+
+- New `MOSprite` INI property `IconFile`, which can be used to define a separate sprite to be displayed in GUI elements, such as the Buy Menu.  
+	Defined similarly to `SpriteFile`, i.e. `IconFile = ContentFile` followed up by a `FilePath` to the sprite.
+	
+- New `MOSprite` Lua functions `GetIconWidth()` and `GetIconHeight()` which return the dimensions of its GUI representation.
+
+- New `PrimitiveMan` Lua functions `DrawIconPrimitive(player, pos, entity)` and `DrawIconPrimitive(pos, entity)` which can be used to draw the GUI representation of the passed in entity.
+
+- New `AEmitter` and `PEmitter` Lua (R) property `ThrottleFactor`, which gets the throttle strength as a multiplier value that factors in either the positive or negative throttle multiplier according to throttle.
+
+- New `AHuman` Lua (R) property `EquippedMass`, which returns the total mass of any `HeldDevice`s currently equipped by the actor.
+
+- New Settings.ini flag `UseExperimentalMultiplayerSpeedBoosts = 1/0`. When turned on, it will use some code that **may** speed up multiplayer.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- `ACrab` actors will now default to showing their `Turret` sprite as their GUI icon. If no turret is defined, the `ACrab`'s own sprite will be used.  
+	In a similar fashion, `AHuman` will now default to its torso sprite as its GUI representation if no `Head` has somehow been defined.
+
+- `ThrownDevice`s will now use `StanceOffset`, `SharpStanceOffset` and `SupportOffset` in the same way as any other `HeldDevice`. In addition, `EndThrowOffset` will be used to set the BG hand position while sharp aiming or throwing.
+
+- `AHuman` throwing angle will no longer be affected by the rotation of the body.
+
+- Exposed `MovableObject` property `RestThreshold` to Lua (R/W).
 
 - `ACRocket`s can now function without a full set of thrusters. This also means that "Null Emitter" thrusters are no longer required for rockets.
 
@@ -271,7 +332,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Recoil when firing weapons now affects sharp aim.
 
-- The third argument for `distance` to be filled out in `MovableMan:GetClosestActor()` is now a `Vector` rather than `float`.
+- The distance arguments for `MovableMan` functions `GetClosestActor` and `GetClosestTeamActor` are now of type `Vector` rather than `float`.
 
 - File paths in INIs are now case sensitive.
 
@@ -434,6 +495,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed a bug where choosing `-Random-` as a player's tech and pressing start game had a 1 in (number of techs + 1) chance to crash the game.
 
 - Console error spam will no longer cripple performance over time.
+
+- `AudioMan:StopAll()` now actually stops all sounds, instead of just stopping music.
 
 - Fixed incorrect mouse bounds during splitscreen when the mouse player was not Player 1.
 

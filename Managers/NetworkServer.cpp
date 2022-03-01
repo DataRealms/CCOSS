@@ -126,14 +126,14 @@ namespace RTE {
 		m_UseHighCompression = true;
 		m_UseFastCompression = false;
 		m_HighCompressionLevel = LZ4HC_CLEVEL_OPT_MIN;
-		m_FastAccelerationFactor = 1;
+		m_FastAccelerationFactor = 10;
 		m_UseInterlacing = false;
-		m_EncodingFps = 30;
+		m_EncodingFps = 60;
 		m_ShowInput = false;
 		m_ShowStats = false;
 		m_TransmitAsBoxes = true;
-		m_BoxWidth = 32;
-		m_BoxHeight = 44;
+		m_BoxWidth = 64;
+		m_BoxHeight = 88;
 		m_UseNATService = false;
 		m_NatServerConnected = false;
 		m_LastPackedReceived.Reset();
@@ -729,6 +729,8 @@ namespace RTE {
 		m_DataUncompressedTotal[player] += payloadSize;
 
 		m_SendSceneSetupData[player] = false;
+		m_SendSceneData[player] = false;
+		m_SendFrameData[player] = false;
 
 		// While we're on the same thread with freshly connected player, send current music being played
 		if (g_AudioMan.IsMusicPlaying()) {
@@ -1152,15 +1154,19 @@ namespace RTE {
 	int NetworkServer::SendFrame(short player) {
 		long long currentTicks = g_TimerMan.GetRealTickCount();
 		double fps = static_cast<double>(m_EncodingFps);
-		double secsPerFrame = 1.0 / fps;
-		double secsSinceLastFrame = static_cast<double>(currentTicks - m_LastFrameSentTime[player]) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
+		if (g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) {
+			RakSleep(1000 / fps);
+		} else {
+			double secsPerFrame = 1.0 / fps;
+			double secsSinceLastFrame = static_cast<double>(currentTicks - m_LastFrameSentTime[player]) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
 
-		// Fix for an overflow which may happen if server lags for a few seconds when loading activities
-		if (secsSinceLastFrame < 0) { secsSinceLastFrame = secsPerFrame; }
+			// Fix for an overflow which may happen if server lags for a few seconds when loading activities
+			if (secsSinceLastFrame < 0) { secsSinceLastFrame = secsPerFrame; }
 
-		m_MsecPerFrame[player] = static_cast<int>(secsSinceLastFrame * 1000.0);
+			m_MsecPerFrame[player] = static_cast<int>(secsSinceLastFrame * 1000.0);
 
-		m_LastFrameSentTime[player] = g_TimerMan.GetRealTickCount();
+			m_LastFrameSentTime[player] = g_TimerMan.GetRealTickCount();
+		}
 
 		// Wait till FrameMan releases bitmap
 		SetThreadExitReason(player, NetworkServer::LOCKED);
@@ -1446,8 +1452,10 @@ namespace RTE {
 		}
 		ProcessTerrainChanges(player);
 
-		double secsSinceSendStart = static_cast<double>(g_TimerMan.GetRealTickCount() - currentTicks) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
-		m_MsecPerSendCall[player] = static_cast<int>(secsSinceSendStart * 1000.0);
+		if (!g_SettingsMan.UseExperimentalMultiplayerSpeedBoosts()) {
+			double secsSinceSendStart = static_cast<double>(g_TimerMan.GetRealTickCount() - currentTicks) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
+			m_MsecPerSendCall[player] = static_cast<int>(secsSinceSendStart * 1000.0);
+		}
 
 		SetThreadExitReason(player, NetworkServer::NORMAL);
 		return 0;
@@ -1653,8 +1661,14 @@ namespace RTE {
 				for (short player = 0; player < c_MaxClients; player++) {
 					if (IsPlayerConnected(player)) {
 						votesNeeded++;
-						if (m_EndActivityVotes[player]) { endActivityVotes++; }
-						if (m_RestartActivityVotes[player]) { restartVotes++; }
+						if (m_EndActivityVotes[player]) {
+							endActivityVotes++;
+							m_EndActivityVotes[player] = false;
+						}
+						if (m_RestartActivityVotes[player]) {
+							restartVotes++;
+							m_RestartActivityVotes[player] = false;
+						}
 					}
 				}
 
@@ -1674,22 +1688,22 @@ namespace RTE {
 						g_ActivityMan.GetActivity()->ResetMessageTimer(i);
 					}
 
-					// establish timer so restarts can only occur once per 5 seconds
+					// establish timer so restarts can only occur once per 3 seconds
 					long long currentTicks = g_TimerMan.GetRealTickCount();
-					int minRestartInterval = 5;
+					int minRestartInterval = 3;
 
-					if (endActivityVotes >= votesNeeded) {
-						g_ActivityMan.EndActivity();
-						g_ActivityMan.SetRestartActivity();
-						g_ActivityMan.SetInActivity(false);
-					} else if (restartVotes >= votesNeeded && ((currentTicks - m_LatestRestartTime > (g_TimerMan.GetTicksPerSecond() * minRestartInterval) || m_LatestRestartTime == 0))) {
-						m_LatestRestartTime = currentTicks;
-						g_ActivityMan.RestartActivity();
-					}
-
-					for (short player = 0; player < c_MaxClients; player++) {
-						m_EndActivityVotes[player] = false;
-						m_RestartActivityVotes[player] = false;
+					if ((currentTicks - m_LatestRestartTime > (g_TimerMan.GetTicksPerSecond() * minRestartInterval)) || m_LatestRestartTime == 0) {
+						if (endActivityVotes >= votesNeeded) {
+							m_LatestRestartTime = currentTicks;
+							g_ActivityMan.EndActivity();
+							g_ActivityMan.SetRestartActivity();
+							g_ActivityMan.SetInActivity(false);
+							for (short player = 0; player < c_MaxClients; player++) { ClearInputMessages(player); }
+						} else if (restartVotes >= votesNeeded) {
+							m_LatestRestartTime = currentTicks;
+							g_ActivityMan.RestartActivity();
+							for (short player = 0; player < c_MaxClients; player++) { ClearInputMessages(player); }
+						}
 					}
 				}
 			}

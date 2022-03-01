@@ -364,6 +364,21 @@ namespace RTE {
 		/// <param name="hFlipped">Whether to flip the sprite horizontally.</param>
 		/// <param name="vFlipped">Whether to flip the sprite vertically.</param>
 		void DrawBitmapPrimitive(int player, const Vector &centerPos, Entity *entity, float rotAngle, int frame, bool hFlipped, bool vFlipped);
+
+		/// <summary>
+		/// Schedule to draw the GUI icon of an object.
+		/// </summary>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
+		/// <param name="entity">An entity to draw sprite from.</param>
+		void DrawIconPrimitive(const Vector &centerPos, Entity *entity) { DrawIconPrimitive(-1, centerPos, entity); }
+
+		/// <summary>
+		/// Schedule to draw the GUI icon of an object, visible only to a specified player.
+		/// </summary>
+		/// <param name="player">Player screen to draw primitive on.</param>
+		/// <param name="centerPos">Position of primitive's center in scene coordinates.</param>
+		/// <param name="entity">An entity to draw sprite from.</param>
+		void DrawIconPrimitive(int player, const Vector &centerPos, Entity *entity);
 #pragma endregion
 
 	protected:

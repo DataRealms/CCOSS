@@ -118,6 +118,7 @@ namespace RTE {
 			reader >> m_JointOffset;
 		} else if (propName == "BreakWound") {
 			m_BreakWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader));
+			if (!m_ParentBreakWound) { m_ParentBreakWound = m_BreakWound; }
 		} else if (propName == "ParentBreakWound") {
 			m_ParentBreakWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader));
 		} else if (propName == "InheritsHFlipped") {
@@ -206,11 +207,12 @@ namespace RTE {
 		}
 		totalImpulseForce *= jointStiffnessValueToUse;
 
-		if (gibImpulseLimitValueToUse > 0 && totalImpulseForce.GetMagnitude() > gibImpulseLimitValueToUse) {
+		float totalImpulseForceMagnitude = totalImpulseForce.GetMagnitude();
+		if (gibImpulseLimitValueToUse > 0 && totalImpulseForceMagnitude > gibImpulseLimitValueToUse) {
 			jointImpulses += totalImpulseForce.SetMagnitude(gibImpulseLimitValueToUse);
 			GibThis();
 			return false;
-		} else if (jointStrengthValueToUse > 0 && totalImpulseForce.GetMagnitude() > jointStrengthValueToUse) {
+		} else if (jointStrengthValueToUse > 0 && totalImpulseForceMagnitude > jointStrengthValueToUse) {
 			jointImpulses += totalImpulseForce.SetMagnitude(jointStrengthValueToUse);
 			m_Parent->RemoveAttachable(this, true, true);
 			return false;
@@ -285,9 +287,8 @@ namespace RTE {
 			if (hitor->GetApplyWoundDamageOnCollision()) { damageToAdd += m_pEntryWound->GetEmitDamage() * hitor->WoundDamageMultiplier(); }
 			if (hitor->GetApplyWoundBurstDamageOnCollision()) { damageToAdd += m_pEntryWound->GetBurstDamage() * hitor->WoundDamageMultiplier(); }
 
-			if (damageToAdd != 0) {
-				AddDamage(damageToAdd);
-
+			if (damageToAdd != 0) { AddDamage(damageToAdd); }
+			if (penetrated || damageToAdd != 0) {
 				if (Actor *parentAsActor = dynamic_cast<Actor *>(GetRootParent()); parentAsActor && parentAsActor->GetPerceptiveness() > 0) {
 					Vector extruded(hd.HitVel[HITOR]);
 					extruded.SetMagnitude(parentAsActor->GetHeight());
@@ -325,7 +326,7 @@ namespace RTE {
 		if (m_Parent) {
 			UpdatePositionAndJointPositionBasedOnOffsets();
 			if (m_ParentOffset != m_PrevParentOffset || m_JointOffset != m_PrevJointOffset) { m_Parent->HandlePotentialRadiusAffectingAttachable(this); }
-			m_Vel = m_Parent->GetVel();
+			SetVel(m_Parent->GetVel());
 			m_Team = m_Parent->GetTeam();
 
 			MOSRotating *rootParentAsMOSR = dynamic_cast<MOSRotating *>(GetRootParent());

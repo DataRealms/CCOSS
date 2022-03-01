@@ -311,7 +311,7 @@ bool SceneEditorGUI::TestBrainResidence(bool noBrainIsOK)
     {
         // Got to update the pathfinding graphs so the latest terrain is used for the below tests
         g_SceneMan.GetScene()->UpdatePathFinding();
-        m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(pBrain->GetPos(), Vector(pBrain->GetPos().m_X, 0), m_BrainSkyPath);
+		UpdateBrainSkyPathAndCost(pBrain->GetPos());
     }
     else
     {
@@ -709,7 +709,7 @@ void SceneEditorGUI::Update()
         m_CursorInAir = g_SceneMan.GetTerrMatter(snappedPos.GetFloorIntX(), snappedPos.GetFloorIntY()) == g_MaterialAir;
 
         // Check brain position validity with pathfinding and show a path to the sky
-        m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(m_CursorPos, Vector(m_CursorPos.m_X, 0), m_BrainSkyPath);
+		UpdateBrainSkyPathAndCost(m_CursorPos);
 /*
         // Process the new path we now have, if any
         if (!m_BrainSkyPath.empty())
@@ -784,8 +784,7 @@ void SceneEditorGUI::Update()
             g_FrameMan.SetScreenText("Release to ADD the new object - Tap other button to cancel", g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
 
         // Check brain position validity with pathfinding and show a path to the sky
-        if (m_PreviousMode == INSTALLINGBRAIN)
-            m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(m_CursorPos, Vector(m_CursorPos.m_X, 0), m_BrainSkyPath);
+		if (m_PreviousMode == INSTALLINGBRAIN) { UpdateBrainSkyPathAndCost(m_CursorPos); }
 
         m_DrawCurrentObject = true;
 
@@ -1101,7 +1100,7 @@ void SceneEditorGUI::Update()
 								// If we have a friendly actor or brain nearby then give him an item instead of placing it
 								bool toPlace = true;
 
-								float distanceToActor = 0;
+								Vector distanceToActor;
 								Actor *pNearestActor = g_MovableMan.GetClosestTeamActor(m_pController->GetTeam(), m_pController->GetPlayer(), pPlacedClone->GetPos(), 20, distanceToActor);
 
 								// If we could not find an ordinary actor, then look for brain actor
@@ -1653,31 +1652,36 @@ void SceneEditorGUI::UpdatePieMenu()
     m_pPieMenu->RealignSlices();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateBrainPath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the brain path to the current resident brain, if any. If
-//                  there's none, the path is cleared.
+void SceneEditorGUI::UpdateBrainSkyPathAndCost(Vector brainPos) {
+	int offsetX = 0;
+	int spacing = 20;
+	int orbitPosX;
+	// If the ceiling directly above is blocked, search the surroundings for gaps.
+	for (int i = 0; i < g_SceneMan.GetSceneWidth() / spacing; i++) {
+		orbitPosX = brainPos.GetFloorIntX() + offsetX;
+		if (g_SceneMan.GetTerrMatter(orbitPosX, 0) == g_MaterialAir) {
+			break;
+		} else {
+			offsetX = i * (i % 2 == 0 ? spacing : -spacing);
+		}
+		if (!g_SceneMan.IsWithinBounds(orbitPosX, 0)) { offsetX *= -1; }
+	}
+	m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(brainPos, Vector(orbitPosX, 0), m_BrainSkyPath, 5.0F);
+}
 
-bool SceneEditorGUI::UpdateBrainPath()
-{
-    // First see if we have a brain in hand
-    if (m_pCurrentObject && m_pCurrentObject->IsInGroup("Brains"))
-    {
-        m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(m_CursorPos, Vector(m_CursorPos.m_X, 0), m_BrainSkyPath);
-        return true;
-    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // If not, then do we have a resident?
-    SceneObject *pBrain = g_SceneMan.GetScene()->GetResidentBrain(m_pController->GetPlayer());
-    if (pBrain)
-        m_BrainSkyPathCost = g_SceneMan.GetScene()->CalculatePath(pBrain->GetPos(), Vector(pBrain->GetPos().m_X, 0), m_BrainSkyPath);
-    else
-    {
-        m_BrainSkyPath.clear();
-        m_BrainSkyPathCost = 0;
-        return false;
-    }
-    return true;
+bool SceneEditorGUI::UpdateBrainPath() {
+	if (m_pCurrentObject && m_pCurrentObject->IsInGroup("Brains")) {
+		UpdateBrainSkyPathAndCost(m_CursorPos);
+	} else if (SceneObject *residentBrain = g_SceneMan.GetScene()->GetResidentBrain(m_pController->GetPlayer())) {
+		UpdateBrainSkyPathAndCost(residentBrain->GetPos());
+	} else {
+		m_BrainSkyPath.clear();
+		m_BrainSkyPathCost = 0;
+		return false;
+	}
+	return true;
 }

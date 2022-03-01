@@ -237,7 +237,14 @@ namespace RTE {
 		if (m_AudioEnabled) {
 			if (m_IsInMultiplayerMode) { RegisterMusicEvent(-1, MUSIC_PLAY, filePath, loops); }
 
-			FMOD_RESULT result = m_MusicChannelGroup->stop();
+			bool musicIsPlaying;
+			FMOD_RESULT result = m_MusicChannelGroup->isPlaying(&musicIsPlaying);
+			if (result == FMOD_OK && musicIsPlaying) {
+				bool doNotPlayNextStream = true;
+				FMOD_RESULT result = m_MusicChannelGroup->setUserData(&doNotPlayNextStream);
+				result = (result == FMOD_OK) ? m_MusicChannelGroup->stop() : result;
+				result = (result == FMOD_OK) ? m_MusicChannelGroup->setUserData(nullptr) : result;
+			}
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not stop existing music to play new music: " + std::string(FMOD_ErrorString(result)));
 				return;
@@ -808,7 +815,9 @@ namespace RTE {
 
 	FMOD_RESULT F_CALLBACK AudioMan::MusicChannelEndedCallback(FMOD_CHANNELCONTROL *channelControl, FMOD_CHANNELCONTROL_TYPE channelControlType, FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void *unusedCommandData1, void *unusedCommandData2) {
 		if (channelControlType == FMOD_CHANNELCONTROL_CHANNEL && callbackType == FMOD_CHANNELCONTROL_CALLBACK_END) {
-			g_AudioMan.PlayNextStream();
+			void *userData;
+			FMOD_RESULT result = g_AudioMan.m_MusicChannelGroup->getUserData(&userData);
+			if (userData == nullptr) { g_AudioMan.PlayNextStream(); }
 		}
 		return FMOD_OK;
 	}

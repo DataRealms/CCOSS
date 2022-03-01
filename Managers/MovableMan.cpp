@@ -530,9 +530,9 @@ Actor * MovableMan::GetPrevTeamActor(int team, Actor *pBeforeThis)
 // Description:     Get a pointer to an Actor in the internal Actor list that is of a
 //                  specifc team and closest to a specific scene point.
 
-Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, float &getDistance, const Actor *pExcludeThis)
+Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scenePoint, int maxRadius, Vector &getDistance, const Actor *pExcludeThis)
 {
-    if (team < Activity::NoTeam || team >= Activity::MaxTeamCount || m_Actors.empty() ||  m_ActorRoster[team].empty())
+    if (team < Activity::NoTeam || team >= Activity::MaxTeamCount || m_Actors.empty() || m_ActorRoster[team].empty())
         return 0;
 
     Activity *pActivity = g_ActivityMan.GetActivity();
@@ -566,9 +566,9 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
     {
         for (list<Actor *>::iterator aIt = m_ActorRoster[team].begin(); aIt != m_ActorRoster[team].end(); ++aIt)
         {
-            if ((*aIt) == pExcludeThis || (*aIt)->GetController()->IsPlayerControlled(player) || (pActivity && pActivity->IsOtherPlayerBrain(*aIt, player)))
-                continue;
-
+			if ((*aIt) == pExcludeThis || (player != NoPlayer && ((*aIt)->GetController()->IsPlayerControlled(player) || (pActivity && pActivity->IsOtherPlayerBrain(*aIt, player))))) {
+				continue;
+			}
             distanceVec = g_SceneMan.ShortestDistance((*aIt)->GetPos(), scenePoint);
             distance = distanceVec.GetMagnitude();
 
@@ -577,11 +577,11 @@ Actor * MovableMan::GetClosestTeamActor(int team, int player, const Vector &scen
             {
                 shortestDistance = distance;
                 pClosestActor = *aIt;
+				getDistance.SetXY(distanceVec.GetX(), distanceVec.GetY());
             }
         }
     }
 
-    getDistance = shortestDistance;
     return pClosestActor;
 }
 
@@ -1354,50 +1354,51 @@ bool MovableMan::RemoveMO(MovableObject *pMOToRem)
     return false;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          KillAllEnemyActors
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Kills and destroys all enemies of a specific team.
-
-int MovableMan::KillAllEnemyActors(int exceptTeam)
-{
+int MovableMan::KillAllTeamActors(int teamToKill) const {
     int killCount = 0;
 
-    // Kill all regular Actors
-    for (deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
-    {
-        if ((*aIt)->GetTeam() != exceptTeam)
-        {
-			// Blow up the heads of humanoids, for effect.
-			AHuman *human = dynamic_cast<AHuman *>(*aIt);
-			if (human && human->GetHead()) {
-				human->GetHead()->GibThis();
-			} else {
-				(*aIt)->GibThis();
-			}
-            killCount++;
-        }
-    }
-
-    // Kill all Actors added this frame
-    for (deque<Actor *>::iterator aIt = m_AddedActors.begin(); aIt != m_AddedActors.end(); ++aIt)
-    {
-        if ((*aIt)->GetTeam() != exceptTeam)
-        {
-			// Blow up the heads of humanoids, for effect.
-			AHuman *human = dynamic_cast<AHuman *>(*aIt);
-			if (human && human->GetHead()) {
-				human->GetHead()->GibThis();
-			} else {
-				(*aIt)->GibThis();
-			}
-            killCount++;
+    for (std::deque<Actor *> actorList : { m_Actors, m_AddedActors }) {
+        for (Actor *actor : actorList) {
+            if (actor->GetTeam() == teamToKill) {
+                const AHuman *actorAsHuman = dynamic_cast<AHuman *>(actor);
+                if (actorAsHuman && actorAsHuman->GetHead()) {
+                    actorAsHuman->GetHead()->GibThis();
+                } else {
+                    actor->GibThis();
+                }
+                killCount++;
+            }
         }
     }
 
     return killCount;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int MovableMan::KillAllEnemyActors(int teamNotToKill) const {
+    int killCount = 0;
+
+    for (std::deque<Actor *> actorList : { m_Actors, m_AddedActors }) {
+        for (Actor *actor : actorList) {
+            if (actor->GetTeam() != teamNotToKill) {
+                const AHuman *actorAsHuman = dynamic_cast<AHuman *>(actor);
+                if (actorAsHuman && actorAsHuman->GetHead()) {
+                    actorAsHuman->GetHead()->GibThis();
+                } else {
+                    actor->GibThis();
+                }
+                killCount++;
+            }
+        }
+    }
+
+    return killCount;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1549,7 +1550,7 @@ void MovableMan::OverrideMaterialDoors(bool enable, int team)
         {
             // Update first so the door attachable piece is in the right position and doesn't take out a werid chunk of the terrain
             pDoor->Update();
-            pDoor->MaterialDrawOverride(enable);
+            pDoor->TempEraseOrRedrawDoorMaterial(enable);
         }
     }
     // Also check all doors added this frame
@@ -1560,7 +1561,7 @@ void MovableMan::OverrideMaterialDoors(bool enable, int team)
         {
             // Update first so the door attachable piece is in the right position and doesn't take out a werid chunk of the terrain
             pDoor->Update();
-            pDoor->MaterialDrawOverride(enable);
+            pDoor->TempEraseOrRedrawDoorMaterial(enable);
         }
     }
 }
@@ -1944,39 +1945,30 @@ void MovableMan::Update()
 
     // SETTLE PARTICLES //////////////////////////////////////////////////
     // Only settle after all updates and deletions are done
-    if (m_SettlingEnabled)
-    {
-        parIt = partition(m_Particles.begin(), m_Particles.end(), std::not_fn(std::mem_fn(&MovableObject::ToSettle)));
-        midIt = parIt;
+	if (m_SettlingEnabled) {
+		parIt = partition(m_Particles.begin(), m_Particles.end(), std::not_fn(std::mem_fn(&MovableObject::ToSettle)));
+		midIt = parIt;
 
-        while (parIt != m_Particles.end())
-        {
-            Vector parPos((*parIt)->GetPos().GetFloored());
-            Material const * terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.m_X, parPos.m_Y));
-            if ((*parIt)->GetDrawPriority() >= terrMat->GetPriority())
-            {
-                // Gold particle special case to avoid compacting of gold
-                if ((*parIt)->GetMaterial()->GetIndex() == c_GoldMaterialID)
-                {
-                    for (int s = 0; terrMat->GetIndex() == c_GoldMaterialID; ++s)
-                    {
-                        if (s % 2 == 0)
-                            parPos.m_Y -= 1.0;
-                        else
-                            parPos.m_X += (RandomNum() >= 0.5F ? 1.0F : -1.0F);
-                        terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.m_X, parPos.m_Y));
-                    }
-                    (*parIt)->SetPos(parPos);
-                }
-
-//                (*parIt)->Draw(g_SceneMan.GetTerrain()->GetFGColorBitmap(), Vector(), g_DrawColor, true);
-//                (*parIt)->Draw(g_SceneMan.GetTerrain()->GetMaterialBitmap(), Vector(), g_DrawMaterial, true);
-                g_SceneMan.GetTerrain()->ApplyMovableObject(*parIt);
-            }
-            delete *(parIt++);
-        }
-        m_Particles.erase(midIt, m_Particles.end());
-    }
+		while (parIt != m_Particles.end()) {
+			Vector parPos((*parIt)->GetPos());
+			Material const * terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.GetFloorIntX(), parPos.GetFloorIntY()));
+			int piling = (*parIt)->GetMaterial()->GetPiling();
+			if (piling > 0) {
+				for (int s = 0; s < piling && (terrMat->GetIndex() == (*parIt)->GetMaterial()->GetIndex() || terrMat->GetIndex() == (*parIt)->GetMaterial()->GetSettleMaterial()); ++s) {
+					if ((piling - s) % 2 == 0) {
+						parPos.m_Y -= 1.0F;
+					} else {
+						parPos.m_X += (RandomNum() >= 0.5F ? 1.0F : -1.0F);
+					}
+					terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.GetFloorIntX(), parPos.GetFloorIntY()));
+				}
+				(*parIt)->SetPos(parPos.GetFloored());
+			}
+			if ((*parIt)->GetDrawPriority() >= terrMat->GetPriority()) { g_SceneMan.GetTerrain()->ApplyMovableObject(*parIt); }
+			delete *(parIt++);
+		}
+		m_Particles.erase(midIt, m_Particles.end());
+	}
 
     release_bitmap(g_SceneMan.GetTerrain()->GetMaterialBitmap());
 

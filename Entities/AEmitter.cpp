@@ -69,11 +69,11 @@ void AEmitter::Clear()
 // Description:     Creates a AEmitter to be identical to another, by deep copy.
 
 int AEmitter::Create(const AEmitter &reference) {
-    if (reference.m_pFlash) {
-        m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFlash->GetUniqueID());
-        SetFlash(dynamic_cast<Attachable *>(reference.m_pFlash->Clone()));
-    }
+    if (reference.m_pFlash) { m_ReferenceHardcodedAttachableUniqueIDs.insert(reference.m_pFlash->GetUniqueID()); }
+
     Attachable::Create(reference);
+
+    if (reference.m_pFlash) { SetFlash(dynamic_cast<Attachable *>(reference.m_pFlash->Clone())); }
 
     for (const Emission *referenceEmission : reference.m_EmissionList) {
         m_EmissionList.push_back(dynamic_cast<Emission *>(referenceEmission->Clone()));
@@ -345,13 +345,7 @@ float AEmitter::EstimateImpulse(bool burst)
     }
 
 	// Scale the emission rate up or down according to the appropriate throttle multiplier.
-	float throttleFactor = 1.0F;
-	float absThrottle = std::abs(m_Throttle);
-	if (m_Throttle < 0) {
-		throttleFactor = throttleFactor * (1 - absThrottle) + (m_NegativeThrottleMultiplier * absThrottle);
-	} else if (m_Throttle > 0) {
-		throttleFactor = throttleFactor * (1 - absThrottle) + (m_PositiveThrottleMultiplier * absThrottle);
-	}
+	float throttleFactor = GetThrottleFactor();
     // Apply the throttle factor to the emission rate per update
 	if (burst) { return m_AvgBurstImpulse * throttleFactor; }
     
@@ -433,14 +427,7 @@ void AEmitter::Update()
 // TODO: Potentially get this once outside instead, like in attach/detach")
         MovableObject *pRootParent = GetRootParent();
 
-		// Scale the emission rate up or down according to the appropriate throttle multiplier.
-		float throttleFactor = 1.0F;
-		float absThrottle = std::abs(m_Throttle);
-		if (m_Throttle < 0) {
-			throttleFactor = throttleFactor * (1 - absThrottle) + (m_NegativeThrottleMultiplier * absThrottle);
-		} else if (m_Throttle > 0) {
-			throttleFactor = throttleFactor * (1 - absThrottle) + (m_PositiveThrottleMultiplier * absThrottle);
-		}
+		float throttleFactor = GetThrottleFactor();
 		m_FlashScale = throttleFactor;
         // Check burst triggering against whether the spacing is fulfilled
         if (m_BurstTriggered && (m_BurstSpacing <= 0 || m_BurstTimer.IsPastSimMS(m_BurstSpacing)))
@@ -532,8 +519,7 @@ void AEmitter::Update()
 
                     // Add to accumulative recoil impulse generated, F = m * a
                     // If enabled, that is
-                    if ((*eItr)->PushesEmitter())
-                        pushImpulses -= emitVel * pParticle->GetMass();
+                    if ((*eItr)->PushesEmitter() && (GetParent() || GetMass() > 0)) { pushImpulses -= emitVel * pParticle->GetMass(); }
 
                     // Set the emitted particle to not hit this emitter's parent, if applicable
                     if (m_EmissionsIgnoreThis)

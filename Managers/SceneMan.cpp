@@ -1213,8 +1213,8 @@ void SceneMan::RegisterTerrainChange(int x, int y, int w, int h, unsigned char c
 //                  Use PenetrationResult() to retrieve the resulting effects on the
 //                  incoming particle if it manages to knock the scene pixel out.
 
-bool SceneMan::TryPenetrate(const int posX,
-                            const int posY,
+bool SceneMan::TryPenetrate(int posX,
+                            int posY,
                             const Vector &impulse,
                             const Vector &velocity,
                             float &retardation,
@@ -1229,6 +1229,7 @@ bool SceneMan::TryPenetrate(const int posX,
     if (!m_pCurrentScene->GetTerrain()->IsWithinBounds(posX, posY))
         return false;
 
+    WrapPosition(posX, posY);
     unsigned char materialID = _getpixel(m_pCurrentScene->GetTerrain()->GetMaterialBitmap(), posX, posY);
     if (materialID == g_MaterialAir)
     {

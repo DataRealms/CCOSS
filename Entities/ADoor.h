@@ -101,49 +101,49 @@ namespace RTE {
 		/// Gets this ADoor's door move start sound. Ownership is NOT transferred!
 		/// </summary>
 		/// <returns>The SoundContainer for this ADoor's door move start sound.</returns>
-		SoundContainer * GetDoorMoveStartSound() const { return m_DoorMoveStartSound; }
+		SoundContainer * GetDoorMoveStartSound() const { return m_DoorMoveStartSound.get(); }
 
 		/// <summary>
 		/// Sets this ADoor's door move start sound. Ownership IS transferred!
 		/// </summary>
 		/// <param name="newSound">The new SoundContainer for this ADoor's door move start sound.</param>
-		void SetDoorMoveStartSound(SoundContainer *newSound) { m_DoorMoveStartSound = newSound; }
+		void SetDoorMoveStartSound(SoundContainer *newSound) { m_DoorMoveStartSound.reset(newSound); }
 
 		/// <summary>
 		/// Gets this ADoor's door move sound. Ownership is NOT transferred!
 		/// </summary>
 		/// <returns>The SoundContainer for this ADoor's door move sound.</returns>
-		SoundContainer * GetDoorMoveSound() const { return m_DoorMoveSound; }
+		SoundContainer * GetDoorMoveSound() const { return m_DoorMoveSound.get(); }
 
 		/// <summary>
 		/// Sets this ADoor's door move sound. Ownership IS transferred!
 		/// </summary>
 		/// <param name="newSound">The new SoundContainer for this ADoor's door move sound.</param>
-		void SetDoorMoveSound(SoundContainer *newSound) { m_DoorMoveSound = newSound; }
+		void SetDoorMoveSound(SoundContainer *newSound) { m_DoorMoveSound.reset(newSound); }
 
 		/// <summary>
 		/// Gets this ADoor's door direction change sound. Ownership is NOT transferred!
 		/// </summary>
 		/// <returns>The SoundContainer for this ADoor's door direction change sound.</returns>
-		SoundContainer * GetDoorDirectionChangeSound() const { return m_DoorDirectionChangeSound; }
+		SoundContainer * GetDoorDirectionChangeSound() const { return m_DoorDirectionChangeSound.get(); }
 
 		/// <summary>
 		/// Sets this ADoor's door direction change sound. Ownership IS transferred!
 		/// </summary>
 		/// <param name="newSound">The new SoundContainer for this ADoor's door direction change sound.</param>
-		void SetDoorDirectionChangeSound(SoundContainer *newSound) { m_DoorDirectionChangeSound = newSound; }
+		void SetDoorDirectionChangeSound(SoundContainer *newSound) { m_DoorDirectionChangeSound.reset(newSound); }
 
 		/// <summary>
 		/// Gets this ADoor's door move end sound. Ownership is NOT transferred!
 		/// </summary>
 		/// <returns>The SoundContainer for this ADoor's door move end sound.</returns>
-		SoundContainer * GetDoorMoveEndSound() const { return m_DoorMoveEndSound; }
+		SoundContainer * GetDoorMoveEndSound() const { return m_DoorMoveEndSound.get(); }
 
 		/// <summary>
 		/// Sets this ADoor's door move end sound. Ownership IS transferred!
 		/// </summary>
 		/// <param name="newSound">The new SoundContainer for this ADoor's door move end sound.</param>
-		void SetDoorMoveEndSound(SoundContainer *newSound) { m_DoorMoveEndSound = newSound; }
+		void SetDoorMoveEndSound(SoundContainer *newSound) { m_DoorMoveEndSound.reset(newSound); }
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -163,10 +163,10 @@ namespace RTE {
 		void StopDoor();
 
 		/// <summary>
-		/// Used to temporarily remove or add back the material drawing of this in the scene. Used for making pathfinding work through doors.
+		/// Used to temporarily remove or add back the material drawing of this in the Scene. Used for making pathfinding work through doors.
 		/// </summary>
-		/// <param name="enable">Whether to enable the override or not.</param>
-		void MaterialDrawOverride(bool enable);
+		/// <param name="erase">Whether to erase door material (true) or draw it (false).</param>
+		void TempEraseOrRedrawDoorMaterial(bool erase);
 #pragma endregion
 
 #pragma region Virtual Override Methods
@@ -231,13 +231,14 @@ namespace RTE {
 
 		unsigned char m_DoorMaterialID; //!< The ID of the door material drawn to the terrain.
 		bool m_DoorMaterialDrawn; //!< Whether the door material is currently drawn onto the material layer.
+		Timer m_DoorMaterialRedrawTimer; //!< Timer for redrawing the door material layer from time-to-time.
 		bool m_DoorMaterialTempErased; //!< Whether the drawing override is enabled and the door material is erased to allow better pathfinding.
 		Vector m_LastDoorMaterialPos; //!< The position the door attachable had when its material was drawn to the material bitmap. This is used to erase the previous material representation.
 
-		SoundContainer *m_DoorMoveStartSound; //!< Sound played when the door starts moving from fully open/closed position towards the opposite end.
-		SoundContainer *m_DoorMoveSound; //!< Sound played while the door is moving between open/closed position.
-		SoundContainer *m_DoorDirectionChangeSound; //!< Sound played when the door is interrupted while moving and changes directions. 
-		SoundContainer *m_DoorMoveEndSound; //!< Sound played when the door stops moving and is at fully open/closed position.
+		std::unique_ptr<SoundContainer> m_DoorMoveStartSound; //!< Sound played when the door starts moving from fully open/closed position towards the opposite end.
+		std::unique_ptr<SoundContainer> m_DoorMoveSound; //!< Sound played while the door is moving between open/closed position.
+		std::unique_ptr<SoundContainer> m_DoorDirectionChangeSound; //!< Sound played when the door is interrupted while moving and changes directions. 
+		std::unique_ptr<SoundContainer> m_DoorMoveEndSound; //!< Sound played when the door stops moving and is at fully open/closed position.
 
 	private:
 
@@ -261,16 +262,16 @@ namespace RTE {
 		/// <summary>
 		/// Draws the material under the position of the door attachable, to create terrain collision detection for the doors.
 		/// </summary>
-		void DrawDoorMaterial();
+		/// <param name="disallowErasingMaterialBeforeDrawing">Whether to disallow calling EraseDoorMaterial before drawing. Defaults to false, which means normal behaviour applies and this may erase the material before drawing it.</param>
+		void DrawDoorMaterial(bool disallowErasingMaterialBeforeDrawing = false);
 
 		/// <summary>
 		/// Flood-fills the material area under the last position of the door attachable that matches the material index of it.
 		/// This is to get rid of the material footprint made with DrawDoorMaterial when the door part starts to move.
 		/// </summary>
 		/// <param name="updateMaterialArea">Whether to update the MaterialArea after erasing or not. Used for DrawDoorMaterial().</param>
-		/// <param name="keepMaterialDrawnFlag">Whether to keep the DoorMaterialDrawn flag or not. Used for MaterialDrawOverride().</param>
 		/// <returns>Whether the fill erasure was successful (if the same material as the door was found and erased).</returns>
-		bool EraseDoorMaterial(bool updateMaterialArea = true, bool keepMaterialDrawnFlag = false);
+		bool EraseDoorMaterial(bool updateMaterialArea = true);
 
 		/// <summary>
 		/// Clears all the member variables of this ADoor, effectively resetting the members of this abstraction level only.

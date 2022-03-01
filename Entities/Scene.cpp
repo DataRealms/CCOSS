@@ -143,6 +143,19 @@ bool Scene::Area::AddBox(const Box &newBox)
     return true;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool Scene::Area::RemoveBox(const Box &boxToRemove) {
+    std::vector<Box>::iterator boxToRemoveIterator = std::find(m_BoxList.begin(), m_BoxList.end(), boxToRemove);
+    if (boxToRemoveIterator != m_BoxList.end()) {
+        m_BoxList.erase(boxToRemoveIterator);
+        return true;
+    }
+    return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  HasNoArea
@@ -2276,16 +2289,17 @@ bool Scene::HasArea(string areaName)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets a specific area box identified by a name. Ownership is NOT transferred!
 
-Scene::Area * Scene::GetArea(string areaName)
-{
-    for (list<Area>::iterator aItr = m_AreaList.begin(); aItr != m_AreaList.end(); ++aItr)
-    {
-        if ((*aItr).GetName() == areaName)
-            return &(*aItr);
-    }
+Scene::Area * Scene::GetArea(const std::string_view &areaName, bool luaWarnNotError) {
+	for (Scene::Area &area : m_AreaList) {
+		if (area.GetName() == areaName) {
+			return &area;
+		}
+	}
 
-    g_ConsoleMan.PrintString("ERROR: Could not find the requested Scene Area named: " + areaName);
-    return 0;
+	std::string luaMessageStart = luaWarnNotError ? "WARNING" : "ERROR";
+    g_ConsoleMan.PrintString(luaMessageStart + ": Could not find the requested Scene Area named: " + areaName.data());
+
+    return nullptr;
 }
 
 

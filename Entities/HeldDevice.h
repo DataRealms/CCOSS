@@ -254,7 +254,7 @@ ClassInfoGetters;
 	/// Gets whether this HeldDevice is currently supported by a second hand.
 	/// </summary>
 	/// <returns>Whether the device is supported or not.</returns>
-	bool GetSupported() { return m_Supported; }
+	bool GetSupported() const { return m_Supported; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -527,7 +527,13 @@ ClassInfoGetters;
 // Arguments:       None.
 // Return value:    Whetehr magazine is full or not.
 
-    virtual bool IsFull() const { return true; }
+	virtual bool IsFull() const { return true; }
+
+	/// <summary>
+	/// Tells whether this HeldDevice is currently empty of ammo.
+	/// </summary>
+	/// <returns>Whether this HeldDevice is empty.</returns>
+	virtual bool IsEmpty() const { return false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -387,16 +387,23 @@ public:
 	void SetAngularVel(float newRotVel) override { m_AngularVel = newRotVel; }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetGraphicalIcon
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets a bitmap showing a good identifyable icon of this, for use in
-//                  GUI lists etc.
-// Arguments:       None.
-// Return value:    A good identifyable graphical representation of this in a BITMAP, if
-//                  available. If not, 0 is returned. Ownership is NOT TRANSFERRED!
+	/// <summary>
+	/// Gets the GUI representation of this MOSprite, either based on the first frame of its sprite or separately defined icon file.
+	/// </summary>
+	/// <returns>The graphical representation of this MOSprite as a BITMAP.</returns>
+	BITMAP * GetGraphicalIcon() const override { return m_GraphicalIcon != nullptr ? m_GraphicalIcon : m_aSprite[0]; }
 
-    BITMAP * GetGraphicalIcon() const override { return m_aSprite[0]; }
+	/// <summary>
+	/// Gets the width of this MOSprite's GUI icon.
+	/// </summary>
+	/// <returns>The width of the GUI icon bitmap.</returns>
+	int GetIconWidth() const { return GetGraphicalIcon()->w; }
+
+	/// <summary>
+	/// Gets the height of this MOSprite's GUI icon.
+	/// </summary>
+	/// <returns>The height of the GUI icon bitmap.</returns>
+	int GetIconHeight() const { return GetGraphicalIcon()->h; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -572,6 +579,8 @@ protected:
     ContentFile m_SpriteFile;
     // Vector of pointers to BITMAPs representing the multiple frames of this sprite.
     std::vector<BITMAP *> m_aSprite;
+	ContentFile m_IconFile;	//!< The file containing the GUI icon.
+	BITMAP *m_GraphicalIcon;	//!< The GUI representation of this MOSprite as a BITMAP.
     // Number of frames, or elements in the m_aSprite array.
     unsigned int m_FrameCount;
     Vector m_SpriteOffset;

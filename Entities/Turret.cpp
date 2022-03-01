@@ -134,7 +134,7 @@ namespace RTE {
     void Turret::SetParent(MOSRotating *newParent) {
 		Attachable::SetParent(newParent);
 		for (HeldDevice *mountedDevice : m_MountedDevices) {
-			mountedDevice->Deactivate(); //mountedDevice->Reloading = false; m_ReloadTmr.Reset();
+			mountedDevice->Deactivate();
 		}
 	}
 
